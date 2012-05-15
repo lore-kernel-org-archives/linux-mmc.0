@@ -1,29 +1,28 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
+From: Saugata Das <saugata.das@linaro.org>
 Subject: Re: [RFC 1/2] [MMC-4.5] Disable emulation
-Date: Tue, 15 May 2012 15:47:10 +0530
-Message-ID: <CANfBPZ-AKz-xnoR7rET5+DhWr=KXBaGZ3uSQCAnxaQmtahR07Q@mail.gmail.com>
+Date: Tue, 15 May 2012 20:19:56 +0530
+Message-ID: <CAKLKtzcd5_cs31YQVpQ-b=c-tVXohTEO1P2qQc5NUK_fh1QpsA@mail.gmail.com>
 References: <1336574901-26579-1-git-send-email-saugata.das@stericsson.com>
- <4FB0DD88.2050005@codeaurora.org> <CAKLKtzfihpmU4Xhwj_u5oYkYo4Ra5twaPB3-WvVkzxF3EAVYAA@mail.gmail.com>
- <4FB1FA50.8010505@codeaurora.org>
+	<4FB0DD88.2050005@codeaurora.org>
+	<CAKLKtzfihpmU4Xhwj_u5oYkYo4Ra5twaPB3-WvVkzxF3EAVYAA@mail.gmail.com>
+	<4FB1FA50.8010505@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:39946 "EHLO
-	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751894Ab2EOKRd convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 15 May 2012 06:17:33 -0400
-Received: by bkty8 with SMTP id y8so4518233bkt.3
-        for <linux-mmc@vger.kernel.org>; Tue, 15 May 2012 03:17:30 -0700 (PDT)
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:41893 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752908Ab2EOOt5 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 May 2012 10:49:57 -0400
+Received: by qadb17 with SMTP id b17so3663398qad.19
+        for <linux-mmc@vger.kernel.org>; Tue, 15 May 2012 07:49:57 -0700 (PDT)
 In-Reply-To: <4FB1FA50.8010505@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: Saugata Das <saugata.das@linaro.org>, Saugata Das <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org, patches@linaro.org
+Cc: Saugata Das <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org, patches@linaro.org
 
-On Tue, May 15, 2012 at 12:10 PM, Subhash Jadavani
-<subhashj@codeaurora.org> wrote:
+On 15 May 2012 12:10, Subhash Jadavani <subhashj@codeaurora.org> wrote:
 > On 5/14/2012 8:21 PM, Saugata Das wrote:
 >>
 >> On 14 May 2012 15:55, Subhash Jadavani<subhashj@codeaurora.org> =A0w=
@@ -96,10 +95,21 @@ ity. So
 > this is just a proof of concept that setting the block queue logical =
 sector
 > size to 4K works or not?
+
+Yes and it works. Note that, even the partition tables need to be 4KB a=
+ligned.
+
 > Are vendors promising any performance improvement if we run the devic=
 e in 4K
 > sector size mode rather than emulation mode?
 >
+
+Atleast from the explanation in the spec on emulation mode, this
+promises to provide some improvement. Some vendors may already have
+some proprietary optimization to optimize access which are not 4KB
+aligned. But lets target this 4KB alignment to have a good performance
+across devices.
+
 > I have few other doubts (from specification point of view) when the d=
 evice
 > starts running in native sector size mode:
@@ -109,24 +119,21 @@ ccess
 > and shall not support reliable write mode EN_REL_WR=3D0."
 > =A0 =A0 =A0 =A0Shouldn't this patch make ensure this?
 >
+
+Yes, May be, we should add a check in mmc-util i.e. set
+USE_NATIVE_SECTOR only if EN_REL_WR =3D 1 .
+
+
 > 2. =A0Some internal sizes reported by the device may change after suc=
 cessfully
 > disabling of the emulation mode.
 > =A0 =A0 =A0 =A0Shouldn't =A0we take of this as well?
-This would be because if a single 512byte sector was marked as bad
-(unusable) initially, the entire
-aligned 4K block would be marked as bad now after switching to 4K
-sector size, resulting in a slight capacity shrinkage.
-  This would only matter if the switch happens for a fairly old
-device. Typically, the sector size change should happen during factory
-initialization, so there wouldn't be too many bad blocks, so it
-shouldn't be much of an issue now.
-  Of course, this is just one aspect of a problem for the "dynamic
-device capacity" feature of eMMC4.5, and can be solved if we get to
-that..
-
-
 >
+
+Which parameter size will change ? I did not come across such remark
+in the specification.
+
+
 > 3. After a successful disabling of the emulation mode, the content of=
  the
 > User Data Area is undefined.
@@ -144,6 +151,13 @@ which
 > could flash the images after setting the use_native_sector field and =
 power
 > cycle.
+
+Kernel is not disabling emulation mode. The mmc-util tool is doing it.
+You are right, the flashing utility will disable the emulation mode
+(mmc-util change can be used as a reference for the flashing utility).
+Kernel (mmc driver) just needs to understand that the mode has changed
+and notify file system accordingly (blk_queue_logical_block_size)
+
 >
 > 4. Data transfers on the bus are still using 512B CRC-protected block=
 s, but
@@ -153,6 +167,9 @@ s, but
  in 512B sector
 > mode but amount of data will be in multple of 8 such 512B blocks?
 >
+
+Yes, there is no host controller change.
+
 > 5. Sector addressing is still used, but sector addresses shall always=
  be
 > aligned to 8 (4KB)
@@ -182,6 +199,9 @@ ddress (at
 > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00x1000 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
 =3D> 8
 >
+
+Yes, it continues to be 512B addressing.
+
 > =A0 =A0 =A0 =A04K sector addressing:
 > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(byte address) =A0 =A0 =A0 =A0 (sector=
  address)
@@ -213,6 +233,15 @@ uld it be use
 at
 > access to 4KB memory area, don't you need to take of the same in MMC
 > =A0 =A0 =A0 =A0block driver?
+
+Yes, single block read/write is not be allowed. From file system, we
+should not have 512B read/write once we have indicated 4KB logical
+sector size from blk_queue_logical_block_size.
+
+I think we can have a check on this from mmc_blk_rw_rq_prep, where a
+single block read/write request will be returned with,
+__blk_end_request(req, -EIO, blk_rq_cur_bytes(req));
+
 >
 > 7. what should be the block length set by CMD16 (SET_BLOCK_LENGTH) co=
 mmand?
@@ -222,9 +251,14 @@ s command is
 y
 > mentioned in specification.
 >
+
+I guess, it should be multiple of 4KB ! I see that mmc_set_blocklen is
+returning the error code to the caller. So, I see nothing to be done
+there.
+
+
 > Regards,
 > Subhash
->
 >
 >>
 >>> Other than that, this patch looks good to me.
@@ -265,8 +299,3 @@ tag_unit_size =3D 0;
 >> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
 >
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
