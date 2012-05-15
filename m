@@ -1,49 +1,44 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH] mmc:sdio:retry CMD52/53 when error happens
-Date: Tue, 15 May 2012 09:15:42 +0200
-Message-ID: <4FB2029E.3060107@stericsson.com>
-References: <1336984792-13956-1-git-send-email-yongd@marvell.com> <4FB10156.2080900@stericsson.com> <89813612683626448B837EE5A0B6A7CB1A2B9F19B7@SC-VEXCH4.marvell.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [RFC 00/12] OMAP DMA engine conversion
+Date: Tue, 15 May 2012 08:41:41 +0100
+Message-ID: <20120515074141.GA16276@n2100.arm.linux.org.uk>
+References: <20120423160409.GE24299@n2100.arm.linux.org.uk> <1337055564.16185.5356.camel@vkoul-udesk3>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <89813612683626448B837EE5A0B6A7CB1A2B9F19B7@SC-VEXCH4.marvell.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Yong Ding <yongd@marvell.com>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "stefan.xk.nilsson@stericsson.com" <stefan.xk.nilsson@stericsson.com>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "svenkatr@ti.com" <svenkatr@ti.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1337055564.16185.5356.camel@vkoul-udesk3>
+Sender: linux-omap-owner@vger.kernel.org
+To: Vinod Koul <vinod.koul@linux.intel.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Yong Ding,
+On Tue, May 15, 2012 at 09:49:24AM +0530, Vinod Koul wrote:
+> On Mon, 2012-04-23 at 17:04 +0100, Russell King - ARM Linux wrote:
+> > For the full text, please see 
+> > 
+> > http://lists.arm.linux.org.uk/lurker/message/20120418.100954.7fa7acf8.en.html
+> > 
+> > This version contains updates for some of the comments received from the
+> > previous round, and adds the OMAP1/2 MMC and SPI drivers to the conversion.
+> > 
+> > I've also added a note to feature-removal noting that the existing APIs
+> > will be removed around 2013 - I'm planning January for that at the
+> > moment.  Having drivers around which are unconverted blocks further work
+> > on the DMA engine conversion, so it's actually important that we get
+> > as many drivers converted as soon as possible.
+> > 
+> > Anything which isn't converted will probably have its DMA code removed,
+> > or if that results in the driver not being usable, the driver itself
+> > will be removed.
+> > 
+> > This series is still in RFC mode...
+> Hi Russell,
+> 
+> What is the state of this series, would be good to have this merged in
+> upcoming merge window.
 
-On 05/15/2012 05:14 AM, Yong Ding wrote:
-> Hi Ulf Hansson, Thanks for your comments.
->
-> Such retry mechanism is a simple CMD-level or sdio-core-level retry
-> which takes advantage of the mmc core internal retry. There is not
-> any side effect, but with it, even those SDIO function driver's
-> without its own retrying mechanism can benefit in some conditions.
+It's not ready for merging.  While it allows some of the OMAP drivers
+to be converted, there's others which need changes to omap-dma.c.
 
-I am not sure about that. It all depends on what kind of protocol the 
-SDIO func driver is handling and as well what SDIO hw that is connected.
-
-For a WLAN interface you might end up in reading/writing the next 
-buffer, maybe messing up even more data. Have you considered this?
-
->
-> Besides, for CMD52, it can be used during SDIO card
-> initialization/detection phase. At that time, SDIO function driver
-> hasn't started to work. Of course we can probably encounter CMD52
-> error due to some reasons(eg, board-level schematic bad behavior),
-> and such retry can be a potential workaround. Actually, we've
-> encountered exactly such case in our development.
-
-I realize that there is a need for this, but I am not sure we always 
-would like to have "retries" for every CMD52/53 request.
-
-During SDIO initialization before SDIO func driver is started, retries 
-should be safe since there is no upper protocol to consider yet. Maybe 
-we should try to create a patch which only enables retries during SDIO 
-init sequence instead!?
-
-Kind regards
-Ulf Hansson
+So, I'm _not_ planning to see this in for the upcoming merge window.
