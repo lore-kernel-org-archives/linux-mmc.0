@@ -1,87 +1,72 @@
-From: Yong Ding <yongd@marvell.com>
-Subject: RE: [PATCH] mmc:sdio:retry CMD52/53 when error happens
-Date: Mon, 14 May 2012 20:14:35 -0700
-Message-ID: <89813612683626448B837EE5A0B6A7CB1A2B9F19B7@SC-VEXCH4.marvell.com>
-References: <1336984792-13956-1-git-send-email-yongd@marvell.com>
- <4FB10156.2080900@stericsson.com>
+From: Vinod Koul <vinod.koul@linux.intel.com>
+Subject: Re: [RFC 00/12] OMAP DMA engine conversion
+Date: Tue, 15 May 2012 09:49:24 +0530
+Message-ID: <1337055564.16185.5356.camel@vkoul-udesk3>
+References: <20120423160409.GE24299@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog105.obsmtp.com ([74.125.149.75]:37723 "EHLO
-	na3sys009aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751079Ab2EODPD convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 May 2012 23:15:03 -0400
-In-Reply-To: <4FB10156.2080900@stericsson.com>
-Content-Language: en-US
+Received: from mga03.intel.com ([143.182.124.21]:3016 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755528Ab2EOE0e (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 15 May 2012 00:26:34 -0400
+In-Reply-To: <20120423160409.GE24299@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "stefan.xk.nilsson@stericsson.com" <stefan.xk.nilsson@stericsson.com>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "svenkatr@ti.com" <svenkatr@ti.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi Ulf Hansson,
-Thanks for your comments.
+On Mon, 2012-04-23 at 17:04 +0100, Russell King - ARM Linux wrote:
+> For the full text, please see 
+> 
+> http://lists.arm.linux.org.uk/lurker/message/20120418.100954.7fa7acf8.en.html
+> 
+> This version contains updates for some of the comments received from the
+> previous round, and adds the OMAP1/2 MMC and SPI drivers to the conversion.
+> 
+> I've also added a note to feature-removal noting that the existing APIs
+> will be removed around 2013 - I'm planning January for that at the
+> moment.  Having drivers around which are unconverted blocks further work
+> on the DMA engine conversion, so it's actually important that we get
+> as many drivers converted as soon as possible.
+> 
+> Anything which isn't converted will probably have its DMA code removed,
+> or if that results in the driver not being usable, the driver itself
+> will be removed.
+> 
+> This series is still in RFC mode...
+Hi Russell,
 
-Such retry mechanism is a simple CMD-level or sdio-core-level retry which takes advantage of the mmc core internal retry. There is not any side effect, but with it, even those SDIO function driver's without its own retrying mechanism can benefit in some conditions.
+What is the state of this series, would be good to have this merged in
+upcoming merge window.
+> 
+>  Documentation/feature-removal-schedule.txt |   11 +
+>  arch/arm/mach-omap1/board-h2-mmc.c         |    1 -
+>  arch/arm/mach-omap1/board-h3-mmc.c         |    1 -
+>  arch/arm/mach-omap1/board-nokia770.c       |    1 -
+>  arch/arm/mach-omap2/board-n8x0.c           |    1 -
+>  arch/arm/mach-omap2/hsmmc.c                |    1 -
+>  arch/arm/plat-omap/dma.c                   |   14 +
+>  arch/arm/plat-omap/include/plat/mmc.h      |    2 -
+>  drivers/dma/Kconfig                        |   10 +
+>  drivers/dma/Makefile                       |    2 +
+>  drivers/dma/omap-dma.c                     |  521 ++++++++++++++++++++++++++++
+>  drivers/dma/sa11x0-dma.c                   |  249 ++++---------
+>  drivers/dma/virt-dma.c                     |   99 ++++++
+>  drivers/dma/virt-dma.h                     |  138 ++++++++
+>  drivers/mmc/host/omap.c                    |  369 +++++++++-----------
+>  drivers/mmc/host/omap_hsmmc.c              |  206 ++++++------
+>  drivers/spi/spi-omap2-mcspi.c              |  228 +++++++------
+>  17 files changed, 1268 insertions(+), 586 deletions(-)
+> 
+> 
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 
-Besides, for CMD52, it can be used during SDIO card initialization/detection phase. At that time, SDIO function driver hasn't started to work. Of course we can probably encounter CMD52 error due to some reasons(eg, board-level schematic bad behavior), and such retry can be a potential workaround. Actually, we've encountered exactly such case in our development.
 
-
-Best Wishes,
-
-Yong Ding
-Operating Systems Engineering,
-Application Processor Systems Engineering
-
------Original Message-----
-From: Ulf Hansson [mailto:ulf.hansson@stericsson.com] 
-Sent: Monday, May 14, 2012 8:58 PM
-To: Yong Ding
-Cc: cjb@laptop.org; linux-mmc@vger.kernel.org; stefan.xk.nilsson@stericsson.com; linus.walleij@linaro.org; svenkatr@ti.com; linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] mmc:sdio:retry CMD52/53 when error happens
-
-Hi Yongd,
-
- From my perspective I don't think this patch is wanted.
-
-A retry mechanism is likely very much hw-SDIO device dependent. Upper 
-layers (SDIO func driver) is thus the only software that is able to 
-handle retries correctly.
-
-Kind regards
-Ulf Hansson
-
-
-On 05/14/2012 10:39 AM, yongd wrote:
->    Set sdio CMD52/53's retry time as MMC_CMD_RETRIES. As a result,
-> sdio might benefit from core-internal CMD retry mechanism when
-> some errors happen(CRC, etc).
->
-> Signed-off-by: yongd<yongd@marvell.com>
-> ---
->   drivers/mmc/core/sdio_ops.c |    3 ++-
->   1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
-> index d29e206..884c27e 100644
-> --- a/drivers/mmc/core/sdio_ops.c
-> +++ b/drivers/mmc/core/sdio_ops.c
-> @@ -86,7 +86,7 @@ static int mmc_io_rw_direct_host(struct mmc_host *host, int write, unsigned fn,
->   	cmd.arg |= in;
->   	cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_AC;
->
-> -	err = mmc_wait_for_cmd(host,&cmd, 0);
-> +	err = mmc_wait_for_cmd(host,&cmd, MMC_CMD_RETRIES);
->   	if (err)
->   		return err;
->
-> @@ -147,6 +147,7 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
->   	else
->   		cmd.arg |= 0x08000000 | blocks;		/* block mode */
->   	cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
-> +	cmd.retries = MMC_CMD_RETRIES;
->
->   	data.blksz = blksz;
->   	/* Code in host drivers/fwk assumes that "blocks" always is>=1 */
+-- 
+~Vinod
 
