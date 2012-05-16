@@ -1,70 +1,146 @@
-From: <ludovic.desroches@atmel.com>
-Subject: [PATCH 2/2] mmc: at91-mci: this driver is now deprecated
-Date: Wed, 16 May 2012 17:51:59 +0200
-Message-ID: <1337183519-25459-3-git-send-email-ludovic.desroches@atmel.com>
-References: <1337183519-25459-1-git-send-email-ludovic.desroches@atmel.com>
+From: Saugata Das <saugata.das@stericsson.com>
+Subject: [PATCH 2/2] [MMC-4.5] [MMC UTIL] Disable emulation
+Date: Wed, 16 May 2012 21:56:55 +0530
+Message-ID: <1337185615-17202-2-git-send-email-saugata.das@stericsson.com>
+References: <1337185615-17202-1-git-send-email-saugata.das@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:19734 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755776Ab2EPPwl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 May 2012 11:52:41 -0400
-In-Reply-To: <1337183519-25459-1-git-send-email-ludovic.desroches@atmel.com>
+Received: from eu1sys200aog112.obsmtp.com ([207.126.144.133]:58167 "EHLO
+	eu1sys200aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751743Ab2EPQ1l (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 May 2012 12:27:41 -0400
+In-Reply-To: <1337185615-17202-1-git-send-email-saugata.das@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, Ludovic Desroches <ludovic.desroches@atmel.com>
+To: linux-mmc@vger.kernel.org, venkat@linaro.org
+Cc: patches@linaro.org, saugata.das@linaro.org, arnd.bergmann@linaro.org, lporzio@micron.com
 
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
+From: Saugata Das <saugata.das@linaro.org>
 
-at91-mci is deprecated since atmel-mci can deal with all chips.
+In this patch, we add utility to disable emulation mode in the eMMC-4.5.
+This is done to increase the data sector size to 4KB.
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+Signed-off-by: Saugata Das <saugata.das@linaro.org>
+
+changes in v2:
+	Review rework based on comments from Subhash
 ---
- Documentation/feature-removal-schedule.txt |   11 +++++++++++
- drivers/mmc/host/Kconfig                   |    7 +++++--
- 2 files changed, 16 insertions(+), 2 deletions(-)
+ mmc.c      |    6 ++++++
+ mmc.h      |   10 ++++++++++
+ mmc_cmds.c |   51 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ mmc_cmds.h |    1 +
+ 4 files changed, 68 insertions(+), 0 deletions(-)
 
-diff --git a/Documentation/feature-removal-schedule.txt b/Documentation/feature-removal-schedule.txt
-index 03ca210..8b4aef2 100644
---- a/Documentation/feature-removal-schedule.txt
-+++ b/Documentation/feature-removal-schedule.txt
-@@ -539,3 +539,14 @@ When:	3.6
- Why:	setitimer is not returning -EFAULT if user pointer is NULL. This
- 	violates the spec.
- Who:	Sasikantha Babu <sasikanth.v19@gmail.com>
+diff --git a/mmc.c b/mmc.c
+index c27fc24..ebc7ab2 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -65,6 +65,12 @@ static struct Command commands[] = {
+ 		"Set the eMMC writeprotect status of <device>.",
+ 	  NULL
+ 	},
++	{ do_disable_512B_emulation, -1,
++	  "disable 512B emulation", "<device>\n"
++		"Set the eMMC data sector size to 4KB by disabling emulation <device>.",
++	  NULL
++	},
 +
-+----------------------------
+ 	{ 0, 0, 0, 0 }
+ };
+ 
+diff --git a/mmc.h b/mmc.h
+index 3af36f1..34c31d3 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -35,6 +35,16 @@
+ #define EXT_CSD_PART_SWITCH_TIME	199
+ #define EXT_CSD_BOOT_CFG		179
+ #define EXT_CSD_BOOT_WP			173
++#define EXT_CSD_WR_REL_PARAM	166
++#define EXT_CSD_NATIVE_SECTOR_SIZE	63 /* R */
++#define EXT_CSD_USE_NATIVE_SECTOR	62 /* R/W */
++#define EXT_CSD_DATA_SECTOR_SIZE	61 /* R */
 +
-+What:	at91-mci driver ("CONFIG_MMC_AT91")
-+When:	3.7
-+Why:	There two mci drivers: at91-mci and atmel-mci. The PDC support was
-+	added to atmel-mci as a first step to support more chips. Then
-+	at91-mci was kept only for old IP versions (on at91rm9200 and
-+	at91sam9261). The support of these IP versions has just been added
-+	so atmel-mci can be used for all chips.
-+Who:	Ludovic Desroches <ludovic.desroches@atmel.com>
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 2bc06e7..f150591 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -278,10 +278,13 @@ choice
- 	  Choose which driver to use for the Atmel MCI Silicon
++/*
++ * WR_REL_PARAM field definitions
++ */
++#define HS_CTRL_REL	(1<<0)
++#define EN_REL_WR	(1<<2)
  
- config MMC_AT91
--	tristate "AT91 SD/MMC Card Interface support"
-+	tristate "AT91 SD/MMC Card Interface support (DEPRECATED)"
- 	depends on ARCH_AT91
- 	help
--	  This selects the AT91 MCI controller.
-+	  This selects the AT91 MCI controller. This driver will be
-+	  remove soon (for more information have a look to
-+	  Documentation/feature-removal-schedule.txt). Please use
-+	  MMC_ATMEL_MCI.
+ /*
+  * EXT_CSD field definitions
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 4562cef..f0e64c9 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -168,6 +168,57 @@ int do_writeprotect_set(int nargs, char **argv)
+ 	return ret;
+ }
  
- 	  If unsure, say N.
- 
++
++int do_disable_512B_emulation(int nargs, char **argv)
++{
++	__u8 ext_csd[512], native_sector_size, data_sector_size, wr_rel_param;
++	int fd, ret;
++	char *device;
++
++	CHECK(nargs != 2, "Usage: mmc </path/to/mmcblkX>\n", exit(1));
++
++	device = argv[1];
++
++	fd = open(device, O_RDWR);
++	if (fd < 0) {
++		perror("open");
++		exit(1);
++	}
++
++	ret = read_extcsd(fd, ext_csd);
++	if (ret) {
++		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
++		exit(1);
++	}
++
++	wr_rel_param = ext_csd[EXT_CSD_WR_REL_PARAM];
++	native_sector_size = ext_csd[EXT_CSD_NATIVE_SECTOR_SIZE];
++	data_sector_size = ext_csd[EXT_CSD_DATA_SECTOR_SIZE];
++
++	if (native_sector_size &&
++		!data_sector_size &&
++		(wr_rel_param & EN_REL_WR)) {
++		ret = write_extcsd_value(fd, EXT_CSD_USE_NATIVE_SECTOR, 1);
++
++		if (ret) {
++			fprintf(stderr, "Could not write 0x%02x to "
++					"EXT_CSD[%d] in %s\n",
++					1, EXT_CSD_BOOT_WP, device);
++			exit(1);
++		}
++		printf("MMC disable 512B emulation successful\n"
++				"Now reset the device to switch to 4KB "
++				"native sector mode\n");
++	} else if (native_sector_size && data_sector_size) {
++		printf("MMC already disabled 512B emulation mode\n");
++	} else {
++		printf("MMC does not support disabling 512B emulation mode\n");
++	}
++
++	return ret;
++}
++
++
+ int do_read_extcsd(int nargs, char **argv)
+ {
+ 	__u8 ext_csd[512], ext_csd_rev, reg;
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index 66e9acb..56f46d7 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -19,3 +19,4 @@ int do_read_extcsd(int nargs, char **argv);
+ int do_write_extcsd(int nargs, char **argv);
+ int do_writeprotect_get(int nargs, char **argv);
+ int do_writeprotect_set(int nargs, char **argv);
++int do_disable_512B_emulation(int nargs, char **argv);
 -- 
-1.7.5.4
+1.7.4.3
 
