@@ -1,42 +1,49 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: regulator advise needed
-Date: Tue, 15 May 2012 16:30:17 -0700
-Message-ID: <A093AC61-96F8-4F76-B6C9-0C6B3C541B29@marvell.com>
+From: <sonic.zhang@analog.com>
+Subject: [PATCH 2/5] mmc: bfin_sdh: Move descriptor array structure into blackfin dma.h head file.
+Date: Wed, 16 May 2012 15:50:34 +0800
+Message-ID: <1337154637-11724-2-git-send-email-sonic.zhang@analog.com>
+References: <1337154637-11724-1-git-send-email-sonic.zhang@analog.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog126.obsmtp.com ([74.125.149.155]:39164 "EHLO
-	na3sys009aog126.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S966190Ab2EOXaj convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 15 May 2012 19:30:39 -0400
-Content-Language: en-US
+Received: from db3ehsobe006.messaging.microsoft.com ([213.199.154.144]:44594
+	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757004Ab2EPIBh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 May 2012 04:01:37 -0400
+In-Reply-To: <1337154637-11724-1-git-send-email-sonic.zhang@analog.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Cc: LKML <linux-kernel@vger.kernel.org>, uclinux-dist-devel@blackfin.uclinux.org, Sonic Zhang <sonic.zhang@analog.com>
+
+From: Sonic Zhang <sonic.zhang@analog.com>
+
+The descriptor array is common among all blackfin dma channels.
+
+Signed-off-by: Sonic Zhang <sonic.zhang@analog.com>
+---
+ drivers/mmc/host/bfin_sdh.c |    7 -------
+ 1 files changed, 0 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
+index fd25b0c..56a1093 100644
+--- a/drivers/mmc/host/bfin_sdh.c
++++ b/drivers/mmc/host/bfin_sdh.c
+@@ -49,13 +49,6 @@
+ #define bfin_write_SDH_CFG		bfin_write_RSI_CFG
+ #endif
+ 
+-struct dma_desc_array {
+-	unsigned long	start_addr;
+-	unsigned short	cfg;
+-	unsigned short	x_count;
+-	short		x_modify;
+-} __packed;
+-
+ struct sdh_host {
+ 	struct mmc_host		*mmc;
+ 	spinlock_t		lock;
+-- 
+1.7.0.4
 
 
-In sdhci_set_ios() we call sdhci_set_power()
-
-this code assumes that the SDHCI_POWER_CONTROL register works in the SD controller.
-In our controller it does not.  We need a regulator to do the right thing.
-
-I hae added regulator support (patch coming)
-BUT the code crashes because we are scheduling in atomic context  when sdhci_set_power() is called.
-
-the current "hack" is
-
-	spin_unlock_irqrestore(&host->lock, flags);
-printk("%s/%d: ios->power_mode = %x\n", __func__, __LINE__, ios->power_mode);
-	if (ios->power_mode == MMC_POWER_OFF)
-		sdhci_set_power(host, -1);
-	else
-		sdhci_set_power(host, ios->vdd);
-	spin_lock_irqsave(&host->lock, flags);
-
-
-I could just disable the interrupt line on the controller while I do this change (like I proposed before)
-but maybe someone knows another way to get there from here.
-
-Philip
