@@ -1,50 +1,222 @@
-From: <sonic.zhang@analog.com>
-Subject: [PATCH] mmc: bfin_sdh: Update Kconfig to support new RSI controller in bf60x.
-Date: Wed, 16 May 2012 15:58:10 +0800
-Message-ID: <1337155090-12172-1-git-send-email-sonic.zhang@analog.com>
+From: <ludovic.desroches@atmel.com>
+Subject: [PATCH 1/4] mmc: atmel-mci: the r/w proof capability lack was not well managed
+Date: Wed, 16 May 2012 15:25:58 +0200
+Message-ID: <1337174761-23988-2-git-send-email-ludovic.desroches@atmel.com>
+References: <1337174761-23988-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe010.messaging.microsoft.com ([216.32.180.30]:10629
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753877Ab2EPIJJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 May 2012 04:09:09 -0400
+Received: from eusmtp01.atmel.com ([212.144.249.242]:51033 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S966185Ab2EPN0S (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 May 2012 09:26:18 -0400
+In-Reply-To: <1337174761-23988-1-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
-Cc: LKML <linux-kernel@vger.kernel.org>, uclinux-dist-devel@blackfin.uclinux.org, Sonic Zhang <sonic.zhang@analog.com>, Bob Liu <lliubbo@gmail.com>
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-From: Sonic Zhang <sonic.zhang@analog.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Signed-off-by: Sonic Zhang <sonic.zhang@analog.com>
-Signed-off-by: Bob Liu <lliubbo@gmail.com>
+First mci IPs (mainly on rm9200 and 9261) don't have the r/w proof capability.
+The driver didn't work correctly without this capability in PDC mode because
+of the double buffer switch which is too slow even if we stop the transfer to
+perform this switch.
+
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 ---
- drivers/mmc/host/Kconfig |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/atmel-mci.c |   92 +++++++++++++++++++++++++++++++++++------
+ 1 files changed, 78 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 2bc06e7..788e394 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -500,7 +500,7 @@ config MMC_VIA_SDMMC
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 50e8652..308f8ae 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -91,6 +91,11 @@ struct atmel_mci_dma {
+  * @regs: Pointer to MMIO registers.
+  * @sg: Scatterlist entry currently being processed by PIO or PDC code.
+  * @pio_offset: Offset into the current scatterlist entry.
++ * @buffer: Buffer used if we don't have the r/w proof capability. We
++ *      don't have the time to switch pdc buffers so we have to use only
++ *      one buffer for the full transaction.
++ * @buf_size: size of the buffer.
++ * @phys_buf_addr: buffer address needed for pdc.
+  * @cur_slot: The slot which is currently using the controller.
+  * @mrq: The request currently being processed on @cur_slot,
+  *	or NULL if the controller is idle.
+@@ -166,6 +171,9 @@ struct atmel_mci {
  
- config SDH_BFIN
- 	tristate "Blackfin Secure Digital Host support"
--	depends on (BF54x && !BF544) || (BF51x && !BF512)
-+	depends on (BF54x && !BF544) || (BF51x && !BF512) || BF60x
- 	help
- 	  If you say yes here you will get support for the Blackfin on-chip
- 	  Secure Digital Host interface.  This includes support for MMC and
-@@ -513,7 +513,7 @@ config SDH_BFIN
+ 	struct scatterlist	*sg;
+ 	unsigned int		pio_offset;
++	unsigned int		*buffer;
++	unsigned int		buf_size;
++	dma_addr_t		buf_phys_addr;
  
- config SDH_BFIN_MISSING_CMD_PULLUP_WORKAROUND
- 	bool "Blackfin EZkit Missing SDH_CMD Pull Up Resistor Workaround"
--	depends on SDH_BFIN
-+	depends on SDH_BFIN && !BF60x
- 	help
- 	  If you say yes here SD-Cards may work on the EZkit.
+ 	struct atmel_mci_slot	*cur_slot;
+ 	struct mmc_request	*mrq;
+@@ -480,6 +488,11 @@ err:
+ 	dev_err(&mmc->class_dev, "failed to initialize debugfs for slot\n");
+ }
  
++static inline unsigned int atmci_get_version(struct atmel_mci *host)
++{
++	return atmci_readl(host, ATMCI_VERSION) & 0x00000fff;
++}
++
+ static inline unsigned int atmci_ns_to_clocks(struct atmel_mci *host,
+ 					unsigned int ns)
+ {
+@@ -603,6 +616,7 @@ static void atmci_pdc_set_single_buf(struct atmel_mci *host,
+ 	enum atmci_xfer_dir dir, enum atmci_pdc_buf buf_nb)
+ {
+ 	u32 pointer_reg, counter_reg;
++	unsigned int buf_size;
+ 
+ 	if (dir == XFER_RECEIVE) {
+ 		pointer_reg = ATMEL_PDC_RPR;
+@@ -617,8 +631,15 @@ static void atmci_pdc_set_single_buf(struct atmel_mci *host,
+ 		counter_reg += ATMEL_PDC_SCND_BUF_OFF;
+ 	}
+ 
+-	atmci_writel(host, pointer_reg, sg_dma_address(host->sg));
+-	if (host->data_size <= sg_dma_len(host->sg)) {
++	if (!host->caps.has_rwproof) {
++		buf_size = host->buf_size;
++		atmci_writel(host, pointer_reg, host->buf_phys_addr);
++	} else {
++		buf_size = sg_dma_len(host->sg);
++		atmci_writel(host, pointer_reg, sg_dma_address(host->sg));
++	}
++
++	if (host->data_size <= buf_size) {
+ 		if (host->data_size & 0x3) {
+ 			/* If size is different from modulo 4, transfer bytes */
+ 			atmci_writel(host, counter_reg, host->data_size);
+@@ -670,7 +691,15 @@ static void atmci_pdc_cleanup(struct atmel_mci *host)
+  */
+ static void atmci_pdc_complete(struct atmel_mci *host)
+ {
++	int transfer_size = host->data->blocks * host->data->blksz;
++
+ 	atmci_writel(host, ATMEL_PDC_PTCR, ATMEL_PDC_RXTDIS | ATMEL_PDC_TXTDIS);
++
++	if ((!host->caps.has_rwproof)
++	    && (host->data->flags & MMC_DATA_READ))
++		sg_copy_from_buffer(host->data->sg, host->data->sg_len,
++		                    host->buffer, transfer_size);
++
+ 	atmci_pdc_cleanup(host);
+ 
+ 	/*
+@@ -817,6 +846,12 @@ atmci_prepare_data_pdc(struct atmel_mci *host, struct mmc_data *data)
+ 	/* Configure PDC */
+ 	host->data_size = data->blocks * data->blksz;
+ 	sg_len = dma_map_sg(&host->pdev->dev, data->sg, data->sg_len, dir);
++
++	if ((!host->caps.has_rwproof)
++	    && (host->data->flags & MMC_DATA_WRITE))
++		sg_copy_to_buffer(host->data->sg, host->data->sg_len,
++		                  host->buffer, host->data_size);
++
+ 	if (host->data_size)
+ 		atmci_pdc_set_both_buf(host,
+ 			((dir == DMA_FROM_DEVICE) ? XFER_RECEIVE : XFER_TRANSMIT));
+@@ -1878,13 +1913,26 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+ 		mmc->caps |= MMC_CAP_SDIO_IRQ;
+ 	if (host->caps.has_highspeed)
+ 		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
+-	if (slot_data->bus_width >= 4)
++	/*
++	 * Without the read/write proof capability, it is strongly suggested to
++	 * use only one bit for data to prevent fifo underruns and overruns
++	 * which will corrupt data.
++	 */
++	if ((slot_data->bus_width >= 4) && host->caps.has_rwproof)
+ 		mmc->caps |= MMC_CAP_4_BIT_DATA;
+ 
+-	mmc->max_segs = 64;
+-	mmc->max_req_size = 32768 * 512;
+-	mmc->max_blk_size = 32768;
+-	mmc->max_blk_count = 512;
++	if (atmci_get_version(host) < 0x200) {
++		mmc->max_segs = 256;
++		mmc->max_blk_size = 4095;
++		mmc->max_blk_count = 256;
++		mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
++		mmc->max_seg_size = mmc->max_blk_size * mmc->max_segs;
++	} else {
++		mmc->max_segs = 64;
++		mmc->max_req_size = 32768 * 512;
++		mmc->max_blk_size = 32768;
++		mmc->max_blk_count = 512;
++	}
+ 
+ 	/* Assume card is present initially */
+ 	set_bit(ATMCI_CARD_PRESENT, &slot->flags);
+@@ -2008,11 +2056,6 @@ static bool atmci_configure_dma(struct atmel_mci *host)
+ 	}
+ }
+ 
+-static inline unsigned int atmci_get_version(struct atmel_mci *host)
+-{
+-	return atmci_readl(host, ATMCI_VERSION) & 0x00000fff;
+-}
+-
+ /*
+  * HSMCI (High Speed MCI) module is not fully compatible with MCI module.
+  * HSMCI provides DMA support and a new config register but no more supports
+@@ -2139,14 +2182,20 @@ static int __init atmci_probe(struct platform_device *pdev)
+ 	if (pdata->slot[0].bus_width) {
+ 		ret = atmci_init_slot(host, &pdata->slot[0],
+ 				0, ATMCI_SDCSEL_SLOT_A, ATMCI_SDIOIRQA);
+-		if (!ret)
++		if (!ret) {
+ 			nr_slots++;
++			host->buf_size = host->slot[0]->mmc->max_req_size;
++		}
+ 	}
+ 	if (pdata->slot[1].bus_width) {
+ 		ret = atmci_init_slot(host, &pdata->slot[1],
+ 				1, ATMCI_SDCSEL_SLOT_B, ATMCI_SDIOIRQB);
+-		if (!ret)
++		if (!ret) {
+ 			nr_slots++;
++			if (host->slot[1]->mmc->max_req_size > host->buf_size)
++				host->buf_size =
++					host->slot[1]->mmc->max_req_size;
++		}
+ 	}
+ 
+ 	if (!nr_slots) {
+@@ -2154,6 +2203,17 @@ static int __init atmci_probe(struct platform_device *pdev)
+ 		goto err_init_slot;
+ 	}
+ 
++	if (!host->caps.has_rwproof) {
++		host->buffer = dma_alloc_coherent(&pdev->dev, host->buf_size,
++		                                  &host->buf_phys_addr,
++						  GFP_KERNEL);
++		if (!host->buffer) {
++			ret = -ENOMEM;
++			dev_err(&pdev->dev, "buffer allocation failed\n");
++			goto err_init_slot;
++		}
++	}
++
+ 	dev_info(&pdev->dev,
+ 			"Atmel MCI controller at 0x%08lx irq %d, %u slots\n",
+ 			host->mapbase, irq, nr_slots);
+@@ -2180,6 +2240,10 @@ static int __exit atmci_remove(struct platform_device *pdev)
+ 
+ 	platform_set_drvdata(pdev, NULL);
+ 
++	if (host->buffer)
++		dma_free_coherent(&pdev->dev, host->buf_size,
++		                  host->buffer, host->buf_phys_addr);
++
+ 	for (i = 0; i < ATMCI_MAX_NR_SLOTS; i++) {
+ 		if (host->slot[i])
+ 			atmci_cleanup_slot(host->slot[i], i);
 -- 
-1.7.0.4
-
+1.7.5.4
 
