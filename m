@@ -1,41 +1,45 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: Re: [PATCH 3/7] mmc: dw_mmc: add device tree support
-Date: Thu, 17 May 2012 21:09:21 +0530
-Message-ID: <CAJuYYwTf=+Nkw2Ox9MYLybovSH8dNttYQzV4-Gg2xvZnVffZXw@mail.gmail.com>
-References: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
-	<1335935266-25289-4-git-send-email-thomas.abraham@linaro.org>
-	<Pine.LNX.4.64.1205040047280.18111@axis700.grange>
-	<CAJuYYwQj7gzZ9piJAJLcf7SiyJnQ6nZ63-X9ieQ-FCj6TNhQPQ@mail.gmail.com>
-	<Pine.LNX.4.64.1205122117340.11826@axis700.grange>
+From: ludovic.desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH 0/4] mmc: atmel-mci: add support for old mci IPs
+Date: Thu, 17 May 2012 20:25:21 +0200
+Message-ID: <4FB54291.4080509@atmel.com>
+References: <1337174761-23988-1-git-send-email-ludovic.desroches@atmel.com>
+ <87obpn3rm0.fsf@laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:42377 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752364Ab2EQPjW convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 May 2012 11:39:22 -0400
-Received: by vbbff1 with SMTP id ff1so1739095vbb.19
-        for <linux-mmc@vger.kernel.org>; Thu, 17 May 2012 08:39:21 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1205122117340.11826@axis700.grange>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"; Format="flowed"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <87obpn3rm0.fsf@laptop.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Chris Ball <cjb@laptop.org>
+Cc: nicolas.ferre@atmel.com, ludovic.desroches@atmel.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, patches@linaro.org, linux-kernel@vger.kernel.org, rob.herring@calxeda.com, grant.likely@secretlab.ca, kgene.kim@samsung.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
 
-On 13 May 2012 01:01, Guennadi Liakhovetski <g.liakhovetski@gmx.de> wro=
-te:
-> Sure. I think, my patch, that I mentioned above, shall be dropped, at
-> least in its present form. But if at least in principle we do want to=
- have
-> a common MMC OF parser for common bindings, some code from your patch
-> would become redundant, I think. BTW, isn't this
+Le 05/17/2012 02:43 PM, Chris Ball a =E9crit :
+> Hi Ludovic,
 >
-> + =A0 =A0 =A0 gpio =3D of_get_named_gpio(np, "wp_gpios", 0);
+> On Wed, May 16 2012, ludovic.desroches@atmel.com wrote:
+>> This set of patches is an extra step to remove at91-mci dirver which is =
+mainly
+>> used for old chips having mci IPs whose version is lesser than v2xx (rm9=
+200
+>> and 9261).
+>> Since it introduces many changes and there was a lack of logs to help pe=
+ople
+>> when there is an issue with atmel-mci driver, I added some debug logs.
+>>
+>> These changes have been tested on at91rm9200, at91sam9261, at91sam9263,
+>> at91sam9g10 and at91sam9g45.
 >
-> a typo? Shouldn't it be "wp-gpios" instead?
+> Thanks, pushed all four to mmc-next for 3.5.
+>
+> - Chris.
 
-Yes, it is a typo. Thanks for your review. This is fixed now.
-
-Regards,
-Thomas.
+Thanks Chris
