@@ -1,41 +1,42 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Fixed sdio interrupt mask bit setting bug
-Date: Thu, 17 May 2012 08:35:38 -0400
-Message-ID: <87wr4b3rz9.fsf@laptop.org>
-References: <002901cd31ac$fb410250$f1c306f0$%kim@samsung.com>
-	<CAFbHwiSwu32cdzQib+TYj9uSt+PXmA1Ltk1mzECRoy1DfdjyNQ@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc:sdio:guarantee setting card data bus width as 4-bit
+Date: Thu, 17 May 2012 08:37:36 -0400
+Message-ID: <87sjez3rvz.fsf@laptop.org>
+References: <1337058583-2014-1-git-send-email-yongd@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAFbHwiSwu32cdzQib+TYj9uSt+PXmA1Ltk1mzECRoy1DfdjyNQ@mail.gmail.com>
-	(Will Newton's message of "Mon, 14 May 2012 10:06:41 +0100")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Will Newton <will.newton@gmail.com>
-Cc: Kyoungil Kim <ki0351.kim@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:50771 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755017Ab2EQMhs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 17 May 2012 08:37:48 -0400
+In-Reply-To: <1337058583-2014-1-git-send-email-yongd@marvell.com>
+	(yongd@marvell.com's message of "Tue, 15 May 2012 13:09:43 +0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: yongd <yongd@marvell.com>
+Cc: linux-mmc@vger.kernel.org, prakity@marvell.com, ohad@wizery.com, linus.walleij@linaro.org, ulf.hansson@stericsson.com, linux-kernel@vger.kernel.org
 
 Hi,
 
-On Mon, May 14 2012, Will Newton wrote:
-> On Mon, May 14, 2012 at 9:38 AM, Kyoungil Kim <ki0351.kim@samsung.com=
-> wrote:
->> The sdio interrupt mask bits are arranged in [31:16].
->> (1 << SDMMC_INT_SDIO(slot->id))) does 16 bits left shift twice.
->> So this patch changes to do 16 bits left shift only one time.
->>
->> Signed-off-by: Kyoungil Kim <ki0351.kim@samsung.com>
->> ---
->> =C2=A0drivers/mmc/host/dw_mmc.c | =C2=A0 =C2=A04 ++--
->> =C2=A01 files changed, 2 insertions(+), 2 deletions(-)
+On Tue, May 15 2012, yongd wrote:
+>   SDIO_CCCR_IF[1:0] in SDIO card is used for card data bus width
+> setting as below,
+>      00b: 1-bit bus
+>      01b: Reserved
+>      10b: 4-bit bus
+>      11b: 8-bit bus(only for embedded SDIO)
+>   And sdio_enable_wide is for setting data bus width as 4-bit. But
+> currently, it 1stly read the register, 2ndly OR' 1b with SDIO_CCCR_IF[1],
+> and then write it back.
+>   As we can see, such way is based on such assumption that the
+> SDIO_CCCR_IF[0] is always 0. Apparently, this is not right.
 >
-> Yes, looks correct.
->
-> Acked-by: Will Newton <will.newton@imgtec.com>
+> Signed-off-by: yongd <yongd@marvell.com>
 
-Thanks, pushed to mmc-next for 3.5.
+Thanks.  Can we have your full name, for the copyright record?
 
 - Chris.
---=20
+-- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
