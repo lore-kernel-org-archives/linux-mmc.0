@@ -1,122 +1,44 @@
-From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: RE: [PATCH v2 1/2] [MMC-4.5] Disable emulation
-Date: Thu, 17 May 2012 17:13:24 +0530
-Message-ID: <000601cd3422$4733c540$d59b4fc0$@codeaurora.org>
-References: <1337252542-25795-1-git-send-email-saugata.das@stericsson.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 0/3] mmc: omap: driver registration cleanups
+Date: Thu, 17 May 2012 08:27:24 -0400
+Message-ID: <871umj56xf.fsf@laptop.org>
+References: <1336476935-16564-1-git-send-email-svenkatr@ti.com>
+	<CANrkHUaajRTd3D3QU7pfTRN5cv9QaqYcryOs4YNSYHq-kBkYVw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:52143 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755418Ab2EQLnp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 May 2012 07:43:45 -0400
-In-Reply-To: <1337252542-25795-1-git-send-email-saugata.das@stericsson.com>
-Content-Language: en-us
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <CANrkHUaajRTd3D3QU7pfTRN5cv9QaqYcryOs4YNSYHq-kBkYVw@mail.gmail.com>
+	(T. Krishnamoorthy's message of "Thu, 10 May 2012 20:24:37 +0530")
+Sender: linux-omap-owner@vger.kernel.org
+To: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Cc: Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Saugata Das' <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org
-Cc: patches@linaro.org, saugata.das@linaro.org, arnd.bergmann@linaro.org, venkat@linaro.org, lporzio@micron.com, linkinjeon@gmail.com
 
-Looks good to me.
-Reviewed-by: Subhash Jadavani <subhashj@codeaurora.org>
+Hi,
 
-Regards,
-Subhash
+On Thu, May 10 2012, T Krishnamoorthy, Balaji wrote:
+> On Tue, May 8, 2012 at 5:05 PM, Venkatraman S <svenkatr@ti.com> wrote=
+:
+>> Cleanups for the legacy omap mmc driver to remove clutter and
+>> make it well behaved as module.
+>>
+>> Venkatraman S (3):
+>> =C2=A0mmc: omap: convert to per instance workqueue
+>> =C2=A0mmc: omap: make it behave well as module
+>> =C2=A0mmc: omap: convert to module_platform_driver
+>
+> Looks good to me, So
+> Acked-by: Balaji T K <balajitk@ti.com>
 
-> -----Original Message-----
-> From: Saugata Das [mailto:saugata.das@stericsson.com]
-> Sent: Thursday, May 17, 2012 4:32 PM
-> To: linux-mmc@vger.kernel.org
-> Cc: patches@linaro.org; saugata.das@linaro.org; subhashj@codeaurora.org;
-> arnd.bergmann@linaro.org; venkat@linaro.org; lporzio@micron.com;
-> linkinjeon@gmail.com
-> Subject: [PATCH v2 1/2] [MMC-4.5] Disable emulation
-> 
-> From: Saugata Das <saugata.das@linaro.org>
-> 
-> This patch adds the support for large sector size of 4KB by disabling
-> emulation.
-> This patch passes eMMC DATA_SECTOR_SIZE as the logical block size during
-> mmc_blk_alloc_req.
-> 
-> In order to use this patch for 4KB sector size, ensure that
-> USE_NATIVE_SECTOR is enabled, partition table is 4KB sector size aligned
-and
-> file system block and sector size are 4KB multiples.
-> 
-> Signed-off-by: Saugata Das <saugata.das@linaro.org>
-> 
-> changes in v2:
-> 	Updated description, added pr_err based on review feedback
-> ---
->  drivers/mmc/card/block.c |   18 ++++++++++++++++--
->  drivers/mmc/core/mmc.c   |    2 ++
->  2 files changed, 18 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c index
-> 91cda75..d628c5d 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -1284,7 +1284,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
-> *mq, struct request *rqc)
->  	int ret = 1, disable_multi = 0, retry = 0, type;
->  	enum mmc_blk_status status;
->  	struct mmc_queue_req *mq_rq;
-> -	struct request *req;
-> +	struct request *req = rqc;
->  	struct mmc_async_req *areq;
-> 
->  	if (!rqc && !mq->mqrq_prev->req)
-> @@ -1292,6 +1292,16 @@ static int mmc_blk_issue_rw_rq(struct
-> mmc_queue *mq, struct request *rqc)
-> 
->  	do {
->  		if (rqc) {
-> +			/*
-> +			 * When 4KB native sector is enabled, only 8 blocks
-> +			 * multiple read or write is allowed
-> +			 */
-> +			if ((brq->data.blocks & 0x07) &&
-> +				(card->ext_csd.data_sector_size == 4096)) {
-> +				pr_err("%s: Transfer size is not 4KB sector
-> size aligned\n",
-> +					req->rq_disk->disk_name);
-> +				goto cmd_abort;
-> +			}
->  			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
->  			areq = &mq->mqrq_cur->mmc_active;
->  		} else
-> @@ -1539,7 +1549,11 @@ static struct mmc_blk_data
-> *mmc_blk_alloc_req(struct mmc_card *card,
->  	snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
->  		 "mmcblk%d%s", md->name_idx, subname ? subname : "");
-> 
-> -	blk_queue_logical_block_size(md->queue.queue, 512);
-> +	if (mmc_card_mmc(card))
-> +		blk_queue_logical_block_size(md->queue.queue,
-> +			card->ext_csd.data_sector_size);
-> +	else
-> +		blk_queue_logical_block_size(md->queue.queue, 512);
->  	set_capacity(md->disk, size);
-> 
->  	if (mmc_host_cmd23(card->host)) {
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
-> 7268c26..11444c6 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -516,6 +516,8 @@ static int mmc_read_ext_csd(struct mmc_card *card,
-> u8 *ext_csd)
->  		} else {
->  			card->ext_csd.data_tag_unit_size = 0;
->  		}
-> +	} else {
-> +		card->ext_csd.data_sector_size = 512;
->  	}
-> 
->  out:
-> --
-> 1.7.4.3
+Thanks, pushed to mmc-next for 3.5.
 
-
+- Chris.
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
