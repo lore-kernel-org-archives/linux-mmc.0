@@ -1,193 +1,50 @@
-From: Saugata Das <saugata.das@linaro.org>
+From: Arnd Bergmann <arnd.bergmann@linaro.org>
 Subject: Re: [PATCH 1/2] [MMC-4.5] Disable emulation
-Date: Thu, 17 May 2012 10:35:26 +0530
-Message-ID: <CAKLKtzdq_dxskGzoGBkqFOwjodJFHoTjCNGT_uwu_Jgj3R=juA@mail.gmail.com>
-References: <1337185615-17202-1-git-send-email-saugata.das@stericsson.com>
-	<CAKYAXd8PsrTjTvfM3y4PFg-oHGZs2ayUFrFAG1=_7NXvYRngfg@mail.gmail.com>
-	<CAKLKtzeZaOJ7vKqLgj5HYJF18ww+=C5LwWkU_i-77D0Xz6EVSQ@mail.gmail.com>
-	<CAKYAXd_pNg0MwX5vR2Pegn0UeSX3=qO4WU70QExfiFooD8yLuw@mail.gmail.com>
-	<CAKLKtzdGcunYY=QRw5XLxaA1JBJBB4TziVPD-SyxRVAPr-ddPQ@mail.gmail.com>
+Date: Thu, 17 May 2012 07:07:34 +0000
+Message-ID: <201205170707.34674.arnd.bergmann@linaro.org>
+References: <1337185615-17202-1-git-send-email-saugata.das@stericsson.com> <CAKLKtzeZaOJ7vKqLgj5HYJF18ww+=C5LwWkU_i-77D0Xz6EVSQ@mail.gmail.com> <CAKYAXd_pNg0MwX5vR2Pegn0UeSX3=qO4WU70QExfiFooD8yLuw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: Text/Plain;
+  charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f49.google.com ([209.85.216.49]:44444 "EHLO
-	mail-qa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752761Ab2EQFF0 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 May 2012 01:05:26 -0400
-Received: by qabj40 with SMTP id j40so1872933qab.1
-        for <linux-mmc@vger.kernel.org>; Wed, 16 May 2012 22:05:26 -0700 (PDT)
-In-Reply-To: <CAKLKtzdGcunYY=QRw5XLxaA1JBJBB4TziVPD-SyxRVAPr-ddPQ@mail.gmail.com>
+Received: from moutng.kundenserver.de ([212.227.17.9]:61907 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759685Ab2EQHHo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 May 2012 03:07:44 -0400
+In-Reply-To: <CAKYAXd_pNg0MwX5vR2Pegn0UeSX3=qO4WU70QExfiFooD8yLuw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Namjae Jeon <linkinjeon@gmail.com>
-Cc: Saugata Das <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org, venkat@linaro.org, patches@linaro.org, arnd.bergmann@linaro.org, lporzio@micron.com
+Cc: Saugata Das <saugata.das@linaro.org>, Saugata Das <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org, venkat@linaro.org, patches@linaro.org, lporzio@micron.com
 
-On 17 May 2012 10:17, Saugata Das <saugata.das@linaro.org> wrote:
-> On 17 May 2012 09:04, Namjae Jeon <linkinjeon@gmail.com> wrote:
->> 2012/5/17, Saugata Das <saugata.das@linaro.org>:
->>> On 17 May 2012 06:35, Namjae Jeon <linkinjeon@gmail.com> wrote:
->>>> 2012/5/17, Saugata Das <saugata.das@stericsson.com>:
->>>>> From: Saugata Das <saugata.das@linaro.org>
->>>>>
->>>>> This patch adds the support for large sector size of 4KB by disab=
-ling
->>>>> emulation.
->>>>> This patch passes eMMC DATA_SECTOR_SIZE as the logical block size=
- during
->>>>> mmc_blk_alloc_req.
->>>>>
->>>>> In order to use this patch for 4KB sector size, ensure that
->>>>> USE_NATIVE_SECTOR
->>>>> is enabled, partition table is 4KB sector size aligned and file s=
-ystem
->>>>> block
->>>>> size is 4KB.
->>>> If you change native 4K from 512B emulation, filesystem sector siz=
-e is
->>>> also 4KB align as well block size.
->>>> because default block size of most of filesystem is 4KB, but
->>>> filesystem sector size is 512B,
->>>> So filesystem corruption can be occured on native 4K device.
->>>>>
->>>
->>> I have tested ext4 with 4KB block size and I did not see an instanc=
-e
->>> where it requested 512B.
->> -> yes, you can not see it, because when formating parittion, sector
->> size is set to 4K by I/O topology. As you know, several filesystems
->> can be used on eMMC not only Ext4. You should mention filesystem
->> sector size align in changelog.
->
-> I will add the remark that file system block and sector size should b=
-e
-> 4KB multiple.
->
->>> For sure, if someone is using file system with 512B sector on eMMC
->>> then the USE_NATIVE_SECTOR should not be enabled.
->> -> it will be the reason about below my question.
->>>
->>> The idea behind the patch is, MMC driver should notify the sector s=
-ize
->>> information in a generic manner to file system. So, we depend here =
-on
->>> ext_csd.data_sector_size, which should work in both 512B and 4KB ca=
-se.
->>>
->>>
->>>>> Signed-off-by: Saugata Das <saugata.das@linaro.org>
->>>>> ---
->>>>> =A0drivers/mmc/card/block.c | =A0 16 ++++++++++++++--
->>>>> =A0drivers/mmc/core/mmc.c =A0 | =A0 =A02 ++
->>>>> =A02 files changed, 16 insertions(+), 2 deletions(-)
->>>>>
->>>>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->>>>> index 91cda75..b4d0eb1 100644
->>>>> --- a/drivers/mmc/card/block.c
->>>>> +++ b/drivers/mmc/card/block.c
->>>>> @@ -1284,7 +1284,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_q=
-ueue
->>>>> *mq,
->>>>> struct request *rqc)
->>>>> =A0 =A0 =A0 int ret =3D 1, disable_multi =3D 0, retry =3D 0, type=
-;
->>>>> =A0 =A0 =A0 enum mmc_blk_status status;
->>>>> =A0 =A0 =A0 struct mmc_queue_req *mq_rq;
->>>>> - =A0 =A0 struct request *req;
->>>>> + =A0 =A0 struct request *req =3D rqc;
->>>>> =A0 =A0 =A0 struct mmc_async_req *areq;
->>>>>
->>>>> =A0 =A0 =A0 if (!rqc && !mq->mqrq_prev->req)
->>>>> @@ -1292,6 +1292,14 @@ static int mmc_blk_issue_rw_rq(struct mmc_=
-queue
->>>>> *mq,
->>>>> struct request *rqc)
->>>>>
->>>>> =A0 =A0 =A0 do {
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (rqc) {
->>>>> +
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * When 4KB native s=
-ector is enabled, single
->>>>> block
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * read or write is =
-not allowed
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 */
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((brq->data.blocks =3D=
-=3D 1) &&
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (card->=
-ext_csd.data_sector_size =3D=3D 4096))
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto cm=
-d_abort;
->>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 Why did you add this
->>>> code in any case ?
->>>>
->>>
->>> This was pointed during the previous review that with 4KB sector mo=
-de,
->>> 512B transfer is not allowed. So, this check has been added here.
->> -> I think that you should add error log to inform user error case.
->
-> I will add pr_err here. I will also modify the condition
-> (brq->data.blocks =3D=3D 1) =A0to
-> (brq->data.blocks % 4)
->
+On Thursday 17 May 2012, Namjae Jeon wrote:
+> 2012/5/17, Saugata Das <saugata.das@linaro.org>:
+> > On 17 May 2012 06:35, Namjae Jeon <linkinjeon@gmail.com> wrote:
+> >> 2012/5/17, Saugata Das <saugata.das@stericsson.com>:
+> >> If you change native 4K from 512B emulation, filesystem sector size is
+> >> also 4KB align as well block size.
+> >> because default block size of most of filesystem is 4KB, but
+> >> filesystem sector size is 512B,
+> >> So filesystem corruption can be occured on native 4K device.
+> >>>
+> >
+> > I have tested ext4 with 4KB block size and I did not see an instance
+> > where it requested 512B.
+> -> yes, you can not see it, because when formating parittion, sector
+> size is set to 4K by I/O topology. As you know, several filesystems
+> can be used on eMMC not only Ext4. You should mention filesystem
+> sector size align in changelog.
 
-Oops. It will be (brq->data.blocks % 8)
+It's important to note here that if someone tries to use a block size
+of less than 4KB on eMMC, or has a misaligned partition, that is already
+a mistake and causes increased wear and reduced performance. Forcing 4KB
+alignment is defintely a good idea and I would recommend setting the
+'disable emulation' flag on all hardware that allows it just for this
+reason.
 
->
->>>
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_blk_rw_rq_prep(mq=
-->mqrq_cur, card, 0, mq);
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 areq =3D &mq->mqrq_cu=
-r->mmc_active;
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else
->>>>> @@ -1539,7 +1547,11 @@ static struct mmc_blk_data
->>>>> *mmc_blk_alloc_req(struct
->>>>> mmc_card *card,
->>>>> =A0 =A0 =A0 snprintf(md->disk->disk_name, sizeof(md->disk->disk_n=
-ame),
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0"mmcblk%d%s", md->name_idx, subnam=
-e ? subname : "");
->>>>>
->>>>> - =A0 =A0 blk_queue_logical_block_size(md->queue.queue, 512);
->>>>> + =A0 =A0 if (mmc_card_mmc(card))
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 blk_queue_logical_block_size(md->queue.=
-queue,
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_sect=
-or_size);
->>>>> + =A0 =A0 else
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 blk_queue_logical_block_size(md->queue.=
-queue, 512);
->>>>> =A0 =A0 =A0 set_capacity(md->disk, size);
->>>>>
->>>>> =A0 =A0 =A0 if (mmc_host_cmd23(card->host)) {
->>>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>>>> index 7268c26..11444c6 100644
->>>>> --- a/drivers/mmc/core/mmc.c
->>>>> +++ b/drivers/mmc/core/mmc.c
->>>>> @@ -516,6 +516,8 @@ static int mmc_read_ext_csd(struct mmc_card *=
-card,
->>>>> u8
->>>>> *ext_csd)
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_ta=
-g_unit_size =3D 0;
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->>>>> + =A0 =A0 } else {
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_sector_size =3D 512;
->>>>> =A0 =A0 =A0 }
->>>>>
->>>>> =A0out:
->>>>> --
->>>>> 1.7.4.3
->>>>>
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe linux-m=
-mc" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.h=
-tml
->>>>>
->>>
+Also note that hard drives and SSDs are also moving to 4KB hard sector
+size and other block devices (DVD-RAM, DASD, ...) have only supported
+larger sectors since the start and can be used with most file systems.
+
+	Arnd
