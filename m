@@ -1,50 +1,44 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH -next] mmc: omap_hsmmc: pass IRQF_ONESHOT to request_threaded_irq
-Date: Thu, 17 May 2012 10:32:37 -0400
-Message-ID: <87y5oq3mka.fsf@laptop.org>
-References: <1337221633-26656-1-git-send-email-ming.lei@canonical.com>
-	<CANfBPZ__JCHs01yt_AwgqjVXebBCxMiqCyThPf4Rr8MB191h5g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:60587 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752204Ab2EQOcj convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 May 2012 10:32:39 -0400
-In-Reply-To: <CANfBPZ__JCHs01yt_AwgqjVXebBCxMiqCyThPf4Rr8MB191h5g@mail.gmail.com>
-	(Venkatraman S.'s message of "Thu, 17 May 2012 19:26:38 +0530")
-Sender: linux-mmc-owner@vger.kernel.org
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: [PATCH v2 0/6] mmc: dw_mmc: add support for device tree based
+ instantiation
+Date: Thu, 17 May 2012 20:40:05 +0530
+Message-ID: <1337267411-28226-1-git-send-email-thomas.abraham@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
+Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: "S, Venkatraman" <svenkatr@ti.com>
-Cc: Ming Lei <ming.lei@canonical.com>, Grant Likely <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi,
+This patch series is the second version of the patches that adds device tree
+support for Synopsis Designware Mobile Storage Host Controller.
 
-On Thu, May 17 2012, S, Venkatraman wrote:
-> On Thu, May 17, 2012 at 7:57 AM, Ming Lei <ming.lei@canonical.com> wr=
-ote:
->> The flag of IRQF_ONESHOT should be passed to request_threaded_irq,
->> otherwise the following failure message should be dumped because
->> hardware handler is defined as NULL:
->>
->> [ =C2=A0 =C2=A03.383483] genirq: Threaded irq requested with handler=
-=3DNULL and
->> !ONESHOT for irq 368
->> [ =C2=A0 =C2=A03.392730] omap_hsmmc: probe of omap_hsmmc.0 failed wi=
-th error -22
->>
->> The patch fixes one kernel hang bug which is caused by mmc card
->> probe failure and root device can't be brought up.
->>
->> Signed-off-by: Ming Lei <ming.lei@canonical.com>
->
-> Right thing to do!
-> Acked-by: Venkatraman S <svenkatr@ti.com>
+The first patch converts the copy of controller device instance into a
+reference. This is need to allow device resource management api to correctly
+manage the resources allocated by the driver. The second patch fixes the
+incorrect abort of the probe in case a slot initialization fails. This is
+fixed by allowing as many slots to be initialized successfully and failing
+only if there are no slots that were initialized.
 
-Thanks, pushed to mmc-next for 3.5 with a stable@ tag added.
+The third patch adds clock lookup in the driver and this is optional. Platforms
+that do not need any clock gating and control for the dw_mmc controllers will
+not be affected with this change. The fourth patch adds a quirk to notify the
+controller about the absence of the write protect line.
 
-- Chris.
---=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+The fifth patch adds device tree based discovery support for the dw_mmc driver.
+The sixth patch add Samsung Exynos5250 specific extentions to the driver.
+
+Thomas Abraham (6):
+  mmc: dw_mmc: convert copy of struct device in struct dw_mci to a reference
+  mmc: dw_mmc: allow probe to succeed even if one slot is initialized
+  mmc: dw_mmc: lookup for optional biu and ciu clocks
+  mmc: dw_mmc: add quirk to indicate missing write protect line
+  mmc: dw_mmc: add device tree support
+  mmc: dw_mmc: add samsung exynos5250 specific extentions
+
+ .../devicetree/bindings/mmc/synposis-dw-mshc.txt   |  139 ++++++++
+ drivers/mmc/host/dw_mmc-pltfm.c                    |   41 +++-
+ drivers/mmc/host/dw_mmc.c                          |  362 +++++++++++++++++---
+ drivers/mmc/host/dw_mmc.h                          |   23 ++
+ include/linux/mmc/dw_mmc.h                         |   17 +-
+ 5 files changed, 530 insertions(+), 52 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
