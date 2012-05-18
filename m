@@ -1,64 +1,60 @@
 From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH 06/29] regulator: export a function to check if regulator
- can change status
-Date: Fri, 18 May 2012 16:08:58 +0100
-Message-ID: <20120518150858.GB4039@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH 04/29] regulator: fix devm_regulator_put() to call
+ regulator_put() explicitly
+Date: Fri, 18 May 2012 16:10:55 +0100
+Message-ID: <20120518151055.GC4039@opensource.wolfsonmicro.com>
 References: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
- <1336057558-11031-7-git-send-email-g.liakhovetski@gmx.de>
- <20120503152558.GL3955@opensource.wolfsonmicro.com>
- <Pine.LNX.4.64.1205181030550.23140@axis700.grange>
+ <1336057558-11031-5-git-send-email-g.liakhovetski@gmx.de>
+ <20120503165606.GR3955@opensource.wolfsonmicro.com>
+ <Pine.LNX.4.64.1205181053510.23140@axis700.grange>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="WYTEVAkct0FjGQmd"
+	protocol="application/pgp-signature"; boundary="O3RTKUHj+75w1tg5"
 Return-path: <linux-sh-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1205181030550.23140@axis700.grange>
+In-Reply-To: <Pine.LNX.4.64.1205181053510.23140@axis700.grange>
 Sender: linux-sh-owner@vger.kernel.org
 To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---WYTEVAkct0FjGQmd
+--O3RTKUHj+75w1tg5
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
 
-On Fri, May 18, 2012 at 10:33:42AM +0200, Guennadi Liakhovetski wrote:
-> On Thu, 3 May 2012, Mark Brown wrote:
+On Fri, May 18, 2012 at 10:54:26AM +0200, Guennadi Liakhovetski wrote:
 
-> > Bear in mind that the regulator may be shared by other users so even if
-> > the regulator is flagged as potentially being able to change status that
-> > doesn't mean that it actually can change status.
+> > > +	regulator_put(regulator);
+> > >  	rc = devres_destroy(regulator->dev, devm_regulator_release,
+> > >  			    devm_regulator_match, regulator);
 
-> Yes, I think, that's ok. We just need to know, that the card can in=20
-> principle be powered off. We don't need a guarantee, that we can power it=
-=20
-> down at any time, when we think we need it.
+> So, shall we rather use your new devres_release() here?
 
-Well, in that case what's the benefit in not just unconditionally
-claiming that you can power off and doing runtime PM on the card?
+Yes, I already have a patch queued for 3.6 after things propagate
+through in the merge window and have a fix based on the current API in
+the regulator tree for 3.5 that doesn't have the double free issue.
 
---WYTEVAkct0FjGQmd
+--O3RTKUHj+75w1tg5
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.12 (GNU/Linux)
 
-iQIcBAEBAgAGBQJPtmYEAAoJEBus8iNuMP3d0bAP/2x/c6P1gzk7JuT1jgG/C+Rf
-a8+illx2abROcA8NK2t9wZu/dobqv8vSpQUxl1400sDJ69gm7dufsbF+tb9MXhuI
-jPx0ZGkCSghX/JuVaWyDL9qZ+rxHVOr6wtVs7mN5IAICkUCX2Gz5v8bG+0NIFrDT
-e3KA8+fWbImCb9XWhnlykXs6NWodel8WXbq/Vh+B0rezhMU3w2WOqU8uJHPRGWab
-0lpuXUEX3uKLxumNVdiHhpMo049Qi6qb9Vwctu5C12HmYWXUHq+25GqLvFftnCNN
-vjhH7SpPhhH2pjA3K55PjdwNTafWdQ0vLfCSpzlMDier/ahTPVHuF6XOyrcdduuG
-2j6iywBG4wagUaYK/E+jyyQvGUh9DWSE00luF8wDoKqmmkUojdneoAxZLh4diMXa
-sEkyfmdUMnYB1CkHvhgOu+bXy7ls5Tk0ygt23DeeG+aWjIQUBCi8kh3gQMVxnDUi
-/DOOvTt6k+5/KNA9sFMGiHzRHeCQflo+A2A92NsmeA14DhyZKeEWrn6N6vaNW56Q
-5+HDSruibCixePURW8cXx2pfmfzXi5aAIEpMpwyVvXQmG9IK7nSdFRkHhLY/6BFM
-bVDkNLZQp5F8q0/EoBY8GHZhF16l8Ywzj3vbSMnCI2ZDSWfsD1h/sU2ZoXdtkkyR
-dc9Sqzw7iyscGiKROncw
-=Zzlb
+iQIcBAEBAgAGBQJPtmZ5AAoJEBus8iNuMP3dlq0P/jVIODZDAvbpV4V6g/pxLXqc
+6YT2PXTlqiGrIEIAXgDSFckzVy+cCG7H7LcBEvte+A8MghQsOSzhqN5juQe8x743
+aEbYm2G4ed+ieacjokFggXMKkwWbUvFLADbffcFjV//LFS9ajqAM7b2GGJZMyGeq
+mh2A9EF6nKTjguCccEAEb0aEuKkCgakY9cku7mQWJNeXU1xBvoyR/jTTk1igmSvd
+FlPovrGF/7meRk443mGmbCqImmJDxJyX8vBHFjzAtBnGiFWc25GPY8SobX5u/Fix
+IHRoZ7Oqdr1NDJtR9KWYK0rPgADBqaqxrl6NOh+5Tv/FaPq0tlPgMv/HAePam1yt
+AmynHenYb1HgI+l8BKNYSeS4iCzvgXTm+4WpcQepqtTv9WmTSF49z4b0O7NS19F8
+3HQ6Bs5GesN64kJPwjWldVOYqKqmcXj3T6Yo31hRCppWRDF3+FM/oqhHf0QJzHl4
+Ik62WlXeEGjqC2O7jFYQkamML3tsvm6b5A/0pz1HdiUqGwa9CE/m4o2JcgyyuBgD
+7YsNbEQtcCl/2HiDmsLtmKWj2HLs9+UgkLO9gIH2IQhAygRGc81QmBYuZS7DGlVL
+hQA6tR/mWRGJoPzL0kcJHFp9z6jJ/UfQWlpIp00A6QY2iqkx1anT9mYYz6/4DG1i
+pUW3WHmyFHl5JM7iQBGz
+=6ibH
 -----END PGP SIGNATURE-----
 
---WYTEVAkct0FjGQmd--
+--O3RTKUHj+75w1tg5--
