@@ -1,58 +1,34 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 04/29] regulator: fix devm_regulator_put() to call
- regulator_put() explicitly
-Date: Fri, 18 May 2012 10:54:26 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1205181053510.23140@axis700.grange>
+From: Paul Mundt <lethal@linux-sh.org>
+Subject: Re: [PATCH 05/29] regulator: use IS_ERR_OR_NULL() instead of
+ open-coding
+Date: Fri, 18 May 2012 17:57:50 +0900
+Message-ID: <20120518085749.GE24355@linux-sh.org>
 References: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
- <1336057558-11031-5-git-send-email-g.liakhovetski@gmx.de>
- <20120503165606.GR3955@opensource.wolfsonmicro.com>
+ <1336057558-11031-6-git-send-email-g.liakhovetski@gmx.de>
+ <20120503153239.GN3955@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:53637 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964972Ab2ERIy3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 May 2012 04:54:29 -0400
-In-Reply-To: <20120503165606.GR3955@opensource.wolfsonmicro.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20120503153239.GN3955@opensource.wolfsonmicro.com>
+Sender: linux-sh-owner@vger.kernel.org
 To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-Hi Mark
-
-On Thu, 3 May 2012, Mark Brown wrote:
-
-> On Thu, May 03, 2012 at 05:05:33PM +0200, Guennadi Liakhovetski wrote:
-> > devres_destroy() doesn't call the release() method, it only destroys the
-> > resource. The caller should take care to release the associated object
-> > itself.
+On Thu, May 03, 2012 at 04:32:39PM +0100, Mark Brown wrote:
+> On Thu, May 03, 2012 at 05:05:34PM +0200, Guennadi Liakhovetski wrote:
 > 
-> > +	regulator_put(regulator);
-> >  	rc = devres_destroy(regulator->dev, devm_regulator_release,
-> >  			    devm_regulator_match, regulator);
-
-So, shall we rather use your new devres_release() here?
-
-Thanks
-Guennadi
-
-> Oh dear.  This seems like pretty peculiar behaviour on the part of
-> devres_destroy() - everything about the function and its documentation
-> would suggest that it'd actually free the resource not just free the
-> devm_ internal bits of the resource, and especially given that we have
-> to pass the release function in.
+> > -	if (regulator == NULL || IS_ERR(regulator))
+> > +	if (IS_ERR_OR_NULL(regulator))
 > 
-> This also seems like it's the wrong way round - it probably shouldn't
-> matter that much but we should really only do the regulator_put() after
-> the destroy succeeded since there's a small chance that hotplug or
-> something might cause this to run while the device is being removed
-> elsewhere so we could end up trying to double free.
-> 
-> Also, this patch is totally unrelated to the rest of the series and
-> should really have been sent separately.
+> The bigger question here is why we're accepting NULL in the first place.
 
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+I'm not sure about the regulator case, but it's been useful to support
+passing NULL around in the clock framework case. There are plenty of
+cases where a struct clk is optional and if we fail to find the clock we
+just set clk to NULL and continue on without having to constantly check
+the value of the clk pointer, which helps considerably when you consider
+the number of clk_enable/disable() pairs some drivers have.
+
+Presumably the same applies for regulators?
