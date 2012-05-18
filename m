@@ -1,79 +1,79 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH 13/29] mmc: tmio: add regulator support
-Date: Fri, 18 May 2012 16:34:18 +0100
-Message-ID: <20120518153416.GE4039@opensource.wolfsonmicro.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 07/29] mmc: add a function to get a regulator, supplying
+ card's Vdd
+Date: Fri, 18 May 2012 17:39:39 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1205181727320.23140@axis700.grange>
 References: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
- <1336057558-11031-14-git-send-email-g.liakhovetski@gmx.de>
- <20120503155655.GQ3955@opensource.wolfsonmicro.com>
- <Pine.LNX.4.64.1205181137570.23140@axis700.grange>
+ <1336057558-11031-8-git-send-email-g.liakhovetski@gmx.de>
+ <20120503154252.GO3955@opensource.wolfsonmicro.com>
+ <Pine.LNX.4.64.1205181059560.23140@axis700.grange>
+ <20120518151837.GD4039@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="dFWYt1i2NyOo1oI9"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:37194 "EHLO
-	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754065Ab2ERPeY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 May 2012 11:34:24 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1205181137570.23140@axis700.grange>
+Received: from moutng.kundenserver.de ([212.227.17.8]:55126 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755456Ab2ERPjm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 May 2012 11:39:42 -0400
+In-Reply-To: <20120518151837.GD4039@opensource.wolfsonmicro.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
 Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 
+On Fri, 18 May 2012, Mark Brown wrote:
 
---dFWYt1i2NyOo1oI9
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> On Fri, May 18, 2012 at 11:28:31AM +0200, Guennadi Liakhovetski wrote:
+> 
+> > 1. A regulator that can (in principle) change state, i.e., switch on and 
+> > off. Such a regulator is good to keep for the runtime to power up and down 
+> > the card.
+> 
+> > 2. A regulator, that cannot switch, but at least can tell its supplied 
+> > voltage is used ones to read out supported voltages and released again.
+> 
+> This doesn't make sense, you can only change the voltages if you hold a
+> reference to the regulator.
 
-On Fri, May 18, 2012 at 11:55:53AM +0200, Guennadi Liakhovetski wrote:
-> On Thu, 3 May 2012, Mark Brown wrote:
+Yes, that's obviously a thinko. I forgot, that mmc also switches between 
+different voltages, not only powers on and off.
 
-> > should it be being factored out into the core?
+> > 3. A regulator that can do none of the above is defined as "useless"
+> 
+> > > You may also run into trouble on boards that use the ability to disable
+> > > unused regulators at the end of boot - they'll power things off even
+> > > without the ability to change status at runtime.
+> 
+> > Aha, you mean, I shouldn't put() the regulator, even if it cannot change 
+> > status itself?
+> 
+> Yes, you ought to to be safe and like I say if you want to manage the
+> voltage then you need to keep a reference to the regulator.
+> 
+> > Can this also happen with a dummy regulator?
+> 
+> Obviously not,
 
-> Weeeell, it's not a lot of code. We could make this a library function,=
-=20
-> provided by the core, but I don't think it would be very straight forward=
-=20
-> to also automate its calling, thus freeing individual drivers from this=
-=20
-> task. As you can see in these two drivers, one of them turns the card on=
-=20
-> already upon MMC_POWER_UP, the other one only in MMC_POWER_ON. I'm not=20
-> sure off the top of my head why this difference is there, but in any case=
-=20
-> different drivers might have different ideas about this. So, I'm not sure=
-=20
-> whether this micro-optimisation is worth it.
+Well, I certainly understand, that a dummy regulator cannot switch power 
+by itself:-) Well, theoretically it can happen, that the board code / OF 
+is missing the required entry and a shared regulator will be powered off, 
+that also powers mmc, but that's obviously a bug.
 
-My take on this would be that we shouldn't even have to think about what
-the differences are and that if there are genuine tradeoffs here it's
-likely that we should be offering them at runtime or to boards or
-something rather than picking something in an individual driver.  If
-there are meaningful differences I'd at least expect to be able to tell
-what they are.
+> though if you've got explicit code in to handle dummy
+> regulators you're rather missing the point.  Their entire purpose is to
+> provide a crutch to keep the system going if bits are missing from the
+> bindings, they're not intended to be used in production.
 
---dFWYt1i2NyOo1oI9
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+I was thinking about what to use to power off the card if both a platform 
+callback (legacy) and a regulator are available (see, e.g., "[PATCH 
+08/29] mmc: sh_mmcif: add regulator support"). But perhaps giving 
+preference to the regulator is bogus. Maybe I should just switch both, or 
+even give preference to the call-back. What do you think? Switching both 
+is, perhaps, the safest bet.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJPtmvyAAoJEBus8iNuMP3dgDkP/1XtwriOZNsYa6PcZASxrcGa
-nxfucveaK0Cma8bvQzElC2sZ03DEGiE/8HdH9omo32nFL0QIJ/v0W2jzsrxpzVpL
-87Jfil5C+fiK7ccbIwBYrG6lCKRDM8hY+l4CthYVtoR+JTCB6JaaUcR36ZAISUHl
-jtVRcXqhpqC4HjkoSPoeBCEyn5b2pR2Ogs/3Pgm3sw0Be7YfPi5TFPx6i/LlUzcF
-sE3Bh7+GRsjkIZB5+dce8koxmAW/Su8dW0CO8DM+BSenL7UmPkrGCjMGdxGRHj4E
-QBQ3iXjr1VYb5T0o3nxkOJbjDxaD719jUE+ZKCqDtKJ3lzVaMzmf4Xg1xIy1TB+q
-AesNio/INlWiPaiISP8iNcowUyj3DfXrNRdbvf4WDgc+C65xoBx0NxU8nO3/VGE4
-mDPzn7G3xA25GOEy61VuP4p2nNoZW0HODdzVXdcQjzTByiz0qJeb0fjtlvLaNv2J
-s/crMYWvcceXmYmzJvwIIR7AKsCockLaFX3pYS5Kbamatg4A7Zy+suA2CBIPwkto
-E1WtD+2Qks0Flwvgp40Jdam262zvVNbtiuZS//MvqNZlO55pO2CCPzc0IGQFFazu
-iusjPaRUzpAuhHSN1gL1EGOE+K1ehK1xfzSvZMLeeNWCj4X382VH6MO4BiBWTKrR
-QvLOLlwQm6gzMEEubliA
-=5PGr
------END PGP SIGNATURE-----
-
---dFWYt1i2NyOo1oI9--
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
