@@ -1,32 +1,39 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: UHS Support
-Date: Thu, 17 May 2012 21:03:30 -0700
-Message-ID: <A11AF76B-CF0B-4EC2-9B87-79325B74526D@marvell.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH v2 3/6] mmc: dw_mmc: lookup for optional biu and ciu
+	clocks
+Date: Fri, 18 May 2012 08:49:01 +0100
+Message-ID: <20120518074901.GA843@n2100.arm.linux.org.uk>
+References: <1337267411-28226-1-git-send-email-thomas.abraham@linaro.org> <1337267411-28226-4-git-send-email-thomas.abraham@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:56212 "EHLO
-	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752061Ab2EREG0 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 18 May 2012 00:06:26 -0400
-Content-Language: en-US
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:47616 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760891Ab2ERHtQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 May 2012 03:49:16 -0400
+Content-Disposition: inline
+In-Reply-To: <1337267411-28226-4-git-send-email-thomas.abraham@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Aaron Lu <Aaron.Lu@amd.com>, Arindam Nath <arindam.nath@amd.com>
+To: Thomas Abraham <thomas.abraham@linaro.org>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, patches@linaro.org, linux-kernel@vger.kernel.org, rob.herring@calxeda.com, grant.likely@secretlab.ca, kgene.kim@samsung.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
 
+On Thu, May 17, 2012 at 08:40:08PM +0530, Thomas Abraham wrote:
+> +err_clk:
+> +	if (!IS_ERR(host->ciu_clk))
+> +		clk_disable_unprepare(host->ciu_clk);
+> +	if (!IS_ERR(host->biu_clk))
+> +		clk_disable_unprepare(host->biu_clk);
+> +	clk_put(host->ciu_clk);
+> +	clk_put(host->biu_clk);
 
-Voltage for vcc/vccq is supplied on some of our boards for SD using either a dedicated voltage supply at 3.3v.
++	if (!IS_ERR(host->ciu_clk)) {
++		clk_disable_unprepare(host->ciu_clk);
++		clk_put(host->ciu_clk);
++	}
++	if (!IS_ERR(host->biu_clk)) {
++		clk_disable_unprepare(host->biu_clk);
++		clk_put(host->biu_clk);
++	}
 
-The SD controller indicates in the capability1 register (caps[1])  that UHS is supported but since 1.8v is not available in practice there is no support.
-
-There are two ways I can see to solve this problem
-
-a) allow caps[1] to be passed in (like caps[0]) is today via a quirk) and have the caller to sdhci_add_host() just clear the bits for UHS support.
-b) define a new quirk that indicates UHS is not supported.
-
-I favor a) but wanted the list to have a chance to respond if there is a preference.
-
-Philip
+And the same in the other occurrence.
