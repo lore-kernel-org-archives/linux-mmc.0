@@ -1,67 +1,189 @@
-From: Santosh Shilimkar <santosh.shilimkar@ti.com>
-Subject: [PATCH] mmc: core: Fix build warning with !CONFIG_SUSPEND
-Date: Sat, 19 May 2012 13:28:39 +0530
-Message-ID: <1337414319-27719-1-git-send-email-santosh.shilimkar@ti.com>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: [PATCH v1 1/1] mmc: block: replace __blk_end_request() with blk_end_request()
+Date: Sat, 19 May 2012 16:34:19 +0530
+Message-ID: <000001cd35af$2eae5ba0$8c0b12e0$@codeaurora.org>
+References: <1334082412-2821-1-git-send-email-subhashj@codeaurora.org>	<87pqbfv3e1.fsf@laptop.org>	<000201cd174a$f3019b80$d904d280$@codeaurora.org>	<000301cd1d22$57444d40$05cce7c0$@codeaurora.org> <CAKYAXd9QfEEJLQGG6PJgnNyyXP4D2Sa-PqhiZ=dDdQv50z76+A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:54680 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758362Ab2ESH7I (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 19 May 2012 03:59:08 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: 
+Content-Language: en-us
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: 'Chris Ball' <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 'Namjae Jeon' <linkinjeon@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Santosh Shilimkar <santosh.shilimkar@ti.com>, Chris Ball <cjb@laptop.org>
 
-With !CONFIG_SUSPEND, mmc core layer throws below build warnings.
+Hi Chris,
 
-drivers/mmc/core/bus.c:125: warning: 'mmc_bus_suspend' defined but not used
-drivers/mmc/core/bus.c:136: warning: 'mmc_bus_resume' defined but not used
-drivers/mmc/core/sdio_bus.c:197: warning: 'pm_no_operation' defined but not used
+Do you see any issues with this patch?
 
-Fix is by wrapping suspend hooks under CONFIG_SUSPEND
+Regards,
+Subhash
 
-Signed-off-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
-Cc: Chris Ball <cjb@laptop.org>
----
- drivers/mmc/core/bus.c      |    2 ++
- drivers/mmc/core/sdio_bus.c |    2 +-
- 2 files changed, 3 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index c60cee9..ca8925d 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -122,6 +122,7 @@ static int mmc_bus_remove(struct device *dev)
- 	return 0;
- }
- 
-+#ifdef CONFIG_SUSPEND
- static int mmc_bus_suspend(struct device *dev)
- {
- 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
-@@ -143,6 +144,7 @@ static int mmc_bus_resume(struct device *dev)
- 		ret = drv->resume(card);
- 	return ret;
- }
-+#endif
- 
- #ifdef CONFIG_PM_RUNTIME
- 
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 236842e..87d1b7e 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -192,7 +192,7 @@ static int sdio_bus_remove(struct device *dev)
- 	return ret;
- }
- 
--#ifdef CONFIG_PM
-+#ifdef CONFIG_SUSPEND
- 
- static int pm_no_operation(struct device *dev)
- {
--- 
-1.7.5.4
-
+> -----Original Message-----
+> From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
+> Sent: Wednesday, April 18, 2012 1:07 PM
+> To: 'Namjae Jeon'
+> Cc: 'Chris Ball'; 'linux-mmc@vger.kernel.org'; 'linux-arm-
+> msm@vger.kernel.org'
+> Subject: RE: [PATCH v1 1/1] mmc: block: replace __blk_end_request() with
+> blk_end_request()
+> 
+> Hi Namjae,
+> 
+> > -----Original Message-----
+> > From: Namjae Jeon [mailto:linkinjeon@gmail.com]
+> > Sent: Wednesday, April 18, 2012 11:12 AM
+> > To: Subhash Jadavani
+> > Cc: Chris Ball; linux-mmc@vger.kernel.org;
+> > linux-arm-msm@vger.kernel.org
+> > Subject: Re: [PATCH v1 1/1] mmc: block: replace __blk_end_request()
+> > with
+> > blk_end_request()
+> >
+> > Hi. Subhash.
+> >
+> > Would you share which option you used in LMDD, iozone test ?
+> 
+> Following are the commands. Page cache is flushed before next iteration.
+> Original numbers shared were average of almost 10 iterations.
+> 
+> LMDD:
+> 	100MB file read/write:
+> 		write:
+> 			lmdd if=internal of=/data/datafile bs=128k count=800
+> flush=1 sync=1
+> 		read:
+> 			lmdd if=/data/datafile of=internal bs=128k flush=1
+> sync=1
+> 
+> IOZONE:
+> 	100MB file read/write:
+> 		Write:
+> 			iozone -i0 -s100m -r128k -e -w -f /data/datafile -U
+> /data/
+> 		Read:
+> 			iozone -i1 -s100m -r128k -e -f /data/datafile -U /data/
+> 
+> Regards,
+> Subhash
+> 
+> >
+> > Thanks.
+> >
+> > 2012/4/18 Subhash Jadavani <subhashj@codeaurora.org>:
+> > > Hi Chris,
+> > >
+> > >> -----Original Message-----
+> > >> From: linux-arm-msm-owner@vger.kernel.org [mailto:linux-arm-msm-
+> > >> owner@vger.kernel.org] On Behalf Of Subhash Jadavani
+> > >> Sent: Wednesday, April 11, 2012 12:22 AM
+> > >> To: 'Chris Ball'
+> > >> Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org
+> > >> Subject: RE: [PATCH v1 1/1] mmc: block: replace __blk_end_request()
+> > >> with
+> > >> blk_end_request()
+> > >>
+> > >>
+> > >>
+> > >> > -----Original Message-----
+> > >> > From: Chris Ball [mailto:cjb@laptop.org]
+> > >> > Sent: Wednesday, April 11, 2012 12:08 AM
+> > >> > To: Subhash Jadavani
+> > >> > Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org
+> > >> > Subject: Re: [PATCH v1 1/1] mmc: block: replace
+> > >> > __blk_end_request() with
+> > >> > blk_end_request()
+> > >> >
+> > >> > Hi,
+> > >> >
+> > >> > On Tue, Apr 10 2012, Subhash Jadavani wrote:
+> > >> > > This patch replaces all __blk_end_request() calls with
+> > >> > > blk_end_request() and __blk_end_request_all() calls with
+> > >> > > blk_end_request_all().
+> > >> > >
+> > >> > > Testing done: 20 process concurrent read/write on sd card and
+> eMMC.
+> > >> > > Ran this test for almost a day on multicore system and no
+> > >> > > errors observed.
+> > >> >
+> > >> > Is there a measurable improvement in throughput or latency that
+> > >> > you can
+> > >> show
+> > >> > data for?
+> > >>
+> > >> This change was not meant for improving MMC throughput; it's
+> > >> basically
+> > > about
+> > >> becoming fair to other threads/interrupts in the system. By holding
+> > >> spin
+> > > lock
+> > >> and interrupts disabled for longer duration, we won't allow other
+> > >> threads/interrupts to run at all.
+> > >> Actually slight performance degradation at file system level can be
+> > > expected as
+> > >> we are not holding the spin lock during blk_update_bidi_request()
+> > >> which
+> > > means
+> > >> our mmcqd thread may get preempted for other high priority thread
+> > >> or any interrupt in the system.
+> > >>
+> > >>
+> > >> These are performance numbers (100MB file write) with eMMC running
+> > >> in DDR
+> > >> mode:
+> > >>
+> > >> Without this patch:
+> > >>       Name of the Test        Value   Unit
+> > >>       LMDD Read Test  53.79   MBPS
+> > >>       LMDD Write Test 18.86   MBPS
+> > >>       IOZONE  Read Test       51.65   MBPS
+> > >>       IOZONE  Write Test      24.36   MBPS
+> > >>
+> > >> With this patch:
+> > >>
+> > >>       Name of the Test        Value   Unit
+> > >>       LMDD Read Test  52.94   MBPS
+> > >>       LMDD Write Test 16.70   MBPS
+> > >>       IOZONE  Read Test       52.08   MBPS
+> > >>       IOZONE  Write Test      23.29   MBPS
+> > >>
+> > >> Read numbers are fine. Write numbers are bit down (especially LMDD
+> > >> write), may be because write requests normally have large transfer
+> > >> size and which means there are chances that while mmcq is executing
+> > >> blk_update_bidi_request(), it may get interrupted by interrupts or
+> > >> other
+> > > high
+> > >> priority thread.
+> > >
+> > > Any thoughts/suggestions on this patch and numbers?
+> > >
+> > > Regards,
+> > > Subhash
+> > >>
+> > >> Regards,
+> > >> Subhash
+> > >>
+> > >> >
+> > >> > Thanks,
+> > >> >
+> > >> > - Chris.
+> > >> > --
+> > >> > Chris Ball   <cjb@laptop.org>   <http://printf.net/> One Laptop
+> > >> > Per Child
+> > >>
+> > >> --
+> > >> To unsubscribe from this list: send the line "unsubscribe linux-arm-
+> msm"
+> > > in the
+> > >> body of a message to majordomo@vger.kernel.org More majordomo
+> info
+> > >> at http://vger.kernel.org/majordomo-info.html
+> > >
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> > > in the body of a message to majordomo@vger.kernel.org More
+> majordomo
+> > > info at  http://vger.kernel.org/majordomo-info.html
