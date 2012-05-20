@@ -1,104 +1,168 @@
-From: Marc Dietrich <marvin24@gmx.de>
-Subject: Re: emmc power select failure
-Date: Sat, 19 May 2012 17:38:50 +0200
-Message-ID: <5020225.pSQj6FTFv6@ax5200p>
-References: <1721770.czJDhHnFDk@ax5200p> <CANYdXnpBgpgOFv_rSg+tGTE_vppbV6XO66h5eyr9X2LUFk4T_A@mail.gmail.com>
+From: merez@codeaurora.org
+Subject: Re: [PATCH v6 1/3] mmc: core: Add packed command feature of eMMC4.5
+Date: Sun, 20 May 2012 04:31:58 -0700 (PDT)
+Message-ID: <3bc900aff2cd9c84a2c01f3b18f00cf0.squirrel@www.codeaurora.org>
+References: <009d01cd3411$0febc350$2fc349f0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout-de.gmx.net ([213.165.64.22]:36231 "HELO
-	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1753183Ab2ETLZu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 May 2012 07:25:50 -0400
-In-Reply-To: <CANYdXnpBgpgOFv_rSg+tGTE_vppbV6XO66h5eyr9X2LUFk4T_A@mail.gmail.com>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:43633 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750927Ab2ETLb7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 May 2012 07:31:59 -0400
+In-Reply-To: <009d01cd3411$0febc350$2fc349f0$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-Cc: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, merez@codeaurora.org, linux-kernel@vger.kernel.org
 
-Hi Shashidhar,
+Looks good to me.
 
-ok, now that the bus width switch error became fatal in recent kernels, the 
-problem started to became painful...
+Thanks,
+Maya Erez
+Consultant for Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
 
-I added some debug printks to the mmc_switch function in mmc_ops.c:
+> This patch adds packed command feature of eMMC4.5.
+> The maximum number for packing read(or write) is offered
+> and exception event relevant to packed command which is
+> used for error handling is enabled. If host wants to use
+> this feature, MMC_CAP2_PACKED_CMD should be set.
+>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+>  drivers/mmc/core/mmc.c   |   24 ++++++++++++++++++++++++
+>  include/linux/mmc/card.h |    3 +++
+>  include/linux/mmc/host.h |    4 ++++
+>  include/linux/mmc/mmc.h  |   15 +++++++++++++++
+>  4 files changed, 46 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 2f0e11c..8310ce8 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -516,6 +516,11 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8
+> *ext_csd)
+>  		} else {
+>  			card->ext_csd.data_tag_unit_size = 0;
+>  		}
+> +
+> +		card->ext_csd.max_packed_writes =
+> +			ext_csd[EXT_CSD_MAX_PACKED_WRITES];
+> +		card->ext_csd.max_packed_reads =
+> +			ext_csd[EXT_CSD_MAX_PACKED_READS];
+>  	}
+>
+>  out:
+> @@ -1244,6 +1249,25 @@ static int mmc_init_card(struct mmc_host *host, u32
+> ocr,
+>  		}
+>  	}
+>
+> +	if ((host->caps2 & MMC_CAP2_PACKED_CMD) &&
+> +			(card->ext_csd.max_packed_writes > 0) &&
+> +			(card->ext_csd.max_packed_reads > 0)) {
+> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +				EXT_CSD_EXP_EVENTS_CTRL,
+> +				EXT_CSD_PACKED_EVENT_EN,
+> +				card->ext_csd.generic_cmd6_time);
+> +		if (err && err != -EBADMSG)
+> +			goto free_card;
+> +		if (err) {
+> +			pr_warning("%s: Enabling packed event failed\n",
+> +					mmc_hostname(card->host));
+> +			card->ext_csd.packed_event_en = 0;
+> +			err = 0;
+> +		} else {
+> +			card->ext_csd.packed_event_en = 1;
+> +		}
+> +	}
+> +
+>  	if (!oldcard)
+>  		host->card = card;
+>
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index d76513b..4aeb4e9 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -53,6 +53,9 @@ struct mmc_ext_csd {
+>  	u8			part_config;
+>  	u8			cache_ctrl;
+>  	u8			rst_n_function;
+> +	u8			max_packed_writes;
+> +	u8			max_packed_reads;
+> +	u8			packed_event_en;
+>  	unsigned int		part_time;		/* Units: ms */
+>  	unsigned int		sa_timeout;		/* Units: 100ns */
+>  	unsigned int		generic_cmd6_time;	/* Units: 10ms */
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 0707d22..9d0d946 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -238,6 +238,10 @@ struct mmc_host {
+>  #define MMC_CAP2_BROKEN_VOLTAGE	(1 << 7)	/* Use the broken voltage */
+>  #define MMC_CAP2_DETECT_ON_ERR	(1 << 8)	/* On I/O err check card removal
+> */
+>  #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
+> +#define MMC_CAP2_PACKED_RD	(1 << 10)	/* Allow packed read */
+> +#define MMC_CAP2_PACKED_WR	(1 << 11)	/* Allow packed write */
+> +#define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
+> +				 MMC_CAP2_PACKED_WR) /* Allow packed commands */
+>
+>  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+>  	unsigned int        power_notify_type;
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index d425cab..254901a 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -139,6 +139,7 @@ static inline bool mmc_op_multi(u32 opcode)
+>  #define R1_CURRENT_STATE(x)	((x & 0x00001E00) >> 9)	/* sx, b (4 bits) */
+>  #define R1_READY_FOR_DATA	(1 << 8)	/* sx, a */
+>  #define R1_SWITCH_ERROR		(1 << 7)	/* sx, c */
+> +#define R1_EXP_EVENT		(1 << 6)	/* sr, a */
+>  #define R1_APP_CMD		(1 << 5)	/* sr, c */
+>
+>  #define R1_STATE_IDLE	0
+> @@ -274,6 +275,10 @@ struct _mmc_csd {
+>  #define EXT_CSD_FLUSH_CACHE		32      /* W */
+>  #define EXT_CSD_CACHE_CTRL		33      /* R/W */
+>  #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
+> +#define EXT_CSD_PACKED_FAILURE_INDEX	35	/* RO */
+> +#define EXT_CSD_PACKED_CMD_STATUS	36	/* RO */
+> +#define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
+> +#define EXT_CSD_EXP_EVENTS_CTRL	56	/* R/W, 2 bytes */
+>  #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
+>  #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
+>  #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+> @@ -318,6 +323,8 @@ struct _mmc_csd {
+>  #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
+>  #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
+>  #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
+> +#define EXT_CSD_MAX_PACKED_WRITES	500	/* RO */
+> +#define EXT_CSD_MAX_PACKED_READS	501	/* RO */
+>  #define EXT_CSD_HPI_FEATURES		503	/* RO */
+>
+>  /*
+> @@ -377,6 +384,14 @@ struct _mmc_csd {
+>  #define EXT_CSD_PWR_CL_4BIT_MASK	0x0F	/* 8 bit PWR CLS */
+>  #define EXT_CSD_PWR_CL_8BIT_SHIFT	4
+>  #define EXT_CSD_PWR_CL_4BIT_SHIFT	0
+> +
+> +#define EXT_CSD_PACKED_EVENT_EN	(1 << 3)
+> +
+> +#define EXT_CSD_PACKED_FAILURE	(1 << 3)
+> +
+> +#define EXT_CSD_PACKED_GENERIC_ERROR	(1 << 0)
+> +#define EXT_CSD_PACKED_INDEXED_ERROR	(1 << 1)
+> +
+>  /*
+>   * MMC_SWITCH access modes
+>   */
+> --
+> 1.7.0.4
+>
+>
+>
 
-[    1.433253] sdhci: Secure Digital Host Controller Interface driver
-[    1.442993] sdhci: Copyright(c) Pierre Ossman
-[    1.450802] sdhci-pltfm: SDHCI platform and OF driver helper
-[    1.460363] mmc0: Invalid maximum block size, assuming 512 bytes
-[    1.469905] mmc0: no vmmc regulator found
-[    1.477523] Registered led device: mmc0::
-[    1.524716] mmc0: SDHCI controller on sdhci-tegra.0 [sdhci-tegra.0] using 
-ADMA
-[    1.535694] mmc1: Invalid maximum block size, assuming 512 bytes
-[    1.546965] mmc1: no vmmc regulator found
-[    1.557964] Registered led device: mmc1::
-[    1.603176] mmc1: SDHCI controller on sdhci-tegra.3 [sdhci-tegra.3] using 
-ADMA
-[    1.863003] mmc0: new high speed SDHC card at address aaaa
-[    1.888671] mmcblk0: mmc0:aaaa SD16G 14.8 GiB 
-[    1.918111]  mmcblk0: p1
-[    2.022258] mmc1 switching: index: 175 value: 1 set: 1 timeout: 0
-[    2.039804] mmc1 return status is: 0x00000900
-[    2.046419] mmc1 switching: index: 185 value: 1 set: 1 timeout: 0
-[    2.069361] mmc1 return status is: 0x00000900
-[    2.075991] mmc1: exec mmc_switch with val 3 and time 0
-[    2.088771] mmc1 switching: index: 187 value: 3 set: 1 timeout: 0
-[    2.097515] mmc1 return status is: 0x00000980
-[    2.104200] mmc1: power class selection for ext_csd_bus_width 2 failed
-[    2.113093] mmc1: error -74 whilst initialising MMC card
-[    2.275468] mmc1 switching: index: 175 value: 1 set: 1 timeout: 0
-[    2.293980] mmc1 return status is: 0x00000900
-[    2.300754] mmc1 switching: index: 185 value: 1 set: 1 timeout: 0
-[    2.310502] mmc1 return status is: 0x00000900
-[    2.317268] mmc1: exec mmc_switch with val 3 and time 0
-[    2.324874] mmc1 switching: index: 187 value: 3 set: 1 timeout: 0
-[    2.333719] mmc1 return status is: 0x00000980
-[    2.340434] mmc1: power class selection for ext_csd_bus_width 2 failed
-[    2.349381] mmc1: error -74 whilst initialising MMC card
-[    2.485465] mmc1 switching: index: 175 value: 1 set: 1 timeout: 0
-[    2.495166] mmc1 return status is: 0x00000900
-[    2.501866] mmc1 switching: index: 185 value: 1 set: 1 timeout: 0
-[    2.511521] mmc1 return status is: 0x00000900
-[    2.518173] mmc1: exec mmc_switch with val 3 and time 0
-[    2.525707] mmc1 switching: index: 187 value: 3 set: 1 timeout: 0
-[    2.543724] mmc1 return status is: 0x00000980
-[    2.550504] mmc1: power class selection for ext_csd_bus_width 2 failed
-[    2.559483] mmc1: error -74 whilst initialising MMC card
-[    2.695482] mmc1 switching: index: 175 value: 1 set: 1 timeout: 0
-[    2.705240] mmc1 return status is: 0x00000900
-[    2.711978] mmc1 switching: index: 185 value: 1 set: 1 timeout: 0
-[    2.721699] mmc1 return status is: 0x00000900
-[    2.728424] mmc1: exec mmc_switch with val 3 and time 0
-[    2.736031] mmc1 switching: index: 187 value: 3 set: 1 timeout: 0
-[    2.744870] mmc1 return status is: 0x00000980
-[    2.751604] mmc1: power class selection for ext_csd_bus_width 2 failed
-[    2.760558] mmc1: error -74 whilst initialising MMC card
-
-Anything I can do to resolve this?
-
-Marc
-
-On Monday 16 April 2012 15:25:55 Shashidhar Hiremath wrote:
-> Hi,
->   is the 8bit bus width supported by the hardware ?
-> 
-> On Fri, Apr 13, 2012 at 11:29 PM, Marc Dietrich <marvin24@gmx.de> wrote:
-> > Hi,
-> > 
-> > I'm running linux-next on a tegra-sdhci host which has a Toshiba
-> > THGBM2G6D2FBAI9 eMMC connected. During boot I get a "mmc1: power class
-> > selection to bus width 8 failed" warning.
-> > 
-> > /sys/kernel/debug/mmc1# cat ios
-> > clock:          48000000 Hz
-> > actual clock:   48000000 Hz
-> > vdd:            20 (3.2 ~ 3.3 V)
-> > bus mode:       2 (push-pull)
-> > chip select:    0 (don't care)
-> > power mode:     2 (on)
-> > bus width:      3 (8 bits)
-> > timing spec:    1 (mmc high-speed)
 
