@@ -1,104 +1,66 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH 2/4] mmc: dw_mmc: fix the IDMAC sw reset
-Date: Sun, 20 May 2012 13:27:32 +0900
-Message-ID: <003301cd3640$dfa1eb70$9ee5c250$%jun@samsung.com>
+Subject: [PATCH 4/4] mmc: dw_mmc: correct the calculation for CLKDIV
+Date: Sun, 20 May 2012 13:27:52 +0900
+Message-ID: <003501cd3640$ec0f1270$c42d3750$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:47547 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750877Ab2ETE1d (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 May 2012 00:27:33 -0400
-Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
+Received: from mailout1.samsung.com ([203.254.224.24]:38633 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750984Ab2ETE1y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 May 2012 00:27:54 -0400
+Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M4B0059L0DW0P90@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Sun, 20 May 2012 13:27:32 +0900 (KST)
+ 17 2011)) with ESMTP id <0M4B000N60EHO370@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Sun, 20 May 2012 13:27:53 +0900 (KST)
 Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0M4B001L70DWGSA0@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Sun, 20 May 2012 13:27:32 +0900 (KST)
+ with ESMTPA id <0M4B00IE10EG0J00@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Sun, 20 May 2012 13:27:52 +0900 (KST)
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>
 
-IDMAC may not be cleaned in driver probe if it has
-been already used in boot time. So IDMAC needs sw
-reset newly. And DMA interface reset precedes the
-internal DMAC reset. Additionally SDMMC_IDMAC_SWRESET
-is replaced with magic code.
+In case of "host->bus_hz < slot->clock", divider value is
+miscalculated. And clock divider register value is multiple
+of 2. If calculated divider value is odd number, result can
+be over-clocking.
 
 Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
- drivers/mmc/host/dw_mmc.c |   18 ++++++++++--------
- 1 files changed, 10 insertions(+), 8 deletions(-)
+ drivers/mmc/host/dw_mmc.c |   10 ++++++----
+ 1 files changed, 6 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index b46faf0..44aa292 100644
+index f2f8463..c87745e 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -418,6 +418,8 @@ static int dw_mci_idmac_init(struct dw_mci *host)
- 	p->des3 = host->sg_dma;
- 	p->des0 = IDMAC_DES0_ER;
+@@ -617,14 +617,16 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+ 	u32 div;
  
-+	mci_writel(host, BMOD, SDMMC_IDMAC_SWRESET);
+ 	if (slot->clock != host->current_speed) {
+-		if (host->bus_hz % slot->clock)
++		div = host->bus_hz / slot->clock;
++		if (host->bus_hz % slot->clock &&
++			host->bus_hz > slot->clock)
+ 			/*
+ 			 * move the + 1 after the divide to prevent
+ 			 * over-clocking the card.
+ 			 */
+-			div = ((host->bus_hz / slot->clock) >> 1) + 1;
+-		else
+-			div = (host->bus_hz  / slot->clock) >> 1;
++			div += 1;
 +
- 	/* Mask out interrupts - get Tx & Rx complete only */
- 	mci_writel(host, IDINTEN, SDMMC_IDMAC_INT_NI | SDMMC_IDMAC_INT_RI |
- 		   SDMMC_IDMAC_INT_TI);
-@@ -1724,7 +1726,8 @@ static void dw_mci_work_routine_card(struct work_struct *work)
++		div = (host->bus_hz != slot->clock) ? DIV_ROUND_UP(div, 2) : 0;
  
- #ifdef CONFIG_MMC_DW_IDMAC
- 				ctrl = mci_readl(host, BMOD);
--				ctrl |= 0x01; /* Software reset of DMA */
-+				/* Software reset of DMA */
-+				ctrl |= SDMMC_IDMAC_SWRESET;
- 				mci_writel(host, BMOD, ctrl);
- #endif
- 
-@@ -1949,10 +1952,6 @@ int dw_mci_probe(struct dw_mci *host)
- 	spin_lock_init(&host->lock);
- 	INIT_LIST_HEAD(&host->queue);
- 
--
--	host->dma_ops = host->pdata->dma_ops;
--	dw_mci_init_dma(host);
--
- 	/*
- 	 * Get the host data width - this assumes that HCON has been set with
- 	 * the correct values.
-@@ -1985,6 +1984,9 @@ int dw_mci_probe(struct dw_mci *host)
- 		goto err_dmaunmap;
- 	}
- 
-+	host->dma_ops = host->pdata->dma_ops;
-+	dw_mci_init_dma(host);
-+
- 	/* Clear the interrupts for the host controller */
- 	mci_writel(host, RINTSTS, 0xFFFFFFFF);
- 	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
-@@ -2169,14 +2171,14 @@ int dw_mci_resume(struct dw_mci *host)
- 	if (host->vmmc)
- 		regulator_enable(host->vmmc);
- 
--	if (host->dma_ops->init)
--		host->dma_ops->init(host);
--
- 	if (!mci_wait_reset(&host->dev, host)) {
- 		ret = -ENODEV;
- 		return ret;
- 	}
- 
-+	if (host->dma_ops->init)
-+		host->dma_ops->init(host);
-+
- 	/* Restore the old value at FIFOTH register */
- 	mci_writel(host, FIFOTH, host->fifoth_val);
- 
+ 		dev_info(&slot->mmc->class_dev,
+ 			 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ"
 -- 
 1.7.0.4
 
