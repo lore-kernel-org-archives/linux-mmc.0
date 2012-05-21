@@ -1,156 +1,164 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH]mmc: core: not to --qty when calculate timeout for SECURE_ERASE
-Date: Mon, 21 May 2012 14:27:47 +0300
-Message-ID: <4FBA26B3.8020704@intel.com>
-References: <20120413041934.GA30513@intel.com> <4FBA217D.4020402@intel.com> <17296D9F8FF2234F831FC3DF505A87A90FE598D3@SHSMSX102.ccr.corp.intel.com>
+From: Subhash Jadavani <subhashj@codeaurora.org>
+Subject: Re: [PATCH v6 1/3] mmc: core: Add packed command feature of eMMC4.5
+Date: Mon, 21 May 2012 17:00:03 +0530
+Message-ID: <4FBA273B.6010106@codeaurora.org>
+References: <009d01cd3411$0febc350$2fc349f0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:10481 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751563Ab2EUL1Z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 21 May 2012 07:27:25 -0400
-In-Reply-To: <17296D9F8FF2234F831FC3DF505A87A90FE598D3@SHSMSX102.ccr.corp.intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <009d01cd3411$0febc350$2fc349f0$%jun@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, merez@codeaurora.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>
 
-On 21/05/12 14:19, Dong, Chuanxiao wrote:
-> 
-> 
->> -----Original Message-----
->> From: Hunter, Adrian
->> Sent: Monday, May 21, 2012 7:06 PM
->> To: Dong, Chuanxiao
->> Cc: linux-mmc@vger.kernel.org; cjb@laptop.org
->> Subject: Re: [PATCH]mmc: core: not to --qty when calculate timeout for
->> SECURE_ERASE
->>
->> On 13/04/12 07:19, Chuanxiao Dong wrote:
->>> --qty when calculating erase timeout for trim/erase & secure
->>> trim/erase can prevent the erase range crossing qty+1 erase groups,
->>> which made the final timeout value is too large for the host.
->>>
->>> When operate SECURE_ERASE, driver needs the erase range is aligned
->>> with erase size, otherwise do nothing and return an error. That is to
->>> say it is not necessary for SECURE_ERASE to --qty since it will never
->>> cross an erase group.
->>>
->>> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
->>> ---
->>>  drivers/mmc/core/core.c |    9 ++++++++-
->>>  1 files changed, 8 insertions(+), 1 deletions(-)
->>>
->>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
->>> e541efb..b5a393a 100644
->>> --- a/drivers/mmc/core/core.c
->>> +++ b/drivers/mmc/core/core.c
->>> @@ -1761,7 +1761,7 @@ static unsigned int mmc_do_calc_max_discard(struct
->> mmc_card *card,
->>>  	if (!qty)
->>>  		return 0;
->>>
->>> -	if (qty == 1)
->>> +	if (qty == 1 && arg != MMC_SECURE_ERASE_ARG)
->>>  		return 1;
->>
->> arg is never MMC_SECURE_ERASE_ARG
->>
->>>
->>>  	/* Convert qty to sectors */
->>> @@ -1772,6 +1772,13 @@ static unsigned int mmc_do_calc_max_discard(struct
->> mmc_card *card,
->>>  	else
->>>  		max_discard = --qty * card->erase_size;
->>>
->>> +	/*
->>> +	 * since SECURE_ERASE is erase group aligned, otherwise
->>> +	 * it cannot be erased in secure purpose, needn't --qty
->>> +	 */
->>> +	if (arg == MMC_SECURE_ERASE_ARG)
->>> +		max_discard += card->erase_size;
->>> +
->>>  	return max_discard;
->>>  }
->>>
->>
->> What about:
->>
->> From: Adrian Hunter <adrian.hunter@intel.com>
->> Date: Mon, 21 May 2012 13:32:42 +0300
->> Subject: [PATCH] mmc: core: fix max_discard calculation
->>
->> The maximum discard calculation was unnecessarily pessimistic in the case of
->> erasing entire erase groups.  In that case, the quantity does not need to be
->> decreased by 1 to allow for misalignment because the erasure is always aligned to
->> whole erase groups.
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->> ---
->>  drivers/mmc/core/core.c |   22 +++++++++++++++++-----
->>  1 files changed, 17 insertions(+), 5 deletions(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
->> 0b6141d..36bfdce 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -1742,7 +1742,7 @@ static unsigned int mmc_do_calc_max_discard(struct
->> mmc_card *card,  {
->>  	struct mmc_host *host = card->host;
->>  	unsigned int max_discard, x, y, qty = 0, max_qty, timeout;
->> -	unsigned int last_timeout = 0;
->> +	unsigned int last_timeout = 0, aligned_qty;
->>
->>  	if (card->erase_shift)
->>  		max_qty = UINT_MAX >> card->erase_shift; @@ -1769,16 +1769,28 @@
->> static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
->>  	if (!qty)
->>  		return 0;
->>
->> -	if (qty == 1)
->> -		return 1;
->> +	if (arg & MMC_TRIM_ARGS) {
->> +		/*
->> +		 * The requested number of sectors may not be aligned to an
->> +		 * erase group, so we have to decrease the quantity by 1 (unless
->> +		 * it is 1) e.g. trimming 2 sectors could cause 2 erase groups
->> +		 * to be affected even though 2 sectors is less than the size of
->> +		 * 1 erase group.
->> +		 */
->> +		if (qty == 1)
->> +			return 1;
->> +		aligned_qty = qty - 1;
->> +	} else {
->> +		aligned_qty = qty;
->> +	}
->>
->>  	/* Convert qty to sectors */
->>  	if (card->erase_shift)
->> -		max_discard = --qty << card->erase_shift;
->> +		max_discard = aligned_qty << card->erase_shift;
->>  	else if (mmc_card_sd(card))
->>  		max_discard = qty;
->>  	else
->> -		max_discard = --qty * card->erase_size;
->> +		max_discard = aligned_qty * card->erase_size;
->>
->>  	return max_discard;
->>  }
-> 
-> Hi Hunter,
-> Your patch looks good to me.
-> 
-> Since you also mentioned that the arg will never be MMC_SECURE_ERASE_ARG, I want to know why not calculate erase size for secure trim/erase operations? As specification said, secure trim/erase operations has different timeout value with trim/erase.
 
-There are 2 problems.  First, there is only 1 value for maximum discard
-whether secure or not.  Secondly, the timeout for secure erase can be so
-great that any quantity exceeds the maximum timeout.
+Hi Seungwon,
 
-> 
-> Thanks
-> Chuanxiao
-> 
-> 
+Sorry for commenting on this late. I have one comment below. Please 
+check if it makes sense or not.
 
+On 5/17/2012 3:10 PM, Seungwon Jeon wrote:
+> This patch adds packed command feature of eMMC4.5.
+> The maximum number for packing read(or write) is offered
+> and exception event relevant to packed command which is
+> used for error handling is enabled. If host wants to use
+> this feature, MMC_CAP2_PACKED_CMD should be set.
+>
+> Signed-off-by: Seungwon Jeon<tgih.jun@samsung.com>
+> ---
+>   drivers/mmc/core/mmc.c   |   24 ++++++++++++++++++++++++
+>   include/linux/mmc/card.h |    3 +++
+>   include/linux/mmc/host.h |    4 ++++
+>   include/linux/mmc/mmc.h  |   15 +++++++++++++++
+>   4 files changed, 46 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 2f0e11c..8310ce8 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -516,6 +516,11 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>   		} else {
+>   			card->ext_csd.data_tag_unit_size = 0;
+>   		}
+> +
+> +		card->ext_csd.max_packed_writes =
+> +			ext_csd[EXT_CSD_MAX_PACKED_WRITES];
+> +		card->ext_csd.max_packed_reads =
+> +			ext_csd[EXT_CSD_MAX_PACKED_READS];
+>   	}
+>
+>   out:
+> @@ -1244,6 +1249,25 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>   		}
+>   	}
+>
+> +	if ((host->caps2&  MMC_CAP2_PACKED_CMD)&&
+> +			(card->ext_csd.max_packed_writes>  0)&&
+> +			(card->ext_csd.max_packed_reads>  0)) {
+why both max_packed_reads and max_packed_writes need to be non-zero to 
+enable the write packing event? What if write packing is not supported 
+by card and only read packing is supported? Shouldn't we still make the 
+read packing work?
+
+I would suggest to change it like this:
+     if (  (host->caps2 & MMC_CAP2_PACKED_WR && 
+card->ext_csd.max_packed_writes > 0) ||
+            (host->caps2 & MMC_CAP2_PACKED_RD && 
+card->ext_csd.max_packed_reads > 0)
+> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +				EXT_CSD_EXP_EVENTS_CTRL,
+> +				EXT_CSD_PACKED_EVENT_EN,
+> +				card->ext_csd.generic_cmd6_time);
+> +		if (err&&  err != -EBADMSG)
+> +			goto free_card;
+> +		if (err) {
+> +			pr_warning("%s: Enabling packed event failed\n",
+> +					mmc_hostname(card->host));
+> +			card->ext_csd.packed_event_en = 0;
+> +			err = 0;
+> +		} else {
+> +			card->ext_csd.packed_event_en = 1;
+> +		}
+> +	}
+> +
+>   	if (!oldcard)
+>   		host->card = card;
+>
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index d76513b..4aeb4e9 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -53,6 +53,9 @@ struct mmc_ext_csd {
+>   	u8			part_config;
+>   	u8			cache_ctrl;
+>   	u8			rst_n_function;
+> +	u8			max_packed_writes;
+> +	u8			max_packed_reads;
+> +	u8			packed_event_en;
+>   	unsigned int		part_time;		/* Units: ms */
+>   	unsigned int		sa_timeout;		/* Units: 100ns */
+>   	unsigned int		generic_cmd6_time;	/* Units: 10ms */
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 0707d22..9d0d946 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -238,6 +238,10 @@ struct mmc_host {
+>   #define MMC_CAP2_BROKEN_VOLTAGE	(1<<  7)	/* Use the broken voltage */
+>   #define MMC_CAP2_DETECT_ON_ERR	(1<<  8)	/* On I/O err check card removal */
+>   #define MMC_CAP2_HC_ERASE_SZ	(1<<  9)	/* High-capacity erase size */
+> +#define MMC_CAP2_PACKED_RD	(1<<  10)	/* Allow packed read */
+> +#define MMC_CAP2_PACKED_WR	(1<<  11)	/* Allow packed write */
+> +#define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
+> +				 MMC_CAP2_PACKED_WR) /* Allow packed commands */
+>
+>   	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+>   	unsigned int        power_notify_type;
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index d425cab..254901a 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -139,6 +139,7 @@ static inline bool mmc_op_multi(u32 opcode)
+>   #define R1_CURRENT_STATE(x)	((x&  0x00001E00)>>  9)	/* sx, b (4 bits) */
+>   #define R1_READY_FOR_DATA	(1<<  8)	/* sx, a */
+>   #define R1_SWITCH_ERROR		(1<<  7)	/* sx, c */
+> +#define R1_EXP_EVENT		(1<<  6)	/* sr, a */
+>   #define R1_APP_CMD		(1<<  5)	/* sr, c */
+>
+>   #define R1_STATE_IDLE	0
+> @@ -274,6 +275,10 @@ struct _mmc_csd {
+>   #define EXT_CSD_FLUSH_CACHE		32      /* W */
+>   #define EXT_CSD_CACHE_CTRL		33      /* R/W */
+>   #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
+> +#define EXT_CSD_PACKED_FAILURE_INDEX	35	/* RO */
+> +#define EXT_CSD_PACKED_CMD_STATUS	36	/* RO */
+> +#define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
+> +#define EXT_CSD_EXP_EVENTS_CTRL	56	/* R/W, 2 bytes */
+>   #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
+>   #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
+>   #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+> @@ -318,6 +323,8 @@ struct _mmc_csd {
+>   #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
+>   #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
+>   #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
+> +#define EXT_CSD_MAX_PACKED_WRITES	500	/* RO */
+> +#define EXT_CSD_MAX_PACKED_READS	501	/* RO */
+>   #define EXT_CSD_HPI_FEATURES		503	/* RO */
+>
+>   /*
+> @@ -377,6 +384,14 @@ struct _mmc_csd {
+>   #define EXT_CSD_PWR_CL_4BIT_MASK	0x0F	/* 8 bit PWR CLS */
+>   #define EXT_CSD_PWR_CL_8BIT_SHIFT	4
+>   #define EXT_CSD_PWR_CL_4BIT_SHIFT	0
+> +
+> +#define EXT_CSD_PACKED_EVENT_EN	(1<<  3)
+> +
+> +#define EXT_CSD_PACKED_FAILURE	(1<<  3)
+> +
+> +#define EXT_CSD_PACKED_GENERIC_ERROR	(1<<  0)
+> +#define EXT_CSD_PACKED_INDEXED_ERROR	(1<<  1)
+> +
+>   /*
+>    * MMC_SWITCH access modes
+>    */
