@@ -1,120 +1,107 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] mmc: mxs-mmc: Add wp-inverted property
-Date: Mon, 21 May 2012 23:17:38 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1205212314070.5421@axis700.grange>
-References: <1337634071-8531-1-git-send-email-marex@denx.de>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:52691 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759094Ab2EUVSL convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 May 2012 17:18:11 -0400
-In-Reply-To: <1337634071-8531-1-git-send-email-marex@denx.de>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: [PATCH 2/2] ARM: dt: tegra: remove legacy support-8bit property
+Date: Mon, 21 May 2012 16:51:00 -0600
+Message-ID: <1337640660-13273-2-git-send-email-swarren@wwwdotorg.org>
+References: <1337640660-13273-1-git-send-email-swarren@wwwdotorg.org>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1337640660-13273-1-git-send-email-swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Marek Vasut <marex@denx.de>
-Cc: linux-arm-kernel@lists.infradead.org, Shawn Guo <shawn.guo@linaro.org>, Fabio Estevam <fabio.estevam@freescale.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, =?UTF-8?q?Lothar=20Wa=C3=9Fmann?= <LW@karo-electronics.de>
 
-On Mon, 21 May 2012, Marek Vasut wrote:
+From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-> The write-protect GPIO is inverted on some boards. Handle such case.
->=20
-> Signed-off-by: Marek Vasut <marex@denx.de>
-> Cc: Shawn Guo <shawn.guo@linaro.org>
-> Cc: Fabio Estevam <fabio.estevam@freescale.com>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: Chris Ball <cjb@laptop.org>
-> Cc: Lothar Wa=C3=9Fmann <LW@karo-electronics.de>
-> ---
->  drivers/mmc/host/mxs-mmc.c |   15 +++++++++++++--
->  1 file changed, 13 insertions(+), 2 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index 277161d..9bfd08e 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -164,16 +164,23 @@ struct mxs_mmc_host {
->  	spinlock_t			lock;
->  	int				sdio_irq_en;
->  	int				wp_gpio;
-> +	int				wp_inverted:1;
+The driver supports the new bus-width property, so remove the legacy
+support-8bit property.
 
-I think, many mmc drivers could use such a flag, so, I proposed this
-
-http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg14018.html
-
-and I'm planning to respin that entire patch-series, taking reviews int=
-o=20
-account. However, that specific patch doesn't depend on anything, so, i=
-t=20
-can be taken directly. Then drivers would just use the new CAP2 flag,=20
-instead of adding similar flags to their private data. Another advantag=
-e=20
-of having that flag centrally is, that it will enable its use from the=20
-slot function helper module
-
-http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg14031.html
-
-which I'll also respin soon.
-
-Thanks
-Guennadi
-
->  };
-> =20
->  static int mxs_mmc_get_ro(struct mmc_host *mmc)
->  {
->  	struct mxs_mmc_host *host =3D mmc_priv(mmc);
-> +	int ret;
-> =20
->  	if (!gpio_is_valid(host->wp_gpio))
->  		return -EINVAL;
-> =20
-> -	return gpio_get_value(host->wp_gpio);
-> +	ret =3D gpio_get_value(host->wp_gpio);
-> +
-> +	if (host->wp_inverted)
-> +		ret =3D !ret;
-> +
-> +	return ret;
->  }
-> =20
->  static int mxs_mmc_get_cd(struct mmc_host *mmc)
-> @@ -707,6 +714,7 @@ static int mxs_mmc_probe(struct platform_device *=
-pdev)
->  	struct pinctrl *pinctrl;
->  	int ret =3D 0, irq_err, irq_dma;
->  	dma_cap_mask_t mask;
-> +	enum of_gpio_flags flags;
-> =20
->  	iores =3D platform_get_resource(pdev, IORESOURCE_MEM, 0);
->  	dmares =3D platform_get_resource(pdev, IORESOURCE_DMA, 0);
-> @@ -785,7 +793,10 @@ static int mxs_mmc_probe(struct platform_device =
-*pdev)
->  			mmc->caps |=3D MMC_CAP_4_BIT_DATA;
->  		else if (bus_width =3D=3D 8)
->  			mmc->caps |=3D MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
-> -		host->wp_gpio =3D of_get_named_gpio(np, "wp-gpios", 0);
-> +		host->wp_gpio =3D of_get_named_gpio_flags(np, "wp-gpios", 0,
-> +							&flags);
-> +		if (flags & OF_GPIO_ACTIVE_LOW)
-> +			host->wp_inverted =3D 1;
->  	} else {
->  		if (pdata->flags & SLOTF_8_BIT_CAPABLE)
->  			mmc->caps |=3D MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
-> --=20
-> 1.7.10
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
+Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 ---
-Guennadi Liakhovetski, Ph.D.
-=46reelance Open-Source Software Developer
-http://www.open-technology.de/
+ arch/arm/boot/dts/tegra-cardhu.dts   |    1 -
+ arch/arm/boot/dts/tegra-harmony.dts  |    1 -
+ arch/arm/boot/dts/tegra-paz00.dts    |    1 -
+ arch/arm/boot/dts/tegra-seaboard.dts |    1 -
+ arch/arm/boot/dts/tegra-ventana.dts  |    1 -
+ arch/arm/boot/dts/tegra-whistler.dts |    2 --
+ 6 files changed, 0 insertions(+), 7 deletions(-)
+
+diff --git a/arch/arm/boot/dts/tegra-cardhu.dts b/arch/arm/boot/dts/tegra-cardhu.dts
+index 36321bc..c169bce 100644
+--- a/arch/arm/boot/dts/tegra-cardhu.dts
++++ b/arch/arm/boot/dts/tegra-cardhu.dts
+@@ -144,7 +144,6 @@
+ 
+ 	sdhci@78000600 {
+ 		status = "okay";
+-		support-8bit;
+ 		bus-width = <8>;
+ 	};
+ 
+diff --git a/arch/arm/boot/dts/tegra-harmony.dts b/arch/arm/boot/dts/tegra-harmony.dts
+index 7de7013..f146dbf 100644
+--- a/arch/arm/boot/dts/tegra-harmony.dts
++++ b/arch/arm/boot/dts/tegra-harmony.dts
+@@ -307,7 +307,6 @@
+ 		cd-gpios = <&gpio 58 0>; /* gpio PH2 */
+ 		wp-gpios = <&gpio 59 0>; /* gpio PH3 */
+ 		power-gpios = <&gpio 70 0>; /* gpio PI6 */
+-		support-8bit;
+ 		bus-width = <8>;
+ 	};
+ 
+diff --git a/arch/arm/boot/dts/tegra-paz00.dts b/arch/arm/boot/dts/tegra-paz00.dts
+index bfeb117..684a9e1 100644
+--- a/arch/arm/boot/dts/tegra-paz00.dts
++++ b/arch/arm/boot/dts/tegra-paz00.dts
+@@ -301,7 +301,6 @@
+ 
+ 	sdhci@c8000600 {
+ 		status = "okay";
+-		support-8bit;
+ 		bus-width = <8>;
+ 	};
+ 
+diff --git a/arch/arm/boot/dts/tegra-seaboard.dts b/arch/arm/boot/dts/tegra-seaboard.dts
+index 1ea26c2..07030bf 100644
+--- a/arch/arm/boot/dts/tegra-seaboard.dts
++++ b/arch/arm/boot/dts/tegra-seaboard.dts
+@@ -450,7 +450,6 @@
+ 
+ 	sdhci@c8000600 {
+ 		status = "okay";
+-		support-8bit;
+ 		bus-width = <8>;
+ 	};
+ 
+diff --git a/arch/arm/boot/dts/tegra-ventana.dts b/arch/arm/boot/dts/tegra-ventana.dts
+index 445343b..be90544 100644
+--- a/arch/arm/boot/dts/tegra-ventana.dts
++++ b/arch/arm/boot/dts/tegra-ventana.dts
+@@ -314,7 +314,6 @@
+ 
+ 	sdhci@c8000600 {
+ 		status = "okay";
+-		support-8bit;
+ 		bus-width = <8>;
+ 	};
+ 
+diff --git a/arch/arm/boot/dts/tegra-whistler.dts b/arch/arm/boot/dts/tegra-whistler.dts
+index 2548648..6916310 100644
+--- a/arch/arm/boot/dts/tegra-whistler.dts
++++ b/arch/arm/boot/dts/tegra-whistler.dts
+@@ -276,13 +276,11 @@
+ 	sdhci@c8000400 {
+ 		status = "okay";
+ 		wp-gpios = <&gpio 173 0>; /* gpio PV5 */
+-		support-8bit;
+ 		bus-width = <8>;
+ 	};
+ 
+ 	sdhci@c8000600 {
+ 		status = "okay";
+-		support-8bit;
+ 		bus-width = <8>;
+ 	};
+ 
+-- 
+1.7.0.4
