@@ -1,41 +1,41 @@
-From: Marek Vasut <marex@denx.de>
-Subject: [PATCH] mmc: mxs-mmc: Move of_match_table out of CONFIG_PM
-Date: Mon, 21 May 2012 06:33:27 +0200
-Message-ID: <1337574807-8637-1-git-send-email-marex@denx.de>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH 1/4] mmc: dw_mmc: fix the transmission handling in IDMAC
+Date: Mon, 21 May 2012 11:11:37 +0100
+Message-ID: <CAFbHwiR+rHfmHpBfT0R7QVmkrJbCUVZ-wYT1=xVQeRbSL7F0jA@mail.gmail.com>
+References: <003201cd3640$d940ec90$8bc2c5b0$%jun@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-out.m-online.net ([212.18.0.10]:52941 "EHLO
-	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750794Ab2EUEdb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 May 2012 00:33:31 -0400
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:63997 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756734Ab2EUKLh convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 May 2012 06:11:37 -0400
+Received: by pbbrp8 with SMTP id rp8so6740057pbb.19
+        for <linux-mmc@vger.kernel.org>; Mon, 21 May 2012 03:11:37 -0700 (PDT)
+In-Reply-To: <003201cd3640$d940ec90$8bc2c5b0$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: Marek Vasut <marex@denx.de>, Shawn Guo <shawn.guo@linaro.org>, Fabio Estevam <fabio.estevam@freescale.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, James Hogan <james.hogan@imgtec.com>
 
-Signed-off-by: Marek Vasut <marex@denx.de>
-Cc: Shawn Guo <shawn.guo@linaro.org>
-Cc: Fabio Estevam <fabio.estevam@freescale.com>
-Cc: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>
-Acked-by: Shawn Guo <shawn.guo@linaro.org>
----
- drivers/mmc/host/mxs-mmc.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+On Sun, May 20, 2012 at 5:27 AM, Seungwon Jeon <tgih.jun@samsung.com> w=
+rote:
+> DTO interrupt can be later than transmit interrupt(IDMAC)
+> in case of write. Current handling of IDMAC interrupt sets
+> EVENT_DATA_COMPLETE as well as EVENT_XFER_COMPLETE regardless
+> DTO rising. This makes the current request be finished in tasklet
+> and permits the next request even though current data transfer
+> is still in progress. As a result, sequence is broken and lock-up
+> happens. Setting EVENT_DATA_COMPLETE is not proper after IDMAC
+> interrupt. It should be taken after DTO interrupt is generated.
+>
+> Reported-by: Dmitry Shmidt <dimitrysh@android.com>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+> =A0drivers/mmc/host/dw_mmc.c | =A0 =A01 -
+> =A01 files changed, 0 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 34a9026..277161d 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -894,8 +894,8 @@ static struct platform_driver mxs_mmc_driver = {
- 		.owner	= THIS_MODULE,
- #ifdef CONFIG_PM
- 		.pm	= &mxs_mmc_pm_ops,
--		.of_match_table = mxs_mmc_dt_ids,
- #endif
-+		.of_match_table = mxs_mmc_dt_ids,
- 	},
- };
- 
--- 
-1.7.10
+This looks ok, although I don't have any IDMAC hardware to test with.
 
+Acked-by: Will Newton <will.newton@imgtec.com>
