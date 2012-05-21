@@ -1,164 +1,83 @@
-From: Subhash Jadavani <subhashj@codeaurora.org>
-Subject: Re: [PATCH v6 1/3] mmc: core: Add packed command feature of eMMC4.5
-Date: Mon, 21 May 2012 17:00:03 +0530
-Message-ID: <4FBA273B.6010106@codeaurora.org>
-References: <009d01cd3411$0febc350$2fc349f0$%jun@samsung.com>
+From: Marek Vasut <marex@denx.de>
+Subject: [PATCH] mmc: mxs-mmc: Add wp-inverted property
+Date: Mon, 21 May 2012 23:01:11 +0200
+Message-ID: <1337634071-8531-1-git-send-email-marex@denx.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <009d01cd3411$0febc350$2fc349f0$%jun@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, merez@codeaurora.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-out.m-online.net ([212.18.0.9]:48703 "EHLO
+	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758652Ab2EUVB1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 May 2012 17:01:27 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Marek Vasut <marex@denx.de>, Shawn Guo <shawn.guo@linaro.org>, Fabio Estevam <fabio.estevam@freescale.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, =?UTF-8?q?Lothar=20Wa=C3=9Fmann?= <LW@karo-electronics.de>
 
+The write-protect GPIO is inverted on some boards. Handle such case.
 
-Hi Seungwon,
+Signed-off-by: Marek Vasut <marex@denx.de>
+Cc: Shawn Guo <shawn.guo@linaro.org>
+Cc: Fabio Estevam <fabio.estevam@freescale.com>
+Cc: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Lothar Wa=C3=9Fmann <LW@karo-electronics.de>
+---
+ drivers/mmc/host/mxs-mmc.c |   15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
 
-Sorry for commenting on this late. I have one comment below. Please 
-check if it makes sense or not.
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index 277161d..9bfd08e 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -164,16 +164,23 @@ struct mxs_mmc_host {
+ 	spinlock_t			lock;
+ 	int				sdio_irq_en;
+ 	int				wp_gpio;
++	int				wp_inverted:1;
+ };
+=20
+ static int mxs_mmc_get_ro(struct mmc_host *mmc)
+ {
+ 	struct mxs_mmc_host *host =3D mmc_priv(mmc);
++	int ret;
+=20
+ 	if (!gpio_is_valid(host->wp_gpio))
+ 		return -EINVAL;
+=20
+-	return gpio_get_value(host->wp_gpio);
++	ret =3D gpio_get_value(host->wp_gpio);
++
++	if (host->wp_inverted)
++		ret =3D !ret;
++
++	return ret;
+ }
+=20
+ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+@@ -707,6 +714,7 @@ static int mxs_mmc_probe(struct platform_device *pd=
+ev)
+ 	struct pinctrl *pinctrl;
+ 	int ret =3D 0, irq_err, irq_dma;
+ 	dma_cap_mask_t mask;
++	enum of_gpio_flags flags;
+=20
+ 	iores =3D platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	dmares =3D platform_get_resource(pdev, IORESOURCE_DMA, 0);
+@@ -785,7 +793,10 @@ static int mxs_mmc_probe(struct platform_device *p=
+dev)
+ 			mmc->caps |=3D MMC_CAP_4_BIT_DATA;
+ 		else if (bus_width =3D=3D 8)
+ 			mmc->caps |=3D MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
+-		host->wp_gpio =3D of_get_named_gpio(np, "wp-gpios", 0);
++		host->wp_gpio =3D of_get_named_gpio_flags(np, "wp-gpios", 0,
++							&flags);
++		if (flags & OF_GPIO_ACTIVE_LOW)
++			host->wp_inverted =3D 1;
+ 	} else {
+ 		if (pdata->flags & SLOTF_8_BIT_CAPABLE)
+ 			mmc->caps |=3D MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
+--=20
+1.7.10
 
-On 5/17/2012 3:10 PM, Seungwon Jeon wrote:
-> This patch adds packed command feature of eMMC4.5.
-> The maximum number for packing read(or write) is offered
-> and exception event relevant to packed command which is
-> used for error handling is enabled. If host wants to use
-> this feature, MMC_CAP2_PACKED_CMD should be set.
->
-> Signed-off-by: Seungwon Jeon<tgih.jun@samsung.com>
-> ---
->   drivers/mmc/core/mmc.c   |   24 ++++++++++++++++++++++++
->   include/linux/mmc/card.h |    3 +++
->   include/linux/mmc/host.h |    4 ++++
->   include/linux/mmc/mmc.h  |   15 +++++++++++++++
->   4 files changed, 46 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 2f0e11c..8310ce8 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -516,6 +516,11 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
->   		} else {
->   			card->ext_csd.data_tag_unit_size = 0;
->   		}
-> +
-> +		card->ext_csd.max_packed_writes =
-> +			ext_csd[EXT_CSD_MAX_PACKED_WRITES];
-> +		card->ext_csd.max_packed_reads =
-> +			ext_csd[EXT_CSD_MAX_PACKED_READS];
->   	}
->
->   out:
-> @@ -1244,6 +1249,25 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->   		}
->   	}
->
-> +	if ((host->caps2&  MMC_CAP2_PACKED_CMD)&&
-> +			(card->ext_csd.max_packed_writes>  0)&&
-> +			(card->ext_csd.max_packed_reads>  0)) {
-why both max_packed_reads and max_packed_writes need to be non-zero to 
-enable the write packing event? What if write packing is not supported 
-by card and only read packing is supported? Shouldn't we still make the 
-read packing work?
-
-I would suggest to change it like this:
-     if (  (host->caps2 & MMC_CAP2_PACKED_WR && 
-card->ext_csd.max_packed_writes > 0) ||
-            (host->caps2 & MMC_CAP2_PACKED_RD && 
-card->ext_csd.max_packed_reads > 0)
-> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +				EXT_CSD_EXP_EVENTS_CTRL,
-> +				EXT_CSD_PACKED_EVENT_EN,
-> +				card->ext_csd.generic_cmd6_time);
-> +		if (err&&  err != -EBADMSG)
-> +			goto free_card;
-> +		if (err) {
-> +			pr_warning("%s: Enabling packed event failed\n",
-> +					mmc_hostname(card->host));
-> +			card->ext_csd.packed_event_en = 0;
-> +			err = 0;
-> +		} else {
-> +			card->ext_csd.packed_event_en = 1;
-> +		}
-> +	}
-> +
->   	if (!oldcard)
->   		host->card = card;
->
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index d76513b..4aeb4e9 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -53,6 +53,9 @@ struct mmc_ext_csd {
->   	u8			part_config;
->   	u8			cache_ctrl;
->   	u8			rst_n_function;
-> +	u8			max_packed_writes;
-> +	u8			max_packed_reads;
-> +	u8			packed_event_en;
->   	unsigned int		part_time;		/* Units: ms */
->   	unsigned int		sa_timeout;		/* Units: 100ns */
->   	unsigned int		generic_cmd6_time;	/* Units: 10ms */
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 0707d22..9d0d946 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -238,6 +238,10 @@ struct mmc_host {
->   #define MMC_CAP2_BROKEN_VOLTAGE	(1<<  7)	/* Use the broken voltage */
->   #define MMC_CAP2_DETECT_ON_ERR	(1<<  8)	/* On I/O err check card removal */
->   #define MMC_CAP2_HC_ERASE_SZ	(1<<  9)	/* High-capacity erase size */
-> +#define MMC_CAP2_PACKED_RD	(1<<  10)	/* Allow packed read */
-> +#define MMC_CAP2_PACKED_WR	(1<<  11)	/* Allow packed write */
-> +#define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
-> +				 MMC_CAP2_PACKED_WR) /* Allow packed commands */
->
->   	mmc_pm_flag_t		pm_caps;	/* supported pm features */
->   	unsigned int        power_notify_type;
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index d425cab..254901a 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -139,6 +139,7 @@ static inline bool mmc_op_multi(u32 opcode)
->   #define R1_CURRENT_STATE(x)	((x&  0x00001E00)>>  9)	/* sx, b (4 bits) */
->   #define R1_READY_FOR_DATA	(1<<  8)	/* sx, a */
->   #define R1_SWITCH_ERROR		(1<<  7)	/* sx, c */
-> +#define R1_EXP_EVENT		(1<<  6)	/* sr, a */
->   #define R1_APP_CMD		(1<<  5)	/* sr, c */
->
->   #define R1_STATE_IDLE	0
-> @@ -274,6 +275,10 @@ struct _mmc_csd {
->   #define EXT_CSD_FLUSH_CACHE		32      /* W */
->   #define EXT_CSD_CACHE_CTRL		33      /* R/W */
->   #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
-> +#define EXT_CSD_PACKED_FAILURE_INDEX	35	/* RO */
-> +#define EXT_CSD_PACKED_CMD_STATUS	36	/* RO */
-> +#define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
-> +#define EXT_CSD_EXP_EVENTS_CTRL	56	/* R/W, 2 bytes */
->   #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
->   #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
->   #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
-> @@ -318,6 +323,8 @@ struct _mmc_csd {
->   #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
->   #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
->   #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
-> +#define EXT_CSD_MAX_PACKED_WRITES	500	/* RO */
-> +#define EXT_CSD_MAX_PACKED_READS	501	/* RO */
->   #define EXT_CSD_HPI_FEATURES		503	/* RO */
->
->   /*
-> @@ -377,6 +384,14 @@ struct _mmc_csd {
->   #define EXT_CSD_PWR_CL_4BIT_MASK	0x0F	/* 8 bit PWR CLS */
->   #define EXT_CSD_PWR_CL_8BIT_SHIFT	4
->   #define EXT_CSD_PWR_CL_4BIT_SHIFT	0
-> +
-> +#define EXT_CSD_PACKED_EVENT_EN	(1<<  3)
-> +
-> +#define EXT_CSD_PACKED_FAILURE	(1<<  3)
-> +
-> +#define EXT_CSD_PACKED_GENERIC_ERROR	(1<<  0)
-> +#define EXT_CSD_PACKED_INDEXED_ERROR	(1<<  1)
-> +
->   /*
->    * MMC_SWITCH access modes
->    */
