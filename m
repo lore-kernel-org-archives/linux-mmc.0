@@ -1,28 +1,28 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 2/4] mmc: dw_mmc: fix the IDMAC sw reset
-Date: Tue, 22 May 2012 12:34:12 +0900
-Message-ID: <006301cd37cb$c167da70$44378f50$%jun@samsung.com>
-References: <003301cd3640$dfa1eb70$9ee5c250$%jun@samsung.com>
- <CAFbHwiQtKvut6yNiwkHRZEptidQMYa7DKUrFsTAd69tTihrwDA@mail.gmail.com>
+Subject: RE: [PATCH 4/4] mmc: dw_mmc: correct the calculation for CLKDIV
+Date: Tue, 22 May 2012 12:35:24 +0900
+Message-ID: <006401cd37cb$ec45d260$c4d17720$%jun@samsung.com>
+References: <003501cd3640$ec0f1270$c42d3750$%jun@samsung.com>
+ <CAFbHwiSHB8NBc1Ji192L4sP_=RDjFEz7_+pOw8+jGby89AjLAA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:64774 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758858Ab2EVDeb convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 May 2012 23:34:31 -0400
-Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
+Received: from mailout1.samsung.com ([203.254.224.24]:26486 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751749Ab2EVDf0 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 May 2012 23:35:26 -0400
+Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M4E006Z3N7QIOA0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 22 May 2012 12:34:12 +0900 (KST)
+ 17 2011)) with ESMTP id <0M4E0071MN8LAU70@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 22 May 2012 12:35:24 +0900 (KST)
 Received: from DOTGIHJUN01 ([12.23.118.161])
  by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0M4E009M2N90PJM0@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 22 May 2012 12:34:12 +0900 (KST)
-In-reply-to: <CAFbHwiQtKvut6yNiwkHRZEptidQMYa7DKUrFsTAd69tTihrwDA@mail.gmail.com>
+ with ESMTPA id <0M4E00AH9NB0RCL0@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 22 May 2012 12:35:24 +0900 (KST)
+In-reply-to: <CAFbHwiSHB8NBc1Ji192L4sP_=RDjFEz7_+pOw8+jGby89AjLAA@mail.gmail.com>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -32,77 +32,67 @@ Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'James Hogan' <jam
 Will Newton <will.newton@gmail.com> wrote:
 > On Sun, May 20, 2012 at 5:27 AM, Seungwon Jeon <tgih.jun@samsung.com>=
  wrote:
-> > IDMAC may not be cleaned in driver probe if it has
-> > been already used in boot time. So IDMAC needs sw
-> > reset newly. And DMA interface reset precedes the
-> > internal DMAC reset. Additionally SDMMC_IDMAC_SWRESET
-> > is replaced with magic code.
+> > In case of "host->bus_hz < slot->clock", divider value is
+> > miscalculated. And clock divider register value is multiple
+> > of 2. If calculated divider value is odd number, result can
+> > be over-clocking.
 > >
 > > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 > > ---
-> > =A0drivers/mmc/host/dw_mmc.c | =A0 18 ++++++++++--------
-> > =A01 files changed, 10 insertions(+), 8 deletions(-)
+> > =A0drivers/mmc/host/dw_mmc.c | =A0 10 ++++++----
+> > =A01 files changed, 6 insertions(+), 4 deletions(-)
 > >
 > > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> > index b46faf0..44aa292 100644
+> > index f2f8463..c87745e 100644
 > > --- a/drivers/mmc/host/dw_mmc.c
 > > +++ b/drivers/mmc/host/dw_mmc.c
-> > @@ -418,6 +418,8 @@ static int dw_mci_idmac_init(struct dw_mci *hos=
-t)
-> > =A0 =A0 =A0 =A0p->des3 =3D host->sg_dma;
-> > =A0 =A0 =A0 =A0p->des0 =3D IDMAC_DES0_ER;
+> > @@ -617,14 +617,16 @@ static void dw_mci_setup_bus(struct dw_mci_sl=
+ot *slot)
+> > =A0 =A0 =A0 =A0u32 div;
 > >
-> > + =A0 =A0 =A0 mci_writel(host, BMOD, SDMMC_IDMAC_SWRESET);
-> > +
-> > =A0 =A0 =A0 =A0/* Mask out interrupts - get Tx & Rx complete only *=
-/
-> > =A0 =A0 =A0 =A0mci_writel(host, IDINTEN, SDMMC_IDMAC_INT_NI | SDMMC=
-_IDMAC_INT_RI |
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 SDMMC_IDMAC_INT_TI);
-> > @@ -1724,7 +1726,8 @@ static void dw_mci_work_routine_card(struct w=
-ork_struct *work)
-> >
-> > =A0#ifdef CONFIG_MMC_DW_IDMAC
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ctrl=
- =3D mci_readl(host, BMOD);
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl =
-|=3D 0x01; /* Software reset of DMA */
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* So=
-ftware reset of DMA */
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl =
-|=3D SDMMC_IDMAC_SWRESET;
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mci_=
-writel(host, BMOD, ctrl);
-> > =A0#endif
-> >
-> > @@ -1949,10 +1952,6 @@ int dw_mci_probe(struct dw_mci *host)
-> > =A0 =A0 =A0 =A0spin_lock_init(&host->lock);
-> > =A0 =A0 =A0 =A0INIT_LIST_HEAD(&host->queue);
-> >
-> > -
-> > - =A0 =A0 =A0 host->dma_ops =3D host->pdata->dma_ops;
-> > - =A0 =A0 =A0 dw_mci_init_dma(host);
-> > -
-> > =A0 =A0 =A0 =A0/*
-> > =A0 =A0 =A0 =A0 * Get the host data width - this assumes that HCON =
-has been set with
-> > =A0 =A0 =A0 =A0 * the correct values.
-> > @@ -1985,6 +1984,9 @@ int dw_mci_probe(struct dw_mci *host)
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto err_dmaunmap;
-> > =A0 =A0 =A0 =A0}
-> >
-> > + =A0 =A0 =A0 host->dma_ops =3D host->pdata->dma_ops;
-> > + =A0 =A0 =A0 dw_mci_init_dma(host);
-> > +
+> > =A0 =A0 =A0 =A0if (slot->clock !=3D host->current_speed) {
+> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->bus_hz % slot->clock)
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 div =3D host->bus_hz / slot->clock;
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->bus_hz % slot->clock &&
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->bus_hz > slot->=
+clock)
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/*
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * move the + 1 afte=
+r the divide to prevent
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * over-clocking the=
+ card.
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 */
 >=20
-> I think this change may break the error handling. The error label
-> err_dmaunmap jumped to above expects
-> that host->dma_ops is non-NULL. Please check that the error handling =
-is ok.
-Right. I'll apply it.
+> This comment seems to be no longer relevant so it should be removed.
+>=20
+> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 div =3D ((host->bus_h=
+z / slot->clock) >> 1) + 1;
+> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
+> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 div =3D (host->bus_hz=
+ =A0/ slot->clock) >> 1;
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 div +=3D 1;
+div +=3D 1;
+It's still effective.
 
-Thanks,
+Best regards,
 Seungwon Jeon
+> > +
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 div =3D (host->bus_hz !=3D slot->cloc=
+k) ? DIV_ROUND_UP(div, 2) : 0;
+> >
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0dev_info(&slot->mmc->class_dev,
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "Bus speed (slot %d=
+) =3D %dHz (slot req %dHz, actual %dHZ"
+> > --
+> > 1.7.0.4
+> >
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc=
+" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
+l
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
 in
