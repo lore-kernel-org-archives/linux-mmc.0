@@ -1,17 +1,18 @@
 From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: Re: [PATCH v3 2/3] ARM: at91: add clocks for DT entries
-Date: Tue, 22 May 2012 14:56:03 +0200
-Message-ID: <4FBB8CE3.5010104@atmel.com>
-References: <1337681352-18521-1-git-send-email-ludovic.desroches@atmel.com> <1337681352-18521-3-git-send-email-ludovic.desroches@atmel.com>
+Subject: Re: [PATCH v3 3/3] ARM: dts: add nodes for atmel hsmci controllers
+ for atmel platforms
+Date: Tue, 22 May 2012 15:11:59 +0200
+Message-ID: <4FBB909F.4090606@atmel.com>
+References: <1337681352-18521-1-git-send-email-ludovic.desroches@atmel.com> <1337681352-18521-4-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:42092 "EHLO
+Received: from eusmtp01.atmel.com ([212.144.249.242]:44857 "EHLO
 	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751165Ab2EVM4G (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 May 2012 08:56:06 -0400
-In-Reply-To: <1337681352-18521-3-git-send-email-ludovic.desroches@atmel.com>
+	with ESMTP id S1751840Ab2EVNMC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 May 2012 09:12:02 -0400
+In-Reply-To: <1337681352-18521-4-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ludovic.desroches@atmel.com
@@ -20,58 +21,176 @@ Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, plagnioj@jc
 On 05/22/2012 12:09 PM, ludovic.desroches@atmel.com :
 > From: Ludovic Desroches <ludovic.desroches@atmel.com>
 > 
-> Add clocks to clock lookup table for DT entries.
+> Add nodes for mci controllers.
 > 
 > Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> ---
+>  arch/arm/boot/dts/at91sam9g20.dtsi     |   12 ++++++++++++
+
+Maybe this one will have to be reworked on top of new ADC declarations.
+Maybe also take into account the device tree support for sam9260: it is
+linked with 9g20 support...
+
+otherwise, once rebased you can add my:
 
 Acked-by: Nicolas Ferre <nicolas.ferre@atmel.com>
 
-This one will probably go through arm-soc git tree...
+(and I think that this one also should go through arm-soc)
 
-> ---
->  arch/arm/mach-at91/at91sam9260.c |    1 +
->  arch/arm/mach-at91/at91sam9g45.c |    2 ++
->  arch/arm/mach-at91/at91sam9x5.c  |    2 ++
->  3 files changed, 5 insertions(+), 0 deletions(-)
+>  arch/arm/boot/dts/at91sam9g25ek.dts    |   16 ++++++++++++++++
+>  arch/arm/boot/dts/at91sam9g45.dtsi     |   24 ++++++++++++++++++++++++
+>  arch/arm/boot/dts/at91sam9m10g45ek.dts |   17 +++++++++++++++++
+>  arch/arm/boot/dts/at91sam9x5.dtsi      |   24 ++++++++++++++++++++++++
+>  5 files changed, 93 insertions(+), 0 deletions(-)
 > 
-> diff --git a/arch/arm/mach-at91/at91sam9260.c b/arch/arm/mach-at91/at91sam9260.c
-> index 46f7742..c356471 100644
-> --- a/arch/arm/mach-at91/at91sam9260.c
-> +++ b/arch/arm/mach-at91/at91sam9260.c
-> @@ -218,6 +218,7 @@ static struct clk_lookup periph_clocks_lookups[] = {
->  	CLKDEV_CON_DEV_ID("t1_clk", "fffdc000.timer", &tc4_clk),
->  	CLKDEV_CON_DEV_ID("t2_clk", "fffdc000.timer", &tc5_clk),
->  	CLKDEV_CON_DEV_ID("hclk", "500000.ohci", &ohci_clk),
-> +	CLKDEV_CON_DEV_ID("mci_clk", "fffa8000.mmc", &mmc_clk),
->  	/* fake hclk clock */
->  	CLKDEV_CON_DEV_ID("hclk", "at91_ohci", &ohci_clk),
->  	CLKDEV_CON_ID("pioA", &pioA_clk),
-> diff --git a/arch/arm/mach-at91/at91sam9g45.c b/arch/arm/mach-at91/at91sam9g45.c
-> index d222f83..0a2c662 100644
-> --- a/arch/arm/mach-at91/at91sam9g45.c
-> +++ b/arch/arm/mach-at91/at91sam9g45.c
-> @@ -235,6 +235,8 @@ static struct clk_lookup periph_clocks_lookups[] = {
->  	CLKDEV_CON_DEV_ID("t0_clk", "fffd4000.timer", &tcb0_clk),
->  	CLKDEV_CON_DEV_ID("hclk", "700000.ohci", &uhphs_clk),
->  	CLKDEV_CON_DEV_ID("ehci_clk", "800000.ehci", &uhphs_clk),
-> +	CLKDEV_CON_DEV_ID("mci_clk", "fff80000.mmc", &mmc0_clk),
-> +	CLKDEV_CON_DEV_ID("mci_clk", "fffd0000.mmc", &mmc1_clk),
->  	/* fake hclk clock */
->  	CLKDEV_CON_DEV_ID("hclk", "at91_ohci", &uhphs_clk),
->  	CLKDEV_CON_ID("pioA", &pioA_clk),
-> diff --git a/arch/arm/mach-at91/at91sam9x5.c b/arch/arm/mach-at91/at91sam9x5.c
-> index 13c8cae..39cbef3 100644
-> --- a/arch/arm/mach-at91/at91sam9x5.c
-> +++ b/arch/arm/mach-at91/at91sam9x5.c
-> @@ -225,6 +225,8 @@ static struct clk_lookup periph_clocks_lookups[] = {
->  	CLKDEV_CON_DEV_ID("t0_clk", "f800c000.timer", &tcb0_clk),
->  	CLKDEV_CON_DEV_ID("dma_clk", "ffffec00.dma-controller", &dma0_clk),
->  	CLKDEV_CON_DEV_ID("dma_clk", "ffffee00.dma-controller", &dma1_clk),
-> +	CLKDEV_CON_DEV_ID("mci_clk", "f0008000.mmc", &mmc0_clk),
-> +	CLKDEV_CON_DEV_ID("mci_clk", "f000c000.mmc", &mmc1_clk),
->  	CLKDEV_CON_ID("pioA", &pioAB_clk),
->  	CLKDEV_CON_ID("pioB", &pioAB_clk),
->  	CLKDEV_CON_ID("pioC", &pioCD_clk),
+> diff --git a/arch/arm/boot/dts/at91sam9g20.dtsi b/arch/arm/boot/dts/at91sam9g20.dtsi
+> index 773ef48..6a28bfe 100644
+> --- a/arch/arm/boot/dts/at91sam9g20.dtsi
+> +++ b/arch/arm/boot/dts/at91sam9g20.dtsi
+> @@ -197,6 +197,18 @@
+>  				interrupts = <10 4>;
+>  				status = "disabled";
+>  			};
+> +
+> +			mmc0: mmc@fffa800 {
+> +				compatible = "atmel,hsmci";
+> +				reg = <0xfffa800 0x600>;
+> +				interrupts = <9 4>;
+> +				status = "disabled";
+> +				#address-cells = <1>;
+> +				#size-cells = <0>;
+> +				slot@0 {
+> +					reg = <0>;
+> +				};
+> +			};
+>  		};
+>  
+>  		nand0: nand@40000000 {
+> diff --git a/arch/arm/boot/dts/at91sam9g25ek.dts b/arch/arm/boot/dts/at91sam9g25ek.dts
+> index 7829a4d..dd94f4b 100644
+> --- a/arch/arm/boot/dts/at91sam9g25ek.dts
+> +++ b/arch/arm/boot/dts/at91sam9g25ek.dts
+> @@ -32,6 +32,22 @@
+>  				phy-mode = "rmii";
+>  				status = "okay";
+>  			};
+> +
+> +			mmc0: mmc@f0008000 {
+> +				status = "okay";
+> +				slot@0 {
+> +					bus-width = <4>;
+> +					cd-gpios = <&pioD 15 0>;
+> +				};
+> +			};
+> +
+> +			mmc1: mmc@f000c000 {
+> +				status = "okay";
+> +				slot@0 {
+> +					bus-width = <4>;
+> +					cd-gpios = <&pioD 14 0>;
+> +				};
+> +			};
+>  		};
+>  
+>  		usb0: ohci@00600000 {
+> diff --git a/arch/arm/boot/dts/at91sam9g45.dtsi b/arch/arm/boot/dts/at91sam9g45.dtsi
+> index c804214..2922648 100644
+> --- a/arch/arm/boot/dts/at91sam9g45.dtsi
+> +++ b/arch/arm/boot/dts/at91sam9g45.dtsi
+> @@ -199,6 +199,30 @@
+>  				interrupts = <25 4>;
+>  				status = "disabled";
+>  			};
+> +
+> +			mmc0: mmc@fff80000 {
+> +				compatible = "atmel,hsmci";
+> +				reg = <0xfff80000 0x600>;
+> +				interrupts = <11 4>;
+> +				status = "disabled";
+> +				#address-cells = <1>;
+> +				#size-cells = <0>;
+> +				slot@0 {
+> +					reg = <0>;
+> +				};
+> +			};
+> +
+> +			mmc1: mmc@fffd0000 {
+> +				compatible = "atmel,hsmci";
+> +				reg = <0xfffd0000 0x600>;
+> +				interrupts = <29 4>;
+> +				status = "disabled";
+> +				#address-cells = <1>;
+> +				#size-cells = <0>;
+> +				slot@0 {
+> +					reg = <0>;
+> +				};
+> +			};
+>  		};
+>  
+>  		nand0: nand@40000000 {
+> diff --git a/arch/arm/boot/dts/at91sam9m10g45ek.dts b/arch/arm/boot/dts/at91sam9m10g45ek.dts
+> index a3633bd..bc4cb3c 100644
+> --- a/arch/arm/boot/dts/at91sam9m10g45ek.dts
+> +++ b/arch/arm/boot/dts/at91sam9m10g45ek.dts
+> @@ -46,6 +46,23 @@
+>  				phy-mode = "rmii";
+>  				status = "okay";
+>  			};
+> +
+> +			mmc0: mmc@fff80000 {
+> +				status = "okay";
+> +				slot@0 {
+> +					bus-width = <4>;
+> +					cd-gpios = <&pioD 10 0>;
+> +				};
+> +			};
+> +
+> +			mmc1: mmc@fffd0000 {
+> +				status = "okay";
+> +				slot@0 {
+> +					bus-width = <4>;
+> +					cd-gpios = <&pioD 11 0>;
+> +					wp-gpios = <&pioD 29 0>;
+> +				};
+> +			};
+>  		};
+>  
+>  		nand0: nand@40000000 {
+> diff --git a/arch/arm/boot/dts/at91sam9x5.dtsi b/arch/arm/boot/dts/at91sam9x5.dtsi
+> index dd4ed74..d5999b2 100644
+> --- a/arch/arm/boot/dts/at91sam9x5.dtsi
+> +++ b/arch/arm/boot/dts/at91sam9x5.dtsi
+> @@ -190,6 +190,30 @@
+>  				interrupts = <27 4>;
+>  				status = "disabled";
+>  			};
+> +
+> +			mmc0: mmc@f0008000 {
+> +				compatible = "atmel,hsmci";
+> +				reg = <0xf0008000 0x600>;
+> +				interrupts = <12 4>;
+> +				status = "disabled";
+> +				#address-cells = <1>;
+> +				#size-cells = <0>;
+> +				slot@0 {
+> +					reg = <0>;
+> +				};
+> +			};
+> +
+> +			mmc1: mmc@f000c000 {
+> +				compatible = "atmel,hsmci";
+> +				reg = <0xf000c000 0x600>;
+> +				interrupts = <26 4>;
+> +				status = "disabled";
+> +				#address-cells = <1>;
+> +				#size-cells = <0>;
+> +				slot@0 {
+> +					reg = <0>;
+> +				};
+> +			};
+>  		};
+>  
+>  		nand0: nand@40000000 {
 
 
 -- 
