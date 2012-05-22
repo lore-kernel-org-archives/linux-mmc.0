@@ -1,182 +1,48 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v6 1/3] mmc: core: Add packed command feature of eMMC4.5
-Date: Tue, 22 May 2012 12:35:43 +0900
-Message-ID: <006501cd37cb$f7894670$e69bd350$%jun@samsung.com>
-References: <009d01cd3411$0febc350$2fc349f0$%jun@samsung.com>
- <4FBA273B.6010106@codeaurora.org>
+Subject: [PATCH v2 0/4] mmc: dw_mmc: some fiex for hosw driver
+Date: Tue, 22 May 2012 13:00:45 +0900
+Message-ID: <006701cd37cf$76e576c0$64b06440$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:65372 "EHLO
+Received: from mailout3.samsung.com ([203.254.224.33]:17205 "EHLO
 	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751749Ab2EVDfo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 May 2012 23:35:44 -0400
-In-reply-to: <4FBA273B.6010106@codeaurora.org>
+	with ESMTP id S1750981Ab2EVEAr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 May 2012 00:00:47 -0400
+Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M4E00I0WOH9OVF0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 22 May 2012 13:00:45 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0M4E005T4OH960G0@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 22 May 2012 13:00:45 +0900 (KST)
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Subhash Jadavani' <subhashj@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, merez@codeaurora.org, linux-kernel@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>
 
-Subhash Jadavani <subhashj@codeaurora.org> wrote:
-> Hi Seungwon,
-> 
-> Sorry for commenting on this late. I have one comment below. Please
-> check if it makes sense or not.
-> 
-> On 5/17/2012 3:10 PM, Seungwon Jeon wrote:
-> > This patch adds packed command feature of eMMC4.5.
-> > The maximum number for packing read(or write) is offered
-> > and exception event relevant to packed command which is
-> > used for error handling is enabled. If host wants to use
-> > this feature, MMC_CAP2_PACKED_CMD should be set.
-> >
-> > Signed-off-by: Seungwon Jeon<tgih.jun@samsung.com>
-> > ---
-> >   drivers/mmc/core/mmc.c   |   24 ++++++++++++++++++++++++
-> >   include/linux/mmc/card.h |    3 +++
-> >   include/linux/mmc/host.h |    4 ++++
-> >   include/linux/mmc/mmc.h  |   15 +++++++++++++++
-> >   4 files changed, 46 insertions(+), 0 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> > index 2f0e11c..8310ce8 100644
-> > --- a/drivers/mmc/core/mmc.c
-> > +++ b/drivers/mmc/core/mmc.c
-> > @@ -516,6 +516,11 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
-> >   		} else {
-> >   			card->ext_csd.data_tag_unit_size = 0;
-> >   		}
-> > +
-> > +		card->ext_csd.max_packed_writes =
-> > +			ext_csd[EXT_CSD_MAX_PACKED_WRITES];
-> > +		card->ext_csd.max_packed_reads =
-> > +			ext_csd[EXT_CSD_MAX_PACKED_READS];
-> >   	}
-> >
-> >   out:
-> > @@ -1244,6 +1249,25 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
-> >   		}
-> >   	}
-> >
-> > +	if ((host->caps2&  MMC_CAP2_PACKED_CMD)&&
-> > +			(card->ext_csd.max_packed_writes>  0)&&
-> > +			(card->ext_csd.max_packed_reads>  0)) {
-> why both max_packed_reads and max_packed_writes need to be non-zero to
-> enable the write packing event? What if write packing is not supported
-> by card and only read packing is supported? Shouldn't we still make the
-> read packing work?
-I have not experienced that case. But it seems like possible actually.
-Spec doesn't mention two should be satisfied for packed command.
-I'll apply your comment.
+This patch-set includes fixes for the Synopsys DesignWare MMC driver
+
+Changes in v2:
+        - fix the error handling(mmc: dw_mmc: fix the IDMAC sw reset)
+
+Seungwon Jeon (4):
+      mmc: dw_mmc: fix the transmission handling in IDMAC
+      mmc: dw_mmc: fix the IDMAC sw reset
+      mmc: dw_mmc: fix the wrong sequence
+      mmc: dw_mmc: correct the calculation for CLKDIV
+
+drivers/mmc/host/dw_mmc.c |   36 +++++++++++++++++++-----------------
+1 files changed, 19 insertions(+), 17 deletions(-)
 
 Best regards,
-Seungwon Jeon
-> 
-> I would suggest to change it like this:
->      if (  (host->caps2 & MMC_CAP2_PACKED_WR &&
-> card->ext_csd.max_packed_writes > 0) ||
->             (host->caps2 & MMC_CAP2_PACKED_RD &&
-> card->ext_csd.max_packed_reads > 0)
-> > +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> > +				EXT_CSD_EXP_EVENTS_CTRL,
-> > +				EXT_CSD_PACKED_EVENT_EN,
-> > +				card->ext_csd.generic_cmd6_time);
-> > +		if (err&&  err != -EBADMSG)
-> > +			goto free_card;
-> > +		if (err) {
-> > +			pr_warning("%s: Enabling packed event failed\n",
-> > +					mmc_hostname(card->host));
-> > +			card->ext_csd.packed_event_en = 0;
-> > +			err = 0;
-> > +		} else {
-> > +			card->ext_csd.packed_event_en = 1;
-> > +		}
-> > +	}
-> > +
-> >   	if (!oldcard)
-> >   		host->card = card;
-> >
-> > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> > index d76513b..4aeb4e9 100644
-> > --- a/include/linux/mmc/card.h
-> > +++ b/include/linux/mmc/card.h
-> > @@ -53,6 +53,9 @@ struct mmc_ext_csd {
-> >   	u8			part_config;
-> >   	u8			cache_ctrl;
-> >   	u8			rst_n_function;
-> > +	u8			max_packed_writes;
-> > +	u8			max_packed_reads;
-> > +	u8			packed_event_en;
-> >   	unsigned int		part_time;		/* Units: ms */
-> >   	unsigned int		sa_timeout;		/* Units: 100ns */
-> >   	unsigned int		generic_cmd6_time;	/* Units: 10ms */
-> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> > index 0707d22..9d0d946 100644
-> > --- a/include/linux/mmc/host.h
-> > +++ b/include/linux/mmc/host.h
-> > @@ -238,6 +238,10 @@ struct mmc_host {
-> >   #define MMC_CAP2_BROKEN_VOLTAGE	(1<<  7)	/* Use the broken voltage */
-> >   #define MMC_CAP2_DETECT_ON_ERR	(1<<  8)	/* On I/O err check card removal */
-> >   #define MMC_CAP2_HC_ERASE_SZ	(1<<  9)	/* High-capacity erase size */
-> > +#define MMC_CAP2_PACKED_RD	(1<<  10)	/* Allow packed read */
-> > +#define MMC_CAP2_PACKED_WR	(1<<  11)	/* Allow packed write */
-> > +#define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
-> > +				 MMC_CAP2_PACKED_WR) /* Allow packed commands */
-> >
-> >   	mmc_pm_flag_t		pm_caps;	/* supported pm features */
-> >   	unsigned int        power_notify_type;
-> > diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> > index d425cab..254901a 100644
-> > --- a/include/linux/mmc/mmc.h
-> > +++ b/include/linux/mmc/mmc.h
-> > @@ -139,6 +139,7 @@ static inline bool mmc_op_multi(u32 opcode)
-> >   #define R1_CURRENT_STATE(x)	((x&  0x00001E00)>>  9)	/* sx, b (4 bits) */
-> >   #define R1_READY_FOR_DATA	(1<<  8)	/* sx, a */
-> >   #define R1_SWITCH_ERROR		(1<<  7)	/* sx, c */
-> > +#define R1_EXP_EVENT		(1<<  6)	/* sr, a */
-> >   #define R1_APP_CMD		(1<<  5)	/* sr, c */
-> >
-> >   #define R1_STATE_IDLE	0
-> > @@ -274,6 +275,10 @@ struct _mmc_csd {
-> >   #define EXT_CSD_FLUSH_CACHE		32      /* W */
-> >   #define EXT_CSD_CACHE_CTRL		33      /* R/W */
-> >   #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
-> > +#define EXT_CSD_PACKED_FAILURE_INDEX	35	/* RO */
-> > +#define EXT_CSD_PACKED_CMD_STATUS	36	/* RO */
-> > +#define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
-> > +#define EXT_CSD_EXP_EVENTS_CTRL	56	/* R/W, 2 bytes */
-> >   #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
-> >   #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
-> >   #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
-> > @@ -318,6 +323,8 @@ struct _mmc_csd {
-> >   #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
-> >   #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
-> >   #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
-> > +#define EXT_CSD_MAX_PACKED_WRITES	500	/* RO */
-> > +#define EXT_CSD_MAX_PACKED_READS	501	/* RO */
-> >   #define EXT_CSD_HPI_FEATURES		503	/* RO */
-> >
-> >   /*
-> > @@ -377,6 +384,14 @@ struct _mmc_csd {
-> >   #define EXT_CSD_PWR_CL_4BIT_MASK	0x0F	/* 8 bit PWR CLS */
-> >   #define EXT_CSD_PWR_CL_8BIT_SHIFT	4
-> >   #define EXT_CSD_PWR_CL_4BIT_SHIFT	0
-> > +
-> > +#define EXT_CSD_PACKED_EVENT_EN	(1<<  3)
-> > +
-> > +#define EXT_CSD_PACKED_FAILURE	(1<<  3)
-> > +
-> > +#define EXT_CSD_PACKED_GENERIC_ERROR	(1<<  0)
-> > +#define EXT_CSD_PACKED_INDEXED_ERROR	(1<<  1)
-> > +
-> >   /*
-> >    * MMC_SWITCH access modes
-> >    */
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Seungwon Jeon.
+--
+1.7.2.3
+
 
