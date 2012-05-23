@@ -1,127 +1,99 @@
-From: Dmitry Shmidt <dimitrysh@android.com>
-Subject: Re: [PATCH v2 2/4] mmc: dw_mmc: fix the IDMAC sw reset
-Date: Wed, 23 May 2012 10:33:34 -0700
-Message-ID: <CALzehA3XceVSePzU5vcTNbhv7Gwvu4CR=+pjndvfyCjpoLsajw@mail.gmail.com>
-References: <006901cd37cf$81750420$845f0c60$%jun@samsung.com>
+From: <ludovic.desroches@atmel.com>
+Subject: [PATCH v4 2/3] ARM: at91: add clocks for DT entries
+Date: Wed, 23 May 2012 21:38:51 +0200
+Message-ID: <1337801931-13823-1-git-send-email-ludovic.desroches@atmel.com>
+References: <1337681352-18521-3-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:63745 "EHLO
-	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757228Ab2EWRdg convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 23 May 2012 13:33:36 -0400
-Received: by lahd3 with SMTP id d3so5296587lah.19
-        for <linux-mmc@vger.kernel.org>; Wed, 23 May 2012 10:33:34 -0700 (PDT)
-In-Reply-To: <006901cd37cf$81750420$845f0c60$%jun@samsung.com>
+Received: from eusmtp01.atmel.com ([212.144.249.242]:52655 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752129Ab2EWTjg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 May 2012 15:39:36 -0400
+In-Reply-To: <1337681352-18521-3-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, devicetree-discuss@lists.ozlabs.org, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-On Mon, May 21, 2012 at 9:01 PM, Seungwon Jeon <tgih.jun@samsung.com> w=
-rote:
-> IDMAC may not be cleaned in driver probe if it has
-> been already used in boot time. So IDMAC needs sw
-> reset newly. And DMA interface reset precedes the
-> internal DMAC reset. Additionally SDMMC_IDMAC_SWRESET
-> is replaced with magic code.
->
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> ---
-> =A0drivers/mmc/host/dw_mmc.c | =A0 24 ++++++++++++------------
-> =A01 files changed, 12 insertions(+), 12 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index b46faf0..98fe023 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -418,6 +418,8 @@ static int dw_mci_idmac_init(struct dw_mci *host)
-> =A0 =A0 =A0 =A0p->des3 =3D host->sg_dma;
-> =A0 =A0 =A0 =A0p->des0 =3D IDMAC_DES0_ER;
->
-> + =A0 =A0 =A0 mci_writel(host, BMOD, SDMMC_IDMAC_SWRESET);
-> +
-> =A0 =A0 =A0 =A0/* Mask out interrupts - get Tx & Rx complete only */
-> =A0 =A0 =A0 =A0mci_writel(host, IDINTEN, SDMMC_IDMAC_INT_NI | SDMMC_I=
-DMAC_INT_RI |
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 SDMMC_IDMAC_INT_TI);
-> @@ -1724,7 +1726,8 @@ static void dw_mci_work_routine_card(struct wor=
-k_struct *work)
->
-> =A0#ifdef CONFIG_MMC_DW_IDMAC
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ctrl =3D=
- mci_readl(host, BMOD);
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl |=3D=
- 0x01; /* Software reset of DMA */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Soft=
-ware reset of DMA */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl |=3D=
- SDMMC_IDMAC_SWRESET;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mci_wr=
-itel(host, BMOD, ctrl);
-> =A0#endif
->
-> @@ -1949,10 +1952,6 @@ int dw_mci_probe(struct dw_mci *host)
-> =A0 =A0 =A0 =A0spin_lock_init(&host->lock);
-> =A0 =A0 =A0 =A0INIT_LIST_HEAD(&host->queue);
->
-> -
-> - =A0 =A0 =A0 host->dma_ops =3D host->pdata->dma_ops;
-> - =A0 =A0 =A0 dw_mci_init_dma(host);
-> -
-> =A0 =A0 =A0 =A0/*
-> =A0 =A0 =A0 =A0 * Get the host data width - this assumes that HCON ha=
-s been set with
-> =A0 =A0 =A0 =A0 * the correct values.
-> @@ -1980,10 +1979,11 @@ int dw_mci_probe(struct dw_mci *host)
-> =A0 =A0 =A0 =A0}
->
-> =A0 =A0 =A0 =A0/* Reset all blocks */
-> - =A0 =A0 =A0 if (!mci_wait_reset(&host->dev, host)) {
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D -ENODEV;
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err_dmaunmap;
-> - =A0 =A0 =A0 }
-> + =A0 =A0 =A0 if (!mci_wait_reset(&host->dev, host))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENODEV;
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-You would probably want something like this:
-+ =A0 =A0 =A0 if (!mci_wait_reset(&host->dev, host)) {
-+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D -ENODEV;
-+               goto err_free_hclk;
-+       }
+Add clocks to clock lookup table for DT entries.
 
-> +
-> + =A0 =A0 =A0 host->dma_ops =3D host->pdata->dma_ops;
-> + =A0 =A0 =A0 dw_mci_init_dma(host);
->
-> =A0 =A0 =A0 =A0/* Clear the interrupts for the host controller */
-> =A0 =A0 =A0 =A0mci_writel(host, RINTSTS, 0xFFFFFFFF);
-> @@ -2169,14 +2169,14 @@ int dw_mci_resume(struct dw_mci *host)
-> =A0 =A0 =A0 =A0if (host->vmmc)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0regulator_enable(host->vmmc);
->
-> - =A0 =A0 =A0 if (host->dma_ops->init)
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->dma_ops->init(host);
-> -
-> =A0 =A0 =A0 =A0if (!mci_wait_reset(&host->dev, host)) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ret =3D -ENODEV;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return ret;
-> =A0 =A0 =A0 =A0}
->
-> + =A0 =A0 =A0 if (host->dma_ops->init)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->dma_ops->init(host);
-> +
-> =A0 =A0 =A0 =A0/* Restore the old value at FIFOTH register */
-> =A0 =A0 =A0 =A0mci_writel(host, FIFOTH, host->fifoth_val);
->
-> --
-> 1.7.0.4
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
+v4: add new chips
+
+ arch/arm/mach-at91/at91sam9260.c |    1 +
+ arch/arm/mach-at91/at91sam9263.c |    2 ++
+ arch/arm/mach-at91/at91sam9g45.c |    2 ++
+ arch/arm/mach-at91/at91sam9n12.c |    1 +
+ arch/arm/mach-at91/at91sam9x5.c  |    2 ++
+ 5 files changed, 8 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/mach-at91/at91sam9260.c b/arch/arm/mach-at91/at91sam9260.c
+index 2b1e438..ddba004 100644
+--- a/arch/arm/mach-at91/at91sam9260.c
++++ b/arch/arm/mach-at91/at91sam9260.c
+@@ -226,6 +226,7 @@ static struct clk_lookup periph_clocks_lookups[] = {
+ 	CLKDEV_CON_DEV_ID("t1_clk", "fffdc000.timer", &tc4_clk),
+ 	CLKDEV_CON_DEV_ID("t2_clk", "fffdc000.timer", &tc5_clk),
+ 	CLKDEV_CON_DEV_ID("hclk", "500000.ohci", &ohci_clk),
++	CLKDEV_CON_DEV_ID("mci_clk", "fffa8000.mmc", &mmc_clk),
+ 	/* fake hclk clock */
+ 	CLKDEV_CON_DEV_ID("hclk", "at91_ohci", &ohci_clk),
+ 	CLKDEV_CON_ID("pioA", &pioA_clk),
+diff --git a/arch/arm/mach-at91/at91sam9263.c b/arch/arm/mach-at91/at91sam9263.c
+index 0eb20f9..f165b25 100644
+--- a/arch/arm/mach-at91/at91sam9263.c
++++ b/arch/arm/mach-at91/at91sam9263.c
+@@ -211,6 +211,8 @@ static struct clk_lookup periph_clocks_lookups[] = {
+ 	CLKDEV_CON_DEV_ID("hclk", "a00000.ohci", &ohci_clk),
+ 	CLKDEV_CON_DEV_ID("spi_clk", "fffa4000.spi", &spi0_clk),
+ 	CLKDEV_CON_DEV_ID("spi_clk", "fffa8000.spi", &spi1_clk),
++	CLKDEV_CON_DEV_ID("mci_clk", "fff80000.mmc", &mmc0_clk),
++	CLKDEV_CON_DEV_ID("mci_clk", "fff84000.mmc", &mmc1_clk),
+ };
+ 
+ static struct clk_lookup usart_clocks_lookups[] = {
+diff --git a/arch/arm/mach-at91/at91sam9g45.c b/arch/arm/mach-at91/at91sam9g45.c
+index 4792682..aa24e82 100644
+--- a/arch/arm/mach-at91/at91sam9g45.c
++++ b/arch/arm/mach-at91/at91sam9g45.c
+@@ -242,6 +242,8 @@ static struct clk_lookup periph_clocks_lookups[] = {
+ 	CLKDEV_CON_DEV_ID("t0_clk", "fffd4000.timer", &tcb0_clk),
+ 	CLKDEV_CON_DEV_ID("hclk", "700000.ohci", &uhphs_clk),
+ 	CLKDEV_CON_DEV_ID("ehci_clk", "800000.ehci", &uhphs_clk),
++	CLKDEV_CON_DEV_ID("mci_clk", "fff80000.mmc", &mmc0_clk),
++	CLKDEV_CON_DEV_ID("mci_clk", "fffd0000.mmc", &mmc1_clk),
+ 	/* fake hclk clock */
+ 	CLKDEV_CON_DEV_ID("hclk", "at91_ohci", &uhphs_clk),
+ 	CLKDEV_CON_ID("pioA", &pioA_clk),
+diff --git a/arch/arm/mach-at91/at91sam9n12.c b/arch/arm/mach-at91/at91sam9n12.c
+index 0849466..cce4e0f 100644
+--- a/arch/arm/mach-at91/at91sam9n12.c
++++ b/arch/arm/mach-at91/at91sam9n12.c
+@@ -168,6 +168,7 @@ static struct clk_lookup periph_clocks_lookups[] = {
+ 	CLKDEV_CON_DEV_ID("usart", "f8028000.serial", &usart3_clk),
+ 	CLKDEV_CON_DEV_ID("t0_clk", "f8008000.timer", &tcb_clk),
+ 	CLKDEV_CON_DEV_ID("t0_clk", "f800c000.timer", &tcb_clk),
++	CLKDEV_CON_DEV_ID("mci_clk", "f0008000.mmc", &mmc_clk),
+ 	CLKDEV_CON_DEV_ID("dma_clk", "ffffec00.dma-controller", &dma_clk),
+ 	CLKDEV_CON_ID("pioA", &pioAB_clk),
+ 	CLKDEV_CON_ID("pioB", &pioAB_clk),
+diff --git a/arch/arm/mach-at91/at91sam9x5.c b/arch/arm/mach-at91/at91sam9x5.c
+index 1b144b4..de86e37 100644
+--- a/arch/arm/mach-at91/at91sam9x5.c
++++ b/arch/arm/mach-at91/at91sam9x5.c
+@@ -231,6 +231,8 @@ static struct clk_lookup periph_clocks_lookups[] = {
+ 	CLKDEV_CON_DEV_ID("t0_clk", "f800c000.timer", &tcb0_clk),
+ 	CLKDEV_CON_DEV_ID("dma_clk", "ffffec00.dma-controller", &dma0_clk),
+ 	CLKDEV_CON_DEV_ID("dma_clk", "ffffee00.dma-controller", &dma1_clk),
++	CLKDEV_CON_DEV_ID("mci_clk", "f0008000.mmc", &mmc0_clk),
++	CLKDEV_CON_DEV_ID("mci_clk", "f000c000.mmc", &mmc1_clk),
+ 	CLKDEV_CON_ID("pioA", &pioAB_clk),
+ 	CLKDEV_CON_ID("pioB", &pioAB_clk),
+ 	CLKDEV_CON_ID("pioC", &pioCD_clk),
+-- 
+1.7.5.4
+
