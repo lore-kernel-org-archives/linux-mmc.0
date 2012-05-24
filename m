@@ -1,37 +1,37 @@
-From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
-Subject: Re: [PATCH v4 2/3] ARM: at91: add clocks for DT entries
-Date: Thu, 24 May 2012 11:43:47 +0200
-Message-ID: <20120524094347.GI3377@game.jcrosoft.org>
-References: <1337681352-18521-3-git-send-email-ludovic.desroches@atmel.com>
- <1337801931-13823-1-git-send-email-ludovic.desroches@atmel.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: MMC_CAP_POWER_OFF_CARD, MMC_PM_KEEP_POWER - when to set
+Date: Thu, 24 May 2012 13:18:43 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1205241205030.1462@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1337801931-13823-1-git-send-email-ludovic.desroches@atmel.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: ludovic.desroches@atmel.com
-Cc: nicolas.ferre@atmel.com, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.8]:52679 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751714Ab2EXLTA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 May 2012 07:19:00 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Ohad Ben-Cohen <ohad@wizery.com>, Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@marvell.com>
 
-On 21:38 Wed 23 May     , ludovic.desroches@atmel.com wrote:
-> From: Ludovic Desroches <ludovic.desroches@atmel.com>
-> 
-> Add clocks to clock lookup table for DT entries.
-> 
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-Acked-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Hi all
 
-please next time send it as a new thread
+I'm a bit confused by the above two macros. The latter of them seems 
+rather clear: it indicates, whether the card power should be kept across 
+all kinds of suspend. Whereas the former one is not so clear. Some sources 
+indicate, that this flag means, that the host / board are _capable_ of 
+powering down the slot. Others seem to suggest, that it also means, that 
+the card can handle being powered off. The former meaning would make sense 
+to me, but then - why would one want to check it when deciding whether or 
+not to use runtime PM with the host? Isn't it exactly what the 
+MMC_PM_KEEP_POWER flag is for? If MMC_CAP_POWER_OFF_CARD does indeed mean, 
+that the host is able to switch the power off and on, then it can be 
+safely set almost always. E.g., if the slot is supplied by a regulator, 
+this flag can be enabled automatically?
 
-Best Regards,
-J.
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
