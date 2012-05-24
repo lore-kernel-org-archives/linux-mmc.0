@@ -1,77 +1,59 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+From: Ohad Ben-Cohen <ohad@wizery.com>
 Subject: Re: MMC_CAP_POWER_OFF_CARD, MMC_PM_KEEP_POWER - when to set
-Date: Thu, 24 May 2012 17:42:38 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1205241737420.1462@axis700.grange>
+Date: Thu, 24 May 2012 22:08:40 +0300
+Message-ID: <CAK=WgbZ+Cjafh==X84TNq+rZurxpswg61F=UenHKMB05k7oCGw@mail.gmail.com>
 References: <Pine.LNX.4.64.1205241205030.1462@axis700.grange>
  <CAK=Wgbb7RwAhhSCwb-NYCd8SNzQTJSNna8t4Zqdi5Q9T1ADSxg@mail.gmail.com>
- <Pine.LNX.4.64.1205241441240.1462@axis700.grange>
- <CAK=WgbZNeMZ+J-0t-piUNuMnrh5TjCAPBMpaTSJc=GnSx6z2YA@mail.gmail.com>
- <Pine.LNX.4.64.1205241559060.1462@axis700.grange>
- <CAK=WgbZggEEyrbp6QLHC+O+H7nOZrZuRuam2KJijTGGs=Oeozg@mail.gmail.com>
+ <Pine.LNX.4.64.1205241441240.1462@axis700.grange> <CAK=WgbZNeMZ+J-0t-piUNuMnrh5TjCAPBMpaTSJc=GnSx6z2YA@mail.gmail.com>
+ <Pine.LNX.4.64.1205241559060.1462@axis700.grange> <CAK=WgbZggEEyrbp6QLHC+O+H7nOZrZuRuam2KJijTGGs=Oeozg@mail.gmail.com>
+ <Pine.LNX.4.64.1205241737420.1462@axis700.grange>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:63878 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757327Ab2EXPm5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 May 2012 11:42:57 -0400
-In-Reply-To: <CAK=WgbZggEEyrbp6QLHC+O+H7nOZrZuRuam2KJijTGGs=Oeozg@mail.gmail.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:57895 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754043Ab2EXTJC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 May 2012 15:09:02 -0400
+Received: by pbbrp8 with SMTP id rp8so657044pbb.19
+        for <linux-mmc@vger.kernel.org>; Thu, 24 May 2012 12:09:02 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1205241737420.1462@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>, Daniel Drake <dsd@laptop.org>
 
-Hi Ohad
+Hi Guennadi,
 
-On Thu, 24 May 2012, Ohad Ben-Cohen wrote:
+On Thu, May 24, 2012 at 6:42 PM, Guennadi Liakhovetski
+<g.liakhovetski@gmx.de> wrote:
+> Yes, exactly, in certain cases. And when it's not hard-wired?
 
-> Hi Guennadi,
-> 
-> On Thu, May 24, 2012 at 5:06 PM, Guennadi Liakhovetski
-> <g.liakhovetski@gmx.de> wrote:
-> > Sorry, I mean - you don't know what card will be plugged in, so, you
-> > cannot know, whether that specific card and its driver can be safely
-> > powered off.
-> 
-> We do know in certain cases, most commonly with wifi SDIO cards which
-> are hardwired to the board.
+We don't support this yet.
 
-Yes, exactly, in certain cases. And when it's not hard-wired?
+Daniel suggested using either black or white listing (based on
+vendor/device id presumably) so we can support regular cards without
+breaking others, but I'm not sure if Daniel had any free cycles to
+look into it.
 
-> > Ok, I think, it's this: MMC_PM_KEEP_POWER is for system-wide suspend /
-> > resume, whereas MMC_CAP_POWER_OFF_CARD is for runtime PM. Am I right?
-> 
-> MMC_CAP_POWER_OFF_CARD is used by SDIO runtime PM, but I won't
-> classify it as "runtime PM" specific. It describes the hardware, and
-> not inherently limited to a specific use case.
+> Because with pluggable cards one flag is not enough. I think, you need (1)
+> board capability to switch power, and (2) driver's allowance to power the
+> card down.
+...
+> The problem of hot-pluggable cards. One card / driver combination will
+> support powering down at runtime, another one will not.
 
-Ok
+Ah ok now I understand you, thanks for the explanation.
 
-> > that case, I think, they also should function similar
-> 
-> Can you explain why ?
+Whether or not to involve the driver here probably depends on the
+actual hardware requirements. E.g., if the vendor/device id is enough
+information, then we might be able to implement this below the drivers
+without involving them. But in case only the driver could tell between
+variants of specific chips, then a generic white/black listing might
+not be enough.
 
-Because with pluggable cards one flag is not enough. I think, you need (1) 
-board capability to switch power, and (2) driver's allowance to power the 
-card down.
+Feel free to propose a solution, but please back it up with real
+hardware and show that it satisfies the MMC_CAP_POWER_OFF_CARD issues
+we had in the past.
 
-> > - wouldn't it make
-> > sense to use MMC_CAP_POWER_OFF_CARD similar to MMC_PM_KEEP_POWER - as a
-> > static capability flag (meaning, whether the board is physically able to
-> > switch power) and a dynamic flag, that, say, an SDIO function driver could
-> > set if it knows, that it cannot handle runtime power switching properly?
-> 
-> I'm not sure I'm following the reasoning.
-> 
-> Can you explain what are you trying to solve ? Is there a specific
-> problem you have in mind ?
-
-The problem of hot-pluggable cards. One card / driver combination will 
-support powering down at runtime, another one will not.
-
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Thanks,
+Ohad.
