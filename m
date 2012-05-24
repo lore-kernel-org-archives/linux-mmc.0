@@ -1,113 +1,185 @@
-From: ludovic.desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH] mmc: atmel-mci: fix burst/chunk size modification
-Date: Thu, 24 May 2012 09:21:00 +0200
-Message-ID: <4FBDE15C.1000607@atmel.com>
-References: <1337176838-24111-1-git-send-email-ludovic.desroches@atmel.com>
- <1337176838-24111-2-git-send-email-ludovic.desroches@atmel.com>
+From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Subject: Re: [PATCH v4 1/3] mmc: atmel-mci: add device tree support
+Date: Thu, 24 May 2012 11:43:04 +0200
+Message-ID: <20120524094304.GH3377@game.jcrosoft.org>
+References: <1337681352-18521-2-git-send-email-ludovic.desroches@atmel.com>
+ <1337757830-19361-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"; Format="flowed"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1337176838-24111-2-git-send-email-ludovic.desroches@atmel.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Chris Ball <cjb@laptop.org>
-Cc: nicolas.ferre@atmel.com, ludovic.desroches@atmel.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from [188.165.41.191] ([188.165.41.191]:39456 "EHLO
+	mo3.mail-out.ovh.net" rhost-flags-FAIL-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753625Ab2EXJnk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 May 2012 05:43:40 -0400
+Received: from mail91.ha.ovh.net (b7.ovh.net [213.186.33.57])
+	by mo3.mail-out.ovh.net (Postfix) with SMTP id B7FF2FF9349
+	for <linux-mmc@vger.kernel.org>; Thu, 24 May 2012 11:45:55 +0200 (CEST)
+Content-Disposition: inline
+In-Reply-To: <1337757830-19361-1-git-send-email-ludovic.desroches@atmel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ludovic.desroches@atmel.com
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nicolas.ferre@atmel.com, devicetree-discuss@lists.ozlabs.org
 
-Hi Chris,
-
-I was doing some tests on mmc-next and I had issues with atmel-mci and =
-
-DMA because this patch was missing.
-
-Can you pull it?
-
-Thanks.
-
-Regards.
-
-Ludovic
-
-Le 05/16/2012 04:00 PM, ludovic.desroches@atmel.com a =E9crit :
-> From: Nicolas Ferre<nicolas.ferre@atmel.com>
->
-> The use of DMA slave config operation requires that the burst size
-> (aka chunk size) is specified through this interface.
-> Modify atmel-mci slave driver to use this specification on its side.
->
-> Signed-off-by: Nicolas Ferre<nicolas.ferre@atmel.com>
-> Signed-off-by: Ludovic Desroches<ludovic.desroches@atmel.com>
+On 09:23 Wed 23 May     , ludovic.desroches@atmel.com wrote:
+> From: Ludovic Desroches <ludovic.desroches@atmel.com>
+> 
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 > ---
->   drivers/mmc/host/atmel-mci-regs.h |   14 ++++++++++++++
->   drivers/mmc/host/atmel-mci.c      |    7 +++++--
->   2 files changed, 19 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/atmel-mci-regs.h b/drivers/mmc/host/atmel-m=
-ci-regs.h
-> index 787aba1..ab56f7d 100644
-> --- a/drivers/mmc/host/atmel-mci-regs.h
-> +++ b/drivers/mmc/host/atmel-mci-regs.h
-> @@ -140,4 +140,18 @@
->   #define atmci_writel(port,reg,value)			\
->   	__raw_writel((value), (port)->regs + reg)
->
-> +/*
-> + * Fix sconfig's burst size according to atmel MCI. We need to convert t=
-hem as:
-> + * 1 ->  0, 4 ->  1, 8 ->  2, 16 ->  3.
-> + *
-> + * This can be done by finding most significant bit set.
-> + */
-> +static inline unsigned int atmci_convert_chksize(unsigned int maxburst)
-> +{
-> +	if (maxburst>  1)
-> +		return fls(maxburst) - 2;
-> +	else
-> +		return 0;
-> +}
+>  .../devicetree/bindings/mmc/atmel-hsmci.txt        |   67 +++++++++++++++
+>  drivers/mmc/host/atmel-mci.c                       |   87 +++++++++++++++++++-
+>  2 files changed, 152 insertions(+), 2 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt b/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
+> new file mode 100644
+> index 0000000..81c20cc
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
+> @@ -0,0 +1,67 @@
+> +* Atmel High Speed MultiMedia Card Interface
 > +
->   #endif /* __DRIVERS_MMC_ATMEL_MCI_H__ */
+> +This controller on atmel products provides an interface for MMC, SD and SDIO
+> +types of memory cards.
+> +
+> +1) MCI node
+> +
+> +Required properties:
+> +- compatible: no blank "atmel,hsmci"
+> +- reg: should contain HSMCI registers location and length
+> +- interrupts: should contain HSMCI interrupt number
+> +- #address-cells: should be one. The cell is the slot id.
+> +- #size-cells: should be zero.
+> +- at least one slot node
+> +
+> +The node contains child nodes for each slot that the platform uses
+> +
+> +Example MCI node:
+> +
+> +mmc0: mmc@f0008000 {
+> +	compatible = "atmel,hsmci";
+> +	reg = <0xf0008000 0x600>;
+> +	interrupts = <12 4>;
+> +	#address-cells = <1>;
+> +	#size-cells = <0>;
+> +
+> +	[ child node definitions...]
+> +};
+> +
+> +2) slot nodes
+> +
+> +Required properties:
+> +- reg: should contain the slot id.
+> +- bus-width: number of data lines connected to the controller
+> +
+> +Optional properties:
+> +- cd-gpios: specify GPIOs for card detection
+> +- cd-inverted: invert the value of external card detect gpio line
+> +- wp-gpios: specify GPIOs for write protection
+> +
+> +Example slot node:
+> +
+> +slot@0 {
+> +	reg = <0>;
+> +	bus-width = <4>;
+> +	cd-gpios = <&pioD 15 0>
+> +	cd-inverted;
+> +};
+> +
+> +Example full MCI node:
+> +mmc0: mmc@f0008000 {
+> +	compatible = "atmel,hsmci";
+> +	reg = <0xf0008000 0x600>;
+> +	interrupts = <12 4>;
+> +	#address-cells = <1>;
+> +	#size-cells = <0>;
+> +	slot@0 {
+> +		reg = <0>;
+> +		bus-width = <4>;
+> +		cd-gpios = <&pioD 15 0>
+> +		cd-inverted;
+> +	};
+> +	slot@1 {
+> +		reg = <1>;
+> +		bus-width = <4>;
+> +	};
+> +};
 > diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index 2dbfb28..50e8652 100644
+> index 556d384..1842dc7 100644
 > --- a/drivers/mmc/host/atmel-mci.c
 > +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -834,6 +834,7 @@ atmci_prepare_data_dma(struct atmel_mci *host, struct=
- mmc_data *data)
->   	enum dma_data_direction		direction;
->   	enum dma_transfer_direction	slave_dirn;
->   	unsigned int			sglen;
-> +	u32				maxburst;
->   	u32 iflags;
->
->   	data->error =3D -EINPROGRESS;
-> @@ -867,16 +868,18 @@ atmci_prepare_data_dma(struct atmel_mci *host, stru=
-ct mmc_data *data)
->   	if (!chan)
->   		return -ENODEV;
->
-> -	atmci_writel(host, ATMCI_DMA, ATMCI_DMA_CHKSIZE(3) | ATMCI_DMAEN);
-> -
->   	if (data->flags&  MMC_DATA_READ) {
->   		direction =3D DMA_FROM_DEVICE;
->   		host->dma_conf.direction =3D slave_dirn =3D DMA_DEV_TO_MEM;
-> +		maxburst =3D atmci_convert_chksize(host->dma_conf.src_maxburst);
->   	} else {
->   		direction =3D DMA_TO_DEVICE;
->   		host->dma_conf.direction =3D slave_dirn =3D DMA_MEM_TO_DEV;
-> +		maxburst =3D atmci_convert_chksize(host->dma_conf.dst_maxburst);
->   	}
->
-> +	atmci_writel(host, ATMCI_DMA, ATMCI_DMA_CHKSIZE(maxburst) | ATMCI_DMAEN=
-);
+> @@ -19,6 +19,9 @@
+>  #include <linux/interrupt.h>
+>  #include <linux/ioport.h>
+>  #include <linux/module.h>
+> +#include <linux/of.h>
+> +#include <linux/of_device.h>
+> +#include <linux/of_gpio.h>
+>  #include <linux/platform_device.h>
+>  #include <linux/scatterlist.h>
+>  #include <linux/seq_file.h>
+> @@ -493,6 +496,72 @@ err:
+>  	dev_err(&mmc->class_dev, "failed to initialize debugfs for slot\n");
+>  }
+>  
+> +#if defined(CONFIG_OF)
+> +static const struct of_device_id atmci_dt_ids[] = {
+> +	{ .compatible = "atmel,hsmci" },
+> +	{ /* sentinel */ }
+> +};
 > +
->   	sglen =3D dma_map_sg(chan->device->dev, data->sg,
->   			data->sg_len, direction);
->
+> +MODULE_DEVICE_TABLE(of, atmci_dt_ids);
+> +
+> +static struct mci_platform_data __devinit*
+> +atmci_of_init(struct platform_device *pdev)
+> +{
+> +	struct device_node *np = pdev->dev.of_node;
+> +	struct device_node *cnp;
+> +	struct mci_platform_data *pdata;
+> +	u32 slot_id;
+> +	int ret;
+> +
+> +	if (!np) {
+> +		dev_err(&pdev->dev, "device node not found\n");
+> +		return ERR_PTR(-EINVAL);
+> +	}
+> +
+> +	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
+> +	if (!pdata) {
+> +		dev_err(&pdev->dev, "could not allocate memory for pdata\n");
+> +		return ERR_PTR(-ENOMEM);
+> +	}
+> +
+> +	for_each_child_of_node(np, cnp) {
+> +		ret = of_property_read_u32(cnp, "reg", &slot_id);
+> +		if (ret) {
+really need ret = ?
+> +			dev_warn(&pdev->dev, "reg property is missing for %s\n",
+> +				 cnp->full_name);
+> +			continue;
+> +		}
+> +
+> +		if (slot_id > (ATMCI_MAX_NR_SLOTS-1)) {
+missing spase arround '-'
+if (slot_id >= ATMCI_MAX_NR_SLOTS)
+will do the same
+> +			dev_warn(&pdev->dev, "can't have more than %d slots\n",
+> +			         ATMCI_MAX_NR_SLOTS);
+> +			break;
+> +		}
+> +
+> +		if (of_property_read_u32(cnp, "bus-width",
+> +		                         &pdata->slot[slot_id].bus_width))
+> +			pdata->slot[slot_id].bus_width = 1;
+> +
+> +		pdata->slot[slot_id].detect_pin =
+> +			of_get_named_gpio(cnp, "cd-gpios", 0);
+> +
+> +		pdata->slot[slot_id].detect_is_active_high =
+> +			of_property_read_bool(cnp, "cd-inverted");
+I really this this is redondant with gpio binding
+
+Chris??
+
+BestRegards,
+J.
