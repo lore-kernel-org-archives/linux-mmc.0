@@ -1,45 +1,178 @@
 From: <ludovic.desroches@atmel.com>
-Subject: [PATCH v5 0/4] atmel-mci device tree support
-Date: Thu, 24 May 2012 17:15:52 +0200
-Message-ID: <1337872556-17667-1-git-send-email-ludovic.desroches@atmel.com>
+Subject: [PATCH 4/4 v5] ARM: dts: add nodes for atmel hsmci controllers for atmel boards
+Date: Thu, 24 May 2012 17:15:56 +0200
+Message-ID: <1337872556-17667-5-git-send-email-ludovic.desroches@atmel.com>
+References: <1337872556-17667-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:47620 "EHLO
+Received: from eusmtp01.atmel.com ([212.144.249.242]:47649 "EHLO
 	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755926Ab2EXPQQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 May 2012 11:16:16 -0400
+	with ESMTP id S1757241Ab2EXPQW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 May 2012 11:16:22 -0400
+In-Reply-To: <1337872556-17667-1-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: nicolas.ferre@atmel.com, plagnioj@jcrosoft.com
+Cc: nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Hi,
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-This patch-set adds device tree support for atmel-mci.
+Add mci controller nodes to atmel boards.
 
-Regards
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
+ arch/arm/boot/dts/at91sam9263ek.dts         |   10 ++++++++++
+ arch/arm/boot/dts/at91sam9g20ek_2mmc.dts    |   12 ++++++++++++
+ arch/arm/boot/dts/at91sam9g20ek_common.dtsi |    9 +++++++++
+ arch/arm/boot/dts/at91sam9g25ek.dts         |   18 ++++++++++++++++++
+ arch/arm/boot/dts/at91sam9m10g45ek.dts      |   19 +++++++++++++++++++
+ arch/arm/boot/dts/at91sam9n12ek.dts         |    9 +++++++++
+ 6 files changed, 77 insertions(+), 0 deletions(-)
 
-Ludovic
-
-v5:
-- cleanup
-- split dts commit: one for SOCs, one for boards
-
-v4:
-- cleanup
-- add extra chips and boards for atmel-mci dt support
-
-v3:
-- use cd-inverted instead of cd-invert to follow mmc common binding.
-- don't assign a pointer to pdev->dev.platform.
-- add mci controller nodes to other chips and boards.
-- put all dts file changes together.
-
-v2:
-- squash patch v1 2/4 and 3/4.
-- change atmci_get_of_slots to atmci_of_init and manage pdata allocation into
-it.
-- correct potential issue (e.g. having only one slot which is not slot0 into
-the dt) about slots by adding a reg property corresponding to the slot id.
+diff --git a/arch/arm/boot/dts/at91sam9263ek.dts b/arch/arm/boot/dts/at91sam9263ek.dts
+index f86ac4b..05028ed 100644
+--- a/arch/arm/boot/dts/at91sam9263ek.dts
++++ b/arch/arm/boot/dts/at91sam9263ek.dts
+@@ -50,6 +50,16 @@
+ 				atmel,vbus-gpio = <&pioA 25 0>;
+ 				status = "okay";
+ 			};
++
++			mmc0: mmc@fff80000 {
++				status = "okay";
++				slot@0 {
++					reg = <0>;
++					bus-width = <4>;
++					cd-gpios = <&pioE 18 0>;
++					wp-gpios = <&pioE 19 0>;
++				};
++			};
+ 		};
+ 
+ 		nand0: nand@40000000 {
+diff --git a/arch/arm/boot/dts/at91sam9g20ek_2mmc.dts b/arch/arm/boot/dts/at91sam9g20ek_2mmc.dts
+index f1b2e14..684b229 100644
+--- a/arch/arm/boot/dts/at91sam9g20ek_2mmc.dts
++++ b/arch/arm/boot/dts/at91sam9g20ek_2mmc.dts
+@@ -12,6 +12,18 @@
+ 	model = "Atmel at91sam9g20ek 2 mmc";
+ 	compatible = "atmel,at91sam9g20ek_2mmc", "atmel,at91sam9g20", "atmel,at91sam9";
+ 
++	ahb {
++		apb{
++			mmc0: mmc@fffa8000 {
++				slot@0 {
++					reg = <0>;
++					bus-width = <4>;
++					cd-gpios = <&pioC 2 0>;
++				};
++			};
++		};
++	};
++
+ 	leds {
+ 		compatible = "gpio-leds";
+ 
+diff --git a/arch/arm/boot/dts/at91sam9g20ek_common.dtsi b/arch/arm/boot/dts/at91sam9g20ek_common.dtsi
+index b06c0db..7da326a 100644
+--- a/arch/arm/boot/dts/at91sam9g20ek_common.dtsi
++++ b/arch/arm/boot/dts/at91sam9g20ek_common.dtsi
+@@ -51,6 +51,15 @@
+ 				atmel,vbus-gpio = <&pioC 5 0>;
+ 				status = "okay";
+ 			};
++
++			mmc0: mmc@fffa8000 {
++				status = "okay";
++				slot@1 {
++					reg = <1>;
++					bus-width = <4>;
++					cd-gpios = <&pioC 9 0>;
++				};
++			};
+ 		};
+ 
+ 		nand0: nand@40000000 {
+diff --git a/arch/arm/boot/dts/at91sam9g25ek.dts b/arch/arm/boot/dts/at91sam9g25ek.dts
+index 7829a4d..422a9fb 100644
+--- a/arch/arm/boot/dts/at91sam9g25ek.dts
++++ b/arch/arm/boot/dts/at91sam9g25ek.dts
+@@ -32,6 +32,24 @@
+ 				phy-mode = "rmii";
+ 				status = "okay";
+ 			};
++
++			mmc0: mmc@f0008000 {
++				status = "okay";
++				slot@0 {
++					reg = <0>;
++					bus-width = <4>;
++					cd-gpios = <&pioD 15 0>;
++				};
++			};
++
++			mmc1: mmc@f000c000 {
++				status = "okay";
++				slot@0 {
++					reg = <0>;
++					bus-width = <4>;
++					cd-gpios = <&pioD 14 0>;
++				};
++			};
+ 		};
+ 
+ 		usb0: ohci@00600000 {
+diff --git a/arch/arm/boot/dts/at91sam9m10g45ek.dts b/arch/arm/boot/dts/at91sam9m10g45ek.dts
+index a3633bd..7a7b571 100644
+--- a/arch/arm/boot/dts/at91sam9m10g45ek.dts
++++ b/arch/arm/boot/dts/at91sam9m10g45ek.dts
+@@ -46,6 +46,25 @@
+ 				phy-mode = "rmii";
+ 				status = "okay";
+ 			};
++
++			mmc0: mmc@fff80000 {
++				status = "okay";
++				slot@0 {
++					reg = <0>;
++					bus-width = <4>;
++					cd-gpios = <&pioD 10 0>;
++				};
++			};
++
++			mmc1: mmc@fffd0000 {
++				status = "okay";
++				slot@0 {
++					reg = <0>;
++					bus-width = <4>;
++					cd-gpios = <&pioD 11 0>;
++					wp-gpios = <&pioD 29 0>;
++				};
++			};
+ 		};
+ 
+ 		nand0: nand@40000000 {
+diff --git a/arch/arm/boot/dts/at91sam9n12ek.dts b/arch/arm/boot/dts/at91sam9n12ek.dts
+index f4e43e3..44b42d9 100644
+--- a/arch/arm/boot/dts/at91sam9n12ek.dts
++++ b/arch/arm/boot/dts/at91sam9n12ek.dts
+@@ -37,6 +37,15 @@
+ 			dbgu: serial@fffff200 {
+ 				status = "okay";
+ 			};
++
++			mmc0: mmc@f0008000 {
++				status = "okay";
++				slot@0 {
++					reg = <0>;
++					bus-width = <4>;
++					cd-gpios = <&pioA 7 0>;
++				};
++			};
+ 		};
+ 
+ 		nand0: nand@40000000 {
+-- 
+1.7.5.4
 
