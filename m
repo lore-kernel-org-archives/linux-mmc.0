@@ -1,98 +1,58 @@
-From: <ludovic.desroches@atmel.com>
-Subject: [PATCH 2/4 v5] ARM: at91: add clocks for DT entries
-Date: Thu, 24 May 2012 17:15:54 +0200
-Message-ID: <1337872556-17667-3-git-send-email-ludovic.desroches@atmel.com>
-References: <1337872556-17667-1-git-send-email-ludovic.desroches@atmel.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: MMC_CAP_POWER_OFF_CARD, MMC_PM_KEEP_POWER - when to set
+Date: Thu, 24 May 2012 18:22:45 +0300
+Message-ID: <CAK=WgbZggEEyrbp6QLHC+O+H7nOZrZuRuam2KJijTGGs=Oeozg@mail.gmail.com>
+References: <Pine.LNX.4.64.1205241205030.1462@axis700.grange>
+ <CAK=Wgbb7RwAhhSCwb-NYCd8SNzQTJSNna8t4Zqdi5Q9T1ADSxg@mail.gmail.com>
+ <Pine.LNX.4.64.1205241441240.1462@axis700.grange> <CAK=WgbZNeMZ+J-0t-piUNuMnrh5TjCAPBMpaTSJc=GnSx6z2YA@mail.gmail.com>
+ <Pine.LNX.4.64.1205241559060.1462@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:47630 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754866Ab2EXPQT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 May 2012 11:16:19 -0400
-In-Reply-To: <1337872556-17667-1-git-send-email-ludovic.desroches@atmel.com>
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:52330 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756729Ab2EXPXF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 May 2012 11:23:05 -0400
+Received: by gglu4 with SMTP id u4so7819544ggl.19
+        for <linux-mmc@vger.kernel.org>; Thu, 24 May 2012 08:23:05 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1205241559060.1462@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, Ludovic Desroches <ludovic.desroches@atmel.com>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>
 
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Hi Guennadi,
 
-Add clocks to clock lookup table for DT entries.
+On Thu, May 24, 2012 at 5:06 PM, Guennadi Liakhovetski
+<g.liakhovetski@gmx.de> wrote:
+> Sorry, I mean - you don't know what card will be plugged in, so, you
+> cannot know, whether that specific card and its driver can be safely
+> powered off.
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-Acked-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
----
- arch/arm/mach-at91/at91sam9260.c |    1 +
- arch/arm/mach-at91/at91sam9263.c |    2 ++
- arch/arm/mach-at91/at91sam9g45.c |    2 ++
- arch/arm/mach-at91/at91sam9n12.c |    1 +
- arch/arm/mach-at91/at91sam9x5.c  |    2 ++
- 5 files changed, 8 insertions(+), 0 deletions(-)
+We do know in certain cases, most commonly with wifi SDIO cards which
+are hardwired to the board.
 
-diff --git a/arch/arm/mach-at91/at91sam9260.c b/arch/arm/mach-at91/at91sam9260.c
-index 2b1e438..ddba004 100644
---- a/arch/arm/mach-at91/at91sam9260.c
-+++ b/arch/arm/mach-at91/at91sam9260.c
-@@ -226,6 +226,7 @@ static struct clk_lookup periph_clocks_lookups[] = {
- 	CLKDEV_CON_DEV_ID("t1_clk", "fffdc000.timer", &tc4_clk),
- 	CLKDEV_CON_DEV_ID("t2_clk", "fffdc000.timer", &tc5_clk),
- 	CLKDEV_CON_DEV_ID("hclk", "500000.ohci", &ohci_clk),
-+	CLKDEV_CON_DEV_ID("mci_clk", "fffa8000.mmc", &mmc_clk),
- 	/* fake hclk clock */
- 	CLKDEV_CON_DEV_ID("hclk", "at91_ohci", &ohci_clk),
- 	CLKDEV_CON_ID("pioA", &pioA_clk),
-diff --git a/arch/arm/mach-at91/at91sam9263.c b/arch/arm/mach-at91/at91sam9263.c
-index 0eb20f9..f165b25 100644
---- a/arch/arm/mach-at91/at91sam9263.c
-+++ b/arch/arm/mach-at91/at91sam9263.c
-@@ -211,6 +211,8 @@ static struct clk_lookup periph_clocks_lookups[] = {
- 	CLKDEV_CON_DEV_ID("hclk", "a00000.ohci", &ohci_clk),
- 	CLKDEV_CON_DEV_ID("spi_clk", "fffa4000.spi", &spi0_clk),
- 	CLKDEV_CON_DEV_ID("spi_clk", "fffa8000.spi", &spi1_clk),
-+	CLKDEV_CON_DEV_ID("mci_clk", "fff80000.mmc", &mmc0_clk),
-+	CLKDEV_CON_DEV_ID("mci_clk", "fff84000.mmc", &mmc1_clk),
- };
- 
- static struct clk_lookup usart_clocks_lookups[] = {
-diff --git a/arch/arm/mach-at91/at91sam9g45.c b/arch/arm/mach-at91/at91sam9g45.c
-index 4792682..aa24e82 100644
---- a/arch/arm/mach-at91/at91sam9g45.c
-+++ b/arch/arm/mach-at91/at91sam9g45.c
-@@ -242,6 +242,8 @@ static struct clk_lookup periph_clocks_lookups[] = {
- 	CLKDEV_CON_DEV_ID("t0_clk", "fffd4000.timer", &tcb0_clk),
- 	CLKDEV_CON_DEV_ID("hclk", "700000.ohci", &uhphs_clk),
- 	CLKDEV_CON_DEV_ID("ehci_clk", "800000.ehci", &uhphs_clk),
-+	CLKDEV_CON_DEV_ID("mci_clk", "fff80000.mmc", &mmc0_clk),
-+	CLKDEV_CON_DEV_ID("mci_clk", "fffd0000.mmc", &mmc1_clk),
- 	/* fake hclk clock */
- 	CLKDEV_CON_DEV_ID("hclk", "at91_ohci", &uhphs_clk),
- 	CLKDEV_CON_ID("pioA", &pioA_clk),
-diff --git a/arch/arm/mach-at91/at91sam9n12.c b/arch/arm/mach-at91/at91sam9n12.c
-index 0849466..cce4e0f 100644
---- a/arch/arm/mach-at91/at91sam9n12.c
-+++ b/arch/arm/mach-at91/at91sam9n12.c
-@@ -168,6 +168,7 @@ static struct clk_lookup periph_clocks_lookups[] = {
- 	CLKDEV_CON_DEV_ID("usart", "f8028000.serial", &usart3_clk),
- 	CLKDEV_CON_DEV_ID("t0_clk", "f8008000.timer", &tcb_clk),
- 	CLKDEV_CON_DEV_ID("t0_clk", "f800c000.timer", &tcb_clk),
-+	CLKDEV_CON_DEV_ID("mci_clk", "f0008000.mmc", &mmc_clk),
- 	CLKDEV_CON_DEV_ID("dma_clk", "ffffec00.dma-controller", &dma_clk),
- 	CLKDEV_CON_ID("pioA", &pioAB_clk),
- 	CLKDEV_CON_ID("pioB", &pioAB_clk),
-diff --git a/arch/arm/mach-at91/at91sam9x5.c b/arch/arm/mach-at91/at91sam9x5.c
-index 1b144b4..de86e37 100644
---- a/arch/arm/mach-at91/at91sam9x5.c
-+++ b/arch/arm/mach-at91/at91sam9x5.c
-@@ -231,6 +231,8 @@ static struct clk_lookup periph_clocks_lookups[] = {
- 	CLKDEV_CON_DEV_ID("t0_clk", "f800c000.timer", &tcb0_clk),
- 	CLKDEV_CON_DEV_ID("dma_clk", "ffffec00.dma-controller", &dma0_clk),
- 	CLKDEV_CON_DEV_ID("dma_clk", "ffffee00.dma-controller", &dma1_clk),
-+	CLKDEV_CON_DEV_ID("mci_clk", "f0008000.mmc", &mmc0_clk),
-+	CLKDEV_CON_DEV_ID("mci_clk", "f000c000.mmc", &mmc1_clk),
- 	CLKDEV_CON_ID("pioA", &pioAB_clk),
- 	CLKDEV_CON_ID("pioB", &pioAB_clk),
- 	CLKDEV_CON_ID("pioC", &pioCD_clk),
--- 
-1.7.5.4
+> Ok, I think, it's this: MMC_PM_KEEP_POWER is for system-wide suspend /
+> resume, whereas MMC_CAP_POWER_OFF_CARD is for runtime PM. Am I right?
 
+MMC_CAP_POWER_OFF_CARD is used by SDIO runtime PM, but I won't
+classify it as "runtime PM" specific. It describes the hardware, and
+not inherently limited to a specific use case.
+
+> that case, I think, they also should function similar
+
+Can you explain why ?
+
+> - wouldn't it make
+> sense to use MMC_CAP_POWER_OFF_CARD similar to MMC_PM_KEEP_POWER - as a
+> static capability flag (meaning, whether the board is physically able to
+> switch power) and a dynamic flag, that, say, an SDIO function driver could
+> set if it knows, that it cannot handle runtime power switching properly?
+
+I'm not sure I'm following the reasoning.
+
+Can you explain what are you trying to solve ? Is there a specific
+problem you have in mind ?
+
+Thanks,
+Ohad.
