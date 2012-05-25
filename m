@@ -1,7 +1,7 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 04/10 v3] mmc: add CD GPIO polling support to slot functions
-Date: Fri, 25 May 2012 17:45:39 +0200
-Message-ID: <1337960752-4944-25-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 2/3 v3] ARM: mach-shmobile: switch all SDHI instances on mackerel to use GPIO CD
+Date: Fri, 25 May 2012 17:45:51 +0200
+Message-ID: <1337960752-4944-37-git-send-email-g.liakhovetski@gmx.de>
 References: <Pine.LNX.4.64.1205251727260.13353@axis700.grange>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <Pine.LNX.4.64.1205251727260.13353@axis700.grange>
@@ -10,115 +10,125 @@ To: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-A simple extension of mmc slot functions add support for CD GPIO polling
-for cases, where the GPIO cannot produce interrupts or this is for some
-reason not desired.
+All 3 SDHI instances on mackerel use GPIOs for card-detection and can be
+switched to use the generic GPIO CD helper. SDHI0 card-detect is configured
+to produce interrupts, SDHI1 and SDHI2 are polled.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/core/slot-gpio.c  |   45 +++++++++++++++++++++++++++++++---------
- include/linux/mmc/slot-gpio.h |    2 +
- 2 files changed, 37 insertions(+), 10 deletions(-)
+ arch/arm/mach-shmobile/board-mackerel.c |   46 +++++++++++++++----------------
+ 1 files changed, 22 insertions(+), 24 deletions(-)
 
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 468e5a0..d70b790 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -29,6 +29,18 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
- 	return IRQ_HANDLED;
- }
+diff --git a/arch/arm/mach-shmobile/board-mackerel.c b/arch/arm/mach-shmobile/board-mackerel.c
+index 5881bb1..45854a9 100644
+--- a/arch/arm/mach-shmobile/board-mackerel.c
++++ b/arch/arm/mach-shmobile/board-mackerel.c
+@@ -1032,15 +1032,6 @@ static struct platform_device nand_flash_device = {
+ 	},
+ };
  
-+int mmc_gpio_get_cd(struct mmc_host *host)
-+{
-+	struct mmc_gpio *ctx = host->slot.handler_priv;
-+
-+	if (!ctx || !gpio_is_valid(ctx->cd_gpio))
-+		return -ENOSYS;
-+
-+	return !gpio_get_value_cansleep(ctx->cd_gpio) ^
-+		!(host->caps2 & MMC_CAP2_INVERTED_CD);
-+}
-+EXPORT_SYMBOL(mmc_gpio_get_cd);
-+
- int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
- {
- 	size_t len = strlen(dev_name(host->parent)) + 4;
-@@ -36,9 +48,6 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
- 	int irq = gpio_to_irq(gpio);
- 	int ret;
- 
--	if (irq < 0)
--		return irq;
+-/*
+- * The card detect pin of the top SD/MMC slot (CN7) is active low and is
+- * connected to GPIO A22 of SH7372 (GPIO_PORT41).
+- */
+-static int slot_cn7_get_cd(struct platform_device *pdev)
+-{
+-	return !gpio_get_value(GPIO_PORT41);
+-}
 -
- 	ctx = kmalloc(sizeof(*ctx) + len, GFP_KERNEL);
- 	if (!ctx)
- 		return -ENOMEM;
-@@ -49,20 +58,32 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
- 	if (ret < 0)
- 		goto egpioreq;
+ /* SDHI0 */
+ static struct sh_mobile_sdhi_info sdhi0_info = {
+ 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
+@@ -1084,14 +1075,17 @@ static struct platform_device sdhi0_device = {
  
--	ret = request_threaded_irq(irq, NULL, mmc_gpio_cd_irqt,
-+	/*
-+	 * Even if gpio_to_irq() returns a valid IRQ number, the platform might
-+	 * still prefer to poll, e.g., because that IRQ number is already used
-+	 * by another unit and cannot be shared.
-+	 */
-+	if (irq >= 0 && host->caps & MMC_CAP_NEEDS_POLL)
-+		irq = -EINVAL;
+ #if !defined(CONFIG_MMC_SH_MMCIF) && !defined(CONFIG_MMC_SH_MMCIF_MODULE)
+ /* SDHI1 */
 +
-+	if (irq >= 0) {
-+		ret = request_threaded_irq(irq, NULL, mmc_gpio_cd_irqt,
- 			IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT,
- 			ctx->cd_label, host);
--	if (ret < 0)
--		goto eirqreq;
-+		if (ret < 0)
-+			irq = ret;
-+	}
++/* GPIO_PORT41 can trigger IRQ8, but it is used by USBHS1, we have to poll */
+ static struct sh_mobile_sdhi_info sdhi1_info = {
+ 	.dma_slave_tx	= SHDMA_SLAVE_SDHI1_TX,
+ 	.dma_slave_rx	= SHDMA_SLAVE_SDHI1_RX,
+ 	.tmio_ocr_mask	= MMC_VDD_165_195,
+-	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE,
++	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE | TMIO_MMC_USE_GPIO_CD,
+ 	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+ 			  MMC_CAP_NEEDS_POLL,
+-	.get_cd		= slot_cn7_get_cd,
++	.tmio_caps2	= MMC_CAP2_INVERTED_CD,
++	.cd_gpio	= GPIO_PORT41,
+ };
  
--	ctx->cd_gpio = gpio;
- 	host->slot.cd_irq = irq;
+ static struct resource sdhi1_resources[] = {
+@@ -1129,23 +1123,20 @@ static struct platform_device sdhi1_device = {
+ };
+ #endif
+ 
++/* SDHI2 */
 +
-+	if (irq < 0)
-+		host->caps |= MMC_CAP_NEEDS_POLL;
+ /*
+  * The card detect pin of the top SD/MMC slot (CN23) is active low and is
+  * connected to GPIO SCIFB_SCK of SH7372 (GPIO_PORT162).
+  */
+-static int slot_cn23_get_cd(struct platform_device *pdev)
+-{
+-	return !gpio_get_value(GPIO_PORT162);
+-}
+-
+-/* SDHI2 */
+ static struct sh_mobile_sdhi_info sdhi2_info = {
+ 	.dma_slave_tx	= SHDMA_SLAVE_SDHI2_TX,
+ 	.dma_slave_rx	= SHDMA_SLAVE_SDHI2_RX,
+-	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE,
++	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE | TMIO_MMC_USE_GPIO_CD,
+ 	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+ 			  MMC_CAP_NEEDS_POLL,
+-	.get_cd		= slot_cn23_get_cd,
++	.tmio_caps2	= MMC_CAP2_INVERTED_CD,
++	.cd_gpio	= GPIO_PORT162,
+ };
+ 
+ static struct resource sdhi2_resources[] = {
+@@ -1183,6 +1174,16 @@ static struct platform_device sdhi2_device = {
+ };
+ 
+ /* SH_MMCIF */
 +
-+	ctx->cd_gpio = gpio;
- 	host->slot.handler_priv = ctx;
- 
- 	return 0;
- 
--eirqreq:
--	gpio_free(gpio);
- egpioreq:
- 	kfree(ctx);
- 	return ret;
-@@ -76,8 +97,12 @@ void mmc_gpio_free_cd(struct mmc_host *host)
- 	if (!ctx)
- 		return;
- 
--	free_irq(host->slot.cd_irq, host);
-+	if (host->slot.cd_irq >= 0) {
-+		free_irq(host->slot.cd_irq, host);
-+		host->slot.cd_irq = -EINVAL;
-+	}
- 	gpio_free(ctx->cd_gpio);
-+	host->slot.handler_priv = NULL;
- 	kfree(ctx);
- }
- EXPORT_SYMBOL(mmc_gpio_free_cd);
-diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
-index edfaa32..1a977d7 100644
---- a/include/linux/mmc/slot-gpio.h
-+++ b/include/linux/mmc/slot-gpio.h
-@@ -12,6 +12,8 @@
- #define MMC_SLOT_GPIO_H
- 
- struct mmc_host;
++/*
++ * The card detect pin of the top SD/MMC slot (CN7) is active low and is
++ * connected to GPIO A22 of SH7372 (GPIO_PORT41).
++ */
++static int slot_cn7_get_cd(struct platform_device *pdev)
++{
++	return !gpio_get_value(GPIO_PORT41);
++}
 +
-+int mmc_gpio_get_cd(struct mmc_host *host);
- int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio);
- void mmc_gpio_free_cd(struct mmc_host *host);
+ static struct resource sh_mmcif_resources[] = {
+ 	[0] = {
+ 		.name	= "MMCIF",
+@@ -1521,10 +1522,11 @@ static void __init mackerel_init(void)
+ 	gpio_request(GPIO_FN_SDHID1_2, NULL);
+ 	gpio_request(GPIO_FN_SDHID1_1, NULL);
+ 	gpio_request(GPIO_FN_SDHID1_0, NULL);
+-#endif
++#else
+ 	/* card detect pin for MMC slot (CN7) */
+ 	gpio_request(GPIO_PORT41, NULL);
+ 	gpio_direction_input(GPIO_PORT41);
++#endif
  
+ 	/* enable SDHI2 */
+ 	gpio_request(GPIO_FN_SDHICMD2, NULL);
+@@ -1534,10 +1536,6 @@ static void __init mackerel_init(void)
+ 	gpio_request(GPIO_FN_SDHID2_1, NULL);
+ 	gpio_request(GPIO_FN_SDHID2_0, NULL);
+ 
+-	/* card detect pin for microSD slot (CN23) */
+-	gpio_request(GPIO_PORT162, NULL);
+-	gpio_direction_input(GPIO_PORT162);
+-
+ 	/* MMCIF */
+ 	gpio_request(GPIO_FN_MMCD0_0, NULL);
+ 	gpio_request(GPIO_FN_MMCD0_1, NULL);
 -- 
 1.7.2.5
 
