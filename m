@@ -1,130 +1,166 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 04/10 v3] mmc: add CD GPIO polling support to slot functions
-Date: Fri, 25 May 2012 17:16:03 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1205251358440.13353@axis700.grange>
+Subject: [PATCH 05/10 v3] mmc: convert slot functions to managed allocation
+Date: Fri, 25 May 2012 17:16:07 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1205251359200.13353@axis700.grange>
 References: <Pine.LNX.4.64.1205251045490.13353@axis700.grange>
  <Pine.LNX.4.64.1205251321020.13353@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:62929 "EHLO
+Received: from moutng.kundenserver.de ([212.227.126.187]:56277 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751639Ab2EYPQF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 May 2012 11:16:05 -0400
+	with ESMTP id S1752896Ab2EYPQJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 May 2012 11:16:09 -0400
 In-Reply-To: <Pine.LNX.4.64.1205251321020.13353@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
 
-A simple extension of mmc slot functions add support for CD GPIO polling
-for cases, where the GPIO cannot produce interrupts or this is for some
-reason not desired.
+This prepares for the addition of further slot functions.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/core/slot-gpio.c  |   45 +++++++++++++++++++++++++++++++---------
- include/linux/mmc/slot-gpio.h |    2 +
- 2 files changed, 37 insertions(+), 10 deletions(-)
+ drivers/mmc/core/host.c      |    2 +
+ drivers/mmc/core/slot-gpio.c |   49 +++++++++++++++++++++++++++++++----------
+ include/linux/mmc/host.h     |    3 ++
+ 3 files changed, 42 insertions(+), 12 deletions(-)
 
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index b8c5290..74cf29a5 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -32,6 +32,7 @@
+ static void mmc_host_classdev_release(struct device *dev)
+ {
+ 	struct mmc_host *host = cls_dev_to_mmc_host(dev);
++	mutex_destroy(&host->slot.lock);
+ 	kfree(host);
+ }
+ 
+@@ -327,6 +328,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 
+ 	mmc_host_clk_init(host);
+ 
++	mutex_init(&host->slot.lock);
+ 	host->slot.cd_irq = -EINVAL;
+ 
+ 	spin_lock_init(&host->lock);
 diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 468e5a0..d70b790 100644
+index d70b790..f14c8a1 100644
 --- a/drivers/mmc/core/slot-gpio.c
 +++ b/drivers/mmc/core/slot-gpio.c
-@@ -29,6 +29,18 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
+@@ -29,6 +29,33 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
  	return IRQ_HANDLED;
  }
  
-+int mmc_gpio_get_cd(struct mmc_host *host)
++static int mmc_gpio_alloc(struct mmc_host *host)
 +{
-+	struct mmc_gpio *ctx = host->slot.handler_priv;
++	size_t len = strlen(dev_name(host->parent)) + 4;
++	struct mmc_gpio *ctx;
 +
-+	if (!ctx || !gpio_is_valid(ctx->cd_gpio))
-+		return -ENOSYS;
++	mutex_lock(&host->slot.lock);
 +
-+	return !gpio_get_value_cansleep(ctx->cd_gpio) ^
-+		!(host->caps2 & MMC_CAP2_INVERTED_CD);
++	ctx = host->slot.handler_priv;
++	if (!ctx) {
++		/*
++		 * devm_kzalloc() can be called after device_initialize(), even
++		 * before device_add(), i.e., between mmc_alloc_host() and
++		 * mmc_add_host()
++		 */
++		ctx = devm_kzalloc(&host->class_dev, sizeof(*ctx) + len,
++				   GFP_KERNEL);
++		if (ctx) {
++			snprintf(ctx->cd_label, len, "%s cd", dev_name(host->parent));
++			host->slot.handler_priv = ctx;
++		}
++	}
++
++	mutex_unlock(&host->slot.lock);
++
++	return ctx ? 0 : -ENOMEM;
 +}
-+EXPORT_SYMBOL(mmc_gpio_get_cd);
 +
+ int mmc_gpio_get_cd(struct mmc_host *host)
+ {
+ 	struct mmc_gpio *ctx = host->slot.handler_priv;
+@@ -43,20 +70,24 @@ EXPORT_SYMBOL(mmc_gpio_get_cd);
+ 
  int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
  {
- 	size_t len = strlen(dev_name(host->parent)) + 4;
-@@ -36,9 +48,6 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
+-	size_t len = strlen(dev_name(host->parent)) + 4;
+ 	struct mmc_gpio *ctx;
  	int irq = gpio_to_irq(gpio);
  	int ret;
  
--	if (irq < 0)
--		return irq;
--
- 	ctx = kmalloc(sizeof(*ctx) + len, GFP_KERNEL);
- 	if (!ctx)
- 		return -ENOMEM;
-@@ -49,20 +58,32 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
+-	ctx = kmalloc(sizeof(*ctx) + len, GFP_KERNEL);
+-	if (!ctx)
+-		return -ENOMEM;
++	ret = mmc_gpio_alloc(host);
++	if (ret < 0)
++		return ret;
+ 
+-	snprintf(ctx->cd_label, len, "%s cd", dev_name(host->parent));
++	ctx = host->slot.handler_priv;
+ 
+ 	ret = gpio_request_one(gpio, GPIOF_DIR_IN, ctx->cd_label);
  	if (ret < 0)
- 		goto egpioreq;
+-		goto egpioreq;
++		/*
++		 * don't bother freeing gpio. It might still get used by other
++		 * slot functions, in any case it will be freed, when the device
++		 * is destroyed.
++		 */
++		return ret;
  
--	ret = request_threaded_irq(irq, NULL, mmc_gpio_cd_irqt,
-+	/*
-+	 * Even if gpio_to_irq() returns a valid IRQ number, the platform might
-+	 * still prefer to poll, e.g., because that IRQ number is already used
-+	 * by another unit and cannot be shared.
-+	 */
-+	if (irq >= 0 && host->caps & MMC_CAP_NEEDS_POLL)
-+		irq = -EINVAL;
-+
-+	if (irq >= 0) {
-+		ret = request_threaded_irq(irq, NULL, mmc_gpio_cd_irqt,
- 			IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT,
- 			ctx->cd_label, host);
--	if (ret < 0)
--		goto eirqreq;
-+		if (ret < 0)
-+			irq = ret;
-+	}
- 
--	ctx->cd_gpio = gpio;
- 	host->slot.cd_irq = irq;
-+
-+	if (irq < 0)
-+		host->caps |= MMC_CAP_NEEDS_POLL;
-+
-+	ctx->cd_gpio = gpio;
+ 	/*
+ 	 * Even if gpio_to_irq() returns a valid IRQ number, the platform might
+@@ -83,10 +114,6 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
  	host->slot.handler_priv = ctx;
  
  	return 0;
+-
+-egpioreq:
+-	kfree(ctx);
+-	return ret;
+ }
+ EXPORT_SYMBOL(mmc_gpio_request_cd);
  
--eirqreq:
--	gpio_free(gpio);
- egpioreq:
- 	kfree(ctx);
- 	return ret;
-@@ -76,8 +97,12 @@ void mmc_gpio_free_cd(struct mmc_host *host)
- 	if (!ctx)
- 		return;
- 
--	free_irq(host->slot.cd_irq, host);
-+	if (host->slot.cd_irq >= 0) {
-+		free_irq(host->slot.cd_irq, host);
-+		host->slot.cd_irq = -EINVAL;
-+	}
+@@ -102,7 +129,5 @@ void mmc_gpio_free_cd(struct mmc_host *host)
+ 		host->slot.cd_irq = -EINVAL;
+ 	}
  	gpio_free(ctx->cd_gpio);
-+	host->slot.handler_priv = NULL;
- 	kfree(ctx);
+-	host->slot.handler_priv = NULL;
+-	kfree(ctx);
  }
  EXPORT_SYMBOL(mmc_gpio_free_cd);
-diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
-index edfaa32..1a977d7 100644
---- a/include/linux/mmc/slot-gpio.h
-+++ b/include/linux/mmc/slot-gpio.h
-@@ -12,6 +12,8 @@
- #define MMC_SLOT_GPIO_H
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 1b3a917..3f3c8c9 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -11,6 +11,7 @@
+ #define LINUX_MMC_HOST_H
  
- struct mmc_host;
-+
-+int mmc_gpio_get_cd(struct mmc_host *host);
- int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio);
- void mmc_gpio_free_cd(struct mmc_host *host);
+ #include <linux/leds.h>
++#include <linux/mutex.h>
+ #include <linux/sched.h>
+ #include <linux/device.h>
+ #include <linux/fault-inject.h>
+@@ -154,6 +155,7 @@ struct mmc_async_req {
+  * struct mmc_slot - MMC slot functions
+  *
+  * @cd_irq:		MMC/SD-card slot hotplug detection IRQ or -EINVAL
++ * @lock:		protect the @handler_priv pointer
+  * @handler_priv:	MMC/SD-card slot context
+  *
+  * Some MMC/SD host controllers implement slot-functions like card and
+@@ -163,6 +165,7 @@ struct mmc_async_req {
+  */
+ struct mmc_slot {
+ 	int cd_irq;
++	struct mutex lock;
+ 	void *handler_priv;
+ };
  
 -- 
 1.7.2.5
