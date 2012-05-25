@@ -1,135 +1,29 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 5/5 v3] mmc: sh_mmcif: add regulator support
-Date: Fri, 25 May 2012 17:45:25 +0200
-Message-ID: <1337960752-4944-11-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 0/3:1/6 v3] mmc: sh-mmcif: clock management updates
+Date: Fri, 25 May 2012 17:45:16 +0200
+Message-ID: <1337960752-4944-2-git-send-email-g.liakhovetski@gmx.de>
 References: <Pine.LNX.4.64.1205251727260.13353@axis700.grange>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <Pine.LNX.4.64.1205251727260.13353@axis700.grange>
 Sender: linux-sh-owner@vger.kernel.org
 To: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add regulator support to the sh_mmcif driver, but also preserve the current
-power-callback.
+This is a respin of
+http://thread.gmane.org/gmane.linux.ports.sh.devel/14448
+with no functional changes, since there have been to comments to v1. The 
+only change is, that the patch-series
+http://thread.gmane.org/gmane.linux.ports.sh.devel/14425
+has been dropped for now, on which v1 of this series has been based. So, 
+v1 wouldn't apply to current upstream trees.
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Thanks
+Guennadi
 ---
-
-v3: don't (yet) give preference to using the regulator over the .set_pwr() 
-platform callback, call them both if both are available. Thanks to Mark 
-and Magnus.
-
- drivers/mmc/host/sh_mmcif.c |   41 ++++++++++++++++++++++++++++++++++-------
- 1 files changed, 34 insertions(+), 7 deletions(-)
-
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 3834b21..f952978 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -207,6 +207,8 @@ enum mmcif_wait_for {
- 	MMCIF_WAIT_FOR_STOP,
- };
- 
-+struct regulator;
-+
- struct sh_mmcif_host {
- 	struct mmc_host *mmc;
- 	struct mmc_request *mrq;
-@@ -231,6 +233,8 @@ struct sh_mmcif_host {
- 	bool power;
- 	bool card_present;
- 
-+	struct regulator	*vdd;
-+
- 	/* DMA support */
- 	struct dma_chan		*chan_rx;
- 	struct dma_chan		*chan_tx;
-@@ -929,10 +933,21 @@ static int sh_mmcif_clk_update(struct sh_mmcif_host *host)
- 	return ret;
- }
- 
-+static void sh_mmcif_set_power(struct sh_mmcif_host *host, struct mmc_ios *ios)
-+{
-+	struct sh_mmcif_plat_data *pd = host->pd->dev.platform_data;
-+
-+	if (pd->set_pwr)
-+		pd->set_pwr(host->pd, ios->power_mode != MMC_POWER_OFF);
-+	if (host->vdd)
-+		/* Errors ignored... */
-+		mmc_regulator_set_ocr(host->mmc, host->vdd,
-+				      ios->power_mode ? ios->vdd : 0);
-+}
-+
- static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct sh_mmcif_host *host = mmc_priv(mmc);
--	struct sh_mmcif_plat_data *p = host->pd->dev.platform_data;
- 	unsigned long flags;
- 
- 	spin_lock_irqsave(&host->lock, flags);
-@@ -950,6 +965,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			sh_mmcif_request_dma(host, host->pd->dev.platform_data);
- 			host->card_present = true;
- 		}
-+		sh_mmcif_set_power(host, ios);
- 	} else if (ios->power_mode == MMC_POWER_OFF || !ios->clock) {
- 		/* clock stop */
- 		sh_mmcif_clock_control(host, 0);
-@@ -963,8 +979,8 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			pm_runtime_put(&host->pd->dev);
- 			clk_disable(host->hclk);
- 			host->power = false;
--			if (p->set_pwr && ios->power_mode == MMC_POWER_OFF)
--				p->set_pwr(host->pd, 0);
-+			if (ios->power_mode == MMC_POWER_OFF)
-+				sh_mmcif_set_power(host, ios);
- 		}
- 		host->state = STATE_IDLE;
- 		return;
-@@ -972,8 +988,6 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 	if (ios->clock) {
- 		if (!host->power) {
--			if (p->set_pwr)
--				p->set_pwr(host->pd, ios->power_mode);
- 			sh_mmcif_clk_update(host);
- 			pm_runtime_get_sync(&host->pd->dev);
- 			host->power = true;
-@@ -1257,6 +1271,19 @@ static void mmcif_timeout_work(struct work_struct *work)
- 	mmc_request_done(host->mmc, mrq);
- }
- 
-+static void sh_mmcif_init_ocr(struct sh_mmcif_host *host)
-+{
-+	struct sh_mmcif_plat_data *pd = host->pd->dev.platform_data;
-+	struct mmc_host *mmc = host->mmc;
-+
-+	host->vdd = mmc_regulator_get_vmmc(mmc);
-+
-+	if (!mmc->ocr_avail)
-+		mmc->ocr_avail = pd->ocr;
-+	else if (pd->ocr)
-+		dev_warn(mmc_dev(mmc), "Platform OCR mask is ignored\n");
-+}
-+
- static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- {
- 	int ret = 0, irq[2];
-@@ -1304,8 +1331,8 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 	spin_lock_init(&host->lock);
- 
- 	mmc->ops = &sh_mmcif_ops;
--	if (pd->ocr)
--		mmc->ocr_avail = pd->ocr;
-+	sh_mmcif_init_ocr(host);
-+
- 	mmc->caps = MMC_CAP_MMC_HIGHSPEED;
- 	if (pd->caps)
- 		mmc->caps |= pd->caps;
--- 
-1.7.2.5
-
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
 --
 To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 the body of a message to majordomo@vger.kernel.org
