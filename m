@@ -1,20 +1,20 @@
 From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH 3/3] mfd: Enable Debounce logic for SD hotplug detection
-Date: Fri, 25 May 2012 13:52:40 +0530
-Message-ID: <CANfBPZ9NysNJHeSSo+jHdOESo5M9DsyCBuTNspc5wTctTGZabw@mail.gmail.com>
-References: <1337890467-32573-1-git-send-email-vishp@ti.com> <1337890467-32573-4-git-send-email-vishp@ti.com>
+Subject: Re: [PATCH 1/3] mmc: omap_hsmmc: Errata i705: SD hot unplug
+Date: Fri, 25 May 2012 14:07:03 +0530
+Message-ID: <CANfBPZ98Yf+CMoA0ApzHihQqrRNEDKKxPx4U0bMsV=M3XeX4hQ@mail.gmail.com>
+References: <1337890467-32573-1-git-send-email-vishp@ti.com> <1337890467-32573-2-git-send-email-vishp@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:34147 "EHLO
-	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756118Ab2EYIXD convert rfc822-to-8bit
+Received: from na3sys009aog131.obsmtp.com ([74.125.149.247]:48383 "EHLO
+	na3sys009aog131.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932201Ab2EYIh0 convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 25 May 2012 04:23:03 -0400
-Received: by bkwj4 with SMTP id j4so744618bkw.22
-        for <linux-mmc@vger.kernel.org>; Fri, 25 May 2012 01:23:00 -0700 (PDT)
-In-Reply-To: <1337890467-32573-4-git-send-email-vishp@ti.com>
+	Fri, 25 May 2012 04:37:26 -0400
+Received: by bkwj4 with SMTP id j4so761233bkw.22
+        for <linux-mmc@vger.kernel.org>; Fri, 25 May 2012 01:37:24 -0700 (PDT)
+In-Reply-To: <1337890467-32573-2-git-send-email-vishp@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Viswanath Puttagunta <vishp@ti.com>
@@ -22,72 +22,58 @@ Cc: Linux-mmc <linux-mmc@vger.kernel.org>, T Krishnamoorthy Balaji <balajitk@ti.
 
 On Fri, May 25, 2012 at 1:44 AM, Viswanath Puttagunta <vishp@ti.com> wr=
 ote:
+> Turn off IO & PBIAS cells and then SD card VMMC as soon
+> as we get disconnect interrupt. Failure to do so might
+> cause current spikes (latch-up issue) which can potentially
+> burn the IO cells.
 >
-> Enable debounce logic in TWL6030 so that erroneous
-> disconnect/connect interrupts will be suppressed.
->
-> This will fix issue where SD card is either plugged
-> or unplugged very slowly.
->
-> Change-Id: Icc3afa4c66b3bc7920f27ff9c9a3f32e67d5833c
 > Signed-off-by: Viswanath Puttagunta <vishp@ti.com>
-
-Would be better without the Change-Id.
-Also, this needs to be posted to linux-omap and linux-mfd, apart from l=
-inux-mmc.
-
 > ---
-> =A0drivers/mfd/twl6030-irq.c | =A0 =A08 ++++++++
-> =A0include/linux/i2c/twl.h =A0 | =A0 =A05 +++++
-> =A02 files changed, 13 insertions(+), 0 deletions(-)
+> =A0drivers/mmc/host/omap_hsmmc.c | =A0 13 ++++++++++---
+> =A01 files changed, 10 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/mfd/twl6030-irq.c b/drivers/mfd/twl6030-irq.c
-> index b76902f..05bb6e1 100644
-> --- a/drivers/mfd/twl6030-irq.c
-> +++ b/drivers/mfd/twl6030-irq.c
-> @@ -317,6 +317,14 @@ int twl6030_mmc_card_detect_config(void)
->
-> =A0ret);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return ret;
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hs=
+mmc.c
+> index 56d4499..61d830f 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1177,10 +1177,17 @@ static irqreturn_t omap_hsmmc_detect(int irq,=
+ void *dev_id)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0carddetect =3D -ENOSYS;
 > =A0 =A0 =A0 =A0}
-> + =A0 =A0 =A0 ret =3D twl_i2c_write_u8(TWL6030_MODULE_ID0,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (MMC_MI=
-NS_DEB_MASK | MMC_MEXT_DEB_MASK),
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 TWL6030=
-_MMCDEBOUNCING);
-> + =A0 =A0 =A0 if (ret < 0) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("twl6030: Failed to write MMC_ME=
-XT_DEB_MASK %d\n",
+>
+> - =A0 =A0 =A0 if (carddetect)
+> + =A0 =A0 =A0 if (carddetect) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_detect_change(host->mmc, (HZ * 200=
+) / 1000);
+> - =A0 =A0 =A0 else
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_detect_change(host->mmc, (HZ * 50) =
+/ 1000);
+> + =A0 =A0 =A0 } else {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((MMC_POWER_OFF !=3D host->power_mod=
+e) &&
+
+Should be if((host->power_mode !=3D MMC_POWER_OFF)
+
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (mmc_sl=
+ot(host).set_power !=3D NULL)) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_slot(host).set_powe=
+r(host->dev, host->slot_id,
 > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+ =A0 =A0 =A0 =A0 =A0 =A0 0, 0);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->power_mode =3D MM=
+C_POWER_OFF;
+
+This is just changing the default behaviour, irrespective of whether
+the errata is applicable.
+What is the effect of this change for other boards / platforms ?
+
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_detect_change(host->mmc, 0);
 > + =A0 =A0 =A0 }
->
-> =A0 =A0 =A0 =A0return twl6030_irq_base + MMCDETECT_INTR_OFFSET;
+> =A0 =A0 =A0 =A0return IRQ_HANDLED;
 > =A0}
-> diff --git a/include/linux/i2c/twl.h b/include/linux/i2c/twl.h
-> index 1f90de0..672dcfb 100644
-> --- a/include/linux/i2c/twl.h
-> +++ b/include/linux/i2c/twl.h
-> @@ -147,6 +147,11 @@
-> =A0#define SW_FC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(=
-0x1 << 2)
-> =A0#define STS_MMC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00x1
 >
-> +#define TWL6030_MMCDEBOUNCING =A0 =A0 =A0 =A0 =A00xED
-> +#define MMC_DEB_BYPASS =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (0x1 << 7)
-> +#define MMC_MINS_DEB_MASK =A0 =A0 =A0 =A0 =A0 =A0 =A0(0xF << 3)
-> +#define MMC_MEXT_DEB_MASK =A0 =A0 =A0 =A0 =A0 =A0 =A0(0x7 << 0)
-
-Some description about what these values mean (timing etc) would be hel=
-pful.
-
-> +
-> =A0#define TWL6030_CFG_INPUT_PUPD3 =A0 =A0 =A0 =A00xF2
-> =A0#define MMC_PU =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (0x=
-1 << 3)
-> =A0#define MMC_PD =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (0x=
-1 << 2)
 > --
 > 1.7.4.1
 >
