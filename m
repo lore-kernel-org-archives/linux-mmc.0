@@ -1,95 +1,66 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 0/0/6 v3] mmc core, tmio / sdhi and sh-mmcif updates
-Date: Fri, 25 May 2012 18:01:18 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1205251759190.13353@axis700.grange>
-References: <Pine.LNX.4.64.1205251045490.13353@axis700.grange>
- <Pine.LNX.4.64.1205251727260.13353@axis700.grange>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-15
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1205251727260.13353@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, linux-sh@vger.kernel.org
+From: Chris Boot <bootc@bootc.net>
+Subject: [PATCH] mmc: avoid multiblock reads for the last sector in SPI mode
+Date: Fri, 25 May 2012 18:00:03 +0100
+Message-ID: <1337965203-4211-1-git-send-email-bootc@bootc.net>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kamaji.grokhost.net ([87.117.218.43]:52217 "EHLO
+	kamaji.grokhost.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751265Ab2EYRAT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 May 2012 13:00:19 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Chris Boot <bootc@bootc.net>
 
-On Fri, 25 May 2012, Guennadi Liakhovetski wrote:
+I was trying to get a Micro-SD card working over SPI today when I ran
+into an issue which made the card unusable. The card was probed
+correctly, and the msdos partition table was read, but then some command
+was sent that made the card go into a bad state and stay that way. Only
+a re-probe would get the card unstuck and only until just after the
+partition tables were read.
 
-> On Fri, 25 May 2012, Guennadi Liakhovetski wrote:
->=20
-> > Hi all
-> >=20
-> > as follow ups to this email I'll send 6 patch series, which are upd=
-ates to=20
-> > the following 2 patch series:
->=20
-> Ok, sure, this couldn't go without a glitch - I forgot to CC linux-sh=
-=2E So,=20
-> what I will do, I will push all these patches to linux-sh only - with=
-out=20
-> other recepients. Would be nice, if reviewers could at least cc both =
-MLs -=20
-> linux-sh and linux-mmc, but even if someone replies to only one of th=
-em,=20
-> I'll try to make sure to reply to all relevant recepients with a full=
-=20
-> quote of the original review.
+After some digging I ran into a post [1] on the spi-devel-general mailing
+list where someone had exactly the same issue as me, but back in 2007.
+There was a patch attached which, after some cleanup, fixes the issue
+completely for me.
 
-Yes, I know, thank you for your kind words :-D It's Friday, 17:59, +30=B0=
-=20
-Celsius (or more) :-)
+I have tried this with 3 different Micro-SD cards, all of which suffered
+from the problem before the patch and none of which fail after the
+patch.
 
-SORRY
+The error shows up as lots of:
+mmcblk0: error -38 sending status comand, retrying
+mmcblk0: error -38 sending status comand, retrying
+mmcblk0: error -38 sending status comand, aborting
 
-Guennadi
+   1 : http://permalink.gmane.org/gmane.linux.kernel.spi.devel/516
 
-> Sorry for the inconvenience.
->=20
-> Thanks
-> Guennadi
->=20
-> >=20
-> > http://thread.gmane.org/gmane.linux.ports.sh.devel/14448
-> > http://thread.gmane.org/gmane.linux.ports.sh.devel/14673
-> >=20
-> > I have further split the latter of the above to make reviewing easi=
-er.=20
-> > These series address different topics, but since they touch the sam=
-e=20
-> > files, it would be easier to also commit them in the same order. So=
-me=20
-> > patches also touch files under arch/arm and arch/sh, they will requ=
-ire=20
-> > respective acks. The patches have been developed, based on "next" o=
-f 21=20
-> > May.
-> >=20
-> > Thanks
-> > Guennadi
-> > ---
-> > Guennadi Liakhovetski, Ph.D.
-> > Freelance Open-Source Software Developer
-> > http://www.open-technology.de/
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc=
-" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >=20
->=20
-> ---
-> Guennadi Liakhovetski, Ph.D.
-> Freelance Open-Source Software Developer
-> http://www.open-technology.de/
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sh" i=
-n
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
+Signed-off-by: Chris Boot <bootc@bootc.net>
 ---
-Guennadi Liakhovetski, Ph.D.
-=46reelance Open-Source Software Developer
-http://www.open-technology.de/
+ drivers/mmc/card/block.c |   10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index dabec55..8c5ff06 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1139,6 +1139,16 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ 
+ 	if (brq->data.blocks > 1) {
+ 		/*
++		 * Some SD cards in SPI mode return a CRC error or even lock up
++		 * completely when trying to read the last block using a
++		 * multiblock read command.
++		 */
++		if (mmc_host_is_spi(card->host) && (rq_data_dir(req) == READ) &&
++				(blk_rq_pos(req) + blk_rq_sectors(req) ==
++					get_capacity(md->disk)))
++			brq->data.blocks--;
++
++		/*
+ 		 * After a read error, we redo the request one sector
+ 		 * at a time in order to accurately determine which
+ 		 * sectors can be read successfully.
+-- 
+1.7.10
+
