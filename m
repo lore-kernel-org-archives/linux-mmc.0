@@ -1,115 +1,204 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 1/2 v3] mmc: sdhi: add OF support, make platform data optional
-Date: Fri, 25 May 2012 17:45:47 +0200
-Message-ID: <1337960752-4944-33-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 01/10 v3] mmc: extend and rename cd-gpio helpers to handle more slot GPIO functions
+Date: Fri, 25 May 2012 17:45:36 +0200
+Message-ID: <1337960752-4944-22-git-send-email-g.liakhovetski@gmx.de>
 References: <Pine.LNX.4.64.1205251727260.13353@axis700.grange>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <Pine.LNX.4.64.1205251727260.13353@axis700.grange>
 Sender: linux-sh-owner@vger.kernel.org
 To: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Olof Johansson <olof@lixom.net>
+Cc: Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, "S, Venkatraman" <svenkatr@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add primitive support for OF to the SDHI TMIO glue, which also makes it
-necessary to be able to run without platform data.
+GPIOs can be used in MMC/SD-card slots not only for hotplug detection, but
+also to implement the write-protection pin. Rename cd-gpio helpers to
+slot-gpio to make addition of further slot GPIO functions possible.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c |   26 +++++++++++++++++---------
- 1 files changed, 17 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 1e7c5c4..3defd77 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -21,6 +21,7 @@
- #include <linux/kernel.h>
- #include <linux/clk.h>
- #include <linux/slab.h>
-+#include <linux/mod_devicetable.h>
- #include <linux/module.h>
- #include <linux/platform_device.h>
+v3: use the IRQF_ONESHOT flag, thanks to Venkatraman for the comment.
+
+ drivers/mmc/core/Makefile                    |    2 +-
+ drivers/mmc/core/{cd-gpio.c => slot-gpio.c}  |   48 +++++++++++++-------------
+ drivers/mmc/host/tmio_mmc_pio.c              |    6 ++--
+ include/linux/mmc/{cd-gpio.h => slot-gpio.h} |    8 ++--
+ 4 files changed, 32 insertions(+), 32 deletions(-)
+ rename drivers/mmc/core/{cd-gpio.c => slot-gpio.c} (53%)
+ rename include/linux/mmc/{cd-gpio.h => slot-gpio.h} (68%)
+
+diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
+index dca4428..38ed210 100644
+--- a/drivers/mmc/core/Makefile
++++ b/drivers/mmc/core/Makefile
+@@ -7,6 +7,6 @@ mmc_core-y			:= core.o bus.o host.o \
+ 				   mmc.o mmc_ops.o sd.o sd_ops.o \
+ 				   sdio.o sdio_ops.o sdio_bus.o \
+ 				   sdio_cis.o sdio_io.o sdio_irq.o \
+-				   quirks.o cd-gpio.o
++				   quirks.o slot-gpio.o
+ 
+ mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
+diff --git a/drivers/mmc/core/cd-gpio.c b/drivers/mmc/core/slot-gpio.c
+similarity index 53%
+rename from drivers/mmc/core/cd-gpio.c
+rename to drivers/mmc/core/slot-gpio.c
+index f13e38d..9796710 100644
+--- a/drivers/mmc/core/cd-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -12,72 +12,72 @@
+ #include <linux/gpio.h>
+ #include <linux/interrupt.h>
+ #include <linux/jiffies.h>
+-#include <linux/mmc/cd-gpio.h>
  #include <linux/mmc/host.h>
-@@ -133,9 +134,8 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	}
++#include <linux/mmc/slot-gpio.h>
+ #include <linux/module.h>
+ #include <linux/slab.h>
  
- 	mmc_data = &priv->mmc_data;
--	p->pdata = mmc_data;
- 
--	if (p->init) {
-+	if (p && p->init) {
- 		ret = p->init(pdev, &sdhi_ops);
- 		if (ret)
- 			goto einit;
-@@ -149,10 +149,6 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		goto eclkget;
- 	}
- 
--	if (p->set_pwr)
--		mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
--	if (p->get_cd)
--		mmc_data->get_cd = sh_mobile_sdhi_get_cd;
- 	mmc_data->clk_enable = sh_mobile_sdhi_clk_enable;
- 	mmc_data->clk_disable = sh_mobile_sdhi_clk_disable;
- 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
-@@ -164,6 +160,10 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		mmc_data->capabilities |= p->tmio_caps;
- 		mmc_data->capabilities2 |= p->tmio_caps2;
- 		mmc_data->cd_gpio = p->cd_gpio;
-+		if (p->set_pwr)
-+			mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
-+		if (p->get_cd)
-+			mmc_data->get_cd = sh_mobile_sdhi_get_cd;
- 
- 		if (p->dma_slave_tx > 0 && p->dma_slave_rx > 0) {
- 			priv->param_tx.slave_id = p->dma_slave_tx;
-@@ -269,7 +269,7 @@ eirq_card_detect:
- eprobe:
- 	clk_put(priv->clk);
- eclkget:
--	if (p->cleanup)
-+	if (p && p->cleanup)
- 		p->cleanup(pdev);
- einit:
- 	kfree(priv);
-@@ -284,7 +284,8 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
- 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
- 	int i = 0, irq;
- 
--	p->pdata = NULL;
-+	if (p)
-+		p->pdata = NULL;
- 
- 	tmio_mmc_host_remove(host);
- 
-@@ -297,7 +298,7 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
- 
- 	clk_put(priv->clk);
- 
--	if (p->cleanup)
-+	if (p && p->cleanup)
- 		p->cleanup(pdev);
- 
- 	kfree(priv);
-@@ -312,11 +313,18 @@ static const struct dev_pm_ops tmio_mmc_dev_pm_ops = {
- 	.runtime_resume = tmio_mmc_host_runtime_resume,
+-struct mmc_cd_gpio {
+-	unsigned int gpio;
+-	char label[0];
++struct mmc_gpio {
++	unsigned int cd_gpio;
++	char cd_label[0];
  };
  
-+static const struct of_device_id sh_mobile_sdhi_of_match[] = {
-+	{ .compatible = "renesas,shmobile-sdhi" },
-+	{ }
-+};
-+MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
-+
- static struct platform_driver sh_mobile_sdhi_driver = {
- 	.driver		= {
- 		.name	= "sh_mobile_sdhi",
- 		.owner	= THIS_MODULE,
- 		.pm	= &tmio_mmc_dev_pm_ops,
-+		.of_match_table = sh_mobile_sdhi_of_match,
- 	},
- 	.probe		= sh_mobile_sdhi_probe,
- 	.remove		= __devexit_p(sh_mobile_sdhi_remove),
+-static irqreturn_t mmc_cd_gpio_irqt(int irq, void *dev_id)
++static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
+ {
+ 	/* Schedule a card detection after a debounce timeout */
+ 	mmc_detect_change(dev_id, msecs_to_jiffies(100));
+ 	return IRQ_HANDLED;
+ }
+ 
+-int mmc_cd_gpio_request(struct mmc_host *host, unsigned int gpio)
++int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
+ {
+ 	size_t len = strlen(dev_name(host->parent)) + 4;
+-	struct mmc_cd_gpio *cd;
++	struct mmc_gpio *ctx;
+ 	int irq = gpio_to_irq(gpio);
+ 	int ret;
+ 
+ 	if (irq < 0)
+ 		return irq;
+ 
+-	cd = kmalloc(sizeof(*cd) + len, GFP_KERNEL);
+-	if (!cd)
++	ctx = kmalloc(sizeof(*ctx) + len, GFP_KERNEL);
++	if (!ctx)
+ 		return -ENOMEM;
+ 
+-	snprintf(cd->label, len, "%s cd", dev_name(host->parent));
++	snprintf(ctx->cd_label, len, "%s cd", dev_name(host->parent));
+ 
+-	ret = gpio_request_one(gpio, GPIOF_DIR_IN, cd->label);
++	ret = gpio_request_one(gpio, GPIOF_DIR_IN, ctx->cd_label);
+ 	if (ret < 0)
+ 		goto egpioreq;
+ 
+-	ret = request_threaded_irq(irq, NULL, mmc_cd_gpio_irqt,
+-				   IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
+-				   cd->label, host);
++	ret = request_threaded_irq(irq, NULL, mmc_gpio_cd_irqt,
++			IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT,
++			ctx->cd_label, host);
+ 	if (ret < 0)
+ 		goto eirqreq;
+ 
+-	cd->gpio = gpio;
++	ctx->cd_gpio = gpio;
+ 	host->hotplug.irq = irq;
+-	host->hotplug.handler_priv = cd;
++	host->hotplug.handler_priv = ctx;
+ 
+ 	return 0;
+ 
+ eirqreq:
+ 	gpio_free(gpio);
+ egpioreq:
+-	kfree(cd);
++	kfree(ctx);
+ 	return ret;
+ }
+-EXPORT_SYMBOL(mmc_cd_gpio_request);
++EXPORT_SYMBOL(mmc_gpio_request_cd);
+ 
+-void mmc_cd_gpio_free(struct mmc_host *host)
++void mmc_gpio_free_cd(struct mmc_host *host)
+ {
+-	struct mmc_cd_gpio *cd = host->hotplug.handler_priv;
++	struct mmc_gpio *ctx = host->hotplug.handler_priv;
+ 
+-	if (!cd)
++	if (!ctx)
+ 		return;
+ 
+ 	free_irq(host->hotplug.irq, host);
+-	gpio_free(cd->gpio);
+-	kfree(cd);
++	gpio_free(ctx->cd_gpio);
++	kfree(ctx);
+ }
+-EXPORT_SYMBOL(mmc_cd_gpio_free);
++EXPORT_SYMBOL(mmc_gpio_free_cd);
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index b731859..5261934 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -34,9 +34,9 @@
+ #include <linux/io.h>
+ #include <linux/irq.h>
+ #include <linux/mfd/tmio.h>
+-#include <linux/mmc/cd-gpio.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
++#include <linux/mmc/slot-gpio.h>
+ #include <linux/mmc/tmio.h>
+ #include <linux/module.h>
+ #include <linux/pagemap.h>
+@@ -1025,7 +1025,7 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
+ 
+ 	if (pdata->flags & TMIO_MMC_USE_GPIO_CD) {
+-		ret = mmc_cd_gpio_request(mmc, pdata->cd_gpio);
++		ret = mmc_gpio_request_cd(mmc, pdata->cd_gpio);
+ 		if (ret < 0) {
+ 			tmio_mmc_host_remove(_host);
+ 			return ret;
+@@ -1057,7 +1057,7 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
+ 		 * This means we can miss a card-eject, but this is anyway
+ 		 * possible, because of delayed processing of hotplug events.
+ 		 */
+-		mmc_cd_gpio_free(mmc);
++		mmc_gpio_free_cd(mmc);
+ 
+ 	if (!host->native_hotplug)
+ 		pm_runtime_get_sync(&pdev->dev);
+diff --git a/include/linux/mmc/cd-gpio.h b/include/linux/mmc/slot-gpio.h
+similarity index 68%
+rename from include/linux/mmc/cd-gpio.h
+rename to include/linux/mmc/slot-gpio.h
+index cefaba0..edfaa32 100644
+--- a/include/linux/mmc/cd-gpio.h
++++ b/include/linux/mmc/slot-gpio.h
+@@ -8,11 +8,11 @@
+  * published by the Free Software Foundation.
+  */
+ 
+-#ifndef MMC_CD_GPIO_H
+-#define MMC_CD_GPIO_H
++#ifndef MMC_SLOT_GPIO_H
++#define MMC_SLOT_GPIO_H
+ 
+ struct mmc_host;
+-int mmc_cd_gpio_request(struct mmc_host *host, unsigned int gpio);
+-void mmc_cd_gpio_free(struct mmc_host *host);
++int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio);
++void mmc_gpio_free_cd(struct mmc_host *host);
+ 
+ #endif
 -- 
 1.7.2.5
 
