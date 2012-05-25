@@ -1,7 +1,7 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 3/3 v3] mmc: sh_mmcif: re-read the clock frequency every time the clock is turned on
-Date: Fri, 25 May 2012 17:45:19 +0200
-Message-ID: <1337960752-4944-5-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 6/8 v3] mmc: sdhi: do not install dummy callbacks
+Date: Fri, 25 May 2012 17:45:32 +0200
+Message-ID: <1337960752-4944-18-git-send-email-g.liakhovetski@gmx.de>
 References: <Pine.LNX.4.64.1205251727260.13353@axis700.grange>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <Pine.LNX.4.64.1205251727260.13353@axis700.grange>
@@ -10,75 +10,56 @@ To: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-With aggressive clock gating the clock can be disabled during interface
-inactivity. During this time its frequency can be changed by another its
-user. Therefore when the interface is activated again and the clock is
-re-enabled, its frequency has to be re-read.
+Currently the SDHI glue for the TMIO MMC driver installs dummy .get_cd() and
+.set_pwr() callbacks even if the platform didn't supply them. This is not
+necessary, since the TMIO MMC driver itself checks for NULL callbacks. This
+is also dubious if the platform provides a regulator for SD-card power
+switching. It is better to only install those callbacks, if they are really
+provided by the platform.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
+ drivers/mmc/host/sh_mobile_sdhi.c |   14 ++++++--------
+ 1 files changed, 6 insertions(+), 8 deletions(-)
 
-v2: also move clk_enable() inside sh_mmcif_clk_update(), check its return 
-value in .probe()
-
- drivers/mmc/host/sh_mmcif.c |   23 ++++++++++++++++++-----
- 1 files changed, 18 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index e5e8198..bdf42d5 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -916,6 +916,19 @@ static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	sh_mmcif_start_cmd(host, mrq);
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index d8b167c..42f07fa 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -64,18 +64,14 @@ static void sh_mobile_sdhi_set_pwr(struct platform_device *pdev, int state)
+ {
+ 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
+ 
+-	if (p && p->set_pwr)
+-		p->set_pwr(pdev, state);
++	p->set_pwr(pdev, state);
  }
  
-+static int sh_mmcif_clk_update(struct sh_mmcif_host *host)
-+{
-+	int ret = clk_enable(host->hclk);
-+
-+	if (!ret) {
-+		host->clk = clk_get_rate(host->hclk);
-+		host->mmc->f_max = host->clk / 2;
-+		host->mmc->f_min = host->clk / 512;
-+	}
-+
-+	return ret;
-+}
-+
- static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ static int sh_mobile_sdhi_get_cd(struct platform_device *pdev)
  {
- 	struct sh_mmcif_host *host = mmc_priv(mmc);
-@@ -961,7 +974,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		if (!host->power) {
- 			if (p->set_pwr)
- 				p->set_pwr(host->pd, ios->power_mode);
--			clk_enable(host->hclk);
-+			sh_mmcif_clk_update(host);
- 			pm_runtime_get_sync(&host->pd->dev);
- 			host->power = true;
- 			sh_mmcif_sync_reset(host);
-@@ -1314,10 +1327,9 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 		dev_err(&pdev->dev, "cannot get clock \"%s\": %d\n", clk_name, ret);
+ 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
+ 
+-	if (p && p->get_cd)
+-		return p->get_cd(pdev);
+-	else
+-		return -ENOSYS;
++	return p->get_cd(pdev);
+ }
+ 
+ static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
+@@ -153,8 +149,10 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
  		goto eclkget;
  	}
--	clk_enable(host->hclk);
--	host->clk = clk_get_rate(host->hclk);
--	mmc->f_max = host->clk / 2;
--	mmc->f_min = host->clk / 512;
-+	ret = sh_mmcif_clk_update(host);
-+	if (ret < 0)
-+		goto eclkupdate;
  
- 	ret = pm_runtime_resume(&pdev->dev);
- 	if (ret < 0)
-@@ -1359,6 +1371,7 @@ ereqirq0:
- 	pm_runtime_suspend(&pdev->dev);
- eresume:
- 	clk_disable(host->hclk);
-+eclkupdate:
- 	clk_put(host->hclk);
- eclkget:
- 	pm_runtime_disable(&pdev->dev);
+-	mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
+-	mmc_data->get_cd = sh_mobile_sdhi_get_cd;
++	if (p->set_pwr)
++		mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
++	if (p->get_cd)
++		mmc_data->get_cd = sh_mobile_sdhi_get_cd;
+ 	mmc_data->clk_enable = sh_mobile_sdhi_clk_enable;
+ 	mmc_data->clk_disable = sh_mobile_sdhi_clk_disable;
+ 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
 -- 
 1.7.2.5
 
