@@ -1,7 +1,7 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 5/8 v3] mmc: tmio: add regulator support
-Date: Fri, 25 May 2012 17:45:31 +0200
-Message-ID: <1337960752-4944-17-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 5/5 v3] mmc: sh_mmcif: add regulator support
+Date: Fri, 25 May 2012 17:45:25 +0200
+Message-ID: <1337960752-4944-11-git-send-email-g.liakhovetski@gmx.de>
 References: <Pine.LNX.4.64.1205251727260.13353@axis700.grange>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <Pine.LNX.4.64.1205251727260.13353@axis700.grange>
@@ -10,111 +10,123 @@ To: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Currently the TMIO MMC driver derives the OCR mask from the platform data
-and uses a platform callback to turn card power on and off. This patch adds
-regulator support to the driver.
+Add regulator support to the sh_mmcif driver, but also preserve the current
+power-callback.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
 
-v3: similar to MMCIF don't prefer regulator over platform callback, call 
-both. Thanks to all, who commented.
+v3: don't (yet) give preference to using the regulator over the .set_pwr() 
+platform callback, call them both if both are available. Thanks to Mark 
+and Magnus.
 
- drivers/mmc/host/tmio_mmc.h     |    3 +++
- drivers/mmc/host/tmio_mmc_pio.c |   35 +++++++++++++++++++++++++++--------
- 2 files changed, 30 insertions(+), 8 deletions(-)
+ drivers/mmc/host/sh_mmcif.c |   41 ++++++++++++++++++++++++++++++++++-------
+ 1 files changed, 34 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index d857f5c..3a8dcfb 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -39,6 +39,7 @@
- #define TMIO_MASK_IRQ     (TMIO_MASK_READOP | TMIO_MASK_WRITEOP | TMIO_MASK_CMD)
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 3834b21..f952978 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -207,6 +207,8 @@ enum mmcif_wait_for {
+ 	MMCIF_WAIT_FOR_STOP,
+ };
  
- struct tmio_mmc_data;
 +struct regulator;
- 
- struct tmio_mmc_host {
- 	void __iomem *ctl;
-@@ -55,6 +56,8 @@ struct tmio_mmc_host {
- 	void (*set_pwr)(struct platform_device *host, int state);
- 	void (*set_clk_div)(struct platform_device *host, int state);
++
+ struct sh_mmcif_host {
+ 	struct mmc_host *mmc;
+ 	struct mmc_request *mrq;
+@@ -231,6 +233,8 @@ struct sh_mmcif_host {
+ 	bool power;
+ 	bool card_present;
  
 +	struct regulator	*vdd;
 +
- 	/* pio related stuff */
- 	struct scatterlist      *sg_ptr;
- 	struct scatterlist      *sg_orig;
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 579f990..baa0959 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -767,6 +767,16 @@ static int tmio_mmc_clk_update(struct mmc_host *mmc)
+ 	/* DMA support */
+ 	struct dma_chan		*chan_rx;
+ 	struct dma_chan		*chan_tx;
+@@ -929,10 +933,21 @@ static int sh_mmcif_clk_update(struct sh_mmcif_host *host)
  	return ret;
  }
  
-+static void tmio_mmc_set_power(struct tmio_mmc_host *host, struct mmc_ios *ios)
++static void sh_mmcif_set_power(struct sh_mmcif_host *host, struct mmc_ios *ios)
 +{
-+	if (host->set_pwr)
-+		host->set_pwr(host->pdev, ios->power_mode != MMC_POWER_OFF);
++	struct sh_mmcif_plat_data *pd = host->pd->dev.platform_data;
++
++	if (pd->set_pwr)
++		pd->set_pwr(host->pd, ios->power_mode != MMC_POWER_OFF);
 +	if (host->vdd)
 +		/* Errors ignored... */
 +		mmc_regulator_set_ocr(host->mmc, host->vdd,
 +				      ios->power_mode ? ios->vdd : 0);
 +}
 +
- /* Set MMC clock / power.
-  * Note: This controller uses a simple divider scheme therefore it cannot
-  * run a MMC card at full speed (20MHz). The max clock is 24MHz on SD, but as
-@@ -819,13 +829,12 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		}
- 		tmio_mmc_set_clock(host, ios->clock);
- 		/* power up SD bus */
--		if (host->set_pwr)
--			host->set_pwr(host->pdev, 1);
-+		tmio_mmc_set_power(host, ios);
- 		/* start bus clock */
- 		tmio_mmc_clk_start(host);
- 	} else if (ios->power_mode != MMC_POWER_UP) {
--		if (host->set_pwr && ios->power_mode == MMC_POWER_OFF)
--			host->set_pwr(host->pdev, 0);
-+		if (ios->power_mode == MMC_POWER_OFF)
-+			tmio_mmc_set_power(host, ios);
- 		tmio_mmc_clk_stop(host);
- 		if (host->power) {
- 			struct tmio_mmc_data *pdata = host->pdata;
-@@ -885,6 +894,19 @@ static const struct mmc_host_ops tmio_mmc_ops = {
- 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
- };
+ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct sh_mmcif_host *host = mmc_priv(mmc);
+-	struct sh_mmcif_plat_data *p = host->pd->dev.platform_data;
+ 	unsigned long flags;
  
-+static void tmio_mmc_init_ocr(struct tmio_mmc_host *host)
+ 	spin_lock_irqsave(&host->lock, flags);
+@@ -950,6 +965,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			sh_mmcif_request_dma(host, host->pd->dev.platform_data);
+ 			host->card_present = true;
+ 		}
++		sh_mmcif_set_power(host, ios);
+ 	} else if (ios->power_mode == MMC_POWER_OFF || !ios->clock) {
+ 		/* clock stop */
+ 		sh_mmcif_clock_control(host, 0);
+@@ -963,8 +979,8 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			pm_runtime_put(&host->pd->dev);
+ 			clk_disable(host->hclk);
+ 			host->power = false;
+-			if (p->set_pwr && ios->power_mode == MMC_POWER_OFF)
+-				p->set_pwr(host->pd, 0);
++			if (ios->power_mode == MMC_POWER_OFF)
++				sh_mmcif_set_power(host, ios);
+ 		}
+ 		host->state = STATE_IDLE;
+ 		return;
+@@ -972,8 +988,6 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	if (ios->clock) {
+ 		if (!host->power) {
+-			if (p->set_pwr)
+-				p->set_pwr(host->pd, ios->power_mode);
+ 			sh_mmcif_clk_update(host);
+ 			pm_runtime_get_sync(&host->pd->dev);
+ 			host->power = true;
+@@ -1257,6 +1271,19 @@ static void mmcif_timeout_work(struct work_struct *work)
+ 	mmc_request_done(host->mmc, mrq);
+ }
+ 
++static void sh_mmcif_init_ocr(struct sh_mmcif_host *host)
 +{
-+	struct tmio_mmc_data *pdata = host->pdata;
++	struct sh_mmcif_plat_data *pd = host->pd->dev.platform_data;
 +	struct mmc_host *mmc = host->mmc;
 +
 +	host->vdd = mmc_regulator_get_vmmc(mmc);
 +
 +	if (!mmc->ocr_avail)
-+		mmc->ocr_avail = pdata->ocr_mask ? : MMC_VDD_32_33 | MMC_VDD_33_34;
-+	else if (pdata->ocr_mask)
++		mmc->ocr_avail = pd->ocr;
++	else if (pd->ocr)
 +		dev_warn(mmc_dev(mmc), "Platform OCR mask is ignored\n");
 +}
 +
- int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 				  struct platform_device *pdev,
- 				  struct tmio_mmc_data *pdata)
-@@ -930,10 +952,7 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 		mmc->max_segs;
- 	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
- 	mmc->max_seg_size = mmc->max_req_size;
--	if (pdata->ocr_mask)
--		mmc->ocr_avail = pdata->ocr_mask;
--	else
--		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-+	tmio_mmc_init_ocr(_host);
+ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ {
+ 	int ret = 0, irq[2];
+@@ -1304,8 +1331,8 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ 	spin_lock_init(&host->lock);
  
- 	_host->native_hotplug = !(pdata->flags & TMIO_MMC_USE_GPIO_CD ||
- 				  mmc->caps & MMC_CAP_NEEDS_POLL ||
+ 	mmc->ops = &sh_mmcif_ops;
+-	if (pd->ocr)
+-		mmc->ocr_avail = pd->ocr;
++	sh_mmcif_init_ocr(host);
++
+ 	mmc->caps = MMC_CAP_MMC_HIGHSPEED;
+ 	if (pd->caps)
+ 		mmc->caps |= pd->caps;
 -- 
 1.7.2.5
 
