@@ -1,7 +1,7 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 6/8 v3] mmc: sdhi: do not install dummy callbacks
-Date: Fri, 25 May 2012 17:45:32 +0200
-Message-ID: <1337960752-4944-18-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 02/10 v3] mmc: use a more generic name for slot function types and fields
+Date: Fri, 25 May 2012 17:45:37 +0200
+Message-ID: <1337960752-4944-23-git-send-email-g.liakhovetski@gmx.de>
 References: <Pine.LNX.4.64.1205251727260.13353@axis700.grange>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <Pine.LNX.4.64.1205251727260.13353@axis700.grange>
@@ -10,56 +10,94 @@ To: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Currently the SDHI glue for the TMIO MMC driver installs dummy .get_cd() and
-.set_pwr() callbacks even if the platform didn't supply them. This is not
-necessary, since the TMIO MMC driver itself checks for NULL callbacks. This
-is also dubious if the platform provides a regulator for SD-card power
-switching. It is better to only install those callbacks, if they are really
-provided by the platform.
+struct mmc_host::hotplug is becoming a generic hook for slot functions.
+Rename it accordingly.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c |   14 ++++++--------
- 1 files changed, 6 insertions(+), 8 deletions(-)
+ drivers/mmc/core/host.c      |    2 ++
+ drivers/mmc/core/slot-gpio.c |    8 ++++----
+ include/linux/mmc/host.h     |   17 ++++++++++++++---
+ 3 files changed, 20 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index d8b167c..42f07fa 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -64,18 +64,14 @@ static void sh_mobile_sdhi_set_pwr(struct platform_device *pdev, int state)
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 91c84c7..b8c5290 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -327,6 +327,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 
+ 	mmc_host_clk_init(host);
+ 
++	host->slot.cd_irq = -EINVAL;
++
+ 	spin_lock_init(&host->lock);
+ 	init_waitqueue_head(&host->wq);
+ 	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
+diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+index 9796710..468e5a0 100644
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -56,8 +56,8 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
+ 		goto eirqreq;
+ 
+ 	ctx->cd_gpio = gpio;
+-	host->hotplug.irq = irq;
+-	host->hotplug.handler_priv = ctx;
++	host->slot.cd_irq = irq;
++	host->slot.handler_priv = ctx;
+ 
+ 	return 0;
+ 
+@@ -71,12 +71,12 @@ EXPORT_SYMBOL(mmc_gpio_request_cd);
+ 
+ void mmc_gpio_free_cd(struct mmc_host *host)
  {
- 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
+-	struct mmc_gpio *ctx = host->hotplug.handler_priv;
++	struct mmc_gpio *ctx = host->slot.handler_priv;
  
--	if (p && p->set_pwr)
--		p->set_pwr(pdev, state);
-+	p->set_pwr(pdev, state);
+ 	if (!ctx)
+ 		return;
+ 
+-	free_irq(host->hotplug.irq, host);
++	free_irq(host->slot.cd_irq, host);
+ 	gpio_free(ctx->cd_gpio);
+ 	kfree(ctx);
  }
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 368b317..725413d 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -150,8 +150,19 @@ struct mmc_async_req {
+ 	int (*err_check) (struct mmc_card *, struct mmc_async_req *);
+ };
  
- static int sh_mobile_sdhi_get_cd(struct platform_device *pdev)
- {
- 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
+-struct mmc_hotplug {
+-	unsigned int irq;
++/**
++ * struct mmc_slot - MMC slot functions
++ *
++ * @cd_irq:		MMC/SD-card slot hotplug detection IRQ or -EINVAL
++ * @handler_priv:	MMC/SD-card slot context
++ *
++ * Some MMC/SD host controllers implement slot-functions like card and
++ * write-protect detection natively. However, a large number of controllers
++ * leave these functions to the CPU. This struct provides a hook to attach
++ * such slot-function drivers.
++ */
++struct mmc_slot {
++	int cd_irq;
+ 	void *handler_priv;
+ };
  
--	if (p && p->get_cd)
--		return p->get_cd(pdev);
--	else
--		return -ENOSYS;
-+	return p->get_cd(pdev);
- }
+@@ -290,7 +301,7 @@ struct mmc_host {
  
- static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
-@@ -153,8 +149,10 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		goto eclkget;
- 	}
+ 	struct delayed_work	detect;
+ 	int			detect_change;	/* card detect flag */
+-	struct mmc_hotplug	hotplug;
++	struct mmc_slot		slot;
  
--	mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
--	mmc_data->get_cd = sh_mobile_sdhi_get_cd;
-+	if (p->set_pwr)
-+		mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
-+	if (p->get_cd)
-+		mmc_data->get_cd = sh_mobile_sdhi_get_cd;
- 	mmc_data->clk_enable = sh_mobile_sdhi_clk_enable;
- 	mmc_data->clk_disable = sh_mobile_sdhi_clk_disable;
- 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
+ 	const struct mmc_bus_ops *bus_ops;	/* current bus driver */
+ 	unsigned int		bus_refs;	/* reference counter */
 -- 
 1.7.2.5
 
