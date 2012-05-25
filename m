@@ -1,72 +1,127 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 6/8 v3] mmc: sdhi: do not install dummy callbacks
-Date: Fri, 25 May 2012 17:15:25 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1205251314090.13353@axis700.grange>
+Subject: [PATCH 5/8 v3] mmc: tmio: add regulator support
+Date: Fri, 25 May 2012 17:15:21 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1205251308490.13353@axis700.grange>
 References: <Pine.LNX.4.64.1205251045490.13353@axis700.grange>
  <Pine.LNX.4.64.1205251300300.13353@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:58749 "EHLO
+Received: from moutng.kundenserver.de ([212.227.126.171]:57926 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756121Ab2EYPP2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 May 2012 11:15:28 -0400
+	with ESMTP id S1756121Ab2EYPPe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 May 2012 11:15:34 -0400
 In-Reply-To: <Pine.LNX.4.64.1205251300300.13353@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>
 
-Currently the SDHI glue for the TMIO MMC driver installs dummy .get_cd() and
-.set_pwr() callbacks even if the platform didn't supply them. This is not
-necessary, since the TMIO MMC driver itself checks for NULL callbacks. This
-is also dubious if the platform provides a regulator for SD-card power
-switching. It is better to only install those callbacks, if they are really
-provided by the platform.
+Currently the TMIO MMC driver derives the OCR mask from the platform data
+and uses a platform callback to turn card power on and off. This patch adds
+regulator support to the driver.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c |   14 ++++++--------
- 1 files changed, 6 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index d8b167c..42f07fa 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -64,18 +64,14 @@ static void sh_mobile_sdhi_set_pwr(struct platform_device *pdev, int state)
- {
- 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
+v3: similar to MMCIF don't prefer regulator over platform callback, call 
+both. Thanks to all, who commented.
+
+ drivers/mmc/host/tmio_mmc.h     |    3 +++
+ drivers/mmc/host/tmio_mmc_pio.c |   35 +++++++++++++++++++++++++++--------
+ 2 files changed, 30 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index d857f5c..3a8dcfb 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -39,6 +39,7 @@
+ #define TMIO_MASK_IRQ     (TMIO_MASK_READOP | TMIO_MASK_WRITEOP | TMIO_MASK_CMD)
  
--	if (p && p->set_pwr)
--		p->set_pwr(pdev, state);
-+	p->set_pwr(pdev, state);
+ struct tmio_mmc_data;
++struct regulator;
+ 
+ struct tmio_mmc_host {
+ 	void __iomem *ctl;
+@@ -55,6 +56,8 @@ struct tmio_mmc_host {
+ 	void (*set_pwr)(struct platform_device *host, int state);
+ 	void (*set_clk_div)(struct platform_device *host, int state);
+ 
++	struct regulator	*vdd;
++
+ 	/* pio related stuff */
+ 	struct scatterlist      *sg_ptr;
+ 	struct scatterlist      *sg_orig;
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 579f990..baa0959 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -767,6 +767,16 @@ static int tmio_mmc_clk_update(struct mmc_host *mmc)
+ 	return ret;
  }
  
- static int sh_mobile_sdhi_get_cd(struct platform_device *pdev)
- {
- 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
++static void tmio_mmc_set_power(struct tmio_mmc_host *host, struct mmc_ios *ios)
++{
++	if (host->set_pwr)
++		host->set_pwr(host->pdev, ios->power_mode != MMC_POWER_OFF);
++	if (host->vdd)
++		/* Errors ignored... */
++		mmc_regulator_set_ocr(host->mmc, host->vdd,
++				      ios->power_mode ? ios->vdd : 0);
++}
++
+ /* Set MMC clock / power.
+  * Note: This controller uses a simple divider scheme therefore it cannot
+  * run a MMC card at full speed (20MHz). The max clock is 24MHz on SD, but as
+@@ -819,13 +829,12 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		}
+ 		tmio_mmc_set_clock(host, ios->clock);
+ 		/* power up SD bus */
+-		if (host->set_pwr)
+-			host->set_pwr(host->pdev, 1);
++		tmio_mmc_set_power(host, ios);
+ 		/* start bus clock */
+ 		tmio_mmc_clk_start(host);
+ 	} else if (ios->power_mode != MMC_POWER_UP) {
+-		if (host->set_pwr && ios->power_mode == MMC_POWER_OFF)
+-			host->set_pwr(host->pdev, 0);
++		if (ios->power_mode == MMC_POWER_OFF)
++			tmio_mmc_set_power(host, ios);
+ 		tmio_mmc_clk_stop(host);
+ 		if (host->power) {
+ 			struct tmio_mmc_data *pdata = host->pdata;
+@@ -885,6 +894,19 @@ static const struct mmc_host_ops tmio_mmc_ops = {
+ 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
+ };
  
--	if (p && p->get_cd)
--		return p->get_cd(pdev);
++static void tmio_mmc_init_ocr(struct tmio_mmc_host *host)
++{
++	struct tmio_mmc_data *pdata = host->pdata;
++	struct mmc_host *mmc = host->mmc;
++
++	host->vdd = mmc_regulator_get_vmmc(mmc);
++
++	if (!mmc->ocr_avail)
++		mmc->ocr_avail = pdata->ocr_mask ? : MMC_VDD_32_33 | MMC_VDD_33_34;
++	else if (pdata->ocr_mask)
++		dev_warn(mmc_dev(mmc), "Platform OCR mask is ignored\n");
++}
++
+ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 				  struct platform_device *pdev,
+ 				  struct tmio_mmc_data *pdata)
+@@ -930,10 +952,7 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 		mmc->max_segs;
+ 	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+ 	mmc->max_seg_size = mmc->max_req_size;
+-	if (pdata->ocr_mask)
+-		mmc->ocr_avail = pdata->ocr_mask;
 -	else
--		return -ENOSYS;
-+	return p->get_cd(pdev);
- }
+-		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
++	tmio_mmc_init_ocr(_host);
  
- static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
-@@ -153,8 +149,10 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		goto eclkget;
- 	}
- 
--	mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
--	mmc_data->get_cd = sh_mobile_sdhi_get_cd;
-+	if (p->set_pwr)
-+		mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
-+	if (p->get_cd)
-+		mmc_data->get_cd = sh_mobile_sdhi_get_cd;
- 	mmc_data->clk_enable = sh_mobile_sdhi_clk_enable;
- 	mmc_data->clk_disable = sh_mobile_sdhi_clk_disable;
- 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
+ 	_host->native_hotplug = !(pdata->flags & TMIO_MMC_USE_GPIO_CD ||
+ 				  mmc->caps & MMC_CAP_NEEDS_POLL ||
 -- 
 1.7.2.5
 
