@@ -1,43 +1,36 @@
-From: Chris Boot <bootc@bootc.net>
-Subject: [PATCH] mmc: Fix EINVAL if an mmc_spi controller has no IRQ
-Date: Fri, 25 May 2012 18:00:30 +0100
-Message-ID: <1337965230-4589-1-git-send-email-bootc@bootc.net>
+From: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
+Subject: Re: [PATCH] mmc: core: Fix build warning with !CONFIG_SUSPEND
+Date: Sat, 26 May 2012 22:52:40 +0530
+Message-ID: <CAMQu2gwkcVXAp1iThQRn3Ff-AH33aM9CayJO6TQ109kdX=a0_w@mail.gmail.com>
+References: <1337414319-27719-1-git-send-email-santosh.shilimkar@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kamaji.grokhost.net ([87.117.218.43]:52230 "EHLO
-	kamaji.grokhost.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756330Ab2EYRAe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 May 2012 13:00:34 -0400
+Received: from na3sys009aog127.obsmtp.com ([74.125.149.107]:42473 "EHLO
+	na3sys009aog127.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752967Ab2EZRXD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 26 May 2012 13:23:03 -0400
+Received: by qcsu28 with SMTP id u28so1204787qcs.36
+        for <linux-mmc@vger.kernel.org>; Sat, 26 May 2012 10:23:01 -0700 (PDT)
+In-Reply-To: <1337414319-27719-1-git-send-email-santosh.shilimkar@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Chris Boot <bootc@bootc.net>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-kernel@vger.kernel.org, Santosh Shilimkar <santosh.shilimkar@ti.com>, linux-mmc@vger.kernel.org
 
-irq_of_parse_and_map() returns EINVAL if there is no interrupt
-information available in device tree, not NO_IRQ. mmc_spi_get_pdata()
-doesn't account for error returns, and ends up trying to
-request_threaded_irq() with -22 as the IRQ value.
+Chris,
 
-This patch checks for negative returns from irq_of_parse_and_map() as
-well as NO_IRQ, and uses polled mode in those cases.
-
-Signed-off-by: Chris Boot <bootc@bootc.net>
----
- drivers/mmc/host/of_mmc_spi.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-index 1534b58..d3e882a 100644
---- a/drivers/mmc/host/of_mmc_spi.c
-+++ b/drivers/mmc/host/of_mmc_spi.c
-@@ -146,7 +146,7 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
- 		oms->pdata.get_ro = of_mmc_spi_get_ro;
- 
- 	oms->detect_irq = irq_of_parse_and_map(np, 0);
--	if (oms->detect_irq != NO_IRQ) {
-+	if (oms->detect_irq != NO_IRQ && oms->detect_irq > 0) {
- 		oms->pdata.init = of_mmc_spi_init;
- 		oms->pdata.exit = of_mmc_spi_exit;
- 	} else {
--- 
-1.7.10
-
+On Sat, May 19, 2012 at 1:28 PM, Santosh Shilimkar
+<santosh.shilimkar@ti.com> wrote:
+> With !CONFIG_SUSPEND, mmc core layer throws below build warnings.
+>
+> drivers/mmc/core/bus.c:125: warning: 'mmc_bus_suspend' defined but not used
+> drivers/mmc/core/bus.c:136: warning: 'mmc_bus_resume' defined but not used
+> drivers/mmc/core/sdio_bus.c:197: warning: 'pm_no_operation' defined but not used
+>
+> Fix is by wrapping suspend hooks under CONFIG_SUSPEND
+>
+> Signed-off-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
+> Cc: Chris Ball <cjb@laptop.org>
+> ---
+Ping
