@@ -1,27 +1,21 @@
-From: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
+From: Chris Ball <cjb@laptop.org>
 Subject: Re: [PATCH] mmc: core: Fix build warning with !CONFIG_SUSPEND
-Date: Sat, 26 May 2012 22:52:40 +0530
-Message-ID: <CAMQu2gwkcVXAp1iThQRn3Ff-AH33aM9CayJO6TQ109kdX=a0_w@mail.gmail.com>
+Date: Sat, 26 May 2012 22:52:56 -0400
+Message-ID: <87d35q1gjb.fsf@laptop.org>
 References: <1337414319-27719-1-git-send-email-santosh.shilimkar@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog127.obsmtp.com ([74.125.149.107]:42473 "EHLO
-	na3sys009aog127.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752967Ab2EZRXD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 26 May 2012 13:23:03 -0400
-Received: by qcsu28 with SMTP id u28so1204787qcs.36
-        for <linux-mmc@vger.kernel.org>; Sat, 26 May 2012 10:23:01 -0700 (PDT)
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1337414319-27719-1-git-send-email-santosh.shilimkar@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+	(Santosh Shilimkar's message of "Sat, 19 May 2012 13:28:39 +0530")
+Sender: linux-kernel-owner@vger.kernel.org
+To: Santosh Shilimkar <santosh.shilimkar@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-kernel@vger.kernel.org, Santosh Shilimkar <santosh.shilimkar@ti.com>, linux-mmc@vger.kernel.org
 
-Chris,
+Hi,
 
-On Sat, May 19, 2012 at 1:28 PM, Santosh Shilimkar
-<santosh.shilimkar@ti.com> wrote:
+On Sat, May 19 2012, Santosh Shilimkar wrote:
 > With !CONFIG_SUSPEND, mmc core layer throws below build warnings.
 >
 > drivers/mmc/core/bus.c:125: warning: 'mmc_bus_suspend' defined but not used
@@ -33,4 +27,50 @@ On Sat, May 19, 2012 at 1:28 PM, Santosh Shilimkar
 > Signed-off-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
 > Cc: Chris Ball <cjb@laptop.org>
 > ---
-Ping
+>  drivers/mmc/core/bus.c      |    2 ++
+>  drivers/mmc/core/sdio_bus.c |    2 +-
+>  2 files changed, 3 insertions(+), 1 deletions(-)
+>
+> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> index c60cee9..ca8925d 100644
+> --- a/drivers/mmc/core/bus.c
+> +++ b/drivers/mmc/core/bus.c
+> @@ -122,6 +122,7 @@ static int mmc_bus_remove(struct device *dev)
+>  	return 0;
+>  }
+>  
+> +#ifdef CONFIG_SUSPEND
+>  static int mmc_bus_suspend(struct device *dev)
+>  {
+>  	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+> @@ -143,6 +144,7 @@ static int mmc_bus_resume(struct device *dev)
+>  		ret = drv->resume(card);
+>  	return ret;
+>  }
+> +#endif
+>  
+>  #ifdef CONFIG_PM_RUNTIME
+>  
+> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+> index 236842e..87d1b7e 100644
+> --- a/drivers/mmc/core/sdio_bus.c
+> +++ b/drivers/mmc/core/sdio_bus.c
+> @@ -192,7 +192,7 @@ static int sdio_bus_remove(struct device *dev)
+>  	return ret;
+>  }
+>  
+> -#ifdef CONFIG_PM
+> +#ifdef CONFIG_SUSPEND
+>  
+>  static int pm_no_operation(struct device *dev)
+>  {
+
+This patch doesn't apply against mmc-next, and I think this has already
+been fixed upstream -- please could you retest against Linus HEAD?
+
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
