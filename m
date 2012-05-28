@@ -1,15 +1,15 @@
 From: philipspatches@gmail.com
-Subject: [PATCH 3/3] mmc: do not attempt UHS 1.8v support if board does not support it
-Date: Sun, 27 May 2012 18:36:10 -0700
-Message-ID: <1338168970-2052-1-git-send-email-prakity@marvell.com>
+Subject: [PATCH 2/3] mmc: sdhci only set 200ma support for 1.8v if 200ma is available
+Date: Sun, 27 May 2012 18:36:33 -0700
+Message-ID: <1338168993-2087-1-git-send-email-prakity@marvell.com>
 References: <prakity@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-pb0-f46.google.com ([209.85.160.46]:36271 "EHLO
 	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752546Ab2E1BgZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 27 May 2012 21:36:25 -0400
+	with ESMTP id S1752546Ab2E1Bgi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 27 May 2012 21:36:38 -0400
 Received: by mail-pb0-f46.google.com with SMTP id rp8so3998039pbb.19
-        for <linux-mmc@vger.kernel.org>; Sun, 27 May 2012 18:36:25 -0700 (PDT)
+        for <linux-mmc@vger.kernel.org>; Sun, 27 May 2012 18:36:38 -0700 (PDT)
 In-Reply-To: <prakity@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -18,125 +18,93 @@ Cc: Philip Rakity <prakity@marvell.com>
 
 From: Philip Rakity <prakity@marvell.com>
 
-We have h/w that does not support 1.8v signaling even though the
-controller does support this.  If we enable 1.8v support UHS
-cards are recognised but recovery to 3.3v is not possible
-depending on the SD card.
+max_current_caps can return 0 if not available from the sd controller.
+if no regulator is present or the regulator specifies a current
+less then 200ma we will set the 200ma caps bit by default.
 
-Ensure that when we do not support 1.8v UHS mode cards can
-work (in non UHS mode).
+do not do this.
 
 Signed-off-by: Philip Rakity <prakity@marvell.com>
+Reviewed-by: Aaron Lu <aaron_lu@amd.com>
 ---
- drivers/mmc/host/sdhci.c  |   71 +++++++++++++++++++++++---------------------
- include/linux/mmc/sdhci.h |    3 ++
- 2 files changed, 40 insertions(+), 34 deletions(-)
+ drivers/mmc/core/sd.c    |   23 ++++++++++++-----------
+ drivers/mmc/host/sdhci.c |    2 +-
+ include/linux/mmc/card.h |    1 +
+ 3 files changed, 14 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 8d8dff0..f9b37c4 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2782,27 +2782,45 @@ int sdhci_add_host(struct sdhci_host *host)
- 	    mmc_card_is_removable(mmc))
- 		mmc->caps |= MMC_CAP_NEEDS_POLL;
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index c272c68..c6fc3e8 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -553,13 +553,13 @@ static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
  
--	/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
--	if (caps[1] & (SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
--		       SDHCI_SUPPORT_DDR50))
--		mmc->caps |= MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
-+	if (!(host->quirks2 & SDHCI_QUIRK2_HOST_NO_UHS_1_8V_SUPPORT)) {
-+		/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
-+		if (caps[1] & (SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
-+			       SDHCI_SUPPORT_DDR50))
-+			mmc->caps |= MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
-+
-+		/* SDR104 supports also implies SDR50 support */
-+		if (caps[1] & SDHCI_SUPPORT_SDR104)
-+			mmc->caps |= MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_SDR50;
-+		else if (caps[1] & SDHCI_SUPPORT_SDR50)
-+			mmc->caps |= MMC_CAP_UHS_SDR50;
-+
-+		if (caps[1] & SDHCI_SUPPORT_DDR50)
-+			mmc->caps |= MMC_CAP_UHS_DDR50;
-+
-+		/* Does the host need tuning for SDR50? */
-+		if (caps[1] & SDHCI_USE_SDR50_TUNING)
-+			host->flags |= SDHCI_SDR50_NEEDS_TUNING;
-+
-+		/* Does the host need tuning for HS200? */
-+		if (mmc->caps2 & MMC_CAP2_HS200)
-+			host->flags |= SDHCI_HS200_NEEDS_TUNING;
-+
-+		/* Initial value for re-tuning timer count */
-+		host->tuning_count =
-+			(caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
-+				SDHCI_RETUNING_TIMER_COUNT_SHIFT;
+ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
+ {
+-	int current_limit = 0;
++	int current_limit = SD_SET_CURRENT_NO_CHANGE;
+ 	int err;
  
--	/* SDR104 supports also implies SDR50 support */
--	if (caps[1] & SDHCI_SUPPORT_SDR104)
--		mmc->caps |= MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_SDR50;
--	else if (caps[1] & SDHCI_SUPPORT_SDR50)
--		mmc->caps |= MMC_CAP_UHS_SDR50;
--
--	if (caps[1] & SDHCI_SUPPORT_DDR50)
--		mmc->caps |= MMC_CAP_UHS_DDR50;
--
--	/* Does the host need tuning for SDR50? */
--	if (caps[1] & SDHCI_USE_SDR50_TUNING)
--		host->flags |= SDHCI_SDR50_NEEDS_TUNING;
-+		/*
-+		 * In case Re-tuning Timer is not disabled, the actual value of
-+		 * re-tuning timer will be 2 ^ (n - 1).
-+		 */
-+		if (host->tuning_count)
-+			host->tuning_count = 1 << (host->tuning_count - 1);
- 
--	/* Does the host need tuning for HS200? */
--	if (mmc->caps2 & MMC_CAP2_HS200)
--		host->flags |= SDHCI_HS200_NEEDS_TUNING;
-+		/* Re-tuning mode supported by the Host Controller */
-+		host->tuning_mode = (caps[1] & SDHCI_RETUNING_MODE_MASK) >>
-+				     SDHCI_RETUNING_MODE_SHIFT;
+ 	/*
+ 	 * Current limit switch is only defined for SDR50, SDR104, and DDR50
+-	 * bus speed modes. For other bus speed modes, we set the default
+-	 * current limit of 200mA.
++	 * bus speed modes. For other bus speed modes, we do not change the
++	 * current limit.
+ 	 */
+ 	if ((card->sd_bus_speed == UHS_SDR50_BUS_SPEED) ||
+ 	    (card->sd_bus_speed == UHS_SDR104_BUS_SPEED) ||
+@@ -595,17 +595,18 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
+ 			if (card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_200)
+ 				current_limit = SD_SET_CURRENT_LIMIT_200;
+ 		}
+-	} else
+-		current_limit = SD_SET_CURRENT_LIMIT_200;
 +	}
  
- 	/* Driver Type(s) (A, C, D) supported by the host */
- 	if (caps[1] & SDHCI_DRIVER_TYPE_A)
-@@ -2821,21 +2839,6 @@ int sdhci_add_host(struct sdhci_host *host)
- 	else
- 		mmc->power_notify_type = MMC_HOST_PW_NOTIFY_NONE;
+-	err = mmc_sd_switch(card, 1, 3, current_limit, status);
+-	if (err)
+-		return err;
++	if (current_limit != SD_SET_CURRENT_NO_CHANGE) {
++		err = mmc_sd_switch(card, 1, 3, current_limit, status);
++		if (err)
++			return err;
  
--	/* Initial value for re-tuning timer count */
--	host->tuning_count = (caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
--			      SDHCI_RETUNING_TIMER_COUNT_SHIFT;
--
--	/*
--	 * In case Re-tuning Timer is not disabled, the actual value of
--	 * re-tuning timer will be 2 ^ (n - 1).
--	 */
--	if (host->tuning_count)
--		host->tuning_count = 1 << (host->tuning_count - 1);
--
--	/* Re-tuning mode supported by the Host Controller */
--	host->tuning_mode = (caps[1] & SDHCI_RETUNING_MODE_MASK) >>
--			     SDHCI_RETUNING_MODE_SHIFT;
--
- 	ocr_avail = 0;
+-	if (((status[15] >> 4) & 0x0F) != current_limit)
+-		pr_warning("%s: Problem setting current limit!\n",
+-			mmc_hostname(card->host));
++		if (((status[15] >> 4) & 0x0F) != current_limit)
++			pr_warning("%s: Problem setting current limit!\n",
++				mmc_hostname(card->host));
  
- 	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index e9051e1..2367939 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -92,6 +92,9 @@ struct sdhci_host {
++	}
+ 	return 0;
+ }
  
- #define SDHCI_QUIRK2_HOST_OFF_CARD_ON			(1<<0)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 22347d4..8d8dff0 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2914,7 +2914,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 			mmc->caps |= MMC_CAP_MAX_CURRENT_600;
+ 		else if (max_current_180 >= 400)
+ 			mmc->caps |= MMC_CAP_MAX_CURRENT_400;
+-		else
++		else if (max_current_180 >= 200)
+ 			mmc->caps |= MMC_CAP_MAX_CURRENT_200;
+ 	}
  
-+/* host or board design does support 1.8v signaling */
-+#define SDHCI_QUIRK2_HOST_NO_UHS_1_8V_SUPPORT		(1<<1)
-+
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 629b823..a999771 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -145,6 +145,7 @@ struct sd_switch_caps {
+ #define SD_SET_CURRENT_LIMIT_400	1
+ #define SD_SET_CURRENT_LIMIT_600	2
+ #define SD_SET_CURRENT_LIMIT_800	3
++#define SD_SET_CURRENT_NO_CHANGE	(-1)
  
+ #define SD_MAX_CURRENT_200	(1 << SD_SET_CURRENT_LIMIT_200)
+ #define SD_MAX_CURRENT_400	(1 << SD_SET_CURRENT_LIMIT_400)
 -- 
 1.7.0.4
 
