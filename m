@@ -1,148 +1,132 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v2 2/4] mmc: dw_mmc: fix the IDMAC sw reset
-Date: Mon, 28 May 2012 12:32:10 +0900
-Message-ID: <002801cd3c82$7755d020$66017060$%jun@samsung.com>
-References: <006901cd37cf$81750420$845f0c60$%jun@samsung.com>
- <CALzehA3XceVSePzU5vcTNbhv7Gwvu4CR=+pjndvfyCjpoLsajw@mail.gmail.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH 4/5 v3] mmc: add a function to get a regulator,
+ supplying card's Vdd
+Date: Sun, 27 May 2012 20:32:31 -0700
+Message-ID: <1925406B-D680-40BB-890A-78447EEB4583@marvell.com>
+References: <Pine.LNX.4.64.1205251045490.13353@axis700.grange>
+ <Pine.LNX.4.64.1205251208440.13353@axis700.grange>
+ <Pine.LNX.4.64.1205251230540.13353@axis700.grange>
+ <CAPDyKFrrxyk-JpLFge5+0xbYjJ=-24avWn8Optfg88-i006-Ng@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:39040 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752983Ab2E1DcN convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 27 May 2012 23:32:13 -0400
-Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M4P001UIR4Z64C0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 28 May 2012 12:32:11 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0M4P00H76R5MIR90@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 28 May 2012 12:32:10 +0900 (KST)
-In-reply-to: <CALzehA3XceVSePzU5vcTNbhv7Gwvu4CR=+pjndvfyCjpoLsajw@mail.gmail.com>
-Content-language: ko
+Received: from na3sys009aog130.obsmtp.com ([74.125.149.143]:60473 "EHLO
+	na3sys009aog130.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753308Ab2E1De6 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 27 May 2012 23:34:58 -0400
+In-Reply-To: <CAPDyKFrrxyk-JpLFge5+0xbYjJ=-24avWn8Optfg88-i006-Ng@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Dmitry Shmidt' <dimitrysh@android.com>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>
 
-Dmitry Shmidt <dimitrysh@android.com>
-> On Mon, May 21, 2012 at 9:01 PM, Seungwon Jeon <tgih.jun@samsung.com>=
- wrote:
-> > IDMAC may not be cleaned in driver probe if it has
-> > been already used in boot time. So IDMAC needs sw
-> > reset newly. And DMA interface reset precedes the
-> > internal DMAC reset. Additionally SDMMC_IDMAC_SWRESET
-> > is replaced with magic code.
-> >
-> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> > ---
-> > =A0drivers/mmc/host/dw_mmc.c | =A0 24 ++++++++++++------------
-> > =A01 files changed, 12 insertions(+), 12 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> > index b46faf0..98fe023 100644
-> > --- a/drivers/mmc/host/dw_mmc.c
-> > +++ b/drivers/mmc/host/dw_mmc.c
-> > @@ -418,6 +418,8 @@ static int dw_mci_idmac_init(struct dw_mci *hos=
-t)
-> > =A0 =A0 =A0 =A0p->des3 =3D host->sg_dma;
-> > =A0 =A0 =A0 =A0p->des0 =3D IDMAC_DES0_ER;
-> >
-> > + =A0 =A0 =A0 mci_writel(host, BMOD, SDMMC_IDMAC_SWRESET);
-> > +
-> > =A0 =A0 =A0 =A0/* Mask out interrupts - get Tx & Rx complete only *=
-/
-> > =A0 =A0 =A0 =A0mci_writel(host, IDINTEN, SDMMC_IDMAC_INT_NI | SDMMC=
-_IDMAC_INT_RI |
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 SDMMC_IDMAC_INT_TI);
-> > @@ -1724,7 +1726,8 @@ static void dw_mci_work_routine_card(struct w=
-ork_struct *work)
-> >
-> > =A0#ifdef CONFIG_MMC_DW_IDMAC
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ctrl=
- =3D mci_readl(host, BMOD);
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl =
-|=3D 0x01; /* Software reset of DMA */
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* So=
-ftware reset of DMA */
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl =
-|=3D SDMMC_IDMAC_SWRESET;
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mci_=
-writel(host, BMOD, ctrl);
-> > =A0#endif
-> >
-> > @@ -1949,10 +1952,6 @@ int dw_mci_probe(struct dw_mci *host)
-> > =A0 =A0 =A0 =A0spin_lock_init(&host->lock);
-> > =A0 =A0 =A0 =A0INIT_LIST_HEAD(&host->queue);
-> >
-> > -
-> > - =A0 =A0 =A0 host->dma_ops =3D host->pdata->dma_ops;
-> > - =A0 =A0 =A0 dw_mci_init_dma(host);
-> > -
-> > =A0 =A0 =A0 =A0/*
-> > =A0 =A0 =A0 =A0 * Get the host data width - this assumes that HCON =
-has been set with
-> > =A0 =A0 =A0 =A0 * the correct values.
-> > @@ -1980,10 +1979,11 @@ int dw_mci_probe(struct dw_mci *host)
-> > =A0 =A0 =A0 =A0}
-> >
-> > =A0 =A0 =A0 =A0/* Reset all blocks */
-> > - =A0 =A0 =A0 if (!mci_wait_reset(&host->dev, host)) {
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D -ENODEV;
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err_dmaunmap;
-> > - =A0 =A0 =A0 }
-> > + =A0 =A0 =A0 if (!mci_wait_reset(&host->dev, host))
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENODEV;
->=20
-> You would probably want something like this:
-> + =A0 =A0 =A0 if (!mci_wait_reset(&host->dev, host)) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D -ENODEV;
-> +               goto err_free_hclk;
-> +       }
-This is applicable to only our local branch.
 
->=20
-> > +
-> > + =A0 =A0 =A0 host->dma_ops =3D host->pdata->dma_ops;
-> > + =A0 =A0 =A0 dw_mci_init_dma(host);
-> >
-> > =A0 =A0 =A0 =A0/* Clear the interrupts for the host controller */
-> > =A0 =A0 =A0 =A0mci_writel(host, RINTSTS, 0xFFFFFFFF);
-> > @@ -2169,14 +2169,14 @@ int dw_mci_resume(struct dw_mci *host)
-> > =A0 =A0 =A0 =A0if (host->vmmc)
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0regulator_enable(host->vmmc);
-> >
-> > - =A0 =A0 =A0 if (host->dma_ops->init)
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->dma_ops->init(host);
-> > -
-> > =A0 =A0 =A0 =A0if (!mci_wait_reset(&host->dev, host)) {
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ret =3D -ENODEV;
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return ret;
-> > =A0 =A0 =A0 =A0}
-> >
-> > + =A0 =A0 =A0 if (host->dma_ops->init)
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->dma_ops->init(host);
-> > +
-> > =A0 =A0 =A0 =A0/* Restore the old value at FIFOTH register */
-> > =A0 =A0 =A0 =A0mci_writel(host, FIFOTH, host->fifoth_val);
-> >
-> > --
-> > 1.7.0.4
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc=
-" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
-l
+
+I have started looking at this area and I am rather confused.  It seems to me two "dedicated" regulators are required.
+One regulator controls VDD (vcc) and this is the regulator called vmmc.  This regulator MAY support the ability to switch voltages and MAY support the ability to be turned on and off.
+The other regulator supports signal voltage (vccq) for UHS and SDXC cards.  Currently this is not in sdhci.c (I have a patch for this in preparation).  Use of this regulator requires that the VDD regulator be capable of being set to 1.8 or 3.3v and be capable of being turned on/off.  on/off support is needed is the switch to 1.8v signaling fails for any reason.
+
+
+
+On May 27, 2012, at 8:20 PM, Ulf Hansson wrote:
+
+> Hi Guennadi,
+> 
+> On 25 May 2012 17:14, Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
+>> Add a function to get a regulator, supplying card's Vdd on a specific host.
+>> If such a regulator is found, the function checks, whether a valid OCR mask
+>> can be obtained from this regulator.
+>> 
+>> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+>> ---
+>> 
+>> v3: remove bogus attempts to ignore the dummy regulator, drop the check
+>> for whether the regulator can change status, do not assign
+>> MMC_CAP_POWER_OFF_CARD automatically. Thanks to Mark and Magnus for
+>> comments.
+>> 
+>>  drivers/mmc/core/core.c  |   17 +++++++++++++++++
+>>  include/linux/mmc/host.h |    6 ++++++
+>>  2 files changed, 23 insertions(+), 0 deletions(-)
+>> 
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 0b6141d..0f92ec0 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1013,6 +1013,23 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
+>>  }
+>>  EXPORT_SYMBOL(mmc_regulator_set_ocr);
+>> 
+>> +struct regulator *mmc_regulator_get_vmmc(struct mmc_host *mmc)
+>> +{
+>> +       struct device *dev = mmc_dev(mmc);
+>> +       struct regulator *supply = devm_regulator_get(dev, "vmmc");
+>> +       int ret;
+>> +
+>> +       if (IS_ERR(supply))
+>> +               return NULL;
+>> +
+>> +       ret = mmc_regulator_get_ocrmask(supply);
+>> +       if (ret > 0)
+> 
+> Could we have an "else" were a dev_warn prints some info and as well
+> the "ret" maybe?
+> 
+>> +               mmc->ocr_avail = ret;
+>> +
+>> +       return supply;
+>> +}
+>> +EXPORT_SYMBOL(mmc_regulator_get_vmmc);
+>> +
+>>  #endif /* CONFIG_REGULATOR */
+>> 
+>>  /*
+>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+>> index 0707d22..368b317 100644
+>> --- a/include/linux/mmc/host.h
+>> +++ b/include/linux/mmc/host.h
+>> @@ -364,6 +364,7 @@ int mmc_regulator_get_ocrmask(struct regulator *supply);
+>>  int mmc_regulator_set_ocr(struct mmc_host *mmc,
+>>                        struct regulator *supply,
+>>                        unsigned short vdd_bit);
+>> +struct regulator *mmc_regulator_get_vmmc(struct mmc_host *mmc);
+>>  #else
+>>  static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
+>>  {
+>> @@ -376,6 +377,11 @@ static inline int mmc_regulator_set_ocr(struct mmc_host *mmc,
+>>  {
+>>        return 0;
+>>  }
+>> +
+>> +static inline struct regulator *mmc_regulator_get_vmmc(struct mmc_host *mmc)
+>> +{
+>> +       return NULL;
+>> +}
+>>  #endif
+>> 
+> 
+> Some follow-up thoughts, if mmc_regulator_get_vmmc is supposed to be
+> used from the host drivers, the mmc_regulator_get_ocrmask function do
+> no longer have to be an exported function, but instead a static
+> function on core.c I suppose this can be fixed in separate patch,
+> where we also add mmc_regulator_get_vmmc for all host drivers?
+
+
+ have started looking at this area and I am rather confused.  It seems to me two "dedicated" regulators are required.
+One regulator controls VDD (vcc) and this is the regulator called vmmc.  This regulator MAY support the ability to switch voltages and MAY support the ability to be turned on and off.  The main sdhci.c code needs to check the voltages supported by the regulator against the voltages that the host controller supports and adjust the  mmc capabilities to the common set.  I don't think we do this at the moment.
+
+The other regulator supports signal voltage (vccq) for UHS and SDXC cards.  Currently this is not in sdhci.c (I have a patch for this in preparation).  Use of this regulator requires that the vccq regulator be capable of being set to 1.8 or 3.3v and the VDD (vmmc) regulator be capable of being turned on/off.  on/off support is needed is the switch to 1.8v signaling fails for any reason.
+
+
+
+> 
+> Kind regards
+> Ulf Hansson
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
