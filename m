@@ -1,132 +1,38 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH 4/5 v3] mmc: add a function to get a regulator,
- supplying card's Vdd
-Date: Sun, 27 May 2012 20:32:31 -0700
-Message-ID: <1925406B-D680-40BB-890A-78447EEB4583@marvell.com>
-References: <Pine.LNX.4.64.1205251045490.13353@axis700.grange>
- <Pine.LNX.4.64.1205251208440.13353@axis700.grange>
- <Pine.LNX.4.64.1205251230540.13353@axis700.grange>
- <CAPDyKFrrxyk-JpLFge5+0xbYjJ=-24avWn8Optfg88-i006-Ng@mail.gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: [PATCH] mmc: omap: Fix a section warning regression
+Date: Sun, 27 May 2012 23:53:47 -0700
+Message-ID: <20120528065347.GR17852@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog130.obsmtp.com ([74.125.149.143]:60473 "EHLO
-	na3sys009aog130.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753308Ab2E1De6 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 27 May 2012 23:34:58 -0400
-In-Reply-To: <CAPDyKFrrxyk-JpLFge5+0xbYjJ=-24avWn8Optfg88-i006-Ng@mail.gmail.com>
-Content-Language: en-US
+Received: from mho-01-ewr.mailhop.org ([204.13.248.71]:47276 "EHLO
+	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751603Ab2E1Gxu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 May 2012 02:53:50 -0400
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>
+To: linux-mmc@vger.kernel.org
+Cc: Venkatraman S <svenkatr@ti.com>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
+Commit b6e0703b (mmc: omap: make it behave well as a module) made some
+__devinit changes but missed one function causing a section warning:
 
+WARNING: vmlinux.o(.devinit.text+0x8604): Section mismatch in reference
+from the function mmc_omap_probe)
+The function __devinit mmc_omap_probe() references a function
+__init mmc_omap_new_slot()
 
-I have started looking at this area and I am rather confused.  It seems to me two "dedicated" regulators are required.
-One regulator controls VDD (vcc) and this is the regulator called vmmc.  This regulator MAY support the ability to switch voltages and MAY support the ability to be turned on and off.
-The other regulator supports signal voltage (vccq) for UHS and SDXC cards.  Currently this is not in sdhci.c (I have a patch for this in preparation).  Use of this regulator requires that the VDD regulator be capable of being set to 1.8 or 3.3v and be capable of being turned on/off.  on/off support is needed is the switch to 1.8v signaling fails for any reason.
+Signed-off-by: Tony Lindgren <tony@atomide.com>
 
-
-
-On May 27, 2012, at 8:20 PM, Ulf Hansson wrote:
-
-> Hi Guennadi,
-> 
-> On 25 May 2012 17:14, Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
->> Add a function to get a regulator, supplying card's Vdd on a specific host.
->> If such a regulator is found, the function checks, whether a valid OCR mask
->> can be obtained from this regulator.
->> 
->> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
->> ---
->> 
->> v3: remove bogus attempts to ignore the dummy regulator, drop the check
->> for whether the regulator can change status, do not assign
->> MMC_CAP_POWER_OFF_CARD automatically. Thanks to Mark and Magnus for
->> comments.
->> 
->>  drivers/mmc/core/core.c  |   17 +++++++++++++++++
->>  include/linux/mmc/host.h |    6 ++++++
->>  2 files changed, 23 insertions(+), 0 deletions(-)
->> 
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index 0b6141d..0f92ec0 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -1013,6 +1013,23 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
->>  }
->>  EXPORT_SYMBOL(mmc_regulator_set_ocr);
->> 
->> +struct regulator *mmc_regulator_get_vmmc(struct mmc_host *mmc)
->> +{
->> +       struct device *dev = mmc_dev(mmc);
->> +       struct regulator *supply = devm_regulator_get(dev, "vmmc");
->> +       int ret;
->> +
->> +       if (IS_ERR(supply))
->> +               return NULL;
->> +
->> +       ret = mmc_regulator_get_ocrmask(supply);
->> +       if (ret > 0)
-> 
-> Could we have an "else" were a dev_warn prints some info and as well
-> the "ret" maybe?
-> 
->> +               mmc->ocr_avail = ret;
->> +
->> +       return supply;
->> +}
->> +EXPORT_SYMBOL(mmc_regulator_get_vmmc);
->> +
->>  #endif /* CONFIG_REGULATOR */
->> 
->>  /*
->> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->> index 0707d22..368b317 100644
->> --- a/include/linux/mmc/host.h
->> +++ b/include/linux/mmc/host.h
->> @@ -364,6 +364,7 @@ int mmc_regulator_get_ocrmask(struct regulator *supply);
->>  int mmc_regulator_set_ocr(struct mmc_host *mmc,
->>                        struct regulator *supply,
->>                        unsigned short vdd_bit);
->> +struct regulator *mmc_regulator_get_vmmc(struct mmc_host *mmc);
->>  #else
->>  static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
->>  {
->> @@ -376,6 +377,11 @@ static inline int mmc_regulator_set_ocr(struct mmc_host *mmc,
->>  {
->>        return 0;
->>  }
->> +
->> +static inline struct regulator *mmc_regulator_get_vmmc(struct mmc_host *mmc)
->> +{
->> +       return NULL;
->> +}
->>  #endif
->> 
-> 
-> Some follow-up thoughts, if mmc_regulator_get_vmmc is supposed to be
-> used from the host drivers, the mmc_regulator_get_ocrmask function do
-> no longer have to be an exported function, but instead a static
-> function on core.c I suppose this can be fixed in separate patch,
-> where we also add mmc_regulator_get_vmmc for all host drivers?
-
-
- have started looking at this area and I am rather confused.  It seems to me two "dedicated" regulators are required.
-One regulator controls VDD (vcc) and this is the regulator called vmmc.  This regulator MAY support the ability to switch voltages and MAY support the ability to be turned on and off.  The main sdhci.c code needs to check the voltages supported by the regulator against the voltages that the host controller supports and adjust the  mmc capabilities to the common set.  I don't think we do this at the moment.
-
-The other regulator supports signal voltage (vccq) for UHS and SDXC cards.  Currently this is not in sdhci.c (I have a patch for this in preparation).  Use of this regulator requires that the vccq regulator be capable of being set to 1.8 or 3.3v and the VDD (vmmc) regulator be capable of being turned on/off.  on/off support is needed is the switch to 1.8v signaling fails for any reason.
-
-
-
-> 
-> Kind regards
-> Ulf Hansson
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+--- a/drivers/mmc/host/omap.c
++++ b/drivers/mmc/host/omap.c
+@@ -1300,7 +1300,7 @@ static const struct mmc_host_ops mmc_omap_ops = {
+ 	.set_ios	= mmc_omap_set_ios,
+ };
+ 
+-static int __init mmc_omap_new_slot(struct mmc_omap_host *host, int id)
++static int __devinit mmc_omap_new_slot(struct mmc_omap_host *host, int id)
+ {
+ 	struct mmc_omap_slot *slot = NULL;
+ 	struct mmc_host *mmc;
