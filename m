@@ -1,88 +1,142 @@
-From: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
-Subject: Re: [PATCH] mmc: core: Fix build warning with !CONFIG_SUSPEND
-Date: Sun, 27 May 2012 16:11:55 +0530
-Message-ID: <CAMQu2gxH0e=Kdh5eABi3W07Rg_HNsCChUmNOtV4HmxYpQssmFA@mail.gmail.com>
-References: <1337414319-27719-1-git-send-email-santosh.shilimkar@ti.com> <87d35q1gjb.fsf@laptop.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: philipspatches@gmail.com
+Subject: [PATCH 3/3] mmc: do not attempt UHS 1.8v support if board does not support it
+Date: Sun, 27 May 2012 18:36:10 -0700
+Message-ID: <1338168970-2052-1-git-send-email-prakity@marvell.com>
+References: <prakity@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:53363 "EHLO
-	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750927Ab2E0KmR convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 27 May 2012 06:42:17 -0400
-Received: by qcmt36 with SMTP id t36so1239509qcm.29
-        for <linux-mmc@vger.kernel.org>; Sun, 27 May 2012 03:42:15 -0700 (PDT)
-In-Reply-To: <87d35q1gjb.fsf@laptop.org>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:36271 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752546Ab2E1BgZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 27 May 2012 21:36:25 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rp8so3998039pbb.19
+        for <linux-mmc@vger.kernel.org>; Sun, 27 May 2012 18:36:25 -0700 (PDT)
+In-Reply-To: <prakity@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: cjb@laptop.org, linux-mmc@vger.kernel.org
+Cc: Philip Rakity <prakity@marvell.com>
 
-On Sun, May 27, 2012 at 8:22 AM, Chris Ball <cjb@laptop.org> wrote:
-> Hi,
->
-> On Sat, May 19 2012, Santosh Shilimkar wrote:
->> With !CONFIG_SUSPEND, mmc core layer throws below build warnings.
->>
->> drivers/mmc/core/bus.c:125: warning: 'mmc_bus_suspend' defined but n=
-ot used
->> drivers/mmc/core/bus.c:136: warning: 'mmc_bus_resume' defined but no=
-t used
->> drivers/mmc/core/sdio_bus.c:197: warning: 'pm_no_operation' defined =
-but not used
->>
->> Fix is by wrapping suspend hooks under CONFIG_SUSPEND
->>
->> Signed-off-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
->> Cc: Chris Ball <cjb@laptop.org>
->> ---
->> =A0drivers/mmc/core/bus.c =A0 =A0 =A0| =A0 =A02 ++
->> =A0drivers/mmc/core/sdio_bus.c | =A0 =A02 +-
->> =A02 files changed, 3 insertions(+), 1 deletions(-)
->>
->> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
->> index c60cee9..ca8925d 100644
->> --- a/drivers/mmc/core/bus.c
->> +++ b/drivers/mmc/core/bus.c
->> @@ -122,6 +122,7 @@ static int mmc_bus_remove(struct device *dev)
->> =A0 =A0 =A0 return 0;
->> =A0}
->>
->> +#ifdef CONFIG_SUSPEND
->> =A0static int mmc_bus_suspend(struct device *dev)
->> =A0{
->> =A0 =A0 =A0 struct mmc_driver *drv =3D to_mmc_driver(dev->driver);
->> @@ -143,6 +144,7 @@ static int mmc_bus_resume(struct device *dev)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D drv->resume(card);
->> =A0 =A0 =A0 return ret;
->> =A0}
->> +#endif
->>
->> =A0#ifdef CONFIG_PM_RUNTIME
->>
->> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus=
-=2Ec
->> index 236842e..87d1b7e 100644
->> --- a/drivers/mmc/core/sdio_bus.c
->> +++ b/drivers/mmc/core/sdio_bus.c
->> @@ -192,7 +192,7 @@ static int sdio_bus_remove(struct device *dev)
->> =A0 =A0 =A0 return ret;
->> =A0}
->>
->> -#ifdef CONFIG_PM
->> +#ifdef CONFIG_SUSPEND
->>
->> =A0static int pm_no_operation(struct device *dev)
->> =A0{
->
-> This patch doesn't apply against mmc-next, and I think this has alrea=
-dy
-> been fixed upstream -- please could you retest against Linus HEAD?
->
-Indeed. It got fixed by commit 0dd1bfeb6.
-Thanks for the update.
+From: Philip Rakity <prakity@marvell.com>
 
-Regards
-Santosh
+We have h/w that does not support 1.8v signaling even though the
+controller does support this.  If we enable 1.8v support UHS
+cards are recognised but recovery to 3.3v is not possible
+depending on the SD card.
+
+Ensure that when we do not support 1.8v UHS mode cards can
+work (in non UHS mode).
+
+Signed-off-by: Philip Rakity <prakity@marvell.com>
+---
+ drivers/mmc/host/sdhci.c  |   71 +++++++++++++++++++++++---------------------
+ include/linux/mmc/sdhci.h |    3 ++
+ 2 files changed, 40 insertions(+), 34 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 8d8dff0..f9b37c4 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2782,27 +2782,45 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	    mmc_card_is_removable(mmc))
+ 		mmc->caps |= MMC_CAP_NEEDS_POLL;
+ 
+-	/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
+-	if (caps[1] & (SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+-		       SDHCI_SUPPORT_DDR50))
+-		mmc->caps |= MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
++	if (!(host->quirks2 & SDHCI_QUIRK2_HOST_NO_UHS_1_8V_SUPPORT)) {
++		/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
++		if (caps[1] & (SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
++			       SDHCI_SUPPORT_DDR50))
++			mmc->caps |= MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
++
++		/* SDR104 supports also implies SDR50 support */
++		if (caps[1] & SDHCI_SUPPORT_SDR104)
++			mmc->caps |= MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_SDR50;
++		else if (caps[1] & SDHCI_SUPPORT_SDR50)
++			mmc->caps |= MMC_CAP_UHS_SDR50;
++
++		if (caps[1] & SDHCI_SUPPORT_DDR50)
++			mmc->caps |= MMC_CAP_UHS_DDR50;
++
++		/* Does the host need tuning for SDR50? */
++		if (caps[1] & SDHCI_USE_SDR50_TUNING)
++			host->flags |= SDHCI_SDR50_NEEDS_TUNING;
++
++		/* Does the host need tuning for HS200? */
++		if (mmc->caps2 & MMC_CAP2_HS200)
++			host->flags |= SDHCI_HS200_NEEDS_TUNING;
++
++		/* Initial value for re-tuning timer count */
++		host->tuning_count =
++			(caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
++				SDHCI_RETUNING_TIMER_COUNT_SHIFT;
+ 
+-	/* SDR104 supports also implies SDR50 support */
+-	if (caps[1] & SDHCI_SUPPORT_SDR104)
+-		mmc->caps |= MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_SDR50;
+-	else if (caps[1] & SDHCI_SUPPORT_SDR50)
+-		mmc->caps |= MMC_CAP_UHS_SDR50;
+-
+-	if (caps[1] & SDHCI_SUPPORT_DDR50)
+-		mmc->caps |= MMC_CAP_UHS_DDR50;
+-
+-	/* Does the host need tuning for SDR50? */
+-	if (caps[1] & SDHCI_USE_SDR50_TUNING)
+-		host->flags |= SDHCI_SDR50_NEEDS_TUNING;
++		/*
++		 * In case Re-tuning Timer is not disabled, the actual value of
++		 * re-tuning timer will be 2 ^ (n - 1).
++		 */
++		if (host->tuning_count)
++			host->tuning_count = 1 << (host->tuning_count - 1);
+ 
+-	/* Does the host need tuning for HS200? */
+-	if (mmc->caps2 & MMC_CAP2_HS200)
+-		host->flags |= SDHCI_HS200_NEEDS_TUNING;
++		/* Re-tuning mode supported by the Host Controller */
++		host->tuning_mode = (caps[1] & SDHCI_RETUNING_MODE_MASK) >>
++				     SDHCI_RETUNING_MODE_SHIFT;
++	}
+ 
+ 	/* Driver Type(s) (A, C, D) supported by the host */
+ 	if (caps[1] & SDHCI_DRIVER_TYPE_A)
+@@ -2821,21 +2839,6 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	else
+ 		mmc->power_notify_type = MMC_HOST_PW_NOTIFY_NONE;
+ 
+-	/* Initial value for re-tuning timer count */
+-	host->tuning_count = (caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
+-			      SDHCI_RETUNING_TIMER_COUNT_SHIFT;
+-
+-	/*
+-	 * In case Re-tuning Timer is not disabled, the actual value of
+-	 * re-tuning timer will be 2 ^ (n - 1).
+-	 */
+-	if (host->tuning_count)
+-		host->tuning_count = 1 << (host->tuning_count - 1);
+-
+-	/* Re-tuning mode supported by the Host Controller */
+-	host->tuning_mode = (caps[1] & SDHCI_RETUNING_MODE_MASK) >>
+-			     SDHCI_RETUNING_MODE_SHIFT;
+-
+ 	ocr_avail = 0;
+ 
+ 	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index e9051e1..2367939 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -92,6 +92,9 @@ struct sdhci_host {
+ 
+ #define SDHCI_QUIRK2_HOST_OFF_CARD_ON			(1<<0)
+ 
++/* host or board design does support 1.8v signaling */
++#define SDHCI_QUIRK2_HOST_NO_UHS_1_8V_SUPPORT		(1<<1)
++
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
+ 
+-- 
+1.7.0.4
+
