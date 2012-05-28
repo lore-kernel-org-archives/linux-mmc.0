@@ -1,101 +1,119 @@
-From: philipspatches@gmail.com
-Subject: [PATCH 1/3] mmc: sdhci - if MAX_CURRENT returns 0 try to use regulator to get current
-Date: Sun, 27 May 2012 18:36:44 -0700
-Message-ID: <1338169004-2122-1-git-send-email-prakity@marvell.com>
-References: <prakity@marvell.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 4/5 v3] mmc: add a function to get a regulator, supplying
+ card's Vdd
+Date: Mon, 28 May 2012 05:20:06 +0200
+Message-ID: <CAPDyKFrrxyk-JpLFge5+0xbYjJ=-24avWn8Optfg88-i006-Ng@mail.gmail.com>
+References: <Pine.LNX.4.64.1205251045490.13353@axis700.grange>
+	<Pine.LNX.4.64.1205251208440.13353@axis700.grange>
+	<Pine.LNX.4.64.1205251230540.13353@axis700.grange>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:52507 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752195Ab2E1Bgu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 27 May 2012 21:36:50 -0400
-Received: by dady13 with SMTP id y13so3495118dad.19
-        for <linux-mmc@vger.kernel.org>; Sun, 27 May 2012 18:36:49 -0700 (PDT)
-In-Reply-To: <prakity@marvell.com>
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:39972 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752415Ab2E1DUH convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 27 May 2012 23:20:07 -0400
+Received: by eeit10 with SMTP id t10so585341eei.19
+        for <linux-mmc@vger.kernel.org>; Sun, 27 May 2012 20:20:06 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1205251230540.13353@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, linux-mmc@vger.kernel.org
-Cc: Philip Rakity <prakity@marvell.com>, "Mark F. Brown" <mark.brown314@gmail.com>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>
 
-From: Philip Rakity <prakity@marvell.com>
+Hi Guennadi,
 
-The sd host controller spec indicates the the MAX_CURRENT value may be
-returned as 0.  In this case other methods need to be used to return
-the current.  If 0 is returned and there is a regulator, ask the regulator
-for how much current is available.
+On 25 May 2012 17:14, Guennadi Liakhovetski <g.liakhovetski@gmx.de> wro=
+te:
+> Add a function to get a regulator, supplying card's Vdd on a specific=
+ host.
+> If such a regulator is found, the function checks, whether a valid OC=
+R mask
+> can be obtained from this regulator.
+>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
+>
+> v3: remove bogus attempts to ignore the dummy regulator, drop the che=
+ck
+> for whether the regulator can change status, do not assign
+> MMC_CAP_POWER_OFF_CARD automatically. Thanks to Mark and Magnus for
+> comments.
+>
+> =A0drivers/mmc/core/core.c =A0| =A0 17 +++++++++++++++++
+> =A0include/linux/mmc/host.h | =A0 =A06 ++++++
+> =A02 files changed, 23 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 0b6141d..0f92ec0 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1013,6 +1013,23 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc=
+,
+> =A0}
+> =A0EXPORT_SYMBOL(mmc_regulator_set_ocr);
+>
+> +struct regulator *mmc_regulator_get_vmmc(struct mmc_host *mmc)
+> +{
+> + =A0 =A0 =A0 struct device *dev =3D mmc_dev(mmc);
+> + =A0 =A0 =A0 struct regulator *supply =3D devm_regulator_get(dev, "v=
+mmc");
+> + =A0 =A0 =A0 int ret;
+> +
+> + =A0 =A0 =A0 if (IS_ERR(supply))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return NULL;
+> +
+> + =A0 =A0 =A0 ret =3D mmc_regulator_get_ocrmask(supply);
+> + =A0 =A0 =A0 if (ret > 0)
 
-Signed-off-by: Mark F. Brown <mark.brown314@gmail.com>
-Signed-off-by: Philip Rakity <prakity@marvell.com>
-Reviewed-by: Aaron Lu <aaron.lu@amd.com>
----
- drivers/mmc/host/sdhci.c |   28 ++++++++++++++++++++++------
- drivers/mmc/host/sdhci.h |    1 +
- 2 files changed, 23 insertions(+), 6 deletions(-)
+Could we have an "else" were a dev_warn prints some info and as well
+the "ret" maybe?
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index e626732..22347d4 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2837,6 +2837,13 @@ int sdhci_add_host(struct sdhci_host *host)
- 			     SDHCI_RETUNING_MODE_SHIFT;
- 
- 	ocr_avail = 0;
-+
-+	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
-+	if (IS_ERR(host->vmmc)) {
-+		pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
-+		host->vmmc = NULL;
-+	}
-+
- 	/*
- 	 * According to SD Host Controller spec v3.00, if the Host System
- 	 * can afford more than 150mA, Host Driver should set XPC to 1. Also
-@@ -2845,6 +2852,21 @@ int sdhci_add_host(struct sdhci_host *host)
- 	 * value.
- 	 */
- 	max_current_caps = sdhci_readl(host, SDHCI_MAX_CURRENT);
-+	if (!max_current_caps && host->vmmc) {
-+		u32 curr = regulator_get_current_limit(host->vmmc);
-+		if (curr > 0) {
-+
-+			/* convert to SDHCI_MAX_CURRENT format */
-+			curr = curr/1000;  /* convert to mA */
-+			curr = curr/SDHCI_MAX_CURRENT_MULTIPLIER;
-+
-+			curr = min_t(u32, curr, SDHCI_MAX_CURRENT_LIMIT);
-+			max_current_caps =
-+				(curr << SDHCI_MAX_CURRENT_330_SHIFT) |
-+				(curr << SDHCI_MAX_CURRENT_300_SHIFT) |
-+				(curr << SDHCI_MAX_CURRENT_180_SHIFT);
-+		}
-+	}
- 
- 	if (caps[0] & SDHCI_CAN_VDD_330) {
- 		int max_current_330;
-@@ -2995,12 +3017,6 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (ret)
- 		goto untasklet;
- 
--	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
--	if (IS_ERR(host->vmmc)) {
--		pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
--		host->vmmc = NULL;
--	}
--
- 	sdhci_init(host, 0);
- 
- #ifdef CONFIG_MMC_DEBUG
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index f761f23..97653ea 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -205,6 +205,7 @@
- #define SDHCI_CAPABILITIES_1	0x44
- 
- #define SDHCI_MAX_CURRENT		0x48
-+#define  SDHCI_MAX_CURRENT_LIMIT	0xFF
- #define  SDHCI_MAX_CURRENT_330_MASK	0x0000FF
- #define  SDHCI_MAX_CURRENT_330_SHIFT	0
- #define  SDHCI_MAX_CURRENT_300_MASK	0x00FF00
--- 
-1.7.0.4
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->ocr_avail =3D ret;
+> +
+> + =A0 =A0 =A0 return supply;
+> +}
+> +EXPORT_SYMBOL(mmc_regulator_get_vmmc);
+> +
+> =A0#endif /* CONFIG_REGULATOR */
+>
+> =A0/*
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 0707d22..368b317 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -364,6 +364,7 @@ int mmc_regulator_get_ocrmask(struct regulator *s=
+upply);
+> =A0int mmc_regulator_set_ocr(struct mmc_host *mmc,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0struct regulator *supp=
+ly,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0unsigned short vdd_bit=
+);
+> +struct regulator *mmc_regulator_get_vmmc(struct mmc_host *mmc);
+> =A0#else
+> =A0static inline int mmc_regulator_get_ocrmask(struct regulator *supp=
+ly)
+> =A0{
+> @@ -376,6 +377,11 @@ static inline int mmc_regulator_set_ocr(struct m=
+mc_host *mmc,
+> =A0{
+> =A0 =A0 =A0 =A0return 0;
+> =A0}
+> +
+> +static inline struct regulator *mmc_regulator_get_vmmc(struct mmc_ho=
+st *mmc)
+> +{
+> + =A0 =A0 =A0 return NULL;
+> +}
+> =A0#endif
+>
 
+Some follow-up thoughts, if mmc_regulator_get_vmmc is supposed to be
+used from the host drivers, the mmc_regulator_get_ocrmask function do
+no longer have to be an exported function, but instead a static
+function on core.c I suppose this can be fixed in separate patch,
+where we also add mmc_regulator_get_vmmc for all host drivers?
+
+Kind regards
+Ulf Hansson
