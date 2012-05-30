@@ -1,63 +1,54 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v6 1/3] mmc: core: Add packed command feature of eMMC4.5
-Date: Wed, 30 May 2012 09:20:34 +0900
-Message-ID: <001d01cd3dfa$07f83dc0$17e8b940$%jun@samsung.com>
-References: <009d01cd3411$0febc350$2fc349f0$%jun@samsung.com>
- <d98d78ec2312cbc5edb1b2c337ab788d.squirrel@www.codeaurora.org>
+From: Tony Lindgren <tony@atomide.com>
+Subject: [PATCH] mmc: omap: Fix broken reg_shift initialization
+Date: Wed, 30 May 2012 00:13:01 -0700
+Message-ID: <20120530071300.GH12766@atomide.com>
+References: <20120528132147.GC12766@atomide.com>
+ <CAPDyKFrcviT3_Fz13LpFJ+1oKxQ5LKswN7EmzVcWTJkiiDWusA@mail.gmail.com>
+ <20120529074047.GE16340@arwen.pp.htv.fi>
+ <20120529124732.GD12766@atomide.com>
+ <20120529125024.GM9577@arwen.pp.htv.fi>
+ <20120529130312.GE12766@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:39355 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751603Ab2E3AUg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 May 2012 20:20:36 -0400
-In-reply-to: <d98d78ec2312cbc5edb1b2c337ab788d.squirrel@www.codeaurora.org>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20120529130312.GE12766@atomide.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Felipe Balbi <balbi@ti.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: merez@codeaurora.org
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
-Maya Erez <merez@codeaurora.org> wrote:
-> > @@ -1244,6 +1249,25 @@ static int mmc_init_card(struct mmc_host *host, u32
-> > ocr,
-> >  		}
-> >  	}
-> >
-> > +	if ((host->caps2 & MMC_CAP2_PACKED_CMD) &&
-> > +			(card->ext_csd.max_packed_writes > 0) &&
-> > +			(card->ext_csd.max_packed_reads > 0)) {
-> > +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> > +				EXT_CSD_EXP_EVENTS_CTRL,
-> > +				EXT_CSD_PACKED_EVENT_EN,
-> > +				card->ext_csd.generic_cmd6_time);
-> > +		if (err && err != -EBADMSG)
-> > +			goto free_card;
-> > +		if (err) {
-> > +			pr_warning("%s: Enabling packed event failed\n",
-> > +					mmc_hostname(card->host));
-> > +			card->ext_csd.packed_event_en = 0;
-> > +			err = 0;
-> > +		} else {
-> > +			card->ext_csd.packed_event_en = 1;
-> > +		}
-> > +	}
-> > +
-> The above shoud not be performed in case of resume. Therefore it needs to
-> be done only if (!oldcard)
-Could you explain the reason for this?
+Commit fa550189 (mmc: core: Prevent eMMC VCC supply to be cut from late init)
+slightly affected timings for how things are done for the omap MMC driver
+causing the MMC cards not getting detected any longer.
 
-Thanks,
-Seungwon Jeon
-> 
-> Thanks,
-> Maya Erez
-> Consultant for Qualcomm Innovation Center, Inc.
-> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Turns out this was caused by buggy reg_shift initialization in the omap
+MMC driver that was happening after mmc_add_host() was being called.
 
+Fix this by initializing reg_shift before mmc_add_host() is called.
+
+Signed-off-by: Tony Lindgren <tony@atomide.com>
+
+---
+
+Heh found it! Chris, maybe Cc stable on this one?
+
+--- a/drivers/mmc/host/omap.c
++++ b/drivers/mmc/host/omap.c
+@@ -1485,6 +1485,7 @@ static int __devinit mmc_omap_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	host->nr_slots = pdata->nr_slots;
++	host->reg_shift = (cpu_is_omap7xx() ? 1 : 2);
+ 
+ 	host->mmc_omap_wq = alloc_workqueue("mmc_omap", 0, 0);
+ 	if (!host->mmc_omap_wq)
+@@ -1500,8 +1501,6 @@ static int __devinit mmc_omap_probe(struct platform_device *pdev)
+ 		}
+ 	}
+ 
+-	host->reg_shift = (cpu_is_omap7xx() ? 1 : 2);
+-
+ 	return 0;
+ 
+ err_destroy_wq:
