@@ -1,101 +1,94 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] MMC: core: cap MMC card timeouts at 2 seconds.
-Date: Thu, 31 May 2012 23:00:31 +0800
-Message-ID: <CAPDyKFrtdFn-t43r03m630gScYz6Cz+asfruSa=sGcxP0+C+tQ@mail.gmail.com>
-References: <CAEV-rjeEKMNs2N8KEatCi+guFKihgFok4k4nDnd=vTQ5x7iStg@mail.gmail.com>
-	<1338282140-11106-1-git-send-email-torne@google.com>
-	<CAPDyKFrpXc7cODie9g-QK_ZhVpmVZPQ36TDF9CWJcVPL_-EU2Q@mail.gmail.com>
-	<CAEV-rjd1zymsZwsJjzJtF-9fvgYLz00r+K4K4xD2aeLwi76mPw@mail.gmail.com>
+From: "Puttagunta, Viswanath" <vishp@ti.com>
+Subject: Re: [PATCH 1/3] mmc: omap_hsmmc: Errata i705: SD hot unplug
+Date: Thu, 31 May 2012 09:39:10 -0700
+Message-ID: <CANwLT1T=w4--i28aZj2pyHOxa+A5ENj7=1ysR2BVY-rHodTn2A@mail.gmail.com>
+References: <1337890467-32573-1-git-send-email-vishp@ti.com>
+	<1337890467-32573-2-git-send-email-vishp@ti.com>
+	<CANfBPZ98Yf+CMoA0ApzHihQqrRNEDKKxPx4U0bMsV=M3XeX4hQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:52499 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756521Ab2EaPAc convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 May 2012 11:00:32 -0400
-Received: by eeit10 with SMTP id t10so433789eei.19
-        for <linux-mmc@vger.kernel.org>; Thu, 31 May 2012 08:00:31 -0700 (PDT)
-In-Reply-To: <CAEV-rjd1zymsZwsJjzJtF-9fvgYLz00r+K4K4xD2aeLwi76mPw@mail.gmail.com>
+Received: from na3sys009aog118.obsmtp.com ([74.125.149.244]:57722 "EHLO
+	na3sys009aog118.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752132Ab2EaQjN convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 31 May 2012 12:39:13 -0400
+Received: by qcse1 with SMTP id e1so766760qcs.37
+        for <linux-mmc@vger.kernel.org>; Thu, 31 May 2012 09:39:11 -0700 (PDT)
+In-Reply-To: <CANfBPZ98Yf+CMoA0ApzHihQqrRNEDKKxPx4U0bMsV=M3XeX4hQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Torne (Richard Coles)" <torne@google.com>
-Cc: cjb@laptop.org, linus.walleij@linaro.org, jh80.chung@samsung.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ben@decadent.org.uk
+To: "S, Venkatraman" <svenkatr@ti.com>
+Cc: Linux-mmc <linux-mmc@vger.kernel.org>, T Krishnamoorthy Balaji <balajitk@ti.com>, Semen Protsenko <semen.protsenko@ti.com>, Volodymyr Riazantsev <v.riazantsev@ti.com>
 
-Hi Richard,
-
-On 31 May 2012 18:15, Torne (Richard Coles) <torne@google.com> wrote:
-> On 31 May 2012 11:00, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> Hi Richard,
->>
->> On 29 May 2012 17:02, Torne (Richard Coles) <torne@google.com> wrote=
+On Fri, May 25, 2012 at 1:37 AM, S, Venkatraman <svenkatr@ti.com> wrote=
 :
->>> From: "Torne (Richard Coles)" <torne@google.com>
->>>
->>> MMC CSD info can specify very large, ridiculous timeouts, big enoug=
-h to
->>> overflow timeout_ns on 32-bit machines. This can result in the card
->>> timing out on every operation because the wrapped timeout value is =
-far
->>> too small.
->>>
->>> Fix the overflow by capping the result at 2 seconds. =A0Cards speci=
-fying
->>> longer timeouts are almost certainly insane, and host controllers
->>> generally cannot support timeouts that long in any case.
->>>
->>> 2 seconds should be plenty of time for any card to actually functio=
-n;
->>> the timeout calculation code is already using 1 second as a "worst =
-case"
->>> timeout for cards running in SPI mode.
->>>
->>> Signed-off-by: Torne (Richard Coles) <torne@google.com>
->>> ---
->>> =A0drivers/mmc/core/core.c | =A0 11 ++++++++++-
->>> =A01 files changed, 10 insertions(+), 1 deletions(-)
->>>
->>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>> index 0b6141d..3b4a9fc 100644
->>> --- a/drivers/mmc/core/core.c
->>> +++ b/drivers/mmc/core/core.c
->>> @@ -512,7 +512,16 @@ void mmc_set_data_timeout(struct mmc_data *dat=
-a, const struct mmc_card *card)
->>> =A0 =A0 =A0 =A0if (data->flags & MMC_DATA_WRITE)
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mult <<=3D card->csd.r2w_factor;
->>>
->>> - =A0 =A0 =A0 data->timeout_ns =3D card->csd.tacc_ns * mult;
->>> + =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0* The timeout in nanoseconds may overflow with som=
-e cards. Cap it at
->>> + =A0 =A0 =A0 =A0* two seconds both to avoid the overflow and also =
-because host
->>> + =A0 =A0 =A0 =A0* controllers cannot generally generate timeouts t=
-hat long anyway.
->>> + =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 if (card->csd.tacc_ns <=3D (2 * NSEC_PER_SEC) / mult)
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 data->timeout_ns =3D card->csd.tacc_n=
-s * mult;
->>> + =A0 =A0 =A0 else
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 data->timeout_ns =3D 2 * NSEC_PER_SEC=
-;
->>> +
->>
->> The above looks OK to me, although if doing this for tacc_ns we migh=
-t
->> want to do this for tacc_clks as well. Could we include that is this
->> patch as well?
 >
-> timeout_clks can't overflow, that I can see: the highest possible
-> value for tacc_clks is 25500 (it's an 8 bit field specified in
-> 100-clock increments) and the highest mult is 12800 (r2w_factor only
-> goes up to 128). This only makes 0x13747800 :)
+> On Fri, May 25, 2012 at 1:44 AM, Viswanath Puttagunta <vishp@ti.com>
+> wrote:
+> > Turn off IO & PBIAS cells and then SD card VMMC as soon
+> > as we get disconnect interrupt. Failure to do so might
+> > cause current spikes (latch-up issue) which can potentially
+> > burn the IO cells.
+> >
+> > Signed-off-by: Viswanath Puttagunta <vishp@ti.com>
+> > ---
+> > =A0drivers/mmc/host/omap_hsmmc.c | =A0 13 ++++++++++---
+> > =A01 files changed, 10 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/omap_hsmmc.c
+> > b/drivers/mmc/host/omap_hsmmc.c
+> > index 56d4499..61d830f 100644
+> > --- a/drivers/mmc/host/omap_hsmmc.c
+> > +++ b/drivers/mmc/host/omap_hsmmc.c
+> > @@ -1177,10 +1177,17 @@ static irqreturn_t omap_hsmmc_detect(int ir=
+q,
+> > void *dev_id)
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0carddetect =3D -ENOSYS;
+> > =A0 =A0 =A0 =A0}
+> >
+> > - =A0 =A0 =A0 if (carddetect)
+> > + =A0 =A0 =A0 if (carddetect) {
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_detect_change(host->mmc, (HZ * 2=
+00) / 1000);
+> > - =A0 =A0 =A0 else
+> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_detect_change(host->mmc, (HZ * 50=
+) / 1000);
+> > + =A0 =A0 =A0 } else {
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((MMC_POWER_OFF !=3D host->power_m=
+ode) &&
 >
+> Should be if((host->power_mode !=3D MMC_POWER_OFF)
+>
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (mmc_=
+slot(host).set_power !=3D NULL)) {
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_slot(host).set_po=
+wer(host->dev,
+> > host->slot_id,
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 0, 0);
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->power_mode =3D =
+MMC_POWER_OFF;
+>
+> This is just changing the default behaviour, irrespective of whether
+> the errata is applicable.
+> What is the effect of this change for other boards / platforms ?
+>
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_detect_change(host->mmc, 0);
+> > + =A0 =A0 =A0 }
+> > =A0 =A0 =A0 =A0return IRQ_HANDLED;
+> > =A0}
+> >
+> > --
+> > 1.7.4.1
+> >
 
-Thanks for sorting this out and sorry for me being too lazy to read
-the spec. :-)
+Resending as plain text without any html content/formatting.
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+I did not see any -ve effects of turning off the power cell as soon as
+possible when the SD card is turned off. This is why I did not
+differentiate.
 
-Kind regards
-Ulf Hansson
+- Vish
