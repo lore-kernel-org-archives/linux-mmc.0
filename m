@@ -1,278 +1,236 @@
-From: Maya Erez <merez@codeaurora.org>
-Subject: [PATCH v2 1/1] mmc: block: Add write packing control
-Date: Fri,  1 Jun 2012 21:55:11 +0300
-Message-ID: <1338576911-17089-2-git-send-email-merez@codeaurora.org>
-References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
+From: "Mark F. Brown" <mark.brown314@gmail.com>
+Subject: Re: [PATCH 3/3] mmc: do not attempt UHS 1.8v support if board does
+ not support it
+Date: Fri, 1 Jun 2012 19:30:36 -0400
+Message-ID: <CACwGpOAnqGkNTCBHMMX3yrO_5Vy53q_fBCaL4QsG_vQz6ttktw@mail.gmail.com>
+References: <prakity@marvell.com>
+	<1338168970-2052-1-git-send-email-prakity@marvell.com>
+	<CAOGqxeXt5CSnWoq5F++F=2++bXys9uRvLuL0doOm6e+JLYxgFA@mail.gmail.com>
+	<7A2ECBD8-D81C-497B-B641-1803BC5F928D@marvell.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 212.199.104.198.static.012.net.il ([212.199.104.198]:16502 "EHLO
-	lx-merez.qi.qualcomm.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S933626Ab2FAS4B (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jun 2012 14:56:01 -0400
-In-Reply-To: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:48074 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759554Ab2FAXah convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jun 2012 19:30:37 -0400
+Received: by wibhn6 with SMTP id hn6so1107110wib.1
+        for <linux-mmc@vger.kernel.org>; Fri, 01 Jun 2012 16:30:36 -0700 (PDT)
+In-Reply-To: <7A2ECBD8-D81C-497B-B641-1803BC5F928D@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>, "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+To: Philip Rakity <prakity@marvell.com>
+Cc: Alan Cooper <alcooperx@gmail.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-The write packing control will ensure that read requests latency is
-not increased due to long write packed commands.
+Philip,
 
-The trigger for enabling the write packing is managing to pack several
-write requests. The number of potential packed requests that will trigger
-the packing can be configured via sysfs by writing the required value to:
-/sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
-The trigger for disabling the write packing is fetching a read request.
+ I don't think you should add yet another quirk for this. You should
+plumb in a method to mask the capability registers to enable or
+disable features you don't want. This would probably fix problems for
+a lot of controller and board configurations.
 
----
- Documentation/mmc/mmc-dev-attrs.txt |   17 ++++++
- drivers/mmc/card/block.c            |  100 ++++++++++++++++++++++++++++++++++-
- drivers/mmc/card/queue.c            |    8 +++
- drivers/mmc/card/queue.h            |    3 +
- include/linux/mmc/host.h            |    1 +
- 5 files changed, 128 insertions(+), 1 deletions(-)
+-- Mark
 
-diff --git a/Documentation/mmc/mmc-dev-attrs.txt b/Documentation/mmc/mmc-dev-attrs.txt
-index 22ae844..08f7312 100644
---- a/Documentation/mmc/mmc-dev-attrs.txt
-+++ b/Documentation/mmc/mmc-dev-attrs.txt
-@@ -8,6 +8,23 @@ The following attributes are read/write.
-
- 	force_ro		Enforce read-only access even if write protect switch is off.
-
-+	num_wr_reqs_to_start_packing 	This attribute is used to determine
-+	the trigger for activating the write packing, in case the write
-+	packing control feature is enabled.
-+
-+	When the MMC manages to reach a point where num_wr_reqs_to_start_packing
-+	write requests could be packed, it enables the write packing feature.
-+	This allows us to start the write packing only when it is beneficial
-+	and has minimum affect on the read latency.
-+
-+	The number of potential packed requests that will trigger the packing
-+	can be configured via sysfs by writing the required value to:
-+	/sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
-+
-+	The default value of num_wr_reqs_to_start_packing was determined by
-+	running parallel lmdd write and lmdd read operations and calculating
-+	the max number of packed writes requests.
-+
- SD and MMC Device Attributes
- ============================
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 2785fd4..ef192fb 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -114,6 +114,7 @@ struct mmc_blk_data {
- 	struct device_attribute force_ro;
- 	struct device_attribute power_ro_lock;
- 	int	area_type;
-+	struct device_attribute num_wr_reqs_to_start_packing;
- };
-
- static DEFINE_MUTEX(open_lock);
-@@ -281,6 +282,38 @@ out:
- 	return ret;
- }
-
-+static ssize_t
-+num_wr_reqs_to_start_packing_show(struct device *dev,
-+				  struct device_attribute *attr, char *buf)
-+{
-+	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
-+	int num_wr_reqs_to_start_packing;
-+	int ret;
-+
-+	num_wr_reqs_to_start_packing = md->queue.num_wr_reqs_to_start_packing;
-+
-+	ret = snprintf(buf, PAGE_SIZE, "%d\n", num_wr_reqs_to_start_packing);
-+
-+	mmc_blk_put(md);
-+	return ret;
-+}
-+
-+static ssize_t
-+num_wr_reqs_to_start_packing_store(struct device *dev,
-+				 struct device_attribute *attr,
-+				 const char *buf, size_t count)
-+{
-+	int value;
-+	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
-+
-+	sscanf(buf, "%d", &value);
-+	if (value >= 0)
-+		md->queue.num_wr_reqs_to_start_packing = value;
-+
-+	mmc_blk_put(md);
-+	return count;
-+}
-+
- static int mmc_blk_open(struct block_device *bdev, fmode_t mode)
- {
- 	struct mmc_blk_data *md = mmc_blk_get(bdev->bd_disk);
-@@ -1313,6 +1346,48 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 	mmc_queue_bounce_pre(mqrq);
- }
-
-+static void mmc_blk_write_packing_control(struct mmc_queue *mq,
-+					  struct request *req)
-+{
-+	struct mmc_host *host = mq->card->host;
-+	int data_dir;
-+
-+	if (!(host->caps2 & MMC_CAP2_PACKED_WR))
-+		return;
-+
-+	/*
-+	 * In case the packing control is not supported by the host, it should
-+	 * not have an effect on the write packing. Therefore we have to enable
-+	 * the write packing
-+	 */
-+	if (!(host->caps2 & MMC_CAP2_PACKED_WR_CONTROL)) {
-+		mq->wr_packing_enabled = true;
-+		return;
-+	}
-+
-+	if (!req || (req && (req->cmd_flags & REQ_FLUSH))) {
-+		if (mq->num_of_potential_packed_wr_reqs >
-+				mq->num_wr_reqs_to_start_packing)
-+			mq->wr_packing_enabled = true;
-+		return;
-+	}
-+
-+	data_dir = rq_data_dir(req);
-+
-+	if (data_dir == READ) {
-+		mq->num_of_potential_packed_wr_reqs = 0;
-+		mq->wr_packing_enabled = false;
-+		return;
-+	} else if (data_dir == WRITE) {
-+		mq->num_of_potential_packed_wr_reqs++;
-+	}
-+
-+	if (mq->num_of_potential_packed_wr_reqs >
-+			mq->num_wr_reqs_to_start_packing)
-+		mq->wr_packing_enabled = true;
-+
-+}
-+
- static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
- {
- 	struct request_queue *q = mq->queue;
-@@ -1332,6 +1407,9 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
- 			!card->ext_csd.packed_event_en)
- 		goto no_packed;
-
-+	if (!mq->wr_packing_enabled)
-+		goto no_packed;
-+
- 	if ((rq_data_dir(cur) == WRITE) &&
- 			(card->host->caps2 & MMC_CAP2_PACKED_WR))
- 		max_packed_rw = card->ext_csd.max_packed_writes;
-@@ -1396,6 +1474,8 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
- 			break;
- 		}
-
-+		if (rq_data_dir(next) == WRITE)
-+			mq->num_of_potential_packed_wr_reqs++;
- 		list_add_tail(&next->queuelist, &mq->mqrq_cur->packed_list);
- 		cur = next;
- 		reqs++;
-@@ -1780,7 +1860,9 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 		goto out;
- 	}
-
--	if (req && req->cmd_flags & REQ_DISCARD) {
-+	mmc_blk_write_packing_control(mq, req);
-+
-+	if (req && req->cmd_flags & REQ_DISCARD) {
- 		/* complete ongoing async transfer before issuing discard */
- 		if (card->host->areq)
- 			mmc_blk_issue_rw_rq(mq, NULL);
-@@ -2010,6 +2092,8 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
-
- 	if (md) {
- 		card = md->queue.card;
-+		device_remove_file(disk_to_dev(md->disk),
-+				   &md->num_wr_reqs_to_start_packing);
- 		if (md->disk->flags & GENHD_FL_UP) {
- 			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
- 			if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
-@@ -2076,6 +2160,20 @@ static int mmc_add_disk(struct mmc_blk_data *md)
- 		if (ret)
- 			goto power_ro_lock_fail;
- 	}
-+
-+	md->num_wr_reqs_to_start_packing.show =
-+		num_wr_reqs_to_start_packing_show;
-+	md->num_wr_reqs_to_start_packing.store =
-+		num_wr_reqs_to_start_packing_store;
-+	sysfs_attr_init(&md->num_wr_reqs_to_start_packing.attr);
-+	md->num_wr_reqs_to_start_packing.attr.name =
-+		"num_wr_reqs_to_start_packing";
-+	md->num_wr_reqs_to_start_packing.attr.mode = S_IRUGO | S_IWUSR;
-+	ret = device_create_file(disk_to_dev(md->disk),
-+				 &md->num_wr_reqs_to_start_packing);
-+	if (ret)
-+		goto power_ro_lock_fail;
-+
- 	return ret;
-
- power_ro_lock_fail:
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 165d85a..79ef91b 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -25,6 +25,13 @@
- #define MMC_QUEUE_SUSPENDED	(1 << 0)
-
- /*
-+ * Based on benchmark tests the default num of requests to trigger the write
-+ * packing was determined, to keep the read latency as low as possible and
-+ * manage to keep the high write throughput.
-+ */
-+#define DEFAULT_NUM_REQS_TO_START_PACK 17
-+
-+/*
-  * Prepare a MMC request. This just filters out odd stuff.
-  */
- static int mmc_prep_request(struct request_queue *q, struct request *req)
-@@ -181,6 +188,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	mq->mqrq_cur = mqrq_cur;
- 	mq->mqrq_prev = mqrq_prev;
- 	mq->queue->queuedata = mq;
-+	mq->num_wr_reqs_to_start_packing = DEFAULT_NUM_REQS_TO_START_PACK;
-
- 	blk_queue_prep_rq(mq->queue, mmc_prep_request);
- 	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index d761bf1..6c29e0e 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -44,6 +44,9 @@ struct mmc_queue {
- 	struct mmc_queue_req	mqrq[2];
- 	struct mmc_queue_req	*mqrq_cur;
- 	struct mmc_queue_req	*mqrq_prev;
-+	bool			wr_packing_enabled;
-+	int			num_of_potential_packed_wr_reqs;
-+	int			num_wr_reqs_to_start_packing;
- };
-
- extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 9d0d946..0eb6c7b 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -242,6 +242,7 @@ struct mmc_host {
- #define MMC_CAP2_PACKED_WR	(1 << 11)	/* Allow packed write */
- #define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
- 				 MMC_CAP2_PACKED_WR) /* Allow packed commands */
-+#define MMC_CAP2_PACKED_WR_CONTROL (1 << 12) /* Allow write packing control */
-
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 	unsigned int        power_notify_type;
---
-1.7.3.3
--- 
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+On Fri, Jun 1, 2012 at 11:26 AM, Philip Rakity <prakity@marvell.com> wr=
+ote:
+>
+> Alan,
+>
+> I have your patch in my mmc-next. =A0Our controller indicates it SUPP=
+ORTS UHS modes.
+> The regulators do NOT. =A0Cannot switch to 1.8v.
+>
+> Not the same problem as you saw.
+>
+> Philip
+>
+>
+> On Jun 1, 2012, at 6:55 AM, Alan Cooper wrote:
+>
+>> I recently added a patch that prevents the switch to 1.8v if the hos=
+t
+>> capabilities register does not indicate support for any of the UHS
+>> speeds (SDR50, DDR50, SDR104). This allowed our controller to work
+>> with UHS cards in HS mode (50MHz, 3.3v).
+>>
+>> Al
+>>
+>> On Sun, May 27, 2012 at 9:36 PM, =A0<philipspatches@gmail.com> wrote=
+:
+>>> From: Philip Rakity <prakity@marvell.com>
+>>>
+>>> We have h/w that does not support 1.8v signaling even though the
+>>> controller does support this. =A0If we enable 1.8v support UHS
+>>> cards are recognised but recovery to 3.3v is not possible
+>>> depending on the SD card.
+>>>
+>>> Ensure that when we do not support 1.8v UHS mode cards can
+>>> work (in non UHS mode).
+>>>
+>>> Signed-off-by: Philip Rakity <prakity@marvell.com>
+>>> ---
+>>> =A0drivers/mmc/host/sdhci.c =A0| =A0 71 +++++++++++++++++++++++----=
+-----------------
+>>> =A0include/linux/mmc/sdhci.h | =A0 =A03 ++
+>>> =A02 files changed, 40 insertions(+), 34 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index 8d8dff0..f9b37c4 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -2782,27 +2782,45 @@ int sdhci_add_host(struct sdhci_host *host)
+>>> =A0 =A0 =A0 =A0 =A0 =A0mmc_card_is_removable(mmc))
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_NEEDS_POLL;
+>>>
+>>> - =A0 =A0 =A0 /* Any UHS-I mode in caps implies SDR12 and SDR25 sup=
+port. */
+>>> - =A0 =A0 =A0 if (caps[1] & (SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_S=
+DR50 |
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0SDHCI_SUPPORT_DDR50))
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_UHS_SDR12 | MM=
+C_CAP_UHS_SDR25;
+>>> + =A0 =A0 =A0 if (!(host->quirks2 & SDHCI_QUIRK2_HOST_NO_UHS_1_8V_S=
+UPPORT)) {
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Any UHS-I mode in caps implies SDR=
+12 and SDR25 support. */
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (caps[1] & (SDHCI_SUPPORT_SDR104 |=
+ SDHCI_SUPPORT_SDR50 |
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0SDHCI_=
+SUPPORT_DDR50))
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CA=
+P_UHS_SDR12 | MMC_CAP_UHS_SDR25;
+>>> +
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* SDR104 supports also implies SDR50=
+ support */
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (caps[1] & SDHCI_SUPPORT_SDR104)
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CA=
+P_UHS_SDR104 | MMC_CAP_UHS_SDR50;
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else if (caps[1] & SDHCI_SUPPORT_SDR5=
+0)
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CA=
+P_UHS_SDR50;
+>>> +
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (caps[1] & SDHCI_SUPPORT_DDR50)
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CA=
+P_UHS_DDR50;
+>>> +
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Does the host need tuning for SDR5=
+0? */
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (caps[1] & SDHCI_USE_SDR50_TUNING)
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->flags |=3D SDHC=
+I_SDR50_NEEDS_TUNING;
+>>> +
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Does the host need tuning for HS20=
+0? */
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mmc->caps2 & MMC_CAP2_HS200)
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->flags |=3D SDHC=
+I_HS200_NEEDS_TUNING;
+>>> +
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Initial value for re-tuning timer =
+count */
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->tuning_count =3D
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (caps[1] & SDHCI_RETU=
+NING_TIMER_COUNT_MASK) >>
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 SDHCI=
+_RETUNING_TIMER_COUNT_SHIFT;
+>>>
+>>> - =A0 =A0 =A0 /* SDR104 supports also implies SDR50 support */
+>>> - =A0 =A0 =A0 if (caps[1] & SDHCI_SUPPORT_SDR104)
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_UHS_SDR104 | M=
+MC_CAP_UHS_SDR50;
+>>> - =A0 =A0 =A0 else if (caps[1] & SDHCI_SUPPORT_SDR50)
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_UHS_SDR50;
+>>> -
+>>> - =A0 =A0 =A0 if (caps[1] & SDHCI_SUPPORT_DDR50)
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_UHS_DDR50;
+>>> -
+>>> - =A0 =A0 =A0 /* Does the host need tuning for SDR50? */
+>>> - =A0 =A0 =A0 if (caps[1] & SDHCI_USE_SDR50_TUNING)
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->flags |=3D SDHCI_SDR50_NEEDS_TU=
+NING;
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* In case Re-tuning Timer is not d=
+isabled, the actual value of
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* re-tuning timer will be 2 ^ (n -=
+ 1).
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->tuning_count)
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->tuning_count =3D=
+ 1 << (host->tuning_count - 1);
+>>>
+>>> - =A0 =A0 =A0 /* Does the host need tuning for HS200? */
+>>> - =A0 =A0 =A0 if (mmc->caps2 & MMC_CAP2_HS200)
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->flags |=3D SDHCI_HS200_NEEDS_TU=
+NING;
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Re-tuning mode supported by the Ho=
+st Controller */
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->tuning_mode =3D (caps[1] & SDHC=
+I_RETUNING_MODE_MASK) >>
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0SDHCI_RETUNING_MODE_SHIFT;
+>>> + =A0 =A0 =A0 }
+>>>
+>>> =A0 =A0 =A0 =A0/* Driver Type(s) (A, C, D) supported by the host */
+>>> =A0 =A0 =A0 =A0if (caps[1] & SDHCI_DRIVER_TYPE_A)
+>>> @@ -2821,21 +2839,6 @@ int sdhci_add_host(struct sdhci_host *host)
+>>> =A0 =A0 =A0 =A0else
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->power_notify_type =3D MMC_HOST_=
+PW_NOTIFY_NONE;
+>>>
+>>> - =A0 =A0 =A0 /* Initial value for re-tuning timer count */
+>>> - =A0 =A0 =A0 host->tuning_count =3D (caps[1] & SDHCI_RETUNING_TIME=
+R_COUNT_MASK) >>
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 SDHCI_RET=
+UNING_TIMER_COUNT_SHIFT;
+>>> -
+>>> - =A0 =A0 =A0 /*
+>>> - =A0 =A0 =A0 =A0* In case Re-tuning Timer is not disabled, the act=
+ual value of
+>>> - =A0 =A0 =A0 =A0* re-tuning timer will be 2 ^ (n - 1).
+>>> - =A0 =A0 =A0 =A0*/
+>>> - =A0 =A0 =A0 if (host->tuning_count)
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->tuning_count =3D 1 << (host->tu=
+ning_count - 1);
+>>> -
+>>> - =A0 =A0 =A0 /* Re-tuning mode supported by the Host Controller */
+>>> - =A0 =A0 =A0 host->tuning_mode =3D (caps[1] & SDHCI_RETUNING_MODE_=
+MASK) >>
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0SDHCI_RETU=
+NING_MODE_SHIFT;
+>>> -
+>>> =A0 =A0 =A0 =A0ocr_avail =3D 0;
+>>>
+>>> =A0 =A0 =A0 =A0host->vmmc =3D regulator_get(mmc_dev(mmc), "vmmc");
+>>> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+>>> index e9051e1..2367939 100644
+>>> --- a/include/linux/mmc/sdhci.h
+>>> +++ b/include/linux/mmc/sdhci.h
+>>> @@ -92,6 +92,9 @@ struct sdhci_host {
+>>>
+>>> =A0#define SDHCI_QUIRK2_HOST_OFF_CARD_ON =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0(1<<0)
+>>>
+>>> +/* host or board design does support 1.8v signaling */
+>>> +#define SDHCI_QUIRK2_HOST_NO_UHS_1_8V_SUPPORT =A0 =A0 =A0 =A0 =A0(=
+1<<1)
+>>> +
+>>> =A0 =A0 =A0 =A0int irq; =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* Device IR=
+Q */
+>>> =A0 =A0 =A0 =A0void __iomem *ioaddr; =A0 /* Mapped address */
+>>>
+>>> --
+>>> 1.7.0.4
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc=
+" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
+l
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
