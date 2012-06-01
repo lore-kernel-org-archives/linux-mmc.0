@@ -1,64 +1,43 @@
-From: merez@codeaurora.org
-Subject: RE: [PATCH v6 2/3] mmc: core: Support packed write command for
-     eMMC4.5 device
-Date: Fri, 1 Jun 2012 09:45:26 -0700 (PDT)
-Message-ID: <f1ad97e8655631c46afd7084ef6266fd.squirrel@www.codeaurora.org>
-References: <7155413ec18f57c1151a29992be32b1f.squirrel@www.codeaurora.org>
-    <000201cd3fba$942df840$bc89e8c0$%jun@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:13767 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758164Ab2FAQp0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jun 2012 12:45:26 -0400
-In-Reply-To: <000201cd3fba$942df840$bc89e8c0$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Maya Erez <merez@codeaurora.org>
+Subject: [PATCH v2 0/1] mmc: block: Add write packing control
+Date: Fri,  1 Jun 2012 21:55:10 +0300
+Message-ID: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: merez@codeaurora.org, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
+Our experiments showed that the write packing causes degradation of the read
+throughput, in parallel read and write operations.
+Since the read latency is critical for user experience we added a write packing control
+mechanism that disables the write packing in case of read requests.
+This will ensure that read requests latency is not increased due to long write packed commands.
 
-> Maya Erez <merez@codeaurora.org> wrote:
->> > @@ -1313,10 +1609,17 @@ static int mmc_blk_issue_rw_rq(struct
->> mmc_queue
->> *mq, struct request *rqc)
->> >  			 * A block was successfully transferred.
->> >  			 */
->> >  			mmc_blk_reset_success(md, type);
->> > -			spin_lock_irq(&md->lock);
->> > -			ret = __blk_end_request(req, 0,
->> > +
->> > +			if (mq_rq->packed_cmd != MMC_PACKED_NONE) {
->> > +				ret = mmc_blk_end_packed_req(mq, mq_rq);
->> If a specific request in the packed request consistantly fails, there is
->> nothing to stop us from sending the same packed request in an endless
->> loop.
-> There is various error case. This patch reused the existing error
-> handling.
-> What is that case we need to consider?
->
-> Best regards,
-> Seungwon Jeon
+The trigger for enabling the write packing is managing to pack several write requests.
+The number of potential packed requests that will trigger the packing can be configured via sysfs.
+The trigger for disabling the write packing is a fetch of a read request.
 
-This is different from unpacked requests handling since in the packed err
-check function you don't always return the error returned from
-mmc_blk_err_check. In case the EXT_CSD_PACKED_INDEXED_ERROR is set you
-return MMC_BLK_PARTIAL which is handled differently in the
-mmc_blk_issue_rw_rd.
-In our tests we set to 1 the packed bit in CMD23 arg of the first req (in
-the header). As a result, mmc_blk_err_check returned MMC_BLK_CMD_ERR.
-However, mmc_blk_packed_err_check returned MMC_BLK_PARTIAL (since the card
-indicated the index of the first request as the failed request).
-mmc_blk_issue_rw_rd handles MMC_BLK_PARTIAL by sending the packed command
-from the failed index and on, but since the packed bit was still set, the
-same error occurred and was handled the same way and we ended up with an
-endless loop.
-I hope my description is clear, let me know if you have further questions.
+this patch is dependant in the following patches:
+  [PATCH v6 1/3] mmc: core: Add packed command feature of eMMC4.5
+  [PATCH v6 2/3] mmc: core: Support packed write command for eMMC4.5 device
 
-Thanks,
-Maya Erez
-Consultant for Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+Changes in v2:
+    - Move the attribute for setting the packing enabling trigger to the block device
+    - Add documentation of the new attribute
 
+Maya Erez (1):
+  mmc: block: Add write packing control
+
+ Documentation/mmc/mmc-dev-attrs.txt |   17 ++++++
+ drivers/mmc/card/block.c            |  100 ++++++++++++++++++++++++++++++++++-
+ drivers/mmc/card/queue.c            |    8 +++
+ drivers/mmc/card/queue.h            |    3 +
+ include/linux/mmc/host.h            |    1 +
+ 5 files changed, 128 insertions(+), 1 deletions(-)
+
+--
+1.7.3.3
+-- 
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
