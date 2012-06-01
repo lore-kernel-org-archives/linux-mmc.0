@@ -1,58 +1,132 @@
-From: Prashant Gaikwad <pgaikwad@nvidia.com>
-Subject: [PATCH 3/9] mmc: tegra: add clk_prepare/clk_unprepare
-Date: Fri, 1 Jun 2012 14:42:42 +0530
-Message-ID: <1338541968-7961-4-git-send-email-pgaikwad@nvidia.com>
-References: <1338541968-7961-1-git-send-email-pgaikwad@nvidia.com>
+From: "Torne (Richard Coles)" <torne@google.com>
+Subject: Re: [PATCH V2] MMC: core: cap MMC card timeouts at 2 seconds.
+Date: Fri, 1 Jun 2012 10:31:11 +0100
+Message-ID: <CAEV-rjcFx_+Zs+1K5rxapx7ngDkArEKSV8tDubbVL+BfYLDU5Q@mail.gmail.com>
+References: <1338226278-13336-1-git-send-email-torne@google.com>
+	<1338258732.20487.171.camel@deadeye>
+	<4FC87EEA.5010707@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1338541968-7961-1-git-send-email-pgaikwad@nvidia.com>
+In-Reply-To: <4FC87EEA.5010707@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: swarren@nvidia.com, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: linux-kernel@vger.kernel.org, olof@lixom.net, Prashant Gaikwad <pgaikwad@nvidia.com>, paul.gortmaker@windriver.com, shawn.guo@linaro.org, linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ben Hutchings <ben@decadent.org.uk>, cjb@laptop.org, linus.walleij@linaro.org, jh80.chung@samsung.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Use clk_prepare/clk_unprepare as required by the generic clk framework.
+On 1 June 2012 09:35, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 29/05/12 05:32, Ben Hutchings wrote:
+>> On Mon, 2012-05-28 at 18:31 +0100, Torne (Richard Coles) wrote:
+>>> From: "Torne (Richard Coles)" <torne@google.com>
+>>>
+>>> MMC CSD info can specify very large, ridiculous timeouts, big enoug=
+h to
+>>> overflow timeout_ns on 32-bit machines. This can result in the card
+>>> timing out on every operation because the wrapped timeout value is =
+far
+>>> too small.
+>>>
+>>> Fix the overflow by capping the result at 2 seconds. =A0Cards speci=
+fying
+>>> longer timeouts are almost certainly insane, and host controllers
+>>> generally cannot support timeouts that long in any case.
+>>>
+>>> 2 seconds should be plenty of time for any card to actually functio=
+n;
+>>> the timeout calculation code is already using 1 second as a "worst =
+case"
+>>> timeout for cards running in SPI mode.
+>>
+>> Needs a 'Signed-off-by'.
+>>
+>>> ---
+>>> =A0drivers/mmc/core/core.c | =A0 11 ++++++++++-
+>>> =A01 files changed, 10 insertions(+), 1 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>> index 0b6141d..3b4a9fc 100644
+>>> --- a/drivers/mmc/core/core.c
+>>> +++ b/drivers/mmc/core/core.c
+>>> @@ -512,7 +512,16 @@ void mmc_set_data_timeout(struct mmc_data *dat=
+a, const struct mmc_card *card)
+>>> =A0 =A0 =A0if (data->flags & MMC_DATA_WRITE)
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0mult <<=3D card->csd.r2w_factor;
+>>>
+>>> - =A0 =A0data->timeout_ns =3D card->csd.tacc_ns * mult;
+>>> + =A0 =A0/*
+>>> + =A0 =A0 * The timeout in nanoseconds may overflow with some cards=
+=2E Cap it at
+>>> + =A0 =A0 * two seconds both to avoid the overflow and also because=
+ host
+>>> + =A0 =A0 * controllers cannot generally generate timeouts that lon=
+g anyway.
+>>> + =A0 =A0 */
+>>> + =A0 =A0if (card->csd.tacc_ns <=3D (2 * NSEC_PER_SEC) / mult)
+>>> + =A0 =A0 =A0 =A0 =A0 =A0data->timeout_ns =3D card->csd.tacc_ns * m=
+ult;
+>>> + =A0 =A0else
+>>> + =A0 =A0 =A0 =A0 =A0 =A0data->timeout_ns =3D 2 * NSEC_PER_SEC;
+>>
+>> We clearly need to guard against overflow here, and this is the corr=
+ect
+>> way to clamp the multiplication. =A0I can't speak as to whether 2 se=
+conds
+>> is the right limit.
+>
+> The host controllers I have looked at have a limit of around 2.5 seco=
+nds.
+>
+> But why not just use the size of the type as the limit? e.g.
+>
+> =A0 =A0 =A0 =A0if (card->csd.tacc_ns <=3D UINT_MAX / mult)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0data->timeout_ns =3D card->csd.tacc_ns=
+ * mult;
+> =A0 =A0 =A0 =A0else
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0data->timeout_ns =3D UINT_MAX;
 
-This patch should go through Tegra tree since other patches to port tegra
-to generic clock framework are dependent on it. Posting here to get ack from
-the maintainers.
+The host controller drivers don't seem to all do a very good job of
+preventing further overflows or handling large values correctly
+(though some do). sdhci takes the especially annoying additional step
+of printk'ing a warning for *every single MMC command* where
+data->timeout_ns is larger than the controller can accommodate.
+Capping it to a value with a sensible order of magnitude seems to make
+it more likely that cards with obviously bogus CSD parameters will
+actually work. I don't object to using a larger number for the limit,
+but UINT_MAX on a 64-bit system obviously doesn't limit this at all
+and will leave you with timeouts up to 17 minutes, which seems
+ridiculous :)
 
-Signed-off-by: Prashant Gaikwad <pgaikwad@nvidia.com>
----
- drivers/mmc/host/sdhci-tegra.c |    6 +++---
- 1 files changed, 3 insertions(+), 3 deletions(-)
+My original motivation for this patch is that I have a device with an
+eMMC that specifies a 25.5 second timeout, attached to a sdhci host
+whose maximum timeout is 2.8 seconds. Originally I proposed a patch to
+just remove the warning in sdhci, but nobody replied, and when I
+realised there was actually an overflow happening I opted to fix that
+instead.
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index b38d8a7..2789656 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -334,7 +334,7 @@ static int __devinit sdhci_tegra_probe(struct platform_device *pdev)
- 		rc = PTR_ERR(clk);
- 		goto err_clk_get;
- 	}
--	clk_enable(clk);
-+	clk_prepare_enable(clk);
- 	pltfm_host->clk = clk;
- 
- 	host->mmc->pm_caps = plat->pm_flags;
-@@ -349,7 +349,7 @@ static int __devinit sdhci_tegra_probe(struct platform_device *pdev)
- 	return 0;
- 
- err_add_host:
--	clk_disable(pltfm_host->clk);
-+	clk_disable_unprepare(pltfm_host->clk);
- 	clk_put(pltfm_host->clk);
- err_clk_get:
- 	if (gpio_is_valid(plat->wp_gpio))
-@@ -390,7 +390,7 @@ static int __devexit sdhci_tegra_remove(struct platform_device *pdev)
- 	if (gpio_is_valid(plat->power_gpio))
- 		gpio_free(plat->power_gpio);
- 
--	clk_disable(pltfm_host->clk);
-+	clk_disable_unprepare(pltfm_host->clk);
- 	clk_put(pltfm_host->clk);
- 
- 	sdhci_pltfm_free(pdev);
--- 
-1.7.4.1
+So, yeah, we could use UINT_MAX, but then at minimum I also need to
+kill the warning in sdhci to make my device work, and probably all the
+host controller drivers need to be checked to make sure they don't use
+timeout_ns in a way that can overflow.
+
+I've also just noticed that struct mmc_data's comment for timeout_ns
+says /* data timeout (in ns, max 80ms) */ which is not true (the max
+is 102.4 seconds if my math is correct), which may have contributed to
+the host drivers not being too careful :)
+
+What do you think?
+
+>>
+>> Ben.
+>>
+>>> =A0 =A0 =A0data->timeout_clks =3D card->csd.tacc_clks * mult;
+>>>
+>>> =A0 =A0 =A0/*
+>>
+>
+
+
+
+--=20
+Torne (Richard Coles)
+torne@google.com
