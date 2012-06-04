@@ -1,41 +1,55 @@
-From: Heiko =?utf-8?q?St=C3=BCbner?= <heiko@sntech.de>
-Subject: [PATCH] mmc: sdhci-s3c: pass IRQF ONESHOT to request threaded irq
-Date: Sun, 3 Jun 2012 15:29:55 +0200
-Message-ID: <201206031529.56170.heiko@sntech.de>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V3] MMC: core: cap MMC card timeouts at UINT_MAX
+Date: Mon, 04 Jun 2012 11:13:08 +0300
+Message-ID: <4FCC6E14.4010603@intel.com>
+References: <CAEV-rjehr=zWTetxoBCwx0FR5ZzOqZxOTFHAuv1+3u+K=YqAAw@mail.gmail.com> <1338556815-26487-1-git-send-email-torne@google.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1338556815-26487-1-git-send-email-torne@google.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Torne (Richard Coles)" <torne@google.com>
+Cc: cjb@laptop.org, linus.walleij@linaro.org, jh80.chung@samsung.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ben@decadent.org.uk
 List-Id: linux-mmc@vger.kernel.org
 
-Fix a boot regression in existing kernels causing:
+On 01/06/12 16:20, Torne (Richard Coles) wrote:
+> From: "Torne (Richard Coles)" <torne@google.com>
+> 
+> MMC CSD info can specify very large, ridiculous timeouts, big enough to
+> overflow timeout_ns. This can result in the card timing out on every
+> operation because the wrapped timeout value is far too small.
+> 
+> Fix the overflow by capping the result at UINT_MAX.  Cards specifying
+> longer timeouts are almost certainly insane, and host controllers
+> generally cannot support timeouts that long in any case.
+> 
+> Signed-off-by: Torne (Richard Coles) <torne@google.com>
+> ---
+>  drivers/mmc/core/core.c |   11 ++++++++++-
+>  1 files changed, 10 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 0b6141d..74ec3d4 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -512,7 +512,16 @@ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
+>  	if (data->flags & MMC_DATA_WRITE)
+>  		mult <<= card->csd.r2w_factor;
+>  
+> -	data->timeout_ns = card->csd.tacc_ns * mult;
+> +	/*
+> +	 * The timeout in nanoseconds may overflow with some cards. Cap it at
+> +	 * UINT_MAX to avoid the overflow; host controllers cannot generally
+> +	 * generate timeouts that long anyway.
+> +	 */
+> +	if (card->csd.tacc_ns <= UINT_MAX / mult)
+> +		data->timeout_ns = card->csd.tacc_ns * mult;
+> +	else
+> +		data->timeout_ns = UINT_MAX;
+> +
+>  	data->timeout_clks = card->csd.tacc_clks * mult;
+>  
+>  	/*
 
-genirq: Threaded irq requested with handler=NULL and !ONESHOT for irq XXX
-
-caused by 1c6c6952 (genirq: Reject bogus threaded irq requests).
-
-Signed-off-by: Heiko Stuebner <heiko@sntech.de>
----
-Witnessed on a s3c2416 with 3.5-rc1
-
- drivers/mmc/host/sdhci-s3c.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index f473d8b..460ddb5 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -408,7 +408,7 @@ static void sdhci_s3c_setup_card_detect_gpio(struct sdhci_s3c *sc)
- 		if (sc->ext_cd_irq &&
- 		    request_threaded_irq(sc->ext_cd_irq, NULL,
- 					 sdhci_s3c_gpio_card_detect_thread,
--					 IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
-+					 IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT,
- 					 dev_name(dev), sc) == 0) {
- 			int status = gpio_get_value(sc->ext_cd_gpio);
- 			if (pdata->ext_cd_gpio_invert)
--- 
-1.7.2.3
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
