@@ -1,28 +1,80 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH] mmc: sdhci-s3c: pass IRQF ONESHOT to request threaded
- irq
-Date: Mon, 4 Jun 2012 11:19:44 +0100
-Message-ID: <20120604101944.GB25646@sirena.org.uk>
-References: <201206031529.56170.heiko@sntech.de>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v6 2/3] mmc: core: Support packed write command for eMMC4.5
+ device
+Date: Mon, 04 Jun 2012 20:01:44 +0900
+Message-ID: <001d01cd4241$6dd25220$4976f660$%jun@samsung.com>
+References: <7155413ec18f57c1151a29992be32b1f.squirrel@www.codeaurora.org>
+ <000201cd3fba$942df840$bc89e8c0$%jun@samsung.com>
+ <f1ad97e8655631c46afd7084ef6266fd.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <201206031529.56170.heiko@sntech.de>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Heiko St??bner <heiko@sntech.de>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:12379 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752069Ab2FDLBq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Jun 2012 07:01:46 -0400
+In-reply-to: <f1ad97e8655631c46afd7084ef6266fd.squirrel@www.codeaurora.org>
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: merez@codeaurora.org
+Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
-On Sun, Jun 03, 2012 at 03:29:55PM +0200, Heiko St??bner wrote:
+Maya Erez <merez@codeaurora.org> wrote:
+> > Maya Erez <merez@codeaurora.org> wrote:
+> >> > @@ -1313,10 +1609,17 @@ static int mmc_blk_issue_rw_rq(struct
+> >> mmc_queue
+> >> *mq, struct request *rqc)
+> >> >  			 * A block was successfully transferred.
+> >> >  			 */
+> >> >  			mmc_blk_reset_success(md, type);
+> >> > -			spin_lock_irq(&md->lock);
+> >> > -			ret = __blk_end_request(req, 0,
+> >> > +
+> >> > +			if (mq_rq->packed_cmd != MMC_PACKED_NONE) {
+> >> > +				ret = mmc_blk_end_packed_req(mq, mq_rq);
+> >> If a specific request in the packed request consistantly fails, there is
+> >> nothing to stop us from sending the same packed request in an endless
+> >> loop.
+> > There is various error case. This patch reused the existing error
+> > handling.
+> > What is that case we need to consider?
+> >
+> > Best regards,
+> > Seungwon Jeon
+> 
+> This is different from unpacked requests handling since in the packed err
+> check function you don't always return the error returned from
+> mmc_blk_err_check. In case the EXT_CSD_PACKED_INDEXED_ERROR is set you
+> return MMC_BLK_PARTIAL which is handled differently in the
+> mmc_blk_issue_rw_rd.
+> In our tests we set to 1 the packed bit in CMD23 arg of the first req (in
+> the header). As a result, mmc_blk_err_check returned MMC_BLK_CMD_ERR.
+> However, mmc_blk_packed_err_check returned MMC_BLK_PARTIAL (since the card
+> indicated the index of the first request as the failed request).
+> mmc_blk_issue_rw_rd handles MMC_BLK_PARTIAL by sending the packed command
+> from the failed index and on, but since the packed bit was still set, the
+> same error occurred and was handled the same way and we ended up with an
+> endless loop.
+> I hope my description is clear, let me know if you have further questions.
+I tested your test case equally.
+Even though your test makes the header parameter incorrect artificially
+and keeps going with wrong setting repeatedly, we need to assure that
+the similar result can be found practically with normal running.
+I'll test it heavily and check more.
+And if you have more review about this version, please let me know.
 
->  		    request_threaded_irq(sc->ext_cd_irq, NULL,
->  					 sdhci_s3c_gpio_card_detect_thread,
-> -					 IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
-> +					 IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT,
->  					 dev_name(dev), sc) == 0) {
->  			int status = gpio_get_value(sc->ext_cd_gpio);
+Thanks for your review.
+Seungwon Jeon.
+> 
+> Thanks,
+> Maya Erez
+> Consultant for Qualcomm Innovation Center, Inc.
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Separate issue but shouldn't this be request_any_context_irq()?  Most
-GPIOs work just fine in atomic context, though I don't know if the MMC
-core limits things.
