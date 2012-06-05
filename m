@@ -1,25 +1,24 @@
-From: Prashant Gaikwad <pgaikwad@nvidia.com>
-Subject: [PATCH v2 3/9] mmc: tegra: add clk_prepare/clk_unprepare
-Date: Tue, 5 Jun 2012 09:49:20 +0530
-Message-ID: <1338869966-8430-4-git-send-email-pgaikwad@nvidia.com>
-References: <1338869966-8430-1-git-send-email-pgaikwad@nvidia.com>
+From: Prashant Gaikwad <pgaikwad-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v3 3/9] mmc: tegra: add clk_prepare/clk_unprepare
+Date: Tue, 5 Jun 2012 09:59:37 +0530
+Message-ID: <1338870583-8704-4-git-send-email-pgaikwad@nvidia.com>
+References: <1338870583-8704-1-git-send-email-pgaikwad@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate04.nvidia.com ([216.228.121.35]:9288 "EHLO
-	hqemgate04.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751978Ab2FEETC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jun 2012 00:19:02 -0400
-In-Reply-To: <1338869966-8430-1-git-send-email-pgaikwad@nvidia.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1338870583-8704-1-git-send-email-pgaikwad-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org, ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org, Prashant Gaikwad <pgaikwad-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: pgaikwad@nvidia.com
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org
 
 Use clk_prepare/clk_unprepare as required by the generic clk framework.
 
-Signed-off-by: Prashant Gaikwad <pgaikwad@nvidia.com>
+Signed-off-by: Prashant Gaikwad <pgaikwad-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 ---
+Please ignore previous versions. Updated commit message and
+maintainers properly in this version. No other change.
+
 This patch should go through Tegra tree since other patches to port tegra
 to generic clock framework are dependent on it. Posting here to get ack from
 the maintainers.
@@ -60,4 +59,3 @@ index b38d8a7..2789656 100644
  	sdhci_pltfm_free(pdev);
 -- 
 1.7.4.1
-
