@@ -1,54 +1,63 @@
-From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Subject: [PATCH REPOST 1/2] mmc: tegra: use bus-width property instead of support-8bit
-Date: Mon,  4 Jun 2012 12:32:34 -0600
-Message-ID: <1338834755-6900-1-git-send-email-swarren@wwwdotorg.org>
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+From: Prashant Gaikwad <pgaikwad@nvidia.com>
+Subject: [PATCH v2 3/9] mmc: tegra: add clk_prepare/clk_unprepare
+Date: Tue, 5 Jun 2012 09:49:20 +0530
+Message-ID: <1338869966-8430-4-git-send-email-pgaikwad@nvidia.com>
+References: <1338869966-8430-1-git-send-email-pgaikwad@nvidia.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from hqemgate04.nvidia.com ([216.228.121.35]:9288 "EHLO
+	hqemgate04.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751978Ab2FEETC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jun 2012 00:19:02 -0400
+In-Reply-To: <1338869966-8430-1-git-send-email-pgaikwad@nvidia.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: pgaikwad@nvidia.com
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org
 
-From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Use clk_prepare/clk_unprepare as required by the generic clk framework.
 
-Update the driver to parse the new unified bus-width property introduced
-in commit 7f21779 "mmc: dt: Consolidate DT bindings", instead of the legacy
-support-8bit property.
-
-Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Prashant Gaikwad <pgaikwad@nvidia.com>
 ---
-Chris, It's probably easiest conflict-wise if I take this through the Tegra
-tree. (Note: When I posted this series before, I said there shouldn't be any
-conflicts if you take them through the MMC tree. That's probably still true,
-but unforseen future conflicts seem more likely in the .dts files in the
-second patch than sdhci-tegra.c in this patch, so the Tegra tree may make
-more sense). Since the second patch depends on the first, it's easiest if
-these go in through the same tree. Does this sound OK?
+This patch should go through Tegra tree since other patches to port tegra
+to generic clock framework are dependent on it. Posting here to get ack from
+the maintainers.
 
- drivers/mmc/host/sdhci-tegra.c |    5 ++++-
- 1 files changed, 4 insertions(+), 1 deletions(-)
+ drivers/mmc/host/sdhci-tegra.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index b38d8a7..6e5338a 100644
+index b38d8a7..2789656 100644
 --- a/drivers/mmc/host/sdhci-tegra.c
 +++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -223,6 +223,7 @@ static struct tegra_sdhci_platform_data * __devinit sdhci_tegra_dt_parse_pdata(
- {
- 	struct tegra_sdhci_platform_data *plat;
- 	struct device_node *np = pdev->dev.of_node;
-+	u32 bus_width;
+@@ -334,7 +334,7 @@ static int __devinit sdhci_tegra_probe(struct platform_device *pdev)
+ 		rc = PTR_ERR(clk);
+ 		goto err_clk_get;
+ 	}
+-	clk_enable(clk);
++	clk_prepare_enable(clk);
+ 	pltfm_host->clk = clk;
  
- 	if (!np)
- 		return NULL;
-@@ -236,7 +237,9 @@ static struct tegra_sdhci_platform_data * __devinit sdhci_tegra_dt_parse_pdata(
- 	plat->cd_gpio = of_get_named_gpio(np, "cd-gpios", 0);
- 	plat->wp_gpio = of_get_named_gpio(np, "wp-gpios", 0);
- 	plat->power_gpio = of_get_named_gpio(np, "power-gpios", 0);
--	if (of_find_property(np, "support-8bit", NULL))
-+
-+	if (of_property_read_u32(np, "bus-width", &bus_width) == 0 &&
-+	    bus_width == 8)
- 		plat->is_8bit = 1;
+ 	host->mmc->pm_caps = plat->pm_flags;
+@@ -349,7 +349,7 @@ static int __devinit sdhci_tegra_probe(struct platform_device *pdev)
+ 	return 0;
  
- 	return plat;
+ err_add_host:
+-	clk_disable(pltfm_host->clk);
++	clk_disable_unprepare(pltfm_host->clk);
+ 	clk_put(pltfm_host->clk);
+ err_clk_get:
+ 	if (gpio_is_valid(plat->wp_gpio))
+@@ -390,7 +390,7 @@ static int __devexit sdhci_tegra_remove(struct platform_device *pdev)
+ 	if (gpio_is_valid(plat->power_gpio))
+ 		gpio_free(plat->power_gpio);
+ 
+-	clk_disable(pltfm_host->clk);
++	clk_disable_unprepare(pltfm_host->clk);
+ 	clk_put(pltfm_host->clk);
+ 
+ 	sdhci_pltfm_free(pdev);
 -- 
-1.7.0.4
+1.7.4.1
+
