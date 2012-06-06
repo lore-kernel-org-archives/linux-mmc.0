@@ -1,48 +1,43 @@
-From: David Brown <davidb@codeaurora.org>
-Subject: Re: [RFC/PATCH 1/1] mmc: block: Add MMC write packing statistics
-Date: Wed, 6 Jun 2012 09:56:51 -0700
-Message-ID: <20120606165651.GA15102@codeaurora.org>
-References: <1338963389-3147-1-git-send-email-merez@codeaurora.org>
- <1338963389-3147-2-git-send-email-merez@codeaurora.org>
- <CA+NV+VknemgROF5DsSVJ8MDUEyMnrM_vtj66nUTKP6ZvxsF+ag@mail.gmail.com>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: Re: [PATCH REPOST 1/2] mmc: tegra: use bus-width property instead
+ of support-8bit
+Date: Wed, 06 Jun 2012 11:34:48 -0600
+Message-ID: <4FCF94B8.6000400@wwwdotorg.org>
+References: <1338834755-6900-1-git-send-email-swarren@wwwdotorg.org> <20120606135647.GA3423@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CA+NV+VknemgROF5DsSVJ8MDUEyMnrM_vtj66nUTKP6ZvxsF+ag@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Rahul Bedarkar <rpal143@gmail.com>
-Cc: Maya Erez <merez@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:51488 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752173Ab2FFRev (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jun 2012 13:34:51 -0400
+In-Reply-To: <20120606135647.GA3423@void.printf.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Colin Cross <ccross@android.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-tegra@vger.kernel.org, Stephen Warren <swarren@nvidia.com>
 
-On Wed, Jun 06, 2012 at 12:02:10PM +0530, Rahul Bedarkar wrote:
+On 06/06/2012 07:56 AM, Chris Ball wrote:
+> On Mon, Jun 04, 2012 at 12:32:34PM -0600, Stephen Warren wrote:
+>> From: Stephen Warren <swarren@nvidia.com>
+>>
+>> Update the driver to parse the new unified bus-width property introduced
+>> in commit 7f21779 "mmc: dt: Consolidate DT bindings", instead of the legacy
+>> support-8bit property.
+>>
+>> Signed-off-by: Stephen Warren <swarren@nvidia.com>
+>> ---
+>> Chris, It's probably easiest conflict-wise if I take this through the Tegra
+>> tree. (Note: When I posted this series before, I said there shouldn't be any
+>> conflicts if you take them through the MMC tree. That's probably still true,
+>> but unforseen future conflicts seem more likely in the .dts files in the
+>> second patch than sdhci-tegra.c in this patch, so the Tegra tree may make
+>> more sense). Since the second patch depends on the first, it's easiest if
+>> these go in through the same tree. Does this sound OK?
+> 
+> Yes, makes sense -- taking this via the Tegra tree is fine:
+> 
+> Acked-by: Chris Ball <cjb@laptop.org>
 
-> > +static ssize_t mmc_wr_pack_stats_read(struct file *filp, char __us=
-er *ubuf,
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 size_=
-t cnt, loff_t *ppos)
-> > +{
-> > + =A0 =A0 =A0 struct mmc_card *card =3D filp->private_data;
-> > + =A0 =A0 =A0 struct mmc_wr_pack_stats *pack_stats;
-> > + =A0 =A0 =A0 int i;
-
-> Best practice is to initialize variables at the time of declaration,
-> even if you initialize it before using. Many times we forget to do
-> that and there could be logical errors.
-
-gcc will often emit a warning if a variable is used before
-initialization.  There seems to be a trend amongst kernel developers
-to eschew redundant initializations, since they do actually generate
-code.  In fact, there is a macro 'uninitialized_var(x)' to suppress
-the warning from the compiler when it is incorrect, so that a variable
-doesn't have to be initialized when not really needed.
-
-Outside of the kernel, though, I would otherwise agree with you.
-
-David
-
---=20
-Sent by an employee of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora For=
-um.
+Thanks. I have applied the series.
