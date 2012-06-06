@@ -1,66 +1,48 @@
-From: Marek Vasut <marex@denx.de>
-Subject: Re: [PATCH] mmc: mxs-mmc: Move of_match_table out of CONFIG_PM
-Date: Wed, 6 Jun 2012 17:37:54 +0200
-Message-ID: <201206061737.55260.marex@denx.de>
-References: <1337574807-8637-1-git-send-email-marex@denx.de> <87wr3k34pq.fsf@octavius.laptop.org>
+From: David Brown <davidb@codeaurora.org>
+Subject: Re: [RFC/PATCH 1/1] mmc: block: Add MMC write packing statistics
+Date: Wed, 6 Jun 2012 09:56:51 -0700
+Message-ID: <20120606165651.GA15102@codeaurora.org>
+References: <1338963389-3147-1-git-send-email-merez@codeaurora.org>
+ <1338963389-3147-2-git-send-email-merez@codeaurora.org>
+ <CA+NV+VknemgROF5DsSVJ8MDUEyMnrM_vtj66nUTKP6ZvxsF+ag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-out.m-online.net ([212.18.0.9]:47513 "EHLO
-	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753788Ab2FFPiD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jun 2012 11:38:03 -0400
-In-Reply-To: <87wr3k34pq.fsf@octavius.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CA+NV+VknemgROF5DsSVJ8MDUEyMnrM_vtj66nUTKP6ZvxsF+ag@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Rahul Bedarkar <rpal143@gmail.com>
+Cc: Maya Erez <merez@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-arm-kernel@lists.infradead.org, Shawn Guo <shawn.guo@linaro.org>, Fabio Estevam <fabio.estevam@freescale.com>, linux-mmc@vger.kernel.org
 
-Dear Chris Ball,
+On Wed, Jun 06, 2012 at 12:02:10PM +0530, Rahul Bedarkar wrote:
 
-> Hi,
-> 
-> On Mon, May 21 2012, Marek Vasut wrote:
-> > Signed-off-by: Marek Vasut <marex@denx.de>
-> > Cc: Shawn Guo <shawn.guo@linaro.org>
-> > Cc: Fabio Estevam <fabio.estevam@freescale.com>
-> > Cc: linux-mmc@vger.kernel.org
-> > Cc: Chris Ball <cjb@laptop.org>
-> > Acked-by: Shawn Guo <shawn.guo@linaro.org>
-> > ---
-> > 
-> >  drivers/mmc/host/mxs-mmc.c |    2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > 
-> > diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> > index 34a9026..277161d 100644
-> > --- a/drivers/mmc/host/mxs-mmc.c
-> > +++ b/drivers/mmc/host/mxs-mmc.c
-> > @@ -894,8 +894,8 @@ static struct platform_driver mxs_mmc_driver = {
-> > 
-> >  		.owner	= THIS_MODULE,
-> >  
-> >  #ifdef CONFIG_PM
-> >  
-> >  		.pm	= &mxs_mmc_pm_ops,
-> > 
-> > -		.of_match_table = mxs_mmc_dt_ids,
-> > 
-> >  #endif
-> > 
-> > +		.of_match_table = mxs_mmc_dt_ids,
-> > 
-> >  	},
-> >  
-> >  };
-> 
-> Thanks, pushed to mmc-next for 3.5.
+> > +static ssize_t mmc_wr_pack_stats_read(struct file *filp, char __us=
+er *ubuf,
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 size_=
+t cnt, loff_t *ppos)
+> > +{
+> > + =A0 =A0 =A0 struct mmc_card *card =3D filp->private_data;
+> > + =A0 =A0 =A0 struct mmc_wr_pack_stats *pack_stats;
+> > + =A0 =A0 =A0 int i;
 
-Thanks!
+> Best practice is to initialize variables at the time of declaration,
+> even if you initialize it before using. Many times we forget to do
+> that and there could be logical errors.
 
-> - Chris.
+gcc will often emit a warning if a variable is used before
+initialization.  There seems to be a trend amongst kernel developers
+to eschew redundant initializations, since they do actually generate
+code.  In fact, there is a macro 'uninitialized_var(x)' to suppress
+the warning from the compiler when it is incorrect, so that a variable
+doesn't have to be initialized when not really needed.
 
-Best regards,
-Marek Vasut
+Outside of the kernel, though, I would otherwise agree with you.
+
+David
+
+--=20
+Sent by an employee of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora For=
+um.
