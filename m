@@ -1,37 +1,49 @@
-From: Namjae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH v2 1/1] mmc: block: replace __blk_end_request() with blk_end_request()
-Date: Thu, 7 Jun 2012 20:31:35 +0900
-Message-ID: <CAKYAXd_wZ3OO60VCB3W=4Q5RP98DDhQD1c3a4jsXZjOc9okwUg@mail.gmail.com>
-References: <1339064218-31925-1-git-send-email-subhashj@codeaurora.org>
-	<CAKYAXd8VmJEzGG8sd-GJvG9qKGDahmFSBwNxnH3LCocT_F+o2Q@mail.gmail.com>
-	<4FD08671.9040402@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <4FD08671.9040402@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+From: Yaniv Gardi <ygardi@codeaurora.org>
+Subject: [PATCH v6 0/2] *** adding and exposing SANITIZE capability to the user space via a unique IOCTL ***
+Date: Thu,  7 Jun 2012 17:17:19 +0300
+Message-ID: <1339078641-20848-1-git-send-email-ygardi@codeaurora.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:55596 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753172Ab2FGORc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jun 2012 10:17:32 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ygardi@codeaurora.org, merez@codeaurora.org
 
-2012/6/7, Subhash Jadavani <subhashj@codeaurora.org>:
-> On 6/7/2012 4:05 PM, Namjae Jeon wrote:
->> This change is not meant for improving MMC throughput; it's basically
->> >  about becoming fair to other threads/interrupts in the system. By
->> > holding
->> >  spin lock and interrupts disabled for longer duration, we won't allow
->> >  other threads/interrupts to run at all.
-> As i have mentioned in commit text,
->
-> This change is not meant for improving MMC throughput; it's basically
-> about becoming fair to other threads/interrupts in the system. By holding
-> spin lock and interrupts disabled for longer duration, we won't allow
-> other threads/interrupts to run at all.
-Okay, this patch means latency will be improved on multi thread environment.
-Looks reasonable to me.
-Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
->
-> Regards,
-> Subhash
->
->
+*** adding and exposing SANITIZE capability to the user space via a unique IOCTL ***
+
+changes patch v5:
+added BUG_ON() where needed
+
+changes patch v4:
+removed a few debug printouts
+
+changes patch v3:
+split the patch into 2 commits - block and mmc/card
+added capability MMC_CAP2_SANITIZE to mmc controller
+
+Yaniv Gardi (2):
+  block: ioctl support for sanitize in eMMC 4.5
+  mmc: card: Adding support for sanitize in eMMC 4.5
+
+ block/blk-core.c          |   18 +++++++++--
+ block/blk-lib.c           |   51 +++++++++++++++++++++++++++++++
+ block/blk-merge.c         |    6 ++++
+ block/elevator.c          |   41 ++++++++++++++++++++++++-
+ block/ioctl.c             |    9 +++++
+ drivers/mmc/card/block.c  |   72 ++++++++++++++++++++++++++++++++------------
+ drivers/mmc/card/queue.c  |   10 +++++-
+ include/linux/blk_types.h |    5 ++-
+ include/linux/blkdev.h    |    3 ++
+ include/linux/fs.h        |    1 +
+ include/linux/mmc/host.h  |    1 +
+ kernel/trace/blktrace.c   |    2 +
+ 12 files changed, 191 insertions(+), 28 deletions(-)
+
+-- 
+1.7.6
+-- 
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum
