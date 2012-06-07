@@ -1,29 +1,94 @@
-From: merez@codeaurora.org
-Subject: Re: [RFC/PATCH 1/1] mmc: block: Add MMC write packing statistics
-Date: Wed, 6 Jun 2012 13:56:13 -0700 (PDT)
-Message-ID: <310175ff06fd45dca660047535666a61.squirrel@www.codeaurora.org>
+From: Yong Ding <yongd@marvell.com>
+Subject: RE: [PATCH v2] mmc:sdio:guarantee setting card data bus width as
+ 4-bit
+Date: Wed, 6 Jun 2012 18:31:27 -0700
+Message-ID: <89813612683626448B837EE5A0B6A7CB1A2BBF4902@SC-VEXCH4.marvell.com>
+References: <1337058583-2014-1-git-send-email-yongd@marvell.com>
+ <87r4ts4lrf.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Rahul Bedarkar <rpal143@gmail.com>
-Cc: Maya Erez <merez@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <87r4ts4lrf.fsf@octavius.laptop.org>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Philip Rakity <prakity@marvell.com>, "ohad@wizery.com" <ohad@wizery.com>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "ulf.hansson@stericsson.com" <ulf.hansson@stericsson.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
->> +
->> + =A0 =A0 =A0 for (i =3D 1 ; i <=3D max_num_of_packed_reqs ; ++i) {
-> This is something magical number for iterations. why can not we start
-from
-> zero.
-The statistics are kept in the array in the index that equals the numbe=
-r
-of packed requests. Therefore, they are kept in the array in indexes 1 =
-to
-max num of packed reqs.
-I will add a comment to explain that.
+Chris,
+Thanks, and very glad to hear this:-)
 
-Thanks,
-Maya Erez
-Consultant for Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+Best Wishes,
+
+Yong Ding
+Operating Systems Engineering,
+Application Processor Systems Engineering
+
+-----Original Message-----
+From: Chris Ball [mailto:cjb@laptop.org] 
+Sent: Wednesday, June 06, 2012 9:24 PM
+To: Yong Ding
+Cc: linux-mmc@vger.kernel.org; Philip Rakity; ohad@wizery.com; linus.walleij@linaro.org; ulf.hansson@stericsson.com; linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2] mmc:sdio:guarantee setting card data bus width as 4-bit
+
+Hi,
+
+On Tue, May 15 2012, yongd wrote:
+>   SDIO_CCCR_IF[1:0] in SDIO card is used for card data bus width
+> setting as below,
+>      00b: 1-bit bus
+>      01b: Reserved
+>      10b: 4-bit bus
+>      11b: 8-bit bus(only for embedded SDIO)
+>   And sdio_enable_wide is for setting data bus width as 4-bit. But
+> currently, it 1stly read the register, 2ndly OR' 1b with SDIO_CCCR_IF[1],
+> and then write it back.
+>   As we can see, such way is based on such assumption that the
+> SDIO_CCCR_IF[0] is always 0. Apparently, this is not right.
+>
+> Signed-off-by: yongd <yongd@marvell.com>
+> ---
+>  drivers/mmc/core/sdio.c  |    7 +++++++
+>  include/linux/mmc/sdio.h |    2 ++
+>  2 files changed, 9 insertions(+)
+>
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index 13d0e95..7b528cf 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -218,6 +218,13 @@ static int sdio_enable_wide(struct mmc_card *card)
+>  	if (ret)
+>  		return ret;
+>  
+> +	if ((ctrl & SDIO_BUS_WIDTH_MASK)
+> +				== SDIO_BUS_WIDTH_RESERVED)
+> +		printk(KERN_WARNING"%s: SDIO_CCCR_IF is invalid: 0x%02X\n",
+> +					mmc_hostname(card->host), ctrl);
+> +
+> +	/* set as 4-bit bus width */
+> +	ctrl &= ~SDIO_BUS_WIDTH_MASK;
+>  	ctrl |= SDIO_BUS_WIDTH_4BIT;
+>  
+>  	ret = mmc_io_rw_direct(card, 1, 0, SDIO_CCCR_IF, ctrl, NULL);
+> diff --git a/include/linux/mmc/sdio.h b/include/linux/mmc/sdio.h
+> index c9fe66c..17446d3 100644
+> --- a/include/linux/mmc/sdio.h
+> +++ b/include/linux/mmc/sdio.h
+> @@ -98,7 +98,9 @@
+>  
+>  #define SDIO_CCCR_IF		0x07	/* bus interface controls */
+>  
+> +#define  SDIO_BUS_WIDTH_MASK	0x03	/* data bus width setting */
+>  #define  SDIO_BUS_WIDTH_1BIT	0x00
+> +#define  SDIO_BUS_WIDTH_RESERVED 0x01
+>  #define  SDIO_BUS_WIDTH_4BIT	0x02
+>  #define  SDIO_BUS_ECSI		0x20	/* Enable continuous SPI interrupt */
+>  #define  SDIO_BUS_SCSI		0x40	/* Support continuous SPI interrupt */
+
+Thanks, pushed to mmc-next for 3.5.
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
