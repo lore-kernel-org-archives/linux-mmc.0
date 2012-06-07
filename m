@@ -1,18 +1,23 @@
 From: Yaniv Gardi <ygardi@codeaurora.org>
 Subject: [PATCH v6 0/2] *** adding and exposing SANITIZE capability to the user space via a unique IOCTL ***
-Date: Thu,  7 Jun 2012 17:17:19 +0300
-Message-ID: <1339078641-20848-1-git-send-email-ygardi@codeaurora.org>
+Date: Thu,  7 Jun 2012 17:38:59 +0300
+Message-ID: <1339079942-23542-1-git-send-email-ygardi@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:55596 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753172Ab2FGORc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jun 2012 10:17:32 -0400
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:32793 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760847Ab2FGOjJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jun 2012 10:39:09 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: ygardi@codeaurora.org, merez@codeaurora.org
 
 *** adding and exposing SANITIZE capability to the user space via a unique IOCTL ***
+
+changes patch v6:
+fixed some code review comments
+added timeout dependency for CMD6 when
+issueing the sanitize command.
 
 changes patch v5:
 added BUG_ON() where needed
