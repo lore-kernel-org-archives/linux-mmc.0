@@ -1,37 +1,87 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [CFT 03/11] mmc: omap_hsmmc: remove private DMA API implementation
-Date: Thu, 7 Jun 2012 23:23:43 +0530
-Message-ID: <CANfBPZ-wWpwf_AoZV1jToFr=44FYPDtoOQCdd+Hzy03u53POeQ@mail.gmail.com>
-References: <20120607110610.GB15973@n2100.arm.linux.org.uk> <E1ScaYb-0003tZ-Pb@rmk-PC.arm.linux.org.uk>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v2 1/1] mmc: block: replace __blk_end_request() with blk_end_request()
+Date: Thu, 07 Jun 2012 22:53:15 -0400
+Message-ID: <877gvizf8k.fsf@octavius.laptop.org>
+References: <1339064218-31925-1-git-send-email-subhashj@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <E1ScaYb-0003tZ-Pb@rmk-PC.arm.linux.org.uk>
-Sender: linux-omap-owner@vger.kernel.org
-To: Russell King <rmk+kernel@arm.linux.org.uk>
-Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:39717 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752062Ab2FHCxV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 7 Jun 2012 22:53:21 -0400
+In-Reply-To: <1339064218-31925-1-git-send-email-subhashj@codeaurora.org>
+	(Subhash Jadavani's message of "Thu, 7 Jun 2012 15:46:58 +0530")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Subhash Jadavani <subhashj@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 
-On Thu, Jun 7, 2012 at 4:37 PM, Russell King
-<rmk+kernel@arm.linux.org.uk> wrote:
-> Remove the private DMA API implementation from omap_hsmmc, making it
-> use entirely the DMA engine API.
+Hi Subhash,
+
+On Thu, Jun 07 2012, Subhash Jadavani wrote:
+> For completing any block request, MMC block driver is calling:
+> 	spin_lock_irq(queue)
+> 	__blk_end_request()
+> 	spin_unlock_irq(queue)
 >
-> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
-
-Tested this on 4430SDP with rootfs usage, untarring the kernel source
-and compiling it natively.
-
-Tested-by: Venkatraman S <svenkatr@ti.com>
-
-> ---
-> =A0drivers/mmc/host/omap_hsmmc.c | =A0265 ++++++++++-----------------=
---------------
-> =A01 files changed, 64 insertions(+), 201 deletions(-)
+> But if we analyze the sources of latency in kernel using ftrace,
+> __blk_end_request() function at times may take up to 6.5ms with
+> spinlock held and irq disabled.
 >
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> __blk_end_request() calls couple of functions and ftrace output
+> shows that blk_update_bidi_request() function is almost taking 6ms.
+> There are 2 function to end the current request: ___blk_end_request()
+> and blk_end_request(). Both these functions do same thing except
+> that blk_end_request() function doesn't take up the spinlock
+> while calling the blk_update_bidi_request().
+>
+> This patch replaces all __blk_end_request() calls with
+> blk_end_request() and __blk_end_request_all() calls with
+> blk_end_request_all().
+>
+> Testing done: 20 process concurrent read/write on sd card
+> and eMMC. Ran this test for almost a day on multicore system
+> and no errors observed.
+>
+> This change is not meant for improving MMC throughput; it's basically
+> about becoming fair to other threads/interrupts in the system. By holding
+> spin lock and interrupts disabled for longer duration, we won't allow
+> other threads/interrupts to run at all.
+> Actually slight performance degradation at file system level can be expected
+> as we are not holding the spin lock during blk_update_bidi_request() which
+> means our mmcqd thread may get preempted for other high priority thread or
+> any interrupt in the system.
+>
+> These are performance numbers (100MB file write) with eMMC running in DDR
+> mode:
+>
+> Without this patch:
+> 	Name of the Test   Value   Unit
+> 	LMDD Read Test     53.79   MBPS
+> 	LMDD Write Test    18.86   MBPS
+> 	IOZONE  Read Test  51.65   MBPS
+> 	IOZONE  Write Test 24.36   MBPS
+>
+> With this patch:
+> 	Name of the Test    Value  Unit
+> 	LMDD Read Test      52.94  MBPS
+> 	LMDD Write Test     16.70  MBPS
+> 	IOZONE  Read Test   52.08  MBPS
+> 	IOZONE  Write Test  23.29  MBPS
+>
+> Read numbers are fine. Write numbers are bit down (especially LMDD write),
+> may be because write requests normally have large transfer size and
+> which means there are chances that while mmcq is executing
+> blk_update_bidi_request(), it may get interrupted by interrupts or
+> other high priority thread.
+>
+> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+
+Thanks very much for doing this, and for the detailed commit message --
+pushed to mmc-next with Namjae's Reviewed-by.
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
