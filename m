@@ -1,192 +1,226 @@
-From: philipspatches@gmail.com
-Subject: [PATCH 1/2] mmc: Add support for Signal (vccq) Voltage Switching using Regulators
-Date: Fri,  8 Jun 2012 12:26:25 -0700
-Message-ID: <1339183585-21723-1-git-send-email-prakity@marvell.com>
-References: <prakity@marvell.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:58197 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755355Ab2FHT0b (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Jun 2012 15:26:31 -0400
-Received: by dady13 with SMTP id y13so2743464dad.19
-        for <linux-mmc@vger.kernel.org>; Fri, 08 Jun 2012 12:26:31 -0700 (PDT)
-In-Reply-To: <prakity@marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: merez@codeaurora.org
+Subject: RE: [PATCH v2 1/1] mmc: block: Add write packing control
+Date: Sat, 9 Jun 2012 07:46:18 -0700 (PDT)
+Message-ID: <780c1dad11fe08de17a3ff41b22ba3b8.squirrel@www.codeaurora.org>
+References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
+    <1338576911-17089-2-git-send-email-merez@codeaurora.org>
+    <007c01cd455a$56392050$02ab60f0$%jun@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <007c01cd455a$56392050$02ab60f0$%jun@samsung.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Maya Erez' <merez@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION' <linux-doc@vger.kernel.org>, 'open list' <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, linux-mmc@vger.kernel.org, aaron.lu@amd.com, mark.brown314@gmail.com
-Cc: Philip Rakity <prakity@marvell.com>
 
-From: Philip Rakity <prakity@marvell.com>
 
-The SD Host Controller may require a regulator to support signal
-and voltage switching.  Curently we support voltage (vmmc) but not
-signal changing via a regulator.  Add this support.
+> Hi,
+>
+> How can we check the effect?
+> Do you have any result?
+We ran parallel lmdd read and write operations and found out that the
+write packing causes the read throughput to drop from 24MB/s to 12MB/s.
+The write packing control managed to increase the read throughput back to
+the original value.
+We also examined "real life" scenarios, such as performing a big push
+operation in parallel to launching several applications. We measured the
+read latency and found out that with the write packing control the worst
+case of the read latency was smaller.
 
-If a regulator is supported and voltage switching to 1.8V is
-supported then use the vmmc regulator to disable the voltage to
-the core if 1.8 signal voltage switching fails.
+> Please check the several comment below.
+>
+> Maya Erez <merez@codeaurora.org> wrote:
+>> The write packing control will ensure that read requests latency is
+>> not increased due to long write packed commands.
+>>
+>> The trigger for enabling the write packing is managing to pack several
+>> write requests. The number of potential packed requests that will
+>> trigger
+>> the packing can be configured via sysfs by writing the required value
+>> to:
+>> /sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
+>> The trigger for disabling the write packing is fetching a read request.
+>>
+>> ---
+>>  Documentation/mmc/mmc-dev-attrs.txt |   17 ++++++
+>>  drivers/mmc/card/block.c            |  100
+>> ++++++++++++++++++++++++++++++++++-
+>>  drivers/mmc/card/queue.c            |    8 +++
+>>  drivers/mmc/card/queue.h            |    3 +
+>>  include/linux/mmc/host.h            |    1 +
+>>  5 files changed, 128 insertions(+), 1 deletions(-)
+>>
+>> diff --git a/Documentation/mmc/mmc-dev-attrs.txt
+>> b/Documentation/mmc/mmc-dev-attrs.txt
+>> index 22ae844..08f7312 100644
+>> --- a/Documentation/mmc/mmc-dev-attrs.txt
+>> +++ b/Documentation/mmc/mmc-dev-attrs.txt
+>> @@ -8,6 +8,23 @@ The following attributes are read/write.
+>>
+>>  	force_ro		Enforce read-only access even if write protect switch is
+>> off.
+>>
+>> +	num_wr_reqs_to_start_packing 	This attribute is used to determine
+>> +	the trigger for activating the write packing, in case the write
+>> +	packing control feature is enabled.
+>> +
+>> +	When the MMC manages to reach a point where
+>> num_wr_reqs_to_start_packing
+>> +	write requests could be packed, it enables the write packing feature.
+>> +	This allows us to start the write packing only when it is beneficial
+>> +	and has minimum affect on the read latency.
+>> +
+>> +	The number of potential packed requests that will trigger the packing
+>> +	can be configured via sysfs by writing the required value to:
+>> +	/sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
+>> +
+>> +	The default value of num_wr_reqs_to_start_packing was determined by
+>> +	running parallel lmdd write and lmdd read operations and calculating
+>> +	the max number of packed writes requests.
+>> +
+>>  SD and MMC Device Attributes
+>>  ============================
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index 2785fd4..ef192fb 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -114,6 +114,7 @@ struct mmc_blk_data {
+>>  	struct device_attribute force_ro;
+>>  	struct device_attribute power_ro_lock;
+>>  	int	area_type;
+>> +	struct device_attribute num_wr_reqs_to_start_packing;
+>>  };
+>>
+>>  static DEFINE_MUTEX(open_lock);
+>> @@ -281,6 +282,38 @@ out:
+>>  	return ret;
+>>  }
+>>
+>> +static ssize_t
+>> +num_wr_reqs_to_start_packing_show(struct device *dev,
+>> +				  struct device_attribute *attr, char *buf)
+>> +{
+>> +	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
+>> +	int num_wr_reqs_to_start_packing;
+>> +	int ret;
+>> +
+>> +	num_wr_reqs_to_start_packing = md->queue.num_wr_reqs_to_start_packing;
+>> +
+>> +	ret = snprintf(buf, PAGE_SIZE, "%d\n", num_wr_reqs_to_start_packing);
+>> +
+>> +	mmc_blk_put(md);
+>> +	return ret;
+>> +}
+>> +
+>> +static ssize_t
+>> +num_wr_reqs_to_start_packing_store(struct device *dev,
+>> +				 struct device_attribute *attr,
+>> +				 const char *buf, size_t count)
+>> +{
+>> +	int value;
+>> +	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
+>> +
+>> +	sscanf(buf, "%d", &value);
+>> +	if (value >= 0)
+>> +		md->queue.num_wr_reqs_to_start_packing = value;
+>> +
+>> +	mmc_blk_put(md);
+>> +	return count;
+>> +}
+>> +
+>>  static int mmc_blk_open(struct block_device *bdev, fmode_t mode)
+>>  {
+>>  	struct mmc_blk_data *md = mmc_blk_get(bdev->bd_disk);
+>> @@ -1313,6 +1346,48 @@ static void mmc_blk_rw_rq_prep(struct
+>> mmc_queue_req *mqrq,
+>>  	mmc_queue_bounce_pre(mqrq);
+>>  }
+>>
+>> +static void mmc_blk_write_packing_control(struct mmc_queue *mq,
+>> +					  struct request *req)
+>> +{
+>> +	struct mmc_host *host = mq->card->host;
+>> +	int data_dir;
+>> +
+>> +	if (!(host->caps2 & MMC_CAP2_PACKED_WR))
+>> +		return;
+>> +
+>> +	/*
+>> +	 * In case the packing control is not supported by the host, it should
+>> +	 * not have an effect on the write packing. Therefore we have to
+>> enable
+>> +	 * the write packing
+>> +	 */
+>> +	if (!(host->caps2 & MMC_CAP2_PACKED_WR_CONTROL)) {
+>> +		mq->wr_packing_enabled = true;
+>> +		return;
+>> +	}
+>> +
+>> +	if (!req || (req && (req->cmd_flags & REQ_FLUSH))) {
+>> +		if (mq->num_of_potential_packed_wr_reqs >
+>> +				mq->num_wr_reqs_to_start_packing)
+>> +			mq->wr_packing_enabled = true;
+>> +		return;
+>> +	}
+>> +
+>> +	data_dir = rq_data_dir(req);
+>> +
+>> +	if (data_dir == READ) {
+>> +		mq->num_of_potential_packed_wr_reqs = 0;
+>> +		mq->wr_packing_enabled = false;
+>> +		return;
+>> +	} else if (data_dir == WRITE) {
+>> +		mq->num_of_potential_packed_wr_reqs++;
+>> +	}
+>> +
+>> +	if (mq->num_of_potential_packed_wr_reqs >
+>> +			mq->num_wr_reqs_to_start_packing)
+>> +		mq->wr_packing_enabled = true;
+> Write Packing is available only if continuing write requests are over
+> num_wr_reqs_to_start_packing?
+> That means individual request(1...17) will be issued with non-packing.
+> Could you explain your policy more?
+We try to identify the case where there is parallel read and write
+operations. In our experiments we found out that the number of write
+requests between read requests in parallel read and write operations
+doesn't exceed 17 requests. Therefore, we can assume that fetching more
+than 17 write requests without hitting a read request can indicate that
+there is no read activity.
+You are right that this affects the write throughput a bit but the goal of
+this algorithm is to make sure the read throughput and latency are not
+decreased due to write. If this is not the desired result, this algorithm
+can be disabled.
+>> +
+>> +}
+>> +
+>>  static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request
+>> *req)
+>>  {
+>>  	struct request_queue *q = mq->queue;
+>> @@ -1332,6 +1407,9 @@ static u8 mmc_blk_prep_packed_list(struct
+>> mmc_queue *mq, struct request *req)
+>>  			!card->ext_csd.packed_event_en)
+>>  		goto no_packed;
+>>
+>> +	if (!mq->wr_packing_enabled)
+>> +		goto no_packed;
+> If wr_packing_enabled is set to true, several write requests can be
+> packed.
+> We don't need to consider read request since packed write?
+I'm not sure I understand the question. We check if there was a read
+request in the mmc_blk_write_packing_control, and in such a case set
+mq->wr_packing_enabled to false.
+If I didn't answer the question, please explain it again.
 
-Signed-off-by: Philip Rakity <prakity@marvell.com>
----
- drivers/mmc/host/sdhci.c  |   88 ++++++++++++++++++++++++++++++++++-----------
- include/linux/mmc/sdhci.h |    3 +-
- 2 files changed, 69 insertions(+), 22 deletions(-)
+>
+> Thanks,
+> Seungwon Jeon
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 417851f..248f68b 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1584,6 +1584,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
- 	u8 pwr;
- 	u16 clk, ctrl;
- 	u32 present_state;
-+	int ret;
- 
- 	/*
- 	 * Signal Voltage Switching is only applicable for Host Controllers
-@@ -1604,6 +1605,15 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
- 
- 		/* Wait for 5ms */
- 		usleep_range(5000, 5500);
-+		if (host->vmmcvccq) {
-+			ret = regulator_set_voltage(host->vmmcvccq,
-+				3300000, 3300000);
-+			if (ret) {
-+				pr_info(DRIVER_NAME ": Switching to 3.3V "
-+					"signalling voltage failed\n");
-+				return -EIO;
-+			}
-+		}
- 
- 		/* 3.3V regulator output should be stable within 5 ms */
- 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-@@ -1629,29 +1639,43 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
- 			 * Enable 1.8V Signal Enable in the Host Control2
- 			 * register
- 			 */
--			ctrl |= SDHCI_CTRL_VDD_180;
--			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
--
--			/* Wait for 5ms */
--			usleep_range(5000, 5500);
--
--			ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
--			if (ctrl & SDHCI_CTRL_VDD_180) {
--				/* Provide SDCLK again and wait for 1ms*/
--				clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
--				clk |= SDHCI_CLOCK_CARD_EN;
--				sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
--				usleep_range(1000, 1500);
-+			ret = 0;
-+			if (host->vmmcvccq) {
-+				ret = regulator_set_voltage(host->vmmcvccq,
-+					1800000, 1800000);
-+			}
- 
--				/*
--				 * If DAT[3:0] level is 1111b, then the card
--				 * was successfully switched to 1.8V signaling.
--				 */
--				present_state = sdhci_readl(host,
-+			if (!ret) {
-+				ctrl |= SDHCI_CTRL_VDD_180;
-+				sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-+
-+				/* Wait for 5ms */
-+				usleep_range(5000, 5500);
-+
-+				ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+				if (ctrl & SDHCI_CTRL_VDD_180) {
-+					/* Provide SDCLK again */
-+					/* and wait for 1ms*/
-+					clk = sdhci_readw(host,
-+						SDHCI_CLOCK_CONTROL);
-+					clk |= SDHCI_CLOCK_CARD_EN;
-+					sdhci_writew(host, clk,
-+						SDHCI_CLOCK_CONTROL);
-+					usleep_range(1000, 1500);
-+
-+					/*
-+					 * If DAT[3:0] level is 1111b,
-+					 * then the card
-+					 * was successfully switched
-+					 * to 1.8V signaling.
-+					 */
-+					present_state = sdhci_readl(host,
- 							SDHCI_PRESENT_STATE);
--				if ((present_state & SDHCI_DATA_LVL_MASK) ==
--				     SDHCI_DATA_LVL_MASK)
--					return 0;
-+					if ((present_state &
-+						SDHCI_DATA_LVL_MASK) ==
-+							SDHCI_DATA_LVL_MASK)
-+						return 0;
-+				}
- 			}
- 		}
- 
-@@ -1663,11 +1687,15 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
- 		pwr = sdhci_readb(host, SDHCI_POWER_CONTROL);
- 		pwr &= ~SDHCI_POWER_ON;
- 		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
-+		if (host->vmmc)
-+			regulator_disable(host->vmmc);
- 
- 		/* Wait for 1ms as per the spec */
- 		usleep_range(1000, 1500);
- 		pwr |= SDHCI_POWER_ON;
- 		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
-+		if (host->vmmc)
-+			regulator_enable(host->vmmc);
- 
- 		pr_info(DRIVER_NAME ": Switching to 1.8V signalling "
- 			"voltage failed, retrying with S18R set to 0\n");
-@@ -2784,6 +2812,19 @@ int sdhci_add_host(struct sdhci_host *host)
- 	    mmc_card_is_removable(mmc))
- 		mmc->caps |= MMC_CAP_NEEDS_POLL;
- 
-+	/* if vccq regulator and no 1.8V signaling no UHS */
-+	host->vmmcvccq = regulator_get(mmc_dev(mmc), "vmmcvccq");
-+	if (IS_ERR(host->vmmcvccq)) {
-+		printk(KERN_INFO "%s: no vmmcvccq regulator found\n",
-+			mmc_hostname(mmc));
-+		host->vmmcvccq = NULL;
-+	} else if (regulator_is_supported_voltage(host->vmmcvccq,
-+			1800000, 1800000)) {
-+		regulator_enable(host->vmmcvccq);
-+	} else
-+		caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
-+		       SDHCI_SUPPORT_DDR50);
-+
- 	/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
- 	if (caps[1] & (SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
- 		       SDHCI_SUPPORT_DDR50))
-@@ -3108,6 +3149,11 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 	if (host->vmmc)
- 		regulator_put(host->vmmc);
- 
-+	if (host->vmmcvccq) {
-+		regulator_disable(host->vmmcvccq);
-+		regulator_put(host->vmmcvccq);
-+	}
-+
- 	kfree(host->adma_desc);
- 	kfree(host->align_buffer);
- 
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 560fe22..67906bd 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -98,7 +98,8 @@ struct sdhci_host {
- 
- 	const struct sdhci_ops *ops;	/* Low level hw interface */
- 
--	struct regulator *vmmc;	/* Power regulator */
-+	struct regulator *vmmc;		/* Power regulator (vcc or vdd) */
-+	struct regulator *vmmcvccq;	/* Signal regulator (vccq) */
- 
- 	/* Internal data */
- 	struct mmc_host *mmc;	/* MMC structure */
--- 
-1.7.0.4
-
+Thanks,
+Maya Erez
+--
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
