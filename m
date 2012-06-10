@@ -1,206 +1,128 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH v7 2/2] mmc: card: Adding support for sanitize in eMMC
-     4.5
-Date: Sun, 10 Jun 2012 03:43:53 -0700 (PDT)
-Message-ID: <d3895230768f943659a7ab805767871d.squirrel@www.codeaurora.org>
-References: <1339318069-11428-1-git-send-email-ygardi@codeaurora.org>
-    <1339318069-11428-3-git-send-email-ygardi@codeaurora.org>
+From: "Yaniv Gardi" <ygardi@codeaurora.org>
+Subject: RE: [PATCH v6 0/2] *** adding and exposing SANITIZE capability to the user space via a unique IOCTL ***
+Date: Sun, 10 Jun 2012 16:49:26 +0300
+Message-ID: <000b01cd470f$daef74a0$90ce5de0$@codeaurora.org>
+References: <1339079942-23542-1-git-send-email-ygardi@codeaurora.org> <CANfBPZ9ab=x=gbYHH_Zj7mjO+zP4diuAvT+t8CamnQh3qZN8Vg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:32857 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755785Ab2FJKnx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 10 Jun 2012 06:43:53 -0400
-In-Reply-To: <1339318069-11428-3-git-send-email-ygardi@codeaurora.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:63097 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753307Ab2FJNt2 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 10 Jun 2012 09:49:28 -0400
+In-Reply-To: <CANfBPZ9ab=x=gbYHH_Zj7mjO+zP4diuAvT+t8CamnQh3qZN8Vg@mail.gmail.com>
+Content-Language: en-us
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, ygardi@codeaurora.org, linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
+To: "'S, Venkatraman'" <svenkatr@ti.com>
+Cc: linux-mmc@vger.kernel.org, merez@codeaurora.org
 
-Looks good to me.
+=46irst, the REQ_SECURE + REQ_DISCARD are used for specific sector/s. S=
+ANITIZE
+is a generic command that erase all unmapped sectors.
+Second, secure erase for a specific sector (SECURE TRIM) is no longer
+supported.
 
-> This feature delete the unmap memory region of the eMMC card,
-> by writing to a specific register in the EXT_CSD
-> unmap region is the memory region that were previously deleted
-> (by erase, trim or discard operation)
->
-> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
-> Signed-off-by: Maya Erez <merez@codeaurora.org>
-> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
->
-> ---
->  drivers/mmc/card/block.c |   72
-> +++++++++++++++++++++++++++++++++-------------
->  drivers/mmc/card/queue.c |   10 ++++++-
->  include/linux/mmc/host.h |    1 +
->  3 files changed, 62 insertions(+), 21 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index dd2d374..139971e 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -874,10 +874,10 @@ static int mmc_blk_issue_secdiscard_rq(struct
-> mmc_queue *mq,
->  {
->  	struct mmc_blk_data *md = mq->data;
->  	struct mmc_card *card = md->queue.card;
-> -	unsigned int from, nr, arg, trim_arg, erase_arg;
-> +	unsigned int from, nr, arg;
->  	int err = 0, type = MMC_BLK_SECDISCARD;
->
-> -	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
-> +	if (!(mmc_can_secure_erase_trim(card))) {
->  		err = -EOPNOTSUPP;
->  		goto out;
->  	}
-> @@ -885,23 +885,10 @@ static int mmc_blk_issue_secdiscard_rq(struct
-> mmc_queue *mq,
->  	from = blk_rq_pos(req);
->  	nr = blk_rq_sectors(req);
->
-> -	/* The sanitize operation is supported at v4.5 only */
-> -	if (mmc_can_sanitize(card)) {
-> -		erase_arg = MMC_ERASE_ARG;
-> -		trim_arg = MMC_TRIM_ARG;
-> -	} else {
-> -		erase_arg = MMC_SECURE_ERASE_ARG;
-> -		trim_arg = MMC_SECURE_TRIM1_ARG;
-> -	}
-> -
-> -	if (mmc_erase_group_aligned(card, from, nr))
-> -		arg = erase_arg;
-> -	else if (mmc_can_trim(card))
-> -		arg = trim_arg;
-> -	else {
-> -		err = -EINVAL;
-> -		goto out;
-> -	}
-> +	if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
-> +		arg = MMC_SECURE_TRIM1_ARG;
-> +	else
-> +		arg = MMC_SECURE_ERASE_ARG;
->  retry:
->  	if (card->quirks & MMC_QUIRK_INAND_CMD38) {
->  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> @@ -953,6 +940,46 @@ out:
->  	return err ? 0 : 1;
->  }
->
-> +static int mmc_blk_issue_sanitize_rq(struct mmc_queue *mq,
-> +				      struct request *req)
-> +{
-> +	struct mmc_blk_data *md = mq->data;
-> +	struct mmc_card *card = md->queue.card;
-> +	int err = 0;
-> +
-> +	BUG_ON(!card);
-> +	BUG_ON(!card->host);
-> +
-> +	if (!(mmc_can_sanitize(card) &&
-> +	     (card->host->caps2 & MMC_CAP2_SANITIZE))) {
-> +			pr_warning("%s: %s - SANITIZE is not supported\n",
-> +				   mmc_hostname(card->host), __func__);
-> +			err = -EOPNOTSUPP;
-> +			goto out;
-> +	}
-> +
-> +	pr_debug("%s: %s - SANITIZE IN PROGRESS...\n",
-> +		mmc_hostname(card->host), __func__);
-> +
-> +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +					 EXT_CSD_SANITIZE_START, 1, 0);
-> +
-> +	if (err)
-> +		pr_err("%s: %s - mmc_switch() with "
-> +		       "EXT_CSD_SANITIZE_START failed. err=%d\n",
-> +		       mmc_hostname(card->host), __func__, err);
-> +
-> +	pr_debug("%s: %s - SANITIZE COMPLETED\n", mmc_hostname(card->host),
-> +					     __func__);
-> +
-> +out:
-> +	spin_lock_irq(&md->lock);
-> +	__blk_end_request(req, err, blk_rq_bytes(req));
-> +	spin_unlock_irq(&md->lock);
-> +
-> +	return err ? 0 : 1;
-> +}
-> +
->  static int mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
->  {
->  	struct mmc_blk_data *md = mq->data;
-> @@ -1437,7 +1464,12 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
-> struct request *req)
->  		goto out;
->  	}
->
-> -	if (req && req->cmd_flags & REQ_DISCARD) {
-> +	if (req && req->cmd_flags & REQ_SANITIZE) {
-> +		/* complete ongoing async transfer before issuing sanitize */
-> +		if (card->host && card->host->areq)
-> +			mmc_blk_issue_rw_rq(mq, NULL);
-> +		ret = mmc_blk_issue_sanitize_rq(mq, req);
-> +	} else if (req && req->cmd_flags & REQ_DISCARD) {
->  		/* complete ongoing async transfer before issuing discard */
->  		if (card->host->areq)
->  			mmc_blk_issue_rw_rq(mq, NULL);
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index e360a97..4f3250e 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -145,10 +145,15 @@ static void mmc_queue_setup_discard(struct
-> request_queue *q,
->  	/* granularity must not be greater than max. discard */
->  	if (card->pref_erase > max_discard)
->  		q->limits.discard_granularity = 0;
-> -	if (mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))
-> +	if (mmc_can_secure_erase_trim(card))
->  		queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
->  }
->
-> +static void mmc_queue_setup_sanitize(struct request_queue *q)
-> +{
-> +	queue_flag_set_unlocked(QUEUE_FLAG_SANITIZE, q);
-> +}
-> +
->  /**
->   * mmc_init_queue - initialise a queue structure.
->   * @mq: mmc queue
-> @@ -184,6 +189,9 @@ int mmc_init_queue(struct mmc_queue *mq, struct
-> mmc_card *card,
->  	if (mmc_can_erase(card))
->  		mmc_queue_setup_discard(mq->queue, card);
->
-> +	if ((mmc_can_sanitize(card) && (host->caps2 & MMC_CAP2_SANITIZE)))
-> +		mmc_queue_setup_sanitize(mq->queue);
-> +
->  #ifdef CONFIG_MMC_BLOCK_BOUNCE
->  	if (host->max_segs == 1) {
->  		unsigned int bouncesz;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 0707d22..be2b89f 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -238,6 +238,7 @@ struct mmc_host {
->  #define MMC_CAP2_BROKEN_VOLTAGE	(1 << 7)	/* Use the broken voltage */
->  #define MMC_CAP2_DETECT_ON_ERR	(1 << 8)	/* On I/O err check card removal
-> */
->  #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
-> +#define MMC_CAP2_SANITIZE	(1 << 10)		/* Support Sanitize */
->
->  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
->  	unsigned int        power_notify_type;
-> --
-> 1.7.6
-> --
-> Sent by a consultant of the Qualcomm Innovation Center, Inc.
-> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum
->
+Anyhow, SANITIZE replaces the need to issue REQ_SECURE as part of the
+REQ_DISCARD request. In this way DISCARD request finishes much faster (=
+order
+of magnitude) and thus improves system performance. When the NVM conten=
+t
+must be erased, the user may use SANITIZE to erase all unmapped sectors=
+=2E=20
+
+An example of usage is refurbished devices in which the carrier wants t=
+o
+erase NVM content (since the user used only DISCARDs), in this case the=
+ a
+SANITIZE operation will be triggered in the carrier labs from a dedicat=
+ed
+application through IOCTL that goes directly to the device. Note that n=
+o
+change to the FS is required for such operation.
 
 Thanks,
-Maya Erez
---
-Sent by consultant of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+Yaniv
+
+=3D > -----Original Message-----
+=3D > From: S, Venkatraman [mailto:svenkatr@ti.com]
+=3D > Sent: Friday, June 08, 2012 2:30 PM
+=3D > To: Yaniv Gardi
+=3D > Cc: linux-mmc@vger.kernel.org; merez@codeaurora.org
+=3D > Subject: Re: [PATCH v6 0/2] *** adding and exposing SANITIZE capa=
+bility
+to
+=3D > the user space via a unique IOCTL ***
+=3D >=20
+=3D > On Thu, Jun 7, 2012 at 8:08 PM, Yaniv Gardi <ygardi@codeaurora.or=
+g>
+=3D > wrote:
+=3D > > *** adding and exposing SANITIZE capability to the user space v=
+ia a
+=3D > > unique IOCTL ***
+=3D >=20
+=3D > Well, is this really needed ? As I understand, SANITIZE is identi=
+cal to
+=3D > REQ_SECURE + REQ_DISCARD.
+=3D > Mapping the device function to an existing attribute is more easy=
+ that
+=3D > creating the whole plumbing around SANITIZE, just because it exis=
+ts.
+=3D > Apart from the IOCTL, it would be useful to find if any file syst=
+ems
+want to
+=3D > use this, and it is any way more friendly than SECURE + DISCARD.
+=3D >=20
+=3D > >
+=3D > > changes patch v6:
+=3D > > fixed some code review comments
+=3D > > added timeout dependency for CMD6 when issueing the sanitize
+=3D > command.
+=3D > >
+=3D > > changes patch v5:
+=3D > > added BUG_ON() where needed
+=3D > >
+=3D > > changes patch v4:
+=3D > > removed a few debug printouts
+=3D > >
+=3D > > changes patch v3:
+=3D > > split the patch into 2 commits - block and mmc/card added capab=
+ility
+=3D > > MMC_CAP2_SANITIZE to mmc controller
+=3D > >
+=3D > > Yaniv Gardi (2):
+=3D > > =A0block: ioctl support for sanitize in eMMC 4.5
+=3D > > =A0mmc: card: Adding support for sanitize in eMMC 4.5
+=3D > >
+=3D > > =A0block/blk-core.c =A0 =A0 =A0 =A0 =A0| =A0 18 +++++++++--
+=3D > > =A0block/blk-lib.c =A0 =A0 =A0 =A0 =A0 | =A0 51 +++++++++++++++=
+++++++++++++++++
+=3D > > =A0block/blk-merge.c =A0 =A0 =A0 =A0 | =A0 =A06 ++++
+=3D > > =A0block/elevator.c =A0 =A0 =A0 =A0 =A0| =A0 41 +++++++++++++++=
++++++++++-
+=3D > > =A0block/ioctl.c =A0 =A0 =A0 =A0 =A0 =A0 | =A0 =A09 +++++
+=3D > > =A0drivers/mmc/card/block.c =A0| =A0 72
+=3D > > ++++++++++++++++++++++++++++++++------------
+=3D > > =A0drivers/mmc/card/queue.c =A0| =A0 10 +++++-
+=3D > > =A0include/linux/blk_types.h | =A0 =A05 ++-
+=3D > > =A0include/linux/blkdev.h =A0 =A0| =A0 =A03 ++
+=3D > > =A0include/linux/fs.h =A0 =A0 =A0 =A0| =A0 =A01 +
+=3D > > =A0include/linux/mmc/host.h =A0| =A0 =A01 +
+=3D > > =A0kernel/trace/blktrace.c =A0 | =A0 =A02 +
+=3D > > =A012 files changed, 191 insertions(+), 28 deletions(-)
+=3D > >
+=3D > > --
+=3D > > 1.7.6
+=3D > > --
+=3D > > Sent by a consultant of the Qualcomm Innovation Center, Inc.
+=3D > > The Qualcomm Innovation Center, Inc. is a member of the Code Au=
+rora
+=3D > > Forum
+=3D > > --
+=3D > > To unsubscribe from this list: send the line "unsubscribe linux=
+-mmc"
+=3D > > in the body of a message to majordomo@vger.kernel.org More
+=3D > majordomo
+=3D > > info at =A0http://vger.kernel.org/majordomo-info.html
 
