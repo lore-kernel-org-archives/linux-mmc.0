@@ -1,56 +1,54 @@
 From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH v2 0/1] block: Add test-iosched scheduler
-Date: Mon, 11 Jun 2012 21:06:01 +0530
-Message-ID: <CANfBPZ9U+b4p5UQbX_oeLba28fTMfUrVONN=bRakn6d2Or=1ew@mail.gmail.com>
-References: <1339011882-7919-1-git-send-email-merez@codeaurora.org>
- <CANfBPZ8C7YY760yx9ATi1_UJ_itL0N+fVdxx0Lim-55SgGjbng@mail.gmail.com> <41394741acbaf5451f81382a2f31b44f.squirrel@www.codeaurora.org>
+Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
+Date: Mon, 11 Jun 2012 22:49:53 +0530
+Message-ID: <CANfBPZ-HukGqES4eUhxfDhLy+Sj6XJEyPu9kgKCAddPnVyoqKA@mail.gmail.com>
+References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
+ <1338576911-17089-2-git-send-email-merez@codeaurora.org> <007c01cd455a$56392050$02ab60f0$%jun@samsung.com>
+ <780c1dad11fe08de17a3ff41b22ba3b8.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <41394741acbaf5451f81382a2f31b44f.squirrel@www.codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <780c1dad11fe08de17a3ff41b22ba3b8.squirrel@www.codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: merez@codeaurora.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION' <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, Jun 9, 2012 at 8:24 PM,  <merez@codeaurora.org> wrote:
+On Sat, Jun 9, 2012 at 8:16 PM,  <merez@codeaurora.org> wrote:
 >
->> On Thu, Jun 7, 2012 at 1:14 AM, Maya Erez <merez@codeaurora.org> wrote:
->>> The test scheduler allows testing a block device by dispatching
->>> specific requests according to the test case and declare PASS/FAIL
->>> according to the requests completion error code
->>>
->> I can't get the point. Isn't this possible purely from userspace using
->> IOCTLs ?
->> Even otherwise, requiring to modify the scheduler for each test case
->> is definitely not scalable.
-> The main benefit of the test-iosched is the ability to determine the
-> timing of each request that is being dispatched and to put on hold the
-> real FS requests so that they won't affect the tests scenario.
-
-Then a potentially long running test can block any useful work that can
-be done on the device. no-op is not the right scheduler for the example
-you mentioned (eMMC), so such device has to be mounted only for the
-purpose of running the tests.
-So using standard noop + debugfs would be sufficient for 99% of the cases ?
-
-> It also allows each block device to determine pass/fail result taking into
-> account the expected behavior and the actual result.
-
-
-> The scheduler doesn't have to be changed per tests case. What made you
-> think it should be?
-Err.. I misread this section of documentation. I read is as sysfs
-instead of debugfs.
-My mistake..
-<Quote>
-+Each test is exposed via debugfs and can be triggered by writing to
-+the debugfs file. In order to add a new test one should expose a new debugfs
-+file for the new test.
-</Quote>
-
-> Currently we use the test-iosched to test the eMMC4.5 features (such as
-> BKOPs, packed commands and sanitize). I hope that after we will release
-> the tests later this week it will be clearer.
+>> Hi,
 >>
-Sure. It'd be useful.
+>> How can we check the effect?
+>> Do you have any result?
+> We ran parallel lmdd read and write operations and found out that the
+> write packing causes the read throughput to drop from 24MB/s to 12MB/s.
+
+Whoa! That's a big drop.
+BTW, is there a problem with throughput or latency, or both ?
+If these numbers are over long duration (>5 seconds), then where are
+the cycles going?
+It would be nice to see some blktrace figures for the issue, and then fix it,
+rather than apply a band aid like the write-packing-control on top..
+
+
+> The write packing control managed to increase the read throughput back to
+> the original value.
+> We also examined "real life" scenarios, such as performing a big push
+> operation in parallel to launching several applications. We measured the
+> read latency and found out that with the write packing control the worst
+> case of the read latency was smaller.
+>
+>> Please check the several comment below.
+>>
+>> Maya Erez <merez@codeaurora.org> wrote:
+>>> The write packing control will ensure that read requests latency is
+>>> not increased due to long write packed commands.
+>>>
+>>> The trigger for enabling the write packing is managing to pack several
+>>> write requests. The number of potential packed requests that will
+>>> trigger
+>>> the packing can be configured via sysfs by writing the required value
+>>> to:
+>>> /sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
+>>> The trigger for disabling the write packing is fetching a read request.
+>>>
