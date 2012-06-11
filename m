@@ -1,153 +1,72 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [PATCH v6 0/2] *** adding and exposing SANITIZE capability to
- the user space via a unique IOCTL ***
-Date: Mon, 11 Jun 2012 03:03:34 +0000
-Message-ID: <17296D9F8FF2234F831FC3DF505A87A90FE9A104@SHSMSX102.ccr.corp.intel.com>
-References: <1339079942-23542-1-git-send-email-ygardi@codeaurora.org>
- <CANfBPZ9ab=x=gbYHH_Zj7mjO+zP4diuAvT+t8CamnQh3qZN8Vg@mail.gmail.com>
- <000b01cd470f$daef74a0$90ce5de0$@codeaurora.org>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH] regulator: pass voltage when calling notifier for change
+Date: Mon, 11 Jun 2012 11:59:21 +0800
+Message-ID: <20120611035918.GH4218@opensource.wolfsonmicro.com>
+References: <1339270755-2503-1-git-send-email-prakity@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:32130 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751609Ab2FKDD5 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 10 Jun 2012 23:03:57 -0400
-In-Reply-To: <000b01cd470f$daef74a0$90ce5de0$@codeaurora.org>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="pfTAc8Cvt8L6I27a"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1339270755-2503-1-git-send-email-prakity@marvell.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Philip Rakity <philipspatches@gmail.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Yaniv Gardi <ygardi@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "merez@codeaurora.org" <merez@codeaurora.org>
 
-Hi Yaniv
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org
-> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Yaniv Gardi
-> Sent: Sunday, June 10, 2012 9:49 PM
-> To: 'S, Venkatraman'
-> Cc: linux-mmc@vger.kernel.org; merez@codeaurora.org
-> Subject: RE: [PATCH v6 0/2] *** adding and exposing SANITIZE capabili=
-ty to the user
-> space via a unique IOCTL ***
->=20
-> First, the REQ_SECURE + REQ_DISCARD are used for specific sector/s. S=
-ANITIZE is a
-> generic command that erase all unmapped sectors.
-If a lot of sectors, like 4GBytes, have been marked as unmapped, how lo=
-ng will SANITIZE command take to erase all of them? Will it cause a lon=
-g time delay for other requests?
 
-> Second, secure erase for a specific sector (SECURE TRIM) is no longer=
- supported.
-REQ_SECURE can still erase a specific sector in current MMC driver.
-If the device support SANITIZE, driver will first use ERASE/TRIM comman=
-d to mark unmapped sectors, and then issue SANITIZE command to erase th=
-em. eMMC4.5 specification has said clearly that ERASE/TRIM command can =
-move the mapped host address range to the unmapped host address range.
-If the device cannot support SANTIZE, driver will use secure erase/trim=
- command directly.
+--pfTAc8Cvt8L6I27a
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
->=20
-> Anyhow, SANITIZE replaces the need to issue REQ_SECURE as part of the
-> REQ_DISCARD request. In this way DISCARD request finishes much faster=
- (order of
-> magnitude) and thus improves system performance. When the NVM content=
- must
-> be erased, the user may use SANITIZE to erase all unmapped sectors.
->=20
-> An example of usage is refurbished devices in which the carrier wants=
- to erase
-> NVM content (since the user used only DISCARDs), in this case the a S=
-ANITIZE
-> operation will be triggered in the carrier labs from a dedicated appl=
-ication through
-> IOCTL that goes directly to the device. Note that no change to the FS=
- is required for
-> such operation.
-I think the usage you posted here is just what REQ_SECURE implemented. =
-REQ_SECURE will first unmapped the mapped host address and then issue S=
-ANITIZE command to erase the contents.
+On Sat, Jun 09, 2012 at 12:39:15PM -0700, Philip Rakity wrote:
 
-Thanks
-Chuanxiao
->=20
-> Thanks,
-> Yaniv
->=20
-> =3D > -----Original Message-----
-> =3D > From: S, Venkatraman [mailto:svenkatr@ti.com] =3D > Sent: Frida=
-y, June 08, 2012
-> 2:30 PM =3D > To: Yaniv Gardi =3D > Cc: linux-mmc@vger.kernel.org;
-> merez@codeaurora.org =3D > Subject: Re: [PATCH v6 0/2] *** adding and=
- exposing
-> SANITIZE capability to =3D > the user space via a unique IOCTL *** =3D=
- > =3D > On Thu, Jun
-> 7, 2012 at 8:08 PM, Yaniv Gardi <ygardi@codeaurora.org> =3D > wrote:
-> =3D > > *** adding and exposing SANITIZE capability to the user space=
- via a =3D > >
-> unique IOCTL *** =3D > =3D > Well, is this really needed ? As I under=
-stand, SANITIZE is
-> identical to =3D > REQ_SECURE + REQ_DISCARD.
-> =3D > Mapping the device function to an existing attribute is more ea=
-sy that =3D >
-> creating the whole plumbing around SANITIZE, just because it exists.
-> =3D > Apart from the IOCTL, it would be useful to find if any file sy=
-stems want to =3D >
-> use this, and it is any way more friendly than SECURE + DISCARD.
-> =3D >
-> =3D > >
-> =3D > > changes patch v6:
-> =3D > > fixed some code review comments
-> =3D > > added timeout dependency for CMD6 when issueing the sanitize =
-=3D >
-> command.
-> =3D > >
-> =3D > > changes patch v5:
-> =3D > > added BUG_ON() where needed
-> =3D > >
-> =3D > > changes patch v4:
-> =3D > > removed a few debug printouts
-> =3D > >
-> =3D > > changes patch v3:
-> =3D > > split the patch into 2 commits - block and mmc/card added cap=
-ability =3D > >
-> MMC_CAP2_SANITIZE to mmc controller =3D > > =3D > > Yaniv Gardi (2):
-> =3D > > =A0block: ioctl support for sanitize in eMMC 4.5 =3D > > =A0m=
-mc: card: Adding
-> support for sanitize in eMMC 4.5 =3D > > =3D > > =A0block/blk-core.c =
-=A0 =A0 =A0 =A0 =A0| =A0 18
-> +++++++++-- =3D > > =A0block/blk-lib.c =A0 =A0 =A0 =A0 =A0 | =A0 51
-> +++++++++++++++++++++++++++++++ =3D > > =A0block/blk-merge.c =A0 =A0 =
-=A0 =A0 | =A0 =A06
-> ++++ =3D > > =A0block/elevator.c =A0 =A0 =A0 =A0 =A0| =A0 41 ++++++++=
-++++++++++++++++-
-> =3D > > =A0block/ioctl.c =A0 =A0 =A0 =A0 =A0 =A0 | =A0 =A09 +++++
-> =3D > > =A0drivers/mmc/card/block.c =A0| =A0 72 =3D > >
-> ++++++++++++++++++++++++++++++++------------
-> =3D > > =A0drivers/mmc/card/queue.c =A0| =A0 10 +++++-
-> =3D > > =A0include/linux/blk_types.h | =A0 =A05 ++-
-> =3D > > =A0include/linux/blkdev.h =A0 =A0| =A0 =A03 ++
-> =3D > > =A0include/linux/fs.h =A0 =A0 =A0 =A0| =A0 =A01 +
-> =3D > > =A0include/linux/mmc/host.h =A0| =A0 =A01 +
-> =3D > > =A0kernel/trace/blktrace.c =A0 | =A0 =A02 + =3D > > =A012 fil=
-es changed, 191
-> insertions(+), 28 deletions(-) =3D > > =3D > > -- =3D > > 1.7.6 =3D >=
- > -- =3D > > Sent by a
-> consultant of the Qualcomm Innovation Center, Inc.
-> =3D > > The Qualcomm Innovation Center, Inc. is a member of the Code =
-Aurora =3D > >
-> Forum =3D > > -- =3D > > To unsubscribe from this list: send the line=
- "unsubscribe
-> linux-mmc"
-> =3D > > in the body of a message to majordomo@vger.kernel.org More =3D=
- >
-> majordomo =3D > > info at =A0http://vger.kernel.org/majordomo-info.ht=
-ml
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> -	trace_regulator_set_voltage_complete(rdev_get_name(rdev), selector);
+> +		voltage =3D _regulator_get_voltage(rdev);
+> +		if (voltage >=3D 0)
+> +			_notifier_call_chain(rdev,
+> +					REGULATOR_EVENT_VOLTAGE_CHANGE,
+> +					(void *)voltage);
+> +	}
+> +	trace_regulator_set_voltage_complete(rdev_get_name(rdev), ret);
+
+Hrm, I know we discussed this offline but now that I see the actual code
+for the full change here I'm a bit worried about the performance impact
+=66rom calling get_voltage() again with devices that don't cache the
+register map (it'll be negligable for those that do).  Looking a bit at
+the context I think probably what we want to do here is directly call
+list_voltage() for the selector we've just set so that the driver
+doesn't end up going back to the hardware to read the register value.
+
+Another option is to look at the notifier chain to see if there's any
+actual users but that seems more complicated and less abstracted.
+
+We definitely do want to pass the voltage out, now that I see this I
+seem to remember that the reason we don't is exactly the performance
+concern above but that all predates the use of selectors here which
+means we should be able to avoid the I/O costs.
+
+--pfTAc8Cvt8L6I27a
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJP1W0PAAoJEBus8iNuMP3dnuoP/jt4EHxRQg5857ThJdJltyiu
+btZKDBT7Tsqo0tCXm/zzpotcIJkEp8adC6J/+E4Sq08nFSvTbLPj2ISTYgc9lpKF
+pt/Zq/TUE6CS849n7btJ0c6YUMNu1wkJw5un03/kiwh5XSUNRT1Mj6sANOJYclZ8
+28aS9JfxA2fZ4KICOmbei80NcZLjSKkDNkZm7/x2TCH2Lz8UPTQ1HCaamMCNgBny
+NijzXJ6V7YANTF9bn5iywryAwXWUrHmAJFeEjQI8fDSIbQr1F9AbZ7UFhK5DwRNs
+ByZj/TWrwmOpmCEAQgkcPLtNMiOKeJuur4acpkmsOUqJsSnEbzJVPkOAvuV8mtqu
+rzy1oTV+PIZMAlmWRI6yC52CGqYd1vK3kItMRELC5T9lbaCE4jXKrbc+xLyAJ3l8
+rM49XhQHW3vwAM/oSz2riGpFFIbCCG0CZe8KuvPUuYQrKl0GmaVNXsVDinOi8fUf
+UlAoFTe/aLQbjQCfI1Daj8e1K511z2yrLnvtdIB9SYAKmBphYAIR3nvhqHFCJEV9
+GQjijCMz8XTQMSPpUge4OnlrYkd+W6zfJ+0dnQLoIaVy/Ns/hvXeuMUHFUgPwulf
+0232udQ1Ts4qJJkM/JdVu55+lQAx3+aK8enFwHNS3D8ajEDbUkVJapNr5AwGW58f
+yiW+Kr8eoiWH8wfZtdyA
+=X4yC
+-----END PGP SIGNATURE-----
+
+--pfTAc8Cvt8L6I27a--
