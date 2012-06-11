@@ -1,41 +1,28 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH v7 1/3] mmc: core: Add packed command feature of eMMC4.5
-Date: Mon, 11 Jun 2012 13:26:53 -0700 (PDT)
-Message-ID: <68ac9afd251593ab3df348a469a10adb.squirrel@www.codeaurora.org>
-References: <000601cd47ab$8ad77c50$a08674f0$%jun@samsung.com>
+From: Muthu Kumar <muthu.lkml@gmail.com>
+Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
+Date: Mon, 11 Jun 2012 14:19:46 -0700
+Message-ID: <CAFR8uefCD_WXDM6m+-XwG10+W0UXqOtK7_sxWD3uVckh3pnR-Q@mail.gmail.com>
+References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
+	<1338576911-17089-2-git-send-email-merez@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:25629 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750885Ab2FKU0x (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jun 2012 16:26:53 -0400
-In-Reply-To: <000601cd47ab$8ad77c50$a08674f0$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1338576911-17089-2-git-send-email-merez@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Maya Erez <merez@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Maya Erez' <merez@codeaurora.org>, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>
 
+On Fri, Jun 1, 2012 at 11:55 AM, Maya Erez <merez@codeaurora.org> wrote:
+> The write packing control will ensure that read requests latency is
+> not increased due to long write packed commands.
+>
+> The trigger for enabling the write packing is managing to pack several
+> write requests. The number of potential packed requests that will trigger
+> the packing can be configured via sysfs by writing the required value to:
+> /sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
+> The trigger for disabling the write packing is fetching a read request.
+>
 
-> +	if ((host->caps2 & MMC_CAP2_PACKED_CMD) &&
-> +			((card->ext_csd.max_packed_writes > 0) ||
-> +			(card->ext_csd.max_packed_reads > 0))) {
-> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +				EXT_CSD_EXP_EVENTS_CTRL,
-> +				EXT_CSD_PACKED_EVENT_EN,
-> +				card->ext_csd.generic_cmd6_time);
-> +		if (err && err != -EBADMSG)
-> +			goto free_card;
-
-Subhash suggestion to change to the following is missing:
-     if (  (host->caps2 & MMC_CAP2_PACKED_WR &&
-card->ext_csd.max_packed_writes > 0) ||
-            (host->caps2 & MMC_CAP2_PACKED_RD &&
-card->ext_csd.max_packed_reads > 0)
-
-Thanks,
-Maya Erez
-Consultant for Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-
+If it is applicable only to MMC why do we have this sysfs attr for all
+block devices?
