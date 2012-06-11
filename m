@@ -1,276 +1,84 @@
-From: merez@codeaurora.org
-Subject: RE: [PATCH v2 1/1] mmc: block: Add write packing control
-Date: Mon, 11 Jun 2012 06:55:35 -0700 (PDT)
-Message-ID: <453f08411c87367450f544d288745bee.squirrel@www.codeaurora.org>
-References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
-    <1338576911-17089-2-git-send-email-merez@codeaurora.org>
-    <007c01cd455a$56392050$02ab60f0$%jun@samsung.com>
-    <780c1dad11fe08de17a3ff41b22ba3b8.squirrel@www.codeaurora.org>
-    <000a01cd47b2$05982420$10c86c60$%jun@samsung.com>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH 4/5 v3] mmc: add a function to get a regulator, supplying
+ card's Vdd
+Date: Mon, 11 Jun 2012 22:23:33 +0800
+Message-ID: <20120611142332.GR11439@opensource.wolfsonmicro.com>
+References: <Pine.LNX.4.64.1205251045490.13353@axis700.grange>
+ <Pine.LNX.4.64.1205251208440.13353@axis700.grange>
+ <Pine.LNX.4.64.1205251230540.13353@axis700.grange>
+ <CAPDyKFrrxyk-JpLFge5+0xbYjJ=-24avWn8Optfg88-i006-Ng@mail.gmail.com>
+ <1925406B-D680-40BB-890A-78447EEB4583@marvell.com>
+ <4FC33362.4010806@intel.com>
+ <20120528144317.GF4032@opensource.wolfsonmicro.com>
+ <Pine.LNX.4.64.1206111321120.29799@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <000a01cd47b2$05982420$10c86c60$%jun@samsung.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Maya Erez' <merez@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 'DOCUMENTATION'' <linux-doc@vger.kernel.org>, 'open list' <linux-kernel@vger.kernel.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="brdEIFGMNIjz5YJG"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from cassiel.sirena.org.uk ([80.68.93.111]:42379 "EHLO
+	cassiel.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755039Ab2FKOX7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jun 2012 10:23:59 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1206111321120.29799@axis700.grange>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@marvell.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
 
 
-> Maya Erez <merez@codeaurora.org> wrote:
->>
->> > Hi,
->> >
->> > How can we check the effect?
->> > Do you have any result?
->> We ran parallel lmdd read and write operations and found out that the
->> write packing causes the read throughput to drop from 24MB/s to 12MB/s.
->> The write packing control managed to increase the read throughput back
->> to
->> the original value.
->> We also examined "real life" scenarios, such as performing a big push
->> operation in parallel to launching several applications. We measured the
->> read latency and found out that with the write packing control the worst
->> case of the read latency was smaller.
->>
->> > Please check the several comment below.
->> >
->> > Maya Erez <merez@codeaurora.org> wrote:
->> >> The write packing control will ensure that read requests latency is
->> >> not increased due to long write packed commands.
->> >>
->> >> The trigger for enabling the write packing is managing to pack
->> several
->> >> write requests. The number of potential packed requests that will
->> >> trigger
->> >> the packing can be configured via sysfs by writing the required value
->> >> to:
->> >> /sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
->> >> The trigger for disabling the write packing is fetching a read
->> request.
->> >>
->> >> ---
->> >>  Documentation/mmc/mmc-dev-attrs.txt |   17 ++++++
->> >>  drivers/mmc/card/block.c            |  100
->> >> ++++++++++++++++++++++++++++++++++-
->> >>  drivers/mmc/card/queue.c            |    8 +++
->> >>  drivers/mmc/card/queue.h            |    3 +
->> >>  include/linux/mmc/host.h            |    1 +
->> >>  5 files changed, 128 insertions(+), 1 deletions(-)
->> >>
->> >> diff --git a/Documentation/mmc/mmc-dev-attrs.txt
->> >> b/Documentation/mmc/mmc-dev-attrs.txt
->> >> index 22ae844..08f7312 100644
->> >> --- a/Documentation/mmc/mmc-dev-attrs.txt
->> >> +++ b/Documentation/mmc/mmc-dev-attrs.txt
->> >> @@ -8,6 +8,23 @@ The following attributes are read/write.
->> >>
->> >>  	force_ro		Enforce read-only access even if write protect switch is
->> >> off.
->> >>
->> >> +	num_wr_reqs_to_start_packing 	This attribute is used to determine
->> >> +	the trigger for activating the write packing, in case the write
->> >> +	packing control feature is enabled.
->> >> +
->> >> +	When the MMC manages to reach a point where
->> >> num_wr_reqs_to_start_packing
->> >> +	write requests could be packed, it enables the write packing
->> feature.
->> >> +	This allows us to start the write packing only when it is
->> beneficial
->> >> +	and has minimum affect on the read latency.
->> >> +
->> >> +	The number of potential packed requests that will trigger the
->> packing
->> >> +	can be configured via sysfs by writing the required value to:
->> >> +	/sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
->> >> +
->> >> +	The default value of num_wr_reqs_to_start_packing was determined by
->> >> +	running parallel lmdd write and lmdd read operations and
->> calculating
->> >> +	the max number of packed writes requests.
->> >> +
->> >>  SD and MMC Device Attributes
->> >>  ============================
->> >>
->> >> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> >> index 2785fd4..ef192fb 100644
->> >> --- a/drivers/mmc/card/block.c
->> >> +++ b/drivers/mmc/card/block.c
->> >> @@ -114,6 +114,7 @@ struct mmc_blk_data {
->> >>  	struct device_attribute force_ro;
->> >>  	struct device_attribute power_ro_lock;
->> >>  	int	area_type;
->> >> +	struct device_attribute num_wr_reqs_to_start_packing;
->> >>  };
->> >>
->> >>  static DEFINE_MUTEX(open_lock);
->> >> @@ -281,6 +282,38 @@ out:
->> >>  	return ret;
->> >>  }
->> >>
->> >> +static ssize_t
->> >> +num_wr_reqs_to_start_packing_show(struct device *dev,
->> >> +				  struct device_attribute *attr, char *buf)
->> >> +{
->> >> +	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
->> >> +	int num_wr_reqs_to_start_packing;
->> >> +	int ret;
->> >> +
->> >> +	num_wr_reqs_to_start_packing =
->> md->queue.num_wr_reqs_to_start_packing;
->> >> +
->> >> +	ret = snprintf(buf, PAGE_SIZE, "%d\n",
->> num_wr_reqs_to_start_packing);
->> >> +
->> >> +	mmc_blk_put(md);
->> >> +	return ret;
->> >> +}
->> >> +
->> >> +static ssize_t
->> >> +num_wr_reqs_to_start_packing_store(struct device *dev,
->> >> +				 struct device_attribute *attr,
->> >> +				 const char *buf, size_t count)
->> >> +{
->> >> +	int value;
->> >> +	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
->> >> +
->> >> +	sscanf(buf, "%d", &value);
->> >> +	if (value >= 0)
->> >> +		md->queue.num_wr_reqs_to_start_packing = value;
->> >> +
->> >> +	mmc_blk_put(md);
->> >> +	return count;
->> >> +}
->> >> +
->> >>  static int mmc_blk_open(struct block_device *bdev, fmode_t mode)
->> >>  {
->> >>  	struct mmc_blk_data *md = mmc_blk_get(bdev->bd_disk);
->> >> @@ -1313,6 +1346,48 @@ static void mmc_blk_rw_rq_prep(struct
->> >> mmc_queue_req *mqrq,
->> >>  	mmc_queue_bounce_pre(mqrq);
->> >>  }
->> >>
->> >> +static void mmc_blk_write_packing_control(struct mmc_queue *mq,
->> >> +					  struct request *req)
->> >> +{
->> >> +	struct mmc_host *host = mq->card->host;
->> >> +	int data_dir;
->> >> +
->> >> +	if (!(host->caps2 & MMC_CAP2_PACKED_WR))
->> >> +		return;
->> >> +
->> >> +	/*
->> >> +	 * In case the packing control is not supported by the host, it
->> should
->> >> +	 * not have an effect on the write packing. Therefore we have to
->> >> enable
->> >> +	 * the write packing
->> >> +	 */
->> >> +	if (!(host->caps2 & MMC_CAP2_PACKED_WR_CONTROL)) {
->> >> +		mq->wr_packing_enabled = true;
->> >> +		return;
->> >> +	}
->> >> +
->> >> +	if (!req || (req && (req->cmd_flags & REQ_FLUSH))) {
->> >> +		if (mq->num_of_potential_packed_wr_reqs >
->> >> +				mq->num_wr_reqs_to_start_packing)
->> >> +			mq->wr_packing_enabled = true;
->> >> +		return;
->> >> +	}
->> >> +
->> >> +	data_dir = rq_data_dir(req);
->> >> +
->> >> +	if (data_dir == READ) {
->> >> +		mq->num_of_potential_packed_wr_reqs = 0;
->> >> +		mq->wr_packing_enabled = false;
->> >> +		return;
->> >> +	} else if (data_dir == WRITE) {
->> >> +		mq->num_of_potential_packed_wr_reqs++;
->> >> +	}
->> >> +
->> >> +	if (mq->num_of_potential_packed_wr_reqs >
->> >> +			mq->num_wr_reqs_to_start_packing)
->> >> +		mq->wr_packing_enabled = true;
->> > Write Packing is available only if continuing write requests are over
->> > num_wr_reqs_to_start_packing?
->> > That means individual request(1...17) will be issued with non-packing.
->> > Could you explain your policy more?
->> We try to identify the case where there is parallel read and write
->> operations. In our experiments we found out that the number of write
->> requests between read requests in parallel read and write operations
->> doesn't exceed 17 requests. Therefore, we can assume that fetching more
->> than 17 write requests without hitting a read request can indicate that
->> there is no read activity.
-> We can apply this experiment regardless I/O scheduler?
-> Which I/O scheduler was used with this experiment?
-The experiment was performed with the CFQ scheduler. Since the deadline
-uses a batch of 16 requests it should also fit the deadline scheduler.
-In case another value is required, this value can be changed via sysfs.
->
->> You are right that this affects the write throughput a bit but the goal
->> of
->> this algorithm is to make sure the read throughput and latency are not
->> decreased due to write. If this is not the desired result, this
->> algorithm
->> can be disabled.
->> >> +
->> >> +}
->> >> +
->> >>  static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct
->> request
->> >> *req)
->> >>  {
->> >>  	struct request_queue *q = mq->queue;
->> >> @@ -1332,6 +1407,9 @@ static u8 mmc_blk_prep_packed_list(struct
->> >> mmc_queue *mq, struct request *req)
->> >>  			!card->ext_csd.packed_event_en)
->> >>  		goto no_packed;
->> >>
->> >> +	if (!mq->wr_packing_enabled)
->> >> +		goto no_packed;
->> > If wr_packing_enabled is set to true, several write requests can be
->> > packed.
->> > We don't need to consider read request since packed write?
->> I'm not sure I understand the question. We check if there was a read
->> request in the mmc_blk_write_packing_control, and in such a case set
->> mq->wr_packing_enabled to false.
->> If I didn't answer the question, please explain it again.
-> Packed write can be possible after exceeding 17 requests.
-> Is it assured that read request doesn't follow immediately after packed
-> write?
-> I wonder this case.
-Currently in such a case we will send the packed command followed by the
-read request. The latency of this read request will be high due to waiting
-for the completion of the packed write. However, since we will disable the
-write packing, the latency of the following read requests will be low.
-We are working on a solution where the read request will bypass the write
-requests in such a case. This change requires modification of the
-scheduler in order to re-insert the write requests to the scheduler.
->
-> Thanks,
-> Seungwon Jeon.
->>
->> >
->> > Thanks,
->> > Seungwon Jeon
->>
->> Thanks,
->> Maya Erez
->> --
->> Sent by a consultant of the Qualcomm Innovation Center, Inc.
->> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+--brdEIFGMNIjz5YJG
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Thanks,
-Maya Erez
-Consultant for Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+On Mon, Jun 11, 2012 at 02:39:29PM +0200, Guennadi Liakhovetski wrote:
+> On Mon, 28 May 2012, Mark Brown wrote:
 
+> > Even if the supply is always on you can easily provide an always on
+> > regulator.  From the point of view of the consumer if there are two
+> > physical supplies needed it's much clearer and easier to just code that
+> > and deal with the fact that we might have no control over them
+> > externally, there's nothing device specific about that process.
+
+> Mark, I'm not sure I understand your above comment correctly. The=20
+> function, that I add in this patch doesn't do much now, that we removed=
+=20
+
+> IIUC, to satisfy Philip's requirement for a second regulator it would=20
+> suffice to just issue one more devm_regulator_get() and let the caller=20
+> deal with any errors. Is this what you're suggesting or are you against=
+=20
+> adding the second regulator? We could of course also add it later, but=20
+> that would change the function prototype (unless we add regulator pointer=
+s=20
+> to struct mmc_host itself). Whith existing users such changes are a bit=
+=20
+> messy...
+
+Yes, that's what I'm suggesting.  I guess you could wrap the two
+regulators up in a small struct without it being too invasive?
+
+--brdEIFGMNIjz5YJG
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJP1f8qAAoJEBus8iNuMP3dxWAP/iyMK6ILDgN19X+8/CtiKS12
+7mh4+iSqzicrR15lt4cl3595JKOv0OC6EyqCY0pQ/l4EfbTvUqVoc3eJmjhA901a
+Z+5P7oqWQoysqnqR/AaLC/oZvQBh1L10zhiVVEw7JMmIbUMGmHIuzac2nZ0CkpCT
+64HmPsolNH/Ha3YMrh9GXc+XwKgN/OxSUaNZqnzACf2yVOYYEyoHAPF+W94oFALO
+Nk1e48zkuIil6pQHXnStgp8ndnWEV7BdOPzzyE2mQNH2ooGmKTmaO6a4B8cDhU6f
+Tg+pYMiQF4I0cIk3QAy7/uqhekkO3BTBKSh240WHniTs/MmWKAKB/e++oZWFJVYM
+QIrpC2bD9+CsqG3ZZhvzDef6w5onO3YJPfEUEZ/tom0kSg9vbIT8tDq5ZpY4A71u
+xP6ZBojS6Avt81UZSgNiiJTDBtH02Lmt9MrDNF8Rlt09c5hBpiaiNCqYxSOyR3NY
+Hksu0fznnZq0KCSFzHW3R+peUc4XueN7O4wgBeIHS4o6HXckAe6e9vSQHq0a5Uws
+xl6ruO2+t5+wE394C+kwJTzhDkLQYmrh4e9A2GBeXlApNVva2BnQoFAWG9WxEUVF
+ua3HIyR4EvVClSCwin+CzmmRuJcS3GKA5cBEU/h4IDaTkEwpQyPmBut9zrU91q73
+qi6c4LqA8NvEP6Ut8I0+
+=OhtF
+-----END PGP SIGNATURE-----
+
+--brdEIFGMNIjz5YJG--
