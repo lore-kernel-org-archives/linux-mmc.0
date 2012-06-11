@@ -1,299 +1,244 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH v7 3/3] mmc: core: Support packed read command for eMMC4.5
- device
-Date: Mon, 11 Jun 2012 17:24:29 +0900
-Message-ID: <000801cd47ab$9eda9fc0$dc8fdf40$%jun@samsung.com>
+Subject: RE: [PATCH v2 1/1] mmc: block: Add write packing control
+Date: Mon, 11 Jun 2012 18:10:18 +0900
+Message-ID: <000a01cd47b2$05982420$10c86c60$%jun@samsung.com>
+References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
+ <1338576911-17089-2-git-send-email-merez@codeaurora.org>
+ <007c01cd455a$56392050$02ab60f0$%jun@samsung.com>
+ <780c1dad11fe08de17a3ff41b22ba3b8.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:44207 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751007Ab2FKIYa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jun 2012 04:24:30 -0400
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-reply-to: <780c1dad11fe08de17a3ff41b22ba3b8.squirrel@www.codeaurora.org>
 Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-doc-owner@vger.kernel.org
+To: 'Maya Erez' <merez@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 'DOCUMENTATION'' <linux-doc@vger.kernel.org>, 'open list' <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Maya Erez' <merez@codeaurora.org>, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>
 
-Add the packed read command for issuing datas. Unlike the
-packed write, command header is handled separately.
+Maya Erez <merez@codeaurora.org> wrote:
+> 
+> > Hi,
+> >
+> > How can we check the effect?
+> > Do you have any result?
+> We ran parallel lmdd read and write operations and found out that the
+> write packing causes the read throughput to drop from 24MB/s to 12MB/s.
+> The write packing control managed to increase the read throughput back to
+> the original value.
+> We also examined "real life" scenarios, such as performing a big push
+> operation in parallel to launching several applications. We measured the
+> read latency and found out that with the write packing control the worst
+> case of the read latency was smaller.
+> 
+> > Please check the several comment below.
+> >
+> > Maya Erez <merez@codeaurora.org> wrote:
+> >> The write packing control will ensure that read requests latency is
+> >> not increased due to long write packed commands.
+> >>
+> >> The trigger for enabling the write packing is managing to pack several
+> >> write requests. The number of potential packed requests that will
+> >> trigger
+> >> the packing can be configured via sysfs by writing the required value
+> >> to:
+> >> /sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
+> >> The trigger for disabling the write packing is fetching a read request.
+> >>
+> >> ---
+> >>  Documentation/mmc/mmc-dev-attrs.txt |   17 ++++++
+> >>  drivers/mmc/card/block.c            |  100
+> >> ++++++++++++++++++++++++++++++++++-
+> >>  drivers/mmc/card/queue.c            |    8 +++
+> >>  drivers/mmc/card/queue.h            |    3 +
+> >>  include/linux/mmc/host.h            |    1 +
+> >>  5 files changed, 128 insertions(+), 1 deletions(-)
+> >>
+> >> diff --git a/Documentation/mmc/mmc-dev-attrs.txt
+> >> b/Documentation/mmc/mmc-dev-attrs.txt
+> >> index 22ae844..08f7312 100644
+> >> --- a/Documentation/mmc/mmc-dev-attrs.txt
+> >> +++ b/Documentation/mmc/mmc-dev-attrs.txt
+> >> @@ -8,6 +8,23 @@ The following attributes are read/write.
+> >>
+> >>  	force_ro		Enforce read-only access even if write protect switch is
+> >> off.
+> >>
+> >> +	num_wr_reqs_to_start_packing 	This attribute is used to determine
+> >> +	the trigger for activating the write packing, in case the write
+> >> +	packing control feature is enabled.
+> >> +
+> >> +	When the MMC manages to reach a point where
+> >> num_wr_reqs_to_start_packing
+> >> +	write requests could be packed, it enables the write packing feature.
+> >> +	This allows us to start the write packing only when it is beneficial
+> >> +	and has minimum affect on the read latency.
+> >> +
+> >> +	The number of potential packed requests that will trigger the packing
+> >> +	can be configured via sysfs by writing the required value to:
+> >> +	/sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
+> >> +
+> >> +	The default value of num_wr_reqs_to_start_packing was determined by
+> >> +	running parallel lmdd write and lmdd read operations and calculating
+> >> +	the max number of packed writes requests.
+> >> +
+> >>  SD and MMC Device Attributes
+> >>  ============================
+> >>
+> >> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> >> index 2785fd4..ef192fb 100644
+> >> --- a/drivers/mmc/card/block.c
+> >> +++ b/drivers/mmc/card/block.c
+> >> @@ -114,6 +114,7 @@ struct mmc_blk_data {
+> >>  	struct device_attribute force_ro;
+> >>  	struct device_attribute power_ro_lock;
+> >>  	int	area_type;
+> >> +	struct device_attribute num_wr_reqs_to_start_packing;
+> >>  };
+> >>
+> >>  static DEFINE_MUTEX(open_lock);
+> >> @@ -281,6 +282,38 @@ out:
+> >>  	return ret;
+> >>  }
+> >>
+> >> +static ssize_t
+> >> +num_wr_reqs_to_start_packing_show(struct device *dev,
+> >> +				  struct device_attribute *attr, char *buf)
+> >> +{
+> >> +	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
+> >> +	int num_wr_reqs_to_start_packing;
+> >> +	int ret;
+> >> +
+> >> +	num_wr_reqs_to_start_packing = md->queue.num_wr_reqs_to_start_packing;
+> >> +
+> >> +	ret = snprintf(buf, PAGE_SIZE, "%d\n", num_wr_reqs_to_start_packing);
+> >> +
+> >> +	mmc_blk_put(md);
+> >> +	return ret;
+> >> +}
+> >> +
+> >> +static ssize_t
+> >> +num_wr_reqs_to_start_packing_store(struct device *dev,
+> >> +				 struct device_attribute *attr,
+> >> +				 const char *buf, size_t count)
+> >> +{
+> >> +	int value;
+> >> +	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
+> >> +
+> >> +	sscanf(buf, "%d", &value);
+> >> +	if (value >= 0)
+> >> +		md->queue.num_wr_reqs_to_start_packing = value;
+> >> +
+> >> +	mmc_blk_put(md);
+> >> +	return count;
+> >> +}
+> >> +
+> >>  static int mmc_blk_open(struct block_device *bdev, fmode_t mode)
+> >>  {
+> >>  	struct mmc_blk_data *md = mmc_blk_get(bdev->bd_disk);
+> >> @@ -1313,6 +1346,48 @@ static void mmc_blk_rw_rq_prep(struct
+> >> mmc_queue_req *mqrq,
+> >>  	mmc_queue_bounce_pre(mqrq);
+> >>  }
+> >>
+> >> +static void mmc_blk_write_packing_control(struct mmc_queue *mq,
+> >> +					  struct request *req)
+> >> +{
+> >> +	struct mmc_host *host = mq->card->host;
+> >> +	int data_dir;
+> >> +
+> >> +	if (!(host->caps2 & MMC_CAP2_PACKED_WR))
+> >> +		return;
+> >> +
+> >> +	/*
+> >> +	 * In case the packing control is not supported by the host, it should
+> >> +	 * not have an effect on the write packing. Therefore we have to
+> >> enable
+> >> +	 * the write packing
+> >> +	 */
+> >> +	if (!(host->caps2 & MMC_CAP2_PACKED_WR_CONTROL)) {
+> >> +		mq->wr_packing_enabled = true;
+> >> +		return;
+> >> +	}
+> >> +
+> >> +	if (!req || (req && (req->cmd_flags & REQ_FLUSH))) {
+> >> +		if (mq->num_of_potential_packed_wr_reqs >
+> >> +				mq->num_wr_reqs_to_start_packing)
+> >> +			mq->wr_packing_enabled = true;
+> >> +		return;
+> >> +	}
+> >> +
+> >> +	data_dir = rq_data_dir(req);
+> >> +
+> >> +	if (data_dir == READ) {
+> >> +		mq->num_of_potential_packed_wr_reqs = 0;
+> >> +		mq->wr_packing_enabled = false;
+> >> +		return;
+> >> +	} else if (data_dir == WRITE) {
+> >> +		mq->num_of_potential_packed_wr_reqs++;
+> >> +	}
+> >> +
+> >> +	if (mq->num_of_potential_packed_wr_reqs >
+> >> +			mq->num_wr_reqs_to_start_packing)
+> >> +		mq->wr_packing_enabled = true;
+> > Write Packing is available only if continuing write requests are over
+> > num_wr_reqs_to_start_packing?
+> > That means individual request(1...17) will be issued with non-packing.
+> > Could you explain your policy more?
+> We try to identify the case where there is parallel read and write
+> operations. In our experiments we found out that the number of write
+> requests between read requests in parallel read and write operations
+> doesn't exceed 17 requests. Therefore, we can assume that fetching more
+> than 17 write requests without hitting a read request can indicate that
+> there is no read activity.
+We can apply this experiment regardless I/O scheduler?
+Which I/O scheduler was used with this experiment?
 
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
----
- drivers/mmc/card/block.c |  134 +++++++++++++++++++++++++++++++++++++++++++---
- drivers/mmc/card/queue.c |    6 ++-
- drivers/mmc/card/queue.h |    2 +
- 3 files changed, 133 insertions(+), 9 deletions(-)
+> You are right that this affects the write throughput a bit but the goal of
+> this algorithm is to make sure the read throughput and latency are not
+> decreased due to write. If this is not the desired result, this algorithm
+> can be disabled.
+> >> +
+> >> +}
+> >> +
+> >>  static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request
+> >> *req)
+> >>  {
+> >>  	struct request_queue *q = mq->queue;
+> >> @@ -1332,6 +1407,9 @@ static u8 mmc_blk_prep_packed_list(struct
+> >> mmc_queue *mq, struct request *req)
+> >>  			!card->ext_csd.packed_event_en)
+> >>  		goto no_packed;
+> >>
+> >> +	if (!mq->wr_packing_enabled)
+> >> +		goto no_packed;
+> > If wr_packing_enabled is set to true, several write requests can be
+> > packed.
+> > We don't need to consider read request since packed write?
+> I'm not sure I understand the question. We check if there was a read
+> request in the mmc_blk_write_packing_control, and in such a case set
+> mq->wr_packing_enabled to false.
+> If I didn't answer the question, please explain it again.
+Packed write can be possible after exceeding 17 requests.
+Is it assured that read request doesn't follow immediately after packed write?
+I wonder this case.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 2107e4a..3f879d2 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -62,6 +62,7 @@ MODULE_ALIAS("mmc:block");
- 			(req->cmd_flags & REQ_META)) && \
- 			(rq_data_dir(req) == WRITE))
- #define PACKED_CMD_VER		0x01
-+#define PACKED_CMD_RD		0x01
- #define PACKED_CMD_WR		0x02
- 
- static DEFINE_MUTEX(block_mutex);
-@@ -104,6 +105,7 @@ struct mmc_blk_data {
- #define MMC_BLK_WRITE		BIT(1)
- #define MMC_BLK_DISCARD		BIT(2)
- #define MMC_BLK_SECDISCARD	BIT(3)
-+#define MMC_BLK_WR_HDR		BIT(4)
- 
- 	/*
- 	 * Only set in main mmc_blk_data associated
-@@ -1062,7 +1064,8 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 	 * kind.  If it was a write, we may have transitioned to
- 	 * program mode, which we have to wait for it to complete.
- 	 */
--	if (!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ) {
-+	if ((!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ) ||
-+			(mq_mrq->packed_cmd == MMC_PACKED_WR_HDR)) {
- 		u32 status;
- 		do {
- 			int err = get_card_status(card, &status, 5);
-@@ -1087,7 +1090,8 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 		       (unsigned)blk_rq_sectors(req),
- 		       brq->cmd.resp[0], brq->stop.resp[0]);
- 
--		if (rq_data_dir(req) == READ) {
-+		if (rq_data_dir(req) == READ &&
-+				mq_mrq->packed_cmd != MMC_PACKED_WR_HDR) {
- 			if (ecc_err)
- 				return MMC_BLK_ECC_ERR;
- 			return MMC_BLK_DATA_ERR;
-@@ -1330,6 +1334,9 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
- 	if ((rq_data_dir(cur) == WRITE) &&
- 			(card->host->caps2 & MMC_CAP2_PACKED_WR))
- 		max_packed_rw = card->ext_csd.max_packed_writes;
-+	else if ((rq_data_dir(cur) == READ) &&
-+			(card->host->caps2 & MMC_CAP2_PACKED_RD))
-+		max_packed_rw = card->ext_csd.max_packed_reads;
- 
- 	if (max_packed_rw == 0)
- 		goto no_packed;
-@@ -1426,13 +1433,16 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
- 	u32 *packed_cmd_hdr = mqrq->packed_cmd_hdr;
- 	u8 i = 1;
- 
--	mqrq->packed_cmd = MMC_PACKED_WRITE;
-+	mqrq->packed_cmd = (rq_data_dir(req) == READ) ?
-+		MMC_PACKED_WR_HDR : MMC_PACKED_WRITE;
- 	mqrq->packed_blocks = 0;
- 	mqrq->packed_fail_idx = MMC_PACKED_N_IDX;
- 
- 	memset(packed_cmd_hdr, 0, sizeof(mqrq->packed_cmd_hdr));
- 	packed_cmd_hdr[0] = (mqrq->packed_num << 16) |
--		(PACKED_CMD_WR << 8) | PACKED_CMD_VER;
-+		(((rq_data_dir(req) == READ) ?
-+		  PACKED_CMD_RD : PACKED_CMD_WR) << 8) |
-+		PACKED_CMD_VER;
- 
- 	/*
- 	 * Argument for each entry of packed group
-@@ -1464,7 +1474,8 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
- 	brq->mrq.stop = &brq->stop;
- 
- 	brq->sbc.opcode = MMC_SET_BLOCK_COUNT;
--	brq->sbc.arg = MMC_CMD23_ARG_PACKED | (mqrq->packed_blocks + 1);
-+	brq->sbc.arg = MMC_CMD23_ARG_PACKED |
-+		((rq_data_dir(req) == READ) ? 1 : mqrq->packed_blocks + 1);
- 	brq->sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
- 
- 	brq->cmd.opcode = MMC_WRITE_MULTIPLE_BLOCK;
-@@ -1474,7 +1485,12 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
- 	brq->cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
- 
- 	brq->data.blksz = 512;
--	brq->data.blocks = mqrq->packed_blocks + 1;
-+	/*
-+	 * Write separately the packd command header only for packed read.
-+	 * In case of packed write, header is sent with blocks of data.
-+	 */
-+	brq->data.blocks = (rq_data_dir(req) == READ) ?
-+		1 : mqrq->packed_blocks + 1;
- 	brq->data.flags |= MMC_DATA_WRITE;
- 
- 	brq->stop.opcode = MMC_STOP_TRANSMISSION;
-@@ -1487,6 +1503,45 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
- 	brq->data.sg_len = mmc_queue_map_sg(mq, mqrq);
- 
- 	mqrq->mmc_active.mrq = &brq->mrq;
-+	mqrq->mmc_active.err_check = (rq_data_dir(req) == READ) ?
-+		mmc_blk_err_check : mmc_blk_packed_err_check;
-+
-+	mmc_queue_bounce_pre(mqrq);
-+}
-+
-+static void mmc_blk_packed_rrq_prep(struct mmc_queue_req *mqrq,
-+				    struct mmc_card *card,
-+				    struct mmc_queue *mq)
-+{
-+	struct mmc_blk_request *brq = &mqrq->brq;
-+	struct request *req = mqrq->req;
-+
-+	mqrq->packed_cmd = MMC_PACKED_READ;
-+
-+	memset(brq, 0, sizeof(struct mmc_blk_request));
-+	brq->mrq.cmd = &brq->cmd;
-+	brq->mrq.data = &brq->data;
-+	brq->mrq.stop = &brq->stop;
-+
-+	brq->cmd.opcode = MMC_READ_MULTIPLE_BLOCK;
-+	brq->cmd.arg = blk_rq_pos(req);
-+	if (!mmc_card_blockaddr(card))
-+		brq->cmd.arg <<= 9;
-+	brq->cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-+	brq->data.blksz = 512;
-+	brq->data.blocks = mqrq->packed_blocks;
-+	brq->data.flags |= MMC_DATA_READ;
-+
-+	brq->stop.opcode = MMC_STOP_TRANSMISSION;
-+	brq->stop.arg = 0;
-+	brq->stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-+
-+	mmc_set_data_timeout(&brq->data, card);
-+
-+	brq->data.sg = mqrq->sg;
-+	brq->data.sg_len = mmc_queue_map_sg(mq, mqrq);
-+
-+	mqrq->mmc_active.mrq = &brq->mrq;
- 	mqrq->mmc_active.err_check = mmc_blk_packed_err_check;
- 
- 	mmc_queue_bounce_pre(mqrq);
-@@ -1521,6 +1576,56 @@ static int mmc_blk_cmd_err(struct mmc_blk_data *md, struct mmc_card *card,
- 	return ret;
- }
- 
-+static int mmc_blk_chk_hdr_err(struct mmc_queue *mq, int status)
-+{
-+	struct mmc_blk_data *md = mq->data;
-+	struct mmc_card *card = md->queue.card;
-+	int type = MMC_BLK_WR_HDR, err = 0;
-+
-+	switch (status) {
-+	case MMC_BLK_PARTIAL:
-+	case MMC_BLK_RETRY:
-+		err = 0;
-+		break;
-+	case MMC_BLK_CMD_ERR:
-+	case MMC_BLK_ABORT:
-+	case MMC_BLK_DATA_ERR:
-+	case MMC_BLK_ECC_ERR:
-+		err = mmc_blk_reset(md, card->host, type);
-+		if (!err)
-+			mmc_blk_reset_success(md, type);
-+		break;
-+	}
-+
-+	return err;
-+}
-+
-+static int mmc_blk_issue_packed_rd(struct mmc_queue *mq,
-+				   struct mmc_queue_req *mq_rq)
-+{
-+	struct mmc_blk_data *md = mq->data;
-+	struct mmc_card *card = md->queue.card;
-+	int status, ret, retry = 2;
-+
-+	do {
-+		mmc_start_req(card->host, NULL, (int *) &status);
-+		if (status) {
-+			ret = mmc_blk_chk_hdr_err(mq, status);
-+			if (ret)
-+				break;
-+			mmc_blk_packed_hdr_wrq_prep(mq_rq, card, mq);
-+			mmc_start_req(card->host, &mq_rq->mmc_active, NULL);
-+		} else {
-+			mmc_blk_packed_rrq_prep(mq_rq, card, mq);
-+			mmc_start_req(card->host, &mq_rq->mmc_active, NULL);
-+			ret = 0;
-+			break;
-+		}
-+	} while (retry-- > 0);
-+
-+	return ret;
-+}
-+
- static int mmc_blk_end_packed_req(struct mmc_queue_req *mq_rq)
- {
- 	struct request *prq;
-@@ -1626,8 +1731,12 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 		} else
- 			areq = NULL;
- 		areq = mmc_start_req(card->host, areq, (int *) &status);
--		if (!areq)
--			return 0;
-+		if (!areq) {
-+			if (mq->mqrq_cur->packed_cmd == MMC_PACKED_WR_HDR)
-+				goto snd_packed_rd;
-+			else
-+				return 0;
-+		}
- 
- 		mq_rq = container_of(areq, struct mmc_queue_req, mmc_active);
- 		brq = &mq_rq->brq;
-@@ -1726,10 +1835,19 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 				mmc_blk_packed_hdr_wrq_prep(mq_rq, card, mq);
- 				mmc_start_req(card->host,
- 						&mq_rq->mmc_active, NULL);
-+				if (mq_rq->packed_cmd == MMC_PACKED_WR_HDR) {
-+					if (mmc_blk_issue_packed_rd(mq, mq_rq))
-+						goto cmd_abort;
-+				}
- 			}
- 		}
- 	} while (ret);
- 
-+snd_packed_rd:
-+	if (mq->mqrq_cur->packed_cmd == MMC_PACKED_WR_HDR) {
-+		if (mmc_blk_issue_packed_rd(mq, mq->mqrq_cur))
-+			goto start_new_req;
-+	}
- 	return 1;
- 
-  cmd_abort:
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 165d85a..277905e 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -389,11 +389,15 @@ static unsigned int mmc_queue_packed_map_sg(struct mmc_queue *mq,
- 
- 	cmd = mqrq->packed_cmd;
- 
--	if (cmd == MMC_PACKED_WRITE) {
-+	if (cmd == MMC_PACKED_WR_HDR || cmd == MMC_PACKED_WRITE) {
- 		__sg = sg;
- 		sg_set_buf(__sg, mqrq->packed_cmd_hdr,
- 				sizeof(mqrq->packed_cmd_hdr));
- 		sg_len++;
-+		if (cmd == MMC_PACKED_WR_HDR) {
-+			sg_mark_end(__sg);
-+			return sg_len;
-+		}
- 		__sg->page_link &= ~0x02;
- 	}
- 
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index 5e04938..a8cad1f 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -14,7 +14,9 @@ struct mmc_blk_request {
- 
- enum mmc_packed_cmd {
- 	MMC_PACKED_NONE = 0,
-+	MMC_PACKED_WR_HDR,
- 	MMC_PACKED_WRITE,
-+	MMC_PACKED_READ,
- };
- 
- struct mmc_queue_req {
--- 
-1.7.0.4
-
+Thanks,
+Seungwon Jeon.
+> 
+> >
+> > Thanks,
+> > Seungwon Jeon
+> 
+> Thanks,
+> Maya Erez
+> --
+> Sent by a consultant of the Qualcomm Innovation Center, Inc.
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
