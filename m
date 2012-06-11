@@ -1,70 +1,56 @@
-From: Artem Bityutskiy <dedekind1@gmail.com>
-Subject: Re: [PATCH 2/3] ext4: Context support
-Date: Mon, 11 Jun 2012 14:41:31 +0300
-Message-ID: <1339414891.2401.12.camel@sauron.fi.intel.com>
-References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com>
-	 <1339411562-17100-2-git-send-email-saugata.das@stericsson.com>
-Reply-To: dedekind1@gmail.com
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 05/29] regulator: use IS_ERR_OR_NULL() instead of
+ open-coding
+Date: Mon, 11 Jun 2012 13:38:13 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1206111332310.29799@axis700.grange>
+References: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
+ <1336057558-11031-6-git-send-email-g.liakhovetski@gmx.de>
+ <20120503153239.GN3955@opensource.wolfsonmicro.com> <20120518085749.GE24355@linux-sh.org>
+ <20120518150417.GA4039@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature";
-	boundary="=-DxL3rsG/llSyPQYw6hpH"
-Return-path: <linux-ext4-owner@vger.kernel.org>
-In-Reply-To: <1339411562-17100-2-git-send-email-saugata.das@stericsson.com>
-Sender: linux-ext4-owner@vger.kernel.org
-To: Saugata Das <saugata.das@stericsson.com>
-Cc: linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, Saugata Das <saugata.das@linaro.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <20120518150417.GA4039@opensource.wolfsonmicro.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: Paul Mundt <lethal@linux-sh.org>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+Hi Mark
 
---=-DxL3rsG/llSyPQYw6hpH
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+On Fri, 18 May 2012, Mark Brown wrote:
 
-On Mon, 2012-06-11 at 16:16 +0530, Saugata Das wrote:
-> +/* Get the context of the buffer within the underlying storage device */
-> +static int ext4_get_context(struct page *page)
-> +{
-> +	if (page && page->mapping && page->mapping->host)
-> +		return page->mapping->host->i_ino;
-> +	else
-> +		return 0;
-> +}
+> On Fri, May 18, 2012 at 05:57:50PM +0900, Paul Mundt wrote:
+> > On Thu, May 03, 2012 at 04:32:39PM +0100, Mark Brown wrote:
+> > > On Thu, May 03, 2012 at 05:05:34PM +0200, Guennadi Liakhovetski wrote:
+> 
+> > > > -	if (regulator == NULL || IS_ERR(regulator))
+> > > > +	if (IS_ERR_OR_NULL(regulator))
+> 
+> > > The bigger question here is why we're accepting NULL in the first place.
+> 
+> > I'm not sure about the regulator case, but it's been useful to support
+> > passing NULL around in the clock framework case. There are plenty of
+> > cases where a struct clk is optional and if we fail to find the clock we
+> > just set clk to NULL and continue on without having to constantly check
+> > the value of the clk pointer, which helps considerably when you consider
+> > the number of clk_enable/disable() pairs some drivers have.
+> 
+> > Presumably the same applies for regulators?
+> 
+> This is checking the value of regulator_get(), NULL is a perfectly valid
+> regulator value to get passed back.
 
-Word "context" is very generic and it is widely used various things, and
-I believe we should try to avoid overloading this term and obfuscating
-the I/O stack with various functions and other identifiers like
-"get_context()". This would hurt readability. It is fine to use it
-withing the UFS-specific code, but not globally withing the kernel code.
+Sorry, could you clarify, how it is valid? No, I'm not proposing to revive 
+this patch, just curious, what exactly you meant by this. AFAICS NULL is 
+never returned from regulator_get(). The value, that's returned by it is 
+then directly dereferenced in other regulator API calls, for which you 
+don't normally want a NULL. So, having a regulator pointer == NULL seems 
+to be as valid to me as causing a BUG() is? :-)
 
-I do not really have good name candidates, but even "ufscontext" is
-already better than just "context". Or "iocontext" ? Or just "ufsdata" ?
-
---=20
-Best Regards,
-Artem Bityutskiy
-
---=-DxL3rsG/llSyPQYw6hpH
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-Content-Transfer-Encoding: 7bit
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAABAgAGBQJP1dlrAAoJECmIfjd9wqK0OrYP/RAZPz7knC0MnIatbM8yeiFF
-OstklmN/o9JM/2jUSLzRVXKaYNGdQ2W5ZPyc452c7uXbPmvSjy1Yxr/els55Yg3l
-hMs7gYvlJC5ptSzLYQFjx57RyXc7/bIrVp+Vz7soqFyIYyED5BF4SUQIzFZhjGs3
-hfphdkGEQ3aiijn5JqYXvtSaUcDrrb5Ea/uJ39f8MpTUoDbkh6KbimMokuZsB6H1
-RDhN/nJxJ53HLSIA4WsiCOkCopaUVcBNwT4jiftqJp+mcUtrl8/RHWN8cBlIsCVU
-rpjJCg8jz3UjHam3W0VfcDCwZEfqszOYzuvqTeGCBxEn+gjQnmXwiD2n3oUTSmWg
-5kskT9ipFo/5Im4bsnwAjBBiCdsyjW0gWBWlbwqwn6ccQbb/EmV/4fdo5s6jLBBg
-l04x0SMUy6OEtqQISpdlGITp4sYX2L35CgtU4gnCzoSFKprtrp6HZgbGlcMoX7T7
-X9Z+C487fbakq/X0Qcc5ouebxcYLdB+F9iJ+EG3Ys/uB8oD2XJqIttqXVDxVO59T
-YM34Uu4TgCM2ScNQ2lHQakGt3+UX8xulR97mnQi8T6drUVgFZVZwHTs1NhpMRVOZ
-+MSnUMswBYvRLmKBrehkZcR/0Z+VbKzhWSaAu7vsK/kggKIERH8bz80Fhbjs+oVF
-QHzxgqIsiV1S4fLcuM1B
-=4Fv5
------END PGP SIGNATURE-----
-
---=-DxL3rsG/llSyPQYw6hpH--
-
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
