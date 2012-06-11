@@ -1,78 +1,139 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH 4/5 v3] mmc: add a function to get a regulator, supplying
- card's Vdd
-Date: Mon, 11 Jun 2012 16:43:54 +0200
-Message-ID: <4FD6042A.10102@stericsson.com>
-References: <Pine.LNX.4.64.1205251045490.13353@axis700.grange> <Pine.LNX.4.64.1205251208440.13353@axis700.grange> <Pine.LNX.4.64.1205251230540.13353@axis700.grange> <CAPDyKFrrxyk-JpLFge5+0xbYjJ=-24avWn8Optfg88-i006-Ng@mail.gmail.com> <1925406B-D680-40BB-890A-78447EEB4583@marvell.com> <4FC33362.4010806@intel.com> <20120528144317.GF4032@opensource.wolfsonmicro.com> <Pine.LNX.4.64.1206111321120.29799@axis700.grange> <20120611142332.GR11439@opensource.wolfsonmicro.com> <15DF5528-1451-4121-A572-C293B5DCA8B4@marvell.com>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH v6 0/2] *** adding and exposing SANITIZE capability to the
+ user space via a unique IOCTL ***
+Date: Mon, 11 Jun 2012 20:25:34 +0530
+Message-ID: <CANfBPZ_eV2r-VV-myQ+MYfNWjpx1+cojfxtEs7EE2XnJB=3-zw@mail.gmail.com>
+References: <1339079942-23542-1-git-send-email-ygardi@codeaurora.org>
+ <CANfBPZ9ab=x=gbYHH_Zj7mjO+zP4diuAvT+t8CamnQh3qZN8Vg@mail.gmail.com> <000b01cd470f$daef74a0$90ce5de0$@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog108.obsmtp.com ([207.126.144.125]:48599 "EHLO
-	eu1sys200aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755289Ab2FKOo0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jun 2012 10:44:26 -0400
-In-Reply-To: <15DF5528-1451-4121-A572-C293B5DCA8B4@marvell.com>
+Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:34436 "EHLO
+	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753410Ab2FKO4A convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Jun 2012 10:56:00 -0400
+Received: by bkcji2 with SMTP id ji2so4638061bkc.33
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jun 2012 07:55:56 -0700 (PDT)
+In-Reply-To: <000b01cd470f$daef74a0$90ce5de0$@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
+To: Yaniv Gardi <ygardi@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, merez@codeaurora.org
 
-On 06/11/2012 04:36 PM, Philip Rakity wrote:
+On Sun, Jun 10, 2012 at 7:19 PM, Yaniv Gardi <ygardi@codeaurora.org> wr=
+ote:
+> First, the REQ_SECURE + REQ_DISCARD are used for specific sector/s. S=
+ANITIZE
+> is a generic command that erase all unmapped sectors.
+> Second, secure erase for a specific sector (SECURE TRIM) is no longer
+> supported.
 >
-> On Jun 11, 2012, at 7:23 AM, Mark Brown wrote:
->
->> On Mon, Jun 11, 2012 at 02:39:29PM +0200, Guennadi Liakhovetski wrote:
->>> On Mon, 28 May 2012, Mark Brown wrote:
->>
->>>> Even if the supply is always on you can easily provide an always on
->>>> regulator.  From the point of view of the consumer if there are two
->>>> physical supplies needed it's much clearer and easier to just code that
->>>> and deal with the fact that we might have no control over them
->>>> externally, there's nothing device specific about that process.
->>
->>> Mark, I'm not sure I understand your above comment correctly. The
->>> function, that I add in this patch doesn't do much now, that we removed
->>
->>> IIUC, to satisfy Philip's requirement for a second regulator it would
->>> suffice to just issue one more devm_regulator_get() and let the caller
->>> deal with any errors. Is this what you're suggesting or are you against
->>> adding the second regulator? We could of course also add it later, but
->>> that would change the function prototype (unless we add regulator pointers
->>> to struct mmc_host itself). Whith existing users such changes are a bit
->>> messy...
->>
->> Yes, that's what I'm suggesting.  I guess you could wrap the two
->> regulators up in a small struct without it being too invasive?
->
->
-> Some background notes:
-> Historically SD cards operated with the same vccq (signaling for dat and clk pins)
-> and vcc (core) voltage.
-> usually 3.3v -->  we would use one regulator to supply both.  The power (regulator)
-> was always on and as far as the SD code was concerned never exposed
-> (eg regulator_get (vmmc) returned an error).
->
-> Now enter UHS cards.  They allow (require) the vccq voltage change from
-> 3.3v to 1.8v when operating in UHS mode (DDR50, SDR50, SDR104).
-> They also note that when a voltage switch is done to move the card
-> into UHS mode (3.3V to 1.8V) the switch may fail.  In this case vcc
-> needs to turned off and then back on to cause the card to reinitialize.
->
-> This led me to the conclusion two regulators are required.
-> vccq must be switchable between 3.3 and 1.8
-> vcc must be able to be turned off/on and may be switchable to a lower voltage.
->
-> Note: embedded MMC is different (eMMC).  Since it is embedded it is
-> assumed by the spec that the board designed knows that they are doing
-> and the correct voltages are supplied.
->
+> Anyhow, SANITIZE replaces the need to issue REQ_SECURE as part of the
+> REQ_DISCARD request. In this way DISCARD request finishes much faster=
+ (order
+> of magnitude) and thus improves system performance. When the NVM cont=
+ent
+> must be erased, the user may use SANITIZE to erase all unmapped secto=
+rs.
 
-Just some additional input;
-In eMMC scenario you have two regulators as well. One called vcc (power 
-to the card) and one called vccq (io-voltage). Very much depending on 
-the hw board design, you may use one, two or no regulator at all for 
-these power(s).
+SECURE is not used for all DISCARDs anyway - so that's how it works alr=
+eady.
 
-Kind regards
-Ulf Hansson
+>
+> An example of usage is refurbished devices in which the carrier wants=
+ to
+> erase NVM content (since the user used only DISCARDs), in this case t=
+he a
+> SANITIZE operation will be triggered in the carrier labs from a dedic=
+ated
+> application through IOCTL that goes directly to the device. Note that=
+ no
+> change to the FS is required for such operation.
+>
+> Thanks,
+> Yaniv
+>
+> =3D > -----Original Message-----
+> =3D > From: S, Venkatraman [mailto:svenkatr@ti.com]
+> =3D > Sent: Friday, June 08, 2012 2:30 PM
+> =3D > To: Yaniv Gardi
+> =3D > Cc: linux-mmc@vger.kernel.org; merez@codeaurora.org
+> =3D > Subject: Re: [PATCH v6 0/2] *** adding and exposing SANITIZE ca=
+pability
+> to
+> =3D > the user space via a unique IOCTL ***
+> =3D >
+> =3D > On Thu, Jun 7, 2012 at 8:08 PM, Yaniv Gardi <ygardi@codeaurora.=
+org>
+> =3D > wrote:
+> =3D > > *** adding and exposing SANITIZE capability to the user space=
+ via a
+> =3D > > unique IOCTL ***
+> =3D >
+> =3D > Well, is this really needed ? As I understand, SANITIZE is iden=
+tical to
+> =3D > REQ_SECURE + REQ_DISCARD.
+> =3D > Mapping the device function to an existing attribute is more ea=
+sy that
+> =3D > creating the whole plumbing around SANITIZE, just because it ex=
+ists.
+> =3D > Apart from the IOCTL, it would be useful to find if any file sy=
+stems
+> want to
+> =3D > use this, and it is any way more friendly than SECURE + DISCARD=
+=2E
+> =3D >
+> =3D > >
+> =3D > > changes patch v6:
+> =3D > > fixed some code review comments
+> =3D > > added timeout dependency for CMD6 when issueing the sanitize
+> =3D > command.
+> =3D > >
+> =3D > > changes patch v5:
+> =3D > > added BUG_ON() where needed
+> =3D > >
+> =3D > > changes patch v4:
+> =3D > > removed a few debug printouts
+> =3D > >
+> =3D > > changes patch v3:
+> =3D > > split the patch into 2 commits - block and mmc/card added cap=
+ability
+> =3D > > MMC_CAP2_SANITIZE to mmc controller
+> =3D > >
+> =3D > > Yaniv Gardi (2):
+> =3D > > =A0block: ioctl support for sanitize in eMMC 4.5
+> =3D > > =A0mmc: card: Adding support for sanitize in eMMC 4.5
+> =3D > >
+> =3D > > =A0block/blk-core.c =A0 =A0 =A0 =A0 =A0| =A0 18 +++++++++--
+> =3D > > =A0block/blk-lib.c =A0 =A0 =A0 =A0 =A0 | =A0 51 +++++++++++++=
+++++++++++++++++++
+> =3D > > =A0block/blk-merge.c =A0 =A0 =A0 =A0 | =A0 =A06 ++++
+> =3D > > =A0block/elevator.c =A0 =A0 =A0 =A0 =A0| =A0 41 +++++++++++++=
++++++++++++-
+> =3D > > =A0block/ioctl.c =A0 =A0 =A0 =A0 =A0 =A0 | =A0 =A09 +++++
+> =3D > > =A0drivers/mmc/card/block.c =A0| =A0 72
+> =3D > > ++++++++++++++++++++++++++++++++------------
+> =3D > > =A0drivers/mmc/card/queue.c =A0| =A0 10 +++++-
+> =3D > > =A0include/linux/blk_types.h | =A0 =A05 ++-
+> =3D > > =A0include/linux/blkdev.h =A0 =A0| =A0 =A03 ++
+> =3D > > =A0include/linux/fs.h =A0 =A0 =A0 =A0| =A0 =A01 +
+> =3D > > =A0include/linux/mmc/host.h =A0| =A0 =A01 +
+> =3D > > =A0kernel/trace/blktrace.c =A0 | =A0 =A02 +
+> =3D > > =A012 files changed, 191 insertions(+), 28 deletions(-)
+> =3D > >
+> =3D > > --
+> =3D > > 1.7.6
+> =3D > > --
+> =3D > > Sent by a consultant of the Qualcomm Innovation Center, Inc.
+> =3D > > The Qualcomm Innovation Center, Inc. is a member of the Code =
+Aurora
+> =3D > > Forum
+> =3D > > --
+> =3D > > To unsubscribe from this list: send the line "unsubscribe lin=
+ux-mmc"
+> =3D > > in the body of a message to majordomo@vger.kernel.org More
+> =3D > majordomo
+> =3D > > info at =A0http://vger.kernel.org/majordomo-info.html
+>
