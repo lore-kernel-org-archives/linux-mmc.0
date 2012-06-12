@@ -1,59 +1,57 @@
-From: Ted Ts'o <tytso@mit.edu>
-Subject: Re: [PATCH 2/3] ext4: Context support
-Date: Tue, 12 Jun 2012 08:32:17 -0400
-Message-ID: <20120612123217.GB7288@thunk.org>
-References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com>
- <1339411562-17100-2-git-send-email-saugata.das@stericsson.com>
- <1339414891.2401.12.camel@sauron.fi.intel.com>
- <20120611122736.GA14051@thunk.org>
- <CAKLKtzeo1x+0Kxd0+29yqvXh4FBiS+p=T7b1-BWb6HXH5e1hhQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: [PATCH] mmc: tmio: Don't access hardware registers after stopping clocks
+Date: Tue, 12 Jun 2012 14:57:18 +0200
+Message-ID: <1339505838-8831-1-git-send-email-laurent.pinchart@ideasonboard.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from li9-11.members.linode.com ([67.18.176.11]:49296 "EHLO
-	imap.thunk.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752106Ab2FLMcV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 12 Jun 2012 08:32:21 -0400
-Content-Disposition: inline
-In-Reply-To: <CAKLKtzeo1x+0Kxd0+29yqvXh4FBiS+p=T7b1-BWb6HXH5e1hhQ@mail.gmail.com>
+Received: from perceval.ideasonboard.com ([95.142.166.194]:36796 "EHLO
+	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752534Ab2FLM5P (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jun 2012 08:57:15 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Saugata Das <saugata.das@linaro.org>
-Cc: Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, Arnd Bergmann <arnd.bergmann@linaro.org>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 
-On Tue, Jun 12, 2012 at 05:51:22PM +0530, Saugata Das wrote:
-> > The proof-of-concept patches seem to use the inode number as a way =
-of
-> > trying to group related writes, but what about at a larger level th=
-an
-> > that? =A0For example, if we install a RPM or deb package where all =
-of
-> > the files will likely be replaced together, should that be given th=
-e
-> > same context?
->=20
-> In this patch, context is used at file level based on inode number.
-> So, in the above example, multiple contexts will be used for the
-> directory, file updates during RPM installation.
+The tmio_mmc_set_ios() function configures the MMC power, clock and bus
+width. When the MMC controller gets powered off, runtime PM switches the
+MSTP clock off. Writing to to CTL_SD_MEM_CARD_OPT register afterwards
+fails and prints an error message to the kernel log.
 
-Yes --- I was trying to explore if we should try to do better than
-that.  For example, it would probably be a good idea (at minimum) to
-hash some kind of partition id into the inode number to form the
-context id.  It's probably rare that a MMC card would be partitioned,
-but it might be much more common for other flash devices.
+As configuring the bus width is pointless when the interface gets
+powered down, skip the operation when power is off.
 
-I could also imagine schemes where via some fcntl, additional file
-descriptors could be joined to the context of another file descriptor.
-Or maybe we have a scheme whereby some high-level, abstract, context
-id's could be generated, and assigned to a group of file descriptors.
+Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+---
+ drivers/mmc/host/tmio_mmc_pio.c |   16 +++++++++-------
+ 1 files changed, 9 insertions(+), 7 deletions(-)
 
-A hueristic where all file creations that occur within close together
-in time are considered to be related might work well for the package
-installation case, but might break down in others.  Which is why I
-asked the question of what is the downside if the hueristics screw up,
-and occasionally group together files/blocks that aren't related with
-respect to when they are deallocated (since that *is* what the flash
-devices care about, right?)
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 9a7996a..de1226d 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -816,13 +816,15 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		tmio_mmc_clk_stop(host);
+ 	}
+ 
+-	switch (ios->bus_width) {
+-	case MMC_BUS_WIDTH_1:
+-		sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x80e0);
+-	break;
+-	case MMC_BUS_WIDTH_4:
+-		sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x00e0);
+-	break;
++	if (host->power) {
++		switch (ios->bus_width) {
++		case MMC_BUS_WIDTH_1:
++			sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x80e0);
++		break;
++		case MMC_BUS_WIDTH_4:
++			sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x00e0);
++		break;
++		}
+ 	}
+ 
+ 	/* Let things settle. delay taken from winCE driver */
+-- 
+1.7.3.4
 
-						- Ted
