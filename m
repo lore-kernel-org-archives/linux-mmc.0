@@ -1,57 +1,43 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: [PATCH] mmc: tmio: Don't access hardware registers after stopping clocks
-Date: Tue, 12 Jun 2012 14:57:18 +0200
-Message-ID: <1339505838-8831-1-git-send-email-laurent.pinchart@ideasonboard.com>
+From: Johan Rudholm <johan.rudholm@stericsson.com>
+Subject: [PATCH] mmc: card: Do not scan boot partitions
+Date: Tue, 12 Jun 2012 15:04:13 +0200
+Message-ID: <1339506253-7164-1-git-send-email-johan.rudholm@stericsson.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:36796 "EHLO
-	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752534Ab2FLM5P (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jun 2012 08:57:15 -0400
+Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:37610 "EHLO
+	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751168Ab2FLNEi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jun 2012 09:04:38 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>
 
-The tmio_mmc_set_ios() function configures the MMC power, clock and bus
-width. When the MMC controller gets powered off, runtime PM switches the
-MSTP clock off. Writing to to CTL_SD_MEM_CARD_OPT register afterwards
-fails and prints an error message to the kernel log.
+Do not scan boot partitions for "soft" partitions, since the boot
+partitions are supposed to contain boot code. Silences the following
+message during boot:
 
-As configuring the bus width is pointless when the interface gets
-powered down, skip the operation when power is off.
+ mmcblkXbootY: unknown partition table
 
-Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
 ---
- drivers/mmc/host/tmio_mmc_pio.c |   16 +++++++++-------
- 1 files changed, 9 insertions(+), 7 deletions(-)
+ drivers/mmc/card/block.c |    2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 9a7996a..de1226d 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -816,13 +816,15 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		tmio_mmc_clk_stop(host);
- 	}
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 7e3f453..efdea68 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1515,6 +1515,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	md->disk->queue = md->queue.queue;
+ 	md->disk->driverfs_dev = parent;
+ 	set_disk_ro(md->disk, md->read_only || default_ro);
++	if (area_type & MMC_BLK_DATA_AREA_BOOT)
++		md->disk->flags = GENHD_FL_NO_PART_SCAN;
  
--	switch (ios->bus_width) {
--	case MMC_BUS_WIDTH_1:
--		sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x80e0);
--	break;
--	case MMC_BUS_WIDTH_4:
--		sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x00e0);
--	break;
-+	if (host->power) {
-+		switch (ios->bus_width) {
-+		case MMC_BUS_WIDTH_1:
-+			sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x80e0);
-+		break;
-+		case MMC_BUS_WIDTH_4:
-+			sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x00e0);
-+		break;
-+		}
- 	}
- 
- 	/* Let things settle. delay taken from winCE driver */
+ 	/*
+ 	 * As discussed on lkml, GENHD_FL_REMOVABLE should:
 -- 
-1.7.3.4
+1.7.10
 
