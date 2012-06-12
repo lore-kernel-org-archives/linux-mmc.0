@@ -1,50 +1,60 @@
 From: merez@codeaurora.org
-Subject: Re: [PATCH v4 1/1] block: Add test-iosched scheduler
-Date: Tue, 12 Jun 2012 12:58:44 -0700 (PDT)
-Message-ID: <f9b014a8098cce8e4bac8d333d7101c0.squirrel@www.codeaurora.org>
-References: <1339491984-8462-1-git-send-email-merez@codeaurora.org>
-    <1339491984-8462-2-git-send-email-merez@codeaurora.org>
-    <x4962awk4fs.fsf@segfault.boston.devel.redhat.com>
+Subject: Re: [PATCH 1/1] block: Add eMMC4.5 packed commands unit-tests
+Date: Tue, 12 Jun 2012 13:04:08 -0700 (PDT)
+Message-ID: <877b9088e2763c57e24f9931b5839a3e.squirrel@www.codeaurora.org>
+References: <1339494088-29126-1-git-send-email-merez@codeaurora.org>
+    <1339494088-29126-2-git-send-email-merez@codeaurora.org>
+    <x491ulkk4cb.fsf@segfault.boston.devel.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <x4962awk4fs.fsf@segfault.boston.devel.redhat.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Jeff Moyer <jmoyer@redhat.com>
-Cc: Maya Erez <merez@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:35833 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753067Ab2FLUEI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jun 2012 16:04:08 -0400
+In-Reply-To: <x491ulkk4cb.fsf@segfault.boston.devel.redhat.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jeff Moyer <jmoyer@redhat.com>
+Cc: Maya Erez <merez@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Lee Susman <lsusman@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
 
 
-On Tue, June 12, 2012 7:09 am, Jeff Moyer wrote:
+On Tue, June 12, 2012 7:11 am, Jeff Moyer wrote:
 > Maya Erez <merez@codeaurora.org> writes:
 >
->> The test scheduler allows testing a block device by dispatching
->> specific requests according to the test case and declare PASS/FAIL
->> according to the requests completion error code
->
-> What sort of tests have you written that make use of this
-> infrastructure?
->
->> @@ -1072,8 +1072,6 @@ struct request *blk_get_request(struct
->> request_queue *q, int rw, gfp_t gfp_mask)
->>  {
->>  	struct request *rq;
+>> Expose the following packed commands tests:
+>> - Test the write packed commands list preparation
+>> - Simulate a returned error code
+>> - Send an invalid packed command to the card
 >>
->> -	BUG_ON(rw != READ && rw != WRITE);
->> -
+>> Signed-off-by: Lee Susman <lsusman@codeaurora.org>
+>> Signed-off-by: Maya Erez <merez@codeaurora.org>
+>>
+>> diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig
+>> index 3b1f783..bbe8cac 100644
+>> --- a/drivers/mmc/card/Kconfig
+>> +++ b/drivers/mmc/card/Kconfig
+>> @@ -67,3 +67,14 @@ config MMC_TEST
+>>
+>>  	  This driver is only of interest to those developing or
+>>  	  testing a host driver. Most people should say N here.
+>> +
+>> +config MMC_BLOCK_TEST
+>> +	tristate "MMC block test"
+>> +	depends on MMC_BLOCK && IOSCHED_TEST
 >
-> Please explain this.
-get_request and get_request_wait, called by blk_get_request, expects to
-get the REQ_SYNC flag in addition to the read/write flag. Moreover, it
-uses the REQ_SYNC flag in its algorithm decision making.
-However blk_get_request expects to get a Boolean to indicate only
-read/write flag and cannot handle the REQ_SYNC flag.
+> Umm, if this depends on your iosched-test patch, then you should make
+> them both part of a patch series.  It would have answered one of my
+> questions on that patch.
 >
 > Cheers,
 > Jeff
 >
+I will combine them in the next patch.
 
+Thanks,
+Maya Erez
 
 -- 
 Sent by consultant of Qualcomm Innovation Center, Inc.
