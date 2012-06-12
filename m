@@ -1,62 +1,66 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH 1/1] block: Add eMMC4.5 packed commands unit-tests
-Date: Tue, 12 Jun 2012 13:04:08 -0700 (PDT)
-Message-ID: <877b9088e2763c57e24f9931b5839a3e.squirrel@www.codeaurora.org>
-References: <1339494088-29126-1-git-send-email-merez@codeaurora.org>
-    <1339494088-29126-2-git-send-email-merez@codeaurora.org>
-    <x491ulkk4cb.fsf@segfault.boston.devel.redhat.com>
+From: Arnd Bergmann <arnd.bergmann@linaro.org>
+Subject: Re: [PATCH 2/3] ext4: Context support
+Date: Tue, 12 Jun 2012 20:07:28 +0000
+Message-ID: <201206122007.28514.arnd.bergmann@linaro.org>
+References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com> <201206121455.50639.arnd.bergmann@linaro.org> <20120612181958.GB1803@thunk.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: Text/Plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:35833 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753067Ab2FLUEI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jun 2012 16:04:08 -0400
-In-Reply-To: <x491ulkk4cb.fsf@segfault.boston.devel.redhat.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-ext4-owner@vger.kernel.org>
+In-Reply-To: <20120612181958.GB1803@thunk.org>
+Sender: linux-ext4-owner@vger.kernel.org
+To: Ted Ts'o <tytso@mit.edu>
+Cc: Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jeff Moyer <jmoyer@redhat.com>
-Cc: Maya Erez <merez@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Lee Susman <lsusman@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
 
+On Tuesday 12 June 2012, Ted Ts'o wrote:
+> On Tue, Jun 12, 2012 at 02:55:50PM +0000, Arnd Bergmann wrote:
+> > 
+> > As I said, it's not a technical limitation, but a logical conclusion
+> > from trying to use the context ID for something useful. The only
+> > reason to use context ID in the first place is to reduce the amount
+> > of garbage collection in the device (improving performance and expected
+> > life of the device), so any context ID annotations we make should be
+> > directed at giving useful information to the device to actually do that.
+> 
+> ... and a big part of that is knowing what is the downside if we give
+> incorrect information to the device.  And what are the exact
+> implications of what it means to group a set of blocks into a
+> "context".
+> 
+> If it is fundamentally a promise that blocks in a context will be
+> overwritten or trimmed at the same time then is it counterproductive
+> to group blocks for overwrite-in-place database where the lifetimes of
+> the block are extremely different?  Is that giving "wrong" information
+> going to significantly increase the write amplification factor? 
 
-On Tue, June 12, 2012 7:11 am, Jeff Moyer wrote:
-> Maya Erez <merez@codeaurora.org> writes:
->
->> Expose the following packed commands tests:
->> - Test the write packed commands list preparation
->> - Simulate a returned error code
->> - Send an invalid packed command to the card
->>
->> Signed-off-by: Lee Susman <lsusman@codeaurora.org>
->> Signed-off-by: Maya Erez <merez@codeaurora.org>
->>
->> diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig
->> index 3b1f783..bbe8cac 100644
->> --- a/drivers/mmc/card/Kconfig
->> +++ b/drivers/mmc/card/Kconfig
->> @@ -67,3 +67,14 @@ config MMC_TEST
->>
->>  	  This driver is only of interest to those developing or
->>  	  testing a host driver. Most people should say N here.
->> +
->> +config MMC_BLOCK_TEST
->> +	tristate "MMC block test"
->> +	depends on MMC_BLOCK && IOSCHED_TEST
->
-> Umm, if this depends on your iosched-test patch, then you should make
-> them both part of a patch series.  It would have answered one of my
-> questions on that patch.
->
-> Cheers,
-> Jeff
->
-I will combine them in the next patch.
+I don't think that can be derived from the definition of the context.
+Instead, the important part is that we separate the data with predictable
+lifetime from data with unpredictable lifetime. If we happen to be
+writing both a linear file on the one hand (or multiple such files) and
+at the same time updating a database, any reasonable implementation would
+be able to benefit from the fact that the linear data is now in a different
+erase block from the random-access data. The database file is still
+screwed like it is without context support, but it no longer makes
+the linear access worse.
 
-Thanks,
-Maya Erez
+> It may be that the standard doesn't actually answer these questions
+> and even worse, SSD manufactures may be stupidly trying to keep this
+> stuff as a "trade securet" --- but we do need to know in order to
+> optimize performance on real hardware....
 
--- 
-Sent by consultant of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+Right. The danger here is that the context support was described in
+the standard first, while none of the devices seem to even be
+smart enough to make use of the information we put in there. Once
+operating systems start putting some data in there, at least
+some manufacturers will start making use of that data to optimize
+the accesses, but it's very unlikely that they will tell us exactly
+what they are doing. Having code in ext4 that uses the contexts will
+at least make it more likely that the firmware optimizations are
+based on ext4 measurements rather than some other file system or
+operating system.
+>From talking with the emmc device vendors, I can tell you that ext4
+is very high on the list of file systems to optimize for, because
+they all target Android products.
 
+	Arnd
