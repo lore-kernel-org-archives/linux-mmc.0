@@ -1,54 +1,104 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v7 1/3] mmc: core: Add packed command feature of eMMC4.5
-Date: Tue, 12 Jun 2012 12:12:49 +0900
-Message-ID: <001a01cd4849$3f287180$bd795480$%jun@samsung.com>
-References: <000601cd47ab$8ad77c50$a08674f0$%jun@samsung.com>
- <68ac9afd251593ab3df348a469a10adb.squirrel@www.codeaurora.org>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
+Date: Tue, 12 Jun 2012 09:37:12 +0530
+Message-ID: <CANfBPZ9ce-f3FSmv6sFx6-fvpipe2HvZNzWu2=iwr8PNTb7qhQ@mail.gmail.com>
+References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
+ <1338576911-17089-2-git-send-email-merez@codeaurora.org> <007c01cd455a$56392050$02ab60f0$%jun@samsung.com>
+ <780c1dad11fe08de17a3ff41b22ba3b8.squirrel@www.codeaurora.org>
+ <CANfBPZ-HukGqES4eUhxfDhLy+Sj6XJEyPu9kgKCAddPnVyoqKA@mail.gmail.com> <4c35449ed272eb5831cf2f8765eeeb48.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:49485 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751604Ab2FLDMv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jun 2012 23:12:51 -0400
-In-reply-to: <68ac9afd251593ab3df348a469a10adb.squirrel@www.codeaurora.org>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <4c35449ed272eb5831cf2f8765eeeb48.squirrel@www.codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: merez@codeaurora.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION' <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
-Maya Erez <merez@codeaurora.org> wrote:
-> > +	if ((host->caps2 & MMC_CAP2_PACKED_CMD) &&
-> > +			((card->ext_csd.max_packed_writes > 0) ||
-> > +			(card->ext_csd.max_packed_reads > 0))) {
-> > +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> > +				EXT_CSD_EXP_EVENTS_CTRL,
-> > +				EXT_CSD_PACKED_EVENT_EN,
-> > +				card->ext_csd.generic_cmd6_time);
-> > +		if (err && err != -EBADMSG)
-> > +			goto free_card;
-> 
-> Subhash suggestion to change to the following is missing:
->      if (  (host->caps2 & MMC_CAP2_PACKED_WR &&
-> card->ext_csd.max_packed_writes > 0) ||
->             (host->caps2 & MMC_CAP2_PACKED_RD &&
-> card->ext_csd.max_packed_reads > 0)
-Thanks to detect.
-It'll be applied.
+On Tue, Jun 12, 2012 at 1:49 AM,  <merez@codeaurora.org> wrote:
+>
+>> On Sat, Jun 9, 2012 at 8:16 PM, =A0<merez@codeaurora.org> wrote:
+>>>
+>>>> Hi,
+>>>>
+>>>> How can we check the effect?
+>>>> Do you have any result?
+>>> We ran parallel lmdd read and write operations and found out that t=
+he
+>>> write packing causes the read throughput to drop from 24MB/s to 12M=
+B/s.
+>>
+>> Whoa! That's a big drop.
+>> BTW, is there a problem with throughput or latency, or both ?
+>> If these numbers are over long duration (>5 seconds), then where are
+>> the cycles going?
+>> It would be nice to see some blktrace figures for the issue, and the=
+n fix
+>> it,
+>> rather than apply a band aid like the write-packing-control on top..
+> I believe this is because the write packing changes the dispatching p=
+olicy
+> of the scheduler. Without write packing only 2 write requests were
+> fetched, giving the read requests a chance to be inserted into the
+> scheduler while we wait for the completion of the first write request=
+=2E
 
-Best regards,
-Seungwon Jeon
+Which I/O scheduler are you using ? Both CFQ and deadline would do the
+balancing
+act to prevent writes overwhelming reads. Writes are async and reads
+are sync (usually),
+so this imbalance would have existed otherwise, packed command or not.
 
-> 
+> Then when the next fetch was performed the read request would be the
+> chosen one. When write packing is enabled we keep fetching all the wr=
+ite
+> requests that are queued (assuming there are no read requests inserte=
+d
+> yet) and when the read is inserted and fetched is has to wait for the
+> completion of a bigger amount of write requests.
+>
+
+Yes - but that should introduce latency, not bandwidth drop - unless yo=
+u are
+using the no-op scheduler.
+
+>>
+>>
+>>> The write packing control managed to increase the read throughput b=
+ack
+>>> to
+>>> the original value.
+>>> We also examined "real life" scenarios, such as performing a big pu=
+sh
+>>> operation in parallel to launching several applications. We measure=
+d the
+>>> read latency and found out that with the write packing control the =
+worst
+>>> case of the read latency was smaller.
+>>>
+>>>> Please check the several comment below.
+>>>>
+>>>> Maya Erez <merez@codeaurora.org> wrote:
+>>>>> The write packing control will ensure that read requests latency =
+is
+>>>>> not increased due to long write packed commands.
+>>>>>
+>>>>> The trigger for enabling the write packing is managing to pack se=
+veral
+>>>>> write requests. The number of potential packed requests that will
+>>>>> trigger
+>>>>> the packing can be configured via sysfs by writing the required v=
+alue
+>>>>> to:
+>>>>> /sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
+>>>>> The trigger for disabling the write packing is fetching a read
+>>>>> request.
+>>>>>
+>>
+>
 > Thanks,
 > Maya Erez
 > Consultant for Qualcomm Innovation Center, Inc.
 > Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+>
