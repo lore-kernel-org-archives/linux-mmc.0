@@ -1,57 +1,40 @@
-From: Jeff Moyer <jmoyer@redhat.com>
-Subject: Re: [PATCH v4 1/1] block: Add test-iosched scheduler
-Date: Tue, 12 Jun 2012 16:13:46 -0400
-Message-ID: <x498vfsi8zp.fsf@segfault.boston.devel.redhat.com>
-References: <1339491984-8462-1-git-send-email-merez@codeaurora.org>
-	<1339491984-8462-2-git-send-email-merez@codeaurora.org>
-	<x4962awk4fs.fsf@segfault.boston.devel.redhat.com>
-	<f9b014a8098cce8e4bac8d333d7101c0.squirrel@www.codeaurora.org>
+From: Ted Ts'o <tytso@mit.edu>
+Subject: Re: [PATCH 2/3] ext4: Context support
+Date: Tue, 12 Jun 2012 16:41:28 -0400
+Message-ID: <20120612204128.GF12161@thunk.org>
+References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com>
+ <201206121455.50639.arnd.bergmann@linaro.org>
+ <20120612181958.GB1803@thunk.org>
+ <201206122007.28514.arnd.bergmann@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41512 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751623Ab2FLUNt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 12 Jun 2012 16:13:49 -0400
-In-Reply-To: <f9b014a8098cce8e4bac8d333d7101c0.squirrel@www.codeaurora.org>
-	(merez@codeaurora.org's message of "Tue, 12 Jun 2012 12:58:44 -0700
-	(PDT)")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <201206122007.28514.arnd.bergmann@linaro.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Arnd Bergmann <arnd.bergmann@linaro.org>
+Cc: Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: merez@codeaurora.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 
-merez@codeaurora.org writes:
+On Tue, Jun 12, 2012 at 08:07:28PM +0000, Arnd Bergmann wrote:
+> Right. The danger here is that the context support was described in
+> the standard first, while none of the devices seem to even be
+> smart enough to make use of the information we put in there. Once
+> operating systems start putting some data in there, at least
+> some manufacturers will start making use of that data to optimize
+> the accesses, but it's very unlikely that they will tell us exactly
+> what they are doing. Having code in ext4 that uses the contexts will
+> at least make it more likely that the firmware optimizations are
+> based on ext4 measurements rather than some other file system or
+> operating system.
+>
+> From talking with the emmc device vendors, I can tell you that ext4
+> is very high on the list of file systems to optimize for, because
+> they all target Android products.
 
-> On Tue, June 12, 2012 7:09 am, Jeff Moyer wrote:
->> Maya Erez <merez@codeaurora.org> writes:
->>
->>> The test scheduler allows testing a block device by dispatching
->>> specific requests according to the test case and declare PASS/FAIL
->>> according to the requests completion error code
->>
->> What sort of tests have you written that make use of this
->> infrastructure?
->>
->>> @@ -1072,8 +1072,6 @@ struct request *blk_get_request(struct
->>> request_queue *q, int rw, gfp_t gfp_mask)
->>>  {
->>>  	struct request *rq;
->>>
->>> -	BUG_ON(rw != READ && rw != WRITE);
->>> -
->>
->> Please explain this.
-> get_request and get_request_wait, called by blk_get_request, expects to
-> get the REQ_SYNC flag in addition to the read/write flag. Moreover, it
-> uses the REQ_SYNC flag in its algorithm decision making.
-> However blk_get_request expects to get a Boolean to indicate only
-> read/write flag and cannot handle the REQ_SYNC flag.
+Well, I have a contact at SanDisk where I can discuss things under
+NDA, if that will help.  He had reached out to me specifically because
+of ext4 and Android --- he's the guy that I invited to give a talk at
+the LSF workshop last year.
 
-Right, so why is it okay to change this?  Right now, blk_get_request is
-used for block special requests.  There is no sense of sync vs. async
-for such requests (that's an fs request notion).  Perhaps you're calling
-the wrong function?
-
-Cheers,
-Jeff
+					- Ted
