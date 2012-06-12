@@ -1,28 +1,42 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] mmc: dt: Deduplicate binding docs by referencing mmc.txt
-Date: Tue, 12 Jun 2012 14:50:20 +0000
-Message-ID: <201206121450.21092.arnd@arndb.de>
-References: <87bokp5lv2.fsf@octavius.laptop.org>
+From: Arnd Bergmann <arnd.bergmann@linaro.org>
+Subject: Re: [PATCH 2/3] ext4: Context support
+Date: Tue, 12 Jun 2012 14:55:50 +0000
+Message-ID: <201206121455.50639.arnd.bergmann@linaro.org>
+References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com> <201206121329.25953.arnd.bergmann@linaro.org> <CAKLKtzdLvRNFWiAV_ssFfSQFTMmgq+jHq4LNG9H70Zq9WZm5yg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: Text/Plain;
-  charset="iso-8859-15"
+  charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:61212 "EHLO
+Received: from moutng.kundenserver.de ([212.227.17.8]:62109 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752145Ab2FLOu0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jun 2012 10:50:26 -0400
-In-Reply-To: <87bokp5lv2.fsf@octavius.laptop.org>
+	with ESMTP id S1751623Ab2FLOzy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jun 2012 10:55:54 -0400
+In-Reply-To: <CAKLKtzdLvRNFWiAV_ssFfSQFTMmgq+jHq4LNG9H70Zq9WZm5yg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Arnd Bergmann <arndb@arndb.de>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Stephen Warren <swarren@wwwdotorg.org>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, Wolfram Sang <w.sang@pengutronix.de>
+To: Saugata Das <saugata.das@linaro.org>
+Cc: Ted Ts'o <tytso@mit.edu>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org
 
-On Tuesday 12 June 2012, Chris Ball wrote:
+On Tuesday 12 June 2012, Saugata Das wrote:
+> > I don't think that is correct. The most obvious implementation in eMMC
+> > hardware for this would be to group all data from one context to be
+> > written into the same erase block, in order to reduce the amount
+> > of garbage collection that needs to happen at erase time. AFAICT,
+> > the main interest here is, as Ted is guessing correctly, to make sure
+> > that all data which gets written into one context has roughly the
+> > same life time before it gets erased or overwritten.
 > 
-> Now that we have common bindings for MMC, rewrite the individual
-> bindings to inherit from mmc.txt and describe their differences.
-> 
-> Signed-off-by: Chris Ball <cjb@laptop.org>
+> The restriction is there on "large unit" context, which prevents
+> trim/erase of the blocks till the context is active. But we do not
+> enable "large unit". On non-"large unit" context, the specification
+> does not restrict the trim/erase of blocks based on context.
 
-Acked-by: Arnd Bergmann <arnd@arndb.de>
+As I said, it's not a technical limitation, but a logical conclusion
+from trying to use the context ID for something useful. The only
+reason to use context ID in the first place is to reduce the amount
+of garbage collection in the device (improving performance and expected
+life of the device), so any context ID annotations we make should be
+directed at giving useful information to the device to actually do that.
+
+	Arnd
