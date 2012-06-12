@@ -1,52 +1,54 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH] mmc: dt: Add reg/interrupts to mmc.txt for clarity.
-Date: Mon, 11 Jun 2012 22:10:31 -0400
-Message-ID: <877gvd5lgo.fsf@octavius.laptop.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v7 1/3] mmc: core: Add packed command feature of eMMC4.5
+Date: Tue, 12 Jun 2012 12:12:49 +0900
+Message-ID: <001a01cd4849$3f287180$bd795480$%jun@samsung.com>
+References: <000601cd47ab$8ad77c50$a08674f0$%jun@samsung.com>
+ <68ac9afd251593ab3df348a469a10adb.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:51939 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751856Ab2FLCKl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 11 Jun 2012 22:10:41 -0400
+Received: from mailout4.samsung.com ([203.254.224.34]:49485 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751604Ab2FLDMv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jun 2012 23:12:51 -0400
+In-reply-to: <68ac9afd251593ab3df348a469a10adb.squirrel@www.codeaurora.org>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+To: merez@codeaurora.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>
 
-Even though these aren't parsed by the MMC driver, make clear that
-they're required by the OF core.  (Also, a few typo fixes.)
+Maya Erez <merez@codeaurora.org> wrote:
+> > +	if ((host->caps2 & MMC_CAP2_PACKED_CMD) &&
+> > +			((card->ext_csd.max_packed_writes > 0) ||
+> > +			(card->ext_csd.max_packed_reads > 0))) {
+> > +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> > +				EXT_CSD_EXP_EVENTS_CTRL,
+> > +				EXT_CSD_PACKED_EVENT_EN,
+> > +				card->ext_csd.generic_cmd6_time);
+> > +		if (err && err != -EBADMSG)
+> > +			goto free_card;
+> 
+> Subhash suggestion to change to the following is missing:
+>      if (  (host->caps2 & MMC_CAP2_PACKED_WR &&
+> card->ext_csd.max_packed_writes > 0) ||
+>             (host->caps2 & MMC_CAP2_PACKED_RD &&
+> card->ext_csd.max_packed_reads > 0)
+Thanks to detect.
+It'll be applied.
 
-Signed-off-by: Chris Ball <cjb@laptop.org>
----
- Documentation/devicetree/bindings/mmc/mmc.txt |   10 +++++++---
- 1 file changed, 7 insertions(+), 3 deletions(-)
+Best regards,
+Seungwon Jeon
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index 6e70dcd..8a6811f 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -2,13 +2,17 @@ These properties are common to multiple MMC host controllers. Any host
- that requires the respective functionality should implement them using
- these definitions.
- 
-+Interpreted by the OF core:
-+- reg: Registers location and length.
-+- interrupts: Interrupts used by the MMC controller.
-+
- Required properties:
- - bus-width: Number of data lines, can be <1>, <4>, or <8>
- 
- Optional properties:
--- cd-gpios : Specify GPIOs for card detection, see gpio binding
--- wp-gpios : Specify GPIOs for write protection, see gpio binding
--- cd-inverted: when present, polarity on the wp gpio line is inverted
-+- cd-gpios: Specify GPIOs for card detection, see gpio binding
-+- wp-gpios: Specify GPIOs for write protection, see gpio binding
-+- cd-inverted: when present, polarity on the cd gpio line is inverted
- - wp-inverted: when present, polarity on the wp gpio line is inverted
- - non-removable: non-removable slot (like eMMC)
- - max-frequency: maximum operating clock frequency
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> 
+> Thanks,
+> Maya Erez
+> Consultant for Qualcomm Innovation Center, Inc.
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
