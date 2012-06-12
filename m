@@ -1,75 +1,57 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: mmc_cd_gpio_request() failed request_threaded_irq()
-Date: Tue, 12 Jun 2012 23:24:02 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1206122323040.6800@axis700.grange>
-References: <87aa09xcd6.wl%kuninori.morimoto.gx@renesas.com>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH] mmc: tmio: Don't access hardware registers after stopping clocks
+Date: Tue, 12 Jun 2012 23:28:22 +0200
+Message-ID: <3019432.q0GM0tRQD3@avalon>
+References: <1339505838-8831-1-git-send-email-laurent.pinchart@ideasonboard.com> <Pine.LNX.4.64.1206121517590.6800@axis700.grange>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:59919 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753854Ab2FLVYE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jun 2012 17:24:04 -0400
-In-Reply-To: <87aa09xcd6.wl%kuninori.morimoto.gx@renesas.com>
+Received: from perceval.ideasonboard.com ([95.142.166.194]:33850 "EHLO
+	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751696Ab2FLV2R (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jun 2012 17:28:17 -0400
+In-Reply-To: <Pine.LNX.4.64.1206121517590.6800@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: kuninori.morimoto.gx@renesas.com
-Cc: linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 
-On Mon, 11 Jun 2012, kuninori.morimoto.gx@renesas.com wrote:
+Hi Guennadi,
 
-> Hi all
+On Tuesday 12 June 2012 15:31:49 Guennadi Liakhovetski wrote:
+> On Tue, 12 Jun 2012, Laurent Pinchart wrote:
+> > The tmio_mmc_set_ios() function configures the MMC power, clock and bus
+> > width. When the MMC controller gets powered off, runtime PM switches the
+> > MSTP clock off. Writing to to CTL_SD_MEM_CARD_OPT register afterwards
+> > fails and prints an error message to the kernel log.
+> > 
+> > As configuring the bus width is pointless when the interface gets
+> > powered down, skip the operation when power is off.
 > 
-> I noticed that mmc_cd_gpio_request() failed on request_threaded_irq().
-> Now, I'm using v3.5-rc2 kernel.
+> The patch looks good - thanks! But maybe we can make the commit message a
+> bit more precise. I think, ios->power_mode refers to powering the card
+> down and up, not the controller. We use this information to also try to
+> put the controller in a power-saving mode. Depending on the kernel and
+> board configuration this can be a NOP, it can switch the MSTP clock off,
+> as you correctly notice, or it can power the whole PM domain, to which the
+> controller belongs, down. So, maybe something like this would be better:
 > 
-> current ${LINUX}/drivers/mmc/core/cd-gpio.c :: mmc_cd_gpio_request() uses
+> The tmio_mmc_set_ios() function configures the MMC power, clock and bus
+> width. When the mmc core requests the driver to power off the card, we
+> inform runtime PM, that the controller can be suspended. This can lead to
+> the MSTP clock being turned off. Writing to to CTL_SD_MEM_CARD_OPT
+> register afterwards fails and prints an error message to the kernel log.
 > 
-> request_threaded_irq(irq, NULL, mmc_cd_gpio_irqt,
-> 		   IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
-> 		   cd->label, host);
+> As conf... (continue as above)
 > 
-> It doesn't have hander (2nd is NULL), and flag doesn't have IRQF_ONESHOT.
-> Then, it run  request_threaded_irq() -> __setup_irq()
-> and, it got this error.
-> 
-> pr_err("Threaded irq requested with handler=NULL and !ONESHOT for irq %d\n",
-> 	irq);
-> 
-> I'm not sure detail of it, but maybe from this commit
-> 
-> -------------------------------------------
-> commit 1c6c69525b40eb76de8adf039409722015927dc3
-> Author: Thomas Gleixner <tglx@linutronix.de>
-> Date:   Thu Apr 19 10:35:17 2012 +0200
-> 
->     genirq: Reject bogus threaded irq requests
+> Feel free to further improve the above :)
 
-Also see this thread: https://lkml.org/lkml/2012/6/12/151
+Thank you for the feedback. I'll send a v2 that incorporates a second related 
+fix.
 
-For now you can add an IRQF_ONESHOT flag to the call.
+-- 
+Regards,
 
-Thanks
-Guennadi
+Laurent Pinchart
 
->     
->     Requesting a threaded interrupt without a primary handler and without
->     IRQF_ONESHOT set is dangerous.
->     
->     The core will use the default primary handler for it, which merily
->     wakes the thread. For a level type interrupt this results in an
->     interrupt storm, because the interrupt line is reenabled after the
->     primary handler runs. The device has still the line asserted, which
->     brings us back into the primary handler.
->     ...
-> ------------------------------------------
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
