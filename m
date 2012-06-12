@@ -1,40 +1,63 @@
-From: Ted Ts'o <tytso@mit.edu>
-Subject: Re: [PATCH 2/3] ext4: Context support
-Date: Tue, 12 Jun 2012 16:41:28 -0400
-Message-ID: <20120612204128.GF12161@thunk.org>
-References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com>
- <201206121455.50639.arnd.bergmann@linaro.org>
- <20120612181958.GB1803@thunk.org>
- <201206122007.28514.arnd.bergmann@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <201206122007.28514.arnd.bergmann@linaro.org>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd.bergmann@linaro.org>
-Cc: Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: [PATCH] mmc: sh_mmcif: Support MMC_SLEEP_AWAKE command
+Date: Tue, 12 Jun 2012 22:56:09 +0200
+Message-ID: <1339534569-27923-1-git-send-email-laurent.pinchart@ideasonboard.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from perceval.ideasonboard.com ([95.142.166.194]:54225 "EHLO
+	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754117Ab2FLU4F (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jun 2012 16:56:05 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Simon Horman <horms@verge.net.au>, linux-sh@vger.kernel.org
 
-On Tue, Jun 12, 2012 at 08:07:28PM +0000, Arnd Bergmann wrote:
-> Right. The danger here is that the context support was described in
-> the standard first, while none of the devices seem to even be
-> smart enough to make use of the information we put in there. Once
-> operating systems start putting some data in there, at least
-> some manufacturers will start making use of that data to optimize
-> the accesses, but it's very unlikely that they will tell us exactly
-> what they are doing. Having code in ext4 that uses the contexts will
-> at least make it more likely that the firmware optimizations are
-> based on ext4 measurements rather than some other file system or
-> operating system.
->
-> From talking with the emmc device vendors, I can tell you that ext4
-> is very high on the list of file systems to optimize for, because
-> they all target Android products.
+The MMC_SLEEP_AWAKE and SD_IO_SEND_OP_COND commands share the same
+opcode. SD_IO_SEND_OP_COND isn't supported by the SH MMCIF, but
+MMC_SLEEP_AWAKE is. Discriminate between the two commands using the
+command flags, and reject SD_IO_SEND_OP_COND only.
 
-Well, I have a contact at SanDisk where I can discuss things under
-NDA, if that will help.  He had reached out to me specifically because
-of ext4 and Android --- he's the guy that I invited to give a talk at
-the LSF workshop last year.
+Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+---
+ drivers/mmc/host/sh_mmcif.c |   14 ++++----------
+ 1 files changed, 4 insertions(+), 10 deletions(-)
 
-					- Ted
+Not supporting the MMC_SLEEP_AWAKE command makes system suspend fail if an MMC
+or eMMC device supporting sleep/wake is connected. The issue has been first
+noticed on the Armadillo 800 EVA board.
+
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 724b35e..e32da11 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -892,21 +892,15 @@ static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 
+ 	switch (mrq->cmd->opcode) {
+ 	/* MMCIF does not support SD/SDIO command */
+-	case SD_IO_SEND_OP_COND:
++	case MMC_SLEEP_AWAKE: /* = SD_IO_SEND_OP_COND (5) */
++	case MMC_SEND_EXT_CSD: /* = SD_SEND_IF_COND (8) */
++		if ((mrq->cmd->flags & MMC_CMD_MASK) != MMC_CMD_BCR)
++			break;
+ 	case MMC_APP_CMD:
+ 		host->state = STATE_IDLE;
+ 		mrq->cmd->error = -ETIMEDOUT;
+ 		mmc_request_done(mmc, mrq);
+ 		return;
+-	case MMC_SEND_EXT_CSD: /* = SD_SEND_IF_COND (8) */
+-		if (!mrq->data) {
+-			/* send_if_cond cmd (not support) */
+-			host->state = STATE_IDLE;
+-			mrq->cmd->error = -ETIMEDOUT;
+-			mmc_request_done(mmc, mrq);
+-			return;
+-		}
+-		break;
+ 	default:
+ 		break;
+ 	}
+-- 
+Regards,
+
+Laurent Pinchart
+
