@@ -1,45 +1,42 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [RESEND PATCH] mmc: dw_mmc: Add check for IDMAC configuration
-Date: Tue, 12 Jun 2012 11:08:02 +0100
-Message-ID: <CAFbHwiRXXbOzCPeb0jdrzjmq1aeisjRSY5xNwrQbeNYJx04UJg@mail.gmail.com>
-References: <1339495102-4889-1-git-send-email-girish.shivananjappa@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Maya Erez <merez@codeaurora.org>
+Subject: [PATCH v1 0/1] block: Add eMMC4.5 packed commands unit-tests
+Date: Tue, 12 Jun 2012 13:44:20 +0300
+Message-ID: <1339497861-31367-1-git-send-email-merez@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:41495 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751019Ab2FLKIC convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jun 2012 06:08:02 -0400
-Received: by pbbrp8 with SMTP id rp8so591016pbb.19
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Jun 2012 03:08:02 -0700 (PDT)
-In-Reply-To: <1339495102-4889-1-git-send-email-girish.shivananjappa@linaro.org>
+Received: from 212.199.104.198.static.012.net.il ([212.199.104.198]:29615 "EHLO
+	lx-merez.qi.qualcomm.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751797Ab2FLKod (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jun 2012 06:44:33 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, patches@linaro.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>
 
-On Tue, Jun 12, 2012 at 10:58 AM, Girish K S
-<girish.shivananjappa@linaro.org> wrote:
-> In the Current dwmmc driver there is support for selecting IDMAC from
-> the menu config option. If the support for IDMAC is enabled in the me=
-nu
-> config and Hardware configuration register's DMA_INTERFACE field is 0=
-=2E
-> Still the driver will try to do the DMA initialization.
->
-> The dw_mci_idmac_init function currently implemented returns only suc=
-cess
-> indicating that the DMA initialization is always successful. The curr=
-ent
-> patch will add a ciheck for existance of the DMA IP and allow the
-> DMA initialization.
->
-> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
-> ---
-> =A0drivers/mmc/host/dw_mmc.c | =A0 15 +++++++++++++--
-> =A01 files changed, 13 insertions(+), 2 deletions(-)
+Expose the following packed commands tests:
+- Test the write packed commands list preparation
+- Simulate a returned error code
+- Send an invalid packed command to the card
 
-Ok, this version looks better.
+This patch is dependant in the following patches:
+  [PATCH v7 1/3] mmc: core: Add packed command feature of eMMC4.5
+  [PATCH v7 2/3] mmc: core: Support packed write command for eMMC4.5 device
+  [RFC/PATCH 1/1] Add MMC write packing statistics
+  [PATCH v4 1/1] block: Add test-iosched scheduler
 
-Acked-by: Will Newton <will.newton@imgtec.com>
+Maya Erez (1):
+  block: Add eMMC4.5 packed commands unit-tests
+
+ drivers/mmc/card/Kconfig          |   11 +
+ drivers/mmc/card/Makefile         |    1 +
+ drivers/mmc/card/block.c          |   82 ++-
+ drivers/mmc/card/mmc_block_test.c | 1407 +++++++++++++++++++++++++++++++++++++
+ drivers/mmc/card/queue.h          |   15 +
+ 5 files changed, 1504 insertions(+), 12 deletions(-)
+ create mode 100644 drivers/mmc/card/mmc_block_test.c
+
+-- 
+1.7.3.3
+-- 
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+
