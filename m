@@ -1,104 +1,53 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: MMC: commit dba3c29 ruins mmc card data on beagle-xm revB
-Date: Wed, 13 Jun 2012 20:58:54 +0530
-Message-ID: <CANrkHUaxJGcv2bdUWTCB_oKct-iFCKCdb7OQPTUjS4MuKeCS2w@mail.gmail.com>
-References: <CACVXFVO-Wm1Qwporby1M=+yPz81AWHpZRBZSbr5tgT32b6sSEA@mail.gmail.com>
-	<CANrkHUYd8Ww6De4MiZ8_oPfcnhvtsZXOySLRiWSBU4QUQ6beHw@mail.gmail.com>
-	<CACVXFVP16UmHe-GGydrSMgGHwnkSvYhnY339=zr=BfCehvS8Kw@mail.gmail.com>
+From: "Franky Lin" <frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Subject: Re: Where to power on the wifi device before loading the
+ driver.
+Date: Wed, 13 Jun 2012 10:33:13 -0700
+Message-ID: <4FD8CED9.6030901@broadcom.com>
+References: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88@HKMAIL01.nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACVXFVP16UmHe-GGydrSMgGHwnkSvYhnY339=zr=BfCehvS8Kw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ming Lei <ming.lei@canonical.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>
+Content-Type: text/plain;
+ charset=iso-8859-1;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88-Q4EWCATADntDw2glCA4ptUEOCMrvLtNR@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Wei Ni <wni-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Cc: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "'linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "'linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Mursalin Akon <makon-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Rakesh Kumar <krakesh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jun 11, 2012 at 12:50 PM, Ming Lei <ming.lei@canonical.com> wrote:
->
-> On Mon, Jun 11, 2012 at 2:21 PM, T Krishnamoorthy, Balaji
-> <balajitk@ti.com> wrote:
-> > Hi Ming Lei,
-> > Can you let me know if you noticed any write/timeout errors ?
->
-> Nothing error logs found during writing.
-Hi,
+Hi Wei,
 
-Couldn't reproduce the issue with BeagleXM rev C, Might be a combination
-of rev and SD card. How often do you see mis-match in file content?
-
-Can you please try the inlined patch to get more info?
-
----
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 9a7a60a..77aabe6 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -60,6 +60,7 @@
- #define OMAP_HSMMC_STAT		0x0130
- #define OMAP_HSMMC_IE		0x0134
- #define OMAP_HSMMC_ISE		0x0138
-+#define OMAP_HSMMC_AC12		0x013C
- #define OMAP_HSMMC_CAPA		0x0140
-
- #define VS18			(1 << 26)
-@@ -177,6 +178,7 @@ struct omap_hsmmc_host {
- 	int			reqs_blocked;
- 	int			use_reg;
- 	int			req_in_progress;
-+	int			autocmd_err;
- 	unsigned int		flags;
- 	struct omap_hsmmc_next	next_data;
-
-@@ -983,6 +985,7 @@ static void omap_hsmmc_do_irq(struct
-omap_hsmmc_host *host, int status)
- {
- 	struct mmc_data *data;
- 	int end_cmd = 0, end_trans = 0;
-+	u32 autocmd12;
-
- 	if (!host->req_in_progress) {
- 		do {
-@@ -998,6 +1001,13 @@ static void omap_hsmmc_do_irq(struct
-omap_hsmmc_host *host, int status)
-
- 	if (status & ERR) {
- 		omap_hsmmc_dbg_report_irq(host, status);
-+		if (status & (1 << 24)) {
-+			host->autocmd_err = 1;
-+			dev_err(mmc_dev(host->mmc), "AutoCMD error STAT 0x%x\n", status);
-+			autocmd12 = OMAP_HSMMC_READ(host->base, AC12);
-+			dev_err(mmc_dev(host->mmc), "AutoCMD error 0x%x\n", autocmd12);
-+		}
-+
- 		if ((status & CMD_TIMEOUT) ||
- 			(status & CMD_CRC)) {
- 			if (host->cmd) {
----
+On 06/13/2012 03:40 AM, Wei Ni wrote:
+> In the brcmfmac init routine, it call sdio_register_driver() to register driver, if the wifi device is powered on, then the mmc driver will enumerate it, and call the probe callback routine.
 >
-> Below is one of my test case.
+> On the Cardhu, the wifi's power is controlled by two gpios (power-gpio and reset-gpio), the default state is power-off. So we need to power on it before calling sdio_register_driver(), if not, the mmc driver can't enumerate it, and will not call the probe routine.
+> This power on sequence is:
+> set power-gpio to 1 ;
+> mdelay(100) ;
+> set reset-gpio to 1 ;
+> mdelay(200);
 >
-> root@beagleboard:~# upk
-> updateing kernel...
-> flush storage...
-> root@beagleboard:~# cat bin/upk
-> #!/bin/sh
->
-> echo "updateing kernel..."
-> cp -f /mnt/nfs/t/uImage /media/mmcblk0p1/
->
-> echo "flush storage..."
-> sync
-> root@beagleboard:~# diff /mnt/nfs/t/uImage /media/mmcblk0p1/uImage
-> Binary files /mnt/nfs/t/uImage and /media/mmcblk0p1/uImage differ
-> root@beagleboard:~# umount /media/mmcblk0p1
-> root@beagleboard:~# mount -t vfat /dev/mmcblk0p1 /media/mmcblk0p1
-> root@beagleboard:~#
-> root@beagleboard:~#
-> root@beagleboard:~# diff /mnt/nfs/t/uImage /media/mmcblk0p1/uImage
-> Binary files /mnt/nfs/t/uImage and /media/mmcblk0p1/uImage differ
->
->
-> Thanks,
-> --
-> Ming Lei
+> My question is where to power on the wifi. We may have three places to power on it:
+> 1. power on it in the brcmfmac driver before calling sdio_register_driver(). But I think this power sequence is special for tegra30 cardhu, it's not good to add it in the generic wifi driver, because different board may use the different way to power on the wifi.
+> 2. power on it in the mmc driver. In our tegra SD driver, it has power-gpios property, which allow the slot to be powered. But this power is for mmc slot, could we add this wifi power sequence in the tegra SD driver?
+> 3. hard-coded into DT. Set these gpios in the DT, something like pinmux settings, but in this way, it's not good to put the mdelay() value in the DT.
+
+We introduced oob interrupt support in 3.5 [1]. We are using a virtual 
+platform device to retrieve board specific oob interrupt GPIO setting. 
+You should be able to implement the power control in this way as well. 
+Brcmfmac gets the GPIOs through platform device interface, powers up the 
+chip and triggers a card detection. Then 4329 should be enumerated by 
+MMC stack. The reason we didn't implement this is the card detection. 
+Some design doesn't have hardware card detection since the WiFi chip is 
+already on board. And the current MMC stack doesn't have virtual card 
+detection interface.
+
+Franky
+
+[1]: http://www.spinics.net/lists/linux-wireless/msg89335.html
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
