@@ -1,139 +1,152 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 1/5 v4] mmc: sh_mmcif: simplify and use meaningful label
- names in error-handling
-Date: Wed, 13 Jun 2012 15:37:15 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1206131532490.17854@axis700.grange>
-References: <Pine.LNX.4.64.1206131515180.17854@axis700.grange>
+Subject: Re: [PATCH v5] mmc: add a function to get regulators, supplying
+ card's power
+Date: Wed, 13 Jun 2012 15:44:22 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1206131543500.17854@axis700.grange>
+References: <Pine.LNX.4.64.1206131454260.17854@axis700.grange>
+ <4FD8973D.2010409@stericsson.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:63737 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753202Ab2FMNha (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jun 2012 09:37:30 -0400
-In-Reply-To: <Pine.LNX.4.64.1206131515180.17854@axis700.grange>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <4FD8973D.2010409@stericsson.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@marvell.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>
 
-A check for NULL platform data can be conveniently made in the very
-beginning of probing. Replace numbered error-handling labels in .probe()
-with meaningful names to make any future reorganisation simpler.
+On Wed, 13 Jun 2012, Ulf Hansson wrote:
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> Hi Guennadi,
+> 
+> On 06/13/2012 02:57 PM, Guennadi Liakhovetski wrote:
+> > Add a function to get regulators, supplying card's Vdd and Vccq on a
+> > specific host. If a Vdd supplying regulator is found, the function checks,
+> > whether a valid OCR mask can be obtained from it. The Vccq regulator is
+> > optional. A failure to get it is not fatal.
+> > 
+> > Signed-off-by: Guennadi Liakhovetski<g.liakhovetski@gmx.de>
+> > ---
+> > 
+> > v5: put struct mmc_supply inside struct mmc_host, thanks for all comments
+> > 
+> >   drivers/mmc/core/core.c  |   24 ++++++++++++++++++++++++
+> >   include/linux/mmc/host.h |   16 ++++++++++++++--
+> >   2 files changed, 38 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > index 0b6141d..4aa8658 100644
+> > --- a/drivers/mmc/core/core.c
+> > +++ b/drivers/mmc/core/core.c
+> > @@ -1013,6 +1013,30 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
+> >   }
+> >   EXPORT_SYMBOL(mmc_regulator_set_ocr);
+> > 
+> > +int mmc_regulator_get_supply(struct mmc_host *mmc)
+> > +{
+> > +	struct device *dev = mmc_dev(mmc);
+> > +	struct regulator *supply;
+> > +	int ret;
+> > +
+> > +	supply = devm_regulator_get(dev, "vmmc");
+> > +
+> > +	if (IS_ERR(supply))
+> > +		return PTR_ERR(supply);
+> > +
+> > +	mmc->supply.vmmc = supply;
+> > +	mmc->supply.vqmmc = devm_regulator_get(dev, "vqmmc");
+> > +
+> > +	ret = mmc_regulator_get_ocrmask(supply);
+> > +	if (ret>  0)
+> > +		mmc->ocr_avail = ret;
+> > +	else
+> > +		dev_warn(mmc_dev(mmc), "Failed getting OCR mask: %d\n", ret);
+> > +
+> > +	return 0;
+> > +}
+> > +EXPORT_SYMBOL_GPL(mmc_regulator_get_supply);
+> > +
+> >   #endif /* CONFIG_REGULATOR */
+> > 
+> >   /*
+> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> > index 0707d22..9deb725 100644
+> > --- a/include/linux/mmc/host.h
+> > +++ b/include/linux/mmc/host.h
+> > @@ -155,6 +155,13 @@ struct mmc_hotplug {
+> >   	void *handler_priv;
+> >   };
+> > 
+> > +struct regulator;
+> 
+> Sorry for not spotting this before. Can we not remove this and instead do an
+> include in the top of this file like:
+> #include <linux/regulator/consumer.h>
+
+No, forward-declaring a single struct is preferred over including a 
+complete header.
+
+Thanks
+Guennadi
+
+> 
+> > +
+> > +struct mmc_supply {
+> > +	struct regulator *vmmc;		/* Card power supply */
+> > +	struct regulator *vqmmc;	/* Optional Vccq supply */
+> > +};
+> 
+> Do we really need a new separate struct for this? I am in favor of having the
+> regulators directly in the mmc_host, just for simplicity.
+> 
+> > +
+> >   struct mmc_host {
+> >   	struct device		*parent;
+> >   	struct device		class_dev;
+> > @@ -309,6 +316,7 @@ struct mmc_host {
+> >   #ifdef CONFIG_REGULATOR
+> >   	bool			regulator_enabled; /* regulator state */
+> >   #endif
+> > +	struct mmc_supply	supply;
+> > 
+> >   	struct dentry		*debugfs_root;
+> > 
+> > @@ -357,13 +365,12 @@ static inline void mmc_signal_sdio_irq(struct mmc_host
+> > *host)
+> >   	wake_up_process(host->sdio_irq_thread);
+> >   }
+> > 
+> > -struct regulator;
+> > -
+> >   #ifdef CONFIG_REGULATOR
+> >   int mmc_regulator_get_ocrmask(struct regulator *supply);
+> >   int mmc_regulator_set_ocr(struct mmc_host *mmc,
+> >   			struct regulator *supply,
+> >   			unsigned short vdd_bit);
+> > +int mmc_regulator_get_supply(struct mmc_host *mmc);
+> >   #else
+> >   static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
+> >   {
+> > @@ -376,6 +383,11 @@ static inline int mmc_regulator_set_ocr(struct mmc_host
+> > *mmc,
+> >   {
+> >   	return 0;
+> >   }
+> > +
+> > +static inline int mmc_regulator_get_supply(struct mmc_host *mmc)
+> > +{
+> > +	return 0;
+> > +}
+> >   #endif
+> > 
+> >   int mmc_card_awake(struct mmc_host *host);
+> 
+> Sorry being a bit picky, I am that mode today :-)
+> 
+> Kind regards
+> Ulf Hansson
+> 
+
 ---
- drivers/mmc/host/sh_mmcif.c |   41 ++++++++++++++++++++---------------------
- 1 files changed, 20 insertions(+), 21 deletions(-)
-
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index e32da11..d6ffb05 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1241,11 +1241,16 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 	int ret = 0, irq[2];
- 	struct mmc_host *mmc;
- 	struct sh_mmcif_host *host;
--	struct sh_mmcif_plat_data *pd;
-+	struct sh_mmcif_plat_data *pd = pdev->dev.platform_data;
- 	struct resource *res;
- 	void __iomem *reg;
- 	char clk_name[8];
- 
-+	if (!pd) {
-+		dev_err(&pdev->dev, "sh_mmcif plat data error.\n");
-+		return -ENXIO;
-+	}
-+
- 	irq[0] = platform_get_irq(pdev, 0);
- 	irq[1] = platform_get_irq(pdev, 1);
- 	if (irq[0] < 0 || irq[1] < 0) {
-@@ -1262,16 +1267,11 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 		dev_err(&pdev->dev, "ioremap error.\n");
- 		return -ENOMEM;
- 	}
--	pd = pdev->dev.platform_data;
--	if (!pd) {
--		dev_err(&pdev->dev, "sh_mmcif plat data error.\n");
--		ret = -ENXIO;
--		goto clean_up;
--	}
-+
- 	mmc = mmc_alloc_host(sizeof(struct sh_mmcif_host), &pdev->dev);
- 	if (!mmc) {
- 		ret = -ENOMEM;
--		goto clean_up;
-+		goto ealloch;
- 	}
- 	host		= mmc_priv(mmc);
- 	host->mmc	= mmc;
-@@ -1283,7 +1283,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 	if (IS_ERR(host->hclk)) {
- 		dev_err(&pdev->dev, "cannot get clock \"%s\"\n", clk_name);
- 		ret = PTR_ERR(host->hclk);
--		goto clean_up1;
-+		goto eclkget;
- 	}
- 	clk_enable(host->hclk);
- 	host->clk = clk_get_rate(host->hclk);
-@@ -1313,7 +1313,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 
- 	ret = pm_runtime_resume(&pdev->dev);
- 	if (ret < 0)
--		goto clean_up2;
-+		goto eresume;
- 
- 	INIT_DELAYED_WORK(&host->timeout_work, mmcif_timeout_work);
- 
-@@ -1322,17 +1322,17 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 	ret = request_threaded_irq(irq[0], sh_mmcif_intr, sh_mmcif_irqt, 0, "sh_mmc:error", host);
- 	if (ret) {
- 		dev_err(&pdev->dev, "request_irq error (sh_mmc:error)\n");
--		goto clean_up3;
-+		goto ereqirq0;
- 	}
- 	ret = request_threaded_irq(irq[1], sh_mmcif_intr, sh_mmcif_irqt, 0, "sh_mmc:int", host);
- 	if (ret) {
- 		dev_err(&pdev->dev, "request_irq error (sh_mmc:int)\n");
--		goto clean_up4;
-+		goto ereqirq1;
- 	}
- 
- 	ret = mmc_add_host(mmc);
- 	if (ret < 0)
--		goto clean_up5;
-+		goto emmcaddh;
- 
- 	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
- 
-@@ -1341,20 +1341,19 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 		sh_mmcif_readl(host->addr, MMCIF_CE_VERSION) & 0x0000ffff);
- 	return ret;
- 
--clean_up5:
-+emmcaddh:
- 	free_irq(irq[1], host);
--clean_up4:
-+ereqirq1:
- 	free_irq(irq[0], host);
--clean_up3:
-+ereqirq0:
- 	pm_runtime_suspend(&pdev->dev);
--clean_up2:
-+eresume:
- 	pm_runtime_disable(&pdev->dev);
- 	clk_disable(host->hclk);
--clean_up1:
-+eclkget:
- 	mmc_free_host(mmc);
--clean_up:
--	if (reg)
--		iounmap(reg);
-+ealloch:
-+	iounmap(reg);
- 	return ret;
- }
- 
--- 
-1.7.2.5
-
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
