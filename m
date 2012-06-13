@@ -1,58 +1,104 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci-pxa: Add device tree support
-Date: Wed, 13 Jun 2012 10:15:08 -0400
-Message-ID: <87sjdzxpqr.fsf@octavius.laptop.org>
-References: <8762aw1hcw.fsf@octavius.laptop.org>
-	<CAMj5Bkge5GwQmuz2MpDx19ymAac0WxvF-s2DN=x8U4OWTvmecw@mail.gmail.com>
+From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Subject: Re: MMC: commit dba3c29 ruins mmc card data on beagle-xm revB
+Date: Wed, 13 Jun 2012 20:58:54 +0530
+Message-ID: <CANrkHUaxJGcv2bdUWTCB_oKct-iFCKCdb7OQPTUjS4MuKeCS2w@mail.gmail.com>
+References: <CACVXFVO-Wm1Qwporby1M=+yPz81AWHpZRBZSbr5tgT32b6sSEA@mail.gmail.com>
+	<CANrkHUYd8Ww6De4MiZ8_oPfcnhvtsZXOySLRiWSBU4QUQ6beHw@mail.gmail.com>
+	<CACVXFVP16UmHe-GGydrSMgGHwnkSvYhnY339=zr=BfCehvS8Kw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:37419 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752885Ab2FMOPS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jun 2012 10:15:18 -0400
-In-Reply-To: <CAMj5Bkge5GwQmuz2MpDx19ymAac0WxvF-s2DN=x8U4OWTvmecw@mail.gmail.com>
-	(zhangfei gao's message of "Wed, 13 Jun 2012 11:11:49 +0800")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CACVXFVP16UmHe-GGydrSMgGHwnkSvYhnY339=zr=BfCehvS8Kw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ming Lei <ming.lei@canonical.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Haojian Zhuang <haojian.zhuang@gmail.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Philip Rakity <prakity@marvell.com>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org
 
-Hi Zhangfei,
-
-On Tue, Jun 12 2012, zhangfei gao wrote:
-> On Wed, Jun 13, 2012 at 3:05 AM, Chris Ball <cjb@laptop.org> wrote:
->> Tested on an OLPC XO-1.75. =C2=A0(MMP2, sdhci-pxav3, CONFIG_MACH_MMP=
-2_DT=3Dy)
->>
->> Signed-off-by: Chris Ball <cjb@laptop.org>
->> ---
->> =C2=A0.../devicetree/bindings/mmc/sdhci-pxa.txt =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 =C2=A0| =C2=A0 21 ++++++++
->> =C2=A0drivers/mmc/host/sdhci-pxav2.c =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 | =C2=A0 52 ++++++++++++++++++++
->> =C2=A0drivers/mmc/host/sdhci-pxav3.c =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 | =C2=A0 50 +++++++++++++++++++
->> =C2=A03 files changed, 123 insertions(+)
->> =C2=A0create mode 100644 Documentation/devicetree/bindings/mmc/sdhci=
--pxa.txt
+On Mon, Jun 11, 2012 at 12:50 PM, Ming Lei <ming.lei@canonical.com> wrote:
 >
-> Thanks Chris for the great help, compile error if CONFIG_OF not defin=
-ed.
+> On Mon, Jun 11, 2012 at 2:21 PM, T Krishnamoorthy, Balaji
+> <balajitk@ti.com> wrote:
+> > Hi Ming Lei,
+> > Can you let me know if you noticed any write/timeout errors ?
+>
+> Nothing error logs found during writing.
+Hi,
 
-Thanks for catching this!
+Couldn't reproduce the issue with BeagleXM rev C, Might be a combination
+of rev and SD card. How often do you see mis-match in file content?
 
-How do you feel about having the compatible node say "sdhci-pxav3"
-instead of "mrvl,pxav3-mmc"?  I used the mrvl prefix because it fits
-in with the rest of your existing DT, but it seems like it would be
-better to name the driver directly.  The DTs here live inside the
-source tree, so we're not depending on anyone else's terminology.
+Can you please try the inlined patch to get more info?
 
-If you're okay with sdhci-pxav{2,3} in compatible, I'll include that
-in v2 of the patch with the rest of your fixes.
+---
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 9a7a60a..77aabe6 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -60,6 +60,7 @@
+ #define OMAP_HSMMC_STAT		0x0130
+ #define OMAP_HSMMC_IE		0x0134
+ #define OMAP_HSMMC_ISE		0x0138
++#define OMAP_HSMMC_AC12		0x013C
+ #define OMAP_HSMMC_CAPA		0x0140
 
-- Chris.
---=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+ #define VS18			(1 << 26)
+@@ -177,6 +178,7 @@ struct omap_hsmmc_host {
+ 	int			reqs_blocked;
+ 	int			use_reg;
+ 	int			req_in_progress;
++	int			autocmd_err;
+ 	unsigned int		flags;
+ 	struct omap_hsmmc_next	next_data;
+
+@@ -983,6 +985,7 @@ static void omap_hsmmc_do_irq(struct
+omap_hsmmc_host *host, int status)
+ {
+ 	struct mmc_data *data;
+ 	int end_cmd = 0, end_trans = 0;
++	u32 autocmd12;
+
+ 	if (!host->req_in_progress) {
+ 		do {
+@@ -998,6 +1001,13 @@ static void omap_hsmmc_do_irq(struct
+omap_hsmmc_host *host, int status)
+
+ 	if (status & ERR) {
+ 		omap_hsmmc_dbg_report_irq(host, status);
++		if (status & (1 << 24)) {
++			host->autocmd_err = 1;
++			dev_err(mmc_dev(host->mmc), "AutoCMD error STAT 0x%x\n", status);
++			autocmd12 = OMAP_HSMMC_READ(host->base, AC12);
++			dev_err(mmc_dev(host->mmc), "AutoCMD error 0x%x\n", autocmd12);
++		}
++
+ 		if ((status & CMD_TIMEOUT) ||
+ 			(status & CMD_CRC)) {
+ 			if (host->cmd) {
+---
+>
+> Below is one of my test case.
+>
+> root@beagleboard:~# upk
+> updateing kernel...
+> flush storage...
+> root@beagleboard:~# cat bin/upk
+> #!/bin/sh
+>
+> echo "updateing kernel..."
+> cp -f /mnt/nfs/t/uImage /media/mmcblk0p1/
+>
+> echo "flush storage..."
+> sync
+> root@beagleboard:~# diff /mnt/nfs/t/uImage /media/mmcblk0p1/uImage
+> Binary files /mnt/nfs/t/uImage and /media/mmcblk0p1/uImage differ
+> root@beagleboard:~# umount /media/mmcblk0p1
+> root@beagleboard:~# mount -t vfat /dev/mmcblk0p1 /media/mmcblk0p1
+> root@beagleboard:~#
+> root@beagleboard:~#
+> root@beagleboard:~# diff /mnt/nfs/t/uImage /media/mmcblk0p1/uImage
+> Binary files /mnt/nfs/t/uImage and /media/mmcblk0p1/uImage differ
+>
+>
+> Thanks,
+> --
+> Ming Lei
