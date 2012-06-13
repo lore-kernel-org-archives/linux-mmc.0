@@ -1,53 +1,88 @@
-From: "Franky Lin" <frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Subject: Re: Where to power on the wifi device before loading the
- driver.
-Date: Wed, 13 Jun 2012 10:33:13 -0700
-Message-ID: <4FD8CED9.6030901@broadcom.com>
-References: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88@HKMAIL01.nvidia.com>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH v1 1/1] mmc: block: fix the data timeout issue with ACMD22
+Date: Thu, 14 Jun 2012 00:35:48 +0530
+Message-ID: <CANfBPZ81uBVAhC=NWDMfoU_KsoyKQD0a-mpqO7DW+u3s1SpNWA@mail.gmail.com>
+References: <1339587643-22115-1-git-send-email-subhashj@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=iso-8859-1;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88-Q4EWCATADntDw2glCA4ptUEOCMrvLtNR@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Wei Ni <wni-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Cc: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "'linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "'linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Mursalin Akon <makon-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Rakesh Kumar <krakesh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1339587643-22115-1-git-send-email-subhashj@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Subhash Jadavani <subhashj@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Wei,
-
-On 06/13/2012 03:40 AM, Wei Ni wrote:
-> In the brcmfmac init routine, it call sdio_register_driver() to register driver, if the wifi device is powered on, then the mmc driver will enumerate it, and call the probe callback routine.
+On Wed, Jun 13, 2012 at 5:10 PM, Subhash Jadavani
+<subhashj@codeaurora.org> wrote:
+> If multi block write operation fails for SD card, during
+> error handling we send the SD_APP_SEND_NUM_WR_BLKS (ACMD22)
+> to know how many blocks were already programmed by card.
 >
-> On the Cardhu, the wifi's power is controlled by two gpios (power-gpio and reset-gpio), the default state is power-off. So we need to power on it before calling sdio_register_driver(), if not, the mmc driver can't enumerate it, and will not call the probe routine.
-> This power on sequence is:
-> set power-gpio to 1 ;
-> mdelay(100) ;
-> set reset-gpio to 1 ;
-> mdelay(200);
+> But mmc_sd_num_wr_blocks() function which sends the ACMD22
+> calculates the data timeout value from csd.tacc_ns and
+> csd.tacc_clks parameters which will be 0 for block addressed
+> (>2GB cards) SD card. This would result in timeout_ns and
+> timeout_clks being 0 in the mmc_request passed to host driver.
+> This means host controller would program its data timeout timer
+> value with 0 which could result in DATA TIMEOUT errors from
+> controller.
 >
-> My question is where to power on the wifi. We may have three places to power on it:
-> 1. power on it in the brcmfmac driver before calling sdio_register_driver(). But I think this power sequence is special for tegra30 cardhu, it's not good to add it in the generic wifi driver, because different board may use the different way to power on the wifi.
-> 2. power on it in the mmc driver. In our tegra SD driver, it has power-gpios property, which allow the slot to be powered. But this power is for mmc slot, could we add this wifi power sequence in the tegra SD driver?
-> 3. hard-coded into DT. Set these gpios in the DT, something like pinmux settings, but in this way, it's not good to put the mdelay() value in the DT.
+> To fix this issue, mmc_sd_num_wr_blocks() should instead
+> just call the mmc_set_data_timeout() to calculate the
+> data timeout value. mmc_set_data_timeout() function
+> ensures that non zero timeout value is set even for
+> block addressed SD cards.
+>
+> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
 
-We introduced oob interrupt support in 3.5 [1]. We are using a virtual 
-platform device to retrieve board specific oob interrupt GPIO setting. 
-You should be able to implement the power control in this way as well. 
-Brcmfmac gets the GPIOs through platform device interface, powers up the 
-chip and triggers a card detection. Then 4329 should be enumerated by 
-MMC stack. The reason we didn't implement this is the card detection. 
-Some design doesn't have hardware card detection since the WiFi chip is 
-already on board. And the current MMC stack doesn't have virtual card 
-detection interface.
+The patch log could be improvised (Just mention that
+set_data_timeout() is reused .. etc")
+Even otherwise, its fine.
+Reviewed-by: Venkatraman S <svenkatr@ti.com>
 
-Franky
-
-[1]: http://www.spinics.net/lists/linux-wireless/msg89335.html
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> ---
+> =A0drivers/mmc/card/block.c | =A0 14 +-------------
+> =A01 files changed, 1 insertions(+), 13 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 7e3f453..f1c84de 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -554,7 +554,6 @@ static u32 mmc_sd_num_wr_blocks(struct mmc_card *=
+card)
+> =A0 =A0 =A0 =A0struct mmc_request mrq =3D {NULL};
+> =A0 =A0 =A0 =A0struct mmc_command cmd =3D {0};
+> =A0 =A0 =A0 =A0struct mmc_data data =3D {0};
+> - =A0 =A0 =A0 unsigned int timeout_us;
+>
+> =A0 =A0 =A0 =A0struct scatterlist sg;
+>
+> @@ -574,23 +573,12 @@ static u32 mmc_sd_num_wr_blocks(struct mmc_card=
+ *card)
+> =A0 =A0 =A0 =A0cmd.arg =3D 0;
+> =A0 =A0 =A0 =A0cmd.flags =3D MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AD=
+TC;
+>
+> - =A0 =A0 =A0 data.timeout_ns =3D card->csd.tacc_ns * 100;
+> - =A0 =A0 =A0 data.timeout_clks =3D card->csd.tacc_clks * 100;
+> -
+> - =A0 =A0 =A0 timeout_us =3D data.timeout_ns / 1000;
+> - =A0 =A0 =A0 timeout_us +=3D data.timeout_clks * 1000 /
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 (card->host->ios.clock / 1000);
+> -
+> - =A0 =A0 =A0 if (timeout_us > 100000) {
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 data.timeout_ns =3D 100000000;
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 data.timeout_clks =3D 0;
+> - =A0 =A0 =A0 }
+> -
+> =A0 =A0 =A0 =A0data.blksz =3D 4;
+> =A0 =A0 =A0 =A0data.blocks =3D 1;
+> =A0 =A0 =A0 =A0data.flags =3D MMC_DATA_READ;
+> =A0 =A0 =A0 =A0data.sg =3D &sg;
+> =A0 =A0 =A0 =A0data.sg_len =3D 1;
+> + =A0 =A0 =A0 mmc_set_data_timeout(&data, card);
+>
+> =A0 =A0 =A0 =A0mrq.cmd =3D &cmd;
+> =A0 =A0 =A0 =A0mrq.data =3D &data;
+> --
