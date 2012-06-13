@@ -1,55 +1,44 @@
 From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH] mmc: sh_mmcif: Support MMC_SLEEP_AWAKE command
-Date: Wed, 13 Jun 2012 09:39:56 +0200
-Message-ID: <47844351.ibBFGBYgKQ@avalon>
-References: <1339534569-27923-1-git-send-email-laurent.pinchart@ideasonboard.com> <20120613011201.GD16686@verge.net.au>
+Subject: Re: [PATCH v2] mmc: tmio: Don't access hardware registers after stopping clocks
+Date: Wed, 13 Jun 2012 09:42:01 +0200
+Message-ID: <1563726.iOzzD8v7Ct@avalon>
+References: <1339536575-6578-1-git-send-email-laurent.pinchart@ideasonboard.com> <20120613011712.GF16686@verge.net.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7Bit
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20120613011201.GD16686@verge.net.au>
+In-Reply-To: <20120613011712.GF16686@verge.net.au>
 Sender: linux-sh-owner@vger.kernel.org
 To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-sh@vger.kernel.org
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 Hi Simon,
 
-On Wednesday 13 June 2012 10:12:01 Simon Horman wrote:
-> On Tue, Jun 12, 2012 at 10:56:09PM +0200, Laurent Pinchart wrote:
-> > The MMC_SLEEP_AWAKE and SD_IO_SEND_OP_COND commands share the same
-> > opcode. SD_IO_SEND_OP_COND isn't supported by the SH MMCIF, but
-> > MMC_SLEEP_AWAKE is. Discriminate between the two commands using the
-> > command flags, and reject SD_IO_SEND_OP_COND only.
+On Wednesday 13 June 2012 10:17:12 Simon Horman wrote:
+> On Tue, Jun 12, 2012 at 11:29:35PM +0200, Laurent Pinchart wrote:
+> > The tmio_mmc_set_ios() function configures the MMC power, clock and bus
+> > width. When the mmc core requests the driver to power off the card, we
+> > inform runtime PM, that the controller can be suspended. This can lead
+> > to the MSTP clock being turned off.
+> > 
+> > Writing to any 16-bit hardware registers with the MSTP clock off leads
+> > to timeouts and errors being printed to the kernel log. This can occur
+> > both when stopping the MMC clock and when configuring the bus width.
+> > 
+> > To fix this, stop the MMC clock before calling put_runtime_pm(), and
+> > skip bus width configuration when power is off.
 > > 
 > > Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-> > ---
-> > 
-> >  drivers/mmc/host/sh_mmcif.c |   14 ++++----------
-> >  1 files changed, 4 insertions(+), 10 deletions(-)
-> > 
-> > Not supporting the MMC_SLEEP_AWAKE command makes system suspend fail if an
-> > MMC or eMMC device supporting sleep/wake is connected. The issue has been
-> > first noticed on the Armadillo 800 EVA board.
 > 
 > Hi Laurent,
 > 
-> Do you have a test-case for this?
+> could you let me know if there is a (simple :) way for me to exercise this?
 
-echo mem > /sys/power/state on Armadillo 800 EVA was my test case. It failed 
-without the patch, and succeeds with it.
-
-> Also, did you check to make sure that the Mackerel still works?
-
-Yes it still works. However, I have no way to test the MMC_SLEEP_AWAKE command 
-on the Mackerel board, as my MMC card doesn't support it (on the Armadillo the 
-eMMC chip supports the MMC_SLEEP_AWAKE command).
-
-BTW, I wonder whether the current implementation is really the best one. If 
-the hardware doesn't support SD/SDIO commands, instead of intercepting 
-commands and rejecting the ones used by SD/SDIO at probe time, wouldn't it be 
-better for host drivers to tell that they don't support SD and/or SDIO using 
-flags in the mmc_host structure ?
+Without the patch suspending the Armadillo board to RAM produces a "timeout 
+waiting for SD bus idle" message. Make sure you apply the "mmc: sh_mmcif: 
+Support MMC_SLEEP_AWAKE command" patch first, or suspending the board will 
+fail completely.
 
 -- 
 Regards,
