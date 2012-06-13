@@ -1,82 +1,162 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v9] mmc: support BKOPS feature for eMMC
-Date: Wed, 13 Jun 2012 12:07:12 +0900
-Message-ID: <4FD803E0.8050206@samsung.com>
-References: <dc39d568ca6fa31dda7d6420a61cba3f.squirrel@www.codeaurora.org>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pxa: Add device tree support
+Date: Wed, 13 Jun 2012 11:11:49 +0800
+Message-ID: <CAMj5Bkge5GwQmuz2MpDx19ymAac0WxvF-s2DN=x8U4OWTvmecw@mail.gmail.com>
+References: <8762aw1hcw.fsf@octavius.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:62468 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751283Ab2FMDHo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jun 2012 23:07:44 -0400
-Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M5J00JLQCON9AE0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 13 Jun 2012 12:07:42 +0900 (KST)
-Received: from [165.213.219.108] by mmp1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0M5J00IRECOTSQ60@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 13 Jun 2012 12:07:42 +0900 (KST)
-In-reply-to: <dc39d568ca6fa31dda7d6420a61cba3f.squirrel@www.codeaurora.org>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:46890 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752029Ab2FMDLv convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jun 2012 23:11:51 -0400
+Received: by wgbdr13 with SMTP id dr13so134258wgb.1
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Jun 2012 20:11:49 -0700 (PDT)
+In-Reply-To: <8762aw1hcw.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: merez@codeaurora.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@stericsson.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Haojian Zhuang <haojian.zhuang@gmail.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Philip Rakity <prakity@marvell.com>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org
 
-On 06/12/2012 07:58 PM, merez@codeaurora.org wrote:
+On Wed, Jun 13, 2012 at 3:05 AM, Chris Ball <cjb@laptop.org> wrote:
+> Tested on an OLPC XO-1.75. =A0(MMP2, sdhci-pxav3, CONFIG_MACH_MMP2_DT=
+=3Dy)
+>
+> Signed-off-by: Chris Ball <cjb@laptop.org>
+> ---
+> =A0.../devicetree/bindings/mmc/sdhci-pxa.txt =A0 =A0 =A0 =A0 =A0| =A0=
+ 21 ++++++++
+> =A0drivers/mmc/host/sdhci-pxav2.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 | =A0 52 ++++++++++++++++++++
+> =A0drivers/mmc/host/sdhci-pxav3.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 | =A0 50 +++++++++++++++++++
+> =A03 files changed, 123 insertions(+)
+> =A0create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-pxa=
+=2Etxt
 
->> @@ -359,12 +443,15 @@ struct mmc_async_req *mmc_start_req(struct
-> mmc_host
->> *host,
->>  	if (!err && areq)
->>  		start_err = __mmc_start_req(host, areq->mrq);
->>
->> -	if (host->areq)
->> +	if (host->areq) {
->> +		if (!areq && host->areq && mmc_card_mmc(host->card))
->> +			mmc_start_bkops(host->card);
-> I think it would be better to start tey BKOPs in the queue thread when it
-> becomes idle.
-> We have seen cases where there are several requests fetched and then NULL
-> but by the time the previous request ends there are more requests to be
-> fetched. Starting the BKOPs here instead of in the queue thread increases
-> the probability of using HPI to stop the BKOPs due to incoming request,
-> which is not a desirable action.
+Thanks Chris for the great help, compile error if CONFIG_OF not defined=
+=2E
 
-I will change this point.
+>
+> +#ifdef CONFIG_OF
+> +static const struct of_device_id sdhci_pxav2_of_match[] =3D {
+> + =A0 =A0 =A0 {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .compatible =3D "mrvl,pxav2-mmc",
+> + =A0 =A0 =A0 },
+> + =A0 =A0 =A0 {},
+> +};
+> +MODULE_DEVICE_TABLE(of, sdhci_pxav2_of_match);
+> +
+> +static struct sdhci_pxa_platdata *pxav2_get_mmc_pdata(struct device =
+*dev)
+> +{
+> + =A0 =A0 =A0 struct sdhci_pxa_platdata *pdata;
+> + =A0 =A0 =A0 struct device_node *np =3D dev->of_node;
+> + =A0 =A0 =A0 u32 bus_width;
+> + =A0 =A0 =A0 u32 clk_delay_cycles;
 
-> 
->>  		mmc_post_req(host, host->areq->mrq, 0);
->> +	}
->>
->>  	 /* Cancel a prepared request if it was not started. */
->>  	if ((err || start_err) && areq)
->> -			mmc_post_req(host, areq->mrq, -EINVAL);
->> +		mmc_post_req(host, areq->mrq, -EINVAL);
-> Remove this change, it is not related to this patch.
+> +
+> + =A0 =A0 =A0 return pdata;
+> +}
+> +#else
+> +static inline struct sdhci_pxa_platdata pxav2_get_mmc_pdata(struct d=
+evice *dev)
+Should be static struct sdhci_pxa_platdata *pxav2_get_mmc_pdata(struct
+device *dev)
+> +{
+> + =A0 =A0 =A0 return NULL;
+> +}
+> +#endif
+> +
+> =A0static int __devinit sdhci_pxav2_probe(struct platform_device *pde=
+v)
+> =A0{
+> =A0 =A0 =A0 =A0struct sdhci_pltfm_host *pltfm_host;
+> @@ -128,6 +173,8 @@ static int __devinit sdhci_pxav2_probe(struct pla=
+tform_device *pdev)
+> =A0 =A0 =A0 =A0struct device *dev =3D &pdev->dev;
+> =A0 =A0 =A0 =A0struct sdhci_host *host =3D NULL;
+> =A0 =A0 =A0 =A0struct sdhci_pxa *pxa =3D NULL;
+> + =A0 =A0 =A0 const struct of_device_id *match;
+> +
+> =A0 =A0 =A0 =A0int ret;
+> =A0 =A0 =A0 =A0struct clk *clk;
+>
+> @@ -156,6 +203,10 @@ static int __devinit sdhci_pxav2_probe(struct pl=
+atform_device *pdev)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0| SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0| SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN;
+>
+> + =A0 =A0 =A0 match =3D of_match_device(of_match_ptr(sdhci_pxav2_of_m=
+atch), &pdev->dev);
+> + =A0 =A0 =A0 if (match) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata =3D pxav2_get_mmc_pdata(dev);
+> + =A0 =A0 =A0 }
+> =A0 =A0 =A0 =A0if (pdata) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (pdata->flags & PXA_FLAG_CARD_PERMA=
+NENT) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* on-chip device */
+> @@ -218,6 +269,7 @@ static struct platform_driver sdhci_pxav2_driver =
+=3D {
+> =A0 =A0 =A0 =A0.driver =A0 =A0 =A0 =A0 =3D {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.name =A0 =3D "sdhci-pxav2",
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.owner =A0=3D THIS_MODULE,
 
-Ok.
-Anything else?
+#ifdef CONFIG_OF required, otherwise build fail.
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .of_match_table =3D sdhci_pxav2_of_matc=
+h,
+#endif
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.pm =A0 =A0 =3D SDHCI_PLTFM_PMOPS,
+> =A0 =A0 =A0 =A0},
+> =A0 =A0 =A0 =A0.probe =A0 =A0 =A0 =A0 =A0=3D sdhci_pxav2_probe,
+> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-=
+pxav3.c
+> index f296956..1835c94 100644
+> --- a/drivers/mmc/host/sdhci-pxav3.c
+> +++ b/drivers/mmc/host/sdhci-pxav3.c
 
-Best Regards,
-Jaehoon Chung
+> +#ifdef CONFIG_OF
+> +static const struct of_device_id sdhci_pxav3_of_match[] =3D {
+> + =A0 =A0 =A0 {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .compatible =3D "mrvl,pxav3-mmc",
+> + =A0 =A0 =A0 },
+> + =A0 =A0 =A0 {},
+> +};
+> +MODULE_DEVICE_TABLE(of, sdhci_pxav3_of_match);
+> +
+> +static struct sdhci_pxa_platdata *pxav3_get_mmc_pdata(struct device =
+*dev)
+> +{
 
-> 
-> Thanks,
-> Maya Erez
-> Consultant for Qualcomm Innovation Center, Inc.
-> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-> 
-> 
-> 
-> 
+> +}
+> +#else
+> +static inline struct sdhci_pxa_platdata pxav3_get_mmc_pdata(struct d=
+evice *dev)
+Should be static struct sdhci_pxa_platdata *pxav3_get_mmc_pdata(struct
+device *dev)
+> +{
+> + =A0 =A0 =A0 return NULL;
+> +}
+> +#endif
+> +
+> @@ -263,6 +312,7 @@ static int __devexit sdhci_pxav3_remove(struct pl=
+atform_device *pdev)
+> =A0static struct platform_driver sdhci_pxav3_driver =3D {
+> =A0 =A0 =A0 =A0.driver =A0 =A0 =A0 =A0 =3D {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.name =A0 =3D "sdhci-pxav3",
+#ifdef CONFIG_OF required, otherwise build fail.
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .of_match_table =3D sdhci_pxav3_of_matc=
+h,
+#endif
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.owner =A0=3D THIS_MODULE,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.pm =A0 =A0 =3D SDHCI_PLTFM_PMOPS,
+> =A0 =A0 =A0 =A0},
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
-
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
