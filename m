@@ -1,31 +1,27 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH v2] mmc: tmio: Don't access hardware registers after
- stopping clocks
-Date: Wed, 13 Jun 2012 15:27:35 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1206131527080.17854@axis700.grange>
-References: <1339536575-6578-1-git-send-email-laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH] mmc: sh_mmcif: Support MMC_SLEEP_AWAKE command
+Date: Wed, 13 Jun 2012 15:27:54 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1206131527410.17854@axis700.grange>
+References: <1339534569-27923-1-git-send-email-laurent.pinchart@ideasonboard.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1339536575-6578-1-git-send-email-laurent.pinchart@ideasonboard.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.126.187]:56139 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753688Ab2FMN2A (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jun 2012 09:28:00 -0400
+In-Reply-To: <1339534569-27923-1-git-send-email-laurent.pinchart@ideasonboard.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Cc: linux-mmc@vger.kernel.org, Simon Horman <horms@verge.net.au>, linux-sh@vger.kernel.org
 
 On Tue, 12 Jun 2012, Laurent Pinchart wrote:
 
-> The tmio_mmc_set_ios() function configures the MMC power, clock and bus
-> width. When the mmc core requests the driver to power off the card, we
-> inform runtime PM, that the controller can be suspended. This can lead
-> to the MSTP clock being turned off.
-> 
-> Writing to any 16-bit hardware registers with the MSTP clock off leads
-> to timeouts and errors being printed to the kernel log. This can occur
-> both when stopping the MMC clock and when configuring the bus width.
-> 
-> To fix this, stop the MMC clock before calling put_runtime_pm(), and
-> skip bus width configuration when power is off.
+> The MMC_SLEEP_AWAKE and SD_IO_SEND_OP_COND commands share the same
+> opcode. SD_IO_SEND_OP_COND isn't supported by the SH MMCIF, but
+> MMC_SLEEP_AWAKE is. Discriminate between the two commands using the
+> command flags, and reject SD_IO_SEND_OP_COND only.
 > 
 > Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
 
@@ -35,43 +31,43 @@ Thanks
 Guennadi
 
 > ---
->  drivers/mmc/host/tmio_mmc_pio.c |   18 ++++++++++--------
->  1 files changed, 10 insertions(+), 8 deletions(-)
+>  drivers/mmc/host/sh_mmcif.c |   14 ++++----------
+>  1 files changed, 4 insertions(+), 10 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> index 9a7996a..53d1de6 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -810,19 +810,21 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  		if (host->set_pwr && ios->power_mode == MMC_POWER_OFF)
->  			host->set_pwr(host->pdev, 0);
->  		if (host->power) {
-> +			tmio_mmc_clk_stop(host);
->  			host->power = false;
->  			pm_runtime_put(dev);
->  		}
-> -		tmio_mmc_clk_stop(host);
->  	}
+> Not supporting the MMC_SLEEP_AWAKE command makes system suspend fail if an MMC
+> or eMMC device supporting sleep/wake is connected. The issue has been first
+> noticed on the Armadillo 800 EVA board.
+> 
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index 724b35e..e32da11 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -892,21 +892,15 @@ static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
 >  
-> -	switch (ios->bus_width) {
-> -	case MMC_BUS_WIDTH_1:
-> -		sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x80e0);
-> -	break;
-> -	case MMC_BUS_WIDTH_4:
-> -		sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x00e0);
-> -	break;
-> +	if (host->power) {
-> +		switch (ios->bus_width) {
-> +		case MMC_BUS_WIDTH_1:
-> +			sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x80e0);
-> +		break;
-> +		case MMC_BUS_WIDTH_4:
-> +			sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x00e0);
-> +		break;
-> +		}
+>  	switch (mrq->cmd->opcode) {
+>  	/* MMCIF does not support SD/SDIO command */
+> -	case SD_IO_SEND_OP_COND:
+> +	case MMC_SLEEP_AWAKE: /* = SD_IO_SEND_OP_COND (5) */
+> +	case MMC_SEND_EXT_CSD: /* = SD_SEND_IF_COND (8) */
+> +		if ((mrq->cmd->flags & MMC_CMD_MASK) != MMC_CMD_BCR)
+> +			break;
+>  	case MMC_APP_CMD:
+>  		host->state = STATE_IDLE;
+>  		mrq->cmd->error = -ETIMEDOUT;
+>  		mmc_request_done(mmc, mrq);
+>  		return;
+> -	case MMC_SEND_EXT_CSD: /* = SD_SEND_IF_COND (8) */
+> -		if (!mrq->data) {
+> -			/* send_if_cond cmd (not support) */
+> -			host->state = STATE_IDLE;
+> -			mrq->cmd->error = -ETIMEDOUT;
+> -			mmc_request_done(mmc, mrq);
+> -			return;
+> -		}
+> -		break;
+>  	default:
+>  		break;
 >  	}
->  
->  	/* Let things settle. delay taken from winCE driver */
 > -- 
 > Regards,
 > 
