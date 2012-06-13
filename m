@@ -1,69 +1,69 @@
 From: merez@codeaurora.org
-Subject: Re: [PATCH v9] mmc: support BKOPS feature for eMMC
-Date: Tue, 12 Jun 2012 23:18:11 -0700 (PDT)
-Message-ID: <63d2a1617cbe83b94750378ebe64520e.squirrel@www.codeaurora.org>
-References: <dc39d568ca6fa31dda7d6420a61cba3f.squirrel@www.codeaurora.org>
-    <4FD803E0.8050206@samsung.com>
+Subject: Re: [PATCH v4 1/1] block: Add test-iosched scheduler
+Date: Tue, 12 Jun 2012 23:22:42 -0700 (PDT)
+Message-ID: <9b1f5eadae482d6c6e9fe390d1fec040.squirrel@www.codeaurora.org>
+References: <1339491984-8462-1-git-send-email-merez@codeaurora.org>
+    <1339491984-8462-2-git-send-email-merez@codeaurora.org>
+    <x4962awk4fs.fsf@segfault.boston.devel.redhat.com>
+    <f9b014a8098cce8e4bac8d333d7101c0.squirrel@www.codeaurora.org>
+    <x498vfsi8zp.fsf@segfault.boston.devel.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:3024 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751679Ab2FMGSL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jun 2012 02:18:11 -0400
-In-Reply-To: <4FD803E0.8050206@samsung.com>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:56810 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752401Ab2FMGWm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jun 2012 02:22:42 -0400
+In-Reply-To: <x498vfsi8zp.fsf@segfault.boston.devel.redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-Cc: merez@codeaurora.org, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@stericsson.com>
+To: Jeff Moyer <jmoyer@redhat.com>
+Cc: merez@codeaurora.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 
 
-On Tue, June 12, 2012 8:07 pm, Jaehoon Chung wrote:
-> On 06/12/2012 07:58 PM, merez@codeaurora.org wrote:
+On Tue, June 12, 2012 1:13 pm, Jeff Moyer wrote:
+> merez@codeaurora.org writes:
 >
->>> @@ -359,12 +443,15 @@ struct mmc_async_req *mmc_start_req(struct
->> mmc_host
->>> *host,
->>>  	if (!err && areq)
->>>  		start_err = __mmc_start_req(host, areq->mrq);
+>> On Tue, June 12, 2012 7:09 am, Jeff Moyer wrote:
+>>> Maya Erez <merez@codeaurora.org> writes:
 >>>
->>> -	if (host->areq)
->>> +	if (host->areq) {
->>> +		if (!areq && host->areq && mmc_card_mmc(host->card))
->>> +			mmc_start_bkops(host->card);
->> I think it would be better to start tey BKOPs in the queue thread when
->> it
->> becomes idle.
->> We have seen cases where there are several requests fetched and then
->> NULL
->> but by the time the previous request ends there are more requests to be
->> fetched. Starting the BKOPs here instead of in the queue thread
->> increases
->> the probability of using HPI to stop the BKOPs due to incoming request,
->> which is not a desirable action.
->
-> I will change this point.
->
->>
->>>  		mmc_post_req(host, host->areq->mrq, 0);
->>> +	}
+>>>> The test scheduler allows testing a block device by dispatching
+>>>> specific requests according to the test case and declare PASS/FAIL
+>>>> according to the requests completion error code
 >>>
->>>  	 /* Cancel a prepared request if it was not started. */
->>>  	if ((err || start_err) && areq)
->>> -			mmc_post_req(host, areq->mrq, -EINVAL);
->>> +		mmc_post_req(host, areq->mrq, -EINVAL);
->> Remove this change, it is not related to this patch.
+>>> What sort of tests have you written that make use of this
+>>> infrastructure?
+>>>
+>>>> @@ -1072,8 +1072,6 @@ struct request *blk_get_request(struct
+>>>> request_queue *q, int rw, gfp_t gfp_mask)
+>>>>  {
+>>>>  	struct request *rq;
+>>>>
+>>>> -	BUG_ON(rw != READ && rw != WRITE);
+>>>> -
+>>>
+>>> Please explain this.
+>> get_request and get_request_wait, called by blk_get_request, expects to
+>> get the REQ_SYNC flag in addition to the read/write flag. Moreover, it
+>> uses the REQ_SYNC flag in its algorithm decision making.
+>> However blk_get_request expects to get a Boolean to indicate only
+>> read/write flag and cannot handle the REQ_SYNC flag.
 >
-> Ok.
-> Anything else?
+> Right, so why is it okay to change this?  Right now, blk_get_request is
+> used for block special requests.  There is no sense of sync vs. async
+> for such requests (that's an fs request notion).  Perhaps you're calling
+> the wrong function?
 >
-> Best Regards,
-> Jaehoon Chung
-We have no further comments.
+> Cheers,
+> Jeff
+>
+I use this function to get a WRITE_FLUSH request (which includes in its
+flags the REQ_SYNC flag).
+Is there another function I should use for this purpose?
 
 Thanks,
-Maya Erez
-
+Maya
 -- 
 Sent by consultant of Qualcomm Innovation Center, Inc.
 Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
