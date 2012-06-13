@@ -1,34 +1,42 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH] mmc: sh_mmcif: Support MMC_SLEEP_AWAKE command
-Date: Wed, 13 Jun 2012 10:12:01 +0900
-Message-ID: <20120613011201.GD16686@verge.net.au>
-References: <1339534569-27923-1-git-send-email-laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH v2] mmc: tmio: Don't access hardware registers after
+ stopping clocks
+Date: Wed, 13 Jun 2012 10:17:12 +0900
+Message-ID: <20120613011712.GF16686@verge.net.au>
+References: <1339536575-6578-1-git-send-email-laurent.pinchart@ideasonboard.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:46676 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751035Ab2FMBRO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jun 2012 21:17:14 -0400
 Content-Disposition: inline
-In-Reply-To: <1339534569-27923-1-git-send-email-laurent.pinchart@ideasonboard.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Cc: linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-sh@vger.kernel.org
+In-Reply-To: <1339536575-6578-1-git-send-email-laurent.pinchart@ideasonboard.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 
-On Tue, Jun 12, 2012 at 10:56:09PM +0200, Laurent Pinchart wrote:
-> The MMC_SLEEP_AWAKE and SD_IO_SEND_OP_COND commands share the same
-> opcode. SD_IO_SEND_OP_COND isn't supported by the SH MMCIF, but
-> MMC_SLEEP_AWAKE is. Discriminate between the two commands using the
-> command flags, and reject SD_IO_SEND_OP_COND only.
+On Tue, Jun 12, 2012 at 11:29:35PM +0200, Laurent Pinchart wrote:
+> The tmio_mmc_set_ios() function configures the MMC power, clock and bus
+> width. When the mmc core requests the driver to power off the card, we
+> inform runtime PM, that the controller can be suspended. This can lead
+> to the MSTP clock being turned off.
+> 
+> Writing to any 16-bit hardware registers with the MSTP clock off leads
+> to timeouts and errors being printed to the kernel log. This can occur
+> both when stopping the MMC clock and when configuring the bus width.
+> 
+> To fix this, stop the MMC clock before calling put_runtime_pm(), and
+> skip bus width configuration when power is off.
 > 
 > Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-> ---
->  drivers/mmc/host/sh_mmcif.c |   14 ++++----------
->  1 files changed, 4 insertions(+), 10 deletions(-)
-> 
-> Not supporting the MMC_SLEEP_AWAKE command makes system suspend fail if an MMC
-> or eMMC device supporting sleep/wake is connected. The issue has been first
-> noticed on the Armadillo 800 EVA board.
 
 Hi Laurent,
 
-Do you have a test-case for this?
-Also, did you check to make sure that the Mackerel still works?
+could you let me know if there is a (simple :) way for me to exercise this?
+
+> ---
+>  drivers/mmc/host/tmio_mmc_pio.c |   18 ++++++++++--------
+>  1 files changed, 10 insertions(+), 8 deletions(-)
