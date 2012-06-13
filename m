@@ -1,69 +1,108 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: Where to power on the wifi device before loading the driver.
-Date: Wed, 13 Jun 2012 15:17:06 -0600
-Message-ID: <4FD90352.9090606@wwwdotorg.org>
-References: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88@HKMAIL01.nvidia.com>
+From: merez@codeaurora.org
+Subject: Re: [PATCH v7 1/3] mmc: core: Add packed command feature of eMMC4.5
+Date: Wed, 13 Jun 2012 14:43:25 -0700 (PDT)
+Message-ID: <1476f0476a2dcfc6f7db9dbb4be0ab2b.squirrel@www.codeaurora.org>
+References: <000601cd47ab$8ad77c50$a08674f0$%jun@samsung.com>
+    <CANfBPZ9dwwAOBbXPqGV64k-sB-MzRtTO8x7tXnZBjtYN+V88XQ@mail.gmail.com>
+    <000001cd489c$115f03b0$341d0b10$%jun@samsung.com>
+    <113bb1f38dbc386f1adfc580e10dc2e5.squirrel@www.codeaurora.org>
+    <CANfBPZ_+=keFgv-xDbzkZi2uVFvd46_JGoxweMKa1CvfX=X7=g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:50004 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752231Ab2FMVRL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jun 2012 17:17:11 -0400
-In-Reply-To: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88@HKMAIL01.nvidia.com>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:5338 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754420Ab2FMVna (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jun 2012 17:43:30 -0400
+In-Reply-To: <CANfBPZ_+=keFgv-xDbzkZi2uVFvd46_JGoxweMKa1CvfX=X7=g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wei Ni <wni@nvidia.com>
-Cc: Stephen Warren <swarren@nvidia.com>, "'linux-wireless@vger.kernel.org'" <linux-wireless@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mursalin Akon <makon@nvidia.com>, Rakesh Kumar <krakesh@nvidia.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Olof Johansson <olof@lixom.net>
+To: "S, Venkatraman" <svenkatr@ti.com>
+Cc: merez@codeaurora.org, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, Subhash Jadavani <subhashj@codeaurora.org>
 
-On 06/13/2012 04:40 AM, Wei Ni wrote:
-> Hi, all
-> I'm working on the tegra30 wifi upstream issue.
-> 
-> The tegra30 board (Cardhu) use Broadcom 4329 as wifi device, and use brcmfmac as the wifi driver.
-> 
-> In the brcmfmac init routine, it call sdio_register_driver() to register driver, if the wifi device is powered on, then the mmc driver will enumerate it, and call the probe callback routine.
-> 
-> On the Cardhu, the wifi's power is controlled by two gpios (power-gpio and reset-gpio), the default state is power-off. So we need to power on it before calling sdio_register_driver(), if not, the mmc driver can't enumerate it, and will not call the probe routine.
-> This power on sequence is: 
-> set power-gpio to 1 ;
-> mdelay(100) ;
-> set reset-gpio to 1 ;
-> mdelay(200);
-> 
-> My question is where to power on the wifi. We may have three places to power on it:
-> 1. power on it in the brcmfmac driver before calling sdio_register_driver(). But I think this power sequence is special for tegra30 cardhu, it's not good to add it in the generic wifi driver, because different board may use the different way to power on the wifi.
-> 2. power on it in the mmc driver. In our tegra SD driver, it has power-gpios property, which allow the slot to be powered. But this power is for mmc slot, could we add this wifi power sequence in the tegra SD driver?
-> 3. hard-coded into DT. Set these gpios in the DT, something like pinmux settings, but in this way, it's not good to put the mdelay() value in the DT.
-> 
-> I have no good idea for it, does anyone has suggestion?
 
-The core of the issue is that:
+On Wed, June 13, 2012 12:49 pm, S, Venkatraman wrote:
+> On Wed, Jun 13, 2012 at 12:45 AM,  <merez@codeaurora.org> wrote:
+>>
+>>> S, Venkatraman <svenkatr@ti.com> wrote:
+>>>> On Mon, Jun 11, 2012 at 1:53 PM, Seungwon Jeon <tgih.jun@samsung.com>
+>>>> wrote:
+>>>> > This patch adds packed command feature of eMMC4.5.
+>>>> > The maximum number for packing read(or write) is offered
+>>>> > and exception event relevant to packed command which is
+>>>> > used for error handling is enabled. If host wants to use
+>>>> > this feature, MMC_CAP2_PACKED_CMD should be set.
+>>>> >
+>>>> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>>>>
+>>>> Can you please post some clear performance benchmarks with your
+>>>> patchset
+>>>> ?
+>>>> Given that #merez claims to see a significant performance drop for
+>>>> reads, it will be
+>>>> good to compare notes.
+>>>> If it's not too much trouble, both CFQ and deadline scheduler figures
+>>>> would be useful, on a
+>>>> set of read only, write only and parallel read write usecases.
+>>>>
+>>>> I can also try to replicate your results if you can publish the exact
+>>>> configuration you used
+>>>> for testing (example: iozone parameters)
+>>> I'm checking the merez's result.
+>>> Currently packed command is effective on write.
+>>> When running packed write with iozone, there is 25% performance gains.
+>>> (ex: iozone -az -i0 -I -s 10m -f /target/test -e)
+>>>
+>> Our tests shows performance gain of 50-60% in scenarios of only write
+>> lmdd
+>> operations.
+>>
+>> As I mentioned in the write packing control thread the degradation of
+>> read
+>> performance in case of mix read/write operations appears also without
+>> write packing. Therefore I don't think it should stop us from approving
+>> the write packing patch, that gives a significant improvement to the
+>> write
+>> performance.
+>> The read performance degradation should be resolved regardless of the
+>> write packing patch.
+>>
+>
+> One further question - when you say "degradation of read performance
+> in case of mix
+> read/write operations appears also without write packing", what
+> exactly does that mean?
+> Degradation w.r.to to read-only test ? Or any expected throughput ?
 
-* Tegra30 support is via device tree.
-* We have an SDIO bus, and the WiFi device attached to that bus is
-enumerable.
-* Since the WiFi device is enumerable, no node exists in the DT to
-represent it.
-* However, the driver for the WiFi device needs certain information,
-such as the reset GPIO ID and perhaps power GPIO.
+I meant w.r. to read only test.
 
-For the power GPIO, it seems reasonable to either use the existing Tegra
-SD controller's power-gpios DT property, or replace that property with a
-real regulator binding. The SD driver would then control this. Still,
-that approach would mean the WiFi driver wouldn't be able to control
-power to the device directly, which might not be a good thing.
+>
+> If the scenario you mention is accurate, I was actually thinking that
+> we should recommend to merge
+> read packing first, then merge write packing once the read performance
+> issue is well understood.
 
-However, I'm not sure that the reset GPIO is also something that should
-be controlled by the SD card driver; it seems like it's much more
-closely related to the WiFi device/driver.
+I don't know if you followed the early discussion of this patch but the
+read throughput was not proved as efficient and in some of the cases it
+also caused degradation of the read performance. Therefore, we don't
+intend to merge it yet.
+>
+> I am all for better performance with packing control etc, but the
+> overall code complexity is really
+> increasing more than necessary. I want to make sure that it is really
+> worth the effort.
 
-I wonder if the power and reset GPIO shouldn't be represented as a
-combined custom regulator type, which knows how to sequence multiple GPIOs.
+In my opinion a gain of 50%-60% of the write performance worth the
+complexity of the code and the effort to fix the issues it reveals.
 
-Perhaps SDIO "client" devices also need a way to communicate with their
-"host port" to obtain services such as power and reset control?
+>
+> Thanks,
+> Venkat.
+>
 
-This is all very similar to the WiFi rfkill discussion we have re: the
-Toshiba AC100 a little while back, although that was USB rather than SDIO.
+
+-- 
+Sent by consultant of Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+
