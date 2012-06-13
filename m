@@ -1,76 +1,66 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH v7 1/3] mmc: core: Add packed command feature of eMMC4.5
-Date: Thu, 14 Jun 2012 01:19:56 +0530
-Message-ID: <CANfBPZ_+=keFgv-xDbzkZi2uVFvd46_JGoxweMKa1CvfX=X7=g@mail.gmail.com>
-References: <000601cd47ab$8ad77c50$a08674f0$%jun@samsung.com>
- <CANfBPZ9dwwAOBbXPqGV64k-sB-MzRtTO8x7tXnZBjtYN+V88XQ@mail.gmail.com>
- <000001cd489c$115f03b0$341d0b10$%jun@samsung.com> <113bb1f38dbc386f1adfc580e10dc2e5.squirrel@www.codeaurora.org>
+From: merez@codeaurora.org
+Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
+Date: Wed, 13 Jun 2012 12:52:58 -0700 (PDT)
+Message-ID: <fb2303ea3a3a5470e76d1faa2abd471b.squirrel@www.codeaurora.org>
+References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
+    <1338576911-17089-2-git-send-email-merez@codeaurora.org>
+    <CAFR8uefCD_WXDM6m+-XwG10+W0UXqOtK7_sxWD3uVckh3pnR-Q@mail.gmail.com>
+    <CAFR8uee7hWLC-h_abZOCEuqeUeuhDuJp74x3R-3n+c61xyfaPQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <113bb1f38dbc386f1adfc580e10dc2e5.squirrel@www.codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: merez@codeaurora.org
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, Subhash Jadavani <subhashj@codeaurora.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAFR8uee7hWLC-h_abZOCEuqeUeuhDuJp74x3R-3n+c61xyfaPQ@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Muthu Kumar <muthu.lkml@gmail.com>
+Cc: Maya Erez <merez@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jun 13, 2012 at 12:45 AM,  <merez@codeaurora.org> wrote:
->
->> S, Venkatraman <svenkatr@ti.com> wrote:
->>> On Mon, Jun 11, 2012 at 1:53 PM, Seungwon Jeon <tgih.jun@samsung.com>
->>> wrote:
->>> > This patch adds packed command feature of eMMC4.5.
->>> > The maximum number for packing read(or write) is offered
->>> > and exception event relevant to packed command which is
->>> > used for error handling is enabled. If host wants to use
->>> > this feature, MMC_CAP2_PACKED_CMD should be set.
->>> >
->>> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+
+On Mon, June 11, 2012 5:28 pm, Muthu Kumar wrote:
+> On Mon, Jun 11, 2012 at 2:19 PM, Muthu Kumar <muthu.lkml@gmail.com> wrote:
+>> On Fri, Jun 1, 2012 at 11:55 AM, Maya Erez <merez@codeaurora.org> wrote:
+>>> The write packing control will ensure that read requests latency is
+>>> not increased due to long write packed commands.
 >>>
->>> Can you please post some clear performance benchmarks with your patchset
->>> ?
->>> Given that #merez claims to see a significant performance drop for
->>> reads, it will be
->>> good to compare notes.
->>> If it's not too much trouble, both CFQ and deadline scheduler figures
->>> would be useful, on a
->>> set of read only, write only and parallel read write usecases.
+>>> The trigger for enabling the write packing is managing to pack several
+>>> write requests. The number of potential packed requests that will
+>>> trigger
+>>> the packing can be configured via sysfs by writing the required value
+>>> to:
+>>> /sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
+>>> The trigger for disabling the write packing is fetching a read request.
 >>>
->>> I can also try to replicate your results if you can publish the exact
->>> configuration you used
->>> for testing (example: iozone parameters)
->> I'm checking the merez's result.
->> Currently packed command is effective on write.
->> When running packed write with iozone, there is 25% performance gains.
->> (ex: iozone -az -i0 -I -s 10m -f /target/test -e)
 >>
-> Our tests shows performance gain of 50-60% in scenarios of only write lmdd
-> operations.
+>> If it is applicable only to MMC why do we have this sysfs attr for all
+>> block devices?
 >
-> As I mentioned in the write packing control thread the degradation of read
-> performance in case of mix read/write operations appears also without
-> write packing. Therefore I don't think it should stop us from approving
-> the write packing patch, that gives a significant improvement to the write
-> performance.
-> The read performance degradation should be resolved regardless of the
-> write packing patch.
+> Just to be clear, please create a directory, say mmc, under
+> /sys/block/<dev>/ and create the attr inside that.
 >
+> You can refer to dm (dm-sysfs.c) for sample implementation.
+>
+> Regards,
+> Muthu
+>
+Hi Muthu,
 
-One further question - when you say "degradation of read performance
-in case of mix
-read/write operations appears also without write packing", what
-exactly does that mean?
-Degradation w.r.to to read-only test ? Or any expected throughput ?
+I released a new version of this patch which doesn't include this change yet.
 
-If the scenario you mention is accurate, I was actually thinking that
-we should recommend to merge
-read packing first, then merge write packing once the read performance
-issue is well understood.
-
-I am all for better performance with packing control etc, but the
-overall code complexity is really
-increasing more than necessary. I want to make sure that it is really
-worth the effort.
+I understand why you think it would be best to distinguish the MMC
+specific attribute from the general block devices attributes.
+However, since this attribute is created only for the MMC block device,
+other block devices won't be aware of it. Therefore, it doesn't
+necessarily require a separation to a different folder.
+Currently there is another MMC specific attribute (force_ro) which is also
+created in the root directory. I think it would be better to also create
+the num_wr_reqs_to_start_packing in the same folder as force_ro and not
+make it an exceptional attribute in its location and the code that handles
+it.
+I would appreciate your opinion on that.
 
 Thanks,
-Venkat.
+Maya
+-- 
+Sent by consultant of Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
