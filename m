@@ -1,66 +1,51 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
-Date: Wed, 13 Jun 2012 12:52:58 -0700 (PDT)
-Message-ID: <fb2303ea3a3a5470e76d1faa2abd471b.squirrel@www.codeaurora.org>
-References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
-    <1338576911-17089-2-git-send-email-merez@codeaurora.org>
-    <CAFR8uefCD_WXDM6m+-XwG10+W0UXqOtK7_sxWD3uVckh3pnR-Q@mail.gmail.com>
-    <CAFR8uee7hWLC-h_abZOCEuqeUeuhDuJp74x3R-3n+c61xyfaPQ@mail.gmail.com>
+From: Ted Ts'o <tytso@mit.edu>
+Subject: Re: [PATCH 2/3] ext4: Context support
+Date: Wed, 13 Jun 2012 16:00:33 -0400
+Message-ID: <20120613200033.GB17990@thunk.org>
+References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com>
+ <201206122007.28514.arnd.bergmann@linaro.org>
+ <20120612204128.GF12161@thunk.org>
+ <201206131944.35351.arnd.bergmann@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CAFR8uee7hWLC-h_abZOCEuqeUeuhDuJp74x3R-3n+c61xyfaPQ@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Muthu Kumar <muthu.lkml@gmail.com>
-Cc: Maya Erez <merez@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-ext4-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <201206131944.35351.arnd.bergmann@linaro.org>
+Sender: linux-ext4-owner@vger.kernel.org
+To: Arnd Bergmann <arnd.bergmann@linaro.org>
+Cc: Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>, Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, "Luca Porzio (lporzio)" <lporzio@micron.com>
 List-Id: linux-mmc@vger.kernel.org
 
+On Wed, Jun 13, 2012 at 07:44:35PM +0000, Arnd Bergmann wrote:
+> 
+> I think using the inode number is a reasonable fit. Using the
+> inode number of the parent directory might be more appropriate
+> but it breaks with hard links and cross-directory renames (we
+> must not use the same LBA with conflicting context numbers,
+> or flush the old context inbetween).
 
-On Mon, June 11, 2012 5:28 pm, Muthu Kumar wrote:
-> On Mon, Jun 11, 2012 at 2:19 PM, Muthu Kumar <muthu.lkml@gmail.com> wrote:
->> On Fri, Jun 1, 2012 at 11:55 AM, Maya Erez <merez@codeaurora.org> wrote:
->>> The write packing control will ensure that read requests latency is
->>> not increased due to long write packed commands.
->>>
->>> The trigger for enabling the write packing is managing to pack several
->>> write requests. The number of potential packed requests that will
->>> trigger
->>> the packing can be configured via sysfs by writing the required value
->>> to:
->>> /sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
->>> The trigger for disabling the write packing is fetching a read request.
->>>
->>
->> If it is applicable only to MMC why do we have this sysfs attr for all
->> block devices?
->
-> Just to be clear, please create a directory, say mmc, under
-> /sys/block/<dev>/ and create the attr inside that.
->
-> You can refer to dm (dm-sysfs.c) for sample implementation.
->
-> Regards,
-> Muthu
->
-Hi Muthu,
+I think the inode number of the parent directory by itself is actually
+*not* a good idea, because there are plenty of cases where files in
+the same directory do not have the same life time.  For example,
+consider your openoffice files in ~/Documents, for example.  Or worse,
+the files in ~/Downloads written by your web browser.
 
-I released a new version of this patch which doesn't include this change yet.
+It might be worth considering the hueristic of a series of files
+written by a single process close together in time as belonging to a
+single context.  That still might not be quite right in the case of a
+git checkout for example, most of the time I think that hueristic
+would be quite valid.
 
-I understand why you think it would be best to distinguish the MMC
-specific attribute from the general block devices attributes.
-However, since this attribute is created only for the MMC block device,
-other block devices won't be aware of it. Therefore, it doesn't
-necessarily require a separation to a different folder.
-Currently there is another MMC specific attribute (force_ro) which is also
-created in the root directory. I think it would be better to also create
-the num_wr_reqs_to_start_packing in the same folder as force_ro and not
-make it an exceptional attribute in its location and the code that handles
-it.
-I would appreciate your opinion on that.
+One thing that *would* be worth consider when trying to decide the
+right granularity for a context would be the size of the erase block.
+If the erase block is 2 megs, and we are writing a lot of 8 meg files,
+a per-inode context granularity probably makes a lot of sense.
 
-Thanks,
-Maya
--- 
-Sent by consultant of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+OTOH, if the erase block size is 8mb, and we are writing a whole bunch
+of small files, we probably want to use a much more aggressive way of
+aggregating relating blocks than just "inodes" that average in size of
+say, 32k or 128k.  Getting this information may requiring leaning
+rather hard on the eMMC manufacturers, since they (irrationally, in my
+opinion) think this should be trade secret information.  :-(
+
+	       	    	      	    	   - Ted
