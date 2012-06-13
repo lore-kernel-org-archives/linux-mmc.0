@@ -1,276 +1,83 @@
-From: Maya Erez <merez@codeaurora.org>
-Subject: [PATCH v3 1/1] mmc: block: Add write packing control
-Date: Wed, 13 Jun 2012 22:37:16 +0300
-Message-ID: <1339616240-27361-2-git-send-email-merez@codeaurora.org>
-References: <1339616240-27361-1-git-send-email-merez@codeaurora.org>
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1339616240-27361-1-git-send-email-merez@codeaurora.org>
-Sender: linux-doc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>, "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+From: Arnd Bergmann <arnd.bergmann@linaro.org>
+Subject: Re: [PATCH 2/3] ext4: Context support
+Date: Wed, 13 Jun 2012 19:44:35 +0000
+Message-ID: <201206131944.35351.arnd.bergmann@linaro.org>
+References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com> <201206122007.28514.arnd.bergmann@linaro.org> <20120612204128.GF12161@thunk.org>
+Mime-Version: 1.0
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <20120612204128.GF12161@thunk.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Ted Ts'o <tytso@mit.edu>, Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>
+Cc: Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, "Luca Porzio (lporzio)" <lporzio@micron.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The write packing control will ensure that read requests latency is
-not increased due to long write packed commands.
+On Tuesday 12 June 2012, Ted Ts'o wrote:
+> On Tue, Jun 12, 2012 at 08:07:28PM +0000, Arnd Bergmann wrote:
+> > Right. The danger here is that the context support was described in
+> > the standard first, while none of the devices seem to even be
+> > smart enough to make use of the information we put in there. Once
+> > operating systems start putting some data in there, at least
+> > some manufacturers will start making use of that data to optimize
+> > the accesses, but it's very unlikely that they will tell us exactly
+> > what they are doing. Having code in ext4 that uses the contexts will
+> > at least make it more likely that the firmware optimizations are
+> > based on ext4 measurements rather than some other file system or
+> > operating system.
+> >
+> > From talking with the emmc device vendors, I can tell you that ext4
+> > is very high on the list of file systems to optimize for, because
+> > they all target Android products.
+> 
+> Well, I have a contact at SanDisk where I can discuss things under
+> NDA, if that will help.  He had reached out to me specifically because
+> of ext4 and Android --- he's the guy that I invited to give a talk at
+> the LSF workshop last year.
 
-The trigger for enabling the write packing is managing to pack several
-write requests. The number of potential packed requests that will trigger
-the packing can be configured via sysfs by writing the required value to:
-/sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
-The trigger for disabling the write packing is fetching a read request.
+Well, the Linaro storage team is in close contact with Alex Lemberg
+from Sandisk, Luca Porzio from Micron and Hyojin Jeong from Samsung,
+and we discussed this patch in our meeting two weeks ago and on
+our Linaro mailing lists before that.
 
----
- Documentation/mmc/mmc-dev-attrs.txt |   17 ++++++
- drivers/mmc/card/block.c            |  101 ++++++++++++++++++++++++++++++++++-
- drivers/mmc/card/queue.c            |    8 +++
- drivers/mmc/card/queue.h            |    3 +
- include/linux/mmc/host.h            |    1 +
- 5 files changed, 129 insertions(+), 1 deletions(-)
+I have a good feeling about that work relationship, and they
+all understand the needs of the Linux file systems, but my impression
+is also that with an NDA in place we would not be able to put any
+better implementation into the Linux kernel that makes use of hw
+details of one of the manufacturers. Also note that the eMMC standard
+is intentionally written in an abstract way to give the hardware
+manufacturers the option to provide better implementations over time,
+e.g. when new devices start using large amounts of cache, or replace
+NAND flash with phase change memory or other technologies.
 
-diff --git a/Documentation/mmc/mmc-dev-attrs.txt b/Documentation/mmc/mmc-dev-attrs.txt
-index 22ae844..08f7312 100644
---- a/Documentation/mmc/mmc-dev-attrs.txt
-+++ b/Documentation/mmc/mmc-dev-attrs.txt
-@@ -8,6 +8,23 @@ The following attributes are read/write.
- 
- 	force_ro		Enforce read-only access even if write protect switch is off.
- 
-+	num_wr_reqs_to_start_packing 	This attribute is used to determine
-+	the trigger for activating the write packing, in case the write
-+	packing control feature is enabled.
-+
-+	When the MMC manages to reach a point where num_wr_reqs_to_start_packing
-+	write requests could be packed, it enables the write packing feature.
-+	This allows us to start the write packing only when it is beneficial
-+	and has minimum affect on the read latency.
-+
-+	The number of potential packed requests that will trigger the packing
-+	can be configured via sysfs by writing the required value to:
-+	/sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
-+
-+	The default value of num_wr_reqs_to_start_packing was determined by
-+	running parallel lmdd write and lmdd read operations and calculating
-+	the max number of packed writes requests.
-+
- SD and MMC Device Attributes
- ============================
- 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 2107e4a..d795b3c 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -114,6 +114,7 @@ struct mmc_blk_data {
- 	struct device_attribute force_ro;
- 	struct device_attribute power_ro_lock;
- 	int	area_type;
-+	struct device_attribute num_wr_reqs_to_start_packing;
- };
- 
- static DEFINE_MUTEX(open_lock);
-@@ -281,6 +282,38 @@ out:
- 	return ret;
- }
- 
-+static ssize_t
-+num_wr_reqs_to_start_packing_show(struct device *dev,
-+				  struct device_attribute *attr, char *buf)
-+{
-+	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
-+	int num_wr_reqs_to_start_packing;
-+	int ret;
-+
-+	num_wr_reqs_to_start_packing = md->queue.num_wr_reqs_to_start_packing;
-+
-+	ret = snprintf(buf, PAGE_SIZE, "%d\n", num_wr_reqs_to_start_packing);
-+
-+	mmc_blk_put(md);
-+	return ret;
-+}
-+
-+static ssize_t
-+num_wr_reqs_to_start_packing_store(struct device *dev,
-+				 struct device_attribute *attr,
-+				 const char *buf, size_t count)
-+{
-+	int value;
-+	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
-+
-+	sscanf(buf, "%d", &value);
-+	if (value >= 0)
-+		md->queue.num_wr_reqs_to_start_packing = value;
-+
-+	mmc_blk_put(md);
-+	return count;
-+}
-+
- static int mmc_blk_open(struct block_device *bdev, fmode_t mode)
- {
- 	struct mmc_blk_data *md = mmc_blk_get(bdev->bd_disk);
-@@ -1308,6 +1341,49 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 	mmc_queue_bounce_pre(mqrq);
- }
- 
-+static void mmc_blk_write_packing_control(struct mmc_queue *mq,
-+					  struct request *req)
-+{
-+	struct mmc_host *host = mq->card->host;
-+	int data_dir;
-+
-+	if (!(host->caps2 & MMC_CAP2_PACKED_WR))
-+		return;
-+
-+	/*
-+	 * In case the packing control is not supported by the host, it should
-+	 * not have an effect on the write packing. Therefore we have to enable
-+	 * the write packing
-+	 */
-+	if (!(host->caps2 & MMC_CAP2_PACKED_WR_CONTROL)) {
-+		mq->wr_packing_enabled = true;
-+		return;
-+	}
-+
-+	if (!req || (req && (req->cmd_flags & REQ_FLUSH))) {
-+		if (mq->num_of_potential_packed_wr_reqs >
-+				mq->num_wr_reqs_to_start_packing)
-+			mq->wr_packing_enabled = true;
-+		mq->num_of_potential_packed_wr_reqs = 0;
-+		return;
-+	}
-+
-+	data_dir = rq_data_dir(req);
-+
-+	if (data_dir == READ) {
-+		mq->num_of_potential_packed_wr_reqs = 0;
-+		mq->wr_packing_enabled = false;
-+		return;
-+	} else if (data_dir == WRITE) {
-+		mq->num_of_potential_packed_wr_reqs++;
-+	}
-+
-+	if (mq->num_of_potential_packed_wr_reqs >
-+			mq->num_wr_reqs_to_start_packing)
-+		mq->wr_packing_enabled = true;
-+
-+}
-+
- static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
- {
- 	struct request_queue *q = mq->queue;
-@@ -1327,6 +1403,9 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
- 			!card->ext_csd.packed_event_en)
- 		goto no_packed;
- 
-+	if (!mq->wr_packing_enabled)
-+		goto no_packed;
-+
- 	if ((rq_data_dir(cur) == WRITE) &&
- 			(card->host->caps2 & MMC_CAP2_PACKED_WR))
- 		max_packed_rw = card->ext_csd.max_packed_writes;
-@@ -1391,6 +1470,8 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
- 			break;
- 		}
- 
-+		if (rq_data_dir(next) == WRITE)
-+			mq->num_of_potential_packed_wr_reqs++;
- 		list_add_tail(&next->queuelist, &mq->mqrq_cur->packed_list);
- 		cur = next;
- 		reqs++;
-@@ -1777,7 +1858,9 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 		goto out;
- 	}
- 
--	if (req && req->cmd_flags & REQ_DISCARD) {
-+	mmc_blk_write_packing_control(mq, req);
-+
-+	if (req && req->cmd_flags & REQ_DISCARD) {		
- 		/* complete ongoing async transfer before issuing discard */
- 		if (card->host->areq)
- 			mmc_blk_issue_rw_rq(mq, NULL);
-@@ -2007,6 +2090,8 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
- 
- 	if (md) {
- 		card = md->queue.card;
-+		device_remove_file(disk_to_dev(md->disk),
-+				   &md->num_wr_reqs_to_start_packing);
- 		if (md->disk->flags & GENHD_FL_UP) {
- 			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
- 			if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
-@@ -2073,6 +2158,20 @@ static int mmc_add_disk(struct mmc_blk_data *md)
- 		if (ret)
- 			goto power_ro_lock_fail;
- 	}
-+
-+	md->num_wr_reqs_to_start_packing.show =
-+		num_wr_reqs_to_start_packing_show;
-+	md->num_wr_reqs_to_start_packing.store =
-+		num_wr_reqs_to_start_packing_store;
-+	sysfs_attr_init(&md->num_wr_reqs_to_start_packing.attr);
-+	md->num_wr_reqs_to_start_packing.attr.name =
-+		"num_wr_reqs_to_start_packing";
-+	md->num_wr_reqs_to_start_packing.attr.mode = S_IRUGO | S_IWUSR;
-+	ret = device_create_file(disk_to_dev(md->disk),
-+				 &md->num_wr_reqs_to_start_packing);
-+	if (ret)
-+		goto power_ro_lock_fail;
-+
- 	return ret;
- 
- power_ro_lock_fail:
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 165d85a..79ef91b 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -25,6 +25,13 @@
- #define MMC_QUEUE_SUSPENDED	(1 << 0)
- 
- /*
-+ * Based on benchmark tests the default num of requests to trigger the write
-+ * packing was determined, to keep the read latency as low as possible and
-+ * manage to keep the high write throughput.
-+ */
-+#define DEFAULT_NUM_REQS_TO_START_PACK 17
-+
-+/*
-  * Prepare a MMC request. This just filters out odd stuff.
-  */
- static int mmc_prep_request(struct request_queue *q, struct request *req)
-@@ -181,6 +188,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	mq->mqrq_cur = mqrq_cur;
- 	mq->mqrq_prev = mqrq_prev;
- 	mq->queue->queuedata = mq;
-+	mq->num_wr_reqs_to_start_packing = DEFAULT_NUM_REQS_TO_START_PACK;
- 
- 	blk_queue_prep_rq(mq->queue, mmc_prep_request);
- 	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index 5e04938..93e4b59 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -45,6 +45,9 @@ struct mmc_queue {
- 	struct mmc_queue_req	mqrq[2];
- 	struct mmc_queue_req	*mqrq_cur;
- 	struct mmc_queue_req	*mqrq_prev;
-+	bool			wr_packing_enabled;
-+	int			num_of_potential_packed_wr_reqs;
-+	int			num_wr_reqs_to_start_packing;
- };
- 
- extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 9d0d946..0eb6c7b 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -242,6 +242,7 @@ struct mmc_host {
- #define MMC_CAP2_PACKED_WR	(1 << 11)	/* Allow packed write */
- #define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
- 				 MMC_CAP2_PACKED_WR) /* Allow packed commands */
-+#define MMC_CAP2_PACKED_WR_CONTROL (1 << 12) /* Allow write packing control */
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 	unsigned int        power_notify_type;
--- 
-1.7.3.3
--- 
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+That said, I think it is rather clear what the authors of the spec
+had in mind, and there is only one reasonable implementation given
+current flash technology: You get something like a log structured
+file system with 15 contexts, where each context writes to exactly
+one erase block at a given time. This is not all that different
+from how eMMC/SD/USB works already without context support, the main
+difference being that the context normally gets picked based on the
+LBA of the write in segments between 512KB and 16MB. Because the number
+of active contexts is smaller than the number of total segments in
+the device, the device keeps an LRU list of something between 5 and
+30 segments.
 
+Letting the file system pick the context number based on information
+it has about the contents rather than the LBA should reduce the amount
+of garbage collection if there is a stronger correlation between life
+times of data written to the same context than there is between
+life times of data written to adjacent LBA numbers.
+
+The trouble with this is of course that getting the file system to
+do a really good job at picking the context numbers is a harder
+task than coming up with a block allocation scheme that just gets
+it right for devices without context ID support ;-).
+
+I think using the inode number is a reasonable fit. Using the
+inode number of the parent directory might be more appropriate
+but it breaks with hard links and cross-directory renames (we
+must not use the same LBA with conflicting context numbers,
+or flush the old context inbetween).
+
+	Arnd
