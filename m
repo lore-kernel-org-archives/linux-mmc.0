@@ -1,83 +1,76 @@
-From: Arnd Bergmann <arnd.bergmann@linaro.org>
-Subject: Re: [PATCH 2/3] ext4: Context support
-Date: Wed, 13 Jun 2012 19:44:35 +0000
-Message-ID: <201206131944.35351.arnd.bergmann@linaro.org>
-References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com> <201206122007.28514.arnd.bergmann@linaro.org> <20120612204128.GF12161@thunk.org>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH v7 1/3] mmc: core: Add packed command feature of eMMC4.5
+Date: Thu, 14 Jun 2012 01:19:56 +0530
+Message-ID: <CANfBPZ_+=keFgv-xDbzkZi2uVFvd46_JGoxweMKa1CvfX=X7=g@mail.gmail.com>
+References: <000601cd47ab$8ad77c50$a08674f0$%jun@samsung.com>
+ <CANfBPZ9dwwAOBbXPqGV64k-sB-MzRtTO8x7tXnZBjtYN+V88XQ@mail.gmail.com>
+ <000001cd489c$115f03b0$341d0b10$%jun@samsung.com> <113bb1f38dbc386f1adfc580e10dc2e5.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <20120612204128.GF12161@thunk.org>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Ted Ts'o <tytso@mit.edu>, Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>
-Cc: Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, "Luca Porzio (lporzio)" <lporzio@micron.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <113bb1f38dbc386f1adfc580e10dc2e5.squirrel@www.codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: merez@codeaurora.org
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, Subhash Jadavani <subhashj@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tuesday 12 June 2012, Ted Ts'o wrote:
-> On Tue, Jun 12, 2012 at 08:07:28PM +0000, Arnd Bergmann wrote:
-> > Right. The danger here is that the context support was described in
-> > the standard first, while none of the devices seem to even be
-> > smart enough to make use of the information we put in there. Once
-> > operating systems start putting some data in there, at least
-> > some manufacturers will start making use of that data to optimize
-> > the accesses, but it's very unlikely that they will tell us exactly
-> > what they are doing. Having code in ext4 that uses the contexts will
-> > at least make it more likely that the firmware optimizations are
-> > based on ext4 measurements rather than some other file system or
-> > operating system.
-> >
-> > From talking with the emmc device vendors, I can tell you that ext4
-> > is very high on the list of file systems to optimize for, because
-> > they all target Android products.
-> 
-> Well, I have a contact at SanDisk where I can discuss things under
-> NDA, if that will help.  He had reached out to me specifically because
-> of ext4 and Android --- he's the guy that I invited to give a talk at
-> the LSF workshop last year.
+On Wed, Jun 13, 2012 at 12:45 AM,  <merez@codeaurora.org> wrote:
+>
+>> S, Venkatraman <svenkatr@ti.com> wrote:
+>>> On Mon, Jun 11, 2012 at 1:53 PM, Seungwon Jeon <tgih.jun@samsung.com>
+>>> wrote:
+>>> > This patch adds packed command feature of eMMC4.5.
+>>> > The maximum number for packing read(or write) is offered
+>>> > and exception event relevant to packed command which is
+>>> > used for error handling is enabled. If host wants to use
+>>> > this feature, MMC_CAP2_PACKED_CMD should be set.
+>>> >
+>>> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>>>
+>>> Can you please post some clear performance benchmarks with your patchset
+>>> ?
+>>> Given that #merez claims to see a significant performance drop for
+>>> reads, it will be
+>>> good to compare notes.
+>>> If it's not too much trouble, both CFQ and deadline scheduler figures
+>>> would be useful, on a
+>>> set of read only, write only and parallel read write usecases.
+>>>
+>>> I can also try to replicate your results if you can publish the exact
+>>> configuration you used
+>>> for testing (example: iozone parameters)
+>> I'm checking the merez's result.
+>> Currently packed command is effective on write.
+>> When running packed write with iozone, there is 25% performance gains.
+>> (ex: iozone -az -i0 -I -s 10m -f /target/test -e)
+>>
+> Our tests shows performance gain of 50-60% in scenarios of only write lmdd
+> operations.
+>
+> As I mentioned in the write packing control thread the degradation of read
+> performance in case of mix read/write operations appears also without
+> write packing. Therefore I don't think it should stop us from approving
+> the write packing patch, that gives a significant improvement to the write
+> performance.
+> The read performance degradation should be resolved regardless of the
+> write packing patch.
+>
 
-Well, the Linaro storage team is in close contact with Alex Lemberg
-from Sandisk, Luca Porzio from Micron and Hyojin Jeong from Samsung,
-and we discussed this patch in our meeting two weeks ago and on
-our Linaro mailing lists before that.
+One further question - when you say "degradation of read performance
+in case of mix
+read/write operations appears also without write packing", what
+exactly does that mean?
+Degradation w.r.to to read-only test ? Or any expected throughput ?
 
-I have a good feeling about that work relationship, and they
-all understand the needs of the Linux file systems, but my impression
-is also that with an NDA in place we would not be able to put any
-better implementation into the Linux kernel that makes use of hw
-details of one of the manufacturers. Also note that the eMMC standard
-is intentionally written in an abstract way to give the hardware
-manufacturers the option to provide better implementations over time,
-e.g. when new devices start using large amounts of cache, or replace
-NAND flash with phase change memory or other technologies.
+If the scenario you mention is accurate, I was actually thinking that
+we should recommend to merge
+read packing first, then merge write packing once the read performance
+issue is well understood.
 
-That said, I think it is rather clear what the authors of the spec
-had in mind, and there is only one reasonable implementation given
-current flash technology: You get something like a log structured
-file system with 15 contexts, where each context writes to exactly
-one erase block at a given time. This is not all that different
-from how eMMC/SD/USB works already without context support, the main
-difference being that the context normally gets picked based on the
-LBA of the write in segments between 512KB and 16MB. Because the number
-of active contexts is smaller than the number of total segments in
-the device, the device keeps an LRU list of something between 5 and
-30 segments.
+I am all for better performance with packing control etc, but the
+overall code complexity is really
+increasing more than necessary. I want to make sure that it is really
+worth the effort.
 
-Letting the file system pick the context number based on information
-it has about the contents rather than the LBA should reduce the amount
-of garbage collection if there is a stronger correlation between life
-times of data written to the same context than there is between
-life times of data written to adjacent LBA numbers.
-
-The trouble with this is of course that getting the file system to
-do a really good job at picking the context numbers is a harder
-task than coming up with a block allocation scheme that just gets
-it right for devices without context ID support ;-).
-
-I think using the inode number is a reasonable fit. Using the
-inode number of the parent directory might be more appropriate
-but it breaks with hard links and cross-directory renames (we
-must not use the same LBA with conflicting context numbers,
-or flush the old context inbetween).
-
-	Arnd
+Thanks,
+Venkat.
