@@ -1,88 +1,46 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH v1 1/1] mmc: block: fix the data timeout issue with ACMD22
-Date: Thu, 14 Jun 2012 00:35:48 +0530
-Message-ID: <CANfBPZ81uBVAhC=NWDMfoU_KsoyKQD0a-mpqO7DW+u3s1SpNWA@mail.gmail.com>
-References: <1339587643-22115-1-git-send-email-subhashj@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Maya Erez <merez@codeaurora.org>
+Subject: [PATCH v3 0/1] mmc: block: Add write packing control
+Date: Wed, 13 Jun 2012 22:37:15 +0300
+Message-ID: <1339616240-27361-1-git-send-email-merez@codeaurora.org>
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1339587643-22115-1-git-send-email-subhashj@codeaurora.org>
 Sender: linux-arm-msm-owner@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jun 13, 2012 at 5:10 PM, Subhash Jadavani
-<subhashj@codeaurora.org> wrote:
-> If multi block write operation fails for SD card, during
-> error handling we send the SD_APP_SEND_NUM_WR_BLKS (ACMD22)
-> to know how many blocks were already programmed by card.
->
-> But mmc_sd_num_wr_blocks() function which sends the ACMD22
-> calculates the data timeout value from csd.tacc_ns and
-> csd.tacc_clks parameters which will be 0 for block addressed
-> (>2GB cards) SD card. This would result in timeout_ns and
-> timeout_clks being 0 in the mmc_request passed to host driver.
-> This means host controller would program its data timeout timer
-> value with 0 which could result in DATA TIMEOUT errors from
-> controller.
->
-> To fix this issue, mmc_sd_num_wr_blocks() should instead
-> just call the mmc_set_data_timeout() to calculate the
-> data timeout value. mmc_set_data_timeout() function
-> ensures that non zero timeout value is set even for
-> block addressed SD cards.
->
-> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+Our experiments showed that the write packing causes degradation of the read
+throughput, in parallel read and write operations.
+Since the read latency is critical for user experience we added a write packing control
+mechanism that disables the write packing in case of read requests.
+This will ensure that read requests latency is not increased due to long write packed commands.
 
-The patch log could be improvised (Just mention that
-set_data_timeout() is reused .. etc")
-Even otherwise, its fine.
-Reviewed-by: Venkatraman S <svenkatr@ti.com>
+The trigger for enabling the write packing is managing to pack several write requests.
+The number of potential packed requests that will trigger the packing can be configured via sysfs.
+The trigger for disabling the write packing is a fetch of a read request.
 
-> ---
-> =A0drivers/mmc/card/block.c | =A0 14 +-------------
-> =A01 files changed, 1 insertions(+), 13 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 7e3f453..f1c84de 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -554,7 +554,6 @@ static u32 mmc_sd_num_wr_blocks(struct mmc_card *=
-card)
-> =A0 =A0 =A0 =A0struct mmc_request mrq =3D {NULL};
-> =A0 =A0 =A0 =A0struct mmc_command cmd =3D {0};
-> =A0 =A0 =A0 =A0struct mmc_data data =3D {0};
-> - =A0 =A0 =A0 unsigned int timeout_us;
->
-> =A0 =A0 =A0 =A0struct scatterlist sg;
->
-> @@ -574,23 +573,12 @@ static u32 mmc_sd_num_wr_blocks(struct mmc_card=
- *card)
-> =A0 =A0 =A0 =A0cmd.arg =3D 0;
-> =A0 =A0 =A0 =A0cmd.flags =3D MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AD=
-TC;
->
-> - =A0 =A0 =A0 data.timeout_ns =3D card->csd.tacc_ns * 100;
-> - =A0 =A0 =A0 data.timeout_clks =3D card->csd.tacc_clks * 100;
-> -
-> - =A0 =A0 =A0 timeout_us =3D data.timeout_ns / 1000;
-> - =A0 =A0 =A0 timeout_us +=3D data.timeout_clks * 1000 /
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 (card->host->ios.clock / 1000);
-> -
-> - =A0 =A0 =A0 if (timeout_us > 100000) {
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 data.timeout_ns =3D 100000000;
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 data.timeout_clks =3D 0;
-> - =A0 =A0 =A0 }
-> -
-> =A0 =A0 =A0 =A0data.blksz =3D 4;
-> =A0 =A0 =A0 =A0data.blocks =3D 1;
-> =A0 =A0 =A0 =A0data.flags =3D MMC_DATA_READ;
-> =A0 =A0 =A0 =A0data.sg =3D &sg;
-> =A0 =A0 =A0 =A0data.sg_len =3D 1;
-> + =A0 =A0 =A0 mmc_set_data_timeout(&data, card);
->
-> =A0 =A0 =A0 =A0mrq.cmd =3D &cmd;
-> =A0 =A0 =A0 =A0mrq.data =3D &data;
-> --
+this patch is dependant in the following patches:
+  [PATCH v7 1/3] mmc: core: Add packed command feature of eMMC4.5
+  [PATCH v7 2/3] mmc: core: Support packed write command for eMMC4.5 device
+
+Changes in v3:
+    - Fix the settings of num_of_potential_packed_wr_reqs
+
+Changes in v2:
+    - Move the attribute for setting the packing enabling trigger to the block device
+    - Add documentation of the new attribute
+
+Maya Erez (1):
+  mmc: block: Add write packing control
+
+ Documentation/mmc/mmc-dev-attrs.txt |   17 ++++++
+ drivers/mmc/card/block.c            |  101 ++++++++++++++++++++++++++++++++++-
+ drivers/mmc/card/queue.c            |    8 +++
+ drivers/mmc/card/queue.h            |    3 +
+ include/linux/mmc/host.h            |    1 +
+ 5 files changed, 129 insertions(+), 1 deletions(-)
+
+-- 
+1.7.3.3
+-- 
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
