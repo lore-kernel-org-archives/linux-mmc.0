@@ -1,70 +1,95 @@
-From: Muthu Kumar <muthu.lkml@gmail.com>
-Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
-Date: Wed, 13 Jun 2012 15:21:49 -0700
-Message-ID: <CAFR8ueecGqw=JzAGVHV61-SqOnn_C-ryT54KCQCbKkJpXUGY9w@mail.gmail.com>
-References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
-	<1338576911-17089-2-git-send-email-merez@codeaurora.org>
-	<CAFR8uefCD_WXDM6m+-XwG10+W0UXqOtK7_sxWD3uVckh3pnR-Q@mail.gmail.com>
-	<CAFR8uee7hWLC-h_abZOCEuqeUeuhDuJp74x3R-3n+c61xyfaPQ@mail.gmail.com>
-	<fb2303ea3a3a5470e76d1faa2abd471b.squirrel@www.codeaurora.org>
+From: Ted Ts'o <tytso@mit.edu>
+Subject: Re: [PATCH 2/3] ext4: Context support
+Date: Wed, 13 Jun 2012 22:07:57 -0400
+Message-ID: <20120614020757.GB8226@thunk.org>
+References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com>
+ <201206131944.35351.arnd.bergmann@linaro.org>
+ <20120613200033.GB17990@thunk.org>
+ <201206132043.47962.arnd.bergmann@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <fb2303ea3a3a5470e76d1faa2abd471b.squirrel@www.codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: merez@codeaurora.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <201206132043.47962.arnd.bergmann@linaro.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Arnd Bergmann <arnd.bergmann@linaro.org>
+Cc: Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>, Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, "Luca Porzio (lporzio)" <lporzio@micron.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jun 13, 2012 at 12:52 PM,  <merez@codeaurora.org> wrote:
->
-> On Mon, June 11, 2012 5:28 pm, Muthu Kumar wrote:
->> On Mon, Jun 11, 2012 at 2:19 PM, Muthu Kumar <muthu.lkml@gmail.com> wrote:
->>> On Fri, Jun 1, 2012 at 11:55 AM, Maya Erez <merez@codeaurora.org> wrote:
->>>> trigger
->>>> the packing can be configured via sysfs by writing the required value
->>>> to:
->>>> /sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
->>>> The trigger for disabling the write packing is fetching a read request.
->>>>
->>>
->>> If it is applicable only to MMC why do we have this sysfs attr for all
->>> block devices?
->>
->> Just to be clear, please create a directory, say mmc, under
->> /sys/block/<dev>/ and create the attr inside that.
->>
->> You can refer to dm (dm-sysfs.c) for sample implementation.
-> I understand why you think it would be best to distinguish the MMC
-> specific attribute from the general block devices attributes.
-> However, since this attribute is created only for the MMC block device,
-> other block devices won't be aware of it.
+On Wed, Jun 13, 2012 at 08:43:47PM +0000, Arnd Bergmann wrote:
+> > It might be worth considering the hueristic of a series of files
+> > written by a single process close together in time as belonging to a
+> > single context.  That still might not be quite right in the case of a
+> > git checkout for example, most of the time I think that hueristic
+> > would be quite valid.
+> 
+> I agree that using the process as an indication would be nice, but
+> I could not come up with a way to ensure that we use the same
+> context ID if two processes are writing to the same file.
 
-I understand its created by the MMC code so will not be there for
-other block devices. But having the device specific attributes inside
-one <device> directory is better/cleaner. And since we are already
-following that model for other devices, why not follow that for MMC
-also?
+Oh, well *that's* easy.  Whichever process opens the file drops a
+context ID into fs-specific inode structure (for ext4, that would be
+struct ext4_inode_info), and if a second process opens the file, we
+use the same context ID.  When the last file descriptor for the inode
+is closed, we zap the context ID.
 
-> Therefore, it doesn't
-> necessarily require a separation to a different folder.
-> Currently there is another MMC specific attribute (force_ro) which is also
-> created in the root directory. I think it would be better to also create
-> the num_wr_reqs_to_start_packing in the same folder as force_ro and not
-> make it an exceptional attribute in its location and the code that handles
-> it.
+It also occurs to me that if a file is being written to by two
+processes, it's likely that it's a update-in-place database, and we
+want to treat those special; no matter what the size, we probably
+don't want to group that file into the same context as the others.
+More generally, if a file is opened without O_CREAT, it's probably a
+good bet that it wants to either be in a context by itself, or not
+part of any context.
 
-Then time to move that as well to "mmc" directory.
+The files which we would probably find most interesting is the files
+which are created from scratch, and more specifically, for files which
+are dumped out all at once: i.e., open w/O_CREAT, optional fallocate,
+write, optional fsync, and close.  If we can detect a series of file
+operations with this characteristic originating from the same process,
+when we detect a second open w/O_CREAT very shortly after the first
+O_CREAT in the same directory from the same process, we simply reuse
+the context ID for the second and subsequent files.
 
-Regards,
-Muthu
+> I think ideally we would also want to write small files separately from
+> large files in the file system, and that would also make support for
+> contexts less useful.
 
+Well, for file systems with delayed allocation, this is actually
+pretty easy.  By the time we do the writeback for a file with delayed
+allocation, if it's substantially bigger than the erase block size and
+we haven't yet written any blocks for the file, we should give it a
+new context ID.  And furthermore, your idea that we should try to
+align the file on an erase block boundary would be a great thing to
+do.
 
-> I would appreciate your opinion on that.
->
-> Thanks,
-> Maya
-> --
-> Sent by consultant of Qualcomm Innovation Center, Inc.
-> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
->
+> For eMMC at least the erase block size is information that we should
+> be able to figure out. While I've seen devices that are lying there,
+> the representatives of the eMMC manufactures that I talked to basically
+> agreed that we should take the provided information to be correct
+> and if it happens to be wrong, that should be considered a firmware
+> bug that may result in bad performance and should be fixed in the
+> next version.
+
+What would be *great* is if the erase block size were exposed in
+sysfs, and that the blockid library (which is how mke2fs and other
+similar mkfs programs get other storage device parameters) were
+enhanced to return this information.
+
+> For SD cards, almost everyone is lying and we cannot trust the
+> information, and for USB flash, there is no way to ask the device.
+> In both of these cases, we probably want to detect the erase block
+> size at mkfs time using some timing attack that I worked on before.
+> Note that those devices also do not offer support for context IDs.
+
+Yes, although presumably aligning large files to erase block
+boundaries would still be useful, yes?
+
+So adding an erase block size to the ext2/3/4 superblock sounds like a
+first great step.  By making it be a superblock field, that way it's
+possible to override the value returned by the hardware if it turns
+out to be a lie, and we can also use programs like flashbench to
+figure out the erase block size and populate the superblock value via
+some userspace process.  (Possibly called out of mke2fs directly if we
+can automate it completely, and make it dead reliable.)
+
+    	     		    	     	- Ted
