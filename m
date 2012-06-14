@@ -1,47 +1,44 @@
-From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Subject: Re: Where to power on the wifi device before loading the driver.
-Date: Thu, 14 Jun 2012 09:54:22 -0600
-Message-ID: <4FDA092E.10301@wwwdotorg.org>
-References: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88@HKMAIL01.nvidia.com> <4FD90352.9090606@wwwdotorg.org> <20120614063120.GA20167@avionic-0098.mockup.avionic-design.de> <20120614121234.GC3913@opensource.wolfsonmicro.com>
+From: Nicolas Pitre <nicolas.pitre@linaro.org>
+Subject: Re: [PATCH 2/3] ext4: Context support
+Date: Thu, 14 Jun 2012 12:14:13 -0400 (EDT)
+Message-ID: <alpine.LFD.2.02.1206141204591.23555@xanadu.home>
+References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com> <201206131944.35351.arnd.bergmann@linaro.org> <20120613200033.GB17990@thunk.org> <201206132043.47962.arnd.bergmann@linaro.org> <20120614020757.GB8226@thunk.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20120614121234.GC3913-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>
-Cc: Thierry Reding <thierry.reding-RM9K5IK7kjKj5M59NBduVrNAH6kLmebB@public.gmane.org>, Wei Ni <wni-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Mursalin Akon <makon-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "'linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "'linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rakesh Kumar <krakesh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <20120614020757.GB8226@thunk.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Ted Ts'o <tytso@mit.edu>
+Cc: Arnd Bergmann <arnd.bergmann@linaro.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>, Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, "Luca Porzio (lporzio)" <lporzio@micron.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 06/14/2012 06:12 AM, Mark Brown wrote:
-> On Thu, Jun 14, 2012 at 08:31:20AM +0200, Thierry Reding wrote:
->> On Wed, Jun 13, 2012 at 03:17:06PM -0600, Stephen Warren wrote:
-> 
->>> The core of the issue is that:
-> 
->>> * Tegra30 support is via device tree. * We have an SDIO bus,
->>> and the WiFi device attached to that bus is enumerable. * Since
->>> the WiFi device is enumerable, no node exists in the DT to 
->>> represent it. * However, the driver for the WiFi device needs
->>> certain information, such as the reset GPIO ID and perhaps
->>> power GPIO.
-> 
->> PCI devices are also enumerable and yet they can be matched up
->> with nodes in the device tree. Perhaps something similar could be
->> added for the SDIO bus?
-> 
-> This seems to make the most sense - pushing this through the
-> regulator API is just a bodge.
+On Wed, 13 Jun 2012, Ted Ts'o wrote:
 
-Yes, that seems reasonable.
+> On Wed, Jun 13, 2012 at 08:43:47PM +0000, Arnd Bergmann wrote:
+> 
+> > For SD cards, almost everyone is lying and we cannot trust the
+> > information, and for USB flash, there is no way to ask the device.
+> > In both of these cases, we probably want to detect the erase block
+> > size at mkfs time using some timing attack that I worked on before.
+> > Note that those devices also do not offer support for context IDs.
+> 
+> Yes, although presumably aligning large files to erase block
+> boundaries would still be useful, yes?
+> 
+> So adding an erase block size to the ext2/3/4 superblock sounds like a
+> first great step.  By making it be a superblock field, that way it's
+> possible to override the value returned by the hardware if it turns
+> out to be a lie, and we can also use programs like flashbench to
+> figure out the erase block size and populate the superblock value via
+> some userspace process.  (Possibly called out of mke2fs directly if we
+> can automate it completely, and make it dead reliable.)
 
-Presumably the power GPIO should be a fixed regulator though, since it
-is a power control not just a plain old GPIO? That said, the current
-driver apparently deals with this as a GPIO already.
+Let's not forget that, in almost all cases, filesystem images are not 
+created live on the final medium.  Factories are picking a batch of 
+flash devices and a pre-built filesystem image is stamped on them, and 
+there might not even be a guarantee that those flash devices will all 
+have the same characteristics.  So to say that making this tuning at 
+mkfs time is probably not the best strategy.
 
-The reset GPIO can separately/directly controlled by the WiFi driver
-though.
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+Nicolas
