@@ -1,59 +1,45 @@
 From: Sonic Zhang <sonic.adi@gmail.com>
-Subject: [PATCH 4/5 v2] mmc: bfin_sdh: Remove redundent suspend and resume setting.
-Date: Thu, 14 Jun 2012 17:22:22 +0800
-Message-ID: <1339665743-7947-4-git-send-email-sonic.adi@gmail.com>
-References: <1339665743-7947-1-git-send-email-sonic.adi@gmail.com>
+Subject: [PATCH 1/5 v2] mmc: bfin_sdh: limit mmc DMA segment len to 1 for bf518.
+Date: Thu, 14 Jun 2012 17:22:19 +0800
+Message-ID: <1339665743-7947-1-git-send-email-sonic.adi@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1339665743-7947-1-git-send-email-sonic.adi@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
-Cc: LKML <linux-kernel@vger.kernel.org>, uclinux-dist-devel@blackfin.uclinux.org, Sonic Zhang <sonic.zhang@analog.com>, Bob Liu <lliubbo@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from va3ehsobe001.messaging.microsoft.com ([216.32.180.11]:51788
+	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755483Ab2FNJ0U (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jun 2012 05:26:20 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Cc: LKML <linux-kernel@vger.kernel.org>, uclinux-dist-devel@blackfin.uclinux.org, Sonic Zhang <sonic.zhang@analog.com>
 
 From: Sonic Zhang <sonic.zhang@analog.com>
 
-mmc core suspend and resume functions had already called sdh_set_ios with proper flags.
+bf518 RSI dma doesn't work in array mode.
 
 Signed-off-by: Sonic Zhang <sonic.zhang@analog.com>
-Signed-off-by: Bob Liu <lliubbo@gmail.com>
 ---
- drivers/mmc/host/bfin_sdh.c |   15 ---------------
- 1 files changed, 0 insertions(+), 15 deletions(-)
+ drivers/mmc/host/bfin_sdh.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
 
 diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
-index f47526f..7776614 100644
+index 0366617..fd25b0c 100644
 --- a/drivers/mmc/host/bfin_sdh.c
 +++ b/drivers/mmc/host/bfin_sdh.c
-@@ -643,11 +643,6 @@ static int sdh_suspend(struct platform_device *dev, pm_message_t state)
- 	if (mmc)
- 		ret = mmc_suspend_host(mmc);
+@@ -469,7 +469,11 @@ static int __devinit sdh_probe(struct platform_device *pdev)
+ 	}
  
--#ifndef RSI_BLKSZ
--	bfin_write_SDH_PWR_CTL(bfin_read_SDH_PWR_CTL() & ~PWR_ON);
--#else
--	bfin_write_SDH_CFG(bfin_read_SDH_CFG() & ~PWR_ON);
--#endif
- 	peripheral_free_list(drv_data->pin_req);
- 
- 	return ret;
-@@ -669,16 +664,6 @@ static int sdh_resume(struct platform_device *dev)
- 	/* Secure Digital Host shares DMA with Nand controller */
- 	bfin_write_DMAC1_PERIMUX(bfin_read_DMAC1_PERIMUX() | 0x1);
- #endif
--#ifndef RSI_BLKSZ
--	bfin_write_SDH_PWR_CTL(bfin_read_SDH_PWR_CTL() | PWR_ON);
--	bfin_write_SDH_CFG(bfin_read_SDH_CFG() | CLKS_EN);
--#else
--	bfin_write_SDH_CFG(bfin_read_SDH_CFG() | CLKS_EN | PWR_ON);
--#endif
--	SSYNC();
--
--	bfin_write_SDH_CFG((bfin_read_SDH_CFG() & 0x1F) | (PUP_SDDAT | PUP_SDDAT3));
--	SSYNC();
- 
- 	if (mmc)
- 		ret = mmc_resume_host(mmc);
+ 	mmc->ops = &sdh_ops;
++#if defined(CONFIG_BF54x)
+ 	mmc->max_segs = 32;
++#elif defined(CONFIG_BF51x)
++	mmc->max_segs = 1;
++#endif
+ 	mmc->max_seg_size = 1 << 16;
+ 	mmc->max_blk_size = 1 << 11;
+ 	mmc->max_blk_count = 1 << 11;
 -- 
 1.7.0.4
+
+
