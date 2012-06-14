@@ -1,41 +1,40 @@
-From: Ted Ts'o <tytso@mit.edu>
-Subject: Re: [PATCH 2/3] ext4: Context support
-Date: Thu, 14 Jun 2012 13:05:33 -0400
-Message-ID: <20120614170533.GA15093@thunk.org>
-References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com>
- <201206131944.35351.arnd.bergmann@linaro.org>
- <20120613200033.GB17990@thunk.org>
- <201206132043.47962.arnd.bergmann@linaro.org>
- <20120614020757.GB8226@thunk.org>
- <alpine.LFD.2.02.1206141204591.23555@xanadu.home>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-ext4-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <alpine.LFD.2.02.1206141204591.23555@xanadu.home>
-Sender: linux-ext4-owner@vger.kernel.org
-To: Nicolas Pitre <nicolas.pitre@linaro.org>
-Cc: Arnd Bergmann <arnd.bergmann@linaro.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>, Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, "Luca Porzio (lporzio)" <lporzio@micron.com>
+From: Jonathan Kliegman <kliegs@chromium.org>
+Subject: [PATCH] mmc: dw_mmc: Fix null dma_ops access when use_dma is false
+Date: Thu, 14 Jun 2012 13:31:55 -0400
+Message-ID: <1339695115-606-1-git-send-email-kliegs@chromium.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:46027 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756276Ab2FNRcY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jun 2012 13:32:24 -0400
+Received: by vcbf11 with SMTP id f11so1168641vcb.19
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Jun 2012 10:32:23 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Jonathan Kliegman <kliegs@chromium.org>
 
-On Thu, Jun 14, 2012 at 12:14:13PM -0400, Nicolas Pitre wrote:
-> Let's not forget that, in almost all cases, filesystem images are not 
-> created live on the final medium.  Factories are picking a batch of 
-> flash devices and a pre-built filesystem image is stamped on them, and 
-> there might not even be a guarantee that those flash devices will all 
-> have the same characteristics.  So to say that making this tuning at 
-> mkfs time is probably not the best strategy.
+host->dma_ops is not valid if host->usa dma is 0 so protect
+host->dma_ops reference in dw_mci_resume
 
-Sure, that just means there needs to be a way of overriding the values
-used by mke2fs.  (Because as you create the fs image, the storage
-device parameters may make a difference to how blocks get allocated.)
+Signed-off-by: Jonathan Kliegman <kliegs@chromium.org>
+---
+ drivers/mmc/host/dw_mmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-The reason why I talk about making it work automatically at mke2fs
-time is that the vast majority of created file systems (where a
-specially created fs by a handset vendor counts as "one", even if it
-then gets stamped on millions of devices), the end user is someone
-naive/oblivious, so the right thing *has* to happen by default in the
-common case of running mke2fs on the storage device where the file
-system gets used.
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 1ca5e72..e2758d5 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2175,7 +2175,7 @@ int dw_mci_resume(struct dw_mci *host)
+ 		return ret;
+ 	}
+ 
+-	if (host->dma_ops->init)
++	if (host->use_dma && host->dma_ops->init)
+ 		host->dma_ops->init(host);
+ 
+ 	/* Restore the old value at FIFOTH register */
+-- 
+1.7.7.3
 
-					- Ted
