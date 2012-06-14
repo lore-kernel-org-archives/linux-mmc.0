@@ -1,46 +1,41 @@
-From: "Franky Lin" <frankyl@broadcom.com>
-Subject: Re: Where to power on the wifi device before loading the
- driver.
-Date: Thu, 14 Jun 2012 09:45:56 -0700
-Message-ID: <4FDA1544.1020701@broadcom.com>
-References: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88@HKMAIL01.nvidia.com>
- <4FD8CED9.6030901@broadcom.com>
- <6B4D417B830BC44B8026029FD256F7F1C377BFFE89@HKMAIL01.nvidia.com>
+From: Ted Ts'o <tytso@mit.edu>
+Subject: Re: [PATCH 2/3] ext4: Context support
+Date: Thu, 14 Jun 2012 13:05:33 -0400
+Message-ID: <20120614170533.GA15093@thunk.org>
+References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com>
+ <201206131944.35351.arnd.bergmann@linaro.org>
+ <20120613200033.GB17990@thunk.org>
+ <201206132043.47962.arnd.bergmann@linaro.org>
+ <20120614020757.GB8226@thunk.org>
+ <alpine.LFD.2.02.1206141204591.23555@xanadu.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mms2.broadcom.com ([216.31.210.18]:3738 "EHLO mms2.broadcom.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756055Ab2FNQqz convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jun 2012 12:46:55 -0400
-In-Reply-To: <6B4D417B830BC44B8026029FD256F7F1C377BFFE89@HKMAIL01.nvidia.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-ext4-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <alpine.LFD.2.02.1206141204591.23555@xanadu.home>
+Sender: linux-ext4-owner@vger.kernel.org
+To: Nicolas Pitre <nicolas.pitre@linaro.org>
+Cc: Arnd Bergmann <arnd.bergmann@linaro.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>, Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, "Luca Porzio (lporzio)" <lporzio@micron.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Wei Ni <wni@nvidia.com>
-Cc: Stephen Warren <swarren@nvidia.com>, "'linux-wireless@vger.kernel.org'" <linux-wireless@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mursalin Akon <makon@nvidia.com>, Rakesh Kumar <krakesh@nvidia.com>
 
-On 06/13/2012 09:17 PM, Wei Ni wrote:
-> Wei: Yes, in OOB mode, it's easy to add a device node in the DT, to p=
-ass
-> the gpio property to brcmfmac driver. But the NO-OOB mode doesn=92t u=
-se the
-> virtual platform device, so we can't pass the gpio to driver. We need=
- to find
-> a way to support these two mode both.
-> Could we use the virtual platform device both for OOB and NO-OOB mode=
-? so that
-> we can implement power control in these two mode, and we can add a fl=
-ags to
-> control if need to power on or not.
+On Thu, Jun 14, 2012 at 12:14:13PM -0400, Nicolas Pitre wrote:
+> Let's not forget that, in almost all cases, filesystem images are not 
+> created live on the final medium.  Factories are picking a batch of 
+> flash devices and a pre-built filesystem image is stamped on them, and 
+> there might not even be a guarantee that those flash devices will all 
+> have the same characteristics.  So to say that making this tuning at 
+> mkfs time is probably not the best strategy.
 
-Of course you can use it for non OOB.
+Sure, that just means there needs to be a way of overriding the values
+used by mke2fs.  (Because as you create the fs image, the storage
+device parameters may make a difference to how blocks get allocated.)
 
-> BTW, does that power on sequence is generally for 4329?
+The reason why I talk about making it work automatically at mke2fs
+time is that the vast majority of created file systems (where a
+specially created fs by a handset vendor counts as "one", even if it
+then gets stamped on millions of devices), the end user is someone
+naive/oblivious, so the right thing *has* to happen by default in the
+common case of running mke2fs on the storage device where the file
+system gets used.
 
-Yes.
-
-Regards.
-=46ranky
-
+					- Ted
