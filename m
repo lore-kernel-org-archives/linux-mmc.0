@@ -1,117 +1,118 @@
-From: haojian.zhuang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-Subject: Re: Re: [PATCH] mmc: sdhci-pxa: Add device tree support
-Date: Thu, 14 Jun 2012 02:15:23 +0000
-Message-ID: <e89a8ff1c3b8b41f0104c26545d9@google.com>
-References: <87sjdzxpqr.fsf@octavius.laptop.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v7 1/3] mmc: core: Add packed command feature of eMMC4.5
+Date: Thu, 14 Jun 2012 12:10:38 +0900
+Message-ID: <003b01cd49db$4678a6b0$d369f410$%jun@samsung.com>
+References: <000601cd47ab$8ad77c50$a08674f0$%jun@samsung.com>
+ <CANfBPZ9dwwAOBbXPqGV64k-sB-MzRtTO8x7tXnZBjtYN+V88XQ@mail.gmail.com>
+ <000001cd489c$115f03b0$341d0b10$%jun@samsung.com>
+ <113bb1f38dbc386f1adfc580e10dc2e5.squirrel@www.codeaurora.org>
+ <CANfBPZ_+=keFgv-xDbzkZi2uVFvd46_JGoxweMKa1CvfX=X7=g@mail.gmail.com>
+ <1476f0476a2dcfc6f7db9dbb4be0ab2b.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============3627717907685580079=="
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <87sjdzxpqr.fsf-DGHOrqG7t0YzNDMTQreKSUB+6BGkLq7r@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Haojian Zhuang <haojian.zhuang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, Philip Rakity <prakity-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Zhangfei Gao <zhangfei.gao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, zhangfei gao <zhangfei.gao-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-List-Id: linux-mmc@vger.kernel.org
-
---===============3627717907685580079==
-Content-Type: multipart/alternative; boundary=e89a8ff1c3b8b41ef304c26545d6
-
---e89a8ff1c3b8b41ef304c26545d6
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed; delsp=yes
-
-On , Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org> wrote:
-> Hi Zhangfei,
-
-
-
-> On Tue, Jun 12 2012, zhangfei gao wrote:
-
-> > On Wed, Jun 13, 2012 at 3:05 AM, Chris Ball cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org> wrote:
-
-
-> How do you feel about having the compatible node say "sdhci-pxav3"
-> instead of "mrvl,pxav3-mmc"? I used the mrvl prefix because it fits
-> in with the rest of your existing DT, but it seems like it would be
-> better to name the driver directly. The DTs here live inside the
-> source tree, so we're not depending on anyone else's terminology.
-
-> If you're okay with sdhci-pxav{2,3} in compatible, I'll include that
-> in v2 of the patch with the rest of your fixes.
-
-Compatible node could be "mrvl,pxav3-mmc" or "mrvl,sdhci-pxav3". It's
-depend on your choice. I prefer to use vendor name in compatible property.
-And we could avoid naming conflict.
-
-+ if (of_find_property(np, "non-removable", NULL))
-+ pdata->flags |= PXA_FLAG_CARD_PERMANENT;
-+
-+ of_property_read_u32(np, "bus-width", &bus_width);
-+ if (bus_width == 8)
-+ pdata->flags |= PXA_FLAG_SD_8_BIT_CAPABLE_SLOT;
-+
-+ of_property_read_u32(np, "clk-delay-cycles", &clk_delay_cycles);
-+ if (clk_delay_cycles > 0)
-+ pdata->clk_delay_cycles = clk_delay_cycles;
-+
-
-These properties should be "mrvl,non-removable", "mrvl,bus-width",
-"mrvl,clk-delay-cycles". Since it's mentioned in
-Documentations/devicetree/booting-without-of.txt. "It is recommended
-that if you add any "custom" property whose name may clash with
-standard defined ones, you prefix them with your vendor name and
-a comma."
-
---e89a8ff1c3b8b41ef304c26545d6
-Content-Type: text/html; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-On , Chris Ball &lt;cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org&gt; wrote:<br />&gt; Hi Zhangfei,<br />&=
-gt; <br />&gt; <br />&gt; <br />&gt; On Tue, Jun 12 2012, zhangfei gao wrot=
-e:<br />&gt; <br />&gt; &gt; On Wed, Jun 13, 2012 at 3:05 AM, Chris Ball cj=
-b@laptop.org&gt; wrote:<br />&gt; <br />&gt; <br />&gt; How do you feel abo=
-ut having the compatible node say &quot;sdhci-pxav3&quot;<br />&gt; instead=
- of &quot;mrvl,pxav3-mmc&quot;? =A0I used the mrvl prefix because it fits<b=
-r />&gt; in with the rest of your existing DT, but it seems like it would b=
-e<br />&gt; better to name the driver directly. =A0The DTs here live inside=
- the<br />&gt; source tree, so we&#39;re not depending on anyone else&#39;s=
- terminology.<br />&gt; <br />&gt; If you&#39;re okay with sdhci-pxav{2,3} =
-in compatible, I&#39;ll include that<br />&gt; in v2 of the patch with the =
-rest of your fixes.<br />&gt; <br />Compatible node could be &quot;mrvl,pxa=
-v3-mmc&quot; or &quot;mrvl,sdhci-pxav3&quot;. It&#39;s <br />depend on your=
- choice. I prefer to use vendor name in compatible property.<br />And we co=
-uld avoid naming conflict.<br /><br />+       if (of_find_property(np, &quo=
-t;non-removable&quot;, NULL))<br />+               pdata-&gt;flags |=3D PXA=
-_FLAG_CARD_PERMANENT;<br />+<br />+       of_property_read_u32(np, &quot;bu=
-s-width&quot;, &bus_width);<br />+       if (bus_width =3D=3D 8)<br />+    =
-           pdata-&gt;flags |=3D PXA_FLAG_SD_8_BIT_CAPABLE_SLOT;<br />+<br /=
->+       of_property_read_u32(np, &quot;clk-delay-cycles&quot;, &clk_delay_=
-cycles);<br />+       if (clk_delay_cycles &gt; 0)<br />+               pda=
-ta-&gt;clk_delay_cycles =3D clk_delay_cycles;<br />+<br /><br />These prope=
-rties should be &quot;mrvl,non-removable&quot;, &quot;mrvl,bus-width&quot;,=
- <br />&quot;mrvl,clk-delay-cycles&quot;.  Since it&#39;s mentioned in <br =
-/>Documentations/devicetree/booting-without-of.txt. &quot;It is recommended=
- <br />that if you add any &quot;custom&quot; property whose name may clash=
- with <br />standard defined ones, you prefix them with your vendor name an=
-d <br />a comma.&quot;
---e89a8ff1c3b8b41ef304c26545d6--
-
---===============3627717907685580079==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:15269 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754707Ab2FNDKl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jun 2012 23:10:41 -0400
+In-reply-to: <1476f0476a2dcfc6f7db9dbb4be0ab2b.squirrel@www.codeaurora.org>
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: merez@codeaurora.org, "'S, Venkatraman'" <svenkatr@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Subhash Jadavani' <subhashj@codeaurora.org>
 
-_______________________________________________
-devicetree-discuss mailing list
-devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-https://lists.ozlabs.org/listinfo/devicetree-discuss
+Maya Erez <merez@codeaurora.org> wrote:
+> On Wed, June 13, 2012 12:49 pm, S, Venkatraman wrote:
+> > On Wed, Jun 13, 2012 at 12:45 AM,  <merez@codeaurora.org> wrote:
+> >>
+> >>> S, Venkatraman <svenkatr@ti.com> wrote:
+> >>>> On Mon, Jun 11, 2012 at 1:53 PM, Seungwon Jeon <tgih.jun@samsung.com>
+> >>>> wrote:
+> >>>> > This patch adds packed command feature of eMMC4.5.
+> >>>> > The maximum number for packing read(or write) is offered
+> >>>> > and exception event relevant to packed command which is
+> >>>> > used for error handling is enabled. If host wants to use
+> >>>> > this feature, MMC_CAP2_PACKED_CMD should be set.
+> >>>> >
+> >>>> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> >>>>
+> >>>> Can you please post some clear performance benchmarks with your
+> >>>> patchset
+> >>>> ?
+> >>>> Given that #merez claims to see a significant performance drop for
+> >>>> reads, it will be
+> >>>> good to compare notes.
+> >>>> If it's not too much trouble, both CFQ and deadline scheduler figures
+> >>>> would be useful, on a
+> >>>> set of read only, write only and parallel read write usecases.
+> >>>>
+> >>>> I can also try to replicate your results if you can publish the exact
+> >>>> configuration you used
+> >>>> for testing (example: iozone parameters)
+> >>> I'm checking the merez's result.
+> >>> Currently packed command is effective on write.
+> >>> When running packed write with iozone, there is 25% performance gains.
+> >>> (ex: iozone -az -i0 -I -s 10m -f /target/test -e)
+> >>>
+> >> Our tests shows performance gain of 50-60% in scenarios of only write
+> >> lmdd
+> >> operations.
+> >>
+> >> As I mentioned in the write packing control thread the degradation of
+> >> read
+> >> performance in case of mix read/write operations appears also without
+> >> write packing. Therefore I don't think it should stop us from approving
+> >> the write packing patch, that gives a significant improvement to the
+> >> write
+> >> performance.
+> >> The read performance degradation should be resolved regardless of the
+> >> write packing patch.
+> >>
+> >
+> > One further question - when you say "degradation of read performance
+> > in case of mix
+> > read/write operations appears also without write packing", what
+> > exactly does that mean?
+> > Degradation w.r.to to read-only test ? Or any expected throughput ?
+> 
+> I meant w.r. to read only test.
+> 
+> >
+> > If the scenario you mention is accurate, I was actually thinking that
+> > we should recommend to merge
+> > read packing first, then merge write packing once the read performance
+> > issue is well understood.
+> 
+> I don't know if you followed the early discussion of this patch but the
+> read throughput was not proved as efficient and in some of the cases it
+> also caused degradation of the read performance. Therefore, we don't
+> intend to merge it yet.
+As I have mentioned in previous mailing, eMMC device which is tested with this patch
+is not optimized for packed read. So currently it is difficult to ensure that
+packed read is effective for performance. We need to test various vendor device
+in regard to packed read.
 
---===============3627717907685580079==--
+Thanks,
+Seungwon Jeon
+
+> >
+> > I am all for better performance with packing control etc, but the
+> > overall code complexity is really
+> > increasing more than necessary. I want to make sure that it is really
+> > worth the effort.
+> 
+> In my opinion a gain of 50%-60% of the write performance worth the
+> complexity of the code and the effort to fix the issues it reveals.
+> 
+> >
+> > Thanks,
+> > Venkat.
+> >
+> 
+> 
+> --
+> Sent by consultant of Qualcomm Innovation Center, Inc.
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+
