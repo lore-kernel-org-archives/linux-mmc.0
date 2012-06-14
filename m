@@ -1,44 +1,120 @@
-From: Nicolas Pitre <nicolas.pitre@linaro.org>
-Subject: Re: [PATCH 2/3] ext4: Context support
-Date: Thu, 14 Jun 2012 15:08:57 -0400 (EDT)
-Message-ID: <alpine.LFD.2.02.1206141505300.23555@xanadu.home>
-References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com> <201206131944.35351.arnd.bergmann@linaro.org> <20120613200033.GB17990@thunk.org> <201206132043.47962.arnd.bergmann@linaro.org> <20120614020757.GB8226@thunk.org>
- <alpine.LFD.2.02.1206141204591.23555@xanadu.home> <20120614170533.GA15093@thunk.org>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH] mmc: tmio: Don't access hardware registers after stopping clocks
+Date: Thu, 14 Jun 2012 21:12:51 +0200
+Message-ID: <1538938.WjgJgiBpYR@avalon>
+References: <1339505838-8831-1-git-send-email-laurent.pinchart@ideasonboard.com> <CANqRtoQdzq5VHqBo1WQUYimVAYsGM6+XmE5r1Aoadm_HpY=eMA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <20120614170533.GA15093@thunk.org>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Ted Ts'o <tytso@mit.edu>
-Cc: Arnd Bergmann <arnd.bergmann@linaro.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>, Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, "Luca Porzio (lporzio)" <lporzio@micron.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from perceval.ideasonboard.com ([95.142.166.194]:47809 "EHLO
+	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756453Ab2FNTMp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jun 2012 15:12:45 -0400
+In-Reply-To: <CANqRtoQdzq5VHqBo1WQUYimVAYsGM6+XmE5r1Aoadm_HpY=eMA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 
-On Thu, 14 Jun 2012, Ted Ts'o wrote:
+Hi Magnus,
 
-> On Thu, Jun 14, 2012 at 12:14:13PM -0400, Nicolas Pitre wrote:
-> > Let's not forget that, in almost all cases, filesystem images are not 
-> > created live on the final medium.  Factories are picking a batch of 
-> > flash devices and a pre-built filesystem image is stamped on them, and 
-> > there might not even be a guarantee that those flash devices will all 
-> > have the same characteristics.  So to say that making this tuning at 
-> > mkfs time is probably not the best strategy.
+On Thursday 14 June 2012 20:12:33 Magnus Damm wrote:
+> On Tue, Jun 12, 2012 at 9:57 PM, Laurent Pinchart wrote:
+> > The tmio_mmc_set_ios() function configures the MMC power, clock and bus
+> > width. When the MMC controller gets powered off, runtime PM switches the
+> > MSTP clock off. Writing to to CTL_SD_MEM_CARD_OPT register afterwards
+> > fails and prints an error message to the kernel log.
+> > 
+> > As configuring the bus width is pointless when the interface gets
+> > powered down, skip the operation when power is off.
+> > 
+> > Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
 > 
-> Sure, that just means there needs to be a way of overriding the values
-> used by mke2fs.  (Because as you create the fs image, the storage
-> device parameters may make a difference to how blocks get allocated.)
+> First of all, thanks for reporting this issue and coming up with a fix!
+
+You're welcome. You can expect more of them ;-)
+
+> Can you please explain a bit more about when this triggers? Is this
+> related to suspend-to-ram perhaps? Which hardware platform? Is
+> CONFIG_PM_RUNTIME=y set?
+
+I've noticed the problem on the Armadillo board with CONFIG_PM_RUNTIME=y. The 
+driver spits out "timeout waiting for SD bus idle" error messages more or less 
+continuously.
+
+> I suspect that this may be a side effect of the current PM code used
+> on the A1 SoC (which is hooked up on the armadillo board).
 > 
-> The reason why I talk about making it work automatically at mke2fs
-> time is that the vast majority of created file systems (where a
-> specially created fs by a handset vendor counts as "one", even if it
-> then gets stamped on millions of devices), the end user is someone
-> naive/oblivious, so the right thing *has* to happen by default in the
-> common case of running mke2fs on the storage device where the file
-> system gets used.
+> In short, the A1 SoC does not yet make use of PM domains, but AP4 and
+> the mackerel board (sh7372 based) is using PM domains.
 
-Absolutely.  However it is fair to say that less than 0.01% of total end 
-users will even think of running mke2fs on their device.  So another 
-strategy that can be executed at run time when the fs is live would be 
-required too.
+Does this mean that runtime PM is a no-op on A1 ? That would surprise me, as 
+turning CONFIG_PM_RUNTIME off gets rid of the problem, so runtime PM is 
+somehow involved. Even if the power domain does not get turned off, can't the 
+MSTP clock be turned off ?
 
+> This difference may result in different state of clocks at suspend-to-ram
+> timing. So the SDHI driver may work just fine on the mackerel board, but not
+> on the armadillo board. If that's the case then perhaps we shouldn't fix the
+> driver, but instead look at the platform level.
 
-Nicolas
+I still believe there's a bug in the driver, please see below.
+
+> > diff --git a/drivers/mmc/host/tmio_mmc_pio.c
+> > b/drivers/mmc/host/tmio_mmc_pio.c index 9a7996a..de1226d 100644
+> > --- a/drivers/mmc/host/tmio_mmc_pio.c
+> > +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> > @@ -816,13 +816,15 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc,
+> > struct mmc_ios *ios) tmio_mmc_clk_stop(host);
+> >        }
+> > 
+> > -       switch (ios->bus_width) {
+> > -       case MMC_BUS_WIDTH_1:
+> > -               sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x80e0);
+> > -       break;
+> > -       case MMC_BUS_WIDTH_4:
+> > -               sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x00e0);
+> > -       break;
+> > +       if (host->power) {
+> > +               switch (ios->bus_width) {
+> > +               case MMC_BUS_WIDTH_1:
+> > +                       sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT,
+> > 0x80e0);
+> > +               break;
+> > +               case MMC_BUS_WIDTH_4:
+> > +                       sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT,
+> > 0x00e0);
+> > +               break;
+> > +               }
+> >        }
+> > 
+> >        /* Let things settle. delay taken from winCE driver */
+> > --
+> > 1.7.3.4
+> 
+> Is it possible that you get here through tmio_mmc_host_suspend() and
+> mmc_suspend_host()?
+> 
+> Just guessing. =)
+
+I haven't checked the complete call stack, but I don't think it matters that 
+much.
+
+What happens here is that the driver tried to write to a 16-bit hardware 
+register after calling pm_runtime_put(). At that point runtime PM may have 
+turned to power domain and/or the MSTP clock off for the device. Writing to a 
+16-bit register first polls for the bus idle bit in the CTL_STATUS2 to be set. 
+This never happens in this case (probably because the clock has been turned 
+off), so the write operation fails.
+
+Speaking generally, I think we should avoid writing to the device after 
+calling pm_runtime_put(), it just doesn't make much sense. If we release the 
+device from a PM point of view, it means we don't need to touch it anymore, so 
+we should prevent writes until the next pm_runtime_get_sync() call.
+
+-- 
+Regards,
+
+Laurent Pinchart
+
