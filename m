@@ -1,58 +1,76 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH 1/2] regulator: core.c Pass voltage to notifier when
- setting voltage
-Date: Fri, 15 Jun 2012 19:08:12 +0100
-Message-ID: <20120615180812.GA18638@opensource.wolfsonmicro.com>
-References: <1339711609-3417-1-git-send-email-prakity@marvell.com>
- <CADTbHxq5rmHJtFTp53sYhFSYWVrSqyo_Jq+0aWNOF2HQR+nhGA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="SUOF0GtieIMvvwua"
+From: Philip Rakity <philipspatches@gmail.com>
+Subject: [PATCH 1/2] regulator: core.c Pass voltage to notifier when setting voltage
+Date: Fri, 15 Jun 2012 11:27:36 -0700
+Message-ID: <1339784856-1779-1-git-send-email-prakity@marvell.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CADTbHxq5rmHJtFTp53sYhFSYWVrSqyo_Jq+0aWNOF2HQR+nhGA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Pankaj Jangra <jangra.pankaj9@gmail.com>
-Cc: Philip Rakity <philipspatches@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>
+To: linux-kernel@vger.kernel.org, broonie@opensource.wolfsonmicro.com
+Cc: linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>
 List-Id: linux-mmc@vger.kernel.org
 
+V3
+--
 
---SUOF0GtieIMvvwua
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Fix type where data argument was not passed in
+blocking_notifier_call_chain.
 
-On Fri, Jun 15, 2012 at 11:28:38PM +0530, Pankaj Jangra wrote:
+edits to check in comments (below)
 
-> I am also curious to know if you pass the  voltage here to notifier call
-> how does it make any difference, since in
-> blocking_notifier_call_chain() again passes the NULL. So does your patch
-> should  modify the arguments to this function also?
-> Please let me know if i am missing something in understanding.
+V2
+--
 
-Your mail would have been rather more comprehensible if you'd mentioned
-that you were talking about the call in _blocking_notifier_call_chain()
-(which is obviously buggy).
+Incorporate performance suggestions made by Mark Brown
+Use linux-next as base code rather than mmc-next
 
---SUOF0GtieIMvvwua
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+The voltage being set should be passed to the call in handler
+requesting the callback.  Currently this is not done.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
+The callin handler cannot call regulator_get_voltage() to get the
+information since the mutex is held by the regulator and
+deadlock occurs.
 
-iQIcBAEBAgAGBQJP23oEAAoJEBus8iNuMP3dHmcP/31GlpNhrk696wzg0qinfC6F
-e8FXFdfPdAHn5GJmKXUf4MS7WHpX4yLqqx/u37NCOn8r8pGN+3BP6bXimgykrgAc
-NvvmNfQKfzpp4tkvjsD4khArCVRXom1qldIepiBbSCnDPjDdqz/UJxN9h1vqQqsn
-ZDXkC3TyQHOIt2C42iL5r0RKGzgew44GI+XZH8pVtul+6sOHQemsz8/qQVLDArKc
-tcGyDakeDwjzrRWdIpPVo/oT5CKnfnNFZRWBk2ZYmUF0OQGHX2dKHabz62UqQk6r
-YdvUIvdEfO6anTdK9NcyFok/WpEizRzUE5HeVSUvAqDGLoeU2VLqXxosiBxXrU81
-aRSwfnn+dmbvevnF4uME+3aPklSszVI23WXcezn/XDPDYZw8TNOIXwJrqbBYlCis
-a2SLGmBWqfYE7ufhhlt5yLn41wZG1Ut7hKip1V2s52VKRXBTGdtCz66yKkRPbk5v
-0ohL4tFfwn6J5chul9cll82xaxmTetkqvr0k3BK8OjJ47XzSr/RRoVvePf6PR/s+
-FtwJ5klL1G3fVVyvvtnHAlsh6S31gO4E/L7N/d5VSSoWMY8gbcHUisvNj8/HnWkC
-qtpSXbI4TvgOwCyh2Wv1YStdhimrC6R2Ov3eexL1t8iCsPIa4STEidRyaw2C4azT
-hEx/YrpX6kKQ9Vxw2QX+
-=wRLx
------END PGP SIGNATURE-----
+Without this change the receiver of the call in cannot know what
+action to take.  This is used, for example, to set PAD voltages
+when doing SD vccq voltage changes.
 
---SUOF0GtieIMvvwua--
+Signed-off-by: Philip Rakity <prakity@marvell.com>
+---
+ drivers/regulator/core.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
+index 63507a5..cdf6905 100644
+--- a/drivers/regulator/core.c
++++ b/drivers/regulator/core.c
+@@ -2153,7 +2153,7 @@ static int _regulator_do_set_voltage(struct regulator_dev *rdev,
+ 	if (rdev->desc->ops->list_voltage)
+ 		best_val = rdev->desc->ops->list_voltage(rdev, selector);
+ 	else
+-		best_val = -1;
++		best_val = _regulator_get_voltage(rdev);
+ 
+ 	/* Call set_voltage_time_sel if successfully obtained old_selector */
+ 	if (_regulator_is_enabled(rdev) && ret == 0 && old_selector >= 0 &&
+@@ -2176,9 +2176,9 @@ static int _regulator_do_set_voltage(struct regulator_dev *rdev,
+ 		udelay(delay);
+ 	}
+ 
+-	if (ret == 0)
++	if (ret == 0 && best_val >= 0)
+ 		_notifier_call_chain(rdev, REGULATOR_EVENT_VOLTAGE_CHANGE,
+-				     NULL);
++				     (void *)best_val);
+ 
+ 	trace_regulator_set_voltage_complete(rdev_get_name(rdev), best_val);
+ 
+@@ -2692,7 +2692,7 @@ static void _notifier_call_chain(struct regulator_dev *rdev,
+ 				  unsigned long event, void *data)
+ {
+ 	/* call rdev chain first */
+-	blocking_notifier_call_chain(&rdev->notifier, event, NULL);
++	blocking_notifier_call_chain(&rdev->notifier, event, data);
+ }
+ 
+ /**
+-- 
+1.7.0.4
