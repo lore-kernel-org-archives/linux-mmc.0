@@ -1,57 +1,104 @@
-From: Pankaj Jangra <jangra.pankaj9@gmail.com>
-Subject: Re: [PATCH 1/2] regulator: core.c Pass voltage to notifier when
- setting voltage
-Date: Sat, 16 Jun 2012 00:20:04 +0530
-Message-ID: <CADTbHxpfQpKMkwzUakUUzt1mKO5rQ2A7_vuh9SA7i6Cq0VinZg@mail.gmail.com>
-References: <1339784856-1779-1-git-send-email-prakity@marvell.com>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: [PATCH] mmc: tmio: Don't access hardware registers after stopping clocks
+Date: Fri, 15 Jun 2012 21:08:13 +0200
+Message-ID: <201206152108.13304.rjw@sisk.pl>
+References: <1339505838-8831-1-git-send-email-laurent.pinchart@ideasonboard.com> <201206151203.02965.rjw@sisk.pl> <1740149.ZARlYKHO9G@avalon>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1339784856-1779-1-git-send-email-prakity@marvell.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Philip Rakity <philipspatches@gmail.com>
-Cc: linux-kernel@vger.kernel.org, broonie@opensource.wolfsonmicro.com, linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1740149.ZARlYKHO9G@avalon>
+Sender: linux-sh-owner@vger.kernel.org
+To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Cc: Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+On Friday, June 15, 2012, Laurent Pinchart wrote:
+> Hi Rafael,
+> 
+> On Friday 15 June 2012 12:03:02 Rafael J. Wysocki wrote:
+> > On Thursday, June 14, 2012, Rafael J. Wysocki wrote:
+> > > On Thursday, June 14, 2012, Laurent Pinchart wrote:
+> > > > On Thursday 14 June 2012 21:37:26 Rafael J. Wysocki wrote:
+> > > > > On Thursday, June 14, 2012, Laurent Pinchart wrote:
+> > > > > > On Thursday 14 June 2012 20:12:33 Magnus Damm wrote:
+> > > > > > > On Tue, Jun 12, 2012 at 9:57 PM, Laurent Pinchart wrote:
+> > > > > > > > The tmio_mmc_set_ios() function configures the MMC power, clock
+> > > > > > > > and bus width. When the MMC controller gets powered off, runtime
+> > > > > > > > PM switches the MSTP clock off. Writing to to
+> > > > > > > > CTL_SD_MEM_CARD_OPT register afterwards fails and prints an
+> > > > > > > > error message to the kernel log.
+> > > > > > > > 
+> > > > > > > > As configuring the bus width is pointless when the interface
+> > > > > > > > gets powered down, skip the operation when power is off.
+> > > > > > > > 
+> > > > > > > > Signed-off-by: Laurent Pinchart
+> > > > > > > > <laurent.pinchart@ideasonboard.com>
+> > > > > > > 
+> > > > > > > First of all, thanks for reporting this issue and coming up with a
+> > > > > > > fix!
+> > > > > > 
+> > > > > > You're welcome. You can expect more of them ;-)
+> > > > > > 
+> > > > > > > Can you please explain a bit more about when this triggers? Is
+> > > > > > > this related to suspend-to-ram perhaps? Which hardware platform?
+> > > > > > > Is CONFIG_PM_RUNTIME=y set?
+> > > > > > 
+> > > > > > I've noticed the problem on the Armadillo board with
+> > > > > > CONFIG_PM_RUNTIME=y.
+> > > > > > The driver spits out "timeout waiting for SD bus idle" error
+> > > > > > messages more or less continuously.
+> > > > > > 
+> > > > > > > I suspect that this may be a side effect of the current PM code
+> > > > > > > used on the A1 SoC (which is hooked up on the armadillo board).
+> > > > > > > 
+> > > > > > > In short, the A1 SoC does not yet make use of PM domains, but AP4
+> > > > > > > and the mackerel board (sh7372 based) is using PM domains.
+> > > > > > 
+> > > > > > Does this mean that runtime PM is a no-op on A1 ? That would
+> > > > > > surprise me, as turning CONFIG_PM_RUNTIME off gets rid of the
+> > > > > > problem, so runtime PM is somehow involved. Even if the power domain
+> > > > > > does not get turned off, can't the MSTP clock be turned off ?
+> > > > > 
+> > > > > The problem is, most likely, that with CONFIG_PM_RUNTIME set the code
+> > > > > in drivers/sh/pm_runtime.c triggers and that causes default_pm_domain
+> > > > > to be used.
+> > > > > 
+> > > > > So, I don't really think we need to "fix" every driver in turn,
+> > > > > default_pm_domain seems to be what needs fixing.  I'm not exactly sure
+> > > > > how to fix it at the moment, though.
+> > > > 
+> > > > But isn't there still an issue in the driver itself ? If my
+> > > > understanding is correct, calling pm_runtime_put() essentially means "I
+> > > > won't need to touch the device from now on, it can be suspended it
+> > > > needed/useful/appropriate/whatever". The runtime PM core is then free to
+> > > > turn the power domain and/or clock off synchronously or with a delay,
+> > > > or do nothing. After signaling that it won't need to touch the device,
+> > > > the driver should really avoid touching the device until the next
+> > > > pm_runtime_get_sync() call.
+> > > 
+> > > That's correct, the hardware shouldn't be touched after runtime suspend.
+> > 
+> > On a second thought, runtime suspend should only happen when it is _known_
+> > that the hardware won't be accessed.  So, if the hardware _is_ accessed
+> > after runtime suspend, the runtime suspend shouldn't have happened in the
+> > first place.
+> > 
+> > That's why I don't think it is correct to "harden" code paths that shouldn't
+> > be entered after runtime suspend in the first place.
+> 
+> I don't think we disagree is. The problem with the TMIO driver is that it 
+> entered after runtime suspend a code path that should not be entered. When the 
+> driver is notified by the MMC core that access to the card is not needed 
+> anymore, it correctly signal to the runtime PM core that the device can be 
+> suspended, but then tried to setup the device nonetheless.
 
-On Fri, Jun 15, 2012 at 11:57 PM, Philip Rakity
-<philipspatches@gmail.com> wrote:
-> V3
-> --
->
-> Fix type where data argument was not passed in
-> blocking_notifier_call_chain.
->
-> edits to check in comments (below)
->
-> V2
-> --
->
-> Incorporate performance suggestions made by Mark Brown
-> Use linux-next as base code rather than mmc-next
->
-> The voltage being set should be passed to the call in handler
-> requesting the callback. =A0Currently this is not done.
->
-> The callin handler cannot call regulator_get_voltage() to get the
+I see.
 
-"The calling"
+> There's no point in 
+> setting up the device after we get told that we don't need it anymore, it will 
+> be setup when resumed anyway. That's the code path that was wrong, and is 
+> fixed by my patch.
 
-> information since the mutex is held by the regulator and
-> deadlock occurs.
->
-> Without this change the receiver of the call in cannot know what
-> action to take. =A0This is used, for example, to set PAD voltages
-> when doing SD vccq voltage changes.
->
-> Signed-off-by: Philip Rakity <prakity@marvell.com>
-> ---
-
-Since you are submitting your patch from the different email than your
-Singed-off email. So you should put in first line of message
-=46rom: <your real email>.
-
-Regards,
-Pankaj Jangra
+OK, then.
