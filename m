@@ -1,73 +1,43 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH 1/2] regulator: core.c Pass voltage to notifier when
- setting voltage
-Date: Fri, 15 Jun 2012 12:18:38 -0700
-Message-ID: <DFD0DA03-D72C-4B5D-9E56-AA214202400A@marvell.com>
-References: <1339784856-1779-1-git-send-email-prakity@marvell.com>
- <CADTbHxpfQpKMkwzUakUUzt1mKO5rQ2A7_vuh9SA7i6Cq0VinZg@mail.gmail.com>
+From: Ted Ts'o <tytso@mit.edu>
+Subject: Re: [PATCH 2/3] ext4: Context support
+Date: Fri, 15 Jun 2012 17:30:46 -0400
+Message-ID: <20120615213046.GB7363@thunk.org>
+References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com>
+ <20120614170533.GA15093@thunk.org>
+ <alpine.LFD.2.02.1206141505300.23555@xanadu.home>
+ <201206150919.23484.arnd.bergmann@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog120.obsmtp.com ([74.125.149.140]:35523 "EHLO
-	na3sys009aog120.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753793Ab2FOTSp convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 15 Jun 2012 15:18:45 -0400
-In-Reply-To: <CADTbHxpfQpKMkwzUakUUzt1mKO5rQ2A7_vuh9SA7i6Cq0VinZg@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-ext4-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <201206150919.23484.arnd.bergmann@linaro.org>
+Sender: linux-ext4-owner@vger.kernel.org
+To: Arnd Bergmann <arnd.bergmann@linaro.org>
+Cc: Nicolas Pitre <nicolas.pitre@linaro.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>, Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, "Luca Porzio (lporzio)" <lporzio@micron.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Pankaj Jangra <jangra.pankaj9@gmail.com>
-Cc: Philip Rakity <philipspatches@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "broonie@opensource.wolfsonmicro.com" <broonie@opensource.wolfsonmicro.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-
-On Jun 15, 2012, at 11:50 AM, Pankaj Jangra wrote:
-
-> Hi,
+On Fri, Jun 15, 2012 at 09:19:23AM +0000, Arnd Bergmann wrote:
 > 
-> On Fri, Jun 15, 2012 at 11:57 PM, Philip Rakity
-> <philipspatches@gmail.com> wrote:
->> V3
->> --
->> 
->> Fix type where data argument was not passed in
->> blocking_notifier_call_chain.
->> 
->> edits to check in comments (below)
->> 
->> V2
->> --
->> 
->> Incorporate performance suggestions made by Mark Brown
->> Use linux-next as base code rather than mmc-next
->> 
->> The voltage being set should be passed to the call in handler
->> requesting the callback.  Currently this is not done.
->> 
->> The callin handler cannot call regulator_get_voltage() to get the
-> 
-> "The calling"
+> The trouble is that detecting the erase block size requires us to
+> write specific patterns to the device, which is generally a bad
+> idea after the file system has been created.
 
-I am not sure what the correct term for this.  The blocking_notifier_call_chain calls 
-what ?   calling might imply blocking_notifier_call_chain() since it is doing the calling.
-What is the receiver of the call named ?
+How much space do you need?  It's not hard to allocate a bunch of
+space, in a file, use FIEMAP ioctl to verify that you have a
+contiguous range of blocks, and then do direct I/O into that region.
 
+> I think the best we can do is
 > 
->> information since the mutex is held by the regulator and
->> deadlock occurs.
->> 
->> Without this change the receiver of the call in cannot know what
->> action to take.  This is used, for example, to set PAD voltages
->> when doing SD vccq voltage changes.
->> 
->> Signed-off-by: Philip Rakity <prakity@marvell.com>
->> ---
-> 
-> Since you are submitting your patch from the different email than your
-> Singed-off email. So you should put in first line of message
-> From: <your real email>.
-> 
-> Regards,
-> Pankaj Jangra
+> * default to "unspecified" as before
+> * if "unspecified", make the file system ask the block device. in
+>   case of eMMC, that will usually be reliable
+> * Add an option to mkfs and tunefs to hardcode a specific size for
+>   users that know the size and can't rely on the blockdev reporting
+>   it correctly to the file system.
+> * Add an option to mkfs to autodetect the size for the drive it's
+>   run on.
 
+Well, I think we can do better; the question is whether or not it's
+worth the effort.  It may not be....
+
+				- Ted
