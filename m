@@ -1,43 +1,53 @@
-From: Andreas Dilger <adilger@dilger.ca>
-Subject: Re: [PATCH 2/3] ext4: Context support
-Date: Thu, 14 Jun 2012 23:18:36 -0600
-Message-ID: <A65DE25A-54D6-4367-9CBD-E47A36B7E4AE@dilger.ca>
-References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com> <201206132043.47962.arnd.bergmann@linaro.org> <20120614020757.GB8226@thunk.org> <201206142155.32009.arnd.bergmann@linaro.org>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <201206142155.32009.arnd.bergmann@linaro.org>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd.bergmann@linaro.org>
-Cc: Ted Ts'o <tytso@mit.edu>, Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>, Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, "Luca Porzio (lporzio)" <lporzio@micron.com>
+From: Wei Ni <wni@nvidia.com>
+Subject: RE: Where to power on the wifi device before loading the driver.
+Date: Fri, 15 Jun 2012 14:09:41 +0800
+Message-ID: <6B4D417B830BC44B8026029FD256F7F1C377BFFE8D@HKMAIL01.nvidia.com>
+References: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88@HKMAIL01.nvidia.com>
+ <4FD90352.9090606@wwwdotorg.org>
+ <20120614063120.GA20167@avionic-0098.mockup.avionic-design.de>
+ <20120614121234.GC3913@opensource.wolfsonmicro.com>
+ <4FDA092E.10301@wwwdotorg.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from hqemgate04.nvidia.com ([216.228.121.35]:15483 "EHLO
+	hqemgate04.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751361Ab2FOGKL convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jun 2012 02:10:11 -0400
+In-Reply-To: <4FDA092E.10301@wwwdotorg.org>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Stephen Warren' <swarren@wwwdotorg.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, "'frankyl@broadcom.com'" <frankyl@broadcom.com>
+Cc: Thierry Reding <thierry.reding@avionic-design.de>, Mursalin Akon <makon@nvidia.com>, "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "'linux-wireless@vger.kernel.org'" <linux-wireless@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, Rakesh Kumar <krakesh@nvidia.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 2012-06-14, at 3:55 PM, Arnd Bergmann wrote:
-> My feeling is that we would actually benefit much more from the
-> erase block alignment than from the context for the large files.
-> 
-> I think this is something we can do in the Linaro storage team.
-> We actually have plans to also put the erase block size in the swap
-> header, so we should be able to use the same code in mke2fs and mkswap,
-> and potentially others. What we discussed in the storage team meeting
-> today is that we start out by making ext4 aware of the erase block
-> size through the superblock and aligning extents for large files to
-> erase block boundaries.
+On Thu, Jun 14, 2012 at 23:54:22, Stephen Warren wrote:
+>>>> The core of the issue is that:
+>>
+>>>> * Tegra30 support is via device tree. * We have an SDIO bus, and 
+>>>> the WiFi device attached to that bus is enumerable. * Since the 
+>>>> WiFi device is enumerable, no node exists in the DT to represent 
+>>>> it. * However, the driver for the WiFi device needs certain 
+>>>> information, such as the reset GPIO ID and perhaps power GPIO.
+>>
+>>> PCI devices are also enumerable and yet they can be matched up with 
+>>> nodes in the device tree. Perhaps something similar could be added 
+>>> for the SDIO bus?
+>>
+>> This seems to make the most sense - pushing this through the 
+>> regulator API is just a bodge.
+>
+>Yes, that seems reasonable.
+>
+>Presumably the power GPIO should be a fixed regulator though, since it 
+>is a power control not just a plain old GPIO? That said, the current driver apparently deals with this as a GPIO already.
+>
+>The reset GPIO can separately/directly controlled by the WiFi driver though.
 
-Note that there are already the s_raid_stride and s_raid_stripe_width,
-used by the ext4 allocator to align the start and size of allocations
-on RAID systems.  The erase block size would be like s_raid_stride
-(the minimum amount of data to allocate and write contiguously).
+I talked with Franky, this power sequence is generally for 4329, so it mean this sequence can be put into the wifi driver.
+We can use the virtual platform device both for OOB and non OOB.
+I will send out patches later.
 
-I don't know that there is a benefit to having a separate erase block
-size, since in the end it means the same as s_raid_stride to the
-allocator - make sure allocations/writes are aligned and sized on
-multiples of this.
-
-Cheers, Andreas
-
-
-
-
-
+---
+nvpublic
