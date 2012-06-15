@@ -1,7 +1,7 @@
-From: Per Forlin <per.lkml@gmail.com>
+From: Saugata Das <saugata.das@linaro.org>
 Subject: Re: [PATCH v5] MMC-4.5 Power OFF Notify Rework
-Date: Fri, 15 Jun 2012 09:49:26 +0200
-Message-ID: <CAFEEs1meu0nxz2Hx1B4jNFd=mzc=PdckuDuBioTR0XN_3Jbzpw@mail.gmail.com>
+Date: Fri, 15 Jun 2012 14:04:45 +0530
+Message-ID: <CAKLKtzc6WQnhXur-jpWHpRWguyMWsTU1o9zbn-39M8Y+ot8HrA@mail.gmail.com>
 References: <1337687104-19376-1-git-send-email-girish.shivananjappa@linaro.org>
 	<CAFEEs1=nTZpc1WOhg1RFBNSwg5R-QqryDEr=VwHbNgEY8Vj1Fg@mail.gmail.com>
 	<CAGxe1ZHvv5gNi05nO4g5dRmjUprmbGMipJeQbxavwrC=UEQ1Xg@mail.gmail.com>
@@ -14,22 +14,19 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f42.google.com ([74.125.82.42]:34720 "EHLO
-	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752539Ab2FOHtb convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jun 2012 03:49:31 -0400
-Received: by wgbds11 with SMTP id ds11so263717wgb.1
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Jun 2012 00:49:30 -0700 (PDT)
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:62576 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752394Ab2FOIeq convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jun 2012 04:34:46 -0400
+Received: by gglu4 with SMTP id u4so2101406ggl.19
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Jun 2012 01:34:45 -0700 (PDT)
 In-Reply-To: <4FDAE2CD.6090703@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: Saugata Das <saugata.das@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Girish K S <girish.shivananjappa@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "patches@linaro.org" <patches@linaro.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>
+Cc: Per Forlin <per.lkml@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Girish K S <girish.shivananjappa@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "patches@linaro.org" <patches@linaro.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, Per FORLIN <per.forlin@stericsson.com>
 
-Hi Ulf,
-
-On Fri, Jun 15, 2012 at 9:22 AM, Ulf Hansson <ulf.hansson@stericsson.co=
-m> wrote:
+On 15 June 2012 12:52, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
 > On 06/15/2012 05:49 AM, Saugata Das wrote:
 >>
 >> On 15 June 2012 00:36, Per Forlin<per.lkml@gmail.com> =A0wrote:
@@ -81,7 +78,6 @@ h
 >>> @@ -1347,7 +1347,7 @@ static void mmc_detect(struct mmc_host *host)
 >>> -static int mmc_suspend(struct mmc_host *host)
 >>> +static int __mmc_suspend(struct mmc_host *host, bool remove)
-The remove parameter takes care of the remove case.
 >>>
 >>> @@ -1356,7 +1356,8 @@ static int mmc_suspend(struct mmc_host *host)
 >>> =A0 =A0 =A0 =A0mmc_claim_host(host);
@@ -132,10 +128,6 @@ ot be
 > want in suspend.
 >
 > Leave this to be fixed in a separate patch instead.
-I have addressed this in my prototype patch above. The remove param in
-__suspend tells if we are removing or just suspending. This approach
-actually removes lines of code in core.c mmc_stop_host().
-
 >
 >
 >>
@@ -168,12 +160,19 @@ e.
 m
 > suspend should be fine. Unless I missed something of course. :-)
 >
-I'm in favour of simplifying this patch. CMD0 instead of CMD5 reduces
-the number of lines in this patch. It also make this patch work :)
-Using CMD 5 to wake up could be done in a separate patch.
 
-Bottom line. If the patch is clean and works I'm happy.
-I can help out and test the patch.
+CMD0 is a reset. I expect with power OFF notify enable, the eMMC
+device will postpone some control information update to its internal
+non-volatile memory (e.g. some data structures which are kept in the
+controller buffers and not stored in NAND). If we do a CMD0, then the
+eMMC device will be reset and we may lose some data. In addition to
+that, doing complete card initialization will increase the wakeup time
+(for 4.4 devices).
 
-Regards,
-Per
+Till now, we have done complete card initialization during resume and
+not done a real resume. I am not sure, if this patch is exposing some
+host drivers issue now. So, please check the drivers as well.
+
+
+> Kind regards
+> Ulf Hansson
