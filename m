@@ -1,63 +1,36 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH] MMC-4.5 Power OFF Notify Rework
-Date: Fri, 15 Jun 2012 18:27:04 +0530
-Message-ID: <CANfBPZ8yK1YOC=MBs6dvwj=sghuKUmvYDwCH17P-g9D99D_Vkg@mail.gmail.com>
-References: <1339733331-8563-1-git-send-email-saugata.das@stericsson.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Fix null dma_ops access when use_dma is false
+Date: Fri, 15 Jun 2012 14:14:48 +0100
+Message-ID: <CAFbHwiRo9J+ZkaK7YUcVvtxN5TkmvxUy-q-EDgngve-t+oJ0CQ@mail.gmail.com>
+References: <1339695115-606-1-git-send-email-kliegs@chromium.org>
+	<4FDAE34C.1030102@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog112.obsmtp.com ([74.125.149.207]:38014 "EHLO
-	na3sys009aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756838Ab2FOM51 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jun 2012 08:57:27 -0400
-Received: by bkvi18 with SMTP id i18so3957467bkv.27
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Jun 2012 05:57:24 -0700 (PDT)
-In-Reply-To: <1339733331-8563-1-git-send-email-saugata.das@stericsson.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:45146 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752539Ab2FONOt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jun 2012 09:14:49 -0400
+Received: by pbbrp8 with SMTP id rp8so5270239pbb.19
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Jun 2012 06:14:49 -0700 (PDT)
+In-Reply-To: <4FDAE34C.1030102@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Saugata Das <saugata.das@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, patches@linaro.org, saugata.das@linaro.org, girish.shivananjappa@linaro.org, asutoshd@codeaurora.org, subhashj@codeaurora.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Jonathan Kliegman <kliegs@chromium.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>
 
-On Fri, Jun 15, 2012 at 9:38 AM, Saugata Das <saugata.das@stericsson.com> wrote:
-> From: Saugata Das <saugata.das@linaro.org>
+On Fri, Jun 15, 2012 at 8:25 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> It looks good to me.
 >
-> This is a rework of the existing POWER OFF NOTIFY patch. The current problem
-> with the patch comes from the ambiguity on the usage of POWER OFF NOTIFY
-> together with SLEEP and misunderstanding on the usage of MMC_POWER_OFF
-> power_mode from mmc_set_ios in different host controller drivers.
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 >
-> This new patch works around this problem by adding a new host CAP,
-> MMC_CAP2_POWER_OFF_VCCQ_DURING_SUSPEND, which when set sends a
-> POWER OFF NOTIFY from mmc_suspend instead of SLEEP. It is expected that host
-> controller drivers will set this CAP, if they switch off both Vcc and Vccq
-> from MMC_POWER_OFF condition within mmc_set_ios. However, note that there
-> is no harm in sending MMC_POWER_NOTIFY even if Vccq is not switched off.
+> On 06/15/2012 02:31 AM, Jonathan Kliegman wrote:
 >
-> This patch also sends POWER OFF NOTIFY from power management routines (e.g.
-> mmc_power_save_host, mmc_pm_notify/PM_SUSPEND_PREPARE, mmc_stop_host), which
-> does reinitialization of the eMMC on the return path of the power management
-> routines (e.g. mmc_power_restore_host, mmc_pm_notify/PM_POST_RESTORE,
-> mmc_start_host).
->
-> This patch sets POWER_OFF_NOTIFICATION to POWER_OFF_SHORT if it is sent from
-> the suspend sequence. If it is sent from shutdown sequence then it is set to
-> POWER_OFF_LONG.
->
-> Earlier implementation of PowerOff Notify as a core function is replaced as
-> a device's bus operation.
->
-> For the cards that cannot cut vccq can sleep during suspend. But the after
-> suspend->sleep->poweroff the ios values are modified. which results in
-> malfunction of card after resume. This patch fixes that issue by saving the
-> ios before sleep and restoring the saved values before resume.
->
-> Signed-off-by: Saugata Das <saugata.das@linaro.org>
-> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
-> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
-> Reviewed-by: Subhash Jadavani <subhashj@codeaurora.org>
->
-I just had a chance to test this on OMAP. I only have v4.41 card on
-this one, so it doesn't do
-Power Off Notify, but suspend resume works with just CMD5, and hasn't caused a
-regression. FWIW,
- Partially Tested-by: Venkatraman S<svenkatr@ti.com>
+>> host->dma_ops is not valid if host->usa dma is 0 so protect
+>> host->dma_ops reference in dw_mci_resume
+>>
+>> Signed-off-by: Jonathan Kliegman <kliegs@chromium.org>
+
+Yes, looks good to me too.
+
+Acked-by: Will Newton <will.newton@imgtec.com>
