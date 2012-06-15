@@ -1,524 +1,630 @@
-From: Saugata Das <saugata.das@stericsson.com>
-Subject: [PATCH] MMC-4.5 Power OFF Notify Rework
-Date: Fri, 15 Jun 2012 09:38:51 +0530
-Message-ID: <1339733331-8563-1-git-send-email-saugata.das@stericsson.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v9] mmc: support BKOPS feature for eMMC
+Date: Fri, 15 Jun 2012 13:19:58 +0900
+Message-ID: <4FDAB7EE.5050809@samsung.com>
+References: <4FD1821D.4070603@samsung.com> <4FD88B7D.3000600@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:48126 "EHLO
-	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750808Ab2FOEJL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jun 2012 00:09:11 -0400
+Received: from mailout3.samsung.com ([203.254.224.33]:28427 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750759Ab2FOEUe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jun 2012 00:20:34 -0400
+Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M5N00DHQ5E6FW40@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 15 Jun 2012 13:20:32 +0900 (KST)
+Received: from [165.213.219.108] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0M5N00B5H5E7YU10@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 15 Jun 2012 13:20:32 +0900 (KST)
+In-reply-to: <4FD88B7D.3000600@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: patches@linaro.org, saugata.das@linaro.org, girish.shivananjappa@linaro.org, asutoshd@codeaurora.org, subhashj@codeaurora.org
+To: Subhash Jadavani <subhashj@codeaurora.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Maya Erez <merez@codeaurora.org>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-From: Saugata Das <saugata.das@linaro.org>
+Hi Subhash,
 
-This is a rework of the existing POWER OFF NOTIFY patch. The current problem
-with the patch comes from the ambiguity on the usage of POWER OFF NOTIFY
-together with SLEEP and misunderstanding on the usage of MMC_POWER_OFF
-power_mode from mmc_set_ios in different host controller drivers.
+On 06/13/2012 09:45 PM, Subhash Jadavani wrote:
 
-This new patch works around this problem by adding a new host CAP,
-MMC_CAP2_POWER_OFF_VCCQ_DURING_SUSPEND, which when set sends a
-POWER OFF NOTIFY from mmc_suspend instead of SLEEP. It is expected that host
-controller drivers will set this CAP, if they switch off both Vcc and Vccq
-from MMC_POWER_OFF condition within mmc_set_ios. However, note that there
-is no harm in sending MMC_POWER_NOTIFY even if Vccq is not switched off.
+> Hi Jaehoon,
+> 
+> Find few comments inline below. Also, periodic BKOPs support was present in v8 but now you have removed it in v9. Is there any reason for it?
 
-This patch also sends POWER OFF NOTIFY from power management routines (e.g.
-mmc_power_save_host, mmc_pm_notify/PM_SUSPEND_PREPARE, mmc_stop_host), which
-does reinitialization of the eMMC on the return path of the power management
-routines (e.g. mmc_power_restore_host, mmc_pm_notify/PM_POST_RESTORE,
-mmc_start_host).
+Yes, there is the periodic bkops in v-8. But, i have discussed this with Konstantin and Maya.
+1) Submit Basic BKOPS in priority work.
+2) after (1), we can add the periodic bkops.
+The periodic bkops also need for eMMC's maintenance. but First, we want to merge the basic bkops feature in mainline.
+The Periodic bkops should be other patch.
 
-This patch sets POWER_OFF_NOTIFICATION to POWER_OFF_SHORT if it is sent from
-the suspend sequence. If it is sent from shutdown sequence then it is set to
-POWER_OFF_LONG.
+> 
+> Regards,
+> Subhash
+> 
+> On 6/8/2012 10:09 AM, Jaehoon Chung wrote:
+>> Enable eMMC background operations (BKOPS) feature.
+>>
+>> If URGENT_BKOPS is set after a response, note that BKOPS
+>> are required. After all I/O requests are finished, run
+>> BKOPS if required. Should read/write operations be requested
+>> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
+>> and then service the request.
+>> If BKOPS-STATUS is upper than LEVEL2, need to check until clear
+>> the BKOPS-STATUS vaule.
+>>
+>> If you want to enable this feature, set MMC_CAP2_BKOPS.
+>> And if you want to set the BKOPS_EN bit in ext_csd register,
+>> use the MMC_CAP2_INIT_BKOPS.
+>>
+>> Future considerations
+>>   * Check BKOPS_LEVEL=1 and start BKOPS in a preventive manner.
+>>   * Interrupt ongoing BKOPS before powering off the card.
+>>   * How get BKOPS_STATUS value.(periodically send ext_csd command?)
+>>
+>> Signed-off-by: Jaehoon Chung<jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin Park<kyungmin.park@samsung.com>
+>> Signed-off-by: Konstantin Dorfman<kdorfman@codeaurora.org>
+>> Signed-off-by: Maya Erez<merez@codeaurora.org>
+>> ---
+>> Changelog V9:
+>>     - Rebased on patch-v7.
+>>     - Added Konstantin and Maya's patch
+>>         : mmc:core: Define synchronous BKOPS timeout
+>>         : mmc:core: eMMC4.5 BKOPS fixes
+>>     - Removed periodic bkops
+>>         : This feature will do in future work
+>>     - Add __mmc_switch() for waiting_for_prod_done.
+>>     
+>> Changelog V8:
+>>     - Remove host->lock spin lock reviewed by Adrian
+>>     - Support periodic start bkops
+>>     - when bkops_status is level-3, if timeout is set to 0, send hpi.
+>>     - Move the start-bkops point
+>> Changelog V7:
+>>     - Use HPI command when issued URGENT_BKOPS
+>>     - Recheck until clearing the bkops-status bit.
+>> Changelog V6:
+>>     - Add the flag of check-bkops-status.
+>>       (For fixing async_req problem)
+>>     - Add the capability for MMC_CAP2_INIT_BKOPS.
+>>       (When unset the bkops_en bit in ext_csd register)
+>>     - modify the wrong condition.
+>> Changelog V5:
+>>     - Rebase based on the latest mmc-next.
+>>     - modify codes based-on Chris's comment
+>> Changelog V4:
+>>     - Add mmc_read_bkops_status
+>>     - When URGENT_BKOPS(level2-3), didn't use HPI command.
+>>     - In mmc_switch(), use R1B/R1 according to level.
+>> Changelog V3:
+>>     - move the bkops setting's location in mmc_blk_issue_rw_rq
+>>     - modify condition checking
+>>     - bkops_en is assigned ext_csd[EXT_CSD_BKOPS_EN] instead of "1"
+>>     - remove the unused code
+>>     - change pr_debug instead of pr_warn in mmc_send_hpi_cmd
+>>     - Add the Future consideration suggested by Per
+>> Changelog V2:
+>>     - Use EXCEPTION_STATUS instead of URGENT_BKOPS
+>>     - Add function to check Exception_status(for eMMC4.5)
+>> ---
+>>   drivers/mmc/card/queue.c   |    2 +
+>>   drivers/mmc/core/core.c    |  161 +++++++++++++++++++++++++++++++++++++++++++-
+>>   drivers/mmc/core/mmc.c     |   18 +++++
+>>   drivers/mmc/core/mmc_ops.c |   27 ++++++-
+>>   include/linux/mmc/card.h   |   16 +++++
+>>   include/linux/mmc/core.h   |    5 ++
+>>   include/linux/mmc/host.h   |    2 +
+>>   include/linux/mmc/mmc.h    |   19 +++++
+>>   8 files changed, 243 insertions(+), 7 deletions(-)
+>>
+>> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+>> index e360a97..e4a2cde 100644
+>> --- a/drivers/mmc/card/queue.c
+>> +++ b/drivers/mmc/card/queue.c
+>> @@ -66,6 +66,8 @@ static int mmc_queue_thread(void *d)
+>>           spin_unlock_irq(q->queue_lock);
+>>
+>>           if (req || mq->mqrq_prev->req) {
+>> +            if (mmc_card_doing_bkops(mq->card))
+>> +                mmc_stop_bkops(mq->card);
+> This is what we had discussed last time but i don't see that you are considering error returned by mmc_stop_bkops(). Any reason for it?
+> [Subhash] mmc_stop_bkops() may fail and can return an error but we are ignoring it here. What if this function has returned error which means BKOPS may still be running in card and if you go ahead and issue another read/write request?
+> [Jaehoon] Great..i didn't think that..I will consider this point. Thanks.
 
-Earlier implementation of PowerOff Notify as a core function is replaced as
-a device's bus operation.
+Will do fix..
 
-For the cards that cannot cut vccq can sleep during suspend. But the after
-suspend->sleep->poweroff the ios values are modified. which results in
-malfunction of card after resume. This patch fixes that issue by saving the
-ios before sleep and restoring the saved values before resume.
+> 
+>>               set_current_state(TASK_RUNNING);
+>>               mq->issue_fn(mq, req);
+>>           } else {
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 0b6141d..9adb004 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -41,6 +41,12 @@
+>>   #include "sd_ops.h"
+>>   #include "sdio_ops.h"
+>>
+>> +/*
+>> + * The Background operation can take a long time, depends on the house keeping
+>> + * operations the card has to peform
+>> + */
+>> +#define MMC_BKOPS_MAX_TIMEOUT    (4 * 80 * 1000) /* max time to wait in ms */
+>> +
+>>   static struct workqueue_struct *workqueue;
+>>   static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
+>>
+>> @@ -175,6 +181,16 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
+>>           if (mrq->done)
+>>               mrq->done(mrq);
+>>
+>> +        /*
+>> +         * Check BKOPS urgency from each R1 response
+>> +         */
+>> +        if (host->card&&  mmc_card_mmc(host->card)&&
+>> +            ((mmc_resp_type(cmd) == MMC_RSP_R1) ||
+>> +             (mmc_resp_type(cmd) == MMC_RSP_R1B))&&
+>> +            (cmd->resp[0]&  R1_EXCEPTION_EVENT)) {
+>> +            mmc_card_set_check_bkops(host->card);
+>> +        }
+>> +
+>>           mmc_host_clk_release(host);
+>>       }
+>>   }
+>> @@ -245,6 +261,74 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+>>       host->ops->request(host, mrq);
+>>   }
+>>
+>> +/**
+>> + *    mmc_start_bkops - start BKOPS for supported cards
+>> + *    @card: MMC card to start BKOPS
+>> + *
+>> + *    Start background operations whenever requested.
+>> + *    when the urgent BKOPS bit is set in a R1 command response
+>> + *    then background operations should be started immediately.
+>> +*/
+>> +void mmc_start_bkops(struct mmc_card *card)
+>> +{
+>> +    int err;
+>> +    int timeout;
+>> +    u8 wait_for_prog_done;
+>> +
+>> +    BUG_ON(!card);
+>> +    if (!card->ext_csd.bkops_en || !(card->host->caps2&  MMC_CAP2_BKOPS))
+>> +        return;
+>> +
+>> +    if (mmc_card_check_bkops(card)) {
+>> +        mmc_card_clr_check_bkops(card);
+>> +        if (mmc_is_exception_event(card, EXT_CSD_URGENT_BKOPS))
+>> +            if (card->ext_csd.raw_bkops_status)
+>> +                mmc_card_set_need_bkops(card);
+>> +    }
+>> +
+>> +    /*
+>> +     * If card is already doing bkops or need for
+>> +     * bkops flag is not set, then do nothing just
+>> +     * return
+>> +     */
+>> +    if (mmc_card_doing_bkops(card) || !mmc_card_need_bkops(card))
+>> +        return;
+>> +
+>> +    mmc_claim_host(card->host);
+>> +    if (card->ext_csd.raw_bkops_status>= EXT_CSD_BKOPS_LEVEL_2) {
+>> +        timeout = MMC_BKOPS_MAX_TIMEOUT;
+>> +        wait_for_prog_done = 1;
+>> +    } else {
+>> +        timeout = 0;
+>> +        wait_for_prog_done = 0;
+>> +    }
+>> +
+>> +    err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> +            EXT_CSD_BKOPS_START, 1, timeout, wait_for_prog_done);
+>> +    if (err) {
+>> +        pr_warn("%s: error %d starting bkops\n",
+>> +               mmc_hostname(card->host), err);
+>> +        mmc_card_clr_need_bkops(card);
+>> +        goto out;
+>> +    }
+>> +
+>> +    mmc_card_clr_need_bkops(card);
+>> +
+>> +    /*
+>> +     * For urgent bkops status (LEVEL_2 and more)
+>> +     * bkops executed synchronously, otherwise
+>> +     * the operation is in progress
+>> +     */
+>> +    if (card->ext_csd.raw_bkops_status>= EXT_CSD_BKOPS_LEVEL_2)
+>> +        mmc_card_set_check_bkops(card);
+>> +    else
+>> +        mmc_card_set_doing_bkops(card);
+>> +
+>> +out:
+>> +    mmc_release_host(card->host);
+>> +}
+>> +EXPORT_SYMBOL(mmc_start_bkops);
+>> +
+>>   static void mmc_wait_done(struct mmc_request *mrq)
+>>   {
+>>       complete(&mrq->completion);
+>> @@ -359,12 +443,15 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+>>       if (!err&&  areq)
+>>           start_err = __mmc_start_req(host, areq->mrq);
+>>
+>> -    if (host->areq)
+>> +    if (host->areq) {
+>> +        if (!areq&&  host->areq&&  mmc_card_mmc(host->card))
+>> +            mmc_start_bkops(host->card);
+>>           mmc_post_req(host, host->areq->mrq, 0);
+>> +    }
+>>
+>>        /* Cancel a prepared request if it was not started. */
+>>       if ((err || start_err)&&  areq)
+>> -            mmc_post_req(host, areq->mrq, -EINVAL);
+>> +        mmc_post_req(host, areq->mrq, -EINVAL);
+>>
+>>       if (err)
+>>           host->areq = NULL;
+>> @@ -480,6 +567,66 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd, int retries
+>>   EXPORT_SYMBOL(mmc_wait_for_cmd);
+>>
+>>   /**
+>> + *    mmc_stop_bkops - stop ongoing BKOPS
+>> + *    @card: MMC card to check BKOPS
+>> + *
+>> + *    Send HPI command to stop ongoing background operations,
+>> + *    to allow rapid servicing of foreground operations,e.g. read/
+>> + *    writes. Wait until the card comes out of the programming state
+>> + *    to avoid errors in servicing read/write requests.
+>> + */
+>> +int mmc_stop_bkops(struct mmc_card *card)
+>> +{
+>> +    int err = 0;
+>> +
+>> +    BUG_ON(!card);
+>> +
+>> +    err = mmc_interrupt_hpi(card);
+>> +
+>> +    mmc_card_clr_doing_bkops(card);
+> 
+> Here even if mmc_interrupt_hpi() fails, you are clearing the DOING_BKOPS flag which is not correct. Which should clear this flag if HPI issued successfully.
 
-Signed-off-by: Saugata Das <saugata.das@linaro.org>
-Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
-Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
-Reviewed-by: Subhash Jadavani <subhashj@codeaurora.org>
+If hpi command is failed, we can consider two case.
+1) bkops is already done.
+2) send_command error.
+I will add the code handled them.
 
-changes in v6:
-	-save/restore ios during suspend/resume
-changes in v5:
-	modified the the handling of return value in mmc_poweroff_notify.
-changes in v4:
-	As suggested in review,
-	- Moved mmc_can_poweroff_notify to core.c
-	- Moved mmc_claim_host, mmc_release_host outside mmc_poweroff_notify
-	- Added check for wrong initialization for poweroff_notify_type
-	- mmc_poweroff_notify is modified to take as 2nd parameter
-changes in v3:
-	This version addresses the review comments given by Subhash and Ulf
-changes in v2:
-	This version addresses the changes suggested by Ulf
----
- drivers/mmc/core/core.c   |  127 ++++++++++++++++++++++-----------------------
- drivers/mmc/core/core.h   |    3 +
- drivers/mmc/core/mmc.c    |   58 ++++++++++++++++++---
- drivers/mmc/host/dw_mmc.c |    5 --
- drivers/mmc/host/sdhci.c  |    9 ---
- include/linux/mmc/card.h  |    5 +-
- include/linux/mmc/core.h  |    1 +
- include/linux/mmc/host.h  |    6 +--
- include/linux/mmc/mmc.h   |    7 +++
- 9 files changed, 128 insertions(+), 93 deletions(-)
+> 
+> 
+> 
+>> +
+>> +    return err;
+>> +}
+>> +EXPORT_SYMBOL(mmc_stop_bkops);
+>> +
+>> +int mmc_read_bkops_status(struct mmc_card *card)
+>> +{
+>> +    int err;
+>> +    u8 ext_csd[512];
+>> +
+>> +    mmc_claim_host(card->host);
+>> +    err = mmc_send_ext_csd(card, ext_csd);
+>> +    mmc_release_host(card->host);
+>> +    if (err)
+>> +        return err;
+>> +
+>> +    card->ext_csd.raw_bkops_status = ext_csd[EXT_CSD_BKOPS_STATUS];
+>> +    card->ext_csd.raw_exception_status = ext_csd[EXT_CSD_EXCEPTION_STATUS];
+>> +
+>> +    return 0;
+>> +}
+>> +EXPORT_SYMBOL(mmc_read_bkops_status);
+>> +
+>> +int mmc_is_exception_event(struct mmc_card *card, unsigned int value)
+>> +{
+>> +    int err;
+>> +
+>> +    err = mmc_read_bkops_status(card);
+>> +    if (err) {
+>> +        pr_err("%s: Didn't read bkops status : %d\n",
+>> +               mmc_hostname(card->host), err);
+>> +        return 0;
+>> +    }
+>> +
+>> +    /* In eMMC 4.41, R1_EXCEPTION_EVENT is URGENT_BKOPS */
+>> +    if (card->ext_csd.rev == 5)
+>> +        return 1;
+>> +
+>> +    return (card->ext_csd.raw_exception_status&  value) ? 1 : 0;
+>> +}
+>> +EXPORT_SYMBOL(mmc_is_exception_event);
+>> +
+>> +/**
+>>    *    mmc_set_data_timeout - set the timeout for a data command
+>>    *    @data: data phase for command
+>>    *    @card: the MMC card associated with the data transfer
+>> @@ -2294,8 +2441,11 @@ int mmc_suspend_host(struct mmc_host *host)
+>>       mmc_bus_get(host);
+>>       if (host->bus_ops&&  !host->bus_dead) {
+>>
+>> -        if (host->bus_ops->suspend)
+>> +        if (host->bus_ops->suspend) {
+>> +            if (mmc_card_doing_bkops(host->card))
+>> +                mmc_stop_bkops(host->card);
+>>               err = host->bus_ops->suspend(host);
+>> +        }
+>>
+>>           if (err == -ENOSYS || !host->bus_ops->resume) {
+>>               /*
+>> @@ -2382,6 +2532,11 @@ int mmc_pm_notify(struct notifier_block *notify_block,
+>>       switch (mode) {
+>>       case PM_HIBERNATION_PREPARE:
+>>       case PM_SUSPEND_PREPARE:
+>> +        if (host->card&&  mmc_card_mmc(host->card)&&
+>> +                mmc_card_doing_bkops(host->card)) {
+>> +            mmc_interrupt_hpi(host->card);
+>> +            mmc_card_clr_doing_bkops(host->card);
+>> +        }
+>>
+>>           spin_lock_irqsave(&host->lock, flags);
+>>           host->rescan_disable = 1;
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 258b203..9e036e5 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -463,6 +463,24 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>>       }
+>>
+>>       if (card->ext_csd.rev>= 5) {
+>> +        /* check whether the eMMC card support BKOPS */
+>> +        if (ext_csd[EXT_CSD_BKOPS_SUPPORT]&  0x1) {
+>> +            card->ext_csd.bkops = 1;
+>> +            card->ext_csd.bkops_en = ext_csd[EXT_CSD_BKOPS_EN];
+>> +            card->ext_csd.raw_bkops_status =
+>> +                ext_csd[EXT_CSD_BKOPS_STATUS];
+>> +            if (!card->ext_csd.bkops_en&&
+>> +                card->host->caps2&  MMC_CAP2_INIT_BKOPS) {
+>> +                err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> +                    EXT_CSD_BKOPS_EN, 1, 0);
+>> +                if (err)
+>> +                    pr_warn("%s: Enabling BKOPS failed\n",
+>> +                        mmc_hostname(card->host));
+>> +                else
+>> +                    card->ext_csd.bkops_en = 1;
+>> +            }
+>> +        }
+>> +
+>>           /* check whether the eMMC card supports HPI */
+>>           if (ext_csd[EXT_CSD_HPI_FEATURES]&  0x1) {
+>>               card->ext_csd.hpi = 1;
+>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+>> index 69370f4..f0bebd9 100644
+>> --- a/drivers/mmc/core/mmc_ops.c
+>> +++ b/drivers/mmc/core/mmc_ops.c
+>> @@ -367,18 +367,20 @@ int mmc_spi_set_crc(struct mmc_host *host, int use_crc)
+>>   }
+>>
+>>   /**
+>> - *    mmc_switch - modify EXT_CSD register
+>> + *    __mmc_switch - modify EXT_CSD register
+>>    *    @card: the MMC card associated with the data transfer
+>>    *    @set: cmd set values
+>>    *    @index: EXT_CSD register index
+>>    *    @value: value to program into EXT_CSD register
+>>    *    @timeout_ms: timeout (ms) for operation performed by register write,
+>>    *                   timeout of zero implies maximum possible timeout
+>> + *      @wait_for_prod_done: is waiting for program done
+>>    *
+>>    *    Modifies the EXT_CSD register for selected card.
+>>    */
+>> -int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>> -           unsigned int timeout_ms)
+>> +int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>> +           unsigned int timeout_ms, u8 wait_for_prog_done)
+>> +
+>>   {
+>>       int err;
+>>       struct mmc_command cmd = {0};
+>> @@ -392,13 +394,23 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>>             (index<<  16) |
+>>             (value<<  8) |
+>>             set;
+>> -    cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+>> +
+>> +    cmd.flags = MMC_CMD_AC;
+>> +    if (wait_for_prog_done)
+>> +        cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
+>> +    else
+>> +        cmd.flags |= MMC_RSP_R1 | MMC_RSP_R1;
+> 
+> is this typo here? did you mean MMC_RSP_SPI_R1  | MMC_RSP_R1 ??
+>> +
+>>       cmd.cmd_timeout_ms = timeout_ms;
+>>
+>>       err = mmc_wait_for_cmd(card->host,&cmd, MMC_CMD_RETRIES);
+>>       if (err)
+>>           return err;
+>>
+>> +    /* No need to check card status in case of BKOPS switch*/
+>> +    if (index == EXT_CSD_BKOPS_START)
+>> +        return 0;
+>> +
+>>       /* Must check status to be sure of no errors */
+>>       do {
+>>           err = mmc_send_status(card,&status);
+>> @@ -423,6 +435,13 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>>
+>>       return 0;
+>>   }
+>> +EXPORT_SYMBOL_GPL(__mmc_switch);
+>> +
+>> +int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>> +        unsigned int timeout_ms)
+>> +{
+>> +    return __mmc_switch(card, set, index, value, timeout_ms, 1);
+>> +}
+>>   EXPORT_SYMBOL_GPL(mmc_switch);
+>>
+>>   int mmc_send_status(struct mmc_card *card, u32 *status)
+>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+>> index d76513b..50b3539 100644
+>> --- a/include/linux/mmc/card.h
+>> +++ b/include/linux/mmc/card.h
+>> @@ -76,10 +76,13 @@ struct mmc_ext_csd {
+>>       bool            hpi_en;            /* HPI enablebit */
+>>       bool            hpi;            /* HPI support bit */
+>>       unsigned int        hpi_cmd;        /* cmd used as HPI */
+>> +    bool            bkops;        /* background support bit */
+>> +    bool            bkops_en;    /* background enable bit */
+>>       unsigned int            data_sector_size;       /* 512 bytes or 4KB */
+>>       unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
+>>       unsigned int        boot_ro_lock;        /* ro lock support */
+>>       bool            boot_ro_lockable;
+>> +    u8            raw_exception_status;    /* 53 */
+>>       u8            raw_partition_support;    /* 160 */
+>>       u8            raw_erased_mem_count;    /* 181 */
+>>       u8            raw_ext_csd_structure;    /* 194 */
+>> @@ -93,6 +96,7 @@ struct mmc_ext_csd {
+>>       u8            raw_sec_erase_mult;    /* 230 */
+>>       u8            raw_sec_feature_support;/* 231 */
+>>       u8            raw_trim_mult;        /* 232 */
+>> +    u8            raw_bkops_status;    /* 246 */
+>>       u8            raw_sectors[4];        /* 212 - 4 bytes */
+>>
+>>       unsigned int            feature_support;
+>> @@ -225,6 +229,9 @@ struct mmc_card {
+>>   #define MMC_CARD_REMOVED    (1<<7)        /* card has been removed */
+>>   #define MMC_STATE_HIGHSPEED_200    (1<<8)        /* card is in HS200 mode */
+>>   #define MMC_STATE_SLEEP        (1<<9)        /* card is in sleep state */
+>> +#define MMC_STATE_NEED_BKOPS    (1<<10)        /* card need to do BKOPS */
+>> +#define MMC_STATE_DOING_BKOPS    (1<<11)        /* card is doing BKOPS */
+>> +#define MMC_STATE_CHECK_BKOPS    (1<<12)        /* card need to check BKOPS */
+>>       unsigned int        quirks;     /* card quirks */
+>>   #define MMC_QUIRK_LENIENT_FN0    (1<<0)        /* allow SDIO FN0 writes outside of the VS CCCR range */
+>>   #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)    /* use func->cur_blksize */
+>> @@ -391,6 +398,9 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+>>   #define mmc_card_ext_capacity(c) ((c)->state&  MMC_CARD_SDXC)
+>>   #define mmc_card_removed(c)    ((c)&&  ((c)->state&  MMC_CARD_REMOVED))
+>>   #define mmc_card_is_sleep(c)    ((c)->state&  MMC_STATE_SLEEP)
+>> +#define mmc_card_need_bkops(c)    ((c)->state&  MMC_STATE_NEED_BKOPS)
+>> +#define mmc_card_doing_bkops(c)    ((c)->state&  MMC_STATE_DOING_BKOPS)
+>> +#define mmc_card_check_bkops(c) ((c)->state&  MMC_STATE_CHECK_BKOPS)
+>>
+>>   #define mmc_card_set_present(c)    ((c)->state |= MMC_STATE_PRESENT)
+>>   #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
+>> @@ -403,7 +413,13 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+>>   #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
+>>   #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
+>>   #define mmc_card_set_sleep(c)    ((c)->state |= MMC_STATE_SLEEP)
+>> +#define mmc_card_set_need_bkops(c)    ((c)->state |= MMC_STATE_NEED_BKOPS)
+>> +#define mmc_card_set_doing_bkops(c)    ((c)->state |= MMC_STATE_DOING_BKOPS)
+>> +#define mmc_card_set_check_bkops(c) ((c)->state |= MMC_STATE_CHECK_BKOPS)
+>>
+>> +#define mmc_card_clr_need_bkops(c)    ((c)->state&= ~MMC_STATE_NEED_BKOPS)
+>> +#define mmc_card_clr_doing_bkops(c)    ((c)->state&= ~MMC_STATE_DOING_BKOPS)
+>> +#define mmc_card_clr_check_bkops(c) ((c)->state&= ~MMC_STATE_CHECK_BKOPS)
+>>   #define mmc_card_clr_sleep(c)    ((c)->state&= ~MMC_STATE_SLEEP)
+>>   /*
+>>    * Quirk add/remove for MMC products.
+>> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+>> index 1b431c7..bda3d86 100644
+>> --- a/include/linux/mmc/core.h
+>> +++ b/include/linux/mmc/core.h
+>> @@ -134,6 +134,9 @@ struct mmc_host;
+>>   struct mmc_card;
+>>   struct mmc_async_req;
+>>
+>> +extern int mmc_stop_bkops(struct mmc_card *);
+>> +extern int mmc_read_bkops_status(struct mmc_card *);
+>> +extern int mmc_is_exception_event(struct mmc_card *, unsigned int);
+>>   extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
+>>                          struct mmc_async_req *, int *);
+>>   extern int mmc_interrupt_hpi(struct mmc_card *);
+>> @@ -142,6 +145,8 @@ extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
+>>   extern int mmc_app_cmd(struct mmc_host *, struct mmc_card *);
+>>   extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
+>>       struct mmc_command *, int);
+>> +extern void mmc_start_bkops(struct mmc_card *card);
+>> +extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, u8);
+>>   extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
+>>
+>>   #define MMC_ERASE_ARG        0x00000000
+>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+>> index 0707d22..d23caf2 100644
+>> --- a/include/linux/mmc/host.h
+>> +++ b/include/linux/mmc/host.h
+>> @@ -238,6 +238,8 @@ struct mmc_host {
+>>   #define MMC_CAP2_BROKEN_VOLTAGE    (1<<  7)    /* Use the broken voltage */
+>>   #define MMC_CAP2_DETECT_ON_ERR    (1<<  8)    /* On I/O err check card removal */
+>>   #define MMC_CAP2_HC_ERASE_SZ    (1<<  9)    /* High-capacity erase size */
+>> +#define MMC_CAP2_INIT_BKOPS    (1<<  10)    /* To enable BKOPS */
+>> +#define MMC_CAP2_BKOPS        (1<<  11)    /* BKOPS supported */
+>>
+>>       mmc_pm_flag_t        pm_caps;    /* supported pm features */
+>>       unsigned int        power_notify_type;
+>> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+>> index d425cab..80cfbf1 100644
+>> --- a/include/linux/mmc/mmc.h
+>> +++ b/include/linux/mmc/mmc.h
+>> @@ -139,6 +139,7 @@ static inline bool mmc_op_multi(u32 opcode)
+>>   #define R1_CURRENT_STATE(x)    ((x&  0x00001E00)>>  9)    /* sx, b (4 bits) */
+>>   #define R1_READY_FOR_DATA    (1<<  8)    /* sx, a */
+>>   #define R1_SWITCH_ERROR        (1<<  7)    /* sx, c */
+>> +#define R1_EXCEPTION_EVENT    (1<<  6)    /* sx, a */
+>>   #define R1_APP_CMD        (1<<  5)    /* sr, c */
+>>
+>>   #define R1_STATE_IDLE    0
+>> @@ -274,12 +275,15 @@ struct _mmc_csd {
+>>   #define EXT_CSD_FLUSH_CACHE        32      /* W */
+>>   #define EXT_CSD_CACHE_CTRL        33      /* R/W */
+>>   #define EXT_CSD_POWER_OFF_NOTIFICATION    34    /* R/W */
+>> +#define EXT_CSD_EXCEPTION_STATUS    54    /* RO */
+>>   #define EXT_CSD_DATA_SECTOR_SIZE    61    /* R */
+>>   #define EXT_CSD_GP_SIZE_MULT        143    /* R/W */
+>>   #define EXT_CSD_PARTITION_ATTRIBUTE    156    /* R/W */
+>>   #define EXT_CSD_PARTITION_SUPPORT    160    /* RO */
+>>   #define EXT_CSD_HPI_MGMT        161    /* R/W */
+>>   #define EXT_CSD_RST_N_FUNCTION        162    /* R/W */
+>> +#define EXT_CSD_BKOPS_EN        163    /* R/W */
+>> +#define EXT_CSD_BKOPS_START        164    /* W */
+>>   #define EXT_CSD_SANITIZE_START        165     /* W */
+>>   #define EXT_CSD_WR_REL_PARAM        166    /* RO */
+>>   #define EXT_CSD_BOOT_WP            173    /* R/W */
+>> @@ -313,11 +317,13 @@ struct _mmc_csd {
+>>   #define EXT_CSD_PWR_CL_200_360        237    /* RO */
+>>   #define EXT_CSD_PWR_CL_DDR_52_195    238    /* RO */
+>>   #define EXT_CSD_PWR_CL_DDR_52_360    239    /* RO */
+>> +#define EXT_CSD_BKOPS_STATUS        246    /* RO */
+>>   #define EXT_CSD_POWER_OFF_LONG_TIME    247    /* RO */
+>>   #define EXT_CSD_GENERIC_CMD6_TIME    248    /* RO */
+>>   #define EXT_CSD_CACHE_SIZE        249    /* RO, 4 bytes */
+>>   #define EXT_CSD_TAG_UNIT_SIZE        498    /* RO */
+>>   #define EXT_CSD_DATA_TAG_SUPPORT    499    /* RO */
+>> +#define EXT_CSD_BKOPS_SUPPORT        502    /* RO */
+>>   #define EXT_CSD_HPI_FEATURES        503    /* RO */
+>>
+>>   /*
+>> @@ -386,4 +392,17 @@ struct _mmc_csd {
+>>   #define MMC_SWITCH_MODE_CLEAR_BITS    0x02    /* Clear bits which are 1 in value */
+>>   #define MMC_SWITCH_MODE_WRITE_BYTE    0x03    /* Set target to value */
+>>
+>> +/*
+>> + * BKOPS status level
+>> + */
+>> +#define EXT_CSD_BKOPS_LEVEL_2        0x2
+>> +
+>> +/*
+>> + * EXCEPTION_EVENT_STATUS field (eMMC4.5)
+>> + */
+>> +#define EXT_CSD_URGENT_BKOPS        BIT(0)
+>> +#define EXT_CSD_DYNCAP_NEEDED        BIT(1)
+>> +#define EXT_CSD_SYSPOOL_EXHAUSTED    BIT(2)
+>> +#define EXT_CSD_PACKED_FAILURE        BIT(3)
+>> +
+>>   #endif /* LINUX_MMC_MMC_H */
+> 
+> 
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 0b6141d..6f68aad 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -734,6 +734,25 @@ void mmc_set_chip_select(struct mmc_host *host, int mode)
- }
- 
- /*
-+ * used to save the ios before suspend.
-+ */
-+void mmc_save_ios(struct mmc_host *host, struct mmc_ios *ios)
-+{
-+	mmc_host_clk_hold(host);
-+	memcpy(&host->saved_ios, ios, sizeof(struct mmc_ios));
-+	mmc_host_clk_release(host);
-+}
-+
-+/*
-+ * Restore the saved ios.
-+ */
-+void mmc_restore_ios(struct mmc_host *host, struct mmc_ios *saved_ios)
-+{
-+	memcpy(&host->ios, saved_ios, sizeof(struct mmc_ios));
-+	mmc_set_ios(host);
-+}
-+
-+/*
-  * Sets the host clock to the highest possible frequency that
-  * is below "hz".
-  */
-@@ -1101,48 +1120,6 @@ void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type)
- 	mmc_host_clk_release(host);
- }
- 
--static void mmc_poweroff_notify(struct mmc_host *host)
--{
--	struct mmc_card *card;
--	unsigned int timeout;
--	unsigned int notify_type = EXT_CSD_NO_POWER_NOTIFICATION;
--	int err = 0;
--
--	card = host->card;
--	mmc_claim_host(host);
--
--	/*
--	 * Send power notify command only if card
--	 * is mmc and notify state is powered ON
--	 */
--	if (card && mmc_card_mmc(card) &&
--	    (card->poweroff_notify_state == MMC_POWERED_ON)) {
--
--		if (host->power_notify_type == MMC_HOST_PW_NOTIFY_SHORT) {
--			notify_type = EXT_CSD_POWER_OFF_SHORT;
--			timeout = card->ext_csd.generic_cmd6_time;
--			card->poweroff_notify_state = MMC_POWEROFF_SHORT;
--		} else {
--			notify_type = EXT_CSD_POWER_OFF_LONG;
--			timeout = card->ext_csd.power_off_longtime;
--			card->poweroff_notify_state = MMC_POWEROFF_LONG;
--		}
--
--		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--				 EXT_CSD_POWER_OFF_NOTIFICATION,
--				 notify_type, timeout);
--
--		if (err && err != -EBADMSG)
--			pr_err("Device failed to respond within %d poweroff "
--			       "time. Forcefully powering down the device\n",
--			       timeout);
--
--		/* Set the card state to no notification after the poweroff */
--		card->poweroff_notify_state = MMC_NO_POWER_NOTIFICATION;
--	}
--	mmc_release_host(host);
--}
--
- /*
-  * Apply power to the MMC stack.  This is a two-stage process.
-  * First, we enable power to the card without the clock running.
-@@ -1202,8 +1179,6 @@ static void mmc_power_up(struct mmc_host *host)
- 
- void mmc_power_off(struct mmc_host *host)
- {
--	int err = 0;
--
- 	if (host->ios.power_mode == MMC_POWER_OFF)
- 		return;
- 
-@@ -1212,22 +1187,6 @@ void mmc_power_off(struct mmc_host *host)
- 	host->ios.clock = 0;
- 	host->ios.vdd = 0;
- 
--	/*
--	 * For eMMC 4.5 device send AWAKE command before
--	 * POWER_OFF_NOTIFY command, because in sleep state
--	 * eMMC 4.5 devices respond to only RESET and AWAKE cmd
--	 */
--	if (host->card && mmc_card_is_sleep(host->card) &&
--	    host->bus_ops->resume) {
--		err = host->bus_ops->resume(host);
--
--		if (!err)
--			mmc_poweroff_notify(host);
--		else
--			pr_warning("%s: error %d during resume "
--				   "(continue with poweroff sequence)\n",
--				   mmc_hostname(host), err);
--	}
- 
- 	/*
- 	 * Reset ocr mask to be the highest possible voltage supported for
-@@ -1726,6 +1685,15 @@ int mmc_can_secure_erase_trim(struct mmc_card *card)
- }
- EXPORT_SYMBOL(mmc_can_secure_erase_trim);
- 
-+int mmc_can_poweroff_notify(const struct mmc_card *card)
-+{
-+	return card &&
-+		mmc_card_mmc(card) &&
-+		card->host->bus_ops->poweroff_notify &&
-+		(card->poweroff_notify_state == MMC_POWERED_ON);
-+}
-+EXPORT_SYMBOL(mmc_can_poweroff_notify);
-+
- int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
- 			    unsigned int nr)
- {
-@@ -2096,6 +2064,15 @@ void mmc_stop_host(struct mmc_host *host)
- 
- 	mmc_bus_get(host);
- 	if (host->bus_ops && !host->bus_dead) {
-+		mmc_claim_host(host);
-+		if (mmc_can_poweroff_notify(host->card)) {
-+			int err = host->bus_ops->poweroff_notify(host,
-+						MMC_PW_OFF_NOTIFY_LONG);
-+			if (err)
-+				pr_info("%s: error [%d] in poweroff notify\n",
-+					mmc_hostname(host), err);
-+		}
-+		mmc_release_host(host);
- 		/* Calling bus_ops->remove() with a claimed host can deadlock */
- 		if (host->bus_ops->remove)
- 			host->bus_ops->remove(host);
-@@ -2131,6 +2108,15 @@ int mmc_power_save_host(struct mmc_host *host)
- 
- 	if (host->bus_ops->power_save)
- 		ret = host->bus_ops->power_save(host);
-+	mmc_claim_host(host);
-+	if (mmc_can_poweroff_notify(host->card)) {
-+		int err = host->bus_ops->poweroff_notify(host,
-+					MMC_PW_OFF_NOTIFY_SHORT);
-+		if (err)
-+			pr_info("%s: error [%d] in poweroff notify\n",
-+				mmc_hostname(host), err);
-+	}
-+	mmc_release_host(host);
- 
- 	mmc_bus_put(host);
- 
-@@ -2173,8 +2159,11 @@ int mmc_card_awake(struct mmc_host *host)
- 
- 	mmc_bus_get(host);
- 
--	if (host->bus_ops && !host->bus_dead && host->bus_ops->awake)
-+	if (host->bus_ops && !host->bus_dead && host->bus_ops->awake) {
- 		err = host->bus_ops->awake(host);
-+		if (!err)
-+			mmc_card_clr_sleep(host->card);
-+	}
- 
- 	mmc_bus_put(host);
- 
-@@ -2191,8 +2180,11 @@ int mmc_card_sleep(struct mmc_host *host)
- 
- 	mmc_bus_get(host);
- 
--	if (host->bus_ops && !host->bus_dead && host->bus_ops->sleep)
-+	if (host->bus_ops && !host->bus_dead && host->bus_ops->sleep) {
- 		err = host->bus_ops->sleep(host);
-+		if (!err)
-+			mmc_card_set_sleep(host->card);
-+	}
- 
- 	mmc_bus_put(host);
- 
-@@ -2385,12 +2377,20 @@ int mmc_pm_notify(struct notifier_block *notify_block,
- 
- 		spin_lock_irqsave(&host->lock, flags);
- 		host->rescan_disable = 1;
--		host->power_notify_type = MMC_HOST_PW_NOTIFY_SHORT;
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		cancel_delayed_work_sync(&host->detect);
- 
- 		if (!host->bus_ops || host->bus_ops->suspend)
- 			break;
-+		mmc_claim_host(host);
-+		if (mmc_can_poweroff_notify(host->card)) {
-+			int err = host->bus_ops->poweroff_notify(host,
-+						MMC_PW_OFF_NOTIFY_SHORT);
-+			if (err)
-+				pr_info("%s: error [%d] in poweroff notify\n",
-+					mmc_hostname(host), err);
-+		}
-+		mmc_release_host(host);
- 
- 		/* Calling bus_ops->remove() with a claimed host can deadlock */
- 		if (host->bus_ops->remove)
-@@ -2409,7 +2409,6 @@ int mmc_pm_notify(struct notifier_block *notify_block,
- 
- 		spin_lock_irqsave(&host->lock, flags);
- 		host->rescan_disable = 0;
--		host->power_notify_type = MMC_HOST_PW_NOTIFY_LONG;
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		mmc_detect_change(host, 0);
- 
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 3bdafbc..6952abe 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -25,6 +25,7 @@ struct mmc_bus_ops {
- 	int (*power_save)(struct mmc_host *);
- 	int (*power_restore)(struct mmc_host *);
- 	int (*alive)(struct mmc_host *);
-+	int (*poweroff_notify)(struct mmc_host *, int notify);
- };
- 
- void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
-@@ -33,6 +34,8 @@ void mmc_detach_bus(struct mmc_host *host);
- void mmc_init_erase(struct mmc_card *card);
- 
- void mmc_set_chip_select(struct mmc_host *host, int mode);
-+void mmc_save_ios(struct mmc_host *host, struct mmc_ios *ios);
-+void mmc_restore_ios(struct mmc_host *host, struct mmc_ios *saved_ios);
- void mmc_set_clock(struct mmc_host *host, unsigned int hz);
- void mmc_gate_clock(struct mmc_host *host);
- void mmc_ungate_clock(struct mmc_host *host);
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 2f0e11c..c809025 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1259,6 +1259,40 @@ err:
- 	return err;
- }
- 
-+static int mmc_poweroff_notify(struct mmc_host *host, int notify)
-+{
-+	struct mmc_card *card;
-+	unsigned int timeout;
-+	unsigned int notify_type = EXT_CSD_NO_POWER_NOTIFICATION;
-+	int err;
-+
-+	card = host->card;
-+
-+	if (notify == MMC_PW_OFF_NOTIFY_SHORT) {
-+		notify_type = EXT_CSD_POWER_OFF_SHORT;
-+		timeout = card->ext_csd.generic_cmd6_time;
-+	} else if (notify == MMC_PW_OFF_NOTIFY_LONG) {
-+		notify_type = EXT_CSD_POWER_OFF_LONG;
-+		timeout = card->ext_csd.power_off_longtime;
-+	} else {
-+		pr_info("%s: mmc_poweroff_notify called "
-+			"with notify type %d\n", mmc_hostname(host), notify);
-+		return -EINVAL;
-+	}
-+
-+	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+			 EXT_CSD_POWER_OFF_NOTIFICATION,
-+			 notify_type, timeout);
-+
-+	if (err)
-+		pr_err("%s: Device failed to respond within %d "
-+		       "poweroff timeout.\n", mmc_hostname(host), timeout);
-+	else
-+		card->poweroff_notify_state =
-+					MMC_NO_POWER_NOTIFICATION;
-+
-+	return err;
-+}
- /*
-  * Host is being removed. Free up the current card.
-  */
-@@ -1319,13 +1353,19 @@ static int mmc_suspend(struct mmc_host *host)
- 	BUG_ON(!host->card);
- 
- 	mmc_claim_host(host);
--	if (mmc_card_can_sleep(host)) {
--		err = mmc_card_sleep(host);
--		if (!err)
--			mmc_card_set_sleep(host->card);
--	} else if (!mmc_host_is_spi(host))
--		mmc_deselect_cards(host);
--	host->card->state &= ~(MMC_STATE_HIGHSPEED | MMC_STATE_HIGHSPEED_200);
-+	if (mmc_can_poweroff_notify(host->card) &&
-+		(host->caps2 & MMC_CAP2_POWER_OFF_VCCQ_DURING_SUSPEND)) {
-+		err = mmc_poweroff_notify(host, MMC_PW_OFF_NOTIFY_SHORT);
-+	} else {
-+		if (mmc_card_can_sleep(host)) {
-+			mmc_save_ios(host, &host->ios);
-+			err = mmc_card_sleep(host);
-+		} else if (!mmc_host_is_spi(host))
-+			mmc_deselect_cards(host);
-+	}
-+	if (!err)
-+		host->card->state &=
-+			~(MMC_STATE_HIGHSPEED | MMC_STATE_HIGHSPEED_200);
- 	mmc_release_host(host);
- 
- 	return err;
-@@ -1346,8 +1386,8 @@ static int mmc_resume(struct mmc_host *host)
- 
- 	mmc_claim_host(host);
- 	if (mmc_card_is_sleep(host->card)) {
-+		mmc_restore_ios(host, &host->saved_ios);
- 		err = mmc_card_awake(host);
--		mmc_card_clr_sleep(host->card);
- 	} else
- 		err = mmc_init_card(host, host->ocr, host->card);
- 	mmc_release_host(host);
-@@ -1407,6 +1447,7 @@ static const struct mmc_bus_ops mmc_ops = {
- 	.resume = NULL,
- 	.power_restore = mmc_power_restore,
- 	.alive = mmc_alive,
-+	.poweroff_notify = mmc_poweroff_notify,
- };
- 
- static const struct mmc_bus_ops mmc_ops_unsafe = {
-@@ -1418,6 +1459,7 @@ static const struct mmc_bus_ops mmc_ops_unsafe = {
- 	.resume = mmc_resume,
- 	.power_restore = mmc_power_restore,
- 	.alive = mmc_alive,
-+	.poweroff_notify = mmc_poweroff_notify,
- };
- 
- static void mmc_attach_bus_ops(struct mmc_host *host)
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 1532357..463130f 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1788,11 +1788,6 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	if (host->pdata->quirks & DW_MCI_QUIRK_HIGHSPEED)
- 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
- 
--	if (mmc->caps2 & MMC_CAP2_POWEROFF_NOTIFY)
--		mmc->power_notify_type = MMC_HOST_PW_NOTIFY_SHORT;
--	else
--		mmc->power_notify_type = MMC_HOST_PW_NOTIFY_NONE;
--
- 	if (host->pdata->blk_settings) {
- 		mmc->max_segs = host->pdata->blk_settings->max_segs;
- 		mmc->max_blk_size = host->pdata->blk_settings->max_blk_size;
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index e626732..c0a5a91 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2812,15 +2812,6 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (caps[1] & SDHCI_DRIVER_TYPE_D)
- 		mmc->caps |= MMC_CAP_DRIVER_TYPE_D;
- 
--	/*
--	 * If Power Off Notify capability is enabled by the host,
--	 * set notify to short power off notify timeout value.
--	 */
--	if (mmc->caps2 & MMC_CAP2_POWEROFF_NOTIFY)
--		mmc->power_notify_type = MMC_HOST_PW_NOTIFY_SHORT;
--	else
--		mmc->power_notify_type = MMC_HOST_PW_NOTIFY_NONE;
--
- 	/* Initial value for re-tuning timer count */
- 	host->tuning_count = (caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
- 			      SDHCI_RETUNING_TIMER_COUNT_SHIFT;
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index d76513b..040eec4 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -239,11 +239,10 @@ struct mmc_card {
- #define MMC_QUIRK_BROKEN_BYTE_MODE_512 (1<<8)	/* Avoid sending 512 bytes in */
- #define MMC_QUIRK_LONG_READ_TIME (1<<9)		/* Data read time > CSD says */
- 						/* byte mode */
--	unsigned int    poweroff_notify_state;	/* eMMC4.5 notify feature */
-+	unsigned int		poweroff_notify_state; /* MMC-4.5 poweroff
-+							notify feature */
- #define MMC_NO_POWER_NOTIFICATION	0
- #define MMC_POWERED_ON			1
--#define MMC_POWEROFF_SHORT		2
--#define MMC_POWEROFF_LONG		3
- 
- 	unsigned int		erase_size;	/* erase size in sectors */
-  	unsigned int		erase_shift;	/* if erase unit is power 2 */
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 1b431c7..54894d6 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -161,6 +161,7 @@ extern int mmc_can_trim(struct mmc_card *card);
- extern int mmc_can_discard(struct mmc_card *card);
- extern int mmc_can_sanitize(struct mmc_card *card);
- extern int mmc_can_secure_erase_trim(struct mmc_card *card);
-+extern int mmc_can_poweroff_notify(const struct mmc_card *card);
- extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
- 				   unsigned int nr);
- extern unsigned int mmc_calc_max_discard(struct mmc_card *card);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 0707d22..b089968 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -238,12 +238,9 @@ struct mmc_host {
- #define MMC_CAP2_BROKEN_VOLTAGE	(1 << 7)	/* Use the broken voltage */
- #define MMC_CAP2_DETECT_ON_ERR	(1 << 8)	/* On I/O err check card removal */
- #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
-+#define MMC_CAP2_POWER_OFF_VCCQ_DURING_SUSPEND	(1 << 10)
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
--	unsigned int        power_notify_type;
--#define MMC_HOST_PW_NOTIFY_NONE		0
--#define MMC_HOST_PW_NOTIFY_SHORT	1
--#define MMC_HOST_PW_NOTIFY_LONG		2
- 
- #ifdef CONFIG_MMC_CLKGATE
- 	int			clk_requests;	/* internal reference counter */
-@@ -270,6 +267,7 @@ struct mmc_host {
- 	spinlock_t		lock;		/* lock for claim and bus ops */
- 
- 	struct mmc_ios		ios;		/* current io bus settings */
-+	struct mmc_ios		saved_ios;	/* saved io bus settings */
- 	u32			ocr;		/* the current OCR setting */
- 
- 	/* group bitfields together to minimize padding */
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index d425cab..b11876b 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -386,4 +386,11 @@ struct _mmc_csd {
- #define MMC_SWITCH_MODE_CLEAR_BITS	0x02	/* Clear bits which are 1 in value */
- #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value */
- 
-+/*
-+ * MMC Poweroff Notify types
-+ */
-+#define MMC_PW_OFF_NOTIFY_NONE		0
-+#define MMC_PW_OFF_NOTIFY_SHORT		1
-+#define MMC_PW_OFF_NOTIFY_LONG		2
-+
- #endif /* LINUX_MMC_MMC_H */
--- 
-1.7.4.3
 
