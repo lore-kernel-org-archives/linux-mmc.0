@@ -1,51 +1,22 @@
-From: Arnd Bergmann <arnd.bergmann@linaro.org>
-Subject: Re: [PATCH 2/3] ext4: Context support
-Date: Fri, 15 Jun 2012 10:54:22 +0000
-Message-ID: <201206151054.22838.arnd.bergmann@linaro.org>
-References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com> <201206150925.40625.arnd.bergmann@linaro.org> <94C38A12-AA21-40EF-85AC-B4410F7F03B0@dilger.ca>
+From: Axel Lin <axel.lin@gmail.com>
+Subject: Re: [PATCH 2/2] regulator: core.c Only delay when setting voltage
+ requires this
+Date: Fri, 15 Jun 2012 19:19:57 +0800
+Message-ID: <CAF+7xWnXL_2AvZ_5TR+fa-yMOf6qbK+m8p3pkPJQVbHzPw-zhg@mail.gmail.com>
+References: <1339711676-3488-1-git-send-email-prakity@marvell.com>
+Reply-To: axel.lin@gmail.com
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:64431 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756449Ab2FOKyj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jun 2012 06:54:39 -0400
-In-Reply-To: <94C38A12-AA21-40EF-85AC-B4410F7F03B0@dilger.ca>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1339711676-3488-1-git-send-email-prakity@marvell.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Philip Rakity <philipspatches@gmail.com>
+Cc: linux-kernel@vger.kernel.org, broonie@opensource.wolfsonmicro.com, linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Andreas Dilger <adilger@dilger.ca>
-Cc: Ted Ts'o <tytso@mit.edu>, Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>, Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, "Luca Porzio (lporzio)" <lporzio@micron.com>
 
-On Friday 15 June 2012, Andreas Dilger wrote:
-> 
-> On 2012-06-15, at 3:25 AM, Arnd Bergmann wrote:
-> > 
-> > Good point. For flash drives, the specific optimizations we do might
-> > be different from what we do on RAID, but they have enough in common
-> > that we could use the same mechanism to detect them.
-> > 
-> > Is ext4 able to cope well with stride sizes between 512KB and 24MB?
-> 
-> It is typically used on RAID arrays with 1MB or 4MB alignment.
-
-Ok, that sounds like it's the same order of magnitued, which definitely
-helps. The most common erase block sizes today are 4 MB and 8 MB,
-though they tend to double every one or two years.
-
-> It is considerably more CPU efficient to use power-of-two alignment,
-> but it is also possible to use non-power-of-two values if needed, so
-> long as they are at least a multiple of the block size.
-
-I see. It's quite common to have a multiple of three nowadays (1.5M B,
-3 MB, 6 MB, 12 MB) because of the way that TLC flash is getting used,
-but I've also seen TLC based devices that cut a 4 MB erase block in
-three parts, rounded to the next superpage size (1376+1376+1344 KB).
-
-In the former case, we might represent that as a stride=2^n and
-stripe-width=3*stride if that helps, in the latter case it sounds
-like it has to be stride=stripe-width=2^n anyway.
-Usually we're interested in the larger of these two sizes anyway.
-
-	Arnd
+2012/6/15 Philip Rakity <philipspatches@gmail.com>:
+> minor optimization: move delay code to where delay is set and
+> thus where it is used vs in the main line path.
+>
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
+Acked-by: Axel Lin <axel.lin@gmail.com>
