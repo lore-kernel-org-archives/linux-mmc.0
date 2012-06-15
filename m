@@ -1,36 +1,62 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Fix null dma_ops access when use_dma is false
-Date: Fri, 15 Jun 2012 14:14:48 +0100
-Message-ID: <CAFbHwiRo9J+ZkaK7YUcVvtxN5TkmvxUy-q-EDgngve-t+oJ0CQ@mail.gmail.com>
-References: <1339695115-606-1-git-send-email-kliegs@chromium.org>
-	<4FDAE34C.1030102@samsung.com>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: Re: Where to power on the wifi device before loading the driver.
+Date: Fri, 15 Jun 2012 09:49:10 -0600
+Message-ID: <4FDB5976.20809@wwwdotorg.org>
+References: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88@HKMAIL01.nvidia.com> <4FD90352.9090606@wwwdotorg.org> <20120614063120.GA20167@avionic-0098.mockup.avionic-design.de> <20120614121234.GC3913@opensource.wolfsonmicro.com> <4FDA092E.10301@wwwdotorg.org> <6B4D417B830BC44B8026029FD256F7F1C377BFFE8D@HKMAIL01.nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:45146 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752539Ab2FONOt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jun 2012 09:14:49 -0400
-Received: by pbbrp8 with SMTP id rp8so5270239pbb.19
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Jun 2012 06:14:49 -0700 (PDT)
-In-Reply-To: <4FDAE34C.1030102@samsung.com>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:51773 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932315Ab2FOPtO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jun 2012 11:49:14 -0400
+In-Reply-To: <6B4D417B830BC44B8026029FD256F7F1C377BFFE8D@HKMAIL01.nvidia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Jonathan Kliegman <kliegs@chromium.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>
+To: Wei Ni <wni@nvidia.com>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, "'frankyl@broadcom.com'" <frankyl@broadcom.com>, Thierry Reding <thierry.reding@avionic-design.de>, Mursalin Akon <makon@nvidia.com>, "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "'linux-wireless@vger.kernel.org'" <linux-wireless@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, Rakesh Kumar <krakesh@nvidia.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Fri, Jun 15, 2012 at 8:25 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> It looks good to me.
->
-> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
->
-> On 06/15/2012 02:31 AM, Jonathan Kliegman wrote:
->
->> host->dma_ops is not valid if host->usa dma is 0 so protect
->> host->dma_ops reference in dw_mci_resume
+On 06/15/2012 12:09 AM, Wei Ni wrote:
+> On Thu, Jun 14, 2012 at 23:54:22, Stephen Warren wrote:
+>>>>> The core of the issue is that:
+>>>
+>>>>> * Tegra30 support is via device tree. * We have an SDIO bus, and 
+>>>>> the WiFi device attached to that bus is enumerable. * Since the 
+>>>>> WiFi device is enumerable, no node exists in the DT to represent 
+>>>>> it. * However, the driver for the WiFi device needs certain 
+>>>>> information, such as the reset GPIO ID and perhaps power GPIO.
+>>>
+>>>> PCI devices are also enumerable and yet they can be matched up with 
+>>>> nodes in the device tree. Perhaps something similar could be added 
+>>>> for the SDIO bus?
+>>>
+>>> This seems to make the most sense - pushing this through the 
+>>> regulator API is just a bodge.
 >>
->> Signed-off-by: Jonathan Kliegman <kliegs@chromium.org>
+>> Yes, that seems reasonable.
+>>
+>> Presumably the power GPIO should be a fixed regulator though, since it 
+>> is a power control not just a plain old GPIO? That said, the current driver apparently deals with this as a GPIO already.
+>>
+>> The reset GPIO can separately/directly controlled by the WiFi driver though.
+> 
+> I talked with Franky, this power sequence is generally for 4329, so it mean this sequence can be put into the wifi driver.
+> We can use the virtual platform device both for OOB and non OOB.
+> I will send out patches later.
 
-Yes, looks good to me too.
+Can you please expand on what a "virtual platform device" is; device
+tree typically represents real hardware rather than anything "virtual".
 
-Acked-by: Will Newton <will.newton@imgtec.com>
+Now if this means adding a child node under the SDIO controller to
+represent the attached device, and storing any settings required by that
+device in that child node, that's probably a reasonable basic approach.
+
+BTW, which GPIO is the power GPIO; is it WF_EN on the schematic? That
+seems reasonable to represent as a GPIO rather than a regulator since it
+connects directly into the WiFi device as a GPIO, and its use within the
+WiFi device can indeed be governed purely internally to the WiFi
+driver/HW. However, if this is some GPIO that controls the power to e.g.
+VBAT3V3_IN_WF, VDDIO_WF, or other power supply to the WiFi card, then
+it'd be better represented as a regulator, since the control point is
+outside the WiFi device.
