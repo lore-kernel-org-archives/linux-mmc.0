@@ -1,87 +1,36 @@
-From: Roland Stigge <stigge@antcom.de>
-Subject: [PATCH v2] mmc: mmci.c: Defer probe() in case of yet uninitialized
- GPIOs
-Date: Sat, 16 Jun 2012 18:49:35 +0200
-Message-ID: <1339865375-22314-1-git-send-email-stigge@antcom.de>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v2] mmc: mmci.c: Defer probe() in case of yet uninitialized GPIOs
+Date: Sat, 16 Jun 2012 17:23:23 +0000
+Message-ID: <201206161723.23768.arnd@arndb.de>
+References: <1339865375-22314-1-git-send-email-stigge@antcom.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linus.walleij@linaro.org, sebastian.rasmussen@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com, linux-arm-kernel@lists.infradead.org
-Cc: Roland Stigge <stigge@antcom.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.126.186]:61527 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754333Ab2FPRXk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Jun 2012 13:23:40 -0400
+In-Reply-To: <1339865375-22314-1-git-send-email-stigge@antcom.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Roland Stigge <stigge@antcom.de>, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linus.walleij@linaro.org, sebastian.rasmussen@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com
 
-If the GPIOs used by the MMCI driver are not registered yet when the driver is
-probe()d, they can't be used. This happens if the mmci driver is probed before
-the respective GPIO controller (e.g. on the LPC32xx EA3250 board, the PCA9532
-GPIO controller would be initialized via DT after mmci). Therefore, we defer
-mmci in this case.
+On Saturday 16 June 2012, Roland Stigge wrote:
+> +       if (of_get_property(np, "wp-gpios", NULL)) {
+> +               pdata->gpio_wp = of_get_named_gpio(np, "wp-gpios", 0);
+> +               if (pdata->gpio_wp == -ENODEV)
+> +                       pdata->gpio_wp = -EPROBE_DEFER;
+> +       } else {
+> +               pdata->gpio_wp = -ENODEV;
+> +       }
 
-Signed-off-by: Roland Stigge <stigge@antcom.de>
+This is still very ugly and there is a certain danfer that we might
+have to duplicate this across more drivers. Can't we make
+of_get_named_gpio_flags return -EPROBE_DEFER in cases where we can't
+find the GPIO number yet but still have a chance of returning it at
+a later point?
 
----
- drivers/mmc/host/mmci.c |   30 +++++++++++++++++++++++-------
- 1 file changed, 23 insertions(+), 7 deletions(-)
-
---- linux-2.6.orig/drivers/mmc/host/mmci.c
-+++ linux-2.6/drivers/mmc/host/mmci.c
-@@ -1215,13 +1215,21 @@ static void mmci_dt_populate_generic_pda
- {
- 	int bus_width = 0;
- 
--	pdata->gpio_wp = of_get_named_gpio(np, "wp-gpios", 0);
--	if (!pdata->gpio_wp)
--		pdata->gpio_wp = -1;
--
--	pdata->gpio_cd = of_get_named_gpio(np, "cd-gpios", 0);
--	if (!pdata->gpio_cd)
--		pdata->gpio_cd = -1;
-+	if (of_get_property(np, "wp-gpios", NULL)) {
-+		pdata->gpio_wp = of_get_named_gpio(np, "wp-gpios", 0);
-+		if (pdata->gpio_wp == -ENODEV)
-+			pdata->gpio_wp = -EPROBE_DEFER;
-+	} else {
-+		pdata->gpio_wp = -ENODEV;
-+	}
-+
-+	if (of_get_property(np, "cd-gpios", NULL)) {
-+		pdata->gpio_cd = of_get_named_gpio(np, "cd-gpios", 0);
-+		if (pdata->gpio_cd == -ENODEV)
-+			pdata->gpio_cd = -EPROBE_DEFER;
-+	} else {
-+		pdata->gpio_cd = -ENODEV;
-+	}
- 
- 	if (of_get_property(np, "cd-inverted", NULL))
- 		pdata->cd_invert = true;
-@@ -1424,6 +1432,10 @@ static int __devinit mmci_probe(struct a
- 	writel(0, host->base + MMCIMASK1);
- 	writel(0xfff, host->base + MMCICLEAR);
- 
-+	if (plat->gpio_cd == -EPROBE_DEFER) {
-+		ret = -EPROBE_DEFER;
-+		goto err_gpio_cd;
-+	}
- 	if (gpio_is_valid(plat->gpio_cd)) {
- 		ret = gpio_request(plat->gpio_cd, DRIVER_NAME " (cd)");
- 		if (ret == 0)
-@@ -1447,6 +1459,10 @@ static int __devinit mmci_probe(struct a
- 		if (ret >= 0)
- 			host->gpio_cd_irq = gpio_to_irq(plat->gpio_cd);
- 	}
-+	if (plat->gpio_wp == -EPROBE_DEFER) {
-+		ret = -EPROBE_DEFER;
-+		goto err_gpio_wp;
-+	}
- 	if (gpio_is_valid(plat->gpio_wp)) {
- 		ret = gpio_request(plat->gpio_wp, DRIVER_NAME " (wp)");
- 		if (ret == 0)
+	Arnd
