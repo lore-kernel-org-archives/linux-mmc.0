@@ -1,48 +1,39 @@
-From: Pankaj Jangra <jangra.pankaj9@gmail.com>
-Subject: Re: [PATCH 1/2] regulator: core.c Pass voltage to notifier when
- setting voltage
-Date: Sat, 16 Jun 2012 12:03:06 +0530
-Message-ID: <CADTbHxrOWP02cCLD-gb3izE6QA-z70QEeCEW8J+V1sHt7dkyPg@mail.gmail.com>
-References: <1339784856-1779-1-git-send-email-prakity@marvell.com>
-	<CADTbHxpfQpKMkwzUakUUzt1mKO5rQ2A7_vuh9SA7i6Cq0VinZg@mail.gmail.com>
-	<DFD0DA03-D72C-4B5D-9E56-AA214202400A@marvell.com>
+From: Arnd Bergmann <arnd.bergmann@linaro.org>
+Subject: Re: [PATCH 2/3] ext4: Context support
+Date: Sat, 16 Jun 2012 06:49:57 +0000
+Message-ID: <201206160649.57838.arnd.bergmann@linaro.org>
+References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com> <201206150919.23484.arnd.bergmann@linaro.org> <20120615213046.GB7363@thunk.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <DFD0DA03-D72C-4B5D-9E56-AA214202400A@marvell.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Philip Rakity <philipspatches@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "broonie@opensource.wolfsonmicro.com" <broonie@opensource.wolfsonmicro.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-ext4-owner@vger.kernel.org>
+In-Reply-To: <20120615213046.GB7363@thunk.org>
+Sender: linux-ext4-owner@vger.kernel.org
+To: Ted Ts'o <tytso@mit.edu>
+Cc: Nicolas Pitre <nicolas.pitre@linaro.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>, Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, "Luca Porzio (lporzio)" <lporzio@micron.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+On Friday 15 June 2012, Ted Ts'o wrote:
+> On Fri, Jun 15, 2012 at 09:19:23AM +0000, Arnd Bergmann wrote:
+> > 
+> > The trouble is that detecting the erase block size requires us to
+> > write specific patterns to the device, which is generally a bad
+> > idea after the file system has been created.
+> 
+> How much space do you need?  It's not hard to allocate a bunch of
+> space, in a file, use FIEMAP ioctl to verify that you have a
+> contiguous range of blocks, and then do direct I/O into that region.
 
-On Sat, Jun 16, 2012 at 12:48 AM, Philip Rakity <prakity@marvell.com> w=
-rote:
->
-> On Jun 15, 2012, at 11:50 AM, Pankaj Jangra wrote:
->
->> Hi,
->>
->> On Fri, Jun 15, 2012 at 11:57 PM, Philip Rakity
->> <philipspatches@gmail.com> wrote:
->>> V3
->>> --
->>>
->>>
->>> The callin handler cannot call regulator_get_voltage() to get the
->>
->> "The calling"
->
-> I am not sure what the correct term for this. =A0The blocking_notifie=
-r_call_chain calls
-> what ? =A0 calling might imply blocking_notifier_call_chain() since i=
-t is doing the calling.
-> What is the receiver of the call named ?
->
+We need a few erase blocks, spaced apart by a few erase blocks each.
+Since we don't have to detect the number of erase blocks that the
+device can handle, a small number would be ok I guess, so in order
+to detect an 8 MB erase block correctly, we might use 3 erase blocks
+that are spaced apart by 5 erase blocks, for a total of 104MB.
 
-I was trying to bring up the spelling typo s/callin/calling though
+Once we figure out the erase block size, it would also help to
+verify that we can write to at least e.g. 5 blocks concurrently
+without triggering garbage collection, so we can print a warning
+if it doesn't.
 
-Regards,
-Pankaj Jangra
+	Arnd
