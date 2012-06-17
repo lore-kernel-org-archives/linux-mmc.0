@@ -1,36 +1,29 @@
-From: Roland Stigge <stigge@antcom.de>
-Subject: [PATCH v3 2/2] mmc: mmci.c: Remove wrong error handling of gpio 0
-Date: Sun, 17 Jun 2012 12:11:33 +0200
-Message-ID: <1339927893-8842-3-git-send-email-stigge@antcom.de>
-References: <1339927893-8842-1-git-send-email-stigge@antcom.de>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1339927893-8842-1-git-send-email-stigge@antcom.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com, linux-arm-kernel@lists.infradead.org
-Cc: Roland Stigge <stigge@antcom.de>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH v3 1/2] mmc: mmci.c: Defer probe() in case of yet
+	uninitialized GPIOs
+Date: Sun, 17 Jun 2012 17:21:42 +0100
+Message-ID: <20120617162142.GA26446@n2100.arm.linux.org.uk>
+References: <1339927893-8842-1-git-send-email-stigge@antcom.de> <1339927893-8842-2-git-send-email-stigge@antcom.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:57452 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757519Ab2FQQXU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Jun 2012 12:23:20 -0400
+Content-Disposition: inline
+In-Reply-To: <1339927893-8842-2-git-send-email-stigge@antcom.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Roland Stigge <stigge@antcom.de>
+Cc: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, ulf.hansson@stericsson.com, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com, linux-arm-kernel@lists.infradead.org
 
-Zero is a valid GPIO and shouldn't be handled as an error return code from
-of_get_named_gpio(). It was a leftover from old code before getting
-pdata->gpio_*() was modified.
+On Sun, Jun 17, 2012 at 12:11:32PM +0200, Roland Stigge wrote:
+> If the GPIOs used by the MMCI driver are not registered yet when the driver is
+> probe()d, they can't be used. This happens if the mmci driver is probed before
+> the respective GPIO controller (e.g. on the LPC32xx EA3250 board, the PCA9532
+> GPIO controller would be initialized via DT after mmci). Therefore, we defer
+> mmci in this case.
 
-Signed-off-by: Roland Stigge <stigge@antcom.de>
----
- drivers/mmc/host/mmci.c |    5 -----
- 1 file changed, 5 deletions(-)
-
---- linux-2.6.orig/drivers/mmc/host/mmci.c
-+++ linux-2.6/drivers/mmc/host/mmci.c
-@@ -1216,12 +1216,7 @@ static void mmci_dt_populate_generic_pda
- 	int bus_width = 0;
- 
- 	pdata->gpio_wp = of_get_named_gpio(np, "wp-gpios", 0);
--	if (!pdata->gpio_wp)
--		pdata->gpio_wp = -1;
--
- 	pdata->gpio_cd = of_get_named_gpio(np, "cd-gpios", 0);
--	if (!pdata->gpio_cd)
--		pdata->gpio_cd = -1;
- 
- 	if (of_get_property(np, "cd-inverted", NULL))
- 		pdata->cd_invert = true;
+I'm much happier with this.  Provided the change to the GPIO OF stuff is
+fine.
