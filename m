@@ -1,35 +1,39 @@
 From: Roland Stigge <stigge@antcom.de>
-Subject: Re: [PATCH v2] mmc: mmci.c: Defer probe() in case of yet uninitialized
- GPIOs
-Date: Sat, 16 Jun 2012 21:04:17 +0200
-Message-ID: <4FDCD8B1.5000407@antcom.de>
-References: <1339865375-22314-1-git-send-email-stigge@antcom.de> <201206161723.23768.arnd@arndb.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH] gpio: of_get_named_gpio_flags() return -EPROBE_DEFER if GPIO not yet available
+Date: Sun, 17 Jun 2012 12:11:31 +0200
+Message-ID: <1339927893-8842-1-git-send-email-stigge@antcom.de>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <201206161723.23768.arnd@arndb.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linus.walleij@linaro.org, sebastian.rasmussen@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com
+To: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com, linux-arm-kernel@lists.infradead.org
+Cc: Roland Stigge <stigge@antcom.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On 16/06/12 19:23, Arnd Bergmann wrote:
-> On Saturday 16 June 2012, Roland Stigge wrote:
->> +       if (of_get_property(np, "wp-gpios", NULL)) {
->> +               pdata->gpio_wp = of_get_named_gpio(np, "wp-gpios", 0);
->> +               if (pdata->gpio_wp == -ENODEV)
->> +                       pdata->gpio_wp = -EPROBE_DEFER;
->> +       } else {
->> +               pdata->gpio_wp = -ENODEV;
->> +       }
-> 
-> This is still very ugly and there is a certain danfer that we might
-> have to duplicate this across more drivers. Can't we make
-> of_get_named_gpio_flags return -EPROBE_DEFER in cases where we can't
-> find the GPIO number yet but still have a chance of returning it at
-> a later point?
+of_get_named_gpio_flags() and of_get_named_gpio() return -EPROBE_DEFER if the
+respective GPIO is not (yet) available. This is useful if driver's probe()
+functions try to get a GPIO whose controller isn't probed yet. Thus, the driver
+can be probed again later on.
 
-OK, will post a new patch.
+The function still returns -EINVAL on other errors (parse error or node doesn't
+exist). This way, the case of an optional/intentionally missing GPIO is handled
+appropriately.
 
-Roland
+Signed-off-by: Roland Stigge <stigge@antcom.de>
+
+---
+ drivers/gpio/gpiolib-of.c |    5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+--- linux-2.6.orig/drivers/gpio/gpiolib-of.c
++++ linux-2.6/drivers/gpio/gpiolib-of.c
+@@ -62,7 +62,10 @@ static int of_gpiochip_find_and_xlate(st
+ int of_get_named_gpio_flags(struct device_node *np, const char *propname,
+                            int index, enum of_gpio_flags *flags)
+ {
+-	struct gg_data gg_data = { .flags = flags, .out_gpio = -ENODEV };
++	/* Return -EPROBE_DEFER to support probe() functions to be called
++	 * later when the GPIO actually becomes available
++	 */
++	struct gg_data gg_data = { .flags = flags, .out_gpio = -EPROBE_DEFER };
+ 	int ret;
+ 
+ 	/* .of_xlate might decide to not fill in the flags, so clear it. */
