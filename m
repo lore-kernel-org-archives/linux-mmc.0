@@ -1,40 +1,89 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: [PATCH] gpio: of_get_named_gpio_flags() return -EPROBE_DEFER
- if GPIO not yet available
-Date: Sun, 17 Jun 2012 20:06:31 -0600
-Message-ID: <4FDE8D27.6030508@wwwdotorg.org>
-References: <1339927893-8842-1-git-send-email-stigge@antcom.de>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH RESEND v7 0/3] mmc: core: Support packed command feature of
+ eMMC4.5
+Date: Mon, 18 Jun 2012 14:41:35 +0900
+Message-ID: <007901cd4d15$06184c00$1248e400$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1339927893-8842-1-git-send-email-stigge@antcom.de>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Roland Stigge <stigge@antcom.de>
-Cc: linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, rob.herring@calxeda.com, grant.likely@secretlab.ca, linux-arm-kernel@lists.infradead.org, rmk+kernel@arm.linux.org.uk, cjb@laptop.org, ulf.hansson@stericsson.com, aletes.xgr@gmail.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:59381 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751075Ab2FRFll (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jun 2012 01:41:41 -0400
+Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M5S007YVT54QVF0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 18 Jun 2012 14:41:35 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0M5S00EI8T5BTX20@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 18 Jun 2012 14:41:35 +0900 (KST)
+References: 
+In-reply-to: 
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Maya Erez' <merez@codeaurora.org>, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>
 
-On 06/17/2012 04:11 AM, Roland Stigge wrote:
-> of_get_named_gpio_flags() and of_get_named_gpio() return -EPROBE_DEFER if the
-> respective GPIO is not (yet) available. This is useful if driver's probe()
-> functions try to get a GPIO whose controller isn't probed yet. Thus, the driver
-> can be probed again later on.
-> 
-> The function still returns -EINVAL on other errors (parse error or node doesn't
-> exist). This way, the case of an optional/intentionally missing GPIO is handled
-> appropriately.
+This patch-set adds support of packed command feature
+for eMMC4.5 devices.
 
-While I agree this is a correct change, it is going to break some
-existing code - at least sound/soc/tegra/tegra_{wm8903.c,alc5632.c}. I'm
-happy to send patches for those files though (is this going into 3.5 or
-3.6?). However, have you audited all existing callers (including
-indirect, e.g. through plain of_get_named_gpio()) for issues this will
-cause?
+This is resending of v7 because review of Subhash Jadavani in v6 is not applied properly.
+
+Changes in v7:
+	- Break the endless execution in some error handling(from Maya Erez).
+	- Change the condition for enabling packed command(from Subhash Jadavani).
+	- Spilt the error related routine from mmc_blk_issue_rw_rq.
+
+Changes in v6:
+	- Split the patch for packed read.
+	- Remove the unnecessary code. 
+
+Changes in v5:
+	- Revert "Add a variable member in mmc_host for minimum number of packed entries".
+	- Fix the partial packed command from failure index.
+	- Clean an unnecessary parameter of mmc_blk_packed_hdr_wrq_prep 
+	- Clean warning of checkpatch.
+
+Changes in v4:
+	- Add Data-tag as CMD23 argument for packed header.
+	- Separate the capability of MMC_CAP2_PACKED_CMD into read and write.
+	- Remove unncessary initial value.
+
+Changes in v3:
+	- Add a variable member in mmc_host for minimum number of packed entries.
+	  This value can be overridden by host.
+	- Fix a handling of error sequence.
+
+Changes in v2:
+	- Fix the packed read sequence and error handling.
+	- Apply checking the exception status for all cases with
+	  the comments from Maya Erez and Sahitya Tummala.
+	- Fix preparing the packed list with the comment from Maya Erez and Venkatraman.
+
+
+Seungwon Jeon (3):
+      mmc: core: Add packed command feature of eMMC4.5
+      mmc: core: Support packed write command for eMMC4.5 device
+      mmc: core: Support packed read command for eMMC4.5 device
+
+drivers/mmc/card/block.c   |  532 +++++++++++++++++++++++++++++++++++++++++---
+drivers/mmc/card/queue.c   |   49 ++++-
+drivers/mmc/card/queue.h   |   14 ++
+drivers/mmc/core/mmc.c     |   25 ++
+drivers/mmc/core/mmc_ops.c |    1 +
+include/linux/mmc/card.h   |    3 +
+include/linux/mmc/core.h   |    4 +
+include/linux/mmc/host.h   |    4 +
+include/linux/mmc/mmc.h    |   15 ++
+9 files changed, 616 insertions(+), 31 deletions(-)
+
+Best regards,
+Seungwon Jeon.
+--
+1.7.2.3
+
+
