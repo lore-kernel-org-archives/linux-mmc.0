@@ -1,51 +1,57 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: [PATCH] gpio: of_get_named_gpio_flags() return -EPROBE_DEFER
- if GPIO not yet available
-Date: Mon, 18 Jun 2012 08:50:38 -0600
-Message-ID: <4FDF403E.9090302@wwwdotorg.org>
-References: <1339927893-8842-1-git-send-email-stigge@antcom.de> <4FDE8D27.6030508@wwwdotorg.org> <4FDEF293.9080305@antcom.de>
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: Re: Where to power on the wifi device before loading the driver.
+Date: Mon, 18 Jun 2012 09:01:45 -0600
+Message-ID: <4FDF42D9.2050305@wwwdotorg.org>
+References: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88@HKMAIL01.nvidia.com> <4FD90352.9090606@wwwdotorg.org> <20120614063120.GA20167@avionic-0098.mockup.avionic-design.de> <20120614121234.GC3913@opensource.wolfsonmicro.com> <4FDA092E.10301@wwwdotorg.org> <6B4D417B830BC44B8026029FD256F7F1C377BFFE8D@HKMAIL01.nvidia.com> <4FDB5976.20809@wwwdotorg.org> <6B4D417B830BC44B8026029FD256F7F1C6EE2DD61F@HKMAIL01.nvidia.com> <96C9D994977DD0439FB6D3FE3B13DD907DE14CB4DF@BGMAIL01.nvidia.com> <96C9D994977DD0439FB6D3FE3B13DD907DE14CB4E8@BGMAIL01.nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:36076 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751265Ab2FROuo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jun 2012 10:50:44 -0400
-In-Reply-To: <4FDEF293.9080305@antcom.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <96C9D994977DD0439FB6D3FE3B13DD907DE14CB4E8-kdsAE/FnitNDw2glCA4ptUEOCMrvLtNR@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Laxman Dewangan <ldewangan-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Cc: Rakesh Kumar <krakesh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Wei Ni <wni-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, "'frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org'" <frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Thierry Reding <thierry.reding-RM9K5IK7kjKj5M59NBduVrNAH6kLmebB@public.gmane.org>, Mursalin Akon <makon-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "'linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "'linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Roland Stigge <stigge@antcom.de>
-Cc: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com, linux-arm-kernel@lists.infradead.org
 
-On 06/18/2012 03:19 AM, Roland Stigge wrote:
-> On 06/18/2012 04:06 AM, Stephen Warren wrote:
->> On 06/17/2012 04:11 AM, Roland Stigge wrote:
->>> of_get_named_gpio_flags() and of_get_named_gpio() return -EPROBE_DEFER if the
->>> respective GPIO is not (yet) available. This is useful if driver's probe()
->>> functions try to get a GPIO whose controller isn't probed yet. Thus, the driver
->>> can be probed again later on.
->>>
->>> The function still returns -EINVAL on other errors (parse error or node doesn't
->>> exist). This way, the case of an optional/intentionally missing GPIO is handled
->>> appropriately.
->>
->> While I agree this is a correct change, it is going to break some
->> existing code - at least sound/soc/tegra/tegra_{wm8903.c,alc5632.c}.
-> 
-> Can you please tell in which way the patch breaks those drivers?
-> However, I can see that those drivers solved the same problem in a
-> different way (deferring of_get_named_gpio(), via the sound init()). So
-> they could be adjusted to take advantage of new -EPROBE_DEFER.
+On 06/18/2012 02:03 AM, Laxman Dewangan wrote:
+> Rakesh Kumar wrote at Monday, June 18, 2012 1:11 PM:
+> > Stephen Warren wrote:
+> >> Now if this means adding a child node under the SDIO controller
+> >> to represent the attached device, and storing any settings
+> >> required by that device in that child node, that's probably a
+> >> reasonable basic approach.
+> >>
+> >> BTW, which GPIO is the power GPIO; is it WF_EN on the schematic?
+> >> That seems reasonable to represent as a GPIO rather than a
+> >> regulator since it connects directly into the WiFi device as a
+> >> GPIO, and its use within the WiFi device can indeed be governed
+> >> purely internally to the WiFi driver/HW. However, if this is some
+> >> GPIO that controls the power to e.g. VBAT3V3_IN_WF, VDDIO_WF, or
+> >> other power supply to the WiFi card, then it'd be better
+> >> represented as a regulator, since the control point is outside the
+> >> WiFi device.
+> > 
+> > Tegra uses two GPIO (WF_EN and WF_RST) to power on and reset bcm4329
+> > card. In case of bcm4329, these two lines are shorted. Tegra does
+> > not control VBAT3V3_IN_WF, VDDIO_WF, or other power supply to the
+> > WiFi card based on these GPIO. Uses of these GPIO are internal to
+> > WiFi HW.  It is reasonable to represent as a GPU rather than
+> > regulator.
+>
+> If it is for power then it has to go via regulator. It does not make
+> sense to directly control the gpio inside the wifi driver.
 
-The drivers I mentioned test the return code of of_get_named_gpio() to
-see if it's -ENODEV, which means that DT property for that GPIO exists
-but the driver for it isn't available yet, so the property can't be
-parsed. In this case, the sound drivers defer their own probe. If
-of_get_named_gpio() is modified to return -EPROBE_DEFER directly, then
-it won't be returning -ENODEV, and hence the sound drivers' check for
--ENODEV won't fire, and hence the sound drivers will just continue their
-probe assuming that the particular GPIOs are not present on the board
-(since they are all optional, so anything other than an explicit
-deferral error from of_get_named_gpio() is not treated as an error).
-This will break sound on those platforms.
+As far as the board goes, WF_EN is just a GPIO signal to the WiFi card;
+it doesn't gate power to the card. If it gates power inside the card,
+that's an internal implementation detail of the card, and something I'd
+be fine with the driver knowing directly, and hence I'm OK with
+representing this as a GPIO rather than a regulator - that's what it is
+externally to the WiFi device.
+
+(BTW everyone, many of the emails in this thread are awfully formatted -
+top-posted and not word-wrapped. It's very hard to read them... I tried
+to reformat everything and fix it in this email)
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
