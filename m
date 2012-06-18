@@ -1,69 +1,66 @@
 From: Roland Stigge <stigge@antcom.de>
-Subject: Re: [PATCH] gpio: of_get_named_gpio_flags() return -EPROBE_DEFER
- if GPIO not yet available
-Date: Mon, 18 Jun 2012 18:40:48 +0200
-Message-ID: <4FDF5A10.5080706@antcom.de>
-References: <1339927893-8842-1-git-send-email-stigge@antcom.de> <4FDE8D27.6030508@wwwdotorg.org> <4FDEF293.9080305@antcom.de> <4FDF403E.9090302@wwwdotorg.org> <4FDF4461.60707@antcom.de> <4FDF4543.6090009@wwwdotorg.org> <4FDF47D8.9000309@antcom.de> <4FDF4D14.50203@wwwdotorg.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH 1/2] sound: tegra_wm8903: Adjust to of_get_named_gpio() change
+Date: Mon, 18 Jun 2012 18:42:21 +0200
+Message-ID: <1340037743-12924-1-git-send-email-stigge@antcom.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from antcom.de ([188.40.178.216]:44164 "EHLO chuck.antcom.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751839Ab2FRQkv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 18 Jun 2012 12:40:51 -0400
-In-Reply-To: <4FDF4D14.50203@wwwdotorg.org>
+Received: from mail.work-microwave.de ([62.245.205.51]:29670 "EHLO
+	work-microwave.de" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751236Ab2FRQnB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jun 2012 12:43:01 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com, linux-arm-kernel@lists.infradead.org, broonie@opensource.wolfsonmicro.com, lrg@ti.com, perex@perex.cz, tiwai@suse.de, alsa-devel@alsa-project.org
+To: swarren@wwwdotorg.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com, linux-arm-kernel@lists.infradead.org, broonie@opensource.wolfsonmicro.com, lrg@ti.com, perex@perex.cz, tiwai@suse.de, alsa-devel@alsa-project.org
+Cc: Roland Stigge <stigge@antcom.de>
 
-On 06/18/2012 05:45 PM, Stephen Warren wrote:
->>>> Should be easy to fix (replacing the if (... == -ENODEV) to -EPROBE_DEFER.
->>>>
->>>> Will you provide patches as signalled, of should I? Which branch would
->>>> be the correct one to build on top?
->>>
->>> I'm happy either way. It'd probably be best to roll the change into your
->>> patch/series so you can manage all the dependencies in one series, but
->>> if you can't for some reason, I'm happy to provide a patch for this.
->>
->> I should be able ;-) - is broonie's sound.git, branch for-next the
->> correct one to patch against?
-> 
-> Yes, that's the one. Thanks.
+of_get_named_gpio() was changed to return -EPROBE_DEFER in case of
+gpios not probed yet. This patch adjusts tegra_wm8903 to this.
 
-I'm posting this as a series of 2 for the sound changes only. Would be 
-easiest to merge separately via sound/for-next, and the gpiolib-of 
-change via gpio. However, this could break bisecting.
+Signed-off-by: Roland Stigge <stigge@antcom.de>
 
-Since the respective precondition commits are only in the sound tree, 
-this would be the only one practical for merging a single combined 
-patch (combining those 3). Would this be OK for the GPIO maintainers? 
-It's practically only a one-line change in gpiolib-of.c that would come 
-in via sound.
-
-Thanks in advance,
-
-Roland
-
-
-PS: Just for illustration purposes for the sound maintainers:
 ---
- drivers/gpio/gpiolib-of.c |    5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+Applies to git://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git,
+branch for-next
 
---- linux-2.6.orig/drivers/gpio/gpiolib-of.c
-+++ linux-2.6/drivers/gpio/gpiolib-of.c
-@@ -62,7 +62,10 @@ static int of_gpiochip_find_and_xlate(st
- int of_get_named_gpio_flags(struct device_node *np, const char *propname,
-                            int index, enum of_gpio_flags *flags)
- {
--       struct gg_data gg_data = { .flags = flags, .out_gpio = -ENODEV };
-+       /* Return -EPROBE_DEFER to support probe() functions to be called
-+        * later when the GPIO actually becomes available
-+        */
-+       struct gg_data gg_data = { .flags = flags, .out_gpio = -EPROBE_DEFER };
-        int ret;
+ sound/soc/tegra/tegra_wm8903.c |   10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-        /* .of_xlate might decide to not fill in the flags, so clear it. */
+diff --git a/sound/soc/tegra/tegra_wm8903.c b/sound/soc/tegra/tegra_wm8903.c
+index 0c5bb33..d4f14e4 100644
+--- a/sound/soc/tegra/tegra_wm8903.c
++++ b/sound/soc/tegra/tegra_wm8903.c
+@@ -284,27 +284,27 @@ static __devinit int tegra_wm8903_driver_probe(struct platform_device *pdev)
+ 	} else if (np) {
+ 		pdata->gpio_spkr_en = of_get_named_gpio(np,
+ 						"nvidia,spkr-en-gpios", 0);
+-		if (pdata->gpio_spkr_en == -ENODEV)
++		if (pdata->gpio_spkr_en == -EPROBE_DEFER)
+ 			return -EPROBE_DEFER;
+ 
+ 		pdata->gpio_hp_mute = of_get_named_gpio(np,
+ 						"nvidia,hp-mute-gpios", 0);
+-		if (pdata->gpio_hp_mute == -ENODEV)
++		if (pdata->gpio_hp_mute == -EPROBE_DEFER)
+ 			return -EPROBE_DEFER;
+ 
+ 		pdata->gpio_hp_det = of_get_named_gpio(np,
+ 						"nvidia,hp-det-gpios", 0);
+-		if (pdata->gpio_hp_det == -ENODEV)
++		if (pdata->gpio_hp_det == -EPROBE_DEFER)
+ 			return -EPROBE_DEFER;
+ 
+ 		pdata->gpio_int_mic_en = of_get_named_gpio(np,
+ 						"nvidia,int-mic-en-gpios", 0);
+-		if (pdata->gpio_int_mic_en == -ENODEV)
++		if (pdata->gpio_int_mic_en == -EPROBE_DEFER)
+ 			return -EPROBE_DEFER;
+ 
+ 		pdata->gpio_ext_mic_en = of_get_named_gpio(np,
+ 						"nvidia,ext-mic-en-gpios", 0);
+-		if (pdata->gpio_ext_mic_en == -ENODEV)
++		if (pdata->gpio_ext_mic_en == -EPROBE_DEFER)
+ 			return -EPROBE_DEFER;
+ 	}
+ 
+-- 
+1.7.10
+
