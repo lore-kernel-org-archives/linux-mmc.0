@@ -1,45 +1,178 @@
-From: Roland Stigge <stigge@antcom.de>
-Subject: Re: [PATCH] gpio: of_get_named_gpio_flags() return -EPROBE_DEFER
- if GPIO not yet available
-Date: Mon, 18 Jun 2012 13:24:07 +0200
-Message-ID: <4FDF0FD7.3060004@antcom.de>
-References: <1339927893-8842-1-git-send-email-stigge@antcom.de> <4FDE8D27.6030508@wwwdotorg.org> <4FDEF293.9080305@antcom.de>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: [PATCH RESEND v7 1/3] mmc: core: Add packed command feature of eMMC4.5
+Date: Mon, 18 Jun 2012 17:04:19 +0530
+Message-ID: <000001cd4d46$502f2990$f08d7cb0$@codeaurora.org>
+References: <007a01cd4d15$2bba3d10$832eb730$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <4FDEF293.9080305@antcom.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain;
+	charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:43015 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751201Ab2FRLe0 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jun 2012 07:34:26 -0400
+In-Reply-To: <007a01cd4d15$2bba3d10$832eb730$%jun@samsung.com>
+Content-Language: en-us
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Seungwon Jeon' <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Maya Erez' <merez@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>
 
-On 06/18/2012 11:19 AM, Roland Stigge wrote:
->> While I agree this is a correct change, it is going to break some
->> existing code - at least sound/soc/tegra/tegra_{wm8903.c,alc5632.c}.
-> 
-> Can you please tell in which way the patch breaks those drivers?
-> However, I can see that those drivers solved the same problem in a
-> different way (deferring of_get_named_gpio(), via the sound init()). So
-> they could be adjusted to take advantage of new -EPROBE_DEFER
-> 
->> However, have you audited all existing callers (including
->> indirect, e.g. through plain of_get_named_gpio()) for issues this will
->> cause?
-> 
-> Thanks for the hint, I searched the code and found
-> 
-> drivers/spi/spi-pl022.c
-> 
-> to be using -ENODEV as indication to return -EPROBE_DEFER from probe().
-> Will send a patch that adjusts to our of_get_named_gpio_flags() patch
-> and if it's good, we should join the two.
+Looks good to me.
+Reviewed-by:  Subhash Jadavani <subhashj@codeaurora.org>
 
-Turned out that this is a fix for a yet-unapplied patch (to support dt
-for pl022). Alexandre will merge my fix into his patch.
+> -----Original Message-----
+> From: Seungwon Jeon [mailto:tgih.jun@samsung.com]
+> Sent: Monday, June 18, 2012 11:13 AM
+> To: linux-mmc@vger.kernel.org
+> Cc: linux-kernel@vger.kernel.org; 'Chris Ball'; 'Maya Erez'; 'Subhash Jadavani';
+> 'S, Venkatraman'
+> Subject: [PATCH RESEND v7 1/3] mmc: core: Add packed command feature of
+> eMMC4.5
+> 
+> This patch adds packed command feature of eMMC4.5.
+> The maximum number for packing read(or write) is offered and exception
+> event relevant to packed command which is used for error handling is enabled.
+> If host wants to use this feature, MMC_CAP2_PACKED_CMD should be set.
+> 
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+>  drivers/mmc/core/mmc.c   |   25 +++++++++++++++++++++++++
+>  include/linux/mmc/card.h |    3 +++
+>  include/linux/mmc/host.h |    4 ++++
+>  include/linux/mmc/mmc.h  |   15 +++++++++++++++
+>  4 files changed, 47 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
+> 258b203..bfb271f 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -516,6 +516,11 @@ static int mmc_read_ext_csd(struct mmc_card *card,
+> u8 *ext_csd)
+>  		} else {
+>  			card->ext_csd.data_tag_unit_size = 0;
+>  		}
+> +
+> +		card->ext_csd.max_packed_writes =
+> +			ext_csd[EXT_CSD_MAX_PACKED_WRITES];
+> +		card->ext_csd.max_packed_reads =
+> +			ext_csd[EXT_CSD_MAX_PACKED_READS];
+>  	} else {
+>  		card->ext_csd.data_sector_size = 512;
+>  	}
+> @@ -1246,6 +1251,26 @@ static int mmc_init_card(struct mmc_host *host,
+> u32 ocr,
+>  		}
+>  	}
+> 
+> +	if ((host->caps2 & MMC_CAP2_PACKED_WR &&
+> +			card->ext_csd.max_packed_writes > 0) ||
+> +	    (host->caps2 & MMC_CAP2_PACKED_RD &&
+> +			card->ext_csd.max_packed_reads > 0)) {
+> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +				EXT_CSD_EXP_EVENTS_CTRL,
+> +				EXT_CSD_PACKED_EVENT_EN,
+> +				card->ext_csd.generic_cmd6_time);
+> +		if (err && err != -EBADMSG)
+> +			goto free_card;
+> +		if (err) {
+> +			pr_warning("%s: Enabling packed event failed\n",
+> +					mmc_hostname(card->host));
+> +			card->ext_csd.packed_event_en = 0;
+> +			err = 0;
+> +		} else {
+> +			card->ext_csd.packed_event_en = 1;
+> +		}
+> +	}
+> +
+>  	if (!oldcard)
+>  		host->card = card;
+> 
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h index
+> d76513b..4aeb4e9 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -53,6 +53,9 @@ struct mmc_ext_csd {
+>  	u8			part_config;
+>  	u8			cache_ctrl;
+>  	u8			rst_n_function;
+> +	u8			max_packed_writes;
+> +	u8			max_packed_reads;
+> +	u8			packed_event_en;
+>  	unsigned int		part_time;		/* Units: ms */
+>  	unsigned int		sa_timeout;		/* Units: 100ns */
+>  	unsigned int		generic_cmd6_time;	/* Units: 10ms */
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h index
+> 0707d22..9d0d946 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -238,6 +238,10 @@ struct mmc_host {
+>  #define MMC_CAP2_BROKEN_VOLTAGE	(1 << 7)	/* Use the broken
+> voltage */
+>  #define MMC_CAP2_DETECT_ON_ERR	(1 << 8)	/* On I/O err check card
+> removal */
+>  #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
+> +#define MMC_CAP2_PACKED_RD	(1 << 10)	/* Allow packed read
+> */
+> +#define MMC_CAP2_PACKED_WR	(1 << 11)	/* Allow packed write
+> */
+> +#define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
+> +				 MMC_CAP2_PACKED_WR) /* Allow packed
+> commands */
+> 
+>  	mmc_pm_flag_t		pm_caps;	/* supported pm
+> features */
+>  	unsigned int        power_notify_type;
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h index
+> d425cab..254901a 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -139,6 +139,7 @@ static inline bool mmc_op_multi(u32 opcode)
+>  #define R1_CURRENT_STATE(x)	((x & 0x00001E00) >> 9)	/* sx, b (4 bits) */
+>  #define R1_READY_FOR_DATA	(1 << 8)	/* sx, a */
+>  #define R1_SWITCH_ERROR		(1 << 7)	/* sx, c */
+> +#define R1_EXP_EVENT		(1 << 6)	/* sr, a */
+>  #define R1_APP_CMD		(1 << 5)	/* sr, c */
+> 
+>  #define R1_STATE_IDLE	0
+> @@ -274,6 +275,10 @@ struct _mmc_csd {
+>  #define EXT_CSD_FLUSH_CACHE		32      /* W */
+>  #define EXT_CSD_CACHE_CTRL		33      /* R/W */
+>  #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
+> +#define EXT_CSD_PACKED_FAILURE_INDEX	35	/* RO */
+> +#define EXT_CSD_PACKED_CMD_STATUS	36	/* RO */
+> +#define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
+> +#define EXT_CSD_EXP_EVENTS_CTRL	56	/* R/W, 2 bytes */
+>  #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
+>  #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
+>  #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+> @@ -318,6 +323,8 @@ struct _mmc_csd {
+>  #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
+>  #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
+>  #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
+> +#define EXT_CSD_MAX_PACKED_WRITES	500	/* RO */
+> +#define EXT_CSD_MAX_PACKED_READS	501	/* RO */
+>  #define EXT_CSD_HPI_FEATURES		503	/* RO */
+> 
+>  /*
+> @@ -377,6 +384,14 @@ struct _mmc_csd {
+>  #define EXT_CSD_PWR_CL_4BIT_MASK	0x0F	/* 8 bit PWR CLS */
+>  #define EXT_CSD_PWR_CL_8BIT_SHIFT	4
+>  #define EXT_CSD_PWR_CL_4BIT_SHIFT	0
+> +
+> +#define EXT_CSD_PACKED_EVENT_EN	(1 << 3)
+> +
+> +#define EXT_CSD_PACKED_FAILURE	(1 << 3)
+> +
+> +#define EXT_CSD_PACKED_GENERIC_ERROR	(1 << 0)
+> +#define EXT_CSD_PACKED_INDEXED_ERROR	(1 << 1)
+> +
+>  /*
+>   * MMC_SWITCH access modes
+>   */
+> --
+> 1.7.0.4
+> 
 
-So I can't find immediate breakage from the gpiolib-of patch.
 
-Thanks,
-
-Roland
