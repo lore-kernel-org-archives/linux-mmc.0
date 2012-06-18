@@ -1,80 +1,86 @@
-From: Laxman Dewangan <ldewangan-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Subject: RE: Where to power on the wifi device before loading the driver.
-Date: Mon, 18 Jun 2012 13:33:19 +0530
-Message-ID: <96C9D994977DD0439FB6D3FE3B13DD907DE14CB4E8@BGMAIL01.nvidia.com>
-References: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88@HKMAIL01.nvidia.com>
- <4FD90352.9090606@wwwdotorg.org>
- <20120614063120.GA20167@avionic-0098.mockup.avionic-design.de>
- <20120614121234.GC3913@opensource.wolfsonmicro.com>
- <4FDA092E.10301@wwwdotorg.org>
- <6B4D417B830BC44B8026029FD256F7F1C377BFFE8D@HKMAIL01.nvidia.com>
- <4FDB5976.20809@wwwdotorg.org>
- <6B4D417B830BC44B8026029FD256F7F1C6EE2DD61F@HKMAIL01.nvidia.com>
- <96C9D994977DD0439FB6D3FE3B13DD907DE14CB4DF@BGMAIL01.nvidia.com>
+From: Roland Stigge <stigge@antcom.de>
+Subject: Re: [PATCH] gpio: of_get_named_gpio_flags() return -EPROBE_DEFER
+ if GPIO not yet available
+Date: Mon, 18 Jun 2012 11:19:15 +0200
+Message-ID: <4FDEF293.9080305@antcom.de>
+References: <1339927893-8842-1-git-send-email-stigge@antcom.de> <4FDE8D27.6030508@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <96C9D994977DD0439FB6D3FE3B13DD907DE14CB4DF-kdsAE/FnitNDw2glCA4ptUEOCMrvLtNR@public.gmane.org>
-Content-Language: en-US
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rakesh Kumar <krakesh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Wei Ni <wni-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, 'Stephen Warren' <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Cc: Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, "'frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org'" <frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Thierry Reding <thierry.reding-RM9K5IK7kjKj5M59NBduVrNAH6kLmebB@public.gmane.org>, Mursalin Akon <makon-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "'linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "'linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from antcom.de ([188.40.178.216]:39738 "EHLO chuck.antcom.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751716Ab2FRJTS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 18 Jun 2012 05:19:18 -0400
+In-Reply-To: <4FDE8D27.6030508@wwwdotorg.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stephen Warren <swarren@wwwdotorg.org>
+Cc: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com, linux-arm-kernel@lists.infradead.org
 
-If it is for power then it has to go via regulator. It does not make sense to directly control the gpio inside the wifi driver.
+On 06/18/2012 04:06 AM, Stephen Warren wrote:
+> On 06/17/2012 04:11 AM, Roland Stigge wrote:
+>> of_get_named_gpio_flags() and of_get_named_gpio() return -EPROBE_DEFER if the
+>> respective GPIO is not (yet) available. This is useful if driver's probe()
+>> functions try to get a GPIO whose controller isn't probed yet. Thus, the driver
+>> can be probed again later on.
+>>
+>> The function still returns -EINVAL on other errors (parse error or node doesn't
+>> exist). This way, the case of an optional/intentionally missing GPIO is handled
+>> appropriately.
+> 
+> While I agree this is a correct change, it is going to break some
+> existing code - at least sound/soc/tegra/tegra_{wm8903.c,alc5632.c}.
 
+Can you please tell in which way the patch breaks those drivers?
+However, I can see that those drivers solved the same problem in a
+different way (deferring of_get_named_gpio(), via the sound init()). So
+they could be adjusted to take advantage of new -EPROBE_DEFER.
 
------Original Message-----
-From: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Rakesh Kumar
-Sent: Monday, June 18, 2012 1:11 PM
-To: Wei Ni; 'Stephen Warren'
-Cc: Mark Brown; 'frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org'; Thierry Reding; Mursalin Akon; 'linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'; devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org; 'linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'; linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Subject: RE: Where to power on the wifi device before loading the driver.
+> I'm
+> happy to send patches for those files though (is this going into 3.5 or
+> 3.6?).
 
->Now if this means adding a child node under the SDIO controller to represent the attached device, and storing any settings required by that device in that child node, that's probably a reasonable basic approach.
->
->BTW, which GPIO is the power GPIO; is it WF_EN on the schematic? That seems reasonable to represent as a GPIO rather than a regulator since it connects directly into the WiFi device as a GPIO, and its use within the WiFi device can indeed be governed purely internally to the WiFi driver/HW. However, if this is some GPIO that controls the power to e.g.
->VBAT3V3_IN_WF, VDDIO_WF, or other power supply to the WiFi card, then it'd be better represented as a regulator, since the control point is outside the WiFi device.
+For 3.6 would be best, IMO.
 
-Tegra uses two GPIO (WF_EN and WF_RST) to power on and reset bcm4329 card. In case of bcm4329, these two lines are shorted. Tegra does not control VBAT3V3_IN_WF, VDDIO_WF, or other power supply to the WiFi card based on these GPIO. Uses of these GPIO are internal to WiFi HW.  It is reasonable to represent as a GPU rather than regulator.
+> However, have you audited all existing callers (including
+> indirect, e.g. through plain of_get_named_gpio()) for issues this will
+> cause?
 
-Rakesh
----
-nvpublic
+Thanks for the hint, I searched the code and found
 
------Original Message-----
-From: Wei Ni 
-Sent: 18 June 2012 11:50
-To: 'Stephen Warren'; Rakesh Kumar
-Cc: Mark Brown; 'frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org'; Thierry Reding; Mursalin Akon; 'linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'; devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org; 'linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'; linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Subject: RE: Where to power on the wifi device before loading the driver.
+drivers/spi/spi-pl022.c
 
-On Fri, Jun 15, 2012 at 23:49:10, Stephen Warren wrote:
->> I talked with Franky, this power sequence is generally for 4329, so 
->> it mean this sequence can be put into the wifi driver.
->> We can use the virtual platform device both for OOB and non OOB.
->> I will send out patches later.
->
->Can you please expand on what a "virtual platform device" is; device tree typically represents real hardware rather than anything "virtual".
+to be using -ENODEV as indication to return -EPROBE_DEFER from probe().
+Will send a patch that adjusts to our of_get_named_gpio_flags() patch
+and if it's good, we should join the two.
 
-The "virtual platform device" is created before the real wifi device, so that it can pass the gpios to the driver, and power up the device before calling sdio_register_driver.
-But as Franky said, this power sequence is only generally for 4329, not for the USB dongle chips. So it's not a good idea to add this "power up" in brcmfmac.
+Some drivers possibly suffer from the same issue that the patch adresses:
 
->
->Now if this means adding a child node under the SDIO controller to represent the attached device, and storing any settings required by that device in that child node, that's probably a reasonable basic approach.
->
->BTW, which GPIO is the power GPIO; is it WF_EN on the schematic? That seems reasonable to represent as a GPIO rather than a regulator since it connects directly into the WiFi device as a GPIO, and its use within the WiFi device can indeed be governed purely internally to the WiFi driver/HW. However, if this is some GPIO that controls the power to e.g.
->VBAT3V3_IN_WF, VDDIO_WF, or other power supply to the WiFi card, then it'd be better represented as a regulator, since the control point is outside the WiFi device.
+drivers/mfd/twl6040-core.c
+drivers/staging/nvec/nvec.c
+drivers/usb/host/ohci-at91.c
+drivers/usb/host/ehci-tegra.c
+drivers/usb/gadget/at91_udc.c
+drivers/spi/spi-imx.c
+drivers/spi/spi-sirf.c
+drivers/mmc/host/sdhci-tegra.c
+drivers/mmc/host/omap_hsmmc.c
+drivers/mmc/host/mxs-mmc.c
+drivers/mmc/host/sdhci-esdhc-imx.c
+drivers/regulator/tps62360-regulator.c
+drivers/regulator/fixed.c
 
-I think Rakesh may can answer this.
+But the breakage therefore exists even before the patch.
 
-Wei.
----
-nvpublic
+Other drivers don't handle the result of of_get_named_gpio*() correctly
+at all:
 
+drivers/power/sbs-battery.c
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-tegra" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I can help the respective maintainers to work out this issue when we
+have the EPROBE_DEFER ready in gpiolib-of.c.
+
+Thanks,
+
+Roland
