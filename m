@@ -1,44 +1,43 @@
-From: Leon Romanovsky <leon@leon.nu>
-Subject: Re: [PATCH 2/2] sound: tegra_alc5632: Adjust to of_get_named_gpio() change
-Date: Tue, 19 Jun 2012 09:29:58 +0300
-Message-ID: <CALq1K=LXVqfiyrLjn+_p+NTU3X5RjyQzvKdVRf09zXk-RqbkrQ@mail.gmail.com>
-References: <1340037743-12924-1-git-send-email-stigge@antcom.de>
- <1340037743-12924-2-git-send-email-stigge@antcom.de> <CAAAP30G1qzDn+NKT1is+GJ9K2DS3Sm3QY+=n7s-P-Rop2b7FPQ@mail.gmail.com>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: [PATCH] mmc: tmio: Don't access hardware registers after stopping clocks
+Date: Tue, 19 Jun 2012 15:53:30 +0900
+Message-ID: <CANqRtoQD+sneTT7tCYji7YGpX5eJEQrWCQoX8jWJ1hiChjFh_g@mail.gmail.com>
+References: <1339505838-8831-1-git-send-email-laurent.pinchart@ideasonboard.com>
+	<CANqRtoQdzq5VHqBo1WQUYimVAYsGM6+XmE5r1Aoadm_HpY=eMA@mail.gmail.com>
+	<1538938.WjgJgiBpYR@avalon>
+	<CANqRtoS3JqNHFXcOutssQxpD6DNnyV1QawT2hf251z5d05LJWw@mail.gmail.com>
+	<Pine.LNX.4.64.1206150907110.11729@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:62875 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753832Ab2FSGaU convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jun 2012 02:30:20 -0400
-Received: by lbbgm6 with SMTP id gm6so5319681lbb.19
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Jun 2012 23:30:19 -0700 (PDT)
-In-Reply-To: <CAAAP30G1qzDn+NKT1is+GJ9K2DS3Sm3QY+=n7s-P-Rop2b7FPQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1206150907110.11729@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Laurent Pinchart <laurent.pinchart@ideasonboard.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
-Cc: Roland Stigge <stigge@antcom.de>, swarren@wwwdotorg.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, broonie@opensource.wolfsonmicro.com, lrg@ti.com, perex@perex.cz, tiwai@suse.de, alsa-devel@alsa-project.org
 
-On Mon, Jun 18, 2012 at 8:28 PM, Alexandre Pereira da Silva
-<aletes.xgr@gmail.com> wrote:
-> On Mon, Jun 18, 2012 at 1:42 PM, Roland Stigge <stigge@antcom.de> wro=
-te:
->> of_get_named_gpio() was changed to return -EPROBE_DEFER in case of
->> gpios not probed yet. This patch adjusts tegra_alc5632 to this.
->>
->> Signed-off-by: Roland Stigge <stigge@antcom.de>
-> Acked-by: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
-Hi Alexandre,
-Sorry to be rude, but can you explain me why did you "Acked-by" on this=
- patch ?
-I don't see your name in git log for tegra_alc5632.c file:
-http://git.kernel.org/?p=3Dlinux/kernel/git/broonie/sound.git;a=3Dhisto=
-ry;f=3Dsound/soc/tegra/tegra_alc5632.c;h=3Dd684df294c0c5c80458b6de591c1=
-6965027db14b;hb=3Drefs/heads/for-next
+On Fri, Jun 15, 2012 at 4:09 PM, Guennadi Liakhovetski
+<g.liakhovetski@gmx.de> wrote:
+> On Fri, 15 Jun 2012, Magnus Damm wrote:
+>
+> [snip]
+>
+>> Guennadi, does this trigger on sh7372 as well? If not, why is that?
+>
+> No. That message is produced by the sh_mobile_sdhi_wait_idle() function,
+> which is only used, if the TMIO_MMC_HAS_IDLE_WAIT flag is set, which is
+> not set on mackerel (or ap4evb).
 
-Thanks.
+Ok, thanks for checking this. It seems that we are "lucky" to find
+this breakage...
 
---=20
-Leon Romanovsky | Independent Linux Consultant
-=C2=A0 =C2=A0 =C2=A0 =C2=A0=C2=A0www.leon.nu=C2=A0| leon@leon.nu
+In the future, please take care to make sure this does not happen
+again. This goes without saying, but the driver should not access the
+hardware when it is Runtime PM suspended. I believe it should be
+possible to verify the code paths by manual code inspection. Also, to
+make the behavior more consistent you may want to make use of
+"pm_runtime_put_sync()" instead of "pm_runtime_put()".
+
+Thanks,
+
+/ magnus
