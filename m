@@ -1,7 +1,7 @@
-From: Wei Ni <wni@nvidia.com>
-Subject: RE: Where to power on the wifi device before loading the driver.
-Date: Tue, 19 Jun 2012 17:13:47 +0800
-Message-ID: <6B4D417B830BC44B8026029FD256F7F1C6EE2DD625@HKMAIL01.nvidia.com>
+From: Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>
+Subject: Re: Where to power on the wifi device before loading the driver.
+Date: Tue, 19 Jun 2012 10:17:19 +0100
+Message-ID: <20120619091719.GZ3974@opensource.wolfsonmicro.com>
 References: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88@HKMAIL01.nvidia.com>
  <4FD90352.9090606@wwwdotorg.org>
  <20120614063120.GA20167@avionic-0098.mockup.avionic-design.de>
@@ -10,63 +10,69 @@ References: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88@HKMAIL01.nvidia.com>
  <6B4D417B830BC44B8026029FD256F7F1C377BFFE8D@HKMAIL01.nvidia.com>
  <4FDB5976.20809@wwwdotorg.org>
  <6B4D417B830BC44B8026029FD256F7F1C6EE2DD61F@HKMAIL01.nvidia.com>
- <96C9D994977DD0439FB6D3FE3B13DD907DE14CB4DF@BGMAIL01.nvidia.com>
- <96C9D994977DD0439FB6D3FE3B13DD907DE14CB4E8@BGMAIL01.nvidia.com>
- <4FDF42D9.2050305@wwwdotorg.org>
+ <43E4817426ED174AA81263BCECB4351D138E8ACD6B@sc-vexch3.marvell.com>
+ <6B4D417B830BC44B8026029FD256F7F1C6EE2DD622@HKMAIL01.nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="Windows-1252"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate03.nvidia.com ([216.228.121.140]:19861 "EHLO
-	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753443Ab2FSJNw convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jun 2012 05:13:52 -0400
-In-Reply-To: <4FDF42D9.2050305@wwwdotorg.org>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="6ysXqiu0yoUmUNJB"
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <6B4D417B830BC44B8026029FD256F7F1C6EE2DD622-Q4EWCATADntDw2glCA4ptUEOCMrvLtNR@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Wei Ni <wni-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Cc: 'Philip Rakity' <prakity-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, 'Stephen Warren' <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Rakesh Kumar <krakesh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "'frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org'" <frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Thierry Reding <thierry.reding-RM9K5IK7kjKj5M59NBduVrNAH6kLmebB@public.gmane.org>, Mursalin Akon <makon-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "'linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "'linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: 'Stephen Warren' <swarren@wwwdotorg.org>, Laxman Dewangan <ldewangan@nvidia.com>
-Cc: Rakesh Kumar <krakesh@nvidia.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, "'frankyl@broadcom.com'" <frankyl@broadcom.com>, Thierry Reding <thierry.reding@avionic-design.de>, Mursalin Akon <makon@nvidia.com>, "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "'linux-wireless@vger.kernel.org'" <linux-wireless@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
-
-On Mon, Jun 18, 2012 at 23:01:45, Stephen Warren wrote:
->On 06/18/2012 02:03 AM, Laxman Dewangan wrote:
->> Rakesh Kumar wrote at Monday, June 18, 2012 1:11 PM:
->> > Stephen Warren wrote:
->> >> Now if this means adding a child node under the SDIO controller to 
->> >> represent the attached device, and storing any settings required 
->> >> by that device in that child node, that's probably a reasonable 
->> >> basic approach.
->> >>
->> >> BTW, which GPIO is the power GPIO; is it WF_EN on the schematic?
->> >> That seems reasonable to represent as a GPIO rather than a 
->> >> regulator since it connects directly into the WiFi device as a 
->> >> GPIO, and its use within the WiFi device can indeed be governed 
->> >> purely internally to the WiFi driver/HW. However, if this is some 
->> >> GPIO that controls the power to e.g. VBAT3V3_IN_WF, VDDIO_WF, or 
->> >> other power supply to the WiFi card, then it'd be better 
->> >> represented as a regulator, since the control point is outside the 
->> >> WiFi device.
->> >
->> > Tegra uses two GPIO (WF_EN and WF_RST) to power on and reset 
->> > bcm4329 card. In case of bcm4329, these two lines are shorted. 
->> > Tegra does not control VBAT3V3_IN_WF, VDDIO_WF, or other power 
->> > supply to the WiFi card based on these GPIO. Uses of these GPIO are 
->> > internal to WiFi HW.  It is reasonable to represent as a GPU rather 
->> > than regulator.
->>
->> If it is for power then it has to go via regulator. It does not make 
->> sense to directly control the gpio inside the wifi driver.
->
->As far as the board goes, WF_EN is just a GPIO signal to the WiFi card; 
->it doesn't gate power to the card. If it gates power inside the card, 
->that's an internal implementation detail of the card, and something I'd 
->be fine with the driver knowing directly, and hence I'm OK with representing
->this as a GPIO rather than a regulator - that's what it is externally to the WiFi device.
-
-Because these gpio is just for wifi device, could we use the rfkill-gpio driver for this isse? We just need to add DT support in rfkill-gpio driver and add a device node in the DT. And the user also can use the rfkill interface to control the wifi device.
-
->
->(BTW everyone, many of the emails in this thread are awfully formatted 
->- top-posted and not word- wrapped. It's very hard to read them... I tried to reformat everything and fix it in this email)
 
 
+--6ysXqiu0yoUmUNJB
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Tue, Jun 19, 2012 at 12:25:58PM +0800, Wei Ni wrote:
+
+As Stephen previously said please fix your mail formatting - word
+wrapping within paragraphs is important!
+
+> On Tue, Jun 19, 2012 at 09:23:35, Philip Rakity wrote:
+> >Why can't you use the regulator notify to get called back on power or=20
+> >voltage change options to plumb in the manipulation of the gpio. I can=
+=20
+> >imagine you might need to add a notify call in core.c if you need to=20
+> >assert the gpio before power is applied
+>=20
+> Yes, we can use the regulator notify, but the Tegra30 support is via
+> device tree, I think there have no special board file to run the call
+> back.
+
+You can mix board files with device tree for cases where device tree is
+not yet up to the job, though the goal should be to come up with a way
+of expressing things in device tree.
+
+--6ysXqiu0yoUmUNJB
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJP4ENIAAoJEBus8iNuMP3dV3AQAJZ5EfiY0JeT/Y42cpJBJwGG
+qzabJ1J3K7ky0rIFa+F/vrDJcISCtADNqyd+Qs2igokZjAz5BsTdSqMUa+tS2APn
+DxWpYg0vxmmXp6QfJcVaqzQlDqawZ7ZwEKV4nwq0Ux6IvHLnkuHZMPKJs90GiXiV
+IVjCbe/m1stYARcxvkbc23Y5RVQR6PJ9tubdyXxW+F1qV99ofTALWuXH29e8h8fg
+/aRLNAKzktoyxxnNaNSlqxXINPggkIzr/BLVIdAwGCdF0oiDgg44wN8EQvY0DZtX
+P5xvdeC12UG0SsBli1zft/buuOWdzYas+pdC4C7v84+baiQs1MxtAbefixaIZLH3
+kH59UtwFSxLuXvF/MJZPrZw2/8wYh1eleBp86Ye0Ipzn//mImhUZ8/4h0xGU95lr
+BB1OQG9HfUZoftnsES8Ri6+fAIEBdmn2dStwuiBO/n7hqdEh1r+NNhN5do1x8VJ/
+nLfqNyE9uOVBVHI+0BE1G5+veO/agc+XYZNY+rCP7PZYgBpnMoz2bJFUU7WP16MQ
+b9CFxjPXfY9hlBv3mrg82oXQLnAaSaTjyzrA5/hW9kRJgl4S1g4ZE8efLA3BVqnS
+PClOE7VrMiynW/RUK+w1SfsLKDaJipTXGE/FvKQzAduhlbmzMHimpKEvg7z3BFwD
+VZUTtD1P0zK1YZqadjDl
+=D/TS
+-----END PGP SIGNATURE-----
+
+--6ysXqiu0yoUmUNJB--
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
