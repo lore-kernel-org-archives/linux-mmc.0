@@ -1,43 +1,72 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH] mmc: tmio: Don't access hardware registers after stopping clocks
-Date: Tue, 19 Jun 2012 15:53:30 +0900
-Message-ID: <CANqRtoQD+sneTT7tCYji7YGpX5eJEQrWCQoX8jWJ1hiChjFh_g@mail.gmail.com>
-References: <1339505838-8831-1-git-send-email-laurent.pinchart@ideasonboard.com>
-	<CANqRtoQdzq5VHqBo1WQUYimVAYsGM6+XmE5r1Aoadm_HpY=eMA@mail.gmail.com>
-	<1538938.WjgJgiBpYR@avalon>
-	<CANqRtoS3JqNHFXcOutssQxpD6DNnyV1QawT2hf251z5d05LJWw@mail.gmail.com>
-	<Pine.LNX.4.64.1206150907110.11729@axis700.grange>
+From: Wei Ni <wni@nvidia.com>
+Subject: RE: Where to power on the wifi device before loading the driver.
+Date: Tue, 19 Jun 2012 17:13:47 +0800
+Message-ID: <6B4D417B830BC44B8026029FD256F7F1C6EE2DD625@HKMAIL01.nvidia.com>
+References: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88@HKMAIL01.nvidia.com>
+ <4FD90352.9090606@wwwdotorg.org>
+ <20120614063120.GA20167@avionic-0098.mockup.avionic-design.de>
+ <20120614121234.GC3913@opensource.wolfsonmicro.com>
+ <4FDA092E.10301@wwwdotorg.org>
+ <6B4D417B830BC44B8026029FD256F7F1C377BFFE8D@HKMAIL01.nvidia.com>
+ <4FDB5976.20809@wwwdotorg.org>
+ <6B4D417B830BC44B8026029FD256F7F1C6EE2DD61F@HKMAIL01.nvidia.com>
+ <96C9D994977DD0439FB6D3FE3B13DD907DE14CB4DF@BGMAIL01.nvidia.com>
+ <96C9D994977DD0439FB6D3FE3B13DD907DE14CB4E8@BGMAIL01.nvidia.com>
+ <4FDF42D9.2050305@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1206150907110.11729@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Laurent Pinchart <laurent.pinchart@ideasonboard.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from hqemgate03.nvidia.com ([216.228.121.140]:19861 "EHLO
+	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753443Ab2FSJNw convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jun 2012 05:13:52 -0400
+In-Reply-To: <4FDF42D9.2050305@wwwdotorg.org>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Stephen Warren' <swarren@wwwdotorg.org>, Laxman Dewangan <ldewangan@nvidia.com>
+Cc: Rakesh Kumar <krakesh@nvidia.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, "'frankyl@broadcom.com'" <frankyl@broadcom.com>, Thierry Reding <thierry.reding@avionic-design.de>, Mursalin Akon <makon@nvidia.com>, "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "'linux-wireless@vger.kernel.org'" <linux-wireless@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Fri, Jun 15, 2012 at 4:09 PM, Guennadi Liakhovetski
-<g.liakhovetski@gmx.de> wrote:
-> On Fri, 15 Jun 2012, Magnus Damm wrote:
+On Mon, Jun 18, 2012 at 23:01:45, Stephen Warren wrote:
+>On 06/18/2012 02:03 AM, Laxman Dewangan wrote:
+>> Rakesh Kumar wrote at Monday, June 18, 2012 1:11 PM:
+>> > Stephen Warren wrote:
+>> >> Now if this means adding a child node under the SDIO controller to 
+>> >> represent the attached device, and storing any settings required 
+>> >> by that device in that child node, that's probably a reasonable 
+>> >> basic approach.
+>> >>
+>> >> BTW, which GPIO is the power GPIO; is it WF_EN on the schematic?
+>> >> That seems reasonable to represent as a GPIO rather than a 
+>> >> regulator since it connects directly into the WiFi device as a 
+>> >> GPIO, and its use within the WiFi device can indeed be governed 
+>> >> purely internally to the WiFi driver/HW. However, if this is some 
+>> >> GPIO that controls the power to e.g. VBAT3V3_IN_WF, VDDIO_WF, or 
+>> >> other power supply to the WiFi card, then it'd be better 
+>> >> represented as a regulator, since the control point is outside the 
+>> >> WiFi device.
+>> >
+>> > Tegra uses two GPIO (WF_EN and WF_RST) to power on and reset 
+>> > bcm4329 card. In case of bcm4329, these two lines are shorted. 
+>> > Tegra does not control VBAT3V3_IN_WF, VDDIO_WF, or other power 
+>> > supply to the WiFi card based on these GPIO. Uses of these GPIO are 
+>> > internal to WiFi HW.  It is reasonable to represent as a GPU rather 
+>> > than regulator.
+>>
+>> If it is for power then it has to go via regulator. It does not make 
+>> sense to directly control the gpio inside the wifi driver.
 >
-> [snip]
+>As far as the board goes, WF_EN is just a GPIO signal to the WiFi card; 
+>it doesn't gate power to the card. If it gates power inside the card, 
+>that's an internal implementation detail of the card, and something I'd 
+>be fine with the driver knowing directly, and hence I'm OK with representing
+>this as a GPIO rather than a regulator - that's what it is externally to the WiFi device.
+
+Because these gpio is just for wifi device, could we use the rfkill-gpio driver for this isse? We just need to add DT support in rfkill-gpio driver and add a device node in the DT. And the user also can use the rfkill interface to control the wifi device.
+
 >
->> Guennadi, does this trigger on sh7372 as well? If not, why is that?
->
-> No. That message is produced by the sh_mobile_sdhi_wait_idle() function,
-> which is only used, if the TMIO_MMC_HAS_IDLE_WAIT flag is set, which is
-> not set on mackerel (or ap4evb).
+>(BTW everyone, many of the emails in this thread are awfully formatted 
+>- top-posted and not word- wrapped. It's very hard to read them... I tried to reformat everything and fix it in this email)
 
-Ok, thanks for checking this. It seems that we are "lucky" to find
-this breakage...
 
-In the future, please take care to make sure this does not happen
-again. This goes without saying, but the driver should not access the
-hardware when it is Runtime PM suspended. I believe it should be
-possible to verify the code paths by manual code inspection. Also, to
-make the behavior more consistent you may want to make use of
-"pm_runtime_put_sync()" instead of "pm_runtime_put()".
-
-Thanks,
-
-/ magnus
