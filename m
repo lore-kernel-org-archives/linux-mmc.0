@@ -1,78 +1,52 @@
-From: Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>
-Subject: Re: Where to power on the wifi device before loading the driver.
-Date: Tue, 19 Jun 2012 10:17:19 +0100
-Message-ID: <20120619091719.GZ3974@opensource.wolfsonmicro.com>
-References: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88@HKMAIL01.nvidia.com>
- <4FD90352.9090606@wwwdotorg.org>
- <20120614063120.GA20167@avionic-0098.mockup.avionic-design.de>
- <20120614121234.GC3913@opensource.wolfsonmicro.com>
- <4FDA092E.10301@wwwdotorg.org>
- <6B4D417B830BC44B8026029FD256F7F1C377BFFE8D@HKMAIL01.nvidia.com>
- <4FDB5976.20809@wwwdotorg.org>
- <6B4D417B830BC44B8026029FD256F7F1C6EE2DD61F@HKMAIL01.nvidia.com>
- <43E4817426ED174AA81263BCECB4351D138E8ACD6B@sc-vexch3.marvell.com>
- <6B4D417B830BC44B8026029FD256F7F1C6EE2DD622@HKMAIL01.nvidia.com>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH] mmc: tmio: Don't access hardware registers after stopping clocks
+Date: Tue, 19 Jun 2012 11:34:56 +0200
+Message-ID: <5753942.6DRRAABTSC@avalon>
+References: <1339505838-8831-1-git-send-email-laurent.pinchart@ideasonboard.com> <Pine.LNX.4.64.1206150907110.11729@axis700.grange> <CANqRtoQD+sneTT7tCYji7YGpX5eJEQrWCQoX8jWJ1hiChjFh_g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="6ysXqiu0yoUmUNJB"
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <6B4D417B830BC44B8026029FD256F7F1C6EE2DD622-Q4EWCATADntDw2glCA4ptUEOCMrvLtNR@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Wei Ni <wni-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Cc: 'Philip Rakity' <prakity-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, 'Stephen Warren' <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Rakesh Kumar <krakesh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "'frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org'" <frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Thierry Reding <thierry.reding-RM9K5IK7kjKj5M59NBduVrNAH6kLmebB@public.gmane.org>, Mursalin Akon <makon-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "'linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "'linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from perceval.ideasonboard.com ([95.142.166.194]:56747 "EHLO
+	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751067Ab2FSJer (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jun 2012 05:34:47 -0400
+In-Reply-To: <CANqRtoQD+sneTT7tCYji7YGpX5eJEQrWCQoX8jWJ1hiChjFh_g@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "Rafael J. Wysocki" <rjw@sisk.pl>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 
+Hi Magnus,
 
---6ysXqiu0yoUmUNJB
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Tuesday 19 June 2012 15:53:30 Magnus Damm wrote:
+> On Fri, Jun 15, 2012 at 4:09 PM, Guennadi Liakhovetski wrote:
+> > On Fri, 15 Jun 2012, Magnus Damm wrote:
+> > 
+> > [snip]
+> > 
+> >> Guennadi, does this trigger on sh7372 as well? If not, why is that?
+> > 
+> > No. That message is produced by the sh_mobile_sdhi_wait_idle() function,
+> > which is only used, if the TMIO_MMC_HAS_IDLE_WAIT flag is set, which is
+> > not set on mackerel (or ap4evb).
+> 
+> Ok, thanks for checking this. It seems that we are "lucky" to find
+> this breakage...
+> 
+> In the future, please take care to make sure this does not happen
+> again. This goes without saying, but the driver should not access the
+> hardware when it is Runtime PM suspended. I believe it should be
+> possible to verify the code paths by manual code inspection. Also, to
+> make the behavior more consistent you may want to make use of
+> "pm_runtime_put_sync()" instead of "pm_runtime_put()".
 
-On Tue, Jun 19, 2012 at 12:25:58PM +0800, Wei Ni wrote:
+For testing that's a good idea. That makes me wonder whether we should have a 
+Kconfig option to turn all pm_runtime_put() into pm_runtime_put_sync() for 
+stress-testing.
 
-As Stephen previously said please fix your mail formatting - word
-wrapping within paragraphs is important!
+-- 
+Regards,
 
-> On Tue, Jun 19, 2012 at 09:23:35, Philip Rakity wrote:
-> >Why can't you use the regulator notify to get called back on power or=20
-> >voltage change options to plumb in the manipulation of the gpio. I can=
-=20
-> >imagine you might need to add a notify call in core.c if you need to=20
-> >assert the gpio before power is applied
->=20
-> Yes, we can use the regulator notify, but the Tegra30 support is via
-> device tree, I think there have no special board file to run the call
-> back.
+Laurent Pinchart
 
-You can mix board files with device tree for cases where device tree is
-not yet up to the job, though the goal should be to come up with a way
-of expressing things in device tree.
-
---6ysXqiu0yoUmUNJB
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJP4ENIAAoJEBus8iNuMP3dV3AQAJZ5EfiY0JeT/Y42cpJBJwGG
-qzabJ1J3K7ky0rIFa+F/vrDJcISCtADNqyd+Qs2igokZjAz5BsTdSqMUa+tS2APn
-DxWpYg0vxmmXp6QfJcVaqzQlDqawZ7ZwEKV4nwq0Ux6IvHLnkuHZMPKJs90GiXiV
-IVjCbe/m1stYARcxvkbc23Y5RVQR6PJ9tubdyXxW+F1qV99ofTALWuXH29e8h8fg
-/aRLNAKzktoyxxnNaNSlqxXINPggkIzr/BLVIdAwGCdF0oiDgg44wN8EQvY0DZtX
-P5xvdeC12UG0SsBli1zft/buuOWdzYas+pdC4C7v84+baiQs1MxtAbefixaIZLH3
-kH59UtwFSxLuXvF/MJZPrZw2/8wYh1eleBp86Ye0Ipzn//mImhUZ8/4h0xGU95lr
-BB1OQG9HfUZoftnsES8Ri6+fAIEBdmn2dStwuiBO/n7hqdEh1r+NNhN5do1x8VJ/
-nLfqNyE9uOVBVHI+0BE1G5+veO/agc+XYZNY+rCP7PZYgBpnMoz2bJFUU7WP16MQ
-b9CFxjPXfY9hlBv3mrg82oXQLnAaSaTjyzrA5/hW9kRJgl4S1g4ZE8efLA3BVqnS
-PClOE7VrMiynW/RUK+w1SfsLKDaJipTXGE/FvKQzAduhlbmzMHimpKEvg7z3BFwD
-VZUTtD1P0zK1YZqadjDl
-=D/TS
------END PGP SIGNATURE-----
-
---6ysXqiu0yoUmUNJB--
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
