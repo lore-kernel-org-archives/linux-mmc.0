@@ -1,81 +1,60 @@
-From: Ted Ts'o <tytso@mit.edu>
-Subject: Re: [PATCH 2/3] ext4: Context support
-Date: Mon, 18 Jun 2012 13:42:14 -0400
-Message-ID: <20120618174214.GA1506@thunk.org>
-References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com>
- <201206160726.07851.arnd.bergmann@linaro.org>
- <20120616134923.GA12140@thunk.org>
- <201206161741.23900.arnd.bergmann@linaro.org>
+From: Philip Rakity <prakity-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Subject: RE: Where to power on the wifi device before loading the driver.
+Date: Mon, 18 Jun 2012 18:23:35 -0700
+Message-ID: <43E4817426ED174AA81263BCECB4351D138E8ACD6B@sc-vexch3.marvell.com>
+References: <6B4D417B830BC44B8026029FD256F7F1C377BFFE88@HKMAIL01.nvidia.com>
+ <4FD90352.9090606@wwwdotorg.org>
+ <20120614063120.GA20167@avionic-0098.mockup.avionic-design.de>
+ <20120614121234.GC3913@opensource.wolfsonmicro.com>
+ <4FDA092E.10301@wwwdotorg.org>
+ <6B4D417B830BC44B8026029FD256F7F1C377BFFE8D@HKMAIL01.nvidia.com>
+ <4FDB5976.20809@wwwdotorg.org>,<6B4D417B830BC44B8026029FD256F7F1C6EE2DD61F@HKMAIL01.nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from li9-11.members.linode.com ([67.18.176.11]:51126 "EHLO
-	imap.thunk.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752713Ab2FRRmV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 18 Jun 2012 13:42:21 -0400
-Content-Disposition: inline
-In-Reply-To: <201206161741.23900.arnd.bergmann@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <6B4D417B830BC44B8026029FD256F7F1C6EE2DD61F-Q4EWCATADntDw2glCA4ptUEOCMrvLtNR@public.gmane.org>
+Content-Language: en-US
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Wei Ni <wni-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, 'Stephen Warren' <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Rakesh Kumar <krakesh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Cc: Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, "'frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org'" <frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Thierry Reding <thierry.reding-RM9K5IK7kjKj5M59NBduVrNAH6kLmebB@public.gmane.org>, Mursalin Akon <makon-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "'linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "'linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd.bergmann@linaro.org>
-Cc: Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>, Saugata Das <saugata.das@linaro.org>, Artem Bityutskiy <dedekind1@gmail.com>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, "Luca Porzio (lporzio)" <lporzio@micron.com>
 
-On Sat, Jun 16, 2012 at 05:41:23PM +0000, Arnd Bergmann wrote:
-> 
-> * We cannot read from write-only large-unit context, so we have to
->   do one of these:
->    a) ensure we never drop any pages from page-cache between writing
->       them to the large context and closing that context
->    b) if we need to read some data that we have just written to the
->       large-unit context, close that context and open a new rw-context
->       without the large-unit flag set (or write in the default context)
+Why can't you use the regulator notify to get called back on power or voltage change options to plumb in the manipulation of the gpio. I can imagine you might need to add a notify call in core.c if you need to assert the gpio before power is applied
 
-If we ever a read on the inode in question, we close the large-unit
-context.  That's the simplest thing to do, since we then don't need to
-track which blocks had been written from the inode.  And in general,
-if you have a random read/write workload, large-unit contexts probably
-won't help you.  We mainly would need this when the workload is doing
-large sequential writes, which is *easy* to optimize for.
 
-> * All writes to the large-unit context have to be done in superpage
->   size, which means something between 8 and 32 kb typically, so more
->   than the underlying fs block size
+________________________________________
+From: linux-mmc-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [linux-mmc-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Wei Ni [wni-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org]
+Sent: Sunday, June 17, 2012 11:20 PM
+To: 'Stephen Warren'; Rakesh Kumar
+Cc: Mark Brown; 'frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org'; Thierry Reding; Mursalin Akon; 'linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'; devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org; 'linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'; linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Subject: RE: Where to power on the wifi device before loading the driver.
 
-Right, so we only enable the large-unit context when we are in
-ext4_da_writepages() and we can do the first write in a way that meets
-the requirements (i.e., the write starts aligned on the erase block,
-and is a multiple of the superpage size).  The moment we need to do a
-read (see above) or a write which doesn't meet the large-unit
-restrictions, we close the large-unit context.
+On Fri, Jun 15, 2012 at 23:49:10, Stephen Warren wrote:
+>> I talked with Franky, this power sequence is generally for 4329, so
+>> it mean this sequence can be put into the wifi driver.
+>> We can use the virtual platform device both for OOB and non OOB.
+>> I will send out patches later.
+>
+>Can you please expand on what a "virtual platform device" is; device tree typically represents real hardware rather than anything "virtual".
 
-(This is why I asked the question about whether there are performance
-penalties for opening and closing contexts.  If it requires flushing
-the NCQ queues, ala the trim request, then we might need to be more
-careful.)
+The "virtual platform device" is created before the real wifi device, so that it can pass the gpios to the driver, and power up the device before calling sdio_register_driver.
+But as Franky said, this power sequence is only generally for 4329, not for the USB dongle chips. So it's not a good idea to add this "power up" in brcmfmac.
 
-> * We can only start the large unit at the start of an erase block. If
->   we unmount the drive and later continue writing, it has to continue
->   without the large-unit flag at first until we hit an erase block
->   boundary.
+>
+>Now if this means adding a child node under the SDIO controller to represent the attached device, and storing any settings required by that device in that child node, that's probably a reasonable basic approach.
+>
+>BTW, which GPIO is the power GPIO; is it WF_EN on the schematic? That seems reasonable to represent as a GPIO rather than a regulator since it connects directly into the WiFi device as a GPIO, and its use within the WiFi device can indeed be governed purely internally to the WiFi driver/HW. However, if this is some GPIO that controls the power to e.g.
+>VBAT3V3_IN_WF, VDDIO_WF, or other power supply to the WiFi card, then it'd be better represented as a regulator, since the control point is outside the WiFi device.
 
-My assumption was that when you umount the drive, the file system
-would close all of the contexts.
+I think Rakesh may can answer this.
 
-> * If we run out of contexts in the block device, we might have to
->   close a large-unit context before getting to the end of it.
+Wei.
+---
+nvpublic
 
-Yep.
 
-> My impression was always that the high-end storage folks try to make
-> everything behave nicely whatever the access patterns are, and they
-> can do it because an SSD controllers has vast amounts of cache (megabytes,
-> not kilobytes) and processing power (e.g. 1Ghz ARMv5 instead of 50 Mhz
-> 8051) to handle it, and they also make use of tagged command queuing to
-> let the device have multiple outstanding requests.
-
-Well, the high-end stoarge folks still would need to know if a set of
-blocks being written are related.  The large-unit contexts might not
-matter as much, but knowing that a set of writes *are* related is
-something that would help them.
-
-					- Ted
+--
+To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
