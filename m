@@ -1,7 +1,7 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 1/7 v4] mmc: tmio: don't needlessly enable interrupts during probing
-Date: Wed, 20 Jun 2012 19:10:30 +0200
-Message-ID: <1340212236-647-2-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 3/7 v4] mmc: sdhi: implement tmio-mmc clock enable-update and disable callbacks
+Date: Wed, 20 Jun 2012 19:10:32 +0200
+Message-ID: <1340212236-647-4-git-send-email-g.liakhovetski@gmx.de>
 References: <1340212236-647-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1340212236-647-1-git-send-email-g.liakhovetski@gmx.de>
@@ -10,54 +10,59 @@ To: linux-sh@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-We don't have to force-enable MMC interrupts in our .probe() method,
-mmc_add_host() will trigger card detection, that will enable all the
-necessary interrupts.
+Instead of delivering one static clock frequency value, read from the
+hardware during probing, enable the tmio-mmc driver to re-read the
+frequency dynamically.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/tmio_mmc_pio.c |   21 +++++++++++----------
- 1 files changed, 11 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c |   24 +++++++++++++++++++++++-
+ 1 files changed, 23 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 53d1de6..9069d4a 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -950,6 +950,17 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 934b68e..d8b167c 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -39,6 +39,27 @@ struct sh_mobile_sdhi {
+ 	struct tmio_mmc_dma dma_priv;
+ };
  
- 	_host->sdcard_irq_mask = sd_ctrl_read32(_host, CTL_IRQ_MASK);
- 	tmio_mmc_disable_mmc_irqs(_host, TMIO_MASK_ALL);
++static int sh_mobile_sdhi_clk_enable(struct platform_device *pdev, unsigned int *f)
++{
++	struct mmc_host *mmc = dev_get_drvdata(&pdev->dev);
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++	struct sh_mobile_sdhi *priv = container_of(host->pdata, struct sh_mobile_sdhi, mmc_data);
++	int ret = clk_enable(priv->clk);
++	if (ret < 0)
++		return ret;
 +
-+	/* Unmask the IRQs we want to know about */
-+	if (!_host->chan_rx)
-+		irq_mask |= TMIO_MASK_READOP;
-+	if (!_host->chan_tx)
-+		irq_mask |= TMIO_MASK_WRITEOP;
-+	if (!_host->native_hotplug)
-+		irq_mask &= ~(TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
++	*f = clk_get_rate(priv->clk);
++	return 0;
++}
 +
-+	_host->sdcard_irq_mask &= ~irq_mask;
++static void sh_mobile_sdhi_clk_disable(struct platform_device *pdev)
++{
++	struct mmc_host *mmc = dev_get_drvdata(&pdev->dev);
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++	struct sh_mobile_sdhi *priv = container_of(host->pdata, struct sh_mobile_sdhi, mmc_data);
++	clk_disable(priv->clk);
++}
 +
- 	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
- 		tmio_mmc_enable_sdio_irq(mmc, 0);
+ static void sh_mobile_sdhi_set_pwr(struct platform_device *pdev, int state)
+ {
+ 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
+@@ -132,9 +153,10 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		goto eclkget;
+ 	}
  
-@@ -967,16 +978,6 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 
- 	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
- 
--	/* Unmask the IRQs we want to know about */
--	if (!_host->chan_rx)
--		irq_mask |= TMIO_MASK_READOP;
--	if (!_host->chan_tx)
--		irq_mask |= TMIO_MASK_WRITEOP;
--	if (!_host->native_hotplug)
--		irq_mask &= ~(TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
--
--	tmio_mmc_enable_mmc_irqs(_host, irq_mask);
--
- 	if (pdata->flags & TMIO_MMC_USE_GPIO_CD) {
- 		ret = mmc_cd_gpio_request(mmc, pdata->cd_gpio);
- 		if (ret < 0) {
+-	mmc_data->hclk = clk_get_rate(priv->clk);
+ 	mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
+ 	mmc_data->get_cd = sh_mobile_sdhi_get_cd;
++	mmc_data->clk_enable = sh_mobile_sdhi_clk_enable;
++	mmc_data->clk_disable = sh_mobile_sdhi_clk_disable;
+ 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
+ 	if (p) {
+ 		mmc_data->flags = p->tmio_flags;
 -- 
 1.7.2.5
 
