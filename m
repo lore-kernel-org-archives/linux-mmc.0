@@ -1,13 +1,13 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 5/5 v4] mmc: sh_mmcif: add regulator support
-Date: Wed, 20 Jun 2012 08:38:27 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1206200820510.20254@axis700.grange>
+Subject: Re: [PATCH 2/5 v4] mmc: sh_mmcif: fix clock management
+Date: Wed, 20 Jun 2012 08:41:42 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1206200839460.20254@axis700.grange>
 References: <Pine.LNX.4.64.1206131515180.17854@axis700.grange>
- <Pine.LNX.4.64.1206131535090.17854@axis700.grange> <20120620051232.GE20030@verge.net.au>
+ <Pine.LNX.4.64.1206131533240.17854@axis700.grange> <20120620051857.GF20030@verge.net.au>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20120620051232.GE20030@verge.net.au>
+In-Reply-To: <20120620051857.GF20030@verge.net.au>
 Sender: linux-sh-owner@vger.kernel.org
 To: Simon Horman <horms@verge.net.au>
 Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>
@@ -17,120 +17,173 @@ On Wed, 20 Jun 2012, Simon Horman wrote:
 
 > Hi Guennadi,
 > 
-> On Wed, Jun 13, 2012 at 03:37:31PM +0200, Guennadi Liakhovetski wrote:
-> > Add regulator support to the sh_mmcif driver, but also preserve the current
-> > power-callback.
+> On Wed, Jun 13, 2012 at 03:37:19PM +0200, Guennadi Liakhovetski wrote:
+> > Regardless, whether the MMC bus clock is the same, as the PM clock on this
+> > specific interface, it has to be managed separately. Its proper management
+> > should also include enabling and disabling of the clock, whenever the
+> > interface is becoming active or going idle respectively.
 > > 
 > > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 > > ---
-> > 
-> > v4: update to the new mmc_regulator_get_supply() function
-> > 
-> >  drivers/mmc/host/sh_mmcif.c |   38 +++++++++++++++++++++++++++++++-------
-> >  1 files changed, 31 insertions(+), 7 deletions(-)
+> >  drivers/mmc/host/sh_mmcif.c |   46 +++++++++++++++++++++---------------------
+> >  1 files changed, 23 insertions(+), 23 deletions(-)
 > > 
 > > diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> > index 4680276..204bced 100644
+> > index d6ffb05..6a93b04 100644
 > > --- a/drivers/mmc/host/sh_mmcif.c
 > > +++ b/drivers/mmc/host/sh_mmcif.c
-> > @@ -923,10 +923,22 @@ static int sh_mmcif_clk_update(struct sh_mmcif_host *host)
-> >  	return ret;
-> >  }
-> >  
-> > +static void sh_mmcif_set_power(struct sh_mmcif_host *host, struct mmc_ios *ios)
-> > +{
-> > +	struct sh_mmcif_plat_data *pd = host->pd->dev.platform_data;
-> > +	struct mmc_host *mmc = host->mmc;
-> > +
-> > +	if (pd->set_pwr)
-> > +		pd->set_pwr(host->pd, ios->power_mode != MMC_POWER_OFF);
-> > +	if (!IS_ERR(mmc->supply.vmmc))
-> > +		/* Errors ignored... */
-> > +		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
-> > +				      ios->power_mode ? ios->vdd : 0);
-> > +}
-> > +
-> >  static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >  {
-> >  	struct sh_mmcif_host *host = mmc_priv(mmc);
-> > -	struct sh_mmcif_plat_data *p = host->pd->dev.platform_data;
-> >  	unsigned long flags;
-> >  
-> >  	spin_lock_irqsave(&host->lock, flags);
-> > @@ -944,6 +956,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >  			sh_mmcif_request_dma(host, host->pd->dev.platform_data);
-> >  			host->card_present = true;
+> > @@ -942,6 +942,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 > >  		}
-> > +		sh_mmcif_set_power(host, ios);
-> >  	} else if (ios->power_mode == MMC_POWER_OFF || !ios->clock) {
-> >  		/* clock stop */
-> >  		sh_mmcif_clock_control(host, 0);
-> > @@ -957,8 +970,8 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> >  		if (host->power) {
 > >  			pm_runtime_put(&host->pd->dev);
-> >  			clk_disable(host->hclk);
+> > +			clk_disable(host->hclk);
 > >  			host->power = false;
-> > -			if (p->set_pwr && ios->power_mode == MMC_POWER_OFF)
-> > -				p->set_pwr(host->pd, 0);
-> > +			if (ios->power_mode == MMC_POWER_OFF)
-> > +				sh_mmcif_set_power(host, ios);
-> >  		}
-> >  		host->state = STATE_IDLE;
-> >  		return;
-> > @@ -966,8 +979,6 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >  
-> >  	if (ios->clock) {
+> >  			if (p->down_pwr && ios->power_mode == MMC_POWER_OFF)
+> >  				p->down_pwr(host->pd);
+> > @@ -954,6 +955,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 > >  		if (!host->power) {
-> > -			if (p->set_pwr)
-> > -				p->set_pwr(host->pd, ios->power_mode);
-> >  			sh_mmcif_clk_update(host);
+> >  			if (p->set_pwr)
+> >  				p->set_pwr(host->pd, ios->power_mode);
+> > +			clk_enable(host->hclk);
 > >  			pm_runtime_get_sync(&host->pd->dev);
 > >  			host->power = true;
+> >  			sh_mmcif_sync_reset(host);
+> > @@ -1278,22 +1280,11 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+> >  	host->addr	= reg;
+> >  	host->timeout	= 1000;
+> >  
+> > -	snprintf(clk_name, sizeof(clk_name), "mmc%d", pdev->id);
+> > -	host->hclk = clk_get(&pdev->dev, clk_name);
+> > -	if (IS_ERR(host->hclk)) {
+> > -		dev_err(&pdev->dev, "cannot get clock \"%s\"\n", clk_name);
+> > -		ret = PTR_ERR(host->hclk);
+> > -		goto eclkget;
+> > -	}
+> > -	clk_enable(host->hclk);
+> > -	host->clk = clk_get_rate(host->hclk);
+> >  	host->pd = pdev;
+> >  
+> >  	spin_lock_init(&host->lock);
+> >  
+> >  	mmc->ops = &sh_mmcif_ops;
+> > -	mmc->f_max = host->clk / 2;
+> > -	mmc->f_min = host->clk / 512;
+> >  	if (pd->ocr)
+> >  		mmc->ocr_avail = pd->ocr;
+> >  	mmc->caps = MMC_CAP_MMC_HIGHSPEED;
+> > @@ -1305,18 +1296,30 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+> >  	mmc->max_blk_count = mmc->max_req_size / mmc->max_blk_size;
+> >  	mmc->max_seg_size = mmc->max_req_size;
+> >  
+> > -	sh_mmcif_sync_reset(host);
+> >  	platform_set_drvdata(pdev, host);
+> >  
+> >  	pm_runtime_enable(&pdev->dev);
+> >  	host->power = false;
+> >  
+> > +	snprintf(clk_name, sizeof(clk_name), "mmc%d", pdev->id);
+> > +	host->hclk = clk_get(&pdev->dev, clk_name);
+> > +	if (IS_ERR(host->hclk)) {
+> > +		ret = PTR_ERR(host->hclk);
+> > +		dev_err(&pdev->dev, "cannot get clock \"%s\": %d\n", clk_name, ret);
+> > +		goto eclkget;
+> > +	}
+> > +	clk_enable(host->hclk);
+> > +	host->clk = clk_get_rate(host->hclk);
+> > +	mmc->f_max = host->clk / 2;
+> > +	mmc->f_min = host->clk / 512;
+> > +
+> >  	ret = pm_runtime_resume(&pdev->dev);
+> >  	if (ret < 0)
+> >  		goto eresume;
+> >  
+> >  	INIT_DELAYED_WORK(&host->timeout_work, mmcif_timeout_work);
+> >  
+> > +	sh_mmcif_sync_reset(host);
+> >  	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
+> >  
+> >  	ret = request_threaded_irq(irq[0], sh_mmcif_intr, sh_mmcif_irqt, 0, "sh_mmc:error", host);
+> > @@ -1330,6 +1333,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+> >  		goto ereqirq1;
+> >  	}
+> >  
+> > +	clk_disable(host->hclk);
+> >  	ret = mmc_add_host(mmc);
+> >  	if (ret < 0)
+> >  		goto emmcaddh;
 > 
-> It is unclear to me how this hunk relates to the description of the
-> change in the changelog.
+> Could you clarify the purpose of two hunks above.
+> They seem to move code down in sh_mmcif_probe().
+> Is this related to the call to pm_runtime_enable() ?
 
-Right, it is probably not very obvious. We could extend the description 
-with something like:
-
-Also note, that the card power is not switched off during clock gating 
-periods, hence there's no need to power it on every time the card is 
-re-activated.
+The sh_mmcif_sync_reset() call accesses the hardware so it only makes 
+sense after the hardware has been resumed. Moving the clk_enable() call 
+down improves consistency by grouping clock and runtime PM code together 
+during probe() similar to other paths.
 
 Thanks
 Guennadi
 
 > 
-> > @@ -1251,6 +1262,19 @@ static void mmcif_timeout_work(struct work_struct *work)
-> >  	mmc_request_done(host->mmc, mrq);
+> > @@ -1348,9 +1352,10 @@ ereqirq1:
+> >  ereqirq0:
+> >  	pm_runtime_suspend(&pdev->dev);
+> >  eresume:
+> > -	pm_runtime_disable(&pdev->dev);
+> >  	clk_disable(host->hclk);
+> > +	clk_put(host->hclk);
+> >  eclkget:
+> > +	pm_runtime_disable(&pdev->dev);
+> >  	mmc_free_host(mmc);
+> >  ealloch:
+> >  	iounmap(reg);
+> > @@ -1363,6 +1368,7 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
+> >  	int irq[2];
+> >  
+> >  	host->dying = true;
+> > +	clk_enable(host->hclk);
+> >  	pm_runtime_get_sync(&pdev->dev);
+> >  
+> >  	dev_pm_qos_hide_latency_limit(&pdev->dev);
+> > @@ -1388,9 +1394,9 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
+> >  
+> >  	platform_set_drvdata(pdev, NULL);
+> >  
+> > -	clk_disable(host->hclk);
+> >  	mmc_free_host(host->mmc);
+> >  	pm_runtime_put_sync(&pdev->dev);
+> > +	clk_disable(host->hclk);
+> >  	pm_runtime_disable(&pdev->dev);
+> >  
+> >  	return 0;
+> > @@ -1399,24 +1405,18 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
+> >  #ifdef CONFIG_PM
+> >  static int sh_mmcif_suspend(struct device *dev)
+> >  {
+> > -	struct platform_device *pdev = to_platform_device(dev);
+> > -	struct sh_mmcif_host *host = platform_get_drvdata(pdev);
+> > +	struct sh_mmcif_host *host = dev_get_drvdata(dev);
+> >  	int ret = mmc_suspend_host(host->mmc);
+> >  
+> > -	if (!ret) {
+> > +	if (!ret)
+> >  		sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
+> > -		clk_disable(host->hclk);
+> > -	}
+> >  
+> >  	return ret;
 > >  }
 > >  
-> > +static void sh_mmcif_init_ocr(struct sh_mmcif_host *host)
-> > +{
-> > +	struct sh_mmcif_plat_data *pd = host->pd->dev.platform_data;
-> > +	struct mmc_host *mmc = host->mmc;
-> > +
-> > +	mmc_regulator_get_supply(mmc);
-> > +
-> > +	if (!mmc->ocr_avail)
-> > +		mmc->ocr_avail = pd->ocr;
-> > +	else if (pd->ocr)
-> > +		dev_warn(mmc_dev(mmc), "Platform OCR mask is ignored\n");
-> > +}
-> > +
-> >  static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+> >  static int sh_mmcif_resume(struct device *dev)
 > >  {
-> >  	int ret = 0, irq[2];
-> > @@ -1298,8 +1322,8 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
-> >  	spin_lock_init(&host->lock);
+> > -	struct platform_device *pdev = to_platform_device(dev);
+> > -	struct sh_mmcif_host *host = platform_get_drvdata(pdev);
+> > -
+> > -	clk_enable(host->hclk);
+> > +	struct sh_mmcif_host *host = dev_get_drvdata(dev);
 > >  
-> >  	mmc->ops = &sh_mmcif_ops;
-> > -	if (pd->ocr)
-> > -		mmc->ocr_avail = pd->ocr;
-> > +	sh_mmcif_init_ocr(host);
-> > +
-> >  	mmc->caps = MMC_CAP_MMC_HIGHSPEED;
-> >  	if (pd->caps)
-> >  		mmc->caps |= pd->caps;
+> >  	return mmc_resume_host(host->mmc);
+> >  }
 > > -- 
 > > 1.7.2.5
 > > 
