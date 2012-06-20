@@ -1,63 +1,63 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3] mmc: core: Fix the HPI execution sequence
-Date: Wed, 20 Jun 2012 13:01:06 -0400
-Message-ID: <87y5nh3okt.fsf@octavius.laptop.org>
-References: <1340184834-12700-1-git-send-email-svenkatr@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:39408 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757380Ab2FTRBW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Jun 2012 13:01:22 -0400
-In-Reply-To: <1340184834-12700-1-git-send-email-svenkatr@ti.com> (Venkatraman
-	S.'s message of "Wed, 20 Jun 2012 15:03:54 +0530")
-Sender: linux-mmc-owner@vger.kernel.org
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 1/7 v4] mmc: tmio: don't needlessly enable interrupts during probing
+Date: Wed, 20 Jun 2012 19:10:30 +0200
+Message-ID: <1340212236-647-2-git-send-email-g.liakhovetski@gmx.de>
+References: <1340212236-647-1-git-send-email-g.liakhovetski@gmx.de>
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1340212236-647-1-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-sh@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: linux-mmc@vger.kernel.org, linkinjeon@gmail.com, jh80.chung@samsung.com, alex.lemberg@sandisk.com, Kostya <kdorfman@codeaurora.org>
 
-Hi, trivial style comments,
+We don't have to force-enable MMC interrupts in our .probe() method,
+mmc_add_host() will trigger card detection, that will enable all the
+necessary interrupts.
 
-On Wed, Jun 20 2012, Venkatraman S wrote:
->	switch (R1_CURRENT_STATE(status)) {
->
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
+ drivers/mmc/host/tmio_mmc_pio.c |   21 +++++++++++----------
+ 1 files changed, 11 insertions(+), 10 deletions(-)
 
-No newline here.
-
->	case R1_STATE_IDLE:
->	case R1_STATE_READY:
->	case R1_STATE_STBY: /* intentional fall through */
->		/* In idle states, HPI is not needed and the caller
->		 can issue the next intended command immediately */
->		goto out;
->		break;
-
-This might just be personal style, but I don't think of this as
-"intentional fall through" -- you're just matching multiple cases.
-
-Case fall-through would be if the code inside the cases didn't call
-goto or break at the end and kept going into the next code block,
-which doesn't happen here.  Here's an elegant use of fall-through:
-   http://chris.printf.net/btrfs_parse_size.txt
-
-I don't think you should bother using break after you've already
-called goto.
-
-Also, please use:
-/*
- * comment 1
- * comment 2
- */
-
-for multiline comments instead of
-
-/* comment 1
- comment 2 */
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 53d1de6..9069d4a 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -950,6 +950,17 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
  
-Thanks!
-
-- Chris.
+ 	_host->sdcard_irq_mask = sd_ctrl_read32(_host, CTL_IRQ_MASK);
+ 	tmio_mmc_disable_mmc_irqs(_host, TMIO_MASK_ALL);
++
++	/* Unmask the IRQs we want to know about */
++	if (!_host->chan_rx)
++		irq_mask |= TMIO_MASK_READOP;
++	if (!_host->chan_tx)
++		irq_mask |= TMIO_MASK_WRITEOP;
++	if (!_host->native_hotplug)
++		irq_mask &= ~(TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
++
++	_host->sdcard_irq_mask &= ~irq_mask;
++
+ 	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
+ 		tmio_mmc_enable_sdio_irq(mmc, 0);
+ 
+@@ -967,16 +978,6 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 
+ 	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
+ 
+-	/* Unmask the IRQs we want to know about */
+-	if (!_host->chan_rx)
+-		irq_mask |= TMIO_MASK_READOP;
+-	if (!_host->chan_tx)
+-		irq_mask |= TMIO_MASK_WRITEOP;
+-	if (!_host->native_hotplug)
+-		irq_mask &= ~(TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
+-
+-	tmio_mmc_enable_mmc_irqs(_host, irq_mask);
+-
+ 	if (pdata->flags & TMIO_MMC_USE_GPIO_CD) {
+ 		ret = mmc_cd_gpio_request(mmc, pdata->cd_gpio);
+ 		if (ret < 0) {
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.2.5
+
