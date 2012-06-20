@@ -1,69 +1,73 @@
-From: Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>
-Subject: Re: Where to power on the wifi device before loading the driver.
-Date: Wed, 20 Jun 2012 11:47:44 +0100
-Message-ID: <20120620104744.GK3978@opensource.wolfsonmicro.com>
-References: <20120614121234.GC3913@opensource.wolfsonmicro.com>
- <4FDA092E.10301@wwwdotorg.org>
- <6B4D417B830BC44B8026029FD256F7F1C377BFFE8D@HKMAIL01.nvidia.com>
- <4FDB5976.20809@wwwdotorg.org>
- <6B4D417B830BC44B8026029FD256F7F1C6EE2DD61F@HKMAIL01.nvidia.com>
- <43E4817426ED174AA81263BCECB4351D138E8ACD6B@sc-vexch3.marvell.com>
- <6B4D417B830BC44B8026029FD256F7F1C6EE2DD622@HKMAIL01.nvidia.com>
- <20120619091719.GZ3974@opensource.wolfsonmicro.com>
- <6B4D417B830BC44B8026029FD256F7F1C6EE2DD626@HKMAIL01.nvidia.com>
- <4FE112F2.7000506@wwwdotorg.org>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH] mmc: sh_mmcif: Support MMC_SLEEP_AWAKE command
+Date: Wed, 20 Jun 2012 12:51:34 +0200
+Message-ID: <4469877.ZyruNqIujY@avalon>
+References: <1339534569-27923-1-git-send-email-laurent.pinchart@ideasonboard.com> <47844351.ibBFGBYgKQ@avalon> <20120620064238.GH20030@verge.net.au>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="F55Y67F01HNW3AgB"
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <4FE112F2.7000506-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Cc: Wei Ni <wni-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, 'Philip Rakity' <prakity-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Rakesh Kumar <krakesh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "'frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org'" <frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Thierry Reding <thierry.reding-RM9K5IK7kjKj5M59NBduVrNAH6kLmebB@public.gmane.org>, Mursalin Akon <makon-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "'linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "'linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <20120620064238.GH20030@verge.net.au>
+Sender: linux-sh-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+Hi Simon,
 
---F55Y67F01HNW3AgB
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+On Wednesday 20 June 2012 15:42:38 Simon Horman wrote:
+> On Wed, Jun 13, 2012 at 09:39:56AM +0200, Laurent Pinchart wrote:
+> > On Wednesday 13 June 2012 10:12:01 Simon Horman wrote:
+> > > On Tue, Jun 12, 2012 at 10:56:09PM +0200, Laurent Pinchart wrote:
+> > > > The MMC_SLEEP_AWAKE and SD_IO_SEND_OP_COND commands share the same
+> > > > opcode. SD_IO_SEND_OP_COND isn't supported by the SH MMCIF, but
+> > > > MMC_SLEEP_AWAKE is. Discriminate between the two commands using the
+> > > > command flags, and reject SD_IO_SEND_OP_COND only.
+> > > > 
+> > > > Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+> > > > ---
+> > > > 
+> > > >  drivers/mmc/host/sh_mmcif.c |   14 ++++----------
+> > > >  1 files changed, 4 insertions(+), 10 deletions(-)
+> > > > 
+> > > > Not supporting the MMC_SLEEP_AWAKE command makes system suspend fail
+> > > > if an MMC or eMMC device supporting sleep/wake is connected. The issue
+> > > > has been first noticed on the Armadillo 800 EVA board.
+> > > 
+> > > Hi Laurent,
+> > > 
+> > > Do you have a test-case for this?
+> > 
+> > echo mem > /sys/power/state on Armadillo 800 EVA was my test case. It
+> > failed without the patch, and succeeds with it.
+> 
+> I'm not having much luck with or without your patch.
+> 
+> # echo mem > /sys/power/state
+> echo: write error: No such device
+> 
+> I am using 3.5-rc3. With the armadillo default config + EXT3 + SUSPEND.
+> Perhaps I am missing some options?
 
-On Tue, Jun 19, 2012 at 06:01:54PM -0600, Stephen Warren wrote:
+You're probably missing a patch. I'll send it as a reply to this e-mail.
 
-> Unfortunately, it should be noted that the WiFi device socket on Cardhu
-> apparently isn't some standardized thing (like PCIe) but something
-> rather more custom, although there are apparently devices available to
-> plug into it from multiple module vendors which contain WiFi chips from
-> multiple chip vendors.
+> > > Also, did you check to make sure that the Mackerel still works?
+> > 
+> > Yes it still works. However, I have no way to test the MMC_SLEEP_AWAKE
+> > command on the Mackerel board, as my MMC card doesn't support it (on the
+> > Armadillo the eMMC chip supports the MMC_SLEEP_AWAKE command).
+> > 
+> > BTW, I wonder whether the current implementation is really the best one.
+> > If the hardware doesn't support SD/SDIO commands, instead of intercepting
+> > commands and rejecting the ones used by SD/SDIO at probe time, wouldn't it
+> > be better for host drivers to tell that they don't support SD and/or SDIO
+> > using flags in the mmc_host structure ?
+> 
+> I don't have any strong thoughts on this but your approach
+> does sound interesting.
 
-Right, and indeed someone may decide to plug in something that isn't a
-WiFi device at all but some other SDIO attached device with totally
-different uses for those GPIOs.  Really these boards are an example of
-the sort of thing I was talking about with modular reference systems,
-though a simpler case as given what's brought out you probably can just
-do something like list all the options that are there and allow hotplug
-to sort things out.
+-- 
+Regards,
 
---F55Y67F01HNW3AgB
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+Laurent Pinchart
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJP4apGAAoJEBus8iNuMP3dfD0P/2Xtd5aTLHDWOxvbicUix1CW
-v+mfFEHoglO0I8GcC7QWEibEStlIlXDdXQ63CZLPia08XiCqyb9ls57ZWppTTpY8
-CH049NpfmHRMHkPe865wYf62TcQd5oQf7qGVjEU6GF8WP/6Wajc+HwTUmhRGAarN
-cuLNP4lF2qKqJAVORe5bLUdgChtNLSn0XQCReyC9aVtWJ7VrNZv+BLe55a5jAZpM
-9Io+wIo+z40X3xVqAaNhdk2ZkEE+l2Ytd8bju8u1xl4gTMx2hS3g/Nyn2uHxng8R
-HQgYvHX9hybf9njdbIgWAHm+6fz3JPE/Jass7iQ6V2+iqnX2HvEkbtaLBtxCTKc+
-k2XdW4/IggN195pr3HMWU7ssjpkvrXwxi49dqWzvY0yCWGUSDaw8CKy6kGGtKvvd
-W1TAVxmLlz6r4CcS0t9v2UF19bswuy8z22TKRIRsh3EO23X1OY/DTk0tMS16in3U
-CcdvsXFPwa+xolqSkFGUf98Y3dr3G7q7zNF3EoebiXrsung7/lRo1psMFjasV6ur
-5aluaQ4cvtYgdVAJf5hKmiAankNhvIAGK0HLnZNhK3Al/3jh/KML0WPZQAukXO4B
-Cm8yVf2N5w9KW3NGajbVl5/AoyZZgU2sOl4jVKLPniWddZpTqj0DuGXNlg3qW26F
-/j0HH7ZJPXBuLCBHM6rI
-=RgVm
------END PGP SIGNATURE-----
-
---F55Y67F01HNW3AgB--
