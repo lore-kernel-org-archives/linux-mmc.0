@@ -1,56 +1,46 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: card: Do not scan boot partitions
-Date: Wed, 20 Jun 2012 02:18:39 -0400
-Message-ID: <87oboe4ibk.fsf@octavius.laptop.org>
-References: <1339506253-7164-1-git-send-email-johan.rudholm@stericsson.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 4/5 v4] mmc: sh_mmcif: remove redundant .down_pwr()
+ callback
+Date: Wed, 20 Jun 2012 08:19:26 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1206200818110.20254@axis700.grange>
+References: <Pine.LNX.4.64.1206131515180.17854@axis700.grange>
+ <Pine.LNX.4.64.1206131534250.17854@axis700.grange> <20120620045808.GC20030@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:45753 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753245Ab2FTGSn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Jun 2012 02:18:43 -0400
-In-Reply-To: <1339506253-7164-1-git-send-email-johan.rudholm@stericsson.com>
-	(Johan Rudholm's message of "Tue, 12 Jun 2012 15:04:13 +0200")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <20120620045808.GC20030@verge.net.au>
+Sender: linux-sh-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <johan.rudholm@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-Hi Johan,
+Hi Simon
 
-On Tue, Jun 12 2012, Johan Rudholm wrote:
-> Do not scan boot partitions for "soft" partitions, since the boot
-> partitions are supposed to contain boot code. Silences the following
-> message during boot:
->
->  mmcblkXbootY: unknown partition table
->
-> Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
-> ---
->  drivers/mmc/card/block.c |    2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 7e3f453..efdea68 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -1515,6 +1515,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
->  	md->disk->queue = md->queue.queue;
->  	md->disk->driverfs_dev = parent;
->  	set_disk_ro(md->disk, md->read_only || default_ro);
-> +	if (area_type & MMC_BLK_DATA_AREA_BOOT)
-> +		md->disk->flags = GENHD_FL_NO_PART_SCAN;
->  
->  	/*
->  	 * As discussed on lkml, GENHD_FL_REMOVABLE should:
+On Wed, 20 Jun 2012, Simon Horman wrote:
 
-Would it be impossible to add a partition table to mmcblkXbootY,
-or just unlikely?
+> On Wed, Jun 13, 2012 at 03:37:27PM +0200, Guennadi Liakhovetski wrote:
+> > >From the original version of sh_mmcif the .set_pwr() callback has only been
+> > used to turn the card's power on, and the .down_pwr() callback has been
+> > used to turn it off. .set_pwr() can be used for both these tasks, which is
+> > also how it is implemented by the only user of this API: the SH7724 ecovec
+> > board.
+> > 
+> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> 
+> Reviewed-by: Simon Horman <horms@verge.net.au>
+> 
+> Do you also intend to post patches for the following?
+> 
+> * Remove mmcif_down_pwr from ecovec
+> * Remove down_pwr from struct sh_mmcif_plat_data
 
-Thanks,
+Sure, since these patches depend on each other we have to make sure this 
+one gets applied first. The other two then can be applied in their time, 
+they do not affect the functionality any more.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
