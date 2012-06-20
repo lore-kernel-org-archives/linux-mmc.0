@@ -1,65 +1,134 @@
-From: ludovic.desroches <ludovic.desroches@atmel.com>
-Subject: Fwd: Re: [PATCH]  mmc: at91: fix bus speed
-Date: Wed, 20 Jun 2012 11:13:07 +0200
-Message-ID: <4FE19423.4010103@atmel.com>
-References: <4FE18E84.9000603@atmel.com>
+From: Venkatraman S <svenkatr@ti.com>
+Subject: [PATCH v3] mmc: core: Fix the HPI execution sequence
+Date: Wed, 20 Jun 2012 15:03:54 +0530
+Message-ID: <1340184834-12700-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <4FE18E84.9000603@atmel.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-mmc@vger.kernel.org
-Cc: ludovic.desroches@atmel.com, =?UTF-8?B?UHJjaGFsIEppxZnDrQ==?= <jiri.prchal@aksignal.cz>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:61000 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751758Ab2FTJev (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 20 Jun 2012 05:34:51 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, linkinjeon@gmail.com, jh80.chung@samsung.com, alex.lemberg@sandisk.com, Venkatraman S <svenkatr@ti.com>, Kostya <kdorfman@codeaurora.org>
 
-QWRkIG1tYyBtYWlsaW5nIGxpc3QuCgoKLS0tLS0tLS0gTWVzc2FnZSBvcmlnaW5hbCAtLS0tLS0t
-LQpTdWpldDogUmU6IFtQQVRDSF0gIG1tYzogYXQ5MTogZml4IGJ1cyBzcGVlZApEYXRlIDogV2Vk
-LCAyMCBKdW4gMjAxMiAxMDo0OTowOCArMDIwMApEZSA6IGx1ZG92aWMuZGVzcm9jaGVzIDxsdWRv
-dmljLmRlc3JvY2hlc0BhdG1lbC5jb20+ClBvdXIgOiBQcmNoYWwgSmnFmcOtIDxqaXJpLnByY2hh
-bEBha3NpZ25hbC5jej4KQ29waWUgw6AgOiA8bHVkb3ZpYy5kZXNyb2NoZXNAYXRtZWwuY29tPiwg
-CjxsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc+CgpIZWxsbyBKaXJpLAoKVGhh
-bmtzIGZvciB5b3VyIHBhdGNoIGJ1dCBhdDkxLW1jaSBpcyBub3cgZGVwcmVjYXRlZCBhbmQgc2hv
-dWxkIGJlCnJlbW92ZWQgaW4gMy43LgpPbiBvbmUgaGFuZCBJIGRvbid0IGtub3cgaWYgd2UgaGF2
-ZSB0byBjb250aW51ZSB0byB0YWtlIHBhdGNoZXMgZm9yIHRoaXMKZHJpdmVyLCBvbiB0aGUgb3Ro
-ZXIgaGFuZCBpdCdzIGEgZml4IGZvciBzb21lIFNEIGNhcmRzLgoKTGUgMDYvMjAvMjAxMiAxMDox
-NSBBTSwgUHJjaGFsIEppxZnDrSBhIMOpY3JpdCA6Cj4gVGhpcyBwYXRjaCBjaGFuZ2UgbWluaW11
-bSBhbmQgbWF4aW11bSBjbG9jayBzcGVlZCBiZWNhdXNlIHNvbWUgbm9uYW1lCj4gY2FyZHMgZG9l
-c24ndCB3b3JrIGR1cmluZyBpbml0IGV2ZW4gYXQgMzc1a0h6IGFuZCBuZXcgY2FyZHMgKFNEIHYu
-IDMuMCkKPiBjYW4gcnVuIGF0IDUwIG9yIDEwMCBNSHouCj4gQWxzbyBhZGVkIGNsa2RpdiByZWdp
-c3RlciBvdmVycnVuIGZpeCB3aGVuIHNldHRpbmcgbG93IHNwZWVkcy4KPgo+IFNpZ25lZC1vZmYt
-Ynk6IEppcmkgUHJjaGFsIDxqaXJpLnByY2hhbEBha3NpZ25hbC5jej4KPiAtLS0KPgo+IC0tLSBs
-aW51eC9saW51eC0zLjUtcmMzL2RyaXZlcnMvbW1jL2hvc3QvYXQ5MV9tY2kuYy5vcmlnICAgIDIw
-MTItMDYtMTcKPiAwMjoyNToxNy4wMDAwMDAwMDAgKzAyMDAKPiArKysgbGludXgvbGludXgtMy41
-LXJjMy9kcml2ZXJzL21tYy9ob3N0L2F0OTFfbWNpLmMgICAgMjAxMi0wNi0xOAo+IDExOjAxOjQ5
-Ljc1MTQxNTk4NCArMDIwMAo+IEBAIC03MjQsNiArNzI0LDEwIEBAIHN0YXRpYyB2b2lkIGF0OTFf
-bWNpX3NldF9pb3Moc3RydWN0IG1tY18KPiAgICAgICAgICAgZWxzZQo+ICAgICAgICAgICAgICAg
-Y2xrZGl2ID0gKGF0OTFfbWFzdGVyX2Nsb2NrIC8gaW9zLT5jbG9jaykgLyAyOwo+Cj4gKyAgICAg
-ICAgLyogc2V0IG1heGltdW0gZGl2aWRlciAqLwo+ICsgICAgICAgIGlmIChjbGtkaXYgPiAyNTUp
-Cj4gKyAgICAgICAgICAgIGNsa2RpdiA9IDI1NTsKPiArCj4gICAgICAgICAgIHByX2RlYnVnKCJj
-bGtkaXYgPSAlZC4gbWNjayA9ICVsZFxuIiwgY2xrZGl2LAo+ICAgICAgICAgICAgICAgYXQ5MV9t
-YXN0ZXJfY2xvY2sgLyAoMiAqIChjbGtkaXYgKyAxKSkpOwo+ICAgICAgIH0KPiBAQCAtOTQ4LDgg
-Kzk1Miw4IEBAIHN0YXRpYyBpbnQgX19pbml0IGF0OTFfbWNpX3Byb2JlKHN0cnVjdAo+ICAgICAg
-IH0KPgo+ICAgICAgIG1tYy0+b3BzID0gJmF0OTFfbWNpX29wczsKPiAtICAgIG1tYy0+Zl9taW4g
-PSAzNzUwMDA7Cj4gLSAgICBtbWMtPmZfbWF4ID0gMjUwMDAwMDA7Cj4gKyAgICBtbWMtPmZfbWlu
-ID0gMjAwMDAwOyAvKiBub3QgYWxsIGNhcmRzIGNhbiBydW4gYXQgMzc1a0h6ICovCgpJIHdpbGwg
-Y2hlY2sgb24gYXRtZWwtbWNpIGlmIHdlIGhhdmUgdG8gZGVjcmVhc2UgZl9taW4uCgo+ICsgICAg
-bW1jLT5mX21heCA9IDEwMDAwMDAwMDsgLyogbmV3IGNhcmRzIGNhbiBydW4gYXQgMTAwTUh6ICov
-CgpNQ0kgb3BlcmF0ZXMgYXQgYSByYXRlIG9mIHVwIHRvIG1hc3RlciBjbG9jayBkaXZpZGVkIGJ5
-IHR3byBzbyB5b3UgY2FuJ3QKcmVhY2ggMTAwTUh6IGFzIG1heCBmcmVxdWVuY3kgc2luY2UgaXQg
-bWVhbnMgdGhhdCBvdXIgbWFzdGVyIGNsb2NrIGlzIGF0CjIwME1IeiB0aGF0IGlzIG5vdCB0aGUg
-Y2FzZS4gSSB3b3VsZCBzYXkgNTBNSHogaXMgdGhlIG1heGltdW0gZnJlcXVlbmN5CmZvciBwcm9k
-dWN0IGNvbXBhdGlibGUgd2l0aCBhdDkxLW1jaS4KCj4gICAgICAgbW1jLT5vY3JfYXZhaWwgPSBN
-TUNfVkREXzMyXzMzIHwgTU1DX1ZERF8zM18zNDsKPiAgICAgICBtbWMtPmNhcHMgPSAwOwo+Cj4K
-PgoKUmVnYXJkcwoKTHVkb3ZpYwoKCgoKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFybS1r
-ZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWls
-bWFuL2xpc3RpbmZvL2xpbnV4LWFybS1rZXJuZWwK
+mmc_execute_hpi should send the HPI command only
+once, and only if the card is in PRG state.
+
+According to eMMC spec, the command's completion time is
+not dependent on OUT_OF_INTERRUPT_TIME. Only the transition
+out of PRG STATE is guarded by OUT_OF_INTERRUPT_TIME - which is
+defined to begin at the end of sending the command itself.
+
+Specify the default timeout for the actual sending of HPI
+command, and then use OUT_OF_INTERRUPT_TIME to wait for
+the transition out of PRG state.
+
+Reported-by: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Signed-off-by: Venkatraman S <svenkatr@ti.com>
+Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+CC: Kostya <kdorfman@codeaurora.org>
+---
+v2 discussions: http://marc.info/?l=linux-mmc&m=133657255616390&w=2
+
+v2->v3: 
+	Return gracefully for card idle states (suggested by kdorfman)
+
+ drivers/mmc/core/core.c    |   57 ++++++++++++++++++++++++++------------------
+ drivers/mmc/core/mmc_ops.c |    1 -
+ 2 files changed, 34 insertions(+), 24 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 80ec427..08ed144 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -404,6 +404,7 @@ int mmc_interrupt_hpi(struct mmc_card *card)
+ {
+ 	int err;
+ 	u32 status;
++	unsigned long starttime;
+ 
+ 	BUG_ON(!card);
+ 
+@@ -419,30 +420,40 @@ int mmc_interrupt_hpi(struct mmc_card *card)
+ 		goto out;
+ 	}
+ 
+-	/*
+-	 * If the card status is in PRG-state, we can send the HPI command.
+-	 */
+-	if (R1_CURRENT_STATE(status) == R1_STATE_PRG) {
+-		do {
+-			/*
+-			 * We don't know when the HPI command will finish
+-			 * processing, so we need to resend HPI until out
+-			 * of prg-state, and keep checking the card status
+-			 * with SEND_STATUS.  If a timeout error occurs when
+-			 * sending the HPI command, we are already out of
+-			 * prg-state.
+-			 */
+-			err = mmc_send_hpi_cmd(card, &status);
+-			if (err)
+-				pr_debug("%s: abort HPI (%d error)\n",
+-					 mmc_hostname(card->host), err);
++	switch (R1_CURRENT_STATE(status)) {
+ 
+-			err = mmc_send_status(card, &status);
+-			if (err)
+-				break;
+-		} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
+-	} else
+-		pr_debug("%s: Left prg-state\n", mmc_hostname(card->host));
++	case R1_STATE_IDLE:
++	case R1_STATE_READY:
++	case R1_STATE_STBY: /* intentional fall through */
++		/* In idle states, HPI is not needed and the caller
++		 can issue the next intended command immediately */
++		goto out;
++		break;
++	case R1_STATE_PRG:
++		break;
++	default:
++		/* In all other states, it's illegal to issue HPI */
++		pr_debug("%s: HPI cannot be sent. Card state=%d\n",
++			mmc_hostname(card->host), R1_CURRENT_STATE(status));
++		err = -EINVAL;
++		goto out;
++		break;
++	}
++
++	starttime = jiffies;
++	err = mmc_send_hpi_cmd(card, &status);
++	if (err)
++		goto out;
++
++	do {
++		err = mmc_send_status(card, &status);
++
++		if (!err && R1_CURRENT_STATE(status) == R1_STATE_TRAN)
++			break;
++		if (jiffies_to_msecs(jiffies - starttime) >=
++			card->ext_csd.out_of_int_time)
++			err = -ETIMEDOUT;
++	} while (!err);
+ 
+ out:
+ 	mmc_release_host(card->host);
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 69370f4..0ed2cc5 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -569,7 +569,6 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
+ 
+ 	cmd.opcode = opcode;
+ 	cmd.arg = card->rca << 16 | 1;
+-	cmd.cmd_timeout_ms = card->ext_csd.out_of_int_time;
+ 
+ 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
+ 	if (err) {
+-- 
+1.7.10.rc2
+
