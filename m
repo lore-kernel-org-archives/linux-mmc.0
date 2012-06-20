@@ -1,44 +1,44 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Fix null dma_ops access when use_dma is false
-Date: Wed, 20 Jun 2012 02:34:57 -0400
-Message-ID: <87boke4hke.fsf@octavius.laptop.org>
-References: <1339695115-606-1-git-send-email-kliegs@chromium.org>
-	<4FDAE34C.1030102@samsung.com>
-	<CAFbHwiRo9J+ZkaK7YUcVvtxN5TkmvxUy-q-EDgngve-t+oJ0CQ@mail.gmail.com>
+Subject: Re: Write Timeout is too long.
+Date: Wed, 20 Jun 2012 02:37:51 -0400
+Message-ID: <877gv24hfk.fsf@octavius.laptop.org>
+References: <CAMEN=G4ucjXyE9O=PhJwtMMMjdXni1NYnScUkT66hhQ-QGG6Sg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:58321 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:58352 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751211Ab2FTGfC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Jun 2012 02:35:02 -0400
-In-Reply-To: <CAFbHwiRo9J+ZkaK7YUcVvtxN5TkmvxUy-q-EDgngve-t+oJ0CQ@mail.gmail.com>
-	(Will Newton's message of "Fri, 15 Jun 2012 14:14:48 +0100")
+	id S1751514Ab2FTGhy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 20 Jun 2012 02:37:54 -0400
+In-Reply-To: <CAMEN=G4ucjXyE9O=PhJwtMMMjdXni1NYnScUkT66hhQ-QGG6Sg@mail.gmail.com>
+	(Juan Carlos Garza Fernandez's message of "Mon, 18 Jun 2012 16:45:17
+	+0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Will Newton <will.newton@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Jonathan Kliegman <kliegs@chromium.org>, linux-mmc@vger.kernel.org, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>
+To: Juan Carlos Garza Fernandez <juancarlosgarza@gmail.com>
+Cc: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Fri, Jun 15 2012, Will Newton wrote:
-> On Fri, Jun 15, 2012 at 8:25 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> It looks good to me.
->>
->> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
->>
->> On 06/15/2012 02:31 AM, Jonathan Kliegman wrote:
->>
->>> host->dma_ops is not valid if host->usa dma is 0 so protect
->>> host->dma_ops reference in dw_mci_resume
->>>
->>> Signed-off-by: Jonathan Kliegman <kliegs@chromium.org>
+On Mon, Jun 18 2012, Juan Carlos Garza Fernandez wrote:
+> Hi,
 >
-> Yes, looks good to me too.
+> On the past, the write timeout was increased from 300 ms to 3 seconds
+> (see commit 3bdc9ba892d6a294d16e9e6e0c4041926aa3d58c from Paul
+> Walmsley)  as some cards had issues with that limit, which is correct
+> as the issue can be reproduced by me. Increasing that timeout solves
+> the problem, however increasing the timeout to 3 seconds is a bit too
+> much and  following error message occurs in the kernel log:
 >
-> Acked-by: Will Newton <will.newton@imgtec.com>
+>  mmc1: Too large timeout requested for CMD25!
 
-Thanks, pushed to mmc-next for 3.6.
+This is now fixed in mainline:
+
+http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=09eeff52bf20d485bcafc441f01c142c59c3da16
+
+by just silencing the warning.
+
+Thanks,
 
 - Chris.
 -- 
