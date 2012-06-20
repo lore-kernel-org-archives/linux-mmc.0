@@ -1,200 +1,66 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 2/5 v4] mmc: sh_mmcif: fix clock management
-Date: Wed, 20 Jun 2012 08:41:42 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1206200839460.20254@axis700.grange>
-References: <Pine.LNX.4.64.1206131515180.17854@axis700.grange>
- <Pine.LNX.4.64.1206131533240.17854@axis700.grange> <20120620051857.GF20030@verge.net.au>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH] mmc: sh_mmcif: Support MMC_SLEEP_AWAKE command
+Date: Wed, 20 Jun 2012 15:42:38 +0900
+Message-ID: <20120620064238.GH20030@verge.net.au>
+References: <1339534569-27923-1-git-send-email-laurent.pinchart@ideasonboard.com>
+ <20120613011201.GD16686@verge.net.au>
+ <47844351.ibBFGBYgKQ@avalon>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20120620051857.GF20030@verge.net.au>
+Content-Disposition: inline
+In-Reply-To: <47844351.ibBFGBYgKQ@avalon>
 Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>
+To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Cc: linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 20 Jun 2012, Simon Horman wrote:
-
-> Hi Guennadi,
+On Wed, Jun 13, 2012 at 09:39:56AM +0200, Laurent Pinchart wrote:
+> Hi Simon,
 > 
-> On Wed, Jun 13, 2012 at 03:37:19PM +0200, Guennadi Liakhovetski wrote:
-> > Regardless, whether the MMC bus clock is the same, as the PM clock on this
-> > specific interface, it has to be managed separately. Its proper management
-> > should also include enabling and disabling of the clock, whenever the
-> > interface is becoming active or going idle respectively.
+> On Wednesday 13 June 2012 10:12:01 Simon Horman wrote:
+> > On Tue, Jun 12, 2012 at 10:56:09PM +0200, Laurent Pinchart wrote:
+> > > The MMC_SLEEP_AWAKE and SD_IO_SEND_OP_COND commands share the same
+> > > opcode. SD_IO_SEND_OP_COND isn't supported by the SH MMCIF, but
+> > > MMC_SLEEP_AWAKE is. Discriminate between the two commands using the
+> > > command flags, and reject SD_IO_SEND_OP_COND only.
+> > > 
+> > > Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+> > > ---
+> > > 
+> > >  drivers/mmc/host/sh_mmcif.c |   14 ++++----------
+> > >  1 files changed, 4 insertions(+), 10 deletions(-)
+> > > 
+> > > Not supporting the MMC_SLEEP_AWAKE command makes system suspend fail if an
+> > > MMC or eMMC device supporting sleep/wake is connected. The issue has been
+> > > first noticed on the Armadillo 800 EVA board.
 > > 
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > ---
-> >  drivers/mmc/host/sh_mmcif.c |   46 +++++++++++++++++++++---------------------
-> >  1 files changed, 23 insertions(+), 23 deletions(-)
+> > Hi Laurent,
 > > 
-> > diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> > index d6ffb05..6a93b04 100644
-> > --- a/drivers/mmc/host/sh_mmcif.c
-> > +++ b/drivers/mmc/host/sh_mmcif.c
-> > @@ -942,6 +942,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >  		}
-> >  		if (host->power) {
-> >  			pm_runtime_put(&host->pd->dev);
-> > +			clk_disable(host->hclk);
-> >  			host->power = false;
-> >  			if (p->down_pwr && ios->power_mode == MMC_POWER_OFF)
-> >  				p->down_pwr(host->pd);
-> > @@ -954,6 +955,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >  		if (!host->power) {
-> >  			if (p->set_pwr)
-> >  				p->set_pwr(host->pd, ios->power_mode);
-> > +			clk_enable(host->hclk);
-> >  			pm_runtime_get_sync(&host->pd->dev);
-> >  			host->power = true;
-> >  			sh_mmcif_sync_reset(host);
-> > @@ -1278,22 +1280,11 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
-> >  	host->addr	= reg;
-> >  	host->timeout	= 1000;
-> >  
-> > -	snprintf(clk_name, sizeof(clk_name), "mmc%d", pdev->id);
-> > -	host->hclk = clk_get(&pdev->dev, clk_name);
-> > -	if (IS_ERR(host->hclk)) {
-> > -		dev_err(&pdev->dev, "cannot get clock \"%s\"\n", clk_name);
-> > -		ret = PTR_ERR(host->hclk);
-> > -		goto eclkget;
-> > -	}
-> > -	clk_enable(host->hclk);
-> > -	host->clk = clk_get_rate(host->hclk);
-> >  	host->pd = pdev;
-> >  
-> >  	spin_lock_init(&host->lock);
-> >  
-> >  	mmc->ops = &sh_mmcif_ops;
-> > -	mmc->f_max = host->clk / 2;
-> > -	mmc->f_min = host->clk / 512;
-> >  	if (pd->ocr)
-> >  		mmc->ocr_avail = pd->ocr;
-> >  	mmc->caps = MMC_CAP_MMC_HIGHSPEED;
-> > @@ -1305,18 +1296,30 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
-> >  	mmc->max_blk_count = mmc->max_req_size / mmc->max_blk_size;
-> >  	mmc->max_seg_size = mmc->max_req_size;
-> >  
-> > -	sh_mmcif_sync_reset(host);
-> >  	platform_set_drvdata(pdev, host);
-> >  
-> >  	pm_runtime_enable(&pdev->dev);
-> >  	host->power = false;
-> >  
-> > +	snprintf(clk_name, sizeof(clk_name), "mmc%d", pdev->id);
-> > +	host->hclk = clk_get(&pdev->dev, clk_name);
-> > +	if (IS_ERR(host->hclk)) {
-> > +		ret = PTR_ERR(host->hclk);
-> > +		dev_err(&pdev->dev, "cannot get clock \"%s\": %d\n", clk_name, ret);
-> > +		goto eclkget;
-> > +	}
-> > +	clk_enable(host->hclk);
-> > +	host->clk = clk_get_rate(host->hclk);
-> > +	mmc->f_max = host->clk / 2;
-> > +	mmc->f_min = host->clk / 512;
-> > +
-> >  	ret = pm_runtime_resume(&pdev->dev);
-> >  	if (ret < 0)
-> >  		goto eresume;
-> >  
-> >  	INIT_DELAYED_WORK(&host->timeout_work, mmcif_timeout_work);
-> >  
-> > +	sh_mmcif_sync_reset(host);
-> >  	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
-> >  
-> >  	ret = request_threaded_irq(irq[0], sh_mmcif_intr, sh_mmcif_irqt, 0, "sh_mmc:error", host);
-> > @@ -1330,6 +1333,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
-> >  		goto ereqirq1;
-> >  	}
-> >  
-> > +	clk_disable(host->hclk);
-> >  	ret = mmc_add_host(mmc);
-> >  	if (ret < 0)
-> >  		goto emmcaddh;
+> > Do you have a test-case for this?
 > 
-> Could you clarify the purpose of two hunks above.
-> They seem to move code down in sh_mmcif_probe().
-> Is this related to the call to pm_runtime_enable() ?
+> echo mem > /sys/power/state on Armadillo 800 EVA was my test case. It failed 
+> without the patch, and succeeds with it.
 
-The sh_mmcif_sync_reset() call accesses the hardware so it only makes 
-sense after the hardware has been resumed. Moving the clk_enable() call 
-down improves consistency by grouping clock and runtime PM code together 
-during probe() similar to other paths.
+I'm not having much luck with or without your patch.
 
-Thanks
-Guennadi
+# echo mem > /sys/power/state
+echo: write error: No such device
 
+I am using 3.5-rc3. With the armadillo default config + EXT3 + SUSPEND.
+Perhaps I am missing some options?
+
+> > Also, did you check to make sure that the Mackerel still works?
 > 
-> > @@ -1348,9 +1352,10 @@ ereqirq1:
-> >  ereqirq0:
-> >  	pm_runtime_suspend(&pdev->dev);
-> >  eresume:
-> > -	pm_runtime_disable(&pdev->dev);
-> >  	clk_disable(host->hclk);
-> > +	clk_put(host->hclk);
-> >  eclkget:
-> > +	pm_runtime_disable(&pdev->dev);
-> >  	mmc_free_host(mmc);
-> >  ealloch:
-> >  	iounmap(reg);
-> > @@ -1363,6 +1368,7 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
-> >  	int irq[2];
-> >  
-> >  	host->dying = true;
-> > +	clk_enable(host->hclk);
-> >  	pm_runtime_get_sync(&pdev->dev);
-> >  
-> >  	dev_pm_qos_hide_latency_limit(&pdev->dev);
-> > @@ -1388,9 +1394,9 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
-> >  
-> >  	platform_set_drvdata(pdev, NULL);
-> >  
-> > -	clk_disable(host->hclk);
-> >  	mmc_free_host(host->mmc);
-> >  	pm_runtime_put_sync(&pdev->dev);
-> > +	clk_disable(host->hclk);
-> >  	pm_runtime_disable(&pdev->dev);
-> >  
-> >  	return 0;
-> > @@ -1399,24 +1405,18 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
-> >  #ifdef CONFIG_PM
-> >  static int sh_mmcif_suspend(struct device *dev)
-> >  {
-> > -	struct platform_device *pdev = to_platform_device(dev);
-> > -	struct sh_mmcif_host *host = platform_get_drvdata(pdev);
-> > +	struct sh_mmcif_host *host = dev_get_drvdata(dev);
-> >  	int ret = mmc_suspend_host(host->mmc);
-> >  
-> > -	if (!ret) {
-> > +	if (!ret)
-> >  		sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
-> > -		clk_disable(host->hclk);
-> > -	}
-> >  
-> >  	return ret;
-> >  }
-> >  
-> >  static int sh_mmcif_resume(struct device *dev)
-> >  {
-> > -	struct platform_device *pdev = to_platform_device(dev);
-> > -	struct sh_mmcif_host *host = platform_get_drvdata(pdev);
-> > -
-> > -	clk_enable(host->hclk);
-> > +	struct sh_mmcif_host *host = dev_get_drvdata(dev);
-> >  
-> >  	return mmc_resume_host(host->mmc);
-> >  }
-> > -- 
-> > 1.7.2.5
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-sh" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
+> Yes it still works. However, I have no way to test the MMC_SLEEP_AWAKE command 
+> on the Mackerel board, as my MMC card doesn't support it (on the Armadillo the 
+> eMMC chip supports the MMC_SLEEP_AWAKE command).
 > 
+> BTW, I wonder whether the current implementation is really the best one. If 
+> the hardware doesn't support SD/SDIO commands, instead of intercepting 
+> commands and rejecting the ones used by SD/SDIO at probe time, wouldn't it be 
+> better for host drivers to tell that they don't support SD and/or SDIO using 
+> flags in the mmc_host structure ?
 
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+I don't have any strong thoughts on this but your approach
+does sound interesting.
