@@ -1,48 +1,46 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH] mmc: sh_mmcif: Support MMC_SLEEP_AWAKE command
-Date: Wed, 20 Jun 2012 15:06:36 +0200
-Message-ID: <2609967.tcqa2xCl8R@avalon>
-References: <1339534569-27923-1-git-send-email-laurent.pinchart@ideasonboard.com> <CAPDyKFo_my_+xQOKYooNawtJ1b3Ncm2osNg9TMN8YpftXfr+Jg@mail.gmail.com>
+From: Johan Rudholm <jrudholm@gmail.com>
+Subject: Re: [PATCH] mmc: card: Do not scan boot partitions
+Date: Wed, 20 Jun 2012 16:04:43 +0200
+Message-ID: <CA+20K0DhLnCXv_3Q=p6hRv6UAnxy+gCS0=RHcH-ozFejovou3A@mail.gmail.com>
+References: <1339506253-7164-1-git-send-email-johan.rudholm@stericsson.com>
+	<87oboe4ibk.fsf@octavius.laptop.org>
+	<CA+20K0DJYYeo80pVC1wLo_+VaXYvgiOnJzSvf9mE_u69Dj941w@mail.gmail.com>
+	<CACRpkda6gbAT1=qnHmvGv9UhqDVokvobcqw65vdsXHsrz8=QQw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:43515 "EHLO
-	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753814Ab2FTNGZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jun 2012 09:06:25 -0400
-In-Reply-To: <CAPDyKFo_my_+xQOKYooNawtJ1b3Ncm2osNg9TMN8YpftXfr+Jg@mail.gmail.com>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:55907 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751950Ab2FTOEp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jun 2012 10:04:45 -0400
+Received: by lbbgm6 with SMTP id gm6so653604lbb.19
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Jun 2012 07:04:43 -0700 (PDT)
+In-Reply-To: <CACRpkda6gbAT1=qnHmvGv9UhqDVokvobcqw65vdsXHsrz8=QQw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Simon Horman <horms@verge.net.au>, linux-sh@vger.kernel.org, Saugata Das <saugata.das@linaro.org>, Girish Shivananjappa <girish.shivananjappa@linaro.org>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-Hi Ulf,
+Hi Linus,
 
-On Wednesday 20 June 2012 13:54:33 Ulf Hansson wrote:
-> Hi Laurent,
-> 
-> Your issue seem more related to a mmc protocol problem. Likely caused
-> by a bad patch for eMMC 4.5 poweroff notify. The patch I refer to is:
-> "mmc: core: Fix PowerOff Notify suspend/resume"
-> 
-> You may try to revert this patch and see if the same problem occurs for you.
-> 
-> We are trying to fix the issue inserted by the above commit in a patch
-> named: "MMC-4.5 Power OFF Notify Rework", please have a look if you have
-> the time.
+2012/6/20 Linus Walleij <linus.walleij@linaro.org>:
+> On Wed, Jun 20, 2012 at 9:27 AM, Johan Rudholm <jrudholm@gmail.com> wrote:
+>> 2012/6/20 Chris Ball <cjb@laptop.org>:
+>>>
+>>> Would it be impossible to add a partition table to mmcblkXbootY,
+>>> or just unlikely?
+>>
+>> I believe this is just an unlikely scenario since the boot partitions
+>> are supposed to contain boot code and also because of their relatively
+>> small size (a few MBs), but there is no technical problem. Perhaps it
+>> should be left up to the user?
+>
+> Like we add a Kconfig bool option "support partition scanning on boot
+> partitions" and then we default that to "n", so systems that really
+> want to do that can turn it on the day they need it.
+>
+> Could you augment the patch like that?
 
-I think the two issues are othorgonal (but please feel free to tell me if 
-there's something I'm missing).
+Sure, I'll send an updated version with this functionality!
 
-The MMCIF controller driver rejects the MMC_SLEEP_AWAKE command 
-unconditionally, even though it should be accepted, because it happens to 
-share the command number with an SDIO command (SD_IO_SEND_OP_COND) used to 
-probe SDIO support. My patch fixes this by accepting the MMC_SLEEP_AWAKE 
-command but still rejecting the SD_IO_SEND_OP_COND command.
-
--- 
-Regards,
-
-Laurent Pinchart
-
+//Johan
