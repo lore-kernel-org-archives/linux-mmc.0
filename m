@@ -1,97 +1,60 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [RESEND PATCH] mmc: dw_mmc: Add check for IDMAC configuration
-Date: Wed, 20 Jun 2012 02:07:28 -0400
-Message-ID: <87wr324iu7.fsf@octavius.laptop.org>
-References: <1339495102-4889-1-git-send-email-girish.shivananjappa@linaro.org>
-	<CAFbHwiRXXbOzCPeb0jdrzjmq1aeisjRSY5xNwrQbeNYJx04UJg@mail.gmail.com>
+Subject: Re: mmc_cd_gpio_request() failed request_threaded_irq()
+Date: Wed, 20 Jun 2012 02:15:06 -0400
+Message-ID: <87sjdq4ihh.fsf@octavius.laptop.org>
+References: <87aa09xcd6.wl%kuninori.morimoto.gx@renesas.com>
+	<Pine.LNX.4.64.1206122323040.6800@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41800 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:45723 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752267Ab2FTGHd convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jun 2012 02:07:33 -0400
-In-Reply-To: <CAFbHwiRXXbOzCPeb0jdrzjmq1aeisjRSY5xNwrQbeNYJx04UJg@mail.gmail.com>
-	(Will Newton's message of "Tue, 12 Jun 2012 11:08:02 +0100")
+	id S1753922Ab2FTGPM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 20 Jun 2012 02:15:12 -0400
+In-Reply-To: <Pine.LNX.4.64.1206122323040.6800@axis700.grange> (Guennadi
+	Liakhovetski's message of "Tue, 12 Jun 2012 23:24:02 +0200 (CEST)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Will Newton <will.newton@gmail.com>
-Cc: Girish K S <girish.shivananjappa@linaro.org>, linux-mmc@vger.kernel.org, patches@linaro.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: kuninori.morimoto.gx@renesas.com, linux-mmc@vger.kernel.org
 
-Hi Girish,
+Hi Guennadi,
 
-On Tue, Jun 12 2012, Will Newton wrote:
-> On Tue, Jun 12, 2012 at 10:58 AM, Girish K S
-> <girish.shivananjappa@linaro.org> wrote:
->> In the Current dwmmc driver there is support for selecting IDMAC fro=
-m
->> the menu config option. If the support for IDMAC is enabled in the m=
-enu
->> config and Hardware configuration register's DMA_INTERFACE field is =
-0.
->> Still the driver will try to do the DMA initialization.
->>
->> The dw_mci_idmac_init function currently implemented returns only su=
-ccess
->> indicating that the DMA initialization is always successful. The cur=
-rent
->> patch will add a ciheck for existance of the DMA IP and allow the
->> DMA initialization.
->>
->> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
->> ---
->> =C2=A0drivers/mmc/host/dw_mmc.c | =C2=A0 15 +++++++++++++--
->> =C2=A01 files changed, 13 insertions(+), 2 deletions(-)
+On Tue, Jun 12 2012, Guennadi Liakhovetski wrote:
+>> I noticed that mmc_cd_gpio_request() failed on request_threaded_irq().
+>> Now, I'm using v3.5-rc2 kernel.
+>> 
+>> current ${LINUX}/drivers/mmc/core/cd-gpio.c :: mmc_cd_gpio_request() uses
+>> 
+>> request_threaded_irq(irq, NULL, mmc_cd_gpio_irqt,
+>> 		   IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
+>> 		   cd->label, host);
+>> 
+>> It doesn't have hander (2nd is NULL), and flag doesn't have IRQF_ONESHOT.
+>> Then, it run  request_threaded_irq() -> __setup_irq()
+>> and, it got this error.
+>> 
+>> pr_err("Threaded irq requested with handler=NULL and !ONESHOT for irq %d\n",
+>> 	irq);
+>> 
+>> I'm not sure detail of it, but maybe from this commit
+>> 
+>> -------------------------------------------
+>> commit 1c6c69525b40eb76de8adf039409722015927dc3
+>> Author: Thomas Gleixner <tglx@linutronix.de>
+>> Date:   Thu Apr 19 10:35:17 2012 +0200
+>> 
+>>     genirq: Reject bogus threaded irq requests
 >
-> Ok, this version looks better.
+> Also see this thread: https://lkml.org/lkml/2012/6/12/151
 >
-> Acked-by: Will Newton <will.newton@imgtec.com>
+> For now you can add an IRQF_ONESHOT flag to the call.
 
-A quick point of patch etiquette:  you used a subject line of [RESEND
-PATCH], but this isn't a resend of a patch.  A resend is when you're
-resending a copy of a patch *without any modifications* because it was
-ignored, or you'd like more discussion, or you're adding new people to
-the e-mail thread.
-
-This is a v2 of a patch, because you made changes since the last patch.
-The right way to signify that is with [PATCH v2] in the Subject line,
-and a section just below the "---" after the Signed-off-by that explain=
-s
-what you changed.  E.g.:
-
-=3D=3D=3D=3D=3D=3D=3D
-Subject: [PATCH v2] mmc: dw_mmc: Add check for IDMAC configuration
-
-In the Current dwmmc driver there is support for selecting IDMAC from
-the menu config option. If the support for IDMAC is enabled in the menu
-config and Hardware configuration register's DMA_INTERFACE field is 0.
-Still the driver will try to do the DMA initialization.
-
-The dw_mci_idmac_init function currently implemented returns only succe=
-ss
-indicating that the DMA initialization is always successful. The curren=
-t
-patch will add a ciheck for existance of the DMA IP and allow the
-DMA initialization.
-
-Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
----
-Changes since v1:
- * Protect against configuration mistakes by falling back to PIO if
-   CONFIG_MMC_DW_IDMAC=3Dy but the hardware has no IDMAC support.
-=20
- drivers/mmc/host/dw_mmc.c |   15 +++++++++++++--
- 1 files changed, 13 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-=3D=3D=3D=3D=3D=3D=3D
-
-I've applied the patch to mmc-next for 3.6 now.
+Should we get this change into 3.5?
 
 Thanks,
 
 - Chris.
---=20
+-- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
