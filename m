@@ -1,40 +1,49 @@
-From: Ming Lei <ming.lei@canonical.com>
-Subject: Re: MMC: commit dba3c29 ruins mmc card data on beagle-xm revB
-Date: Wed, 20 Jun 2012 10:02:35 +0800
-Message-ID: <CACVXFVPgfVaEQGCaCOxLTKov3RcBe8AxSR12GFNMBBN5CTbgaw@mail.gmail.com>
-References: <CACVXFVO-Wm1Qwporby1M=+yPz81AWHpZRBZSbr5tgT32b6sSEA@mail.gmail.com>
-	<CANrkHUYd8Ww6De4MiZ8_oPfcnhvtsZXOySLRiWSBU4QUQ6beHw@mail.gmail.com>
-	<CACVXFVP16UmHe-GGydrSMgGHwnkSvYhnY339=zr=BfCehvS8Kw@mail.gmail.com>
-	<CANrkHUaxJGcv2bdUWTCB_oKct-iFCKCdb7OQPTUjS4MuKeCS2w@mail.gmail.com>
-	<4FE0AE7B.4040502@gmail.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v2] mmc: tmio: Don't access hardware registers after
+ stopping clocks
+Date: Wed, 20 Jun 2012 11:23:15 +0900
+Message-ID: <20120620022312.GA898@verge.net.au>
+References: <1339536575-6578-1-git-send-email-laurent.pinchart@ideasonboard.com>
+ <87ehpir0rl.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:55265 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752401Ab2FTCCi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jun 2012 22:02:38 -0400
-In-Reply-To: <4FE0AE7B.4040502@gmail.com>
+Received: from kirsty.vergenet.net ([202.4.237.240]:60047 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753453Ab2FTCXT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jun 2012 22:23:19 -0400
+Content-Disposition: inline
+In-Reply-To: <87ehpir0rl.wl%kuninori.morimoto.gx@renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Paolo Pisati <p.pisati@gmail.com>
-Cc: "T Krishnamoorthy, Balaji" <balajitk@ti.com>, linux-mmc@vger.kernel.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 
-On Wed, Jun 20, 2012 at 12:53 AM, Paolo Pisati <p.pisati@gmail.com> wrote:
-> On 06/13/2012 05:28 PM, T Krishnamoorthy, Balaji wrote:
->> Couldn't reproduce the issue with BeagleXM rev C, Might be a combination
->> of rev and SD card. How often do you see mis-match in file content?
->
-> i just want to say that i'm affected by this too, and i can reproduce it
-> 100%.
+On Wed, Jun 13, 2012 at 09:11:13PM -0700, Kuninori Morimoto wrote:
+> 
+> Laurent Pinchart wrote:
+> > 
+> > The tmio_mmc_set_ios() function configures the MMC power, clock and bus
+> > width. When the mmc core requests the driver to power off the card, we
+> > inform runtime PM, that the controller can be suspended. This can lead
+> > to the MSTP clock being turned off.
+> > 
+> > Writing to any 16-bit hardware registers with the MSTP clock off leads
+> > to timeouts and errors being printed to the kernel log. This can occur
+> > both when stopping the MMC clock and when configuring the bus width.
+> > 
+> > To fix this, stop the MMC clock before calling put_runtime_pm(), and
+> > skip bus width configuration when power is off.
+> > 
+> > Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+> > ---
+> 
+> This patch solved kzm9g MicroSD hang-up issue.
+> 
+> Tested-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 
-So it is not only me affected by the commit.
+Yes, it solves that issue for me too.
 
-Considered it is a serious problem(just several kernel boots may
-destroy the rootfs on my board) and no any progress obtained since
-report, I will send a patch to revert the commit to avoid more victims.
+Tested-by: Simon Horman <horms@verge.net.au>
 
 
-Thanks,
---
-Ming Lei
