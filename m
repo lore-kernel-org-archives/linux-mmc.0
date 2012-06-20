@@ -1,49 +1,32 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH v2] mmc: tmio: Don't access hardware registers after
- stopping clocks
-Date: Wed, 20 Jun 2012 11:23:15 +0900
-Message-ID: <20120620022312.GA898@verge.net.au>
-References: <1339536575-6578-1-git-send-email-laurent.pinchart@ideasonboard.com>
- <87ehpir0rl.wl%kuninori.morimoto.gx@renesas.com>
+Subject: Re: [PATCH 4/5 v4] mmc: sh_mmcif: remove redundant .down_pwr()
+ callback
+Date: Wed, 20 Jun 2012 13:58:08 +0900
+Message-ID: <20120620045808.GC20030@verge.net.au>
+References: <Pine.LNX.4.64.1206131515180.17854@axis700.grange>
+ <Pine.LNX.4.64.1206131534250.17854@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:60047 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753453Ab2FTCXT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jun 2012 22:23:19 -0400
+Return-path: <linux-sh-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <87ehpir0rl.wl%kuninori.morimoto.gx@renesas.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <Pine.LNX.4.64.1206131534250.17854@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Cc: Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 
-On Wed, Jun 13, 2012 at 09:11:13PM -0700, Kuninori Morimoto wrote:
+On Wed, Jun 13, 2012 at 03:37:27PM +0200, Guennadi Liakhovetski wrote:
+> >From the original version of sh_mmcif the .set_pwr() callback has only been
+> used to turn the card's power on, and the .down_pwr() callback has been
+> used to turn it off. .set_pwr() can be used for both these tasks, which is
+> also how it is implemented by the only user of this API: the SH7724 ecovec
+> board.
 > 
-> Laurent Pinchart wrote:
-> > 
-> > The tmio_mmc_set_ios() function configures the MMC power, clock and bus
-> > width. When the mmc core requests the driver to power off the card, we
-> > inform runtime PM, that the controller can be suspended. This can lead
-> > to the MSTP clock being turned off.
-> > 
-> > Writing to any 16-bit hardware registers with the MSTP clock off leads
-> > to timeouts and errors being printed to the kernel log. This can occur
-> > both when stopping the MMC clock and when configuring the bus width.
-> > 
-> > To fix this, stop the MMC clock before calling put_runtime_pm(), and
-> > skip bus width configuration when power is off.
-> > 
-> > Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-> > ---
-> 
-> This patch solved kzm9g MicroSD hang-up issue.
-> 
-> Tested-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Yes, it solves that issue for me too.
+Reviewed-by: Simon Horman <horms@verge.net.au>
 
-Tested-by: Simon Horman <horms@verge.net.au>
+Do you also intend to post patches for the following?
 
-
+* Remove mmcif_down_pwr from ecovec
+* Remove down_pwr from struct sh_mmcif_plat_data
