@@ -1,7 +1,7 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 3/7 v4] mmc: sdhi: implement tmio-mmc clock enable-update and disable callbacks
-Date: Wed, 20 Jun 2012 19:10:32 +0200
-Message-ID: <1340212236-647-4-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 2/7 v4] mmc: tmio: add callbacks to enable-update and disable the interface clock
+Date: Wed, 20 Jun 2012 19:10:31 +0200
+Message-ID: <1340212236-647-3-git-send-email-g.liakhovetski@gmx.de>
 References: <1340212236-647-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1340212236-647-1-git-send-email-g.liakhovetski@gmx.de>
@@ -10,59 +10,113 @@ To: linux-sh@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Instead of delivering one static clock frequency value, read from the
-hardware during probing, enable the tmio-mmc driver to re-read the
-frequency dynamically.
+Every time the clock is enabled after possibly being disabled, we have
+to re-read its frequency and update our configuration.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c |   24 +++++++++++++++++++++++-
- 1 files changed, 23 insertions(+), 1 deletions(-)
+ drivers/mmc/host/tmio_mmc_pio.c |   35 ++++++++++++++++++++++++++++++++---
+ include/linux/mfd/tmio.h        |    3 +++
+ 2 files changed, 35 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 934b68e..d8b167c 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -39,6 +39,27 @@ struct sh_mobile_sdhi {
- 	struct tmio_mmc_dma dma_priv;
- };
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 9069d4a..869ee69 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -751,6 +751,22 @@ fail:
+ 	mmc_request_done(mmc, mrq);
+ }
  
-+static int sh_mobile_sdhi_clk_enable(struct platform_device *pdev, unsigned int *f)
++static int tmio_mmc_clk_update(struct mmc_host *mmc)
 +{
-+	struct mmc_host *mmc = dev_get_drvdata(&pdev->dev);
 +	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	struct sh_mobile_sdhi *priv = container_of(host->pdata, struct sh_mobile_sdhi, mmc_data);
-+	int ret = clk_enable(priv->clk);
-+	if (ret < 0)
-+		return ret;
++	struct tmio_mmc_data *pdata = host->pdata;
++	int ret;
 +
-+	*f = clk_get_rate(priv->clk);
-+	return 0;
++	if (!pdata->clk_enable)
++		return -ENOTSUPP;
++
++	ret = pdata->clk_enable(host->pdev, &mmc->f_max);
++	if (!ret)
++		mmc->f_min = mmc->f_max / 512;
++
++	return ret;
 +}
 +
-+static void sh_mobile_sdhi_clk_disable(struct platform_device *pdev)
-+{
-+	struct mmc_host *mmc = dev_get_drvdata(&pdev->dev);
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	struct sh_mobile_sdhi *priv = container_of(host->pdata, struct sh_mobile_sdhi, mmc_data);
-+	clk_disable(priv->clk);
-+}
-+
- static void sh_mobile_sdhi_set_pwr(struct platform_device *pdev, int state)
- {
- 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
-@@ -132,9 +153,10 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		goto eclkget;
+ /* Set MMC clock / power.
+  * Note: This controller uses a simple divider scheme therefore it cannot
+  * run a MMC card at full speed (20MHz). The max clock is 24MHz on SD, but as
+@@ -797,6 +813,7 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	 */
+ 	if (ios->power_mode == MMC_POWER_ON && ios->clock) {
+ 		if (!host->power) {
++			tmio_mmc_clk_update(mmc);
+ 			pm_runtime_get_sync(dev);
+ 			host->power = true;
+ 		}
+@@ -810,9 +827,12 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		if (host->set_pwr && ios->power_mode == MMC_POWER_OFF)
+ 			host->set_pwr(host->pdev, 0);
+ 		if (host->power) {
++			struct tmio_mmc_data *pdata = host->pdata;
+ 			tmio_mmc_clk_stop(host);
+ 			host->power = false;
+ 			pm_runtime_put(dev);
++			if (pdata->clk_disable)
++				pdata->clk_disable(host->pdev);
+ 		}
  	}
  
--	mmc_data->hclk = clk_get_rate(priv->clk);
- 	mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
- 	mmc_data->get_cd = sh_mobile_sdhi_get_cd;
-+	mmc_data->clk_enable = sh_mobile_sdhi_clk_enable;
-+	mmc_data->clk_disable = sh_mobile_sdhi_clk_disable;
- 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
- 	if (p) {
- 		mmc_data->flags = p->tmio_flags;
+@@ -906,8 +926,6 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 
+ 	mmc->ops = &tmio_mmc_ops;
+ 	mmc->caps = MMC_CAP_4_BIT_DATA | pdata->capabilities;
+-	mmc->f_max = pdata->hclk;
+-	mmc->f_min = mmc->f_max / 512;
+ 	mmc->max_segs = 32;
+ 	mmc->max_blk_size = 512;
+ 	mmc->max_blk_count = (PAGE_CACHE_SIZE / mmc->max_blk_size) *
+@@ -929,6 +947,11 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 	if (ret < 0)
+ 		goto pm_disable;
+ 
++	if (tmio_mmc_clk_update(mmc) < 0) {
++		mmc->f_max = pdata->hclk;
++		mmc->f_min = mmc->f_max / 512;
++	}
++
+ 	/*
+ 	 * There are 4 different scenarios for the card detection:
+ 	 *  1) an external gpio irq handles the cd (best for power savings)
+@@ -974,7 +997,13 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 	/* See if we also get DMA */
+ 	tmio_mmc_request_dma(_host, pdata);
+ 
+-	mmc_add_host(mmc);
++	ret = mmc_add_host(mmc);
++	if (pdata->clk_disable)
++		pdata->clk_disable(pdev);
++	if (ret < 0) {
++		tmio_mmc_host_remove(_host);
++		return ret;
++	}
+ 
+ 	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
+ 
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index f5171db..b332c4c 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -110,6 +110,9 @@ struct tmio_mmc_data {
+ 	void (*set_clk_div)(struct platform_device *host, int state);
+ 	int (*get_cd)(struct platform_device *host);
+ 	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
++	/* clock management callbacks */
++	int (*clk_enable)(struct platform_device *pdev, unsigned int *f);
++	void (*clk_disable)(struct platform_device *pdev);
+ };
+ 
+ /*
 -- 
 1.7.2.5
 
