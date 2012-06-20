@@ -1,135 +1,50 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 2/5 v4] mmc: sh_mmcif: fix clock management
-Date: Wed, 20 Jun 2012 15:58:54 +0900
-Message-ID: <20120620065854.GM20030@verge.net.au>
-References: <Pine.LNX.4.64.1206131515180.17854@axis700.grange>
- <Pine.LNX.4.64.1206131533240.17854@axis700.grange>
- <20120620051857.GF20030@verge.net.au>
- <Pine.LNX.4.64.1206200839460.20254@axis700.grange>
+Subject: Re: [PATCH] mmc: sh_mmcif: mmc->f_max heuristic
+Date: Wed, 20 Jun 2012 16:02:27 +0900
+Message-ID: <20120620070227.GN20030@verge.net.au>
+References: <1340171905-12534-1-git-send-email-horms@verge.net.au>
+ <Pine.LNX.4.64.1206200845590.20254@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:51714 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752873Ab2FTG65 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jun 2012 02:58:57 -0400
+Return-path: <linux-sh-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1206200839460.20254@axis700.grange>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+In-Reply-To: <Pine.LNX.4.64.1206200845590.20254@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
 To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jun 20, 2012 at 08:41:42AM +0200, Guennadi Liakhovetski wrote:
+On Wed, Jun 20, 2012 at 08:49:38AM +0200, Guennadi Liakhovetski wrote:
+> Hi Simon
+> 
+> Thanks for addressing this issue.
+> 
 > On Wed, 20 Jun 2012, Simon Horman wrote:
 > 
-> > Hi Guennadi,
+> > In 930f152cc9998388031af577843baae572ac8ab6 ("mmc: sh_mmcif: mmc->f_max
+> > should be half of the bus clock") I changed the setting of mmc->f_max from
+> > the bus clock to half the bus clock based on the manual for the sh7372 SoC.
 > > 
-> > On Wed, Jun 13, 2012 at 03:37:19PM +0200, Guennadi Liakhovetski wrote:
-> > > Regardless, whether the MMC bus clock is the same, as the PM clock on this
-> > > specific interface, it has to be managed separately. Its proper management
-> > > should also include enabling and disabling of the clock, whenever the
-> > > interface is becoming active or going idle respectively.
-> > > 
-> > > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > > ---
-> > >  drivers/mmc/host/sh_mmcif.c |   46 +++++++++++++++++++++---------------------
-> > >  1 files changed, 23 insertions(+), 23 deletions(-)
-> > > 
-> > > diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> > > index d6ffb05..6a93b04 100644
-> > > --- a/drivers/mmc/host/sh_mmcif.c
-> > > +++ b/drivers/mmc/host/sh_mmcif.c
-> > > @@ -942,6 +942,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> > >  		}
-> > >  		if (host->power) {
-> > >  			pm_runtime_put(&host->pd->dev);
-> > > +			clk_disable(host->hclk);
-> > >  			host->power = false;
-> > >  			if (p->down_pwr && ios->power_mode == MMC_POWER_OFF)
-> > >  				p->down_pwr(host->pd);
-> > > @@ -954,6 +955,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> > >  		if (!host->power) {
-> > >  			if (p->set_pwr)
-> > >  				p->set_pwr(host->pd, ios->power_mode);
-> > > +			clk_enable(host->hclk);
-> > >  			pm_runtime_get_sync(&host->pd->dev);
-> > >  			host->power = true;
-> > >  			sh_mmcif_sync_reset(host);
-> > > @@ -1278,22 +1280,11 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
-> > >  	host->addr	= reg;
-> > >  	host->timeout	= 1000;
-> > >  
-> > > -	snprintf(clk_name, sizeof(clk_name), "mmc%d", pdev->id);
-> > > -	host->hclk = clk_get(&pdev->dev, clk_name);
-> > > -	if (IS_ERR(host->hclk)) {
-> > > -		dev_err(&pdev->dev, "cannot get clock \"%s\"\n", clk_name);
-> > > -		ret = PTR_ERR(host->hclk);
-> > > -		goto eclkget;
-> > > -	}
-> > > -	clk_enable(host->hclk);
-> > > -	host->clk = clk_get_rate(host->hclk);
-> > >  	host->pd = pdev;
-> > >  
-> > >  	spin_lock_init(&host->lock);
-> > >  
-> > >  	mmc->ops = &sh_mmcif_ops;
-> > > -	mmc->f_max = host->clk / 2;
-> > > -	mmc->f_min = host->clk / 512;
-> > >  	if (pd->ocr)
-> > >  		mmc->ocr_avail = pd->ocr;
-> > >  	mmc->caps = MMC_CAP_MMC_HIGHSPEED;
-> > > @@ -1305,18 +1296,30 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
-> > >  	mmc->max_blk_count = mmc->max_req_size / mmc->max_blk_size;
-> > >  	mmc->max_seg_size = mmc->max_req_size;
-> > >  
-> > > -	sh_mmcif_sync_reset(host);
-> > >  	platform_set_drvdata(pdev, host);
-> > >  
-> > >  	pm_runtime_enable(&pdev->dev);
-> > >  	host->power = false;
-> > >  
-> > > +	snprintf(clk_name, sizeof(clk_name), "mmc%d", pdev->id);
-> > > +	host->hclk = clk_get(&pdev->dev, clk_name);
-> > > +	if (IS_ERR(host->hclk)) {
-> > > +		ret = PTR_ERR(host->hclk);
-> > > +		dev_err(&pdev->dev, "cannot get clock \"%s\": %d\n", clk_name, ret);
-> > > +		goto eclkget;
-> > > +	}
-> > > +	clk_enable(host->hclk);
-> > > +	host->clk = clk_get_rate(host->hclk);
-> > > +	mmc->f_max = host->clk / 2;
-> > > +	mmc->f_min = host->clk / 512;
-> > > +
-> > >  	ret = pm_runtime_resume(&pdev->dev);
-> > >  	if (ret < 0)
-> > >  		goto eresume;
-> > >  
-> > >  	INIT_DELAYED_WORK(&host->timeout_work, mmcif_timeout_work);
-> > >  
-> > > +	sh_mmcif_sync_reset(host);
-> > >  	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
-> > >  
-> > >  	ret = request_threaded_irq(irq[0], sh_mmcif_intr, sh_mmcif_irqt, 0, "sh_mmc:error", host);
-> > > @@ -1330,6 +1333,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
-> > >  		goto ereqirq1;
-> > >  	}
-> > >  
-> > > +	clk_disable(host->hclk);
-> > >  	ret = mmc_add_host(mmc);
-> > >  	if (ret < 0)
-> > >  		goto emmcaddh;
+> > Inspection of sh_mmcif_clock_control() reveals that it relies on
+> > mmc->f_max being set to the bus speed in order to enable the supplementary
+> > clock, a feature that does not exist on the sh7372.
 > > 
-> > Could you clarify the purpose of two hunks above.
-> > They seem to move code down in sh_mmcif_probe().
-> > Is this related to the call to pm_runtime_enable() ?
+> > Armed with this information implement the following heuristic for setting
+> > mmc->f_max:
+> > 
+> > * Use bus clock if the supplementary clock feature is present
+> >   - Assumed to work on the sh7757lcr board, the only board present
+> >     in the tree which has the feature.
 > 
-> The sh_mmcif_sync_reset() call accesses the hardware so it only makes 
-> sense after the hardware has been resumed. Moving the clk_enable() call 
-> down improves consistency by grouping clock and runtime PM code together 
-> during probe() similar to other paths.
+> To be able to better understand this change: do we have access to the 
+> sh7757 documentation and does it actually explain how the CLK_SUP_PCLK bit 
+> in MMCIF_CE_CLK_CTRL functions? Does it actually set the MMC bus clock to 
+> be equal to the host clock?
 
-Thanks.
-
-Reviewed-by: Simon Horman <horms@verge.net.au>
+My understanding is that neither Magnus nor I have access to the
+documentation for the sh7757. Thus we could only infer things from
+examining the source code. I would be very happy if someone with access to
+the documentation could shed some further light on this. In particular,
+I would be happy if this heuristic was shown not to be necessary. But
+in lieu of access to the documentation I think this patch is reasonable.
 
