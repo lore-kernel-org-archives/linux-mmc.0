@@ -1,72 +1,97 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH] mmc: sh_mmcif: mmc->f_max heuristic
-Date: Wed, 20 Jun 2012 14:58:25 +0900
-Message-ID: <1340171905-12534-1-git-send-email-horms@verge.net.au>
-Return-path: <linux-sh-owner@vger.kernel.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [RESEND PATCH] mmc: dw_mmc: Add check for IDMAC configuration
+Date: Wed, 20 Jun 2012 02:07:28 -0400
+Message-ID: <87wr324iu7.fsf@octavius.laptop.org>
+References: <1339495102-4889-1-git-send-email-girish.shivananjappa@linaro.org>
+	<CAFbHwiRXXbOzCPeb0jdrzjmq1aeisjRSY5xNwrQbeNYJx04UJg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:41800 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752267Ab2FTGHd convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jun 2012 02:07:33 -0400
+In-Reply-To: <CAFbHwiRXXbOzCPeb0jdrzjmq1aeisjRSY5xNwrQbeNYJx04UJg@mail.gmail.com>
+	(Will Newton's message of "Tue, 12 Jun 2012 11:08:02 +0100")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Will Newton <will.newton@gmail.com>
+Cc: Girish K S <girish.shivananjappa@linaro.org>, linux-mmc@vger.kernel.org, patches@linaro.org
 
-In 930f152cc9998388031af577843baae572ac8ab6 ("mmc: sh_mmcif: mmc->f_max
-should be half of the bus clock") I changed the setting of mmc->f_max from
-the bus clock to half the bus clock based on the manual for the sh7372 SoC.
+Hi Girish,
 
-Inspection of sh_mmcif_clock_control() reveals that it relies on
-mmc->f_max being set to the bus speed in order to enable the supplementary
-clock, a feature that does not exist on the sh7372.
+On Tue, Jun 12 2012, Will Newton wrote:
+> On Tue, Jun 12, 2012 at 10:58 AM, Girish K S
+> <girish.shivananjappa@linaro.org> wrote:
+>> In the Current dwmmc driver there is support for selecting IDMAC fro=
+m
+>> the menu config option. If the support for IDMAC is enabled in the m=
+enu
+>> config and Hardware configuration register's DMA_INTERFACE field is =
+0.
+>> Still the driver will try to do the DMA initialization.
+>>
+>> The dw_mci_idmac_init function currently implemented returns only su=
+ccess
+>> indicating that the DMA initialization is always successful. The cur=
+rent
+>> patch will add a ciheck for existance of the DMA IP and allow the
+>> DMA initialization.
+>>
+>> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+>> ---
+>> =C2=A0drivers/mmc/host/dw_mmc.c | =C2=A0 15 +++++++++++++--
+>> =C2=A01 files changed, 13 insertions(+), 2 deletions(-)
+>
+> Ok, this version looks better.
+>
+> Acked-by: Will Newton <will.newton@imgtec.com>
 
-Armed with this information implement the following heuristic for setting
-mmc->f_max:
+A quick point of patch etiquette:  you used a subject line of [RESEND
+PATCH], but this isn't a resend of a patch.  A resend is when you're
+resending a copy of a patch *without any modifications* because it was
+ignored, or you'd like more discussion, or you're adding new people to
+the e-mail thread.
 
-* Use bus clock if the supplementary clock feature is present
-  - Assumed to work on the sh7757lcr board, the only board present
-    in the tree which has the feature.
-* Use half the bus clock otherwise
-  - As per the documentation for the sh7372 SoC.
+This is a v2 of a patch, because you made changes since the last patch.
+The right way to signify that is with [PATCH v2] in the Subject line,
+and a section just below the "---" after the Signed-off-by that explain=
+s
+what you changed.  E.g.:
 
-Reported-by: Magnus Damm <damm@opensource.se>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Signed-off-by: Simon Horman <horms@verge.net.au>
+=3D=3D=3D=3D=3D=3D=3D
+Subject: [PATCH v2] mmc: dw_mmc: Add check for IDMAC configuration
 
+In the Current dwmmc driver there is support for selecting IDMAC from
+the menu config option. If the support for IDMAC is enabled in the menu
+config and Hardware configuration register's DMA_INTERFACE field is 0.
+Still the driver will try to do the DMA initialization.
+
+The dw_mci_idmac_init function currently implemented returns only succe=
+ss
+indicating that the DMA initialization is always successful. The curren=
+t
+patch will add a ciheck for existance of the DMA IP and allow the
+DMA initialization.
+
+Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
 ---
+Changes since v1:
+ * Protect against configuration mistakes by falling back to PIO if
+   CONFIG_MMC_DW_IDMAC=3Dy but the hardware has no IDMAC support.
+=20
+ drivers/mmc/host/dw_mmc.c |   15 +++++++++++++--
+ 1 files changed, 13 insertions(+), 2 deletions(-)
 
-Regression information:
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+=3D=3D=3D=3D=3D=3D=3D
 
-It seems likely that this resolves a regression for the sh7757lcr which was
-introduced by 930f152cc9998388031af577843baae572ac8ab6 ("mmc: sh_mmcif:
-mmc->f_max should be half of the bus clock"). However, although I have the
-hardware in question I am unsure how to exercise the code to test if there
-is a problem or not.
+I've applied the patch to mmc-next for 3.6 now.
 
-930f152cc9998388031af577843baae572ac8ab6 was added between the 3.3 and 3.4.
+Thanks,
 
-Dependency information:
-
-This patch is based on Guennadi Liakhovetski's recent series
-"[PATCH 0/5 v4] mmc: sh_mmcif: clock and power updates". It should
-be trivial to rebase it on 3.5-rc3.
----
- drivers/mmc/host/sh_mmcif.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index f0f518b..dfcfe83 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -919,10 +919,11 @@ static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
- static int sh_mmcif_clk_update(struct sh_mmcif_host *host)
- {
- 	int ret = clk_enable(host->hclk);
-+	struct sh_mmcif_plat_data *p = host->pd->dev.platform_data;
- 
- 	if (!ret) {
- 		host->clk = clk_get_rate(host->hclk);
--		host->mmc->f_max = host->clk / 2;
-+		host->mmc->f_max = p->sup_pclk ? host->clk : host->clk / 2;
- 		host->mmc->f_min = host->clk / 512;
- 	}
- 
--- 
-1.7.10.2.484.gcd07cc5
-
+- Chris.
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
