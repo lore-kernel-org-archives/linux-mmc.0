@@ -1,41 +1,65 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: card: Do not scan boot partitions
-Date: Wed, 20 Jun 2012 10:55:36 +0200
-Message-ID: <CACRpkda6gbAT1=qnHmvGv9UhqDVokvobcqw65vdsXHsrz8=QQw@mail.gmail.com>
-References: <1339506253-7164-1-git-send-email-johan.rudholm@stericsson.com>
-	<87oboe4ibk.fsf@octavius.laptop.org>
-	<CA+20K0DJYYeo80pVC1wLo_+VaXYvgiOnJzSvf9mE_u69Dj941w@mail.gmail.com>
+From: ludovic.desroches <ludovic.desroches@atmel.com>
+Subject: Fwd: Re: [PATCH]  mmc: at91: fix bus speed
+Date: Wed, 20 Jun 2012 11:13:07 +0200
+Message-ID: <4FE19423.4010103@atmel.com>
+References: <4FE18E84.9000603@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:49926 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754645Ab2FTIzh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jun 2012 04:55:37 -0400
-Received: by qcro28 with SMTP id o28so4038799qcr.19
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Jun 2012 01:55:36 -0700 (PDT)
-In-Reply-To: <CA+20K0DJYYeo80pVC1wLo_+VaXYvgiOnJzSvf9mE_u69Dj941w@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <4FE18E84.9000603@atmel.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-mmc@vger.kernel.org
+Cc: ludovic.desroches@atmel.com, =?UTF-8?B?UHJjaGFsIEppxZnDrQ==?= <jiri.prchal@aksignal.cz>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <jrudholm@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-On Wed, Jun 20, 2012 at 9:27 AM, Johan Rudholm <jrudholm@gmail.com> wrote:
-> 2012/6/20 Chris Ball <cjb@laptop.org>:
->>
->> Would it be impossible to add a partition table to mmcblkXbootY,
->> or just unlikely?
->
-> I believe this is just an unlikely scenario since the boot partitions
-> are supposed to contain boot code and also because of their relatively
-> small size (a few MBs), but there is no technical problem. Perhaps it
-> should be left up to the user?
-
-Like we add a Kconfig bool option "support partition scanning on boot
-partitions" and then we default that to "n", so systems that really
-want to do that can turn it on the day they need it.
-
-Could you augment the patch like that?
-
-Yours,
-Linus Walleij
+QWRkIG1tYyBtYWlsaW5nIGxpc3QuCgoKLS0tLS0tLS0gTWVzc2FnZSBvcmlnaW5hbCAtLS0tLS0t
+LQpTdWpldDogUmU6IFtQQVRDSF0gIG1tYzogYXQ5MTogZml4IGJ1cyBzcGVlZApEYXRlIDogV2Vk
+LCAyMCBKdW4gMjAxMiAxMDo0OTowOCArMDIwMApEZSA6IGx1ZG92aWMuZGVzcm9jaGVzIDxsdWRv
+dmljLmRlc3JvY2hlc0BhdG1lbC5jb20+ClBvdXIgOiBQcmNoYWwgSmnFmcOtIDxqaXJpLnByY2hh
+bEBha3NpZ25hbC5jej4KQ29waWUgw6AgOiA8bHVkb3ZpYy5kZXNyb2NoZXNAYXRtZWwuY29tPiwg
+CjxsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc+CgpIZWxsbyBKaXJpLAoKVGhh
+bmtzIGZvciB5b3VyIHBhdGNoIGJ1dCBhdDkxLW1jaSBpcyBub3cgZGVwcmVjYXRlZCBhbmQgc2hv
+dWxkIGJlCnJlbW92ZWQgaW4gMy43LgpPbiBvbmUgaGFuZCBJIGRvbid0IGtub3cgaWYgd2UgaGF2
+ZSB0byBjb250aW51ZSB0byB0YWtlIHBhdGNoZXMgZm9yIHRoaXMKZHJpdmVyLCBvbiB0aGUgb3Ro
+ZXIgaGFuZCBpdCdzIGEgZml4IGZvciBzb21lIFNEIGNhcmRzLgoKTGUgMDYvMjAvMjAxMiAxMDox
+NSBBTSwgUHJjaGFsIEppxZnDrSBhIMOpY3JpdCA6Cj4gVGhpcyBwYXRjaCBjaGFuZ2UgbWluaW11
+bSBhbmQgbWF4aW11bSBjbG9jayBzcGVlZCBiZWNhdXNlIHNvbWUgbm9uYW1lCj4gY2FyZHMgZG9l
+c24ndCB3b3JrIGR1cmluZyBpbml0IGV2ZW4gYXQgMzc1a0h6IGFuZCBuZXcgY2FyZHMgKFNEIHYu
+IDMuMCkKPiBjYW4gcnVuIGF0IDUwIG9yIDEwMCBNSHouCj4gQWxzbyBhZGVkIGNsa2RpdiByZWdp
+c3RlciBvdmVycnVuIGZpeCB3aGVuIHNldHRpbmcgbG93IHNwZWVkcy4KPgo+IFNpZ25lZC1vZmYt
+Ynk6IEppcmkgUHJjaGFsIDxqaXJpLnByY2hhbEBha3NpZ25hbC5jej4KPiAtLS0KPgo+IC0tLSBs
+aW51eC9saW51eC0zLjUtcmMzL2RyaXZlcnMvbW1jL2hvc3QvYXQ5MV9tY2kuYy5vcmlnICAgIDIw
+MTItMDYtMTcKPiAwMjoyNToxNy4wMDAwMDAwMDAgKzAyMDAKPiArKysgbGludXgvbGludXgtMy41
+LXJjMy9kcml2ZXJzL21tYy9ob3N0L2F0OTFfbWNpLmMgICAgMjAxMi0wNi0xOAo+IDExOjAxOjQ5
+Ljc1MTQxNTk4NCArMDIwMAo+IEBAIC03MjQsNiArNzI0LDEwIEBAIHN0YXRpYyB2b2lkIGF0OTFf
+bWNpX3NldF9pb3Moc3RydWN0IG1tY18KPiAgICAgICAgICAgZWxzZQo+ICAgICAgICAgICAgICAg
+Y2xrZGl2ID0gKGF0OTFfbWFzdGVyX2Nsb2NrIC8gaW9zLT5jbG9jaykgLyAyOwo+Cj4gKyAgICAg
+ICAgLyogc2V0IG1heGltdW0gZGl2aWRlciAqLwo+ICsgICAgICAgIGlmIChjbGtkaXYgPiAyNTUp
+Cj4gKyAgICAgICAgICAgIGNsa2RpdiA9IDI1NTsKPiArCj4gICAgICAgICAgIHByX2RlYnVnKCJj
+bGtkaXYgPSAlZC4gbWNjayA9ICVsZFxuIiwgY2xrZGl2LAo+ICAgICAgICAgICAgICAgYXQ5MV9t
+YXN0ZXJfY2xvY2sgLyAoMiAqIChjbGtkaXYgKyAxKSkpOwo+ICAgICAgIH0KPiBAQCAtOTQ4LDgg
+Kzk1Miw4IEBAIHN0YXRpYyBpbnQgX19pbml0IGF0OTFfbWNpX3Byb2JlKHN0cnVjdAo+ICAgICAg
+IH0KPgo+ICAgICAgIG1tYy0+b3BzID0gJmF0OTFfbWNpX29wczsKPiAtICAgIG1tYy0+Zl9taW4g
+PSAzNzUwMDA7Cj4gLSAgICBtbWMtPmZfbWF4ID0gMjUwMDAwMDA7Cj4gKyAgICBtbWMtPmZfbWlu
+ID0gMjAwMDAwOyAvKiBub3QgYWxsIGNhcmRzIGNhbiBydW4gYXQgMzc1a0h6ICovCgpJIHdpbGwg
+Y2hlY2sgb24gYXRtZWwtbWNpIGlmIHdlIGhhdmUgdG8gZGVjcmVhc2UgZl9taW4uCgo+ICsgICAg
+bW1jLT5mX21heCA9IDEwMDAwMDAwMDsgLyogbmV3IGNhcmRzIGNhbiBydW4gYXQgMTAwTUh6ICov
+CgpNQ0kgb3BlcmF0ZXMgYXQgYSByYXRlIG9mIHVwIHRvIG1hc3RlciBjbG9jayBkaXZpZGVkIGJ5
+IHR3byBzbyB5b3UgY2FuJ3QKcmVhY2ggMTAwTUh6IGFzIG1heCBmcmVxdWVuY3kgc2luY2UgaXQg
+bWVhbnMgdGhhdCBvdXIgbWFzdGVyIGNsb2NrIGlzIGF0CjIwME1IeiB0aGF0IGlzIG5vdCB0aGUg
+Y2FzZS4gSSB3b3VsZCBzYXkgNTBNSHogaXMgdGhlIG1heGltdW0gZnJlcXVlbmN5CmZvciBwcm9k
+dWN0IGNvbXBhdGlibGUgd2l0aCBhdDkxLW1jaS4KCj4gICAgICAgbW1jLT5vY3JfYXZhaWwgPSBN
+TUNfVkREXzMyXzMzIHwgTU1DX1ZERF8zM18zNDsKPiAgICAgICBtbWMtPmNhcHMgPSAwOwo+Cj4K
+PgoKUmVnYXJkcwoKTHVkb3ZpYwoKCgoKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFybS1r
+ZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWls
+bWFuL2xpc3RpbmZvL2xpbnV4LWFybS1rZXJuZWwK
