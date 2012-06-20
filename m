@@ -1,46 +1,40 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 4/5 v4] mmc: sh_mmcif: remove redundant .down_pwr()
- callback
-Date: Wed, 20 Jun 2012 08:19:26 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1206200818110.20254@axis700.grange>
-References: <Pine.LNX.4.64.1206131515180.17854@axis700.grange>
- <Pine.LNX.4.64.1206131534250.17854@axis700.grange> <20120620045808.GC20030@verge.net.au>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: sh_mmcif: Support MMC_SLEEP_AWAKE command
+Date: Wed, 20 Jun 2012 02:21:03 -0400
+Message-ID: <87k3z24i7k.fsf@octavius.laptop.org>
+References: <1339534569-27923-1-git-send-email-laurent.pinchart@ideasonboard.com>
+	<Pine.LNX.4.64.1206131527410.17854@axis700.grange>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20120620045808.GC20030@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:55608 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752439Ab2FTGVH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 20 Jun 2012 02:21:07 -0400
+In-Reply-To: <Pine.LNX.4.64.1206131527410.17854@axis700.grange> (Guennadi
+	Liakhovetski's message of "Wed, 13 Jun 2012 15:27:54 +0200 (CEST)")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Laurent Pinchart <laurent.pinchart@ideasonboard.com>, linux-mmc@vger.kernel.org, Simon Horman <horms@verge.net.au>, linux-sh@vger.kernel.org
 
-Hi Simon
+Hi,
 
-On Wed, 20 Jun 2012, Simon Horman wrote:
+On Wed, Jun 13 2012, Guennadi Liakhovetski wrote:
+> On Tue, 12 Jun 2012, Laurent Pinchart wrote:
+>
+>> The MMC_SLEEP_AWAKE and SD_IO_SEND_OP_COND commands share the same
+>> opcode. SD_IO_SEND_OP_COND isn't supported by the SH MMCIF, but
+>> MMC_SLEEP_AWAKE is. Discriminate between the two commands using the
+>> command flags, and reject SD_IO_SEND_OP_COND only.
+>> 
+>> Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+>
+> Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-> On Wed, Jun 13, 2012 at 03:37:27PM +0200, Guennadi Liakhovetski wrote:
-> > >From the original version of sh_mmcif the .set_pwr() callback has only been
-> > used to turn the card's power on, and the .down_pwr() callback has been
-> > used to turn it off. .set_pwr() can be used for both these tasks, which is
-> > also how it is implemented by the only user of this API: the SH7724 ecovec
-> > board.
-> > 
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> 
-> Reviewed-by: Simon Horman <horms@verge.net.au>
-> 
-> Do you also intend to post patches for the following?
-> 
-> * Remove mmcif_down_pwr from ecovec
-> * Remove down_pwr from struct sh_mmcif_plat_data
+Thanks, pushed to mmc-next for 3.6.
 
-Sure, since these patches depend on each other we have to make sure this 
-one gets applied first. The other two then can be applied in their time, 
-they do not affect the functionality any more.
-
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
