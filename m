@@ -1,56 +1,52 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: mmc_cd_gpio_request() failed request_threaded_irq()
-Date: Wed, 20 Jun 2012 02:15:06 -0400
-Message-ID: <87sjdq4ihh.fsf@octavius.laptop.org>
-References: <87aa09xcd6.wl%kuninori.morimoto.gx@renesas.com>
-	<Pine.LNX.4.64.1206122323040.6800@axis700.grange>
+Subject: Re: [PATCH] mmc: card: Do not scan boot partitions
+Date: Wed, 20 Jun 2012 02:18:39 -0400
+Message-ID: <87oboe4ibk.fsf@octavius.laptop.org>
+References: <1339506253-7164-1-git-send-email-johan.rudholm@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:45723 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:45753 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753922Ab2FTGPM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Jun 2012 02:15:12 -0400
-In-Reply-To: <Pine.LNX.4.64.1206122323040.6800@axis700.grange> (Guennadi
-	Liakhovetski's message of "Tue, 12 Jun 2012 23:24:02 +0200 (CEST)")
+	id S1753245Ab2FTGSn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 20 Jun 2012 02:18:43 -0400
+In-Reply-To: <1339506253-7164-1-git-send-email-johan.rudholm@stericsson.com>
+	(Johan Rudholm's message of "Tue, 12 Jun 2012 15:04:13 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: kuninori.morimoto.gx@renesas.com, linux-mmc@vger.kernel.org
+To: Johan Rudholm <johan.rudholm@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-Hi Guennadi,
+Hi Johan,
 
-On Tue, Jun 12 2012, Guennadi Liakhovetski wrote:
->> I noticed that mmc_cd_gpio_request() failed on request_threaded_irq().
->> Now, I'm using v3.5-rc2 kernel.
->> 
->> current ${LINUX}/drivers/mmc/core/cd-gpio.c :: mmc_cd_gpio_request() uses
->> 
->> request_threaded_irq(irq, NULL, mmc_cd_gpio_irqt,
->> 		   IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
->> 		   cd->label, host);
->> 
->> It doesn't have hander (2nd is NULL), and flag doesn't have IRQF_ONESHOT.
->> Then, it run  request_threaded_irq() -> __setup_irq()
->> and, it got this error.
->> 
->> pr_err("Threaded irq requested with handler=NULL and !ONESHOT for irq %d\n",
->> 	irq);
->> 
->> I'm not sure detail of it, but maybe from this commit
->> 
->> -------------------------------------------
->> commit 1c6c69525b40eb76de8adf039409722015927dc3
->> Author: Thomas Gleixner <tglx@linutronix.de>
->> Date:   Thu Apr 19 10:35:17 2012 +0200
->> 
->>     genirq: Reject bogus threaded irq requests
+On Tue, Jun 12 2012, Johan Rudholm wrote:
+> Do not scan boot partitions for "soft" partitions, since the boot
+> partitions are supposed to contain boot code. Silences the following
+> message during boot:
 >
-> Also see this thread: https://lkml.org/lkml/2012/6/12/151
+>  mmcblkXbootY: unknown partition table
 >
-> For now you can add an IRQF_ONESHOT flag to the call.
+> Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
+> ---
+>  drivers/mmc/card/block.c |    2 ++
+>  1 file changed, 2 insertions(+)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 7e3f453..efdea68 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -1515,6 +1515,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>  	md->disk->queue = md->queue.queue;
+>  	md->disk->driverfs_dev = parent;
+>  	set_disk_ro(md->disk, md->read_only || default_ro);
+> +	if (area_type & MMC_BLK_DATA_AREA_BOOT)
+> +		md->disk->flags = GENHD_FL_NO_PART_SCAN;
+>  
+>  	/*
+>  	 * As discussed on lkml, GENHD_FL_REMOVABLE should:
 
-Should we get this change into 3.5?
+Would it be impossible to add a partition table to mmcblkXbootY,
+or just unlikely?
 
 Thanks,
 
