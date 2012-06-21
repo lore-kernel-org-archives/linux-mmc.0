@@ -1,82 +1,50 @@
-From: ludovic.desroches <ludovic.desroches@atmel.com>
-Subject: Re: Fwd: Re: [PATCH]  mmc: at91: fix bus speed
-Date: Thu, 21 Jun 2012 10:23:41 +0200
-Message-ID: <4FE2DA0D.2080509@atmel.com>
-References: <4FE18E84.9000603@atmel.com> <4FE19423.4010103@atmel.com>
- <4FE2D3A9.6000803@aksignal.cz>
+From: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Subject: Re: mmc-utils: Initial contribute of lsmmc
+Date: Thu, 21 Jun 2012 10:47:58 +0200
+Message-ID: <4FE2DFBE.2010105@st.com>
+References: <E2E6AC6BFAD06343BA2D97432459C1B60AD59DF92E@EXDCVYMBSTM005.EQ1STM.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <4FE2D3A9.6000803@aksignal.cz>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: =?UTF-8?B?UHJjaGFsIEppxZnDrQ==?= <jiri.prchal@aksignal.cz>
-Cc: "ludovic.desroches" <ludovic.desroches@atmel.com>, linux-mmc@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:54090 "EHLO
+	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1758879Ab2FUIsH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jun 2012 04:48:07 -0400
+In-Reply-To: <E2E6AC6BFAD06343BA2D97432459C1B60AD59DF92E@EXDCVYMBSTM005.EQ1STM.local>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Johan RUDHOLM <johan.rudholm@stericsson.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sebastian Rasmussen <sebras@gmail.com>, Per FORLIN <per.forlin@stericsson.com>, Ulf HANSSON <ulf.hansson@stericsson.com>
 
-SGVsbG8gUHJjaGFsLAoKTGUgMDYvMjEvMjAxMiAwOTo1NiBBTSwgUHJjaGFsIEppxZnDrSBhIMOp
-Y3JpdCA6Cj4gSGVsbG8gTHVkb3ZpYywKPiBJIGhhdmUgdHJpZWQgaXQgd2l0aCBhdG1lbC1tY2kg
-ZHJpdmVyLiBJdCB0b29rIG1lIGxpdHRsZSB0aW1lIHRvIGNoYW5nZQo+IHNldHRpbmcgb2YgbXkg
-Ym9hcmQuCj4gSXQgc2VlbXMgdG8gdHJ5IGNsb2NrIGRvd24gdG8gMjAwa0h6Ogo+IFsgICAgNS44
-NjAwMDBdIG1tYzA6IG1tY19yZXNjYW5fdHJ5X2ZyZXE6IHRyeWluZyB0byBpbml0IGNhcmQgYXQg
-NDAwMDAwIEh6Cj4gWyAgICA1LjkyMDAwMF0gbW1jMDogbW1jX3Jlc2Nhbl90cnlfZnJlcTogdHJ5
-aW5nIHRvIGluaXQgY2FyZCBhdCAzMDAwMDAgSHoKPiBbICAgIDUuOTgwMDAwXSBtbWMwOiBtbWNf
-cmVzY2FuX3RyeV9mcmVxOiB0cnlpbmcgdG8gaW5pdCBjYXJkIGF0IDIwNTA3OSBIego+IEFzIEkg
-c2VlIGluIGRyaXZlciBzb3VyY2UsIHRoZXJlIGlzIGJldHRlciBjbGtkaXYgb3ZlcnJ1biB3b3Jr
-IGFyb3VuZC4KClllcyBpdCB3YXMgd2VsbCBtYW5hZ2VkIGluIHRoaXMgZHJpdmVyLgoKPiBCdXQg
-SSBkb24ndCBmaW5kIG1pbiBhbmQgbWF4IGZyZXEgZGVmaW5pdGlvbnMgaW4gdGhpcyBkcml2ZXIs
-IGl0IGlzCj4gcHJvYmFibHkgc29tZXdoZXJlIGVsc2UuCgpJbnRvIGF0bWVsX2luaXRfc2xvdDoK
-bW1jLT5mX21pbiA9IERJVl9ST1VORF9VUChob3N0LT5idXNfaHosIDUxMik7Cm1tYy0+Zl9tYXgg
-PSBob3N0LT5idXNfaHogLyAyOwoKUmVnYXJkcwoKTHVkb3ZpYwoKPiBTbyB0aGlzIHdvdWxkIGJl
-IE9LLgo+Cj4gRG5lIDIwLjYuMjAxMiAxMToxMywgbHVkb3ZpYy5kZXNyb2NoZXMgbmFwc2FsKGEp
-Ogo+PiBBZGQgbW1jIG1haWxpbmcgbGlzdC4KPj4KPj4KPj4gLS0tLS0tLS0gTWVzc2FnZSBvcmln
-aW5hbCAtLS0tLS0tLQo+PiBTdWpldDogUmU6IFtQQVRDSF0gbW1jOiBhdDkxOiBmaXggYnVzIHNw
-ZWVkCj4+IERhdGUgOiBXZWQsIDIwIEp1biAyMDEyIDEwOjQ5OjA4ICswMjAwCj4+IERlIDogbHVk
-b3ZpYy5kZXNyb2NoZXMgPGx1ZG92aWMuZGVzcm9jaGVzQGF0bWVsLmNvbT4KPj4gUG91ciA6IFBy
-Y2hhbCBKacWZw60gPGppcmkucHJjaGFsQGFrc2lnbmFsLmN6Pgo+PiBDb3BpZSDDoCA6IDxsdWRv
-dmljLmRlc3JvY2hlc0BhdG1lbC5jb20+LAo+PiA8bGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZy
-YWRlYWQub3JnPgo+Pgo+PiBIZWxsbyBKaXJpLAo+Pgo+PiBUaGFua3MgZm9yIHlvdXIgcGF0Y2gg
-YnV0IGF0OTEtbWNpIGlzIG5vdyBkZXByZWNhdGVkIGFuZCBzaG91bGQgYmUKPj4gcmVtb3ZlZCBp
-biAzLjcuCj4+IE9uIG9uZSBoYW5kIEkgZG9uJ3Qga25vdyBpZiB3ZSBoYXZlIHRvIGNvbnRpbnVl
-IHRvIHRha2UgcGF0Y2hlcyBmb3IgdGhpcwo+PiBkcml2ZXIsIG9uIHRoZSBvdGhlciBoYW5kIGl0
-J3MgYSBmaXggZm9yIHNvbWUgU0QgY2FyZHMuCj4+Cj4+IExlIDA2LzIwLzIwMTIgMTA6MTUgQU0s
-IFByY2hhbCBKacWZw60gYSDDqWNyaXQgOgo+Pj4gVGhpcyBwYXRjaCBjaGFuZ2UgbWluaW11bSBh
-bmQgbWF4aW11bSBjbG9jayBzcGVlZCBiZWNhdXNlIHNvbWUgbm9uYW1lCj4+PiBjYXJkcyBkb2Vz
-bid0IHdvcmsgZHVyaW5nIGluaXQgZXZlbiBhdCAzNzVrSHogYW5kIG5ldyBjYXJkcyAoU0Qgdi4g
-My4wKQo+Pj4gY2FuIHJ1biBhdCA1MCBvciAxMDAgTUh6Lgo+Pj4gQWxzbyBhZGVkIGNsa2RpdiBy
-ZWdpc3RlciBvdmVycnVuIGZpeCB3aGVuIHNldHRpbmcgbG93IHNwZWVkcy4KPj4+Cj4+PiBTaWdu
-ZWQtb2ZmLWJ5OiBKaXJpIFByY2hhbCA8amlyaS5wcmNoYWxAYWtzaWduYWwuY3o+Cj4+PiAtLS0K
-Pj4+Cj4+PiAtLS0gbGludXgvbGludXgtMy41LXJjMy9kcml2ZXJzL21tYy9ob3N0L2F0OTFfbWNp
-LmMub3JpZyAyMDEyLTA2LTE3Cj4+PiAwMjoyNToxNy4wMDAwMDAwMDAgKzAyMDAKPj4+ICsrKyBs
-aW51eC9saW51eC0zLjUtcmMzL2RyaXZlcnMvbW1jL2hvc3QvYXQ5MV9tY2kuYyAyMDEyLTA2LTE4
-Cj4+PiAxMTowMTo0OS43NTE0MTU5ODQgKzAyMDAKPj4+IEBAIC03MjQsNiArNzI0LDEwIEBAIHN0
-YXRpYyB2b2lkIGF0OTFfbWNpX3NldF9pb3Moc3RydWN0IG1tY18KPj4+IGVsc2UKPj4+IGNsa2Rp
-diA9IChhdDkxX21hc3Rlcl9jbG9jayAvIGlvcy0+Y2xvY2spIC8gMjsKPj4+Cj4+PiArIC8qIHNl
-dCBtYXhpbXVtIGRpdmlkZXIgKi8KPj4+ICsgaWYgKGNsa2RpdiA+IDI1NSkKPj4+ICsgY2xrZGl2
-ID0gMjU1Owo+Pj4gKwo+Pj4gcHJfZGVidWcoImNsa2RpdiA9ICVkLiBtY2NrID0gJWxkXG4iLCBj
-bGtkaXYsCj4+PiBhdDkxX21hc3Rlcl9jbG9jayAvICgyICogKGNsa2RpdiArIDEpKSk7Cj4+PiB9
-Cj4+PiBAQCAtOTQ4LDggKzk1Miw4IEBAIHN0YXRpYyBpbnQgX19pbml0IGF0OTFfbWNpX3Byb2Jl
-KHN0cnVjdAo+Pj4gfQo+Pj4KPj4+IG1tYy0+b3BzID0gJmF0OTFfbWNpX29wczsKPj4+IC0gbW1j
-LT5mX21pbiA9IDM3NTAwMDsKPj4+IC0gbW1jLT5mX21heCA9IDI1MDAwMDAwOwo+Pj4gKyBtbWMt
-PmZfbWluID0gMjAwMDAwOyAvKiBub3QgYWxsIGNhcmRzIGNhbiBydW4gYXQgMzc1a0h6ICovCj4+
-Cj4+IEkgd2lsbCBjaGVjayBvbiBhdG1lbC1tY2kgaWYgd2UgaGF2ZSB0byBkZWNyZWFzZSBmX21p
-bi4KPj4KPj4+ICsgbW1jLT5mX21heCA9IDEwMDAwMDAwMDsgLyogbmV3IGNhcmRzIGNhbiBydW4g
-YXQgMTAwTUh6ICovCj4+Cj4+IE1DSSBvcGVyYXRlcyBhdCBhIHJhdGUgb2YgdXAgdG8gbWFzdGVy
-IGNsb2NrIGRpdmlkZWQgYnkgdHdvIHNvIHlvdSBjYW4ndAo+PiByZWFjaCAxMDBNSHogYXMgbWF4
-IGZyZXF1ZW5jeSBzaW5jZSBpdCBtZWFucyB0aGF0IG91ciBtYXN0ZXIgY2xvY2sgaXMgYXQKPj4g
-MjAwTUh6IHRoYXQgaXMgbm90IHRoZSBjYXNlLiBJIHdvdWxkIHNheSA1ME1IeiBpcyB0aGUgbWF4
-aW11bSBmcmVxdWVuY3kKPj4gZm9yIHByb2R1Y3QgY29tcGF0aWJsZSB3aXRoIGF0OTEtbWNpLgo+
-Pgo+Pj4gbW1jLT5vY3JfYXZhaWwgPSBNTUNfVkREXzMyXzMzIHwgTU1DX1ZERF8zM18zNDsKPj4+
-IG1tYy0+Y2FwcyA9IDA7Cj4+Pgo+Pj4KPj4+Cj4+Cj4+IFJlZ2FyZHMKPj4KPj4gTHVkb3ZpYwo+
-Pgo+Pgo+Pgo+Pgo+Pgo+Cj4KPgoKCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2Vy
-bmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1h
-bi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
+Hello Johan.
+
+On 6/21/2012 9:44 AM, Johan RUDHOLM wrote:
+> Dear all,
+> 
+> this is a release to the community of the source code of the utility
+> "lsmmc", created by Sebastian Rasmussen formerly at ST-Ericsson.
+> 
+> lsmmc contains an extensive parser of the CID, CSD, SCR and EXT_CSD
+> registers, as well as an archive of these registers for over 120
+> eMMC and SD-cards. The utility works as-is and uses sysfs to read the
+> register values.
+> 
+> It could be a candidate for incorporation into the mmc-utils, but it
+> naturally requires some adaptation. Please consider this code to be at
+> your disposal.
+
+FYI, some work has been already done (and reviewed by Sebastian); take a
+look at
+
+http://git.kernel.org/?p=linux/kernel/git/cjb/mmc-utils.git;a=commit;h=a5bf4a2030a9dcfbcebf1b647e65c1e936a56e14
+
+Peppe
+
+> Chris: I decided that a .tar.gz was more tasteful in the end, the patch
+> whould have contained lines > 1000 chars and been 8000 lines long ;)
+> 
+> Kind regards, Johan
+> 
+
+
