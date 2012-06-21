@@ -1,75 +1,48 @@
-From: =?UTF-8?B?UHJjaGFsIEppxZnDrQ==?= <jiri.prchal@aksignal.cz>
-Subject: Re: Fwd: Re: [PATCH]  mmc: at91: fix bus speed
-Date: Thu, 21 Jun 2012 09:56:25 +0200
-Message-ID: <4FE2D3A9.6000803@aksignal.cz>
-References: <4FE18E84.9000603@atmel.com> <4FE19423.4010103@atmel.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: card: Do not scan boot partitions
+Date: Thu, 21 Jun 2012 10:05:08 +0200
+Message-ID: <CACRpkda+9G6Xawk14NOx05Osm9rmJNNe8wbiDKbMgrrEP1CPJw@mail.gmail.com>
+References: <1339506253-7164-1-git-send-email-johan.rudholm@stericsson.com>
+	<87oboe4ibk.fsf@octavius.laptop.org>
+	<CA+20K0DJYYeo80pVC1wLo_+VaXYvgiOnJzSvf9mE_u69Dj941w@mail.gmail.com>
+	<CACRpkda6gbAT1=qnHmvGv9UhqDVokvobcqw65vdsXHsrz8=QQw@mail.gmail.com>
+	<87txy53mva.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <4FE19423.4010103@atmel.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: "ludovic.desroches" <ludovic.desroches@atmel.com>
-Cc: linux-mmc@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:62650 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753554Ab2FUIFJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jun 2012 04:05:09 -0400
+Received: by wgbdr13 with SMTP id dr13so373313wgb.1
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Jun 2012 01:05:08 -0700 (PDT)
+In-Reply-To: <87txy53mva.fsf@octavius.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Johan Rudholm <jrudholm@gmail.com>, Johan Rudholm <johan.rudholm@stericsson.com>, linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-SGVsbG8gTHVkb3ZpYywKSSBoYXZlIHRyaWVkIGl0IHdpdGggYXRtZWwtbWNpIGRyaXZlci4gSXQg
-dG9vayBtZSBsaXR0bGUgdGltZSB0byBjaGFuZ2Ugc2V0dGluZyBvZiBteSBib2FyZC4KSXQgc2Vl
-bXMgdG8gdHJ5IGNsb2NrIGRvd24gdG8gMjAwa0h6OgpbICAgIDUuODYwMDAwXSBtbWMwOiBtbWNf
-cmVzY2FuX3RyeV9mcmVxOiB0cnlpbmcgdG8gaW5pdCBjYXJkIGF0IDQwMDAwMCBIegpbICAgIDUu
-OTIwMDAwXSBtbWMwOiBtbWNfcmVzY2FuX3RyeV9mcmVxOiB0cnlpbmcgdG8gaW5pdCBjYXJkIGF0
-IDMwMDAwMCBIegpbICAgIDUuOTgwMDAwXSBtbWMwOiBtbWNfcmVzY2FuX3RyeV9mcmVxOiB0cnlp
-bmcgdG8gaW5pdCBjYXJkIGF0IDIwNTA3OSBIegpBcyBJIHNlZSBpbiBkcml2ZXIgc291cmNlLCB0
-aGVyZSBpcyBiZXR0ZXIgY2xrZGl2IG92ZXJydW4gd29yayBhcm91bmQuCkJ1dCBJIGRvbid0IGZp
-bmQgbWluIGFuZCBtYXggZnJlcSBkZWZpbml0aW9ucyBpbiB0aGlzIGRyaXZlciwgaXQgaXMgcHJv
-YmFibHkgc29tZXdoZXJlIGVsc2UuClNvIHRoaXMgd291bGQgYmUgT0suCgpEbmUgMjAuNi4yMDEy
-IDExOjEzLCBsdWRvdmljLmRlc3JvY2hlcyBuYXBzYWwoYSk6Cj4gQWRkIG1tYyBtYWlsaW5nIGxp
-c3QuCj4KPgo+IC0tLS0tLS0tIE1lc3NhZ2Ugb3JpZ2luYWwgLS0tLS0tLS0KPiBTdWpldDogUmU6
-IFtQQVRDSF0gbW1jOiBhdDkxOiBmaXggYnVzIHNwZWVkCj4gRGF0ZSA6IFdlZCwgMjAgSnVuIDIw
-MTIgMTA6NDk6MDggKzAyMDAKPiBEZSA6IGx1ZG92aWMuZGVzcm9jaGVzIDxsdWRvdmljLmRlc3Jv
-Y2hlc0BhdG1lbC5jb20+Cj4gUG91ciA6IFByY2hhbCBKacWZw60gPGppcmkucHJjaGFsQGFrc2ln
-bmFsLmN6Pgo+IENvcGllIMOgIDogPGx1ZG92aWMuZGVzcm9jaGVzQGF0bWVsLmNvbT4sIDxsaW51
-eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc+Cj4KPiBIZWxsbyBKaXJpLAo+Cj4gVGhh
-bmtzIGZvciB5b3VyIHBhdGNoIGJ1dCBhdDkxLW1jaSBpcyBub3cgZGVwcmVjYXRlZCBhbmQgc2hv
-dWxkIGJlCj4gcmVtb3ZlZCBpbiAzLjcuCj4gT24gb25lIGhhbmQgSSBkb24ndCBrbm93IGlmIHdl
-IGhhdmUgdG8gY29udGludWUgdG8gdGFrZSBwYXRjaGVzIGZvciB0aGlzCj4gZHJpdmVyLCBvbiB0
-aGUgb3RoZXIgaGFuZCBpdCdzIGEgZml4IGZvciBzb21lIFNEIGNhcmRzLgo+Cj4gTGUgMDYvMjAv
-MjAxMiAxMDoxNSBBTSwgUHJjaGFsIEppxZnDrSBhIMOpY3JpdCA6Cj4+IFRoaXMgcGF0Y2ggY2hh
-bmdlIG1pbmltdW0gYW5kIG1heGltdW0gY2xvY2sgc3BlZWQgYmVjYXVzZSBzb21lIG5vbmFtZQo+
-PiBjYXJkcyBkb2Vzbid0IHdvcmsgZHVyaW5nIGluaXQgZXZlbiBhdCAzNzVrSHogYW5kIG5ldyBj
-YXJkcyAoU0Qgdi4gMy4wKQo+PiBjYW4gcnVuIGF0IDUwIG9yIDEwMCBNSHouCj4+IEFsc28gYWRl
-ZCBjbGtkaXYgcmVnaXN0ZXIgb3ZlcnJ1biBmaXggd2hlbiBzZXR0aW5nIGxvdyBzcGVlZHMuCj4+
-Cj4+IFNpZ25lZC1vZmYtYnk6IEppcmkgUHJjaGFsIDxqaXJpLnByY2hhbEBha3NpZ25hbC5jej4K
-Pj4gLS0tCj4+Cj4+IC0tLSBsaW51eC9saW51eC0zLjUtcmMzL2RyaXZlcnMvbW1jL2hvc3QvYXQ5
-MV9tY2kuYy5vcmlnIDIwMTItMDYtMTcKPj4gMDI6MjU6MTcuMDAwMDAwMDAwICswMjAwCj4+ICsr
-KyBsaW51eC9saW51eC0zLjUtcmMzL2RyaXZlcnMvbW1jL2hvc3QvYXQ5MV9tY2kuYyAyMDEyLTA2
-LTE4Cj4+IDExOjAxOjQ5Ljc1MTQxNTk4NCArMDIwMAo+PiBAQCAtNzI0LDYgKzcyNCwxMCBAQCBz
-dGF0aWMgdm9pZCBhdDkxX21jaV9zZXRfaW9zKHN0cnVjdCBtbWNfCj4+IGVsc2UKPj4gY2xrZGl2
-ID0gKGF0OTFfbWFzdGVyX2Nsb2NrIC8gaW9zLT5jbG9jaykgLyAyOwo+Pgo+PiArIC8qIHNldCBt
-YXhpbXVtIGRpdmlkZXIgKi8KPj4gKyBpZiAoY2xrZGl2ID4gMjU1KQo+PiArIGNsa2RpdiA9IDI1
-NTsKPj4gKwo+PiBwcl9kZWJ1ZygiY2xrZGl2ID0gJWQuIG1jY2sgPSAlbGRcbiIsIGNsa2RpdiwK
-Pj4gYXQ5MV9tYXN0ZXJfY2xvY2sgLyAoMiAqIChjbGtkaXYgKyAxKSkpOwo+PiB9Cj4+IEBAIC05
-NDgsOCArOTUyLDggQEAgc3RhdGljIGludCBfX2luaXQgYXQ5MV9tY2lfcHJvYmUoc3RydWN0Cj4+
-IH0KPj4KPj4gbW1jLT5vcHMgPSAmYXQ5MV9tY2lfb3BzOwo+PiAtIG1tYy0+Zl9taW4gPSAzNzUw
-MDA7Cj4+IC0gbW1jLT5mX21heCA9IDI1MDAwMDAwOwo+PiArIG1tYy0+Zl9taW4gPSAyMDAwMDA7
-IC8qIG5vdCBhbGwgY2FyZHMgY2FuIHJ1biBhdCAzNzVrSHogKi8KPgo+IEkgd2lsbCBjaGVjayBv
-biBhdG1lbC1tY2kgaWYgd2UgaGF2ZSB0byBkZWNyZWFzZSBmX21pbi4KPgo+PiArIG1tYy0+Zl9t
-YXggPSAxMDAwMDAwMDA7IC8qIG5ldyBjYXJkcyBjYW4gcnVuIGF0IDEwME1IeiAqLwo+Cj4gTUNJ
-IG9wZXJhdGVzIGF0IGEgcmF0ZSBvZiB1cCB0byBtYXN0ZXIgY2xvY2sgZGl2aWRlZCBieSB0d28g
-c28geW91IGNhbid0Cj4gcmVhY2ggMTAwTUh6IGFzIG1heCBmcmVxdWVuY3kgc2luY2UgaXQgbWVh
-bnMgdGhhdCBvdXIgbWFzdGVyIGNsb2NrIGlzIGF0Cj4gMjAwTUh6IHRoYXQgaXMgbm90IHRoZSBj
-YXNlLiBJIHdvdWxkIHNheSA1ME1IeiBpcyB0aGUgbWF4aW11bSBmcmVxdWVuY3kKPiBmb3IgcHJv
-ZHVjdCBjb21wYXRpYmxlIHdpdGggYXQ5MS1tY2kuCj4KPj4gbW1jLT5vY3JfYXZhaWwgPSBNTUNf
-VkREXzMyXzMzIHwgTU1DX1ZERF8zM18zNDsKPj4gbW1jLT5jYXBzID0gMDsKPj4KPj4KPj4KPgo+
-IFJlZ2FyZHMKPgo+IEx1ZG92aWMKPgo+Cj4KPgo+CgoKX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBtYWlsaW5nIGxpc3QKbGlu
-dXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQu
-b3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
+On Wed, Jun 20, 2012 at 7:38 PM, Chris Ball <cjb@laptop.org> wrote:
+> On Wed, Jun 20 2012, Linus Walleij wrote:
+>>
+>> Like we add a Kconfig bool option "support partition scanning on boot
+>> partitions" and then we default that to "n", so systems that really
+>> want to do that can turn it on the day they need it.
+>
+> I'm not so happy with adding Kconfig options for configuring driver
+> behavior -- it's usually a failure to just do the right thing.
+
+This is not for drivers but for the core. But I get the idea...
+
+> If we think that people might want to use a partition table on their
+> boot partitions then we should just support doing that, as we do now.
+
+OK in that case I think it's better to disallow partition tables
+on the boot partitions, then the day someone has a valid usecase
+we can add it back.
+
+So then the patch is good as it is to me:
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
+
+Yours,
+Linus Walleij
