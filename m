@@ -1,28 +1,43 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH] mmc: sh_mmcif: mmc->f_max heuristic
-Date: Thu, 21 Jun 2012 09:47:51 +0900
-Message-ID: <20120621004751.GB10003@verge.net.au>
-References: <1340171905-12534-1-git-send-email-horms@verge.net.au>
- <Pine.LNX.4.64.1206200845590.20254@axis700.grange>
- <20120620070227.GN20030@verge.net.au>
- <A389CA2909F7E548A28A6A30A9446C0903651FAAD5@REAMBX.NA.RTA>
+From: Haojian Zhuang <haojian.zhuang@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pxa: Add device tree support
+Date: Thu, 21 Jun 2012 11:03:25 +0800
+Message-ID: <CAN1soZxVEu5dO8ZuRZ241a+0x0X+tC-DaO+QiLzS4=Knyym7PA@mail.gmail.com>
+References: <8762aw1hcw.fsf@octavius.laptop.org>
+	<874nq65y8x.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <A389CA2909F7E548A28A6A30A9446C0903651FAAD5@REAMBX.NA.RTA>
-Sender: linux-sh-owner@vger.kernel.org
-To: "Brandt, Chris" <Chris.Brandt@renesas.com>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:51667 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758105Ab2FUDD0 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jun 2012 23:03:26 -0400
+Received: by bkcji2 with SMTP id ji2so107501bkc.19
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Jun 2012 20:03:25 -0700 (PDT)
+In-Reply-To: <874nq65y8x.fsf@octavius.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Zhangfei Gao <zhangfei.gao@marvell.com>, Philip Rakity <prakity@marvell.com>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, wmb@laptop.org
 
-On Wed, Jun 20, 2012 at 07:56:44AM -0700, Brandt, Chris wrote:
-> > I would be very happy if someone with access to
-> > the documentation could shed some further light on this.
-> 
-> According to the SH7757 manual, setting the CLKDIV[3:0] in the CE_CLK_CTRL register 0xF selects Pck as the bus clock frequency. So, unlike other devices where Pck/2 (CLKDIV[3:0]=0) is the max bus speed, the SH7757 can run at Pck when CLKDIV=0xF.
+On Wed, Jun 20, 2012 at 1:49 PM, Chris Ball <cjb@laptop.org> wrote:
+> Tested on an OLPC XO-1.75. =A0(MMP2, sdhci-pxav3, CONFIG_MACH_MMP2_DT=
+=3Dy)
+>
+> Signed-off-by: Chris Ball <cjb@laptop.org>
+> ---
+> Changes since v1:
+>
+> * Add CONFIG_OF guard around of_match_table, per Zhangfei.
+> * Fix function prototypes under !CONFIG_OF, per Zhangfei.
+> * Change "clk-delay-cycles" to "mrvl,clk-delay-cycles", per Haojian.
+>
+> =A0.../devicetree/bindings/mmc/sdhci-pxa.txt =A0 =A0 =A0 =A0 =A0| =A0=
+ 21 ++++++++
+> =A0drivers/mmc/host/sdhci-pxav2.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 | =A0 54 ++++++++++++++++++++
+> =A0drivers/mmc/host/sdhci-pxav3.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 | =A0 52 +++++++++++++++++++
+> =A03 files changed, 127 insertions(+)
 
-Thanks Chris,
-
-please correct me if I am wrong, but that seems to indicate the heuristic
-is correct. At least for the sh7757 and sh7372.
+Acked-by: Haojian Zhuang <haojian.zhuang@gmail.com>
