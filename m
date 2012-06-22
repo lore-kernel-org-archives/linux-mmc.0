@@ -1,58 +1,55 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [RFC PATCH] Revert "mmc: omap_hsmmc: Enable Auto CMD12"
-Date: Fri, 22 Jun 2012 16:58:40 +0530
-Message-ID: <CANfBPZ-KSfRM5_fw+tknBEQGXsnTzH+t3MwzE=PLaCiHZXXGvw@mail.gmail.com>
-References: <1340362175-25807-1-git-send-email-ming.lei@canonical.com>
+From: Paolo Pisati <p.pisati@gmail.com>
+Subject: Re: MMC: commit dba3c29 ruins mmc card data on beagle-xm revB
+Date: Fri, 22 Jun 2012 13:51:42 +0200
+Message-ID: <4FE45C4E.8060808@gmail.com>
+References: <CACVXFVO-Wm1Qwporby1M=+yPz81AWHpZRBZSbr5tgT32b6sSEA@mail.gmail.com> <CANrkHUYd8Ww6De4MiZ8_oPfcnhvtsZXOySLRiWSBU4QUQ6beHw@mail.gmail.com> <CACVXFVP16UmHe-GGydrSMgGHwnkSvYhnY339=zr=BfCehvS8Kw@mail.gmail.com> <CANrkHUaxJGcv2bdUWTCB_oKct-iFCKCdb7OQPTUjS4MuKeCS2w@mail.gmail.com> <4FE0AE7B.4040502@gmail.com> <CANrkHUawrQfb+o+W7FrYACv6NocZn_MAym5A209peP8tW1nZRQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog119.obsmtp.com ([74.125.149.246]:36987 "EHLO
-	na3sys009aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1761530Ab2FVL3D convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Jun 2012 07:29:03 -0400
-Received: by dano14 with SMTP id o14so2447980dan.11
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Jun 2012 04:29:02 -0700 (PDT)
-In-Reply-To: <1340362175-25807-1-git-send-email-ming.lei@canonical.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:56686 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755585Ab2FVLvr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jun 2012 07:51:47 -0400
+In-Reply-To: <CANrkHUawrQfb+o+W7FrYACv6NocZn_MAym5A209peP8tW1nZRQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ming Lei <ming.lei@canonical.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Balaji T K <balajitk@ti.com>
+To: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Cc: Ming Lei <ming.lei@canonical.com>, linux-mmc@vger.kernel.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>
 
-On Fri, Jun 22, 2012 at 4:19 PM, Ming Lei <ming.lei@canonical.com> wrot=
-e:
-> This patch reverts the commit dba3c29ea4a1d5d544.
->
-> After bisecting, this commit dba3c29 is found to ruin micro-SD card d=
-ata
-> (writing incorrect file, or fs is corrupt after several times mount)
-> on the beagle-xm revB, and reverting the commit will fix the problem.
->
-> Also from TRM of OMAP3/OMAP4/DM37x, the below is mentioned about
-> the Auto CMD12 Enable bit.
-> =A0 =A0 =A0 =A0- SDIO does not support this feature.
-> =A0 =A0 =A0 =A0- SD card only.
-> Looks it is not suitable to always enable Auto CMD12 in host controll=
-er
-> driver.
->
-> Considered that the commit is not mature enough, so ask to revert it
-> first.
->
-> Cc: Balaji T K <balajitk@ti.com>
-> Cc: Venkatraman S <svenkatr@ti.com>
-> Buglink: https://lkml.org/lkml/2012/6/10/225
-> Reported-by: Paolo Pisati <p.pisati@gmail.com>
-> Reported-bisected-and-tested-by: Ming Lei <ming.lei@canonical.com>
-> Signed-off-by: Ming Lei <ming.lei@canonical.com>
+On 06/20/2012 09:23 AM, T Krishnamoorthy, Balaji wrote:
+>>
+>> i just want to say that i'm affected by this too, and i can reproduce it
+>> 100%.
+>>
+> 
+> Is it with SD or MMC card
+> Can you provide Beagle board rev info?
 
-Agreed. We can revert this and add it later when the behavior is well
-understood.
+kingston 4g class 4 sdhc c04g taiwan
 
-Acked-by: Venkatraman S <svenkatr@ti.com>
+tested on a beagle xm rev a and rev c, both boards exhibit the same
+problem with this card, while with a brand new sandisk 16gb sdhc class 4
+card, everything is ok.
 
-> ---
-> =A0drivers/mmc/host/omap_hsmmc.c | =A0 15 +++------------
-> =A01 file changed, 3 insertions(+), 12 deletions(-)
->
+i tried reverting dba3c29 "Enable Auto CMD12", and both cards are
+behaving fine.
+
+>> do you want me to run that patch or you already have enough data?
+> 
+> Can you enable MMC debug and apply the debug patch I provided.
+> The debug patch did not print any AUTOCMD errors with Ming Lei setup.
+
+http://people.canonical.com/~ppisati/mmc-testing/
+
+test-mmc.sh: script used for testing
+
+test-mmc.log: md5sum of file copied around (as you can see after the
+umount the md5 changes)
+
+test-mmc.syslog: mmc-debug output (plus your patch)
+
+after the test, my sd card was so badly wounded that it wouldn't even boot.
+-- 
+bye,
+p.
