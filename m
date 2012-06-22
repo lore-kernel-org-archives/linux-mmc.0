@@ -1,71 +1,158 @@
-From: Artem Bityutskiy <dedekind1@gmail.com>
-Subject: Re: [PATCH 2/3] ext4: Context support
-Date: Fri, 22 Jun 2012 16:29:13 +0300
-Message-ID: <1340371753.3363.7.camel@koala>
-References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com>
-	 <201206122007.28514.arnd.bergmann@linaro.org>
-	 <20120612204128.GF12161@thunk.org>
-	 <201206131944.35351.arnd.bergmann@linaro.org>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: [PATCH v5] mmc: core: Fix the HPI execution sequence
+Date: Fri, 22 Jun 2012 19:01:46 +0530
+Message-ID: <000a01cd507b$6176af60$24640e20$@codeaurora.org>
+References: <003a01cd4fc3$c5e21ec0$51a65c40$@codeaurora.org> <1340345556-13820-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature";
-	boundary="=-B95O5XiujiIlHa+XiYYh"
-Return-path: <linux-ext4-owner@vger.kernel.org>
-In-Reply-To: <201206131944.35351.arnd.bergmann@linaro.org>
-Sender: linux-ext4-owner@vger.kernel.org
-To: Arnd Bergmann <arnd.bergmann@linaro.org>
-Cc: Ted Ts'o <tytso@mit.edu>, Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>, Saugata Das <saugata.das@linaro.org>, Saugata Das <saugata.das@stericsson.com>, linux-ext4@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org, venkat@linaro.org, "Luca Porzio (lporzio)" <lporzio@micron.com>
-List-Id: linux-mmc@vger.kernel.org
-
-
---=-B95O5XiujiIlHa+XiYYh
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-On Wed, 2012-06-13 at 19:44 +0000, Arnd Bergmann wrote:
-> I think using the inode number is a reasonable fit. Using the
-> inode number of the parent directory might be more appropriate
-> but it breaks with hard links and cross-directory renames (we
-> must not use the same LBA with conflicting context numbers,
-> or flush the old context inbetween).
-
-I would put it this way.
-
-1. contex =3D inode number for data blocks.
-2. context =3D parent directory's inode number for stat data (times,
-permissions, etc) blocks and directory entry blocks. Should help things
-like readdir and readdir + stat. Besides, this stuff tend to change more
-often than the data, so mixing it with the data in the same eraseblock
-is not smart.
-3. context =3D parent inode number for all the stuff belonging to xattrs.
-
-We do something similar in UBIFS.
-
---=20
-Best Regards,
-Artem Bityutskiy
-
---=-B95O5XiujiIlHa+XiYYh
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
+Content-Type: text/plain;
+	charset="us-ascii"
 Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:24773 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1762055Ab2FVNbv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jun 2012 09:31:51 -0400
+In-Reply-To: <1340345556-13820-1-git-send-email-svenkatr@ti.com>
+Content-Language: en-us
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: 'Venkatraman S' <svenkatr@ti.com>, cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, linkinjeon@gmail.com, jh80.chung@samsung.com, alex.lemberg@sandisk.com, 'Kostya' <kdorfman@codeaurora.org>
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
+Thanks Venkatraman. Looks good to me.
+Reviewed-by: Subhash Jadavani <subhashj@codeaurora.org>
 
-iQIcBAABAgAGBQJP5HMpAAoJECmIfjd9wqK0wOMP/0WLtrd2KQF6T1dLk1pdfsoT
-C/RVafAySd/Ww9w9c8XNG4CV7I0RwHY6vVO7JmN1Z5IElvF+upEo8JXCqO+JRIRl
-WeoencsjCJCXvUvv6xDzxBSxNuMQRJZ6MJ7qmqfmTssreQ3yaPHG7eOs6K5C3mIx
-1PTCm1LSTA/LgF36sdF21C9DGb1ycDzndvJcRIuCEOKjO31S+SDhlscuul863MlK
-3xtOtHV3pFTWYTNdEBaTQEu9SB03GXgRSMopfIB84Vx/IK8qA4nekU5U9BZ9q72n
-0kh8bPjKtD6jxgS3xlJaXoQFjZdCNhIBrZnQay7MYnFx3Lu1CKKsCbEaoz0gMTNM
-INW2c3w2UOaH3Ok+GYNFjcjqDXbMWfhUuDE6y4txcJhzaMejwxI3bhAukDROq27A
-shnWuvtZcplqkLp9YAECAfXq6x34KHYsdT9fU7CuQ2yRvrvKgidijfZFe2+xKrbU
-DJtdgZ7mvSY2ZFGViNCqa/y2kjG/MfooHZkSIh/YbSYdHUEXJ7xmmAuZOzf5XdOq
-AAvcnWgS3E7g3bB2acp+hGTaefbv9fIgwzAoW/dunquIcbBdcHnLxmXSXajKS1BZ
-z1PLHtIQC42xgYoHDb6w0z/jPO1j+saCCB7ekeP7Px4rvubztbIIxH58IsEoX5ZG
-NJoF3aW9aeObP9AO3Eo0
-=lMhn
------END PGP SIGNATURE-----
+Regards,
+Subhash
 
---=-B95O5XiujiIlHa+XiYYh--
+> -----Original Message-----
+> From: Venkatraman S [mailto:svenkatr@ti.com]
+> Sent: Friday, June 22, 2012 11:43 AM
+> To: cjb@laptop.org
+> Cc: linux-mmc@vger.kernel.org; linkinjeon@gmail.com;
+> jh80.chung@samsung.com; alex.lemberg@sandisk.com;
+> subhashj@codeaurora.org; Venkatraman S; Kostya
+> Subject: [PATCH v5] mmc: core: Fix the HPI execution sequence
+> 
+> mmc_execute_hpi should send the HPI command only once, and only if the
+> card is in PRG state.
+> 
+> According to eMMC spec, the command's completion time is not dependent on
+> OUT_OF_INTERRUPT_TIME. Only the transition out of PRG STATE is guarded by
+> OUT_OF_INTERRUPT_TIME - which is defined to begin at the end of sending
+> the command itself.
+> 
+> Specify the default timeout for the actual sending of HPI command, and
+then
+> use OUT_OF_INTERRUPT_TIME to wait for the transition out of PRG state.
+> 
+> Reported-by: Alex Lemberg <Alex.Lemberg@sandisk.com>
+> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+> Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+> CC: Kostya <kdorfman@codeaurora.org>
+> ---
+> v4->v5: Start time calculation after the HPI command has been sent
+> 
+> v3->v4: Fix coding style issues as suggested by Chris Ball.
+>        Use time_after() for safe time diff calculations as
+>         suggested by Subash Jadavani.
+> 
+>  drivers/mmc/core/core.c    |   55
+++++++++++++++++++++++++++-----------------
+> -
+>  drivers/mmc/core/mmc_ops.c |    1 -
+>  2 files changed, 32 insertions(+), 24 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
+> 80ec427..f11de40 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -404,6 +404,7 @@ int mmc_interrupt_hpi(struct mmc_card *card)  {
+>  	int err;
+>  	u32 status;
+> +	unsigned long prg_wait;
+> 
+>  	BUG_ON(!card);
+> 
+> @@ -419,30 +420,38 @@ int mmc_interrupt_hpi(struct mmc_card *card)
+>  		goto out;
+>  	}
+> 
+> -	/*
+> -	 * If the card status is in PRG-state, we can send the HPI command.
+> -	 */
+> -	if (R1_CURRENT_STATE(status) == R1_STATE_PRG) {
+> -		do {
+> -			/*
+> -			 * We don't know when the HPI command will finish
+> -			 * processing, so we need to resend HPI until out
+> -			 * of prg-state, and keep checking the card status
+> -			 * with SEND_STATUS.  If a timeout error occurs when
+> -			 * sending the HPI command, we are already out of
+> -			 * prg-state.
+> -			 */
+> -			err = mmc_send_hpi_cmd(card, &status);
+> -			if (err)
+> -				pr_debug("%s: abort HPI (%d error)\n",
+> -					 mmc_hostname(card->host), err);
+> +	switch (R1_CURRENT_STATE(status)) {
+> +	case R1_STATE_IDLE:
+> +	case R1_STATE_READY:
+> +	case R1_STATE_STBY:
+> +		/*
+> +		 * In idle states, HPI is not needed and the caller
+> +		 * can issue the next intended command immediately
+> +		 */
+> +		goto out;
+> +	case R1_STATE_PRG:
+> +		break;
+> +	default:
+> +		/* In all other states, it's illegal to issue HPI */
+> +		pr_debug("%s: HPI cannot be sent. Card state=%d\n",
+> +			mmc_hostname(card->host),
+> R1_CURRENT_STATE(status));
+> +		err = -EINVAL;
+> +		goto out;
+> +	}
+> 
+> -			err = mmc_send_status(card, &status);
+> -			if (err)
+> -				break;
+> -		} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
+> -	} else
+> -		pr_debug("%s: Left prg-state\n", mmc_hostname(card->host));
+> +	err = mmc_send_hpi_cmd(card, &status);
+> +	if (err)
+> +		goto out;
+> +
+> +	prg_wait = jiffies +
+msecs_to_jiffies(card->ext_csd.out_of_int_time);
+> +	do {
+> +		err = mmc_send_status(card, &status);
+> +
+> +		if (!err && R1_CURRENT_STATE(status) == R1_STATE_TRAN)
+> +			break;
+> +		if (time_after(jiffies, prg_wait))
+> +			err = -ETIMEDOUT;
+> +	} while (!err);
+> 
+>  out:
+>  	mmc_release_host(card->host);
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 69370f4..0ed2cc5 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -569,7 +569,6 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32
+> *status)
+> 
+>  	cmd.opcode = opcode;
+>  	cmd.arg = card->rca << 16 | 1;
+> -	cmd.cmd_timeout_ms = card->ext_csd.out_of_int_time;
+> 
+>  	err = mmc_wait_for_cmd(card->host, &cmd, 0);
+>  	if (err) {
+> --
+> 1.7.10.rc2
+
 
