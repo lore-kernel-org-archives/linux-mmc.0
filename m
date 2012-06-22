@@ -1,89 +1,135 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH] mmc: sh_mmcif: mmc->f_max heuristic
-Date: Fri, 22 Jun 2012 08:49:32 +0900
-Message-ID: <1340322572-16024-1-git-send-email-horms@verge.net.au>
+From: Venkatraman S <svenkatr@ti.com>
+Subject: [PATCH v5] mmc: core: Fix the HPI execution sequence
+Date: Fri, 22 Jun 2012 11:42:36 +0530
+Message-ID: <1340345556-13820-1-git-send-email-svenkatr@ti.com>
+References: <003a01cd4fc3$c5e21ec0$51a65c40$@codeaurora.org>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:53205 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760623Ab2FUXty (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jun 2012 19:49:54 -0400
+Received: from comal.ext.ti.com ([198.47.26.152]:45800 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1761316Ab2FVGNR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Jun 2012 02:13:17 -0400
+In-Reply-To: <003a01cd4fc3$c5e21ec0$51a65c40$@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Chris Brandt <Chris.Brandt@renesas.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, linkinjeon@gmail.com, jh80.chung@samsung.com, alex.lemberg@sandisk.com, subhashj@codeaurora.org, Venkatraman S <svenkatr@ti.com>, Kostya <kdorfman@codeaurora.org>
 
-In 930f152cc9998388031af577843baae572ac8ab6 ("mmc: sh_mmcif: mmc->f_max
-should be half of the bus clock") I changed the setting of mmc->f_max from
-the bus clock to half the bus clock based on the manual for the sh7372 SoC.
+mmc_execute_hpi should send the HPI command only
+once, and only if the card is in PRG state.
 
-Inspection of sh_mmcif_clock_control() reveals that it relies on
-mmc->f_max being set to the bus speed in order to enable the supplementary
-clock, a feature that is only known to exist on the sh7757 SoC.
+According to eMMC spec, the command's completion time is
+not dependent on OUT_OF_INTERRUPT_TIME. Only the transition
+out of PRG STATE is guarded by OUT_OF_INTERRUPT_TIME - which is
+defined to begin at the end of sending the command itself.
 
-Armed with this information implement the following heuristic for setting
-mmc->f_max:
+Specify the default timeout for the actual sending of HPI
+command, and then use OUT_OF_INTERRUPT_TIME to wait for
+the transition out of PRG state.
 
-* Use bus clock if the supplementary clock feature is present
-  - Confirmed in the documentation of the sh7757 SoC.
-* Use half the bus clock otherwise
-  - As per the documentation for the sh7372, sh7724 and R8A7740 SoCs.
-
-Reported-by: Magnus Damm <damm@opensource.se>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Chris Brandt <Chris.Brandt@renesas.com>
-Signed-off-by: Simon Horman <horms@verge.net.au>
-
+Reported-by: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Signed-off-by: Venkatraman S <svenkatr@ti.com>
+Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+CC: Kostya <kdorfman@codeaurora.org>
 ---
+v4->v5: Start time calculation after the HPI command has been sent
 
-Regression information:
+v3->v4: Fix coding style issues as suggested by Chris Ball.
+       Use time_after() for safe time diff calculations as
+        suggested by Subash Jadavani.
 
-It seems likely that this resolves a regression for the sh7757lcr which was
-introduced by 930f152cc9998388031af577843baae572ac8ab6 ("mmc: sh_mmcif:
-mmc->f_max should be half of the bus clock"). However, although I have the
-hardware in question I am unsure how to exercise the code to test if there
-is a problem or not.
+ drivers/mmc/core/core.c    |   55 ++++++++++++++++++++++++++------------------
+ drivers/mmc/core/mmc_ops.c |    1 -
+ 2 files changed, 32 insertions(+), 24 deletions(-)
 
-930f152cc9998388031af577843baae572ac8ab6 was added between the 3.3 and 3.4.
-
-Dependency information:
-
-This patch is based on Guennadi Liakhovetski's recent series
-"[PATCH 0/5 v4] mmc: sh_mmcif: clock and power updates". It should
-be trivial to rebase it on 3.5-rc3.
----
- drivers/mmc/host/sh_mmcif.c | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 204bced..04b14d0 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -450,7 +450,11 @@ static void sh_mmcif_clock_control(struct sh_mmcif_host *host, unsigned int clk)
- 
- 	if (!clk)
- 		return;
--	if (p->sup_pclk && clk == host->clk)
-+	/* clk == host->clk implies that p->sup_pclk is non-zero
-+	 * as otherwise the maximum value of clk is host->clk / 2
-+	 * as per the value of host->mmc->f_max
-+	 */
-+	if (clk == host->clk)
- 		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_SUP_PCLK);
- 	else
- 		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_CLEAR &
-@@ -913,10 +917,11 @@ static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
- static int sh_mmcif_clk_update(struct sh_mmcif_host *host)
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 80ec427..f11de40 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -404,6 +404,7 @@ int mmc_interrupt_hpi(struct mmc_card *card)
  {
- 	int ret = clk_enable(host->hclk);
-+	struct sh_mmcif_plat_data *p = host->pd->dev.platform_data;
+ 	int err;
+ 	u32 status;
++	unsigned long prg_wait;
  
- 	if (!ret) {
- 		host->clk = clk_get_rate(host->hclk);
--		host->mmc->f_max = host->clk / 2;
-+		host->mmc->f_max = p->sup_pclk ? host->clk : host->clk / 2;
- 		host->mmc->f_min = host->clk / 512;
+ 	BUG_ON(!card);
+ 
+@@ -419,30 +420,38 @@ int mmc_interrupt_hpi(struct mmc_card *card)
+ 		goto out;
  	}
  
+-	/*
+-	 * If the card status is in PRG-state, we can send the HPI command.
+-	 */
+-	if (R1_CURRENT_STATE(status) == R1_STATE_PRG) {
+-		do {
+-			/*
+-			 * We don't know when the HPI command will finish
+-			 * processing, so we need to resend HPI until out
+-			 * of prg-state, and keep checking the card status
+-			 * with SEND_STATUS.  If a timeout error occurs when
+-			 * sending the HPI command, we are already out of
+-			 * prg-state.
+-			 */
+-			err = mmc_send_hpi_cmd(card, &status);
+-			if (err)
+-				pr_debug("%s: abort HPI (%d error)\n",
+-					 mmc_hostname(card->host), err);
++	switch (R1_CURRENT_STATE(status)) {
++	case R1_STATE_IDLE:
++	case R1_STATE_READY:
++	case R1_STATE_STBY:
++		/*
++		 * In idle states, HPI is not needed and the caller
++		 * can issue the next intended command immediately
++		 */
++		goto out;
++	case R1_STATE_PRG:
++		break;
++	default:
++		/* In all other states, it's illegal to issue HPI */
++		pr_debug("%s: HPI cannot be sent. Card state=%d\n",
++			mmc_hostname(card->host), R1_CURRENT_STATE(status));
++		err = -EINVAL;
++		goto out;
++	}
+ 
+-			err = mmc_send_status(card, &status);
+-			if (err)
+-				break;
+-		} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
+-	} else
+-		pr_debug("%s: Left prg-state\n", mmc_hostname(card->host));
++	err = mmc_send_hpi_cmd(card, &status);
++	if (err)
++		goto out;
++
++	prg_wait = jiffies + msecs_to_jiffies(card->ext_csd.out_of_int_time);
++	do {
++		err = mmc_send_status(card, &status);
++
++		if (!err && R1_CURRENT_STATE(status) == R1_STATE_TRAN)
++			break;
++		if (time_after(jiffies, prg_wait))
++			err = -ETIMEDOUT;
++	} while (!err);
+ 
+ out:
+ 	mmc_release_host(card->host);
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 69370f4..0ed2cc5 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -569,7 +569,6 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
+ 
+ 	cmd.opcode = opcode;
+ 	cmd.arg = card->rca << 16 | 1;
+-	cmd.cmd_timeout_ms = card->ext_csd.out_of_int_time;
+ 
+ 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
+ 	if (err) {
 -- 
-1.7.10.2.484.gcd07cc5
+1.7.10.rc2
 
