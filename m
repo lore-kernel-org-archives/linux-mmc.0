@@ -1,56 +1,171 @@
-From: Ming Lei <ming.lei@canonical.com>
-Subject: Re: [RFC PATCH] Revert "mmc: omap_hsmmc: Enable Auto CMD12"
-Date: Fri, 22 Jun 2012 21:04:04 +0800
-Message-ID: <CACVXFVPwxavwpAGx8dfK7sKSWh1DK56B467cGCMoHJyQJ_o_OA@mail.gmail.com>
-References: <1340362175-25807-1-git-send-email-ming.lei@canonical.com>
-	<CANrkHUacUKPS=hee6=dhcGAjiC1CS88RNrBNy=wFX5y1Oxb05A@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:38320 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761968Ab2FVNEJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jun 2012 09:04:09 -0400
-Received: from mail-yx0-f174.google.com ([209.85.213.174])
-	by youngberry.canonical.com with esmtpsa (TLS1.0:RSA_ARCFOUR_MD5:16)
-	(Exim 4.71)
-	(envelope-from <ming.lei@canonical.com>)
-	id 1Si3Wv-0003zR-Ve
-	for linux-mmc@vger.kernel.org; Fri, 22 Jun 2012 13:04:06 +0000
-Received: by yenl2 with SMTP id l2so1469621yen.19
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Jun 2012 06:04:05 -0700 (PDT)
-In-Reply-To: <CANrkHUacUKPS=hee6=dhcGAjiC1CS88RNrBNy=wFX5y1Oxb05A@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 5/9 v4] mmc: convert slot functions to managed allocation
+Date: Fri, 22 Jun 2012 15:23:18 +0200
+Message-ID: <1340371402-4801-6-git-send-email-g.liakhovetski@gmx.de>
+References: <1340371402-4801-1-git-send-email-g.liakhovetski@gmx.de>
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1340371402-4801-1-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-sh@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>
 
-On Fri, Jun 22, 2012 at 8:29 PM, T Krishnamoorthy, Balaji
-<balajitk@ti.com> wrote:
+This prepares for the addition of further slot functions.
 
-> Hi Ming,
-> Rather than reverting the entire commit,
-> Can you try with the below change alone, so that AutoCMD12 can be easily
-> enabled back when needed.
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
 
-I don't think it is a good practice to just revert it partially.
+v4:
 
-I'd like to test your constructive patches for helping to troubleshoot
-the problem.
+1. gpio variables are now signed
+2. take care to mark gpio variables as invalid in hotplug context
+3. MMC_CAP2_*_ACTIVE_HIGH inverted compared to v3
 
-But I has not enough time to test this kind of change just for
-choosing reverting it totally or in part.
+ drivers/mmc/core/host.c      |    2 +
+ drivers/mmc/core/slot-gpio.c |   51 +++++++++++++++++++++++++++++++----------
+ include/linux/mmc/host.h     |    3 ++
+ 3 files changed, 43 insertions(+), 13 deletions(-)
 
-I have a working filesystem(at least 5G) on the card, after each
-tests, I have to copy the original filesystem into the card again
-for recovery of my work. The process is very tedious and will
-take me some time(it is a slow card.)
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index b8c5290..74cf29a5 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -32,6 +32,7 @@
+ static void mmc_host_classdev_release(struct device *dev)
+ {
+ 	struct mmc_host *host = cls_dev_to_mmc_host(dev);
++	mutex_destroy(&host->slot.lock);
+ 	kfree(host);
+ }
+ 
+@@ -327,6 +328,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 
+ 	mmc_host_clk_init(host);
+ 
++	mutex_init(&host->slot.lock);
+ 	host->slot.cd_irq = -EINVAL;
+ 
+ 	spin_lock_init(&host->lock);
+diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+index 92cba02..41689da 100644
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -29,6 +29,34 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
+ 	return IRQ_HANDLED;
+ }
+ 
++static int mmc_gpio_alloc(struct mmc_host *host)
++{
++	size_t len = strlen(dev_name(host->parent)) + 4;
++	struct mmc_gpio *ctx;
++
++	mutex_lock(&host->slot.lock);
++
++	ctx = host->slot.handler_priv;
++	if (!ctx) {
++		/*
++		 * devm_kzalloc() can be called after device_initialize(), even
++		 * before device_add(), i.e., between mmc_alloc_host() and
++		 * mmc_add_host()
++		 */
++		ctx = devm_kzalloc(&host->class_dev, sizeof(*ctx) + len,
++				   GFP_KERNEL);
++		if (ctx) {
++			snprintf(ctx->cd_label, len, "%s cd", dev_name(host->parent));
++			ctx->cd_gpio = -EINVAL;
++			host->slot.handler_priv = ctx;
++		}
++	}
++
++	mutex_unlock(&host->slot.lock);
++
++	return ctx ? 0 : -ENOMEM;
++}
++
+ int mmc_gpio_get_cd(struct mmc_host *host)
+ {
+ 	struct mmc_gpio *ctx = host->slot.handler_priv;
+@@ -43,20 +71,24 @@ EXPORT_SYMBOL(mmc_gpio_get_cd);
+ 
+ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
+ {
+-	size_t len = strlen(dev_name(host->parent)) + 4;
+ 	struct mmc_gpio *ctx;
+ 	int irq = gpio_to_irq(gpio);
+ 	int ret;
+ 
+-	ctx = kmalloc(sizeof(*ctx) + len, GFP_KERNEL);
+-	if (!ctx)
+-		return -ENOMEM;
++	ret = mmc_gpio_alloc(host);
++	if (ret < 0)
++		return ret;
+ 
+-	snprintf(ctx->cd_label, len, "%s cd", dev_name(host->parent));
++	ctx = host->slot.handler_priv;
+ 
+ 	ret = gpio_request_one(gpio, GPIOF_DIR_IN, ctx->cd_label);
+ 	if (ret < 0)
+-		goto egpioreq;
++		/*
++		 * don't bother freeing memory. It might still get used by other
++		 * slot functions, in any case it will be freed, when the device
++		 * is destroyed.
++		 */
++		return ret;
+ 
+ 	/*
+ 	 * Even if gpio_to_irq() returns a valid IRQ number, the platform might
+@@ -80,13 +112,8 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
+ 		host->caps |= MMC_CAP_NEEDS_POLL;
+ 
+ 	ctx->cd_gpio = gpio;
+-	host->slot.handler_priv = ctx;
+ 
+ 	return 0;
+-
+-egpioreq:
+-	kfree(ctx);
+-	return ret;
+ }
+ EXPORT_SYMBOL(mmc_gpio_request_cd);
+ 
+@@ -107,7 +134,5 @@ void mmc_gpio_free_cd(struct mmc_host *host)
+ 	ctx->cd_gpio = -EINVAL;
+ 
+ 	gpio_free(gpio);
+-	host->slot.handler_priv = NULL;
+-	kfree(ctx);
+ }
+ EXPORT_SYMBOL(mmc_gpio_free_cd);
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index c1a03ee..65c64ee 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -11,6 +11,7 @@
+ #define LINUX_MMC_HOST_H
+ 
+ #include <linux/leds.h>
++#include <linux/mutex.h>
+ #include <linux/sched.h>
+ #include <linux/device.h>
+ #include <linux/fault-inject.h>
+@@ -154,6 +155,7 @@ struct mmc_async_req {
+  * struct mmc_slot - MMC slot functions
+  *
+  * @cd_irq:		MMC/SD-card slot hotplug detection IRQ or -EINVAL
++ * @lock:		protect the @handler_priv pointer
+  * @handler_priv:	MMC/SD-card slot context
+  *
+  * Some MMC/SD host controllers implement slot-functions like card and
+@@ -163,6 +165,7 @@ struct mmc_async_req {
+  */
+ struct mmc_slot {
+ 	int cd_irq;
++	struct mutex lock;
+ 	void *handler_priv;
+ };
+ 
+-- 
+1.7.2.5
 
-Also some sectors in my another card has been damaged
-permanently during the tests, but I am not sure if it is caused by
-its lifetime or just your patch.
-
-
-thanks,
---
-Ming Lei
