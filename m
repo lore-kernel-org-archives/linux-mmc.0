@@ -1,171 +1,51 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 5/9 v4] mmc: convert slot functions to managed allocation
-Date: Fri, 22 Jun 2012 15:23:18 +0200
-Message-ID: <1340371402-4801-6-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 8/9 v4] mmc: sh_mobile_sdhi: support caps2 flags
+Date: Fri, 22 Jun 2012 15:23:21 +0200
+Message-ID: <1340371402-4801-9-git-send-email-g.liakhovetski@gmx.de>
 References: <1340371402-4801-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.10]:59206 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1762085Ab2FVNX1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jun 2012 09:23:27 -0400
 In-Reply-To: <1340371402-4801-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-sh-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-sh@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>
-List-Id: linux-mmc@vger.kernel.org
 
-This prepares for the addition of further slot functions.
+Let SDHI platforms specify mmc_host::caps2 flags in their platform data.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
+ drivers/mmc/host/sh_mobile_sdhi.c  |    1 +
+ include/linux/mmc/sh_mobile_sdhi.h |    1 +
+ 2 files changed, 2 insertions(+), 0 deletions(-)
 
-v4:
-
-1. gpio variables are now signed
-2. take care to mark gpio variables as invalid in hotplug context
-3. MMC_CAP2_*_ACTIVE_HIGH inverted compared to v3
-
- drivers/mmc/core/host.c      |    2 +
- drivers/mmc/core/slot-gpio.c |   51 +++++++++++++++++++++++++++++++----------
- include/linux/mmc/host.h     |    3 ++
- 3 files changed, 43 insertions(+), 13 deletions(-)
-
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index b8c5290..74cf29a5 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -32,6 +32,7 @@
- static void mmc_host_classdev_release(struct device *dev)
- {
- 	struct mmc_host *host = cls_dev_to_mmc_host(dev);
-+	mutex_destroy(&host->slot.lock);
- 	kfree(host);
- }
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 42f07fa..1e7c5c4 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -162,6 +162,7 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 			mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
+ 		mmc_data->ocr_mask = p->tmio_ocr_mask;
+ 		mmc_data->capabilities |= p->tmio_caps;
++		mmc_data->capabilities2 |= p->tmio_caps2;
+ 		mmc_data->cd_gpio = p->cd_gpio;
  
-@@ -327,6 +328,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 
- 	mmc_host_clk_init(host);
- 
-+	mutex_init(&host->slot.lock);
- 	host->slot.cd_irq = -EINVAL;
- 
- 	spin_lock_init(&host->lock);
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 92cba02..41689da 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -29,6 +29,34 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
- 	return IRQ_HANDLED;
- }
- 
-+static int mmc_gpio_alloc(struct mmc_host *host)
-+{
-+	size_t len = strlen(dev_name(host->parent)) + 4;
-+	struct mmc_gpio *ctx;
-+
-+	mutex_lock(&host->slot.lock);
-+
-+	ctx = host->slot.handler_priv;
-+	if (!ctx) {
-+		/*
-+		 * devm_kzalloc() can be called after device_initialize(), even
-+		 * before device_add(), i.e., between mmc_alloc_host() and
-+		 * mmc_add_host()
-+		 */
-+		ctx = devm_kzalloc(&host->class_dev, sizeof(*ctx) + len,
-+				   GFP_KERNEL);
-+		if (ctx) {
-+			snprintf(ctx->cd_label, len, "%s cd", dev_name(host->parent));
-+			ctx->cd_gpio = -EINVAL;
-+			host->slot.handler_priv = ctx;
-+		}
-+	}
-+
-+	mutex_unlock(&host->slot.lock);
-+
-+	return ctx ? 0 : -ENOMEM;
-+}
-+
- int mmc_gpio_get_cd(struct mmc_host *host)
- {
- 	struct mmc_gpio *ctx = host->slot.handler_priv;
-@@ -43,20 +71,24 @@ EXPORT_SYMBOL(mmc_gpio_get_cd);
- 
- int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
- {
--	size_t len = strlen(dev_name(host->parent)) + 4;
- 	struct mmc_gpio *ctx;
- 	int irq = gpio_to_irq(gpio);
- 	int ret;
- 
--	ctx = kmalloc(sizeof(*ctx) + len, GFP_KERNEL);
--	if (!ctx)
--		return -ENOMEM;
-+	ret = mmc_gpio_alloc(host);
-+	if (ret < 0)
-+		return ret;
- 
--	snprintf(ctx->cd_label, len, "%s cd", dev_name(host->parent));
-+	ctx = host->slot.handler_priv;
- 
- 	ret = gpio_request_one(gpio, GPIOF_DIR_IN, ctx->cd_label);
- 	if (ret < 0)
--		goto egpioreq;
-+		/*
-+		 * don't bother freeing memory. It might still get used by other
-+		 * slot functions, in any case it will be freed, when the device
-+		 * is destroyed.
-+		 */
-+		return ret;
- 
- 	/*
- 	 * Even if gpio_to_irq() returns a valid IRQ number, the platform might
-@@ -80,13 +112,8 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
- 		host->caps |= MMC_CAP_NEEDS_POLL;
- 
- 	ctx->cd_gpio = gpio;
--	host->slot.handler_priv = ctx;
- 
- 	return 0;
--
--egpioreq:
--	kfree(ctx);
--	return ret;
- }
- EXPORT_SYMBOL(mmc_gpio_request_cd);
- 
-@@ -107,7 +134,5 @@ void mmc_gpio_free_cd(struct mmc_host *host)
- 	ctx->cd_gpio = -EINVAL;
- 
- 	gpio_free(gpio);
--	host->slot.handler_priv = NULL;
--	kfree(ctx);
- }
- EXPORT_SYMBOL(mmc_gpio_free_cd);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index c1a03ee..65c64ee 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -11,6 +11,7 @@
- #define LINUX_MMC_HOST_H
- 
- #include <linux/leds.h>
-+#include <linux/mutex.h>
- #include <linux/sched.h>
- #include <linux/device.h>
- #include <linux/fault-inject.h>
-@@ -154,6 +155,7 @@ struct mmc_async_req {
-  * struct mmc_slot - MMC slot functions
-  *
-  * @cd_irq:		MMC/SD-card slot hotplug detection IRQ or -EINVAL
-+ * @lock:		protect the @handler_priv pointer
-  * @handler_priv:	MMC/SD-card slot context
-  *
-  * Some MMC/SD host controllers implement slot-functions like card and
-@@ -163,6 +165,7 @@ struct mmc_async_req {
-  */
- struct mmc_slot {
- 	int cd_irq;
-+	struct mutex lock;
- 	void *handler_priv;
- };
- 
+ 		if (p->dma_slave_tx > 0 && p->dma_slave_rx > 0) {
+diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
+index e94e620..b65679f 100644
+--- a/include/linux/mmc/sh_mobile_sdhi.h
++++ b/include/linux/mmc/sh_mobile_sdhi.h
+@@ -23,6 +23,7 @@ struct sh_mobile_sdhi_info {
+ 	int dma_slave_rx;
+ 	unsigned long tmio_flags;
+ 	unsigned long tmio_caps;
++	unsigned long tmio_caps2;
+ 	u32 tmio_ocr_mask;	/* available MMC voltages */
+ 	unsigned int cd_gpio;
+ 	struct tmio_mmc_data *pdata;
 -- 
 1.7.2.5
 
