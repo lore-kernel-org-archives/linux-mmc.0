@@ -1,158 +1,104 @@
-From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: RE: [PATCH v5] mmc: core: Fix the HPI execution sequence
-Date: Fri, 22 Jun 2012 19:01:46 +0530
-Message-ID: <000a01cd507b$6176af60$24640e20$@codeaurora.org>
-References: <003a01cd4fc3$c5e21ec0$51a65c40$@codeaurora.org> <1340345556-13820-1-git-send-email-svenkatr@ti.com>
+From: Rajendra Nayak <rnayak@ti.com>
+Subject: [PATCH 02/11] mmc: omap: add clk_prepare and clk_unprepare
+Date: Fri, 22 Jun 2012 19:18:01 +0530
+Message-ID: <1340372890-10091-3-git-send-email-rnayak@ti.com>
+References: <1340372890-10091-1-git-send-email-rnayak@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:24773 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1762055Ab2FVNbv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jun 2012 09:31:51 -0400
-In-Reply-To: <1340345556-13820-1-git-send-email-svenkatr@ti.com>
-Content-Language: en-us
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1340372890-10091-1-git-send-email-rnayak@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: paul@pwsan.com, mturquette@ti.com
+Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Rajendra Nayak <rnayak@ti.com>, Chris Ball <cjb@laptop.org>, Balaji T K <balajitk@ti.com>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Venkatraman S' <svenkatr@ti.com>, cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, linkinjeon@gmail.com, jh80.chung@samsung.com, alex.lemberg@sandisk.com, 'Kostya' <kdorfman@codeaurora.org>
 
-Thanks Venkatraman. Looks good to me.
-Reviewed-by: Subhash Jadavani <subhashj@codeaurora.org>
+In preparation of OMAP moving to Common Clk Framework(CCF) add clk_prepare()
+and clk_unprepare() for the mmc and hsmmc clocks as part of the drivers
+probe() and remove() routines.
 
-Regards,
-Subhash
+Signed-off-by: Rajendra Nayak <rnayak@ti.com>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Balaji T K <balajitk@ti.com>
+Cc: <linux-mmc@vger.kernel.org>
+---
+ drivers/mmc/host/omap.c       |    9 ++++++---
+ drivers/mmc/host/omap_hsmmc.c |    6 +++---
+ 2 files changed, 9 insertions(+), 6 deletions(-)
 
-> -----Original Message-----
-> From: Venkatraman S [mailto:svenkatr@ti.com]
-> Sent: Friday, June 22, 2012 11:43 AM
-> To: cjb@laptop.org
-> Cc: linux-mmc@vger.kernel.org; linkinjeon@gmail.com;
-> jh80.chung@samsung.com; alex.lemberg@sandisk.com;
-> subhashj@codeaurora.org; Venkatraman S; Kostya
-> Subject: [PATCH v5] mmc: core: Fix the HPI execution sequence
-> 
-> mmc_execute_hpi should send the HPI command only once, and only if the
-> card is in PRG state.
-> 
-> According to eMMC spec, the command's completion time is not dependent on
-> OUT_OF_INTERRUPT_TIME. Only the transition out of PRG STATE is guarded by
-> OUT_OF_INTERRUPT_TIME - which is defined to begin at the end of sending
-> the command itself.
-> 
-> Specify the default timeout for the actual sending of HPI command, and
-then
-> use OUT_OF_INTERRUPT_TIME to wait for the transition out of PRG state.
-> 
-> Reported-by: Alex Lemberg <Alex.Lemberg@sandisk.com>
-> Signed-off-by: Venkatraman S <svenkatr@ti.com>
-> Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
-> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-> CC: Kostya <kdorfman@codeaurora.org>
-> ---
-> v4->v5: Start time calculation after the HPI command has been sent
-> 
-> v3->v4: Fix coding style issues as suggested by Chris Ball.
->        Use time_after() for safe time diff calculations as
->         suggested by Subash Jadavani.
-> 
->  drivers/mmc/core/core.c    |   55
-++++++++++++++++++++++++++-----------------
-> -
->  drivers/mmc/core/mmc_ops.c |    1 -
->  2 files changed, 32 insertions(+), 24 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
-> 80ec427..f11de40 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -404,6 +404,7 @@ int mmc_interrupt_hpi(struct mmc_card *card)  {
->  	int err;
->  	u32 status;
-> +	unsigned long prg_wait;
-> 
->  	BUG_ON(!card);
-> 
-> @@ -419,30 +420,38 @@ int mmc_interrupt_hpi(struct mmc_card *card)
->  		goto out;
->  	}
-> 
-> -	/*
-> -	 * If the card status is in PRG-state, we can send the HPI command.
-> -	 */
-> -	if (R1_CURRENT_STATE(status) == R1_STATE_PRG) {
-> -		do {
-> -			/*
-> -			 * We don't know when the HPI command will finish
-> -			 * processing, so we need to resend HPI until out
-> -			 * of prg-state, and keep checking the card status
-> -			 * with SEND_STATUS.  If a timeout error occurs when
-> -			 * sending the HPI command, we are already out of
-> -			 * prg-state.
-> -			 */
-> -			err = mmc_send_hpi_cmd(card, &status);
-> -			if (err)
-> -				pr_debug("%s: abort HPI (%d error)\n",
-> -					 mmc_hostname(card->host), err);
-> +	switch (R1_CURRENT_STATE(status)) {
-> +	case R1_STATE_IDLE:
-> +	case R1_STATE_READY:
-> +	case R1_STATE_STBY:
-> +		/*
-> +		 * In idle states, HPI is not needed and the caller
-> +		 * can issue the next intended command immediately
-> +		 */
-> +		goto out;
-> +	case R1_STATE_PRG:
-> +		break;
-> +	default:
-> +		/* In all other states, it's illegal to issue HPI */
-> +		pr_debug("%s: HPI cannot be sent. Card state=%d\n",
-> +			mmc_hostname(card->host),
-> R1_CURRENT_STATE(status));
-> +		err = -EINVAL;
-> +		goto out;
-> +	}
-> 
-> -			err = mmc_send_status(card, &status);
-> -			if (err)
-> -				break;
-> -		} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
-> -	} else
-> -		pr_debug("%s: Left prg-state\n", mmc_hostname(card->host));
-> +	err = mmc_send_hpi_cmd(card, &status);
-> +	if (err)
-> +		goto out;
-> +
-> +	prg_wait = jiffies +
-msecs_to_jiffies(card->ext_csd.out_of_int_time);
-> +	do {
-> +		err = mmc_send_status(card, &status);
-> +
-> +		if (!err && R1_CURRENT_STATE(status) == R1_STATE_TRAN)
-> +			break;
-> +		if (time_after(jiffies, prg_wait))
-> +			err = -ETIMEDOUT;
-> +	} while (!err);
-> 
->  out:
->  	mmc_release_host(card->host);
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 69370f4..0ed2cc5 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -569,7 +569,6 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32
-> *status)
-> 
->  	cmd.opcode = opcode;
->  	cmd.arg = card->rca << 16 | 1;
-> -	cmd.cmd_timeout_ms = card->ext_csd.out_of_int_time;
-> 
->  	err = mmc_wait_for_cmd(card->host, &cmd, 0);
->  	if (err) {
-> --
-> 1.7.10.rc2
-
+diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+index 552196c..331fa89 100644
+--- a/drivers/mmc/host/omap.c
++++ b/drivers/mmc/host/omap.c
+@@ -1466,13 +1466,14 @@ static int __devinit mmc_omap_probe(struct platform_device *pdev)
+ 		ret = PTR_ERR(host->iclk);
+ 		goto err_free_mmc_host;
+ 	}
+-	clk_enable(host->iclk);
++	clk_prepare_enable(host->iclk);
+ 
+ 	host->fclk = clk_get(&pdev->dev, "fck");
+ 	if (IS_ERR(host->fclk)) {
+ 		ret = PTR_ERR(host->fclk);
+ 		goto err_free_iclk;
+ 	}
++	clk_prepare(host->fclk);
+ 
+ 	ret = request_irq(host->irq, mmc_omap_irq, 0, DRIVER_NAME, host);
+ 	if (ret)
+@@ -1509,9 +1510,10 @@ err_plat_cleanup:
+ err_free_irq:
+ 	free_irq(host->irq, host);
+ err_free_fclk:
++	clk_unprepare(host->fclk);
+ 	clk_put(host->fclk);
+ err_free_iclk:
+-	clk_disable(host->iclk);
++	clk_disable_unprepare(host->iclk);
+ 	clk_put(host->iclk);
+ err_free_mmc_host:
+ 	iounmap(host->virt_base);
+@@ -1539,8 +1541,9 @@ static int __devexit mmc_omap_remove(struct platform_device *pdev)
+ 
+ 	mmc_omap_fclk_enable(host, 0);
+ 	free_irq(host->irq, host);
++	clk_unprepare(host->fclk);
+ 	clk_put(host->fclk);
+-	clk_disable(host->iclk);
++	clk_disable_unprepare(host->iclk);
+ 	clk_put(host->iclk);
+ 
+ 	iounmap(host->virt_base);
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 9a7a60a..154baa5 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1908,7 +1908,7 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
+ 	if (IS_ERR(host->dbclk)) {
+ 		dev_warn(mmc_dev(host->mmc), "Failed to get debounce clk\n");
+ 		host->dbclk = NULL;
+-	} else if (clk_enable(host->dbclk) != 0) {
++	} else if (clk_prepare_enable(host->dbclk) != 0) {
+ 		dev_warn(mmc_dev(host->mmc), "Failed to enable debounce clk\n");
+ 		clk_put(host->dbclk);
+ 		host->dbclk = NULL;
+@@ -2032,7 +2032,7 @@ err_irq:
+ 	pm_runtime_disable(host->dev);
+ 	clk_put(host->fclk);
+ 	if (host->dbclk) {
+-		clk_disable(host->dbclk);
++		clk_disable_unprepare(host->dbclk);
+ 		clk_put(host->dbclk);
+ 	}
+ err1:
+@@ -2067,7 +2067,7 @@ static int __devexit omap_hsmmc_remove(struct platform_device *pdev)
+ 	pm_runtime_disable(host->dev);
+ 	clk_put(host->fclk);
+ 	if (host->dbclk) {
+-		clk_disable(host->dbclk);
++		clk_disable_unprepare(host->dbclk);
+ 		clk_put(host->dbclk);
+ 	}
+ 
+-- 
+1.7.1
 
