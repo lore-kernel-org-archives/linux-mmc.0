@@ -1,107 +1,61 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 2/9 v4] mmc: use a more generic name for slot function types and fields
-Date: Fri, 22 Jun 2012 15:23:15 +0200
-Message-ID: <1340371402-4801-3-git-send-email-g.liakhovetski@gmx.de>
-References: <1340371402-4801-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:50802 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1762100Ab2FVNXn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jun 2012 09:23:43 -0400
-In-Reply-To: <1340371402-4801-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH 0/9 v4] mmc: cd-gpio: extend to handle more slot functions
+Date: Fri, 22 Jun 2012 15:23:13 +0200
+Message-ID: <1340371402-4801-1-git-send-email-g.liakhovetski@gmx.de>
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-sh@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>
+List-Id: linux-mmc@vger.kernel.org
 
-struct mmc_host::hotplug is becoming a generic hook for slot functions.
-Rename it accordingly.
+This patch series extends the cd-gpio helper module to handle further common 
+slot functions, often implemented using GPIOs: CD polling and WP. It 
+supersedes patches 1-8 and 10/10 from
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
- drivers/mmc/core/host.c      |    2 ++
- drivers/mmc/core/slot-gpio.c |    8 ++++----
- include/linux/mmc/host.h     |   17 ++++++++++++++---
- 3 files changed, 20 insertions(+), 7 deletions(-)
+http://thread.gmane.org/gmane.linux.kernel.mmc/14624/focus=14644
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 91c84c7..b8c5290 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -327,6 +327,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 
- 	mmc_host_clk_init(host);
- 
-+	host->slot.cd_irq = -EINVAL;
-+
- 	spin_lock_init(&host->lock);
- 	init_waitqueue_head(&host->wq);
- 	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 9796710..468e5a0 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -56,8 +56,8 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
- 		goto eirqreq;
- 
- 	ctx->cd_gpio = gpio;
--	host->hotplug.irq = irq;
--	host->hotplug.handler_priv = ctx;
-+	host->slot.cd_irq = irq;
-+	host->slot.handler_priv = ctx;
- 
- 	return 0;
- 
-@@ -71,12 +71,12 @@ EXPORT_SYMBOL(mmc_gpio_request_cd);
- 
- void mmc_gpio_free_cd(struct mmc_host *host)
- {
--	struct mmc_gpio *ctx = host->hotplug.handler_priv;
-+	struct mmc_gpio *ctx = host->slot.handler_priv;
- 
- 	if (!ctx)
- 		return;
- 
--	free_irq(host->hotplug.irq, host);
-+	free_irq(host->slot.cd_irq, host);
- 	gpio_free(ctx->cd_gpio);
- 	kfree(ctx);
- }
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 9deb725..90b6a38 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -150,8 +150,19 @@ struct mmc_async_req {
- 	int (*err_check) (struct mmc_card *, struct mmc_async_req *);
- };
- 
--struct mmc_hotplug {
--	unsigned int irq;
-+/**
-+ * struct mmc_slot - MMC slot functions
-+ *
-+ * @cd_irq:		MMC/SD-card slot hotplug detection IRQ or -EINVAL
-+ * @handler_priv:	MMC/SD-card slot context
-+ *
-+ * Some MMC/SD host controllers implement slot-functions like card and
-+ * write-protect detection natively. However, a large number of controllers
-+ * leave these functions to the CPU. This struct provides a hook to attach
-+ * such slot-function drivers.
-+ */
-+struct mmc_slot {
-+	int cd_irq;
- 	void *handler_priv;
- };
- 
-@@ -297,7 +308,7 @@ struct mmc_host {
- 
- 	struct delayed_work	detect;
- 	int			detect_change;	/* card detect flag */
--	struct mmc_hotplug	hotplug;
-+	struct mmc_slot		slot;
- 
- 	const struct mmc_bus_ops *bus_ops;	/* current bus driver */
- 	unsigned int		bus_refs;	/* reference counter */
+Patch 9/10 from it is not needed any more, because the default polarity of 
+CD and RO GPIOs is now active low, which is also what is used by all 
+initial users. This makes updating them unnecessary and allows us to apply 
+patch 10/10 (which now becomes 9/9) immediately without first having to 
+wait for platform updates.
+
+Thanks
+Guennadi
+
+Guennadi Liakhovetski (9):
+  mmc: extend and rename cd-gpio helpers to handle more slot GPIO
+    functions
+  mmc: use a more generic name for slot function types and fields
+  mmc: add two capability flags for CD and WP signal polarity
+  mmc: add CD GPIO polling support to slot functions
+  mmc: convert slot functions to managed allocation
+  mmc: add WP pin handler to slot functions
+  mmc: tmio: support caps2 flags
+  mmc: sh_mobile_sdhi: support caps2 flags
+  mmc: tmio: use generic GPIO CD and WP handlers
+
+ drivers/mmc/core/Makefile          |    2 +-
+ drivers/mmc/core/cd-gpio.c         |   83 ----------------
+ drivers/mmc/core/host.c            |    4 +
+ drivers/mmc/core/slot-gpio.c       |  188 ++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sh_mobile_sdhi.c  |    1 +
+ drivers/mmc/host/tmio_mmc_pio.c    |   13 ++-
+ include/linux/mfd/tmio.h           |    1 +
+ include/linux/mmc/cd-gpio.h        |   18 ----
+ include/linux/mmc/host.h           |   22 ++++-
+ include/linux/mmc/sh_mobile_sdhi.h |    1 +
+ include/linux/mmc/slot-gpio.h      |   24 +++++
+ 11 files changed, 249 insertions(+), 108 deletions(-)
+ delete mode 100644 drivers/mmc/core/cd-gpio.c
+ create mode 100644 drivers/mmc/core/slot-gpio.c
+ delete mode 100644 include/linux/mmc/cd-gpio.h
+ create mode 100644 include/linux/mmc/slot-gpio.h
+
 -- 
 1.7.2.5
 
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
