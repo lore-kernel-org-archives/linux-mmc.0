@@ -1,53 +1,74 @@
-From: "Luca Porzio (lporzio)" <lporzio@micron.com>
-Subject: RE: [PATCH 2/3] ext4: Context support
-Date: Fri, 22 Jun 2012 14:07:29 +0000
-Message-ID: <26E7A31274623843B0E8CF86148BFE32779DA704@NTXAVZMBX04.azit.micron.com>
-References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com>
-	 <201206122007.28514.arnd.bergmann@linaro.org>
-	 <20120612204128.GF12161@thunk.org>
-	 <201206131944.35351.arnd.bergmann@linaro.org>
- <1340371753.3363.7.camel@koala>
+From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Subject: Re: [RFC PATCH] Revert "mmc: omap_hsmmc: Enable Auto CMD12"
+Date: Fri, 22 Jun 2012 20:43:46 +0530
+Message-ID: <CANrkHUYGLiO8S-Y1ubWmXQffhVGgex=Q=RH3DhwTqyqkZz6SaQ@mail.gmail.com>
+References: <1340362175-25807-1-git-send-email-ming.lei@canonical.com>
+	<CANrkHUacUKPS=hee6=dhcGAjiC1CS88RNrBNy=wFX5y1Oxb05A@mail.gmail.com>
+	<87sjdnjykh.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from masquerade.micron.com ([137.201.242.130]:59306 "EHLO
-	masquerade.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1762151Ab2FVOHp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jun 2012 10:07:45 -0400
-In-Reply-To: <1340371753.3363.7.camel@koala>
-Content-Language: en-US
+Received: from na3sys009aog111.obsmtp.com ([74.125.149.205]:35293 "EHLO
+	na3sys009aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755503Ab2FVPNt convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Jun 2012 11:13:49 -0400
+Received: by lbok6 with SMTP id k6so4998568lbo.18
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Jun 2012 08:13:46 -0700 (PDT)
+In-Reply-To: <87sjdnjykh.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Artem Bityutskiy <dedekind1@gmail.com>, Arnd Bergmann <arnd.bergmann@linaro.org>
-Cc: Ted Ts'o <tytso@mit.edu>, Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>, Saugata Das <saugata.das@linaro.org>, Saugata Das <saugata.das@stericsson.com>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>, "venkat@linaro.org" <venkat@linaro.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: Ming Lei <ming.lei@canonical.com>, linux-mmc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>
 
-SGFsbG8sDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogbGludXgtbW1j
-LW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5l
-bC5vcmddDQo+IE9uIEJlaGFsZiBPZiBBcnRlbSBCaXR5dXRza2l5DQo+IFNlbnQ6IEZyaWRheSwg
-SnVuZSAyMiwgMjAxMiAzOjI5IFBNDQo+IFRvOiBBcm5kIEJlcmdtYW5uDQo+IENjOiBUZWQgVHMn
-bzsgQWxleCBMZW1iZXJnOyBIWU9KSU4gSkVPTkc7IFNhdWdhdGEgRGFzOyBTYXVnYXRhIERhczsg
-bGludXgtDQo+IGV4dDRAdmdlci5rZXJuZWwub3JnOyBsaW51eC1mc2RldmVsQHZnZXIua2VybmVs
-Lm9yZzsgbGludXgtDQo+IG1tY0B2Z2VyLmtlcm5lbC5vcmc7IHBhdGNoZXNAbGluYXJvLm9yZzsg
-dmVua2F0QGxpbmFyby5vcmc7IEx1Y2EgUG9yemlvDQo+IChscG9yemlvKQ0KPiBTdWJqZWN0OiBS
-ZTogW1BBVENIIDIvM10gZXh0NDogQ29udGV4dCBzdXBwb3J0DQo+IA0KPiBPbiBXZWQsIDIwMTIt
-MDYtMTMgYXQgMTk6NDQgKzAwMDAsIEFybmQgQmVyZ21hbm4gd3JvdGU6DQo+ID4gSSB0aGluayB1
-c2luZyB0aGUgaW5vZGUgbnVtYmVyIGlzIGEgcmVhc29uYWJsZSBmaXQuIFVzaW5nIHRoZSBpbm9k
-ZQ0KPiA+IG51bWJlciBvZiB0aGUgcGFyZW50IGRpcmVjdG9yeSBtaWdodCBiZSBtb3JlIGFwcHJv
-cHJpYXRlIGJ1dCBpdCBicmVha3MNCj4gPiB3aXRoIGhhcmQgbGlua3MgYW5kIGNyb3NzLWRpcmVj
-dG9yeSByZW5hbWVzICh3ZSBtdXN0IG5vdCB1c2UgdGhlIHNhbWUNCj4gPiBMQkEgd2l0aCBjb25m
-bGljdGluZyBjb250ZXh0IG51bWJlcnMsIG9yIGZsdXNoIHRoZSBvbGQgY29udGV4dA0KPiA+IGlu
-YmV0d2VlbikuDQo+IA0KPiBJIHdvdWxkIHB1dCBpdCB0aGlzIHdheS4NCj4gDQo+IDEuIGNvbnRl
-eCA9IGlub2RlIG51bWJlciBmb3IgZGF0YSBibG9ja3MuDQo+IDIuIGNvbnRleHQgPSBwYXJlbnQg
-ZGlyZWN0b3J5J3MgaW5vZGUgbnVtYmVyIGZvciBzdGF0IGRhdGEgKHRpbWVzLA0KPiBwZXJtaXNz
-aW9ucywgZXRjKSBibG9ja3MgYW5kIGRpcmVjdG9yeSBlbnRyeSBibG9ja3MuIFNob3VsZCBoZWxw
-IHRoaW5ncyBsaWtlDQo+IHJlYWRkaXIgYW5kIHJlYWRkaXIgKyBzdGF0LiBCZXNpZGVzLCB0aGlz
-IHN0dWZmIHRlbmQgdG8gY2hhbmdlIG1vcmUgb2Z0ZW4gdGhhbg0KPiB0aGUgZGF0YSwgc28gbWl4
-aW5nIGl0IHdpdGggdGhlIGRhdGEgaW4gdGhlIHNhbWUgZXJhc2VibG9jayBpcyBub3Qgc21hcnQu
-DQo+IDMuIGNvbnRleHQgPSBwYXJlbnQgaW5vZGUgbnVtYmVyIGZvciBhbGwgdGhlIHN0dWZmIGJl
-bG9uZ2luZyB0byB4YXR0cnMuDQo+IA0KPiBXZSBkbyBzb21ldGhpbmcgc2ltaWxhciBpbiBVQklG
-Uy4NCj4gDQoNCkRvZXNuJ3QgdGhpcyBlbmQgdXAgdXNpbmcgdG9vIG1hbnkgY29udGV4dHM/DQpP
-cGVuaW5nIG9uZSBjb250ZXh0cyBwZXIgaW5vZGUgd291bGQgZW5kIHVwIGluIG9wZW5pbmcgbW9y
-ZSBjb250ZXh0cyB0aGFuIGF2YWlsYWJsZS4NClRoZSBlTU1DIHNwZWMgZm9yYmlkcyBtb3JlIHRo
-YW4gMTUgY29udGV4dHMgZm9yIHRoZSB3aG9sZSBkZXZpY2UuDQoNCj4gLS0NCj4gQmVzdCBSZWdh
-cmRzLA0KPiBBcnRlbSBCaXR5dXRza2l5DQoNCkNoZWVycywNCiAgICBMdWNhDQo=
+On Fri, Jun 22, 2012 at 6:25 PM, Chris Ball <cjb@laptop.org> wrote:
+> Hi,
+>
+> On Fri, Jun 22 2012, T Krishnamoorthy, Balaji wrote:
+>> On Fri, Jun 22, 2012 at 4:19 PM, Ming Lei <ming.lei@canonical.com> w=
+rote:
+>>> This patch reverts the commit dba3c29ea4a1d5d544.
+>>>
+>>> After bisecting, this commit dba3c29 is found to ruin micro-SD card=
+ data
+>>> (writing incorrect file, or fs is corrupt after several times mount=
+)
+>>> on the beagle-xm revB, and reverting the commit will fix the proble=
+m.
+>>
+>> Hi Ming,
+>> Rather than reverting the entire commit,
+>> Can you try with the below change alone, so that AutoCMD12 can be ea=
+sily
+>> enabled back when needed.
+>>
+>> @@ -1859,7 +1859,6 @@ static int __devinit omap_hsmmc_probe(st
+>> =A0 =A0 =A0 host->mapbase =A0 =3D res->start + pdata->reg_offset;
+>> =A0 =A0 =A0 host->base =A0 =A0 =A0=3D ioremap(host->mapbase, SZ_4K);
+>> =A0 =A0 =A0 host->power_mode =3D MMC_POWER_OFF;
+>> - =A0 =A0 host->flags =A0 =A0 =3D AUTO_CMD12;
+>> =A0 =A0 =A0 host->next_data.cookie =3D 1;
+>>
+>> =A0 =A0 =A0 platform_set_drvdata(pdev, host);
+>
+> I'm not totally comfortable with that; seems like it should be harder
+> to cause data corruption than turning on a single flag in the host.
+>
+> The full revert is probably best until we know what the underlying
+> bug is, and how to disable AUTO_CMD12 on all affected systems.
+
+I tested autocmd12 to be working on OMAP2,3,4 SDP. With beagle board
+data corruption is observed with some cards, so it is going to be selec=
+tively
+enabling/disabling for some SoCs via board data or DT until data corrup=
+tion
+due to Autocmd12 is root caused.
+
+>
+> Thanks,
+>
+> - Chris.
+> --
+> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
+> One Laptop Per Child
