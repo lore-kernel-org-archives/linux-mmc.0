@@ -1,104 +1,53 @@
-From: Rajendra Nayak <rnayak@ti.com>
-Subject: [PATCH 02/11] mmc: omap: add clk_prepare and clk_unprepare
-Date: Fri, 22 Jun 2012 19:18:01 +0530
-Message-ID: <1340372890-10091-3-git-send-email-rnayak@ti.com>
-References: <1340372890-10091-1-git-send-email-rnayak@ti.com>
+From: "Luca Porzio (lporzio)" <lporzio@micron.com>
+Subject: RE: [PATCH 2/3] ext4: Context support
+Date: Fri, 22 Jun 2012 14:07:29 +0000
+Message-ID: <26E7A31274623843B0E8CF86148BFE32779DA704@NTXAVZMBX04.azit.micron.com>
+References: <1339411562-17100-1-git-send-email-saugata.das@stericsson.com>
+	 <201206122007.28514.arnd.bergmann@linaro.org>
+	 <20120612204128.GF12161@thunk.org>
+	 <201206131944.35351.arnd.bergmann@linaro.org>
+ <1340371753.3363.7.camel@koala>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1340372890-10091-1-git-send-email-rnayak@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: paul@pwsan.com, mturquette@ti.com
-Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Rajendra Nayak <rnayak@ti.com>, Chris Ball <cjb@laptop.org>, Balaji T K <balajitk@ti.com>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from masquerade.micron.com ([137.201.242.130]:59306 "EHLO
+	masquerade.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1762151Ab2FVOHp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jun 2012 10:07:45 -0400
+In-Reply-To: <1340371753.3363.7.camel@koala>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Artem Bityutskiy <dedekind1@gmail.com>, Arnd Bergmann <arnd.bergmann@linaro.org>
+Cc: Ted Ts'o <tytso@mit.edu>, Alex Lemberg <Alex.Lemberg@sandisk.com>, HYOJIN JEONG <syr.jeong@samsung.com>, Saugata Das <saugata.das@linaro.org>, Saugata Das <saugata.das@stericsson.com>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>, "venkat@linaro.org" <venkat@linaro.org>
 
-In preparation of OMAP moving to Common Clk Framework(CCF) add clk_prepare()
-and clk_unprepare() for the mmc and hsmmc clocks as part of the drivers
-probe() and remove() routines.
-
-Signed-off-by: Rajendra Nayak <rnayak@ti.com>
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Balaji T K <balajitk@ti.com>
-Cc: <linux-mmc@vger.kernel.org>
----
- drivers/mmc/host/omap.c       |    9 ++++++---
- drivers/mmc/host/omap_hsmmc.c |    6 +++---
- 2 files changed, 9 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index 552196c..331fa89 100644
---- a/drivers/mmc/host/omap.c
-+++ b/drivers/mmc/host/omap.c
-@@ -1466,13 +1466,14 @@ static int __devinit mmc_omap_probe(struct platform_device *pdev)
- 		ret = PTR_ERR(host->iclk);
- 		goto err_free_mmc_host;
- 	}
--	clk_enable(host->iclk);
-+	clk_prepare_enable(host->iclk);
- 
- 	host->fclk = clk_get(&pdev->dev, "fck");
- 	if (IS_ERR(host->fclk)) {
- 		ret = PTR_ERR(host->fclk);
- 		goto err_free_iclk;
- 	}
-+	clk_prepare(host->fclk);
- 
- 	ret = request_irq(host->irq, mmc_omap_irq, 0, DRIVER_NAME, host);
- 	if (ret)
-@@ -1509,9 +1510,10 @@ err_plat_cleanup:
- err_free_irq:
- 	free_irq(host->irq, host);
- err_free_fclk:
-+	clk_unprepare(host->fclk);
- 	clk_put(host->fclk);
- err_free_iclk:
--	clk_disable(host->iclk);
-+	clk_disable_unprepare(host->iclk);
- 	clk_put(host->iclk);
- err_free_mmc_host:
- 	iounmap(host->virt_base);
-@@ -1539,8 +1541,9 @@ static int __devexit mmc_omap_remove(struct platform_device *pdev)
- 
- 	mmc_omap_fclk_enable(host, 0);
- 	free_irq(host->irq, host);
-+	clk_unprepare(host->fclk);
- 	clk_put(host->fclk);
--	clk_disable(host->iclk);
-+	clk_disable_unprepare(host->iclk);
- 	clk_put(host->iclk);
- 
- 	iounmap(host->virt_base);
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 9a7a60a..154baa5 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1908,7 +1908,7 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
- 	if (IS_ERR(host->dbclk)) {
- 		dev_warn(mmc_dev(host->mmc), "Failed to get debounce clk\n");
- 		host->dbclk = NULL;
--	} else if (clk_enable(host->dbclk) != 0) {
-+	} else if (clk_prepare_enable(host->dbclk) != 0) {
- 		dev_warn(mmc_dev(host->mmc), "Failed to enable debounce clk\n");
- 		clk_put(host->dbclk);
- 		host->dbclk = NULL;
-@@ -2032,7 +2032,7 @@ err_irq:
- 	pm_runtime_disable(host->dev);
- 	clk_put(host->fclk);
- 	if (host->dbclk) {
--		clk_disable(host->dbclk);
-+		clk_disable_unprepare(host->dbclk);
- 		clk_put(host->dbclk);
- 	}
- err1:
-@@ -2067,7 +2067,7 @@ static int __devexit omap_hsmmc_remove(struct platform_device *pdev)
- 	pm_runtime_disable(host->dev);
- 	clk_put(host->fclk);
- 	if (host->dbclk) {
--		clk_disable(host->dbclk);
-+		clk_disable_unprepare(host->dbclk);
- 		clk_put(host->dbclk);
- 	}
- 
--- 
-1.7.1
-
+SGFsbG8sDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogbGludXgtbW1j
+LW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5l
+bC5vcmddDQo+IE9uIEJlaGFsZiBPZiBBcnRlbSBCaXR5dXRza2l5DQo+IFNlbnQ6IEZyaWRheSwg
+SnVuZSAyMiwgMjAxMiAzOjI5IFBNDQo+IFRvOiBBcm5kIEJlcmdtYW5uDQo+IENjOiBUZWQgVHMn
+bzsgQWxleCBMZW1iZXJnOyBIWU9KSU4gSkVPTkc7IFNhdWdhdGEgRGFzOyBTYXVnYXRhIERhczsg
+bGludXgtDQo+IGV4dDRAdmdlci5rZXJuZWwub3JnOyBsaW51eC1mc2RldmVsQHZnZXIua2VybmVs
+Lm9yZzsgbGludXgtDQo+IG1tY0B2Z2VyLmtlcm5lbC5vcmc7IHBhdGNoZXNAbGluYXJvLm9yZzsg
+dmVua2F0QGxpbmFyby5vcmc7IEx1Y2EgUG9yemlvDQo+IChscG9yemlvKQ0KPiBTdWJqZWN0OiBS
+ZTogW1BBVENIIDIvM10gZXh0NDogQ29udGV4dCBzdXBwb3J0DQo+IA0KPiBPbiBXZWQsIDIwMTIt
+MDYtMTMgYXQgMTk6NDQgKzAwMDAsIEFybmQgQmVyZ21hbm4gd3JvdGU6DQo+ID4gSSB0aGluayB1
+c2luZyB0aGUgaW5vZGUgbnVtYmVyIGlzIGEgcmVhc29uYWJsZSBmaXQuIFVzaW5nIHRoZSBpbm9k
+ZQ0KPiA+IG51bWJlciBvZiB0aGUgcGFyZW50IGRpcmVjdG9yeSBtaWdodCBiZSBtb3JlIGFwcHJv
+cHJpYXRlIGJ1dCBpdCBicmVha3MNCj4gPiB3aXRoIGhhcmQgbGlua3MgYW5kIGNyb3NzLWRpcmVj
+dG9yeSByZW5hbWVzICh3ZSBtdXN0IG5vdCB1c2UgdGhlIHNhbWUNCj4gPiBMQkEgd2l0aCBjb25m
+bGljdGluZyBjb250ZXh0IG51bWJlcnMsIG9yIGZsdXNoIHRoZSBvbGQgY29udGV4dA0KPiA+IGlu
+YmV0d2VlbikuDQo+IA0KPiBJIHdvdWxkIHB1dCBpdCB0aGlzIHdheS4NCj4gDQo+IDEuIGNvbnRl
+eCA9IGlub2RlIG51bWJlciBmb3IgZGF0YSBibG9ja3MuDQo+IDIuIGNvbnRleHQgPSBwYXJlbnQg
+ZGlyZWN0b3J5J3MgaW5vZGUgbnVtYmVyIGZvciBzdGF0IGRhdGEgKHRpbWVzLA0KPiBwZXJtaXNz
+aW9ucywgZXRjKSBibG9ja3MgYW5kIGRpcmVjdG9yeSBlbnRyeSBibG9ja3MuIFNob3VsZCBoZWxw
+IHRoaW5ncyBsaWtlDQo+IHJlYWRkaXIgYW5kIHJlYWRkaXIgKyBzdGF0LiBCZXNpZGVzLCB0aGlz
+IHN0dWZmIHRlbmQgdG8gY2hhbmdlIG1vcmUgb2Z0ZW4gdGhhbg0KPiB0aGUgZGF0YSwgc28gbWl4
+aW5nIGl0IHdpdGggdGhlIGRhdGEgaW4gdGhlIHNhbWUgZXJhc2VibG9jayBpcyBub3Qgc21hcnQu
+DQo+IDMuIGNvbnRleHQgPSBwYXJlbnQgaW5vZGUgbnVtYmVyIGZvciBhbGwgdGhlIHN0dWZmIGJl
+bG9uZ2luZyB0byB4YXR0cnMuDQo+IA0KPiBXZSBkbyBzb21ldGhpbmcgc2ltaWxhciBpbiBVQklG
+Uy4NCj4gDQoNCkRvZXNuJ3QgdGhpcyBlbmQgdXAgdXNpbmcgdG9vIG1hbnkgY29udGV4dHM/DQpP
+cGVuaW5nIG9uZSBjb250ZXh0cyBwZXIgaW5vZGUgd291bGQgZW5kIHVwIGluIG9wZW5pbmcgbW9y
+ZSBjb250ZXh0cyB0aGFuIGF2YWlsYWJsZS4NClRoZSBlTU1DIHNwZWMgZm9yYmlkcyBtb3JlIHRo
+YW4gMTUgY29udGV4dHMgZm9yIHRoZSB3aG9sZSBkZXZpY2UuDQoNCj4gLS0NCj4gQmVzdCBSZWdh
+cmRzLA0KPiBBcnRlbSBCaXR5dXRza2l5DQoNCkNoZWVycywNCiAgICBMdWNhDQo=
