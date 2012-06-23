@@ -1,39 +1,56 @@
-From: Paul Walmsley <paul@pwsan.com>
-Subject: Re: [PATCH 02/11] mmc: omap: add clk_prepare and clk_unprepare
-Date: Fri, 22 Jun 2012 12:34:07 -0600 (MDT)
-Message-ID: <alpine.DEB.2.00.1206221233490.10198@utopia.booyaka.com>
-References: <1340372890-10091-1-git-send-email-rnayak@ti.com> <1340372890-10091-3-git-send-email-rnayak@ti.com> <CANfBPZ-YpupgvzPcJsqZpG4QOErw6kqBNWjP2GL5teDwU+wbBA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from utopia.booyaka.com ([72.9.107.138]:44708 "EHLO
-	utopia.booyaka.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754992Ab2FVSeI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jun 2012 14:34:08 -0400
-In-Reply-To: <CANfBPZ-YpupgvzPcJsqZpG4QOErw6kqBNWjP2GL5teDwU+wbBA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Maya Erez <merez@codeaurora.org>
+Subject: [PATCH v2 0/3] mmc: card: Add eMMC4.5 write packed commands unit-tests
+Date: Sat, 23 Jun 2012 22:24:50 +0300
+Message-ID: <1340479493-28470-1-git-send-email-merez@codeaurora.org>
+References: <n>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <n>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: "S, Venkatraman" <svenkatr@ti.com>
-Cc: Rajendra Nayak <rnayak@ti.com>, mturquette@ti.com, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Balaji T K <balajitk@ti.com>, linux-mmc@vger.kernel.org
 
-On Fri, 22 Jun 2012, S, Venkatraman wrote:
+Expose the following packed commands tests:
+- Test the write packed commands list preparation
+- Simulate a returned error code
+- Send an invalid packed command to the card
 
-> On Fri, Jun 22, 2012 at 7:18 PM, Rajendra Nayak <rnayak@ti.com> wrote:
-> > In preparation of OMAP moving to Common Clk Framework(CCF) add clk_prepare()
-> > and clk_unprepare() for the mmc and hsmmc clocks as part of the drivers
-> > probe() and remove() routines.
-> >
-> > Signed-off-by: Rajendra Nayak <rnayak@ti.com>
-> > Cc: Chris Ball <cjb@laptop.org>
-> > Cc: Balaji T K <balajitk@ti.com>
-> > Cc: <linux-mmc@vger.kernel.org>
-> 
-> Rajendra,
->   Can this be applied independently, or does this patch have a
-> dependency on other patches in the series ?
+This patch is dependant in the following patches:
+  [PATCH RESEND v7 1/3] mmc: core: Add packed command feature of eMMC4.5
+  [PATCH RESEND v7 2/3] mmc: core: Support packed write command for eMMC4.5 device
 
-A better way to handle this one would be to convert the driver to runtime 
-PM.  That needs to be done anyway.
+Changes in V2:
+    - Add MMC write packing statistics and test-iosched scheduler patches as part of this patch.
+    - Code review fixes
 
+Maya Erez (3):
+  mmc: block: Add MMC write packing statistics
+  block: Add test-iosched scheduler
+  block: Add eMMC4.5 write packed commands unit-tests
 
-- Paul
+ Documentation/block/test-iosched.txt |   39 +
+ block/Kconfig.iosched                |   11 +
+ block/Makefile                       |    1 +
+ block/blk-core.c                     |    3 +-
+ block/test-iosched.c                 | 1005 +++++++++++++++++++++++
+ drivers/mmc/card/Kconfig             |   11 +
+ drivers/mmc/card/Makefile            |    1 +
+ drivers/mmc/card/block.c             |  138 +++-
+ drivers/mmc/card/mmc_block_test.c    | 1449 ++++++++++++++++++++++++++++++++++
+ drivers/mmc/card/queue.h             |   15 +
+ drivers/mmc/core/bus.c               |    4 +
+ drivers/mmc/core/debugfs.c           |  169 ++++
+ drivers/mmc/core/mmc.c               |   18 +
+ include/linux/mmc/card.h             |   24 +
+ include/linux/test-iosched.h         |  218 +++++
+ 15 files changed, 3091 insertions(+), 15 deletions(-)
+ create mode 100644 Documentation/block/test-iosched.txt
+ create mode 100644 block/test-iosched.c
+ create mode 100644 drivers/mmc/card/mmc_block_test.c
+ create mode 100644 include/linux/test-iosched.h
+
+-- 
+1.7.3.3
+-- 
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
