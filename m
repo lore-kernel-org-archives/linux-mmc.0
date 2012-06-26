@@ -1,57 +1,294 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: [PATCH] mmc: mxs-mmc: enable regulator for mmc slot
-Date: Tue, 26 Jun 2012 16:38:57 +0800
-Message-ID: <1340699937-8163-1-git-send-email-shawn.guo@linaro.org>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH RESEND v7 2/3] mmc: core: Support packed write command for
+ eMMC4.5 device
+Date: Tue, 26 Jun 2012 14:19:00 +0530
+Message-ID: <CANfBPZ-Rt-RqBgBCj9Y-p5jEOk8Xs9j6xS_pzu83U_rMr_2qCQ@mail.gmail.com>
+References: <007b01cd4d15$40673510$c1359f30$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:8722
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1758434Ab2FZIix (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jun 2012 04:38:53 -0400
+Received: from na3sys009aog125.obsmtp.com ([74.125.149.153]:58403 "EHLO
+	na3sys009aog125.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751161Ab2FZItY convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 26 Jun 2012 04:49:24 -0400
+Received: by bkcjg9 with SMTP id jg9so4102199bkc.9
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jun 2012 01:49:21 -0700 (PDT)
+In-Reply-To: <007b01cd4d15$40673510$c1359f30$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Shawn Guo <shawn.guo@linaro.org>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, Maya Erez <merez@codeaurora.org>, Subhash Jadavani <subhashj@codeaurora.org>
 
-If bootloader or platform initialization code does not enable the
-power supply to mmc slot, we need to do it in mmc driver.
+On Mon, Jun 18, 2012 at 11:13 AM, Seungwon Jeon <tgih.jun@samsung.com> =
+wrote:
+> This patch supports packed write command of eMMC4.5 device.
+> Several writes can be grouped in packed command and all data
+> of the individual commands can be sent in a single transfer
+> on the bus.
+>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+> =A0drivers/mmc/card/block.c =A0 | =A0406 ++++++++++++++++++++++++++++=
++++++++++++++---
+> =A0drivers/mmc/card/queue.c =A0 | =A0 45 +++++-
+> =A0drivers/mmc/card/queue.h =A0 | =A0 12 ++
+> =A0drivers/mmc/core/mmc_ops.c | =A0 =A01 +
+> =A0include/linux/mmc/core.h =A0 | =A0 =A04 +
+> =A05 files changed, 441 insertions(+), 27 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 7e3f453..eb99e35 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -58,6 +58,12 @@ MODULE_ALIAS("mmc:block");
+> =A0#define INAND_CMD38_ARG_SECTRIM1 0x81
+> =A0#define INAND_CMD38_ARG_SECTRIM2 0x88
+>
+> +#define mmc_req_rel_wr(req) =A0 =A0(((req->cmd_flags & REQ_FUA) || \
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (req->cmd_flags & REQ_M=
+ETA)) && \
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (rq_data_dir(req) =3D=3D=
+ WRITE))
+> +#define PACKED_CMD_VER =A0 =A0 =A0 =A0 0x01
+> +#define PACKED_CMD_WR =A0 =A0 =A0 =A0 =A00x02
+> +
+> =A0static DEFINE_MUTEX(block_mutex);
+>
+> =A0/*
+> @@ -123,9 +129,21 @@ enum mmc_blk_status {
+> =A0 =A0 =A0 =A0MMC_BLK_NOMEDIUM,
+> =A0};
+>
+> +enum {
+> + =A0 =A0 =A0 MMC_PACKED_N_IDX =3D -1,
+> + =A0 =A0 =A0 MMC_PACKED_N_ZERO,
+> + =A0 =A0 =A0 MMC_PACKED_N_SINGLE,
+> +};
+> +
+> =A0module_param(perdev_minors, int, 0444);
+> =A0MODULE_PARM_DESC(perdev_minors, "Minors numbers to allocate per de=
+vice");
+>
+> +static inline void mmc_blk_clear_packed(struct mmc_queue_req *mqrq)
+> +{
+> + =A0 =A0 =A0 mqrq->packed_cmd =3D MMC_PACKED_NONE;
+> + =A0 =A0 =A0 mqrq->packed_num =3D MMC_PACKED_N_ZERO;
+> +}
+> +
+> =A0static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
+> =A0{
+> =A0 =A0 =A0 =A0struct mmc_blk_data *md;
+> @@ -1081,12 +1099,61 @@ static int mmc_blk_err_check(struct mmc_card =
+*card,
+> =A0 =A0 =A0 =A0if (!brq->data.bytes_xfered)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return MMC_BLK_RETRY;
+>
+> + =A0 =A0 =A0 if (mq_mrq->packed_cmd !=3D MMC_PACKED_NONE) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (unlikely(brq->data.blocks << 9 !=3D=
+ brq->data.bytes_xfered))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return MMC_BLK_PARTIAL;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return MMC_BLK_SUCCESS;
+> + =A0 =A0 =A0 }
+> +
+> =A0 =A0 =A0 =A0if (blk_rq_bytes(req) !=3D brq->data.bytes_xfered)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return MMC_BLK_PARTIAL;
+>
+> =A0 =A0 =A0 =A0return MMC_BLK_SUCCESS;
+> =A0}
+>
+> +static int mmc_blk_packed_err_check(struct mmc_card *card,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ struct mmc_async_req *areq)
+> +{
+> + =A0 =A0 =A0 struct mmc_queue_req *mq_rq =3D container_of(areq, stru=
+ct mmc_queue_req,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_active);
+> + =A0 =A0 =A0 struct request *req =3D mq_rq->req;
+> + =A0 =A0 =A0 int err, check, status;
+> + =A0 =A0 =A0 u8 ext_csd[512];
+> +
+> + =A0 =A0 =A0 mq_rq->packed_retries--;
+> + =A0 =A0 =A0 check =3D mmc_blk_err_check(card, areq);
+> + =A0 =A0 =A0 err =3D get_card_status(card, &status, 0);
+> + =A0 =A0 =A0 if (err) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("%s: error %d sending status com=
+mand\n",
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 req->rq=
+_disk->disk_name, err);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return MMC_BLK_ABORT;
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 if (status & R1_EXP_EVENT) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_send_ext_csd(card, ext_csd)=
+;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("%s: error %d se=
+nding ext_csd\n",
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 req->rq_disk->disk_name, err);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return MMC_BLK_ABORT;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((ext_csd[EXT_CSD_EXP_EVENTS_STATUS]=
+ &
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 EXT_CSD_PACKED_FAILURE) &&
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (ext_cs=
+d[EXT_CSD_PACKED_CMD_STATUS] &
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT_=
+CSD_PACKED_GENERIC_ERROR)) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ext_csd[EXT_CSD_PAC=
+KED_CMD_STATUS] &
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 EXT_CSD_PACKED_INDEXED_ERROR) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mq_rq->=
+packed_fail_idx =3D
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ext=
+_csd[EXT_CSD_PACKED_FAILURE_INDEX] - 1;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return =
+MMC_BLK_PARTIAL;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 return check;
+> +}
+> +
+> =A0static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct mm=
+c_card *card,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 int disab=
+le_multi,
+> @@ -1241,10 +1308,197 @@ static void mmc_blk_rw_rq_prep(struct mmc_qu=
+eue_req *mqrq,
+> =A0 =A0 =A0 =A0mmc_queue_bounce_pre(mqrq);
+> =A0}
+>
+> +static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct requ=
+est *req)
+> +{
+> + =A0 =A0 =A0 struct request_queue *q =3D mq->queue;
+> + =A0 =A0 =A0 struct mmc_card *card =3D mq->card;
+> + =A0 =A0 =A0 struct request *cur =3D req, *next =3D NULL;
+> + =A0 =A0 =A0 struct mmc_blk_data *md =3D mq->data;
+> + =A0 =A0 =A0 bool en_rel_wr =3D card->ext_csd.rel_param & EXT_CSD_WR=
+_REL_PARAM_EN;
+> + =A0 =A0 =A0 unsigned int req_sectors =3D 0, phys_segments =3D 0;
+> + =A0 =A0 =A0 unsigned int max_blk_count, max_phys_segs;
+> + =A0 =A0 =A0 u8 put_back =3D 0;
+> + =A0 =A0 =A0 u8 max_packed_rw =3D 0;
+> + =A0 =A0 =A0 u8 reqs =3D 0;
+> +
+> + =A0 =A0 =A0 mmc_blk_clear_packed(mq->mqrq_cur);
+> +
+> + =A0 =A0 =A0 if (!(md->flags & MMC_BLK_CMD23) ||
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 !card->ext_csd.packed_e=
+vent_en)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto no_packed;
+> +
+> + =A0 =A0 =A0 if ((rq_data_dir(cur) =3D=3D WRITE) &&
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (card->host->caps2 & MM=
+C_CAP2_PACKED_WR))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 max_packed_rw =3D card->ext_csd.max_pac=
+ked_writes;
+> +
+> + =A0 =A0 =A0 if (max_packed_rw =3D=3D 0)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto no_packed;
+> +
+> + =A0 =A0 =A0 if (mmc_req_rel_wr(cur) &&
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (md->flags & MMC_BLK_RE=
+L_WR) &&
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 !en_rel_wr) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto no_packed;
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 max_blk_count =3D min(card->host->max_blk_count,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->host->max_req_siz=
+e >> 9);
+> + =A0 =A0 =A0 if (unlikely(max_blk_count > 0xffff))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 max_blk_count =3D 0xffff;
+> +
+> + =A0 =A0 =A0 max_phys_segs =3D queue_max_segments(q);
+> + =A0 =A0 =A0 req_sectors +=3D blk_rq_sectors(cur);
+> + =A0 =A0 =A0 phys_segments +=3D cur->nr_phys_segments;
+> +
+> + =A0 =A0 =A0 if (rq_data_dir(cur) =3D=3D WRITE) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 req_sectors++;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 phys_segments++;
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 while (reqs < max_packed_rw - 1) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_lock_irq(q->queue_lock);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 next =3D blk_fetch_request(q);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_unlock_irq(q->queue_lock);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!next)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (next->cmd_flags & REQ_DISCARD ||
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 next->c=
+md_flags & REQ_FLUSH) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 put_back =3D 1;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (rq_data_dir(cur) !=3D rq_data_dir(n=
+ext)) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 put_back =3D 1;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mmc_req_rel_wr(next) &&
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (md->fl=
+ags & MMC_BLK_REL_WR) &&
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 !en_rel=
+_wr) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 put_back =3D 1;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 req_sectors +=3D blk_rq_sectors(next);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (req_sectors > max_blk_count) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 put_back =3D 1;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 phys_segments +=3D =A0next->nr_phys_seg=
+ments;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (phys_segments > max_phys_segs) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 put_back =3D 1;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 list_add_tail(&next->queuelist, &mq->mq=
+rq_cur->packed_list);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 cur =3D next;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 reqs++;
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 if (put_back) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_lock_irq(q->queue_lock);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 blk_requeue_request(q, next);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_unlock_irq(q->queue_lock);
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 if (reqs > 0) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 list_add(&req->queuelist, &mq->mqrq_cur=
+->packed_list);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mq->mqrq_cur->packed_num =3D ++reqs;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mq->mqrq_cur->packed_retries =3D reqs;
 
-Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
----
- drivers/mmc/host/mxs-mmc.c |   11 +++++++++++
- 1 files changed, 11 insertions(+), 0 deletions(-)
+^^ This means that the number of times the packed command is retried
+is equal to the number of requests
+it packs ? How are they related ?
 
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 34a9026..1a29668 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -707,6 +707,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 	struct pinctrl *pinctrl;
- 	int ret = 0, irq_err, irq_dma;
- 	dma_cap_mask_t mask;
-+	struct regulator *reg_vmmc;
- 
- 	iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	dmares = platform_get_resource(pdev, IORESOURCE_DMA, 0);
-@@ -747,6 +748,16 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 	host->mmc = mmc;
- 	host->sdio_irq_en = 0;
- 
-+	reg_vmmc = devm_regulator_get(&pdev->dev, "vmmc");
-+	if (!IS_ERR(reg_vmmc)) {
-+		ret = regulator_enable(reg_vmmc);
-+		if (ret) {
-+			dev_err(&pdev->dev,
-+				"Failed to enable vmmc regulator: %d\n", ret);
-+			goto out_mmc_free;
-+		}
-+	}
-+
- 	pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
- 	if (IS_ERR(pinctrl)) {
- 		ret = PTR_ERR(pinctrl);
--- 
-1.7.5.4
-
-
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return reqs;
+> + =A0 =A0 =A0 }
+> +
+> +no_packed:
+> + =A0 =A0 =A0 mmc_blk_clear_packed(mq->mqrq_cur);
+> + =A0 =A0 =A0 return 0;
+> +}
+> +
