@@ -1,87 +1,150 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [RFC PATCH] Revert "mmc: omap_hsmmc: Enable Auto CMD12"
-Date: Tue, 26 Jun 2012 20:44:36 +0530
-Message-ID: <CANrkHUYRsD0Cz-_qAOeKjmDnuf36nqzf-sOEsX=uBG2QsdW0qw@mail.gmail.com>
-References: <1340362175-25807-1-git-send-email-ming.lei@canonical.com>
-	<CANrkHUacUKPS=hee6=dhcGAjiC1CS88RNrBNy=wFX5y1Oxb05A@mail.gmail.com>
-	<87sjdnjykh.fsf@octavius.laptop.org>
-	<CANrkHUYGLiO8S-Y1ubWmXQffhVGgex=Q=RH3DhwTqyqkZz6SaQ@mail.gmail.com>
-	<87hau3jqyl.fsf@octavius.laptop.org>
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: Re: Where to power on the wifi device before loading the driver.
+Date: Tue, 26 Jun 2012 10:53:27 -0600
+Message-ID: <4FE9E907.6050803@wwwdotorg.org>
+References: <20120614121234.GC3913@opensource.wolfsonmicro.com>
+ <4FDA092E.10301@wwwdotorg.org>
+ <6B4D417B830BC44B8026029FD256F7F1C377BFFE8D@HKMAIL01.nvidia.com>
+ <4FDB5976.20809@wwwdotorg.org>
+ <6B4D417B830BC44B8026029FD256F7F1C6EE2DD61F@HKMAIL01.nvidia.com>
+ <43E4817426ED174AA81263BCECB4351D138E8ACD6B@sc-vexch3.marvell.com>
+ <6B4D417B830BC44B8026029FD256F7F1C6EE2DD622@HKMAIL01.nvidia.com>
+ <20120619091719.GZ3974@opensource.wolfsonmicro.com>
+ <6B4D417B830BC44B8026029FD256F7F1C6EE2DD626@HKMAIL01.nvidia.com>
+ <4FE112F2.7000506@wwwdotorg.org>
+ <20120626085605.GA6047@shlinux2.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog102.obsmtp.com ([74.125.149.69]:59938 "EHLO
-	na3sys009aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757370Ab2FZPOm convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 26 Jun 2012 11:14:42 -0400
-Received: by eekc13 with SMTP id c13so16219eek.37
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jun 2012 08:14:36 -0700 (PDT)
-In-Reply-To: <87hau3jqyl.fsf@octavius.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <20120626085605.GA6047-Fb7DQEYuewWctlrPMvKcciBecyulp+rMXqFh9Ls21Oc@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Dong Aisheng <aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+Cc: USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "alexander.shishkin-VuQAYsv1563Yd54FQh9/CA@public.gmane.org" <alexander.shishkin-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, b29397-KZfg59tc24xl57MIdRCFDg@public.gmane.org, Mursalin Akon <makon-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, r64343-KZfg59tc24xl57MIdRCFDg@public.gmane.org, Marek Vasut <marek.vasut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, "'linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, 'Philip Rakity' <prakity-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Li Frank-B20596 <B20596-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, "'frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org'" <frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rakesh Kumar <krakesh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, ARM kernel mailing list <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, r65037-KZfg59tc24xl57MIdRCFDg@public.gmane.org, Wei Ni <wni-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Estevam Fabio-R49496 <r49496-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, 'Mark Brown' <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>'linu
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Ming Lei <ming.lei@canonical.com>, linux-mmc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>
 
-On Fri, Jun 22, 2012 at 9:09 PM, Chris Ball <cjb@laptop.org> wrote:
-> Hi,
->
-> On Fri, Jun 22 2012, T Krishnamoorthy, Balaji wrote:
->>>>> After bisecting, this commit dba3c29 is found to ruin micro-SD ca=
-rd data
->>>>> (writing incorrect file, or fs is corrupt after several times mou=
-nt)
->>>>> on the beagle-xm revB, and reverting the commit will fix the prob=
-lem.
->>>>
->>>> Hi Ming,
->>>> Rather than reverting the entire commit,
->>>> Can you try with the below change alone, so that AutoCMD12 can be =
-easily
->>>> enabled back when needed.
->>>>
->>>> @@ -1859,7 +1859,6 @@ static int __devinit omap_hsmmc_probe(st
->>>> =A0 =A0 =A0 host->mapbase =A0 =3D res->start + pdata->reg_offset;
->>>> =A0 =A0 =A0 host->base =A0 =A0 =A0=3D ioremap(host->mapbase, SZ_4K=
-);
->>>> =A0 =A0 =A0 host->power_mode =3D MMC_POWER_OFF;
->>>> - =A0 =A0 host->flags =A0 =A0 =3D AUTO_CMD12;
->>>> =A0 =A0 =A0 host->next_data.cookie =3D 1;
->>>>
->>>> =A0 =A0 =A0 platform_set_drvdata(pdev, host);
->>>
->>> I'm not totally comfortable with that; seems like it should be hard=
-er
->>> to cause data corruption than turning on a single flag in the host.
->>>
->>> The full revert is probably best until we know what the underlying
->>> bug is, and how to disable AUTO_CMD12 on all affected systems.
+(I'm adding everyone on thread "ARM: imx6q: add config-on-boot gpios" to
+the CC of this similar thread. Sorry if you think that's spam.)
+
+On 06/26/2012 02:56 AM, Dong Aisheng wrote:
+> On Tue, Jun 19, 2012 at 06:01:54PM -0600, Stephen Warren wrote:
+...
+>> I think what we need is some way of matching a DT node to a device even
+>> when that device was instantiated through some probing mechanism such as
+>> SDIO or USB (and I've heard hints that one can already do this for PCI;
+>> I should investigate).
 >>
->> I tested autocmd12 to be working on OMAP2,3,4 SDP. With beagle board
->> data corruption is observed with some cards, so it is going to be
->> selectively enabling/disabling for some SoCs via board data or DT
->> until data corruption due to Autocmd12 is root caused.
->
-> So far I agree with Ming that AUTO_CMD12 support should just be rever=
-ted
-> until you understand the root cause circumstances of the corruption a=
-nd
-> know how to turn it back on safely.
->
-> I'm not willing to build up a blacklist of which boards don't support=
- it
-> by waiting for more reports of data corruption, and I'm even reluctan=
-t
-> to use a whitelist until we understand more about the nature of the
-> whitelist. =A0The effort here should be concentrated on root causing,
-> not on trying to make per-board decisions without understanding what'=
-s
-> actually going on.
+>> So, we start off with the plain SDHCI controller node:
+>>
+>> sdhci@78000000 {
+>> 	compatible = "nvidia,tegra30-sdhci", "nvidia,tegra20-sdhci";
+>> 	reg = <0x78000000 0x200>;
+>> 	interrupts = <0 14 0x04>;
+>> };
+>>
+>> Then, we add a child node to represent the device that's attached:
+>>
+>> sdhci@78000000 {
+>> 	compatible = "nvidia,tegra30-sdhci", "nvidia,tegra20-sdhci";
+>> 	reg = <0x78000000 0x200>;
+>> 	interrupts = <0 14 0x04>;
+>>
+>> 	sdio-device {
+>> 		reset-gpios = <...>;
+>> 		enable-gpios = <...>;
+>> 	};
+>> };
+>>
+>> When the SDHCI controller/core instantiates the child device it finds on
+>> the HW bus, it initializes that struct device's of_node with a pointer
+>> to the sdio-device node above. From there, the child device can get DT
+>> properties such as GPIOs in the usual way.
+>>
+>> However, there are still some issues that need thought here; what if (as
+>> is I believe the case on Cardhu) we can in fact plug in multiple
+>> different types of device into the socket? Might we end up with
+>> something like:
+>>
+>> sdhci@78000000 {
+>> 	compatible = "nvidia,tegra30-sdhci", "nvidia,tegra20-sdhci";
+>> 	reg = <0x78000000 0x200>;
+>> 	interrupts = <0 14 0x04>;
+>>
+>> 	sdio-device-option@0 {
+>> 		compatible = "broadcom,bcm4239";
+>> 		reset-gpios = <...>;
+>> 		enable-gpios = <...>;
+>> 	};
+>>
+>> 	sdio-device-option@1 {
+>> 		compatible = "broadcom,bcm4330";
+>> 		reset-gpios = <...>;
+>> 		enable-gpios = <...>;
+>> 	};
+>> };
+>>
+>> and match on compatible value?
+>>
+> I like this idea.
+> We may extend the sdio_device_id to contain a compatible string,
+> then sdio core is responsible to pass the corresponding device node to the
+> sdio function driver once a match device found, this is sdio function independent.
+> The sdio function driver then are responsible to parse the device node to
+> fetch the needed information like reset-gpios and enable-gpios to do correct
+> initialization sequence.
+> 
+> However, one known question for this model is that some WiFi may need reset the chip
+> via gpio first before being able to be enumerated.
 
-OK, revert is the best option until I can reproduce and root cause the =
-issue.
+Yes, that's exactly the issue that makes the above binding incorrect.
 
---=20
-Thanks and Regards,
-Balaji T K
+In another thread on a very similar topic, I proposed a binding that
+would address this issue:
+
+http://www.spinics.net/lists/linux-usb/msg66013.html
+
+> sdhci@78000000 {
+> 	compatible = "nvidia,tegra30-sdhci", "nvidia,tegra20-sdhci";
+> 	reg = <0x78000000 0x200>;
+> 	interrupts = <0 14 0x04>;
+>
+> 	sdio-device {
+> 		reset-gpios = <...>;
+> 		enable-gpios = <...>;
+> 	};
+> };
+
+> ehci {
+>     /* The following node is dynamically detected, although the hub
+>      * IC is physically soldered onto the board
+>      */
+>     hub {
+>         hub { /* also dynamic */
+>             port@2 {
+>                 child-supply = <&regulator>;
+>                 reset-gpios = <&gpio 0 0>;
+>             };
+>         };
+>     };
+> }
+
+Presumably something similar could be set up with platform data.
+
+Basically, the SD controller or USB host/hub node contains a child that
+represents the socket/port/... that needs some services provided to it
+(power, reset de-asserted, even clocks). The services provided by that
+node are set up before enumeration, so that the device will respond to
+enumeration. Hopefully, the DT representation of this socket/port/..
+could be shared across arbitrary types of controller (so both SD and
+USB) and the driver the "implements" that node would be common code that
+SD and USB call into, rather than having them both re-implement it from
+scratch.
