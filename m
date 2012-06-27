@@ -1,46 +1,54 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: [patch -resend] mmc: ushc: fix an endianness conversion in
- ushc_request()
-Date: Wed, 27 Jun 2012 12:02:58 +0300
-Message-ID: <20120627090258.GH31212@elgon.mountain>
-References: <20120627085800.GA3007@mwanda>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH] mmc: always save error codes in mmc_regulator_get_supply()
+Date: Wed, 27 Jun 2012 17:18:32 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1206271714270.24173@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rcsinet15.oracle.com ([148.87.113.117]:23235 "EHLO
-	rcsinet15.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755294Ab2F0JDY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jun 2012 05:03:24 -0400
-Content-Disposition: inline
-In-Reply-To: <20120627085800.GA3007@mwanda>
+Received: from moutng.kundenserver.de ([212.227.126.171]:51686 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757413Ab2F0PSq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jun 2012 11:18:46 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Greg Kroah-Hartman <gregkh@suse.de>, linux-mmc@vger.kernel.org, David Vrabel <david.vrabel@csr.com>, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>
 
-The ->cmd_idx field is 8 bits, not 16 so the call to cpu_to_le16()
-will probably set cmd_idx to zero here on big endian systems.  My guess
-is that this works because it has been tested on little endian systems
-where the conversion to le16 is a nop.
+If mmc_regulator_get_supply() fails to obtain any of the regulators, store
+the error codes in struct mmc_host to unify error reporting to the host
+driver.
 
-Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
-I don't have a way to test this.
 
-I have added a sentence to the changelog.  I have added David Vrabel to
-the CC list.  This was originally sent to the mailing list on Mon, 21
-Nov 2011 and there was no response.
+Chris, if you don't mind rebasing your mmc-next branch, feel free to roll 
+this patch into the original "mmc: add a function to get regulators, 
+supplying card's power". Otherwise, committing it as an incremental patch 
+is also ok.
 
-diff --git a/drivers/mmc/host/ushc.c b/drivers/mmc/host/ushc.c
-index c0105a2..25932f5 100644
---- a/drivers/mmc/host/ushc.c
-+++ b/drivers/mmc/host/ushc.c
-@@ -278,7 +278,7 @@ static void ushc_request(struct mmc_host *mmc, struct mmc_request *req)
- 	ushc->current_req = req;
+ drivers/mmc/core/core.c |    5 ++---
+ 1 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 385cadf..d0f17d8 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1020,13 +1020,12 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
+ 	int ret;
  
- 	/* Start cmd with CBW. */
--	ushc->cbw->cmd_idx = cpu_to_le16(req->cmd->opcode);
-+	ushc->cbw->cmd_idx = req->cmd->opcode;
- 	if (req->data)
- 		ushc->cbw->block_size = cpu_to_le16(req->data->blksz);
- 	else
+ 	supply = devm_regulator_get(dev, "vmmc");
++	mmc->supply.vmmc = supply;
++	mmc->supply.vqmmc = devm_regulator_get(dev, "vqmmc");
+ 
+ 	if (IS_ERR(supply))
+ 		return PTR_ERR(supply);
+ 
+-	mmc->supply.vmmc = supply;
+-	mmc->supply.vqmmc = devm_regulator_get(dev, "vqmmc");
+-
+ 	ret = mmc_regulator_get_ocrmask(supply);
+ 	if (ret > 0)
+ 		mmc->ocr_avail = ret;
+-- 
+1.7.2.5
+
