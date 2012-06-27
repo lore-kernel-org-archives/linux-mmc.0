@@ -1,99 +1,46 @@
-From: Rajendra Nayak <rnayak@ti.com>
-Subject: [PATCH v2] mmc: omap: add clk_prepare and clk_unprepare
-Date: Wed, 27 Jun 2012 14:19:54 +0530
-Message-ID: <1340786994-29565-1-git-send-email-rnayak@ti.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: [patch -resend] mmc: ushc: fix an endianness conversion in
+ ushc_request()
+Date: Wed, 27 Jun 2012 12:02:58 +0300
+Message-ID: <20120627090258.GH31212@elgon.mountain>
+References: <20120627085800.GA3007@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:58158 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751192Ab2F0IuN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 27 Jun 2012 04:50:13 -0400
+Received: from rcsinet15.oracle.com ([148.87.113.117]:23235 "EHLO
+	rcsinet15.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755294Ab2F0JDY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jun 2012 05:03:24 -0400
+Content-Disposition: inline
+In-Reply-To: <20120627085800.GA3007@mwanda>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-omap@vger.kernel.org
-Cc: Rajendra Nayak <rnayak@ti.com>, Chris Ball <cjb@laptop.org>, Balaji T K <balajitk@ti.com>, linux-mmc@vger.kernel.org, Paul Walmsley <paul@pwsan.com>, Mike Turquette <mturquette@linaro.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: Greg Kroah-Hartman <gregkh@suse.de>, linux-mmc@vger.kernel.org, David Vrabel <david.vrabel@csr.com>, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
 
-In preparation of OMAP moving to Common Clk Framework(CCF) add clk_prepare()
-and clk_unprepare() for the hsmmc clocks.
+The ->cmd_idx field is 8 bits, not 16 so the call to cpu_to_le16()
+will probably set cmd_idx to zero here on big endian systems.  My guess
+is that this works because it has been tested on little endian systems
+where the conversion to le16 is a nop.
 
-Signed-off-by: Rajendra Nayak <rnayak@ti.com>
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Balaji T K <balajitk@ti.com>
-Cc: <linux-mmc@vger.kernel.org>
-Cc: Paul Walmsley <paul@pwsan.com>
-Cc: Mike Turquette <mturquette@linaro.org>
+Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   14 +++++++-------
- 1 files changed, 7 insertions(+), 7 deletions(-)
+I don't have a way to test this.
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 9a7a60a..07f5945 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1097,7 +1097,7 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
- 	/* Disable the clocks */
- 	pm_runtime_put_sync(host->dev);
- 	if (host->dbclk)
--		clk_disable(host->dbclk);
-+		clk_disable_unprepare(host->dbclk);
- 
- 	/* Turn the power off */
- 	ret = mmc_slot(host).set_power(host->dev, host->slot_id, 0, 0);
-@@ -1108,7 +1108,7 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
- 					       vdd);
- 	pm_runtime_get_sync(host->dev);
- 	if (host->dbclk)
--		clk_enable(host->dbclk);
-+		clk_prepare_enable(host->dbclk);
- 
- 	if (ret != 0)
- 		goto err;
-@@ -1908,7 +1908,7 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
- 	if (IS_ERR(host->dbclk)) {
- 		dev_warn(mmc_dev(host->mmc), "Failed to get debounce clk\n");
- 		host->dbclk = NULL;
--	} else if (clk_enable(host->dbclk) != 0) {
-+	} else if (clk_prepare_enable(host->dbclk) != 0) {
- 		dev_warn(mmc_dev(host->mmc), "Failed to enable debounce clk\n");
- 		clk_put(host->dbclk);
- 		host->dbclk = NULL;
-@@ -2032,7 +2032,7 @@ err_irq:
- 	pm_runtime_disable(host->dev);
- 	clk_put(host->fclk);
- 	if (host->dbclk) {
--		clk_disable(host->dbclk);
-+		clk_disable_unprepare(host->dbclk);
- 		clk_put(host->dbclk);
- 	}
- err1:
-@@ -2067,7 +2067,7 @@ static int __devexit omap_hsmmc_remove(struct platform_device *pdev)
- 	pm_runtime_disable(host->dev);
- 	clk_put(host->fclk);
- 	if (host->dbclk) {
--		clk_disable(host->dbclk);
-+		clk_disable_unprepare(host->dbclk);
- 		clk_put(host->dbclk);
- 	}
- 
-@@ -2125,7 +2125,7 @@ static int omap_hsmmc_suspend(struct device *dev)
- 	}
- 
- 	if (host->dbclk)
--		clk_disable(host->dbclk);
-+		clk_disable_unprepare(host->dbclk);
- err:
- 	pm_runtime_put_sync(host->dev);
- 	return ret;
-@@ -2146,7 +2146,7 @@ static int omap_hsmmc_resume(struct device *dev)
- 	pm_runtime_get_sync(host->dev);
- 
- 	if (host->dbclk)
--		clk_enable(host->dbclk);
-+		clk_prepare_enable(host->dbclk);
- 
- 	if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER))
- 		omap_hsmmc_conf_bus_power(host);
--- 
-1.7.1
+I have added a sentence to the changelog.  I have added David Vrabel to
+the CC list.  This was originally sent to the mailing list on Mon, 21
+Nov 2011 and there was no response.
 
+diff --git a/drivers/mmc/host/ushc.c b/drivers/mmc/host/ushc.c
+index c0105a2..25932f5 100644
+--- a/drivers/mmc/host/ushc.c
++++ b/drivers/mmc/host/ushc.c
+@@ -278,7 +278,7 @@ static void ushc_request(struct mmc_host *mmc, struct mmc_request *req)
+ 	ushc->current_req = req;
+ 
+ 	/* Start cmd with CBW. */
+-	ushc->cbw->cmd_idx = cpu_to_le16(req->cmd->opcode);
++	ushc->cbw->cmd_idx = req->cmd->opcode;
+ 	if (req->data)
+ 		ushc->cbw->block_size = cpu_to_le16(req->data->blksz);
+ 	else
