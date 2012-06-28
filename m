@@ -1,49 +1,46 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: My outstanding MMC / SDHI/TMIO / MMCIF patches for 3.6
-Date: Thu, 28 Jun 2012 10:29:02 -0400
-Message-ID: <87sjdf8q8h.fsf@octavius.laptop.org>
-References: <Pine.LNX.4.64.1206281029270.31813@axis700.grange>
+From: Srinivas <mail3srinivas@gmail.com>
+Subject: Re: SDHCI regression since 2.6.39
+Date: Thu, 28 Jun 2012 14:35:14 +0000 (UTC)
+Message-ID: <loom.20120628T163204-199@post.gmane.org>
+References: <4E6EA3E4.5080401@goop.org> <m2bouo37by.fsf@bob.laptop.org> <4E6F8C24.3090207@goop.org> <m2wrdc1i5b.fsf@bob.laptop.org> <4E6FA44F.1050705@goop.org> <m2aaa89t1m.fsf@bob.laptop.org> <4E6FBB00.9090803@goop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:47637 "EHLO void.printf.net"
+Received: from plane.gmane.org ([80.91.229.3]:46529 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751128Ab2F1O3H (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Jun 2012 10:29:07 -0400
-In-Reply-To: <Pine.LNX.4.64.1206281029270.31813@axis700.grange> (Guennadi
-	Liakhovetski's message of "Thu, 28 Jun 2012 10:36:13 +0200 (CEST)")
+	id S1752066Ab2F1OkM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 28 Jun 2012 10:40:12 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1SkFt8-0005QP-Pp
+	for linux-mmc@vger.kernel.org; Thu, 28 Jun 2012 16:40:07 +0200
+Received: from telemedia-smb-174.20.183.122.airtelbroadband.in ([telemedia-smb-174.20.183.122.airtelbroadband.in])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Jun 2012 16:40:06 +0200
+Received: from mail3srinivas by telemedia-smb-174.20.183.122.airtelbroadband.in with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Jun 2012 16:40:06 +0200
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+To: linux-mmc@vger.kernel.org
 
-Hi Guennadi,
+Jeremy Fitzhardinge <jeremy <at> goop.org> writes:
 
-On Thu, Jun 28 2012, Guennadi Liakhovetski wrote:
-> There are a number of MMC patches from me outstanding for 3.6. 
-> Appreciating, that it might not be very easy to keep on overview - what 
-> latest versions are and in which order they should be applied - would you 
-> like me to either assemble a list of patches with links to ML archives or 
-> maybe set up a git branch somewhere on github? In the latter case - would 
-> you require some signing process - if it is at all supported on github. 
-> No, I never used one, but I'd have a look if you prefer me to use one.
->
-> We still have some time until 3.6 merge window, but it would be nice to 
-> let patches simmer for a while in -next.
 
-Thanks, a github branch based on mmc-next would be great, and you don't
-need to sign it.
+> 
+> I have two: a PNY 8GB Class 10 card, and an EyeFi Connect X2 4GB, class 6.
+> 
+>     J
 
-If you have gpg setup but don't want to learn how to use git signed tags
-yet, something you could do is sign the e-mail that "git request-pull"
-generates that says "pull from url <foo> to go from commit <hash>
-to a new HEAD hash of <hash>".
 
-(This effectively signs all the commits, because applying all of the
-correct commits is the only way to get to that new hash, and I can
-verify that I have that hash as my new HEAD after pulling.)
+May I know the final solution for this?
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+
+
+
+
+
+
+
