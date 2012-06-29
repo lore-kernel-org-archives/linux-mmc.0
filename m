@@ -1,67 +1,48 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/2] mmc: only support voltage (vdd) that regulator agree's with
-Date: Fri, 29 Jun 2012 19:19:19 -0400
-Message-ID: <87pq8haeq0.fsf@octavius.laptop.org>
-References: <prakity@marvell.com>
-	<1339183573-21688-1-git-send-email-prakity@marvell.com>
+Subject: Re: My outstanding MMC / SDHI/TMIO / MMCIF patches for 3.6
+Date: Fri, 29 Jun 2012 19:25:21 -0400
+Message-ID: <87lij5aefy.fsf@octavius.laptop.org>
+References: <Pine.LNX.4.64.1206281029270.31813@axis700.grange>
+	<87sjdf8q8h.fsf@octavius.laptop.org>
+	<Pine.LNX.4.64.1206291701110.9084@axis700.grange>
+	<87ehoy84oy.fsf@octavius.laptop.org>
+	<Pine.LNX.4.64.1206292041340.9152@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:33620 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:39578 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752503Ab2F2XT0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 29 Jun 2012 19:19:26 -0400
-In-Reply-To: <1339183573-21688-1-git-send-email-prakity@marvell.com>
-	(philipspatches@gmail.com's message of "Fri, 8 Jun 2012 12:26:13
-	-0700")
+	id S1752778Ab2F2XZ2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 29 Jun 2012 19:25:28 -0400
+In-Reply-To: <Pine.LNX.4.64.1206292041340.9152@axis700.grange> (Guennadi
+	Liakhovetski's message of "Fri, 29 Jun 2012 20:44:50 +0200 (CEST)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: philipspatches@gmail.com
-Cc: linux-mmc@vger.kernel.org, aaron.lu@amd.com, mark.brown314@gmail.com, Philip Rakity <prakity@marvell.com>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 
-Hi,
+Hi Guennadi,
 
-On Fri, Jun 08 2012, philipspatches@gmail.com wrote:
-> From: Philip Rakity <prakity@marvell.com>
+On Fri, Jun 29 2012, Guennadi Liakhovetski wrote:
+> Ah, ok, right, sorry, I thought, it would be a part of the "git 
+> request-pull" output.
+
+It is for newer versions of git, FWIW.
+
+> So, the top commit has hash
 >
-> If we are using a regulator the SD Host Controller and the
-> regulator should agree about the voltages supported.  Use
-> the common subset that is supported.
+> 7c4cf5b31b98f51ebfc8db89b022e4f52f93f5db
 >
-> Signed-off-by: Philip Rakity <prakity@marvell.com>
+> Hope, this is what's required :-)
 
-This breaks the build when CONFIG_REGULATOR=n -- I've applied what looks
-like the correct fix to me:
+Yes, perfect -- pulled and pushed out to mmc-next.  Thanks!
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index eae7c3c..caba999 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2832,51 +2832,53 @@ int sdhci_add_host(struct sdhci_host *host)
-+#ifdef CONFIG_REGULATOR
- 	/*
- 	 * According to SD Host Controller spec v3.00, if the Host System
- 	 * can afford more than 150mA, Host Driver should set XPC to 1. Also
- 	 * the value is meaningful only if Voltage Support in the Capabilities
- 	 * register is set. The actual current value is 4 times the register
- 	 * value.
- 	 */
- 	if (host->vmmc) {
- 		ret = regulator_is_supported_voltage(host->vmmc, 3300000,
- 			3300000);
- 		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
- 			caps[0] &= ~SDHCI_CAN_VDD_330;
- 		ret = regulator_is_supported_voltage(host->vmmc, 3000000,
- 			3000000);
- 		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_300)))
- 			caps[0] &= ~SDHCI_CAN_VDD_300;
- 		ret = regulator_is_supported_voltage(host->vmmc, 1800000,
- 			1800000);
- 		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_180)))
- 			caps[0] &= ~SDHCI_CAN_VDD_180;
- 	}
-+#endif /* CONFIG_REGULATOR */
+Could we get a file in Documentation/devicetree/bindings/mmc/ for the
+new sh_mmcif DT bindings you've added, please?  It can come as a new
+patch on top of these.  I know it'll be very short right now; you can
+at least show an example of a DT node that works.
 
+- Chris.
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
