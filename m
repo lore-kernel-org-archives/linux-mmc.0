@@ -1,59 +1,44 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci: A new flag SDHCI_NEEDS_RETUNING_TIMER
-Date: Fri, 29 Jun 2012 02:11:29 -0400
-Message-ID: <87ipea8x66.fsf@octavius.laptop.org>
-References: <1340949594-27929-1-git-send-email-aaron.lu@amd.com>
-	<1340949594-27929-3-git-send-email-aaron.lu@amd.com>
+From: Saugata Das <saugata.das@stericsson.com>
+Subject: [PATCH] [MMC 4.5] Fix for checking block numbers in disable emulation mode
+Date: Fri, 29 Jun 2012 12:02:34 +0530
+Message-ID: <1340951554-29504-1-git-send-email-saugata.das@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:60732 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750907Ab2F2GLe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 29 Jun 2012 02:11:34 -0400
-In-Reply-To: <1340949594-27929-3-git-send-email-aaron.lu@amd.com> (Aaron Lu's
-	message of "Fri, 29 Jun 2012 13:59:54 +0800")
+Received: from eu1sys200aog103.obsmtp.com ([207.126.144.115]:35310 "EHLO
+	eu1sys200aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751007Ab2F2GdH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jun 2012 02:33:07 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lu@amd.com>
-Cc: linux-mmc@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
+To: linux-mmc@vger.kernel.org
+Cc: patches@linaro.org, Saugata Das <saugata.das@linaro.org>
 
-Hi,
+From: Saugata Das <saugata.das@linaro.org>
 
-On Fri, Jun 29 2012, Aaron Lu wrote:
-> Add a new flag of SDHCI_NEEDS_RETUNING_TIMER to represent if the host
-> needs retuning timer currently when driving the card inserted.
->
-> This flag is set when the host does tuning the first time for the card
-> and is used afterwards whenever needs to decide if the host is currently
-> using a retuning timer.
->
-> This flag is cleared when the card is removed in sdhci_reinit.
->
-> The set/clear of the flag and the start/stop of the retuning timer is
-> associated with the card's init/remove time, so there is no need to
-> touch it when the host is to be removed as at that time the card should
-> have already been removed.
+In 512B disable emulation patch, a check is done to ensure that size
+of the data is multiple of 4KB. However, the check is done with
+brq->data.blocks, which is not initialized at the point of check.
+This is now changed to blk_rq_sectors.
 
-[...]
-> @@ -3097,10 +3092,6 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
->  
->  	free_irq(host->irq, host);
->  
-> -	del_timer_sync(&host->timer);
-> -	if (host->version >= SDHCI_SPEC_300)
-> -		del_timer_sync(&host->tuning_timer);
-> -
->  	tasklet_kill(&host->card_tasklet);
->  	tasklet_kill(&host->finish_tasklet);
+Signed-off-by: Saugata Das <saugata.das@linaro.org>
+---
+ drivers/mmc/card/block.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-The last paragraph of the commit message explains why you remove the
-del_timer_sync() call on the tuning_timer; but why do you remove it
-from the main (timeouts) host->timer too?
-
-Thanks,
-
-- Chris.
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index d628c5d..ee8b3d6 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1296,7 +1296,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 			 * When 4KB native sector is enabled, only 8 blocks
+ 			 * multiple read or write is allowed
+ 			 */
+-			if ((brq->data.blocks & 0x07) &&
++			if ((blk_rq_sectors(req) & 0x07) &&
+ 				(card->ext_csd.data_sector_size == 4096)) {
+ 				pr_err("%s: Transfer size is not 4KB sector size aligned\n",
+ 					req->rq_disk->disk_name);
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.4.3
+
