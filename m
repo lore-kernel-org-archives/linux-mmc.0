@@ -1,48 +1,59 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: My outstanding MMC / SDHI/TMIO / MMCIF patches for 3.6
-Date: Fri, 29 Jun 2012 19:25:21 -0400
-Message-ID: <87lij5aefy.fsf@octavius.laptop.org>
-References: <Pine.LNX.4.64.1206281029270.31813@axis700.grange>
-	<87sjdf8q8h.fsf@octavius.laptop.org>
-	<Pine.LNX.4.64.1206291701110.9084@axis700.grange>
-	<87ehoy84oy.fsf@octavius.laptop.org>
-	<Pine.LNX.4.64.1206292041340.9152@axis700.grange>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:39578 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752778Ab2F2XZ2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 29 Jun 2012 19:25:28 -0400
-In-Reply-To: <Pine.LNX.4.64.1206292041340.9152@axis700.grange> (Guennadi
-	Liakhovetski's message of "Fri, 29 Jun 2012 20:44:50 +0200 (CEST)")
-Sender: linux-mmc-owner@vger.kernel.org
+From: Maya Erez <merez@codeaurora.org>
+Subject: [PATCH v3 0/3] mmc: card: Add eMMC4.5 write packed commands unit-tests
+Date: Sat, 30 Jun 2012 11:43:33 +0300
+Message-ID: <1341045816-10810-1-git-send-email-merez@codeaurora.org>
+References: <n>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <n>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 
-Hi Guennadi,
+Expose the following packed commands tests:
+- Test the write packed commands list preparation
+- Simulate a returned error code
+- Send an invalid packed command to the card
 
-On Fri, Jun 29 2012, Guennadi Liakhovetski wrote:
-> Ah, ok, right, sorry, I thought, it would be a part of the "git 
-> request-pull" output.
+This patch is dependant in the following patches:
+  [PATCH v8 1/3] mmc: core: Add packed command feature of eMMC4.5
+  [PATCH v8 2/3] mmc: core: Support packed write command for eMMC4.5 device
 
-It is for newer versions of git, FWIW.
+Changes in v3:
+    - Fix the cancel round mechanism
 
-> So, the top commit has hash
->
-> 7c4cf5b31b98f51ebfc8db89b022e4f52f93f5db
->
-> Hope, this is what's required :-)
+Changes in v2:
+    - Add MMC write packing statistics and test-iosched scheduler patches as part of this patch.
+    - Code review fixes
 
-Yes, perfect -- pulled and pushed out to mmc-next.  Thanks!
+Maya Erez (3):
+  mmc: block: Add MMC write packing statistics
+  block: Add test-iosched scheduler
+  mmc: card: Add eMMC4.5 write packed commands unit-tests
 
-Could we get a file in Documentation/devicetree/bindings/mmc/ for the
-new sh_mmcif DT bindings you've added, please?  It can come as a new
-patch on top of these.  I know it'll be very short right now; you can
-at least show an example of a DT node that works.
+ Documentation/block/test-iosched.txt |   39 +
+ block/Kconfig.iosched                |   11 +
+ block/Makefile                       |    1 +
+ block/blk-core.c                     |    3 +-
+ block/test-iosched.c                 | 1020 +++++++++++++++++++++++
+ drivers/mmc/card/Kconfig             |   11 +
+ drivers/mmc/card/Makefile            |    1 +
+ drivers/mmc/card/block.c             |  138 +++-
+ drivers/mmc/card/mmc_block_test.c    | 1469 ++++++++++++++++++++++++++++++++++
+ drivers/mmc/card/queue.h             |   15 +
+ drivers/mmc/core/bus.c               |    4 +
+ drivers/mmc/core/debugfs.c           |  169 ++++
+ drivers/mmc/core/mmc.c               |   18 +
+ include/linux/mmc/card.h             |   24 +
+ include/linux/test-iosched.h         |  233 ++++++
+ 15 files changed, 3141 insertions(+), 15 deletions(-)
+ create mode 100644 Documentation/block/test-iosched.txt
+ create mode 100644 block/test-iosched.c
+ create mode 100644 drivers/mmc/card/mmc_block_test.c
+ create mode 100644 include/linux/test-iosched.h
 
-- Chris.
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.3.3
+-- 
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
