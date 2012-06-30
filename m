@@ -1,58 +1,55 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: My outstanding MMC / SDHI/TMIO / MMCIF patches for 3.6
-Date: Sat, 30 Jun 2012 12:45:55 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1206301243320.19932@axis700.grange>
-References: <Pine.LNX.4.64.1206281029270.31813@axis700.grange>
- <87sjdf8q8h.fsf@octavius.laptop.org> <Pine.LNX.4.64.1206291701110.9084@axis700.grange>
- <87ehoy84oy.fsf@octavius.laptop.org> <Pine.LNX.4.64.1206292041340.9152@axis700.grange>
- <87lij5aefy.fsf@octavius.laptop.org>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:54895 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753091Ab2F3KqJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 30 Jun 2012 06:46:09 -0400
-In-Reply-To: <87lij5aefy.fsf@octavius.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Sylwester Nawrocki <sylvester.nawrocki@gmail.com>
+Subject: [PATCH] mmc: Convert s3cmci driver to gpiolib API
+Date: Sat, 30 Jun 2012 14:24:22 +0200
+Message-ID: <1341059062-16530-1-git-send-email-sylvester.nawrocki@gmail.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Sylwester Nawrocki <sylvester.nawrocki@gmail.com>, Ben Dooks <ben-linux@fluff.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 
-On Fri, 29 Jun 2012, Chris Ball wrote:
+The s3c2410_gpio* calls are obsolete and have been scheduled for
+removal since several kernel releases. Remove them and use common
+gpiolib API.
 
-> Hi Guennadi,
-> 
-> On Fri, Jun 29 2012, Guennadi Liakhovetski wrote:
-> > Ah, ok, right, sorry, I thought, it would be a part of the "git 
-> > request-pull" output.
-> 
-> It is for newer versions of git, FWIW.
-> 
-> > So, the top commit has hash
-> >
-> > 7c4cf5b31b98f51ebfc8db89b022e4f52f93f5db
-> >
-> > Hope, this is what's required :-)
-> 
-> Yes, perfect -- pulled and pushed out to mmc-next.  Thanks!
+This patch is a prerequisite for removal of the S3C24XX SoC specific
+arch/arm/plat-samsung/include/gpio-fns.h header.
 
-Great, thanks!
+Tested on Micro2440-SDK.
 
-> Could we get a file in Documentation/devicetree/bindings/mmc/ for the
-> new sh_mmcif DT bindings you've added, please?  It can come as a new
-> patch on top of these.  I know it'll be very short right now; you can
-> at least show an example of a DT node that works.
-
-I added OF support to both sh_mmcif and sh_mobile_sdhi (tmio_mmc), but in 
-both cases it's just at the most primitive level. This means, those 
-drivers will only use reg and interrupts DT properties, nothing else so 
-far. More shall be added in the future. Does this level of support also 
-have to be documented?
-
-Thanks
-Guennadi
+Cc: Ben Dooks <ben-linux@fluff.org>
+Signed-off-by: Sylwester Nawrocki <sylvester.nawrocki@gmail.com>
 ---
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+ drivers/mmc/host/s3cmci.c |   10 +++-------
+ 1 files changed, 3 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+index c3622a6..bd5a5cc 100644
+--- a/drivers/mmc/host/s3cmci.c
++++ b/drivers/mmc/host/s3cmci.c
+@@ -26,7 +26,6 @@
+ #include <mach/dma.h>
+
+ #include <mach/regs-sdi.h>
+-#include <mach/regs-gpio.h>
+
+ #include <plat/mci.h>
+
+@@ -1237,12 +1236,9 @@ static void s3cmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_ON:
+ 	case MMC_POWER_UP:
+-		s3c2410_gpio_cfgpin(S3C2410_GPE(5), S3C2410_GPE5_SDCLK);
+-		s3c2410_gpio_cfgpin(S3C2410_GPE(6), S3C2410_GPE6_SDCMD);
+-		s3c2410_gpio_cfgpin(S3C2410_GPE(7), S3C2410_GPE7_SDDAT0);
+-		s3c2410_gpio_cfgpin(S3C2410_GPE(8), S3C2410_GPE8_SDDAT1);
+-		s3c2410_gpio_cfgpin(S3C2410_GPE(9), S3C2410_GPE9_SDDAT2);
+-		s3c2410_gpio_cfgpin(S3C2410_GPE(10), S3C2410_GPE10_SDDAT3);
++		/* Configure GPE5...GPE10 pins in SD mode */
++		s3c_gpio_cfgall_range(S3C2410_GPE(5), 6, S3C_GPIO_SFN(2),
++				      S3C_GPIO_PULL_NONE);
+
+ 		if (host->pdata->set_power)
+ 			host->pdata->set_power(ios->power_mode, ios->vdd);
+--
+1.7.4.1
