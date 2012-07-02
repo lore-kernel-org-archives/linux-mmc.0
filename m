@@ -1,56 +1,57 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: [PATCH] mmc: Report failure reasons for all cases in sdhci_add_host()
-Date: Mon,  2 Jul 2012 14:26:15 +0100
-Message-ID: <1341235575-17553-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+From: Saugata Das <saugata.das@linaro.org>
+Subject: Re: [PATCH] mmc: core: Revert "skip card initialization if powerclass
+ selection fails"
+Date: Mon, 2 Jul 2012 19:14:25 +0530
+Message-ID: <CAKLKtzfEZx764-OqC+bpaaiuJKConFOTxv0hVrWJd3obkJww1Q@mail.gmail.com>
+References: <1341212194-24650-1-git-send-email-svenkatr@ti.com>
+	<CAKLKtzcHnvoi66J4q=SEZmWhtHh3+V3_=4+B7u0XNukCckpm7g@mail.gmail.com>
+	<1724838.XSl2kMpQ3Z@fb07-iapwap2>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:48007 "EHLO
-	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751173Ab2GBN0S (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jul 2012 09:26:18 -0400
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:58423 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751450Ab2GBNo0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jul 2012 09:44:26 -0400
+Received: by ghrr11 with SMTP id r11so4076657ghr.19
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Jul 2012 06:44:25 -0700 (PDT)
+In-Reply-To: <1724838.XSl2kMpQ3Z@fb07-iapwap2>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Mark Brown <broonie@opensource.wolfsonmicro.com>
+To: Marc Dietrich <marvin24@gmx.de>
+Cc: Venkatraman S <svenkatr@ti.com>, cjb@laptop.org, linux-mmc@vger.kernel.org, girish.shivananjappa@linaro.org, Ulf Hansson <ulf.hansson@stericsson.com>, Subhash Jadavani <subhashj@codeaurora.org>
 
-For most error conditions sdhci_add_host() will print a diagnostic
-message indicating why it failed but there are a few cases where this
-does not happen. Add error messages in these cases to aid diagnosis.
+On 2 July 2012 16:47, Marc Dietrich <marvin24@gmx.de> wrote:
+> Am Montag, 2. Juli 2012, 14:13:31 schrieb Saugata Das:
+>> On 2 July 2012 12:26, Venkatraman S <svenkatr@ti.com> wrote:
+>> > This reverts commit 3d93576e(skip card initialization if
+>> > power class selection fails).
+>> > Problem has been reported when this is used with eMMC4.41
+>> > card with Tegra Platform. Till the issue is root caused,
+>> > bus width selection failure should not be treated as fatal.
+>>
+>> According to me, we need to find the root issue (which could be either
+>> host not able to provide enough current or faulty eMMC). Do we know,
+>> what could be the side effect of working on eMMC  with less power than
+>> what it has requested in PWR_CL ?
+>>
+>> One known issue with the current power class selection is that we do
+>> not check the current requirement for a selected power class. It
+>> assumes that host is able to provide the maximum current needed at
+>> highest speed (> 800mA). Is it already checked on Tegra ?
+>
+> Acording to the schematic, the emmc is "fused" with 150mA and 450mA. There are
+> many supplies connected to it, so it is hard to tell what is the maximum, but
+> certainly not 800 mA. Why do you think it should be such high? Powerclass "7"
+> means 270 mA max and 160 mA RMS (dual voltage card). Btw, you may successfully
+> google for the "schematic document" for this "paz00" board in question.
+>
 
-Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
----
- drivers/mmc/host/sdhci.c |   10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
+I was referring to maximum current as per 4.5 spec (power class 15). I
+saw the logs which you sent earlier and the driver is trying to set
+power class 3 (=> 180mA RMS / 280mA peak). May be, you can check the
+regulators, if 450mA supply is enabled.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index caba999..acbc420 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3031,8 +3031,11 @@ int sdhci_add_host(struct sdhci_host *host)
- 
- 	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
- 		mmc_hostname(mmc), host);
--	if (ret)
-+	if (ret) {
-+		pr_err("%s: Failed to request IRQ %d: %d\n",
-+		       mmc_hostname(mmc), host->irq, ret);
- 		goto untasklet;
-+	}
- 
- 	sdhci_init(host, 0);
- 
-@@ -3049,8 +3052,11 @@ int sdhci_add_host(struct sdhci_host *host)
- 	host->led.brightness_set = sdhci_led_control;
- 
- 	ret = led_classdev_register(mmc_dev(mmc), &host->led);
--	if (ret)
-+	if (ret) {
-+		pr_err("%s: Failed to register LED device: %d\n",
-+		       mmc_hostname(mmc), ret);
- 		goto reset;
-+	}
- #endif
- 
- 	mmiowb();
--- 
-1.7.10
 
+> Marc
+>
