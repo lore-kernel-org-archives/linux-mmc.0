@@ -1,76 +1,56 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: mmci.c regression
-Date: Mon, 2 Jul 2012 14:07:57 +0100
-Message-ID: <20120702130757.GH16319@n2100.arm.linux.org.uk>
-References: <4FF190A2.6@antcom.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: [PATCH] mmc: Report failure reasons for all cases in sdhci_add_host()
+Date: Mon,  2 Jul 2012 14:26:15 +0100
+Message-ID: <1341235575-17553-1-git-send-email-broonie@opensource.wolfsonmicro.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:36462 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750861Ab2GBNIF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jul 2012 09:08:05 -0400
-Content-Disposition: inline
-In-Reply-To: <4FF190A2.6@antcom.de>
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:48007 "EHLO
+	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751173Ab2GBN0S (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jul 2012 09:26:18 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Roland Stigge <stigge@antcom.de>
-Cc: linux-mmc@vger.kernel.org, Grant Likely <grant.likely@secretlab.ca>, cjb@laptop.org, Alexandre Pereira da Silva <aletes.xgr@gmail.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Mark Brown <broonie@opensource.wolfsonmicro.com>
 
-On Mon, Jul 02, 2012 at 02:14:26PM +0200, Roland Stigge wrote:
-> Hi,
-> 
-> I'm getting a strange regression with mmci.c at v3.5-rc4 -> v3.5-rc5: Bootup:
-> 
-> v3.5-rc4:
-> 
-> mmci-pl18x 20098000.sd: mmc0: PL180 manf 41 rev0 at 0x20098000 irq 15,13 (pio)
-> mmci-pl18x 20098000.sd: no DMA platform data
-> mmc0: new SD card at address bd34
-> mmcblk0: mmc0:bd34 SD02G 1.83 GiB 
-> mmcblk0: error -5 transferring data, sector 0, nr 8, cmd response 0x900, card status 0xb00
-> mmcblk0: retrying using single block read
->  mmcblk0: p1
-> 
-> v3.5-rc5:
-> 
-> mmci-pl18x 20098000.sd: mmc0: PL180 manf 41 rev0 at 0x20098000 irq 15,13 (pio)
-> mmci-pl18x 20098000.sd: no DMA platform data
-> mmc0: new SD card at address bd34
-> mmcblk0: mmc0:bd34 SD02G 1.83 GiB 
-> mmcblk0: error -5 transferring data, sector 0, nr 8, cmd response 0x0, card status 0x900
-> mmcblk0: retrying using single block read
-> mmcblk0: error -5 transferring data, sector 0, nr 8, cmd response 0x0, card status 0x0
-> end_request: I/O error, dev mmcblk0, sector 0
-> mmcblk0: error -5 transferring data, sector 1, nr 7, cmd response 0x0, card status 0x0
-> end_request: I/O error, dev mmcblk0, sector 1
-> mmcblk0: error -5 transferring data, sector 2, nr 6, cmd response 0x0, card status 0x0
-> end_request: I/O error, dev mmcblk0, sector 2
-> Buffer I/O error on device mmcblk0, logical block 0
->  mmcblk0: unable to read partition table
+For most error conditions sdhci_add_host() will print a diagnostic
+message indicating why it failed but there are a few cases where this
+does not happen. Add error messages in these cases to aid diagnosis.
 
-Nothing changed with the mmci driver between these two, but there is this
-change:
+Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
+---
+ drivers/mmc/host/sdhci.c |   10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
-commit d380443cd0271903bf9516bc04cead81676be034
-Author: Subhash Jadavani <subhashj@codeaurora.org>
-Date:   Wed Jun 13 17:10:43 2012 +0530
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index caba999..acbc420 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3031,8 +3031,11 @@ int sdhci_add_host(struct sdhci_host *host)
+ 
+ 	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+ 		mmc_hostname(mmc), host);
+-	if (ret)
++	if (ret) {
++		pr_err("%s: Failed to request IRQ %d: %d\n",
++		       mmc_hostname(mmc), host->irq, ret);
+ 		goto untasklet;
++	}
+ 
+ 	sdhci_init(host, 0);
+ 
+@@ -3049,8 +3052,11 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	host->led.brightness_set = sdhci_led_control;
+ 
+ 	ret = led_classdev_register(mmc_dev(mmc), &host->led);
+-	if (ret)
++	if (ret) {
++		pr_err("%s: Failed to register LED device: %d\n",
++		       mmc_hostname(mmc), ret);
+ 		goto reset;
++	}
+ #endif
+ 
+ 	mmiowb();
+-- 
+1.7.10
 
-    mmc: block: fix the data timeout issue with ACMD22
-
-You could try reverting that and seeing whether that fixes it, otherwise
-it's going to have to be a git bisect.
-
-There's three things that would cause an -EIO error:
-
-1. if DMA is being used, and there is data left in the FIFO after the DMA
-   has allegedly completed.
-2. an underrun on sending data to the card (you're trying to receive so
-   this doesn't apply)
-3. an overrun on receiving data from the card (eg, the PIO interrupt handling
-   is not fast enough to keep up with the data coming off the card.)
-
-I suspect (3) is your problem, and finding out what caused that is
-definitely going to be a matter for bisect - and this will probably be
-where you'd probably end up wishing that running all IRQ handlers
-exclusively wasn't done now.
