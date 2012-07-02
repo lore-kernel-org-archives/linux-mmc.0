@@ -1,60 +1,56 @@
-From: Roland Stigge <stigge@antcom.de>
-Subject: mmci.c regression
-Date: Mon, 02 Jul 2012 14:14:26 +0200
-Message-ID: <4FF190A2.6@antcom.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+From: Maya Erez <merez@codeaurora.org>
+Subject: [PATCH v4 0/1] mmc: block: Add write packing control
+Date: Mon,  2 Jul 2012 15:15:35 +0300
+Message-ID: <1341231337-6921-1-git-send-email-merez@codeaurora.org>
+References: <n>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from antcom.de ([188.40.178.216]:53104 "EHLO chuck.antcom.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751320Ab2GBMOa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 2 Jul 2012 08:14:30 -0400
+Received: from 212.199.104.198.static.012.net.il ([212.199.104.198]:55763 "EHLO
+	lx-merez.qi.qualcomm.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1750803Ab2GBMPt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jul 2012 08:15:49 -0400
+In-Reply-To: <n>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: rmk+kernel@arm.linux.org.uk, Grant Likely <grant.likely@secretlab.ca>, cjb@laptop.org, Alexandre Pereira da Silva <aletes.xgr@gmail.com>
+Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>
 
-Hi,
+Our experiments showed that the write packing causes degradation of the read
+throughput, in parallel read and write operations.
+Since the read latency is critical for user experience we added a write packing control
+mechanism that disables the write packing in case of read requests.
+This will ensure that read requests latency is not increased due to long write packed commands.
 
-I'm getting a strange regression with mmci.c at v3.5-rc4 -> v3.5-rc5: Bootup:
+The trigger for enabling the write packing is managing to pack several write requests.
+The number of potential packed requests that will trigger the packing can be configured via sysfs.
+The trigger for disabling the write packing is a fetch of a read request.
 
-v3.5-rc4:
+this patch is dependant in the following patches:
+  [PATCH v8 1/3] mmc: core: Add packed command feature of eMMC4.5
+  [PATCH v8 2/3] mmc: core: Support packed write command for eMMC4.5 device
 
-mmci-pl18x 20098000.sd: mmc0: PL180 manf 41 rev0 at 0x20098000 irq 15,13 (pio)
-mmci-pl18x 20098000.sd: no DMA platform data
-mmc0: new SD card at address bd34
-mmcblk0: mmc0:bd34 SD02G 1.83 GiB 
-mmcblk0: error -5 transferring data, sector 0, nr 8, cmd response 0x900, card status 0xb00
-mmcblk0: retrying using single block read
- mmcblk0: p1
+Changes in v4:
+    - Move MMC specific attributes to mmc sub-directory
 
-v3.5-rc5:
+Changes in v3:
+    - Fix the settings of num_of_potential_packed_wr_reqs
 
-mmci-pl18x 20098000.sd: mmc0: PL180 manf 41 rev0 at 0x20098000 irq 15,13 (pio)
-mmci-pl18x 20098000.sd: no DMA platform data
-mmc0: new SD card at address bd34
-mmcblk0: mmc0:bd34 SD02G 1.83 GiB 
-mmcblk0: error -5 transferring data, sector 0, nr 8, cmd response 0x0, card status 0x900
-mmcblk0: retrying using single block read
-mmcblk0: error -5 transferring data, sector 0, nr 8, cmd response 0x0, card status 0x0
-end_request: I/O error, dev mmcblk0, sector 0
-mmcblk0: error -5 transferring data, sector 1, nr 7, cmd response 0x0, card status 0x0
-end_request: I/O error, dev mmcblk0, sector 1
-mmcblk0: error -5 transferring data, sector 2, nr 6, cmd response 0x0, card status 0x0
-end_request: I/O error, dev mmcblk0, sector 2
-Buffer I/O error on device mmcblk0, logical block 0
- mmcblk0: unable to read partition table
+Changes in v2:
+    - Move the attribute for setting the packing enabling trigger to the block device
+    - Add documentation of the new attribute
 
-This happens on bootup with _some_ cards that already have the "error -5" in v3.5-rc4. This
-was ok where up to v3.5-rc4, it worked on a subsequent retry as above. Unfortunately, it
-now fails with v3.5-rc5.
+Maya Erez (2):
+  mmc: card: Move MMC specific attributes to mmc sub-directory
+  mmc: block: Add write packing control
 
-Unfortunately, I can't see a relevant change in the mmci driver or mmc host code.
-An indirect timing issue on bootup?
+ Documentation/mmc/mmc-dev-attrs.txt |   17 ++++
+ drivers/mmc/card/block.c            |  176 +++++++++++++++++++++++++++++++++--
+ drivers/mmc/card/queue.c            |    8 ++
+ drivers/mmc/card/queue.h            |    3 +
+ include/linux/mmc/host.h            |    1 +
+ 5 files changed, 197 insertions(+), 8 deletions(-)
 
-Inserting cards _after_ bootup generally works. SoC is LPC32XX.
-
-Thanks in advance.
-
-Roland
+-- 
+1.7.3.3
+-- 
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
