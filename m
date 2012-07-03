@@ -1,64 +1,62 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: mxs-mmc: enable regulator for mmc slot
-Date: Tue, 03 Jul 2012 18:56:58 -0400
-Message-ID: <87txxo78sl.fsf@octavius.laptop.org>
-References: <1340699937-8163-1-git-send-email-shawn.guo@linaro.org>
+Subject: Re: [PATCH] mmc: always save error codes in mmc_regulator_get_supply()
+Date: Tue, 03 Jul 2012 19:01:53 -0400
+Message-ID: <87pq8c78ke.fsf@octavius.laptop.org>
+References: <Pine.LNX.4.64.1206271714270.24173@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56253 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:36537 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932955Ab2GCW5D (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 3 Jul 2012 18:57:03 -0400
-In-Reply-To: <1340699937-8163-1-git-send-email-shawn.guo@linaro.org> (Shawn
-	Guo's message of "Tue, 26 Jun 2012 16:38:57 +0800")
+	id S1756428Ab2GCXB6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 3 Jul 2012 19:01:58 -0400
+In-Reply-To: <Pine.LNX.4.64.1206271714270.24173@axis700.grange> (Guennadi
+	Liakhovetski's message of "Wed, 27 Jun 2012 17:18:32 +0200 (CEST)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Tue, Jun 26 2012, Shawn Guo wrote:
-> If bootloader or platform initialization code does not enable the
-> power supply to mmc slot, we need to do it in mmc driver.
+On Wed, Jun 27 2012, Guennadi Liakhovetski wrote:
+> If mmc_regulator_get_supply() fails to obtain any of the regulators, store
+> the error codes in struct mmc_host to unify error reporting to the host
+> driver.
 >
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 > ---
->  drivers/mmc/host/mxs-mmc.c |   11 +++++++++++
->  1 files changed, 11 insertions(+), 0 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index 34a9026..1a29668 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -707,6 +707,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
->  	struct pinctrl *pinctrl;
->  	int ret = 0, irq_err, irq_dma;
->  	dma_cap_mask_t mask;
-> +	struct regulator *reg_vmmc;
+> Chris, if you don't mind rebasing your mmc-next branch, feel free to roll 
+> this patch into the original "mmc: add a function to get regulators, 
+> supplying card's power". Otherwise, committing it as an incremental patch 
+> is also ok.
+>
+>  drivers/mmc/core/core.c |    5 ++---
+>  1 files changed, 2 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 385cadf..d0f17d8 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1020,13 +1020,12 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
+>  	int ret;
 >  
->  	iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->  	dmares = platform_get_resource(pdev, IORESOURCE_DMA, 0);
-> @@ -747,6 +748,16 @@ static int mxs_mmc_probe(struct platform_device *pdev)
->  	host->mmc = mmc;
->  	host->sdio_irq_en = 0;
+>  	supply = devm_regulator_get(dev, "vmmc");
+> +	mmc->supply.vmmc = supply;
+> +	mmc->supply.vqmmc = devm_regulator_get(dev, "vqmmc");
 >  
-> +	reg_vmmc = devm_regulator_get(&pdev->dev, "vmmc");
-> +	if (!IS_ERR(reg_vmmc)) {
-> +		ret = regulator_enable(reg_vmmc);
-> +		if (ret) {
-> +			dev_err(&pdev->dev,
-> +				"Failed to enable vmmc regulator: %d\n", ret);
-> +			goto out_mmc_free;
-> +		}
-> +	}
-> +
->  	pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
->  	if (IS_ERR(pinctrl)) {
->  		ret = PTR_ERR(pinctrl);
+>  	if (IS_ERR(supply))
+>  		return PTR_ERR(supply);
+>  
+> -	mmc->supply.vmmc = supply;
+> -	mmc->supply.vqmmc = devm_regulator_get(dev, "vqmmc");
+> -
+>  	ret = mmc_regulator_get_ocrmask(supply);
+>  	if (ret > 0)
+>  		mmc->ocr_avail = ret;
 
-Thanks, pushed to mmc-next for 3.6.
+Thanks, I rebased it and pushed out to mmc-next.
 
 - Chris.
 -- 
