@@ -1,70 +1,74 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH] mmc: mxs-mmc: enable regulator for mmc slot
-Date: Tue, 3 Jul 2012 15:45:01 +0800
-Message-ID: <20120703074458.GD22705@S2101-09.ap.freescale.net>
-References: <1340699937-8163-1-git-send-email-shawn.guo@linaro.org>
+From: Aaron Lu <aaron.lu@amd.com>
+Subject: [PATCH v2] mmc: sdhci: fix incorrect command used in tuning
+Date: Tue, 3 Jul 2012 17:27:49 +0800
+Message-ID: <1341307669-20834-1-git-send-email-aaron.lu@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:37185 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755796Ab2GCHoS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jul 2012 03:44:18 -0400
-Received: by pbbrp8 with SMTP id rp8so8826670pbb.19
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Jul 2012 00:44:18 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <1340699937-8163-1-git-send-email-shawn.guo@linaro.org>
+Received: from am1ehsobe001.messaging.microsoft.com ([213.199.154.204]:34343
+	"EHLO am1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751793Ab2GCJ2V (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jul 2012 05:28:21 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Girish K S <girish.shivananjappa@linaro.org>, Subhash Jadavani <subhashj@codeaurora.org>, Philip Rakity <prakity@marvell.com>, Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>, Aaron Lu <aaron.lu@amd.com>, stable <stable@vger.kernel.org>, "[3.3+]"@domain.invalid
 
-Hi Chris,
+V2:
+Fix for SDIO case: both SD and SDIO cards use cmd19 while eMMC use cmd21.
 
-Ping.
+V1:
+For SD hosts using retuning mode 1, when retuning timer expired, it will
+need to do retuning in sdhci_request before processing the actual
+request. But the retuning command is fixed: cmd19 for SD card and cmd21
+for eMMC card, so we can't use the original request's command to do the
+tuning.
 
-Regards,
-Shawn
+And since the tuning command depends on the card type atteched to the
+host, we will need to know the card type to use the correct tuning
+command.
 
-On Tue, Jun 26, 2012 at 04:38:57PM +0800, Shawn Guo wrote:
-> If bootloader or platform initialization code does not enable the
-> power supply to mmc slot, we need to do it in mmc driver.
-> 
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> ---
->  drivers/mmc/host/mxs-mmc.c |   11 +++++++++++
->  1 files changed, 11 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index 34a9026..1a29668 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -707,6 +707,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
->  	struct pinctrl *pinctrl;
->  	int ret = 0, irq_err, irq_dma;
->  	dma_cap_mask_t mask;
-> +	struct regulator *reg_vmmc;
->  
->  	iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->  	dmares = platform_get_resource(pdev, IORESOURCE_DMA, 0);
-> @@ -747,6 +748,16 @@ static int mxs_mmc_probe(struct platform_device *pdev)
->  	host->mmc = mmc;
->  	host->sdio_irq_en = 0;
->  
-> +	reg_vmmc = devm_regulator_get(&pdev->dev, "vmmc");
-> +	if (!IS_ERR(reg_vmmc)) {
-> +		ret = regulator_enable(reg_vmmc);
-> +		if (ret) {
-> +			dev_err(&pdev->dev,
-> +				"Failed to enable vmmc regulator: %d\n", ret);
-> +			goto out_mmc_free;
-> +		}
-> +	}
-> +
->  	pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
->  	if (IS_ERR(pinctrl)) {
->  		ret = PTR_ERR(pinctrl);
-> -- 
-> 1.7.5.4
-> 
-> 
+Cc: stable <stable@vger.kernel.org> [3.3+]
+Signed-off-by: Aaron Lu <aaron.lu@amd.com>
+---
+ drivers/mmc/host/sdhci.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index f76736b..4e53e6b 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -27,6 +27,7 @@
+ 
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/host.h>
++#include <linux/mmc/card.h>
+ 
+ #include "sdhci.h"
+ 
+@@ -1245,6 +1246,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	struct sdhci_host *host;
+ 	bool present;
+ 	unsigned long flags;
++	u32 tuning_opcode;
+ 
+ 	host = mmc_priv(mmc);
+ 
+@@ -1292,8 +1294,12 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		 */
+ 		if ((host->flags & SDHCI_NEEDS_RETUNING) &&
+ 		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
++			/* eMMC uses cmd21 while sd and sdio use cmd19 */
++			tuning_opcode = mmc->card->type == MMC_TYPE_MMC ?
++				MMC_SEND_TUNING_BLOCK_HS200 :
++				MMC_SEND_TUNING_BLOCK;
+ 			spin_unlock_irqrestore(&host->lock, flags);
+-			sdhci_execute_tuning(mmc, mrq->cmd->opcode);
++			sdhci_execute_tuning(mmc, tuning_opcode);
+ 			spin_lock_irqsave(&host->lock, flags);
+ 
+ 			/* Restore original mmc_request structure */
+-- 
+1.7.11.1.3.g4c8a9db
+
+
