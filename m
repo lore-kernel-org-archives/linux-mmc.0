@@ -1,45 +1,66 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: [PATCH] sdhci-pci: CaFe has broken card detection
-Date: Tue,  3 Jul 2012 23:13:39 +0100 (BST)
-Message-ID: <20120703221340.221729D401E@zog.reactivated.net>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: mxs-mmc: enable regulator for mmc slot
+Date: Tue, 03 Jul 2012 18:56:58 -0400
+Message-ID: <87txxo78sl.fsf@octavius.laptop.org>
+References: <1340699937-8163-1-git-send-email-shawn.guo@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mtaout02-winn.ispmail.ntl.com ([81.103.221.48]:49344 "EHLO
-	mtaout02-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756313Ab2GCWNo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jul 2012 18:13:44 -0400
+Received: from void.printf.net ([89.145.121.20]:56253 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932955Ab2GCW5D (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 3 Jul 2012 18:57:03 -0400
+In-Reply-To: <1340699937-8163-1-git-send-email-shawn.guo@linaro.org> (Shawn
+	Guo's message of "Tue, 26 Jun 2012 16:38:57 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-At http://dev.laptop.org/ticket/11980 we have determined that the
-Marvell CaFe SDHCI controller reports bad card presence during
-resume. It reports that no card is present even when it is.
+Hi,
 
-Around 400ms after resuming, a "card inserted" interrupt is generated,
-at which point it starts reporting presence.
+On Tue, Jun 26 2012, Shawn Guo wrote:
+> If bootloader or platform initialization code does not enable the
+> power supply to mmc slot, we need to do it in mmc driver.
+>
+> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+> ---
+>  drivers/mmc/host/mxs-mmc.c |   11 +++++++++++
+>  1 files changed, 11 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index 34a9026..1a29668 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -707,6 +707,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>  	struct pinctrl *pinctrl;
+>  	int ret = 0, irq_err, irq_dma;
+>  	dma_cap_mask_t mask;
+> +	struct regulator *reg_vmmc;
+>  
+>  	iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>  	dmares = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+> @@ -747,6 +748,16 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>  	host->mmc = mmc;
+>  	host->sdio_irq_en = 0;
+>  
+> +	reg_vmmc = devm_regulator_get(&pdev->dev, "vmmc");
+> +	if (!IS_ERR(reg_vmmc)) {
+> +		ret = regulator_enable(reg_vmmc);
+> +		if (ret) {
+> +			dev_err(&pdev->dev,
+> +				"Failed to enable vmmc regulator: %d\n", ret);
+> +			goto out_mmc_free;
+> +		}
+> +	}
+> +
+>  	pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
+>  	if (IS_ERR(pinctrl)) {
+>  		ret = PTR_ERR(pinctrl);
 
-Work around this hardware oddity by setting the
-SDHCI_QUIRK_BROKEN_CARD_DETECTION flag. Thanks to Chris Ball for helping
-with diagnosis.
+Thanks, pushed to mmc-next for 3.6.
 
-Signed-off-by: Daniel Drake <dsd@laptop.org>
----
- drivers/mmc/host/sdhci-pci.c |    1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 69ef0be..504da71 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -157,6 +157,7 @@ static const struct sdhci_pci_fixes sdhci_ene_714 = {
- static const struct sdhci_pci_fixes sdhci_cafe = {
- 	.quirks		= SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER |
- 			  SDHCI_QUIRK_NO_BUSY_IRQ |
-+			  SDHCI_QUIRK_BROKEN_CARD_DETECTION |
- 			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
- };
- 
+- Chris.
 -- 
-1.7.10.4
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
