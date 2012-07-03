@@ -1,7 +1,7 @@
 From: Girish K S <girish.shivananjappa@linaro.org>
 Subject: Re: [PATCH v2] mmc: sdhci: fix incorrect command used in tuning
-Date: Tue, 3 Jul 2012 17:30:17 +0530
-Message-ID: <CAGxe1ZEAR_vo_drsK43+THAHz361MOVSz8vDQmJuu3J8XGqLCQ@mail.gmail.com>
+Date: Tue, 3 Jul 2012 17:32:36 +0530
+Message-ID: <CAGxe1ZGuunrQCyhujss1vtbyqcC-qxyV8Ui2_Jb026U315u7pg@mail.gmail.com>
 References: <1341307669-20834-1-git-send-email-aaron.lu@amd.com>
 	<CAGxe1ZGBmOyW-nShKVAmPgQNn-_RLiFYXHBBYuDKecOaJVO+uQ@mail.gmail.com>
 	<20120703113122.GA1972@localhost.localdomain>
@@ -10,12 +10,12 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f53.google.com ([209.85.216.53]:38193 "EHLO
-	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755051Ab2GCMAS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jul 2012 08:00:18 -0400
-Received: by qaas11 with SMTP id s11so2492869qaa.19
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Jul 2012 05:00:17 -0700 (PDT)
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:56426 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754349Ab2GCMCi convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jul 2012 08:02:38 -0400
+Received: by qcro28 with SMTP id o28so3494997qcr.19
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Jul 2012 05:02:37 -0700 (PDT)
 In-Reply-To: <CAGxe1ZGO_3dgXJPAa94Ha8t=jCdrJrJb36X-CthnU60u7iopaw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -125,8 +125,7 @@ o/mmc
 > function for this. Since mmc_host_ops has a member .execute_tuning
 > which takes 2 parameters that are called from respective sd/mmc/sdio
 > card files. there might be conflict
-sorry igonre it
-
+Sorry i just read it wrongly (function has only 1 param).
 >>
 >> -Aaron
 >>
