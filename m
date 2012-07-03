@@ -1,87 +1,240 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: RE: [PATCH v2] mmc: sdhci: fix incorrect command used in tuning
-Date: Tue, 3 Jul 2012 07:03:28 -0700
-Message-ID: <43E4817426ED174AA81263BCECB4351D138E8ACE8D@sc-vexch3.marvell.com>
-References: <1341307669-20834-1-git-send-email-aaron.lu@amd.com>
+Subject: Re: [PATCH 2/2] mmc: sd: Fix sd current limit setting
+Date: Tue, 3 Jul 2012 07:18:03 -0700
+Message-ID: <45A5DFDF-7448-469E-82F2-EA89E379CA43@marvell.com>
+References: <1341296172-10645-1-git-send-email-aaron.lu@amd.com>
+ <1341296172-10645-3-git-send-email-aaron.lu@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog117.obsmtp.com ([74.125.149.242]:39688 "EHLO
-	na3sys009aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750818Ab2GCOFk convert rfc822-to-8bit
+Received: from na3sys009aog108.obsmtp.com ([74.125.149.199]:49303 "EHLO
+	na3sys009aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751854Ab2GCOSa convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 3 Jul 2012 10:05:40 -0400
-In-Reply-To: <1341307669-20834-1-git-send-email-aaron.lu@amd.com>
+	Tue, 3 Jul 2012 10:18:30 -0400
+In-Reply-To: <1341296172-10645-3-git-send-email-aaron.lu@amd.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lu@amd.com>, Girish K S <girish.shivananjappa@linaro.org>, Subhash Jadavani <subhashj@codeaurora.org>, Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lwe@gmail.com>, stable <stable@vger.kernel.org>, "\"[3.3+]\"@domain.invalid" <"[3.3+]"@domain.invalid>
+To: Aaron Lu <aaron.lu@amd.com>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lwe@gmail.com>
 
-Reviewed-by philip Rakity prakity@marvell.com
-________________________________________
-From: Aaron Lu [aaron.lu@amd.com]
-Sent: Tuesday, July 03, 2012 2:27 AM
-To: Girish K S; Subhash Jadavani; Philip Rakity; Chris Ball
-Cc: linux-mmc@vger.kernel.org; Aaron Lu; Aaron Lu; stable; "[3.3+]"@domain.invalid
-Subject: [PATCH v2] mmc: sdhci: fix incorrect command used in tuning
+Hi Arron,
 
-V2:
-Fix for SDIO case: both SD and SDIO cards use cmd19 while eMMC use cmd21.
+One minor comment -- okay without the change but clearer IMHO with the change.
 
-V1:
-For SD hosts using retuning mode 1, when retuning timer expired, it will
-need to do retuning in sdhci_request before processing the actual
-request. But the retuning command is fixed: cmd19 for SD card and cmd21
-for eMMC card, so we can't use the original request's command to do the
-tuning.
+Reviewed-by: Philip Rakity <prakity@marvell.com>
 
-And since the tuning command depends on the card type atteched to the
-host, we will need to know the card type to use the correct tuning
-command.
+Philip
 
-Cc: stable <stable@vger.kernel.org> [3.3+]
-Signed-off-by: Aaron Lu <aaron.lu@amd.com>
----
- drivers/mmc/host/sdhci.c | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index f76736b..4e53e6b 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -27,6 +27,7 @@
+On Jul 2, 2012, at 11:16 PM, Aaron Lu wrote:
 
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/host.h>
-+#include <linux/mmc/card.h>
+> Host has different current capabilities at different voltages, we need
+> to record these settings seperately. Before set current limit for the sd
+> card, find out the current voltage first and then find out the current
+> capabilities of the host to set the limit.
+> 
+> Signed-off-by: Aaron Lu <aaron.lu@amd.com>
+> ---
+> drivers/mmc/core/sd.c    | 58 ++++++++++++++++++++++++++++++++++++++++++------
+> drivers/mmc/host/sdhci.c | 28 +++++++++++++++++++----
+> include/linux/mmc/host.h | 16 +++++++++----
+> 3 files changed, 87 insertions(+), 15 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index ae72d6e..4b4cf4d 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -521,11 +521,39 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
+> {
+> 	int current_limit = SD_SET_CURRENT_NO_CHANGE;
+> 	int err;
+> +	u8 voltage;
+	u32 voltage;
+> 
+> 	/*
+> 	 * Current limit switch is only defined for SDR50, SDR104, and DDR50
+> 	 * bus speed modes. For other bus speed modes, we do not change the
+> 	 * current limit.
+> +	 */
+> +	if ((card->sd_bus_speed != UHS_SDR50_BUS_SPEED) &&
+> +	    (card->sd_bus_speed != UHS_SDR104_BUS_SPEED) &&
+> +	    (card->sd_bus_speed != UHS_DDR50_BUS_SPEED))
+> +		return 0;
+> +
+> +	/*
+> +	 * Host has different current capabilities when operating at
+> +	 * different voltages, so find out the current voltage first.
+> +	 */
+> +	switch (1 << card->host->ios.vdd) {
+> +		case MMC_VDD_165_195:
+> +			voltage = 0; /* host's voltage is 1.8V */
 
- #include "sdhci.h"
+It is a little clearly if you do this or make voltage 0, 1, 2 an enum for the routine.
+otherwise
+	reviewed-by: Philip Rakity <prakity@marvell.com>
+			voltage = MMC_VDD_165_195;
+> 
+> +			break;
+> +		case MMC_VDD_29_30:
+> +		case MMC_VDD_30_31:
+> +			voltage = 1; /* host's voltage is 3.0V */
+			voltage = MMC_VDD_29_30 | MMC_VDD_30_31;
+> 
+> +			break;
+> +		case MMC_VDD_32_33:
+> +		case MMC_VDD_33_34:
+> +			voltage = 2; /* host's voltage is 3.3V */
+			voltage = MMC_VDD_32_33 | MMC_VDD_33_34;
+> 
+> +			break;
+> +		default:
+> +			BUG(); /* host's voltage is invalid */
+> +	}
+> +
+> +	/*
+> 	 * We only check host's capability here, if we set a limit that is
+> 	 * higher than the card's maximum current, the card will be using its
+> 	 * maximum current, e.g. if the card's maximum current is 300ma, and
+> @@ -533,16 +561,32 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
+> 	 * when we set current limit to 400/600/800ma, the card will draw its
+> 	 * maximum 300ma from the host.
+> 	 */
+> -	if ((card->sd_bus_speed == UHS_SDR50_BUS_SPEED) ||
+> -	    (card->sd_bus_speed == UHS_SDR104_BUS_SPEED) ||
+> -	    (card->sd_bus_speed == UHS_DDR50_BUS_SPEED)) {
+> -		if (card->host->caps & MMC_CAP_MAX_CURRENT_800)
+> +	if (voltage == 0) {
+	if (voltage == MMC_VDD_165_195) { 
+> +		if (card->host->caps & MMC_CAP_MAX_CURRENT_800_180)
+> +			current_limit = SD_SET_CURRENT_LIMIT_800;
+> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_600_180)
+> +			current_limit = SD_SET_CURRENT_LIMIT_600;
+> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_400_180)
+> +			current_limit = SD_SET_CURRENT_LIMIT_400;
+> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_200_180)
+> +			current_limit = SD_SET_CURRENT_LIMIT_200;
+> +	} else if (voltage == 1)
+	} else if (voltage == ( MMC_VDD_29_30 | MMC_VDD_30_31)
 
-@@ -1245,6 +1246,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
-        struct sdhci_host *host;
-        bool present;
-        unsigned long flags;
-+       u32 tuning_opcode;
-
-        host = mmc_priv(mmc);
-
-@@ -1292,8 +1294,12 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
-                 */
-                if ((host->flags & SDHCI_NEEDS_RETUNING) &&
-                    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
-+                       /* eMMC uses cmd21 while sd and sdio use cmd19 */
-+                       tuning_opcode = mmc->card->type == MMC_TYPE_MMC ?
-+                               MMC_SEND_TUNING_BLOCK_HS200 :
-+                               MMC_SEND_TUNING_BLOCK;
-                        spin_unlock_irqrestore(&host->lock, flags);
--                       sdhci_execute_tuning(mmc, mrq->cmd->opcode);
-+                       sdhci_execute_tuning(mmc, tuning_opcode);
-                        spin_lock_irqsave(&host->lock, flags);
-
-                        /* Restore original mmc_request structure */
---
-1.7.11.1.3.g4c8a9db
-
+	etc ?
+> {
+> +		if (card->host->caps & MMC_CAP_MAX_CURRENT_800_300)
+> +			current_limit = SD_SET_CURRENT_LIMIT_800;
+> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_600_300)
+> +			current_limit = SD_SET_CURRENT_LIMIT_600;
+> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_400_300)
+> +			current_limit = SD_SET_CURRENT_LIMIT_400;
+> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_200_300)
+> +			current_limit = SD_SET_CURRENT_LIMIT_200;
+> +	} else if (voltage == 2) {
+> +		if (card->host->caps & MMC_CAP_MAX_CURRENT_800_330)
+> 			current_limit = SD_SET_CURRENT_LIMIT_800;
+> -		else if (card->host->caps & MMC_CAP_MAX_CURRENT_600)
+> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_600_330)
+> 			current_limit = SD_SET_CURRENT_LIMIT_600;
+> -		else if (card->host->caps & MMC_CAP_MAX_CURRENT_400)
+> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_400_330)
+> 			current_limit = SD_SET_CURRENT_LIMIT_400;
+> -		else if (card->host->caps & MMC_CAP_MAX_CURRENT_200)
+> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_200_330)
+> 			current_limit = SD_SET_CURRENT_LIMIT_200;
+> 	}
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index caba999..00c2cbb 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2897,6 +2897,16 @@ int sdhci_add_host(struct sdhci_host *host)
+> 
+> 		if (max_current_330 > 150)
+> 			mmc->caps |= MMC_CAP_SET_XPC_330;
+> +
+> +		/* Maximum current capabilities of the host at 3.3V */
+> +		if (max_current_330 >= 800)
+> +			mmc->caps |= MMC_CAP_MAX_CURRENT_800_330;
+> +		else if (max_current_330 >= 600)
+> +			mmc->caps |= MMC_CAP_MAX_CURRENT_600_330;
+> +		else if (max_current_330 >= 400)
+> +			mmc->caps |= MMC_CAP_MAX_CURRENT_400_330;
+> +		else if (max_current_330 >= 200)
+> +			mmc->caps |= MMC_CAP_MAX_CURRENT_200_330;
+> 	}
+> 	if (caps[0] & SDHCI_CAN_VDD_300) {
+> 		int max_current_300;
+> @@ -2910,6 +2920,16 @@ int sdhci_add_host(struct sdhci_host *host)
+> 
+> 		if (max_current_300 > 150)
+> 			mmc->caps |= MMC_CAP_SET_XPC_300;
+> +
+> +		/* Maximum current capabilities of the host at 3.0V */
+> +		if (max_current_300 >= 800)
+> +			mmc->caps |= MMC_CAP_MAX_CURRENT_800_300;
+> +		else if (max_current_300 >= 600)
+> +			mmc->caps |= MMC_CAP_MAX_CURRENT_600_300;
+> +		else if (max_current_300 >= 400)
+> +			mmc->caps |= MMC_CAP_MAX_CURRENT_400_300;
+> +		else if (max_current_300 >= 200)
+> +			mmc->caps |= MMC_CAP_MAX_CURRENT_200_300;
+> 	}
+> 	if (caps[0] & SDHCI_CAN_VDD_180) {
+> 		int max_current_180;
+> @@ -2926,13 +2946,13 @@ int sdhci_add_host(struct sdhci_host *host)
+> 
+> 		/* Maximum current capabilities of the host at 1.8V */
+> 		if (max_current_180 >= 800)
+> -			mmc->caps |= MMC_CAP_MAX_CURRENT_800;
+> +			mmc->caps |= MMC_CAP_MAX_CURRENT_800_180;
+> 		else if (max_current_180 >= 600)
+> -			mmc->caps |= MMC_CAP_MAX_CURRENT_600;
+> +			mmc->caps |= MMC_CAP_MAX_CURRENT_600_180;
+> 		else if (max_current_180 >= 400)
+> -			mmc->caps |= MMC_CAP_MAX_CURRENT_400;
+> +			mmc->caps |= MMC_CAP_MAX_CURRENT_400_180;
+> 		else if (max_current_180 >= 200)
+> -			mmc->caps |= MMC_CAP_MAX_CURRENT_200;
+> +			mmc->caps |= MMC_CAP_MAX_CURRENT_200_180;
+> 	}
+> 
+> 	mmc->ocr_avail = ocr_avail;
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 65c64ee..ca84ffb 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -238,10 +238,10 @@ struct mmc_host {
+> #define MMC_CAP_DRIVER_TYPE_A	(1 << 23)	/* Host supports Driver Type A */
+> #define MMC_CAP_DRIVER_TYPE_C	(1 << 24)	/* Host supports Driver Type C */
+> #define MMC_CAP_DRIVER_TYPE_D	(1 << 25)	/* Host supports Driver Type D */
+> -#define MMC_CAP_MAX_CURRENT_200	(1 << 26)	/* Host max current limit is 200mA */
+> -#define MMC_CAP_MAX_CURRENT_400	(1 << 27)	/* Host max current limit is 400mA */
+> -#define MMC_CAP_MAX_CURRENT_600	(1 << 28)	/* Host max current limit is 600mA */
+> -#define MMC_CAP_MAX_CURRENT_800	(1 << 29)	/* Host max current limit is 800mA */
+> +#define MMC_CAP_MAX_CURRENT_200_180 (1 << 26)	/* Host max current limit is 200mA at 1.8V */
+> +#define MMC_CAP_MAX_CURRENT_400_180 (1 << 27)	/* Host max current limit is 400mA at 1.8V */
+> +#define MMC_CAP_MAX_CURRENT_600_180 (1 << 28)	/* Host max current limit is 600mA at 1.8V */
+> +#define MMC_CAP_MAX_CURRENT_800_180 (1 << 29)	/* Host max current limit is 800mA at 1.8V */
+> #define MMC_CAP_CMD23		(1 << 30)	/* CMD23 supported. */
+> #define MMC_CAP_HW_RESET	(1 << 31)	/* Hardware reset */
+> 
+> @@ -261,6 +261,14 @@ struct mmc_host {
+> #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
+> #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
+> #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
+> +#define MMC_CAP_MAX_CURRENT_200_300 (1 << 12)	/* Host max current limit is 200mA at 3.0V */
+> +#define MMC_CAP_MAX_CURRENT_400_300 (1 << 13)	/* Host max current limit is 400mA at 3.0V */
+> +#define MMC_CAP_MAX_CURRENT_600_300 (1 << 14)	/* Host max current limit is 600mA at 3.0V */
+> +#define MMC_CAP_MAX_CURRENT_800_300 (1 << 15)	/* Host max current limit is 800mA at 3.0V */
+> +#define MMC_CAP_MAX_CURRENT_200_330 (1 << 16)	/* Host max current limit is 200mA at 3.3V */
+> +#define MMC_CAP_MAX_CURRENT_400_330 (1 << 17)	/* Host max current limit is 400mA at 3.3V */
+> +#define MMC_CAP_MAX_CURRENT_600_330 (1 << 18)	/* Host max current limit is 600mA at 3.3V */
+> +#define MMC_CAP_MAX_CURRENT_800_330 (1 << 19)	/* Host max current limit is 800mA at 3.3V */
+> 
+> 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+> 	unsigned int        power_notify_type;
+> -- 
+> 1.7.11.1.3.g4c8a9db
+> 
+> 
 
