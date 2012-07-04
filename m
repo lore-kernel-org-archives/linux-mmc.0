@@ -1,40 +1,64 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] sdhci: V3:  Allow CAPS[1] to be set via QUIRK
-Date: Tue, 03 Jul 2012 19:05:34 -0400
-Message-ID: <87lij078e9.fsf@octavius.laptop.org>
-References: <1340858967-2413-1-git-send-email-prakity@marvell.com>
+Subject: Re: [PATCH] mmc: Convert s3cmci driver to gpiolib API
+Date: Tue, 03 Jul 2012 20:27:41 -0400
+Message-ID: <87hato74le.fsf@octavius.laptop.org>
+References: <1341059062-16530-1-git-send-email-sylvester.nawrocki@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:49853 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752452Ab2GCXFj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 3 Jul 2012 19:05:39 -0400
-In-Reply-To: <1340858967-2413-1-git-send-email-prakity@marvell.com>
-	(philipspatches@gmail.com's message of "Wed, 27 Jun 2012 21:49:27
-	-0700")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1341059062-16530-1-git-send-email-sylvester.nawrocki@gmail.com>
+	(Sylwester Nawrocki's message of "Sat, 30 Jun 2012 14:24:22 +0200")
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Sylwester Nawrocki <sylvester.nawrocki@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Ben Dooks <ben-linux@fluff.org>
 List-Id: linux-mmc@vger.kernel.org
-To: philipspatches@gmail.com
-Cc: linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>
 
 Hi,
 
-On Thu, Jun 28 2012, philipspatches@gmail.com wrote:
-> From: Philip Rakity <prakity@marvell.com>
+On Sat, Jun 30 2012, Sylwester Nawrocki wrote:
+> The s3c2410_gpio* calls are obsolete and have been scheduled for
+> removal since several kernel releases. Remove them and use common
+> gpiolib API.
 >
-> currently only the capability_0 register can be set if
-> SDHCI_QUIRK_MISSING_CAPS is defined.  This is a problem when
-> the capability_1 register also needs changing.  Use the
-> SDHCI_QUIRK_MISSING_CAPS to allow both registers to be set.
+> This patch is a prerequisite for removal of the S3C24XX SoC specific
+> arch/arm/plat-samsung/include/gpio-fns.h header.
 >
-> Redefining caps[1] is useful when the board design does not
-> support 1.8v vccq so UHS modes are not available.  The code
-> that calls sdhci_add_host can then detect this condition and
-> adjust the caps so the UHS mode will not be attempted on UHS
-> cards
+> Tested on Micro2440-SDK.
 >
-> Signed-off-by: Philip Rakity <prakity@marvell.com>
+> Cc: Ben Dooks <ben-linux@fluff.org>
+> Signed-off-by: Sylwester Nawrocki <sylvester.nawrocki@gmail.com>
+> ---
+>  drivers/mmc/host/s3cmci.c |   10 +++-------
+>  1 files changed, 3 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+> index c3622a6..bd5a5cc 100644
+> --- a/drivers/mmc/host/s3cmci.c
+> +++ b/drivers/mmc/host/s3cmci.c
+> @@ -26,7 +26,6 @@
+>  #include <mach/dma.h>
+>
+>  #include <mach/regs-sdi.h>
+> -#include <mach/regs-gpio.h>
+>
+>  #include <plat/mci.h>
+>
+> @@ -1237,12 +1236,9 @@ static void s3cmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	switch (ios->power_mode) {
+>  	case MMC_POWER_ON:
+>  	case MMC_POWER_UP:
+> -		s3c2410_gpio_cfgpin(S3C2410_GPE(5), S3C2410_GPE5_SDCLK);
+> -		s3c2410_gpio_cfgpin(S3C2410_GPE(6), S3C2410_GPE6_SDCMD);
+> -		s3c2410_gpio_cfgpin(S3C2410_GPE(7), S3C2410_GPE7_SDDAT0);
+> -		s3c2410_gpio_cfgpin(S3C2410_GPE(8), S3C2410_GPE8_SDDAT1);
+> -		s3c2410_gpio_cfgpin(S3C2410_GPE(9), S3C2410_GPE9_SDDAT2);
+> -		s3c2410_gpio_cfgpin(S3C2410_GPE(10), S3C2410_GPE10_SDDAT3);
+> +		/* Configure GPE5...GPE10 pins in SD mode */
+> +		s3c_gpio_cfgall_range(S3C2410_GPE(5), 6, S3C_GPIO_SFN(2),
+> +				      S3C_GPIO_PULL_NONE);
+>
+>  		if (host->pdata->set_power)
+>  			host->pdata->set_power(ios->power_mode, ios->vdd);
 
 Thanks, pushed to mmc-next for 3.6.
 
