@@ -1,66 +1,54 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: Report failure reasons for all cases in sdhci_add_host()
-Date: Tue, 03 Jul 2012 20:29:55 -0400
-Message-ID: <87d34c74ho.fsf@octavius.laptop.org>
-References: <1341235575-17553-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH] sdhci-pci: CaFe has broken card detection
+Date: Tue, 03 Jul 2012 20:32:44 -0400
+Message-ID: <878vf074cz.fsf@octavius.laptop.org>
+References: <20120703221340.221729D401E@zog.reactivated.net>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:50785 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:50801 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751754Ab2GDA37 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 3 Jul 2012 20:29:59 -0400
-In-Reply-To: <1341235575-17553-1-git-send-email-broonie@opensource.wolfsonmicro.com>
-	(Mark Brown's message of "Mon, 2 Jul 2012 14:26:15 +0100")
+	id S1752081Ab2GDAcr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 3 Jul 2012 20:32:47 -0400
+In-Reply-To: <20120703221340.221729D401E@zog.reactivated.net> (Daniel Drake's
+	message of "Tue, 3 Jul 2012 23:13:39 +0100 (BST)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+To: Daniel Drake <dsd@laptop.org>
 Cc: linux-mmc@vger.kernel.org
 
-Hi,
+Hi Dan,
 
-On Mon, Jul 02 2012, Mark Brown wrote:
-> For most error conditions sdhci_add_host() will print a diagnostic
-> message indicating why it failed but there are a few cases where this
-> does not happen. Add error messages in these cases to aid diagnosis.
+On Tue, Jul 03 2012, Daniel Drake wrote:
+> At http://dev.laptop.org/ticket/11980 we have determined that the
+> Marvell CaFe SDHCI controller reports bad card presence during
+> resume. It reports that no card is present even when it is.
 >
-> Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
+> Around 400ms after resuming, a "card inserted" interrupt is generated,
+> at which point it starts reporting presence.
+>
+> Work around this hardware oddity by setting the
+> SDHCI_QUIRK_BROKEN_CARD_DETECTION flag. Thanks to Chris Ball for helping
+> with diagnosis.
+>
+> Signed-off-by: Daniel Drake <dsd@laptop.org>
 > ---
->  drivers/mmc/host/sdhci.c |   10 ++++++++--
->  1 file changed, 8 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/sdhci-pci.c |    1 +
+>  1 file changed, 1 insertion(+)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index caba999..acbc420 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3031,8 +3031,11 @@ int sdhci_add_host(struct sdhci_host *host)
->  
->  	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
->  		mmc_hostname(mmc), host);
-> -	if (ret)
-> +	if (ret) {
-> +		pr_err("%s: Failed to request IRQ %d: %d\n",
-> +		       mmc_hostname(mmc), host->irq, ret);
->  		goto untasklet;
-> +	}
->  
->  	sdhci_init(host, 0);
->  
-> @@ -3049,8 +3052,11 @@ int sdhci_add_host(struct sdhci_host *host)
->  	host->led.brightness_set = sdhci_led_control;
->  
->  	ret = led_classdev_register(mmc_dev(mmc), &host->led);
-> -	if (ret)
-> +	if (ret) {
-> +		pr_err("%s: Failed to register LED device: %d\n",
-> +		       mmc_hostname(mmc), ret);
->  		goto reset;
-> +	}
->  #endif
->  
->  	mmiowb();
+> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+> index 69ef0be..504da71 100644
+> --- a/drivers/mmc/host/sdhci-pci.c
+> +++ b/drivers/mmc/host/sdhci-pci.c
+> @@ -157,6 +157,7 @@ static const struct sdhci_pci_fixes sdhci_ene_714 = {
+>  static const struct sdhci_pci_fixes sdhci_cafe = {
+>  	.quirks		= SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER |
+>  			  SDHCI_QUIRK_NO_BUSY_IRQ |
+> +			  SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+>  			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
+>  };
 
-Thanks, pushed to mmc-next for 3.6.
+Thanks, pushed to mmc-next for 3.6 with a stable@ tag to fix the regression.
 
 - Chris.
 -- 
