@@ -1,54 +1,43 @@
-From: Ming Lei <ming.lei@canonical.com>
-Subject: [PATCH] MMC: OMAP: make MMC_OMAP* depend on DMA_OMAP
-Date: Thu,  5 Jul 2012 09:12:01 +0800
-Message-ID: <1341450721-20993-1-git-send-email-ming.lei@canonical.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:48763 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751281Ab2GEBML (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jul 2012 21:12:11 -0400
-Received: by pbbrp8 with SMTP id rp8so11890498pbb.19
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Jul 2012 18:12:10 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>
+Subject: [PATCH v1 1/2] mmc: sdhci-dove: Add SDHCI_QUIRK_NO_HISPD_BIT
+Date: Thu,  5 Jul 2012 12:14:00 +0200
+Message-ID: <1341483241-18300-1-git-send-email-sebastian.hesselbarth@googlemail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>
+Cc: Chris Ball <cjb@laptop.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Viresh Kumar <viresh.kumar@st.com>, Manuel Lauss <manuel.lauss@googlemail.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Ming Lei <ming.lei@canonical.com>
 
-Recent commits on omap mmc/hsmmc in -next tree switch to
-DMA_ENGINE entirely, so make MMC_OMAP* depend on DMA_OMAP
-and DMA_ENGINE, otherwise OMAP MMC/HSMMC won't work without
-enabling DMA_ENGINE and DMA_OMAP.
+The sdio controller on dove doesn't have a bit to indicate
+high-speed. With the quirk set it fixes accessing high-speed
+sdcards.
 
-The patch simply make them depend on DMA_OMAP since DMA_OMAP
-will select DMA_ENGINE automatically.
-
-Signed-off-by: Ming Lei <ming.lei@canonical.com>
+Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>
+Cc: Viresh Kumar <viresh.kumar@st.com>
+Cc: Manuel Lauss <manuel.lauss@googlemail.com>
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-kernel@vger.kernel.org
 ---
- drivers/mmc/host/Kconfig |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-dove.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index aa131b3..ef72c50 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -231,7 +231,7 @@ config MMC_SDHCI_S3C_DMA
+diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
+index 177f697..9c85368 100644
+--- a/drivers/mmc/host/sdhci-dove.c
++++ b/drivers/mmc/host/sdhci-dove.c
+@@ -66,7 +66,8 @@ static struct sdhci_pltfm_data sdhci_dove_pdata = {
+ 	.quirks	= SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER |
+ 		  SDHCI_QUIRK_NO_BUSY_IRQ |
+ 		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
+-		  SDHCI_QUIRK_FORCE_DMA,
++		  SDHCI_QUIRK_FORCE_DMA |
++		  SDHCI_QUIRK_NO_HISPD_BIT,
+ };
  
- config MMC_OMAP
- 	tristate "TI OMAP Multimedia Card Interface support"
--	depends on ARCH_OMAP
-+	depends on ARCH_OMAP && DMA_OMAP
- 	select TPS65010 if MACH_OMAP_H2
- 	help
- 	  This selects the TI OMAP Multimedia card Interface.
-@@ -242,7 +242,7 @@ config MMC_OMAP
- 
- config MMC_OMAP_HS
- 	tristate "TI OMAP High Speed Multimedia Card Interface support"
--	depends on SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4
-+	depends on (SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4) && DMA_OMAP
- 	help
- 	  This selects the TI OMAP High Speed Multimedia card Interface.
- 	  If you have an OMAP2430 or OMAP3 board or OMAP4 board with a
+ static int __devinit sdhci_dove_probe(struct platform_device *pdev)
 -- 
-1.7.9.5
-
+1.7.10
