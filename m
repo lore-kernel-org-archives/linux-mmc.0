@@ -1,110 +1,50 @@
-From: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>
-Subject: [PATCH v1 2/2] mmc: sdhci-dove: Prepare for common clock framework
-Date: Thu,  5 Jul 2012 12:14:01 +0200
-Message-ID: <1341483241-18300-2-git-send-email-sebastian.hesselbarth@googlemail.com>
-References: <1341483241-18300-1-git-send-email-sebastian.hesselbarth@googlemail.com>
+From: Daniel Drake <dsd@laptop.org>
+Subject: [PATCH] sdhci: poll for card even when card is logically unremovable
+Date: Thu,  5 Jul 2012 22:06:13 +0100 (BST)
+Message-ID: <20120705210613.8B3F89D401E@zog.reactivated.net>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:42557 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755103Ab2GEKOQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jul 2012 06:14:16 -0400
-In-Reply-To: <1341483241-18300-1-git-send-email-sebastian.hesselbarth@googlemail.com>
+Received: from mtaout02-winn.ispmail.ntl.com ([81.103.221.48]:39418 "EHLO
+	mtaout02-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751974Ab2GEVGe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jul 2012 17:06:34 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>
-Cc: Chris Ball <cjb@laptop.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Viresh Kumar <viresh.kumar@st.com>, Manuel Lauss <manuel.lauss@googlemail.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-
-As mach-dove is moving towards common clock framework prepare
-the sdhci driver to grab it's clock.
-
-Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>
-Cc: Viresh Kumar <viresh.kumar@st.com>
-Cc: Manuel Lauss <manuel.lauss@googlemail.com>
+To: cjb@laptop.org
 Cc: linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
-Cc: linux-kernel@vger.kernel.org
----
- drivers/mmc/host/sdhci-dove.c |   48 ++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 47 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
-index 9c85368..a6e53a1 100644
---- a/drivers/mmc/host/sdhci-dove.c
-+++ b/drivers/mmc/host/sdhci-dove.c
-@@ -20,11 +20,17 @@
-  */
+The Marvell CaFe is now marked as having bad card detection to fix
+a problem during system resume.
+
+Now on the OLPC XO-1 we are facing the issue that the card is marked
+as logically unremovable (via MMC_UNSAFE_RESUME), which means that
+mmc_card_is_removable considers the card non-removable. The existing
+code logic decides not to poll for card presence in this case, and
+card detection is also disabled because of the quirk being set.
+This means that no SD cards are detected when inserted after boot.
+
+Refine the logic to enable card presence polling in the case when
+a card is logically unremovable, only avoiding the poll in the case
+when the card is physically non-removable (denoted with
+MMC_CAP_NONREMOVABLE).
+
+Signed-off-by: Daniel Drake <dsd@laptop.org>
+---
+ drivers/mmc/host/sdhci.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index f4b8b4d..dd71a05 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2779,7 +2779,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
  
- #include <linux/io.h>
-+#include <linux/clk.h>
-+#include <linux/err.h>
- #include <linux/module.h>
- #include <linux/mmc/host.h>
+ 	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
+-	    mmc_card_is_removable(mmc))
++	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
+ 		mmc->caps |= MMC_CAP_NEEDS_POLL;
  
- #include "sdhci-pltfm.h"
- 
-+struct sdhci_dove_priv {
-+	struct clk *clk;
-+};
-+
- static u16 sdhci_dove_readw(struct sdhci_host *host, int reg)
- {
- 	u16 ret;
-@@ -72,11 +78,51 @@ static struct sdhci_pltfm_data sdhci_dove_pdata = {
- 
- static int __devinit sdhci_dove_probe(struct platform_device *pdev)
- {
--	return sdhci_pltfm_register(pdev, &sdhci_dove_pdata);
-+	struct sdhci_host *host;
-+	struct sdhci_pltfm_host *pltfm_host;
-+	struct sdhci_dove_priv *priv;
-+	int ret;
-+
-+	ret = sdhci_pltfm_register(pdev, &sdhci_dove_pdata);
-+	if (ret)
-+		goto sdhci_dove_register_fail;
-+
-+	priv = devm_kzalloc(&pdev->dev, sizeof(struct sdhci_dove_priv),
-+			    GFP_KERNEL);
-+	if (!priv) {
-+		dev_err(&pdev->dev, "unable to allocate private data");
-+		ret = -ENOMEM;
-+		goto sdhci_dove_allocate_fail;
-+	}
-+
-+	host = platform_get_drvdata(pdev);
-+	pltfm_host = sdhci_priv(host);
-+	pltfm_host->priv = priv;
-+
-+	priv->clk = clk_get(&pdev->dev, NULL);
-+	if (!IS_ERR(priv->clk))
-+		clk_prepare_enable(priv->clk);
-+	return 0;
-+
-+sdhci_dove_allocate_fail:
-+	sdhci_pltfm_unregister(pdev);
-+sdhci_dove_register_fail:
-+	return ret;
- }
- 
- static int __devexit sdhci_dove_remove(struct platform_device *pdev)
- {
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_dove_priv *priv = pltfm_host->priv;
-+
-+	if (priv->clk) {
-+		if (!IS_ERR(priv->clk)) {
-+			clk_disable_unprepare(priv->clk);
-+			clk_put(priv->clk);
-+		}
-+		devm_kfree(&pdev->dev, priv->clk);
-+	}
- 	return sdhci_pltfm_unregister(pdev);
- }
- 
+ 	/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
 -- 
-1.7.10
+1.7.10.4
 
