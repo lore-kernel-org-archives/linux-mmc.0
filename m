@@ -1,35 +1,59 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v1 5/5] mmc: card: Add RPMB support in IOCTL interface
-Date: Sun, 8 Jul 2012 21:22:04 +0200
-Message-ID: <CACRpkdZXStms8tnsUDKp-TxWMFNt-m6USAM1Gcp3X8Ttp7hhXg@mail.gmail.com>
-References: <1341564244-6178-1-git-send-email-loic.pallardy@stericsson.com>
-	<1341564244-6178-6-git-send-email-loic.pallardy@stericsson.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v8 2/2] mmc: support packed write command for eMMC4.5 device
+Date: Mon, 09 Jul 2012 08:52:49 +0900
+Message-ID: <009701cd5d64$c7dc2aa0$57947fe0$%jun@samsung.com>
+References: <ed6366950474fb35cac89881648fb9e9.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f46.google.com ([209.85.216.46]:55256 "EHLO
-	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751938Ab2GHTWF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Jul 2012 15:22:05 -0400
-Received: by qadb17 with SMTP id b17so1271338qad.19
-        for <linux-mmc@vger.kernel.org>; Sun, 08 Jul 2012 12:22:04 -0700 (PDT)
-In-Reply-To: <1341564244-6178-6-git-send-email-loic.pallardy@stericsson.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:65391 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752435Ab2GHXwv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Jul 2012 19:52:51 -0400
+Received: from epcpsbgm1.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M6V00GTS8ZDTDD0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 09 Jul 2012 08:52:49 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0M6V00IMI9018O00@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 09 Jul 2012 08:52:49 +0900 (KST)
+In-reply-to: <ed6366950474fb35cac89881648fb9e9.squirrel@www.codeaurora.org>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Loic Pallardy <loic.pallardy@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Ulf Hansson <ulf.hansson@stericcson.com>, Alex Macro <alex.macro@stericsson.com>
+To: merez@codeaurora.org
+Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>, 'Saugata Das' <saugata.das@linaro.org>, 'Namjae Jeon' <linkinjeon@gmail.com>
 
-On Fri, Jul 6, 2012 at 10:44 AM, Loic Pallardy
-<loic.pallardy@stericsson.com> wrote:
+Sunday, July 08, 2012, Maya <merez@codeaurora.org> wrote:
+> One minor comment below:
+> 
+> > @@ -1278,9 +1609,15 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
+> *mq, struct request *rqc)
+> >  			    (card->ext_csd.data_sector_size == 4096)) {
+> You can use mmc_large_sec here (instead of card->ext_csd.data_sector_size
+> == 4096)
+Yes, but this line is kept due to another issue related with 4KB sector. 
 
-> RPMB partition is accessing though /dev/block/mmcXrpmb device
-> User callers can read and write entire data frame(s) as defined
-> by JEDEC Standard JESD84-A441, using standard IOCTL interface.
->
-> Signed-off-by: Alex Macro <alex.macro@stericsson.com>
-> Signed-off-by: Loic Pallardy <loic.pallardy@stericsson.com>
+Thanks,
+Seungwon Jeon
 
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
+> 
+> Thanks,
+> Maya
+> 
+> --
+> Sent by consultant of Qualcomm Innovation Center, Inc.
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+> 
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Yours,
-Linus Walleij
