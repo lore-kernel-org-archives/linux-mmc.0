@@ -1,36 +1,36 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH v8 2/2] mmc: support packed write command for eMMC4.5   
-        device
-Date: Sun, 8 Jul 2012 05:12:17 -0700 (PDT)
-Message-ID: <ed6366950474fb35cac89881648fb9e9.squirrel@www.codeaurora.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v1 1/5] mmc: core: Expose access to RPMB partition
+Date: Sun, 8 Jul 2012 21:17:52 +0200
+Message-ID: <CACRpkdb7JbOpEBYEsbe0OgH0com=eTfv-dnqz+XCDtyjTaAGPQ@mail.gmail.com>
+References: <1341564244-6178-1-git-send-email-loic.pallardy@stericsson.com>
+	<1341564244-6178-2-git-send-email-loic.pallardy@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:14310 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750798Ab2GHMMS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Jul 2012 08:12:18 -0400
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:51755 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752097Ab2GHTRx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Jul 2012 15:17:53 -0400
+Received: by qadb17 with SMTP id b17so1270305qad.19
+        for <linux-mmc@vger.kernel.org>; Sun, 08 Jul 2012 12:17:52 -0700 (PDT)
+In-Reply-To: <1341564244-6178-2-git-send-email-loic.pallardy@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Maya Erez' <merez@codeaurora.org>, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>, 'Saugata Das' <saugata.das@linaro.org>, 'Namjae Jeon' <linkinjeon@gmail.com>
+To: Loic Pallardy <loic.pallardy@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Ulf Hansson <ulf.hansson@stericcson.com>, Alex Macro <alex.macro@stericsson.com>
 
-One minor comment below:
+On Fri, Jul 6, 2012 at 10:44 AM, Loic Pallardy
+<loic.pallardy@stericsson.com> wrote:
 
-> @@ -1278,9 +1609,15 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
-*mq, struct request *rqc)
->  			    (card->ext_csd.data_sector_size == 4096)) {
-You can use mmc_large_sec here (instead of card->ext_csd.data_sector_size
-== 4096)
+> Following JEDEC standard, if the mmc support RPMB partition,
+> a new interface is created and exposed via /dev/block.
+> Users will be able to access RPMB partition using standard
+> mmc IOCTL command.
+>
+> Signed-off-by: Alex Macro <alex.macro@stericsson.com>
+> Signed-off-by: Loic Pallardy <loic.pallardy@stericsson.com>
 
-Thanks,
-Maya
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
--- 
-Sent by consultant of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-
-
-
-
+Yours,
+Linus Walleij
