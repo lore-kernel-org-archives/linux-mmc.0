@@ -1,213 +1,151 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH v2 2/2] mmc: sd: Fix sd current limit setting
-Date: Sun, 8 Jul 2012 18:23:37 -0700
-Message-ID: <72CDB358-AFAD-4E22-812D-F454561BE9F6@marvell.com>
-References: <1341296172-10645-1-git-send-email-aaron.lu@amd.com>
- <1341296172-10645-3-git-send-email-aaron.lu@amd.com>
- <87mx3g5ov5.fsf@octavius.laptop.org>
- <20120704053148.GC2607@aarontestpc.amd.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v2] Fix for checking block numbers in disable emulation mode
+Date: Mon, 09 Jul 2012 10:51:10 +0900
+Message-ID: <009f01cd5d75$506d9c90$f148d5b0$%jun@samsung.com>
+References: <1341582904-31896-1-git-send-email-saugata.das@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog131.obsmtp.com ([74.125.149.247]:43867 "EHLO
-	na3sys009aog131.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751191Ab2GIBXx convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 8 Jul 2012 21:23:53 -0400
-In-Reply-To: <20120704053148.GC2607@aarontestpc.amd.com>
-Content-Language: en-US
+Received: from mailout2.samsung.com ([203.254.224.25]:56983 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751585Ab2GIBv1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Jul 2012 21:51:27 -0400
+Received: from epcpsbgm2.samsung.com (mailout2.samsung.com [203.254.224.25])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M6V009YVEH76A90@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 09 Jul 2012 10:51:10 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0M6V00HBDEHATZ30@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 09 Jul 2012 10:51:10 +0900 (KST)
+In-reply-to: <1341582904-31896-1-git-send-email-saugata.das@stericsson.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <Aaron.Lu@amd.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lwe@gmail.com>
+To: 'Saugata Das' <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org
+Cc: patches@linaro.org, 'Saugata Das' <saugata.das@linaro.org>
 
+Hi Saugata,
 
-Reviewed-by: Philip Rakity <prakity@Marvell.com>
+Could check the your worked base?
+It can't be merged.
+And there are some comments below.
 
-On Jul 3, 2012, at 10:31 PM, Aaron Lu wrote:
-
-> Host has different current capabilities at different voltages, we need
-> to record these settings seperately. The defined voltages are 1.8/3.0/3.3.
-> For other voltages, we do not touch current limit setting.
+Friday, July 06, 2012, Saugata Das <saugata.das@stericsson.com> wrote:
+> From: Saugata Das <saugata.das@linaro.org>
 > 
-> Before set current limit for the sd card, find out the host's operating
-> voltage first and then find out the current capabilities of the host at
-> that voltage to set the current limit.
+> In 512B disable emulation patch, a check is done to ensure that size
+> of the data is multiple of 4KB within mmc_blk_issue_rw_rq. However,
+> the check is done with brq->data.blocks, which is not initialized at
+> the point of check. This is now changed to blk_rq_sectors.
 > 
-> Signed-off-by: Aaron Lu <aaron.lu@amd.com>
+> In addition, when retrying read transfers, the current code retries
+> with single block. This has been changed to 8 blocks if disable
+> emulation is enabled.
+> 
+> For hosts which are not capable to handle transfer of multiple of 4KB,
+> a check has been added in mmc_read_ext_csd. A check has been added for
+> reliable write with EN_REL_WR=0, which is not allowed.
+> 
+> Signed-off-by: Saugata Das <saugata.das@linaro.org>
+> 
+> Changes in v2 :
+> 	- Added check in mmc_read_ext_csd
+It's not good way to add version history here.
 > ---
-> v2:
-> Do not call BUG() when the host's voltage is not supported as suggested by
-> Chris Ball.
-> Do not use 0/1/2 to represent the host's voltage as suggested by Philip Rakity.
+>  drivers/mmc/card/block.c |   19 +++++++++++++------
+>  drivers/mmc/core/mmc.c   |    9 +++++++--
+>  2 files changed, 20 insertions(+), 8 deletions(-)
 > 
-> drivers/mmc/core/sd.c    | 44 +++++++++++++++++++++++++++++++++++++-------
-> drivers/mmc/host/sdhci.c | 28 ++++++++++++++++++++++++----
-> include/linux/mmc/host.h | 16 ++++++++++++----
-> 3 files changed, 73 insertions(+), 15 deletions(-)
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index d628c5d..69b7b03 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -1114,7 +1114,10 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>  	bool do_rel_wr = ((req->cmd_flags & REQ_FUA) ||
+>  			  (req->cmd_flags & REQ_META)) &&
+>  		(rq_data_dir(req) == WRITE) &&
+> -		(md->flags & MMC_BLK_REL_WR);
+> +		(md->flags & MMC_BLK_REL_WR) &&
+> +		((card->ext_csd.data_sector_size == 512) ||
+> +		 ((card->ext_csd.data_sector_size == 4096) &&
+> +		  (card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN)));
 > 
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 8460568..312b78d 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -521,11 +521,25 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
-> {
-> 	int current_limit = SD_SET_CURRENT_NO_CHANGE;
-> 	int err;
-> +	u32 voltage;
+>  	memset(brq, 0, sizeof(struct mmc_blk_request));
+>  	brq->mrq.cmd = &brq->cmd;
+> @@ -1145,7 +1148,9 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>  		 * sectors can be read successfully.
+>  		 */
+>  		if (disable_multi)
+> -			brq->data.blocks = 1;
+> +			brq->data.blocks =
+> +				(card->ext_csd.data_sector_size == 4096) ?
+> +					8 : 1;
 > 
-> 	/*
-> 	 * Current limit switch is only defined for SDR50, SDR104, and DDR50
-> 	 * bus speed modes. For other bus speed modes, we do not change the
-> 	 * current limit.
-> +	 */
-> +	if ((card->sd_bus_speed != UHS_SDR50_BUS_SPEED) &&
-> +	    (card->sd_bus_speed != UHS_SDR104_BUS_SPEED) &&
-> +	    (card->sd_bus_speed != UHS_DDR50_BUS_SPEED))
-> +		return 0;
-> +
-> +	/*
-> +	 * Host has different current capabilities when operating at
-> +	 * different voltages, so find out the current voltage first.
-> +	 */
-> +	voltage = 1 << card->host->ios.vdd;
-> +
-> +	/*
-> 	 * We only check host's capability here, if we set a limit that is
-> 	 * higher than the card's maximum current, the card will be using its
-> 	 * maximum current, e.g. if the card's maximum current is 300ma, and
-> @@ -533,16 +547,32 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
-> 	 * when we set current limit to 400/600/800ma, the card will draw its
-> 	 * maximum 300ma from the host.
-> 	 */
-> -	if ((card->sd_bus_speed == UHS_SDR50_BUS_SPEED) ||
-> -	    (card->sd_bus_speed == UHS_SDR104_BUS_SPEED) ||
-> -	    (card->sd_bus_speed == UHS_DDR50_BUS_SPEED)) {
-> -		if (card->host->caps & MMC_CAP_MAX_CURRENT_800)
-> +	if (voltage == MMC_VDD_165_195) {
-> +		if (card->host->caps & MMC_CAP_MAX_CURRENT_800_180)
-> +			current_limit = SD_SET_CURRENT_LIMIT_800;
-> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_600_180)
-> +			current_limit = SD_SET_CURRENT_LIMIT_600;
-> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_400_180)
-> +			current_limit = SD_SET_CURRENT_LIMIT_400;
-> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_200_180)
-> +			current_limit = SD_SET_CURRENT_LIMIT_200;
-> +	} else if (voltage & (MMC_VDD_29_30 | MMC_VDD_30_31)) {
-> +		if (card->host->caps & MMC_CAP_MAX_CURRENT_800_300)
-> +			current_limit = SD_SET_CURRENT_LIMIT_800;
-> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_600_300)
-> +			current_limit = SD_SET_CURRENT_LIMIT_600;
-> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_400_300)
-> +			current_limit = SD_SET_CURRENT_LIMIT_400;
-> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_200_300)
-> +			current_limit = SD_SET_CURRENT_LIMIT_200;
-> +	} else if (voltage & (MMC_VDD_32_33 | MMC_VDD_33_34)) {
-> +		if (card->host->caps & MMC_CAP_MAX_CURRENT_800_330)
-> 			current_limit = SD_SET_CURRENT_LIMIT_800;
-> -		else if (card->host->caps & MMC_CAP_MAX_CURRENT_600)
-> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_600_330)
-> 			current_limit = SD_SET_CURRENT_LIMIT_600;
-> -		else if (card->host->caps & MMC_CAP_MAX_CURRENT_400)
-> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_400_330)
-> 			current_limit = SD_SET_CURRENT_LIMIT_400;
-> -		else if (card->host->caps & MMC_CAP_MAX_CURRENT_200)
-> +		else if (card->host->caps & MMC_CAP_MAX_CURRENT_200_330)
-> 			current_limit = SD_SET_CURRENT_LIMIT_200;
-> 	}
+>  		/* Some controllers can't do multiblock reads due to hw bugs */
+>  		if (card->host->caps2 & MMC_CAP2_NO_MULTI_READ &&
+> @@ -1296,10 +1301,11 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+>  			 * When 4KB native sector is enabled, only 8 blocks
+>  			 * multiple read or write is allowed
+>  			 */
+> -			if ((brq->data.blocks & 0x07) &&
+> +			if ((blk_rq_sectors(req) & 0x07) &&
+>  				(card->ext_csd.data_sector_size == 4096)) {
+> -				pr_err("%s: Transfer size is not 4KB sector size aligned\n",
+> -					req->rq_disk->disk_name);
+> +				pr_err("%s: Transfer size [%d] is not 4KB sector size aligned\n",
+> +					req->rq_disk->disk_name,
+> +					blk_rq_sectors(req));
+rqc seems be proper instead of req.
+In do-while loop for error-handling, req can be replaced with previous request.
+Also, it would be better check the alignment in outer loop.
+How about move to out of loop?
+
+Best regards,
+Seungwon Jeon
+
+>  				goto cmd_abort;
+>  			}
+>  			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
+> @@ -1364,7 +1370,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+>  			/* Fall through */
+>  		}
+>  		case MMC_BLK_ECC_ERR:
+> -			if (brq->data.blocks > 1) {
+> +			if (brq->data.blocks >
+> +				(card->ext_csd.data_sector_size >> 9)) {
+>  				/* Redo read one sector at a time */
+>  				pr_warning("%s: retrying using single block read\n",
+>  					   req->rq_disk->disk_name);
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 28fbd77..fb68f17 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -503,9 +503,14 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  			ext_csd[EXT_CSD_CACHE_SIZE + 2] << 16 |
+>  			ext_csd[EXT_CSD_CACHE_SIZE + 3] << 24;
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 3ec4182..d89e97c 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2913,6 +2913,16 @@ int sdhci_add_host(struct sdhci_host *host)
+> -		if (ext_csd[EXT_CSD_DATA_SECTOR_SIZE] == 1)
+> +		if (ext_csd[EXT_CSD_DATA_SECTOR_SIZE] == 1) {
+> +			if ((card->host->caps2 & MMC_CAP2_NO_MULTI_READ) ||
+> +				(card->host->max_blk_count & 0x07)) {
+> +				err = -EINVAL;
+> +				goto out;
+> +			}
+>  			card->ext_csd.data_sector_size = 4096;
+> -		else
+> +		} else
+>  			card->ext_csd.data_sector_size = 512;
 > 
-> 		if (max_current_330 > 150)
-> 			mmc->caps |= MMC_CAP_SET_XPC_330;
-> +
-> +		/* Maximum current capabilities of the host at 3.3V */
-> +		if (max_current_330 >= 800)
-> +			mmc->caps |= MMC_CAP_MAX_CURRENT_800_330;
-> +		else if (max_current_330 >= 600)
-> +			mmc->caps |= MMC_CAP_MAX_CURRENT_600_330;
-> +		else if (max_current_330 >= 400)
-> +			mmc->caps |= MMC_CAP_MAX_CURRENT_400_330;
-> +		else if (max_current_330 >= 200)
-> +			mmc->caps |= MMC_CAP_MAX_CURRENT_200_330;
-> 	}
-> 	if (caps[0] & SDHCI_CAN_VDD_300) {
-> 		int max_current_300;
-> @@ -2926,6 +2936,16 @@ int sdhci_add_host(struct sdhci_host *host)
+>  		if ((ext_csd[EXT_CSD_DATA_TAG_SUPPORT] & 1) &&
+> --
+> 1.7.4.3
 > 
-> 		if (max_current_300 > 150)
-> 			mmc->caps |= MMC_CAP_SET_XPC_300;
-> +
-> +		/* Maximum current capabilities of the host at 3.0V */
-> +		if (max_current_300 >= 800)
-> +			mmc->caps |= MMC_CAP_MAX_CURRENT_800_300;
-> +		else if (max_current_300 >= 600)
-> +			mmc->caps |= MMC_CAP_MAX_CURRENT_600_300;
-> +		else if (max_current_300 >= 400)
-> +			mmc->caps |= MMC_CAP_MAX_CURRENT_400_300;
-> +		else if (max_current_300 >= 200)
-> +			mmc->caps |= MMC_CAP_MAX_CURRENT_200_300;
-> 	}
-> 	if (caps[0] & SDHCI_CAN_VDD_180) {
-> 		int max_current_180;
-> @@ -2942,13 +2962,13 @@ int sdhci_add_host(struct sdhci_host *host)
-> 
-> 		/* Maximum current capabilities of the host at 1.8V */
-> 		if (max_current_180 >= 800)
-> -			mmc->caps |= MMC_CAP_MAX_CURRENT_800;
-> +			mmc->caps |= MMC_CAP_MAX_CURRENT_800_180;
-> 		else if (max_current_180 >= 600)
-> -			mmc->caps |= MMC_CAP_MAX_CURRENT_600;
-> +			mmc->caps |= MMC_CAP_MAX_CURRENT_600_180;
-> 		else if (max_current_180 >= 400)
-> -			mmc->caps |= MMC_CAP_MAX_CURRENT_400;
-> +			mmc->caps |= MMC_CAP_MAX_CURRENT_400_180;
-> 		else if (max_current_180 >= 200)
-> -			mmc->caps |= MMC_CAP_MAX_CURRENT_200;
-> +			mmc->caps |= MMC_CAP_MAX_CURRENT_200_180;
-> 	}
-> 
-> 	mmc->ocr_avail = ocr_avail;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 65c64ee..ca84ffb 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -238,10 +238,10 @@ struct mmc_host {
-> #define MMC_CAP_DRIVER_TYPE_A	(1 << 23)	/* Host supports Driver Type A */
-> #define MMC_CAP_DRIVER_TYPE_C	(1 << 24)	/* Host supports Driver Type C */
-> #define MMC_CAP_DRIVER_TYPE_D	(1 << 25)	/* Host supports Driver Type D */
-> -#define MMC_CAP_MAX_CURRENT_200	(1 << 26)	/* Host max current limit is 200mA */
-> -#define MMC_CAP_MAX_CURRENT_400	(1 << 27)	/* Host max current limit is 400mA */
-> -#define MMC_CAP_MAX_CURRENT_600	(1 << 28)	/* Host max current limit is 600mA */
-> -#define MMC_CAP_MAX_CURRENT_800	(1 << 29)	/* Host max current limit is 800mA */
-> +#define MMC_CAP_MAX_CURRENT_200_180 (1 << 26)	/* Host max current limit is 200mA at 1.8V */
-> +#define MMC_CAP_MAX_CURRENT_400_180 (1 << 27)	/* Host max current limit is 400mA at 1.8V */
-> +#define MMC_CAP_MAX_CURRENT_600_180 (1 << 28)	/* Host max current limit is 600mA at 1.8V */
-> +#define MMC_CAP_MAX_CURRENT_800_180 (1 << 29)	/* Host max current limit is 800mA at 1.8V */
-> #define MMC_CAP_CMD23		(1 << 30)	/* CMD23 supported. */
-> #define MMC_CAP_HW_RESET	(1 << 31)	/* Hardware reset */
-> 
-> @@ -261,6 +261,14 @@ struct mmc_host {
-> #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
-> #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
-> #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
-> +#define MMC_CAP_MAX_CURRENT_200_300 (1 << 12)	/* Host max current limit is 200mA at 3.0V */
-> +#define MMC_CAP_MAX_CURRENT_400_300 (1 << 13)	/* Host max current limit is 400mA at 3.0V */
-> +#define MMC_CAP_MAX_CURRENT_600_300 (1 << 14)	/* Host max current limit is 600mA at 3.0V */
-> +#define MMC_CAP_MAX_CURRENT_800_300 (1 << 15)	/* Host max current limit is 800mA at 3.0V */
-> +#define MMC_CAP_MAX_CURRENT_200_330 (1 << 16)	/* Host max current limit is 200mA at 3.3V */
-> +#define MMC_CAP_MAX_CURRENT_400_330 (1 << 17)	/* Host max current limit is 400mA at 3.3V */
-> +#define MMC_CAP_MAX_CURRENT_600_330 (1 << 18)	/* Host max current limit is 600mA at 3.3V */
-> +#define MMC_CAP_MAX_CURRENT_800_330 (1 << 19)	/* Host max current limit is 800mA at 3.3V */
-> 
-> 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
-> 	unsigned int        power_notify_type;
-> -- 
-> 1.7.11.1.3.g4c8a9db
-> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
