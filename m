@@ -1,14 +1,14 @@
 From: Girish K S <girish.shivananjappa@linaro.org>
 Subject: Re: [PATCH RESEND v7 1/2] block: ioctl support for sanitize in eMMC 4.5
-Date: Mon, 9 Jul 2012 14:33:18 +0530
-Message-ID: <CAGxe1ZFUy8yZrt3U+0wm0UYocTZny970UG+4w7yFrA-EVMRTfw@mail.gmail.com>
+Date: Mon, 9 Jul 2012 15:32:18 +0530
+Message-ID: <CAGxe1ZE9csKdwm-Pidm4A6Acq2=WAfW91ypsbEa=SYJbXGXrJA@mail.gmail.com>
 References: <1340872367-16206-1-git-send-email-ygardi@codeaurora.org>
 	<1340872367-16206-2-git-send-email-ygardi@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
 In-Reply-To: <1340872367-16206-2-git-send-email-ygardi@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: Yaniv Gardi <ygardi@codeaurora.org>
 Cc: linux-mmc@vger.kernel.org, merez@codeaurora.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
@@ -152,9 +152,8 @@ On 28 June 2012 14:02, Yaniv Gardi <ygardi@codeaurora.org> wrote:
 >
 > +       /* don't merge file system requests and sanitize requests */
 > +       if ((req->cmd_flags & REQ_SANITIZE) != (next->cmd_flags & REQ_SANITIZE))
-this will not compile. gives compile error. Either change the function
-parameter to req or change in the above condition as rq
 > +               return false;
+also the next data structure is not available in this function.
 > +
 >         /* don't merge file system requests and discard requests */
 >         if ((bio->bi_rw & REQ_DISCARD) != (rq->bio->bi_rw & REQ_DISCARD))
