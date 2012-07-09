@@ -1,53 +1,39 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] sdio: Change pr_warning to pr_warn_ratelimited
-Date: Mon, 09 Jul 2012 06:29:52 -0400
-Message-ID: <87mx39ut0f.fsf@octavius.laptop.org>
-References: <27240C0AC20F114CBF8149A2696CBE4A0DD517@SHSMSX101.ccr.corp.intel.com>
+From: Johan Rudholm <jrudholm@gmail.com>
+Subject: Re: [PATCH v1 1/5] mmc: core: Expose access to RPMB partition
+Date: Mon, 9 Jul 2012 19:42:59 +0200
+Message-ID: <CA+20K0AWCGM4cBM8Orv4XvNTs2-bcz+0zpJsoufcmojUJL9ujw@mail.gmail.com>
+References: <1341564244-6178-1-git-send-email-loic.pallardy@stericsson.com>
+	<1341564244-6178-2-git-send-email-loic.pallardy@stericsson.com>
+	<CACRpkdb7JbOpEBYEsbe0OgH0com=eTfv-dnqz+XCDtyjTaAGPQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <27240C0AC20F114CBF8149A2696CBE4A0DD517@SHSMSX101.ccr.corp.intel.com>
-	(Chuansheng Liu's message of "Thu, 14 Jun 2012 10:49:17 +0000")
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Liu, Chuansheng" <chuansheng.liu@intel.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Yanmin Zhang <yanmin_zhang@linux.intel.com>
-	(yanmin_zhang@linux.intel.com)" <yanmin_zhang@linux.intel.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:47007 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751084Ab2GIRnA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jul 2012 13:43:00 -0400
+Received: by yhmm54 with SMTP id m54so11148116yhm.19
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Jul 2012 10:42:59 -0700 (PDT)
+In-Reply-To: <CACRpkdb7JbOpEBYEsbe0OgH0com=eTfv-dnqz+XCDtyjTaAGPQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Loic Pallardy <loic.pallardy@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Ulf Hansson <ulf.hansson@stericcson.com>, Alex Macro <alex.macro@stericsson.com>
 
-Hi,
+2012/7/8 Linus Walleij <linus.walleij@linaro.org>:
+> On Fri, Jul 6, 2012 at 10:44 AM, Loic Pallardy
+> <loic.pallardy@stericsson.com> wrote:
+>
+>> Following JEDEC standard, if the mmc support RPMB partition,
+>> a new interface is created and exposed via /dev/block.
+>> Users will be able to access RPMB partition using standard
+>> mmc IOCTL command.
+>>
+>> Signed-off-by: Alex Macro <alex.macro@stericsson.com>
+>> Signed-off-by: Loic Pallardy <loic.pallardy@stericsson.com>
+>
+> Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
-On Thu, Jun 14 2012, Liu, Chuansheng wrote:
-> From: liu chuansheng <chuansheng.liu@intel.com>
-> Subject: [PATCH] sdio: Change pr_warning to pr_warn_ratelimited
->
-> When debug one bad issue, got lots of pr_warning messages
-> "queuing unknown CIS tuple" which caused the printk storm
-> and flooded the console.
->
-> This patch is changing the pr_warning api to pr_warn_ratelimited.
->
-> Signed-off-by: liu chuansheng <chuansheng.liu@intel.com>
-> ---
->  drivers/mmc/core/sdio_cis.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
-> index f1c7ed8..8e94e55 100644
-> --- a/drivers/mmc/core/sdio_cis.c
-> +++ b/drivers/mmc/core/sdio_cis.c
-> @@ -313,7 +313,7 @@ static int sdio_read_cis(struct mmc_card *card, struct sdio_func *func)
->  
->                         if (ret == -ENOENT) {
->                                 /* warn about unknown tuples */
-> -                               pr_warning("%s: queuing unknown"
-> +                               pr_warn_ratelimited("%s: queuing unknown"
->                                        " CIS tuple 0x%02x (%u bytes)\n",
->                                        mmc_hostname(card->host),
->                                        tpl_code, tpl_link);
+Acked-by: Johan Rudholm <johan.rudholm@stericsson.com>
 
-Thanks, pushed to mmc-next for 3.6.
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+//Johan
