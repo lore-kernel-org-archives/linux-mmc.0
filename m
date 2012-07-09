@@ -1,14 +1,14 @@
 From: Girish K S <girish.shivananjappa@linaro.org>
 Subject: Re: [PATCH RESEND v7 1/2] block: ioctl support for sanitize in eMMC 4.5
-Date: Mon, 9 Jul 2012 14:07:13 +0530
-Message-ID: <CAGxe1ZGrgUZFNwoRF3nRE6Tku7S7EOhi6TYeyihAutEfbZ_Jvg@mail.gmail.com>
+Date: Mon, 9 Jul 2012 14:33:18 +0530
+Message-ID: <CAGxe1ZFUy8yZrt3U+0wm0UYocTZny970UG+4w7yFrA-EVMRTfw@mail.gmail.com>
 References: <1340872367-16206-1-git-send-email-ygardi@codeaurora.org>
 	<1340872367-16206-2-git-send-email-ygardi@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1340872367-16206-2-git-send-email-ygardi@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Yaniv Gardi <ygardi@codeaurora.org>
 Cc: linux-mmc@vger.kernel.org, merez@codeaurora.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
@@ -152,6 +152,8 @@ On 28 June 2012 14:02, Yaniv Gardi <ygardi@codeaurora.org> wrote:
 >
 > +       /* don't merge file system requests and sanitize requests */
 > +       if ((req->cmd_flags & REQ_SANITIZE) != (next->cmd_flags & REQ_SANITIZE))
+this will not compile. gives compile error. Either change the function
+parameter to req or change in the above condition as rq
 > +               return false;
 > +
 >         /* don't merge file system requests and discard requests */
@@ -280,12 +282,6 @@ On 28 June 2012 14:02, Yaniv Gardi <ygardi@codeaurora.org> wrote:
 >                 rwbs[i++] = 'R';
 >         else
 > --
-there is a conflict in the macro definition of include/linux/mmc/host.h
-for
-#define MMC_CAP2_SANITIZE       (1 << 10)               /* Support Sanitize */
-kindly change it to
-#define MMC_CAP2_SANITIZE       (1 << 12)               /* Support Sanitize */
-as 10th bit is already in use for other purpose
 > 1.7.6
 > --
 > Sent by a consultant of the Qualcomm Innovation Center, Inc.
