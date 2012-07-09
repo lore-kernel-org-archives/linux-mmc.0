@@ -1,77 +1,53 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v8 2/2] mmc: support packed write command for eMMC4.5 device
-Date: Mon, 09 Jul 2012 19:13:03 +0900
-Message-ID: <00c401cd5dbb$6d605630$48210290$%jun@samsung.com>
-References: <ed6366950474fb35cac89881648fb9e9.squirrel@www.codeaurora.org>
- <009701cd5d64$c7dc2aa0$57947fe0$%jun@samsung.com>
- <fc9caa907c442ce8390e774744d9dae7.squirrel@www.codeaurora.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] sdio: Change pr_warning to pr_warn_ratelimited
+Date: Mon, 09 Jul 2012 06:29:52 -0400
+Message-ID: <87mx39ut0f.fsf@octavius.laptop.org>
+References: <27240C0AC20F114CBF8149A2696CBE4A0DD517@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:50723 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752530Ab2GIKNF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jul 2012 06:13:05 -0400
-Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M6W004QX1POY9V0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 09 Jul 2012 19:13:04 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0M6W00IM51PRB560@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 09 Jul 2012 19:13:03 +0900 (KST)
-In-reply-to: <fc9caa907c442ce8390e774744d9dae7.squirrel@www.codeaurora.org>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <27240C0AC20F114CBF8149A2696CBE4A0DD517@SHSMSX101.ccr.corp.intel.com>
+	(Chuansheng Liu's message of "Thu, 14 Jun 2012 10:49:17 +0000")
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Liu, Chuansheng" <chuansheng.liu@intel.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Yanmin Zhang <yanmin_zhang@linux.intel.com>
+	(yanmin_zhang@linux.intel.com)" <yanmin_zhang@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: merez@codeaurora.org
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>, 'Saugata Das' <saugata.das@linaro.org>, 'Namjae Jeon' <linkinjeon@gmail.com>
 
-Monday, July 09, 2012, Maya <merez@codeaurora.org> wrote:
-> On Sun, July 8, 2012 4:52 pm, Seungwon Jeon wrote:
-> > Sunday, July 08, 2012, Maya <merez@codeaurora.org> wrote:
-> >> One minor comment below:
-> >>
-> >> > @@ -1278,9 +1609,15 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
-> >> *mq, struct request *rqc)
-> >> >  			    (card->ext_csd.data_sector_size == 4096)) {
-> >> You can use mmc_large_sec here (instead of
-> >> card->ext_csd.data_sector_size
-> >> == 4096)
-> > Yes, but this line is kept due to another issue related with 4KB sector.
-> >
-> > Thanks,
-> > Seungwon Jeon
-> Hi,
-> 
-> I'm not sure I understand your reply. mmc_large_sec does exactly what the
-> if here does.
-> My suggestion is to replace the code with the new function you added.
-> I agree it's an old code but this way the code will be consistent and
-> mmc_large_sec will be used in every place we would like to check if the
-> sector size is 4K.
-I just remained. The code you pointed can be replaced.
-Regardless this review, I'll rework.
-eMMC 4.51 spec was updated in June and there is some changes.
-Spec mentions packed header is 8 blocks in 4KB native device.
-I'll apply this change.
+Hi,
 
-Thanks,
-Seungwon Jeon
+On Thu, Jun 14 2012, Liu, Chuansheng wrote:
+> From: liu chuansheng <chuansheng.liu@intel.com>
+> Subject: [PATCH] sdio: Change pr_warning to pr_warn_ratelimited
+>
+> When debug one bad issue, got lots of pr_warning messages
+> "queuing unknown CIS tuple" which caused the printk storm
+> and flooded the console.
+>
+> This patch is changing the pr_warning api to pr_warn_ratelimited.
+>
+> Signed-off-by: liu chuansheng <chuansheng.liu@intel.com>
+> ---
+>  drivers/mmc/core/sdio_cis.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
+> index f1c7ed8..8e94e55 100644
+> --- a/drivers/mmc/core/sdio_cis.c
+> +++ b/drivers/mmc/core/sdio_cis.c
+> @@ -313,7 +313,7 @@ static int sdio_read_cis(struct mmc_card *card, struct sdio_func *func)
+>  
+>                         if (ret == -ENOENT) {
+>                                 /* warn about unknown tuples */
+> -                               pr_warning("%s: queuing unknown"
+> +                               pr_warn_ratelimited("%s: queuing unknown"
+>                                        " CIS tuple 0x%02x (%u bytes)\n",
+>                                        mmc_hostname(card->host),
+>                                        tpl_code, tpl_link);
 
-> 
-> Thanks,
-> Maya
-> 
-> --
-> Sent by consultant of Qualcomm Innovation Center, Inc.
-> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks, pushed to mmc-next for 3.6.
 
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
