@@ -1,52 +1,66 @@
-From: merez@codeaurora.org
-Subject: RE: [PATCH v8 2/2] mmc: support packed write command for eMMC4.5
-     device
-Date: Mon, 9 Jul 2012 00:01:23 -0700 (PDT)
-Message-ID: <fc9caa907c442ce8390e774744d9dae7.squirrel@www.codeaurora.org>
-References: <ed6366950474fb35cac89881648fb9e9.squirrel@www.codeaurora.org>
-    <009701cd5d64$c7dc2aa0$57947fe0$%jun@samsung.com>
+From: ludovic.desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH] mmc: atmel-mci: modify CLKDIV displaying in debugfs
+Date: Mon, 9 Jul 2012 09:05:53 +0200
+Message-ID: <4FFA82D1.5080904@atmel.com>
+References: <1341569511-11340-1-git-send-email-nicolas.ferre@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:36829 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752355Ab2GIHBX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jul 2012 03:01:23 -0400
-In-Reply-To: <009701cd5d64$c7dc2aa0$57947fe0$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"; Format="flowed"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1341569511-11340-1-git-send-email-nicolas.ferre@atmel.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: Chris Ball <cjb@laptop.org>, Ludovic.Desroches@atmel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: merez@codeaurora.org, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>, 'Saugata Das' <saugata.das@linaro.org>, 'Namjae Jeon' <linkinjeon@gmail.com>
 
-
-On Sun, July 8, 2012 4:52 pm, Seungwon Jeon wrote:
-> Sunday, July 08, 2012, Maya <merez@codeaurora.org> wrote:
->> One minor comment below:
->>
->> > @@ -1278,9 +1609,15 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
->> *mq, struct request *rqc)
->> >  			    (card->ext_csd.data_sector_size == 4096)) {
->> You can use mmc_large_sec here (instead of
->> card->ext_csd.data_sector_size
->> == 4096)
-> Yes, but this line is kept due to another issue related with 4KB sector.
+Le 07/06/2012 12:11 PM, Nicolas Ferre a =E9crit :
+> Modify clock division displaying in debugfs for matching
+> the new CLKDIV,CLKODD user interface arrangement.
+> Is using the has_odd_clk_div property to choose the proper format.
 >
-> Thanks,
-> Seungwon Jeon
-Hi,
+> Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
 
-I'm not sure I understand your reply. mmc_large_sec does exactly what the
-if here does.
-My suggestion is to replace the code with the new function you added.
-I agree it's an old code but this way the code will be consistent and
-mmc_large_sec will be used in every place we would like to check if the
-sector size is 4K.
 
-Thanks,
-Maya
+Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 
--- 
-Sent by consultant of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+Thanks.
 
+> ---
+>   drivers/mmc/host/atmel-mci.c |   12 +++++++++---
+>   1 files changed, 9 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index 1fe20cd..9c5daa2 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -396,11 +396,17 @@ static int atmci_regs_show(struct seq_file *s, void=
+ *v)
+>   	clk_disable(host->mck);
+>   	spin_unlock_bh(&host->lock);
+>
+> -	seq_printf(s, "MR:\t0x%08x%s%s CLKDIV=3D%u\n",
+> +	seq_printf(s, "MR:\t0x%08x%s%s ",
+>   			buf[ATMCI_MR / 4],
+>   			buf[ATMCI_MR / 4] & ATMCI_MR_RDPROOF ? " RDPROOF" : "",
+> -			buf[ATMCI_MR / 4] & ATMCI_MR_WRPROOF ? " WRPROOF" : "",
+> -			buf[ATMCI_MR / 4] & 0xff);
+> +			buf[ATMCI_MR / 4] & ATMCI_MR_WRPROOF ? " WRPROOF" : "");
+> +	if (host->caps.has_odd_clk_div)
+> +		seq_printf(s, "{CLKDIV,CLKODD}=3D%u\n",
+> +				((buf[ATMCI_MR / 4] & 0xff) << 1)
+> +				| ((buf[ATMCI_MR / 4] >> 16) & 1));
+> +	else
+> +		seq_printf(s, "CLKDIV=3D%u\n",
+> +				(buf[ATMCI_MR / 4] & 0xff));
+>   	seq_printf(s, "DTOR:\t0x%08x\n", buf[ATMCI_DTOR / 4]);
+>   	seq_printf(s, "SDCR:\t0x%08x\n", buf[ATMCI_SDCR / 4]);
+>   	seq_printf(s, "ARGR:\t0x%08x\n", buf[ATMCI_ARGR / 4]);
+>
