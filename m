@@ -1,42 +1,60 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 2/2] mmc: sd: Fix sd current limit setting
-Date: Mon, 09 Jul 2012 22:57:40 -0400
-Message-ID: <87629wuxuj.fsf@octavius.laptop.org>
-References: <1341296172-10645-1-git-send-email-aaron.lu@amd.com>
-	<1341296172-10645-3-git-send-email-aaron.lu@amd.com>
-	<87mx3g5ov5.fsf@octavius.laptop.org>
-	<20120704053148.GC2607@aarontestpc.amd.com>
+Subject: Re: [PATCH] MMC: OMAP: make MMC_OMAP* depend on DMA_OMAP
+Date: Mon, 09 Jul 2012 23:13:38 -0400
+Message-ID: <871ukkux3x.fsf@octavius.laptop.org>
+References: <1341450721-20993-1-git-send-email-ming.lei@canonical.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56404 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:33612 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753189Ab2GJC7E (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 9 Jul 2012 22:59:04 -0400
-In-Reply-To: <20120704053148.GC2607@aarontestpc.amd.com> (Aaron Lu's message
-	of "Wed, 4 Jul 2012 13:31:48 +0800")
+	id S1751042Ab2GJDNp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 9 Jul 2012 23:13:45 -0400
+In-Reply-To: <1341450721-20993-1-git-send-email-ming.lei@canonical.com> (Ming
+	Lei's message of "Thu, 5 Jul 2012 09:12:01 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lu@amd.com>
-Cc: Philip Rakity <prakity@marvell.com>, linux-mmc@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
+To: Ming Lei <ming.lei@canonical.com>
+Cc: linux-mmc@vger.kernel.org
 
-Hi,
+Hi Ming,
 
-On Wed, Jul 04 2012, Aaron Lu wrote:
-> Host has different current capabilities at different voltages, we need
-> to record these settings seperately. The defined voltages are 1.8/3.0/3.3.
-> For other voltages, we do not touch current limit setting.
+On Wed, Jul 04 2012, Ming Lei wrote:
+> Recent commits on omap mmc/hsmmc in -next tree switch to
+> DMA_ENGINE entirely, so make MMC_OMAP* depend on DMA_OMAP
+> and DMA_ENGINE, otherwise OMAP MMC/HSMMC won't work without
+> enabling DMA_ENGINE and DMA_OMAP.
 >
-> Before set current limit for the sd card, find out the host's operating
-> voltage first and then find out the current capabilities of the host at
-> that voltage to set the current limit.
+> The patch simply make them depend on DMA_OMAP since DMA_OMAP
+> will select DMA_ENGINE automatically.
 >
-> Signed-off-by: Aaron Lu <aaron.lu@amd.com>
+> Signed-off-by: Ming Lei <ming.lei@canonical.com>
 > ---
-> v2:
-> Do not call BUG() when the host's voltage is not supported as suggested by
-> Chris Ball.
-> Do not use 0/1/2 to represent the host's voltage as suggested by Philip Rakity.
+>  drivers/mmc/host/Kconfig |    4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index aa131b3..ef72c50 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -231,7 +231,7 @@ config MMC_SDHCI_S3C_DMA
+>  
+>  config MMC_OMAP
+>  	tristate "TI OMAP Multimedia Card Interface support"
+> -	depends on ARCH_OMAP
+> +	depends on ARCH_OMAP && DMA_OMAP
+>  	select TPS65010 if MACH_OMAP_H2
+>  	help
+>  	  This selects the TI OMAP Multimedia card Interface.
+> @@ -242,7 +242,7 @@ config MMC_OMAP
+>  
+>  config MMC_OMAP_HS
+>  	tristate "TI OMAP High Speed Multimedia Card Interface support"
+> -	depends on SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4
+> +	depends on (SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4) && DMA_OMAP
+>  	help
+>  	  This selects the TI OMAP High Speed Multimedia card Interface.
+>  	  If you have an OMAP2430 or OMAP3 board or OMAP4 board with a
 
 Thanks, pushed to mmc-next for 3.6.
 
