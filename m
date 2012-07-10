@@ -1,62 +1,41 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] sdhci: poll for card even when card is logically unremovable
-Date: Mon, 09 Jul 2012 23:16:43 -0400
-Message-ID: <87wr2ctiec.fsf@octavius.laptop.org>
-References: <20120705210613.8B3F89D401E@zog.reactivated.net>
+Subject: Re: [PATCH] mmc: atmel-mci: fix incorrect setting of host->data to
+ NULL
+Date: Mon, 09 Jul 2012 23:18:33 -0400
+Message-ID: <87sjd0tiba.fsf@octavius.laptop.org>
+References: <1341568713-8869-1-git-send-email-nicolas.ferre@atmel.com>
+ <4FF6B831.5060005@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:52747 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751826Ab2GJDQr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 9 Jul 2012 23:16:47 -0400
-In-Reply-To: <20120705210613.8B3F89D401E@zog.reactivated.net> (Daniel Drake's
-	message of "Thu, 5 Jul 2012 22:06:13 +0100 (BST)")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <4FF6B831.5060005@atmel.com> (ludovic desroches's message of
+ "Fri, 6 Jul 2012 12:04:33 +0200")
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: "ludovic.desroches" <ludovic.desroches@atmel.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <dsd@laptop.org>
-Cc: linux-mmc@vger.kernel.org
 
-Hi Dan,
-
-On Thu, Jul 05 2012, Daniel Drake wrote:
-> The Marvell CaFe is now marked as having bad card detection to fix
-> a problem during system resume.
->
-> Now on the OLPC XO-1 we are facing the issue that the card is marked
-> as logically unremovable (via MMC_UNSAFE_RESUME), which means that
-> mmc_card_is_removable considers the card non-removable. The existing
-> code logic decides not to poll for card presence in this case, and
-> card detection is also disabled because of the quirk being set.
-> This means that no SD cards are detected when inserted after boot.
->
-> Refine the logic to enable card presence polling in the case when
-> a card is logically unremovable, only avoiding the poll in the case
-> when the card is physically non-removable (denoted with
-> MMC_CAP_NONREMOVABLE).
->
-> Signed-off-by: Daniel Drake <dsd@laptop.org>
-> ---
->  drivers/mmc/host/sdhci.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index f4b8b4d..dd71a05 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2779,7 +2779,7 @@ int sdhci_add_host(struct sdhci_host *host)
->  		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
->  
->  	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
-> -	    mmc_card_is_removable(mmc))
-> +	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
->  		mmc->caps |= MMC_CAP_NEEDS_POLL;
->  
->  	/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
-
-Thanks, pushed to mmc-next for 3.6.
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+SGksCgpPbiBGcmksIEp1bCAwNiAyMDEyLCBsdWRvdmljLmRlc3JvY2hlcyB3cm90ZToKPiBMZSAw
+Ny8wNi8yMDEyIDExOjU4IEFNLCBOaWNvbGFzIEZlcnJlIGEgw6ljcml0IDoKPj4gU2V0dGluZyBo
+b3N0LT5kYXRhIHRvIE5VTEwgaXMgaW5jb3JyZWN0IHNlcXVlbmNlIGluIFNUQVRFX1NFTkRJTkdf
+U1RPUAo+PiBzdGF0ZSBvZiBGU006IFRoaXMgZWFybHkgc2V0dGluZyBsZWFkcyB0byB0aGUgc2tp
+cCBvZiBkbWFfdW5tYXBfc2coKQo+PiBpbiBhdG1jaV9kbWFfY2xlYW51cCgpIHdoaWNoIGlzIGEg
+YnVnLgo+Pgo+PiBJZGVhIHRha2VuIGZvcm0gZHdfbW1jIGJ5IFNldW5nd29uIEplb24uCj4+Cj4+
+IFNpZ25lZC1vZmYtYnk6IE5pY29sYXMgRmVycmUgPG5pY29sYXMuZmVycmVAYXRtZWwuY29tPgo+
+PiBDYzogU2V1bmd3b24gSmVvbiA8dGdpaC5qdW5Ac2Ftc3VuZy5jb20+Cj4KPiBBY2tlZC1ieTog
+THVkb3ZpYyBEZXNyb2NoZXMgPGx1ZG92aWMuZGVzcm9jaGVzQGF0bWVsLmNvbT4KClRoYW5rcywg
+cHVzaGVkIHRvIG1tYy1uZXh0IGZvciAzLjYuCgotIENocmlzLgotLSAKQ2hyaXMgQmFsbCAgIDxj
+amJAbGFwdG9wLm9yZz4gICA8aHR0cDovL3ByaW50Zi5uZXQvPgpPbmUgTGFwdG9wIFBlciBDaGls
+ZAoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgt
+YXJtLWtlcm5lbCBtYWlsaW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQu
+b3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJt
+LWtlcm5lbAo=
