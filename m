@@ -1,40 +1,41 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: host: sdhci.  UHS Switch failure - cycle power if regulator is used
-Date: Mon, 09 Jul 2012 23:26:03 -0400
-Message-ID: <87hatgthys.fsf@octavius.laptop.org>
-References: <1340813700-10898-1-git-send-email-prakity@marvell.com>
-	<4FFA701A.8010100@amd.com>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: fix runtime suspend crash: add host
+ checks in callbacks
+Date: Tue, 10 Jul 2012 09:55:47 +0530
+Message-ID: <CANfBPZ-ucJkgJLt4eXRvfGTCJnWTxHUuL9Cnp9GoaQq7keHGqg@mail.gmail.com>
+References: <1341620786-13598-1-git-send-email-khilman@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:58114 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753075Ab2GJD0J (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 9 Jul 2012 23:26:09 -0400
-In-Reply-To: <4FFA701A.8010100@amd.com> (Aaron Lu's message of "Mon, 9 Jul
-	2012 13:46:02 +0800")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1341620786-13598-1-git-send-email-khilman@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Kevin Hilman <khilman@ti.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>, Rajendra Nayak <rnayak@ti.com>, Adrian Hunter <adrian.hunter@intel.com>, "open list:MULTIMEDIA CARD (...), linux-kernel@vger.kernel.org (open
+	list)" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lu@amd.com>
-Cc: philipspatches@gmail.com, linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>
 
-Hi,
-
-On Mon, Jul 09 2012, Aaron Lu wrote:
-> On 06/28/2012 12:15 AM, philipspatches@gmail.com wrote:
->> From: Philip Rakity<prakity@marvell.com>
->>
->> Power needs to be removed from the card when switching to 1.8v fails.
->>
->> If a regulator is used to control vmmc we need to turn the
->> regulator off and then back on otherwise power will not be removed
->> from the card.
+On Sat, Jul 7, 2012 at 5:56 AM, Kevin Hilman <khilman@ti.com> wrote:
+> Due to the way the driver core takes runtime PM references during
+> probe, a driver's runtime PM callbacks may not be called until probe
+> returns.  During probe, drvdata is set to the 'host' pointer but if
+> probe fails, drvdata is set to NULL.
 >
-> Reviewed-by: Aaron Lu <aaron.lu@amd.com>
+> The runtime PM callbacks currently blindly dereference this host
+> pointer, but if probe fails, and the runtime PM callbacks are called
+> after probe returns, a NULL pointer dereference will result.
+>
+Pardon my ignorance, but why would runtime suspend be called for a
+device whose probe has failed ? AFAIK, MMC stack wouldn't make
+the _enable()/disable() calls, which call runtime PM APIs, unless the
+probe is successful.
+ Is there a stacktrace for the offending caller ?
 
-Thanks, pushed to mmc-next for 3.6.
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> Fix this by simply checking to be sure the host pointer is non-NULL.
+>
+> Signed-off-by: Kevin Hilman <khilman@ti.com>
+> ---
+> Applies to v3.5-rc5.  Fix is needed for v3.5-rc.
+>
+Can you please let me know which commit introduced this problem
+in the first place ? There were not many changes in MMC PM code
+in this merge window.
