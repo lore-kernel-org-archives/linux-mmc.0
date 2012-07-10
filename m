@@ -1,67 +1,54 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH v8 1/2] mmc: add packed command feature of eMMC4.5
-Date: Tue, 10 Jul 2012 03:45:15 -0700 (PDT)
-Message-ID: <9177cd479f2dec231b65102cb35a3e6a.squirrel@www.codeaurora.org>
-References: <006801cd55b0$314960f0$93dc22d0$%jun@samsung.com>
-    <87y5msqhxy.fsf@octavius.laptop.org>
-    <fc0bbbfabb899fd68e522b843b668041.squirrel@www.codeaurora.org>
-    <87mx38qdcs.fsf@octavius.laptop.org>
+From: Loic pallardy <loic.pallardy@gmail.com>
+Subject: Re: [PATCH v1 5/5] mmc: card: Add RPMB support in IOCTL interface
+Date: Tue, 10 Jul 2012 14:28:46 +0200
+Message-ID: <CAKGveeYiwWWVaxcm0HnJi3cLuFFYVrDZMdbNt2V96he_TGwPog@mail.gmail.com>
+References: <1341564244-6178-1-git-send-email-loic.pallardy@stericsson.com>
+	<1341564244-6178-6-git-send-email-loic.pallardy@stericsson.com>
+	<CAKYAXd_EPPvC4tRLjugMxy09_2Hd8bsGmkmYrzf_k3L621rPSw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:2455 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753224Ab2GJKpQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jul 2012 06:45:16 -0400
-In-Reply-To: <87mx38qdcs.fsf@octavius.laptop.org>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:45036 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755390Ab2GJM2r (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jul 2012 08:28:47 -0400
+Received: by obbuo13 with SMTP id uo13so22094108obb.19
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Jul 2012 05:28:46 -0700 (PDT)
+In-Reply-To: <CAKYAXd_EPPvC4tRLjugMxy09_2Hd8bsGmkmYrzf_k3L621rPSw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: merez@codeaurora.org, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>, 'Saugata Das' <saugata.das@linaro.org>, 'Namjae Jeon' <linkinjeon@gmail.com>
+To: Namjae Jeon <linkinjeon@gmail.com>
+Cc: Loic Pallardy <loic.pallardy@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Ulf Hansson <ulf.hansson@stericcson.com>, Alex Macro <alex.macro@stericsson.com>
 
+Repost in text format
 
-On Tue, July 10, 2012 12:33 am, Chris Ball wrote:
-> Hi,
+2012/7/10 Namjae Jeon <linkinjeon@gmail.com>
 >
-> On Tue, Jul 10 2012, merez@codeaurora.org wrote:
->>> Sorry, I don't have a copy of the eMMC 4.5 spec -- is PACKED_EVENT_EN
->>> a one-time programmable fuse on the eMMC, like BKOPS_ENABLE was?
->>
->> No, it's not.
+> >
+> > +     err = mmc_blk_part_switch(card, md);
+> > +     if (err)
+> > +             goto cmd_rel_host;
+> > +
+> Should it wrapped by if (is_rpbm) condition ? It can be called in other
+> ioctl.
+It was my first implementation, but in that case you have to manage a
+session, switching on RPMB partition at the begining of the IOCTL and
+restore previous partition at the end. (because RPMB partition doesn't
+support all commands).
+
+Having a look to how mmc driver manages partition selection, I saw
+that mmc_blk_issue_rq for instance calls mmc_blk_part_switch in the
+beginning to be sure it's on the right partition, but never restores
+
+The proposal is to use same way and to make it compliant with Boot and
+GP partitions if there are any special commands supported by them.
 >
-> Excellent, thanks.
->
-> I've pushed both v8 patches to mmc-next.  Before pushing it up to Linus,
-> I'd like to get a better idea of the variety of performances differences
-> seen using packed writes -- has it been tried on devices from multiple
-> eMMC vendors, and multiple host controller vendors?  Can we try to build
-> up a quick table of results, with a standard test like iozone, to check
-> that we've got decent test coverage?  Seungwon suggests using:
->
-> iozone -az -i0 -I -s 10m -f /target/test -e
->
-> I'm also worried about how much code this is adding, but I agree that
-> it's worth it if the performance benefits are as described.
->
-> Thanks,
->
-> - Chris.
+> >       if (idata->ic.is_acmd) {
+> >               err = mmc_app_cmd(card->host, card);
+> >               if (err)
+> >                       goto cmd_rel_host;
+> >       }
 > --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-> --
-
-Hi Chris,
-
-I suggest to also use lmdd as a benchmark test for write packing, since
-write packing is mostly beneficial in long sequential operations.
-It can be used as follows:
-lmdd if=internal of=/data/file1 bs=128k count=3000
-
-Thanks,
-Maya
--- 
-Sent by consultant of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
