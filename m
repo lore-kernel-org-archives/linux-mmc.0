@@ -1,134 +1,83 @@
 From: Kevin Hilman <khilman@ti.com>
-Subject: Re: [CFT 03/11] mmc: omap_hsmmc: remove private DMA API implementation
-Date: Tue, 10 Jul 2012 14:48:56 -0700
-Message-ID: <87vchvl22f.fsf@ti.com>
-References: <20120607110610.GB15973@n2100.arm.linux.org.uk>
-	<E1ScaYb-0003tZ-Pb@rmk-PC.arm.linux.org.uk>
+Subject: Re: [PATCH] mmc: omap_hsmmc: fix runtime suspend crash: add host checks in callbacks
+Date: Tue, 10 Jul 2012 15:57:06 -0700
+Message-ID: <87629vkywt.fsf@ti.com>
+References: <1341620786-13598-1-git-send-email-khilman@ti.com>
+	<CANfBPZ-ucJkgJLt4eXRvfGTCJnWTxHUuL9Cnp9GoaQq7keHGqg@mail.gmail.com>
+	<871ukjvgyg.fsf@ti.com>
+	<CANfBPZ8i-N-0=GMk5OZ+oLipCv3fihHd3N1gYp_F94PE5LM5rg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <E1ScaYb-0003tZ-Pb@rmk-PC.arm.linux.org.uk> (Russell King's
-	message of "Thu, 07 Jun 2012 12:07:13 +0100")
-Sender: linux-omap-owner@vger.kernel.org
-To: Russell King <rmk+kernel@arm.linux.org.uk>
-Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog105.obsmtp.com ([74.125.149.75]:55012 "EHLO
+	na3sys009aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754764Ab2GJW5I (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jul 2012 18:57:08 -0400
+Received: by pbbrq13 with SMTP id rq13so1094998pbb.8
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Jul 2012 15:57:07 -0700 (PDT)
+In-Reply-To: <CANfBPZ8i-N-0=GMk5OZ+oLipCv3fihHd3N1gYp_F94PE5LM5rg@mail.gmail.com>
+	(Venkatraman S.'s message of "Tue, 10 Jul 2012 20:17:45 +0530")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "S, Venkatraman" <svenkatr@ti.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>, Rajendra Nayak <rnayak@ti.com>, Adrian Hunter <adrian.hunter@intel.com>, "open list:MULTIMEDIA CARD (...), linux-kernel@vger.kernel.org
+	(open list)" <linux-mmc@vger.kernel.org>
 
-Hi Russell,
+"S, Venkatraman" <svenkatr@ti.com> writes:
 
-Russell King <rmk+kernel@arm.linux.org.uk> writes:
+> On Tue, Jul 10, 2012 at 7:47 PM, Kevin Hilman <khilman@ti.com> wrote:
+>> "S, Venkatraman" <svenkatr@ti.com> writes:
+>>
+>>> On Sat, Jul 7, 2012 at 5:56 AM, Kevin Hilman <khilman@ti.com> wrote:
+>>>> Due to the way the driver core takes runtime PM references during
+>>>> probe, a driver's runtime PM callbacks may not be called until probe
+>>>> returns.  During probe, drvdata is set to the 'host' pointer but if
+>>>> probe fails, drvdata is set to NULL.
+>>>>
+>>>> The runtime PM callbacks currently blindly dereference this host
+>>>> pointer, but if probe fails, and the runtime PM callbacks are called
+>>>> after probe returns, a NULL pointer dereference will result.
+>>>>
+>>> Pardon my ignorance, but why would runtime suspend be called for a
+>>> device whose probe has failed ? AFAIK, MMC stack wouldn't make the
+>>> _enable()/disable() calls, which call runtime PM APIs, unless the
+>>> probe is successful.  Is there a stacktrace for the offending caller ?
+>>
+>> First thing to note: there are several error conditions *after*
+>> pm_runtime_enable() and the first _get_sync() are called.
+>>
+>> So here's what can happen:
+>>
+>> The driver core does a _get_noresume() before calling the driver's
+>> probe, so the runtime PM usecount is already 1 when the driver is
+>> called.  The _get_sync() in _probe enables the device and increases the
+>> usecount to 2.  The _put_sync() at the end of ->probe() will decrease
+>> the usecount to 1, but since the usecount is still non-zero, the
+>> driver's callbacks are still not called.  It's not until the driver core
+>> does its _put_sync (to balance the _get_noresume() that the usecount
+>> goes to zero and the driver's callbacks are called.
+>>
+> Thanks for the detailed explanation.
+> But pm_runtime_disable() is called in the error path, so shouldn't
+> it prevent the driver callbacks from being called ? 
 
-> Remove the private DMA API implementation from omap_hsmmc, making it
-> use entirely the DMA engine API.
->
-> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+Yes, you're right.  
 
-While testing this, I noticed a minor problem in the case of probe
-failure (e.g. if dmaengine is not built into the kernel.)
+I'm getting a few different problems mixed together here.  To work on a
+different problem, I had commented out the pm_runtime_disable() call in
+the error path and so I was seeing the callbacks being called even on
+probe failure.  Withe the pm_runtime_disable() added back, that doesn't
+happen.
 
-The current driver suffers from this same problem but should probably be
-fixed when converting to dmaengine...
+However, there is another case where the runtime PM callbacks may be
+called: the PM domain code in omap_device can still attempts to call the
+runtime PM callbacks during late suspend for devices that are not
+already runtime suspended.  This is done even when there is no driver
+bound to a device, but this is a bug in the omap_device code, not in the
+MMC driver.  So I'll be sending a patch shortly to fix that.
 
-[...]
+So, all that to say, this patch can be dropped.
 
-> @@ -2048,36 +1919,28 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
->  		dev_err(mmc_dev(host->mmc), "cannot get DMA TX channel\n");
->  		goto err_irq;
->  	}
-> -	host->dma_line_tx = res->start;
-> +	tx_req = res->start;
->  
->  	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
->  	if (!res) {
->  		dev_err(mmc_dev(host->mmc), "cannot get DMA RX channel\n");
->  		goto err_irq;
->  	}
-> -	host->dma_line_rx = res->start;
-> +	rx_req = res->start;
->  
-> -	{
-> -		dma_cap_mask_t mask;
-> -		unsigned sig;
-> -		extern bool omap_dma_filter_fn(struct dma_chan *chan, void *param);
-> -
-> -		dma_cap_zero(mask);
-> -		dma_cap_set(DMA_SLAVE, mask);
-> -#if 1
-> -		sig = host->dma_line_rx;
-> -		host->rx_chan = dma_request_channel(mask, omap_dma_filter_fn, &sig);
-> -		if (!host->rx_chan) {
-> -			dev_warn(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", sig);
-> -		}
-> -#endif
-> -#if 1
-> -		sig = host->dma_line_tx;
-> -		host->tx_chan = dma_request_channel(mask, omap_dma_filter_fn, &sig);
-> -		if (!host->tx_chan) {
-> -			dev_warn(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel %u\n", sig);
-> -		}
-> -#endif
-> +	dma_cap_zero(mask);
-> +	dma_cap_set(DMA_SLAVE, mask);
-> +
-> +	host->rx_chan = dma_request_channel(mask, omap_dma_filter_fn, &rx_req);
-> +	if (!host->rx_chan) {
-> +		dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
-> +		goto err_irq;
-> +	}
-> +
-> +	host->tx_chan = dma_request_channel(mask, omap_dma_filter_fn, &tx_req);
-> +	if (!host->tx_chan) {
-> +		dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel %u\n", tx_req);
-> +		goto err_irq;
->  	}
-
-If either of these fails, ret is zero so even though this results in a
-failed probe, the return value (ret) is zero meaning the driver still
-gets bound to the device.
-
-The patch below fixes this and applies on your 'for-next' branch.  Or,
-feel free to fold this into the original if you prefer.
+Thanks for the detailed review.
 
 Kevin
-
->From af7537997b46ee3991985fecd4b4a302bdc0df31 Mon Sep 17 00:00:00 2001
-From: Kevin Hilman <khilman@ti.com>
-Date: Tue, 10 Jul 2012 14:30:18 -0700
-Subject: [PATCH] mmc: omap_hsmmc: ensure probe returns error if DMA channel
- request fails
-
-If dma_request_channel() fails (e.g. because DMA engine is not built
-into the kernel), the return value from probe is zero causing the
-driver to be bound to the device even though probe failed.
-
-To fix, ensure that probe returns an error value when a DMA channel
-request fail.
-
-Cc: Russell King <rmk+kernel@arm.linux.org.uk>
-Signed-off-by: Kevin Hilman <khilman@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c |    2 ++
- 1 file changed, 2 insertions(+)
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 2338703..ddcecf8 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1924,12 +1924,14 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
- 	host->rx_chan = dma_request_channel(mask, omap_dma_filter_fn, &rx_req);
- 	if (!host->rx_chan) {
- 		dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
-+		ret = -ENXIO;
- 		goto err_irq;
- 	}
- 
- 	host->tx_chan = dma_request_channel(mask, omap_dma_filter_fn, &tx_req);
- 	if (!host->tx_chan) {
- 		dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel %u\n", tx_req);
-+		ret -ENXIO;
- 		goto err_irq;
- 	}
- 
--- 
-1.7.9.2
-
