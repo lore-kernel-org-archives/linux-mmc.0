@@ -1,60 +1,58 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] MMC: OMAP: make MMC_OMAP* depend on DMA_OMAP
-Date: Mon, 09 Jul 2012 23:13:38 -0400
-Message-ID: <871ukkux3x.fsf@octavius.laptop.org>
-References: <1341450721-20993-1-git-send-email-ming.lei@canonical.com>
+Subject: Re: [PATCH] sdhci: poll for card even when card is logically unremovable
+Date: Mon, 09 Jul 2012 23:16:43 -0400
+Message-ID: <87wr2ctiec.fsf@octavius.laptop.org>
+References: <20120705210613.8B3F89D401E@zog.reactivated.net>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:33612 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:52747 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751042Ab2GJDNp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 9 Jul 2012 23:13:45 -0400
-In-Reply-To: <1341450721-20993-1-git-send-email-ming.lei@canonical.com> (Ming
-	Lei's message of "Thu, 5 Jul 2012 09:12:01 +0800")
+	id S1751826Ab2GJDQr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 9 Jul 2012 23:16:47 -0400
+In-Reply-To: <20120705210613.8B3F89D401E@zog.reactivated.net> (Daniel Drake's
+	message of "Thu, 5 Jul 2012 22:06:13 +0100 (BST)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ming Lei <ming.lei@canonical.com>
+To: Daniel Drake <dsd@laptop.org>
 Cc: linux-mmc@vger.kernel.org
 
-Hi Ming,
+Hi Dan,
 
-On Wed, Jul 04 2012, Ming Lei wrote:
-> Recent commits on omap mmc/hsmmc in -next tree switch to
-> DMA_ENGINE entirely, so make MMC_OMAP* depend on DMA_OMAP
-> and DMA_ENGINE, otherwise OMAP MMC/HSMMC won't work without
-> enabling DMA_ENGINE and DMA_OMAP.
+On Thu, Jul 05 2012, Daniel Drake wrote:
+> The Marvell CaFe is now marked as having bad card detection to fix
+> a problem during system resume.
 >
-> The patch simply make them depend on DMA_OMAP since DMA_OMAP
-> will select DMA_ENGINE automatically.
+> Now on the OLPC XO-1 we are facing the issue that the card is marked
+> as logically unremovable (via MMC_UNSAFE_RESUME), which means that
+> mmc_card_is_removable considers the card non-removable. The existing
+> code logic decides not to poll for card presence in this case, and
+> card detection is also disabled because of the quirk being set.
+> This means that no SD cards are detected when inserted after boot.
 >
-> Signed-off-by: Ming Lei <ming.lei@canonical.com>
+> Refine the logic to enable card presence polling in the case when
+> a card is logically unremovable, only avoiding the poll in the case
+> when the card is physically non-removable (denoted with
+> MMC_CAP_NONREMOVABLE).
+>
+> Signed-off-by: Daniel Drake <dsd@laptop.org>
 > ---
->  drivers/mmc/host/Kconfig |    4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/sdhci.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index aa131b3..ef72c50 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -231,7 +231,7 @@ config MMC_SDHCI_S3C_DMA
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index f4b8b4d..dd71a05 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2779,7 +2779,7 @@ int sdhci_add_host(struct sdhci_host *host)
+>  		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
 >  
->  config MMC_OMAP
->  	tristate "TI OMAP Multimedia Card Interface support"
-> -	depends on ARCH_OMAP
-> +	depends on ARCH_OMAP && DMA_OMAP
->  	select TPS65010 if MACH_OMAP_H2
->  	help
->  	  This selects the TI OMAP Multimedia card Interface.
-> @@ -242,7 +242,7 @@ config MMC_OMAP
+>  	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
+> -	    mmc_card_is_removable(mmc))
+> +	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
+>  		mmc->caps |= MMC_CAP_NEEDS_POLL;
 >  
->  config MMC_OMAP_HS
->  	tristate "TI OMAP High Speed Multimedia Card Interface support"
-> -	depends on SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4
-> +	depends on (SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4) && DMA_OMAP
->  	help
->  	  This selects the TI OMAP High Speed Multimedia card Interface.
->  	  If you have an OMAP2430 or OMAP3 board or OMAP4 board with a
+>  	/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
 
 Thanks, pushed to mmc-next for 3.6.
 
