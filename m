@@ -1,97 +1,77 @@
-From: merez@codeaurora.org
-Subject: RE: [PATCH v8 2/2] mmc: support packed write command for eMMC4.5   
-        device
-Date: Mon, 9 Jul 2012 22:48:02 -0700 (PDT)
-Message-ID: <aceccf0b4995cb9f2eea9ff8bebd9091.squirrel@www.codeaurora.org>
-References: <ed6366950474fb35cac89881648fb9e9.squirrel@www.codeaurora.org>
-    <009701cd5d64$c7dc2aa0$57947fe0$%jun@samsung.com>
-    <fc9caa907c442ce8390e774744d9dae7.squirrel@www.codeaurora.org>
-    <00c401cd5dbb$6d605630$48210290$%jun@samsung.com>
-    <189ede36e2bce393f6957b14dccf37d1.squirrel@www.codeaurora.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v8 1/2] mmc: add packed command feature of eMMC4.5
+Date: Tue, 10 Jul 2012 01:54:49 -0400
+Message-ID: <87y5msqhxy.fsf@octavius.laptop.org>
+References: <006801cd55b0$314960f0$93dc22d0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:18661 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752442Ab2GJFsC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jul 2012 01:48:02 -0400
-In-Reply-To: <189ede36e2bce393f6957b14dccf37d1.squirrel@www.codeaurora.org>
+Received: from void.printf.net ([89.145.121.20]:58903 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752052Ab2GJFzH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 Jul 2012 01:55:07 -0400
+In-Reply-To: <006801cd55b0$314960f0$93dc22d0$%jun@samsung.com> (Seungwon
+	Jeon's message of "Fri, 29 Jun 2012 13:32:29 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, merez@codeaurora.org, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>, 'Saugata Das' <saugata.das@linaro.org>, 'Namjae Jeon' <linkinjeon@gmail.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, 'Maya Erez' <merez@codeaurora.org>, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>, 'Saugata Das' <saugata.das@linaro.org>, 'Namjae Jeon' <linkinjeon@gmail.com>
 
-Hi Chris,
+Hi,
 
-Can we push this change to mmc-next?
+On Fri, Jun 29 2012, Seungwon Jeon wrote:
+> This patch adds packed command feature of eMMC4.5.
+> The maximum number for packing read(or write) is offered
+> and exception event relevant to packed command which is
+> used for error handling is enabled. If host wants to use
+> this feature, MMC_CAP2_PACKED_CMD should be set.
+>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> Reviewed-by: Maya Erez <merez@codeaurora.org>
+> Reviewed-by: Subhash Jadavani <subhashj@codeaurora.org>
+> Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+> ---
+>  drivers/mmc/core/mmc.c   |   25 +++++++++++++++++++++++++
+>  include/linux/mmc/card.h |    3 +++
+>  include/linux/mmc/host.h |    4 ++++
+>  include/linux/mmc/mmc.h  |   15 +++++++++++++++
+>  4 files changed, 47 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 258b203..bfb271f 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -516,6 +516,11 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  		} else {
+>  			card->ext_csd.data_tag_unit_size = 0;
+>  		}
+> +
+> +		card->ext_csd.max_packed_writes =
+> +			ext_csd[EXT_CSD_MAX_PACKED_WRITES];
+> +		card->ext_csd.max_packed_reads =
+> +			ext_csd[EXT_CSD_MAX_PACKED_READS];
+>  	} else {
+>  		card->ext_csd.data_sector_size = 512;
+>  	}
+> @@ -1246,6 +1251,26 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>  		}
+>  	}
+>  
+> +	if ((host->caps2 & MMC_CAP2_PACKED_WR &&
+> +			card->ext_csd.max_packed_writes > 0) ||
+> +	    (host->caps2 & MMC_CAP2_PACKED_RD &&
+> +			card->ext_csd.max_packed_reads > 0)) {
+> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +				EXT_CSD_EXP_EVENTS_CTRL,
+> +				EXT_CSD_PACKED_EVENT_EN,
+> +				card->ext_csd.generic_cmd6_time);
+
+Sorry, I don't have a copy of the eMMC 4.5 spec -- is PACKED_EVENT_EN
+a one-time programmable fuse on the eMMC, like BKOPS_ENABLE was?
 
 Thanks,
-Maya
-On Mon, July 9, 2012 10:40 pm, merez@codeaurora.org wrote:
->
-> On Mon, July 9, 2012 3:13 am, Seungwon Jeon wrote:
->> Monday, July 09, 2012, Maya <merez@codeaurora.org> wrote:
->>> On Sun, July 8, 2012 4:52 pm, Seungwon Jeon wrote:
->>> > Sunday, July 08, 2012, Maya <merez@codeaurora.org> wrote:
->>> >> One minor comment below:
->>> >>
->>> >> > @@ -1278,9 +1609,15 @@ static int mmc_blk_issue_rw_rq(struct
->>> mmc_queue
->>> >> *mq, struct request *rqc)
->>> >> >  			    (card->ext_csd.data_sector_size == 4096)) {
->>> >> You can use mmc_large_sec here (instead of
->>> >> card->ext_csd.data_sector_size
->>> >> == 4096)
->>> > Yes, but this line is kept due to another issue related with 4KB
->>> sector.
->>> >
->>> > Thanks,
->>> > Seungwon Jeon
->>> Hi,
->>>
->>> I'm not sure I understand your reply. mmc_large_sec does exactly what
->>> the
->>> if here does.
->>> My suggestion is to replace the code with the new function you added.
->>> I agree it's an old code but this way the code will be consistent and
->>> mmc_large_sec will be used in every place we would like to check if the
->>> sector size is 4K.
->> I just remained. The code you pointed can be replaced.
->> Regardless this review, I'll rework.
->> eMMC 4.51 spec was updated in June and there is some changes.
->> Spec mentions packed header is 8 blocks in 4KB native device.
->> I'll apply this change.
-> No need to apply the change.
-> You are probably right and since it is not related to your change it can
-> be done later on.
->>
->> Thanks,
->> Seungwon Jeon
->>
->>>
->>> Thanks,
->>> Maya
->>>
->>> --
->>> Sent by consultant of Qualcomm Innovation Center, Inc.
->>> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->
->
-> --
-> Sent by consultant of Qualcomm Innovation Center, Inc.
-> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
->
->
 
-
+- Chris.
 -- 
-Sent by consultant of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
