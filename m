@@ -1,48 +1,62 @@
-From: Kevin Hilman <khilman@ti.com>
-Subject: [PATCH] mmc: omap_hsmmc: ensure probe returns error upon resource failure
-Date: Tue, 10 Jul 2012 16:40:56 -0700
-Message-ID: <1341963658-20896-1-git-send-email-khilman@ti.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org
-Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>, Rajendra Nayak <rnayak@ti.com>, Adrian Hunter <adrian.hunter@intel.com>, open list <linux-kernel@vger.kernel.org>
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH v1 5/5] mmc: card: Add RPMB support in IOCTL interface
+Date: Wed, 11 Jul 2012 09:12:44 +0900
+Message-ID: <CAKYAXd-8dBjnzau0U12hzaUx+F3GPaB6N2nXB19yV6hkM9WC5Q@mail.gmail.com>
+References: <1341564244-6178-1-git-send-email-loic.pallardy@stericsson.com>
+	<1341564244-6178-6-git-send-email-loic.pallardy@stericsson.com>
+	<CAKYAXd_EPPvC4tRLjugMxy09_2Hd8bsGmkmYrzf_k3L621rPSw@mail.gmail.com>
+	<CAKGveeYiwWWVaxcm0HnJi3cLuFFYVrDZMdbNt2V96he_TGwPog@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:50633 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756401Ab2GKAMs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jul 2012 20:12:48 -0400
+Received: by wgbdr13 with SMTP id dr13so473644wgb.1
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Jul 2012 17:12:46 -0700 (PDT)
+In-Reply-To: <CAKGveeYiwWWVaxcm0HnJi3cLuFFYVrDZMdbNt2V96he_TGwPog@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Loic pallardy <loic.pallardy@gmail.com>
+Cc: Loic Pallardy <loic.pallardy@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Ulf Hansson <ulf.hansson@stericcson.com>, Alex Macro <alex.macro@stericsson.com>
 
-If platform_get_resource_by_name() fails, driver probe is aborted an
-should return an error so the driver is not bound to the device.
+2012/7/10, Loic pallardy <loic.pallardy@gmail.com>:
+> Repost in text format
+>
+> 2012/7/10 Namjae Jeon <linkinjeon@gmail.com>
+>>
+>> >
+>> > +     err = mmc_blk_part_switch(card, md);
+>> > +     if (err)
+>> > +             goto cmd_rel_host;
+>> > +
+>> Should it wrapped by if (is_rpbm) condition ? It can be called in other
+>> ioctl.
+> It was my first implementation, but in that case you have to manage a
+> session, switching on RPMB partition at the begining of the IOCTL and
+> restore previous partition at the end. (because RPMB partition doesn't
+> support all commands).
+>
+> Having a look to how mmc driver manages partition selection, I saw
+> that mmc_blk_issue_rq for instance calls mmc_blk_part_switch in the
+> beginning to be sure it's on the right partition, but never restores
+>
+> The proposal is to use same way and to make it compliant with Boot and
+> GP partitions if there are any special commands supported by them.
+Okay, I understood what you mean.
+we should change partition switching in other ioctl again after ioctl
+about rpmb is called.
 
-However, in the current error path of platform_get_resource_by_name(),
-probe returns zero since the return value (ret) is not properly set.
-With a zero return value, the driver core assumes probe was successful
-and will bind the driver to the device.
-
-Fix this by ensuring that probe returns an error code in this failure
-path.
-
-Signed-off-by: Kevin Hilman <khilman@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c |    2 ++
- 1 file changed, 2 insertions(+)
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 389a3ee..19e60e9 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1931,6 +1931,7 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
- 	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
- 	if (!res) {
- 		dev_err(mmc_dev(host->mmc), "cannot get DMA TX channel\n");
-+		ret = -ENXIO;
- 		goto err_irq;
- 	}
- 	host->dma_line_tx = res->start;
-@@ -1938,6 +1939,7 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
- 	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
- 	if (!res) {
- 		dev_err(mmc_dev(host->mmc), "cannot get DMA RX channel\n");
-+		ret = -ENXIO;
- 		goto err_irq;
- 	}
- 	host->dma_line_rx = res->start;
--- 
-1.7.9.2
+Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+>>
+>> >       if (idata->ic.is_acmd) {
+>> >               err = mmc_app_cmd(card->host, card);
+>> >               if (err)
+>> >                       goto cmd_rel_host;
+>> >       }
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
