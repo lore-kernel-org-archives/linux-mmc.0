@@ -1,45 +1,59 @@
-From: Loic Pallardy <loic.pallardy-ext@stericsson.com>
-Subject: [PATCH v2 2/5] mmc: card: Do not scan RPMB partitions
-Date: Wed, 11 Jul 2012 15:01:15 +0200
-Message-ID: <1342011675-11221-1-git-send-email-loic.pallardy-ext@stericsson.com>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: [PATCH 3/4] dma: sh: provide a migration path for slave drivers
+ to stop using .private
+Date: Thu, 12 Jul 2012 06:55:32 +0900
+Message-ID: <CANqRtoRz2NF6BEEYcy_BwZ7Hm5EF9zP2Z0eoQcbxaSfUuc2i9Q@mail.gmail.com>
+References: <1341418663-24432-1-git-send-email-g.liakhovetski@gmx.de>
+	<1341418663-24432-4-git-send-email-g.liakhovetski@gmx.de>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog107.obsmtp.com ([207.126.144.123]:53544 "EHLO
-	eu1sys200aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754837Ab2GKNCL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jul 2012 09:02:11 -0400
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:63991 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933334Ab2GKVzd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jul 2012 17:55:33 -0400
+In-Reply-To: <1341418663-24432-4-git-send-email-g.liakhovetski@gmx.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Ulf Hansson <ulf.hansson@stericcson.com>, Loic Pallardy <loic.pallardy@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Vinod Koul <vinod.koul@intel.com>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
 
-From: Loic Pallardy <loic.pallardy@stericsson.com>
+Hi Guennadi,
 
-Do not scan rpmb partitions for "soft" partitions, since the rpmb
-partition contains protected data. Silences the following
-message during boot:
+[CC Paul]
 
- mmcblkXRPMB: unknown partition table
+On Thu, Jul 5, 2012 at 1:17 AM, Guennadi Liakhovetski
+<g.liakhovetski@gmx.de> wrote:
+> This patch extends the sh dmaengine driver to support the preferred channel
+> selection and configuration method, instead of using the "private" field
+> from struct dma_chan. We add a standard filter function to be used by
+> slave drivers instead of implementing their own ones, and add support for
+> the DMA_SLAVE_CONFIG control operation, which must accompany the new
+> channel selection method. We still support the legacy .private channel
+> allocation method to cater for a smooth driver migration.
+>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
 
-Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
----
- drivers/mmc/card/block.c | 2 ++
- 1 file changed, 2 insertions(+)
+Thanks for your efforts on this. Something that caught my eye in this
+patch is this portion:
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 276d21c..d8edb8d 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1521,6 +1521,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 	md->disk->queue = md->queue.queue;
- 	md->disk->driverfs_dev = parent;
- 	set_disk_ro(md->disk, md->read_only || default_ro);
-+	if (area_type & MMC_BLK_DATA_AREA_RPMB)
-+		md->disk->flags |= GENHD_FL_NO_PART_SCAN;
- 
- 	/*
- 	 * As discussed on lkml, GENHD_FL_REMOVABLE should:
--- 
-1.7.11.1
++bool shdma_chan_filter(struct dma_chan *chan, void *arg);
 
+If we would use this function in our DMA Engine slave drivers (MMCIF,
+SDHI, SCIF, FSI, SIU and so on) then wouldn't we add a strict
+dependency on this symbol provided by this particular DMA Engine
+driver implementation for the DMAC hardware (that your patch
+modifies)?
+
+And what do we do if we want to use the same DMA Engine slave driver
+with a different DMA Engine driver implementation?
+
+>From my point of view, there must be some better way to not have such
+tight dependencies between the DMA Engine slave consumer and the DMA
+Engine driver. Not sure what that looks like though. This symbol
+dependency is pretty far from great IMO.
+
+Thanks,
+
+/ magnus
