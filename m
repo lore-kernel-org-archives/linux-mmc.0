@@ -1,96 +1,52 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v9] mmc: support BKOPS feature for eMMC
-Date: Thu, 12 Jul 2012 15:50:58 +0900
-Message-ID: <4FFE73D2.9080500@samsung.com>
-References: <4FD1821D.4070603@samsung.com> <4FD9EB47.6000905@intel.com>
- <4FFE5A58.1060807@samsung.com> <4FFE67F1.8030306@intel.com>
+From: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>
+Subject: [RESEND PATCH v1 1/2] mmc: sdhci-dove: Add SDHCI_QUIRK_NO_HISPD_BIT
+Date: Thu, 12 Jul 2012 09:26:48 +0200
+Message-ID: <4FFE7C38.9020800@googlemail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:13862 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756909Ab2GLGvR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jul 2012 02:51:17 -0400
-Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M7100ASLCCYPX60@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 12 Jul 2012 15:51:06 +0900 (KST)
-Received: from [10.90.51.55] by mmp2.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0M7100L6LCD5NM10@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 12 Jul 2012 15:51:06 +0900 (KST)
-In-reply-to: <4FFE67F1.8030306@intel.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:58556 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752803Ab2GLH0w (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jul 2012 03:26:52 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Maya Erez <merez@codeaurora.org>, Ulf Hansson <ulf.hansson@stericsson.com>
+To: Rabeeh Khoury <rabeeh@solid-run.com>
+Cc: Chris Ball <cjb@laptop.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Manuel Lauss <manuel.lauss@googlemail.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 
-Thanks for comment.
-I will test and send the patch within this week.
+Bump. There has been no discussion on this patch nor on patch 2/2. Is there
+anybody out there willing to test and confirm these patches?
+--
+The sdio controller on dove doesn't have a bit to indicate
+high-speed. With the quirk set it fixes accessing high-speed
+sdcards.
 
-Best Regards,
-Jaehoon Chung
+Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>
+Cc: Manuel Lauss <manuel.lauss@googlemail.com>
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-kernel@vger.kernel.org
+---
+  drivers/mmc/host/sdhci-dove.c |    3 ++-
+  1 file changed, 2 insertions(+), 1 deletion(-)
 
-On 07/12/2012 03:00 PM, Adrian Hunter wrote:
-
-> On 12/07/12 08:02, Jaehoon Chung wrote:
->> Hi, Adrian,
->>
->> On 06/14/2012 10:46 PM, Adrian Hunter wrote:
->>
->>> On 08/06/12 07:39, Jaehoon Chung wrote:
->>>> Enable eMMC background operations (BKOPS) feature.
->>>>
->>>> If URGENT_BKOPS is set after a response, note that BKOPS
->>>> are required. After all I/O requests are finished, run
->>>> BKOPS if required. Should read/write operations be requested
->>>> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
->>>> and then service the request.
->>>> If BKOPS-STATUS is upper than LEVEL2, need to check until clear
->>>> the BKOPS-STATUS vaule. 
->>>>
->>>> If you want to enable this feature, set MMC_CAP2_BKOPS.
->>>> And if you want to set the BKOPS_EN bit in ext_csd register,
->>>> use the MMC_CAP2_INIT_BKOPS.
->>>>
->>>> Future considerations
->>>>  * Check BKOPS_LEVEL=1 and start BKOPS in a preventive manner.
->>>>  * Interrupt ongoing BKOPS before powering off the card.
->>>>  * How get BKOPS_STATUS value.(periodically send ext_csd command?)
->>>>
->>>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->>>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->>>> Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
->>>> Signed-off-by: Maya Erez <merez@codeaurora.org>
->>>> ---
->>>
->>> I would not expect this to work nicely with runtime PM.  I expect that BKOPS
->>> would need to be stopped beforehand.  But that would limit the time
->>> available for BKOPS since runtime PM would always kick in and stop it.  How
->>> is runtime PM to be handled?
->>
->> I think that add some function like the mmc_runtime_pm_suspend().
->> int mmc_runtime_pm_suspend()
->> {
->> 	if running bkops {
->> 		waiting for limit time..=> (when upper than Level2)
->> 		otherwise don't wait
->> 		stop-bkops
->> 	} else
->> 		nothing..
->> }
->> Almost runtime PM is controlled at host side.
->> So it's not very good that add the bkops control code at host side.
->> How about this? i want to get your opinion.
-> 
-> Possibly, but ideally it should be controlled through the runtime PM API.
-> For example, sdhci uses pm_runtime_get / put which must be paired.
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
+index 177f697..9c85368 100644
+--- a/drivers/mmc/host/sdhci-dove.c
++++ b/drivers/mmc/host/sdhci-dove.c
+@@ -66,7 +66,8 @@ static struct sdhci_pltfm_data sdhci_dove_pdata = {
+  	.quirks	= SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER |
+  		  SDHCI_QUIRK_NO_BUSY_IRQ |
+  		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
+-		  SDHCI_QUIRK_FORCE_DMA,
++		  SDHCI_QUIRK_FORCE_DMA |
++		  SDHCI_QUIRK_NO_HISPD_BIT,
+  };
+   static int __devinit sdhci_dove_probe(struct platform_device *pdev)
+-- 
+1.7.10
 
