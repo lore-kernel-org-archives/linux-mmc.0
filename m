@@ -1,69 +1,87 @@
-From: Paul Mundt <lethal@linux-sh.org>
-Subject: Re: [PATCH 3/4] dma: sh: provide a migration path for slave drivers
- to stop using .private
-Date: Thu, 12 Jul 2012 13:00:19 +0900
-Message-ID: <20120712040018.GB11440@linux-sh.org>
-References: <1341418663-24432-1-git-send-email-g.liakhovetski@gmx.de>
- <1341418663-24432-4-git-send-email-g.liakhovetski@gmx.de>
- <CANqRtoRz2NF6BEEYcy_BwZ7Hm5EF9zP2Z0eoQcbxaSfUuc2i9Q@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v9] mmc: support BKOPS feature for eMMC
+Date: Thu, 12 Jul 2012 14:02:16 +0900
+Message-ID: <4FFE5A58.1060807@samsung.com>
+References: <4FD1821D.4070603@samsung.com> <4FD9EB47.6000905@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from linux-sh.org ([111.68.239.195]:57315 "EHLO linux-sh.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750737Ab2GLEAm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 12 Jul 2012 00:00:42 -0400
-Content-Disposition: inline
-In-Reply-To: <CANqRtoRz2NF6BEEYcy_BwZ7Hm5EF9zP2Z0eoQcbxaSfUuc2i9Q@mail.gmail.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:17372 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751857Ab2GLFC1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jul 2012 01:02:27 -0400
+Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M71003SM7C2CUN0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 12 Jul 2012 14:02:26 +0900 (KST)
+Received: from [10.90.51.55] by mmp1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0M7100D217BYH770@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 12 Jul 2012 14:02:25 +0900 (KST)
+In-reply-to: <4FD9EB47.6000905@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Magnus Damm <magnus.damm@gmail.com>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Vinod Koul <vinod.koul@intel.com>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Maya Erez <merez@codeaurora.org>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-On Thu, Jul 12, 2012 at 06:55:32AM +0900, Magnus Damm wrote:
-> Hi Guennadi,
-> 
-> [CC Paul]
-> 
-> On Thu, Jul 5, 2012 at 1:17 AM, Guennadi Liakhovetski
-> <g.liakhovetski@gmx.de> wrote:
-> > This patch extends the sh dmaengine driver to support the preferred channel
-> > selection and configuration method, instead of using the "private" field
-> > from struct dma_chan. We add a standard filter function to be used by
-> > slave drivers instead of implementing their own ones, and add support for
-> > the DMA_SLAVE_CONFIG control operation, which must accompany the new
-> > channel selection method. We still support the legacy .private channel
-> > allocation method to cater for a smooth driver migration.
-> >
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > ---
-> 
-> Thanks for your efforts on this. Something that caught my eye in this
-> patch is this portion:
-> 
-> +bool shdma_chan_filter(struct dma_chan *chan, void *arg);
-> 
-> If we would use this function in our DMA Engine slave drivers (MMCIF,
-> SDHI, SCIF, FSI, SIU and so on) then wouldn't we add a strict
-> dependency on this symbol provided by this particular DMA Engine
-> driver implementation for the DMAC hardware (that your patch
-> modifies)?
-> 
-> And what do we do if we want to use the same DMA Engine slave driver
-> with a different DMA Engine driver implementation?
-> 
-> From my point of view, there must be some better way to not have such
-> tight dependencies between the DMA Engine slave consumer and the DMA
-> Engine driver. Not sure what that looks like though. This symbol
-> dependency is pretty far from great IMO.
-> 
-I vaguely recall this coming up before, and it wasn't acceptable then
-either.
+Hi, Adrian,
 
-We will by no means be adding driver-specific hooks in to other drivers
-that really couldn't care less what the underlying DMA engine driving
-them is.
+On 06/14/2012 10:46 PM, Adrian Hunter wrote:
 
-We already have CPUs with different DMA engines that can be used by the
-same drivers. As I said the last time, this needs to be fixed in the
-dmaengine framework, period.
+> On 08/06/12 07:39, Jaehoon Chung wrote:
+>> Enable eMMC background operations (BKOPS) feature.
+>>
+>> If URGENT_BKOPS is set after a response, note that BKOPS
+>> are required. After all I/O requests are finished, run
+>> BKOPS if required. Should read/write operations be requested
+>> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
+>> and then service the request.
+>> If BKOPS-STATUS is upper than LEVEL2, need to check until clear
+>> the BKOPS-STATUS vaule. 
+>>
+>> If you want to enable this feature, set MMC_CAP2_BKOPS.
+>> And if you want to set the BKOPS_EN bit in ext_csd register,
+>> use the MMC_CAP2_INIT_BKOPS.
+>>
+>> Future considerations
+>>  * Check BKOPS_LEVEL=1 and start BKOPS in a preventive manner.
+>>  * Interrupt ongoing BKOPS before powering off the card.
+>>  * How get BKOPS_STATUS value.(periodically send ext_csd command?)
+>>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+>> Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
+>> Signed-off-by: Maya Erez <merez@codeaurora.org>
+>> ---
+> 
+> I would not expect this to work nicely with runtime PM.  I expect that BKOPS
+> would need to be stopped beforehand.  But that would limit the time
+> available for BKOPS since runtime PM would always kick in and stop it.  How
+> is runtime PM to be handled?
+
+I think that add some function like the mmc_runtime_pm_suspend().
+int mmc_runtime_pm_suspend()
+{
+	if running bkops {
+		waiting for limit time..=> (when upper than Level2)
+		otherwise don't wait
+		stop-bkops
+	} else
+		nothing..
+}
+Almost runtime PM is controlled at host side.
+So it's not very good that add the bkops control code at host side.
+How about this? i want to get your opinion.
+
+Best Regards,
+Jaehoon Chung
+
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+
