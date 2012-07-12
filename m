@@ -1,96 +1,53 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 3/4] dma: sh: provide a migration path for slave drivers
- to stop using .private
-Date: Thu, 12 Jul 2012 10:34:49 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1207121025020.19866@axis700.grange>
-References: <1341418663-24432-1-git-send-email-g.liakhovetski@gmx.de>
- <1341418663-24432-4-git-send-email-g.liakhovetski@gmx.de>
- <CANqRtoRz2NF6BEEYcy_BwZ7Hm5EF9zP2Z0eoQcbxaSfUuc2i9Q@mail.gmail.com>
- <20120712040018.GB11440@linux-sh.org>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20120712040018.GB11440@linux-sh.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: Paul Mundt <lethal@linux-sh.org>
-Cc: Magnus Damm <magnus.damm@gmail.com>, Vinod Koul <vinod.koul@intel.com>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: [PATCH v3 0/6] mmc: dw_mmc: add support for device tree based
+ instantiation
+Date: Thu, 12 Jul 2012 18:24:22 +0530
+Message-ID: <1342097668-25243-1-git-send-email-thomas.abraham@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:34014 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751225Ab2GLMkl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jul 2012 08:40:41 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
+Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org
 
-Hi Paul, Magnus
+This patch series adds device tree support for Synopsis Designware Mobile
+Storage Host Controller.
 
-On Thu, 12 Jul 2012, Paul Mundt wrote:
+The first patch converts the copy of controller device instance into a
+reference. This is need to allow device resource management api to correctly
+manage the resources allocated by the driver. The second patch fixes the
+incorrect abort of the probe in case a slot initialization fails. This is
+fixed by allowing as many slots to be initialized successfully and failing
+only if there are no slots that were initialized.
 
-> On Thu, Jul 12, 2012 at 06:55:32AM +0900, Magnus Damm wrote:
-> > Hi Guennadi,
-> > 
-> > [CC Paul]
-> > 
-> > On Thu, Jul 5, 2012 at 1:17 AM, Guennadi Liakhovetski
-> > <g.liakhovetski@gmx.de> wrote:
-> > > This patch extends the sh dmaengine driver to support the preferred channel
-> > > selection and configuration method, instead of using the "private" field
-> > > from struct dma_chan. We add a standard filter function to be used by
-> > > slave drivers instead of implementing their own ones, and add support for
-> > > the DMA_SLAVE_CONFIG control operation, which must accompany the new
-> > > channel selection method. We still support the legacy .private channel
-> > > allocation method to cater for a smooth driver migration.
-> > >
-> > > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > > ---
-> > 
-> > Thanks for your efforts on this. Something that caught my eye in this
-> > patch is this portion:
-> > 
-> > +bool shdma_chan_filter(struct dma_chan *chan, void *arg);
-> > 
-> > If we would use this function in our DMA Engine slave drivers (MMCIF,
-> > SDHI, SCIF, FSI, SIU and so on) then wouldn't we add a strict
-> > dependency on this symbol provided by this particular DMA Engine
-> > driver implementation for the DMAC hardware (that your patch
-> > modifies)?
+The third patch adds clock lookup in the driver and this is optional. Platforms
+that do not need any clock gating and control for the dw_mmc controllers will
+not be affected with this change. The fourth patch adds a quirk to notify the
+controller about the absence of the write protect line.
 
-This dependency is nothing new. Now all those drivers depend on shdma too, 
-though, in a softer way - by using struct sh_dmae_slave. That struct is 
-defined in include/linux/sh_dma.h and so we _could_ reuse it between 
-several sh(-mobile) DMAC variants, but IIUC, there's currently no truly 
-reliable way to make DMA slave drive drivers completely generic. And this 
-will remain this way as long as DMA channel filtering is relying on an 
-opaque argument, specific to each DMAC driver.
+The fifth patch adds device tree based discovery support for the dw_mmc driver.
+The sixth patch add Samsung Exynos5250 specific extentions to the driver.
 
-Russell has shown in a mail, how this hard dependency can be sort of 
-eliminated by passing a string as a filter parameter. But then again - 
-this _only_ works with drivers, that use this method. Similarly any non 
-hardware-specific type could be used, e.g., an integer slave ID.
+This patchset is based on Samsung kernel tree's for-next branch with the
+mmc tree's mmc-next branch merged.
 
-Moreover, I've been told explicitly, that exporting filter functions from 
-respective DMAC drivers _is_ the correct way to use the current API...
+Thomas Abraham (6):
+  mmc: dw_mmc: convert copy of struct device in struct dw_mci to a reference
+  mmc: dw_mmc: allow probe to succeed even if one slot is initialized
+  mmc: dw_mmc: lookup for optional biu and ciu clocks
+  mmc: dw_mmc: add quirk to indicate missing write protect line
+  mmc: dw_mmc: add device tree support
+  mmc: dw_mmc: add samsung exynos5250 specific extentions
 
-> > And what do we do if we want to use the same DMA Engine slave driver
-> > with a different DMA Engine driver implementation?
-> > 
-> > From my point of view, there must be some better way to not have such
-> > tight dependencies between the DMA Engine slave consumer and the DMA
-> > Engine driver. Not sure what that looks like though. This symbol
-> > dependency is pretty far from great IMO.
-> > 
-> I vaguely recall this coming up before, and it wasn't acceptable then
-> either.
-> 
-> We will by no means be adding driver-specific hooks in to other drivers
-> that really couldn't care less what the underlying DMA engine driving
-> them is.
-> 
-> We already have CPUs with different DMA engines that can be used by the
-> same drivers. As I said the last time, this needs to be fixed in the
-> dmaengine framework, period.
+ .../devicetree/bindings/mmc/synposis-dw-mshc.txt   |  144 ++++++++
+ drivers/mmc/host/dw_mmc-pci.c                      |    2 +-
+ drivers/mmc/host/dw_mmc-pltfm.c                    |   41 +++-
+ drivers/mmc/host/dw_mmc.c                          |  364 +++++++++++++++++---
+ drivers/mmc/host/dw_mmc.h                          |   23 ++
+ include/linux/mmc/dw_mmc.h                         |   17 +-
+ 6 files changed, 538 insertions(+), 53 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
 
-Sure, that's what my DMA mux-driver idea [1] is aiming to achieve.
-
-Thanks
-Guennadi
-
-[1] http://article.gmane.org/gmane.linux.ports.arm.omap/80357
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
