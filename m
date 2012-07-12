@@ -1,56 +1,58 @@
-From: Attila Kinali <attila@kinali.ch>
-Subject: Re: mmc: mxs: DEADLOCK
-Date: Thu, 12 Jul 2012 17:13:50 +0200
-Message-ID: <20120712171350.011ee50f582c10f962ba1e48@kinali.ch>
-References: <4FFC367A.8020100@bluegiga.com>
-	<20120711060607.GE14060@S2101-09.ap.freescale.net>
-	<20120712160008.03731746cdc5cf4bb0548256@kinali.ch>
-	<20120712143950.GA16343@S2101-09.ap.freescale.net>
+From: Chris Ball <cjb@laptop.org>
+Subject: [GIT PULL] MMC fixes for 3.5-rc7
+Date: Thu, 12 Jul 2012 15:15:28 -0400
+Message-ID: <87liiopz8v.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.opencsw.org ([82.220.5.51]:34224 "EHLO mail.opencsw.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932679Ab2GLPNx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 12 Jul 2012 11:13:53 -0400
-In-Reply-To: <20120712143950.GA16343@S2101-09.ap.freescale.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Lauri Hintsala <lauri.hintsala@bluegiga.com>, Marek Vasut <marex@denx.de>, Koen Beel <koen.beel@barco.com>, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, Veli-Pekka Peltola <veli-pekka.peltola@bluegiga.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Thu, 12 Jul 2012 22:39:53 +0800
-Shawn Guo <shawn.guo@linaro.org> wrote:
+Hi Linus,
 
-> > 
-> > I ran into the same problem today, but the proposed fix doesn't seem
-> > to work for me:
-> > 
-> It's a different problem from what Lauri reported and fixed.  
+Please pull from:
 
-Ok... 
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-fixes-for-3.5-rc7
 
-> I haven't
-> played SDIO card that much, so I'm not completely clear about the SDIO
-> calling sequence, but is it reasonable that mxs_mmc_enable_sdio_irq is
-> being called recursively?
+to receive two small MMC fixes for 3.5-rc7, both regressions against
+3.5-rc1.  There are no merge conflicts, and the patches have been tested
+in linux-next.  Thanks.
 
-I don't know. I dont know the code at all and not how the sdio system
-works. But a quick check shows, that mxs_mmc_enable_sdio_irq does not
-call any other function (besides readel, writel) and hence cannot call itself.
 
-For me it rather looks like that there seem to be two consequtive
-irqs that get passed to sdio_irq_thread which then calls 
-mxs_mmc_enable_sdio_irq.
+The following changes since commit 5db9a4d99b0157a513944e9a44d29c9cec2e91dc:
 
-But with my limited knowledge i cannot check this theory.
-Can anyone give me some hints how i could verify this?
+  cgroup: fix cgroup hierarchy umount race (2012-07-07 16:08:18 -0700)
 
-			Attila Kinali
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-fixes-for-3.5-rc7
+
+for you to fetch changes up to 623b51fc8642fd3c795fa9903be3adaa537ad9c5:
+
+  mmc: cd-gpio: pass IRQF_ONESHOT to request_threaded_irq() (2012-07-10 23:03:57 -0400)
+
+----------------------------------------------------------------
+MMC fixes for 3.5-rc7:
+ - Revert a patch that made failing to select power class fatal;
+   it turns out that it fails non-fatally on Tegra boards.
+   Regression against 3.5-rc1.
+ - Add the IRQF_ONESHOT flag to the cd-gpio driver, which turned
+   into a regression in 3.5-rc1 when IRQF_ONESHOT became required
+   for threaded IRQs with no handler.
+
+----------------------------------------------------------------
+Guennadi Liakhovetski (1):
+      mmc: cd-gpio: pass IRQF_ONESHOT to request_threaded_irq()
+
+Venkatraman S (1):
+      mmc: core: Revert "skip card initialization if power class selection fails"
+
+ drivers/mmc/core/cd-gpio.c |    4 ++--
+ drivers/mmc/core/mmc.c     |   18 +++++++++++-------
+ 2 files changed, 13 insertions(+), 9 deletions(-)
 
 -- 
-The trouble with you, Shev, is you don't say anything until you've saved
-up a whole truckload of damned heavy brick arguments and then you dump
-them all out and never look at the bleeding body mangled beneath the heap
-		-- Tirin, The Dispossessed, U. Le Guin
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
