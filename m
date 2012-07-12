@@ -1,135 +1,127 @@
-From: Thomas Abraham <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 3/6] mmc: dw_mmc: lookup for optional biu and ciu clocks
-Date: Thu, 12 Jul 2012 18:24:25 +0530
-Message-ID: <1342097668-25243-4-git-send-email-thomas.abraham@linaro.org>
-References: <1342097668-25243-1-git-send-email-thomas.abraham@linaro.org>
+From: Attila Kinali <attila@kinali.ch>
+Subject: Re: mmc: mxs: DEADLOCK
+Date: Thu, 12 Jul 2012 16:00:08 +0200
+Message-ID: <20120712160008.03731746cdc5cf4bb0548256@kinali.ch>
+References: <4FFC367A.8020100@bluegiga.com>
+ <20120711060607.GE14060@S2101-09.ap.freescale.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-reply-to: <1342097668-25243-1-git-send-email-thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Cc: linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20120711060607.GE14060@S2101-09.ap.freescale.net>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: Marek Vasut <marex@denx.de>, Koen Beel <koen.beel@barco.com>, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, Lauri Hintsala <lauri.hintsala@bluegiga.com>, Veli-Pekka Peltola <veli-pekka.peltola@bluegiga.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Some platforms allow for clock gating and control of bus interface unit clock
-and card interface unit clock. Add support for clock lookup of optional biu
-and ciu clocks for clock gating and clock speed determination.
+On Wed, 11 Jul 2012 14:06:09 +0800
+Shawn Guo <shawn.guo@linaro.org> wrote:
 
-Signed-off-by: Abhilash Kesavan <a.kesavan-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Signed-off-by: Thomas Abraham <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/mmc/host/dw_mmc.c  |   42 +++++++++++++++++++++++++++++++++++++++---
- include/linux/mmc/dw_mmc.h |    4 ++++
- 2 files changed, 43 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index cd58063..679473c 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1953,18 +1953,38 @@ int dw_mci_probe(struct dw_mci *host)
- 		return -ENODEV;
- 	}
- 
--	if (!host->pdata->bus_hz) {
-+	host->biu_clk = clk_get(host->dev, "biu");
-+	if (IS_ERR(host->biu_clk))
-+		dev_dbg(host->dev, "biu clock not available\n");
-+	else
-+		clk_prepare_enable(host->biu_clk);
-+
-+	host->ciu_clk = clk_get(host->dev, "ciu");
-+	if (IS_ERR(host->ciu_clk))
-+		dev_dbg(host->dev, "ciu clock not available\n");
-+	else
-+		clk_prepare_enable(host->ciu_clk);
-+
-+	if (IS_ERR(host->ciu_clk))
-+		host->bus_hz = host->pdata->bus_hz;
-+	else
-+		host->bus_hz = clk_get_rate(host->ciu_clk);
-+
-+	if (!host->bus_hz) {
- 		dev_err(host->dev,
- 			"Platform data must supply bus speed\n");
--		return -ENODEV;
-+		ret = -ENODEV;
-+		goto err_clk;
- 	}
- 
--	host->bus_hz = host->pdata->bus_hz;
- 	host->quirks = host->pdata->quirks;
- 
- 	spin_lock_init(&host->lock);
- 	INIT_LIST_HEAD(&host->queue);
- 
-+	host->dma_ops = host->pdata->dma_ops;
-+	dw_mci_init_dma(host);
-+
- 	/*
- 	 * Get the host data width - this assumes that HCON has been set with
- 	 * the correct values.
-@@ -2109,6 +2129,16 @@ err_dmaunmap:
- 		regulator_disable(host->vmmc);
- 		regulator_put(host->vmmc);
- 	}
-+
-+err_clk:
-+	if (!IS_ERR(host->ciu_clk)) {
-+		clk_disable_unprepare(host->ciu_clk);
-+		clk_put(host->ciu_clk);
-+	}
-+	if (!IS_ERR(host->biu_clk)) {
-+		clk_disable_unprepare(host->biu_clk);
-+		clk_put(host->biu_clk);
-+	}
- 	return ret;
- }
- EXPORT_SYMBOL(dw_mci_probe);
-@@ -2142,6 +2172,12 @@ void dw_mci_remove(struct dw_mci *host)
- 		regulator_put(host->vmmc);
- 	}
- 
-+	if (!IS_ERR(host->ciu_clk))
-+		clk_disable_unprepare(host->ciu_clk);
-+	if (!IS_ERR(host->biu_clk))
-+		clk_disable_unprepare(host->biu_clk);
-+	clk_put(host->ciu_clk);
-+	clk_put(host->biu_clk);
- }
- EXPORT_SYMBOL(dw_mci_remove);
- 
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index a37a573..787ad56 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -78,6 +78,8 @@ struct mmc_data;
-  * @data_offset: Set the offset of DATA register according to VERID.
-  * @dev: Device associated with the MMC controller.
-  * @pdata: Platform data associated with the MMC controller.
-+ * @biu_clk: Pointer to bus interface unit clock instance.
-+ * @ciu_clk: Pointer to card interface unit clock instance.
-  * @slot: Slots sharing this MMC controller.
-  * @fifo_depth: depth of FIFO.
-  * @data_shift: log2 of FIFO item size.
-@@ -158,6 +160,8 @@ struct dw_mci {
- 	u16			data_offset;
- 	struct device		*dev;
- 	struct dw_mci_board	*pdata;
-+	struct clk		*biu_clk;
-+	struct clk		*ciu_clk;
- 	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
- 
- 	/* FIFO push and pull */
+> > I found a way to fix this issue:
+> > 
+> > --- a/drivers/mmc/host/mxs-mmc.c
+> > +++ b/drivers/mmc/host/mxs-mmc.c
+> > @@ -278,11 +278,11 @@ static irqreturn_t mxs_mmc_irq_handler(int
+> > irq, void *dev_id)
+> >  	writel(stat & MXS_MMC_IRQ_BITS,
+> >  	       host->base + HW_SSP_CTRL1(host) + STMP_OFFSET_REG_CLR);
+> > 
+> > +	spin_unlock(&host->lock);
+> > +
+> >  	if ((stat & BM_SSP_CTRL1_SDIO_IRQ) && (stat & BM_SSP_CTRL1_SDIO_IRQ_EN))
+> >  		mmc_signal_sdio_irq(host->mmc);
+> > 
+> > -	spin_unlock(&host->lock);
+> > -
+> >  	if (stat & BM_SSP_CTRL1_RESP_TIMEOUT_IRQ)
+> >  		cmd->error = -ETIMEDOUT;
+> >  	else if (stat & BM_SSP_CTRL1_RESP_ERR_IRQ)
+> > 
+> > 
+> > Is there any reason to keep mmc_signal_sdio_irq inside the spinlock?
+> > mmc_signal_sdio_irq calls mxs_mmc_enable_sdio_irq and it tries to
+> > acquire lock while it is already acquired.
+> > 
+> The fix looks right to me.  You can have my ack when you send a patch
+> for it.
+> 
+> Acked-by: Shawn Guo <shawn.guo@linaro.org>
+
+I ran into the same problem today, but the proposed fix doesn't seem
+to work for me:
+
+---schnipp---
+# modprobe libertas_sdio
+[   59.200000] lib80211: common routines for IEEE802.11 drivers
+[   59.240000] cfg80211: Calling CRDA to update world regulatory domain
+[   59.320000] libertas_sdio: Libertas SDIO driver
+[   59.330000] libertas_sdio: Copyright Pierre Ossman
+# modprobe mxs-mmc
+[   64.210000] mxs-mmc 80010000.ssp: initialized
+[   64.260000] mxs-mmc 80034000.ssp: initialized
+[   64.270000] mmc0: new SDIO card at address 0001
+# [   65.440000] libertas_sdio mmc0:0001:1: (unregistered net_device): 00:13:04:80:00:3f, fw 9.70.3p24, cap 0x00000303
+[   65.470000] 
+[   65.470000] =============================================
+[   65.470000] [ INFO: possible recursive locking detected ]
+[   65.470000] 3.5.0-rc5 #2 Not tainted
+[   65.470000] ---------------------------------------------
+[   65.470000] ksdioirqd/mmc0/73 is trying to acquire lock:
+[   65.470000]  (&(&host->lock)->rlock#2){-.-...}, at: [<bf054120>] mxs_mmc_enable_sdio_irq+0x18/0xdc [mxs_mmc]
+[   65.470000] 
+[   65.470000] but task is already holding lock:
+[   65.470000]  (&(&host->lock)->rlock#2){-.-...}, at: [<bf054120>] mxs_mmc_enable_sdio_irq+0x18/0xdc [mxs_mmc]
+[   65.470000] 
+[   65.470000] other info that might help us debug this:
+[   65.470000]  Possible unsafe locking scenario:
+[   65.470000] 
+[   65.470000]        CPU0
+[   65.470000]        ----
+[   65.470000]   lock(&(&host->lock)->rlock#2);
+[   65.470000]   lock(&(&host->lock)->rlock#2);
+[   65.470000] 
+[   65.470000]  *** DEADLOCK ***
+[   65.470000] 
+[   65.470000]  May be due to missing lock nesting notation
+[   65.470000] 
+[   65.470000] 1 lock held by ksdioirqd/mmc0/73:
+[   65.470000]  #0:  (&(&host->lock)->rlock#2){-.-...}, at: [<bf054120>] mxs_mmc_enable_sdio_irq+0x18/0xdc [mxs_mmc]
+[   65.470000] 
+[   65.470000] stack backtrace:
+[   65.470000] [<c0014990>] (unwind_backtrace+0x0/0xf4) from [<c005ccb8>] (__lock_acquire+0x14f8/0x1b98)
+[   65.470000] [<c005ccb8>] (__lock_acquire+0x14f8/0x1b98) from [<c005d3f8>] (lock_acquire+0xa0/0x108)
+[   65.470000] [<c005d3f8>] (lock_acquire+0xa0/0x108) from [<c02f671c>] (_raw_spin_lock_irqsave+0x48/0x5c)
+[   65.470000] [<c02f671c>] (_raw_spin_lock_irqsave+0x48/0x5c) from [<bf054120>] (mxs_mmc_enable_sdio_irq+0x18/0xdc [mxs_mmc])
+[   65.470000] [<bf054120>] (mxs_mmc_enable_sdio_irq+0x18/0xdc [mxs_mmc]) from [<bf0541d0>] (mxs_mmc_enable_sdio_irq+0xc8/0xdc [mxs_mmc])
+[   65.470000] [<bf0541d0>] (mxs_mmc_enable_sdio_irq+0xc8/0xdc [mxs_mmc]) from [<c0219b38>] (sdio_irq_thread+0x1bc/0x274)
+[   65.470000] [<c0219b38>] (sdio_irq_thread+0x1bc/0x274) from [<c003c324>] (kthread+0x8c/0x98)
+[   65.470000] [<c003c324>] (kthread+0x8c/0x98) from [<c00101ac>] (kernel_thread_exit+0x0/0x8)
+[   65.470000] BUG: spinlock lockup suspected on CPU#0, ksdioirqd/mmc0/73
+[   65.470000]  lock: 0xc3358724, .magic: dead4ead, .owner: ksdioirqd/mmc0/73, .owner_cpu: 0
+[   65.470000] [<c0014990>] (unwind_backtrace+0x0/0xf4) from [<c01b46b0>] (do_raw_spin_lock+0x100/0x144)
+[   65.470000] [<c01b46b0>] (do_raw_spin_lock+0x100/0x144) from [<c02f6724>] (_raw_spin_lock_irqsave+0x50/0x5c)
+[   65.470000] [<c02f6724>] (_raw_spin_lock_irqsave+0x50/0x5c) from [<bf054120>] (mxs_mmc_enable_sdio_irq+0x18/0xdc [mxs_mmc])
+[   65.470000] [<bf054120>] (mxs_mmc_enable_sdio_irq+0x18/0xdc [mxs_mmc]) from [<bf0541d0>] (mxs_mmc_enable_sdio_irq+0xc8/0xdc [mxs_mmc])
+[   65.470000] [<bf0541d0>] (mxs_mmc_enable_sdio_irq+0xc8/0xdc [mxs_mmc]) from [<c0219b38>] (sdio_irq_thread+0x1bc/0x274)
+[   65.470000] [<c0219b38>] (sdio_irq_thread+0x1bc/0x274) from [<c003c324>] (kthread+0x8c/0x98)
+[   65.470000] [<c003c324>] (kthread+0x8c/0x98) from [<c00101ac>] (kernel_thread_exit+0x0/0x8)
+---schnapp---
+
+Any hints how to work around or fix this, would be appreciated
+
+			Attila Kinali
+
 -- 
-1.6.6.rc2
+It is upon moral qualities that a society is ultimately founded. All 
+the prosperity and technological sophistication in the world is of no 
+use without that foundation.
+                 -- Miss Matheson, The Diamond Age, Neil Stephenson
