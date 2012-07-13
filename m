@@ -1,59 +1,41 @@
-From: y@pengutronix.de
-Subject: [PATCH 09/11] mmc/omap_hsmmc: add a const qualifier
-Date: Fri, 13 Jul 2012 14:32:12 +0200
-Message-ID: <46831.7579165616$1342182836@news.gmane.org>
+From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+Subject: Re: [PATCH 00/11] make struct of_device_id.data const
+Date: Fri, 13 Jul 2012 14:39:08 +0200
+Message-ID: <20120713123908.GF592@pengutronix.de>
 References: <1342182734-321-1-git-send-email-y>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+Content-Disposition: inline
 In-Reply-To: <1342182734-321-1-git-send-email-y>
-Sender: linux-omap-owner@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>, Arnd Bergmann <arnd@arndb.de>
-Cc: kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org, devicetree-discuss@lists.ozlabs.org, Rob Herring <rob.herring@calxeda.com>, =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>, Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>, Balaji T K <balajitk@ti.com>, Rajendra Nayak <rnayak@ti.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>
+Cc: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linus Walleij <linus.walleij-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Wolfram Sang <w.sang-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>, Alan Cox <alan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-=46rom: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
+Hello,
 
-This prepares of_device_id.data becoming const. Without this change
-the following warning would occur:
+On Fri, Jul 13, 2012 at 02:32:02PM +0200, y@pengutronix.de wrote:
+This is utter non-sense, it was me who sent these mails (and pressed 'y'
+when git send-email asked if "Uwe Kleine-K=F6nig
+<u.kleine-koenig-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>" is the right sender). Please make sure
+to correct this when replying to the patches.
 
-	drivers/mmc/host/omap_hsmmc.c: In function 'omap_hsmmc_probe':
-	drivers/mmc/host/omap_hsmmc.c:1808: warning: initialization discards q=
-ualifiers from pointer target type
+Sorry for the inconvenience.
 
-Signed-off-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Venkatraman S <svenkatr@ti.com>
-Cc: Balaji T K <balajitk@ti.com>
-Cc: Rajendra Nayak <rnayak@ti.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-omap@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
----
- drivers/mmc/host/omap_hsmmc.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Best regards
+Uwe
+-- =
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmm=
-c.c
-index 389a3ee..5bcd043 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1805,7 +1805,7 @@ static int __devinit omap_hsmmc_probe(struct plat=
-form_device *pdev)
- 	if (match) {
- 		pdata =3D of_get_hsmmc_pdata(&pdev->dev);
- 		if (match->data) {
--			u16 *offsetp =3D match->data;
-+			const u16 *offsetp =3D match->data;
- 			pdata->reg_offset =3D *offsetp;
- 		}
- 	}
---=20
-1.7.10.4
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
