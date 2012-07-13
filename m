@@ -1,120 +1,132 @@
 From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH] mmc: dw-mmc: retry to send when inform ciu
-Date: Fri, 13 Jul 2012 12:19:36 +0530
-Message-ID: <CAGxe1ZGu9AiDxxmgN30h=ZvVE9-EGaqgUyXE9BSyrxED-WuthA@mail.gmail.com>
-References: <4FFF9CD7.6000904@samsung.com>
+Subject: Re: [PATCH v3 3/6] mmc: dw_mmc: lookup for optional biu and ciu clocks
+Date: Fri, 13 Jul 2012 14:41:35 +0530
+Message-ID: <CAGxe1ZGMvrec-nEYdZJ84Hub0fByYvnkCY_dRq2k489gCRSxQg@mail.gmail.com>
+References: <1342097668-25243-1-git-send-email-thomas.abraham@linaro.org>
+	<1342097668-25243-4-git-send-email-thomas.abraham@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:43303 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752440Ab2GMGth (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jul 2012 02:49:37 -0400
-Received: by qcro28 with SMTP id o28so1986396qcr.19
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Jul 2012 23:49:36 -0700 (PDT)
-In-Reply-To: <4FFF9CD7.6000904@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1342097668-25243-4-git-send-email-thomas.abraham@linaro.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Thomas Abraham <thomas.abraham@linaro.org>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-On 13 July 2012 09:28, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> As DesignWare spec, when inform ciu, waiting for clearing start_bit
-> or HLE is set. In case of HLE, repeat the command.
+On 12 July 2012 18:24, Thomas Abraham <thomas.abraham@linaro.org> wrote:
+> Some platforms allow for clock gating and control of bus interface unit clock
+> and card interface unit clock. Add support for clock lookup of optional biu
+> and ciu clocks for clock gating and clock speed determination.
 >
-> Before the patch, repeat the below message.
-> mmc_host mmc0: Timeout sending command (cmd 0x202000 arg 0x0 status 0x80202000)
-> If this message is produced, repeat the send command during 10 times.
-I dont understand what the above message. its not clear. can you
-please explain it
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
+> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
 > ---
->  drivers/mmc/host/dw_mmc.c |   39 +++++++++++++++++++++++++++++++--------
->  1 files changed, 31 insertions(+), 8 deletions(-)
+>  drivers/mmc/host/dw_mmc.c  |   42 +++++++++++++++++++++++++++++++++++++++---
+>  include/linux/mmc/dw_mmc.h |    4 ++++
+>  2 files changed, 43 insertions(+), 3 deletions(-)
 >
 > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 72dc3cd..bec1a67 100644
+> index cd58063..679473c 100644
 > --- a/drivers/mmc/host/dw_mmc.c
 > +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -603,7 +603,7 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
+> @@ -1953,18 +1953,38 @@ int dw_mci_probe(struct dw_mci *host)
+>                 return -ENODEV;
 >         }
->  }
 >
-> -static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
-> +static int mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
->  {
->         struct dw_mci *host = slot->host;
->         unsigned long timeout = jiffies + msecs_to_jiffies(500);
-> @@ -616,11 +616,37 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
->         while (time_before(jiffies, timeout)) {
->                 cmd_status = mci_readl(host, CMD);
->                 if (!(cmd_status & SDMMC_CMD_START))
-> -                       return;
-> +                       return 0;
+> -       if (!host->pdata->bus_hz) {
+> +       host->biu_clk = clk_get(host->dev, "biu");
+> +       if (IS_ERR(host->biu_clk))
+> +               dev_dbg(host->dev, "biu clock not available\n");
+> +       else
+> +               clk_prepare_enable(host->biu_clk);
+> +
+> +       host->ciu_clk = clk_get(host->dev, "ciu");
+> +       if (IS_ERR(host->ciu_clk))
+> +               dev_dbg(host->dev, "ciu clock not available\n");
+> +       else
+> +               clk_prepare_enable(host->ciu_clk);
+> +
+> +       if (IS_ERR(host->ciu_clk))
+> +               host->bus_hz = host->pdata->bus_hz;
+> +       else
+> +               host->bus_hz = clk_get_rate(host->ciu_clk);
+> +
+> +       if (!host->bus_hz) {
+>                 dev_err(host->dev,
+>                         "Platform data must supply bus speed\n");
+> -               return -ENODEV;
+> +               ret = -ENODEV;
+> +               goto err_clk;
 >         }
->         dev_err(&slot->mmc->class_dev,
->                 "Timeout sending command (cmd %#x arg %#x status %#x)\n",
->                 cmd, arg, cmd_status);
+>
+> -       host->bus_hz = host->pdata->bus_hz;
+>         host->quirks = host->pdata->quirks;
+>
+>         spin_lock_init(&host->lock);
+>         INIT_LIST_HEAD(&host->queue);
+>
+> +       host->dma_ops = host->pdata->dma_ops;
+> +       dw_mci_init_dma(host);
+This initialization is already done.
 > +
-> +       return -ETIMEDOUT;
-> +}
+>         /*
+>          * Get the host data width - this assumes that HCON has been set with
+>          * the correct values.
+> @@ -2109,6 +2129,16 @@ err_dmaunmap:
+>                 regulator_disable(host->vmmc);
+>                 regulator_put(host->vmmc);
+>         }
 > +
-> +static void dw_mci_inform_ciu(struct dw_mci_slot *slot)
-> +{
-> +       struct dw_mci *host = slot->host;
-> +       unsigned long retry = 10;
-> +       int ret;
-> +       u32 ctrl;
-> +
-> +       while (1) {
-> +               ret = mci_send_cmd(slot,
-> +                    SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
-> +               if (!ret)
-> +                       break;
-the returned error type is timeout. Is it not necessary to read and
-check the HLE bit here before resending.
-> +               ctrl = mci_readl(host, CTRL);
-> +               ctrl |= SDMMC_CTRL_RESET;
-> +               mci_writel(host, CTRL, ctrl);
-> +
-> +               if (retry-- == 0) {
-> +                       dev_err(&slot->mmc->class_dev,"Timeout inform CIU\n");
-> +                       break;
-> +               } else
-> +                       dev_info(&slot->mmc->class_dev,"Retry send command\n");
+> +err_clk:
+> +       if (!IS_ERR(host->ciu_clk)) {
+> +               clk_disable_unprepare(host->ciu_clk);
+> +               clk_put(host->ciu_clk);
 > +       }
+> +       if (!IS_ERR(host->biu_clk)) {
+> +               clk_disable_unprepare(host->biu_clk);
+> +               clk_put(host->biu_clk);
+> +       }
+>         return ret;
 >  }
->
->  static void dw_mci_setup_bus(struct dw_mci_slot *slot)
-> @@ -649,23 +675,20 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
->                 mci_writel(host, CLKSRC, 0);
->
->                 /* inform CIU */
-> -               mci_send_cmd(slot,
-> -                            SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
-> +               dw_mci_inform_ciu(slot);
->
->                 /* set clock to desired speed */
->                 mci_writel(host, CLKDIV, div);
->
->                 /* inform CIU */
-> -               mci_send_cmd(slot,
-> -                            SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
-> +               dw_mci_inform_ciu(slot);
->
->                 /* enable clock */
->                 mci_writel(host, CLKENA, ((SDMMC_CLKEN_ENABLE |
->                            SDMMC_CLKEN_LOW_PWR) << slot->id));
->
->                 /* inform CIU */
-> -               mci_send_cmd(slot,
-> -                            SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
-> +               dw_mci_inform_ciu(slot);
->
->                 host->current_speed = slot->clock;
+>  EXPORT_SYMBOL(dw_mci_probe);
+> @@ -2142,6 +2172,12 @@ void dw_mci_remove(struct dw_mci *host)
+>                 regulator_put(host->vmmc);
 >         }
+>
+> +       if (!IS_ERR(host->ciu_clk))
+> +               clk_disable_unprepare(host->ciu_clk);
+> +       if (!IS_ERR(host->biu_clk))
+> +               clk_disable_unprepare(host->biu_clk);
+> +       clk_put(host->ciu_clk);
+> +       clk_put(host->biu_clk);
+>  }
+>  EXPORT_SYMBOL(dw_mci_remove);
+>
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index a37a573..787ad56 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -78,6 +78,8 @@ struct mmc_data;
+>   * @data_offset: Set the offset of DATA register according to VERID.
+>   * @dev: Device associated with the MMC controller.
+>   * @pdata: Platform data associated with the MMC controller.
+> + * @biu_clk: Pointer to bus interface unit clock instance.
+> + * @ciu_clk: Pointer to card interface unit clock instance.
+>   * @slot: Slots sharing this MMC controller.
+>   * @fifo_depth: depth of FIFO.
+>   * @data_shift: log2 of FIFO item size.
+> @@ -158,6 +160,8 @@ struct dw_mci {
+>         u16                     data_offset;
+>         struct device           *dev;
+>         struct dw_mci_board     *pdata;
+> +       struct clk              *biu_clk;
+> +       struct clk              *ciu_clk;
+>         struct dw_mci_slot      *slot[MAX_MCI_SLOTS];
+>
+>         /* FIFO push and pull */
+> --
+> 1.6.6.rc2
+>
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
