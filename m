@@ -1,133 +1,58 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH v3 3/6] mmc: dw_mmc: lookup for optional biu and ciu clocks
-Date: Fri, 13 Jul 2012 14:41:35 +0530
-Message-ID: <CAGxe1ZGMvrec-nEYdZJ84Hub0fByYvnkCY_dRq2k489gCRSxQg@mail.gmail.com>
-References: <1342097668-25243-1-git-send-email-thomas.abraham@linaro.org>
-	<1342097668-25243-4-git-send-email-thomas.abraham@linaro.org>
+From: y@pengutronix.de
+Subject: [PATCH 09/11] mmc/omap_hsmmc: add a const qualifier
+Date: Fri, 13 Jul 2012 14:32:12 +0200
+Message-ID: <14117.549340199$1342182819@news.gmane.org>
+References: <1342182734-321-1-git-send-email-y>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1342097668-25243-4-git-send-email-thomas.abraham@linaro.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Thomas Abraham <thomas.abraham@linaro.org>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:52253 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933218Ab2GMMdV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jul 2012 08:33:21 -0400
+In-Reply-To: <1342182734-321-1-git-send-email-y>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Grant Likely <grant.likely@secretlab.ca>, Arnd Bergmann <arnd@arndb.de>
+Cc: kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org, devicetree-discuss@lists.ozlabs.org, Rob Herring <rob.herring@calxeda.com>, =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>, Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>, Balaji T K <balajitk@ti.com>, Rajendra Nayak <rnayak@ti.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On 12 July 2012 18:24, Thomas Abraham <thomas.abraham@linaro.org> wrote:
-> Some platforms allow for clock gating and control of bus interface unit clock
-> and card interface unit clock. Add support for clock lookup of optional biu
-> and ciu clocks for clock gating and clock speed determination.
->
-> Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
-> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
-> ---
->  drivers/mmc/host/dw_mmc.c  |   42 +++++++++++++++++++++++++++++++++++++++---
->  include/linux/mmc/dw_mmc.h |    4 ++++
->  2 files changed, 43 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index cd58063..679473c 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1953,18 +1953,38 @@ int dw_mci_probe(struct dw_mci *host)
->                 return -ENODEV;
->         }
->
-> -       if (!host->pdata->bus_hz) {
-> +       host->biu_clk = clk_get(host->dev, "biu");
-> +       if (IS_ERR(host->biu_clk))
-> +               dev_dbg(host->dev, "biu clock not available\n");
-> +       else
-> +               clk_prepare_enable(host->biu_clk);
-> +
-> +       host->ciu_clk = clk_get(host->dev, "ciu");
-> +       if (IS_ERR(host->ciu_clk))
-> +               dev_dbg(host->dev, "ciu clock not available\n");
-> +       else
-> +               clk_prepare_enable(host->ciu_clk);
-> +
-> +       if (IS_ERR(host->ciu_clk))
-> +               host->bus_hz = host->pdata->bus_hz;
-> +       else
-> +               host->bus_hz = clk_get_rate(host->ciu_clk);
-> +
-> +       if (!host->bus_hz) {
->                 dev_err(host->dev,
->                         "Platform data must supply bus speed\n");
-> -               return -ENODEV;
-> +               ret = -ENODEV;
-> +               goto err_clk;
->         }
->
-> -       host->bus_hz = host->pdata->bus_hz;
->         host->quirks = host->pdata->quirks;
->
->         spin_lock_init(&host->lock);
->         INIT_LIST_HEAD(&host->queue);
->
-> +       host->dma_ops = host->pdata->dma_ops;
-> +       dw_mci_init_dma(host);
-This initialization is already done.
-> +
->         /*
->          * Get the host data width - this assumes that HCON has been set with
->          * the correct values.
-> @@ -2109,6 +2129,16 @@ err_dmaunmap:
->                 regulator_disable(host->vmmc);
->                 regulator_put(host->vmmc);
->         }
-> +
-> +err_clk:
-> +       if (!IS_ERR(host->ciu_clk)) {
-> +               clk_disable_unprepare(host->ciu_clk);
-> +               clk_put(host->ciu_clk);
-> +       }
-> +       if (!IS_ERR(host->biu_clk)) {
-> +               clk_disable_unprepare(host->biu_clk);
-> +               clk_put(host->biu_clk);
-> +       }
->         return ret;
->  }
->  EXPORT_SYMBOL(dw_mci_probe);
-> @@ -2142,6 +2172,12 @@ void dw_mci_remove(struct dw_mci *host)
->                 regulator_put(host->vmmc);
->         }
->
-> +       if (!IS_ERR(host->ciu_clk))
-> +               clk_disable_unprepare(host->ciu_clk);
-> +       if (!IS_ERR(host->biu_clk))
-> +               clk_disable_unprepare(host->biu_clk);
-> +       clk_put(host->ciu_clk);
-> +       clk_put(host->biu_clk);
->  }
->  EXPORT_SYMBOL(dw_mci_remove);
->
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index a37a573..787ad56 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -78,6 +78,8 @@ struct mmc_data;
->   * @data_offset: Set the offset of DATA register according to VERID.
->   * @dev: Device associated with the MMC controller.
->   * @pdata: Platform data associated with the MMC controller.
-> + * @biu_clk: Pointer to bus interface unit clock instance.
-> + * @ciu_clk: Pointer to card interface unit clock instance.
->   * @slot: Slots sharing this MMC controller.
->   * @fifo_depth: depth of FIFO.
->   * @data_shift: log2 of FIFO item size.
-> @@ -158,6 +160,8 @@ struct dw_mci {
->         u16                     data_offset;
->         struct device           *dev;
->         struct dw_mci_board     *pdata;
-> +       struct clk              *biu_clk;
-> +       struct clk              *ciu_clk;
->         struct dw_mci_slot      *slot[MAX_MCI_SLOTS];
->
->         /* FIFO push and pull */
-> --
-> 1.6.6.rc2
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+=46rom: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
+
+This prepares of_device_id.data becoming const. Without this change
+the following warning would occur:
+
+	drivers/mmc/host/omap_hsmmc.c: In function 'omap_hsmmc_probe':
+	drivers/mmc/host/omap_hsmmc.c:1808: warning: initialization discards q=
+ualifiers from pointer target type
+
+Signed-off-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Venkatraman S <svenkatr@ti.com>
+Cc: Balaji T K <balajitk@ti.com>
+Cc: Rajendra Nayak <rnayak@ti.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-omap@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
+---
+ drivers/mmc/host/omap_hsmmc.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmm=
+c.c
+index 389a3ee..5bcd043 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1805,7 +1805,7 @@ static int __devinit omap_hsmmc_probe(struct plat=
+form_device *pdev)
+ 	if (match) {
+ 		pdata =3D of_get_hsmmc_pdata(&pdev->dev);
+ 		if (match->data) {
+-			u16 *offsetp =3D match->data;
++			const u16 *offsetp =3D match->data;
+ 			pdata->reg_offset =3D *offsetp;
+ 		}
+ 	}
+--=20
+1.7.10.4
+
