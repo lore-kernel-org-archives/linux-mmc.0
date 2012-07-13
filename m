@@ -1,302 +1,118 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH v4 2/2] mmc: block: Add write packing control
-Date: Thu, 12 Jul 2012 13:56:05 -0700 (PDT)
-Message-ID: <01e04d3a64b3adeb1d491088b7b4970e.squirrel@www.codeaurora.org>
-References: <n> <1341231337-6921-3-git-send-email-merez@codeaurora.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: dw-mmc: retry to send when inform ciu
+Date: Fri, 13 Jul 2012 12:58:15 +0900
+Message-ID: <4FFF9CD7.6000904@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1341231337-6921-3-git-send-email-merez@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:59326 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752901Ab2GMD61 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jul 2012 23:58:27 -0400
+Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M72006MOZ1DQL20@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 13 Jul 2012 12:58:26 +0900 (KST)
+Received: from [10.90.51.55] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0M7200810Z1CVZ50@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 13 Jul 2012 12:58:25 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Chris,
+As DesignWare spec, when inform ciu, waiting for clearing start_bit
+or HLE is set. In case of HLE, repeat the command.
 
-Can we push this change to mmc-next?
+Before the patch, repeat the below message.
+mmc_host mmc0: Timeout sending command (cmd 0x202000 arg 0x0 status 0x80202000)
+If this message is produced, repeat the send command during 10 times.
 
-Thanks,
-Maya
-On Mon, July 2, 2012 5:15 am, Maya Erez wrote:
-> The write packing control will ensure that read requests latency is
-> not increased due to long write packed commands.
->
-> The trigger for enabling the write packing is managing to pack several
-> write requests. The number of potential packed requests that will trigger
-> the packing can be configured via sysfs by writing the required value to:
-> /sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
-> The trigger for disabling the write packing is fetching a read request.
->
-> Signed-off-by: Maya Erez <merez@codeaurora.org>
->
-> diff --git a/Documentation/mmc/mmc-dev-attrs.txt
-> b/Documentation/mmc/mmc-dev-attrs.txt
-> index 22ae844..f4a48a8 100644
-> --- a/Documentation/mmc/mmc-dev-attrs.txt
-> +++ b/Documentation/mmc/mmc-dev-attrs.txt
-> @@ -8,6 +8,23 @@ The following attributes are read/write.
->
->  	force_ro		Enforce read-only access even if write protect switch is off.
->
-> +	num_wr_reqs_to_start_packing 	This attribute is used to determine
-> +	the trigger for activating the write packing, in case the write
-> +	packing control feature is enabled.
-> +
-> +	When the MMC manages to reach a point where num_wr_reqs_to_start_packing
-> +	write requests could be packed, it enables the write packing feature.
-> +	This allows us to start the write packing only when it is beneficial
-> +	and has minimum affect on the read latency.
-> +
-> +	The number of potential packed requests that will trigger the packing
-> +	can be configured via sysfs by writing the required value to:
-> +	/sys/block/<block_dev_name>/mmc/num_wr_reqs_to_start_packing.
-> +
-> +	The default value of num_wr_reqs_to_start_packing was determined by
-> +	running parallel lmdd write and lmdd read operations and calculating
-> +	the max number of packed writes requests.
-> +
->  SD and MMC Device Attributes
->  ============================
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index c23034d..3d13d5f 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -114,6 +114,7 @@ struct mmc_blk_data {
->  	struct device_attribute force_ro;
->  	struct device_attribute power_ro_lock;
->  	int	area_type;
-> +	struct device_attribute num_wr_reqs_to_start_packing;
->
->  	struct kobject kobj;
->  	struct kobj_type kobj_type;
-> @@ -329,6 +330,38 @@ out:
->  	return ret;
->  }
->
-> +static ssize_t
-> +num_wr_reqs_to_start_packing_show(struct device *dev,
-> +				  struct device_attribute *attr, char *buf)
-> +{
-> +	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
-> +	int num_wr_reqs_to_start_packing;
-> +	int ret;
-> +
-> +	num_wr_reqs_to_start_packing = md->queue.num_wr_reqs_to_start_packing;
-> +
-> +	ret = snprintf(buf, PAGE_SIZE, "%d\n", num_wr_reqs_to_start_packing);
-> +
-> +	mmc_blk_put(md);
-> +	return ret;
-> +}
-> +
-> +static ssize_t
-> +num_wr_reqs_to_start_packing_store(struct device *dev,
-> +				 struct device_attribute *attr,
-> +				 const char *buf, size_t count)
-> +{
-> +	int value;
-> +	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
-> +
-> +	sscanf(buf, "%d", &value);
-> +	if (value >= 0)
-> +		md->queue.num_wr_reqs_to_start_packing = value;
-> +
-> +	mmc_blk_put(md);
-> +	return count;
-> +}
-> +
->  static int mmc_blk_open(struct block_device *bdev, fmode_t mode)
->  {
->  	struct mmc_blk_data *md = mmc_blk_get(bdev->bd_disk);
-> @@ -1344,6 +1377,49 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req
-> *mqrq,
->  	mmc_queue_bounce_pre(mqrq);
->  }
->
-> +static void mmc_blk_write_packing_control(struct mmc_queue *mq,
-> +					  struct request *req)
-> +{
-> +	struct mmc_host *host = mq->card->host;
-> +	int data_dir;
-> +
-> +	if (!(host->caps2 & MMC_CAP2_PACKED_WR))
-> +		return;
-> +
-> +	/*
-> +	 * In case the packing control is not supported by the host, it should
-> +	 * not have an effect on the write packing. Therefore we have to enable
-> +	 * the write packing
-> +	 */
-> +	if (!(host->caps2 & MMC_CAP2_PACKED_WR_CONTROL)) {
-> +		mq->wr_packing_enabled = true;
-> +		return;
-> +	}
-> +
-> +	if (!req || (req && (req->cmd_flags & REQ_FLUSH))) {
-> +		if (mq->num_of_potential_packed_wr_reqs >
-> +				mq->num_wr_reqs_to_start_packing)
-> +			mq->wr_packing_enabled = true;
-> +		mq->num_of_potential_packed_wr_reqs = 0;
-> +		return;
-> +	}
-> +
-> +	data_dir = rq_data_dir(req);
-> +
-> +	if (data_dir == READ) {
-> +		mq->num_of_potential_packed_wr_reqs = 0;
-> +		mq->wr_packing_enabled = false;
-> +		return;
-> +	} else if (data_dir == WRITE) {
-> +		mq->num_of_potential_packed_wr_reqs++;
-> +	}
-> +
-> +	if (mq->num_of_potential_packed_wr_reqs >
-> +			mq->num_wr_reqs_to_start_packing)
-> +		mq->wr_packing_enabled = true;
-> +
-> +}
-> +
->  static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request
-> *req)
->  {
->  	struct request_queue *q = mq->queue;
-> @@ -1363,6 +1439,9 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue
-> *mq, struct request *req)
->  			!card->ext_csd.packed_event_en)
->  		goto no_packed;
->
-> +	if (!mq->wr_packing_enabled)
-> +		goto no_packed;
-> +
->  	if ((rq_data_dir(cur) == WRITE) &&
->  			(card->host->caps2 & MMC_CAP2_PACKED_WR))
->  		max_packed_rw = card->ext_csd.max_packed_writes;
-> @@ -1436,6 +1515,8 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue
-> *mq, struct request *req)
->  			break;
->  		}
->
-> +		if (rq_data_dir(next) == WRITE)
-> +			mq->num_of_potential_packed_wr_reqs++;
->  		list_add_tail(&next->queuelist, &mq->mqrq_cur->packed_list);
->  		cur = next;
->  		reqs++;
-> @@ -1821,7 +1902,9 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
-> struct request *req)
->  		goto out;
->  	}
->
-> -	if (req && req->cmd_flags & REQ_DISCARD) {
-> +	mmc_blk_write_packing_control(mq, req);
-> +
-> +	if (req && req->cmd_flags & REQ_DISCARD) {
->  		/* complete ongoing async transfer before issuing discard */
->  		if (card->host->areq)
->  			mmc_blk_issue_rw_rq(mq, NULL);
-> @@ -2057,6 +2140,8 @@ static void mmc_blk_remove_req(struct mmc_blk_data
-> *md)
->  					card->ext_csd.boot_ro_lockable)
->  				sysfs_remove_file(&md->kobj,
->  					&md->power_ro_lock.attr);
-> +			sysfs_remove_file(&md->kobj,
-> +				&md->num_wr_reqs_to_start_packing.attr);
->
->  			/* Stop new requests from getting into the queue */
->  			del_gendisk(md->disk);
-> @@ -2124,8 +2209,26 @@ static int mmc_add_disk(struct mmc_blk_data *md)
->  		if (ret)
->  			goto power_ro_lock_fail;
->  	}
-> +
-> +	md->num_wr_reqs_to_start_packing.show =
-> +		num_wr_reqs_to_start_packing_show;
-> +	md->num_wr_reqs_to_start_packing.store =
-> +		num_wr_reqs_to_start_packing_store;
-> +	sysfs_attr_init(&md->num_wr_reqs_to_start_packing.attr);
-> +	md->num_wr_reqs_to_start_packing.attr.name =
-> +		"num_wr_reqs_to_start_packing";
-> +	md->num_wr_reqs_to_start_packing.attr.mode = S_IRUGO | S_IWUSR;
-> +	ret = sysfs_create_file(&md->kobj,
-> +				&md->num_wr_reqs_to_start_packing.attr);
-> +	if (ret)
-> +		goto num_wr_reqs_to_start_packing_fail;
-> +
->  	return ret;
->
-> +num_wr_reqs_to_start_packing_fail:
-> +	if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
-> +	     card->ext_csd.boot_ro_lockable)
-> +		sysfs_remove_file(&md->kobj, &md->power_ro_lock.attr);
->  power_ro_lock_fail:
->  	sysfs_remove_file(&md->kobj, &md->force_ro.attr);
->  force_ro_fail:
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index 165d85a..79ef91b 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -25,6 +25,13 @@
->  #define MMC_QUEUE_SUSPENDED	(1 << 0)
->
->  /*
-> + * Based on benchmark tests the default num of requests to trigger the
-> write
-> + * packing was determined, to keep the read latency as low as possible
-> and
-> + * manage to keep the high write throughput.
-> + */
-> +#define DEFAULT_NUM_REQS_TO_START_PACK 17
-> +
-> +/*
->   * Prepare a MMC request. This just filters out odd stuff.
->   */
->  static int mmc_prep_request(struct request_queue *q, struct request *req)
-> @@ -181,6 +188,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct
-> mmc_card *card,
->  	mq->mqrq_cur = mqrq_cur;
->  	mq->mqrq_prev = mqrq_prev;
->  	mq->queue->queuedata = mq;
-> +	mq->num_wr_reqs_to_start_packing = DEFAULT_NUM_REQS_TO_START_PACK;
->
->  	blk_queue_prep_rq(mq->queue, mmc_prep_request);
->  	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
-> diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-> index 5e04938..93e4b59 100644
-> --- a/drivers/mmc/card/queue.h
-> +++ b/drivers/mmc/card/queue.h
-> @@ -45,6 +45,9 @@ struct mmc_queue {
->  	struct mmc_queue_req	mqrq[2];
->  	struct mmc_queue_req	*mqrq_cur;
->  	struct mmc_queue_req	*mqrq_prev;
-> +	bool			wr_packing_enabled;
-> +	int			num_of_potential_packed_wr_reqs;
-> +	int			num_wr_reqs_to_start_packing;
->  };
->
->  extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *,
-> spinlock_t *,
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index bb19b98..6a439ae 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -249,6 +249,7 @@ struct mmc_host {
->  #define MMC_CAP2_PACKED_WR	(1 << 11)	/* Allow packed write */
->  #define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
->  				 MMC_CAP2_PACKED_WR) /* Allow packed commands */
-> +#define MMC_CAP2_PACKED_WR_CONTROL (1 << 12) /* Allow write packing
-> control */
->
->  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
->  	unsigned int        power_notify_type;
-> --
-> 1.7.3.3
-> --
-> Sent by a consultant of the Qualcomm Innovation Center, Inc.
-> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
->
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c |   39 +++++++++++++++++++++++++++++++--------
+ 1 files changed, 31 insertions(+), 8 deletions(-)
 
-
--- 
-Sent by consultant of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 72dc3cd..bec1a67 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -603,7 +603,7 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
+ 	}
+ }
+ 
+-static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
++static int mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
+ {
+ 	struct dw_mci *host = slot->host;
+ 	unsigned long timeout = jiffies + msecs_to_jiffies(500);
+@@ -616,11 +616,37 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
+ 	while (time_before(jiffies, timeout)) {
+ 		cmd_status = mci_readl(host, CMD);
+ 		if (!(cmd_status & SDMMC_CMD_START))
+-			return;
++			return 0;
+ 	}
+ 	dev_err(&slot->mmc->class_dev,
+ 		"Timeout sending command (cmd %#x arg %#x status %#x)\n",
+ 		cmd, arg, cmd_status);
++
++	return -ETIMEDOUT;
++}
++
++static void dw_mci_inform_ciu(struct dw_mci_slot *slot)
++{
++	struct dw_mci *host = slot->host;
++	unsigned long retry = 10;
++	int ret;
++	u32 ctrl;
++
++	while (1) {
++		ret = mci_send_cmd(slot,
++		     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
++		if (!ret)
++			break;
++		ctrl = mci_readl(host, CTRL);
++		ctrl |= SDMMC_CTRL_RESET;
++		mci_writel(host, CTRL, ctrl);
++
++		if (retry-- == 0) {
++			dev_err(&slot->mmc->class_dev,"Timeout inform CIU\n");
++			break;
++		} else
++			dev_info(&slot->mmc->class_dev,"Retry send command\n");
++	}
+ }
+ 
+ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+@@ -649,23 +675,20 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+ 		mci_writel(host, CLKSRC, 0);
+ 
+ 		/* inform CIU */
+-		mci_send_cmd(slot,
+-			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
++		dw_mci_inform_ciu(slot);
+ 
+ 		/* set clock to desired speed */
+ 		mci_writel(host, CLKDIV, div);
+ 
+ 		/* inform CIU */
+-		mci_send_cmd(slot,
+-			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
++		dw_mci_inform_ciu(slot);
+ 
+ 		/* enable clock */
+ 		mci_writel(host, CLKENA, ((SDMMC_CLKEN_ENABLE |
+ 			   SDMMC_CLKEN_LOW_PWR) << slot->id));
+ 
+ 		/* inform CIU */
+-		mci_send_cmd(slot,
+-			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
++		dw_mci_inform_ciu(slot);
+ 
+ 		host->current_speed = slot->clock;
+ 	}
