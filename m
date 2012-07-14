@@ -1,31 +1,62 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH RESEND v4 1/2] mmc: card: Move MMC specific attributes to mmc sub-directory
-Date: Sat, 14 Jul 2012 14:59:48 -0400
-Message-ID: <87a9z2kw2j.fsf@octavius.laptop.org>
-References: <1342291613-3189-2-git-send-email-merez@codeaurora.org>
+Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
+Date: Sat, 14 Jul 2012 15:12:54 -0400
+Message-ID: <87629qkvgp.fsf@octavius.laptop.org>
+References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
+	<1338576911-17089-2-git-send-email-merez@codeaurora.org>
+	<CAFR8uefCD_WXDM6m+-XwG10+W0UXqOtK7_sxWD3uVckh3pnR-Q@mail.gmail.com>
+	<CAFR8uee7hWLC-h_abZOCEuqeUeuhDuJp74x3R-3n+c61xyfaPQ@mail.gmail.com>
+	<fb2303ea3a3a5470e76d1faa2abd471b.squirrel@www.codeaurora.org>
+	<CAFR8ueecGqw=JzAGVHV61-SqOnn_C-ryT54KCQCbKkJpXUGY9w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1342291613-3189-2-git-send-email-merez@codeaurora.org> (Maya
-	Erez's message of "Sat, 14 Jul 2012 21:46:52 +0300")
+In-Reply-To: <CAFR8ueecGqw=JzAGVHV61-SqOnn_C-ryT54KCQCbKkJpXUGY9w@mail.gmail.com>
+	(Muthu Kumar's message of "Wed, 13 Jun 2012 15:21:49 -0700")
 Sender: linux-arm-msm-owner@vger.kernel.org
-To: Maya Erez <merez@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
+To: Muthu Kumar <muthu.lkml@gmail.com>
+Cc: merez@codeaurora.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Sat, Jul 14 2012, Maya Erez wrote:
-> Separate MMC specific attributes from general block device
-> attributes and move them from the /sys/block/<BLOCK_DEV> directory
-> to /sys/block/<BLOCK_DEV>/mmc directory
+On Wed, Jun 13 2012, Muthu Kumar wrote:
+> On Wed, Jun 13, 2012 at 12:52 PM,  <merez@codeaurora.org> wrote:
+>>
+>> On Mon, June 11, 2012 5:28 pm, Muthu Kumar wrote:
+>>> On Mon, Jun 11, 2012 at 2:19 PM, Muthu Kumar <muthu.lkml@gmail.com> wrote:
+>>>> On Fri, Jun 1, 2012 at 11:55 AM, Maya Erez <merez@codeaurora.org> wrote:
+>>>>> trigger
+>>>>> the packing can be configured via sysfs by writing the required value
+>>>>> to:
+>>>>> /sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
+>>>>> The trigger for disabling the write packing is fetching a read request.
+>>>>>
+>>>>
+>>>> If it is applicable only to MMC why do we have this sysfs attr for all
+>>>> block devices?
+>>>
+>>> Just to be clear, please create a directory, say mmc, under
+>>> /sys/block/<dev>/ and create the attr inside that.
+>>>
+>>> You can refer to dm (dm-sysfs.c) for sample implementation.
+>> I understand why you think it would be best to distinguish the MMC
+>> specific attribute from the general block devices attributes.
+>> However, since this attribute is created only for the MMC block device,
+>> other block devices won't be aware of it.
+>
+> I understand its created by the MMC code so will not be there for
+> other block devices. But having the device specific attributes inside
+> one <device> directory is better/cleaner. And since we are already
+> following that model for other devices, why not follow that for MMC
+> also?
 
-I don't think we can do this, even though the change is a good one.
-What happens if someone has userspace scripts that manipulate force_ro,
-or ro_lock_until_next_power_on?
+I've already replied to a later version of the patch, but just to get
+this comment in at the appropriate point of the discussion as well:
 
-sysfs isn't a firmly stable kernel ABI, but I think it's much closer
-to one than this patch implies.
+Even though it would result in a cleaner sysfs, I don't want to do
+this now because it will break userspace scripts that are depending
+on the current locations of these attributes.
 
 Thanks,
 
