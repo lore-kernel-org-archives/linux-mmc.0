@@ -1,40 +1,48 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: [PATCH] mmc: core: skip mmc_power_up call from start host
-Date: Fri, 13 Jul 2012 18:27:15 +0530
-Message-ID: <1342184235-6912-1-git-send-email-girish.shivananjappa@linaro.org>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
+From: Maya Erez <merez@codeaurora.org>
+Subject: [PATCH RESEND v4 0/2] mmc: block: Add write packing control
+Date: Sat, 14 Jul 2012 21:46:51 +0300
+Message-ID: <1342291613-3189-1-git-send-email-merez@codeaurora.org>
+References: <n>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <n>
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The call to the mmc_power_up during the mmc_start_host breaks the card
-detection in design-ware host controller. This patch removes the call to
-mmc_power_up function during host start.
+Our experiments showed that the write packing causes degradation of the read
+throughput, in parallel read and write operations.
+Since the read latency is critical for user experience we added a write packing control
+mechanism that disables the write packing in case of read requests.
+This will ensure that read requests latency is not increased due to long write packed commands.
 
-This fix works fine with sdhci (sdhci compatilble host controller)
-and dw_mmc (design-ware host controller). and has no side effect due to
-this removal.
+The trigger for enabling the write packing is managing to pack several write requests.
+The number of potential packed requests that will trigger the packing can be configured via sysfs.
+The trigger for disabling the write packing is a fetch of a read request.
 
-Tested on : origen-board and smdk-5250 board.
+Changes in v4:
+    - Move MMC specific attributes to mmc sub-directory
 
-Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/core.c |    1 -
- 1 files changed, 0 insertions(+), 1 deletions(-)
+Changes in v3:
+    - Fix the settings of num_of_potential_packed_wr_reqs
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 9503cab..503aefc 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2108,7 +2108,6 @@ void mmc_start_host(struct mmc_host *host)
- {
- 	host->f_init = max(freqs[0], host->f_min);
- 	host->rescan_disable = 0;
--	mmc_power_up(host);
- 	mmc_detect_change(host, 0);
- }
- 
+Changes in v2:
+    - Move the attribute for setting the packing enabling trigger to the block device
+    - Add documentation of the new attribute
+
+Maya Erez (2):
+  mmc: card: Move MMC specific attributes to mmc sub-directory
+  mmc: block: Add write packing control
+
+ Documentation/mmc/mmc-dev-attrs.txt |   17 ++++
+ drivers/mmc/card/block.c            |  176 +++++++++++++++++++++++++++++++++--
+ drivers/mmc/card/queue.c            |    8 ++
+ drivers/mmc/card/queue.h            |    3 +
+ include/linux/mmc/host.h            |    1 +
+ 5 files changed, 197 insertions(+), 8 deletions(-)
+
 -- 
-1.7.4.1
+1.7.3.3
+-- 
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
