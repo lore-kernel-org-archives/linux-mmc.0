@@ -1,66 +1,43 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
-Date: Sat, 14 Jul 2012 15:12:54 -0400
-Message-ID: <87629qkvgp.fsf@octavius.laptop.org>
-References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
-	<1338576911-17089-2-git-send-email-merez@codeaurora.org>
-	<CAFR8uefCD_WXDM6m+-XwG10+W0UXqOtK7_sxWD3uVckh3pnR-Q@mail.gmail.com>
-	<CAFR8uee7hWLC-h_abZOCEuqeUeuhDuJp74x3R-3n+c61xyfaPQ@mail.gmail.com>
-	<fb2303ea3a3a5470e76d1faa2abd471b.squirrel@www.codeaurora.org>
-	<CAFR8ueecGqw=JzAGVHV61-SqOnn_C-ryT54KCQCbKkJpXUGY9w@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH RESEND] gpio: of_get_named_gpio_flags() return
+ -EPROBE_DEFER if GPIO not yet available
+Date: Sat, 14 Jul 2012 21:57:08 +0200
+Message-ID: <CACRpkdYrZizqvZqsocLEGrkY5yPMuYFfmR3UUSFZgPDvEPa0eA@mail.gmail.com>
+References: <1340836334-20427-1-git-send-email-stigge@antcom.de>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CAFR8ueecGqw=JzAGVHV61-SqOnn_C-ryT54KCQCbKkJpXUGY9w@mail.gmail.com>
-	(Muthu Kumar's message of "Wed, 13 Jun 2012 15:21:49 -0700")
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Muthu Kumar <muthu.lkml@gmail.com>
-Cc: merez@codeaurora.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:45516 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751583Ab2GNT5J (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Jul 2012 15:57:09 -0400
+Received: by qadb17 with SMTP id b17so946419qad.19
+        for <linux-mmc@vger.kernel.org>; Sat, 14 Jul 2012 12:57:08 -0700 (PDT)
+In-Reply-To: <1340836334-20427-1-git-send-email-stigge@antcom.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Roland Stigge <stigge@antcom.de>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Grant Likely <grant.likely@secretlab.ca>
+Cc: cjb@laptop.org, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com, linux-arm-kernel@lists.infradead.org
 
-Hi,
+On Thu, Jun 28, 2012 at 12:32 AM, Roland Stigge <stigge@antcom.de> wrote:
 
-On Wed, Jun 13 2012, Muthu Kumar wrote:
-> On Wed, Jun 13, 2012 at 12:52 PM,  <merez@codeaurora.org> wrote:
->>
->> On Mon, June 11, 2012 5:28 pm, Muthu Kumar wrote:
->>> On Mon, Jun 11, 2012 at 2:19 PM, Muthu Kumar <muthu.lkml@gmail.com> wrote:
->>>> On Fri, Jun 1, 2012 at 11:55 AM, Maya Erez <merez@codeaurora.org> wrote:
->>>>> trigger
->>>>> the packing can be configured via sysfs by writing the required value
->>>>> to:
->>>>> /sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
->>>>> The trigger for disabling the write packing is fetching a read request.
->>>>>
->>>>
->>>> If it is applicable only to MMC why do we have this sysfs attr for all
->>>> block devices?
->>>
->>> Just to be clear, please create a directory, say mmc, under
->>> /sys/block/<dev>/ and create the attr inside that.
->>>
->>> You can refer to dm (dm-sysfs.c) for sample implementation.
->> I understand why you think it would be best to distinguish the MMC
->> specific attribute from the general block devices attributes.
->> However, since this attribute is created only for the MMC block device,
->> other block devices won't be aware of it.
+> of_get_named_gpio_flags() and of_get_named_gpio() return -EPROBE_DEFER if the
+> respective GPIO is not (yet) available. This is useful if driver's probe()
+> functions try to get a GPIO whose controller isn't probed yet. Thus, the driver
+> can be probed again later on.
 >
-> I understand its created by the MMC code so will not be there for
-> other block devices. But having the device specific attributes inside
-> one <device> directory is better/cleaner. And since we are already
-> following that model for other devices, why not follow that for MMC
-> also?
+> The function still returns -EINVAL on other errors (parse error or node doesn't
+> exist). This way, the case of an optional/intentionally missing GPIO is handled
+> appropriately.
+>
+> Signed-off-by: Roland Stigge <stigge@antcom.de>
+> Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
-I've already replied to a later version of the patch, but just to get
-this comment in at the appropriate point of the discussion as well:
+If I understand correctly this relates closely to another patch from Mark Brown
+we discussed the other day (sorry for missing this patch, which arrived
+earlier, for a while).
 
-Even though it would result in a cleaner sysfs, I don't want to do
-this now because it will break userspace scripts that are depending
-on the current locations of these attributes.
+Mark/Grant can you look at this patch?
 
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Yours,
+Linus Walleij
