@@ -1,43 +1,37 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH RESEND] gpio: of_get_named_gpio_flags() return
- -EPROBE_DEFER if GPIO not yet available
-Date: Sat, 14 Jul 2012 21:57:08 +0200
-Message-ID: <CACRpkdYrZizqvZqsocLEGrkY5yPMuYFfmR3UUSFZgPDvEPa0eA@mail.gmail.com>
-References: <1340836334-20427-1-git-send-email-stigge@antcom.de>
+Subject: Re: [PATCH v2 2/5] mmc: card: Do not scan RPMB partitions
+Date: Sat, 14 Jul 2012 22:25:50 +0200
+Message-ID: <CACRpkdaErwNUYKsY+y23ONMk3V6kS0EQ7s+aLVBox5RA+hFw0A@mail.gmail.com>
+References: <1342011675-11221-1-git-send-email-loic.pallardy-ext@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f46.google.com ([209.85.216.46]:45516 "EHLO
-	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751583Ab2GNT5J (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Jul 2012 15:57:09 -0400
-Received: by qadb17 with SMTP id b17so946419qad.19
-        for <linux-mmc@vger.kernel.org>; Sat, 14 Jul 2012 12:57:08 -0700 (PDT)
-In-Reply-To: <1340836334-20427-1-git-send-email-stigge@antcom.de>
+Received: from mail-qa0-f53.google.com ([209.85.216.53]:37814 "EHLO
+	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752591Ab2GNUZv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Jul 2012 16:25:51 -0400
+Received: by qaas11 with SMTP id s11so954151qaa.19
+        for <linux-mmc@vger.kernel.org>; Sat, 14 Jul 2012 13:25:50 -0700 (PDT)
+In-Reply-To: <1342011675-11221-1-git-send-email-loic.pallardy-ext@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Roland Stigge <stigge@antcom.de>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Grant Likely <grant.likely@secretlab.ca>
-Cc: cjb@laptop.org, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com, linux-arm-kernel@lists.infradead.org
+To: Loic Pallardy <loic.pallardy-ext@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Ulf Hansson <ulf.hansson@stericcson.com>, Loic Pallardy <loic.pallardy@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>
 
-On Thu, Jun 28, 2012 at 12:32 AM, Roland Stigge <stigge@antcom.de> wrote:
+On Wed, Jul 11, 2012 at 3:01 PM, Loic Pallardy
+<loic.pallardy-ext@stericsson.com> wrote:
 
-> of_get_named_gpio_flags() and of_get_named_gpio() return -EPROBE_DEFER if the
-> respective GPIO is not (yet) available. This is useful if driver's probe()
-> functions try to get a GPIO whose controller isn't probed yet. Thus, the driver
-> can be probed again later on.
+> From: Loic Pallardy <loic.pallardy@stericsson.com>
 >
-> The function still returns -EINVAL on other errors (parse error or node doesn't
-> exist). This way, the case of an optional/intentionally missing GPIO is handled
-> appropriately.
+> Do not scan rpmb partitions for "soft" partitions, since the rpmb
+> partition contains protected data. Silences the following
+> message during boot:
 >
-> Signed-off-by: Roland Stigge <stigge@antcom.de>
-> Acked-by: Linus Walleij <linus.walleij@linaro.org>
+>  mmcblkXRPMB: unknown partition table
+>
+> Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
 
-If I understand correctly this relates closely to another patch from Mark Brown
-we discussed the other day (sorry for missing this patch, which arrived
-earlier, for a while).
-
-Mark/Grant can you look at this patch?
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
 Yours,
 Linus Walleij
