@@ -1,118 +1,305 @@
-From: gaoqiang <gaoqiangscut@gmail.com>
-Subject: Re: question about IO-sched
-Date: Sun, 15 Jul 2012 15:08:12 +0800
-Message-ID: <op.whg7fy00n27o5l@gaoqiang-d1.corp.qihoo.net>
-References: <op.whbsn0qvn27o5l@gaoqiang-d1.corp.qihoo.net>
- <CADX3swpSAt9gdSgYihOJKs1=geQkmB04rCVTSgh=DEXQx7QPmQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk;
-	format=flowed	delsp=yes
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:38804 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750952Ab2GOHKG convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Jul 2012 03:10:06 -0400
-In-Reply-To: <CADX3swpSAt9gdSgYihOJKs1=geQkmB04rCVTSgh=DEXQx7QPmQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Maya Erez <merez@codeaurora.org>
+Subject: [PATCH v5] mmc: block: Add write packing control
+Date: Sun, 15 Jul 2012 11:05:05 +0300
+Message-ID: <1342339567-24472-1-git-send-email-merez@codeaurora.org>
+References: <n>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <n>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>, "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Corrado Zoccolo <czoccolo@gmail.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-many thanks. but why the sys_read operation hangs on sync_page ? there =
-are =20
-still
-many free memory.I mean ,the actually free memory,excluding the various=
- =20
-kinds of
-caches or buffers.
+The write packing control will ensure that read requests latency is
+not increased due to long write packed commands.
 
+The trigger for enabling the write packing is managing to pack several
+write requests. The number of potential packed requests that will trigger
+the packing can be configured via sysfs by writing the required value to:
+/sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
+The trigger for disabling the write packing is fetching a read request.
 
-=D4=DA Fri, 13 Jul 2012 22:15:31 +0800=A3=ACCorrado Zoccolo <czoccolo@g=
-mail.com> =20
-=D0=B4=B5=C0:
+Signed-off-by: Maya Erez <merez@codeaurora.org>
+---
+Our experiments showed that the write packing causes degradation of the read
+throughput, in parallel read and write operations.
+Since the read latency is critical for user experience we added a write packing control
+mechanism that disables the write packing in case of read requests.
+This will ensure that read requests latency is not increased due to long write packed commands.
 
-> Hi,
-> the catch is that writes are "fire and forget", so they keep accumula=
-ting
-> in the I/O sched, and there is always plenty of them to schedule (unl=
-ess
-> you explicitly make sync writes).
->
-> The reader, instead, waits for the result of each read operation befo=
-re
-> scheduling a new read, so there is at most one outstanding read, and =
-some
-> time nothing.
->
-> The deadline scheduler is work conserving, meaning that it never leav=
-es =20
-> the
-> disk idle when there is work queued, and most of the time after an
-> operation completes, there is only write work queued, so you see much=
- =20
-> more
-> writes being sent to the device.
->
-> Only schedulers that delay writes waiting for reads (as Anticipatory =
-in =20
-> old
-> kernels, and now CFQ) can achieve higher read to write ratios.
->
-> Cheers
-> Corrado
->
-> On Thu, Jul 12, 2012 at 11:01 AM, gaoqiang <gaoqiangscut@gmail.com> =20
-> wrote:
->
->> Hi,all
->>
->>         I have long known that deadline is read-prefered. but a simp=
-le
->> test gives the opposite result.
->>
->>         with two processes running at the same time,one for read and=
- one
->> for write.actually,they did nothing bug IO operation.
->>         while(true)
->>         {
->>                 read();
->>         }
->>         the other:
->>         while(true)
->>         {
->>                 write();
->>         }
->>
->>         with deadline IO-sched  and ext4 filesystem.as a result, rea=
-d
->> ratio was about below 3M/s.and write about 100M/s. I have tested bot=
-h
->> kernel-2.6.18 and kernel-2.6.32,getting the same result.
->>
->>         I add some debug information in the kernel and recompile,fou=
-nd
->> that,it has little to do with IO-sched layer because read request =20
->> dropped
->> into deadline was 5% of write request .from /proc/<pid>/stack,the re=
-ad
->> process hands on sync_page most of the time.
->>         what is the matter ? anyone help me ?
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-kern=
-el" =20
->> in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  =20
->> http://vger.kernel.org/**majordomo-info.html<http://vger.kernel.org/=
-majordomo-info.html>
->> Please read the FAQ at  http://www.tux.org/lkml/
->>
->
->
->
+The trigger for enabling the write packing is managing to pack several write requests.
+The number of potential packed requests that will trigger the packing can be configured via sysfs.
+The trigger for disabling the write packing is a fetch of a read request.
 
+Changes in v5:
+    - Revert v4 changes
+    - fix the device attribute removal in case of failure of device_create_file
 
---=20
-=CA=B9=D3=C3 Opera =B8=EF=C3=FC=D0=D4=B5=C4=B5=E7=D7=D3=D3=CA=BC=FE=BF=CD=
-=BB=A7=B3=CC=D0=F2: http://www.opera.com/mail/
+Changes in v4:
+    - Move MMC specific attributes to mmc sub-directory
+
+Changes in v3:
+    - Fix the settings of num_of_potential_packed_wr_reqs
+
+Changes in v2:
+    - Move the attribute for setting the packing enabling trigger to the block device
+    - Add documentation of the new attribute
+---
+ Documentation/mmc/mmc-dev-attrs.txt |   17 ++++++
+ drivers/mmc/card/block.c            |  104 +++++++++++++++++++++++++++++++++++
+ drivers/mmc/card/queue.c            |    8 +++
+ drivers/mmc/card/queue.h            |    3 +
+ include/linux/mmc/host.h            |    1 +
+ 5 files changed, 133 insertions(+), 0 deletions(-)
+
+diff --git a/Documentation/mmc/mmc-dev-attrs.txt b/Documentation/mmc/mmc-dev-attrs.txt
+index 22ae844..08f7312 100644
+--- a/Documentation/mmc/mmc-dev-attrs.txt
++++ b/Documentation/mmc/mmc-dev-attrs.txt
+@@ -8,6 +8,23 @@ The following attributes are read/write.
+ 
+ 	force_ro		Enforce read-only access even if write protect switch is off.
+ 
++	num_wr_reqs_to_start_packing 	This attribute is used to determine
++	the trigger for activating the write packing, in case the write
++	packing control feature is enabled.
++
++	When the MMC manages to reach a point where num_wr_reqs_to_start_packing
++	write requests could be packed, it enables the write packing feature.
++	This allows us to start the write packing only when it is beneficial
++	and has minimum affect on the read latency.
++
++	The number of potential packed requests that will trigger the packing
++	can be configured via sysfs by writing the required value to:
++	/sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
++
++	The default value of num_wr_reqs_to_start_packing was determined by
++	running parallel lmdd write and lmdd read operations and calculating
++	the max number of packed writes requests.
++
+ SD and MMC Device Attributes
+ ============================
+ 
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 4ba0f09..73e26f3 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -114,6 +114,7 @@ struct mmc_blk_data {
+ 	struct device_attribute force_ro;
+ 	struct device_attribute power_ro_lock;
+ 	int	area_type;
++	struct device_attribute num_wr_reqs_to_start_packing;
+ };
+ 
+ static DEFINE_MUTEX(open_lock);
+@@ -281,6 +282,38 @@ out:
+ 	return ret;
+ }
+ 
++static ssize_t
++num_wr_reqs_to_start_packing_show(struct device *dev,
++				  struct device_attribute *attr, char *buf)
++{
++	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
++	int num_wr_reqs_to_start_packing;
++	int ret;
++
++	num_wr_reqs_to_start_packing = md->queue.num_wr_reqs_to_start_packing;
++
++	ret = snprintf(buf, PAGE_SIZE, "%d\n", num_wr_reqs_to_start_packing);
++
++	mmc_blk_put(md);
++	return ret;
++}
++
++static ssize_t
++num_wr_reqs_to_start_packing_store(struct device *dev,
++				 struct device_attribute *attr,
++				 const char *buf, size_t count)
++{
++	int value;
++	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
++
++	sscanf(buf, "%d", &value);
++	if (value >= 0)
++		md->queue.num_wr_reqs_to_start_packing = value;
++
++	mmc_blk_put(md);
++	return count;
++}
++
+ static int mmc_blk_open(struct block_device *bdev, fmode_t mode)
+ {
+ 	struct mmc_blk_data *md = mmc_blk_get(bdev->bd_disk);
+@@ -1296,6 +1329,49 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ 	mmc_queue_bounce_pre(mqrq);
+ }
+ 
++static void mmc_blk_write_packing_control(struct mmc_queue *mq,
++					  struct request *req)
++{
++	struct mmc_host *host = mq->card->host;
++	int data_dir;
++
++	if (!(host->caps2 & MMC_CAP2_PACKED_WR))
++		return;
++
++	/*
++	 * In case the packing control is not supported by the host, it should
++	 * not have an effect on the write packing. Therefore we have to enable
++	 * the write packing
++	 */
++	if (!(host->caps2 & MMC_CAP2_PACKED_WR_CONTROL)) {
++		mq->wr_packing_enabled = true;
++		return;
++	}
++
++	if (!req || (req && (req->cmd_flags & REQ_FLUSH))) {
++		if (mq->num_of_potential_packed_wr_reqs >
++				mq->num_wr_reqs_to_start_packing)
++			mq->wr_packing_enabled = true;
++		mq->num_of_potential_packed_wr_reqs = 0;
++		return;
++	}
++
++	data_dir = rq_data_dir(req);
++
++	if (data_dir == READ) {
++		mq->num_of_potential_packed_wr_reqs = 0;
++		mq->wr_packing_enabled = false;
++		return;
++	} else if (data_dir == WRITE) {
++		mq->num_of_potential_packed_wr_reqs++;
++	}
++
++	if (mq->num_of_potential_packed_wr_reqs >
++			mq->num_wr_reqs_to_start_packing)
++		mq->wr_packing_enabled = true;
++
++}
++
+ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
+ {
+ 	struct request_queue *q = mq->queue;
+@@ -1314,6 +1390,9 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
+ 	if (!(md->flags & MMC_BLK_CMD23) || !card->ext_csd.packed_event_en)
+ 		goto no_packed;
+ 
++	if (!mq->wr_packing_enabled)
++		goto no_packed;
++
+ 	if ((rq_data_dir(cur) == WRITE) &&
+ 	    (card->host->caps2 & MMC_CAP2_PACKED_WR))
+ 		max_packed_rw = card->ext_csd.max_packed_writes;
+@@ -1384,6 +1463,8 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
+ 			break;
+ 		}
+ 
++		if (rq_data_dir(next) == WRITE)
++			mq->num_of_potential_packed_wr_reqs++;
+ 		list_add_tail(&next->queuelist, &mq->mqrq_cur->packed_list);
+ 		cur = next;
+ 		reqs++;
+@@ -1768,6 +1849,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 		goto out;
+ 	}
+ 
++	mmc_blk_write_packing_control(mq, req);
++
+ 	if (req && req->cmd_flags & REQ_DISCARD) {
+ 		/* complete ongoing async transfer before issuing discard */
+ 		if (card->host->areq)
+@@ -2004,6 +2087,8 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+ 					card->ext_csd.boot_ro_lockable)
+ 				device_remove_file(disk_to_dev(md->disk),
+ 					&md->power_ro_lock);
++			device_remove_file(disk_to_dev(md->disk),
++					   &md->num_wr_reqs_to_start_packing);
+ 
+ 			/* Stop new requests from getting into the queue */
+ 			del_gendisk(md->disk);
+@@ -2064,8 +2149,27 @@ static int mmc_add_disk(struct mmc_blk_data *md)
+ 		if (ret)
+ 			goto power_ro_lock_fail;
+ 	}
++
++	md->num_wr_reqs_to_start_packing.show =
++		num_wr_reqs_to_start_packing_show;
++	md->num_wr_reqs_to_start_packing.store =
++		num_wr_reqs_to_start_packing_store;
++	sysfs_attr_init(&md->num_wr_reqs_to_start_packing.attr);
++	md->num_wr_reqs_to_start_packing.attr.name =
++		"num_wr_reqs_to_start_packing";
++	md->num_wr_reqs_to_start_packing.attr.mode = S_IRUGO | S_IWUSR;
++	ret = device_create_file(disk_to_dev(md->disk),
++				 &md->num_wr_reqs_to_start_packing);
++	if (ret)
++		goto num_wr_reqs_to_start_packing_fail;
++
+ 	return ret;
+ 
++num_wr_reqs_to_start_packing_fail:
++	if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
++	     card->ext_csd.boot_ro_lockable)
++		device_remove_file(disk_to_dev(md->disk),
++				   &md->power_ro_lock);
+ power_ro_lock_fail:
+ 	device_remove_file(disk_to_dev(md->disk), &md->force_ro);
+ force_ro_fail:
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 230bad3..91036c1 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -25,6 +25,13 @@
+ #define MMC_QUEUE_SUSPENDED	(1 << 0)
+ 
+ /*
++ * Based on benchmark tests the default num of requests to trigger the write
++ * packing was determined, to keep the read latency as low as possible and
++ * manage to keep the high write throughput.
++ */
++#define DEFAULT_NUM_REQS_TO_START_PACK 17
++
++/*
+  * Prepare a MMC request. This just filters out odd stuff.
+  */
+ static int mmc_prep_request(struct request_queue *q, struct request *req)
+@@ -181,6 +188,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 	mq->mqrq_cur = mqrq_cur;
+ 	mq->mqrq_prev = mqrq_prev;
+ 	mq->queue->queuedata = mq;
++	mq->num_wr_reqs_to_start_packing = DEFAULT_NUM_REQS_TO_START_PACK;
+ 
+ 	blk_queue_prep_rq(mq->queue, mmc_prep_request);
+ 	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index 5e04938..93e4b59 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -45,6 +45,9 @@ struct mmc_queue {
+ 	struct mmc_queue_req	mqrq[2];
+ 	struct mmc_queue_req	*mqrq_cur;
+ 	struct mmc_queue_req	*mqrq_prev;
++	bool			wr_packing_enabled;
++	int			num_of_potential_packed_wr_reqs;
++	int			num_wr_reqs_to_start_packing;
+ };
+ 
+ extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 79d8921..f9a5917 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -273,6 +273,7 @@ struct mmc_host {
+ #define MMC_CAP2_PACKED_WR	    (1 << 21)	/* Allow packed write */
+ #define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
+ 				 MMC_CAP2_PACKED_WR) /* Allow packed commands */
++#define MMC_CAP2_PACKED_WR_CONTROL (1 << 22) /* Allow write packing control */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 	unsigned int        power_notify_type;
+-- 
+1.7.3.3
+-- 
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
