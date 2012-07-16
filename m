@@ -1,71 +1,44 @@
-From: Muthu Kumar <muthu.lkml@gmail.com>
-Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
-Date: Mon, 16 Jul 2012 09:44:57 -0700
-Message-ID: <CAFR8uefP0VV2fbBLv27y2KnMPRFPbGssm6EUdaqhZXXyQ2+k2Q@mail.gmail.com>
-References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
-	<1338576911-17089-2-git-send-email-merez@codeaurora.org>
-	<CAFR8uefCD_WXDM6m+-XwG10+W0UXqOtK7_sxWD3uVckh3pnR-Q@mail.gmail.com>
-	<CAFR8uee7hWLC-h_abZOCEuqeUeuhDuJp74x3R-3n+c61xyfaPQ@mail.gmail.com>
-	<fb2303ea3a3a5470e76d1faa2abd471b.squirrel@www.codeaurora.org>
-	<CAFR8ueecGqw=JzAGVHV61-SqOnn_C-ryT54KCQCbKkJpXUGY9w@mail.gmail.com>
-	<87629qkvgp.fsf@octavius.laptop.org>
-	<CAFR8uedwb1_gB-j6=riUuiJcEPY13rNJCLv1bxXc6aebnhonYw@mail.gmail.com>
-	<87pq7wjudy.fsf@octavius.laptop.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH RESEND] gpio: of_get_named_gpio_flags() return
+ -EPROBE_DEFER if GPIO not yet available
+Date: Tue, 17 Jul 2012 00:16:48 +0200
+Message-ID: <CACRpkdb0k4fNigA6FGyEobxUt-JnmUy-ni7XzH-gup-ic_j+VQ@mail.gmail.com>
+References: <1340836334-20427-1-git-send-email-stigge@antcom.de>
+	<CACRpkdYrZizqvZqsocLEGrkY5yPMuYFfmR3UUSFZgPDvEPa0eA@mail.gmail.com>
+	<20120715211120.GH4041@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:61698 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753635Ab2GPQo6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jul 2012 12:44:58 -0400
-In-Reply-To: <87pq7wjudy.fsf@octavius.laptop.org>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:44850 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753118Ab2GPWQt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jul 2012 18:16:49 -0400
+Received: by qadb17 with SMTP id b17so1899855qad.19
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Jul 2012 15:16:49 -0700 (PDT)
+In-Reply-To: <20120715211120.GH4041@opensource.wolfsonmicro.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Jens Axboe <axboe@kernel.dk>
-Cc: merez@codeaurora.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: Roland Stigge <stigge@antcom.de>, Grant Likely <grant.likely@secretlab.ca>, cjb@laptop.org, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com, linux-arm-kernel@lists.infradead.org
 
-On Sun, Jul 15, 2012 at 7:46 PM, Chris Ball <cjb@laptop.org> wrote:
-> Hi,
+On Sun, Jul 15, 2012 at 11:11 PM, Mark Brown
+<broonie@opensource.wolfsonmicro.com> wrote:
+> On Sat, Jul 14, 2012 at 09:57:08PM +0200, Linus Walleij wrote:
 >
-> On Sun, Jul 15 2012, Muthu Kumar wrote:
->>> I've already replied to a later version of the patch, but just to get
->>> this comment in at the appropriate point of the discussion as well:
->>>
->>> Even though it would result in a cleaner sysfs, I don't want to do
->>> this now because it will break userspace scripts that are depending
->>> on the current locations of these attributes.
->>
->> Maya is adding a new sysfs attribute with that patch. So, there should
->> not be any user space stuff that depends on it.
+>> If I understand correctly this relates closely to another patch from Mark Brown
+>> we discussed the other day (sorry for missing this patch, which arrived
+>> earlier, for a while).
 >
-> In the later patchset, Maya's "[PATCH v4 1/2] mmc: card: Move MMC
-> specific attributes to mmc sub-directory" moves the existing attributes
-> into the mmc/ directory.
+>> Mark/Grant can you look at this patch?
 >
-> It's that move that I'm objecting to, rather than the creation of a new
-> directory -- although since we're going to leave the current attributes
-> where they are, it might not make sense to add the new directory.
->
-> We'd be creating two places that people have to look for mmc-related
-> attributes, which is arguably less clean than having one place to look
-> even though it's mixed in with the other block device attributes.
+> Not unless I have a copy of it, no...
 
-So, what is the plan for fixing the user land tools and cleaning this up?
+Sorry, forwarded a copy to you.
 
-Jens,
-What do you think?
+> I had thought a version of this
+> had been submitted already and was in a similar place to the one for
+> gpio_request().
 
+Me to...
 
-Regards,
-Muthu
-
-
-
-
->
-> Thanks,
->
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
+Linus Walleij
