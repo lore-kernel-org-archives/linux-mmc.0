@@ -1,46 +1,37 @@
-From: Attila Kinali <attila@kinali.ch>
-Subject: Re: mmc: mxs: DEADLOCK
-Date: Mon, 16 Jul 2012 14:07:20 +0200
-Message-ID: <20120716140720.4af66a1b45375bc6b83dc986@kinali.ch>
-References: <4FFC367A.8020100@bluegiga.com>
-	<20120711060607.GE14060@S2101-09.ap.freescale.net>
-	<20120712160008.03731746cdc5cf4bb0548256@kinali.ch>
-	<5003AD52.7070304@bluegiga.com>
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH v2 2/5] mmc: card: Do not scan RPMB partitions
+Date: Mon, 16 Jul 2012 22:25:36 +0900
+Message-ID: <CAKYAXd8Ztfrb4798PH-71z=b5DS3n7oL3Z2SfEJwuGLieFP8sg@mail.gmail.com>
+References: <1342011675-11221-1-git-send-email-loic.pallardy-ext@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.opencsw.org ([82.220.5.51]:51687 "EHLO mail.opencsw.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750843Ab2GPMHW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 16 Jul 2012 08:07:22 -0400
-In-Reply-To: <5003AD52.7070304@bluegiga.com>
+Received: from mail-wg0-f42.google.com ([74.125.82.42]:62519 "EHLO
+	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751319Ab2GPNZh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jul 2012 09:25:37 -0400
+Received: by wgbfm10 with SMTP id fm10so2391793wgb.1
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Jul 2012 06:25:36 -0700 (PDT)
+In-Reply-To: <1342011675-11221-1-git-send-email-loic.pallardy-ext@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lauri Hintsala <lauri.hintsala@bluegiga.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>, Marek Vasut <marex@denx.de>, Koen Beel <koen.beel@barco.com>, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, Veli-Pekka Peltola <veli-pekka.peltola@bluegiga.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Loic Pallardy <loic.pallardy-ext@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Ulf Hansson <ulf.hansson@stericcson.com>, Loic Pallardy <loic.pallardy@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>
 
-Moin, Lauri,
-
-On Mon, 16 Jul 2012 08:57:38 +0300
-Lauri Hintsala <lauri.hintsala@bluegiga.com> wrote:
-
-> 
-> 
-> Does this patch fix your issue?
-
-A preliminary test shows that it at least fixes the oops at module loading.
-I haven't had the chance yet to give it a full test, but i would say it
-fixes it enough to be workable.
-
-Thanks a lot!
-
-			Attila Kinali
-
-
-
--- 
-The trouble with you, Shev, is you don't say anything until you've saved
-up a whole truckload of damned heavy brick arguments and then you dump
-them all out and never look at the bleeding body mangled beneath the heap
-		-- Tirin, The Dispossessed, U. Le Guin
+2012/7/11, Loic Pallardy <loic.pallardy-ext@stericsson.com>:
+> From: Loic Pallardy <loic.pallardy@stericsson.com>
+>
+> Do not scan rpmb partitions for "soft" partitions, since the rpmb
+> partition contains protected data. Silences the following
+> message during boot:
+>
+>  mmcblkXRPMB: unknown partition table
+>
+> Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
+Looks good to me.
+Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+You sent only 2/5 patch...
+Would you resend all v2 patches after including tag linus's ack and my
+reviewed-by ?
+Thanks.
+> ---
