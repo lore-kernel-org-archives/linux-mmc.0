@@ -1,7 +1,7 @@
-From: Muthu Kumar <muthu.lkml@gmail.com>
+From: Chris Ball <cjb@laptop.org>
 Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
-Date: Sun, 15 Jul 2012 18:49:09 -0700
-Message-ID: <CAFR8uedwb1_gB-j6=riUuiJcEPY13rNJCLv1bxXc6aebnhonYw@mail.gmail.com>
+Date: Sun, 15 Jul 2012 22:46:01 -0400
+Message-ID: <87pq7wjudy.fsf@octavius.laptop.org>
 References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
 	<1338576911-17089-2-git-send-email-merez@codeaurora.org>
 	<CAFR8uefCD_WXDM6m+-XwG10+W0UXqOtK7_sxWD3uVckh3pnR-Q@mail.gmail.com>
@@ -9,69 +9,45 @@ References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
 	<fb2303ea3a3a5470e76d1faa2abd471b.squirrel@www.codeaurora.org>
 	<CAFR8ueecGqw=JzAGVHV61-SqOnn_C-ryT54KCQCbKkJpXUGY9w@mail.gmail.com>
 	<87629qkvgp.fsf@octavius.laptop.org>
+	<CAFR8uedwb1_gB-j6=riUuiJcEPY13rNJCLv1bxXc6aebnhonYw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <87629qkvgp.fsf@octavius.laptop.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
+Content-Type: text/plain
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <CAFR8uedwb1_gB-j6=riUuiJcEPY13rNJCLv1bxXc6aebnhonYw@mail.gmail.com>
+	(Muthu Kumar's message of "Sun, 15 Jul 2012 18:49:09 -0700")
+Sender: linux-doc-owner@vger.kernel.org
+To: Muthu Kumar <muthu.lkml@gmail.com>
 Cc: merez@codeaurora.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Chris,
+Hi,
 
-On Sat, Jul 14, 2012 at 12:12 PM, Chris Ball <cjb@laptop.org> wrote:
-> Hi,
->
-> On Wed, Jun 13 2012, Muthu Kumar wrote:
->> On Wed, Jun 13, 2012 at 12:52 PM,  <merez@codeaurora.org> wrote:
->>>
->>> On Mon, June 11, 2012 5:28 pm, Muthu Kumar wrote:
->>>> On Mon, Jun 11, 2012 at 2:19 PM, Muthu Kumar <muthu.lkml@gmail.com> wrote:
->>>>> On Fri, Jun 1, 2012 at 11:55 AM, Maya Erez <merez@codeaurora.org> wrote:
->>>>>> trigger
->>>>>> the packing can be configured via sysfs by writing the required value
->>>>>> to:
->>>>>> /sys/block/<block_dev_name>/num_wr_reqs_to_start_packing.
->>>>>> The trigger for disabling the write packing is fetching a read request.
->>>>>>
->>>>>
->>>>> If it is applicable only to MMC why do we have this sysfs attr for all
->>>>> block devices?
->>>>
->>>> Just to be clear, please create a directory, say mmc, under
->>>> /sys/block/<dev>/ and create the attr inside that.
->>>>
->>>> You can refer to dm (dm-sysfs.c) for sample implementation.
->>> I understand why you think it would be best to distinguish the MMC
->>> specific attribute from the general block devices attributes.
->>> However, since this attribute is created only for the MMC block device,
->>> other block devices won't be aware of it.
+On Sun, Jul 15 2012, Muthu Kumar wrote:
+>> I've already replied to a later version of the patch, but just to get
+>> this comment in at the appropriate point of the discussion as well:
 >>
->> I understand its created by the MMC code so will not be there for
->> other block devices. But having the device specific attributes inside
->> one <device> directory is better/cleaner. And since we are already
->> following that model for other devices, why not follow that for MMC
->> also?
+>> Even though it would result in a cleaner sysfs, I don't want to do
+>> this now because it will break userspace scripts that are depending
+>> on the current locations of these attributes.
 >
-> I've already replied to a later version of the patch, but just to get
-> this comment in at the appropriate point of the discussion as well:
->
-> Even though it would result in a cleaner sysfs, I don't want to do
-> this now because it will break userspace scripts that are depending
-> on the current locations of these attributes.
->
+> Maya is adding a new sysfs attribute with that patch. So, there should
+> not be any user space stuff that depends on it.
 
-Maya is adding a new sysfs attribute with that patch. So, there should
-not be any user space stuff that depends on it.
+In the later patchset, Maya's "[PATCH v4 1/2] mmc: card: Move MMC
+specific attributes to mmc sub-directory" moves the existing attributes
+into the mmc/ directory.
 
-Regards,
-Muthu
+It's that move that I'm objecting to, rather than the creation of a new
+directory -- although since we're going to leave the current attributes
+where they are, it might not make sense to add the new directory.
 
+We'd be creating two places that people have to look for mmc-related
+attributes, which is arguably less clean than having one place to look
+even though it's mixed in with the other block device attributes.
 
-> Thanks,
->
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
