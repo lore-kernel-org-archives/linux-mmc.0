@@ -1,41 +1,59 @@
-From: Wilson & Cassie <griscruf@comcast.net>
-Subject: Re: [PATCH] esdhc: fix DMA_MASK to not break mx25 DMA access
-Date: Tue, 17 Jul 2012 12:32:05 -0400
-Message-ID: <8D8658B1-9B29-4677-8CA8-EBEE0C42D3E6@comcast.net>
-References: <AF702D0F-8919-4E98-BD6C-DF05E0EE4DDE@savantav.com> <3DC84FDD-7D96-46D6-A9F2-C3F8A47E9051@comcast.net> <20120716214711.GX30009@pengutronix.de>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Javier Martinez Canillas <javier@dowhile0.org>
+Subject: Re: [PATCH v2 1/1] mmc: host: enable OMAP DMA engine support for omap
+ hosts by default
+Date: Tue, 17 Jul 2012 18:38:35 +0200
+Message-ID: <CABxcv=k+9XBRHXVLpr30vtLyj6fOYyqyoWDSdtp3jRTk0oM5WQ@mail.gmail.com>
+References: <1342508636-2782-1-git-send-email-javier@dowhile0.org>
+	<CAMQu2gyf=-0QG4UCDEGfDmsCZ+xJs_B=+SSH3VxqO4hu=mSPdg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from qmta11.westchester.pa.mail.comcast.net ([76.96.59.211]:46146
-	"EHLO QMTA11.westchester.pa.mail.comcast.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752517Ab2GQQhx convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 17 Jul 2012 12:37:53 -0400
-In-Reply-To: <20120716214711.GX30009@pengutronix.de>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:51953 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752517Ab2GQQif (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jul 2012 12:38:35 -0400
+Received: by mail-yx0-f174.google.com with SMTP id l2so580041yen.19
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Jul 2012 09:38:35 -0700 (PDT)
+In-Reply-To: <CAMQu2gyf=-0QG4UCDEGfDmsCZ+xJs_B=+SSH3VxqO4hu=mSPdg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Sascha Hauer <s.hauer@pengutronix.de>
+To: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
+Cc: Tony Lindgren <tony@atomide.com>, Kevin Hilman <khilman@ti.com>, Russell King <linux@arm.linux.org.uk>, linux-omap@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Patch to not set reserved bits in i.MX25 PROCTL register.  DMA stops working if those bits get set.
+On Tue, Jul 17, 2012 at 9:09 AM, Shilimkar, Santosh
+<santosh.shilimkar@ti.com> wrote:
+> On Tue, Jul 17, 2012 at 12:33 PM, Javier Martinez Canillas
+> <javier@dowhile0.org> wrote:
+>> The OMAP MMC and OMAP High Speed MMC hosts now use entirely the DMA
+>> engine API instead of the previous private DMA API implementation.
+>>
+>> So, if the kernel is built with support for any of these hosts but it
+>> doesn't support DMA devices nor OMAP DMA support, it fails when trying
+>> to obtain a DMA channel which leads to the following error on an OMAP3
+>> IGEPv2 Rev.C board (and probably on most OMAP boards with MMC support):
+>>
+>> [    2.199981] omap_hsmmc omap_hsmmc.1: unable to obtain RX DMA engine channel 48
+>> [    2.215087] omap_hsmmc omap_hsmmc.0: unable to obtain RX DMA engine channel 62
+>>
+>> selecting automatically CONFIG_DMADEVICES and CONFIG_DMA_OMAP solves it.
+>>
+>> While being there, also update drivers/spi/spi-omap2-mcspi which has been
+>> ported to DMA engine API too.
+>>
+>> Signed-off-by: Javier Martinez Canillas <javier@dowhile0.org>
+>> ---
+>>
+> Looks like this patch should go to Russell's tree where rest of the OMAP
+> DMA engine patches are queued.
+>
+> For the patch itself,
+> Acked-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
 
-Signed-off-by: Wilson Callan <wilson.callan at savantsystems.com>
-Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
+Hi Santhosh,
 
---- linux-3.4.4/drivers/mmc/host/sdhci-esdhc-imx.c.orig	2012-07-04 13:58:16.239979741 -0400
-+++ linux-3.4.4/drivers/mmc/host/sdhci-esdhc-imx.c	2012-07-04 14:34:38.939949292 -0400
-@@ -310,8 +310,10 @@ static void esdhc_writeb_le(struct sdhci
- 				SDHCI_CTRL_D3CD);
- 		/* ensure the endianess */
- 		new_val |= ESDHC_HOST_CONTROL_LE;
--		/* DMA mode bits are shifted */
--		new_val |= (val & SDHCI_CTRL_DMA_MASK) << 5;
-+		if (!is_imx25_esdhc(imx_data)) { // bits 8&9 are reserved on mx25
-+			/* DMA mode bits are shifted */
-+			new_val |= (val & SDHCI_CTRL_DMA_MASK) << 5;
-+		}
- 
- 		esdhc_clrset_le(host, 0xffff, new_val, reg);
- 		return;
+Thanks a lot for your feedback.
 
+Russell can you take this patch please or do you want me to resend?
+
+Best regards,
+Javier
