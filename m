@@ -1,126 +1,124 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH] mmc-util: add the method to enable the bkops
-Date: Tue, 17 Jul 2012 15:06:30 +0530
-Message-ID: <CANfBPZ--SWDN+VM+zrBzrOhqW0wB5mSHCMF4XSWz_rE9EtV3XA@mail.gmail.com>
-References: <5004D179.6080706@samsung.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dwmmc: Add quirk for broken Hardware Config
+Date: Tue, 17 Jul 2012 18:48:48 +0900
+Message-ID: <50053500.6030409@samsung.com>
+References: <1342428302-10707-1-git-send-email-girish.shivananjappa@linaro.org>
+ <5005184E.6000807@samsung.com>
+ <CAGxe1ZGdADbDbJHV+=knDxtO4PxsNVq6A4jc1oCx8SDc_mDHQw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog129.obsmtp.com ([74.125.149.142]:57021 "EHLO
-	na3sys009aog129.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751293Ab2GQJgy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jul 2012 05:36:54 -0400
-Received: by bkty7 with SMTP id y7so124759bkt.3
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Jul 2012 02:36:51 -0700 (PDT)
-In-Reply-To: <5004D179.6080706@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <CAGxe1ZGdADbDbJHV+=knDxtO4PxsNVq6A4jc1oCx8SDc_mDHQw@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, will.newton@imgtec.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org, shashidharh@vayavyalabs.com, thomas.abraham@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Maya Erez <merez@codeaurora.org>, Saugata Das <saugata.das@linaro.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
 
-Minor printk nits..
-
-On Tue, Jul 17, 2012 at 8:14 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> This patch added the method to enable the bkops.
-> In ext_csd register, BKOPS_EN bit is one-time programable.
-> So if you want to use the bkops, use the this command.
->
-> <usage>
-> #mmc bkops enable /dev/mmcblk0
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
->  mmc.c      |    5 +++++
->  mmc.h      |    7 +++++++
->  mmc_cmds.c |   39 +++++++++++++++++++++++++++++++++++++++
->  mmc_cmds.h |    1 +
->  4 files changed, 52 insertions(+), 0 deletions(-)
->
-> diff --git a/mmc.c b/mmc.c
-> index 379d667..3a12653 100644
-> --- a/mmc.c
-> +++ b/mmc.c
-> @@ -75,6 +75,11 @@ static struct Command commands[] = {
->                 "Enable the boot partition for the <device>.\nTo receive acknowledgment of boot from the card set <send_ack>\nto 1, else set it to 0.",
->           NULL
->         },
-> +       { do_write_bkops_en, -1,
-> +         "bkops enable", "<device>\n"
-> +               "Enable the eMMC BKOPS feature enable on <device>.",
-s/feature enable on/feature on/
-
-> +         NULL
-> +       },
->         { 0, 0, 0, 0 }
->  };
->
-> diff --git a/mmc.h b/mmc.h
-> index 0a521a8..3d77b38 100644
-> --- a/mmc.h
-> +++ b/mmc.h
-> @@ -31,12 +31,14 @@
->   */
->  #define EXT_CSD_S_CMD_SET              504
->  #define EXT_CSD_HPI_FEATURE            503
-> +#define EXT_CSD_BKOPS_SUPPORT          502     /* RO */
->  #define EXT_CSD_BOOT_INFO              228     /* R/W */
->  #define EXT_CSD_PART_SWITCH_TIME       199
->  #define EXT_CSD_BOOT_CFG               179
->  #define EXT_CSD_PART_CONFIG            179
->  #define EXT_CSD_BOOT_WP                        173
->  #define EXT_CSD_WR_REL_PARAM           166
-> +#define EXT_CSD_BKOPS_EN               163     /* R/W */
->  #define EXT_CSD_NATIVE_SECTOR_SIZE     63 /* R */
->  #define EXT_CSD_USE_NATIVE_SECTOR      62 /* R/W */
->  #define EXT_CSD_DATA_SECTOR_SIZE       61 /* R */
-> @@ -48,6 +50,11 @@
->  #define EN_REL_WR      (1<<2)
->
->  /*
-> + * BKOPS_EN field definition
-> + */
-> +#define BKOPS_ENABLE   (1<<0)
-> +
-> +/*
->   * EXT_CSD field definitions
->   */
->  #define EXT_CSD_HPI_SUPP               (1<<0)
-> diff --git a/mmc_cmds.c b/mmc_cmds.c
-> index 90619db..271d1e4 100644
-> --- a/mmc_cmds.c
-> +++ b/mmc_cmds.c
-> @@ -280,6 +280,45 @@ int do_write_boot_en(int nargs, char **argv)
->         return ret;
->  }
->
-> +int do_write_bkops_en(int nargs, char **argv)
-> +{
-> +       __u8 ext_csd[512], value = 0;
-> +       int fd, ret;
-> +       char *device;
-> +
-> +       CHECK(nargs != 2, "Usage: mmc bkops enable </path/to/mmcblkX>\n",
-> +                       exit(1));
-> +
-> +       device = argv[1];
-> +
-> +       fd = open(device, O_RDWR);
-> +       if (fd < 0) {
-> +               perror("open");
-> +               exit(1);
-> +       }
-> +
-> +       ret = read_extcsd(fd, ext_csd);
-> +       if (ret) {
-> +               fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
-> +               exit(1);
-> +       }
-> +
-> +       if (!(ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1)) {
-> +               fprintf(stderr, "Didn't support BKOPS from %s\n", device);
-
-Better reported as fprintf(stderr, "%s does not support BKOPS\n", device);
-
-After fixing this, feel free to add my
-Reviewed-by: Venkatraman S<svenkatr@ti.com>
+On 07/17/2012 06:17 PM, Girish K S wrote:
+> On 17 July 2012 13:16, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> Hi Girish,
+>>
+>> On 07/16/2012 05:45 PM, Girish K S wrote:
+>>> In some Soc'S that integrate Designware mmc host controllers, the
+>>> HCON register is broken. The hardware configuration is not
+>>> updated. One specific usecase is the IDMAC. In Exysons5 SoC
+>>> there exist a internal DMA, but the HCON register's DMA_INTERFACE
+>>> field is not set to indicate its existance.
+>>>
+>>> This quirk can be used in such case to force the existance broken
+>>> HCON field.
+>>>
+>>> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+>>> ---
+>>>  drivers/mmc/host/dw_mmc-pltfm.c |    5 +++++
+>>>  drivers/mmc/host/dw_mmc.c       |   11 ++++++++++-
+>>>  drivers/mmc/host/dw_mmc.h       |    1 +
+>>>  include/linux/mmc/host.h        |    1 +
+>>>  4 files changed, 17 insertions(+), 1 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+>>> index 900f412..24ea485 100644
+>>> --- a/drivers/mmc/host/dw_mmc-pltfm.c
+>>> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
+>>> @@ -35,9 +35,14 @@ static unsigned long exynos5250_dwmmc_caps[4] = {
+>>>       MMC_CAP_CMD23,
+>>>  };
+>>>
+>>> +static unsigned long exynos5250_dwmmc_caps2[1] = {
+>>> +     MMC_CAP2_CONFIG_BROKEN,
+>>> +};
+>>> +
+>>>  static struct dw_mci_drv_data exynos5250_drv_data = {
+>>>       .ctrl_type      = DW_MCI_TYPE_EXYNOS5250,
+>>>       .caps           = exynos5250_dwmmc_caps,
+>>> +     .caps2          = exynos5250_dwmmc_caps2,
+>>>  };
+>>>
+>>>  static const struct of_device_id dw_mci_pltfm_match[] = {
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index 1a59a92..030224c 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -431,7 +431,13 @@ static int dw_mci_idmac_init(struct dw_mci *host)
+>>>       /* Check if Hardware Configuration Register has support for DMA */
+>>>       dma_support = (mci_readl(host, HCON) >> 16) & 0x3;
+>>>
+>>> -     if (!dma_support || dma_support > 2) {
+>>> +     /*
+>>> +      * In Some of the Soc's the HCON Register is broken. Even though the
+>>> +      * Soc's has a internal DMA the HCON register's DMA field doesnt
+>>> +      * show it. So additional quirk is added for such Soc's
+>>> +      */
+>>> +     if ((!dma_support || dma_support > 2) &&
+>>> +             !((u32)host->drv_data->caps2 & MMC_CAP2_CONFIG_BROKEN)) {
+>> Just caps2? if use the device tree, need to get ctrl_id?
+> but i found one thing. I have initialized only one channel. are you
+> mentioning to initialize all 4 channels of exynos5
+You're defined "unsigned long *caps2"..host->drv_data->caps2?? what's value?
+>> It didn't work..
+>>>               dev_err(&host->dev,
+>>>                       "Host Controller does not support IDMA Tx.\n");
+>>>               host->dma_ops = NULL;
+>>> @@ -1957,6 +1963,9 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>>       if (host->pdata->caps2)
+>>>               mmc->caps2 = host->pdata->caps2;
+>>>
+>>> +     if (host->drv_data->caps2)
+>>> +             mmc->caps2 |= host->drv_data->caps2[ctrl_id];
+>>> +
+>>>       if (host->pdata->get_bus_wd) {
+>>>               if (host->pdata->get_bus_wd(slot->id) >= 4)
+>>>                       mmc->caps |= MMC_CAP_4_BIT_DATA;
+>>> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+>>> index 6c17282..8c4810a 100644
+>>> --- a/drivers/mmc/host/dw_mmc.h
+>>> +++ b/drivers/mmc/host/dw_mmc.h
+>>> @@ -203,6 +203,7 @@ extern int dw_mci_resume(struct dw_mci *host);
+>>>  struct dw_mci_drv_data {
+>>>       unsigned long           ctrl_type;
+>>>       unsigned long           *caps;
+>>> +     unsigned long           *caps2;
+>>>  };
+>>>
+>>>  #endif /* _DW_MMC_H_ */
+>>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+>>> index 65c64ee..ab5c7f9 100644
+>>> --- a/include/linux/mmc/host.h
+>>> +++ b/include/linux/mmc/host.h
+>>> @@ -261,6 +261,7 @@ struct mmc_host {
+>>>  #define MMC_CAP2_HC_ERASE_SZ (1 << 9)        /* High-capacity erase size */
+>>>  #define MMC_CAP2_CD_ACTIVE_HIGH      (1 << 10)       /* Card-detect signal active high */
+>>>  #define MMC_CAP2_RO_ACTIVE_HIGH      (1 << 11)       /* Write-protect signal active high */
+>>> +#define MMC_CAP2_CONFIG_BROKEN       (1 << 12)       /* Broken Config Register */
+>>>
+>>>       mmc_pm_flag_t           pm_caps;        /* supported pm features */
+>>>       unsigned int        power_notify_type;
+>>>
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
