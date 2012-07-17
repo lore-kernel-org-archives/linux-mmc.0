@@ -1,91 +1,63 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: mmc: mxs: DEADLOCK
-Date: Tue, 17 Jul 2012 20:40:34 +0800
-Message-ID: <20120717124033.GB3109@S2100-06.ap.freescale.net>
-References: <4FFC367A.8020100@bluegiga.com>
- <20120711060607.GE14060@S2101-09.ap.freescale.net>
- <20120712160008.03731746cdc5cf4bb0548256@kinali.ch>
- <5003AD52.7070304@bluegiga.com>
- <5004F00F.5000800@bluegiga.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v10] mmc: support BKOPS feature for eMMC
+Date: Tue, 17 Jul 2012 15:30:37 +0300
+Message-ID: <50055AED.4000709@intel.com>
+References: <5004D176.7090306@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe002.messaging.microsoft.com ([213.199.154.205]:22684
-	"EHLO am1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752547Ab2GQMTm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jul 2012 08:19:42 -0400
-Content-Disposition: inline
-In-Reply-To: <5004F00F.5000800@bluegiga.com>
+Received: from mga14.intel.com ([143.182.124.37]:64063 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751159Ab2GQM3n (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 17 Jul 2012 08:29:43 -0400
+In-Reply-To: <5004D176.7090306@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lauri Hintsala <lauri.hintsala@bluegiga.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>, Attila Kinali <attila@kinali.ch>, Marek Vasut <marex@denx.de>, Koen Beel <koen.beel@barco.com>, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, Veli-Pekka Peltola <veli-pekka.peltola@bluegiga.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Maya Erez <merez@codeaurora.org>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-On Tue, Jul 17, 2012 at 07:54:39AM +0300, Lauri Hintsala wrote:
-> Shawn,
-> 
-> Could you review this patch? Attila reported it fixes his SDIO
-> initialization issue.
-> 
-Thanks for fixing it.
+On 17/07/12 05:44, Jaehoon Chung wrote:
 
-Acked-by: Shawn Guo <shawn.guo@linaro.org>
+<snip>
 
-> Lauri
-> 
-> 
-> On 07/16/2012 08:57 AM, Lauri Hintsala wrote:
-> >>Any hints how to work around or fix this, would be appreciated
-> >
-> >
-> >Does this patch fix your issue?
-> >
-> > >>>>>>>
-> >--- a/drivers/mmc/host/mxs-mmc.c
-> >+++ b/drivers/mmc/host/mxs-mmc.c
-> >@@ -637,11 +637,6 @@ static void mxs_mmc_enable_sdio_irq(struct mmc_host
-> >*mmc, int enable)
-> >                 host->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_SET);
-> >          writel(BM_SSP_CTRL1_SDIO_IRQ_EN,
-> >                 host->base + HW_SSP_CTRL1(host) + STMP_OFFSET_REG_SET);
-> >-
-> >-        if (readl(host->base + HW_SSP_STATUS(host)) &
-> >-                BM_SSP_STATUS_SDIO_IRQ)
-> >-            mmc_signal_sdio_irq(host->mmc);
-> >-
-> >      } else {
-> >          writel(BM_SSP_CTRL0_SDIO_IRQ_CHECK,
-> >                 host->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_CLR);
-> >@@ -650,6 +645,11 @@ static void mxs_mmc_enable_sdio_irq(struct mmc_host
-> >*mmc, int enable)
-> >      }
-> >
-> >      spin_unlock_irqrestore(&host->lock, flags);
-> >+
-> >+    if (enable && readl(host->base + HW_SSP_STATUS(host)) &
-> >+            BM_SSP_STATUS_SDIO_IRQ)
-> >+        mmc_signal_sdio_irq(host->mmc);
-> >+
-> >  }
-> >
-> >  static const struct mmc_host_ops mxs_mmc_ops = {
-> ><<<<<<<
-> >
-> >mxs_mmc_enable_sdio_irq was called by mmc_signal_sdio_irq.
-> >mmc_signal_sdio_irq was called inside spin lock. So the lock was tried
-> >to acquire before it was released.
-> >
-> >
-> >Best regards,
-> >Lauri Hintsala
-> >--
-> >To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> >the body of a message to majordomo@vger.kernel.org
-> >More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+> +/**
+> + *	mmc_start_bkops - start BKOPS for supported cards
+> + *	@card: MMC card to start BKOPS
+> + *
+> + *	Start background operations whenever requested.
+> + *	when the urgent BKOPS bit is set in a R1 command response
+> + *	then background operations should be started immediately.
+> +*/
+> +void mmc_start_bkops(struct mmc_card *card)
+> +{
+> +	int err;
+> +	int timeout;
+> +	u8 use_busy_signal;
+> +
+> +	BUG_ON(!card);
+> +	if (!card->ext_csd.bkops_en || !(card->host->caps2 & MMC_CAP2_BKOPS))
+> +		return;
+> +
+> +	if (mmc_is_exception_event(card, EXT_CSD_URGENT_BKOPS))
+> +		if (card->ext_csd.raw_bkops_status)
+> +			mmc_card_set_need_bkops(card);
+> +
+> +	/*
+> +	 * If card is already doing bkops or need for
+> +	 * bkops flag is not set, then do nothing just
+> +	 * return
+> +	 */
+> +	if (mmc_card_doing_bkops(card) || !mmc_card_need_bkops(card))
+> +		return;
+> +
+> +	mmc_claim_host(card->host);
+> +	if (card->ext_csd.raw_bkops_status >= EXT_CSD_BKOPS_LEVEL_2) {
+> +		timeout = MMC_BKOPS_MAX_TIMEOUT;
+> +		use_busy_signal = 0;
+> +	} else {
+> +		timeout = 0;
+> +		use_busy_signal = 1;
+> +	}
 
+Is this the right way around?
