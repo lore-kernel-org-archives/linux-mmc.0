@@ -1,41 +1,45 @@
-From: Linus Walleij <linus.walleij@linaro.org>
+From: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
 Subject: Re: [PATCH RESEND] gpio: of_get_named_gpio_flags() return
  -EPROBE_DEFER if GPIO not yet available
-Date: Tue, 17 Jul 2012 20:24:18 +0200
-Message-ID: <CACRpkdYBBa8BZMeGK0kiXNysn_ErpyKhTtbK8yFxf+JyMSndFw@mail.gmail.com>
+Date: Tue, 17 Jul 2012 15:30:46 -0300
+Message-ID: <CAAAP30FtFOQSJ8UvN6H+L6qwPyphi27L+mxi-3COu6RAJQTHcQ@mail.gmail.com>
 References: <1340836334-20427-1-git-send-email-stigge@antcom.de>
+	<CACRpkdYBBa8BZMeGK0kiXNysn_ErpyKhTtbK8yFxf+JyMSndFw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:62536 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750847Ab2GQSYT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jul 2012 14:24:19 -0400
-Received: by qcro28 with SMTP id o28so501197qcr.19
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Jul 2012 11:24:18 -0700 (PDT)
-In-Reply-To: <1340836334-20427-1-git-send-email-stigge@antcom.de>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:47259 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752059Ab2GQSar (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jul 2012 14:30:47 -0400
+In-Reply-To: <CACRpkdYBBa8BZMeGK0kiXNysn_ErpyKhTtbK8yFxf+JyMSndFw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Roland Stigge <stigge@antcom.de>
-Cc: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com, linux-arm-kernel@lists.infradead.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Roland Stigge <stigge@antcom.de>, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Thu, Jun 28, 2012 at 12:32 AM, Roland Stigge <stigge@antcom.de> wrote:
-
-> of_get_named_gpio_flags() and of_get_named_gpio() return -EPROBE_DEFER if the
-> respective GPIO is not (yet) available. This is useful if driver's probe()
-> functions try to get a GPIO whose controller isn't probed yet. Thus, the driver
-> can be probed again later on.
+On Tue, Jul 17, 2012 at 3:24 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
+> On Thu, Jun 28, 2012 at 12:32 AM, Roland Stigge <stigge@antcom.de> wrote:
 >
-> The function still returns -EINVAL on other errors (parse error or node doesn't
-> exist). This way, the case of an optional/intentionally missing GPIO is handled
-> appropriately.
+>> of_get_named_gpio_flags() and of_get_named_gpio() return -EPROBE_DEFER if the
+>> respective GPIO is not (yet) available. This is useful if driver's probe()
+>> functions try to get a GPIO whose controller isn't probed yet. Thus, the driver
+>> can be probed again later on.
+>>
+>> The function still returns -EINVAL on other errors (parse error or node doesn't
+>> exist). This way, the case of an optional/intentionally missing GPIO is handled
+>> appropriately.
+>>
+>> Signed-off-by: Roland Stigge <stigge@antcom.de>
 >
-> Signed-off-by: Roland Stigge <stigge@antcom.de>
+> Patch applied, if all gpio stuff shall defer properly in v3.6 we need this
+> so let's do some testing in -next!
+>
+> Would be nice to get some ACK besides my own...
 
-Patch applied, if all gpio stuff shall defer properly in v3.6 we need this
-so let's do some testing in -next!
+You can add mine. I've been using this patch for quite some time now.
 
-Would be nice to get some ACK besides my own...
+Acked-by: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
 
-Yours,
-Linus Walleij
+> Yours,
+> Linus Walleij
