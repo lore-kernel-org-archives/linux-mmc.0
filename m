@@ -1,41 +1,87 @@
-From: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
-Subject: Re: [PATCH v2 1/1] mmc: host: enable OMAP DMA engine support for omap
- hosts by default
-Date: Tue, 17 Jul 2012 12:39:05 +0530
-Message-ID: <CAMQu2gyf=-0QG4UCDEGfDmsCZ+xJs_B=+SSH3VxqO4hu=mSPdg@mail.gmail.com>
-References: <1342508636-2782-1-git-send-email-javier@dowhile0.org>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH RESEND] gpio: of_get_named_gpio_flags() return
+ -EPROBE_DEFER if GPIO not yet available
+Date: Tue, 17 Jul 2012 08:43:24 +0100
+Message-ID: <20120717074324.GA12047@opensource.wolfsonmicro.com>
+References: <1340836334-20427-1-git-send-email-stigge@antcom.de>
+ <CACRpkdYrZizqvZqsocLEGrkY5yPMuYFfmR3UUSFZgPDvEPa0eA@mail.gmail.com>
+ <20120715211120.GH4041@opensource.wolfsonmicro.com>
+ <CACRpkdb0k4fNigA6FGyEobxUt-JnmUy-ni7XzH-gup-ic_j+VQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1342508636-2782-1-git-send-email-javier@dowhile0.org>
-Sender: linux-omap-owner@vger.kernel.org
-To: Javier Martinez Canillas <javier@dowhile0.org>
-Cc: Tony Lindgren <tony@atomide.com>, Kevin Hilman <khilman@ti.com>, Russell King <linux@arm.linux.org.uk>, linux-omap@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============3322000719589225912=="
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CACRpkdb0k4fNigA6FGyEobxUt-JnmUy-ni7XzH-gup-ic_j+VQ@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Roland Stigge <stigge@antcom.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, rob.herring@calxeda.com, Grant Likely <grant.likely@secretlab.ca>, linux-arm-kernel@lists.infradead.org, rmk+kernel@arm.linux.org.uk, cjb@laptop.org, ulf.hansson@stericsson.com, aletes.xgr@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jul 17, 2012 at 12:33 PM, Javier Martinez Canillas
-<javier@dowhile0.org> wrote:
-> The OMAP MMC and OMAP High Speed MMC hosts now use entirely the DMA
-> engine API instead of the previous private DMA API implementation.
->
-> So, if the kernel is built with support for any of these hosts but it
-> doesn't support DMA devices nor OMAP DMA support, it fails when trying
-> to obtain a DMA channel which leads to the following error on an OMAP3
-> IGEPv2 Rev.C board (and probably on most OMAP boards with MMC support):
->
-> [    2.199981] omap_hsmmc omap_hsmmc.1: unable to obtain RX DMA engine channel 48
-> [    2.215087] omap_hsmmc omap_hsmmc.0: unable to obtain RX DMA engine channel 62
->
-> selecting automatically CONFIG_DMADEVICES and CONFIG_DMA_OMAP solves it.
->
-> While being there, also update drivers/spi/spi-omap2-mcspi which has been
-> ported to DMA engine API too.
->
-> Signed-off-by: Javier Martinez Canillas <javier@dowhile0.org>
-> ---
->
-Looks like this patch should go to Russell's tree where rest of the OMAP
-DMA engine patches are queued.
 
-For the patch itself,
-Acked-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
+--===============3322000719589225912==
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="M9NhX3UHpAaciwkO"
+Content-Disposition: inline
+
+
+--M9NhX3UHpAaciwkO
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+On Tue, Jul 17, 2012 at 12:16:48AM +0200, Linus Walleij wrote:
+> On Sun, Jul 15, 2012 at 11:11 PM, Mark Brown
+
+> > I had thought a version of this
+> > had been submitted already and was in a similar place to the one for
+> > gpio_request().
+
+> Me to...
+
+Greg just merged the driver core patch for pushing the deferred devices
+to the end of the dpm list before reprobing them which should address
+Grant's concern about doing this in gpiolib.
+
+--M9NhX3UHpAaciwkO
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJQBReVAAoJEBus8iNuMP3dX+YP/26yy+wf0P9dfwDuUzqIwDly
+1LJwZICuOa6dcaxY/k9Afqrf0zPJtkf761QCg6cRSjfHCE2zazv+wzy21TqwhUB0
+ZI3ZbjOAUXIJXZR40AMhT273Ze8u05hPolAmbP4mzFulrkCn+sWy+y7I36viAWob
+h5hBh1mVZF81Krj2oObhbkcLT9Ta3Od3PdXf8L/DBJY7XjymFFqMQLAVhQm2Fahx
+xwbQqty2L4dWFD1ZkF/896kRXoNhiyJqRC6Q01vj0JHS7BIFF2kR926EfCyhHy7+
+UyBlJ5eryaDGf+P1Gk17MccvnHHV/p5/EG17XP+P4K3Pd2yM6efvVEpmb11e9zGJ
+lUOWkgL5tDMbPyI8SNZyyCL4fkGPu7XULmhWEhb02oOHMbWnl9YubYlCoHFoA82M
+Wz4a8Z179V3flPwByRhC3dzCCrT/lC096F9fEur463USdp4rYmQmjI8y+A8CawIb
+bEOnWWznUjTelVvumkOFGTm7goayWjTZrRSBQwPw/hbrpGX9yT0TIrpRMX1+nOaq
+MS8sx0+4biZo/R5ZI1QswXWZT1ge7vSZrigh9+LJ4sqD//3+1jRj5a+GlDqTkzmg
+dJbwaKSO6aBSwGRL/vy/F9tHZvgdRfIyS0WJhH77Lg13t4f9nS21obI3MtR49tAa
+JgK3N0ZUB2mocVi+sJ/l
+=NwsN
+-----END PGP SIGNATURE-----
+
+--M9NhX3UHpAaciwkO--
+
+
+--===============3322000719589225912==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+linux-arm-kernel mailing list
+linux-arm-kernel@lists.infradead.org
+http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
+--===============3322000719589225912==--
