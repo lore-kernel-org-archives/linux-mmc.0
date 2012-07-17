@@ -1,61 +1,74 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
+From: Thomas Abraham <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Subject: Re: [PATCH v3 5/6] mmc: dw_mmc: add device tree support
-Date: Tue, 17 Jul 2012 15:49:58 +0530
-Message-ID: <CAJuYYwTLxEgm3CnPof4ub=XQazJ+PaUG-zk14nGnpBwWsnHMvw@mail.gmail.com>
+Date: Tue, 17 Jul 2012 15:51:21 +0530
+Message-ID: <CAJuYYwRzAB0eUm5xV1PiB01wKXJq2efYJPczgw0EAangQLNEew@mail.gmail.com>
 References: <1342097668-25243-1-git-send-email-thomas.abraham@linaro.org>
-	<1342097668-25243-6-git-send-email-thomas.abraham@linaro.org>
-	<CAGxe1ZHZr2=127p8X-A12K2-zOyKMOJ0fkx5pWNovVteFfSPwg@mail.gmail.com>
+ <1342097668-25243-6-git-send-email-thomas.abraham@linaro.org>
+ <87liikjpw0.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAGxe1ZHZr2=127p8X-A12K2-zOyKMOJ0fkx5pWNovVteFfSPwg@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <87liikjpw0.fsf-DGHOrqG7t0YzNDMTQreKSUB+6BGkLq7r@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 16 July 2012 09:45, Girish K S <girish.shivananjappa@linaro.org> wrote:
-> On 12 July 2012 18:24, Thomas Abraham <thomas.abraham@linaro.org> wrote:
-
-[...]
-
->>
->> +#ifdef CONFIG_OF
->> +static struct dw_mci_drv_data synopsis_drv_data = {
->> +       .ctrl_type      = DW_MCI_TYPE_SYNOPSIS,
->> +};
+On 16 July 2012 09:53, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org> wrote:
+> Hi,
+>
+> On Thu, Jul 12 2012, Thomas Abraham wrote:
+>> diff --git a/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
+>> new file mode 100644
+>> index 0000000..3acd6c9
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
+>> @@ -0,0 +1,108 @@
+>> +* Synopsis Designware Mobile Storage Host Controller
 >> +
->> +static const struct of_device_id dw_mci_pltfm_match[] = {
->> +       { .compatible = "snps,dw-mshc",
->> +                       .data = (void *)&synopsis_drv_data, },
->> +       {},
->> +};
->> +MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
->> +#else
->> +static const struct of_device_id dw_mci_pltfm_match[];
-> the #else and a statement can be completely removed if of_match_ptr is
-> used while accessing the dw_mci_pltfm_match in of_match_node function.
->> +#endif
+>> +The Synopsis designware mobile storage host controller is used to interface
+>> +a SoC with storage medium such as eMMC or SD/MMC cards.
 >> +
->>  static int dw_mci_pltfm_probe(struct platform_device *pdev)
->>  {
->>         struct dw_mci *host;
->> @@ -51,6 +67,13 @@ static int dw_mci_pltfm_probe(struct platform_device *pdev)
->>         if (!host->regs)
->>                 goto err_free;
->>         platform_set_drvdata(pdev, host);
+>> +Required Properties:
 >> +
->> +       if (pdev->dev.of_node) {
->> +               const struct of_device_id *match;
->> +               match = of_match_node(dw_mci_pltfm_match, pdev->dev.of_node);
-> can be modified to of_match_node(of_match_pt(dw_mci_pltfm_match),
-> pdev->dev.of_node);
-> This will remove the dummy allocation of variable as mentioned above.
-> Also it will be generic in non dt case.
+>> +* compatible: should be one of the following
+>> +     - snps,dw-mshc: for controllers compliant with synopsis dw-mshc.
+>> +
+>> +* reg: physical base address of the dw-mshc controller and size of its memory
+>> +  region.
+>> +
+>> +* interrupts: interrupt specifier for the controller. The format and value of
+>> +  the interrupt specifier depends on the interrupt parent for the controller.
+>
+> Please instead add:
+>
+> This file documents differences between the core properties described
+> by mmc.txt and the properties used by the dw_mmc driver.
+>
+> mmc.txt already describes compatible, reg, interrupts, bus-width,
+> cd-gpios, and wp-gpios, so you don't need to describe those again.
 
-Ok. Thanks for the suggestion. I will modify it as per your suggestion.
+Ok. I will change it.
+
+>
+>> +     cnt = sizeof(of_quriks) / sizeof(struct dw_mci_of_quirks);
+>> +     for (idx = 0; idx < cnt; idx++)
+>> +             if (of_get_property(np, of_quriks[idx].quirk, NULL))
+>> +                     pdata->quirks |= of_quriks[idx].id;
+>
+> of_quirks, not of_quriks.
+
+Yes, thanks for pointing this out. I will fix this.
 
 Thanks,
 Thomas.
-
-[...]
