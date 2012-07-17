@@ -1,17 +1,23 @@
 From: Girish K S <girish.shivananjappa@linaro.org>
 Subject: Re: [PATCH] mmc: dwmmc: Add quirk for broken Hardware Config
-Date: Tue, 17 Jul 2012 14:33:31 +0530
-Message-ID: <CAGxe1ZEER0FmfH7_Loz6OC7KUskdCKN95YdrPT_ykUXJDathZQ@mail.gmail.com>
+Date: Tue, 17 Jul 2012 14:47:34 +0530
+Message-ID: <CAGxe1ZGdADbDbJHV+=knDxtO4PxsNVq6A4jc1oCx8SDc_mDHQw@mail.gmail.com>
 References: <1342428302-10707-1-git-send-email-girish.shivananjappa@linaro.org>
 	<5005184E.6000807@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f53.google.com ([209.85.216.53]:34180 "EHLO
+	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753773Ab2GQJRf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jul 2012 05:17:35 -0400
+Received: by qaas11 with SMTP id s11so115986qaa.19
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Jul 2012 02:17:34 -0700 (PDT)
 In-Reply-To: <5005184E.6000807@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Jaehoon Chung <jh80.chung@samsung.com>
 Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, will.newton@imgtec.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org, shashidharh@vayavyalabs.com, thomas.abraham@linaro.org
-List-Id: linux-mmc@vger.kernel.org
 
 On 17 July 2012 13:16, Jaehoon Chung <jh80.chung@samsung.com> wrote:
 > Hi Girish,
@@ -70,17 +76,9 @@ On 17 July 2012 13:16, Jaehoon Chung <jh80.chung@samsung.com> wrote:
 >> +     if ((!dma_support || dma_support > 2) &&
 >> +             !((u32)host->drv_data->caps2 & MMC_CAP2_CONFIG_BROKEN)) {
 > Just caps2? if use the device tree, need to get ctrl_id?
-ctrl id is available for exynos5 in the parent structure of caps2.
-I think device tree will be used to only get the platform related
-information. The platform information that dwmmc expects is only the
-compatible string.
-The quirk information is part of the driver data. And the caps2 is
-embedded inside the driver data.
-
-In the above case. IDMAC init is called in probe for every instance of
-the host controller.
+but i found one thing. I have initialized only one channel. are you
+mentioning to initialize all 4 channels of exynos5
 > It didn't work..
-I tested it for exynos5. There is no issue.
 >>               dev_err(&host->dev,
 >>                       "Host Controller does not support IDMA Tx.\n");
 >>               host->dma_ops = NULL;
