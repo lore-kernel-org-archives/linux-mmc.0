@@ -1,222 +1,126 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: sd: Fix sd current limit setting
-Date: Tue, 17 Jul 2012 15:04:05 +0530
-Message-ID: <CAGxe1ZF=T7GL6ZcyV-=MEd5WVWexNrUbrEZDsYGdFD+KPH4XfA@mail.gmail.com>
-References: <1341296172-10645-1-git-send-email-aaron.lu@amd.com>
-	<1341296172-10645-3-git-send-email-aaron.lu@amd.com>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH] mmc-util: add the method to enable the bkops
+Date: Tue, 17 Jul 2012 15:06:30 +0530
+Message-ID: <CANfBPZ--SWDN+VM+zrBzrOhqW0wB5mSHCMF4XSWz_rE9EtV3XA@mail.gmail.com>
+References: <5004D179.6080706@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:54578 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751330Ab2GQJeH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jul 2012 05:34:07 -0400
-Received: by qcro28 with SMTP id o28so80297qcr.19
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Jul 2012 02:34:06 -0700 (PDT)
-In-Reply-To: <1341296172-10645-3-git-send-email-aaron.lu@amd.com>
+Received: from na3sys009aog129.obsmtp.com ([74.125.149.142]:57021 "EHLO
+	na3sys009aog129.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751293Ab2GQJgy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jul 2012 05:36:54 -0400
+Received: by bkty7 with SMTP id y7so124759bkt.3
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Jul 2012 02:36:51 -0700 (PDT)
+In-Reply-To: <5004D179.6080706@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lu@amd.com>
-Cc: Chris Ball <cjb@laptop.org>, Philip Rakity <prakity@marvell.com>, linux-mmc@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Maya Erez <merez@codeaurora.org>, Saugata Das <saugata.das@linaro.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
 
-On 3 July 2012 11:46, Aaron Lu <aaron.lu@amd.com> wrote:
-> Host has different current capabilities at different voltages, we need
-> to record these settings seperately. Before set current limit for the sd
-> card, find out the current voltage first and then find out the current
-> capabilities of the host to set the limit.
+Minor printk nits..
+
+On Tue, Jul 17, 2012 at 8:14 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> This patch added the method to enable the bkops.
+> In ext_csd register, BKOPS_EN bit is one-time programable.
+> So if you want to use the bkops, use the this command.
 >
-> Signed-off-by: Aaron Lu <aaron.lu@amd.com>
+> <usage>
+> #mmc bkops enable /dev/mmcblk0
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 > ---
->  drivers/mmc/core/sd.c    | 58 ++++++++++++++++++++++++++++++++++++++++++------
->  drivers/mmc/host/sdhci.c | 28 +++++++++++++++++++----
->  include/linux/mmc/host.h | 16 +++++++++----
->  3 files changed, 87 insertions(+), 15 deletions(-)
+>  mmc.c      |    5 +++++
+>  mmc.h      |    7 +++++++
+>  mmc_cmds.c |   39 +++++++++++++++++++++++++++++++++++++++
+>  mmc_cmds.h |    1 +
+>  4 files changed, 52 insertions(+), 0 deletions(-)
 >
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index ae72d6e..4b4cf4d 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -521,11 +521,39 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
->  {
->         int current_limit = SD_SET_CURRENT_NO_CHANGE;
->         int err;
-> +       u8 voltage;
+> diff --git a/mmc.c b/mmc.c
+> index 379d667..3a12653 100644
+> --- a/mmc.c
+> +++ b/mmc.c
+> @@ -75,6 +75,11 @@ static struct Command commands[] = {
+>                 "Enable the boot partition for the <device>.\nTo receive acknowledgment of boot from the card set <send_ack>\nto 1, else set it to 0.",
+>           NULL
+>         },
+> +       { do_write_bkops_en, -1,
+> +         "bkops enable", "<device>\n"
+> +               "Enable the eMMC BKOPS feature enable on <device>.",
+s/feature enable on/feature on/
+
+> +         NULL
+> +       },
+>         { 0, 0, 0, 0 }
+>  };
 >
->         /*
->          * Current limit switch is only defined for SDR50, SDR104, and DDR50
->          * bus speed modes. For other bus speed modes, we do not change the
->          * current limit.
-> +        */
-> +       if ((card->sd_bus_speed != UHS_SDR50_BUS_SPEED) &&
-> +           (card->sd_bus_speed != UHS_SDR104_BUS_SPEED) &&
-> +           (card->sd_bus_speed != UHS_DDR50_BUS_SPEED))
-> +               return 0;
+> diff --git a/mmc.h b/mmc.h
+> index 0a521a8..3d77b38 100644
+> --- a/mmc.h
+> +++ b/mmc.h
+> @@ -31,12 +31,14 @@
+>   */
+>  #define EXT_CSD_S_CMD_SET              504
+>  #define EXT_CSD_HPI_FEATURE            503
+> +#define EXT_CSD_BKOPS_SUPPORT          502     /* RO */
+>  #define EXT_CSD_BOOT_INFO              228     /* R/W */
+>  #define EXT_CSD_PART_SWITCH_TIME       199
+>  #define EXT_CSD_BOOT_CFG               179
+>  #define EXT_CSD_PART_CONFIG            179
+>  #define EXT_CSD_BOOT_WP                        173
+>  #define EXT_CSD_WR_REL_PARAM           166
+> +#define EXT_CSD_BKOPS_EN               163     /* R/W */
+>  #define EXT_CSD_NATIVE_SECTOR_SIZE     63 /* R */
+>  #define EXT_CSD_USE_NATIVE_SECTOR      62 /* R/W */
+>  #define EXT_CSD_DATA_SECTOR_SIZE       61 /* R */
+> @@ -48,6 +50,11 @@
+>  #define EN_REL_WR      (1<<2)
+>
+>  /*
+> + * BKOPS_EN field definition
+> + */
+> +#define BKOPS_ENABLE   (1<<0)
 > +
-> +       /*
-> +        * Host has different current capabilities when operating at
-> +        * different voltages, so find out the current voltage first.
-> +        */
-> +       switch (1 << card->host->ios.vdd) {
-> +               case MMC_VDD_165_195:
-> +                       voltage = 0; /* host's voltage is 1.8V */
-> +                       break;
-> +               case MMC_VDD_29_30:
-> +               case MMC_VDD_30_31:
-> +                       voltage = 1; /* host's voltage is 3.0V */
-> +                       break;
-> +               case MMC_VDD_32_33:
-> +               case MMC_VDD_33_34:
-> +                       voltage = 2; /* host's voltage is 3.3V */
-> +                       break;
-> +               default:
-> +                       BUG(); /* host's voltage is invalid */
+> +/*
+>   * EXT_CSD field definitions
+>   */
+>  #define EXT_CSD_HPI_SUPP               (1<<0)
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index 90619db..271d1e4 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -280,6 +280,45 @@ int do_write_boot_en(int nargs, char **argv)
+>         return ret;
+>  }
+>
+> +int do_write_bkops_en(int nargs, char **argv)
+> +{
+> +       __u8 ext_csd[512], value = 0;
+> +       int fd, ret;
+> +       char *device;
+> +
+> +       CHECK(nargs != 2, "Usage: mmc bkops enable </path/to/mmcblkX>\n",
+> +                       exit(1));
+> +
+> +       device = argv[1];
+> +
+> +       fd = open(device, O_RDWR);
+> +       if (fd < 0) {
+> +               perror("open");
+> +               exit(1);
 > +       }
 > +
-> +       /*
->          * We only check host's capability here, if we set a limit that is
->          * higher than the card's maximum current, the card will be using its
->          * maximum current, e.g. if the card's maximum current is 300ma, and
-> @@ -533,16 +561,32 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
->          * when we set current limit to 400/600/800ma, the card will draw its
->          * maximum 300ma from the host.
->          */
-> -       if ((card->sd_bus_speed == UHS_SDR50_BUS_SPEED) ||
-> -           (card->sd_bus_speed == UHS_SDR104_BUS_SPEED) ||
-> -           (card->sd_bus_speed == UHS_DDR50_BUS_SPEED)) {
-> -               if (card->host->caps & MMC_CAP_MAX_CURRENT_800)
-> +       if (voltage == 0) {
-> +               if (card->host->caps & MMC_CAP_MAX_CURRENT_800_180)
-> +                       current_limit = SD_SET_CURRENT_LIMIT_800;
-> +               else if (card->host->caps & MMC_CAP_MAX_CURRENT_600_180)
-> +                       current_limit = SD_SET_CURRENT_LIMIT_600;
-> +               else if (card->host->caps & MMC_CAP_MAX_CURRENT_400_180)
-> +                       current_limit = SD_SET_CURRENT_LIMIT_400;
-> +               else if (card->host->caps & MMC_CAP_MAX_CURRENT_200_180)
-> +                       current_limit = SD_SET_CURRENT_LIMIT_200;
-> +       } else if (voltage == 1) {
-> +               if (card->host->caps & MMC_CAP_MAX_CURRENT_800_300)
-> +                       current_limit = SD_SET_CURRENT_LIMIT_800;
-> +               else if (card->host->caps & MMC_CAP_MAX_CURRENT_600_300)
-> +                       current_limit = SD_SET_CURRENT_LIMIT_600;
-> +               else if (card->host->caps & MMC_CAP_MAX_CURRENT_400_300)
-> +                       current_limit = SD_SET_CURRENT_LIMIT_400;
-> +               else if (card->host->caps & MMC_CAP_MAX_CURRENT_200_300)
-> +                       current_limit = SD_SET_CURRENT_LIMIT_200;
-> +       } else if (voltage == 2) {
-> +               if (card->host->caps & MMC_CAP_MAX_CURRENT_800_330)
->                         current_limit = SD_SET_CURRENT_LIMIT_800;
-> -               else if (card->host->caps & MMC_CAP_MAX_CURRENT_600)
-> +               else if (card->host->caps & MMC_CAP_MAX_CURRENT_600_330)
->                         current_limit = SD_SET_CURRENT_LIMIT_600;
-> -               else if (card->host->caps & MMC_CAP_MAX_CURRENT_400)
-> +               else if (card->host->caps & MMC_CAP_MAX_CURRENT_400_330)
->                         current_limit = SD_SET_CURRENT_LIMIT_400;
-> -               else if (card->host->caps & MMC_CAP_MAX_CURRENT_200)
-> +               else if (card->host->caps & MMC_CAP_MAX_CURRENT_200_330)
->                         current_limit = SD_SET_CURRENT_LIMIT_200;
->         }
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index caba999..00c2cbb 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2897,6 +2897,16 @@ int sdhci_add_host(struct sdhci_host *host)
->
->                 if (max_current_330 > 150)
->                         mmc->caps |= MMC_CAP_SET_XPC_330;
+> +       ret = read_extcsd(fd, ext_csd);
+> +       if (ret) {
+> +               fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
+> +               exit(1);
+> +       }
 > +
-> +               /* Maximum current capabilities of the host at 3.3V */
-> +               if (max_current_330 >= 800)
-> +                       mmc->caps |= MMC_CAP_MAX_CURRENT_800_330;
-> +               else if (max_current_330 >= 600)
-> +                       mmc->caps |= MMC_CAP_MAX_CURRENT_600_330;
-> +               else if (max_current_330 >= 400)
-> +                       mmc->caps |= MMC_CAP_MAX_CURRENT_400_330;
-> +               else if (max_current_330 >= 200)
-> +                       mmc->caps |= MMC_CAP_MAX_CURRENT_200_330;
->         }
->         if (caps[0] & SDHCI_CAN_VDD_300) {
->                 int max_current_300;
-> @@ -2910,6 +2920,16 @@ int sdhci_add_host(struct sdhci_host *host)
->
->                 if (max_current_300 > 150)
->                         mmc->caps |= MMC_CAP_SET_XPC_300;
-> +
-> +               /* Maximum current capabilities of the host at 3.0V */
-> +               if (max_current_300 >= 800)
-> +                       mmc->caps |= MMC_CAP_MAX_CURRENT_800_300;
-> +               else if (max_current_300 >= 600)
-> +                       mmc->caps |= MMC_CAP_MAX_CURRENT_600_300;
-> +               else if (max_current_300 >= 400)
-> +                       mmc->caps |= MMC_CAP_MAX_CURRENT_400_300;
-> +               else if (max_current_300 >= 200)
-> +                       mmc->caps |= MMC_CAP_MAX_CURRENT_200_300;
->         }
->         if (caps[0] & SDHCI_CAN_VDD_180) {
->                 int max_current_180;
-> @@ -2926,13 +2946,13 @@ int sdhci_add_host(struct sdhci_host *host)
->
->                 /* Maximum current capabilities of the host at 1.8V */
->                 if (max_current_180 >= 800)
-> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_800;
-> +                       mmc->caps |= MMC_CAP_MAX_CURRENT_800_180;
->                 else if (max_current_180 >= 600)
-> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_600;
-> +                       mmc->caps |= MMC_CAP_MAX_CURRENT_600_180;
->                 else if (max_current_180 >= 400)
-> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_400;
-> +                       mmc->caps |= MMC_CAP_MAX_CURRENT_400_180;
->                 else if (max_current_180 >= 200)
-> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_200;
-> +                       mmc->caps |= MMC_CAP_MAX_CURRENT_200_180;
->         }
->
->         mmc->ocr_avail = ocr_avail;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 65c64ee..ca84ffb 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -238,10 +238,10 @@ struct mmc_host {
->  #define MMC_CAP_DRIVER_TYPE_A  (1 << 23)       /* Host supports Driver Type A */
->  #define MMC_CAP_DRIVER_TYPE_C  (1 << 24)       /* Host supports Driver Type C */
->  #define MMC_CAP_DRIVER_TYPE_D  (1 << 25)       /* Host supports Driver Type D */
-> -#define MMC_CAP_MAX_CURRENT_200        (1 << 26)       /* Host max current limit is 200mA */
-> -#define MMC_CAP_MAX_CURRENT_400        (1 << 27)       /* Host max current limit is 400mA */
-> -#define MMC_CAP_MAX_CURRENT_600        (1 << 28)       /* Host max current limit is 600mA */
-> -#define MMC_CAP_MAX_CURRENT_800        (1 << 29)       /* Host max current limit is 800mA */
-> +#define MMC_CAP_MAX_CURRENT_200_180 (1 << 26)  /* Host max current limit is 200mA at 1.8V */
-> +#define MMC_CAP_MAX_CURRENT_400_180 (1 << 27)  /* Host max current limit is 400mA at 1.8V */
-> +#define MMC_CAP_MAX_CURRENT_600_180 (1 << 28)  /* Host max current limit is 600mA at 1.8V */
-> +#define MMC_CAP_MAX_CURRENT_800_180 (1 << 29)  /* Host max current limit is 800mA at 1.8V */
->  #define MMC_CAP_CMD23          (1 << 30)       /* CMD23 supported. */
->  #define MMC_CAP_HW_RESET       (1 << 31)       /* Hardware reset */
->
-> @@ -261,6 +261,14 @@ struct mmc_host {
->  #define MMC_CAP2_HC_ERASE_SZ   (1 << 9)        /* High-capacity erase size */
->  #define MMC_CAP2_CD_ACTIVE_HIGH        (1 << 10)       /* Card-detect signal active high */
->  #define MMC_CAP2_RO_ACTIVE_HIGH        (1 << 11)       /* Write-protect signal active high */
-> +#define MMC_CAP_MAX_CURRENT_200_300 (1 << 12)  /* Host max current limit is 200mA at 3.0V */
-> +#define MMC_CAP_MAX_CURRENT_400_300 (1 << 13)  /* Host max current limit is 400mA at 3.0V */
-> +#define MMC_CAP_MAX_CURRENT_600_300 (1 << 14)  /* Host max current limit is 600mA at 3.0V */
-> +#define MMC_CAP_MAX_CURRENT_800_300 (1 << 15)  /* Host max current limit is 800mA at 3.0V */
-> +#define MMC_CAP_MAX_CURRENT_200_330 (1 << 16)  /* Host max current limit is 200mA at 3.3V */
-> +#define MMC_CAP_MAX_CURRENT_400_330 (1 << 17)  /* Host max current limit is 400mA at 3.3V */
-> +#define MMC_CAP_MAX_CURRENT_600_330 (1 << 18)  /* Host max current limit is 600mA at 3.3V */
-> +#define MMC_CAP_MAX_CURRENT_800_330 (1 << 19)  /* Host max current limit is 800mA at 3.3V */
-sorry for seeing this late.
-The macro name should be **_CAP2_***. This is already merged in
-chris's mmc-next branch,
-Chris,
-Is it possible to change the macro name in the mmc-next branch for this patch?
+> +       if (!(ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1)) {
+> +               fprintf(stderr, "Didn't support BKOPS from %s\n", device);
 
->
->         mmc_pm_flag_t           pm_caps;        /* supported pm features */
->         unsigned int        power_notify_type;
-> --
-> 1.7.11.1.3.g4c8a9db
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Better reported as fprintf(stderr, "%s does not support BKOPS\n", device);
+
+After fixing this, feel free to add my
+Reviewed-by: Venkatraman S<svenkatr@ti.com>
