@@ -2,21 +2,17 @@ From: =?utf-8?B?5pyJ5pWI5p6c5YaN5LuY5qy+?= <admin@sumstar.com>
 Subject: =?utf-8?B?MjAxMuaYpeWtozExMeWxiuW5v+S6pOS8muS5sOWutu+8jOe+pOWPkei9r+S7tg==?=
 	=?utf-8?B?77yMQjJC6K+i55uY5Lmw5a6244CBdGhvbWFzbmV0IOmHhw==?=
 	=?utf-8?B?6LSt5ZWGLOa1t+WFs+aVsOaNrizlsZXkvJrkubDlrrYg5LuFMzAw5YWDIQ==?=
-Date: Tue, 17 Jul 2012 00:17:24 +0000 (UTC)
-Message-ID: <20210717081217331888@sumstar.com>
+Date: Tue, 17 Jul 2012 00:17:26 +0000 (UTC)
+Message-ID: <20210717081217331888__12108.5491301075$1342484246$gmane$org@sumstar.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
 	charset="utf-8"
 Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [123.124.222.66] ([123.124.222.66]:14258 "HELO sumstar.com"
-	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with SMTP
-	id S1753608Ab2GQARP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 16 Jul 2012 20:17:15 -0400
+Return-path: <linux-omap-owner@vger.kernel.org>
 Date: Sat, 17 Jul 2021 08:12:05 +0800
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-omap-owner@vger.kernel.org
 To: lucas.geffroy@hotmail.com, linuxjr@hotmail.com, linux-laptop@vger.ke, lucas.samper@live.com, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, lucas@137.78.76.83.cust.bluewin.ch, linux-omap@vger.kernel.org, linux-pcisupport@cao-vlsi.ibp.fr, linuxprogram@gmail.com, linuxrat@gnuchina.org
+List-Id: linux-mmc@vger.kernel.org
 
 MjAxMuaYpeWtozExMeWxiuW5v+S6pOS8muS5sOWutu+8jOa1t+WFs+aVsOaNruaPkOWNlXBpZXJz
 54mI77yMMjAwOC0yMDEy5bm0OeWxiuW5v+S6pOS8muaVsOaNruOAgg0KDQrkuIDlhbExMOS4quWM
