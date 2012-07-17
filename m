@@ -1,59 +1,44 @@
-From: Javier Martinez Canillas <javier@dowhile0.org>
-Subject: Re: [PATCH v2 1/1] mmc: host: enable OMAP DMA engine support for omap
- hosts by default
-Date: Tue, 17 Jul 2012 18:38:35 +0200
-Message-ID: <CABxcv=k+9XBRHXVLpr30vtLyj6fOYyqyoWDSdtp3jRTk0oM5WQ@mail.gmail.com>
-References: <1342508636-2782-1-git-send-email-javier@dowhile0.org>
-	<CAMQu2gyf=-0QG4UCDEGfDmsCZ+xJs_B=+SSH3VxqO4hu=mSPdg@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH RESEND] gpio: of_get_named_gpio_flags() return
+ -EPROBE_DEFER if GPIO not yet available
+Date: Tue, 17 Jul 2012 20:17:45 +0200
+Message-ID: <CACRpkdaUfx6iiydHAwzZMG=a5y5kcoB+zeaVTvXjcPArGX8bMg@mail.gmail.com>
+References: <1340836334-20427-1-git-send-email-stigge@antcom.de>
+	<CACRpkdYrZizqvZqsocLEGrkY5yPMuYFfmR3UUSFZgPDvEPa0eA@mail.gmail.com>
+	<20120715211120.GH4041@opensource.wolfsonmicro.com>
+	<CACRpkdb0k4fNigA6FGyEobxUt-JnmUy-ni7XzH-gup-ic_j+VQ@mail.gmail.com>
+	<20120717074324.GA12047@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:51953 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752517Ab2GQQif (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jul 2012 12:38:35 -0400
-Received: by mail-yx0-f174.google.com with SMTP id l2so580041yen.19
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Jul 2012 09:38:35 -0700 (PDT)
-In-Reply-To: <CAMQu2gyf=-0QG4UCDEGfDmsCZ+xJs_B=+SSH3VxqO4hu=mSPdg@mail.gmail.com>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:54721 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756091Ab2GQSRq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jul 2012 14:17:46 -0400
+Received: by qadb17 with SMTP id b17so2504708qad.19
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Jul 2012 11:17:46 -0700 (PDT)
+In-Reply-To: <20120717074324.GA12047@opensource.wolfsonmicro.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
-Cc: Tony Lindgren <tony@atomide.com>, Kevin Hilman <khilman@ti.com>, Russell King <linux@arm.linux.org.uk>, linux-omap@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: Roland Stigge <stigge@antcom.de>, Grant Likely <grant.likely@secretlab.ca>, cjb@laptop.org, rob.herring@calxeda.com, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, aletes.xgr@gmail.com, linux-arm-kernel@lists.infradead.org
 
-On Tue, Jul 17, 2012 at 9:09 AM, Shilimkar, Santosh
-<santosh.shilimkar@ti.com> wrote:
-> On Tue, Jul 17, 2012 at 12:33 PM, Javier Martinez Canillas
-> <javier@dowhile0.org> wrote:
->> The OMAP MMC and OMAP High Speed MMC hosts now use entirely the DMA
->> engine API instead of the previous private DMA API implementation.
->>
->> So, if the kernel is built with support for any of these hosts but it
->> doesn't support DMA devices nor OMAP DMA support, it fails when trying
->> to obtain a DMA channel which leads to the following error on an OMAP3
->> IGEPv2 Rev.C board (and probably on most OMAP boards with MMC support):
->>
->> [    2.199981] omap_hsmmc omap_hsmmc.1: unable to obtain RX DMA engine channel 48
->> [    2.215087] omap_hsmmc omap_hsmmc.0: unable to obtain RX DMA engine channel 62
->>
->> selecting automatically CONFIG_DMADEVICES and CONFIG_DMA_OMAP solves it.
->>
->> While being there, also update drivers/spi/spi-omap2-mcspi which has been
->> ported to DMA engine API too.
->>
->> Signed-off-by: Javier Martinez Canillas <javier@dowhile0.org>
->> ---
->>
-> Looks like this patch should go to Russell's tree where rest of the OMAP
-> DMA engine patches are queued.
+On Tue, Jul 17, 2012 at 9:43 AM, Mark Brown
+<broonie@opensource.wolfsonmicro.com> wrote:
+> On Tue, Jul 17, 2012 at 12:16:48AM +0200, Linus Walleij wrote:
+>> On Sun, Jul 15, 2012 at 11:11 PM, Mark Brown
 >
-> For the patch itself,
-> Acked-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
+>> > I had thought a version of this
+>> > had been submitted already and was in a similar place to the one for
+>> > gpio_request().
+>
+>> Me to...
+>
+> Greg just merged the driver core patch for pushing the deferred devices
+> to the end of the dpm list before reprobing them which should address
+> Grant's concern about doing this in gpiolib.
 
-Hi Santhosh,
+OK sounds good, I'll look over your patch again.
 
-Thanks a lot for your feedback.
-
-Russell can you take this patch please or do you want me to resend?
-
-Best regards,
-Javier
+Yours,
+Linus Walleij
