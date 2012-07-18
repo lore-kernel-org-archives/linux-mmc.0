@@ -1,247 +1,177 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v10] mmc: support BKOPS feature for eMMC
-Date: Wed, 18 Jul 2012 15:42:22 +0900
-Message-ID: <50065ACE.1030802@samsung.com>
-References: <c6e6e1f03f528666c9080b92a8e15317.squirrel@www.codeaurora.org>
+From: Corrado Zoccolo <czoccolo@gmail.com>
+Subject: Re: question about IO-sched
+Date: Wed, 18 Jul 2012 08:51:09 +0200
+Message-ID: <CADX3swq9cfPtd3a1ibYWjQBiTMGzqYbS=KNTkdo1eW4LFxsJJA@mail.gmail.com>
+References: <op.whbsn0qvn27o5l@gaoqiang-d1.corp.qihoo.net>
+	<CADX3swpSAt9gdSgYihOJKs1=geQkmB04rCVTSgh=DEXQx7QPmQ@mail.gmail.com>
+	<op.whg7fy00n27o5l@gaoqiang-d1.corp.qihoo.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:59580 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751492Ab2GRGmc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jul 2012 02:42:32 -0400
-Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M7C00FA2FY5GR50@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 18 Jul 2012 15:42:24 +0900 (KST)
-Received: from [10.90.51.55] by mmp1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0M7C0022PFYNTMC0@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 18 Jul 2012 15:42:24 +0900 (KST)
-In-reply-to: <c6e6e1f03f528666c9080b92a8e15317.squirrel@www.codeaurora.org>
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:52117 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751080Ab2GRGvK convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jul 2012 02:51:10 -0400
+In-Reply-To: <op.whg7fy00n27o5l@gaoqiang-d1.corp.qihoo.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: merez@codeaurora.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@stericsson.com>
+To: gaoqiang <gaoqiangscut@gmail.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On 07/18/2012 04:34 AM, merez@codeaurora.org wrote:
-> See my comments below.
-> 
->> +/**
->> + *	mmc_start_bkops - start BKOPS for supported cards
->> + *	@card: MMC card to start BKOPS
->> + *
->> + *	Start background operations whenever requested.
->> + *	when the urgent BKOPS bit is set in a R1 command response
->> + *	then background operations should be started immediately.
->> +*/
->> +void mmc_start_bkops(struct mmc_card *card)
->> +{
->> +	int err;
->> +	int timeout;
->> +	u8 use_busy_signal;
->> +
->> +	BUG_ON(!card);
->> +	if (!card->ext_csd.bkops_en || !(card->host->caps2 & MMC_CAP2_BKOPS))
-> 
-> Can you please explain why we need to have MMC_CAP2_BKOPS in addition to
-> card->ext_csd.bkops_en?
-We can remove the MMC_CAP2_BKOPS. but if someone didn't want to use the bkops feature,
-then can control with that capability.
-> 
-> +		return;
->> +
->> +	if (mmc_is_exception_event(card, EXT_CSD_URGENT_BKOPS))
->> +		if (card->ext_csd.raw_bkops_status)
->> +			mmc_card_set_need_bkops(card);
-> 
-> I think we can remove the bkops need flag. You can just return here in
-> case it is not needed instead of updating the flag and checking it in the
-> next line.
-Right..it can remove..i will remove.
-> 
-> 
->> @@ -354,6 +422,20 @@ struct mmc_async_req *mmc_start_req(struct mmc_host
-> *host,
->>  	if (host->areq) {
->>  		mmc_wait_for_req_done(host, host->areq->mrq);
->>  		err = host->areq->err_check(host->card, host->areq);
->> +		/*
->> +		 * Check BKOPS urgency from each R1 response
->> +		 */
->> +		if (host->card && mmc_card_mmc(host->card) &&
->> +		((mmc_resp_type(host->areq->mrq->cmd) == MMC_RSP_R1) ||
->> +		 (mmc_resp_type(host->areq->mrq->cmd) == MMC_RSP_R1B)) &&
->> +		(host->areq->mrq->cmd->resp[0] & R1_EXP_EVENT))
->> +			mmc_start_bkops(host->card);
->> +		/*
->> +		 * If areq exsit,
->> +		 * we stop the bkops for foreground operation
->> +		 */
->> +		if (areq && mmc_card_doing_bkops(host->card))
->> +			err = mmc_stop_bkops(host->card);
-> 
-> I think that mmc_start_bkops should handle only level 2 and 3 for now.
-> Since it is not likely to have an exception with level 1 on, the best way
-> to deal with it is inside mmc_start_bkops (starting the BKOPs for levels 2
-> and 3).
-> When the periodiv BKOPs will be added, then level 1 will be fully
-> supported. In such a case mmc_start_bkops should know to start BKOPs on
-> level 1 only if it is called due to the periodic delayed work (for
-> example, by adding a flag to mmc_start_bkops)
-> 
->> +int mmc_stop_bkops(struct mmc_card *card)
->> +{
->> +	int err = 0;
->> +
->> +	BUG_ON(!card);
->> +	err = mmc_interrupt_hpi(card);
->> +
->> +	/*
->> +	 * if err is EINVAL, it's status that can't issue HPI.
->> +	 * Maybe it should be completed the BKOPS.
-> 
-> should complete
-> 
->> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 4ad994a..baf90e0 100644
->> --- a/drivers/mmc/core/mmc_ops.c
->> +++ b/drivers/mmc/core/mmc_ops.c
->> @@ -368,18 +368,19 @@ int mmc_spi_set_crc(struct mmc_host *host, int
-> use_crc)
->>  }
+On Sun, Jul 15, 2012 at 9:08 AM, gaoqiang <gaoqiangscut@gmail.com> wrot=
+e:
+>
+> many thanks. but why the sys_read operation hangs on sync_page ? ther=
+e are
+> still
+> many free memory.I mean ,the actually free memory,excluding the vario=
+us
+> kinds of
+> caches or buffers.
+http://kerneltrap.org/node/4941 explains sync_page:
+>
+> ->sync_page() is an awful misnomer. Usually, when page IO operation i=
+s
+> requested by calling ->writepage() or ->readpage(), file-system queue=
+s
+> IO request (e.g., disk-based file system may do this my calling
+> submit_bio()), but underlying device driver does not proceed with thi=
+s
+> IO immediately, because IO scheduling is more efficient when there ar=
+e
+> multiple requests in the queue.
+> Only when something really wants to wait for IO completion
+> (wait_on_page_{locked,writeback}() are used to wait for read and writ=
+e
+> completion respectively) IO queue is processed. To do this
+> wait_on_page_bit() calls ->sync_page() (see block_sync_page()---stand=
+ard
+> implementation of ->sync_page() for disk-based file systems).
+> So, semantics of ->sync_page() are roughly "kick underlying storage
+> driver to actually perform all IO queued for this page, and, maybe, f=
+or
+> other pages on this device too".
+
+It is expected that sys_read will wait until the data is available for
+the process.
+If you don't want to wait (because you can do other stuff in the mean
+time, including queuing other I/O operations), you can use aio_read.
+The kernel will notify your process when the operation completes and
+the data is available in memory.
+
+Thanks,
+Corrado
+
+>
+>
+> =E5=9C=A8 Fri, 13 Jul 2012 22:15:31 +0800=EF=BC=8CCorrado Zoccolo <cz=
+occolo@gmail.com> =E5=86=99=E9=81=93:
+>
+>> Hi,
+>> the catch is that writes are "fire and forget", so they keep accumul=
+ating
+>> in the I/O sched, and there is always plenty of them to schedule (un=
+less
+>> you explicitly make sync writes).
 >>
->>  /**
->> - *	mmc_switch - modify EXT_CSD register
->> + *	__mmc_switch - modify EXT_CSD register
->>   *	@card: the MMC card associated with the data transfer
->>   *	@set: cmd set values
->>   *	@index: EXT_CSD register index
->>   *	@value: value to program into EXT_CSD register
->>   *	@timeout_ms: timeout (ms) for operation performed by register write,
-> *                   timeout of zero implies maximum possible timeout
->> + *                   @wait_for_prod_done: is waiting for program done
-> 
-> Change the comment for the new parameter: use_busy_signal
-Will fix
-> 
->>   *
->>   *	Modifies the EXT_CSD register for selected card.
->>   */
->> -int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value, -
->    unsigned int timeout_ms)
->> +int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value, +
->      unsigned int timeout_ms, u8 use_busy_signal)
-> 
-> Use bool instead of u8
-Will change
-> 
->>  {
->>  	int err;
->>  	struct mmc_command cmd = {0};
->> @@ -393,13 +394,24 @@ int mmc_switch(struct mmc_card *card, u8 set, u8
-> index, u8 value,
->>  		  (index << 16) |
->>  		  (value << 8) |
->>  		  set;
->> -	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
->> +
->> +	cmd.flags = MMC_CMD_AC;
->> +	if (use_busy_signal)
->> +		cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
->> +	else
->> +		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
->> +
->>  	cmd.cmd_timeout_ms = timeout_ms;
+>> The reader, instead, waits for the result of each read operation bef=
+ore
+>> scheduling a new read, so there is at most one outstanding read, and=
+ some
+>> time nothing.
 >>
->>  	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
->>  	if (err)
->>  		return err;
+>> The deadline scheduler is work conserving, meaning that it never lea=
+ves
+>> the
+>> disk idle when there is work queued, and most of the time after an
+>> operation completes, there is only write work queued, so you see muc=
+h
+>> more
+>> writes being sent to the device.
 >>
->> +	/* No need to check card status in case of BKOPS LEVEL2 switch*/
-> 
-> have a space before the */
-> 
->> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h index
-> cdfbc3c..b9e11aa 100644
->> --- a/include/linux/mmc/card.h
->> +++ b/include/linux/mmc/card.h
->> @@ -79,10 +79,13 @@ struct mmc_ext_csd {
->>  	bool			hpi_en;			/* HPI enablebit */
->>  	bool			hpi;			/* HPI support bit */
->>  	unsigned int		hpi_cmd;		/* cmd used as HPI */
->> +	bool			bkops;		/* background support bit */
->> +	bool			bkops_en;	/* background enable bit */
->>  	unsigned int            data_sector_size;       /* 512 bytes or 4KB */
-> unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
->>  	unsigned int		boot_ro_lock;		/* ro lock support */
->>  	bool			boot_ro_lockable;
->> +	u8			raw_exception_status;	/* 53 */
->>  	u8			raw_partition_support;	/* 160 */
->>  	u8			raw_erased_mem_count;	/* 181 */
->>  	u8			raw_ext_csd_structure;	/* 194 */
->> @@ -96,6 +99,7 @@ struct mmc_ext_csd {
->>  	u8			raw_sec_erase_mult;	/* 230 */
->>  	u8			raw_sec_feature_support;/* 231 */
->>  	u8			raw_trim_mult;		/* 232 */
->> +	u8			raw_bkops_status;	/* 246 */
->>  	u8			raw_sectors[4];		/* 212 - 4 bytes */
+>> Only schedulers that delay writes waiting for reads (as Anticipatory=
+ in
+>> old
+>> kernels, and now CFQ) can achieve higher read to write ratios.
 >>
->>  	unsigned int            feature_support;
->> @@ -229,6 +233,9 @@ struct mmc_card {
->>  #define MMC_CARD_REMOVED	(1<<7)		/* card has been removed */
->>  #define MMC_STATE_HIGHSPEED_200	(1<<8)		/* card is in HS200 mode */
-> #define MMC_STATE_SLEEP		(1<<9)		/* card is in sleep state */
->> +#define MMC_STATE_NEED_BKOPS	(1<<10)		/* card need to do BKOPS */
-> +#define MMC_STATE_DOING_BKOPS	(1<<11)		/* card is doing BKOPS */
-> +#define MMC_STATE_CHECK_BKOPS	(1<<12)		/* card need to check BKOPS */
-> 
-> MMC_STATE_CHECK_BKOPS is not used, can be removed
-> 
->> @@ -400,6 +407,9 @@ static inline void __maybe_unused
-> remove_quirk(struct
->> mmc_card *card, int data)
->>  #define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
->>  #define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
-> #define mmc_card_is_sleep(c)	((c)->state & MMC_STATE_SLEEP)
->> +#define mmc_card_need_bkops(c)	((c)->state & MMC_STATE_NEED_BKOPS)
-> This flag can also be removed
-> +#define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
-> +#define mmc_card_check_bkops(c) ((c)->state & MMC_STATE_CHECK_BKOPS)
-> 
-> mmc_card_check_bkops is not used, can be removed
-> 
+>> Cheers
+>> Corrado
 >>
->>  #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
-> #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
->> @@ -412,7 +422,13 @@ static inline void __maybe_unused
-> remove_quirk(struct
->> mmc_card *card, int data)
->>  #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
-> #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
-> #define mmc_card_set_sleep(c)	((c)->state |= MMC_STATE_SLEEP)
->> +#define mmc_card_set_need_bkops(c)	((c)->state |= MMC_STATE_NEED_BKOPS)
-> +#define mmc_card_set_doing_bkops(c)	((c)->state |=
-> MMC_STATE_DOING_BKOPS)
->> +#define mmc_card_set_check_bkops(c) ((c)->state |=
-> MMC_STATE_CHECK_BKOPS)
-> 
-> mmc_card_set_check_bkops can be removed
-> 
+>> On Thu, Jul 12, 2012 at 11:01 AM, gaoqiang <gaoqiangscut@gmail.com>
+>> wrote:
 >>
->> +#define mmc_card_clr_need_bkops(c)	((c)->state &=
-> ~MMC_STATE_NEED_BKOPS)
->> +#define mmc_card_clr_doing_bkops(c)	((c)->state &=
->> ~MMC_STATE_DOING_BKOPS)
->> +#define mmc_card_clr_check_bkops(c) ((c)->state &=
->> ~MMC_STATE_CHECK_BKOPS)
-> 
-> mmc_card_clr_check_bkops can be removed
-> 
-> Thanks,
-> Maya
-> 
+>>> Hi,all
+>>>
+>>>         I have long known that deadline is read-prefered. but a sim=
+ple
+>>> test gives the opposite result.
+>>>
+>>>         with two processes running at the same time,one for read an=
+d one
+>>> for write.actually,they did nothing bug IO operation.
+>>>         while(true)
+>>>         {
+>>>                 read();
+>>>         }
+>>>         the other:
+>>>         while(true)
+>>>         {
+>>>                 write();
+>>>         }
+>>>
+>>>         with deadline IO-sched  and ext4 filesystem.as a result, re=
+ad
+>>> ratio was about below 3M/s.and write about 100M/s. I have tested bo=
+th
+>>> kernel-2.6.18 and kernel-2.6.32,getting the same result.
+>>>
+>>>         I add some debug information in the kernel and recompile,fo=
+und
+>>> that,it has little to do with IO-sched layer because read request
+>>> dropped
+>>> into deadline was 5% of write request .from /proc/<pid>/stack,the r=
+ead
+>>> process hands on sync_page most of the time.
+>>>         what is the matter ? anyone help me ?
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-ker=
+nel"
+>>> in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at
+>>> http://vger.kernel.org/**majordomo-info.html<http://vger.kernel.org=
+/majordomo-info.html>
+>>>
+>>> Please read the FAQ at  http://www.tux.org/lkml/
+>>>
+>>
+>>
+>>
+>
+>
+> --
+> =E4=BD=BF=E7=94=A8 Opera =E9=9D=A9=E5=91=BD=E6=80=A7=E7=9A=84=E7=94=B5=
+=E5=AD=90=E9=82=AE=E4=BB=B6=E5=AE=A2=E6=88=B7=E7=A8=8B=E5=BA=8F: http:/=
+/www.opera.com/mail/
 
 
+
+
+--
+_______________________________________________________________________=
+___
+
+dott. Corrado Zoccolo                          mailto:czoccolo@gmail.co=
+m
+PhD - Department of Computer Science - University of Pisa, Italy
+-----------------------------------------------------------------------=
+---
+The self-confidence of a warrior is not the self-confidence of the aver=
+age
+man. The average man seeks certainty in the eyes of the onlooker and ca=
+lls
+that self-confidence. The warrior seeks impeccability in his own eyes a=
+nd
+calls that humbleness.
+                               Tales of Power - C. Castaneda
