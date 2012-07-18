@@ -1,41 +1,80 @@
-From: Jassi Brar <jaswinder.singh@linaro.org>
-Subject: Re: Devicetree: Initialization order of mmc block devices?
-Date: Wed, 18 Jul 2012 12:53:18 +0530
-Message-ID: <CAJe_ZhcY78ah81zsfwXxE=bMG4o6v9RwZV_DQyUj7g=d-1hR_w@mail.gmail.com>
-References: <5006571A.7060103@de.bosch.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
+Date: Wed, 18 Jul 2012 03:26:24 -0400
+Message-ID: <87vchlmswv.fsf@octavius.laptop.org>
+References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
+	<1338576911-17089-2-git-send-email-merez@codeaurora.org>
+	<CAFR8uefCD_WXDM6m+-XwG10+W0UXqOtK7_sxWD3uVckh3pnR-Q@mail.gmail.com>
+	<CAFR8uee7hWLC-h_abZOCEuqeUeuhDuJp74x3R-3n+c61xyfaPQ@mail.gmail.com>
+	<fb2303ea3a3a5470e76d1faa2abd471b.squirrel@www.codeaurora.org>
+	<CAFR8ueecGqw=JzAGVHV61-SqOnn_C-ryT54KCQCbKkJpXUGY9w@mail.gmail.com>
+	<87629qkvgp.fsf@octavius.laptop.org>
+	<CAFR8uedwb1_gB-j6=riUuiJcEPY13rNJCLv1bxXc6aebnhonYw@mail.gmail.com>
+	<87pq7wjudy.fsf@octavius.laptop.org>
+	<CAFR8uefP0VV2fbBLv27y2KnMPRFPbGssm6EUdaqhZXXyQ2+k2Q@mail.gmail.com>
+	<87pq7ungsw.fsf@octavius.laptop.org>
+	<31ba3fefcfc5352a6c41955a4e07ae8f.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:42145 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751948Ab2GRHXU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jul 2012 03:23:20 -0400
-Received: by lbbgm6 with SMTP id gm6so1710141lbb.19
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Jul 2012 00:23:18 -0700 (PDT)
-In-Reply-To: <5006571A.7060103@de.bosch.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <31ba3fefcfc5352a6c41955a4e07ae8f.squirrel@www.codeaurora.org>
+	(merez@codeaurora.org's message of "Tue, 17 Jul 2012 23:34:38 -0700
+	(PDT)")
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: merez@codeaurora.org
+Cc: Muthu Kumar <muthu.lkml@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, "S, Venkatraman" <svenkatr@ti.com>, Seungwon Jeon <tgih.jun@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Dirk Behme <dirk.behme@de.bosch.com>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Wohlrab Knut (CM-AI/PJ-CA33)" <Knut.Wohlrab@de.bosch.com>
 
-On 18 July 2012 11:56, Dirk Behme <dirk.behme@de.bosch.com> wrote:
->
-> Similar to [1] we have a device which has two mmc block devices connected:
-> One external removable and a second internal hard wired one. Depending on
-> the availability of the external removable mmc card at boot time, the
-> internal hard wired device becomes mmcblk1 (external mmc card available ==
-> mmcblk0) or mmcblk0 if the external one is not there. This order is given by
-> the hardware.
->
-> With older, non-DT kernels, we used the hack from [2] to control the
-> initialization order and force the internal hard wired device to mmcblk0.
->
-> Now, we are switching to a newer, DT based kernel. With a DT based kernel
-> this hack doesn't seem to work an more.
->
-> Any idea how we could influence the initialization order of the mmc block
-> devices using a DT based kernel? Ensuring that the internal, hard wired mmc
-> card is always mapped to mmcblk0?
->
-Doesn't it work by simply by moving the "internal" element before
-"external" in the array 'struct twl4030_hsmmc_info mmc[]' ?
+Hi,  [removing Jens and the documentation list, since now we're
+talking about the MMC side only]
+
+On Wed, Jul 18 2012, merez@codeaurora.org wrote:
+> Is there anything else that holds this patch from being pushed to mmc-next?
+
+Yes, I'm still uncomfortable with the write packing patchsets for a
+couple of reasons, and I suspect that the sum of those reasons means
+that we should probably plan on holding off merging it until after 3.6.
+
+Here are the open issues; please correct any misunderstandings:
+
+With Seungwon's patchset ("Support packed write command"):
+
+* I still don't have a good set of representative benchmarks showing
+  what kind of performance changes come with this patchset.  It seems
+  like we've had a small amount of testing on one controller/eMMC part
+  combo from Seungwon, and an entirely different test from Maya, and the
+  results aren't documented fully anywhere to the level of describing
+  what the hardware was, what the test was, and what the results were
+  before and after the patchset.
+
+With the reads-during-writes regression:
+
+* Venkat still has open questions about the nature of the read
+  regression, and thinks we should understand it with blktrace before
+  trying to fix it.  Maya has a theory about writes overwhelming reads,
+  but Venkat doesn't understand why this would explain the observed
+  bandwidth drop.
+
+With Maya's patchset ("write packing control"):
+
+* Venkat thinks that HPI should be used, and the number-of-requests
+  metric is too coarse, and it doesn't let you disable packing at the
+  right time, and you're essentially implementing a new I/O scheduler
+  inside the MMC subsystem without understanding the root cause for
+  why that's necessary.
+
+My sense is that there's no way we can solve all of these to
+satisfaction in the next week (which is when the merge window will
+open), but that by waiting a cycle we might come up with some good
+answers.
+
+What do other people think?  If you're excited about these patchsets,
+now would be a fine time to come forward with your benchmarking results
+and to help understand the reads-during-writes regression.
+
+Thanks!
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
