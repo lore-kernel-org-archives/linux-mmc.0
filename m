@@ -1,80 +1,68 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
-Date: Wed, 18 Jul 2012 03:26:24 -0400
-Message-ID: <87vchlmswv.fsf@octavius.laptop.org>
-References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
-	<1338576911-17089-2-git-send-email-merez@codeaurora.org>
-	<CAFR8uefCD_WXDM6m+-XwG10+W0UXqOtK7_sxWD3uVckh3pnR-Q@mail.gmail.com>
-	<CAFR8uee7hWLC-h_abZOCEuqeUeuhDuJp74x3R-3n+c61xyfaPQ@mail.gmail.com>
-	<fb2303ea3a3a5470e76d1faa2abd471b.squirrel@www.codeaurora.org>
-	<CAFR8ueecGqw=JzAGVHV61-SqOnn_C-ryT54KCQCbKkJpXUGY9w@mail.gmail.com>
-	<87629qkvgp.fsf@octavius.laptop.org>
-	<CAFR8uedwb1_gB-j6=riUuiJcEPY13rNJCLv1bxXc6aebnhonYw@mail.gmail.com>
-	<87pq7wjudy.fsf@octavius.laptop.org>
-	<CAFR8uefP0VV2fbBLv27y2KnMPRFPbGssm6EUdaqhZXXyQ2+k2Q@mail.gmail.com>
-	<87pq7ungsw.fsf@octavius.laptop.org>
-	<31ba3fefcfc5352a6c41955a4e07ae8f.squirrel@www.codeaurora.org>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH 1/1] mmc: host: enable OMAP DMA engine support for omap
+ hosts by default
+Date: Wed, 18 Jul 2012 13:14:57 +0530
+Message-ID: <CANfBPZ97onLov1TwXYaT5A6D5XzXxwpvk+=y09W_9FmcOne4Mw@mail.gmail.com>
+References: <1342485005-5178-1-git-send-email-javier@dowhile0.org>
+ <CAMQu2gxaF8K78puE84+=8VJLbsdtdD97ww81XJxG6sCtYTYXww@mail.gmail.com>
+ <CABxcv=nsmeVLspzXERYXebmPaNO6rKCsVnak7dMtvGjiYH4vOw@mail.gmail.com>
+ <20120718065951.GH6522@atomide.com> <CAMQu2gzX1d1FQtE3z=cwfA6daDgxJe6UFUaSY0PzGGLQOz_-ZQ@mail.gmail.com>
+ <20120718071039.GI6522@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <31ba3fefcfc5352a6c41955a4e07ae8f.squirrel@www.codeaurora.org>
-	(merez@codeaurora.org's message of "Tue, 17 Jul 2012 23:34:38 -0700
-	(PDT)")
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: merez@codeaurora.org
-Cc: Muthu Kumar <muthu.lkml@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, "S, Venkatraman" <svenkatr@ti.com>, Seungwon Jeon <tgih.jun@samsung.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20120718071039.GI6522@atomide.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, Javier Martinez Canillas <javier@dowhile0.org>, Kevin.Hilman.khilman@ti.com, Russell King <linux@arm.linux.org.uk>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,  [removing Jens and the documentation list, since now we're
-talking about the MMC side only]
-
-On Wed, Jul 18 2012, merez@codeaurora.org wrote:
-> Is there anything else that holds this patch from being pushed to mmc-next?
-
-Yes, I'm still uncomfortable with the write packing patchsets for a
-couple of reasons, and I suspect that the sum of those reasons means
-that we should probably plan on holding off merging it until after 3.6.
-
-Here are the open issues; please correct any misunderstandings:
-
-With Seungwon's patchset ("Support packed write command"):
-
-* I still don't have a good set of representative benchmarks showing
-  what kind of performance changes come with this patchset.  It seems
-  like we've had a small amount of testing on one controller/eMMC part
-  combo from Seungwon, and an entirely different test from Maya, and the
-  results aren't documented fully anywhere to the level of describing
-  what the hardware was, what the test was, and what the results were
-  before and after the patchset.
-
-With the reads-during-writes regression:
-
-* Venkat still has open questions about the nature of the read
-  regression, and thinks we should understand it with blktrace before
-  trying to fix it.  Maya has a theory about writes overwhelming reads,
-  but Venkat doesn't understand why this would explain the observed
-  bandwidth drop.
-
-With Maya's patchset ("write packing control"):
-
-* Venkat thinks that HPI should be used, and the number-of-requests
-  metric is too coarse, and it doesn't let you disable packing at the
-  right time, and you're essentially implementing a new I/O scheduler
-  inside the MMC subsystem without understanding the root cause for
-  why that's necessary.
-
-My sense is that there's no way we can solve all of these to
-satisfaction in the next week (which is when the merge window will
-open), but that by waiting a cycle we might come up with some good
-answers.
-
-What do other people think?  If you're excited about these patchsets,
-now would be a fine time to come forward with your benchmarking results
-and to help understand the reads-during-writes regression.
-
-Thanks!
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+On Wed, Jul 18, 2012 at 12:40 PM, Tony Lindgren <tony@atomide.com> wrote:
+> * Shilimkar, Santosh <santosh.shilimkar@ti.com> [120718 00:09]:
+>> On Wed, Jul 18, 2012 at 12:29 PM, Tony Lindgren <tony@atomide.com> wrote:
+>> > * Javier Martinez Canillas <javier@dowhile0.org> [120716 23:56]:
+>> >> On Tue, Jul 17, 2012 at 8:45 AM, Shilimkar, Santosh
+>> >> <santosh.shilimkar@ti.com> wrote:
+>> >> > Hi,
+>> >> >
+>> >> > On Tue, Jul 17, 2012 at 6:00 AM, Javier Martinez Canillas
+>> >> > <javier@dowhile0.org> wrote:
+>> >> >> The OMAP MMC and OMAP High Speed MMC hosts now use entirely the DMA
+>> >> >> engine API instead of the previous private DMA API implementation.
+>> >> >>
+>> >> >> So, if the kernel is built with support for any of these hosts but it
+>> >> >> doesn't support DMA devices nor OMAP DMA support, it fails when trying
+>> >> >> to obtain a DMA channel which leads to the following error on an OMAP3
+>> >> >> IGEPv2 Rev.C board (and probably on most OMAP boards with MMC support):
+>> >> >>
+>> >> >> [    2.199981] omap_hsmmc omap_hsmmc.1: unable to obtain RX DMA engine channel 48
+>> >> >> [    2.215087] omap_hsmmc omap_hsmmc.0: unable to obtain RX DMA engine channel 62
+>> >> >>
+>> >> >> selecting automatically CONFIG_DMADEVICES and CONFIG_DMA_OMAP solves it.
+>> >> >>
+>> >> >> Signed-off-by: Javier Martinez Canillas <javier@dowhile0.org>
+>> >> >> ---
+>> >> > Considering, we are updating drivers to select the DMA engine, can you
+>> >> > also include
+>> >> > "drivers/spi/spi-omap2-mcspi.c" which is also updated for DMA engine.
+>> >> >
+>> >> > Regards
+>> >> > Santosh
+>> >>
+>> >> Hi Santosh,
+>> >>
+>> >> Ok, I'll send a v2 now which includes spi-omap2-mcspi then.
+>> >
+>> > I don't think we should do this, the drivers should work with and without
+>> > dma. This just needs to be added to the omap2plus_defconfig.
+>> >
+>> Well this was not decided based on any DMA CONFIG option before for
+>> the subject drivers. It is already by default enabled if the DMA is supported
+>> by the driver IP. There is a possibility to disable it from driver platform/dt
+>> data so that still remains.
+>
+> I think it should rather be that if the driver is broken and does not work
+> without DMA, it should have depends on CONFIG_DMA_OMAP.
+>
+I can confirm that omap MMC can't work without DMA; polled mode is not
+supported / implemented.
