@@ -1,68 +1,144 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
-Date: Tue, 17 Jul 2012 18:50:23 -0400
-Message-ID: <87pq7ungsw.fsf@octavius.laptop.org>
-References: <1338576911-17089-1-git-send-email-merez@codeaurora.org>
-	<1338576911-17089-2-git-send-email-merez@codeaurora.org>
-	<CAFR8uefCD_WXDM6m+-XwG10+W0UXqOtK7_sxWD3uVckh3pnR-Q@mail.gmail.com>
-	<CAFR8uee7hWLC-h_abZOCEuqeUeuhDuJp74x3R-3n+c61xyfaPQ@mail.gmail.com>
-	<fb2303ea3a3a5470e76d1faa2abd471b.squirrel@www.codeaurora.org>
-	<CAFR8ueecGqw=JzAGVHV61-SqOnn_C-ryT54KCQCbKkJpXUGY9w@mail.gmail.com>
-	<87629qkvgp.fsf@octavius.laptop.org>
-	<CAFR8uedwb1_gB-j6=riUuiJcEPY13rNJCLv1bxXc6aebnhonYw@mail.gmail.com>
-	<87pq7wjudy.fsf@octavius.laptop.org>
-	<CAFR8uefP0VV2fbBLv27y2KnMPRFPbGssm6EUdaqhZXXyQ2+k2Q@mail.gmail.com>
+From: Aaron Lu <aaron.lu@amd.com>
+Subject: Re: [PATCH 2/2] mmc: sd: Fix sd current limit setting
+Date: Wed, 18 Jul 2012 13:09:39 +0800
+Message-ID: <20120718050939.GA30490@srdclcs1.amd.com>
+References: <1341296172-10645-1-git-send-email-aaron.lu@amd.com>
+ <1341296172-10645-3-git-send-email-aaron.lu@amd.com>
+ <CAGxe1ZF=T7GL6ZcyV-=MEd5WVWexNrUbrEZDsYGdFD+KPH4XfA@mail.gmail.com>
+ <20120717134325.GA2567@localhost.localdomain>
+ <87fw8qieap.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAFR8uefP0VV2fbBLv27y2KnMPRFPbGssm6EUdaqhZXXyQ2+k2Q@mail.gmail.com>
-	(Muthu Kumar's message of "Mon, 16 Jul 2012 09:44:57 -0700")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Muthu Kumar <muthu.lkml@gmail.com>
-Cc: Jens Axboe <axboe@kernel.dk>, merez@codeaurora.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from db3ehsobe001.messaging.microsoft.com ([213.199.154.139]:34047
+	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751488Ab2GRFJy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jul 2012 01:09:54 -0400
+Content-Disposition: inline
+In-Reply-To: <87fw8qieap.fsf@octavius.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Girish K S <girish.shivananjappa@linaro.org>, Philip Rakity <prakity@marvell.com>, linux-mmc@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
 
-Hi Muthu,
+Hi,
 
-On Mon, Jul 16 2012, Muthu Kumar wrote:
-> On Sun, Jul 15, 2012 at 7:46 PM, Chris Ball <cjb@laptop.org> wrote:
->> Hi,
->>
->> On Sun, Jul 15 2012, Muthu Kumar wrote:
->>>> I've already replied to a later version of the patch, but just to get
->>>> this comment in at the appropriate point of the discussion as well:
->>>>
->>>> Even though it would result in a cleaner sysfs, I don't want to do
->>>> this now because it will break userspace scripts that are depending
->>>> on the current locations of these attributes.
->>>
->>> Maya is adding a new sysfs attribute with that patch. So, there should
->>> not be any user space stuff that depends on it.
->>
->> In the later patchset, Maya's "[PATCH v4 1/2] mmc: card: Move MMC
->> specific attributes to mmc sub-directory" moves the existing attributes
->> into the mmc/ directory.
->>
->> It's that move that I'm objecting to, rather than the creation of a new
->> directory -- although since we're going to leave the current attributes
->> where they are, it might not make sense to add the new directory.
->>
->> We'd be creating two places that people have to look for mmc-related
->> attributes, which is arguably less clean than having one place to look
->> even though it's mixed in with the other block device attributes.
->
-> So, what is the plan for fixing the user land tools and cleaning this up?
+On Tue, Jul 17, 2012 at 11:43:26AM -0400, Chris Ball wrote:
+> >
+> > Chris, please let me know how you want to deal with this and I'll be
+> > glad to do whatever I can to fix this. Sorry for the trouble.
+> 
+> No worries, I can rebase it in.  Mind sending a patch on top of current
+> mmc-next for me to squash on top of the previous one?
 
-At the moment I don't have any plan to do that, because the cure
-(potentially breaking userland scripts that are writing to some
-read/write attributes, by breaking ABI to move everything into a
-new directory) seems worse than the disease (having some attributes
-in a directory that isn't the ideal one).
+Is the following patch OK? This is based on top of current mmc-next with
+the previous one in tree. Not sure if this is what you want though.
 
-I'd be willing to explore something like Venkat's idea if the block
-layer maintainers insist, though.
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 312b78d..ec03d15 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -557,22 +557,22 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
+ 		else if (card->host->caps & MMC_CAP_MAX_CURRENT_200_180)
+ 			current_limit = SD_SET_CURRENT_LIMIT_200;
+ 	} else if (voltage & (MMC_VDD_29_30 | MMC_VDD_30_31)) {
+-		if (card->host->caps & MMC_CAP_MAX_CURRENT_800_300)
++		if (card->host->caps2 & MMC_CAP2_MAX_CURRENT_800_300)
+ 			current_limit = SD_SET_CURRENT_LIMIT_800;
+-		else if (card->host->caps & MMC_CAP_MAX_CURRENT_600_300)
++		else if (card->host->caps2 & MMC_CAP2_MAX_CURRENT_600_300)
+ 			current_limit = SD_SET_CURRENT_LIMIT_600;
+-		else if (card->host->caps & MMC_CAP_MAX_CURRENT_400_300)
++		else if (card->host->caps2 & MMC_CAP2_MAX_CURRENT_400_300)
+ 			current_limit = SD_SET_CURRENT_LIMIT_400;
+-		else if (card->host->caps & MMC_CAP_MAX_CURRENT_200_300)
++		else if (card->host->caps2 & MMC_CAP2_MAX_CURRENT_200_300)
+ 			current_limit = SD_SET_CURRENT_LIMIT_200;
+ 	} else if (voltage & (MMC_VDD_32_33 | MMC_VDD_33_34)) {
+-		if (card->host->caps & MMC_CAP_MAX_CURRENT_800_330)
++		if (card->host->caps2 & MMC_CAP2_MAX_CURRENT_800_330)
+ 			current_limit = SD_SET_CURRENT_LIMIT_800;
+-		else if (card->host->caps & MMC_CAP_MAX_CURRENT_600_330)
++		else if (card->host->caps2 & MMC_CAP2_MAX_CURRENT_600_330)
+ 			current_limit = SD_SET_CURRENT_LIMIT_600;
+-		else if (card->host->caps & MMC_CAP_MAX_CURRENT_400_330)
++		else if (card->host->caps2 & MMC_CAP2_MAX_CURRENT_400_330)
+ 			current_limit = SD_SET_CURRENT_LIMIT_400;
+-		else if (card->host->caps & MMC_CAP_MAX_CURRENT_200_330)
++		else if (card->host->caps2 & MMC_CAP2_MAX_CURRENT_200_330)
+ 			current_limit = SD_SET_CURRENT_LIMIT_200;
+ 	}
+ 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 455a093..29d4357 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2920,13 +2920,13 @@ int sdhci_add_host(struct sdhci_host *host)
+ 
+ 		/* Maximum current capabilities of the host at 3.3V */
+ 		if (max_current_330 >= 800)
+-			mmc->caps |= MMC_CAP_MAX_CURRENT_800_330;
++			mmc->caps2 |= MMC_CAP2_MAX_CURRENT_800_330;
+ 		else if (max_current_330 >= 600)
+-			mmc->caps |= MMC_CAP_MAX_CURRENT_600_330;
++			mmc->caps2 |= MMC_CAP2_MAX_CURRENT_600_330;
+ 		else if (max_current_330 >= 400)
+-			mmc->caps |= MMC_CAP_MAX_CURRENT_400_330;
++			mmc->caps2 |= MMC_CAP2_MAX_CURRENT_400_330;
+ 		else if (max_current_330 >= 200)
+-			mmc->caps |= MMC_CAP_MAX_CURRENT_200_330;
++			mmc->caps2 |= MMC_CAP2_MAX_CURRENT_200_330;
+ 	}
+ 	if (caps[0] & SDHCI_CAN_VDD_300) {
+ 		int max_current_300;
+@@ -2943,13 +2943,13 @@ int sdhci_add_host(struct sdhci_host *host)
+ 
+ 		/* Maximum current capabilities of the host at 3.0V */
+ 		if (max_current_300 >= 800)
+-			mmc->caps |= MMC_CAP_MAX_CURRENT_800_300;
++			mmc->caps2 |= MMC_CAP2_MAX_CURRENT_800_300;
+ 		else if (max_current_300 >= 600)
+-			mmc->caps |= MMC_CAP_MAX_CURRENT_600_300;
++			mmc->caps2 |= MMC_CAP2_MAX_CURRENT_600_300;
+ 		else if (max_current_300 >= 400)
+-			mmc->caps |= MMC_CAP_MAX_CURRENT_400_300;
++			mmc->caps2 |= MMC_CAP2_MAX_CURRENT_400_300;
+ 		else if (max_current_300 >= 200)
+-			mmc->caps |= MMC_CAP_MAX_CURRENT_200_300;
++			mmc->caps2 |= MMC_CAP2_MAX_CURRENT_200_300;
+ 	}
+ 	if (caps[0] & SDHCI_CAN_VDD_180) {
+ 		int max_current_180;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 79d8921..4a40312 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -261,14 +261,14 @@ struct mmc_host {
+ #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
+ #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
+ #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
+-#define MMC_CAP_MAX_CURRENT_200_300 (1 << 12)	/* Host max current limit is 200mA at 3.0V */
+-#define MMC_CAP_MAX_CURRENT_400_300 (1 << 13)	/* Host max current limit is 400mA at 3.0V */
+-#define MMC_CAP_MAX_CURRENT_600_300 (1 << 14)	/* Host max current limit is 600mA at 3.0V */
+-#define MMC_CAP_MAX_CURRENT_800_300 (1 << 15)	/* Host max current limit is 800mA at 3.0V */
+-#define MMC_CAP_MAX_CURRENT_200_330 (1 << 16)	/* Host max current limit is 200mA at 3.3V */
+-#define MMC_CAP_MAX_CURRENT_400_330 (1 << 17)	/* Host max current limit is 400mA at 3.3V */
+-#define MMC_CAP_MAX_CURRENT_600_330 (1 << 18)	/* Host max current limit is 600mA at 3.3V */
+-#define MMC_CAP_MAX_CURRENT_800_330 (1 << 19)	/* Host max current limit is 800mA at 3.3V */
++#define MMC_CAP2_MAX_CURRENT_200_300 (1 << 12)	/* Host max current limit is 200mA at 3.0V */
++#define MMC_CAP2_MAX_CURRENT_400_300 (1 << 13)	/* Host max current limit is 400mA at 3.0V */
++#define MMC_CAP2_MAX_CURRENT_600_300 (1 << 14)	/* Host max current limit is 600mA at 3.0V */
++#define MMC_CAP2_MAX_CURRENT_800_300 (1 << 15)	/* Host max current limit is 800mA at 3.0V */
++#define MMC_CAP2_MAX_CURRENT_200_330 (1 << 16)	/* Host max current limit is 200mA at 3.3V */
++#define MMC_CAP2_MAX_CURRENT_400_330 (1 << 17)	/* Host max current limit is 400mA at 3.3V */
++#define MMC_CAP2_MAX_CURRENT_600_330 (1 << 18)	/* Host max current limit is 600mA at 3.3V */
++#define MMC_CAP2_MAX_CURRENT_800_330 (1 << 19)	/* Host max current limit is 800mA at 3.3V */
+ #define MMC_CAP2_PACKED_RD	    (1 << 20)	/* Allow packed read */
+ #define MMC_CAP2_PACKED_WR	    (1 << 21)	/* Allow packed write */
+ #define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+
+
+Thanks,
+Aaron
+
