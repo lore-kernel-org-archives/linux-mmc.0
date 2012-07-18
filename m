@@ -1,148 +1,133 @@
-From: Dirk Behme <dirk.behme@de.bosch.com>
-Subject: Devicetree: Initialization order of mmc block devices?
-Date: Wed, 18 Jul 2012 08:26:34 +0200
-Message-ID: <5006571A.7060103@de.bosch.com>
+From: merez@codeaurora.org
+Subject: Re: [PATCH v10] mmc: support BKOPS feature for eMMC
+Date: Tue, 17 Jul 2012 23:31:36 -0700 (PDT)
+Message-ID: <66ba92a0b384c7ce5c84df6a9c374bc1.squirrel@www.codeaurora.org>
+References: <5004D176.7090306@samsung.com> <50055AED.4000709@intel.com>
+    <50056176.5010502@samsung.com> <500654A7.8010501@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from imta22.fe.bosch.de ([139.15.243.26]:37223 "EHLO
-	imta22.fe.bosch.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751712Ab2GRGaB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jul 2012 02:30:01 -0400
-Received: from smtp2-v.fe.bosch.de (imta23.fe.bosch.de [139.15.243.227])
-	by imta22.fe.bosch.de (Postfix) with ESMTP id 053BF1E40665
-	for <linux-mmc@vger.kernel.org>; Wed, 18 Jul 2012 08:30:00 +0200 (CEST)
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:1937 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751946Ab2GRGbh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jul 2012 02:31:37 -0400
+In-Reply-To: <500654A7.8010501@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "Wohlrab Knut (CM-AI/PJ-CA33)" <Knut.Wohlrab@de.bosch.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Maya Erez <merez@codeaurora.org>, Ulf Hansson <ulf.hansson@stericsson.com>
 
 
-Similar to [1] we have a device which has two mmc block devices 
-connected: One external removable and a second internal hard wired one. 
-Depending on the availability of the external removable mmc card at boot 
-time, the internal hard wired device becomes mmcblk1 (external mmc card 
-available == mmcblk0) or mmcblk0 if the external one is not there. This 
-order is given by the hardware.
+On Tue, July 17, 2012 11:16 pm, Adrian Hunter wrote:
+> On 17/07/12 15:58, Jaehoon Chung wrote:
+>> On 07/17/2012 09:30 PM, Adrian Hunter wrote:
+>>> On 17/07/12 05:44, Jaehoon Chung wrote:
+>>>
+>>> <snip>
+>>>
+>>>> +/**
+>>>> + *	mmc_start_bkops - start BKOPS for supported cards
+>>>> + *	@card: MMC card to start BKOPS
+>>>> + *
+>>>> + *	Start background operations whenever requested.
+>>>> + *	when the urgent BKOPS bit is set in a R1 command response
+>>>> + *	then background operations should be started immediately.
+>>>> +*/
+>>>> +void mmc_start_bkops(struct mmc_card *card)
+>>>> +{
+>>>> +	int err;
+>>>> +	int timeout;
+>>>> +	u8 use_busy_signal;
+>>>> +
+>>>> +	BUG_ON(!card);
+>>>> +	if (!card->ext_csd.bkops_en || !(card->host->caps2 &
+>>>> MMC_CAP2_BKOPS))
+>>>> +		return;
+>>>> +
+>>>> +	if (mmc_is_exception_event(card, EXT_CSD_URGENT_BKOPS))
+>>>> +		if (card->ext_csd.raw_bkops_status)
+>>>> +			mmc_card_set_need_bkops(card);
+>>>> +
+>>>> +	/*
+>>>> +	 * If card is already doing bkops or need for
+>>>> +	 * bkops flag is not set, then do nothing just
+>>>> +	 * return
+>>>> +	 */
+>>>> +	if (mmc_card_doing_bkops(card) || !mmc_card_need_bkops(card))
+>>>> +		return;
+>>>> +
+>>>> +	mmc_claim_host(card->host);
+>>>> +	if (card->ext_csd.raw_bkops_status >= EXT_CSD_BKOPS_LEVEL_2) {
+>>>> +		timeout = MMC_BKOPS_MAX_TIMEOUT;
+>>>> +		use_busy_signal = 0;
+>>>> +	} else {
+>>>> +		timeout = 0;
+>>>> +		use_busy_signal = 1;
+>>>> +	}
+>>>
+>>> Is this the right way around?
+>>
+>> use the mmc_switch() with R1B..
+>> this case is no problem, because after sending bkops, repeat the
+>> checking card status until prg-done.
+>> But, at sdhci controller, be occurred data timeout error.
+>> Because response type is r1b, and timeout value is too large.
+>> (Actually, i think that is controller's problem..but just its my test
+>> environment.)
+>>
+>> if other sdhci controller working well with R1b, use_busy_signal need
+>> not.
+>> Just use the mmc_switch().
+>>
+>> But When running bkops level2/3 use with R1 type, also no problem.
+>> Because the also checking status in mmc_switch() until prg-done.
+>
+> You added:
+>
+> +	/*
+> +	 * For urgent bkops status (LEVEL_2 and more)
+> +	 * bkops executed synchronously, otherwise
+> +	 * the operation is in progress
+> +	 */
+> +	if (card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2)
+> +		mmc_card_set_doing_bkops(card);
+>
+> But:
+> 	status < 2		=> use_busy_signal = 1
+> 	use_busy_signal = 1	=> waiting
+> 	waiting			=> the operation is NOT in progress
+>
+> Hence my question: Is this the right way around?
 
-With older, non-DT kernels, we used the hack from [2] to control the 
-initialization order and force the internal hard wired device to mmcblk0.
+Good catch.
+in mmc_start_bkops, use_busy_signal should be set to 1 in case
+card->ext_csd.raw_bkops_status >= EXT_CSD_BKOPS_LEVEL_2
 
-Now, we are switching to a newer, DT based kernel. With a DT based 
-kernel this hack doesn't seem to work an more.
+>
+> Also this change is needed for the addition of 'use_busy_signal' to
+> mmc_switch:
+>
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index baf90e0..e202a5e 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -417,7 +417,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8
+> index, u8 value,
+>                 err = mmc_send_status(card, &status);
+>                 if (err)
+>                         return err;
+> -               if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
+> +               if (use_busy_signal && (card->host->caps &
+> MMC_CAP_WAIT_WHILE_BUSY))
+>                         break;
+>                 if (mmc_host_is_spi(card->host))
+>                         break;
+>
+>
 
-Any idea how we could influence the initialization order of the mmc 
-block devices using a DT based kernel? Ensuring that the internal, hard 
-wired mmc card is always mapped to mmcblk0?
 
-Many thanks and best regards
+-- 
+Sent by consultant of Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
 
-Dirk
-
-[1] https://bugs.maemo.org/show_bug.cgi?id=2747
-
-[2] https://bugs.maemo.org/show_bug.cgi?id=2747
-
-bigger patch for fremantle kernel which extends also platform data 
-structures
-
-https://bugs.maemo.org/attachment.cgi?id=2127
-
---- kernel-2.6.28-20094803.3/arch/arm/mach-omap2/board-rx51-flash.c 
-2010-01-24 23:23:10.000000000 +0100
-+++ 
-kernel-2.6.28-20094803.3-fanoush/arch/arm/mach-omap2/board-rx51-flash.c 
-2010-01-24 22:22:02.000000000 +0100
-@@ -59,6 +59,7 @@ static struct platform_device *rx51_flas
-  static struct twl4030_hsmmc_info mmc[] __initdata = {
-  	{
-  		.name		= "external",
-+		.mmcblk_devidx	= 1,
-  		.mmc		= 1,
-  		.wires		= 4,
-  		.cover_only	= true,
-@@ -69,6 +70,7 @@ static struct twl4030_hsmmc_info mmc[] _
-  	},
-  	{
-  		.name		= "internal",
-+		.mmcblk_devidx	= 0,
-  		.mmc		= 2,
-  		.wires		= 8,
-  		.gpio_cd	= -EINVAL,
---- kernel-2.6.28-20094803.3/arch/arm/mach-omap2/mmc-twl4030.c 
-2010-01-24 23:23:10.000000000 +0100
-+++ kernel-2.6.28-20094803.3-fanoush/arch/arm/mach-omap2/mmc-twl4030.c 
-2010-01-24 22:59:35.000000000 +0100
-@@ -745,6 +745,7 @@ void __init twl4030_mmc_init(struct twl4
-  		else
-  			sprintf(twl->name, "mmc%islot%i", c->mmc, 1);
-  		mmc->slots[0].name = twl->name;
-+		mmc->slots[0].mmcblk_devidx = c->mmcblk_devidx;
-  		mmc->nr_slots = 1;
-  		mmc->slots[0].wires = c->wires;
-  		mmc->slots[0].internal_clock = !c->ext_clock;
---- kernel-2.6.28-20094803.3/arch/arm/mach-omap2/mmc-twl4030.h 
-2010-01-24 23:23:10.000000000 +0100
-+++ kernel-2.6.28-20094803.3-fanoush/arch/arm/mach-omap2/mmc-twl4030.h 
-2010-01-24 22:20:51.000000000 +0100
-@@ -19,6 +19,7 @@ struct twl4030_hsmmc_info {
-  	int	gpio_cd;	/* or -EINVAL */
-  	int	gpio_wp;	/* or -EINVAL */
-  	char	*name;		/* or NULL for default */
-+	int	mmcblk_devidx;  /* preferred mmcblkX device index */
-  };
-
-  #if	defined(CONFIG_TWL4030_CORE) && \
---- kernel-2.6.28-20094803.3/arch/arm/plat-omap/include/mach/mmc.h 
-2010-01-24 23:23:10.000000000 +0100
-+++ 
-kernel-2.6.28-20094803.3-fanoush/arch/arm/plat-omap/include/mach/mmc.h 
-2010-01-24 22:53:59.000000000 +0100
-@@ -110,6 +110,7 @@ struct omap_mmc_platform_data {
-  		int (* get_cover_state)(struct device *dev, int slot);
-
-  		const char *name;
-+		int mmcblk_devidx; /* preferred mmcblkX index for this slot */
-  		u32 ocr_mask;
-
-  		/* Card detection IRQs */
---- kernel-2.6.28-20094803.3/drivers/mmc/card/block.c	2010-01-24 
-23:23:09.000000000 +0100
-+++ kernel-2.6.28-20094803.3-fanoush/drivers/mmc/card/block.c	2010-01-24 
-22:14:12.000000000 +0100
-@@ -479,7 +479,7 @@ static struct mmc_blk_data *mmc_blk_allo
-  	struct mmc_blk_data *md;
-  	int devidx, ret;
-
--	devidx = find_first_zero_bit(dev_use, MMC_NUM_MINORS);
-+	devidx = find_next_zero_bit(dev_use, MMC_NUM_MINORS, 
-card->host->mmcblk_devidx);
-  	if (devidx >= MMC_NUM_MINORS)
-  		return ERR_PTR(-ENOSPC);
-  	__set_bit(devidx, dev_use);
---- kernel-2.6.28-20094803.3/drivers/mmc/host/omap_hsmmc.c	2010-01-24 
-23:23:09.000000000 +0100
-+++ kernel-2.6.28-20094803.3-fanoush/drivers/mmc/host/omap_hsmmc.c 
-2010-01-25 12:27:07.000000000 +0100
-@@ -1710,6 +1710,7 @@ static int __init omap_hsmmc_probe(struc
-  	mmc->max_seg_size = mmc->max_req_size;
-
-  	mmc->ocr_avail = mmc_slot(host).ocr_mask;
-+	mmc->mmcblk_devidx = mmc_slot(host).mmcblk_devidx;
-  	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED;
-
-  	if (mmc_slot(host).wires >= 8)
---- kernel-2.6.28-20094803.3/include/linux/mmc/host.h	2010-01-24 
-23:23:10.000000000 +0100
-+++ kernel-2.6.28-20094803.3-fanoush/include/linux/mmc/host.h	2010-01-24 
-22:12:20.000000000 +0100
-@@ -207,7 +207,7 @@ struct mmc_host {
-  #endif
-
-  	struct dentry		*debugfs_root;
--
-+	unsigned int		mmcblk_devidx; /* preferred mmc block device index 
-(mmcblkX) */
-  	unsigned long		private[0] ____cacheline_aligned;
-  };
