@@ -1,45 +1,112 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/2] mmc: sd: Fix sd current limit setting
-Date: Wed, 18 Jul 2012 01:28:40 -0400
-Message-ID: <87liihocxj.fsf@octavius.laptop.org>
-References: <1341296172-10645-1-git-send-email-aaron.lu@amd.com>
-	<1341296172-10645-3-git-send-email-aaron.lu@amd.com>
-	<CAGxe1ZF=T7GL6ZcyV-=MEd5WVWexNrUbrEZDsYGdFD+KPH4XfA@mail.gmail.com>
-	<20120717134325.GA2567@localhost.localdomain>
-	<87fw8qieap.fsf@octavius.laptop.org>
-	<20120718050939.GA30490@srdclcs1.amd.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v10] mmc: support BKOPS feature for eMMC
+Date: Wed, 18 Jul 2012 09:16:07 +0300
+Message-ID: <500654A7.8010501@intel.com>
+References: <5004D176.7090306@samsung.com> <50055AED.4000709@intel.com> <50056176.5010502@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43965 "EHLO void.printf.net"
+Received: from mga11.intel.com ([192.55.52.93]:39727 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752582Ab2GRF2x (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 18 Jul 2012 01:28:53 -0400
-In-Reply-To: <20120718050939.GA30490@srdclcs1.amd.com> (Aaron Lu's message of
-	"Wed, 18 Jul 2012 13:09:39 +0800")
+	id S1750764Ab2GRGPP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 18 Jul 2012 02:15:15 -0400
+In-Reply-To: <50056176.5010502@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lu@amd.com>
-Cc: Girish K S <girish.shivananjappa@linaro.org>, Philip Rakity <prakity@marvell.com>, linux-mmc@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Maya Erez <merez@codeaurora.org>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-Hi Aaron,
+On 17/07/12 15:58, Jaehoon Chung wrote:
+> On 07/17/2012 09:30 PM, Adrian Hunter wrote:
+>> On 17/07/12 05:44, Jaehoon Chung wrote:
+>>
+>> <snip>
+>>
+>>> +/**
+>>> + *	mmc_start_bkops - start BKOPS for supported cards
+>>> + *	@card: MMC card to start BKOPS
+>>> + *
+>>> + *	Start background operations whenever requested.
+>>> + *	when the urgent BKOPS bit is set in a R1 command response
+>>> + *	then background operations should be started immediately.
+>>> +*/
+>>> +void mmc_start_bkops(struct mmc_card *card)
+>>> +{
+>>> +	int err;
+>>> +	int timeout;
+>>> +	u8 use_busy_signal;
+>>> +
+>>> +	BUG_ON(!card);
+>>> +	if (!card->ext_csd.bkops_en || !(card->host->caps2 & MMC_CAP2_BKOPS))
+>>> +		return;
+>>> +
+>>> +	if (mmc_is_exception_event(card, EXT_CSD_URGENT_BKOPS))
+>>> +		if (card->ext_csd.raw_bkops_status)
+>>> +			mmc_card_set_need_bkops(card);
+>>> +
+>>> +	/*
+>>> +	 * If card is already doing bkops or need for
+>>> +	 * bkops flag is not set, then do nothing just
+>>> +	 * return
+>>> +	 */
+>>> +	if (mmc_card_doing_bkops(card) || !mmc_card_need_bkops(card))
+>>> +		return;
+>>> +
+>>> +	mmc_claim_host(card->host);
+>>> +	if (card->ext_csd.raw_bkops_status >= EXT_CSD_BKOPS_LEVEL_2) {
+>>> +		timeout = MMC_BKOPS_MAX_TIMEOUT;
+>>> +		use_busy_signal = 0;
+>>> +	} else {
+>>> +		timeout = 0;
+>>> +		use_busy_signal = 1;
+>>> +	}
+>>
+>> Is this the right way around?
+> 
+> use the mmc_switch() with R1B..
+> this case is no problem, because after sending bkops, repeat the checking card status until prg-done.
+> But, at sdhci controller, be occurred data timeout error.
+> Because response type is r1b, and timeout value is too large.
+> (Actually, i think that is controller's problem..but just its my test environment.)
+> 
+> if other sdhci controller working well with R1b, use_busy_signal need not.
+> Just use the mmc_switch().
+> 
+> But When running bkops level2/3 use with R1 type, also no problem.
+> Because the also checking status in mmc_switch() until prg-done.
 
-On Wed, Jul 18 2012, Aaron Lu wrote:
-> Is the following patch OK? This is based on top of current mmc-next with
-> the previous one in tree. Not sure if this is what you want though.
+You added:
 
-Yes, that's perfect; squashed into the original patch and pushed out
-to mmc-next.  Thanks!
++	/*
++	 * For urgent bkops status (LEVEL_2 and more)
++	 * bkops executed synchronously, otherwise
++	 * the operation is in progress
++	 */
++	if (card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2)
++		mmc_card_set_doing_bkops(card);
 
-Having there be so many MAX_CURRENT defines -- and having them be
-split in the middle between CAP_ and CAP2_ -- is starting to feel
-a bit awkward.  Does anyone have ideas on how that might be tidied
-up, since we have an opportunity to come up with a better plan
-before this gets merged soon?
+But:
+	status < 2		=> use_busy_signal = 1
+	use_busy_signal = 1	=> waiting
+	waiting			=> the operation is NOT in progress
 
-Thanks,
+Hence my question: Is this the right way around?
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Also this change is needed for the addition of 'use_busy_signal' to
+mmc_switch:
+
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index baf90e0..e202a5e 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -417,7 +417,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+                err = mmc_send_status(card, &status);
+                if (err)
+                        return err;
+-               if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
++               if (use_busy_signal && (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY))
+                        break;
+                if (mmc_host_is_spi(card->host))
+                        break;
+
