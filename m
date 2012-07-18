@@ -1,92 +1,73 @@
-From: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
-Subject: Re: [PATCH 1/1] mmc: host: enable OMAP DMA engine support for omap
- hosts by default
-Date: Wed, 18 Jul 2012 15:14:28 +0530
-Message-ID: <CAMQu2gy+uXJFfmOwLX=YH41pr-N+T28-1wLo5rXEaj9MGffHPw@mail.gmail.com>
-References: <1342485005-5178-1-git-send-email-javier@dowhile0.org>
- <CAMQu2gxaF8K78puE84+=8VJLbsdtdD97ww81XJxG6sCtYTYXww@mail.gmail.com>
- <CABxcv=nsmeVLspzXERYXebmPaNO6rKCsVnak7dMtvGjiYH4vOw@mail.gmail.com>
- <20120718065951.GH6522@atomide.com> <CAMQu2gzX1d1FQtE3z=cwfA6daDgxJe6UFUaSY0PzGGLQOz_-ZQ@mail.gmail.com>
- <20120718071039.GI6522@atomide.com> <CANfBPZ97onLov1TwXYaT5A6D5XzXxwpvk+=y09W_9FmcOne4Mw@mail.gmail.com>
- <CAMQu2gy-U1WmgGOGZ+VyXjZmLem9TEWbq5kR8jzC0qXvqF-=BA@mail.gmail.com>
- <CAAwP0s2Efuuc7vsX3bZuwz175zUjnmsOV87OcZ06p_eoe4T3Ug@mail.gmail.com>
- <CAMQu2gxLwGACAT-r6=L9DKB=3fTNaEJ4woZOb4zttJ8qTTJmFA@mail.gmail.com>
- <CAAwP0s2apfBHLKHtzvwqb2KPCMNhEXMe5R9792bO7FhfY5Y+uQ@mail.gmail.com> <CANfBPZ_N4ZK5PgFQLHWMwsG60tb-FPTjeieTJ92rBUNgONAxAw@mail.gmail.com>
+From: Knut Wohlrab <knut.wohlrab@de.bosch.com>
+Subject: Re: Devicetree: Initialization order of mmc block devices?
+Date: Wed, 18 Jul 2012 11:49:10 +0200
+Message-ID: <50068696.8070408@de.bosch.com>
+References: <5006571A.7060103@de.bosch.com> <CAJe_ZhcY78ah81zsfwXxE=bMG4o6v9RwZV_DQyUj7g=d-1hR_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog135.obsmtp.com ([74.125.149.84]:60858 "EHLO
-	na3sys009aog135.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751010Ab2GRJou (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jul 2012 05:44:50 -0400
-Received: by yenq10 with SMTP id q10so2439491yen.9
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Jul 2012 02:44:49 -0700 (PDT)
-In-Reply-To: <CANfBPZ_N4ZK5PgFQLHWMwsG60tb-FPTjeieTJ92rBUNgONAxAw@mail.gmail.com>
+Received: from imta22.fe.bosch.de ([139.15.243.26]:43180 "EHLO
+	imta22.fe.bosch.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752736Ab2GRJw6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jul 2012 05:52:58 -0400
+Received: from smtp2-v.fe.bosch.de (imta24.fe.bosch.de [139.15.243.27])
+	by imta22.fe.bosch.de (Postfix) with ESMTP id 738AE1E405F5
+	for <linux-mmc@vger.kernel.org>; Wed, 18 Jul 2012 11:52:57 +0200 (CEST)
+In-Reply-To: <CAJe_ZhcY78ah81zsfwXxE=bMG4o6v9RwZV_DQyUj7g=d-1hR_w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "S, Venkatraman" <svenkatr@ti.com>
-Cc: Javier Martinez Canillas <martinez.javier@gmail.com>, Tony Lindgren <tony@atomide.com>, Javier Martinez Canillas <javier@dowhile0.org>, Kevin Hilman <khilman@ti.com>, Russell King <linux@arm.linux.org.uk>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Jassi Brar <jaswinder.singh@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "Behme Dirk (CM-AI/PJ-CF32)" <Dirk.Behme@de.bosch.com>
 
-On Wed, Jul 18, 2012 at 3:08 PM, S, Venkatraman <svenkatr@ti.com> wrote:
-> On Wed, Jul 18, 2012 at 2:46 PM, Javier Martinez Canillas
-> <martinez.javier@gmail.com> wrote:
-
-[...]
-
->>>>
->>>> And what about enabling it at the SoC config level but making the
->>>> drivers dependant on CONFIG_DMADEVICES and CONFIG_DMA_OMAP? If you
->>>> agree I can send something like this in two different patches (one for
->>>> the omap2plus_defconfig and another to make the drivers dependant on
->>>> the config option):
->>>>
->>>> diff --git a/arch/arm/configs/omap2plus_defconfig
->>>> b/arch/arm/configs/omap2plus_defconfig
->>>> index b152de7..e58edc3 100644
->>>> --- a/arch/arm/configs/omap2plus_defconfig
->>>> +++ b/arch/arm/configs/omap2plus_defconfig
->>>> @@ -193,6 +193,8 @@ CONFIG_MMC_OMAP_HS=y
->>>>  CONFIG_RTC_CLASS=y
->>>>  CONFIG_RTC_DRV_TWL92330=y
->>>>  CONFIG_RTC_DRV_TWL4030=y
->>>> +CONFIG_DMADEVICES=y
->>>> +CONFIG_DMA_OMAP=y
->>>>  CONFIG_EXT2_FS=y
->>>>  CONFIG_EXT3_FS=y
->>>>  # CONFIG_EXT3_FS_XATTR is not set
->>>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->>>> index aa131b3..314c7bd 100644
->>>> --- a/drivers/mmc/host/Kconfig
->>>> +++ b/drivers/mmc/host/Kconfig
->>>> @@ -231,7 +231,7 @@ config MMC_SDHCI_S3C_DMA
->>>>
->>>>  config MMC_OMAP
->>>>         tristate "TI OMAP Multimedia Card Interface support"
->>>> -       depends on ARCH_OMAP
->>>> +       depends on ARCH_OMAP && DMADEVICES && DMA_OMAP
->>>
->>> May be. But since for sure a driver knows that it needs DMA
->>> support to be enabled, I will just select it rather than depends
->>> on.
->>>
->>> Regards
->>> santosh
+On 07/18/2012 09:23 AM, Jassi Brar wrote:
+> On 18 July 2012 11:56, Dirk Behme <dirk.behme@de.bosch.com> wrote:
+>> Similar to [1] we have a device which has two mmc block devices connected:
+>> One external removable and a second internal hard wired one. Depending on
+>> the availability of the external removable mmc card at boot time, the
+>> internal hard wired device becomes mmcblk1 (external mmc card available ==
+>> mmcblk0) or mmcblk0 if the external one is not there. This order is given by
+>> the hardware.
 >>
->> Yes I agree with you, I was just exploring other options :-)
+>> With older, non-DT kernels, we used the hack from [2] to control the
+>> initialization order and force the internal hard wired device to mmcblk0.
 >>
-> For MMC atleast, there's already a patch in mmc-next to do a "Depends On"
-> http://git.kernel.org/?p=linux/kernel/git/cjb/mmc.git;a=commit;h=7c68046c99f0b96d965c31cf42814b9a0f15ad46
+>> Now, we are switching to a newer, DT based kernel. With a DT based kernel
+>> this hack doesn't seem to work an more.
+>>
+>> Any idea how we could influence the initialization order of the mmc block
+>> devices using a DT based kernel? Ensuring that the internal, hard wired mmc
+>> card is always mapped to mmcblk0?
+>>
+> Doesn't it work by simply by moving the "internal" element before
+> "external" in the array 'struct twl4030_hsmmc_info mmc[]' ?
 
-Change log assumes says .
+Thanks a lot for quick response. Yes, the order of MMC devices in the 
+hardware definition of a board file is a possible solution. But we are 
+using a device tree file (*.dts) with this definitions:
+...
+usdhc@02198000 { /* uSDHC3, eMMC */
+     fsl,card-wired;
+     status = "okay";
+};
 
-"The patch simply make them depend on DMA_OMAP since DMA_OMAP
-will select DMA_ENGINE automatically"
+usdhc@02190000 { /* uSDHC1, SD card */
+     cd-gpios = <&gpio1 4 0>;
+     wp-gpios = <&gpio1 2 0>;
+     status = "okay";
+};
+....
+The order of the entries doesn't matter. The SDHC controller 1 is probed 
+first. If a SD card is inserted at boot time, its "mmcblk0", the 
+embedded MMC (eMMC) device "mmcblk1".  This makes it difficult to give 
+the kernel the correct device for the eMMC root file system 
+("root=/dev/mmcblk?p1 ...").
 
-This won't be true if the DMA selection are not done
-at ARCH_OMAP level as discussed in this thread.
+Is there any solution to define a scan order or a MMC device number/name 
+with a device tree?
 
-Having said that, I think Russell and Tony need to
-take call on how this needs to be handled.
+Thanks a lot and best regards
 
-Regards
-Santosh
+Knut
+
+
