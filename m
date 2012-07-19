@@ -1,57 +1,72 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH RESEND v7 2/2] mmc: card: Adding support for sanitize
-     in eMMC 4.5
-Date: Thu, 19 Jul 2012 04:25:20 -0700 (PDT)
-Message-ID: <f5830acb2ddca29357a0125cd8f3d577.squirrel@www.codeaurora.org>
-References: <1340872367-16206-1-git-send-email-ygardi@codeaurora.org>
-    <1340872367-16206-3-git-send-email-ygardi@codeaurora.org>
-    <87629k9rkc.fsf@octavius.laptop.org>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH] MMC: OMAP: make MMC_OMAP* depend on DMA_OMAP
+Date: Thu, 19 Jul 2012 16:59:45 +0530
+Message-ID: <CANfBPZ8K3=EG296_ZBd_ZaMaKPCXx4YWBOT6LjCy9T6ZsVhRHw@mail.gmail.com>
+References: <1341450721-20993-1-git-send-email-ming.lei@canonical.com> <87pq7s9w8f.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <87629k9rkc.fsf@octavius.laptop.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Yaniv Gardi <ygardi@codeaurora.org>, linux-mmc@vger.kernel.org, merez@codeaurora.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog118.obsmtp.com ([74.125.149.244]:60207 "EHLO
+	na3sys009aog118.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754014Ab2GSLaI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jul 2012 07:30:08 -0400
+Received: by bkcjk13 with SMTP id jk13so1895458bkc.10
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Jul 2012 04:30:05 -0700 (PDT)
+In-Reply-To: <87pq7s9w8f.fsf@octavius.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, Ming Lei <ming.lei@canonical.com>, Kevin Hilman <khilman@ti.com>, Javier Martinez Canillas <martinez.javier@gmail.com>, Tony Lindgren <tony@atomide.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap <linux-omap@vger.kernel.org>
 
-On Wed, July 18, 2012 11:46 pm, Chris Ball wrote:
-> Hi Yaniv,
+On Thu, Jul 19, 2012 at 10:35 AM, Chris Ball <cjb@laptop.org> wrote:
+> Hi Venkat -- please could you ACK/review this patch?
 >
-> On Thu, Jun 28 2012, Yaniv Gardi wrote:
->> This feature delete the unmap memory region of the eMMC card,
->> by writing to a specific register in the EXT_CSD
->> unmap region is the memory region that were previously deleted
->> (by erase, trim or discard operation)
+
+Chris,
+ I think we have to hold on to this patch just for today. There's
+another thread about this same issue on linux-omap
+
+> On Wed, Jul 04 2012, Ming Lei wrote:
+>> Recent commits on omap mmc/hsmmc in -next tree switch to
+>> DMA_ENGINE entirely, so make MMC_OMAP* depend on DMA_OMAP
+>> and DMA_ENGINE, otherwise OMAP MMC/HSMMC won't work without
+>> enabling DMA_ENGINE and DMA_OMAP.
 >>
->> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
->
-> Did you reply to Chuanxiao's review comments yet?  He said:
->
-> "So to implement your scenario, how about only add
-> mmc_blk_issue_sanitize_rq() for REQ_SANITIZE but not touch
-> mmc_blk_issue_secdiscard_rq()? With your changes in
-> mmc_blk_issue_secdiscard_rq(), eMMC4.5 device will be failed to operate
-> secure trim/erase for REQ_SECURE request."
->
-> at: http://thread.gmane.org/gmane.linux.kernel.mmc/14822/focus=14880
->
-> Thanks,
+>> The patch simply make them depend on DMA_OMAP since DMA_OMAP
+>> will select DMA_ENGINE automatically.
+>>
+>> Signed-off-by: Ming Lei <ming.lei@canonical.com>
+>> ---
+>>  drivers/mmc/host/Kconfig |    4 ++--
+>>  1 file changed, 2 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>> index aa131b3..ef72c50 100644
+>> --- a/drivers/mmc/host/Kconfig
+>> +++ b/drivers/mmc/host/Kconfig
+>> @@ -231,7 +231,7 @@ config MMC_SDHCI_S3C_DMA
+>>
+>>  config MMC_OMAP
+>>       tristate "TI OMAP Multimedia Card Interface support"
+>> -     depends on ARCH_OMAP
+>> +     depends on ARCH_OMAP && DMA_OMAP
+>>       select TPS65010 if MACH_OMAP_H2
+>>       help> Thanks,
 >
 > - Chris.
 > --
 > Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 > One Laptop Per Child
+
+
+>>         This selects the TI OMAP Multimedia card Interface.
+>> @@ -242,7 +242,7 @@ config MMC_OMAP
+>>
+>>  config MMC_OMAP_HS
+>>       tristate "TI OMAP High Speed Multimedia Card Interface support"
+>> -     depends on SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4
+>> +     depends on (SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4) && DMA_OMAP
+>>       help
+>>         This selects the TI OMAP High Speed Multimedia card Interface.
+>>         If you have an OMAP2430 or OMAP3 board or OMAP4 board with a
 >
-
-Secure trim and secure erase were removed from eMMC4.5. Please refer to
-annex B at B.6 section in eMMC4.5 spec.
-Therefore, failure upon trying to do secure trim/erase is the expected
-behavior for eMMC4.5 devices.
-
-Thanks,
-Maya
--- 
-Sent by consultant of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
