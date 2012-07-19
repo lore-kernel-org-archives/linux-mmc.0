@@ -1,72 +1,44 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH] MMC: OMAP: make MMC_OMAP* depend on DMA_OMAP
-Date: Thu, 19 Jul 2012 16:59:45 +0530
-Message-ID: <CANfBPZ8K3=EG296_ZBd_ZaMaKPCXx4YWBOT6LjCy9T6ZsVhRHw@mail.gmail.com>
-References: <1341450721-20993-1-git-send-email-ming.lei@canonical.com> <87pq7s9w8f.fsf@octavius.laptop.org>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 1/1] mmc: host: enable OMAP DMA engine support for omap
+ hosts by default
+Date: Thu, 19 Jul 2012 04:31:17 -0700
+Message-ID: <20120719113116.GM6522@atomide.com>
+References: <1342485005-5178-1-git-send-email-javier@dowhile0.org>
+ <CAMQu2gxaF8K78puE84+=8VJLbsdtdD97ww81XJxG6sCtYTYXww@mail.gmail.com>
+ <CABxcv=nsmeVLspzXERYXebmPaNO6rKCsVnak7dMtvGjiYH4vOw@mail.gmail.com>
+ <20120718065951.GH6522@atomide.com>
+ <CAAwP0s1UB_Q33KhXp_gvKfTMHRiBaH60HmXsMKxVkAxT1byctg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog118.obsmtp.com ([74.125.149.244]:60207 "EHLO
-	na3sys009aog118.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754014Ab2GSLaI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jul 2012 07:30:08 -0400
-Received: by bkcjk13 with SMTP id jk13so1895458bkc.10
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Jul 2012 04:30:05 -0700 (PDT)
-In-Reply-To: <87pq7s9w8f.fsf@octavius.laptop.org>
+Received: from mho-01-ewr.mailhop.org ([204.13.248.71]:35891 "EHLO
+	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752972Ab2GSLbX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jul 2012 07:31:23 -0400
+Content-Disposition: inline
+In-Reply-To: <CAAwP0s1UB_Q33KhXp_gvKfTMHRiBaH60HmXsMKxVkAxT1byctg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Ming Lei <ming.lei@canonical.com>, Kevin Hilman <khilman@ti.com>, Javier Martinez Canillas <martinez.javier@gmail.com>, Tony Lindgren <tony@atomide.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap <linux-omap@vger.kernel.org>
+To: Javier Martinez Canillas <martinez.javier@gmail.com>
+Cc: Javier Martinez Canillas <javier@dowhile0.org>, "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, Kevin.Hilman.khilman@ti.com, Russell King <linux@arm.linux.org.uk>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On Thu, Jul 19, 2012 at 10:35 AM, Chris Ball <cjb@laptop.org> wrote:
-> Hi Venkat -- please could you ACK/review this patch?
->
+* Javier Martinez Canillas <martinez.javier@gmail.com> [120718 01:31]:
+> That was my first approach in fact, I sent this patch:
+> https://patchwork.kernel.org/patch/1198401/
+> 
+> But then was told by Kevin Hilman that the right solution was to do
+> the select on the drives to fix not only omap2plus_defconfig but any
+> config.
+> So I sent this patch and Santosh agrees with Kevin.
+> 
+> I don't really know the hardware nor the driver well enough to have a
+> strong position on this.
 
-Chris,
- I think we have to hold on to this patch just for today. There's
-another thread about this same issue on linux-omap
+Ideally we would not select it or have depends on it. DMA channels
+can run out, and drivers need to work also without DMA. For doing
+distro kernels, building everything as modules should be an option
+rather than forcing to build in all kinds of code.
 
-> On Wed, Jul 04 2012, Ming Lei wrote:
->> Recent commits on omap mmc/hsmmc in -next tree switch to
->> DMA_ENGINE entirely, so make MMC_OMAP* depend on DMA_OMAP
->> and DMA_ENGINE, otherwise OMAP MMC/HSMMC won't work without
->> enabling DMA_ENGINE and DMA_OMAP.
->>
->> The patch simply make them depend on DMA_OMAP since DMA_OMAP
->> will select DMA_ENGINE automatically.
->>
->> Signed-off-by: Ming Lei <ming.lei@canonical.com>
->> ---
->>  drivers/mmc/host/Kconfig |    4 ++--
->>  1 file changed, 2 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->> index aa131b3..ef72c50 100644
->> --- a/drivers/mmc/host/Kconfig
->> +++ b/drivers/mmc/host/Kconfig
->> @@ -231,7 +231,7 @@ config MMC_SDHCI_S3C_DMA
->>
->>  config MMC_OMAP
->>       tristate "TI OMAP Multimedia Card Interface support"
->> -     depends on ARCH_OMAP
->> +     depends on ARCH_OMAP && DMA_OMAP
->>       select TPS65010 if MACH_OMAP_H2
->>       help> Thanks,
->
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
+Regards,
 
-
->>         This selects the TI OMAP Multimedia card Interface.
->> @@ -242,7 +242,7 @@ config MMC_OMAP
->>
->>  config MMC_OMAP_HS
->>       tristate "TI OMAP High Speed Multimedia Card Interface support"
->> -     depends on SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4
->> +     depends on (SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4) && DMA_OMAP
->>       help
->>         This selects the TI OMAP High Speed Multimedia card Interface.
->>         If you have an OMAP2430 or OMAP3 board or OMAP4 board with a
->
+Tony
