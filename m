@@ -1,47 +1,55 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: mxs-mmc: Add wp-inverted property
-Date: Thu, 19 Jul 2012 11:12:24 -0400
-Message-ID: <87d33r944n.fsf@octavius.laptop.org>
-References: <1339181738-22769-1-git-send-email-marex@denx.de>
-	<87hat394lp.fsf@octavius.laptop.org>
-	<201207191706.06058.marex@denx.de>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: dw-mmc: fixed secstion mismatch in reference
+Date: Fri, 20 Jul 2012 00:19:05 +0900
+Message-ID: <50082569.8030002@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:50824 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751745Ab2GSPMc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 19 Jul 2012 11:12:32 -0400
-In-Reply-To: <201207191706.06058.marex@denx.de> (Marek Vasut's message of
-	"Thu, 19 Jul 2012 17:06:05 +0200")
+Received: from mailout3.samsung.com ([203.254.224.33]:55946 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751516Ab2GSPTK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jul 2012 11:19:10 -0400
+Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M7E001MPYJLRYH0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 20 Jul 2012 00:19:09 +0900 (KST)
+Received: from [10.90.51.55] by mmp1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0M7E00NHOYJW0530@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 20 Jul 2012 00:19:09 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Marek Vasut <marex@denx.de>
-Cc: linux-mmc@vger.kernel.org, Shawn Guo <shawn.guo@linaro.org>, Fabio Estevam <fabio.estevam@freescale.com>, Lothar =?utf-8?Q?Wa=C3=9Fmann?= <LW@karo-electronics.de>
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>, Shashidhar Hiremath <shashidharh@vayavyalabs.com>
 
-Hi,
+Fixed the below message.
 
-On Thu, Jul 19 2012, Marek Vasut wrote:
->> > diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
->> > index 34a9026..c6964e1 100644
->> > --- a/drivers/mmc/host/mxs-mmc.c
->> > +++ b/drivers/mmc/host/mxs-mmc.c
->> > @@ -164,16 +164,23 @@ struct mxs_mmc_host {
->> > 
->> >  	spinlock_t			lock;
->> >  	int				sdio_irq_en;
->> >  	int				wp_gpio;
->> > 
->> > +	int				wp_inverted:1;
->> 
->> Mind if I change this to "bool wp_inverted;"?  Other than that, looks
->> fine and I'll merge it for 3.6.
->
-> That should be fine. Thanks!
+WARNING: drivers/mmc/host/built-in.o(.text+0x5ee8): Section mismatch in reference from the function dw_mci_probe() to the function .init.text:dw_mci_init_slot()
+The function dw_mci_probe() references
+the function __init dw_mci_init_slot().
+This is often because dw_mci_probe lacks a __init
+annotation or the annotation of dw_mci_init_slot is wrong
 
-Thanks, pushed to mmc-next for 3.6.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-- Chris.
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 72dc3cd..7955eba 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1760,7 +1760,7 @@ static void dw_mci_work_routine_card(struct work_struct *work)
+ 	}
+ }
+ 
+-static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
++static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ {
+ 	struct mmc_host *mmc;
+ 	struct dw_mci_slot *slot;
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.4.1
