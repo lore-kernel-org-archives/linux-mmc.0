@@ -1,327 +1,317 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v3 6/6] mmc: dw_mmc: add samsung exynos5250 specific
- extentions
-Date: Thu, 19 Jul 2012 12:51:08 +0900
-Message-ID: <002901cd6561$bb6dc9e0$32495da0$%jun@samsung.com>
-References: <1342097668-25243-1-git-send-email-thomas.abraham@linaro.org>
- <1342097668-25243-7-git-send-email-thomas.abraham@linaro.org>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: sd: Fix sd current limit setting
+Date: Thu, 19 Jul 2012 10:17:27 +0530
+Message-ID: <CAGxe1ZGoLWr-m6OAriOC4noXGz6SMBGMdMYrk1+wJQw7nwud3g@mail.gmail.com>
+References: <1341296172-10645-1-git-send-email-aaron.lu@amd.com>
+	<1341296172-10645-3-git-send-email-aaron.lu@amd.com>
+	<CAGxe1ZF=T7GL6ZcyV-=MEd5WVWexNrUbrEZDsYGdFD+KPH4XfA@mail.gmail.com>
+	<20120717134325.GA2567@localhost.localdomain>
+	<87fw8qieap.fsf@octavius.laptop.org>
+	<20120718050939.GA30490@srdclcs1.amd.com>
+	<87liihocxj.fsf@octavius.laptop.org>
+	<20120718062223.GA2711@aarontestpc.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:39001 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752698Ab2GSDvM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jul 2012 23:51:12 -0400
-In-reply-to: <1342097668-25243-7-git-send-email-thomas.abraham@linaro.org>
-Content-language: ko
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:46736 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751545Ab2GSEr2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jul 2012 00:47:28 -0400
+Received: by qcro28 with SMTP id o28so1433119qcr.19
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Jul 2012 21:47:27 -0700 (PDT)
+In-Reply-To: <20120718062223.GA2711@aarontestpc.amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Thomas Abraham' <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
-Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org
+To: Aaron Lu <aaron.lu@amd.com>
+Cc: Chris Ball <cjb@laptop.org>, Philip Rakity <prakity@marvell.com>, linux-mmc@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
 
-Hi,
-
-This version does not seems to consider previous reviews fully.
-Could you check the comments below?
-
-July 12, 2012, Thomas Abraham <thomas.abraham@linaro.org> wrote:
-> The instantiation of the Synopsis Designware controller on Exynos5250
-> include extension for SDR and DDR specific tx/rx phase shift timing
-> and CIU internal divider. In addition to that, the option to skip the
-> command hold stage is also introduced. Add support for these Exynos5250
-> specfic extenstions.
-> 
-> Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
-> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
-> ---
->  .../devicetree/bindings/mmc/synposis-dw-mshc.txt   |   38 ++++++++++++++++++-
->  drivers/mmc/host/dw_mmc-pltfm.c                    |   15 +++++++
->  drivers/mmc/host/dw_mmc.c                          |   40 +++++++++++++++++++-
->  drivers/mmc/host/dw_mmc.h                          |   14 +++++++
->  include/linux/mmc/dw_mmc.h                         |    6 +++
->  5 files changed, 110 insertions(+), 3 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
-> b/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
-> index 3acd6c9..69d78c1 100644
-> --- a/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
-> @@ -7,6 +7,8 @@ Required Properties:
-> 
->  * compatible: should be one of the following
->  	- snps,dw-mshc: for controllers compliant with synopsis dw-mshc.
-> +	- samsung,exynos5250-dw-mshc: for controllers with Samsung
-> +	  Exynos5250 specific extentions.
-> 
->  * reg: physical base address of the dw-mshc controller and size of its memory
->    region.
-> @@ -74,13 +76,45 @@ Aliases:
->    the following format 'mshc{n}' where n is a unique number for the alias.
-> 
-> 
-> +Samsung Exynos4/5 specific properties:
-> +
-> +Some of the variants of Exynos4 (such as Exynos4412) and Exynos5 SoC's
-> +includes few extensions to the Synopsis Designware Mobile Storage Host
-> +Controller. The following properties are used to describe those extensions.
-> +
-> +* samsung,dw-mshc-sdr-timing: Specifies the value of CUI clock divider, CIU
-> +  clock phase shift value in transmit mode and CIU clock phase shift value in
-> +  receive mode for single data rate mode operation. Refer notes of the valid
-> +  values below.
-> +
-> +* samsung,dw-mshc-ddr-timing: Specifies the value of CUI clock divider, CIU
-> +  clock phase shift value in transmit mode and CIU clock phase shift value in
-> +  receive mode for double data rate mode operation. Refer notes of the valid
-> +  values below. The order of the cells should be
-> +
-> +    - First Cell: 	CIU clock divider value (applicable only for Exynos5
-> +			SoC's, should be zero for Exynos4 SoC's)
-> +    - Second Cell:	CIU clock phase shift value for tx mode.
-> +    - Third Cell:	CIU clock phase shift value for rx mode.
-> +
-> +  Valid values for SDR and DDR CIU clock timing for Exynos5250:
-> +
-> +    - valid values for CIU clock divider, tx phase shift and rx phase shift
-> +      is 0 to 7.
-> +
-> +    - When CIU clock divider value is set to 3, all possible 8 phase shift
-> +      values can be used.
-> +
-> +    - If CIU clock divider value is 0 (that is divide by 1), both tx and rx
-> +      phase shift clocks should be 0.
-> +
->  Example:
-> 
->    The MSHC controller node can be split into two portions, SoC specific and
->    board specific portions as listed below.
-> 
->  	dwmmc0@12200000 {
-> -		compatible = "snps,dw-mshc";
-> +		compatible = "samsung,exynos5250-dw-mshc";
->  		reg = <0x12200000 0x1000>;
->  		interrupts = <0 75 0>;
->  		#address-cells = <1>;
-> @@ -94,6 +128,8 @@ Example:
->  		no-write-protect;
->  		fifo-depth = <0x80>;
->  		card-detect-delay = <200>;
-> +		samsung,dw-mshc-sdr-timing = <2 3 3>;
-> +		samsung,dw-mshc-ddr-timing = <1 2 3>;
-> 
->  		slot@0 {
->  			reg = <0>;
-> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-> index 8d24f6d..900f412 100644
-> --- a/drivers/mmc/host/dw_mmc-pltfm.c
-> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
-> @@ -27,9 +27,24 @@ static struct dw_mci_drv_data synopsis_drv_data = {
->  	.ctrl_type	= DW_MCI_TYPE_SYNOPSIS,
->  };
-> 
-> +static unsigned long exynos5250_dwmmc_caps[4] = {
-> +	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
-> +		MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
-> +	MMC_CAP_CMD23,
-> +	MMC_CAP_CMD23,
-> +	MMC_CAP_CMD23,
-> +};
-> +
-Kyungmin Park has already pointed .
-It's not still proper place for board specific caps.
-If I'm incorrect, please let me know.
-And why MMC_CAP_CMD23 is default caps for all channel of hosts?
-
-> +static struct dw_mci_drv_data exynos5250_drv_data = {
-> +	.ctrl_type	= DW_MCI_TYPE_EXYNOS5250,
-> +	.caps		= exynos5250_dwmmc_caps,
-> +};
-> +
->  static const struct of_device_id dw_mci_pltfm_match[] = {
->  	{ .compatible = "snps,dw-mshc",
->  			.data = (void *)&synopsis_drv_data, },
-> +	{ .compatible = "samsung,exynos5250-dw-mshc",
-> +			.data = (void *)&exynos5250_drv_data, },
->  	{},
->  };
->  MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 3bc276d..bbf1209 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -236,6 +236,7 @@ static void dw_mci_set_timeout(struct dw_mci *host)
->  static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
->  {
->  	struct mmc_data	*data;
-> +	struct dw_mci_slot *slot = mmc_priv(mmc);
->  	u32 cmdr;
->  	cmd->error = -EINPROGRESS;
-> 
-> @@ -265,6 +266,17 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
->  			cmdr |= SDMMC_CMD_DAT_WR;
->  	}
-> 
-> +	/*
-> +	 * Samsung Exynos5250 extends the use of CMD register with the use of
-> +	 * bit 29 (which is reserved on standard MSHC controllers) for
-> +	 * optionally bypassing the HOLD register for command and data. The
-> +	 * HOLD register should be bypassed in case there is no phase shift
-> +	 * applied on CMD/DATA that is sent to the card.
-> +	 */
-> +	if (slot->host->drv_data->ctrl_type == DW_MCI_TYPE_EXYNOS5250)
-> +		if (SDMMC_CLKSEL_GET_SELCLK_DRV(mci_readl(slot->host, CLKSEL)))
-> +			cmdr |= SDMMC_CMD_USE_HOLD_REG;
-> +
->  	return cmdr;
+On 18 July 2012 11:52, Aaron Lu <aaron.lu@amd.com> wrote:
+> Hi Chris,
+>
+> On Wed, Jul 18, 2012 at 01:28:40AM -0400, Chris Ball wrote:
+>> Hi Aaron,
+>>
+>> On Wed, Jul 18 2012, Aaron Lu wrote:
+>> > Is the following patch OK? This is based on top of current mmc-next with
+>> > the previous one in tree. Not sure if this is what you want though.
+>>
+>> Yes, that's perfect; squashed into the original patch and pushed out
+>> to mmc-next.  Thanks!
+>>
+>> Having there be so many MAX_CURRENT defines -- and having them be
+>> split in the middle between CAP_ and CAP2_ -- is starting to feel
+>> a bit awkward.
+>
+> I agree.
+>
+>> Does anyone have ideas on how that might be tidied up,
+>> since we have an opportunity to come up with a better plan
+>> before this gets merged soon?
+>
+> What about we add three fields in mmc_host to store the max current
+> value for 3.3v/3.0v/1.8v and use that when needed instead of the cap
+> setting of the host?
+>
+> I've prepared the following code, please check if this is better than
+> the current one:
+>
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 312b78d..2232004 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -517,11 +517,36 @@ static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
+>         return 0;
 >  }
-> 
-> @@ -802,10 +814,19 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  	regs = mci_readl(slot->host, UHS_REG);
-> 
->  	/* DDR mode set */
-> -	if (ios->timing == MMC_TIMING_UHS_DDR50)
-> +	if (ios->timing == MMC_TIMING_UHS_DDR50) {
->  		regs |= (0x1 << slot->id) << 16;
-> -	else
-> +		mci_writel(slot->host, CLKSEL, slot->host->ddr_timing);
-> +	} else {
->  		regs &= ~(0x1 << slot->id) << 16;
-> +		mci_writel(slot->host, CLKSEL, slot->host->sdr_timing);
-> +	}
+>
+> +/* Get host's max current setting at its current voltage */
+> +static u32 sd_get_host_max_current(struct mmc_host *host)
+> +{
+> +       u32 voltage, max_current;
 > +
-> +	if (slot->host->drv_data->ctrl_type == DW_MCI_TYPE_EXYNOS5250) {
-> +		slot->host->bus_hz = clk_get_rate(slot->host->ciu_clk);
-> +		slot->host->bus_hz /= SDMMC_CLKSEL_GET_DIVRATIO(
-> +					mci_readl(slot->host, CLKSEL));
-> +	}
-As you know, CLKSEL is specific for Samsung soc.
-0x09C(CLKSEL)  is reserved area in Synopsys memory map.
-In case of non-samsung-soc, we cannot ensure this usage.
-In previous version, I have suggested separating the variant into another file.
-
-> 
->  	mci_writel(slot->host, UHS_REG, regs);
-> 
-> @@ -2086,6 +2107,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->  	struct dw_mci_board *pdata;
->  	struct device *dev = host->dev;
->  	struct device_node *np = dev->of_node;
-> +	u32 timing[3];
->  	int idx, cnt;
-> 
->  	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
-> @@ -2108,6 +2130,20 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->  		if (of_get_property(np, of_quriks[idx].quirk, NULL))
->  			pdata->quirks |= of_quriks[idx].id;
-> 
-> +	if (of_property_read_u32_array(dev->of_node,
-> +			"samsung,dw-mshc-sdr-timing", timing, 3))
-> +		host->sdr_timing = DW_MCI_DEF_SDR_TIMING;
-Host of non-samsung will reach here.
-host->sdr_timing is needed for this host? host->ddr_timing is the same.
-
-> +	else
-> +		host->sdr_timing = SDMMC_CLKSEL_TIMING(timing[0],
-> +					timing[1], timing[2]);
+> +       voltage = 1 << host->ios.vdd;
+> +       switch (voltage) {
+> +       case MMC_VDD_165_195:
+> +               max_current = host->max_current_180;
+> +               break;
+> +       case MMC_VDD_29_30:
+> +       case MMC_VDD_30_31:
+> +               max_current = host->max_current_300;
+> +               break;
+> +       case MMC_VDD_32_33:
+> +       case MMC_VDD_33_34:
+> +               max_current = host->max_current_330;
+> +               break;
+> +       default:
+> +               max_current = 0;
+> +       }
 > +
-> +	if (of_property_read_u32_array(dev->of_node,
-> +			"samsung,dw-mshc-ddr-timing", timing, 3))
-> +		host->ddr_timing = DW_MCI_DEF_DDR_TIMING;
-> +	else
-> +		host->ddr_timing = SDMMC_CLKSEL_TIMING(timing[0],
-> +					timing[1], timing[2]);
+> +       return max_current;
+> +}
 > +
->  	if (of_property_read_u32(np, "fifo-depth", &pdata->fifo_depth))
->  		dev_info(dev, "fifo-depth property not found, using "
->  				"value of FIFOTH register as default\n");
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 1ecaa02..6c17282 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -53,6 +53,7 @@
->  #define SDMMC_IDINTEN		0x090
->  #define SDMMC_DSCADDR		0x094
->  #define SDMMC_BUFADDR		0x098
-> +#define SDMMC_CLKSEL		0x09C /* specific to Samsung Exynos5250 */
->  #define SDMMC_DATA(x)		(x)
-> 
->  /*
-> @@ -111,6 +112,7 @@
->  #define SDMMC_INT_ERROR			0xbfc2
->  /* Command register defines */
->  #define SDMMC_CMD_START			BIT(31)
-> +#define SDMMC_CMD_USE_HOLD_REG		BIT(29)
->  #define SDMMC_CMD_CCS_EXP		BIT(23)
->  #define SDMMC_CMD_CEATA_RD		BIT(22)
->  #define SDMMC_CMD_UPD_CLK		BIT(21)
-> @@ -142,6 +144,17 @@
->  /* Version ID register define */
->  #define SDMMC_GET_VERID(x)		((x) & 0xFFFF)
-> 
-> +#define DW_MCI_DEF_SDR_TIMING		0x03030002
-> +#define DW_MCI_DEF_DDR_TIMING		0x03020001
-What is the basis for these timing?
-These values is board-specific.
-
-> +#define SDMMC_CLKSEL_CCLK_SAMPLE(x)	(((x) & 3) << 0)
-> +#define SDMMC_CLKSEL_CCLK_DRIVE(x)	(((x) & 3) << 16)
-> +#define SDMMC_CLKSEL_CCLK_DIVIDER(x)	(((x) & 3) << 24)
-If it's for exynos5, it will be 7 not 3.
-
-> +#define SDMMC_CLKSEL_TIMING(x, y, z)	(SDMMC_CLKSEL_CCLK_SAMPLE(x) |	\
-> +					SDMMC_CLKSEL_CCLK_DRIVE(y) |	\
-> +					SDMMC_CLKSEL_CCLK_DIVIDER(z))
-> +#define SDMMC_CLKSEL_GET_DIVRATIO(x)	((((x) >> 24) & 0x7) + 1)
-> +#define SDMMC_CLKSEL_GET_SELCLK_DRV(x)	(((x) >> 16) & 0x7)
+>  static int sd_set_current_limit(struct mmc_card *card, u8 *status)
+>  {
+>         int current_limit = SD_SET_CURRENT_NO_CHANGE;
+>         int err;
+> -       u32 voltage;
+> +       u32 max_current;
+>
+>         /*
+>          * Current limit switch is only defined for SDR50, SDR104, and DDR50
+> @@ -535,9 +560,9 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
+>
+>         /*
+>          * Host has different current capabilities when operating at
+> -        * different voltages, so find out the current voltage first.
+> +        * different voltages, so find out its max current first.
+>          */
+> -       voltage = 1 << card->host->ios.vdd;
+> +       max_current = sd_get_host_max_current(card->host);
+>
+>         /*
+>          * We only check host's capability here, if we set a limit that is
+> @@ -547,34 +572,15 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
+>          * when we set current limit to 400/600/800ma, the card will draw its
+>          * maximum 300ma from the host.
+>          */
+> -       if (voltage == MMC_VDD_165_195) {
+> -               if (card->host->caps & MMC_CAP_MAX_CURRENT_800_180)
+> -                       current_limit = SD_SET_CURRENT_LIMIT_800;
+> -               else if (card->host->caps & MMC_CAP_MAX_CURRENT_600_180)
+> -                       current_limit = SD_SET_CURRENT_LIMIT_600;
+> -               else if (card->host->caps & MMC_CAP_MAX_CURRENT_400_180)
+> -                       current_limit = SD_SET_CURRENT_LIMIT_400;
+> -               else if (card->host->caps & MMC_CAP_MAX_CURRENT_200_180)
+> -                       current_limit = SD_SET_CURRENT_LIMIT_200;
+> -       } else if (voltage & (MMC_VDD_29_30 | MMC_VDD_30_31)) {
+> -               if (card->host->caps & MMC_CAP_MAX_CURRENT_800_300)
+> -                       current_limit = SD_SET_CURRENT_LIMIT_800;
+> -               else if (card->host->caps & MMC_CAP_MAX_CURRENT_600_300)
+> -                       current_limit = SD_SET_CURRENT_LIMIT_600;
+> -               else if (card->host->caps & MMC_CAP_MAX_CURRENT_400_300)
+> -                       current_limit = SD_SET_CURRENT_LIMIT_400;
+> -               else if (card->host->caps & MMC_CAP_MAX_CURRENT_200_300)
+> -                       current_limit = SD_SET_CURRENT_LIMIT_200;
+> -       } else if (voltage & (MMC_VDD_32_33 | MMC_VDD_33_34)) {
+> -               if (card->host->caps & MMC_CAP_MAX_CURRENT_800_330)
+> -                       current_limit = SD_SET_CURRENT_LIMIT_800;
+> -               else if (card->host->caps & MMC_CAP_MAX_CURRENT_600_330)
+> -                       current_limit = SD_SET_CURRENT_LIMIT_600;
+> -               else if (card->host->caps & MMC_CAP_MAX_CURRENT_400_330)
+> -                       current_limit = SD_SET_CURRENT_LIMIT_400;
+> -               else if (card->host->caps & MMC_CAP_MAX_CURRENT_200_330)
+> -                       current_limit = SD_SET_CURRENT_LIMIT_200;
+> -       }
 > +
-Is this patch considered only for exynos5250?
-In case of exynos4210, the number of bits is different.
-If upper macros is backward-compatible, it would be better.
+> +       if (max_current >= 800)
+> +               current_limit = SD_SET_CURRENT_LIMIT_800;
+> +       else if (max_current >= 600)
+> +               current_limit = SD_SET_CURRENT_LIMIT_600;
+> +       else if (max_current >= 400)
+> +               current_limit = SD_SET_CURRENT_LIMIT_400;
+> +       else if (max_current >= 200)
+> +               current_limit = SD_SET_CURRENT_LIMIT_200;
+>
+>         if (current_limit != SD_SET_CURRENT_NO_CHANGE) {
+>                 err = mmc_sd_switch(card, 1, 3, current_limit, status);
+> @@ -707,6 +713,7 @@ struct device_type sd_type = {
+>  int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
+>  {
+>         int err;
+> +       u32 max_current;
+>
+>         /*
+>          * Since we're changing the OCR value, we seem to
+> @@ -734,9 +741,12 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
+>             MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_DDR50))
+>                 ocr |= SD_OCR_S18R;
+>
+> -       /* If the host can supply more than 150mA, XPC should be set to 1. */
+> -       if (host->caps & (MMC_CAP_SET_XPC_330 | MMC_CAP_SET_XPC_300 |
+> -           MMC_CAP_SET_XPC_180))
+> +       /*
+> +        * If the host can supply more than 150mA at current voltage,
+> +        * XPC should be set to 1.
+> +        */
+> +       max_current = sd_get_host_max_current(host);
+> +       if (max_current > 150)
+>                 ocr |= SD_OCR_XPC;
+>
+>  try_again:
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 455a093..a72ad30 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2906,73 +2906,30 @@ int sdhci_add_host(struct sdhci_host *host)
+>         }
+>
+>         if (caps[0] & SDHCI_CAN_VDD_330) {
+> -               int max_current_330;
+> -
+>                 ocr_avail |= MMC_VDD_32_33 | MMC_VDD_33_34;
+>
+> -               max_current_330 = ((max_current_caps &
+> +               mmc->max_current_330 = ((max_current_caps &
+>                                    SDHCI_MAX_CURRENT_330_MASK) >>
+>                                    SDHCI_MAX_CURRENT_330_SHIFT) *
+>                                    SDHCI_MAX_CURRENT_MULTIPLIER;
+>
+> -               if (max_current_330 > 150)
+> -                       mmc->caps |= MMC_CAP_SET_XPC_330;
+> -
+> -               /* Maximum current capabilities of the host at 3.3V */
+> -               if (max_current_330 >= 800)
+> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_800_330;
+> -               else if (max_current_330 >= 600)
+> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_600_330;
+> -               else if (max_current_330 >= 400)
+> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_400_330;
+> -               else if (max_current_330 >= 200)
+> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_200_330;
+>         }
+>         if (caps[0] & SDHCI_CAN_VDD_300) {
+> -               int max_current_300;
+> -
+>                 ocr_avail |= MMC_VDD_29_30 | MMC_VDD_30_31;
+>
+> -               max_current_300 = ((max_current_caps &
+> +               mmc->max_current_300 = ((max_current_caps &
+>                                    SDHCI_MAX_CURRENT_300_MASK) >>
+>                                    SDHCI_MAX_CURRENT_300_SHIFT) *
+>                                    SDHCI_MAX_CURRENT_MULTIPLIER;
+>
+> -               if (max_current_300 > 150)
+> -                       mmc->caps |= MMC_CAP_SET_XPC_300;
+> -
+> -               /* Maximum current capabilities of the host at 3.0V */
+> -               if (max_current_300 >= 800)
+> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_800_300;
+> -               else if (max_current_300 >= 600)
+> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_600_300;
+> -               else if (max_current_300 >= 400)
+> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_400_300;
+> -               else if (max_current_300 >= 200)
+> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_200_300;
+>         }
+>         if (caps[0] & SDHCI_CAN_VDD_180) {
+> -               int max_current_180;
+> -
+>                 ocr_avail |= MMC_VDD_165_195;
+>
+> -               max_current_180 = ((max_current_caps &
+> +               mmc->max_current_180 = ((max_current_caps &
+>                                    SDHCI_MAX_CURRENT_180_MASK) >>
+>                                    SDHCI_MAX_CURRENT_180_SHIFT) *
+>                                    SDHCI_MAX_CURRENT_MULTIPLIER;
+> -
+> -               if (max_current_180 > 150)
+> -                       mmc->caps |= MMC_CAP_SET_XPC_180;
+> -
+> -               /* Maximum current capabilities of the host at 1.8V */
+> -               if (max_current_180 >= 800)
+> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_800_180;
+> -               else if (max_current_180 >= 600)
+> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_600_180;
+> -               else if (max_current_180 >= 400)
+> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_400_180;
+> -               else if (max_current_180 >= 200)
+> -                       mmc->caps |= MMC_CAP_MAX_CURRENT_200_180;
+>         }
+>
+>         mmc->ocr_avail = ocr_avail;
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 79d8921..8d2c052 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -189,6 +189,9 @@ struct mmc_host {
+>         u32                     ocr_avail_sd;   /* SD-specific OCR */
+>         u32                     ocr_avail_mmc;  /* MMC-specific OCR */
+>         struct notifier_block   pm_notify;
+> +       u32                     max_current_330;
+> +       u32                     max_current_300;
+> +       u32                     max_current_180;
+>
+>  #define MMC_VDD_165_195                0x00000080      /* VDD voltage 1.65 - 1.95 */
+>  #define MMC_VDD_20_21          0x00000100      /* VDD voltage 2.0 ~ 2.1 */
+> @@ -232,16 +235,9 @@ struct mmc_host {
+>  #define MMC_CAP_UHS_SDR50      (1 << 17)       /* Host supports UHS SDR50 mode */
+>  #define MMC_CAP_UHS_SDR104     (1 << 18)       /* Host supports UHS SDR104 mode */
+>  #define MMC_CAP_UHS_DDR50      (1 << 19)       /* Host supports UHS DDR50 mode */
+> -#define MMC_CAP_SET_XPC_330    (1 << 20)       /* Host supports >150mA current at 3.3V */
+> -#define MMC_CAP_SET_XPC_300    (1 << 21)       /* Host supports >150mA current at 3.0V */
+> -#define MMC_CAP_SET_XPC_180    (1 << 22)       /* Host supports >150mA current at 1.8V */
+>  #define MMC_CAP_DRIVER_TYPE_A  (1 << 23)       /* Host supports Driver Type A */
+>  #define MMC_CAP_DRIVER_TYPE_C  (1 << 24)       /* Host supports Driver Type C */
+>  #define MMC_CAP_DRIVER_TYPE_D  (1 << 25)       /* Host supports Driver Type D */
+> -#define MMC_CAP_MAX_CURRENT_200_180 (1 << 26)  /* Host max current limit is 200mA at 1.8V */
+> -#define MMC_CAP_MAX_CURRENT_400_180 (1 << 27)  /* Host max current limit is 400mA at 1.8V */
+> -#define MMC_CAP_MAX_CURRENT_600_180 (1 << 28)  /* Host max current limit is 600mA at 1.8V */
+> -#define MMC_CAP_MAX_CURRENT_800_180 (1 << 29)  /* Host max current limit is 800mA at 1.8V */
+>  #define MMC_CAP_CMD23          (1 << 30)       /* CMD23 supported. */
+>  #define MMC_CAP_HW_RESET       (1 << 31)       /* Hardware reset */
+>
+> @@ -261,14 +257,6 @@ struct mmc_host {
+>  #define MMC_CAP2_HC_ERASE_SZ   (1 << 9)        /* High-capacity erase size */
+>  #define MMC_CAP2_CD_ACTIVE_HIGH        (1 << 10)       /* Card-detect signal active high */
+>  #define MMC_CAP2_RO_ACTIVE_HIGH        (1 << 11)       /* Write-protect signal active high */
+> -#define MMC_CAP_MAX_CURRENT_200_300 (1 << 12)  /* Host max current limit is 200mA at 3.0V */
+> -#define MMC_CAP_MAX_CURRENT_400_300 (1 << 13)  /* Host max current limit is 400mA at 3.0V */
+> -#define MMC_CAP_MAX_CURRENT_600_300 (1 << 14)  /* Host max current limit is 600mA at 3.0V */
+> -#define MMC_CAP_MAX_CURRENT_800_300 (1 << 15)  /* Host max current limit is 800mA at 3.0V */
+> -#define MMC_CAP_MAX_CURRENT_200_330 (1 << 16)  /* Host max current limit is 200mA at 3.3V */
+> -#define MMC_CAP_MAX_CURRENT_400_330 (1 << 17)  /* Host max current limit is 400mA at 3.3V */
+> -#define MMC_CAP_MAX_CURRENT_600_330 (1 << 18)  /* Host max current limit is 600mA at 3.3V */
+> -#define MMC_CAP_MAX_CURRENT_800_330 (1 << 19)  /* Host max current limit is 800mA at 3.3V */
+>  #define MMC_CAP2_PACKED_RD         (1 << 20)   /* Allow packed read */
+>  #define MMC_CAP2_PACKED_WR         (1 << 21)   /* Allow packed write */
+>  #define MMC_CAP2_PACKED_CMD    (MMC_CAP2_PACKED_RD | \
+>
+Looks like a better solution than earlier one.
+Reviewed By: Girish K S <girish.shivananjappa@linaro.org>
 
-Best regards,
-Seungwon Jeon
-
->  /* Register access macros */
->  #define mci_readl(dev, reg)			\
->  	__raw_readl((dev)->regs + SDMMC_##reg)
-> @@ -184,6 +197,7 @@ extern int dw_mci_resume(struct dw_mci *host);
-> 
->  /* Variations in the dw_mci controller */
->  #define DW_MCI_TYPE_SYNOPSIS		0
-> +#define DW_MCI_TYPE_EXYNOS5250		1 /* Samsung Exynos5250 Extensions */
-> 
->  /* dw_mci platform driver data */
->  struct dw_mci_drv_data {
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index ae45e4f..32c778f 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -82,6 +82,8 @@ struct mmc_data;
->   * @biu_clk: Pointer to bus interface unit clock instance.
->   * @ciu_clk: Pointer to card interface unit clock instance.
->   * @slot: Slots sharing this MMC controller.
-> + * @sdr_timing: Clock phase shifting for driving and sampling in sdr mode
-> + * @ddr_timing: Clock phase shifting for driving and sampling in ddr mode
->   * @fifo_depth: depth of FIFO.
->   * @data_shift: log2 of FIFO item size.
->   * @part_buf_start: Start index in part_buf.
-> @@ -166,6 +168,10 @@ struct dw_mci {
->  	struct clk		*ciu_clk;
->  	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
-> 
-> +	/* Phase Shift Value (for exynos5250 variant) */
-> +	u32			sdr_timing;
-> +	u32			ddr_timing;
-> +
->  	/* FIFO push and pull */
->  	int			fifo_depth;
->  	int			data_shift;
-> --
-> 1.6.6.rc2
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+Chris,
+How about the holes created by removal of caps2 macros. Will they be
+adjusted to follow the sequence or left as it is for future use.
+>
+> Thanks,
+> Aaron
+>
