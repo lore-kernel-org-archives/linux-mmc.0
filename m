@@ -1,37 +1,40 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/2] mmc: sd: Fix sd current limit setting
-Date: Thu, 19 Jul 2012 02:25:05 -0400
-Message-ID: <87d33s9sji.fsf@octavius.laptop.org>
-References: <1341296172-10645-1-git-send-email-aaron.lu@amd.com>
-	<1341296172-10645-3-git-send-email-aaron.lu@amd.com>
-	<CAGxe1ZF=T7GL6ZcyV-=MEd5WVWexNrUbrEZDsYGdFD+KPH4XfA@mail.gmail.com>
-	<20120717134325.GA2567@localhost.localdomain>
-	<87fw8qieap.fsf@octavius.laptop.org>
-	<20120718050939.GA30490@srdclcs1.amd.com>
-	<87liihocxj.fsf@octavius.laptop.org>
-	<20120718062223.GA2711@aarontestpc.amd.com>
-	<87hat4bhgn.fsf@octavius.laptop.org>
+Subject: Re: [PATCH RESEND v7 2/2] mmc: card: Adding support for sanitize in eMMC 4.5
+Date: Thu, 19 Jul 2012 02:46:11 -0400
+Message-ID: <87629k9rkc.fsf@octavius.laptop.org>
+References: <1340872367-16206-1-git-send-email-ygardi@codeaurora.org>
+	<1340872367-16206-3-git-send-email-ygardi@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43133 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751482Ab2GSGZK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 19 Jul 2012 02:25:10 -0400
-In-Reply-To: <87hat4bhgn.fsf@octavius.laptop.org> (Chris Ball's message of
-	"Wed, 18 Jul 2012 22:41:28 -0400")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1340872367-16206-3-git-send-email-ygardi@codeaurora.org> (Yaniv
+	Gardi's message of "Thu, 28 Jun 2012 11:32:46 +0300")
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Yaniv Gardi <ygardi@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, merez@codeaurora.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lu@amd.com>
-Cc: Girish K S <girish.shivananjappa@linaro.org>, Philip Rakity <prakity@marvell.com>, linux-mmc@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
 
-Hi,
+Hi Yaniv,
 
-On Wed, Jul 18 2012, Chris Ball wrote:
-> Girish/Philip, does this look good to you too?  If so, I'll squash it
-> into the original patch.
+On Thu, Jun 28 2012, Yaniv Gardi wrote:
+> This feature delete the unmap memory region of the eMMC card,
+> by writing to a specific register in the EXT_CSD
+> unmap region is the memory region that were previously deleted
+> (by erase, trim or discard operation)
+>
+> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
 
-Thanks, everyone -- squashed in and pushed out to mmc-next.
+Did you reply to Chuanxiao's review comments yet?  He said:
+
+"So to implement your scenario, how about only add
+mmc_blk_issue_sanitize_rq() for REQ_SANITIZE but not touch
+mmc_blk_issue_secdiscard_rq()? With your changes in
+mmc_blk_issue_secdiscard_rq(), eMMC4.5 device will be failed to operate
+secure trim/erase for REQ_SECURE request."
+
+at: http://thread.gmane.org/gmane.linux.kernel.mmc/14822/focus=14880
+
+Thanks,
 
 - Chris.
 -- 
