@@ -1,48 +1,40 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 1/1] mmc: host: enable OMAP DMA engine support for omap
- hosts by default
-Date: Thu, 19 Jul 2012 04:32:47 -0700
-Message-ID: <20120719113246.GN6522@atomide.com>
-References: <20120718065951.GH6522@atomide.com>
- <CAMQu2gzX1d1FQtE3z=cwfA6daDgxJe6UFUaSY0PzGGLQOz_-ZQ@mail.gmail.com>
- <20120718071039.GI6522@atomide.com>
- <CANfBPZ97onLov1TwXYaT5A6D5XzXxwpvk+=y09W_9FmcOne4Mw@mail.gmail.com>
- <CAMQu2gy-U1WmgGOGZ+VyXjZmLem9TEWbq5kR8jzC0qXvqF-=BA@mail.gmail.com>
- <CAAwP0s2Efuuc7vsX3bZuwz175zUjnmsOV87OcZ06p_eoe4T3Ug@mail.gmail.com>
- <CAMQu2gxLwGACAT-r6=L9DKB=3fTNaEJ4woZOb4zttJ8qTTJmFA@mail.gmail.com>
- <CAAwP0s2apfBHLKHtzvwqb2KPCMNhEXMe5R9792bO7FhfY5Y+uQ@mail.gmail.com>
- <CANfBPZ_N4ZK5PgFQLHWMwsG60tb-FPTjeieTJ92rBUNgONAxAw@mail.gmail.com>
- <CAMQu2gy+uXJFfmOwLX=YH41pr-N+T28-1wLo5rXEaj9MGffHPw@mail.gmail.com>
+From: Marek Vasut <marex@denx.de>
+Subject: Re: [PATCH] mmc: mxs-mmc: Add wp-inverted property
+Date: Thu, 19 Jul 2012 13:50:32 +0200
+Message-ID: <201207191350.32735.marex@denx.de>
+References: <1339181738-22769-1-git-send-email-marex@denx.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: Text/Plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-01-ewr.mailhop.org ([204.13.248.71]:36856 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750782Ab2GSLcv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jul 2012 07:32:51 -0400
-Content-Disposition: inline
-In-Reply-To: <CAMQu2gy+uXJFfmOwLX=YH41pr-N+T28-1wLo5rXEaj9MGffHPw@mail.gmail.com>
+Received: from mail-out.m-online.net ([212.18.0.10]:40755 "EHLO
+	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751690Ab2GSLui convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jul 2012 07:50:38 -0400
+In-Reply-To: <1339181738-22769-1-git-send-email-marex@denx.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
-Cc: "S, Venkatraman" <svenkatr@ti.com>, Javier Martinez Canillas <martinez.javier@gmail.com>, Javier Martinez Canillas <javier@dowhile0.org>, Kevin Hilman <khilman@ti.com>, Russell King <linux@arm.linux.org.uk>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Shawn Guo <shawn.guo@linaro.org>, Fabio Estevam <fabio.estevam@freescale.com>, Chris Ball <cjb@laptop.org>, Lothar =?iso-8859-1?q?Wa=DFmann?= <LW@karo-electronics.de>
 
-* Shilimkar, Santosh <santosh.shilimkar@ti.com> [120718 02:49]:
-> 
-> "The patch simply make them depend on DMA_OMAP since DMA_OMAP
-> will select DMA_ENGINE automatically"
-> 
-> This won't be true if the DMA selection are not done
-> at ARCH_OMAP level as discussed in this thread.
-> 
-> Having said that, I think Russell and Tony need to
-> take call on how this needs to be handled.
+Hi,
 
-As the DMA channels can run out, drivers should also work
-without DMA. And building everything as modules should be
-possible for the distro kernels.
+> The write-protect GPIO is inverted on some boards. Handle such case.
+>=20
+> Signed-off-by: Marek Vasut <marex@denx.de>
+> Cc: Shawn Guo <shawn.guo@linaro.org>
+> Cc: Fabio Estevam <fabio.estevam@freescale.com>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: Chris Ball <cjb@laptop.org>
+> Cc: Lothar Wa=DFmann <LW@karo-electronics.de>
 
-So I'd rather not have either select or depends and have
-the drivers fixed.
+[...]
 
-Tony
+I don't see this in -next yet, was this applied please? Or maybe it is =
+stuck in=20
+some tree that wasn't pulled yet?
+
+Thanks!
+
+Best regards,
+Marek Vasut
