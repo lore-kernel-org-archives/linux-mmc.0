@@ -1,55 +1,68 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: dw-mmc: fixed secstion mismatch in reference
-Date: Fri, 20 Jul 2012 00:19:05 +0900
-Message-ID: <50082569.8030002@samsung.com>
+Subject: Re: [PATCH v3 0/6] mmc: dw_mmc: add support for device tree based
+ instantiation
+Date: Fri, 20 Jul 2012 00:28:27 +0900
+Message-ID: <5008279B.4000001@samsung.com>
+References: <1342097668-25243-1-git-send-email-thomas.abraham@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:55946 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751516Ab2GSPTK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jul 2012 11:19:10 -0400
-Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M7E001MPYJLRYH0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 20 Jul 2012 00:19:09 +0900 (KST)
-Received: from [10.90.51.55] by mmp1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0M7E00NHOYJW0530@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 20 Jul 2012 00:19:09 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1342097668-25243-1-git-send-email-thomas.abraham@linaro.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Thomas Abraham <thomas.abraham@linaro.org>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>, Shashidhar Hiremath <shashidharh@vayavyalabs.com>
 
-Fixed the below message.
+Hi Thomas,
 
-WARNING: drivers/mmc/host/built-in.o(.text+0x5ee8): Section mismatch in reference from the function dw_mci_probe() to the function .init.text:dw_mci_init_slot()
-The function dw_mci_probe() references
-the function __init dw_mci_init_slot().
-This is often because dw_mci_probe lacks a __init
-annotation or the annotation of dw_mci_init_slot is wrong
+I think not good that added the samsung specific code into dw_mmc-pltfm.c
+How about separating to dw-mmc-exynos.c?
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+Best Regards,
+Jaehoon Chung
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 72dc3cd..7955eba 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1760,7 +1760,7 @@ static void dw_mci_work_routine_card(struct work_struct *work)
- 	}
- }
- 
--static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
-+static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- {
- 	struct mmc_host *mmc;
- 	struct dw_mci_slot *slot;
--- 
-1.7.4.1
+On 07/12/2012 09:54 PM, Thomas Abraham wrote:
+> This patch series adds device tree support for Synopsis Designware Mobile
+> Storage Host Controller.
+> 
+> The first patch converts the copy of controller device instance into a
+> reference. This is need to allow device resource management api to correctly
+> manage the resources allocated by the driver. The second patch fixes the
+> incorrect abort of the probe in case a slot initialization fails. This is
+> fixed by allowing as many slots to be initialized successfully and failing
+> only if there are no slots that were initialized.
+> 
+> The third patch adds clock lookup in the driver and this is optional. Platforms
+> that do not need any clock gating and control for the dw_mmc controllers will
+> not be affected with this change. The fourth patch adds a quirk to notify the
+> controller about the absence of the write protect line.
+> 
+> The fifth patch adds device tree based discovery support for the dw_mmc driver.
+> The sixth patch add Samsung Exynos5250 specific extentions to the driver.
+> 
+> This patchset is based on Samsung kernel tree's for-next branch with the
+> mmc tree's mmc-next branch merged.
+> 
+> Thomas Abraham (6):
+>   mmc: dw_mmc: convert copy of struct device in struct dw_mci to a reference
+>   mmc: dw_mmc: allow probe to succeed even if one slot is initialized
+>   mmc: dw_mmc: lookup for optional biu and ciu clocks
+>   mmc: dw_mmc: add quirk to indicate missing write protect line
+>   mmc: dw_mmc: add device tree support
+>   mmc: dw_mmc: add samsung exynos5250 specific extentions
+> 
+>  .../devicetree/bindings/mmc/synposis-dw-mshc.txt   |  144 ++++++++
+>  drivers/mmc/host/dw_mmc-pci.c                      |    2 +-
+>  drivers/mmc/host/dw_mmc-pltfm.c                    |   41 +++-
+>  drivers/mmc/host/dw_mmc.c                          |  364 +++++++++++++++++---
+>  drivers/mmc/host/dw_mmc.h                          |   23 ++
+>  include/linux/mmc/dw_mmc.h                         |   17 +-
+>  6 files changed, 538 insertions(+), 53 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
