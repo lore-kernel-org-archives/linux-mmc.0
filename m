@@ -1,52 +1,60 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] esdhc: fix DMA_MASK to not break mx25 DMA access
-Date: Thu, 19 Jul 2012 02:51:21 -0400
-Message-ID: <871uk89rbq.fsf@octavius.laptop.org>
-References: <AF702D0F-8919-4E98-BD6C-DF05E0EE4DDE@savantav.com>
-	<3DC84FDD-7D96-46D6-A9F2-C3F8A47E9051@comcast.net>
-	<20120716214711.GX30009@pengutronix.de>
-	<8D8658B1-9B29-4677-8CA8-EBEE0C42D3E6@comcast.net>
+From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Subject: Re: Devicetree: Initialization order of mmc block devices?
+Date: Thu, 19 Jul 2012 10:07:32 +0200
+Message-ID: <20120719100732.0197abf9@skate>
+References: <5006571A.7060103@de.bosch.com>
+	<CAJe_ZhcY78ah81zsfwXxE=bMG4o6v9RwZV_DQyUj7g=d-1hR_w@mail.gmail.com>
+	<50068696.8070408@de.bosch.com>
+	<CAJe_Zhfmn4dUHk6xtudwCEurigvX64xce3VAozdjDdpSWSbRkA@mail.gmail.com>
+	<5006C40D.300@de.bosch.com>
+	<5006CE33.2040205@boundarydevices.com>
+	<5006D361.2070705@de.bosch.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:52572 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750907Ab2GSGv3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 19 Jul 2012 02:51:29 -0400
-In-Reply-To: <8D8658B1-9B29-4677-8CA8-EBEE0C42D3E6@comcast.net> (Wilson &
-	Cassie's message of "Tue, 17 Jul 2012 12:32:05 -0400")
+Received: from mail.free-electrons.com ([88.190.12.23]:37131 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753431Ab2GSIHp convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jul 2012 04:07:45 -0400
+In-Reply-To: <5006D361.2070705@de.bosch.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wilson & Cassie <griscruf@comcast.net>
-Cc: linux-mmc@vger.kernel.org, Sascha Hauer <s.hauer@pengutronix.de>, wilson.callan@savantsystems.com
+To: Knut Wohlrab <knut.wohlrab@de.bosch.com>
+Cc: Eric Nelson <eric.nelson@boundarydevices.com>, Jassi Brar <jaswinder.singh@linaro.org>, "Behme Dirk (CM-AI/PJ-CF32)" <Dirk.Behme@de.bosch.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi,
+Le Wed, 18 Jul 2012 17:16:49 +0200,
+Knut Wohlrab <knut.wohlrab@de.bosch.com> a =C3=A9crit :
 
-On Tue, Jul 17 2012, Wilson & Cassie wrote:
-> Patch to not set reserved bits in i.MX25 PROCTL register.  DMA stops working if those bits get set.
->
-> Signed-off-by: Wilson Callan <wilson.callan at savantsystems.com>
-> Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
->
-> --- linux-3.4.4/drivers/mmc/host/sdhci-esdhc-imx.c.orig	2012-07-04 13:58:16.239979741 -0400
-> +++ linux-3.4.4/drivers/mmc/host/sdhci-esdhc-imx.c	2012-07-04 14:34:38.939949292 -0400
-> @@ -310,8 +310,10 @@ static void esdhc_writeb_le(struct sdhci
->  				SDHCI_CTRL_D3CD);
->  		/* ensure the endianess */
->  		new_val |= ESDHC_HOST_CONTROL_LE;
-> -		/* DMA mode bits are shifted */
-> -		new_val |= (val & SDHCI_CTRL_DMA_MASK) << 5;
-> +		if (!is_imx25_esdhc(imx_data)) { // bits 8&9 are reserved on mx25
-> +			/* DMA mode bits are shifted */
-> +			new_val |= (val & SDHCI_CTRL_DMA_MASK) << 5;
-> +		}
->  
->  		esdhc_clrset_le(host, 0xffff, new_val, reg);
->  		return;
+> No, because we have to know which will be the name of the root device=
+=20
+> _before_ we start the kernel. In our embedded device we start the ker=
+nel=20
+> with a bootloader (U-Boot) and pass the root device with the kernel=20
+> command line parameter "root=3D/dev/mmcblk0p1". That is not possible =
+if we=20
+> do not know what will be the name of the root device (mmcblk0 or=20
+> mmcblk1) when kernel try to mount it.
 
-Thanks, pushed to mmc-next for 3.6.
+You can always work around this by having a minimal initramfs inside
+your kernel, which contains a basic userspace environment that will
+just locate the right location of the real root filesystem, mount it,
+and switch to it. But I agree that it's a bit painful to have such a
+complexity just to identify which device contains the root filesystem.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+I also believe the root=3DUUID=3D... thing does not work when root=3D i=
+s
+parsed by the kernel, unless you have a GPT partition table or
+something like that. With the old-style partition table, the UUIDs are
+inside the filesystems, and the kernel does not know about them. At
+least that was my understanding of the matter about a year ago when I
+looked into this.
+
+Best regards,
+
+Thomas
+--=20
+Thomas Petazzoni, Free Electrons
+Kernel, drivers, real-time and embedded Linux
+development, consulting, training and support.
+http://free-electrons.com
