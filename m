@@ -1,67 +1,104 @@
-From: Jassi Brar <jaswinder.singh@linaro.org>
-Subject: Re: Devicetree: Initialization order of mmc block devices?
-Date: Fri, 20 Jul 2012 17:26:01 +0530
-Message-ID: <CAJe_Zhfu-k0V7q527JSqdThn_c7WfNcaHmYOwBBaaRh+A=2hKA@mail.gmail.com>
-References: <5006571A.7060103@de.bosch.com>
-	<CAJe_ZhcY78ah81zsfwXxE=bMG4o6v9RwZV_DQyUj7g=d-1hR_w@mail.gmail.com>
-	<50068696.8070408@de.bosch.com>
-	<CAJe_Zhfmn4dUHk6xtudwCEurigvX64xce3VAozdjDdpSWSbRkA@mail.gmail.com>
-	<5006C40D.300@de.bosch.com>
-	<CAJe_Zhcyug17ZnKtmKnVhHT=Mm1PKdE68f21WWkUVtfCwNxSwg@mail.gmail.com>
-	<50094168.2090900@de.bosch.com>
+From: merez@codeaurora.org
+Subject: Re: [RESEND PATCH v10] mmc: support BKOPS feature for eMMC
+Date: Fri, 20 Jul 2012 04:58:23 -0700 (PDT)
+Message-ID: <0af2721026286ee4d196ead20848664e.squirrel@www.codeaurora.org>
+References: <500823C5.4010503@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:64349 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751559Ab2GTL4D (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jul 2012 07:56:03 -0400
-Received: by vcbfk26 with SMTP id fk26so2866360vcb.19
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Jul 2012 04:56:02 -0700 (PDT)
-In-Reply-To: <50094168.2090900@de.bosch.com>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:19772 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751821Ab2GTL6X (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jul 2012 07:58:23 -0400
+In-Reply-To: <500823C5.4010503@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dirk Behme <dirk.behme@de.bosch.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Wohlrab Knut (CM-AI/PJ-CA31)" <Knut.Wohlrab@de.bosch.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Arnd Bergmann <arnd@arndb.de>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Maya Erez <merez@codeaurora.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
 
-On 20 July 2012 17:00, Dirk Behme <dirk.behme@de.bosch.com> wrote:
-> On 19.07.2012 22:45, Jassi Brar wrote:
 
->>> This problem can occur on many devices with embedded MMC and removable
->>> SD,
->>> e.g. smart phones. So I think we should find an solution to define MMC
->>> scan
->>> order or device number/name in a device tree.
->>>
->> I assume your issue is that due to async nature of mmc scanning, the
->> eMMC is detected later than external card, despite being the probe for
->> eMMC's slot initiated first ?
->> If so, we can do by simply associating 'N' of 'mmcblkN' with the slot
->> index i.e, mmc_host.index (instead of mmc_blk_data.name_idx). Which is
->> always in the order of probe calling. And we don't need to modify, or
->> expect more of, DT for that.
+On Thu, July 19, 2012 8:12 am, Jaehoon Chung wrote:
+> +void mmc_start_bkops(struct mmc_card *card, bool from_exception)
+> +{
+> +        int err;
+> +        int timeout;
+> +        bool use_busy_signal;
+> +
+> +        BUG_ON(!card);
+> +
+> +        if (!card->ext_csd.bkops_en || mmc_card_doing_bkops(card) ||
+> +                !(card->host->caps2 & MMC_CAP2_BKOPS))
+> +                return;
+To my opinion, the host cannot decide not to support BKOPs if it is
+enabled by the card. In such a case, the card will expect the host to
+start the BKOPs and may get into performance degradation.
+I think the MMC_CAP2_BKOPS should be removed.
+Does everyone agree or do I miss something?
+
+> @@ -489,6 +568,53 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct
+> mmc_command *cmd, int retries
+>  EXPORT_SYMBOL(mmc_wait_for_cmd);
 >
+>  /**
+> + *	mmc_stop_bkops - stop ongoing BKOPS
+> + *	@card: MMC card to check BKOPS
+> + *
+> + *	Send HPI command to stop ongoing background operations,
+> + *	to allow rapid servicing of foreground operations,e.g. read/
+> + *	writes. Wait until the card comes out of the programming state
+> + *	to avoid errors in servicing read/write requests.
+> + */
+> +int mmc_stop_bkops(struct mmc_card *card)
+> +{
+> +	int err = 0;
+> +
+> +	BUG_ON(!card);
+> +	err = mmc_interrupt_hpi(card);
+> +
+> +	/*
+> +	 * if err is EINVAL, it's status that can't issue HPI.
+> +	 * it should complete the BKOPS.
+> +	 */
+> +	if (!err || (err == -EINVAL)) {
+> +		mmc_card_clr_doing_bkops(card);
+> +		err = 0;
+> +	}
+I don't understand the comment regarding the case where err equals
+-EINVAL. Can you please explain it?
+
+> @@ -392,13 +393,25 @@ int mmc_switch(struct mmc_card *card, u8 set, u8
+> index, u8 value,
+>                    (index << 16) |
+>                    (value << 8) |
+>                    set;
+> -        cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> +        cmd.flags = MMC_CMD_AC;
+> +        if (use_busy_signal)
+> +                cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
+> +        else
+> +                cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
+> +
+> +
+>          cmd.cmd_timeout_ms = timeout_ms;
 >
-> Do you mean something like
+>          err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
+>          if (err)
+>                  return err;
 >
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -1536,7 +1536,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct
-> mmc_card *card,
->          */
->
->         snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
-> -                "mmcblk%d%s", md->name_idx, subname ? subname : "");
-> +                "mmcblk%d%s", card->host->index, subname ? subname : "");
->
->         blk_queue_logical_block_size(md->queue.queue, 512);
->         set_capacity(md->disk, size);
->
-> ?
->
-Exactly!
-It seems too trivial and default for the author to have missed it, so
-I suspect I am overlooking something yet again. I would dig email
-archives to know more about that naming convention before dare submit
-a patch :)
+> +        /*
+> +         * No need to check card status in case of BKOPS LEVEL1 switch
+> +         */
+
+Change the comment to be general (don't mention BKOPs level 1), something
+like:
+No need to check card status in case of unblocking command.
+Also, 1 line comment should be /* comment */
+
+Thanks,
+Maya
+
+-- 
+Sent by consultant of Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+
