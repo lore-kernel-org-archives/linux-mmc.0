@@ -1,56 +1,74 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: RE: [PATCH v3 0/6] mmc: dw_mmc: add support for device tree based
- instantiation
-Date: Fri, 20 Jul 2012 07:47:34 +0900
-Message-ID: <195201cd6600$7cb089f0$76119dd0$%kim@samsung.com>
-References: <1342097668-25243-1-git-send-email-thomas.abraham@linaro.org>
- <5008279B.4000001@samsung.com>
- <CAJuYYwQBgpJ1wiS3fSDS2cMi6kanuO47rc8SmniAqjRPuBGJHg@mail.gmail.com>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH 1/1] mmc: host: enable OMAP DMA engine support for omap
+ hosts by default
+Date: Fri, 20 Jul 2012 14:58:10 +0530
+Message-ID: <CANfBPZ_rS230ziPFTDVUdad_oCHNapLKpdrKst_6RxLDqixm4A@mail.gmail.com>
+References: <20120718065951.GH6522@atomide.com> <CAMQu2gzX1d1FQtE3z=cwfA6daDgxJe6UFUaSY0PzGGLQOz_-ZQ@mail.gmail.com>
+ <20120718071039.GI6522@atomide.com> <CANfBPZ97onLov1TwXYaT5A6D5XzXxwpvk+=y09W_9FmcOne4Mw@mail.gmail.com>
+ <CAMQu2gy-U1WmgGOGZ+VyXjZmLem9TEWbq5kR8jzC0qXvqF-=BA@mail.gmail.com>
+ <CAAwP0s2Efuuc7vsX3bZuwz175zUjnmsOV87OcZ06p_eoe4T3Ug@mail.gmail.com>
+ <CAMQu2gxLwGACAT-r6=L9DKB=3fTNaEJ4woZOb4zttJ8qTTJmFA@mail.gmail.com>
+ <CAAwP0s2apfBHLKHtzvwqb2KPCMNhEXMe5R9792bO7FhfY5Y+uQ@mail.gmail.com>
+ <CANfBPZ_N4ZK5PgFQLHWMwsG60tb-FPTjeieTJ92rBUNgONAxAw@mail.gmail.com>
+ <CAMQu2gy+uXJFfmOwLX=YH41pr-N+T28-1wLo5rXEaj9MGffHPw@mail.gmail.com> <20120719113246.GN6522@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:10091 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751951Ab2GSWrf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jul 2012 18:47:35 -0400
-In-reply-to: <CAJuYYwQBgpJ1wiS3fSDS2cMi6kanuO47rc8SmniAqjRPuBGJHg@mail.gmail.com>
-Content-language: ko
+Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:47619 "EHLO
+	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751227Ab2GTJ2d (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jul 2012 05:28:33 -0400
+Received: by bkwj10 with SMTP id j10so3165798bkw.19
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Jul 2012 02:28:30 -0700 (PDT)
+In-Reply-To: <20120719113246.GN6522@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Thomas Abraham' <thomas.abraham@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, patches@linaro.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, Javier Martinez Canillas <martinez.javier@gmail.com>, Javier Martinez Canillas <javier@dowhile0.org>, Kevin Hilman <khilman@ti.com>, Russell King <linux@arm.linux.org.uk>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Thomas Abraham wrote:
-> 
-> On 19 July 2012 20:58, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> > Hi Thomas,
-> >
-> > I think not good that added the samsung specific code into dw_mmc-
-> pltfm.c
-> > How about separating to dw-mmc-exynos.c?
-> 
-> I am not sure of this. The only samsung specific code in
-> dw_mmc-pltfm.c file is the data for of_device_id instances. The clock
-> lookup added into this file in the 3rd patch does not cause any harm
-> on non-samsung SoC's which might not define those clocks (on clock
-> lookup failure, there are only warning printed, the driver's probe
-> does not fail.
-> 
-I agree with Thomas' opinion, in addition, the dw_mmc-pltfm.c file can
-support that, so adding dw-mmc-exynos.c is not needed now.
+On Thu, Jul 19, 2012 at 5:02 PM, Tony Lindgren <tony@atomide.com> wrote:
+> * Shilimkar, Santosh <santosh.shilimkar@ti.com> [120718 02:49]:
+>>
+>> "The patch simply make them depend on DMA_OMAP since DMA_OMAP
+>> will select DMA_ENGINE automatically"
+>>
+>> This won't be true if the DMA selection are not done
+>> at ARCH_OMAP level as discussed in this thread.
+>>
+>> Having said that, I think Russell and Tony need to
+>> take call on how this needs to be handled.
+>
+> As the DMA channels can run out, drivers should also work
+> without DMA. And building everything as modules should be
+> possible for the distro kernels.
+>
+> So I'd rather not have either select or depends and have
+> the drivers fixed.
+>
 
-> I would prefer not to add separate file for Exynos SoC's for now.
-> Splitting into different files will need to defined new callbacks
-> which I fell is not really required.
-> 
-Yes.
+Ok - I'll work on getting polling mode to work, but as you know it's
+not the mode to get the best performance out of the device.
+I see that you've also merged the changes to omap2plus_defconfig, which should
+get MMC working as before DMA Engine conversion.
 
-Thanks.
+There's a small patch needed to omap_hsmmc to return a non-zero error code
+during the probe error path. This will atleast make probe failure
+explicit when DMA
+is not available.
 
-Best regards,
-Kgene.
---
-Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-SW Solution Development Team, Samsung Electronics Co., Ltd.
+Let me know if you want me to post it separately as a patch..
 
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 2338703..892a046 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1773,7 +1773,7 @@ static int __devinit omap_hsmmc_probe(struct
+platform_device *pdev)
+        struct mmc_host *mmc;
+        struct omap_hsmmc_host *host = NULL;
+        struct resource *res;
+-       int ret, irq;
++       int ret = -ENXIO, irq;
+        const struct of_device_id *match;
+        dma_cap_mask_t mask;
+        unsigned tx_req, rx_req;
