@@ -1,137 +1,54 @@
-From: merez@codeaurora.org
-Subject: Re: [RESEND PATCH v10] mmc: support BKOPS feature for eMMC
-Date: Mon, 23 Jul 2012 02:14:52 -0700 (PDT)
-Message-ID: <c169f4ac2e5c9f2c40571b03f45b34ab.squirrel@www.codeaurora.org>
-References: <500823C5.4010503@samsung.com>
-    <0af2721026286ee4d196ead20848664e.squirrel@www.codeaurora.org>
-    <500CA8AA.5090704@samsung.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Disable low power mode if SDIO interrupts
+ are used
+Date: Mon, 23 Jul 2012 10:19:16 +0100
+Message-ID: <CAFbHwiQNY+R56pbRJBcR9+BcGmJn6bV=7Y0ELNBT1bqkQ6D+kA@mail.gmail.com>
+References: <1342808038-7558-1-git-send-email-dianders@chromium.org>
+	<CAFbHwiQh-Cwo4xo6-vCbvWsmz_cheZK1m3SnwkvSziunV1ShBA@mail.gmail.com>
+	<CAD=FV=WxcXFgf+0a1UfAPRWuvWptLm9RjSqW3tEZjyT0Z+4gkA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:41760 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751729Ab2GWJOw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jul 2012 05:14:52 -0400
-In-Reply-To: <500CA8AA.5090704@samsung.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:64821 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751041Ab2GWJTR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jul 2012 05:19:17 -0400
+In-Reply-To: <CAD=FV=WxcXFgf+0a1UfAPRWuvWptLm9RjSqW3tEZjyT0Z+4gkA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: merez@codeaurora.org, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+To: Doug Anderson <dianders@chromium.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, James Hogan <james.hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-kernel@vger.kernel.org
 
-Hi Jaehoon,
+On Mon, Jul 23, 2012 at 3:48 AM, Doug Anderson <dianders@chromium.org> wrote:
+> On Sat, Jul 21, 2012 at 3:40 AM, Will Newton <will.newton@gmail.com> wrote:
+>>>  static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+>>>  {
+>>>         struct dw_mci_slot *slot = mmc_priv(mmc);
+>>> @@ -871,6 +896,14 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+>>>         /* Enable/disable Slot Specific SDIO interrupt */
+>>>         int_mask = mci_readl(host, INTMASK);
+>>>         if (enb) {
+>>> +               /*
+>>> +                * Turn off low power mode if it was enabled.  This is a bit of
+>>> +                * a heavy operation and we disable / enable IRQs a lot, so
+>>> +                * we'll leave them disabled; they will get re-enabled again in
+>>> +                * dw_mci_setup_bus().
+>>> +                */
+>>> +               dw_mci_disable_low_power(mmc);
+>>> +
+>>
+>> Is it safe to just disable low power here or could the setting be
+>> overwritten in setup_bus?
+>
+> Very good question.  In my current setup I don't see setup_bus()
+> called during normal operation.  If it were, my kernel messages would
+> be constantly spammed with messages like:
+>     Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)
+>
+> ...and they're not.  Things may be different with different SDIO cards perhaps?
 
-I don't have additional comments.
+Yeah I think setup_bus should only setup the card clock once at
+startup but it may also be required on resume?
 
-Thanks,
-Maya
-On Sun, July 22, 2012 6:28 pm, Jaehoon Chung wrote:
-> Hi Maya,
->
-> On 07/20/2012 08:58 PM, merez@codeaurora.org wrote:
->>
->> On Thu, July 19, 2012 8:12 am, Jaehoon Chung wrote:
->>> +void mmc_start_bkops(struct mmc_card *card, bool from_exception)
->>> +{
->>> +        int err;
->>> +        int timeout;
->>> +        bool use_busy_signal;
->>> +
->>> +        BUG_ON(!card);
->>> +
->>> +        if (!card->ext_csd.bkops_en || mmc_card_doing_bkops(card) ||
->>> +                !(card->host->caps2 & MMC_CAP2_BKOPS))
->>> +                return;
->> To my opinion, the host cannot decide not to support BKOPs if it is
->> enabled by the card. In such a case, the card will expect the host to
->> start the BKOPs and may get into performance degradation.
->> I think the MMC_CAP2_BKOPS should be removed.
->> Does everyone agree or do I miss something?
-> Ok..i will remove capability. I saw that other people agreed your opinion.
->>
->>> @@ -489,6 +568,53 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct
->>> mmc_command *cmd, int retries
->>>  EXPORT_SYMBOL(mmc_wait_for_cmd);
->>>
->>>  /**
->>> + *	mmc_stop_bkops - stop ongoing BKOPS
->>> + *	@card: MMC card to check BKOPS
->>> + *
->>> + *	Send HPI command to stop ongoing background operations,
->>> + *	to allow rapid servicing of foreground operations,e.g. read/
->>> + *	writes. Wait until the card comes out of the programming state
->>> + *	to avoid errors in servicing read/write requests.
->>> + */
->>> +int mmc_stop_bkops(struct mmc_card *card)
->>> +{
->>> +	int err = 0;
->>> +
->>> +	BUG_ON(!card);
->>> +	err = mmc_interrupt_hpi(card);
->>> +
->>> +	/*
->>> +	 * if err is EINVAL, it's status that can't issue HPI.
->>> +	 * it should complete the BKOPS.
->>> +	 */
->>> +	if (!err || (err == -EINVAL)) {
->>> +		mmc_card_clr_doing_bkops(card);
->>> +		err = 0;
->>> +	}
->> I don't understand the comment regarding the case where err equals
->> -EINVAL. Can you please explain it?
-> When err is -EINVAL, already completed bkops.
-> After completed bkops, should be the trans status.
-> If my understanding is wrong, let me know.
->>
->>> @@ -392,13 +393,25 @@ int mmc_switch(struct mmc_card *card, u8 set, u8
->>> index, u8 value,
->>>                    (index << 16) |
->>>                    (value << 8) |
->>>                    set;
->>> -        cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
->>> +        cmd.flags = MMC_CMD_AC;
->>> +        if (use_busy_signal)
->>> +                cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
->>> +        else
->>> +                cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
->>> +
->>> +
->>>          cmd.cmd_timeout_ms = timeout_ms;
->>>
->>>          err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
->>>          if (err)
->>>                  return err;
->>>
->>> +        /*
->>> +         * No need to check card status in case of BKOPS LEVEL1 switch
->>> +         */
->>
->> Change the comment to be general (don't mention BKOPs level 1),
->> something
->> like:
->> No need to check card status in case of unblocking command.
->> Also, 1 line comment should be /* comment */
-> Will fix.
->
-> Any other comment? if you have other comment, let me know.
-> I will send the patch after fixing on today.
->
-> Best Regards,
-> Jaehoon Chung
->>
->> Thanks,
->> Maya
->>
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
-
--- 
-Sent by consultant of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-
+I should probably mention I have not tested this driver with any SDIO
+devices, although I believe there are other people out there who do!
