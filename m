@@ -1,68 +1,62 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v3 0/6] mmc: dw_mmc: add support for device tree based
- instantiation
-Date: Mon, 23 Jul 2012 10:57:35 +0900
-Message-ID: <500CAF8F.5040407@samsung.com>
-References: <1342097668-25243-1-git-send-email-thomas.abraham@linaro.org>
- <5008279B.4000001@samsung.com>
- <CAJuYYwQBgpJ1wiS3fSDS2cMi6kanuO47rc8SmniAqjRPuBGJHg@mail.gmail.com>
- <195201cd6600$7cb089f0$76119dd0$%kim@samsung.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Disable low power mode if SDIO interrupts
+ are used
+Date: Sun, 22 Jul 2012 19:48:34 -0700
+Message-ID: <CAD=FV=WxcXFgf+0a1UfAPRWuvWptLm9RjSqW3tEZjyT0Z+4gkA@mail.gmail.com>
+References: <1342808038-7558-1-git-send-email-dianders@chromium.org>
+	<CAFbHwiQh-Cwo4xo6-vCbvWsmz_cheZK1m3SnwkvSziunV1ShBA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:64288 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753404Ab2GWB5s (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 22 Jul 2012 21:57:48 -0400
-In-reply-to: <195201cd6600$7cb089f0$76119dd0$%kim@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAFbHwiQh-Cwo4xo6-vCbvWsmz_cheZK1m3SnwkvSziunV1ShBA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Will Newton <will.newton@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, James Hogan <james.hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kukjin Kim <kgene.kim@samsung.com>
-Cc: 'Thomas Abraham' <thomas.abraham@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, patches@linaro.org
 
-On 07/20/2012 07:47 AM, Kukjin Kim wrote:
-> Thomas Abraham wrote:
->>
->> On 19 July 2012 20:58, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>> Hi Thomas,
->>>
->>> I think not good that added the samsung specific code into dw_mmc-
->> pltfm.c
->>> How about separating to dw-mmc-exynos.c?
->>
->> I am not sure of this. The only samsung specific code in
->> dw_mmc-pltfm.c file is the data for of_device_id instances. The clock
->> lookup added into this file in the 3rd patch does not cause any harm
->> on non-samsung SoC's which might not define those clocks (on clock
->> lookup failure, there are only warning printed, the driver's probe
->> does not fail.
->>
-> I agree with Thomas' opinion, in addition, the dw_mmc-pltfm.c file can
-> support that, so adding dw-mmc-exynos.c is not needed now.
-> 
->> I would prefer not to add separate file for Exynos SoC's for now.
->> Splitting into different files will need to defined new callbacks
->> which I fell is not really required.
-Then where is the callback function located?
+On Sat, Jul 21, 2012 at 3:40 AM, Will Newton <will.newton@gmail.com> wrote:
+>>  static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+>>  {
+>>         struct dw_mci_slot *slot = mmc_priv(mmc);
+>> @@ -871,6 +896,14 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+>>         /* Enable/disable Slot Specific SDIO interrupt */
+>>         int_mask = mci_readl(host, INTMASK);
+>>         if (enb) {
+>> +               /*
+>> +                * Turn off low power mode if it was enabled.  This is a bit of
+>> +                * a heavy operation and we disable / enable IRQs a lot, so
+>> +                * we'll leave them disabled; they will get re-enabled again in
+>> +                * dw_mci_setup_bus().
+>> +                */
+>> +               dw_mci_disable_low_power(mmc);
+>> +
+>
+> Is it safe to just disable low power here or could the setting be
+> overwritten in setup_bus?
 
-Best Regards,
-Jaehoon Chung
->>
-> Yes.
-> 
-> Thanks.
-> 
-> Best regards,
-> Kgene.
-> --
-> Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-> SW Solution Development Team, Samsung Electronics Co., Ltd.
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Very good question.  In my current setup I don't see setup_bus()
+called during normal operation.  If it were, my kernel messages would
+be constantly spammed with messages like:
+    Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)
 
+...and they're not.  Things may be different with different SDIO cards perhaps?
 
+In any case, it's pretty easy for me to spin the patch so that we
+don't clobber the low power bit in setup_bus() if SDIO interrupts are
+enabled.  That makes a lot of sense, though I'd need to make sure that
+low power mode does eventually get set again if someone ejects the
+SDIO card and puts in a non-SDIO card.
+
+I'll spin the patch tomorrow when I can test it properly and also
+address some commenting concerns another engineer at chromium.org had.
+
+It still feels to me like there ought to be a better place to put this
+code.  I'd rather disable low power mode as soon as we detect an SDIO
+card.  I spent time searching and the best I could find was
+dw_mci_enable_sdio_irq(), but I'm all ears if someone has a better
+idea!  :)  Certainly this code needs to go somewhere if we want SDIO
+interrupts to be reliable.
+
+Thanks for your feeback!  :)
+
+-Doug
