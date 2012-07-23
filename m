@@ -1,39 +1,88 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH 12/25] mmc/omap_hsmmc: add a const qualifier
-Date: Mon, 23 Jul 2012 21:11:40 +0530
-Message-ID: <CANfBPZ-5Jqy3CmUg7Oqt58ZQNa1LwwfSO6BAXk7Zxi0gpSKe+w@mail.gmail.com>
-References: <1343034810-3386-1-git-send-email-u.kleine-koenig@pengutronix.de> <1343034810-3386-13-git-send-email-u.kleine-koenig@pengutronix.de>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Disable low power mode if SDIO interrupts
+ are used
+Date: Mon, 23 Jul 2012 10:00:59 -0700
+Message-ID: <CAD=FV=XuXUe1Jyd_urCzmS5+1vv7iuNTXYr23XYZp+MnTq1HGg@mail.gmail.com>
+References: <1342808038-7558-1-git-send-email-dianders@chromium.org>
+	<CAFbHwiQh-Cwo4xo6-vCbvWsmz_cheZK1m3SnwkvSziunV1ShBA@mail.gmail.com>
+	<CAD=FV=WxcXFgf+0a1UfAPRWuvWptLm9RjSqW3tEZjyT0Z+4gkA@mail.gmail.com>
+	<CAFbHwiQNY+R56pbRJBcR9+BcGmJn6bV=7Y0ELNBT1bqkQ6D+kA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1343034810-3386-13-git-send-email-u.kleine-koenig@pengutronix.de>
-Sender: linux-omap-owner@vger.kernel.org
-To: =?ISO-8859-1?Q?Uwe_Kleine=2DK=F6nig?= <u.kleine-koenig@pengutronix.de>
-Cc: Grant Likely <grant.likely@secretlab.ca>, Arnd Bergmann <arnd@arndb.de>, Rob Herring <rob.herring@calxeda.com>, Kevin Hilman <khilman@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:43508 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753755Ab2GWRBA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jul 2012 13:01:00 -0400
+Received: by qcro28 with SMTP id o28so3368045qcr.19
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Jul 2012 10:00:59 -0700 (PDT)
+In-Reply-To: <CAFbHwiQNY+R56pbRJBcR9+BcGmJn6bV=7Y0ELNBT1bqkQ6D+kA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Will Newton <will.newton@gmail.com>, ki0351.kim@samsung.com
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, James Hogan <james.hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-kernel@vger.kernel.org, Grant Grundler <grundler@chromium.org>, Olof Johansson <olofj@chromium.org>, shashidharh@vayavyalabs.com
 
-On Mon, Jul 23, 2012 at 2:43 PM, Uwe Kleine-K=F6nig
-<u.kleine-koenig@pengutronix.de> wrote:
-> This prepares *of_device_id.data becoming const. Without this change
-> the following warning would occur:
+On Mon, Jul 23, 2012 at 2:19 AM, Will Newton <will.newton@gmail.com> wrote:
+>> Very good question.  In my current setup I don't see setup_bus()
+>> called during normal operation.  If it were, my kernel messages would
+>> be constantly spammed with messages like:
+>>     Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)
+>>
+>> ...and they're not.  Things may be different with different SDIO cards perhaps?
 >
->         drivers/mmc/host/omap_hsmmc.c: In function 'omap_hsmmc_probe'=
-:
->         drivers/mmc/host/omap_hsmmc.c:1808: warning: initialization d=
-iscards qualifiers from pointer target type
->
-> Signed-off-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
+> Yeah I think setup_bus should only setup the card clock once at
+> startup but it may also be required on resume?
 
-Acked-by: Venkatraman S <svenkatr@ti.com>
+We just got suspend/resume working yesterday, so I can now test this!  :)
+
+With our current driver (which had some modifications to allow for
+MMC_PM_KEEP_POWER that I assume will be posted before too long), I did
+some testing with printk.  On my system I found that
+dw_mci_setup_bus() is always called with SDIO interrupts turned off,
+even during the resume path.  That means my previous posted patch is
+OK.
+
+I also looked more closely at the resume path.  I see this in the
+current upstream code in the resume function:
+
+	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
+
+This will clobber SDIO interrupts.  That means that if we have any
+hope of SDIO interrupts working, someone will need to call
+dw_mci_enable_sdio_irq() which will re-disable low power mode.  This
+also points to my previous patch being OK.
 
 
-> ---
->  drivers/mmc/host/omap_hsmmc.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+...but putting the extra check in setup_bus() still doesn't hurt,
+though, so I'll post that shortly.  I have looked into the SDIO code
+and see that when the sdio_irq_thread exits it always disables SDIO
+interrupts.  That means that I can still rely on setup_bus to properly
+re-enable low power mode when it's called after an SDIO module is
+removed.  :)
+
+
+> I should probably mention I have not tested this driver with any SDIO
+> devices, although I believe there are other people out there who do!
+
+Agreed.  Given that I've seen recent patches (authored May 14th 2012,
+for instance) fixing major SDIO issues with this driver, I'd conclude:
+
+* Use of this driver for SDIO is very new and there may still be bugs.
+
+* If others are using SDIO interrupts and haven't seen this issue,
+they've got something different about their system.  Perhaps the SDIO
+module they're using behaves in a way that SDIO interrupts always come
+in at the same time as some other source?  ...or maybe they do some
+type of periodic polling and are thus OK with missing some interrupts?
+ The exynos manual that includes the dw mmc controller is very clear
+that you can't use low power mode and SDIO interrupts and it was
+definitely failing for us.
+
+I've added the author of the most recent SDIO patch to this email
+thread.  Sorry for missing that before.  Kyoungil: do you have any
+comments on this?
+
+
+-Doug
