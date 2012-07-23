@@ -1,115 +1,275 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH v2] mmc: dw_mmc: Disable low power mode if SDIO interrupts are used
-Date: Mon, 23 Jul 2012 10:02:35 -0700
-Message-ID: <1343062955-24516-1-git-send-email-dianders@chromium.org>
-References: <CAD=FV=XuXUe1Jyd_urCzmS5+1vv7iuNTXYr23XYZp+MnTq1HGg@mail.gmail.com>
+From: philipspatches@gmail.com
+Subject: [PATCH] sdhci: Add regulator support for vccq (voltage regualor)
+Date: Mon, 23 Jul 2012 15:56:23 -0700
+Message-ID: <1343084183-6070-1-git-send-email-prakity@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f202.google.com ([209.85.212.202]:46630 "EHLO
-	mail-wi0-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753296Ab2GWRCn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jul 2012 13:02:43 -0400
-Received: by wibhr14 with SMTP id hr14so169462wib.1
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Jul 2012 10:02:41 -0700 (PDT)
-In-Reply-To: <CAD=FV=XuXUe1Jyd_urCzmS5+1vv7iuNTXYr23XYZp+MnTq1HGg@mail.gmail.com>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:55941 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752055Ab2GWW43 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jul 2012 18:56:29 -0400
+Received: by qadb17 with SMTP id b17so1437374qad.19
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Jul 2012 15:56:28 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-kernel@vger.kernel.org, Grant Grundler <grundler@chromium.org>, Olof Johansson <olofj@chromium.org>, shashidharh@vayavyalabs.com, ki0351.kim@samsung.com, Doug Anderson <dianders@chromium.org>
+To: cjb@laptop.org, linux-mmc@vger.kernel.org
+Cc: Philip Rakity <prakity@marvell.com>
 
-The documentation for the dw_mmc part says that the low power
-mode should normally only be set for MMC and SD memory and should
-be turned off for SDIO cards that need interrupts detected.
+From: Philip Rakity <prakity@marvell.com>
 
-The best place I could find to do this is when the SDIO interrupt
-was first enabled.  I rely on the fact that dw_mci_setup_bus()
-will be called when it's time to reenable.
+On some systems the host controller does not support vccq
+signaling.  This is supplied by a dedicated regulator (vqmmc).
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
+Add support for this regulator.
+
+Signed-off-by: Philip Rakity <prakity@marvell.com>
 ---
-Changes in v2:
-- Commenting fixes requested by Grant Grundler.
-- Be extra certain that we don't re-turn on the low power mode in
-  CLKENA in dw_mci_setup_bus() if SDIO interrupts are enabled.
-  There are no known instances of this happening but it's good to be safe.
+ drivers/mmc/host/sdhci.c  |  179 +++++++++++++++++++++++++++++----------------
+ include/linux/mmc/sdhci.h |    3 +-
+ 2 files changed, 117 insertions(+), 65 deletions(-)
 
- drivers/mmc/host/dw_mmc.c |   43 ++++++++++++++++++++++++++++++++++++++++---
- 1 files changed, 40 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 72dc3cd..0ab1771 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -627,6 +627,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
- {
- 	struct dw_mci *host = slot->host;
- 	u32 div;
-+	u32 clk_en_a;
- 
- 	if (slot->clock != host->current_speed) {
- 		div = host->bus_hz / slot->clock;
-@@ -659,9 +660,11 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
- 		mci_send_cmd(slot,
- 			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
- 
--		/* enable clock */
--		mci_writel(host, CLKENA, ((SDMMC_CLKEN_ENABLE |
--			   SDMMC_CLKEN_LOW_PWR) << slot->id));
-+		/* enable clock; only low power if no SDIO */
-+		clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
-+		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->id)))
-+			clk_en_a |= SDMMC_CLKEN_LOW_PWR << slot->id;
-+		mci_writel(host, CLKENA, clk_en_a);
- 
- 		/* inform CIU */
- 		mci_send_cmd(slot,
-@@ -862,6 +865,32 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
- 	return present;
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9a11dc3..ac50d35 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1597,57 +1597,64 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ 	spin_unlock_irqrestore(&host->lock, flags);
  }
  
-+/*
-+ * Disable lower power mode.
-+ *
-+ * Low power mode will stop the card clock when idle.  According to
-+ * documentation (Exynos 5250 User's Manual 0.04, description of
-+ * CLKENA register) we should disable low power mode for SDIO cards
-+ * if we need interrupts to work.
-+ *
-+ * This function is fast if the power mode is already disabled.
-+ */
-+static void dw_mci_disable_low_power(struct mmc_host *mmc)
-+{
-+	struct dw_mci_slot *slot = mmc_priv(mmc);
-+	struct dw_mci *host = slot->host;
-+	u32 clk_en_a;
-+	const u32 clken_low_pwr = SDMMC_CLKEN_LOW_PWR << slot->id;
-+
-+	clk_en_a = mci_readl(host, CLKENA);
-+
-+	if (clk_en_a & clken_low_pwr) {
-+		mci_writel(host, CLKENA, clk_en_a & ~clken_low_pwr);
-+		mci_send_cmd(slot, SDMMC_CMD_UPD_CLK |
-+			     SDMMC_CMD_PRV_DAT_WAIT, 0);
+-static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+-						struct mmc_ios *ios)
++static int sdhci_do_3_3v_signal_voltage_switch(struct sdhci_host *host,
++						u16 ctrl)
+ {
+-	u8 pwr;
+-	u16 clk, ctrl;
+-	u32 present_state;
+-
+-	/*
+-	 * Signal Voltage Switching is only applicable for Host Controllers
+-	 * v3.00 and above.
+-	 */
+-	if (host->version < SDHCI_SPEC_300)
+-		return 0;
+-
+-	/*
+-	 * We first check whether the request is to set signalling voltage
+-	 * to 3.3V. If so, we change the voltage to 3.3V and return quickly.
+-	 */
+-	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+-	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
+-		/* Set 1.8V Signal Enable in the Host Control2 register to 0 */
+-		ctrl &= ~SDHCI_CTRL_VDD_180;
+-		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
++	int ret;
+ 
+-		/* Wait for 5ms */
+-		usleep_range(5000, 5500);
++	/* Set 1.8V Signal Enable in the Host Control2 register to 0 */
++	ctrl &= ~SDHCI_CTRL_VDD_180;
++	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 
+-		/* 3.3V regulator output should be stable within 5 ms */
+-		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+-		if (!(ctrl & SDHCI_CTRL_VDD_180))
+-			return 0;
+-		else {
++	if (host->vqmmc) {
++		ret = regulator_set_voltage(host->vqmmc,
++			3300000, 3300000);
++		if (ret) {
+ 			pr_info(DRIVER_NAME ": Switching to 3.3V "
+ 				"signalling voltage failed\n");
+ 			return -EIO;
+ 		}
+-	} else if (!(ctrl & SDHCI_CTRL_VDD_180) &&
+-		  (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180)) {
+-		/* Stop SDCLK */
+-		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+-		clk &= ~SDHCI_CLOCK_CARD_EN;
+-		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
 +	}
++	/* Wait for 5ms */
++	usleep_range(5000, 5500);
+ 
+-		/* Check whether DAT[3:0] is 0000 */
+-		present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
+-		if (!((present_state & SDHCI_DATA_LVL_MASK) >>
+-		       SDHCI_DATA_LVL_SHIFT)) {
+-			/*
+-			 * Enable 1.8V Signal Enable in the Host Control2
+-			 * register
+-			 */
++	/* 3.3V regulator output should be stable within 5 ms */
++	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++	if (!(ctrl & SDHCI_CTRL_VDD_180))
++		return 0;
++
++	pr_info(DRIVER_NAME ": Switching to 3.3V signalling voltage failed\n");
++	return -EIO;
 +}
 +
- static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
- {
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
-@@ -871,6 +900,14 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
- 	/* Enable/disable Slot Specific SDIO interrupt */
- 	int_mask = mci_readl(host, INTMASK);
- 	if (enb) {
-+		/*
-+		 * Turn off low power mode if it was enabled.  This is a bit of
-+		 * a heavy operation and we disable / enable IRQs a lot, so
-+		 * we'll leave low power mode disabled and it will get
-+		 * re-enabled again in dw_mci_setup_bus().
-+		 */
-+		dw_mci_disable_low_power(mmc);
++static int sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
++						u16 ctrl)
++{
++	u8 pwr;
++	u16 clk;
++	u32 present_state;
++	int ret;
 +
- 		mci_writel(host, INTMASK,
- 			   (int_mask | SDMMC_INT_SDIO(slot->id)));
- 	} else {
++	/* Stop SDCLK */
++	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++	clk &= ~SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++	/* Check whether DAT[3:0] is 0000 */
++	present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
++	if (!((present_state & SDHCI_DATA_LVL_MASK) >>
++	       SDHCI_DATA_LVL_SHIFT)) {
++		/*
++		 * Enable 1.8V Signal Enable in the Host Control2
++		 * register
++		 */
++		if (host->vqmmc)
++			ret = regulator_set_voltage(host->vqmmc,
++				1800000, 1800000);
++		else
++			ret = 0;
++
++		if (!ret) {
+ 			ctrl |= SDHCI_CTRL_VDD_180;
+ 			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 
+@@ -1656,7 +1663,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+ 
+ 			ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 			if (ctrl & SDHCI_CTRL_VDD_180) {
+-				/* Provide SDCLK again and wait for 1ms*/
++				/* Provide SDCLK again and wait for 1ms */
+ 				clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+ 				clk |= SDHCI_CLOCK_CARD_EN;
+ 				sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+@@ -1673,29 +1680,54 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+ 					return 0;
+ 			}
+ 		}
++	}
+ 
+-		/*
+-		 * If we are here, that means the switch to 1.8V signaling
+-		 * failed. We power cycle the card, and retry initialization
+-		 * sequence by setting S18R to 0.
+-		 */
+-		pwr = sdhci_readb(host, SDHCI_POWER_CONTROL);
+-		pwr &= ~SDHCI_POWER_ON;
+-		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+-		if (host->vmmc)
+-			regulator_disable(host->vmmc);
++	/*
++	 * If we are here, that means the switch to 1.8V signaling
++	 * failed. We power cycle the card, and retry initialization
++	 * sequence by setting S18R to 0.
++	 */
++	pwr = sdhci_readb(host, SDHCI_POWER_CONTROL);
++	pwr &= ~SDHCI_POWER_ON;
++	sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
++	if (host->vmmc)
++		regulator_disable(host->vmmc);
+ 
+-		/* Wait for 1ms as per the spec */
+-		usleep_range(1000, 1500);
+-		pwr |= SDHCI_POWER_ON;
+-		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+-		if (host->vmmc)
+-			regulator_enable(host->vmmc);
++	/* Wait for 1ms as per the spec */
++	usleep_range(1000, 1500);
++	pwr |= SDHCI_POWER_ON;
++	sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
++	if (host->vmmc)
++		regulator_enable(host->vmmc);
+ 
+-		pr_info(DRIVER_NAME ": Switching to 1.8V signalling "
+-			"voltage failed, retrying with S18R set to 0\n");
+-		return -EAGAIN;
+-	} else
++	pr_info(DRIVER_NAME ": Switching to 1.8V signalling "
++		"voltage failed, retrying with S18R set to 0\n");
++	return -EAGAIN;
++}
++
++static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
++						struct mmc_ios *ios)
++{
++	u16 ctrl;
++
++	/*
++	 * Signal Voltage Switching is only applicable for Host Controllers
++	 * v3.00 and above.
++	 */
++	if (host->version < SDHCI_SPEC_300)
++		return 0;
++
++	/*
++	 * We first check whether the request is to set signalling voltage
++	 * to 3.3V. If so, we change the voltage to 3.3V and return quickly.
++	 */
++	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)
++		return sdhci_do_3_3v_signal_voltage_switch(host, ctrl);
++	else if (!(ctrl & SDHCI_CTRL_VDD_180) &&
++			(ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180))
++		return sdhci_do_1_8v_signal_voltage_switch(host, ctrl);
++	else
+ 		/* No signal voltage switch required */
+ 		return 0;
+ }
+@@ -2802,6 +2834,20 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
+ 		mmc->caps |= MMC_CAP_NEEDS_POLL;
+ 
++	/* if vqmmc regulator and no 1.8V signaling no UHS */
++
++	host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
++	if (IS_ERR(host->vqmmc)) {
++		pr_info("%s: no vqmmc regulator found\n",
++			mmc_hostname(mmc));
++		host->vqmmc = NULL;
++	} else if (regulator_is_supported_voltage(host->vqmmc,
++			1800000, 1800000))
++		regulator_enable(host->vqmmc);
++	else
++		caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
++		       SDHCI_SUPPORT_DDR50);
++
+ 	/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
+ 	if (caps[1] & (SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+ 		       SDHCI_SUPPORT_DDR50))
+@@ -3122,6 +3168,11 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 	if (host->vmmc)
+ 		regulator_put(host->vmmc);
+ 
++	if (host->vqmmc) {
++		regulator_disable(host->vqmmc);
++		regulator_put(host->vqmmc);
++	}
++
+ 	kfree(host->adma_desc);
+ 	kfree(host->align_buffer);
+ 
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index ac83b10..fa8529a 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -97,7 +97,8 @@ struct sdhci_host {
+ 
+ 	const struct sdhci_ops *ops;	/* Low level hw interface */
+ 
+-	struct regulator *vmmc;	/* Power regulator */
++	struct regulator *vmmc;		/* Power regulator (vmmc) */
++	struct regulator *vqmmc;	/* Signaling regulator (vccq) */
+ 
+ 	/* Internal data */
+ 	struct mmc_host *mmc;	/* MMC structure */
 -- 
-1.7.7.3
+1.7.0.4
 
