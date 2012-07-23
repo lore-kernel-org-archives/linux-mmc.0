@@ -1,210 +1,126 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [GIT PULL] MMC updates for 3.6-rc1
-Date: Sun, 22 Jul 2012 17:19:24 -0400
-Message-ID: <87394j1okj.fsf@octavius.laptop.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RESEND PATCH v10] mmc: support BKOPS feature for eMMC
+Date: Mon, 23 Jul 2012 10:28:10 +0900
+Message-ID: <500CA8AA.5090704@samsung.com>
+References: <500823C5.4010503@samsung.com>
+ <0af2721026286ee4d196ead20848664e.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41837 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752628Ab2GVVTa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 22 Jul 2012 17:19:30 -0400
+Received: from mailout1.samsung.com ([203.254.224.24]:34260 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752809Ab2GWB2X (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 22 Jul 2012 21:28:23 -0400
+Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M7L00B04AR9S6D0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 23 Jul 2012 10:28:22 +0900 (KST)
+Received: from [10.90.51.55] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0M7L00473AR8WQ90@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 23 Jul 2012 10:28:21 +0900 (KST)
+In-reply-to: <0af2721026286ee4d196ead20848664e.squirrel@www.codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: merez@codeaurora.org
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
 
-Hi Linus,
+Hi Maya,
 
-Please pull from:
+On 07/20/2012 08:58 PM, merez@codeaurora.org wrote:
+> 
+> On Thu, July 19, 2012 8:12 am, Jaehoon Chung wrote:
+>> +void mmc_start_bkops(struct mmc_card *card, bool from_exception)
+>> +{
+>> +        int err;
+>> +        int timeout;
+>> +        bool use_busy_signal;
+>> +
+>> +        BUG_ON(!card);
+>> +
+>> +        if (!card->ext_csd.bkops_en || mmc_card_doing_bkops(card) ||
+>> +                !(card->host->caps2 & MMC_CAP2_BKOPS))
+>> +                return;
+> To my opinion, the host cannot decide not to support BKOPs if it is
+> enabled by the card. In such a case, the card will expect the host to
+> start the BKOPs and may get into performance degradation.
+> I think the MMC_CAP2_BKOPS should be removed.
+> Does everyone agree or do I miss something?
+Ok..i will remove capability. I saw that other people agreed your opinion.
+> 
+>> @@ -489,6 +568,53 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct
+>> mmc_command *cmd, int retries
+>>  EXPORT_SYMBOL(mmc_wait_for_cmd);
+>>
+>>  /**
+>> + *	mmc_stop_bkops - stop ongoing BKOPS
+>> + *	@card: MMC card to check BKOPS
+>> + *
+>> + *	Send HPI command to stop ongoing background operations,
+>> + *	to allow rapid servicing of foreground operations,e.g. read/
+>> + *	writes. Wait until the card comes out of the programming state
+>> + *	to avoid errors in servicing read/write requests.
+>> + */
+>> +int mmc_stop_bkops(struct mmc_card *card)
+>> +{
+>> +	int err = 0;
+>> +
+>> +	BUG_ON(!card);
+>> +	err = mmc_interrupt_hpi(card);
+>> +
+>> +	/*
+>> +	 * if err is EINVAL, it's status that can't issue HPI.
+>> +	 * it should complete the BKOPS.
+>> +	 */
+>> +	if (!err || (err == -EINVAL)) {
+>> +		mmc_card_clr_doing_bkops(card);
+>> +		err = 0;
+>> +	}
+> I don't understand the comment regarding the case where err equals
+> -EINVAL. Can you please explain it?
+When err is -EINVAL, already completed bkops.
+After completed bkops, should be the trans status.
+If my understanding is wrong, let me know.
+> 
+>> @@ -392,13 +393,25 @@ int mmc_switch(struct mmc_card *card, u8 set, u8
+>> index, u8 value,
+>>                    (index << 16) |
+>>                    (value << 8) |
+>>                    set;
+>> -        cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+>> +        cmd.flags = MMC_CMD_AC;
+>> +        if (use_busy_signal)
+>> +                cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
+>> +        else
+>> +                cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
+>> +
+>> +
+>>          cmd.cmd_timeout_ms = timeout_ms;
+>>
+>>          err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
+>>          if (err)
+>>                  return err;
+>>
+>> +        /*
+>> +         * No need to check card status in case of BKOPS LEVEL1 switch
+>> +         */
+> 
+> Change the comment to be general (don't mention BKOPs level 1), something
+> like:
+> No need to check card status in case of unblocking command.
+> Also, 1 line comment should be /* comment */
+Will fix.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-merge-for-3.6-rc1
+Any other comment? if you have other comment, let me know.
+I will send the patch after fixing on today.
 
-to receive the MMC merge for 3.6.  The patches have been tested in
-linux-next, and there are currently no merge conflicts.  Thanks.
+Best Regards,
+Jaehoon Chung
+> 
+> Thanks,
+> Maya
+> 
 
 
-The following changes since commit 623b51fc8642fd3c795fa9903be3adaa537ad9c5:
-
-  mmc: cd-gpio: pass IRQF_ONESHOT to request_threaded_irq() (2012-07-10 23:03:57 -0400)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-merge-for-3.6-rc1
-
-for you to fetch changes up to 30b87c60e9cbfcdfce22aa652fc1e5d061fcb733:
-
-  mmc: sdhci-dove: Prepare for common clock framework (2012-07-22 16:42:48 -0400)
-
-----------------------------------------------------------------
-MMC highlights for 3.6:
-
-Core:
- - Rename cd-gpio to slot-gpio and extend it to support more
-   slot GPIO functions, such as write-protect.
- - Add a function to get regulators (Vdd and Vccq) for a host.
-
-Drivers:
- - sdhci-pxav2, sdhci-pxav3: Add device tree support.
- - sdhi: Add device tree support.
- - sh_mmcif: Add support for regulators, device tree, slot-gpio.
- - tmio: Add regulator support, use slot-gpio.
-
-----------------------------------------------------------------
-Aaron Lu (6):
-      mmc: sdhci: fix incorrect command used in tuning
-      mmc: sdhci: restore host settings when card is removed
-      mmc: core: Simplify and fix for SD switch processing
-      mmc: sdhci: Introduce new flag SDHCI_USING_RETUNING_TIMER
-      mmc: sd: Fix sd current limit setting
-      mmc: core: reset signal voltage on power up
-
-Alan Cox (1):
-      mmc: core: correct invalid error checking
-
-Chris Ball (4):
-      mmc: core: Export regulator_* functions as GPL
-      mmc: dt: Deduplicate binding docs by referencing mmc.txt
-      mmc: dt: Add reg/interrupts to mmc.txt for clarity.
-      mmc: sdhci-pxa: Add device tree support
-
-Daniel Drake (2):
-      mmc: sdhci-pci: CaFe has broken card detection
-      mmc: sdhci: poll for card even when card is logically unremovable
-
-Girish K S (1):
-      mmc: dw_mmc: Add check for IDMAC configuration
-
-Guennadi Liakhovetski (26):
-      mmc: tmio: use MMC opcode defines instead of numbers
-      mmc: extend and rename cd-gpio helpers to handle more slot GPIO functions
-      mmc: add a function to get regulators, supplying card's power
-      mmc: tmio: don't needlessly enable interrupts during probing
-      mmc: tmio: add callbacks to enable-update and disable the interface clock
-      mmc: sdhi: implement tmio-mmc clock enable-update and disable callbacks
-      mmc: tmio: add regulator support
-      mmc: sdhi: do not install dummy callbacks
-      mmc: tmio: remove a duplicated comment line
-      mmc: sh_mmcif: simplify and use meaningful label names in error-handling
-      mmc: sh_mmcif: fix clock management
-      mmc: sh_mmcif: re-read the clock frequency every time it is turned on
-      mmc: sh_mmcif: remove redundant .down_pwr() callback
-      mmc: sh_mmcif: add regulator support
-      mmc: core: use a more generic name for slot function types and fields
-      mmc: add two capability flags for CD and WP signal polarity
-      mmc: add CD GPIO polling support to slot functions
-      mmc: core: convert slot functions to managed allocation
-      mmc: core: add WP pin handler to slot functions
-      mmc: tmio: support caps2 flags
-      mmc: sh_mobile_sdhi: support caps2 flags
-      mmc: tmio: use generic GPIO CD and WP handlers
-      mmc: sdhi: add OF support, make platform data optional
-      mmc: sh-mmcif: add OF support, make platform data optional
-      mmc: prohibit card detection when host is not ready
-      mmc: sh_mmcif: support generic card-detection
-
-Jonathan Kliegman (1):
-      mmc: dw_mmc: Fix null dma_ops access when use_dma is false
-
-Kevin Hilman (1):
-      mmc: omap_hsmmc: ensure probe returns error upon resource failure
-
-Laurent Pinchart (2):
-      mmc: sh_mmcif: Support MMC_SLEEP_AWAKE command
-      mmc: tmio: Don't access hardware registers after stopping clocks
-
-Liu Chuansheng (1):
-      mmc: sdio: Change pr_warning to pr_warn_ratelimited
-
-Marek Vasut (1):
-      mmc: mxs-mmc: Add wp-inverted property
-
-Mark Brown (1):
-      mmc: sdhci: Report failure reasons for all cases in sdhci_add_host()
-
-Nicolas Ferre (2):
-      mmc: atmel-mci: fix incorrect setting of host->data to NULL
-      mmc: atmel-mci: modify CLKDIV displaying in debugfs
-
-Philip Rakity (5):
-      mmc: sdhci: if MAX_CURRENT is 0, try getting current from regulator
-      mmc: sdhci: only set 200mA support for 1.8v if 200mA is available
-      mmc: only support voltage (vdd) that regulator agrees with
-      mmc: sdhci: Allow caps[1] to be set via SDHCI_QUIRK_MISSING_CAPS
-      mmc: sdhci: When a UHS switch fails, cycle power if regulator is used
-
-Rajendra Nayak (1):
-      mmc: omap_hsmmc: add clk_prepare and clk_unprepare
-
-Sebastian Hesselbarth (2):
-      mmc: sdhci-dove: Add SDHCI_QUIRK_NO_HISPD_BIT
-      mmc: sdhci-dove: Prepare for common clock framework
-
-Shawn Guo (1):
-      mmc: mxs-mmc: enable regulator for mmc slot
-
-Subhash Jadavani (1):
-      mmc: block: replace __blk_end_request() with blk_end_request()
-
-Sylwester Nawrocki (1):
-      mmc: s3cmci: Convert s3cmci driver to gpiolib API
-
-Venkatraman S (1):
-      mmc: core: Fix the HPI execution sequence
-
-Wilson Callan (1):
-      mmc: esdhc: Fix DMA_MASK to not break mx25 DMA access
-
- .../devicetree/bindings/mmc/fsl-esdhc.txt          |   25 +--
- .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |    8 +-
- .../devicetree/bindings/mmc/mmc-spi-slot.txt       |    8 +-
- Documentation/devicetree/bindings/mmc/mmc.txt      |   10 +-
- Documentation/devicetree/bindings/mmc/mmci.txt     |   12 +-
- Documentation/devicetree/bindings/mmc/mxs-mmc.txt  |    8 +-
- .../devicetree/bindings/mmc/nvidia-sdhci.txt       |    8 +-
- .../devicetree/bindings/mmc/sdhci-pxa.txt          |   21 +++
- .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    7 +-
- drivers/mmc/card/block.c                           |   36 +---
- drivers/mmc/core/Makefile                          |    2 +-
- drivers/mmc/core/cd-gpio.c                         |   83 ---------
- drivers/mmc/core/core.c                            |   90 +++++++---
- drivers/mmc/core/host.c                            |    6 +
- drivers/mmc/core/mmc.c                             |    3 -
- drivers/mmc/core/mmc_ops.c                         |    1 -
- drivers/mmc/core/sd.c                              |  171 ++++++++----------
- drivers/mmc/core/sdio.c                            |    7 -
- drivers/mmc/core/sdio_cis.c                        |    2 +-
- drivers/mmc/core/slot-gpio.c                       |  188 ++++++++++++++++++++
- drivers/mmc/host/atmel-mci.c                       |   14 +-
- drivers/mmc/host/dw_mmc.c                          |   17 +-
- drivers/mmc/host/mxs-mmc.c                         |   26 ++-
- drivers/mmc/host/omap_hsmmc.c                      |   16 +-
- drivers/mmc/host/s3cmci.c                          |   10 +-
- drivers/mmc/host/sdhci-dove.c                      |   51 +++++-
- drivers/mmc/host/sdhci-esdhc-imx.c                 |    9 +-
- drivers/mmc/host/sdhci-pci.c                       |    1 +
- drivers/mmc/host/sdhci-pxav2.c                     |   54 ++++++
- drivers/mmc/host/sdhci-pxav3.c                     |   52 ++++++
- drivers/mmc/host/sdhci.c                           |  144 +++++++++------
- drivers/mmc/host/sdhci.h                           |    1 +
- drivers/mmc/host/sh_mmcif.c                        |  185 ++++++++++++-------
- drivers/mmc/host/sh_mobile_sdhi.c                  |   66 +++++--
- drivers/mmc/host/tmio_mmc_pio.c                    |  132 ++++++++++----
- include/linux/mfd/tmio.h                           |    4 +
- include/linux/mmc/card.h                           |    1 +
- include/linux/mmc/cd-gpio.h                        |   18 --
- include/linux/mmc/host.h                           |   48 +++--
- include/linux/mmc/sdhci.h                          |    4 +-
- include/linux/mmc/sh_mmcif.h                       |    2 +
- include/linux/mmc/sh_mobile_sdhi.h                 |    1 +
- include/linux/mmc/slot-gpio.h                      |   24 +++
- 43 files changed, 1057 insertions(+), 519 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
- delete mode 100644 drivers/mmc/core/cd-gpio.c
- create mode 100644 drivers/mmc/core/slot-gpio.c
- delete mode 100644 include/linux/mmc/cd-gpio.h
- create mode 100644 include/linux/mmc/slot-gpio.h
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
