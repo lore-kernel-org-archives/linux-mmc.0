@@ -1,188 +1,31 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
-Date: Mon, 23 Jul 2012 04:43:12 -0700 (PDT)
-Message-ID: <b09d01655db4d4aa535b9a9d310bc8f9.squirrel@www.codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: merez@codeaurora.org, Muthu Kumar <muthu.lkml@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, "S, Venkatraman" <svenkatr@ti.com>, Seungwon Jeon <tgih.jun@samsung.com>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: [PATCH V1] Add Quirk for Broken Configuration
+Date: Mon, 23 Jul 2012 17:35:26 +0530
+Message-ID: <1343045127-20227-1-git-send-email-girish.shivananjappa@linaro.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, will.newton@imgtec.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org, shashidharh@vayavyalabs.com, thomas.abraham@linaro.org, jh80.chung@samsung.com, svenkatr@ti.com, Girish K S <girish.shivananjappa@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, July 18, 2012 12:26 am, Chris Ball wrote:
-> Hi,  [removing Jens and the documentation list, since now we're
-> talking about the MMC side only]
->
-> On Wed, Jul 18 2012, merez@codeaurora.org wrote:
->> Is there anything else that holds this patch from being pushed to
-mmc-next?
->
-> Yes, I'm still uncomfortable with the write packing patchsets for a
-couple of reasons, and I suspect that the sum of those reasons means th=
-at
-we should probably plan on holding off merging it until after 3.6.
->
-> Here are the open issues; please correct any misunderstandings:
->
-> With Seungwon's patchset ("Support packed write command"):
->
-> * I still don't have a good set of representative benchmarks showing
->   what kind of performance changes come with this patchset.  It seems
-like we've had a small amount of testing on one controller/eMMC part co=
-mbo
-from Seungwon, and an entirely different test from Maya, and the result=
-s
-aren't documented fully anywhere to the level of describing what the
-hardware was, what the test was, and what the results were before and
-after the patchset.
+This patch is based on the device tree support of dw_mmc host controller
+posted by Thomas Abraham. Below is the list of his patch in review stage
 
-Currently, there is only one card vendor that supports packed commands.
-=46ollowing are our sequential write (LMDD) test results on 2 of our ta=
-rgets
-(in MB/s):
-                       No packing        packing
-Target 1 (SDR 50MHz)     15               25
-Target 2 (DDR 50MHz)     20               30
+mmc: dw_mmc: convert copy of struct device in struct dw_mci to a reference
+mmc: dw_mmc: allow probe to succeed even if one slot is initialized
+mmc: dw_mmc: lookup for optional biu and ciu clocks
+mmc: dw_mmc: add quirk to indicate missing write protect line
+mmc: dw_mmc: add device tree support
+mmc: dw_mmc: add samsung exynos5250 specific extentions
 
->
-> With the reads-during-writes regression:
->
-> * Venkat still has open questions about the nature of the read
->   regression, and thinks we should understand it with blktrace before
-trying to fix it.  Maya has a theory about writes overwhelming reads, b=
-ut
-Venkat doesn't understand why this would explain the observed
-bandwidth drop.
+Girish K S (1):
+  mmc: dwmmc: Add quirk for broken Hardware Config
 
-The degradation of read due to writes is not a new behavior and exists
-also without the write packing feature (which only increases the
-degradation). Our investigation of this phenomenon led us to the
-Conclusion that a new scheduling policy should be used for mobile devic=
-es,
-but this is not related to the current discussion of the write packing
-feature.
+ drivers/mmc/host/dw_mmc-pltfm.c |   10 +++-
+ drivers/mmc/host/dw_mmc.c       |  151 ++++++++++++++++++++++++---------------
+ drivers/mmc/host/dw_mmc.h       |    1 +
+ include/linux/mmc/dw_mmc.h      |    4 +-
+ 4 files changed, 107 insertions(+), 59 deletions(-)
 
-The write packing feature increases the degradation of read due to writ=
-e
-since it allows the MMC to fetch many write requests in a row, instead =
-of
-fetching only one at a time.  Therefore some of the read requests will
-have to wait for the completion of more write requests before they can =
-be
-issued.
-
-To overcome this behavior, the solution would be to stop the write pack=
-ing
-when a read request is fetched, and this is the algorithm suggested by =
-the
-write packing control.
-
-Let's also keep in mind that lmdd benchmarking doesn't fully reflect th=
-e
-real life in which there are not many scenarios that cause massive read
-and write operations. In our user-common-scenarios tests we saw that in
-many cases the write packing decreases the read latency. It can happen =
-in
-cases where the same amount of write requests is fetched with and witho=
-ut
-packing. In such a case the write packing decreases the transfer time o=
-f
-the write requests and causes the read request to wait for a shorter ti=
-me.
-
->
-> With Maya's patchset ("write packing control"):
->
-> * Venkat thinks that HPI should be used, and the number-of-requests
->   metric is too coarse, and it doesn't let you disable packing at the
-right time, and you're essentially implementing a new I/O scheduler ins=
-ide
-the MMC subsystem without understanding the root cause for why that's
-necessary.
-
-According to our measurements the stop transmission (CMD12) + HPI is a
-heavy operation that may take up to several milliseconds. Therefore, a
-massive usage of HPI can cause a degradation of performance.
-In addition, it doesn=92t provide a complete solution for read during w=
-rite
-since it doesn=92t solve the problem of =93what to do with the interrup=
-ted
-write request remainder?=94.  That is, a common interrupting read reque=
-st
-will usually be followed by another one. If we just continue to write t=
-he
-interrupted write request remainder we will probably get another HPI du=
-e
-to the second read request, so eventually we may end up with lots of HP=
-Is
-and write retries. A complete solution will be: stop the current write,
-change packing mode to non-packing, serve the read request, push back t=
-he
-write remainders to the block I/O scheduler and let him schedule them
-again probably after the read burst ends (this requires block layer
-support of course).
-
-Regarding the packing control, there seem to be a confusion since the
-number-of-requests is the trigger for *enabling* the packing (after it =
-was
-disabled), while a single read request disable packing. Therefore, the
-packing is stopped at the right time.
-
-The packing control doesn't add any scheduling policy to the MMC layer.
-The write packing feature is the one changing the scheduling policy by
-fetching many write requests in a row without a delay that allows read
-requests to come in the middle.
-By disabling the write packing, the write packing control returns the o=
-ld
-scheduling policy. It causes the MMC to fetch the requests one by one,
-thus read requests are served as before.
-
-It is correct that the trigger for enabling the write packing control
-should be adjusted per platform and doesn't give a complete solution. A=
-s I
-mentioned above, the complete solution will include the usage of write
-packing control, a re-insert of the write packed to the scheduler when =
-a
-read request is fetched and usage of HPI to stop the packing that is
-already transferred.
-
-To summarize -
-We recommend including the write packing in 3.6 due to the following re=
-asons:
-1. It significantly improves the write throughput
-2. In some of the cases it even decreases the read latency
-3. The read degradation in simultaneous read-write flows already exist,
-even without this feature
-
-As for the write packing control, it can be included in 3.6 to supply a
-partial solution for the read degradation or we can postpone it to 3.7 =
-and
-integrate it as part of the complete solution.
-
-Thanks,
-Maya
-
->
-> My sense is that there's no way we can solve all of these to
-> satisfaction in the next week (which is when the merge window will
-open), but that by waiting a cycle we might come up with some good answ=
-ers.
->
-> What do other people think?  If you're excited about these patchsets,
-now would be a fine time to come forward with your benchmarking results
-and to help understand the reads-during-writes regression.
->
-> Thanks!
->
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
->
-
-
---=20
-Sent by consultant of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+-- 
+1.7.4.1
