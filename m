@@ -1,51 +1,45 @@
 From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?=
 	<u.kleine-koenig@pengutronix.de>
-Subject: [PATCH 12/25] mmc/omap_hsmmc: add a const qualifier
-Date: Mon, 23 Jul 2012 11:13:17 +0200
-Message-ID: <1343034810-3386-13-git-send-email-u.kleine-koenig@pengutronix.de>
+Subject: [PATCH 19/25] of: add const to struct *of_device_id.data
+Date: Mon, 23 Jul 2012 11:13:24 +0200
+Message-ID: <1343034810-3386-20-git-send-email-u.kleine-koenig@pengutronix.de>
 References: <1343034810-3386-1-git-send-email-u.kleine-koenig@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:36060 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751582Ab2GWJO3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jul 2012 05:14:29 -0400
 In-Reply-To: <1343034810-3386-1-git-send-email-u.kleine-koenig@pengutronix.de>
-Sender: linux-omap-owner@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>, Arnd Bergmann <arnd@arndb.de>, Rob Herring <rob.herring@calxeda.com>, Kevin Hilman <khilman@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Grant Likely <grant.likely@secretlab.ca>, Arnd Bergmann <arnd@arndb.de>, Rob Herring <rob.herring@calxeda.com>
+Cc: kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org, Alan Cox <alan@linux.intel.com>, Ben Dooks <ben-linux@fluff.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, cbe-oss-dev@lists.ozlabs.org, Chris Ball <cjb@laptop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>kernel@pengutronix.de, Kevin Hilman <khilman@ti.com>, Kumar Gala <galak@kernel.crashing.org>, Linus Walleij <linus.walleij@stericsson.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Marc Kleine-Budde <mkl@pengutronix.de>, Oliver Hartkopp <socketcan@hartkopp.net>, Paul Mackerras <paulus@samba.org>, Russell King <linux@arm.linux.org.uk>, Samuel Ortiz <sameo@linux.intel.com>, spi-devel-general@lists.sourceforge.net, Timur Tabi <timur@freescale.com>, Vinod Koul <vinod.koul@intel.com>, Wim Van Sebroeck <wim@iguana.be>, Wolfram Sang <w.sang@pengutronix.de>
 
-This prepares *of_device_id.data becoming const. Without this change
-the following warning would occur:
-
-	drivers/mmc/host/omap_hsmmc.c: In function 'omap_hsmmc_probe':
-	drivers/mmc/host/omap_hsmmc.c:1808: warning: initialization discards q=
-ualifiers from pointer target type
+Drivers should never need to modify the data of a device id. So it can
+be const which in turn allows more consts in the driver.
 
 Signed-off-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
 ---
- drivers/mmc/host/omap_hsmmc.c |    2 +-
+ include/linux/mod_devicetable.h |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmm=
-c.c
-index 389a3ee..5bcd043 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1805,7 +1805,7 @@ static int __devinit omap_hsmmc_probe(struct plat=
-form_device *pdev)
- 	if (match) {
- 		pdata =3D of_get_hsmmc_pdata(&pdev->dev);
- 		if (match->data) {
--			u16 *offsetp =3D match->data;
-+			const u16 *offsetp =3D match->data;
- 			pdata->reg_offset =3D *offsetp;
- 		}
- 	}
+diff --git a/include/linux/mod_devicetable.h b/include/linux/mod_device=
+table.h
+index 5db9382..98fb3fe 100644
+--- a/include/linux/mod_devicetable.h
++++ b/include/linux/mod_devicetable.h
+@@ -224,7 +224,7 @@ struct of_device_id
+ 	char	type[32];
+ 	char	compatible[128];
+ #ifdef __KERNEL__
+-	void	*data;
++	const void *data;
+ #else
+ 	kernel_ulong_t data;
+ #endif
 --=20
 1.7.10.4
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
