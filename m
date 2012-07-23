@@ -1,118 +1,137 @@
-From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?=
-	<u.kleine-koenig@pengutronix.de>
-Subject: [PATCH v2 00/25] make *struct of_device_id.data const
-Date: Mon, 23 Jul 2012 11:13:05 +0200
-Message-ID: <1343034810-3386-1-git-send-email-u.kleine-koenig@pengutronix.de>
+From: merez@codeaurora.org
+Subject: Re: [RESEND PATCH v10] mmc: support BKOPS feature for eMMC
+Date: Mon, 23 Jul 2012 02:14:52 -0700 (PDT)
+Message-ID: <c169f4ac2e5c9f2c40571b03f45b34ab.squirrel@www.codeaurora.org>
+References: <500823C5.4010503@samsung.com>
+    <0af2721026286ee4d196ead20848664e.squirrel@www.codeaurora.org>
+    <500CA8AA.5090704@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:36079 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751325Ab2GWJOm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jul 2012 05:14:42 -0400
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:41760 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751729Ab2GWJOw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jul 2012 05:14:52 -0400
+In-Reply-To: <500CA8AA.5090704@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>, Arnd Bergmann <arnd@arndb.de>, Rob Herring <rob.herring@calxeda.com>
-Cc: kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org, Alan Cox <alan@linux.intel.com>, Ben Dooks <ben-linux@fluff.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, cbe-oss-dev@lists.ozlabs.org, Chris Ball <cjb@laptop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>kernel@pengutronix.de, Kevin Hilman <khilman@ti.com>, Kumar Gala <galak@kernel.crashing.org>, Linus Walleij <linus.walleij@stericsson.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Marc Kleine-Budde <mkl@pengutronix.de>, Oliver Hartkopp <socketcan@hartkopp.net>, Paul Mackerras <paulus@samba.org>, Russell King <linux@arm.linux.org.uk>, Samuel Ortiz <sameo@linux.intel.com>, spi-devel-general@lists.sourceforge.net, Timur Tabi <timur@freescale.com>, Vinod Koul <vinod.koul@intel.com>, Wim Van Sebroeck <wim@iguana.be>, Wolfram Sang <w.sang@pengutronix.de>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: merez@codeaurora.org, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
 
-Hello,
+Hi Jaehoon,
 
-this is the 2nd version of this series whose goal is to make struct
-of_device_id.data const. Conceptually a driver must not modify the data
-contained there so making it const is the right thing.
+I don't have additional comments.
 
-v1 of this series was sent with Message-id:
-1342182734-321-1-git-send-email-y. Changes since then are:
- - powerpc fixes
- - several new consts that were found by Arnd that are possible after
-   patch 19.
-  =20
-Arnd suggested to take this series via arm-soc late for 3.6 in one go
-because patch 19 depends on the former patches but is a precondition to
-the latter and it fixes a few warnings. So getting it in via the
-respective maintainer trees would need a much bigger coordination
-effort. That means I prefer getting Acks over you taking the patch.
+Thanks,
+Maya
+On Sun, July 22, 2012 6:28 pm, Jaehoon Chung wrote:
+> Hi Maya,
+>
+> On 07/20/2012 08:58 PM, merez@codeaurora.org wrote:
+>>
+>> On Thu, July 19, 2012 8:12 am, Jaehoon Chung wrote:
+>>> +void mmc_start_bkops(struct mmc_card *card, bool from_exception)
+>>> +{
+>>> +        int err;
+>>> +        int timeout;
+>>> +        bool use_busy_signal;
+>>> +
+>>> +        BUG_ON(!card);
+>>> +
+>>> +        if (!card->ext_csd.bkops_en || mmc_card_doing_bkops(card) ||
+>>> +                !(card->host->caps2 & MMC_CAP2_BKOPS))
+>>> +                return;
+>> To my opinion, the host cannot decide not to support BKOPs if it is
+>> enabled by the card. In such a case, the card will expect the host to
+>> start the BKOPs and may get into performance degradation.
+>> I think the MMC_CAP2_BKOPS should be removed.
+>> Does everyone agree or do I miss something?
+> Ok..i will remove capability. I saw that other people agreed your opinion.
+>>
+>>> @@ -489,6 +568,53 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct
+>>> mmc_command *cmd, int retries
+>>>  EXPORT_SYMBOL(mmc_wait_for_cmd);
+>>>
+>>>  /**
+>>> + *	mmc_stop_bkops - stop ongoing BKOPS
+>>> + *	@card: MMC card to check BKOPS
+>>> + *
+>>> + *	Send HPI command to stop ongoing background operations,
+>>> + *	to allow rapid servicing of foreground operations,e.g. read/
+>>> + *	writes. Wait until the card comes out of the programming state
+>>> + *	to avoid errors in servicing read/write requests.
+>>> + */
+>>> +int mmc_stop_bkops(struct mmc_card *card)
+>>> +{
+>>> +	int err = 0;
+>>> +
+>>> +	BUG_ON(!card);
+>>> +	err = mmc_interrupt_hpi(card);
+>>> +
+>>> +	/*
+>>> +	 * if err is EINVAL, it's status that can't issue HPI.
+>>> +	 * it should complete the BKOPS.
+>>> +	 */
+>>> +	if (!err || (err == -EINVAL)) {
+>>> +		mmc_card_clr_doing_bkops(card);
+>>> +		err = 0;
+>>> +	}
+>> I don't understand the comment regarding the case where err equals
+>> -EINVAL. Can you please explain it?
+> When err is -EINVAL, already completed bkops.
+> After completed bkops, should be the trans status.
+> If my understanding is wrong, let me know.
+>>
+>>> @@ -392,13 +393,25 @@ int mmc_switch(struct mmc_card *card, u8 set, u8
+>>> index, u8 value,
+>>>                    (index << 16) |
+>>>                    (value << 8) |
+>>>                    set;
+>>> -        cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+>>> +        cmd.flags = MMC_CMD_AC;
+>>> +        if (use_busy_signal)
+>>> +                cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
+>>> +        else
+>>> +                cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
+>>> +
+>>> +
+>>>          cmd.cmd_timeout_ms = timeout_ms;
+>>>
+>>>          err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
+>>>          if (err)
+>>>                  return err;
+>>>
+>>> +        /*
+>>> +         * No need to check card status in case of BKOPS LEVEL1 switch
+>>> +         */
+>>
+>> Change the comment to be general (don't mention BKOPs level 1),
+>> something
+>> like:
+>> No need to check card status in case of unblocking command.
+>> Also, 1 line comment should be /* comment */
+> Will fix.
+>
+> Any other comment? if you have other comment, let me know.
+> I will send the patch after fixing on today.
+>
+> Best Regards,
+> Jaehoon Chung
+>>
+>> Thanks,
+>> Maya
+>>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-Vinod Koul already took
-        dmaengine: at_hdmac: add a few const qualifiers
-that is in next-20120723 as 7fd63ccdad72 now. Vinod, I don't follow you=
-r
-pull requests, but assuming you didn't let it already pull for 3.6 I
-suggest you drop it from your queue and I just take your Ack.
 
-This series was build tested for arm (all defconfigs) and powerpc (all
-defconfigs and an allyesconfig) and grep didn't find more issues. As
-before it introduces a warning in drivers/regulator/twl-regulator.c.
-This driver does modify its .of_match_table when a device is bound whic=
-h
-doesn't fits the concept of independant devices. Arnd noticed another
-new warning in drivers/scsi/qlogicpti.c that isn't that easy to resolve=
-,
-because the pointer to (now) const data is passed as first argument to
-scsi_host_alloc. To fix that properly struct Scsi_Host.hostt needs to
-get a const, too. Alternatively I could introduce a cast removing the
-const, but I don't like that.
-
-This series is also available at:
-
-	git://git.pengutronix.de/git/ukl/linux.git ofdeviceiddata
-
-and I will modify it there for the Acks I'm getting.
-
-Arnd Bergmann (6):
-  watchdog/mpc8xxx: add a const qualifier
-  powerpc/fsl_msi: drop unneeded cast to non-const pointer
-  mfd/da9052: make i2c_device_id array const
-  i2c/mpc: make data used as *of_device_id.data const
-  macintosh/mediabay: make data used as *of_device_id.data const
-  can: mpc5xxx_can: make data used as *of_device_id.data const
-
-Marc Kleine-Budde (1):
-  can: mpc5xxx_can: make data in mpc5xxx_can_probe const
-
-Uwe Kleine-K=C3=B6nig (18):
-  spi/imx: make spi_imx_data.devtype_data member point to const data
-  spi/spi-omap2-mcspi: add a const qualifier
-  serial/imx: make imx_port.devdata member point to const data
-  serial/mpc52xx_uart: add a const qualifier
-  ARM: cache-l2x0: add a const qualifier
-  misc/atmel_tc: make atmel_tc.tcb_config member point to const data
-  gpio/gpio-omap.c: add a const qualifier
-  gpio/mpc8xxx: add a const qualifier
-  i2c/i2c-omap: add a const qualifier
-  i2c/mpc: add a const qualifier
-  dmaengine: at_hdmac: add a few const qualifiers
-  mmc/omap_hsmmc: add a const qualifier
-  macintosh/mediabay: add a const qualifier
-  powerpc/83xx: add a const qualifier
-  powerpc/fsl_msi: add a const qualifier
-  powerpc/celleb_pci: add a const qualifier
-  of: add const to struct *of_device_id.data
-  gpio/gpio-omap: make platformdata used as *of_device_id.data const
-
- arch/arm/mm/cache-l2x0.c                 |    2 +-
- arch/powerpc/platforms/83xx/suspend.c    |    2 +-
- arch/powerpc/platforms/cell/celleb_pci.c |    2 +-
- arch/powerpc/sysdev/fsl_msi.c            |    8 ++++----
- drivers/dma/at_hdmac.c                   |    4 ++--
- drivers/gpio/gpio-mpc8xxx.c              |    2 +-
- drivers/gpio/gpio-omap.c                 |    8 ++++----
- drivers/i2c/busses/i2c-mpc.c             |   12 ++++++------
- drivers/i2c/busses/i2c-omap.c            |    3 ++-
- drivers/macintosh/mediabay.c             |    8 ++++----
- drivers/mfd/da9052-i2c.c                 |    4 ++--
- drivers/mmc/host/omap_hsmmc.c            |    2 +-
- drivers/net/can/mscan/mpc5xxx_can.c      |    6 +++---
- drivers/spi/spi-imx.c                    |    2 +-
- drivers/spi/spi-omap2-mcspi.c            |    2 +-
- drivers/tty/serial/imx.c                 |    2 +-
- drivers/tty/serial/mpc52xx_uart.c        |    2 +-
- drivers/watchdog/mpc8xxx_wdt.c           |    2 +-
- include/linux/atmel_tc.h                 |    2 +-
- include/linux/mod_devicetable.h          |    2 +-
- 20 files changed, 39 insertions(+), 38 deletions(-)
-
---=20
-1.7.10.4
+-- 
+Sent by consultant of Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
 
