@@ -1,82 +1,48 @@
-From: "Yaniv Gardi" <ygardi@codeaurora.org>
-Subject: RE: [PATCH RESEND v7 2/2] mmc: card: Adding support for sanitize      in eMMC 4.5
-Date: Tue, 24 Jul 2012 09:40:08 +0300
-Message-ID: <000001cd6967$2ce2a010$86a7e030$@codeaurora.org>
-References: <1340872367-16206-1-git-send-email-ygardi@codeaurora.org>    <1340872367-16206-3-git-send-email-ygardi@codeaurora.org>    <87629k9rkc.fsf@octavius.laptop.org> <f5830acb2ddca29357a0125cd8f3d577.squirrel@www.codeaurora.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH RESEND v7 2/2] mmc: card: Adding support for sanitize in eMMC 4.5
+Date: Tue, 24 Jul 2012 02:56:17 -0400
+Message-ID: <87obn5y7e6.fsf_-_@octavius.laptop.org>
+References: <1340872367-16206-1-git-send-email-ygardi@codeaurora.org>
+	<1340872367-16206-3-git-send-email-ygardi@codeaurora.org>
+	<87629k9rkc.fsf@octavius.laptop.org>
+	<f5830acb2ddca29357a0125cd8f3d577.squirrel@www.codeaurora.org>
+	<000001cd6967$2ce2a010$86a7e030$@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <f5830acb2ddca29357a0125cd8f3d577.squirrel@www.codeaurora.org>
-Content-language: en-us
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 'open list' <linux-kernel@vger.kernel.org>, merez@codeaurora.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:59588 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754759Ab2GXG4j (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 24 Jul 2012 02:56:39 -0400
+In-Reply-To: <000001cd6967$2ce2a010$86a7e030$@codeaurora.org> (Yaniv Gardi's
+	message of "Tue, 24 Jul 2012 09:40:08 +0300")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Yaniv Gardi <ygardi@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 'open list' <linux-kernel@vger.kernel.org>, merez@codeaurora.org, Girish K S <girish.shivananjappa@linaro.org>, "S, Venkatraman" <svenkatr@ti.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Stephen Boyd <sboyd@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kmpark@infradead.org>
 
-Hi Chris,
+Hi Yaniv,
 
-Are there any additional open issues to discuss regarding the sanitize
-capability ?
-If not, we would like to see this patch pushed into mmc-next.
+On Tue, Jul 24 2012, Yaniv Gardi wrote:
+> Are there any additional open issues to discuss regarding the sanitize
+> capability ?
+> If not, we would like to see this patch pushed into mmc-next.
 
-Thanks,
-Yaniv
+I think you've responded to all of the open issues, thanks -- I'm adding
+everyone who made a review comment to the CC list for this mail, so that
+they can check whether v7 addresses their concerns, and consider asking
+more questions or providing a Reviewed-by.
 
-= > -----Original Message-----
-= > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-= > owner@vger.kernel.org] On Behalf Of merez@codeaurora.org
-= > Sent: Thursday, July 19, 2012 2:25 PM
-= > To: Chris Ball
-= > Cc: Yaniv Gardi; linux-mmc@vger.kernel.org; merez@codeaurora.org;
-= > linux-arm-msm@vger.kernel.org; open list
-= > Subject: Re: [PATCH RESEND v7 2/2] mmc: card: Adding support for
-= > sanitize in eMMC 4.5
-= > 
-= > On Wed, July 18, 2012 11:46 pm, Chris Ball wrote:
-= > > Hi Yaniv,
-= > >
-= > > On Thu, Jun 28 2012, Yaniv Gardi wrote:
-= > >> This feature delete the unmap memory region of the eMMC card, by
-= > >> writing to a specific register in the EXT_CSD unmap region is the
-= > >> memory region that were previously deleted (by erase, trim or discard
-= > >> operation)
-= > >>
-= > >> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
-= > >
-= > > Did you reply to Chuanxiao's review comments yet?  He said:
-= > >
-= > > "So to implement your scenario, how about only add
-= > > mmc_blk_issue_sanitize_rq() for REQ_SANITIZE but not touch
-= > > mmc_blk_issue_secdiscard_rq()? With your changes in
-= > > mmc_blk_issue_secdiscard_rq(), eMMC4.5 device will be failed to
-= > > operate secure trim/erase for REQ_SECURE request."
-= > >
-= > > at:
-= > http://thread.gmane.org/gmane.linux.kernel.mmc/14822/focus=14880
-= > >
-= > > Thanks,
-= > >
-= > > - Chris.
-= > > --
-= > > Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-= > > One Laptop Per Child
-= > >
-= > 
-= > Secure trim and secure erase were removed from eMMC4.5. Please refer
-= > to annex B at B.6 section in eMMC4.5 spec.
-= > Therefore, failure upon trying to do secure trim/erase is the expected
-= > behavior for eMMC4.5 devices.
-= > 
-= > Thanks,
-= > Maya
-= > --
-= > Sent by consultant of Qualcomm Innovation Center, Inc.
-= > Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-= > 
-= > --
-= > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-the
-= > body of a message to majordomo@vger.kernel.org More majordomo info
-= > at  http://vger.kernel.org/majordomo-info.html
+How are you doing with getting the block layer patches merged?  I'd like
+to get both layers into linux-next around the same time, if we can.
+
+I wonder if there's any way to test whether sanitize has had an effect.
+It would be good to know whether it actually does anything on a specific
+eMMC, although I'm sure it's difficult to tell.
+
+Thanks!
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
