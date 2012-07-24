@@ -1,140 +1,90 @@
-From: Andy Lee <raphael.andy.lee@gmail.com>
-Subject: [PATCH] mmc: core: Remove bounce buffer in mmc_send_cxd_data()
-Date: Tue, 24 Jul 2012 22:10:04 +0900
-Message-ID: <CAPOY1bUqm1Lb4ppf5UYqUA+cbK3_sHE=zJu3x6-UNb+uKiYiWg@mail.gmail.com>
+From: <ludovic.desroches@atmel.com>
+Subject: [PATCH RESEND v5 0/4] atmel-mci device tree support
+Date: Tue, 24 Jul 2012 15:30:02 +0200
+Message-ID: <1343136606-8874-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:37290 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754001Ab2GXNKF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jul 2012 09:10:05 -0400
+Received: from eusmtp01.atmel.com ([212.144.249.242]:65147 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750897Ab2GXNbL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jul 2012 09:31:11 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: cjb@laptop.org, nicolas.ferre@atmel.com, plagnioj@jcrosoft.com
 
-It is expected that Extended CSD register(the size of this register
-is larger than CID/CSD) will be referenced more frequently as more
-fields have been added to Extended CSD.
-This patch is intended to avoid the use of bounce buffer for reading
-Extended CSD register in mmc_send_cxd_data(). It seems that it is
-not a good option to double the memory used.
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Signed-off-by: kyungsik.lee <kyungsik.lee@lge.com>
----
- drivers/mmc/core/mmc_ops.c |   45 ++++++++++++++++++++++++++++---------------
- 1 files changed, 29 insertions(+), 16 deletions(-)
+Hello,
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 0ed2cc5..b1a7df3 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -238,14 +238,6 @@ mmc_send_cxd_data(struct mmc_card *card, struct
-mmc_host *host,
- 	struct mmc_command cmd = {0};
- 	struct mmc_data data = {0};
- 	struct scatterlist sg;
--	void *data_buf;
--
--	/* dma onto stack is unsafe/nonportable, but callers to this
--	 * routine normally provide temporary on-stack buffers ...
--	 */
--	data_buf = kmalloc(len, GFP_KERNEL);
--	if (data_buf == NULL)
--		return -ENOMEM;
+I resend this set of patches because patches 2, 3 and 4 were acked by
+Jean-Christophe. Patch 1 was also acked by Jean-Christophe excepted for
+cd-inverted property since it was redundant with gpio bindings.
 
- 	mrq.cmd = &cmd;
- 	mrq.data = &data;
-@@ -266,7 +258,7 @@ mmc_send_cxd_data(struct mmc_card *card, struct
-mmc_host *host,
- 	data.sg = &sg;
- 	data.sg_len = 1;
+I thought we were agree to go ahead since it was a common binding already
+documented and it will concern all drivers.
 
--	sg_init_one(&sg, data_buf, len);
-+	sg_init_one(&sg, buf, len);
+Chris are you agree to take patch 1/4? Others patches may go to at91 tree,
+isn't it?
+By the way, I have updated documentation in patch 1/4 in the same way as you
+did with the patch 'mmc: dt: Deduplicate binding docs by referencing mmc.txt'.
+I didn't remove common properties from slot part because I think it is not
+obvious to use these properties into the slot node.
 
- 	if (opcode == MMC_SEND_CSD || opcode == MMC_SEND_CID) {
- 		/*
-@@ -280,9 +272,6 @@ mmc_send_cxd_data(struct mmc_card *card, struct
-mmc_host *host,
+Regards
 
- 	mmc_wait_for_req(host, &mrq);
+Ludovic
 
--	memcpy(buf, data_buf, len);
--	kfree(data_buf);
--
- 	if (cmd.error)
- 		return cmd.error;
- 	if (data.error)
-@@ -294,24 +283,37 @@ mmc_send_cxd_data(struct mmc_card *card, struct
-mmc_host *host,
- int mmc_send_csd(struct mmc_card *card, u32 *csd)
- {
- 	int ret, i;
-+	u32 *csd_t;
 
- 	if (!mmc_host_is_spi(card->host))
- 		return mmc_send_cxd_native(card->host, card->rca << 16,
- 				csd, MMC_SEND_CSD);
+v5:
+- cleanup
+- split dts commit: one for SOCs, one for boards
 
--	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd, 16);
-+	csd_t = kmalloc(16, GFP_KERNEL);
-+	if (!csd_t)
-+		return -ENOMEM;
-+
-+	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd_t, 16);
- 	if (ret)
--		return ret;
-+		goto err;
-+
-+	memcpy(csd, csd_t, 16);
+v4:
+- cleanup
+- add extra chips and boards for atmel-mci dt support
 
- 	for (i = 0;i < 4;i++)
- 		csd[i] = be32_to_cpu(csd[i]);
+v3:
+- use cd-inverted instead of cd-invert to follow mmc common binding.
+- don't assign a pointer to pdev->dev.platform.
+- add mci controller nodes to other chips and boards.
+- put all dts file changes together.
 
-+	kfree(csd_t);
- 	return 0;
-+
-+err:
-+	kfree(csd_t);
-+	return ret;
- }
+v2:
+- squash patch v1 2/4 and 3/4.
+- change atmci_get_of_slots to atmci_of_init and manage pdata allocation into
+it.
+- correct potential issue (e.g. having only one slot which is not slot0 into
+the dt) about slots by adding a reg property corresponding to the slot id.
 
- int mmc_send_cid(struct mmc_host *host, u32 *cid)
- {
- 	int ret, i;
-+	u32 *cid_t;
+Ludovic Desroches (4):
+  mmc: atmel-mci: add device tree support
+  ARM: at91: add clocks for DT entries
+  ARM: dts: add nodes for atmel hsmci controllers for atmel SOCs
+  ARM: dts: add nodes for atmel hsmci controllers for atmel boards
 
- 	if (!mmc_host_is_spi(host)) {
- 		if (!host->card)
-@@ -320,14 +322,25 @@ int mmc_send_cid(struct mmc_host *host, u32 *cid)
- 				cid, MMC_SEND_CID);
- 	}
+ .../devicetree/bindings/mmc/atmel-hsmci.txt        |   68 ++++++++++++++++
+ arch/arm/boot/dts/at91sam9260.dtsi                 |    9 ++
+ arch/arm/boot/dts/at91sam9263.dtsi                 |   18 ++++
+ arch/arm/boot/dts/at91sam9263ek.dts                |   10 +++
+ arch/arm/boot/dts/at91sam9g20ek_2mmc.dts           |   12 +++
+ arch/arm/boot/dts/at91sam9g20ek_common.dtsi        |    9 ++
+ arch/arm/boot/dts/at91sam9g25ek.dts                |   18 ++++
+ arch/arm/boot/dts/at91sam9g45.dtsi                 |   18 ++++
+ arch/arm/boot/dts/at91sam9m10g45ek.dts             |   19 +++++
+ arch/arm/boot/dts/at91sam9n12.dtsi                 |    9 ++
+ arch/arm/boot/dts/at91sam9n12ek.dts                |    9 ++
+ arch/arm/boot/dts/at91sam9x5.dtsi                  |   18 ++++
+ arch/arm/mach-at91/at91sam9260.c                   |    1 +
+ arch/arm/mach-at91/at91sam9263.c                   |    2 +
+ arch/arm/mach-at91/at91sam9g45.c                   |    2 +
+ arch/arm/mach-at91/at91sam9n12.c                   |    1 +
+ arch/arm/mach-at91/at91sam9x5.c                    |    2 +
+ drivers/mmc/host/atmel-mci.c                       |   85 +++++++++++++++++++-
+ 18 files changed, 308 insertions(+), 2 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
 
--	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid, 16);
-+	cid_t = kmalloc(16, GFP_KERNEL);
-+	if (!cid_t)
-+		return -ENOMEM;
-+
-+	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid_t, 16);
- 	if (ret)
--		return ret;
-+		goto err;
-+
-+	memcpy(cid, cid_t, 16);
-
- 	for (i = 0;i < 4;i++)
- 		cid[i] = be32_to_cpu(cid[i]);
-
-+	kfree(cid_t);
- 	return 0;
-+
-+err:
-+	kfree(cid_t);
-+	return ret;
- }
-
- int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd)
 -- 
-1.7.0.4
+1.7.5.4
+
