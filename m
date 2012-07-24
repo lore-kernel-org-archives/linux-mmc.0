@@ -1,85 +1,83 @@
-From: <ludovic.desroches@atmel.com>
-Subject: [PATCH] mmc: atmel-mci: not busy flag has also to be used for read operations
-Date: Tue, 24 Jul 2012 11:42:04 +0200
-Message-ID: <1343122924-7799-1-git-send-email-ludovic.desroches@atmel.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: add busmode selection support
+Date: Tue, 24 Jul 2012 20:09:05 +0900
+Message-ID: <500E8251.906@samsung.com>
+References: <1343042200-19524-1-git-send-email-girish.shivananjappa@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:32824 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753232Ab2GXJmu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jul 2012 05:42:50 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1343042200-19524-1-git-send-email-girish.shivananjappa@linaro.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, will.newton@imgtec.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, linux-arm-kernel@lists.infradead.org
 
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Hi Girish,
 
-Even if the datasheet says that the not busy flag has to be used only for
-write operations, it's false excepted for version lesser than v2xx.
-Not waiting the not busy flag for read operations can cause the controller to
-hang-up during the initialization of some SD cards.
+Well..just tested on my board.
+this patch didn't work.(eMMC card didn't initialize)
+meaning of ios->bus_mode and synosys's bus_mode is same?
+How did you test this patch?
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-Cc: stable@vger.kernel.org
+Best Regards,
+Jaehoon Chung
 
-
-Hello,
-
-This is a fix for 3.5 and later.
-
-Due to the big changes into atmel-mci driver to support all atmel mci versions,
-a bug was introduced.
-With some SD cards (mainly micro) when using DMA, the controller hangs-up after
-the first CMD6 command because the next command is sent too early.
-
-Regards
-
-Ludovic
-
-
----
- drivers/mmc/host/atmel-mci.c |    6 +++++-
- 1 files changed, 5 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index f2c115e..b6abfa7 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -81,6 +81,7 @@ struct atmel_mci_caps {
- 	bool	has_bad_data_ordering;
- 	bool	need_reset_after_xfer;
- 	bool	need_blksz_mul_4;
-+	bool	need_notbusy_for_read_ops;
- };
- 
- struct atmel_mci_dma {
-@@ -1619,7 +1620,8 @@ static void atmci_tasklet_func(unsigned long priv)
- 				__func__);
- 			atmci_set_completed(host, EVENT_XFER_COMPLETE);
- 
--			if (host->data->flags & MMC_DATA_WRITE) {
-+			if (host->caps.need_notbusy_for_read_ops
-+			    || (host->data->flags & MMC_DATA_WRITE)) {
- 				atmci_writel(host, ATMCI_IER, ATMCI_NOTBUSY);
- 				state = STATE_WAITING_NOTBUSY;
- 			} else if (host->mrq->stop) {
-@@ -2212,6 +2214,7 @@ static void __init atmci_get_cap(struct atmel_mci *host)
- 	host->caps.has_bad_data_ordering = 1;
- 	host->caps.need_reset_after_xfer = 1;
- 	host->caps.need_blksz_mul_4 = 1;
-+	host->caps.need_notbusy_for_read_ops = 0;
- 
- 	/* keep only major version number */
- 	switch (version & 0xf00) {
-@@ -2232,6 +2235,7 @@ static void __init atmci_get_cap(struct atmel_mci *host)
- 	case 0x200:
- 		host->caps.has_rwproof = 1;
- 		host->caps.need_blksz_mul_4 = 0;
-+		host->caps.need_notbusy_for_read_ops = 1;
- 	case 0x100:
- 		host->caps.has_bad_data_ordering = 0;
- 		host->caps.need_reset_after_xfer = 0;
--- 
-1.7.5.4
+On 07/23/2012 08:16 PM, Girish K S wrote:
+> Synopsis Designware host controller has suppport for open
+> drain mode selection. During the mmc card initialization the
+> host controller can select the open-drain bit to allow the device
+> initialization in the open-drain mode. Once the device enters
+> the standby mode this bit can be reset to enter push-pull mode.
+> 
+> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+> ---
+>  drivers/mmc/host/dw_mmc.c |   14 ++++++++++++++
+>  drivers/mmc/host/dw_mmc.h |    1 +
+>  2 files changed, 15 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 72dc3cd..da11e5a 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -773,6 +773,18 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  	spin_unlock_bh(&host->lock);
+>  }
+>  
+> +static void dw_mci_set_busmode(struct dw_mci_slot *slot)
+> +{
+> +	struct mmc_ios *ios = &slot->mmc->ios;
+> +	u32 reg;
+> +
+> +	reg = mci_readl(slot->host, CTRL);
+> +	if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN)
+> +		mci_writel(slot->host, CTRL, reg | SDMMC_CTRL_ENABLE_OD);
+> +	else
+> +		mci_writel(slot->host, CTRL, reg & ~SDMMC_CTRL_ENABLE_OD);
+> +}
+> +
+>  static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  {
+>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+> @@ -818,6 +830,8 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	default:
+>  		break;
+>  	}
+> +
+> +	dw_mci_set_busmode(slot);
+>  }
+>  
+>  static int dw_mci_get_ro(struct mmc_host *mmc)
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 15c27e1..1a53fb2 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -67,6 +67,7 @@
+>  
+>  /* Control register defines */
+>  #define SDMMC_CTRL_USE_IDMAC		BIT(25)
+> +#define SDMMC_CTRL_ENABLE_OD		BIT(24)
+>  #define SDMMC_CTRL_CEATA_INT_EN		BIT(11)
+>  #define SDMMC_CTRL_SEND_AS_CCSD		BIT(10)
+>  #define SDMMC_CTRL_SEND_CCSD		BIT(9)
+> 
