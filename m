@@ -1,119 +1,71 @@
-From: Jae hoon Chung <jh80.chung@gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: add busmode selection support
-Date: Tue, 24 Jul 2012 22:44:27 +0900
-Message-ID: <CAELcNGSnpXd152m8jgFbmUP0OBSiGKTVAqefqTF2_YFqDMofuA@mail.gmail.com>
-References: <1343042200-19524-1-git-send-email-girish.shivananjappa@linaro.org>
-	<500E8251.906@samsung.com>
-	<CAGxe1ZHA80qYj=vOhx5YYBhyVE_wG55PrK6DpLvA-KKef9g_GA@mail.gmail.com>
-	<CAGxe1ZFK96HRRN=42R4nwk3i26mONrTYN86TKsVMhCx94Oug9g@mail.gmail.com>
-	<CAELcNGT6CmbzmcbGB+-ZuYnjmy+vrumgb9CQxYntZYRwyJ8m6A@mail.gmail.com>
-	<CAGxe1ZHTQzFjGYgveg-MS-C7Chx+CHtY+QEZc4JX8xgnJPF6Ww@mail.gmail.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH v2 00/25] make *struct of_device_id.data const
+Date: Tue, 24 Jul 2012 15:01:47 +0000
+Message-ID: <201207241501.48302.arnd@arndb.de>
+References: <1343034810-3386-1-git-send-email-u.kleine-koenig@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:42584 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753330Ab2GXNo3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jul 2012 09:44:29 -0400
-In-Reply-To: <CAGxe1ZHTQzFjGYgveg-MS-C7Chx+CHtY+QEZc4JX8xgnJPF6Ww@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+In-Reply-To: <1343034810-3386-1-git-send-email-u.kleine-koenig-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: Uwe =?utf-8?q?Kleine-K=C3=B6nig?= <u.kleine-koenig-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+Cc: Benjamin Herrenschmidt <benh-XVmvHMARGAS8U2dJNN8I7kB+6BGkLq7r@public.gmane.org>, Wim Van Sebroeck <wim-IQzOog9fTRqzQB+pC5nmwQ@public.gmane.org>, Paul Mackerras <paulus-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Kevin Hilman <khilman-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Samuel Ortiz <sameo-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, arm-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, cbe-oss-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Marc Kleine-Budde <mkl-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Ben Dooks <ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org>, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Timur Tabi <timur-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Alan Cox <alan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Linus Walleij <linus.walleij-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, Oliver Hartkopp <socketcan-fJ+pQTUTwRTk1uMJSBkQmQ@public.gmane.org>, spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, will.newton@imgtec.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org
 
-2012/7/24 Girish K S <girish.shivananjappa@linaro.org>:
-> On 24 July 2012 18:37, Jae hoon Chung <jh80.chung@gmail.com> wrote:
->> Hi Girish,
->>
->> Right, it be mentioned about the open-drain mode in synopsys spec.
->> But if didn't work on other board, there is some problem.
->> We can consider the location of set_busmode() .
-> may i know the board on which you are testing. i will try to use the
-> same and simulate the problem
-Exynos4 board and eMMC4.5 card, Synopsys IP version is 2.40a
->>
->> Best Regards,
->> Jaehoon Chung
->>
->> 2012/7/24 Girish K S <girish.shivananjappa@linaro.org>:
->>> On 24 July 2012 17:06, Girish K S <girish.shivananjappa@linaro.org> wrote:
->>>> On 24 July 2012 16:39, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>>>> Hi Girish,
->>>>>
->>>>> Well..just tested on my board.
->>>>> this patch didn't work.(eMMC card didn't initialize)
->>>>> meaning of ios->bus_mode and synosys's bus_mode is same?
->>> Yes it is same. synopsys spec says this is specific to MMC
->>> initialization. when the card core sets this mode during
->>> initialization. the host has to set this bit
->>>>> How did you test this patch?
->>>> Tested it on exynos5 board using dt patches of thomas (with some
->>>> modification to his patch)
->>>>>
->>>>> Best Regards,
->>>>> Jaehoon Chung
->>>>>
->>>>> On 07/23/2012 08:16 PM, Girish K S wrote:
->>>>>> Synopsis Designware host controller has suppport for open
->>>>>> drain mode selection. During the mmc card initialization the
->>>>>> host controller can select the open-drain bit to allow the device
->>>>>> initialization in the open-drain mode. Once the device enters
->>>>>> the standby mode this bit can be reset to enter push-pull mode.
->>>>>>
->>>>>> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
->>>>>> ---
->>>>>>  drivers/mmc/host/dw_mmc.c |   14 ++++++++++++++
->>>>>>  drivers/mmc/host/dw_mmc.h |    1 +
->>>>>>  2 files changed, 15 insertions(+), 0 deletions(-)
->>>>>>
->>>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>>>> index 72dc3cd..da11e5a 100644
->>>>>> --- a/drivers/mmc/host/dw_mmc.c
->>>>>> +++ b/drivers/mmc/host/dw_mmc.c
->>>>>> @@ -773,6 +773,18 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>>>>>       spin_unlock_bh(&host->lock);
->>>>>>  }
->>>>>>
->>>>>> +static void dw_mci_set_busmode(struct dw_mci_slot *slot)
->>>>>> +{
->>>>>> +     struct mmc_ios *ios = &slot->mmc->ios;
->>>>>> +     u32 reg;
->>>>>> +
->>>>>> +     reg = mci_readl(slot->host, CTRL);
->>>>>> +     if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN)
->>>>>> +             mci_writel(slot->host, CTRL, reg | SDMMC_CTRL_ENABLE_OD);
->>>>>> +     else
->>>>>> +             mci_writel(slot->host, CTRL, reg & ~SDMMC_CTRL_ENABLE_OD);
->>>>>> +}
->>>>>> +
->>>>>>  static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>>>>>  {
->>>>>>       struct dw_mci_slot *slot = mmc_priv(mmc);
->>>>>> @@ -818,6 +830,8 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>>>>>       default:
->>>>>>               break;
->>>>>>       }
->>>>>> +
->>>>>> +     dw_mci_set_busmode(slot);
->>>>>>  }
->>>>>>
->>>>>>  static int dw_mci_get_ro(struct mmc_host *mmc)
->>>>>> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
->>>>>> index 15c27e1..1a53fb2 100644
->>>>>> --- a/drivers/mmc/host/dw_mmc.h
->>>>>> +++ b/drivers/mmc/host/dw_mmc.h
->>>>>> @@ -67,6 +67,7 @@
->>>>>>
->>>>>>  /* Control register defines */
->>>>>>  #define SDMMC_CTRL_USE_IDMAC         BIT(25)
->>>>>> +#define SDMMC_CTRL_ENABLE_OD         BIT(24)
->>>>>>  #define SDMMC_CTRL_CEATA_INT_EN              BIT(11)
->>>>>>  #define SDMMC_CTRL_SEND_AS_CCSD              BIT(10)
->>>>>>  #define SDMMC_CTRL_SEND_CCSD         BIT(9)
->>>>>>
->>>>>
->>>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+T24gTW9uZGF5IDIzIEp1bHkgMjAxMiwgVXdlIEtsZWluZS1Lw7ZuaWcgd3JvdGU6Cj4gdGhpcyBp
+cyB0aGUgMm5kIHZlcnNpb24gb2YgdGhpcyBzZXJpZXMgd2hvc2UgZ29hbCBpcyB0byBtYWtlIHN0
+cnVjdAo+IG9mX2RldmljZV9pZC5kYXRhIGNvbnN0LiBDb25jZXB0dWFsbHkgYSBkcml2ZXIgbXVz
+dCBub3QgbW9kaWZ5IHRoZSBkYXRhCj4gY29udGFpbmVkIHRoZXJlIHNvIG1ha2luZyBpdCBjb25z
+dCBpcyB0aGUgcmlnaHQgdGhpbmcuCj4gCj4gdjEgb2YgdGhpcyBzZXJpZXMgd2FzIHNlbnQgd2l0
+aCBNZXNzYWdlLWlkOgo+IDEzNDIxODI3MzQtMzIxLTEtZ2l0LXNlbmQtZW1haWwteS4gQ2hhbmdl
+cyBzaW5jZSB0aGVuIGFyZToKPiAgLSBwb3dlcnBjIGZpeGVzCj4gIC0gc2V2ZXJhbCBuZXcgY29u
+c3RzIHRoYXQgd2VyZSBmb3VuZCBieSBBcm5kIHRoYXQgYXJlIHBvc3NpYmxlIGFmdGVyCj4gICAg
+cGF0Y2ggMTkuCj4gICAgCj4gQXJuZCBzdWdnZXN0ZWQgdG8gdGFrZSB0aGlzIHNlcmllcyB2aWEg
+YXJtLXNvYyBsYXRlIGZvciAzLjYgaW4gb25lIGdvCj4gYmVjYXVzZSBwYXRjaCAxOSBkZXBlbmRz
+IG9uIHRoZSBmb3JtZXIgcGF0Y2hlcyBidXQgaXMgYSBwcmVjb25kaXRpb24gdG8KPiB0aGUgbGF0
+dGVyIGFuZCBpdCBmaXhlcyBhIGZldyB3YXJuaW5ncy4gU28gZ2V0dGluZyBpdCBpbiB2aWEgdGhl
+Cj4gcmVzcGVjdGl2ZSBtYWludGFpbmVyIHRyZWVzIHdvdWxkIG5lZWQgYSBtdWNoIGJpZ2dlciBj
+b29yZGluYXRpb24KPiBlZmZvcnQuIFRoYXQgbWVhbnMgSSBwcmVmZXIgZ2V0dGluZyBBY2tzIG92
+ZXIgeW91IHRha2luZyB0aGUgcGF0Y2guCj4gCj4gVmlub2QgS291bCBhbHJlYWR5IHRvb2sKPiAg
+ICAgICAgIGRtYWVuZ2luZTogYXRfaGRtYWM6IGFkZCBhIGZldyBjb25zdCBxdWFsaWZpZXJzCj4g
+dGhhdCBpcyBpbiBuZXh0LTIwMTIwNzIzIGFzIDdmZDYzY2NkYWQ3MiBub3cuIFZpbm9kLCBJIGRv
+bid0IGZvbGxvdyB5b3VyCj4gcHVsbCByZXF1ZXN0cywgYnV0IGFzc3VtaW5nIHlvdSBkaWRuJ3Qg
+bGV0IGl0IGFscmVhZHkgcHVsbCBmb3IgMy42IEkKPiBzdWdnZXN0IHlvdSBkcm9wIGl0IGZyb20g
+eW91ciBxdWV1ZSBhbmQgSSBqdXN0IHRha2UgeW91ciBBY2suCj4gCj4gVGhpcyBzZXJpZXMgd2Fz
+IGJ1aWxkIHRlc3RlZCBmb3IgYXJtIChhbGwgZGVmY29uZmlncykgYW5kIHBvd2VycGMgKGFsbAo+
+IGRlZmNvbmZpZ3MgYW5kIGFuIGFsbHllc2NvbmZpZykgYW5kIGdyZXAgZGlkbid0IGZpbmQgbW9y
+ZSBpc3N1ZXMuIEFzCj4gYmVmb3JlIGl0IGludHJvZHVjZXMgYSB3YXJuaW5nIGluIGRyaXZlcnMv
+cmVndWxhdG9yL3R3bC1yZWd1bGF0b3IuYy4KPiBUaGlzIGRyaXZlciBkb2VzIG1vZGlmeSBpdHMg
+Lm9mX21hdGNoX3RhYmxlIHdoZW4gYSBkZXZpY2UgaXMgYm91bmQgd2hpY2gKPiBkb2Vzbid0IGZp
+dHMgdGhlIGNvbmNlcHQgb2YgaW5kZXBlbmRhbnQgZGV2aWNlcy4gQXJuZCBub3RpY2VkIGFub3Ro
+ZXIKPiBuZXcgd2FybmluZyBpbiBkcml2ZXJzL3Njc2kvcWxvZ2ljcHRpLmMgdGhhdCBpc24ndCB0
+aGF0IGVhc3kgdG8gcmVzb2x2ZSwKPiBiZWNhdXNlIHRoZSBwb2ludGVyIHRvIChub3cpIGNvbnN0
+IGRhdGEgaXMgcGFzc2VkIGFzIGZpcnN0IGFyZ3VtZW50IHRvCj4gc2NzaV9ob3N0X2FsbG9jLiBU
+byBmaXggdGhhdCBwcm9wZXJseSBzdHJ1Y3QgU2NzaV9Ib3N0Lmhvc3R0IG5lZWRzIHRvCj4gZ2V0
+IGEgY29uc3QsIHRvby4gQWx0ZXJuYXRpdmVseSBJIGNvdWxkIGludHJvZHVjZSBhIGNhc3QgcmVt
+b3ZpbmcgdGhlCj4gY29uc3QsIGJ1dCBJIGRvbid0IGxpa2UgdGhhdC4KPiAKPiBUaGlzIHNlcmll
+cyBpcyBhbHNvIGF2YWlsYWJsZSBhdDoKPiAKPiAgICAgICAgIGdpdDovL2dpdC5wZW5ndXRyb25p
+eC5kZS9naXQvdWtsL2xpbnV4LmdpdCBvZmRldmljZWlkZGF0YQo+IAo+IGFuZCBJIHdpbGwgbW9k
+aWZ5IGl0IHRoZXJlIGZvciB0aGUgQWNrcyBJJ20gZ2V0dGluZy4KClB1bGxlZCB0aGUgZW50aXJl
+IHNlcmllcyBpbnRvIGFybS1zb2MvbGF0ZS93YXJuaW5ncy4gVGhhbmtzIGV2ZXJ5b25lCndobyBw
+cm92aWRlZCBBY2tzLiBJJ2xsIHdhaXQgZm9yIGEgZmV3IG1vcmUgZGF5cyB0byBsZXQgdGhpcyBz
+aXQKaW4gbGludXgtbmV4dCBhbmQgaWYgbm9ib2R5IGNvbXBsYWlucywgT2xvZiBvciBJIHdpbGwg
+Zm9yd2FyZCBpdAp0byBMaW51cy4KCglBcm5kCgotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KTGl2ZSBT
+ZWN1cml0eSBWaXJ0dWFsIENvbmZlcmVuY2UKRXhjbHVzaXZlIGxpdmUgZXZlbnQgd2lsbCBjb3Zl
+ciBhbGwgdGhlIHdheXMgdG9kYXkncyBzZWN1cml0eSBhbmQgCnRocmVhdCBsYW5kc2NhcGUgaGFz
+IGNoYW5nZWQgYW5kIGhvdyBJVCBtYW5hZ2VycyBjYW4gcmVzcG9uZC4gRGlzY3Vzc2lvbnMgCndp
+bGwgaW5jbHVkZSBlbmRwb2ludCBzZWN1cml0eSwgbW9iaWxlIHNlY3VyaXR5IGFuZCB0aGUgbGF0
+ZXN0IGluIG1hbHdhcmUgCnRocmVhdHMuIGh0dHA6Ly93d3cuYWNjZWxhY29tbS5jb20vamF3L3Nm
+cm5sMDQyNDIwMTIvMTE0LzUwMTIyMjYzLwpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fXwpzcGktZGV2ZWwtZ2VuZXJhbCBtYWlsaW5nIGxpc3QKc3BpLWRldmVs
+LWdlbmVyYWxAbGlzdHMuc291cmNlZm9yZ2UubmV0Cmh0dHBzOi8vbGlzdHMuc291cmNlZm9yZ2Uu
+bmV0L2xpc3RzL2xpc3RpbmZvL3NwaS1kZXZlbC1nZW5lcmFsCg==
