@@ -1,26 +1,21 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v2] mmc: dw_mmc: Disable low power mode if SDIO interrupts
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2] mmc: dw_mmc: Disable low power mode if SDIO interrupts
  are used
-Date: Tue, 24 Jul 2012 10:17:06 +0900
-Message-ID: <004d01cd693a$0a55d7b0$1f018710$%jun@samsung.com>
+Date: Tue, 24 Jul 2012 10:36:52 +0900
+Message-ID: <500DFC34.8070205@samsung.com>
 References: <CAD=FV=XuXUe1Jyd_urCzmS5+1vv7iuNTXYr23XYZp+MnTq1HGg@mail.gmail.com>
  <1343062955-24516-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:47436 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755159Ab2GXBRM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jul 2012 21:17:12 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-reply-to: <1343062955-24516-1-git-send-email-dianders@chromium.org>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-kernel@vger.kernel.org, Grant Grundler <grundler@chromium.org>, Olof Johansson <olofj@chromium.org>, shashidharh@vayavyalabs.com, ki0351.kim@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: 'Doug Anderson' <dianders@chromium.org>, linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-kernel@vger.kernel.org, 'Grant Grundler' <grundler@chromium.org>, 'Olof Johansson' <olofj@chromium.org>, shashidharh@vayavyalabs.com, ki0351.kim@samsung.com
 
-July 24, 2012, Doug Anderson <dianders@chromium.org> wrote:
+On 07/24/2012 02:02 AM, Doug Anderson wrote:
 > The documentation for the dw_mmc part says that the low power
 > mode should normally only be set for MMC and SD memory and should
 > be turned off for SDIO cards that need interrupts detected.
@@ -49,13 +44,13 @@ July 24, 2012, Doug Anderson <dianders@chromium.org> wrote:
 >  	struct dw_mci *host = slot->host;
 >  	u32 div;
 > +	u32 clk_en_a;
-> 
+>  
 >  	if (slot->clock != host->current_speed) {
 >  		div = host->bus_hz / slot->clock;
 > @@ -659,9 +660,11 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
 >  		mci_send_cmd(slot,
 >  			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
-> 
+>  
 > -		/* enable clock */
 > -		mci_writel(host, CLKENA, ((SDMMC_CLKEN_ENABLE |
 > -			   SDMMC_CLKEN_LOW_PWR) << slot->id));
@@ -64,17 +59,13 @@ July 24, 2012, Doug Anderson <dianders@chromium.org> wrote:
 > +		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->id)))
 > +			clk_en_a |= SDMMC_CLKEN_LOW_PWR << slot->id;
 > +		mci_writel(host, CLKENA, clk_en_a);
-I have followed this patch from v1.
-I think it's a good point.
-Looks good to me.
-
-> 
+>  
 >  		/* inform CIU */
 >  		mci_send_cmd(slot,
 > @@ -862,6 +865,32 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
 >  	return present;
 >  }
-> 
+>  
 > +/*
 > + * Disable lower power mode.
 > + *
@@ -82,18 +73,9 @@ Looks good to me.
 > + * documentation (Exynos 5250 User's Manual 0.04, description of
 > + * CLKENA register) we should disable low power mode for SDIO cards
 > + * if we need interrupts to work.
-Above comment is correct, but this is not specific for Exynos5250.
-Exynos5250 is just one of host controllers base on Synopsys's.
-It'd be better to remove the part related to Exynos you mentioned .
-
-
 > + *
+As Seungwon is mentioned, that is not exynos5250 specific.
 > + * This function is fast if the power mode is already disabled.
-Definitely, low power mode not power mode, right?
-
-Best regards,
-Seungwon Jeon
-
 > + */
 > +static void dw_mci_disable_low_power(struct mmc_host *mmc)
 > +{
@@ -125,15 +107,9 @@ Seungwon Jeon
 > +		 * re-enabled again in dw_mci_setup_bus().
 > +		 */
 > +		dw_mci_disable_low_power(mmc);
+How about using "slot" instead of "mmc"?
 > +
 >  		mci_writel(host, INTMASK,
 >  			   (int_mask | SDMMC_INT_SDIO(slot->id)));
 >  	} else {
-> --
-> 1.7.7.3
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
