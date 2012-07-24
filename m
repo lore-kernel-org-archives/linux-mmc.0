@@ -1,30 +1,112 @@
-From: Loic pallardy <loic.pallardy@gmail.com>
-Subject: Re: [PATCH v2 2/5] mmc: card: Do not scan RPMB partitions
-Date: Tue, 24 Jul 2012 13:50:24 +0200
-Message-ID: <CAKGveeaUnhNP4uTnm5xJSM12korg9Mx7DyY+xN_5cVQnv0fREQ@mail.gmail.com>
-References: <1342011675-11221-1-git-send-email-loic.pallardy-ext@stericsson.com>
-	<CAKYAXd8Ztfrb4798PH-71z=b5DS3n7oL3Z2SfEJwuGLieFP8sg@mail.gmail.com>
+From: Jae hoon Chung <jh80.chung@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: add busmode selection support
+Date: Tue, 24 Jul 2012 22:07:09 +0900
+Message-ID: <CAELcNGT6CmbzmcbGB+-ZuYnjmy+vrumgb9CQxYntZYRwyJ8m6A@mail.gmail.com>
+References: <1343042200-19524-1-git-send-email-girish.shivananjappa@linaro.org>
+	<500E8251.906@samsung.com>
+	<CAGxe1ZHA80qYj=vOhx5YYBhyVE_wG55PrK6DpLvA-KKef9g_GA@mail.gmail.com>
+	<CAGxe1ZFK96HRRN=42R4nwk3i26mONrTYN86TKsVMhCx94Oug9g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:44394 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753305Ab2GXLuZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jul 2012 07:50:25 -0400
-Received: by obbuo13 with SMTP id uo13so11011052obb.19
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Jul 2012 04:50:25 -0700 (PDT)
-In-Reply-To: <CAKYAXd8Ztfrb4798PH-71z=b5DS3n7oL3Z2SfEJwuGLieFP8sg@mail.gmail.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:39411 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753726Ab2GXNHL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jul 2012 09:07:11 -0400
+In-Reply-To: <CAGxe1ZFK96HRRN=42R4nwk3i26mONrTYN86TKsVMhCx94Oug9g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Namjae Jeon <linkinjeon@gmail.com>
-Cc: Loic Pallardy <loic.pallardy-ext@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Loic Pallardy <loic.pallardy@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, will.newton@imgtec.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org
 
-2012/7/16 Namjae Jeon <linkinjeon@gmail.com>:
+Hi Girish,
 
-> Would you resend all v2 patches after including tag linus's ack and my
-> reviewed-by ?
-> Thanks.
+Right, it be mentioned about the open-drain mode in synopsys spec.
+But if didn't work on other board, there is some problem.
+We can consider the location of set_busmode() .
 
-Yes, I will resend a new series including acked and reviewed-by tags.
-BR,
-Loic
+Best Regards,
+Jaehoon Chung
+
+2012/7/24 Girish K S <girish.shivananjappa@linaro.org>:
+> On 24 July 2012 17:06, Girish K S <girish.shivananjappa@linaro.org> wrote:
+>> On 24 July 2012 16:39, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>>> Hi Girish,
+>>>
+>>> Well..just tested on my board.
+>>> this patch didn't work.(eMMC card didn't initialize)
+>>> meaning of ios->bus_mode and synosys's bus_mode is same?
+> Yes it is same. synopsys spec says this is specific to MMC
+> initialization. when the card core sets this mode during
+> initialization. the host has to set this bit
+>>> How did you test this patch?
+>> Tested it on exynos5 board using dt patches of thomas (with some
+>> modification to his patch)
+>>>
+>>> Best Regards,
+>>> Jaehoon Chung
+>>>
+>>> On 07/23/2012 08:16 PM, Girish K S wrote:
+>>>> Synopsis Designware host controller has suppport for open
+>>>> drain mode selection. During the mmc card initialization the
+>>>> host controller can select the open-drain bit to allow the device
+>>>> initialization in the open-drain mode. Once the device enters
+>>>> the standby mode this bit can be reset to enter push-pull mode.
+>>>>
+>>>> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+>>>> ---
+>>>>  drivers/mmc/host/dw_mmc.c |   14 ++++++++++++++
+>>>>  drivers/mmc/host/dw_mmc.h |    1 +
+>>>>  2 files changed, 15 insertions(+), 0 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>>> index 72dc3cd..da11e5a 100644
+>>>> --- a/drivers/mmc/host/dw_mmc.c
+>>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>>> @@ -773,6 +773,18 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>>>       spin_unlock_bh(&host->lock);
+>>>>  }
+>>>>
+>>>> +static void dw_mci_set_busmode(struct dw_mci_slot *slot)
+>>>> +{
+>>>> +     struct mmc_ios *ios = &slot->mmc->ios;
+>>>> +     u32 reg;
+>>>> +
+>>>> +     reg = mci_readl(slot->host, CTRL);
+>>>> +     if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN)
+>>>> +             mci_writel(slot->host, CTRL, reg | SDMMC_CTRL_ENABLE_OD);
+>>>> +     else
+>>>> +             mci_writel(slot->host, CTRL, reg & ~SDMMC_CTRL_ENABLE_OD);
+>>>> +}
+>>>> +
+>>>>  static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>>  {
+>>>>       struct dw_mci_slot *slot = mmc_priv(mmc);
+>>>> @@ -818,6 +830,8 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>>       default:
+>>>>               break;
+>>>>       }
+>>>> +
+>>>> +     dw_mci_set_busmode(slot);
+>>>>  }
+>>>>
+>>>>  static int dw_mci_get_ro(struct mmc_host *mmc)
+>>>> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+>>>> index 15c27e1..1a53fb2 100644
+>>>> --- a/drivers/mmc/host/dw_mmc.h
+>>>> +++ b/drivers/mmc/host/dw_mmc.h
+>>>> @@ -67,6 +67,7 @@
+>>>>
+>>>>  /* Control register defines */
+>>>>  #define SDMMC_CTRL_USE_IDMAC         BIT(25)
+>>>> +#define SDMMC_CTRL_ENABLE_OD         BIT(24)
+>>>>  #define SDMMC_CTRL_CEATA_INT_EN              BIT(11)
+>>>>  #define SDMMC_CTRL_SEND_AS_CCSD              BIT(10)
+>>>>  #define SDMMC_CTRL_SEND_CCSD         BIT(9)
+>>>>
+>>>
+>>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
