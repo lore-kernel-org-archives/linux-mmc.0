@@ -1,531 +1,613 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH v11] mmc: support BKOPS feature for eMMC
-Date: Tue, 24 Jul 2012 10:56:56 +0900
-Message-ID: <500E00E8.7040504@samsung.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH V2] mmc: dwmmc: Add quirk for broken Hardware Config
+Date: Tue, 24 Jul 2012 14:18:14 +0900
+Message-ID: <000001cd695b$badb3140$309193c0$%jun@samsung.com>
+References: <1343045127-20227-1-git-send-email-girish.shivananjappa@linaro.org>
+ <1343045127-20227-2-git-send-email-girish.shivananjappa@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ks_c_5601-1987
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:11684 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755091Ab2GXB5L (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jul 2012 21:57:11 -0400
-Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M7N008136R9POE0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 24 Jul 2012 10:57:09 +0900 (KST)
-Received: from [10.90.51.55] by mmp2.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0M7N003N06R81H50@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 24 Jul 2012 10:57:09 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1343045127-20227-2-git-send-email-girish.shivananjappa@linaro.org>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Girish K S' <girish.shivananjappa@linaro.org>, linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, will.newton@imgtec.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org, shashidharh@vayavyalabs.com, thomas.abraham@linaro.org, jh80.chung@samsung.com, svenkatr@ti.com
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Maya Erez <merez@codeaurora.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Adrian Hunter <adrian.hunter@intel.com>, Per FORLIN <per.forlin@stericsson.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
 
-Enable eMMC background operations (BKOPS) feature.
+Hi Girish,
 
-If URGENT_BKOPS is set after a response, note that BKOPS
-are required. Immediately run BKOPS if required.
-read/write operations should be requested during BKOPS(LEVEL-1),
-then issue HPI to interrupt the ongoing BKOPS 
-and service the foreground operation.
-(This patch is only control the LEVEL2/3.)
+July 23, 2012, Girish K S <girish.shivananjappa@linaro.org> wrote:
+> In some Soc'S that integrate Designware mmc host controllers, the
+> HCON register is broken. The hardware configuration is not
+> updated. One specific usecase is the IDMAC. In Exysons5 SoC
+> there exist a internal DMA, but the HCON register's DMA_INTERFACE
+> field is not set to indicate its existance.
+> 
+> This quirk can be used in such case to force the existance broken
+> HCON field.
+> 
+> changes in v2:
+> 	-moved the implementation to quirk framework as per venkat's
+> 	 review comment.
+> changes in v1:
+> 	-modified the caps2 field access per controller index.Reported
+> 	 by Jaehoon Chung <jh80.chung@samsung.com>.
+> 	-replaced the pointer to device with the pointer to platform
+> 	 device in struct dw_mci.
+Change related to adding pointer of platform_device is needed in this patch seriously?
+I guess that the purpose is to get id of platform_device in case of non-dt.
+Although a lot of replace is done throughout dw_mmc, actual usage is only in dw_get_platform_device_id.
+You can split it into another patch if this change is needed, or it's good to use other way.
+For example, to_platform_device macro is useful to get pointer of platform_device.
 
-When repeating the writing 1GB data, at a certain time, performance is decreased.
-At that time, card is also triggered the Level-3 or Level-2.
-After running bkops, performance is recovered.
+Best regards,
+Seungwon Jeon
 
-Future considerations
- * Check BKOPS_LEVEL=1 and start BKOPS in a preventive manner.
- * Interrupt ongoing BKOPS before powering off the card.
- * How get BKOPS_STATUS value.(periodically send ext_csd command?)
- * If use periodic bkops, also consider runtime_pm control.
-
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
-Signed-off-by: Maya Erez <merez@codeaurora.org>
----
-Changelog v11:
-	- removed the MMC_CAP2_BKOPS.
-		: if card support and enable bkops, then use it.
-Changelog v10:
-	- Based on latest mmc-next
-	- Only control the level-2/3.
-		: If triggered upper than level2, immediately start bkops.
-	- Remove the BKOPS_CAP2_INIT_BKOPS (move into mmc-util)
-	- change use_busy_signal instead of waiting_for_prog_done for __mmc_switch
-	- Remove the useless code.
-	- Add the from_exception to prepare the periodic bkops.
-Changelog V9:
-	- Rebased on patch-v7.
-	- Added Konstantin and Maya's patch
-		: mmc:core: Define synchronous BKOPS timeout
-		: mmc:core: eMMC4.5 BKOPS fixes
-	- Removed periodic bkops
-		: This feature will do in future work
-	- Add __mmc_switch() for waiting_for_prod_done.
-	
-Changelog V8:
-	- Remove host->lock spin lock reviewed by Adrian
-	- Support periodic start bkops
-	- when bkops_status is level-3, if timeout is set to 0, send hpi.
-	- Move the start-bkops point
-Changelog V7:
-	- Use HPI command when issued URGENT_BKOPS
-	- Recheck until clearing the bkops-status bit.
-Changelog V6:
-	- Add the flag of check-bkops-status.
-	  (For fixing async_req problem)
-	- Add the capability for MMC_CAP2_INIT_BKOPS.
-	  (When unset the bkops_en bit in ext_csd register)
-	- modify the wrong condition.
-Changelog V5:
-	- Rebase based on the latest mmc-next.
-	- modify codes based-on Chris's comment
-Changelog V4:
-	- Add mmc_read_bkops_status
-	- When URGENT_BKOPS(level2-3), didn't use HPI command.
-	- In mmc_switch(), use R1B/R1 according to level.
-Changelog V3:
-	- move the bkops setting's location in mmc_blk_issue_rw_rq
-	- modify condition checking
-	- bkops_en is assigned ext_csd[EXT_CSD_BKOPS_EN] instead of "1"
-	- remove the unused code
-	- change pr_debug instead of pr_warn in mmc_send_hpi_cmd
-	- Add the Future consideration suggested by Per
-Changelog V2:
-	- Use EXCEPTION_STATUS instead of URGENT_BKOPS
-	- Add function to check Exception_status(for eMMC4.5)
----
- drivers/mmc/core/core.c    |  145 +++++++++++++++++++++++++++++++++++++++++++-
- drivers/mmc/core/mmc.c     |   11 +++
- drivers/mmc/core/mmc_ops.c |   26 +++++++-
- include/linux/mmc/card.h   |    8 +++
- include/linux/mmc/core.h   |    4 +
- include/linux/mmc/mmc.h    |   19 ++++++
- 6 files changed, 207 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 8ac5246..ed2cc93 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -41,6 +41,12 @@
- #include "sd_ops.h"
- #include "sdio_ops.h"
- 
-+/*
-+ * The Background operation can take a long time, depends on the house keeping
-+ * operations the card has to peform
-+ */
-+#define MMC_BKOPS_MAX_TIMEOUT	(4 * 60 * 1000) /* max time to wait in ms */
-+
- static struct workqueue_struct *workqueue;
- static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
- 
-@@ -245,6 +251,70 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 	host->ops->request(host, mrq);
- }
- 
-+/**
-+ *	mmc_start_bkops - start BKOPS for supported cards
-+ *	@card: MMC card to start BKOPS
-+ *	@form_exception: A flags to indicate if this function was
-+ *			called due to an exception raised by the card
-+ *
-+ *	Start background operations whenever requested.
-+ *	when the urgent BKOPS bit is set in a R1 command response
-+ *	then background operations should be started immediately.
-+*/
-+void mmc_start_bkops(struct mmc_card *card, bool from_exception)
-+{
-+	int err;
-+	int timeout;
-+	bool use_busy_signal;
-+
-+	BUG_ON(!card);
-+
-+	if (!card->ext_csd.bkops_en || mmc_card_doing_bkops(card))
-+		return;
-+
-+	err = mmc_read_bkops_status(card);
-+	if (err) {
-+		pr_err("%s: Didn't read bkops status : %d\n",
-+		       mmc_hostname(card->host), err);
-+		return;
-+	}
-+
-+	if (!card->ext_csd.raw_bkops_status)
-+		return;
-+
-+	if (card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2
-+	    && (from_exception))
-+		return;
-+
-+	mmc_claim_host(card->host);
-+	if (card->ext_csd.raw_bkops_status >= EXT_CSD_BKOPS_LEVEL_2) {
-+		timeout = MMC_BKOPS_MAX_TIMEOUT;
-+		use_busy_signal = true;
-+	} else {
-+		timeout = 0;
-+		use_busy_signal = false;
-+	}
-+
-+	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+			EXT_CSD_BKOPS_START, 1, timeout, use_busy_signal);
-+	if (err) {
-+		pr_warn("%s: error %d starting bkops\n",
-+			   mmc_hostname(card->host), err);
-+		goto out;
-+	}
-+
-+	/*
-+	 * For urgent bkops status (LEVEL_2 and more)
-+	 * bkops executed synchronously, otherwise
-+	 * the operation is in progress
-+	 */
-+	if (!use_busy_signal)
-+		mmc_card_set_doing_bkops(card);
-+out:
-+	mmc_release_host(card->host);
-+}
-+EXPORT_SYMBOL(mmc_start_bkops);
-+
- static void mmc_wait_done(struct mmc_request *mrq)
- {
- 	complete(&mrq->completion);
-@@ -354,6 +424,14 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
- 	if (host->areq) {
- 		mmc_wait_for_req_done(host, host->areq->mrq);
- 		err = host->areq->err_check(host->card, host->areq);
-+		/*
-+		 * Check BKOPS urgency for each R1 response
-+		 */
-+		if (host->card && mmc_card_mmc(host->card) &&
-+		((mmc_resp_type(host->areq->mrq->cmd) == MMC_RSP_R1) ||
-+		 (mmc_resp_type(host->areq->mrq->cmd) == MMC_RSP_R1B)) &&
-+		(host->areq->mrq->cmd->resp[0] & R1_EXCEPTION_EVENT))
-+			mmc_start_bkops(host->card, true);
- 	}
- 
- 	if (!err && areq)
-@@ -489,6 +567,53 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd, int retries
- EXPORT_SYMBOL(mmc_wait_for_cmd);
- 
- /**
-+ *	mmc_stop_bkops - stop ongoing BKOPS
-+ *	@card: MMC card to check BKOPS
-+ *
-+ *	Send HPI command to stop ongoing background operations,
-+ *	to allow rapid servicing of foreground operations,e.g. read/
-+ *	writes. Wait until the card comes out of the programming state
-+ *	to avoid errors in servicing read/write requests.
-+ */
-+int mmc_stop_bkops(struct mmc_card *card)
-+{
-+	int err = 0;
-+
-+	BUG_ON(!card);
-+	err = mmc_interrupt_hpi(card);
-+
-+	/*
-+	 * if err is EINVAL, it's status that can't issue HPI.
-+	 * it should complete the BKOPS.
-+	 */
-+	if (!err || (err == -EINVAL)) {
-+		mmc_card_clr_doing_bkops(card);
-+		err = 0;
-+	}
-+
-+	return err;
-+}
-+EXPORT_SYMBOL(mmc_stop_bkops);
-+
-+int mmc_read_bkops_status(struct mmc_card *card)
-+{
-+	int err;
-+	u8 ext_csd[512];
-+
-+	mmc_claim_host(card->host);
-+	err = mmc_send_ext_csd(card, ext_csd);
-+	mmc_release_host(card->host);
-+	if (err)
-+		return err;
-+
-+	card->ext_csd.raw_bkops_status = ext_csd[EXT_CSD_BKOPS_STATUS];
-+	card->ext_csd.raw_exception_status = ext_csd[EXT_CSD_EXP_EVENTS_STATUS];
-+
-+	return 0;
-+}
-+EXPORT_SYMBOL(mmc_read_bkops_status);
-+
-+/**
-  *	mmc_set_data_timeout - set the timeout for a data command
-  *	@data: data phase for command
-  *	@card: the MMC card associated with the data transfer
-@@ -2328,7 +2453,13 @@ int mmc_suspend_host(struct mmc_host *host)
- 	mmc_bus_get(host);
- 	if (host->bus_ops && !host->bus_dead) {
- 
--		if (host->bus_ops->suspend)
-+		if (host->bus_ops->suspend) {
-+			if (mmc_card_doing_bkops(host->card)) {
-+				err = mmc_stop_bkops(host->card);
-+				if (err)
-+					goto out;
-+			}
-+		}
- 			err = host->bus_ops->suspend(host);
- 
- 		if (err == -ENOSYS || !host->bus_ops->resume) {
-@@ -2411,11 +2542,21 @@ int mmc_pm_notify(struct notifier_block *notify_block,
- 	struct mmc_host *host = container_of(
- 		notify_block, struct mmc_host, pm_notify);
- 	unsigned long flags;
--
-+	int err = 0;
- 
- 	switch (mode) {
- 	case PM_HIBERNATION_PREPARE:
- 	case PM_SUSPEND_PREPARE:
-+		if (host->card && mmc_card_mmc(host->card) &&
-+				mmc_card_doing_bkops(host->card)) {
-+			err = mmc_stop_bkops(host->card);
-+			if (err) {
-+				pr_err("%s didn't stop bkops\n",
-+					mmc_hostname(host));
-+				return err;
-+			}
-+			mmc_card_clr_doing_bkops(host->card);
-+		}
- 
- 		spin_lock_irqsave(&host->lock, flags);
- 		host->rescan_disable = 1;
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 396b258..9c5caa6 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -463,6 +463,17 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 	}
- 
- 	if (card->ext_csd.rev >= 5) {
-+		/* check whether the eMMC card support BKOPS */
-+		if (ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1) {
-+			card->ext_csd.bkops = 1;
-+			card->ext_csd.bkops_en = ext_csd[EXT_CSD_BKOPS_EN];
-+			card->ext_csd.raw_bkops_status =
-+				ext_csd[EXT_CSD_BKOPS_STATUS];
-+			if (!card->ext_csd.bkops_en)
-+				pr_info("%s: Didn't set BKOPS_EN bit!\n",
-+						mmc_hostname(card->host));
-+		}
-+
- 		/* check whether the eMMC card supports HPI */
- 		if (ext_csd[EXT_CSD_HPI_FEATURES] & 0x1) {
- 			card->ext_csd.hpi = 1;
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 0ed2cc5..be0a98c 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -367,18 +367,19 @@ int mmc_spi_set_crc(struct mmc_host *host, int use_crc)
- }
- 
- /**
-- *	mmc_switch - modify EXT_CSD register
-+ *	__mmc_switch - modify EXT_CSD register
-  *	@card: the MMC card associated with the data transfer
-  *	@set: cmd set values
-  *	@index: EXT_CSD register index
-  *	@value: value to program into EXT_CSD register
-  *	@timeout_ms: timeout (ms) for operation performed by register write,
-  *                   timeout of zero implies maximum possible timeout
-+ *	@use_busy_signal: use the busy signal as response type
-  *
-  *	Modifies the EXT_CSD register for selected card.
-  */
--int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
--	       unsigned int timeout_ms)
-+int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
-+	       unsigned int timeout_ms, bool use_busy_signal)
- {
- 	int err;
- 	struct mmc_command cmd = {0};
-@@ -392,13 +393,23 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 		  (index << 16) |
- 		  (value << 8) |
- 		  set;
--	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-+	cmd.flags = MMC_CMD_AC;
-+	if (use_busy_signal)
-+		cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
-+	else
-+		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
-+
-+
- 	cmd.cmd_timeout_ms = timeout_ms;
- 
- 	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
- 	if (err)
- 		return err;
- 
-+	/* No need to check card status in case of unblocking command */
-+	if (!use_busy_signal)
-+		return 0;
-+
- 	/* Must check status to be sure of no errors */
- 	do {
- 		err = mmc_send_status(card, &status);
-@@ -423,6 +434,13 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 
- 	return 0;
- }
-+EXPORT_SYMBOL_GPL(__mmc_switch);
-+
-+int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
-+		unsigned int timeout_ms)
-+{
-+	return __mmc_switch(card, set, index, value, timeout_ms, true);
-+}
- EXPORT_SYMBOL_GPL(mmc_switch);
- 
- int mmc_send_status(struct mmc_card *card, u32 *status)
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 111aca5..342fe84 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -76,10 +76,13 @@ struct mmc_ext_csd {
- 	bool			hpi_en;			/* HPI enablebit */
- 	bool			hpi;			/* HPI support bit */
- 	unsigned int		hpi_cmd;		/* cmd used as HPI */
-+	bool			bkops;		/* background support bit */
-+	bool			bkops_en;	/* background enable bit */
- 	unsigned int            data_sector_size;       /* 512 bytes or 4KB */
- 	unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
- 	unsigned int		boot_ro_lock;		/* ro lock support */
- 	bool			boot_ro_lockable;
-+	u8			raw_exception_status;	/* 53 */
- 	u8			raw_partition_support;	/* 160 */
- 	u8			raw_erased_mem_count;	/* 181 */
- 	u8			raw_ext_csd_structure;	/* 194 */
-@@ -93,6 +96,7 @@ struct mmc_ext_csd {
- 	u8			raw_sec_erase_mult;	/* 230 */
- 	u8			raw_sec_feature_support;/* 231 */
- 	u8			raw_trim_mult;		/* 232 */
-+	u8			raw_bkops_status;	/* 246 */
- 	u8			raw_sectors[4];		/* 212 - 4 bytes */
- 
- 	unsigned int            feature_support;
-@@ -226,6 +230,7 @@ struct mmc_card {
- #define MMC_CARD_REMOVED	(1<<7)		/* card has been removed */
- #define MMC_STATE_HIGHSPEED_200	(1<<8)		/* card is in HS200 mode */
- #define MMC_STATE_SLEEP		(1<<9)		/* card is in sleep state */
-+#define MMC_STATE_DOING_BKOPS	(1<<10)		/* card is doing BKOPS */
- 	unsigned int		quirks; 	/* card quirks */
- #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
- #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
-@@ -392,6 +397,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
- #define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
- #define mmc_card_is_sleep(c)	((c)->state & MMC_STATE_SLEEP)
-+#define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
- 
- #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
- #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
-@@ -404,7 +410,9 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
- #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
- #define mmc_card_set_sleep(c)	((c)->state |= MMC_STATE_SLEEP)
-+#define mmc_card_set_doing_bkops(c)	((c)->state |= MMC_STATE_DOING_BKOPS)
- 
-+#define mmc_card_clr_doing_bkops(c)	((c)->state &= ~MMC_STATE_DOING_BKOPS)
- #define mmc_card_clr_sleep(c)	((c)->state &= ~MMC_STATE_SLEEP)
- /*
-  * Quirk add/remove for MMC products.
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 1b431c7..9b9cdaf 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -134,6 +134,8 @@ struct mmc_host;
- struct mmc_card;
- struct mmc_async_req;
- 
-+extern int mmc_stop_bkops(struct mmc_card *);
-+extern int mmc_read_bkops_status(struct mmc_card *);
- extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
- 					   struct mmc_async_req *, int *);
- extern int mmc_interrupt_hpi(struct mmc_card *);
-@@ -142,6 +144,8 @@ extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
- extern int mmc_app_cmd(struct mmc_host *, struct mmc_card *);
- extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
- 	struct mmc_command *, int);
-+extern void mmc_start_bkops(struct mmc_card *card, bool from_exception);
-+extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool);
- extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
- 
- #define MMC_ERASE_ARG		0x00000000
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index d425cab..01e4b39 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -139,6 +139,7 @@ static inline bool mmc_op_multi(u32 opcode)
- #define R1_CURRENT_STATE(x)	((x & 0x00001E00) >> 9)	/* sx, b (4 bits) */
- #define R1_READY_FOR_DATA	(1 << 8)	/* sx, a */
- #define R1_SWITCH_ERROR		(1 << 7)	/* sx, c */
-+#define R1_EXCEPTION_EVENT	(1 << 6)	/* sx, a */
- #define R1_APP_CMD		(1 << 5)	/* sr, c */
- 
- #define R1_STATE_IDLE	0
-@@ -274,12 +275,15 @@ struct _mmc_csd {
- #define EXT_CSD_FLUSH_CACHE		32      /* W */
- #define EXT_CSD_CACHE_CTRL		33      /* R/W */
- #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
-+#define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO */
- #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
- #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
- #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
- #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
- #define EXT_CSD_HPI_MGMT		161	/* R/W */
- #define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
-+#define EXT_CSD_BKOPS_EN		163	/* R/W */
-+#define EXT_CSD_BKOPS_START		164	/* W */
- #define EXT_CSD_SANITIZE_START		165     /* W */
- #define EXT_CSD_WR_REL_PARAM		166	/* RO */
- #define EXT_CSD_BOOT_WP			173	/* R/W */
-@@ -313,11 +317,13 @@ struct _mmc_csd {
- #define EXT_CSD_PWR_CL_200_360		237	/* RO */
- #define EXT_CSD_PWR_CL_DDR_52_195	238	/* RO */
- #define EXT_CSD_PWR_CL_DDR_52_360	239	/* RO */
-+#define EXT_CSD_BKOPS_STATUS		246	/* RO */
- #define EXT_CSD_POWER_OFF_LONG_TIME	247	/* RO */
- #define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
- #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
- #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
- #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
-+#define EXT_CSD_BKOPS_SUPPORT		502	/* RO */
- #define EXT_CSD_HPI_FEATURES		503	/* RO */
- 
- /*
-@@ -378,6 +384,19 @@ struct _mmc_csd {
- #define EXT_CSD_PWR_CL_8BIT_SHIFT	4
- #define EXT_CSD_PWR_CL_4BIT_SHIFT	0
- /*
-+ * EXCEPTION_EVENT_STATUS field
-+ */
-+#define EXT_CSD_URGENT_BKOPS		BIT(0)
-+#define EXT_CSD_DYNCAP_NEEDED		BIT(1)
-+#define EXT_CSD_SYSPOOL_EXHAUSTED	BIT(2)
-+#define EXT_CSD_PACKED_FAILURE		BIT(3)
-+
-+/*
-+ * BKOPS status level
-+ */
-+#define EXT_CSD_BKOPS_LEVEL_2		0x2
-+
-+/*
-  * MMC_SWITCH access modes
-  */
- 
--- 
-1.7.4.1
+> 	-updated driver data for all 4 mmc controllers of exynos5 SoC.
+> 	-added non device-tree support for ctrl_id access.
+> 
+> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+> ---
+>  drivers/mmc/host/dw_mmc-pltfm.c |   10 +++-
+>  drivers/mmc/host/dw_mmc.c       |  151 ++++++++++++++++++++++++---------------
+>  drivers/mmc/host/dw_mmc.h       |    1 +
+>  include/linux/mmc/dw_mmc.h      |    4 +-
+>  4 files changed, 107 insertions(+), 59 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+> index 900f412..7d31e90 100644
+> --- a/drivers/mmc/host/dw_mmc-pltfm.c
+> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
+> @@ -35,9 +35,17 @@ static unsigned long exynos5250_dwmmc_caps[4] = {
+>  	MMC_CAP_CMD23,
+>  };
+> 
+> +static unsigned long exynos5250_dwmmc_quirks[4] = {
+> +	DW_MCI_QUIRK_NO_HCON_DMA_INFO,
+> +	DW_MCI_QUIRK_NO_HCON_DMA_INFO,
+> +	DW_MCI_QUIRK_NO_HCON_DMA_INFO,
+> +	DW_MCI_QUIRK_NO_HCON_DMA_INFO,
+> +};
+> +
+>  static struct dw_mci_drv_data exynos5250_drv_data = {
+>  	.ctrl_type	= DW_MCI_TYPE_EXYNOS5250,
+>  	.caps		= exynos5250_dwmmc_caps,
+> +	.quirks		= exynos5250_dwmmc_quirks,
+>  };
+> 
+>  static const struct of_device_id dw_mci_pltfm_match[] = {
+> @@ -74,7 +82,7 @@ static int dw_mci_pltfm_probe(struct platform_device *pdev)
+>  		goto err_free;
+>  	}
+> 
+> -	host->dev = &pdev->dev;
+> +	host->pdev = pdev;
+>  	host->irq_flags = 0;
+>  	host->pdata = pdev->dev.platform_data;
+>  	ret = -ENOMEM;
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 000da16..b32e200 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -283,8 +283,10 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+>  static void dw_mci_start_command(struct dw_mci *host,
+>  				 struct mmc_command *cmd, u32 cmd_flags)
+>  {
+> +	struct device *dev = &host->pdev->dev;
+> +
+>  	host->cmd = cmd;
+> -	dev_vdbg(host->dev,
+> +	dev_vdbg(dev,
+>  		 "start command: ARGR=0x%08x CMDR=0x%08x\n",
+>  		 cmd->arg, cmd_flags);
+> 
+> @@ -323,10 +325,11 @@ static int dw_mci_get_dma_dir(struct mmc_data *data)
+>  static void dw_mci_dma_cleanup(struct dw_mci *host)
+>  {
+>  	struct mmc_data *data = host->data;
+> +	struct device *dev = &host->pdev->dev;
+> 
+>  	if (data)
+>  		if (!data->host_cookie)
+> -			dma_unmap_sg(host->dev,
+> +			dma_unmap_sg(dev,
+>  				     data->sg,
+>  				     data->sg_len,
+>  				     dw_mci_get_dma_dir(data));
+> @@ -351,8 +354,9 @@ static void dw_mci_idmac_stop_dma(struct dw_mci *host)
+>  static void dw_mci_idmac_complete_dma(struct dw_mci *host)
+>  {
+>  	struct mmc_data *data = host->data;
+> +	struct device *dev = &host->pdev->dev;
+> 
+> -	dev_vdbg(host->dev, "DMA complete\n");
+> +	dev_vdbg(dev, "DMA complete\n");
+> 
+>  	host->dma_ops->cleanup(host);
+> 
+> @@ -420,10 +424,27 @@ static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
+>  	mci_writel(host, PLDMND, 1);
+>  }
+> 
+> +static int dw_get_platform_device_id(struct dw_mci *host)
+> +{
+> +	int ctrl_id;
+> +	struct device *dev = &host->pdev->dev;
+> +
+> +	if (dev->of_node)
+> +		ctrl_id = of_alias_get_id(dev->of_node, "mshc");
+> +	else
+> +		ctrl_id = host->pdev->id;
+> +
+> +	if (ctrl_id < 0)
+> +		ctrl_id = 0;
+> +
+> +	return ctrl_id;
+> +}
+> +
+>  static int dw_mci_idmac_init(struct dw_mci *host)
+>  {
+>  	struct idmac_desc *p;
+>  	int i, dma_support;
+> +	struct device *dev = &host->pdev->dev;
+> 
+>  	/* Number of descriptors in the ring buffer */
+>  	host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc);
+> @@ -431,14 +452,20 @@ static int dw_mci_idmac_init(struct dw_mci *host)
+>  	/* Check if Hardware Configuration Register has support for DMA */
+>  	dma_support = (mci_readl(host, HCON) >> 16) & 0x3;
+> 
+> -	if (!dma_support || dma_support > 2) {
+> -		dev_err(&host->dev,
+> +	/*
+> +	 * In Some of the Soc's the HCON Register is broken. Even though the
+> +	 * Soc's has a internal DMA the HCON register's DMA field doesnt
+> +	 * show it. So additional quirk is added for such Soc's
+> +	 */
+> +	if ((!dma_support || dma_support > 2) &&
+> +	    !(host->quirks & DW_MCI_QUIRK_NO_HCON_DMA_INFO)) {
+> +		dev_err(dev,
+>  			"Host Controller does not support IDMA Tx.\n");
+>  		host->dma_ops = NULL;
+>  		return -ENODEV;
+>  	}
+> 
+> -	dev_info(&host->dev, "Using internal DMA controller.\n");
+> +	dev_info(dev, "Using internal DMA controller.\n");
+> 
+>  	/* Forward link the descriptor list */
+>  	for (i = 0, p = host->sg_cpu; i < host->ring_size - 1; i++, p++)
+> @@ -474,6 +501,7 @@ static int dw_mci_pre_dma_transfer(struct dw_mci *host,
+>  {
+>  	struct scatterlist *sg;
+>  	unsigned int i, sg_len;
+> +	struct device *dev = &host->pdev->dev;
+> 
+>  	if (!next && data->host_cookie)
+>  		return data->host_cookie;
+> @@ -494,7 +522,7 @@ static int dw_mci_pre_dma_transfer(struct dw_mci *host,
+>  			return -EINVAL;
+>  	}
+> 
+> -	sg_len = dma_map_sg(host->dev,
+> +	sg_len = dma_map_sg(dev,
+>  			    data->sg,
+>  			    data->sg_len,
+>  			    dw_mci_get_dma_dir(data));
+> @@ -532,12 +560,13 @@ static void dw_mci_post_req(struct mmc_host *mmc,
+>  {
+>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+>  	struct mmc_data *data = mrq->data;
+> +	struct device *dev = &slot->host->pdev->dev;
+> 
+>  	if (!slot->host->use_dma || !data)
+>  		return;
+> 
+>  	if (data->host_cookie)
+> -		dma_unmap_sg(slot->host->dev,
+> +		dma_unmap_sg(dev,
+>  			     data->sg,
+>  			     data->sg_len,
+>  			     dw_mci_get_dma_dir(data));
+> @@ -548,6 +577,7 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+>  {
+>  	int sg_len;
+>  	u32 temp;
+> +	struct device *dev = &host->pdev->dev;
+> 
+>  	host->using_dma = 0;
+> 
+> @@ -563,7 +593,7 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+> 
+>  	host->using_dma = 1;
+> 
+> -	dev_vdbg(host->dev,
+> +	dev_vdbg(dev,
+>  		 "sd sg_cpu: %#lx sg_dma: %#lx sg_len: %d\n",
+>  		 (unsigned long)host->sg_cpu, (unsigned long)host->sg_dma,
+>  		 sg_len);
+> @@ -928,6 +958,7 @@ static void dw_mci_request_end(struct dw_mci *host, struct mmc_request *mrq)
+>  {
+>  	struct dw_mci_slot *slot;
+>  	struct mmc_host	*prev_mmc = host->cur_slot->mmc;
+> +	struct device *dev = &host->pdev->dev;
+> 
+>  	WARN_ON(host->cmd || host->data);
+> 
+> @@ -937,12 +968,12 @@ static void dw_mci_request_end(struct dw_mci *host, struct mmc_request *mrq)
+>  		slot = list_entry(host->queue.next,
+>  				  struct dw_mci_slot, queue_node);
+>  		list_del(&slot->queue_node);
+> -		dev_vdbg(host->dev, "list not empty: %s is next\n",
+> +		dev_vdbg(dev, "list not empty: %s is next\n",
+>  			 mmc_hostname(slot->mmc));
+>  		host->state = STATE_SENDING_CMD;
+>  		dw_mci_start_request(host, slot);
+>  	} else {
+> -		dev_vdbg(host->dev, "list empty\n");
+> +		dev_vdbg(dev, "list empty\n");
+>  		host->state = STATE_IDLE;
+>  	}
+> 
+> @@ -1081,7 +1112,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>  					data->bytes_xfered = 0;
+>  					data->error = -ETIMEDOUT;
+>  				} else {
+> -					dev_err(host->dev,
+> +					dev_err(&host->pdev->dev,
+>  						"data FIFO error "
+>  						"(status=%08x)\n",
+>  						status);
+> @@ -1829,7 +1860,8 @@ static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
+> 
+>  static int dw_mci_of_setup_bus(struct dw_mci *host, u8 slot, u32 bus_wd)
+>  {
+> -	struct device_node *np = dw_mci_of_find_slot_node(host->dev, slot);
+> +	struct device *dev = &host->pdev->dev;
+> +	struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
+>  	int idx, gpio, ret;
+> 
+>  	if (!np)
+> @@ -1838,13 +1870,13 @@ static int dw_mci_of_setup_bus(struct dw_mci *host, u8 slot, u32 bus_wd)
+>  	for (idx = 0; idx < NUM_PINS(bus_wd); idx++) {
+>  		gpio = of_get_gpio(np, idx);
+>  		if (!gpio_is_valid(gpio)) {
+> -			dev_err(host->dev, "invalid gpio: %d\n", gpio);
+> +			dev_err(dev, "invalid gpio: %d\n", gpio);
+>  			return -EINVAL;
+>  		}
+> 
+> -		ret = devm_gpio_request(host->dev, gpio, "dw-mci-bus");
+> +		ret = devm_gpio_request(dev, gpio, "dw-mci-bus");
+>  		if (ret) {
+> -			dev_err(host->dev, "gpio [%d] request failed\n", gpio);
+> +			dev_err(dev, "gpio [%d] request failed\n", gpio);
+>  			return -EBUSY;
+>  		}
+>  	}
+> @@ -1852,11 +1884,11 @@ static int dw_mci_of_setup_bus(struct dw_mci *host, u8 slot, u32 bus_wd)
+>  	host->slot[slot]->wp_gpio = -1;
+>  	gpio = of_get_named_gpio(np, "wp-gpios", 0);
+>  	if (!gpio_is_valid(gpio)) {
+> -		dev_info(host->dev, "wp gpio not available");
+> +		dev_info(dev, "wp gpio not available");
+>  	} else {
+> -		ret = devm_gpio_request(host->dev, gpio, "dw-mci-wp");
+> +		ret = devm_gpio_request(dev, gpio, "dw-mci-wp");
+>  		if (ret)
+> -			dev_info(host->dev, "gpio [%d] request failed\n",
+> +			dev_info(dev, "gpio [%d] request failed\n",
+>  						gpio);
+>  		else
+>  			host->slot[slot]->wp_gpio = gpio;
+> @@ -1865,11 +1897,11 @@ static int dw_mci_of_setup_bus(struct dw_mci *host, u8 slot, u32 bus_wd)
+>  	host->slot[slot]->cd_gpio = -1;
+>  	gpio = of_get_named_gpio(np, "cd-gpios", 0);
+>  	if (!gpio_is_valid(gpio)) {
+> -		dev_info(host->dev, "cd gpio not available");
+> +		dev_info(dev, "cd gpio not available");
+>  	} else {
+> -		ret = devm_gpio_request(host->dev, gpio, "dw-mci-cd");
+> +		ret = devm_gpio_request(dev, gpio, "dw-mci-cd");
+>  		if (ret)
+> -			dev_err(host->dev, "gpio [%d] request failed\n", gpio);
+> +			dev_err(dev, "gpio [%d] request failed\n", gpio);
+>  		else
+>  			host->slot[slot]->cd_gpio = gpio;
+>  	}
+> @@ -1893,8 +1925,9 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  	struct mmc_host *mmc;
+>  	struct dw_mci_slot *slot;
+>  	int ctrl_id, ret;
+> +	struct device *dev = &host->pdev->dev;
+> 
+> -	mmc = mmc_alloc_host(sizeof(struct dw_mci_slot), host->dev);
+> +	mmc = mmc_alloc_host(sizeof(struct dw_mci_slot), dev);
+>  	if (!mmc)
+>  		return -ENOMEM;
+> 
+> @@ -1923,11 +1956,8 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  	if (host->pdata->caps)
+>  		mmc->caps = host->pdata->caps;
+> 
+> -	if (host->dev->of_node) {
+> -		ctrl_id = of_alias_get_id(host->dev->of_node, "mshc");
+> -		if (ctrl_id < 0)
+> -			ctrl_id = 0;
+> -	}
+> +	ctrl_id = dw_get_platform_device_id(host);
+> +
+>  	if (host->drv_data->caps)
+>  		mmc->caps |= host->drv_data->caps[ctrl_id];
+> 
+> @@ -1937,9 +1967,9 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  	if (host->pdata->get_bus_wd) {
+>  		if (host->pdata->get_bus_wd(slot->id) >= 4)
+>  			mmc->caps |= MMC_CAP_4_BIT_DATA;
+> -	} else if (host->dev->of_node) {
+> +	} else if (dev->of_node) {
+>  		unsigned int bus_width;
+> -		bus_width = dw_mci_of_get_bus_wd(host->dev, slot->id);
+> +		bus_width = dw_mci_of_get_bus_wd(dev, slot->id);
+>  		switch (bus_width) {
+>  		case 8:
+>  			mmc->caps |= MMC_CAP_8_BIT_DATA;
+> @@ -2030,11 +2060,12 @@ static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
+> 
+>  static void dw_mci_init_dma(struct dw_mci *host)
+>  {
+> +	struct device *dev = &host->pdev->dev;
+>  	/* Alloc memory for sg translation */
+> -	host->sg_cpu = dma_alloc_coherent(host->dev, PAGE_SIZE,
+> +	host->sg_cpu = dma_alloc_coherent(dev, PAGE_SIZE,
+>  					  &host->sg_dma, GFP_KERNEL);
+>  	if (!host->sg_cpu) {
+> -		dev_err(host->dev, "%s: could not alloc DMA memory\n",
+> +		dev_err(dev, "%s: could not alloc DMA memory\n",
+>  			__func__);
+>  		goto no_dma;
+>  	}
+> @@ -2050,12 +2081,12 @@ static void dw_mci_init_dma(struct dw_mci *host)
+>  	if (host->dma_ops->init && host->dma_ops->start &&
+>  	    host->dma_ops->stop && host->dma_ops->cleanup) {
+>  		if (host->dma_ops->init(host)) {
+> -			dev_err(host->dev, "%s: Unable to initialize "
+> +			dev_err(dev, "%s: Unable to initialize "
+>  				"DMA Controller.\n", __func__);
+>  			goto no_dma;
+>  		}
+>  	} else {
+> -		dev_err(host->dev, "DMA initialization not found.\n");
+> +		dev_err(dev, "DMA initialization not found.\n");
+>  		goto no_dma;
+>  	}
+> 
+> @@ -2063,7 +2094,7 @@ static void dw_mci_init_dma(struct dw_mci *host)
+>  	return;
+> 
+>  no_dma:
+> -	dev_info(host->dev, "Using PIO mode.\n");
+> +	dev_info(dev, "Using PIO mode.\n");
+>  	host->use_dma = 0;
+>  	return;
+>  }
+> @@ -2109,7 +2140,7 @@ static struct dw_mci_of_quirks {
+>  static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  {
+>  	struct dw_mci_board *pdata;
+> -	struct device *dev = host->dev;
+> +	struct device *dev = &host->pdev->dev;
+>  	struct device_node *np = dev->of_node;
+>  	u32 timing[3];
+>  	int idx, cnt;
+> @@ -2166,33 +2197,34 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+> 
+>  int dw_mci_probe(struct dw_mci *host)
+>  {
+> -	int width, i, ret = 0;
+> +	int width, i, ctrl_id, ret = 0;
+>  	u32 fifo_size;
+>  	int init_slots = 0;
+> +	struct device *dev = &host->pdev->dev;
+> 
+>  	if (!host->pdata) {
+>  		host->pdata = dw_mci_parse_dt(host);
+>  		if (IS_ERR(host->pdata)) {
+> -			dev_err(host->dev, "platform data not available\n");
+> +			dev_err(dev, "platform data not available\n");
+>  			return -EINVAL;
+>  		}
+>  	}
+> 
+>  	if (!host->pdata->select_slot && host->pdata->num_slots > 1) {
+> -		dev_err(host->dev,
+> +		dev_err(dev,
+>  			"Platform data must supply select_slot function\n");
+>  		return -ENODEV;
+>  	}
+> 
+> -	host->biu_clk = clk_get(host->dev, "biu");
+> +	host->biu_clk = clk_get(dev, "biu");
+>  	if (IS_ERR(host->biu_clk))
+> -		dev_dbg(host->dev, "biu clock not available\n");
+> +		dev_dbg(dev, "biu clock not available\n");
+>  	else
+>  		clk_prepare_enable(host->biu_clk);
+> 
+> -	host->ciu_clk = clk_get(host->dev, "ciu");
+> +	host->ciu_clk = clk_get(dev, "ciu");
+>  	if (IS_ERR(host->ciu_clk))
+> -		dev_dbg(host->dev, "ciu clock not available\n");
+> +		dev_dbg(dev, "ciu clock not available\n");
+>  	else
+>  		clk_prepare_enable(host->ciu_clk);
+> 
+> @@ -2202,7 +2234,7 @@ int dw_mci_probe(struct dw_mci *host)
+>  		host->bus_hz = clk_get_rate(host->ciu_clk);
+> 
+>  	if (!host->bus_hz) {
+> -		dev_err(host->dev,
+> +		dev_err(dev,
+>  			"Platform data must supply bus speed\n");
+>  		ret = -ENODEV;
+>  		goto err_clk;
+> @@ -2210,6 +2242,11 @@ int dw_mci_probe(struct dw_mci *host)
+> 
+>  	host->quirks = host->pdata->quirks;
+> 
+> +	ctrl_id = dw_get_platform_device_id(host);
+> +
+> +	if (host->drv_data->quirks)
+> +		host->quirks |= host->drv_data->quirks[ctrl_id];
+> +
+>  	spin_lock_init(&host->lock);
+>  	INIT_LIST_HEAD(&host->queue);
+> 
+> @@ -2243,7 +2280,7 @@ int dw_mci_probe(struct dw_mci *host)
+>  	}
+> 
+>  	/* Reset all blocks */
+> -	if (!mci_wait_reset(host->dev, host))
+> +	if (!mci_wait_reset(dev, host))
+>  		return -ENODEV;
+> 
+>  	host->dma_ops = host->pdata->dma_ops;
+> @@ -2300,15 +2337,15 @@ int dw_mci_probe(struct dw_mci *host)
+>  	for (i = 0; i < host->num_slots; i++) {
+>  		ret = dw_mci_init_slot(host, i);
+>  		if (ret)
+> -			dev_dbg(host->dev, "slot %d init failed\n", i);
+> +			dev_dbg(dev, "slot %d init failed\n", i);
+>  		else
+>  			init_slots++;
+>  	}
+> 
+>  	if (init_slots) {
+> -		dev_info(host->dev, "%d slots initialized\n", init_slots);
+> +		dev_info(dev, "%d slots initialized\n", init_slots);
+>  	} else {
+> -		dev_dbg(host->dev, "attempted to initialize %d slots, "
+> +		dev_dbg(dev, "attempted to initialize %d slots, "
+>  					"but failed on all\n", host->num_slots);
+>  		goto err_init_slot;
+>  	}
+> @@ -2318,7 +2355,7 @@ int dw_mci_probe(struct dw_mci *host)
+>  	 * Need to check the version-id and set data-offset for DATA register.
+>  	 */
+>  	host->verid = SDMMC_GET_VERID(mci_readl(host, VERID));
+> -	dev_info(host->dev, "Version ID is %04x\n", host->verid);
+> +	dev_info(dev, "Version ID is %04x\n", host->verid);
+> 
+>  	if (host->verid < DW_MMC_240A)
+>  		host->data_offset = DATA_OFFSET;
+> @@ -2335,12 +2372,12 @@ int dw_mci_probe(struct dw_mci *host)
+>  		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
+>  	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE); /* Enable mci interrupt */
+> 
+> -	dev_info(host->dev, "DW MMC controller at irq %d, "
+> +	dev_info(dev, "DW MMC controller at irq %d, "
+>  		 "%d bit host data width, "
+>  		 "%u deep fifo\n",
+>  		 host->irq, width, fifo_size);
+>  	if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO)
+> -		dev_info(host->dev, "Internal DMAC interrupt fix enabled.\n");
+> +		dev_info(dev, "Internal DMAC interrupt fix enabled.\n");
+> 
+>  	return 0;
+> 
+> @@ -2353,7 +2390,7 @@ err_workqueue:
+>  err_dmaunmap:
+>  	if (host->use_dma && host->dma_ops->exit)
+>  		host->dma_ops->exit(host);
+> -	dma_free_coherent(host->dev, PAGE_SIZE,
+> +	dma_free_coherent(dev, PAGE_SIZE,
+>  			  host->sg_cpu, host->sg_dma);
+> 
+>  	if (host->vmmc) {
+> @@ -2377,23 +2414,23 @@ EXPORT_SYMBOL(dw_mci_probe);
+>  void dw_mci_remove(struct dw_mci *host)
+>  {
+>  	int i;
+> +	struct device *dev = &host->pdev->dev;
+> 
+>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+>  	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
+> 
+>  	for (i = 0; i < host->num_slots; i++) {
+> -		dev_dbg(host->dev, "remove slot %d\n", i);
+> +		dev_dbg(dev, "remove slot %d\n", i);
+>  		if (host->slot[i])
+>  			dw_mci_cleanup_slot(host->slot[i], i);
+>  	}
+> -
+>  	/* disable clock to CIU */
+>  	mci_writel(host, CLKENA, 0);
+>  	mci_writel(host, CLKSRC, 0);
+> 
+>  	free_irq(host->irq, host);
+>  	destroy_workqueue(host->card_workqueue);
+> -	dma_free_coherent(host->dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
+> +	dma_free_coherent(dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
+> 
+>  	if (host->use_dma && host->dma_ops->exit)
+>  		host->dma_ops->exit(host);
+> @@ -2451,7 +2488,7 @@ int dw_mci_resume(struct dw_mci *host)
+>  	if (host->vmmc)
+>  		regulator_enable(host->vmmc);
+> 
+> -	if (!mci_wait_reset(host->dev, host)) {
+> +	if (!mci_wait_reset(&host->pdev->dev, host)) {
+>  		ret = -ENODEV;
+>  		return ret;
+>  	}
+> @@ -2483,7 +2520,7 @@ EXPORT_SYMBOL(dw_mci_resume);
+> 
+>  static int __init dw_mci_init(void)
+>  {
+> -	printk(KERN_INFO "Synopsys Designware Multimedia Card Interface Driver");
+> +	pr_info("Synopsys Designware Multimedia Card Interface Driver");
+>  	return 0;
+>  }
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 6c17282..a3d684b 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -203,6 +203,7 @@ extern int dw_mci_resume(struct dw_mci *host);
+>  struct dw_mci_drv_data {
+>  	unsigned long		ctrl_type;
+>  	unsigned long		*caps;
+> +	unsigned long		*quirks;
+>  };
+> 
+>  #endif /* _DW_MMC_H_ */
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index 32c778f..03c409b 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -161,7 +161,7 @@ struct dw_mci {
+>  	u32			fifoth_val;
+>  	u16			verid;
+>  	u16			data_offset;
+> -	struct device		*dev;
+> +	struct platform_device	*pdev;
+>  	struct dw_mci_board	*pdata;
+>  	struct dw_mci_drv_data	*drv_data;
+>  	struct clk		*biu_clk;
+> @@ -215,6 +215,8 @@ struct dw_mci_dma_ops {
+>  #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(3)
+>  /* Write Protect detection not available */
+>  #define DW_MCI_QUIRK_NO_WRITE_PROTECT		BIT(4)
+> +/* HCON Register's IDMAC information broken */
+> +#define DW_MCI_QUIRK_NO_HCON_DMA_INFO		BIT(5)
+> 
+>  struct dma_pdata;
+> 
+> --
+> 1.7.4.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
