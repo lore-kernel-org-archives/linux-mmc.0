@@ -1,68 +1,38 @@
-From: Julia Lawall <Julia.Lawall-L2FTfq7BK8M@public.gmane.org>
-Subject: [PATCH 2/2] drivers/mmc/host/vub300.c: add missing usb_free_urb
-Date: Tue, 24 Jul 2012 17:06:10 +0200
-Message-ID: <1343142370-27876-2-git-send-email-Julia.Lawall@lip6.fr>
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tony Olech <tony.olech-ze5PQcJzaeOs0fm86SgGizGjJy/sRE9J@public.gmane.org>
-Cc: kernel-janitors-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v2] mmc: dw_mmc: Disable low power mode if SDIO interrupts
+ are used
+Date: Tue, 24 Jul 2012 09:58:23 -0700
+Message-ID: <CAD=FV=WeX+TACSR+z7ynmurnSnayGc30_gFRtnek=Mv-c3o3JA@mail.gmail.com>
+References: <CAD=FV=XuXUe1Jyd_urCzmS5+1vv7iuNTXYr23XYZp+MnTq1HGg@mail.gmail.com>
+	<1343062955-24516-1-git-send-email-dianders@chromium.org>
+	<004d01cd693a$0a55d7b0$1f018710$%jun@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <004d01cd693a$0a55d7b0$1f018710$%jun@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-kernel@vger.kernel.org, Grant Grundler <grundler@chromium.org>, Olof Johansson <olofj@chromium.org>, shashidharh@vayavyalabs.com, ki0351.kim@samsung.com
 List-Id: linux-mmc@vger.kernel.org
 
-From: Julia Lawall <Julia.Lawall-L2FTfq7BK8M@public.gmane.org>
+On Mon, Jul 23, 2012 at 6:17 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> I have followed this patch from v1.
+> I think it's a good point.
+> Looks good to me.
 
-Add missing usb_free_urb on failure path after usb_alloc_urb.
+Thanks for the review!  Looking forward to your ack with the next version.  :)
 
-A simplified version of the semantic match that finds this problem is as
-follows: (http://coccinelle.lip6.fr/)
+> Above comment is correct, but this is not specific for Exynos5250.
+> Exynos5250 is just one of host controllers base on Synopsys's.
+> It'd be better to remove the part related to Exynos you mentioned .
 
-// <smpl>
-@km exists@
-local idexpression e;
-expression e1,e2,e3;
-type T,T1;
-identifier f;
-@@
+Done.  Grant had requested me to quote exactly which manual I found
+the requirement in, but I think describing just that it was found in
+the description of the CLKENA register is enough.  I've changed it.
 
-* e = usb_alloc_urb(...)
-... when any
-    when != e = e1
-    when != e1 = (T)e
-    when != e1(...,(T)e,...)
-    when != &e->f
-if(...) { ... when != e2(...,(T1)e,...)
-                 when != e3 = e
-                 when forall
-(
-             return <+...e...+>;
-|
-*             return ...;
-) }
-// </smpl>
+> Definitely, low power mode not power mode, right?
 
-Signed-off-by: Julia Lawall <Julia.Lawall-L2FTfq7BK8M@public.gmane.org>
+Done.  Good catch!
 
----
- drivers/mmc/host/vub300.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-index 3135a1a..6c39bf1 100644
---- a/drivers/mmc/host/vub300.c
-+++ b/drivers/mmc/host/vub300.c
-@@ -2358,9 +2358,9 @@ error5:
- 	 * which is contained at the end of struct mmc
- 	 */
- error4:
--	usb_free_urb(command_out_urb);
--error1:
- 	usb_free_urb(command_res_urb);
-+error1:
-+	usb_free_urb(command_out_urb);
- error0:
- 	return retval;
- }
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-Doug
