@@ -1,14 +1,16 @@
 From: <ludovic.desroches@atmel.com>
-Subject: [PATCH RESEND v5 0/4] atmel-mci device tree support
-Date: Tue, 24 Jul 2012 15:30:02 +0200
-Message-ID: <1343136606-8874-1-git-send-email-ludovic.desroches@atmel.com>
+Subject: [PATCH 3/4] ARM: dts: add nodes for atmel hsmci controllers for atmel SOCs
+Date: Tue, 24 Jul 2012 15:30:05 +0200
+Message-ID: <1343136606-8874-4-git-send-email-ludovic.desroches@atmel.com>
+References: <1343136606-8874-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:65147 "EHLO
+Received: from eusmtp01.atmel.com ([212.144.249.242]:65181 "EHLO
 	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750897Ab2GXNbL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jul 2012 09:31:11 -0400
+	with ESMTP id S1751378Ab2GXNbS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jul 2012 09:31:18 -0400
+In-Reply-To: <1343136606-8874-1-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
@@ -16,75 +18,145 @@ Cc: cjb@laptop.org, nicolas.ferre@atmel.com, plagnioj@jcrosoft.com
 
 From: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Hello,
+Add mci controller nodes to atmel SOCs.
 
-I resend this set of patches because patches 2, 3 and 4 were acked by
-Jean-Christophe. Patch 1 was also acked by Jean-Christophe excepted for
-cd-inverted property since it was redundant with gpio bindings.
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+Acked-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+---
+ arch/arm/boot/dts/at91sam9260.dtsi |    9 +++++++++
+ arch/arm/boot/dts/at91sam9263.dtsi |   18 ++++++++++++++++++
+ arch/arm/boot/dts/at91sam9g45.dtsi |   18 ++++++++++++++++++
+ arch/arm/boot/dts/at91sam9n12.dtsi |    9 +++++++++
+ arch/arm/boot/dts/at91sam9x5.dtsi  |   18 ++++++++++++++++++
+ 5 files changed, 72 insertions(+), 0 deletions(-)
 
-I thought we were agree to go ahead since it was a common binding already
-documented and it will concern all drivers.
-
-Chris are you agree to take patch 1/4? Others patches may go to at91 tree,
-isn't it?
-By the way, I have updated documentation in patch 1/4 in the same way as you
-did with the patch 'mmc: dt: Deduplicate binding docs by referencing mmc.txt'.
-I didn't remove common properties from slot part because I think it is not
-obvious to use these properties into the slot node.
-
-Regards
-
-Ludovic
-
-
-v5:
-- cleanup
-- split dts commit: one for SOCs, one for boards
-
-v4:
-- cleanup
-- add extra chips and boards for atmel-mci dt support
-
-v3:
-- use cd-inverted instead of cd-invert to follow mmc common binding.
-- don't assign a pointer to pdev->dev.platform.
-- add mci controller nodes to other chips and boards.
-- put all dts file changes together.
-
-v2:
-- squash patch v1 2/4 and 3/4.
-- change atmci_get_of_slots to atmci_of_init and manage pdata allocation into
-it.
-- correct potential issue (e.g. having only one slot which is not slot0 into
-the dt) about slots by adding a reg property corresponding to the slot id.
-
-Ludovic Desroches (4):
-  mmc: atmel-mci: add device tree support
-  ARM: at91: add clocks for DT entries
-  ARM: dts: add nodes for atmel hsmci controllers for atmel SOCs
-  ARM: dts: add nodes for atmel hsmci controllers for atmel boards
-
- .../devicetree/bindings/mmc/atmel-hsmci.txt        |   68 ++++++++++++++++
- arch/arm/boot/dts/at91sam9260.dtsi                 |    9 ++
- arch/arm/boot/dts/at91sam9263.dtsi                 |   18 ++++
- arch/arm/boot/dts/at91sam9263ek.dts                |   10 +++
- arch/arm/boot/dts/at91sam9g20ek_2mmc.dts           |   12 +++
- arch/arm/boot/dts/at91sam9g20ek_common.dtsi        |    9 ++
- arch/arm/boot/dts/at91sam9g25ek.dts                |   18 ++++
- arch/arm/boot/dts/at91sam9g45.dtsi                 |   18 ++++
- arch/arm/boot/dts/at91sam9m10g45ek.dts             |   19 +++++
- arch/arm/boot/dts/at91sam9n12.dtsi                 |    9 ++
- arch/arm/boot/dts/at91sam9n12ek.dts                |    9 ++
- arch/arm/boot/dts/at91sam9x5.dtsi                  |   18 ++++
- arch/arm/mach-at91/at91sam9260.c                   |    1 +
- arch/arm/mach-at91/at91sam9263.c                   |    2 +
- arch/arm/mach-at91/at91sam9g45.c                   |    2 +
- arch/arm/mach-at91/at91sam9n12.c                   |    1 +
- arch/arm/mach-at91/at91sam9x5.c                    |    2 +
- drivers/mmc/host/atmel-mci.c                       |   85 +++++++++++++++++++-
- 18 files changed, 308 insertions(+), 2 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
-
+diff --git a/arch/arm/boot/dts/at91sam9260.dtsi b/arch/arm/boot/dts/at91sam9260.dtsi
+index f449efc..ae54bf3 100644
+--- a/arch/arm/boot/dts/at91sam9260.dtsi
++++ b/arch/arm/boot/dts/at91sam9260.dtsi
+@@ -198,6 +198,15 @@
+ 				status = "disabled";
+ 			};
+ 
++			mmc0: mmc@fffa8000 {
++				compatible = "atmel,hsmci";
++				reg = <0xfffa800 0x600>;
++				interrupts = <9 4>;
++				status = "disabled";
++				#address-cells = <1>;
++				#size-cells = <0>;
++			};
++
+ 			adc0: adc@fffe0000 {
+ 				compatible = "atmel,at91sam9260-adc";
+ 				reg = <0xfffe0000 0x100>;
+diff --git a/arch/arm/boot/dts/at91sam9263.dtsi b/arch/arm/boot/dts/at91sam9263.dtsi
+index 0209913..a327ebe 100644
+--- a/arch/arm/boot/dts/at91sam9263.dtsi
++++ b/arch/arm/boot/dts/at91sam9263.dtsi
+@@ -179,6 +179,24 @@
+ 				interrupts = <24 4>;
+ 				status = "disabled";
+ 			};
++
++			mmc0: mmc@fff80000 {
++				compatible = "atmel,hsmci";
++				reg = <0xfff80000 0x600>;
++				interrupts = <10 4>;
++				status = "disabled";
++				#address-cells = <1>;
++				#size-cells = <0>;
++			};
++
++			mmc1: mmc@fff84000 {
++				compatible = "atmel,hsmci";
++				reg = <0xfff84000 0x600>;
++				interrupts = <11 4>;
++				status = "disabled";
++				#address-cells = <1>;
++				#size-cells = <0>;
++			};
+ 		};
+ 
+ 		nand0: nand@40000000 {
+diff --git a/arch/arm/boot/dts/at91sam9g45.dtsi b/arch/arm/boot/dts/at91sam9g45.dtsi
+index 7dbccaf..0360bf8 100644
+--- a/arch/arm/boot/dts/at91sam9g45.dtsi
++++ b/arch/arm/boot/dts/at91sam9g45.dtsi
+@@ -236,6 +236,24 @@
+ 					trigger-value = <0x6>;
+ 				};
+ 			};
++
++			mmc0: mmc@fff80000 {
++				compatible = "atmel,hsmci";
++				reg = <0xfff80000 0x600>;
++				interrupts = <11 4>;
++				status = "disabled";
++				#address-cells = <1>;
++				#size-cells = <0>;
++			};
++
++			mmc1: mmc@fffd0000 {
++				compatible = "atmel,hsmci";
++				reg = <0xfffd0000 0x600>;
++				interrupts = <29 4>;
++				status = "disabled";
++				#address-cells = <1>;
++				#size-cells = <0>;
++			};
+ 		};
+ 
+ 		nand0: nand@40000000 {
+diff --git a/arch/arm/boot/dts/at91sam9n12.dtsi b/arch/arm/boot/dts/at91sam9n12.dtsi
+index cb84de7..f3e03fb 100644
+--- a/arch/arm/boot/dts/at91sam9n12.dtsi
++++ b/arch/arm/boot/dts/at91sam9n12.dtsi
+@@ -82,6 +82,15 @@
+ 				reg = <0xfffffe10 0x10>;
+ 			};
+ 
++			mmc0: mmc@f0008000 {
++				compatible = "atmel,hsmci";
++				reg = <0xf0008000 0x600>;
++				interrupts = <12 4>;
++				status = "disabled";
++				#address-cells = <1>;
++				#size-cells = <0>;
++			};
++
+ 			tcb0: timer@f8008000 {
+ 				compatible = "atmel,at91sam9x5-tcb";
+ 				reg = <0xf8008000 0x100>;
+diff --git a/arch/arm/boot/dts/at91sam9x5.dtsi b/arch/arm/boot/dts/at91sam9x5.dtsi
+index 6b3ef43..4e8125b 100644
+--- a/arch/arm/boot/dts/at91sam9x5.dtsi
++++ b/arch/arm/boot/dts/at91sam9x5.dtsi
+@@ -228,6 +228,24 @@
+ 					trigger-value = <0x6>;
+ 				};
+ 			};
++
++			mmc0: mmc@f0008000 {
++				compatible = "atmel,hsmci";
++				reg = <0xf0008000 0x600>;
++				interrupts = <12 4>;
++				status = "disabled";
++				#address-cells = <1>;
++				#size-cells = <0>;
++			};
++
++			mmc1: mmc@f000c000 {
++				compatible = "atmel,hsmci";
++				reg = <0xf000c000 0x600>;
++				interrupts = <26 4>;
++				status = "disabled";
++				#address-cells = <1>;
++				#size-cells = <0>;
++			};
+ 		};
+ 
+ 		nand0: nand@40000000 {
 -- 
 1.7.5.4
 
