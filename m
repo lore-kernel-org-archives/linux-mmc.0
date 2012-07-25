@@ -1,245 +1,136 @@
-From: Maya Erez <merez@codeaurora.org>
-Subject: [PATCH] mmc: card: Add Sanitize unit test
-Date: Wed, 25 Jul 2012 09:37:37 +0300
-Message-ID: <1343198350-5307-1-git-send-email-merez@codeaurora.org>
-References: <n>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <n>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
+From: Kyungsik Lee <kyungsik.lee@lge.com>
+Subject: [PATCH RESEND] mmc: core: Remove bounce buffer in mmc_send_cxd_data()
+Date: Wed, 25 Jul 2012 17:06:18 +0900
+Message-ID: <1343203578-21874-1-git-send-email-kyungsik.lee@lge.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from LGEMRELSE1Q.lge.com ([156.147.1.111]:49430 "EHLO
+	LGEMRELSE1Q.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754712Ab2GYIGi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jul 2012 04:06:38 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Pierre Ossman <drzeus@drzeus.cx>, raphael.andy.lee@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Kyungsik Lee <kyungsik.lee@lge.com>
 
-This test write data to the card, then send DISCARD on random
-addresses on the card, send SANITIZE to the card to erase all
-the unmapped areas.
+It is expected that Extended CSD register(the size of this register
+is larger than CID/CSD) will be referenced more frequently as more
+fields have been added to Extended CSD and it seems that it is not
+a good option to double the memory used.
 
-Signed-off-by: Maya Erez <merez@codeaurora.org>
+This patch is intended to avoid the use of bounce buffer for reading
+Extended CSD register in mmc_send_cxd_data().
+
+Signed-off-by: Kyungsik Lee <kyungsik.lee@lge.com>
 ---
-This patch depends of the following patches:
-  [PATCH RESEND v7 1/2] block: ioctl support for sanitize in eMMC 4.5
-  [PATCH RESEND v7 2/2] mmc: card: Adding support for sanitize in eMMC 4.5
-  [PATCH v4 2/3] block: Add test-iosched scheduler
-  [PATCH v4 3/3] mmc: card: Add eMMC4.5 write packed commands unit-tests
+ drivers/mmc/core/mmc_ops.c |   45 ++++++++++++++++++++++++++++---------------
+ 1 files changed, 29 insertions(+), 16 deletions(-)
 
----
- block/test-iosched.c              |    3 +
- drivers/mmc/card/mmc_block_test.c |  120 +++++++++++++++++++++++++++++++++++++
- include/linux/test-iosched.h      |    1 +
- 3 files changed, 124 insertions(+), 0 deletions(-)
-
-diff --git a/block/test-iosched.c b/block/test-iosched.c
-index 6f0b0b3..e04befd 100644
---- a/block/test-iosched.c
-+++ b/block/test-iosched.c
-@@ -173,6 +173,9 @@ int test_iosched_add_unique_test_req(int is_err_expcted,
- 		bio->bi_size = nr_sects << 9;
- 		bio->bi_sector = start_sec;
- 		break;
-+	case REQ_UNIQUE_SANITIZE:
-+		bio->bi_rw = REQ_WRITE | REQ_SANITIZE;
-+		break;
- 	default:
- 		test_pr_err("%s: Invalid request type %d", __func__,
- 			    req_unique);
-diff --git a/drivers/mmc/card/mmc_block_test.c b/drivers/mmc/card/mmc_block_test.c
-index f2a0ac7..25af8cc 100644
---- a/drivers/mmc/card/mmc_block_test.c
-+++ b/drivers/mmc/card/mmc_block_test.c
-@@ -33,11 +33,16 @@
- #define PACKED_HDR_RW_MASK 0x0000FF00
- #define PACKED_HDR_NUM_REQS_MASK 0x00FF0000
- #define PACKED_HDR_BITS_16_TO_29_SET 0x3FFF0000
-+#define SECTOR_SIZE 512
-+#define NUM_OF_SECTORS_PER_BIO		((BIO_U32_SIZE * 4) / SECTOR_SIZE)
-+#define BIO_TO_SECTOR(x)		(x * NUM_OF_SECTORS_PER_BIO)
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 0ed2cc5..95d94a0 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -238,14 +238,6 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
+ 	struct mmc_command cmd = {0};
+ 	struct mmc_data data = {0};
+ 	struct scatterlist sg;
+-	void *data_buf;
+-
+-	/* dma onto stack is unsafe/nonportable, but callers to this
+-	 * routine normally provide temporary on-stack buffers ...
+-	 */
+-	data_buf = kmalloc(len, GFP_KERNEL);
+-	if (data_buf == NULL)
+-		return -ENOMEM;
  
- #define test_pr_debug(fmt, args...) pr_debug("%s: "fmt"\n", MODULE_NAME, args)
- #define test_pr_info(fmt, args...) pr_info("%s: "fmt"\n", MODULE_NAME, args)
- #define test_pr_err(fmt, args...) pr_err("%s: "fmt"\n", MODULE_NAME, args)
+ 	mrq.cmd = &cmd;
+ 	mrq.data = &data;
+@@ -266,7 +258,7 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
+ 	data.sg = &sg;
+ 	data.sg_len = 1;
  
-+#define SANITIZE_TEST_TIMEOUT 240000
+-	sg_init_one(&sg, data_buf, len);
++	sg_init_one(&sg, buf, len);
+ 
+ 	if (opcode == MMC_SEND_CSD || opcode == MMC_SEND_CID) {
+ 		/*
+@@ -280,9 +272,6 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
+ 
+ 	mmc_wait_for_req(host, &mrq);
+ 
+-	memcpy(buf, data_buf, len);
+-	kfree(data_buf);
+-
+ 	if (cmd.error)
+ 		return cmd.error;
+ 	if (data.error)
+@@ -294,24 +283,37 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
+ int mmc_send_csd(struct mmc_card *card, u32 *csd)
+ {
+ 	int ret, i;
++	u32 *csd_tmp;
+ 
+ 	if (!mmc_host_is_spi(card->host))
+ 		return mmc_send_cxd_native(card->host, card->rca << 16,
+ 				csd, MMC_SEND_CSD);
+ 
+-	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd, 16);
++	csd_tmp = kmalloc(16, GFP_KERNEL);
++	if (!csd_tmp)
++		return -ENOMEM;
 +
- enum is_random {
- 	NON_RANDOM_TEST,
- 	RANDOM_TEST,
-@@ -83,6 +88,8 @@ enum mmc_block_test_testcases {
- 	TEST_CMD23_BITS_16TO29_SET,
- 	TEST_CMD23_HDR_BLK_NOT_IN_COUNT,
- 	INVALID_CMD_MAX_TESTCASE = TEST_CMD23_HDR_BLK_NOT_IN_COUNT,
++	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd_tmp, 16);
+ 	if (ret)
+-		return ret;
++		goto err;
 +
-+	TEST_WRITE_DISCARD_SANITIZE_READ,
- };
++	memcpy(csd, csd_tmp, 16);
  
- enum mmc_block_test_group {
-@@ -98,6 +105,7 @@ struct mmc_block_test_debug {
- 	struct dentry *err_check_test;
- 	struct dentry *send_invalid_packed_test;
- 	struct dentry *random_test_seed;
-+	struct dentry *discard_sanitize_test;
- };
+ 	for (i = 0;i < 4;i++)
+ 		csd[i] = be32_to_cpu(csd[i]);
  
- struct mmc_block_test_data {
-@@ -454,6 +462,8 @@ static char *get_test_case_str(struct test_data *td)
- 		return "Test invalid - cmd23 bits [16-29] set";
- 	case TEST_CMD23_HDR_BLK_NOT_IN_COUNT:
- 		return "Test invalid - cmd23 header block not in count";
-+	case TEST_WRITE_DISCARD_SANITIZE_READ:
-+		return "\nTest write, discard, sanitize";
- 	default:
- 		 return "Unknown testcase";
++	kfree(csd_tmp);
+ 	return 0;
++
++err:
++	kfree(csd_tmp);
++	return ret;
+ }
+ 
+ int mmc_send_cid(struct mmc_host *host, u32 *cid)
+ {
+ 	int ret, i;
++	u32 *cid_tmp;
+ 
+ 	if (!mmc_host_is_spi(host)) {
+ 		if (!host->card)
+@@ -320,14 +322,25 @@ int mmc_send_cid(struct mmc_host *host, u32 *cid)
+ 				cid, MMC_SEND_CID);
  	}
-@@ -1080,6 +1090,63 @@ static int validate_packed_commands_settings(void)
+ 
+-	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid, 16);
++	cid_tmp = kmalloc(16, GFP_KERNEL);
++	if (!cid_tmp)
++		return -ENOMEM;
++
++	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid_tmp, 16);
+ 	if (ret)
+-		return ret;
++		goto err;
++
++	memcpy(cid, cid_tmp, 16);
+ 
+ 	for (i = 0;i < 4;i++)
+ 		cid[i] = be32_to_cpu(cid[i]);
+ 
++	kfree(cid_tmp);
  	return 0;
++
++err:
++	kfree(cid_tmp);
++	return ret;
  }
  
-+static void pseudo_rnd_sector_and_size(unsigned int *seed,
-+				       unsigned int min_start_sector,
-+				       unsigned int *start_sector,
-+				       unsigned int *num_of_bios)
-+{
-+	unsigned int max_sec = min_start_sector + TEST_MAX_SECTOR_RANGE;
-+	do {
-+		*start_sector = pseudo_random_seed(seed,
-+						   1, max_sec);
-+		*num_of_bios = pseudo_random_seed(seed,
-+						  1, TEST_MAX_BIOS_PER_REQ);
-+		if (!(*num_of_bios))
-+			*num_of_bios = 1;
-+	} while ((*start_sector < min_start_sector) ||
-+		 (*start_sector + (*num_of_bios * BIO_U32_SIZE * 4)) > max_sec);
-+}
-+
-+/* sanitize test functions */
-+static int prepare_write_discard_sanitize_read(struct test_data *td)
-+{
-+	unsigned int start_sector;
-+	unsigned int num_of_bios = 0;
-+	static unsigned int total_bios;
-+	unsigned int *num_bios_seed;
-+	int i = 0;
-+
-+	if (mbtd->random_test_seed == 0) {
-+		mbtd->random_test_seed =
-+			(unsigned int)(get_jiffies_64() & 0xFFFF);
-+		test_pr_info("%s: got seed from jiffies %d",
-+			     __func__, mbtd->random_test_seed);
-+	}
-+	num_bios_seed = &mbtd->random_test_seed;
-+
-+	do {
-+		pseudo_rnd_sector_and_size(num_bios_seed, td->start_sector,
-+					   &start_sector, &num_of_bios);
-+
-+		/* DISCARD */
-+		total_bios += num_of_bios;
-+		test_pr_info("%s: discard req: id=%d, startSec=%d, NumBios=%d",
-+		       __func__, td->unique_next_req_id, start_sector,
-+			     num_of_bios);
-+		test_iosched_add_unique_test_req(0, REQ_UNIQUE_DISCARD,
-+				    start_sector, BIO_TO_SECTOR(num_of_bios),
-+						 NULL);
-+
-+	} while (++i < (BLKDEV_MAX_RQ-10));
-+
-+	test_pr_info("%s: total discard bios = %d", __func__, total_bios);
-+
-+	test_pr_info("%s: add sanitize req", __func__);
-+	test_iosched_add_unique_test_req(0, REQ_UNIQUE_SANITIZE, 0, 0, NULL);
-+
-+	return 0;
-+}
-+
- static bool message_repeat;
- static int test_open(struct inode *inode, struct file *file)
- {
-@@ -1397,12 +1464,56 @@ const struct file_operations send_invalid_packed_test_ops = {
- 	.read = send_invalid_packed_test_read,
- };
- 
-+static ssize_t write_discard_sanitize_test_write(struct file *file,
-+				const char __user *buf,
-+				size_t count,
-+				loff_t *ppos)
-+{
-+	int ret = 0;
-+	int i = 0;
-+	int number = -1;
-+
-+	sscanf(buf, "%d", &number);
-+	if (number <= 0)
-+		number = 1;
-+
-+	test_pr_info("%s: -- write_discard_sanitize TEST --\n", __func__);
-+
-+	memset(&mbtd->test_info, 0, sizeof(struct test_info));
-+
-+	mbtd->test_group = TEST_GENERAL_GROUP;
-+
-+	mbtd->test_info.data = mbtd;
-+	mbtd->test_info.prepare_test_fn = prepare_write_discard_sanitize_read;
-+	mbtd->test_info.get_test_case_str_fn = get_test_case_str;
-+	mbtd->test_info.timeout_msec = SANITIZE_TEST_TIMEOUT;
-+
-+	for (i = 0 ; i < number ; ++i) {
-+		test_pr_info("%s: Cycle # %d / %d\n", __func__, i+1, number);
-+		test_pr_info("%s: ===================", __func__);
-+
-+		mbtd->test_info.testcase = TEST_WRITE_DISCARD_SANITIZE_READ;
-+		ret = test_iosched_start_test(&mbtd->test_info);
-+
-+		if (ret)
-+			break;
-+	}
-+
-+	return count;
-+}
-+
-+const struct file_operations write_discard_sanitize_test_ops = {
-+	.open = test_open,
-+	.write = write_discard_sanitize_test_write,
-+};
-+
- static void mmc_block_test_debugfs_cleanup(void)
- {
- 	debugfs_remove(mbtd->debug.random_test_seed);
- 	debugfs_remove(mbtd->debug.send_write_packing_test);
- 	debugfs_remove(mbtd->debug.err_check_test);
- 	debugfs_remove(mbtd->debug.send_invalid_packed_test);
-+	debugfs_remove(mbtd->debug.discard_sanitize_test);
- }
- 
- static int mmc_block_test_debugfs_init(void)
-@@ -1454,6 +1565,15 @@ static int mmc_block_test_debugfs_init(void)
- 	if (!mbtd->debug.send_invalid_packed_test)
- 		goto err_nomem;
- 
-+	mbtd->debug.discard_sanitize_test =
-+		debugfs_create_file("write_discard_sanitize_test",
-+				    S_IRUGO | S_IWUGO,
-+				    tests_root,
-+				    NULL,
-+				    &write_discard_sanitize_test_ops);
-+	if (!mbtd->debug.discard_sanitize_test)
-+		goto err_nomem;
-+
- 	return 0;
- 
- err_nomem:
-diff --git a/include/linux/test-iosched.h b/include/linux/test-iosched.h
-index 8054409..1e428c5 100644
---- a/include/linux/test-iosched.h
-+++ b/include/linux/test-iosched.h
-@@ -65,6 +65,7 @@ enum req_unique_type {
- 	REQ_UNIQUE_NONE,
- 	REQ_UNIQUE_DISCARD,
- 	REQ_UNIQUE_FLUSH,
-+	REQ_UNIQUE_SANITIZE,
- };
- 
- /**
+ int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd)
 -- 
-1.7.3.3
--- 
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum
+1.7.0.4
+
