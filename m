@@ -1,136 +1,47 @@
-From: Kyungsik Lee <kyungsik.lee@lge.com>
-Subject: [PATCH RESEND] mmc: core: Remove bounce buffer in mmc_send_cxd_data()
-Date: Wed, 25 Jul 2012 17:06:18 +0900
-Message-ID: <1343203578-21874-1-git-send-email-kyungsik.lee@lge.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH v3] mmc: dw_mmc: Disable low power mode if SDIO interrupts
+ are used
+Date: Wed, 25 Jul 2012 10:11:02 +0100
+Message-ID: <CAFbHwiQuE75YPBPtOihtX4jOKP31n_mO6pu6VOTQkp9_jhjtRA@mail.gmail.com>
+References: <CAD=FV=Wa1bCRvLNnFjhht6nvNorm3CRzX5zrn-YDA2Jec1K3Eg@mail.gmail.com>
+	<1343149145-22927-1-git-send-email-dianders@chromium.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from LGEMRELSE1Q.lge.com ([156.147.1.111]:49430 "EHLO
-	LGEMRELSE1Q.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754712Ab2GYIGi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jul 2012 04:06:38 -0400
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:36013 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750897Ab2GYJLD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jul 2012 05:11:03 -0400
+In-Reply-To: <1343149145-22927-1-git-send-email-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Pierre Ossman <drzeus@drzeus.cx>, raphael.andy.lee@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Kyungsik Lee <kyungsik.lee@lge.com>
+To: Doug Anderson <dianders@chromium.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, James Hogan <james.hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-kernel@vger.kernel.org, Grant Grundler <grundler@chromium.org>, Olof Johansson <olofj@chromium.org>, shashidharh@vayavyalabs.com, ki0351.kim@samsung.com
 
-It is expected that Extended CSD register(the size of this register
-is larger than CID/CSD) will be referenced more frequently as more
-fields have been added to Extended CSD and it seems that it is not
-a good option to double the memory used.
+On Tue, Jul 24, 2012 at 5:59 PM, Doug Anderson <dianders@chromium.org> wrote:
+> The documentation for the dw_mmc part says that the low power
+> mode should normally only be set for MMC and SD memory and should
+> be turned off for SDIO cards that need interrupts detected.
+>
+> The best place I could find to do this is when the SDIO interrupt
+> was first enabled.  I rely on the fact that dw_mci_setup_bus()
+> will be called when it's time to reenable.
+>
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> ---
+> Changes in v3:
+> - Commenting fixes requested by Seungwoon Jeon and Jaehoon Chung.
+> - Only pass 'slot' to the low power disable function since whole mmc
+>   structure wasn't needed.
+>
+> Changes in v2:
+> - Commenting fixes requested by Grant Grundler.
+> - Be extra certain that we don't re-turn on the low power mode in
+>   CLKENA in dw_mci_setup_bus() if SDIO interrupts are enabled.
+>   There are no known instances of this happening but it's good to be safe.
+>
+>
+>  drivers/mmc/host/dw_mmc.c |   41 ++++++++++++++++++++++++++++++++++++++---
+>  1 files changed, 38 insertions(+), 3 deletions(-)
 
-This patch is intended to avoid the use of bounce buffer for reading
-Extended CSD register in mmc_send_cxd_data().
-
-Signed-off-by: Kyungsik Lee <kyungsik.lee@lge.com>
----
- drivers/mmc/core/mmc_ops.c |   45 ++++++++++++++++++++++++++++---------------
- 1 files changed, 29 insertions(+), 16 deletions(-)
-
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 0ed2cc5..95d94a0 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -238,14 +238,6 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- 	struct mmc_command cmd = {0};
- 	struct mmc_data data = {0};
- 	struct scatterlist sg;
--	void *data_buf;
--
--	/* dma onto stack is unsafe/nonportable, but callers to this
--	 * routine normally provide temporary on-stack buffers ...
--	 */
--	data_buf = kmalloc(len, GFP_KERNEL);
--	if (data_buf == NULL)
--		return -ENOMEM;
- 
- 	mrq.cmd = &cmd;
- 	mrq.data = &data;
-@@ -266,7 +258,7 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- 	data.sg = &sg;
- 	data.sg_len = 1;
- 
--	sg_init_one(&sg, data_buf, len);
-+	sg_init_one(&sg, buf, len);
- 
- 	if (opcode == MMC_SEND_CSD || opcode == MMC_SEND_CID) {
- 		/*
-@@ -280,9 +272,6 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- 
- 	mmc_wait_for_req(host, &mrq);
- 
--	memcpy(buf, data_buf, len);
--	kfree(data_buf);
--
- 	if (cmd.error)
- 		return cmd.error;
- 	if (data.error)
-@@ -294,24 +283,37 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- int mmc_send_csd(struct mmc_card *card, u32 *csd)
- {
- 	int ret, i;
-+	u32 *csd_tmp;
- 
- 	if (!mmc_host_is_spi(card->host))
- 		return mmc_send_cxd_native(card->host, card->rca << 16,
- 				csd, MMC_SEND_CSD);
- 
--	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd, 16);
-+	csd_tmp = kmalloc(16, GFP_KERNEL);
-+	if (!csd_tmp)
-+		return -ENOMEM;
-+
-+	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd_tmp, 16);
- 	if (ret)
--		return ret;
-+		goto err;
-+
-+	memcpy(csd, csd_tmp, 16);
- 
- 	for (i = 0;i < 4;i++)
- 		csd[i] = be32_to_cpu(csd[i]);
- 
-+	kfree(csd_tmp);
- 	return 0;
-+
-+err:
-+	kfree(csd_tmp);
-+	return ret;
- }
- 
- int mmc_send_cid(struct mmc_host *host, u32 *cid)
- {
- 	int ret, i;
-+	u32 *cid_tmp;
- 
- 	if (!mmc_host_is_spi(host)) {
- 		if (!host->card)
-@@ -320,14 +322,25 @@ int mmc_send_cid(struct mmc_host *host, u32 *cid)
- 				cid, MMC_SEND_CID);
- 	}
- 
--	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid, 16);
-+	cid_tmp = kmalloc(16, GFP_KERNEL);
-+	if (!cid_tmp)
-+		return -ENOMEM;
-+
-+	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid_tmp, 16);
- 	if (ret)
--		return ret;
-+		goto err;
-+
-+	memcpy(cid, cid_tmp, 16);
- 
- 	for (i = 0;i < 4;i++)
- 		cid[i] = be32_to_cpu(cid[i]);
- 
-+	kfree(cid_tmp);
- 	return 0;
-+
-+err:
-+	kfree(cid_tmp);
-+	return ret;
- }
- 
- int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd)
--- 
-1.7.0.4
-
+Acked-by: Will Newton <will.newton@imgtec.com>
