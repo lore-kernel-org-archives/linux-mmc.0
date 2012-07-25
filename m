@@ -1,77 +1,41 @@
-From: "Yaniv Gardi" <ygardi@codeaurora.org>
-Subject: RE: [PATCH RESEND v7 2/2] mmc: card: Adding support for sanitize in eMMC 4.5
-Date: Wed, 25 Jul 2012 12:39:43 +0300
-Message-ID: <000401cd6a49$6e74aef0$4b5e0cd0$@codeaurora.org>
-References: <1340872367-16206-1-git-send-email-ygardi@codeaurora.org>	<1340872367-16206-3-git-send-email-ygardi@codeaurora.org>	<87629k9rkc.fsf@octavius.laptop.org>	<f5830acb2ddca29357a0125cd8f3d577.squirrel@www.codeaurora.org>	<000001cd6967$2ce2a010$86a7e030$@codeaurora.org> <87obn5y7e6.fsf_-_@octavius.laptop.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v3] mmc: dw_mmc: Disable low power mode if SDIO interrupts
+ are used
+Date: Wed, 25 Jul 2012 19:02:16 +0900
+Message-ID: <500FC428.8030305@samsung.com>
+References: <CAD=FV=Wa1bCRvLNnFjhht6nvNorm3CRzX5zrn-YDA2Jec1K3Eg@mail.gmail.com>
+ <1343149145-22927-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="US-ASCII"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <87obn5y7e6.fsf_-_@octavius.laptop.org>
-Content-language: en-us
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>, axboe@kernel.dk
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 'open list' <linux-kernel@vger.kernel.org>, merez@codeaurora.org, 'Girish K S' <girish.shivananjappa@linaro.org>, "'S, Venkatraman'" <svenkatr@ti.com>, "'Dong, Chuanxiao'" <chuanxiao.dong@intel.com>, 'Stephen Boyd' <sboyd@codeaurora.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Kyungmin Park' <kmpark@infradead.org>merez@codeaurora.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:26272 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751102Ab2GYKCd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jul 2012 06:02:33 -0400
+In-reply-to: <1343149145-22927-1-git-send-email-dianders@chromium.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-kernel@vger.kernel.org, Grant Grundler <grundler@chromium.org>, Olof Johansson <olofj@chromium.org>, shashidharh@vayavyalabs.com, ki0351.kim@samsung.com
 
-+ Jens Axboe
+> +
+>  static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+>  {
+>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+> @@ -871,6 +898,14 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+>  	/* Enable/disable Slot Specific SDIO interrupt */
+>  	int_mask = mci_readl(host, INTMASK);
+>  	if (enb) {
+> +		/*
+> +		 * Turn off low power mode if it was enabled.  This is a bit of
+> +		 * a heavy operation and we disable / enable IRQs a lot, so
+> +		 * we'll leave low power mode disabled and it will get
+> +		 * re-enabled again in dw_mci_setup_bus().
+> +		 */
+> +		dw_mci_disable_low_power(mmc_priv(mmc));
+Just use the slot. slot is already assigned to mmc_priv(mmc)
 
-Hi Jens,
-Can you please review the v8 patch and refer to it? As seen below,
-everything is all set to push the change in the mmc layer,
-But it's better to push the feature to both modules
-
-Hi Chris,
-I just uploaded a v8, which has small fix in the block layer. It has no
-changes at all, in the mmc layer.
-Hope we soon have a reply from Jens regarding when the sanitize patch can be
-pushed in to linux-next in the block layer.
+Reviewed-by: Jaehoon Chung <jh80.chung@samsung.com>
 
 
-Thanks,
-Yaniv
-
-= > -----Original Message-----
-= > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-= > owner@vger.kernel.org] On Behalf Of Chris Ball
-= > Sent: Tuesday, July 24, 2012 9:56 AM
-= > To: Yaniv Gardi
-= > Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org; 'open
-= > list'; merez@codeaurora.org; Girish K S; S, Venkatraman; Dong,
-Chuanxiao;
-= > Stephen Boyd; Jaehoon Chung; Kyungmin Park
-= > Subject: Re: [PATCH RESEND v7 2/2] mmc: card: Adding support for
-= > sanitize in eMMC 4.5
-= > 
-= > Hi Yaniv,
-= > 
-= > On Tue, Jul 24 2012, Yaniv Gardi wrote:
-= > > Are there any additional open issues to discuss regarding the sanitize
-= > > capability ?
-= > > If not, we would like to see this patch pushed into mmc-next.
-= > 
-= > I think you've responded to all of the open issues, thanks -- I'm adding
-= > everyone who made a review comment to the CC list for this mail, so that
-= > they can check whether v7 addresses their concerns, and consider asking
-= > more questions or providing a Reviewed-by.
-= > 
-= > How are you doing with getting the block layer patches merged?  I'd like
-to
-= > get both layers into linux-next around the same time, if we can.
-= > 
-= > I wonder if there's any way to test whether sanitize has had an effect.
-= > It would be good to know whether it actually does anything on a specific
-= > eMMC, although I'm sure it's difficult to tell.
-= > 
-= > Thanks!
-= > 
-= > - Chris.
-= > --
-= > Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-= > One Laptop Per Child
-= > --
-= > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-the
-= > body of a message to majordomo@vger.kernel.org More majordomo info
-= > at  http://vger.kernel.org/majordomo-info.html
