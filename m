@@ -1,205 +1,121 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH RESEND v8 2/2] mmc: card: Adding support for sanitize
-     in eMMC 4.5
-Date: Wed, 25 Jul 2012 06:11:59 -0700 (PDT)
-Message-ID: <13bc276bf91dfaef04a6dea92bfd3e68.squirrel@www.codeaurora.org>
-References: <1343215901-15430-1-git-send-email-ygardi@codeaurora.org>
-    <1343215901-15430-3-git-send-email-ygardi@codeaurora.org>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH] mmc: dw_mmc: add busmode selection support
+Date: Wed, 25 Jul 2012 18:52:51 +0530
+Message-ID: <CAGxe1ZGP+d0A-WEuWVr6kT8Fx54Rjvw5oZd7=j+N_VnjHrLO5Q@mail.gmail.com>
+References: <1343042200-19524-1-git-send-email-girish.shivananjappa@linaro.org>
+	<500E8251.906@samsung.com>
+	<CAGxe1ZHA80qYj=vOhx5YYBhyVE_wG55PrK6DpLvA-KKef9g_GA@mail.gmail.com>
+	<CAGxe1ZFK96HRRN=42R4nwk3i26mONrTYN86TKsVMhCx94Oug9g@mail.gmail.com>
+	<CAELcNGT6CmbzmcbGB+-ZuYnjmy+vrumgb9CQxYntZYRwyJ8m6A@mail.gmail.com>
+	<CAGxe1ZHTQzFjGYgveg-MS-C7Chx+CHtY+QEZc4JX8xgnJPF6Ww@mail.gmail.com>
+	<CAELcNGSnpXd152m8jgFbmUP0OBSiGKTVAqefqTF2_YFqDMofuA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1343215901-15430-3-git-send-email-ygardi@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Yaniv Gardi <ygardi@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CAELcNGSnpXd152m8jgFbmUP0OBSiGKTVAqefqTF2_YFqDMofuA@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Jae hoon Chung <jh80.chung@gmail.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, will.newton@imgtec.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Looks good to me.
-Reviewed-by: Maya Erez <merez@codeaurora.org>
-
-On Wed, July 25, 2012 4:31 am, Yaniv Gardi wrote:
-> This feature delete the unmap memory region of the eMMC card,
-> by writing to a specific register in the EXT_CSD
-> unmap region is the memory region that were previously deleted
-> (by erase, trim or discard operation)
->
-> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
->
-> ---
->  drivers/mmc/card/block.c |   72
-> +++++++++++++++++++++++++++++++++-------------
->  drivers/mmc/card/queue.c |   10 ++++++-
->  include/linux/mmc/host.h |    1 +
->  3 files changed, 62 insertions(+), 21 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index f1c84de..c45ec9f 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -860,10 +860,10 @@ static int mmc_blk_issue_secdiscard_rq(struct
-> mmc_queue *mq,
->  {
->  	struct mmc_blk_data *md = mq->data;
->  	struct mmc_card *card = md->queue.card;
-> -	unsigned int from, nr, arg, trim_arg, erase_arg;
-> +	unsigned int from, nr, arg;
->  	int err = 0, type = MMC_BLK_SECDISCARD;
->
-> -	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
-> +	if (!(mmc_can_secure_erase_trim(card))) {
->  		err = -EOPNOTSUPP;
->  		goto out;
->  	}
-> @@ -871,23 +871,10 @@ static int mmc_blk_issue_secdiscard_rq(struct
-> mmc_queue *mq,
->  	from = blk_rq_pos(req);
->  	nr = blk_rq_sectors(req);
->
-> -	/* The sanitize operation is supported at v4.5 only */
-> -	if (mmc_can_sanitize(card)) {
-> -		erase_arg = MMC_ERASE_ARG;
-> -		trim_arg = MMC_TRIM_ARG;
-> -	} else {
-> -		erase_arg = MMC_SECURE_ERASE_ARG;
-> -		trim_arg = MMC_SECURE_TRIM1_ARG;
-> -	}
-> -
-> -	if (mmc_erase_group_aligned(card, from, nr))
-> -		arg = erase_arg;
-> -	else if (mmc_can_trim(card))
-> -		arg = trim_arg;
-> -	else {
-> -		err = -EINVAL;
-> -		goto out;
-> -	}
-> +	if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
-> +		arg = MMC_SECURE_TRIM1_ARG;
-> +	else
-> +		arg = MMC_SECURE_ERASE_ARG;
->  retry:
->  	if (card->quirks & MMC_QUIRK_INAND_CMD38) {
->  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> @@ -937,6 +924,46 @@ out:
->  	return err ? 0 : 1;
->  }
->
-> +static int mmc_blk_issue_sanitize_rq(struct mmc_queue *mq,
-> +				      struct request *req)
-> +{
-> +	struct mmc_blk_data *md = mq->data;
-> +	struct mmc_card *card = md->queue.card;
-> +	int err = 0;
-> +
-> +	BUG_ON(!card);
-> +	BUG_ON(!card->host);
-> +
-> +	if (!(mmc_can_sanitize(card) &&
-> +	     (card->host->caps2 & MMC_CAP2_SANITIZE))) {
-> +			pr_warning("%s: %s - SANITIZE is not supported\n",
-> +				   mmc_hostname(card->host), __func__);
-> +			err = -EOPNOTSUPP;
-> +			goto out;
-> +	}
-> +
-> +	pr_debug("%s: %s - SANITIZE IN PROGRESS...\n",
-> +		mmc_hostname(card->host), __func__);
-> +
-> +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +					 EXT_CSD_SANITIZE_START, 1, 0);
-> +
-> +	if (err)
-> +		pr_err("%s: %s - mmc_switch() with "
-> +		       "EXT_CSD_SANITIZE_START failed. err=%d\n",
-> +		       mmc_hostname(card->host), __func__, err);
-> +
-> +	pr_debug("%s: %s - SANITIZE COMPLETED\n", mmc_hostname(card->host),
-> +					     __func__);
-> +
-> +out:
-> +	spin_lock_irq(&md->lock);
-> +	__blk_end_request(req, err, blk_rq_bytes(req));
-> +	spin_unlock_irq(&md->lock);
-> +
-> +	return err ? 0 : 1;
-> +}
-> +
->  static int mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
->  {
->  	struct mmc_blk_data *md = mq->data;
-> @@ -1407,7 +1434,12 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
-> struct request *req)
->  		goto out;
->  	}
->
-> -	if (req && req->cmd_flags & REQ_DISCARD) {
-> +	if (req && req->cmd_flags & REQ_SANITIZE) {
-> +		/* complete ongoing async transfer before issuing sanitize */
-> +		if (card->host && card->host->areq)
-> +			mmc_blk_issue_rw_rq(mq, NULL);
-> +		ret = mmc_blk_issue_sanitize_rq(mq, req);
-> +	} else if (req && req->cmd_flags & REQ_DISCARD) {
->  		/* complete ongoing async transfer before issuing discard */
->  		if (card->host->areq)
->  			mmc_blk_issue_rw_rq(mq, NULL);
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index e360a97..4f3250e 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -145,10 +145,15 @@ static void mmc_queue_setup_discard(struct
-> request_queue *q,
->  	/* granularity must not be greater than max. discard */
->  	if (card->pref_erase > max_discard)
->  		q->limits.discard_granularity = 0;
-> -	if (mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))
-> +	if (mmc_can_secure_erase_trim(card))
->  		queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
->  }
->
-> +static void mmc_queue_setup_sanitize(struct request_queue *q)
-> +{
-> +	queue_flag_set_unlocked(QUEUE_FLAG_SANITIZE, q);
-> +}
-> +
->  /**
->   * mmc_init_queue - initialise a queue structure.
->   * @mq: mmc queue
-> @@ -184,6 +189,9 @@ int mmc_init_queue(struct mmc_queue *mq, struct
-> mmc_card *card,
->  	if (mmc_can_erase(card))
->  		mmc_queue_setup_discard(mq->queue, card);
->
-> +	if ((mmc_can_sanitize(card) && (host->caps2 & MMC_CAP2_SANITIZE)))
-> +		mmc_queue_setup_sanitize(mq->queue);
-> +
->  #ifdef CONFIG_MMC_BLOCK_BOUNCE
->  	if (host->max_segs == 1) {
->  		unsigned int bouncesz;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index f578a71..84d1b82 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -257,6 +257,7 @@ struct mmc_host {
->  #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
->  #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active
-> high */
->  #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active
-> high */
-> +#define MMC_CAP2_SANITIZE	(1 << 12)		/* Support Sanitize */
->
->  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
->  	unsigned int        power_notify_type;
-> --
-> 1.7.6
-> --
-> Sent by a consultant of the Qualcomm Innovation Center, Inc.
-> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
-
--- 
-Sent by consultant of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+On 24 July 2012 19:14, Jae hoon Chung <jh80.chung@gmail.com> wrote:
+> 2012/7/24 Girish K S <girish.shivananjappa@linaro.org>:
+>> On 24 July 2012 18:37, Jae hoon Chung <jh80.chung@gmail.com> wrote:
+>>> Hi Girish,
+>>>
+>>> Right, it be mentioned about the open-drain mode in synopsys spec.
+>>> But if didn't work on other board, there is some problem.
+>>> We can consider the location of set_busmode() .
+>> may i know the board on which you are testing. i will try to use the
+>> same and simulate the problem
+> Exynos4 board and eMMC4.5 card, Synopsys IP version is 2.40a
+Just now i tested it on exynos4 board/ eMMC 4.4 card Synopsis 2.40a
+host controller. Everything works fine. this patch doesnt have any
+side effect on the exynos4 board
+please check from ur end. might be some other issue.
+>>>
+>>> Best Regards,
+>>> Jaehoon Chung
+>>>
+>>> 2012/7/24 Girish K S <girish.shivananjappa@linaro.org>:
+>>>> On 24 July 2012 17:06, Girish K S <girish.shivananjappa@linaro.org> wrote:
+>>>>> On 24 July 2012 16:39, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>>>>>> Hi Girish,
+>>>>>>
+>>>>>> Well..just tested on my board.
+>>>>>> this patch didn't work.(eMMC card didn't initialize)
+>>>>>> meaning of ios->bus_mode and synosys's bus_mode is same?
+>>>> Yes it is same. synopsys spec says this is specific to MMC
+>>>> initialization. when the card core sets this mode during
+>>>> initialization. the host has to set this bit
+>>>>>> How did you test this patch?
+>>>>> Tested it on exynos5 board using dt patches of thomas (with some
+>>>>> modification to his patch)
+>>>>>>
+>>>>>> Best Regards,
+>>>>>> Jaehoon Chung
+>>>>>>
+>>>>>> On 07/23/2012 08:16 PM, Girish K S wrote:
+>>>>>>> Synopsis Designware host controller has suppport for open
+>>>>>>> drain mode selection. During the mmc card initialization the
+>>>>>>> host controller can select the open-drain bit to allow the device
+>>>>>>> initialization in the open-drain mode. Once the device enters
+>>>>>>> the standby mode this bit can be reset to enter push-pull mode.
+>>>>>>>
+>>>>>>> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+>>>>>>> ---
+>>>>>>>  drivers/mmc/host/dw_mmc.c |   14 ++++++++++++++
+>>>>>>>  drivers/mmc/host/dw_mmc.h |    1 +
+>>>>>>>  2 files changed, 15 insertions(+), 0 deletions(-)
+>>>>>>>
+>>>>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>>>>>> index 72dc3cd..da11e5a 100644
+>>>>>>> --- a/drivers/mmc/host/dw_mmc.c
+>>>>>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>>>>>> @@ -773,6 +773,18 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>>>>>>       spin_unlock_bh(&host->lock);
+>>>>>>>  }
+>>>>>>>
+>>>>>>> +static void dw_mci_set_busmode(struct dw_mci_slot *slot)
+>>>>>>> +{
+>>>>>>> +     struct mmc_ios *ios = &slot->mmc->ios;
+>>>>>>> +     u32 reg;
+>>>>>>> +
+>>>>>>> +     reg = mci_readl(slot->host, CTRL);
+>>>>>>> +     if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN)
+>>>>>>> +             mci_writel(slot->host, CTRL, reg | SDMMC_CTRL_ENABLE_OD);
+>>>>>>> +     else
+>>>>>>> +             mci_writel(slot->host, CTRL, reg & ~SDMMC_CTRL_ENABLE_OD);
+>>>>>>> +}
+>>>>>>> +
+>>>>>>>  static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>>>>>  {
+>>>>>>>       struct dw_mci_slot *slot = mmc_priv(mmc);
+>>>>>>> @@ -818,6 +830,8 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>>>>>       default:
+>>>>>>>               break;
+>>>>>>>       }
+>>>>>>> +
+>>>>>>> +     dw_mci_set_busmode(slot);
+>>>>>>>  }
+>>>>>>>
+>>>>>>>  static int dw_mci_get_ro(struct mmc_host *mmc)
+>>>>>>> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+>>>>>>> index 15c27e1..1a53fb2 100644
+>>>>>>> --- a/drivers/mmc/host/dw_mmc.h
+>>>>>>> +++ b/drivers/mmc/host/dw_mmc.h
+>>>>>>> @@ -67,6 +67,7 @@
+>>>>>>>
+>>>>>>>  /* Control register defines */
+>>>>>>>  #define SDMMC_CTRL_USE_IDMAC         BIT(25)
+>>>>>>> +#define SDMMC_CTRL_ENABLE_OD         BIT(24)
+>>>>>>>  #define SDMMC_CTRL_CEATA_INT_EN              BIT(11)
+>>>>>>>  #define SDMMC_CTRL_SEND_AS_CCSD              BIT(10)
+>>>>>>>  #define SDMMC_CTRL_SEND_CCSD         BIT(9)
+>>>>>>>
+>>>>>>
+>>>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
