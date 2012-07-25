@@ -1,47 +1,35 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH v3] mmc: dw_mmc: Disable low power mode if SDIO interrupts
- are used
-Date: Wed, 25 Jul 2012 10:11:02 +0100
-Message-ID: <CAFbHwiQuE75YPBPtOihtX4jOKP31n_mO6pu6VOTQkp9_jhjtRA@mail.gmail.com>
-References: <CAD=FV=Wa1bCRvLNnFjhht6nvNorm3CRzX5zrn-YDA2Jec1K3Eg@mail.gmail.com>
-	<1343149145-22927-1-git-send-email-dianders@chromium.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:36013 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750897Ab2GYJLD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jul 2012 05:11:03 -0400
-In-Reply-To: <1343149145-22927-1-git-send-email-dianders@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Yaniv Gardi <ygardi@codeaurora.org>
+Subject: [PATCH v8 0/2] *** adding and exposing SANITIZE capability to the user space via a unique IOCTL ***
+Date: Wed, 25 Jul 2012 12:32:44 +0300
+Message-ID: <1343208766-8046-1-git-send-email-ygardi@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Yaniv Gardi <ygardi@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, James Hogan <james.hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-kernel@vger.kernel.org, Grant Grundler <grundler@chromium.org>, Olof Johansson <olofj@chromium.org>, shashidharh@vayavyalabs.com, ki0351.kim@samsung.com
 
-On Tue, Jul 24, 2012 at 5:59 PM, Doug Anderson <dianders@chromium.org> wrote:
-> The documentation for the dw_mmc part says that the low power
-> mode should normally only be set for MMC and SD memory and should
-> be turned off for SDIO cards that need interrupts detected.
->
-> The best place I could find to do this is when the SDIO interrupt
-> was first enabled.  I rely on the fact that dw_mci_setup_bus()
-> will be called when it's time to reenable.
->
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> ---
-> Changes in v3:
-> - Commenting fixes requested by Seungwoon Jeon and Jaehoon Chung.
-> - Only pass 'slot' to the low power disable function since whole mmc
->   structure wasn't needed.
->
-> Changes in v2:
-> - Commenting fixes requested by Grant Grundler.
-> - Be extra certain that we don't re-turn on the low power mode in
->   CLKENA in dw_mci_setup_bus() if SDIO interrupts are enabled.
->   There are no known instances of this happening but it's good to be safe.
->
->
->  drivers/mmc/host/dw_mmc.c |   41 ++++++++++++++++++++++++++++++++++++++---
->  1 files changed, 38 insertions(+), 3 deletions(-)
+*** adding and exposing SANITIZE capability to the user space via a unique IOCTL ***
 
-Acked-by: Will Newton <will.newton@imgtec.com>
+Yaniv Gardi (2):
+  block: ioctl support for sanitize in eMMC 4.5
+  mmc: card: Adding support for sanitize in eMMC 4.5
+
+ block/blk-core.c          |   15 +++++++--
+ block/blk-lib.c           |   51 +++++++++++++++++++++++++++++++
+ block/blk-merge.c         |    4 ++
+ block/elevator.c          |    2 +-
+ block/ioctl.c             |    9 +++++
+ drivers/mmc/card/block.c  |   72 ++++++++++++++++++++++++++++++++------------
+ drivers/mmc/card/queue.c  |   10 +++++-
+ include/linux/blk_types.h |    5 ++-
+ include/linux/blkdev.h    |    3 ++
+ include/linux/fs.h        |    1 +
+ include/linux/mmc/host.h  |    1 +
+ kernel/trace/blktrace.c   |    2 +
+ 12 files changed, 149 insertions(+), 26 deletions(-)
+
+-- 
+1.7.6
+-- 
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum
