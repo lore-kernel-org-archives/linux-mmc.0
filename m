@@ -1,49 +1,65 @@
 From: Dirk Behme <dirk.behme@de.bosch.com>
 Subject: Re: Devicetree: Initialization order of mmc block devices?
-Date: Thu, 26 Jul 2012 10:06:08 +0200
-Message-ID: <5010FA70.3080306@de.bosch.com>
-References: <5006571A.7060103@de.bosch.com> <201207191313.46178.arnd@arndb.de>
+Date: Thu, 26 Jul 2012 11:16:43 +0200
+Message-ID: <50110AFB.9090300@de.bosch.com>
+References: <5006571A.7060103@de.bosch.com>	<CAJe_ZhcY78ah81zsfwXxE=bMG4o6v9RwZV_DQyUj7g=d-1hR_w@mail.gmail.com>	<50068696.8070408@de.bosch.com>	<CAJe_Zhfmn4dUHk6xtudwCEurigvX64xce3VAozdjDdpSWSbRkA@mail.gmail.com>	<5006C40D.300@de.bosch.com>	<CAJe_Zhcyug17ZnKtmKnVhHT=Mm1PKdE68f21WWkUVtfCwNxSwg@mail.gmail.com>	<50094168.2090900@de.bosch.com> <CAJe_Zhfu-k0V7q527JSqdThn_c7WfNcaHmYOwBBaaRh+A=2hKA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from imta22.fe.bosch.de ([139.15.243.26]:60374 "EHLO
-	imta22.fe.bosch.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750766Ab2GZIJm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jul 2012 04:09:42 -0400
-Received: from smtp2-v.fe.bosch.de (imta24.fe.bosch.de [139.15.243.27])
-	by imta22.fe.bosch.de (Postfix) with ESMTP id 95ABA1E40894
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Jul 2012 10:09:41 +0200 (CEST)
-In-Reply-To: <201207191313.46178.arnd@arndb.de>
+Received: from smtp2-v.fe.bosch.de ([139.15.237.6]:62891 "EHLO
+	smtp2-v.fe.bosch.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751067Ab2GZJTe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jul 2012 05:19:34 -0400
+In-Reply-To: <CAJe_Zhfu-k0V7q527JSqdThn_c7WfNcaHmYOwBBaaRh+A=2hKA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "Wohlrab Knut (CM-AI/PJ-CA31)" <Knut.Wohlrab@de.bosch.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Jassi Brar <jaswinder.singh@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Arnd Bergmann <arnd@arndb.de>, "Wohlrab Knut (CM-AI/PJ-CA33)" <Knut.Wohlrab@de.bosch.com>
 
-On 19.07.2012 15:13, Arnd Bergmann wrote:
-> On Wednesday 18 July 2012, Dirk Behme wrote:
->> Any idea how we could influence the initialization order of the mmc 
->> block devices using a DT based kernel? Ensuring that the internal, hard 
->> wired mmc card is always mapped to mmcblk0?
+On 20.07.2012 13:56, Jassi Brar wrote:
+> On 20 July 2012 17:00, Dirk Behme <dirk.behme@de.bosch.com> wrote:
+>> On 19.07.2012 22:45, Jassi Brar wrote:
 > 
-> I think the best solution would be to parse the "/aliases" device node
-> and look for an "mmc0" or "mmc1" property with a phandle to the respective
-> device. That's how we sort the serial ports. We have the of_alias_get_id()
-> function to pick out a node from there, so it should be possible to use
-> that in the mmc core similar to how we use it in the uart drivers.
+>>>> This problem can occur on many devices with embedded MMC and removable
+>>>> SD,
+>>>> e.g. smart phones. So I think we should find an solution to define MMC
+>>>> scan
+>>>> order or device number/name in a device tree.
+>>>>
+>>> I assume your issue is that due to async nature of mmc scanning, the
+>>> eMMC is detected later than external card, despite being the probe for
+>>> eMMC's slot initiated first ?
+>>> If so, we can do by simply associating 'N' of 'mmcblkN' with the slot
+>>> index i.e, mmc_host.index (instead of mmc_blk_data.name_idx). Which is
+>>> always in the order of probe calling. And we don't need to modify, or
+>>> expect more of, DT for that.
+>>
+>> Do you mean something like
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -1536,7 +1536,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct
+>> mmc_card *card,
+>>          */
+>>
+>>         snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
+>> -                "mmcblk%d%s", md->name_idx, subname ? subname : "");
+>> +                "mmcblk%d%s", card->host->index, subname ? subname : "");
+>>
+>>         blk_queue_logical_block_size(md->queue.queue, 512);
+>>         set_capacity(md->disk, size);
+>>
+>> ?
+>>
+> Exactly!
+> It seems too trivial and default for the author to have missed it, so
+> I suspect I am overlooking something yet again. I would dig email
+> archives to know more about that naming convention before dare submit
+> a patch :)
 
-Looking at the serial example you mentioned and trying to adapt that for 
-mmcblkX I tried something like below [1] on a Freescale i.MX6 board and 
-it seems to work :) Is this what you had in mind?
-
-While I think the DT/of_alias_get_id() part looks ok (?), the way of 
-passing the retrieved value from the driver sdhci-esdhc-imx.c to the 
-block.c is quite hackish. I took it from the examples how this was 
-hacked in the past.
-
-Is there any better way of passing the information read in the driver by 
-of_alias_get_id() to block.c? With the value read by of_alias_get_id() 
-we somehow have to set name_idx in block.c.
+What's about anything like this [1]?
 
 Best regards
 
@@ -51,115 +67,76 @@ Dirk
 
 [1]
 
-Just fyi: From hardware point of view, usdhc1 connects the removable SD 
-card, while usdhc3 attaches the non-removable eMMC. With the alias, 
-independent if the SD card is there or not, the eMMC becomes always 
-mmcblk1. And this is what we like to achieve here.
-
 ---
-  arch/arm/boot/dts/imx6q-sabrelite.dts         |    5 +++++
-  arch/arm/plat-mxc/include/mach/esdhc.h |    1 +
-  drivers/mmc/card/block.c               |    6 ++++--
-  drivers/mmc/host/sdhci-esdhc-imx.c     |   14 ++++++++++++++
-  include/linux/mmc/host.h               |    3 +++
-  5 files changed, 27 insertions(+), 2 deletions(-)
+  drivers/mmc/card/Kconfig |   27 +++++++++++++++++++++++++++
+  drivers/mmc/card/block.c |    2 +-
+  include/linux/mmc/host.h |    7 +++++++
+  3 files changed, 35 insertions(+), 1 deletion(-)
 
-Index: a/arch/arm/boot/dts/imx6q-sabrelite.dts
+Index: a/drivers/mmc/card/Kconfig
 ===================================================================
---- a/arch/arm/boot/dts/imx6q-sabrelite.dts
-+++ b/arch/arm/boot/dts/imx6q-sabrelite.dts
-@@ -18,6 +18,11 @@
-  	model = "Freescale i.MX6 Quad sabrelite Sample Board";
-  	compatible = "fsl,imx6q-sabrelite", "fsl,imx6q";
+--- a/drivers/mmc/card/Kconfig
++++ b/drivers/mmc/card/Kconfig
+@@ -50,6 +50,33 @@ config MMC_BLOCK_BOUNCE
 
-+	aliases {
-+		mmcblk0 = &usdhc1;
-+		mmcblk1 = &usdhc3;
-+	};
+  	  If unsure, say Y here.
+
++config MMC_SLOTINDEX
++	bool "Use host index for enumerating mmxblkN"
++	depends on MMC_BLOCK
++	default n
++	help
++	  On embedded devices, often there is a combination of
++	  removable mmc devices (e.g. MMC/SD cards) and hard
++	  wired ones (e.g. eMMC). Depending on the hardware
++	  configuration, the 'mmcblkN' node might change if
++	  the removable device is available or not at boot time.
 +
-  	memory {
-  		reg = <0x10000000 0x40000000>;
-  	};
-  	Index: freescale-linux-2.6-imx.git/drivers/mmc/host/sdhci-esdhc-imx.c
-===================================================================
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -447,10 +447,21 @@ sdhci_esdhc_imx_probe_dt(struct platform
-  			 struct esdhc_platform_data *boarddata)
-  {
-  	struct device_node *np = pdev->dev.of_node;
-+	int ret;
-
-  	if (!np)
-  		return -ENODEV;
-
-+	ret = of_alias_get_id(np, "mmcblk");
-+	if (ret < 0) {
-+		dev_err(&pdev->dev, "failed to get alias id, errno %d\n", ret);
-+		return -ENODEV;
-+	}
++	  E.g. if the removable device is attached at boot time,
++	  it might become mmxblk0. And the hard wired one mmcblk1.
++	  But if the removable device isn't there at boot time,
++	  the hard wired one will become mmcblk0. This makes it
++	  somehow difficult to hard code the root device to the
++	  non-removable device and boot fast.
 +
-+	boarddata->devidx = ret;
++	  Enabling this option will simply associating 'N' of
++	  'mmcblkN' with the slot index instead of the dynamic
++	  name index. The slot index is always the same, ensuring
++	  that the non-removable mmc device is associated always
++	  with the same mmcblkN. Independent of the availability of
++	  the removable one.
 +
-  	if (of_get_property(np, "fsl,card-wired", NULL))
-  		boarddata->cd_type = ESDHC_CD_PERMANENT;
-
-@@ -581,6 +592,9 @@ static int __devinit sdhci_esdhc_imx_pro
-  					host->mmc->parent->platform_data);
-  	}
-
-+	/* copy mmc block device index */
-+	host->mmc->devidx = boarddata->devidx;
++	  If unsure, say N here.
 +
-  	/* write_protect */
-  	if (boarddata->wp_type == ESDHC_WP_GPIO) {
-  		err = gpio_request_one(boarddata->wp_gpio, GPIOF_IN, "ESDHC_WP");
-Index: a/arch/arm/plat-mxc/include/mach/esdhc.h
-===================================================================
---- a/arch/arm/plat-mxc/include/mach/esdhc.h
-+++ bt/arch/arm/plat-mxc/include/mach/esdhc.h
-@@ -41,5 +41,6 @@ struct esdhc_platform_data {
-  	enum wp_types wp_type;
-  	enum cd_types cd_type;
-  	int vdd_180;
-+	unsigned int devidx;
-  };
-  #endif /* __ASM_ARCH_IMX_ESDHC_H */
-Index: freescale-linux-2.6-imx.git/drivers/mmc/card/block.c
+  config SDIO_UART
+  	tristate "SDIO UART/GPS class support"
+  	help
+Index: a/drivers/mmc/card/block.c
 ===================================================================
 --- a/drivers/mmc/card/block.c
 +++ b/drivers/mmc/card/block.c
-@@ -1466,7 +1466,8 @@ static struct mmc_blk_data *mmc_blk_allo
-  	struct mmc_blk_data *md;
-  	int devidx, ret;
-
--	devidx = find_first_zero_bit(dev_use, max_devices);
-+	devidx = find_next_zero_bit(dev_use, max_devices,
-+			card->host->devidx);
-  	if (devidx >= max_devices)
-  		return ERR_PTR(-ENOSPC);
-  	__set_bit(devidx, dev_use);
-@@ -1484,7 +1485,8 @@ static struct mmc_blk_data *mmc_blk_allo
-  	 * index anymore so we keep track of a name index.
+@@ -1536,7 +1536,7 @@ static struct mmc_blk_data *mmc_blk_allo
   	 */
-  	if (!subname) {
--		md->name_idx = find_first_zero_bit(name_use, max_devices);
-+		md->name_idx = find_next_zero_bit(name_use, max_devices,
-+				card->host->devidx);
-  		__set_bit(md->name_idx, name_use);
-  	} else
-  		md->name_idx = ((struct mmc_blk_data *)
+
+  	snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
+-		 "mmcblk%d%s", md->name_idx, subname ? subname : "");
++		 "mmcblk%d%s", NAMEIDX, subname ? subname : "");
+
+  	blk_queue_logical_block_size(md->queue.queue, 512);
+  	set_capacity(md->disk, size);
 Index: a/include/linux/mmc/host.h
 ===================================================================
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
-@@ -326,6 +326,9 @@ struct mmc_host {
-
-  	unsigned int		actual_clock;	/* Actual HC clock rate */
-
-+	/* preferred mmc block device index (mmcblkX) */
-+	unsigned int		devidx;
+@@ -437,4 +437,11 @@ static inline unsigned int mmc_host_clk_
+  	return host->ios.clock;
+  }
+  #endif
 +
-  	unsigned long		private[0] ____cacheline_aligned;
-  };
-
++#ifdef CONFIG_MMC_SLOTINDEX
++#define NAMEIDX (card->host->index)
++#else
++#define NAMEIDX (md->name_idx)
++#endif
++
+  #endif /* LINUX_MMC_HOST_H */
