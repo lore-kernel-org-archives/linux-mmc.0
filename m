@@ -1,107 +1,201 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH RESEND v8 2/2] mmc: card: Adding support for sanitize in
- eMMC 4.5
-Date: Thu, 26 Jul 2012 22:06:49 +0530
-Message-ID: <CANfBPZ_M82Hro_Whq1HY9Z=oqgiLk4N_8BCPcEpUnqRVm-pKGQ@mail.gmail.com>
-References: <1343215901-15430-1-git-send-email-ygardi@codeaurora.org> <1343215901-15430-3-git-send-email-ygardi@codeaurora.org>
+From: merez@codeaurora.org
+Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
+Date: Thu, 26 Jul 2012 11:54:54 -0700 (PDT)
+Message-ID: <f35f04238ad2e00e976d5f99b4b29648.squirrel@www.codeaurora.org>
+References: <34e29d774773a7dfa3e1b57232249b68.squirrel@www.codeaurora.org>
+    <CANfBPZ9NZAdK4tEDJ8wiNKNjRUuqaLKk3qqVZVgod8vwYVuOYw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1343215901-15430-3-git-send-email-ygardi@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Yaniv Gardi <ygardi@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CANfBPZ9NZAdK4tEDJ8wiNKNjRUuqaLKk3qqVZVgod8vwYVuOYw@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: "S, Venkatraman" <svenkatr@ti.com>
+Cc: merez@codeaurora.org, Chris Ball <cjb@laptop.org>, Muthu Kumar <muthu.lkml@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jul 25, 2012 at 5:01 PM, Yaniv Gardi <ygardi@codeaurora.org> wrote:
-> This feature delete the unmap memory region of the eMMC card,
-> by writing to a specific register in the EXT_CSD
-> unmap region is the memory region that were previously deleted
-> (by erase, trim or discard operation)
+
+On Thu, July 26, 2012 8:28 am, S, Venkatraman wrote:
+> On Tue, Jul 24, 2012 at 2:14 PM,  <merez@codeaurora.org> wrote:
+>> On Mon, July 23, 2012 5:22 am, S, Venkatraman wrote:
+>>> On Mon, Jul 23, 2012 at 5:13 PM,  <merez@codeaurora.org> wrote:
+>>>> On Wed, July 18, 2012 12:26 am, Chris Ball wrote:
+>>>>> Hi,  [removing Jens and the documentation list, since now we're
+>> talking about the MMC side only]
+>>>>> On Wed, Jul 18 2012, merez@codeaurora.org wrote:
+>>>>>> Is there anything else that holds this patch from being pushed to
+>>>> mmc-next?
+>>>>> Yes, I'm still uncomfortable with the write packing patchsets for a
+>>>> couple of reasons, and I suspect that the sum of those reasons means
+>>>> that
+>>>> we should probably plan on holding off merging it until after 3.6.
+>>>>> Here are the open issues; please correct any misunderstandings: With
+>> Seungwon's patchset ("Support packed write command"):
+>>>>> * I still don't have a good set of representative benchmarks showing
+>>>>>   what kind of performance changes come with this patchset.  It seems
+>>>> like we've had a small amount of testing on one controller/eMMC part
+>>>> combo
+>>>> from Seungwon, and an entirely different test from Maya, and the
+>> results
+>>>> aren't documented fully anywhere to the level of describing what the
+>> hardware was, what the test was, and what the results were before and
+>> after the patchset.
+>>>> Currently, there is only one card vendor that supports packed
+>>>> commands.
+>> Following are our sequential write (LMDD) test results on 2 of our
+>> targets
+>>>> (in MB/s):
+>>>>                        No packing        packing
+>>>> Target 1 (SDR 50MHz)     15               25
+>>>> Target 2 (DDR 50MHz)     20               30
+>>>>> With the reads-during-writes regression:
+>>>>> * Venkat still has open questions about the nature of the read
+>>>>>   regression, and thinks we should understand it with blktrace before
+>>>> trying to fix it.  Maya has a theory about writes overwhelming reads,
+>>>> but
+>>>> Venkat doesn't understand why this would explain the observed
+>>>> bandwidth drop.
+>>>> The degradation of read due to writes is not a new behavior and exists
+>> also without the write packing feature (which only increases the
+>> degradation). Our investigation of this phenomenon led us to the
+>> Conclusion that a new scheduling policy should be used for mobile
+>> devices,
+>>>> but this is not related to the current discussion of the write packing
+>> feature.
+>>>> The write packing feature increases the degradation of read due to
+>> write
+>>>> since it allows the MMC to fetch many write requests in a row, instead
+>>>> of
+>>>> fetching only one at a time.  Therefore some of the read requests will
+>> have to wait for the completion of more write requests before they can
+>> be
+>>>> issued.
+>>>
+>>> I am a bit puzzled by this claim. One thing I checked carefully when
+>> reviewing write packing patches from SJeon was that the code didn't
+>> plough through a mixed list of reads and writes and selected only
+>> writes.
+>>> This section of the code in "mmc_blk_prep_packed_list()", from v8
+>> patchset..
+>>> <Quote>
+>>> +               if (rq_data_dir(cur) != rq_data_dir(next)) {
+>>> +                       put_back = 1;
+>>> +                       break;
+>>> +               }
+>>> </Quote>
+>>>
+>>> means that once a read is encountered in the middle of write packing,
+>> the packing is stopped at that point and it is executed. Then the next
+>> blk_fetch_request should get the next read and continue as before.
+>>>
+>>> IOW, the ordering of reads and writes is _not_ altered when using
+>>> packed
+>> commands.
+>>> For example if there were 5 write requests, followed by 1 read,
+>>> followed by 5 more write requests in the request_queue, the first 5
+>> writes will be executed as one "packed command", then the read will be
+>> executed, and then the remaining 5 writes will be executed as one
+>> "packed command". So the read does not have to wait any more than it
+>> waited before (packing feature)
+>>
+>> Let me try to better explain with your example.
+>> Without packing the MMC layer will fetch 2 write requests and wait for
+>> the
+>> first write request completion before fetching another write request.
+>> During this time the read request could be inserted into the CFQ and
+>> since
+>> it has higher priority than the async write it will be dispatched in the
+>> next fetch. So, the result would be 2 write requests followed by one
+>> read
+>> request and the read would have to wait for completion of only 2 write
+>> requests.
+>> With packing, all the 5 write requests will be fetched in a row, and
+>> then
+>> the read will arrive and be dispatched in the next fetch. Then the read
+>> will have to wait for the completion of 5 write requests.
+>>
+>> Few more clarifications:
+>> Due to the plug list mechanism in the block layer the applications can
+>> "aggregate" several requests to be inserted into the scheduler before
+>> waking the MMC queue thread.
+>> This leads to a situation where there are several write requests in the
+>> CFQ queue when MMC starts to do the fetches.
+>>
+>> If the read was inserted while we are building the packed command then I
+>> agree that we should have seen less effect on the read performance.
+>> However, the write packing statistics show that in most of the cases the
+>> packing stopped due to an empty queue, meaning that the read was
+>> inserted
+>> to the CFQ after all the pending write requests were fetched and packed.
+>>
+>> Following is an example for write packing statistics of a READ/WRITE
+>> parallel scenario:
+>> write packing statistics:
+>> Packed 1 reqs - 448 times
+>> Packed 2 reqs - 38 times
+>> Packed 3 reqs - 23 times
+>> Packed 4 reqs - 30 times
+>> Packed 5 reqs - 14 times
+>> Packed 6 reqs - 8 times
+>> Packed 7 reqs - 4 times
+>> Packed 8 reqs - 1 times
+>> Packed 10 reqs - 1 times
+>> Packed 34 reqs - 1 times
+>> stopped packing due to the following reasons:
+>> 2 times: wrong data direction (meaning a READ was fetched and stopped
+>> the
+>> packing)
+>> 1 times: flush or discard
+>> 565 times: empty queue (meaning blk_fetch_request returned NULL)
+>>
+>>>
+>>> And I requested blktrace to confirm that this is indeed the behaviour.
+>>
+>> The trace logs show that in case of no packing, there are maximum of 3-4
+>> requests issued before a read request, while with packing there are also
+>> cases of 6 and 7 requests dispatched before a read request.
+>>
+>> I'm waiting for an approval for sharing the block trace logs.
+>> Since this is a simple test to run you can collect the trace logs and
+>> let
+>> us know if you reach other conclusions.
+>>
+> Thanks for the brief. I don't have the eMMC4.5 device with me yet, so
+> I can't reproduce the result.
+
+I sent the trace logs of both packing and non packing. Please let me know
+if you have additional questions after reviewing them.
+
+The problem you describe is most likely
+> applicable
+> to any block device driver with a large queue depth ( any queue depth >1).
+> I'll check to see what knobs in block affect the result.
+> Speaking of it, what is the host controller you use to test this ?
+
+The controller I use is msm_sdcc.
+
+> I was wondering if host->max_seg_size is taken into account while packed
+> command
+> is in use. If not, shouldn't it be ?  - it could act as a better
+> throttle for "packing density".
+
+The max segments (which is calculated from host->max_seg_size) is taking
+into account when preparing the packed list (so that the whole packed
+won't exceed the max number of segments).
+I'm not sure I understand how host->max_seg_size can be used as a throttle
+for "packing density". Can you please explain?
+
 >
-> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
+> Thanks,
+> Venkat.
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
-> ---
->  drivers/mmc/card/block.c |   72 +++++++++++++++++++++++++++++++++-------------
->  drivers/mmc/card/queue.c |   10 ++++++-
->  include/linux/mmc/host.h |    1 +
->  3 files changed, 62 insertions(+), 21 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index f1c84de..c45ec9f 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -860,10 +860,10 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
->  {
->         struct mmc_blk_data *md = mq->data;
->         struct mmc_card *card = md->queue.card;
-> -       unsigned int from, nr, arg, trim_arg, erase_arg;
-> +       unsigned int from, nr, arg;
->         int err = 0, type = MMC_BLK_SECDISCARD;
->
-> -       if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
-> +       if (!(mmc_can_secure_erase_trim(card))) {
->                 err = -EOPNOTSUPP;
->                 goto out;
->         }
-> @@ -871,23 +871,10 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
->         from = blk_rq_pos(req);
->         nr = blk_rq_sectors(req);
->
-> -       /* The sanitize operation is supported at v4.5 only */
-> -       if (mmc_can_sanitize(card)) {
-> -               erase_arg = MMC_ERASE_ARG;
-> -               trim_arg = MMC_TRIM_ARG;
-> -       } else {
-> -               erase_arg = MMC_SECURE_ERASE_ARG;
-> -               trim_arg = MMC_SECURE_TRIM1_ARG;
-> -       }
-> -
-> -       if (mmc_erase_group_aligned(card, from, nr))
-> -               arg = erase_arg;
-> -       else if (mmc_can_trim(card))
-> -               arg = trim_arg;
-> -       else {
-> -               err = -EINVAL;
-> -               goto out;
-> -       }
-> +       if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
-> +               arg = MMC_SECURE_TRIM1_ARG;
-> +       else
-> +               arg = MMC_SECURE_ERASE_ARG;
->  retry:
->         if (card->quirks & MMC_QUIRK_INAND_CMD38) {
->                 err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> @@ -937,6 +924,46 @@ out:
->         return err ? 0 : 1;
->  }
->
-> +static int mmc_blk_issue_sanitize_rq(struct mmc_queue *mq,
-> +                                     struct request *req)
-> +{
-> +       struct mmc_blk_data *md = mq->data;
-> +       struct mmc_card *card = md->queue.card;
-> +       int err = 0;
-> +
-> +       BUG_ON(!card);
-> +       BUG_ON(!card->host);
-> +
-> +       if (!(mmc_can_sanitize(card) &&
-> +            (card->host->caps2 & MMC_CAP2_SANITIZE))) {
-> +                       pr_warning("%s: %s - SANITIZE is not supported\n",
-> +                                  mmc_hostname(card->host), __func__);
-> +                       err = -EOPNOTSUPP;
-> +                       goto out;
-> +       }
-> +
-> +       pr_debug("%s: %s - SANITIZE IN PROGRESS...\n",
-> +               mmc_hostname(card->host), __func__);
-> +
-> +       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +                                        EXT_CSD_SANITIZE_START, 1, 0);
-> +
-Everything else seems to be good overall. But you need some sort of timeout
-implementation and handling for SANTIZE. It's not interrupted to
-provide way for other commands,
-as generic CMD6 timeout doesn't apply.
-Currently, the device can be easily DOS'ed by just issuing the IOCTL repeatedly.
+
+Thanks,
+Maya
+-- 
+Sent by consultant of Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
