@@ -1,116 +1,157 @@
-From: Jassi Brar <jaswinder.singh@linaro.org>
-Subject: Re: Devicetree: Initialization order of mmc block devices?
-Date: Thu, 26 Jul 2012 15:09:53 +0530
-Message-ID: <CAJe_ZhfR2MT5F969fkLXPhYcxn2G6Lgoh_W6hE_qUmVRwX=b8w@mail.gmail.com>
-References: <5006571A.7060103@de.bosch.com>
-	<CAJe_ZhcY78ah81zsfwXxE=bMG4o6v9RwZV_DQyUj7g=d-1hR_w@mail.gmail.com>
-	<50068696.8070408@de.bosch.com>
-	<CAJe_Zhfmn4dUHk6xtudwCEurigvX64xce3VAozdjDdpSWSbRkA@mail.gmail.com>
-	<5006C40D.300@de.bosch.com>
-	<CAJe_Zhcyug17ZnKtmKnVhHT=Mm1PKdE68f21WWkUVtfCwNxSwg@mail.gmail.com>
-	<50094168.2090900@de.bosch.com>
-	<CAJe_Zhfu-k0V7q527JSqdThn_c7WfNcaHmYOwBBaaRh+A=2hKA@mail.gmail.com>
-	<50110AFB.9090300@de.bosch.com>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
+Date: Thu, 26 Jul 2012 20:58:24 +0530
+Message-ID: <CANfBPZ9NZAdK4tEDJ8wiNKNjRUuqaLKk3qqVZVgod8vwYVuOYw@mail.gmail.com>
+References: <34e29d774773a7dfa3e1b57232249b68.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:43968 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751364Ab2GZJjy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jul 2012 05:39:54 -0400
-Received: by vcbfk26 with SMTP id fk26so1463925vcb.19
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Jul 2012 02:39:53 -0700 (PDT)
-In-Reply-To: <50110AFB.9090300@de.bosch.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <34e29d774773a7dfa3e1b57232249b68.squirrel@www.codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: merez@codeaurora.org
+Cc: Chris Ball <cjb@laptop.org>, Muthu Kumar <muthu.lkml@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Dirk Behme <dirk.behme@de.bosch.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Arnd Bergmann <arnd@arndb.de>, "Wohlrab Knut (CM-AI/PJ-CA33)" <Knut.Wohlrab@de.bosch.com>
 
-On 26 July 2012 14:46, Dirk Behme <dirk.behme@de.bosch.com> wrote:
+On Tue, Jul 24, 2012 at 2:14 PM,  <merez@codeaurora.org> wrote:
+> On Mon, July 23, 2012 5:22 am, S, Venkatraman wrote:
+>> On Mon, Jul 23, 2012 at 5:13 PM,  <merez@codeaurora.org> wrote:
+>>> On Wed, July 18, 2012 12:26 am, Chris Ball wrote:
+>>>> Hi,  [removing Jens and the documentation list, since now we're
+> talking about the MMC side only]
+>>>> On Wed, Jul 18 2012, merez@codeaurora.org wrote:
+>>>>> Is there anything else that holds this patch from being pushed to
+>>> mmc-next?
+>>>> Yes, I'm still uncomfortable with the write packing patchsets for a
+>>> couple of reasons, and I suspect that the sum of those reasons means that
+>>> we should probably plan on holding off merging it until after 3.6.
+>>>> Here are the open issues; please correct any misunderstandings: With
+> Seungwon's patchset ("Support packed write command"):
+>>>> * I still don't have a good set of representative benchmarks showing
+>>>>   what kind of performance changes come with this patchset.  It seems
+>>> like we've had a small amount of testing on one controller/eMMC part combo
+>>> from Seungwon, and an entirely different test from Maya, and the
+> results
+>>> aren't documented fully anywhere to the level of describing what the
+> hardware was, what the test was, and what the results were before and
+> after the patchset.
+>>> Currently, there is only one card vendor that supports packed commands.
+> Following are our sequential write (LMDD) test results on 2 of our
+> targets
+>>> (in MB/s):
+>>>                        No packing        packing
+>>> Target 1 (SDR 50MHz)     15               25
+>>> Target 2 (DDR 50MHz)     20               30
+>>>> With the reads-during-writes regression:
+>>>> * Venkat still has open questions about the nature of the read
+>>>>   regression, and thinks we should understand it with blktrace before
+>>> trying to fix it.  Maya has a theory about writes overwhelming reads, but
+>>> Venkat doesn't understand why this would explain the observed
+>>> bandwidth drop.
+>>> The degradation of read due to writes is not a new behavior and exists
+> also without the write packing feature (which only increases the
+> degradation). Our investigation of this phenomenon led us to the
+> Conclusion that a new scheduling policy should be used for mobile
+> devices,
+>>> but this is not related to the current discussion of the write packing
+> feature.
+>>> The write packing feature increases the degradation of read due to
+> write
+>>> since it allows the MMC to fetch many write requests in a row, instead of
+>>> fetching only one at a time.  Therefore some of the read requests will
+> have to wait for the completion of more write requests before they can
+> be
+>>> issued.
+>>
+>> I am a bit puzzled by this claim. One thing I checked carefully when
+> reviewing write packing patches from SJeon was that the code didn't
+> plough through a mixed list of reads and writes and selected only
+> writes.
+>> This section of the code in "mmc_blk_prep_packed_list()", from v8
+> patchset..
+>> <Quote>
+>> +               if (rq_data_dir(cur) != rq_data_dir(next)) {
+>> +                       put_back = 1;
+>> +                       break;
+>> +               }
+>> </Quote>
+>>
+>> means that once a read is encountered in the middle of write packing,
+> the packing is stopped at that point and it is executed. Then the next
+> blk_fetch_request should get the next read and continue as before.
+>>
+>> IOW, the ordering of reads and writes is _not_ altered when using packed
+> commands.
+>> For example if there were 5 write requests, followed by 1 read,
+>> followed by 5 more write requests in the request_queue, the first 5
+> writes will be executed as one "packed command", then the read will be
+> executed, and then the remaining 5 writes will be executed as one
+> "packed command". So the read does not have to wait any more than it
+> waited before (packing feature)
+>
+> Let me try to better explain with your example.
+> Without packing the MMC layer will fetch 2 write requests and wait for the
+> first write request completion before fetching another write request.
+> During this time the read request could be inserted into the CFQ and since
+> it has higher priority than the async write it will be dispatched in the
+> next fetch. So, the result would be 2 write requests followed by one read
+> request and the read would have to wait for completion of only 2 write
+> requests.
+> With packing, all the 5 write requests will be fetched in a row, and then
+> the read will arrive and be dispatched in the next fetch. Then the read
+> will have to wait for the completion of 5 write requests.
+>
+> Few more clarifications:
+> Due to the plug list mechanism in the block layer the applications can
+> "aggregate" several requests to be inserted into the scheduler before
+> waking the MMC queue thread.
+> This leads to a situation where there are several write requests in the
+> CFQ queue when MMC starts to do the fetches.
+>
+> If the read was inserted while we are building the packed command then I
+> agree that we should have seen less effect on the read performance.
+> However, the write packing statistics show that in most of the cases the
+> packing stopped due to an empty queue, meaning that the read was inserted
+> to the CFQ after all the pending write requests were fetched and packed.
+>
+> Following is an example for write packing statistics of a READ/WRITE
+> parallel scenario:
+> write packing statistics:
+> Packed 1 reqs - 448 times
+> Packed 2 reqs - 38 times
+> Packed 3 reqs - 23 times
+> Packed 4 reqs - 30 times
+> Packed 5 reqs - 14 times
+> Packed 6 reqs - 8 times
+> Packed 7 reqs - 4 times
+> Packed 8 reqs - 1 times
+> Packed 10 reqs - 1 times
+> Packed 34 reqs - 1 times
+> stopped packing due to the following reasons:
+> 2 times: wrong data direction (meaning a READ was fetched and stopped the
+> packing)
+> 1 times: flush or discard
+> 565 times: empty queue (meaning blk_fetch_request returned NULL)
+>
+>>
+>> And I requested blktrace to confirm that this is indeed the behaviour.
+>
+> The trace logs show that in case of no packing, there are maximum of 3-4
+> requests issued before a read request, while with packing there are also
+> cases of 6 and 7 requests dispatched before a read request.
+>
+> I'm waiting for an approval for sharing the block trace logs.
+> Since this is a simple test to run you can collect the trace logs and let
+> us know if you reach other conclusions.
+>
+Thanks for the brief. I don't have the eMMC4.5 device with me yet, so
+I can't reproduce the result. The problem you describe is most likely
+applicable
+to any block device driver with a large queue depth ( any queue depth >1).
+I'll check to see what knobs in block affect the result.
+Speaking of it, what is the host controller you use to test this ?
+I was wondering if host->max_seg_size is taken into account while packed command
+is in use. If not, shouldn't it be ?  - it could act as a better
+throttle for "packing density".
 
-> ---
->  drivers/mmc/card/Kconfig |   27 +++++++++++++++++++++++++++
->  drivers/mmc/card/block.c |    2 +-
->  include/linux/mmc/host.h |    7 +++++++
->  3 files changed, 35 insertions(+), 1 deletion(-)
->
-> Index: a/drivers/mmc/card/Kconfig
-> ===================================================================
-> --- a/drivers/mmc/card/Kconfig
-> +++ b/drivers/mmc/card/Kconfig
-> @@ -50,6 +50,33 @@ config MMC_BLOCK_BOUNCE
->
->           If unsure, say Y here.
->
-> +config MMC_SLOTINDEX
-> +       bool "Use host index for enumerating mmxblkN"
-> +       depends on MMC_BLOCK
-> +       default n
-> +       help
-> +         On embedded devices, often there is a combination of
-> +         removable mmc devices (e.g. MMC/SD cards) and hard
-> +         wired ones (e.g. eMMC). Depending on the hardware
-> +         configuration, the 'mmcblkN' node might change if
-> +         the removable device is available or not at boot time.
-> +
-> +         E.g. if the removable device is attached at boot time,
-> +         it might become mmxblk0. And the hard wired one mmcblk1.
-> +         But if the removable device isn't there at boot time,
-> +         the hard wired one will become mmcblk0. This makes it
-> +         somehow difficult to hard code the root device to the
-> +         non-removable device and boot fast.
-> +
-> +         Enabling this option will simply associating 'N' of
-> +         'mmcblkN' with the slot index instead of the dynamic
-> +         name index. The slot index is always the same, ensuring
-> +         that the non-removable mmc device is associated always
-> +         with the same mmcblkN. Independent of the availability of
-> +         the removable one.
-> +
-> +         If unsure, say N here.
-> +
->  config SDIO_UART
->         tristate "SDIO UART/GPS class support"
->         help
-> Index: a/drivers/mmc/card/block.c
-> ===================================================================
->
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -1536,7 +1536,7 @@ static struct mmc_blk_data *mmc_blk_allo
->          */
->
->         snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
-> -                "mmcblk%d%s", md->name_idx, subname ? subname : "");
-> +                "mmcblk%d%s", NAMEIDX, subname ? subname : "");
->
->
->         blk_queue_logical_block_size(md->queue.queue, 512);
->         set_capacity(md->disk, size);
-> Index: a/include/linux/mmc/host.h
-> ===================================================================
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -437,4 +437,11 @@ static inline unsigned int mmc_host_clk_
->         return host->ios.clock;
->  }
->  #endif
-> +
-> +#ifdef CONFIG_MMC_SLOTINDEX
-> +#define NAMEIDX (card->host->index)
-> +#else
-> +#define NAMEIDX (md->name_idx)
-> +#endif
-> +
->  #endif /* LINUX_MMC_HOST_H */
-
-I would suggest first attempting the original patch ...
-
-        snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
--                "mmcblk%d%s", md->name_idx, subname ? subname : "");
-+                "mmcblk%d%s", card->host->index, subname ? subname : "");
-
-
-That would either provide the simplest solution to the problem or
-teach us the importance of current naming scheme, in which case you
-could try this patch :)
+Thanks,
+Venkat.
