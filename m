@@ -1,35 +1,36 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v8 2/2] mmc: card: Adding support for sanitize in eMMC 4.5
-Date: Thu, 26 Jul 2012 13:27:49 +0000
-Message-ID: <201207261327.49781.arnd@arndb.de>
-References: <1343208766-8046-1-git-send-email-ygardi@codeaurora.org> <1343208766-8046-3-git-send-email-ygardi@codeaurora.org>
+Subject: Re: [PATCH v8 1/2] block: ioctl support for sanitize in eMMC 4.5
+Date: Thu, 26 Jul 2012 13:36:31 +0000
+Message-ID: <201207261336.32018.arnd@arndb.de>
+References: <1343208766-8046-1-git-send-email-ygardi@codeaurora.org> <1343208766-8046-2-git-send-email-ygardi@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: Text/Plain;
   charset="iso-8859-15"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:57537 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753170Ab2GZVo7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jul 2012 17:44:59 -0400
-In-Reply-To: <1343208766-8046-3-git-send-email-ygardi@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1343208766-8046-2-git-send-email-ygardi@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Yaniv Gardi <ygardi@codeaurora.org>
 Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
 On Wednesday 25 July 2012, Yaniv Gardi wrote:
-> This feature delete the unmap memory region of the eMMC card,
-> by writing to a specific register in the EXT_CSD
-> unmap region is the memory region that were previously deleted
-> (by erase, trim or discard operation)
+> 
+> Adding a new ioctl to support sanitize operation in eMMC
+> cards version 4.5.
+> The sanitize ioctl support helps performing this operation
+> via user application.
 > 
 > Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
+> 
 
-This looks like it will only work for eMMC-4.5 but not for SD-3.01, which
-offers the same funcitonality in the form of the "start recording" option
-to CMD20. Is there any reason why you would want to implement one but
-not the other?
+Can you explain how you expect this to be called by a file system?
+We've debated this in the past and concluded that we probably
+want to do it at the same time as batched discard, but I don't
+see if the sanitize request should be sent for each FITRIM
+or whether we should better have a separate file system level
+ioctl. My feeling is that it would be more useful to call this
+feature through a file system level ioctl than through a block
+level ioctl, but I guess it makes sense to support both.
 
 	Arnd
-
