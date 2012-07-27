@@ -1,36 +1,78 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v8 1/2] block: ioctl support for sanitize in eMMC 4.5
-Date: Thu, 26 Jul 2012 13:36:31 +0000
-Message-ID: <201207261336.32018.arnd@arndb.de>
-References: <1343208766-8046-1-git-send-email-ygardi@codeaurora.org> <1343208766-8046-2-git-send-email-ygardi@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1343208766-8046-2-git-send-email-ygardi@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Yaniv Gardi <ygardi@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
+From: Lukas Czerner <lczerner@redhat.com>
+Subject: Add invalidatepage_range address space operation
+Date: Fri, 27 Jul 2012 10:00:59 +0200
+Message-ID: <1343376074-28034-1-git-send-email-lczerner@redhat.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:43945 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751858Ab2G0IBd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Jul 2012 04:01:33 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-fsdevel@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org, tytso@mit.edu, hughd@google.com, linux-mmc@vger.kernel.org
 
-On Wednesday 25 July 2012, Yaniv Gardi wrote:
-> 
-> Adding a new ioctl to support sanitize operation in eMMC
-> cards version 4.5.
-> The sanitize ioctl support helps performing this operation
-> via user application.
-> 
-> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
-> 
+This set of patches are aimed to allow truncate_inode_pages_range() handle
+ranges which are not aligned at the end of the page. Currently it will
+hit BUG_ON() when the end of the range is not aligned. Punch hole feature
+however can benefit from this ability saving file systems some work not
+forcing them to implement their own invalidate code to handle unaligned
+ranges.
 
-Can you explain how you expect this to be called by a file system?
-We've debated this in the past and concluded that we probably
-want to do it at the same time as batched discard, but I don't
-see if the sanitize request should be sent for each FITRIM
-or whether we should better have a separate file system level
-ioctl. My feeling is that it would be more useful to call this
-feature through a file system level ioctl than through a block
-level ioctl, but I guess it makes sense to support both.
+In order for this to work we need however new address space operation
+invalidatepage_range which should be able to handle page invalidation with
+offset and length specified.
 
-	Arnd
+patch 01:	Implements the new invalidatepage_range address space
+		operation in the mm layer
+patch 02 - 05:	Wire the new invalidatepage_range aop to the ext4, xfs and
+		ocfs2 file system (which are currently the only file
+		systems supporting punch hole) and implement this
+		functionality for jbd2 as well.
+patch 06:	Change truncate_inode_pages_range() to handle unaligned
+		ranges.
+patch 07 - 15:	Ext4 specific changes which take benefit from the
+		previous truncate_inode_pages_range() change. Not all
+		are realated specifically to this change, but all are
+		related to the punch hole feature.
+
+Thanks!
+-Lukas
+
+
+[PATCH 01/15] mm: add invalidatepage_range address space operation
+[PATCH 02/15] jbd2: implement jbd2_journal_invalidatepage_range
+[PATCH 03/15] ext4: implement invalidatepage_range aop
+[PATCH 04/15] xfs: implement invalidatepage_range aop
+[PATCH 05/15] ocfs2: implement invalidatepage_range aop
+[PATCH 06/15] mm: teach truncate_inode_pages_range() to handle non
+[PATCH 07/15] ext4: Take i_mutex before punching hole
+[PATCH 08/15] Revert "ext4: remove no longer used functions in
+[PATCH 09/15] Revert "ext4: fix fsx truncate failure"
+[PATCH 10/15] ext4: use ext4_zero_partial_blocks in punch_hole
+[PATCH 11/15] ext4: remove unused discard_partial_page_buffers
+[PATCH 12/15] ext4: remove unused code from ext4_remove_blocks()
+[PATCH 13/15] ext4: update ext4_ext_remove_space trace point
+[PATCH 14/15] ext4: make punch hole code path work with bigalloc
+[PATCH 15/15] ext4: Allow punch hole with bigalloc enabled
+
+
+fs/buffer.c                 |   23 +++-
+fs/ext4/ext4.h              |   14 +-
+fs/ext4/extents.c           |  215 +++++++++++-------------------
+fs/ext4/indirect.c          |   13 +--
+fs/ext4/inode.c             |  316 +++++++++++++++++++------------------------
+fs/jbd2/journal.c           |    1 +
+fs/jbd2/transaction.c       |   20 +++-
+fs/ocfs2/aops.c             |    7 +-
+fs/xfs/xfs_aops.c           |   14 +-
+fs/xfs/xfs_trace.h          |   41 ++++++-
+include/linux/buffer_head.h |    2 +
+include/linux/fs.h          |    2 +
+include/linux/jbd2.h        |    2 +
+include/linux/mm.h          |    2 +
+include/trace/events/ext4.h |   55 +++++---
+mm/truncate.c               |  107 +++++++++++-----
+16 files changed, 437 insertions(+), 397 deletions(-)
+
+
