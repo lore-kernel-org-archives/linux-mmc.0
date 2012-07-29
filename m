@@ -1,195 +1,250 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
-Date: Fri, 27 Jul 2012 14:37:53 +0530
-Message-ID: <CANfBPZ9Pbsp4OXh-kCveiAm-ing8i4k5WZvAzrdi8G4d8tCDdA@mail.gmail.com>
-References: <34e29d774773a7dfa3e1b57232249b68.squirrel@www.codeaurora.org>
- <CANfBPZ9NZAdK4tEDJ8wiNKNjRUuqaLKk3qqVZVgod8vwYVuOYw@mail.gmail.com> <f35f04238ad2e00e976d5f99b4b29648.squirrel@www.codeaurora.org>
+From: Minchan Kim <minchan@kernel.org>
+Subject: Re: [PATCH v11] mmc: support BKOPS feature for eMMC
+Date: Sun, 29 Jul 2012 11:33:00 +0900
+Message-ID: <CAEwNFnA0CKaORGJ1TVnjYgLgi6dtgebVZ1xUVeY6MU92LWb9RA@mail.gmail.com>
+References: <500E00E8.7040504@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <f35f04238ad2e00e976d5f99b4b29648.squirrel@www.codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: merez@codeaurora.org
-Cc: Chris Ball <cjb@laptop.org>, Muthu Kumar <muthu.lkml@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:47736 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752713Ab2G2CdB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 28 Jul 2012 22:33:01 -0400
+Received: by wgbdr13 with SMTP id dr13so3840324wgb.1
+        for <linux-mmc@vger.kernel.org>; Sat, 28 Jul 2012 19:33:00 -0700 (PDT)
+In-Reply-To: <500E00E8.7040504@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Maya Erez <merez@codeaurora.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Adrian Hunter <adrian.hunter@intel.com>, Per FORLIN <per.forlin@stericsson.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
 
-On Fri, Jul 27, 2012 at 12:24 AM,  <merez@codeaurora.org> wrote:
+On Tue, Jul 24, 2012 at 10:56 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Enable eMMC background operations (BKOPS) feature.
 >
-> On Thu, July 26, 2012 8:28 am, S, Venkatraman wrote:
->> On Tue, Jul 24, 2012 at 2:14 PM,  <merez@codeaurora.org> wrote:
->>> On Mon, July 23, 2012 5:22 am, S, Venkatraman wrote:
->>>> On Mon, Jul 23, 2012 at 5:13 PM,  <merez@codeaurora.org> wrote:
->>>>> On Wed, July 18, 2012 12:26 am, Chris Ball wrote:
->>>>>> Hi,  [removing Jens and the documentation list, since now we're
->>> talking about the MMC side only]
->>>>>> On Wed, Jul 18 2012, merez@codeaurora.org wrote:
->>>>>>> Is there anything else that holds this patch from being pushed to
->>>>> mmc-next?
->>>>>> Yes, I'm still uncomfortable with the write packing patchsets for a
->>>>> couple of reasons, and I suspect that the sum of those reasons means
->>>>> that
->>>>> we should probably plan on holding off merging it until after 3.6.
->>>>>> Here are the open issues; please correct any misunderstandings: With
->>> Seungwon's patchset ("Support packed write command"):
->>>>>> * I still don't have a good set of representative benchmarks showing
->>>>>>   what kind of performance changes come with this patchset.  It seems
->>>>> like we've had a small amount of testing on one controller/eMMC part
->>>>> combo
->>>>> from Seungwon, and an entirely different test from Maya, and the
->>> results
->>>>> aren't documented fully anywhere to the level of describing what the
->>> hardware was, what the test was, and what the results were before and
->>> after the patchset.
->>>>> Currently, there is only one card vendor that supports packed
->>>>> commands.
->>> Following are our sequential write (LMDD) test results on 2 of our
->>> targets
->>>>> (in MB/s):
->>>>>                        No packing        packing
->>>>> Target 1 (SDR 50MHz)     15               25
->>>>> Target 2 (DDR 50MHz)     20               30
->>>>>> With the reads-during-writes regression:
->>>>>> * Venkat still has open questions about the nature of the read
->>>>>>   regression, and thinks we should understand it with blktrace before
->>>>> trying to fix it.  Maya has a theory about writes overwhelming reads,
->>>>> but
->>>>> Venkat doesn't understand why this would explain the observed
->>>>> bandwidth drop.
->>>>> The degradation of read due to writes is not a new behavior and exists
->>> also without the write packing feature (which only increases the
->>> degradation). Our investigation of this phenomenon led us to the
->>> Conclusion that a new scheduling policy should be used for mobile
->>> devices,
->>>>> but this is not related to the current discussion of the write packing
->>> feature.
->>>>> The write packing feature increases the degradation of read due to
->>> write
->>>>> since it allows the MMC to fetch many write requests in a row, instead
->>>>> of
->>>>> fetching only one at a time.  Therefore some of the read requests will
->>> have to wait for the completion of more write requests before they can
->>> be
->>>>> issued.
->>>>
->>>> I am a bit puzzled by this claim. One thing I checked carefully when
->>> reviewing write packing patches from SJeon was that the code didn't
->>> plough through a mixed list of reads and writes and selected only
->>> writes.
->>>> This section of the code in "mmc_blk_prep_packed_list()", from v8
->>> patchset..
->>>> <Quote>
->>>> +               if (rq_data_dir(cur) != rq_data_dir(next)) {
->>>> +                       put_back = 1;
->>>> +                       break;
->>>> +               }
->>>> </Quote>
->>>>
->>>> means that once a read is encountered in the middle of write packing,
->>> the packing is stopped at that point and it is executed. Then the next
->>> blk_fetch_request should get the next read and continue as before.
->>>>
->>>> IOW, the ordering of reads and writes is _not_ altered when using
->>>> packed
->>> commands.
->>>> For example if there were 5 write requests, followed by 1 read,
->>>> followed by 5 more write requests in the request_queue, the first 5
->>> writes will be executed as one "packed command", then the read will be
->>> executed, and then the remaining 5 writes will be executed as one
->>> "packed command". So the read does not have to wait any more than it
->>> waited before (packing feature)
->>>
->>> Let me try to better explain with your example.
->>> Without packing the MMC layer will fetch 2 write requests and wait for
->>> the
->>> first write request completion before fetching another write request.
->>> During this time the read request could be inserted into the CFQ and
->>> since
->>> it has higher priority than the async write it will be dispatched in the
->>> next fetch. So, the result would be 2 write requests followed by one
->>> read
->>> request and the read would have to wait for completion of only 2 write
->>> requests.
->>> With packing, all the 5 write requests will be fetched in a row, and
->>> then
->>> the read will arrive and be dispatched in the next fetch. Then the read
->>> will have to wait for the completion of 5 write requests.
->>>
->>> Few more clarifications:
->>> Due to the plug list mechanism in the block layer the applications can
->>> "aggregate" several requests to be inserted into the scheduler before
->>> waking the MMC queue thread.
->>> This leads to a situation where there are several write requests in the
->>> CFQ queue when MMC starts to do the fetches.
->>>
->>> If the read was inserted while we are building the packed command then I
->>> agree that we should have seen less effect on the read performance.
->>> However, the write packing statistics show that in most of the cases the
->>> packing stopped due to an empty queue, meaning that the read was
->>> inserted
->>> to the CFQ after all the pending write requests were fetched and packed.
->>>
->>> Following is an example for write packing statistics of a READ/WRITE
->>> parallel scenario:
->>> write packing statistics:
->>> Packed 1 reqs - 448 times
->>> Packed 2 reqs - 38 times
->>> Packed 3 reqs - 23 times
->>> Packed 4 reqs - 30 times
->>> Packed 5 reqs - 14 times
->>> Packed 6 reqs - 8 times
->>> Packed 7 reqs - 4 times
->>> Packed 8 reqs - 1 times
->>> Packed 10 reqs - 1 times
->>> Packed 34 reqs - 1 times
->>> stopped packing due to the following reasons:
->>> 2 times: wrong data direction (meaning a READ was fetched and stopped
->>> the
->>> packing)
->>> 1 times: flush or discard
->>> 565 times: empty queue (meaning blk_fetch_request returned NULL)
->>>
->>>>
->>>> And I requested blktrace to confirm that this is indeed the behaviour.
->>>
->>> The trace logs show that in case of no packing, there are maximum of 3-4
->>> requests issued before a read request, while with packing there are also
->>> cases of 6 and 7 requests dispatched before a read request.
->>>
->>> I'm waiting for an approval for sharing the block trace logs.
->>> Since this is a simple test to run you can collect the trace logs and
->>> let
->>> us know if you reach other conclusions.
->>>
->> Thanks for the brief. I don't have the eMMC4.5 device with me yet, so
->> I can't reproduce the result.
+> If URGENT_BKOPS is set after a response, note that BKOPS
+> are required. Immediately run BKOPS if required.
+> read/write operations should be requested during BKOPS(LEVEL-1),
+> then issue HPI to interrupt the ongoing BKOPS
+> and service the foreground operation.
+> (This patch is only control the LEVEL2/3.)
 >
-> I sent the trace logs of both packing and non packing. Please let me know
-> if you have additional questions after reviewing them.
+> When repeating the writing 1GB data, at a certain time, performance is decreased.
+> At that time, card is also triggered the Level-3 or Level-2.
+> After running bkops, performance is recovered.
 >
-> The problem you describe is most likely
->> applicable
->> to any block device driver with a large queue depth ( any queue depth >1).
->> I'll check to see what knobs in block affect the result.
->> Speaking of it, what is the host controller you use to test this ?
+> Future considerations
+>  * Check BKOPS_LEVEL=1 and start BKOPS in a preventive manner.
+>  * Interrupt ongoing BKOPS before powering off the card.
+>  * How get BKOPS_STATUS value.(periodically send ext_csd command?)
+>  * If use periodic bkops, also consider runtime_pm control.
 >
-> The controller I use is msm_sdcc.
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
+> Signed-off-by: Maya Erez <merez@codeaurora.org>
+> ---
+> Changelog v11:
+>         - removed the MMC_CAP2_BKOPS.
+>                 : if card support and enable bkops, then use it.
+> Changelog v10:
+>         - Based on latest mmc-next
+>         - Only control the level-2/3.
+>                 : If triggered upper than level2, immediately start bkops.
+>         - Remove the BKOPS_CAP2_INIT_BKOPS (move into mmc-util)
+>         - change use_busy_signal instead of waiting_for_prog_done for __mmc_switch
+>         - Remove the useless code.
+>         - Add the from_exception to prepare the periodic bkops.
+> Changelog V9:
+>         - Rebased on patch-v7.
+>         - Added Konstantin and Maya's patch
+>                 : mmc:core: Define synchronous BKOPS timeout
+>                 : mmc:core: eMMC4.5 BKOPS fixes
+>         - Removed periodic bkops
+>                 : This feature will do in future work
+>         - Add __mmc_switch() for waiting_for_prod_done.
 >
->> I was wondering if host->max_seg_size is taken into account while packed
->> command
->> is in use. If not, shouldn't it be ?  - it could act as a better
->> throttle for "packing density".
+> Changelog V8:
+>         - Remove host->lock spin lock reviewed by Adrian
+>         - Support periodic start bkops
+>         - when bkops_status is level-3, if timeout is set to 0, send hpi.
+>         - Move the start-bkops point
+> Changelog V7:
+>         - Use HPI command when issued URGENT_BKOPS
+>         - Recheck until clearing the bkops-status bit.
+> Changelog V6:
+>         - Add the flag of check-bkops-status.
+>           (For fixing async_req problem)
+>         - Add the capability for MMC_CAP2_INIT_BKOPS.
+>           (When unset the bkops_en bit in ext_csd register)
+>         - modify the wrong condition.
+> Changelog V5:
+>         - Rebase based on the latest mmc-next.
+>         - modify codes based-on Chris's comment
+> Changelog V4:
+>         - Add mmc_read_bkops_status
+>         - When URGENT_BKOPS(level2-3), didn't use HPI command.
+>         - In mmc_switch(), use R1B/R1 according to level.
+> Changelog V3:
+>         - move the bkops setting's location in mmc_blk_issue_rw_rq
+>         - modify condition checking
+>         - bkops_en is assigned ext_csd[EXT_CSD_BKOPS_EN] instead of "1"
+>         - remove the unused code
+>         - change pr_debug instead of pr_warn in mmc_send_hpi_cmd
+>         - Add the Future consideration suggested by Per
+> Changelog V2:
+>         - Use EXCEPTION_STATUS instead of URGENT_BKOPS
+>         - Add function to check Exception_status(for eMMC4.5)
+> ---
+>  drivers/mmc/core/core.c    |  145 +++++++++++++++++++++++++++++++++++++++++++-
+>  drivers/mmc/core/mmc.c     |   11 +++
+>  drivers/mmc/core/mmc_ops.c |   26 +++++++-
+>  include/linux/mmc/card.h   |    8 +++
+>  include/linux/mmc/core.h   |    4 +
+>  include/linux/mmc/mmc.h    |   19 ++++++
+>  6 files changed, 207 insertions(+), 6 deletions(-)
 >
-> The max segments (which is calculated from host->max_seg_size) is taking
-> into account when preparing the packed list (so that the whole packed
-> won't exceed the max number of segments).
-> I'm not sure I understand how host->max_seg_size can be used as a throttle
-> for "packing density". Can you please explain?
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 8ac5246..ed2cc93 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -41,6 +41,12 @@
+>  #include "sd_ops.h"
+>  #include "sdio_ops.h"
 >
-Ok - I overlooked that max_segments is indeed used to limit the number
-of requests
-that are packed.(And this corresponds to max_seg_size, which is what I intended)
-I should be getting my MMC4.5 test gear in a couple of days - I'll run
-it through
-on some hosts and can either provide more feedback or Ack this patch.
-Regards,
-Venkat.
+> +/*
+> + * The Background operation can take a long time, depends on the house keeping
+> + * operations the card has to peform
+> + */
+> +#define MMC_BKOPS_MAX_TIMEOUT  (4 * 60 * 1000) /* max time to wait in ms */
+> +
+>  static struct workqueue_struct *workqueue;
+>  static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
+>
+> @@ -245,6 +251,70 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+>         host->ops->request(host, mrq);
+>  }
+>
+> +/**
+> + *     mmc_start_bkops - start BKOPS for supported cards
+> + *     @card: MMC card to start BKOPS
+> + *     @form_exception: A flags to indicate if this function was
+> + *                     called due to an exception raised by the card
+> + *
+> + *     Start background operations whenever requested.
+> + *     when the urgent BKOPS bit is set in a R1 command response
+> + *     then background operations should be started immediately.
+> +*/
+> +void mmc_start_bkops(struct mmc_card *card, bool from_exception)
+> +{
+> +       int err;
+> +       int timeout;
+> +       bool use_busy_signal;
+> +
+> +       BUG_ON(!card);
+> +
+> +       if (!card->ext_csd.bkops_en || mmc_card_doing_bkops(card))
+> +               return;
+> +
+> +       err = mmc_read_bkops_status(card);
+> +       if (err) {
+> +               pr_err("%s: Didn't read bkops status : %d\n",
+> +                      mmc_hostname(card->host), err);
+> +               return;
+> +       }
+> +
+> +       if (!card->ext_csd.raw_bkops_status)
+> +               return;
+> +
+> +       if (card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2
+> +           && (from_exception))
+> +               return;
+> +
+> +       mmc_claim_host(card->host);
+> +       if (card->ext_csd.raw_bkops_status >= EXT_CSD_BKOPS_LEVEL_2) {
+> +               timeout = MMC_BKOPS_MAX_TIMEOUT;
+> +               use_busy_signal = true;
+> +       } else {
+> +               timeout = 0;
+> +               use_busy_signal = false;
+> +       }
+> +
+> +       err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +                       EXT_CSD_BKOPS_START, 1, timeout, use_busy_signal);
+> +       if (err) {
+> +               pr_warn("%s: error %d starting bkops\n",
+> +                          mmc_hostname(card->host), err);
+> +               goto out;
+> +       }
+> +
+> +       /*
+> +        * For urgent bkops status (LEVEL_2 and more)
+> +        * bkops executed synchronously, otherwise
+> +        * the operation is in progress
+> +        */
+> +       if (!use_busy_signal)
+> +               mmc_card_set_doing_bkops(card);
+> +out:
+> +       mmc_release_host(card->host);
+> +}
+> +EXPORT_SYMBOL(mmc_start_bkops);
+> +
+>  static void mmc_wait_done(struct mmc_request *mrq)
+>  {
+>         complete(&mrq->completion);
+> @@ -354,6 +424,14 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+>         if (host->areq) {
+>                 mmc_wait_for_req_done(host, host->areq->mrq);
+>                 err = host->areq->err_check(host->card, host->areq);
+> +               /*
+> +                * Check BKOPS urgency for each R1 response
+> +                */
+> +               if (host->card && mmc_card_mmc(host->card) &&
+> +               ((mmc_resp_type(host->areq->mrq->cmd) == MMC_RSP_R1) ||
+> +                (mmc_resp_type(host->areq->mrq->cmd) == MMC_RSP_R1B)) &&
+> +               (host->areq->mrq->cmd->resp[0] & R1_EXCEPTION_EVENT))
+> +                       mmc_start_bkops(host->card, true);
+>         }
+>
+>         if (!err && areq)
+> @@ -489,6 +567,53 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd, int retries
+>  EXPORT_SYMBOL(mmc_wait_for_cmd);
+>
+>  /**
+> + *     mmc_stop_bkops - stop ongoing BKOPS
+> + *     @card: MMC card to check BKOPS
+> + *
+> + *     Send HPI command to stop ongoing background operations,
+> + *     to allow rapid servicing of foreground operations,e.g. read/
+> + *     writes. Wait until the card comes out of the programming state
+> + *     to avoid errors in servicing read/write requests.
+> + */
+> +int mmc_stop_bkops(struct mmc_card *card)
+> +{
+> +       int err = 0;
+> +
+> +       BUG_ON(!card);
+> +       err = mmc_interrupt_hpi(card);
+> +
+> +       /*
+> +        * if err is EINVAL, it's status that can't issue HPI.
+> +        * it should complete the BKOPS.
+> +        */
+> +       if (!err || (err == -EINVAL)) {
+> +               mmc_card_clr_doing_bkops(card);
+> +               err = 0;
+> +       }
+> +
+> +       return err;
+> +}
+> +EXPORT_SYMBOL(mmc_stop_bkops);
+> +
+> +int mmc_read_bkops_status(struct mmc_card *card)
+> +{
+> +       int err;
+> +       u8 ext_csd[512];
+
+512 byte stack? Isn't it really a problem?
+
+-- 
+Kind regards,
+Minchan Kim
