@@ -1,144 +1,104 @@
-From: Kyungsik Lee <kyungsik.lee@lge.com>
-Subject: [PATCH RESEND v2] mmc: core: Remove bounce buffer in mmc_send_cxd_data()
-Date: Mon, 30 Jul 2012 11:04:41 +0900
-Message-ID: <1343613881-6803-1-git-send-email-kyungsik.lee@lge.com>
+From: jyothishree <jyothi281@gmail.com>
+Subject: Re: Data CRC error in eMMC
+Date: Mon, 30 Jul 2012 04:44:51 +0000 (UTC)
+Message-ID: <loom.20120730T063848-667@post.gmane.org>
+References: <loom.20120727T101420-949@post.gmane.org> <003901cd6d51$5097da00$f1c78e00$@codeaurora.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from LGEMRELSE1Q.lge.com ([156.147.1.111]:60778 "EHLO
-	LGEMRELSE1Q.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753886Ab2G3CEq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Jul 2012 22:04:46 -0400
+Received: from plane.gmane.org ([80.91.229.3]:43603 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751803Ab2G3EpE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 30 Jul 2012 00:45:04 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1Svhqm-00009b-Qv
+	for linux-mmc@vger.kernel.org; Mon, 30 Jul 2012 06:45:02 +0200
+Received: from 203.247.149.152 ([203.247.149.152])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Jul 2012 06:45:00 +0200
+Received: from jyothi281 by 203.247.149.152 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Jul 2012 06:45:00 +0200
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Venkatraman S <svenkatr@ti.com>, Jaehoon Chung <jh80.chung@samsung.com>, raphael.andy.lee@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Kyungsik Lee <kyungsik.lee@lge.com>
+To: linux-mmc@vger.kernel.org
 
-It is expected that Extended CSD register(the size of this register
-is larger than CID/CSD) will be referenced more frequently as more
-fields have been added to Extended CSD and it seems that it is not
-a good option to double the memory used.
+Asutosh Das <asutoshd <at> codeaurora.org> writes:
 
-This patch is intended to avoid the use of bounce buffer for reading
-Extended CSD register in mmc_send_cxd_data().
+> 
+> >> I am getting data CRC error for CMD25 during suspend mode.
+> Try checking if the voltage supplied to card is correct after resuming.
+> 
+> Thanks
+> Asutosh
+> 
+> --
+> Sent by consultant of Qualcomm Innovation Center, Inc.
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+> 
+> -----Original Message-----
+> From: linux-mmc-owner <at> vger.kernel.org
+> [mailto:linux-mmc-owner <at> vger.kernel.org] On Behalf Of jyothishree
+> Sent: Friday, July 27, 2012 1:49 PM
+> To: linux-mmc <at> vger.kernel.org
+> Subject: Data CRC error in eMMC
+> 
+> Hello,
+> I am getting data CRC error for CMD25 during suspend mode. 
+> because of this eMMC error, partition is mapped as read only and system
+> hangs.
+> pease let me know how to approach to fix this issue.
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the
+> body of a message to majordomo <at> vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo <at> vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+Hello Asutosh Das,
 
-Signed-off-by: Kyungsik Lee <kyungsik.lee@lge.com>
----
-Changes in v2:
-- Handling on-stack buffer if it's used in caller.
----
- drivers/mmc/core/mmc_ops.c |   56 ++++++++++++++++++++++++++++++++++---------
- 1 files changed, 44 insertions(+), 12 deletions(-)
+Thanks for your reply.
+This problem is during suspend mode.
+Voltage value set in board file is as shown below.SDCC1 --> eMMC
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 0ed2cc5..dae5492 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -239,13 +239,19 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- 	struct mmc_data data = {0};
- 	struct scatterlist sg;
- 	void *data_buf;
-+	int is_on_stack;
- 
--	/* dma onto stack is unsafe/nonportable, but callers to this
--	 * routine normally provide temporary on-stack buffers ...
--	 */
--	data_buf = kmalloc(len, GFP_KERNEL);
--	if (data_buf == NULL)
--		return -ENOMEM;
-+	is_on_stack = object_is_on_stack(buf);
-+	if (is_on_stack) {
-+
-+		/* dma onto stack is unsafe/nonportable, but callers to this
-+		 * routine normally provide temporary on-stack buffers ...
-+		 */
-+		data_buf = kmalloc(len, GFP_KERNEL);
-+		if (data_buf == NULL)
-+			return -ENOMEM;
-+	} else
-+		data_buf = buf;
- 
- 	mrq.cmd = &cmd;
- 	mrq.data = &data;
-@@ -280,8 +286,10 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- 
- 	mmc_wait_for_req(host, &mrq);
- 
--	memcpy(buf, data_buf, len);
--	kfree(data_buf);
-+	if (is_on_stack) {
-+		memcpy(buf, data_buf, len);
-+		kfree(data_buf);
-+	}
- 
- 	if (cmd.error)
- 		return cmd.error;
-@@ -294,24 +302,37 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- int mmc_send_csd(struct mmc_card *card, u32 *csd)
- {
- 	int ret, i;
-+	u32 *csd_tmp;
- 
- 	if (!mmc_host_is_spi(card->host))
- 		return mmc_send_cxd_native(card->host, card->rca << 16,
- 				csd, MMC_SEND_CSD);
- 
--	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd, 16);
-+	csd_tmp = kmalloc(16, GFP_KERNEL);
-+	if (!csd_tmp)
-+		return -ENOMEM;
-+
-+	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd_tmp, 16);
- 	if (ret)
--		return ret;
-+		goto err;
-+
-+	memcpy(csd, csd_tmp, 16);
- 
- 	for (i = 0;i < 4;i++)
- 		csd[i] = be32_to_cpu(csd[i]);
- 
-+	kfree(csd_tmp);
- 	return 0;
-+
-+err:
-+	kfree(csd_tmp);
-+	return ret;
- }
- 
- int mmc_send_cid(struct mmc_host *host, u32 *cid)
- {
- 	int ret, i;
-+	u32 *cid_tmp;
- 
- 	if (!mmc_host_is_spi(host)) {
- 		if (!host->card)
-@@ -320,14 +341,25 @@ int mmc_send_cid(struct mmc_host *host, u32 *cid)
- 				cid, MMC_SEND_CID);
- 	}
- 
--	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid, 16);
-+	cid_tmp = kmalloc(16, GFP_KERNEL);
-+	if (!cid_tmp)
-+		return -ENOMEM;
-+
-+	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid_tmp, 16);
- 	if (ret)
--		return ret;
-+		goto err;
-+
-+	memcpy(cid, cid_tmp, 16);
- 
- 	for (i = 0;i < 4;i++)
- 		cid[i] = be32_to_cpu(cid[i]);
- 
-+	kfree(cid_tmp);
- 	return 0;
-+
-+err:
-+	kfree(cid_tmp);
-+	return ret;
- }
- 
- int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd)
--- 
-1.7.0.4
+mmc_vdd_reg_data[MAX_SDCC_CONTROLLER]{
+[SDCC1] = {
+                .name = "sdc_vdd",
+                .high_vol_level = 2950000,
+                .low_vol_level = 2950000,
+                .always_on = 1,
+                .lpm_sup = 1,
+                .lpm_uA = 18000, //9000-->18000 (18mA)
+                .hpm_uA = 200000, /* 200mA */
+        },
+}
+
+and vdd_io data values are
+mmc_vdd_io_reg_data[MAX_SDCC_CONTROLLER] = {
+ [SDCC1] = {
+                .name = "sdc_vdd_io",
+                .always_on = 1,
+                .high_vol_level = 1800000,
+                .low_vol_level = 1800000,
+                .hpm_uA = 200000, /* 200mA */
+        },
+}
+
+and as per above details, voltage supplied to the card is same high_vol and 
+low_volt is same 2.95
+Please let me know in mmc driver if there is any point where we can check the 
+supplied voltage during suspend and resume.
+
+Best regards,
+Jyothishree NK
+
+
 
