@@ -1,153 +1,52 @@
-From: NeilBrown <neilb@suse.de>
-Subject: Re: [PATCH] MMC/omap_hsmmc: handle failure of regulator_get better.
-Date: Mon, 30 Jul 2012 16:48:10 +1000
-Message-ID: <20120730164810.5b43c020@notabene.brown>
-References: <20120730101245.7dbe72b0@notabene.brown>
-	<501619A4.50906@ti.com>
-	<20120730162414.3818bded@notabene.brown>
-	<50162B95.3070502@ti.com>
+From: Bob Liu <lliubbo@gmail.com>
+Subject: [PATCH] drivers: mmc: bfin_sdh: fix build error
+Date: Mon, 30 Jul 2012 15:03:02 +0800
+Message-ID: <1343631782-24207-1-git-send-email-lliubbo@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=PGP-SHA1;
- boundary="Sig_/OG+Pnmsx0SuRTle3W8r/OX0"; protocol="application/pgp-signature"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <50162B95.3070502@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Rajendra Nayak <rnayak@ti.com>
-Cc: Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>, Balaji T K <balajitk@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:33033
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753189Ab2G3HCo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jul 2012 03:02:44 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: adrian.hunter@intel.com, ludovic.desroches@atmel.com, rmk+kernel@arm.linux.org.uk, g.liakhovetski@gmx.de, cjb@laptop.org, uclinux-dist-devel@blackfin.uclinux.org, Sonic Zhang <sonic.zhang@analog.com>, Bob Liu <lliubbo@gmail.com>
 
---Sig_/OG+Pnmsx0SuRTle3W8r/OX0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
+From: Sonic Zhang <sonic.zhang@analog.com>
 
-On Mon, 30 Jul 2012 12:07:09 +0530 Rajendra Nayak <rnayak@ti.com> wrote:
+Descriptor array structure has been moved into blackfin dma.h head file.
+This patch fix below error:
 
-> On Monday 30 July 2012 11:54 AM, NeilBrown wrote:
-> > On Mon, 30 Jul 2012 10:50:36 +0530 Rajendra Nayak<rnayak@ti.com>  wrote:
-> >
-> >> On Monday 30 July 2012 05:42 AM, NeilBrown wrote:
-> >>>
-> >>> 1/ if regulator_get fails, return an error.  This is important
-> >>>      if it failed with EPROBE_DEFER, as the probe needs to be
-> >>>      deferred.
-> >>>
-> >>> 2/ Don't set .set_power until the regulator has been found, or
-> >>>      the deferred probe will not bother calling omap_hsmmc_reg_get().
-> >>
-> >> I am not very sure, but aren't the data structures re-allocated on a
-> >> re-probe (after it was deferred) causing .set_power to be lost anyway?
-> >>
-> >
-> > Apparently not - as I needed to make that change before the re-probe wo=
-uld
-> > work.
-> >
-> > Looking at the code to remind myself:
-> >
-> > #define mmc_slot(host)		(host->pdata->slots[host->slot_id])
-> >
-> > so the slot is inside the platform data which is allocated in
-> > omap_hsmmc_init_one, called from omap_hsmmc_init.
-> > This is all prior to the probing of the device.
-> >
-> > So no: once set_power is set, it stays set.
->=20
-> Thanks for the explanation, makes sense.
->=20
-> Acked-by: Rajendra Nayak <rnayak@ti.com>
+drivers/mmc/host/bfin_sdh.c:52:8: error: redefinition of 'struct
+dma_desc_array'
+make[4]: *** [drivers/mmc/host/bfin_sdh.o] Error 1
 
-Thanks.
+Signed-off-by: Sonic Zhang <sonic.zhang@analog.com>
+Signed-off-by: Bob Liu <lliubbo@gmail.com>
+---
+ drivers/mmc/host/bfin_sdh.c |   13 -------------
+ 1 file changed, 13 deletions(-)
 
->=20
-> Btw, is the support for re-probe/deferred probe already merged
-> now? or are you testing this with some out of tree patches.
+diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
+index 0366617..a17dd73 100644
+--- a/drivers/mmc/host/bfin_sdh.c
++++ b/drivers/mmc/host/bfin_sdh.c
+@@ -49,13 +49,6 @@
+ #define bfin_write_SDH_CFG		bfin_write_RSI_CFG
+ #endif
+ 
+-struct dma_desc_array {
+-	unsigned long	start_addr;
+-	unsigned short	cfg;
+-	unsigned short	x_count;
+-	short		x_modify;
+-} __packed;
+-
+ struct sdh_host {
+ 	struct mmc_host		*mmc;
+ 	spinlock_t		lock;
+-- 
+1.7.9.5
 
-deferred-probe works in 3.5.=20
-
-commit 04bf30115f4ba2beda1efb6cfbae49cdc757f3a9
-Author: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Date:   Sun Mar 11 13:07:56 2012 +0000
-
-    regulator: Support driver probe deferral
-=20
-makes it work for regulators.
-
-commit d1c3414c2a9d10ef7f0f7665f5d2947cd088c093
-Author: Grant Likely <grant.likely@secretlab.ca>
-Date:   Mon Mar 5 08:47:41 2012 -0700
-
-    drivercore: Add driver probe deferral mechanism
-
-added the basic mechanism.
-
-GPIOs are also supported in 3.6-rc thanks to
-
-commit e93545763021988def06fbda28fe5da133589a96
-Author: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Date:   Mon Jul 9 12:22:56 2012 +0100
-
-    gpiolib: Defer failed gpio requests by default
-
-so the omap_hsmmc_late_init() stuff can probably be removed, though I haven=
-'t
-tried and there might be some subtlety in there that isn't covered by
-EPROBE_DEFER
-
-NeilBrown
-
-
->=20
-> >
-> > Thanks,
-> > NeilBrown
-> >
-> >>>
-> >>> Signed-off-by: NeilBrown<neilb@suse.de>
-> >>>
-> >>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hs=
-mmc.c
-> >>> index 389a3ee..f052c29 100644
-> >>> --- a/drivers/mmc/host/omap_hsmmc.c
-> >>> +++ b/drivers/mmc/host/omap_hsmmc.c
-> >>> @@ -299,12 +299,12 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc=
-_host *host)
-> >>>    	struct regulator *reg;
-> >>>    	int ocr_value =3D 0;
-> >>>
-> >>> -	mmc_slot(host).set_power =3D omap_hsmmc_set_power;
-> >>> -
-> >>>    	reg =3D regulator_get(host->dev, "vmmc");
-> >>>    	if (IS_ERR(reg)) {
-> >>>    		dev_dbg(host->dev, "vmmc regulator missing\n");
-> >>> +		return PTR_ERR(reg);
-> >>>    	} else {
-> >>> +		mmc_slot(host).set_power =3D omap_hsmmc_set_power;
-> >>>    		host->vcc =3D reg;
-> >>>    		ocr_value =3D mmc_regulator_get_ocrmask(reg);
-> >>>    		if (!mmc_slot(host).ocr_mask) {
-> >
-
-
---Sig_/OG+Pnmsx0SuRTle3W8r/OX0
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Disposition: attachment; filename=signature.asc
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.18 (GNU/Linux)
-
-iQIVAwUBUBYuKjnsnt1WYoG5AQIcDQ//T+ZJThREwNR702BdPQMIg1pZD6s/kFeC
-K6cfVXAsFw0xfCY+/h6ICsHh08kKuxdOjcPWWR4+viucR1mQJvStDLaJ3JHTimPh
-nYXFPFxmSoIHAPcqeuzLtei3v5iwVevxiZcB6N/n1DQKefGYkh87EsIkDJIazpOJ
-h3joDZEY6PiVA7s/fLUdUi6INCQpV9k16LrcwXFqDUuzyHvi+7h4SqVd6tgiZaNW
-MluychRcDVrSO7xzh/bds75TGBOcGptTgWl8XDu2eBW8et43kLQCxB2EWlJrIPJM
-4yYNgi21M8LtUoNBsZhHSYiPGb43eTNs8+Mm/Hi3E+sTZ7hTCA6A/RBTfvYLYnV3
-DC/X6Gmyw6YQ1YtZ3L7hsjWXrovIgwHOL4VGQDkVBNJ7q87OPWDWW3foae4NbYnL
-NOqheLIKbMx4e0xJuwnr/OMtxVfl27kw98FG4NslITcnBPzqG1l7aKU0LTtVAwYn
-5H56U3bcKLuDWKgXE7XIOwgePps9guSndofwQZE+eR/maNgFj/widNvM5aO8iX2w
-F2oUc4dzAGgLdLUCcaJeHdjqomndyH0ogsJPYlXxeghpPRO/kd19er5jmfexy+sc
-pVa28N0noBHH4sXgP9ljaunyHMzvE+FBUAg9d3TkrlmWl0Pie8vjjq/NoqGAUzk6
-EH+zYr2ac1M=
-=h8TC
------END PGP SIGNATURE-----
-
---Sig_/OG+Pnmsx0SuRTle3W8r/OX0--
