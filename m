@@ -1,157 +1,84 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH RESEND v2] mmc: core: Remove bounce buffer in mmc_send_cxd_data()
-Date: Mon, 30 Jul 2012 18:46:31 +0530
-Message-ID: <CANfBPZ-pa++A=OSmhaEfVs-TDVtTbsBi4FacaPxuvfNJRe-Jxw@mail.gmail.com>
-References: <1343613881-6803-1-git-send-email-kyungsik.lee@lge.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog131.obsmtp.com ([74.125.149.247]:46921 "EHLO
-	na3sys009aog131.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754096Ab2G3NQx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jul 2012 09:16:53 -0400
-Received: by qaea16 with SMTP id a16so858444qae.10
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Jul 2012 06:16:51 -0700 (PDT)
-In-Reply-To: <1343613881-6803-1-git-send-email-kyungsik.lee@lge.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>
+Subject: [PATCH 1/1] ARM: dove: DT support for sdhci-dove
+Date: Mon, 30 Jul 2012 18:35:34 +0200
+Message-ID: <1343666134-21205-1-git-send-email-sebastian.hesselbarth@googlemail.com>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>
+Cc: Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Manuel Lauss <manuel.lauss@googlemail.com>, David Brown <davidb@codeaurora.org>, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kyungsik Lee <kyungsik.lee@lge.com>
-Cc: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, raphael.andy.lee@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Mon, Jul 30, 2012 at 7:34 AM, Kyungsik Lee <kyungsik.lee@lge.com> wrote:
-> It is expected that Extended CSD register(the size of this register
-> is larger than CID/CSD) will be referenced more frequently as more
-> fields have been added to Extended CSD and it seems that it is not
-> a good option to double the memory used.
->
-> This patch is intended to avoid the use of bounce buffer for reading
-> Extended CSD register in mmc_send_cxd_data().
-Maybe I am reading this wrong, but mmc_send_cid and mmc_send_csd are always
-called with card->raw_cid and card->raw_csd, which are allocated from the heap,
-(from mmc_alloc_card).
-So the second half of your changes are not required, or a WARN_ON
-might suffice ?
+This patch adds device tree support and binding documentiation for
+sdhci-dove.
 
->
-> Signed-off-by: Kyungsik Lee <kyungsik.lee@lge.com>
-> ---
-> Changes in v2:
-> - Handling on-stack buffer if it's used in caller.
-> ---
->  drivers/mmc/core/mmc_ops.c |   56 ++++++++++++++++++++++++++++++++++---------
->  1 files changed, 44 insertions(+), 12 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 0ed2cc5..dae5492 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -239,13 +239,19 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
->         struct mmc_data data = {0};
->         struct scatterlist sg;
->         void *data_buf;
-> +       int is_on_stack;
->
-> -       /* dma onto stack is unsafe/nonportable, but callers to this
-> -        * routine normally provide temporary on-stack buffers ...
-> -        */
-> -       data_buf = kmalloc(len, GFP_KERNEL);
-> -       if (data_buf == NULL)
-> -               return -ENOMEM;
-> +       is_on_stack = object_is_on_stack(buf);
-> +       if (is_on_stack) {
-> +
-> +               /* dma onto stack is unsafe/nonportable, but callers to this
-> +                * routine normally provide temporary on-stack buffers ...
-> +                */
-> +               data_buf = kmalloc(len, GFP_KERNEL);
-> +               if (data_buf == NULL)
-> +                       return -ENOMEM;
-> +       } else
-> +               data_buf = buf;
->
->         mrq.cmd = &cmd;
->         mrq.data = &data;
-> @@ -280,8 +286,10 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
->
->         mmc_wait_for_req(host, &mrq);
->
-> -       memcpy(buf, data_buf, len);
-> -       kfree(data_buf);
-> +       if (is_on_stack) {
-> +               memcpy(buf, data_buf, len);
-> +               kfree(data_buf);
-> +       }
->
->         if (cmd.error)
->                 return cmd.error;
-> @@ -294,24 +302,37 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
->  int mmc_send_csd(struct mmc_card *card, u32 *csd)
->  {
->         int ret, i;
-> +       u32 *csd_tmp;
->
->         if (!mmc_host_is_spi(card->host))
->                 return mmc_send_cxd_native(card->host, card->rca << 16,
->                                 csd, MMC_SEND_CSD);
->
-> -       ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd, 16);
-> +       csd_tmp = kmalloc(16, GFP_KERNEL);
-> +       if (!csd_tmp)
-> +               return -ENOMEM;
-> +
-> +       ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd_tmp, 16);
->         if (ret)
-> -               return ret;
-> +               goto err;
-> +
-> +       memcpy(csd, csd_tmp, 16);
->
->         for (i = 0;i < 4;i++)
->                 csd[i] = be32_to_cpu(csd[i]);
->
-> +       kfree(csd_tmp);
->         return 0;
-> +
-> +err:
-> +       kfree(csd_tmp);
-> +       return ret;
->  }
->
->  int mmc_send_cid(struct mmc_host *host, u32 *cid)
->  {
->         int ret, i;
-> +       u32 *cid_tmp;
->
->         if (!mmc_host_is_spi(host)) {
->                 if (!host->card)
-> @@ -320,14 +341,25 @@ int mmc_send_cid(struct mmc_host *host, u32 *cid)
->                                 cid, MMC_SEND_CID);
->         }
->
-> -       ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid, 16);
-> +       cid_tmp = kmalloc(16, GFP_KERNEL);
-> +       if (!cid_tmp)
-> +               return -ENOMEM;
-> +
-> +       ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid_tmp, 16);
->         if (ret)
-> -               return ret;
-> +               goto err;
-> +
-> +       memcpy(cid, cid_tmp, 16);
->
->         for (i = 0;i < 4;i++)
->                 cid[i] = be32_to_cpu(cid[i]);
->
-> +       kfree(cid_tmp);
->         return 0;
-> +
-> +err:
-> +       kfree(cid_tmp);
-> +       return ret;
->  }
->
->  int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd)
-> --
-> 1.7.0.4
->
+Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>
+Cc: Grant Likely <grant.likely@secretlab.ca>
+Cc: Rob Herring <rob.herring@calxeda.com>
+Cc: Rob Landley <rob@landley.net>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: Manuel Lauss <manuel.lauss@googlemail.com>
+Cc: David Brown <davidb@codeaurora.org>
+Cc: devicetree-discuss@lists.ozlabs.org
+Cc: linux-doc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
+
+---
+ Documentation/devicetree/bindings/mmc/sdhci-dove.txt |   12 ++++++++++++
+ drivers/mmc/host/sdhci-dove.c                        |    8 ++++++++
+ 2 files changed, 20 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-dove.txt
+
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-dove.txt b/Documentation/devicetree/bindings/mmc/sdhci-dove.txt
+new file mode 100644
+index 0000000..3dd42552
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/sdhci-dove.txt
+@@ -0,0 +1,12 @@
++* Marvell sdhci-dove controller
++
++Required properties:
++- compatible: Should be "marvell,dove-sdhci".
++
++Example:
++
++sdio0: sdio@92000 {
++	compatible = "marvell,dove-sdhci";
++	reg = <0x92000 0x100>;
++	interrupts = <35>, <37>;
++};
+diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
+index a6e53a1..90140eb 100644
+--- a/drivers/mmc/host/sdhci-dove.c
++++ b/drivers/mmc/host/sdhci-dove.c
+@@ -24,6 +24,7 @@
+ #include <linux/err.h>
+ #include <linux/module.h>
+ #include <linux/mmc/host.h>
++#include <linux/of.h>
+ 
+ #include "sdhci-pltfm.h"
+ 
+@@ -126,11 +127,18 @@ static int __devexit sdhci_dove_remove(struct platform_device *pdev)
+ 	return sdhci_pltfm_unregister(pdev);
+ }
+ 
++static const struct of_device_id sdhci_dove_of_match_table[] __devinitdata = {
++	{ .compatible = "marvell,dove-sdhci", },
++	{}
++};
++MODULE_DEVICE_TABLE(of, sdhci_dove_of_match_table);
++
+ static struct platform_driver sdhci_dove_driver = {
+ 	.driver		= {
+ 		.name	= "sdhci-dove",
+ 		.owner	= THIS_MODULE,
+ 		.pm	= SDHCI_PLTFM_PMOPS,
++		.of_match_table = of_match_ptr(sdhci_dove_of_match_table),
+ 	},
+ 	.probe		= sdhci_dove_probe,
+ 	.remove		= __devexit_p(sdhci_dove_remove),
+-- 
+1.7.10.4
+
