@@ -1,107 +1,179 @@
-From: Masanari Iida <standby24x7@gmail.com>
-Subject: [PATCH] [trivial] mmc: host: Fix typo in mmc/hosts
-Date: Tue, 31 Jul 2012 05:32:09 +0900
-Message-ID: <1343680329-25343-1-git-send-email-standby24x7@gmail.com>
+From: "kyungsik.lee" <kyungsik.lee@lge.com>
+Subject: Re: [PATCH RESEND v2] mmc: core: Remove bounce buffer in mmc_send_cxd_data()
+Date: Tue, 31 Jul 2012 10:00:02 +0900
+Message-ID: <50172E12.5010002@lge.com>
+References: <1343613881-6803-1-git-send-email-kyungsik.lee@lge.com> <CANfBPZ-pa++A=OSmhaEfVs-TDVtTbsBi4FacaPxuvfNJRe-Jxw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:58325 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754195Ab2G3Ubd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jul 2012 16:31:33 -0400
+Received: from LGEMRELSE6Q.lge.com ([156.147.1.121]:63650 "EHLO
+	LGEMRELSE6Q.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752012Ab2GaBAG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jul 2012 21:00:06 -0400
+In-Reply-To: <CANfBPZ-pa++A=OSmhaEfVs-TDVtTbsBi4FacaPxuvfNJRe-Jxw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: trivial@kernel.org, linux-kernel@vger.kernel.org, cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, Masanari Iida <standby24x7@gmail.com>
+To: "S, Venkatraman" <svenkatr@ti.com>
+Cc: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, raphael.andy.lee@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Correct spelling in printk and comments in mmc/hosts.
-
-Signed-off-by: Masanari Iida <standby24x7@gmail.com>
----
- drivers/mmc/core/sdio.c            | 2 +-
- drivers/mmc/host/at91_mci.c        | 2 +-
- drivers/mmc/host/atmel-mci.c       | 2 +-
- drivers/mmc/host/omap_hsmmc.c      | 2 +-
- drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
- drivers/mmc/host/vub300.c          | 2 +-
- 6 files changed, 6 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 41c5fd8..595e1c8 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -644,7 +644,7 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
- 	/*
- 	 * If the host and card support UHS-I mode request the card
- 	 * to switch to 1.8V signaling level.  No 1.8v signalling if
--	 * UHS mode is not enabled to maintain compatibilty and some
-+	 * UHS mode is not enabled to maintain compatibility and some
- 	 * systems that claim 1.8v signalling in fact do not support
- 	 * it.
- 	 */
-diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
-index efdb81d..74bed0f 100644
---- a/drivers/mmc/host/at91_mci.c
-+++ b/drivers/mmc/host/at91_mci.c
-@@ -356,7 +356,7 @@ static void at91_mci_handle_transmitted(struct at91mci_host *host)
- }
- 
- /*
-- * Update bytes tranfered count during a write operation
-+ * Update bytes transfered count during a write operation
-  */
- static void at91_mci_update_bytes_xfered(struct at91mci_host *host)
- {
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index f2c115e..383c93b 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -1015,7 +1015,7 @@ static void atmci_stop_transfer(struct atmel_mci *host)
- }
- 
- /*
-- * Stop data transfer because error(s) occured.
-+ * Stop data transfer because error(s) occurred.
-  */
- static void atmci_stop_transfer_pdc(struct atmel_mci *host)
- {
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 9a7a60a..4d4f097 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -448,7 +448,7 @@ static void omap_hsmmc_stop_clock(struct omap_hsmmc_host *host)
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
- 		OMAP_HSMMC_READ(host->base, SYSCTL) & ~CEN);
- 	if ((OMAP_HSMMC_READ(host->base, SYSCTL) & CEN) != 0x0)
--		dev_dbg(mmc_dev(host->mmc), "MMC Clock is not stoped\n");
-+		dev_dbg(mmc_dev(host->mmc), "MMC Clock is not stopped\n");
- }
- 
- static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index ebbe984..ca22b6b 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -313,7 +313,7 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
- 		new_val = val & (SDHCI_CTRL_LED | \
- 				SDHCI_CTRL_4BITBUS | \
- 				SDHCI_CTRL_D3CD);
--		/* ensure the endianess */
-+		/* ensure the endianness */
- 		new_val |= ESDHC_HOST_CONTROL_LE;
- 		/* DMA mode bits are shifted */
- 		new_val |= (val & SDHCI_CTRL_DMA_MASK) << 5;
-diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-index 3135a1a..58eab9a 100644
---- a/drivers/mmc/host/vub300.c
-+++ b/drivers/mmc/host/vub300.c
-@@ -806,7 +806,7 @@ static void command_res_completed(struct urb *urb)
- 		 * we suspect a buggy USB host controller
- 		 */
- 	} else if (!vub300->data) {
--		/* this means that the command (typically CMD52) suceeded */
-+		/* this means that the command (typically CMD52) succeeded */
- 	} else if (vub300->resp.common.header_type != 0x02) {
- 		/*
- 		 * this is an error response from the VUB300 chip
--- 
-1.7.12.rc0.56.g425b8a2
+On 2012-07-30 =EC=98=A4=ED=9B=84 10:16, S, Venkatraman wrote:
+> On Mon, Jul 30, 2012 at 7:34 AM, Kyungsik Lee <kyungsik.lee@lge.com> =
+wrote:
+>> It is expected that Extended CSD register(the size of this register
+>> is larger than CID/CSD) will be referenced more frequently as more
+>> fields have been added to Extended CSD and it seems that it is not
+>> a good option to double the memory used.
+>>
+>> This patch is intended to avoid the use of bounce buffer for reading
+>> Extended CSD register in mmc_send_cxd_data().
+> Maybe I am reading this wrong, but mmc_send_cid and mmc_send_csd are =
+always
+> called with card->raw_cid and card->raw_csd, which are allocated from=
+ the heap,
+> (from mmc_alloc_card).
+> So the second half of your changes are not required, or a WARN_ON
+> might suffice ?
+In case of non cache-coherent architecture, the address of raw_cid and=20
+raw_csd should
+be aligned on a cache line boundary for DMA. It's not guaranteed all th=
+e=20
+time.
+So using kmalloc() is a way to make it work.
+>
+>> Signed-off-by: Kyungsik Lee <kyungsik.lee@lge.com>
+>> ---
+>> Changes in v2:
+>> - Handling on-stack buffer if it's used in caller.
+>> ---
+>>   drivers/mmc/core/mmc_ops.c |   56 ++++++++++++++++++++++++++++++++=
+++---------
+>>   1 files changed, 44 insertions(+), 12 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+>> index 0ed2cc5..dae5492 100644
+>> --- a/drivers/mmc/core/mmc_ops.c
+>> +++ b/drivers/mmc/core/mmc_ops.c
+>> @@ -239,13 +239,19 @@ mmc_send_cxd_data(struct mmc_card *card, struc=
+t mmc_host *host,
+>>          struct mmc_data data =3D {0};
+>>          struct scatterlist sg;
+>>          void *data_buf;
+>> +       int is_on_stack;
+>>
+>> -       /* dma onto stack is unsafe/nonportable, but callers to this
+>> -        * routine normally provide temporary on-stack buffers ...
+>> -        */
+>> -       data_buf =3D kmalloc(len, GFP_KERNEL);
+>> -       if (data_buf =3D=3D NULL)
+>> -               return -ENOMEM;
+>> +       is_on_stack =3D object_is_on_stack(buf);
+>> +       if (is_on_stack) {
+>> +
+>> +               /* dma onto stack is unsafe/nonportable, but callers=
+ to this
+>> +                * routine normally provide temporary on-stack buffe=
+rs ...
+>> +                */
+>> +               data_buf =3D kmalloc(len, GFP_KERNEL);
+>> +               if (data_buf =3D=3D NULL)
+>> +                       return -ENOMEM;
+>> +       } else
+>> +               data_buf =3D buf;
+>>
+>>          mrq.cmd =3D &cmd;
+>>          mrq.data =3D &data;
+>> @@ -280,8 +286,10 @@ mmc_send_cxd_data(struct mmc_card *card, struct=
+ mmc_host *host,
+>>
+>>          mmc_wait_for_req(host, &mrq);
+>>
+>> -       memcpy(buf, data_buf, len);
+>> -       kfree(data_buf);
+>> +       if (is_on_stack) {
+>> +               memcpy(buf, data_buf, len);
+>> +               kfree(data_buf);
+>> +       }
+>>
+>>          if (cmd.error)
+>>                  return cmd.error;
+>> @@ -294,24 +302,37 @@ mmc_send_cxd_data(struct mmc_card *card, struc=
+t mmc_host *host,
+>>   int mmc_send_csd(struct mmc_card *card, u32 *csd)
+>>   {
+>>          int ret, i;
+>> +       u32 *csd_tmp;
+>>
+>>          if (!mmc_host_is_spi(card->host))
+>>                  return mmc_send_cxd_native(card->host, card->rca <<=
+ 16,
+>>                                  csd, MMC_SEND_CSD);
+>>
+>> -       ret =3D mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, cs=
+d, 16);
+>> +       csd_tmp =3D kmalloc(16, GFP_KERNEL);
+>> +       if (!csd_tmp)
+>> +               return -ENOMEM;
+>> +
+>> +       ret =3D mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, cs=
+d_tmp, 16);
+>>          if (ret)
+>> -               return ret;
+>> +               goto err;
+>> +
+>> +       memcpy(csd, csd_tmp, 16);
+>>
+>>          for (i =3D 0;i < 4;i++)
+>>                  csd[i] =3D be32_to_cpu(csd[i]);
+>>
+>> +       kfree(csd_tmp);
+>>          return 0;
+>> +
+>> +err:
+>> +       kfree(csd_tmp);
+>> +       return ret;
+>>   }
+>>
+>>   int mmc_send_cid(struct mmc_host *host, u32 *cid)
+>>   {
+>>          int ret, i;
+>> +       u32 *cid_tmp;
+>>
+>>          if (!mmc_host_is_spi(host)) {
+>>                  if (!host->card)
+>> @@ -320,14 +341,25 @@ int mmc_send_cid(struct mmc_host *host, u32 *c=
+id)
+>>                                  cid, MMC_SEND_CID);
+>>          }
+>>
+>> -       ret =3D mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid, 16)=
+;
+>> +       cid_tmp =3D kmalloc(16, GFP_KERNEL);
+>> +       if (!cid_tmp)
+>> +               return -ENOMEM;
+>> +
+>> +       ret =3D mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid_tmp,=
+ 16);
+>>          if (ret)
+>> -               return ret;
+>> +               goto err;
+>> +
+>> +       memcpy(cid, cid_tmp, 16);
+>>
+>>          for (i =3D 0;i < 4;i++)
+>>                  cid[i] =3D be32_to_cpu(cid[i]);
+>>
+>> +       kfree(cid_tmp);
+>>          return 0;
+>> +
+>> +err:
+>> +       kfree(cid_tmp);
+>> +       return ret;
+>>   }
+>>
+>>   int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>> --
+>> 1.7.0.4
+>>
 
