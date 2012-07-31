@@ -1,143 +1,95 @@
-From: Kyungsik Lee <kyungsik.lee@lge.com>
-Subject: [PATCH RESEND v3] mmc: core: Remove bounce buffer in mmc_send_cxd_data()
-Date: Tue, 31 Jul 2012 11:00:24 +0900
-Message-ID: <1343700024-29861-1-git-send-email-kyungsik.lee@lge.com>
+From: Chao Xie <xiechao.mail@gmail.com>
+Subject: [PATCH] mmc: sdhci: fix the clock APIs for pxav2 and pxav3 driver
+Date: Tue, 31 Jul 2012 14:35:25 +0800
+Message-ID: <1343716525-7962-1-git-send-email-xiechao.mail@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from LGEMRELSE6Q.lge.com ([156.147.1.121]:55149 "EHLO
-	LGEMRELSE6Q.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754608Ab2GaCA7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jul 2012 22:00:59 -0400
+Received: from na3sys009aog131.obsmtp.com ([74.125.149.247]:37315 "EHLO
+	na3sys009aog131.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752433Ab2GaGfo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jul 2012 02:35:44 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Venkatraman S <svenkatr@ti.com>, Jaehoon Chung <jh80.chung@samsung.com>, raphael.andy.lee@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Kyungsik Lee <kyungsik.lee@lge.com>
+To: haojian.zhuang@gmail.com, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Chao Xie <chao.xie@marvell.com>, Chao Xie <xiechao.mail@gmail.com>
 
-It is expected that Extended CSD register(the size of this register
-is larger than CID/CSD) will be referenced more frequently as more
-fields have been added to Extended CSD and it seems that it is not
-a good option to double the memory used.
+From: Chao Xie <chao.xie@marvell.com>
 
-This patch is intended to avoid the use of bounce buffer for reading
-Extended CSD register in mmc_send_cxd_data().
-
-Signed-off-by: Kyungsik Lee <kyungsik.lee@lge.com>
+Signed-off-by: Chao Xie <xiechao.mail@gmail.com>
 ---
-Changes in v2:
-- Handling on-stack buffer if it's used in caller.
+ drivers/mmc/host/sdhci-pxav2.c |    6 +++---
+ drivers/mmc/host/sdhci-pxav3.c |    8 ++++----
+ 2 files changed, 7 insertions(+), 7 deletions(-)
 
-Changes in v3:
-- Remove unnecesary code.
----
- drivers/mmc/core/mmc_ops.c |   54 ++++++++++++++++++++++++++++++++-----------
- 1 files changed, 40 insertions(+), 14 deletions(-)
-
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 0ed2cc5..036e6d5 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -239,13 +239,19 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- 	struct mmc_data data = {0};
- 	struct scatterlist sg;
- 	void *data_buf;
-+	int is_on_stack;
- 
--	/* dma onto stack is unsafe/nonportable, but callers to this
--	 * routine normally provide temporary on-stack buffers ...
--	 */
--	data_buf = kmalloc(len, GFP_KERNEL);
--	if (data_buf == NULL)
--		return -ENOMEM;
-+	is_on_stack = object_is_on_stack(buf);
-+	if (is_on_stack) {
-+
-+		/* dma onto stack is unsafe/nonportable, but callers to this
-+		 * routine normally provide temporary on-stack buffers ...
-+		 */
-+		data_buf = kmalloc(len, GFP_KERNEL);
-+		if (data_buf == NULL)
-+			return -ENOMEM;
-+	} else
-+		data_buf = buf;
- 
- 	mrq.cmd = &cmd;
- 	mrq.data = &data;
-@@ -280,8 +286,10 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- 
- 	mmc_wait_for_req(host, &mrq);
- 
--	memcpy(buf, data_buf, len);
--	kfree(data_buf);
-+	if (is_on_stack) {
-+		memcpy(buf, data_buf, len);
-+		kfree(data_buf);
-+	}
- 
- 	if (cmd.error)
- 		return cmd.error;
-@@ -294,24 +302,34 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- int mmc_send_csd(struct mmc_card *card, u32 *csd)
- {
- 	int ret, i;
-+	u32 *csd_tmp;
- 
- 	if (!mmc_host_is_spi(card->host))
- 		return mmc_send_cxd_native(card->host, card->rca << 16,
- 				csd, MMC_SEND_CSD);
- 
--	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd, 16);
-+	csd_tmp = kmalloc(16, GFP_KERNEL);
-+	if (!csd_tmp)
-+		return -ENOMEM;
-+
-+	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd_tmp, 16);
- 	if (ret)
--		return ret;
-+		goto err;
-+
-+	memcpy(csd, csd_tmp, 16);
- 
- 	for (i = 0;i < 4;i++)
- 		csd[i] = be32_to_cpu(csd[i]);
- 
--	return 0;
-+err:
-+	kfree(csd_tmp);
-+	return ret;
- }
- 
- int mmc_send_cid(struct mmc_host *host, u32 *cid)
- {
- 	int ret, i;
-+	u32 *cid_tmp;
- 
- 	if (!mmc_host_is_spi(host)) {
- 		if (!host->card)
-@@ -320,14 +338,22 @@ int mmc_send_cid(struct mmc_host *host, u32 *cid)
- 				cid, MMC_SEND_CID);
+diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+index dbb75bf..4d10159 100644
+--- a/drivers/mmc/host/sdhci-pxav2.c
++++ b/drivers/mmc/host/sdhci-pxav2.c
+@@ -150,7 +150,7 @@ static int __devinit sdhci_pxav2_probe(struct platform_device *pdev)
+ 		goto err_clk_get;
  	}
+ 	pltfm_host->clk = clk;
+-	clk_enable(clk);
++	clk_prepare_enable(clk);
  
--	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid, 16);
-+	cid_tmp = kmalloc(16, GFP_KERNEL);
-+	if (!cid_tmp)
-+		return -ENOMEM;
-+
-+	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid_tmp, 16);
- 	if (ret)
--		return ret;
-+		goto err;
-+
-+	memcpy(cid, cid_tmp, 16);
+ 	host->quirks = SDHCI_QUIRK_BROKEN_ADMA
+ 		| SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
+@@ -188,7 +188,7 @@ static int __devinit sdhci_pxav2_probe(struct platform_device *pdev)
+ 	return 0;
  
- 	for (i = 0;i < 4;i++)
- 		cid[i] = be32_to_cpu(cid[i]);
+ err_add_host:
+-	clk_disable(clk);
++	clk_disable_unprepare(clk);
+ 	clk_put(clk);
+ err_clk_get:
+ 	sdhci_pltfm_free(pdev);
+@@ -204,7 +204,7 @@ static int __devexit sdhci_pxav2_remove(struct platform_device *pdev)
  
--	return 0;
-+err:
-+	kfree(cid_tmp);
-+	return ret;
- }
+ 	sdhci_remove_host(host, 1);
  
- int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd)
+-	clk_disable(pltfm_host->clk);
++	clk_disable_unprepare(pltfm_host->clk);
+ 	clk_put(pltfm_host->clk);
+ 	sdhci_pltfm_free(pdev);
+ 	kfree(pxa);
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index f296956..0f8f698 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -186,14 +186,14 @@ static int __devinit sdhci_pxav3_probe(struct platform_device *pdev)
+ 	pltfm_host = sdhci_priv(host);
+ 	pltfm_host->priv = pxa;
+ 
+-	clk = clk_get(dev, "PXA-SDHCLK");
++	clk = clk_get(dev, NULL);
+ 	if (IS_ERR(clk)) {
+ 		dev_err(dev, "failed to get io clock\n");
+ 		ret = PTR_ERR(clk);
+ 		goto err_clk_get;
+ 	}
+ 	pltfm_host->clk = clk;
+-	clk_enable(clk);
++	clk_prepare_enable(clk);
+ 
+ 	host->quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
+ 		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
+@@ -234,7 +234,7 @@ static int __devinit sdhci_pxav3_probe(struct platform_device *pdev)
+ 	return 0;
+ 
+ err_add_host:
+-	clk_disable(clk);
++	clk_disable_unprepare(clk);
+ 	clk_put(clk);
+ err_clk_get:
+ 	sdhci_pltfm_free(pdev);
+@@ -250,7 +250,7 @@ static int __devexit sdhci_pxav3_remove(struct platform_device *pdev)
+ 
+ 	sdhci_remove_host(host, 1);
+ 
+-	clk_disable(pltfm_host->clk);
++	clk_disable_unprepare(pltfm_host->clk);
+ 	clk_put(pltfm_host->clk);
+ 	sdhci_pltfm_free(pdev);
+ 	kfree(pxa);
 -- 
 1.7.0.4
 
