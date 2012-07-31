@@ -1,57 +1,31 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH 3/3] drivers/mmc/host: Add realtek sdmmc interface driver
-Date: Tue, 31 Jul 2012 17:22:04 +0200
-Message-ID: <20120731152204.GA4563@x1.osrc.amd.com>
-References: <1343720576-22181-1-git-send-email-wei_wang@realsil.com.cn>
+From: Jens Axboe <axboe@kernel.dk>
+Subject: Re: [PATCH v5 1/3] block: Add test-iosched scheduler
+Date: Tue, 31 Jul 2012 17:46:22 +0200
+Message-ID: <5017FDCE.5030700@kernel.dk>
+References: <n> <1343744710-31700-2-git-send-email-merez@codeaurora.org> <09c3a301ad7ca4fa396c4d00615312c1.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.skyhub.de ([78.46.96.112]:40144 "EHLO mail.skyhub.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755040Ab2GaPWE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 31 Jul 2012 11:22:04 -0400
-Content-Disposition: inline
-In-Reply-To: <1343720576-22181-1-git-send-email-wei_wang@realsil.com.cn>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <09c3a301ad7ca4fa396c4d00615312c1.squirrel@www.codeaurora.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: merez@codeaurora.org
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: wei_wang@realsil.com.cn
-Cc: gregkh@linuxfoundation.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, arnd@arndb.de, aaron.lu@amd.come
 
-On Tue, Jul 31, 2012 at 03:42:56PM +0800, wei_wang@realsil.com.cn wrote:
-> From: Wei WANG <wei_wang@realsil.com.cn>
+On 07/31/2012 04:36 PM, merez@codeaurora.org wrote:
+> Hi Jens,
 > 
-> Realtek SD/MMC card interface driver is used to access
-> SD/MMC card, with the help of Realtek card reader adapter driver.
+> Do you have comments on this patch?
+> Can we push it to kernel 3.6 version?
 
-Yep,
+I have questions - what is this good for? In other words, explain to me
+why this is useful code. And in particular why this cannot be done from
+userspace with bsg and block tracing?
 
-it builds and boots fine with latest Linus tree.
-
-When I put the card in, the kernel says:
-
-[ 1162.197980] rtsx_core: MMC/SD card detected in socket 0:0
-[ 1162.302571] rtsx_sdmmc: Realtek SDMMC controller found
-[ 1163.202172] mmc0: new ultra high speed SDR50 SDHC card at address e624
-[ 1163.237151] mmcblk0: mmc0:e624 SU16G 14.8 GiB
-[ 1163.263627]  mmcblk0: p1
-
-Then when I format the card it says:
-
-[ 1284.457681] DMA: Out of SW-IOMMU space for 524288 bytes at device 0000:03:00.0
-[ 1284.475972] DMA: Out of SW-IOMMU space for 368640 bytes at device 0000:03:00.0
-
-which doesn't look too kosher to me. It comes from
-swiotlb.c:swiotlb_full() and it says that in both cases map_single fails
-mapping those 524Kb and 368K buffers.
-
-It looks from here as if the driver is trying to map too big buffers
-which the swiotlb can't handle? But I'm just stabbing in the dark here.
-
-Accessing the card seems ok, I'll play with it for a while and keep you
-posted.
-
-Thanks.
+IOW, I'm dubious as to whether a new _io scheduler_ is the correct
+solution to the problem you have at hand.
 
 -- 
-Regards/Gruss,
-Boris.
+Jens Axboe
+
