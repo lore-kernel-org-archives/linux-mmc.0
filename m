@@ -1,95 +1,185 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH 3/3] drivers/mmc/host: Add realtek sdmmc interface driver
-Date: Tue, 31 Jul 2012 20:11:39 +0200
-Message-ID: <20120731181138.GA5825@x1.osrc.amd.com>
-References: <1343720576-22181-1-git-send-email-wei_wang@realsil.com.cn>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 1/3] drivers/misc: Add realtek card reader core driver
+Date: Tue, 31 Jul 2012 11:23:25 +0000
+Message-ID: <201207311123.25862.arnd@arndb.de>
+References: <1343720536-22077-1-git-send-email-wei_wang@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.skyhub.de ([78.46.96.112]:46150 "EHLO mail.skyhub.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754319Ab2GaSLi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 31 Jul 2012 14:11:38 -0400
-Content-Disposition: inline
-In-Reply-To: <1343720576-22181-1-git-send-email-wei_wang@realsil.com.cn>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: Text/Plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1343720536-22077-1-git-send-email-wei_wang@realsil.com.cn>
+Sender: linux-kernel-owner@vger.kernel.org
 To: wei_wang@realsil.com.cn
-Cc: gregkh@linuxfoundation.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, arnd@arndb.de, aaron.lu@amd.come
+Cc: gregkh@linuxfoundation.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, bp@alien8.de, aaron.lu@amd.come
+List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jul 31, 2012 at 03:42:56PM +0800, wei_wang@realsil.com.cn wrote=
-:
+On Tuesday 31 July 2012, wei_wang@realsil.com.cn wrote:
 > From: Wei WANG <wei_wang@realsil.com.cn>
->=20
-> Realtek SD/MMC card interface driver is used to access
-> SD/MMC card, with the help of Realtek card reader adapter driver.
->=20
+> 
+> Realtek card reader core driver is the bus driver for Realtek
+> driver-based card reader, which supplies adapter layer to
+> be used by lower-level pci/usb card reader and upper-level
+> sdmmc/memstick host driver.
+> 
 > Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
-> ---
 
-[ =E2=80=A6 ]
+You posted the sdmmc host driver and the pci card reader driver.
+I assume that the USB card reader and the memstick host
+will also get posted at some point. Do you have a timeframe
+for those?
 
-> +static void __devexit realtek_sdmmc_remove(struct rtsx_dev *sock)
+The hardware seems to also support xd/smartmedia. Do you have
+plans to add those? I think we have some code in drivers/mfd
+that acts as an abstraction layer for these, given that the
+host has to do the wear leveling there too.
+
+>  Documentation/misc-devices/realtek_cr.txt |   27 ++
+>  drivers/misc/Kconfig                      |    1 +
+>  drivers/misc/Makefile                     |    1 +
+>  drivers/misc/realtek_cr/Kconfig           |   26 ++
+>  drivers/misc/realtek_cr/Makefile          |    7 +
+>  drivers/misc/realtek_cr/core/Kconfig      |    5 +
+>  drivers/misc/realtek_cr/core/Makefile     |    1 +
+>  drivers/misc/realtek_cr/core/rtsx_core.c  |  462 +++++++++++++++++++++++++++++
+>  include/linux/rtsx_core.h                 |  188 ++++++++++++
+>  9 files changed, 718 insertions(+)
+>  create mode 100644 Documentation/misc-devices/realtek_cr.txt
+>  create mode 100644 drivers/misc/realtek_cr/Kconfig
+>  create mode 100644 drivers/misc/realtek_cr/Makefile
+>  create mode 100644 drivers/misc/realtek_cr/core/Kconfig
+>  create mode 100644 drivers/misc/realtek_cr/core/Makefile
+>  create mode 100644 drivers/misc/realtek_cr/core/rtsx_core.c
+>  create mode 100644 include/linux/rtsx_core.h
+
+As usual for most things getting added to drivers/misc, I'm skeptical
+about it actually fitting in here. Normally I'd put such a multiplexer
+into drivers/mfd. Given that you actually need your own bus, rather
+than just a single host with multiple endpoints, drivers/bus/realtek/cr
+might be best.
+
+> +udev rules
+> +----------
+> +
+> +In order to modprobe Realtek SD/MMC interface driver automatically, the following rule
+> +should be added to the udev rules file:
+> +
+> +SUBSYSTEM=="rtsx_cr", ENV{RTSX_CARD_TYPE}=="SD", RUN+="/sbin/modprobe -bv rtsx_sdmmc"
+
+This should not be necessary if you put the right module alias into the driver itself.
+
+> +struct rtsx_adapter *rtsx_alloc_adapter(unsigned int num_sockets,
+> +					struct device *dev)
 > +{
-> +	struct mmc_host *mmc =3D rtsx_get_drvdata(sock);
-> +	struct realtek_sdmmc *host;
+> +	struct rtsx_adapter *adapter;
 > +
-> +	host =3D mmc_priv(mmc);
-> +	host->eject =3D 1;
-> +
-> +	mutex_lock(&host->host_mutex);
-> +	if (host->mrq) {
-> +		dev_dbg(&(sock->dev),
-> +			"%s: Controller removed during transfer\n",
-> +			mmc_hostname(mmc));
-> +
-> +		rtsx_complete_unfinished_transfer(sock);
-> +
-> +		host->mrq->cmd->error =3D -ENOMEDIUM;
-> +		if (host->mrq->stop)
-> +			host->mrq->stop->error =3D -ENOMEDIUM;
-> +		mmc_request_done(mmc, host->mrq);
+> +	adapter = kzalloc(sizeof(*adapter)
+> +		     + sizeof(struct rtsx_dev *) * num_sockets, GFP_KERNEL);
+> +	if (adapter) {
+> +		adapter->dev.class = &rtsx_adapter_class;
+> +		adapter->dev.parent = dev;
+> +		device_initialize(&adapter->dev);
+> +		spin_lock_init(&adapter->lock);
+> +		adapter->num_sockets = num_sockets;
 > +	}
-> +	mutex_unlock(&host->host_mutex);
+> +	return adapter;
+> +}
+> +EXPORT_SYMBOL(rtsx_alloc_adapter);
+
+You should generally use EXPORT_SYMBOL_GPL for new symbols unless there is
+a strong reason not to (and then you should explain that reason).
 > +
-> +	mmc_remove_host(mmc);
-> +	mmc_free_host(mmc);
+> +void rtsx_queue_work(struct work_struct *work)
+> +{
+> +	queue_work(workqueue, work);
+> +}
+> +EXPORT_SYMBOL(rtsx_queue_work);
 > +
-> +	pr_info(DRV_NAME
-> +		": Realtek SDMMC controller has been removed\n");
+> +void rtsx_queue_delayed_work(struct delayed_work *dwork, unsigned long delay)
+> +{
+> +	queue_delayed_work(workqueue, dwork, delay);
+> +}
+> +EXPORT_SYMBOL(rtsx_queue_delayed_work);
 
-Oh and this appears in the logs when I remove the card:
+I would not bother with this, just move the workqueue into the client driver
+itself, which may result in a few duplicate lines but less code overall.
 
-[11721.313471] rtsx_sdmmc: Realtek SDMMC controller has been removed
+> +int rtsx_register_driver(struct rtsx_driver *drv)
+> +{
+> +	drv->driver.bus = &rtsx_bus_type;
+> +
+> +	return driver_register(&drv->driver);
+> +}
+> +EXPORT_SYMBOL(rtsx_register_driver);
+> +
+> +void rtsx_unregister_driver(struct rtsx_driver *drv)
+> +{
+> +	driver_unregister(&drv->driver);
+> +}
+> +EXPORT_SYMBOL(rtsx_unregister_driver);
 
-but it is simply polluting the logs with useless info that a card has
-been removed.
+Same thing here: There will only be very few drivers for this bus, so it's
+easier to call the driver_register function from the drivers. You need to export
+the rtsx_bus_type in that case though, but that is done for most buses.
 
-If you really need those printk (same with the PCI-E driver) you could
-try to use dev_dbg() like you do above.
+> +void rtsx_complete_unfinished_transfer(struct rtsx_dev *sock)
+> +{
+> +	struct rtsx_adapter *adapter = sock_to_adapter(sock);
+> +
+> +	adapter->common_ops->complete_unfinished_transfer(adapter);
+> +}
+> +EXPORT_SYMBOL(rtsx_complete_unfinished_transfer);
+> +
+> +void rtsx_sdmmc_set_bus_width(struct rtsx_dev *sock, unsigned char bus_width)
+> +{
+> +	struct rtsx_adapter *adapter = sock_to_adapter(sock);
+> +
+> +	adapter->sdmmc_ops->sdmmc_set_bus_width(adapter, bus_width);
+> +}
+> +EXPORT_SYMBOL(rtsx_sdmmc_set_bus_width);
+> +
+> +void rtsx_sdmmc_set_power_mode(struct rtsx_dev *sock, unsigned char power_mode)
+> +{
+> +	struct rtsx_adapter *adapter = sock_to_adapter(sock);
+> +
+> +	adapter->sdmmc_ops->sdmmc_set_power_mode(adapter, power_mode);
+> +}
+> +EXPORT_SYMBOL(rtsx_sdmmc_set_power_mode);
+> +
+> +void rtsx_sdmmc_set_timing(struct rtsx_dev *sock, unsigned char timing)
+> +{
+> +	struct rtsx_adapter *adapter = sock_to_adapter(sock);
+> +
+> +	adapter->sdmmc_ops->sdmmc_set_timing(adapter, timing);
+> +}
+> +EXPORT_SYMBOL(rtsx_sdmmc_set_timing);
+> +
+> +int rtsx_sdmmc_switch_voltage(struct rtsx_dev *sock, unsigned char voltage)
+> +{
+> +	struct rtsx_adapter *adapter = sock_to_adapter(sock);
+> +
+> +	return adapter->sdmmc_ops->sdmmc_switch_voltage(adapter, voltage);
+> +}
+> +EXPORT_SYMBOL(rtsx_sdmmc_switch_voltage);
 
-Same for the probe function.
+With this level of abstraction in your own driver, I wonder if it wouldn't be
+easier to have completely separate mmc drivers for each of the two host options
+(pci and usb). Apparently you have almost no shared code in the MMC driver
+/or/ in the bus driver.
 
-But, more importantly and while playing with this, I replugged the card
-and it said:
+>From this, I think it would be easier to kill off your own bus driver entirely
+and move the rtsx_pci.c driver into drivers/mfd, and then merge your
+pci/sdmmc.c file with rtsx_sdmmc.c.
 
-[12072.632332] rtsx_core: MMC/SD card detected in socket 0:0
-[12072.642855] rtsx_sdmmc: Realtek SDMMC controller found
-[12073.839561] mmc0: error -110 whilst initialising SD card
-[12075.138833] mmc0: error -110 whilst initialising SD card
-[12076.438158] mmc0: error -110 whilst initialising SD card
+> +#define wait_timeout_x(task_state, msecs)			\
+> +do {								\
+> +	set_current_state((task_state));			\
+> +	schedule_timeout(msecs_to_jiffies(msecs));		\
+> +} while (0)
+> +
+> +#define wait_timeout(msecs)	wait_timeout_x(TASK_INTERRUPTIBLE, (msecs))
 
-and now I can't mount the card anymore:
+This is the same as msleep_interruptible, right? Note that with interuptible
+sleep, you should always check if you got interrupted and return -ERESTARTSYS
+to user space.
 
-$ mount /dev/mmcblk0 /mnt/tmp/
-mount: /dev/mmcblk0 is not a valid block device
-
-$ mount /dev/mmcblk0p1 /mnt/tmp/
-mount: /dev/mmcblk0p1 is not a valid block device
-
-Hmm..
-
---=20
-Regards/Gruss,
-Boris.
+	Arnd
