@@ -1,96 +1,172 @@
-From: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>
-Subject: [PATCH v2 1/1] ARM: dove: DT support for sdhci-dove
-Date: Tue, 31 Jul 2012 10:12:59 +0200
-Message-ID: <1343722379-32699-1-git-send-email-sebastian.hesselbarth@googlemail.com>
-References: <1343666134-21205-1-git-send-email-sebastian.hesselbarth@googlemail.com>
+From: "kyungsik.lee" <kyungsik.lee@lge.com>
+Subject: Re: [PATCH RESEND v3] mmc: core: Remove bounce buffer in mmc_send_cxd_data()
+Date: Tue, 31 Jul 2012 17:37:52 +0900
+Message-ID: <50179960.2030007@lge.com>
+References: <1343700024-29861-1-git-send-email-kyungsik.lee@lge.com> <CANfBPZ_9XOjgeeRk8zrNWHH1VgevXu74P4bYGcRBSVj7Rs6GEw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:55800 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754814Ab2GaINS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jul 2012 04:13:18 -0400
-In-Reply-To: <1343666134-21205-1-git-send-email-sebastian.hesselbarth@googlemail.com>
+Received: from LGEMRELSE7Q.lge.com ([156.147.1.151]:65222 "EHLO
+	LGEMRELSE7Q.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755809Ab2GaIhz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jul 2012 04:37:55 -0400
+In-Reply-To: <CANfBPZ_9XOjgeeRk8zrNWHH1VgevXu74P4bYGcRBSVj7Rs6GEw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>
-Cc: Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Manuel Lauss <manuel.lauss@googlemail.com>, David Brown <davidb@codeaurora.org>, Andrew Lunn <andrew@lunn.ch>, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: "S, Venkatraman" <svenkatr@ti.com>
+Cc: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, raphael.andy.lee@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-This patch adds device tree support and binding documentiation for
-sdhci-dove.
+On 2012-07-31 =EC=98=A4=ED=9B=84 4:19, S, Venkatraman wrote:
+> On Tue, Jul 31, 2012 at 7:30 AM, Kyungsik Lee <kyungsik.lee@lge.com> =
+wrote:
+>> It is expected that Extended CSD register(the size of this register
+>> is larger than CID/CSD) will be referenced more frequently as more
+>> fields have been added to Extended CSD and it seems that it is not
+>> a good option to double the memory used.
+>>
+>> This patch is intended to avoid the use of bounce buffer for reading
+>> Extended CSD register in mmc_send_cxd_data().
+>>
+>> Signed-off-by: Kyungsik Lee <kyungsik.lee@lge.com>
+>> ---
+>> Changes in v2:
+>> - Handling on-stack buffer if it's used in caller.
+>>
+>> Changes in v3:
+>> - Remove unnecesary code.
+>> ---
+>>   drivers/mmc/core/mmc_ops.c |   54 ++++++++++++++++++++++++++++++++=
+-----------
+>>   1 files changed, 40 insertions(+), 14 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+>> index 0ed2cc5..036e6d5 100644
+>> --- a/drivers/mmc/core/mmc_ops.c
+>> +++ b/drivers/mmc/core/mmc_ops.c
+>> @@ -239,13 +239,19 @@ mmc_send_cxd_data(struct mmc_card *card, struc=
+t mmc_host *host,
+>>          struct mmc_data data =3D {0};
+>>          struct scatterlist sg;
+>>          void *data_buf;
+>> +       int is_on_stack;
+>>
+>> -       /* dma onto stack is unsafe/nonportable, but callers to this
+>> -        * routine normally provide temporary on-stack buffers ...
+>> -        */
+>> -       data_buf =3D kmalloc(len, GFP_KERNEL);
+>> -       if (data_buf =3D=3D NULL)
+>> -               return -ENOMEM;
+>> +       is_on_stack =3D object_is_on_stack(buf);
+>> +       if (is_on_stack) {
+>> +
+>> +               /* dma onto stack is unsafe/nonportable, but callers=
+ to this
+>> +                * routine normally provide temporary on-stack buffe=
+rs ...
+>> +                */
+>> +               data_buf =3D kmalloc(len, GFP_KERNEL);
+>> +               if (data_buf =3D=3D NULL)
+>> +                       return -ENOMEM;
+>> +       } else
+>> +               data_buf =3D buf;
+>>
+>>          mrq.cmd =3D &cmd;
+>>          mrq.data =3D &data;
+>> @@ -280,8 +286,10 @@ mmc_send_cxd_data(struct mmc_card *card, struct=
+ mmc_host *host,
+>>
+>>          mmc_wait_for_req(host, &mrq);
+>>
+>> -       memcpy(buf, data_buf, len);
+>> -       kfree(data_buf);
+>> +       if (is_on_stack) {
+>> +               memcpy(buf, data_buf, len);
+>> +               kfree(data_buf);
+>> +       }
+>>
+>>          if (cmd.error)
+>>                  return cmd.error;
+>> @@ -294,24 +302,34 @@ mmc_send_cxd_data(struct mmc_card *card, struc=
+t mmc_host *host,
+>>   int mmc_send_csd(struct mmc_card *card, u32 *csd)
+>>   {
+>>          int ret, i;
+>> +       u32 *csd_tmp;
+>>
+>>          if (!mmc_host_is_spi(card->host))
+>>                  return mmc_send_cxd_native(card->host, card->rca <<=
+ 16,
+>>                                  csd, MMC_SEND_CSD);
+>>
+>> -       ret =3D mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, cs=
+d, 16);
+>> +       csd_tmp =3D kmalloc(16, GFP_KERNEL);
+>> +       if (!csd_tmp)
+>> +               return -ENOMEM;
+>> +
+>> +       ret =3D mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, cs=
+d_tmp, 16);
+>>          if (ret)
+>> -               return ret;
+>> +               goto err;
+>> +
+>> +       memcpy(csd, csd_tmp, 16);
+> Can this memcpy be folded into the for loop below
+> as for (....) { csd[i] =3D be32_to_cpu(csd_tmp[i]); ?
+Yes, you're right. I will fix it as you suggested.
 
-v2: extended documentation and removed second interrupt as it is marked 
-    'reserved' in dove datasheet.
-
-Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>
-Cc: Grant Likely <grant.likely@secretlab.ca>
-Cc: Rob Herring <rob.herring@calxeda.com>
-Cc: Rob Landley <rob@landley.net>
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: Manuel Lauss <manuel.lauss@googlemail.com>
-Cc: David Brown <davidb@codeaurora.org>
-Cc: Andrew Lunn <andrew@lunn.ch>
-Cc: devicetree-discuss@lists.ozlabs.org
-Cc: linux-doc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
-
----
- Documentation/devicetree/bindings/mmc/sdhci-dove.txt |   14 ++++++++++++++
- drivers/mmc/host/sdhci-dove.c                        |    8 ++++++++
- 2 files changed, 22 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-dove.txt
-
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-dove.txt b/Documentation/devicetree/bindings/mmc/sdhci-dove.txt
-new file mode 100644
-index 0000000..f08bb30
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-dove.txt
-@@ -0,0 +1,14 @@
-+* Marvell sdhci-dove controller
-+
-+Required properties:
-+- compatible: Should be "marvell,dove-sdhci".
-+- reg: Physical base address of the sdhci controller.
-+- interrupts: interrupt nr of the sdhci controller.
-+
-+Example:
-+
-+sdio0: sdio@92000 {
-+	compatible = "marvell,dove-sdhci";
-+	reg = <0x92000 0x100>;
-+	interrupts = <35>;
-+};
-diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
-index a6e53a1..90140eb 100644
---- a/drivers/mmc/host/sdhci-dove.c
-+++ b/drivers/mmc/host/sdhci-dove.c
-@@ -24,6 +24,7 @@
- #include <linux/err.h>
- #include <linux/module.h>
- #include <linux/mmc/host.h>
-+#include <linux/of.h>
- 
- #include "sdhci-pltfm.h"
- 
-@@ -126,11 +127,18 @@ static int __devexit sdhci_dove_remove(struct platform_device *pdev)
- 	return sdhci_pltfm_unregister(pdev);
- }
- 
-+static const struct of_device_id sdhci_dove_of_match_table[] __devinitdata = {
-+	{ .compatible = "marvell,dove-sdhci", },
-+	{}
-+};
-+MODULE_DEVICE_TABLE(of, sdhci_dove_of_match_table);
-+
- static struct platform_driver sdhci_dove_driver = {
- 	.driver		= {
- 		.name	= "sdhci-dove",
- 		.owner	= THIS_MODULE,
- 		.pm	= SDHCI_PLTFM_PMOPS,
-+		.of_match_table = of_match_ptr(sdhci_dove_of_match_table),
- 	},
- 	.probe		= sdhci_dove_probe,
- 	.remove		= __devexit_p(sdhci_dove_remove),
--- 
-1.7.10.4
+Thanks,
+Kyungsik Lee
+>>          for (i =3D 0;i < 4;i++)
+>>                  csd[i] =3D be32_to_cpu(csd[i]);
+>>
+>> -       return 0;
+>> +err:
+>> +       kfree(csd_tmp);
+>> +       return ret;
+>>   }
+>>
+>>   int mmc_send_cid(struct mmc_host *host, u32 *cid)
+>>   {
+>>          int ret, i;
+>> +       u32 *cid_tmp;
+>>
+>>          if (!mmc_host_is_spi(host)) {
+>>                  if (!host->card)
+>> @@ -320,14 +338,22 @@ int mmc_send_cid(struct mmc_host *host, u32 *c=
+id)
+>>                                  cid, MMC_SEND_CID);
+>>          }
+>>
+>> -       ret =3D mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid, 16)=
+;
+>> +       cid_tmp =3D kmalloc(16, GFP_KERNEL);
+>> +       if (!cid_tmp)
+>> +               return -ENOMEM;
+>> +
+>> +       ret =3D mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid_tmp,=
+ 16);
+>>          if (ret)
+>> -               return ret;
+>> +               goto err;
+>> +
+>> +       memcpy(cid, cid_tmp, 16);
+>>
+> <Same comment as above>
+>
+>>          for (i =3D 0;i < 4;i++)
+>>                  cid[i] =3D be32_to_cpu(cid[i]);
+>>
+>> -       return 0;
+>> +err:
+>> +       kfree(cid_tmp);
+>> +       return ret;
+>>   }
+>>
+>>   int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>> --
+>> 1.7.0.4
+>>
 
