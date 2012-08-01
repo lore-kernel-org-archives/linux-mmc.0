@@ -1,145 +1,98 @@
-From: Kyungsik Lee <kyungsik.lee@lge.com>
-Subject: [PATCH RESEND v4] mmc: core: Remove bounce buffer in mmc_send_cxd_data()
-Date: Wed,  1 Aug 2012 10:05:45 +0900
-Message-ID: <1343783145-17623-1-git-send-email-kyungsik.lee@lge.com>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH 1/3] mmc: dw_mmc: amend using error interrupt status
+Date: Wed, 1 Aug 2012 09:57:28 +0530
+Message-ID: <CAGxe1ZH=NZ5ZC3SVjaxwoXa_5dZEQzCAzYxK40Sy2rYr4dCpBA@mail.gmail.com>
+References: <006301cd6f7c$db537500$91fa5f00$%jun@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from LGEMRELSE7Q.lge.com ([156.147.1.151]:43618 "EHLO
-	LGEMRELSE7Q.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752327Ab2HABGZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jul 2012 21:06:25 -0400
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:61511 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750941Ab2HAE13 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Aug 2012 00:27:29 -0400
+Received: by vbbff1 with SMTP id ff1so6575244vbb.19
+        for <linux-mmc@vger.kernel.org>; Tue, 31 Jul 2012 21:27:28 -0700 (PDT)
+In-Reply-To: <006301cd6f7c$db537500$91fa5f00$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Venkatraman S <svenkatr@ti.com>, Jaehoon Chung <jh80.chung@samsung.com>, raphael.andy.lee@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Kyungsik Lee <kyungsik.lee@lge.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
-It is expected that Extended CSD register(the size of this register
-is larger than CID/CSD) will be referenced more frequently as more
-fields have been added to Extended CSD and it seems that it is not
-a good option to double the memory used.
+On 1 August 2012 06:00, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> RINTSTS status includes masked interrupts as well as unmasked.
+> data_status and cmd_status are set by value of RINTSTS in interrupt handler
+> and tasklet finally uses it to decide whether error is happened or not.
+> In addition, MINTSTS status is used for setting data_status in PIO.
+> Masked error interrupt will not be handled and that status can be considered
+> non-error case.
+>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c |   11 +++++------
+>  1 files changed, 5 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 72dc3cd..7baed45 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1547,12 +1547,11 @@ static void dw_mci_cmd_interrupt(struct dw_mci *host, u32 status)
+>  static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>  {
+>         struct dw_mci *host = dev_id;
+> -       u32 status, pending;
+> +       u32 pending;
+>         unsigned int pass_count = 0;
+>         int i;
+>
+>         do {
+> -               status = mci_readl(host, RINTSTS);
+>                 pending = mci_readl(host, MINTSTS); /* read-only mask reg */
+>
+>                 /*
+> @@ -1570,7 +1569,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>
+>                 if (pending & DW_MCI_CMD_ERROR_FLAGS) {
+>                         mci_writel(host, RINTSTS, DW_MCI_CMD_ERROR_FLAGS);
+> -                       host->cmd_status = status;
+> +                       host->cmd_status = pending;
+>                         smp_wmb();
+>                         set_bit(EVENT_CMD_COMPLETE, &host->pending_events);
+>                 }
+> @@ -1578,7 +1577,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>                 if (pending & DW_MCI_DATA_ERROR_FLAGS) {
+>                         /* if there is an error report DATA_ERROR */
+>                         mci_writel(host, RINTSTS, DW_MCI_DATA_ERROR_FLAGS);
+> -                       host->data_status = status;
+> +                       host->data_status = pending;
+>                         smp_wmb();
+>                         set_bit(EVENT_DATA_ERROR, &host->pending_events);
+>                         if (!(pending & (SDMMC_INT_DTO | SDMMC_INT_DCRC |
+> @@ -1589,7 +1588,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>                 if (pending & SDMMC_INT_DATA_OVER) {
+>                         mci_writel(host, RINTSTS, SDMMC_INT_DATA_OVER);
+>                         if (!host->data_status)
+> -                               host->data_status = status;
+> +                               host->data_status = pending;
+>                         smp_wmb();
+>                         if (host->dir_status == DW_MCI_RECV_STATUS) {
+>                                 if (host->sg != NULL)
+> @@ -1613,7 +1612,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>
+>                 if (pending & SDMMC_INT_CMD_DONE) {
+>                         mci_writel(host, RINTSTS, SDMMC_INT_CMD_DONE);
+> -                       dw_mci_cmd_interrupt(host, status);
+> +                       dw_mci_cmd_interrupt(host, pending);
+>                 }
+>
+>                 if (pending & SDMMC_INT_CD) {
+> --
+Looks good to me
+Reviewed By:- Girish K S <girish.shivananjappa@linaro.org>
 
-This patch is intended to avoid the use of bounce buffer for reading
-Extended CSD register in mmc_send_cxd_data().
-
-Signed-off-by: Kyungsik Lee <kyungsik.lee@lge.com>
-Signed-off-by: S, Venkatraman <svenkatr@ti.com>
----
-Changes in v2:
-- Handling on-stack buffer if it's used in caller.
-
-Changes in v3:
-- Remove unnecesary code.
-
-Changes in v4:
-- Modify codes based-on S, Venkatraman's comments.
----
- drivers/mmc/core/mmc_ops.c |   54 +++++++++++++++++++++++++++++++-------------
- 1 files changed, 38 insertions(+), 16 deletions(-)
-
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 0ed2cc5..920a017 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -239,13 +239,19 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- 	struct mmc_data data = {0};
- 	struct scatterlist sg;
- 	void *data_buf;
-+	int is_on_stack;
- 
--	/* dma onto stack is unsafe/nonportable, but callers to this
--	 * routine normally provide temporary on-stack buffers ...
--	 */
--	data_buf = kmalloc(len, GFP_KERNEL);
--	if (data_buf == NULL)
--		return -ENOMEM;
-+	is_on_stack = object_is_on_stack(buf);
-+	if (is_on_stack) {
-+
-+		/* dma onto stack is unsafe/nonportable, but callers to this
-+		 * routine normally provide temporary on-stack buffers ...
-+		 */
-+		data_buf = kmalloc(len, GFP_KERNEL);
-+		if (data_buf == NULL)
-+			return -ENOMEM;
-+	} else
-+		data_buf = buf;
- 
- 	mrq.cmd = &cmd;
- 	mrq.data = &data;
-@@ -280,8 +286,10 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- 
- 	mmc_wait_for_req(host, &mrq);
- 
--	memcpy(buf, data_buf, len);
--	kfree(data_buf);
-+	if (is_on_stack) {
-+		memcpy(buf, data_buf, len);
-+		kfree(data_buf);
-+	}
- 
- 	if (cmd.error)
- 		return cmd.error;
-@@ -294,24 +302,32 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- int mmc_send_csd(struct mmc_card *card, u32 *csd)
- {
- 	int ret, i;
-+	u32 *csd_tmp;
- 
- 	if (!mmc_host_is_spi(card->host))
- 		return mmc_send_cxd_native(card->host, card->rca << 16,
- 				csd, MMC_SEND_CSD);
- 
--	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd, 16);
-+	csd_tmp = kmalloc(16, GFP_KERNEL);
-+	if (!csd_tmp)
-+		return -ENOMEM;
-+
-+	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd_tmp, 16);
- 	if (ret)
--		return ret;
-+		goto err;
- 
- 	for (i = 0;i < 4;i++)
--		csd[i] = be32_to_cpu(csd[i]);
-+		csd[i] = be32_to_cpu(csd_tmp[i]);
- 
--	return 0;
-+err:
-+	kfree(csd_tmp);
-+	return ret;
- }
- 
- int mmc_send_cid(struct mmc_host *host, u32 *cid)
- {
- 	int ret, i;
-+	u32 *cid_tmp;
- 
- 	if (!mmc_host_is_spi(host)) {
- 		if (!host->card)
-@@ -320,14 +336,20 @@ int mmc_send_cid(struct mmc_host *host, u32 *cid)
- 				cid, MMC_SEND_CID);
- 	}
- 
--	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid, 16);
-+	cid_tmp = kmalloc(16, GFP_KERNEL);
-+	if (!cid_tmp)
-+		return -ENOMEM;
-+
-+	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid_tmp, 16);
- 	if (ret)
--		return ret;
-+		goto err;
- 
- 	for (i = 0;i < 4;i++)
--		cid[i] = be32_to_cpu(cid[i]);
-+		cid[i] = be32_to_cpu(cid_tmp[i]);
- 
--	return 0;
-+err:
-+	kfree(cid_tmp);
-+	return ret;
- }
- 
- int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd)
--- 
-1.7.0.4
-
+> 1.7.0.4
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
