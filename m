@@ -1,98 +1,191 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH 1/3] mmc: dw_mmc: amend using error interrupt status
-Date: Wed, 1 Aug 2012 09:57:28 +0530
-Message-ID: <CAGxe1ZH=NZ5ZC3SVjaxwoXa_5dZEQzCAzYxK40Sy2rYr4dCpBA@mail.gmail.com>
-References: <006301cd6f7c$db537500$91fa5f00$%jun@samsung.com>
+From: wwang <wei_wang@realsil.com.cn>
+Subject: Re: [PATCH 1/3] drivers/misc: Add realtek card reader core driver
+Date: Wed, 1 Aug 2012 14:19:17 +0800
+Message-ID: <5018CA65.1080906@realsil.com.cn>
+References: <1343720536-22077-1-git-send-email-wei_wang@realsil.com.cn> <201207311123.25862.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=GB2312
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:61511 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750941Ab2HAE13 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Aug 2012 00:27:29 -0400
-Received: by vbbff1 with SMTP id ff1so6575244vbb.19
-        for <linux-mmc@vger.kernel.org>; Tue, 31 Jul 2012 21:27:28 -0700 (PDT)
-In-Reply-To: <006301cd6f7c$db537500$91fa5f00$%jun@samsung.com>
+Received: from rtits2.realtek.com ([60.250.210.242]:53509 "EHLO
+	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752412Ab2HAGUG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Aug 2012 02:20:06 -0400
+In-Reply-To: <201207311123.25862.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "bp@alien8.de" <bp@alien8.de>
 
-On 1 August 2012 06:00, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> RINTSTS status includes masked interrupts as well as unmasked.
-> data_status and cmd_status are set by value of RINTSTS in interrupt handler
-> and tasklet finally uses it to decide whether error is happened or not.
-> In addition, MINTSTS status is used for setting data_status in PIO.
-> Masked error interrupt will not be handled and that status can be considered
-> non-error case.
+=D3=DA 2012=C4=EA07=D4=C231=C8=D5 19:23, Arnd Bergmann =D0=B4=B5=C0:
 >
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc.c |   11 +++++------
->  1 files changed, 5 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 72dc3cd..7baed45 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1547,12 +1547,11 @@ static void dw_mci_cmd_interrupt(struct dw_mci *host, u32 status)
->  static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->  {
->         struct dw_mci *host = dev_id;
-> -       u32 status, pending;
-> +       u32 pending;
->         unsigned int pass_count = 0;
->         int i;
->
->         do {
-> -               status = mci_readl(host, RINTSTS);
->                 pending = mci_readl(host, MINTSTS); /* read-only mask reg */
->
->                 /*
-> @@ -1570,7 +1569,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->
->                 if (pending & DW_MCI_CMD_ERROR_FLAGS) {
->                         mci_writel(host, RINTSTS, DW_MCI_CMD_ERROR_FLAGS);
-> -                       host->cmd_status = status;
-> +                       host->cmd_status = pending;
->                         smp_wmb();
->                         set_bit(EVENT_CMD_COMPLETE, &host->pending_events);
->                 }
-> @@ -1578,7 +1577,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->                 if (pending & DW_MCI_DATA_ERROR_FLAGS) {
->                         /* if there is an error report DATA_ERROR */
->                         mci_writel(host, RINTSTS, DW_MCI_DATA_ERROR_FLAGS);
-> -                       host->data_status = status;
-> +                       host->data_status = pending;
->                         smp_wmb();
->                         set_bit(EVENT_DATA_ERROR, &host->pending_events);
->                         if (!(pending & (SDMMC_INT_DTO | SDMMC_INT_DCRC |
-> @@ -1589,7 +1588,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->                 if (pending & SDMMC_INT_DATA_OVER) {
->                         mci_writel(host, RINTSTS, SDMMC_INT_DATA_OVER);
->                         if (!host->data_status)
-> -                               host->data_status = status;
-> +                               host->data_status = pending;
->                         smp_wmb();
->                         if (host->dir_status == DW_MCI_RECV_STATUS) {
->                                 if (host->sg != NULL)
-> @@ -1613,7 +1612,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->
->                 if (pending & SDMMC_INT_CMD_DONE) {
->                         mci_writel(host, RINTSTS, SDMMC_INT_CMD_DONE);
-> -                       dw_mci_cmd_interrupt(host, status);
-> +                       dw_mci_cmd_interrupt(host, pending);
->                 }
->
->                 if (pending & SDMMC_INT_CD) {
-> --
-Looks good to me
-Reviewed By:- Girish K S <girish.shivananjappa@linaro.org>
+> You posted the sdmmc host driver and the pci card reader driver.
+> I assume that the USB card reader and the memstick host
+> will also get posted at some point. Do you have a timeframe
+> for those?
 
-> 1.7.0.4
+I will submit my memstick host driver around two months later, and
+submit USB part at the end of this year.
+
 >
+> The hardware seems to also support xd/smartmedia. Do you have
+> plans to add those? I think we have some code in drivers/mfd
+> that acts as an abstraction layer for these, given that the
+> host has to do the wear leveling there too.
+
+Yes, xD is still in our plan. But because the user population of xD/SM
+is so small, we put the priority of writing xD host driver in a relevan=
+t
+low level.
+Maybe we will submit this driver in the next year.
+
+> As usual for most things getting added to drivers/misc, I'm skeptical
+> about it actually fitting in here. Normally I'd put such a multiplexe=
+r
+> into drivers/mfd. Given that you actually need your own bus, rather
+> than just a single host with multiple endpoints, drivers/bus/realtek/=
+cr
+> might be best.
+We do need a bus driver. We support multi models of card at the same
+time, so we need a way to bind all of the host drivers. And in the
+internal of our card reader, we have only one DMA engine and one ring
+buffer to handle massive data, so we also need a way to protect the
+critical area between different card hosts. Bus driver is convenient to
+handle this situation. Another way to fulfill is to call every register
+function of different host (like mmc, memstick) in sequence in card
+reader driver, whether pci-based or usb-based, if not using bus driver.
+I prefer the prior scheme, which is more flexible and less redundant co=
+de.
+
+Using bus driver:
+
+sdmmc memstick
+\ /
+\ /
+\ /
+rtsx bus driver
+/ \
+/ \
+/ \
+/ \
+rtsx pci rtsx usb
+
+
+Not using bus driver:
+
+sdmmc-pci memstick-pci
+\ /
+\ /
+\ /
+\ /
+rtsx pci
+
+sdmmc-usb memstick-usb
+\ /
+\ /
+\ /
+\ /
+rtsx usb
+
+And you said we should put our own bus driver in drivers/bus/realtek/cr=
+,
+but where is drivers/bus? Or can I just put this bus driver and our
+pci/usb card reader driver into drivers/mfd?
+
+>> +udev rules
+>> +----------
+>> +
+>> +In order to modprobe Realtek SD/MMC interface driver automatically,=
+ the following rule
+>> +should be added to the udev rules file:
+>> +
+>> +SUBSYSTEM=3D=3D"rtsx_cr", ENV{RTSX_CARD_TYPE}=3D=3D"SD", RUN+=3D"/s=
+bin/modprobe -bv rtsx_sdmmc"
+> This should not be necessary if you put the right module alias into t=
+he driver itself.
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> You should generally use EXPORT_SYMBOL_GPL for new symbols unless the=
+re is
+> a strong reason not to (and then you should explain that reason).
+
+Got it, I will modify it.
+
+>> +
+>> +void rtsx_queue_work(struct work_struct *work)
+>> +{
+>> +	queue_work(workqueue, work);
+>> +}
+>> +EXPORT_SYMBOL(rtsx_queue_work);
+>> +
+>> +void rtsx_queue_delayed_work(struct delayed_work *dwork, unsigned l=
+ong delay)
+>> +{
+>> +	queue_delayed_work(workqueue, dwork, delay);
+>> +}
+>> +EXPORT_SYMBOL(rtsx_queue_delayed_work);
+> I would not bother with this, just move the workqueue into the client=
+ driver
+> itself, which may result in a few duplicate lines but less code overa=
+ll.
+>
+>> +int rtsx_register_driver(struct rtsx_driver *drv)
+>> +{
+>> +	drv->driver.bus =3D &rtsx_bus_type;
+>> +
+>> +	return driver_register(&drv->driver);
+>> +}
+>> +EXPORT_SYMBOL(rtsx_register_driver);
+>> +
+>> +void rtsx_unregister_driver(struct rtsx_driver *drv)
+>> +{
+>> +	driver_unregister(&drv->driver);
+>> +}
+>> +EXPORT_SYMBOL(rtsx_unregister_driver);
+> Same thing here: There will only be very few drivers for this bus, so=
+ it's
+> easier to call the driver_register function from the drivers. You nee=
+d to export
+> the rtsx_bus_type in that case though, but that is done for most buse=
+s.
+
+I will consider this.
+
+> With this level of abstraction in your own driver, I wonder if it wou=
+ldn't be
+> easier to have completely separate mmc drivers for each of the two ho=
+st options
+> (pci and usb). Apparently you have almost no shared code in the MMC d=
+river
+> /or/ in the bus driver.
+
+If we support MMC only, writing separate drivers for pci and usb is mor=
+e
+proper and clear. But we try to support mmc and memstick, and maybe xD
+later, it seems that having a bus driver is more convenient.
+
+>
+> From this, I think it would be easier to kill off your own bus driver=
+ entirely
+> and move the rtsx_pci.c driver into drivers/mfd, and then merge your
+> pci/sdmmc.c file with rtsx_sdmmc.c.
+>
+>> +#define wait_timeout_x(task_state, msecs)			\
+>> +do {								\
+>> +	set_current_state((task_state));			\
+>> +	schedule_timeout(msecs_to_jiffies(msecs));		\
+>> +} while (0)
+>> +
+>> +#define wait_timeout(msecs)	wait_timeout_x(TASK_INTERRUPTIBLE, (mse=
+cs))
+> This is the same as msleep_interruptible, right? Note that with inter=
+uptible
+> sleep, you should always check if you got interrupted and return -ERE=
+STARTSYS
+> to user space.
+
+Thank you for your explanation. It seems that I should call msleep
+instead of msleep_interruptible.
+
+Best regards,
+wwang
+
