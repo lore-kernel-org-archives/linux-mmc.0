@@ -1,191 +1,158 @@
-From: wwang <wei_wang@realsil.com.cn>
+From: Arnd Bergmann <arnd@arndb.de>
 Subject: Re: [PATCH 1/3] drivers/misc: Add realtek card reader core driver
-Date: Wed, 1 Aug 2012 14:19:17 +0800
-Message-ID: <5018CA65.1080906@realsil.com.cn>
-References: <1343720536-22077-1-git-send-email-wei_wang@realsil.com.cn> <201207311123.25862.arnd@arndb.de>
+Date: Wed, 1 Aug 2012 14:31:01 +0000
+Message-ID: <201208011431.02050.arnd@arndb.de>
+References: <1343720536-22077-1-git-send-email-wei_wang@realsil.com.cn> <201207311123.25862.arnd@arndb.de> <5018CA65.1080906@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
+Content-Type: Text/Plain; charset=gb2312
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rtits2.realtek.com ([60.250.210.242]:53509 "EHLO
-	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752412Ab2HAGUG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Aug 2012 02:20:06 -0400
-In-Reply-To: <201207311123.25862.arnd@arndb.de>
+Received: from moutng.kundenserver.de ([212.227.126.187]:55127 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752181Ab2HAObj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Aug 2012 10:31:39 -0400
+In-Reply-To: <5018CA65.1080906@realsil.com.cn>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
+To: wwang <wei_wang@realsil.com.cn>
 Cc: "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "bp@alien8.de" <bp@alien8.de>
 
-=D3=DA 2012=C4=EA07=D4=C231=C8=D5 19:23, Arnd Bergmann =D0=B4=B5=C0:
->
-> You posted the sdmmc host driver and the pci card reader driver.
-> I assume that the USB card reader and the memstick host
-> will also get posted at some point. Do you have a timeframe
-> for those?
+On Wednesday 01 August 2012, wwang wrote:
+> =D3=DA 2012=C4=EA07=D4=C231=C8=D5 19:23, Arnd Bergmann =D0=B4=B5=C0:
+> >
+> > You posted the sdmmc host driver and the pci card reader driver.
+> > I assume that the USB card reader and the memstick host
+> > will also get posted at some point. Do you have a timeframe
+> > for those?
+>=20
+> I will submit my memstick host driver around two months later, and
+> submit USB part at the end of this year.
 
-I will submit my memstick host driver around two months later, and
-submit USB part at the end of this year.
+ok.
 
->
-> The hardware seems to also support xd/smartmedia. Do you have
-> plans to add those? I think we have some code in drivers/mfd
-> that acts as an abstraction layer for these, given that the
-> host has to do the wear leveling there too.
+> > The hardware seems to also support xd/smartmedia. Do you have
+> > plans to add those? I think we have some code in drivers/mfd
+> > that acts as an abstraction layer for these, given that the
+> > host has to do the wear leveling there too.
+>=20
+> Yes, xD is still in our plan. But because the user population of xD/S=
+M
+> is so small, we put the priority of writing xD host driver in a relev=
+ant
+> low level.
+> Maybe we will submit this driver in the next year.
 
-Yes, xD is still in our plan. But because the user population of xD/SM
-is so small, we put the priority of writing xD host driver in a relevan=
-t
-low level.
-Maybe we will submit this driver in the next year.
+Ok. When you get to that, I think you should use the code
+from drivers/mtd/nand/sm_common.c, but it's better to confirm
+that with the MTD maintainers first.
 
-> As usual for most things getting added to drivers/misc, I'm skeptical
-> about it actually fitting in here. Normally I'd put such a multiplexe=
-r
-> into drivers/mfd. Given that you actually need your own bus, rather
-> than just a single host with multiple endpoints, drivers/bus/realtek/=
-cr
-> might be best.
-We do need a bus driver. We support multi models of card at the same
-time, so we need a way to bind all of the host drivers. And in the
-internal of our card reader, we have only one DMA engine and one ring
-buffer to handle massive data, so we also need a way to protect the
-critical area between different card hosts. Bus driver is convenient to
-handle this situation. Another way to fulfill is to call every register
-function of different host (like mmc, memstick) in sequence in card
-reader driver, whether pci-based or usb-based, if not using bus driver.
-I prefer the prior scheme, which is more flexible and less redundant co=
-de.
+> > As usual for most things getting added to drivers/misc, I'm skeptic=
+al
+> > about it actually fitting in here. Normally I'd put such a multiple=
+xer
+> > into drivers/mfd. Given that you actually need your own bus, rather
+> > than just a single host with multiple endpoints, drivers/bus/realte=
+k/cr
+> > might be best.
+> We do need a bus driver. We support multi models of card at the same
+> time, so we need a way to bind all of the host drivers. And in the
+> internal of our card reader, we have only one DMA engine and one ring
+> buffer to handle massive data, so we also need a way to protect the
+> critical area between different card hosts. Bus driver is convenient =
+to
+> handle this situation. Another way to fulfill is to call every regist=
+er
+> function of different host (like mmc, memstick) in sequence in card
+> reader driver, whether pci-based or usb-based, if not using bus drive=
+r.
+> I prefer the prior scheme, which is more flexible and less redundant =
+code.
 
-Using bus driver:
+I understand where you are coming from, but IMHO a bus driver would
+make more sense if the bus was a low-level abstraction that allows you
+to add new high-level drivers (memstick, smartmedia, ...) without
+having to modify the low-level drivers, which I believe is not possible
+with your current code.
 
-sdmmc memstick
-\ /
-\ /
-\ /
-rtsx bus driver
-/ \
-/ \
-/ \
-/ \
-rtsx pci rtsx usb
+> Using bus driver:
+>=20
+> sdmmc memstick
+> \ /
+> \ /
+> \ /
+> rtsx bus driver
+> / \
+> / \
+> / \
+> / \
+> rtsx pci rtsx usb
+
+In reality, what you have seems to be actually more like
+
+    sdmmc    memstick
+        \       /
+         \     /
+          \   /
+     rtsx bus driver
+       /         \
+      /           \
+     /             \
+    /               \
+  rtsx-pci         rtsx-usb
+   /    \           /    \
+ pci-mmc \       usb-mmc  \
+   pci-memstick       usb-memstick
+
+> Not using bus driver:
+>=20
+> sdmmc-pci memstick-pci
+> \ /
+> \ /
+> \ /
+> \ /
+> rtsx pci
+>=20
+> sdmmc-usb memstick-usb
+> \ /
+> \ /
+> \ /
+> \ /
+> rtsx usb
+>=20
+> And you said we should put our own bus driver in drivers/bus/realtek/=
+cr,
+> but where is drivers/bus? Or can I just put this bus driver and our
+> pci/usb card reader driver into drivers/mfd?
+
+The best driver abstractions have the most specific code as a top-level
+module that calls into more generic code.
+
+What I would suggest you do is to have the code that is common between
+the USB and PCI drivers in a loadable module that both of the other
+modules call into:
 
 
-Not using bus driver:
+   sdmmc-pci      sdmmc-usb        memstick-pci      memstick-usb
+     \   \           /   \             /    \           /   |
+      |   \         /     \           /      \         /    |
+      |    \       /       \___      /        \       /     |
+      \    sdmmc-common     ___|____/      memstick-common  |
+       \     |             /   |                       |    /
+        \____|______      /    |____________      _____|___/
+             |      \    /                  \    /     |  =20
+             |     pci-common             usb-common   |
+             \              \              /           /
+              \              \            /            /
+               \_____________ \          /____________/
+                             \rtsx-common/
 
-sdmmc-pci memstick-pci
-\ /
-\ /
-\ /
-\ /
-rtsx pci
 
-sdmmc-usb memstick-usb
-\ /
-\ /
-\ /
-\ /
-rtsx usb
+You can skip a few of these if they are not needed, but in principle
+you should get the idea. In this example, the pci-common and the
+usb-common drivers would each be MFD driver that export a bunch
+of slave devices. All the mmc specific code that you currently
+have in the pci driver would then go all the way to the top into
+the sdmmc-pci driver, and anything that is shared goes into one
+of the lower modules.
 
-And you said we should put our own bus driver in drivers/bus/realtek/cr=
-,
-but where is drivers/bus? Or can I just put this bus driver and our
-pci/usb card reader driver into drivers/mfd?
-
->> +udev rules
->> +----------
->> +
->> +In order to modprobe Realtek SD/MMC interface driver automatically,=
- the following rule
->> +should be added to the udev rules file:
->> +
->> +SUBSYSTEM=3D=3D"rtsx_cr", ENV{RTSX_CARD_TYPE}=3D=3D"SD", RUN+=3D"/s=
-bin/modprobe -bv rtsx_sdmmc"
-> This should not be necessary if you put the right module alias into t=
-he driver itself.
->
-> You should generally use EXPORT_SYMBOL_GPL for new symbols unless the=
-re is
-> a strong reason not to (and then you should explain that reason).
-
-Got it, I will modify it.
-
->> +
->> +void rtsx_queue_work(struct work_struct *work)
->> +{
->> +	queue_work(workqueue, work);
->> +}
->> +EXPORT_SYMBOL(rtsx_queue_work);
->> +
->> +void rtsx_queue_delayed_work(struct delayed_work *dwork, unsigned l=
-ong delay)
->> +{
->> +	queue_delayed_work(workqueue, dwork, delay);
->> +}
->> +EXPORT_SYMBOL(rtsx_queue_delayed_work);
-> I would not bother with this, just move the workqueue into the client=
- driver
-> itself, which may result in a few duplicate lines but less code overa=
-ll.
->
->> +int rtsx_register_driver(struct rtsx_driver *drv)
->> +{
->> +	drv->driver.bus =3D &rtsx_bus_type;
->> +
->> +	return driver_register(&drv->driver);
->> +}
->> +EXPORT_SYMBOL(rtsx_register_driver);
->> +
->> +void rtsx_unregister_driver(struct rtsx_driver *drv)
->> +{
->> +	driver_unregister(&drv->driver);
->> +}
->> +EXPORT_SYMBOL(rtsx_unregister_driver);
-> Same thing here: There will only be very few drivers for this bus, so=
- it's
-> easier to call the driver_register function from the drivers. You nee=
-d to export
-> the rtsx_bus_type in that case though, but that is done for most buse=
-s.
-
-I will consider this.
-
-> With this level of abstraction in your own driver, I wonder if it wou=
-ldn't be
-> easier to have completely separate mmc drivers for each of the two ho=
-st options
-> (pci and usb). Apparently you have almost no shared code in the MMC d=
-river
-> /or/ in the bus driver.
-
-If we support MMC only, writing separate drivers for pci and usb is mor=
-e
-proper and clear. But we try to support mmc and memstick, and maybe xD
-later, it seems that having a bus driver is more convenient.
-
->
-> From this, I think it would be easier to kill off your own bus driver=
- entirely
-> and move the rtsx_pci.c driver into drivers/mfd, and then merge your
-> pci/sdmmc.c file with rtsx_sdmmc.c.
->
->> +#define wait_timeout_x(task_state, msecs)			\
->> +do {								\
->> +	set_current_state((task_state));			\
->> +	schedule_timeout(msecs_to_jiffies(msecs));		\
->> +} while (0)
->> +
->> +#define wait_timeout(msecs)	wait_timeout_x(TASK_INTERRUPTIBLE, (mse=
-cs))
-> This is the same as msleep_interruptible, right? Note that with inter=
-uptible
-> sleep, you should always check if you got interrupted and return -ERE=
-STARTSYS
-> to user space.
-
-Thank you for your explanation. It seems that I should call msleep
-instead of msleep_interruptible.
-
-Best regards,
-wwang
-
+	Arnd
