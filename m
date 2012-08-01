@@ -1,185 +1,46 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 1/3] drivers/misc: Add realtek card reader core driver
-Date: Tue, 31 Jul 2012 11:23:25 +0000
-Message-ID: <201207311123.25862.arnd@arndb.de>
-References: <1343720536-22077-1-git-send-email-wei_wang@realsil.com.cn>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH 0/3] mmc: dw_mmc: some fixes for error handling
+Date: Wed, 01 Aug 2012 09:29:58 +0900
+Message-ID: <006201cd6f7c$c9c06730$5d413590$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1343720536-22077-1-git-send-email-wei_wang@realsil.com.cn>
-Sender: linux-kernel-owner@vger.kernel.org
-To: wei_wang@realsil.com.cn
-Cc: gregkh@linuxfoundation.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, bp@alien8.de, aaron.lu@amd.come
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:52109 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753997Ab2HAAaE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jul 2012 20:30:04 -0400
+Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M8100CAAW1XEL60@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 01 Aug 2012 09:30:01 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0M8100M0TW1ZRD90@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 01 Aug 2012 09:30:01 +0900 (KST)
+References: 
+In-reply-to: 
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>
 
-On Tuesday 31 July 2012, wei_wang@realsil.com.cn wrote:
-> From: Wei WANG <wei_wang@realsil.com.cn>
-> 
-> Realtek card reader core driver is the bus driver for Realtek
-> driver-based card reader, which supplies adapter layer to
-> be used by lower-level pci/usb card reader and upper-level
-> sdmmc/memstick host driver.
-> 
-> Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
+This patch-set includes fixes for the Synopsys DesignWare MMC driver
 
-You posted the sdmmc host driver and the pci card reader driver.
-I assume that the USB card reader and the memstick host
-will also get posted at some point. Do you have a timeframe
-for those?
+Seungwon Jeon (3):
+      mmc: dw_mmc: amend using error interrupt status
+      mmc: dw_mmc: correct mishandling error interrupt
+      mmc: dw_mmc: fix error handling in PIO mode
 
-The hardware seems to also support xd/smartmedia. Do you have
-plans to add those? I think we have some code in drivers/mfd
-that acts as an abstraction layer for these, given that the
-host has to do the wear leveling there too.
+drivers/mmc/host/dw_mmc.c |   44 ++++++++------------------------------------
+1 files changed, 8 insertions(+), 36 deletions(-)
 
->  Documentation/misc-devices/realtek_cr.txt |   27 ++
->  drivers/misc/Kconfig                      |    1 +
->  drivers/misc/Makefile                     |    1 +
->  drivers/misc/realtek_cr/Kconfig           |   26 ++
->  drivers/misc/realtek_cr/Makefile          |    7 +
->  drivers/misc/realtek_cr/core/Kconfig      |    5 +
->  drivers/misc/realtek_cr/core/Makefile     |    1 +
->  drivers/misc/realtek_cr/core/rtsx_core.c  |  462 +++++++++++++++++++++++++++++
->  include/linux/rtsx_core.h                 |  188 ++++++++++++
->  9 files changed, 718 insertions(+)
->  create mode 100644 Documentation/misc-devices/realtek_cr.txt
->  create mode 100644 drivers/misc/realtek_cr/Kconfig
->  create mode 100644 drivers/misc/realtek_cr/Makefile
->  create mode 100644 drivers/misc/realtek_cr/core/Kconfig
->  create mode 100644 drivers/misc/realtek_cr/core/Makefile
->  create mode 100644 drivers/misc/realtek_cr/core/rtsx_core.c
->  create mode 100644 include/linux/rtsx_core.h
+Best regards,
+Seungwon Jeon.
+--
+1.7.2.3
 
-As usual for most things getting added to drivers/misc, I'm skeptical
-about it actually fitting in here. Normally I'd put such a multiplexer
-into drivers/mfd. Given that you actually need your own bus, rather
-than just a single host with multiple endpoints, drivers/bus/realtek/cr
-might be best.
 
-> +udev rules
-> +----------
-> +
-> +In order to modprobe Realtek SD/MMC interface driver automatically, the following rule
-> +should be added to the udev rules file:
-> +
-> +SUBSYSTEM=="rtsx_cr", ENV{RTSX_CARD_TYPE}=="SD", RUN+="/sbin/modprobe -bv rtsx_sdmmc"
-
-This should not be necessary if you put the right module alias into the driver itself.
-
-> +struct rtsx_adapter *rtsx_alloc_adapter(unsigned int num_sockets,
-> +					struct device *dev)
-> +{
-> +	struct rtsx_adapter *adapter;
-> +
-> +	adapter = kzalloc(sizeof(*adapter)
-> +		     + sizeof(struct rtsx_dev *) * num_sockets, GFP_KERNEL);
-> +	if (adapter) {
-> +		adapter->dev.class = &rtsx_adapter_class;
-> +		adapter->dev.parent = dev;
-> +		device_initialize(&adapter->dev);
-> +		spin_lock_init(&adapter->lock);
-> +		adapter->num_sockets = num_sockets;
-> +	}
-> +	return adapter;
-> +}
-> +EXPORT_SYMBOL(rtsx_alloc_adapter);
-
-You should generally use EXPORT_SYMBOL_GPL for new symbols unless there is
-a strong reason not to (and then you should explain that reason).
-> +
-> +void rtsx_queue_work(struct work_struct *work)
-> +{
-> +	queue_work(workqueue, work);
-> +}
-> +EXPORT_SYMBOL(rtsx_queue_work);
-> +
-> +void rtsx_queue_delayed_work(struct delayed_work *dwork, unsigned long delay)
-> +{
-> +	queue_delayed_work(workqueue, dwork, delay);
-> +}
-> +EXPORT_SYMBOL(rtsx_queue_delayed_work);
-
-I would not bother with this, just move the workqueue into the client driver
-itself, which may result in a few duplicate lines but less code overall.
-
-> +int rtsx_register_driver(struct rtsx_driver *drv)
-> +{
-> +	drv->driver.bus = &rtsx_bus_type;
-> +
-> +	return driver_register(&drv->driver);
-> +}
-> +EXPORT_SYMBOL(rtsx_register_driver);
-> +
-> +void rtsx_unregister_driver(struct rtsx_driver *drv)
-> +{
-> +	driver_unregister(&drv->driver);
-> +}
-> +EXPORT_SYMBOL(rtsx_unregister_driver);
-
-Same thing here: There will only be very few drivers for this bus, so it's
-easier to call the driver_register function from the drivers. You need to export
-the rtsx_bus_type in that case though, but that is done for most buses.
-
-> +void rtsx_complete_unfinished_transfer(struct rtsx_dev *sock)
-> +{
-> +	struct rtsx_adapter *adapter = sock_to_adapter(sock);
-> +
-> +	adapter->common_ops->complete_unfinished_transfer(adapter);
-> +}
-> +EXPORT_SYMBOL(rtsx_complete_unfinished_transfer);
-> +
-> +void rtsx_sdmmc_set_bus_width(struct rtsx_dev *sock, unsigned char bus_width)
-> +{
-> +	struct rtsx_adapter *adapter = sock_to_adapter(sock);
-> +
-> +	adapter->sdmmc_ops->sdmmc_set_bus_width(adapter, bus_width);
-> +}
-> +EXPORT_SYMBOL(rtsx_sdmmc_set_bus_width);
-> +
-> +void rtsx_sdmmc_set_power_mode(struct rtsx_dev *sock, unsigned char power_mode)
-> +{
-> +	struct rtsx_adapter *adapter = sock_to_adapter(sock);
-> +
-> +	adapter->sdmmc_ops->sdmmc_set_power_mode(adapter, power_mode);
-> +}
-> +EXPORT_SYMBOL(rtsx_sdmmc_set_power_mode);
-> +
-> +void rtsx_sdmmc_set_timing(struct rtsx_dev *sock, unsigned char timing)
-> +{
-> +	struct rtsx_adapter *adapter = sock_to_adapter(sock);
-> +
-> +	adapter->sdmmc_ops->sdmmc_set_timing(adapter, timing);
-> +}
-> +EXPORT_SYMBOL(rtsx_sdmmc_set_timing);
-> +
-> +int rtsx_sdmmc_switch_voltage(struct rtsx_dev *sock, unsigned char voltage)
-> +{
-> +	struct rtsx_adapter *adapter = sock_to_adapter(sock);
-> +
-> +	return adapter->sdmmc_ops->sdmmc_switch_voltage(adapter, voltage);
-> +}
-> +EXPORT_SYMBOL(rtsx_sdmmc_switch_voltage);
-
-With this level of abstraction in your own driver, I wonder if it wouldn't be
-easier to have completely separate mmc drivers for each of the two host options
-(pci and usb). Apparently you have almost no shared code in the MMC driver
-/or/ in the bus driver.
-
->From this, I think it would be easier to kill off your own bus driver entirely
-and move the rtsx_pci.c driver into drivers/mfd, and then merge your
-pci/sdmmc.c file with rtsx_sdmmc.c.
-
-> +#define wait_timeout_x(task_state, msecs)			\
-> +do {								\
-> +	set_current_state((task_state));			\
-> +	schedule_timeout(msecs_to_jiffies(msecs));		\
-> +} while (0)
-> +
-> +#define wait_timeout(msecs)	wait_timeout_x(TASK_INTERRUPTIBLE, (msecs))
-
-This is the same as msleep_interruptible, right? Note that with interuptible
-sleep, you should always check if you got interrupted and return -ERESTARTSYS
-to user space.
-
-	Arnd
