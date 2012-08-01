@@ -1,101 +1,145 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH 3/3] mmc: dw_mmc: fix error handling in PIO mode
-Date: Wed, 01 Aug 2012 09:30:46 +0900
-Message-ID: <006501cd6f7c$e4ca6670$ae5f3350$%jun@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+From: Kyungsik Lee <kyungsik.lee@lge.com>
+Subject: [PATCH RESEND v4] mmc: core: Remove bounce buffer in mmc_send_cxd_data()
+Date: Wed,  1 Aug 2012 10:05:45 +0900
+Message-ID: <1343783145-17623-1-git-send-email-kyungsik.lee@lge.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:52448 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753997Ab2HAAav (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jul 2012 20:30:51 -0400
-Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M8100HBQW1N5L80@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 01 Aug 2012 09:30:47 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0M8100HW1W3A2H90@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 01 Aug 2012 09:30:46 +0900 (KST)
-References: 
-In-reply-to: 
-Content-language: ko
+Received: from LGEMRELSE7Q.lge.com ([156.147.1.151]:43618 "EHLO
+	LGEMRELSE7Q.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752327Ab2HABGZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jul 2012 21:06:25 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Venkatraman S <svenkatr@ti.com>, Jaehoon Chung <jh80.chung@samsung.com>, raphael.andy.lee@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Kyungsik Lee <kyungsik.lee@lge.com>
 
-Data transfer will be continued until all the bytes are transmitted,
-even if data crc error occurs during a multiple-block data transfer.
-This means RXDR/TXDR interrupts will occurs until data transfer is
-terminated. Early setting of host->sg to NULL prevents going into
-xxx_data_pio functions, hence permanent unhandled RXDR/TXDR interrupts
-occurs. And checking error interrupt status in the xxx_data_pio functions
-is no need because dw_mci_interrupt does do the same. This patch also
-removes it.
+It is expected that Extended CSD register(the size of this register
+is larger than CID/CSD) will be referenced more frequently as more
+fields have been added to Extended CSD and it seems that it is not
+a good option to double the memory used.
 
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+This patch is intended to avoid the use of bounce buffer for reading
+Extended CSD register in mmc_send_cxd_data().
+
+Signed-off-by: Kyungsik Lee <kyungsik.lee@lge.com>
+Signed-off-by: S, Venkatraman <svenkatr@ti.com>
 ---
- drivers/mmc/host/dw_mmc.c |   29 ++---------------------------
- 1 files changed, 2 insertions(+), 27 deletions(-)
+Changes in v2:
+- Handling on-stack buffer if it's used in caller.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 1a5db20..cf8511b 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1429,22 +1429,10 @@ static void dw_mci_read_data_pio(struct dw_mci *host)
- 			nbytes += len;
- 			remain -= len;
- 		} while (remain);
--		sg_miter->consumed = offset;
+Changes in v3:
+- Remove unnecesary code.
+
+Changes in v4:
+- Modify codes based-on S, Venkatraman's comments.
+---
+ drivers/mmc/core/mmc_ops.c |   54 +++++++++++++++++++++++++++++++-------------
+ 1 files changed, 38 insertions(+), 16 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 0ed2cc5..920a017 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -239,13 +239,19 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
+ 	struct mmc_data data = {0};
+ 	struct scatterlist sg;
+ 	void *data_buf;
++	int is_on_stack;
  
-+		sg_miter->consumed = offset;
- 		status = mci_readl(host, MINTSTS);
- 		mci_writel(host, RINTSTS, SDMMC_INT_RXDR);
--		if (status & DW_MCI_DATA_ERROR_FLAGS) {
--			host->data_status = status;
--			data->bytes_xfered += nbytes;
--			sg_miter_stop(sg_miter);
--			host->sg = NULL;
--			smp_wmb();
--
--			set_bit(EVENT_DATA_ERROR, &host->pending_events);
--
--			tasklet_schedule(&host->tasklet);
--			return;
--		}
- 	} while (status & SDMMC_INT_RXDR); /*if the RXDR is ready read again*/
- 	data->bytes_xfered += nbytes;
+-	/* dma onto stack is unsafe/nonportable, but callers to this
+-	 * routine normally provide temporary on-stack buffers ...
+-	 */
+-	data_buf = kmalloc(len, GFP_KERNEL);
+-	if (data_buf == NULL)
+-		return -ENOMEM;
++	is_on_stack = object_is_on_stack(buf);
++	if (is_on_stack) {
++
++		/* dma onto stack is unsafe/nonportable, but callers to this
++		 * routine normally provide temporary on-stack buffers ...
++		 */
++		data_buf = kmalloc(len, GFP_KERNEL);
++		if (data_buf == NULL)
++			return -ENOMEM;
++	} else
++		data_buf = buf;
  
-@@ -1497,23 +1485,10 @@ static void dw_mci_write_data_pio(struct dw_mci *host)
- 			nbytes += len;
- 			remain -= len;
- 		} while (remain);
--		sg_miter->consumed = offset;
+ 	mrq.cmd = &cmd;
+ 	mrq.data = &data;
+@@ -280,8 +286,10 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
  
-+		sg_miter->consumed = offset;
- 		status = mci_readl(host, MINTSTS);
- 		mci_writel(host, RINTSTS, SDMMC_INT_TXDR);
--		if (status & DW_MCI_DATA_ERROR_FLAGS) {
--			host->data_status = status;
--			data->bytes_xfered += nbytes;
--			sg_miter_stop(sg_miter);
--			host->sg = NULL;
--
--			smp_wmb();
--
--			set_bit(EVENT_DATA_ERROR, &host->pending_events);
--
--			tasklet_schedule(&host->tasklet);
--			return;
--		}
- 	} while (status & SDMMC_INT_TXDR); /* if TXDR write again */
- 	data->bytes_xfered += nbytes;
+ 	mmc_wait_for_req(host, &mrq);
  
+-	memcpy(buf, data_buf, len);
+-	kfree(data_buf);
++	if (is_on_stack) {
++		memcpy(buf, data_buf, len);
++		kfree(data_buf);
++	}
+ 
+ 	if (cmd.error)
+ 		return cmd.error;
+@@ -294,24 +302,32 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
+ int mmc_send_csd(struct mmc_card *card, u32 *csd)
+ {
+ 	int ret, i;
++	u32 *csd_tmp;
+ 
+ 	if (!mmc_host_is_spi(card->host))
+ 		return mmc_send_cxd_native(card->host, card->rca << 16,
+ 				csd, MMC_SEND_CSD);
+ 
+-	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd, 16);
++	csd_tmp = kmalloc(16, GFP_KERNEL);
++	if (!csd_tmp)
++		return -ENOMEM;
++
++	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd_tmp, 16);
+ 	if (ret)
+-		return ret;
++		goto err;
+ 
+ 	for (i = 0;i < 4;i++)
+-		csd[i] = be32_to_cpu(csd[i]);
++		csd[i] = be32_to_cpu(csd_tmp[i]);
+ 
+-	return 0;
++err:
++	kfree(csd_tmp);
++	return ret;
+ }
+ 
+ int mmc_send_cid(struct mmc_host *host, u32 *cid)
+ {
+ 	int ret, i;
++	u32 *cid_tmp;
+ 
+ 	if (!mmc_host_is_spi(host)) {
+ 		if (!host->card)
+@@ -320,14 +336,20 @@ int mmc_send_cid(struct mmc_host *host, u32 *cid)
+ 				cid, MMC_SEND_CID);
+ 	}
+ 
+-	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid, 16);
++	cid_tmp = kmalloc(16, GFP_KERNEL);
++	if (!cid_tmp)
++		return -ENOMEM;
++
++	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid_tmp, 16);
+ 	if (ret)
+-		return ret;
++		goto err;
+ 
+ 	for (i = 0;i < 4;i++)
+-		cid[i] = be32_to_cpu(cid[i]);
++		cid[i] = be32_to_cpu(cid_tmp[i]);
+ 
+-	return 0;
++err:
++	kfree(cid_tmp);
++	return ret;
+ }
+ 
+ int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd)
 -- 
 1.7.0.4
-
 
