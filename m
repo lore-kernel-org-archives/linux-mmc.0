@@ -1,68 +1,36 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH v5 1/3] block: Add test-iosched scheduler
-Date: Thu, 2 Aug 2012 06:16:48 -0700 (PDT)
-Message-ID: <340c1ff468880f247cc9377705edd6e4.squirrel@www.codeaurora.org>
-References: <n> <1343744710-31700-2-git-send-email-merez@codeaurora.org>
-    <09c3a301ad7ca4fa396c4d00615312c1.squirrel@www.codeaurora.org>
-    <5017FDCE.5030700@kernel.dk>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH RESEND v5] mmc: core: Remove bounce buffer in mmc_send_cxd_data()
+Date: Thu, 2 Aug 2012 20:18:54 +0530
+Message-ID: <CANfBPZ_pVuDU+cd_pQr+GxWd2Dsf3zjfnwW547Sm8SkDaJUuFA@mail.gmail.com>
+References: <1343891231-3042-1-git-send-email-kyungsik.lee@lge.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <5017FDCE.5030700@kernel.dk>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Jens Axboe <axboe@kernel.dk>
-Cc: merez@codeaurora.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1343891231-3042-1-git-send-email-kyungsik.lee@lge.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kyungsik Lee <kyungsik.lee@lge.com>
+Cc: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, raphael.andy.lee@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-
-On Tue, July 31, 2012 8:46 am, Jens Axboe wrote:
-> On 07/31/2012 04:36 PM, merez@codeaurora.org wrote:
->> Hi Jens,
->>
->> Do you have comments on this patch?
->> Can we push it to kernel 3.6 version?
+On Thu, Aug 2, 2012 at 12:37 PM, Kyungsik Lee <kyungsik.lee@lge.com> wrote:
+> It is expected that Extended CSD register(the size of this register
+> is larger than CID/CSD) will be referenced more frequently as more
+> fields have been added to Extended CSD and it seems that it is not
+> a good option to double the memory used.
 >
-> I have questions - what is this good for? In other words, explain to me
-> why this is useful code. And in particular why this cannot be done from
-> userspace with bsg and block tracing?
+> This patch is intended to avoid the use of bounce buffer for reading
+> Extended CSD register in mmc_send_cxd_data(). It will provide a better
+> performance gain by removing memcpy() overhead for a half KiB and
+> a redundant bounce buffer allocated repeatedly at the cost of providing
+> DMA-capable buffer from upper caller(but on-stack buffer is allowed
+> with no performance gain).
 >
-> IOW, I'm dubious as to whether a new _io scheduler_ is the correct
-> solution to the problem you have at hand.
->
-> --
-> Jens Axboe
->
->
+> Signed-off-by: Kyungsik Lee <kyungsik.lee@lge.com>
+> Signed-off-by: S, Venkatraman <svenkatr@ti.com>
 
-The test scheduler allows us to control the dispatched requests and their
-order without an interfering of other requests.
-You can review the patches which depends on this patch in order to better
-understand how it is used.
-For example, in the eMMC4.5 packed commands feature, the MMC layer can
-pack read or write requests (the packed requests must be of the same
-direction). MMC layer will stop fetching the requests in case the packing
-conditions are broken.
-In order to test this feature we had to have a full control on the
-requests that the MMC layer fetches and their order, so that we will be
-able to determine if the expected behavior was actually achieved.
-The test-iosched can call specific block device callbacks, for example for
-checking the test results.
-Also, in order to be able to run out tests on the main eMMC card that runs
-in HS200, we cannot "shut down" the real FS requests, otherwise our phone
-won't come up or crash.
-The test-iosched allows us to delay the real FS requests until the end of
-the test, therefore the tests can be done on the main eMMC card.
+I don't think my sign off is warranted. I gave just an illustration.
+You can add my
+Reviewed-by: Venkatraman S <svenkatr@ti.com>
 
-We chose not to use blocktrace due to the "real" FS requests interference
-in the middle of the test.
-
-I'm not familiar with bsg so I cannot tell if it can answer all the
-requirements I specified above.
-
-Thanks,
-Maya
-
--- 
-Sent by consultant of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+Regards,
+Venkat.
