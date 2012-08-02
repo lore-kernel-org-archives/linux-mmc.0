@@ -1,163 +1,68 @@
-From: Kyungsik Lee <kyungsik.lee@lge.com>
-Subject: [PATCH RESEND v5] mmc: core: Remove bounce buffer in mmc_send_cxd_data()
-Date: Thu,  2 Aug 2012 16:07:11 +0900
-Message-ID: <1343891231-3042-1-git-send-email-kyungsik.lee@lge.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from LGEMRELSE7Q.lge.com ([156.147.1.151]:62647 "EHLO
-	LGEMRELSE7Q.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751486Ab2HBHHW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Aug 2012 03:07:22 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: merez@codeaurora.org
+Subject: Re: [PATCH v5 1/3] block: Add test-iosched scheduler
+Date: Thu, 2 Aug 2012 06:16:48 -0700 (PDT)
+Message-ID: <340c1ff468880f247cc9377705edd6e4.squirrel@www.codeaurora.org>
+References: <n> <1343744710-31700-2-git-send-email-merez@codeaurora.org>
+    <09c3a301ad7ca4fa396c4d00615312c1.squirrel@www.codeaurora.org>
+    <5017FDCE.5030700@kernel.dk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <5017FDCE.5030700@kernel.dk>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Jens Axboe <axboe@kernel.dk>
+Cc: merez@codeaurora.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Venkatraman S <svenkatr@ti.com>, Jaehoon Chung <jh80.chung@samsung.com>, raphael.andy.lee@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Kyungsik Lee <kyungsik.lee@lge.com>
 
-It is expected that Extended CSD register(the size of this register
-is larger than CID/CSD) will be referenced more frequently as more
-fields have been added to Extended CSD and it seems that it is not
-a good option to double the memory used.
 
-This patch is intended to avoid the use of bounce buffer for reading
-Extended CSD register in mmc_send_cxd_data(). It will provide a better
-performance gain by removing memcpy() overhead for a half KiB and
-a redundant bounce buffer allocated repeatedly at the cost of providing
-DMA-capable buffer from upper caller(but on-stack buffer is allowed
-with no performance gain).
+On Tue, July 31, 2012 8:46 am, Jens Axboe wrote:
+> On 07/31/2012 04:36 PM, merez@codeaurora.org wrote:
+>> Hi Jens,
+>>
+>> Do you have comments on this patch?
+>> Can we push it to kernel 3.6 version?
+>
+> I have questions - what is this good for? In other words, explain to me
+> why this is useful code. And in particular why this cannot be done from
+> userspace with bsg and block tracing?
+>
+> IOW, I'm dubious as to whether a new _io scheduler_ is the correct
+> solution to the problem you have at hand.
+>
+> --
+> Jens Axboe
+>
+>
 
-Signed-off-by: Kyungsik Lee <kyungsik.lee@lge.com>
-Signed-off-by: S, Venkatraman <svenkatr@ti.com>
----
-Changes in v2:
-- Handling on-stack buffer if it's used in caller.
+The test scheduler allows us to control the dispatched requests and their
+order without an interfering of other requests.
+You can review the patches which depends on this patch in order to better
+understand how it is used.
+For example, in the eMMC4.5 packed commands feature, the MMC layer can
+pack read or write requests (the packed requests must be of the same
+direction). MMC layer will stop fetching the requests in case the packing
+conditions are broken.
+In order to test this feature we had to have a full control on the
+requests that the MMC layer fetches and their order, so that we will be
+able to determine if the expected behavior was actually achieved.
+The test-iosched can call specific block device callbacks, for example for
+checking the test results.
+Also, in order to be able to run out tests on the main eMMC card that runs
+in HS200, we cannot "shut down" the real FS requests, otherwise our phone
+won't come up or crash.
+The test-iosched allows us to delay the real FS requests until the end of
+the test, therefore the tests can be done on the main eMMC card.
 
-Changes in v3:
-- Remove unnecesary code.
+We chose not to use blocktrace due to the "real" FS requests interference
+in the middle of the test.
 
-Changes in v4:
-- Modify codes based-on S, Venkatraman's comments.
+I'm not familiar with bsg so I cannot tell if it can answer all the
+requirements I specified above.
 
-Changes in v5:
-- Modify commit log and add NOTE description.
----
- drivers/mmc/core/mmc_ops.c |   58 +++++++++++++++++++++++++++++++------------
- 1 files changed, 42 insertions(+), 16 deletions(-)
+Thanks,
+Maya
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 0ed2cc5..acf578d 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -230,6 +230,10 @@ mmc_send_cxd_native(struct mmc_host *host, u32 arg, u32 *cxd, int opcode)
- 	return 0;
- }
- 
-+/*
-+ * NOTE: void *buf, Caller for the buf is required to use DMA-capable
-+ * buffer or on-stack buffer(with some overhead in callee).
-+ */
- static int
- mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- 		u32 opcode, void *buf, unsigned len)
-@@ -239,13 +243,19 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- 	struct mmc_data data = {0};
- 	struct scatterlist sg;
- 	void *data_buf;
-+	int is_on_stack;
- 
--	/* dma onto stack is unsafe/nonportable, but callers to this
--	 * routine normally provide temporary on-stack buffers ...
--	 */
--	data_buf = kmalloc(len, GFP_KERNEL);
--	if (data_buf == NULL)
--		return -ENOMEM;
-+	is_on_stack = object_is_on_stack(buf);
-+	if (is_on_stack) {
-+
-+		/* dma onto stack is unsafe/nonportable, but callers to this
-+		 * routine normally provide temporary on-stack buffers ...
-+		 */
-+		data_buf = kmalloc(len, GFP_KERNEL);
-+		if (data_buf == NULL)
-+			return -ENOMEM;
-+	} else
-+		data_buf = buf;
- 
- 	mrq.cmd = &cmd;
- 	mrq.data = &data;
-@@ -280,8 +290,10 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- 
- 	mmc_wait_for_req(host, &mrq);
- 
--	memcpy(buf, data_buf, len);
--	kfree(data_buf);
-+	if (is_on_stack) {
-+		memcpy(buf, data_buf, len);
-+		kfree(data_buf);
-+	}
- 
- 	if (cmd.error)
- 		return cmd.error;
-@@ -294,24 +306,32 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
- int mmc_send_csd(struct mmc_card *card, u32 *csd)
- {
- 	int ret, i;
-+	u32 *csd_tmp;
- 
- 	if (!mmc_host_is_spi(card->host))
- 		return mmc_send_cxd_native(card->host, card->rca << 16,
- 				csd, MMC_SEND_CSD);
- 
--	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd, 16);
-+	csd_tmp = kmalloc(16, GFP_KERNEL);
-+	if (!csd_tmp)
-+		return -ENOMEM;
-+
-+	ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd_tmp, 16);
- 	if (ret)
--		return ret;
-+		goto err;
- 
- 	for (i = 0;i < 4;i++)
--		csd[i] = be32_to_cpu(csd[i]);
-+		csd[i] = be32_to_cpu(csd_tmp[i]);
- 
--	return 0;
-+err:
-+	kfree(csd_tmp);
-+	return ret;
- }
- 
- int mmc_send_cid(struct mmc_host *host, u32 *cid)
- {
- 	int ret, i;
-+	u32 *cid_tmp;
- 
- 	if (!mmc_host_is_spi(host)) {
- 		if (!host->card)
-@@ -320,14 +340,20 @@ int mmc_send_cid(struct mmc_host *host, u32 *cid)
- 				cid, MMC_SEND_CID);
- 	}
- 
--	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid, 16);
-+	cid_tmp = kmalloc(16, GFP_KERNEL);
-+	if (!cid_tmp)
-+		return -ENOMEM;
-+
-+	ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CID, cid_tmp, 16);
- 	if (ret)
--		return ret;
-+		goto err;
- 
- 	for (i = 0;i < 4;i++)
--		cid[i] = be32_to_cpu(cid[i]);
-+		cid[i] = be32_to_cpu(cid_tmp[i]);
- 
--	return 0;
-+err:
-+	kfree(cid_tmp);
-+	return ret;
- }
- 
- int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd)
 -- 
-1.7.0.4
-
+Sent by consultant of Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
