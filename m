@@ -1,38 +1,69 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH 0/3] mmc: dw_mmc: some fixes for error handling
-Date: Mon, 6 Aug 2012 10:17:30 +0100
-Message-ID: <CAFbHwiQ82g3eBXgTOLWDx1vpA=N4i_b8Ry9er8G7YVJ85Oq7ag@mail.gmail.com>
-References: <006201cd6f7c$c9c06730$5d413590$%jun@samsung.com>
-	<5019E649.6040203@samsung.com>
+From: Bob Liu <lliubbo@gmail.com>
+Subject: Re: [PATCH] drivers: mmc: bfin_sdh: fix build error
+Date: Mon, 6 Aug 2012 17:27:40 +0800
+Message-ID: <CAA_GA1c3w_6Oq7dR+0Exw-warJyL9dr2PKyT6nrkWrDfx=MCKQ@mail.gmail.com>
+References: <1343631782-24207-1-git-send-email-lliubbo@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:40565 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752952Ab2HFJRa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Aug 2012 05:17:30 -0400
-Received: by pbbrr13 with SMTP id rr13so2301537pbb.19
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Aug 2012 02:17:30 -0700 (PDT)
-In-Reply-To: <5019E649.6040203@samsung.com>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:37225 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755612Ab2HFJ1m (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Aug 2012 05:27:42 -0400
+Received: by wgbdr13 with SMTP id dr13so2545355wgb.1
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Aug 2012 02:27:41 -0700 (PDT)
+In-Reply-To: <1343631782-24207-1-git-send-email-lliubbo@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, James Hogan <james.hogan@imgtec.com>
+To: cjb@laptop.org
+Cc: adrian.hunter@intel.com, ludovic.desroches@atmel.com, rmk+kernel@arm.linux.org.uk, g.liakhovetski@gmx.de, uclinux-dist-devel@blackfin.uclinux.org, Sonic Zhang <sonic.zhang@analog.com>, Bob Liu <lliubbo@gmail.com>, linux-mmc@vger.kernel.org
 
-On Thu, Aug 2, 2012 at 3:30 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> This patch-set looks good to me.
->
-> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
->
-> On 08/01/2012 09:29 AM, Seungwon Jeon wrote:
->> This patch-set includes fixes for the Synopsys DesignWare MMC driver
->>
->> Seungwon Jeon (3):
->>       mmc: dw_mmc: amend using error interrupt status
->>       mmc: dw_mmc: correct mishandling error interrupt
->>       mmc: dw_mmc: fix error handling in PIO mode
->>
->> drivers/mmc/host/dw_mmc.c |   44 ++++++++------------------------------------
->> 1 files changed, 8 insertions(+), 36 deletions(-)
+Hi Chris,
 
-Acked-by: Will Newton <will.newton@imgtec.com>
+Would you please take a look at this patch?
+Since without this patch, regression test for blackfin will fail:
+http://kisskb.ellerman.id.au/kisskb/matrix/
+
+Thank you!
+
+On Mon, Jul 30, 2012 at 3:03 PM, Bob Liu <lliubbo@gmail.com> wrote:
+> From: Sonic Zhang <sonic.zhang@analog.com>
+>
+> Descriptor array structure has been moved into blackfin dma.h head file.
+> This patch fix below error:
+>
+> drivers/mmc/host/bfin_sdh.c:52:8: error: redefinition of 'struct
+> dma_desc_array'
+> make[4]: *** [drivers/mmc/host/bfin_sdh.o] Error 1
+>
+> Signed-off-by: Sonic Zhang <sonic.zhang@analog.com>
+> Signed-off-by: Bob Liu <lliubbo@gmail.com>
+> ---
+>  drivers/mmc/host/bfin_sdh.c |   13 -------------
+>  1 file changed, 13 deletions(-)
+>
+> diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
+> index 0366617..a17dd73 100644
+> --- a/drivers/mmc/host/bfin_sdh.c
+> +++ b/drivers/mmc/host/bfin_sdh.c
+> @@ -49,13 +49,6 @@
+>  #define bfin_write_SDH_CFG             bfin_write_RSI_CFG
+>  #endif
+>
+> -struct dma_desc_array {
+> -       unsigned long   start_addr;
+> -       unsigned short  cfg;
+> -       unsigned short  x_count;
+> -       short           x_modify;
+> -} __packed;
+> -
+>  struct sdh_host {
+>         struct mmc_host         *mmc;
+>         spinlock_t              lock;
+> --
+> 1.7.9.5
+>
+
+-- 
+Regards,
+--Bob
