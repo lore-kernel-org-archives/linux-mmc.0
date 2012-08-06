@@ -1,72 +1,49 @@
-From: Loic Pallardy <loic.pallardy-ext@stericsson.com>
-Subject: [PATCH v3 4/5] mmc: core: Add mmc_set_blockcount feature
-Date: Mon, 6 Aug 2012 17:12:30 +0200
-Message-ID: <1344265951-22437-5-git-send-email-loic.pallardy-ext@stericsson.com>
-References: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 1/2] mmc: block: mmcblkN: use slot index instead of dynamic name index
+Date: Mon, 06 Aug 2012 11:31:17 -0400
+Message-ID: <8739402g1m.fsf@octavius.laptop.org>
+References: <1344237900-14815-1-git-send-email-dirk.behme@de.bosch.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog115.obsmtp.com ([207.126.144.139]:41878 "EHLO
-	eu1sys200aog115.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932132Ab2HFPNk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Aug 2012 11:13:40 -0400
-In-Reply-To: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
+Received: from void.printf.net ([89.145.121.20]:35944 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755529Ab2HFPbZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 6 Aug 2012 11:31:25 -0400
+In-Reply-To: <1344237900-14815-1-git-send-email-dirk.behme@de.bosch.com> (Dirk
+	Behme's message of "Mon, 6 Aug 2012 09:24:59 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Ulf Hansson <ulf.hansson@stericcson.com>, Loic Pallardy <loic.pallardy-ext@stericsson.com>, Alex Macro <alex.macro@stericsson.com>, Loic Pallardy <loic.pallardy@stericsson.com>
+To: Dirk Behme <dirk.behme@de.bosch.com>
+Cc: linux-mmc@vger.kernel.org, linaro-dev@lists.linaro.org, linux-embedded@vger.kernel.org, Jassi Brar <jaswinder.singh@linaro.org>
 
-Provide support for automatically sending Set Block Count
-(CMD23) messages. Used at least for RPMB support.
+Hi,
 
-Signed-off-by: Alex Macro <alex.macro@stericsson.com>
-Signed-off-by: Loic Pallardy <loic.pallardy@stericsson.com>
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
-Acked-by: Johan Rudholm <johan.rudholm@stericsson.com>
-Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
----
- drivers/mmc/core/core.c  | 14 ++++++++++++++
- include/linux/mmc/core.h |  2 ++
- 2 files changed, 16 insertions(+)
+On Mon, Aug 06 2012, Dirk Behme wrote:
+> On embedded devices, often there is a combination of removable mmc
+> devices (e.g. MMC/SD cards) and hard wired ones (e.g. eMMC).
+> Depending on the hardware configuration, the 'mmcblkN' node might
+> change if the removable device is available or not at boot time.
+>
+> E.g. if the removable device is attached at boot time, it might
+> become mmxblk0. And the hard wired one mmcblk1. But if the removable
+> device isn't there at boot time, the hard wired one will become
+> mmcblk0. This makes it somehow difficult to hard code the root device
+> to the non-removable device and boot fast.
+>
+> This change does simply associate 'N' of 'mmcblkN' with the slot index
+> instead of the dynamic name index. The slot index is always the same,
+> ensuring that the non-removable mmc device is associated always
+> with the same mmcblkN. Independent of the availability of the removable
+> one.
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 0b6141d..7990e2c 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1827,6 +1827,20 @@ int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen)
- }
- EXPORT_SYMBOL(mmc_set_blocklen);
- 
-+int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
-+			bool is_rel_write)
-+{
-+	struct mmc_command cmd = {0};
-+
-+	cmd.opcode = MMC_SET_BLOCK_COUNT;
-+	cmd.arg = blockcount & 0x0000FFFF;
-+	if (is_rel_write)
-+		cmd.arg |= 1 << 31;
-+	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
-+	return mmc_wait_for_cmd(card->host, &cmd, 5);
-+}
-+EXPORT_SYMBOL(mmc_set_blockcount);
-+
- static void mmc_hw_reset_for_init(struct mmc_host *host)
- {
- 	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 1b431c7..098b7dd 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -166,6 +166,8 @@ extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
- extern unsigned int mmc_calc_max_discard(struct mmc_card *card);
- 
- extern int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
-+extern int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
-+			      bool is_rel_write);
- extern int mmc_hw_reset(struct mmc_host *host);
- extern int mmc_hw_reset_check(struct mmc_host *host);
- extern int mmc_can_reset(struct mmc_card *card);
+I like this change in principle, but doesn't it break boot for everyone
+currently using e.g. root=/dev/mmcblk0p1 on slot index 2?  That doesn't
+sound like an acceptable regression.
+
+Thanks,
+
+- Chris.
 -- 
-1.7.11.1
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
