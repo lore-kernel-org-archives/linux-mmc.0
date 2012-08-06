@@ -1,107 +1,123 @@
-From: Masanari Iida <standby24x7@gmail.com>
-Subject: [PATCH] [trivial] mmc: Fix typo in mmc
-Date: Sun,  5 Aug 2012 23:25:40 +0900
-Message-ID: <1344176740-5521-1-git-send-email-standby24x7@gmail.com>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH] eSDHC: Add ADMA mode support for eSDHC
+Date: Mon, 6 Aug 2012 02:26:01 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C115197@039-SN1MPN1-002.039d.mgd.msft.net>
+References: <1331177102-24455-1-git-send-email-r66093@freescale.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:46015 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752971Ab2HEOZC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Aug 2012 10:25:02 -0400
+Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:37365
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755520Ab2HFC0G convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 5 Aug 2012 22:26:06 -0400
+In-Reply-To: <1331177102-24455-1-git-send-email-r66093@freescale.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org, trivial@kernel.org, cjb@laptop.org, linux-mmc@vger.kernel.org
-Cc: Masanari Iida <standby24x7@gmail.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: Pan Jiafei-B37022 <B37022@freescale.com>, Jin Zhengxiong-R64188 <R64188@freescale.com>
 
-Correct spelling typo in drivers/mmc
+Hi, Chris and Anton
+This patch has been pended five months, and no any feedback, do you have any comment about it?
+Or it can be merged into next release?
+We need it to enable the ADMA feature for FSL eSDHC controller.
 
-Signed-off-by: Masanari Iida <standby24x7@gmail.com>
----
- drivers/mmc/core/sdio.c            | 2 +-
- drivers/mmc/host/at91_mci.c        | 2 +-
- drivers/mmc/host/atmel-mci.c       | 2 +-
- drivers/mmc/host/omap_hsmmc.c      | 2 +-
- drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
- drivers/mmc/host/vub300.c          | 2 +-
- 6 files changed, 6 insertions(+), 6 deletions(-)
+Best Regards
+Jerry Huang
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index d4619e2..2273ce6 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -641,7 +641,7 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
- 	/*
- 	 * If the host and card support UHS-I mode request the card
- 	 * to switch to 1.8V signaling level.  No 1.8v signalling if
--	 * UHS mode is not enabled to maintain compatibilty and some
-+	 * UHS mode is not enabled to maintain compatibility and some
- 	 * systems that claim 1.8v signalling in fact do not support
- 	 * it.
- 	 */
-diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
-index efdb81d..74bed0f 100644
---- a/drivers/mmc/host/at91_mci.c
-+++ b/drivers/mmc/host/at91_mci.c
-@@ -356,7 +356,7 @@ static void at91_mci_handle_transmitted(struct at91mci_host *host)
- }
- 
- /*
-- * Update bytes tranfered count during a write operation
-+ * Update bytes transfered count during a write operation
-  */
- static void at91_mci_update_bytes_xfered(struct at91mci_host *host)
- {
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 322412c..eea9cf2 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -1021,7 +1021,7 @@ static void atmci_stop_transfer(struct atmel_mci *host)
- }
- 
- /*
-- * Stop data transfer because error(s) occured.
-+ * Stop data transfer because error(s) occurred.
-  */
- static void atmci_stop_transfer_pdc(struct atmel_mci *host)
- {
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 3a09f93..686e256 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -447,7 +447,7 @@ static void omap_hsmmc_stop_clock(struct omap_hsmmc_host *host)
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
- 		OMAP_HSMMC_READ(host->base, SYSCTL) & ~CEN);
- 	if ((OMAP_HSMMC_READ(host->base, SYSCTL) & CEN) != 0x0)
--		dev_dbg(mmc_dev(host->mmc), "MMC Clock is not stoped\n");
-+		dev_dbg(mmc_dev(host->mmc), "MMC Clock is not stopped\n");
- }
- 
- static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index e23f813..32f4a07 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -315,7 +315,7 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
- 		new_val = val & (SDHCI_CTRL_LED | \
- 				SDHCI_CTRL_4BITBUS | \
- 				SDHCI_CTRL_D3CD);
--		/* ensure the endianess */
-+		/* ensure the endianness */
- 		new_val |= ESDHC_HOST_CONTROL_LE;
- 		/* bits 8&9 are reserved on mx25 */
- 		if (!is_imx25_esdhc(imx_data)) {
-diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-index 3135a1a..58eab9a 100644
---- a/drivers/mmc/host/vub300.c
-+++ b/drivers/mmc/host/vub300.c
-@@ -806,7 +806,7 @@ static void command_res_completed(struct urb *urb)
- 		 * we suspect a buggy USB host controller
- 		 */
- 	} else if (!vub300->data) {
--		/* this means that the command (typically CMD52) suceeded */
-+		/* this means that the command (typically CMD52) succeeded */
- 	} else if (vub300->resp.common.header_type != 0x02) {
- 		/*
- 		 * this is an error response from the VUB300 chip
--- 
-1.7.12.rc1.17.g9a7365c
+
+> -----Original Message-----
+> From: Huang Changming-R66093
+> Sent: Thursday, March 08, 2012 11:25 AM
+> To: linux-mmc@vger.kernel.org
+> Cc: Huang Changming-R66093; Pan Jiafei-B37022; Jin Zhengxiong-R64188;
+> Chris Ball; Anton Vorontsov
+> Subject: [PATCH] eSDHC: Add ADMA mode support for eSDHC
+> 
+> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> 
+> The register of eSDHC Host Controller Capabilities is not compatible with
+> standard SDHC register, and eSDHC cannot support End Attribute in NOP
+> ADMA
+> descriptor. With this patch eSDHC can works in ADMA mode
+> and performance can be improved.
+> 
+> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> Signed-off-by: Pan Jiafei <Jiafei.Pan@freescale.com>
+> Signed-off-by: Jason Jin <Jason.jin@freescale.com>
+> CC: Chris Ball <cjb@laptop.org>
+> CC: Anton Vorontsov <cbouatmailru@gmail.com>
+> ---
+>  drivers/mmc/host/sdhci-of-esdhc.c |   36
+> +++++++++++++++++++++++++++++++++---
+>  1 files changed, 33 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-
+> of-esdhc.c
+> index f8eb1fb..ae5fcbf 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -21,6 +21,32 @@
+>  #include "sdhci-pltfm.h"
+>  #include "sdhci-esdhc.h"
+> 
+> +#define VENDOR_V_22	0x12
+> +static u32 esdhc_readl(struct sdhci_host *host, int reg)
+> +{
+> +	u32 ret;
+> +
+> +	ret = in_be32(host->ioaddr + reg);
+> +	/*
+> +	 * The bit of ADMA flag in eSDHC is not compatible with standard
+> +	 * SDHC register, so set fake flag SDHCI_CAN_DO_ADMA2 when ADMA is
+> +	 * supported by eSDHC.
+> +	 * And for many FSL eSDHC controller, the reset value of field
+> +	 * SDHCI_CAN_DO_ADMA1 is one, but some of them can't support ADMA,
+> +	 * only these vendor version is greater than 2.2/0x12 support ADMA.
+> +	 * For FSL eSDHC, must aligned 4-byte, so use 0xFC to read the
+> +	 * the verdor version number, oxFE is SDHCI_HOST_VERSION.
+> +	 */
+> +	if ((reg == SDHCI_CAPABILITIES) && (ret & SDHCI_CAN_DO_ADMA1)) {
+> +		u32 tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
+> +		tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+> +		if (tmp > VENDOR_V_22)
+> +			ret |= SDHCI_CAN_DO_ADMA2;
+> +	}
+> +
+> +	return ret;
+> +}
+> +
+>  static u16 esdhc_readw(struct sdhci_host *host, int reg)
+>  {
+>  	u16 ret;
+> @@ -144,7 +170,7 @@ static void esdhc_of_resume(struct sdhci_host *host)
+>  #endif
+> 
+>  static struct sdhci_ops sdhci_esdhc_ops = {
+> -	.read_l = sdhci_be32bs_readl,
+> +	.read_l = esdhc_readl,
+>  	.read_w = esdhc_readw,
+>  	.read_b = esdhc_readb,
+>  	.write_l = sdhci_be32bs_writel,
+> @@ -161,9 +187,13 @@ static struct sdhci_ops sdhci_esdhc_ops = {
+>  };
+> 
+>  static struct sdhci_pltfm_data sdhci_esdhc_pdata = {
+> -	/* card detection could be handled via GPIO */
+> +	/*
+> +	 * card detection could be handled via GPIO
+> +	 * eSDHC cannot support End Attribute in NOP ADMA descriptor
+> +	 */
+>  	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_CARD_DETECTION
+> -		| SDHCI_QUIRK_NO_CARD_NO_RESET,
+> +		| SDHCI_QUIRK_NO_CARD_NO_RESET
+> +		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+>  	.ops = &sdhci_esdhc_ops,
+>  };
+> 
+> --
+> 1.7.5.4
+
 
