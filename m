@@ -1,47 +1,31 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/2] mmc: block: mmcblkN: use slot index instead of dynamic name index
-Date: Mon, 06 Aug 2012 11:31:17 -0400
-Message-ID: <8739402g1m.fsf@octavius.laptop.org>
-References: <1344237900-14815-1-git-send-email-dirk.behme@de.bosch.com>
+Subject: Re: [PATCH] drivers: mmc: bfin_sdh: fix build error
+Date: Mon, 06 Aug 2012 11:34:37 -0400
+Message-ID: <87y5ls11bm.fsf@octavius.laptop.org>
+References: <1343631782-24207-1-git-send-email-lliubbo@gmail.com>
+	<CAA_GA1c3w_6Oq7dR+0Exw-warJyL9dr2PKyT6nrkWrDfx=MCKQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35944 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:35966 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755529Ab2HFPbZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 6 Aug 2012 11:31:25 -0400
-In-Reply-To: <1344237900-14815-1-git-send-email-dirk.behme@de.bosch.com> (Dirk
-	Behme's message of "Mon, 6 Aug 2012 09:24:59 +0200")
+	id S1755529Ab2HFPep (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 6 Aug 2012 11:34:45 -0400
+In-Reply-To: <CAA_GA1c3w_6Oq7dR+0Exw-warJyL9dr2PKyT6nrkWrDfx=MCKQ@mail.gmail.com>
+	(Bob Liu's message of "Mon, 6 Aug 2012 17:27:40 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dirk Behme <dirk.behme@de.bosch.com>
-Cc: linux-mmc@vger.kernel.org, linaro-dev@lists.linaro.org, linux-embedded@vger.kernel.org, Jassi Brar <jaswinder.singh@linaro.org>
+To: Bob Liu <lliubbo@gmail.com>
+Cc: adrian.hunter@intel.com, ludovic.desroches@atmel.com, rmk+kernel@arm.linux.org.uk, g.liakhovetski@gmx.de, uclinux-dist-devel@blackfin.uclinux.org, Sonic Zhang <sonic.zhang@analog.com>, linux-mmc@vger.kernel.org
 
-Hi,
+Hi Bob,
 
-On Mon, Aug 06 2012, Dirk Behme wrote:
-> On embedded devices, often there is a combination of removable mmc
-> devices (e.g. MMC/SD cards) and hard wired ones (e.g. eMMC).
-> Depending on the hardware configuration, the 'mmcblkN' node might
-> change if the removable device is available or not at boot time.
->
-> E.g. if the removable device is attached at boot time, it might
-> become mmxblk0. And the hard wired one mmcblk1. But if the removable
-> device isn't there at boot time, the hard wired one will become
-> mmcblk0. This makes it somehow difficult to hard code the root device
-> to the non-removable device and boot fast.
->
-> This change does simply associate 'N' of 'mmcblkN' with the slot index
-> instead of the dynamic name index. The slot index is always the same,
-> ensuring that the non-removable mmc device is associated always
-> with the same mmcblkN. Independent of the availability of the removable
-> one.
+On Mon, Aug 06 2012, Bob Liu wrote:
+> Would you please take a look at this patch?
+> Since without this patch, regression test for blackfin will fail:
+> http://kisskb.ellerman.id.au/kisskb/matrix/
 
-I like this change in principle, but doesn't it break boot for everyone
-currently using e.g. root=/dev/mmcblk0p1 on slot index 2?  That doesn't
-sound like an acceptable regression.
-
-Thanks,
+Thanks, pushed to mmc-next for 3.6 now.
 
 - Chris.
 -- 
