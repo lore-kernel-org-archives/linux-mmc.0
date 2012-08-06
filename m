@@ -1,47 +1,72 @@
 From: Loic Pallardy <loic.pallardy-ext@stericsson.com>
-Subject: [PATCH v3 2/5] mmc: card: Do not scan RPMB partitions
-Date: Mon, 6 Aug 2012 17:12:28 +0200
-Message-ID: <1344265951-22437-3-git-send-email-loic.pallardy-ext@stericsson.com>
+Subject: [PATCH v3 4/5] mmc: core: Add mmc_set_blockcount feature
+Date: Mon, 6 Aug 2012 17:12:30 +0200
+Message-ID: <1344265951-22437-5-git-send-email-loic.pallardy-ext@stericsson.com>
 References: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog117.obsmtp.com ([207.126.144.143]:53906 "EHLO
-	eu1sys200aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932132Ab2HFPNd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Aug 2012 11:13:33 -0400
+Received: from eu1sys200aog115.obsmtp.com ([207.126.144.139]:41878 "EHLO
+	eu1sys200aog115.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932132Ab2HFPNk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Aug 2012 11:13:40 -0400
 In-Reply-To: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Ulf Hansson <ulf.hansson@stericcson.com>, Loic Pallardy <loic.pallardy-ext@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Ulf Hansson <ulf.hansson@stericcson.com>, Loic Pallardy <loic.pallardy-ext@stericsson.com>, Alex Macro <alex.macro@stericsson.com>, Loic Pallardy <loic.pallardy@stericsson.com>
 
-Do not scan rpmb partitions for "soft" partitions, since the rpmb
-partition contains protected data. Silences the following
-message during boot:
+Provide support for automatically sending Set Block Count
+(CMD23) messages. Used at least for RPMB support.
 
- mmcblkXRPMB: unknown partition table
-
-Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
+Signed-off-by: Alex Macro <alex.macro@stericsson.com>
+Signed-off-by: Loic Pallardy <loic.pallardy@stericsson.com>
 Acked-by: Linus Walleij <linus.walleij@linaro.org>
+Acked-by: Johan Rudholm <johan.rudholm@stericsson.com>
 Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
 ---
- drivers/mmc/card/block.c | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/mmc/core/core.c  | 14 ++++++++++++++
+ include/linux/mmc/core.h |  2 ++
+ 2 files changed, 16 insertions(+)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 276d21c..d8edb8d 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1521,6 +1521,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 	md->disk->queue = md->queue.queue;
- 	md->disk->driverfs_dev = parent;
- 	set_disk_ro(md->disk, md->read_only || default_ro);
-+	if (area_type & MMC_BLK_DATA_AREA_RPMB)
-+		md->disk->flags |= GENHD_FL_NO_PART_SCAN;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 0b6141d..7990e2c 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1827,6 +1827,20 @@ int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen)
+ }
+ EXPORT_SYMBOL(mmc_set_blocklen);
  
- 	/*
- 	 * As discussed on lkml, GENHD_FL_REMOVABLE should:
++int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
++			bool is_rel_write)
++{
++	struct mmc_command cmd = {0};
++
++	cmd.opcode = MMC_SET_BLOCK_COUNT;
++	cmd.arg = blockcount & 0x0000FFFF;
++	if (is_rel_write)
++		cmd.arg |= 1 << 31;
++	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
++	return mmc_wait_for_cmd(card->host, &cmd, 5);
++}
++EXPORT_SYMBOL(mmc_set_blockcount);
++
+ static void mmc_hw_reset_for_init(struct mmc_host *host)
+ {
+ 	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 1b431c7..098b7dd 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -166,6 +166,8 @@ extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
+ extern unsigned int mmc_calc_max_discard(struct mmc_card *card);
+ 
+ extern int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
++extern int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
++			      bool is_rel_write);
+ extern int mmc_hw_reset(struct mmc_host *host);
+ extern int mmc_hw_reset_check(struct mmc_host *host);
+ extern int mmc_can_reset(struct mmc_card *card);
 -- 
 1.7.11.1
 
