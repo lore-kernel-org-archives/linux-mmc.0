@@ -1,66 +1,38 @@
-From: Dirk Behme <dirk.behme-V5te9oGctAVWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH 1/2] mmc: block: mmcblkN: use slot index instead of dynamic
-	name index
-Date: Mon, 6 Aug 2012 09:24:59 +0200
-Message-ID: <1344237900-14815-1-git-send-email-dirk.behme@de.bosch.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH 0/3] mmc: dw_mmc: some fixes for error handling
+Date: Mon, 6 Aug 2012 10:17:30 +0100
+Message-ID: <CAFbHwiQ82g3eBXgTOLWDx1vpA=N4i_b8Ry9er8G7YVJ85Oq7ag@mail.gmail.com>
+References: <006201cd6f7c$c9c06730$5d413590$%jun@samsung.com>
+	<5019E649.6040203@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, linux-embedded-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:40565 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752952Ab2HFJRa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Aug 2012 05:17:30 -0400
+Received: by pbbrr13 with SMTP id rr13so2301537pbb.19
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Aug 2012 02:17:30 -0700 (PDT)
+In-Reply-To: <5019E649.6040203@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, James Hogan <james.hogan@imgtec.com>
 
-On embedded devices, often there is a combination of removable mmc
-devices (e.g. MMC/SD cards) and hard wired ones (e.g. eMMC).
-Depending on the hardware configuration, the 'mmcblkN' node might
-change if the removable device is available or not at boot time.
+On Thu, Aug 2, 2012 at 3:30 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> This patch-set looks good to me.
+>
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+>
+> On 08/01/2012 09:29 AM, Seungwon Jeon wrote:
+>> This patch-set includes fixes for the Synopsys DesignWare MMC driver
+>>
+>> Seungwon Jeon (3):
+>>       mmc: dw_mmc: amend using error interrupt status
+>>       mmc: dw_mmc: correct mishandling error interrupt
+>>       mmc: dw_mmc: fix error handling in PIO mode
+>>
+>> drivers/mmc/host/dw_mmc.c |   44 ++++++++------------------------------------
+>> 1 files changed, 8 insertions(+), 36 deletions(-)
 
-E.g. if the removable device is attached at boot time, it might
-become mmxblk0. And the hard wired one mmcblk1. But if the removable
-device isn't there at boot time, the hard wired one will become
-mmcblk0. This makes it somehow difficult to hard code the root device
-to the non-removable device and boot fast.
-
-This change does simply associate 'N' of 'mmcblkN' with the slot index
-instead of the dynamic name index. The slot index is always the same,
-ensuring that the non-removable mmc device is associated always
-with the same mmcblkN. Independent of the availability of the removable
-one.
-
-This issue has a long history. One prominent one is e.g. from the
-Maemo based Nokia N810 device:
-
-https://bugs.maemo.org/show_bug.cgi?id=2747
-
-Signed-off-by: Dirk Behme <dirk.behme-V5te9oGctAVWk0Htik3J/w@public.gmane.org>
-CC: Jassi Brar <jaswinder.singh-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-CC: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
----
- drivers/mmc/card/block.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index f1c84de..a01d306 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1517,7 +1517,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 	 */
- 
- 	snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
--		 "mmcblk%d%s", md->name_idx, subname ? subname : "");
-+		 "mmcblk%d%s", card->host->index, subname ? subname : "");
- 
- 	if (mmc_card_mmc(card))
- 		blk_queue_logical_block_size(md->queue.queue,
--- 
-1.7.0.4
+Acked-by: Will Newton <will.newton@imgtec.com>
