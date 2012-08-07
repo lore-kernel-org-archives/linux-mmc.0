@@ -1,17 +1,108 @@
-From: "Gabriel Phillip" <aix@ssjh.sk>
-Subject: Urgent and Confidential
-Date: Tue, 7 Aug 2012 08:50:10 +0200
-Message-ID: <20120807065030.M4820@ssjh.sk>
-Reply-To: internationaldsk@aol.co.uk
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCH] arm/dts: omap5: Add mmc controller nodes and board data
+Date: Tue, 7 Aug 2012 12:48:21 +0530
+Message-ID: <1344323901-20342-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset=iso-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.ssjh.sk ([87.197.33.18]:51518 "EHLO ssjh.sk"
+Received: from comal.ext.ti.com ([198.47.26.152]:41336 "EHLO comal.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751510Ab2HGHNZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Aug 2012 03:13:25 -0400
+	id S1750862Ab2HGHSo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 7 Aug 2012 03:18:44 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: arnd@arndb.de, tony@atomide.com, gregkh@linuxfoundation.org, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, rob.herring@calxeda.com
+Cc: linux-mmc@vger.kernel.org, balbi@ti.com, Balaji T K <balajitk@ti.com>
 
-Please contact me ASAP.
+Add OMAP MMC related device tree data for OMAP5.
+
+Signed-off-by: Balaji T K <balajitk@ti.com>
+---
+ arch/arm/boot/dts/omap5-evm.dts |   31 +++++++++++++++++++++++++++++++
+ arch/arm/boot/dts/omap5.dtsi    |   31 +++++++++++++++++++++++++++++++
+ 2 files changed, 62 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/boot/dts/omap5-evm.dts b/arch/arm/boot/dts/omap5-evm.dts
+index 200c39a..7bb0c9d 100644
+--- a/arch/arm/boot/dts/omap5-evm.dts
++++ b/arch/arm/boot/dts/omap5-evm.dts
+@@ -17,4 +17,35 @@
+ 		device_type = "memory";
+ 		reg = <0x80000000 0x40000000>; /* 1 GB */
+ 	};
++
++	vmmcsd_fixed: fixedregulator-mmcsd {
++		compatible = "regulator-fixed";
++		regulator-name = "vmmcsd_fixed";
++		regulator-min-microvolt = <3000000>;
++		regulator-max-microvolt = <3000000>;
++	};
++};
++
++&mmc1 {
++	vmmc-supply = <&vmmcsd_fixed>;
++	bus-width = <4>;
++};
++
++&mmc2 {
++	vmmc-supply = <&vmmcsd_fixed>;
++	bus-width = <8>;
++	ti,non-removable;
++};
++
++&mmc3 {
++	bus-width = <4>;
++	ti,non-removable;
++};
++
++&mmc4 {
++	status = "disabled";
++};
++
++&mmc5 {
++	status = "disabled";
+ };
+diff --git a/arch/arm/boot/dts/omap5.dtsi b/arch/arm/boot/dts/omap5.dtsi
+index 57e5270..881d60c 100644
+--- a/arch/arm/boot/dts/omap5.dtsi
++++ b/arch/arm/boot/dts/omap5.dtsi
+@@ -180,5 +180,36 @@
+ 			ti,hwmods = "uart6";
+ 			clock-frequency = <48000000>;
+ 		};
++
++		mmc1: mmc@4809c000 {
++			compatible = "ti,omap4-hsmmc";
++			ti,hwmods = "mmc1";
++			ti,dual-volt;
++			ti,needs-special-reset;
++		};
++
++		mmc2: mmc@480b4000 {
++			compatible = "ti,omap4-hsmmc";
++			ti,hwmods = "mmc2";
++			ti,needs-special-reset;
++		};
++
++		mmc3: mmc@480ad000 {
++			compatible = "ti,omap4-hsmmc";
++			ti,hwmods = "mmc3";
++			ti,needs-special-reset;
++		};
++
++		mmc4: mmc@480d1000 {
++			compatible = "ti,omap4-hsmmc";
++			ti,hwmods = "mmc4";
++			ti,needs-special-reset;
++		};
++
++		mmc5: mmc@480d5000 {
++			compatible = "ti,omap4-hsmmc";
++			ti,hwmods = "mmc5";
++			ti,needs-special-reset;
++		};
+ 	};
+ };
+-- 
+1.7.5.4
+
