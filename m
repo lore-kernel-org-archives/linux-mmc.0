@@ -1,108 +1,32 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH] arm/dts: omap5: Add mmc controller nodes and board data
-Date: Tue, 7 Aug 2012 12:48:21 +0530
-Message-ID: <1344323901-20342-1-git-send-email-balajitk@ti.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH] arm/dts: omap5: Add mmc controller nodes and board data
+Date: Tue, 7 Aug 2012 08:30:01 +0000
+Message-ID: <201208070830.01776.arnd@arndb.de>
+References: <1344323901-20342-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:41336 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750862Ab2HGHSo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Aug 2012 03:18:44 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <1344323901-20342-1-git-send-email-balajitk-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
+Cc: gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, balbi-l0cyMroinI0@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: arnd@arndb.de, tony@atomide.com, gregkh@linuxfoundation.org, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, rob.herring@calxeda.com
-Cc: linux-mmc@vger.kernel.org, balbi@ti.com, Balaji T K <balajitk@ti.com>
 
-Add OMAP MMC related device tree data for OMAP5.
+On Tuesday 07 August 2012, Balaji T K wrote:
+> 
+> Add OMAP MMC related device tree data for OMAP5.
+> 
+> Signed-off-by: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
+> ---
 
-Signed-off-by: Balaji T K <balajitk@ti.com>
----
- arch/arm/boot/dts/omap5-evm.dts |   31 +++++++++++++++++++++++++++++++
- arch/arm/boot/dts/omap5.dtsi    |   31 +++++++++++++++++++++++++++++++
- 2 files changed, 62 insertions(+), 0 deletions(-)
-
-diff --git a/arch/arm/boot/dts/omap5-evm.dts b/arch/arm/boot/dts/omap5-evm.dts
-index 200c39a..7bb0c9d 100644
---- a/arch/arm/boot/dts/omap5-evm.dts
-+++ b/arch/arm/boot/dts/omap5-evm.dts
-@@ -17,4 +17,35 @@
- 		device_type = "memory";
- 		reg = <0x80000000 0x40000000>; /* 1 GB */
- 	};
-+
-+	vmmcsd_fixed: fixedregulator-mmcsd {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vmmcsd_fixed";
-+		regulator-min-microvolt = <3000000>;
-+		regulator-max-microvolt = <3000000>;
-+	};
-+};
-+
-+&mmc1 {
-+	vmmc-supply = <&vmmcsd_fixed>;
-+	bus-width = <4>;
-+};
-+
-+&mmc2 {
-+	vmmc-supply = <&vmmcsd_fixed>;
-+	bus-width = <8>;
-+	ti,non-removable;
-+};
-+
-+&mmc3 {
-+	bus-width = <4>;
-+	ti,non-removable;
-+};
-+
-+&mmc4 {
-+	status = "disabled";
-+};
-+
-+&mmc5 {
-+	status = "disabled";
- };
-diff --git a/arch/arm/boot/dts/omap5.dtsi b/arch/arm/boot/dts/omap5.dtsi
-index 57e5270..881d60c 100644
---- a/arch/arm/boot/dts/omap5.dtsi
-+++ b/arch/arm/boot/dts/omap5.dtsi
-@@ -180,5 +180,36 @@
- 			ti,hwmods = "uart6";
- 			clock-frequency = <48000000>;
- 		};
-+
-+		mmc1: mmc@4809c000 {
-+			compatible = "ti,omap4-hsmmc";
-+			ti,hwmods = "mmc1";
-+			ti,dual-volt;
-+			ti,needs-special-reset;
-+		};
-+
-+		mmc2: mmc@480b4000 {
-+			compatible = "ti,omap4-hsmmc";
-+			ti,hwmods = "mmc2";
-+			ti,needs-special-reset;
-+		};
-+
-+		mmc3: mmc@480ad000 {
-+			compatible = "ti,omap4-hsmmc";
-+			ti,hwmods = "mmc3";
-+			ti,needs-special-reset;
-+		};
-+
-+		mmc4: mmc@480d1000 {
-+			compatible = "ti,omap4-hsmmc";
-+			ti,hwmods = "mmc4";
-+			ti,needs-special-reset;
-+		};
-+
-+		mmc5: mmc@480d5000 {
-+			compatible = "ti,omap4-hsmmc";
-+			ti,hwmods = "mmc5";
-+			ti,needs-special-reset;
-+		};
- 	};
- };
--- 
-1.7.5.4
-
+Acked-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
