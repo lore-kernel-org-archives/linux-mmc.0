@@ -1,43 +1,45 @@
-From: Bob Liu <lliubbo@gmail.com>
-Subject: Re: [PATCH] drivers: mmc: bfin_sdh: fix build error
-Date: Tue, 7 Aug 2012 10:10:29 +0800
-Message-ID: <CAA_GA1fbDZpKZ2hTfJ2+adR+yKqdCfRJLeBR+msdU1TbHTGppw@mail.gmail.com>
-References: <1343631782-24207-1-git-send-email-lliubbo@gmail.com>
-	<CAA_GA1c3w_6Oq7dR+0Exw-warJyL9dr2PKyT6nrkWrDfx=MCKQ@mail.gmail.com>
-	<87y5ls11bm.fsf@octavius.laptop.org>
+From: Sonic Zhang <sonic.adi@gmail.com>
+Subject: [PATCH 1/4] mmc: bfin_sdh: limit mmc DMA segment len to 1 for bf518.
+Date: Tue, 7 Aug 2012 11:10:12 +0800
+Message-ID: <1344309015-13248-1-git-send-email-sonic.adi@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:34015 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932323Ab2HGCKa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Aug 2012 22:10:30 -0400
-Received: by wibhm11 with SMTP id hm11so2307527wib.1
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Aug 2012 19:10:29 -0700 (PDT)
-In-Reply-To: <87y5ls11bm.fsf@octavius.laptop.org>
+Received: from co1ehsobe006.messaging.microsoft.com ([216.32.180.189]:41092
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932447Ab2HGDBI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Aug 2012 23:01:08 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: adrian.hunter@intel.com, ludovic.desroches@atmel.com, rmk+kernel@arm.linux.org.uk, g.liakhovetski@gmx.de, uclinux-dist-devel@blackfin.uclinux.org, Sonic Zhang <sonic.zhang@analog.com>, linux-mmc@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Bob Liu <liubbo@gmail.com>, uclinux-dist-devel@blackfin.uclinux.org, Sonic Zhang <sonic.zhang@analog.com>
 
-On Mon, Aug 6, 2012 at 11:34 PM, Chris Ball <cjb@laptop.org> wrote:
-> Hi Bob,
->
-> On Mon, Aug 06 2012, Bob Liu wrote:
->> Would you please take a look at this patch?
->> Since without this patch, regression test for blackfin will fail:
->> http://kisskb.ellerman.id.au/kisskb/matrix/
->
-> Thanks, pushed to mmc-next for 3.6 now.
->
+From: Sonic Zhang <sonic.zhang@analog.com>
 
-Thank you.
+bf518 RSI dma doesn't work in array mode.
 
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
+Signed-off-by: Sonic Zhang <sonic.zhang@analog.com>
+---
+ drivers/mmc/host/bfin_sdh.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
 
+diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
+index 0366617..fd25b0c 100644
+--- a/drivers/mmc/host/bfin_sdh.c
++++ b/drivers/mmc/host/bfin_sdh.c
+@@ -469,7 +469,11 @@ static int __devinit sdh_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	mmc->ops = &sdh_ops;
++#if defined(CONFIG_BF54x)
+ 	mmc->max_segs = 32;
++#elif defined(CONFIG_BF51x)
++	mmc->max_segs = 1;
++#endif
+ 	mmc->max_seg_size = 1 << 16;
+ 	mmc->max_blk_size = 1 << 11;
+ 	mmc->max_blk_count = 1 << 11;
 -- 
-Regards,
---Bob
+1.7.0.4
+
+
