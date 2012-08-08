@@ -1,55 +1,277 @@
-From: "Tanya Brokhman" <tlinder@codeaurora.org>
-Subject: RE: [RFC/PATCH 0/2] ROW scheduling Algorithm
-Date: Wed, 8 Aug 2012 13:37:22 +0300
-Message-ID: <004101cd7551$cd269130$6773b390$@codeaurora.org>
-References: <1344166241-18708-1-git-send-email-tlinder@codeaurora.org> <502214E8.7070603@samsung.com>
+From: Qiang Liu <qiang.liu@freescale.com>
+Subject: [PATCH RESEND 1/2] SD/MMC: add an interface to re-initialize bounce buffer
+Date: Wed, 8 Aug 2012 19:06:17 +0800
+Message-ID: <1344423978-2138-1-git-send-email-qiang.liu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <502214E8.7070603@samsung.com>
-Content-language: he
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>
-Cc: axboe@kernel.dk, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: leoli@freescale.com, Qiang Liu <qiang.liu@freescale.com>, Chris Ball <cjb@laptop.org>, Rob Landley <rob@landley.net>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Chung
+Add attribute bouncesz under sysfs.
+Provide a helper of dynamic adjustment of bounce buffer for SDMA mmc card at
+run-time (mounted or unmounted filesystem).
 
-> Hi
-> 
-> I tested with this patch on my board.
-> But i didn't get any performance benefit.
-> Which benchmark did you use?
+bouncesz should be integer multiple of 512, the value range is from 4K to 4M.
 
-As I already mentioned I used lmdd. The results I published were collected using the bellow command run in parallel:
-adb shell /data/lmdd if=internal of=/data/writefile bs=128k count=3000
-adb shell /data/lmdd if=/data/readfile of=internal bs=128k count=3000
+1. use variable instead of MMC_QUEUE_BOUNCESZ;
+2. Re-initialize bounce buffer accorinding to new bounce size at run-time;
 
-With lmdd we did see great improvement both in throughput and in read latency:
-CFQ:	     READ  20.81 MB/sec,    WRITE  15.23 MB/sec   Worst case READ latency 230 msec     Worst case write latency   9370   msec
-ROW:         READ  27.75 MB/sec      WRITE  15.34 MB/sec   Worst case READ latency   85 msec     Worst case write latency   12025 msec
-
-ROW can be configured to perform at ~34 MB/sec throughput in the above scenario but in this configuration worst case write latency increases to ~13 sec.
-
-> And sometime this scheduler didn't work well read/write operation.
-> (i didn't know exactly what problem.)
-
-This may be. We're still working on testing the scheduler and improving it. It's not yet totally "bug free". I've uploaded the code as RFC. 
-
-> 
-> The below is my environment:
-> Kernel Version: linux-3.4
-> Card: eMMC4.5 (50MHz DDR mode, 8-bit buswidth) Host controller : dw-
-> mmc (DesignWare MMC controller) Benchmark : IOzone
-> 
-
-My environment is similar except the host controller which is msm-sdcc. 
-Could you please give me the exact iozone command you used? I'll replay it on my setup.
-
-Thanks,
-Tanya Brokhman
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Rob Landley <rob@landley.net>
+Signed-off-by: Qiang Liu <qiang.liu@freescale.com>
 ---
-Sent by an consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+
+Hi all,
+
+I resend the patch because bounce size is a key factor of performance for some
+SDMA card, larger bounce size will improve throughput under condition of mass
+data transfer. So I add this helper and export the value to user space.
+
+ drivers/mmc/card/block.c |   48 +++++++++++++++++++++
+ drivers/mmc/card/queue.c |  102 +++++++++++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/card/queue.h |    6 +++
+ 3 files changed, 155 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index f1c84de..3ea4ac3 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -58,6 +58,9 @@ MODULE_ALIAS("mmc:block");
+ #define INAND_CMD38_ARG_SECTRIM1 0x81
+ #define INAND_CMD38_ARG_SECTRIM2 0x88
+
++#define MMC_MIN_QUEUE_BOUNCESZ 4096
++#define MMC_MAX_QUEUE_BOUNCESZ 4194304
++
+ static DEFINE_MUTEX(block_mutex);
+
+ /*
+@@ -107,6 +110,7 @@ struct mmc_blk_data {
+ 	unsigned int	part_curr;
+ 	struct device_attribute force_ro;
+ 	struct device_attribute power_ro_lock;
++	struct device_attribute bouncesz;
+ 	int	area_type;
+ };
+
+@@ -263,6 +267,33 @@ out:
+ 	return ret;
+ }
+
++#ifdef CONFIG_MMC_BLOCK_BOUNCE
++static ssize_t mmc_bouncesz_show(struct device *dev,
++		struct device_attribute *attr, char *buf)
++{
++	 return sprintf(buf, "%u\n", mmc_queue_bouncesz);
++}
++
++static ssize_t mmc_bouncesz_store(struct device *dev,
++		struct device_attribute *attr,
++		const char *buf, size_t count)
++{
++	unsigned int bouncesz;
++	struct mmc_blk_data *md;
++
++	if ((sscanf(buf, "%d", &bouncesz) != 1) ||
++			(bouncesz < MMC_MIN_QUEUE_BOUNCESZ) ||
++			(bouncesz > MMC_MAX_QUEUE_BOUNCESZ) ||
++			(bouncesz % 512 != 0))
++		return -EINVAL;
++
++	md = mmc_blk_get(dev_to_disk(dev));
++	mmc_reinit_bounce_queue(&md->queue, md->queue.card, bouncesz);
++	mmc_blk_put(md);
++	return mmc_queue_bouncesz;
++}
++#endif
++
+ static int mmc_blk_open(struct block_device *bdev, fmode_t mode)
+ {
+ 	struct mmc_blk_data *md = mmc_blk_get(bdev->bd_disk);
+@@ -1648,6 +1679,8 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+ 			del_gendisk(md->disk);
+ 		}
+
++		device_remove_file(disk_to_dev(md->disk), &md->bouncesz);
++
+ 		/* Then flush out any already in there */
+ 		mmc_cleanup_queue(&md->queue);
+ 		mmc_blk_put(md);
+@@ -1683,6 +1716,17 @@ static int mmc_add_disk(struct mmc_blk_data *md)
+ 	if (ret)
+ 		goto force_ro_fail;
+
++#ifdef CONFIG_MMC_BLOCK_BOUNCE
++	md->bouncesz.show = mmc_bouncesz_show;
++	md->bouncesz.store = mmc_bouncesz_store;
++	sysfs_attr_init(&md->bouncesz.attr);
++	md->bouncesz.attr.name = "bouncesz";
++	md->bouncesz.attr.mode = S_IRUGO | S_IWUSR;
++	ret = device_create_file(disk_to_dev(md->disk), &md->bouncesz);
++	if (ret)
++		goto bouncesz_fail;
++#endif
++
+ 	if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
+ 	     card->ext_csd.boot_ro_lockable) {
+ 		umode_t mode;
+@@ -1707,6 +1751,10 @@ static int mmc_add_disk(struct mmc_blk_data *md)
+
+ power_ro_lock_fail:
+ 	device_remove_file(disk_to_dev(md->disk), &md->force_ro);
++#ifdef CONFIG_MMC_BLOCK_BOUNCE
++bouncesz_fail:
++	device_remove_file(disk_to_dev(md->disk), &md->bouncesz);
++#endif
+ force_ro_fail:
+ 	del_gendisk(md->disk);
+
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index e360a97..b9777a5 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -22,6 +22,10 @@
+
+ #define MMC_QUEUE_BOUNCESZ	65536
+
++#ifdef CONFIG_MMC_BLOCK_BOUNCE
++unsigned mmc_queue_bouncesz = MMC_QUEUE_BOUNCESZ;
++#endif
++
+ #define MMC_QUEUE_SUSPENDED	(1 << 0)
+
+ /*
+@@ -188,7 +192,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 	if (host->max_segs == 1) {
+ 		unsigned int bouncesz;
+
+-		bouncesz = MMC_QUEUE_BOUNCESZ;
++		bouncesz = mmc_queue_bouncesz;
+
+ 		if (bouncesz > host->max_req_size)
+ 			bouncesz = host->max_req_size;
+@@ -332,6 +336,102 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
+ EXPORT_SYMBOL(mmc_cleanup_queue);
+
+ /**
++ * mmc_reinit_bounce_queue - re-initialise a bounce buffer.
++ * @mq: mmc queue
++ * @card: mmc card to attach this queue
++ * @bouncesz: the bounce size that need re-initializing
++ *
++ * Initialise a MMC card request queue.
++ */
++#ifdef CONFIG_MMC_BLOCK_BOUNCE
++int mmc_reinit_bounce_queue(struct mmc_queue *mq, struct mmc_card *card,
++		   unsigned int bouncesz)
++{
++	struct mmc_host *host = card->host;
++	struct mmc_queue_req *mqrq_cur = &mq->mqrq[0];
++	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
++	int ret;
++	struct scatterlist *curr_bounce_sg, *prev_bounce_sg;
++	char *curr_bounce_buf, *prev_bounce_buf;
++
++	mmc_claim_host(card->host);
++
++	bouncesz = min(bouncesz, host->max_req_size);
++	bouncesz = min(bouncesz, host->max_seg_size);
++	bouncesz = min(bouncesz, host->max_blk_count * 512);
++
++	/* store current using addr of bounce_buf and bounce_sg */
++	curr_bounce_sg = mqrq_cur->bounce_sg;
++	prev_bounce_sg = mqrq_prev->bounce_sg;
++	curr_bounce_buf = mqrq_cur->bounce_buf;
++	prev_bounce_buf = mqrq_prev->bounce_buf;
++
++	if (host->max_segs != 1)
++		goto restore_queue;
++
++	/* realloc bounce queue use given bounce size */
++	mqrq_cur->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
++	if (!mqrq_cur->bounce_buf) {
++		printk(KERN_WARNING "%s: unable to "
++			"allocate bounce cur buffer\n",
++			mmc_card_name(card));
++		ret = -ENOMEM;
++		goto restore_queue;
++	}
++
++	mqrq_prev->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
++	if (!mqrq_prev->bounce_buf) {
++		printk(KERN_WARNING "%s: unable to "
++			"allocate bounce prev buffer\n",
++			mmc_card_name(card));
++		kfree(mqrq_cur->bounce_buf);
++		mqrq_cur->bounce_buf = NULL;
++		ret = -ENOMEM;
++		goto restore_queue;
++	}
++
++	mqrq_cur->bounce_sg =
++		mmc_alloc_sg(bouncesz / 512, &ret);
++	if (ret)
++		goto cleanup_queue;
++
++	mqrq_prev->bounce_sg =
++		mmc_alloc_sg(bouncesz / 512, &ret);
++	if (ret)
++		goto cleanup_queue;
++
++	blk_queue_max_hw_sectors(mq->queue, bouncesz / 512);
++	blk_queue_max_segments(mq->queue, bouncesz / 512);
++	blk_queue_max_segment_size(mq->queue, bouncesz);
++	mmc_queue_bouncesz = bouncesz;
++
++	kfree(curr_bounce_sg);
++	kfree(prev_bounce_sg);
++	kfree(curr_bounce_buf);
++	kfree(prev_bounce_buf);
++
++	mmc_release_host(card->host);
++	return 0;
++
++cleanup_queue:
++	/* cleanup bounce queue first */
++	kfree(mqrq_cur->sg);
++	kfree(mqrq_cur->bounce_buf);
++	kfree(mqrq_prev->sg);
++	kfree(mqrq_prev->bounce_buf);
++
++restore_queue:
++	mqrq_cur->bounce_buf = curr_bounce_buf;
++	mqrq_prev->bounce_buf = prev_bounce_buf;
++	mqrq_cur->bounce_sg = curr_bounce_sg;
++	mqrq_prev->bounce_sg = prev_bounce_sg;
++
++	mmc_release_host(card->host);
++	return ret;
++}
++#endif
++
++/**
+  * mmc_queue_suspend - suspend a MMC request queue
+  * @mq: MMC queue to suspend
+  *
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index d2a1eb4..c1dee6d 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -46,4 +46,10 @@ extern unsigned int mmc_queue_map_sg(struct mmc_queue *,
+ extern void mmc_queue_bounce_pre(struct mmc_queue_req *);
+ extern void mmc_queue_bounce_post(struct mmc_queue_req *);
+
++#ifdef CONFIG_MMC_BLOCK_BOUNCE
++extern int mmc_reinit_bounce_queue(struct mmc_queue *, struct mmc_card *,
++		unsigned int);
++extern unsigned mmc_queue_bouncesz;
++#endif
++
+ #endif
+--
+1.7.5.1
+
+
