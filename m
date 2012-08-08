@@ -1,137 +1,35 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v4] mmc: dw_mmc: Disable low power mode if SDIO interrupts are used
-Date: Tue, 07 Aug 2012 23:40:59 -0400
-Message-ID: <87obmmvyno.fsf@octavius.laptop.org>
-References: <CAD=FV=V0Z=f+DNZKnaX9cJqS3MTmPdF8G3wmbYJYW34bUZqoXg@mail.gmail.com>
-	<1343230397-10500-1-git-send-email-dianders@chromium.org>
-	<000501cd6ae3$33beb8b0$9b3c2a10$%jun@samsung.com>
+Subject: Re: [PATCH 1/4] mmc: bfin_sdh: limit mmc DMA segment len to 1 for bf518.
+Date: Tue, 07 Aug 2012 23:42:51 -0400
+Message-ID: <87k3xavykk.fsf@octavius.laptop.org>
+References: <1344309015-13248-1-git-send-email-sonic.adi@gmail.com>
+	<CAJxxZ0M9oReELfJ_ncu=eHd=Qy0Bpx=06Jv3MzvOPbRTh_h-jg@mail.gmail.com>
+	<87zk66vz45.fsf@octavius.laptop.org>
+	<DB904C5425BA6F4E8424B3B51A1414D1714D286429@NWD2CMBX1.ad.analog.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:47032 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:47043 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754972Ab2HHDlG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Aug 2012 23:41:06 -0400
-In-Reply-To: <000501cd6ae3$33beb8b0$9b3c2a10$%jun@samsung.com> (Seungwon
-	Jeon's message of "Thu, 26 Jul 2012 13:00:31 +0900")
+	id S1756339Ab2HHDm4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 7 Aug 2012 23:42:56 -0400
+In-Reply-To: <DB904C5425BA6F4E8424B3B51A1414D1714D286429@NWD2CMBX1.ad.analog.com>
+	(Sonic Zhang's message of "Tue, 7 Aug 2012 23:39:49 -0400")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Doug Anderson' <dianders@chromium.org>, linux-mmc@vger.kernel.org, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-kernel@vger.kernel.org, 'Grant Grundler' <grundler@chromium.org>, 'Olof Johansson' <olofj@chromium.org>, shashidharh@vayavyalabs.com, ki0351.kim@samsung.com
+To: "Zhang, Sonic" <Sonic.Zhang@analog.com>
+Cc: Sonic Zhang <sonic.adi@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Bob Liu <liubbo@gmail.com>, "uclinux-dist-devel@blackfin.uclinux.org" <uclinux-dist-devel@blackfin.uclinux.org>
 
 Hi,
 
-On Thu, Jul 26 2012, Seungwon Jeon wrote:
-> July 26, 2012, Doug Anderson <dianders@chromium.org> wrote:
->> The documentation for the dw_mmc part says that the low power
->> mode should normally only be set for MMC and SD memory and should
->> be turned off for SDIO cards that need interrupts detected.
->> 
->> The best place I could find to do this is when the SDIO interrupt
->> was first enabled.  I rely on the fact that dw_mci_setup_bus()
->> will be called when it's time to reenable.
->> 
->> Signed-off-by: Doug Anderson <dianders@chromium.org>
->> ---
->> Changes in v4:
->> - Don't regenerate slot variable when we already had it.
->> 
->> Changes in v3:
->> - Commenting fixes requested by Seungwoon Jeon and Jaehoon Chung.
->> - Only pass 'slot' to the low power disable function since whole mmc
->>   structure wasn't needed.
->> 
->> Changes in v2:
->> - Commenting fixes requested by Grant Grundler.
->> - Be extra certain that we don't re-turn on the low power mode in
->>   CLKENA in dw_mci_setup_bus() if SDIO interrupts are enabled.
->>   There are no known instances of this happening but it's good to be safe.
->> 
->>  drivers/mmc/host/dw_mmc.c |   41 ++++++++++++++++++++++++++++++++++++++---
->>  1 files changed, 38 insertions(+), 3 deletions(-)
->> 
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 72dc3cd..882748b 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -627,6 +627,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
->>  {
->>  	struct dw_mci *host = slot->host;
->>  	u32 div;
->> +	u32 clk_en_a;
->> 
->>  	if (slot->clock != host->current_speed) {
->>  		div = host->bus_hz / slot->clock;
->> @@ -659,9 +660,11 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
->>  		mci_send_cmd(slot,
->>  			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
->> 
->> -		/* enable clock */
->> -		mci_writel(host, CLKENA, ((SDMMC_CLKEN_ENABLE |
->> -			   SDMMC_CLKEN_LOW_PWR) << slot->id));
->> +		/* enable clock; only low power if no SDIO */
->> +		clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
->> +		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->id)))
->> +			clk_en_a |= SDMMC_CLKEN_LOW_PWR << slot->id;
->> +		mci_writel(host, CLKENA, clk_en_a);
->> 
->>  		/* inform CIU */
->>  		mci_send_cmd(slot,
->> @@ -862,6 +865,30 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
->>  	return present;
->>  }
->> 
->> +/*
->> + * Disable lower power mode.
->> + *
->> + * Low power mode will stop the card clock when idle.  According to the
->> + * description of the CLKENA register we should disable low power mode
->> + * for SDIO cards if we need SDIO interrupts to work.
->> + *
->> + * This function is fast if low power mode is already disabled.
->> + */
->> +static void dw_mci_disable_low_power(struct dw_mci_slot *slot)
->> +{
->> +	struct dw_mci *host = slot->host;
->> +	u32 clk_en_a;
->> +	const u32 clken_low_pwr = SDMMC_CLKEN_LOW_PWR << slot->id;
->> +
->> +	clk_en_a = mci_readl(host, CLKENA);
->> +
->> +	if (clk_en_a & clken_low_pwr) {
->> +		mci_writel(host, CLKENA, clk_en_a & ~clken_low_pwr);
->> +		mci_send_cmd(slot, SDMMC_CMD_UPD_CLK |
->> +			     SDMMC_CMD_PRV_DAT_WAIT, 0);
->> +	}
->> +}
->> +
->>  static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
->>  {
->>  	struct dw_mci_slot *slot = mmc_priv(mmc);
->> @@ -871,6 +898,14 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
->>  	/* Enable/disable Slot Specific SDIO interrupt */
->>  	int_mask = mci_readl(host, INTMASK);
->>  	if (enb) {
->> +		/*
->> +		 * Turn off low power mode if it was enabled.  This is a bit of
->> +		 * a heavy operation and we disable / enable IRQs a lot, so
->> +		 * we'll leave low power mode disabled and it will get
->> +		 * re-enabled again in dw_mci_setup_bus().
->> +		 */
->> +		dw_mci_disable_low_power(slot);
->> +
->>  		mci_writel(host, INTMASK,
->>  			   (int_mask | SDMMC_INT_SDIO(slot->id)));
->>  	} else {
+On Tue, Aug 07 2012, Zhang, Sonic wrote:
+> Hi Chris,
 >
-> Basically, disabling low power mode doesn't affect origin working.
-> This patch will guarantees to supply the clock while sdio interrupt is activated.
-> Looks good to me.
-> Chris, feel free to add my ack.
->
-> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+> Cliff Cai was not working for Analog Devices since 2011. I take over
+> this SD driver now. I will revise the maintainer for bfin_sdh.c soon.
 
-Thanks, pushed to mmc-next for 3.7.
+Thanks.  Please can you send me that patch now?  I'll merge your other
+this patchset at the same time.
 
 - Chris.
 -- 
