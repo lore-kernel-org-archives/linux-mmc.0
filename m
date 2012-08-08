@@ -1,40 +1,57 @@
-From: Sonic Zhang <sonic.adi@gmail.com>
-Subject: [PATCH] mmc: bfin_sdh: Update blackfin sd driver mainainter's email in MAINTAINERS.
-Date: Wed, 8 Aug 2012 12:16:08 +0800
-Message-ID: <1344399368-1243-1-git-send-email-sonic.adi@gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] MMC/omap_hsmmc: handle failure of regulator_get better.
+Date: Wed, 08 Aug 2012 00:07:15 -0400
+Message-ID: <874noeuivg.fsf@octavius.laptop.org>
+References: <20120730101245.7dbe72b0@notabene.brown>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:22249
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750749Ab2HHEGq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Aug 2012 00:06:46 -0400
+Received: from void.printf.net ([89.145.121.20]:44986 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750749Ab2HHEHW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 8 Aug 2012 00:07:22 -0400
+In-Reply-To: <20120730101245.7dbe72b0@notabene.brown> (NeilBrown's message of
+	"Mon, 30 Jul 2012 10:12:45 +1000")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Bob Liu <liubbo@gmail.com>, uclinux-dist-devel@blackfin.uclinux.org, Sonic Zhang <sonic.zhang@analog.com>
+To: NeilBrown <neilb@suse.de>
+Cc: Venkatraman S <svenkatr@ti.com>, Balaji T K <balajitk@ti.com>, Rajendra Nayak <rnayak@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-From: Sonic Zhang <sonic.zhang@analog.com>
+Hi,
 
-Signed-off-by: Sonic Zhang <sonic.zhang@analog.com>
----
- MAINTAINERS |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+On Sun, Jul 29 2012, NeilBrown wrote:
+> 1/ if regulator_get fails, return an error.  This is important
+>    if it failed with EPROBE_DEFER, as the probe needs to be
+>    deferred.
+>
+> 2/ Don't set .set_power until the regulator has been found, or
+>    the deferred probe will not bother calling omap_hsmmc_reg_get().
+>
+> Signed-off-by: NeilBrown <neilb@suse.de>
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 389a3ee..f052c29 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -299,12 +299,12 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+>  	struct regulator *reg;
+>  	int ocr_value = 0;
+>  
+> -	mmc_slot(host).set_power = omap_hsmmc_set_power;
+> -
+>  	reg = regulator_get(host->dev, "vmmc");
+>  	if (IS_ERR(reg)) {
+>  		dev_dbg(host->dev, "vmmc regulator missing\n");
+> +		return PTR_ERR(reg);
+>  	} else {
+> +		mmc_slot(host).set_power = omap_hsmmc_set_power;
+>  		host->vcc = reg;
+>  		ocr_value = mmc_regulator_get_ocrmask(reg);
+>  		if (!mmc_slot(host).ocr_mask) {
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 94b823f..72c2681 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -1513,7 +1513,7 @@ S:	Supported
- F:	drivers/rtc/rtc-bfin.c
- 
- BLACKFIN SDH DRIVER
--M:	Cliff Cai <cliff.cai@analog.com>
-+M:	Sonic Zhang <sonic.zhang@analog.com>
- L:	uclinux-dist-devel@blackfin.uclinux.org
- W:	http://blackfin.uclinux.org
- S:	Supported
+Thanks, pushed to mmc-next for 3.7.
+
+- Chris.
 -- 
-1.7.0.4
-
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
