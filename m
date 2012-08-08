@@ -1,77 +1,50 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: atmel-mci: not busy flag has also to be used for read operations
-Date: Tue, 07 Aug 2012 23:05:33 -0400
-Message-ID: <87lihqxev6.fsf@octavius.laptop.org>
-References: <1343122924-7799-1-git-send-email-ludovic.desroches@atmel.com>
+Subject: Re: [PATCH RESEND v5 0/4] atmel-mci device tree support
+Date: Tue, 07 Aug 2012 23:14:23 -0400
+Message-ID: <87hasexegg.fsf@octavius.laptop.org>
+References: <1343136606-8874-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:51434 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:36502 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751970Ab2HHDFn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Aug 2012 23:05:43 -0400
-In-Reply-To: <1343122924-7799-1-git-send-email-ludovic.desroches@atmel.com>
-	(ludovic desroches's message of "Tue, 24 Jul 2012 11:42:04 +0200")
+	id S1755426Ab2HHDO2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 7 Aug 2012 23:14:28 -0400
+In-Reply-To: <1343136606-8874-1-git-send-email-ludovic.desroches@atmel.com>
+	(ludovic desroches's message of "Tue, 24 Jul 2012 15:30:02 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ludovic.desroches@atmel.com
-Cc: linux-mmc@vger.kernel.org, nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, linux-arm-kernel@lists.infradead.org
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nicolas.ferre@atmel.com, plagnioj@jcrosoft.com
 
 Hi,
 
 On Tue, Jul 24 2012, ludovic.desroches@atmel.com wrote:
 > From: Ludovic Desroches <ludovic.desroches@atmel.com>
 >
-> Even if the datasheet says that the not busy flag has to be used only for
-> write operations, it's false excepted for version lesser than v2xx.
-> Not waiting the not busy flag for read operations can cause the controller to
-> hang-up during the initialization of some SD cards.
->
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> Cc: stable@vger.kernel.org
->
->
 > Hello,
 >
-> This is a fix for 3.5 and later.
->
-> Due to the big changes into atmel-mci driver to support all atmel mci versions,
-> a bug was introduced.
-> With some SD cards (mainly micro) when using DMA, the controller hangs-up after
-> the first CMD6 command because the next command is sent too early.
->
-> Regards
->
-> Ludovic
->
->
-> ---
->  drivers/mmc/host/atmel-mci.c |    6 +++++-
->  1 files changed, 5 insertions(+), 1 deletions(-)
+> I resend this set of patches because patches 2, 3 and 4 were acked by
+> Jean-Christophe. Patch 1 was also acked by Jean-Christophe excepted for
+> cd-inverted property since it was redundant with gpio bindings.
 
-Thanks.  I've applied this for mmc-next now, but please put your patch
-commentary *underneath* the "---" lines, so that it doesn't end up in
-the git history itself.  I've rewritten the commit message to be:
+In future, it's helpful for me if you can add the Acked-by lines you
+receive into the patches when you resend them.  Thanks!
 
+> I thought we were agree to go ahead since it was a common binding already
+> documented and it will concern all drivers.
 
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Agreed.  It's a documented core MMC binding, it's fine to use it.
 
-Even if the datasheet says that the not busy flag has to be used only
-for write operations, it's false except for version lesser than v2xx.
+> Chris are you agree to take patch 1/4? Others patches may go to at91 tree,
+> isn't it?
 
-Not waiting on the not busy flag for read operations can cause the
-controller to hang-up during the initialization of some SD cards
-with DMA after the first CMD6 -- the next command is sent too early.
+Yes, let's do that.  I've applied patch 1/4 to mmc-next for 3.7, and you
+can send the others via the at91 tree with the ACK that Arnd gave.
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-Cc: stable <stable@vger.kernel.org> [3.5, 3.6]
-Signed-off-by: Chris Ball <cjb@laptop.org>
----
-<patch commentary can go here>
+Thanks,
 
- drivers/mmc/host/atmel-mci.c | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
-
+- Chris.
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
