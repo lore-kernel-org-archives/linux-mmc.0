@@ -1,58 +1,108 @@
-From: Dirk Behme <dirk.behme@de.bosch.com>
-Subject: Re: [PATCH 1/2] mmc: block: mmcblkN: use slot index instead of dynamic
- name index
-Date: Wed, 8 Aug 2012 08:12:22 +0200
-Message-ID: <50220346.4030606@de.bosch.com>
-References: <1344237900-14815-1-git-send-email-dirk.behme@de.bosch.com> <8739402g1m.fsf@octavius.laptop.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RFC/PATCH 0/2] ROW scheduling Algorithm
+Date: Wed, 08 Aug 2012 16:27:36 +0900
+Message-ID: <502214E8.7070603@samsung.com>
+References: <1344166241-18708-1-git-send-email-tlinder@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp2-v.fe.bosch.de ([139.15.237.6]:37522 "EHLO
-	smtp2-v.fe.bosch.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756532Ab2HHGPI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Aug 2012 02:15:08 -0400
-In-Reply-To: <8739402g1m.fsf@octavius.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-reply-to: <1344166241-18708-1-git-send-email-tlinder@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Tatyana Brokhman <tlinder@codeaurora.org>
+Cc: axboe@kernel.dk, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linaro-dev@lists.linaro.org" <linaro-dev@lists.linaro.org>, "linux-embedded@vger.kernel.org" <linux-embedded@vger.kernel.org>, Jassi Brar <jaswinder.singh@linaro.org>
 
-Hi Chris,
+Hi
 
-On 06.08.2012 17:31, Chris Ball wrote:
-> Hi,
-> 
-> On Mon, Aug 06 2012, Dirk Behme wrote:
->> On embedded devices, often there is a combination of removable mmc
->> devices (e.g. MMC/SD cards) and hard wired ones (e.g. eMMC).
->> Depending on the hardware configuration, the 'mmcblkN' node might
->> change if the removable device is available or not at boot time.
->>
->> E.g. if the removable device is attached at boot time, it might
->> become mmxblk0. And the hard wired one mmcblk1. But if the removable
->> device isn't there at boot time, the hard wired one will become
->> mmcblk0. This makes it somehow difficult to hard code the root device
->> to the non-removable device and boot fast.
->>
->> This change does simply associate 'N' of 'mmcblkN' with the slot index
->> instead of the dynamic name index. The slot index is always the same,
->> ensuring that the non-removable mmc device is associated always
->> with the same mmcblkN. Independent of the availability of the removable
->> one.
-> 
-> I like this change in principle,
+I tested with this patch on my board.
+But i didn't get any performance benefit.
+Which benchmark did you use?
+And sometime this scheduler didn't work well read/write operation.
+(i didn't know exactly what problem.)
 
-Thanks :)
+The below is my environment:
+Kernel Version: linux-3.4
+Card: eMMC4.5 (50MHz DDR mode, 8-bit buswidth)
+Host controller : dw-mmc (DesignWare MMC controller)
+Benchmark : IOzone
 
-> but doesn't it break boot for everyone
-> currently using e.g. root=/dev/mmcblk0p1 on slot index 2?  That doesn't
-> sound like an acceptable regression.
+*CFQ Scheduler
+Read : 35MB
+Write : 17MB
 
-I'm not really an expert of the code in block.c. Could you imagine a 
-change which has the same result we'd like to get with the proposed 
-patch but doesn't have the regression you mention?
+*ROW Scheduler
+Read : 28MB
+Write : 17MB
 
-Many thanks and best regards
+How do you think about this result?
 
-Dirk
+Best Regards,
+Jaehoon Chung
+
+On 08/05/2012 08:30 PM, Tatyana Brokhman wrote:
+> The ROW scheduling algorithm will be used in mobile devices as defaul=
+t
+> block layer IO scheduling algorithm. ROW stands for "READ Over WRITE"
+> which is the main requests dispatch policy of this algorithm.
+>=20
+> The ROW IO scheduler was developed with the mobile devices needs in
+> mind. In mobile devices we favor user experience upon everything else=
+,
+> thus we want to give READ IO requests as much priority as possible.
+> In mobile devices we won=E2=80=99t have AS much parallel threads as o=
+n desktops.
+> Usually it=E2=80=99s a single thread or at most 2 simultaneous workin=
+g threads
+> for read & write. Favoring READ requests over WRITEs decreases the RE=
+AD
+> latency greatly.
+>=20
+> The main idea of the ROW scheduling policy is:
+> If there are READ requests in pipe - dispatch them but don't starve
+> the WRITE requests too much.
+>=20
+> Bellow you=E2=80=99ll find a small comparison of ROW to existing sche=
+dulers.
+> The test that was run for these measurements is parallel lmdd read an=
+d write.
+> The tests were performed on:
+> kernel version: 3.4
+> Underline device driver: mmc
+> Host controller: msm-sdcc
+> Card:standard emmc NAND flash
+>=20
+> ---------------------------------------------------------------------=
+-----
+>    Algorithm   |   Throughput [mb/sec]   |   Worst case Latency [msec=
+]   |
+>                |     READ    |   WRITE   |     READ      |     WRITE =
+    |
+> ---------------------------------------------------------------------=
+-----
+> Noop           |    12.12    |   25.18   |     4407      |      4804 =
+    |
+> Deadline       |    12.02    |   24.6    |     705       |      5130 =
+    |=20
+> CFQ	       |    20.81    |   15.23   |     230       |      9370     =
+|
+> ROW	       |    27.75    |   15.34   |      85       |     12025     =
+|
+> ---------------------------------------------------------------------=
+----|
+>=20
+>=20
+> Tatyana Brokhman (2):
+>   block: Expose kblock_schedule_delayed_work()
+>   block: Adding ROW scheduling algorithm
+>=20
+>  Documentation/block/row-iosched.txt |  117 ++++++
+>  block/Kconfig.iosched               |   22 ++
+>  block/Makefile                      |    1 +
+>  block/row-iosched.c                 |  675 +++++++++++++++++++++++++=
+++++++++++
+>  include/linux/blkdev.h              |    2 +
+>  5 files changed, 817 insertions(+), 0 deletions(-)
+>  create mode 100644 Documentation/block/row-iosched.txt
+>  create mode 100644 block/row-iosched.c
+>=20
