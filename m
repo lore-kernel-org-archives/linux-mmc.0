@@ -1,48 +1,37 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH RESEND v5 0/4] atmel-mci device tree support
-Date: Tue, 07 Aug 2012 23:14:23 -0400
-Message-ID: <87hasexegg.fsf@octavius.laptop.org>
-References: <1343136606-8874-1-git-send-email-ludovic.desroches@atmel.com>
+Subject: Re: [PATCH 1/3] mmc: dw_mmc: amend using error interrupt status
+Date: Tue, 07 Aug 2012 23:17:32 -0400
+Message-ID: <87d332xeb7.fsf@octavius.laptop.org>
+References: <006301cd6f7c$db537500$91fa5f00$%jun@samsung.com>
+	<CAGxe1ZH=NZ5ZC3SVjaxwoXa_5dZEQzCAzYxK40Sy2rYr4dCpBA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36502 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:56699 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755426Ab2HHDO2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Aug 2012 23:14:28 -0400
-In-Reply-To: <1343136606-8874-1-git-send-email-ludovic.desroches@atmel.com>
-	(ludovic desroches's message of "Tue, 24 Jul 2012 15:30:02 +0200")
+	id S1751728Ab2HHDRi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 7 Aug 2012 23:17:38 -0400
+In-Reply-To: <CAGxe1ZH=NZ5ZC3SVjaxwoXa_5dZEQzCAzYxK40Sy2rYr4dCpBA@mail.gmail.com>
+	(Girish K. S.'s message of "Wed, 1 Aug 2012 09:57:28 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ludovic.desroches@atmel.com
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nicolas.ferre@atmel.com, plagnioj@jcrosoft.com
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
 Hi,
 
-On Tue, Jul 24 2012, ludovic.desroches@atmel.com wrote:
-> From: Ludovic Desroches <ludovic.desroches@atmel.com>
->
-> Hello,
->
-> I resend this set of patches because patches 2, 3 and 4 were acked by
-> Jean-Christophe. Patch 1 was also acked by Jean-Christophe excepted for
-> cd-inverted property since it was redundant with gpio bindings.
+On Wed, Aug 01 2012, Girish K S wrote:
+> On 1 August 2012 06:00, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> RINTSTS status includes masked interrupts as well as unmasked.
+>> data_status and cmd_status are set by value of RINTSTS in interrupt handler
+>> and tasklet finally uses it to decide whether error is happened or not.
+>> In addition, MINTSTS status is used for setting data_status in PIO.
+>> Masked error interrupt will not be handled and that status can be considered
+>> non-error case.
+>>
+>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 
-In future, it's helpful for me if you can add the Acked-by lines you
-receive into the patches when you resend them.  Thanks!
-
-> I thought we were agree to go ahead since it was a common binding already
-> documented and it will concern all drivers.
-
-Agreed.  It's a documented core MMC binding, it's fine to use it.
-
-> Chris are you agree to take patch 1/4? Others patches may go to at91 tree,
-> isn't it?
-
-Yes, let's do that.  I've applied patch 1/4 to mmc-next for 3.7, and you
-can send the others via the at91 tree with the ACK that Arnd gave.
-
-Thanks,
+Thanks, pushed to mmc-next for 3.7.
 
 - Chris.
 -- 
