@@ -1,65 +1,39 @@
-From: Sonic Zhang <sonic.adi@gmail.com>
-Subject: Re: [PATCH 1/4] mmc: bfin_sdh: limit mmc DMA segment len to 1 for bf518.
-Date: Wed, 8 Aug 2012 11:23:09 +0800
-Message-ID: <CAJxxZ0M9oReELfJ_ncu=eHd=Qy0Bpx=06Jv3MzvOPbRTh_h-jg@mail.gmail.com>
-References: <1344309015-13248-1-git-send-email-sonic.adi@gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 3/3] mmc: dw_mmc: fix error handling in PIO mode
+Date: Tue, 07 Aug 2012 23:21:17 -0400
+Message-ID: <874noexe4y.fsf@octavius.laptop.org>
+References: <006501cd6f7c$e4ca6670$ae5f3350$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:34981 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757091Ab2HHDXK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Aug 2012 23:23:10 -0400
-Received: by eeil10 with SMTP id l10so67639eei.19
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Aug 2012 20:23:09 -0700 (PDT)
-In-Reply-To: <1344309015-13248-1-git-send-email-sonic.adi@gmail.com>
+Received: from void.printf.net ([89.145.121.20]:54278 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757323Ab2HHDVV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 7 Aug 2012 23:21:21 -0400
+In-Reply-To: <006501cd6f7c$e4ca6670$ae5f3350$%jun@samsung.com> (Seungwon
+	Jeon's message of "Wed, 01 Aug 2012 09:30:46 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Bob Liu <liubbo@gmail.com>, uclinux-dist-devel@blackfin.uclinux.org, Sonic Zhang <sonic.zhang@analog.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>
 
-Hi Chris,
+Hi,
 
-Could you review this series of patches for Blackfin on-chip SD
-controller? The head file and new BF60x machine code have been merged
-upstream. These patches are necessary to get SD driver built on BF60x.
+On Tue, Jul 31 2012, Seungwon Jeon wrote:
+> Data transfer will be continued until all the bytes are transmitted,
+> even if data crc error occurs during a multiple-block data transfer.
+> This means RXDR/TXDR interrupts will occurs until data transfer is
+> terminated. Early setting of host->sg to NULL prevents going into
+> xxx_data_pio functions, hence permanent unhandled RXDR/TXDR interrupts
+> occurs. And checking error interrupt status in the xxx_data_pio functions
+> is no need because dw_mci_interrupt does do the same. This patch also
+> removes it.
+>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 
-Thanks
+Thanks, pushed to mmc-next for 3.7.
 
-Sonic Zhang
-
-
-On Tue, Aug 7, 2012 at 11:10 AM, Sonic Zhang <sonic.adi@gmail.com> wrote:
-> From: Sonic Zhang <sonic.zhang@analog.com>
->
-> bf518 RSI dma doesn't work in array mode.
->
-> Signed-off-by: Sonic Zhang <sonic.zhang@analog.com>
-> ---
->  drivers/mmc/host/bfin_sdh.c |    4 ++++
->  1 files changed, 4 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
-> index 0366617..fd25b0c 100644
-> --- a/drivers/mmc/host/bfin_sdh.c
-> +++ b/drivers/mmc/host/bfin_sdh.c
-> @@ -469,7 +469,11 @@ static int __devinit sdh_probe(struct platform_device *pdev)
->         }
->
->         mmc->ops = &sdh_ops;
-> +#if defined(CONFIG_BF54x)
->         mmc->max_segs = 32;
-> +#elif defined(CONFIG_BF51x)
-> +       mmc->max_segs = 1;
-> +#endif
->         mmc->max_seg_size = 1 << 16;
->         mmc->max_blk_size = 1 << 11;
->         mmc->max_blk_count = 1 << 11;
-> --
-> 1.7.0.4
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
