@@ -1,37 +1,34 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 3/3] mmc: dw_mmc: fix error handling in PIO mode
-Date: Tue, 07 Aug 2012 23:21:17 -0400
-Message-ID: <874noexe4y.fsf@octavius.laptop.org>
-References: <006501cd6f7c$e4ca6670$ae5f3350$%jun@samsung.com>
+Subject: Re: [PATCH 1/4] mmc: bfin_sdh: limit mmc DMA segment len to 1 for bf518.
+Date: Tue, 07 Aug 2012 23:31:06 -0400
+Message-ID: <87zk66vz45.fsf@octavius.laptop.org>
+References: <1344309015-13248-1-git-send-email-sonic.adi@gmail.com>
+	<CAJxxZ0M9oReELfJ_ncu=eHd=Qy0Bpx=06Jv3MzvOPbRTh_h-jg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54278 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:48725 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757323Ab2HHDVV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Aug 2012 23:21:21 -0400
-In-Reply-To: <006501cd6f7c$e4ca6670$ae5f3350$%jun@samsung.com> (Seungwon
-	Jeon's message of "Wed, 01 Aug 2012 09:30:46 +0900")
+	id S1751370Ab2HHDbO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 7 Aug 2012 23:31:14 -0400
+In-Reply-To: <CAJxxZ0M9oReELfJ_ncu=eHd=Qy0Bpx=06Jv3MzvOPbRTh_h-jg@mail.gmail.com>
+	(Sonic Zhang's message of "Wed, 8 Aug 2012 11:23:09 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>
+To: Sonic Zhang <sonic.adi@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Bob Liu <liubbo@gmail.com>, uclinux-dist-devel@blackfin.uclinux.org, Sonic Zhang <sonic.zhang@analog.com>, Cliff Cai <cliff.cai@analog.com>
 
 Hi,
 
-On Tue, Jul 31 2012, Seungwon Jeon wrote:
-> Data transfer will be continued until all the bytes are transmitted,
-> even if data crc error occurs during a multiple-block data transfer.
-> This means RXDR/TXDR interrupts will occurs until data transfer is
-> terminated. Early setting of host->sg to NULL prevents going into
-> xxx_data_pio functions, hence permanent unhandled RXDR/TXDR interrupts
-> occurs. And checking error interrupt status in the xxx_data_pio functions
-> is no need because dw_mci_interrupt does do the same. This patch also
-> removes it.
->
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+On Tue, Aug 07 2012, Sonic Zhang wrote:
+> Could you review this series of patches for Blackfin on-chip SD
+> controller? The head file and new BF60x machine code have been merged
+> upstream. These patches are necessary to get SD driver built on BF60x.
 
-Thanks, pushed to mmc-next for 3.7.
+I see that Cliff Cai <cliff.cai@analog.com> is listed as the maintainer
+of bfin_sdh.c in MAINTAINERS -- is it possible for you to get his ACK?
+
+Thanks,
 
 - Chris.
 -- 
