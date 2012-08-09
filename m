@@ -1,33 +1,39 @@
-From: "Lee Susman" <lsusman@codeaurora.org>
-Subject: (unknown)
-Date: Wed, 8 Aug 2012 23:55:10 -0700 (PDT)
-Message-ID: <730b7f12309112022731f13920cb2f6d.squirrel@www.codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:38446 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752470Ab2HIGzK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Aug 2012 02:55:10 -0400
-Subject: 
-Sender: linux-mmc-owner@vger.kernel.org
+From: Thierry Reding <thierry.reding@avionic-design.de>
+Subject: [PATCH] mmc: sdio: Fix PM_SLEEP related build warnings
+Date: Thu,  9 Aug 2012 08:56:53 +0200
+Message-ID: <1344495413-7164-1-git-send-email-thierry.reding@avionic-design.de>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Paul Gortmaker <paul.gortmaker@windriver.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: axboe@kernel.dk, linux-mmc@vger.kernel.org
-Cc: tlinder@codeaurora.org
 
-Hello all,
+Power management callbacks defined by SIMPLE_DEV_PM_OPS are only used if
+the PM_SLEEP Kconfig symbol has been defined. If not, the compiler will
+complain about them being unused.
 
-I ran into some difficulty with Btreplay, maybe you could help me:
-I am trying to emulate async write requests using Btreplay, but it seems
-that Btreplay submits only sync writes.
-I could not find any reference in the code as to manipulating this option.
+Signed-off-by: Thierry Reding <thierry.reding@avionic-design.de>
+---
+ drivers/mmc/core/sdio_bus.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-I would appreciate your help.
-
-Thanks,
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index 236842e..f8f90b4 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -193,11 +193,12 @@ static int sdio_bus_remove(struct device *dev)
+ }
+ 
+ #ifdef CONFIG_PM
+-
++#ifdef CONFIG_PM_SLEEP
+ static int pm_no_operation(struct device *dev)
+ {
+ 	return 0;
+ }
++#endif
+ 
+ static const struct dev_pm_ops sdio_bus_pm_ops = {
+ 	SET_SYSTEM_SLEEP_PM_OPS(pm_no_operation, pm_no_operation)
 -- 
-Lee Susman,
-Consultant for Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-
+1.7.11.4
