@@ -1,58 +1,91 @@
-From: "Tanya Brokhman" <tlinder@codeaurora.org>
-Subject: RE: [RFC/PATCH 0/2] ROW scheduling Algorithm
-Date: Thu, 9 Aug 2012 08:06:25 +0300
-Message-ID: <004201cd75ec$bb701970$32504c50$@codeaurora.org>
-References: <1344166241-18708-1-git-send-email-tlinder@codeaurora.org> <502214E8.7070603@samsung.com>
+From: ludovic.desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH] mmc: atmel-mci: not busy flag has also to be used for
+ read operations
+Date: Thu, 9 Aug 2012 08:29:15 +0200
+Message-ID: <502358BB.8010801@atmel.com>
+References: <1343122924-7799-1-git-send-email-ludovic.desroches@atmel.com>
+ <87lihqxev6.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <502214E8.7070603@samsung.com>
-Content-language: he
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>
-Cc: axboe@kernel.dk, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"; Format="flowed"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <87lihqxev6.fsf@octavius.laptop.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Chris Ball <cjb@laptop.org>
+Cc: nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, ludovic.desroches@atmel.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Chung
+Le 08/08/2012 05:05 AM, Chris Ball a =E9crit :
+> Hi,
+>
+> On Tue, Jul 24 2012, ludovic.desroches@atmel.com wrote:
+>> From: Ludovic Desroches <ludovic.desroches@atmel.com>
+>>
+>> Even if the datasheet says that the not busy flag has to be used only for
+>> write operations, it's false excepted for version lesser than v2xx.
+>> Not waiting the not busy flag for read operations can cause the controll=
+er to
+>> hang-up during the initialization of some SD cards.
+>>
+>> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+>> Cc: stable@vger.kernel.org
+>>
+>>
+>> Hello,
+>>
+>> This is a fix for 3.5 and later.
+>>
+>> Due to the big changes into atmel-mci driver to support all atmel mci ve=
+rsions,
+>> a bug was introduced.
+>> With some SD cards (mainly micro) when using DMA, the controller hangs-u=
+p after
+>> the first CMD6 command because the next command is sent too early.
+>>
+>> Regards
+>>
+>> Ludovic
+>>
+>>
+>> ---
+>>   drivers/mmc/host/atmel-mci.c |    6 +++++-
+>>   1 files changed, 5 insertions(+), 1 deletions(-)
+>
+> Thanks.  I've applied this for mmc-next now, but please put your patch
+> commentary *underneath* the "---" lines, so that it doesn't end up in
+> the git history itself.  I've rewritten the commit message to be:
 
+Sorry for this error.
 
-> The below is my environment:
-> Kernel Version: linux-3.4
-> Card: eMMC4.5 (50MHz DDR mode, 8-bit buswidth) Host controller : dw-
-> mmc (DesignWare MMC controller) Benchmark : IOzone
-> 
-> *CFQ Scheduler
-> Read : 35MB
-> Write : 17MB
-> 
-> *ROW Scheduler
-> Read : 28MB
-> Write : 17MB
-> 
-> How do you think about this result?
-> 
+Thanks
 
-I run your cmd of iozone on my setup and got a bit different results:
-CFQ scheduler:
-          204800   16384   27903   27248    40345    40399
-READ:	40   MB/sec 		WRITE: 27   MB/sec
+Ludovic
 
-ROW scheduler:
-READ:	39.6 MB/sec		WRITE: 27MB/sec
-
-As you can see the results are the same for both schedulers.
-Anyway, the improvement added by ROW is in scenario of parallel read and write, which iozone doesn't do so running iozone for comparing ROW to CFQ is useless.
-If it's not too difficult I would appreciate if you could run the bellow 2 commands simultaneously on your setup:
-adb shell /data/lmdd if=internal of=/data/writefile bs=128k count=3000 
-adb shell /data/lmdd if=/data/readfile of=internal bs=128k count=3000
-You'll see an improvement in throughput when using ROW over CFQ.
-We have a patch that also measures latency and we saw that read latency was also improved greatly when using ROW.
-
-
-Thanks,
-Tanya Brokhman
----
-Sent by an consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+>
+>
+> From: Ludovic Desroches <ludovic.desroches@atmel.com>
+>
+> Even if the datasheet says that the not busy flag has to be used only
+> for write operations, it's false except for version lesser than v2xx.
+>
+> Not waiting on the not busy flag for read operations can cause the
+> controller to hang-up during the initialization of some SD cards
+> with DMA after the first CMD6 -- the next command is sent too early.
+>
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> Cc: stable <stable@vger.kernel.org> [3.5, 3.6]
+> Signed-off-by: Chris Ball <cjb@laptop.org>
+> ---
+> <patch commentary can go here>
+>
+>   drivers/mmc/host/atmel-mci.c | 6 +++++-
+>   1 file changed, 5 insertions(+), 1 deletion(-)
+>
