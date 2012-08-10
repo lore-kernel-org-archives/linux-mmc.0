@@ -1,55 +1,93 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH] mmc: sdio: Fix PM_SLEEP related build warnings
-Date: Thu, 9 Aug 2012 12:00:10 +0200
-Message-ID: <201208091200.11161.rjw@sisk.pl>
-References: <1344504741-12081-1-git-send-email-thierry.reding@avionic-design.de>
+From: Chunhe Lan <Chunhe.Lan@freescale.com>
+Subject: [PATCH v3 1/2] mmc: Move mmc_delay() to include/linux/mmc/core.h
+Date: Fri, 10 Aug 2012 18:25:13 -0400
+Message-ID: <1344637513-29383-1-git-send-email-Chunhe.Lan@freescale.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-2"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([193.178.161.156]:50325 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751477Ab2HIJyQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 9 Aug 2012 05:54:16 -0400
-In-Reply-To: <1344504741-12081-1-git-send-email-thierry.reding@avionic-design.de>
+Received: from am1ehsobe002.messaging.microsoft.com ([213.199.154.205]:53892
+	"EHLO am1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751317Ab2HJKXT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Aug 2012 06:23:19 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Thierry Reding <thierry.reding@avionic-design.de>
-Cc: Chris Ball <cjb@laptop.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linuxppc-dev@lists.ozlabs.org, kumar.gala@freescale.com, cjb@laptop.org, Chunhe Lan <Chunhe.Lan@freescale.com>, Kumar Gala <galak@kernel.crashing.org>
 
-On Thursday, August 09, 2012, Thierry Reding wrote:
-> Power management callbacks defined by SIMPLE_DEV_PM_OPS are only used if
-> the PM_SLEEP Kconfig symbol has been defined. If not, the compiler will
-> complain about them being unused. However, since the callback for this
-> driver doesn't do anything it can just as well be dropped.
-> 
-> Signed-off-by: Thierry Reding <thierry.reding@avionic-design.de>
+Move mmc_delay() from drivers/mmc/core/core.h to
+include/linux/mmc/core.h. So when other functions
+call it with include syntax using <linux/mmc/core.h>
+of absolute path rather than "../core/core.h" of
+relative path.
 
-Acked-by: Rafael J. Wysocki <rjw@sisk.pl>
+Signed-off-by: Chunhe Lan <Chunhe.Lan@freescale.com>
+Signed-off-by: Kumar Gala <galak@kernel.crashing.org>
+Cc: Chris Ball <cjb@laptop.org>
+---
+ drivers/mmc/core/core.h  |   12 ------------
+ include/linux/mmc/core.h |   11 +++++++++++
+ 2 files changed, 11 insertions(+), 12 deletions(-)
 
-> ---
->  drivers/mmc/core/sdio_bus.c | 7 -------
->  1 file changed, 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-> index 236842e..6bf6879 100644
-> --- a/drivers/mmc/core/sdio_bus.c
-> +++ b/drivers/mmc/core/sdio_bus.c
-> @@ -193,14 +193,7 @@ static int sdio_bus_remove(struct device *dev)
->  }
->  
->  #ifdef CONFIG_PM
-> -
-> -static int pm_no_operation(struct device *dev)
-> -{
-> -	return 0;
-> -}
-> -
->  static const struct dev_pm_ops sdio_bus_pm_ops = {
-> -	SET_SYSTEM_SLEEP_PM_OPS(pm_no_operation, pm_no_operation)
->  	SET_RUNTIME_PM_OPS(
->  		pm_generic_runtime_suspend,
->  		pm_generic_runtime_resume,
-> 
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 3bdafbc..5f63d00 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -11,8 +11,6 @@
+ #ifndef _MMC_CORE_CORE_H
+ #define _MMC_CORE_CORE_H
+ 
+-#include <linux/delay.h>
+-
+ #define MMC_CMD_RETRIES        3
+ 
+ struct mmc_bus_ops {
+@@ -46,16 +44,6 @@ void mmc_set_timing(struct mmc_host *host, unsigned int timing);
+ void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
+ void mmc_power_off(struct mmc_host *host);
+ 
+-static inline void mmc_delay(unsigned int ms)
+-{
+-	if (ms < 1000 / HZ) {
+-		cond_resched();
+-		mdelay(ms);
+-	} else {
+-		msleep(ms);
+-	}
+-}
+-
+ void mmc_rescan(struct work_struct *work);
+ void mmc_start_host(struct mmc_host *host);
+ void mmc_stop_host(struct mmc_host *host);
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 1b431c7..7021658 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -10,6 +10,7 @@
+ 
+ #include <linux/interrupt.h>
+ #include <linux/completion.h>
++#include <linux/delay.h>
+ 
+ struct request;
+ struct mmc_data;
+@@ -192,6 +193,16 @@ static inline void mmc_claim_host(struct mmc_host *host)
+ 	__mmc_claim_host(host, NULL);
+ }
+ 
++static inline void mmc_delay(unsigned int ms)
++{
++	if (ms < 1000 / HZ) {
++		cond_resched();
++		mdelay(ms);
++	} else {
++		msleep(ms);
++	}
++}
++
+ extern u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
+ 
+ #endif /* LINUX_MMC_CORE_H */
+-- 
+1.7.6.5
+
 
