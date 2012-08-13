@@ -1,37 +1,98 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [PATCH 1/2] drivers/mfd: Add realtek pcie card reader driver
-Date: Mon, 13 Aug 2012 10:13:42 +0300
-Message-ID: <20120813071342.GC4546@mwanda>
-References: <1344823586-2956-1-git-send-email-wei_wang@realsil.com.cn>
- <20120813064012.GC4559@mwanda>
- <5028A87A.4020403@realsil.com.cn>
+From: IAN CHEN <ian.cy.chen@samsung.com>
+Subject: [PATCH] mmc: card: Skip secure option for MoviNAND.
+Date: Mon, 13 Aug 2012 18:50:37 +0900
+Message-ID: <5028CDED.2020307@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rcsinet15.oracle.com ([148.87.113.117]:26698 "EHLO
-	rcsinet15.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752719Ab2HMHON (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Aug 2012 03:14:13 -0400
-Content-Disposition: inline
-In-Reply-To: <5028A87A.4020403@realsil.com.cn>
+Received: from mailout3.samsung.com ([203.254.224.33]:48584 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751143Ab2HMJzA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Aug 2012 05:55:00 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: wwang <wei_wang@realsil.com.cn>
-Cc: "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "arnd@arndb.de" <arnd@arndb.de>, "sameo@linux.intel.com" <sameo@linux.intel.com>, "bp@alien8.de" <bp@alien8.de>
+To: cjb@laptop.org, linkinjeon@gmail.com, adrian.hunter@intel.com, subhashj@codeaurora.org, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com, ian.cy.chen@samsung.com
 
-On Mon, Aug 13, 2012 at 03:10:50PM +0800, wwang wrote:
-> =E4=BA=8E 2012=E5=B9=B408=E6=9C=8813=E6=97=A5 14:40, Dan Carpenter =E5=
-=86=99=E9=81=93:
-> > Looks like bitwise OR was intended here.
-> Hi Dan:
->=20
-> Thank you. I will resend the patches.
->=20
+>From 5c60eb8be04c7440d6e33b8f72ea2046a3657ac4 Mon Sep 17 00:00:00 2001
+From: ian.cy.chen <ian.cy.chen@samsung.com>
+Date: Mon, 13 Aug 2012 10:53:55 +0900
+Subject: [PATCH] mmc: card: Skip secure option for MoviNAND.
 
-It's always best to hold off a day on resending, in case there are
-other comments.
+For several MoviNAND, there are some known issue with secure option.
+For these specific MoviNAND device, we skip secure option.
 
-regards,
-dan carpenter
+Signed-off-by: Ian Chen <ian.cy.chen@samsung.com>
+---
+ drivers/mmc/card/block.c |   24 +++++++++++++++++++++++-
+ include/linux/mmc/card.h |    1 +
+ 2 files changed, 24 insertions(+), 1 deletions(-)
 
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index f1c84de..9f47dbf 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1411,7 +1411,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
+struct request *req)
+         /* complete ongoing async transfer before issuing discard */
+         if (card->host->areq)
+             mmc_blk_issue_rw_rq(mq, NULL);
+-        if (req->cmd_flags & REQ_SECURE)
++        if (req->cmd_flags & REQ_SECURE &&
++            !(card->quirks & MMC_QUIRK_MOVINAND_SECURE))
+             ret = mmc_blk_issue_secdiscard_rq(mq, req);
+         else
+             ret = mmc_blk_issue_discard_rq(mq, req);
+@@ -1716,6 +1717,7 @@ force_ro_fail:
+ #define CID_MANFID_SANDISK    0x2
+ #define CID_MANFID_TOSHIBA    0x11
+ #define CID_MANFID_MICRON    0x13
++#define CID_MANFID_SAMSUNG    0x15
+ 
+ static const struct mmc_fixup blk_fixups[] =
+ {
+@@ -1752,6 +1754,26 @@ static const struct mmc_fixup blk_fixups[] =
+     MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
+           MMC_QUIRK_LONG_READ_TIME),
+ 
++    /*
++     * Some issue about secure erase/secure trim for Samsung MoviNAND
++     */
++    MMC_FIXUP("M8G2FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++          MMC_QUIRK_MOVINAND_SECURE),
++    MMC_FIXUP("MAG4FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++          MMC_QUIRK_MOVINAND_SECURE),
++    MMC_FIXUP("MBG8FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++          MMC_QUIRK_MOVINAND_SECURE),
++    MMC_FIXUP("MCGAFA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++          MMC_QUIRK_MOVINAND_SECURE),
++    MMC_FIXUP("VAL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++          MMC_QUIRK_MOVINAND_SECURE),
++    MMC_FIXUP("VYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++          MMC_QUIRK_MOVINAND_SECURE),
++    MMC_FIXUP("KYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++          MMC_QUIRK_MOVINAND_SECURE),
++    MMC_FIXUP("VZL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++          MMC_QUIRK_MOVINAND_SECURE),
++
+     END_FIXUP
+ };
+ 
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 111aca5..4505a30 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -239,6 +239,7 @@ struct mmc_card {
+ #define MMC_QUIRK_BLK_NO_CMD23    (1<<7)        /* Avoid CMD23 for
+regular multiblock */
+ #define MMC_QUIRK_BROKEN_BYTE_MODE_512 (1<<8)    /* Avoid sending 512
+bytes in */
+ #define MMC_QUIRK_LONG_READ_TIME (1<<9)        /* Data read time > CSD
+says */
++#define MMC_QUIRK_MOVINAND_SECURE (1<<10)    /* MoviNAND secure issue */
+                         /* byte mode */
+     unsigned int    poweroff_notify_state;    /* eMMC4.5 notify feature */
+ #define MMC_NO_POWER_NOTIFICATION    0
+-- 
+1.7.0.4
