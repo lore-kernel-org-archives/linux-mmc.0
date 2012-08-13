@@ -1,45 +1,52 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: card: Skip secure option for MoviNAND.
-Date: Mon, 13 Aug 2012 15:39:43 +0200
-Message-ID: <CACRpkdZMbcX9u5rcwwUhZStjr_aoKcFSuEf0rK8YzEJ_rqq0TQ@mail.gmail.com>
-References: <5028CDED.2020307@samsung.com>
+From: Dmitry Rozhkov <dmitry.rozhkov@jollamobile.com>
+Subject: [PATCH] mmc: Adjust timings for power ramping up
+Date: Mon, 13 Aug 2012 19:19:21 +0300
+Message-ID: <20120813161921.GA5022@x230>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5028CDED.2020307@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: IAN CHEN <ian.cy.chen@samsung.com>
-Cc: cjb@laptop.org, linkinjeon@gmail.com, adrian.hunter@intel.com, subhashj@codeaurora.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp154.iad.emailsrvr.com ([207.97.245.154]:45237 "EHLO
+	smtp154.iad.emailsrvr.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752241Ab2HMQ0i (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Aug 2012 12:26:38 -0400
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-On Mon, Aug 13, 2012 at 11:50 AM, IAN CHEN <ian.cy.chen@samsung.com> wrote:
+According to p6.4.1.1 of the Physical Layer Simplified Specification
+Ver3.01 the "host needs to keep power line level less than 0.5V and
+more than 1ms before power ramp up". This patch adds an explicit delay
+of 10ms just before power rump up.
 
-> For several MoviNAND, there are some known issue with secure option.
-> For these specific MoviNAND device, we skip secure option.
+Without this patch some microSD cards (e.g. Kingston 8G Class 10) can't be
+used as bootable media on some TI OMAP chips at least.
+See https://bugs.nemomobile.org/show_bug.cgi?id=92 for details.
 
-OK..
+Signed-off-by: Dmitry Rozhkov <dmitry.rozhkov@jollamobile.com>
+---
+ drivers/mmc/core/core.c |    7 +++++++
+ 1 file changed, 7 insertions(+)
 
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 111aca5..4505a30 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -239,6 +239,7 @@ struct mmc_card {
->  #define MMC_QUIRK_BLK_NO_CMD23    (1<<7)        /* Avoid CMD23 for
-> regular multiblock */
->  #define MMC_QUIRK_BROKEN_BYTE_MODE_512 (1<<8)    /* Avoid sending 512
-> bytes in */
->  #define MMC_QUIRK_LONG_READ_TIME (1<<9)        /* Data read time > CSD
-> says */
-> +#define MMC_QUIRK_MOVINAND_SECURE (1<<10)    /* MoviNAND secure issue */
->                          /* byte mode */
->      unsigned int    poweroff_notify_state;    /* eMMC4.5 notify feature */
->  #define MMC_NO_POWER_NOTIFICATION    0
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 0b6141d..22b0eb2 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1163,6 +1163,13 @@ static void mmc_power_up(struct mmc_host *host)
+ 
+ 	mmc_host_clk_hold(host);
+ 
++	/*
++	 * According to p6.4.1.1 of the Physical Layer Simplified Specification
++	 * Ver3.01 the "host needs to keep power line level less than 0.5V and
++	 * more than 1ms before power ramp up".
++	 */
++	mmc_delay(10);
++
+ 	/* If ocr is set, we use it */
+ 	if (host->ocr)
+ 		bit = ffs(host->ocr) - 1;
+-- 
+1.7.9.5
 
-So if there is a FOO memory with broken secure features I will have to add
-MMC_QUIRK_FOO_SECURE  etc?
-
-No thanks, name the flag something netral that can be reused, like
-MMC_QUIRK_SECURE_MODE_BROKEN, simply.
-
-Yours,
-Linus Walleij
