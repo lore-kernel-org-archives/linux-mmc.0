@@ -1,52 +1,59 @@
-From: Dmitry Rozhkov <dmitry.rozhkov@jollamobile.com>
-Subject: [PATCH] mmc: Adjust timings for power ramping up
-Date: Mon, 13 Aug 2012 19:19:21 +0300
-Message-ID: <20120813161921.GA5022@x230>
+From: Maxim Levitsky <maximlevitsky@gmail.com>
+Subject: Re: [PATCH 1/3] drivers/misc: Add realtek card reader core driver
+Date: Mon, 13 Aug 2012 23:59:36 +0300
+Message-ID: <1344891576.16792.5.camel@maxim-laptop>
+References: <1343720536-22077-1-git-send-email-wei_wang@realsil.com.cn>
+	 <201207311123.25862.arnd@arndb.de> <5018CA65.1080906@realsil.com.cn>
+	 <201208011431.02050.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp154.iad.emailsrvr.com ([207.97.245.154]:45237 "EHLO
-	smtp154.iad.emailsrvr.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752241Ab2HMQ0i (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Aug 2012 12:26:38 -0400
-Content-Disposition: inline
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <201208011431.02050.arnd@arndb.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: wwang <wei_wang@realsil.com.cn>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "bp@alien8.de" <bp@alien8.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
 
-According to p6.4.1.1 of the Physical Layer Simplified Specification
-Ver3.01 the "host needs to keep power line level less than 0.5V and
-more than 1ms before power ramp up". This patch adds an explicit delay
-of 10ms just before power rump up.
+On Wed, 2012-08-01 at 14:31 +0000, Arnd Bergmann wrote:=20
+> On Wednesday 01 August 2012, wwang wrote:
+> > =E4=BA=8E 2012=E5=B9=B407=E6=9C=8831=E6=97=A5 19:23, Arnd Bergmann =
+=E5=86=99=E9=81=93:
+> > >
+> > > You posted the sdmmc host driver and the pci card reader driver.
+> > > I assume that the USB card reader and the memstick host
+> > > will also get posted at some point. Do you have a timeframe
+> > > for those?
+> >=20
+> > I will submit my memstick host driver around two months later, and
+> > submit USB part at the end of this year.
+>=20
+> ok.
+>=20
+> > > The hardware seems to also support xd/smartmedia. Do you have
+> > > plans to add those? I think we have some code in drivers/mfd
+> > > that acts as an abstraction layer for these, given that the
+> > > host has to do the wear leveling there too.
+> >=20
+> > Yes, xD is still in our plan. But because the user population of xD=
+/SM
+> > is so small, we put the priority of writing xD host driver in a rel=
+evant
+> > low level.
+> > Maybe we will submit this driver in the next year.
+>=20
+> Ok. When you get to that, I think you should use the code
+> from drivers/mtd/nand/sm_common.c, but it's better to confirm
+> that with the MTD maintainers first.
+Just note that this file doesn't have much stuff as it turned out
+that xD card readers and cards are just raw NAND.
+Except that large xD cards, still use small block size, and somewhat
+different IDs, thus I placed them in this file.
 
-Without this patch some microSD cards (e.g. Kingston 8G Class 10) can't be
-used as bootable media on some TI OMAP chips at least.
-See https://bugs.nemomobile.org/show_bug.cgi?id=92 for details.
+You just need to write a NAND driver exposing raw flash, and my sm_ftl
+will take care of wear leveling and everything else.
 
-Signed-off-by: Dmitry Rozhkov <dmitry.rozhkov@jollamobile.com>
----
- drivers/mmc/core/core.c |    7 +++++++
- 1 file changed, 7 insertions(+)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 0b6141d..22b0eb2 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1163,6 +1163,13 @@ static void mmc_power_up(struct mmc_host *host)
- 
- 	mmc_host_clk_hold(host);
- 
-+	/*
-+	 * According to p6.4.1.1 of the Physical Layer Simplified Specification
-+	 * Ver3.01 the "host needs to keep power line level less than 0.5V and
-+	 * more than 1ms before power ramp up".
-+	 */
-+	mmc_delay(10);
-+
- 	/* If ocr is set, we use it */
- 	if (host->ocr)
- 		bit = ffs(host->ocr) - 1;
--- 
-1.7.9.5
-
+If any questions, bug-reports, just notes, I glad to hear about this.
+Best regards,
+Maxim Levitsky
