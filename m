@@ -1,30 +1,35 @@
-From: Namjae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH v3] mmc: card: Skip secure option for MoviNAND.
-Date: Tue, 14 Aug 2012 16:23:15 +0900
-Message-ID: <CAKYAXd86V59ffWG05-g5VuE_PHOsbfstNrpYAdM9+69jZHJXAQ@mail.gmail.com>
-References: <5029F8F6.1080207@samsung.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: card: Skip secure option for MoviNAND.
+Date: Tue, 14 Aug 2012 10:03:24 +0200
+Message-ID: <CACRpkdaC98DxifezD7-=ww2rjet5CnSiH2SN4UqgcyOsWa=MiA@mail.gmail.com>
+References: <5028CDED.2020307@samsung.com>
+	<CAKYAXd--Ta1xL2uMEsArmpsg99x+B21ScJOQAty=RFWWCQ6M2w@mail.gmail.com>
+	<000e01cd79c2$4c6a8cc0$e53fa640$%cy.chen@samsung.com>
+	<CAKYAXd9h5KG09zMm2gO_0keycfBQ-Pq5-Z+tXYrhfuSc0equLQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:35810 "EHLO
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:47302 "EHLO
 	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753978Ab2HNHXQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Aug 2012 03:23:16 -0400
-In-Reply-To: <5029F8F6.1080207@samsung.com>
+	with ESMTP id S1751866Ab2HNIDZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Aug 2012 04:03:25 -0400
+Received: by vcbfk26 with SMTP id fk26so81529vcb.19
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Aug 2012 01:03:24 -0700 (PDT)
+In-Reply-To: <CAKYAXd9h5KG09zMm2gO_0keycfBQ-Pq5-Z+tXYrhfuSc0equLQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: IAN CHEN <ian.cy.chen@samsung.com>
-Cc: cjb@laptop.org, adrian.hunter@intel.com, subhashj@codeaurora.org, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com
+To: Namjae Jeon <linkinjeon@gmail.com>
+Cc: IAN CHEN <ian.cy.chen@samsung.com>, cjb@laptop.org, adrian.hunter@intel.com, subhashj@codeaurora.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com
 
-2012/8/14, IAN CHEN <ian.cy.chen@samsung.com>:
-> For several MoviNAND, there are some known issue with secure option.
-> For these specific MoviNAND device, we skip secure option.
->
-> You could refer this discussion in XDA developers.
-> http://forum.xda-developers.com/showthread.php?t=1644364
-> https://plus.google.com/111398485184813224730/posts/21pTYfTsCkB#111398485184813224730/posts/21pTYfTsCkB
->
-> Signed-off-by: Ian Chen <ian.cy.chen@samsung.com>
-> ---
-Looks good.
-Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+On Tue, Aug 14, 2012 at 5:51 AM, Namjae Jeon <linkinjeon@gmail.com> wrote:
+
+> So Would you change flag name to be neutral ?
+
+MMC_QUIRK_SEC_ERASE_TRIM_BROKEN
+
+It appears that mmc_blk_issue_secdiscard_rq() always use both
+erase and trim (given helpers like mmc_can_secure_erase_trim())
+so if either is broken we set this flag.
+
+Yours,
+Linus Walleij
