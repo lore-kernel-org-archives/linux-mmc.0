@@ -1,51 +1,77 @@
-From: =?gb2312?B?zfXsvw==?= <wei_wang@realsil.com.cn>
-Subject: =?gb2312?B?tPC4tDogW1BBVENIIHYyIDAvMl0gQWRkIG1vZHVsZXMgdG8gc3VwcG9ydCBy?==?gb2312?B?ZWFsdGVrIFBDSUUgY2FyZCByZWFkZXI=?=
-Date: Tue, 14 Aug 2012 23:22:38 +0800
-Message-ID: <637A8844983F7F4092120E33EA3F28CD31E74BE133@RSEX1.realsil.com.cn>
-References: <cover.1344939464.git.wei_wang@realsil.com.cn>,
- <20120814150550.GA4091@x1.osrc.amd.com>
+From: Dmitry Rozhkov <dmitry.rozhkov@jollamobile.com>
+Subject: Re: [PATCH] mmc: Adjust timings for power ramping up
+Date: Tue, 14 Aug 2012 18:59:29 +0300
+Message-ID: <502A75E1.7040709@jollamobile.com>
+References: <20120813161921.GA5022@x230> <CAGxe1ZGcfMQXMSZ_a5BqKoEEmr48AD01NU6LGtZEWCiktCnnXQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20120814150550.GA4091@x1.osrc.amd.com>
-Content-Language: zh-CN
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/devel>,
- <mailto:devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/devel>
-List-Post: <mailto:devel@linuxdriverproject.org>
-List-Help: <mailto:devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/devel>,
- <mailto:devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: devel-bounces@linuxdriverproject.org
-Sender: devel-bounces@linuxdriverproject.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: "sameo@linux.intel.com" <sameo@linux.intel.com>, "arnd@arndb.de" <arnd@arndb.de>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "cjb@laptop.org" <cjb@laptop.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp174.iad.emailsrvr.com ([207.97.245.174]:45815 "EHLO
+	smtp174.iad.emailsrvr.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754021Ab2HNP7c (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Aug 2012 11:59:32 -0400
+In-Reply-To: <CAGxe1ZGcfMQXMSZ_a5BqKoEEmr48AD01NU6LGtZEWCiktCnnXQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Hi Boris:
+On 08/14/2012 04:58 PM, Girish K S wrote:
+> On 13 August 2012 11:19, Dmitry Rozhkov <dmitry.rozhkov@jollamobile.com> wrote:
+>> According to p6.4.1.1 of the Physical Layer Simplified Specification
+>> Ver3.01 the "host needs to keep power line level less than 0.5V and
+>> more than 1ms before power ramp up". This patch adds an explicit delay
+>> of 10ms just before power rump up.
+>>
+>> Without this patch some microSD cards (e.g. Kingston 8G Class 10) can't be
+>> used as bootable media on some TI OMAP chips at least.
+>> See https://bugs.nemomobile.org/show_bug.cgi?id=92 for details.
+>>
+>> Signed-off-by: Dmitry Rozhkov <dmitry.rozhkov@jollamobile.com>
+>> ---
+>>   drivers/mmc/core/core.c |    7 +++++++
+>>   1 file changed, 7 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 0b6141d..22b0eb2 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1163,6 +1163,13 @@ static void mmc_power_up(struct mmc_host *host)
+>>
+>>          mmc_host_clk_hold(host);
+>>
+>> +       /*
+>> +        * According to p6.4.1.1 of the Physical Layer Simplified Specification
+>> +        * Ver3.01 the "host needs to keep power line level less than 0.5V and
+>> +        * more than 1ms before power ramp up".
+>> +        */
+>> +       mmc_delay(10);
+> can you instead just try giving this delay in mmc_start_host as a
+> parameter to mmc_detect_change.
+It would be too late. Here is the theory.
 
-Can you tell me the detailed information about your pc and the SD card? Do you have ever tried to use another SD card? 
-I have tested all of the SD cards that we have in our company, and everything runs smoothly.  Maybe it is compatibilty issue and we have to debug it specifically.
+The function mmc_power_up currently controls the process of powering up 
+as a two-phases process:
 
-Please help to check the VID:PID of the card reader using lspci, and I will send you our SCSI driver for this reader to test the card.
+0V (initial state) => apply MMC_POWER_UP => delay 10ms until Vdd is 
+reached  (first phase) => apply MMC_POWER_ON => delay 10ms for 
+initialization sequence to complete (second phase).
 
-Thank you!
-BR,
-wwang
+It perfectly conforms to the spec V2.00
 
-________________________________________
+But the spec V3.01 clarifies now that the process consists of three 
+phases actually:
+1. keeping reset level voltage (>1ms)
+2. power ramp up phase (from 0.1ms to 35ms)
+3. initialization sequence (1ms)
 
-Yeah, this thing still has issues though.
+See the figure 6-2 on the page 111.
 
-When I slide in an SD card and do
+If I add the delay as a parameter to mmc_detect_change in mmc_start_host 
+it'd be equal to extending the third phase to 20ms though even 10ms is 
+more than enough.
 
-$ mkfs.ext3 /dev/mmcblk0p1
+The second things is that it's better to keep this sequence in one 
+function for the sake of maintainability.
 
-after having created the partition with fdisk, we run out of DMA space and the
-hung-tasks detector triggers:
-
-
---
-Regards/Gruss,
-Boris.
