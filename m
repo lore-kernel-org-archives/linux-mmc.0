@@ -1,19 +1,23 @@
 From: IAN CHEN <ian.cy.chen@samsung.com>
 Subject: RE: [PATCH] mmc: card: Skip secure option for MoviNAND.
-Date: Tue, 14 Aug 2012 11:10:04 +0900
-Message-ID: <000101cd79c1$ebf01040$c3d030c0$%cy.chen@samsung.com>
+Date: Tue, 14 Aug 2012 11:12:47 +0900
+Message-ID: <000e01cd79c2$4c6a8cc0$e53fa640$%cy.chen@samsung.com>
 References: <5028CDED.2020307@samsung.com>
  <CAKYAXd--Ta1xL2uMEsArmpsg99x+B21ScJOQAty=RFWWCQ6M2w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:40591 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753908Ab2HNCLn convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Aug 2012 22:11:43 -0400
 In-reply-to: <CAKYAXd--Ta1xL2uMEsArmpsg99x+B21ScJOQAty=RFWWCQ6M2w@mail.gmail.com>
 Content-language: en-us
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: 'Namjae Jeon' <linkinjeon@gmail.com>
 Cc: cjb@laptop.org, adrian.hunter@intel.com, subhashj@codeaurora.org, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com
-List-Id: linux-mmc@vger.kernel.org
 
 Dear Mr. Jeon,
 
@@ -27,7 +31,7 @@ You could refer this discussion in XDA developers.
 
 Regards,
 Ian
- 
+
 -----Original Message-----
 From: Namjae Jeon [mailto:linkinjeon@gmail.com] 
 Sent: Monday, August 13, 2012 10:03 PM
@@ -56,3 +60,4 @@ Thanks.
 >  include/linux/mmc/card.h |    1 +
 >  2 files changed, 24 insertions(+), 1 deletions(-)
 >
+
