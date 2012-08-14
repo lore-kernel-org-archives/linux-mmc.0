@@ -1,34 +1,45 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v3] mmc: card: Skip secure option for MoviNAND.
-Date: Tue, 14 Aug 2012 10:06:49 +0200
-Message-ID: <CACRpkdYNKxjRXC=4no0p55ADkUvXTEcfW3b2z+Exg=cpHCtAAQ@mail.gmail.com>
-References: <5029F8F6.1080207@samsung.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 1/2] drivers/mfd: Add realtek pcie card reader driver
+Date: Tue, 14 Aug 2012 09:32:26 +0000
+Message-ID: <201208140932.27276.arnd@arndb.de>
+References: <1344922213-19581-1-git-send-email-wei_wang@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:57052 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751866Ab2HNIGu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Aug 2012 04:06:50 -0400
-Received: by vcbfk26 with SMTP id fk26so83521vcb.19
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Aug 2012 01:06:49 -0700 (PDT)
-In-Reply-To: <5029F8F6.1080207@samsung.com>
+Received: from moutng.kundenserver.de ([212.227.17.9]:50049 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753519Ab2HNJct (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Aug 2012 05:32:49 -0400
+In-Reply-To: <1344922213-19581-1-git-send-email-wei_wang@realsil.com.cn>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: IAN CHEN <ian.cy.chen@samsung.com>
-Cc: cjb@laptop.org, linkinjeon@gmail.com, adrian.hunter@intel.com, subhashj@codeaurora.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com
+To: wei_wang@realsil.com.cn
+Cc: gregkh@linuxfoundation.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, sameo@linux.intel.com, bp@alien8.de
 
-On Tue, Aug 14, 2012 at 9:06 AM, IAN CHEN <ian.cy.chen@samsung.com> wrote:
+On Tuesday 14 August 2012, wei_wang@realsil.com.cn wrote:
+> From: Wei WANG <wei_wang@realsil.com.cn>
+> 
+> Realtek PCI-E card reader driver adapts requests from upper-level
+> sdmmc/memstick layer to the real physical card reader.
+> 
+> Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
 
-> +#define MMC_QUIRK_SECURE_MODE_BROKEN (1<<10)   /* Skip secure for
-> erase/trim */
+When you post a new version of patches, please add a version number in the
+subject line, like " [PATCH v3 1/2] drivers/mfd: Add realtek pcie card
+reader driver", to make it easier for people to know what has changed.
+It's also helpful to have a "[PATCH 0/XX]" as 'git format-patch
+--cover-letter' generates and list the changes to the previous versions
+of your patch in there. Best combine this with 'git send-email --thread
+--no-chain-reply', so all patches are sent in the same email thread as
+the introductory mail.
 
-OK this will work and sorry for being picky, but we are working with RPMB
-support and that's some other "secure mode" so to avoid any
-misuderstandings it's better to name the flag like I proposed,
-MMC_QUIRK_SEC_ERASE_TRIM_BROKEN
+Finally, when you get an 'Acked-by' or 'Reviewed-by' tag from someone,
+please add that below your Signed-off-by.
 
-I won't die if this goes in though :-)
+Your patches both look fine now, so you can add my
 
-Yours,
-Linus Walleij
+Reviewed-by: Arnd Bergmann <arnd@arndb.de>
+
+	Arnd
