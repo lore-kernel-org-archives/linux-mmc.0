@@ -1,55 +1,74 @@
-From: Tejun Heo <tj@kernel.org>
-Subject: Re: [PATCH v2 1/2] drivers/mfd: Add realtek pcie card reader driver
-Date: Thu, 16 Aug 2012 14:25:48 -0700
-Message-ID: <20120816212548.GI24861@google.com>
-References: <cover.1344939464.git.wei_wang@realsil.com.cn>
- <81fef7d4f337f6d8e3365752bbb3ef87302b82a0.1344939464.git.wei_wang@realsil.com.cn>
- <201208150640.54561.arnd@arndb.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Matt Porter <mporter@ti.com>
+Subject: [PATCH 0/3] DaVinci DMA engine conversion
+Date: Thu, 16 Aug 2012 17:44:28 -0400
+Message-ID: <1345153471-22757-1-git-send-email-mporter@ti.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:48565 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933362Ab2HPVcg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Aug 2012 17:32:36 -0400
-Content-Disposition: inline
-In-Reply-To: <201208150640.54561.arnd@arndb.de>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:34790 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754119Ab2HPVnk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Aug 2012 17:43:40 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: wei_wang@realsil.com.cn, gregkh@linuxfoundation.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, sameo@linux.intel.com, bp@alien8.de
+To: vinod.koul@intel.com, dan.j.williams@intel.com, cjb@laptop.org, grant.likely@secretlab.ca
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Sekhar Nori <nsekhar@ti.com>
 
-On Wed, Aug 15, 2012 at 06:40:54AM +0000, Arnd Bergmann wrote:
-> On Tuesday 14 August 2012, wei_wang@realsil.com.cn wrote:
-> > +
-> > +void rtsx_pci_start_run(struct rtsx_pcr *pcr)
-> > +{
-> > +       /* If pci device removed, don't queue idle work any more */
-> > +       if (pcr->remove_pci)
-> > +               return;
-> > +
-> > +       if (pcr->state != PDEV_STAT_RUN) {
-> > +               pcr->state = PDEV_STAT_RUN;
-> > +               pcr->ops->enable_auto_blink(pcr);
-> > +       }
-> > +
-> > +       mod_timer(&pcr->idle_timer, jiffies + msecs_to_jiffies(200));
-> > +}
-> > +EXPORT_SYMBOL_GPL(rtsx_pci_start_run);
-> 
-> One more comment on the mod_timer/queue_work combination: I just saw that
-> Tejun Heo posted a series to introduce a new mod_delayed_work() helper.
-> 
-> Once that goes in, it would be best to start using it here.
+This series begins the conversion of the DaVinci private
+EDMA API implementation to a DMA engine driver and
+converts two of the three in-kernel users of the private
+EDMA API to DMA engine.
 
-mod_delayed_work() is now in the following git branch.
+The approach taken is similar to the recent OMAP DMA
+Engine conversion. The EDMA DMA Engine driver is a
+wrapper around the existing private EDMA implementation
+and registers the platform device within the driver.
+This allows the conversion series to stand alone with
+just the drivers and no changes to platform code. It
+also allows peripheral drivers to continue to use the
+private EDMA implementation until they are converted.
 
- git://git.kernel.org/pub/scm/linux/kernel/git/tj/wq.git wq-mod_delayed
+The EDMA DMA Engine driver supports slave transfers only
+at this time. It is planned to add cyclic transfers in
+support of audio peripherals.
 
-The branch is stable and will be pushed during for-3.7 merge window.
-Please feel free to pull as necessary.
+There are three users of the private EDMA API in the
+kernel now: davinci_mmc, spi-davinci, and davinci-mcasp.
+This series provides DMA Engine conversions for the
+davinci_mmc and spi-davinci drivers which use the
+supported slave transfers.
 
-Thanks.
+This series has been tested on an AM18x EVM and
+performance is comparable with the private EDMA
+API implementations. I do not have a Wifi module
+for the AM18x EVM to test the MMC1 instance which
+has DMA channels on the second EDMA channel controller
+instance. Testing is needed on all DaVinci platforms
+including DM355/365, DM644x/6x, DA830/OMAP-L137/AM17x,
+and DA850/OMAP-L138/AM18x.
+
+After this series, the current plan is to complete
+the mcasp driver conversion which includes adding
+cyclic dma support. This will then enable the
+removal and refactoring of the private EDMA API
+functionality into the EDMA DMA Engine driver.
+Since EDMA is also used on the AM33xx family of
+parts in mach-omap2/, the plan is to enable this
+driver on that platform as well.
+
+Matt Porter (3):
+  dmaengine: add TI EDMA DMA engine driver
+  mmc: davinci_mmc: convert to DMA engine API
+  spi: spi-davinci: convert to DMA engine API
+
+ drivers/dma/Kconfig            |    9 +
+ drivers/dma/Makefile           |    1 +
+ drivers/dma/edma.c             |  729 ++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/davinci_mmc.c |  271 +++++----------
+ drivers/spi/spi-davinci.c      |  292 +++++++---------
+ include/linux/edma.h           |   29 ++
+ 6 files changed, 980 insertions(+), 351 deletions(-)
+ create mode 100644 drivers/dma/edma.c
+ create mode 100644 include/linux/edma.h
 
 -- 
-tejun
+1.7.9.5
+
