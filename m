@@ -1,43 +1,49 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v2 1/2] drivers/mfd: Add realtek pcie card reader driver
-Date: Wed, 15 Aug 2012 06:40:54 +0000
-Message-ID: <201208150640.54561.arnd@arndb.de>
-References: <cover.1344939464.git.wei_wang@realsil.com.cn> <81fef7d4f337f6d8e3365752bbb3ef87302b82a0.1344939464.git.wei_wang@realsil.com.cn>
+From: IAN CHEN <ian.cy.chen@samsung.com>
+Subject: RE: [PATCH v3] mmc: card: Skip secure option for MoviNAND.
+Date: Thu, 16 Aug 2012 13:09:39 +0900
+Message-ID: <000f01cd7b64$f70f6620$e52e3260$%cy.chen@samsung.com>
+References: <5029F8F6.1080207@samsung.com>
+ <CACRpkdYNKxjRXC=4no0p55ADkUvXTEcfW3b2z+Exg=cpHCtAAQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:57885 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751251Ab2HOGlM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Aug 2012 02:41:12 -0400
-In-Reply-To: <81fef7d4f337f6d8e3365752bbb3ef87302b82a0.1344939464.git.wei_wang@realsil.com.cn>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <CACRpkdYNKxjRXC=4no0p55ADkUvXTEcfW3b2z+Exg=cpHCtAAQ@mail.gmail.com>
+Content-language: en-us
+Sender: linux-kernel-owner@vger.kernel.org
+To: 'Linus Walleij' <linus.walleij@linaro.org>
+Cc: cjb@laptop.org, linkinjeon@gmail.com, adrian.hunter@intel.com, subhashj@codeaurora.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: wei_wang@realsil.com.cn
-Cc: gregkh@linuxfoundation.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, sameo@linux.intel.com, bp@alien8.de, Tejun Heo <tj@kernel.org>
 
-On Tuesday 14 August 2012, wei_wang@realsil.com.cn wrote:
-> +
-> +void rtsx_pci_start_run(struct rtsx_pcr *pcr)
-> +{
-> +       /* If pci device removed, don't queue idle work any more */
-> +       if (pcr->remove_pci)
-> +               return;
-> +
-> +       if (pcr->state != PDEV_STAT_RUN) {
-> +               pcr->state = PDEV_STAT_RUN;
-> +               pcr->ops->enable_auto_blink(pcr);
-> +       }
-> +
-> +       mod_timer(&pcr->idle_timer, jiffies + msecs_to_jiffies(200));
-> +}
-> +EXPORT_SYMBOL_GPL(rtsx_pci_start_run);
+MMC_QUIRK_SEC_ERASE_TRIM_BROKEN seems quite clear but I might not use "SEC"
+due to it could be Samsung Electronics Corporation.
+So, how about MMC_QUIRK_SECDISCARD_BROKEN which was used in
+mmc_blk_issue_secdiscard_rq() naming, the function we skip.
+Or, MMC_QUIRK_SECERASE_SECTRIM_BROKEN?
 
-One more comment on the mod_timer/queue_work combination: I just saw that
-Tejun Heo posted a series to introduce a new mod_delayed_work() helper.
+Regards,
+Ian
+-----Original Message-----
+From: Linus Walleij [mailto:linus.walleij@linaro.org] 
+Sent: Tuesday, August 14, 2012 5:07 PM
+To: IAN CHEN
+Cc: cjb@laptop.org; linkinjeon@gmail.com; adrian.hunter@intel.com;
+subhashj@codeaurora.org; linux-mmc@vger.kernel.org;
+linux-kernel@vger.kernel.org; d.j.shin@samsung.com;
+jongtae22.kim@samsung.com; kyungmin.park@samsung.com; jh80.chung@samsung.com
+Subject: Re: [PATCH v3] mmc: card: Skip secure option for MoviNAND.
 
-Once that goes in, it would be best to start using it here.
+On Tue, Aug 14, 2012 at 9:06 AM, IAN CHEN <ian.cy.chen@samsung.com> wrote:
 
-	Arnd
+> +#define MMC_QUIRK_SECURE_MODE_BROKEN (1<<10)   /* Skip secure for
+> erase/trim */
+
+OK this will work and sorry for being picky, but we are working with RPMB
+support and that's some other "secure mode" so to avoid any
+misuderstandings it's better to name the flag like I proposed,
+MMC_QUIRK_SEC_ERASE_TRIM_BROKEN
+
+I won't die if this goes in though :-)
+
+Yours,
+Linus Walleij
