@@ -1,40 +1,226 @@
 From: Venkatraman S <svenkatr@ti.com>
-Subject: [PATCH 10/10] mmc: omap_hsmmc: Move to Maintained state in MAINTAINERS
-Date: Sat, 18 Aug 2012 00:22:30 +0530
-Message-ID: <1345229550-8672-11-git-send-email-svenkatr@ti.com>
+Subject: [PATCH 09/10] mmc: omap_hsmmc: convert from IP timer to hrtimer
+Date: Sat, 18 Aug 2012 00:22:29 +0530
+Message-ID: <1345229550-8672-10-git-send-email-svenkatr@ti.com>
 References: <1345229550-8672-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bear.ext.ti.com ([192.94.94.41]:44749 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932504Ab2HQSyI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 17 Aug 2012 14:54:08 -0400
 In-Reply-To: <1345229550-8672-1-git-send-email-svenkatr@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 Cc: cjb@laptop.org, balajitk@ti.com, vishp@ti.com, Venkatraman S <svenkatr@ti.com>
-List-Id: linux-mmc@vger.kernel.org
 
-I can continue to look after this driver.
+omap hsmmc controller IP has an inbuilt timer that can be programmed to
+guard against unresponsive operations. But it's range is very narrow,
+and it's maximum countable time is a few seconds.
+
+Card maintenance operations like BKOPS and SECURE DISCARD and long
+stream writes like packed command require timers of order of
+several minutes.
+So get rid of using the IP timer entirely and use kernel's hrtimer
+functionality for guarding the device operations.
+As part of this change, a workaround that disabled timeouts for
+MMC_ERASE commands is removed, and the arbitary timing of 100ms
+is used only when the timeout is not explicitly specified by core.
 
 Signed-off-by: Venkatraman S <svenkatr@ti.com>
 ---
- MAINTAINERS | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/host/omap_hsmmc.c | 96 ++++++++++++++++++++++---------------------
+ 1 file changed, 50 insertions(+), 46 deletions(-)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 72c2681..75e3c3e 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -4933,8 +4933,10 @@ S:	Maintained
- F:	drivers/mmc/host/omap.c
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 9afdd20..8f7cebc 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -79,7 +79,7 @@
+ #define CLKD_SHIFT		6
+ #define DTO_MASK		0x000F0000
+ #define DTO_SHIFT		16
+-#define INT_EN_MASK		0x307F0033
++#define INT_EN_MASK		0x306E0033
+ #define BWR_ENABLE		(1 << 4)
+ #define BRR_ENABLE		(1 << 5)
+ #define DTO_ENABLE		(1 << 20)
+@@ -160,6 +160,7 @@ struct omap_hsmmc_host {
+ 	unsigned int		dma_sg_idx;
+ 	unsigned char		bus_mode;
+ 	unsigned char		power_mode;
++	unsigned int		ns_per_clk_cycle;
+ 	int			suspended;
+ 	int			irq;
+ 	int			use_dma, dma_ch;
+@@ -172,6 +173,7 @@ struct omap_hsmmc_host {
+ 	int			reqs_blocked;
+ 	int			use_reg;
+ 	int			req_in_progress;
++	struct hrtimer	guard_timer;
+ 	struct omap_hsmmc_next	next_data;
  
- OMAP HS MMC SUPPORT
-+M:	Venkatraman S <svenkatr@ti.com>
-+L:	linux-mmc@vger.kernel.org
- L:	linux-omap@vger.kernel.org
--S:	Orphan
-+S:	Maintained
- F:	drivers/mmc/host/omap_hsmmc.c
+ 	struct	omap_mmc_platform_data	*pdata;
+@@ -455,10 +457,6 @@ static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
+ 	else
+ 		irq_mask = INT_EN_MASK;
  
- OMAP RANDOM NUMBER GENERATOR SUPPORT
+-	/* Disable timeout for erases */
+-	if (cmd->opcode == MMC_ERASE)
+-		irq_mask &= ~DTO_ENABLE;
+-
+ 	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+ 	OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
+ 	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
+@@ -508,6 +506,9 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
+ 		&& time_before(jiffies, timeout))
+ 		cpu_relax();
+ 
++	if (ios->clock)
++		host->ns_per_clk_cycle = DIV_ROUND_UP(NSEC_PER_SEC, ios->clock);
++
+ 	omap_hsmmc_start_clock(host);
+ }
+ 
+@@ -824,7 +825,7 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host, struct mmc_data *data)
+ 		omap_hsmmc_request_done(host, mrq);
+ 		return;
+ 	}
+-
++	hrtimer_cancel(&host->guard_timer);
+ 	host->data = NULL;
+ 
+ 	if (!data->error)
+@@ -859,8 +860,11 @@ omap_hsmmc_cmd_done(struct omap_hsmmc_host *host, struct mmc_command *cmd)
+ 			cmd->resp[0] = OMAP_HSMMC_READ(host->base, RSP10);
+ 		}
+ 	}
+-	if ((host->data == NULL && !host->response_busy) || cmd->error)
++	if ((host->data == NULL && !host->response_busy) || cmd->error) {
++		if (cmd->error != -ETIMEDOUT)
++			hrtimer_cancel(&host->guard_timer);
+ 		omap_hsmmc_request_done(host, cmd->mrq);
++	}
+ }
+ 
+ /*
+@@ -992,7 +996,7 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
+ 			hsmmc_command_incomplete(host, -EILSEQ);
+ 
+ 		end_cmd = 1;
+-		if (host->data || host->response_busy) {
++		if (data || host->response_busy) {
+ 			end_trans = 1;
+ 			host->response_busy = 0;
+ 		}
+@@ -1292,41 +1296,35 @@ static int omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host,
+ 	return 0;
+ }
+ 
+-static void set_data_timeout(struct omap_hsmmc_host *host,
+-			     unsigned int timeout_ns,
+-			     unsigned int timeout_clks)
++static void set_guard_timer(struct omap_hsmmc_host *host,
++		unsigned long timeout_ms, unsigned long timeout_ns,
++		unsigned int timeout_clks)
+ {
+-	unsigned int timeout, cycle_ns;
+-	uint32_t reg, clkd, dto = 0;
++	ktime_t gtime;
++	unsigned int sec, nsec;
+ 
+-	reg = OMAP_HSMMC_READ(host->base, SYSCTL);
+-	clkd = (reg & CLKD_MASK) >> CLKD_SHIFT;
+-	if (clkd == 0)
+-		clkd = 1;
++	sec = timeout_ms / MSEC_PER_SEC;
++	nsec = (timeout_ms % MSEC_PER_SEC) * NSEC_PER_MSEC + timeout_ns;
+ 
+-	cycle_ns = 1000000000 / (clk_get_rate(host->fclk) / clkd);
+-	timeout = timeout_ns / cycle_ns;
+-	timeout += timeout_clks;
+-	if (timeout) {
+-		while ((timeout & 0x80000000) == 0) {
+-			dto += 1;
+-			timeout <<= 1;
+-		}
+-		dto = 31 - dto;
+-		timeout <<= 1;
+-		if (timeout && dto)
+-			dto += 1;
+-		if (dto >= 13)
+-			dto -= 13;
+-		else
+-			dto = 0;
+-		if (dto > 14)
+-			dto = 14;
+-	}
++	nsec += timeout_clks * host->ns_per_clk_cycle;
++	gtime = ktime_set(sec, nsec);
+ 
+-	reg &= ~DTO_MASK;
+-	reg |= dto << DTO_SHIFT;
+-	OMAP_HSMMC_WRITE(host->base, SYSCTL, reg);
++	hrtimer_start(&host->guard_timer, gtime, HRTIMER_MODE_REL);
++}
++
++enum hrtimer_restart omap_hsmmc_timedout(struct hrtimer *gtimer)
++{
++	struct omap_hsmmc_host *host;
++	host = container_of(gtimer, struct omap_hsmmc_host, guard_timer);
++
++	omap_hsmmc_disable_irq(host);
++	hsmmc_command_incomplete(host, -ETIMEDOUT);
++	host->response_busy = 0;
++	omap_hsmmc_cmd_done(host, host->cmd);
++	if (host->data)
++		omap_hsmmc_xfer_done(host, host->data);
++
++	return HRTIMER_NORESTART;
+ }
+ 
+ /*
+@@ -1340,18 +1338,22 @@ omap_hsmmc_prepare_data(struct omap_hsmmc_host *host, struct mmc_request *req)
+ 
+ 	if (req->data == NULL) {
+ 		OMAP_HSMMC_WRITE(host->base, BLK, 0);
+-		/*
+-		 * Set an arbitrary 100ms data timeout for commands with
+-		 * busy signal.
+-		 */
+-		if (req->cmd->flags & MMC_RSP_BUSY)
+-			set_data_timeout(host, 100000000U, 0);
++		if (req->cmd->cmd_timeout_ms == 0) {
++			/*
++			 * Set an arbitrary 100ms data timeout for commands with
++			 * busy signal.
++			 */
++			set_guard_timer(host, 100, 0, 0);
++		} else {
++			set_guard_timer(host, req->cmd->cmd_timeout_ms, 0, 0);
++		}
+ 		return 0;
+ 	}
+ 
+ 	OMAP_HSMMC_WRITE(host->base, BLK, (req->data->blksz)
+ 					| (req->data->blocks << 16));
+-	set_data_timeout(host, req->data->timeout_ns, req->data->timeout_clks);
++	set_guard_timer(host, 0, req->data->timeout_ns,
++			req->data->timeout_clks);
+ 
+ 	if (host->use_dma) {
+ 		ret = omap_hsmmc_start_dma_transfer(host, req);
+@@ -1921,6 +1923,8 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
+ 		pdata->suspend = omap_hsmmc_suspend_cdirq;
+ 		pdata->resume = omap_hsmmc_resume_cdirq;
+ 	}
++	hrtimer_init(&host->guard_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
++	host->guard_timer.function = omap_hsmmc_timedout;
+ 
+ 	omap_hsmmc_disable_irq(host);
+ 
 -- 
 1.7.11.1.25.g0e18bef
 
