@@ -1,43 +1,43 @@
 From: Venkatraman S <svenkatr@ti.com>
-Subject: [PATCH 01/10] mmc: core: Add TRANsfer state to non-HPI state
-Date: Sat, 18 Aug 2012 00:22:21 +0530
-Message-ID: <1345229550-8672-2-git-send-email-svenkatr@ti.com>
+Subject: [PATCH 02/10] mmc: debugfs: Print ext_csd in ascending order
+Date: Sat, 18 Aug 2012 00:22:22 +0530
+Message-ID: <1345229550-8672-3-git-send-email-svenkatr@ti.com>
 References: <1345229550-8672-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:55033 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932379Ab2HQSxd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 17 Aug 2012 14:53:33 -0400
 In-Reply-To: <1345229550-8672-1-git-send-email-svenkatr@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 Cc: cjb@laptop.org, balajitk@ti.com, vishp@ti.com, Venkatraman S <svenkatr@ti.com>
-List-Id: linux-mmc@vger.kernel.org
 
-HPI can be issued only in programming state to bring the card to
-transfer state. If the card is already in transfer state, doing
-a HPI is redundant.
-Fix this by adding transfer state to the list of exceptions to
-doing HPI and return without error.
+ext_csd exported through debugfs is printed in reverse order (from
+byte 511 to 0), which causes confusion.
+Fix the for loop to print ext_csd in natural order.
 
 Signed-off-by: Venkatraman S <svenkatr@ti.com>
 ---
- drivers/mmc/core/core.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/core/debugfs.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 8ac5246..835c9f0 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -424,8 +424,9 @@ int mmc_interrupt_hpi(struct mmc_card *card)
- 	case R1_STATE_IDLE:
- 	case R1_STATE_READY:
- 	case R1_STATE_STBY:
-+	case R1_STATE_TRAN:
- 		/*
--		 * In idle states, HPI is not needed and the caller
-+		 * In idle and transfer states, HPI is not needed and the caller
- 		 * can issue the next intended command immediately
- 		 */
- 		goto out;
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index 9ab5b17..d96c643 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -281,7 +281,7 @@ static int mmc_ext_csd_open(struct inode *inode, struct file *filp)
+ 	if (err)
+ 		goto out_free;
+ 
+-	for (i = 511; i >= 0; i--)
++	for (i = 0; i < 512; i++)
+ 		n += sprintf(buf + n, "%02x", ext_csd[i]);
+ 	n += sprintf(buf + n, "\n");
+ 	BUG_ON(n != EXT_CSD_STR_LEN);
 -- 
 1.7.11.1.25.g0e18bef
 
