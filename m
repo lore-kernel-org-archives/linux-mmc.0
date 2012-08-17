@@ -1,64 +1,88 @@
 From: Venkatraman S <svenkatr@ti.com>
-Subject: [PATCH 03/10] mmc: omap: remove unused variables and includes
-Date: Sat, 18 Aug 2012 00:22:23 +0530
-Message-ID: <1345229550-8672-4-git-send-email-svenkatr@ti.com>
+Subject: [PATCH 04/10] mmc: omap: fix mmc_omap_report_irq to use dev_dbg macros
+Date: Sat, 18 Aug 2012 00:22:24 +0530
+Message-ID: <1345229550-8672-5-git-send-email-svenkatr@ti.com>
 References: <1345229550-8672-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:55046 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932379Ab2HQSxn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 17 Aug 2012 14:53:43 -0400
 In-Reply-To: <1345229550-8672-1-git-send-email-svenkatr@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 Cc: cjb@laptop.org, balajitk@ti.com, vishp@ti.com, Venkatraman S <svenkatr@ti.com>
-List-Id: linux-mmc@vger.kernel.org
 
-Get rid of some unnecessary includes in the driver and
-a few unused variables.
+The function mmc_omap_report_irq uses raw printks and the
+actual output was disabled by a static variable. Make
+the function use dev_vdbg macro and use it under the
+standard CONFIG_MMC_DEBUG flag.
 
 Signed-off-by: Venkatraman S <svenkatr@ti.com>
 ---
- drivers/mmc/host/omap.c | 10 ----------
- 1 file changed, 10 deletions(-)
+ drivers/mmc/host/omap.c | 29 +++++++++++++++++------------
+ 1 file changed, 17 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index 50e08f0..0ec4e55 100644
+index 0ec4e55..614f63c 100644
 --- a/drivers/mmc/host/omap.c
 +++ b/drivers/mmc/host/omap.c
-@@ -27,18 +27,10 @@
- #include <linux/mmc/card.h>
- #include <linux/clk.h>
- #include <linux/scatterlist.h>
--#include <linux/i2c/tps65010.h>
- #include <linux/slab.h>
+@@ -679,22 +679,29 @@ mmc_omap_xfer_data(struct mmc_omap_host *host, int write)
+ 	}
+ }
  
--#include <asm/io.h>
--#include <asm/irq.h>
--
--#include <plat/board.h>
- #include <plat/mmc.h>
--#include <asm/gpio.h>
- #include <plat/dma.h>
--#include <plat/mux.h>
--#include <plat/fpga.h>
+-static inline void mmc_omap_report_irq(u16 status)
++#ifdef CONFIG_MMC_DEBUG
++static void mmc_omap_report_irq(struct mmc_omap_host *host, u16 status)
+ {
+ 	static const char *mmc_omap_status_bits[] = {
+ 		"EOC", "CD", "CB", "BRS", "EOFB", "DTO", "DCRC", "CTO",
+ 		"CCRC", "CRW", "AF", "AE", "OCRB", "CIRQ", "CERR"
+ 	};
+-	int i, c = 0;
++	int i;
++	char res[64], *buf = res;
++
++	buf += sprintf(buf, "MMC IRQ 0x%x:", status);
  
- #define	OMAP_MMC_REG_CMD	0x00
- #define	OMAP_MMC_REG_ARGL	0x01
-@@ -107,7 +99,6 @@ struct mmc_omap_slot {
- 	u16			saved_con;
- 	u16			bus_mode;
- 	unsigned int		fclk_freq;
--	unsigned		powered:1;
+ 	for (i = 0; i < ARRAY_SIZE(mmc_omap_status_bits); i++)
+-		if (status & (1 << i)) {
+-			if (c)
+-				printk(" ");
+-			printk("%s", mmc_omap_status_bits[i]);
+-			c++;
+-		}
++		if (status & (1 << i))
++			buf += sprintf(buf, " %s", mmc_omap_status_bits[i]);
++	dev_vdbg(mmc_dev(host->mmc), "%s\n", res);
++}
++#else
++static void mmc_omap_report_irq(struct mmc_omap_host *host, u16 status)
++{
+ }
++#endif
++
  
- 	struct tasklet_struct	cover_tasklet;
- 	struct timer_list       cover_timer;
-@@ -139,7 +130,6 @@ struct mmc_omap_host {
- 	unsigned int		phys_base;
- 	int			irq;
- 	unsigned char		bus_mode;
--	unsigned char		hw_bus_mode;
- 	unsigned int		reg_shift;
- 
- 	struct work_struct	cmd_abort_work;
+ static irqreturn_t mmc_omap_irq(int irq, void *dev_id)
+ {
+@@ -728,12 +735,10 @@ static irqreturn_t mmc_omap_irq(int irq, void *dev_id)
+ 			cmd = host->cmd->opcode;
+ 		else
+ 			cmd = -1;
+-#ifdef CONFIG_MMC_DEBUG
+ 		dev_dbg(mmc_dev(host->mmc), "MMC IRQ %04x (CMD %d): ",
+ 			status, cmd);
+-		mmc_omap_report_irq(status);
+-		printk("\n");
+-#endif
++		mmc_omap_report_irq(host, status);
++
+ 		if (host->total_bytes_left) {
+ 			if ((status & OMAP_MMC_STAT_A_FULL) ||
+ 			    (status & OMAP_MMC_STAT_END_OF_DATA))
 -- 
 1.7.11.1.25.g0e18bef
 
