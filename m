@@ -1,99 +1,53 @@
-From: IAN CHEN <ian.cy.chen@samsung.com>
-Subject: [PATCH v5] mmc: card: Skip secure option for MoviNAND.
-Date: Fri, 17 Aug 2012 16:09:57 +0900
-Message-ID: <502DEE45.40405@samsung.com>
+From: Heiko =?iso-8859-15?q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: [PATCH] mmc: sdhci-s3c: Add device tree support
+Date: Fri, 17 Aug 2012 10:06:24 +0200
+Message-ID: <201208171006.25051.heiko@sntech.de>
+References: <1345132169-21066-1-git-send-email-thomas.abraham@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:22110 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752202Ab2HQHNx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Aug 2012 03:13:53 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1345132169-21066-1-git-send-email-thomas.abraham@linaro.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Thomas Abraham <thomas.abraham@linaro.org>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, linkinjeon@gmail.com, adrian.hunter@intel.com, subhashj@codeaurora.org, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com, ian.cy.chen@samsung.com
 
-For several MoviNAND, there are some known issue with secure option.
-For these specific MoviNAND device, we skip secure option.
+Hi Thomas,
 
-You could refer this discussion in XDA developers.
-http://forum.xda-developers.com/showthread.php?t=1644364
-https://plus.google.com/111398485184813224730/posts/21pTYfTsCkB#111398485184813224730/posts/21pTYfTsCkB
+Am Donnerstag, 16. August 2012, 17:49:29 schrieb Thomas Abraham:
+> Add device tree based discovery support for Samsung's sdhci controller
+> 
+> Cc: Ben Dooks <ben-linux@fluff.org>
+> Cc: Kukjin Kim <kgene.kim@samsung.com>
+> Cc: Chris Ball <cjb@laptop.org>
+> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci-s3c.c |  146
+> ++++++++++++++++++++++++++++++++++++++++-- 1 files changed, 140
+> insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index a50c205..7fcc642 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
 
-Signed-off-by: Ian Chen <ian.cy.chen@samsung.com>
-Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
----
- drivers/mmc/card/block.c |   24 +++++++++++++++++++++++-
- include/linux/mmc/card.h |    1 +
- 2 files changed, 24 insertions(+), 1 deletions(-)
+[...]
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index f1c84de..0377885 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1411,7 +1411,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
-struct request *req)
- 		/* complete ongoing async transfer before issuing discard */
- 		if (card->host->areq)
- 			mmc_blk_issue_rw_rq(mq, NULL);
--		if (req->cmd_flags & REQ_SECURE)
-+		if (req->cmd_flags & REQ_SECURE &&
-+			!(card->quirks & MMC_QUIRK_SEC_ERASE_TRIM_BROKEN))
- 			ret = mmc_blk_issue_secdiscard_rq(mq, req);
- 		else
- 			ret = mmc_blk_issue_discard_rq(mq, req);
-@@ -1716,6 +1717,7 @@ force_ro_fail:
- #define CID_MANFID_SANDISK	0x2
- #define CID_MANFID_TOSHIBA	0x11
- #define CID_MANFID_MICRON	0x13
-+#define CID_MANFID_SAMSUNG	0x15
+> @@ -737,6 +860,16 @@ static struct platform_device_id
+> sdhci_s3c_driver_ids[] = { };
+>  MODULE_DEVICE_TABLE(platform, sdhci_s3c_driver_ids);
+> 
+> +#ifdef CONFIG_OF
+> +static const struct of_device_id sdhci_s3c_dt_match[] = {
+> +	{ .compatible = "samsung,s3c6410-sdhci", },
+> +	{ .compatible = "samsung,exynos4210-sdhci",
+> +		.data = &exynos4_sdhci_drv_data },
 
- static const struct mmc_fixup blk_fixups[] =
- {
-@@ -1752,6 +1754,26 @@ static const struct mmc_fixup blk_fixups[] =
- 	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
- 		  MMC_QUIRK_LONG_READ_TIME),
+Please use the EXYNOS4_SDHCI_DRV_DATA constant here. Otherwise other Samsung 
+platforms experimenting with dt will break.
 
-+	/*
-+	 * Some issue about secure erase/secure trim for Samsung MoviNAND
-+	 */
-+	MMC_FIXUP("M8G2FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+	MMC_FIXUP("MAG4FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+	MMC_FIXUP("MBG8FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+	MMC_FIXUP("MCGAFA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+	MMC_FIXUP("VAL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+	MMC_FIXUP("VYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+	MMC_FIXUP("KYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+	MMC_FIXUP("VZL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+
- 	END_FIXUP
- };
 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 111aca5..4b27f9f 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -239,6 +239,7 @@ struct mmc_card {
- #define MMC_QUIRK_BLK_NO_CMD23	(1<<7)		/* Avoid CMD23 for regular
-multiblock */
- #define MMC_QUIRK_BROKEN_BYTE_MODE_512 (1<<8)	/* Avoid sending 512
-bytes in */
- #define MMC_QUIRK_LONG_READ_TIME (1<<9)		/* Data read time > CSD says */
-+#define MMC_QUIRK_SEC_ERASE_TRIM_BROKEN (1<<10)	/* Skip secure for
-erase/trim */
- 						/* byte mode */
- 	unsigned int    poweroff_notify_state;	/* eMMC4.5 notify feature */
- #define MMC_NO_POWER_NOTIFICATION	0
--- 
-1.7.0.4
+Thanks
+Heiko
