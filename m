@@ -1,187 +1,145 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH] Add MSI support for SDHCI PCI hosts
-Date: Fri, 17 Aug 2012 09:35:52 -0700
-Message-ID: <15456EE0-A358-4864-9F8D-B7F13014C47E@marvell.com>
-References: <1345194854-8330-1-git-send-email-daniel@quora.org>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH] omap-hsmmc: Implementation of i761 errata
+Date: Fri, 17 Aug 2012 22:58:34 +0530
+Message-ID: <CANfBPZ9NqZGN1LPNu+5DVWdkut2AL3O_8TWtWhBTufpdRZYZ_Q@mail.gmail.com>
+References: <1345219546-6646-1-git-send-email-semen.protsenko@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:45080 "EHLO
-	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932131Ab2HQQf5 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 17 Aug 2012 12:35:57 -0400
-In-Reply-To: <1345194854-8330-1-git-send-email-daniel@quora.org>
-Content-Language: en-US
+Received: from na3sys009aog132.obsmtp.com ([74.125.149.250]:33214 "EHLO
+	na3sys009aog132.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1758086Ab2HQR24 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Aug 2012 13:28:56 -0400
+Received: by pbbrp8 with SMTP id rp8so3655665pbb.29
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Aug 2012 10:28:54 -0700 (PDT)
+In-Reply-To: <1345219546-6646-1-git-send-email-semen.protsenko@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel J Blueman <daniel@quora.org>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Semen Protsenko <semen.protsenko@ti.com>
+Cc: linux-omap@vger.kernel.org, Volodymyr Ryazantsev <x0153367@ti.com>, Viswanath Puttagunta <vishp@ti.com>, Balaji T Krishnamoorthy <balajitk@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>
 
+On Fri, Aug 17, 2012 at 9:35 PM, Semen Protsenko <semen.protsenko@ti.com> wrote:
+> Errata description:
+> Due to a bad behavior of an internal signal, the Card Error interrupt bit
+> MMCHS_STAT[28] CERR may not be set sometimes when an error occurred in the
+> card response.
+>
+> Workaround:
+> After responses of type R1/R1b for all cards and responses of type R5/R5b/R6
+> for SD and SDIO cards, software must read two registers: MMCHS_RSP10 and
+> MMCHS_CSRE. When a MMCHS_CSRE[i] bit is set to 1, if the corresponding bit at
+> the same position in the response MMCHS_RSP10[i] is set to 1, the host
+> controller indicates a card error and software should proceed in the same way
+> as if a CERR interrupt would have been detected in the MMCHS_STAT register.
+>
+> Note:
+> This errata is applicable for omap44xx.
+>
+> Signed-off-by: Semen Protsenko <semen.protsenko@ti.com>
 
-The interrupt source could be from a non-pci device.  Say a gpio or whatever.
-Does it make sense to break this patch into two patches ?  
+The implementation looks fine, but can we simply not set the errata
+flag and make this as default
+behaviour ? I suppose the documented behaviour with CSRE and RSP10 is
+independent of the
+errata..
 
-On Aug 17, 2012, at 2:14 AM, Daniel J Blueman <daniel@quora.org> wrote:
+Also, please send it to the linux-mmc list as well.
 
-> Allow module parameter 'enable_msi' to request an MSI interrupt for
-> hosts where available (presently PCI). Useful as a workaround on
-> platforms where the legacy interrupt is broken.
-> 
-> Signed-off-by: Daniel J Blueman <daniel@quora.org>
 > ---
-> drivers/mmc/host/sdhci-pci.c |   30 ++++++++++++++++++++++++++++++
-> drivers/mmc/host/sdhci.c     |   23 +++++++++++++++++++++++
-> drivers/mmc/host/sdhci.h     |    2 ++
-> 3 files changed, 55 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-> index 504da71..fbde589 100644
-> --- a/drivers/mmc/host/sdhci-pci.c
-> +++ b/drivers/mmc/host/sdhci-pci.c
-> @@ -934,6 +934,34 @@ static int sdhci_pci_enable_dma(struct sdhci_host *host)
-> 	return 0;
-> }
-> 
-> +static int sdhci_pci_enable_msi(struct sdhci_host *host)
+>  drivers/mmc/host/omap_hsmmc.c |   38 ++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 38 insertions(+)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 3a09f93..17803de 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -34,6 +34,7 @@
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/core.h>
+>  #include <linux/mmc/mmc.h>
+> +#include <linux/mmc/card.h>
+>  #include <linux/io.h>
+>  #include <linux/semaphore.h>
+>  #include <linux/gpio.h>
+> @@ -47,6 +48,7 @@
+>  /* OMAP HSMMC Host Controller Registers */
+>  #define OMAP_HSMMC_SYSCONFIG   0x0010
+>  #define OMAP_HSMMC_SYSSTATUS   0x0014
+> +#define OMAP_HSMMC_CSRE                0x0024
+>  #define OMAP_HSMMC_CON         0x002C
+>  #define OMAP_HSMMC_BLK         0x0104
+>  #define OMAP_HSMMC_ARG         0x0108
+> @@ -117,6 +119,9 @@
+>  #define OMAP_MMC_MAX_CLOCK     52000000
+>  #define DRIVER_NAME            "omap_hsmmc"
+>
+> +/* Errata definitions */
+> +#define OMAP_HSMMC_ERRATA_I761 BIT(0)
+> +
+>  /*
+>   * One controller can have multiple slots, like on some omap boards using
+>   * omap.c controller driver. Luckily this is not currently done on any known
+> @@ -177,6 +182,7 @@ struct omap_hsmmc_host {
+>         int                     reqs_blocked;
+>         int                     use_reg;
+>         int                     req_in_progress;
+> +       unsigned int            errata;
+>         struct omap_hsmmc_next  next_data;
+>
+>         struct  omap_mmc_platform_data  *pdata;
+> @@ -857,6 +863,23 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host, struct mmc_data *data)
+>         omap_hsmmc_start_command(host, data->stop, NULL);
+>  }
+>
+> +static int
+> +omap_hsmmc_errata_i761(struct omap_hsmmc_host *host, struct mmc_command *cmd)
 > +{
-> +	struct sdhci_pci_slot *slot;
-> +	struct pci_dev *pdev;
-> +	int ret;
+> +       u32 rsp10, csre;
 > +
-> +	slot = sdhci_priv(host);
-> +	pdev = slot->chip->pdev;
+> +       if ((cmd->flags & MMC_RSP_R1) == MMC_RSP_R1
+> +                       || (host->mmc->card && (mmc_card_sd(host->mmc->card)
+> +                       || mmc_card_sdio(host->mmc->card))
+> +                       && (cmd->flags & MMC_RSP_R5))) {
+> +               rsp10 = OMAP_HSMMC_READ(host->base, RSP10);
+> +               csre = OMAP_HSMMC_READ(host->base, CSRE);
+> +               return rsp10 & csre;
+> +       }
 > +
-> +	ret = pci_enable_msi(pdev);
-> +	if (ret)
-> +		return ret;
-> +
-> +	host->irq = pdev->irq;
-> +	return 0;
+> +       return 0;
 > +}
 > +
-> +static void sdhci_pci_disable_msi(struct sdhci_host *host)
-> +{
-> +	struct sdhci_pci_slot *slot;
-> +	struct pci_dev *pdev;
+>  /*
+>   * Notify the core about command completion
+>   */
+> @@ -1046,6 +1069,17 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
+>                 }
+>         }
+>
+> +       /* Errata i761 */
+> +       if ((host->errata & OMAP_HSMMC_ERRATA_I761) && host->cmd
+> +                       && omap_hsmmc_errata_i761(host, host->cmd)) {
+> +               /* Do the same as for CARD_ERR case */
+> +               dev_dbg(mmc_dev(host->mmc), "Ignoring card err CMD%d\n",
+> +                               host->cmd->opcode);
+> +               end_cmd = 1;
+> +               if (host->data)
+> +                       end_trans = 1;
+> +       }
 > +
-> +	slot = sdhci_priv(host);
-> +	pdev = slot->chip->pdev;
+>         OMAP_HSMMC_WRITE(host->base, STAT, status);
+>
+>         if (end_cmd || ((status & CC) && host->cmd))
+> @@ -1829,6 +1863,10 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
+>         host->power_mode = MMC_POWER_OFF;
+>         host->next_data.cookie = 1;
+>
+> +       host->errata = 0;
+> +       if (cpu_is_omap44xx())
+> +               host->errata |= OMAP_HSMMC_ERRATA_I761;
 > +
-> +	pci_disable_msi(pdev);
-> +}
-> +
-> static int sdhci_pci_8bit_width(struct sdhci_host *host, int width)
-> {
-> 	u8 ctrl;
-> @@ -976,6 +1004,8 @@ static void sdhci_pci_hw_reset(struct sdhci_host *host)
-> 
-> static struct sdhci_ops sdhci_pci_ops = {
-> 	.enable_dma	= sdhci_pci_enable_dma,
-> +	.enable_msi	= sdhci_pci_enable_msi,
-> +	.disable_msi	= sdhci_pci_disable_msi,
-> 	.platform_8bit_width	= sdhci_pci_8bit_width,
-> 	.hw_reset		= sdhci_pci_hw_reset,
-> };
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 9a11dc3..9fa2180 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -45,6 +45,7 @@
-> 
-> static unsigned int debug_quirks = 0;
-> static unsigned int debug_quirks2;
-> +static bool enable_msi;
-> 
-> static void sdhci_finish_data(struct sdhci_host *);
-> 
-> @@ -2433,6 +2434,9 @@ int sdhci_suspend_host(struct sdhci_host *host)
-> 
-> 	free_irq(host->irq, host);
-> 
-> +	if (host->ops->disable_msi && enable_msi)
-> +		host->ops->disable_msi(host);
-> +
-> 	return ret;
-> }
-> 
-> @@ -2447,6 +2451,12 @@ int sdhci_resume_host(struct sdhci_host *host)
-> 			host->ops->enable_dma(host);
-> 	}
-> 
-> +	if (host->ops->enable_msi && enable_msi) {
-> +		ret = host->ops->enable_msi(host);
-> +		if (ret)
-> +			return ret;
-> +	}
-> +
-> 	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
-> 			  mmc_hostname(host->mmc), host);
-> 	if (ret)
-> @@ -3024,6 +3034,12 @@ int sdhci_add_host(struct sdhci_host *host)
-> 		host->tuning_timer.function = sdhci_tuning_timer;
-> 	}
-> 
-> +	if (host->ops->enable_msi && enable_msi) {
-> +		ret = host->ops->enable_msi(host);
-> +		if (ret)
-> +			return ret;
-> +	}
-> +
-> 	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
-> 		mmc_hostname(mmc), host);
-> 	if (ret) {
-> @@ -3071,6 +3087,8 @@ int sdhci_add_host(struct sdhci_host *host)
-> reset:
-> 	sdhci_reset(host, SDHCI_RESET_ALL);
-> 	free_irq(host->irq, host);
-> +	if (host->ops->disable_msi && enable_msi)
-> +		host->ops->disable_msi(host);
-> #endif
-> untasklet:
-> 	tasklet_kill(&host->card_tasklet);
-> @@ -3114,6 +3132,9 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
-> 
-> 	free_irq(host->irq, host);
-> 
-> +	if (host->ops->disable_msi && enable_msi)
-> +		host->ops->disable_msi(host);
-> +
-> 	del_timer_sync(&host->timer);
-> 
-> 	tasklet_kill(&host->card_tasklet);
-> @@ -3162,6 +3183,7 @@ module_exit(sdhci_drv_exit);
-> 
-> module_param(debug_quirks, uint, 0444);
-> module_param(debug_quirks2, uint, 0444);
-> +module_param(enable_msi, bool, 0444);
-> 
-> MODULE_AUTHOR("Pierre Ossman <pierre@ossman.eu>");
-> MODULE_DESCRIPTION("Secure Digital Host Controller Interface core driver");
-> @@ -3169,3 +3191,4 @@ MODULE_LICENSE("GPL");
-> 
-> MODULE_PARM_DESC(debug_quirks, "Force certain quirks.");
-> MODULE_PARM_DESC(debug_quirks2, "Force certain other quirks.");
-> +MODULE_PARM_DESC(debug_quirks2, "Enable MSI interrupt support where possible.");
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 97653ea..df4e003 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -264,6 +264,8 @@ struct sdhci_ops {
-> 	void	(*set_clock)(struct sdhci_host *host, unsigned int clock);
-> 
-> 	int		(*enable_dma)(struct sdhci_host *host);
-> +	int		(*enable_msi)(struct sdhci_host *host);
-> +	void		(*disable_msi)(struct sdhci_host *host);
-> 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
-> 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
-> 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
-> -- 
-> 1.7.10.4
-> 
+>         platform_set_drvdata(pdev, host);
+>
+>         mmc->ops        = &omap_hsmmc_ops;
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+> 1.7.10.4
+>
