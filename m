@@ -1,31 +1,197 @@
-From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Subject: Re: [PATCH] mmc: tegra: convert to device tree support only
-Date: Fri, 17 Aug 2012 13:01:31 -0600
-Message-ID: <502E950B.2010205@wwwdotorg.org>
-References: <1345187071-6619-1-git-send-email-josephl@nvidia.com>
+From: Daniel J Blueman <daniel@quora.org>
+Subject: Re: [PATCH] Add MSI support for SDHCI PCI hosts
+Date: Sat, 18 Aug 2012 13:06:07 +0800
+Message-ID: <CAMVG2sv1h0AdzQ23jQaab2HhP6WOqwc0hFhyUhWtcarfZgP=Yw@mail.gmail.com>
+References: <1345194854-8330-1-git-send-email-daniel@quora.org>
+	<15456EE0-A358-4864-9F8D-B7F13014C47E@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1345187071-6619-1-git-send-email-josephl-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: Joseph Lo <josephl-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <15456EE0-A358-4864-9F8D-B7F13014C47E@marvell.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>, Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 08/17/2012 01:04 AM, Joseph Lo wrote:
-> When compiling a kernel that supports only Tegra30 and not Tegra20,
-> the SDHCI driver will fail to compile since the of_match_device() failure
-> fallback code unconditinally references soc_data_tegra20, which is only
-> compiled in when Tegra20 support is enabled.
-> 
-> In Kernel 3.7, both Tegra20 and Tegra30 will only support booting using
-> device tree, Hence, there is never a need to fall back to using
-> soc_data_tegra20 if of_mach_device() fails. Instead, make this case an
-> error. This removes the reference to soc_data_tegra20, and hence solves
-> the compile failure.
+Hi Philip,
 
-Tested-by: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+The interrupt could be from another source, though Message Signalled
+Interrupts are a PCI (and variants) only feature at present. I'm happy
+to split the patch and/or make the module param specific to sdhci-pci.
 
-(built and tested both Tegra20-only and Tegr30-only kernels with this
-applied on top of next-20120816).
+Let's see what the maintainers prefer...Chris?
+
+Dan
+
+On 18 August 2012 00:35, Philip Rakity <prakity@marvell.com> wrote:
+>
+> The interrupt source could be from a non-pci device.  Say a gpio or whatever.
+> Does it make sense to break this patch into two patches ?
+>
+> On Aug 17, 2012, at 2:14 AM, Daniel J Blueman <daniel@quora.org> wrote:
+>
+>> Allow module parameter 'enable_msi' to request an MSI interrupt for
+>> hosts where available (presently PCI). Useful as a workaround on
+>> platforms where the legacy interrupt is broken.
+>>
+>> Signed-off-by: Daniel J Blueman <daniel@quora.org>
+>> ---
+>> drivers/mmc/host/sdhci-pci.c |   30 ++++++++++++++++++++++++++++++
+>> drivers/mmc/host/sdhci.c     |   23 +++++++++++++++++++++++
+>> drivers/mmc/host/sdhci.h     |    2 ++
+>> 3 files changed, 55 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+>> index 504da71..fbde589 100644
+>> --- a/drivers/mmc/host/sdhci-pci.c
+>> +++ b/drivers/mmc/host/sdhci-pci.c
+>> @@ -934,6 +934,34 @@ static int sdhci_pci_enable_dma(struct sdhci_host *host)
+>>       return 0;
+>> }
+>>
+>> +static int sdhci_pci_enable_msi(struct sdhci_host *host)
+>> +{
+>> +     struct sdhci_pci_slot *slot;
+>> +     struct pci_dev *pdev;
+>> +     int ret;
+>> +
+>> +     slot = sdhci_priv(host);
+>> +     pdev = slot->chip->pdev;
+>> +
+>> +     ret = pci_enable_msi(pdev);
+>> +     if (ret)
+>> +             return ret;
+>> +
+>> +     host->irq = pdev->irq;
+>> +     return 0;
+>> +}
+>> +
+>> +static void sdhci_pci_disable_msi(struct sdhci_host *host)
+>> +{
+>> +     struct sdhci_pci_slot *slot;
+>> +     struct pci_dev *pdev;
+>> +
+>> +     slot = sdhci_priv(host);
+>> +     pdev = slot->chip->pdev;
+>> +
+>> +     pci_disable_msi(pdev);
+>> +}
+>> +
+>> static int sdhci_pci_8bit_width(struct sdhci_host *host, int width)
+>> {
+>>       u8 ctrl;
+>> @@ -976,6 +1004,8 @@ static void sdhci_pci_hw_reset(struct sdhci_host *host)
+>>
+>> static struct sdhci_ops sdhci_pci_ops = {
+>>       .enable_dma     = sdhci_pci_enable_dma,
+>> +     .enable_msi     = sdhci_pci_enable_msi,
+>> +     .disable_msi    = sdhci_pci_disable_msi,
+>>       .platform_8bit_width    = sdhci_pci_8bit_width,
+>>       .hw_reset               = sdhci_pci_hw_reset,
+>> };
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 9a11dc3..9fa2180 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -45,6 +45,7 @@
+>>
+>> static unsigned int debug_quirks = 0;
+>> static unsigned int debug_quirks2;
+>> +static bool enable_msi;
+>>
+>> static void sdhci_finish_data(struct sdhci_host *);
+>>
+>> @@ -2433,6 +2434,9 @@ int sdhci_suspend_host(struct sdhci_host *host)
+>>
+>>       free_irq(host->irq, host);
+>>
+>> +     if (host->ops->disable_msi && enable_msi)
+>> +             host->ops->disable_msi(host);
+>> +
+>>       return ret;
+>> }
+>>
+>> @@ -2447,6 +2451,12 @@ int sdhci_resume_host(struct sdhci_host *host)
+>>                       host->ops->enable_dma(host);
+>>       }
+>>
+>> +     if (host->ops->enable_msi && enable_msi) {
+>> +             ret = host->ops->enable_msi(host);
+>> +             if (ret)
+>> +                     return ret;
+>> +     }
+>> +
+>>       ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+>>                         mmc_hostname(host->mmc), host);
+>>       if (ret)
+>> @@ -3024,6 +3034,12 @@ int sdhci_add_host(struct sdhci_host *host)
+>>               host->tuning_timer.function = sdhci_tuning_timer;
+>>       }
+>>
+>> +     if (host->ops->enable_msi && enable_msi) {
+>> +             ret = host->ops->enable_msi(host);
+>> +             if (ret)
+>> +                     return ret;
+>> +     }
+>> +
+>>       ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+>>               mmc_hostname(mmc), host);
+>>       if (ret) {
+>> @@ -3071,6 +3087,8 @@ int sdhci_add_host(struct sdhci_host *host)
+>> reset:
+>>       sdhci_reset(host, SDHCI_RESET_ALL);
+>>       free_irq(host->irq, host);
+>> +     if (host->ops->disable_msi && enable_msi)
+>> +             host->ops->disable_msi(host);
+>> #endif
+>> untasklet:
+>>       tasklet_kill(&host->card_tasklet);
+>> @@ -3114,6 +3132,9 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+>>
+>>       free_irq(host->irq, host);
+>>
+>> +     if (host->ops->disable_msi && enable_msi)
+>> +             host->ops->disable_msi(host);
+>> +
+>>       del_timer_sync(&host->timer);
+>>
+>>       tasklet_kill(&host->card_tasklet);
+>> @@ -3162,6 +3183,7 @@ module_exit(sdhci_drv_exit);
+>>
+>> module_param(debug_quirks, uint, 0444);
+>> module_param(debug_quirks2, uint, 0444);
+>> +module_param(enable_msi, bool, 0444);
+>>
+>> MODULE_AUTHOR("Pierre Ossman <pierre@ossman.eu>");
+>> MODULE_DESCRIPTION("Secure Digital Host Controller Interface core driver");
+>> @@ -3169,3 +3191,4 @@ MODULE_LICENSE("GPL");
+>>
+>> MODULE_PARM_DESC(debug_quirks, "Force certain quirks.");
+>> MODULE_PARM_DESC(debug_quirks2, "Force certain other quirks.");
+>> +MODULE_PARM_DESC(debug_quirks2, "Enable MSI interrupt support where possible.");
+>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>> index 97653ea..df4e003 100644
+>> --- a/drivers/mmc/host/sdhci.h
+>> +++ b/drivers/mmc/host/sdhci.h
+>> @@ -264,6 +264,8 @@ struct sdhci_ops {
+>>       void    (*set_clock)(struct sdhci_host *host, unsigned int clock);
+>>
+>>       int             (*enable_dma)(struct sdhci_host *host);
+>> +     int             (*enable_msi)(struct sdhci_host *host);
+>> +     void            (*disable_msi)(struct sdhci_host *host);
+>>       unsigned int    (*get_max_clock)(struct sdhci_host *host);
+>>       unsigned int    (*get_min_clock)(struct sdhci_host *host);
+>>       unsigned int    (*get_timeout_clock)(struct sdhci_host *host);
+>> --
+>> 1.7.10.4
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+
+
+-- 
+Daniel J Blueman
