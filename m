@@ -1,36 +1,58 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v4] mmc: card: Skip secure option for MoviNAND.
-Date: Sun, 19 Aug 2012 00:21:12 +0200
-Message-ID: <CACRpkdZjssRDyE6FRsY6O6_30XBNRk4_TTS7B1=7DcmXvo8Hhw@mail.gmail.com>
-References: <502C8247.7070209@samsung.com>
+From: Theodore Ts'o <tytso@mit.edu>
+Subject: Re: Add invalidatepage_range address space operation
+Date: Sat, 18 Aug 2012 20:57:27 -0400
+Message-ID: <20120819005727.GA15763@thunk.org>
+References: <1343376074-28034-1-git-send-email-lczerner@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:57283 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752456Ab2HRWVN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Aug 2012 18:21:13 -0400
-Received: by vcbfk26 with SMTP id fk26so3983429vcb.19
-        for <linux-mmc@vger.kernel.org>; Sat, 18 Aug 2012 15:21:12 -0700 (PDT)
-In-Reply-To: <502C8247.7070209@samsung.com>
+Received: from li9-11.members.linode.com ([67.18.176.11]:45536 "EHLO
+	imap.thunk.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751388Ab2HSA5c (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 18 Aug 2012 20:57:32 -0400
+Content-Disposition: inline
+In-Reply-To: <1343376074-28034-1-git-send-email-lczerner@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: IAN CHEN <ian.cy.chen@samsung.com>
-Cc: cjb@laptop.org, linkinjeon@gmail.com, adrian.hunter@intel.com, subhashj@codeaurora.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com
+To: Lukas Czerner <lczerner@redhat.com>
+Cc: linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org, hughd@google.com, linux-mmc@vger.kernel.org
 
-On Thu, Aug 16, 2012 at 7:16 AM, IAN CHEN <ian.cy.chen@samsung.com> wrote:
+On Fri, Jul 27, 2012 at 10:00:59AM +0200, Lukas Czerner wrote:
+> This set of patches are aimed to allow truncate_inode_pages_range() handle
+> ranges which are not aligned at the end of the page. Currently it will
+> hit BUG_ON() when the end of the range is not aligned. Punch hole feature
+> however can benefit from this ability saving file systems some work not
+> forcing them to implement their own invalidate code to handle unaligned
+> ranges.
+> 
+> In order for this to work we need however new address space operation
+> invalidatepage_range which should be able to handle page invalidation with
+> offset and length specified.
+> 
+> patch 01:	Implements the new invalidatepage_range address space
+> 		operation in the mm layer
+> patch 02 - 05:	Wire the new invalidatepage_range aop to the ext4, xfs and
+> 		ocfs2 file system (which are currently the only file
+> 		systems supporting punch hole) and implement this
+> 		functionality for jbd2 as well.
+> patch 06:	Change truncate_inode_pages_range() to handle unaligned
+> 		ranges.
+> patch 07 - 15:	Ext4 specific changes which take benefit from the
+> 		previous truncate_inode_pages_range() change. Not all
+> 		are realated specifically to this change, but all are
+> 		related to the punch hole feature.
 
-> For several MoviNAND, there are some known issue with secure option.
-> For these specific MoviNAND device, we skip secure option.
->
-> You could refer this discussion in XDA developers.
-> http://forum.xda-developers.com/showthread.php?t=1644364
-> https://plus.google.com/111398485184813224730/posts/21pTYfTsCkB#111398485184813224730/posts/21pTYfTsCkB
->
-> Signed-off-by: Ian Chen <ian.cy.chen@samsung.com>
+What's the current status of this patch series?
 
-Looking good!
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+I haven't seen much if any comment from the mm folks and the xfs/ocfs2
+folks.  I've incorporated the patches into the unstable portion of the
+ext4 tree so I can do some testing (some minor changes to the ext4
+patches were needed to rebase the patch series to the 3.6-rc1-based
+ext4 dev tree, but nothing major).  However, I don't want to include
+this into the ext4 tree for merging into linux-next unless we get
+general agreement from the maintainers of the other trees that are
+affected by this patch series.
 
-Yours,
-Linus Walleij
+Thansk,
+
+						- Ted
