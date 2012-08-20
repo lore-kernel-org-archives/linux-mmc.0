@@ -1,101 +1,247 @@
-From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH] omap-hsmmc: Implementation of i761 errata
-Date: Mon, 20 Aug 2012 11:58:43 +0300
-Message-ID: <20120820085842.GK17455@arwen.pp.htv.fi>
-References: <1345219546-6646-1-git-send-email-semen.protsenko@ti.com>
- <CANfBPZ9NqZGN1LPNu+5DVWdkut2AL3O_8TWtWhBTufpdRZYZ_Q@mail.gmail.com>
- <CANwLT1SADwqn2Hgj2etiYyRu=TboT8DOfBsqjg02rrk6CYcFTw@mail.gmail.com>
- <CANfBPZ9iAuMmwGC_QuhM9k4MyAt4mgAYVSG3K3uMq=mOH_dewg@mail.gmail.com>
- <CAMQu2gzc4o_fYGk8Jgtd5tf89xh1N2e4DhN8MKE_Zm=eg_e1=Q@mail.gmail.com>
- <CAM=Q2cs+oX6pYe=ME9At49QXfzJjsMjy0g0YidFD5F7JNBVYzQ@mail.gmail.com>
-Reply-To: balbi@ti.com
+From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
+Subject: Re: [PATCH 06/15] mm: teach truncate_inode_pages_range() to handle
+ non page aligned ranges
+Date: Mon, 20 Aug 2012 12:26:42 +0200 (CEST)
+Message-ID: <alpine.LFD.2.00.1208201221360.3975@vpn-8-6.rdu.redhat.com>
+References: <1343376074-28034-1-git-send-email-lczerner@redhat.com> <1343376074-28034-7-git-send-email-lczerner@redhat.com> <alpine.LSU.2.00.1208192144260.2390@eggly.anvils>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="KaGhPsiNaI6/sRd6"
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAM=Q2cs+oX6pYe=ME9At49QXfzJjsMjy0g0YidFD5F7JNBVYzQ@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Shubhrajyoti Datta <omaplinuxkernel@gmail.com>
-Cc: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, "Puttagunta, Viswanath" <vishp@ti.com>, Semen Protsenko <semen.protsenko@ti.com>, linux-omap@vger.kernel.org, Volodymyr Ryazantsev <x0153367@ti.com>, Balaji T Krishnamoorthy <balajitk@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, "S, Venkatraman" <svenkatr@ti.com>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-ext4-owner@vger.kernel.org>
+In-Reply-To: <alpine.LSU.2.00.1208192144260.2390@eggly.anvils>
+Sender: linux-ext4-owner@vger.kernel.org
+To: Hugh Dickins <hughd@google.com>
+Cc: Lukas Czerner <lczerner@redhat.com>, linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org, tytso@mit.edu, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
 List-Id: linux-mmc@vger.kernel.org
 
+On Sun, 19 Aug 2012, Hugh Dickins wrote:
 
---KaGhPsiNaI6/sRd6
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> Date: Sun, 19 Aug 2012 21:52:48 -0700 (PDT)
+> From: Hugh Dickins <hughd@google.com>
+> To: Lukas Czerner <lczerner@redhat.com>
+> Cc: linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org, tytso@mit.edu,
+>     linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+> Subject: Re: [PATCH 06/15] mm: teach truncate_inode_pages_range() to handle
+>     non page aligned ranges
+> 
+> On Fri, 27 Jul 2012, Lukas Czerner wrote:
+> 
+> > This commit changes truncate_inode_pages_range() so it can handle non
+> > page aligned regions of the truncate. Currently we can hit BUG_ON when
+> > the end of the range is not page aligned, but we can handle unaligned
+> > start of the range.
+> > 
+> > Being able to handle non page aligned regions of the page can help file
+> > system punch_hole implementations and save some work, because once we're
+> > holding the page we might as well deal with it right away.
+> > 
+> > In order for this to work correctly, called must register
+> > invalidatepage_range address space operation, or rely solely on the
+> > block_invalidatepage_range. That said it will BUG_ON() if caller
+> > implements invalidatepage(), does not implement invalidatepage_range()
+> > and use truncate_inode_pages_range() with unaligned end of the range.
+> > 
+> > This was based on the code provided by Hugh Dickins with some small
+> > changes to make use of do_invalidatepage_range().
+> > 
+> > Signed-off-by: Lukas Czerner <lczerner@redhat.com>
+> > Cc: Andrew Morton <akpm@linux-foundation.org>
+> > Cc: Hugh Dickins <hughd@google.com>
+> 
+> Acked-by: Hugh Dickins <hughd@google.com>
+> 
+> This looks good to me.  I like the way you provide the same args
+> to do_invalidatepage_range() as to zero_user_segment():
+> 
+> 		zero_user_segment(page, partial_start, top);
+> 		if (page_has_private(page))
+> 			do_invalidatepage_range(page, partial_start, top);
+> 
+> Unfortunately, that is not what patches 01-05 are expecting...
 
-On Mon, Aug 20, 2012 at 02:30:01PM +0530, Shubhrajyoti Datta wrote:
-> On Mon, Aug 20, 2012 at 12:25 PM, Shilimkar, Santosh
-> <santosh.shilimkar@ti.com> wrote:
-> > On Mon, Aug 20, 2012 at 12:08 PM, S, Venkatraman <svenkatr@ti.com> wrot=
-e:
-> >>
-> >> On Fri, Aug 17, 2012 at 11:43 PM, Puttagunta, Viswanath <vishp@ti.com>
-> >> wrote:
-> [...]
-> >> >>> Signed-off-by: Semen Protsenko <semen.protsenko@ti.com>
-> >> >>
-> >> >> The implementation looks fine, but can we simply not set the errata
-> >> >> flag and make this as default
-> >> >> behaviour ? I suppose the documented behaviour with CSRE and RSP10 =
-is
-> >> >> independent of the
-> >> >> errata..
-> >> >>
-> >> >> Also, please send it to the linux-mmc list as well.
-> >> >
-> >> > Vish>> We don't know if this errata effects OMAP5 as well. So, I thi=
-nk
-> >> > we should only do this if we are OMAP4.
-> >> >
-> >> That's precisely why the code shouldn't check for cpu_() flags. There =
-are
-> >> other
-> >> OMAP variants as well and we can't check all of them
-> >> What I mean is to make the check for RSP10 and CSRE all the time as pa=
-rt
-> >> of the IRQ check.
-> >>   Then it equally applies to silcon with or without errata.
-> >
-> > Apart from above comment, please don't add the cpu_is_xxx() check inside
-> > device driver. You can pass that information from platform code
-> > while registering the MMC controllers using a flag and then just
-> > use that flag to enable/disable errata in the driver.
->=20
-> The other option is to check something like MMCHS_HL_REV to get the ip re=
-vision
-> and decide.
+Thank for the review Hugh. The fact is that the third argument of
+the invalidatepage_range() was meant to be length and the problem is
+actually in this patch, where I am passing end offset as the third
+argument.
 
-If the revision register is broken, please don't pass a flag. Use
-different compatible attributes and/or platform_device_id structures to
-make sure you can differentiate the versions on the driver itself
-without any needs to use cpu_is_* or pass flags.
+But you've made it clear that you would like better the semantics
+where the third argument is actually the end offset. Is that right ?
+If so, I'll change it accordingly, otherwise I'll just fix this
+patch.
 
---=20
-balbi
+Thanks!
+-Lukas
 
---KaGhPsiNaI6/sRd6
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJQMfxCAAoJEIaOsuA1yqREq5kP+QE+6UYoZxcrIEnJoI1g/XQG
-8Co+qZCPqKlpKYxa/v6y+L+JKWl1EqBNH5TTzGIYaqrx96sfGkq3gs9uXaJgV7bZ
-QdRknsNy9ZOK605xFJ3iyfKr2F8fzgqW+KVvOdV0s1j3Ggeyle48m9T2Edjr2t1s
-LL0aTmeU07C/KVrWZgyu4VoHjBGdzoQaR9IdJEDAlxBsEVhX7NaAIy0zNpnJ5hhF
-qnboDViEShl3K/iRppwKspXiLst4B+I0qTLFT2eNDQ1N3ODD4uySqdikmTeedHJ+
-Ow2HYqlIZm1fXczYqKnsQMASKwTc6qkMAMT97QdO1lY4YTp6O9V6kWsZ/cEXCMNN
-YqerV1fXJq5w5mJmpKKPfxwPZCcpSZzuVKCPwpLzJwswp+jgTBePuYmL7VnMING2
-thV4t2++BPE/jrRnJYum2Dtkxdzf7EEzPVkx3pg2FLAG/52XzFl21qGGdMM1rOdw
-h5i8yY2/UKwovxhzAdkQw6o60I07V9YHooSmF9xQgNZSZdJCEoZTXqMbsSgJAefL
-F4UCwMygBMoPN/1Z+fo7yH4pex5XqrxXmi5Y0nUL6fxvtwtyHpDNG7FWtDn11hm4
-K7SFC6kZbO69dOVdX4CNuZOCxHpMj7qM2cB7sX2bBRBWVSkYEbcKUEK6LnNTUbgQ
-IxhT7wcpXi6vtRJaPUix
-=w2xo
------END PGP SIGNATURE-----
-
---KaGhPsiNaI6/sRd6--
+> 
+> Hugh
+> 
+> > ---
+> >  mm/truncate.c |   77 +++++++++++++++++++++++++++++++++++++--------------------
+> >  1 files changed, 50 insertions(+), 27 deletions(-)
+> > 
+> > diff --git a/mm/truncate.c b/mm/truncate.c
+> > index e29e5ea..1f6ea8b 100644
+> > --- a/mm/truncate.c
+> > +++ b/mm/truncate.c
+> > @@ -71,14 +71,6 @@ void do_invalidatepage_range(struct page *page, unsigned long offset,
+> >  #endif
+> >  }
+> >  
+> > -static inline void truncate_partial_page(struct page *page, unsigned partial)
+> > -{
+> > -	zero_user_segment(page, partial, PAGE_CACHE_SIZE);
+> > -	cleancache_invalidate_page(page->mapping, page);
+> > -	if (page_has_private(page))
+> > -		do_invalidatepage(page, partial);
+> > -}
+> > -
+> >  /*
+> >   * This cancels just the dirty bit on the kernel page itself, it
+> >   * does NOT actually remove dirty bits on any mmap's that may be
+> > @@ -212,8 +204,8 @@ int invalidate_inode_page(struct page *page)
+> >   * @lend: offset to which to truncate
+> >   *
+> >   * Truncate the page cache, removing the pages that are between
+> > - * specified offsets (and zeroing out partial page
+> > - * (if lstart is not page aligned)).
+> > + * specified offsets (and zeroing out partial pages
+> > + * if lstart or lend + 1 is not page aligned).
+> >   *
+> >   * Truncate takes two passes - the first pass is nonblocking.  It will not
+> >   * block on page locks and it will not block on writeback.  The second pass
+> > @@ -224,35 +216,44 @@ int invalidate_inode_page(struct page *page)
+> >   * We pass down the cache-hot hint to the page freeing code.  Even if the
+> >   * mapping is large, it is probably the case that the final pages are the most
+> >   * recently touched, and freeing happens in ascending file offset order.
+> > + *
+> > + * Note that it is able to handle cases where lend + 1 is not page aligned.
+> > + * However in order for this to work caller have to register
+> > + * invalidatepage_range address space operation or rely solely on
+> > + * block_invalidatepage_range(). That said, do_invalidatepage_range() will
+> > + * BUG_ON() if caller implements invalidatapage(), does not implement
+>                                     invalidatepage()
+> > + * invalidatepage_range() and uses truncate_inode_pages_range() with lend + 1
+> > + * unaligned to the page cache size.
+> >   */
+> >  void truncate_inode_pages_range(struct address_space *mapping,
+> >  				loff_t lstart, loff_t lend)
+> >  {
+> > -	const pgoff_t start = (lstart + PAGE_CACHE_SIZE-1) >> PAGE_CACHE_SHIFT;
+> > -	const unsigned partial = lstart & (PAGE_CACHE_SIZE - 1);
+> > +	pgoff_t start = (lstart + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
+> > +	pgoff_t end = (lend + 1) >> PAGE_CACHE_SHIFT;
+> > +	unsigned int partial_start = lstart & (PAGE_CACHE_SIZE - 1);
+> > +	unsigned int partial_end = (lend + 1) & (PAGE_CACHE_SIZE - 1);
+> >  	struct pagevec pvec;
+> >  	pgoff_t index;
+> > -	pgoff_t end;
+> >  	int i;
+> >  
+> >  	cleancache_invalidate_inode(mapping);
+> >  	if (mapping->nrpages == 0)
+> >  		return;
+> >  
+> > -	BUG_ON((lend & (PAGE_CACHE_SIZE - 1)) != (PAGE_CACHE_SIZE - 1));
+> > -	end = (lend >> PAGE_CACHE_SHIFT);
+> > +	if (lend == -1)
+> > +		end = -1;	/* unsigned, so actually very big */
+> >  
+> >  	pagevec_init(&pvec, 0);
+> >  	index = start;
+> > -	while (index <= end && pagevec_lookup(&pvec, mapping, index,
+> > -			min(end - index, (pgoff_t)PAGEVEC_SIZE - 1) + 1)) {
+> > +	while (index < end && pagevec_lookup(&pvec, mapping, index,
+> > +			min(end - index, (pgoff_t)PAGEVEC_SIZE))) {
+> >  		mem_cgroup_uncharge_start();
+> >  		for (i = 0; i < pagevec_count(&pvec); i++) {
+> >  			struct page *page = pvec.pages[i];
+> >  
+> >  			/* We rely upon deletion not changing page->index */
+> >  			index = page->index;
+> > -			if (index > end)
+> > +			if (index >= end)
+> >  				break;
+> >  
+> >  			if (!trylock_page(page))
+> > @@ -271,27 +272,51 @@ void truncate_inode_pages_range(struct address_space *mapping,
+> >  		index++;
+> >  	}
+> >  
+> > -	if (partial) {
+> > +	if (partial_start) {
+> >  		struct page *page = find_lock_page(mapping, start - 1);
+> >  		if (page) {
+> > +			unsigned int top = PAGE_CACHE_SIZE;
+> > +			if (start > end) {
+> > +				top = partial_end;
+> > +				partial_end = 0;
+> > +			}
+> > +			wait_on_page_writeback(page);
+> > +			zero_user_segment(page, partial_start, top);
+> > +			cleancache_invalidate_page(mapping, page);
+> > +			if (page_has_private(page))
+> > +				do_invalidatepage_range(page, partial_start,
+> > +							top);
+> > +			unlock_page(page);
+> > +			page_cache_release(page);
+> > +		}
+> > +	}
+> > +	if (partial_end) {
+> > +		struct page *page = find_lock_page(mapping, end);
+> > +		if (page) {
+> >  			wait_on_page_writeback(page);
+> > -			truncate_partial_page(page, partial);
+> > +			zero_user_segment(page, 0, partial_end);
+> > +			cleancache_invalidate_page(mapping, page);
+> > +			if (page_has_private(page))
+> > +				do_invalidatepage_range(page, 0,
+> > +							partial_end);
+> >  			unlock_page(page);
+> >  			page_cache_release(page);
+> >  		}
+> >  	}
+> > +	if (start >= end)
+> > +		return;
+> >  
+> >  	index = start;
+> >  	for ( ; ; ) {
+> >  		cond_resched();
+> >  		if (!pagevec_lookup(&pvec, mapping, index,
+> > -			min(end - index, (pgoff_t)PAGEVEC_SIZE - 1) + 1)) {
+> > +			min(end - index, (pgoff_t)PAGEVEC_SIZE))) {
+> >  			if (index == start)
+> >  				break;
+> >  			index = start;
+> >  			continue;
+> >  		}
+> > -		if (index == start && pvec.pages[0]->index > end) {
+> > +		if (index == start && pvec.pages[0]->index >= end) {
+> >  			pagevec_release(&pvec);
+> >  			break;
+> >  		}
+> > @@ -301,7 +326,7 @@ void truncate_inode_pages_range(struct address_space *mapping,
+> >  
+> >  			/* We rely upon deletion not changing page->index */
+> >  			index = page->index;
+> > -			if (index > end)
+> > +			if (index >= end)
+> >  				break;
+> >  
+> >  			lock_page(page);
+> > @@ -646,10 +671,8 @@ void truncate_pagecache_range(struct inode *inode, loff_t lstart, loff_t lend)
+> >  	 * This rounding is currently just for example: unmap_mapping_range
+> >  	 * expands its hole outwards, whereas we want it to contract the hole
+> >  	 * inwards.  However, existing callers of truncate_pagecache_range are
+> > -	 * doing their own page rounding first; and truncate_inode_pages_range
+> > -	 * currently BUGs if lend is not pagealigned-1 (it handles partial
+> > -	 * page at start of hole, but not partial page at end of hole).  Note
+> > -	 * unmap_mapping_range allows holelen 0 for all, and we allow lend -1.
+> > +	 * doing their own page rounding first.  Note that unmap_mapping_range
+> > +	 * allows holelen 0 for all, and we allow lend -1 for end of file.
+> >  	 */
+> >  
+> >  	/*
+> > -- 
+> > 1.7.7.6
+> > 
+> > 
+> 
