@@ -1,118 +1,58 @@
-From: Hugh Dickins <hughd@google.com>
-Subject: Re: [PATCH 07/15] ext4: Take i_mutex before punching hole
-Date: Sun, 19 Aug 2012 22:45:08 -0700 (PDT)
-Message-ID: <alpine.LSU.2.00.1208192224390.2390@eggly.anvils>
-References: <1343376074-28034-1-git-send-email-lczerner@redhat.com> <1343376074-28034-8-git-send-email-lczerner@redhat.com>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH] omap-hsmmc: Implementation of i761 errata
+Date: Mon, 20 Aug 2012 12:08:12 +0530
+Message-ID: <CANfBPZ9iAuMmwGC_QuhM9k4MyAt4mgAYVSG3K3uMq=mOH_dewg@mail.gmail.com>
+References: <1345219546-6646-1-git-send-email-semen.protsenko@ti.com>
+ <CANfBPZ9NqZGN1LPNu+5DVWdkut2AL3O_8TWtWhBTufpdRZYZ_Q@mail.gmail.com> <CANwLT1SADwqn2Hgj2etiYyRu=TboT8DOfBsqjg02rrk6CYcFTw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <1343376074-28034-8-git-send-email-lczerner@redhat.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Lukas Czerner <lczerner@redhat.com>
-Cc: linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org, tytso@mit.edu, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog121.obsmtp.com ([74.125.149.145]:55298 "EHLO
+	na3sys009aog121.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751785Ab2HTGie (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Aug 2012 02:38:34 -0400
+Received: by dadi14 with SMTP id i14so2396230dad.14
+        for <linux-mmc@vger.kernel.org>; Sun, 19 Aug 2012 23:38:33 -0700 (PDT)
+In-Reply-To: <CANwLT1SADwqn2Hgj2etiYyRu=TboT8DOfBsqjg02rrk6CYcFTw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Puttagunta, Viswanath" <vishp@ti.com>
+Cc: Semen Protsenko <semen.protsenko@ti.com>, linux-omap@vger.kernel.org, Volodymyr Ryazantsev <x0153367@ti.com>, Balaji T Krishnamoorthy <balajitk@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>
 
-On Fri, 27 Jul 2012, Lukas Czerner wrote:
-
-> Currently the allocation might happen in the punched range after the
-> truncation and before the releasing the space of the range. This would
-> lead to blocks being unallocated under the mapped buffer heads resulting
-> in nasty bugs.
-> 
-> With this commit we take i_mutex before going to do anything in the
-> ext4_ext_punch_hole() preventing any write to happen while the hole
-> punching is in progress. This will also allow us to ditch the writeout
-> of dirty pages withing the range.
-> 
-> This commit was based on code provided by Zheng Liu, thanks!
-
-I'm glad you have found that i_mutex really is needed here: it had
-worried me that it was not taken, but I could only raise a concern,
-didn't really know one way or the other.
-
-> 
-> Signed-off-by: Lukas Czerner <lczerner@redhat.com>
-> ---
->  fs/ext4/extents.c |   26 ++++++++++----------------
->  1 files changed, 10 insertions(+), 16 deletions(-)
-> 
-> diff --git a/fs/ext4/extents.c b/fs/ext4/extents.c
-> index 91341ec..2d6a216 100644
-> --- a/fs/ext4/extents.c
-> +++ b/fs/ext4/extents.c
-> @@ -4755,9 +4755,11 @@ int ext4_ext_punch_hole(struct file *file, loff_t offset, loff_t length)
->  	loff_t first_page_offset, last_page_offset;
->  	int credits, err = 0;
->  
-> +	mutex_lock(&inode->i_mutex);
-> +
->  	/* No need to punch hole beyond i_size */
->  	if (offset >= inode->i_size)
-> -		return 0;
-> +		goto out1;
-
-Note that this is wrong, but there is no reason why it should be you
-to fix it in this patchset.  Blocks may have been fallocated beyond
-i_size, and they should be removed when a hole is punched there.
-
-It's on the ext4 TODO list to be fixed, so don't worry about it:
-unless your changes happen to make it trivial to fix at the same time.
-
->  
->  	/*
->  	 * If the hole extends beyond i_size, set the hole
-> @@ -4775,18 +4777,6 @@ int ext4_ext_punch_hole(struct file *file, loff_t offset, loff_t length)
->  	first_page_offset = first_page << PAGE_CACHE_SHIFT;
->  	last_page_offset = last_page << PAGE_CACHE_SHIFT;
->  
-> -	/*
-> -	 * Write out all dirty pages to avoid race conditions
-> -	 * Then release them.
-> -	 */
-> -	if (mapping->nrpages && mapping_tagged(mapping, PAGECACHE_TAG_DIRTY)) {
-> -		err = filemap_write_and_wait_range(mapping,
-> -			offset, offset + length - 1);
-> -
-> -		if (err)
-> -			return err;
-> -	}
-> -
-
-It's not clear to me why that's now safe to remove: a little more comment
-in the commit would be good; but so long as it's clear to ext4 developers,
-don't try to make it clear to me - that would take far too long!
-
-Hugh
-
->  	/* Now release the pages */
->  	if (last_page_offset > first_page_offset) {
->  		truncate_pagecache_range(inode, first_page_offset,
-> @@ -4798,12 +4788,14 @@ int ext4_ext_punch_hole(struct file *file, loff_t offset, loff_t length)
->  
->  	credits = ext4_writepage_trans_blocks(inode);
->  	handle = ext4_journal_start(inode, credits);
-> -	if (IS_ERR(handle))
-> -		return PTR_ERR(handle);
-> +	if (IS_ERR(handle)) {
-> +		err = PTR_ERR(handle);
-> +		goto out1;
-> +	}
->  
->  	err = ext4_orphan_add(handle, inode);
->  	if (err)
-> -		goto out;
-> +		goto out1;
->  
->  	/*
->  	 * Now we need to zero out the non-page-aligned data in the
-> @@ -4893,6 +4885,8 @@ out:
->  	inode->i_mtime = inode->i_ctime = ext4_current_time(inode);
->  	ext4_mark_inode_dirty(handle, inode);
->  	ext4_journal_stop(handle);
-> +out1:
-> +	mutex_unlock(&inode->i_mutex);
->  	return err;
->  }
->  int ext4_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
-> -- 
-> 1.7.7.6
+On Fri, Aug 17, 2012 at 11:43 PM, Puttagunta, Viswanath <vishp@ti.com> wrote:
+> On Fri, Aug 17, 2012 at 12:28 PM, S, Venkatraman <svenkatr@ti.com> wrote:
+>> On Fri, Aug 17, 2012 at 9:35 PM, Semen Protsenko <semen.protsenko@ti.com> wrote:
+>>> Errata description:
+>>> Due to a bad behavior of an internal signal, the Card Error interrupt bit
+>>> MMCHS_STAT[28] CERR may not be set sometimes when an error occurred in the
+>>> card response.
+>>>
+>>> Workaround:
+>>> After responses of type R1/R1b for all cards and responses of type R5/R5b/R6
+>>> for SD and SDIO cards, software must read two registers: MMCHS_RSP10 and
+>>> MMCHS_CSRE. When a MMCHS_CSRE[i] bit is set to 1, if the corresponding bit at
+>>> the same position in the response MMCHS_RSP10[i] is set to 1, the host
+>>> controller indicates a card error and software should proceed in the same way
+>>> as if a CERR interrupt would have been detected in the MMCHS_STAT register.
+>>>
+>>> Note:
+>>> This errata is applicable for omap44xx.
+>>>
+>>> Signed-off-by: Semen Protsenko <semen.protsenko@ti.com>
+>>
+>> The implementation looks fine, but can we simply not set the errata
+>> flag and make this as default
+>> behaviour ? I suppose the documented behaviour with CSRE and RSP10 is
+>> independent of the
+>> errata..
+>>
+>> Also, please send it to the linux-mmc list as well.
+>
+> Vish>> We don't know if this errata effects OMAP5 as well. So, I think
+> we should only do this if we are OMAP4.
+>
+That's precisely why the code shouldn't check for cpu_() flags. There are other
+OMAP variants as well and we can't check all of them
+What I mean is to make the check for RSP10 and CSRE all the time as part
+of the IRQ check.
+  Then it equally applies to silcon with or without errata.
