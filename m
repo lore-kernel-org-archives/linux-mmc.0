@@ -1,98 +1,64 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [RFC/PATCH 0/2] ROW scheduling Algorithm
-Date: Mon, 20 Aug 2012 17:44:34 +0900
-Message-ID: <003901cd7eb0$064791f0$12d6b5d0$%jun@samsung.com>
-References: <1344166241-18708-1-git-send-email-tlinder@codeaurora.org>
- <502214E8.7070603@samsung.com> <004201cd75ec$bb701970$32504c50$@codeaurora.org>
+From: Shubhrajyoti Datta <omaplinuxkernel@gmail.com>
+Subject: Re: [PATCH] omap-hsmmc: Implementation of i761 errata
+Date: Mon, 20 Aug 2012 14:30:01 +0530
+Message-ID: <CAM=Q2cs+oX6pYe=ME9At49QXfzJjsMjy0g0YidFD5F7JNBVYzQ@mail.gmail.com>
+References: <1345219546-6646-1-git-send-email-semen.protsenko@ti.com>
+	<CANfBPZ9NqZGN1LPNu+5DVWdkut2AL3O_8TWtWhBTufpdRZYZ_Q@mail.gmail.com>
+	<CANwLT1SADwqn2Hgj2etiYyRu=TboT8DOfBsqjg02rrk6CYcFTw@mail.gmail.com>
+	<CANfBPZ9iAuMmwGC_QuhM9k4MyAt4mgAYVSG3K3uMq=mOH_dewg@mail.gmail.com>
+	<CAMQu2gzc4o_fYGk8Jgtd5tf89xh1N2e4DhN8MKE_Zm=eg_e1=Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-reply-to: <004201cd75ec$bb701970$32504c50$@codeaurora.org>
-Content-language: ko
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: 'Tanya Brokhman' <tlinder@codeaurora.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
-Cc: axboe@kernel.dk, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:40146 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751601Ab2HTJAF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Aug 2012 05:00:05 -0400
+In-Reply-To: <CAMQu2gzc4o_fYGk8Jgtd5tf89xh1N2e4DhN8MKE_Zm=eg_e1=Q@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
+Cc: "Puttagunta, Viswanath" <vishp@ti.com>, Semen Protsenko <semen.protsenko@ti.com>, linux-omap@vger.kernel.org, Volodymyr Ryazantsev <x0153367@ti.com>, Balaji T Krishnamoorthy <balajitk@ti.com>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, "S, Venkatraman" <svenkatr@ti.com>
 
-On Thursday, August 09, 2012 2:06 PM, Tanya Brokhman <tlinder@codeaurora.org> wrote:
-Thank you for interesting patch.
-Here is other test result.
+On Mon, Aug 20, 2012 at 12:25 PM, Shilimkar, Santosh
+<santosh.shilimkar@ti.com> wrote:
+> On Mon, Aug 20, 2012 at 12:08 PM, S, Venkatraman <svenkatr@ti.com> wrote:
+>>
+>> On Fri, Aug 17, 2012 at 11:43 PM, Puttagunta, Viswanath <vishp@ti.com>
+>> wrote:
+[...]
+>> >>> Signed-off-by: Semen Protsenko <semen.protsenko@ti.com>
+>> >>
+>> >> The implementation looks fine, but can we simply not set the errata
+>> >> flag and make this as default
+>> >> behaviour ? I suppose the documented behaviour with CSRE and RSP10 is
+>> >> independent of the
+>> >> errata..
+>> >>
+>> >> Also, please send it to the linux-mmc list as well.
+>> >
+>> > Vish>> We don't know if this errata effects OMAP5 as well. So, I think
+>> > we should only do this if we are OMAP4.
+>> >
+>> That's precisely why the code shouldn't check for cpu_() flags. There are
+>> other
+>> OMAP variants as well and we can't check all of them
+>> What I mean is to make the check for RSP10 and CSRE all the time as part
+>> of the IRQ check.
+>>   Then it equally applies to silcon with or without errata.
+>
+> Apart from above comment, please don't add the cpu_is_xxx() check inside
+> device driver. You can pass that information from platform code
+> while registering the MMC controllers using a flag and then just
+> use that flag to enable/disable errata in the driver.
 
-* Test environment
-kernel version: 3.4
-Underline device driver: mmc
-Host controller: dw_mmc
-Card:standard emmc NAND flash
+The other option is to check something like MMCHS_HL_REV to get the ip revision
+and decide.
 
-* lmdd with parallel read and write
-/data/lmdd if=internal of=/data/writefile bs=128k count=3000
-/data/lmdd if=/data/readfile of=internal bs=128k count=3000
-		READ		WRITE
-CFQ		37MB		23MB
-ROW		41MB		23MB
 
-* iozone with parallel read and write
-/data/iozone -i0 -r4096k -s200m -I -e -w -f/data/write
-/data/iozone -i1 -r4096k -s200m -I -e -f/data/read
-		READ		WRITE
-CFQ		23MB		24MB
-ROW		40MB		17MB
-
-Results show that read throughput of ROW is better than CFQ.
-However, write throughput is degraded in case of IOZONE test.
-Depending on user scenario, write can be considered to be important.
-It needs to check the starvation of write.
-
-Thanks,
-Seungwon Jeon
-
-> Hi Chung
-> 
-> 
-> > The below is my environment:
-> > Kernel Version: linux-3.4
-> > Card: eMMC4.5 (50MHz DDR mode, 8-bit buswidth) Host controller : dw-
-> > mmc (DesignWare MMC controller) Benchmark : IOzone
-> >
-> > *CFQ Scheduler
-> > Read : 35MB
-> > Write : 17MB
-> >
-> > *ROW Scheduler
-> > Read : 28MB
-> > Write : 17MB
-> >
-> > How do you think about this result?
-> >
-> 
-> I run your cmd of iozone on my setup and got a bit different results:
-> CFQ scheduler:
->           204800   16384   27903   27248    40345    40399
-> READ:	40   MB/sec 		WRITE: 27   MB/sec
-> 
-> ROW scheduler:
-> READ:	39.6 MB/sec		WRITE: 27MB/sec
-> 
-> As you can see the results are the same for both schedulers.
-> Anyway, the improvement added by ROW is in scenario of parallel read and write, which iozone doesn't
-> do so running iozone for comparing ROW to CFQ is useless.
-> If it's not too difficult I would appreciate if you could run the bellow 2 commands simultaneously on
-> your setup:
-> adb shell /data/lmdd if=internal of=/data/writefile bs=128k count=3000
-> adb shell /data/lmdd if=/data/readfile of=internal bs=128k count=3000
-> You'll see an improvement in throughput when using ROW over CFQ.
-> We have a patch that also measures latency and we saw that read latency was also improved greatly when
-> using ROW.
-> 
-> 
-> Thanks,
-> Tanya Brokhman
-> ---
-> Sent by an consultant of the Qualcomm Innovation Center, Inc.
-> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
-> 
-> 
+>
+> Regards
+> Santosh
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
