@@ -1,71 +1,125 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: Re: [PATCH] mmc: dt: Add 'broken-cd' DT binding
-Date: Tue, 21 Aug 2012 20:51:44 +0530
-Message-ID: <CAJuYYwSNMvCctp2A7bizwXX7zMuSo64_9_Z4RUKLBZHRV4oSvA@mail.gmail.com>
-References: <1345547371-6784-1-git-send-email-thomas.abraham@linaro.org>
-	<CAJuYYwSv+dum8RP9xy+AZCH9pTU0peDpwjt7TA5zn3MFsG1uWA@mail.gmail.com>
-	<87k3ws5uhs.fsf@octavius.laptop.org>
-	<201208211208.49987.arnd@arndb.de>
-	<87393g5mic.fsf@octavius.laptop.org>
-	<5033A34E.7040201@gmail.com>
+From: Shubhrajyoti Datta <omaplinuxkernel@gmail.com>
+Subject: Re: [PATCH 06/10] mmc: omap_hsmmc: remove access to SYSCONFIG register
+Date: Tue, 21 Aug 2012 21:08:11 +0530
+Message-ID: <CAM=Q2cv=YmZpXOVwzJt6qXGYkL9DpHbhv4CRNEkhWL8Mn+EOeg@mail.gmail.com>
+References: <1345229550-8672-1-git-send-email-svenkatr@ti.com>
+	<1345229550-8672-7-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <5033A34E.7040201@gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Rob Herring <robherring2@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, grant.likely@secretlab.ca, patches@linaro.org, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:43922 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753206Ab2HUPiN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Aug 2012 11:38:13 -0400
+In-Reply-To: <1345229550-8672-7-git-send-email-svenkatr@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Venkatraman S <svenkatr@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, balajitk@ti.com, vishp@ti.com
 
-On 21 August 2012 20:33, Rob Herring <robherring2@gmail.com> wrote:
-> On 08/21/2012 09:48 AM, Chris Ball wrote:
->> Hi, adding Shawn and Wolfram,
+Hi Venkat,
+Some doubts below.
+
+On Sat, Aug 18, 2012 at 12:22 AM, Venkatraman S <svenkatr@ti.com> wrote:
+> SYSCONFIG register of HSMMC IP is managed by the omap hwmod
+> abstraction layer.
+
+At init only right?
+
+
+> Resetting the IP and configuring the correct
+> SYSCONFIG mode is centrally managed by hwmod.
 >
-> snip...
->
->> Rob Herring said:
->>> This makes the most sense to me. However, I prefer broken-cd over
->>> cd-internal. The binding should add properties for exceptions, not SDHCI
->>> spec compliant implementations.
->>
->> Agreed, I was going to say the same thing.  Putting it all together, it
->> sounds like we want:
->>
->> no extra properties:  the CD pin on the host just works.
->> broken-cd:            the CD pin on the host is broken; use polling.
->> cd-gpios:             the GPIO listed is the CD pin on the host being
->>                       brought out directly to a GPIO.
->> cd-external:          when used with cd-gpios, specifies that the GPIO
->>                       in cd-gpios is external to the CD pin on the host.
->>
->> cd-gpios and cd-external can be present on the same node.  if broken-cd
->> is present, it must be the only one of these nodes used.
->
-> I don't see the point of cd-external. Either you just use the CD
-> interrupt defined within the SDHCI or you have a gpio line independent
-> of the SDHCI and use cd-gpios.
+> Remove code which manipulates IP reset and SYSCONFIG directly in the
+> driver.
 
-There should be way to distinguish between the two types of 'cd-gpios' value.
+I am not sure if mmc needs a reset.
 
-(A) a 'cd-gpios' line that connects the card-detect pin of the mmc
-physical slot to the card-detect pad to the mmc host controller.
+However IMHO
+In case it needs a reset
 
-(B) a 'cd-gpios' line that is connected to the card-detect pin of the
-slot but not to the card-detect pad of the mmc host controller (used
-either as gpio interrupt or polled gpio line).
-
-So the binding 'cd-external' can act as an additional qualifier to
-value of 'cd-gpios' to represent the second type. Hence, the bindings
-proposed by Chris does support all the possible combinations of
-card-detection used by the Samsung sdhci controller driver.
-
-Thanks,
-Thomas.
+the hwmod way could be to use  omap_hwmod_reset
+However I  fear it may be an issue with dt.
+or
+may be sysc could be restored something like [1]
 
 
+
+if it doesnt need reset even the check for the SYSSTATUS could be
+considered for removal.
+
+[1] http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg12041.html
 
 
 
 >
-> Rob
+> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c | 24 ++----------------------
+>  1 file changed, 2 insertions(+), 22 deletions(-)
 >
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index da4f5a7..4bc55ac 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -44,7 +44,6 @@
+>  #include <plat/cpu.h>
+>
+>  /* OMAP HSMMC Host Controller Registers */
+> -#define OMAP_HSMMC_SYSCONFIG   0x0010
+>  #define OMAP_HSMMC_SYSSTATUS   0x0014
+>  #define OMAP_HSMMC_CON         0x002C
+>  #define OMAP_HSMMC_BLK         0x0104
+> @@ -576,21 +575,8 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
+>         if (host->context_loss == context_loss)
+>                 return 1;
+>
+> -       /* Wait for hardware reset */
+> -       timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+> -       while ((OMAP_HSMMC_READ(host->base, SYSSTATUS) & RESETDONE) != RESETDONE
+> -               && time_before(jiffies, timeout))
+> -               ;
+> -
+> -       /* Do software reset */
+> -       OMAP_HSMMC_WRITE(host->base, SYSCONFIG, SOFTRESET);
+> -       timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+> -       while ((OMAP_HSMMC_READ(host->base, SYSSTATUS) & RESETDONE) != RESETDONE
+> -               && time_before(jiffies, timeout))
+> -               ;
+> -
+> -       OMAP_HSMMC_WRITE(host->base, SYSCONFIG,
+> -                       OMAP_HSMMC_READ(host->base, SYSCONFIG) | AUTOIDLE);
+> +       if (!OMAP_HSMMC_READ(host->base, SYSSTATUS) & RESETDONE)
+> +               return 1;
+Should this check be removed.
+
+>
+>         if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT) {
+>                 if (host->power_mode != MMC_POWER_OFF &&
+> @@ -1593,10 +1579,6 @@ static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
+>         value = OMAP_HSMMC_READ(host->base, CAPA);
+>         OMAP_HSMMC_WRITE(host->base, CAPA, value | capa);
+>
+> -       /* Set the controller to AUTO IDLE mode */
+> -       value = OMAP_HSMMC_READ(host->base, SYSCONFIG);
+> -       OMAP_HSMMC_WRITE(host->base, SYSCONFIG, value | AUTOIDLE);
+> -
+>         /* Set SD bus power bit */
+>         set_sd_bus_power(host);
+>  }
+> @@ -1654,8 +1636,6 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
+>
+>         pm_runtime_get_sync(host->dev);
+>
+> -       seq_printf(s, "SYSCONFIG:\t0x%08x\n",
+> -                       OMAP_HSMMC_READ(host->base, SYSCONFIG));
+>         seq_printf(s, "CON:\t\t0x%08x\n",
+>                         OMAP_HSMMC_READ(host->base, CON));
+>         seq_printf(s, "HCTL:\t\t0x%08x\n",
+> --
+> 1.7.11.1.25.g0e18bef
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
