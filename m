@@ -1,125 +1,78 @@
-From: Shubhrajyoti Datta <omaplinuxkernel@gmail.com>
-Subject: Re: [PATCH 06/10] mmc: omap_hsmmc: remove access to SYSCONFIG register
-Date: Tue, 21 Aug 2012 21:08:11 +0530
-Message-ID: <CAM=Q2cv=YmZpXOVwzJt6qXGYkL9DpHbhv4CRNEkhWL8Mn+EOeg@mail.gmail.com>
-References: <1345229550-8672-1-git-send-email-svenkatr@ti.com>
-	<1345229550-8672-7-git-send-email-svenkatr@ti.com>
+From: Rob Herring <robherring2@gmail.com>
+Subject: Re: [PATCH] mmc: dt: Add 'broken-cd' DT binding
+Date: Tue, 21 Aug 2012 11:01:52 -0500
+Message-ID: <5033B0F0.7050506@gmail.com>
+References: <1345547371-6784-1-git-send-email-thomas.abraham@linaro.org> <CAJuYYwSv+dum8RP9xy+AZCH9pTU0peDpwjt7TA5zn3MFsG1uWA@mail.gmail.com> <87k3ws5uhs.fsf@octavius.laptop.org> <201208211208.49987.arnd@arndb.de> <87393g5mic.fsf@octavius.laptop.org> <5033A34E.7040201@gmail.com> <87pq6k46jg.fsf@octavius.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:43922 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753206Ab2HUPiN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Aug 2012 11:38:13 -0400
-In-Reply-To: <1345229550-8672-7-git-send-email-svenkatr@ti.com>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:63087 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757751Ab2HUQBz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Aug 2012 12:01:55 -0400
+In-Reply-To: <87pq6k46jg.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, balajitk@ti.com, vishp@ti.com
+To: Chris Ball <cjb@laptop.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Thomas Abraham <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, grant.likely@secretlab.ca, patches@linaro.org, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>
 
-Hi Venkat,
-Some doubts below.
+On 08/21/2012 10:18 AM, Chris Ball wrote:
+> Hi,
+> 
+> On Tue, Aug 21 2012, Rob Herring wrote:
+>>> cd-gpios and cd-external can be present on the same node.  if broken-cd
+>>> is present, it must be the only one of these nodes used.
+>>
+>> I don't see the point of cd-external. Either you just use the CD
+>> interrupt defined within the SDHCI or you have a gpio line independent
+>> of the SDHCI and use cd-gpios.
+> 
+> You've described two of the possible cases, but not the third.  In the
+> third case, you have a gpio line that is not independent of the SDHCI,
+> because it is the SDHCI's CD pin brought out to be directly accessible
+> via a GPIO.
 
-On Sat, Aug 18, 2012 at 12:22 AM, Venkatraman S <svenkatr@ti.com> wrote:
-> SYSCONFIG register of HSMMC IP is managed by the omap hwmod
-> abstraction layer.
+That is covered by absence of cd-gpios and broken-cd. Any *-gpios
+property means the signal is a GPIO line controlled by a GPIO controller.
 
-At init only right?
+I suppose you could have the CD state readable via the SDHCI, but the
+interrupt comes from a GPIO controller. Or vice-versa, but that's a
+pretty broken use case if you can't pick which way you are going to use
+things.
 
+> 
+> The difference is in the handling of the interrupt -- if you don't have
+> "cd-external" then you're just using the SDHCI's interrupt, but if you
+> have an independent line then you're going to need to register your own
+> IRQ handler on it, and "cd-external" signifies that.
+> 
+> Thomas wrote this explanation earlier in the thread:
+>> "samsung,sdhci-cd-gpio" means that the cd-gpio line is not connected
+>> to the card-detect pad of the sdhci controller. Instead, it identifies
+>> cd-gpio as a gpio pin, connected to the card-detect pin of the "card
+>> slot" and it can used as a source of external interrupt. The driver
+>> can register card insert/remove handler for this interrupt and get
+>> notified about the changes in card state.
+>>
+>> "sdhci-cd-internal" means that the "cd-gpio" line is used to connect
+>> the card-detect pin of the card slot and the card-detect pad of the
+>> sdhci controller. The controller is then aware of any changes in card
+>> state and the controller generates appropriate interrupts to notify
+>> changes in card-state.
+> 
 
-> Resetting the IP and configuring the correct
-> SYSCONFIG mode is centrally managed by hwmod.
->
-> Remove code which manipulates IP reset and SYSCONFIG directly in the
-> driver.
+It seems you are mixing pin muxing and who controls/handles the CD
+detect signal. Pin muxing is a separate issue and should be addressed by
+pin mux bindings. Either the signal functions as a GPIO or it functions
+as a CD as part of the SDHCI. You may have muxing on the CD pin that
+allows it to function either way, but the DT binding should describe how
+you want it to be configured and used.
 
-I am not sure if mmc needs a reset.
+Rob
 
-However IMHO
-In case it needs a reset
+> Thanks,
+> 
+> - Chris.
+> 
 
-the hwmod way could be to use  omap_hwmod_reset
-However I  fear it may be an issue with dt.
-or
-may be sysc could be restored something like [1]
-
-
-
-if it doesnt need reset even the check for the SYSSTATUS could be
-considered for removal.
-
-[1] http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg12041.html
-
-
-
->
-> Signed-off-by: Venkatraman S <svenkatr@ti.com>
-> ---
->  drivers/mmc/host/omap_hsmmc.c | 24 ++----------------------
->  1 file changed, 2 insertions(+), 22 deletions(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index da4f5a7..4bc55ac 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -44,7 +44,6 @@
->  #include <plat/cpu.h>
->
->  /* OMAP HSMMC Host Controller Registers */
-> -#define OMAP_HSMMC_SYSCONFIG   0x0010
->  #define OMAP_HSMMC_SYSSTATUS   0x0014
->  #define OMAP_HSMMC_CON         0x002C
->  #define OMAP_HSMMC_BLK         0x0104
-> @@ -576,21 +575,8 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
->         if (host->context_loss == context_loss)
->                 return 1;
->
-> -       /* Wait for hardware reset */
-> -       timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
-> -       while ((OMAP_HSMMC_READ(host->base, SYSSTATUS) & RESETDONE) != RESETDONE
-> -               && time_before(jiffies, timeout))
-> -               ;
-> -
-> -       /* Do software reset */
-> -       OMAP_HSMMC_WRITE(host->base, SYSCONFIG, SOFTRESET);
-> -       timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
-> -       while ((OMAP_HSMMC_READ(host->base, SYSSTATUS) & RESETDONE) != RESETDONE
-> -               && time_before(jiffies, timeout))
-> -               ;
-> -
-> -       OMAP_HSMMC_WRITE(host->base, SYSCONFIG,
-> -                       OMAP_HSMMC_READ(host->base, SYSCONFIG) | AUTOIDLE);
-> +       if (!OMAP_HSMMC_READ(host->base, SYSSTATUS) & RESETDONE)
-> +               return 1;
-Should this check be removed.
-
->
->         if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT) {
->                 if (host->power_mode != MMC_POWER_OFF &&
-> @@ -1593,10 +1579,6 @@ static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
->         value = OMAP_HSMMC_READ(host->base, CAPA);
->         OMAP_HSMMC_WRITE(host->base, CAPA, value | capa);
->
-> -       /* Set the controller to AUTO IDLE mode */
-> -       value = OMAP_HSMMC_READ(host->base, SYSCONFIG);
-> -       OMAP_HSMMC_WRITE(host->base, SYSCONFIG, value | AUTOIDLE);
-> -
->         /* Set SD bus power bit */
->         set_sd_bus_power(host);
->  }
-> @@ -1654,8 +1636,6 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
->
->         pm_runtime_get_sync(host->dev);
->
-> -       seq_printf(s, "SYSCONFIG:\t0x%08x\n",
-> -                       OMAP_HSMMC_READ(host->base, SYSCONFIG));
->         seq_printf(s, "CON:\t\t0x%08x\n",
->                         OMAP_HSMMC_READ(host->base, CON));
->         seq_printf(s, "HCTL:\t\t0x%08x\n",
-> --
-> 1.7.11.1.25.g0e18bef
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
