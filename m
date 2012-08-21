@@ -1,63 +1,92 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: dt: Add 'broken-cd' DT binding
-Date: Tue, 21 Aug 2012 11:18:59 -0400
-Message-ID: <87pq6k46jg.fsf@octavius.laptop.org>
-References: <1345547371-6784-1-git-send-email-thomas.abraham@linaro.org>
-	<CAJuYYwSv+dum8RP9xy+AZCH9pTU0peDpwjt7TA5zn3MFsG1uWA@mail.gmail.com>
-	<87k3ws5uhs.fsf@octavius.laptop.org>
-	<201208211208.49987.arnd@arndb.de>
-	<87393g5mic.fsf@octavius.laptop.org> <5033A34E.7040201@gmail.com>
+From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Subject: Re: [PATCH 07/10] mmc: omap_hsmmc: consolidate flush posted writes
+ for HSMMC IRQs
+Date: Tue, 21 Aug 2012 20:51:41 +0530
+Message-ID: <CANrkHUZLHO4nPvd37AaO43F37uCKB1LnsRxBOia5R3osF1ONvw@mail.gmail.com>
+References: <1345229550-8672-1-git-send-email-svenkatr@ti.com>
+	<1345229550-8672-8-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:58368 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751622Ab2HUPTI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 21 Aug 2012 11:19:08 -0400
-In-Reply-To: <5033A34E.7040201@gmail.com> (Rob Herring's message of "Tue, 21
-	Aug 2012 10:03:42 -0500")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1345229550-8672-8-git-send-email-svenkatr@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Venkatraman S <svenkatr@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, vishp@ti.com
 List-Id: linux-mmc@vger.kernel.org
-To: Rob Herring <robherring2@gmail.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, Thomas Abraham <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, grant.likely@secretlab.ca, patches@linaro.org, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>
 
-Hi,
+On Sat, Aug 18, 2012 at 12:22 AM, Venkatraman S <svenkatr@ti.com> wrote:
+> Flushing spurious IRQs from HSMMC IP is done twice in
+> omap_hsmmc_irq and omap_hsmmc_do_irq.
 
-On Tue, Aug 21 2012, Rob Herring wrote:
->> cd-gpios and cd-external can be present on the same node.  if broken-cd
->> is present, it must be the only one of these nodes used.
+spurious IRQ is flushed in start of omap_hsmmc_do_irq
+and irq acked at the end of omap_hsmmc_do_irq
+
+> Consolidate them to one location.
+
+if you wanted to consolidated ...
+
 >
-> I don't see the point of cd-external. Either you just use the CD
-> interrupt defined within the SDHCI or you have a gpio line independent
-> of the SDHCI and use cd-gpios.
+> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c | 17 ++++-------------
+>  1 file changed, 4 insertions(+), 13 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 4bc55ac..20453c8 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -969,15 +969,6 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
+>         struct mmc_data *data;
+>         int end_cmd = 0, end_trans = 0;
+>
+> -       if (!host->req_in_progress) {
 
-You've described two of the possible cases, but not the third.  In the
-third case, you have a gpio line that is not independent of the SDHCI,
-because it is the SDHCI's CD pin brought out to be directly accessible
-via a GPIO.
+just do a return from here
 
-The difference is in the handling of the interrupt -- if you don't have
-"cd-external" then you're just using the SDHCI's interrupt, but if you
-have an independent line then you're going to need to register your own
-IRQ handler on it, and "cd-external" signifies that.
+> -               do {
+> -                       OMAP_HSMMC_WRITE(host->base, STAT, status);
+> -                       /* Flush posted write */
+> -                       status = OMAP_HSMMC_READ(host->base, STAT);
+> -               } while (status & INT_EN_MASK);
+> -               return;
+> -       }
+> -
+>         data = host->data;
+>         dev_vdbg(mmc_dev(host->mmc), "IRQ Status is %x\n", status);
+>
+> @@ -1028,8 +1019,6 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
+>                 }
+>         }
+>
+> -       OMAP_HSMMC_WRITE(host->base, STAT, status);
+> -
+>         if (end_cmd || ((status & CC) && host->cmd))
+>                 omap_hsmmc_cmd_done(host, host->cmd);
+>         if ((end_trans || (status & TC)) && host->mrq)
+> @@ -1045,11 +1034,13 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
+>         int status;
+>
+>         status = OMAP_HSMMC_READ(host->base, STAT);
+> -       do {
+> +       while (status & INT_EN_MASK && host->req_in_progress) {
 
-Thomas wrote this explanation earlier in the thread:
-> "samsung,sdhci-cd-gpio" means that the cd-gpio line is not connected
-> to the card-detect pad of the sdhci controller. Instead, it identifies
-> cd-gpio as a gpio pin, connected to the card-detect pin of the "card
-> slot" and it can used as a source of external interrupt. The driver
-> can register card insert/remove handler for this interrupt and get
-> notified about the changes in card state.
-> 
-> "sdhci-cd-internal" means that the "cd-gpio" line is used to connect
-> the card-detect pin of the card slot and the card-detect pad of the
-> sdhci controller. The controller is then aware of any changes in card
-> state and the controller generates appropriate interrupts to notify
-> changes in card-state.
+and remove the check for host->req_in_progress
+I think do while loop can be retained as it will get executed once anyway.
 
-Thanks,
+>                 omap_hsmmc_do_irq(host, status);
+> +
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+>                 /* Flush posted write */
+
+comment is misplaced
+
+> +               OMAP_HSMMC_WRITE(host->base, STAT, status);
+>                 status = OMAP_HSMMC_READ(host->base, STAT);
+> -       } while (status & INT_EN_MASK);
+> +       }
+>
+>         return IRQ_HANDLED;
+>  }
+> --
+> 1.7.11.1.25.g0e18bef
+>
