@@ -1,51 +1,47 @@
-From: Vinod Koul <vinod.koul-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: Re: [PATCH v2 3/3] spi: spi-davinci: convert to DMA engine API
-Date: Wed, 22 Aug 2012 09:15:22 +0530
-Message-ID: <1345607122.1895.44.camel@vkoul-udesk3>
-References: <1345574589-24757-1-git-send-email-mporter@ti.com>
-	<1345574589-24757-4-git-send-email-mporter@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <1345574589-24757-4-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+From: Doug Anderson <dianders@chromium.org>
+Subject: [PATCH 1/2] mmc: core: Add a capability for disabling mmc cards
+Date: Tue, 21 Aug 2012 21:05:17 -0700
+Message-ID: <1345608318-15347-1-git-send-email-dianders@chromium.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Olof Johansson <olof@lixom.net>, Alim Akhtar <alim.akhtar@samsung.com>, Thomas P Abraham <thomas.ab@samsung.com>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, James Hogan <james.hogan@imgtec.com>, linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Doug Anderson <dianders@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 2012-08-21 at 14:43 -0400, Matt Porter wrote:
-> Removes use of the DaVinci EDMA private DMA API and replaces
-> it with use of the DMA engine API.
-> 
-> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-> ---
+On some systems we need a way to disable MMC card support in a MMC/SD
+card slot.  Add support in the core SD/MMC code to support this.
 
-> +		struct dma_slave_config dma_rx_conf = {
-> +			.direction = DMA_DEV_TO_MEM,
-> +			.src_addr = (unsigned long)dspi->pbase + SPIBUF,
-> +			.src_addr_width = data_type,
-> +			.src_maxburst = 1,
-what does 1 mean in this context? We define as number of units that
-needs to be transfered, so are you sure that you want only one unit to
-be dma'ed in a single burst. that seems like killing your dmac,
-shouldn't you be using larger bursts for a better dma performance?
+Signed-off-by: Doug Anderson <dianders@chromium.org>
+Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+---
+ drivers/mmc/core/core.c  |    2 +-
+ include/linux/mmc/host.h |    1 +
+ 2 files changed, 2 insertions(+), 1 deletions(-)
 
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 8ac5246..3214972 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1981,7 +1981,7 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+ 		return 0;
+ 	if (!mmc_attach_sd(host))
+ 		return 0;
+-	if (!mmc_attach_mmc(host))
++	if (!(host->caps2 & MMC_CAP2_NO_MMC) && !mmc_attach_mmc(host))
+ 		return 0;
+ 
+ 	mmc_power_off(host);
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index f578a71..f36370e 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -257,6 +257,7 @@ struct mmc_host {
+ #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
+ #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
+ #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
++#define MMC_CAP2_NO_MMC		(1 << 12)	/* Only SD supported, not MMC */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 	unsigned int        power_notify_type;
 -- 
-~Vinod
-
-
-------------------------------------------------------------------------------
-Live Security Virtual Conference
-Exclusive live event will cover all the ways today's security and 
-threat landscape has changed and how IT managers can respond. Discussions 
-will include endpoint security, mobile security and the latest in malware 
-threats. http://www.accelacomm.com/jaw/sfrnl04242012/114/50122263/
+1.7.7.3
