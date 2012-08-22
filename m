@@ -1,139 +1,50 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH] mmc: sh-mmcif: avoid Oops on spurious interrupts
-Date: Wed, 22 Aug 2012 08:49:47 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1208220840400.26767@axis700.grange>
-References: <878vdxd3mq.wl%kuninori.morimoto.gx@renesas.com>
- <20120803050039.GA1614@linux-sh.org> <20120809042844.GF1614@linux-sh.org>
- <87hasc3bv5.wl%kuninori.morimoto.gx@renesas.com> <874nobqntv.wl%kuninori.morimoto.gx@renesas.com>
- <20120810123804.GK1614@linux-sh.org> <502DDC97.5080501@kmckk.co.jp>
- <87wr0us6tg.wl%kuninori.morimoto.gx@renesas.com> <20120820031352.GC25767@linux-sh.org>
- <87obm6ry98.wl%kuninori.morimoto.gx@renesas.com> <20120820043853.GD25767@linux-sh.org>
- <87mx1qrx1x.wl%kuninori.morimoto.gx@renesas.com> <5031D9FF.8060801@kmckk.co.jp>
+From: Loic pallardy <loic.pallardy@gmail.com>
+Subject: Re: [PATCH v3 5/5] mmc: card: Add RPMB support in IOCTL interface
+Date: Wed, 22 Aug 2012 09:43:26 +0200
+Message-ID: <CAKGveeZrbBJObhpoMcdfw9DS4J9+w3MbxYX7qxVnJrgyUQ_x0w@mail.gmail.com>
+References: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
+	<1344265951-22437-6-git-send-email-loic.pallardy-ext@stericsson.com>
+	<CAPM_RLb9P61E+DVQh6e_gFO5QtcVLbxmEPX4WBVO_XxHA=7Saw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <5031D9FF.8060801@kmckk.co.jp>
-Sender: linux-sh-owner@vger.kernel.org
-To: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
-Cc: yusuke.goda.sx@renesas.com, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:58699 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752195Ab2HVHn1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Aug 2012 03:43:27 -0400
+Received: by obbuo13 with SMTP id uo13so1036842obb.19
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Aug 2012 00:43:27 -0700 (PDT)
+In-Reply-To: <CAPM_RLb9P61E+DVQh6e_gFO5QtcVLbxmEPX4WBVO_XxHA=7Saw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: shashidhar hiremath <shashidar1887@gmail.com>
+Cc: Loic Pallardy <loic.pallardy-ext@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Ulf Hansson <ulf.hansson@stericcson.com>, Loic Pallardy <loic.pallardy@stericsson.com>
 
-On some systems, e.g., kzm9g, MMCIF interfaces can produce spurious 
-interrupts without any active request. To prevent the Oops, that results 
-in such cases, don't dereference the mmc request pointer until we make 
-sure, that we are indeed processing such a request.
+>
+>
+> Hi,
+>   Any specific reason why the RPMB support is implemented using the
+> IOCTL interface. Can this be done by the Kernel itself instead of
+> being initiated by a user space application ?
+>
+> --
+> regards,
+> Shashidhar Hiremath
+> --
 
-Reported-by: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
+Hi,
+There are several reasons for that:
+- RPMB partition supports only few commands, it is not a "standard" partition
+- RPMB data access requests a dedicated data frame which contains MAC,
+write counter, address...
+- Only trusted/secured applications owns authentification key to
+calculate MAC (message authentification code) for each data frame.
 
-Hello Kobayashi-san
+So implementing RPMB access in kernel will complexify the driver (link
+with security, data frame management...) and create vulnerability from
+security point of view.
+With this solution, kernel driver provides just a pipe between secured
+application and eMMC.
 
-On Mon, 20 Aug 2012, Tetsuyuki Kobayashi wrote:
-
-...
-
-> After applying this patch on kzm9g board, I got this error regarding eMMC.
-> I think this is another problem.
-> 
-> 
-> Unable to handle kernel NULL pointer dereference at virtual address 00000008
-> pgd = c0004000
-> [00000008] *pgd=00000000
-> Internal error: Oops: 17 [#1] PREEMPT SMP ARM
-> Modules linked in:
-> CPU: 1    Not tainted  (3.6.0-rc2+ #103)
-> PC is at sh_mmcif_irqt+0x20/0xb30
-> LR is at irq_thread+0x94/0x16c
-
-[snip]
-
-> My quick fix is below.
-> 
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 5d81427..e587fbc 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -1104,7 +1104,15 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
->  {
->         struct sh_mmcif_host *host = dev_id;
->         struct mmc_request *mrq = host->mrq;
-> -       struct mmc_data *data = mrq->data;
-> +       /*struct mmc_data *data = mrq->data; -- this cause null pointer access*/
-> +       struct mmc_data *data;
-> +
-> +       /* quick fix by koba */
-> +       if (mrq == NULL) {
-> +               printk("sh_mmcif_irqt: mrq == NULL: host->wait_for=%d\n", host->wait_for);
-> +       } else {
-> +               data = mrq->data;
-> +       }
-> 
->         cancel_delayed_work_sync(&host->timeout_work);
-> 
-> 
-> With this patch, there is no null pointer accesses and got this log.
-> 
-> sh_mmcif_irqt: mrq == NULL: host->wait_for=0
-> sh_mmcif_irqt: mrq == NULL: host->wait_for=0
->   ...
-> 
-> host->wait_for is 0. it is MMCIF_WAIT_FOR_REQUEST.
-> There is code such like:
-> 
->        host->wait_for = MMCIF_WAIT_FOR_REQUEST;
->        host->mrq = NULL;
-> 
-> So, at the top of sh_mmcif_irqt, if host->wait_for == MMCIF_WAIT_FOR_REQUEST,
-> host->mrq = NULL. 
-> It is too earlier to access mrq->data before checking host->mrq. it may
-> cause null pointer access.
-> 
-> Goda-san, could you check this and refine the code of sh_mmcif_irqt?
-
-Thanks for your report and a fix. Could you please double-check, whether 
-the below patch also fixes your problem? Since such spurious interrupts 
-are possible I would commit a check like this one, but in the longer run 
-we want to identify and eliminate them, if possible. But since so far 
-these interrupts only happen on 1 board model and also not on all units 
-and not upon each boot, this could be a bit tricky.
-
-One more question - is this only needed for 3.7 or also for 3.6 / stable?
-
-Thanks
-Guennadi
-
- drivers/mmc/host/sh_mmcif.c |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 5d81427..82bf921 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1104,7 +1104,6 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
- {
- 	struct sh_mmcif_host *host = dev_id;
- 	struct mmc_request *mrq = host->mrq;
--	struct mmc_data *data = mrq->data;
- 
- 	cancel_delayed_work_sync(&host->timeout_work);
- 
-@@ -1152,13 +1151,14 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
- 	case MMCIF_WAIT_FOR_READ_END:
- 	case MMCIF_WAIT_FOR_WRITE_END:
- 		if (host->sd_error)
--			data->error = sh_mmcif_error_manage(host);
-+			mrq->data->error = sh_mmcif_error_manage(host);
- 		break;
- 	default:
- 		BUG();
- 	}
- 
- 	if (host->wait_for != MMCIF_WAIT_FOR_STOP) {
-+		struct mmc_data *data = mrq->data;
- 		if (!mrq->cmd->error && data && !data->error)
- 			data->bytes_xfered =
- 				data->blocks * data->blksz;
--- 
-1.7.2.5
-
+Regards,
+Loic
