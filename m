@@ -1,59 +1,70 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH] mmc: dt: Add card-detection properties to core binding.
-Date: Wed, 22 Aug 2012 14:05:35 -0400
-Message-ID: <874nnu245s.fsf_-_@octavius.laptop.org>
-References: <1345547371-6784-1-git-send-email-thomas.abraham@linaro.org>
-	<CAJuYYwSv+dum8RP9xy+AZCH9pTU0peDpwjt7TA5zn3MFsG1uWA@mail.gmail.com>
-	<87k3ws5uhs.fsf@octavius.laptop.org>
-	<201208211208.49987.arnd@arndb.de>
-	<87393g5mic.fsf@octavius.laptop.org> <5033A34E.7040201@gmail.com>
-	<87pq6k46jg.fsf@octavius.laptop.org> <5033B0F0.7050506@gmail.com>
-	<CAJuYYwR+oCQUcgoy6ZuHp0XAa+EAj9d-FvLtwsQcP3muFMrKLA@mail.gmail.com>
-	<20120822055151.GT24242@S2101-09.ap.freescale.net>
-	<877gsr5iz1.fsf@octavius.laptop.org>
-	<CAJuYYwQz00ZzB5MxRG66XEPZApAtS6bwJAafmw3b=7DD7u+Crg@mail.gmail.com>
-	<87y5l7421h.fsf@octavius.laptop.org>
-	<CAJuYYwQLUs5qb8NqtPf3=ytNHJ_VdnN8Z4yWwyk2+OTftdWFXw@mail.gmail.com>
-	<87393f3rkj.fsf@octavius.laptop.org>
+From: Nicolas Pitre <nico@fluxnic.net>
+Subject: Re: [PATCH 1/2] mmc: core: Add a capability for disabling mmc cards
+Date: Wed, 22 Aug 2012 14:25:45 -0400 (EDT)
+Message-ID: <alpine.LFD.2.02.1208221423050.1754@xanadu.home>
+References: <1345608318-15347-1-git-send-email-dianders@chromium.org>
+ <50346181.3010406@samsung.com>
+ <CAD=FV=UZM9b6++DkgemZA7qpAZgFN+NyyLjRecgSdjcEsu0YYA@mail.gmail.com>
+ <5ED03810-753A-407D-A994-E1FD22BE45E6@marvell.com>
+ <CAOesGMjX+jW6PKCzej27NHN2QFTg8XbMawPJNa53eQ2ojee3+A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <87393f3rkj.fsf@octavius.laptop.org> (Chris Ball's message of
-	"Wed, 22 Aug 2012 10:54:36 -0400")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Thomas Abraham <thomas.abraham@linaro.org>
-Cc: Shawn Guo <shawn.guo@linaro.org>, Rob Herring <robherring2@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, grant.likely@secretlab.ca, patches@linaro.org, Wolfram Sang <w.sang@pengutronix.de>
+Content-Type: TEXT/PLAIN; CHARSET=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <CAOesGMjX+jW6PKCzej27NHN2QFTg8XbMawPJNa53eQ2ojee3+A@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Olof Johansson <olof@lixom.net>
+Cc: Philip Rakity <prakity@marvell.com>, Doug Anderson <dianders@chromium.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alim Akhtar <alim.akhtar@samsung.com>, Thomas P Abraham <thomas.ab@samsung.com>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Signed-off-by: Chris Ball <cjb@laptop.org>
----
- Documentation/devicetree/bindings/mmc/mmc.txt | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
+On Wed, 22 Aug 2012, Olof Johansson wrote:
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index 8a6811f..8e2e0ba 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -9,12 +9,17 @@ Interpreted by the OF core:
- Required properties:
- - bus-width: Number of data lines, can be <1>, <4>, or <8>
- 
-+Card detection:
-+If no property below is supplied, standard SDHCI card detect is used.
-+Only one of the properties in this section should be supplied:
-+  - broken-cd: There is no card detection available; polling must be used.
-+  - cd-gpios: Specify GPIOs for card detection, see gpio binding
-+  - non-removable: non-removable slot (like eMMC); assume always present.
-+
- Optional properties:
--- cd-gpios: Specify GPIOs for card detection, see gpio binding
- - wp-gpios: Specify GPIOs for write protection, see gpio binding
- - cd-inverted: when present, polarity on the cd gpio line is inverted
- - wp-inverted: when present, polarity on the wp gpio line is inverted
--- non-removable: non-removable slot (like eMMC)
- - max-frequency: maximum operating clock frequency
- 
- Example:
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> On Wed, Aug 22, 2012 at 9:00 AM, Philip Rakity <prakity@marvell.com> wrote:
+> >
+> > On Aug 22, 2012, at 8:44 AM, Doug Anderson <dianders@chromium.org> wrote:
+> >
+> >> Thanks for your feedback.  In this case I have a card that is an MMC
+> >> card so mmc_attach_sdio() and mmc_attach_sd() will fail.  If I let
+> >> mmc_attach_mmc() run it will actually find the MMC card.  However, on
+> >> this platform it is not valid to recognize MMC cards.
+> >>
+> >
+> >
+> > Understand.
+> >
+> > Can you explain why the change is needed.  Is it for technical
+> > reasons that MMC is not allowed -- if so then I do not understand how SD can work
+> > and MMC cannot.
+> >
+> > If it is for marketing reasons -- then --- oh well .....
+> >
+> >
+> > Could you add some additional comments to the commit message.
+> > I think it makes sense to handle all 3 cases
+> > a) SDIO not allowed
+> > b) SD not allowed
+> > c) MMC not allowed
+> 
+> We are working with a system manufacturer who wishes to only support
+> SD cards in their product, and need to accommodate that. It made sense
+> for us to contribute this work upstream since others might want to do
+> the same in the future for some reason.
+> 
+> Adding all three cases makes sense if others foresee a use case for it.
+
+Isn't this rather revolting?
+
+Personally I find such "feature" totally ridiculous. If said
+manufacturer doesn't want to support MMC cards, they just have to not
+advertise it, period.  Or if they really mean it, then they only have to
+state it explicitly in their user manual, and repeat it if ever problems
+are reported.
+
+Dumbing down kernel functionality to serve marketing purpose or
+technology lock-ins is utterly stupid.  Purposely restricting
+interoperability might even be ruled illegal in some jurisdictions.
+
+I therefore insist on providing a vehement NAK on such patches.
+
+
+Nicolas
