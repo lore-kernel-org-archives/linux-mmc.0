@@ -1,71 +1,116 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: Re: [PATCH 1/2] mmc: core: Add a capability for disabling mmc cards
-Date: Wed, 22 Aug 2012 09:50:37 -0700
-Message-ID: <CAOesGMjX+jW6PKCzej27NHN2QFTg8XbMawPJNa53eQ2ojee3+A@mail.gmail.com>
-References: <1345608318-15347-1-git-send-email-dianders@chromium.org>
-	<50346181.3010406@samsung.com>
-	<CAD=FV=UZM9b6++DkgemZA7qpAZgFN+NyyLjRecgSdjcEsu0YYA@mail.gmail.com>
-	<5ED03810-753A-407D-A994-E1FD22BE45E6@marvell.com>
+From: Mitch Bradley <wmb-D5eQfiDGL7eakBO8gow8eQ@public.gmane.org>
+Subject: Re: [PATCH] mmc: dt: Add 'broken-cd' DT binding
+Date: Wed, 22 Aug 2012 07:09:42 -1000
+Message-ID: <50351256.60507@firmworks.com>
+References: <1345547371-6784-1-git-send-email-thomas.abraham@linaro.org>
+ <CAJuYYwSv+dum8RP9xy+AZCH9pTU0peDpwjt7TA5zn3MFsG1uWA@mail.gmail.com>
+ <87k3ws5uhs.fsf@octavius.laptop.org> <201208211208.49987.arnd@arndb.de>
+ <87393g5mic.fsf@octavius.laptop.org> <5033A34E.7040201@gmail.com>
+ <87pq6k46jg.fsf@octavius.laptop.org> <5033B0F0.7050506@gmail.com>
+ <CAJuYYwR+oCQUcgoy6ZuHp0XAa+EAj9d-FvLtwsQcP3muFMrKLA@mail.gmail.com>
+ <20120822055151.GT24242@S2101-09.ap.freescale.net>
+ <877gsr5iz1.fsf@octavius.laptop.org>
+ <CAJuYYwQz00ZzB5MxRG66XEPZApAtS6bwJAafmw3b=7DD7u+Crg@mail.gmail.com>
+ <87y5l7421h.fsf@octavius.laptop.org>
+ <CAJuYYwQLUs5qb8NqtPf3=ytNHJ_VdnN8Z4yWwyk2+OTftdWFXw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:42218 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758156Ab2HVQuj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Aug 2012 12:50:39 -0400
-Received: by wgbdr13 with SMTP id dr13so1041412wgb.1
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Aug 2012 09:50:37 -0700 (PDT)
-In-Reply-To: <5ED03810-753A-407D-A994-E1FD22BE45E6@marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <CAJuYYwQLUs5qb8NqtPf3=ytNHJ_VdnN8Z4yWwyk2+OTftdWFXw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Thomas Abraham <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Wolfram Sang <w.sang-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Doug Anderson <dianders@chromium.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alim Akhtar <alim.akhtar@samsung.com>, Thomas P Abraham <thomas.ab@samsung.com>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-Hi,
+Hi Thomas,
 
-On Wed, Aug 22, 2012 at 9:00 AM, Philip Rakity <prakity@marvell.com> wrote:
->
-> On Aug 22, 2012, at 8:44 AM, Doug Anderson <dianders@chromium.org> wrote:
->
->> Jaehoon,
+On 8/22/2012 2:04 AM, Thomas Abraham wrote:
+> On 22 August 2012 16:38, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org> wrote:
+>> Hi Thomas,
 >>
->> On Tue, Aug 21, 2012 at 9:35 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> On Wed, Aug 22 2012, Thomas Abraham wrote:
+>>>> This matches Mitch's last suggestion exactly -- I think we're all agreed
+>>>> on these properties now.  The only remaining question is how to handle
+>>>> the pinctrl for CD in Thomas's case.
 >>>
->>> Hi Doug,
+>>> Hi Chris,
 >>>
->>> I didn't know what purpose is.
->>> Why need to add the MMC_CAP2_NO_MMC?
->>> If card is SD or SDIO, mmc_attach_mmc(host) should not be entered.
->>> Could you explain to me in more detail?
+>>> For sdhci-s3c driver, the 'broken-cd' and 'cd-gpios' bindings are
+>>> sufficient. But, are drivers free to use implementation specific
+>>> behavior when using these bindings. Or do we strictly adhere to the
+>>> table which Shawn has listed. For sdhci-s3c driver, I would like to
+>>> deviate from the "implication" column listed above.
 >>
->> Thanks for your feedback.  In this case I have a card that is an MMC
->> card so mmc_attach_sdio() and mmc_attach_sd() will fail.  If I let
->> mmc_attach_mmc() run it will actually find the MMC card.  However, on
->> this platform it is not valid to recognize MMC cards.
+>> I'd rather you use the implications described above for the names
+>> described above; there's not much point in defining named behaviors
+>> across the subsystem if they're actually different in each driver.
+> 
+> Ok.
+> 
 >>
->
->
-> Understand.
->
-> Can you explain why the change is needed.  Is it for technical
-> reasons that MMC is not allowed -- if so then I do not understand how SD can work
-> and MMC cannot.
->
-> If it is for marketing reasons -- then --- oh well .....
->
->
-> Could you add some additional comments to the commit message.
-> I think it makes sense to handle all 3 cases
-> a) SDIO not allowed
-> b) SD not allowed
-> c) MMC not allowed
-
-We are working with a system manufacturer who wishes to only support
-SD cards in their product, and need to accommodate that. It made sense
-for us to contribute this work upstream since others might want to do
-the same in the future for some reason.
-
-Adding all three cases makes sense if others foresee a use case for it.
+>> But I think you can still use driver-internal properties that change the
+>> interpretation of those names in a documented way.  If the meaning of
+>> cd-gpios is modified when coupled with your "samsung,sdhci-cd-external",
+>> that's okay with me.  That should cover all the cases you need until you
+>> migrate to using pinctrl, right?  So, you could immediately support:
+>>
+>> none          -> currently "samsung,sdhci-cd-internal"
+>> broken-cd     -> currently "samsung,sdhci-cd-none"
+>> cd-gpios      -> currently "samsung,sdhci-cd-gpios"
+>> non-removable -> currently "samsung,sdhci-cd-permanent"
+>> cd-gpios + samsung,sdhci-cd-external -> currently "samsung,sdhci-cd-external"
+>>
+>> How does that sound?
+> 
+> Not quite there yet. It is not possible to leave out cd-gpios for
+> "samsung,sdhci-cd-internal" since the current Samsung pinmux
+> configuration piggybacks on gpio dt binding.
 
 
--Olof
+Sorry to interject on a topic that seems to have already been decided,
+but I'm confused by one thing and would like clarification.  I
+understand that you need to use a GPIO-style specifier as a surrogate
+for a pinmux specification - that much is clear.  What is not clear is
+why it's necessary to (ab)use the name "cd-gpios" for it.
+
+Why not use a different property name, e.g. "samsung,cd-pinmux-gpio =
+<gpio-specifier>" for the "cd-gpios + samsung,sdhci-cd-internal" case?
+Then both "samsung,sdhci-cdi-internal" and "samsung,sdhci-cd-external"
+could go away.  There would only be one system-dependent property
+"samsung,cd-pinmux-gpio" whose name would make it clear that it's
+conflating pinmuxing and gpios.
+
+I think the scheme I propose would be clearer, less likely to confuse
+other people who try to use the driver as a model, require less
+hand-waving in the documentation, and easier to change to a proper
+pinmuxing scheme should that become available later.
+
+
+ Can we use the following
+> instead.
+> 
+> none               -> currently "samsung,sdhci-cd-none"
+> broken-cd        -> currently "samsung,sdhci-cd-none"
+> cd-gpios          -> currently "samsung,sdhci-cd-gpios"
+> non-removable -> currently "samsung,sdhci-cd-permanent"
+> cd-gpios + samsung,sdhci-cd-internal -> currently "samsung,sdhci-cd-internal"
+> 
+> Thanks Chris.
+> 
+> Regards,
+> Thomas.
+> _______________________________________________
+> devicetree-discuss mailing list
+> devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+> https://lists.ozlabs.org/listinfo/devicetree-discuss
+> 
