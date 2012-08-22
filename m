@@ -1,7 +1,7 @@
 From: Chris Ball <cjb@laptop.org>
 Subject: Re: [PATCH] mmc: dt: Add 'broken-cd' DT binding
-Date: Wed, 22 Aug 2012 10:54:36 -0400
-Message-ID: <87393f3rkj.fsf@octavius.laptop.org>
+Date: Wed, 22 Aug 2012 10:58:51 -0400
+Message-ID: <87d32j2ct0.fsf@octavius.laptop.org>
 References: <1345547371-6784-1-git-send-email-thomas.abraham@linaro.org>
 	<CAJuYYwSv+dum8RP9xy+AZCH9pTU0peDpwjt7TA5zn3MFsG1uWA@mail.gmail.com>
 	<87k3ws5uhs.fsf@octavius.laptop.org>
@@ -10,52 +10,47 @@ References: <1345547371-6784-1-git-send-email-thomas.abraham@linaro.org>
 	<87pq6k46jg.fsf@octavius.laptop.org> <5033B0F0.7050506@gmail.com>
 	<CAJuYYwR+oCQUcgoy6ZuHp0XAa+EAj9d-FvLtwsQcP3muFMrKLA@mail.gmail.com>
 	<20120822055151.GT24242@S2101-09.ap.freescale.net>
-	<877gsr5iz1.fsf@octavius.laptop.org>
-	<CAJuYYwQz00ZzB5MxRG66XEPZApAtS6bwJAafmw3b=7DD7u+Crg@mail.gmail.com>
-	<87y5l7421h.fsf@octavius.laptop.org>
-	<CAJuYYwQLUs5qb8NqtPf3=ytNHJ_VdnN8Z4yWwyk2+OTftdWFXw@mail.gmail.com>
+	<877gsr5iz1.fsf@octavius.laptop.org> <5034F2AD.7060801@wwwdotorg.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAJuYYwQLUs5qb8NqtPf3=ytNHJ_VdnN8Z4yWwyk2+OTftdWFXw@mail.gmail.com>
-	(Thomas Abraham's message of "Wed, 22 Aug 2012 17:34:53 +0530")
+In-Reply-To: <5034F2AD.7060801@wwwdotorg.org> (Stephen Warren's message of
+	"Wed, 22 Aug 2012 08:54:37 -0600")
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Thomas Abraham <thomas.abraham@linaro.org>
-Cc: Shawn Guo <shawn.guo@linaro.org>, Rob Herring <robherring2@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, grant.likely@secretlab.ca, patches@linaro.org, Wolfram Sang <w.sang@pengutronix.de>
+To: Stephen Warren <swarren@wwwdotorg.org>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linux-samsung-soc@vger.kernel.org, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Thomas,
+Hi Stephen,
 
-On Wed, Aug 22 2012, Thomas Abraham wrote:
->> none          -> currently "samsung,sdhci-cd-internal"
->> broken-cd     -> currently "samsung,sdhci-cd-none"
->> cd-gpios      -> currently "samsung,sdhci-cd-gpios"
->> non-removable -> currently "samsung,sdhci-cd-permanent"
->> cd-gpios + samsung,sdhci-cd-external -> currently "samsung,sdhci-cd-external"
->>
->> How does that sound?
+On Wed, Aug 22 2012, Stephen Warren wrote:
+> On 08/22/2012 04:17 AM, Chris Ball wrote:
+>> Hi,
+>> 
+>> On Wed, Aug 22 2012, Shawn Guo wrote:
+>>> The following is what I have on my mind.
+>>>
+>>> broken-cd	cd-gpios	implication
+>>> -------------------------------------------
+>>> no		no		SDHCI CD
+>>> no		yes		GPIO CD
+>>> yes		no		NO CD / Broken CD
+>>> yes		yes		Invalid
+>>>
+>>> yes: property presents
+>>> no: property does not present
+>> 
+>> This matches Mitch's last suggestion exactly -- I think we're all agreed
+>> on these properties now.  The only remaining question is how to handle
+>> the pinctrl for CD in Thomas's case.
 >
-> Not quite there yet. It is not possible to leave out cd-gpios for
-> "samsung,sdhci-cd-internal" since the current Samsung pinmux
-> configuration piggybacks on gpio dt binding. Can we use the following
-> instead.
->
-> none               -> currently "samsung,sdhci-cd-none"
-> broken-cd        -> currently "samsung,sdhci-cd-none"
-> cd-gpios          -> currently "samsung,sdhci-cd-gpios"
-> non-removable -> currently "samsung,sdhci-cd-permanent"
-> cd-gpios + samsung,sdhci-cd-internal -> currently "samsung,sdhci-cd-internal"
+> Sorry if this has already been mentioned, but I assume the standard
+> non-removable property overrides any of those, or is invalid in
+> combination with any of those?
 
-I see.  Okay; unless anyone has better ideas, it sounds like you should
-go ahead and do that -- with something like this in your binding docs:
-
-"This binding differs from the core MMC binding by requiring a cd-gpios
-property to be present to use internal card-detection.  If no cd-gpios
-are present (and "non-removable" is missing) the driver will poll for
-card-detection as if a "broken-cd" property was provided."
-
-I'll send out the new core bindings doc shortly.  Finishing off another
-thread -- the "samsung-sdhci.txt" name is okay.
+Yes, absolutely.  I'll make sure to explain that in the new version of
+the document.  (I think the reason it hasn't been mentioned much in this
+thread is that it's already part of the core bindings.)
 
 Thanks,
 
