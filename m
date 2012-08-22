@@ -1,57 +1,67 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH 2/2] mmc: dw_mmc: Add a DISABLE_MMC quirk that sets the core mmc cap
-Date: Tue, 21 Aug 2012 21:05:18 -0700
-Message-ID: <1345608318-15347-2-git-send-email-dianders@chromium.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 1/2] mmc: core: Add a capability for disabling mmc cards
+Date: Wed, 22 Aug 2012 13:35:13 +0900
+Message-ID: <50346181.3010406@samsung.com>
 References: <1345608318-15347-1-git-send-email-dianders@chromium.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gg0-f202.google.com ([209.85.161.202]:38762 "EHLO
-	mail-gg0-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750747Ab2HVEF5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Aug 2012 00:05:57 -0400
-Received: by ggnu1 with SMTP id u1so72610ggn.1
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Aug 2012 21:05:56 -0700 (PDT)
-In-Reply-To: <1345608318-15347-1-git-send-email-dianders@chromium.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:9364 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753211Ab2HVEf3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Aug 2012 00:35:29 -0400
+In-reply-to: <1345608318-15347-1-git-send-email-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Olof Johansson <olof@lixom.net>, Alim Akhtar <alim.akhtar@samsung.com>, Thomas P Abraham <thomas.ab@samsung.com>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, James Hogan <james.hogan@imgtec.com>, linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Doug Anderson <dianders@chromium.org>
+To: Doug Anderson <dianders@chromium.org>
+Cc: linux-mmc@vger.kernel.org, Olof Johansson <olof@lixom.net>, Alim Akhtar <alim.akhtar@samsung.com>, Thomas P Abraham <thomas.ab@samsung.com>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, James Hogan <james.hogan@imgtec.com>, linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On some systems we need a way to disable MMC card support in a MMC/SD
-card slot.  Add support in the dw_mmc to support this.
+Hi Doug,
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
- drivers/mmc/host/dw_mmc.c  |    3 +++
- include/linux/mmc/dw_mmc.h |    2 ++
- 2 files changed, 5 insertions(+), 0 deletions(-)
+I didn't know what purpose is.
+Why need to add the MMC_CAP2_NO_MMC?
+If card is SD or SDIO, mmc_attach_mmc(host) should not be entered.
+Could you explain to me in more detail?
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index af40d22..09111bf 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1810,6 +1810,9 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	if (host->pdata->quirks & DW_MCI_QUIRK_HIGHSPEED)
- 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
- 
-+	if (host->pdata->quirks & DW_MCI_QUIRK_DISABLE_MMC)
-+		mmc->caps2 |= MMC_CAP2_NO_MMC;
-+
- 	if (mmc->caps2 & MMC_CAP2_POWEROFF_NOTIFY)
- 		mmc->power_notify_type = MMC_HOST_PW_NOTIFY_SHORT;
- 	else
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 7a7ebd3..5eaa9b9 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -201,6 +201,8 @@ struct dw_mci_dma_ops {
- #define DW_MCI_QUIRK_HIGHSPEED			BIT(2)
- /* Unreliable card detection */
- #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(3)
-+/* Only support SD cards, not MMC */
-+#define DW_MCI_QUIRK_DISABLE_MMC		BIT(4)
- 
- 
- struct dma_pdata;
--- 
-1.7.7.3
+Best Regards,
+Jaehoon Chung
+
+On 08/22/2012 01:05 PM, Doug Anderson wrote:
+> On some systems we need a way to disable MMC card support in a MMC/SD
+> card slot.  Add support in the core SD/MMC code to support this.
+> 
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+> ---
+>  drivers/mmc/core/core.c  |    2 +-
+>  include/linux/mmc/host.h |    1 +
+>  2 files changed, 2 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 8ac5246..3214972 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1981,7 +1981,7 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+>  		return 0;
+>  	if (!mmc_attach_sd(host))
+>  		return 0;
+> -	if (!mmc_attach_mmc(host))
+> +	if (!(host->caps2 & MMC_CAP2_NO_MMC) && !mmc_attach_mmc(host))
+>  		return 0;
+>  
+>  	mmc_power_off(host);
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index f578a71..f36370e 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -257,6 +257,7 @@ struct mmc_host {
+>  #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
+>  #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
+>  #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
+> +#define MMC_CAP2_NO_MMC		(1 << 12)	/* Only SD supported, not MMC */
+>  
+>  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+>  	unsigned int        power_notify_type;
+> 
 
