@@ -1,78 +1,143 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: Re: [PATCH] mmc: dt: Add 'broken-cd' DT binding
-Date: Wed, 22 Aug 2012 17:34:53 +0530
-Message-ID: <CAJuYYwQLUs5qb8NqtPf3=ytNHJ_VdnN8Z4yWwyk2+OTftdWFXw@mail.gmail.com>
-References: <1345547371-6784-1-git-send-email-thomas.abraham@linaro.org>
-	<CAJuYYwSv+dum8RP9xy+AZCH9pTU0peDpwjt7TA5zn3MFsG1uWA@mail.gmail.com>
-	<87k3ws5uhs.fsf@octavius.laptop.org>
-	<201208211208.49987.arnd@arndb.de>
-	<87393g5mic.fsf@octavius.laptop.org>
-	<5033A34E.7040201@gmail.com>
-	<87pq6k46jg.fsf@octavius.laptop.org>
-	<5033B0F0.7050506@gmail.com>
-	<CAJuYYwR+oCQUcgoy6ZuHp0XAa+EAj9d-FvLtwsQcP3muFMrKLA@mail.gmail.com>
-	<20120822055151.GT24242@S2101-09.ap.freescale.net>
-	<877gsr5iz1.fsf@octavius.laptop.org>
-	<CAJuYYwQz00ZzB5MxRG66XEPZApAtS6bwJAafmw3b=7DD7u+Crg@mail.gmail.com>
-	<87y5l7421h.fsf@octavius.laptop.org>
+From: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
+Subject: Re: [PATCH] mmc: sh-mmcif: avoid Oops on spurious interrupts
+Date: Wed, 22 Aug 2012 21:16:00 +0900
+Message-ID: <5034CD80.70501@kmckk.co.jp>
+References: <878vdxd3mq.wl%kuninori.morimoto.gx@renesas.com> <20120803050039.GA1614@linux-sh.org> <20120809042844.GF1614@linux-sh.org> <87hasc3bv5.wl%kuninori.morimoto.gx@renesas.com> <874nobqntv.wl%kuninori.morimoto.gx@renesas.com> <20120810123804.GK1614@linux-sh.org> <502DDC97.5080501@kmckk.co.jp> <87wr0us6tg.wl%kuninori.morimoto.gx@renesas.com> <20120820031352.GC25767@linux-sh.org> <87obm6ry98.wl%kuninori.morimoto.gx@renesas.com> <20120820043853.GD25767@linux-sh.org> <87mx1qrx1x.wl%kuninori.morimoto.gx@renesas.com> <5031D9FF.8060801@kmckk.co.jp> <Pine.LNX.4.64.1208220840400.26767@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <87y5l7421h.fsf@octavius.laptop.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Shawn Guo <shawn.guo@linaro.org>, Rob Herring <robherring2@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, grant.likely@secretlab.ca, patches@linaro.org, Wolfram Sang <w.sang@pengutronix.de>
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1208220840400.26767@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: yusuke.goda.sx@renesas.com, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org, koba@kmckk.co.jp
 List-Id: linux-mmc@vger.kernel.org
 
-On 22 August 2012 16:38, Chris Ball <cjb@laptop.org> wrote:
-> Hi Thomas,
+Hello Guennadi,
+
+Thank you for your patch. I will test this next week.
+
+ > One more question - is this only needed for 3.7 or also for 3.6 / stable?
+
+I hope this also for 3.6 / stable because it is more robust.
+The other hand, we need investigate why this strange interrupt happens.
+
+(2012/08/22 15:49), Guennadi Liakhovetski wrote:
+> On some systems, e.g., kzm9g, MMCIF interfaces can produce spurious
+> interrupts without any active request. To prevent the Oops, that results
+> in such cases, don't dereference the mmc request pointer until we make
+> sure, that we are indeed processing such a request.
 >
-> On Wed, Aug 22 2012, Thomas Abraham wrote:
->>> This matches Mitch's last suggestion exactly -- I think we're all agreed
->>> on these properties now.  The only remaining question is how to handle
->>> the pinctrl for CD in Thomas's case.
+> Reported-by: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
+>
+> Hello Kobayashi-san
+>
+> On Mon, 20 Aug 2012, Tetsuyuki Kobayashi wrote:
+>
+> ...
+>
+>> After applying this patch on kzm9g board, I got this error regarding eMMC.
+>> I think this is another problem.
 >>
->> Hi Chris,
 >>
->> For sdhci-s3c driver, the 'broken-cd' and 'cd-gpios' bindings are
->> sufficient. But, are drivers free to use implementation specific
->> behavior when using these bindings. Or do we strictly adhere to the
->> table which Shawn has listed. For sdhci-s3c driver, I would like to
->> deviate from the "implication" column listed above.
+>> Unable to handle kernel NULL pointer dereference at virtual address 00000008
+>> pgd = c0004000
+>> [00000008] *pgd=00000000
+>> Internal error: Oops: 17 [#1] PREEMPT SMP ARM
+>> Modules linked in:
+>> CPU: 1    Not tainted  (3.6.0-rc2+ #103)
+>> PC is at sh_mmcif_irqt+0x20/0xb30
+>> LR is at irq_thread+0x94/0x16c
 >
-> I'd rather you use the implications described above for the names
-> described above; there's not much point in defining named behaviors
-> across the subsystem if they're actually different in each driver.
-
-Ok.
-
+> [snip]
 >
-> But I think you can still use driver-internal properties that change the
-> interpretation of those names in a documented way.  If the meaning of
-> cd-gpios is modified when coupled with your "samsung,sdhci-cd-external",
-> that's okay with me.  That should cover all the cases you need until you
-> migrate to using pinctrl, right?  So, you could immediately support:
+>> My quick fix is below.
+>>
+>> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+>> index 5d81427..e587fbc 100644
+>> --- a/drivers/mmc/host/sh_mmcif.c
+>> +++ b/drivers/mmc/host/sh_mmcif.c
+>> @@ -1104,7 +1104,15 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+>>   {
+>>          struct sh_mmcif_host *host = dev_id;
+>>          struct mmc_request *mrq = host->mrq;
+>> -       struct mmc_data *data = mrq->data;
+>> +       /*struct mmc_data *data = mrq->data; -- this cause null pointer access*/
+>> +       struct mmc_data *data;
+>> +
+>> +       /* quick fix by koba */
+>> +       if (mrq == NULL) {
+>> +               printk("sh_mmcif_irqt: mrq == NULL: host->wait_for=%d\n", host->wait_for);
+>> +       } else {
+>> +               data = mrq->data;
+>> +       }
+>>
+>>          cancel_delayed_work_sync(&host->timeout_work);
+>>
+>>
+>> With this patch, there is no null pointer accesses and got this log.
+>>
+>> sh_mmcif_irqt: mrq == NULL: host->wait_for=0
+>> sh_mmcif_irqt: mrq == NULL: host->wait_for=0
+>>    ...
+>>
+>> host->wait_for is 0. it is MMCIF_WAIT_FOR_REQUEST.
+>> There is code such like:
+>>
+>>         host->wait_for = MMCIF_WAIT_FOR_REQUEST;
+>>         host->mrq = NULL;
+>>
+>> So, at the top of sh_mmcif_irqt, if host->wait_for == MMCIF_WAIT_FOR_REQUEST,
+>> host->mrq = NULL.
+>> It is too earlier to access mrq->data before checking host->mrq. it may
+>> cause null pointer access.
+>>
+>> Goda-san, could you check this and refine the code of sh_mmcif_irqt?
 >
-> none          -> currently "samsung,sdhci-cd-internal"
-> broken-cd     -> currently "samsung,sdhci-cd-none"
-> cd-gpios      -> currently "samsung,sdhci-cd-gpios"
-> non-removable -> currently "samsung,sdhci-cd-permanent"
-> cd-gpios + samsung,sdhci-cd-external -> currently "samsung,sdhci-cd-external"
+> Thanks for your report and a fix. Could you please double-check, whether
+> the below patch also fixes your problem? Since such spurious interrupts
+> are possible I would commit a check like this one, but in the longer run
+> we want to identify and eliminate them, if possible. But since so far
+> these interrupts only happen on 1 board model and also not on all units
+> and not upon each boot, this could be a bit tricky.
 >
-> How does that sound?
+> One more question - is this only needed for 3.7 or also for 3.6 / stable?
+>
+> Thanks
+> Guennadi
+>
+>   drivers/mmc/host/sh_mmcif.c |    4 ++--
+>   1 files changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index 5d81427..82bf921 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -1104,7 +1104,6 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+>   {
+>   	struct sh_mmcif_host *host = dev_id;
+>   	struct mmc_request *mrq = host->mrq;
+> -	struct mmc_data *data = mrq->data;
+>
+>   	cancel_delayed_work_sync(&host->timeout_work);
+>
+> @@ -1152,13 +1151,14 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+>   	case MMCIF_WAIT_FOR_READ_END:
+>   	case MMCIF_WAIT_FOR_WRITE_END:
+>   		if (host->sd_error)
+> -			data->error = sh_mmcif_error_manage(host);
+> +			mrq->data->error = sh_mmcif_error_manage(host);
+>   		break;
+>   	default:
+>   		BUG();
+>   	}
+>
+>   	if (host->wait_for != MMCIF_WAIT_FOR_STOP) {
+> +		struct mmc_data *data = mrq->data;
+>   		if (!mrq->cmd->error && data && !data->error)
+>   			data->bytes_xfered =
+>   				data->blocks * data->blksz;
+>
 
-Not quite there yet. It is not possible to leave out cd-gpios for
-"samsung,sdhci-cd-internal" since the current Samsung pinmux
-configuration piggybacks on gpio dt binding. Can we use the following
-instead.
-
-none               -> currently "samsung,sdhci-cd-none"
-broken-cd        -> currently "samsung,sdhci-cd-none"
-cd-gpios          -> currently "samsung,sdhci-cd-gpios"
-non-removable -> currently "samsung,sdhci-cd-permanent"
-cd-gpios + samsung,sdhci-cd-internal -> currently "samsung,sdhci-cd-internal"
-
-Thanks Chris.
-
-Regards,
-Thomas.
