@@ -1,67 +1,71 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: dt: Add 'broken-cd' DT binding
-Date: Wed, 22 Aug 2012 07:08:26 -0400
-Message-ID: <87y5l7421h.fsf@octavius.laptop.org>
-References: <1345547371-6784-1-git-send-email-thomas.abraham@linaro.org>
-	<CAJuYYwSv+dum8RP9xy+AZCH9pTU0peDpwjt7TA5zn3MFsG1uWA@mail.gmail.com>
-	<87k3ws5uhs.fsf@octavius.laptop.org>
-	<201208211208.49987.arnd@arndb.de>
-	<87393g5mic.fsf@octavius.laptop.org> <5033A34E.7040201@gmail.com>
-	<87pq6k46jg.fsf@octavius.laptop.org> <5033B0F0.7050506@gmail.com>
-	<CAJuYYwR+oCQUcgoy6ZuHp0XAa+EAj9d-FvLtwsQcP3muFMrKLA@mail.gmail.com>
-	<20120822055151.GT24242@S2101-09.ap.freescale.net>
-	<877gsr5iz1.fsf@octavius.laptop.org>
-	<CAJuYYwQz00ZzB5MxRG66XEPZApAtS6bwJAafmw3b=7DD7u+Crg@mail.gmail.com>
+From: Felipe Balbi <balbi@ti.com>
+Subject: Re: [PATCH 09/10] mmc: omap_hsmmc: convert from IP timer to hrtimer
+Date: Wed, 22 Aug 2012 14:28:32 +0300
+Message-ID: <20120822112830.GB27029@arwen.pp.htv.fi>
+References: <1345229550-8672-1-git-send-email-svenkatr@ti.com>
+ <1345229550-8672-10-git-send-email-svenkatr@ti.com>
+ <20120821104248.GR10347@arwen.pp.htv.fi>
+ <CANfBPZ-VbkDRADNgecyXSqj3YH-mAZcihEm2YRrMW8_RWpORyQ@mail.gmail.com>
+Reply-To: balbi@ti.com
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35861 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753007Ab2HVLIi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 22 Aug 2012 07:08:38 -0400
-In-Reply-To: <CAJuYYwQz00ZzB5MxRG66XEPZApAtS6bwJAafmw3b=7DD7u+Crg@mail.gmail.com>
-	(Thomas Abraham's message of "Wed, 22 Aug 2012 16:21:33 +0530")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="8GpibOaaTibBMecb"
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CANfBPZ-VbkDRADNgecyXSqj3YH-mAZcihEm2YRrMW8_RWpORyQ@mail.gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: "S, Venkatraman" <svenkatr@ti.com>
+Cc: balbi@ti.com, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, balajitk@ti.com, vishp@ti.com
 List-Id: linux-mmc@vger.kernel.org
-To: Thomas Abraham <thomas.abraham@linaro.org>
-Cc: Shawn Guo <shawn.guo@linaro.org>, Rob Herring <robherring2@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, grant.likely@secretlab.ca, patches@linaro.org, Wolfram Sang <w.sang@pengutronix.de>
 
-Hi Thomas,
 
-On Wed, Aug 22 2012, Thomas Abraham wrote:
->> This matches Mitch's last suggestion exactly -- I think we're all agreed
->> on these properties now.  The only remaining question is how to handle
->> the pinctrl for CD in Thomas's case.
->
-> Hi Chris,
->
-> For sdhci-s3c driver, the 'broken-cd' and 'cd-gpios' bindings are
-> sufficient. But, are drivers free to use implementation specific
-> behavior when using these bindings. Or do we strictly adhere to the
-> table which Shawn has listed. For sdhci-s3c driver, I would like to
-> deviate from the "implication" column listed above.
+--8GpibOaaTibBMecb
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-I'd rather you use the implications described above for the names
-described above; there's not much point in defining named behaviors
-across the subsystem if they're actually different in each driver.
+Hi,
 
-But I think you can still use driver-internal properties that change the
-interpretation of those names in a documented way.  If the meaning of
-cd-gpios is modified when coupled with your "samsung,sdhci-cd-external",
-that's okay with me.  That should cover all the cases you need until you
-migrate to using pinctrl, right?  So, you could immediately support:
+On Wed, Aug 22, 2012 at 04:08:17PM +0530, S, Venkatraman wrote:
+> >> @@ -992,7 +996,7 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_ho=
+st *host, int status)
+> >>                       hsmmc_command_incomplete(host, -EILSEQ);
+> >>
+> >>               end_cmd =3D 1;
+> >> -             if (host->data || host->response_busy) {
+> >> +             if (data || host->response_busy) {
+> >
+> > This doesn't seem like it belongs to $SUBJECT...
+> >
+> I thought is was a small fix which didn't warrant a separate patch though.
 
-none          -> currently "samsung,sdhci-cd-internal"
-broken-cd     -> currently "samsung,sdhci-cd-none"
-cd-gpios      -> currently "samsung,sdhci-cd-gpios"
-non-removable -> currently "samsung,sdhci-cd-permanent"
-cd-gpios + samsung,sdhci-cd-external -> currently "samsung,sdhci-cd-external"
+sure, that's fair. But it does deserve a mention on commit log too.
+Something along the lines of "while at that, also use a 'data' variable
+which was already defined instead of dereferencing host again".
 
-How does that sound?
+--=20
+balbi
 
-Thanks,
+--8GpibOaaTibBMecb
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJQNMJeAAoJEIaOsuA1yqREerAP/0KwE1LQ663Z9gMKXbMQJSXI
+bk2qD0RWwDRm8tg3/1eQtGx+QyfcWIEVh9cXKo/VqbLNXrDikUNP+N0z99gki+A+
+drQ2z11BgfGPD9EM9n88a9lbtFmWkkFEbd+2+xclniGi7lax7U86hIT0+a+lPOgy
+jB2a+4xxPViXzeJp8NnJ7l8TiuuKUo3yuncnZuPe9dqM7gAS/8/TofN2VbODvhNP
+Ynu5J2oh63kBbJ4VhLLCkCRVhMKqq+eR4ptsxYxwJBP63azOcGUgb9FJGAhWV5Ez
+D0vQdDc902v5JznV2Fire+WASGaqlYO+STjrQK514zPLDOfKjYUZ6IVTZDMfudW/
+/MAuT/teY265opSZX5D9u8rPMExjV05w2WtK0P8P66EJte+Wr6CfaeCB4ehORDQF
+qEYrQXcOoX5Y9B8z8kOOBNG5z+oxsv1pqlx0xFtJ2ZA686vrvIFH0sFGp5Y8PwQu
+H7aqB8jf43I6Y4Ee9ze9H4f0acS5TZpsL9s9cnPRrco8aEnDR2eUvr+QQfjpIFBW
+70IugMoVjc+wjlBWhmxvWG8YUDxgNOENpmhtqHW+yja1ajSdMvtmqmOTEOrxlTS7
+uVY5cGEAvFdQaboibO/2dmYmA9eFY8B3/N1pt1pvQzv95CKIHv/jT/6zRmUKK/1s
+eTEDASdUV5WSO3Frp18W
+=dmek
+-----END PGP SIGNATURE-----
+
+--8GpibOaaTibBMecb--
