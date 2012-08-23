@@ -1,77 +1,61 @@
-From: Tom Rini <trini@ti.com>
-Subject: Re: [PATCH v3 0/3] DaVinci DMA engine conversion
-Date: Wed, 22 Aug 2012 23:01:23 -0700
-Message-ID: <20120823060123.GA12312@bill-the-cat>
-References: <1345684176-21472-1-git-send-email-mporter@ti.com>
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: Re: [PATCH] mmc: dt: Add 'broken-cd' DT binding
+Date: Thu, 23 Aug 2012 12:29:52 +0530
+Message-ID: <CAJuYYwRDPU=m=XkYx8FPts=ar0pWyN7iTH5+6Kmb5KWMdT8pPg@mail.gmail.com>
+References: <1345547371-6784-1-git-send-email-thomas.abraham@linaro.org>
+	<CAJuYYwSv+dum8RP9xy+AZCH9pTU0peDpwjt7TA5zn3MFsG1uWA@mail.gmail.com>
+	<87k3ws5uhs.fsf@octavius.laptop.org>
+	<201208211208.49987.arnd@arndb.de>
+	<87393g5mic.fsf@octavius.laptop.org>
+	<5033A34E.7040201@gmail.com>
+	<87pq6k46jg.fsf@octavius.laptop.org>
+	<5033B0F0.7050506@gmail.com>
+	<CAJuYYwR+oCQUcgoy6ZuHp0XAa+EAj9d-FvLtwsQcP3muFMrKLA@mail.gmail.com>
+	<20120822055151.GT24242@S2101-09.ap.freescale.net>
+	<877gsr5iz1.fsf@octavius.laptop.org>
+	<CAJuYYwQz00ZzB5MxRG66XEPZApAtS6bwJAafmw3b=7DD7u+Crg@mail.gmail.com>
+	<87y5l7421h.fsf@octavius.laptop.org>
+	<CAJuYYwQLUs5qb8NqtPf3=ytNHJ_VdnN8Z4yWwyk2+OTftdWFXw@mail.gmail.com>
+	<50351256.60507@firmworks.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="AhhlLboLdkugWU4S"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:52509 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753899Ab2HWGB2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Aug 2012 02:01:28 -0400
-Content-Disposition: inline
-In-Reply-To: <1345684176-21472-1-git-send-email-mporter@ti.com>
+Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:56018 "EHLO
+	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751261Ab2HWG7y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Aug 2012 02:59:54 -0400
+Received: by lagy9 with SMTP id y9so248572lag.19
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Aug 2012 23:59:53 -0700 (PDT)
+In-Reply-To: <50351256.60507@firmworks.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Porter <mporter@ti.com>
-Cc: vinod.koul@intel.com, cjb@laptop.org, grant.likely@secretlab.ca, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Sekhar Nori <nsekhar@ti.com>
+To: Mitch Bradley <wmb@firmworks.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>
 
+On 22 August 2012 22:39, Mitch Bradley <wmb@firmworks.com> wrote:
+> Sorry to interject on a topic that seems to have already been decided,
+> but I'm confused by one thing and would like clarification.  I
+> understand that you need to use a GPIO-style specifier as a surrogate
+> for a pinmux specification - that much is clear.  What is not clear is
+> why it's necessary to (ab)use the name "cd-gpios" for it.
+>
+> Why not use a different property name, e.g. "samsung,cd-pinmux-gpio =
+> <gpio-specifier>" for the "cd-gpios + samsung,sdhci-cd-internal" case?
+> Then both "samsung,sdhci-cdi-internal" and "samsung,sdhci-cd-external"
+> could go away.  There would only be one system-dependent property
+> "samsung,cd-pinmux-gpio" whose name would make it clear that it's
+> conflating pinmuxing and gpios.
 
---AhhlLboLdkugWU4S
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Right, I agree. I will prepare the sdhci-s3c based on Chris's new
+generic binding patch and your suggestion.
 
-On Wed, Aug 22, 2012 at 09:09:33PM -0400, Matt Porter wrote:
+>
+> I think the scheme I propose would be clearer, less likely to confuse
+> other people who try to use the driver as a model, require less
+> hand-waving in the documentation, and easier to change to a proper
+> pinmuxing scheme should that become available later.
 
-[snip]
-> Matt Porter (3):
->   dmaengine: add TI EDMA DMA engine driver
->   mmc: davinci_mmc: convert to DMA engine API
->   spi: spi-davinci: convert to DMA engine API
->=20
->  drivers/dma/Kconfig            |   10 +
->  drivers/dma/Makefile           |    1 +
->  drivers/dma/edma.c             |  671 ++++++++++++++++++++++++++++++++++=
-++++++
->  drivers/mmc/host/davinci_mmc.c |  271 +++++-----------
->  drivers/spi/spi-davinci.c      |  292 ++++++++---------
->  include/linux/edma.h           |   29 ++
->  6 files changed, 923 insertions(+), 351 deletions(-)
->  create mode 100644 drivers/dma/edma.c
->  create mode 100644 include/linux/edma.h
+Thanks for your time.
 
-On the Logic PD AM1808 EVM:
-mmc0 rootfs: http://pastebin.com/HKVdmA0G
-jffs2 on the SPI flash rootfs: http://pastebin.com/cpAHgdug
-
-Tested-by: Tom Rini <trini@ti.com>
-
---=20
-Tom
-
---AhhlLboLdkugWU4S
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iQIcBAEBAgAGBQJQNcczAAoJENk4IS6UOR1WbKoP/27KgPYRsTGlN4Rlg3nu0M2v
-9lUG+/eG8IvOBRWILROIsS4StIeK9NjswsrGT9WJLzJvZCsRBkOYXqanMDYr9VES
-4S56uwMsa7r/oYbi1OHEJSKfMqovHUB8PTw8BnDAGHgsB00kOefcuTYHtK6NROJI
-4lhNar82jHSdRPZ+hb6+pcxrHAOu0RqZHuJJ0vyH4NE5jv2iUhI7VmPyivlU3SOe
-J0LagMFEEl8Bnk0DsuZbjQh1aajjK3toKrapannnP6RUCcYzKx/6i2mdICINgl2t
-v+uWcsoRvVahNB0TSLhyBJydqn/LqEehdEe4EYzFOBBLUi2aVSU/+oaov8rfQzBx
-Iv821ti9P6FvKBWoFG4kPX5ITzVJ9cpaOcW/Zi8B4gF5MuzDz5zjjVSv10stRjSK
-ySAv5YzRBXrykYb+DQvdz1FLqQdfF6/5QWU+kRSucgetjN7kXJlkE2aOy4JvTAVt
-s+XQL+wxwOKz8SfU1JPpUFo7xOJvfbAVRCBDVC1MRrcJ9H8fjI/wYeVgoVVqMOk2
-nxTaqz2j5pNfJaXuijHzofNfqh5QpHVIAfQgw239/BqzXUnXD2EvLnURfJjRf2aR
-iZ4vBABR5U9gFCg5OcLKeEfmEOnyZ7VW6ameCZwJB6yFWTJikWvxU+wCyPdgSrGP
-e2Av2e1OEnvmVGKs5AME
-=YRVJ
------END PGP SIGNATURE-----
-
---AhhlLboLdkugWU4S--
+Regards,
+Thomas.
