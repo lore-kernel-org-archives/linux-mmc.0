@@ -1,365 +1,162 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: [PATCH v5] mmc: sdhci-s3c: Add device tree support
-Date: Thu, 23 Aug 2012 22:40:09 +0530
-Message-ID: <1345741809-18599-1-git-send-email-thomas.abraham@linaro.org>
+From: Peter Meerwald <pmeerw@pmeerw.net>
+Subject: Re: [PATCH 1/1] mmc: host: enable OMAP DMA engine support for omap
+ hosts by default
+Date: Thu, 23 Aug 2012 23:00:42 +0200 (CEST)
+Message-ID: <alpine.DEB.2.01.1208232246530.15831@pmeerw.net>
+References: <1342485005-5178-1-git-send-email-javier@dowhile0.org> <CAMQu2gxaF8K78puE84+=8VJLbsdtdD97ww81XJxG6sCtYTYXww@mail.gmail.com> <CABxcv=nsmeVLspzXERYXebmPaNO6rKCsVnak7dMtvGjiYH4vOw@mail.gmail.com> <20120718065951.GH6522@atomide.com>
+ <CAMQu2gzX1d1FQtE3z=cwfA6daDgxJe6UFUaSY0PzGGLQOz_-ZQ@mail.gmail.com> <20120718071039.GI6522@atomide.com> <CANfBPZ97onLov1TwXYaT5A6D5XzXxwpvk+=y09W_9FmcOne4Mw@mail.gmail.com> <CAMQu2gy-U1WmgGOGZ+VyXjZmLem9TEWbq5kR8jzC0qXvqF-=BA@mail.gmail.com>
+ <CAAwP0s2Efuuc7vsX3bZuwz175zUjnmsOV87OcZ06p_eoe4T3Ug@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:63371 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751935Ab2HWQx1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Aug 2012 12:53:27 -0400
+Received: from ns.pmeerw.net ([87.118.82.44]:41295 "EHLO pmeerw.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S934336Ab2HWVAn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 23 Aug 2012 17:00:43 -0400
+In-Reply-To: <CAAwP0s2Efuuc7vsX3bZuwz175zUjnmsOV87OcZ06p_eoe4T3Ug@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
-Cc: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org, wmb@firmworks.com, patches@linaro.org
+To: Javier Martinez Canillas <martinez.javier@gmail.com>
+Cc: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, "S, Venkatraman" <svenkatr@ti.com>, Tony Lindgren <tony@atomide.com>, Javier Martinez Canillas <javier@dowhile0.org>, Kevin Hilman <khilman@ti.com>, Russell King <linux@arm.linux.org.uk>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Add device tree based discovery support for Samsung's sdhci controller
+On Wed, 18 Jul 2012, Javier Martinez Canillas wrote:
 
-Cc: Ben Dooks <ben-linux@fluff.org>
-Cc: Kukjin Kim <kgene.kim@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>
-Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
----
-Changes since v4:
-Adapted to new mmc core card detection bindings as specfied in the patch:
-[PATCH] mmc: dt: Add card-detection properties to core binding
-and extends it "samsung,cd-pinmux-gpio" property as suggested by
-Mitch Bradley <wmb@firmworks.com>
+> On Wed, Jul 18, 2012 at 10:36 AM, Shilimkar, Santosh
+> <santosh.shilimkar@ti.com> wrote:
+> > On Wed, Jul 18, 2012 at 1:14 PM, S, Venkatraman <svenkatr@ti.com> wrote:
+> >> On Wed, Jul 18, 2012 at 12:40 PM, Tony Lindgren <tony@atomide.com> wrote:
+> >>> * Shilimkar, Santosh <santosh.shilimkar@ti.com> [120718 00:09]:
+> >>>> On Wed, Jul 18, 2012 at 12:29 PM, Tony Lindgren <tony@atomide.com> wrote:
+> >>>> > * Javier Martinez Canillas <javier@dowhile0.org> [120716 23:56]:
+> >>>> >> On Tue, Jul 17, 2012 at 8:45 AM, Shilimkar, Santosh
+> >>>> >> <santosh.shilimkar@ti.com> wrote:
+> >>>> >> > Hi,
+> >>>> >> >
+> >>>> >> > On Tue, Jul 17, 2012 at 6:00 AM, Javier Martinez Canillas
+> >>>> >> > <javier@dowhile0.org> wrote:
+> >>>> >> >> The OMAP MMC and OMAP High Speed MMC hosts now use entirely the DMA
+> >>>> >> >> engine API instead of the previous private DMA API implementation.
+> >>>> >> >>
+> >>>> >> >> So, if the kernel is built with support for any of these hosts but it
+> >>>> >> >> doesn't support DMA devices nor OMAP DMA support, it fails when trying
+> >>>> >> >> to obtain a DMA channel which leads to the following error on an OMAP3
+> >>>> >> >> IGEPv2 Rev.C board (and probably on most OMAP boards with MMC support):
+> >>>> >> >>
+> >>>> >> >> [ 2.199981] omap_hsmmc omap_hsmmc.1: unable to obtain RX DMA engine channel 48
+> >>>> >> >> [    2.215087] omap_hsmmc omap_hsmmc.0: unable to obtain RX DMA engine channel 62
+> >>>> >> >>
+> >>>> >> >> selecting automatically CONFIG_DMADEVICES and CONFIG_DMA_OMAP solves it.
+> >>>> >> >>
+> >>>> >> >> Signed-off-by: Javier Martinez Canillas <javier@dowhile0.org>
+> >>>> >> >> ---
+> >>>> >> > Considering, we are updating drivers to select the DMA engine, can you
+> >>>> >> > also include
+> >>>> >> > "drivers/spi/spi-omap2-mcspi.c" which is also updated for DMA engine.
+> >>>> >> >
+> >>>> >> > Regards
+> >>>> >> > Santosh
+> >>>> >>
+> >>>> >> Hi Santosh,
+> >>>> >>
+> >>>> >> Ok, I'll send a v2 now which includes spi-omap2-mcspi then.
+> >>>> >
+> >>>> > I don't think we should do this, the drivers should work with and without
+> >>>> > dma. This just needs to be added to the omap2plus_defconfig.
+> >>>> >
+> >>>> Well this was not decided based on any DMA CONFIG option before for
+> >>>> the subject drivers. It is already by default enabled if the DMA is supported
+> >>>> by the driver IP. There is a possibility to disable it from driver platform/dt
+> >>>> data so that still remains.
+> >>>
+> >>> I think it should rather be that if the driver is broken and does not work
+> >>> without DMA, it should have depends on CONFIG_DMA_OMAP.
+> >>>
+> >> I can confirm that omap MMC can't work without DMA; polled mode is not
+> >> supported / implemented.
+> >
+> > Same case for SPI driver as well. It uses DMA for everything except the cases
+> > where DMA doesn't make sense like 1 byte/2 byte etc. And its not configurable,
+> >
+> > At least considering this, it is better we do this per driver than enabling
+> > it at SOC config.
+> >
+> > Regards
+> > Santosh
+> > --
+> 
+> Hi Santosh,
+> 
+> And what about enabling it at the SoC config level but making the
+> drivers dependant on CONFIG_DMADEVICES and CONFIG_DMA_OMAP? If you
+> agree I can send something like this in two different patches (one for
+> the omap2plus_defconfig and another to make the drivers dependant on
+> the config option):
+> 
+> diff --git a/arch/arm/configs/omap2plus_defconfig
+> b/arch/arm/configs/omap2plus_defconfig
+> index b152de7..e58edc3 100644
+> --- a/arch/arm/configs/omap2plus_defconfig
+> +++ b/arch/arm/configs/omap2plus_defconfig
+> @@ -193,6 +193,8 @@ CONFIG_MMC_OMAP_HS=y
+>  CONFIG_RTC_CLASS=y
+>  CONFIG_RTC_DRV_TWL92330=y
+>  CONFIG_RTC_DRV_TWL4030=y
+> +CONFIG_DMADEVICES=y
+> +CONFIG_DMA_OMAP=y
+>  CONFIG_EXT2_FS=y
+>  CONFIG_EXT3_FS=y
+>  # CONFIG_EXT3_FS_XATTR is not set
 
-Changes since v3:
+above has been merged, 89269ef1f0abc72c551198123e19cd4edfd43cf4
+but I am missing the patches below in mainline (3.6-rc3) -- what happened?
 
-The patch series that adds device tree support for Samsung sdhci controller
-had six patches in total, of which, the first five patches have been accepted.
-The sixth patch in the series was dropped since it was using custom Samsung
-properties for descrbing the bus-width and card-detect gpio, but had otherwise
-addressed all the comments.
+as Javier pointed out in https://patchwork.kernel.org/patch/1203391/, 
+MMC is broken support e.g. on beagleboard unless DMA_OMAP is defined
 
-This patch reworks the sixth patch in v3 of the sdhci device tree support
-patch series. The only change in this patch from the v3 version is the use of
-generic mmc bindings for descrbing the bus-width and card-detect gpio.
+I suggest to take below patches and help to avoid some extra gray hair for 
+people looking for a fix for non-booting beagleboards
 
- .../devicetree/bindings/mmc/samsung-sdhci.txt      |   53 +++++++
- drivers/mmc/host/sdhci-s3c.c                       |  162 +++++++++++++++++++-
- 2 files changed, 209 insertions(+), 6 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
+thanks, p.
 
-diff --git a/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt b/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
-new file mode 100644
-index 0000000..361c2ee
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
-@@ -0,0 +1,53 @@
-+* Samsung's SDHCI Controller device tree bindings
-+
-+Samsung's SDHCI controller is used as a connectivity interface with external
-+MMC, SD and eMMC storage mediums. This file documents differences between the
-+core mmc properties described by mmc.txt and the properties used by the
-+Samsung implmentation of the SDHCI controller.
-+
-+Note: The mmc core bindings documentation states that if none of the core
-+card-detect bindings are used, then the standard sdhci card detect mechanism
-+is used. The Samsung's SDHCI controller bindings extends this as listed below.
-+
-+[A] The property "samsung,cd-pinmux-gpio" can be used as stated in the
-+    "Optional Board Specific Properties" section below.
-+
-+[B] If core card-detect bindings and "samsung,cd-pinmux-gpio" property
-+    is not specified, it is assumed that there is no card detection
-+    mechanism used.
-+
-+Required SoC Specific Properties:
-+- compatible: should be one of the following
-+  - "samsung,s3c6410-sdhci": For controllers compatible with s3c6410 sdhci
-+    controller.
-+  - "samsung,exynos4210-sdhci": For controllers compatible with Exynos4 sdhci
-+    controller.
-+
-+Required Board Specific Properties:
-+- gpios: Should specify the gpios used for clock, command and data lines. The
-+  gpio specifier format depends on the gpio controller.
-+
-+Optional Board Specific Properties:
-+- samsung,cd-pinmux-gpio: Specifies the card detect line that is routed
-+  through a pinmux to the card-detect pin of the card slot. This property
-+  should be used only if none of the mmc core card-detect properties are
-+  used.
-+
-+Example:
-+	sdhci@12530000 {
-+		compatible = "samsung,exynos4210-sdhci";
-+		reg = <0x12530000 0x100>;
-+		interrupts = <0 75 0>;
-+		bus-width = <4>;
-+		cd-gpios = <&gpk2 2 2 3 3>;
-+		gpios = <&gpk2 0 2 0 3>,  /* clock line */
-+			<&gpk2 1 2 0 3>,  /* command line */
-+			<&gpk2 3 2 3 3>,  /* data line 0 */
-+			<&gpk2 4 2 3 3>,  /* data line 1 */
-+			<&gpk2 5 2 3 3>,  /* data line 2 */
-+			<&gpk2 6 2 3 3>;  /* data line 3 */
-+	};
-+
-+	Note: This example shows both SoC specific and board specific properties
-+	in a single device node. The properties can be actually be seperated
-+	into SoC specific node and board specific node.
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index a50c205..445910e 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -34,6 +34,9 @@
- 
- #define MAX_BUS_CLK	(4)
- 
-+/* Number of gpio's used is max data bus width + command and clock lines */
-+#define NUM_GPIOS(x)	(x + 2)
-+
- /**
-  * struct sdhci_s3c - S3C SDHCI instance
-  * @host: The SDHCI host created
-@@ -41,6 +44,7 @@
-  * @ioarea: The resource created when we claimed the IO area.
-  * @pdata: The platform data for this controller.
-  * @cur_clk: The index of the current bus clock.
-+ * @gpios: List of gpio numbers parsed from device tree.
-  * @clk_io: The clock for the internal bus interface.
-  * @clk_bus: The clocks that are available for the SD/MMC bus clock.
-  */
-@@ -52,6 +56,7 @@ struct sdhci_s3c {
- 	unsigned int		cur_clk;
- 	int			ext_cd_irq;
- 	int			ext_cd_gpio;
-+	int			*gpios;
- 
- 	struct clk		*clk_io;
- 	struct clk		*clk_bus[MAX_BUS_CLK];
-@@ -419,9 +424,125 @@ static void sdhci_s3c_setup_card_detect_gpio(struct sdhci_s3c *sc)
- 	}
- }
- 
-+#ifdef CONFIG_OF
-+static int __devinit sdhci_s3c_parse_dt(struct device *dev,
-+		struct sdhci_host *host, struct s3c_sdhci_platdata *pdata)
-+{
-+	struct device_node *node = dev->of_node;
-+	struct sdhci_s3c *ourhost = to_s3c(host);
-+	u32 max_width;
-+	int gpio, cnt, ret;
-+
-+	/* if the bus-width property is not specified, assume width as 1 */
-+	if (of_property_read_u32(node, "bus-width", &max_width))
-+		max_width = 1;
-+	pdata->max_width = max_width;
-+
-+	ourhost->gpios = devm_kzalloc(dev, NUM_GPIOS(pdata->max_width) *
-+				sizeof(int), GFP_KERNEL);
-+	if (!ourhost->gpios)
-+		return -ENOMEM;
-+
-+	/* get the card detection method */
-+	if (of_get_property(node, "broken-cd", 0)) {
-+		pdata->cd_type = S3C_SDHCI_CD_NONE;
-+		goto setup_bus;
-+	}
-+
-+	if (of_get_property(node, "non-removable", 0)) {
-+		pdata->cd_type = S3C_SDHCI_CD_PERMANENT;
-+		goto setup_bus;
-+	}
-+
-+	gpio = of_get_named_gpio(node, "cd-gpios", 0);
-+	if (gpio_is_valid(gpio)) {
-+		pdata->cd_type = S3C_SDHCI_CD_GPIO;
-+		goto found_cd;
-+	} else {
-+		if (gpio != -ENOENT) {
-+			dev_err(dev, "invalid card detect gpio specified\n");
-+			return -EINVAL;
-+		}
-+	}
-+
-+	gpio = of_get_named_gpio(node, "samsung,cd-pinmux-gpio", 0);
-+	if (gpio_is_valid(gpio)) {
-+		pdata->cd_type = S3C_SDHCI_CD_INTERNAL;
-+		goto found_cd;
-+	} else {
-+		if (gpio != -ENOENT) {
-+			dev_err(dev, "invalid card detect gpio specified\n");
-+			return -EINVAL;
-+		}
-+	}
-+
-+	dev_info(dev, "assuming no card detect line available\n");
-+	pdata->cd_type = S3C_SDHCI_CD_NONE;
-+
-+ found_cd:
-+	if (pdata->cd_type == S3C_SDHCI_CD_GPIO) {
-+		pdata->ext_cd_gpio = gpio;
-+		ourhost->ext_cd_gpio = -1;
-+		if (of_get_property(node, "cd-inverted", NULL))
-+			pdata->ext_cd_gpio_invert = 1;
-+	} else if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
-+		ret = gpio_request(gpio, "sdhci-cd");
-+		if (ret) {
-+			dev_err(dev, "card detect gpio request failed\n");
-+			return -EINVAL;
-+		}
-+		ourhost->ext_cd_gpio = gpio;
-+	}
-+
-+ setup_bus:
-+	/* get the gpios for command, clock and data lines */
-+	for (cnt = 0; cnt < NUM_GPIOS(pdata->max_width); cnt++) {
-+		gpio = of_get_gpio(node, cnt);
-+		if (!gpio_is_valid(gpio)) {
-+			dev_err(dev, "invalid gpio[%d]\n", cnt);
-+			goto err_free_dt_cd_gpio;
-+		}
-+		ourhost->gpios[cnt] = gpio;
-+	}
-+
-+	for (cnt = 0; cnt < NUM_GPIOS(pdata->max_width); cnt++) {
-+		ret = gpio_request(ourhost->gpios[cnt], "sdhci-gpio");
-+		if (ret) {
-+			dev_err(dev, "gpio[%d] request failed\n", cnt);
-+			goto err_free_dt_gpios;
-+		}
-+	}
-+
-+	return 0;
-+
-+ err_free_dt_gpios:
-+	while (--cnt >= 0)
-+		gpio_free(ourhost->gpios[cnt]);
-+ err_free_dt_cd_gpio:
-+	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL)
-+		gpio_free(ourhost->ext_cd_gpio);
-+	return -EINVAL;
-+}
-+#else
-+static int __devinit sdhci_s3c_parse_dt(struct device *dev,
-+		struct sdhci_host *host, struct s3c_sdhci_platdata *pdata)
-+{
-+	return -EINVAL;
-+}
-+#endif
-+
-+static const struct of_device_id sdhci_s3c_dt_match[];
-+
- static inline struct sdhci_s3c_drv_data *sdhci_s3c_get_driver_data(
- 			struct platform_device *pdev)
- {
-+#ifdef CONFIG_OF
-+	if (pdev->dev.of_node) {
-+		const struct of_device_id *match;
-+		match = of_match_node(sdhci_s3c_dt_match, pdev->dev.of_node);
-+		return (struct sdhci_s3c_drv_data *)match->data;
-+	}
-+#endif
- 	return (struct sdhci_s3c_drv_data *)
- 			platform_get_device_id(pdev)->driver_data;
- }
-@@ -436,7 +557,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	struct resource *res;
- 	int ret, irq, ptr, clks;
- 
--	if (!pdev->dev.platform_data) {
-+	if (!pdev->dev.platform_data && !pdev->dev.of_node) {
- 		dev_err(dev, "no device data specified\n");
- 		return -ENOENT;
- 	}
-@@ -452,21 +573,28 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 		dev_err(dev, "sdhci_alloc_host() failed\n");
- 		return PTR_ERR(host);
- 	}
-+	sc = sdhci_priv(host);
- 
- 	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
- 	if (!pdata) {
- 		ret = -ENOMEM;
--		goto err_io_clk;
-+		goto err_pdata;
-+	}
-+
-+	if (pdev->dev.of_node) {
-+		ret = sdhci_s3c_parse_dt(&pdev->dev, host, pdata);
-+		if (ret)
-+			goto err_pdata;
-+	} else {
-+		memcpy(pdata, pdev->dev.platform_data, sizeof(*pdata));
-+		sc->ext_cd_gpio = -1; /* invalid gpio number */
- 	}
--	memcpy(pdata, pdev->dev.platform_data, sizeof(*pdata));
- 
- 	drv_data = sdhci_s3c_get_driver_data(pdev);
--	sc = sdhci_priv(host);
- 
- 	sc->host = host;
- 	sc->pdev = pdev;
- 	sc->pdata = pdata;
--	sc->ext_cd_gpio = -1; /* invalid gpio number */
- 
- 	platform_set_drvdata(pdev, host);
- 
-@@ -631,6 +759,12 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	clk_put(sc->clk_io);
- 
-  err_io_clk:
-+	for (ptr = 0; ptr < NUM_GPIOS(sc->pdata->max_width); ptr++)
-+		gpio_free(sc->gpios[ptr]);
-+	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL)
-+		gpio_free(sc->ext_cd_gpio);
-+
-+ err_pdata:
- 	sdhci_free_host(host);
- 
- 	return ret;
-@@ -638,9 +772,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 
- static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
- {
--	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
- 	struct sdhci_host *host =  platform_get_drvdata(pdev);
- 	struct sdhci_s3c *sc = sdhci_priv(host);
-+	struct s3c_sdhci_platdata *pdata = sc->pdata;
- 	int ptr;
- 
- 	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
-@@ -665,6 +799,11 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
- 	clk_disable(sc->clk_io);
- 	clk_put(sc->clk_io);
- 
-+	if (pdev->dev.of_node) {
-+		for (ptr = 0; ptr < NUM_GPIOS(sc->pdata->max_width); ptr++)
-+			gpio_free(sc->gpios[ptr]);
-+	}
-+
- 	sdhci_free_host(host);
- 	platform_set_drvdata(pdev, NULL);
- 
-@@ -737,6 +876,16 @@ static struct platform_device_id sdhci_s3c_driver_ids[] = {
- };
- MODULE_DEVICE_TABLE(platform, sdhci_s3c_driver_ids);
- 
-+#ifdef CONFIG_OF
-+static const struct of_device_id sdhci_s3c_dt_match[] = {
-+	{ .compatible = "samsung,s3c6410-sdhci", },
-+	{ .compatible = "samsung,exynos4210-sdhci",
-+		.data = (void *)EXYNOS4_SDHCI_DRV_DATA },
-+	{},
-+};
-+MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
-+#endif
-+
- static struct platform_driver sdhci_s3c_driver = {
- 	.probe		= sdhci_s3c_probe,
- 	.remove		= __devexit_p(sdhci_s3c_remove),
-@@ -744,6 +893,7 @@ static struct platform_driver sdhci_s3c_driver = {
- 	.driver		= {
- 		.owner	= THIS_MODULE,
- 		.name	= "s3c-sdhci",
-+		.of_match_table = of_match_ptr(sdhci_s3c_dt_match),
- 		.pm	= SDHCI_S3C_PMOPS,
- 	},
- };
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index aa131b3..314c7bd 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -231,7 +231,7 @@ config MMC_SDHCI_S3C_DMA
+> 
+>  config MMC_OMAP
+>  	tristate "TI OMAP Multimedia Card Interface support"
+> -	depends on ARCH_OMAP
+> +	depends on ARCH_OMAP && DMADEVICES && DMA_OMAP
+>  	select TPS65010 if MACH_OMAP_H2
+>  	help
+>  	  This selects the TI OMAP Multimedia card Interface.
+> @@ -242,7 +242,8 @@ config MMC_OMAP
+> 
+>  config MMC_OMAP_HS
+>  	tristate "TI OMAP High Speed Multimedia Card Interface support"
+> -	depends on SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4
+> +	depends on (SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4) && \
+> +		    DMADEVICES && DMA_OMAP
+>  	help
+>  	  This selects the TI OMAP High Speed Multimedia card Interface.
+>  	  If you have an OMAP2430 or OMAP3 board or OMAP4 board with a
+> diff --git a/drivers/spi/Kconfig b/drivers/spi/Kconfig
+> index cd2fe35..1c23242 100644
+> --- a/drivers/spi/Kconfig
+> +++ b/drivers/spi/Kconfig
+> @@ -237,7 +237,7 @@ config SPI_OMAP_UWIRE
+> 
+>  config SPI_OMAP24XX
+>  	tristate "McSPI driver for OMAP"
+> -	depends on ARCH_OMAP2PLUS
+> +	depends on ARCH_OMAP2PLUS && DMADEVICES && DMA_OMAP
+>  	help
+>  	  SPI master controller for OMAP24XX and later Multichannel SPI
+>  	  (McSPI) modules.
+
+
 -- 
-1.6.6.rc2
 
+Peter Meerwald
++43-664-2444418 (mobile)
