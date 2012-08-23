@@ -1,459 +1,79 @@
-From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v3 3/3] spi: spi-davinci: convert to DMA engine API
-Date: Wed, 22 Aug 2012 21:09:36 -0400
-Message-ID: <1345684176-21472-4-git-send-email-mporter@ti.com>
-References: <1345684176-21472-1-git-send-email-mporter@ti.com>
+From: wwang <wei_wang@realsil.com.cn>
+Subject: [drivers/mmc]Issue on DMA out of SW-IOMMU space
+Date: Thu, 23 Aug 2012 09:45:23 +0800
+Message-ID: <50358B33.2030603@realsil.com.cn>
+References: <cover.1345516106.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="GB2312"
 Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <1345684176-21472-1-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from rtits2.realtek.com ([60.250.210.242]:40741 "EHLO
+	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751972Ab2HWBpy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Aug 2012 21:45:54 -0400
+In-Reply-To: <cover.1345516106.git.wei_wang@realsil.com.cn>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "cjb@laptop.org" <cjb@laptop.org>, "arnd@arndb.de" <arnd@arndb.de>, "bp@alien8.de" <bp@alien8.de>
 
-Removes use of the DaVinci EDMA private DMA API and replaces
-it with use of the DMA engine API.
+Hi all:
 
-Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
----
- drivers/spi/spi-davinci.c |  292 ++++++++++++++++++++-------------------------
- 1 file changed, 130 insertions(+), 162 deletions(-)
+Several days ago I sent out a series of patches to support Realtek
+SD/MMC reader. Boris helped to give it a test using his Thinkpad x121e,
+with a built-in Realtek card reader named rts5209. (Hi, Thank you, Boris
+.. ) And he reported that some error messages, as below shows, would
+arise when formating a 16G SD UHS-I card using mkfs.ext3.
 
-diff --git a/drivers/spi/spi-davinci.c b/drivers/spi/spi-davinci.c
-index 9b2901f..c1ec52d 100644
---- a/drivers/spi/spi-davinci.c
-+++ b/drivers/spi/spi-davinci.c
-@@ -25,13 +25,14 @@
- #include <linux/platform_device.h>
- #include <linux/err.h>
- #include <linux/clk.h>
-+#include <linux/dmaengine.h>
- #include <linux/dma-mapping.h>
-+#include <linux/edma.h>
- #include <linux/spi/spi.h>
- #include <linux/spi/spi_bitbang.h>
- #include <linux/slab.h>
- 
- #include <mach/spi.h>
--#include <mach/edma.h>
- 
- #define SPI_NO_RESOURCE		((resource_size_t)-1)
- 
-@@ -113,14 +114,6 @@
- #define SPIDEF		0x4c
- #define SPIFMT0		0x50
- 
--/* We have 2 DMA channels per CS, one for RX and one for TX */
--struct davinci_spi_dma {
--	int			tx_channel;
--	int			rx_channel;
--	int			dummy_param_slot;
--	enum dma_event_q	eventq;
--};
--
- /* SPI Controller driver's private data. */
- struct davinci_spi {
- 	struct spi_bitbang	bitbang;
-@@ -134,11 +127,14 @@ struct davinci_spi {
- 
- 	const void		*tx;
- 	void			*rx;
--#define SPI_TMP_BUFSZ	(SMP_CACHE_BYTES + 1)
--	u8			rx_tmp_buf[SPI_TMP_BUFSZ];
- 	int			rcount;
- 	int			wcount;
--	struct davinci_spi_dma	dma;
-+
-+	struct dma_chan		*dma_rx;
-+	struct dma_chan		*dma_tx;
-+	int			dma_rx_chnum;
-+	int			dma_tx_chnum;
-+
- 	struct davinci_spi_platform_data *pdata;
- 
- 	void			(*get_rx)(u32 rx_data, struct davinci_spi *);
-@@ -496,21 +492,23 @@ out:
- 	return errors;
- }
- 
--static void davinci_spi_dma_callback(unsigned lch, u16 status, void *data)
-+static void davinci_spi_dma_rx_callback(void *data)
- {
--	struct davinci_spi *dspi = data;
--	struct davinci_spi_dma *dma = &dspi->dma;
-+	struct davinci_spi *dspi = (struct davinci_spi *)data;
- 
--	edma_stop(lch);
-+	dspi->rcount = 0;
- 
--	if (status == DMA_COMPLETE) {
--		if (lch == dma->rx_channel)
--			dspi->rcount = 0;
--		if (lch == dma->tx_channel)
--			dspi->wcount = 0;
--	}
-+	if (!dspi->wcount && !dspi->rcount)
-+		complete(&dspi->done);
-+}
- 
--	if ((!dspi->wcount && !dspi->rcount) || (status != DMA_COMPLETE))
-+static void davinci_spi_dma_tx_callback(void *data)
-+{
-+	struct davinci_spi *dspi = (struct davinci_spi *)data;
-+
-+	dspi->wcount = 0;
-+
-+	if (!dspi->wcount && !dspi->rcount)
- 		complete(&dspi->done);
- }
- 
-@@ -526,20 +524,20 @@ static void davinci_spi_dma_callback(unsigned lch, u16 status, void *data)
- static int davinci_spi_bufs(struct spi_device *spi, struct spi_transfer *t)
- {
- 	struct davinci_spi *dspi;
--	int data_type, ret;
-+	int data_type, ret = -ENOMEM;
- 	u32 tx_data, spidat1;
- 	u32 errors = 0;
- 	struct davinci_spi_config *spicfg;
- 	struct davinci_spi_platform_data *pdata;
- 	unsigned uninitialized_var(rx_buf_count);
--	struct device *sdev;
-+	void *dummy_buf = NULL;
-+	struct scatterlist sg_rx, sg_tx;
- 
- 	dspi = spi_master_get_devdata(spi->master);
- 	pdata = dspi->pdata;
- 	spicfg = (struct davinci_spi_config *)spi->controller_data;
- 	if (!spicfg)
- 		spicfg = &davinci_spi_default_cfg;
--	sdev = dspi->bitbang.master->dev.parent;
- 
- 	/* convert len to words based on bits_per_word */
- 	data_type = dspi->bytes_per_word[spi->chip_select];
-@@ -567,112 +565,83 @@ static int davinci_spi_bufs(struct spi_device *spi, struct spi_transfer *t)
- 		spidat1 |= tx_data & 0xFFFF;
- 		iowrite32(spidat1, dspi->base + SPIDAT1);
- 	} else {
--		struct davinci_spi_dma *dma;
--		unsigned long tx_reg, rx_reg;
--		struct edmacc_param param;
--		void *rx_buf;
--		int b, c;
--
--		dma = &dspi->dma;
--
--		tx_reg = (unsigned long)dspi->pbase + SPIDAT1;
--		rx_reg = (unsigned long)dspi->pbase + SPIBUF;
--
--		/*
--		 * Transmit DMA setup
--		 *
--		 * If there is transmit data, map the transmit buffer, set it
--		 * as the source of data and set the source B index to data
--		 * size. If there is no transmit data, set the transmit register
--		 * as the source of data, and set the source B index to zero.
--		 *
--		 * The destination is always the transmit register itself. And
--		 * the destination never increments.
--		 */
--
--		if (t->tx_buf) {
--			t->tx_dma = dma_map_single(&spi->dev, (void *)t->tx_buf,
--						t->len, DMA_TO_DEVICE);
--			if (dma_mapping_error(&spi->dev, t->tx_dma)) {
--				dev_dbg(sdev, "Unable to DMA map %d bytes"
--						"TX buffer\n", t->len);
--				return -ENOMEM;
--			}
--		}
--
--		/*
--		 * If number of words is greater than 65535, then we need
--		 * to configure a 3 dimension transfer.  Use the BCNTRLD
--		 * feature to allow for transfers that aren't even multiples
--		 * of 65535 (or any other possible b size) by first transferring
--		 * the remainder amount then grabbing the next N blocks of
--		 * 65535 words.
--		 */
--
--		c = dspi->wcount / (SZ_64K - 1);	/* N 65535 Blocks */
--		b = dspi->wcount - c * (SZ_64K - 1);	/* Remainder */
--		if (b)
--			c++;
-+		struct dma_slave_config dma_rx_conf = {
-+			.direction = DMA_DEV_TO_MEM,
-+			.src_addr = (unsigned long)dspi->pbase + SPIBUF,
-+			.src_addr_width = data_type,
-+			.src_maxburst = 1,
-+		};
-+		struct dma_slave_config dma_tx_conf = {
-+			.direction = DMA_MEM_TO_DEV,
-+			.dst_addr = (unsigned long)dspi->pbase + SPIDAT1,
-+			.dst_addr_width = data_type,
-+			.dst_maxburst = 1,
-+		};
-+		struct dma_async_tx_descriptor *rxdesc;
-+		struct dma_async_tx_descriptor *txdesc;
-+		void *buf;
-+
-+		dummy_buf = kzalloc(t->len, GFP_KERNEL);
-+		if (!dummy_buf)
-+			goto err_alloc_dummy_buf;
-+
-+		dmaengine_slave_config(dspi->dma_rx, &dma_rx_conf);
-+		dmaengine_slave_config(dspi->dma_tx, &dma_tx_conf);
-+
-+		sg_init_table(&sg_rx, 1);
-+		if (!t->rx_buf)
-+			buf = dummy_buf;
- 		else
--			b = SZ_64K - 1;
--
--		param.opt = TCINTEN | EDMA_TCC(dma->tx_channel);
--		param.src = t->tx_buf ? t->tx_dma : tx_reg;
--		param.a_b_cnt = b << 16 | data_type;
--		param.dst = tx_reg;
--		param.src_dst_bidx = t->tx_buf ? data_type : 0;
--		param.link_bcntrld = 0xffffffff;
--		param.src_dst_cidx = t->tx_buf ? data_type : 0;
--		param.ccnt = c;
--		edma_write_slot(dma->tx_channel, &param);
--		edma_link(dma->tx_channel, dma->dummy_param_slot);
--
--		/*
--		 * Receive DMA setup
--		 *
--		 * If there is receive buffer, use it to receive data. If there
--		 * is none provided, use a temporary receive buffer. Set the
--		 * destination B index to 0 so effectively only one byte is used
--		 * in the temporary buffer (address does not increment).
--		 *
--		 * The source of receive data is the receive data register. The
--		 * source address never increments.
--		 */
--
--		if (t->rx_buf) {
--			rx_buf = t->rx_buf;
--			rx_buf_count = t->len;
--		} else {
--			rx_buf = dspi->rx_tmp_buf;
--			rx_buf_count = sizeof(dspi->rx_tmp_buf);
-+			buf = t->rx_buf;
-+		t->rx_dma = dma_map_single(&spi->dev, buf,
-+				t->len, DMA_FROM_DEVICE);
-+		if (!t->rx_dma) {
-+			ret = -EFAULT;
-+			goto err_rx_map;
- 		}
-+		sg_dma_address(&sg_rx) = t->rx_dma;
-+		sg_dma_len(&sg_rx) = t->len;
- 
--		t->rx_dma = dma_map_single(&spi->dev, rx_buf, rx_buf_count,
--							DMA_FROM_DEVICE);
--		if (dma_mapping_error(&spi->dev, t->rx_dma)) {
--			dev_dbg(sdev, "Couldn't DMA map a %d bytes RX buffer\n",
--								rx_buf_count);
--			if (t->tx_buf)
--				dma_unmap_single(&spi->dev, t->tx_dma, t->len,
--								DMA_TO_DEVICE);
--			return -ENOMEM;
-+		sg_init_table(&sg_tx, 1);
-+		if (!t->tx_buf)
-+			buf = dummy_buf;
-+		else
-+			buf = (void *)t->tx_buf;
-+		t->tx_dma = dma_map_single(&spi->dev, buf,
-+				t->len, DMA_FROM_DEVICE);
-+		if (!t->tx_dma) {
-+			ret = -EFAULT;
-+			goto err_tx_map;
- 		}
--
--		param.opt = TCINTEN | EDMA_TCC(dma->rx_channel);
--		param.src = rx_reg;
--		param.a_b_cnt = b << 16 | data_type;
--		param.dst = t->rx_dma;
--		param.src_dst_bidx = (t->rx_buf ? data_type : 0) << 16;
--		param.link_bcntrld = 0xffffffff;
--		param.src_dst_cidx = (t->rx_buf ? data_type : 0) << 16;
--		param.ccnt = c;
--		edma_write_slot(dma->rx_channel, &param);
-+		sg_dma_address(&sg_tx) = t->tx_dma;
-+		sg_dma_len(&sg_tx) = t->len;
-+
-+		rxdesc = dmaengine_prep_slave_sg(dspi->dma_rx,
-+				&sg_rx, 1, DMA_DEV_TO_MEM,
-+				DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
-+		if (!rxdesc)
-+			goto err_desc;
-+
-+		txdesc = dmaengine_prep_slave_sg(dspi->dma_tx,
-+				&sg_tx, 1, DMA_MEM_TO_DEV,
-+				DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
-+		if (!txdesc)
-+			goto err_desc;
-+
-+		rxdesc->callback = davinci_spi_dma_rx_callback;
-+		rxdesc->callback_param = (void *)dspi;
-+		txdesc->callback = davinci_spi_dma_tx_callback;
-+		txdesc->callback_param = (void *)dspi;
- 
- 		if (pdata->cshold_bug)
- 			iowrite16(spidat1 >> 16, dspi->base + SPIDAT1 + 2);
- 
--		edma_start(dma->rx_channel);
--		edma_start(dma->tx_channel);
-+		dmaengine_submit(rxdesc);
-+		dmaengine_submit(txdesc);
-+
-+		dma_async_issue_pending(dspi->dma_rx);
-+		dma_async_issue_pending(dspi->dma_tx);
-+
- 		set_io_bits(dspi->base + SPIINT, SPIINT_DMA_REQ_EN);
- 	}
- 
-@@ -690,15 +659,13 @@ static int davinci_spi_bufs(struct spi_device *spi, struct spi_transfer *t)
- 
- 	clear_io_bits(dspi->base + SPIINT, SPIINT_MASKALL);
- 	if (spicfg->io_type == SPI_IO_TYPE_DMA) {
--
--		if (t->tx_buf)
--			dma_unmap_single(&spi->dev, t->tx_dma, t->len,
--								DMA_TO_DEVICE);
--
--		dma_unmap_single(&spi->dev, t->rx_dma, rx_buf_count,
--							DMA_FROM_DEVICE);
--
- 		clear_io_bits(dspi->base + SPIINT, SPIINT_DMA_REQ_EN);
-+
-+		dma_unmap_single(&spi->dev, t->rx_dma,
-+				t->len, DMA_FROM_DEVICE);
-+		dma_unmap_single(&spi->dev, t->tx_dma,
-+				t->len, DMA_TO_DEVICE);
-+		kfree(dummy_buf);
- 	}
- 
- 	clear_io_bits(dspi->base + SPIGCR1, SPIGCR1_SPIENA_MASK);
-@@ -716,11 +683,20 @@ static int davinci_spi_bufs(struct spi_device *spi, struct spi_transfer *t)
- 	}
- 
- 	if (dspi->rcount != 0 || dspi->wcount != 0) {
--		dev_err(sdev, "SPI data transfer error\n");
-+		dev_err(&spi->dev, "SPI data transfer error\n");
- 		return -EIO;
- 	}
- 
- 	return t->len;
-+
-+err_desc:
-+	dma_unmap_single(&spi->dev, t->tx_dma, t->len, DMA_TO_DEVICE);
-+err_tx_map:
-+	dma_unmap_single(&spi->dev, t->rx_dma, t->len, DMA_FROM_DEVICE);
-+err_rx_map:
-+	kfree(dummy_buf);
-+err_alloc_dummy_buf:
-+	return ret;
- }
- 
- /**
-@@ -751,39 +727,33 @@ static irqreturn_t davinci_spi_irq(s32 irq, void *data)
- 
- static int davinci_spi_request_dma(struct davinci_spi *dspi)
- {
-+	dma_cap_mask_t mask;
-+	struct device *sdev = dspi->bitbang.master->dev.parent;
- 	int r;
--	struct davinci_spi_dma *dma = &dspi->dma;
- 
--	r = edma_alloc_channel(dma->rx_channel, davinci_spi_dma_callback, dspi,
--								dma->eventq);
--	if (r < 0) {
--		pr_err("Unable to request DMA channel for SPI RX\n");
--		r = -EAGAIN;
-+	dma_cap_zero(mask);
-+	dma_cap_set(DMA_SLAVE, mask);
-+
-+	dspi->dma_rx = dma_request_channel(mask, edma_filter_fn,
-+					   &dspi->dma_rx_chnum);
-+	if (!dspi->dma_rx) {
-+		dev_err(sdev, "request RX DMA channel failed\n");
-+		r = -ENODEV;
- 		goto rx_dma_failed;
- 	}
- 
--	r = edma_alloc_channel(dma->tx_channel, davinci_spi_dma_callback, dspi,
--								dma->eventq);
--	if (r < 0) {
--		pr_err("Unable to request DMA channel for SPI TX\n");
--		r = -EAGAIN;
-+	dspi->dma_tx = dma_request_channel(mask, edma_filter_fn,
-+					   &dspi->dma_tx_chnum);
-+	if (!dspi->dma_tx) {
-+		dev_err(sdev, "request TX DMA channel failed\n");
-+		r = -ENODEV;
- 		goto tx_dma_failed;
- 	}
- 
--	r = edma_alloc_slot(EDMA_CTLR(dma->tx_channel), EDMA_SLOT_ANY);
--	if (r < 0) {
--		pr_err("Unable to request SPI TX DMA param slot\n");
--		r = -EAGAIN;
--		goto param_failed;
--	}
--	dma->dummy_param_slot = r;
--	edma_link(dma->dummy_param_slot, dma->dummy_param_slot);
--
- 	return 0;
--param_failed:
--	edma_free_channel(dma->tx_channel);
-+
- tx_dma_failed:
--	edma_free_channel(dma->rx_channel);
-+	dma_release_channel(dspi->dma_rx);
- rx_dma_failed:
- 	return r;
- }
-@@ -898,9 +868,8 @@ static int __devinit davinci_spi_probe(struct platform_device *pdev)
- 	dspi->bitbang.txrx_bufs = davinci_spi_bufs;
- 	if (dma_rx_chan != SPI_NO_RESOURCE &&
- 	    dma_tx_chan != SPI_NO_RESOURCE) {
--		dspi->dma.rx_channel = dma_rx_chan;
--		dspi->dma.tx_channel = dma_tx_chan;
--		dspi->dma.eventq = pdata->dma_event_q;
-+		dspi->dma_rx_chnum = dma_rx_chan;
-+		dspi->dma_tx_chnum = dma_tx_chan;
- 
- 		ret = davinci_spi_request_dma(dspi);
- 		if (ret)
-@@ -955,9 +924,8 @@ static int __devinit davinci_spi_probe(struct platform_device *pdev)
- 	return ret;
- 
- free_dma:
--	edma_free_channel(dspi->dma.tx_channel);
--	edma_free_channel(dspi->dma.rx_channel);
--	edma_free_slot(dspi->dma.dummy_param_slot);
-+	dma_release_channel(dspi->dma_rx);
-+	dma_release_channel(dspi->dma_tx);
- free_clk:
- 	clk_disable(dspi->clk);
- 	clk_put(dspi->clk);
--- 
-1.7.9.5
+[ 286.244866] mmc0: new ultra high speed SDR50 SDHC card at address e624
+[ 286.277199] mmcblk0: mmc0:e624 SU16G 14.8 GiB
+[ 286.318163] mmcblk0:
+[ 363.754647] mmcblk0: p1
+[ 379.545510] DMA: Out of SW-IOMMU space for 438272 bytes at device
+0000:03:00.0
+[ 389.578514] DMA: Out of SW-IOMMU space for 380928 bytes at device
+0000:03:00.0
+[ 399.590953] DMA: Out of SW-IOMMU space for 524288 bytes at device
+0000:03:00.0
+[ 409.590698] DMA: Out of SW-IOMMU space for 380928 bytes at device
+0000:03:00.0
+[ 419.589054] DMA: Out of SW-IOMMU space for 380928 bytes at device
+0000:03:00.0
 
+That's to say, in some situation dma_map_sg would fail when transferring
+massive data.
+By adding more debug message I found some facts:
+1. In Thinkpad x121e, the transfer size in one transfer is often 512KB.
+(But in my notebook, the largest transfer size I found is 64KB);
+2. When dma_map_sg succeeds, the largest sg size in the sglist will not
+be larger than 256KB;
+3. When dma_map_sg fails, the sg number of the sglist is always 2, and
+the total transfer size is circa 512KB. So I guess that the largest sg
+size may be larger than 256KB.
 
-------------------------------------------------------------------------------
-Live Security Virtual Conference
-Exclusive live event will cover all the ways today's security and 
-threat landscape has changed and how IT managers can respond. Discussions 
-will include endpoint security, mobile security and the latest in malware 
-threats. http://www.accelacomm.com/jaw/sfrnl04242012/114/50122263/
+Based on the above facts and guess, I asked Boris to help to change
+mmc->max_seg_size from 512KB to 64KB in Realtek SD/MMC host driver, and
+everything is OK.
+
+(Hi Boris, you have also tested 256KB later, and the result is still OK,
+right ?)
+
+So my question comes out.
+>From our experiment, it seems that mmc host driver must set a proper
+value to max_seg_size at first. But I really don't think it's the host
+driver's responsibility to guess/inquiry the max DMA segment size before
+declaring it.
+The host driver is all along passive to response the request from the
+upper layer. If the segment is too large to handle, that buffer should
+be divided into more smaller pieces at first in the upper layer and then
+pass on to the lower layer, which is our host driver in this case. And I
+didn't find any host driver in drivers/mmc/host to inquiry the max DMA
+segment size that this platform can afford before declaring their
+max_seg_size.
+
+Maybe I missed something , but I still can't find the answer for now. So
+please help :-)
+
+BR,
+wwang
+
