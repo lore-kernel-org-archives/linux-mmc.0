@@ -1,33 +1,24 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: core: Do not rescan non-removable devices
-Date: Thu, 23 Aug 2012 15:56:43 +0200
-Message-ID: <CACRpkdaCAinV5v-S-3nHfyWmf8O4QmnbvwGJpUz6SKuT-zR2hA@mail.gmail.com>
-References: <1345722055-12459-1-git-send-email-johan.rudholm@stericsson.com>
+From: Aaron Lu <aaron.lwe@gmail.com>
+Subject: Re: v3.6-rc1: modprobe hangs with sdhci failure on dell e6410
+Date: Thu, 23 Aug 2012 22:58:57 +0800
+Message-ID: <CAOzJMDTTAzzV3VHgvY6B3ooe1ZyWkRGvfDgbFw4ZonQJFu3uAQ@mail.gmail.com>
+References: <5034E895.4050105@broadcom.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:56795 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1030266Ab2HWN4o (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Aug 2012 09:56:44 -0400
-Received: by wgbdr13 with SMTP id dr13so631409wgb.1
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Aug 2012 06:56:43 -0700 (PDT)
-In-Reply-To: <1345722055-12459-1-git-send-email-johan.rudholm@stericsson.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <5034E895.4050105@broadcom.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Arend van Spriel <arend@broadcom.com>
+Cc: linux-mmc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Philip Rakity <prakity@marvell.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <johan.rudholm@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-On Thu, Aug 23, 2012 at 1:40 PM, Johan Rudholm
-<johan.rudholm@stericsson.com> wrote:
-
-> If MMC_CAP_NONREMOVABLE is set, only issue a detect job on init.
+On Wed, Aug 22, 2012 at 10:11 PM, Arend van Spriel <arend@broadcom.com> wrote:
+> A quick search using google did not provide clues. Regardless if there is
+> anything inserted the hang occurs.
 >
-> Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Gr. AvS
 
-Seems logical...
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
+Also, your .config might be helpful.
 
-Yours,
-Linus Walleij
+Thanks,
+Aaron
