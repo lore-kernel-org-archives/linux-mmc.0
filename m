@@ -1,172 +1,45 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] mmc: sh-mmcif: avoid Oops on spurious interrupts
-Date: Thu, 23 Aug 2012 09:11:09 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1208230908550.22797@axis700.grange>
-References: <878vdxd3mq.wl%kuninori.morimoto.gx@renesas.com>
- <20120803050039.GA1614@linux-sh.org> <20120809042844.GF1614@linux-sh.org>
- <87hasc3bv5.wl%kuninori.morimoto.gx@renesas.com> <874nobqntv.wl%kuninori.morimoto.gx@renesas.com>
- <20120810123804.GK1614@linux-sh.org> <502DDC97.5080501@kmckk.co.jp>
- <87wr0us6tg.wl%kuninori.morimoto.gx@renesas.com> <20120820031352.GC25767@linux-sh.org>
- <87obm6ry98.wl%kuninori.morimoto.gx@renesas.com> <20120820043853.GD25767@linux-sh.org>
- <87mx1qrx1x.wl%kuninori.morimoto.gx@renesas.com> <5031D9FF.8060801@kmckk.co.jp>
- <Pine.LNX.4.64.1208220840400.26767@axis700.grange> <5034CD80.70501@kmckk.co.jp>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH 0/5] Add the dw-mmc patches
+Date: Thu, 23 Aug 2012 20:31:48 +0900
+Message-ID: <503614A4.4010403@samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <5034CD80.70501@kmckk.co.jp>
-Sender: linux-sh-owner@vger.kernel.org
-To: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
-Cc: yusuke.goda.sx@renesas.com, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:22746 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755101Ab2HWLcE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Aug 2012 07:32:04 -0400
+Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M9700L0VHD7CG20@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 23 Aug 2012 20:32:03 +0900 (KST)
+Received: from [10.90.51.55] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0M9700JGCHDFWSB0@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 23 Aug 2012 20:32:03 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>
 
-Hello Kobayashi-san
+These patches added some feature for dw-mmc.
 
-On Wed, 22 Aug 2012, Tetsuyuki Kobayashi wrote:
+Jaehoon Chung (5):
+  mmc: dw-mmc: fixed the section mismatch in reference
+  mmc: dw-mmc: ensure that the card is not busy when changing clock.
+  mmc: dw-mmc: add the platdata related with clock
+  mmc: dw-mmc: add the header file for exynos specific code.
+  mmc: dw-mmc: add the use_hold_reg in CMD register
 
-> Hello Guennadi,
-> 
-> Thank you for your patch. I will test this next week.
+ drivers/mmc/host/dw_mmc-pltfm.c   |    4 +-
+ drivers/mmc/host/dw_mmc.c         |   71 +++++++++++++++++++++++++++++++++----
+ drivers/mmc/host/dw_mmc.h         |    2 +
+ include/linux/mmc/dw_mmc.h        |   11 ++++++
+ include/linux/mmc/exynos-dw_mmc.h |   55 ++++++++++++++++++++++++++++
+ 5 files changed, 134 insertions(+), 9 deletions(-)
+ create mode 100644 include/linux/mmc/exynos-dw_mmc.h
 
-Great, thanks very much! I'l also try to fund some time early in September 
-to test on my board. Could you please send me your .config kernel 
-configuration (off-list)?
-
-Thanks
-Guennadi
-
-> > One more question - is this only needed for 3.7 or also for 3.6 / stable?
-> 
-> I hope this also for 3.6 / stable because it is more robust.
-> The other hand, we need investigate why this strange interrupt happens.
-> 
-> (2012/08/22 15:49), Guennadi Liakhovetski wrote:
-> > On some systems, e.g., kzm9g, MMCIF interfaces can produce spurious
-> > interrupts without any active request. To prevent the Oops, that results
-> > in such cases, don't dereference the mmc request pointer until we make
-> > sure, that we are indeed processing such a request.
-> > 
-> > Reported-by: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > ---
-> > 
-> > Hello Kobayashi-san
-> > 
-> > On Mon, 20 Aug 2012, Tetsuyuki Kobayashi wrote:
-> > 
-> > ...
-> > 
-> > > After applying this patch on kzm9g board, I got this error regarding eMMC.
-> > > I think this is another problem.
-> > > 
-> > > 
-> > > Unable to handle kernel NULL pointer dereference at virtual address
-> > > 00000008
-> > > pgd = c0004000
-> > > [00000008] *pgd=00000000
-> > > Internal error: Oops: 17 [#1] PREEMPT SMP ARM
-> > > Modules linked in:
-> > > CPU: 1    Not tainted  (3.6.0-rc2+ #103)
-> > > PC is at sh_mmcif_irqt+0x20/0xb30
-> > > LR is at irq_thread+0x94/0x16c
-> > 
-> > [snip]
-> > 
-> > > My quick fix is below.
-> > > 
-> > > diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> > > index 5d81427..e587fbc 100644
-> > > --- a/drivers/mmc/host/sh_mmcif.c
-> > > +++ b/drivers/mmc/host/sh_mmcif.c
-> > > @@ -1104,7 +1104,15 @@ static irqreturn_t sh_mmcif_irqt(int irq, void
-> > > *dev_id)
-> > >   {
-> > >          struct sh_mmcif_host *host = dev_id;
-> > >          struct mmc_request *mrq = host->mrq;
-> > > -       struct mmc_data *data = mrq->data;
-> > > +       /*struct mmc_data *data = mrq->data; -- this cause null pointer
-> > > access*/
-> > > +       struct mmc_data *data;
-> > > +
-> > > +       /* quick fix by koba */
-> > > +       if (mrq == NULL) {
-> > > +               printk("sh_mmcif_irqt: mrq == NULL: host->wait_for=%d\n",
-> > > host->wait_for);
-> > > +       } else {
-> > > +               data = mrq->data;
-> > > +       }
-> > > 
-> > >          cancel_delayed_work_sync(&host->timeout_work);
-> > > 
-> > > 
-> > > With this patch, there is no null pointer accesses and got this log.
-> > > 
-> > > sh_mmcif_irqt: mrq == NULL: host->wait_for=0
-> > > sh_mmcif_irqt: mrq == NULL: host->wait_for=0
-> > >    ...
-> > > 
-> > > host->wait_for is 0. it is MMCIF_WAIT_FOR_REQUEST.
-> > > There is code such like:
-> > > 
-> > >         host->wait_for = MMCIF_WAIT_FOR_REQUEST;
-> > >         host->mrq = NULL;
-> > > 
-> > > So, at the top of sh_mmcif_irqt, if host->wait_for ==
-> > > MMCIF_WAIT_FOR_REQUEST,
-> > > host->mrq = NULL.
-> > > It is too earlier to access mrq->data before checking host->mrq. it may
-> > > cause null pointer access.
-> > > 
-> > > Goda-san, could you check this and refine the code of sh_mmcif_irqt?
-> > 
-> > Thanks for your report and a fix. Could you please double-check, whether
-> > the below patch also fixes your problem? Since such spurious interrupts
-> > are possible I would commit a check like this one, but in the longer run
-> > we want to identify and eliminate them, if possible. But since so far
-> > these interrupts only happen on 1 board model and also not on all units
-> > and not upon each boot, this could be a bit tricky.
-> > 
-> > One more question - is this only needed for 3.7 or also for 3.6 / stable?
-> > 
-> > Thanks
-> > Guennadi
-> > 
-> >   drivers/mmc/host/sh_mmcif.c |    4 ++--
-> >   1 files changed, 2 insertions(+), 2 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> > index 5d81427..82bf921 100644
-> > --- a/drivers/mmc/host/sh_mmcif.c
-> > +++ b/drivers/mmc/host/sh_mmcif.c
-> > @@ -1104,7 +1104,6 @@ static irqreturn_t sh_mmcif_irqt(int irq, void
-> > *dev_id)
-> >   {
-> >   	struct sh_mmcif_host *host = dev_id;
-> >   	struct mmc_request *mrq = host->mrq;
-> > -	struct mmc_data *data = mrq->data;
-> > 
-> >   	cancel_delayed_work_sync(&host->timeout_work);
-> > 
-> > @@ -1152,13 +1151,14 @@ static irqreturn_t sh_mmcif_irqt(int irq, void
-> > *dev_id)
-> >   	case MMCIF_WAIT_FOR_READ_END:
-> >   	case MMCIF_WAIT_FOR_WRITE_END:
-> >   		if (host->sd_error)
-> > -			data->error = sh_mmcif_error_manage(host);
-> > +			mrq->data->error = sh_mmcif_error_manage(host);
-> >   		break;
-> >   	default:
-> >   		BUG();
-> >   	}
-> > 
-> >   	if (host->wait_for != MMCIF_WAIT_FOR_STOP) {
-> > +		struct mmc_data *data = mrq->data;
-> >   		if (!mrq->cmd->error && data && !data->error)
-> >   			data->bytes_xfered =
-> >   				data->blocks * data->blksz;
-> > 
-> 
-
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+-- 
+1.7.4.1
