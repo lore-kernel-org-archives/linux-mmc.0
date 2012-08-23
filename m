@@ -1,49 +1,92 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: [PATCH] ARM: at91/feature-removal-schedule: delay at91_mci removal
-Date: Thu, 23 Aug 2012 15:27:28 +0200
-Message-ID: <1345728448-29384-1-git-send-email-nicolas.ferre@atmel.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 5/5] mmc: dw-mmc: add the use_hold_reg in CMD register
+Date: Thu, 23 Aug 2012 22:28:07 +0900
+Message-ID: <50362FE7.2060703@samsung.com>
+References: <503614A9.2020304@samsung.com>
+ <CAFbHwiQkmb08dc53gHX6MMVEKMLoSAiqYsmcF4VKtYMLVWnadw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:29492 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933964Ab2HWN1e (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Aug 2012 09:27:34 -0400
+Received: from mailout3.samsung.com ([203.254.224.33]:27300 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933202Ab2HWN2Y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Aug 2012 09:28:24 -0400
+Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M970038KMRA99E0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 23 Aug 2012 22:28:23 +0900 (KST)
+Received: from [10.90.51.55] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0M97003F0MRAHR20@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 23 Aug 2012 22:28:22 +0900 (KST)
+In-reply-to: <CAFbHwiQkmb08dc53gHX6MMVEKMLoSAiqYsmcF4VKtYMLVWnadw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Cc: cjb@laptop.org, ludovic.desroches@atmel.com, plagnioj@jcrosoft.com, arnd@arndb.de, olof@lixom.net, Nicolas Ferre <nicolas.ferre@atmel.com>
+To: Will Newton <will.newton@gmail.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>
 
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
+On 08/23/2012 09:41 PM, Will Newton wrote:
+> On Thu, Aug 23, 2012 at 12:31 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> This patch is added the use_hold_reg bit in CMD register.
+>>
+>> In upper version than 2.40a, bit[29] of CMD register is used the use_hold_reg.
+>> Some SoC is affected by this bit.
+>> (This bit means whether use hold register when send data and cmd.
+>>  And related with cclk_in_drv phase)
+>>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c  |   36 ++++++++++++++++++++++++++++++++++++
+>>  drivers/mmc/host/dw_mmc.h  |    1 +
+>>  include/linux/mmc/dw_mmc.h |    3 +++
+>>  3 files changed, 40 insertions(+), 0 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index feafa2d..426171f 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -265,11 +265,45 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+>>  static void dw_mci_start_command(struct dw_mci *host,
+>>                                  struct mmc_command *cmd, u32 cmd_flags)
+>>  {
+>> +       struct dw_mci_slot *slot = host->cur_slot;
+>> +       struct mmc_ios *ios = &slot->mmc->ios;
+>> +
+>>         host->cmd = cmd;
+>>         dev_vdbg(&host->dev,
+>>                  "start command: ARGR=0x%08x CMDR=0x%08x\n",
+>>                  cmd->arg, cmd_flags);
+>>
+>> +       if (host->quirks & DW_MCI_QUIRK_USE_CLKSEL_REG) {
+>> +               /*
+>> +                * If use HOLD register and SDR12/SDSR25,
+>> +                * CMD and DATA sent to card through HOLD register by default.
+>> +                * But if mode is SDR50/DDR50/SDR104,
+>> +                * only use the hold register when cclk_in_drv value is upper than 0.
+> 
+> "greater" might be better than "upper" here.
+will change.
+> 
+>> +                */
+>> +               switch (ios->timing) {
+>> +               case MMC_TIMING_UHS_SDR50:
+>> +               case MMC_TIMING_UHS_DDR50:
+>> +                       if (host->pdata->get_clk_drv)
+>> +                               if ((host->pdata->get_clk_drv(host) &&
+>> +                                               host->use_hold_reg)) {
+> 
+> There's more brackets than necessary here in the second if, and the
+> two if conditions could probably be combined to make it neater.
+Ok. I will fix.
 
-Delay sd/mmc driver at91_mci.c removal because of tight schedule to
-move platform data to new driver atmel-mci.
-
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
----
-Hi,
-
-I plan to queue this one with the at91-fixes pull-request for 3.6. If you do
-not feel it is a good idea, please say so.
-
-
- Documentation/feature-removal-schedule.txt |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/Documentation/feature-removal-schedule.txt b/Documentation/feature-removal-schedule.txt
-index afaff31..f4d8c71 100644
---- a/Documentation/feature-removal-schedule.txt
-+++ b/Documentation/feature-removal-schedule.txt
-@@ -579,7 +579,7 @@ Why:	KVM tracepoints provide mostly equivalent information in a much more
- ----------------------------
- 
- What:	at91-mci driver ("CONFIG_MMC_AT91")
--When:	3.7
-+When:	3.8
- Why:	There are two mci drivers: at91-mci and atmel-mci. The PDC support
- 	was added to atmel-mci as a first step to support more chips.
- 	Then at91-mci was kept only for old IP versions (on at91rm9200 and
--- 
-1.7.10
+Best Regards,
+Jaehoon Chung
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
