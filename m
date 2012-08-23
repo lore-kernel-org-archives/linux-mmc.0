@@ -1,71 +1,83 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH 5/5] mmc: dw-mmc: add the use_hold_reg in CMD register
-Date: Thu, 23 Aug 2012 13:41:41 +0100
-Message-ID: <CAFbHwiQkmb08dc53gHX6MMVEKMLoSAiqYsmcF4VKtYMLVWnadw@mail.gmail.com>
-References: <503614A9.2020304@samsung.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 2/5] mmc: dw-mmc: ensure that the card is not busy when
+ changing clock.
+Date: Thu, 23 Aug 2012 22:26:58 +0900
+Message-ID: <50362FA1.6010005@samsung.com>
+References: <503614A5.5090906@samsung.com>
+ <CAFbHwiRm3niUF+Kds0-+XOUzCu8F5hkY9NJi+jKg_PtFrhQ+CQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f53.google.com ([209.85.216.53]:51758 "EHLO
-	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753579Ab2HWMlm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Aug 2012 08:41:42 -0400
-Received: by qaas11 with SMTP id s11so443347qaa.19
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Aug 2012 05:41:41 -0700 (PDT)
-In-Reply-To: <503614A9.2020304@samsung.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:53867 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933798Ab2HWN1P (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Aug 2012 09:27:15 -0400
+Received: from epcpsbgm1.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M97006MAMOWBFC0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 23 Aug 2012 22:27:14 +0900 (KST)
+Received: from [10.90.51.55] by mmp1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0M9700IXUMPDNO20@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 23 Aug 2012 22:27:13 +0900 (KST)
+In-reply-to: <CAFbHwiRm3niUF+Kds0-+XOUzCu8F5hkY9NJi+jKg_PtFrhQ+CQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>
+To: Will Newton <will.newton@gmail.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>
 
-On Thu, Aug 23, 2012 at 12:31 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> This patch is added the use_hold_reg bit in CMD register.
->
-> In upper version than 2.40a, bit[29] of CMD register is used the use_hold_reg.
-> Some SoC is affected by this bit.
-> (This bit means whether use hold register when send data and cmd.
->  And related with cclk_in_drv phase)
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc.c  |   36 ++++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/dw_mmc.h  |    1 +
->  include/linux/mmc/dw_mmc.h |    3 +++
->  3 files changed, 40 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index feafa2d..426171f 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -265,11 +265,45 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
->  static void dw_mci_start_command(struct dw_mci *host,
->                                  struct mmc_command *cmd, u32 cmd_flags)
->  {
-> +       struct dw_mci_slot *slot = host->cur_slot;
-> +       struct mmc_ios *ios = &slot->mmc->ios;
-> +
->         host->cmd = cmd;
->         dev_vdbg(&host->dev,
->                  "start command: ARGR=0x%08x CMDR=0x%08x\n",
->                  cmd->arg, cmd_flags);
->
-> +       if (host->quirks & DW_MCI_QUIRK_USE_CLKSEL_REG) {
-> +               /*
-> +                * If use HOLD register and SDR12/SDSR25,
-> +                * CMD and DATA sent to card through HOLD register by default.
-> +                * But if mode is SDR50/DDR50/SDR104,
-> +                * only use the hold register when cclk_in_drv value is upper than 0.
+On 08/23/2012 09:33 PM, Will Newton wrote:
+> On Thu, Aug 23, 2012 at 12:31 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> To avoid glitches in the card clock output,
+>> need to check whether card is busy or not.
+>>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c |   30 ++++++++++++++++++++++++------
+>>  drivers/mmc/host/dw_mmc.h |    1 +
+>>  2 files changed, 25 insertions(+), 6 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 36f98c0..8bef3c2 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -623,6 +623,27 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
+>>                 cmd, arg, cmd_status);
+>>  }
+>>
+>> +static void dw_mci_inform_ciu(struct dw_mci_slot *slot)
+>> +{
+>> +       struct dw_mci *host = slot->host;
+>> +       unsigned long timeout = jiffies + msecs_to_jiffies(500);
+> 
+> Is there a reason why this timeout value was chosen? It seems quite long.
+There is no special reason. I will fix it with more reasonable value.
+> 
+>> +       u32 ctrl, status;
+>> +
+>> +       do {
+>> +               status = mci_readl(host, STATUS);
+>> +               if (!(status & SDMMC_DATA_BUSY))
+>> +                       break;
+>> +               ctrl = mci_readl(host, CTRL);
+>> +               ctrl |= SDMMC_CTRL_RESET;
+>> +               mci_writel(host, CTRL, ctrl);
+>> +       } while (time_before(jiffies, timeout));
+>> +
+>> +       if (status & SDMMC_DATA_BUSY)
+>> +               dev_err(&slot->mmc->class_dev,"Card is busy..!\n");
+> 
+> The two periods in this message do not need to be there.
+Will fix.
 
-"greater" might be better than "upper" here.
+Best Regards,
+Jaehoon Chung
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-> +                */
-> +               switch (ios->timing) {
-> +               case MMC_TIMING_UHS_SDR50:
-> +               case MMC_TIMING_UHS_DDR50:
-> +                       if (host->pdata->get_clk_drv)
-> +                               if ((host->pdata->get_clk_drv(host) &&
-> +                                               host->use_hold_reg)) {
-
-There's more brackets than necessary here in the second if, and the
-two if conditions could probably be combined to make it neater.
