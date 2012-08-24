@@ -1,45 +1,39 @@
-From: "Arend van Spriel" <arend@broadcom.com>
-Subject: Re: v3.6-rc1: modprobe hangs with sdhci failure on dell e6410
-Date: Fri, 24 Aug 2012 21:58:27 +0200
-Message-ID: <5037DCE3.2010505@broadcom.com>
-References: <5034E895.4050105@broadcom.com>
- <CAOzJMDTTAzzV3VHgvY6B3ooe1ZyWkRGvfDgbFw4ZonQJFu3uAQ@mail.gmail.com>
- <50373A31.7040803@broadcom.com>
+From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH] arm/dts: omap5: Add mmc controller nodes and board data
+Date: Fri, 24 Aug 2012 13:02:22 -0700
+Message-ID: <20120824200221.GW11011@atomide.com>
+References: <1344323901-20342-1-git-send-email-balajitk@ti.com>
+ <201208070830.01776.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=iso-8859-1;
- format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mms3.broadcom.com ([216.31.210.19]:4115 "EHLO mms3.broadcom.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1760169Ab2HXT6i (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 24 Aug 2012 15:58:38 -0400
-In-Reply-To: <50373A31.7040803@broadcom.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <201208070830.01776.arnd-r2nGTMty4D4@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Cc: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, balbi-l0cyMroinI0@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lwe@gmail.com>
-Cc: linux-mmc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Philip Rakity <prakity@marvell.com>
 
-On 08/24/2012 10:24 AM, Arend van Spriel wrote:
-> On 08/23/2012 04:58 PM, Aaron Lu wrote:
->> On Wed, Aug 22, 2012 at 10:11 PM, Arend van Spriel
->> <arend@broadcom.com> wrote:
->>> A quick search using google did not provide clues. Regardless if
->>> there is
->>> anything inserted the hang occurs.
->>>
->>> Gr. AvS
->>
->> Also, your .config might be helpful.
->
-> True. Here it is.
->
-> Gr. AvS
+* Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> [120807 02:21]:
+> On Tuesday 07 August 2012, Balaji T K wrote:
+> > 
+> > Add OMAP MMC related device tree data for OMAP5.
+> > 
+> > Signed-off-by: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
+> > ---
+> 
+> Acked-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
 
-Inspected the logs on another machine running the same kernel and it has 
-the same issue. I was not using the mmc slot on that machine so I was 
-not aware. On x86_64 I am not seeing the issue (so far).
+Applying this into omap devel-dt branch. 
 
-Gr. AvS
-
+Tony
