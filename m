@@ -1,58 +1,57 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 4/5] mmc: dw-mmc: add the header file for exynos specific
- code.
-Date: Fri, 24 Aug 2012 18:35:46 +0900
-Message-ID: <50374AF2.60706@samsung.com>
-References: <503614A7.3050004@samsung.com>
- <CAFbHwiRjhRmX3C-KgkC59F7c7EK4ivf4U2oCFfRtV5=EpLtSXw@mail.gmail.com>
+From: <wei_wang@realsil.com.cn>
+Subject: [PATCH v4 0/2] Add modules to support realtek PCIE card reader
+Date: Fri, 24 Aug 2012 17:36:21 +0800
+Message-ID: <cover.1345620826.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:9265 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756351Ab2HXJgF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Aug 2012 05:36:05 -0400
-Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M9900H6M6N35WZ0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 24 Aug 2012 18:36:03 +0900 (KST)
-Received: from [10.90.51.55] by mmp1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0M99004K46O35C90@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 24 Aug 2012 18:36:03 +0900 (KST)
-In-reply-to: <CAFbHwiRjhRmX3C-KgkC59F7c7EK4ivf4U2oCFfRtV5=EpLtSXw@mail.gmail.com>
+Received: from rtits2.realtek.com ([60.250.210.242]:55818 "EHLO
+	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750788Ab2HXJhD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Aug 2012 05:37:03 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Will Newton <will.newton@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>
+To: gregkh@linuxfoundation.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, arnd@arndb.de, sameo@linux.intel.com
+Cc: bp@alien8.de, Wei WANG <wei_wang@realsil.com.cn>
 
-Hi Will
+From: Wei WANG <wei_wang@realsil.com.cn>
 
-On 08/24/2012 06:29 PM, Will Newton wrote:
-> On Thu, Aug 23, 2012 at 12:31 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> 
-> Hi Jaehoon,
-> 
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->> ---
->>  include/linux/mmc/exynos-dw_mmc.h |   55 +++++++++++++++++++++++++++++++++++++
->>  1 files changed, 55 insertions(+), 0 deletions(-)
->>  create mode 100644 include/linux/mmc/exynos-dw_mmc.h
-> 
-> What is the purpose of adding this header file if it is not included
-> anywhere? Is there a patch missing from the series?
-I will send to add the patch in the next version.
-This header should be included into board file related with exynos4 or exynos5.
-Thank you for comment.
+Support for Realtek PCI-Express driver-based card readers including rts5209 and rts5229.
 
-Best Regards,
-Jaehoon Chung
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+v2:
+1. Using platform device to replace realtek slot bus
+
+v3:
+1. Fix a bug that DMA out of SW-IOMMU space in Lenovo Thinkpad x121e
+2. Tested by Borislav Petkov <bp@alien8.de>
+
+v4:
+1. Fulfill power management callbacks
+
+Wei WANG (2):
+  drivers/mfd: Add realtek pcie card reader driver
+  drivers/mmc: Add realtek pcie sdmmc host driver
+
+ drivers/mfd/Kconfig               |    9 +
+ drivers/mfd/Makefile              |    4 +
+ drivers/mfd/rts5209.c             |  104 +++
+ drivers/mfd/rts5229.c             |  119 ++++
+ drivers/mfd/rtsx_pcr.c            | 1314 +++++++++++++++++++++++++++++++++++
+ drivers/mfd/rtsx_pcr.h            |   31 +
+ drivers/mmc/host/Kconfig          |    7 +
+ drivers/mmc/host/Makefile         |    2 +
+ drivers/mmc/host/rtsx_pci_sdmmc.c | 1378 +++++++++++++++++++++++++++++++++++++
+ include/linux/mfd/rtsx_common.h   |   47 ++
+ include/linux/mfd/rtsx_pci.h      |  690 +++++++++++++++++++
+ 11 files changed, 3705 insertions(+)
+ create mode 100644 drivers/mfd/rts5209.c
+ create mode 100644 drivers/mfd/rts5229.c
+ create mode 100644 drivers/mfd/rtsx_pcr.c
+ create mode 100644 drivers/mfd/rtsx_pcr.h
+ create mode 100644 drivers/mmc/host/rtsx_pci_sdmmc.c
+ create mode 100644 include/linux/mfd/rtsx_common.h
+ create mode 100644 include/linux/mfd/rtsx_pci.h
+
+-- 
+1.7.9.5
 
