@@ -1,107 +1,154 @@
-From: Paul Walmsley <paul@pwsan.com>
-Subject: [PATCH] MMC: OMAP MSDI: fix broken PIO mode
-Date: Fri, 24 Aug 2012 06:00:18 +0000 (UTC)
-Message-ID: <alpine.DEB.2.00.1208240555210.25436@utopia.booyaka.com>
+From: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
+Subject: Re: [PATCH 1/1] mmc: host: enable OMAP DMA engine support for omap
+ hosts by default
+Date: Fri, 24 Aug 2012 12:40:12 +0530
+Message-ID: <CAMQu2gyEGPbNEE0ur0wh9RoJKuBe4B5NkQMUafQNWGVLX8t9vg@mail.gmail.com>
+References: <1342485005-5178-1-git-send-email-javier@dowhile0.org>
+ <CAMQu2gxaF8K78puE84+=8VJLbsdtdD97ww81XJxG6sCtYTYXww@mail.gmail.com>
+ <CABxcv=nsmeVLspzXERYXebmPaNO6rKCsVnak7dMtvGjiYH4vOw@mail.gmail.com>
+ <20120718065951.GH6522@atomide.com> <CAMQu2gzX1d1FQtE3z=cwfA6daDgxJe6UFUaSY0PzGGLQOz_-ZQ@mail.gmail.com>
+ <20120718071039.GI6522@atomide.com> <CANfBPZ97onLov1TwXYaT5A6D5XzXxwpvk+=y09W_9FmcOne4Mw@mail.gmail.com>
+ <CAMQu2gy-U1WmgGOGZ+VyXjZmLem9TEWbq5kR8jzC0qXvqF-=BA@mail.gmail.com>
+ <CAAwP0s2Efuuc7vsX3bZuwz175zUjnmsOV87OcZ06p_eoe4T3Ug@mail.gmail.com> <alpine.DEB.2.01.1208232246530.15831@pmeerw.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="843723315-2101401518-1345788018=:25436"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from utopia.booyaka.com ([74.50.51.50]:60200 "EHLO
-	utopia.booyaka.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753742Ab2HXGHA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Aug 2012 02:07:00 -0400
+Received: from na3sys009aog105.obsmtp.com ([74.125.149.75]:50305 "EHLO
+	na3sys009aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752554Ab2HXHKe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Aug 2012 03:10:34 -0400
+Received: by iakx26 with SMTP id x26so3611450iak.18
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Aug 2012 00:10:33 -0700 (PDT)
+In-Reply-To: <alpine.DEB.2.01.1208232246530.15831@pmeerw.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jarkko Lavinen <jarkko.lavinen@nokia.com>, linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, tony@atomide.com, =?ISO-8859-15?Q?Juha_Yrj=F6l=E4?= <juha.yrjola@nokia.com>, Carlos Aguiar <carlos.aguiar@indt.org.br>, Russell King <rmk+kernel@arm.linux.org.uk>
+To: Peter Meerwald <pmeerw@pmeerw.net>
+Cc: Javier Martinez Canillas <martinez.javier@gmail.com>, "S, Venkatraman" <svenkatr@ti.com>, Tony Lindgren <tony@atomide.com>, Javier Martinez Canillas <javier@dowhile0.org>, Kevin Hilman <khilman@ti.com>, Russell King <linux@arm.linux.org.uk>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Fri, Aug 24, 2012 at 2:30 AM, Peter Meerwald <pmeerw@pmeerw.net> wrote:
+>
+> On Wed, 18 Jul 2012, Javier Martinez Canillas wrote:
+>
+> > On Wed, Jul 18, 2012 at 10:36 AM, Shilimkar, Santosh
+> > <santosh.shilimkar@ti.com> wrote:
+> > > On Wed, Jul 18, 2012 at 1:14 PM, S, Venkatraman <svenkatr@ti.com>
+> > > wrote:
+> > >> On Wed, Jul 18, 2012 at 12:40 PM, Tony Lindgren <tony@atomide.com>
+> > >> wrote:
+> > >>> * Shilimkar, Santosh <santosh.shilimkar@ti.com> [120718 00:09]:
+> > >>>> On Wed, Jul 18, 2012 at 12:29 PM, Tony Lindgren <tony@atomide.com>
+> > >>>> wrote:
+> > >>>> > * Javier Martinez Canillas <javier@dowhile0.org> [120716 23:56]:
+> > >>>> >> On Tue, Jul 17, 2012 at 8:45 AM, Shilimkar, Santosh
+> > >>>> >> <santosh.shilimkar@ti.com> wrote:
+> > >>>> >> > Hi,
+> > >>>> >> >
+> > >>>> >> > On Tue, Jul 17, 2012 at 6:00 AM, Javier Martinez Canillas
+> > >>>> >> > <javier@dowhile0.org> wrote:
+> > >>>> >> >> The OMAP MMC and OMAP High Speed MMC hosts now use entirely
+> > >>>> >> >> the DMA
+> > >>>> >> >> engine API instead of the previous private DMA API
+> > >>>> >> >> implementation.
+> > >>>> >> >>
+> > >>>> >> >> So, if the kernel is built with support for any of these
+> > >>>> >> >> hosts but it
+> > >>>> >> >> doesn't support DMA devices nor OMAP DMA support, it fails
+> > >>>> >> >> when trying
+> > >>>> >> >> to obtain a DMA channel which leads to the following error on
+> > >>>> >> >> an OMAP3
+> > >>>> >> >> IGEPv2 Rev.C board (and probably on most OMAP boards with MMC
+> > >>>> >> >> support):
+> > >>>> >> >>
+> > >>>> >> >> [ 2.199981] omap_hsmmc omap_hsmmc.1: unable to obtain RX DMA
+> > >>>> >> >> engine channel 48
+> > >>>> >> >> [    2.215087] omap_hsmmc omap_hsmmc.0: unable to obtain RX
+> > >>>> >> >> DMA engine channel 62
+> > >>>> >> >>
+> > >>>> >> >> selecting automatically CONFIG_DMADEVICES and CONFIG_DMA_OMAP
+> > >>>> >> >> solves it.
+> > >>>> >> >>
+> > >>>> >> >> Signed-off-by: Javier Martinez Canillas <javier@dowhile0.org>
+> > >>>> >> >> ---
+> > >>>> >> > Considering, we are updating drivers to select the DMA engine,
+> > >>>> >> > can you
+> > >>>> >> > also include
+> > >>>> >> > "drivers/spi/spi-omap2-mcspi.c" which is also updated for DMA
+> > >>>> >> > engine.
+> > >>>> >> >
+> > >>>> >> > Regards
+> > >>>> >> > Santosh
+> > >>>> >>
+> > >>>> >> Hi Santosh,
+> > >>>> >>
+> > >>>> >> Ok, I'll send a v2 now which includes spi-omap2-mcspi then.
+> > >>>> >
+> > >>>> > I don't think we should do this, the drivers should work with and
+> > >>>> > without
+> > >>>> > dma. This just needs to be added to the omap2plus_defconfig.
+> > >>>> >
+> > >>>> Well this was not decided based on any DMA CONFIG option before for
+> > >>>> the subject drivers. It is already by default enabled if the DMA is
+> > >>>> supported
+> > >>>> by the driver IP. There is a possibility to disable it from driver
+> > >>>> platform/dt
+> > >>>> data so that still remains.
+> > >>>
+> > >>> I think it should rather be that if the driver is broken and does
+> > >>> not work
+> > >>> without DMA, it should have depends on CONFIG_DMA_OMAP.
+> > >>>
+> > >> I can confirm that omap MMC can't work without DMA; polled mode is
+> > >> not
+> > >> supported / implemented.
+> > >
+> > > Same case for SPI driver as well. It uses DMA for everything except
+> > > the cases
+> > > where DMA doesn't make sense like 1 byte/2 byte etc. And its not
+> > > configurable,
+> > >
+> > > At least considering this, it is better we do this per driver than
+> > > enabling
+> > > it at SOC config.
+> > >
+> > > Regards
+> > > Santosh
+> > > --
+> >
+> > Hi Santosh,
+> >
+> > And what about enabling it at the SoC config level but making the
+> > drivers dependant on CONFIG_DMADEVICES and CONFIG_DMA_OMAP? If you
+> > agree I can send something like this in two different patches (one for
+> > the omap2plus_defconfig and another to make the drivers dependant on
+> > the config option):
+> >
+> > diff --git a/arch/arm/configs/omap2plus_defconfig
+> > b/arch/arm/configs/omap2plus_defconfig
+> > index b152de7..e58edc3 100644
+> > --- a/arch/arm/configs/omap2plus_defconfig
+> > +++ b/arch/arm/configs/omap2plus_defconfig
+> > @@ -193,6 +193,8 @@ CONFIG_MMC_OMAP_HS=y
+> >  CONFIG_RTC_CLASS=y
+> >  CONFIG_RTC_DRV_TWL92330=y
+> >  CONFIG_RTC_DRV_TWL4030=y
+> > +CONFIG_DMADEVICES=y
+> > +CONFIG_DMA_OMAP=y
+> >  CONFIG_EXT2_FS=y
+> >  CONFIG_EXT3_FS=y
+> >  # CONFIG_EXT3_FS_XATTR is not set
+>
+> above has been merged, 89269ef1f0abc72c551198123e19cd4edfd43cf4
+> but I am missing the patches below in mainline (3.6-rc3) -- what happened?
+>
+> as Javier pointed out in https://patchwork.kernel.org/patch/1203391/,
+> MMC is broken support e.g. on beagleboard unless DMA_OMAP is defined
+>
+> I suggest to take below patches and help to avoid some extra gray hair for
+> people looking for a fix for non-booting beagleboards
+>
+May be I am missing something, but why you would need below patch
+for beagle with "89269ef1f0abc72c551198123e19cd4edfd43cf4" commit
+enabling the DMA_OMAP for all OMAP boards.
 
---843723315-2101401518-1345788018=:25436
-Content-Type: TEXT/PLAIN; charset=ISO-8859-15
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-
-
-After commit 26b88520b80695a6fa5fd95b5d97c03f4daf87e0 ("mmc:
-omap_hsmmc: remove private DMA API implementation"), the Nokia N800
-here stopped booting:
-
-[    2.086181] Waiting for root device /dev/mmcblk0p1...
-[    2.324066] Unhandled fault: imprecise external abort (0x406) at 0x00000=
-000
-[    2.331451] Internal error: : 406 [#1] ARM
-[    2.335784] Modules linked in:
-[    2.339050] CPU: 0    Not tainted  (3.6.0-rc3 #60)
-[    2.344146] PC is at default_idle+0x28/0x30
-[    2.348602] LR is at trace_hardirqs_on_caller+0x15c/0x1b0
-
-=2E..
-
-This turned out to be due to memory corruption caused by long-broken
-PIO code in drivers/mmc/host/omap.c.  (Previously, this driver had
-been using DMA; but the above commit caused the MMC driver to fall
-back to PIO mode with an unmodified Kconfig.)
-
-The PIO code, added with the rest of the driver in commit
-730c9b7e6630f786fcec026fb11d2e6f2c90fdcb ("[MMC] Add OMAP MMC host
-driver"), confused bytes with 16-bit words.  This bug caused memory
-located after the PIO transfer buffer to be corrupted with transfers
-larger than 32 bytes.  The driver also did not increment the buffer
-pointer after the transfer occurred.  This bug resulted in data
-corruption during any transfer larger than 64 bytes.
-
-Signed-off-by: Paul Walmsley <paul@pwsan.com>
-Cc: Juha Yrj=F6l=E4 <juha.yrjola@nokia.com>
-Cc: Tony Lindgren <tony@atomide.com>
-Cc: Carlos Aguiar <carlos.aguiar@indt.org.br>
-Cc: Russell King <rmk+kernel@arm.linux.org.uk>
----
- drivers/mmc/host/omap.c |   14 +++++++++++---
- 1 file changed, 11 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index 50e08f0..a5999a7 100644
---- a/drivers/mmc/host/omap.c
-+++ b/drivers/mmc/host/omap.c
-@@ -668,7 +668,7 @@ mmc_omap_clk_timer(unsigned long data)
- static void
- mmc_omap_xfer_data(struct mmc_omap_host *host, int write)
- {
--=09int n;
-+=09int n, nwords;
-=20
- =09if (host->buffer_bytes_left =3D=3D 0) {
- =09=09host->sg_idx++;
-@@ -678,15 +678,23 @@ mmc_omap_xfer_data(struct mmc_omap_host *host, int wr=
-ite)
- =09n =3D 64;
- =09if (n > host->buffer_bytes_left)
- =09=09n =3D host->buffer_bytes_left;
-+
-+=09nwords =3D n / 2;
-+=09nwords +=3D n & 1; /* handle odd number of bytes to transfer */
-+
- =09host->buffer_bytes_left -=3D n;
- =09host->total_bytes_left -=3D n;
- =09host->data->bytes_xfered +=3D n;
-=20
- =09if (write) {
--=09=09__raw_writesw(host->virt_base + OMAP_MMC_REG(host, DATA), host->buff=
-er, n);
-+=09=09__raw_writesw(host->virt_base + OMAP_MMC_REG(host, DATA),
-+=09=09=09      host->buffer, nwords);
- =09} else {
--=09=09__raw_readsw(host->virt_base + OMAP_MMC_REG(host, DATA), host->buffe=
-r, n);
-+=09=09__raw_readsw(host->virt_base + OMAP_MMC_REG(host, DATA),
-+=09=09=09     host->buffer, nwords);
- =09}
-+
-+=09host->buffer +=3D nwords;
- }
-=20
- static inline void mmc_omap_report_irq(u16 status)
---=20
-1.7.10.4
-
---843723315-2101401518-1345788018=:25436--
+Regards
+Santosh
