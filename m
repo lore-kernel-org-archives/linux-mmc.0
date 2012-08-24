@@ -1,174 +1,71 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 5/5] mmc: dw-mmc: add the use_hold_reg in CMD register
-Date: Fri, 24 Aug 2012 14:19:26 +0900
-Message-ID: <50370EDE.3010202@samsung.com>
-References: <503614A9.2020304@samsung.com>
- <00af01cd81af$66d7a1c0$3486e540$%jun@samsung.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH] mmc: dt: Add card-detection properties to core binding.
+Date: Fri, 24 Aug 2012 13:44:51 +0800
+Message-ID: <20120824054449.GP24242@S2101-09.ap.freescale.net>
+References: <87pq6k46jg.fsf@octavius.laptop.org>
+ <5033B0F0.7050506@gmail.com>
+ <CAJuYYwR+oCQUcgoy6ZuHp0XAa+EAj9d-FvLtwsQcP3muFMrKLA@mail.gmail.com>
+ <20120822055151.GT24242@S2101-09.ap.freescale.net>
+ <877gsr5iz1.fsf@octavius.laptop.org>
+ <CAJuYYwQz00ZzB5MxRG66XEPZApAtS6bwJAafmw3b=7DD7u+Crg@mail.gmail.com>
+ <87y5l7421h.fsf@octavius.laptop.org>
+ <CAJuYYwQLUs5qb8NqtPf3=ytNHJ_VdnN8Z4yWwyk2+OTftdWFXw@mail.gmail.com>
+ <87393f3rkj.fsf@octavius.laptop.org>
+ <874nnu245s.fsf_-_@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:55590 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751436Ab2HXFTp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Aug 2012 01:19:45 -0400
-Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M9800FQ5URMAOK0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 24 Aug 2012 14:19:43 +0900 (KST)
-Received: from [10.90.51.55] by mmp1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0M9800GJ5USUAN10@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 24 Aug 2012 14:19:43 +0900 (KST)
-In-reply-to: <00af01cd81af$66d7a1c0$3486e540$%jun@samsung.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:39005 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753275Ab2HXFoW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Aug 2012 01:44:22 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rr13so2795592pbb.19
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Aug 2012 22:44:21 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <874nnu245s.fsf_-_@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, 'Kyungmin Park' <kyungmin.park@samsung.com>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Thomas Abraham <thomas.abraham@linaro.org>, Rob Herring <robherring2@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, grant.likely@secretlab.ca, patches@linaro.org, Wolfram Sang <w.sang@pengutronix.de>
 
-On 08/24/2012 01:17 PM, Seungwon Jeon wrote:
-> On Thursday, August 23, 2012, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> This patch is added the use_hold_reg bit in CMD register.
->>
->> In upper version than 2.40a, bit[29] of CMD register is used the use_hold_reg.
->> Some SoC is affected by this bit.
->> (This bit means whether use hold register when send data and cmd.
->>  And related with cclk_in_drv phase)
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->> ---
->>  drivers/mmc/host/dw_mmc.c  |   36 ++++++++++++++++++++++++++++++++++++
->>  drivers/mmc/host/dw_mmc.h  |    1 +
->>  include/linux/mmc/dw_mmc.h |    3 +++
->>  3 files changed, 40 insertions(+), 0 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index feafa2d..426171f 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -265,11 +265,45 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
->>  static void dw_mci_start_command(struct dw_mci *host,
->>  				 struct mmc_command *cmd, u32 cmd_flags)
->>  {
->> +	struct dw_mci_slot *slot = host->cur_slot;
->> +	struct mmc_ios *ios = &slot->mmc->ios;
->> +
->>  	host->cmd = cmd;
->>  	dev_vdbg(&host->dev,
->>  		 "start command: ARGR=0x%08x CMDR=0x%08x\n",
->>  		 cmd->arg, cmd_flags);
->>
->> +	if (host->quirks & DW_MCI_QUIRK_USE_CLKSEL_REG) {
->> +		/*
->> +		 * If use HOLD register and SDR12/SDSR25,
->> +		 * CMD and DATA sent to card through HOLD register by default.
->> +		 * But if mode is SDR50/DDR50/SDR104,
->> +		 * only use the hold register when cclk_in_drv value is upper than 0.
->> +		 */
->> +		switch (ios->timing) {
->> +		case MMC_TIMING_UHS_SDR50:
->> +		case MMC_TIMING_UHS_DDR50:
->> +			if (host->pdata->get_clk_drv)
->> +				if ((host->pdata->get_clk_drv(host) &&
->> +						host->use_hold_reg)) {
->> +					cmd_flags |= SDMMC_CMD_USE_HOLD_REG;
->> +					break;
->> +				}
->> +
->> +			cmd_flags &= ~SDMMC_CMD_USE_HOLD_REG;
->> +			break;
->> +		case MMC_TIMING_UHS_SDR104:
->> +		case MMC_TIMING_UHS_SDR12:
->> +		case MMC_TIMING_UHS_SDR25:
->> +			if (host->use_hold_reg) {
-> Are there other conditions to be considered  as well?
-MMC_TIMING_UHS_SDR104 need to consider the cclk_in_drv.
-Below is right..i will fix this.
-	case MMC_TIMING_UHS_SDR_50:
-	case MMC_TIMING_UHS_DDR_50:
-	case MMC_TIMING_UHS_SDR_140:
-		code...
-	case MMC_TIMING_UHS_SDR_12:
-	case MMC_TIMING_UHS_SDR_25:
-		code..
-And we could consider the high-speed/non-DDR mode.
-I will check the manual.
-> 
->> +				cmd_flags |= SDMMC_CMD_USE_HOLD_REG;
->> +				break;
->> +			}
->> +		default:
->> +			cmd_flags &= ~SDMMC_CMD_USE_HOLD_REG;
->> +		}
->> +	}
-> If routine as a whole is moved to dw_mci_set_ios, it would be better.
-> There is no need to execute whenever command starts.
-As you mentioned, I will try to test after modify.
+On Wed, Aug 22, 2012 at 02:05:35PM -0400, Chris Ball wrote:
+> Signed-off-by: Chris Ball <cjb@laptop.org>
 
-Best Regards,
-Jaehoon Chung
-> 
-> Thanks,
-> Seungwon Jeon
-> 
->> +
->>  	mci_writel(host, CMDARG, cmd->arg);
->>  	wmb();
->>
->> @@ -2018,6 +2052,8 @@ int dw_mci_probe(struct dw_mci *host)
->>  		host->data_shift = 2;
->>  	}
->>
->> +	host->use_hold_reg = (mci_readl(host, HCON) >> 22) & 0x1;
->> +
->>  	/* Reset all blocks */
->>  	if (!mci_wait_reset(&host->dev, host))
->>  		return -ENODEV;
->> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
->> index b6a1a78..cc905ee 100644
->> --- a/drivers/mmc/host/dw_mmc.h
->> +++ b/drivers/mmc/host/dw_mmc.h
->> @@ -111,6 +111,7 @@
->>  #define SDMMC_INT_ERROR			0xbfc2
->>  /* Command register defines */
->>  #define SDMMC_CMD_START			BIT(31)
->> +#define SDMMC_CMD_USE_HOLD_REG		BIT(29)
->>  #define SDMMC_CMD_CCS_EXP		BIT(23)
->>  #define SDMMC_CMD_CEATA_RD		BIT(22)
->>  #define SDMMC_CMD_UPD_CLK		BIT(21)
->> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
->> index f20979c..803a80d 100644
->> --- a/include/linux/mmc/dw_mmc.h
->> +++ b/include/linux/mmc/dw_mmc.h
->> @@ -156,6 +156,7 @@ struct dw_mci {
->>  	u32			fifoth_val;
->>  	u16			verid;
->>  	u16			data_offset;
->> +	bool			use_hold_reg;
->>  	struct device		dev;
->>  	struct dw_mci_board	*pdata;
->>  	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
->> @@ -201,6 +202,8 @@ struct dw_mci_dma_ops {
->>  #define DW_MCI_QUIRK_HIGHSPEED			BIT(2)
->>  /* Unreliable card detection */
->>  #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(3)
->> +/* To use the CLKSEL register for phase-shift */
->> +#define DW_MCI_QUIRK_USE_CLKSEL_REG		BIT(4)
->>
->>
->>  struct dma_pdata;
->> --
->> 1.7.4.1
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Acked-by: Shawn Guo <shawn.guo@linaro.org>
 
+Will move sdhci-esdhc-imx driver to this soon.
+
+Regards,
+Shawn
+
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc.txt | 9 +++++++--
+>  1 file changed, 7 insertions(+), 2 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> index 8a6811f..8e2e0ba 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> @@ -9,12 +9,17 @@ Interpreted by the OF core:
+>  Required properties:
+>  - bus-width: Number of data lines, can be <1>, <4>, or <8>
+>  
+> +Card detection:
+> +If no property below is supplied, standard SDHCI card detect is used.
+> +Only one of the properties in this section should be supplied:
+> +  - broken-cd: There is no card detection available; polling must be used.
+> +  - cd-gpios: Specify GPIOs for card detection, see gpio binding
+> +  - non-removable: non-removable slot (like eMMC); assume always present.
+> +
+>  Optional properties:
+> -- cd-gpios: Specify GPIOs for card detection, see gpio binding
+>  - wp-gpios: Specify GPIOs for write protection, see gpio binding
+>  - cd-inverted: when present, polarity on the cd gpio line is inverted
+>  - wp-inverted: when present, polarity on the wp gpio line is inverted
+> -- non-removable: non-removable slot (like eMMC)
+>  - max-frequency: maximum operating clock frequency
+>  
+>  Example:
+> -- 
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
