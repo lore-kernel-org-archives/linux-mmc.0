@@ -1,24 +1,57 @@
-From: wwang <wei_wang@realsil.com.cn>
-Subject: Re: [PATCH v4 0/2] Add modules to support realtek PCIE card reader
-Date: Fri, 24 Aug 2012 17:46:17 +0800
-Message-ID: <50374D69.5020408@realsil.com.cn>
-References: <cover.1345620826.git.wei_wang@realsil.com.cn>
+From: <wei_wang@realsil.com.cn>
+Subject: [PATCH v4 0/2] Add modules to support realtek PCIE card reader
+Date: Fri, 24 Aug 2012 18:00:25 +0800
+Message-ID: <cover.1345801051.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1345620826.git.wei_wang@realsil.com.cn>
-Sender: linux-kernel-owner@vger.kernel.org
-Cc: "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "arnd@arndb.de" <arnd@arndb.de>, "sameo@linux.intel.com" <sameo@linux.intel.com>, "bp@alien8.de" <bp@alien8.de>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from rtits2.realtek.com ([60.250.210.242]:55780 "EHLO
+	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753883Ab2HXKBD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Aug 2012 06:01:03 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org, sameo@linux.intel.com
+Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, bp@alien8.de, Wei WANG <wei_wang@realsil.com.cn>
 
-=D3=DA 2012=C4=EA08=D4=C224=C8=D5 17:36, =CD=F5=EC=BF =D0=B4=B5=C0:
-> From: Wei WANG <wei_wang@realsil.com.cn>
->
-> Support for Realtek PCI-Express driver-based card readers including r=
-ts5209 and rts5229.
->
->
-Oh, bad mail thread. I will resend them all. Please ignore these mails.
+From: Wei WANG <wei_wang@realsil.com.cn>
 
-Sorry for that.
+Support for Realtek PCI-Express driver-based card readers including rts5209 and rts5229.
+
+v2:
+1. Using platform device to replace realtek slot bus
+
+v3:
+1. Fix a bug that DMA out of SW-IOMMU space in Lenovo Thinkpad x121e
+2. Tested by Borislav Petkov <bp@alien8.de>
+
+v4:
+1. Fulfill power management callbacks
+
+Wei WANG (2):
+  drivers/mfd: Add realtek pcie card reader driver
+  drivers/mmc: Add realtek pcie sdmmc host driver
+
+ drivers/mfd/Kconfig               |    9 +
+ drivers/mfd/Makefile              |    4 +
+ drivers/mfd/rts5209.c             |  104 +++
+ drivers/mfd/rts5229.c             |  119 ++++
+ drivers/mfd/rtsx_pcr.c            | 1321 +++++++++++++++++++++++++++++++++++
+ drivers/mfd/rtsx_pcr.h            |   31 +
+ drivers/mmc/host/Kconfig          |    7 +
+ drivers/mmc/host/Makefile         |    2 +
+ drivers/mmc/host/rtsx_pci_sdmmc.c | 1378 +++++++++++++++++++++++++++++++++++++
+ include/linux/mfd/rtsx_common.h   |   47 ++
+ include/linux/mfd/rtsx_pci.h      |  690 +++++++++++++++++++
+ 11 files changed, 3712 insertions(+)
+ create mode 100644 drivers/mfd/rts5209.c
+ create mode 100644 drivers/mfd/rts5229.c
+ create mode 100644 drivers/mfd/rtsx_pcr.c
+ create mode 100644 drivers/mfd/rtsx_pcr.h
+ create mode 100644 drivers/mmc/host/rtsx_pci_sdmmc.c
+ create mode 100644 include/linux/mfd/rtsx_common.h
+ create mode 100644 include/linux/mfd/rtsx_pci.h
+
+-- 
+1.7.9.5
+
