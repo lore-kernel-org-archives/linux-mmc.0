@@ -1,39 +1,64 @@
-From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH] arm/dts: omap5: Add mmc controller nodes and board data
-Date: Fri, 24 Aug 2012 13:02:22 -0700
-Message-ID: <20120824200221.GW11011@atomide.com>
-References: <1344323901-20342-1-git-send-email-balajitk@ti.com>
- <201208070830.01776.arnd@arndb.de>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 1/1] mmc: host: enable OMAP DMA engine support for omap
+ hosts by default
+Date: Sat, 25 Aug 2012 08:57:42 +0100
+Message-ID: <20120825075742.GC25765@n2100.arm.linux.org.uk>
+References: <CAMQu2gy-U1WmgGOGZ+VyXjZmLem9TEWbq5kR8jzC0qXvqF-=BA@mail.gmail.com>
+ <CAAwP0s2Efuuc7vsX3bZuwz175zUjnmsOV87OcZ06p_eoe4T3Ug@mail.gmail.com>
+ <alpine.DEB.2.01.1208232246530.15831@pmeerw.net>
+ <CAMQu2gyEGPbNEE0ur0wh9RoJKuBe4B5NkQMUafQNWGVLX8t9vg@mail.gmail.com>
+ <alpine.DEB.2.01.1208240942100.21552@pmeerw.net>
+ <20120824094231.GA25765@n2100.arm.linux.org.uk>
+ <CAMQu2gxs0bzNMtxb0LFyFKM9s4M4yXxFpopaBO+Hah3RjhCpLA@mail.gmail.com>
+ <20120824103913.GB25765@n2100.arm.linux.org.uk>
+ <CAMQu2gw-vEguFU9naxsHtDVOfJkZVsFNMWJbvbc=ZuULy7TZNA@mail.gmail.com>
+ <alpine.DEB.2.01.1208241404440.21552@pmeerw.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <201208070830.01776.arnd-r2nGTMty4D4@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, balbi-l0cyMroinI0@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+In-Reply-To: <alpine.DEB.2.01.1208241404440.21552@pmeerw.net>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Peter Meerwald <pmeerw@pmeerw.net>
+Cc: Kevin Hilman <khilman@ti.com>, Javier Martinez Canillas <martinez.javier@gmail.com>, linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>, linux-mmc@vger.kernel.org, "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, Chris Ball <cjb@laptop.org>, Javier Martinez Canillas <javier@dowhile0.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-* Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> [120807 02:21]:
-> On Tuesday 07 August 2012, Balaji T K wrote:
-> > 
-> > Add OMAP MMC related device tree data for OMAP5.
-> > 
-> > Signed-off-by: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
-> > ---
+On Fri, Aug 24, 2012 at 02:10:38PM +0200, Peter Meerwald wrote:
+> with Linux 3.6-rc3:
 > 
-> Acked-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+> CONFIG_DMA_OMAP=m
+> CONFIG_DMA_ENGINE=y
+> CONFIG_DMA_VIRTUAL_CHANNELS=m
+> CONFIG_MMC_OMAP_HS=y
+> CONFIG_SPI_OMAP24XX=y
+> CONFIG_MTD_NAND_OMAP2=y
+> 
+>   LD      init/built-in.o
+> drivers/built-in.o: In function `omap2_mcspi_setup':
+> /home/pmeerw/linux-pmeerw/drivers/spi/spi-omap2-mcspi.c:859: undefined reference to `omap_dma_filter_fn'
+> drivers/built-in.o: In function `omap_nand_probe':
+> /home/pmeerw/linux-pmeerw/drivers/mtd/nand/omap2.c:1371: undefined reference to `omap_dma_filter_fn'
+> drivers/built-in.o: In function `omap_hsmmc_probe':
+> /home/pmeerw/linux-pmeerw/drivers/mmc/host/omap_hsmmc.c:2039: undefined reference to `omap_dma_filter_fn'
+> make: *** [vmlinux] Error 1
+> 
+> in addition to SPI and MMC, there seems to be also a NAND dependency
 
-Applying this into omap devel-dt branch. 
+Yes.  Unlike the PL08x driver, OMAP has no way to pass the filter function
+into its drivers, and I didn't want the pain of fiddling around with DT
+crap to try and work out how to do this.  So what you have here is
+something that I got as far as I could, and TI then wanted it pushed into
+mainline.
 
-Tony
+I have no solution for the above at present - the long term solution is
+to sort out how to deal with DMA engine with DT etc.  At the moment,
+there has been discussion about this but no solution.
