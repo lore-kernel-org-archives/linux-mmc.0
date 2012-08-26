@@ -1,87 +1,123 @@
 From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: [PATCH v4 2/9] mmc: dw_mmc: Use devm_* functions in dw_mmc platform
- driver
-Date: Sun, 26 Aug 2012 17:22:00 +0530
-Message-ID: <1345981927-26359-3-git-send-email-thomas.abraham@linaro.org>
+Subject: [PATCH v4 4/9] mmc: dw_mmc: lookup for optional biu and ciu clocks
+Date: Sun, 26 Aug 2012 17:22:02 +0530
+Message-ID: <1345981927-26359-5-git-send-email-thomas.abraham@linaro.org>
 References: <1345981927-26359-1-git-send-email-thomas.abraham@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:22665 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752156Ab2HZLeR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Aug 2012 07:34:17 -0400
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 In-reply-to: <1345981927-26359-1-git-send-email-thomas.abraham@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
 Cc: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, patches@linaro.org
+List-Id: linux-mmc@vger.kernel.org
 
-Use devm_* managed functions for simpler error handling.
+Some platforms allow for clock gating and control of bus interface unit clock
+and card interface unit clock. Add support for clock lookup of optional biu
+and ciu clocks for clock gating and clock speed determination.
 
+Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
 Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
 ---
- drivers/mmc/host/dw_mmc-pltfm.c |   29 ++++++++---------------------
- 1 files changed, 8 insertions(+), 21 deletions(-)
+ drivers/mmc/host/dw_mmc.c  |   42 +++++++++++++++++++++++++++++++++++++++---
+ include/linux/mmc/dw_mmc.h |    4 ++++
+ 2 files changed, 43 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-index 9a63299..1488b17 100644
---- a/drivers/mmc/host/dw_mmc-pltfm.c
-+++ b/drivers/mmc/host/dw_mmc-pltfm.c
-@@ -27,38 +27,27 @@ static int dw_mci_pltfm_probe(struct platform_device *pdev)
- 	struct resource	*regs;
- 	int ret;
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index cd58063..679473c 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1953,18 +1953,38 @@ int dw_mci_probe(struct dw_mci *host)
+ 		return -ENODEV;
+ 	}
  
--	host = kzalloc(sizeof(struct dw_mci), GFP_KERNEL);
-+	host = devm_kzalloc(&pdev->dev, sizeof(struct dw_mci), GFP_KERNEL);
- 	if (!host)
- 		return -ENOMEM;
- 
- 	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	if (!regs) {
--		ret = -ENXIO;
--		goto err_free;
--	}
-+	if (!regs)
-+		return -ENXIO;
- 
- 	host->irq = platform_get_irq(pdev, 0);
--	if (host->irq < 0) {
--		ret = host->irq;
--		goto err_free;
--	}
-+	if (host->irq < 0)
-+		return host->irq;
- 
- 	host->dev = &pdev->dev;
- 	host->irq_flags = 0;
- 	host->pdata = pdev->dev.platform_data;
--	ret = -ENOMEM;
--	host->regs = ioremap(regs->start, resource_size(regs));
-+	host->regs = devm_request_and_ioremap(&pdev->dev, regs);
- 	if (!host->regs)
--		goto err_free;
-+		return -ENOMEM;
+-	if (!host->pdata->bus_hz) {
++	host->biu_clk = clk_get(host->dev, "biu");
++	if (IS_ERR(host->biu_clk))
++		dev_dbg(host->dev, "biu clock not available\n");
++	else
++		clk_prepare_enable(host->biu_clk);
 +
- 	platform_set_drvdata(pdev, host);
- 	ret = dw_mci_probe(host);
--	if (ret)
--		goto err_out;
--	return ret;
--err_out:
--	iounmap(host->regs);
--err_free:
--	kfree(host);
++	host->ciu_clk = clk_get(host->dev, "ciu");
++	if (IS_ERR(host->ciu_clk))
++		dev_dbg(host->dev, "ciu clock not available\n");
++	else
++		clk_prepare_enable(host->ciu_clk);
++
++	if (IS_ERR(host->ciu_clk))
++		host->bus_hz = host->pdata->bus_hz;
++	else
++		host->bus_hz = clk_get_rate(host->ciu_clk);
++
++	if (!host->bus_hz) {
+ 		dev_err(host->dev,
+ 			"Platform data must supply bus speed\n");
+-		return -ENODEV;
++		ret = -ENODEV;
++		goto err_clk;
+ 	}
+ 
+-	host->bus_hz = host->pdata->bus_hz;
+ 	host->quirks = host->pdata->quirks;
+ 
+ 	spin_lock_init(&host->lock);
+ 	INIT_LIST_HEAD(&host->queue);
+ 
++	host->dma_ops = host->pdata->dma_ops;
++	dw_mci_init_dma(host);
++
+ 	/*
+ 	 * Get the host data width - this assumes that HCON has been set with
+ 	 * the correct values.
+@@ -2109,6 +2129,16 @@ err_dmaunmap:
+ 		regulator_disable(host->vmmc);
+ 		regulator_put(host->vmmc);
+ 	}
++
++err_clk:
++	if (!IS_ERR(host->ciu_clk)) {
++		clk_disable_unprepare(host->ciu_clk);
++		clk_put(host->ciu_clk);
++	}
++	if (!IS_ERR(host->biu_clk)) {
++		clk_disable_unprepare(host->biu_clk);
++		clk_put(host->biu_clk);
++	}
  	return ret;
  }
+ EXPORT_SYMBOL(dw_mci_probe);
+@@ -2142,6 +2172,12 @@ void dw_mci_remove(struct dw_mci *host)
+ 		regulator_put(host->vmmc);
+ 	}
  
-@@ -68,8 +57,6 @@ static int __exit dw_mci_pltfm_remove(struct platform_device *pdev)
- 
- 	platform_set_drvdata(pdev, NULL);
- 	dw_mci_remove(host);
--	iounmap(host->regs);
--	kfree(host);
- 	return 0;
++	if (!IS_ERR(host->ciu_clk))
++		clk_disable_unprepare(host->ciu_clk);
++	if (!IS_ERR(host->biu_clk))
++		clk_disable_unprepare(host->biu_clk);
++	clk_put(host->ciu_clk);
++	clk_put(host->biu_clk);
  }
+ EXPORT_SYMBOL(dw_mci_remove);
  
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index a37a573..787ad56 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -78,6 +78,8 @@ struct mmc_data;
+  * @data_offset: Set the offset of DATA register according to VERID.
+  * @dev: Device associated with the MMC controller.
+  * @pdata: Platform data associated with the MMC controller.
++ * @biu_clk: Pointer to bus interface unit clock instance.
++ * @ciu_clk: Pointer to card interface unit clock instance.
+  * @slot: Slots sharing this MMC controller.
+  * @fifo_depth: depth of FIFO.
+  * @data_shift: log2 of FIFO item size.
+@@ -158,6 +160,8 @@ struct dw_mci {
+ 	u16			data_offset;
+ 	struct device		*dev;
+ 	struct dw_mci_board	*pdata;
++	struct clk		*biu_clk;
++	struct clk		*ciu_clk;
+ 	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
+ 
+ 	/* FIFO push and pull */
 -- 
 1.6.6.rc2
-
