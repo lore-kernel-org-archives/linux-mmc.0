@@ -1,64 +1,68 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 1/1] mmc: host: enable OMAP DMA engine support for omap
- hosts by default
-Date: Sat, 25 Aug 2012 08:57:42 +0100
-Message-ID: <20120825075742.GC25765@n2100.arm.linux.org.uk>
-References: <CAMQu2gy-U1WmgGOGZ+VyXjZmLem9TEWbq5kR8jzC0qXvqF-=BA@mail.gmail.com>
- <CAAwP0s2Efuuc7vsX3bZuwz175zUjnmsOV87OcZ06p_eoe4T3Ug@mail.gmail.com>
- <alpine.DEB.2.01.1208232246530.15831@pmeerw.net>
- <CAMQu2gyEGPbNEE0ur0wh9RoJKuBe4B5NkQMUafQNWGVLX8t9vg@mail.gmail.com>
- <alpine.DEB.2.01.1208240942100.21552@pmeerw.net>
- <20120824094231.GA25765@n2100.arm.linux.org.uk>
- <CAMQu2gxs0bzNMtxb0LFyFKM9s4M4yXxFpopaBO+Hah3RjhCpLA@mail.gmail.com>
- <20120824103913.GB25765@n2100.arm.linux.org.uk>
- <CAMQu2gw-vEguFU9naxsHtDVOfJkZVsFNMWJbvbc=ZuULy7TZNA@mail.gmail.com>
- <alpine.DEB.2.01.1208241404440.21552@pmeerw.net>
+From: "Arend van Spriel" <arend@broadcom.com>
+Subject: Re: v3.6-rc1: modprobe hangs with sdhci failure on dell e6410
+Date: Sun, 26 Aug 2012 10:03:55 +0200
+Message-ID: <5039D86B.5040208@broadcom.com>
+References: <5034E895.4050105@broadcom.com>
+ <CAOzJMDTTAzzV3VHgvY6B3ooe1ZyWkRGvfDgbFw4ZonQJFu3uAQ@mail.gmail.com>
+ <50373A31.7040803@broadcom.com> <5037DCE3.2010505@broadcom.com>
+ <35709C36-C251-4701-965A-D3B5DBD6B66A@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain;
+ charset=iso-8859-1;
+ format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.01.1208241404440.21552@pmeerw.net>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Peter Meerwald <pmeerw@pmeerw.net>
-Cc: Kevin Hilman <khilman@ti.com>, Javier Martinez Canillas <martinez.javier@gmail.com>, linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>, linux-mmc@vger.kernel.org, "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, Chris Ball <cjb@laptop.org>, Javier Martinez Canillas <javier@dowhile0.org>, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mms2.broadcom.com ([216.31.210.18]:2789 "EHLO mms2.broadcom.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750750Ab2HZIEJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 26 Aug 2012 04:04:09 -0400
+In-Reply-To: <35709C36-C251-4701-965A-D3B5DBD6B66A@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: linux-mmc@vger.kernel.org
 
-On Fri, Aug 24, 2012 at 02:10:38PM +0200, Peter Meerwald wrote:
-> with Linux 3.6-rc3:
-> 
-> CONFIG_DMA_OMAP=m
-> CONFIG_DMA_ENGINE=y
-> CONFIG_DMA_VIRTUAL_CHANNELS=m
-> CONFIG_MMC_OMAP_HS=y
-> CONFIG_SPI_OMAP24XX=y
-> CONFIG_MTD_NAND_OMAP2=y
-> 
->   LD      init/built-in.o
-> drivers/built-in.o: In function `omap2_mcspi_setup':
-> /home/pmeerw/linux-pmeerw/drivers/spi/spi-omap2-mcspi.c:859: undefined reference to `omap_dma_filter_fn'
-> drivers/built-in.o: In function `omap_nand_probe':
-> /home/pmeerw/linux-pmeerw/drivers/mtd/nand/omap2.c:1371: undefined reference to `omap_dma_filter_fn'
-> drivers/built-in.o: In function `omap_hsmmc_probe':
-> /home/pmeerw/linux-pmeerw/drivers/mmc/host/omap_hsmmc.c:2039: undefined reference to `omap_dma_filter_fn'
-> make: *** [vmlinux] Error 1
-> 
-> in addition to SPI and MMC, there seems to be also a NAND dependency
+On 08/24/2012 10:10 PM, Philip Rakity wrote:
+>
+> Arend,
+>
+> Are you saying issue has nothing to do with mmc ?
 
-Yes.  Unlike the PL08x driver, OMAP has no way to pass the filter function
-into its drivers, and I didn't want the pain of fiddling around with DT
-crap to try and work out how to do this.  So what you have here is
-something that I got as far as I could, and TI then wanted it pushed into
-mainline.
+Nope. What I meant to be saying is:
 
-I have no solution for the above at present - the long term solution is
-to sort out how to deal with DMA engine with DT etc.  At the moment,
-there has been discussion about this but no solution.
+1. the issue occurs regardless whether the slot is populated or not.
+2. it occurs on multiple machine so it seems not a hardware issue on a 
+single machine.
+3. the issue is not seen on same laptop model running 64-bit kernel.
+
+Gr. AvS
+
+> Philip
+> On Aug 24, 2012, at 12:58 PM, Arend van Spriel <arend@broadcom.com> wrote:
+>
+>> On 08/24/2012 10:24 AM, Arend van Spriel wrote:
+>>> On 08/23/2012 04:58 PM, Aaron Lu wrote:
+>>>> On Wed, Aug 22, 2012 at 10:11 PM, Arend van Spriel
+>>>> <arend@broadcom.com> wrote:
+>>>>> A quick search using google did not provide clues. Regardless if
+>>>>> there is
+>>>>> anything inserted the hang occurs.
+>>>>>
+>>>>> Gr. AvS
+>>>>
+>>>> Also, your .config might be helpful.
+>>>
+>>> True. Here it is.
+>>>
+>>> Gr. AvS
+>>
+>> Inspected the logs on another machine running the same kernel and it has
+>> the same issue. I was not using the mmc slot on that machine so I was
+>> not aware. On x86_64 I am not seeing the issue (so far).
+>>
+>> Gr. AvS
+>>
+>
+>
+
+
