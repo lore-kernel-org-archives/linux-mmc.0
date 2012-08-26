@@ -1,73 +1,87 @@
 From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: [PATCH v4 3/9] mmc: dw_mmc: allow probe to succeed even if one slot is
- initialized
-Date: Sun, 26 Aug 2012 17:22:01 +0530
-Message-ID: <1345981927-26359-4-git-send-email-thomas.abraham@linaro.org>
+Subject: [PATCH v4 2/9] mmc: dw_mmc: Use devm_* functions in dw_mmc platform
+ driver
+Date: Sun, 26 Aug 2012 17:22:00 +0530
+Message-ID: <1345981927-26359-3-git-send-email-thomas.abraham@linaro.org>
 References: <1345981927-26359-1-git-send-email-thomas.abraham@linaro.org>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:22665 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752156Ab2HZLeR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Aug 2012 07:34:17 -0400
 In-reply-to: <1345981927-26359-1-git-send-email-thomas.abraham@linaro.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
 Cc: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, patches@linaro.org
-List-Id: linux-mmc@vger.kernel.org
 
-Instead of aborting the probe in case a slot initialization fails, allow
-initialization of as many slots as possible. If there are atleast one
-instance of slot that is successfully initialized, allow the driver probe
-to succeed.
+Use devm_* managed functions for simpler error handling.
 
 Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
 ---
- drivers/mmc/host/dw_mmc.c |   23 +++++++++++++----------
- 1 files changed, 13 insertions(+), 10 deletions(-)
+ drivers/mmc/host/dw_mmc-pltfm.c |   29 ++++++++---------------------
+ 1 files changed, 8 insertions(+), 21 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 948a7ac..cd58063 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1939,6 +1939,7 @@ int dw_mci_probe(struct dw_mci *host)
- {
- 	int width, i, ret = 0;
- 	u32 fifo_size;
-+	int init_slots = 0;
+diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+index 9a63299..1488b17 100644
+--- a/drivers/mmc/host/dw_mmc-pltfm.c
++++ b/drivers/mmc/host/dw_mmc-pltfm.c
+@@ -27,38 +27,27 @@ static int dw_mci_pltfm_probe(struct platform_device *pdev)
+ 	struct resource	*regs;
+ 	int ret;
  
- 	if (!host->pdata || !host->pdata->init) {
- 		dev_err(host->dev,
-@@ -2047,10 +2048,18 @@ int dw_mci_probe(struct dw_mci *host)
- 	/* We need at least one slot to succeed */
- 	for (i = 0; i < host->num_slots; i++) {
- 		ret = dw_mci_init_slot(host, i);
--		if (ret) {
--			ret = -ENODEV;
--			goto err_init_slot;
--		}
-+		if (ret)
-+			dev_dbg(host->dev, "slot %d init failed\n", i);
-+		else
-+			init_slots++;
-+	}
-+
-+	if (init_slots) {
-+		dev_info(host->dev, "%d slots initialized\n", init_slots);
-+	} else {
-+		dev_dbg(host->dev, "attempted to initialize %d slots, "
-+					"but failed on all\n", host->num_slots);
-+		goto err_init_slot;
- 	}
+-	host = kzalloc(sizeof(struct dw_mci), GFP_KERNEL);
++	host = devm_kzalloc(&pdev->dev, sizeof(struct dw_mci), GFP_KERNEL);
+ 	if (!host)
+ 		return -ENOMEM;
  
- 	/*
-@@ -2085,12 +2094,6 @@ int dw_mci_probe(struct dw_mci *host)
- 	return 0;
- 
- err_init_slot:
--	/* De-init any initialized slots */
--	while (i > 0) {
--		if (host->slot[i])
--			dw_mci_cleanup_slot(host->slot[i], i);
--		i--;
+ 	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	if (!regs) {
+-		ret = -ENXIO;
+-		goto err_free;
 -	}
- 	free_irq(host->irq, host);
++	if (!regs)
++		return -ENXIO;
  
- err_workqueue:
+ 	host->irq = platform_get_irq(pdev, 0);
+-	if (host->irq < 0) {
+-		ret = host->irq;
+-		goto err_free;
+-	}
++	if (host->irq < 0)
++		return host->irq;
+ 
+ 	host->dev = &pdev->dev;
+ 	host->irq_flags = 0;
+ 	host->pdata = pdev->dev.platform_data;
+-	ret = -ENOMEM;
+-	host->regs = ioremap(regs->start, resource_size(regs));
++	host->regs = devm_request_and_ioremap(&pdev->dev, regs);
+ 	if (!host->regs)
+-		goto err_free;
++		return -ENOMEM;
++
+ 	platform_set_drvdata(pdev, host);
+ 	ret = dw_mci_probe(host);
+-	if (ret)
+-		goto err_out;
+-	return ret;
+-err_out:
+-	iounmap(host->regs);
+-err_free:
+-	kfree(host);
+ 	return ret;
+ }
+ 
+@@ -68,8 +57,6 @@ static int __exit dw_mci_pltfm_remove(struct platform_device *pdev)
+ 
+ 	platform_set_drvdata(pdev, NULL);
+ 	dw_mci_remove(host);
+-	iounmap(host->regs);
+-	kfree(host);
+ 	return 0;
+ }
+ 
 -- 
 1.6.6.rc2
+
