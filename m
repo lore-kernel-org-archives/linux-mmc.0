@@ -1,68 +1,51 @@
-From: "Arend van Spriel" <arend@broadcom.com>
-Subject: Re: v3.6-rc1: modprobe hangs with sdhci failure on dell e6410
-Date: Sun, 26 Aug 2012 10:03:55 +0200
-Message-ID: <5039D86B.5040208@broadcom.com>
-References: <5034E895.4050105@broadcom.com>
- <CAOzJMDTTAzzV3VHgvY6B3ooe1ZyWkRGvfDgbFw4ZonQJFu3uAQ@mail.gmail.com>
- <50373A31.7040803@broadcom.com> <5037DCE3.2010505@broadcom.com>
- <35709C36-C251-4701-965A-D3B5DBD6B66A@marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain;
- charset=iso-8859-1;
- format=flowed
-Content-Transfer-Encoding: 7bit
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: [PATCH v4 0/9] mmc: dw_mmc: add support for device tree based
+ instantiation
+Date: Sun, 26 Aug 2012 17:21:58 +0530
+Message-ID: <1345981927-26359-1-git-send-email-thomas.abraham@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mms2.broadcom.com ([216.31.210.18]:2789 "EHLO mms2.broadcom.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750750Ab2HZIEJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 26 Aug 2012 04:04:09 -0400
-In-Reply-To: <35709C36-C251-4701-965A-D3B5DBD6B66A@marvell.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:20616 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751471Ab2HZLeN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Aug 2012 07:34:13 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
+Cc: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, patches@linaro.org
 
-On 08/24/2012 10:10 PM, Philip Rakity wrote:
->
-> Arend,
->
-> Are you saying issue has nothing to do with mmc ?
+This is the fourth version of the patch series that adds device tree support
+for Synopsis Designware Mobile Storage Host Controller. In this version, the
+significant change is the spliting of Exynos specific code into a seperate
+file, as suggested by Seungwon Jeon <tgih.jun@samsung.com>. Spliting the
+Exynos specific code into a seperate file did infact keeps the core driver
+code clean, which otherwise was littered with Exynos specific code. I hope
+the changes look sane, though. This has been tested only on smdk5250 board.
 
-Nope. What I meant to be saying is:
+Thomas Abraham (9):
+  mmc: dw_mmc: convert copy of struct device in struct dw_mci to a reference
+  mmc: dw_mmc: Use devm_* functions in dw_mmc platform driver
+  mmc: dw_mmc: allow probe to succeed even if one slot is initialized
+  mmc: dw_mmc: lookup for optional biu and ciu clocks
+  mmc: dw_mmc: add quirk to indicate missing write protect line
+  mmc: dw_mmc: add device tree support
+  mmc: dw_mmc: prepare functions in dw_mmc-pltfm for reuse
+  mmc: dw_mmc: add support for implementation specific callbacks
+  mmc: dw_mmc: add support for exynos specific implementation of dw-mshc
 
-1. the issue occurs regardless whether the slot is populated or not.
-2. it occurs on multiple machine so it seems not a hardware issue on a 
-single machine.
-3. the issue is not seen on same laptop model running 64-bit kernel.
-
-Gr. AvS
-
-> Philip
-> On Aug 24, 2012, at 12:58 PM, Arend van Spriel <arend@broadcom.com> wrote:
->
->> On 08/24/2012 10:24 AM, Arend van Spriel wrote:
->>> On 08/23/2012 04:58 PM, Aaron Lu wrote:
->>>> On Wed, Aug 22, 2012 at 10:11 PM, Arend van Spriel
->>>> <arend@broadcom.com> wrote:
->>>>> A quick search using google did not provide clues. Regardless if
->>>>> there is
->>>>> anything inserted the hang occurs.
->>>>>
->>>>> Gr. AvS
->>>>
->>>> Also, your .config might be helpful.
->>>
->>> True. Here it is.
->>>
->>> Gr. AvS
->>
->> Inspected the logs on another machine running the same kernel and it has
->> the same issue. I was not using the mmc slot on that machine so I was
->> not aware. On x86_64 I am not seeing the issue (so far).
->>
->> Gr. AvS
->>
->
->
-
+ .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   79 ++++++
+ .../devicetree/bindings/mmc/synposis-dw-mshc.txt   |   90 ++++++
+ drivers/mmc/host/Kconfig                           |    9 +
+ drivers/mmc/host/Makefile                          |    3 +-
+ drivers/mmc/host/dw_mmc-exynos.c                   |  247 +++++++++++++++++
+ drivers/mmc/host/dw_mmc-pci.c                      |    2 +-
+ drivers/mmc/host/dw_mmc-pltfm.c                    |   62 +++--
+ drivers/mmc/host/dw_mmc-pltfm.h                    |   20 ++
+ drivers/mmc/host/dw_mmc.c                          |  287 ++++++++++++++++----
+ drivers/mmc/host/dw_mmc.h                          |   22 ++
+ include/linux/mmc/dw_mmc.h                         |   13 +-
+ 11 files changed, 757 insertions(+), 77 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
+ create mode 100644 drivers/mmc/host/dw_mmc-exynos.c
+ create mode 100644 drivers/mmc/host/dw_mmc-pltfm.h
 
