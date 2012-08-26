@@ -1,7 +1,7 @@
 From: Hein Tibosch <hein_tibosch@yahoo.es>
-Subject: [PATCH 2/2] mmc: atmel-mci: AP700x PDC is not connected to MCI
-Date: Mon, 27 Aug 2012 04:22:02 +0800
-Message-ID: <503A856A.9020303@yahoo.es>
+Subject: [PATCH 0/2] mmc: atmel-mci: repair driver for use with AVR32 (AP7000)
+Date: Mon, 27 Aug 2012 04:36:00 +0800
+Message-ID: <503A88B0.30103@yahoo.es>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -19,50 +19,20 @@ To: Nicolas Ferre <nicolas.ferre@atmel.com>, "ludovic.desroches" <ludovic.desroc
 Cc: Havard Skinnemoen <havard@skinnemoen.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, egtvedt@samfundet.no
 List-Id: linux-mmc@vger.kernel.org
 
-Earlier, atmel-mci was adapter to make use of the peripheral DMA
-controller (PDC), in case normal DMA wouldn't work.
-( http://comments.gmane.org/gmane.linux.kernel.mmc/9403 )
-This works OK on ARM platforms (AT91), but it broke the driver
-for AVR32, the AP700x.
-This patch makes the use of PDC depend on CONFIG_AVR32
+Due to changes after 2.6.38, the drivers atmel-mci and dw_dmac got broken
+for the AVR32 platform: the AP7000.
 
-Signed-off-by: Hein Tibosch <hein_tibosch@yahoo.es>
+These two patches repair the atmel-mci driver
 
----
+Thanks to Ludovic for reviewing/styling!
+
+Hein Tibosch (2):
+
+  mmc: atmel-mci: DMA can be used with other controller
+  mmc: atmel-mci: AP700x PDC is not connected to MCI
+
  drivers/mmc/host/atmel-mci-regs.h |    7 +++++++
- drivers/mmc/host/atmel-mci.c      |    2 +-
- 2 files changed, 8 insertions(+), 1 deletions(-)
- 
-diff --git a/drivers/mmc/host/atmel-mci-regs.h b/drivers/mmc/host/atmel-mci-regs.h
-index ab56f7d..c97001e 100644
---- a/drivers/mmc/host/atmel-mci-regs.h
-+++ b/drivers/mmc/host/atmel-mci-regs.h
-@@ -140,6 +140,13 @@
- #define atmci_writel(port,reg,value)			\
- 	__raw_writel((value), (port)->regs + reg)
- 
-+/* On AVR chips the Peripheral DMA Controller is not connected to MCI. */
-+#ifdef CONFIG_AVR32
-+#	define ATMCI_PDC_CONNECTED	0
-+#else
-+#	define ATMCI_PDC_CONNECTED	1
-+#endif
-+
- /*
-  * Fix sconfig's burst size according to atmel MCI. We need to convert them as:
-  * 1 -> 0, 4 -> 1, 8 -> 2, 16 -> 3.
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 66e9fdc..702ab5c 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -2205,7 +2205,7 @@ static void __init atmci_get_cap(struct atmel_mci *host)
- 			"version: 0x%x\n", version);
- 
- 	host->caps.has_dma_conf_reg = 0;
--	host->caps.has_pdc = 1;
-+	host->caps.has_pdc = ATMCI_PDC_CONNECTED;
- 	host->caps.has_cfg_reg = 0;
- 	host->caps.has_cstor_reg = 0;
- 	host->caps.has_highspeed = 0;
+ drivers/mmc/host/atmel-mci.c      |   23 ++++++++++-------------
+ 2 files changed, 17 insertions(+), 13 deletions(-)
+
 -- 
-1.7.8.0
