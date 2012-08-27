@@ -1,78 +1,34 @@
-From: Hans-Christian Egtvedt <egtvedt@samfundet.no>
-Subject: Re: [PATCH] avr32-linux: at32ap700x: set DMA slave properties for
- MCI dw_dmac
-Date: Mon, 27 Aug 2012 09:08:18 +0200
-Message-ID: <20120827070818.GD28721@samfundet.no>
-References: <503A8D97.4070403@yahoo.es>
+From: Harald Welte <laforge@gnumonks.org>
+Subject: Re: [PATCH] mmc: via-sdmmc: Use module_pci_driver
+Date: Mon, 27 Aug 2012 09:50:52 +0200
+Message-ID: <20120827075052.GJ31372@prithivi.gnumonks.org>
+References: <1346049731-21085-1-git-send-email-sachin.kamat@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ganesha.gnumonks.org ([213.95.27.120]:40531 "EHLO
+	ganesha.gnumonks.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752921Ab2H0IJe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Aug 2012 04:09:34 -0400
 Content-Disposition: inline
-In-Reply-To: <503A8D97.4070403@yahoo.es>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Hein Tibosch <hein_tibosch@yahoo.es>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, "ludovic.desroches" <ludovic.desroches@atmel.com>, Havard Skinnemoen <havard@skinnemoen.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+In-Reply-To: <1346049731-21085-1-git-send-email-sachin.kamat@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sachin Kamat <sachin.kamat@linaro.org>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, brucechang@via.com.tw, patches@linaro.org
 
-Around Mon 27 Aug 2012 04:56:55 +0800 or thereabout, Hein Tibosch wrote:
+Hi Sachin,
 
-PS: I prefer avr32: prefix in the Subject for AVR32 kernel stuff, we already
-know this is for the Linux kernel ;)
-
-> @Andrew: could you please push the patch below? Hans-Christian
-> doesn't have a GIT tree on kernel.org
+On Mon, Aug 27, 2012 at 12:12:11PM +0530, Sachin Kamat wrote:
+> module_pci_driver makes the code simpler by eliminating
+> module_init and module_exit calls.
 > 
-> Thanks, Hein
-> 
-> The MCI makes use of the dw_dmac driver when DMA is being used.
-> Due to recent changes the driver was broken because:
-> - the SMS field in the CTLL register received the wrong value 0
-> - a patch in dw_dmac allowed for 64-bit transfers on the
-> memory side, giving an illegal value of 3 in the SRC/DST_TR_WIDTH
-> register.
-> This patch sets the SMS to 1 and limits the maximum transfer
-> width to 2 (32 bits)
-> 
-> Note: this can only be applied after my patch:
-> [PATCH 2/2] dw_dmac: max_mem_width limits value for
-> SRC/DST_TR_WID register
+> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
 
-Thanks for going through this and fixing the MCI/DMA-combo on AVR32.
+Acked-by: Harald Welte <laforge@gnumonks.org>
 
-> Signed-off-by: Hein Tibosch <hein_tibosch@yahoo.es>
-> ---
->  arch/avr32/mach-at32ap/at32ap700x.c |    4 ++++
->  1 files changed, 4 insertions(+), 0 deletions(-)
->  diff --git a/arch/avr32/mach-at32ap/at32ap700x.c b/arch/avr32/mach-at32ap/at32ap700x.c
-> index 0445c4f..e7202af 100644
-> --- a/arch/avr32/mach-at32ap/at32ap700x.c
-> +++ b/arch/avr32/mach-at32ap/at32ap700x.c
-> @@ -1355,6 +1355,10 @@ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
->  				| DWC_CFGH_DST_PER(1));
->  	slave->sdata.cfg_lo &= ~(DWC_CFGL_HS_DST_POL
->  				| DWC_CFGL_HS_SRC_POL);
-> +	/* Give CTLL SMS value 1 */
-
-This comment gives me no information, I don't know what CTLL and SMS are, and
-what does the magic value 1 do? Either skip the comment, or give a short
-block here describing why src_master must be one, and max_mem_width must be 2.
-
-> +	slave->sdata.src_master = 1;
-> +	/* SRC/DST_TR_WIDTH register only accepts 0,1,2 */
-> +	slave->sdata.max_mem_width = 2;
-
-Something like:
-
-/*
- * Setup DMA controller to let source be master, and transfer width to
- * 32-bit.
- */
-slave->sdata.src_master = 1;
-slave->sdata.max_mem_width = 2;
-
->  
->  	data->dma_slave = slave;
->  
 -- 
-mvh
-Hans-Christian Egtvedt
+- Harald Welte <laforge@gnumonks.org>           http://laforge.gnumonks.org/
+============================================================================
+"Privacy in residential applications is a desirable marketing option."
+                                                  (ETSI EN 300 175-7 Ch. A6)
