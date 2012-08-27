@@ -1,61 +1,112 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH v4 0/9] mmc: dw_mmc: add support for device tree based instantiation
-Date: Mon, 27 Aug 2012 10:31:45 +0100
-Message-ID: <CAFbHwiQgs4fwGWMRNWct0xo1JrGwzr2SYRkDyGA5iXpCp+9UJg@mail.gmail.com>
-References: <1345981927-26359-1-git-send-email-thomas.abraham@linaro.org>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH 07/10] mmc: omap_hsmmc: consolidate flush posted writes
+ for HSMMC IRQs
+Date: Mon, 27 Aug 2012 16:32:00 +0530
+Message-ID: <CANfBPZ-V9a1pjb-bZSvED8qsx8D7vPwiwY+wL9zfA-iHaWk2kQ@mail.gmail.com>
+References: <1345229550-8672-1-git-send-email-svenkatr@ti.com>
+ <1345229550-8672-8-git-send-email-svenkatr@ti.com> <CANrkHUZLHO4nPvd37AaO43F37uCKB1LnsRxBOia5R3osF1ONvw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1345981927-26359-1-git-send-email-thomas.abraham@linaro.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Thomas Abraham <thomas.abraham@linaro.org>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, patches@linaro.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aob106.obsmtp.com ([74.125.149.76]:46826 "EHLO
+	na3sys009aog106.obsmtp.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752028Ab2H0LCW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Aug 2012 07:02:22 -0400
+Received: by pbbro12 with SMTP id ro12so7989155pbb.14
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Aug 2012 04:02:20 -0700 (PDT)
+In-Reply-To: <CANrkHUZLHO4nPvd37AaO43F37uCKB1LnsRxBOia5R3osF1ONvw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, vishp@ti.com
 
-On Sun, Aug 26, 2012 at 12:51 PM, Thomas Abraham
-<thomas.abraham@linaro.org> wrote:
-> This is the fourth version of the patch series that adds device tree support
-> for Synopsis Designware Mobile Storage Host Controller. In this version, the
-> significant change is the spliting of Exynos specific code into a seperate
-> file, as suggested by Seungwon Jeon <tgih.jun@samsung.com>. Spliting the
-> Exynos specific code into a seperate file did infact keeps the core driver
-> code clean, which otherwise was littered with Exynos specific code. I hope
-> the changes look sane, though. This has been tested only on smdk5250 board.
+On Tue, Aug 21, 2012 at 8:51 PM, T Krishnamoorthy, Balaji
+<balajitk@ti.com> wrote:
+> On Sat, Aug 18, 2012 at 12:22 AM, Venkatraman S <svenkatr@ti.com> wrote:
+>> Flushing spurious IRQs from HSMMC IP is done twice in
+>> omap_hsmmc_irq and omap_hsmmc_do_irq.
 >
-> Thomas Abraham (9):
->   mmc: dw_mmc: convert copy of struct device in struct dw_mci to a reference
->   mmc: dw_mmc: Use devm_* functions in dw_mmc platform driver
->   mmc: dw_mmc: allow probe to succeed even if one slot is initialized
->   mmc: dw_mmc: lookup for optional biu and ciu clocks
->   mmc: dw_mmc: add quirk to indicate missing write protect line
->   mmc: dw_mmc: add device tree support
->   mmc: dw_mmc: prepare functions in dw_mmc-pltfm for reuse
->   mmc: dw_mmc: add support for implementation specific callbacks
->   mmc: dw_mmc: add support for exynos specific implementation of dw-mshc
+> spurious IRQ is flushed in start of omap_hsmmc_do_irq
+> and irq acked at the end of omap_hsmmc_do_irq
 >
->  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   79 ++++++
->  .../devicetree/bindings/mmc/synposis-dw-mshc.txt   |   90 ++++++
->  drivers/mmc/host/Kconfig                           |    9 +
->  drivers/mmc/host/Makefile                          |    3 +-
->  drivers/mmc/host/dw_mmc-exynos.c                   |  247 +++++++++++++++++
->  drivers/mmc/host/dw_mmc-pci.c                      |    2 +-
->  drivers/mmc/host/dw_mmc-pltfm.c                    |   62 +++--
->  drivers/mmc/host/dw_mmc-pltfm.h                    |   20 ++
->  drivers/mmc/host/dw_mmc.c                          |  287 ++++++++++++++++----
->  drivers/mmc/host/dw_mmc.h                          |   22 ++
->  include/linux/mmc/dw_mmc.h                         |   13 +-
->  11 files changed, 757 insertions(+), 77 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
->  create mode 100644 Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
->  create mode 100644 drivers/mmc/host/dw_mmc-exynos.c
->  create mode 100644 drivers/mmc/host/dw_mmc-pltfm.h
+>> Consolidate them to one location.
+>
+> if you wanted to consolidated ...
+>
+>>
+>> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+>> ---
+>>  drivers/mmc/host/omap_hsmmc.c | 17 ++++-------------
+>>  1 file changed, 4 insertions(+), 13 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+>> index 4bc55ac..20453c8 100644
+>> --- a/drivers/mmc/host/omap_hsmmc.c
+>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>> @@ -969,15 +969,6 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
+>>         struct mmc_data *data;
+>>         int end_cmd = 0, end_trans = 0;
+>>
+>> -       if (!host->req_in_progress) {
+>
+> just do a return from here
 
-This series looks good to me, although I am not familiar enough with
-the device tree stuff to review it in a meaningful way.
+I think it's still better to filter out the validation to the outer
+function and let do_irq to just 'do' it.
 
-Acked-by: Will Newton <will.newton@imgtec.com>
+>
+>> -               do {
+>> -                       OMAP_HSMMC_WRITE(host->base, STAT, status);
+>> -                       /* Flush posted write */
+>> -                       status = OMAP_HSMMC_READ(host->base, STAT);
+>> -               } while (status & INT_EN_MASK);
+>> -               return;
+>> -       }
+>> -
+>>         data = host->data;
+>>         dev_vdbg(mmc_dev(host->mmc), "IRQ Status is %x\n", status);
+>>
+>> @@ -1028,8 +1019,6 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
+>>                 }
+>>         }
+>>
+>> -       OMAP_HSMMC_WRITE(host->base, STAT, status);
+>> -
+>>         if (end_cmd || ((status & CC) && host->cmd))
+>>                 omap_hsmmc_cmd_done(host, host->cmd);
+>>         if ((end_trans || (status & TC)) && host->mrq)
+>> @@ -1045,11 +1034,13 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
+>>         int status;
+>>
+>>         status = OMAP_HSMMC_READ(host->base, STAT);
+>> -       do {
+>> +       while (status & INT_EN_MASK && host->req_in_progress) {
+>
+> and remove the check for host->req_in_progress
+> I think do while loop can be retained as it will get executed once anyway.
 
-Note that the platform driver changes will conflict with Jaehoon
-Chung's patch to fix a section mismatch in that file. Have you tried
-building this as a module and with section mismatch debugging to make
-sure the new code does not add any mismatches?
+It's a minor issue, and the consolidation of the check for
+req_in_progress makes sure that it might
+sometimes be not executed at all..
+
+
+>
+>>                 omap_hsmmc_do_irq(host, status);
+>> +
+>
+>>                 /* Flush posted write */
+>
+> comment is misplaced
+>
+Ok. I'll remove.
+
+>> +               OMAP_HSMMC_WRITE(host->base, STAT, status);
+>>                 status = OMAP_HSMMC_READ(host->base, STAT);
+>> -       } while (status & INT_EN_MASK);
+>> +       }
+>>
+>>         return IRQ_HANDLED;
+>>  }
+>> --
+>> 1.7.11.1.25.g0e18bef
+>>
