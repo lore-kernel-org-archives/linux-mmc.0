@@ -1,30 +1,30 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 4/5] mmc: dw-mmc: add the header file for exynos specific
- code.
-Date: Mon, 27 Aug 2012 10:28:01 +0900
-Message-ID: <000901cd83f3$333d2830$99b77890$%jun@samsung.com>
-References: <503614A7.3050004@samsung.com>
- <00ad01cd81ac$87e285e0$97a791a0$%jun@samsung.com>
- <503709FA.4090302@samsung.com>
+Subject: RE: [PATCH 2/5] mmc: dw-mmc: ensure that the card is not busy when
+ changing clock.
+Date: Mon, 27 Aug 2012 10:38:35 +0900
+Message-ID: <000b01cd83f4$acda02c0$068e0840$%jun@samsung.com>
+References: <503614A5.5090906@samsung.com>
+ <00ac01cd81ac$3eef2370$bccd6a50$%jun@samsung.com>
+ <503708A2.9030500@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:13113 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750783Ab2H0B2F (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Aug 2012 21:28:05 -0400
+Received: from mailout3.samsung.com ([203.254.224.33]:44542 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750831Ab2H0Bii (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Aug 2012 21:38:38 -0400
 Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout4.samsung.com
+ by mailout3.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M9E008F042QXIG0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 27 Aug 2012 10:28:02 +0900 (KST)
+ 17 2011)) with ESMTP id <0M9E004UW4K6QIG0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 27 Aug 2012 10:38:36 +0900 (KST)
 Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0M9E0015542QUCB0@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 27 Aug 2012 10:28:02 +0900 (KST)
-In-reply-to: <503709FA.4090302@samsung.com>
+ with ESMTPA id <0M9E00BFE4KBXS30@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 27 Aug 2012 10:38:36 +0900 (KST)
+In-reply-to: <503708A2.9030500@samsung.com>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -32,92 +32,117 @@ To: 'Jaehoon Chung' <jh80.chung@samsung.com>
 Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, 'Kyungmin Park' <kyungmin.park@samsung.com>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>
 
 On Friday, August 24, 2012, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> On 08/24/2012 12:57 PM, Seungwon Jeon wrote:
+> Hi Seungwon,
+> 
+> On 08/24/2012 12:55 PM, Seungwon Jeon wrote:
+> > Hi Jaehoon,
+> >
 > > On Thursday, August 23, 2012, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> >> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> >> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> >> ---
-> >>  include/linux/mmc/exynos-dw_mmc.h |   55 +++++++++++++++++++++++++++++++++++++
-> >>  1 files changed, 55 insertions(+), 0 deletions(-)
-> >>  create mode 100644 include/linux/mmc/exynos-dw_mmc.h
-> >>
-> >> diff --git a/include/linux/mmc/exynos-dw_mmc.h b/include/linux/mmc/exynos-dw_mmc.h
-> >> new file mode 100644
-> >> index 0000000..03444c2
-> >> --- /dev/null
-> >> +++ b/include/linux/mmc/exynos-dw_mmc.h
-> >> @@ -0,0 +1,55 @@
-> >> +/*
-> >> + * Synopsys DesignWare Multimedia Card Interface driver
-> >> + *
-> >> + * Copyright (c) 2012 Samsung Electronics Co., Ltd.
-> >> + *		http://www.samsung.com
-> >> + *
-> >> + * Header file for Exynos specific register
-> >> + *
-> >> + * This program is free software; you can redistribute it and/or modify
-> >> + * it under the terms of the GNU General Public License version 2 as
-> >> + * published by the Free Software Foundation.
-> >> + */
-> >> +
-> >> +#ifndef _EXYNOS_DW_MMC_H
-> >> +#define _EXYNOS_DW_MMC_H
-> >> +#include <linux/mmc/dw_mmc.h>
-> >> +#include <linux/mmc/host.h>
-> >> +
-> >> +#define SDMMC_EXYNOS_CLKSEL	0x09C
-> >> +
-> >> +#define SDMMC_GET_CLK_DRV(x)		((x) >> 16 & 0x7)
-> >> +#define SDMMC_GET_CLK_SAMPLE(x)		((x) & 0x7)
-> >> +#define SDMMC_CLK_RESET_DRV_SAMPLE	(0x00070007);
-> > Could you check the width of register field?
-> > There is some difference between ExynosX.
-> > It should cover all.
-> I checked the Exynos4 and Exynos5.
-> So i used the 0x7.
-> If i miss something, let me know.
-In case of Eyxnos4210, only 2 bits are used.
-And new field(DIVRATIO) is added in Exynos5.
-It needs to check DIVRATIO for SDMMC_CLK_RESET_DRV_SAMPLE.
+> >> To avoid glitches in the card clock output,
+> >> need to check whether card is busy or not.
+> > Could you describe the problem more?
+> synopsys spec is mentioned. (7.1 Software/Hardware Restrictions)
+> "Before disabling clock, ensure that card is not busy due to any previous data command."
+> 
+> > In which situation did you meet this?
+> At specific board, i found the problem that didn't inform ciu.
+> (It didn't produce always.)
+> At that time, i checked the status register whether card is busy or not.
+> (Start bit of CMD register is cleared, but card is busy.)
+> Current code didn't check the card status. Just check whether the start-bit cleared.
+> host regard that command is completed, will send the next command.
+> But next command didn't issue because Card is busy.
+> This patch can prevent this situation.
+> 
+> If you have any comment or opinion, please let me know. it's great help to me
+If you know a point in time, we can reproduce it.
 
-Thanks,
-Seungwon Jeon.
 > 
 > Best Regards,
 > Jaehoon Chung
 > >
-> >> +
-> >> +#define mci_readl(dev, reg)			\
-> >> +	__raw_readl((dev)->regs + SDMMC_##reg)
-> >> +#define mci_writel(dev, reg, value)			\
-> >> +	__raw_writel((value), (dev)->regs + SDMMC_##reg)
-> >> +
-> >> +static inline int exynos_get_clk_drv(struct dw_mci *host)
+> > Thanks,
+> > Seungwon Jeon
+> >>
+> >> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> >> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> >> ---
+> >>  drivers/mmc/host/dw_mmc.c |   30 ++++++++++++++++++++++++------
+> >>  drivers/mmc/host/dw_mmc.h |    1 +
+> >>  2 files changed, 25 insertions(+), 6 deletions(-)
+> >>
+> >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> >> index 36f98c0..8bef3c2 100644
+> >> --- a/drivers/mmc/host/dw_mmc.c
+> >> +++ b/drivers/mmc/host/dw_mmc.c
+> >> @@ -623,6 +623,27 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
+> >>  		cmd, arg, cmd_status);
+> >>  }
+> >>
+> >> +static void dw_mci_inform_ciu(struct dw_mci_slot *slot)
 > >> +{
-> >> +	return SDMMC_GET_CLK_DRV(mci_readl(host, EXYNOS_CLKSEL));
+> >> +	struct dw_mci *host = slot->host;
+> >> +	unsigned long timeout = jiffies + msecs_to_jiffies(500);
+> >> +	u32 ctrl, status;
+> >> +
+> >> +	do {
+> >> +		status = mci_readl(host, STATUS);
+> >> +		if (!(status & SDMMC_DATA_BUSY))
+> >> +			break;
+> >> +		ctrl = mci_readl(host, CTRL);
+> >> +		ctrl |= SDMMC_CTRL_RESET;
+> >> +		mci_writel(host, CTRL, ctrl);
+> >> +	} while (time_before(jiffies, timeout));
+> >> +
+> >> +	if (status & SDMMC_DATA_BUSY)
+> >> +		dev_err(&slot->mmc->class_dev,"Card is busy..!\n");
+> >> +
+> >> +	mci_send_cmd(slot, SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
 > >> +}
 > >> +
-> >> +static inline int exynos_get_clk_sample(struct dw_mci *host)
-> >> +{
-> >> +	return SDMMC_GET_CLK_DRV(mci_readl(host, EXYNOS_CLKSEL));
-> >> +}
-> >> +
-> >> +static inline void exynos_set_clk_drv_sample(struct dw_mci *host,
-> >> +		struct mmc_ios *ios)
-> >> +{
-> >> +	u32 regs;
-> >> +
-> >> +	regs = mci_readl(host, EXYNOS_CLKSEL);
-> >> +	regs &= ~SDMMC_CLK_RESET_DRV_SAMPLE;
-> >> +	if (ios->timing == MMC_TIMING_UHS_DDR50)
-> >> +		regs |= host->pdata->ddr_timing;
-> >> +	else
-> >> +		regs |= host->pdata->sdr_timing;
-> >> +
-> >> +	mci_writel(host, EXYNOS_CLKSEL, regs);
-> >> +}
-> >> +
-> >> +#endif /* _EXYNOS_DW_MMC_H */
+> >>  static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+> >>  {
+> >>  	struct dw_mci *host = slot->host;
+> >> @@ -650,15 +671,13 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+> >>  		mci_writel(host, CLKSRC, 0);
+> >>
+> >>  		/* inform CIU */
+> >> -		mci_send_cmd(slot,
+> >> -			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+> >> +		dw_mci_inform_ciu(slot);
+> >>
+> >>  		/* set clock to desired speed */
+> >>  		mci_writel(host, CLKDIV, div);
+> >>
+> >>  		/* inform CIU */
+> >> -		mci_send_cmd(slot,
+> >> -			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+> >> +		dw_mci_inform_ciu(slot);
+> >>
+> >>  		/* enable clock; only low power if no SDIO */
+> >>  		clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
+> >> @@ -667,8 +686,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+> >>  		mci_writel(host, CLKENA, clk_en_a);
+> >>
+> >>  		/* inform CIU */
+> >> -		mci_send_cmd(slot,
+> >> -			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+> >> +		dw_mci_inform_ciu(slot);
+> >>
+> >>  		host->current_speed = slot->clock;
+> >>  	}
+> >> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> >> index 15c27e1..b6a1a78 100644
+> >> --- a/drivers/mmc/host/dw_mmc.h
+> >> +++ b/drivers/mmc/host/dw_mmc.h
+> >> @@ -127,6 +127,7 @@
+> >>  #define SDMMC_CMD_INDX(n)		((n) & 0x1F)
+> >>  /* Status register defines */
+> >>  #define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FFF)
+> >> +#define SDMMC_DATA_BUSY			BIT(9)
+> >>  /* Internal DMAC interrupt defines */
+> >>  #define SDMMC_IDMAC_INT_AI		BIT(9)
+> >>  #define SDMMC_IDMAC_INT_NI		BIT(8)
 > >> --
 > >> 1.7.4.1
 > >> --
