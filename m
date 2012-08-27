@@ -1,50 +1,119 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] mmc: core: pre-patch for next eMMC version
-Date: Mon, 27 Aug 2012 14:04:29 +0200
-Message-ID: <CAPDyKFqJynoS5d3EmnRi4CxmUyOMYBRzy2spDgUTfT=7+0Xg6Q@mail.gmail.com>
-References: <5036C96A.7070300@samsung.com>
+Subject: Re: [PATCH 7/13] drivers/mmc/host/mmci.c: use clk_prepare_enable and clk_disable_unprepare
+Date: Mon, 27 Aug 2012 14:33:40 +0200
+Message-ID: <CAPDyKFpf+PzMspT7CECpd=ZVdmp=7i4-pr-6StK8N1aRczNryw@mail.gmail.com>
+References: <1345996865-32082-1-git-send-email-Julia.Lawall@lip6.fr>
+	<1345996865-32082-8-git-send-email-Julia.Lawall@lip6.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:38832 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750948Ab2H0MEb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Aug 2012 08:04:31 -0400
-Received: by weyx8 with SMTP id x8so2306348wey.19
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Aug 2012 05:04:29 -0700 (PDT)
-In-Reply-To: <5036C96A.7070300@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1345996865-32082-8-git-send-email-Julia.Lawall@lip6.fr>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Julia Lawall <Julia.Lawall@lip6.fr>
+Cc: Chris Ball <cjb@laptop.org>, kernel-janitors@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Jaehoon,
+Hi Julia,
 
-I think this patches as of now does not really make sense. These types
-of devices is far from reaching the market and just saying that a
-later revision in the ext_csd is supported is too simple. Moreover,
-why shall we add a quirk for a problem that does not even exist.
+Patches for mmci should normally be sent on the arm list as well. mmci
+is maintained by Russell King, even if the MAINTAINER file does not
+say so.
 
-Kind regards
-Ulf Hansson
+Some minor comment below.
 
-On 24 August 2012 02:23, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> eMMC card revision have increased more faster than before.
-> We need to prepare the next eMMC revision(eMMCx.0).
-> Its revision is 0x7. (eMMC4.5 is 0x6 - can get the information at ext_csd register)
+On 26 August 2012 18:00, Julia Lawall <Julia.Lawall@lip6.fr> wrote:
+> From: Julia Lawall <Julia.Lawall@lip6.fr>
 >
-> Jaehoon Chung (2):
->   mmc: core: prepare the next version of eMMC card
->   mmc: core: add the quirk for broken revision
+
+I think can simplify the commit msg a lot. Just say something with
+"simplify clock code in probe".
+
+> Clk_prepare_enable and clk_disable_unprepare combine clk_prepare and
+> clk_enable, and clk_disable and clk_unprepare.  They make the code more
+> concise, and ensure that clk_unprepare is called when clk_enable fails.
 >
->  drivers/mmc/core/mmc.c     |   15 ++++++++++-----
->  include/linux/mmc/card.h   |    1 +
->  include/linux/mmc/host.h   |    1 +
->  5 files changed, 17 insertions(+), 5 deletions(-)
+> A simplified version of the semantic patch that introduces calls to these
+> functions is as follows: (http://coccinelle.lip6.fr/)
 >
-> --
-> 1.7.4.1
+> // <smpl>
+> @@
+> expression e;
+> @@
+>
+> - clk_prepare(e);
+> - clk_enable(e);
+> + clk_prepare_enable(e);
+>
+> @@
+> expression e;
+> @@
+>
+> - clk_disable(e);
+> - clk_unprepare(e);
+> + clk_disable_unprepare(e);
+> // </smpl>
+>
+> Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
+>
+> ---
+>  drivers/mmc/host/mmci.c |   13 +++----------
+>  1 file changed, 3 insertions(+), 10 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 50ff19a..edc3e9b 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -1309,14 +1309,10 @@ static int __devinit mmci_probe(struct amba_device *dev,
+>                 goto host_free;
+>         }
+>
+> -       ret = clk_prepare(host->clk);
+> +       ret = clk_prepare_enable(host->clk);
+
+white space? Did you run checkpatch?
+
+>         if (ret)
+>                 goto clk_free;
+>
+> -       ret = clk_enable(host->clk);
+> -       if (ret)
+> -               goto clk_unprep;
+> -
+>         host->plat = plat;
+>         host->variant = variant;
+>         host->mclk = clk_get_rate(host->clk);
+> @@ -1515,9 +1511,7 @@ static int __devinit mmci_probe(struct amba_device *dev,
+>   err_gpio_cd:
+>         iounmap(host->base);
+>   clk_disable:
+> -       clk_disable(host->clk);
+> - clk_unprep:
+> -       clk_unprepare(host->clk);
+> +       clk_disable_unprepare(host->clk);
+
+white space? Did you run checkpatch?
+
+>   clk_free:
+>         clk_put(host->clk);
+>   host_free:
+> @@ -1564,8 +1558,7 @@ static int __devexit mmci_remove(struct amba_device *dev)
+>                         gpio_free(host->gpio_cd);
+>
+>                 iounmap(host->base);
+> -               clk_disable(host->clk);
+> -               clk_unprepare(host->clk);
+> +               clk_disable_unprepare(host->clk);
+
+white space? Did you run checkpatch?
+
+>                 clk_put(host->clk);
+>
+>                 if (host->vcc)
+>
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+Kind regards
+Ulf Hansson
