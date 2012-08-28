@@ -1,86 +1,84 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: Re: [PATCH v4 9/9] mmc: dw_mmc: add support for exynos specific
- implementation of dw-mshc
-Date: Tue, 28 Aug 2012 10:50:03 +0530
-Message-ID: <CAJuYYwR4hnr+GykJmEj+9Tmo6QknOQ11_1CbbuHehTNhRuXAhQ@mail.gmail.com>
-References: <1345981927-26359-1-git-send-email-thomas.abraham@linaro.org>
-	<1345981927-26359-10-git-send-email-thomas.abraham@linaro.org>
-	<503B36D0.4030208@samsung.com>
-	<CAJuYYwTKXuJe-8N3kOkkUg_bCzAdG-cG4yjk67zF7dmrg+eGpw@mail.gmail.com>
-	<503C4F5D.8050302@samsung.com>
-	<CAJuYYwSCJ4M6-49ELvgBz-o42kvvExTs=U+qrG_KSF2--zrD4g@mail.gmail.com>
-	<CAJuYYwTShXkEJHHUtsSSzQc13b+uYg80iN5H6s4XRRmxk8rRQQ@mail.gmail.com>
-	<503C542E.9080301@samsung.com>
+From: merez@codeaurora.org
+Subject: Re: [PATCH v5 1/3] block: Add test-iosched scheduler
+Date: Mon, 27 Aug 2012 23:36:19 -0700 (PDT)
+Message-ID: <67c5a8179e7b9f9d6e41a10b1f1601a8.squirrel@www.codeaurora.org>
+References: <n> <1343744710-31700-2-git-send-email-merez@codeaurora.org>
+    <09c3a301ad7ca4fa396c4d00615312c1.squirrel@www.codeaurora.org>
+    <5017FDCE.5030700@kernel.dk>
+    <340c1ff468880f247cc9377705edd6e4.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:40058 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750876Ab2H1FUF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Aug 2012 01:20:05 -0400
-Received: by lbbgj3 with SMTP id gj3so2995798lbb.19
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Aug 2012 22:20:03 -0700 (PDT)
-In-Reply-To: <503C542E.9080301@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <340c1ff468880f247cc9377705edd6e4.squirrel@www.codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+Cc: Jens Axboe <axboe@kernel.dk>, merez@codeaurora.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, tgih.jun@samsung.com, patches@linaro.org
 
-On 28 August 2012 10:46, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> On 08/28/2012 02:10 PM, Thomas Abraham wrote:
->> On 28 August 2012 10:40, Thomas Abraham <thomas.abraham@linaro.org> wrote:
->>> On 28 August 2012 10:25, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>>> Hi Thomas,
->>>>
->>>> On 08/28/2012 01:48 PM, Thomas Abraham wrote:
->>>>> On 27 August 2012 14:28, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>>>>> Hi Thomas,
->>>>>>
->>>>>>> +     gpio = of_get_named_gpio(slot_np, "wp-gpios", 0);
->>>>>>> +     if (gpio_is_valid(gpio)) {
->>>>>>> +             if (devm_gpio_request(host->dev, gpio, "dw-mci-wp"))
->>>>>>> +                     dev_info(host->dev, "gpio [%d] request failed\n",
->>>>>>> +                                             gpio);
->>>>>>> +     } else {
->>>>>>> +             dev_info(host->dev, "wp gpio not available");
->>>>>>> +             host->pdata->quirks |= DW_MCI_QUIRK_NO_WRITE_PROTECT;
->>>>>>> +     }
->>>>>>> +
->>>>>>> +     if (host->pdata->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
->>>>>>> +             return 0;
->>>>>>> +
->>>>>>> +     gpio = of_get_named_gpio(slot_np, "samsung,cd-pinmux-gpio", 0);
->>>>>>> +     if (gpio_is_valid(gpio)) {
->>>>>>> +             if (devm_gpio_request(host->dev, gpio, "dw-mci-cd"))
->>>>>> I'm not sure, but i saw mmc_gpio_request_cd() into drivers/mmc/core/slot-gpio.c.
->>>>>> Can we use this? i think we can use them.
->>>>>> Just my opinion.
->>>>>
->>>>> Thanks for letting me know about this, I was not aware of this.
->>>>> Looking into this code, it is usable for controllers that use a gpio
->>>>> (specified using cd-gpios property) as card-detect line. As you know,
->>>>> the dw-mmc driver does not support this feature yet. In case of
->>>>> exynos, the card-detect pin of the mmc slot is connected to the
->>>>> card-detect pad of the dw-mmc controller using pinmux, which is not
->>>>> considered as a gpio. Hence, mmc_gpio_request_cd() is not applicable
->>>>> in this case.
->>>> But In case of external card-detect-pin, we can use the mmc_gpio_request_cd().
->>>
->>> Yes, we can use. But the current dw-mmc controller driver does not
->>> support this feature yet. The existing driver considers that (a)
->>> card-detect line is connected to the card-detect pad of the controller
->>> or (b) it is broken. For Exynos5250, it is case (a). There is no
->>
->> Sorry, I meant smdk5250, not Exynos5250.
-> Already i tested with my exynos5 board.
-> If you want, i will share the patch.
+Hi Jens,
 
-But did you use "samsung,cd-pinmux-gpio" binding or "cd-gpios" binding
-for specifying the card-detect line. I think, for your board, you have
-to use "cd-gpios". But this patch series does not add support for
-"cd-gpios".
-
-Sure, I will like to have a look at your patch and understand more.
+Can you refer to my reply?
+Currently the test-iosched is our only option for testing the eMMC4.5
+features on a HS200 eMMC card.
 
 Thanks,
-Thomas.
+Maya
+On Thu, August 2, 2012 6:16 am, merez@codeaurora.org wrote:
+>
+> On Tue, July 31, 2012 8:46 am, Jens Axboe wrote:
+>> On 07/31/2012 04:36 PM, merez@codeaurora.org wrote:
+>>> Hi Jens,
+>>>
+>>> Do you have comments on this patch?
+>>> Can we push it to kernel 3.6 version?
+>>
+>> I have questions - what is this good for? In other words, explain to me
+>> why this is useful code. And in particular why this cannot be done from
+>> userspace with bsg and block tracing?
+>>
+>> IOW, I'm dubious as to whether a new _io scheduler_ is the correct
+>> solution to the problem you have at hand.
+>>
+>> --
+>> Jens Axboe
+>>
+>>
+>
+> The test scheduler allows us to control the dispatched requests and their
+> order without an interfering of other requests.
+> You can review the patches which depends on this patch in order to better
+> understand how it is used.
+> For example, in the eMMC4.5 packed commands feature, the MMC layer can
+> pack read or write requests (the packed requests must be of the same
+> direction). MMC layer will stop fetching the requests in case the packing
+> conditions are broken.
+> In order to test this feature we had to have a full control on the
+> requests that the MMC layer fetches and their order, so that we will be
+> able to determine if the expected behavior was actually achieved.
+> The test-iosched can call specific block device callbacks, for example for
+> checking the test results.
+> Also, in order to be able to run out tests on the main eMMC card that runs
+> in HS200, we cannot "shut down" the real FS requests, otherwise our phone
+> won't come up or crash.
+> The test-iosched allows us to delay the real FS requests until the end of
+> the test, therefore the tests can be done on the main eMMC card.
+>
+> We chose not to use blocktrace due to the "real" FS requests interference
+> in the middle of the test.
+>
+> I'm not familiar with bsg so I cannot tell if it can answer all the
+> requirements I specified above.
+>
+> Thanks,
+> Maya
+>
+> --
+> Sent by consultant of Qualcomm Innovation Center, Inc.
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+>
+>
+
+
+-- 
+Sent by consultant of Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
