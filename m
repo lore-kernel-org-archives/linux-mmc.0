@@ -1,37 +1,242 @@
-From: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] mmc: tegra: remove useless include of <mach/*.h>
-Date: Tue, 28 Aug 2012 13:24:38 -0400
-Message-ID: <87bohvvsix.fsf@octavius.laptop.org>
-References: <1346137258-7186-1-git-send-email-swarren@wwwdotorg.org>
-	<503CFE0C.4070502@nvidia.com>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
+Date: Tue, 28 Aug 2012 23:10:35 +0530
+Message-ID: <CANfBPZ9p-1M9hDmG4KUq_ky6+Z+7FMwVA=gz1kc7j0bUSz_EzQ@mail.gmail.com>
+References: <34e29d774773a7dfa3e1b57232249b68.squirrel@www.codeaurora.org>
+ <CANfBPZ9NZAdK4tEDJ8wiNKNjRUuqaLKk3qqVZVgod8vwYVuOYw@mail.gmail.com>
+ <f35f04238ad2e00e976d5f99b4b29648.squirrel@www.codeaurora.org>
+ <CANfBPZ9Pbsp4OXh-kCveiAm-ing8i4k5WZvAzrdi8G4d8tCDdA@mail.gmail.com> <a2a7a94c38abadb36b23c964ad8e9ace.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <503CFE0C.4070502-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org> (Stephen Warren's message of "Tue,
-	28 Aug 2012 10:21:16 -0700")
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Cc: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog112.obsmtp.com ([74.125.149.207]:58538 "EHLO
+	na3sys009aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751779Ab2H1Rk5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Aug 2012 13:40:57 -0400
+Received: by dakf10 with SMTP id f10so3706157dak.11
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Aug 2012 10:40:56 -0700 (PDT)
+In-Reply-To: <a2a7a94c38abadb36b23c964ad8e9ace.squirrel@www.codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: merez@codeaurora.org
+Cc: Chris Ball <cjb@laptop.org>, Muthu Kumar <muthu.lkml@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>
 
-Hi Stephen,
-
-On Tue, Aug 28 2012, Stephen Warren wrote:
-> On 08/28/2012 12:00 AM, Stephen Warren wrote:
->> From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
->> 
->> Nothing from this file is needed, so remove the include. This helps
->> single zImage work by reducing use of the mach-tegra/include/mach/
->> directory.
+On Mon, Aug 27, 2012 at 11:58 PM,  <merez@codeaurora.org> wrote:
 >
-> BTW, it'd be easiest for me to take this through the Tegra tree, since I
-> may be able to delete <mach/gpio-tegra.h> after this.
+> On Fri, July 27, 2012 2:07 am, S, Venkatraman wrote:
+>> On Fri, Jul 27, 2012 at 12:24 AM,  <merez@codeaurora.org> wrote:
+>>>
+>>> On Thu, July 26, 2012 8:28 am, S, Venkatraman wrote:
+>>>> On Tue, Jul 24, 2012 at 2:14 PM,  <merez@codeaurora.org> wrote:
+>>>>> On Mon, July 23, 2012 5:22 am, S, Venkatraman wrote:
+>>>>>> On Mon, Jul 23, 2012 at 5:13 PM,  <merez@codeaurora.org> wrote:
+>>>>>>> On Wed, July 18, 2012 12:26 am, Chris Ball wrote:
+>>>>>>>> Hi,  [removing Jens and the documentation list, since now we're
+>>>>> talking about the MMC side only]
+>>>>>>>> On Wed, Jul 18 2012, merez@codeaurora.org wrote:
+>>>>>>>>> Is there anything else that holds this patch from being pushed to
+>>>>>>> mmc-next?
+>>>>>>>> Yes, I'm still uncomfortable with the write packing patchsets for a
+>>>>>>> couple of reasons, and I suspect that the sum of those reasons means
+>>>>>>> that
+>>>>>>> we should probably plan on holding off merging it until after 3.6.
+>>>>>>>> Here are the open issues; please correct any misunderstandings:
+>>>>>>>> With
+>>>>> Seungwon's patchset ("Support packed write command"):
+>>>>>>>> * I still don't have a good set of representative benchmarks
+>>>>>>>> showing
+>>>>>>>>   what kind of performance changes come with this patchset.  It
+>>>>>>>> seems
+>>>>>>> like we've had a small amount of testing on one controller/eMMC part
+>>>>>>> combo
+>>>>>>> from Seungwon, and an entirely different test from Maya, and the
+>>>>> results
+>>>>>>> aren't documented fully anywhere to the level of describing what the
+>>>>> hardware was, what the test was, and what the results were before and
+>>>>> after the patchset.
+>>>>>>> Currently, there is only one card vendor that supports packed
+>>>>>>> commands.
+>>>>> Following are our sequential write (LMDD) test results on 2 of our
+>>>>> targets
+>>>>>>> (in MB/s):
+>>>>>>>                        No packing        packing
+>>>>>>> Target 1 (SDR 50MHz)     15               25
+>>>>>>> Target 2 (DDR 50MHz)     20               30
+>>>>>>>> With the reads-during-writes regression:
+>>>>>>>> * Venkat still has open questions about the nature of the read
+>>>>>>>>   regression, and thinks we should understand it with blktrace
+>>>>>>>> before
+>>>>>>> trying to fix it.  Maya has a theory about writes overwhelming
+>>>>>>> reads,
+>>>>>>> but
+>>>>>>> Venkat doesn't understand why this would explain the observed
+>>>>>>> bandwidth drop.
+>>>>>>> The degradation of read due to writes is not a new behavior and
+>>>>>>> exists
+>>>>> also without the write packing feature (which only increases the
+>>>>> degradation). Our investigation of this phenomenon led us to the
+>>>>> Conclusion that a new scheduling policy should be used for mobile
+>>>>> devices,
+>>>>>>> but this is not related to the current discussion of the write
+>>>>>>> packing
+>>>>> feature.
+>>>>>>> The write packing feature increases the degradation of read due to
+>>>>> write
+>>>>>>> since it allows the MMC to fetch many write requests in a row,
+>>>>>>> instead
+>>>>>>> of
+>>>>>>> fetching only one at a time.  Therefore some of the read requests
+>>>>>>> will
+>>>>> have to wait for the completion of more write requests before they can
+>>>>> be
+>>>>>>> issued.
+>>>>>>
+>>>>>> I am a bit puzzled by this claim. One thing I checked carefully when
+>>>>> reviewing write packing patches from SJeon was that the code didn't
+>>>>> plough through a mixed list of reads and writes and selected only
+>>>>> writes.
+>>>>>> This section of the code in "mmc_blk_prep_packed_list()", from v8
+>>>>> patchset..
+>>>>>> <Quote>
+>>>>>> +               if (rq_data_dir(cur) != rq_data_dir(next)) {
+>>>>>> +                       put_back = 1;
+>>>>>> +                       break;
+>>>>>> +               }
+>>>>>> </Quote>
+>>>>>>
+>>>>>> means that once a read is encountered in the middle of write packing,
+>>>>> the packing is stopped at that point and it is executed. Then the next
+>>>>> blk_fetch_request should get the next read and continue as before.
+>>>>>>
+>>>>>> IOW, the ordering of reads and writes is _not_ altered when using
+>>>>>> packed
+>>>>> commands.
+>>>>>> For example if there were 5 write requests, followed by 1 read,
+>>>>>> followed by 5 more write requests in the request_queue, the first 5
+>>>>> writes will be executed as one "packed command", then the read will be
+>>>>> executed, and then the remaining 5 writes will be executed as one
+>>>>> "packed command". So the read does not have to wait any more than it
+>>>>> waited before (packing feature)
+>>>>>
+>>>>> Let me try to better explain with your example.
+>>>>> Without packing the MMC layer will fetch 2 write requests and wait for
+>>>>> the
+>>>>> first write request completion before fetching another write request.
+>>>>> During this time the read request could be inserted into the CFQ and
+>>>>> since
+>>>>> it has higher priority than the async write it will be dispatched in
+>>>>> the
+>>>>> next fetch. So, the result would be 2 write requests followed by one
+>>>>> read
+>>>>> request and the read would have to wait for completion of only 2 write
+>>>>> requests.
+>>>>> With packing, all the 5 write requests will be fetched in a row, and
+>>>>> then
+>>>>> the read will arrive and be dispatched in the next fetch. Then the
+>>>>> read
+>>>>> will have to wait for the completion of 5 write requests.
+>>>>>
+>>>>> Few more clarifications:
+>>>>> Due to the plug list mechanism in the block layer the applications can
+>>>>> "aggregate" several requests to be inserted into the scheduler before
+>>>>> waking the MMC queue thread.
+>>>>> This leads to a situation where there are several write requests in
+>>>>> the
+>>>>> CFQ queue when MMC starts to do the fetches.
+>>>>>
+>>>>> If the read was inserted while we are building the packed command then
+>>>>> I
+>>>>> agree that we should have seen less effect on the read performance.
+>>>>> However, the write packing statistics show that in most of the cases
+>>>>> the
+>>>>> packing stopped due to an empty queue, meaning that the read was
+>>>>> inserted
+>>>>> to the CFQ after all the pending write requests were fetched and
+>>>>> packed.
+>>>>>
+>>>>> Following is an example for write packing statistics of a READ/WRITE
+>>>>> parallel scenario:
+>>>>> write packing statistics:
+>>>>> Packed 1 reqs - 448 times
+>>>>> Packed 2 reqs - 38 times
+>>>>> Packed 3 reqs - 23 times
+>>>>> Packed 4 reqs - 30 times
+>>>>> Packed 5 reqs - 14 times
+>>>>> Packed 6 reqs - 8 times
+>>>>> Packed 7 reqs - 4 times
+>>>>> Packed 8 reqs - 1 times
+>>>>> Packed 10 reqs - 1 times
+>>>>> Packed 34 reqs - 1 times
+>>>>> stopped packing due to the following reasons:
+>>>>> 2 times: wrong data direction (meaning a READ was fetched and stopped
+>>>>> the
+>>>>> packing)
+>>>>> 1 times: flush or discard
+>>>>> 565 times: empty queue (meaning blk_fetch_request returned NULL)
+>>>>>
+>>>>>>
+>>>>>> And I requested blktrace to confirm that this is indeed the
+>>>>>> behaviour.
+>>>>>
+>>>>> The trace logs show that in case of no packing, there are maximum of
+>>>>> 3-4
+>>>>> requests issued before a read request, while with packing there are
+>>>>> also
+>>>>> cases of 6 and 7 requests dispatched before a read request.
+>>>>>
+>>>>> I'm waiting for an approval for sharing the block trace logs.
+>>>>> Since this is a simple test to run you can collect the trace logs and
+>>>>> let
+>>>>> us know if you reach other conclusions.
+>>>>>
+>>>> Thanks for the brief. I don't have the eMMC4.5 device with me yet, so
+>>>> I can't reproduce the result.
+>>>
+>>> I sent the trace logs of both packing and non packing. Please let me
+>>> know
+>>> if you have additional questions after reviewing them.
+>>>
+>>> The problem you describe is most likely
+>>>> applicable
+>>>> to any block device driver with a large queue depth ( any queue depth
+>>>> >1).
+>>>> I'll check to see what knobs in block affect the result.
+>>>> Speaking of it, what is the host controller you use to test this ?
+>>>
+>>> The controller I use is msm_sdcc.
+>>>
+>>>> I was wondering if host->max_seg_size is taken into account while
+>>>> packed
+>>>> command
+>>>> is in use. If not, shouldn't it be ?  - it could act as a better
+>>>> throttle for "packing density".
+>>>
+>>> The max segments (which is calculated from host->max_seg_size) is taking
+>>> into account when preparing the packed list (so that the whole packed
+>>> won't exceed the max number of segments).
+>>> I'm not sure I understand how host->max_seg_size can be used as a
+>>> throttle
+>>> for "packing density". Can you please explain?
+>>>
+>> Ok - I overlooked that max_segments is indeed used to limit the number
+>> of requests
+>> that are packed.(And this corresponds to max_seg_size, which is what I
+>> intended)
+>> I should be getting my MMC4.5 test gear in a couple of days - I'll run
+>> it through
+>> on some hosts and can either provide more feedback or Ack this patch.
+>> Regards,
+>> Venkat.
+>
+> Hi Venkat,
+>
+> Do you have additional questions/comments?
+>
+None. I am just running some stress tests on BKOPS patches right now
+and after tomorrow I'll start testing packed command. Will all the
+patches apply on top of current mmc-next ? If not, it would be great
+if
+you can send an updated version.
 
-Fine with me:
-
-Acked-by: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-
-- Chris.
--- 
-Chris Ball   <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>   <http://printf.net/>
-One Laptop Per Child
+Thanks,
+Venkat.
