@@ -1,84 +1,35 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH v5 1/3] block: Add test-iosched scheduler
-Date: Mon, 27 Aug 2012 23:36:19 -0700 (PDT)
-Message-ID: <67c5a8179e7b9f9d6e41a10b1f1601a8.squirrel@www.codeaurora.org>
-References: <n> <1343744710-31700-2-git-send-email-merez@codeaurora.org>
-    <09c3a301ad7ca4fa396c4d00615312c1.squirrel@www.codeaurora.org>
-    <5017FDCE.5030700@kernel.dk>
-    <340c1ff468880f247cc9377705edd6e4.squirrel@www.codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <340c1ff468880f247cc9377705edd6e4.squirrel@www.codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-Cc: Jens Axboe <axboe@kernel.dk>, merez@codeaurora.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, DOCUMENTATION <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: [PATCH] mmc: tegra: remove useless include of <mach/*.h>
+Date: Tue, 28 Aug 2012 00:00:58 -0700
+Message-ID: <1346137258-7186-1-git-send-email-swarren@wwwdotorg.org>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Jens,
+From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-Can you refer to my reply?
-Currently the test-iosched is our only option for testing the eMMC4.5
-features on a HS200 eMMC card.
+Nothing from this file is needed, so remove the include. This helps
+single zImage work by reducing use of the mach-tegra/include/mach/
+directory.
 
-Thanks,
-Maya
-On Thu, August 2, 2012 6:16 am, merez@codeaurora.org wrote:
->
-> On Tue, July 31, 2012 8:46 am, Jens Axboe wrote:
->> On 07/31/2012 04:36 PM, merez@codeaurora.org wrote:
->>> Hi Jens,
->>>
->>> Do you have comments on this patch?
->>> Can we push it to kernel 3.6 version?
->>
->> I have questions - what is this good for? In other words, explain to me
->> why this is useful code. And in particular why this cannot be done from
->> userspace with bsg and block tracing?
->>
->> IOW, I'm dubious as to whether a new _io scheduler_ is the correct
->> solution to the problem you have at hand.
->>
->> --
->> Jens Axboe
->>
->>
->
-> The test scheduler allows us to control the dispatched requests and their
-> order without an interfering of other requests.
-> You can review the patches which depends on this patch in order to better
-> understand how it is used.
-> For example, in the eMMC4.5 packed commands feature, the MMC layer can
-> pack read or write requests (the packed requests must be of the same
-> direction). MMC layer will stop fetching the requests in case the packing
-> conditions are broken.
-> In order to test this feature we had to have a full control on the
-> requests that the MMC layer fetches and their order, so that we will be
-> able to determine if the expected behavior was actually achieved.
-> The test-iosched can call specific block device callbacks, for example for
-> checking the test results.
-> Also, in order to be able to run out tests on the main eMMC card that runs
-> in HS200, we cannot "shut down" the real FS requests, otherwise our phone
-> won't come up or crash.
-> The test-iosched allows us to delay the real FS requests until the end of
-> the test, therefore the tests can be done on the main eMMC card.
->
-> We chose not to use blocktrace due to the "real" FS requests interference
-> in the middle of the test.
->
-> I'm not familiar with bsg so I cannot tell if it can answer all the
-> requirements I specified above.
->
-> Thanks,
-> Maya
->
-> --
-> Sent by consultant of Qualcomm Innovation Center, Inc.
-> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
->
->
+Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+---
+ drivers/mmc/host/sdhci-tegra.c |    1 -
+ 1 file changed, 1 deletion(-)
 
-
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 0810ccc..5393c64 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -27,7 +27,6 @@
+ 
+ #include <asm/gpio.h>
+ 
+-#include <mach/gpio-tegra.h>
+ #include <mach/sdhci.h>
+ 
+ #include "sdhci-pltfm.h"
 -- 
-Sent by consultant of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+1.7.9.5
