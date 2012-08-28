@@ -1,157 +1,201 @@
-From: ludovic.desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH 1/2] mmc: atmel-mci: DMA can be used with other controller
-Date: Tue, 28 Aug 2012 15:25:58 +0200
-Message-ID: <503CC6E6.1020403@atmel.com>
-References: <503A852B.8010902@yahoo.es>
+From: Felipe Balbi <balbi@ti.com>
+Subject: Re: [PATCH 2/2] mmc: omap_hsmmc: cleanup the bitmap definitions of
+ Interrupt Register
+Date: Tue, 28 Aug 2012 16:23:29 +0300
+Message-ID: <20120828132327.GZ27166@arwen.pp.htv.fi>
+References: <1346159947-3194-1-git-send-email-svenkatr@ti.com>
+ <1346159947-3194-2-git-send-email-svenkatr@ti.com>
+Reply-To: balbi@ti.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"; Format="flowed"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <503A852B.8010902@yahoo.es>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Hein Tibosch <hein_tibosch@yahoo.es>
-Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Havard Skinnemoen <havard@skinnemoen.net>, "ludovic.desroches" <ludovic.desroches@atmel.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, egtvedt@samfundet.no
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="Re7H+V5lQR2Zv/pu"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog131.obsmtp.com ([74.125.149.247]:48214 "EHLO
+	na3sys009aog131.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752024Ab2H1N1k (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Aug 2012 09:27:40 -0400
+Received: by lbky2 with SMTP id y2so3046342lbk.17
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Aug 2012 06:27:37 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1346159947-3194-2-git-send-email-svenkatr@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Venkatraman S <svenkatr@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, balbi@ti.com
 
-Hi Hein,
 
-Thanks for your investigation about the MCI issue with AVR chips.
+--Re7H+V5lQR2Zv/pu
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Le 08/26/2012 10:20 PM, Hein Tibosch a =E9crit :
-> After the latest changes to atmel-mci, it could not be used with
-> DMA on the AVR32 platform. This patch will allow to use DMA again
-> and it will avoid access to MCI register ATMCI_DMA.
->
+Hi,
 
-I think you should add more details about the issue:
-Even if the IP version is lower than v3xx and doesn't have the DMA
-configuration register, DMA transfers can be used with a different
-controller than the Atmel AHB DMA one. For instance, some AVR chips use =
+On Tue, Aug 28, 2012 at 06:49:07PM +0530, Venkatraman S wrote:
+> Define the most frequently used bitmasks of the Interrupt Enable /
+> Interrupt Status register with consistent naming ( with _EN suffix).
+>=20
+> Use meaningful concatenation of bitfields for INT_EN_MASK, which shows
+> which interrupts are enabled by default.
+> No functional changes.
+>=20
+> Signed-off-by: Venkatraman S <svenkatr@ti.com>
 
-the Synopsys DesignWare AHB DMA controller.
-
-> Signed-off-by: Hein Tibosch <hein_tibosch@yahoo.es>
->
-
-Some comments below...
+Acked-by: Felipe Balbi <balbi@ti.com>
 
 > ---
->   drivers/mmc/host/atmel-mci.c |   21 +++++++++------------
->   1 files changed, 9 insertions(+), 12 deletions(-)
->
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index f2c115e..66e9fdc 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -71,7 +71,7 @@ enum atmci_pdc_buf {
->   };
->
->   struct atmel_mci_caps {
-> -	bool    has_dma;
-> +	bool    has_dma_conf_reg;
->   	bool    has_pdc;
->   	bool    has_cfg_reg;
->   	bool    has_cstor_reg;
-> @@ -411,7 +411,7 @@ static int atmci_regs_show(struct seq_file *s, void *=
-v)
->   	atmci_show_status_reg(s, "SR", buf[ATMCI_SR / 4]);
->   	atmci_show_status_reg(s, "IMR", buf[ATMCI_IMR / 4]);
->
-> -	if (host->caps.has_dma) {
-> +	if (host->caps.has_dma_conf_reg) {
->   		u32 val;
->
->   		val =3D buf[ATMCI_DMA / 4];
-> @@ -767,7 +767,7 @@ static void atmci_dma_complete(void *arg)
->
->   	dev_vdbg(&host->pdev->dev, "DMA complete\n");
->
-> -	if (host->caps.has_dma)
-> +	if (host->caps.has_dma_conf_reg)
->   		/* Disable DMA hardware handshaking on MCI */
->   		atmci_writel(host, ATMCI_DMA, atmci_readl(host, ATMCI_DMA) & ~ATMCI_D=
-MAEN);
->
-> @@ -954,7 +954,9 @@ atmci_prepare_data_dma(struct atmel_mci *host, struct=
- mmc_data *data)
->   		maxburst =3D atmci_convert_chksize(host->dma_conf.dst_maxburst);
->   	}
->
-> -	atmci_writel(host, ATMCI_DMA, ATMCI_DMA_CHKSIZE(maxburst) | ATMCI_DMAEN=
-);
-> +	if (host->caps.has_dma_conf_reg)
-> +		atmci_writel(host, ATMCI_DMA, ATMCI_DMA_CHKSIZE(maxburst) |
-> +			ATMCI_DMAEN);
->
->   	sglen =3D dma_map_sg(chan->device->dev, data->sg,
->   			data->sg_len, direction);
-> @@ -2202,7 +2204,7 @@ static void __init atmci_get_cap(struct atmel_mci *=
+>  drivers/mmc/host/omap_hsmmc.c | 51 ++++++++++++++++++++++++-------------=
+------
+>  1 file changed, 29 insertions(+), 22 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 57e86a4..03c2362 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -79,28 +79,16 @@
+>  #define CLKD_SHIFT		6
+>  #define DTO_MASK		0x000F0000
+>  #define DTO_SHIFT		16
+> -#define INT_EN_MASK		0x306E0033
+> -#define BWR_ENABLE		(1 << 4)
+> -#define BRR_ENABLE		(1 << 5)
+> -#define DTO_ENABLE		(1 << 20)
+>  #define INIT_STREAM		(1 << 1)
+>  #define DP_SELECT		(1 << 21)
+>  #define DDIR			(1 << 4)
+> -#define DMA_EN			0x1
+> +#define DMAE			0x1
+>  #define MSBS			(1 << 5)
+>  #define BCE			(1 << 1)
+>  #define FOUR_BIT		(1 << 1)
+>  #define DDR			(1 << 19)
+>  #define DW8			(1 << 5)
+> -#define CC			0x1
+> -#define TC			0x02
+>  #define OD			0x1
+> -#define ERR			(1 << 15)
+> -#define CMD_TIMEOUT		(1 << 16)
+> -#define DATA_TIMEOUT		(1 << 20)
+> -#define CMD_CRC			(1 << 17)
+> -#define DATA_CRC		(1 << 21)
+> -#define CARD_ERR		(1 << 28)
+>  #define STAT_CLEAR		0xFFFFFFFF
+>  #define INIT_STREAM_CMD		0x00000000
+>  #define DUAL_VOLT_OCR_BIT	7
+> @@ -109,6 +97,25 @@
+>  #define SOFTRESET		(1 << 1)
+>  #define RESETDONE		(1 << 0)
+> =20
+> +/* Interrupt masks for IE and ISE register */
+> +#define CC_EN			(1 << 0)
+> +#define TC_EN			(1 << 1)
+> +#define BWR_EN			(1 << 4)
+> +#define BRR_EN			(1 << 5)
+> +#define ERR_EN			(1 << 15)
+> +#define CTO_EN			(1 << 16)
+> +#define CCRC_EN		(1 << 17)
+> +#define CEB_EN			(1 << 18)
+> +#define CIE_EN			(1 << 19)
+> +#define DTO_EN			(1 << 20)
+> +#define DCRC_EN		(1 << 21)
+> +#define DEB_EN			(1 << 22)
+> +#define CERR_EN		(1 << 28)
+> +#define BADA_EN		(1 << 29)
+> +
+> +#define INT_EN_MASK		(BADA_EN | CERR_EN | DEB_EN | DCRC_EN | \
+> +		CIE_EN | CEB_EN | CCRC_EN | BRR_EN | BWR_EN | TC_EN | CC_EN)
+> +
+>  #define MMC_AUTOSUSPEND_DELAY	100
+>  #define MMC_TIMEOUT_MS		20
+>  #define OMAP_MMC_MIN_CLOCK	400000
+> @@ -453,7 +460,7 @@ static void omap_hsmmc_enable_irq(struct omap_hsmmc_h=
+ost *host,
+>  	unsigned int irq_mask;
+> =20
+>  	if (host->use_dma)
+> -		irq_mask =3D INT_EN_MASK & ~(BRR_ENABLE | BWR_ENABLE);
+> +		irq_mask =3D INT_EN_MASK & ~(BRR_EN | BWR_EN);
+>  	else
+>  		irq_mask =3D INT_EN_MASK;
+> =20
+> @@ -673,8 +680,8 @@ static void send_init_stream(struct omap_hsmmc_host *=
 host)
->   	dev_info(&host->pdev->dev,
->   			"version: 0x%x\n", version);
->
-> -	host->caps.has_dma =3D 0;
-> +	host->caps.has_dma_conf_reg =3D 0;
->   	host->caps.has_pdc =3D 1;
->   	host->caps.has_cfg_reg =3D 0;
->   	host->caps.has_cstor_reg =3D 0;
-> @@ -2219,12 +2221,7 @@ static void __init atmci_get_cap(struct atmel_mci =
-*host)
->   		host->caps.has_odd_clk_div =3D 1;
->   	case 0x400:
->   	case 0x300:
-> -#ifdef CONFIG_AT_HDMAC
-> -		host->caps.has_dma =3D 1;
-> -#else
-> -		dev_info(&host->pdev->dev,
-> -			"has dma capability but dma engine is not selected, then use pio\n");
-> -#endif
-> +		host->caps.has_dma_conf_reg =3D 1;
->   		host->caps.has_pdc =3D 0;
->   		host->caps.has_cfg_reg =3D 1;
->   		host->caps.has_cstor_reg =3D 1;
-> @@ -2298,7 +2295,7 @@ static int __init atmci_probe(struct platform_devic=
-e *pdev)
->
->   	/* Get MCI capabilities and set operations according to it */
->   	atmci_get_cap(host);
-> -	if (host->caps.has_dma && atmci_configure_dma(host)) {
-> +	if (atmci_configure_dma(host)) {
->   		host->prepare_data =3D &atmci_prepare_data_dma;
->   		host->submit_data =3D &atmci_submit_data_dma;
->   		host->stop_transfer =3D &atmci_stop_transfer_dma;
->
+>  	OMAP_HSMMC_WRITE(host->base, CMD, INIT_STREAM_CMD);
+> =20
+>  	timeout =3D jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+> -	while ((reg !=3D CC) && time_before(jiffies, timeout))
+> -		reg =3D OMAP_HSMMC_READ(host->base, STAT) & CC;
+> +	while ((reg !=3D CC_EN) && time_before(jiffies, timeout))
+> +		reg =3D OMAP_HSMMC_READ(host->base, STAT) & CC_EN;
+> =20
+>  	OMAP_HSMMC_WRITE(host->base, CON,
+>  		OMAP_HSMMC_READ(host->base, CON) & ~INIT_STREAM);
+> @@ -765,7 +772,7 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host=
+, struct mmc_command *cmd,
+>  	}
+> =20
+>  	if (host->use_dma)
+> -		cmdreg |=3D DMA_EN;
+> +		cmdreg |=3D DMAE;
+> =20
+>  	host->req_in_progress =3D 1;
+> =20
+> @@ -988,11 +995,11 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_hos=
+t *host, int status)
+>  	data =3D host->data;
+>  	dev_vdbg(mmc_dev(host->mmc), "IRQ Status is %x\n", status);
+> =20
+> -	if (status & ERR) {
+> +	if (status & ERR_EN) {
+>  		omap_hsmmc_dbg_report_irq(host, status);
+> -		if (status & (CMD_TIMEOUT | DATA_TIMEOUT))
+> +		if (status & (CTO_EN | DTO_EN))
+>  			hsmmc_command_incomplete(host, -ETIMEDOUT);
+> -		else if (status & (CMD_CRC | DATA_CRC))
+> +		else if (status & (CCRC_EN | DCRC_EN))
+>  			hsmmc_command_incomplete(host, -EILSEQ);
+> =20
+>  		end_cmd =3D 1;
+> @@ -1002,9 +1009,9 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_hos=
+t *host, int status)
+>  		}
+>  	}
+> =20
+> -	if (end_cmd || ((status & CC) && host->cmd))
+> +	if (end_cmd || ((status & CC_EN) && host->cmd))
+>  		omap_hsmmc_cmd_done(host, host->cmd);
+> -	if ((end_trans || (status & TC)) && host->mrq)
+> +	if ((end_trans || (status & TC_EN)) && host->mrq)
+>  		omap_hsmmc_xfer_done(host, data);
+>  }
+> =20
+> --=20
+> 1.7.11.1.25.g0e18bef
+>=20
 
-I have tested this patch on at91sam9m10g45, at91sam9g10 and at91sam9261. =
+--=20
+balbi
 
-For chips without MCI support for Atmel AHB DMA, removing the =
+--Re7H+V5lQR2Zv/pu
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
-host->caps.has_dma test involves to use pdata->dma_slave with more =
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
 
-caution to avoid some NULL pointer dereferences
+iQIcBAEBAgAGBQJQPMZPAAoJEIaOsuA1yqRExWsP/1hk8JjdJsobIPPJPv/UAr6Q
+K9H1PEyR4LAz2c1+AXpv+PFi7RxLryRH4h+RweYZ8uzkyUF0iRr+2z/Mzzye079q
+wk7j2FVrk4UQC7wHYmsifH50Ob4LHLR0zcjyl7ftCZDxRjvcw7dnJ7m/3vAL6kc5
+YAAOuRQywBHD564j8+ySH8eA4bXs6VAxnR7kKvB84CPuylsmwB9gel2xuk2Cdj4g
+AOjsdnGcos4Ypyj/4Xh08lZ+KkbZSZyKGAq+GrayzahhH0+l/B37XmpEKiTQSe8y
+7QDKMT2YE+8/PSe5t3yAdzd/QjeFtDZD02ERtj197gvBGNa7GBDChNYhBe56jwrX
++jDBDD/1m9OLq31UiXX+TSXUCGo11z24qqgu6qoWGXcV1wPy7YC3zZkIsn6tEhsy
+SBM1PR4RglUIkhENQyfdNwhsdll9qmAvyTS8pLgl2CM+mIy8GkoonYg3CuD8XGPV
+VOfEOhOWkvzmNdvEQv6qzxEXbd9UG8HYWiZ7KCJTYOxlPS+9Sam44Gs/mX5QA0X/
+SyN1JCCXSagEgw4tpNOkYbtZ4zsGYp9W+vSXUfZ+3+4cZ0JQZI5ksgFrGiJXHCME
+t3H+4aDNDOj3Q0oyTdZnuC6rNAPdwnCPxF/0szba1H5Q9seDktfRZAxq/TfukaZt
+FvHIuY1xIctB44v2mwxV
+=yR/B
+-----END PGP SIGNATURE-----
 
-@@ -2168,16 +2168,21 @@ static bool atmci_configure_dma(struct atmel_mci =
-
-*host)
-                 return false;
-
-         pdata =3D host->pdev->dev.platform_data;
-+       if (!pdata)
-+               return false;
-
--       if (pdata && find_slave_dev(pdata->dma_slave)) {
-+       if (pdata->dma_slave && find_slave_dev(pdata->dma_slave)) {
-                 dma_cap_mask_t mask;
-
-
-Regards
-
-Ludovic
+--Re7H+V5lQR2Zv/pu--
