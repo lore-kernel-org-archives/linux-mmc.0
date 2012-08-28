@@ -1,103 +1,78 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH v2 3/5] mmc: dw-mmc: add the header file for exynos specific
- code.
-Date: Tue, 28 Aug 2012 16:55:43 +0900
-Message-ID: <503C797F.4040506@samsung.com>
+Subject: [PATCH v2 2/5] mmc: dw-mmc: add the platdata related with clock
+Date: Tue, 28 Aug 2012 16:55:42 +0900
+Message-ID: <503C797E.9010004@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:32195 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752663Ab2H1Hzr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Aug 2012 03:55:47 -0400
-Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout1.samsung.com
+Received: from mailout3.samsung.com ([203.254.224.33]:54170 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752254Ab2H1Hzq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Aug 2012 03:55:46 -0400
+Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout3.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M9G000OYGNEIH00@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 28 Aug 2012 16:55:46 +0900 (KST)
-Received: from [10.90.51.55] by mmp2.samsung.com
+ 17 2011)) with ESMTP id <0M9G00D2LGN3DU60@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 28 Aug 2012 16:55:45 +0900 (KST)
+Received: from [10.90.51.55] by mmp1.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0M9G000BCGOXHEH0@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 28 Aug 2012 16:55:46 +0900 (KST)
+ 17 2011)) with ESMTPA id <0M9G00HFKGOWGT20@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 28 Aug 2012 16:55:45 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc <linux-mmc@vger.kernel.org>
 Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <James.Hogan@imgtec.com>, Thomas Abraham <thomas.abraham@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>
 
+Some SoC need to set the clock-phase shift.
+So Add the callback function into platdata for using phase-shift
+
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 ---
- include/linux/mmc/exynos-dw_mmc.h |   61 +++++++++++++++++++++++++++++++++++++
- 1 files changed, 61 insertions(+), 0 deletions(-)
- create mode 100644 include/linux/mmc/exynos-dw_mmc.h
+ drivers/mmc/host/dw_mmc.c  |    3 +++
+ include/linux/mmc/dw_mmc.h |    8 ++++++++
+ 2 files changed, 11 insertions(+), 0 deletions(-)
 
-diff --git a/include/linux/mmc/exynos-dw_mmc.h b/include/linux/mmc/exynos-dw_mmc.h
-new file mode 100644
-index 0000000..3a6b08b
---- /dev/null
-+++ b/include/linux/mmc/exynos-dw_mmc.h
-@@ -0,0 +1,61 @@
-+/*
-+ * Synopsys DesignWare Multimedia Card Interface driver
-+ *
-+ * Copyright (c) 2012 Samsung Electronics Co., Ltd.
-+ *		http://www.samsung.com
-+ *
-+ * Header file for Exynos specific register
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index e30d3ed..437fdf8 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -821,6 +821,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	mci_writel(slot->host, UHS_REG, regs);
+ 
++	if (slot->host->pdata->set_clk_drv_sample)
++		slot->host->pdata->set_clk_drv_sample(slot->host, ios);
 +
-+#ifndef _EXYNOS_DW_MMC_H
-+#define _EXYNOS_DW_MMC_H
-+#include <linux/mmc/dw_mmc.h>
-+#include <linux/mmc/host.h>
+ 	if (ios->clock) {
+ 		/*
+ 		 * Use mirror of ios->clock to prevent race with mmc
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 7a7ebd3..f20979c 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -229,6 +229,9 @@ struct dw_mci_board {
+ 	 */
+ 	unsigned int fifo_depth;
+ 
++	u32 ddr_timing;		/* DDR clock phase timing value */
++	u32 sdr_timing;		/* SDR clock phase timing value */
 +
-+#define SDMMC_EXYNOS_CLKSEL	0x09C
+ 	/* delay in mS before detecting cards after interrupt */
+ 	u32 detect_delay_ms;
+ 
+@@ -249,6 +252,11 @@ struct dw_mci_board {
+ 	struct dw_mci_dma_ops *dma_ops;
+ 	struct dma_pdata *data;
+ 	struct block_settings *blk_settings;
 +
-+#define SDMMC_GET_CLK_DRV(x)		((x) >> 16 & 0x7)
-+#define SDMMC_GET_CLK_SAMPLE(x)		((x) & 0x7)
-+#define SDMCM_GET_DIVRATIO(x)		((x) >> 24 & 0x7)
-+#define SDMMC_CLK_RESET_DRV_SAMPLE	(0x07070007);
++	int (*get_clk_drv)(struct dw_mci *);
++	int (*get_clk_sample)(struct dw_mci *);
++	void (*set_clk_drv_sample)(struct dw_mci *host, struct mmc_ios *ios);
 +
-+#define mci_readl(dev, reg)			\
-+	__raw_readl((dev)->regs + SDMMC_##reg)
-+#define mci_writel(dev, reg, value)			\
-+	__raw_writel((value), (dev)->regs + SDMMC_##reg)
-+
-+static inline int exynos_get_clk_drv(struct dw_mci *host)
-+{
-+	return SDMMC_GET_CLK_DRV(mci_readl(host, EXYNOS_CLKSEL));
-+}
-+
-+static inline int exynos_get_clk_sample(struct dw_mci *host)
-+{
-+	return SDMMC_GET_CLK_DRV(mci_readl(host, EXYNOS_CLKSEL));
-+}
-+
-+static inline void exynos_set_clk_drv_sample(struct dw_mci *host,
-+		struct mmc_ios *ios)
-+{
-+	u32 regs, ratio;
-+
-+	regs = mci_readl(host, EXYNOS_CLKSEL);
-+	ratio = SDMMC_GET_DIV_RATIO(reg);
-+	if (!ratio) {
-+		regs &= ~SDMMC_CLK_RESET_DRV_SAMPLE;
-+		regs |= ratio;
-+		if (ios->timing == MMC_TIMING_UHS_DDR50)
-+			regs |= host->pdata->ddr_timing;
-+		else
-+			regs |= host->pdata->sdr_timing;
-+	} else
-+		regs &= ~SDMMC_CLK_RESET_DRV_SAMPLE;
-+
-+	mci_writel(host, EXYNOS_CLKSEL, regs);
-+}
-+
-+#endif /* _EXYNOS_DW_MMC_H */
+ };
+ 
+ #endif /* LINUX_MMC_DW_MMC_H */
 -- 
 1.7.4.1
