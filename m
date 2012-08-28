@@ -1,242 +1,614 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
-Date: Tue, 28 Aug 2012 23:10:35 +0530
-Message-ID: <CANfBPZ9p-1M9hDmG4KUq_ky6+Z+7FMwVA=gz1kc7j0bUSz_EzQ@mail.gmail.com>
-References: <34e29d774773a7dfa3e1b57232249b68.squirrel@www.codeaurora.org>
- <CANfBPZ9NZAdK4tEDJ8wiNKNjRUuqaLKk3qqVZVgod8vwYVuOYw@mail.gmail.com>
- <f35f04238ad2e00e976d5f99b4b29648.squirrel@www.codeaurora.org>
- <CANfBPZ9Pbsp4OXh-kCveiAm-ing8i4k5WZvAzrdi8G4d8tCDdA@mail.gmail.com> <a2a7a94c38abadb36b23c964ad8e9ace.squirrel@www.codeaurora.org>
+From: Igor Grinberg <grinberg@compulab.co.il>
+Subject: =?UTF-8?q?=5BPATCH=209/9=5D=20ARM=3A=20OMAP=3A=20remove=20plat/board=2Eh=20file?=
+Date: Wed, 29 Aug 2012 02:18:57 +0300
+Message-ID: <1346195937-6383-10-git-send-email-grinberg@compulab.co.il>
+References: <1346195937-6383-1-git-send-email-grinberg@compulab.co.il>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog112.obsmtp.com ([74.125.149.207]:58538 "EHLO
-	na3sys009aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751779Ab2H1Rk5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Aug 2012 13:40:57 -0400
-Received: by dakf10 with SMTP id f10so3706157dak.11
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Aug 2012 10:40:56 -0700 (PDT)
-In-Reply-To: <a2a7a94c38abadb36b23c964ad8e9ace.squirrel@www.codeaurora.org>
+Received: from softlayer.compulab.co.il ([50.23.254.55]:49956 "EHLO
+	compulab.co.il" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752145Ab2H1XTZ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Aug 2012 19:19:25 -0400
+In-Reply-To: <1346195937-6383-1-git-send-email-grinberg@compulab.co.il>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: merez@codeaurora.org
-Cc: Chris Ball <cjb@laptop.org>, Muthu Kumar <muthu.lkml@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>
+To: Tony Lindgren <tony@atomide.com>
+Cc: Kevin Hilman <khilman@ti.com>, Paul Walmsley <paul@pwsan.com>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Igor Grinberg <grinberg@compulab.co.il>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org
 
-On Mon, Aug 27, 2012 at 11:58 PM,  <merez@codeaurora.org> wrote:
->
-> On Fri, July 27, 2012 2:07 am, S, Venkatraman wrote:
->> On Fri, Jul 27, 2012 at 12:24 AM,  <merez@codeaurora.org> wrote:
->>>
->>> On Thu, July 26, 2012 8:28 am, S, Venkatraman wrote:
->>>> On Tue, Jul 24, 2012 at 2:14 PM,  <merez@codeaurora.org> wrote:
->>>>> On Mon, July 23, 2012 5:22 am, S, Venkatraman wrote:
->>>>>> On Mon, Jul 23, 2012 at 5:13 PM,  <merez@codeaurora.org> wrote:
->>>>>>> On Wed, July 18, 2012 12:26 am, Chris Ball wrote:
->>>>>>>> Hi,  [removing Jens and the documentation list, since now we're
->>>>> talking about the MMC side only]
->>>>>>>> On Wed, Jul 18 2012, merez@codeaurora.org wrote:
->>>>>>>>> Is there anything else that holds this patch from being pushed to
->>>>>>> mmc-next?
->>>>>>>> Yes, I'm still uncomfortable with the write packing patchsets for a
->>>>>>> couple of reasons, and I suspect that the sum of those reasons means
->>>>>>> that
->>>>>>> we should probably plan on holding off merging it until after 3.6.
->>>>>>>> Here are the open issues; please correct any misunderstandings:
->>>>>>>> With
->>>>> Seungwon's patchset ("Support packed write command"):
->>>>>>>> * I still don't have a good set of representative benchmarks
->>>>>>>> showing
->>>>>>>>   what kind of performance changes come with this patchset.  It
->>>>>>>> seems
->>>>>>> like we've had a small amount of testing on one controller/eMMC part
->>>>>>> combo
->>>>>>> from Seungwon, and an entirely different test from Maya, and the
->>>>> results
->>>>>>> aren't documented fully anywhere to the level of describing what the
->>>>> hardware was, what the test was, and what the results were before and
->>>>> after the patchset.
->>>>>>> Currently, there is only one card vendor that supports packed
->>>>>>> commands.
->>>>> Following are our sequential write (LMDD) test results on 2 of our
->>>>> targets
->>>>>>> (in MB/s):
->>>>>>>                        No packing        packing
->>>>>>> Target 1 (SDR 50MHz)     15               25
->>>>>>> Target 2 (DDR 50MHz)     20               30
->>>>>>>> With the reads-during-writes regression:
->>>>>>>> * Venkat still has open questions about the nature of the read
->>>>>>>>   regression, and thinks we should understand it with blktrace
->>>>>>>> before
->>>>>>> trying to fix it.  Maya has a theory about writes overwhelming
->>>>>>> reads,
->>>>>>> but
->>>>>>> Venkat doesn't understand why this would explain the observed
->>>>>>> bandwidth drop.
->>>>>>> The degradation of read due to writes is not a new behavior and
->>>>>>> exists
->>>>> also without the write packing feature (which only increases the
->>>>> degradation). Our investigation of this phenomenon led us to the
->>>>> Conclusion that a new scheduling policy should be used for mobile
->>>>> devices,
->>>>>>> but this is not related to the current discussion of the write
->>>>>>> packing
->>>>> feature.
->>>>>>> The write packing feature increases the degradation of read due to
->>>>> write
->>>>>>> since it allows the MMC to fetch many write requests in a row,
->>>>>>> instead
->>>>>>> of
->>>>>>> fetching only one at a time.  Therefore some of the read requests
->>>>>>> will
->>>>> have to wait for the completion of more write requests before they can
->>>>> be
->>>>>>> issued.
->>>>>>
->>>>>> I am a bit puzzled by this claim. One thing I checked carefully when
->>>>> reviewing write packing patches from SJeon was that the code didn't
->>>>> plough through a mixed list of reads and writes and selected only
->>>>> writes.
->>>>>> This section of the code in "mmc_blk_prep_packed_list()", from v8
->>>>> patchset..
->>>>>> <Quote>
->>>>>> +               if (rq_data_dir(cur) != rq_data_dir(next)) {
->>>>>> +                       put_back = 1;
->>>>>> +                       break;
->>>>>> +               }
->>>>>> </Quote>
->>>>>>
->>>>>> means that once a read is encountered in the middle of write packing,
->>>>> the packing is stopped at that point and it is executed. Then the next
->>>>> blk_fetch_request should get the next read and continue as before.
->>>>>>
->>>>>> IOW, the ordering of reads and writes is _not_ altered when using
->>>>>> packed
->>>>> commands.
->>>>>> For example if there were 5 write requests, followed by 1 read,
->>>>>> followed by 5 more write requests in the request_queue, the first 5
->>>>> writes will be executed as one "packed command", then the read will be
->>>>> executed, and then the remaining 5 writes will be executed as one
->>>>> "packed command". So the read does not have to wait any more than it
->>>>> waited before (packing feature)
->>>>>
->>>>> Let me try to better explain with your example.
->>>>> Without packing the MMC layer will fetch 2 write requests and wait for
->>>>> the
->>>>> first write request completion before fetching another write request.
->>>>> During this time the read request could be inserted into the CFQ and
->>>>> since
->>>>> it has higher priority than the async write it will be dispatched in
->>>>> the
->>>>> next fetch. So, the result would be 2 write requests followed by one
->>>>> read
->>>>> request and the read would have to wait for completion of only 2 write
->>>>> requests.
->>>>> With packing, all the 5 write requests will be fetched in a row, and
->>>>> then
->>>>> the read will arrive and be dispatched in the next fetch. Then the
->>>>> read
->>>>> will have to wait for the completion of 5 write requests.
->>>>>
->>>>> Few more clarifications:
->>>>> Due to the plug list mechanism in the block layer the applications can
->>>>> "aggregate" several requests to be inserted into the scheduler before
->>>>> waking the MMC queue thread.
->>>>> This leads to a situation where there are several write requests in
->>>>> the
->>>>> CFQ queue when MMC starts to do the fetches.
->>>>>
->>>>> If the read was inserted while we are building the packed command then
->>>>> I
->>>>> agree that we should have seen less effect on the read performance.
->>>>> However, the write packing statistics show that in most of the cases
->>>>> the
->>>>> packing stopped due to an empty queue, meaning that the read was
->>>>> inserted
->>>>> to the CFQ after all the pending write requests were fetched and
->>>>> packed.
->>>>>
->>>>> Following is an example for write packing statistics of a READ/WRITE
->>>>> parallel scenario:
->>>>> write packing statistics:
->>>>> Packed 1 reqs - 448 times
->>>>> Packed 2 reqs - 38 times
->>>>> Packed 3 reqs - 23 times
->>>>> Packed 4 reqs - 30 times
->>>>> Packed 5 reqs - 14 times
->>>>> Packed 6 reqs - 8 times
->>>>> Packed 7 reqs - 4 times
->>>>> Packed 8 reqs - 1 times
->>>>> Packed 10 reqs - 1 times
->>>>> Packed 34 reqs - 1 times
->>>>> stopped packing due to the following reasons:
->>>>> 2 times: wrong data direction (meaning a READ was fetched and stopped
->>>>> the
->>>>> packing)
->>>>> 1 times: flush or discard
->>>>> 565 times: empty queue (meaning blk_fetch_request returned NULL)
->>>>>
->>>>>>
->>>>>> And I requested blktrace to confirm that this is indeed the
->>>>>> behaviour.
->>>>>
->>>>> The trace logs show that in case of no packing, there are maximum of
->>>>> 3-4
->>>>> requests issued before a read request, while with packing there are
->>>>> also
->>>>> cases of 6 and 7 requests dispatched before a read request.
->>>>>
->>>>> I'm waiting for an approval for sharing the block trace logs.
->>>>> Since this is a simple test to run you can collect the trace logs and
->>>>> let
->>>>> us know if you reach other conclusions.
->>>>>
->>>> Thanks for the brief. I don't have the eMMC4.5 device with me yet, so
->>>> I can't reproduce the result.
->>>
->>> I sent the trace logs of both packing and non packing. Please let me
->>> know
->>> if you have additional questions after reviewing them.
->>>
->>> The problem you describe is most likely
->>>> applicable
->>>> to any block device driver with a large queue depth ( any queue depth
->>>> >1).
->>>> I'll check to see what knobs in block affect the result.
->>>> Speaking of it, what is the host controller you use to test this ?
->>>
->>> The controller I use is msm_sdcc.
->>>
->>>> I was wondering if host->max_seg_size is taken into account while
->>>> packed
->>>> command
->>>> is in use. If not, shouldn't it be ?  - it could act as a better
->>>> throttle for "packing density".
->>>
->>> The max segments (which is calculated from host->max_seg_size) is taking
->>> into account when preparing the packed list (so that the whole packed
->>> won't exceed the max number of segments).
->>> I'm not sure I understand how host->max_seg_size can be used as a
->>> throttle
->>> for "packing density". Can you please explain?
->>>
->> Ok - I overlooked that max_segments is indeed used to limit the number
->> of requests
->> that are packed.(And this corresponds to max_seg_size, which is what I
->> intended)
->> I should be getting my MMC4.5 test gear in a couple of days - I'll run
->> it through
->> on some hosts and can either provide more feedback or Ack this patch.
->> Regards,
->> Venkat.
->
-> Hi Venkat,
->
-> Do you have additional questions/comments?
->
-None. I am just running some stress tests on BKOPS patches right now
-and after tomorrow I'll start testing packed command. Will all the
-patches apply on top of current mmc-next ? If not, it would be great
-if
-you can send an updated version.
+plat/board.h file is now empty - remove it.
 
-Thanks,
-Venkat.
+Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Kyungmin Park <kyungmin.park@samsung.com>
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-mtd@lists.infradead.org
+Signed-off-by: Igor Grinberg <grinberg@compulab.co.il>
+---
+ arch/arm/mach-omap1/board-generic.c          |    1 -
+ arch/arm/mach-omap1/board-voiceblue.c        |    1 -
+ arch/arm/mach-omap1/devices.c                |    1 -
+ arch/arm/mach-omap1/serial.c                 |    1 -
+ arch/arm/mach-omap2/board-2430sdp.c          |    1 -
+ arch/arm/mach-omap2/board-4430sdp.c          |    1 -
+ arch/arm/mach-omap2/board-apollon.c          |    1 -
+ arch/arm/mach-omap2/board-devkit8000.c       |    1 -
+ arch/arm/mach-omap2/board-generic.c          |    1 -
+ arch/arm/mach-omap2/board-igep0020.c         |    1 -
+ arch/arm/mach-omap2/board-ldp.c              |    1 -
+ arch/arm/mach-omap2/board-n8x0.c             |    1 -
+ arch/arm/mach-omap2/board-omap3beagle.c      |    1 -
+ arch/arm/mach-omap2/board-omap3logic.c       |    1 -
+ arch/arm/mach-omap2/board-omap3pandora.c     |    1 -
+ arch/arm/mach-omap2/board-omap3touchbook.c   |    1 -
+ arch/arm/mach-omap2/board-omap4panda.c       |    1 -
+ arch/arm/mach-omap2/board-overo.c            |    1 -
+ arch/arm/mach-omap2/board-rx51-peripherals.c |    1 -
+ arch/arm/mach-omap2/board-rx51.c             |    1 -
+ arch/arm/mach-omap2/board-zoom.c             |    1 -
+ arch/arm/mach-omap2/common.c                 |    1 -
+ arch/arm/mach-omap2/devices.c                |    1 -
+ arch/arm/mach-omap2/gpmc-nand.c              |    1 -
+ arch/arm/mach-omap2/gpmc-onenand.c           |    1 -
+ arch/arm/mach-omap2/gpmc-smc91x.c            |    1 -
+ arch/arm/mach-omap2/gpmc-smsc911x.c          |    1 -
+ arch/arm/mach-omap2/pm-debug.c               |    1 -
+ arch/arm/mach-omap2/pm24xx.c                 |    1 -
+ arch/arm/mach-omap2/serial.c                 |    1 -
+ arch/arm/plat-omap/common.c                  |    1 -
+ arch/arm/plat-omap/counter_32k.c             |    1 -
+ arch/arm/plat-omap/debug-devices.c           |    3 ---
+ arch/arm/plat-omap/devices.c                 |    1 -
+ arch/arm/plat-omap/include/plat/board.h      |   13 -------------
+ arch/arm/plat-omap/include/plat/mmc.h        |    1 -
+ arch/arm/plat-omap/include/plat/usb.h        |    1 -
+ arch/arm/plat-omap/sram.c                    |    1 -
+ drivers/mmc/host/omap.c                      |    1 -
+ drivers/mmc/host/omap_hsmmc.c                |    1 -
+ drivers/mtd/onenand/omap2.c                  |    2 --
+ 41 files changed, 0 insertions(+), 56 deletions(-)
+ delete mode 100644 arch/arm/plat-omap/include/plat/board.h
+
+diff --git a/arch/arm/mach-omap1/board-generic.c b/arch/arm/mach-omap1/=
+board-generic.c
+index d032734..04b5fda 100644
+--- a/arch/arm/mach-omap1/board-generic.c
++++ b/arch/arm/mach-omap1/board-generic.c
+@@ -23,7 +23,6 @@
+ #include <asm/mach/map.h>
+=20
+ #include <plat/mux.h>
+-#include <plat/board.h>
+=20
+ #include <mach/usb.h>
+=20
+diff --git a/arch/arm/mach-omap1/board-voiceblue.c b/arch/arm/mach-omap=
+1/board-voiceblue.c
+index 11e1ff3..1668af3 100644
+--- a/arch/arm/mach-omap1/board-voiceblue.c
++++ b/arch/arm/mach-omap1/board-voiceblue.c
+@@ -35,7 +35,6 @@
+ #include <plat/flash.h>
+ #include <plat/mux.h>
+ #include <plat/tc.h>
+-#include <plat/board.h>
+=20
+ #include <mach/hardware.h>
+ #include <mach/usb.h>
+diff --git a/arch/arm/mach-omap1/devices.c b/arch/arm/mach-omap1/device=
+s.c
+index fa1fa4d..1feca35 100644
+--- a/arch/arm/mach-omap1/devices.c
++++ b/arch/arm/mach-omap1/devices.c
+@@ -20,7 +20,6 @@
+ #include <asm/mach/map.h>
+=20
+ #include <plat/tc.h>
+-#include <plat/board.h>
+ #include <plat/mux.h>
+ #include <plat/dma.h>
+ #include <plat/mmc.h>
+diff --git a/arch/arm/mach-omap1/serial.c b/arch/arm/mach-omap1/serial.=
+c
+index 6809c9e..0d1709b 100644
+--- a/arch/arm/mach-omap1/serial.c
++++ b/arch/arm/mach-omap1/serial.c
+@@ -22,7 +22,6 @@
+=20
+ #include <asm/mach-types.h>
+=20
+-#include <plat/board.h>
+ #include <plat/mux.h>
+ #include <plat/fpga.h>
+=20
+diff --git a/arch/arm/mach-omap2/board-2430sdp.c b/arch/arm/mach-omap2/=
+board-2430sdp.c
+index 9511584..36eee4b 100644
+--- a/arch/arm/mach-omap2/board-2430sdp.c
++++ b/arch/arm/mach-omap2/board-2430sdp.c
+@@ -33,7 +33,6 @@
+ #include <asm/mach/arch.h>
+ #include <asm/mach/map.h>
+=20
+-#include <plat/board.h>
+ #include "common.h"
+ #include <plat/gpmc.h>
+ #include <plat/usb.h>
+diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-omap2/=
+board-4430sdp.c
+index ad8a7d9..04e8574 100644
+--- a/arch/arm/mach-omap2/board-4430sdp.c
++++ b/arch/arm/mach-omap2/board-4430sdp.c
+@@ -34,7 +34,6 @@
+ #include <asm/mach/arch.h>
+ #include <asm/mach/map.h>
+=20
+-#include <plat/board.h>
+ #include "common.h"
+ #include <plat/usb.h>
+ #include <plat/mmc.h>
+diff --git a/arch/arm/mach-omap2/board-apollon.c b/arch/arm/mach-omap2/=
+board-apollon.c
+index e5fa46b..a6a1b48 100644
+--- a/arch/arm/mach-omap2/board-apollon.c
++++ b/arch/arm/mach-omap2/board-apollon.c
+@@ -35,7 +35,6 @@
+ #include <asm/mach/flash.h>
+=20
+ #include <plat/led.h>
+-#include <plat/board.h>
+ #include "common.h"
+ #include <plat/gpmc.h>
+=20
+diff --git a/arch/arm/mach-omap2/board-devkit8000.c b/arch/arm/mach-oma=
+p2/board-devkit8000.c
+index 6567c1c..870a2a5 100644
+--- a/arch/arm/mach-omap2/board-devkit8000.c
++++ b/arch/arm/mach-omap2/board-devkit8000.c
+@@ -40,7 +40,6 @@
+ #include <asm/mach/map.h>
+ #include <asm/mach/flash.h>
+=20
+-#include <plat/board.h>
+ #include "common.h"
+ #include <plat/gpmc.h>
+ #include <plat/nand.h>
+diff --git a/arch/arm/mach-omap2/board-generic.c b/arch/arm/mach-omap2/=
+board-generic.c
+index 6f93a20..38024a5 100644
+--- a/arch/arm/mach-omap2/board-generic.c
++++ b/arch/arm/mach-omap2/board-generic.c
+@@ -20,7 +20,6 @@
+ #include <asm/hardware/gic.h>
+ #include <asm/mach/arch.h>
+=20
+-#include <plat/board.h>
+ #include "common.h"
+ #include "common-board-devices.h"
+=20
+diff --git a/arch/arm/mach-omap2/board-igep0020.c b/arch/arm/mach-omap2=
+/board-igep0020.c
+index 7491529..c4f17bb 100644
+--- a/arch/arm/mach-omap2/board-igep0020.c
++++ b/arch/arm/mach-omap2/board-igep0020.c
+@@ -29,7 +29,6 @@
+ #include <asm/mach-types.h>
+ #include <asm/mach/arch.h>
+=20
+-#include <plat/board.h>
+ #include "common.h"
+ #include <plat/gpmc.h>
+ #include <plat/usb.h>
+diff --git a/arch/arm/mach-omap2/board-ldp.c b/arch/arm/mach-omap2/boar=
+d-ldp.c
+index ef9e829..c37c2a1 100644
+--- a/arch/arm/mach-omap2/board-ldp.c
++++ b/arch/arm/mach-omap2/board-ldp.c
+@@ -35,7 +35,6 @@
+ #include <asm/mach/map.h>
+=20
+ #include <plat/mcspi.h>
+-#include <plat/board.h>
+ #include "common.h"
+ #include <plat/gpmc.h>
+ #include <mach/board-zoom.h>
+diff --git a/arch/arm/mach-omap2/board-n8x0.c b/arch/arm/mach-omap2/boa=
+rd-n8x0.c
+index 677357f..5397209 100644
+--- a/arch/arm/mach-omap2/board-n8x0.c
++++ b/arch/arm/mach-omap2/board-n8x0.c
+@@ -25,7 +25,6 @@
+ #include <asm/mach/arch.h>
+ #include <asm/mach-types.h>
+=20
+-#include <plat/board.h>
+ #include "common.h"
+ #include <plat/menelaus.h>
+ #include <mach/irqs.h>
+diff --git a/arch/arm/mach-omap2/board-omap3beagle.c b/arch/arm/mach-om=
+ap2/board-omap3beagle.c
+index 6202fc7..293e3b2 100644
+--- a/arch/arm/mach-omap2/board-omap3beagle.c
++++ b/arch/arm/mach-omap2/board-omap3beagle.c
+@@ -39,7 +39,6 @@
+ #include <asm/mach/map.h>
+ #include <asm/mach/flash.h>
+=20
+-#include <plat/board.h>
+ #include "common.h"
+ #include <video/omapdss.h>
+ #include <video/omap-panel-tfp410.h>
+diff --git a/arch/arm/mach-omap2/board-omap3logic.c b/arch/arm/mach-oma=
+p2/board-omap3logic.c
+index fca93d1..a63a49d 100644
+--- a/arch/arm/mach-omap2/board-omap3logic.c
++++ b/arch/arm/mach-omap2/board-omap3logic.c
+@@ -41,7 +41,6 @@
+ #include "common-board-devices.h"
+=20
+ #include <plat/mux.h>
+-#include <plat/board.h>
+ #include "common.h"
+ #include <plat/gpmc-smsc911x.h>
+ #include <plat/gpmc.h>
+diff --git a/arch/arm/mach-omap2/board-omap3pandora.c b/arch/arm/mach-o=
+map2/board-omap3pandora.c
+index 57aebee..633c445 100644
+--- a/arch/arm/mach-omap2/board-omap3pandora.c
++++ b/arch/arm/mach-omap2/board-omap3pandora.c
+@@ -40,7 +40,6 @@
+ #include <asm/mach/arch.h>
+ #include <asm/mach/map.h>
+=20
+-#include <plat/board.h>
+ #include "common.h"
+ #include <mach/hardware.h>
+ #include <plat/mcspi.h>
+diff --git a/arch/arm/mach-omap2/board-omap3touchbook.c b/arch/arm/mach=
+-omap2/board-omap3touchbook.c
+index 485d14d..d3556c9 100644
+--- a/arch/arm/mach-omap2/board-omap3touchbook.c
++++ b/arch/arm/mach-omap2/board-omap3touchbook.c
+@@ -44,7 +44,6 @@
+ #include <asm/mach/flash.h>
+ #include <asm/system_info.h>
+=20
+-#include <plat/board.h>
+ #include "common.h"
+ #include <plat/gpmc.h>
+ #include <plat/nand.h>
+diff --git a/arch/arm/mach-omap2/board-omap4panda.c b/arch/arm/mach-oma=
+p2/board-omap4panda.c
+index 70f6d1d..3911c13 100644
+--- a/arch/arm/mach-omap2/board-omap4panda.c
++++ b/arch/arm/mach-omap2/board-omap4panda.c
+@@ -39,7 +39,6 @@
+ #include <asm/mach/map.h>
+ #include <video/omapdss.h>
+=20
+-#include <plat/board.h>
+ #include "common.h"
+ #include <plat/usb.h>
+ #include <plat/mmc.h>
+diff --git a/arch/arm/mach-omap2/board-overo.c b/arch/arm/mach-omap2/bo=
+ard-overo.c
+index 779734d..193d160 100644
+--- a/arch/arm/mach-omap2/board-overo.c
++++ b/arch/arm/mach-omap2/board-overo.c
+@@ -42,7 +42,6 @@
+ #include <asm/mach/flash.h>
+ #include <asm/mach/map.h>
+=20
+-#include <plat/board.h>
+ #include "common.h"
+ #include <video/omapdss.h>
+ #include <video/omap-panel-generic-dpi.h>
+diff --git a/arch/arm/mach-omap2/board-rx51-peripherals.c b/arch/arm/ma=
+ch-omap2/board-rx51-peripherals.c
+index df2534d..3b9fc61 100644
+--- a/arch/arm/mach-omap2/board-rx51-peripherals.c
++++ b/arch/arm/mach-omap2/board-rx51-peripherals.c
+@@ -28,7 +28,6 @@
+ #include <asm/system_info.h>
+=20
+ #include <plat/mcspi.h>
+-#include <plat/board.h>
+ #include "common.h"
+ #include <plat/dma.h>
+ #include <plat/gpmc.h>
+diff --git a/arch/arm/mach-omap2/board-rx51.c b/arch/arm/mach-omap2/boa=
+rd-rx51.c
+index 345dd93..92924eb 100644
+--- a/arch/arm/mach-omap2/board-rx51.c
++++ b/arch/arm/mach-omap2/board-rx51.c
+@@ -24,7 +24,6 @@
+ #include <asm/mach/map.h>
+=20
+ #include <plat/mcspi.h>
+-#include <plat/board.h>
+ #include "common.h"
+ #include <plat/dma.h>
+ #include <plat/gpmc.h>
+diff --git a/arch/arm/mach-omap2/board-zoom.c b/arch/arm/mach-omap2/boa=
+rd-zoom.c
+index 4e7e561..4994438 100644
+--- a/arch/arm/mach-omap2/board-zoom.c
++++ b/arch/arm/mach-omap2/board-zoom.c
+@@ -22,7 +22,6 @@
+ #include <asm/mach/arch.h>
+=20
+ #include "common.h"
+-#include <plat/board.h>
+ #include <plat/usb.h>
+=20
+ #include <mach/board-zoom.h>
+diff --git a/arch/arm/mach-omap2/common.c b/arch/arm/mach-omap2/common.=
+c
+index 069f972..6c2ff4f 100644
+--- a/arch/arm/mach-omap2/common.c
++++ b/arch/arm/mach-omap2/common.c
+@@ -18,7 +18,6 @@
+ #include <linux/io.h>
+=20
+ #include <plat/hardware.h>
+-#include <plat/board.h>
+ #include <plat/mux.h>
+ #include <plat/clock.h>
+=20
+diff --git a/arch/arm/mach-omap2/devices.c b/arch/arm/mach-omap2/device=
+s.c
+index c00c689..56dfa2d 100644
+--- a/arch/arm/mach-omap2/devices.c
++++ b/arch/arm/mach-omap2/devices.c
+@@ -26,7 +26,6 @@
+ #include <asm/pmu.h>
+=20
+ #include "iomap.h"
+-#include <plat/board.h>
+ #include <plat/dma.h>
+ #include <plat/omap_hwmod.h>
+ #include <plat/omap_device.h>
+diff --git a/arch/arm/mach-omap2/gpmc-nand.c b/arch/arm/mach-omap2/gpmc=
+-nand.c
+index 386dec8..513ed9e 100644
+--- a/arch/arm/mach-omap2/gpmc-nand.c
++++ b/arch/arm/mach-omap2/gpmc-nand.c
+@@ -18,7 +18,6 @@
+=20
+ #include <plat/cpu.h>
+ #include <plat/nand.h>
+-#include <plat/board.h>
+ #include <plat/gpmc.h>
+=20
+ static struct resource gpmc_nand_resource =3D {
+diff --git a/arch/arm/mach-omap2/gpmc-onenand.c b/arch/arm/mach-omap2/g=
+pmc-onenand.c
+index a0fa9bb..c5f005e 100644
+--- a/arch/arm/mach-omap2/gpmc-onenand.c
++++ b/arch/arm/mach-omap2/gpmc-onenand.c
+@@ -20,7 +20,6 @@
+=20
+ #include <plat/cpu.h>
+ #include <plat/onenand.h>
+-#include <plat/board.h>
+ #include <plat/gpmc.h>
+=20
+ static struct omap_onenand_platform_data *gpmc_onenand_data;
+diff --git a/arch/arm/mach-omap2/gpmc-smc91x.c b/arch/arm/mach-omap2/gp=
+mc-smc91x.c
+index ba10c24..3f75ff0 100644
+--- a/arch/arm/mach-omap2/gpmc-smc91x.c
++++ b/arch/arm/mach-omap2/gpmc-smc91x.c
+@@ -17,7 +17,6 @@
+ #include <linux/io.h>
+ #include <linux/smc91x.h>
+=20
+-#include <plat/board.h>
+ #include <plat/gpmc.h>
+ #include <plat/gpmc-smc91x.h>
+=20
+diff --git a/arch/arm/mach-omap2/gpmc-smsc911x.c b/arch/arm/mach-omap2/=
+gpmc-smsc911x.c
+index b6c77be..a3a2887 100644
+--- a/arch/arm/mach-omap2/gpmc-smsc911x.c
++++ b/arch/arm/mach-omap2/gpmc-smsc911x.c
+@@ -20,7 +20,6 @@
+ #include <linux/io.h>
+ #include <linux/smsc911x.h>
+=20
+-#include <plat/board.h>
+ #include <plat/gpmc.h>
+ #include <plat/gpmc-smsc911x.h>
+=20
+diff --git a/arch/arm/mach-omap2/pm-debug.c b/arch/arm/mach-omap2/pm-de=
+bug.c
+index 814bcd9..3e1345f 100644
+--- a/arch/arm/mach-omap2/pm-debug.c
++++ b/arch/arm/mach-omap2/pm-debug.c
+@@ -28,7 +28,6 @@
+ #include <linux/slab.h>
+=20
+ #include <plat/clock.h>
+-#include <plat/board.h>
+ #include "powerdomain.h"
+ #include "clockdomain.h"
+ #include <plat/dmtimer.h>
+diff --git a/arch/arm/mach-omap2/pm24xx.c b/arch/arm/mach-omap2/pm24xx.=
+c
+index 9e54dc9..de1caf1 100644
+--- a/arch/arm/mach-omap2/pm24xx.c
++++ b/arch/arm/mach-omap2/pm24xx.c
+@@ -38,7 +38,6 @@
+ #include <plat/clock.h>
+ #include <plat/sram.h>
+ #include <plat/dma.h>
+-#include <plat/board.h>
+=20
+ #include <mach/irqs.h>
+=20
+diff --git a/arch/arm/mach-omap2/serial.c b/arch/arm/mach-omap2/serial.=
+c
+index c1b93c7..10f7f02 100644
+--- a/arch/arm/mach-omap2/serial.c
++++ b/arch/arm/mach-omap2/serial.c
+@@ -29,7 +29,6 @@
+=20
+ #include <plat/omap-serial.h>
+ #include "common.h"
+-#include <plat/board.h>
+ #include <plat/dma.h>
+ #include <plat/omap_hwmod.h>
+ #include <plat/omap_device.h>
+diff --git a/arch/arm/plat-omap/common.c b/arch/arm/plat-omap/common.c
+index 7c04748..e5778ed 100644
+--- a/arch/arm/plat-omap/common.c
++++ b/arch/arm/plat-omap/common.c
+@@ -17,7 +17,6 @@
+ #include <linux/dma-mapping.h>
+=20
+ #include <plat/common.h>
+-#include <plat/board.h>
+ #include <plat/vram.h>
+ #include <plat/dsp.h>
+ #include <plat/dma.h>
+diff --git a/arch/arm/plat-omap/counter_32k.c b/arch/arm/plat-omap/coun=
+ter_32k.c
+index dbf1e03..902d2ff 100644
+--- a/arch/arm/plat-omap/counter_32k.c
++++ b/arch/arm/plat-omap/counter_32k.c
+@@ -24,7 +24,6 @@
+=20
+ #include <plat/hardware.h>
+ #include <plat/common.h>
+-#include <plat/board.h>
+=20
+ #include <plat/clock.h>
+=20
+diff --git a/arch/arm/plat-omap/debug-devices.c b/arch/arm/plat-omap/de=
+bug-devices.c
+index caa1f7b..c7a4c09 100644
+--- a/arch/arm/plat-omap/debug-devices.c
++++ b/arch/arm/plat-omap/debug-devices.c
+@@ -17,9 +17,6 @@
+=20
+ #include <mach/hardware.h>
+=20
+-#include <plat/board.h>
+-
+-
+ /* Many OMAP development platforms reuse the same "debug board"; these
+  * platforms include H2, H3, H4, and Perseus2.
+  */
+diff --git a/arch/arm/plat-omap/devices.c b/arch/arm/plat-omap/devices.=
+c
+index 1cba927..287ac37 100644
+--- a/arch/arm/plat-omap/devices.c
++++ b/arch/arm/plat-omap/devices.c
+@@ -23,7 +23,6 @@
+ #include <asm/memblock.h>
+=20
+ #include <plat/tc.h>
+-#include <plat/board.h>
+ #include <plat/mmc.h>
+ #include <plat/menelaus.h>
+ #include <plat/omap44xx.h>
+diff --git a/arch/arm/plat-omap/include/plat/board.h b/arch/arm/plat-om=
+ap/include/plat/board.h
+deleted file mode 100644
+index d92f1b5..0000000
+--- a/arch/arm/plat-omap/include/plat/board.h
++++ /dev/null
+@@ -1,13 +0,0 @@
+-/*
+- *  arch/arm/plat-omap/include/mach/board.h
+- *
+- *  Information structures for board-specific data
+- *
+- *  Copyright (C) 2004	Nokia Corporation
+- *  Written by Juha Yrj=C3=B6l=C3=A4 <juha.yrjola@nokia.com>
+- */
+-
+-#ifndef _OMAP_BOARD_H
+-#define _OMAP_BOARD_H
+-
+-#endif
+diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap=
+/include/plat/mmc.h
+index eb3e4d5..8b4e4f2 100644
+--- a/arch/arm/plat-omap/include/plat/mmc.h
++++ b/arch/arm/plat-omap/include/plat/mmc.h
+@@ -15,7 +15,6 @@
+ #include <linux/device.h>
+ #include <linux/mmc/host.h>
+=20
+-#include <plat/board.h>
+ #include <plat/omap_hwmod.h>
+=20
+ #define OMAP15XX_NR_MMC		1
+diff --git a/arch/arm/plat-omap/include/plat/usb.h b/arch/arm/plat-omap=
+/include/plat/usb.h
+index 548a4c8..bd20588 100644
+--- a/arch/arm/plat-omap/include/plat/usb.h
++++ b/arch/arm/plat-omap/include/plat/usb.h
+@@ -5,7 +5,6 @@
+=20
+ #include <linux/io.h>
+ #include <linux/usb/musb.h>
+-#include <plat/board.h>
+=20
+ #define OMAP3_HS_USB_PORTS	3
+=20
+diff --git a/arch/arm/plat-omap/sram.c b/arch/arm/plat-omap/sram.c
+index 766181c..d861aa7 100644
+--- a/arch/arm/plat-omap/sram.c
++++ b/arch/arm/plat-omap/sram.c
+@@ -26,7 +26,6 @@
+ #include <asm/mach/map.h>
+=20
+ #include <plat/sram.h>
+-#include <plat/board.h>
+ #include <plat/cpu.h>
+=20
+ #include "sram.h"
+diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+index 50e08f0..5b7d420 100644
+--- a/drivers/mmc/host/omap.c
++++ b/drivers/mmc/host/omap.c
+@@ -33,7 +33,6 @@
+ #include <asm/io.h>
+ #include <asm/irq.h>
+=20
+-#include <plat/board.h>
+ #include <plat/mmc.h>
+ #include <asm/gpio.h>
+ #include <plat/dma.h>
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmm=
+c.c
+index 3a09f93..f871b31 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -40,7 +40,6 @@
+ #include <linux/regulator/consumer.h>
+ #include <linux/pm_runtime.h>
+ #include <mach/hardware.h>
+-#include <plat/board.h>
+ #include <plat/mmc.h>
+ #include <plat/cpu.h>
+=20
+diff --git a/drivers/mtd/onenand/omap2.c b/drivers/mtd/onenand/omap2.c
+index 398a827..10ed992 100644
+--- a/drivers/mtd/onenand/omap2.c
++++ b/drivers/mtd/onenand/omap2.c
+@@ -44,8 +44,6 @@
+=20
+ #include <plat/dma.h>
+=20
+-#include <plat/board.h>
+-
+ #define DRIVER_NAME "omap2-onenand"
+=20
+ #define ONENAND_IO_SIZE		SZ_128K
+--=20
+1.7.8.6
+
