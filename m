@@ -1,78 +1,116 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH v2 2/5] mmc: dw-mmc: add the platdata related with clock
-Date: Tue, 28 Aug 2012 16:55:42 +0900
-Message-ID: <503C797E.9010004@samsung.com>
+Subject: [PATCH v2 1/5] mmc: dw-mmc: ensure that the card is not busy when
+ changing clock
+Date: Tue, 28 Aug 2012 16:55:41 +0900
+Message-ID: <503C797D.4040404@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:54170 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752254Ab2H1Hzq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Aug 2012 03:55:46 -0400
-Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout3.samsung.com
+Received: from mailout1.samsung.com ([203.254.224.24]:32180 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752608Ab2H1Hzp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Aug 2012 03:55:45 -0400
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout1.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M9G00D2LGN3DU60@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 28 Aug 2012 16:55:45 +0900 (KST)
-Received: from [10.90.51.55] by mmp1.samsung.com
+ 17 2011)) with ESMTP id <0M9G000OYGNEIH00@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 28 Aug 2012 16:55:44 +0900 (KST)
+Received: from [10.90.51.55] by mmp2.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0M9G00HFKGOWGT20@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 28 Aug 2012 16:55:45 +0900 (KST)
+ 17 2011)) with ESMTPA id <0M9G0001YGOV6JL0@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 28 Aug 2012 16:55:44 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <James.Hogan@imgtec.com>, Thomas Abraham <thomas.abraham@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, Thomas Abraham <thomas.abraham@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>
 
-Some SoC need to set the clock-phase shift.
-So Add the callback function into platdata for using phase-shift
+synopsys spec is mentioned. (7.1 Software/Hardware Restrictions)
+"Before disabling clock, ensure that card is not busy due to any previous data command."
+
+At specific board, i found the problem that didn't inform ciu.
+(It didn't produce always.)
+At that time, i checked the status register whether card is busy or not.
+(Start bit of CMD register is cleared, but card is busy.)
+Current code didn't check the card status. Just check whether the start-bit cleared.
+host regard that command is completed, will send the next command.
+But next command didn't issue because Card is busy.
+This patch can prevent this situation.
 
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 ---
- drivers/mmc/host/dw_mmc.c  |    3 +++
- include/linux/mmc/dw_mmc.h |    8 ++++++++
- 2 files changed, 11 insertions(+), 0 deletions(-)
+ drivers/mmc/host/dw_mmc.c |   27 +++++++++++++++++++++------
+ drivers/mmc/host/dw_mmc.h |    1 +
+ 2 files changed, 22 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index e30d3ed..437fdf8 100644
+index 36f98c0..e30d3ed 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -821,6 +821,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+@@ -623,6 +623,24 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
+ 		cmd, arg, cmd_status);
+ }
  
- 	mci_writel(slot->host, UHS_REG, regs);
- 
-+	if (slot->host->pdata->set_clk_drv_sample)
-+		slot->host->pdata->set_clk_drv_sample(slot->host, ios);
++static void dw_mci_inform_ciu(struct dw_mci_slot *slot)
++{
++	struct dw_mci *host = slot->host;
++	unsigned long timeout = jiffies + msecs_to_jiffies(10);
++	u32 ctrl, status;
 +
- 	if (ios->clock) {
- 		/*
- 		 * Use mirror of ios->clock to prevent race with mmc
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 7a7ebd3..f20979c 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -229,6 +229,9 @@ struct dw_mci_board {
- 	 */
- 	unsigned int fifo_depth;
- 
-+	u32 ddr_timing;		/* DDR clock phase timing value */
-+	u32 sdr_timing;		/* SDR clock phase timing value */
++	do {
++		status = mci_readl(host, STATUS);
++		if (!(status & SDMMC_DATA_BUSY))
++			break;
++		ctrl = mci_readl(host, CTRL);
++		ctrl |= SDMMC_CTRL_RESET;
++		mci_writel(host, CTRL, ctrl);
++	} while (time_before(jiffies, timeout));
 +
- 	/* delay in mS before detecting cards after interrupt */
- 	u32 detect_delay_ms;
- 
-@@ -249,6 +252,11 @@ struct dw_mci_board {
- 	struct dw_mci_dma_ops *dma_ops;
- 	struct dma_pdata *data;
- 	struct block_settings *blk_settings;
++	mci_send_cmd(slot, SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
++}
 +
-+	int (*get_clk_drv)(struct dw_mci *);
-+	int (*get_clk_sample)(struct dw_mci *);
-+	void (*set_clk_drv_sample)(struct dw_mci *host, struct mmc_ios *ios);
-+
- };
+ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+ {
+ 	struct dw_mci *host = slot->host;
+@@ -650,15 +668,13 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+ 		mci_writel(host, CLKSRC, 0);
  
- #endif /* LINUX_MMC_DW_MMC_H */
+ 		/* inform CIU */
+-		mci_send_cmd(slot,
+-			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
++		dw_mci_inform_ciu(slot);
+ 
+ 		/* set clock to desired speed */
+ 		mci_writel(host, CLKDIV, div);
+ 
+ 		/* inform CIU */
+-		mci_send_cmd(slot,
+-			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
++		dw_mci_inform_ciu(slot);
+ 
+ 		/* enable clock; only low power if no SDIO */
+ 		clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
+@@ -667,8 +683,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+ 		mci_writel(host, CLKENA, clk_en_a);
+ 
+ 		/* inform CIU */
+-		mci_send_cmd(slot,
+-			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
++		dw_mci_inform_ciu(slot);
+ 
+ 		host->current_speed = slot->clock;
+ 	}
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 15c27e1..b6a1a78 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -127,6 +127,7 @@
+ #define SDMMC_CMD_INDX(n)		((n) & 0x1F)
+ /* Status register defines */
+ #define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FFF)
++#define SDMMC_DATA_BUSY			BIT(9)
+ /* Internal DMAC interrupt defines */
+ #define SDMMC_IDMAC_INT_AI		BIT(9)
+ #define SDMMC_IDMAC_INT_NI		BIT(8)
 -- 
 1.7.4.1
