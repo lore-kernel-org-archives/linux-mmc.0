@@ -1,135 +1,154 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v4 4/9] mmc: dw_mmc: lookup for optional biu and ciu clocks
-Date: Tue, 28 Aug 2012 19:43:07 +0900
-Message-ID: <002501cd8509$e97dad60$bc790820$%jun@samsung.com>
+Subject: RE: [PATCH v4 9/9] mmc: dw_mmc: add support for exynos specific
+ implementation of dw-mshc
+Date: Tue, 28 Aug 2012 19:43:54 +0900
+Message-ID: <002601cd850a$050dcc90$0f2965b0$%jun@samsung.com>
 References: <1345981927-26359-1-git-send-email-thomas.abraham@linaro.org>
- <1345981927-26359-5-git-send-email-thomas.abraham@linaro.org>
+ <1345981927-26359-10-git-send-email-thomas.abraham@linaro.org>
+ <002201cd84eb$a26dfab0$e749f010$%jun@samsung.com>
+ <CAJuYYwSPuWmJb-7NFU1DGxLcVak1EUTxJgzAyRnAY7FQSFNUfg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1345981927-26359-5-git-send-email-thomas.abraham@linaro.org>
+In-reply-to: <CAJuYYwSPuWmJb-7NFU1DGxLcVak1EUTxJgzAyRnAY7FQSFNUfg@mail.gmail.com>
 Content-language: ko
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Thomas Abraham' <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
-Cc: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, patches@linaro.org
+To: 'Thomas Abraham' <thomas.abraham@linaro.org>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Sunday, August 26, 2012 Thomas Abraham <thomas.abraham@linaro.org> wrote:
-> Some platforms allow for clock gating and control of bus interface unit clock
-> and card interface unit clock. Add support for clock lookup of optional biu
-> and ciu clocks for clock gating and clock speed determination.
+On Tuesday, August 28, 2012 Thomas Abraham <thomas.abraham@linaro.org> wrote:
+> Hi Seungwon,
 > 
-> Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
-> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
-> ---
->  drivers/mmc/host/dw_mmc.c  |   42 +++++++++++++++++++++++++++++++++++++++---
->  include/linux/mmc/dw_mmc.h |    4 ++++
->  2 files changed, 43 insertions(+), 3 deletions(-)
+> On 28 August 2012 12:36, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> > Hi Thomas,
+> >
+> > Thank you for your effort.
+> > Some reviews seems like to be omitted. Please check more.
+> >
+> > On Sunday, August 26, 2012 Thomas Abraham <thomas.abraham@linaro.org> wrote:
+> >> Samsung Exynos SoC's extend the dw-mshc controller for additional clock and bus
+> >> control. Add support for these extensions and include provide device tree based
+> >> discovery suppory as well.
 > 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index cd58063..679473c 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1953,18 +1953,38 @@ int dw_mci_probe(struct dw_mci *host)
->  		return -ENODEV;
->  	}
+> [...]
 > 
-> -	if (!host->pdata->bus_hz) {
-> +	host->biu_clk = clk_get(host->dev, "biu");
-> +	if (IS_ERR(host->biu_clk))
-> +		dev_dbg(host->dev, "biu clock not available\n");
-> +	else
-> +		clk_prepare_enable(host->biu_clk);
-> +
-> +	host->ciu_clk = clk_get(host->dev, "ciu");
-> +	if (IS_ERR(host->ciu_clk))
-> +		dev_dbg(host->dev, "ciu clock not available\n");
-> +	else
-> +		clk_prepare_enable(host->ciu_clk);
-> +
-> +	if (IS_ERR(host->ciu_clk))
-> +		host->bus_hz = host->pdata->bus_hz;
-> +	else
-> +		host->bus_hz = clk_get_rate(host->ciu_clk);
-I have remained comment in [PATCH 3/9] mmc: dw_mmc: lookup for optional biu and ciu clocks
-Could I get your opinion?
+> >> +static struct dw_mci_exynos_compatible {
+> >> +     char                            *compatible;
+> >> +     enum dw_mci_exynos_type         ctrl_type;
+> >> +} exynos_compat[] = {
+> >> +     {
+> >> +             .compatible     = "samsung,exynos4210-dw-mshc",
+> >> +             .ctrl_type      = DW_MCI_TYPE_EXYNOS4210,
+> >> +     }, {
+> >> +             .compatible     = "samsung,exynos4210-dw-mshc",
+> > typo? exynos4412-dw-mshc is expected.
+> 
+> Yes, that was a typo. I will fix it.
+> 
+> [...]
+> 
+> >> +static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
+> >> +{
+> >> +     struct dw_mci_exynos_priv_data *priv = host->priv;
+> >> +     u8 drv;
+> >> +
+> >> +     /*
+> >> +      * Exynos4412 and Exynos5250 extends the use of CMD register with the
+> >> +      * use of bit 29 (which is reserved on standard MSHC controllers) for
+> >> +      * optionally bypassing the HOLD register for command and data. The
+> >> +      * HOLD register should be bypassed in case there is no phase shift
+> >> +      * applied on CMD/DATA that is sent to the card.
+> >> +      */
+> >> +     if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4412)
+> >> +             drv = SDMMC_CLKSEL_GET_DRV_WD2(mci_readl(host, CLKSEL));
+> > As it  has been mentioned previously,  only exynos4210 uses 2-bit.
+> > So SDMMC_CLKSEL_GET_DRV_WD3 will be right in exynos4412.
+> 
+> In the Exynos4412 user manual that I referred, the SelClk_Drv and
+> SelClk_Sample bit fields of the CLKSEL register are 2 bits wide. Could
+> you please confirm that these two bit-fields are in fact 3 bits wide?
+I think you are referring old manual. 3-bit is right.
+I hope you find this.
+
+> 
+> >
+> >> +     else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5250)
+> >> +             drv = SDMMC_CLKSEL_GET_DRV_WD3(mci_readl(host, CLKSEL));
+> >> +     else
+> >> +             return;
+> >> +     if (drv)
+> >> +             *cmdr |= SDMMC_CMD_USE_HOLD_REG;
+> >> +}
+> >> +
+> >> +static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+> >> +{
+> >> +     struct dw_mci_exynos_priv_data *priv = host->priv;
+> >> +
+> >> +     if (ios->timing == MMC_TIMING_UHS_DDR50)
+> >> +             mci_writel(host, CLKSEL, priv->ddr_timing);
+> >> +     else
+> >> +             mci_writel(host, CLKSEL, priv->sdr_timing);
+> >> +
+> >> +     host->bus_hz = clk_get_rate(host->ciu_clk);
+> >> +     if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5250)
+> >> +             host->bus_hz /= SDMMC_CLKSEL_GET_DIVRATIO(
+> >> +                                     mci_readl(host, CLKSEL));
+> > bus_hz should be recalculated for exynoxs4 as well.
+> > Could you check the previous mailing?
+> 
+> Exynos4 does not have the additional clock divisor, as in Exynos5250.
+> Could you please explain why the bus_hz clock should be divided in
+> Exynos4?
+Yes, clock divisor is used in Exynos5250.
+In case of Exynos4 SoC's, divider value(DIVRATIO) isn't exposed to register.
+But  SDCLKIN is divided by fixed divider value internally.
+As mentioned previously, divider is used like below.
+Exynos4210 : 2
+Exynos4X12 : 4
+
+> 
+> >
+> >> +}
+> >> +
+> >> +static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+> >> +{
+> >> +     struct dw_mci_exynos_priv_data *priv = host->priv;
+> >> +     u32 timing[3];
+> >> +
+> >> +     if (of_property_read_u32_array(host->dev->of_node,
+> >> +                     "samsung,dw-mshc-sdr-timing", timing, 3))
+> >> +             priv->sdr_timing = DW_MCI_DEF_SDR_TIMING;
+> >> +     else
+> >> +             priv->sdr_timing = SDMMC_CLKSEL_TIMING(timing[0],
+> >> +                                     timing[1], timing[2]);
+> >> +
+> >> +     if (of_property_read_u32_array(host->dev->of_node,
+> >> +                     "samsung,dw-mshc-ddr-timing", timing, 3))
+> >> +             priv->ddr_timing = DW_MCI_DEF_DDR_TIMING;
+> >> +     else
+> >> +             priv->ddr_timing = SDMMC_CLKSEL_TIMING(timing[0],
+> >> +                                     timing[1], timing[2]);
+> >> +     return 0;
+> > DW_MCI_DEF_SDR_TIMING and DW_MCI_DEF_DDR_TIMING are board-specific timing values.
+> > So, these values can't be used commonly. It has been already discussed.
+> > If this property is empty, returning error with message will be fine.
+> > Currently just 0 is always returned.
+> 
+> Yes, you had mentioned this previously. But these are only default
+> values. In case, a board cannot work with these default values, the
+> board's dtsi file should provide the correct values by using these
+> bindings. What is your opinion on this, please let me know.
+Is there any basis for these value which you chose?
+If these can be acceptable for the most part, we can consider it for default value.
+But it depends on host of SOC and target board.
 
 Thanks,
 Seungwon Jeon
 
-> +
-> +	if (!host->bus_hz) {
->  		dev_err(host->dev,
->  			"Platform data must supply bus speed\n");
-> -		return -ENODEV;
-> +		ret = -ENODEV;
-> +		goto err_clk;
->  	}
 > 
-> -	host->bus_hz = host->pdata->bus_hz;
->  	host->quirks = host->pdata->quirks;
+> Thanks for your time reviewing this patch series.
 > 
->  	spin_lock_init(&host->lock);
->  	INIT_LIST_HEAD(&host->queue);
-> 
-> +	host->dma_ops = host->pdata->dma_ops;
-> +	dw_mci_init_dma(host);
-> +
->  	/*
->  	 * Get the host data width - this assumes that HCON has been set with
->  	 * the correct values.
-> @@ -2109,6 +2129,16 @@ err_dmaunmap:
->  		regulator_disable(host->vmmc);
->  		regulator_put(host->vmmc);
->  	}
-> +
-> +err_clk:
-> +	if (!IS_ERR(host->ciu_clk)) {
-> +		clk_disable_unprepare(host->ciu_clk);
-> +		clk_put(host->ciu_clk);
-> +	}
-> +	if (!IS_ERR(host->biu_clk)) {
-> +		clk_disable_unprepare(host->biu_clk);
-> +		clk_put(host->biu_clk);
-> +	}
->  	return ret;
->  }
->  EXPORT_SYMBOL(dw_mci_probe);
-> @@ -2142,6 +2172,12 @@ void dw_mci_remove(struct dw_mci *host)
->  		regulator_put(host->vmmc);
->  	}
-> 
-> +	if (!IS_ERR(host->ciu_clk))
-> +		clk_disable_unprepare(host->ciu_clk);
-> +	if (!IS_ERR(host->biu_clk))
-> +		clk_disable_unprepare(host->biu_clk);
-> +	clk_put(host->ciu_clk);
-> +	clk_put(host->biu_clk);
->  }
->  EXPORT_SYMBOL(dw_mci_remove);
-> 
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index a37a573..787ad56 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -78,6 +78,8 @@ struct mmc_data;
->   * @data_offset: Set the offset of DATA register according to VERID.
->   * @dev: Device associated with the MMC controller.
->   * @pdata: Platform data associated with the MMC controller.
-> + * @biu_clk: Pointer to bus interface unit clock instance.
-> + * @ciu_clk: Pointer to card interface unit clock instance.
->   * @slot: Slots sharing this MMC controller.
->   * @fifo_depth: depth of FIFO.
->   * @data_shift: log2 of FIFO item size.
-> @@ -158,6 +160,8 @@ struct dw_mci {
->  	u16			data_offset;
->  	struct device		*dev;
->  	struct dw_mci_board	*pdata;
-> +	struct clk		*biu_clk;
-> +	struct clk		*ciu_clk;
->  	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
-> 
->  	/* FIFO push and pull */
-> --
-> 1.6.6.rc2
+> Regards,
+> Thomas.
