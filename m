@@ -1,75 +1,104 @@
 From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: Re: [PATCH v4 4/9] mmc: dw_mmc: lookup for optional biu and ciu clocks
-Date: Tue, 28 Aug 2012 16:53:23 +0530
-Message-ID: <CAJuYYwQe1R7=Tj_pg8u2Wc9XwjeZP9jYbTDtUk7vVTomQTW_qg@mail.gmail.com>
+Subject: Re: [PATCH v4 9/9] mmc: dw_mmc: add support for exynos specific
+ implementation of dw-mshc
+Date: Tue, 28 Aug 2012 17:05:58 +0530
+Message-ID: <CAJuYYwQKrfxUBqk_SdJ62pdbEqeSU63ExqXY39mEPqgg1oZ+=Q@mail.gmail.com>
 References: <1345981927-26359-1-git-send-email-thomas.abraham@linaro.org>
-	<1345981927-26359-5-git-send-email-thomas.abraham@linaro.org>
-	<002501cd8509$e97dad60$bc790820$%jun@samsung.com>
+	<1345981927-26359-10-git-send-email-thomas.abraham@linaro.org>
+	<002201cd84eb$a26dfab0$e749f010$%jun@samsung.com>
+	<CAJuYYwSPuWmJb-7NFU1DGxLcVak1EUTxJgzAyRnAY7FQSFNUfg@mail.gmail.com>
+	<002601cd850a$050dcc90$0f2965b0$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <002501cd8509$e97dad60$bc790820$%jun@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:38417 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751008Ab2H1LgA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Aug 2012 07:36:00 -0400
+Received: by lbbgj3 with SMTP id gj3so3170361lbb.19
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Aug 2012 04:35:58 -0700 (PDT)
+In-Reply-To: <002601cd850a$050dcc90$0f2965b0$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Seungwon Jeon <tgih.jun@samsung.com>
 Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, patches@linaro.org
-List-Id: linux-mmc@vger.kernel.org
 
 On 28 August 2012 16:13, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> On Sunday, August 26, 2012 Thomas Abraham <thomas.abraham@linaro.org> wrote:
->> Some platforms allow for clock gating and control of bus interface unit clock
->> and card interface unit clock. Add support for clock lookup of optional biu
->> and ciu clocks for clock gating and clock speed determination.
+> On Tuesday, August 28, 2012 Thomas Abraham <thomas.abraham@linaro.org> wrote:
+>> Hi Seungwon,
 >>
->> Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
->> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
->> ---
->>  drivers/mmc/host/dw_mmc.c  |   42 +++++++++++++++++++++++++++++++++++++++---
->>  include/linux/mmc/dw_mmc.h |    4 ++++
->>  2 files changed, 43 insertions(+), 3 deletions(-)
+>> On 28 August 2012 12:36, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+
+[...]
+
+>> >> +     /*
+>> >> +      * Exynos4412 and Exynos5250 extends the use of CMD register with the
+>> >> +      * use of bit 29 (which is reserved on standard MSHC controllers) for
+>> >> +      * optionally bypassing the HOLD register for command and data. The
+>> >> +      * HOLD register should be bypassed in case there is no phase shift
+>> >> +      * applied on CMD/DATA that is sent to the card.
+>> >> +      */
+>> >> +     if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4412)
+>> >> +             drv = SDMMC_CLKSEL_GET_DRV_WD2(mci_readl(host, CLKSEL));
+>> > As it  has been mentioned previously,  only exynos4210 uses 2-bit.
+>> > So SDMMC_CLKSEL_GET_DRV_WD3 will be right in exynos4412.
 >>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index cd58063..679473c 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -1953,18 +1953,38 @@ int dw_mci_probe(struct dw_mci *host)
->>               return -ENODEV;
->>       }
+>> In the Exynos4412 user manual that I referred, the SelClk_Drv and
+>> SelClk_Sample bit fields of the CLKSEL register are 2 bits wide. Could
+>> you please confirm that these two bit-fields are in fact 3 bits wide?
+> I think you are referring old manual. 3-bit is right.
+> I hope you find this.
+
+Ok. Maybe I have an older manual then. I will change it to 3-bit for 4412.
+
+[...]
+
+>> >> +static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>> >> +{
+>> >> +     struct dw_mci_exynos_priv_data *priv = host->priv;
+>> >> +
+>> >> +     if (ios->timing == MMC_TIMING_UHS_DDR50)
+>> >> +             mci_writel(host, CLKSEL, priv->ddr_timing);
+>> >> +     else
+>> >> +             mci_writel(host, CLKSEL, priv->sdr_timing);
+>> >> +
+>> >> +     host->bus_hz = clk_get_rate(host->ciu_clk);
+>> >> +     if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5250)
+>> >> +             host->bus_hz /= SDMMC_CLKSEL_GET_DIVRATIO(
+>> >> +                                     mci_readl(host, CLKSEL));
+>> > bus_hz should be recalculated for exynoxs4 as well.
+>> > Could you check the previous mailing?
 >>
->> -     if (!host->pdata->bus_hz) {
->> +     host->biu_clk = clk_get(host->dev, "biu");
->> +     if (IS_ERR(host->biu_clk))
->> +             dev_dbg(host->dev, "biu clock not available\n");
->> +     else
->> +             clk_prepare_enable(host->biu_clk);
->> +
->> +     host->ciu_clk = clk_get(host->dev, "ciu");
->> +     if (IS_ERR(host->ciu_clk))
->> +             dev_dbg(host->dev, "ciu clock not available\n");
->> +     else
->> +             clk_prepare_enable(host->ciu_clk);
->> +
->> +     if (IS_ERR(host->ciu_clk))
->> +             host->bus_hz = host->pdata->bus_hz;
->> +     else
->> +             host->bus_hz = clk_get_rate(host->ciu_clk);
-> I have remained comment in [PATCH 3/9] mmc: dw_mmc: lookup for optional biu and ciu clocks
-> Could I get your opinion?
+>> Exynos4 does not have the additional clock divisor, as in Exynos5250.
+>> Could you please explain why the bus_hz clock should be divided in
+>> Exynos4?
+> Yes, clock divisor is used in Exynos5250.
+> In case of Exynos4 SoC's, divider value(DIVRATIO) isn't exposed to register.
+> But  SDCLKIN is divided by fixed divider value internally.
+> As mentioned previously, divider is used like below.
+> Exynos4210 : 2
+> Exynos4X12 : 4
 
-Are you referring to the following comment.
+Ok. Thanks for the information. I will add divisor support for Exynos4
+as well. These patches have not been tested with Exynos4 since I do
+not have a Exynos4 based board that uses dw-mmc controller.
 
-> I have posted similar patch some time back.
-> bus_hz represents input rate for cclk_in of mshc.
-> Host of samsung soc doesn't use input clock from system directly.
-> As you have introduced CLKSEL in your another patch, input clock can be
-> changed prior to cclk_in.
-> For non-samsung  host, we don't need to consider this with generic way?
+[...]
 
-The biu and ciu clocks are generic clocks which a platform can
-instantiate. The other option being to use the platform data to
-specify the clock speed using pdata->bus_hz.
+>> > DW_MCI_DEF_SDR_TIMING and DW_MCI_DEF_DDR_TIMING are board-specific timing values.
+>> > So, these values can't be used commonly. It has been already discussed.
+>> > If this property is empty, returning error with message will be fine.
+>> > Currently just 0 is always returned.
+>>
+>> Yes, you had mentioned this previously. But these are only default
+>> values. In case, a board cannot work with these default values, the
+>> board's dtsi file should provide the correct values by using these
+>> bindings. What is your opinion on this, please let me know.
+> Is there any basis for these value which you chose?
+> If these can be acceptable for the most part, we can consider it for default value.
+> But it depends on host of SOC and target board.
 
-The use CLKSEL register is now moved into exynos specific code. So
-non-samsung host is not affected in any way.
+Ok. I will remove the optional value and make this property mandatory.
 
 Thanks,
 Thomas.
