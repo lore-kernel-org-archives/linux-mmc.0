@@ -1,62 +1,82 @@
-From: Kyungmin Park <kyungmin.park@samsung.com>
-Subject: Re: [PATCH 0/2] mmc: core: pre-patch for next eMMC version
-Date: Wed, 29 Aug 2012 20:59:32 +0900
-Message-ID: <CAH9JG2XwdBao=L3KOxDOtbyhcTuq6rKUEpwWU9+zqhU3HeteQw@mail.gmail.com>
-References: <5036C96A.7070300@samsung.com>
-	<CAPDyKFqJynoS5d3EmnRi4CxmUyOMYBRzy2spDgUTfT=7+0Xg6Q@mail.gmail.com>
-	<503C4A01.2030200@samsung.com>
-	<CAPDyKFo0mwkbiQEc8cmPRu9AbB8mUQhuq4AWq=e03fUD1dfKHg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: Quieten "could not set regulator OCR" error.
+Date: Wed, 29 Aug 2012 14:09:17 +0200
+Message-ID: <CAPDyKFofwC-t-7vhxjF5PUZKTiqYxZh8Kh6J6cLCTFuDTw1-eQ@mail.gmail.com>
+References: <87a9xfyko6.fsf@octavius.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:52978 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753308Ab2H2L7d (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Aug 2012 07:59:33 -0400
-Received: by qcro28 with SMTP id o28so272644qcr.19
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Aug 2012 04:59:32 -0700 (PDT)
-In-Reply-To: <CAPDyKFo0mwkbiQEc8cmPRu9AbB8mUQhuq4AWq=e03fUD1dfKHg@mail.gmail.com>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:60675 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752793Ab2H2MJT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Aug 2012 08:09:19 -0400
+Received: by weyx8 with SMTP id x8so271424wey.19
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Aug 2012 05:09:18 -0700 (PDT)
+In-Reply-To: <87a9xfyko6.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+Hi Chris,
 
-On 8/29/12, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> Hi Jaehoon,
+On 28 August 2012 01:33, Chris Ball <cjb@laptop.org> wrote:
+> Some distributions build with CONFIG_REGULATOR_DUMMY=y -- this makes
+> regulator setup succeed harmlessly, but then trying to set the voltage
+> on the dummy regulator will fail as below:
 >
-> On 28 August 2012 06:33, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Hi Ulf,
->>
->> This patch is to support eMMC5.0.(already discussing on eMMC5.0.)
->> Revision value is defined the 0x7 into ext_csd register.(in eMMC5.0's
->> case)
+> [ 6.413866] sdhci-pci 0000:03:00.0: SDHCI controller found [1180:e822]
+> (rev 0)
+> [ 6.414081] _regulator_get: 0000:03:00.0 supply vmmc not found, using
+> dummy regulator
+> [ 6.415252] mmc0: SDHCI controller on PCI [0000:03:00.0] using DMA
+> [ 6.415294] sdhci-pci 0000:03:00.0: could not set regulator OCR (-22)
+> [ 6.444241] sdhci-pci 0000:03:00.0: could not set regulator OCR (-22)
+> [ 6.473648] sdhci-pci 0000:03:00.0: could not set regulator OCR (-22)
+> [..]
 >
-> Until the spec is really set we should not add some new code for this,
-> it does not make sense to kind of guess.
-It's not guess. it's determined and will be discussed at JEDEC soon.
+> Since this isn't an error in this case, move the error to pr_debug().
+> Reference: https://bugs.archlinux.org/task/29008
+>
+> Signed-off-by: Chris Ball <cjb@laptop.org>
+> ---
+>  drivers/mmc/core/core.c | 5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 835c9f0..30d9357 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1017,8 +1017,9 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
+>         }
+>
+>         if (result)
+> -               dev_err(mmc_dev(mmc),
+> -                       "could not set regulator OCR (%d)\n", result);
+> +               pr_debug("%s: could not set regulator OCR (%d)\n",
+> +                        mmc_hostname(mmc), result);
+> +
 
-Revision 1.7 (for MMC V5.0)
+I am not sure this is the correct solution. Would it be possible
+prevent sdhci-* from calling mmc_regulator_set_ocr when it has gotten
+a "dummy" regulator some how?
 
-Thank you,
-Kyungmin Park
->
->>
->> And case of Quirks is preparation patch to prevent the problem that should
->> exist.
->> That Quirks can also use for backward compatibility.
->> (if card is greater version than eMMC4.5 and need to use only eMMC4.5
->> feature?
->>  then can use quirks and known_rev.)
->
-> It is just speculations about potential problems with eMMC 5.0. I
-> think we can leave this to later, if/when we see a need for it.
->
-> Kind regards
-> Ulf Hansson
+In the other scenarios were we use a real regulator, I would interpret
+this error as critical, since the power to the card could not be set
+according to the vdd bit.
+Of course an option could be to leave the error printing to the caller
+of mmc_regulator_set_ocr.. :-)
+
+>         return result;
+>  }
+>  EXPORT_SYMBOL_GPL(mmc_regulator_set_ocr);
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+
+Kind regards
+Ulf Hansson
