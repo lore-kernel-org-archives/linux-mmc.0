@@ -1,79 +1,124 @@
 From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: [PATCH v5 3/9] mmc: dw_mmc: allow probe to succeed even if one slot is
- initialized
-Date: Wed, 29 Aug 2012 16:18:09 +0530
-Message-ID: <1346237295-7116-4-git-send-email-thomas.abraham@linaro.org>
+Subject: [PATCH v5 4/9] mmc: dw_mmc: lookup for optional biu and ciu clocks
+Date: Wed, 29 Aug 2012 16:18:10 +0530
+Message-ID: <1346237295-7116-5-git-send-email-thomas.abraham@linaro.org>
 References: <1346237295-7116-1-git-send-email-thomas.abraham@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:8342 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752791Ab2H2KaO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Aug 2012 06:30:14 -0400
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 In-reply-to: <1346237295-7116-1-git-send-email-thomas.abraham@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
 Cc: will.newton@imgtec.com, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, patches@linaro.org
+List-Id: linux-mmc@vger.kernel.org
 
-Instead of aborting the probe in case a slot initialization fails, allow
-initialization of as many slots as possible. If there are atleast one
-instance of slot that is successfully initialized, allow the driver probe
-to succeed.
+Some platforms allow for clock gating and control of bus interface unit clock
+and card interface unit clock. Add support for clock lookup of optional biu
+and ciu clocks for clock gating and clock speed determination.
 
+Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
 Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
 Acked-by: Will Newton <will.newton@imgtec.com>
 ---
- drivers/mmc/host/dw_mmc.c |   23 +++++++++++++----------
- 1 files changed, 13 insertions(+), 10 deletions(-)
+ drivers/mmc/host/dw_mmc.c  |   42 +++++++++++++++++++++++++++++++++++++++---
+ include/linux/mmc/dw_mmc.h |    4 ++++
+ 2 files changed, 43 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index a18e73c..227c42e 100644
+index 227c42e..90c7c7b 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -1946,6 +1946,7 @@ int dw_mci_probe(struct dw_mci *host)
- {
- 	int width, i, ret = 0;
- 	u32 fifo_size;
-+	int init_slots = 0;
- 
- 	if (!host->pdata || !host->pdata->init) {
- 		dev_err(host->dev,
-@@ -2054,10 +2055,18 @@ int dw_mci_probe(struct dw_mci *host)
- 	/* We need at least one slot to succeed */
- 	for (i = 0; i < host->num_slots; i++) {
- 		ret = dw_mci_init_slot(host, i);
--		if (ret) {
--			ret = -ENODEV;
--			goto err_init_slot;
--		}
-+		if (ret)
-+			dev_dbg(host->dev, "slot %d init failed\n", i);
-+		else
-+			init_slots++;
-+	}
-+
-+	if (init_slots) {
-+		dev_info(host->dev, "%d slots initialized\n", init_slots);
-+	} else {
-+		dev_dbg(host->dev, "attempted to initialize %d slots, "
-+					"but failed on all\n", host->num_slots);
-+		goto err_init_slot;
+@@ -1960,18 +1960,38 @@ int dw_mci_probe(struct dw_mci *host)
+ 		return -ENODEV;
  	}
  
+-	if (!host->pdata->bus_hz) {
++	host->biu_clk = clk_get(host->dev, "biu");
++	if (IS_ERR(host->biu_clk))
++		dev_dbg(host->dev, "biu clock not available\n");
++	else
++		clk_prepare_enable(host->biu_clk);
++
++	host->ciu_clk = clk_get(host->dev, "ciu");
++	if (IS_ERR(host->ciu_clk))
++		dev_dbg(host->dev, "ciu clock not available\n");
++	else
++		clk_prepare_enable(host->ciu_clk);
++
++	if (IS_ERR(host->ciu_clk))
++		host->bus_hz = host->pdata->bus_hz;
++	else
++		host->bus_hz = clk_get_rate(host->ciu_clk);
++
++	if (!host->bus_hz) {
+ 		dev_err(host->dev,
+ 			"Platform data must supply bus speed\n");
+-		return -ENODEV;
++		ret = -ENODEV;
++		goto err_clk;
+ 	}
+ 
+-	host->bus_hz = host->pdata->bus_hz;
+ 	host->quirks = host->pdata->quirks;
+ 
+ 	spin_lock_init(&host->lock);
+ 	INIT_LIST_HEAD(&host->queue);
+ 
++	host->dma_ops = host->pdata->dma_ops;
++	dw_mci_init_dma(host);
++
  	/*
-@@ -2092,12 +2101,6 @@ int dw_mci_probe(struct dw_mci *host)
- 	return 0;
+ 	 * Get the host data width - this assumes that HCON has been set with
+ 	 * the correct values.
+@@ -2116,6 +2136,16 @@ err_dmaunmap:
+ 		regulator_disable(host->vmmc);
+ 		regulator_put(host->vmmc);
+ 	}
++
++err_clk:
++	if (!IS_ERR(host->ciu_clk)) {
++		clk_disable_unprepare(host->ciu_clk);
++		clk_put(host->ciu_clk);
++	}
++	if (!IS_ERR(host->biu_clk)) {
++		clk_disable_unprepare(host->biu_clk);
++		clk_put(host->biu_clk);
++	}
+ 	return ret;
+ }
+ EXPORT_SYMBOL(dw_mci_probe);
+@@ -2149,6 +2179,12 @@ void dw_mci_remove(struct dw_mci *host)
+ 		regulator_put(host->vmmc);
+ 	}
  
- err_init_slot:
--	/* De-init any initialized slots */
--	while (i > 0) {
--		if (host->slot[i])
--			dw_mci_cleanup_slot(host->slot[i], i);
--		i--;
--	}
- 	free_irq(host->irq, host);
++	if (!IS_ERR(host->ciu_clk))
++		clk_disable_unprepare(host->ciu_clk);
++	if (!IS_ERR(host->biu_clk))
++		clk_disable_unprepare(host->biu_clk);
++	clk_put(host->ciu_clk);
++	clk_put(host->biu_clk);
+ }
+ EXPORT_SYMBOL(dw_mci_remove);
  
- err_workqueue:
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index a37a573..787ad56 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -78,6 +78,8 @@ struct mmc_data;
+  * @data_offset: Set the offset of DATA register according to VERID.
+  * @dev: Device associated with the MMC controller.
+  * @pdata: Platform data associated with the MMC controller.
++ * @biu_clk: Pointer to bus interface unit clock instance.
++ * @ciu_clk: Pointer to card interface unit clock instance.
+  * @slot: Slots sharing this MMC controller.
+  * @fifo_depth: depth of FIFO.
+  * @data_shift: log2 of FIFO item size.
+@@ -158,6 +160,8 @@ struct dw_mci {
+ 	u16			data_offset;
+ 	struct device		*dev;
+ 	struct dw_mci_board	*pdata;
++	struct clk		*biu_clk;
++	struct clk		*ciu_clk;
+ 	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
+ 
+ 	/* FIFO push and pull */
 -- 
 1.6.6.rc2
-
