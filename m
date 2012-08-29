@@ -1,109 +1,96 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v6] mmc: card: Skip secure option for MoviNAND.
-Date: Wed, 29 Aug 2012 14:36:54 +0900
-Message-ID: <503DAA76.40509@samsung.com>
-References: <503DA2F1.70601@samsung.com>
+From: IAN CHEN <ian.cy.chen@samsung.com>
+Subject: [PATCH v6] mmc: card: Skip secure option for MoviNAND.
+Date: Wed, 29 Aug 2012 15:05:36 +0900
+Message-ID: <503DB130.8090807@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:31967 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750914Ab2H2FhB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Aug 2012 01:37:01 -0400
-In-reply-to: <503DA2F1.70601@samsung.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:13760 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750914Ab2H2GJd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Aug 2012 02:09:33 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: IAN CHEN <ian.cy.chen@samsung.com>
-Cc: cjb@laptop.org, linkinjeon@gmail.com, adrian.hunter@intel.com, subhashj@codeaurora.org, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com
+To: cjb@laptop.org, linkinjeon@gmail.com, adrian.hunter@intel.com, subhashj@codeaurora.org, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com, ian.cy.chen@samsung.com
 
-Need to check your mail setting.
+For several MoviNAND, there are some known issue with secure option.
+For these specific MoviNAND device, we skip secure option.
 
-On 08/29/2012 02:04 PM, IAN CHEN wrote:
-> For several MoviNAND, there are some known issue with secure option.
-> For these specific MoviNAND device, we skip secure option.
-> 
-> You could refer this discussion in XDA developers.
-> http://forum.xda-developers.com/showthread.php?t=1644364
-> https://plus.google.com/111398485184813224730/posts/21pTYfTsCkB#111398485184813224730/posts/21pTYfTsCkB
-> 
-> Signed-off-by: Ian Chen <ian.cy.chen@samsung.com>
-> Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
-> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
->  drivers/mmc/card/block.c |   24 +++++++++++++++++++++++-
->  include/linux/mmc/card.h |    1 +
->  2 files changed, 24 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index f1c84de..0377885 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -1411,7 +1411,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
-> struct request *req)
-Line wrap.?
->  		/* complete ongoing async transfer before issuing discard */
->  		if (card->host->areq)
->  			mmc_blk_issue_rw_rq(mq, NULL);
-> -		if (req->cmd_flags & REQ_SECURE)
-> +		if (req->cmd_flags & REQ_SECURE &&
-> +			!(card->quirks & MMC_QUIRK_SEC_ERASE_TRIM_BROKEN))
->  			ret = mmc_blk_issue_secdiscard_rq(mq, req);
->  		else
->  			ret = mmc_blk_issue_discard_rq(mq, req);
-> @@ -1716,6 +1717,7 @@ force_ro_fail:
->  #define CID_MANFID_SANDISK	0x2
->  #define CID_MANFID_TOSHIBA	0x11
->  #define CID_MANFID_MICRON	0x13
-> +#define CID_MANFID_SAMSUNG	0x15
-> 
->  static const struct mmc_fixup blk_fixups[] =
->  {
-> @@ -1752,6 +1754,26 @@ static const struct mmc_fixup blk_fixups[] =
->  	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
->  		  MMC_QUIRK_LONG_READ_TIME),
-> 
-> +	/*
-> +	 * Some issue about secure erase/secure trim for Samsung MoviNAND
-> +	 */
-> +	MMC_FIXUP("M8G2FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +	MMC_FIXUP("MAG4FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +	MMC_FIXUP("MBG8FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +	MMC_FIXUP("MCGAFA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +	MMC_FIXUP("VAL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +	MMC_FIXUP("VYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +	MMC_FIXUP("KYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +	MMC_FIXUP("VZL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +
->  	END_FIXUP
->  };
-> 
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 111aca5..4b27f9f 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -239,6 +239,7 @@ struct mmc_card {
->  #define MMC_QUIRK_BLK_NO_CMD23	(1<<7)		/* Avoid CMD23 for regular
-> multiblock */
-here..
->  #define MMC_QUIRK_BROKEN_BYTE_MODE_512 (1<<8)	/* Avoid sending 512
-> bytes in */
-Also
->  #define MMC_QUIRK_LONG_READ_TIME (1<<9)		/* Data read time > CSD says */
-> +#define MMC_QUIRK_SEC_ERASE_TRIM_BROKEN (1<<10)	/* Skip secure for
-> erase/trim */
-Also line wrap?
->  						/* byte mode */
->  	unsigned int    poweroff_notify_state;	/* eMMC4.5 notify feature */
->  #define MMC_NO_POWER_NOTIFICATION	0
-> 
+You could refer this discussion in XDA developers.
+http://forum.xda-developers.com/showthread.php?t=1644364
+https://plus.google.com/111398485184813224730/posts/21pTYfTsCkB#111398485184813224730/posts/21pTYfTsCkB
 
+Signed-off-by: Ian Chen <ian.cy.chen@samsung.com>
+Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ drivers/mmc/card/block.c |   24 +++++++++++++++++++++++-
+ include/linux/mmc/card.h |    1 +
+ 2 files changed, 24 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index f1c84de..0377885 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1411,7 +1411,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 		/* complete ongoing async transfer before issuing discard */
+ 		if (card->host->areq)
+ 			mmc_blk_issue_rw_rq(mq, NULL);
+-		if (req->cmd_flags & REQ_SECURE)
++		if (req->cmd_flags & REQ_SECURE &&
++			!(card->quirks & MMC_QUIRK_SEC_ERASE_TRIM_BROKEN))
+ 			ret = mmc_blk_issue_secdiscard_rq(mq, req);
+ 		else
+ 			ret = mmc_blk_issue_discard_rq(mq, req);
+@@ -1716,6 +1717,7 @@ force_ro_fail:
+ #define CID_MANFID_SANDISK	0x2
+ #define CID_MANFID_TOSHIBA	0x11
+ #define CID_MANFID_MICRON	0x13
++#define CID_MANFID_SAMSUNG	0x15
+ 
+ static const struct mmc_fixup blk_fixups[] =
+ {
+@@ -1752,6 +1754,26 @@ static const struct mmc_fixup blk_fixups[] =
+ 	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
+ 		  MMC_QUIRK_LONG_READ_TIME),
+ 
++	/*
++	 * Some issue about secure erase/secure trim for Samsung MoviNAND
++	 */
++	MMC_FIXUP("M8G2FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++	MMC_FIXUP("MAG4FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++	MMC_FIXUP("MBG8FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++	MMC_FIXUP("MCGAFA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++	MMC_FIXUP("VAL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++	MMC_FIXUP("VYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++	MMC_FIXUP("KYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++	MMC_FIXUP("VZL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++
+ 	END_FIXUP
+ };
+ 
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 111aca5..4b27f9f 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -239,6 +239,7 @@ struct mmc_card {
+ #define MMC_QUIRK_BLK_NO_CMD23	(1<<7)		/* Avoid CMD23 for regular multiblock */
+ #define MMC_QUIRK_BROKEN_BYTE_MODE_512 (1<<8)	/* Avoid sending 512 bytes in */
+ #define MMC_QUIRK_LONG_READ_TIME (1<<9)		/* Data read time > CSD says */
++#define MMC_QUIRK_SEC_ERASE_TRIM_BROKEN (1<<10)	/* Skip secure for erase/trim */
+ 						/* byte mode */
+ 	unsigned int    poweroff_notify_state;	/* eMMC4.5 notify feature */
+ #define MMC_NO_POWER_NOTIFICATION	0
+-- 
+1.7.0.4
