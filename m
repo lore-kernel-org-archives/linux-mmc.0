@@ -1,107 +1,58 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
+From: Chris Ball <cjb@laptop.org>
 Subject: Re: [PATCH v6] mmc: card: Skip secure option for MoviNAND.
-Date: Wed, 29 Aug 2012 16:27:25 +0900
-Message-ID: <503DC45D.7060607@samsung.com>
+Date: Wed, 29 Aug 2012 06:26:59 -0400
+Message-ID: <873936vvrg.fsf@octavius.laptop.org>
 References: <503DB130.8090807@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:59041 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752070Ab2H2H1c (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Aug 2012 03:27:32 -0400
-In-reply-to: <503DB130.8090807@samsung.com>
+Received: from void.printf.net ([89.145.121.20]:40703 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751751Ab2H2K1K (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Aug 2012 06:27:10 -0400
+In-Reply-To: <503DB130.8090807@samsung.com> (IAN CHEN's message of "Wed, 29
+	Aug 2012 15:05:36 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: IAN CHEN <ian.cy.chen@samsung.com>
-Cc: cjb@laptop.org, linkinjeon@gmail.com, adrian.hunter@intel.com, subhashj@codeaurora.org, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com
+Cc: linkinjeon@gmail.com, adrian.hunter@intel.com, subhashj@codeaurora.org, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com
 
-Hi Chris,
+Hi,
 
-Could you merge this patch?
-We want to prevent this problem at mainline kernel.
-
-Best Regards,
-Jaehoon Chung
-
-On 08/29/2012 03:05 PM, IAN CHEN wrote:
+On Wed, Aug 29 2012, IAN CHEN wrote:
 > For several MoviNAND, there are some known issue with secure option.
 > For these specific MoviNAND device, we skip secure option.
-> 
+>
 > You could refer this discussion in XDA developers.
 > http://forum.xda-developers.com/showthread.php?t=1644364
 > https://plus.google.com/111398485184813224730/posts/21pTYfTsCkB#111398485184813224730/posts/21pTYfTsCkB
-> 
+>
 > Signed-off-by: Ian Chen <ian.cy.chen@samsung.com>
 > Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
 > Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 > Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
->  drivers/mmc/card/block.c |   24 +++++++++++++++++++++++-
->  include/linux/mmc/card.h |    1 +
->  2 files changed, 24 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index f1c84de..0377885 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -1411,7 +1411,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
->  		/* complete ongoing async transfer before issuing discard */
->  		if (card->host->areq)
->  			mmc_blk_issue_rw_rq(mq, NULL);
-> -		if (req->cmd_flags & REQ_SECURE)
-> +		if (req->cmd_flags & REQ_SECURE &&
-> +			!(card->quirks & MMC_QUIRK_SEC_ERASE_TRIM_BROKEN))
->  			ret = mmc_blk_issue_secdiscard_rq(mq, req);
->  		else
->  			ret = mmc_blk_issue_discard_rq(mq, req);
-> @@ -1716,6 +1717,7 @@ force_ro_fail:
->  #define CID_MANFID_SANDISK	0x2
->  #define CID_MANFID_TOSHIBA	0x11
->  #define CID_MANFID_MICRON	0x13
-> +#define CID_MANFID_SAMSUNG	0x15
->  
->  static const struct mmc_fixup blk_fixups[] =
->  {
-> @@ -1752,6 +1754,26 @@ static const struct mmc_fixup blk_fixups[] =
->  	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
->  		  MMC_QUIRK_LONG_READ_TIME),
->  
-> +	/*
-> +	 * Some issue about secure erase/secure trim for Samsung MoviNAND
-> +	 */
-> +	MMC_FIXUP("M8G2FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +	MMC_FIXUP("MAG4FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +	MMC_FIXUP("MBG8FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +	MMC_FIXUP("MCGAFA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +	MMC_FIXUP("VAL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +	MMC_FIXUP("VYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +	MMC_FIXUP("KYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +	MMC_FIXUP("VZL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-> +
->  	END_FIXUP
->  };
->  
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 111aca5..4b27f9f 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -239,6 +239,7 @@ struct mmc_card {
->  #define MMC_QUIRK_BLK_NO_CMD23	(1<<7)		/* Avoid CMD23 for regular multiblock */
->  #define MMC_QUIRK_BROKEN_BYTE_MODE_512 (1<<8)	/* Avoid sending 512 bytes in */
->  #define MMC_QUIRK_LONG_READ_TIME (1<<9)		/* Data read time > CSD says */
-> +#define MMC_QUIRK_SEC_ERASE_TRIM_BROKEN (1<<10)	/* Skip secure for erase/trim */
->  						/* byte mode */
->  	unsigned int    poweroff_notify_state;	/* eMMC4.5 notify feature */
->  #define MMC_NO_POWER_NOTIFICATION	0
-> 
 
+Thanks.  We should explain the nature of the bug in the commit message,
+so that users and the stable@ maintainers know how bad the problem is
+by reading the patch.  (This should go to stable@, right?  Do you know
+which kernel versions are affected?)
+
+I'll add something like this, unless you have a better proposal:
+
+==
+For several MoviNAND, there are some known issues with secure option.
+For these specific MoviNAND device, we skip secure option.
+
+Specifically, there is a bug in the eMMC firmware that causes 
+unrecoverable corruption when the MMC is erased with MMC_CAP_ERASE
+enabled.
+
+You could refer this discussion in XDA developers.
+http://forum.xda-developers.com/showthread.php?t=1644364
+https://plus.google.com/111398485184813224730/posts/21pTYfTsCkB#111398485184813224730/posts/21pTYfTsCkB
+==
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
