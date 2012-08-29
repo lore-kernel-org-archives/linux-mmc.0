@@ -1,126 +1,96 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 3/5] mmc: dw-mmc: add the header file for exynos
- specific code.
-Date: Wed, 29 Aug 2012 11:17:11 +0900
-Message-ID: <503D7BA7.3000008@samsung.com>
-References: <503C797F.4040506@samsung.com>
- <CAJuYYwS0Z=YuXBNEhp-f22nFJoKwSG+oDWAPgHTbpTNBWGJbPQ@mail.gmail.com>
+From: IAN CHEN <ian.cy.chen@samsung.com>
+Subject: [PATCH v6] mmc: card: Skip secure option for MoviNAND.
+Date: Wed, 29 Aug 2012 14:04:49 +0900
+Message-ID: <503DA2F1.70601@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:33507 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750881Ab2H2CRS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Aug 2012 22:17:18 -0400
-Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M9H007CDVOPF5A0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 29 Aug 2012 11:17:16 +0900 (KST)
-Received: from [10.90.51.55] by mmp1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0M9H00KXFVORFQ60@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 29 Aug 2012 11:17:16 +0900 (KST)
-In-reply-to: <CAJuYYwS0Z=YuXBNEhp-f22nFJoKwSG+oDWAPgHTbpTNBWGJbPQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: cjb@laptop.org, linkinjeon@gmail.com, adrian.hunter@intel.com, subhashj@codeaurora.org, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com, ian.cy.chen@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: Thomas Abraham <thomas.abraham@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <James.Hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>
 
-On 08/28/2012 10:37 PM, Thomas Abraham wrote:
-> On 28 August 2012 13:25, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->> ---
->>  include/linux/mmc/exynos-dw_mmc.h |   61 +++++++++++++++++++++++++++++++++++++
->>  1 files changed, 61 insertions(+), 0 deletions(-)
->>  create mode 100644 include/linux/mmc/exynos-dw_mmc.h
->>
->> diff --git a/include/linux/mmc/exynos-dw_mmc.h b/include/linux/mmc/exynos-dw_mmc.h
->> new file mode 100644
->> index 0000000..3a6b08b
->> --- /dev/null
->> +++ b/include/linux/mmc/exynos-dw_mmc.h
->> @@ -0,0 +1,61 @@
->> +/*
->> + * Synopsys DesignWare Multimedia Card Interface driver
->> + *
->> + * Copyright (c) 2012 Samsung Electronics Co., Ltd.
->> + *             http://www.samsung.com
->> + *
->> + * Header file for Exynos specific register
->> + *
->> + * This program is free software; you can redistribute it and/or modify
->> + * it under the terms of the GNU General Public License version 2 as
->> + * published by the Free Software Foundation.
->> + */
->> +
->> +#ifndef _EXYNOS_DW_MMC_H
->> +#define _EXYNOS_DW_MMC_H
->> +#include <linux/mmc/dw_mmc.h>
->> +#include <linux/mmc/host.h>
->> +
->> +#define SDMMC_EXYNOS_CLKSEL    0x09C
->> +
->> +#define SDMMC_GET_CLK_DRV(x)           ((x) >> 16 & 0x7)
->> +#define SDMMC_GET_CLK_SAMPLE(x)                ((x) & 0x7)
->> +#define SDMCM_GET_DIVRATIO(x)          ((x) >> 24 & 0x7)
->> +#define SDMMC_CLK_RESET_DRV_SAMPLE     (0x07070007);
->> +
->> +#define mci_readl(dev, reg)                    \
->> +       __raw_readl((dev)->regs + SDMMC_##reg)
->> +#define mci_writel(dev, reg, value)                    \
->> +       __raw_writel((value), (dev)->regs + SDMMC_##reg)
->> +
->> +static inline int exynos_get_clk_drv(struct dw_mci *host)
->> +{
->> +       return SDMMC_GET_CLK_DRV(mci_readl(host, EXYNOS_CLKSEL));
->> +}
->> +
->> +static inline int exynos_get_clk_sample(struct dw_mci *host)
->> +{
->> +       return SDMMC_GET_CLK_DRV(mci_readl(host, EXYNOS_CLKSEL));
->> +}
->> +
->> +static inline void exynos_set_clk_drv_sample(struct dw_mci *host,
->> +               struct mmc_ios *ios)
->> +{
->> +       u32 regs, ratio;
->> +
->> +       regs = mci_readl(host, EXYNOS_CLKSEL);
->> +       ratio = SDMMC_GET_DIV_RATIO(reg);
->> +       if (!ratio) {
->> +               regs &= ~SDMMC_CLK_RESET_DRV_SAMPLE;
->> +               regs |= ratio;
->> +               if (ios->timing == MMC_TIMING_UHS_DDR50)
->> +                       regs |= host->pdata->ddr_timing;
->> +               else
->> +                       regs |= host->pdata->sdr_timing;
->> +       } else
->> +               regs &= ~SDMMC_CLK_RESET_DRV_SAMPLE;
->> +
->> +       mci_writel(host, EXYNOS_CLKSEL, regs);
->> +}
->> +
->> +#endif /* _EXYNOS_DW_MMC_H */
->> --
->> 1.7.4.1
-> 
-> The device tree support patches for dw-mmc gets this done in the
-> exynos specific extension callbacks. Personally, I prefer that over
-> this patch. And, I did not see this code getting used in the other
-> patches of this series.
-this patch is preparation patch to use the CLKSEL register for EXYNOS.
+For several MoviNAND, there are some known issue with secure option.
+For these specific MoviNAND device, we skip secure option.
 
-Best Regards,
-Jaehoon Chung
-> 
-> Thanks,
-> Thomas.
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+You could refer this discussion in XDA developers.
+http://forum.xda-developers.com/showthread.php?t=1644364
+https://plus.google.com/111398485184813224730/posts/21pTYfTsCkB#111398485184813224730/posts/21pTYfTsCkB
 
+Signed-off-by: Ian Chen <ian.cy.chen@samsung.com>
+Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ drivers/mmc/card/block.c |   24 +++++++++++++++++++++++-
+ include/linux/mmc/card.h |    1 +
+ 2 files changed, 24 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index f1c84de..0377885 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1411,7 +1411,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
+struct request *req)
+ 		/* complete ongoing async transfer before issuing discard */
+ 		if (card->host->areq)
+ 			mmc_blk_issue_rw_rq(mq, NULL);
+-		if (req->cmd_flags & REQ_SECURE)
++		if (req->cmd_flags & REQ_SECURE &&
++			!(card->quirks & MMC_QUIRK_SEC_ERASE_TRIM_BROKEN))
+ 			ret = mmc_blk_issue_secdiscard_rq(mq, req);
+ 		else
+ 			ret = mmc_blk_issue_discard_rq(mq, req);
+@@ -1716,6 +1717,7 @@ force_ro_fail:
+ #define CID_MANFID_SANDISK	0x2
+ #define CID_MANFID_TOSHIBA	0x11
+ #define CID_MANFID_MICRON	0x13
++#define CID_MANFID_SAMSUNG	0x15
+
+ static const struct mmc_fixup blk_fixups[] =
+ {
+@@ -1752,6 +1754,26 @@ static const struct mmc_fixup blk_fixups[] =
+ 	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
+ 		  MMC_QUIRK_LONG_READ_TIME),
+
++	/*
++	 * Some issue about secure erase/secure trim for Samsung MoviNAND
++	 */
++	MMC_FIXUP("M8G2FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++	MMC_FIXUP("MAG4FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++	MMC_FIXUP("MBG8FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++	MMC_FIXUP("MCGAFA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++	MMC_FIXUP("VAL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++	MMC_FIXUP("VYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++	MMC_FIXUP("KYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++	MMC_FIXUP("VZL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
++
+ 	END_FIXUP
+ };
+
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 111aca5..4b27f9f 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -239,6 +239,7 @@ struct mmc_card {
+ #define MMC_QUIRK_BLK_NO_CMD23	(1<<7)		/* Avoid CMD23 for regular
+multiblock */
+ #define MMC_QUIRK_BROKEN_BYTE_MODE_512 (1<<8)	/* Avoid sending 512
+bytes in */
+ #define MMC_QUIRK_LONG_READ_TIME (1<<9)		/* Data read time > CSD says */
++#define MMC_QUIRK_SEC_ERASE_TRIM_BROKEN (1<<10)	/* Skip secure for
+erase/trim */
+ 						/* byte mode */
+ 	unsigned int    poweroff_notify_state;	/* eMMC4.5 notify feature */
+ #define MMC_NO_POWER_NOTIFICATION	0
+-- 
+1.7.0.4
