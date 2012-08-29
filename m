@@ -1,58 +1,48 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v6] mmc: card: Skip secure option for MoviNAND.
-Date: Wed, 29 Aug 2012 06:26:59 -0400
-Message-ID: <873936vvrg.fsf@octavius.laptop.org>
-References: <503DB130.8090807@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: [PATCH v5 0/9] mmc: dw_mmc: add support for device tree based
+ instantiation
+Date: Wed, 29 Aug 2012 16:18:06 +0530
+Message-ID: <1346237295-7116-1-git-send-email-thomas.abraham@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:40703 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751751Ab2H2K1K (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 29 Aug 2012 06:27:10 -0400
-In-Reply-To: <503DB130.8090807@samsung.com> (IAN CHEN's message of "Wed, 29
-	Aug 2012 15:05:36 +0900")
+Received: from mailout4.samsung.com ([203.254.224.34]:8287 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752641Ab2H2K37 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Aug 2012 06:29:59 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: IAN CHEN <ian.cy.chen@samsung.com>
-Cc: linkinjeon@gmail.com, adrian.hunter@intel.com, subhashj@codeaurora.org, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com
+To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
+Cc: will.newton@imgtec.com, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, patches@linaro.org
 
-Hi,
+This is the fifth version of the patch series that adds device tree support
+for Synopsis Designware Mobile Storage Host Controller. All the review comments
+from the v4 version have been addressed and rebased on mmc-next branch. Since v4,
+patches 6/9 and 9/9 have been modified. This has been tested on only smdk5250.
 
-On Wed, Aug 29 2012, IAN CHEN wrote:
-> For several MoviNAND, there are some known issue with secure option.
-> For these specific MoviNAND device, we skip secure option.
->
-> You could refer this discussion in XDA developers.
-> http://forum.xda-developers.com/showthread.php?t=1644364
-> https://plus.google.com/111398485184813224730/posts/21pTYfTsCkB#111398485184813224730/posts/21pTYfTsCkB
->
-> Signed-off-by: Ian Chen <ian.cy.chen@samsung.com>
-> Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
-> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+Thomas Abraham (9):
+  mmc: dw_mmc: convert copy of struct device in struct dw_mci to a reference
+  mmc: dw_mmc: Use devm_* functions in dw_mmc platform driver
+  mmc: dw_mmc: allow probe to succeed even if one slot is initialized
+  mmc: dw_mmc: lookup for optional biu and ciu clocks
+  mmc: dw_mmc: add quirk to indicate missing write protect line
+  mmc: dw_mmc: add device tree support
+  mmc: dw_mmc: prepare functions in dw_mmc-pltfm for reuse
+  mmc: dw_mmc: add support for implementation specific callbacks
+  mmc: dw_mmc: add support for exynos specific implementation of dw-mshc
 
-Thanks.  We should explain the nature of the bug in the commit message,
-so that users and the stable@ maintainers know how bad the problem is
-by reading the patch.  (This should go to stable@, right?  Do you know
-which kernel versions are affected?)
+ .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   85 ++++++
+ .../devicetree/bindings/mmc/synposis-dw-mshc.txt   |   79 ++++++
+ drivers/mmc/host/Kconfig                           |    9 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/dw_mmc-exynos.c                   |  243 ++++++++++++++++
+ drivers/mmc/host/dw_mmc-pci.c                      |    2 +-
+ drivers/mmc/host/dw_mmc-pltfm.c                    |   60 +++--
+ drivers/mmc/host/dw_mmc-pltfm.h                    |   20 ++
+ drivers/mmc/host/dw_mmc.c                          |  289 ++++++++++++++++----
+ drivers/mmc/host/dw_mmc.h                          |   22 ++
+ include/linux/mmc/dw_mmc.h                         |   13 +-
+ 11 files changed, 748 insertions(+), 75 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
+ create mode 100644 drivers/mmc/host/dw_mmc-exynos.c
+ create mode 100644 drivers/mmc/host/dw_mmc-pltfm.h
 
-I'll add something like this, unless you have a better proposal:
-
-==
-For several MoviNAND, there are some known issues with secure option.
-For these specific MoviNAND device, we skip secure option.
-
-Specifically, there is a bug in the eMMC firmware that causes 
-unrecoverable corruption when the MMC is erased with MMC_CAP_ERASE
-enabled.
-
-You could refer this discussion in XDA developers.
-http://forum.xda-developers.com/showthread.php?t=1644364
-https://plus.google.com/111398485184813224730/posts/21pTYfTsCkB#111398485184813224730/posts/21pTYfTsCkB
-==
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
