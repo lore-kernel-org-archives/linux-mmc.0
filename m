@@ -1,96 +1,99 @@
-From: IAN CHEN <ian.cy.chen@samsung.com>
-Subject: [PATCH v6] mmc: card: Skip secure option for MoviNAND.
-Date: Wed, 29 Aug 2012 14:04:49 +0900
-Message-ID: <503DA2F1.70601@samsung.com>
+From: Jingoo Han <jg1.han@samsung.com>
+Subject: [PATCH] mmc: sdhci-s3c: fix checkpatch error and warnings
+Date: Wed, 29 Aug 2012 14:35:06 +0900
+Message-ID: <002701cd85a8$0c35e130$24a1a390$%han@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: cjb@laptop.org, linkinjeon@gmail.com, adrian.hunter@intel.com, subhashj@codeaurora.org, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com, ian.cy.chen@samsung.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:31664 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750914Ab2H2FfI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Aug 2012 01:35:08 -0400
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M9I00JNM4U7KUL0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 29 Aug 2012 14:35:06 +0900 (KST)
+Received: from DOJG1HAN02 ([12.23.119.56])
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0M9I00DOX4UI0WR0@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 29 Aug 2012 14:35:06 +0900 (KST)
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Chris Ball' <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, 'Ben Dooks' <ben-linux@fluff.org>, 'Jingoo Han' <jg1.han@samsung.com>
 
-For several MoviNAND, there are some known issue with secure option.
-For these specific MoviNAND device, we skip secure option.
+This patch fixes the checkpatch error and warnings listed below:
 
-You could refer this discussion in XDA developers.
-http://forum.xda-developers.com/showthread.php?t=1644364
-https://plus.google.com/111398485184813224730/posts/21pTYfTsCkB#111398485184813224730/posts/21pTYfTsCkB
+ERROR: return is not a function, parentheses are not required
+WARNING: Prefer pr_err(... to printk(KERN_ERR, ...
+WARNING: quoted string split across lines
+WARNING: line over 80 characters
+WARNING: braces {} are not necessary for single statement blocks
 
-Signed-off-by: Ian Chen <ian.cy.chen@samsung.com>
-Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+Signed-off-by: Jingoo Han <jg1.han@samsung.com>
 ---
- drivers/mmc/card/block.c |   24 +++++++++++++++++++++++-
- include/linux/mmc/card.h |    1 +
- 2 files changed, 24 insertions(+), 1 deletions(-)
+ drivers/mmc/host/sdhci-s3c.c |   14 ++++++++------
+ 1 files changed, 8 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index f1c84de..0377885 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1411,7 +1411,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
-struct request *req)
- 		/* complete ongoing async transfer before issuing discard */
- 		if (card->host->areq)
- 			mmc_blk_issue_rw_rq(mq, NULL);
--		if (req->cmd_flags & REQ_SECURE)
-+		if (req->cmd_flags & REQ_SECURE &&
-+			!(card->quirks & MMC_QUIRK_SEC_ERASE_TRIM_BROKEN))
- 			ret = mmc_blk_issue_secdiscard_rq(mq, req);
- 		else
- 			ret = mmc_blk_issue_discard_rq(mq, req);
-@@ -1716,6 +1717,7 @@ force_ro_fail:
- #define CID_MANFID_SANDISK	0x2
- #define CID_MANFID_TOSHIBA	0x11
- #define CID_MANFID_MICRON	0x13
-+#define CID_MANFID_SAMSUNG	0x15
-
- static const struct mmc_fixup blk_fixups[] =
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index a50c205..00969ba 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -166,7 +166,7 @@ static unsigned int sdhci_s3c_consider_clock(struct sdhci_s3c *ourhost,
+ 	dev_dbg(&ourhost->pdev->dev, "clk %d: rate %ld, want %d, got %ld\n",
+ 		src, rate, wanted, rate / div);
+ 
+-	return (wanted - (rate / div));
++	return wanted - (rate / div);
+ }
+ 
+ /**
+@@ -288,6 +288,7 @@ static unsigned int sdhci_cmu_get_min_clock(struct sdhci_host *host)
+ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
  {
-@@ -1752,6 +1754,26 @@ static const struct mmc_fixup blk_fixups[] =
- 	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
- 		  MMC_QUIRK_LONG_READ_TIME),
-
-+	/*
-+	 * Some issue about secure erase/secure trim for Samsung MoviNAND
-+	 */
-+	MMC_FIXUP("M8G2FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+	MMC_FIXUP("MAG4FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+	MMC_FIXUP("MBG8FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+	MMC_FIXUP("MCGAFA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+	MMC_FIXUP("VAL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+	MMC_FIXUP("VYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+	MMC_FIXUP("KYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+	MMC_FIXUP("VZL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
-+
- 	END_FIXUP
- };
-
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 111aca5..4b27f9f 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -239,6 +239,7 @@ struct mmc_card {
- #define MMC_QUIRK_BLK_NO_CMD23	(1<<7)		/* Avoid CMD23 for regular
-multiblock */
- #define MMC_QUIRK_BROKEN_BYTE_MODE_512 (1<<8)	/* Avoid sending 512
-bytes in */
- #define MMC_QUIRK_LONG_READ_TIME (1<<9)		/* Data read time > CSD says */
-+#define MMC_QUIRK_SEC_ERASE_TRIM_BROKEN (1<<10)	/* Skip secure for
-erase/trim */
- 						/* byte mode */
- 	unsigned int    poweroff_notify_state;	/* eMMC4.5 notify feature */
- #define MMC_NO_POWER_NOTIFICATION	0
+ 	struct sdhci_s3c *ourhost = to_s3c(host);
++	struct device *dev = &ourhost->pdev->dev;
+ 	unsigned long timeout;
+ 	u16 clk = 0;
+ 
+@@ -309,8 +310,8 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+ 		& SDHCI_CLOCK_INT_STABLE)) {
+ 		if (timeout == 0) {
+-			printk(KERN_ERR "%s: Internal clock never "
+-				"stabilised.\n", mmc_hostname(host->mmc));
++			dev_err(dev, "%s: Internal clock never stabilised.\n",
++				mmc_hostname(host->mmc));
+ 			return;
+ 		}
+ 		timeout--;
+@@ -404,7 +405,9 @@ static void sdhci_s3c_setup_card_detect_gpio(struct sdhci_s3c *sc)
+ 		if (sc->ext_cd_irq &&
+ 		    request_threaded_irq(sc->ext_cd_irq, NULL,
+ 					 sdhci_s3c_gpio_card_detect_thread,
+-					 IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT,
++					 IRQF_TRIGGER_RISING |
++					 IRQF_TRIGGER_FALLING |
++					 IRQF_ONESHOT,
+ 					 dev_name(dev), sc) == 0) {
+ 			int status = gpio_get_value(sc->ext_cd_gpio);
+ 			if (pdata->ext_cd_gpio_invert)
+@@ -486,9 +489,8 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 
+ 		snprintf(name, 14, "mmc_busclk.%d", ptr);
+ 		clk = clk_get(dev, name);
+-		if (IS_ERR(clk)) {
++		if (IS_ERR(clk))
+ 			continue;
+-		}
+ 
+ 		clks++;
+ 		sc->clk_bus[ptr] = clk;
 -- 
-1.7.0.4
+1.7.1
+
+
