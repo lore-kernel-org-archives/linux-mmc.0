@@ -1,81 +1,145 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 5/5] mmc: dw-mmc: fix the present flags for card detect
-Date: Wed, 29 Aug 2012 10:51:37 +0900
-Message-ID: <503D75A9.709@samsung.com>
-References: <503C7981.5050209@samsung.com>
- <CAJuYYwQck2zXjQ9A5-m+cQd4DB55oBc4geJ35DEUQCYXdEDVWA@mail.gmail.com>
+Subject: Re: [PATCH v2 1/5] mmc: dw-mmc: ensure that the card is not busy when
+ changing clock
+Date: Wed, 29 Aug 2012 11:02:00 +0900
+Message-ID: <503D7818.2040402@samsung.com>
+References: <503C797D.4040404@samsung.com>
+ <003501cd8584$a1cd8370$e5688a50$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:48527 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750881Ab2H2Bvn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Aug 2012 21:51:43 -0400
-Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout3.samsung.com
+Received: from mailout2.samsung.com ([203.254.224.25]:23957 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751942Ab2H2CCG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Aug 2012 22:02:06 -0400
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout2.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M9H004OSUGS5T80@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 29 Aug 2012 10:51:42 +0900 (KST)
+ 17 2011)) with ESMTP id <0M9H00GJ9UYYM690@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 29 Aug 2012 11:02:05 +0900 (KST)
 Received: from [10.90.51.55] by mmp1.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0M9H00ICAUI6ZQA0@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 29 Aug 2012 10:51:42 +0900 (KST)
-In-reply-to: <CAJuYYwQck2zXjQ9A5-m+cQd4DB55oBc4geJ35DEUQCYXdEDVWA@mail.gmail.com>
+ 17 2011)) with ESMTPA id <0M9H00K2XUZGPW00@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 29 Aug 2012 11:02:04 +0900 (KST)
+In-reply-to: <003501cd8584$a1cd8370$e5688a50$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Thomas Abraham <thomas.abraham@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <James.Hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, 'Kyungmin Park' <kyungmin.park@samsung.com>, 'Will Newton' <will.newton@imgtec.com>, 'Thomas Abraham' <thomas.abraham@linaro.org>
 
-On 08/28/2012 11:04 PM, Thomas Abraham wrote:
-> On 28 August 2012 13:25, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> dw_mci_get_cd() is registered to call-back function.
->> If call host->ops->get_cd(), host didn't set any card present flag.
->> Then host didn't know whether card is present or not.
->> This patch fixed them.
+On 08/29/2012 10:21 AM, Seungwon Jeon wrote:
+> On Tuesday, August 28, 2012, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> synopsys spec is mentioned. (7.1 Software/Hardware Restrictions)
+>> "Before disabling clock, ensure that card is not busy due to any previous data command."
+>>
+>> At specific board, i found the problem that didn't inform ciu.
+>> (It didn't produce always.)
+>> At that time, i checked the status register whether card is busy or not.
+>> (Start bit of CMD register is cleared, but card is busy.)
+>> Current code didn't check the card status. Just check whether the start-bit cleared.
+>> host regard that command is completed, will send the next command.
+>> But next command didn't issue because Card is busy.
+>> This patch can prevent this situation.
 >>
 >> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Singed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 >> ---
->>  drivers/mmc/host/dw_mmc.c |    7 +++++--
->>  1 files changed, 5 insertions(+), 2 deletions(-)
+>>  drivers/mmc/host/dw_mmc.c |   27 +++++++++++++++++++++------
+>>  drivers/mmc/host/dw_mmc.h |    1 +
+>>  2 files changed, 22 insertions(+), 6 deletions(-)
 >>
 >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 3642455..8a87d38 100644
+>> index 36f98c0..e30d3ed 100644
 >> --- a/drivers/mmc/host/dw_mmc.c
 >> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -909,10 +909,13 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
->>                 present = (mci_readl(slot->host, CDETECT) & (1 << slot->id))
->>                         == 0 ? 1 : 0;
->>
->> -       if (present)
->> +       if (present) {
->> +               set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
->>                 dev_dbg(&mmc->class_dev, "card is present\n");
->> -       else
->> +       } else {
->> +               clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
->>                 dev_dbg(&mmc->class_dev, "card is not present\n");
->> +       }
->>
->>         return present;
+>> @@ -623,6 +623,24 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
+>>  		cmd, arg, cmd_status);
 >>  }
+>>
+>> +static void dw_mci_inform_ciu(struct dw_mci_slot *slot)
+>> +{
+>> +	struct dw_mci *host = slot->host;
+>> +	unsigned long timeout = jiffies + msecs_to_jiffies(10);
+> 10ms is from test?
+It's tested...it's not exactly value..but never spent the time. 
+> 
+>> +	u32 ctrl, status;
+>> +
+>> +	do {
+>> +		status = mci_readl(host, STATUS);
+>> +		if (!(status & SDMMC_DATA_BUSY))
+>> +			break;
+>> +		ctrl = mci_readl(host, CTRL);
+>> +		ctrl |= SDMMC_CTRL_RESET;
+>> +		mci_writel(host, CTRL, ctrl);
+>> +	} while (time_before(jiffies, timeout));
+>> +
+>> +	mci_send_cmd(slot, SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+>> +}
+>> +
+>>  static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+>>  {
+>>  	struct dw_mci *host = slot->host;
+>> @@ -650,15 +668,13 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+> According to your quotation of manual("Before disabling clock, ...),
+> Place of dw_mci_inform_ciu is proper here?
+manual is mentioned "before the disabling clock". but i think no problem before send the command.
+> 
+> 	dw_mci_inform_ciu(slot);
+> 	
+>           /* disable clock */
+>          mci_writel(host, CLKENA, 0);
+>          mci_writel(host, CLKSRC, 0);
+> 
+>>  		mci_writel(host, CLKSRC, 0);
+>>
+>>  		/* inform CIU */
+>> -		mci_send_cmd(slot,
+>> -			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+>> +		dw_mci_inform_ciu(slot);
+>>
+>>  		/* set clock to desired speed */
+>>  		mci_writel(host, CLKDIV, div);
+>>
+>>  		/* inform CIU */
+>> -		mci_send_cmd(slot,
+>> -			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+>> +		dw_mci_inform_ciu(slot);
+> And then, since start to change clock sequence, there is no need to check busy-status.
+> Just need to update clock with origin code.
+Right, didn't check the busy-status. but there is also no reason that didn't need to check busy-status.
+>>
+>>  		/* enable clock; only low power if no SDIO */
+>>  		clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
+>> @@ -667,8 +683,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+>>  		mci_writel(host, CLKENA, clk_en_a);
+>>
+>>  		/* inform CIU */
+>> -		mci_send_cmd(slot,
+>> -			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+>> +		dw_mci_inform_ciu(slot);
+> Same here.
+> 
+> Thanks,
+> Seungwon Jeon
+>>
+>>  		host->current_speed = slot->clock;
+>>  	}
+>> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+>> index 15c27e1..b6a1a78 100644
+>> --- a/drivers/mmc/host/dw_mmc.h
+>> +++ b/drivers/mmc/host/dw_mmc.h
+>> @@ -127,6 +127,7 @@
+>>  #define SDMMC_CMD_INDX(n)		((n) & 0x1F)
+>>  /* Status register defines */
+>>  #define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FFF)
+>> +#define SDMMC_DATA_BUSY			BIT(9)
+>>  /* Internal DMAC interrupt defines */
+>>  #define SDMMC_IDMAC_INT_AI		BIT(9)
+>>  #define SDMMC_IDMAC_INT_NI		BIT(8)
 >> --
 >> 1.7.4.1
 > 
-> Isn't this already done in dw_mci_init_slot() function and other
-> places in the driver? I have tested with card insert/removal multiple
-> times and did not notice any failure.
-In my case, use the external cd-gpio pin and use the mmc_gpio_request_cd().
-In that case, if didn't insert SD-card when boot at first time, 
-at next time host didn't recognize Sd-card.
-And it's no problem that the code is placed into get_cd().
-
-Best Regards,
-Jaehoon Chung
-> 
-> Thanks,
-> Thomas.
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
