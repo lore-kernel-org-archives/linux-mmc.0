@@ -1,168 +1,107 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCH 2/2] mmc: omap_hsmmc: cleanup the bitmap definitions of
- Interrupt Register
-Date: Wed, 29 Aug 2012 12:29:19 +0530
-Message-ID: <CANrkHUYa-56TvFtYR5WTjYXt9J8s90L0nXueioGZsOyVsa-jbw@mail.gmail.com>
-References: <1346159947-3194-1-git-send-email-svenkatr@ti.com>
-	<1346159947-3194-2-git-send-email-svenkatr@ti.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v6] mmc: card: Skip secure option for MoviNAND.
+Date: Wed, 29 Aug 2012 16:27:25 +0900
+Message-ID: <503DC45D.7060607@samsung.com>
+References: <503DB130.8090807@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1346159947-3194-2-git-send-email-svenkatr@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, balbi@ti.com
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:59041 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752070Ab2H2H1c (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Aug 2012 03:27:32 -0400
+In-reply-to: <503DB130.8090807@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: IAN CHEN <ian.cy.chen@samsung.com>
+Cc: cjb@laptop.org, linkinjeon@gmail.com, adrian.hunter@intel.com, subhashj@codeaurora.org, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, d.j.shin@samsung.com, jongtae22.kim@samsung.com, kyungmin.park@samsung.com, jh80.chung@samsung.com
 
-On Tue, Aug 28, 2012 at 6:49 PM, Venkatraman S <svenkatr@ti.com> wrote:
-> Define the most frequently used bitmasks of the Interrupt Enable /
-> Interrupt Status register with consistent naming ( with _EN suffix).
->
-> Use meaningful concatenation of bitfields for INT_EN_MASK, which shows
-> which interrupts are enabled by default.
-> No functional changes.
->
-> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+Hi Chris,
+
+Could you merge this patch?
+We want to prevent this problem at mainline kernel.
+
+Best Regards,
+Jaehoon Chung
+
+On 08/29/2012 03:05 PM, IAN CHEN wrote:
+> For several MoviNAND, there are some known issue with secure option.
+> For these specific MoviNAND device, we skip secure option.
+> 
+> You could refer this discussion in XDA developers.
+> http://forum.xda-developers.com/showthread.php?t=1644364
+> https://plus.google.com/111398485184813224730/posts/21pTYfTsCkB#111398485184813224730/posts/21pTYfTsCkB
+> 
+> Signed-off-by: Ian Chen <ian.cy.chen@samsung.com>
+> Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 > ---
->  drivers/mmc/host/omap_hsmmc.c | 51 ++++++++++++++++++++++++-------------------
->  1 file changed, 29 insertions(+), 22 deletions(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 57e86a4..03c2362 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -79,28 +79,16 @@
->  #define CLKD_SHIFT             6
->  #define DTO_MASK               0x000F0000
->  #define DTO_SHIFT              16
-> -#define INT_EN_MASK            0x306E0033
-> -#define BWR_ENABLE             (1 << 4)
-> -#define BRR_ENABLE             (1 << 5)
-> -#define DTO_ENABLE             (1 << 20)
->  #define INIT_STREAM            (1 << 1)
->  #define DP_SELECT              (1 << 21)
->  #define DDIR                   (1 << 4)
-> -#define DMA_EN                 0x1
-> +#define DMAE                   0x1
-
-This change is not needed or may not be part of this patch
-
->  #define MSBS                   (1 << 5)
->  #define BCE                    (1 << 1)
->  #define FOUR_BIT               (1 << 1)
->  #define DDR                    (1 << 19)
->  #define DW8                    (1 << 5)
-> -#define CC                     0x1
-> -#define TC                     0x02
->  #define OD                     0x1
-> -#define ERR                    (1 << 15)
-> -#define CMD_TIMEOUT            (1 << 16)
-> -#define DATA_TIMEOUT           (1 << 20)
-> -#define CMD_CRC                        (1 << 17)
-> -#define DATA_CRC               (1 << 21)
-> -#define CARD_ERR               (1 << 28)
->  #define STAT_CLEAR             0xFFFFFFFF
->  #define INIT_STREAM_CMD                0x00000000
->  #define DUAL_VOLT_OCR_BIT      7
-> @@ -109,6 +97,25 @@
->  #define SOFTRESET              (1 << 1)
->  #define RESETDONE              (1 << 0)
->
-> +/* Interrupt masks for IE and ISE register */
-> +#define CC_EN                  (1 << 0)
-> +#define TC_EN                  (1 << 1)
-
-Minor comment:
-You might want to retain CC, TC...  instead of CC_EN as before.
-CC_EN is not mentioned in TRM. It would be better to reuse CC
-(similarly for other bits fields too) for MMCHS_IE, MMCHS_ISE
-inorder to reduce the number of #define's
-
-> +#define BWR_EN                 (1 << 4)
-> +#define BRR_EN                 (1 << 5)
-> +#define ERR_EN                 (1 << 15)
-
-ERR_EN is not applicable for Interrupt masks for IE and ISE register
-
-> +#define CTO_EN                 (1 << 16)
-> +#define CCRC_EN                (1 << 17)
-> +#define CEB_EN                 (1 << 18)
-> +#define CIE_EN                 (1 << 19)
-> +#define DTO_EN                 (1 << 20)
-> +#define DCRC_EN                (1 << 21)
-> +#define DEB_EN                 (1 << 22)
-> +#define CERR_EN                (1 << 28)
-> +#define BADA_EN                (1 << 29)
+>  drivers/mmc/card/block.c |   24 +++++++++++++++++++++++-
+>  include/linux/mmc/card.h |    1 +
+>  2 files changed, 24 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index f1c84de..0377885 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -1411,7 +1411,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>  		/* complete ongoing async transfer before issuing discard */
+>  		if (card->host->areq)
+>  			mmc_blk_issue_rw_rq(mq, NULL);
+> -		if (req->cmd_flags & REQ_SECURE)
+> +		if (req->cmd_flags & REQ_SECURE &&
+> +			!(card->quirks & MMC_QUIRK_SEC_ERASE_TRIM_BROKEN))
+>  			ret = mmc_blk_issue_secdiscard_rq(mq, req);
+>  		else
+>  			ret = mmc_blk_issue_discard_rq(mq, req);
+> @@ -1716,6 +1717,7 @@ force_ro_fail:
+>  #define CID_MANFID_SANDISK	0x2
+>  #define CID_MANFID_TOSHIBA	0x11
+>  #define CID_MANFID_MICRON	0x13
+> +#define CID_MANFID_SAMSUNG	0x15
+>  
+>  static const struct mmc_fixup blk_fixups[] =
+>  {
+> @@ -1752,6 +1754,26 @@ static const struct mmc_fixup blk_fixups[] =
+>  	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
+>  		  MMC_QUIRK_LONG_READ_TIME),
+>  
+> +	/*
+> +	 * Some issue about secure erase/secure trim for Samsung MoviNAND
+> +	 */
+> +	MMC_FIXUP("M8G2FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
+> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
+> +	MMC_FIXUP("MAG4FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
+> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
+> +	MMC_FIXUP("MBG8FA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
+> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
+> +	MMC_FIXUP("MCGAFA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
+> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
+> +	MMC_FIXUP("VAL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
+> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
+> +	MMC_FIXUP("VYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
+> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
+> +	MMC_FIXUP("KYL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
+> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
+> +	MMC_FIXUP("VZL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
+> +		  MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
 > +
-> +#define INT_EN_MASK            (BADA_EN | CERR_EN | DEB_EN | DCRC_EN | \
-> +               CIE_EN | CEB_EN | CCRC_EN | BRR_EN | BWR_EN | TC_EN | CC_EN)
-> +
->  #define MMC_AUTOSUSPEND_DELAY  100
->  #define MMC_TIMEOUT_MS         20
->  #define OMAP_MMC_MIN_CLOCK     400000
-> @@ -453,7 +460,7 @@ static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
->         unsigned int irq_mask;
->
->         if (host->use_dma)
-> -               irq_mask = INT_EN_MASK & ~(BRR_ENABLE | BWR_ENABLE);
-> +               irq_mask = INT_EN_MASK & ~(BRR_EN | BWR_EN);
->         else
->                 irq_mask = INT_EN_MASK;
->
-> @@ -673,8 +680,8 @@ static void send_init_stream(struct omap_hsmmc_host *host)
->         OMAP_HSMMC_WRITE(host->base, CMD, INIT_STREAM_CMD);
->
->         timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
-> -       while ((reg != CC) && time_before(jiffies, timeout))
-> -               reg = OMAP_HSMMC_READ(host->base, STAT) & CC;
-> +       while ((reg != CC_EN) && time_before(jiffies, timeout))
-> +               reg = OMAP_HSMMC_READ(host->base, STAT) & CC_EN;
->
->         OMAP_HSMMC_WRITE(host->base, CON,
->                 OMAP_HSMMC_READ(host->base, CON) & ~INIT_STREAM);
-> @@ -765,7 +772,7 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
->         }
->
->         if (host->use_dma)
-> -               cmdreg |= DMA_EN;
-> +               cmdreg |= DMAE;
+>  	END_FIXUP
+>  };
+>  
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 111aca5..4b27f9f 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -239,6 +239,7 @@ struct mmc_card {
+>  #define MMC_QUIRK_BLK_NO_CMD23	(1<<7)		/* Avoid CMD23 for regular multiblock */
+>  #define MMC_QUIRK_BROKEN_BYTE_MODE_512 (1<<8)	/* Avoid sending 512 bytes in */
+>  #define MMC_QUIRK_LONG_READ_TIME (1<<9)		/* Data read time > CSD says */
+> +#define MMC_QUIRK_SEC_ERASE_TRIM_BROKEN (1<<10)	/* Skip secure for erase/trim */
+>  						/* byte mode */
+>  	unsigned int    poweroff_notify_state;	/* eMMC4.5 notify feature */
+>  #define MMC_NO_POWER_NOTIFICATION	0
+> 
 
-In that case, this change can be avoided and in couple of other places too ...
-
->
->         host->req_in_progress = 1;
->
-> @@ -988,11 +995,11 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
->         data = host->data;
->         dev_vdbg(mmc_dev(host->mmc), "IRQ Status is %x\n", status);
->
-> -       if (status & ERR) {
-> +       if (status & ERR_EN) {
->                 omap_hsmmc_dbg_report_irq(host, status);
-> -               if (status & (CMD_TIMEOUT | DATA_TIMEOUT))
-> +               if (status & (CTO_EN | DTO_EN))
->                         hsmmc_command_incomplete(host, -ETIMEDOUT);
-> -               else if (status & (CMD_CRC | DATA_CRC))
-> +               else if (status & (CCRC_EN | DCRC_EN))
->                         hsmmc_command_incomplete(host, -EILSEQ);
->
->                 end_cmd = 1;
-> @@ -1002,9 +1009,9 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
->                 }
->         }
->
-> -       if (end_cmd || ((status & CC) && host->cmd))
-> +       if (end_cmd || ((status & CC_EN) && host->cmd))
->                 omap_hsmmc_cmd_done(host, host->cmd);
-> -       if ((end_trans || (status & TC)) && host->mrq)
-> +       if ((end_trans || (status & TC_EN)) && host->mrq)
->                 omap_hsmmc_xfer_done(host, data);
->  }
->
-> --
-> 1.7.11.1.25.g0e18bef
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
