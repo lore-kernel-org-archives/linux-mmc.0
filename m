@@ -1,37 +1,35 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
 Subject: Re: [PATCH v2 3/5] mmc: dw-mmc: add the header file for exynos
  specific code.
-Date: Wed, 29 Aug 2012 11:12:08 +0900
-Message-ID: <503D7A78.3040101@samsung.com>
+Date: Wed, 29 Aug 2012 11:17:11 +0900
+Message-ID: <503D7BA7.3000008@samsung.com>
 References: <503C797F.4040506@samsung.com>
- <003701cd8584$c7dc6720$57953560$%jun@samsung.com>
+ <CAJuYYwS0Z=YuXBNEhp-f22nFJoKwSG+oDWAPgHTbpTNBWGJbPQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:32468 "EHLO
+Received: from mailout1.samsung.com ([203.254.224.24]:33507 "EHLO
 	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750881Ab2H2CMO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Aug 2012 22:12:14 -0400
+	with ESMTP id S1750881Ab2H2CRS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Aug 2012 22:17:18 -0400
 Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
  by mailout1.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M9H007IEVG7SW90@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 29 Aug 2012 11:12:13 +0900 (KST)
+ 17 2011)) with ESMTP id <0M9H007CDVOPF5A0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 29 Aug 2012 11:17:16 +0900 (KST)
 Received: from [10.90.51.55] by mmp1.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0M9H00KF5VGCFQ50@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 29 Aug 2012 11:12:12 +0900 (KST)
-In-reply-to: <003701cd8584$c7dc6720$57953560$%jun@samsung.com>
+ 17 2011)) with ESMTPA id <0M9H00KXFVORFQ60@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 29 Aug 2012 11:17:16 +0900 (KST)
+In-reply-to: <CAJuYYwS0Z=YuXBNEhp-f22nFJoKwSG+oDWAPgHTbpTNBWGJbPQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, 'Kyungmin Park' <kyungmin.park@samsung.com>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <James.Hogan@imgtec.com>, 'Thomas Abraham' <thomas.abraham@linaro.org>
+To: Thomas Abraham <thomas.abraham@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <James.Hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>
 
-On 08/29/2012 10:22 AM, Seungwon Jeon wrote:
-> On Tuesday, August 28, 2012, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Commit message is no need?
-> 
+On 08/28/2012 10:37 PM, Thomas Abraham wrote:
+> On 28 August 2012 13:25, Jaehoon Chung <jh80.chung@samsung.com> wrote:
 >> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 >> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 >> ---
@@ -49,7 +47,7 @@ On 08/29/2012 10:22 AM, Seungwon Jeon wrote:
 >> + * Synopsys DesignWare Multimedia Card Interface driver
 >> + *
 >> + * Copyright (c) 2012 Samsung Electronics Co., Ltd.
->> + *		http://www.samsung.com
+>> + *             http://www.samsung.com
 >> + *
 >> + * Header file for Exynos specific register
 >> + *
@@ -63,63 +61,63 @@ On 08/29/2012 10:22 AM, Seungwon Jeon wrote:
 >> +#include <linux/mmc/dw_mmc.h>
 >> +#include <linux/mmc/host.h>
 >> +
->> +#define SDMMC_EXYNOS_CLKSEL	0x09C
+>> +#define SDMMC_EXYNOS_CLKSEL    0x09C
 >> +
->> +#define SDMMC_GET_CLK_DRV(x)		((x) >> 16 & 0x7)
->> +#define SDMMC_GET_CLK_SAMPLE(x)		((x) & 0x7)
->> +#define SDMCM_GET_DIVRATIO(x)		((x) >> 24 & 0x7)
->> +#define SDMMC_CLK_RESET_DRV_SAMPLE	(0x07070007);
+>> +#define SDMMC_GET_CLK_DRV(x)           ((x) >> 16 & 0x7)
+>> +#define SDMMC_GET_CLK_SAMPLE(x)                ((x) & 0x7)
+>> +#define SDMCM_GET_DIVRATIO(x)          ((x) >> 24 & 0x7)
+>> +#define SDMMC_CLK_RESET_DRV_SAMPLE     (0x07070007);
 >> +
->> +#define mci_readl(dev, reg)			\
->> +	__raw_readl((dev)->regs + SDMMC_##reg)
->> +#define mci_writel(dev, reg, value)			\
->> +	__raw_writel((value), (dev)->regs + SDMMC_##reg)
+>> +#define mci_readl(dev, reg)                    \
+>> +       __raw_readl((dev)->regs + SDMMC_##reg)
+>> +#define mci_writel(dev, reg, value)                    \
+>> +       __raw_writel((value), (dev)->regs + SDMMC_##reg)
 >> +
 >> +static inline int exynos_get_clk_drv(struct dw_mci *host)
 >> +{
->> +	return SDMMC_GET_CLK_DRV(mci_readl(host, EXYNOS_CLKSEL));
+>> +       return SDMMC_GET_CLK_DRV(mci_readl(host, EXYNOS_CLKSEL));
 >> +}
 >> +
 >> +static inline int exynos_get_clk_sample(struct dw_mci *host)
 >> +{
->> +	return SDMMC_GET_CLK_DRV(mci_readl(host, EXYNOS_CLKSEL));
+>> +       return SDMMC_GET_CLK_DRV(mci_readl(host, EXYNOS_CLKSEL));
 >> +}
 >> +
 >> +static inline void exynos_set_clk_drv_sample(struct dw_mci *host,
->> +		struct mmc_ios *ios)
+>> +               struct mmc_ios *ios)
 >> +{
->> +	u32 regs, ratio;
+>> +       u32 regs, ratio;
 >> +
->> +	regs = mci_readl(host, EXYNOS_CLKSEL);
->> +	ratio = SDMMC_GET_DIV_RATIO(reg);
->> +	if (!ratio) {
-> Perhaps, "if (ratio)" is right?
-Right ratio is set to 0, drv/sample value must set to 0.
-It's my mistake. 
-> Anyway, I feel this patch with "mmc: dw-mmc: add the platdata related with clock"
-> is overlapped. It needs to be adjusted.
-Ok, thanks for comment.
-
-Best Regards,
-Jaehoon Chung
-> 
-> 
->> +		regs &= ~SDMMC_CLK_RESET_DRV_SAMPLE;
->> +		regs |= ratio;
->> +		if (ios->timing == MMC_TIMING_UHS_DDR50)
->> +			regs |= host->pdata->ddr_timing;
->> +		else
->> +			regs |= host->pdata->sdr_timing;
->> +	} else
->> +		regs &= ~SDMMC_CLK_RESET_DRV_SAMPLE;
+>> +       regs = mci_readl(host, EXYNOS_CLKSEL);
+>> +       ratio = SDMMC_GET_DIV_RATIO(reg);
+>> +       if (!ratio) {
+>> +               regs &= ~SDMMC_CLK_RESET_DRV_SAMPLE;
+>> +               regs |= ratio;
+>> +               if (ios->timing == MMC_TIMING_UHS_DDR50)
+>> +                       regs |= host->pdata->ddr_timing;
+>> +               else
+>> +                       regs |= host->pdata->sdr_timing;
+>> +       } else
+>> +               regs &= ~SDMMC_CLK_RESET_DRV_SAMPLE;
 >> +
->> +	mci_writel(host, EXYNOS_CLKSEL, regs);
+>> +       mci_writel(host, EXYNOS_CLKSEL, regs);
 >> +}
 >> +
 >> +#endif /* _EXYNOS_DW_MMC_H */
 >> --
 >> 1.7.4.1
 > 
+> The device tree support patches for dw-mmc gets this done in the
+> exynos specific extension callbacks. Personally, I prefer that over
+> this patch. And, I did not see this code getting used in the other
+> patches of this series.
+this patch is preparation patch to use the CLKSEL register for EXYNOS.
+
+Best Regards,
+Jaehoon Chung
+> 
+> Thanks,
+> Thomas.
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
