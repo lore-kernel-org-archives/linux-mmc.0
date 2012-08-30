@@ -1,44 +1,70 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH] mmc: core: Quieten "could not set regulator OCR" error.
-Date: Thu, 30 Aug 2012 10:30:57 -0700
-Message-ID: <20120830173055.GF4356@opensource.wolfsonmicro.com>
-References: <87a9xfyko6.fsf@octavius.laptop.org>
- <CAPDyKFofwC-t-7vhxjF5PUZKTiqYxZh8Kh6J6cLCTFuDTw1-eQ@mail.gmail.com>
- <87mx1dvo9s.fsf@octavius.laptop.org>
- <20120830171214.GD4356@opensource.wolfsonmicro.com>
- <873934qok9.fsf@octavius.laptop.org>
+From: Hein Tibosch <hein_tibosch@yahoo.es>
+Subject: [PATCH v2 2/2] mmc: atmel-mci: AP700x PDC is not connected to MCI
+Date: Fri, 31 Aug 2012 00:34:27 +0800
+Message-ID: <503F9613.5060007@yahoo.es>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:53949 "EHLO
-	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752545Ab2H3RbB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Aug 2012 13:31:01 -0400
-Content-Disposition: inline
-In-Reply-To: <873934qok9.fsf@octavius.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Nicolas Ferre <nicolas.ferre@atmel.com>, "ludovic.desroches" <ludovic.desroches@atmel.com>, Hans-Christian Egtvedt <egtvedt@samfundet.no>, Havard Skinnemoen <havard@skinnemoen.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Liam Girdwood <lrg@ti.com>
 
-On Thu, Aug 30, 2012 at 01:25:58PM -0400, Chris Ball wrote:
-> On Thu, Aug 30 2012, Mark Brown wrote:
+Earlier, atmel-mci was adapted to make use of the peripheral DMA
+controller (PDC), in case normal DMA wouldn't work.
+( http://comments.gmane.org/gmane.linux.kernel.mmc/9403 )
+This works OK on ARM platforms (AT91), but it broke the driver
+for AVR32, the AP700x.
+Although the MCI has PDC support, the connection is not done for
+AVR chips
 
-> > Conversely there is nothing stopping other regulator drivers having
-> > similar properties to the dummy driver, or constraints stopping them
-> > implementing things.  If the MMC framework wants to silently accept
-> > regulators that don't allow the voltage to be set then the MMC framework
-> > should enumerate the range of voltages which can be set using the
-> > regulator it has and then take appropriate action.
+This patch makes the use of PDC depend on CONFIG_AVR32
 
-> I didn't do this because I don't want to silently accept real regulators
-> with insufficient voltage ranges, because that would make it harder to
-> debug real MMC failures.
+Signed-off-by: Hein Tibosch <hein_tibosch@yahoo.es>
 
-> Sounds like my response to the bug reports should be "persuade your
-> distro kernel maintainers to turn off CONFIG_REGULATOR" -- I'll try
-> doing that.
+---
+ drivers/mmc/host/atmel-mci-regs.h |    7 +++++++
+ drivers/mmc/host/atmel-mci.c      |    2 +-
+ 2 files changed, 8 insertions(+), 1 deletions(-)
 
-Or alternatively persuade someone to provide the appropriate fixed
-voltage regulators as part of instantiating the MMC device on these
-systems.
+diff --git a/drivers/mmc/host/atmel-mci-regs.h b/drivers/mmc/host/atmel-mci-regs.h
+index ab56f7d..c97001e 100644
+--- a/drivers/mmc/host/atmel-mci-regs.h
++++ b/drivers/mmc/host/atmel-mci-regs.h
+@@ -140,6 +140,13 @@
+ #define atmci_writel(port,reg,value)			\
+ 	__raw_writel((value), (port)->regs + reg)
+ 
++/* On AVR chips the Peripheral DMA Controller is not connected to MCI. */
++#ifdef CONFIG_AVR32
++#	define ATMCI_PDC_CONNECTED	0
++#else
++#	define ATMCI_PDC_CONNECTED	1
++#endif
++
+ /*
+  * Fix sconfig's burst size according to atmel MCI. We need to convert them as:
+  * 1 -> 0, 4 -> 1, 8 -> 2, 16 -> 3.
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index a6a5593..b8de891 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -2208,7 +2208,7 @@ static void __init atmci_get_cap(struct atmel_mci *host)
+ 			"version: 0x%x\n", version);
+ 
+ 	host->caps.has_dma_conf_reg = 0;
+-	host->caps.has_pdc = 1;
++	host->caps.has_pdc = ATMCI_PDC_CONNECTED;
+ 	host->caps.has_cfg_reg = 0;
+ 	host->caps.has_cstor_reg = 0;
+ 	host->caps.has_highspeed = 0;
+-- 
+1.7.8.0
