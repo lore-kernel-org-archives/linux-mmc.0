@@ -1,44 +1,63 @@
-From: Matt Porter <mporter@ti.com>
-Subject: Re: [PATCH v3 3/3] spi: spi-davinci: convert to DMA engine API
-Date: Thu, 30 Aug 2012 10:43:07 -0400
-Message-ID: <20120830144307.GA26737@beef>
-References: <1345684176-21472-1-git-send-email-mporter@ti.com>
- <1345684176-21472-4-git-send-email-mporter@ti.com>
- <503F75C0.1050507@ti.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: mmc_spi: Use module_spi_driver
+Date: Thu, 30 Aug 2012 11:11:22 -0400
+Message-ID: <87ipc0qusl.fsf@octavius.laptop.org>
+References: <1346048622-2024-1-git-send-email-sachin.kamat@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:34437 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752453Ab2H3Omi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Aug 2012 10:42:38 -0400
-Content-Disposition: inline
-In-Reply-To: <503F75C0.1050507@ti.com>
+Received: from void.printf.net ([89.145.121.20]:43678 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751041Ab2H3PLc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 30 Aug 2012 11:11:32 -0400
+In-Reply-To: <1346048622-2024-1-git-send-email-sachin.kamat@linaro.org>
+	(Sachin Kamat's message of "Mon, 27 Aug 2012 11:53:42 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sekhar Nori <nsekhar@ti.com>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, vinod.koul@intel.com, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, grant.likely@secretlab.ca, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, cjb@laptop.org, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+To: Sachin Kamat <sachin.kamat@linaro.org>
+Cc: linux-mmc@vger.kernel.org, patches@linaro.org
 
-On Thu, Aug 30, 2012 at 07:46:32PM +0530, Sekhar Nori wrote:
-> Hi Matt,
-> 
-> On 8/23/2012 6:39 AM, Matt Porter wrote:
-> > Removes use of the DaVinci EDMA private DMA API and replaces
-> > it with use of the DMA engine API.
-> > 
-> > Signed-off-by: Matt Porter <mporter@ti.com>
-> 
-> I tried testing this patch on my OMAP-L138 EVM, but SPI fails to 
-> initialize after applying the patch.
-> 
-> root@arago:~# dmesg | grep -i spi                                               
-> spi_davinci spi_davinci.1: request RX DMA channel failed                        
+Hi,
 
-Hi Sekhar,
+On Mon, Aug 27 2012, Sachin Kamat wrote:
+> module_spi_driver makes the code simpler by eliminating
+> module_init and module_exit calls.
+>
+> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+> ---
+>  drivers/mmc/host/mmc_spi.c |   15 +--------------
+>  1 files changed, 1 insertions(+), 14 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+> index 273306c..a600eab 100644
+> --- a/drivers/mmc/host/mmc_spi.c
+> +++ b/drivers/mmc/host/mmc_spi.c
+> @@ -1532,20 +1532,7 @@ static struct spi_driver mmc_spi_driver = {
+>  	.remove =	__devexit_p(mmc_spi_remove),
+>  };
+>  
+> -
+> -static int __init mmc_spi_init(void)
+> -{
+> -	return spi_register_driver(&mmc_spi_driver);
+> -}
+> -module_init(mmc_spi_init);
+> -
+> -
+> -static void __exit mmc_spi_exit(void)
+> -{
+> -	spi_unregister_driver(&mmc_spi_driver);
+> -}
+> -module_exit(mmc_spi_exit);
+> -
+> +module_spi_driver(mmc_spi_driver);
+>  
+>  MODULE_AUTHOR("Mike Lavender, David Brownell, "
+>  		"Hans-Peter Nilsson, Jan Nikitenko");
 
-Most likely CONFIG_TI_EDMA is off as it defaults to off in the v3
-series. Try enabling this and if it's the problem then this error
-path can be fixed to properly fallback to PIO only or fail to
-initialize as needed.
+Thanks, pushed to mmc-next for 3.7.
 
--Matt
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
