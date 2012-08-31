@@ -1,70 +1,40 @@
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+From: Vinod Koul <vkoul@infradead.org>
 Subject: Re: [PATCH v3 3/3] spi: spi-davinci: convert to DMA engine API
-Date: Fri, 31 Aug 2012 22:01:03 +0530
-Message-ID: <5040E6C7.6030106@ti.com>
+Date: Fri, 31 Aug 2012 22:32:57 +0530
+Message-ID: <1346432577.15463.16.camel@vkoul-mobl4>
 References: <1345684176-21472-1-git-send-email-mporter@ti.com>
-	<1345684176-21472-4-git-send-email-mporter@ti.com>
-	<503F75C0.1050507@ti.com> <20120830144307.GA26737@beef>
-	<5040E00A.3080600@ti.com> <1346430709.15463.15.camel@vkoul-mobl4>
+	  <1345684176-21472-4-git-send-email-mporter@ti.com>
+	  <503F75C0.1050507@ti.com> <20120830144307.GA26737@beef>
+	  <5040E00A.3080600@ti.com> <1346430709.15463.15.camel@vkoul-mobl4>
+	 <5040E6C7.6030106@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <1346430709.15463.15.camel@vkoul-mobl4>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: Vinod Koul <vkoul-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Cc: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>, List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>Linux, List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from merlin.infradead.org ([205.233.59.134]:48177 "EHLO
+	merlin.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754040Ab2HaQzq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Aug 2012 12:55:46 -0400
+In-Reply-To: <5040E6C7.6030106@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sekhar Nori <nsekhar@ti.com>
+Cc: vinod.koul@intel.com, Matt Porter <mporter@ti.com>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, grant.likely@secretlab.ca, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, cjb@laptop.org, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 
-On 8/31/2012 10:01 PM, Vinod Koul wrote:
-> On Fri, 2012-08-31 at 21:32 +0530, Sekhar Nori wrote:
->> Hi Matt,
->>
->> On 8/30/2012 8:13 PM, Matt Porter wrote:
->>> On Thu, Aug 30, 2012 at 07:46:32PM +0530, Sekhar Nori wrote:
->>>> Hi Matt,
->>>>
->>>> On 8/23/2012 6:39 AM, Matt Porter wrote:
->>>>> Removes use of the DaVinci EDMA private DMA API and replaces
->>>>> it with use of the DMA engine API.
->>>>>
->>>>> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
->>>>
->>>> I tried testing this patch on my OMAP-L138 EVM, but SPI fails to 
->>>> initialize after applying the patch.
->>>>
->>>> root@arago:~# dmesg | grep -i spi                                               
->>>> spi_davinci spi_davinci.1: request RX DMA channel failed                        
->>>
->>> Hi Sekhar,
->>>
->>> Most likely CONFIG_TI_EDMA is off as it defaults to off in the v3
->>> series. Try enabling this and if it's the problem then this error
->>> path can be fixed to properly fallback to PIO only or fail to
->>> initialize as needed.
->>
->> Yes, this was the problem. Since the SPI driver now depends on
->> CONFIG_TI_EDMA for basic operation may be select CONFIG_TI_EDMA in
->> Kconfig if SPI is enabled? That should do until the fallback to PIO is
->> implemented.
-> Then this should be enabled for SPI. Care to send a patch
+On Fri, 2012-08-31 at 22:01 +0530, Sekhar Nori wrote:
+> >> Yes, this was the problem. Since the SPI driver now depends on
+> >> CONFIG_TI_EDMA for basic operation may be select CONFIG_TI_EDMA in
+> >> Kconfig if SPI is enabled? That should do until the fallback to PIO
+> is
+> >> implemented.
+> > Then this should be enabled for SPI. Care to send a patch
+> 
+> By 'this' you mean the Kconfig select? Then there should be no need of
+> a
+> new patch for this. It can be part of this patch itself, no? 
+Either way is okay for me.
 
-By 'this' you mean the Kconfig select? Then there should be no need of a
-new patch for this. It can be part of this patch itself, no?
+-- 
+~Vinod Koul
+Intel Corp.
 
-Thanks,
-Sekhar
-
-------------------------------------------------------------------------------
-Live Security Virtual Conference
-Exclusive live event will cover all the ways today's security and 
-threat landscape has changed and how IT managers can respond. Discussions 
-will include endpoint security, mobile security and the latest in malware 
-threats. http://www.accelacomm.com/jaw/sfrnl04242012/114/50122263/
