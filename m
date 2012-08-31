@@ -1,40 +1,33 @@
-From: Vinod Koul <vkoul@infradead.org>
-Subject: Re: [PATCH v3 3/3] spi: spi-davinci: convert to DMA engine API
-Date: Fri, 31 Aug 2012 22:32:57 +0530
-Message-ID: <1346432577.15463.16.camel@vkoul-mobl4>
-References: <1345684176-21472-1-git-send-email-mporter@ti.com>
-	  <1345684176-21472-4-git-send-email-mporter@ti.com>
-	  <503F75C0.1050507@ti.com> <20120830144307.GA26737@beef>
-	  <5040E00A.3080600@ti.com> <1346430709.15463.15.camel@vkoul-mobl4>
-	 <5040E6C7.6030106@ti.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH] avr32-linux: at32ap700x: set DMA slave properties for
+ MCI dw_dmac
+Date: Fri, 31 Aug 2012 16:44:35 -0700
+Message-ID: <20120831164435.a1b72191.akpm@linux-foundation.org>
+References: <503A8D97.4070403@yahoo.es>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from merlin.infradead.org ([205.233.59.134]:48177 "EHLO
-	merlin.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754040Ab2HaQzq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Aug 2012 12:55:46 -0400
-In-Reply-To: <5040E6C7.6030106@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <503A8D97.4070403@yahoo.es>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Hein Tibosch <hein_tibosch@yahoo.es>
+Cc: egtvedt@samfundet.no, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, "ludovic.desroches" <ludovic.desroches@atmel.com>, Havard Skinnemoen <havard@skinnemoen.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Sekhar Nori <nsekhar@ti.com>
-Cc: vinod.koul@intel.com, Matt Porter <mporter@ti.com>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, grant.likely@secretlab.ca, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, cjb@laptop.org, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 
-On Fri, 2012-08-31 at 22:01 +0530, Sekhar Nori wrote:
-> >> Yes, this was the problem. Since the SPI driver now depends on
-> >> CONFIG_TI_EDMA for basic operation may be select CONFIG_TI_EDMA in
-> >> Kconfig if SPI is enabled? That should do until the fallback to PIO
-> is
-> >> implemented.
-> > Then this should be enabled for SPI. Care to send a patch
-> 
-> By 'this' you mean the Kconfig select? Then there should be no need of
-> a
-> new patch for this. It can be part of this patch itself, no? 
-Either way is okay for me.
+On Mon, 27 Aug 2012 04:56:55 +0800
+Hein Tibosch <hein_tibosch@yahoo.es> wrote:
 
--- 
-~Vinod Koul
-Intel Corp.
+> The MCI makes use of the dw_dmac driver when DMA is being used.
+> Due to recent changes the driver was broken because:
+> - the SMS field in the CTLL register received the wrong value 0
+> - a patch in dw_dmac allowed for 64-bit transfers on the
+> memory side, giving an illegal value of 3 in the SRC/DST_TR_WIDTH
+> register.
 
+Please try to avoid vague descriptions such as "recent changes" and "a
+patch".  We like to see specifics: commit IDs and titles.
+
+This way we can make more informed decisions about patch scheduling. 
+We can ensure that the authors of the earlier commits get to review
+these changes.  Maintainers of other trees can determine whether or not
+their tree needs the particular fix.
