@@ -1,50 +1,155 @@
-From: Vinod Koul <vkoul@infradead.org>
-Subject: Re: [PATCH v3 3/3] spi: spi-davinci: convert to DMA engine API
-Date: Fri, 31 Aug 2012 06:25:54 +0530
-Message-ID: <1346374554.15463.6.camel@vkoul-mobl4>
-References: <1345684176-21472-1-git-send-email-mporter@ti.com>
-	 <1345684176-21472-4-git-send-email-mporter@ti.com>
-	 <503F75C0.1050507@ti.com> <20120830144307.GA26737@beef>
+From: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
+Subject: Re: [PATCH] mmc: sh-mmcif: avoid Oops on spurious interrupts
+Date: Fri, 31 Aug 2012 12:05:49 +0900
+Message-ID: <50402A0D.7070106@kmckk.co.jp>
+References: <878vdxd3mq.wl%kuninori.morimoto.gx@renesas.com> <20120803050039.GA1614@linux-sh.org> <20120809042844.GF1614@linux-sh.org> <87hasc3bv5.wl%kuninori.morimoto.gx@renesas.com> <874nobqntv.wl%kuninori.morimoto.gx@renesas.com> <20120810123804.GK1614@linux-sh.org> <502DDC97.5080501@kmckk.co.jp> <87wr0us6tg.wl%kuninori.morimoto.gx@renesas.com> <20120820031352.GC25767@linux-sh.org> <87obm6ry98.wl%kuninori.morimoto.gx@renesas.com> <20120820043853.GD25767@linux-sh.org> <87mx1qrx1x.wl%kuninori.morimoto.gx@renesas.com> <5031D9FF.8060801@kmckk.co.jp> <Pine.LNX.4.64.1208220840400.26767@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from merlin.infradead.org ([205.233.59.134]:36624 "EHLO
-	merlin.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752763Ab2HaAso (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Aug 2012 20:48:44 -0400
-In-Reply-To: <20120830144307.GA26737@beef>
+Received: from vrgw8.firstserver.ne.jp ([164.46.1.106]:58469 "EHLO
+	vrgw8.firstserver.ne.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751176Ab2HaDGA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Aug 2012 23:06:00 -0400
+In-Reply-To: <Pine.LNX.4.64.1208220840400.26767@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Porter <mporter@ti.com>
-Cc: vinod.koul@intel.com, Sekhar Nori <nsekhar@ti.com>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, grant.likely@secretlab.ca, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, cjb@laptop.org, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: yusuke.goda.sx@renesas.com, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org
 
-On Thu, 2012-08-30 at 10:43 -0400, Matt Porter wrote:
-> On Thu, Aug 30, 2012 at 07:46:32PM +0530, Sekhar Nori wrote:
-> > Hi Matt,
-> > 
-> > On 8/23/2012 6:39 AM, Matt Porter wrote:
-> > > Removes use of the DaVinci EDMA private DMA API and replaces
-> > > it with use of the DMA engine API.
-> > > 
-> > > Signed-off-by: Matt Porter <mporter@ti.com>
-> > 
-> > I tried testing this patch on my OMAP-L138 EVM, but SPI fails to 
-> > initialize after applying the patch.
-> > 
-> > root@arago:~# dmesg | grep -i spi                                               
-> > spi_davinci spi_davinci.1: request RX DMA channel failed                        
-> 
-> Hi Sekhar,
-> 
-> Most likely CONFIG_TI_EDMA is off as it defaults to off in the v3
-> series. Try enabling this and if it's the problem then this error
-> path can be fixed to properly fallback to PIO only or fail to
-> initialize as needed.
-I didnt see any update on this one, is it okay, if so care to send a
-tested-by?
+Hello Guennadi
 
--- 
-~Vinod Koul
-Intel Corp.
+(2012/08/22 15:49), Guennadi Liakhovetski wrote:
+> On some systems, e.g., kzm9g, MMCIF interfaces can produce spurious
+> interrupts without any active request. To prevent the Oops, that results
+> in such cases, don't dereference the mmc request pointer until we make
+> sure, that we are indeed processing such a request.
+>
+> Reported-by: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
+>
+> Hello Kobayashi-san
+>
+> On Mon, 20 Aug 2012, Tetsuyuki Kobayashi wrote:
+>
+> ...
+>
+>> After applying this patch on kzm9g board, I got this error regarding eMMC.
+>> I think this is another problem.
+>>
+>>
+>> Unable to handle kernel NULL pointer dereference at virtual address 00000008
+>> pgd = c0004000
+>> [00000008] *pgd=00000000
+>> Internal error: Oops: 17 [#1] PREEMPT SMP ARM
+>> Modules linked in:
+>> CPU: 1    Not tainted  (3.6.0-rc2+ #103)
+>> PC is at sh_mmcif_irqt+0x20/0xb30
+>> LR is at irq_thread+0x94/0x16c
+>
+> [snip]
+>
+>> My quick fix is below.
+>>
+>> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+>> index 5d81427..e587fbc 100644
+>> --- a/drivers/mmc/host/sh_mmcif.c
+>> +++ b/drivers/mmc/host/sh_mmcif.c
+>> @@ -1104,7 +1104,15 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+>>   {
+>>          struct sh_mmcif_host *host = dev_id;
+>>          struct mmc_request *mrq = host->mrq;
+>> -       struct mmc_data *data = mrq->data;
+>> +       /*struct mmc_data *data = mrq->data; -- this cause null pointer access*/
+>> +       struct mmc_data *data;
+>> +
+>> +       /* quick fix by koba */
+>> +       if (mrq == NULL) {
+>> +               printk("sh_mmcif_irqt: mrq == NULL: host->wait_for=%d\n", host->wait_for);
+>> +       } else {
+>> +               data = mrq->data;
+>> +       }
+>>
+>>          cancel_delayed_work_sync(&host->timeout_work);
+>>
+>>
+>> With this patch, there is no null pointer accesses and got this log.
+>>
+>> sh_mmcif_irqt: mrq == NULL: host->wait_for=0
+>> sh_mmcif_irqt: mrq == NULL: host->wait_for=0
+>>    ...
+>>
+>> host->wait_for is 0. it is MMCIF_WAIT_FOR_REQUEST.
+>> There is code such like:
+>>
+>>         host->wait_for = MMCIF_WAIT_FOR_REQUEST;
+>>         host->mrq = NULL;
+>>
+>> So, at the top of sh_mmcif_irqt, if host->wait_for == MMCIF_WAIT_FOR_REQUEST,
+>> host->mrq = NULL.
+>> It is too earlier to access mrq->data before checking host->mrq. it may
+>> cause null pointer access.
+>>
+>> Goda-san, could you check this and refine the code of sh_mmcif_irqt?
+>
+> Thanks for your report and a fix. Could you please double-check, whether
+> the below patch also fixes your problem? Since such spurious interrupts
+> are possible I would commit a check like this one, but in the longer run
+> we want to identify and eliminate them, if possible. But since so far
+> these interrupts only happen on 1 board model and also not on all units
+> and not upon each boot, this could be a bit tricky.
+>
+> One more question - is this only needed for 3.7 or also for 3.6 / stable?
+>
+> Thanks
+> Guennadi
+>
+>   drivers/mmc/host/sh_mmcif.c |    4 ++--
+>   1 files changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index 5d81427..82bf921 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -1104,7 +1104,6 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+>   {
+>   	struct sh_mmcif_host *host = dev_id;
+>   	struct mmc_request *mrq = host->mrq;
+> -	struct mmc_data *data = mrq->data;
+>
+>   	cancel_delayed_work_sync(&host->timeout_work);
+>
+> @@ -1152,13 +1151,14 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+>   	case MMCIF_WAIT_FOR_READ_END:
+>   	case MMCIF_WAIT_FOR_WRITE_END:
+>   		if (host->sd_error)
+> -			data->error = sh_mmcif_error_manage(host);
+> +			mrq->data->error = sh_mmcif_error_manage(host);
+>   		break;
+>   	default:
+>   		BUG();
+>   	}
+>
+>   	if (host->wait_for != MMCIF_WAIT_FOR_STOP) {
+> +		struct mmc_data *data = mrq->data;
+>   		if (!mrq->cmd->error && data && !data->error)
+>   			data->bytes_xfered =
+>   				data->blocks * data->blksz;
+>
+
+I tried this patch. It seems better.
+But I think this still have potential race condition.
+I am afraid that one cpu enter sh_mmcif_irqt and other cpu write to 
+host->wait_for for new request at the same time.
+How about add this code at the top of sh_mmcif_irqt or before returning 
+IRQ_WAKE_THREAD in sh_mmcif_intr ?
+
+	if (host->state == STATE_IDLE)
+		return IRQ_HANDLED;
+
+I will rebase my test environment to v3.6-rc3 or later. Then I will
+send you my .config.
+
+
 
