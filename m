@@ -1,155 +1,87 @@
-From: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
-Subject: Re: [PATCH] mmc: sh-mmcif: avoid Oops on spurious interrupts
-Date: Fri, 31 Aug 2012 12:05:49 +0900
-Message-ID: <50402A0D.7070106@kmckk.co.jp>
-References: <878vdxd3mq.wl%kuninori.morimoto.gx@renesas.com> <20120803050039.GA1614@linux-sh.org> <20120809042844.GF1614@linux-sh.org> <87hasc3bv5.wl%kuninori.morimoto.gx@renesas.com> <874nobqntv.wl%kuninori.morimoto.gx@renesas.com> <20120810123804.GK1614@linux-sh.org> <502DDC97.5080501@kmckk.co.jp> <87wr0us6tg.wl%kuninori.morimoto.gx@renesas.com> <20120820031352.GC25767@linux-sh.org> <87obm6ry98.wl%kuninori.morimoto.gx@renesas.com> <20120820043853.GD25767@linux-sh.org> <87mx1qrx1x.wl%kuninori.morimoto.gx@renesas.com> <5031D9FF.8060801@kmckk.co.jp> <Pine.LNX.4.64.1208220840400.26767@axis700.grange>
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: Re: [PATCH v5 4/9] mmc: dw_mmc: lookup for optional biu and ciu clocks
+Date: Fri, 31 Aug 2012 10:59:07 +0530
+Message-ID: <CAJuYYwQtAe7kC4DC5Ao04qU_9TSjcREw7ktuf6KNmgXHAvUzKg@mail.gmail.com>
+References: <1346237295-7116-1-git-send-email-thomas.abraham@linaro.org>
+	<1346237295-7116-5-git-send-email-thomas.abraham@linaro.org>
+	<503F28E7.1060608@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from vrgw8.firstserver.ne.jp ([164.46.1.106]:58469 "EHLO
-	vrgw8.firstserver.ne.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751176Ab2HaDGA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Aug 2012 23:06:00 -0400
-In-Reply-To: <Pine.LNX.4.64.1208220840400.26767@axis700.grange>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:62608 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751120Ab2HaF3J (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Aug 2012 01:29:09 -0400
+Received: by lbbgj3 with SMTP id gj3so987381lbb.19
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Aug 2012 22:29:08 -0700 (PDT)
+In-Reply-To: <503F28E7.1060608@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: yusuke.goda.sx@renesas.com, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, will.newton@imgtec.com, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, tgih.jun@samsung.com, patches@linaro.org
 
-Hello Guennadi
+On 30 August 2012 14:18, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi Thomas,
+>
+> On 08/29/2012 07:48 PM, Thomas Abraham wrote:
+>> Some platforms allow for clock gating and control of bus interface unit clock
+>> and card interface unit clock. Add support for clock lookup of optional biu
+>> and ciu clocks for clock gating and clock speed determination.
+>>
+>> Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
+>> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+>> Acked-by: Will Newton <will.newton@imgtec.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c  |   42 +++++++++++++++++++++++++++++++++++++++---
+>>  include/linux/mmc/dw_mmc.h |    4 ++++
+>>  2 files changed, 43 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 227c42e..90c7c7b 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -1960,18 +1960,38 @@ int dw_mci_probe(struct dw_mci *host)
+>>               return -ENODEV;
+>>       }
+>>
+>> -     if (!host->pdata->bus_hz) {
+>> +     host->biu_clk = clk_get(host->dev, "biu");
+>> +     if (IS_ERR(host->biu_clk))
+>> +             dev_dbg(host->dev, "biu clock not available\n");
+>> +     else
+>> +             clk_prepare_enable(host->biu_clk);
+> biu is clock for bus interface?
+> if didn't get "biu_clk" or didn't clk_prepare_enable(), then can we initialize the card?
 
-(2012/08/22 15:49), Guennadi Liakhovetski wrote:
-> On some systems, e.g., kzm9g, MMCIF interfaces can produce spurious
-> interrupts without any active request. To prevent the Oops, that results
-> in such cases, don't dereference the mmc request pointer until we make
-> sure, that we are indeed processing such a request.
->
-> Reported-by: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> ---
->
-> Hello Kobayashi-san
->
-> On Mon, 20 Aug 2012, Tetsuyuki Kobayashi wrote:
->
-> ...
->
->> After applying this patch on kzm9g board, I got this error regarding eMMC.
->> I think this is another problem.
->>
->>
->> Unable to handle kernel NULL pointer dereference at virtual address 00000008
->> pgd = c0004000
->> [00000008] *pgd=00000000
->> Internal error: Oops: 17 [#1] PREEMPT SMP ARM
->> Modules linked in:
->> CPU: 1    Not tainted  (3.6.0-rc2+ #103)
->> PC is at sh_mmcif_irqt+0x20/0xb30
->> LR is at irq_thread+0x94/0x16c
->
-> [snip]
->
->> My quick fix is below.
->>
->> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
->> index 5d81427..e587fbc 100644
->> --- a/drivers/mmc/host/sh_mmcif.c
->> +++ b/drivers/mmc/host/sh_mmcif.c
->> @@ -1104,7 +1104,15 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
->>   {
->>          struct sh_mmcif_host *host = dev_id;
->>          struct mmc_request *mrq = host->mrq;
->> -       struct mmc_data *data = mrq->data;
->> +       /*struct mmc_data *data = mrq->data; -- this cause null pointer access*/
->> +       struct mmc_data *data;
+Hi Jaehoon,
+
+Yes, the biu clock is for bus interface. The biu and ciu clock lookup
+and enable here is optional in the above change. If a platform does
+not define these clocks, then the platform code is responsible for
+enabling these clocks.
+
 >> +
->> +       /* quick fix by koba */
->> +       if (mrq == NULL) {
->> +               printk("sh_mmcif_irqt: mrq == NULL: host->wait_for=%d\n", host->wait_for);
->> +       } else {
->> +               data = mrq->data;
->> +       }
->>
->>          cancel_delayed_work_sync(&host->timeout_work);
->>
->>
->> With this patch, there is no null pointer accesses and got this log.
->>
->> sh_mmcif_irqt: mrq == NULL: host->wait_for=0
->> sh_mmcif_irqt: mrq == NULL: host->wait_for=0
->>    ...
->>
->> host->wait_for is 0. it is MMCIF_WAIT_FOR_REQUEST.
->> There is code such like:
->>
->>         host->wait_for = MMCIF_WAIT_FOR_REQUEST;
->>         host->mrq = NULL;
->>
->> So, at the top of sh_mmcif_irqt, if host->wait_for == MMCIF_WAIT_FOR_REQUEST,
->> host->mrq = NULL.
->> It is too earlier to access mrq->data before checking host->mrq. it may
->> cause null pointer access.
->>
->> Goda-san, could you check this and refine the code of sh_mmcif_irqt?
->
-> Thanks for your report and a fix. Could you please double-check, whether
-> the below patch also fixes your problem? Since such spurious interrupts
-> are possible I would commit a check like this one, but in the longer run
-> we want to identify and eliminate them, if possible. But since so far
-> these interrupts only happen on 1 board model and also not on all units
-> and not upon each boot, this could be a bit tricky.
->
-> One more question - is this only needed for 3.7 or also for 3.6 / stable?
->
-> Thanks
-> Guennadi
->
->   drivers/mmc/host/sh_mmcif.c |    4 ++--
->   1 files changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 5d81427..82bf921 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -1104,7 +1104,6 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
->   {
->   	struct sh_mmcif_host *host = dev_id;
->   	struct mmc_request *mrq = host->mrq;
-> -	struct mmc_data *data = mrq->data;
->
->   	cancel_delayed_work_sync(&host->timeout_work);
->
-> @@ -1152,13 +1151,14 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
->   	case MMCIF_WAIT_FOR_READ_END:
->   	case MMCIF_WAIT_FOR_WRITE_END:
->   		if (host->sd_error)
-> -			data->error = sh_mmcif_error_manage(host);
-> +			mrq->data->error = sh_mmcif_error_manage(host);
->   		break;
->   	default:
->   		BUG();
->   	}
->
->   	if (host->wait_for != MMCIF_WAIT_FOR_STOP) {
-> +		struct mmc_data *data = mrq->data;
->   		if (!mrq->cmd->error && data && !data->error)
->   			data->bytes_xfered =
->   				data->blocks * data->blksz;
->
+>> +     host->ciu_clk = clk_get(host->dev, "ciu");
+>> +     if (IS_ERR(host->ciu_clk))
+>> +             dev_dbg(host->dev, "ciu clock not available\n");
+>> +     else
+>> +             clk_prepare_enable(host->ciu_clk);
+>> +
+>> +     if (IS_ERR(host->ciu_clk))
+>> +             host->bus_hz = host->pdata->bus_hz;
+>> +     else
+>> +             host->bus_hz = clk_get_rate(host->ciu_clk);
+> if clk_get_rate() is incorrect value(ex,400MHz),
+> then mmc->f_min value is too high.
+> because mmc->f_min is assigned to DIV_ROUND_UP(host->bus_hz, 510) into dw_mc_init_slot.
+> Do you have any opinion for solving this?
 
-I tried this patch. It seems better.
-But I think this still have potential race condition.
-I am afraid that one cpu enter sh_mmcif_irqt and other cpu write to 
-host->wait_for for new request at the same time.
-How about add this code at the top of sh_mmcif_irqt or before returning 
-IRQ_WAKE_THREAD in sh_mmcif_intr ?
+One option on Exynos5250 is to use the clock divider in the CLKSEL
+register to divide the ciu clock to a lower value. For Exynos4, since
+there is no clock divider in CLKSEL register, the platform code should
+ensure that the ciu clock has a valid range.
 
-	if (host->state == STATE_IDLE)
-		return IRQ_HANDLED;
+Thanks,
+Thomas.
 
-I will rebase my test environment to v3.6-rc3 or later. Then I will
-send you my .config.
-
-
-
+[...]
