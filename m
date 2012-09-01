@@ -1,73 +1,38 @@
-From: Vinod Koul <vkoul@infradead.org>
-Subject: Re: [PATCH v3 3/3] spi: spi-davinci: convert to DMA engine API
-Date: Sat, 01 Sep 2012 06:32:29 +0530
-Message-ID: <1346461349.2806.4.camel@vkoul-mobl4>
-References: <1345684176-21472-1-git-send-email-mporter@ti.com>
-	 <1345684176-21472-4-git-send-email-mporter@ti.com>
-	 <503F75C0.1050507@ti.com> <20120830144307.GA26737@beef>
-	 <5040E00A.3080600@ti.com> <1346430709.15463.15.camel@vkoul-mobl4>
-	 <5040E6C7.6030106@ti.com> <1346432577.15463.16.camel@vkoul-mobl4>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+From: "George Spelvin" <linux@horizon.com>
+Subject: SD 3.00 Physical layer FULL specification
+Date: 31 Aug 2012 22:27:55 -0400
+Message-ID: <20120901022755.10343.qmail@science.horizon.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from merlin.infradead.org ([205.233.59.134]:41932 "EHLO
-	merlin.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755353Ab2IAAzS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Aug 2012 20:55:18 -0400
-In-Reply-To: <1346432577.15463.16.camel@vkoul-mobl4>
+Received: from science.horizon.com ([71.41.210.146]:64778 "HELO
+	science.horizon.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1752319Ab2IACef (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Aug 2012 22:34:35 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sekhar Nori <nsekhar@ti.com>
-Cc: vinod.koul@intel.com, Matt Porter <mporter@ti.com>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, grant.likely@secretlab.ca, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, cjb@laptop.org, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+To: linux-mmc@vger.kernel.org
+Cc: arnd.bergmann@linaro.org, linux@horizon.com
 
-On Fri, 2012-08-31 at 22:32 +0530, Vinod Koul wrote:
-> On Fri, 2012-08-31 at 22:01 +0530, Sekhar Nori wrote:
-> > >> Yes, this was the problem. Since the SPI driver now depends on
-> > >> CONFIG_TI_EDMA for basic operation may be select CONFIG_TI_EDMA in
-> > >> Kconfig if SPI is enabled? That should do until the fallback to PIO
-> > is
-> > >> implemented.
-> > > Then this should be enabled for SPI. Care to send a patch
-> > 
-> > By 'this' you mean the Kconfig select? Then there should be no need of
-> > a
-> > new patch for this. It can be part of this patch itself, no? 
-> Either way is okay for me.
-And am in good mood :)
+I was just trolling around the net trying to figure out what the
+Pm parameter and speed class of SD cards meant, and I came across a
+definitive answer in the form of a copy of Part 1 of the unredacted
+v3.00 specification (April 16, 2009) at
 
-Applied all with this as well
+http://www.61ic.com/code/attachment.php?aid=73871&k=cfaccbbb80c338769bd7282636c0ca7e&t=1331742726
 
->From b5f14330590118e6a0659255476c0f24ab681e05 Mon Sep 17 00:00:00 2001
-From: Vinod Koul <vinod.koul@linux.intel.com>
-Date: Sat, 1 Sep 2012 06:29:22 +0530
-Subject: [PATCH] spi: davici - make davinci select edma
+I have of course snarfed a copy, and if anyone else on the list
+would benefit from one, I figured it was worth sharing.
 
-Reported-by: Sekhar Nori <nsekhar@ti.com>
-Signed-off-by: Vinod Koul <vinod.koul@linux.intel.com>
----
- drivers/spi/Kconfig |    1 +
- 1 file changed, 1 insertion(+)
+In particular, it documents the FAT update optimizations in SD cards
+(section 4.3.1.7, p. 112).
 
-diff --git a/drivers/spi/Kconfig b/drivers/spi/Kconfig
-index 5f84b55..b9fb9a1 100644
---- a/drivers/spi/Kconfig
-+++ b/drivers/spi/Kconfig
-@@ -134,6 +134,7 @@ config SPI_DAVINCI
- 	tristate "Texas Instruments DaVinci/DA8x/OMAP-L/AM1x SoC SPI
-controller"
- 	depends on ARCH_DAVINCI
- 	select SPI_BITBANG
-+	select TI_EDMA
- 	help
- 	  SPI master controller for DaVinci/DA8x/OMAP-L/AM1x SPI modules.
- 
--- 
-1.7.9.5
+If anyone cares, write performance is defined in terms of updates to
+"allocation units" (i.e. erase blocks) 512K-4MiB in size of a card-defined
+size, which are made up of "recording units" (i.e. FAT clusters).
+Table 4-51 on p. 113 gives the limits.
 
+An update to an allocation unit is a combination of writes of new data
+and and moves (copies) of old data from the pre-existing AU.  Each of
+these has a performance standard, Pw and Pm, respectively.
 
-
--- 
-~Vinod Koul
-Intel Corp.
-
+For a "Class n" card, Pw and Pr must be >= n MB/s, while Pm must be
+>= n/2 MB/s.  (Exacpt, oddly, class 10 has NO lower bound on Pm.)
