@@ -1,51 +1,51 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [RESEND PATCH] mmc-util: add the method to enable the bkops
-Date: Mon, 03 Sep 2012 14:23:30 +0900
-Message-ID: <50443ED2.10009@samsung.com>
-References: <500823C9.1040204@samsung.com> <50407028.5070608@samsung.com>
- <873933pfdy.fsf@octavius.laptop.org>
+From: Vinit Shenoy <vinit.shenoy@st.com>
+Subject: [PATCH 1/1] mmc: debugfs: Set frequency to maximum possible on higher request
+Date: Mon, 3 Sep 2012 16:38:39 +0530
+Message-ID: <1346670519-13097-1-git-send-email-vinit.shenoy@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:51855 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755928Ab2ICFXd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Sep 2012 01:23:33 -0400
-Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout2.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M9R00H36DMYBN80@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 03 Sep 2012 14:23:32 +0900 (KST)
-Received: from [10.90.51.55] by mmp1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0M9R00KNSDN70S70@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 03 Sep 2012 14:23:31 +0900 (KST)
-In-reply-to: <873933pfdy.fsf@octavius.laptop.org>
+Received: from eu1sys200aog108.obsmtp.com ([207.126.144.125]:56027 "EHLO
+	eu1sys200aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756254Ab2ICLJs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Sep 2012 07:09:48 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Maya Erez <merez@codeaurora.org>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+To: cjb@laptop.org, per.forlin@linaro.org, andy.shevchenko@gmail.com, viresh.kumar@linaro.org
+Cc: linux-mmc@vger.kernel.org, spear-devel@list.st.com, Vinit Shenoy <vinit.shenoy@st.com>
 
-On 08/31/2012 06:41 PM, Chris Ball wrote:
-> Hi,
-> 
-> On Fri, Aug 31 2012, Jaehoon Chung wrote:
->> Dear Chris,
->>
->> Could you merge the this at mmc-utils?
->> If you have any other opinion, plz let me know.
-> 
-> Looks good, but I was planning to merge it at the same time as merging
-> the kernel patch -- I think we're waiting on another revision of that?
-Ok, i agree your planning.
-Thanks for reply.
+Currently if we enter a frequency greater than maximum supported,
+-EINVAL is returned. Due to this clock is not switched to maximum
+supported frequency.
 
-Best Regards,
-Jaehoon Chung
-> 
-> Thanks,
-> 
-> - Chris.
-> 
+For example consider the max supported frequency to be 48MHz
+
+echo 20000000 > /sys/kernel/debug/mmc0/clock Here clock is switched to 20Mhz.
+
+echo 80000000 > /sys/kernel/debug/mmc0/clock
+Ideally clock should be set back to 48MHz, but it is still set to 20MHz.
+
+This patch sets value to f_max when the requested frequency is greater
+than f_max
+
+Signed-off-by: Vinit Shenoy <vinit.shenoy@st.com>
+---
+ drivers/mmc/core/debugfs.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index 9ab5b17..c71d3eb 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -174,7 +174,7 @@ static int mmc_clock_opt_set(void *data, u64 val)
+ 
+ 	/* We need this check due to input value is u64 */
+ 	if (val > host->f_max)
+-		return -EINVAL;
++		val = host->f_max;
+ 
+ 	mmc_claim_host(host);
+ 	mmc_set_clock(host, (unsigned int) val);
+-- 
+1.7.3.4
 
