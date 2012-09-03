@@ -1,37 +1,51 @@
-From: Arnd Bergmann <arnd.bergmann@linaro.org>
-Subject: Re: SD 3.00 Physical layer FULL specification
-Date: Sat, 1 Sep 2012 20:19:00 +0000
-Message-ID: <201209012019.00183.arnd.bergmann@linaro.org>
-References: <20120901022755.10343.qmail@science.horizon.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RESEND PATCH] mmc-util: add the method to enable the bkops
+Date: Mon, 03 Sep 2012 14:23:30 +0900
+Message-ID: <50443ED2.10009@samsung.com>
+References: <500823C9.1040204@samsung.com> <50407028.5070608@samsung.com>
+ <873933pfdy.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:61588 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754659Ab2IBSuF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 2 Sep 2012 14:50:05 -0400
-In-Reply-To: <20120901022755.10343.qmail@science.horizon.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:51855 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755928Ab2ICFXd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Sep 2012 01:23:33 -0400
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M9R00H36DMYBN80@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 03 Sep 2012 14:23:32 +0900 (KST)
+Received: from [10.90.51.55] by mmp1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0M9R00KNSDN70S70@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 03 Sep 2012 14:23:31 +0900 (KST)
+In-reply-to: <873933pfdy.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: George Spelvin <linux@horizon.com>
-Cc: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Maya Erez <merez@codeaurora.org>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
 
-On Saturday 01 September 2012, George Spelvin wrote:
-> In particular, it documents the FAT update optimizations in SD cards
-> (section 4.3.1.7, p. 112).
+On 08/31/2012 06:41 PM, Chris Ball wrote:
+> Hi,
 > 
-> If anyone cares, write performance is defined in terms of updates to
-> "allocation units" (i.e. erase blocks) 512K-4MiB in size of a card-defined
-> size, which are made up of "recording units" (i.e. FAT clusters).
-> Table 4-51 on p. 113 gives the limits.
+> On Fri, Aug 31 2012, Jaehoon Chung wrote:
+>> Dear Chris,
+>>
+>> Could you merge the this at mmc-utils?
+>> If you have any other opinion, plz let me know.
+> 
+> Looks good, but I was planning to merge it at the same time as merging
+> the kernel patch -- I think we're waiting on another revision of that?
+Ok, i agree your planning.
+Thanks for reply.
 
-I believe these recommendations are often ignored anyway. A lot of the
-SD cards nowadays have erase block sizes of 1.5, 3, 6, or 8 MB. None
-of these can be specified with this version of the standard. Even for
-the rare cards that have 1MB or 2MB erase block sizes, I've never seen
-one that reports anything but 4MB.
-
-	Arnd
+Best Regards,
+Jaehoon Chung
+> 
+> Thanks,
+> 
+> - Chris.
+> 
 
