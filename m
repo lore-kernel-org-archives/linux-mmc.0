@@ -1,543 +1,352 @@
-From: merez@codeaurora.org
-Subject: Re: [RFC/PATCH] mmc: core: Add support for idle time BKOPs
-Date: Mon, 3 Sep 2012 22:42:55 -0700 (PDT)
-Message-ID: <5388f61c0ab38686475861d53152edb1.squirrel@www.codeaurora.org>
-References: <n@samsung.com>
-    <1344172153-5800-1-git-send-email-merez@codeaurora.org>
-    <503F1813.2010900@samsung.com>
+From: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
+Subject: Re: [PATCH] mmc: sh-mmcif: avoid Oops on spurious interrupts
+Date: Tue, 04 Sep 2012 16:40:29 +0900
+Message-ID: <5045B06D.6080407@kmckk.co.jp>
+References: <878vdxd3mq.wl%kuninori.morimoto.gx@renesas.com> <20120803050039.GA1614@linux-sh.org> <20120809042844.GF1614@linux-sh.org> <87hasc3bv5.wl%kuninori.morimoto.gx@renesas.com> <874nobqntv.wl%kuninori.morimoto.gx@renesas.com> <20120810123804.GK1614@linux-sh.org> <502DDC97.5080501@kmckk.co.jp> <87wr0us6tg.wl%kuninori.morimoto.gx@renesas.com> <20120820031352.GC25767@linux-sh.org> <87obm6ry98.wl%kuninori.morimoto.gx@renesas.com> <20120820043853.GD25767@linux-sh.org> <87mx1qrx1x.wl%kuninori.morimoto.gx@renesas.com> <5031D9FF.8060801@kmckk.co.jp> <Pine.LNX.4.64.1208220840400.26767@axis700.grange> <5034CD80.70501@kmckk.co.jp> <Pine.LNX.4.64.1208230908550.22797@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:7577 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751867Ab2IDFnK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Sep 2012 01:43:10 -0400
-In-Reply-To: <503F1813.2010900@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/mixed;
+ boundary="------------050906000808070308080109"
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1208230908550.22797@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, koba@kmckk.co.jp
 List-Id: linux-mmc@vger.kernel.org
-Cc: Maya Erez <merez@codeaurora.org>, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, open list <linux-kernel@vger.kernel.org>
+
+This is a multi-part message in MIME format.
+--------------050906000808070308080109
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+
+Hello Guennadi,
+
+(2012/08/23 16:11), Guennadi Liakhovetski wrote:> Hello Kobayashi-san
+ >
+ > On Wed, 22 Aug 2012, Tetsuyuki Kobayashi wrote:
+ >
+ >> Hello Guennadi,
+ >>
+ >> Thank you for your patch. I will test this next week.
+ >
+ > Great, thanks very much! I'l also try to fund some time early in 
+September
+ > to test on my board. Could you please send me your .config kernel
+ > configuration (off-list)?
+
+I attached my .config file for kzm9g board.
+
+My working source tree is:
+
+git clone git://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git
+checkout kzm9g branch
+
+apply these 3 patches:
+
+[PATCH] ARM: mach-shmobile: Add compilation support for dtbs using 'make 
+dtbs'
+http://www.spinics.net/lists/linux-sh/msg12970.html
+
+Paul's irqdomain patch
+http://www.spinics.net/lists/linux-sh/msg12760.html
+
+[PATCH] ARM: shmobile: sh73a0: fixup RELOC_BASE of intca_irq_pins_desc
+http://www.spinics.net/lists/linux-sh/msg12876.html
+
+and then, apply your patch for sh_mmcif.c
+
+Simon's Booting DT kernel on a non-DT bootloader is helpful, too.
+http://www.spinics.net/lists/linux-sh/msg13051.html
+
+I made 1 partition of eMMC by fdisk command and made ext4 file system on it.
+The spurious interrupts occurs at boot time and when accesses file sytem
+on eMMC.
 
 
-On Thu, August 30, 2012 12:36 am, Jaehoon Chung wrote:
-> On 08/05/2012 10:08 PM, Maya Erez wrote:
->> When the mmcqd thread is idle, a delayed work is created to check the
->> need for BKOPs. The time to start the delayed work is calculated based
->> on the host controller suspend timeout, in case it was set. If not, a
->> default time is used.
->> If BKOPs is required in level 1, which is non-blocking, there will be
->> polling of the card status to wait for the BKOPs completion and prevent
->> suspend that will interrupt the BKOPs.
->> If the card raised an exception, the need for urgent BKOPs (level 2/3)
->> will be checked immediately and if needed, the BKOPs will be performed
->> without waiting for the next idle time.
->>
->> Signed-off-by: Maya Erez <merez@codeaurora.org>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> ---
->> This patch depends on the following patch:
->>   [PATCH v11] mmc: support BKOPS feature for eMMC
->>
->> This patch is based on the periodic BKOPs implementation in version 8 of
->> "support BKOPS feature for eMMC" patch.
->> The patch was modified to answer the following issues:
->> - In order to prevent a race condition between going into suspend and
->> starting BKOPs,
->>   the suspend timeout of the host controller is taking into accound in
->> determination of the start time
->>   of the delayed work
->> - Since mmc_start_bkops is called from two contexts now, mmc_claim_host
->> was moved to the beginning of the function
->> - Also, the check of doing_bkops should be protected when determing if
->> an HPI is needed due to the same reason.
->> - Starting and canceling the delayed work in each idle caused
->> degradation of iozone performance. Therefore,
->>   the delayed work is not started on each idle. Currently the number of
->> issued requests from the last delayed work
->>   is the trigger. We still investigate the best trigger for starting the
->> delayed work.
->> - To prevent degaradtion of iozone performance we also moved the call to
->> mmc_claim_host outside of mmc_stop_bkops
->>   and its release is done after issue_fn. This prevents an addition of a
->> full claim and release, that is also done
->>   in issue_fn for the first request after idle time.
->> ---
->>  drivers/mmc/card/block.c |    3 +
->>  drivers/mmc/card/queue.c |   20 +++++
->>  drivers/mmc/core/core.c  |  188
->> +++++++++++++++++++++++++++++++++++++++++++---
->>  drivers/mmc/core/host.c  |   24 ++++++
->>  include/linux/mmc/card.h |    3 +
->>  include/linux/mmc/core.h |    3 +
->>  include/linux/mmc/host.h |   25 ++++++
->>  7 files changed, 256 insertions(+), 10 deletions(-)
->>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> index f1c84de..4519271 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -1268,6 +1268,9 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
->> *mq, struct request *rqc)
->>  	if (!rqc && !mq->mqrq_prev->req)
->>  		return 0;
->>
->> +	if (rqc)
->> +		card->idle_bkops_rw_reqs_nr++;
->> +
->>  	do {
->>  		if (rqc) {
->>  			/*
->> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
->> index e360a97..c9e1cee 100644
->> --- a/drivers/mmc/card/queue.c
->> +++ b/drivers/mmc/card/queue.c
->> @@ -51,6 +51,7 @@ static int mmc_queue_thread(void *d)
->>  {
->>  	struct mmc_queue *mq = d;
->>  	struct request_queue *q = mq->queue;
->> +	bool release_host = false;
->>
->>  	current->flags |= PF_MEMALLOC;
->>
->> @@ -66,13 +67,32 @@ static int mmc_queue_thread(void *d)
->>  		spin_unlock_irq(q->queue_lock);
->>
->>  		if (req || mq->mqrq_prev->req) {
->> +			/*
->> +			 * If this is the first request, BKOPs might be in
->> +			 * progress and needs to be stopped before issuing the
->> +			 * request
->> +			 * */
->> +			if (!mq->mqrq_prev->req &&
->> +			    mq->card->ext_csd.bkops_en &&
->> +			    mq->card->idle_bkops_rw_reqs_nr == 0) {
->> +				release_host = true;
->> +				mmc_claim_host(mq->card->host);
->> +				mmc_stop_bkops(mq->card);
->> +			}
->> +
->>  			set_current_state(TASK_RUNNING);
->>  			mq->issue_fn(mq, req);
->> +			if (release_host) {
->> +				release_host = false;
->> +				mmc_release_host(mq->card->host);
->> +			}
->>  		} else {
->>  			if (kthread_should_stop()) {
->>  				set_current_state(TASK_RUNNING);
->>  				break;
->>  			}
->> +
->> +			mmc_start_delayed_bkops(mq->card);
->>  			up(&mq->thread_sem);
->>  			schedule();
->>  			down(&mq->thread_sem);
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index ed2cc93..14830d4 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -46,6 +46,15 @@
->>   * operations the card has to perform
->>   */
->>  #define MMC_BKOPS_MAX_TIMEOUT	(4 * 60 * 1000) /* max time to wait in ms
->> */
->> +/* Polling timeout and interval for waiting on non-blocking BKOPs
->> completion */
->> +#define BKOPS_COMPLETION_POLLING_TIMEOUT 10000 /* in ms */
->> +#define BKOPS_COMPLETION_POLLING_INTERVAL 1000 /* in ms */
->> +/*
->> + * Since canceling the delayed work might have significant effect on
->> the
->> + * performance of small requests we won't queue the delayed work every
->> time
->> + * mmcqd thread is idle
->> + */
->> +#define BKOPS_MIN_REQS_TO_QUEUE_DELAYED_WORK 1000
-> How did you get the minimum request number "1000"?
-> Is this tunable value?
-We tried several values to prevent degradation of iozone results and this
-gave the best results.
-We are still tuning this value and one of the options is to count the
-number of write requests only (since read activity on the card won't
-change the need for BKOPs).
->>
->>  static struct workqueue_struct *workqueue;
->>  static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
->> @@ -252,6 +261,37 @@ mmc_start_request(struct mmc_host *host, struct
->> mmc_request *mrq)
->>  }
->>
->>  /**
->> + *      mmc_start_delayed_bkops() - Start a delayed work to check for
->> the need
->> + *      of non urgent BKOPs
->> + *
->> + *      @card: MMC card to start BKOPS
->> + */
->> +void mmc_start_delayed_bkops(struct mmc_card *card)
->> +{
->> +	if (!card->ext_csd.bkops_en || mmc_card_doing_bkops(card))
->> +		return;
-> if mmc_card_doing_bkops or didn't support bkops, idle_bkops_rw_reqs_nr
-> need to reset?
->> +
->> +	if (card->idle_bkops_rw_reqs_nr <
->> BKOPS_MIN_REQS_TO_QUEUE_DELAYED_WORK)
->> +		return;
->> +
->> +	pr_debug("%s: %s: queueing delayed_bkops_work", __func__,
->> +		 mmc_hostname(card->host));
-> missed "\n"..almost missed the new line("\n") at pr_debug.
-Will fix that.
->> +
->> +	card->idle_bkops_rw_reqs_nr = 0;
->> +
->> +	/*
->> +	 * cancel_delayed_bkops_work will prevent a race condition between
->> +	 * fetching a request by the queue_thread and the delayed work
->> +	 */
->> +	card->host->bkops_info.cancel_delayed_work = false;
->> +	queue_delayed_work(card->host->bkops_info. wq,
->> +			   &card->host->bkops_info.idle_time_dw,
->> +		   msecs_to_jiffies(
->> +			   card->host->bkops_info.time_to_start_bkops_ms));
->> +}
->> +EXPORT_SYMBOL(mmc_start_delayed_bkops);
->> +
->> +/**
->>   *	mmc_start_bkops - start BKOPS for supported cards
->>   *	@card: MMC card to start BKOPS
->>   *	@form_exception: A flags to indicate if this function was
->> @@ -268,23 +308,47 @@ void mmc_start_bkops(struct mmc_card *card, bool
->> from_exception)
->>  	bool use_busy_signal;
->>
->>  	BUG_ON(!card);
->> -
->> -	if (!card->ext_csd.bkops_en || mmc_card_doing_bkops(card))
->> +	if (!card->ext_csd.bkops_en)
->>  		return;
->>
->> +	mmc_claim_host(card->host);
->> +
->> +	if ((card->host->bkops_info.cancel_delayed_work) && !from_exception) {
->> +		pr_debug("%s: %s: cancel_delayed_work was set, exit",
->> +			 __func__, mmc_hostname(card->host));
->> +		card->host->bkops_info.cancel_delayed_work = false;
->> +		goto out;
->> +	}
->> +
->> +	if (mmc_card_doing_bkops(card)) {
->> +		pr_debug("%s: %s: already doing bkops, exit", __func__,
->> +			 mmc_hostname(card->host));
->> +		goto out;
->> +	}
->> +
->>  	err = mmc_read_bkops_status(card);
->>  	if (err) {
->> -		pr_err("%s: Didn't read bkops status : %d\n",
->> +		pr_err("%s: Error %d while reading bkops status\n",
->>  		       mmc_hostname(card->host), err);
->> -		return;
->> +		goto out;
->>  	}
->> -
->>  	if (!card->ext_csd.raw_bkops_status)
->> -		return;
->> +		goto out;
->>
->> -	if (card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2
->> -	    && (from_exception))
->> -		return;
->> +	pr_info("%s: %s: card->ext_csd.raw_bkops_status = %d", __func__,
->> +		mmc_hostname(card->host), card->ext_csd.raw_bkops_status);
->> +
->> +	/*
->> +	 * If the function was called due to exception but there is no need
->> +	 * for urgent BKOPs, BKOPs will be performed by the delayed BKOPs
->> +	 * work, before going to suspend
->> +	 */
->> +	if ((card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2)
->> +	    && (from_exception)) {
->> +		pr_debug("%s: %s: Level 1 from exception, exit", __func__,
->> +			 mmc_hostname(card->host));
->> +		goto out;
->> +	}
->>
->>  	mmc_claim_host(card->host);
->>  	if (card->ext_csd.raw_bkops_status >= EXT_CSD_BKOPS_LEVEL_2) {
->> @@ -308,13 +372,101 @@ void mmc_start_bkops(struct mmc_card *card, bool
->> from_exception)
->>  	 * bkops executed synchronously, otherwise
->>  	 * the operation is in progress
->>  	 */
->> -	if (!use_busy_signal)
->> +	if (!use_busy_signal) {
->>  		mmc_card_set_doing_bkops(card);
->> +		pr_debug("%s: %s: starting the polling thread", __func__,
->> +			 mmc_hostname(card->host));
->> +		card->host->bkops_info.exit_wait_on_completion = false;
->> +		queue_work(system_nrt_wq,
->> +			   &card->host->bkops_info.completion_polling);
->> +	}
->>  out:
->>  	mmc_release_host(card->host);
->> +
->>  }
->>  EXPORT_SYMBOL(mmc_start_bkops);
->>
->> +/**
->> + * mmc_bkops_completion_polling() - Poll on the card status to
->> + * wait for the non-blocking BKOPs completion
->> + * @work:	The completion polling work
->> + *
->> + * The on-going reading of the card status will prevent the card
->> + * from getting into suspend while it is in the middle of
->> + * performing BKOPs.
->> + * Since the non blocking BKOPs can be interrupted by a fetched
->> + * request we also check exit_wait_on_completion.
->> + */
->> +void mmc_bkops_completion_polling(struct work_struct *work)
->> +{
->> +	struct mmc_host *host = container_of(work, struct mmc_host,
->> +			bkops_info.completion_polling);
->> +	unsigned long timeout_jiffies = jiffies +
->> +		msecs_to_jiffies(BKOPS_COMPLETION_POLLING_TIMEOUT);
->> +	u32 status;
->> +	int err;
->> +
->> +	/*
->> +	 * Wait for the BKOPs to complete. Keep reading the status to prevent
->> +	 * the host from getting into suspend
->> +	 */
->> +	do {
->> +		mmc_claim_host(host);
->> +
->> +		if (host->bkops_info.exit_wait_on_completion ||
->> +			(!mmc_card_doing_bkops(host->card))) {
->> +			goto out;
->> +		}
->> +
->> +		err = mmc_send_status(host->card, &status);
->> +		if (err) {
->> +			pr_err("%s: error %d requesting status\n",
->> +			       mmc_hostname(host), err);
->> +			goto out;
->> +		}
->> +
->> +		/*
->> +		 * Some cards mishandle the status bits, so make sure to check
->> +		 * both the busy indication and the card state.
->> +		 */
->> +		if ((status & R1_READY_FOR_DATA) &&
->> +		    (R1_CURRENT_STATE(status) != R1_STATE_PRG)) {
->> +			pr_debug("%s: completed BKOPs, exit polling", __func__);
-> missing "..\n". other pr_debug also missed.
-Will fix that.
->> +			mmc_card_clr_doing_bkops(host->card);
->> +			goto out;
->> +		}
->> +
->> +		mmc_release_host(host);
->> +
->> +		/*
->> +		 * Sleep before checking the card status again to allow the
->> +		 * card to complete the BKOPs operation
->> +		 */
->> +		msleep(BKOPS_COMPLETION_POLLING_INTERVAL);
->> +	} while (time_before(jiffies, timeout_jiffies));
->> +
->> +	pr_debug("%s: exit polling due to timeout", __func__);
->> +
->> +	return;
->> +out:
->> +	mmc_release_host(host);
->> +}
->> +
->> +/**
->> + * mmc_start_idle_time_bkops() - check if a non urgent BKOPs is
->> + * needed
->> + * @work:	The idle time BKOPs work
->> + */
->> +void mmc_start_idle_time_bkops(struct work_struct *work)
->> +{
->> +	struct mmc_host *host = container_of(work, struct mmc_host,
->> +			bkops_info.idle_time_dw.work);
->> +
->> +	mmc_start_bkops(host->card, false);
->> +
->> +}
->> +EXPORT_SYMBOL(mmc_start_idle_time_bkops);
->> +
->>  static void mmc_wait_done(struct mmc_request *mrq)
->>  {
->>  	complete(&mrq->completion);
->> @@ -574,12 +726,28 @@ EXPORT_SYMBOL(mmc_wait_for_cmd);
->>   *	to allow rapid servicing of foreground operations,e.g. read/
->>   *	writes. Wait until the card comes out of the programming state
->>   *	to avoid errors in servicing read/write requests.
->> + *
->> + *      This function should be called when the host is claimed
->>   */
->>  int mmc_stop_bkops(struct mmc_card *card)
->>  {
->>  	int err = 0;
->>
->>  	BUG_ON(!card);
->> +
->> +	if (delayed_work_pending(&card->host->bkops_info.idle_time_dw))
->> +		cancel_delayed_work_sync(&card->host->bkops_info.idle_time_dw);
->> +
->> +	/*
->> +	 * Notify the delayed work to be cancelled, in case it was already
->> +	 * removed from the queue, but was not started yet
->> +	 */
->> +	card->host->bkops_info.cancel_delayed_work = true;
->> +
->> +	if (!mmc_card_doing_bkops(card))
->> +		return err;
->> +
->> +	card->host->bkops_info.exit_wait_on_completion = true;
->>  	err = mmc_interrupt_hpi(card);
->>
->>  	/*
->> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
->> index 597f189..d328191 100644
->> --- a/drivers/mmc/core/host.c
->> +++ b/drivers/mmc/core/host.c
->> @@ -27,6 +27,11 @@
->>  #include "core.h"
->>  #include "host.h"
->>
->> +/*
->> + * A default time for checking the need for non urgent BKOPs once MMC
->> thread
->> + * is idle.
->> + */
->> +#define MMC_IDLE_BKOPS_TIME_MS 2000
->>  #define cls_dev_to_mmc_host(d)	container_of(d, struct mmc_host,
->> class_dev)
->>
->>  static void mmc_host_classdev_release(struct device *dev)
->> @@ -336,6 +341,11 @@ struct mmc_host *mmc_alloc_host(int extra, struct
->> device *dev)
->>  	spin_lock_init(&host->lock);
->>  	init_waitqueue_head(&host->wq);
->>  	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
->> +	host->bkops_info. wq = create_singlethread_workqueue("bkops_wq");
->> +	INIT_DELAYED_WORK(&host->bkops_info.idle_time_dw,
->> +			  mmc_start_idle_time_bkops);
->> +	INIT_WORK(&host->bkops_info.completion_polling,
->> +		  mmc_bkops_completion_polling);
->>  #ifdef CONFIG_PM
->>  	host->pm_notify.notifier_call = mmc_pm_notify;
->>  #endif
->> @@ -386,6 +396,20 @@ int mmc_add_host(struct mmc_host *host)
->>  #endif
->>  	mmc_host_clk_sysfs_init(host);
->>
->> +	/*
->> +	 * Calculate the time to start the BKOPs checking.
->> +	 * The idle time of the host controller should be taken into account
->> +	 * in order to prevent a race condition before starting BKOPs and
->> +	 * going into suspend.
->> +	 * If the host controller didn't set its idle time, a default value is
->> +	 * used.
->> +	 */
->> +	host->bkops_info.time_to_start_bkops_ms = MMC_IDLE_BKOPS_TIME_MS;
->> +	if (host->bkops_info.host_suspend_tout_ms)
->> +		host->bkops_info.time_to_start_bkops_ms = min(
->> +			host->bkops_info.time_to_start_bkops_ms,
->> +			host->bkops_info.host_suspend_tout_ms/2);
->> +
->>  	mmc_start_host(host);
->>  	register_pm_notifier(&host->pm_notify);
->>
->> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
->> index 342fe84..835d6c8 100644
->> --- a/include/linux/mmc/card.h
->> +++ b/include/linux/mmc/card.h
->> @@ -280,6 +280,9 @@ struct mmc_card {
->>  	struct dentry		*debugfs_root;
->>  	struct mmc_part	part[MMC_NUM_PHY_PARTITION]; /* physical partitions */
->>  	unsigned int    nr_parts;
->> +
->> +	/* num of read/write reqs since last BKOPs delayed work was queued */
->> +	unsigned int idle_bkops_rw_reqs_nr;
->>  };
->>
->>  /*
->> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
->> index 9b9cdaf..665d345 100644
->> --- a/include/linux/mmc/core.h
->> +++ b/include/linux/mmc/core.h
->> @@ -145,6 +145,9 @@ extern int mmc_app_cmd(struct mmc_host *, struct
->> mmc_card *);
->>  extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
->>  	struct mmc_command *, int);
->>  extern void mmc_start_bkops(struct mmc_card *card, bool
->> from_exception);
->> +extern void mmc_start_delayed_bkops(struct mmc_card *card);
->> +extern void mmc_start_idle_time_bkops(struct work_struct *work);
->> +extern void mmc_bkops_completion_polling(struct work_struct *work);
->>  extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int,
->> bool);
->>  extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
->>
->> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->> index f578a71..8aaaf1d 100644
->> --- a/include/linux/mmc/host.h
->> +++ b/include/linux/mmc/host.h
->> @@ -176,6 +176,29 @@ struct mmc_supply {
->>  	struct regulator *vqmmc;	/* Optional Vccq supply */
->>  };
->>
->> +/**
->> + * struct mmc_bkops_info - BKOPs data
->> + * @wq:			workqueue
->> + * @idle_time_dw:	Idle time bkops delayed work
->> + * @host_suspend_tout_ms:	The host controller idle time,
->> + *         before getting into suspend
->> + * @time_to_start_bkops_ms:	The time to start the BKOPs
->> + *		  delayed work once MMC thread is idle
->> + * @completion_polling:	Poll on BKOPs completion
->> + * @cancel_delayed_work: A flag to indicate if the delayed work
->> + *	       should be cancelled
->> + * @exit_wait_on_completion:  Exit flag for non blocking BKOPs
->> + */
->> +struct mmc_bkops_info {
->> +	struct workqueue_struct *wq;
->> +	struct delayed_work	idle_time_dw;
->> +	unsigned int		host_suspend_tout_ms;
->> +	unsigned int		time_to_start_bkops_ms;
->> +	struct work_struct	completion_polling;
->> +	bool			cancel_delayed_work;
->> +	bool			exit_wait_on_completion;
->> +};
->> +
->>  struct mmc_host {
->>  	struct device		*parent;
->>  	struct device		class_dev;
->> @@ -340,6 +363,8 @@ struct mmc_host {
->>
->>  	unsigned int		actual_clock;	/* Actual HC clock rate */
->>
->> +	struct mmc_bkops_info	bkops_info;
->> +
->>  	unsigned long		private[0] ____cacheline_aligned;
->>  };
->>
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-Thanks,
-Maya
+>> (2012/08/22 15:49), Guennadi Liakhovetski wrote:
+>>> On some systems, e.g., kzm9g, MMCIF interfaces can produce spurious
+>>> interrupts without any active request. To prevent the Oops, that results
+>>> in such cases, don't dereference the mmc request pointer until we make
+>>> sure, that we are indeed processing such a request.
+>>>
+>>> Reported-by: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
+>>> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+>>> ---
+>>>
+>>> Hello Kobayashi-san
+>>>
+>>> On Mon, 20 Aug 2012, Tetsuyuki Kobayashi wrote:
+>>>
+>>> ...
+>>>
+>>>> After applying this patch on kzm9g board, I got this error regarding eMMC.
+>>>> I think this is another problem.
+>>>>
+>>>>
+>>>> Unable to handle kernel NULL pointer dereference at virtual address
+>>>> 00000008
+>>>> pgd = c0004000
+>>>> [00000008] *pgd=00000000
+>>>> Internal error: Oops: 17 [#1] PREEMPT SMP ARM
+>>>> Modules linked in:
+>>>> CPU: 1    Not tainted  (3.6.0-rc2+ #103)
+>>>> PC is at sh_mmcif_irqt+0x20/0xb30
+>>>> LR is at irq_thread+0x94/0x16c
+>>>
+>>> [snip]
+>>>
+>>>> My quick fix is below.
+>>>>
+>>>> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+>>>> index 5d81427..e587fbc 100644
+>>>> --- a/drivers/mmc/host/sh_mmcif.c
+>>>> +++ b/drivers/mmc/host/sh_mmcif.c
+>>>> @@ -1104,7 +1104,15 @@ static irqreturn_t sh_mmcif_irqt(int irq, void
+>>>> *dev_id)
+>>>>    {
+>>>>           struct sh_mmcif_host *host = dev_id;
+>>>>           struct mmc_request *mrq = host->mrq;
+>>>> -       struct mmc_data *data = mrq->data;
+>>>> +       /*struct mmc_data *data = mrq->data; -- this cause null pointer
+>>>> access*/
+>>>> +       struct mmc_data *data;
+>>>> +
+>>>> +       /* quick fix by koba */
+>>>> +       if (mrq == NULL) {
+>>>> +               printk("sh_mmcif_irqt: mrq == NULL: host->wait_for=%d\n",
+>>>> host->wait_for);
+>>>> +       } else {
+>>>> +               data = mrq->data;
+>>>> +       }
+>>>>
+>>>>           cancel_delayed_work_sync(&host->timeout_work);
+>>>>
+>>>>
+>>>> With this patch, there is no null pointer accesses and got this log.
+>>>>
+>>>> sh_mmcif_irqt: mrq == NULL: host->wait_for=0
+>>>> sh_mmcif_irqt: mrq == NULL: host->wait_for=0
+>>>>     ...
+>>>>
+>>>> host->wait_for is 0. it is MMCIF_WAIT_FOR_REQUEST.
+>>>> There is code such like:
+>>>>
+>>>>          host->wait_for = MMCIF_WAIT_FOR_REQUEST;
+>>>>          host->mrq = NULL;
+>>>>
+>>>> So, at the top of sh_mmcif_irqt, if host->wait_for ==
+>>>> MMCIF_WAIT_FOR_REQUEST,
+>>>> host->mrq = NULL.
+>>>> It is too earlier to access mrq->data before checking host->mrq. it may
+>>>> cause null pointer access.
+>>>>
+>>>> Goda-san, could you check this and refine the code of sh_mmcif_irqt?
+>>>
+>>> Thanks for your report and a fix. Could you please double-check, whether
+>>> the below patch also fixes your problem? Since such spurious interrupts
+>>> are possible I would commit a check like this one, but in the longer run
+>>> we want to identify and eliminate them, if possible. But since so far
+>>> these interrupts only happen on 1 board model and also not on all units
+>>> and not upon each boot, this could be a bit tricky.
+>>>
+>>> One more question - is this only needed for 3.7 or also for 3.6 / stable?
+>>>
+>>> Thanks
+>>> Guennadi
+>>>
+>>>    drivers/mmc/host/sh_mmcif.c |    4 ++--
+>>>    1 files changed, 2 insertions(+), 2 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+>>> index 5d81427..82bf921 100644
+>>> --- a/drivers/mmc/host/sh_mmcif.c
+>>> +++ b/drivers/mmc/host/sh_mmcif.c
+>>> @@ -1104,7 +1104,6 @@ static irqreturn_t sh_mmcif_irqt(int irq, void
+>>> *dev_id)
+>>>    {
+>>>    	struct sh_mmcif_host *host = dev_id;
+>>>    	struct mmc_request *mrq = host->mrq;
+>>> -	struct mmc_data *data = mrq->data;
+>>>
+>>>    	cancel_delayed_work_sync(&host->timeout_work);
+>>>
+>>> @@ -1152,13 +1151,14 @@ static irqreturn_t sh_mmcif_irqt(int irq, void
+>>> *dev_id)
+>>>    	case MMCIF_WAIT_FOR_READ_END:
+>>>    	case MMCIF_WAIT_FOR_WRITE_END:
+>>>    		if (host->sd_error)
+>>> -			data->error = sh_mmcif_error_manage(host);
+>>> +			mrq->data->error = sh_mmcif_error_manage(host);
+>>>    		break;
+>>>    	default:
+>>>    		BUG();
+>>>    	}
+>>>
+>>>    	if (host->wait_for != MMCIF_WAIT_FOR_STOP) {
+>>> +		struct mmc_data *data = mrq->data;
+>>>    		if (!mrq->cmd->error && data && !data->error)
+>>>    			data->bytes_xfered =
+>>>    				data->blocks * data->blksz;
+>>>
 
--- 
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
-of Code Aurora Forum, hosted by The Linux Foundation
 
+
+--------------050906000808070308080109
+Content-Type: text/plain; charset=Shift_JIS;
+ name="kzm9g_koba_defconfig"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename="kzm9g_koba_defconfig"
+
+# CONFIG_ARM_PATCH_PHYS_VIRT is not set
+CONFIG_EXPERIMENTAL=y
+# CONFIG_LOCALVERSION_AUTO is not set
+CONFIG_SYSVIPC=y
+CONFIG_NO_HZ=y
+CONFIG_HIGH_RES_TIMERS=y
+CONFIG_IKCONFIG=y
+CONFIG_IKCONFIG_PROC=y
+CONFIG_LOG_BUF_SHIFT=16
+CONFIG_NAMESPACES=y
+# CONFIG_UTS_NS is not set
+# CONFIG_IPC_NS is not set
+# CONFIG_PID_NS is not set
+# CONFIG_NET_NS is not set
+CONFIG_CC_OPTIMIZE_FOR_SIZE=y
+CONFIG_SYSCTL_SYSCALL=y
+CONFIG_EMBEDDED=y
+CONFIG_SLAB=y
+CONFIG_MODULES=y
+CONFIG_MODULE_FORCE_LOAD=y
+CONFIG_MODULE_UNLOAD=y
+# CONFIG_BLK_DEV_BSG is not set
+# CONFIG_IOSCHED_DEADLINE is not set
+# CONFIG_IOSCHED_CFQ is not set
+CONFIG_ARCH_SHMOBILE=y
+CONFIG_KEYBOARD_GPIO_POLLED=y
+CONFIG_ARCH_SH73A0=y
+CONFIG_MACH_KZM9G=y
+CONFIG_MEMORY_START=0x41000000
+CONFIG_MEMORY_SIZE=0x1f000000
+CONFIG_PL310_ERRATA_588369=y
+CONFIG_PL310_ERRATA_727915=y
+CONFIG_ARM_ERRATA_743622=y
+CONFIG_ARM_ERRATA_751472=y
+CONFIG_ARM_ERRATA_754322=y
+CONFIG_ARM_ERRATA_754327=y
+CONFIG_ARM_ERRATA_764369=y
+CONFIG_PL310_ERRATA_769419=y
+CONFIG_SMP=y
+CONFIG_SCHED_MC=y
+CONFIG_PREEMPT=y
+CONFIG_AEABI=y
+# CONFIG_OABI_COMPAT is not set
+CONFIG_HIGHMEM=y
+CONFIG_ZBOOT_ROM_TEXT=0x0
+CONFIG_ZBOOT_ROM_BSS=0x0
+CONFIG_ARM_APPENDED_DTB=y
+CONFIG_CMDLINE="console=tty0 console=ttySC4,115200 root=/dev/mmcblk0p2 rootfstype=ext4 rw ip=dhcp ignore_loglevel earlyprintk=sh-sci.4,115200"
+CONFIG_CMDLINE_FORCE=y
+CONFIG_KEXEC=y
+CONFIG_VFP=y
+CONFIG_NEON=y
+# CONFIG_CORE_DUMP_DEFAULT_ELF_HEADERS is not set
+CONFIG_PM_RUNTIME=y
+CONFIG_NET=y
+CONFIG_PACKET=y
+CONFIG_UNIX=y
+CONFIG_INET=y
+CONFIG_IP_PNP=y
+CONFIG_IP_PNP_DHCP=y
+# CONFIG_INET_XFRM_MODE_TRANSPORT is not set
+# CONFIG_INET_XFRM_MODE_TUNNEL is not set
+# CONFIG_INET_XFRM_MODE_BEET is not set
+# CONFIG_INET_LRO is not set
+# CONFIG_INET_DIAG is not set
+# CONFIG_IPV6 is not set
+CONFIG_IRDA=y
+CONFIG_SH_IRDA=y
+# CONFIG_WIRELESS is not set
+CONFIG_UEVENT_HELPER_PATH="/sbin/hotplug"
+CONFIG_DEVTMPFS=y
+CONFIG_DEVTMPFS_MOUNT=y
+CONFIG_SCSI=y
+CONFIG_BLK_DEV_SD=y
+CONFIG_NETDEVICES=y
+CONFIG_SMSC911X=y
+# CONFIG_WLAN is not set
+CONFIG_INPUT_SPARSEKMAP=y
+# CONFIG_INPUT_MOUSEDEV is not set
+CONFIG_INPUT_EVDEV=y
+# CONFIG_KEYBOARD_ATKBD is not set
+# CONFIG_INPUT_MOUSE is not set
+CONFIG_INPUT_TOUCHSCREEN=y
+CONFIG_TOUCHSCREEN_ST1232=y
+# CONFIG_LEGACY_PTYS is not set
+CONFIG_SERIAL_SH_SCI=y
+CONFIG_SERIAL_SH_SCI_NR_UARTS=9
+CONFIG_SERIAL_SH_SCI_CONSOLE=y
+# CONFIG_HW_RANDOM is not set
+CONFIG_I2C_CHARDEV=y
+CONFIG_I2C_SH_MOBILE=y
+CONFIG_GPIO_PCF857X=y
+# CONFIG_HWMON is not set
+CONFIG_FB=y
+CONFIG_FB_SH_MOBILE_LCDC=y
+CONFIG_FRAMEBUFFER_CONSOLE=y
+CONFIG_LOGO=y
+CONFIG_FB_SH_MOBILE_MERAM=y
+CONFIG_SOUND=y
+CONFIG_SND=y
+# CONFIG_SND_SUPPORT_OLD_API is not set
+# CONFIG_SND_VERBOSE_PROCFS is not set
+# CONFIG_SND_DRIVERS is not set
+# CONFIG_SND_ARM is not set
+# CONFIG_SND_USB is not set
+CONFIG_SND_SOC=y
+CONFIG_SND_SOC_SH4_FSI=y
+CONFIG_USB=y
+CONFIG_USB_R8A66597_HCD=y
+CONFIG_USB_RENESAS_USBHS=y
+CONFIG_USB_STORAGE=y
+CONFIG_USB_GADGET=y
+CONFIG_USB_RENESAS_USBHS_UDC=y
+CONFIG_USB_ETH=m
+CONFIG_USB_MASS_STORAGE=m
+CONFIG_MMC=y
+# CONFIG_MMC_BLOCK_BOUNCE is not set
+CONFIG_MMC_SDHI=y
+CONFIG_MMC_SH_MMCIF=y
+CONFIG_NEW_LEDS=y
+CONFIG_LEDS_CLASS=y
+CONFIG_RTC_CLASS=y
+CONFIG_RTC_DRV_RS5C372=y
+CONFIG_DMADEVICES=y
+CONFIG_SH_DMAE=y
+CONFIG_ASYNC_TX_DMA=y
+CONFIG_STAGING=y
+CONFIG_EXT2_FS=y
+CONFIG_EXT3_FS=y
+CONFIG_EXT4_FS=y
+CONFIG_VFAT_FS=y
+CONFIG_TMPFS=y
+# CONFIG_MISC_FILESYSTEMS is not set
+CONFIG_NFS_FS=y
+CONFIG_NFS_V3_ACL=y
+CONFIG_NFS_V4=y
+CONFIG_NFS_V4_1=y
+CONFIG_ROOT_NFS=y
+CONFIG_NLS_CODEPAGE_437=y
+CONFIG_NLS_ISO8859_1=y
+CONFIG_PRINTK_TIME=y
+# CONFIG_ENABLE_WARN_DEPRECATED is not set
+# CONFIG_ENABLE_MUST_CHECK is not set
+# CONFIG_SCHED_DEBUG is not set
+# CONFIG_DEBUG_PREEMPT is not set
+# CONFIG_DEBUG_BUGVERBOSE is not set
+CONFIG_DEBUG_INFO=y
+# CONFIG_FTRACE is not set
+CONFIG_CRYPTO_CBC=y
+CONFIG_CRYPTO_MD5=y
+CONFIG_CRYPTO_DES=y
+
+--------------050906000808070308080109--
