@@ -1,142 +1,132 @@
-From: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
-Subject: [PATCH] mmc: omap_hsmmc: Enable HSPE bit for high speed cards
-Date: Tue, 4 Sep 2012 18:39:11 +0530
-Message-ID: <1346764151-21323-1-git-send-email-gururaja.hebbar@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, svenkatr@ti.com
-Cc: rob.herring@calxeda.com, linux-kernel@vger.kernel.org, grant.likely@secretlab.ca, cjb@laptop.org, nsekhar@ti.com, sudhakar.raj@ti.com, gururaja.hebbar@ti.com
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: [PATCH v5 4/9] mmc: dw_mmc: lookup for optional biu and ciu clocks
+Date: Wed, 05 Sep 2012 01:16:08 +0530
+Message-ID: <1346787968-23709-1-git-send-email-thomas.abraham@linaro.org>
+References: <CAJuYYwQ50HCSrDgxrvhRh5X2ECxi_g=_akoa6o9FYCQ5GqHUCQ@mail.gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:57858 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757597Ab2IDT1M (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Sep 2012 15:27:12 -0400
+In-reply-to: <CAJuYYwQ50HCSrDgxrvhRh5X2ECxi_g=_akoa6o9FYCQ5GqHUCQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
+Cc: will.newton@imgtec.com, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, patches@linaro.org
 
-HSMMC IP on AM33xx need a special setting to handle High-speed cards.
-Other platforms like TI81xx, OMAP4 may need this as-well. This depends
-on the HSMMC IP timing closure done for the high speed cards.
+Some platforms allow for clock gating and control of bus interface unit clock
+and card interface unit clock. Add support for clock lookup of optional biu
+and ciu clocks for clock gating and clock speed determination.
 
->From AM335x TRM (SPRUH73F - 18.3.12 Output Signals Generation)
-
-The MMC/SD/SDIO output signals can be driven on either falling edge or
-rising edge depending on the SD_HCTL[2] HSPE bit. This feature allows
-to reach better timing performance, and thus to increase data transfer
-frequency.
-
-There are few pre-requisites for enabling the HSPE bit
-- Controller should support High-Speed-Enable Bit and
-- Controller should not be using DDR Mode and
-- Controller should advertise that it supports High Speed in
-  capabilities register and
-- MMC/SD clock coming out of controller > 25MHz
-
-Signed-off-by: Hebbar, Gururaja <gururaja.hebbar@ti.com>
+Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
+Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+Acked-by: Will Newton <will.newton@imgtec.com>
 ---
-:100644 100644 be76a23... ed271fc... M	Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-:100644 100644 eb3e4d5... 00c658b... M	arch/arm/plat-omap/include/plat/mmc.h
-:100644 100644 c3e96a2... 0e14834... M	drivers/mmc/host/omap_hsmmc.c
- .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    1 +
- arch/arm/plat-omap/include/plat/mmc.h              |    1 +
- drivers/mmc/host/omap_hsmmc.c                      |   30 +++++++++++++++++++-
- 3 files changed, 31 insertions(+), 1 deletions(-)
+ drivers/mmc/host/dw_mmc.c  |   50 +++++++++++++++++++++++++++++++++++++++++--
+ include/linux/mmc/dw_mmc.h |    4 +++
+ 2 files changed, 51 insertions(+), 3 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-index be76a23..ed271fc 100644
---- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-@@ -19,6 +19,7 @@ ti,dual-volt: boolean, supports dual voltage cards
- "supply-name" examples are "vmmc", "vmmc_aux" etc
- ti,non-removable: non-removable slot (like eMMC)
- ti,needs-special-reset: Requires a special softreset sequence
-+ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 227c42e..e8c8491 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1960,13 +1960,40 @@ int dw_mci_probe(struct dw_mci *host)
+ 		return -ENODEV;
+ 	}
  
- Example:
- 	mmc1: mmc@0x4809c000 {
-diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
-index eb3e4d5..00c658b 100644
---- a/arch/arm/plat-omap/include/plat/mmc.h
-+++ b/arch/arm/plat-omap/include/plat/mmc.h
-@@ -127,6 +127,7 @@ struct omap_mmc_platform_data {
- 		/* we can put the features above into this variable */
- #define HSMMC_HAS_PBIAS		(1 << 0)
- #define HSMMC_HAS_UPDATED_RESET	(1 << 1)
-+#define HSMMC_HAS_HSPE_SUPPORT	(1 << 2)
- 		unsigned features;
- 
- 		int switch_pin;			/* gpio (card detect) */
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index c3e96a2..0e14834 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -63,6 +63,7 @@
- 
- #define VS18			(1 << 26)
- #define VS30			(1 << 25)
-+#define HSS			(1 << 21)
- #define SDVS18			(0x5 << 9)
- #define SDVS30			(0x6 << 9)
- #define SDVS33			(0x7 << 9)
-@@ -90,6 +91,7 @@
- #define MSBS			(1 << 5)
- #define BCE			(1 << 1)
- #define FOUR_BIT		(1 << 1)
-+#define HSPE			(1 << 2)
- #define DDR			(1 << 19)
- #define DW8			(1 << 5)
- #define CC			0x1
-@@ -490,6 +492,7 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
- 	struct mmc_ios *ios = &host->mmc->ios;
- 	unsigned long regval;
- 	unsigned long timeout;
-+	unsigned long clkdiv;
- 
- 	dev_vdbg(mmc_dev(host->mmc), "Set clock to %uHz\n", ios->clock);
- 
-@@ -497,7 +500,8 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
- 
- 	regval = OMAP_HSMMC_READ(host->base, SYSCTL);
- 	regval = regval & ~(CLKD_MASK | DTO_MASK);
--	regval = regval | (calc_divisor(host, ios) << 6) | (DTO << 16);
-+	clkdiv = calc_divisor(host, ios);
-+	regval = regval | (clkdiv << 6) | (DTO << 16);
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL, regval);
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
- 		OMAP_HSMMC_READ(host->base, SYSCTL) | ICE);
-@@ -508,6 +512,27 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
- 		&& time_before(jiffies, timeout))
- 		cpu_relax();
- 
-+	/*
-+	 * Enable High-Speed Support
-+	 * Pre-Requisites
-+	 *	- Controller should support High-Speed-Enable Bit
-+	 *	- Controller should not be using DDR Mode
-+	 *	- Controller should advertise that it supports High Speed
-+	 *	  in capabilities register
-+	 *	- MMC/SD clock coming out of controller > 25MHz
-+	 */
-+	if ((mmc_slot(host).features & HSMMC_HAS_HSPE_SUPPORT) &&
-+	    (ios->timing != MMC_TIMING_UHS_DDR50) &&
-+	    ((OMAP_HSMMC_READ(host->base, CAPA) & HSS) == HSS)) {
-+		regval = OMAP_HSMMC_READ(host->base, HCTL);
-+		if (clkdiv && (clk_get_rate(host->fclk)/clkdiv) > 25000000)
-+			regval |= HSPE;
-+		else
-+			regval &= ~HSPE;
-+
-+		OMAP_HSMMC_WRITE(host->base, HCTL, regval);
+-	if (!host->pdata->bus_hz) {
++	host->biu_clk = clk_get(host->dev, "biu");
++	if (IS_ERR(host->biu_clk)) {
++		dev_dbg(host->dev, "biu clock not available\n");
++	} else {
++		ret = clk_prepare_enable(host->biu_clk);
++		if (ret) {
++			dev_err(host->dev, "failed to enable biu clock\n");
++			return ret;
++		}
 +	}
 +
- 	omap_hsmmc_start_clock(host);
- }
- 
-@@ -1701,6 +1726,9 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
- 	if (of_find_property(np, "ti,needs-special-reset", NULL))
- 		pdata->slots[0].features |= HSMMC_HAS_UPDATED_RESET;
- 
-+	if (of_find_property(np, "ti,needs-special-hs-handling", NULL))
-+		pdata->slots[0].features |= HSMMC_HAS_HSPE_SUPPORT;
++	host->ciu_clk = clk_get(host->dev, "ciu");
++	if (IS_ERR(host->ciu_clk)) {
++		dev_dbg(host->dev, "ciu clock not available\n");
++	} else {
++		ret = clk_prepare_enable(host->ciu_clk);
++		if (ret) {
++			dev_err(host->dev, "failed to enable ciu clock\n");
++			goto err_clk_biu;
++		}
++	}
 +
- 	return pdata;
++	if (IS_ERR(host->ciu_clk))
++		host->bus_hz = host->pdata->bus_hz;
++	else
++		host->bus_hz = clk_get_rate(host->ciu_clk);
++
++	if (!host->bus_hz) {
+ 		dev_err(host->dev,
+ 			"Platform data must supply bus speed\n");
+-		return -ENODEV;
++		ret = -ENODEV;
++		goto err_clk_ciu;
+ 	}
+ 
+-	host->bus_hz = host->pdata->bus_hz;
+ 	host->quirks = host->pdata->quirks;
+ 
+ 	spin_lock_init(&host->lock);
+@@ -2116,6 +2143,17 @@ err_dmaunmap:
+ 		regulator_disable(host->vmmc);
+ 		regulator_put(host->vmmc);
+ 	}
++
++err_clk_ciu:
++	if (!IS_ERR(host->ciu_clk)) {
++		clk_disable_unprepare(host->ciu_clk);
++		clk_put(host->ciu_clk);
++	}
++err_clk_biu:
++	if (!IS_ERR(host->biu_clk)) {
++		clk_disable_unprepare(host->biu_clk);
++		clk_put(host->biu_clk);
++	}
+ 	return ret;
  }
- #else
+ EXPORT_SYMBOL(dw_mci_probe);
+@@ -2149,6 +2187,12 @@ void dw_mci_remove(struct dw_mci *host)
+ 		regulator_put(host->vmmc);
+ 	}
+ 
++	if (!IS_ERR(host->ciu_clk))
++		clk_disable_unprepare(host->ciu_clk);
++	if (!IS_ERR(host->biu_clk))
++		clk_disable_unprepare(host->biu_clk);
++	clk_put(host->ciu_clk);
++	clk_put(host->biu_clk);
+ }
+ EXPORT_SYMBOL(dw_mci_remove);
+ 
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index a37a573..787ad56 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -78,6 +78,8 @@ struct mmc_data;
+  * @data_offset: Set the offset of DATA register according to VERID.
+  * @dev: Device associated with the MMC controller.
+  * @pdata: Platform data associated with the MMC controller.
++ * @biu_clk: Pointer to bus interface unit clock instance.
++ * @ciu_clk: Pointer to card interface unit clock instance.
+  * @slot: Slots sharing this MMC controller.
+  * @fifo_depth: depth of FIFO.
+  * @data_shift: log2 of FIFO item size.
+@@ -158,6 +160,8 @@ struct dw_mci {
+ 	u16			data_offset;
+ 	struct device		*dev;
+ 	struct dw_mci_board	*pdata;
++	struct clk		*biu_clk;
++	struct clk		*ciu_clk;
+ 	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
+ 
+ 	/* FIFO push and pull */
 -- 
-1.7.1
+1.6.6.rc2
+
