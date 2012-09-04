@@ -1,265 +1,418 @@
 From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: [PATCH v5 8/9] mmc: dw_mmc: add support for implementation specific
- callbacks
-Date: Wed, 05 Sep 2012 01:17:40 +0530
-Message-ID: <1346788060-23758-1-git-send-email-thomas.abraham@linaro.org>
-References: <1346237295-7116-9-git-send-email-thomas.abraham@linaro.org>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1346237295-7116-9-git-send-email-thomas.abraham@linaro.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
+Subject: [PATCH v5 9/9] mmc: dw_mmc: add support for exynos specific
+ implementation of dw-mshc
+Date: Wed, 05 Sep 2012 01:18:40 +0530
+Message-ID: <1346788120-23799-1-git-send-email-thomas.abraham@linaro.org>
+References: <1346237295-7116-10-git-send-email-thomas.abraham@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:33757 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757662Ab2IDT3o (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Sep 2012 15:29:44 -0400
+In-reply-to: <1346237295-7116-10-git-send-email-thomas.abraham@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
 Cc: will.newton@imgtec.com, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, patches@linaro.org
-List-Id: linux-mmc@vger.kernel.org
 
-The core dw-mshc controller driver can let platform specific implementations
-of the dw-mshc controller to control the hardware as required by such
-implementations. This is acheived by invoking implementation specific (optional)
-callbacks. Define the list of callbacks supported the add invocation points
-for the same.
+Samsung Exynos SoC's extend the dw-mshc controller for additional clock and bus
+control. Add support for these extensions and include provide device tree based
+discovery suppory as well.
 
 Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
 Acked-by: Will Newton <will.newton@imgtec.com>
 ---
- drivers/mmc/host/dw_mmc-pltfm.c |   12 ++++++++-
- drivers/mmc/host/dw_mmc-pltfm.h |    3 +-
- drivers/mmc/host/dw_mmc.c       |   47 ++++++++++++++++++++++++++++++++++++++-
- drivers/mmc/host/dw_mmc.h       |   24 ++++++++++++++++++++
- include/linux/mmc/dw_mmc.h      |    4 +++
- 5 files changed, 86 insertions(+), 4 deletions(-)
+ .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   86 +++++++
+ drivers/mmc/host/Kconfig                           |    9 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/dw_mmc-exynos.c                   |  253 ++++++++++++++++++++
+ 4 files changed, 349 insertions(+), 0 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+ create mode 100644 drivers/mmc/host/dw_mmc-exynos.c
 
-diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-index e17da91..c960ca7 100644
---- a/drivers/mmc/host/dw_mmc-pltfm.c
-+++ b/drivers/mmc/host/dw_mmc-pltfm.c
-@@ -23,7 +23,8 @@
+diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+new file mode 100644
+index 0000000..323a891
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+@@ -0,0 +1,86 @@
++* Samsung Exynos specific extensions to the Synopsis Designware Mobile
++  Storage Host Controller
++
++The Synopsis designware mobile storage host controller is used to interface
++a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
++differences between the core Synopsis dw mshc controller properties described
++by synposis-dw-mshc.txt and the properties used by the Samsung Exynos specific
++extensions to the Synopsis Designware Mobile Storage Host Controller.
++
++Required Properties:
++
++* compatible: should be
++	- "samsung,exynos4210-dw-mshc": for controllers with Samsung Exynos4210
++	  specific extentions.
++	- "samsung,exynos4412-dw-mshc": for controllers with Samsung Exynos4412
++	  specific extentions.
++	- "samsung,exynos5250-dw-mshc": for controllers with Samsung Exynos5250
++	  specific extentions.
++
++* samsung,dw-mshc-ciu-div: Specifies the divider value for the card interface
++  unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
++  ignored for Exynos4 SoC's. The valid range of divider value is 0 to 7.
++
++* samsung,dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
++  in transmit mode and CIU clock phase shift value in receive mode for single
++  data rate mode operation. Refer notes below for the order of the cells and the
++  valid values.
++
++* samsung,dw-mshc-ddr-timing: Specifies the value of CUI clock phase shift value
++  in transmit mode and CIU clock phase shift value in receive mode for double
++  data rate mode operation. Refer notes below for the order of the cells and the
++  valid values.
++
++  Notes for the sdr-timing and ddr-timing values:
++
++    The order of the cells should be
++      - First Cell: CIU clock phase shift value for tx mode.
++      - Second Cell: CIU clock phase shift value for rx mode.
++
++    Valid values for SDR and DDR CIU clock timing for Exynos5250:
++      - valid value for tx phase shift and rx phase shift is 0 to 7.
++      - when CIU clock divider value is set to 3, all possible 8 phase shift
++        values can be used.
++      - if CIU clock divider value is 0 (that is divide by 1), both tx and rx
++        phase shift clocks should be 0.
++
++Required properties for a slot:
++
++* gpios: specifies a list of gpios used for command, clock and data bus. The
++  first gpio is the command line and the second gpio is the clock line. The
++  rest of the gpios (depending on the bus-width property) are the data lines in
++  no particular order. The format of the gpio specifier depends on the gpio
++  controller.
++
++Example:
++
++  The MSHC controller node can be split into two portions, SoC specific and
++  board specific portions as listed below.
++
++	dwmmc0@12200000 {
++		compatible = "samsung,exynos5250-dw-mshc";
++		reg = <0x12200000 0x1000>;
++		interrupts = <0 75 0>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++	};
++
++	dwmmc0@12200000 {
++		num-slots = <1>;
++		supports-highspeed;
++		broken-cd;
++		fifo-depth = <0x80>;
++		card-detect-delay = <200>;
++		samsung,dw-mshc-sdr-timing = <2 3 3>;
++		samsung,dw-mshc-ddr-timing = <1 2 3>;
++
++		slot@0 {
++			reg = <0>;
++			bus-width = <8>;
++			gpios = <&gpc0 0 2 0 3>, <&gpc0 1 2 0 3>,
++				<&gpc1 0 2 3 3>, <&gpc1 1 2 3 3>,
++				<&gpc1 2 2 3 3>, <&gpc1 3 2 3 3>,
++				<&gpc0 3 2 3 3>, <&gpc0 4 2 3 3>,
++				<&gpc0 5 2 3 3>, <&gpc0 6 2 3 3>;
++		};
++	};
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index aa131b3..9bf10e7 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -540,6 +540,15 @@ config MMC_DW_PLTFM
  
- #include "dw_mmc.h"
+ 	  If unsure, say Y.
  
--int dw_mci_pltfm_register(struct platform_device *pdev)
-+int dw_mci_pltfm_register(struct platform_device *pdev,
-+				struct dw_mci_drv_data *drv_data)
- {
- 	struct dw_mci *host;
- 	struct resource	*regs;
-@@ -41,6 +42,7 @@ int dw_mci_pltfm_register(struct platform_device *pdev)
- 	if (host->irq < 0)
- 		return host->irq;
- 
-+	host->drv_data = drv_data;
- 	host->dev = &pdev->dev;
- 	host->irq_flags = 0;
- 	host->pdata = pdev->dev.platform_data;
-@@ -48,6 +50,12 @@ int dw_mci_pltfm_register(struct platform_device *pdev)
- 	if (!host->regs)
- 		return -ENOMEM;
- 
-+	if (host->drv_data->init) {
-+		ret = host->drv_data->init(host);
-+		if (ret)
-+			return ret;
++config MMC_DW_EXYNOS
++	tristate "Exynos specific extentions for Synopsys DW Memory Card Interface"
++	depends on MMC_DW
++	select MMC_DW_PLTFM
++	help
++	  This selects support for Samsung Exynos SoC specific extensions to the
++	  Synopsys DesignWare Memory Card Interface driver. Select this option
++	  for platforms based on Exynos4 and Exynos5 SoC's.
++
+ config MMC_DW_PCI
+ 	tristate "Synopsys Designware MCI support on PCI bus"
+ 	depends on MMC_DW && PCI
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 8922b06..17ad0a7 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -39,6 +39,7 @@ obj-$(CONFIG_MMC_VIA_SDMMC)	+= via-sdmmc.o
+ obj-$(CONFIG_SDH_BFIN)		+= bfin_sdh.o
+ obj-$(CONFIG_MMC_DW)		+= dw_mmc.o
+ obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
++obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
+ obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
+ obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
+ obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+new file mode 100644
+index 0000000..313f364
+--- /dev/null
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -0,0 +1,253 @@
++/*
++ * Exynos Specific Extensions for Synopsys DW Multimedia Card Interface driver
++ *
++ * Copyright (C) 2012, Samsung Electronics Co., Ltd.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/clk.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/dw_mmc.h>
++#include <linux/of.h>
++#include <linux/of_gpio.h>
++
++#include "dw_mmc.h"
++#include "dw_mmc-pltfm.h"
++
++#define NUM_PINS(x)			(x + 2)
++
++#define SDMMC_CLKSEL			0x09C
++#define SDMMC_CLKSEL_CCLK_SAMPLE(x)	(((x) & 7) << 0)
++#define SDMMC_CLKSEL_CCLK_DRIVE(x)	(((x) & 7) << 16)
++#define SDMMC_CLKSEL_CCLK_DIVIDER(x)	(((x) & 7) << 24)
++#define SDMMC_CLKSEL_GET_DRV_WD3(x)	(((x) >> 16) & 0x7)
++#define SDMMC_CLKSEL_TIMING(x, y, z)	(SDMMC_CLKSEL_CCLK_SAMPLE(x) |	\
++					SDMMC_CLKSEL_CCLK_DRIVE(y) |	\
++					SDMMC_CLKSEL_CCLK_DIVIDER(z))
++
++#define SDMMC_CMD_USE_HOLD_REG		BIT(29)
++
++#define EXYNOS4210_FIXED_CIU_CLK_DIV	2
++#define EXYNOS4412_FIXED_CIU_CLK_DIV	4
++
++/* Variations in Exynos specific dw-mshc controller */
++enum dw_mci_exynos_type {
++	DW_MCI_TYPE_EXYNOS4210,
++	DW_MCI_TYPE_EXYNOS4412,
++	DW_MCI_TYPE_EXYNOS5250,
++};
++
++/* Exynos implementation specific driver private data */
++struct dw_mci_exynos_priv_data {
++	enum dw_mci_exynos_type		ctrl_type;
++	u8				ciu_div;
++	u32				sdr_timing;
++	u32				ddr_timing;
++};
++
++static struct dw_mci_exynos_compatible {
++	char				*compatible;
++	enum dw_mci_exynos_type		ctrl_type;
++} exynos_compat[] = {
++	{
++		.compatible	= "samsung,exynos4210-dw-mshc",
++		.ctrl_type	= DW_MCI_TYPE_EXYNOS4210,
++	}, {
++		.compatible	= "samsung,exynos4412-dw-mshc",
++		.ctrl_type	= DW_MCI_TYPE_EXYNOS4412,
++	}, {
++		.compatible	= "samsung,exynos5250-dw-mshc",
++		.ctrl_type	= DW_MCI_TYPE_EXYNOS5250,
++	},
++};
++
++static int dw_mci_exynos_priv_init(struct dw_mci *host)
++{
++	struct dw_mci_exynos_priv_data *priv;
++	int idx;
++
++	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
++	if (!priv) {
++		dev_err(host->dev, "mem alloc failed for private data\n");
++		return -ENOMEM;
 +	}
 +
- 	platform_set_drvdata(pdev, host);
- 	ret = dw_mci_probe(host);
- 	return ret;
-@@ -56,7 +64,7 @@ EXPORT_SYMBOL_GPL(dw_mci_pltfm_register);
- 
- static int __devinit dw_mci_pltfm_probe(struct platform_device *pdev)
- {
--	return dw_mci_pltfm_register(pdev);
-+	return dw_mci_pltfm_register(pdev, NULL);
- }
- 
- static int __devexit dw_mci_pltfm_remove(struct platform_device *pdev)
-diff --git a/drivers/mmc/host/dw_mmc-pltfm.h b/drivers/mmc/host/dw_mmc-pltfm.h
-index 6c065d9..301f245 100644
---- a/drivers/mmc/host/dw_mmc-pltfm.h
-+++ b/drivers/mmc/host/dw_mmc-pltfm.h
-@@ -12,7 +12,8 @@
- #ifndef _DW_MMC_PLTFM_H_
- #define _DW_MMC_PLTFM_H_
- 
--extern int dw_mci_pltfm_register(struct platform_device *pdev);
-+extern int dw_mci_pltfm_register(struct platform_device *pdev,
-+				struct dw_mci_drv_data *drv_data);
- extern int __devexit dw_mci_pltfm_remove(struct platform_device *pdev);
- extern const struct dev_pm_ops dw_mci_pltfm_pmops;
- 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 1308619..6104c0f 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -231,6 +231,7 @@ static void dw_mci_set_timeout(struct dw_mci *host)
- static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
- {
- 	struct mmc_data	*data;
-+	struct dw_mci_slot *slot = mmc_priv(mmc);
- 	u32 cmdr;
- 	cmd->error = -EINPROGRESS;
- 
-@@ -260,6 +261,9 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
- 			cmdr |= SDMMC_CMD_DAT_WR;
- 	}
- 
-+	if (slot->host->drv_data->prepare_command)
-+		slot->host->drv_data->prepare_command(slot->host, &cmdr);
-+
- 	return cmdr;
- }
- 
-@@ -815,6 +819,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		slot->clock = ios->clock;
- 	}
- 
-+	if (slot->host->drv_data->set_ios)
-+		slot->host->drv_data->set_ios(slot->host, ios);
-+
- 	switch (ios->power_mode) {
- 	case MMC_POWER_UP:
- 		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
-@@ -1820,6 +1827,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- {
- 	struct mmc_host *mmc;
- 	struct dw_mci_slot *slot;
-+	int ctrl_id, ret;
- 	u8 bus_width;
- 
- 	mmc = mmc_alloc_host(sizeof(struct dw_mci_slot), host->dev);
-@@ -1851,6 +1859,16 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	if (host->pdata->caps)
- 		mmc->caps = host->pdata->caps;
- 
-+	if (host->dev->of_node) {
-+		ctrl_id = of_alias_get_id(host->dev->of_node, "mshc");
-+		if (ctrl_id < 0)
-+			ctrl_id = 0;
-+	} else {
-+		ctrl_id = to_platform_device(host->dev)->id;
-+	}
-+	if (host->drv_data && host->drv_data->caps)
-+		mmc->caps |= host->drv_data->caps[ctrl_id];
-+
- 	if (host->pdata->caps2)
- 		mmc->caps2 = host->pdata->caps2;
- 
-@@ -1861,6 +1879,14 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	else
- 		bus_width = 1;
- 
-+	if (host->drv_data->setup_bus) {
-+		struct device_node *slot_np;
-+		slot_np = dw_mci_of_find_slot_node(host->dev, slot->id);
-+		ret = host->drv_data->setup_bus(host, slot_np, bus_width);
-+		if (ret)
-+			goto err_setup_bus;
++	for (idx = 0; idx < ARRAY_SIZE(exynos_compat); idx++) {
++		if (of_device_is_compatible(host->dev->of_node,
++					exynos_compat[idx].compatible))
++			priv->ctrl_type = exynos_compat[idx].ctrl_type;
 +	}
 +
- 	switch (bus_width) {
- 	case 8:
- 		mmc->caps |= MMC_CAP_8_BIT_DATA;
-@@ -1927,6 +1953,10 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	queue_work(host->card_workqueue, &host->card_work);
- 
- 	return 0;
++	host->priv = priv;
++	return 0;
++}
 +
-+err_setup_bus:
-+	mmc_free_host(mmc);
-+	return -EINVAL;
- }
- 
- static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
-@@ -2021,7 +2051,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 	struct dw_mci_board *pdata;
- 	struct device *dev = host->dev;
- 	struct device_node *np = dev->of_node;
--	int idx;
-+	int idx, ret;
- 
- 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
- 	if (!pdata) {
-@@ -2048,6 +2078,12 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 
- 	of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
- 
-+	if (host->drv_data->parse_dt) {
-+		ret = host->drv_data->parse_dt(host);
-+		if (ret)
-+			return ERR_PTR(ret);
-+	}
++static int dw_mci_exynos_setup_clock(struct dw_mci *host)
++{
++	struct dw_mci_exynos_priv_data *priv = host->priv;
 +
- 	return pdata;
- }
- 
-@@ -2095,6 +2131,15 @@ int dw_mci_probe(struct dw_mci *host)
- 	else
- 		host->bus_hz = clk_get_rate(host->ciu_clk);
- 
-+	if (host->drv_data->setup_clock) {
-+		ret = host->drv_data->setup_clock(host);
++	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5250)
++		host->bus_hz /= (priv->ciu_div + 1);
++	else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4412)
++		host->bus_hz /= EXYNOS4412_FIXED_CIU_CLK_DIV;
++	else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4210)
++		host->bus_hz /= EXYNOS4210_FIXED_CIU_CLK_DIV;
++
++	return 0;
++}
++
++static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
++{
++	/*
++	 * Exynos4412 and Exynos5250 extends the use of CMD register with the
++	 * use of bit 29 (which is reserved on standard MSHC controllers) for
++	 * optionally bypassing the HOLD register for command and data. The
++	 * HOLD register should be bypassed in case there is no phase shift
++	 * applied on CMD/DATA that is sent to the card.
++	 */
++	if (SDMMC_CLKSEL_GET_DRV_WD3(mci_readl(host, CLKSEL)))
++		*cmdr |= SDMMC_CMD_USE_HOLD_REG;
++}
++
++static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
++{
++	struct dw_mci_exynos_priv_data *priv = host->priv;
++
++	if (ios->timing == MMC_TIMING_UHS_DDR50)
++		mci_writel(host, CLKSEL, priv->ddr_timing);
++	else
++		mci_writel(host, CLKSEL, priv->sdr_timing);
++}
++
++static int dw_mci_exynos_parse_dt(struct dw_mci *host)
++{
++	struct dw_mci_exynos_priv_data *priv = host->priv;
++	struct device_node *np = host->dev->of_node;
++	u32 timing[3];
++	u32 div = 0;
++	int ret;
++
++	of_property_read_u32(np, "samsung,dw-mshc-ciu-div", &div);
++	priv->ciu_div = div;
++
++	ret = of_property_read_u32_array(np,
++			"samsung,dw-mshc-sdr-timing", timing, 2);
++	if (ret)
++		return ret;
++
++	priv->sdr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
++
++	ret = of_property_read_u32_array(np,
++			"samsung,dw-mshc-ddr-timing", timing, 2);
++	if (ret)
++		return ret;
++
++	priv->ddr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
++	return 0;
++}
++
++static int dw_mci_exynos_setup_bus(struct dw_mci *host,
++				struct device_node *slot_np, u8 bus_width)
++{
++	int idx, gpio, ret;
++
++	if (!slot_np)
++		return -EINVAL;
++
++	/* cmd + clock + bus-width pins */
++	for (idx = 0; idx < NUM_PINS(bus_width); idx++) {
++		gpio = of_get_gpio(slot_np, idx);
++		if (!gpio_is_valid(gpio)) {
++			dev_err(host->dev, "invalid gpio: %d\n", gpio);
++			return -EINVAL;
++		}
++
++		ret = devm_gpio_request(host->dev, gpio, "dw-mci-bus");
 +		if (ret) {
-+			dev_err(host->dev,
-+				"implementation specific clock setup failed\n");
-+			return ret;
++			dev_err(host->dev, "gpio [%d] request failed\n", gpio);
++			return -EBUSY;
 +		}
 +	}
 +
- 	if (!host->bus_hz) {
- 		dev_err(host->dev,
- 			"Platform data must supply bus speed\n");
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 15c27e1..53b8fd9 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -182,4 +182,28 @@ extern int dw_mci_suspend(struct dw_mci *host);
- extern int dw_mci_resume(struct dw_mci *host);
- #endif
- 
-+/**
-+ * dw_mci driver data - dw-mshc implementation specific driver data.
-+ * @caps: mmc subsystem specified capabilities of the controller(s).
-+ * @init: early implementation specific initialization.
-+ * @setup_clock: implementation specific clock configuration.
-+ * @prepare_command: handle CMD register extensions.
-+ * @set_ios: handle bus specific extensions.
-+ * @parse_dt: parse implementation specific device tree properties.
-+ * @setup_bus: initialize io-interface
-+ *
-+ * Provide controller implementation specific extensions. The usage of this
-+ * data structure is fully optional and usage of each member in this structure
-+ * is optional as well.
-+ */
-+struct dw_mci_drv_data {
-+	unsigned long	*caps;
-+	int		(*init)(struct dw_mci *host);
-+	int		(*setup_clock)(struct dw_mci *host);
-+	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
-+	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
-+	int		(*parse_dt)(struct dw_mci *host);
-+	int		(*setup_bus)(struct dw_mci *host,
-+				struct device_node *slot_np, u8 bus_width);
++	gpio = of_get_named_gpio(slot_np, "wp-gpios", 0);
++	if (gpio_is_valid(gpio)) {
++		if (devm_gpio_request(host->dev, gpio, "dw-mci-wp"))
++			dev_info(host->dev, "gpio [%d] request failed\n",
++						gpio);
++	} else {
++		dev_info(host->dev, "wp gpio not available");
++		host->pdata->quirks |= DW_MCI_QUIRK_NO_WRITE_PROTECT;
++	}
++
++	if (host->pdata->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
++		return 0;
++
++	gpio = of_get_named_gpio(slot_np, "samsung,cd-pinmux-gpio", 0);
++	if (gpio_is_valid(gpio)) {
++		if (devm_gpio_request(host->dev, gpio, "dw-mci-cd"))
++			dev_err(host->dev, "gpio [%d] request failed\n", gpio);
++	} else {
++		dev_info(host->dev, "cd gpio not available");
++	}
++
++	return 0;
++}
++
++/* Exynos5250 controller specific capabilities */
++static unsigned long exynos5250_dwmmc_caps[4] = {
++	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
++		MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
++	MMC_CAP_CMD23,
++	MMC_CAP_CMD23,
++	MMC_CAP_CMD23,
 +};
- #endif /* _DW_MMC_H_ */
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index b72e4aa..6cb043e 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -78,6 +78,8 @@ struct mmc_data;
-  * @data_offset: Set the offset of DATA register according to VERID.
-  * @dev: Device associated with the MMC controller.
-  * @pdata: Platform data associated with the MMC controller.
-+ * @drv_data: Driver specific data for identified variant of the controller
-+ * @priv: Implementation defined private data.
-  * @biu_clk: Pointer to bus interface unit clock instance.
-  * @ciu_clk: Pointer to card interface unit clock instance.
-  * @slot: Slots sharing this MMC controller.
-@@ -160,6 +162,8 @@ struct dw_mci {
- 	u16			data_offset;
- 	struct device		*dev;
- 	struct dw_mci_board	*pdata;
-+	struct dw_mci_drv_data	*drv_data;
-+	void			*priv;
- 	struct clk		*biu_clk;
- 	struct clk		*ciu_clk;
- 	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
++
++static struct dw_mci_drv_data exynos5250_drv_data = {
++	.caps			= exynos5250_dwmmc_caps,
++	.init			= dw_mci_exynos_priv_init,
++	.setup_clock		= dw_mci_exynos_setup_clock,
++	.prepare_command	= dw_mci_exynos_prepare_command,
++	.set_ios		= dw_mci_exynos_set_ios,
++	.parse_dt		= dw_mci_exynos_parse_dt,
++	.setup_bus		= dw_mci_exynos_setup_bus,
++};
++
++static const struct of_device_id dw_mci_exynos_match[] = {
++	{ .compatible = "samsung,exynos5250-dw-mshc",
++			.data = (void *)&exynos5250_drv_data, },
++	{},
++};
++MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
++
++int dw_mci_exynos_probe(struct platform_device *pdev)
++{
++	struct dw_mci_drv_data *drv_data;
++	const struct of_device_id *match;
++
++	match = of_match_node(dw_mci_exynos_match, pdev->dev.of_node);
++	drv_data = match->data;
++	return dw_mci_pltfm_register(pdev, drv_data);
++}
++
++static struct platform_driver dw_mci_exynos_pltfm_driver = {
++	.probe		= dw_mci_exynos_probe,
++	.remove		= __exit_p(dw_mci_pltfm_remove),
++	.driver		= {
++		.name		= "dwmmc_exynos",
++		.of_match_table	= of_match_ptr(dw_mci_exynos_match),
++		.pm		= &dw_mci_pltfm_pmops,
++	},
++};
++
++module_platform_driver(dw_mci_exynos_pltfm_driver);
++
++MODULE_DESCRIPTION("Samsung Specific DW-MSHC Driver Extension");
++MODULE_AUTHOR("Thomas Abraham <thomas.ab@samsung.com");
++MODULE_LICENSE("GPL v2");
++MODULE_ALIAS("platform:dwmmc-exynos");
 -- 
 1.6.6.rc2
+
