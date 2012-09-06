@@ -1,90 +1,61 @@
-From: Kevin Liu <kliu5@marvell.com>
-Subject: [PATCH 2/2] mmc: sdhci: add asynchronous interrupt support
-Date: Thu,  6 Sep 2012 18:07:36 +0800
-Message-ID: <1346926056-7668-2-git-send-email-kliu5@marvell.com>
-References: <1346926056-7668-1-git-send-email-kliu5@marvell.com>
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: Re: [PATCH] mmc: mxcmmc: fix bug that may block a data transfer
+ forever.
+Date: Thu, 6 Sep 2012 12:32:32 +0200
+Message-ID: <20120906103232.GS26594@pengutronix.de>
+References: <1346917248-6685-1-git-send-email-javier.martin@vista-silicon.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog122.obsmtp.com ([74.125.149.147]:52755 "EHLO
-	na3sys009aog122.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754428Ab2IFKRS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Sep 2012 06:17:18 -0400
-In-Reply-To: <1346926056-7668-1-git-send-email-kliu5@marvell.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:56100 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756461Ab2IFKci (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Sep 2012 06:32:38 -0400
+Content-Disposition: inline
+In-Reply-To: <1346917248-6685-1-git-send-email-javier.martin@vista-silicon.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org, drzeus@drzeus.cx
-Cc: prakity@marvell.com, cxie4@marvell.com, hzhuang1@marvell.com, Kevin Liu <kliu5@marvell.com>
+To: Javier Martin <javier.martin@vista-silicon.com>
+Cc: linux-mmc@vger.kernel.org, viresh.linux@gmail.com, g.liakhovetski@gmx.de, vinod.koul@linux.intel.com, cjb@laptop.org, fabio.estevam@freescale.com, gcembed@gmail.com
 
-If host support asynchronous interrupt and sdio device has enabled it,
-then enable/disable asynchronous interrupt on host when enable/disable
-sdio irq.
+On Thu, Sep 06, 2012 at 09:40:48AM +0200, Javier Martin wrote:
+> The problem can be easily reproduced using a script that loops
+> copying a file in an SD card to another place in the same SD card
+> and its related to read transfers. This only happens with DMA enabled.
+> 
+> This is related to the fact that, when reading, an MMC irq signals
+> the fact that all data from the SD card has been copied to the
+> internal buffers. However, it doesn't signal whether the DMA transfer
+> that is in charge of moving data from these internal buffers to RAM
+> has finished or not. Thus, calling dmaengine_terminate_all() in the
+> MMC irq routine can cancel an ongoing DMA transfer leaving some data
+> in the internal buffers that produces an accumulative effect which,
+> in the end, blocks a read data transfer forever.
 
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
----
- drivers/mmc/host/sdhci.c |   16 ++++++++++++++++
- drivers/mmc/host/sdhci.h |    2 ++
- 2 files changed, 18 insertions(+), 0 deletions(-)
+Doesn't that mean that in case of a DMA read we just have to wait for
+the DMA callback instead of the MMC irq? Something like:
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index d98b199..834be2f 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1567,6 +1567,8 @@ static int sdhci_get_ro(struct mmc_host *mmc)
- 
- static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
- {
-+	u16 ctrl;
-+
- 	if (host->flags & SDHCI_DEVICE_DEAD)
- 		goto out;
- 
-@@ -1575,6 +1577,16 @@ static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
- 	else
- 		host->flags &= ~SDHCI_SDIO_IRQ_ENABLED;
- 
-+	if ((host->mmc->caps2 & MMC_CAP2_ASYNC_INT) &&
-+		(host->mmc->card->cccr.async_int)) {
-+		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+		if (enable)
-+			ctrl |= SDHCI_CTRL_ASYNC_INT_ENABLE;
-+		else
-+			ctrl &= ~SDHCI_CTRL_ASYNC_INT_ENABLE;
-+		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-+	}
-+
- 	/* SDIO IRQ will be enabled as appropriate in runtime resume */
- 	if (host->runtime_suspended)
- 		goto out;
-@@ -2887,6 +2899,10 @@ int sdhci_add_host(struct sdhci_host *host)
- 	else
- 		mmc->power_notify_type = MMC_HOST_PW_NOTIFY_NONE;
- 
-+	/* Does the host support async int? */
-+	if (caps[0] & SDHCI_CAN_ASYNC_INT)
-+		mmc->caps2 |= MMC_CAP2_ASYNC_INT;
-+
- 	/* Initial value for re-tuning timer count */
- 	host->tuning_count = (caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
- 			      SDHCI_RETUNING_TIMER_COUNT_SHIFT;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 97653ea..2e89dac 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -167,6 +167,7 @@
- #define   SDHCI_CTRL_DRV_TYPE_D		0x0030
- #define  SDHCI_CTRL_EXEC_TUNING		0x0040
- #define  SDHCI_CTRL_TUNED_CLK		0x0080
-+#define  SDHCI_CTRL_ASYNC_INT_ENABLE	0x4000
- #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
- 
- #define SDHCI_CAPABILITIES	0x40
-@@ -187,6 +188,7 @@
- #define  SDHCI_CAN_VDD_300	0x02000000
- #define  SDHCI_CAN_VDD_180	0x04000000
- #define  SDHCI_CAN_64BIT	0x10000000
-+#define  SDHCI_CAN_ASYNC_INT	0x20000000
- 
- #define  SDHCI_SUPPORT_SDR50	0x00000001
- #define  SDHCI_SUPPORT_SDR104	0x00000002
+static int mxcmci_start_cmd(struct mxcmci_host *host, struct mmc_command *cmd,
+		unsigned int cmdat)
+{
+	...
+
+	if (mxcmci_use_dma(host)) {
+		if (host->dma_dir == DMA_FROM_DEVICE)
+			setup_dma_callback();
+		else
+			int_cntr |= INT_WRITE_OP_DONE_EN;
+	}
+
+	...
+}
+
+That would be a cleaner solution I think.
+
+Sascha
+
 -- 
-1.7.0.4
-
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
