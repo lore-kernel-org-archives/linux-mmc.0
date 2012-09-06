@@ -1,30 +1,91 @@
-From: "DR.NED OKOH" <infomail@ok.net>
-Subject: REPLY NEEDED
-Date: Wed, 05 Sep 2012 10:10:31 -0700
-Message-ID: <SERVERm0fwYdka0fIQT00004992__47329.9535493881$1346866032$gmane$org@offline.co.il>
-Reply-To: mail.info187@ok.net
+From: Chris Ball <cjb@laptop.org>
+Subject: [GIT PULL] MMC fixes for 3.6-rc5
+Date: Wed, 05 Sep 2012 21:56:06 -0400
+Message-ID: <87k3w7gbih.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; CHARSET=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mxout11.netvision.net.il ([194.90.6.39]:42783 "EHLO
-	mxout11.netvision.net.il" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754083Ab2IER0Q (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Sep 2012 13:26:16 -0400
+Received: from void.printf.net ([89.145.121.20]:46840 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752875Ab2IFB4R (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 5 Sep 2012 21:56:17 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: torvalds@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Good day my dear,
-I am writing to acknowledged you that this is the second time we are notifying you about your payment worth of US$16.5m USD,with foreign Remittance payment department office which is due to be released into your Account As we begin the first fiscal payment of the year 2012.Please send the information below as needed for your fund release to you OK.
+Hi Linus,
 
-1)Your Full Name__________________________ _____________
-2)Your Address_______________________ ______________________________
-3)Your Age___________________________ _______________________
-4)Your Direct Telephone Number________________________ ________________
-5)Fax Number________________________ _________________
-6)Occupation____________________ __________________________
+Please pull from:
 
-We sincerely apologies for our late contact with you, We are committed to serve you better OK and you have been advice to get back to me immediately for more details OK.
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-fixes-for-3.6-rc5
 
-Yours in service
-Dr.Ned Okoh
+to receive MMC fixes for 3.6-rc5.  There are no merge conflicts, and the
+patches have been tested in linux-next.  Thanks.
+
+
+The following changes since commit 0d7614f09c1ebdbaa1599a5aba7593f147bf96ee:
+
+  Linux 3.6-rc1 (2012-08-02 16:38:10 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-fixes-for-3.6-rc5
+
+for you to fetch changes up to 75b53aee2f4fe6375c6007226bf68d75b5c4a929:
+
+  mmc: omap: fix broken PIO mode (2012-09-04 13:58:11 -0400)
+
+----------------------------------------------------------------
+MMC fixes for 3.6-rc5:
+ - a firmware bug on several Samsung MoviNAND eMMC models causes
+   permanent corruption on the device when secure erase and secure trim
+   requests are made, so we disable those requests on these eMMC devices.
+ - atmel-mci: fix a hang with some SD cards by waiting for not-busy flag.
+ - dw_mmc: low-power mode breaks SDIO interrupts; fix PIO error handling;
+   fix handling of error interrupts.
+ - mxs-mmc: fix deadlocks; fix compile error due to dma.h arch change.
+ - omap: fix broken PIO mode causing memory corruption.
+ - sdhci-esdhc: fix card detection.
+
+----------------------------------------------------------------
+Doug Anderson (1):
+      mmc: dw_mmc: Disable low power mode if SDIO interrupts are used
+
+Ian Chen (1):
+      mmc: card: Skip secure erase on MoviNAND; causes unrecoverable corruption.
+
+Lauri Hintsala (2):
+      mmc: mxs-mmc: fix deadlock in SDIO IRQ case
+      mmc: mxs-mmc: fix deadlock caused by recursion loop
+
+Ludovic Desroches (1):
+      mmc: atmel-mci: not busy flag has also to be used for read operations
+
+Paul Walmsley (1):
+      mmc: omap: fix broken PIO mode
+
+Seungwon Jeon (3):
+      mmc: dw_mmc: amend using error interrupt status
+      mmc: dw_mmc: correct mishandling error interrupt
+      mmc: dw_mmc: fix error handling in PIO mode
+
+Shawn Guo (1):
+      mmc: sdhci-esdhc: break out early if clock is 0
+
+Sonic Zhang (1):
+      mmc: bfin_sdh: fix dma_desc_array build error
+
+ drivers/mmc/card/block.c       | 26 ++++++++++++-
+ drivers/mmc/host/atmel-mci.c   |  6 ++-
+ drivers/mmc/host/bfin_sdh.c    |  7 ----
+ drivers/mmc/host/dw_mmc.c      | 85 +++++++++++++++++++++++-------------------
+ drivers/mmc/host/mxs-mmc.c     | 14 +++----
+ drivers/mmc/host/omap.c        | 14 +++++--
+ drivers/mmc/host/sdhci-esdhc.h |  6 +--
+ include/linux/mmc/card.h       |  1 +
+ 8 files changed, 98 insertions(+), 61 deletions(-)
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
