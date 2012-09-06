@@ -1,61 +1,74 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: [PATCH] mmc: mxcmmc: fix bug that may block a data transfer
- forever.
-Date: Thu, 6 Sep 2012 12:32:32 +0200
-Message-ID: <20120906103232.GS26594@pengutronix.de>
-References: <1346917248-6685-1-git-send-email-javier.martin@vista-silicon.com>
+From: Daniel Mack <zonque@gmail.com>
+Subject: Re: [PATCH v3 0/3] DaVinci DMA engine conversion
+Date: Thu, 06 Sep 2012 15:25:21 +0200
+Message-ID: <5048A441.3010109@gmail.com>
+References: <1345684176-21472-1-git-send-email-mporter@ti.com> <503B933F.2030803@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:56100 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756461Ab2IFKci (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Sep 2012 06:32:38 -0400
-Content-Disposition: inline
-In-Reply-To: <1346917248-6685-1-git-send-email-javier.martin@vista-silicon.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:49609 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752518Ab2IFNZa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Sep 2012 09:25:30 -0400
+In-Reply-To: <503B933F.2030803@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Javier Martin <javier.martin@vista-silicon.com>
-Cc: linux-mmc@vger.kernel.org, viresh.linux@gmail.com, g.liakhovetski@gmx.de, vinod.koul@linux.intel.com, cjb@laptop.org, fabio.estevam@freescale.com, gcembed@gmail.com
+To: Matt Porter <mporter@ti.com>
+Cc: vinod.koul@intel.com, cjb@laptop.org, grant.likely@secretlab.ca, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Sekhar Nori <nsekhar@ti.com>
 
-On Thu, Sep 06, 2012 at 09:40:48AM +0200, Javier Martin wrote:
-> The problem can be easily reproduced using a script that loops
-> copying a file in an SD card to another place in the same SD card
-> and its related to read transfers. This only happens with DMA enabled.
+Hi Matt,
+
+On 27.08.2012 17:33, Daniel Mack wrote:
+> On 23.08.2012 03:09, Matt Porter wrote:
+>> This series begins the conversion of the DaVinci private EDMA API
+>> implementation to a DMA engine driver and converts two of the three
+>> in-kernel users of the private EDMA API to DMA engine.
+>>
+>> The approach taken is similar to the recent OMAP DMA Engine
+>> conversion. The EDMA DMA Engine driver is a wrapper around the existing
+>> private EDMA implementation and registers the platform device within
+>> the driver.  This allows the conversion series to stand alone with just
+>> the drivers and no changes to platform code. It also allows peripheral
+>> drivers to continue to use the private EDMA implementation until they
+>> are converted.
+>>
+>> The EDMA DMA Engine driver supports slave transfers only at this time. It
+>> is planned to add cyclic transfers in support of audio peripherals.
+>>
+>> There are three users of the private EDMA API in the kernel now:
+>> davinci_mmc, spi-davinci, and davinci-mcasp.  This series provides DMA
+>> Engine conversions for the davinci_mmc and spi-davinci drivers which
+>> use the supported slave transfers.
+>>
+>> This series has been tested on an AM18x EVM and Hawkboard with
+>> driver performance comparable to that of the private EDMA API
+>> implementations. Both MMC0 and MMC1 are tested which handles the
+>> DA850/OMAP-L138/AM18x specific case where MMC1 uses DMA channels on
+>> a second EDMA channel controller.  All other platforms have a simpler
+>> design with just a single EDMA channel controller.
+>>
+>> For those wanting to easily test this series, I've pushed a branch for
+>> each version to my github tree at https://github.com/ohporter/linux. The
+>> current branch is edma-dmaengine-v3.
+>>
+>> After this series, the current plan is to complete the mcasp driver
+>> conversion which includes adding cyclic dma support. This will then
+>> enable the removal and refactoring of the private EDMA API functionality
+>> into the EDMA DMA Engine driver.  Since EDMA is also used on the AM33xx
+>> family of parts in mach-omap2/, the plan is to enable this driver on
+>> that platform as well.
 > 
-> This is related to the fact that, when reading, an MMC irq signals
-> the fact that all data from the SD card has been copied to the
-> internal buffers. However, it doesn't signal whether the DMA transfer
-> that is in charge of moving data from these internal buffers to RAM
-> has finished or not. Thus, calling dmaengine_terminate_all() in the
-> MMC irq routine can cancel an ongoing DMA transfer leaving some data
-> in the internal buffers that produces an accumulative effect which,
-> in the end, blocks a read data transfer forever.
+> Once you have a patch for the McASP driver conversion, I can happily
+> test this on a AM33xx board, together with Gururaja's latest McASP
+> refactoring series. Let me know how I can help you here.
 
-Doesn't that mean that in case of a DMA read we just have to wait for
-the DMA callback instead of the MMC irq? Something like:
+Did you find some time yet to continue on this side? I don't want to
+appear pushy, but as I need to finish some DT transition on a
+AM33xx-based board, I would much like to help out here, in case I can do
+anything to help speed things along.
 
-static int mxcmci_start_cmd(struct mxcmci_host *host, struct mmc_command *cmd,
-		unsigned int cmdat)
-{
-	...
 
-	if (mxcmci_use_dma(host)) {
-		if (host->dma_dir == DMA_FROM_DEVICE)
-			setup_dma_callback();
-		else
-			int_cntr |= INT_WRITE_OP_DONE_EN;
-	}
+Many thanks for your work!
 
-	...
-}
-
-That would be a cleaner solution I think.
-
-Sascha
-
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+Daniel
