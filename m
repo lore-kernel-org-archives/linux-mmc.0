@@ -1,91 +1,281 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [GIT PULL] MMC fixes for 3.6-rc5
-Date: Wed, 05 Sep 2012 21:56:06 -0400
-Message-ID: <87k3w7gbih.fsf@octavius.laptop.org>
+From: merez@codeaurora.org
+Subject: Re: [PATCH v2 1/1] mmc: block: Add write packing control
+Date: Wed, 5 Sep 2012 22:17:39 -0700 (PDT)
+Message-ID: <3fc0d675156e4a79e97acd1e89ac9748.squirrel@www.codeaurora.org>
+References: <34e29d774773a7dfa3e1b57232249b68.squirrel@www.codeaurora.org>
+    <CANfBPZ9NZAdK4tEDJ8wiNKNjRUuqaLKk3qqVZVgod8vwYVuOYw@mail.gmail.com>
+    <f35f04238ad2e00e976d5f99b4b29648.squirrel@www.codeaurora.org>
+    <CANfBPZ9Pbsp4OXh-kCveiAm-ing8i4k5WZvAzrdi8G4d8tCDdA@mail.gmail.com>
+    <a2a7a94c38abadb36b23c964ad8e9ace.squirrel@www.codeaurora.org>
+    <CANfBPZ9p-1M9hDmG4KUq_ky6+Z+7FMwVA=gz1kc7j0bUSz_EzQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:46840 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752875Ab2IFB4R (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 5 Sep 2012 21:56:17 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CANfBPZ9p-1M9hDmG4KUq_ky6+Z+7FMwVA=gz1kc7j0bUSz_EzQ@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: "S, Venkatraman" <svenkatr@ti.com>
+Cc: merez@codeaurora.org, Chris Ball <cjb@laptop.org>, Muthu Kumar <muthu.lkml@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: torvalds@linux-foundation.org
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi Linus,
+Hi Venkat,
 
-Please pull from:
+Sorry for the late response. I came back from a long vacation and had many
+issues to take care of.
+If you still need a rebased version of the packed commands patches, I can
+send a rebased version of the write packing control patch once Seungwon
+Jeon will send the rebased version of the packing patches.
+Please let us know if you ran into conflicts and it is required.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-fixes-for-3.6-rc5
+Thanks,
+Maya
+On Tue, August 28, 2012 10:40 am, S, Venkatraman wrote:
+> On Mon, Aug 27, 2012 at 11:58 PM,  <merez@codeaurora.org> wrote:
+>>
+>> On Fri, July 27, 2012 2:07 am, S, Venkatraman wrote:
+>>> On Fri, Jul 27, 2012 at 12:24 AM,  <merez@codeaurora.org> wrote:
+>>>>
+>>>> On Thu, July 26, 2012 8:28 am, S, Venkatraman wrote:
+>>>>> On Tue, Jul 24, 2012 at 2:14 PM,  <merez@codeaurora.org> wrote:
+>>>>>> On Mon, July 23, 2012 5:22 am, S, Venkatraman wrote:
+>>>>>>> On Mon, Jul 23, 2012 at 5:13 PM,  <merez@codeaurora.org> wrote:
+>>>>>>>> On Wed, July 18, 2012 12:26 am, Chris Ball wrote:
+>>>>>>>>> Hi,  [removing Jens and the documentation list, since now we're
+>>>>>> talking about the MMC side only]
+>>>>>>>>> On Wed, Jul 18 2012, merez@codeaurora.org wrote:
+>>>>>>>>>> Is there anything else that holds this patch from being pushed
+>>>>>>>>>> to
+>>>>>>>> mmc-next?
+>>>>>>>>> Yes, I'm still uncomfortable with the write packing patchsets for
+>>>>>>>>> a
+>>>>>>>> couple of reasons, and I suspect that the sum of those reasons
+>>>>>>>> means
+>>>>>>>> that
+>>>>>>>> we should probably plan on holding off merging it until after 3.6.
+>>>>>>>>> Here are the open issues; please correct any misunderstandings:
+>>>>>>>>> With
+>>>>>> Seungwon's patchset ("Support packed write command"):
+>>>>>>>>> * I still don't have a good set of representative benchmarks
+>>>>>>>>> showing
+>>>>>>>>>   what kind of performance changes come with this patchset.  It
+>>>>>>>>> seems
+>>>>>>>> like we've had a small amount of testing on one controller/eMMC
+>>>>>>>> part
+>>>>>>>> combo
+>>>>>>>> from Seungwon, and an entirely different test from Maya, and the
+>>>>>> results
+>>>>>>>> aren't documented fully anywhere to the level of describing what
+>>>>>>>> the
+>>>>>> hardware was, what the test was, and what the results were before
+>>>>>> and
+>>>>>> after the patchset.
+>>>>>>>> Currently, there is only one card vendor that supports packed
+>>>>>>>> commands.
+>>>>>> Following are our sequential write (LMDD) test results on 2 of our
+>>>>>> targets
+>>>>>>>> (in MB/s):
+>>>>>>>>                        No packing        packing
+>>>>>>>> Target 1 (SDR 50MHz)     15               25
+>>>>>>>> Target 2 (DDR 50MHz)     20               30
+>>>>>>>>> With the reads-during-writes regression:
+>>>>>>>>> * Venkat still has open questions about the nature of the read
+>>>>>>>>>   regression, and thinks we should understand it with blktrace
+>>>>>>>>> before
+>>>>>>>> trying to fix it.  Maya has a theory about writes overwhelming
+>>>>>>>> reads,
+>>>>>>>> but
+>>>>>>>> Venkat doesn't understand why this would explain the observed
+>>>>>>>> bandwidth drop.
+>>>>>>>> The degradation of read due to writes is not a new behavior and
+>>>>>>>> exists
+>>>>>> also without the write packing feature (which only increases the
+>>>>>> degradation). Our investigation of this phenomenon led us to the
+>>>>>> Conclusion that a new scheduling policy should be used for mobile
+>>>>>> devices,
+>>>>>>>> but this is not related to the current discussion of the write
+>>>>>>>> packing
+>>>>>> feature.
+>>>>>>>> The write packing feature increases the degradation of read due to
+>>>>>> write
+>>>>>>>> since it allows the MMC to fetch many write requests in a row,
+>>>>>>>> instead
+>>>>>>>> of
+>>>>>>>> fetching only one at a time.  Therefore some of the read requests
+>>>>>>>> will
+>>>>>> have to wait for the completion of more write requests before they
+>>>>>> can
+>>>>>> be
+>>>>>>>> issued.
+>>>>>>>
+>>>>>>> I am a bit puzzled by this claim. One thing I checked carefully
+>>>>>>> when
+>>>>>> reviewing write packing patches from SJeon was that the code didn't
+>>>>>> plough through a mixed list of reads and writes and selected only
+>>>>>> writes.
+>>>>>>> This section of the code in "mmc_blk_prep_packed_list()", from v8
+>>>>>> patchset..
+>>>>>>> <Quote>
+>>>>>>> +               if (rq_data_dir(cur) != rq_data_dir(next)) {
+>>>>>>> +                       put_back = 1;
+>>>>>>> +                       break;
+>>>>>>> +               }
+>>>>>>> </Quote>
+>>>>>>>
+>>>>>>> means that once a read is encountered in the middle of write
+>>>>>>> packing,
+>>>>>> the packing is stopped at that point and it is executed. Then the
+>>>>>> next
+>>>>>> blk_fetch_request should get the next read and continue as before.
+>>>>>>>
+>>>>>>> IOW, the ordering of reads and writes is _not_ altered when using
+>>>>>>> packed
+>>>>>> commands.
+>>>>>>> For example if there were 5 write requests, followed by 1 read,
+>>>>>>> followed by 5 more write requests in the request_queue, the first 5
+>>>>>> writes will be executed as one "packed command", then the read will
+>>>>>> be
+>>>>>> executed, and then the remaining 5 writes will be executed as one
+>>>>>> "packed command". So the read does not have to wait any more than it
+>>>>>> waited before (packing feature)
+>>>>>>
+>>>>>> Let me try to better explain with your example.
+>>>>>> Without packing the MMC layer will fetch 2 write requests and wait
+>>>>>> for
+>>>>>> the
+>>>>>> first write request completion before fetching another write
+>>>>>> request.
+>>>>>> During this time the read request could be inserted into the CFQ and
+>>>>>> since
+>>>>>> it has higher priority than the async write it will be dispatched in
+>>>>>> the
+>>>>>> next fetch. So, the result would be 2 write requests followed by one
+>>>>>> read
+>>>>>> request and the read would have to wait for completion of only 2
+>>>>>> write
+>>>>>> requests.
+>>>>>> With packing, all the 5 write requests will be fetched in a row, and
+>>>>>> then
+>>>>>> the read will arrive and be dispatched in the next fetch. Then the
+>>>>>> read
+>>>>>> will have to wait for the completion of 5 write requests.
+>>>>>>
+>>>>>> Few more clarifications:
+>>>>>> Due to the plug list mechanism in the block layer the applications
+>>>>>> can
+>>>>>> "aggregate" several requests to be inserted into the scheduler
+>>>>>> before
+>>>>>> waking the MMC queue thread.
+>>>>>> This leads to a situation where there are several write requests in
+>>>>>> the
+>>>>>> CFQ queue when MMC starts to do the fetches.
+>>>>>>
+>>>>>> If the read was inserted while we are building the packed command
+>>>>>> then
+>>>>>> I
+>>>>>> agree that we should have seen less effect on the read performance.
+>>>>>> However, the write packing statistics show that in most of the cases
+>>>>>> the
+>>>>>> packing stopped due to an empty queue, meaning that the read was
+>>>>>> inserted
+>>>>>> to the CFQ after all the pending write requests were fetched and
+>>>>>> packed.
+>>>>>>
+>>>>>> Following is an example for write packing statistics of a READ/WRITE
+>>>>>> parallel scenario:
+>>>>>> write packing statistics:
+>>>>>> Packed 1 reqs - 448 times
+>>>>>> Packed 2 reqs - 38 times
+>>>>>> Packed 3 reqs - 23 times
+>>>>>> Packed 4 reqs - 30 times
+>>>>>> Packed 5 reqs - 14 times
+>>>>>> Packed 6 reqs - 8 times
+>>>>>> Packed 7 reqs - 4 times
+>>>>>> Packed 8 reqs - 1 times
+>>>>>> Packed 10 reqs - 1 times
+>>>>>> Packed 34 reqs - 1 times
+>>>>>> stopped packing due to the following reasons:
+>>>>>> 2 times: wrong data direction (meaning a READ was fetched and
+>>>>>> stopped
+>>>>>> the
+>>>>>> packing)
+>>>>>> 1 times: flush or discard
+>>>>>> 565 times: empty queue (meaning blk_fetch_request returned NULL)
+>>>>>>
+>>>>>>>
+>>>>>>> And I requested blktrace to confirm that this is indeed the
+>>>>>>> behaviour.
+>>>>>>
+>>>>>> The trace logs show that in case of no packing, there are maximum of
+>>>>>> 3-4
+>>>>>> requests issued before a read request, while with packing there are
+>>>>>> also
+>>>>>> cases of 6 and 7 requests dispatched before a read request.
+>>>>>>
+>>>>>> I'm waiting for an approval for sharing the block trace logs.
+>>>>>> Since this is a simple test to run you can collect the trace logs
+>>>>>> and
+>>>>>> let
+>>>>>> us know if you reach other conclusions.
+>>>>>>
+>>>>> Thanks for the brief. I don't have the eMMC4.5 device with me yet, so
+>>>>> I can't reproduce the result.
+>>>>
+>>>> I sent the trace logs of both packing and non packing. Please let me
+>>>> know
+>>>> if you have additional questions after reviewing them.
+>>>>
+>>>> The problem you describe is most likely
+>>>>> applicable
+>>>>> to any block device driver with a large queue depth ( any queue depth
+>>>>> >1).
+>>>>> I'll check to see what knobs in block affect the result.
+>>>>> Speaking of it, what is the host controller you use to test this ?
+>>>>
+>>>> The controller I use is msm_sdcc.
+>>>>
+>>>>> I was wondering if host->max_seg_size is taken into account while
+>>>>> packed
+>>>>> command
+>>>>> is in use. If not, shouldn't it be ?  - it could act as a better
+>>>>> throttle for "packing density".
+>>>>
+>>>> The max segments (which is calculated from host->max_seg_size) is
+>>>> taking
+>>>> into account when preparing the packed list (so that the whole packed
+>>>> won't exceed the max number of segments).
+>>>> I'm not sure I understand how host->max_seg_size can be used as a
+>>>> throttle
+>>>> for "packing density". Can you please explain?
+>>>>
+>>> Ok - I overlooked that max_segments is indeed used to limit the number
+>>> of requests
+>>> that are packed.(And this corresponds to max_seg_size, which is what I
+>>> intended)
+>>> I should be getting my MMC4.5 test gear in a couple of days - I'll run
+>>> it through
+>>> on some hosts and can either provide more feedback or Ack this patch.
+>>> Regards,
+>>> Venkat.
+>>
+>> Hi Venkat,
+>>
+>> Do you have additional questions/comments?
+>>
+> None. I am just running some stress tests on BKOPS patches right now
+> and after tomorrow I'll start testing packed command. Will all the
+> patches apply on top of current mmc-next ? If not, it would be great
+> if
+> you can send an updated version.
+>
+> Thanks,
+> Venkat.
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-to receive MMC fixes for 3.6-rc5.  There are no merge conflicts, and the
-patches have been tested in linux-next.  Thanks.
-
-
-The following changes since commit 0d7614f09c1ebdbaa1599a5aba7593f147bf96ee:
-
-  Linux 3.6-rc1 (2012-08-02 16:38:10 -0700)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-fixes-for-3.6-rc5
-
-for you to fetch changes up to 75b53aee2f4fe6375c6007226bf68d75b5c4a929:
-
-  mmc: omap: fix broken PIO mode (2012-09-04 13:58:11 -0400)
-
-----------------------------------------------------------------
-MMC fixes for 3.6-rc5:
- - a firmware bug on several Samsung MoviNAND eMMC models causes
-   permanent corruption on the device when secure erase and secure trim
-   requests are made, so we disable those requests on these eMMC devices.
- - atmel-mci: fix a hang with some SD cards by waiting for not-busy flag.
- - dw_mmc: low-power mode breaks SDIO interrupts; fix PIO error handling;
-   fix handling of error interrupts.
- - mxs-mmc: fix deadlocks; fix compile error due to dma.h arch change.
- - omap: fix broken PIO mode causing memory corruption.
- - sdhci-esdhc: fix card detection.
-
-----------------------------------------------------------------
-Doug Anderson (1):
-      mmc: dw_mmc: Disable low power mode if SDIO interrupts are used
-
-Ian Chen (1):
-      mmc: card: Skip secure erase on MoviNAND; causes unrecoverable corruption.
-
-Lauri Hintsala (2):
-      mmc: mxs-mmc: fix deadlock in SDIO IRQ case
-      mmc: mxs-mmc: fix deadlock caused by recursion loop
-
-Ludovic Desroches (1):
-      mmc: atmel-mci: not busy flag has also to be used for read operations
-
-Paul Walmsley (1):
-      mmc: omap: fix broken PIO mode
-
-Seungwon Jeon (3):
-      mmc: dw_mmc: amend using error interrupt status
-      mmc: dw_mmc: correct mishandling error interrupt
-      mmc: dw_mmc: fix error handling in PIO mode
-
-Shawn Guo (1):
-      mmc: sdhci-esdhc: break out early if clock is 0
-
-Sonic Zhang (1):
-      mmc: bfin_sdh: fix dma_desc_array build error
-
- drivers/mmc/card/block.c       | 26 ++++++++++++-
- drivers/mmc/host/atmel-mci.c   |  6 ++-
- drivers/mmc/host/bfin_sdh.c    |  7 ----
- drivers/mmc/host/dw_mmc.c      | 85 +++++++++++++++++++++++-------------------
- drivers/mmc/host/mxs-mmc.c     | 14 +++----
- drivers/mmc/host/omap.c        | 14 +++++--
- drivers/mmc/host/sdhci-esdhc.h |  6 +--
- include/linux/mmc/card.h       |  1 +
- 8 files changed, 98 insertions(+), 61 deletions(-)
 
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
+of Code Aurora Forum, hosted by The Linux Foundation
