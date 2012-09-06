@@ -1,74 +1,42 @@
-From: Daniel Mack <zonque@gmail.com>
-Subject: Re: [PATCH v3 0/3] DaVinci DMA engine conversion
-Date: Thu, 06 Sep 2012 15:25:21 +0200
-Message-ID: <5048A441.3010109@gmail.com>
-References: <1345684176-21472-1-git-send-email-mporter@ti.com> <503B933F.2030803@gmail.com>
+From: "MR.TAN WONG" <subaru04@m6.gyao.ne.jp>
+Subject: (unknown)
+Date: Thu, 06 Sep 2012 21:23:36 +0900
+Message-ID: <20120906122336.00006812.0125__40492.4009614207$1346944855$gmane$org@m6.gyao.ne.jp>
+Reply-To: <tan.wong222@yahoo.com.hk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: Text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:49609 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752518Ab2IFNZa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Sep 2012 09:25:30 -0400
-In-Reply-To: <503B933F.2030803@gmail.com>
+Received: from ms-fb03.so-net.ne.jp ([202.238.84.143]:30779 "EHLO
+	ms-fb03.so-net.ne.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752895Ab2IFPUn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Sep 2012 11:20:43 -0400
+Subject: 
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Porter <mporter@ti.com>
-Cc: vinod.koul@intel.com, cjb@laptop.org, grant.likely@secretlab.ca, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Sekhar Nori <nsekhar@ti.com>
+To: info.rowanc@yahoo.com.ph
 
-Hi Matt,
+DQpGUk9NOk1SLlRBTiBXT05HDQoNCih0YW4ud29uZzIyMkB5YWhvby5jb20uaGspTGV0IG1lIHN0
+YXJ0IGJ5IGludHJvZHVjaW5nIG15c2VsZi4gSSBhbSBNci4gVGFuIFdvbmcgZGlyZWN0b3Igb2Yg
+b3BlcmF0aW9ucyBvZiB0aGUgSGFuZyBTZW5nIEJhbmsgTHRkLiBJIGhhdmUgYW4gb2JzY3VyZWQg
+YnVzaW5lc3Mgc3VnZ2VzdGlvbiBmb3IgeW91LiBUaGF0IHdpbGwgYmUgYSBncmVhdCBiZW5lZml0
+IGZvciB5b3UgYW5kIG1lLiBJdCBpbnZvbHZlIHRoZSB0cmFuc2ZlciBvZiBUd2VudHkgRm91ciBt
+aWxsaW9ucyBGaXZlIEh1bmRyZWQgVGhvdXNhbmQgVW5pdGVkIFN0YXRlIERvbGxhcigkMjQsNTAw
+LDAwMCwwMCkgZGVwb3NpdCBpbiBteSBiYW5rIFNvLCBUd2VudHkgRm91ciBtaWxsaW9ucyBGaXZl
+IEh1bmRyZWQgVGhvdXNhbmQgVW5pdGVkIFN0YXRlIERvbGxhcigkMjQsNTAwLDAwMCwwMCkgaXMg
+c3RpbGwgbHlpbmcgaW4gbXkgYmFuayBhbmQgbm8gb25lIHdpbGwgZXZlciBjb21lIGZvcndhcmQg
+dG8gY2xhaW0gaXQuIFdoYXQgYm90aGVycyBtZSBtb3N0IGlzIHRoYXQgYWNjb3JkaW5nIHRvIHRo
+ZSBsYXdzIG9mIG15IGNvdW50cnkgYXQgdGhlIGV4cGlyYXRpb24gOHllYXJzIHRoZSBmdW5kcyB3
+aWxsIHJldmVydCB0byB0aGUgb3duZXJzaGlwIG9mIHRoZSBIb25nIEtvbmcgR292ZXJubWVudCBp
+ZiBub2JvZHkgYXBwbGllcyB0byBjbGFpbSB0aGUgZnVuZHMuIEFnYWluc3QgdGhpcyBiYWNrZHJv
+cCwgbXkgc3VnZ2VzdGlvbiB0byB5b3UgaXMgdGhhdCBJIHdpbGwgbGlrZSB5b3UgYXMgYSBmb3Jl
+aWduZXIgdG8gc3RhbmQgYXMgdGhlIG5leHQgb2Yga2luIHRvIE1ham9yIEZhZGkgQmFzZW0gc28g
+dGhhdCB5b3Ugd2lsbCBiZSBhYmxlIHRvIHJlY2VpdmUgaGlzIGZ1bmRzLlRyYW5zZmVyLiBTaG91
+bGQgeW91IGJlIGludGVyZXN0ZWQgcGxlYXNlIHNlbmQgbWUgeW91ciBmdWxsIG5hbWVzIGFuZCBj
+dXJyZW50IHJlc2lkZW50aWFsIGFkZHJlc3MgYW5kIEkgd2lsbCBwcmVmZXIgeW91IHRvIHJlYWNo
+IG1lIG9uIHRoaXMgZW1haWwgYWRkcmVzcyAodGFuLndvbmcyMjJAeWFob28uY29tLmhrKSB3aGlj
+aCBpcyBteSBwcml2YXRlIGVtYWlsIGFkZHJlc3MgYW5kIGZpbmFsbHkgYWZ0ZXIgdGhhdCBJIHNo
+YWxsIHByb3ZpZGUgeW91IHdpdGggbW9yZSBkZXRhaWxzIG9mIHRoaXMgb3BlcmF0aW9uLllvdXIg
+ZWFybGllc3QgcmVzcG9uc2UgdG8gdGhpcyBsZXR0ZXIgd2lsbCBiZSBhcHByZWNpYXRlZC4gS2lu
+ZCBSZWdhcmRzLCBNci5UYW4gV29uZy4NCg==
 
-On 27.08.2012 17:33, Daniel Mack wrote:
-> On 23.08.2012 03:09, Matt Porter wrote:
->> This series begins the conversion of the DaVinci private EDMA API
->> implementation to a DMA engine driver and converts two of the three
->> in-kernel users of the private EDMA API to DMA engine.
->>
->> The approach taken is similar to the recent OMAP DMA Engine
->> conversion. The EDMA DMA Engine driver is a wrapper around the existing
->> private EDMA implementation and registers the platform device within
->> the driver.  This allows the conversion series to stand alone with just
->> the drivers and no changes to platform code. It also allows peripheral
->> drivers to continue to use the private EDMA implementation until they
->> are converted.
->>
->> The EDMA DMA Engine driver supports slave transfers only at this time. It
->> is planned to add cyclic transfers in support of audio peripherals.
->>
->> There are three users of the private EDMA API in the kernel now:
->> davinci_mmc, spi-davinci, and davinci-mcasp.  This series provides DMA
->> Engine conversions for the davinci_mmc and spi-davinci drivers which
->> use the supported slave transfers.
->>
->> This series has been tested on an AM18x EVM and Hawkboard with
->> driver performance comparable to that of the private EDMA API
->> implementations. Both MMC0 and MMC1 are tested which handles the
->> DA850/OMAP-L138/AM18x specific case where MMC1 uses DMA channels on
->> a second EDMA channel controller.  All other platforms have a simpler
->> design with just a single EDMA channel controller.
->>
->> For those wanting to easily test this series, I've pushed a branch for
->> each version to my github tree at https://github.com/ohporter/linux. The
->> current branch is edma-dmaengine-v3.
->>
->> After this series, the current plan is to complete the mcasp driver
->> conversion which includes adding cyclic dma support. This will then
->> enable the removal and refactoring of the private EDMA API functionality
->> into the EDMA DMA Engine driver.  Since EDMA is also used on the AM33xx
->> family of parts in mach-omap2/, the plan is to enable this driver on
->> that platform as well.
-> 
-> Once you have a patch for the McASP driver conversion, I can happily
-> test this on a AM33xx board, together with Gururaja's latest McASP
-> refactoring series. Let me know how I can help you here.
-
-Did you find some time yet to continue on this side? I don't want to
-appear pushy, but as I need to finish some DT transition on a
-AM33xx-based board, I would much like to help out here, in case I can do
-anything to help speed things along.
-
-
-Many thanks for your work!
-
-Daniel
