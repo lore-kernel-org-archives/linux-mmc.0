@@ -1,204 +1,127 @@
-From: Javier Martin <javier.martin@vista-silicon.com>
-Subject: [PATCH] mmc: mxcmmc: fix bug that may block a data transfer forever.
-Date: Thu,  6 Sep 2012 09:40:48 +0200
-Message-ID: <1346917248-6685-1-git-send-email-javier.martin@vista-silicon.com>
+From: Kevin Liu <kliu5@marvell.com>
+Subject: [PATCH 1/2] mmc: sdio: add asynchronous interrupt support on device
+Date: Thu,  6 Sep 2012 18:07:35 +0800
+Message-ID: <1346926056-7668-1-git-send-email-kliu5@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f170.google.com ([209.85.212.170]:42309 "EHLO
-	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754308Ab2IFHlN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Sep 2012 03:41:13 -0400
-Received: by wibhq12 with SMTP id hq12so5128350wib.1
-        for <linux-mmc@vger.kernel.org>; Thu, 06 Sep 2012 00:41:11 -0700 (PDT)
+Received: from na3sys009aog122.obsmtp.com ([74.125.149.147]:55163 "EHLO
+	na3sys009aog122.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754428Ab2IFKRP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Sep 2012 06:17:15 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: viresh.linux@gmail.com, g.liakhovetski@gmx.de, vinod.koul@linux.intel.com, s.hauer@pengutronix.de, cjb@laptop.org, fabio.estevam@freescale.com, gcembed@gmail.com, Javier Martin <javier.martin@vista-silicon.com>
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, drzeus@drzeus.cx
+Cc: prakity@marvell.com, cxie4@marvell.com, hzhuang1@marvell.com, Kevin Liu <kliu5@marvell.com>
 
-The problem can be easily reproduced using a script that loops
-copying a file in an SD card to another place in the same SD card
-and its related to read transfers. This only happens with DMA enabled.
+Enable asynchronous interrupt on device by default if both host
+and device support it and clock gating is allowed.
 
-This is related to the fact that, when reading, an MMC irq signals
-the fact that all data from the SD card has been copied to the
-internal buffers. However, it doesn't signal whether the DMA transfer
-that is in charge of moving data from these internal buffers to RAM
-has finished or not. Thus, calling dmaengine_terminate_all() in the
-MMC irq routine can cancel an ongoing DMA transfer leaving some data
-in the internal buffers that produces an accumulative effect which,
-in the end, blocks a read data transfer forever.
+If asynchronous interrupt is enabled, then no need to switch bus
+width to 1bit before suspend.
 
-The following patch watches DMA and MMC irqs and makes sure both have
-arrived before marking any transfer as finished. The 'dangerous' usage
-of dmaengine_terminate_all() is removed and a timeout of 2 seconds
-is added so that the MMC won't block forever anymore.
-
-Signed-off-by: Javier Martin <javier.martin@vista-silicon.com>
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
 ---
- drivers/mmc/host/mxcmmc.c |   97 ++++++++++++++++++++++++++++++++++++++++++---
- 1 file changed, 92 insertions(+), 5 deletions(-)
+ drivers/mmc/core/sdio.c  |   22 +++++++++++++++++++---
+ include/linux/mmc/card.h |    3 ++-
+ include/linux/mmc/host.h |    1 +
+ include/linux/mmc/sdio.h |    5 +++++
+ 4 files changed, 27 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index 28ed52d..4907d40 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -150,6 +150,11 @@ struct mxcmci_host {
- 	int			dmareq;
- 	struct dma_slave_config dma_slave_config;
- 	struct imx_dma_data	dma_data;
-+
-+	bool			dmairq;
-+	bool			mmcirq;
-+	struct timer_list	watchdog;
-+	spinlock_t		irqlock;
- };
- 
- static void mxcmci_set_clk_rate(struct mxcmci_host *host, unsigned int clk_ios);
-@@ -213,6 +218,28 @@ static void mxcmci_softreset(struct mxcmci_host *host)
- 	writew(0xff, host->base + MMC_REG_RES_TO);
- }
- static int mxcmci_setup_dma(struct mmc_host *mmc);
-+static void mxcmci_data_done(struct mxcmci_host *host, unsigned int stat);
-+
-+static void mxcmci_dma_irq_callback(void *param)
-+{
-+	struct mxcmci_host *host = param;
-+	u32 stat = readl(host->base + MMC_REG_STATUS);
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->irqlock, flags);
-+
-+	host->dmairq = true;
-+	if (host->mmcirq) {
-+		del_timer(&host->watchdog);
-+		host->mmcirq = false;
-+		host->dmairq = false;
-+		mxcmci_data_done(host, stat);
-+	}
-+
-+	spin_unlock_irqrestore(&host->irqlock, flags);
-+
-+	dev_dbg(mmc_dev(host->mmc), "%s: 0x%08x\n", __func__, stat);
-+}
- 
- static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
- {
-@@ -268,9 +295,13 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 909c835..0e6634f 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -199,6 +199,21 @@ static int sdio_read_cccr(struct mmc_card *card, u32 ocr)
+ 		}
  	}
- 	wmb();
  
-+	host->desc->callback = mxcmci_dma_irq_callback;
-+	host->desc->callback_param = host;
- 	dmaengine_submit(host->desc);
- 	dma_async_issue_pending(host->dma);
- 
-+	mod_timer(&host->watchdog, jiffies + msecs_to_jiffies(2000));
-+
++	if (cccr_vsn >= SDIO_CCCR_REV_3_00) {
++		if (!(card->quirks & MMC_QUIRK_BROKEN_CLK_GATING) &&
++			(card->host->caps2 & MMC_CAP2_ASYNC_INT)) {
++			if (mmc_io_rw_direct(card, 0, 0,
++				SDIO_CCCR_INT_EXT, 0, &data))
++				goto out;
++			if (data & SDIO_INT_SAI) {
++				data |= SDIO_INT_EAI;
++				if (mmc_io_rw_direct(card, 1, 0,
++					SDIO_CCCR_INT_EXT, data, NULL))
++					goto out;
++				card->cccr.async_int = 1;
++			}
++		}
++	}
+ out:
+ 	return ret;
+ }
+@@ -290,7 +305,6 @@ static int sdio_disable_wide(struct mmc_card *card)
  	return 0;
  }
  
-@@ -345,11 +376,9 @@ static int mxcmci_finish_data(struct mxcmci_host *host, unsigned int stat)
- 	struct mmc_data *data = host->data;
- 	int data_error;
+-
+ static int sdio_enable_4bit_bus(struct mmc_card *card)
+ {
+ 	int err;
+@@ -917,7 +931,8 @@ static int mmc_sdio_suspend(struct mmc_host *host)
+ 		}
+ 	}
  
--	if (mxcmci_use_dma(host)) {
--		dmaengine_terminate_all(host->dma);
-+	if (mxcmci_use_dma(host))
- 		dma_unmap_sg(host->dma->device->dev, data->sg, data->sg_len,
- 				host->dma_dir);
--	}
- 
- 	if (stat & STATUS_ERR_MASK) {
- 		dev_dbg(mmc_dev(host->mmc), "request failed. status: 0x%08x\n",
-@@ -624,8 +653,18 @@ static irqreturn_t mxcmci_irq(int irq, void *devid)
- 		mxcmci_cmd_done(host, stat);
- 
- 	if (mxcmci_use_dma(host) &&
--		  (stat & (STATUS_DATA_TRANS_DONE | STATUS_WRITE_OP_DONE)))
--		mxcmci_data_done(host, stat);
-+		  (stat & (STATUS_DATA_TRANS_DONE | STATUS_WRITE_OP_DONE))) {
-+		spin_lock_irqsave(&host->irqlock, flags);
-+		host->mmcirq = true;
-+		if (host->dmairq) {
-+			del_timer(&host->watchdog);
-+			host->mmcirq = false;
-+			host->dmairq = false;
-+			mxcmci_data_done(host, stat);
-+		}
-+		spin_unlock_irqrestore(&host->irqlock, flags);
-+
-+	}
- 
- 	if (host->default_irq_mask &&
- 		  (stat & (STATUS_CARD_INSERTION | STATUS_CARD_REMOVAL)))
-@@ -844,6 +883,48 @@ static const struct mmc_host_ops mxcmci_ops = {
- 	.init_card		= mxcmci_init_card,
+-	if (!err && mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
++	if (!err && mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)
++		&& !host->card->cccr.async_int) {
+ 		mmc_claim_host(host);
+ 		sdio_disable_wide(host->card);
+ 		mmc_release_host(host);
+@@ -940,7 +955,8 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 	if (mmc_card_is_removable(host) || !mmc_card_keep_power(host))
+ 		err = mmc_sdio_init_card(host, host->ocr, host->card,
+ 					mmc_card_keep_power(host));
+-	else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
++	else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)
++		&& !host->card->cccr.async_int) {
+ 		/* We may have switched to 1-bit mode during suspend */
+ 		err = sdio_enable_4bit_bus(host->card);
+ 		if (err > 0) {
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 4b27f9f..80a8213 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -165,7 +165,8 @@ struct sdio_cccr {
+ 				wide_bus:1,
+ 				high_power:1,
+ 				high_speed:1,
+-				disable_cd:1;
++				disable_cd:1,
++				async_int:1;
  };
  
-+static void mxcmci_watchdog(unsigned long data)
-+{
-+	struct mmc_host *mmc = (struct mmc_host *)data;
-+	struct mxcmci_host *host = mmc_priv(mmc);
-+	struct mmc_request *req = host->req;
-+	unsigned int stat = readl(host->base + MMC_REG_STATUS);
-+	unsigned long flags;
-+
-+	dev_err(mmc_dev(host->mmc), "%s: mmc status = 0x%08x\n", __func__, stat);
-+
-+	spin_lock_irqsave(&host->irqlock, flags);
-+	/* Protect agains spurius triggers */
-+	if (host->dmairq && host->mmcirq) {
-+		dev_err(mmc_dev(host->mmc), "%s: spurius timeout\n", __func__);
-+		host->mmcirq = false;
-+		host->dmairq = false;
-+		return;
-+	}
-+
-+	if (!host->dmairq) {
-+		dev_err(mmc_dev(host->mmc), "%s: irq from DMA didn't arrive\n", __func__);
-+		dmaengine_terminate_all(host->dma);
-+	}
-+	if (!host->mmcirq) {
-+		dev_err(mmc_dev(host->mmc), "%s: irq from MMC didn't arrive\n", __func__);
-+		mxcmci_softreset(host);
-+	}
-+
-+	host->mmcirq = false;
-+	host->dmairq = false;
-+	spin_unlock_irqrestore(&host->irqlock, flags);
-+
-+	/* Mark transfer as erroneus and inform the upper layers */
-+	host->data->error = -ETIMEDOUT;
-+
-+	host->req = NULL;
-+	host->cmd = NULL;
-+	host->data = NULL;
-+
-+	mmc_request_done(host->mmc, req);
-+}
-+
- static int mxcmci_probe(struct platform_device *pdev)
- {
- 	struct mmc_host *mmc;
-@@ -889,6 +970,7 @@ static int mxcmci_probe(struct platform_device *pdev)
- 	host->mmc = mmc;
- 	host->pdata = pdev->dev.platform_data;
- 	spin_lock_init(&host->lock);
-+	spin_lock_init(&host->irqlock);
+ struct sdio_cis {
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index d5d9bd4..78fd877 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -257,6 +257,7 @@ struct mmc_host {
+ #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
+ #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
+ #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
++#define MMC_CAP2_ASYNC_INT	(1 << 12)	/* Asynchronous interrupt support */
  
- 	mxcmci_init_ocr(host);
- 
-@@ -968,6 +1050,11 @@ static int mxcmci_probe(struct platform_device *pdev)
- 
- 	mmc_add_host(mmc);
- 
-+	/* DMA watchdog */
-+	init_timer(&host->watchdog);
-+	host->watchdog.function = &mxcmci_watchdog;
-+	host->watchdog.data = (unsigned long)mmc;
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 	unsigned int        power_notify_type;
+diff --git a/include/linux/mmc/sdio.h b/include/linux/mmc/sdio.h
+index 47e579d..abbb6c8 100644
+--- a/include/linux/mmc/sdio.h
++++ b/include/linux/mmc/sdio.h
+@@ -161,6 +161,11 @@
+ #define  SDIO_DTSx_SET_TYPE_A	(1 << SDIO_DRIVE_DTSx_SHIFT)
+ #define  SDIO_DTSx_SET_TYPE_C	(2 << SDIO_DRIVE_DTSx_SHIFT)
+ #define  SDIO_DTSx_SET_TYPE_D	(3 << SDIO_DRIVE_DTSx_SHIFT)
 +
- 	return 0;
- 
- out_free_irq:
++#define SDIO_CCCR_INT_EXT	0x16
++#define SDIO_INT_SAI		0x01
++#define SDIO_INT_EAI		0x02
++
+ /*
+  * Function Basic Registers (FBR)
+  */
 -- 
-1.7.9.5
+1.7.0.4
 
