@@ -1,42 +1,54 @@
-From: "MR.TAN WONG" <subaru04@m6.gyao.ne.jp>
-Subject: (unknown)
-Date: Thu, 06 Sep 2012 21:23:36 +0900
-Message-ID: <20120906122336.00006812.0125__40492.4009614207$1346944855$gmane$org@m6.gyao.ne.jp>
-Reply-To: <tan.wong222@yahoo.com.hk>
+From: "Mr.Tan Wong" <subaru04@m6.gyao.ne.jp>
+Subject: Congratulations: You Have Won.
+Date: Fri, 07 Sep 2012 05:40:44 +0900
+Message-ID: <20120906204044.0000264B.0685__4494.91446274823$1346964417$gmane$org@m6.gyao.ne.jp>
+Reply-To: <mrtanwng71@kimo.com>
 Mime-Version: 1.0
 Content-Type: Text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ms-fb03.so-net.ne.jp ([202.238.84.143]:30779 "EHLO
-	ms-fb03.so-net.ne.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752895Ab2IFPUn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Sep 2012 11:20:43 -0400
-Subject: 
+Received: from ms-gomx12.so-net.ne.jp ([202.238.84.219]:33251 "EHLO
+	ms-gomx12.plus.so-net.ne.jp" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1759858Ab2IFUqY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Sep 2012 16:46:24 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: info.rowanc@yahoo.com.ph
+To: info@winners.com
 
-DQpGUk9NOk1SLlRBTiBXT05HDQoNCih0YW4ud29uZzIyMkB5YWhvby5jb20uaGspTGV0IG1lIHN0
-YXJ0IGJ5IGludHJvZHVjaW5nIG15c2VsZi4gSSBhbSBNci4gVGFuIFdvbmcgZGlyZWN0b3Igb2Yg
-b3BlcmF0aW9ucyBvZiB0aGUgSGFuZyBTZW5nIEJhbmsgTHRkLiBJIGhhdmUgYW4gb2JzY3VyZWQg
-YnVzaW5lc3Mgc3VnZ2VzdGlvbiBmb3IgeW91LiBUaGF0IHdpbGwgYmUgYSBncmVhdCBiZW5lZml0
-IGZvciB5b3UgYW5kIG1lLiBJdCBpbnZvbHZlIHRoZSB0cmFuc2ZlciBvZiBUd2VudHkgRm91ciBt
-aWxsaW9ucyBGaXZlIEh1bmRyZWQgVGhvdXNhbmQgVW5pdGVkIFN0YXRlIERvbGxhcigkMjQsNTAw
-LDAwMCwwMCkgZGVwb3NpdCBpbiBteSBiYW5rIFNvLCBUd2VudHkgRm91ciBtaWxsaW9ucyBGaXZl
-IEh1bmRyZWQgVGhvdXNhbmQgVW5pdGVkIFN0YXRlIERvbGxhcigkMjQsNTAwLDAwMCwwMCkgaXMg
-c3RpbGwgbHlpbmcgaW4gbXkgYmFuayBhbmQgbm8gb25lIHdpbGwgZXZlciBjb21lIGZvcndhcmQg
-dG8gY2xhaW0gaXQuIFdoYXQgYm90aGVycyBtZSBtb3N0IGlzIHRoYXQgYWNjb3JkaW5nIHRvIHRo
-ZSBsYXdzIG9mIG15IGNvdW50cnkgYXQgdGhlIGV4cGlyYXRpb24gOHllYXJzIHRoZSBmdW5kcyB3
-aWxsIHJldmVydCB0byB0aGUgb3duZXJzaGlwIG9mIHRoZSBIb25nIEtvbmcgR292ZXJubWVudCBp
-ZiBub2JvZHkgYXBwbGllcyB0byBjbGFpbSB0aGUgZnVuZHMuIEFnYWluc3QgdGhpcyBiYWNrZHJv
-cCwgbXkgc3VnZ2VzdGlvbiB0byB5b3UgaXMgdGhhdCBJIHdpbGwgbGlrZSB5b3UgYXMgYSBmb3Jl
-aWduZXIgdG8gc3RhbmQgYXMgdGhlIG5leHQgb2Yga2luIHRvIE1ham9yIEZhZGkgQmFzZW0gc28g
-dGhhdCB5b3Ugd2lsbCBiZSBhYmxlIHRvIHJlY2VpdmUgaGlzIGZ1bmRzLlRyYW5zZmVyLiBTaG91
-bGQgeW91IGJlIGludGVyZXN0ZWQgcGxlYXNlIHNlbmQgbWUgeW91ciBmdWxsIG5hbWVzIGFuZCBj
-dXJyZW50IHJlc2lkZW50aWFsIGFkZHJlc3MgYW5kIEkgd2lsbCBwcmVmZXIgeW91IHRvIHJlYWNo
-IG1lIG9uIHRoaXMgZW1haWwgYWRkcmVzcyAodGFuLndvbmcyMjJAeWFob28uY29tLmhrKSB3aGlj
-aCBpcyBteSBwcml2YXRlIGVtYWlsIGFkZHJlc3MgYW5kIGZpbmFsbHkgYWZ0ZXIgdGhhdCBJIHNo
-YWxsIHByb3ZpZGUgeW91IHdpdGggbW9yZSBkZXRhaWxzIG9mIHRoaXMgb3BlcmF0aW9uLllvdXIg
-ZWFybGllc3QgcmVzcG9uc2UgdG8gdGhpcyBsZXR0ZXIgd2lsbCBiZSBhcHByZWNpYXRlZC4gS2lu
-ZCBSZWdhcmRzLCBNci5UYW4gV29uZy4NCg==
+Congratulations: You Have Won
+
+The MICROSOFT EMAIL PROMO TEAM is glad to announce that
+after a successful completion of the PROMO DRAWS held
+on the 1st September 2012 your e-mail address,attached
+to winning numbers: (11) (80) (12)(96) (09) (43) won in
+the Tenth lottery category.
+
+You have therefore been approved to claim a total sum
+of? 450,000,00 Pounds Sterling in cash credited to REF
+NO:MICRO-L/2009-END10.
+
+All participants were selected through our Microsoft
+computer ballot system drawn from 167,000 Names, as
+part of our International "E-MAIL" Promotion Program
+for our prominent MS-WORD users all over the world and
+for the continuous use of the Internet. You are advised
+to contact the claims-processor with the details below
+via his e-mail address :
+
+NAME:  Mr. Harris Conklin
+EMAIL: mrharrisconklin1@yahoo.com.hk
+
+PLEASE NOTE YOU ARE TO SEND THE FOLLOWING INFORMATION
+TO CLAIM YOUR PRIZE:
+
+1.Full Name:.......
+2.Address:.......
+3.Phone:.......
+4.Country:.......
+5.Sex/Gender:.......
+
+
+YOURS SINCERELY,
+Mr. Harris Conklin.
+
 
