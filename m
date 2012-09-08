@@ -1,54 +1,74 @@
-From: Kevin Hilman <khilman@deeprootsystems.com>
-Subject: Re: [PATCHv2 1/2] mmc: omap_hsmmc: convert from IP timer to hrtimer
-Date: Fri, 07 Sep 2012 14:59:03 -0700
-Message-ID: <877gs5jxzs.fsf@deeprootsystems.com>
-References: <1346159947-3194-1-git-send-email-svenkatr@ti.com>
+From: Mike Thompson <mpthompson@gmail.com>
+Subject: Re: Tracking down suspend/resume ext3/mmc issues on imx233
+Date: Sat, 8 Sep 2012 09:17:42 -0700
+Message-ID: <CAEOSq-PV+7c2nvu3uauOLJcV7WKa1jmd-df0a1H0qY5K4CM5MA@mail.gmail.com>
+References: <CAEOSq-O3SfuAEhMsjX1y1ZgQuWBKef+XZzMR1b4yJhKhaRdymA@mail.gmail.com>
+	<20120907060552.GL26709@S2101-09.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:37745 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751309Ab2IGV7F (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Sep 2012 17:59:05 -0400
-Received: by pbbrr13 with SMTP id rr13so220824pbb.19
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Sep 2012 14:59:05 -0700 (PDT)
-In-Reply-To: <1346159947-3194-1-git-send-email-svenkatr@ti.com> (Venkatraman
-	S.'s message of "Tue, 28 Aug 2012 18:49:06 +0530")
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:55228 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754080Ab2IHQRo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Sep 2012 12:17:44 -0400
+In-Reply-To: <20120907060552.GL26709@S2101-09.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, balbi@ti.com
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: Linux-Arm-Kernel <linux-arm-kernel@lists.infradead.org>, linux-ext4@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Venkatraman S <svenkatr@ti.com> writes:
+I figured the source of my problem.  Normally, the Linux kernel will
+treat mmc cards as removed during suspend.  This is in case the card
+is swapped by the user during the suspend.  However, on the OLinuXino
+the mmc device is the root file system  If the Linux kernel treats the
+mmc card as removed the frozen tasks with open file handles to the
+root filesystem device (such as the journal tasks) will fail when they
+are thawed during resume.  This is the problem I was seeing.
 
-> omap hsmmc controller IP has a built in timer that can be programmed to
-> guard against unresponsive operations. But its range is very narrow,
-> and the maximum countable time is a few seconds.
+Fortunately, there is already a specific kernel config setting
+CONFIG_MMC_UNSAFE_RESUME that needs to be set for systems such as the
+OLinuXino that uses the mmc device for the root filesystem.  I
+overlooked this config setting and spent half a day trying to figure
+out the source of the file system errors on resume.  Next time I'll do
+a better job of looking through related config settings before trying
+to debug an issue that is probably already dealt with.
+
+Mike
+
+On Thu, Sep 6, 2012 at 11:05 PM, Shawn Guo <shawn.guo@linaro.org> wrote:
+> Copy a few more lists to get wider audience ...
 >
-> Card maintenance operations like BKOPS and MMC_ERASE and long
-> stream writes like packed command require timers of order of
-> several minutes, much beyond the capability of the IP timer.
-> So get rid of using the IP timer entirely and use kernel's hrtimer
-> functionality for guarding the device operations.
-> As part of this change, a workaround that disabled timeouts for
-> MMC_ERASE command is removed, and the arbitary timing of 100ms
-> is used only when the timeout is not explicitly specified by core.
+> Regards,
+> Shawn
 >
-> A trivial change to get rid of unnecessary dealiasing of host->data
-> in omap_hsmmc_do_irq is also included.
->
-> Signed-off-by: Venkatraman S <svenkatr@ti.com>
-
-Dumb question: if the timers needed are on the order of minutes, why do
-you need to use high-resolution timers?  I'm guessing the normal
-kernel-internal timers should suffice here (see <linux/timer.h,
-init_timer().)
-
-Also, if they're on the order of minutes, I assume the actual firing
-doesn't have to be precise, so deferrable timers can probably be used
-(and thus help PM by coalescing wakeup events.) 
-
-If my assumptions are true, it might be worth considering using the
-normal timers, and use init_timer_deferrable().
-
-Kevin
+> On Thu, Sep 06, 2012 at 10:03:35PM -0700, Mike Thompson wrote:
+>> I'm working on adding power management support for the imx233 on
+>> 3.6-rc2.  In general I'm working on porting the pm.c file from the
+>> Freescale 2.6.35 kernel for both "standby" and "mem" suspend/resume.
+>> I'm making pretty good progress on porting the code, but I'm running
+>> into an issue outside the immediate code I'm working on.
+>>
+>> ...
+>>
+>> The first reported error is in the ext3 filesystem buffer code where
+>> the file system buffers aren't being filled by the underlying block
+>> device.  At least that's how I'm interpreting the portion of the ext3
+>> file system code that is failing.  However, the mmc device is
+>> correctly reporting finding p1 and p2 partitions on the device which
+>> it would indicate the partition data is being read from the SD card.
+>>
+>> I'm hoping others might have suggestions on how I should go about
+>> tracking down why the ext3 file system can no longer read from the mmc
+>> device upon resume.  For instance, useful places to put some tracing
+>> code to understand what might be failing, or how to determine what
+>> differences there might be before suspend and after resume that might
+>> point to the failure.
+>>
+>> Thanks,
+>>
+>> Mike Thompson
+>>
+>> _______________________________________________
+>> linux-arm-kernel mailing list
+>> linux-arm-kernel@lists.infradead.org
+>> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
