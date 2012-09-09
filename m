@@ -1,77 +1,82 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH] mmc: sdhci-pxav3: dt: Support "cd-gpios" property
-Date: Sat, 08 Sep 2012 23:09:20 -0400
-Message-ID: <87k3w3zycf.fsf@octavius.laptop.org>
+From: "Yaniv Gardi" <ygardi@codeaurora.org>
+Subject: RE: [PATCH v8 1/2] block: ioctl support for sanitize in eMMC 4.5
+Date: Sun, 9 Sep 2012 15:12:29 +0300
+Message-ID: <002e01cd8e84$639f6470$2ade2d50$@codeaurora.org>
+References: <1343208766-8046-1-git-send-email-ygardi@codeaurora.org> <1343208766-8046-2-git-send-email-ygardi@codeaurora.org> <201207261336.32018.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:53851 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752085Ab2IIDJb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 8 Sep 2012 23:09:31 -0400
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:3480 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751065Ab2IIMMc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Sep 2012 08:12:32 -0400
+In-Reply-To: <201207261336.32018.arnd@arndb.de>
+Content-language: en-us
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Philip Rakity <prakity@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+To: 'Arnd Bergmann' <arnd@arndb.de>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 'open list' <linux-kernel@vger.kernel.org>
 
-Tested on OLPC XO-4/MMP3, where the card detection pin for one of the
-controllers is a sideband GPIO.  The third cell in the power-gpios
-property controls whether the GPIO is active high/active low.
+I didn't quite understand everything that you meant in your mail, however I
+will try to explain briefly:
 
-Signed-off-by: Chris Ball <cjb@laptop.org>
----
- drivers/mmc/host/sdhci-pxav3.c | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+SANITIZE replaces the need to issue REQ_SECURE as part of the REQ_DISCARD
+request. In this way DISCARD request finishes much faster (order of
+magnitude) and thus improves system performance. When the NVM content must
+be erased, the user may use SANITIZE to erase all unmapped sectors. 
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 0bdb326..5427d52 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -211,6 +211,10 @@ static struct sdhci_pxa_platdata *pxav3_get_mmc_pdata(struct device *dev)
- 	if (gpio_flags != OF_GPIO_ACTIVE_LOW)
- 		pdata->host_caps2 |= MMC_CAP2_PWR_ACTIVE_HIGH;
- 
-+	pdata->ext_cd_gpio = of_get_named_gpio_flags(np, "cd-gpios", 0, &gpio_flags);
-+	if (gpio_flags != OF_GPIO_ACTIVE_LOW)
-+		pdata->host_caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
-+
- 	return pdata;
- }
- #else
-@@ -292,6 +296,15 @@ static int __devinit sdhci_pxav3_probe(struct platform_device *pdev)
- 				goto err_power_req;
- 			}
- 		}
-+
-+		if (gpio_is_valid(pdata->ext_cd_gpio)) {
-+			ret = mmc_gpio_request_cd(host->mmc, pdata->ext_cd_gpio);
-+			if (ret) {
-+				dev_err(mmc_dev(host->mmc),
-+					"failed to allocate card detect gpio\n");
-+				goto err_cd_req;
-+			}
-+		}
- 	}
- 
- 	host->ops = &pxav3_sdhci_ops;
-@@ -309,6 +322,8 @@ static int __devinit sdhci_pxav3_probe(struct platform_device *pdev)
- err_add_host:
- 	clk_disable_unprepare(clk);
- 	clk_put(clk);
-+	mmc_gpio_free_cd(host->mmc);
-+err_cd_req:
- 	mmc_gpio_free_pwr(host->mmc);
- err_power_req:
- err_clk_get:
-@@ -331,6 +346,8 @@ static int __devexit sdhci_pxav3_remove(struct platform_device *pdev)
- 
- 	if (gpio_is_valid(pdata->power_gpio))
- 		mmc_gpio_free_pwr(host->mmc);
-+	if (gpio_is_valid(pdata->ext_cd_gpio))
-+		mmc_gpio_free_cd(host->mmc);
- 
- 	sdhci_pltfm_free(pdev);
- 	kfree(pxa);
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+An example of usage is refurbished devices in which the carrier wants to
+erase NVM content (since the user used only DISCARDs), in this case the a
+SANITIZE operation will be triggered in the carrier labs from a dedicated
+application through IOCTL that goes directly to the device. Note that no
+change to the FS is required for such operation.
+
+Hope that answers your comments.
+
+Thanks,
+Yaniv
+
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
+of Code Aurora Forum, hosted by The Linux Foundation
+
+
+= > -----Original Message-----
+= > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+= > owner@vger.kernel.org] On Behalf Of Arnd Bergmann
+= > Sent: Thursday, July 26, 2012 4:37 PM
+= > To: Yaniv Gardi
+= > Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org; open
+= > list
+= > Subject: Re: [PATCH v8 1/2] block: ioctl support for sanitize in eMMC
+4.5
+= > 
+= > On Wednesday 25 July 2012, Yaniv Gardi wrote:
+= > >
+= > > Adding a new ioctl to support sanitize operation in eMMC cards version
+= > > 4.5.
+= > > The sanitize ioctl support helps performing this operation via user
+= > > application.
+= > >
+= > > Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
+= > >
+= > 
+= > Can you explain how you expect this to be called by a file system?
+= > We've debated this in the past and concluded that we probably want to do
+= > it at the same time as batched discard, but I don't see if the sanitize
+= > request should be sent for each FITRIM or whether we should better have
+= > a separate file system level ioctl. My feeling is that it would be more
+useful
+= > to call this feature through a file system level ioctl than through a
+block
+= > level ioctl, but I guess it makes sense to support both.
+= > 
+= > 	Arnd
+= > 
+= > --
+= > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+the
+= > body of a message to majordomo@vger.kernel.org More majordomo info
+= > at  http://vger.kernel.org/majordomo-info.html
+
