@@ -1,82 +1,71 @@
-From: "Yaniv Gardi" <ygardi@codeaurora.org>
-Subject: RE: [PATCH v8 1/2] block: ioctl support for sanitize in eMMC 4.5
-Date: Sun, 9 Sep 2012 15:12:29 +0300
-Message-ID: <002e01cd8e84$639f6470$2ade2d50$@codeaurora.org>
-References: <1343208766-8046-1-git-send-email-ygardi@codeaurora.org> <1343208766-8046-2-git-send-email-ygardi@codeaurora.org> <201207261336.32018.arnd@arndb.de>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH] mmc: slot-gpio: Fix missing assignment to ctx->ro_gpio
+Date: Sun, 9 Sep 2012 23:21:20 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1209092318550.11567@axis700.grange>
+References: <87pq5vzyry.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:3480 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751065Ab2IIMMc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Sep 2012 08:12:32 -0400
-In-Reply-To: <201207261336.32018.arnd@arndb.de>
-Content-language: en-us
+Received: from moutng.kundenserver.de ([212.227.17.10]:52524 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753968Ab2IIVVW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Sep 2012 17:21:22 -0400
+In-Reply-To: <87pq5vzyry.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Arnd Bergmann' <arnd@arndb.de>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 'open list' <linux-kernel@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-I didn't quite understand everything that you meant in your mail, however I
-will try to explain briefly:
+Hi Chris
 
-SANITIZE replaces the need to issue REQ_SECURE as part of the REQ_DISCARD
-request. In this way DISCARD request finishes much faster (order of
-magnitude) and thus improves system performance. When the NVM content must
-be erased, the user may use SANITIZE to erase all unmapped sectors. 
+On Sat, 8 Sep 2012, Chris Ball wrote:
 
-An example of usage is refurbished devices in which the carrier wants to
-erase NVM content (since the user used only DISCARDs), in this case the a
-SANITIZE operation will be triggered in the carrier labs from a dedicated
-application through IOCTL that goes directly to the device. Note that no
-change to the FS is required for such operation.
+> mmc_gpio_request_ro() doesn't store the requested gpio in ctx->ro_gpio.
+> As a result, subsequent calls to mmc_gpio_get_ro() will always fail
+> with -ENOSYS because the gpio number isn't available to that function.
+> 
+> Cc: stable <stable@vger.kernel.org>
+> Signed-off-by: Chris Ball <cjb@laptop.org>
+> ---
+>  drivers/mmc/core/slot-gpio.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+> index 0582429..4f9b366 100644
+> --- a/drivers/mmc/core/slot-gpio.c
+> +++ b/drivers/mmc/core/slot-gpio.c
+> @@ -99,6 +99,7 @@ int mmc_gpio_request_ro(struct mmc_host *host, unsigned int gpio)
+>  		return ret;
+>  
+>  	ctx = host->slot.handler_priv;
+> +	ctx->ro_gpio = gpio;
 
-Hope that answers your comments.
+Huh, I wonder how this got lost. But, please, let's do it a bit 
+differently. If gpio_request_one() fails, ctx->ro_gpio shouldn't contain a 
+valid GPIO number. So, I think, it should be
 
-Thanks,
-Yaniv
++	ret = gpio_request_one(gpio, GPIOF_DIR_IN, ctx->ro_label);
++	if (ret < 0)
++		return ret;
++
++	ctx->ro_gpio = gpio;
++
++	return 0;
 
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
-of Code Aurora Forum, hosted by The Linux Foundation
+Agree?
 
+Thanks
+Guennadi
 
-= > -----Original Message-----
-= > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-= > owner@vger.kernel.org] On Behalf Of Arnd Bergmann
-= > Sent: Thursday, July 26, 2012 4:37 PM
-= > To: Yaniv Gardi
-= > Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org; open
-= > list
-= > Subject: Re: [PATCH v8 1/2] block: ioctl support for sanitize in eMMC
-4.5
-= > 
-= > On Wednesday 25 July 2012, Yaniv Gardi wrote:
-= > >
-= > > Adding a new ioctl to support sanitize operation in eMMC cards version
-= > > 4.5.
-= > > The sanitize ioctl support helps performing this operation via user
-= > > application.
-= > >
-= > > Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
-= > >
-= > 
-= > Can you explain how you expect this to be called by a file system?
-= > We've debated this in the past and concluded that we probably want to do
-= > it at the same time as batched discard, but I don't see if the sanitize
-= > request should be sent for each FITRIM or whether we should better have
-= > a separate file system level ioctl. My feeling is that it would be more
-useful
-= > to call this feature through a file system level ioctl than through a
-block
-= > level ioctl, but I guess it makes sense to support both.
-= > 
-= > 	Arnd
-= > 
-= > --
-= > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-the
-= > body of a message to majordomo@vger.kernel.org More majordomo info
-= > at  http://vger.kernel.org/majordomo-info.html
+>  
+>  	return gpio_request_one(gpio, GPIOF_DIR_IN, ctx->ro_label);
+>  }
+> -- 
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> 
 
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
