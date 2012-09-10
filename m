@@ -1,283 +1,176 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [PATCH v5 1/3] drivers/mfd: Add realtek pcie card reader driver
-Date: Mon, 10 Sep 2012 17:47:32 +0300
-Message-ID: <20120910144732.GK19396@mwanda>
-References: <cover.1347256563.git.wei_wang@realsil.com.cn>
- <3bdd140d1927e579fd3e2d98ecf6332650f36d6f.1347256563.git.wei_wang@realsil.com.cn>
+From: Matt Sealey <matt@genesi-usa.com>
+Subject: Re: [PATCH] mmc: mxs-mmc: implement broken-cd
+Date: Mon, 10 Sep 2012 09:58:52 -0500
+Message-ID: <CAKGA1bm990BXJuZ=sQFgaciJxeP_ytPV2tfm1rHi=s=w7b-OYg@mail.gmail.com>
+References: <1347018317-2222-1-git-send-email-lauri.hintsala@bluegiga.com>
+ <20120910060840.GT26709@S2101-09.ap.freescale.net> <504DBB10.9030702@bluegiga.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rcsinet15.oracle.com ([148.87.113.117]:29571 "EHLO
-	rcsinet15.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752360Ab2IJOsI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Sep 2012 10:48:08 -0400
-Content-Disposition: inline
-In-Reply-To: <3bdd140d1927e579fd3e2d98ecf6332650f36d6f.1347256563.git.wei_wang@realsil.com.cn>
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:54676 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753067Ab2IJO7O (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Sep 2012 10:59:14 -0400
+Received: by qcro28 with SMTP id o28so1064327qcr.19
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Sep 2012 07:59:13 -0700 (PDT)
+In-Reply-To: <504DBB10.9030702@bluegiga.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: wei_wang@realsil.com.cn
-Cc: cjb@laptop.org, sameo@linux.intel.com, arnd@arndb.de, oakad@yahoo.com, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, bp@alien8.de, devel@linuxdriverproject.org
+To: Lauri Hintsala <lauri.hintsala@bluegiga.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, veli-pekka.peltola@bluegiga.com, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+
+I think this describes three use cases which are different, as Shawn
+said we have here;
+
+* missing card detect support (card detect is not wired so it's
+impossible to tell, and the controller doesn't support the SD standard
+card detection)
+* non-removable device
+* broken card detect support
+
+The third one is what the property sounds like it describes, but this
+is not the use case you are describing at all. This kind of property
+naming is more like describing "card detect doesn't operate reliably"
+which is true of i.MX devices with certain versions of the eSDHC and
+uSDHC controllers, where non-GPIO card detection interferes with SDIO
+interrupts, but in this case a board designer should add a real card
+detect pin to the board (most more expensive push-push SD card slots
+come with a pin you can wire for CD). In cases where errata is
+published after boards are shipped, broken-cd is a meaningful
+description when described in the absense of a gpio cd description, or
+presence of some cd-handled-internally style property (forgive me for
+not cross-referencing the FSL definition for this property, we don't
+use it here at Genesi since all our boards have GPIO CD)
+
+It seems your device is a combination of the top two in the list, it
+is not down to a broken feature at all, but one that should be
+possible to not implement for devices which are permanently connected.
+A non-removable device should be able to be powered down, at least
+using runtime PM or clock gating (if this works, remember to whitelist
+the card for clock gating!) but card detect shouldn't be used in this
+case to detect if the card is powered or not (this is a problem for
+your card controller and card driver state tracker. The MMC subsystem
+already tracks this state fairly well for power management).
+
+I would refrain from calling a feature "broken card detect" if there
+is actually no breakage involved especially if it would be more
+prudent instead look into how to figure out how to track power
+management state properly without cluttering the device tree.
+
+-- 
+Matt Sealey <matt@genesi-usa.com>
+Product Development Analyst, Genesi USA, Inc.
 
 
-I just had a couple few style comments is all, nothing that couldn't
-be fixed in a later patch.
-
-On Mon, Sep 10, 2012 at 04:03:29PM +0800, wei_wang@realsil.com.cn wrote:
-> +static int rts5209_extra_init_hw(struct rtsx_pcr *pcr)
-> +{
-> +	return 0;
-> +}
-
-It would be nicer if the caller checked whether this pointer was
-NULL and only called it if it needed to.
-
-> +
-> +static int rts5209_optimize_phy(struct rtsx_pcr *pcr)
-> +{
-> +	int err;
-> +
-> +	err = rtsx_pci_write_phy_register(pcr, 0x00, 0xB966);
-> +	if (err < 0)
-> +		return err;
-> +
-> +	return 0;
-> +}
-
-static int rts5209_optimize_phy(struct rtsx_pcr *pcr)
-{
-	return rtsx_pci_write_phy_register(pcr, 0x00, 0xB966);
-}
-
-> +
-> +static int rts5209_turn_on_led(struct rtsx_pcr *pcr)
-> +{
-> +	int err;
-> +
-> +	err = rtsx_pci_write_register(pcr, 0xFD58, 0x01, 0x00);
-> +	if (err < 0)
-> +		return err;
-> +
-> +	return 0;
-> +}
-
-Same.
-
-> +
-> +static int rts5209_turn_off_led(struct rtsx_pcr *pcr)
-> +{
-> +	int err;
-> +
-> +	err = rtsx_pci_write_register(pcr, 0xFD58, 0x01, 0x01);
-> +	if (err < 0)
-> +		return err;
-> +
-> +	return 0;
-> +}
-> +
-
-Same.
-
-> +static int rts5209_enable_auto_blink(struct rtsx_pcr *pcr)
-> +{
-> +	int err;
-> +
-> +	err = rtsx_pci_write_register(pcr, CARD_AUTO_BLINK, 0xFF, 0x0D);
-> +	if (err < 0)
-> +		return err;
-> +
-> +	return 0;
-> +}
-> +
-
-Same.
-
-> +static int rts5209_disable_auto_blink(struct rtsx_pcr *pcr)
-> +{
-> +	int err;
-> +
-> +	err = rtsx_pci_write_register(pcr, CARD_AUTO_BLINK, 0x08, 0x00);
-> +	if (err < 0)
-> +		return err;
-> +
-> +	return 0;
-> +}
-> +
-
-Same.
-
-[snip ]
-
-> +static int rts5229_extra_init_hw(struct rtsx_pcr *pcr)
-> +{
-> +	int err;
-> +
-> +	rtsx_pci_init_cmd(pcr);
-> +
-> +	/* Switch LDO3318 source from DV33 to card_3v3 */
-> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, 0xFE78, 0x03, 0x00);
-> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, 0xFE78, 0x03, 0x01);
-> +	/* LED shine disabled, set initial shine cycle period */
-> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, 0xFC1E, 0x0F, 0x02);
-> +
-> +	err = rtsx_pci_send_cmd(pcr, 100);
-> +	if (err < 0)
-> +		return err;
-> +
-> +	return 0;
-
-	return rtsx_pci_send_cmd(pcr, 100);
-
-> +}
-> +
-> +static int rts5229_optimize_phy(struct rtsx_pcr *pcr)
-> +{
-> +	int err;
-> +
-> +	/* Optimize RX sensitivity */
-> +	err = rtsx_pci_write_phy_register(pcr, 0x00, 0xBA42);
-> +	if (err < 0)
-> +		return err;
-> +
-> +	return 0;
-> +}
-
-Same.
-
-> +
-> +static int rts5229_turn_on_led(struct rtsx_pcr *pcr)
-> +{
-> +	int err;
-> +
-> +	err = rtsx_pci_write_register(pcr, 0xFC1F, 0x02, 0x02);
-> +	if (err < 0)
-> +		return err;
-> +
-> +	return 0;
-> +}
-> +
-
-Same.
-
-> +static int rts5229_turn_off_led(struct rtsx_pcr *pcr)
-> +{
-> +	int err;
-> +
-> +	err = rtsx_pci_write_register(pcr, 0xFC1F, 0x02, 0x00);
-> +	if (err < 0)
-> +		return err;
-> +
-> +	return 0;
-> +}
-
-Same.
-
-> +
-> +static int rts5229_enable_auto_blink(struct rtsx_pcr *pcr)
-> +{
-> +	int err;
-> +
-> +	err = rtsx_pci_write_register(pcr, 0xFC1E, 0x08, 0x08);
-> +	if (err < 0)
-> +		return err;
-> +
-> +	return 0;
-> +}
-
-Same.
-
-> +
-> +static int rts5229_disable_auto_blink(struct rtsx_pcr *pcr)
-> +{
-> +	int err;
-> +
-> +	err = rtsx_pci_write_register(pcr, 0xFC1E, 0x08, 0x00);
-> +	if (err < 0)
-> +		return err;
-> +
-> +	return 0;
-> +}
-
-Same.
-
-[ snip ].
-
-> +static DEFINE_PCI_DEVICE_TABLE(rtsx_pci_ids) = {
-> +	{ 0x10EC, 0x5209, PCI_ANY_ID, PCI_ANY_ID,
-> +		PCI_CLASS_OTHERS << 16, 0xFF0000 },
-> +	{ 0x10EC, 0x5229, PCI_ANY_ID, PCI_ANY_ID,
-> +		PCI_CLASS_OTHERS << 16, 0xFF0000 },
-
-If you want to fit it all on one line you could do:
-
-	{ PCI_DEVICE(0x10EC, 0x5229), PCI_CLASS_OTHERS << 16, 0xFF0000 },
-
-It's weird that this is the only driver in the kernel which uses
-the PCI_CLASS_OTHERS macro like this.
-
-[ snip ]
-
-> +int rtsx_pci_read_register(struct rtsx_pcr *pcr, u16 addr, u8 *data)
-> +{
-> +	u32 val = 2 << 30;
-> +	int i;
-> +
-> +	val |= (u32)(addr & 0x3FFF) << 16;
-> +	rtsx_pci_writel(pcr, RTSX_HAIMR, val);
-> +
-> +	for (i = 0; i < MAX_RW_REG_CNT; i++) {
-> +		val = rtsx_pci_readl(pcr, RTSX_HAIMR);
-> +		if ((val & (1 << 31)) == 0)
-
-When we set this we do "2 << 30" but when we test it we do
-"1 << 31".  It would be nice to be consistent.
-
-> +int rtsx_pci_read_phy_register(struct rtsx_pcr *pcr, u8 addr, u16 *val)
-> +{
-> +	int err, i, finished = 0;
-> +	u16 data = 0;
-            ^^^^^^^^
-Not needed.
-
-> +	u8 *ptr, tmp;
-> +
-
-[ snip ]
-> +	spin_lock_irqsave(&pcr->lock, flags);
-> +
-> +	if (pcr->trans_result == TRANS_RESULT_FAIL) {
-> +		err = -EINVAL;
-> +		spin_unlock_irqrestore(&pcr->lock, flags);
-> +		goto out;
-> +	} else if (pcr->trans_result == TRANS_NO_DEVICE) {
-> +		err = -ENODEV;
-> +		spin_unlock_irqrestore(&pcr->lock, flags);
-> +		goto out;
-> +	}
-> +
-> +	spin_unlock_irqrestore(&pcr->lock, flags);
-
-
-Could be written like:
-	if (pcr->trans_result == TRANS_RESULT_FAIL)
-		err = -EINVAL;
-	else if (pcr->trans_result == TRANS_NO_DEVICE)
-		err = -ENODEV;
-
-	spin_unlock_irqrestore(&pcr->lock, flags);
-
-> +
-> +out:
-> +	spin_lock_irqsave(&pcr->lock, flags);
-> +	pcr->done = NULL;
-> +	spin_unlock_irqrestore(&pcr->lock, flags);
-> +
-
-[snip]
-
-> +	pcr->slots = kzalloc(sizeof(struct rtsx_slot) * pcr->num_slots,
-> +			GFP_KERNEL);
-
-You could use kcalloc() here.
-
-regards,
-dan carpenter
+On Mon, Sep 10, 2012 at 5:04 AM, Lauri Hintsala
+<lauri.hintsala@bluegiga.com> wrote:
+> Hi Shawn,
+>
+>
+> On 09/10/2012 09:08 AM, Shawn Guo wrote:
+>>
+>> On Fri, Sep 07, 2012 at 02:45:17PM +0300, Lauri Hintsala wrote:
+>>>
+>>> This feature allows to use SDIO bus without wiring card detect
+>>> signal.
+>>
+>>
+>> This looks like a case of "broken-cd" ...
+>>
+>>> This is relevant in cases where SDIO device is connected to
+>>> SDIO bus and there is no way to disconnect device from bus (device
+>>> is always present).
+>>>
+>> ... while this sounds like a case of "non-removable".
+>
+>
+> Right, I'll remove this comment.
+>
+> In our case the SDIO device is always physically connected to SDIO bus but
+> the power of the device can be controller. So in SW point of view the device
+> can be removed by switching the power off.
+>
+>
+>
+>>> Signed-off-by: Lauri Hintsala <lauri.hintsala@bluegiga.com>
+>>> ---
+>>>   drivers/mmc/host/mxs-mmc.c |    7 +++++++
+>>>   1 file changed, 7 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+>>> index ad3fcea..992760e 100644
+>>> --- a/drivers/mmc/host/mxs-mmc.c
+>>> +++ b/drivers/mmc/host/mxs-mmc.c
+>>> @@ -165,6 +165,7 @@ struct mxs_mmc_host {
+>>>         int                             sdio_irq_en;
+>>>         int                             wp_gpio;
+>>>         bool                            wp_inverted;
+>>> +       bool                            broken_cd;
+>>>   };
+>>>
+>>>   static int mxs_mmc_get_ro(struct mmc_host *mmc)
+>>> @@ -187,6 +188,9 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+>>>   {
+>>>         struct mxs_mmc_host *host = mmc_priv(mmc);
+>>>
+>>> +       if (host->broken_cd)
+>>> +               return -ENOSYS;
+>>> +
+>>
+>>
+>> The .get_cd caller does not check for error.  This change makes no
+>> sense to me.
+>
+>
+> In our case we don't want to read card detect bit and we have to continue
+> MMC probing because card detect pin is routed nowhere.
+>
+> Could it be better to return zero instead of error? ENOSYS is used to
+> indicate "unreachable card detect" in other drivers (e.g. atmel-mci,
+> omap_hsmmc) and I followed them.
+>
+>
+>
+>> Instead, the driver needs to set MMC_CAP_NEEDS_POLL in
+>> case of "broken-cd".
+>
+>
+> MMC_CAP_NEEDS_POLL is always set in mxs-mmc.
+>
+>
+> Best regards,
+> Lauri
+>
+>
+>>
+>> Regards,
+>> Shawn
+>>
+>>>         return !(readl(host->base + HW_SSP_STATUS(host)) &
+>>>                  BM_SSP_STATUS_CARD_DETECT);
+>>>   }
+>>> @@ -808,6 +812,9 @@ static int mxs_mmc_probe(struct platform_device
+>>> *pdev)
+>>>                                                         &flags);
+>>>                 if (flags & OF_GPIO_ACTIVE_LOW)
+>>>                         host->wp_inverted = 1;
+>>> +
+>>> +               if (of_get_property(np, "broken-cd", NULL))
+>>> +                       host->broken_cd = 1;
+>>>         } else {
+>>>                 if (pdata->flags & SLOTF_8_BIT_CAPABLE)
+>>>                         mmc->caps |= MMC_CAP_4_BIT_DATA |
+>>> MMC_CAP_8_BIT_DATA;
+>>> --
+>>> 1.7.9.5
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
