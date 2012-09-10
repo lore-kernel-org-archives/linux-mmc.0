@@ -1,56 +1,186 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH v2] mmc: slot-gpio: Fix missing assignment to ctx->ro_gpio
-Date: Sun, 09 Sep 2012 22:56:48 -0400
-Message-ID: <87627mzitr.fsf_-_@octavius.laptop.org>
-References: <87pq5vzyry.fsf@octavius.laptop.org>
-	<Pine.LNX.4.64.1209092318550.11567@axis700.grange>
+Subject: [PATCH v2] mmc: slot-gpio: Add support for power gpios
+Date: Sun, 09 Sep 2012 23:01:28 -0400
+Message-ID: <874nn6zilz.fsf_-_@octavius.laptop.org>
+References: <87oblfzypc.fsf@octavius.laptop.org>
+	<Pine.LNX.4.64.1209092325350.11567@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:52568 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:37894 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755074Ab2IJC4v (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 9 Sep 2012 22:56:51 -0400
-In-Reply-To: <Pine.LNX.4.64.1209092318550.11567@axis700.grange> (Guennadi
-	Liakhovetski's message of "Sun, 9 Sep 2012 23:21:20 +0200 (CEST)")
+	id S1753466Ab2IJDBd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 9 Sep 2012 23:01:33 -0400
+In-Reply-To: <Pine.LNX.4.64.1209092325350.11567@axis700.grange> (Guennadi
+	Liakhovetski's message of "Mon, 10 Sep 2012 00:05:11 +0200 (CEST)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Cc: linux-mmc@vger.kernel.org
 
-mmc_gpio_request_ro() doesn't store the requested gpio in ctx->ro_gpio.
-As a result, subsequent calls to mmc_gpio_get_ro() will always fail
-with -ENOSYS because the gpio number isn't available to that function.
+A power gpio is a sideband output gpio that controls card power.
 
-Cc: stable <stable@vger.kernel.org>
 Signed-off-by: Chris Ball <cjb@laptop.org>
 ---
-v2, addressing Guennadi's review comments:
- - If gpio_request_one() fails, ctx->ro_gpio shouldn't contain a
-   valid GPIO number.
+Changelog:
 
- drivers/mmc/core/slot-gpio.c | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+v2, addressing Guennadi's review comments:
+ - More consistent comment and operator coding style
+ - Only store pwr_gpio in ctx if requesting it was successful
+ - Use GPIOF_OUT_INIT_{LOW,HIGH} directly
+
+ drivers/mmc/core/slot-gpio.c  | 70 ++++++++++++++++++++++++++++++++++++++++++-
+ include/linux/mmc/host.h      |  1 +
+ include/linux/mmc/slot-gpio.h |  3 ++
+ 3 files changed, 73 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 0582429..08c6b3d 100644
+index 08c6b3d..cf7e826 100644
 --- a/drivers/mmc/core/slot-gpio.c
 +++ b/drivers/mmc/core/slot-gpio.c
-@@ -100,7 +100,13 @@ int mmc_gpio_request_ro(struct mmc_host *host, unsigned int gpio)
+@@ -20,6 +20,8 @@
+ struct mmc_gpio {
+ 	int ro_gpio;
+ 	int cd_gpio;
++	int pwr_gpio;
++	char *pwr_label;
+ 	char *ro_label;
+ 	char cd_label[0];
+ };
+@@ -33,6 +35,10 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
  
- 	ctx = host->slot.handler_priv;
+ static int mmc_gpio_alloc(struct mmc_host *host)
+ {
++	/*
++	 * The "+ 4" is to leave room for a space, two-char identifier
++	 * and \0 after each label in the mmc_gpio struct.
++	 */
+ 	size_t len = strlen(dev_name(host->parent)) + 4;
+ 	struct mmc_gpio *ctx;
  
--	return gpio_request_one(gpio, GPIOF_DIR_IN, ctx->ro_label);
-+	ret = gpio_request_one(gpio, GPIOF_DIR_IN, ctx->ro_label);
-+	if (ret < 0)
-+		return ret;
+@@ -45,14 +51,19 @@ static int mmc_gpio_alloc(struct mmc_host *host)
+ 		 * before device_add(), i.e., between mmc_alloc_host() and
+ 		 * mmc_add_host()
+ 		 */
+-		ctx = devm_kzalloc(&host->class_dev, sizeof(*ctx) + 2 * len,
 +
-+	ctx->ro_gpio = gpio;
++		/* len * 3 because we have 3 strings to allocate on the end. */
++		ctx = devm_kzalloc(&host->class_dev, sizeof(*ctx) + len * 3,
+ 				   GFP_KERNEL);
+ 		if (ctx) {
+ 			ctx->ro_label = ctx->cd_label + len;
++			ctx->pwr_label = ctx->cd_label + len * 2;
+ 			snprintf(ctx->cd_label, len, "%s cd", dev_name(host->parent));
+ 			snprintf(ctx->ro_label, len, "%s ro", dev_name(host->parent));
++			snprintf(ctx->pwr_label, len, "%s pw", dev_name(host->parent));
+ 			ctx->cd_gpio = -EINVAL;
+ 			ctx->ro_gpio = -EINVAL;
++			ctx->pwr_gpio = -EINVAL;
+ 			host->slot.handler_priv = ctx;
+ 		}
+ 	}
+@@ -74,6 +85,18 @@ int mmc_gpio_get_ro(struct mmc_host *host)
+ }
+ EXPORT_SYMBOL(mmc_gpio_get_ro);
+ 
++int mmc_gpio_get_pwr(struct mmc_host *host)
++{
++	struct mmc_gpio *ctx = host->slot.handler_priv;
 +
-+	return 0;
++	if (!ctx || !gpio_is_valid(ctx->pwr_gpio))
++		return -ENOSYS;
++
++	return !gpio_get_value_cansleep(ctx->pwr_gpio) ^
++		!!(host->caps2 & MMC_CAP2_PWR_ACTIVE_HIGH);
++}
++EXPORT_SYMBOL(mmc_gpio_get_pwr);
++
+ int mmc_gpio_get_cd(struct mmc_host *host)
+ {
+ 	struct mmc_gpio *ctx = host->slot.handler_priv;
+@@ -110,6 +133,36 @@ int mmc_gpio_request_ro(struct mmc_host *host, unsigned int gpio)
  }
  EXPORT_SYMBOL(mmc_gpio_request_ro);
  
++int mmc_gpio_request_pwr(struct mmc_host *host, unsigned int gpio)
++{
++	struct mmc_gpio *ctx;
++	int ret;
++	unsigned long gpio_flags;
++
++	if (!gpio_is_valid(gpio))
++		return -EINVAL;
++
++	ret = mmc_gpio_alloc(host);
++	if (ret < 0)
++		return ret;
++
++	ctx = host->slot.handler_priv;
++
++	if (host->caps2 & MMC_CAP2_PWR_ACTIVE_HIGH)
++		gpio_flags = GPIOF_OUT_INIT_HIGH;
++	else
++		gpio_flags = GPIOF_OUT_INIT_LOW;
++
++	ret = gpio_request_one(gpio, gpio_flags, ctx->pwr_label);
++	if (ret < 0)
++		return ret;
++
++	ctx->pwr_gpio = gpio;
++
++	return 0;
++}
++EXPORT_SYMBOL(mmc_gpio_request_pwr);
++
+ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
+ {
+ 	struct mmc_gpio *ctx;
+@@ -173,6 +226,21 @@ void mmc_gpio_free_ro(struct mmc_host *host)
+ }
+ EXPORT_SYMBOL(mmc_gpio_free_ro);
+ 
++void mmc_gpio_free_pwr(struct mmc_host *host)
++{
++	struct mmc_gpio *ctx = host->slot.handler_priv;
++	int gpio;
++
++	if (!ctx || !gpio_is_valid(ctx->pwr_gpio))
++		return;
++
++	gpio = ctx->pwr_gpio;
++	ctx->pwr_gpio = -EINVAL;
++
++	gpio_free(gpio);
++}
++EXPORT_SYMBOL(mmc_gpio_free_pwr);
++
+ void mmc_gpio_free_cd(struct mmc_host *host)
+ {
+ 	struct mmc_gpio *ctx = host->slot.handler_priv;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index d5d9bd4..5a00cc1 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -257,6 +257,7 @@ struct mmc_host {
+ #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
+ #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
+ #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
++#define MMC_CAP2_PWR_ACTIVE_HIGH (1 << 12)	/* Card power signal active high */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 	unsigned int        power_notify_type;
+diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
+index 7d88d27..d083dfa 100644
+--- a/include/linux/mmc/slot-gpio.h
++++ b/include/linux/mmc/slot-gpio.h
+@@ -21,4 +21,7 @@ int mmc_gpio_get_cd(struct mmc_host *host);
+ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio);
+ void mmc_gpio_free_cd(struct mmc_host *host);
+ 
++int mmc_gpio_get_pwr(struct mmc_host *host);
++int mmc_gpio_request_pwr(struct mmc_host *host, unsigned int gpio);
++void mmc_gpio_free_pwr(struct mmc_host *host);
+ #endif
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
