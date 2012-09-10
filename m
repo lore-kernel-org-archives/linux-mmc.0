@@ -1,176 +1,115 @@
 From: Matt Sealey <matt@genesi-usa.com>
-Subject: Re: [PATCH] mmc: mxs-mmc: implement broken-cd
-Date: Mon, 10 Sep 2012 09:58:52 -0500
-Message-ID: <CAKGA1bm990BXJuZ=sQFgaciJxeP_ytPV2tfm1rHi=s=w7b-OYg@mail.gmail.com>
-References: <1347018317-2222-1-git-send-email-lauri.hintsala@bluegiga.com>
- <20120910060840.GT26709@S2101-09.ap.freescale.net> <504DBB10.9030702@bluegiga.com>
+Subject: Re: Tracking down suspend/resume ext3/mmc issues on imx233
+Date: Mon, 10 Sep 2012 10:11:48 -0500
+Message-ID: <CAKGA1bnug8nqcideOBZyLQZmiVo=G5L3aRHq4k4SNZyH132Y=g@mail.gmail.com>
+References: <CAEOSq-O3SfuAEhMsjX1y1ZgQuWBKef+XZzMR1b4yJhKhaRdymA@mail.gmail.com>
+ <20120907060552.GL26709@S2101-09.ap.freescale.net> <CAEOSq-PV+7c2nvu3uauOLJcV7WKa1jmd-df0a1H0qY5K4CM5MA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:54676 "EHLO
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:40816 "EHLO
 	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753067Ab2IJO7O (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Sep 2012 10:59:14 -0400
-Received: by qcro28 with SMTP id o28so1064327qcr.19
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Sep 2012 07:59:13 -0700 (PDT)
-In-Reply-To: <504DBB10.9030702@bluegiga.com>
+	with ESMTP id S1753650Ab2IJPML (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Sep 2012 11:12:11 -0400
+Received: by qcro28 with SMTP id o28so1085223qcr.19
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Sep 2012 08:12:10 -0700 (PDT)
+In-Reply-To: <CAEOSq-PV+7c2nvu3uauOLJcV7WKa1jmd-df0a1H0qY5K4CM5MA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lauri Hintsala <lauri.hintsala@bluegiga.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>, veli-pekka.peltola@bluegiga.com, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Mike Thompson <mpthompson@gmail.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, Linux-Arm-Kernel <linux-arm-kernel@lists.infradead.org>, linux-ext4@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-I think this describes three use cases which are different, as Shawn
-said we have here;
+Wouldn't it be better if the root filesystem was marked as
+non-removable in the device tree - or in the case of a truly removable
+card, just marked in the MMC subsystem - and the MMC subsystem skipped
+the "it could be removed" for suspend/resume operations?
 
-* missing card detect support (card detect is not wired so it's
-impossible to tell, and the controller doesn't support the SD standard
-card detection)
-* non-removable device
-* broken card detect support
+Whether you can or you cannot remove an SD memory device or eMMC
+controller, having an option that marked "DANGEROUS" that says "MMC
+layer will assume that all cards stayed in their respective slots
+during the suspend" implies that on a system such as the
+numbering-more-than-I-can-count embedded devices here with eMMC and
+any number greater than zero SD card slots (most of them having at
+least two), ALL of them are treated as unsafe resume, when in fact
+only one of them might be.
 
-The third one is what the property sounds like it describes, but this
-is not the use case you are describing at all. This kind of property
-naming is more like describing "card detect doesn't operate reliably"
-which is true of i.MX devices with certain versions of the eSDHC and
-uSDHC controllers, where non-GPIO card detection interferes with SDIO
-interrupts, but in this case a board designer should add a real card
-detect pin to the board (most more expensive push-push SD card slots
-come with a pin you can wire for CD). In cases where errata is
-published after boards are shipped, broken-cd is a meaningful
-description when described in the absense of a gpio cd description, or
-presence of some cd-handled-internally style property (forgive me for
-not cross-referencing the FSL definition for this property, we don't
-use it here at Genesi since all our boards have GPIO CD)
+My use cases here are usually boot from eMMC or boot from external SD
+card (Snowball, Efika MX but one SD card slot is usually not needed to
+go through the unsafe-resume process, all FSL i.MX boards since MX51
+Babbage through the new MX6 boards, Pandaboard, Beagleboard). Just
+because it's possible to boot from external, removable SD card
+shouldn't mean we all have to configure our kernels explicitly to go
+through a strange and unusual path for suspend and resume which leaves
+ALL cards 'mounted' unecessarily over suspend/resume, especially in
+the common case where eMMC is also not the ONLY boot medium (PATA,
+SATA, non-eMMC flash) and eMMC or SD *MAY* only be the root filesystem
+(as opposed to *WILL*)
 
-It seems your device is a combination of the top two in the list, it
-is not down to a broken feature at all, but one that should be
-possible to not implement for devices which are permanently connected.
-A non-removable device should be able to be powered down, at least
-using runtime PM or clock gating (if this works, remember to whitelist
-the card for clock gating!) but card detect shouldn't be used in this
-case to detect if the card is powered or not (this is a problem for
-your card controller and card driver state tracker. The MMC subsystem
-already tracks this state fairly well for power management).
-
-I would refrain from calling a feature "broken card detect" if there
-is actually no breakage involved especially if it would be more
-prudent instead look into how to figure out how to track power
-management state properly without cluttering the device tree.
+??
 
 -- 
 Matt Sealey <matt@genesi-usa.com>
 Product Development Analyst, Genesi USA, Inc.
 
 
-On Mon, Sep 10, 2012 at 5:04 AM, Lauri Hintsala
-<lauri.hintsala@bluegiga.com> wrote:
-> Hi Shawn,
+On Sat, Sep 8, 2012 at 11:17 AM, Mike Thompson <mpthompson@gmail.com> wrote:
+> I figured the source of my problem.  Normally, the Linux kernel will
+> treat mmc cards as removed during suspend.  This is in case the card
+> is swapped by the user during the suspend.  However, on the OLinuXino
+> the mmc device is the root file system  If the Linux kernel treats the
+> mmc card as removed the frozen tasks with open file handles to the
+> root filesystem device (such as the journal tasks) will fail when they
+> are thawed during resume.  This is the problem I was seeing.
 >
+> Fortunately, there is already a specific kernel config setting
+> CONFIG_MMC_UNSAFE_RESUME that needs to be set for systems such as the
+> OLinuXino that uses the mmc device for the root filesystem.  I
+> overlooked this config setting and spent half a day trying to figure
+> out the source of the file system errors on resume.  Next time I'll do
+> a better job of looking through related config settings before trying
+> to debug an issue that is probably already dealt with.
 >
-> On 09/10/2012 09:08 AM, Shawn Guo wrote:
->>
->> On Fri, Sep 07, 2012 at 02:45:17PM +0300, Lauri Hintsala wrote:
->>>
->>> This feature allows to use SDIO bus without wiring card detect
->>> signal.
->>
->>
->> This looks like a case of "broken-cd" ...
->>
->>> This is relevant in cases where SDIO device is connected to
->>> SDIO bus and there is no way to disconnect device from bus (device
->>> is always present).
->>>
->> ... while this sounds like a case of "non-removable".
+> Mike
 >
->
-> Right, I'll remove this comment.
->
-> In our case the SDIO device is always physically connected to SDIO bus but
-> the power of the device can be controller. So in SW point of view the device
-> can be removed by switching the power off.
->
->
->
->>> Signed-off-by: Lauri Hintsala <lauri.hintsala@bluegiga.com>
->>> ---
->>>   drivers/mmc/host/mxs-mmc.c |    7 +++++++
->>>   1 file changed, 7 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
->>> index ad3fcea..992760e 100644
->>> --- a/drivers/mmc/host/mxs-mmc.c
->>> +++ b/drivers/mmc/host/mxs-mmc.c
->>> @@ -165,6 +165,7 @@ struct mxs_mmc_host {
->>>         int                             sdio_irq_en;
->>>         int                             wp_gpio;
->>>         bool                            wp_inverted;
->>> +       bool                            broken_cd;
->>>   };
->>>
->>>   static int mxs_mmc_get_ro(struct mmc_host *mmc)
->>> @@ -187,6 +188,9 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
->>>   {
->>>         struct mxs_mmc_host *host = mmc_priv(mmc);
->>>
->>> +       if (host->broken_cd)
->>> +               return -ENOSYS;
->>> +
->>
->>
->> The .get_cd caller does not check for error.  This change makes no
->> sense to me.
->
->
-> In our case we don't want to read card detect bit and we have to continue
-> MMC probing because card detect pin is routed nowhere.
->
-> Could it be better to return zero instead of error? ENOSYS is used to
-> indicate "unreachable card detect" in other drivers (e.g. atmel-mci,
-> omap_hsmmc) and I followed them.
->
->
->
->> Instead, the driver needs to set MMC_CAP_NEEDS_POLL in
->> case of "broken-cd".
->
->
-> MMC_CAP_NEEDS_POLL is always set in mxs-mmc.
->
->
-> Best regards,
-> Lauri
->
->
+> On Thu, Sep 6, 2012 at 11:05 PM, Shawn Guo <shawn.guo@linaro.org> wrote:
+>> Copy a few more lists to get wider audience ...
 >>
 >> Regards,
 >> Shawn
 >>
->>>         return !(readl(host->base + HW_SSP_STATUS(host)) &
->>>                  BM_SSP_STATUS_CARD_DETECT);
->>>   }
->>> @@ -808,6 +812,9 @@ static int mxs_mmc_probe(struct platform_device
->>> *pdev)
->>>                                                         &flags);
->>>                 if (flags & OF_GPIO_ACTIVE_LOW)
->>>                         host->wp_inverted = 1;
->>> +
->>> +               if (of_get_property(np, "broken-cd", NULL))
->>> +                       host->broken_cd = 1;
->>>         } else {
->>>                 if (pdata->flags & SLOTF_8_BIT_CAPABLE)
->>>                         mmc->caps |= MMC_CAP_4_BIT_DATA |
->>> MMC_CAP_8_BIT_DATA;
->>> --
->>> 1.7.9.5
+>> On Thu, Sep 06, 2012 at 10:03:35PM -0700, Mike Thompson wrote:
+>>> I'm working on adding power management support for the imx233 on
+>>> 3.6-rc2.  In general I'm working on porting the pm.c file from the
+>>> Freescale 2.6.35 kernel for both "standby" and "mem" suspend/resume.
+>>> I'm making pretty good progress on porting the code, but I'm running
+>>> into an issue outside the immediate code I'm working on.
 >>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+>>> ...
+>>>
+>>> The first reported error is in the ext3 filesystem buffer code where
+>>> the file system buffers aren't being filled by the underlying block
+>>> device.  At least that's how I'm interpreting the portion of the ext3
+>>> file system code that is failing.  However, the mmc device is
+>>> correctly reporting finding p1 and p2 partitions on the device which
+>>> it would indicate the partition data is being read from the SD card.
+>>>
+>>> I'm hoping others might have suggestions on how I should go about
+>>> tracking down why the ext3 file system can no longer read from the mmc
+>>> device upon resume.  For instance, useful places to put some tracing
+>>> code to understand what might be failing, or how to determine what
+>>> differences there might be before suspend and after resume that might
+>>> point to the failure.
+>>>
+>>> Thanks,
+>>>
+>>> Mike Thompson
+>>>
+>>> _______________________________________________
+>>> linux-arm-kernel mailing list
+>>> linux-arm-kernel@lists.infradead.org
+>>> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
