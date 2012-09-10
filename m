@@ -1,186 +1,73 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH v2] mmc: slot-gpio: Add support for power gpios
-Date: Sun, 09 Sep 2012 23:01:28 -0400
-Message-ID: <874nn6zilz.fsf_-_@octavius.laptop.org>
-References: <87oblfzypc.fsf@octavius.laptop.org>
-	<Pine.LNX.4.64.1209092325350.11567@axis700.grange>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: [PATCH] mmc: sdhci: fix transfer mode setting bug for cmds w/o data transfer
+Date: Mon, 10 Sep 2012 11:17:29 +0800
+Message-ID: <1347247049-19422-1-git-send-email-keyuan.liu@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:37894 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753466Ab2IJDBd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 9 Sep 2012 23:01:33 -0400
-In-Reply-To: <Pine.LNX.4.64.1209092325350.11567@axis700.grange> (Guennadi
-	Liakhovetski's message of "Mon, 10 Sep 2012 00:05:11 +0200 (CEST)")
+Received: from na3sys009aog117.obsmtp.com ([74.125.149.242]:41345 "EHLO
+	na3sys009aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755074Ab2IJDWW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Sep 2012 23:22:22 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu
+Cc: cxie4@marvell.com, hzhuang1@marvell.com, prakity@marvell.com, wangtt@marvell.com, jlfu@marvell.com, kliu5@marvell.com
 
-A power gpio is a sideband output gpio that controls card power.
+From: Kevin Liu <kliu5@marvell.com>
 
-Signed-off-by: Chris Ball <cjb@laptop.org>
+Commands without data transfer like cmd5/cmd7 will use previous
+transfer mode setting, which may lead to error since some bits
+may have been set unexpectedly.
+For example, cmd5 following cmd18/cmd25 will have timeout error
+since audo cmd23 has been enabled.
+
+Signed-off-by: Jialing Fu <jlfu@marvell.com>
+Signed-off-by: Tim Wang <wangtt@marvell.com>
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
 ---
-Changelog:
+ drivers/mmc/host/sdhci.c |   22 ++++++++++++++--------
+ 1 files changed, 14 insertions(+), 8 deletions(-)
 
-v2, addressing Guennadi's review comments:
- - More consistent comment and operator coding style
- - Only store pwr_gpio in ctx if requesting it was successful
- - Use GPIOF_OUT_INIT_{LOW,HIGH} directly
-
- drivers/mmc/core/slot-gpio.c  | 70 ++++++++++++++++++++++++++++++++++++++++++-
- include/linux/mmc/host.h      |  1 +
- include/linux/mmc/slot-gpio.h |  3 ++
- 3 files changed, 73 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 08c6b3d..cf7e826 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -20,6 +20,8 @@
- struct mmc_gpio {
- 	int ro_gpio;
- 	int cd_gpio;
-+	int pwr_gpio;
-+	char *pwr_label;
- 	char *ro_label;
- 	char cd_label[0];
- };
-@@ -33,6 +35,10 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 834be2f..962f696 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -885,8 +885,21 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+ 	u16 mode;
+ 	struct mmc_data *data = cmd->data;
  
- static int mmc_gpio_alloc(struct mmc_host *host)
- {
-+	/*
-+	 * The "+ 4" is to leave room for a space, two-char identifier
-+	 * and \0 after each label in the mmc_gpio struct.
-+	 */
- 	size_t len = strlen(dev_name(host->parent)) + 4;
- 	struct mmc_gpio *ctx;
+-	if (data == NULL)
++	if (data == NULL) {
++		if (cmd->opcode == MMC_SEND_TUNING_BLOCK ||
++			cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
++			/*
++			 * The tuning block is sent by the card to the host
++			 * controller. So we set the TRNS_READ bit in the
++			 * Transfer Mode register. This also takes care of
++			 * setting DMA Enable and Multi Block Select in the
++			 * same register to 0.
++			 */
++			sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
++		else
++			sdhci_writew(host, 0, SDHCI_TRANSFER_MODE);
+ 		return;
++	}
  
-@@ -45,14 +51,19 @@ static int mmc_gpio_alloc(struct mmc_host *host)
- 		 * before device_add(), i.e., between mmc_alloc_host() and
- 		 * mmc_add_host()
- 		 */
--		ctx = devm_kzalloc(&host->class_dev, sizeof(*ctx) + 2 * len,
-+
-+		/* len * 3 because we have 3 strings to allocate on the end. */
-+		ctx = devm_kzalloc(&host->class_dev, sizeof(*ctx) + len * 3,
- 				   GFP_KERNEL);
- 		if (ctx) {
- 			ctx->ro_label = ctx->cd_label + len;
-+			ctx->pwr_label = ctx->cd_label + len * 2;
- 			snprintf(ctx->cd_label, len, "%s cd", dev_name(host->parent));
- 			snprintf(ctx->ro_label, len, "%s ro", dev_name(host->parent));
-+			snprintf(ctx->pwr_label, len, "%s pw", dev_name(host->parent));
- 			ctx->cd_gpio = -EINVAL;
- 			ctx->ro_gpio = -EINVAL;
-+			ctx->pwr_gpio = -EINVAL;
- 			host->slot.handler_priv = ctx;
+ 	WARN_ON(!host->data);
+ 
+@@ -1854,13 +1867,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 				     SDHCI_BLOCK_SIZE);
  		}
- 	}
-@@ -74,6 +85,18 @@ int mmc_gpio_get_ro(struct mmc_host *host)
- }
- EXPORT_SYMBOL(mmc_gpio_get_ro);
  
-+int mmc_gpio_get_pwr(struct mmc_host *host)
-+{
-+	struct mmc_gpio *ctx = host->slot.handler_priv;
-+
-+	if (!ctx || !gpio_is_valid(ctx->pwr_gpio))
-+		return -ENOSYS;
-+
-+	return !gpio_get_value_cansleep(ctx->pwr_gpio) ^
-+		!!(host->caps2 & MMC_CAP2_PWR_ACTIVE_HIGH);
-+}
-+EXPORT_SYMBOL(mmc_gpio_get_pwr);
-+
- int mmc_gpio_get_cd(struct mmc_host *host)
- {
- 	struct mmc_gpio *ctx = host->slot.handler_priv;
-@@ -110,6 +133,36 @@ int mmc_gpio_request_ro(struct mmc_host *host, unsigned int gpio)
- }
- EXPORT_SYMBOL(mmc_gpio_request_ro);
+-		/*
+-		 * The tuning block is sent by the card to the host controller.
+-		 * So we set the TRNS_READ bit in the Transfer Mode register.
+-		 * This also takes care of setting DMA Enable and Multi Block
+-		 * Select in the same register to 0.
+-		 */
+-		sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
  
-+int mmc_gpio_request_pwr(struct mmc_host *host, unsigned int gpio)
-+{
-+	struct mmc_gpio *ctx;
-+	int ret;
-+	unsigned long gpio_flags;
-+
-+	if (!gpio_is_valid(gpio))
-+		return -EINVAL;
-+
-+	ret = mmc_gpio_alloc(host);
-+	if (ret < 0)
-+		return ret;
-+
-+	ctx = host->slot.handler_priv;
-+
-+	if (host->caps2 & MMC_CAP2_PWR_ACTIVE_HIGH)
-+		gpio_flags = GPIOF_OUT_INIT_HIGH;
-+	else
-+		gpio_flags = GPIOF_OUT_INIT_LOW;
-+
-+	ret = gpio_request_one(gpio, gpio_flags, ctx->pwr_label);
-+	if (ret < 0)
-+		return ret;
-+
-+	ctx->pwr_gpio = gpio;
-+
-+	return 0;
-+}
-+EXPORT_SYMBOL(mmc_gpio_request_pwr);
-+
- int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
- {
- 	struct mmc_gpio *ctx;
-@@ -173,6 +226,21 @@ void mmc_gpio_free_ro(struct mmc_host *host)
- }
- EXPORT_SYMBOL(mmc_gpio_free_ro);
+ 		sdhci_send_command(host, &cmd);
  
-+void mmc_gpio_free_pwr(struct mmc_host *host)
-+{
-+	struct mmc_gpio *ctx = host->slot.handler_priv;
-+	int gpio;
-+
-+	if (!ctx || !gpio_is_valid(ctx->pwr_gpio))
-+		return;
-+
-+	gpio = ctx->pwr_gpio;
-+	ctx->pwr_gpio = -EINVAL;
-+
-+	gpio_free(gpio);
-+}
-+EXPORT_SYMBOL(mmc_gpio_free_pwr);
-+
- void mmc_gpio_free_cd(struct mmc_host *host)
- {
- 	struct mmc_gpio *ctx = host->slot.handler_priv;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index d5d9bd4..5a00cc1 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -257,6 +257,7 @@ struct mmc_host {
- #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
- #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
- #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
-+#define MMC_CAP2_PWR_ACTIVE_HIGH (1 << 12)	/* Card power signal active high */
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 	unsigned int        power_notify_type;
-diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
-index 7d88d27..d083dfa 100644
---- a/include/linux/mmc/slot-gpio.h
-+++ b/include/linux/mmc/slot-gpio.h
-@@ -21,4 +21,7 @@ int mmc_gpio_get_cd(struct mmc_host *host);
- int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio);
- void mmc_gpio_free_cd(struct mmc_host *host);
- 
-+int mmc_gpio_get_pwr(struct mmc_host *host);
-+int mmc_gpio_request_pwr(struct mmc_host *host, unsigned int gpio);
-+void mmc_gpio_free_pwr(struct mmc_host *host);
- #endif
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.0.4
+
