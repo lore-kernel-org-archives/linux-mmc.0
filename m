@@ -1,84 +1,68 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: [PATCH] mmc: sdhci: set regulator min/max voltage according to spec
-Date: Mon, 10 Sep 2012 12:13:36 +0800
-Message-ID: <1347250416-20891-1-git-send-email-keyuan.liu@gmail.com>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCHv2 1/2] mmc: omap_hsmmc: convert from IP timer to hrtimer
+Date: Mon, 10 Sep 2012 10:03:01 +0530
+Message-ID: <CANfBPZ_dg4BBN4-kP1_JGPBb=U16h1mj=PFgP36o=J75BXhk-Q@mail.gmail.com>
+References: <1346159947-3194-1-git-send-email-svenkatr@ti.com> <877gs5jxzs.fsf@deeprootsystems.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog133.obsmtp.com ([74.125.149.82]:44184 "EHLO
-	na3sys009aog133.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751408Ab2IJEZX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Sep 2012 00:25:23 -0400
+Received: from na3sys009aog124.obsmtp.com ([74.125.149.151]:52521 "EHLO
+	na3sys009aog124.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751252Ab2IJEdX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Sep 2012 00:33:23 -0400
+Received: by pbbrr13 with SMTP id rr13so1872651pbb.19
+        for <linux-mmc@vger.kernel.org>; Sun, 09 Sep 2012 21:33:22 -0700 (PDT)
+In-Reply-To: <877gs5jxzs.fsf@deeprootsystems.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu
-Cc: cxie4@marvell.com, hzhuang1@marvell.com, prakity@marvell.com, jlfu@marvell.com, kliu5@marvell.com
+To: Kevin Hilman <khilman@deeprootsystems.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, balbi@ti.com
 
-From: Kevin Liu <kliu5@marvell.com>
+On Sat, Sep 8, 2012 at 3:29 AM, Kevin Hilman
+<khilman@deeprootsystems.com> wrote:
+> Venkatraman S <svenkatr@ti.com> writes:
+>
+>> omap hsmmc controller IP has a built in timer that can be programmed to
+>> guard against unresponsive operations. But its range is very narrow,
+>> and the maximum countable time is a few seconds.
+>>
+>> Card maintenance operations like BKOPS and MMC_ERASE and long
+>> stream writes like packed command require timers of order of
+>> several minutes, much beyond the capability of the IP timer.
+>> So get rid of using the IP timer entirely and use kernel's hrtimer
+>> functionality for guarding the device operations.
+>> As part of this change, a workaround that disabled timeouts for
+>> MMC_ERASE command is removed, and the arbitary timing of 100ms
+>> is used only when the timeout is not explicitly specified by core.
+>>
+>> A trivial change to get rid of unnecessary dealiasing of host->data
+>> in omap_hsmmc_do_irq is also included.
+>>
+>> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+>
+> Dumb question: if the timers needed are on the order of minutes, why do
+> you need to use high-resolution timers?  I'm guessing the normal
+> kernel-internal timers should suffice here (see <linux/timer.h,
+> init_timer().)
+>
+Both sub ms and long duration timers are needed, based on the type of operation.
+The eMMC standard has evolved to define new commands which require
+such long duration
+operations. The short ("control") commands do need high precision.
 
-Use voltage range as below rather than a specific value
-3.3v: (3.2v, 3.4v)
-3.0v: (2.9v, 3.1v)
-1.8v: (1.65v, 1.95v)
+> Also, if they're on the order of minutes, I assume the actual firing
+> doesn't have to be precise, so deferrable timers can probably be used
+> (and thus help PM by coalescing wakeup events.)
+>
+> If my assumptions are true, it might be worth considering using the
+> normal timers, and use init_timer_deferrable().
+>
+I'll certainly look into this. One way is to use the IP timer for
+short commands and
+deferrable timers for long ones - but I reckon it would be messy.
 
-Signed-off-by: Jialing Fu <jlfu@marvell.com>
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
----
- drivers/mmc/host/sdhci.c |   18 +++++++++---------
- 1 files changed, 9 insertions(+), 9 deletions(-)
+I've actually put this patch on hold - as someone pointed out to me that
+this violates some sections of eMMC spec.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 962f696..08dae93 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1632,7 +1632,7 @@ static int sdhci_do_3_3v_signal_voltage_switch(struct sdhci_host *host,
- 	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
- 
- 	if (host->vqmmc) {
--		ret = regulator_set_voltage(host->vqmmc, 3300000, 3300000);
-+		ret = regulator_set_voltage(host->vqmmc, 3200000, 3400000);
- 		if (ret) {
- 			pr_warning("%s: Switching to 3.3V signalling voltage "
- 				   " failed\n", mmc_hostname(host->mmc));
-@@ -1676,7 +1676,7 @@ static int sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
- 		 */
- 		if (host->vqmmc)
- 			ret = regulator_set_voltage(host->vqmmc,
--				1800000, 1800000);
-+				1650000, 1950000);
- 		else
- 			ret = 0;
- 
-@@ -2860,7 +2860,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 		pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
- 		host->vqmmc = NULL;
- 	}
--	else if (regulator_is_supported_voltage(host->vqmmc, 1800000, 1800000))
-+	else if (regulator_is_supported_voltage(host->vqmmc, 1650000, 1950000))
- 		regulator_enable(host->vqmmc);
- 	else
- 		caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
-@@ -2935,16 +2935,16 @@ int sdhci_add_host(struct sdhci_host *host)
- 
- #ifdef CONFIG_REGULATOR
- 	if (host->vmmc) {
--		ret = regulator_is_supported_voltage(host->vmmc, 3300000,
--			3300000);
-+		ret = regulator_is_supported_voltage(host->vmmc, 3200000,
-+			3400000);
- 		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
- 			caps[0] &= ~SDHCI_CAN_VDD_330;
--		ret = regulator_is_supported_voltage(host->vmmc, 3000000,
--			3000000);
-+		ret = regulator_is_supported_voltage(host->vmmc, 2900000,
-+			3100000);
- 		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_300)))
- 			caps[0] &= ~SDHCI_CAN_VDD_300;
--		ret = regulator_is_supported_voltage(host->vmmc, 1800000,
--			1800000);
-+		ret = regulator_is_supported_voltage(host->vmmc, 1650000,
-+			1950000);
- 		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_180)))
- 			caps[0] &= ~SDHCI_CAN_VDD_180;
- 	}
--- 
-1.7.0.4
 
+> Kevin
