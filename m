@@ -1,84 +1,75 @@
 From: <Chang-Ming.Huang@freescale.com>
-Subject: [PATCH 2/3] powerpc/esdhc: add property to disable the CMD23
-Date: Tue, 11 Sep 2012 15:12:44 +0800
-Message-ID: <1347347565-17474-2-git-send-email-Chang-Ming.Huang@freescale.com>
-References: <1347347565-17474-1-git-send-email-Chang-Ming.Huang@freescale.com>
+Subject: [PATCH 1/3] powerpc/esdhc: disable CMD23 for some Freescale SoCs
+Date: Tue, 11 Sep 2012 15:12:43 +0800
+Message-ID: <1347347565-17474-1-git-send-email-Chang-Ming.Huang@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:26972 "EHLO
+Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:48603 "EHLO
 	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751830Ab2IKHpx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Sep 2012 03:45:53 -0400
-In-Reply-To: <1347347565-17474-1-git-send-email-Chang-Ming.Huang@freescale.com>
+	by vger.kernel.org with ESMTP id S1751320Ab2IKHpw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Sep 2012 03:45:52 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Shaohui Xie <Shaohui.Xie@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
 
 From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-Below SOCs don't support the cmd23 command for MMC card,
-therefore, disable it in device tree:
-P1020, P1021, P1022, P1024, P1025 and P4080
+CMD23 causes lots of errors in kernel on some freescale SoCs
+when mmc card used, which is because these controllers does
+not support CMD23, but even on SoCs which declare CMD23 is supported,
+so we'll not use CMD23.
 
 Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
 CC: Anton Vorontsov <cbouatmailru@gmail.com>
 ---
- arch/powerpc/boot/dts/fsl/p1020si-post.dtsi |    1 +
- arch/powerpc/boot/dts/fsl/p1021si-post.dtsi |    1 +
- arch/powerpc/boot/dts/fsl/p1022si-post.dtsi |    1 +
- arch/powerpc/boot/dts/fsl/p4080si-post.dtsi |    1 +
- 4 files changed, 4 insertions(+)
+ drivers/mmc/host/sdhci-pltfm.c |    3 +++
+ drivers/mmc/host/sdhci.c       |    3 +++
+ include/linux/mmc/sdhci.h      |    1 +
+ 3 files changed, 7 insertions(+)
 
-diff --git a/arch/powerpc/boot/dts/fsl/p1020si-post.dtsi b/arch/powerpc/boot/dts/fsl/p1020si-post.dtsi
-index 68cc5e7..793a30b 100644
---- a/arch/powerpc/boot/dts/fsl/p1020si-post.dtsi
-+++ b/arch/powerpc/boot/dts/fsl/p1020si-post.dtsi
-@@ -154,6 +154,7 @@
- 	sdhc@2e000 {
- 		compatible = "fsl,p1020-esdhc", "fsl,esdhc";
- 		sdhci,auto-cmd12;
-+		sdhci,no-cmd23;
- 	};
- /include/ "pq3-sec3.3-0.dtsi"
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index d9a4ef4..1e532dd 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -83,6 +83,9 @@ void sdhci_get_of_property(struct platform_device *pdev)
+ 		    of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
+ 			host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
  
-diff --git a/arch/powerpc/boot/dts/fsl/p1021si-post.dtsi b/arch/powerpc/boot/dts/fsl/p1021si-post.dtsi
-index adb82fd..2b7fd2a 100644
---- a/arch/powerpc/boot/dts/fsl/p1021si-post.dtsi
-+++ b/arch/powerpc/boot/dts/fsl/p1021si-post.dtsi
-@@ -149,6 +149,7 @@
- /include/ "pq3-esdhc-0.dtsi"
- 	sdhc@2e000 {
- 		sdhci,auto-cmd12;
-+		sdhci,no-cmd23;
- 	};
++		if (of_get_property(np, "sdhci,no-cmd23", NULL))
++			host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
++
+ 		clk = of_get_property(np, "clock-frequency", &size);
+ 		if (clk && size == sizeof(*clk) && *clk)
+ 			pltfm_host->clock = be32_to_cpup(clk);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index d98b199..a7ec2a0 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2829,6 +2829,9 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+ 		mmc->caps |= MMC_CAP_4_BIT_DATA;
  
- /include/ "pq3-sec3.3-0.dtsi"
-diff --git a/arch/powerpc/boot/dts/fsl/p1022si-post.dtsi b/arch/powerpc/boot/dts/fsl/p1022si-post.dtsi
-index 06216b8..2334a52 100644
---- a/arch/powerpc/boot/dts/fsl/p1022si-post.dtsi
-+++ b/arch/powerpc/boot/dts/fsl/p1022si-post.dtsi
-@@ -215,6 +215,7 @@
- 	sdhc@2e000 {
- 		compatible = "fsl,p1022-esdhc", "fsl,esdhc";
- 		sdhci,auto-cmd12;
-+		sdhci,no-cmd23;
- 	};
++	if (host->quirks2 & SDHCI_QUIRK2_HOST_NO_CMD23)
++		mmc->caps &= ~MMC_CAP_CMD23;
++
+ 	if (caps[0] & SDHCI_CAN_DO_HISPD)
+ 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
  
- /include/ "pq3-sec3.3-0.dtsi"
-diff --git a/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi b/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi
-index 8d35d2c..5b39952 100644
---- a/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi
-+++ b/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi
-@@ -337,6 +337,7 @@
- 	sdhc@114000 {
- 		voltage-ranges = <3300 3300>;
- 		sdhci,auto-cmd12;
-+		sdhci,no-cmd23;
- 	};
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index fa8529a..1edcb4d 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -91,6 +91,7 @@ struct sdhci_host {
+ 	unsigned int quirks2;	/* More deviations from spec. */
  
- /include/ "qoriq-i2c-0.dtsi"
+ #define SDHCI_QUIRK2_HOST_OFF_CARD_ON			(1<<0)
++#define SDHCI_QUIRK2_HOST_NO_CMD23			(1<<1)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
 -- 
 1.7.9.5
 
