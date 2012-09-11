@@ -1,95 +1,109 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci-pxav3: dt: Support "cd-gpios" property
-Date: Tue, 11 Sep 2012 11:04:58 -0400
-Message-ID: <878vcgy50l.fsf@octavius.laptop.org>
-References: <87k3w3zycf.fsf@octavius.laptop.org>
-	<CAN1soZzUZ6HiZFQ1JL-F3wU=f27dakz1HkzFRStbNP+YQ2PgWw@mail.gmail.com>
+From: Scott Wood <scottwood@freescale.com>
+Subject: Re: [PATCH 2/3] powerpc/esdhc: add property to disable the CMD23
+Date: Tue, 11 Sep 2012 13:28:17 -0500
+Message-ID: <504F82C1.2000907@freescale.com>
+References: <1347347565-17474-1-git-send-email-Chang-Ming.Huang@freescale.com> <1347347565-17474-2-git-send-email-Chang-Ming.Huang@freescale.com> <20120911075429.GA27028@lizard> <20120911080457.GA28235@lizard>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:60833 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752889Ab2IKPFE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 11 Sep 2012 11:05:04 -0400
-In-Reply-To: <CAN1soZzUZ6HiZFQ1JL-F3wU=f27dakz1HkzFRStbNP+YQ2PgWw@mail.gmail.com>
-	(Haojian Zhuang's message of "Tue, 11 Sep 2012 22:36:50 +0800")
+Received: from va3ehsobe005.messaging.microsoft.com ([216.32.180.31]:38198
+	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754527Ab2IKS22 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Sep 2012 14:28:28 -0400
+In-Reply-To: <20120911080457.GA28235@lizard>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haojian Zhuang <haojian.zhuang@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: Chang-Ming.Huang@freescale.com, linuxppc-dev@lists.ozlabs.org, linux-mmc@vger.kernel.org
 
-Hi,
+On 09/11/2012 03:04 AM, Anton Vorontsov wrote:
+> On Tue, Sep 11, 2012 at 12:54:29AM -0700, Anton Vorontsov wrote:
+>> On Tue, Sep 11, 2012 at 03:12:44PM +0800, Chang-Ming.Huang@freescale.com wrote:
+>>> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+>>>
+>>> Below SOCs don't support the cmd23 command for MMC card,
+>>> therefore, disable it in device tree:
+>>> P1020, P1021, P1022, P1024, P1025 and P4080
+>>>
+>>> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+>>
+>> Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
+> 
+> Btw, although the patch is trivial, I guess you still want to let know
+> PowerPC folks about it. Adding Cc and copying the patch:
+> 
+> - - - -
+> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> 
+> Below SOCs don't support the cmd23 command for MMC card,
+> therefore, disable it in device tree:
+> P1020, P1021, P1022, P1024, P1025 and P4080
+> 
+> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> CC: Anton Vorontsov <cbouatmailru@gmail.com>
+> ---
+>  arch/powerpc/boot/dts/fsl/p1020si-post.dtsi |    1 +
+>  arch/powerpc/boot/dts/fsl/p1021si-post.dtsi |    1 +
+>  arch/powerpc/boot/dts/fsl/p1022si-post.dtsi |    1 +
+>  arch/powerpc/boot/dts/fsl/p4080si-post.dtsi |    1 +
+>  4 files changed, 4 insertions(+)
+> 
+> diff --git a/arch/powerpc/boot/dts/fsl/p1020si-post.dtsi b/arch/powerpc/boot/dts/fsl/p1020si-post.dtsi
+> index 68cc5e7..793a30b 100644
+> --- a/arch/powerpc/boot/dts/fsl/p1020si-post.dtsi
+> +++ b/arch/powerpc/boot/dts/fsl/p1020si-post.dtsi
+> @@ -154,6 +154,7 @@
+>  	sdhc@2e000 {
+>  		compatible = "fsl,p1020-esdhc", "fsl,esdhc";
+>  		sdhci,auto-cmd12;
+> +		sdhci,no-cmd23;
+>  	};
+>  /include/ "pq3-sec3.3-0.dtsi"
+>  
+> diff --git a/arch/powerpc/boot/dts/fsl/p1021si-post.dtsi b/arch/powerpc/boot/dts/fsl/p1021si-post.dtsi
+> index adb82fd..2b7fd2a 100644
+> --- a/arch/powerpc/boot/dts/fsl/p1021si-post.dtsi
+> +++ b/arch/powerpc/boot/dts/fsl/p1021si-post.dtsi
+> @@ -149,6 +149,7 @@
+>  /include/ "pq3-esdhc-0.dtsi"
+>  	sdhc@2e000 {
+>  		sdhci,auto-cmd12;
+> +		sdhci,no-cmd23;
+>  	};
+>  
+>  /include/ "pq3-sec3.3-0.dtsi"
+> diff --git a/arch/powerpc/boot/dts/fsl/p1022si-post.dtsi b/arch/powerpc/boot/dts/fsl/p1022si-post.dtsi
+> index 06216b8..2334a52 100644
+> --- a/arch/powerpc/boot/dts/fsl/p1022si-post.dtsi
+> +++ b/arch/powerpc/boot/dts/fsl/p1022si-post.dtsi
+> @@ -215,6 +215,7 @@
+>  	sdhc@2e000 {
+>  		compatible = "fsl,p1022-esdhc", "fsl,esdhc";
+>  		sdhci,auto-cmd12;
+> +		sdhci,no-cmd23;
+>  	};
+>  
+>  /include/ "pq3-sec3.3-0.dtsi"
+> diff --git a/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi b/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi
+> index 8d35d2c..5b39952 100644
+> --- a/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi
+> +++ b/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi
+> @@ -337,6 +337,7 @@
+>  	sdhc@114000 {
+>  		voltage-ranges = <3300 3300>;
+>  		sdhci,auto-cmd12;
+> +		sdhci,no-cmd23;
+>  	};
+>  
+>  /include/ "qoriq-i2c-0.dtsi"
+> 
 
-On Tue, Sep 11 2012, Haojian Zhuang wrote:
-> On Sun, Sep 9, 2012 at 11:09 AM, Chris Ball <cjb@laptop.org> wrote:
->> Tested on OLPC XO-4/MMP3, where the card detection pin for one of the
->> controllers is a sideband GPIO.  The third cell in the power-gpios
->> property controls whether the GPIO is active high/active low.
->>
->> Signed-off-by: Chris Ball <cjb@laptop.org>
->> ---
->>  drivers/mmc/host/sdhci-pxav3.c | 17 +++++++++++++++++
->>  1 file changed, 17 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
->> index 0bdb326..5427d52 100644
->> --- a/drivers/mmc/host/sdhci-pxav3.c
->> +++ b/drivers/mmc/host/sdhci-pxav3.c
->> @@ -211,6 +211,10 @@ static struct sdhci_pxa_platdata *pxav3_get_mmc_pdata(struct device *dev)
->>         if (gpio_flags != OF_GPIO_ACTIVE_LOW)
->>                 pdata->host_caps2 |= MMC_CAP2_PWR_ACTIVE_HIGH;
->>
->> +       pdata->ext_cd_gpio = of_get_named_gpio_flags(np, "cd-gpios", 0, &gpio_flags);
->> +       if (gpio_flags != OF_GPIO_ACTIVE_LOW)
->> +               pdata->host_caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
->> +
->>         return pdata;
->>  }
->>  #else
->> @@ -292,6 +296,15 @@ static int __devinit sdhci_pxav3_probe(struct platform_device *pdev)
->>                                 goto err_power_req;
->>                         }
->>                 }
->> +
->> +               if (gpio_is_valid(pdata->ext_cd_gpio)) {
->> +                       ret = mmc_gpio_request_cd(host->mmc, pdata->ext_cd_gpio);
->> +                       if (ret) {
->> +                               dev_err(mmc_dev(host->mmc),
->> +                                       "failed to allocate card detect gpio\n");
->> +                               goto err_cd_req;
->> +                       }
->> +               }
->>         }
->>
->>         host->ops = &pxav3_sdhci_ops;
->> @@ -309,6 +322,8 @@ static int __devinit sdhci_pxav3_probe(struct platform_device *pdev)
->>  err_add_host:
->>         clk_disable_unprepare(clk);
->>         clk_put(clk);
->> +       mmc_gpio_free_cd(host->mmc);
->> +err_cd_req:
->>         mmc_gpio_free_pwr(host->mmc);
->>  err_power_req:
->>  err_clk_get:
->> @@ -331,6 +346,8 @@ static int __devexit sdhci_pxav3_remove(struct platform_device *pdev)
->>
->>         if (gpio_is_valid(pdata->power_gpio))
->>                 mmc_gpio_free_pwr(host->mmc);
->> +       if (gpio_is_valid(pdata->ext_cd_gpio))
->> +               mmc_gpio_free_cd(host->mmc);
->>
->>         sdhci_pltfm_free(pdev);
->>         kfree(pxa);
->> --
->> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
->> One Laptop Per Child
->
-> Acked-by: Haojian Zhuang <haojian.zhuang@gmail.com>
+This won't help people with old device trees (forked for a custom board,
+tied to an old U-Boot, etc).  The driver should infer this from the
+compatible string or version registers (ideally block-specific version
+registers, but if these are absent or inconclusive, SVR can be used).
 
-Thanks, pushed to mmc-next for 3.7 after rebasing to make this patch
-precede the power_gpio patch (which isn't ready to merge).
+-Scott
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+
