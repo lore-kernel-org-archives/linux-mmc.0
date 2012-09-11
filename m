@@ -1,104 +1,84 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH 2/3] powerpc/esdhc: add property to disable the CMD23
-Date: Tue, 11 Sep 2012 01:04:58 -0700
-Message-ID: <20120911080457.GA28235@lizard>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH 2/3] powerpc/esdhc: add property to disable the CMD23
+Date: Tue, 11 Sep 2012 09:36:33 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C176170@039-SN1MPN1-002.039d.mgd.msft.net>
 References: <1347347565-17474-1-git-send-email-Chang-Ming.Huang@freescale.com>
  <1347347565-17474-2-git-send-email-Chang-Ming.Huang@freescale.com>
- <20120911075429.GA27028@lizard>
+ <20120911075429.GA27028@lizard> <20120911080457.GA28235@lizard>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:42664 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751646Ab2IKIHb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Sep 2012 04:07:31 -0400
-Received: by ieje11 with SMTP id e11so400455iej.19
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Sep 2012 01:07:31 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20120911075429.GA27028@lizard>
+Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:19880
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756781Ab2IKJgi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Sep 2012 05:36:38 -0400
+In-Reply-To: <20120911080457.GA28235@lizard>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chang-Ming.Huang@freescale.com
-Cc: linux-mmc@vger.kernel.org, Kumar Gala <galak@kernel.crashing.org>, linuxppc-dev@lists.ozlabs.org
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kumar Gala <galak@kernel.crashing.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 
-On Tue, Sep 11, 2012 at 12:54:29AM -0700, Anton Vorontsov wrote:
-> On Tue, Sep 11, 2012 at 03:12:44PM +0800, Chang-Ming.Huang@freescale.com wrote:
-> > From: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> > 
-> > Below SOCs don't support the cmd23 command for MMC card,
-> > therefore, disable it in device tree:
-> > P1020, P1021, P1022, P1024, P1025 and P4080
-> > 
-> > Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> 
-> Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
+VGhhbmtzLCBBbnRvbi4NCklmIGl0IGlzIG5lY2Vzc2FyeSwgSSB3aWxsIHJlc2VuZCB0aGlzIHBh
+dGNoIHRvIGxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnLg0KDQpCZXN0IFJlZ2FyZHMNCkpl
+cnJ5IEh1YW5nDQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBbnRv
+biBWb3JvbnRzb3YgW21haWx0bzpjYm91YXRtYWlscnVAZ21haWwuY29tXQ0KPiBTZW50OiBUdWVz
+ZGF5LCBTZXB0ZW1iZXIgMTEsIDIwMTIgNDowNSBQTQ0KPiBUbzogSHVhbmcgQ2hhbmdtaW5nLVI2
+NjA5Mw0KPiBDYzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgS3VtYXIgR2FsYTsgbGludXhw
+cGMtZGV2QGxpc3RzLm96bGFicy5vcmcNCj4gU3ViamVjdDogUmU6IFtQQVRDSCAyLzNdIHBvd2Vy
+cGMvZXNkaGM6IGFkZCBwcm9wZXJ0eSB0byBkaXNhYmxlIHRoZSBDTUQyMw0KPiANCj4gT24gVHVl
+LCBTZXAgMTEsIDIwMTIgYXQgMTI6NTQ6MjlBTSAtMDcwMCwgQW50b24gVm9yb250c292IHdyb3Rl
+Og0KPiA+IE9uIFR1ZSwgU2VwIDExLCAyMDEyIGF0IDAzOjEyOjQ0UE0gKzA4MDAsIENoYW5nLQ0K
+PiBNaW5nLkh1YW5nQGZyZWVzY2FsZS5jb20gd3JvdGU6DQo+ID4gPiBGcm9tOiBKZXJyeSBIdWFu
+ZyA8Q2hhbmctTWluZy5IdWFuZ0BmcmVlc2NhbGUuY29tPg0KPiA+ID4NCj4gPiA+IEJlbG93IFNP
+Q3MgZG9uJ3Qgc3VwcG9ydCB0aGUgY21kMjMgY29tbWFuZCBmb3IgTU1DIGNhcmQsIHRoZXJlZm9y
+ZSwNCj4gPiA+IGRpc2FibGUgaXQgaW4gZGV2aWNlIHRyZWU6DQo+ID4gPiBQMTAyMCwgUDEwMjEs
+IFAxMDIyLCBQMTAyNCwgUDEwMjUgYW5kIFA0MDgwDQo+ID4gPg0KPiA+ID4gU2lnbmVkLW9mZi1i
+eTogSmVycnkgSHVhbmcgPENoYW5nLU1pbmcuSHVhbmdAZnJlZXNjYWxlLmNvbT4NCj4gPg0KPiA+
+IEFja2VkLWJ5OiBBbnRvbiBWb3JvbnRzb3YgPGNib3VhdG1haWxydUBnbWFpbC5jb20+DQo+IA0K
+PiBCdHcsIGFsdGhvdWdoIHRoZSBwYXRjaCBpcyB0cml2aWFsLCBJIGd1ZXNzIHlvdSBzdGlsbCB3
+YW50IHRvIGxldCBrbm93DQo+IFBvd2VyUEMgZm9sa3MgYWJvdXQgaXQuIEFkZGluZyBDYyBhbmQg
+Y29weWluZyB0aGUgcGF0Y2g6DQo+IA0KPiAtIC0gLSAtDQo+IEZyb206IEplcnJ5IEh1YW5nIDxD
+aGFuZy1NaW5nLkh1YW5nQGZyZWVzY2FsZS5jb20+DQo+IA0KPiBCZWxvdyBTT0NzIGRvbid0IHN1
+cHBvcnQgdGhlIGNtZDIzIGNvbW1hbmQgZm9yIE1NQyBjYXJkLCB0aGVyZWZvcmUsDQo+IGRpc2Fi
+bGUgaXQgaW4gZGV2aWNlIHRyZWU6DQo+IFAxMDIwLCBQMTAyMSwgUDEwMjIsIFAxMDI0LCBQMTAy
+NSBhbmQgUDQwODANCj4gDQo+IFNpZ25lZC1vZmYtYnk6IEplcnJ5IEh1YW5nIDxDaGFuZy1NaW5n
+Lkh1YW5nQGZyZWVzY2FsZS5jb20+DQo+IENDOiBBbnRvbiBWb3JvbnRzb3YgPGNib3VhdG1haWxy
+dUBnbWFpbC5jb20+DQo+IC0tLQ0KPiAgYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMHNp
+LXBvc3QuZHRzaSB8ICAgIDEgKw0KPiAgYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMXNp
+LXBvc3QuZHRzaSB8ICAgIDEgKw0KPiAgYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMnNp
+LXBvc3QuZHRzaSB8ICAgIDEgKw0KPiAgYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wNDA4MHNp
+LXBvc3QuZHRzaSB8ICAgIDEgKw0KPiAgNCBmaWxlcyBjaGFuZ2VkLCA0IGluc2VydGlvbnMoKykN
+Cj4gDQo+IGRpZmYgLS1naXQgYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIwc2ktcG9z
+dC5kdHNpDQo+IGIvYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMHNpLXBvc3QuZHRzaQ0K
+PiBpbmRleCA2OGNjNWU3Li43OTNhMzBiIDEwMDY0NA0KPiAtLS0gYS9hcmNoL3Bvd2VycGMvYm9v
+dC9kdHMvZnNsL3AxMDIwc2ktcG9zdC5kdHNpDQo+ICsrKyBiL2FyY2gvcG93ZXJwYy9ib290L2R0
+cy9mc2wvcDEwMjBzaS1wb3N0LmR0c2kNCj4gQEAgLTE1NCw2ICsxNTQsNyBAQA0KPiAgCXNkaGNA
+MmUwMDAgew0KPiAgCQljb21wYXRpYmxlID0gImZzbCxwMTAyMC1lc2RoYyIsICJmc2wsZXNkaGMi
+Ow0KPiAgCQlzZGhjaSxhdXRvLWNtZDEyOw0KPiArCQlzZGhjaSxuby1jbWQyMzsNCj4gIAl9Ow0K
+PiAgL2luY2x1ZGUvICJwcTMtc2VjMy4zLTAuZHRzaSINCj4gDQo+IGRpZmYgLS1naXQgYS9hcmNo
+L3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIxc2ktcG9zdC5kdHNpDQo+IGIvYXJjaC9wb3dlcnBj
+L2Jvb3QvZHRzL2ZzbC9wMTAyMXNpLXBvc3QuZHRzaQ0KPiBpbmRleCBhZGI4MmZkLi4yYjdmZDJh
+IDEwMDY0NA0KPiAtLS0gYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIxc2ktcG9zdC5k
+dHNpDQo+ICsrKyBiL2FyY2gvcG93ZXJwYy9ib290L2R0cy9mc2wvcDEwMjFzaS1wb3N0LmR0c2kN
+Cj4gQEAgLTE0OSw2ICsxNDksNyBAQA0KPiAgL2luY2x1ZGUvICJwcTMtZXNkaGMtMC5kdHNpIg0K
+PiAgCXNkaGNAMmUwMDAgew0KPiAgCQlzZGhjaSxhdXRvLWNtZDEyOw0KPiArCQlzZGhjaSxuby1j
+bWQyMzsNCj4gIAl9Ow0KPiANCj4gIC9pbmNsdWRlLyAicHEzLXNlYzMuMy0wLmR0c2kiDQo+IGRp
+ZmYgLS1naXQgYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIyc2ktcG9zdC5kdHNpDQo+
+IGIvYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMnNpLXBvc3QuZHRzaQ0KPiBpbmRleCAw
+NjIxNmI4Li4yMzM0YTUyIDEwMDY0NA0KPiAtLS0gYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNs
+L3AxMDIyc2ktcG9zdC5kdHNpDQo+ICsrKyBiL2FyY2gvcG93ZXJwYy9ib290L2R0cy9mc2wvcDEw
+MjJzaS1wb3N0LmR0c2kNCj4gQEAgLTIxNSw2ICsyMTUsNyBAQA0KPiAgCXNkaGNAMmUwMDAgew0K
+PiAgCQljb21wYXRpYmxlID0gImZzbCxwMTAyMi1lc2RoYyIsICJmc2wsZXNkaGMiOw0KPiAgCQlz
+ZGhjaSxhdXRvLWNtZDEyOw0KPiArCQlzZGhjaSxuby1jbWQyMzsNCj4gIAl9Ow0KPiANCj4gIC9p
+bmNsdWRlLyAicHEzLXNlYzMuMy0wLmR0c2kiDQo+IGRpZmYgLS1naXQgYS9hcmNoL3Bvd2VycGMv
+Ym9vdC9kdHMvZnNsL3A0MDgwc2ktcG9zdC5kdHNpDQo+IGIvYXJjaC9wb3dlcnBjL2Jvb3QvZHRz
+L2ZzbC9wNDA4MHNpLXBvc3QuZHRzaQ0KPiBpbmRleCA4ZDM1ZDJjLi41YjM5OTUyIDEwMDY0NA0K
+PiAtLS0gYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3A0MDgwc2ktcG9zdC5kdHNpDQo+ICsr
+KyBiL2FyY2gvcG93ZXJwYy9ib290L2R0cy9mc2wvcDQwODBzaS1wb3N0LmR0c2kNCj4gQEAgLTMz
+Nyw2ICszMzcsNyBAQA0KPiAgCXNkaGNAMTE0MDAwIHsNCj4gIAkJdm9sdGFnZS1yYW5nZXMgPSA8
+MzMwMCAzMzAwPjsNCj4gIAkJc2RoY2ksYXV0by1jbWQxMjsNCj4gKwkJc2RoY2ksbm8tY21kMjM7
+DQo+ICAJfTsNCj4gDQo+ICAvaW5jbHVkZS8gInFvcmlxLWkyYy0wLmR0c2kiDQo+IC0tDQo+IDEu
+Ny45LjUNCg0K
 
-Btw, although the patch is trivial, I guess you still want to let know
-PowerPC folks about it. Adding Cc and copying the patch:
-
-- - - -
-From: Jerry Huang <Chang-Ming.Huang@freescale.com>
-
-Below SOCs don't support the cmd23 command for MMC card,
-therefore, disable it in device tree:
-P1020, P1021, P1022, P1024, P1025 and P4080
-
-Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-CC: Anton Vorontsov <cbouatmailru@gmail.com>
----
- arch/powerpc/boot/dts/fsl/p1020si-post.dtsi |    1 +
- arch/powerpc/boot/dts/fsl/p1021si-post.dtsi |    1 +
- arch/powerpc/boot/dts/fsl/p1022si-post.dtsi |    1 +
- arch/powerpc/boot/dts/fsl/p4080si-post.dtsi |    1 +
- 4 files changed, 4 insertions(+)
-
-diff --git a/arch/powerpc/boot/dts/fsl/p1020si-post.dtsi b/arch/powerpc/boot/dts/fsl/p1020si-post.dtsi
-index 68cc5e7..793a30b 100644
---- a/arch/powerpc/boot/dts/fsl/p1020si-post.dtsi
-+++ b/arch/powerpc/boot/dts/fsl/p1020si-post.dtsi
-@@ -154,6 +154,7 @@
- 	sdhc@2e000 {
- 		compatible = "fsl,p1020-esdhc", "fsl,esdhc";
- 		sdhci,auto-cmd12;
-+		sdhci,no-cmd23;
- 	};
- /include/ "pq3-sec3.3-0.dtsi"
- 
-diff --git a/arch/powerpc/boot/dts/fsl/p1021si-post.dtsi b/arch/powerpc/boot/dts/fsl/p1021si-post.dtsi
-index adb82fd..2b7fd2a 100644
---- a/arch/powerpc/boot/dts/fsl/p1021si-post.dtsi
-+++ b/arch/powerpc/boot/dts/fsl/p1021si-post.dtsi
-@@ -149,6 +149,7 @@
- /include/ "pq3-esdhc-0.dtsi"
- 	sdhc@2e000 {
- 		sdhci,auto-cmd12;
-+		sdhci,no-cmd23;
- 	};
- 
- /include/ "pq3-sec3.3-0.dtsi"
-diff --git a/arch/powerpc/boot/dts/fsl/p1022si-post.dtsi b/arch/powerpc/boot/dts/fsl/p1022si-post.dtsi
-index 06216b8..2334a52 100644
---- a/arch/powerpc/boot/dts/fsl/p1022si-post.dtsi
-+++ b/arch/powerpc/boot/dts/fsl/p1022si-post.dtsi
-@@ -215,6 +215,7 @@
- 	sdhc@2e000 {
- 		compatible = "fsl,p1022-esdhc", "fsl,esdhc";
- 		sdhci,auto-cmd12;
-+		sdhci,no-cmd23;
- 	};
- 
- /include/ "pq3-sec3.3-0.dtsi"
-diff --git a/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi b/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi
-index 8d35d2c..5b39952 100644
---- a/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi
-+++ b/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi
-@@ -337,6 +337,7 @@
- 	sdhc@114000 {
- 		voltage-ranges = <3300 3300>;
- 		sdhci,auto-cmd12;
-+		sdhci,no-cmd23;
- 	};
- 
- /include/ "qoriq-i2c-0.dtsi"
--- 
-1.7.9.5
