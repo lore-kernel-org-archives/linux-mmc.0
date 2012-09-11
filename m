@@ -1,118 +1,72 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] Revert "mmc: dw_mmc: Add check for IDMAC configuration"
-Date: Tue, 11 Sep 2012 13:46:05 +0900
-Message-ID: <504EC20D.2030105@samsung.com>
-References: <00d801cd8fc4$738f8540$5aae8fc0$%jun@samsung.com>
- <CAGxe1ZEo68n2QjacyeTd=L7+qB0zPzAL3NUE4Py0_rUVa2VcMQ@mail.gmail.com>
- <504EBFCA.3080203@samsung.com>
- <CAGxe1ZFqp_WZNfBNf=LNNBvKh2oscVHAuy0J-mx2-3xjBLh66Q@mail.gmail.com>
+From: <wei_wang@realsil.com.cn>
+Subject: [PATCH v6 0/3] Add modules to support realtek PCIE card reader
+Date: Tue, 11 Sep 2012 12:54:18 +0800
+Message-ID: <cover.1347330871.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:55669 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751566Ab2IKEqK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Sep 2012 00:46:10 -0400
-Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MA600EQI58SK1I0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 11 Sep 2012 13:46:08 +0900 (KST)
-Received: from [10.90.51.55] by mmp1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0MA600IDP58WPE90@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 11 Sep 2012 13:46:08 +0900 (KST)
-In-reply-to: <CAGxe1ZFqp_WZNfBNf=LNNBvKh2oscVHAuy0J-mx2-3xjBLh66Q@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devel-bounces@linuxdriverproject.org>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/devel>,
+ <mailto:devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/devel/>
+List-Post: <mailto:devel@linuxdriverproject.org>
+List-Help: <mailto:devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/devel>,
+ <mailto:devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: devel-bounces@linuxdriverproject.org
+Sender: "devel" <devel-bounces@linuxdriverproject.org>
+To: cjb@laptop.org, sameo@linux.intel.com
+Cc: arnd@arndb.de, oakad@yahoo.com, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, bp@alien8.de, devel@linuxdriverproject.org
 List-Id: linux-mmc@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, will.newton@imgtec.com, James Hogan <James.Hogan@imgtec.com>
 
-On 09/11/2012 01:40 PM, Girish K S wrote:
-> On 11 September 2012 10:06, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> On 09/11/2012 12:46 PM, Girish K S wrote:
->>> On 11 September 2012 07:53, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->>>> This reverts commit 94c6cee91(Add check for IDMAC configuration).
->>>> Synopsys says that only if internal dmac is not present, optional
->>>> external dma interface is present. When internal dmac is present,
->>>> '0' value in DMA_INTERFACE of HCON is reasonable. DMA_INTERFACE
->>>> indicates external dma interface. And idmac initialization is
->>>> prohibited now. So, let's revert this commit.
->>>
->>> There is no register, or a field in any register which says IDMAC present.
->>> I can see only use_idmac bit field in CTRL register.
->>> So in first place how will i know whether IDMAC is present? Have you
->>> assumed that IDMAC is present.
->>> I would like to know without assuming, whether  IDMAC is present.
->>> If i have missed out something let me know.  i will check and revert back
->> I understood that if INTERNAL_DMAC at HCON register is set to 1, we didn't consdier the DMA_INTERFACE's value.
-> I cannot see any field by name INTERNAL_DMAC in the HCON: can you
-> please tell me the bit position of it.
-> I think INTERNAL_DMAC is the signal interface to AXI master.
-Sorry, You're right. there is no field for INTERNAL_DMAC at HCON register.
->> So although dma_interface is set to 0 or others, host can use the internal DMA.
->>
->> Best Regards,
->> Jaehoon Chung
->>>
->>>>
->>>> CC: Girish K S <girish.shivananjappa@linaro.org>
->>>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->>>> ---
->>>>  drivers/mmc/host/dw_mmc.c |   15 ++-------------
->>>>  1 files changed, 2 insertions(+), 13 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>> index 36f98c0..dcbe9aa 100644
->>>> --- a/drivers/mmc/host/dw_mmc.c
->>>> +++ b/drivers/mmc/host/dw_mmc.c
->>>> @@ -405,23 +405,11 @@ static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
->>>>  static int dw_mci_idmac_init(struct dw_mci *host)
->>>>  {
->>>>         struct idmac_desc *p;
->>>> -       int i, dma_support;
->>>> +       int i;
->>>>
->>>>         /* Number of descriptors in the ring buffer */
->>>>         host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc);
->>>>
->>>> -       /* Check if Hardware Configuration Register has support for DMA */
->>>> -       dma_support = (mci_readl(host, HCON) >> 16) & 0x3;
->>>> -
->>>> -       if (!dma_support || dma_support > 2) {
->>>> -               dev_err(&host->dev,
->>>> -                       "Host Controller does not support IDMA Tx.\n");
->>>> -               host->dma_ops = NULL;
->>>> -               return -ENODEV;
->>>> -       }
->>>> -
->>>> -       dev_info(&host->dev, "Using internal DMA controller.\n");
->>>> -
->>>>         /* Forward link the descriptor list */
->>>>         for (i = 0, p = host->sg_cpu; i < host->ring_size - 1; i++, p++)
->>>>                 p->des3 = host->sg_dma + (sizeof(struct idmac_desc) * (i + 1));
->>>> @@ -1895,6 +1883,7 @@ static void dw_mci_init_dma(struct dw_mci *host)
->>>>         /* Determine which DMA interface to use */
->>>>  #ifdef CONFIG_MMC_DW_IDMAC
->>>>         host->dma_ops = &dw_mci_idmac_ops;
->>>> +       dev_info(&host->dev, "Using internal DMA controller.\n");
->>>>  #endif
->>>>
->>>>         if (!host->dma_ops)
->>>> --
->>>> 1.7.0.4
->>>>
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+From: Wei WANG <wei_wang@realsil.com.cn>
 
+Support for Realtek PCI-Express driver-based card readers including rts5209 and rts5229.
+
+v2:
+1. Using platform device to replace realtek slot bus
+
+v3:
+1. Fix a bug that DMA out of SW-IOMMU space in Lenovo Thinkpad x121e
+2. Tested by Borislav Petkov <bp@alien8.de>
+
+v4:
+1. Fulfill power management callbacks
+
+v5:
+1. Support Memstick card
+
+v6:
+1. Fix some coding style
+
+Wei WANG (3):
+  drivers/mfd: Add realtek pcie card reader driver
+  drivers/mmc: Add realtek pcie sdmmc host driver
+  drivers/memstick: Add realtek pcie memstick host driver
+
+ drivers/memstick/host/Kconfig       |   10 +
+ drivers/memstick/host/Makefile      |    1 +
+ drivers/memstick/host/rtsx_pci_ms.c |  637 ++++++++++++++++
+ drivers/mfd/Kconfig                 |    9 +
+ drivers/mfd/Makefile                |    4 +
+ drivers/mfd/rts5209.c               |  188 +++++
+ drivers/mfd/rts5229.c               |  179 +++++
+ drivers/mfd/rtsx_pcr.c              | 1345 ++++++++++++++++++++++++++++++++++
+ drivers/mfd/rtsx_pcr.h              |   31 +
+ drivers/mmc/host/Kconfig            |    7 +
+ drivers/mmc/host/Makefile           |    2 +
+ drivers/mmc/host/rtsx_pci_sdmmc.c   | 1372 +++++++++++++++++++++++++++++++++++
+ include/linux/mfd/rtsx_common.h     |   47 ++
+ include/linux/mfd/rtsx_pci.h        |  773 ++++++++++++++++++++
+ 14 files changed, 4605 insertions(+)
+ create mode 100644 drivers/memstick/host/rtsx_pci_ms.c
+ create mode 100644 drivers/mfd/rts5209.c
+ create mode 100644 drivers/mfd/rts5229.c
+ create mode 100644 drivers/mfd/rtsx_pcr.c
+ create mode 100644 drivers/mfd/rtsx_pcr.h
+ create mode 100644 drivers/mmc/host/rtsx_pci_sdmmc.c
+ create mode 100644 include/linux/mfd/rtsx_common.h
+ create mode 100644 include/linux/mfd/rtsx_pci.h
+
+-- 
+1.7.9.5
