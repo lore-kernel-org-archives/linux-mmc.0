@@ -1,84 +1,75 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 2/3] powerpc/esdhc: add property to disable the CMD23
-Date: Tue, 11 Sep 2012 09:36:33 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C176170@039-SN1MPN1-002.039d.mgd.msft.net>
-References: <1347347565-17474-1-git-send-email-Chang-Ming.Huang@freescale.com>
- <1347347565-17474-2-git-send-email-Chang-Ming.Huang@freescale.com>
- <20120911075429.GA27028@lizard> <20120911080457.GA28235@lizard>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: [PATCH] mmc: sdhci: refine code for sd clock disable/enable in set ios
+Date: Tue, 11 Sep 2012 19:58:46 +0800
+Message-ID: <1347364726-21492-1-git-send-email-keyuan.liu@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:19880
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756781Ab2IKJgi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Sep 2012 05:36:38 -0400
-In-Reply-To: <20120911080457.GA28235@lizard>
-Content-Language: en-US
+Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:37062 "EHLO
+	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932143Ab2IKMC1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Sep 2012 08:02:27 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kumar Gala <galak@kernel.crashing.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu
+Cc: cxie4@marvell.com, hzhuang1@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-VGhhbmtzLCBBbnRvbi4NCklmIGl0IGlzIG5lY2Vzc2FyeSwgSSB3aWxsIHJlc2VuZCB0aGlzIHBh
-dGNoIHRvIGxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnLg0KDQpCZXN0IFJlZ2FyZHMNCkpl
-cnJ5IEh1YW5nDQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBbnRv
-biBWb3JvbnRzb3YgW21haWx0bzpjYm91YXRtYWlscnVAZ21haWwuY29tXQ0KPiBTZW50OiBUdWVz
-ZGF5LCBTZXB0ZW1iZXIgMTEsIDIwMTIgNDowNSBQTQ0KPiBUbzogSHVhbmcgQ2hhbmdtaW5nLVI2
-NjA5Mw0KPiBDYzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgS3VtYXIgR2FsYTsgbGludXhw
-cGMtZGV2QGxpc3RzLm96bGFicy5vcmcNCj4gU3ViamVjdDogUmU6IFtQQVRDSCAyLzNdIHBvd2Vy
-cGMvZXNkaGM6IGFkZCBwcm9wZXJ0eSB0byBkaXNhYmxlIHRoZSBDTUQyMw0KPiANCj4gT24gVHVl
-LCBTZXAgMTEsIDIwMTIgYXQgMTI6NTQ6MjlBTSAtMDcwMCwgQW50b24gVm9yb250c292IHdyb3Rl
-Og0KPiA+IE9uIFR1ZSwgU2VwIDExLCAyMDEyIGF0IDAzOjEyOjQ0UE0gKzA4MDAsIENoYW5nLQ0K
-PiBNaW5nLkh1YW5nQGZyZWVzY2FsZS5jb20gd3JvdGU6DQo+ID4gPiBGcm9tOiBKZXJyeSBIdWFu
-ZyA8Q2hhbmctTWluZy5IdWFuZ0BmcmVlc2NhbGUuY29tPg0KPiA+ID4NCj4gPiA+IEJlbG93IFNP
-Q3MgZG9uJ3Qgc3VwcG9ydCB0aGUgY21kMjMgY29tbWFuZCBmb3IgTU1DIGNhcmQsIHRoZXJlZm9y
-ZSwNCj4gPiA+IGRpc2FibGUgaXQgaW4gZGV2aWNlIHRyZWU6DQo+ID4gPiBQMTAyMCwgUDEwMjEs
-IFAxMDIyLCBQMTAyNCwgUDEwMjUgYW5kIFA0MDgwDQo+ID4gPg0KPiA+ID4gU2lnbmVkLW9mZi1i
-eTogSmVycnkgSHVhbmcgPENoYW5nLU1pbmcuSHVhbmdAZnJlZXNjYWxlLmNvbT4NCj4gPg0KPiA+
-IEFja2VkLWJ5OiBBbnRvbiBWb3JvbnRzb3YgPGNib3VhdG1haWxydUBnbWFpbC5jb20+DQo+IA0K
-PiBCdHcsIGFsdGhvdWdoIHRoZSBwYXRjaCBpcyB0cml2aWFsLCBJIGd1ZXNzIHlvdSBzdGlsbCB3
-YW50IHRvIGxldCBrbm93DQo+IFBvd2VyUEMgZm9sa3MgYWJvdXQgaXQuIEFkZGluZyBDYyBhbmQg
-Y29weWluZyB0aGUgcGF0Y2g6DQo+IA0KPiAtIC0gLSAtDQo+IEZyb206IEplcnJ5IEh1YW5nIDxD
-aGFuZy1NaW5nLkh1YW5nQGZyZWVzY2FsZS5jb20+DQo+IA0KPiBCZWxvdyBTT0NzIGRvbid0IHN1
-cHBvcnQgdGhlIGNtZDIzIGNvbW1hbmQgZm9yIE1NQyBjYXJkLCB0aGVyZWZvcmUsDQo+IGRpc2Fi
-bGUgaXQgaW4gZGV2aWNlIHRyZWU6DQo+IFAxMDIwLCBQMTAyMSwgUDEwMjIsIFAxMDI0LCBQMTAy
-NSBhbmQgUDQwODANCj4gDQo+IFNpZ25lZC1vZmYtYnk6IEplcnJ5IEh1YW5nIDxDaGFuZy1NaW5n
-Lkh1YW5nQGZyZWVzY2FsZS5jb20+DQo+IENDOiBBbnRvbiBWb3JvbnRzb3YgPGNib3VhdG1haWxy
-dUBnbWFpbC5jb20+DQo+IC0tLQ0KPiAgYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMHNp
-LXBvc3QuZHRzaSB8ICAgIDEgKw0KPiAgYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMXNp
-LXBvc3QuZHRzaSB8ICAgIDEgKw0KPiAgYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMnNp
-LXBvc3QuZHRzaSB8ICAgIDEgKw0KPiAgYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wNDA4MHNp
-LXBvc3QuZHRzaSB8ICAgIDEgKw0KPiAgNCBmaWxlcyBjaGFuZ2VkLCA0IGluc2VydGlvbnMoKykN
-Cj4gDQo+IGRpZmYgLS1naXQgYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIwc2ktcG9z
-dC5kdHNpDQo+IGIvYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMHNpLXBvc3QuZHRzaQ0K
-PiBpbmRleCA2OGNjNWU3Li43OTNhMzBiIDEwMDY0NA0KPiAtLS0gYS9hcmNoL3Bvd2VycGMvYm9v
-dC9kdHMvZnNsL3AxMDIwc2ktcG9zdC5kdHNpDQo+ICsrKyBiL2FyY2gvcG93ZXJwYy9ib290L2R0
-cy9mc2wvcDEwMjBzaS1wb3N0LmR0c2kNCj4gQEAgLTE1NCw2ICsxNTQsNyBAQA0KPiAgCXNkaGNA
-MmUwMDAgew0KPiAgCQljb21wYXRpYmxlID0gImZzbCxwMTAyMC1lc2RoYyIsICJmc2wsZXNkaGMi
-Ow0KPiAgCQlzZGhjaSxhdXRvLWNtZDEyOw0KPiArCQlzZGhjaSxuby1jbWQyMzsNCj4gIAl9Ow0K
-PiAgL2luY2x1ZGUvICJwcTMtc2VjMy4zLTAuZHRzaSINCj4gDQo+IGRpZmYgLS1naXQgYS9hcmNo
-L3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIxc2ktcG9zdC5kdHNpDQo+IGIvYXJjaC9wb3dlcnBj
-L2Jvb3QvZHRzL2ZzbC9wMTAyMXNpLXBvc3QuZHRzaQ0KPiBpbmRleCBhZGI4MmZkLi4yYjdmZDJh
-IDEwMDY0NA0KPiAtLS0gYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIxc2ktcG9zdC5k
-dHNpDQo+ICsrKyBiL2FyY2gvcG93ZXJwYy9ib290L2R0cy9mc2wvcDEwMjFzaS1wb3N0LmR0c2kN
-Cj4gQEAgLTE0OSw2ICsxNDksNyBAQA0KPiAgL2luY2x1ZGUvICJwcTMtZXNkaGMtMC5kdHNpIg0K
-PiAgCXNkaGNAMmUwMDAgew0KPiAgCQlzZGhjaSxhdXRvLWNtZDEyOw0KPiArCQlzZGhjaSxuby1j
-bWQyMzsNCj4gIAl9Ow0KPiANCj4gIC9pbmNsdWRlLyAicHEzLXNlYzMuMy0wLmR0c2kiDQo+IGRp
-ZmYgLS1naXQgYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIyc2ktcG9zdC5kdHNpDQo+
-IGIvYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMnNpLXBvc3QuZHRzaQ0KPiBpbmRleCAw
-NjIxNmI4Li4yMzM0YTUyIDEwMDY0NA0KPiAtLS0gYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNs
-L3AxMDIyc2ktcG9zdC5kdHNpDQo+ICsrKyBiL2FyY2gvcG93ZXJwYy9ib290L2R0cy9mc2wvcDEw
-MjJzaS1wb3N0LmR0c2kNCj4gQEAgLTIxNSw2ICsyMTUsNyBAQA0KPiAgCXNkaGNAMmUwMDAgew0K
-PiAgCQljb21wYXRpYmxlID0gImZzbCxwMTAyMi1lc2RoYyIsICJmc2wsZXNkaGMiOw0KPiAgCQlz
-ZGhjaSxhdXRvLWNtZDEyOw0KPiArCQlzZGhjaSxuby1jbWQyMzsNCj4gIAl9Ow0KPiANCj4gIC9p
-bmNsdWRlLyAicHEzLXNlYzMuMy0wLmR0c2kiDQo+IGRpZmYgLS1naXQgYS9hcmNoL3Bvd2VycGMv
-Ym9vdC9kdHMvZnNsL3A0MDgwc2ktcG9zdC5kdHNpDQo+IGIvYXJjaC9wb3dlcnBjL2Jvb3QvZHRz
-L2ZzbC9wNDA4MHNpLXBvc3QuZHRzaQ0KPiBpbmRleCA4ZDM1ZDJjLi41YjM5OTUyIDEwMDY0NA0K
-PiAtLS0gYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3A0MDgwc2ktcG9zdC5kdHNpDQo+ICsr
-KyBiL2FyY2gvcG93ZXJwYy9ib290L2R0cy9mc2wvcDQwODBzaS1wb3N0LmR0c2kNCj4gQEAgLTMz
-Nyw2ICszMzcsNyBAQA0KPiAgCXNkaGNAMTE0MDAwIHsNCj4gIAkJdm9sdGFnZS1yYW5nZXMgPSA8
-MzMwMCAzMzAwPjsNCj4gIAkJc2RoY2ksYXV0by1jbWQxMjsNCj4gKwkJc2RoY2ksbm8tY21kMjM7
-DQo+ICAJfTsNCj4gDQo+ICAvaW5jbHVkZS8gInFvcmlxLWkyYy0wLmR0c2kiDQo+IC0tDQo+IDEu
-Ny45LjUNCg0K
+From: Kevin Liu <kliu5@marvell.com>
+
+With preset value enabled, there are two continuous times
+of sd clock disable/enable. They can be combined into one
+to save time and make code cleaner.
+
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
+---
+ drivers/mmc/host/sdhci.c |   29 +++++++++--------------------
+ 1 files changed, 9 insertions(+), 20 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 8c56435..9b619e9 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1441,33 +1441,22 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 				ctrl_2 |= SDHCI_CTRL_DRV_TYPE_C;
+ 
+ 			sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+-		} else {
+-			/*
+-			 * According to SDHC Spec v3.00, if the Preset Value
+-			 * Enable in the Host Control 2 register is set, we
+-			 * need to reset SD Clock Enable before changing High
+-			 * Speed Enable to avoid generating clock gliches.
+-			 */
+-
+-			/* Reset SD Clock Enable */
+-			clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+-			clk &= ~SDHCI_CLOCK_CARD_EN;
+-			sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+-
+-			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+-
+-			/* Re-enable SD Clock */
+-			clock = host->clock;
+-			host->clock = 0;
+-			sdhci_set_clock(host, clock);
+ 		}
+ 
+-
+ 		/* Reset SD Clock Enable */
+ 		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+ 		clk &= ~SDHCI_CLOCK_CARD_EN;
+ 		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+ 
++		/*
++		 * According to SDHC Spec v3.00, if the Preset Value
++		 * Enable in the Host Control 2 register is set, we
++		 * need to reset SD Clock Enable before changing High
++		 * Speed Enable to avoid generating clock gliches.
++		 */
++		if (ctrl_2 & SDHCI_CTRL_PRESET_VAL_ENABLE)
++			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
++
+ 		if (host->ops->set_uhs_signaling)
+ 			host->ops->set_uhs_signaling(host, ios->timing);
+ 		else {
+-- 
+1.7.0.4
 
