@@ -1,157 +1,97 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] Revert "mmc: dw_mmc: Add check for IDMAC configuration"
-Date: Wed, 12 Sep 2012 11:21:47 +0900
-Message-ID: <00fb01cd908d$5c8c75f0$15a561d0$%jun@samsung.com>
-References: <00d801cd8fc4$738f8540$5aae8fc0$%jun@samsung.com>
- <CAGxe1ZEo68n2QjacyeTd=L7+qB0zPzAL3NUE4Py0_rUVa2VcMQ@mail.gmail.com>
- <00dd01cd8fe0$b95d2cf0$2c1786d0$%jun@samsung.com>
- <CAGxe1ZFDoxp+QVA77VyGxBEYGqH5_iQ5dnwugychtXViqjc5ig@mail.gmail.com>
- <00e501cd8fe8$26a8e540$73faafc0$%jun@samsung.com>
- <CAGxe1ZExbV9Mhv6_m8EQQAojTtog+SCZKo-WxskvKAAzkfjHKA@mail.gmail.com>
- <CAGxe1ZGb6O3HLVSscEOCVWQGC3NMvXN6iyOinke7VetPEMaOSw@mail.gmail.com>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH 2/3] powerpc/esdhc: add property to disable the CMD23
+Date: Wed, 12 Sep 2012 03:19:18 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C176E94@039-SN1MPN1-002.039d.mgd.msft.net>
+References: <1347347565-17474-1-git-send-email-Chang-Ming.Huang@freescale.com>
+ <1347347565-17474-2-git-send-email-Chang-Ming.Huang@freescale.com>
+ <20120911075429.GA27028@lizard> <20120911080457.GA28235@lizard>
+ <504F82C1.2000907@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:22040 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755569Ab2ILCVt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Sep 2012 22:21:49 -0400
-Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout4.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MA7006XXT79O4B0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 12 Sep 2012 11:21:48 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0MA700IEWT8B3P70@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 12 Sep 2012 11:21:48 +0900 (KST)
-In-reply-to: <CAGxe1ZGb6O3HLVSscEOCVWQGC3NMvXN6iyOinke7VetPEMaOSw@mail.gmail.com>
-Content-language: ko
+Received: from db3ehsobe002.messaging.microsoft.com ([213.199.154.140]:55373
+	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1759979Ab2ILDTa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Sep 2012 23:19:30 -0400
+In-Reply-To: <504F82C1.2000907@freescale.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Girish K S' <girish.shivananjappa@linaro.org>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, will.newton@imgtec.com, 'James Hogan' <James.Hogan@imgtec.com>
+To: Wood Scott-B07421 <B07421@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Tuesday, September 11, 2012, Girish K S <girish.shivananjappa@linaro.org> wrote:
-> On 11 September 2012 12:41, Girish K S <girish.shivananjappa@linaro.org> wrote:
-> > On 11 September 2012 12:09, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> >> On Tuesday, September 11, 2012, Girish K S <girish.shivananjappa@linaro.org> wrote:
-> >>> On 11 September 2012 11:16, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> >>> > On Tuesday, September 11, 2012, Girish K S <girish.shivananjappa@linaro.org> wrote:
-> >>> >> On 11 September 2012 07:53, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> >>> >> > This reverts commit 94c6cee91(Add check for IDMAC configuration).
-> >>> >> > Synopsys says that only if internal dmac is not present, optional
-> >>> >> > external dma interface is present. When internal dmac is present,
-> >>> >> > '0' value in DMA_INTERFACE of HCON is reasonable. DMA_INTERFACE
-> >>> >> > indicates external dma interface. And idmac initialization is
-> >>> >> > prohibited now. So, let's revert this commit.
-> >>> >>
-> >>> >> There is no register, or a field in any register which says IDMAC present.
-> >>> >> I can see only use_idmac bit field in CTRL register.
-> >>> >> So in first place how will i know whether IDMAC is present? Have you
-> >>> >> assumed that IDMAC is present.
-> >>> >> I would like to know without assuming, whether  IDMAC is present.
-> >>> >> If i have missed out something let me know.  i will check and revert back
-> >>> > There is no way to see the presence of idmac from host controller on the runtime.
-> >>> > But enabling idmac is not selected in the menuconfig just with assuming its presence.
-> >>> > User can find the support of idmac from manual at least, I  know the lack of this information in
-> >>> manual though.
-> >>> I cannot find any line in the manual saying "Support IDMAC". Keeping
-> >>> this in mind and the with the literal meaning what the HCON field
-> >>> DMA_INTERFACE means, the above patch was made.
-> >>> i had posted a patch for adding quirk to this (was waiting for some dt
-> >>> patches to be accepted to resend it). Once that patch gets merged it
-> >>> will be helpful for the user to use it comfortably. If QUIRK is
-> >>> enabled it means there is IDMAC and the driver user is intentionally
-> >>> enabling it.
-> >> I mentioned the lack of description of feature in manual.
-> >> When we consider the real meaning of DMA_INTERFACE, '0' value doen't indicate the absence of idmac.
-> >> So, we cannot decide  the support of idmac with the DMA_INTERFACE.
-> >>
-> >> Do you mean this patch:"mmc: dwmmc: Add quirk for broken Hardware Config"?
-> >> HCON register in the original Synopsys doesn't include information of internal dmac.
-> >> Do you think it's also broken?
-> > As per the current available information from the manual i think the
-> > HCON is broken.
-> > May be the synopsys is the right person to clarify this.
-> If you have some confirmation regarding the DMA_INTERFACE from the
-> synopsys. please post it, It will be really helpful in correcting my
-> understanding abt the dma interface
-Information regarding DMA_INTERFACE can be referred enough in Synopsys manual.
-As mentioned above commit message, DMA_INTERFACE specifies the external dma interface.
-'0'(DMA_INTERFACE) means that there is no external dma interface in current host controller.
-Synopsys may supply the idmac for host controller basically.
-If Soc's vendor decides to use external dma interface instead of idmac, 
-then DMA_INTERFACE parameter should be configured before synthesizing RTL.
-I hope it helpful to you. If there is something wrong, please let me know.
-
-Thanks,
-Seungwon Jeon
-> >>> >
-> >>> >>
-> >>> >> >
-> >>> >> > CC: Girish K S <girish.shivananjappa@linaro.org>
-> >>> >> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> >>> >> > ---
-> >>> >> >  drivers/mmc/host/dw_mmc.c |   15 ++-------------
-> >>> >> >  1 files changed, 2 insertions(+), 13 deletions(-)
-> >>> >> >
-> >>> >> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> >>> >> > index 36f98c0..dcbe9aa 100644
-> >>> >> > --- a/drivers/mmc/host/dw_mmc.c
-> >>> >> > +++ b/drivers/mmc/host/dw_mmc.c
-> >>> >> > @@ -405,23 +405,11 @@ static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int
-> sg_len)
-> >>> >> >  static int dw_mci_idmac_init(struct dw_mci *host)
-> >>> >> >  {
-> >>> >> >         struct idmac_desc *p;
-> >>> >> > -       int i, dma_support;
-> >>> >> > +       int i;
-> >>> >> >
-> >>> >> >         /* Number of descriptors in the ring buffer */
-> >>> >> >         host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc);
-> >>> >> >
-> >>> >> > -       /* Check if Hardware Configuration Register has support for DMA */
-> >>> >> > -       dma_support = (mci_readl(host, HCON) >> 16) & 0x3;
-> >>> >> > -
-> >>> >> > -       if (!dma_support || dma_support > 2) {
-> >>> >> > -               dev_err(&host->dev,
-> >>> >> > -                       "Host Controller does not support IDMA Tx.\n");
-> >>> >> > -               host->dma_ops = NULL;
-> >>> >> > -               return -ENODEV;
-> >>> >> > -       }
-> >>> >> > -
-> >>> >> > -       dev_info(&host->dev, "Using internal DMA controller.\n");
-> >>> >> > -
-> >>> >> >         /* Forward link the descriptor list */
-> >>> >> >         for (i = 0, p = host->sg_cpu; i < host->ring_size - 1; i++, p++)
-> >>> >> >                 p->des3 = host->sg_dma + (sizeof(struct idmac_desc) * (i + 1));
-> >>> >> > @@ -1895,6 +1883,7 @@ static void dw_mci_init_dma(struct dw_mci *host)
-> >>> >> >         /* Determine which DMA interface to use */
-> >>> >> >  #ifdef CONFIG_MMC_DW_IDMAC
-> >>> >> >         host->dma_ops = &dw_mci_idmac_ops;
-> >>> >> > +       dev_info(&host->dev, "Using internal DMA controller.\n");
-> >>> >> >  #endif
-> >>> >> >
-> >>> >> >         if (!host->dma_ops)
-> >>> >> > --
-> >>> >> > 1.7.0.4
-> >>> >> >
-> >>> >> >
-> >>> >> --
-> >>> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> >>> >> the body of a message to majordomo@vger.kernel.org
-> >>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>> >
-> >>> --
-> >>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> >>> the body of a message to majordomo@vger.kernel.org
-> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+DQoNCkJlc3QgUmVnYXJkcw0KSmVycnkgSHVhbmcNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2Fn
+ZS0tLS0tDQo+IEZyb206IFdvb2QgU2NvdHQtQjA3NDIxDQo+IFNlbnQ6IFdlZG5lc2RheSwgU2Vw
+dGVtYmVyIDEyLCAyMDEyIDI6MjggQU0NCj4gVG86IEFudG9uIFZvcm9udHNvdg0KPiBDYzogSHVh
+bmcgQ2hhbmdtaW5nLVI2NjA5MzsgbGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmc7IGxpbnV4
+LQ0KPiBtbWNAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMi8zXSBwb3dl
+cnBjL2VzZGhjOiBhZGQgcHJvcGVydHkgdG8gZGlzYWJsZSB0aGUgQ01EMjMNCj4gDQo+IE9uIDA5
+LzExLzIwMTIgMDM6MDQgQU0sIEFudG9uIFZvcm9udHNvdiB3cm90ZToNCj4gPiBPbiBUdWUsIFNl
+cCAxMSwgMjAxMiBhdCAxMjo1NDoyOUFNIC0wNzAwLCBBbnRvbiBWb3JvbnRzb3Ygd3JvdGU6DQo+
+ID4+IE9uIFR1ZSwgU2VwIDExLCAyMDEyIGF0IDAzOjEyOjQ0UE0gKzA4MDAsIENoYW5nLQ0KPiBN
+aW5nLkh1YW5nQGZyZWVzY2FsZS5jb20gd3JvdGU6DQo+ID4+PiBGcm9tOiBKZXJyeSBIdWFuZyA8
+Q2hhbmctTWluZy5IdWFuZ0BmcmVlc2NhbGUuY29tPg0KPiA+Pj4NCj4gPj4+IEJlbG93IFNPQ3Mg
+ZG9uJ3Qgc3VwcG9ydCB0aGUgY21kMjMgY29tbWFuZCBmb3IgTU1DIGNhcmQsIHRoZXJlZm9yZSwN
+Cj4gPj4+IGRpc2FibGUgaXQgaW4gZGV2aWNlIHRyZWU6DQo+ID4+PiBQMTAyMCwgUDEwMjEsIFAx
+MDIyLCBQMTAyNCwgUDEwMjUgYW5kIFA0MDgwDQo+ID4+Pg0KPiA+Pj4gU2lnbmVkLW9mZi1ieTog
+SmVycnkgSHVhbmcgPENoYW5nLU1pbmcuSHVhbmdAZnJlZXNjYWxlLmNvbT4NCj4gPj4NCj4gPj4g
+QWNrZWQtYnk6IEFudG9uIFZvcm9udHNvdiA8Y2JvdWF0bWFpbHJ1QGdtYWlsLmNvbT4NCj4gPg0K
+PiA+IEJ0dywgYWx0aG91Z2ggdGhlIHBhdGNoIGlzIHRyaXZpYWwsIEkgZ3Vlc3MgeW91IHN0aWxs
+IHdhbnQgdG8gbGV0IGtub3cNCj4gPiBQb3dlclBDIGZvbGtzIGFib3V0IGl0LiBBZGRpbmcgQ2Mg
+YW5kIGNvcHlpbmcgdGhlIHBhdGNoOg0KPiA+DQo+ID4gLSAtIC0gLQ0KPiA+IEZyb206IEplcnJ5
+IEh1YW5nIDxDaGFuZy1NaW5nLkh1YW5nQGZyZWVzY2FsZS5jb20+DQo+ID4NCj4gPiBCZWxvdyBT
+T0NzIGRvbid0IHN1cHBvcnQgdGhlIGNtZDIzIGNvbW1hbmQgZm9yIE1NQyBjYXJkLCB0aGVyZWZv
+cmUsDQo+ID4gZGlzYWJsZSBpdCBpbiBkZXZpY2UgdHJlZToNCj4gPiBQMTAyMCwgUDEwMjEsIFAx
+MDIyLCBQMTAyNCwgUDEwMjUgYW5kIFA0MDgwDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBKZXJy
+eSBIdWFuZyA8Q2hhbmctTWluZy5IdWFuZ0BmcmVlc2NhbGUuY29tPg0KPiA+IENDOiBBbnRvbiBW
+b3JvbnRzb3YgPGNib3VhdG1haWxydUBnbWFpbC5jb20+DQo+ID4gLS0tDQo+ID4gIGFyY2gvcG93
+ZXJwYy9ib290L2R0cy9mc2wvcDEwMjBzaS1wb3N0LmR0c2kgfCAgICAxICsNCj4gPiAgYXJjaC9w
+b3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMXNpLXBvc3QuZHRzaSB8ICAgIDEgKw0KPiA+ICBhcmNo
+L3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIyc2ktcG9zdC5kdHNpIHwgICAgMSArDQo+ID4gIGFy
+Y2gvcG93ZXJwYy9ib290L2R0cy9mc2wvcDQwODBzaS1wb3N0LmR0c2kgfCAgICAxICsNCj4gPiAg
+NCBmaWxlcyBjaGFuZ2VkLCA0IGluc2VydGlvbnMoKykNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9h
+cmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIwc2ktcG9zdC5kdHNpDQo+ID4gYi9hcmNoL3Bv
+d2VycGMvYm9vdC9kdHMvZnNsL3AxMDIwc2ktcG9zdC5kdHNpDQo+ID4gaW5kZXggNjhjYzVlNy4u
+NzkzYTMwYiAxMDA2NDQNCj4gPiAtLS0gYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIw
+c2ktcG9zdC5kdHNpDQo+ID4gKysrIGIvYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMHNp
+LXBvc3QuZHRzaQ0KPiA+IEBAIC0xNTQsNiArMTU0LDcgQEANCj4gPiAgCXNkaGNAMmUwMDAgew0K
+PiA+ICAJCWNvbXBhdGlibGUgPSAiZnNsLHAxMDIwLWVzZGhjIiwgImZzbCxlc2RoYyI7DQo+ID4g
+IAkJc2RoY2ksYXV0by1jbWQxMjsNCj4gPiArCQlzZGhjaSxuby1jbWQyMzsNCj4gPiAgCX07DQo+
+ID4gIC9pbmNsdWRlLyAicHEzLXNlYzMuMy0wLmR0c2kiDQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEv
+YXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMXNpLXBvc3QuZHRzaQ0KPiA+IGIvYXJjaC9w
+b3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMXNpLXBvc3QuZHRzaQ0KPiA+IGluZGV4IGFkYjgyZmQu
+LjJiN2ZkMmEgMTAwNjQ0DQo+ID4gLS0tIGEvYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAy
+MXNpLXBvc3QuZHRzaQ0KPiA+ICsrKyBiL2FyY2gvcG93ZXJwYy9ib290L2R0cy9mc2wvcDEwMjFz
+aS1wb3N0LmR0c2kNCj4gPiBAQCAtMTQ5LDYgKzE0OSw3IEBADQo+ID4gIC9pbmNsdWRlLyAicHEz
+LWVzZGhjLTAuZHRzaSINCj4gPiAgCXNkaGNAMmUwMDAgew0KPiA+ICAJCXNkaGNpLGF1dG8tY21k
+MTI7DQo+ID4gKwkJc2RoY2ksbm8tY21kMjM7DQo+ID4gIAl9Ow0KPiA+DQo+ID4gIC9pbmNsdWRl
+LyAicHEzLXNlYzMuMy0wLmR0c2kiDQo+ID4gZGlmZiAtLWdpdCBhL2FyY2gvcG93ZXJwYy9ib290
+L2R0cy9mc2wvcDEwMjJzaS1wb3N0LmR0c2kNCj4gPiBiL2FyY2gvcG93ZXJwYy9ib290L2R0cy9m
+c2wvcDEwMjJzaS1wb3N0LmR0c2kNCj4gPiBpbmRleCAwNjIxNmI4Li4yMzM0YTUyIDEwMDY0NA0K
+PiA+IC0tLSBhL2FyY2gvcG93ZXJwYy9ib290L2R0cy9mc2wvcDEwMjJzaS1wb3N0LmR0c2kNCj4g
+PiArKysgYi9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIyc2ktcG9zdC5kdHNpDQo+ID4g
+QEAgLTIxNSw2ICsyMTUsNyBAQA0KPiA+ICAJc2RoY0AyZTAwMCB7DQo+ID4gIAkJY29tcGF0aWJs
+ZSA9ICJmc2wscDEwMjItZXNkaGMiLCAiZnNsLGVzZGhjIjsNCj4gPiAgCQlzZGhjaSxhdXRvLWNt
+ZDEyOw0KPiA+ICsJCXNkaGNpLG5vLWNtZDIzOw0KPiA+ICAJfTsNCj4gPg0KPiA+ICAvaW5jbHVk
+ZS8gInBxMy1zZWMzLjMtMC5kdHNpIg0KPiA+IGRpZmYgLS1naXQgYS9hcmNoL3Bvd2VycGMvYm9v
+dC9kdHMvZnNsL3A0MDgwc2ktcG9zdC5kdHNpDQo+ID4gYi9hcmNoL3Bvd2VycGMvYm9vdC9kdHMv
+ZnNsL3A0MDgwc2ktcG9zdC5kdHNpDQo+ID4gaW5kZXggOGQzNWQyYy4uNWIzOTk1MiAxMDA2NDQN
+Cj4gPiAtLS0gYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3A0MDgwc2ktcG9zdC5kdHNpDQo+
+ID4gKysrIGIvYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wNDA4MHNpLXBvc3QuZHRzaQ0KPiA+
+IEBAIC0zMzcsNiArMzM3LDcgQEANCj4gPiAgCXNkaGNAMTE0MDAwIHsNCj4gPiAgCQl2b2x0YWdl
+LXJhbmdlcyA9IDwzMzAwIDMzMDA+Ow0KPiA+ICAJCXNkaGNpLGF1dG8tY21kMTI7DQo+ID4gKwkJ
+c2RoY2ksbm8tY21kMjM7DQo+ID4gIAl9Ow0KPiA+DQo+ID4gIC9pbmNsdWRlLyAicW9yaXEtaTJj
+LTAuZHRzaSINCj4gPg0KPiANCj4gVGhpcyB3b24ndCBoZWxwIHBlb3BsZSB3aXRoIG9sZCBkZXZp
+Y2UgdHJlZXMgKGZvcmtlZCBmb3IgYSBjdXN0b20gYm9hcmQsDQo+IHRpZWQgdG8gYW4gb2xkIFUt
+Qm9vdCwgZXRjKS4gIFRoZSBkcml2ZXIgc2hvdWxkIGluZmVyIHRoaXMgZnJvbSB0aGUNCj4gY29t
+cGF0aWJsZSBzdHJpbmcgb3IgdmVyc2lvbiByZWdpc3RlcnMgKGlkZWFsbHkgYmxvY2stc3BlY2lm
+aWMgdmVyc2lvbg0KPiByZWdpc3RlcnMsIGJ1dCBpZiB0aGVzZSBhcmUgYWJzZW50IG9yIGluY29u
+Y2x1c2l2ZSwgU1ZSIGNhbiBiZSB1c2VkKS4NCj4gDQoNCkkgZG9uJ3QgdGhpbmsgaXQgaXMgdGhl
+IGJlc3Qgd2F5IHRvIGRvIGl0Lg0KRm9yIHRoZSBWVk4yLjIgb3Igb2xkZXIsIHNvbWUgc2lsaWNv
+biBzdXBwb3J0IHRoaXMgZmVhdHVyZSAobXBjODUzNiBhbmQgcDIwMjApLCBidXQgb3RoZXIgc2ls
+aWNvbmVzIGRvbid0IHN1cHBvcnQgaXQgKGUuZy4gcDQwODAsIHAxMDJ4KS4NClRob3VnaCwgdGhl
+IGN1cnJlbnQgcDUvcDQvcDMgaGFzIHN1cHBvcnRlZCB0aGlzIGZlYXR1cmUsIGNhbiB3ZSBzdXJl
+IHRoZSBmdXR1cmUgc2lsaWNvbiBzdXBwb3J0IGl0Pw0KU28gSSB0aGluayB0aGUgYmVzdCB3YXkg
+aXMgdG8gc3BlY2lmeSBpdCBpbiBkZXZpY2UgdHJlZSBhcyAnc2RoY2ksYXV0by1jbWQxMicNCg==
 
