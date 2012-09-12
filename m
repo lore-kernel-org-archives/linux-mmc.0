@@ -1,45 +1,152 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH 2/3] powerpc/esdhc: add property to disable the CMD23
-Date: Tue, 11 Sep 2012 20:38:11 -0700
-Message-ID: <20120912033811.GA1886@lizard>
-References: <1347347565-17474-1-git-send-email-Chang-Ming.Huang@freescale.com>
- <1347347565-17474-2-git-send-email-Chang-Ming.Huang@freescale.com>
- <20120911075429.GA27028@lizard>
- <20120911080457.GA28235@lizard>
- <504F82C1.2000907@freescale.com>
- <110EED8CC96DFC488B7E717A2027A27C176E94@039-SN1MPN1-002.039d.mgd.msft.net>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH] Revert "mmc: dw_mmc: Add check for IDMAC configuration"
+Date: Wed, 12 Sep 2012 09:38:29 +0530
+Message-ID: <CAGxe1ZFeC--KE3qqdCbdynL9OyFZsgtB5wKuor=N97XjWyegaw@mail.gmail.com>
+References: <00d801cd8fc4$738f8540$5aae8fc0$%jun@samsung.com>
+	<CAGxe1ZEo68n2QjacyeTd=L7+qB0zPzAL3NUE4Py0_rUVa2VcMQ@mail.gmail.com>
+	<00dd01cd8fe0$b95d2cf0$2c1786d0$%jun@samsung.com>
+	<CAGxe1ZFDoxp+QVA77VyGxBEYGqH5_iQ5dnwugychtXViqjc5ig@mail.gmail.com>
+	<00e501cd8fe8$26a8e540$73faafc0$%jun@samsung.com>
+	<CAGxe1ZExbV9Mhv6_m8EQQAojTtog+SCZKo-WxskvKAAzkfjHKA@mail.gmail.com>
+	<CAGxe1ZGb6O3HLVSscEOCVWQGC3NMvXN6iyOinke7VetPEMaOSw@mail.gmail.com>
+	<00fb01cd908d$5c8c75f0$15a561d0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:43009 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751448Ab2ILDku (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Sep 2012 23:40:50 -0400
-Received: by ieje11 with SMTP id e11so2163942iej.19
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Sep 2012 20:40:50 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C176E94@039-SN1MPN1-002.039d.mgd.msft.net>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:59993 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750698Ab2ILEIa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Sep 2012 00:08:30 -0400
+Received: by vbbff1 with SMTP id ff1so1566820vbb.19
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Sep 2012 21:08:30 -0700 (PDT)
+In-Reply-To: <00fb01cd908d$5c8c75f0$15a561d0$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Changming-R66093 <r66093@freescale.com>
-Cc: Wood Scott-B07421 <B07421@freescale.com>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, will.newton@imgtec.com, James Hogan <James.Hogan@imgtec.com>
 
-On Wed, Sep 12, 2012 at 03:19:18AM +0000, Huang Changming-R66093 wrote:
-[...]
-> I don't think it is the best way to do it.  For the VVN2.2 or older,
-> some silicon support this feature (mpc8536 and p2020), but other
-> silicones don't support it (e.g. p4080, p102x).  Though, the current
-> p5/p4/p3 has supported this feature, can we sure the future silicon
-> support it?  So I think the best way is to specify it in device tree
-> as 'sdhci,auto-cmd12'
-
-In addition to your current patches, you could just add another patch
-that blacklists affected SOC revisions based on the info from PVR/SVR.
-
-For example, see gfar_detect_errata() in
-drivers/net/ethernet/freescale/gianfar.c.
-
-That way you could help users that don't have the newest device trees.
-
-Thanks,
-Anton.
+On 12 September 2012 07:51, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> On Tuesday, September 11, 2012, Girish K S <girish.shivananjappa@linaro.org> wrote:
+>> On 11 September 2012 12:41, Girish K S <girish.shivananjappa@linaro.org> wrote:
+>> > On 11 September 2012 12:09, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> >> On Tuesday, September 11, 2012, Girish K S <girish.shivananjappa@linaro.org> wrote:
+>> >>> On 11 September 2012 11:16, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> >>> > On Tuesday, September 11, 2012, Girish K S <girish.shivananjappa@linaro.org> wrote:
+>> >>> >> On 11 September 2012 07:53, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> >>> >> > This reverts commit 94c6cee91(Add check for IDMAC configuration).
+>> >>> >> > Synopsys says that only if internal dmac is not present, optional
+>> >>> >> > external dma interface is present. When internal dmac is present,
+>> >>> >> > '0' value in DMA_INTERFACE of HCON is reasonable. DMA_INTERFACE
+>> >>> >> > indicates external dma interface. And idmac initialization is
+>> >>> >> > prohibited now. So, let's revert this commit.
+>> >>> >>
+>> >>> >> There is no register, or a field in any register which says IDMAC present.
+>> >>> >> I can see only use_idmac bit field in CTRL register.
+>> >>> >> So in first place how will i know whether IDMAC is present? Have you
+>> >>> >> assumed that IDMAC is present.
+>> >>> >> I would like to know without assuming, whether  IDMAC is present.
+>> >>> >> If i have missed out something let me know.  i will check and revert back
+>> >>> > There is no way to see the presence of idmac from host controller on the runtime.
+>> >>> > But enabling idmac is not selected in the menuconfig just with assuming its presence.
+>> >>> > User can find the support of idmac from manual at least, I  know the lack of this information in
+>> >>> manual though.
+>> >>> I cannot find any line in the manual saying "Support IDMAC". Keeping
+>> >>> this in mind and the with the literal meaning what the HCON field
+>> >>> DMA_INTERFACE means, the above patch was made.
+>> >>> i had posted a patch for adding quirk to this (was waiting for some dt
+>> >>> patches to be accepted to resend it). Once that patch gets merged it
+>> >>> will be helpful for the user to use it comfortably. If QUIRK is
+>> >>> enabled it means there is IDMAC and the driver user is intentionally
+>> >>> enabling it.
+>> >> I mentioned the lack of description of feature in manual.
+>> >> When we consider the real meaning of DMA_INTERFACE, '0' value doen't indicate the absence of idmac.
+>> >> So, we cannot decide  the support of idmac with the DMA_INTERFACE.
+>> >>
+>> >> Do you mean this patch:"mmc: dwmmc: Add quirk for broken Hardware Config"?
+>> >> HCON register in the original Synopsys doesn't include information of internal dmac.
+>> >> Do you think it's also broken?
+>> > As per the current available information from the manual i think the
+>> > HCON is broken.
+>> > May be the synopsys is the right person to clarify this.
+>> If you have some confirmation regarding the DMA_INTERFACE from the
+>> synopsys. please post it, It will be really helpful in correcting my
+>> understanding abt the dma interface
+> Information regarding DMA_INTERFACE can be referred enough in Synopsys manual.
+> As mentioned above commit message, DMA_INTERFACE specifies the external dma interface.
+If this is true (because my discussion is based on the information
+available in the SOc's manual). then i go with the decision of
+reverting.
+> '0'(DMA_INTERFACE) means that there is no external dma interface in current host controller.
+> Synopsys may supply the idmac for host controller basically.
+> If Soc's vendor decides to use external dma interface instead of idmac,
+> then DMA_INTERFACE parameter should be configured before synthesizing RTL.
+> I hope it helpful to you. If there is something wrong, please let me know.
+>
+> Thanks,
+> Seungwon Jeon
+>> >>> >
+>> >>> >>
+>> >>> >> >
+>> >>> >> > CC: Girish K S <girish.shivananjappa@linaro.org>
+>> >>> >> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>> >>> >> > ---
+>> >>> >> >  drivers/mmc/host/dw_mmc.c |   15 ++-------------
+>> >>> >> >  1 files changed, 2 insertions(+), 13 deletions(-)
+>> >>> >> >
+>> >>> >> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> >>> >> > index 36f98c0..dcbe9aa 100644
+>> >>> >> > --- a/drivers/mmc/host/dw_mmc.c
+>> >>> >> > +++ b/drivers/mmc/host/dw_mmc.c
+>> >>> >> > @@ -405,23 +405,11 @@ static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int
+>> sg_len)
+>> >>> >> >  static int dw_mci_idmac_init(struct dw_mci *host)
+>> >>> >> >  {
+>> >>> >> >         struct idmac_desc *p;
+>> >>> >> > -       int i, dma_support;
+>> >>> >> > +       int i;
+>> >>> >> >
+>> >>> >> >         /* Number of descriptors in the ring buffer */
+>> >>> >> >         host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc);
+>> >>> >> >
+>> >>> >> > -       /* Check if Hardware Configuration Register has support for DMA */
+>> >>> >> > -       dma_support = (mci_readl(host, HCON) >> 16) & 0x3;
+>> >>> >> > -
+>> >>> >> > -       if (!dma_support || dma_support > 2) {
+>> >>> >> > -               dev_err(&host->dev,
+>> >>> >> > -                       "Host Controller does not support IDMA Tx.\n");
+>> >>> >> > -               host->dma_ops = NULL;
+>> >>> >> > -               return -ENODEV;
+>> >>> >> > -       }
+>> >>> >> > -
+>> >>> >> > -       dev_info(&host->dev, "Using internal DMA controller.\n");
+>> >>> >> > -
+>> >>> >> >         /* Forward link the descriptor list */
+>> >>> >> >         for (i = 0, p = host->sg_cpu; i < host->ring_size - 1; i++, p++)
+>> >>> >> >                 p->des3 = host->sg_dma + (sizeof(struct idmac_desc) * (i + 1));
+>> >>> >> > @@ -1895,6 +1883,7 @@ static void dw_mci_init_dma(struct dw_mci *host)
+>> >>> >> >         /* Determine which DMA interface to use */
+>> >>> >> >  #ifdef CONFIG_MMC_DW_IDMAC
+>> >>> >> >         host->dma_ops = &dw_mci_idmac_ops;
+>> >>> >> > +       dev_info(&host->dev, "Using internal DMA controller.\n");
+>> >>> >> >  #endif
+>> >>> >> >
+>> >>> >> >         if (!host->dma_ops)
+>> >>> >> > --
+>> >>> >> > 1.7.0.4
+>> >>> >> >
+>> >>> >> >
+>> >>> >> --
+>> >>> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> >>> >> the body of a message to majordomo@vger.kernel.org
+>> >>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>> >
+>> >>> --
+>> >>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> >>> the body of a message to majordomo@vger.kernel.org
+>> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
