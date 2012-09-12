@@ -1,71 +1,57 @@
-From: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
-Subject: RE: [PATCH] mmc: omap_hsmmc: Enable HSPE bit for high speed cards
-Date: Wed, 12 Sep 2012 12:02:54 +0000
-Message-ID: <1BAFE6F6C881BF42822005164F1491C33EA804A8@DBDE01.ent.ti.com>
-References: <1346764151-21323-1-git-send-email-gururaja.hebbar@ti.com>
- <CANfBPZ-Wb7HE45DTmwsMt-hpJRUevjbjm9-aCR61B4JFULb8Mw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="Windows-1252"
+From: Kumar Gala <galak@kernel.crashing.org>
+Subject: Re: [PATCH 2/3] powerpc/esdhc: add property to disable the CMD23
+Date: Wed, 12 Sep 2012 07:13:41 -0500
+Message-ID: <8B1F0805-759E-417A-B787-40DF197896F3@kernel.crashing.org>
+References: <1347347565-17474-1-git-send-email-Chang-Ming.Huang@freescale.com> <1347347565-17474-2-git-send-email-Chang-Ming.Huang@freescale.com> <20120911075429.GA27028@lizard> <20120911080457.GA28235@lizard> <110EED8CC96DFC488B7E717A2027A27C176170@039-SN1MPN1-002.039d.mgd.msft.net> <6D8C87BA-CA06-4215-94F5-63EBF5162B0A@kernel.crashing.org> <2A6FCAE3-288F-4972-90C0-15105932F13E@kernel.crashing.org> <87k3w0y5yn.fsf@octavius.laptop.org> <FC22FA36-B2CF-49C2-A0B1-8A0EA614B9CB@kernel.crashing.org> <87liggwa1w.fsf@octavius.laptop.org> <110EED8CC96DFC488B7E717A2027A27C17701A@039-SN1MPN1-002.039d.mgd.msft.net>
+Mime-Version: 1.0 (Apple Message framework v1278)
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:52767 "EHLO comal.ext.ti.com"
+Received: from gate.crashing.org ([63.228.1.57]:50928 "EHLO gate.crashing.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756296Ab2ILMDD convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Sep 2012 08:03:03 -0400
-In-Reply-To: <CANfBPZ-Wb7HE45DTmwsMt-hpJRUevjbjm9-aCR61B4JFULb8Mw@mail.gmail.com>
-Content-Language: en-US
+	id S1754244Ab2ILMN4 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Sep 2012 08:13:56 -0400
+In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C17701A@039-SN1MPN1-002.039d.mgd.msft.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "S, Venkatraman" <svenkatr@ti.com>
-Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "cjb@laptop.org" <cjb@laptop.org>, "Nori, Sekhar" <nsekhar@ti.com>, "Rajashekhara, Sudhakar" <sudhakar.raj@ti.com>
+To: Huang Changming-R66093 <R66093@freescale.com>
+Cc: Chris Ball <cjb@laptop.org>, "linuxppc-dev@lists.ozlabs.org list" <linuxppc-dev@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Anton Vorontsov <cbouatmailru@gmail.com>
 
-On Wed, Sep 12, 2012 at 14:19:51, S, Venkatraman wrote:
-> On Tue, Sep 4, 2012 at 6:39 PM, Hebbar, Gururaja <gururaja.hebbar@ti.com> wrote:
-> > HSMMC IP on AM33xx need a special setting to handle High-speed cards.
-> > Other platforms like TI81xx, OMAP4 may need this as-well. This depends
-> > on the HSMMC IP timing closure done for the high speed cards.
-> >
-> > From AM335x TRM (SPRUH73F - 18.3.12 Output Signals Generation)
-> >
-> > The MMC/SD/SDIO output signals can be driven on either falling edge or
-> > rising edge depending on the SD_HCTL[2] HSPE bit. This feature allows
-> > to reach better timing performance, and thus to increase data transfer
-> > frequency.
-> >
-> > There are few pre-requisites for enabling the HSPE bit
-> > - Controller should support High-Speed-Enable Bit and
-> > - Controller should not be using DDR Mode and
-> > - Controller should advertise that it supports High Speed in
-> >   capabilities register and
-> > - MMC/SD clock coming out of controller > 25MHz
-> >
+
+On Sep 12, 2012, at 1:18 AM, Huang Changming-R66093 wrote:
+
 > 
-> The patch is well written. But then, I don't see a need for a DT
-> binding for this feature.
-
-My reasons for DT Binding
-1. Not all platforms using this driver has this bit (OMAP2)
-2. Not all platforms using this driver needs this bit to be enabled (OMAP4)
-3. Platforms which require this bit this to be set needs a method to inform 
-driver.
-
-In order to not disturb old/unsupported platforms, I chose this DT method.
-
-> By definition, HS implies 25MHz or above, so that check seems to be
-> redundant as well.
-
-There are chances that the platform Max Clock output from HSMMC IP is < than 
-25 MHz even if the card is High Speed. In such cases it would be better to
-Confirm that the Clock output is actually > 25 MHz
-
-Kindly correct me if I am wrong.
-
-> Meanwhile, I'll check with HSPE enabled on OMAP.
 > 
-> Regards,
-> Venkat.
+> Best Regards
+> Jerry Huang
 > 
+> 
+>> -----Original Message-----
+>> From: Chris Ball [mailto:cjb@laptop.org]
+>> Sent: Wednesday, September 12, 2012 4:59 AM
+>> To: Kumar Gala
+>> Cc: Huang Changming-R66093; linuxppc-dev@lists.ozlabs.org list; linux-
+>> mmc@vger.kernel.org; Anton Vorontsov
+>> Subject: Re: [PATCH 2/3] powerpc/esdhc: add property to disable the CMD23
+>> 
+>> Hi,
+>> 
+>> On Tue, Sep 11 2012, Kumar Gala wrote:
+>>> thanks for the info.  Do you know what's required on controller side
+>>> to handle cards that support CMD23?
+>>> 
+>>> I'm trying to figure out if older controller's on FSL SoCs are missing
+>>> some feature to allow CMD23 to work (vs Auto-CMD23).
+>> 
+>> It seems plausible that it's just not implemented on these controllers.
+>> It's a little strange, since the command's been specified for so long and
+>> we haven't seen any other controllers with problems.  The patch would be
+>> correct if this is true.
+>> 
+> 
+> I didn't find any description about it, but after testing on FSL silicones, I got this result:
+> Some silicones support this command, and some silicones don't support it, which will cause I/O error.
 
+Can you list out which SoCs support it and which don't.  Having this list will be useful in understanding which controller versions supported it.
 
-Regards, 
-Gururaja
+- k
