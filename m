@@ -1,97 +1,45 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 2/3] powerpc/esdhc: add property to disable the CMD23
-Date: Wed, 12 Sep 2012 03:19:18 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C176E94@039-SN1MPN1-002.039d.mgd.msft.net>
+From: Anton Vorontsov <cbouatmailru@gmail.com>
+Subject: Re: [PATCH 2/3] powerpc/esdhc: add property to disable the CMD23
+Date: Tue, 11 Sep 2012 20:38:11 -0700
+Message-ID: <20120912033811.GA1886@lizard>
 References: <1347347565-17474-1-git-send-email-Chang-Ming.Huang@freescale.com>
  <1347347565-17474-2-git-send-email-Chang-Ming.Huang@freescale.com>
- <20120911075429.GA27028@lizard> <20120911080457.GA28235@lizard>
+ <20120911075429.GA27028@lizard>
+ <20120911080457.GA28235@lizard>
  <504F82C1.2000907@freescale.com>
+ <110EED8CC96DFC488B7E717A2027A27C176E94@039-SN1MPN1-002.039d.mgd.msft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe002.messaging.microsoft.com ([213.199.154.140]:55373
-	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1759979Ab2ILDTa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Sep 2012 23:19:30 -0400
-In-Reply-To: <504F82C1.2000907@freescale.com>
-Content-Language: en-US
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:43009 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751448Ab2ILDku (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Sep 2012 23:40:50 -0400
+Received: by ieje11 with SMTP id e11so2163942iej.19
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Sep 2012 20:40:50 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C176E94@039-SN1MPN1-002.039d.mgd.msft.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wood Scott-B07421 <B07421@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Huang Changming-R66093 <r66093@freescale.com>
+Cc: Wood Scott-B07421 <B07421@freescale.com>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-DQoNCkJlc3QgUmVnYXJkcw0KSmVycnkgSHVhbmcNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2Fn
-ZS0tLS0tDQo+IEZyb206IFdvb2QgU2NvdHQtQjA3NDIxDQo+IFNlbnQ6IFdlZG5lc2RheSwgU2Vw
-dGVtYmVyIDEyLCAyMDEyIDI6MjggQU0NCj4gVG86IEFudG9uIFZvcm9udHNvdg0KPiBDYzogSHVh
-bmcgQ2hhbmdtaW5nLVI2NjA5MzsgbGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmc7IGxpbnV4
-LQ0KPiBtbWNAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMi8zXSBwb3dl
-cnBjL2VzZGhjOiBhZGQgcHJvcGVydHkgdG8gZGlzYWJsZSB0aGUgQ01EMjMNCj4gDQo+IE9uIDA5
-LzExLzIwMTIgMDM6MDQgQU0sIEFudG9uIFZvcm9udHNvdiB3cm90ZToNCj4gPiBPbiBUdWUsIFNl
-cCAxMSwgMjAxMiBhdCAxMjo1NDoyOUFNIC0wNzAwLCBBbnRvbiBWb3JvbnRzb3Ygd3JvdGU6DQo+
-ID4+IE9uIFR1ZSwgU2VwIDExLCAyMDEyIGF0IDAzOjEyOjQ0UE0gKzA4MDAsIENoYW5nLQ0KPiBN
-aW5nLkh1YW5nQGZyZWVzY2FsZS5jb20gd3JvdGU6DQo+ID4+PiBGcm9tOiBKZXJyeSBIdWFuZyA8
-Q2hhbmctTWluZy5IdWFuZ0BmcmVlc2NhbGUuY29tPg0KPiA+Pj4NCj4gPj4+IEJlbG93IFNPQ3Mg
-ZG9uJ3Qgc3VwcG9ydCB0aGUgY21kMjMgY29tbWFuZCBmb3IgTU1DIGNhcmQsIHRoZXJlZm9yZSwN
-Cj4gPj4+IGRpc2FibGUgaXQgaW4gZGV2aWNlIHRyZWU6DQo+ID4+PiBQMTAyMCwgUDEwMjEsIFAx
-MDIyLCBQMTAyNCwgUDEwMjUgYW5kIFA0MDgwDQo+ID4+Pg0KPiA+Pj4gU2lnbmVkLW9mZi1ieTog
-SmVycnkgSHVhbmcgPENoYW5nLU1pbmcuSHVhbmdAZnJlZXNjYWxlLmNvbT4NCj4gPj4NCj4gPj4g
-QWNrZWQtYnk6IEFudG9uIFZvcm9udHNvdiA8Y2JvdWF0bWFpbHJ1QGdtYWlsLmNvbT4NCj4gPg0K
-PiA+IEJ0dywgYWx0aG91Z2ggdGhlIHBhdGNoIGlzIHRyaXZpYWwsIEkgZ3Vlc3MgeW91IHN0aWxs
-IHdhbnQgdG8gbGV0IGtub3cNCj4gPiBQb3dlclBDIGZvbGtzIGFib3V0IGl0LiBBZGRpbmcgQ2Mg
-YW5kIGNvcHlpbmcgdGhlIHBhdGNoOg0KPiA+DQo+ID4gLSAtIC0gLQ0KPiA+IEZyb206IEplcnJ5
-IEh1YW5nIDxDaGFuZy1NaW5nLkh1YW5nQGZyZWVzY2FsZS5jb20+DQo+ID4NCj4gPiBCZWxvdyBT
-T0NzIGRvbid0IHN1cHBvcnQgdGhlIGNtZDIzIGNvbW1hbmQgZm9yIE1NQyBjYXJkLCB0aGVyZWZv
-cmUsDQo+ID4gZGlzYWJsZSBpdCBpbiBkZXZpY2UgdHJlZToNCj4gPiBQMTAyMCwgUDEwMjEsIFAx
-MDIyLCBQMTAyNCwgUDEwMjUgYW5kIFA0MDgwDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBKZXJy
-eSBIdWFuZyA8Q2hhbmctTWluZy5IdWFuZ0BmcmVlc2NhbGUuY29tPg0KPiA+IENDOiBBbnRvbiBW
-b3JvbnRzb3YgPGNib3VhdG1haWxydUBnbWFpbC5jb20+DQo+ID4gLS0tDQo+ID4gIGFyY2gvcG93
-ZXJwYy9ib290L2R0cy9mc2wvcDEwMjBzaS1wb3N0LmR0c2kgfCAgICAxICsNCj4gPiAgYXJjaC9w
-b3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMXNpLXBvc3QuZHRzaSB8ICAgIDEgKw0KPiA+ICBhcmNo
-L3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIyc2ktcG9zdC5kdHNpIHwgICAgMSArDQo+ID4gIGFy
-Y2gvcG93ZXJwYy9ib290L2R0cy9mc2wvcDQwODBzaS1wb3N0LmR0c2kgfCAgICAxICsNCj4gPiAg
-NCBmaWxlcyBjaGFuZ2VkLCA0IGluc2VydGlvbnMoKykNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9h
-cmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIwc2ktcG9zdC5kdHNpDQo+ID4gYi9hcmNoL3Bv
-d2VycGMvYm9vdC9kdHMvZnNsL3AxMDIwc2ktcG9zdC5kdHNpDQo+ID4gaW5kZXggNjhjYzVlNy4u
-NzkzYTMwYiAxMDA2NDQNCj4gPiAtLS0gYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIw
-c2ktcG9zdC5kdHNpDQo+ID4gKysrIGIvYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMHNp
-LXBvc3QuZHRzaQ0KPiA+IEBAIC0xNTQsNiArMTU0LDcgQEANCj4gPiAgCXNkaGNAMmUwMDAgew0K
-PiA+ICAJCWNvbXBhdGlibGUgPSAiZnNsLHAxMDIwLWVzZGhjIiwgImZzbCxlc2RoYyI7DQo+ID4g
-IAkJc2RoY2ksYXV0by1jbWQxMjsNCj4gPiArCQlzZGhjaSxuby1jbWQyMzsNCj4gPiAgCX07DQo+
-ID4gIC9pbmNsdWRlLyAicHEzLXNlYzMuMy0wLmR0c2kiDQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEv
-YXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMXNpLXBvc3QuZHRzaQ0KPiA+IGIvYXJjaC9w
-b3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAyMXNpLXBvc3QuZHRzaQ0KPiA+IGluZGV4IGFkYjgyZmQu
-LjJiN2ZkMmEgMTAwNjQ0DQo+ID4gLS0tIGEvYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wMTAy
-MXNpLXBvc3QuZHRzaQ0KPiA+ICsrKyBiL2FyY2gvcG93ZXJwYy9ib290L2R0cy9mc2wvcDEwMjFz
-aS1wb3N0LmR0c2kNCj4gPiBAQCAtMTQ5LDYgKzE0OSw3IEBADQo+ID4gIC9pbmNsdWRlLyAicHEz
-LWVzZGhjLTAuZHRzaSINCj4gPiAgCXNkaGNAMmUwMDAgew0KPiA+ICAJCXNkaGNpLGF1dG8tY21k
-MTI7DQo+ID4gKwkJc2RoY2ksbm8tY21kMjM7DQo+ID4gIAl9Ow0KPiA+DQo+ID4gIC9pbmNsdWRl
-LyAicHEzLXNlYzMuMy0wLmR0c2kiDQo+ID4gZGlmZiAtLWdpdCBhL2FyY2gvcG93ZXJwYy9ib290
-L2R0cy9mc2wvcDEwMjJzaS1wb3N0LmR0c2kNCj4gPiBiL2FyY2gvcG93ZXJwYy9ib290L2R0cy9m
-c2wvcDEwMjJzaS1wb3N0LmR0c2kNCj4gPiBpbmRleCAwNjIxNmI4Li4yMzM0YTUyIDEwMDY0NA0K
-PiA+IC0tLSBhL2FyY2gvcG93ZXJwYy9ib290L2R0cy9mc2wvcDEwMjJzaS1wb3N0LmR0c2kNCj4g
-PiArKysgYi9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3AxMDIyc2ktcG9zdC5kdHNpDQo+ID4g
-QEAgLTIxNSw2ICsyMTUsNyBAQA0KPiA+ICAJc2RoY0AyZTAwMCB7DQo+ID4gIAkJY29tcGF0aWJs
-ZSA9ICJmc2wscDEwMjItZXNkaGMiLCAiZnNsLGVzZGhjIjsNCj4gPiAgCQlzZGhjaSxhdXRvLWNt
-ZDEyOw0KPiA+ICsJCXNkaGNpLG5vLWNtZDIzOw0KPiA+ICAJfTsNCj4gPg0KPiA+ICAvaW5jbHVk
-ZS8gInBxMy1zZWMzLjMtMC5kdHNpIg0KPiA+IGRpZmYgLS1naXQgYS9hcmNoL3Bvd2VycGMvYm9v
-dC9kdHMvZnNsL3A0MDgwc2ktcG9zdC5kdHNpDQo+ID4gYi9hcmNoL3Bvd2VycGMvYm9vdC9kdHMv
-ZnNsL3A0MDgwc2ktcG9zdC5kdHNpDQo+ID4gaW5kZXggOGQzNWQyYy4uNWIzOTk1MiAxMDA2NDQN
-Cj4gPiAtLS0gYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3A0MDgwc2ktcG9zdC5kdHNpDQo+
-ID4gKysrIGIvYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9wNDA4MHNpLXBvc3QuZHRzaQ0KPiA+
-IEBAIC0zMzcsNiArMzM3LDcgQEANCj4gPiAgCXNkaGNAMTE0MDAwIHsNCj4gPiAgCQl2b2x0YWdl
-LXJhbmdlcyA9IDwzMzAwIDMzMDA+Ow0KPiA+ICAJCXNkaGNpLGF1dG8tY21kMTI7DQo+ID4gKwkJ
-c2RoY2ksbm8tY21kMjM7DQo+ID4gIAl9Ow0KPiA+DQo+ID4gIC9pbmNsdWRlLyAicW9yaXEtaTJj
-LTAuZHRzaSINCj4gPg0KPiANCj4gVGhpcyB3b24ndCBoZWxwIHBlb3BsZSB3aXRoIG9sZCBkZXZp
-Y2UgdHJlZXMgKGZvcmtlZCBmb3IgYSBjdXN0b20gYm9hcmQsDQo+IHRpZWQgdG8gYW4gb2xkIFUt
-Qm9vdCwgZXRjKS4gIFRoZSBkcml2ZXIgc2hvdWxkIGluZmVyIHRoaXMgZnJvbSB0aGUNCj4gY29t
-cGF0aWJsZSBzdHJpbmcgb3IgdmVyc2lvbiByZWdpc3RlcnMgKGlkZWFsbHkgYmxvY2stc3BlY2lm
-aWMgdmVyc2lvbg0KPiByZWdpc3RlcnMsIGJ1dCBpZiB0aGVzZSBhcmUgYWJzZW50IG9yIGluY29u
-Y2x1c2l2ZSwgU1ZSIGNhbiBiZSB1c2VkKS4NCj4gDQoNCkkgZG9uJ3QgdGhpbmsgaXQgaXMgdGhl
-IGJlc3Qgd2F5IHRvIGRvIGl0Lg0KRm9yIHRoZSBWVk4yLjIgb3Igb2xkZXIsIHNvbWUgc2lsaWNv
-biBzdXBwb3J0IHRoaXMgZmVhdHVyZSAobXBjODUzNiBhbmQgcDIwMjApLCBidXQgb3RoZXIgc2ls
-aWNvbmVzIGRvbid0IHN1cHBvcnQgaXQgKGUuZy4gcDQwODAsIHAxMDJ4KS4NClRob3VnaCwgdGhl
-IGN1cnJlbnQgcDUvcDQvcDMgaGFzIHN1cHBvcnRlZCB0aGlzIGZlYXR1cmUsIGNhbiB3ZSBzdXJl
-IHRoZSBmdXR1cmUgc2lsaWNvbiBzdXBwb3J0IGl0Pw0KU28gSSB0aGluayB0aGUgYmVzdCB3YXkg
-aXMgdG8gc3BlY2lmeSBpdCBpbiBkZXZpY2UgdHJlZSBhcyAnc2RoY2ksYXV0by1jbWQxMicNCg==
+On Wed, Sep 12, 2012 at 03:19:18AM +0000, Huang Changming-R66093 wrote:
+[...]
+> I don't think it is the best way to do it.  For the VVN2.2 or older,
+> some silicon support this feature (mpc8536 and p2020), but other
+> silicones don't support it (e.g. p4080, p102x).  Though, the current
+> p5/p4/p3 has supported this feature, can we sure the future silicon
+> support it?  So I think the best way is to specify it in device tree
+> as 'sdhci,auto-cmd12'
 
+In addition to your current patches, you could just add another patch
+that blacklists affected SOC revisions based on the info from PVR/SVR.
+
+For example, see gfar_detect_errata() in
+drivers/net/ethernet/freescale/gianfar.c.
+
+That way you could help users that don't have the newest device trees.
+
+Thanks,
+Anton.
