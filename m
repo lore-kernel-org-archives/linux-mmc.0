@@ -1,68 +1,71 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 2/3] powerpc/esdhc: add property to disable the CMD23
-Date: Thu, 13 Sep 2012 02:02:30 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C1785D0@039-SN1MPN1-002.039d.mgd.msft.net>
-References: <1347347565-17474-1-git-send-email-Chang-Ming.Huang@freescale.com>
- <1347347565-17474-2-git-send-email-Chang-Ming.Huang@freescale.com>
- <20120911075429.GA27028@lizard> <20120911080457.GA28235@lizard>
- <110EED8CC96DFC488B7E717A2027A27C176170@039-SN1MPN1-002.039d.mgd.msft.net>
- <6D8C87BA-CA06-4215-94F5-63EBF5162B0A@kernel.crashing.org>
- <2A6FCAE3-288F-4972-90C0-15105932F13E@kernel.crashing.org>
- <87k3w0y5yn.fsf@octavius.laptop.org>
- <FC22FA36-B2CF-49C2-A0B1-8A0EA614B9CB@kernel.crashing.org> <87liggwa1w
- <8B1F0805-759E-417A-B787-40DF197896F3@kernel.crashing.org>
+From: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
+Subject: [PATCH V2] mmc: omap_hsmmc: Pass on the suspend failure to the PM core
+Date: Thu, 13 Sep 2012 12:01:03 +0530
+Message-ID: <1347517863-30017-1-git-send-email-gururaja.hebbar@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <8B1F0805-759E-417A-B787-40DF197896F3@kernel.crashing.org>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Kumar Gala <galak@kernel.crashing.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linuxppc-dev@lists.ozlabs.org list" <linuxppc-dev@lists.ozlabs.org>, Anton Vorontsov <cbouatmailru@gmail.com>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, svenkatr@ti.com
+Cc: rob.herring@calxeda.com, linux-kernel@vger.kernel.org, grant.likely@secretlab.ca, cjb@laptop.org, nsekhar@ti.com, sudhakar.raj@ti.com, gururaja.hebbar@ti.com, Vaibhav Bedia <vaibhav.bedia@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-> >
-> >> -----Original Message-----
-> >> From: Chris Ball [mailto:cjb@laptop.org]
-> >> Sent: Wednesday, September 12, 2012 4:59 AM
-> >> To: Kumar Gala
-> >> Cc: Huang Changming-R66093; linuxppc-dev@lists.ozlabs.org list;
-> >> linux- mmc@vger.kernel.org; Anton Vorontsov
-> >> Subject: Re: [PATCH 2/3] powerpc/esdhc: add property to disable the
-> >> CMD23
-> >>
-> >> Hi,
-> >>
-> >> On Tue, Sep 11 2012, Kumar Gala wrote:
-> >>> thanks for the info.  Do you know what's required on controller side
-> >>> to handle cards that support CMD23?
-> >>>
-> >>> I'm trying to figure out if older controller's on FSL SoCs are
-> >>> missing some feature to allow CMD23 to work (vs Auto-CMD23).
-> >>
-> >> It seems plausible that it's just not implemented on these controllers.
-> >> It's a little strange, since the command's been specified for so long
-> >> and we haven't seen any other controllers with problems.  The patch
-> >> would be correct if this is true.
-> >>
-> >
-> > I didn't find any description about it, but after testing on FSL
-> silicones, I got this result:
-> > Some silicones support this command, and some silicones don't support
-> it, which will cause I/O error.
-> 
-> Can you list out which SoCs support it and which don't.  Having this list
-> will be useful in understanding which controller versions supported it.
-> 
-P1020, p1021, p1022, p1024, p1015 and p4080 can't support it.
-Mpc8536, p2020, and the other current DPAA silicon (e.g. p5020, p3041) support it.
+From: Vaibhav Bedia <vaibhav.bedia@ti.com>
+
+In some cases mmc_suspend_host() is not able to claim the
+host and proceed with the suspend process. The core returns
+-EBUSY to the host controller driver. Unfortunately, the
+host controller driver does not pass on this information
+to the PM core and hence the system suspend process continues.
+
+	ret = mmc_suspend_host(host->mmc);
+	if (ret) {
+		host->suspended = 0;
+		if (host->pdata->resume) {
+			ret = host->pdata->resume(dev, host->slot_id);
+
+The return status from mmc_suspend_host() is overwritten by return
+status from host->pdata->resume. So the original return status is lost.
+
+In these cases the MMC core gets to an unexpected state
+during resume and multiple issues related to MMC crop up.
+1. Host controller driver starts accessing the device registers
+before the clocks are enabled which leads to a prefetch abort.
+2. A file copy thread which was launched before suspend gets
+stuck due to the host not being reclaimed during resume.
+
+To avoid such problems pass on the -EBUSY status to the PM core
+from the host controller driver. With this change, MMC core
+suspend might still fail but it does not end up making the
+system unusable. Suspend gets aborted and the user can try
+suspending the system again.
+
+Signed-off-by: Vaibhav Bedia <vaibhav.bedia@ti.com>
+Signed-off-by: Hebbar, Gururaja <gururaja.hebbar@ti.com>
+---
+Changes from V1:
+	- Instead of forcibly returning -EBUSY on err, retain old
+	status and pass on the same to the caller.
+	- add more detail to commit message (explanation with code
+	snippet)
+
+:100644 100644 9afdd20... d9af5f1... M	drivers/mmc/host/omap_hsmmc.c
+ drivers/mmc/host/omap_hsmmc.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 9afdd20..d9af5f1 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2050,8 +2050,7 @@ static int omap_hsmmc_suspend(struct device *dev)
+ 	if (ret) {
+ 		host->suspended = 0;
+ 		if (host->pdata->resume) {
+-			ret = host->pdata->resume(dev, host->slot_id);
+-			if (ret)
++			if (host->pdata->resume(dev, host->slot_id))
+ 				dev_dbg(dev, "Unmask interrupt failed\n");
+ 		}
+ 		goto err;
+-- 
+1.7.0.4
