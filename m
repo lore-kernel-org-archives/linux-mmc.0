@@ -1,58 +1,58 @@
-From: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
-Subject: RE: [PATCH] mmc: omap_hsmmc: Pass on the suspend failure to the PM
- core
-Date: Thu, 13 Sep 2012 07:09:41 +0000
-Message-ID: <1BAFE6F6C881BF42822005164F1491C33EA81214@DBDE01.ent.ti.com>
-References: <1346764109-21174-1-git-send-email-gururaja.hebbar@ti.com>
- <CANfBPZ93ONzeYj=kD_7pbq=VBQLd98YM9BE9S+sPb3rrrXNFzQ@mail.gmail.com>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH 2/3] powerpc/esdhc: add property to disable the CMD23
+Date: Thu, 13 Sep 2012 07:57:53 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C178A9D@039-SN1MPN1-002.039d.mgd.msft.net>
+References: <1347347565-17474-1-git-send-email-Chang-Ming.Huang@freescale.com>
+ <1347347565-17474-2-git-send-email-Chang-Ming.Huang@freescale.com>
+ <20120911075429.GA27028@lizard> <20120911080457.GA28235@lizard>
+ <504F82C1.2000907@freescale.com>
+ <110EED8CC96DFC488B7E717A2027A27C176E94@039-SN1MPN1-002.039d.mgd.msft.net>
+ <20120912033811.GA1886@lizard>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="Windows-1252"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:35955 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755935Ab2IMHJw convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Sep 2012 03:09:52 -0400
-In-Reply-To: <CANfBPZ93ONzeYj=kD_7pbq=VBQLd98YM9BE9S+sPb3rrrXNFzQ@mail.gmail.com>
+Received: from db3ehsobe004.messaging.microsoft.com ([213.199.154.142]:30494
+	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756202Ab2IMH6B (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Sep 2012 03:58:01 -0400
+In-Reply-To: <20120912033811.GA1886@lizard>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "S, Venkatraman" <svenkatr@ti.com>
-Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "cjb@laptop.org" <cjb@laptop.org>, "Nori, Sekhar" <nsekhar@ti.com>, "Rajashekhara, Sudhakar" <sudhakar.raj@ti.com>, "Bedia, Vaibhav" <vaibhav.bedia@ti.com>
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: Wood Scott-B07421 <B07421@freescale.com>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Tue, Sep 11, 2012 at 11:13:26, S, Venkatraman wrote:
-> On Tue, Sep 4, 2012 at 6:38 PM, Hebbar, Gururaja <gururaja.hebbar@ti.com> wrote:
-> > From: Vaibhav Bedia <vaibhav.bedia@ti.com>
-> >
-> > In some cases mmc_suspend_host() is not able to claim the
-> > host and proceed with the suspend process. The core returns
-> > -EBUSY to the host controller driver. Unfortunately, the
-> > host controller driver does not pass on this information
-> > to the PM core and hence the system suspend process continues.
-> >
-> > In these cases the MMC core gets to an unexpected state
-> > during resume and multiple issues related to MMC crop up.
-> > 1. Host controller driver starts accessing the device registers
-> > before the clocks are enabled which leads to a prefetch abort.
-> > 2. A file copy thread which was launched before suspend gets
-> > stuck due to the host not being reclaimed during resume.
-> >
-> > To avoid such problems pass on the -EBUSY status to the PM core
-> > from the host controller driver. With this change, MMC core
-> > suspend might still fail but it does not end up making the
-> > system unusable. Suspend gets aborted and the user can try
-> > suspending the system again.
-> >
-> 
-> The last time we discussed this, didn't we plan to fix this differently ?
-> Holding the return code of mmc_suspend_host in a separate variable and
-> passing it to the caller
-> of omap_hsmmc_suspend looks more sane to me.
+DQoNCkJlc3QgUmVnYXJkcw0KSmVycnkgSHVhbmcNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2Fn
+ZS0tLS0tDQo+IEZyb206IEFudG9uIFZvcm9udHNvdiBbbWFpbHRvOmNib3VhdG1haWxydUBnbWFp
+bC5jb21dDQo+IFNlbnQ6IFdlZG5lc2RheSwgU2VwdGVtYmVyIDEyLCAyMDEyIDExOjM4IEFNDQo+
+IFRvOiBIdWFuZyBDaGFuZ21pbmctUjY2MDkzDQo+IENjOiBXb29kIFNjb3R0LUIwNzQyMTsgbGlu
+dXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmc7IGxpbnV4LQ0KPiBtbWNAdmdlci5rZXJuZWwub3Jn
+DQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMi8zXSBwb3dlcnBjL2VzZGhjOiBhZGQgcHJvcGVydHkg
+dG8gZGlzYWJsZSB0aGUgQ01EMjMNCj4gDQo+IE9uIFdlZCwgU2VwIDEyLCAyMDEyIGF0IDAzOjE5
+OjE4QU0gKzAwMDAsIEh1YW5nIENoYW5nbWluZy1SNjYwOTMgd3JvdGU6DQo+IFsuLi5dDQo+ID4g
+SSBkb24ndCB0aGluayBpdCBpcyB0aGUgYmVzdCB3YXkgdG8gZG8gaXQuICBGb3IgdGhlIFZWTjIu
+MiBvciBvbGRlciwNCj4gPiBzb21lIHNpbGljb24gc3VwcG9ydCB0aGlzIGZlYXR1cmUgKG1wYzg1
+MzYgYW5kIHAyMDIwKSwgYnV0IG90aGVyDQo+ID4gc2lsaWNvbmVzIGRvbid0IHN1cHBvcnQgaXQg
+KGUuZy4gcDQwODAsIHAxMDJ4KS4gIFRob3VnaCwgdGhlIGN1cnJlbnQNCj4gPiBwNS9wNC9wMyBo
+YXMgc3VwcG9ydGVkIHRoaXMgZmVhdHVyZSwgY2FuIHdlIHN1cmUgdGhlIGZ1dHVyZSBzaWxpY29u
+DQo+ID4gc3VwcG9ydCBpdD8gIFNvIEkgdGhpbmsgdGhlIGJlc3Qgd2F5IGlzIHRvIHNwZWNpZnkg
+aXQgaW4gZGV2aWNlIHRyZWUNCj4gPiBhcyAnc2RoY2ksYXV0by1jbWQxMicNCj4gDQo+IEluIGFk
+ZGl0aW9uIHRvIHlvdXIgY3VycmVudCBwYXRjaGVzLCB5b3UgY291bGQganVzdCBhZGQgYW5vdGhl
+ciBwYXRjaA0KPiB0aGF0IGJsYWNrbGlzdHMgYWZmZWN0ZWQgU09DIHJldmlzaW9ucyBiYXNlZCBv
+biB0aGUgaW5mbyBmcm9tIFBWUi9TVlIuDQo+IA0KPiBGb3IgZXhhbXBsZSwgc2VlIGdmYXJfZGV0
+ZWN0X2VycmF0YSgpIGluDQo+IGRyaXZlcnMvbmV0L2V0aGVybmV0L2ZyZWVzY2FsZS9naWFuZmFy
+LmMuDQo+IA0KPiBUaGF0IHdheSB5b3UgY291bGQgaGVscCB1c2VycyB0aGF0IGRvbid0IGhhdmUg
+dGhlIG5ld2VzdCBkZXZpY2UgdHJlZXMuDQo+IA0KSGksIEFudG9uDQpUaGFua3MuDQpCdXQsIHRo
+ZXNlIHBhdGNoZXMgYXJlIGp1c3QgZm9yIGxhdGVzdCBrZXJuZWwsIGlmIHRoZSB1c2VyIGRvbid0
+IGhhdmUgdGhlIGxhdGVzdCBkZXZpY2UgdHJlZSwNClRoZW4gdGhleSBkb24ndCBoYXZlIHRoZSBs
+YXRlc3Qga2VybmVsLCBhbmQgdGhlc2UgcGF0Y2hlcyBjYW4ndCBiZSB1c2VkIGZvciB0aGVtIGRp
+cmVjdGx5LA0KVGhvdWdoIHByb3ZpZGUgdGhlIGZ1bmN0aW9uIGxpa2UgZ2Zhcl9kZXRlY3RfZXJy
+YXRhLCB0aGV5IG11c3QgbW9kaWZ5IHRoZWlyIGNvZGVzLg0KDQpBbmQgSSBkb24ndCBrbm93IGlm
+IHRoZSBmdXR1cmUgc2lsaWNvbiBjYW4gc3VwcG9ydCBDTUQyMywgaWYgbm90LCB3ZSBtdXN0IG1v
+ZGlmeSBzZGhjIGRyaXZlciBhZ2Fpbi4NCldoZW4gd2UgdXNlIHRoZSBkZXZpY2UgdHJlZSB0byBp
+ZGVudGlmeSBpdCwgaWYgdGhlIHNpbGljb24gZG9lcyBub3Qgc3VwcG9ydCB0aGlzIGZlYXR1cmUs
+DQp3ZSBqdXN0IGFkZCB0aGlzIHByb3BlcnR5IGludG8gdGhlIG5ldyBkZXZpY2UgdHJlZSwgbm90
+IG5lZWQgdG8gbW9kaWZ5IFNESEMgZHJpdmVyLg0KSSB0aGluaywgdGhpcyBpcyB0aGUgYmVzdCB3
+YXkuDQogDQoNCg==
 
-I just pushed a new revision (V2) with above changes. I also added extra information 
-(explanation with code snippet). Kindly let me know your review for the same.
-
-> 
-
-Regards, 
-Gururaja
