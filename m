@@ -1,97 +1,62 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/3] mmc: sdhci-s3c: Enable only required bus clock
-Date: Fri, 14 Sep 2012 18:55:40 +0900
-Message-ID: <5052FF1C.3060803@samsung.com>
+Subject: Re: [PATCH 2/3] mmc: sdhci-s3c: Fix crash on module insertion for
+ second time
+Date: Fri, 14 Sep 2012 19:25:39 +0900
+Message-ID: <50530623.3050306@samsung.com>
 References: <1347613731-29428-1-git-send-email-chander.kashyap@linaro.org>
- <1347613731-29428-2-git-send-email-chander.kashyap@linaro.org>
+ <1347613731-29428-3-git-send-email-chander.kashyap@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1347613731-29428-2-git-send-email-chander.kashyap@linaro.org>
+In-reply-to: <1347613731-29428-3-git-send-email-chander.kashyap@linaro.org>
 Sender: linux-samsung-soc-owner@vger.kernel.org
 To: Chander Kashyap <chander.kashyap@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, ben@simtec.co.uk, broonie@opensource.wolfsonmicro.com, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Chander,
+Looks good to me..
 
-Could you add the error control for clk_enable()?
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
 On 09/14/2012 06:08 PM, Chander Kashyap wrote:
-> In case of multiple bus clock sources, all the clock sources were
-> getting enabled. As only one clock source is needed at the time hence
-> enable only the required bus clock.
+> If sdhci-s3c driver is built as module, it gives following error if inserted
+> again after removing. This was happening as pm_runtime_use_autosuspend() is
+> called in sdhci_s3c_probe() function but in sdhci_s3c_remove() its complementry
+> pm_runtime_dont_use_autosuspend() is not called.
 > 
-> This patch does as follows:
-> 1.	In sdhci_s3c_probe enable only required bus clock source.
-> 
-> 2.	Handle the disabling of old bus clock and enables the
-> 	best clock selected in sdhci_s3c_set_clock().
+> BUG: spinlock bad magic on CPU#1, insmod/955
+>  lock: 0xee771368, .magic: 00000000, .owner: insmod/955, .owner_cpu: 1
+> [<c00147e0>] (unwind_backtrace+0x0/0xf8) from [<c0136b40>] (do_raw_spin_unlock+0xa4/0xe4)
+> [<c0136b40>] (do_raw_spin_unlock+0xa4/0xe4) from [<c01be508>] (_raw_spin_unlock_irqrestore+0xc/0x38)
+> [<c01be508>] (_raw_spin_unlock_irqrestore+0xc/0x38) from [<c01a9334>] (sdhci_runtime_suspend_host+0x54/0x80)
+> [<c01a9334>] (sdhci_runtime_suspend_host+0x54/0x80) from [<bf0060a8>] (sdhci_s3c_runtime_suspend+0x14/0x38 [sdhci_s3c])
+> [<bf0060a8>] (sdhci_s3c_runtime_suspend+0x14/0x38 [sdhci_s3c]) from [<c016cb00>] (pm_generic_runtime_suspend+0x2c/0x40)
+> [<c016cb00>] (pm_generic_runtime_suspend+0x2c/0x40) from [<c0170090>] (__rpm_callback+0x70/0x98)
+> [<c0170090>] (__rpm_callback+0x70/0x98) from [<c01703f0>] (rpm_suspend+0xf0/0x534)
+> [<c01703f0>] (rpm_suspend+0xf0/0x534) from [<c0171670>] (__pm_runtime_suspend+0x5c/0x74)
+> [<c0171670>] (__pm_runtime_suspend+0x5c/0x74) from [<c016d018>] (pm_generic_runtime_idle+0x44/0x4c)
+> [<c016d018>] (pm_generic_runtime_idle+0x44/0x4c) from [<c0170090>] (__rpm_callback+0x70/0x98)
+> [<c0170090>] (__rpm_callback+0x70/0x98) from [<c0170984>] (rpm_idle+0xdc/0x18c)
+> [<c0170984>] (rpm_idle+0xdc/0x18c) from [<c0171608>] (pm_runtime_set_autosuspend_delay+0x30/0x3c)
+> [<c0171608>] (pm_runtime_set_autosuspend_delay+0x30/0x3c) from [<bf0069c4>] (sdhci_s3c_probe+0x35c/0x52c [sdhci_s3c])
+> [<bf0069c4>] (sdhci_s3c_probe+0x35c/0x52c [sdhci_s3c]) from [<c016a014>] (platform_drv_probe+0x18/0x1c)
 > 
 > Signed-off-by: Chander Kashyap <chander.kashyap@linaro.org>
 > ---
->  drivers/mmc/host/sdhci-s3c.c |   12 +++++++-----
->  1 file changed, 7 insertions(+), 5 deletions(-)
+>  drivers/mmc/host/sdhci-s3c.c |    1 +
+>  1 file changed, 1 insertion(+)
 > 
 > diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 00969ba..0cbb4c2 100644
+> index 0cbb4c2..3f4518d 100644
 > --- a/drivers/mmc/host/sdhci-s3c.c
 > +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -203,10 +203,12 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
->  		 best_src, clock, best);
+> @@ -658,6 +658,7 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
 >  
->  	/* select the new clock source */
-> -
->  	if (ourhost->cur_clk != best_src) {
->  		struct clk *clk = ourhost->clk_bus[best_src];
+>  	sdhci_remove_host(host, 1);
 >  
-> +		clk_enable(clk);
-> +		clk_disable(ourhost->clk_bus[ourhost->cur_clk]);
-> +
-Did you consider the case that set_clock is assigned the sdhci_cmu_set_clock()?
-
->  		/* turn clock off to card before changing clock source */
->  		writew(0, host->ioaddr + SDHCI_CLOCK_CONTROL);
->  
-> @@ -501,8 +503,6 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->  		 */
->  		sc->cur_clk = ptr;
->  
-> -		clk_enable(clk);
-> -
->  		dev_info(dev, "clock source %d: %s (%ld Hz)\n",
->  			 ptr, name, clk_get_rate(clk));
->  	}
-> @@ -513,6 +513,8 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->  		goto err_no_busclks;
->  	}
->  
-> +	clk_enable(sc->clk_bus[sc->cur_clk]);
-> +
->  	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->  	host->ioaddr = devm_request_and_ioremap(&pdev->dev, res);
->  	if (!host->ioaddr) {
-> @@ -621,9 +623,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->  	return 0;
->  
->   err_req_regs:
-> +	clk_disable(sc->clk_bus[sc->cur_clk]);
->  	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
->  		if (sc->clk_bus[ptr]) {
-> -			clk_disable(sc->clk_bus[ptr]);
->  			clk_put(sc->clk_bus[ptr]);
->  		}
->  	}
-> @@ -658,9 +660,9 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
->  
+> +	pm_runtime_dont_use_autosuspend(&pdev->dev);
 >  	pm_runtime_disable(&pdev->dev);
 >  
-> +	clk_disable(sc->clk_bus[sc->cur_clk]);
->  	for (ptr = 0; ptr < 3; ptr++) {
->  		if (sc->clk_bus[ptr]) {
-> -			clk_disable(sc->clk_bus[ptr]);
->  			clk_put(sc->clk_bus[ptr]);
->  		}
->  	}
+>  	clk_disable(sc->clk_bus[sc->cur_clk]);
 > 
