@@ -1,32 +1,87 @@
 From: Chander Kashyap <chander.kashyap@linaro.org>
-Subject: [PATCH 0/3] mmc: sdhci-s3c: fixes and enhancements
-Date: Fri, 14 Sep 2012 14:38:48 +0530
-Message-ID: <1347613731-29428-1-git-send-email-chander.kashyap@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:65402 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753455Ab2INJJt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Sep 2012 05:09:49 -0400
-Received: by pbbrr13 with SMTP id rr13so5332769pbb.19
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Sep 2012 02:09:48 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH 1/3] mmc: sdhci-s3c: Enable only required bus clock
+Date: Fri, 14 Sep 2012 14:38:49 +0530
+Message-ID: <1347613731-29428-2-git-send-email-chander.kashyap@linaro.org>
+References: <1347613731-29428-1-git-send-email-chander.kashyap@linaro.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1347613731-29428-1-git-send-email-chander.kashyap@linaro.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org
 Cc: cjb@laptop.org, ben@simtec.co.uk, broonie@opensource.wolfsonmicro.com, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, patches@linaro.org, Chander Kashyap <chander.kashyap@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
-This patchset does as follows:
-Patch 1: Enable only required bus clock in case of multiple clock sources.
-Patch 2: Add pm_runtime_dont_use_autosuspend() in sdhci_s3c_remove();
-Patch 3: Disable clocks in runtime suspend and enable at runtime resume.
+In case of multiple bus clock sources, all the clock sources were
+getting enabled. As only one clock source is needed at the time hence
+enable only the required bus clock.
 
-Chander Kashyap (3):
-  mmc: sdhci-s3c: Enable only required bus clock
-  mmc: sdhci-s3c: Fix crash on module insertion for second time
-  mmc: sdhci-s3c: Add clk_(enable/disable) in runtime suspend/resume
+This patch does as follows:
+1.	In sdhci_s3c_probe enable only required bus clock source.
 
- drivers/mmc/host/sdhci-s3c.c |   38 +++++++++++++++++++++++++++++++-------
- 1 file changed, 31 insertions(+), 7 deletions(-)
+2.	Handle the disabling of old bus clock and enables the
+	best clock selected in sdhci_s3c_set_clock().
 
+Signed-off-by: Chander Kashyap <chander.kashyap@linaro.org>
+---
+ drivers/mmc/host/sdhci-s3c.c |   12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 00969ba..0cbb4c2 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -203,10 +203,12 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
+ 		 best_src, clock, best);
+ 
+ 	/* select the new clock source */
+-
+ 	if (ourhost->cur_clk != best_src) {
+ 		struct clk *clk = ourhost->clk_bus[best_src];
+ 
++		clk_enable(clk);
++		clk_disable(ourhost->clk_bus[ourhost->cur_clk]);
++
+ 		/* turn clock off to card before changing clock source */
+ 		writew(0, host->ioaddr + SDHCI_CLOCK_CONTROL);
+ 
+@@ -501,8 +503,6 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 		 */
+ 		sc->cur_clk = ptr;
+ 
+-		clk_enable(clk);
+-
+ 		dev_info(dev, "clock source %d: %s (%ld Hz)\n",
+ 			 ptr, name, clk_get_rate(clk));
+ 	}
+@@ -513,6 +513,8 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 		goto err_no_busclks;
+ 	}
+ 
++	clk_enable(sc->clk_bus[sc->cur_clk]);
++
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	host->ioaddr = devm_request_and_ioremap(&pdev->dev, res);
+ 	if (!host->ioaddr) {
+@@ -621,9 +623,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	return 0;
+ 
+  err_req_regs:
++	clk_disable(sc->clk_bus[sc->cur_clk]);
+ 	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+ 		if (sc->clk_bus[ptr]) {
+-			clk_disable(sc->clk_bus[ptr]);
+ 			clk_put(sc->clk_bus[ptr]);
+ 		}
+ 	}
+@@ -658,9 +660,9 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+ 
+ 	pm_runtime_disable(&pdev->dev);
+ 
++	clk_disable(sc->clk_bus[sc->cur_clk]);
+ 	for (ptr = 0; ptr < 3; ptr++) {
+ 		if (sc->clk_bus[ptr]) {
+-			clk_disable(sc->clk_bus[ptr]);
+ 			clk_put(sc->clk_bus[ptr]);
+ 		}
+ 	}
 -- 
 1.7.9.5
-
