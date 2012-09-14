@@ -1,73 +1,50 @@
-From: javier Martin <javier.martin@vista-silicon.com>
-Subject: Re: [PATCH v2] mmc: mxcmmc: fix bug that may block a data transfer forever.
-Date: Fri, 14 Sep 2012 14:50:11 +0200
-Message-ID: <CACKLOr0FSG=v8+Fz=USqWhXSC9t9JoqFczi1r51k_uixYBK-Ew@mail.gmail.com>
-References: <1347014617-16238-1-git-send-email-javier.martin@vista-silicon.com>
-	<1347591157.1943.5.camel@vkoul-udesk3>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off notify
+Date: Fri, 14 Sep 2012 16:03:42 +0200
+Message-ID: <CACRpkdaV_PDaYH+RgM2pa9f9Gp97-D9xbxfDkPUBfXSR+-csAg@mail.gmail.com>
+References: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com>
+	<CAGxe1ZF5hBoV5seKYDnwCNgk0ff1+wcie1RgEX19MFGAnNYebg@mail.gmail.com>
+	<CAGxe1ZF6FDTxrbmBkzzSqhP8TPjA_7MbZPukaAeSzs8KOu1m2g@mail.gmail.com>
+	<CAPDyKFotCTKX9O3KYtr3ZtAqaoCaNuHWDYfP23=+z11=_7XQOA@mail.gmail.com>
+	<CAGxe1ZFJhc-c8rS0KGdfTvejs27jjpz7T4Z2AVwoB-=7QOMemg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:52442 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756422Ab2INMuP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Sep 2012 08:50:15 -0400
-Received: by weyx8 with SMTP id x8so2369083wey.19
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Sep 2012 05:50:11 -0700 (PDT)
-In-Reply-To: <1347591157.1943.5.camel@vkoul-udesk3>
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:55115 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756131Ab2INODn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Sep 2012 10:03:43 -0400
+Received: by wibhi8 with SMTP id hi8so8364790wib.1
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Sep 2012 07:03:42 -0700 (PDT)
+In-Reply-To: <CAGxe1ZFJhc-c8rS0KGdfTvejs27jjpz7T4Z2AVwoB-=7QOMemg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vinod Koul <vinod.koul@linux.intel.com>
-Cc: linux-mmc@vger.kernel.org, viresh.linux@gmail.com, g.liakhovetski@gmx.de, s.hauer@pengutronix.de, cjb@laptop.org, fabio.estevam@freescale.com, gcembed@gmail.com
+To: Girish K S <girish.shivananjappa@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Saugata Das <saugata.das@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>
 
-Hi Vinod,
-
-On 14 September 2012 04:52, Vinod Koul <vinod.koul@linux.intel.com> wrote:
-> On Fri, 2012-09-07 at 12:43 +0200, Javier Martin wrote:
+On Fri, Sep 14, 2012 at 10:25 AM, Girish K S
+<girish.shivananjappa@linaro.org> wrote:
+> On 14 September 2012 12:37, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> Hi Girish,
 >>
->> The problem can be easily reproduced using a script that loops
->> copying a file in an SD card to another place in the same SD card
->> and its related to read transfers. This only happens with DMA enabled.
+>> I should also have stated that this patch has not been tested with an
+>> eMMC 4.5 device, thus the power off notification is not fully tested.
+>> Unfortunate I don't have such a device available right now. What I did
+>> test was that patch must not break anything and tested that the
+>> suspend/resume sequence is fixed for eMMC with sleep support. I also
+>> tested this with MMC_CAP2_POWEROFF_NOTIFY enabled.
 >>
->> This is related to the fact that, when reading, an MMC irq signals
->> the fact that all data from the SD card has been copied to the
->> internal buffers. However, it doesn't signal whether the DMA transfer
->> that is in charge of moving data from these internal buffers to RAM
->> has finished or not. Thus, calling dmaengine_terminate_all() in the
->> MMC irq routine can cancel an ongoing DMA transfer leaving some data
->> in the internal buffers that produces an accumulative effect which,
->> in the end, blocks a read data transfer forever.
->>
->> The following patch watches DMA irq for reading and MMC irqs for
->> writing transfers. The 'dangerous' usage of dmaengine_terminate_all()
->> is removed and a timeout of 10 seconds is added so that the MMC won't
->> block forever anymore.
-> For a normal transactions why should you call dmaengine_terminate_all().
+>> Are you able to help out in testing with a eMMC 4.5 device with
+>> POWER_OFF_NOTIFY support?
+>
+> I am also facing the same  problem. The board that i used earlier to
+> upstream 4.5 patches is not functioning. Thats the reason for the
+> delay in upstreaming or sending the patch. Once i get it repaired i ll
+> definitely do it.
+> It would be helpful if somebody in the list can do this in the mean time.
 
-Agree. In fact, this patch fixes that.
+Let's page Arnd, I was under the impression that he has a eMMC 4.5
+board so maybe he can test it?
 
-> This should be called when you doing abort or cleanup in some erranous
-> situation.
-
-After this patch, dmaengine_terminate_all() will only be called if a
-DMA transfer lasts more than 10 seconds, which is an explicit
-error/abort that can happen sometimes (ie. when an SD card is worn
-out).
-
-> why was it called in first place?
-
-I don't know, because I didn't write the original support but it's not
-relevant because this patch removes the incorrect use of
-dmaengine_terminate_all().
-
-Since you took the time to review the patch, could you please give me
-your ack too in case you find everything seems fine?
-
-Regards.
--- 
-Javier Martin
-Vista Silicon S.L.
-CDTUC - FASE C - Oficina S-345
-Avda de los Castros s/n
-39005- Santander. Cantabria. Spain
-+34 942 25 32 60
-www.vista-silicon.com
+Yours,
+Linus Walleij
