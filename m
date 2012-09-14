@@ -1,103 +1,54 @@
-From: Chander Kashyap <chander.kashyap@linaro.org>
-Subject: [PATCH 3/3] mmc: sdhci-s3c: Add clk_(enable/disable) in runtime suspend/resume
-Date: Fri, 14 Sep 2012 14:38:51 +0530
-Message-ID: <1347613731-29428-4-git-send-email-chander.kashyap@linaro.org>
-References: <1347613731-29428-1-git-send-email-chander.kashyap@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off notify
+Date: Fri, 14 Sep 2012 11:19:05 +0200
+Message-ID: <CAPDyKFoWMO1Jz2XuawEffzmemvmhecHdiA8BeRxVU49jtYjAag@mail.gmail.com>
+References: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com>
+	<CAGxe1ZF5hBoV5seKYDnwCNgk0ff1+wcie1RgEX19MFGAnNYebg@mail.gmail.com>
+	<CAGxe1ZF6FDTxrbmBkzzSqhP8TPjA_7MbZPukaAeSzs8KOu1m2g@mail.gmail.com>
+	<CAPDyKFotCTKX9O3KYtr3ZtAqaoCaNuHWDYfP23=+z11=_7XQOA@mail.gmail.com>
+	<CAGxe1ZFJhc-c8rS0KGdfTvejs27jjpz7T4Z2AVwoB-=7QOMemg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:47814 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753727Ab2INJKB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Sep 2012 05:10:01 -0400
-Received: by mail-pb0-f46.google.com with SMTP id rr13so5332770pbb.19
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Sep 2012 02:10:01 -0700 (PDT)
-In-Reply-To: <1347613731-29428-1-git-send-email-chander.kashyap@linaro.org>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:44588 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758166Ab2INJTH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Sep 2012 05:19:07 -0400
+Received: by weyx8 with SMTP id x8so2263231wey.19
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Sep 2012 02:19:06 -0700 (PDT)
+In-Reply-To: <CAGxe1ZFJhc-c8rS0KGdfTvejs27jjpz7T4Z2AVwoB-=7QOMemg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org
-Cc: cjb@laptop.org, ben@simtec.co.uk, broonie@opensource.wolfsonmicro.com, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, patches@linaro.org, Chander Kashyap <chander.kashyap@linaro.org>
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Saugata Das <saugata.das@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>
 
-Perform clock disable/enable in runtime suspend/resume.
+On 14 September 2012 10:25, Girish K S <girish.shivananjappa@linaro.org> wrote:
+> On 14 September 2012 12:37, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> Hi Girish,
+>>
+>> I should also have stated that this patch has not been tested with an
+>> eMMC 4.5 device, thus the power off notification is not fully tested.
+>> Unfortunate I don't have such a device available right now. What I did
+>> test was that patch must not break anything and tested that the
+>> suspend/resume sequence is fixed for eMMC with sleep support. I also
+>> tested this with MMC_CAP2_POWEROFF_NOTIFY enabled.
+>>
+>> Are you able to help out in testing with a eMMC 4.5 device with
+>> POWER_OFF_NOTIFY support?
+> I am also facing the same  problem. The board that i used earlier to
+> upstream 4.5 patches is not functioning. Thats the reason for the
+> delay in upstreaming or sending the patch. Once i get it repaired i ll
+> definitely do it.
+> It would be helpful if somebody in the list can do this in the mean time.
 
-Signed-off-by: Chander Kashyap <chander.kashyap@linaro.org>
----
- drivers/mmc/host/sdhci-s3c.c |   25 +++++++++++++++++++++++--
- 1 file changed, 23 insertions(+), 2 deletions(-)
+Ah, I see.
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 3f4518d..ffffd51 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -513,7 +513,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 		goto err_no_busclks;
- 	}
- 
-+#ifndef CONFIG_PM_RUNTIME
- 	clk_enable(sc->clk_bus[sc->cur_clk]);
-+#endif
- 
- 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	host->ioaddr = devm_request_and_ioremap(&pdev->dev, res);
-@@ -620,10 +622,13 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	    gpio_is_valid(pdata->ext_cd_gpio))
- 		sdhci_s3c_setup_card_detect_gpio(sc);
- 
-+	clk_disable(sc->clk_io);
- 	return 0;
- 
-  err_req_regs:
-+#ifndef CONFIG_PM_RUNTIME
- 	clk_disable(sc->clk_bus[sc->cur_clk]);
-+#endif
- 	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
- 		if (sc->clk_bus[ptr]) {
- 			clk_put(sc->clk_bus[ptr]);
-@@ -656,12 +661,15 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
- 	if (gpio_is_valid(sc->ext_cd_gpio))
- 		gpio_free(sc->ext_cd_gpio);
- 
-+	clk_enable(sc->clk_io);
- 	sdhci_remove_host(host, 1);
- 
- 	pm_runtime_dont_use_autosuspend(&pdev->dev);
- 	pm_runtime_disable(&pdev->dev);
- 
-+#ifndef CONFIG_PM_RUNTIME
- 	clk_disable(sc->clk_bus[sc->cur_clk]);
-+#endif
- 	for (ptr = 0; ptr < 3; ptr++) {
- 		if (sc->clk_bus[ptr]) {
- 			clk_put(sc->clk_bus[ptr]);
-@@ -696,15 +704,28 @@ static int sdhci_s3c_resume(struct device *dev)
- static int sdhci_s3c_runtime_suspend(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_s3c *ourhost = to_s3c(host);
-+	struct clk *busclk = ourhost->clk_io;
-+	int ret;
-+
-+	ret = sdhci_runtime_suspend_host(host);
- 
--	return sdhci_runtime_suspend_host(host);
-+	clk_disable(ourhost->clk_bus[ourhost->cur_clk]);
-+	clk_disable(busclk);
-+	return ret;
- }
- 
- static int sdhci_s3c_runtime_resume(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_s3c *ourhost = to_s3c(host);
-+	struct clk *busclk = ourhost->clk_io;
-+	int ret;
- 
--	return sdhci_runtime_resume_host(host);
-+	clk_enable(busclk);
-+	clk_enable(ourhost->clk_bus[ourhost->cur_clk]);
-+	ret = sdhci_runtime_resume_host(host);
-+	return ret;
- }
- #endif
- 
--- 
-1.7.9.5
+If not possible to test soon, I anyway think we should go ahead with
+this patch, since it fixes the supend/resume sequence for eMMC with
+sleep, which to me is far more important right know, it has been
+broken for several month now. If there are any issues with power off
+notify feature, we can fix that later on. What do you think of that
+approach?
 
+Kind regards
+Ulf Hansson
