@@ -1,111 +1,86 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/3] mmc: sdhci-s3c: Enable only required bus clock
-Date: Fri, 14 Sep 2012 19:49:03 +0900
-Message-ID: <50530B9F.3050803@samsung.com>
-References: <1347613731-29428-1-git-send-email-chander.kashyap@linaro.org>
- <1347613731-29428-2-git-send-email-chander.kashyap@linaro.org>
- <5052FF1C.3060803@samsung.com>
- <CANuQgHG6mp3-oOB=nYLLQu-rqwfmoXJ6V_uiC75NK+NrNd0FPg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <CANuQgHG6mp3-oOB=nYLLQu-rqwfmoXJ6V_uiC75NK+NrNd0FPg@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Chander Kashyap <chander.kashyap@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, ben@simtec.co.uk, broonie@opensource.wolfsonmicro.com, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, patches@linaro.org
+From: Kumar Gala <galak@kernel.crashing.org>
+Subject: Re: [PATCH 2/3] powerpc/esdhc: add property to disable the CMD23
+Date: Fri, 14 Sep 2012 07:40:05 -0500
+Message-ID: <DCC5A84D-5A11-4BD1-B637-F2AA7BE85BBF@kernel.crashing.org>
+References: <1347347565-17474-1-git-send-email-Chang-Ming.Huang@freescale.com> <1347347565-17474-2-git-send-email-Chang-Ming.Huang@freescale.com> <20120911075429.GA27028@lizard> <20120911080457.GA28235@lizard> <110EED8CC96DFC488B7E717A2027A27C176170@039-SN1MPN1-002.039d.mgd.msft.net> <6D8C87BA-CA06-4215-94F5-63EBF5162B0A@kernel.crashing.org> <2A6FCAE3-288F-4972-90C0-15105932F13E@kernel.crashing.org> <87k3w0y5yn.fsf@octavius.laptop.org> <FC22FA36-B2CF-49C2-A0B1-8A0EA614B9CB@kernel.crashing.org> <87liggwa1w <8B1F0805-759E-417A-B787-40DF197896F3@kernel.crashing.org> <110EED8CC96DFC488B7E717A2027A27C1785D0@039-SN1MPN1-002.039d.mgd.msft.net> <4E15F856-D385-40C4-A5FD-5F298C70F402@kernel.crashing.org> <110EED8CC96DFC488B7E717A2027A27C179C7E@039-SN1MPN1-002.039d.mgd.msft.net>
+Mime-Version: 1.0 (Apple Message framework v1278)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gate.crashing.org ([63.228.1.57]:33660 "EHLO gate.crashing.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751017Ab2INMkT convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Sep 2012 08:40:19 -0400
+In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C179C7E@039-SN1MPN1-002.039d.mgd.msft.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Huang Changming-R66093 <R66093@freescale.com>
+Cc: Chris Ball <cjb@laptop.org>, "linuxppc-dev@lists.ozlabs.org list" <linuxppc-dev@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Anton Vorontsov <cbouatmailru@gmail.com>
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+>>>>> 
+>>>>>> -----Original Message-----
+>>>>>> From: Chris Ball [mailto:cjb@laptop.org]
+>>>>>> Sent: Wednesday, September 12, 2012 4:59 AM
+>>>>>> To: Kumar Gala
+>>>>>> Cc: Huang Changming-R66093; linuxppc-dev@lists.ozlabs.org list;
+>>>>>> linux- mmc@vger.kernel.org; Anton Vorontsov
+>>>>>> Subject: Re: [PATCH 2/3] powerpc/esdhc: add property to disable the
+>>>>>> CMD23
+>>>>>> 
+>>>>>> Hi,
+>>>>>> 
+>>>>>> On Tue, Sep 11 2012, Kumar Gala wrote:
+>>>>>>> thanks for the info.  Do you know what's required on controller
+>>>>>>> side to handle cards that support CMD23?
+>>>>>>> 
+>>>>>>> I'm trying to figure out if older controller's on FSL SoCs are
+>>>>>>> missing some feature to allow CMD23 to work (vs Auto-CMD23).
+>>>>>> 
+>>>>>> It seems plausible that it's just not implemented on these
+>> controllers.
+>>>>>> It's a little strange, since the command's been specified for so
+>>>>>> long and we haven't seen any other controllers with problems.  The
+>>>>>> patch would be correct if this is true.
+>>>>>> 
+>>>>> 
+>>>>> I didn't find any description about it, but after testing on FSL
+>>>> silicones, I got this result:
+>>>>> Some silicones support this command, and some silicones don't
+>>>>> support
+>>>> it, which will cause I/O error.
+>>>> 
+>>>> Can you list out which SoCs support it and which don't.  Having this
+>>>> list will be useful in understanding which controller versions
+>> supported it.
+>>>> 
+>>> P1020, p1021, p1022, p1024, p1015 and p4080 can't support it.
+>>> Mpc8536, p2020, and the other current DPAA silicon (e.g. p5020, p3041)
+>> support it.
+>> 
+>> Based on this, why don't we use the HOSTVER register to detect instead of
+>> device tree:
+>> 
+>> 
+>> #define FSL_SDHC_VER_1_0	0x00
+>> #define FSL_SDHC_VER_1_1	0x01
+>> #define FSL_SDHC_VER_2_0	0x10
+>> #define FSL_SDHC_VER_2_1	0x11
+>> #define FSL_SDHC_VER_2_2	0x12
+>> #define FSL_SDHC_VER_2_3	0x13
+>> 
+>> unsigned int vendor_version;
+>> 
+>> vendor_version = sdhci_readw(host, SDHCI_HOST_VERSION); vendor_version =
+>> (vendor_version & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+>> 
+>> if ((vendor_version == FSL_SDHC_VER_1_1) || (vendor_version ==
+>> FSL_SDHC_VER_2_2))
+>> 	host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+>> 
+> 
+> I once thought about it, but if the future silicon does not support this feature,
+> then we continue to modify these codes for new silicon?
 
-On 09/14/2012 07:46 PM, Chander Kashyap wrote:
-> Hi Jaehoon Chung,
-> 
-> On 14 September 2012 15:25, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Hi Chander,
->>
->> Could you add the error control for clk_enable()?
-> It is maintained as original and clk is already checked for error using IS_ERR.
->>
->> On 09/14/2012 06:08 PM, Chander Kashyap wrote:
->>> In case of multiple bus clock sources, all the clock sources were
->>> getting enabled. As only one clock source is needed at the time hence
->>> enable only the required bus clock.
->>>
->>> This patch does as follows:
->>> 1.    In sdhci_s3c_probe enable only required bus clock source.
->>>
->>> 2.    Handle the disabling of old bus clock and enables the
->>>       best clock selected in sdhci_s3c_set_clock().
->>>
->>> Signed-off-by: Chander Kashyap <chander.kashyap@linaro.org>
->>> ---
->>>  drivers/mmc/host/sdhci-s3c.c |   12 +++++++-----
->>>  1 file changed, 7 insertions(+), 5 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
->>> index 00969ba..0cbb4c2 100644
->>> --- a/drivers/mmc/host/sdhci-s3c.c
->>> +++ b/drivers/mmc/host/sdhci-s3c.c
->>> @@ -203,10 +203,12 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
->>>                best_src, clock, best);
->>>
->>>       /* select the new clock source */
->>> -
->>>       if (ourhost->cur_clk != best_src) {
->>>               struct clk *clk = ourhost->clk_bus[best_src];
->>>
->>> +             clk_enable(clk);
->>> +             clk_disable(ourhost->clk_bus[ourhost->cur_clk]);
->>> +
->> Did you consider the case that set_clock is assigned the sdhci_cmu_set_clock()?
-> Yes considered.
->>
->>>               /* turn clock off to card before changing clock source */
->>>               writew(0, host->ioaddr + SDHCI_CLOCK_CONTROL);
->>>
->>> @@ -501,8 +503,6 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->>>                */
->>>               sc->cur_clk = ptr;
->>>
->>> -             clk_enable(clk);
->>> -
->>>               dev_info(dev, "clock source %d: %s (%ld Hz)\n",
->>>                        ptr, name, clk_get_rate(clk));
->>>       }
->>> @@ -513,6 +513,8 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->>>               goto err_no_busclks;
->>>       }
->>>
->>> +     clk_enable(sc->clk_bus[sc->cur_clk]);
->>> +
->>>       res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->>>       host->ioaddr = devm_request_and_ioremap(&pdev->dev, res);
->>>       if (!host->ioaddr) {
->>> @@ -621,9 +623,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->>>       return 0;
->>>
->>>   err_req_regs:
->>> +     clk_disable(sc->clk_bus[sc->cur_clk]);
->>>       for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
->>>               if (sc->clk_bus[ptr]) {
->>> -                     clk_disable(sc->clk_bus[ptr]);
->>>                       clk_put(sc->clk_bus[ptr]);
->>>               }
->>>       }
->>> @@ -658,9 +660,9 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
->>>
->>>       pm_runtime_disable(&pdev->dev);
->>>
->>> +     clk_disable(sc->clk_bus[sc->cur_clk]);
->>>       for (ptr = 0; ptr < 3; ptr++) {
->>>               if (sc->clk_bus[ptr]) {
->>> -                     clk_disable(sc->clk_bus[ptr]);
->>>                       clk_put(sc->clk_bus[ptr]);
->>>               }
->>>       }
->>>
->>
-> 
-> 
-> 
+Yes, but it seems extremely unlikely that future versions of the controller will remove this feature now that it exists.
+
+- k
