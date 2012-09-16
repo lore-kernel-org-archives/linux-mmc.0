@@ -1,60 +1,77 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v11] mmc: support BKOPS feature for eMMC
-Date: Sat, 15 Sep 2012 13:01:41 +0900
-Message-ID: <5053FDA5.9040108@samsung.com>
-References: <500E00E8.7040504@samsung.com>
- <CAEwNFnA0CKaORGJ1TVnjYgLgi6dtgebVZ1xUVeY6MU92LWb9RA@mail.gmail.com>
- <50164D28.4030907@samsung.com>
- <5d379475a64b20988a535fa01213d62a.squirrel@www.codeaurora.org>
- <87ehmsyo07.fsf@octavius.laptop.org> <m3r4q40x8q.fsf@pullcord.laptop.org>
+From: Tatyana Brokhman <tlinder@codeaurora.org>
+Subject: =?UTF-8?q?=5BRFC/PATCH/RESEND=200/2=5D=20ROW=20scheduling=20Algorithm?=
+Date: Sun, 16 Sep 2012 12:00:06 +0300
+Message-ID: <1347786008-6310-1-git-send-email-tlinder@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:46177 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750744Ab2IOEBx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Sep 2012 00:01:53 -0400
-Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout3.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MAD00LV1HV08450@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Sat, 15 Sep 2012 13:01:52 +0900 (KST)
-Received: from [10.90.51.55] by mmp1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0MAD004S8HV3J930@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Sat, 15 Sep 2012 13:01:51 +0900 (KST)
-In-reply-to: <m3r4q40x8q.fsf@pullcord.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: axboe@kernel.dk
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Tatyana Brokhman <tlinder@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: merez@codeaurora.org, Jaehoon Chung <jh80.chung@samsung.com>, Minchan Kim <minchan@kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Adrian Hunter <adrian.hunter@intel.com>, Per FORLIN <per.forlin@stericsson.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
 
-Hi Chris,
+The ROW scheduling algorithm will be used in mobile devices as default
+block layer IO scheduling algorithm. ROW stands for "READ Over WRITE"
+which is the main requests dispatch policy of this algorithm.
 
-I will send the next version until next Monday.
+The ROW IO scheduler was developed with the mobile devices needs in
+mind. In mobile devices we favor user experience upon everything else,
+thus we want to give READ IO requests as much priority as possible.
+In mobile devices we won=E2=80=99t have AS much parallel threads as on =
+desktops.
+Usually it=E2=80=99s a single thread or at most 2 simultaneous working =
+threads
+for read & write. Favoring READ requests over WRITEs decreases the READ
+latency greatly.
 
-Best Regards,
-Jaehoon Chung
+The main idea of the ROW scheduling policy is:
+If there are READ requests in pipe - dispatch them but don't starve
+the WRITE requests too much.
 
-On 09/15/2012 12:40 PM, Chris Ball wrote:
-> Hi Jaehoon,
-> 
-> On Mon, Aug 27 2012, Chris Ball wrote:
->>> I'm not sure it would be a good idea to allocate the buffer every time the
->>> ext_csd is read since with the periodic BKOPs we might do it more often to
->>> see if there is a need for BKOPs.
->>> How about keeping the buffer in the card structure?
->>
->> It's a little large for that, but it would be worth it if we really do
->> use it regularly.  Perhaps go with the kmalloc option for now, add a
->> comment explaining that we should consider storing the entire ext_csd
->> in mmc_card later, and revisit it when the periodic bkops support is
->> submitted and we know how often we need to read the status?
-> 
-> Do you have an ETA on v12 of this patch?  We're running out of time to
-> get it tested before 3.7 opens.  Thanks!
-> 
-> - Chris.
-> 
+Bellow you=E2=80=99ll find a small comparison of ROW to existing schedu=
+lers.
+The test that was run for these measurements is parallel lmdd read and =
+write.
+The tests were performed on:
+kernel version: 3.4
+Underline device driver: mmc
+Host controller: msm-sdcc
+Card:standard emmc NAND flash
 
+-----------------------------------------------------------------------=
+---
+   Algorithm   |   Throughput [mb/sec]   |   Worst case Latency [msec] =
+  |
+               |     READ    |   WRITE   |     READ      |     WRITE   =
+  |
+-----------------------------------------------------------------------=
+---
+Noop           |    12.12    |   25.18   |     4407      |      4804   =
+  |
+Deadline       |    12.02    |   24.6    |     705       |      5130   =
+  |=20
+CFQ	       |    20.81    |   15.23   |     230       |      9370     |
+ROW	       |    27.75    |   15.34   |      85       |     12025     |
+-----------------------------------------------------------------------=
+--|
+
+Tatyana Brokhman (2):
+  block: Expose kblock_schedule_delayed_work()
+  block: Adding ROW scheduling algorithm
+
+ Documentation/block/row-iosched.txt |  117 ++++++
+ block/Kconfig.iosched               |   22 ++
+ block/Makefile                      |    1 +
+ block/row-iosched.c                 |  680 +++++++++++++++++++++++++++=
+++++++++
+ include/linux/blkdev.h              |    2 +
+ 5 files changed, 822 insertions(+), 0 deletions(-)
+ create mode 100644 Documentation/block/row-iosched.txt
+ create mode 100644 block/row-iosched.c
+
+--=20
+1.7.6
+--
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc.=20
+Is a member of Code Aurora Forum, hosted by the Linux Foundation
