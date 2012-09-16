@@ -1,77 +1,43 @@
 From: Tatyana Brokhman <tlinder@codeaurora.org>
-Subject: =?UTF-8?q?=5BRFC/PATCH/RESEND=200/2=5D=20ROW=20scheduling=20Algorithm?=
-Date: Sun, 16 Sep 2012 12:00:06 +0300
-Message-ID: <1347786008-6310-1-git-send-email-tlinder@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: axboe@kernel.dk
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Tatyana Brokhman <tlinder@codeaurora.org>
+Subject: [RFC/PATCH/RESEND 1/2] block: Expose kblock_schedule_delayed_work()
+Date: Sun, 16 Sep 2012 12:00:07 +0300
+Message-ID: <1347786008-6310-2-git-send-email-tlinder@codeaurora.org>
+References: <1347786008-6310-1-git-send-email-tlinder@codeaurora.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:14283 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751480Ab2IPJAe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 16 Sep 2012 05:00:34 -0400
+In-Reply-To: <1347786008-6310-1-git-send-email-tlinder@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: axboe@kernel.dk
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Tatyana Brokhman <tlinder@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
 
-The ROW scheduling algorithm will be used in mobile devices as default
-block layer IO scheduling algorithm. ROW stands for "READ Over WRITE"
-which is the main requests dispatch policy of this algorithm.
+This function is exported in blk-core.c to be used in other modules
+but it's definition in h file is missing.
 
-The ROW IO scheduler was developed with the mobile devices needs in
-mind. In mobile devices we favor user experience upon everything else,
-thus we want to give READ IO requests as much priority as possible.
-In mobile devices we won=E2=80=99t have AS much parallel threads as on =
-desktops.
-Usually it=E2=80=99s a single thread or at most 2 simultaneous working =
-threads
-for read & write. Favoring READ requests over WRITEs decreases the READ
-latency greatly.
+Signed-off-by: Tatyana Brokhman <tlinder@codeaurora.org>
 
-The main idea of the ROW scheduling policy is:
-If there are READ requests in pipe - dispatch them but don't starve
-the WRITE requests too much.
-
-Bellow you=E2=80=99ll find a small comparison of ROW to existing schedu=
-lers.
-The test that was run for these measurements is parallel lmdd read and =
-write.
-The tests were performed on:
-kernel version: 3.4
-Underline device driver: mmc
-Host controller: msm-sdcc
-Card:standard emmc NAND flash
-
------------------------------------------------------------------------=
 ---
-   Algorithm   |   Throughput [mb/sec]   |   Worst case Latency [msec] =
-  |
-               |     READ    |   WRITE   |     READ      |     WRITE   =
-  |
------------------------------------------------------------------------=
----
-Noop           |    12.12    |   25.18   |     4407      |      4804   =
-  |
-Deadline       |    12.02    |   24.6    |     705       |      5130   =
-  |=20
-CFQ	       |    20.81    |   15.23   |     230       |      9370     |
-ROW	       |    27.75    |   15.34   |      85       |     12025     |
------------------------------------------------------------------------=
---|
+ include/linux/blkdev.h |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
 
-Tatyana Brokhman (2):
-  block: Expose kblock_schedule_delayed_work()
-  block: Adding ROW scheduling algorithm
-
- Documentation/block/row-iosched.txt |  117 ++++++
- block/Kconfig.iosched               |   22 ++
- block/Makefile                      |    1 +
- block/row-iosched.c                 |  680 +++++++++++++++++++++++++++=
-++++++++
- include/linux/blkdev.h              |    2 +
- 5 files changed, 822 insertions(+), 0 deletions(-)
- create mode 100644 Documentation/block/row-iosched.txt
- create mode 100644 block/row-iosched.c
-
---=20
+diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+index 4a2ab7c..6929194 100644
+--- a/include/linux/blkdev.h
++++ b/include/linux/blkdev.h
+@@ -1208,6 +1208,8 @@ static inline void put_dev_sector(Sector p)
+ 
+ struct work_struct;
+ int kblockd_schedule_work(struct request_queue *q, struct work_struct *work);
++int kblockd_schedule_delayed_work(struct request_queue *q,
++			struct delayed_work *dwork, unsigned long delay);
+ 
+ #ifdef CONFIG_BLK_CGROUP
+ /*
+-- 
 1.7.6
 --
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc.=20
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. 
 Is a member of Code Aurora Forum, hosted by the Linux Foundation
