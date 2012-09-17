@@ -1,57 +1,61 @@
-From: Haojian Zhuang <haojian.zhuang@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pxav3: dt: Support "power-gpios" property
-Date: Mon, 17 Sep 2012 12:39:40 +0800
-Message-ID: <CAN1soZweREKHqtzcYEzRPnTQd_D-sgjv4HJj0jKL22MviBrUFw@mail.gmail.com>
-References: <87ligjzyge.fsf@octavius.laptop.org>
-	<CAMj5Bkji+WV0dx7vuC8OxprbW0TAOWBsCUimmr5r9iiXAEVw_A@mail.gmail.com>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off notify
+Date: Mon, 17 Sep 2012 10:20:34 +0530
+Message-ID: <CAGxe1ZEYgs3va6SR83UeN02Lnjr4Wd-dGWsPqTputcaiSJW6mA@mail.gmail.com>
+References: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com>
+	<CAGxe1ZFJhc-c8rS0KGdfTvejs27jjpz7T4Z2AVwoB-=7QOMemg@mail.gmail.com>
+	<CACRpkdaV_PDaYH+RgM2pa9f9Gp97-D9xbxfDkPUBfXSR+-csAg@mail.gmail.com>
+	<201209141504.14658.arnd@arndb.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f170.google.com ([209.85.212.170]:63603 "EHLO
-	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751367Ab2IQEjm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Sep 2012 00:39:42 -0400
-Received: by wibhq12 with SMTP id hq12so3902510wib.1
-        for <linux-mmc@vger.kernel.org>; Sun, 16 Sep 2012 21:39:40 -0700 (PDT)
-In-Reply-To: <CAMj5Bkji+WV0dx7vuC8OxprbW0TAOWBsCUimmr5r9iiXAEVw_A@mail.gmail.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:62197 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751450Ab2IQEuf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Sep 2012 00:50:35 -0400
+Received: by vbbff1 with SMTP id ff1so2405563vbb.19
+        for <linux-mmc@vger.kernel.org>; Sun, 16 Sep 2012 21:50:35 -0700 (PDT)
+In-Reply-To: <201209141504.14658.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, kliu5@marvell.com, Mark Brown <broonie@opensource.wolfsonmicro.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Saugata Das <saugata.das@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>
 
-On Tue, Sep 11, 2012 at 1:00 PM, zhangfei gao <zhangfei.gao@gmail.com> wrote:
-> On Sun, Sep 9, 2012 at 11:06 AM, Chris Ball <cjb@laptop.org> wrote:
->> Tested on OLPC XO-4/MMP3, where the card power for two of the
->> controllers is a sideband GPIO.  The third cell in the power-gpios
->> property controls whether the GPIO is active high/active low.
+On 14 September 2012 20:34, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Friday 14 September 2012, Linus Walleij wrote:
+>> On Fri, Sep 14, 2012 at 10:25 AM, Girish K S
+>> <girish.shivananjappa@linaro.org> wrote:
+>> > On 14 September 2012 12:37, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> >> Hi Girish,
+>> >>
+>> >> I should also have stated that this patch has not been tested with an
+>> >> eMMC 4.5 device, thus the power off notification is not fully tested.
+>> >> Unfortunate I don't have such a device available right now. What I did
+>> >> test was that patch must not break anything and tested that the
+>> >> suspend/resume sequence is fixed for eMMC with sleep support. I also
+>> >> tested this with MMC_CAP2_POWEROFF_NOTIFY enabled.
+>> >>
+>> >> Are you able to help out in testing with a eMMC 4.5 device with
+>> >> POWER_OFF_NOTIFY support?
+>> >
+>> > I am also facing the same  problem. The board that i used earlier to
+>> > upstream 4.5 patches is not functioning. Thats the reason for the
+>> > delay in upstreaming or sending the patch. Once i get it repaired i ll
+>> > definitely do it.
+>> > It would be helpful if somebody in the list can do this in the mean time.
 >>
->> (Also, pass host_caps2 through from platdata to the mmc host.)
->>
->> Signed-off-by: Chris Ball <cjb@laptop.org>
->> ---
->> This patch depends on "mmc: slot-gpio: Add support for power gpios"
->>
->>  drivers/mmc/host/sdhci-pxav3.c          | 25 +++++++++++++++++++++++++
->>  include/linux/platform_data/pxa_sdhci.h |  2 ++
->>  2 files changed, 27 insertions(+)
+>> Let's page Arnd, I was under the impression that he has a eMMC 4.5
+>> board so maybe he can test it?
 >
-> Thanks Chris.
-> One questions is could we simply use fixed voltage regulator to control gpio?
-> And register this gpio as vmmc.
+> I have a few eMMC samples but am only using them with my (slow) thinkpad
+> SD card reader. I also don't know which eMMC-4.5 features they implement,
+> as some may be early prototypes.
 >
-> Thanks
-
-Hi Chris,
-
-As my understanding, the buck/LDO supplies power to MMC slot with 2.8V. We
-can call it as regulator A. GPIO pin is used to control this power
-supply to MMC
-slot. We can call it as regulator B (fixed regulator).
-
-I think that we can linked these two regulators as cascade. Since we
-won't change
-voltage as regulator A. This link won't bring us any issue. So we only need to
-control regulator B in mmc driver. How do you think about this idea?
-
-Regards
-Haojian
+> What exactly do you need tested?
+Poweroff Notify feature with the above patch in suspend to ram.
+>
+>         Arnd
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
