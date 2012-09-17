@@ -1,41 +1,77 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 2/3] mmc: davinci_mmc: convert to DMA engine API
-Date: Mon, 17 Sep 2012 03:52:52 -0400
-Message-ID: <m3ipbdytkb.fsf@pullcord.laptop.org>
-References: <1345574589-24757-1-git-send-email-mporter@ti.com>
-	<1345574589-24757-3-git-send-email-mporter@ti.com>
-	<k139rl$gbm$2@ger.gmane.org>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Peter Senna Tschudin <peter.senna@gmail.com>
+Subject: [PATCH 2/4] drivers/mmc/host/omap.c: fix error return code
+Date: Mon, 17 Sep 2012 10:15:26 +0200
+Message-ID: <1347869728-2696-2-git-send-email-peter.senna@gmail.com>
+References: <1347869728-2696-1-git-send-email-peter.senna@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36577 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754066Ab2IQHwm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 17 Sep 2012 03:52:42 -0400
-In-Reply-To: <k139rl$gbm$2@ger.gmane.org> (Koen Kooi's message of "Wed, 22 Aug
-	2012 20:53:43 +0200")
+Received: from mail-we0-f174.google.com ([74.125.82.174]:42545 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751092Ab2IQIPk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Sep 2012 04:15:40 -0400
+In-Reply-To: <1347869728-2696-1-git-send-email-peter.senna@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Koen Kooi <koen@dominion.thruhere.net>
-Cc: linux-mmc@vger.kernel.org, spi-devel-general@lists.sourceforge.net, davinci-linux-open-source@linux.davincidsp.com, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: jarkko.lavinen@nokia.com
+Cc: cjb@laptop.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org, Peter Senna Tschudin <peter.senna@gmail.com>
 
-Hi,
+From: Peter Senna Tschudin <peter.senna@gmail.com>
 
-On Wed, Aug 22 2012, Koen Kooi wrote:
-> Op 21-08-12 20:43, Matt Porter schreef:
->> Removes use of the DaVinci EDMA private DMA API and replaces it with use
->> of the DMA engine API.
->> 
->> Signed-off-by: Matt Porter <mporter@ti.com>
->
-> Runtime tested on hawkboard with 3.6.0-rc2 with rootfs on SD and running
-> bonnie++ on it.
->
-> Tested-by: Koen Kooi <koen@dominion.thruhere.net>
+Convert a nonnegative error return code to a negative one, as returned
+elsewhere in the function.
 
-Thanks, pushed to mmc-next for 3.7.
+A simplified version of the semantic match that finds this problem is as
+follows: (http://coccinelle.lip6.fr/)
 
-- Chris.
+// <smpl>
+(
+if@p1 (\(ret < 0\|ret != 0\))
+ { ... return ret; }
+|
+ret@p1 = 0
+)
+... when != ret = e1
+    when != &ret
+*if(...)
+{
+  ... when != ret = e2
+      when forall
+ return ret;
+}
+// </smpl>
+
+Signed-off-by: Peter Senna Tschudin <peter.senna@gmail.com>
+---
+ drivers/mmc/host/omap.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+index 48ad361..d468f51 100644
+--- a/drivers/mmc/host/omap.c
++++ b/drivers/mmc/host/omap.c
+@@ -1369,8 +1369,10 @@ static int __devinit mmc_omap_probe(struct platform_device *pdev)
+ 	host->irq = irq;
+ 	host->phys_base = host->mem_res->start;
+ 	host->virt_base = ioremap(res->start, resource_size(res));
+-	if (!host->virt_base)
++	if (!host->virt_base) {
++		ret = -ENOMEM;
+ 		goto err_ioremap;
++	}
+ 
+ 	host->iclk = clk_get(&pdev->dev, "ick");
+ 	if (IS_ERR(host->iclk)) {
+@@ -1438,8 +1440,10 @@ static int __devinit mmc_omap_probe(struct platform_device *pdev)
+ 	host->reg_shift = (cpu_is_omap7xx() ? 1 : 2);
+ 
+ 	host->mmc_omap_wq = alloc_workqueue("mmc_omap", 0, 0);
+-	if (!host->mmc_omap_wq)
++	if (!host->mmc_omap_wq) {
++		err = -ENOMEM;
+ 		goto err_plat_cleanup;
++	}
+ 
+ 	for (i = 0; i < pdata->nr_slots; i++) {
+ 		ret = mmc_omap_new_slot(host, i);
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.11.4
+
