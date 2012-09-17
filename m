@@ -1,45 +1,80 @@
 From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH 3/4] drivers/mmc/host/omap_hsmmc.c: fix error return code
-Date: Mon, 17 Sep 2012 23:41:17 +0530
-Message-ID: <CANfBPZ8O7Vd5aPZqwDNfwEzgOt0-usPxHg4W1y_v0yS+gTz+pQ@mail.gmail.com>
-References: <1347869728-2696-1-git-send-email-peter.senna@gmail.com> <1347869728-2696-3-git-send-email-peter.senna@gmail.com>
+Subject: Re: [PATCH V2] mmc: omap_hsmmc: Pass on the suspend failure to the PM core
+Date: Tue, 18 Sep 2012 00:21:02 +0530
+Message-ID: <CANfBPZ9hrKZgAbyUWfT7cLyRVDEEAVC7x=eBwFqBn49m-rmqkw@mail.gmail.com>
+References: <1347517863-30017-1-git-send-email-gururaja.hebbar@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1347869728-2696-3-git-send-email-peter.senna@gmail.com>
+In-Reply-To: <1347517863-30017-1-git-send-email-gururaja.hebbar@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Senna Tschudin <peter.senna@gmail.com>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
+To: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, rob.herring@calxeda.com, linux-kernel@vger.kernel.org, grant.likely@secretlab.ca, cjb@laptop.org, nsekhar@ti.com, sudhakar.raj@ti.com, Vaibhav Bedia <vaibhav.bedia@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Sep 17, 2012 at 1:45 PM, Peter Senna Tschudin
-<peter.senna@gmail.com> wrote:
-> From: Peter Senna Tschudin <peter.senna@gmail.com>
+On Thu, Sep 13, 2012 at 12:01 PM, Hebbar, Gururaja
+<gururaja.hebbar@ti.com> wrote:
+> From: Vaibhav Bedia <vaibhav.bedia@ti.com>
 >
-> Convert a nonnegative error return code to a negative one, as returned
-> elsewhere in the function.
+> In some cases mmc_suspend_host() is not able to claim the
+> host and proceed with the suspend process. The core returns
+> -EBUSY to the host controller driver. Unfortunately, the
+> host controller driver does not pass on this information
+> to the PM core and hence the system suspend process continues.
 >
-> A simplified version of the semantic match that finds this problem is as
-> follows: (http://coccinelle.lip6.fr/)
+>         ret = mmc_suspend_host(host->mmc);
+>         if (ret) {
+>                 host->suspended = 0;
+>                 if (host->pdata->resume) {
+>                         ret = host->pdata->resume(dev, host->slot_id);
 >
-> // <smpl>
-> (
-> if@p1 (\(ret < 0\|ret != 0\))
->  { ... return ret; }
-> |
-> ret@p1 = 0
-> )
-> ... when != ret = e1
->     when != &ret
-> *if(...)
-> {
->   ... when != ret = e2
->       when forall
->  return ret;
-> }
-> // </smpl>
+> The return status from mmc_suspend_host() is overwritten by return
+> status from host->pdata->resume. So the original return status is lost.
 >
-> Signed-off-by: Peter Senna Tschudin <peter.senna@gmail.com>
+> In these cases the MMC core gets to an unexpected state
+> during resume and multiple issues related to MMC crop up.
+> 1. Host controller driver starts accessing the device registers
+> before the clocks are enabled which leads to a prefetch abort.
+> 2. A file copy thread which was launched before suspend gets
+> stuck due to the host not being reclaimed during resume.
+>
+> To avoid such problems pass on the -EBUSY status to the PM core
+> from the host controller driver. With this change, MMC core
+> suspend might still fail but it does not end up making the
+> system unusable. Suspend gets aborted and the user can try
+> suspending the system again.
+>
+> Signed-off-by: Vaibhav Bedia <vaibhav.bedia@ti.com>
+> Signed-off-by: Hebbar, Gururaja <gururaja.hebbar@ti.com>
+This version is good.
 
-Looks good.
 Acked-by: Venkatraman S <svenkatr@ti.com>
+
+> ---
+> Changes from V1:
+>         - Instead of forcibly returning -EBUSY on err, retain old
+>         status and pass on the same to the caller.
+>         - add more detail to commit message (explanation with code
+>         snippet)
+>
+> :100644 100644 9afdd20... d9af5f1... M  drivers/mmc/host/omap_hsmmc.c
+>  drivers/mmc/host/omap_hsmmc.c |    3 +--
+>  1 files changed, 1 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 9afdd20..d9af5f1 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -2050,8 +2050,7 @@ static int omap_hsmmc_suspend(struct device *dev)
+>         if (ret) {
+>                 host->suspended = 0;
+>                 if (host->pdata->resume) {
+> -                       ret = host->pdata->resume(dev, host->slot_id);
+> -                       if (ret)
+> +                       if (host->pdata->resume(dev, host->slot_id))
+>                                 dev_dbg(dev, "Unmask interrupt failed\n");
+>                 }
+>                 goto err;
+> --
+> 1.7.0.4
+>
