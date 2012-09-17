@@ -1,85 +1,52 @@
-From: Peter Senna Tschudin <peter.senna@gmail.com>
-Subject: Re: [PATCH 1/4] drivers/mmc/host/dw_mmc.c: fix error return code
-Date: Mon, 17 Sep 2012 13:35:18 +0200
-Message-ID: <CA+MoWDqR31XWPT+z9tozLpV6_G9yfUHjzReQmQOLvNJNi-pTnQ@mail.gmail.com>
-References: <1347869728-2696-1-git-send-email-peter.senna@gmail.com>
-	<016401cd94ba$733937d0$59aba770$%jun@samsung.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 00/34] i.MX multi-platform support
+Date: Mon, 17 Sep 2012 11:38:13 +0000
+Message-ID: <201209171138.13327.arnd@arndb.de>
+References: <1347860103-4141-1-git-send-email-shawn.guo@linaro.org>
+ <20120917075138.GN6180@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <016401cd94ba$733937d0$59aba770$%jun@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: cjb@laptop.org, will.newton@imgtec.com, jh80.chung@samsung.com, kyungmin.park@samsung.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <alsa-devel-bounces@alsa-project.org>
+In-Reply-To: <20120917075138.GN6180@pengutronix.de>
+List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
+List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
+List-Post: <mailto:alsa-devel@alsa-project.org>
+List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
+List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
+Errors-To: alsa-devel-bounces@alsa-project.org
+Sender: alsa-devel-bounces@alsa-project.org
+To: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: alsa-devel@alsa-project.org, linux-usb@vger.kernel.org, Artem Bityutskiy <artem.bityutskiy@linux.intel.com>, linux-fbdev@vger.kernel.org, Wim Van Sebroeck <wim@iguana.be>, linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org, Florian Tobias Schandinat <FlorianSchandinat@gmx.de>, Paulius Zaleckas <paulius.zaleckas@teltonika.lt>, Chris Ball <cjb@laptop.org>, linux-media@vger.kernel.org, linux-watchdog@vger.kernel.org, rtc-linux@googlegroups.com, Rob Herring <rob.herring@calxeda.com>, linux-arm-kernel@lists.infradead.org, Fabio Estevam <fabio.estevam@freescale.com>, Vinod Koul <vinod.koul@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, Javier Martin <javier.martin@vista-silicon.com>, Andrew Morton <akpm@linux-foundation.org>, Shawn
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Sep 17, 2012 at 11:54 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> On Monday, September 17, 2012, Peter Senna Tschudin <peter.senna@gmail.com> wrote:
->> From: Peter Senna Tschudin <peter.senna@gmail.com>
->>
->> Convert a nonnegative error return code to a negative one, as returned
->> elsewhere in the function.
->>
->> A simplified version of the semantic match that finds this problem is as
->> follows: (http://coccinelle.lip6.fr/)
->>
->> // <smpl>
->> (
->> if@p1 (\(ret < 0\|ret != 0\))
->>  { ... return ret; }
->> |
->> ret@p1 = 0
->> )
->> ... when != ret = e1
->>     when != &ret
->> *if(...)
->> {
->>   ... when != ret = e2
->>       when forall
->>  return ret;
->> }
->> // </smpl>
->>
->> Signed-off-by: Peter Senna Tschudin <peter.senna@gmail.com>
->> ---
->>  drivers/mmc/host/dw_mmc.c | 4 +++-
->>  1 file changed, 3 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 36f98c0..7ad5176 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -2039,8 +2039,10 @@ int dw_mci_probe(struct dw_mci *host)
->>       tasklet_init(&host->tasklet, dw_mci_tasklet_func, (unsigned long)host);
->>       host->card_workqueue = alloc_workqueue("dw-mci-card",
->>                       WQ_MEM_RECLAIM | WQ_NON_REENTRANT, 1);
->> -     if (!host->card_workqueue)
->> +     if (!host->card_workqueue) {
->> +             err = -ENOMEM;
-> ret is expected instead of err.
-> err isn't defined.
+On Monday 17 September 2012, Sascha Hauer wrote:
+> On Mon, Sep 17, 2012 at 01:34:29PM +0800, Shawn Guo wrote:
+> > The series enables multi-platform support for imx.  Since the required
+> > frameworks (clk, pwm) and spare_irq have already been adopted on imx,
+> > the series is all about cleaning up mach/* headers.  Along with the
+> > changes, arch/arm/plat-mxc gets merged into arch/arm/mach-imx.
+> > 
+> > It's based on a bunch of branches (works from others), Rob's initial
+> > multi-platform series, Arnd's platform-data and smp_ops (Marc's) and
+> > imx 3.7 material (Sascha and myself).
+> > 
+> > It's available on branch below.
+> > 
+> >   git://git.linaro.org/people/shawnguo/linux-2.6.git imx/multi-platform
+> > 
+> > It's been tested on imx5 and imx6, and only compile-tested on imx2 and
+> > imx3, so testing on imx2/3 are appreciated.
+> 
+> Great work! This really pushes the i.MX architecture one step closer to
+> a clean code base.
 
-I'm sorry. Somehow I did not compile for testing this one before
-sending. I'll fix, test and resend.
+I agree, this series is wonderful, I thought it would take much longer
+to get this far.
 
->
-> Thanks,
-> Seungwon Jeon
->
->>               goto err_dmaunmap;
->> +     }
->>       INIT_WORK(&host->card_work, dw_mci_work_routine_card);
->>       ret = request_irq(host->irq, dw_mci_interrupt, host->irq_flags, "dw-mci", host);
->>       if (ret)
->> --
->> 1.7.11.4
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe kernel-janitors" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Two small comments on the last two patches from me, but overall I really
+love it.
 
-
-
--- 
-Peter
+Acked-by: Arnd Bergmann <arnd@arndb.de>
