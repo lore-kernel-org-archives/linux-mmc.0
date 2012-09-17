@@ -1,50 +1,48 @@
-From: Lauri Hintsala <lauri.hintsala@bluegiga.com>
-Subject: Re: [PATCH] mmc: mxs-mmc: implement broken-cd
-Date: Mon, 17 Sep 2012 17:40:51 +0300
-Message-ID: <50573673.6050506@bluegiga.com>
-References: <1347018317-2222-1-git-send-email-lauri.hintsala@bluegiga.com> <20120910060840.GT26709@S2101-09.ap.freescale.net> <504DBB10.9030702@bluegiga.com> <CAKGA1bm990BXJuZ=sQFgaciJxeP_ytPV2tfm1rHi=s=w7b-OYg@mail.gmail.com> <505096EF.8060208@bluegiga.com> <50572907.6000700@bluegiga.com> <m3boh4n3z7.fsf@pullcord.laptop.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bluegiga.fi ([194.100.31.45]:61781 "EHLO darkblue.bluegiga.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756320Ab2IQOkx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 17 Sep 2012 10:40:53 -0400
-In-Reply-To: <m3boh4n3z7.fsf@pullcord.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: [PATCH v6 0/9] mmc: dw_mmc: add support for device tree based
+ instantiation
+Date: Mon, 17 Sep 2012 23:46:34 +0530
+Message-ID: <1347905803-22742-1-git-send-email-thomas.abraham@linaro.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
+Cc: will.newton@imgtec.com, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Matt Sealey <matt@genesi-usa.com>, Shawn Guo <shawn.guo@linaro.org>, veli-pekka.peltola@bluegiga.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Hi,
+This series add device tree support for Synopsis Designware IP - Mobile Storage
+Host Controller (MSHC). I had addressed all comments for the v5 version of this
+patch series and had reposted only those patches that were modified. The version
+number of those reposted patches was maintained as v5 as the changes did not
+need any major rework.
 
-On 09/17/2012 05:01 PM, Chris Ball wrote:
-> Hi,
->
-> On Mon, Sep 17 2012, Lauri Hintsala wrote:
->> Is it OK to use broken-cd? broken-cd feature is documented as "There
->> is no card detection available; polling must be used". In this case
->> the card detect is not broken but it is unrouted so it is unavailable.
->>
->> Documentation about broken-cd has been added by commit:
->> https://git.kernel.org/?p=linux/kernel/git/cjb/mmc.git;a=commitdiff;h=abe1e05da365350ac282ba5f6831aae13d97074e
->
-> I'm having trouble following the problem; it sounds like perhaps all you
-> need is:
->
->          if (of_find_property(np, "non-removable", NULL))
->                  mmc->caps |= MMC_CAP_NONREMOVABLE;
->
-> Have you tried that?
+This is mainly a repost of the v5 patches with all patches marked as v6. The
+only new change in this series is adding a comment about bus_hz in platform
+data structure of the driver as suggested by Seungwon Jeon.
 
-Yes I have and it does not work. Current mxs-mmc driver uses polling 
-method and it reads the CARD_DETECT bit of STATUS register. In our case 
-card detect is signal is unrouted so SDIO device is never detect.
+Thomas Abraham (9):
+  mmc: dw_mmc: convert copy of struct device in struct dw_mci to a reference
+  mmc: dw_mmc: Use devm_* functions in dw_mmc platform driver
+  mmc: dw_mmc: allow probe to succeed even if one slot is initialized
+  mmc: dw_mmc: lookup for optional biu and ciu clocks
+  mmc: dw_mmc: add quirk to indicate missing write protect line
+  mmc: dw_mmc: add device tree support
+  mmc: dw_mmc: prepare functions in dw_mmc-pltfm for reuse
+  mmc: dw_mmc: add support for implementation specific callbacks
+  mmc: dw_mmc: add support for exynos specific implementation of dw-mshc
 
-Another problem with NONREMOVABLE feature is in case where power cycle 
-or reset is done for SDIO device. A device drive doesn't detect HW 
-reset. After reset the device driver is still in running state and it 
-does not reinitialize the device. So after reset device stops to work.
-
-Lauri
+ .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   87 ++++++
+ .../devicetree/bindings/mmc/synposis-dw-mshc.txt   |   79 +++++
+ drivers/mmc/host/Kconfig                           |    9 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/dw_mmc-exynos.c                   |  253 ++++++++++++++++
+ drivers/mmc/host/dw_mmc-pci.c                      |    2 +-
+ drivers/mmc/host/dw_mmc-pltfm.c                    |   60 +++--
+ drivers/mmc/host/dw_mmc-pltfm.h                    |   20 ++
+ drivers/mmc/host/dw_mmc.c                          |  308 +++++++++++++++++---
+ drivers/mmc/host/dw_mmc.h                          |   24 ++
+ include/linux/mmc/dw_mmc.h                         |   15 +-
+ 11 files changed, 782 insertions(+), 76 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
+ create mode 100644 drivers/mmc/host/dw_mmc-exynos.c
+ create mode 100644 drivers/mmc/host/dw_mmc-pltfm.h
