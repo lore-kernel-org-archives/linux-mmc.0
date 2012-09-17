@@ -1,87 +1,65 @@
 From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: [PATCH v6 2/9] mmc: dw_mmc: Use devm_* functions in dw_mmc platform
- driver
-Date: Mon, 17 Sep 2012 23:46:36 +0530
-Message-ID: <1347905803-22742-3-git-send-email-thomas.abraham@linaro.org>
+Subject: [PATCH v6 5/9] mmc: dw_mmc: add quirk to indicate missing write
+ protect line
+Date: Mon, 17 Sep 2012 23:46:39 +0530
+Message-ID: <1347905803-22742-6-git-send-email-thomas.abraham@linaro.org>
 References: <1347905803-22742-1-git-send-email-thomas.abraham@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:13259 "EHLO
+Received: from mailout3.samsung.com ([203.254.224.33]:13271 "EHLO
 	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757091Ab2IQR4o (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Sep 2012 13:56:44 -0400
+	with ESMTP id S1757128Ab2IQR4u (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Sep 2012 13:56:50 -0400
 In-reply-to: <1347905803-22742-1-git-send-email-thomas.abraham@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
 Cc: will.newton@imgtec.com, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, patches@linaro.org
 
-Use devm_* managed functions for simpler error handling.
+If the write protect pad of the controller is not connected to the write
+protect pin of the slot, the driver should be notified of this condition
+so that incorrect check for write protection by reading the WRTORT
+register can avoided. The get_ro platform callback can be used for in
+such cases, but with device tree support enabled, such platform callbacks
+cannot be supported.
+
+Add a new quirk for notifying the driver about the missing write protect
+line so the driver can assume that the card write protection is disabled.
 
 Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
 Acked-by: Will Newton <will.newton@imgtec.com>
 ---
- drivers/mmc/host/dw_mmc-pltfm.c |   29 ++++++++---------------------
- 1 files changed, 8 insertions(+), 21 deletions(-)
+ drivers/mmc/host/dw_mmc.c  |    4 +++-
+ include/linux/mmc/dw_mmc.h |    3 ++-
+ 2 files changed, 5 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-index 528d37b..ce7be1a 100644
---- a/drivers/mmc/host/dw_mmc-pltfm.c
-+++ b/drivers/mmc/host/dw_mmc-pltfm.c
-@@ -27,38 +27,27 @@ static int __devinit dw_mci_pltfm_probe(struct platform_device *pdev)
- 	struct resource	*regs;
- 	int ret;
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index de45ad2..455a155 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -830,7 +830,9 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
+ 	struct dw_mci_board *brd = slot->host->pdata;
  
--	host = kzalloc(sizeof(struct dw_mci), GFP_KERNEL);
-+	host = devm_kzalloc(&pdev->dev, sizeof(struct dw_mci), GFP_KERNEL);
- 	if (!host)
- 		return -ENOMEM;
+ 	/* Use platform get_ro function, else try on board write protect */
+-	if (brd->get_ro)
++	if (brd->quirks & DW_MCI_QUIRK_NO_WRITE_PROTECT)
++		read_only = 0;
++	else if (brd->get_ro)
+ 		read_only = brd->get_ro(slot->id);
+ 	else
+ 		read_only =
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 787ad56..b72e4aa 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -205,7 +205,8 @@ struct dw_mci_dma_ops {
+ #define DW_MCI_QUIRK_HIGHSPEED			BIT(2)
+ /* Unreliable card detection */
+ #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(3)
+-
++/* Write Protect detection not available */
++#define DW_MCI_QUIRK_NO_WRITE_PROTECT		BIT(4)
  
- 	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	if (!regs) {
--		ret = -ENXIO;
--		goto err_free;
--	}
-+	if (!regs)
-+		return -ENXIO;
- 
- 	host->irq = platform_get_irq(pdev, 0);
--	if (host->irq < 0) {
--		ret = host->irq;
--		goto err_free;
--	}
-+	if (host->irq < 0)
-+		return host->irq;
- 
- 	host->dev = &pdev->dev;
- 	host->irq_flags = 0;
- 	host->pdata = pdev->dev.platform_data;
--	ret = -ENOMEM;
--	host->regs = ioremap(regs->start, resource_size(regs));
-+	host->regs = devm_request_and_ioremap(&pdev->dev, regs);
- 	if (!host->regs)
--		goto err_free;
-+		return -ENOMEM;
-+
- 	platform_set_drvdata(pdev, host);
- 	ret = dw_mci_probe(host);
--	if (ret)
--		goto err_out;
--	return ret;
--err_out:
--	iounmap(host->regs);
--err_free:
--	kfree(host);
- 	return ret;
- }
- 
-@@ -68,8 +57,6 @@ static int __devexit dw_mci_pltfm_remove(struct platform_device *pdev)
- 
- 	platform_set_drvdata(pdev, NULL);
- 	dw_mci_remove(host);
--	iounmap(host->regs);
--	kfree(host);
- 	return 0;
- }
+ struct dma_pdata;
  
 -- 
 1.6.6.rc2
