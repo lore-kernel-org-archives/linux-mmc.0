@@ -1,327 +1,270 @@
 From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: [PATCH v6 6/9] mmc: dw_mmc: add device tree support
-Date: Mon, 17 Sep 2012 23:46:40 +0530
-Message-ID: <1347905803-22742-7-git-send-email-thomas.abraham@linaro.org>
+Subject: [PATCH v6 8/9] mmc: dw_mmc: add support for implementation specific
+ callbacks
+Date: Mon, 17 Sep 2012 23:46:42 +0530
+Message-ID: <1347905803-22742-9-git-send-email-thomas.abraham@linaro.org>
 References: <1347905803-22742-1-git-send-email-thomas.abraham@linaro.org>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:13280 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932370Ab2IQR45 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Sep 2012 13:56:57 -0400
 In-reply-to: <1347905803-22742-1-git-send-email-thomas.abraham@linaro.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
 Cc: will.newton@imgtec.com, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, patches@linaro.org
-List-Id: linux-mmc@vger.kernel.org
 
-Add device tree based discovery support.
+The core dw-mshc controller driver can let platform specific implementations
+of the dw-mshc controller to control the hardware as required by such
+implementations. This is acheived by invoking implementation specific (optional)
+callbacks. Define the list of callbacks supported the add invocation points
+for the same.
 
 Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
 Acked-by: Will Newton <will.newton@imgtec.com>
 ---
- .../devicetree/bindings/mmc/synposis-dw-mshc.txt   |   79 ++++++++++++
- drivers/mmc/host/dw_mmc-pltfm.c                    |    9 ++
- drivers/mmc/host/dw_mmc.c                          |  130 ++++++++++++++++++-
- 3 files changed, 211 insertions(+), 7 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
+ drivers/mmc/host/dw_mmc-pltfm.c |   12 ++++++++-
+ drivers/mmc/host/dw_mmc-pltfm.h |    3 +-
+ drivers/mmc/host/dw_mmc.c       |   47 ++++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/dw_mmc.h       |   24 ++++++++++++++++++++
+ include/linux/mmc/dw_mmc.h      |    4 +++
+ 5 files changed, 86 insertions(+), 4 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
-new file mode 100644
-index 0000000..06cd32d
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
-@@ -0,0 +1,79 @@
-+* Synopsis Designware Mobile Storage Host Controller
-+
-+The Synopsis designware mobile storage host controller is used to interface
-+a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-+differences between the core mmc properties described by mmc.txt and the
-+properties used by the Synopsis Designware Mobile Storage Host Controller.
-+
-+Required Properties:
-+
-+* compatible: should be
-+	- snps,dw-mshc: for controllers compliant with synopsis dw-mshc.
-+* #address-cells: should be 1.
-+* #size-cells: should be 0.
-+
-+# Slots: The slot specific information are contained within child-nodes with
-+  each child-node representing a supported slot. There should be atleast one
-+  child node representing a card slot. The name of the child node representing
-+  the slot is recommended to be slot@n where n is the unique number of the slot
-+  connnected to the controller. The following are optional properties which
-+  can be included in the slot child node.
-+
-+	* reg: specifies the physical slot number. The valid values of this
-+	  property is 0 to (num-slots -1), where num-slots is the value
-+	  specified by the num-slots property.
-+
-+	* bus-width: as documented in mmc core bindings.
-+
-+	* wp-gpios: specifies the write protect gpio line. The format of the
-+	  gpio specifier depends on the gpio controller. If the write-protect
-+	  line is not available, this property is optional.
-+
-+Optional properties:
-+
-+* num-slots: specifies the number of slots supported by the controller.
-+  The number of physical slots actually used could be equal or less than the
-+  value specified by num-slots. If this property is not specified, the value
-+  of num-slot property is assumed to be 1.
-+
-+* fifo-depth: The maximum size of the tx/rx fifo's. If this property is not
-+  specified, the default value of the fifo size is determined from the
-+  controller registers.
-+
-+* card-detect-delay: Delay in milli-seconds before detecting card after card
-+  insert event. The default value is 0.
-+
-+* supports-highspeed: Enables support for high speed cards (upto 50MHz)
-+
-+* broken-cd: as documented in mmc core bindings.
-+
-+Aliases:
-+
-+- All the MSHC controller nodes should be represented in the aliases node using
-+  the following format 'mshc{n}' where n is a unique number for the alias.
-+
-+Example:
-+
-+The MSHC controller node can be split into two portions, SoC specific and
-+board specific portions as listed below.
-+
-+	dwmmc0@12200000 {
-+		compatible = "snps,dw-mshc";
-+		reg = <0x12200000 0x1000>;
-+		interrupts = <0 75 0>;
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+	};
-+
-+	dwmmc0@12200000 {
-+		num-slots = <1>;
-+		supports-highspeed;
-+		broken-cd;
-+		fifo-depth = <0x80>;
-+		card-detect-delay = <200>;
-+
-+		slot@0 {
-+			reg = <0>;
-+			bus-width = <8>;
-+		};
-+	};
 diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-index ce7be1a..7205905 100644
+index e17da91..c960ca7 100644
 --- a/drivers/mmc/host/dw_mmc-pltfm.c
 +++ b/drivers/mmc/host/dw_mmc-pltfm.c
-@@ -19,6 +19,8 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/dw_mmc.h>
-+#include <linux/of.h>
-+
+@@ -23,7 +23,8 @@
+ 
  #include "dw_mmc.h"
+ 
+-int dw_mci_pltfm_register(struct platform_device *pdev)
++int dw_mci_pltfm_register(struct platform_device *pdev,
++				struct dw_mci_drv_data *drv_data)
+ {
+ 	struct dw_mci *host;
+ 	struct resource	*regs;
+@@ -41,6 +42,7 @@ int dw_mci_pltfm_register(struct platform_device *pdev)
+ 	if (host->irq < 0)
+ 		return host->irq;
+ 
++	host->drv_data = drv_data;
+ 	host->dev = &pdev->dev;
+ 	host->irq_flags = 0;
+ 	host->pdata = pdev->dev.platform_data;
+@@ -48,6 +50,12 @@ int dw_mci_pltfm_register(struct platform_device *pdev)
+ 	if (!host->regs)
+ 		return -ENOMEM;
+ 
++	if (host->drv_data->init) {
++		ret = host->drv_data->init(host);
++		if (ret)
++			return ret;
++	}
++
+ 	platform_set_drvdata(pdev, host);
+ 	ret = dw_mci_probe(host);
+ 	return ret;
+@@ -56,7 +64,7 @@ EXPORT_SYMBOL_GPL(dw_mci_pltfm_register);
  
  static int __devinit dw_mci_pltfm_probe(struct platform_device *pdev)
-@@ -94,10 +96,17 @@ static int dw_mci_pltfm_resume(struct device *dev)
- 
- static SIMPLE_DEV_PM_OPS(dw_mci_pltfm_pmops, dw_mci_pltfm_suspend, dw_mci_pltfm_resume);
- 
-+static const struct of_device_id dw_mci_pltfm_match[] = {
-+	{ .compatible = "snps,dw-mshc", },
-+	{},
-+};
-+MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
-+
- static struct platform_driver dw_mci_pltfm_driver = {
- 	.remove		= __exit_p(dw_mci_pltfm_remove),
- 	.driver		= {
- 		.name		= "dw_mmc",
-+		.of_match_table	= of_match_ptr(dw_mci_pltfm_match),
- 		.pm		= &dw_mci_pltfm_pmops,
- 	},
- };
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 455a155..c792466 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -33,6 +33,7 @@
- #include <linux/bitops.h>
- #include <linux/regulator/consumer.h>
- #include <linux/workqueue.h>
-+#include <linux/of.h>
- 
- #include "dw_mmc.h"
- 
-@@ -1769,10 +1770,57 @@ static void dw_mci_work_routine_card(struct work_struct *work)
- 	}
+ {
+-	return dw_mci_pltfm_register(pdev);
++	return dw_mci_pltfm_register(pdev, NULL);
  }
  
-+#ifdef CONFIG_OF
-+/* given a slot id, find out the device node representing that slot */
-+static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
-+{
-+	struct device_node *np;
-+	const __be32 *addr;
-+	int len;
+ static int __devexit dw_mci_pltfm_remove(struct platform_device *pdev)
+diff --git a/drivers/mmc/host/dw_mmc-pltfm.h b/drivers/mmc/host/dw_mmc-pltfm.h
+index 6c065d9..301f245 100644
+--- a/drivers/mmc/host/dw_mmc-pltfm.h
++++ b/drivers/mmc/host/dw_mmc-pltfm.h
+@@ -12,7 +12,8 @@
+ #ifndef _DW_MMC_PLTFM_H_
+ #define _DW_MMC_PLTFM_H_
+ 
+-extern int dw_mci_pltfm_register(struct platform_device *pdev);
++extern int dw_mci_pltfm_register(struct platform_device *pdev,
++				struct dw_mci_drv_data *drv_data);
+ extern int __devexit dw_mci_pltfm_remove(struct platform_device *pdev);
+ extern const struct dev_pm_ops dw_mci_pltfm_pmops;
+ 
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index c792466..9f8e487 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -231,6 +231,7 @@ static void dw_mci_set_timeout(struct dw_mci *host)
+ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+ {
+ 	struct mmc_data	*data;
++	struct dw_mci_slot *slot = mmc_priv(mmc);
+ 	u32 cmdr;
+ 	cmd->error = -EINPROGRESS;
+ 
+@@ -260,6 +261,9 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+ 			cmdr |= SDMMC_CMD_DAT_WR;
+ 	}
+ 
++	if (slot->host->drv_data->prepare_command)
++		slot->host->drv_data->prepare_command(slot->host, &cmdr);
 +
-+	if (!dev || !dev->of_node)
-+		return NULL;
+ 	return cmdr;
+ }
+ 
+@@ -815,6 +819,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		slot->clock = ios->clock;
+ 	}
+ 
++	if (slot->host->drv_data->set_ios)
++		slot->host->drv_data->set_ios(slot->host, ios);
 +
-+	for_each_child_of_node(dev->of_node, np) {
-+		addr = of_get_property(np, "reg", &len);
-+		if (!addr || (len < sizeof(int)))
-+			continue;
-+		if (be32_to_cpup(addr) == slot)
-+			return np;
-+	}
-+	return NULL;
-+}
-+
-+/* find out bus-width for a given slot */
-+static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
-+{
-+	struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
-+	u32 bus_wd = 1;
-+
-+	if (!np)
-+		return 1;
-+
-+	if (of_property_read_u32(np, "bus-width", &bus_wd))
-+		dev_err(dev, "bus-width property not found, assuming width"
-+			       " as 1\n");
-+	return bus_wd;
-+}
-+#else /* CONFIG_OF */
-+static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
-+{
-+	return 1;
-+}
-+static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
-+{
-+	return NULL;
-+}
-+#endif /* CONFIG_OF */
-+
- static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_UP:
+ 		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+@@ -1820,6 +1827,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
  {
  	struct mmc_host *mmc;
  	struct dw_mci_slot *slot;
-+	u8 bus_width;
++	int ctrl_id, ret;
+ 	u8 bus_width;
  
  	mmc = mmc_alloc_host(sizeof(struct dw_mci_slot), host->dev);
- 	if (!mmc)
-@@ -1782,6 +1830,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	slot->id = id;
- 	slot->mmc = mmc;
- 	slot->host = host;
-+	host->slot[id] = slot;
+@@ -1851,6 +1859,16 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	if (host->pdata->caps)
+ 		mmc->caps = host->pdata->caps;
  
- 	mmc->ops = &dw_mci_ops;
- 	mmc->f_min = DIV_ROUND_UP(host->bus_hz, 510);
-@@ -1806,8 +1855,18 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
++	if (host->dev->of_node) {
++		ctrl_id = of_alias_get_id(host->dev->of_node, "mshc");
++		if (ctrl_id < 0)
++			ctrl_id = 0;
++	} else {
++		ctrl_id = to_platform_device(host->dev)->id;
++	}
++	if (host->drv_data && host->drv_data->caps)
++		mmc->caps |= host->drv_data->caps[ctrl_id];
++
+ 	if (host->pdata->caps2)
  		mmc->caps2 = host->pdata->caps2;
  
- 	if (host->pdata->get_bus_wd)
--		if (host->pdata->get_bus_wd(slot->id) >= 4)
--			mmc->caps |= MMC_CAP_4_BIT_DATA;
-+		bus_width = host->pdata->get_bus_wd(slot->id);
-+	else if (host->dev->of_node)
-+		bus_width = dw_mci_of_get_bus_wd(host->dev, slot->id);
-+	else
-+		bus_width = 1;
-+
-+	switch (bus_width) {
-+	case 8:
-+		mmc->caps |= MMC_CAP_8_BIT_DATA;
-+	case 4:
-+		mmc->caps |= MMC_CAP_4_BIT_DATA;
-+	}
- 
- 	if (host->pdata->quirks & DW_MCI_QUIRK_HIGHSPEED)
- 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
-@@ -1852,7 +1911,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+@@ -1861,6 +1879,14 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
  	else
- 		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+ 		bus_width = 1;
  
--	host->slot[id] = slot;
- 	mmc_add_host(mmc);
++	if (host->drv_data->setup_bus) {
++		struct device_node *slot_np;
++		slot_np = dw_mci_of_find_slot_node(host->dev, slot->id);
++		ret = host->drv_data->setup_bus(host, slot_np, bus_width);
++		if (ret)
++			goto err_setup_bus;
++	}
++
+ 	switch (bus_width) {
+ 	case 8:
+ 		mmc->caps |= MMC_CAP_8_BIT_DATA;
+@@ -1927,6 +1953,10 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	queue_work(host->card_workqueue, &host->card_work);
  
- #if defined(CONFIG_DEBUG_FS)
-@@ -1944,16 +2002,74 @@ static bool mci_wait_reset(struct device *dev, struct dw_mci *host)
- 	return false;
+ 	return 0;
++
++err_setup_bus:
++	mmc_free_host(mmc);
++	return -EINVAL;
  }
  
-+#ifdef CONFIG_OF
-+static struct dw_mci_of_quirks {
-+	char *quirk;
-+	int id;
-+} of_quirks[] = {
-+	{
-+		.quirk	= "supports-highspeed",
-+		.id	= DW_MCI_QUIRK_HIGHSPEED,
-+	}, {
-+		.quirk	= "broken-cd",
-+		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
-+	},
-+};
-+
-+static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
-+{
-+	struct dw_mci_board *pdata;
-+	struct device *dev = host->dev;
-+	struct device_node *np = dev->of_node;
-+	int idx;
-+
-+	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
-+	if (!pdata) {
-+		dev_err(dev, "could not allocate memory for pdata\n");
-+		return ERR_PTR(-ENOMEM);
-+	}
-+
-+	/* find out number of slots supported */
-+	if (of_property_read_u32(dev->of_node, "num-slots",
-+				&pdata->num_slots)) {
-+		dev_info(dev, "num-slots property not found, "
-+				"assuming 1 slot is available\n");
-+		pdata->num_slots = 1;
-+	}
-+
-+	/* get quirks */
-+	for (idx = 0; idx < ARRAY_SIZE(of_quirks); idx++)
-+		if (of_get_property(np, of_quirks[idx].quirk, NULL))
-+			pdata->quirks |= of_quirks[idx].id;
-+
-+	if (of_property_read_u32(np, "fifo-depth", &pdata->fifo_depth))
-+		dev_info(dev, "fifo-depth property not found, using "
-+				"value of FIFOTH register as default\n");
-+
-+	of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
-+
-+	return pdata;
-+}
-+
-+#else /* CONFIG_OF */
-+static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
-+{
-+	return ERR_PTR(-EINVAL);
-+}
-+#endif /* CONFIG_OF */
-+
- int dw_mci_probe(struct dw_mci *host)
- {
- 	int width, i, ret = 0;
- 	u32 fifo_size;
- 	int init_slots = 0;
+ static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
+@@ -2021,7 +2051,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ 	struct dw_mci_board *pdata;
+ 	struct device *dev = host->dev;
+ 	struct device_node *np = dev->of_node;
+-	int idx;
++	int idx, ret;
  
--	if (!host->pdata || !host->pdata->init) {
--		dev_err(host->dev,
--			"Platform data must supply init function\n");
--		return -ENODEV;
-+	if (!host->pdata) {
-+		host->pdata = dw_mci_parse_dt(host);
-+		if (IS_ERR(host->pdata)) {
-+			dev_err(host->dev, "platform data not available\n");
-+			return -EINVAL;
+ 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+ 	if (!pdata) {
+@@ -2048,6 +2078,12 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ 
+ 	of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
+ 
++	if (host->drv_data->parse_dt) {
++		ret = host->drv_data->parse_dt(host);
++		if (ret)
++			return ERR_PTR(ret);
++	}
++
+ 	return pdata;
+ }
+ 
+@@ -2107,6 +2143,15 @@ int dw_mci_probe(struct dw_mci *host)
+ 	else
+ 		host->bus_hz = clk_get_rate(host->ciu_clk);
+ 
++	if (host->drv_data->setup_clock) {
++		ret = host->drv_data->setup_clock(host);
++		if (ret) {
++			dev_err(host->dev,
++				"implementation specific clock setup failed\n");
++			goto err_clk_ciu;
 +		}
- 	}
++	}
++
+ 	if (!host->bus_hz) {
+ 		dev_err(host->dev,
+ 			"Platform data must supply bus speed\n");
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 15c27e1..53b8fd9 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -182,4 +182,28 @@ extern int dw_mci_suspend(struct dw_mci *host);
+ extern int dw_mci_resume(struct dw_mci *host);
+ #endif
  
- 	if (!host->pdata->select_slot && host->pdata->num_slots > 1) {
++/**
++ * dw_mci driver data - dw-mshc implementation specific driver data.
++ * @caps: mmc subsystem specified capabilities of the controller(s).
++ * @init: early implementation specific initialization.
++ * @setup_clock: implementation specific clock configuration.
++ * @prepare_command: handle CMD register extensions.
++ * @set_ios: handle bus specific extensions.
++ * @parse_dt: parse implementation specific device tree properties.
++ * @setup_bus: initialize io-interface
++ *
++ * Provide controller implementation specific extensions. The usage of this
++ * data structure is fully optional and usage of each member in this structure
++ * is optional as well.
++ */
++struct dw_mci_drv_data {
++	unsigned long	*caps;
++	int		(*init)(struct dw_mci *host);
++	int		(*setup_clock)(struct dw_mci *host);
++	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
++	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
++	int		(*parse_dt)(struct dw_mci *host);
++	int		(*setup_bus)(struct dw_mci *host,
++				struct device_node *slot_np, u8 bus_width);
++};
+ #endif /* _DW_MMC_H_ */
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index b72e4aa..6cb043e 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -78,6 +78,8 @@ struct mmc_data;
+  * @data_offset: Set the offset of DATA register according to VERID.
+  * @dev: Device associated with the MMC controller.
+  * @pdata: Platform data associated with the MMC controller.
++ * @drv_data: Driver specific data for identified variant of the controller
++ * @priv: Implementation defined private data.
+  * @biu_clk: Pointer to bus interface unit clock instance.
+  * @ciu_clk: Pointer to card interface unit clock instance.
+  * @slot: Slots sharing this MMC controller.
+@@ -160,6 +162,8 @@ struct dw_mci {
+ 	u16			data_offset;
+ 	struct device		*dev;
+ 	struct dw_mci_board	*pdata;
++	struct dw_mci_drv_data	*drv_data;
++	void			*priv;
+ 	struct clk		*biu_clk;
+ 	struct clk		*ciu_clk;
+ 	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
 -- 
 1.6.6.rc2
+
