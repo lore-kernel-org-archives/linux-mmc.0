@@ -1,43 +1,92 @@
-From: Kumar Gala <galak@kernel.crashing.org>
-Subject: Re: [PATCH 2/3] powerpc/esdhc: add property to disable the CMD23
-Date: Mon, 17 Sep 2012 08:12:56 -0500
-Message-ID: <1166FFD6-342F-4BDA-BF23-794DAEA95CC9@kernel.crashing.org>
-References: <1347347565-17474-1-git-send-email-Chang-Ming.Huang@freescale.com> <1347347565-17474-2-git-send-email-Chang-Ming.Huang@freescale.com> <20120911075429.GA27028@lizard> <20120911080457.GA28235@lizard> <110EED8CC96DFC488B7E717A2027A27C176170@039-SN1MPN1-002.039d.mgd.msft.net> <6D8C87BA-CA06-4215-94F5-63EBF5162B0A@kernel.crashing.org> <2A6FCAE3-288F-4972-90C0-15105932F13E@kernel.crashing.org> <87k3w0y5yn.fsf@octavius.laptop.org> <FC22FA36-B2CF-49C2-A0B1-8A0EA614B9CB@kernel.crashing.org> <8B1F0805-759E-417A-B787-40DF197896F3@kernel.crashing.org> <110EED8CC96DFC488B7E717A2027A27C1785D0@039-SN1MPN1-002.039d.mgd.msft.net> <4E15F856-D385-40C4-A5FD-5F298C70F402@kernel.crashing.org> <m3k3vsn7wf.fsf@pullcord.laptop.org>
-Mime-Version: 1.0 (Apple Message framework v1278)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Lauri Hintsala <lauri.hintsala@bluegiga.com>
+Subject: Re: [PATCH] mmc: mxs-mmc: implement broken-cd
+Date: Mon, 17 Sep 2012 16:43:35 +0300
+Message-ID: <50572907.6000700@bluegiga.com>
+References: <1347018317-2222-1-git-send-email-lauri.hintsala@bluegiga.com> <20120910060840.GT26709@S2101-09.ap.freescale.net> <504DBB10.9030702@bluegiga.com> <CAKGA1bm990BXJuZ=sQFgaciJxeP_ytPV2tfm1rHi=s=w7b-OYg@mail.gmail.com> <505096EF.8060208@bluegiga.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gate.crashing.org ([63.228.1.57]:45782 "EHLO gate.crashing.org"
+Received: from bluegiga.fi ([194.100.31.45]:58273 "EHLO darkblue.bluegiga.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754807Ab2IQNNN convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Sep 2012 09:13:13 -0400
-In-Reply-To: <m3k3vsn7wf.fsf@pullcord.laptop.org>
+	id S1752503Ab2IQNni (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 17 Sep 2012 09:43:38 -0400
+In-Reply-To: <505096EF.8060208@bluegiga.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Huang Changming-R66093 <R66093@freescale.com>, "linuxppc-dev@lists.ozlabs.org list" <linuxppc-dev@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Anton Vorontsov <cbouatmailru@gmail.com>
+To: Matt Sealey <matt@genesi-usa.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, veli-pekka.peltola@bluegiga.com, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+
+Hi,
+
+Is it OK to use broken-cd? broken-cd feature is documented as "There is 
+no card detection available; polling must be used". In this case the 
+card detect is not broken but it is unrouted so it is unavailable.
+
+Documentation about broken-cd has been added by commit:
+https://git.kernel.org/?p=linux/kernel/git/cjb/mmc.git;a=commitdiff;h=abe1e05da365350ac282ba5f6831aae13d97074e
+
+Any tips about power management implementation are welcome if I have to 
+use PM instead of polling method.
+
+Regards,
+Lauri
 
 
-On Sep 17, 2012, at 7:36 AM, Chris Ball wrote:
-
+On 09/12/2012 05:06 PM, Lauri Hintsala wrote:
 > Hi,
-> 
-> On Thu, Sep 13 2012, Kumar Gala wrote:
->>>> Can you list out which SoCs support it and which don't.  Having this list
->>>> will be useful in understanding which controller versions supported it.
->>>> 
->>> P1020, p1021, p1022, p1024, p1015 and p4080 can't support it.
->>> Mpc8536, p2020, and the other current DPAA silicon (e.g. p5020, p3041) support it.
->> 
->> Based on this, why don't we use the HOSTVER register to detect instead of device tree:
-> 
-> I've got a mild preference for handling quirk assignment in the DT
-> rather than in driver code, so I'd prefer to just push the original
-> patch to mmc-next as-is.  Does that sound okay?
-
-Why?  I only ask because I agree with Scott that this means you have to update your device tree to get proper functionality.
-
-> (I think the argument that there isn't going to be any new hardware
-> with this problem is equally in favor of both methods.)
-
-- k
+>
+> On 09/10/2012 05:58 PM, Matt Sealey wrote:
+>> I think this describes three use cases which are different, as Shawn
+>> said we have here;
+>>
+>> * missing card detect support (card detect is not wired so it's
+>> impossible to tell, and the controller doesn't support the SD standard
+>> card detection)
+>> * non-removable device
+>> * broken card detect support
+>>
+>> The third one is what the property sounds like it describes, but this
+>> is not the use case you are describing at all. This kind of property
+>> naming is more like describing "card detect doesn't operate reliably"
+>> which is true of i.MX devices with certain versions of the eSDHC and
+>> uSDHC controllers, where non-GPIO card detection interferes with SDIO
+>> interrupts, but in this case a board designer should add a real card
+>> detect pin to the board (most more expensive push-push SD card slots
+>> come with a pin you can wire for CD). In cases where errata is
+>> published after boards are shipped, broken-cd is a meaningful
+>> description when described in the absense of a gpio cd description, or
+>> presence of some cd-handled-internally style property (forgive me for
+>> not cross-referencing the FSL definition for this property, we don't
+>> use it here at Genesi since all our boards have GPIO CD)
+>>
+>> It seems your device is a combination of the top two in the list, it
+>> is not down to a broken feature at all, but one that should be
+>> possible to not implement for devices which are permanently connected.
+>> A non-removable device should be able to be powered down, at least
+>> using runtime PM or clock gating (if this works, remember to whitelist
+>> the card for clock gating!) but card detect shouldn't be used in this
+>> case to detect if the card is powered or not (this is a problem for
+>> your card controller and card driver state tracker. The MMC subsystem
+>> already tracks this state fairly well for power management).
+>
+> Do you mean the polling mode shouldn't been used to detect if the device
+> is powered?
+>
+> Is there any examples how PM support could be implemented? I'm not
+> familiar with PM subsystem. How is it done in practice? Should I play
+> with fixed regulators?
+>
+> BR,
+> Lauri
+>
+>
+>> I would refrain from calling a feature "broken card detect" if there
+>> is actually no breakage involved especially if it would be more
+>> prudent instead look into how to figure out how to track power
+>> management state properly without cluttering the device tree.
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
