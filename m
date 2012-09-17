@@ -1,70 +1,47 @@
-From: Marek Vasut <marex@denx.de>
-Subject: Re: [PATCH 4/4] drivers/mmc/host/mxs-mmc.c: fix error return code
-Date: Mon, 17 Sep 2012 12:09:28 +0200
-Message-ID: <201209171209.28173.marex@denx.de>
-References: <1347869728-2696-1-git-send-email-peter.senna@gmail.com> <1347869728-2696-4-git-send-email-peter.senna@gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v12] mmc: support BKOPS feature for eMMC
+Date: Mon, 17 Sep 2012 06:30:46 -0400
+Message-ID: <m3wqztx7op.fsf@pullcord.laptop.org>
+References: <5056E25A.6070207@samsung.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-out.m-online.net ([212.18.0.9]:51040 "EHLO
-	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751872Ab2IQKJj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Sep 2012 06:09:39 -0400
-In-Reply-To: <1347869728-2696-4-git-send-email-peter.senna@gmail.com>
+Received: from void.printf.net ([89.145.121.20]:45397 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752668Ab2IQKao (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 17 Sep 2012 06:30:44 -0400
+In-Reply-To: <5056E25A.6070207@samsung.com> (Jaehoon Chung's message of "Mon,
+	17 Sep 2012 17:42:02 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Senna Tschudin <peter.senna@gmail.com>
-Cc: cjb@laptop.org, shawn.guo@linaro.org, broonie@opensource.wolfsonmicro.com, vinod.koul@linux.intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Maya Erez <merez@codeaurora.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Adrian Hunter <adrian.hunter@intel.com>, Per FORLIN <per.forlin@stericsson.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Minchan Kim <minchan@kernel.org>
 
-Dear Peter Senna Tschudin,
+Hi Jaehoon,
 
-> From: Peter Senna Tschudin <peter.senna@gmail.com>
+On Mon, Sep 17 2012, Jaehoon Chung wrote:
+> @@ -2334,7 +2471,13 @@ int mmc_suspend_host(struct mmc_host *host)
+>  	mmc_bus_get(host);
+>  	if (host->bus_ops && !host->bus_dead) {
+>  
+> -		if (host->bus_ops->suspend)
+> +		if (host->bus_ops->suspend) {
+> +			if (mmc_card_doing_bkops(host->card)) {
+> +				err = mmc_stop_bkops(host->card);
+> +				if (err)
+> +					goto out;
+> +			}
+> +		}
+>  			err = host->bus_ops->suspend(host);
+>  
+>  		if (err == -ENOSYS || !host->bus_ops->resume) {
 
-The patch description is a bit crap, but otherwise
+Something's gone very wrong with the closing brace here.  Maybe you want
+the closing brace to be a line later than it is?
 
-Acked-by: Marek Vasut <marex@denx.de>
+Thanks,
 
-> Convert a nonnegative error return code to a negative one, as returned
-> elsewhere in the function.
-> 
-> A simplified version of the semantic match that finds this problem is as
-> follows: (http://coccinelle.lip6.fr/)
-> 
-> // <smpl>
-> (
-> if@p1 (\(ret < 0\|ret != 0\))
->  { ... return ret; }
-> 
-> ret@p1 = 0
-> )
-> ... when != ret = e1
->     when != &ret
-> *if(...)
-> {
->   ... when != ret = e2
->       when forall
->  return ret;
-> }
-> // </smpl>
-> 
-> Signed-off-by: Peter Senna Tschudin <peter.senna@gmail.com>
-> ---
->  drivers/mmc/host/mxs-mmc.c | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index 80d1e6d..afd8fdd 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -674,6 +674,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
->  	if (!ssp->dmach) {
->  		dev_err(mmc_dev(host->mmc),
->  			"%s: failed to request dma\n", __func__);
-> +		ret = -ENODEV;
->  		goto out_clk_put;
->  	}
-
-Best regards,
-Marek Vasut
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
