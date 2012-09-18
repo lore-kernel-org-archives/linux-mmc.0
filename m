@@ -1,28 +1,27 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
 Subject: Re: [PATCH v5] mmc: sdhci-s3c: Add device tree support
-Date: Tue, 18 Sep 2012 09:26:58 +0530
-Message-ID: <CAJuYYwTMi+CjxrR+TfopGuG9HJg1RzvQQ7XvcBFv4YxjmSLQjQ@mail.gmail.com>
+Date: Tue, 18 Sep 2012 13:09:05 +0900
+Message-ID: <5057F3E1.4040905@samsung.com>
 References: <1345741809-18599-1-git-send-email-thomas.abraham@linaro.org>
-	<CAJuYYwRz8mBXefLsuM9D47KxS2iqK6x6YWtjaaEwro7dq5C0_A@mail.gmail.com>
-	<m3lig8kmzl.fsf@pullcord.laptop.org>
+ <CAJuYYwRz8mBXefLsuM9D47KxS2iqK6x6YWtjaaEwro7dq5C0_A@mail.gmail.com>
+ <m3lig8kmzl.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:38168 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932778Ab2IRD47 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Sep 2012 23:56:59 -0400
-Received: by lbbgj3 with SMTP id gj3so4689640lbb.19
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Sep 2012 20:56:58 -0700 (PDT)
-In-Reply-To: <m3lig8kmzl.fsf@pullcord.laptop.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:55121 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752111Ab2IREJY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Sep 2012 00:09:24 -0400
+In-reply-to: <m3lig8kmzl.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org, wmb@firmworks.com, patches@linaro.org, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Thomas Abraham <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org, wmb@firmworks.com, patches@linaro.org, Jaehoon Chung <jh80.chung@samsung.com>
 
-On 18 September 2012 09:20, Chris Ball <cjb@laptop.org> wrote:
+On 09/18/2012 12:50 PM, Chris Ball wrote:
 > Hi,
->
+> 
 > On Mon, Sep 17 2012, Thomas Abraham wrote:
 >> On 23 August 2012 22:40, Thomas Abraham <thomas.abraham@linaro.org> wrote:
 >>> Add device tree based discovery support for Samsung's sdhci controller
@@ -60,54 +59,50 @@ On 18 September 2012 09:20, Chris Ball <cjb@laptop.org> wrote:
 >> This patch adds device tree support for sdhci-s3c driver. All the
 >> comments for this patch has been addressed. Can this be queued for
 >> v3.7?
->
+> 
 > Yes, sounds good.  Jaehoon, perhaps you could give your Reviewed-by
 > for me to add to the patch?  I've pushed this to mmc-next for 3.7
 > now, after adding Jaehoon's else-if suggestion that wasn't acted on:
->
+Right, I suggested them. thanks Chris. Looks good to me this patch except for them.
+
+Reviewed-by: Jaehoon Chung <jh80.chung@samsung.com>
+> 
 > diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
 > index 3d91c7a..0c77b10 100644
 > --- a/drivers/mmc/host/sdhci-s3c.c
 > +++ b/drivers/mmc/host/sdhci-s3c.c
 > @@ -461,22 +461,18 @@ static int __devinit sdhci_s3c_parse_dt(struct device *dev,
->         if (gpio_is_valid(gpio)) {
->                 pdata->cd_type = S3C_SDHCI_CD_GPIO;
->                 goto found_cd;
-> -       } else {
-> -               if (gpio != -ENOENT) {
-> -                       dev_err(dev, "invalid card detect gpio specified\n");
-> -                       return -EINVAL;
-> -               }
-> +       } else if (gpio != -ENOENT) {
-> +               dev_err(dev, "invalid card detect gpio specified\n");
-> +               return -EINVAL;
->         }
->
->         gpio = of_get_named_gpio(node, "samsung,cd-pinmux-gpio", 0);
->         if (gpio_is_valid(gpio)) {
->                 pdata->cd_type = S3C_SDHCI_CD_INTERNAL;
->                 goto found_cd;
-> -       } else {
-> -               if (gpio != -ENOENT) {
-> -                       dev_err(dev, "invalid card detect gpio specified\n");
-> -                       return -EINVAL;
-> -               }
-> +       } else if (gpio != -ENOENT) {
-> +               dev_err(dev, "invalid card detect gpio specified\n");
-> +               return -EINVAL;
->         }
-
-Thank you Chris for your modification.
-
-Regards,
-Thomas.
-
->
->         dev_info(dev, "assuming no card detect line available\n");
->
+>  	if (gpio_is_valid(gpio)) {
+>  		pdata->cd_type = S3C_SDHCI_CD_GPIO;
+>  		goto found_cd;
+> -	} else {
+> -		if (gpio != -ENOENT) {
+> -			dev_err(dev, "invalid card detect gpio specified\n");
+> -			return -EINVAL;
+> -		}
+> +	} else if (gpio != -ENOENT) {
+> +		dev_err(dev, "invalid card detect gpio specified\n");
+> +		return -EINVAL;
+>  	}
+>  
+>  	gpio = of_get_named_gpio(node, "samsung,cd-pinmux-gpio", 0);
+>  	if (gpio_is_valid(gpio)) {
+>  		pdata->cd_type = S3C_SDHCI_CD_INTERNAL;
+>  		goto found_cd;
+> -	} else {
+> -		if (gpio != -ENOENT) {
+> -			dev_err(dev, "invalid card detect gpio specified\n");
+> -			return -EINVAL;
+> -		}
+> +	} else if (gpio != -ENOENT) {
+> +		dev_err(dev, "invalid card detect gpio specified\n");
+> +		return -EINVAL;
+>  	}
+>  
+>  	dev_info(dev, "assuming no card detect line available\n");
+> 
 > Thanks,
->
+> 
 > - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
+> 
+
