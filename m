@@ -1,58 +1,50 @@
-From: javier Martin <javier.martin@vista-silicon.com>
-Subject: Re: [PATCH 29/34] mmc: mxcmmc: remove mach/hardware.h inclusion
-Date: Tue, 18 Sep 2012 11:18:42 +0200
-Message-ID: <CACKLOr24teo+Y6ZqZCAdg7poMN8w3s0QQavV2F+M=fJCcF0aqA@mail.gmail.com>
-References: <1347860103-4141-1-git-send-email-shawn.guo@linaro.org>
-	<1347860103-4141-30-git-send-email-shawn.guo@linaro.org>
-	<m3392h1a0p.fsf@pullcord.laptop.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v2 1/4] drivers/mmc/host/dw_mmc.c: fix error return code
+Date: Tue, 18 Sep 2012 19:13:47 +0900
+Message-ID: <018101cd9586$4ac78b40$e056a1c0$%jun@samsung.com>
+References: <1347869728-2696-1-git-send-email-peter.senna@gmail.com>
+ <1347884417-26754-1-git-send-email-peter.senna@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:45668 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755145Ab2IRJSn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Sep 2012 05:18:43 -0400
-Received: by obbuo13 with SMTP id uo13so10158752obb.19
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Sep 2012 02:18:42 -0700 (PDT)
-In-Reply-To: <m3392h1a0p.fsf@pullcord.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <1347884417-26754-1-git-send-email-peter.senna@gmail.com>
+Content-language: ko
+Sender: linux-kernel-owner@vger.kernel.org
+To: 'Peter Senna Tschudin' <peter.senna@gmail.com>, cjb@laptop.org
+Cc: will.newton@imgtec.com, jh80.chung@samsung.com, kyungmin.park@samsung.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Shawn Guo <shawn.guo@linaro.org>, linux-arm-kernel@lists.infradead.org, Sascha Hauer <s.hauer@pengutronix.de>, Fabio Estevam <fabio.estevam@freescale.com>, Rob Herring <rob.herring@calxeda.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org
 
-Hi Shawn,
+On Monday, September 17, 2012, Peter Senna Tschudin <peter.senna@gmail.com> wrote:
+> From: Peter Senna Tschudin <peter.senna@gmail.com>
+> 
+> Convert a nonnegative error return code to a negative one, as returned
+> elsewhere in the function.
+> 
+> A simplified version of the semantic match that finds this problem is as
+> follows: (http://coccinelle.lip6.fr/)
+> 
+> // <smpl>
+> (
+> if@p1 (\(ret < 0\|ret != 0\))
+>  { ... return ret; }
+> |
+> ret@p1 = 0
+> )
+> ... when != ret = e1
+>     when != &ret
+> *if(...)
+> {
+>   ... when != ret = e2
+>       when forall
+>  return ret;
+> }
+> // </smpl>
+> 
+> Signed-off-by: Peter Senna Tschudin <peter.senna@gmail.com>
 
+Looks good.
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
-
-On 17 September 2012 07:41, Chris Ball <cjb@laptop.org> wrote:
-> Hi,
->
-> On Mon, Sep 17 2012, Shawn Guo wrote:
->> It changes the driver to use platform_device_id rather than cpu_is_xxx
->> to determine the controller type, and updates the platform code
->> accordingly.
->>
->> As the result, mach/hardware.h inclusion gets removed from the driver.
->>
->> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
->> Cc: Chris Ball <cjb@laptop.org>
->> Cc: linux-mmc@vger.kernel.org
->
-the dma fix provided by Sascha is needed for this patch to work too:
-
-http://www.spinics.net/lists/arm-kernel/msg195690.html
-
-Otherwise:
-
-Tested-by: Javier Martin <javier.martin@vista-silicon.com>
-
-
-Regards.
--- 
-Javier Martin
-Vista Silicon S.L.
-CDTUC - FASE C - Oficina S-345
-Avda de los Castros s/n
-39005- Santander. Cantabria. Spain
-+34 942 25 32 60
-www.vista-silicon.com
+> --
+> 1.7.11.4
