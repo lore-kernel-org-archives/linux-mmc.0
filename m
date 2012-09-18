@@ -1,50 +1,56 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v2 1/4] drivers/mmc/host/dw_mmc.c: fix error return code
-Date: Tue, 18 Sep 2012 19:13:47 +0900
-Message-ID: <018101cd9586$4ac78b40$e056a1c0$%jun@samsung.com>
-References: <1347869728-2696-1-git-send-email-peter.senna@gmail.com>
- <1347884417-26754-1-git-send-email-peter.senna@gmail.com>
+From: Anton Vorontsov <cbouatmailru@gmail.com>
+Subject: Re: [PATCH] Powerpc eSDHC Recover from the ADMA error
+Date: Tue, 18 Sep 2012 13:12:22 -0700
+Message-ID: <20120918201220.GA27312@lizard>
+References: <1347955699-18780-1-git-send-email-B42677@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <1347884417-26754-1-git-send-email-peter.senna@gmail.com>
-Content-language: ko
-Sender: linux-kernel-owner@vger.kernel.org
-To: 'Peter Senna Tschudin' <peter.senna@gmail.com>, cjb@laptop.org
-Cc: will.newton@imgtec.com, jh80.chung@samsung.com, kyungmin.park@samsung.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:50355 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754736Ab2IRUPH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Sep 2012 16:15:07 -0400
+Received: by pbbrr13 with SMTP id rr13so727331pbb.19
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Sep 2012 13:15:06 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1347955699-18780-1-git-send-email-B42677@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: B42677@freescale.com
+Cc: linux-mmc@vger.kernel.org, Haijun Zhang <Haijun.Zhang@freescale.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-On Monday, September 17, 2012, Peter Senna Tschudin <peter.senna@gmail.com> wrote:
-> From: Peter Senna Tschudin <peter.senna@gmail.com>
+On Tue, Sep 18, 2012 at 04:08:19PM +0800, B42677@freescale.com wrote:
+> From: Haijun Zhang <Haijun.Zhang@freescale.com>
 > 
-> Convert a nonnegative error return code to a negative one, as returned
-> elsewhere in the function.
+> A-003500: False ADMA Error might be reported when ADMA is used for
+> multiple block read command with Stop at Block Gap. If PROCTL[SABGREQ]
+> is set when the particular block's data is received by the System side
+> logic before entire block(with CRC) data is received by the SD side logic,
+> and also if ADMA descriptor line is fetched at the same time,
+> then DMA engine might report false ADMA error. eSDHC might not be able
+> to Continue(PROCTL[CREQ]=1)after Stop at Block Gap.
+> This issue will impact the eSDHC IP VVN2.3.
 > 
-> A simplified version of the semantic match that finds this problem is as
-> follows: (http://coccinelle.lip6.fr/)
 > 
-> // <smpl>
-> (
-> if@p1 (\(ret < 0\|ret != 0\))
->  { ... return ret; }
-> |
-> ret@p1 = 0
-> )
-> ... when != ret = e1
->     when != &ret
-> *if(...)
-> {
->   ... when != ret = e2
->       when forall
->  return ret;
-> }
-> // </smpl>
-> 
-> Signed-off-by: Peter Senna Tschudin <peter.senna@gmail.com>
+> Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
+> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> CC: Anton Vorontsov <cbouatmailru@gmail.com>
+> ---
+[...]
+> +static void esdhci_of_adma_workaround(struct sdhci_host *host, u32 intmask)
+> +{
+> +	u32 tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
+> +
+> +	tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+> +	if (tmp == VENDOR_V_23) {
+> +		if ((intmask & SDHCI_INT_DATA_END) &&
+> +			(intmask & SDHCI_INT_BLK_GAP)) {
 
-Looks good.
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+By inverting the condition, you could greatly reduce the
+indentation. I.e. return early if the condition is false, and
+do the rest outside of the if block. (Plus, one if statement
+would be enough, no need to nest them.)
 
-> --
-> 1.7.11.4
+Thanks,
+
+Anton.
