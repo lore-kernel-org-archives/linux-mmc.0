@@ -1,202 +1,66 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] mmc: sh-mmcif: avoid Oops on spurious interrupts
-Date: Tue, 18 Sep 2012 08:42:42 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1209180830550.31203@axis700.grange>
-References: <878vdxd3mq.wl%kuninori.morimoto.gx@renesas.com>
- <20120803050039.GA1614@linux-sh.org> <20120809042844.GF1614@linux-sh.org>
- <87hasc3bv5.wl%kuninori.morimoto.gx@renesas.com> <874nobqntv.wl%kuninori.morimoto.gx@renesas.com>
- <20120810123804.GK1614@linux-sh.org> <502DDC97.5080501@kmckk.co.jp>
- <87wr0us6tg.wl%kuninori.morimoto.gx@renesas.com> <20120820031352.GC25767@linux-sh.org>
- <87obm6ry98.wl%kuninori.morimoto.gx@renesas.com> <20120820043853.GD25767@linux-sh.org>
- <87mx1qrx1x.wl%kuninori.morimoto.gx@renesas.com> <5031D9FF.8060801@kmckk.co.jp>
- <Pine.LNX.4.64.1208220840400.26767@axis700.grange> <50402A0D.7070106@kmckk.co.jp>
- <50581127.2000003@kmckk.co.jp>
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: Re: [PATCH 00/34] i.MX multi-platform support
+Date: Tue, 18 Sep 2012 09:52:13 +0200
+Message-ID: <20120918075213.GD24458@pengutronix.de>
+References: <1347860103-4141-1-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <50581127.2000003@kmckk.co.jp>
-Sender: linux-sh-owner@vger.kernel.org
-To: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
-Cc: yusuke.goda.sx@renesas.com, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <alsa-devel-bounces@alsa-project.org>
+Content-Disposition: inline
+In-Reply-To: <1347860103-4141-1-git-send-email-shawn.guo@linaro.org>
+List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
+List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
+List-Post: <mailto:alsa-devel@alsa-project.org>
+List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
+List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
+Errors-To: alsa-devel-bounces@alsa-project.org
+Sender: alsa-devel-bounces@alsa-project.org
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: alsa-devel@alsa-project.org, Mark Brown <broonie@opensource.wolfsonmicro.com>, Artem Bityutskiy <artem.bityutskiy@linux.intel.com>, linux-fbdev@vger.kernel.org, Wim Van Sebroeck <wim@iguana.be>, linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Florian Tobias Schandinat <FlorianSchandinat@gmx.de>, Paulius Zaleckas <paulius.zaleckas@teltonika.lt>, Chris Ball <cjb@laptop.org>, linux-media@vger.kernel.org, linux-watchdog@vger.kernel.org, rtc-linux@googlegroups.com, Rob Herring <rob.herring@calxeda.com>, linux-arm-kernel@lists.infradead.org, Fabio Estevam <fabio.estevam@freescale.com>, Vinod Koul <vinod.koul@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, Javier Martin <javier.martin@vista-silicon.com>, Andrew Morton <akpm@l>
 List-Id: linux-mmc@vger.kernel.org
 
-Hello Kobayashi-san
+Hi Shawn,
 
-On Tue, 18 Sep 2012, Tetsuyuki Kobayashi wrote:
-
-> Hello Guennadi
+On Mon, Sep 17, 2012 at 01:34:29PM +0800, Shawn Guo wrote:
+> The series enables multi-platform support for imx.  Since the required
+> frameworks (clk, pwm) and spare_irq have already been adopted on imx,
+> the series is all about cleaning up mach/* headers.  Along with the
+> changes, arch/arm/plat-mxc gets merged into arch/arm/mach-imx.
 > 
-> (2012/08/31 12:05), Tetsuyuki Kobayashi wrote:
+> It's based on a bunch of branches (works from others), Rob's initial
+> multi-platform series, Arnd's platform-data and smp_ops (Marc's) and
+> imx 3.7 material (Sascha and myself).
 > 
-> > (2012/08/22 15:49), Guennadi Liakhovetski wrote:
-> > > On some systems, e.g., kzm9g, MMCIF interfaces can produce spurious
-> > > interrupts without any active request. To prevent the Oops, that results
-> > > in such cases, don't dereference the mmc request pointer until we make
-> > > sure, that we are indeed processing such a request.
-> > > 
-> > > Reported-by: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
-> > > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > > ---
-> > > 
-> > > Hello Kobayashi-san
-> > > 
-> > > On Mon, 20 Aug 2012, Tetsuyuki Kobayashi wrote:
-> > > 
-> > > ...
-> > > 
-> > > > After applying this patch on kzm9g board, I got this error regarding
-> > > > eMMC.
-> > > > I think this is another problem.
-> > > > 
-> > > > 
-> > > > Unable to handle kernel NULL pointer dereference at virtual address
-> > > > 00000008
-> > > > pgd = c0004000
-> > > > [00000008] *pgd=00000000
-> > > > Internal error: Oops: 17 [#1] PREEMPT SMP ARM
-> > > > Modules linked in:
-> > > > CPU: 1    Not tainted  (3.6.0-rc2+ #103)
-> > > > PC is at sh_mmcif_irqt+0x20/0xb30
-> > > > LR is at irq_thread+0x94/0x16c
-> > > 
-> > > [snip]
-> > > 
-> > > > My quick fix is below.
-> > > > 
-> > > > diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> > > > index 5d81427..e587fbc 100644
-> > > > --- a/drivers/mmc/host/sh_mmcif.c
-> > > > +++ b/drivers/mmc/host/sh_mmcif.c
-> > > > @@ -1104,7 +1104,15 @@ static irqreturn_t sh_mmcif_irqt(int irq, void
-> > > > *dev_id)
-> > > >   {
-> > > >          struct sh_mmcif_host *host = dev_id;
-> > > >          struct mmc_request *mrq = host->mrq;
-> > > > -       struct mmc_data *data = mrq->data;
-> > > > +       /*struct mmc_data *data = mrq->data; -- this cause null
-> > > > pointer access*/
-> > > > +       struct mmc_data *data;
-> > > > +
-> > > > +       /* quick fix by koba */
-> > > > +       if (mrq == NULL) {
-> > > > +               printk("sh_mmcif_irqt: mrq == NULL:
-> > > > host->wait_for=%d\n", host->wait_for);
-> > > > +       } else {
-> > > > +               data = mrq->data;
-> > > > +       }
-> > > > 
-> > > >          cancel_delayed_work_sync(&host->timeout_work);
-> > > > 
-> > > > 
-> > > > With this patch, there is no null pointer accesses and got this log.
-> > > > 
-> > > > sh_mmcif_irqt: mrq == NULL: host->wait_for=0
-> > > > sh_mmcif_irqt: mrq == NULL: host->wait_for=0
-> > > >    ...
-> > > > 
-> > > > host->wait_for is 0. it is MMCIF_WAIT_FOR_REQUEST.
-> > > > There is code such like:
-> > > > 
-> > > >         host->wait_for = MMCIF_WAIT_FOR_REQUEST;
-> > > >         host->mrq = NULL;
-> > > > 
-> > > > So, at the top of sh_mmcif_irqt, if host->wait_for ==
-> > > > MMCIF_WAIT_FOR_REQUEST,
-> > > > host->mrq = NULL.
-> > > > It is too earlier to access mrq->data before checking host->mrq. it may
-> > > > cause null pointer access.
-> > > > 
-> > > > Goda-san, could you check this and refine the code of sh_mmcif_irqt?
-> > > 
-> > > Thanks for your report and a fix. Could you please double-check, whether
-> > > the below patch also fixes your problem? Since such spurious interrupts
-> > > are possible I would commit a check like this one, but in the longer run
-> > > we want to identify and eliminate them, if possible. But since so far
-> > > these interrupts only happen on 1 board model and also not on all units
-> > > and not upon each boot, this could be a bit tricky.
-> > > 
-> > > One more question - is this only needed for 3.7 or also for 3.6 / stable?
-> > > 
-> > > Thanks
-> > > Guennadi
-> > > 
-> > >   drivers/mmc/host/sh_mmcif.c |    4 ++--
-> > >   1 files changed, 2 insertions(+), 2 deletions(-)
-> > > 
-> > > diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> > > index 5d81427..82bf921 100644
-> > > --- a/drivers/mmc/host/sh_mmcif.c
-> > > +++ b/drivers/mmc/host/sh_mmcif.c
-> > > @@ -1104,7 +1104,6 @@ static irqreturn_t sh_mmcif_irqt(int irq, void
-> > > *dev_id)
-> > >   {
-> > >       struct sh_mmcif_host *host = dev_id;
-> > >       struct mmc_request *mrq = host->mrq;
-> > > -    struct mmc_data *data = mrq->data;
-> > > 
-> > >       cancel_delayed_work_sync(&host->timeout_work);
-> > > 
-> > > @@ -1152,13 +1151,14 @@ static irqreturn_t sh_mmcif_irqt(int irq, void
-> > > *dev_id)
-> > >       case MMCIF_WAIT_FOR_READ_END:
-> > >       case MMCIF_WAIT_FOR_WRITE_END:
-> > >           if (host->sd_error)
-> > > -            data->error = sh_mmcif_error_manage(host);
-> > > +            mrq->data->error = sh_mmcif_error_manage(host);
-> > >           break;
-> > >       default:
-> > >           BUG();
-> > >       }
-> > > 
-> > >       if (host->wait_for != MMCIF_WAIT_FOR_STOP) {
-> > > +        struct mmc_data *data = mrq->data;
-> > >           if (!mrq->cmd->error && data && !data->error)
-> > >               data->bytes_xfered =
-> > >                   data->blocks * data->blksz;
-> > > 
-> > 
-> > I tried this patch. It seems better.
-> > But I think this still have potential race condition.
-> > I am afraid that one cpu enter sh_mmcif_irqt and other cpu write to
-> > host->wait_for for new request at the same time.
-> > How about add this code at the top of sh_mmcif_irqt or before returning
-> > IRQ_WAKE_THREAD in sh_mmcif_intr ?
-> > 
-> >      if (host->state == STATE_IDLE)
-> >          return IRQ_HANDLED;
-> > 
-> > I will rebase my test environment to v3.6-rc3 or later. Then I will
-> > send you my .config.
-> > 
-> How is this?
-> I hope this fixed in v3.6.
+> It's available on branch below.
+> 
+>   git://git.linaro.org/people/shawnguo/linux-2.6.git imx/multi-platform
+> 
+> It's been tested on imx5 and imx6, and only compile-tested on imx2 and
+> imx3, so testing on imx2/3 are appreciated.
+> 
+> Subsystem maintainers,
+> 
+> I plan to send the whole series via arm-soc tree at the end of 3.7
+> merge window when all dependant bits hit mainline.  Please have a
+> look at the patches you get copied and provide ACKs if the changes
+> are good.  Thanks.
 
-Sorry, I still haven't come round to looking at this. I think, one thing 
-could halp, if you could try to find out what exactly those spurious 
-interrupts look like, i.e., what's their interrupt status? You could try 
-to print like
+I just had a look at the remaining initcalls in arch-imx. Most of them
+are protected with a cpu_is_*, but this one should be fixed before i.MX
+is enabled for multi platform:
 
-diff -u a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1229,6 +1229,10 @@
- 		host->sd_error = true;
- 		dev_dbg(&host->pd->dev, "int err state = %08x\n", state);
- 	}
-+	if (host->state == STATE_IDLE) {
-+		dev_info(&host->pd->dev, "Spurious IRQ status 0x%x", state);
-+		return IRQ_HANDLED;
-+	}
- 	if (state & ~(INT_CMD12RBE | INT_CMD12CRE)) {
- 		if (!host->dma_active)
- 			return IRQ_WAKE_THREAD;
+arch/arm/mach-imx/devices/devices.c:48:core_initcall(mxc_device_init);
 
-Please, let me know, if it's not very easy for you ATM to perform the 
-test, I'll try to do it myself then.
+I think this won't harm others directly, but it will register i.MX
+related devices on foreign platforms.
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Sascha
+
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
