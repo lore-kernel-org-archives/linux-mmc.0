@@ -1,43 +1,43 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] ARM: shmobile: fix MMCIF IRQ assignment on kzm9g
-Date: Wed, 19 Sep 2012 23:08:52 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1209192306370.28849@axis700.grange>
-References: <Pine.LNX.4.64.1209190042440.31203@axis700.grange>
- <20120919001403.GF12583@verge.net.au>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: Tracking down suspend/resume ext3/mmc issues on imx233
+Date: Thu, 20 Sep 2012 01:23:49 +0200
+Message-ID: <20120919232349.GA24132@elf.ucw.cz>
+References: <CAEOSq-O3SfuAEhMsjX1y1ZgQuWBKef+XZzMR1b4yJhKhaRdymA@mail.gmail.com>
+ <20120907060552.GL26709@S2101-09.ap.freescale.net>
+ <CAEOSq-PV+7c2nvu3uauOLJcV7WKa1jmd-df0a1H0qY5K4CM5MA@mail.gmail.com>
+ <CAKGA1bnug8nqcideOBZyLQZmiVo=G5L3aRHq4k4SNZyH132Y=g@mail.gmail.com>
+ <20120910163345.GB3942@thunk.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20120919001403.GF12583@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, Tetsuyuki Kobayashi <koba@kmckk.co.jp>, yusuke.goda.sx@renesas.com, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20120910163345.GB3942@thunk.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>, Matt Sealey <matt@genesi-usa.com>, Mike Thompson <mpthompson@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Linux-Arm-Kernel <linux-arm-kernel@lists.infradead.org>, linux-ext4@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Simon
-
-On Wed, 19 Sep 2012, Simon Horman wrote:
-
-> On Wed, Sep 19, 2012 at 12:52:26AM +0200, Guennadi Liakhovetski wrote:
-> > Error and operation IRQs are swapped in kzm9g platform data, this patch
-> > fixes their order. The only problem this bug causes is the confusing IRQ 
-> > count in /proc/interrupts output, otherwise functionality is unaffected, 
-> > since the driver doesn't really differentiate between the two IRQs.
-> > 
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+On Mon 2012-09-10 12:33:45, Theodore Ts'o wrote:
+> On Mon, Sep 10, 2012 at 10:11:48AM -0500, Matt Sealey wrote:
+> > Wouldn't it be better if the root filesystem was marked as
+> > non-removable in the device tree - or in the case of a truly removable
+> > card, just marked in the MMC subsystem - and the MMC subsystem skipped
+> > the "it could be removed" for suspend/resume operations?
 > 
-> Thanks Guennadi,
-> 
-> as it happens I merged a very similar (same?) patch into the
-> fixes branch of my renesas tree yesterday. It has been accepted
-> by the arm-soc people and should appear in 3.6.
+> I agree, this makes a lot of sense.  If the root file system
+> disappears, you're toasted either way, so it's fair to assume that the
+> device on which the root file system is located should is
+> non-removable.
 
-Good, just wondering what about ag5evm, it does seem to have the same 
-problem. As mentioned before, this is just a "cosmetic" fix, so, up to you 
-to decide when and how and if you'd like to fix it.
+I'm not sure I agree.
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+If you treat root fs as removable, you'll get "crash". You'll need to
+replay the journal, but data is safe.
+
+If you treat it as non-removable, and someone manages to remove it,
+mount, and reinsert, you'll get silent data corruption.
+
+If the card is not removable, mark it as such...
+									Pavel
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
