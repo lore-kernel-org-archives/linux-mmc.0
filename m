@@ -1,62 +1,59 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V2] mmc: omap_hsmmc: Pass on the suspend failure to the PM core
-Date: Wed, 19 Sep 2012 01:46:10 -0400
-Message-ID: <m34nmuk1jx.fsf@pullcord.laptop.org>
-References: <1347517863-30017-1-git-send-email-gururaja.hebbar@ti.com>
-	<CANfBPZ9hrKZgAbyUWfT7cLyRVDEEAVC7x=eBwFqBn49m-rmqkw@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: mxcmmc: fix bug that may block a data transfer forever.
+Date: Wed, 19 Sep 2012 01:52:34 -0400
+Message-ID: <m3wqzqimot.fsf@pullcord.laptop.org>
+References: <1347014617-16238-1-git-send-email-javier.martin@vista-silicon.com>
+	<20120910074753.GX18243@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <CANfBPZ9hrKZgAbyUWfT7cLyRVDEEAVC7x=eBwFqBn49m-rmqkw@mail.gmail.com>
-	(Venkatraman S.'s message of "Tue, 18 Sep 2012 00:21:02 +0530")
-Sender: linux-omap-owner@vger.kernel.org
-To: "S, Venkatraman" <svenkatr@ti.com>
-Cc: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, rob.herring@calxeda.com, linux-kernel@vger.kernel.org, grant.likely@secretlab.ca, nsekhar@ti.com, sudhakar.raj@ti.com, Vaibhav Bedia <vaibhav.bedia@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:57370 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753981Ab2ISFwQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 19 Sep 2012 01:52:16 -0400
+In-Reply-To: <20120910074753.GX18243@pengutronix.de> (Sascha Hauer's message
+	of "Mon, 10 Sep 2012 09:47:54 +0200")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: Javier Martin <javier.martin@vista-silicon.com>, linux-mmc@vger.kernel.org, viresh.linux@gmail.com, g.liakhovetski@gmx.de, vinod.koul@linux.intel.com, fabio.estevam@freescale.com, gcembed@gmail.com
 
 Hi,
 
-On Mon, Sep 17 2012, S, Venkatraman wrote:
-> On Thu, Sep 13, 2012 at 12:01 PM, Hebbar, Gururaja
-> <gururaja.hebbar@ti.com> wrote:
->> From: Vaibhav Bedia <vaibhav.bedia@ti.com>
->>
->> In some cases mmc_suspend_host() is not able to claim the
->> host and proceed with the suspend process. The core returns
->> -EBUSY to the host controller driver. Unfortunately, the
->> host controller driver does not pass on this information
->> to the PM core and hence the system suspend process continues.
->>
->>         ret = mmc_suspend_host(host->mmc);
->>         if (ret) {
->>                 host->suspended = 0;
->>                 if (host->pdata->resume) {
->>                         ret = host->pdata->resume(dev, host->slot_id);
->>
->> The return status from mmc_suspend_host() is overwritten by return
->> status from host->pdata->resume. So the original return status is lost.
->>
->> In these cases the MMC core gets to an unexpected state
->> during resume and multiple issues related to MMC crop up.
->> 1. Host controller driver starts accessing the device registers
->> before the clocks are enabled which leads to a prefetch abort.
->> 2. A file copy thread which was launched before suspend gets
->> stuck due to the host not being reclaimed during resume.
->>
->> To avoid such problems pass on the -EBUSY status to the PM core
->> from the host controller driver. With this change, MMC core
->> suspend might still fail but it does not end up making the
->> system unusable. Suspend gets aborted and the user can try
->> suspending the system again.
->>
->> Signed-off-by: Vaibhav Bedia <vaibhav.bedia@ti.com>
->> Signed-off-by: Hebbar, Gururaja <gururaja.hebbar@ti.com>
+On Mon, Sep 10 2012, Sascha Hauer wrote:
+> On Fri, Sep 07, 2012 at 12:43:37PM +0200, Javier Martin wrote:
+>> The problem can be easily reproduced using a script that loops
+>> copying a file in an SD card to another place in the same SD card
+>> and its related to read transfers. This only happens with DMA enabled.
+>> 
+>> This is related to the fact that, when reading, an MMC irq signals
+>> the fact that all data from the SD card has been copied to the
+>> internal buffers. However, it doesn't signal whether the DMA transfer
+>> that is in charge of moving data from these internal buffers to RAM
+>> has finished or not. Thus, calling dmaengine_terminate_all() in the
+>> MMC irq routine can cancel an ongoing DMA transfer leaving some data
+>> in the internal buffers that produces an accumulative effect which,
+>> in the end, blocks a read data transfer forever.
+>> 
+>> The following patch watches DMA irq for reading and MMC irqs for
+>> writing transfers. The 'dangerous' usage of dmaengine_terminate_all()
+>> is removed and a timeout of 10 seconds is added so that the MMC won't
+>> block forever anymore.
+>> 
+>> Signed-off-by: Javier Martin <javier.martin@vista-silicon.com>
+>> ---
+>> Changes since v1:
+>>  - Use DMA callbacks for reading and MMC irqs for writing instead
+>>  of monitoring both irqs for each transfer.
+>>  - Increase timeout to 10 seconds to give enough time to slow cards.
+>> 
 >
-> This version is good.
+> Looks good now, thanks.
 >
-> Acked-by: Venkatraman S <svenkatr@ti.com>
+> Reviewed-by: Sascha Hauer <s.hauer@pengutronix.de>
 
-Thanks, pushed to mmc-next for 3.7, with a stable@ tag added (right?).
+Thanks, queued in mmc-next for 3.7.  Vinod, would be good to add your
+Reviewed-by if you're happy with this patch now.
 
 - Chris.
 -- 
