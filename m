@@ -1,44 +1,59 @@
-From: Javier Martin <javier.martin@vista-silicon.com>
-Subject: [PATCH] mmc: mxcmmc: fix SD cards not being detected sometimes.
-Date: Wed, 19 Sep 2012 13:21:07 +0200
-Message-ID: <1348053667-10389-1-git-send-email-javier.martin@vista-silicon.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:40672 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752232Ab2ISLVW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 07:21:22 -0400
-Received: by weyx8 with SMTP id x8so513629wey.19
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Sep 2012 04:21:20 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v6 0/9] mmc: dw_mmc: add support for device tree based
+ instantiation
+Date: Wed, 19 Sep 2012 22:39:09 +0900
+Message-ID: <001201cd966c$25b18e00$7114aa00$%jun@samsung.com>
+References: <1347905803-22742-1-git-send-email-thomas.abraham@linaro.org>
+ <CAJuYYwRcoOv5X=XK8wiVb9fzSAdY_d=+kvJhqMdiT1Fey0JCLw@mail.gmail.com>
+ <CAJuYYwSBtjtEvTMUw9UNZRTbMoMwLio_YLKbTu=daaamS5t5Lg@mail.gmail.com>
+ <m3y5k6h4qj.fsf@pullcord.laptop.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <m3y5k6h4qj.fsf@pullcord.laptop.org>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Chris Ball' <cjb@laptop.org>, 'Thomas Abraham' <thomas.abraham@linaro.org>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, will.newton@imgtec.com, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: viresh.linux@gmail.com, g.liakhovetski@gmx.de, vinod.koul@linux.intel.com, s.hauer@pengutronix.de, cjb@laptop.org, Javier Martin <javier.martin@vista-silicon.com>
 
-When a SD card is initialized some data transfers of 64 and 8 bytes
-are issued. It seems the DMA has some problems dealing with these kind
-of "short" transfers, leading sometimes to the SD card not being detected.
+> Hi Thomas,
+> 
+> On Wed, Sep 19 2012, Thomas Abraham wrote:
+> >> Hi Jaehoon, Seungwon,
+> >>
+> >> All the changes you have suggested for this patch series has been
+> >> completed. If you could ack this series, it would be great.
+> >>
+> >> Thanks,
+> >> Thomas.
+> >
+> > Hi Chris,
+> >
+> > I have addressed all the comments received for the v5 of the dw-mmc
+> > device tree support patch series. Will Newton has acked this patch
+> > series. Can this series be merged for v3.7 ?
+> 
+> Yes, looks good; pushed to mmc-next for 3.7.  Jaehoon and Seungwon,
+> if you reply soon with your ACK then I'll add it to this patchset.
 
-In order to solve this problem, do not use DMA for transfer sizes lower
-than the sector size.
 
-Signed-off-by: Javier Martin <javier.martin@vista-silicon.com>
----
- drivers/mmc/host/mxcmmc.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Also, looks good to me.
+But please check several patches before merging.
+Sorry for late review.
 
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index fc42a2e..a09637f 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -240,7 +240,7 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
- 		return 0;
- 
- 	for_each_sg(data->sg, sg, data->sg_len, i) {
--		if (sg->offset & 3 || sg->length & 3) {
-+		if (sg->offset & 3 || sg->length < 512) {
- 			host->do_dma = 0;
- 			return 0;
- 		}
--- 
-1.7.9.5
+Thanks,
+Seungwon Jeon
 
+> 
+> Thanks,
+> 
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
