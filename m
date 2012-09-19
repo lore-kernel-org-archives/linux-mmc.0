@@ -1,47 +1,28 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH] mmc: sh-mmcif: properly handle MMC_WRITE_MULTIPLE_BLOCK
- completion IRQ
-Date: Wed, 19 Sep 2012 01:10:24 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1209190105080.31203@axis700.grange>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH] ARM: shmobile: fix MMCIF IRQ assignment on kzm9g
+Date: Wed, 19 Sep 2012 09:14:03 +0900
+Message-ID: <20120919001403.GF12583@verge.net.au>
+References: <Pine.LNX.4.64.1209190042440.31203@axis700.grange>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1209190042440.31203@axis700.grange>
 Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Tetsuyuki Kobayashi <koba@kmckk.co.jp>, yusuke.goda.sx@renesas.com, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, Tetsuyuki Kobayashi <koba@kmckk.co.jp>, yusuke.goda.sx@renesas.com, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Upon completion of a MMC_WRITE_MULTIPLE_BLOCK command MMCIF issues an IRQ
-with the DTRANE bit set and often with one or several of CMD12 bits set.
-If those interrupts are not acknowledged, an additional interrupt can be
-produced and will be delivered later, possibly, when the transaction has
-already been completed. To prevent this from happening, CMD12 completion
-interrupt sources have to be cleared too upon reception of an DTRANE IRQ.
+On Wed, Sep 19, 2012 at 12:52:26AM +0200, Guennadi Liakhovetski wrote:
+> Error and operation IRQs are swapped in kzm9g platform data, this patch
+> fixes their order. The only problem this bug causes is the confusing IRQ 
+> count in /proc/interrupts output, otherwise functionality is unaffected, 
+> since the driver doesn't really differentiate between the two IRQs.
+> 
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
+Thanks Guennadi,
 
-Tested on kzm9g and mackerel. Kobayashi-san, this fixes spurious 
-interrupts, that you are observing.
-
- drivers/mmc/host/sh_mmcif.c |    4 +++-
- 1 files changed, 3 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 82bf921..387bf63 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1213,7 +1213,9 @@ static irqreturn_t sh_mmcif_intr(int irq, void *dev_id)
- 		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~INT_BUFRE);
- 		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MBUFRE);
- 	} else if (state & INT_DTRANE) {
--		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~INT_DTRANE);
-+		sh_mmcif_writel(host->addr, MMCIF_CE_INT,
-+			~(INT_CMD12DRE | INT_CMD12RBE |
-+			  INT_CMD12CRE | INT_DTRANE));
- 		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MDTRANE);
- 	} else if (state & INT_CMD12RBE) {
- 		sh_mmcif_writel(host->addr, MMCIF_CE_INT,
--- 
-1.7.2.5
-
+as it happens I merged a very similar (same?) patch into the
+fixes branch of my renesas tree yesterday. It has been accepted
+by the arm-soc people and should appear in 3.6.
