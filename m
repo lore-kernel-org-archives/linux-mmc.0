@@ -1,64 +1,38 @@
-From: Zhang Haijun-B42677 <B42677@freescale.com>
-Subject: RE: [PATCH V2] Powerpc eSDHC Recover from the ADMA error
-Date: Wed, 19 Sep 2012 09:52:08 +0000
-Message-ID: <99E897753B6F7048BD8CCDB4661D02E1100B3C@039-SN2MPN1-021.039d.mgd.msft.net>
-References: <1348031113-19583-1-git-send-email-B42677@freescale.com>
- <20120919060848.GA25261@lizard>
+From: Tomasz Figa <t.figa@samsung.com>
+Subject: Re: [PATCH v2 1/5] mmc: host: sdhci-s3c: Add broken-voltage DT
+ property for broken voltage quirk
+Date: Wed, 19 Sep 2012 12:13:14 +0200
+Message-ID: <1587150.uFGRdL0s8e@amdc1227>
+References: <1346748609-11115-1-git-send-email-t.figa@samsung.com>
+ <1346748609-11115-2-git-send-email-t.figa@samsung.com>
+ <m38vc6k1qu.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:58221
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755586Ab2ISJwN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 05:52:13 -0400
-In-Reply-To: <20120919060848.GA25261@lizard>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <m38vc6k1qu.fsf@pullcord.laptop.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kyungmin.park@samsung.com, jy0922.shim@samsung.com, kgene.kim@samsung.com, thomas.abraham@linaro.org, Ben Dooks <ben-linux@fluff.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Huang Changming-R66093 <r66093@freescale.com>
 
-VGhhbmsgeW91IHZlcnkgbXVjaC4NClBscyByZXZpZXcuDQoNCg0KLS0tLS1PcmlnaW5hbCBNZXNz
-YWdlLS0tLS0NCkZyb206IEFudG9uIFZvcm9udHNvdiBbbWFpbHRvOmNib3VhdG1haWxydUBnbWFp
-bC5jb21dIA0KU2VudDogV2VkbmVzZGF5LCBTZXB0ZW1iZXIgMTksIDIwMTIgMjowOSBBTQ0KVG86
-IFpoYW5nIEhhaWp1bi1CNDI2NzcNCkNjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBaaGFu
-ZyBIYWlqdW4tQjQyNjc3OyBIdWFuZyBDaGFuZ21pbmctUjY2MDkzDQpTdWJqZWN0OiBSZTogW1BB
-VENIIFYyXSBQb3dlcnBjIGVTREhDIFJlY292ZXIgZnJvbSB0aGUgQURNQSBlcnJvcg0KDQpPbiBX
-ZWQsIFNlcCAxOSwgMjAxMiBhdCAwMTowNToxM1BNICswODAwLCBCNDI2NzdAZnJlZXNjYWxlLmNv
-bSB3cm90ZToNCj4gRnJvbTogSGFpanVuIFpoYW5nIDxIYWlqdW4uWmhhbmdAZnJlZXNjYWxlLmNv
-bT4NCj4gDQo+IEEtMDAzNTAwOiBGYWxzZSBBRE1BIEVycm9yIG1pZ2h0IGJlIHJlcG9ydGVkIHdo
-ZW4gQURNQSBpcyB1c2VkIGZvciANCj4gbXVsdGlwbGUgYmxvY2sgcmVhZCBjb21tYW5kIHdpdGgg
-U3RvcCBhdCBCbG9jayBHYXAuIElmIFBST0NUTFtTQUJHUkVRXSANCj4gaXMgc2V0IHdoZW4gdGhl
-IHBhcnRpY3VsYXIgYmxvY2sncyBkYXRhIGlzIHJlY2VpdmVkIGJ5IHRoZSBTeXN0ZW0gc2lkZSAN
-Cj4gbG9naWMgYmVmb3JlIGVudGlyZSBibG9jayh3aXRoIENSQykgZGF0YSBpcyByZWNlaXZlZCBi
-eSB0aGUgU0Qgc2lkZSANCj4gbG9naWMsIGFuZCBhbHNvIGlmIEFETUEgZGVzY3JpcHRvciBsaW5l
-IGlzIGZldGNoZWQgYXQgdGhlIHNhbWUgdGltZSwgDQo+IHRoZW4gRE1BIGVuZ2luZSBtaWdodCBy
-ZXBvcnQgZmFsc2UgQURNQSBlcnJvci4gZVNESEMgbWlnaHQgbm90IGJlIGFibGUgDQo+IHRvIENv
-bnRpbnVlKFBST0NUTFtDUkVRXT0xKWFmdGVyIFN0b3AgYXQgQmxvY2sgR2FwLg0KPiBUaGlzIGlz
-c3VlIHdpbGwgaW1wYWN0IHRoZSBlU0RIQyBJUCBWVk4yLjMuDQo+IA0KPiANCj4gU2lnbmVkLW9m
-Zi1ieTogSGFpanVuIFpoYW5nIDxIYWlqdW4uWmhhbmdAZnJlZXNjYWxlLmNvbT4NCj4gU2lnbmVk
-LW9mZi1ieTogSmVycnkgSHVhbmcgPENoYW5nLU1pbmcuSHVhbmdAZnJlZXNjYWxlLmNvbT4NCj4g
-Q0M6IEFudG9uIFZvcm9udHNvdiA8Y2JvdWF0bWFpbHJ1QGdtYWlsLmNvbT4NCj4gLS0tDQo+IGNo
-YW5nZXMgZm9yIHYyOg0KPiAJLSBJbnZlcnQgdGhlIGNvbmRpdGlvbiBvZiB0aGUgaWYgc3RhdGVt
-ZW50IGluIGZ1bmN0aW9uIHdvcmtncm91bmQNCg0KSG0uDQoNClsuLi5dDQo+ICtzdGF0aWMgdm9p
-ZCBlc2RoY2lfb2ZfYWRtYV93b3JrYXJvdW5kKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0LCB1MzIg
-DQo+ICtpbnRtYXNrKSB7DQo+ICsJdTMyIHRtcCA9IGluX2JlMzIoaG9zdC0+aW9hZGRyICsgU0RI
-Q0lfU0xPVF9JTlRfU1RBVFVTKTsNCj4gKw0KPiArCXRtcCA9ICh0bXAgJiBTREhDSV9WRU5ET1Jf
-VkVSX01BU0spID4+IFNESENJX1ZFTkRPUl9WRVJfU0hJRlQ7DQo+ICsJaWYgKChpbnRtYXNrICYg
-U0RIQ0lfSU5UX0RBVEFfRU5EKSAmJg0KPiArCQkoaW50bWFzayAmIFNESENJX0lOVF9CTEtfR0FQ
-KSAmJg0KPiArCQkodG1wID09IFZFTkRPUl9WXzIzKSkgew0KDQpJIHJlYWxseSBkb24ndCBzZWUg
-aXQgaW52ZXJ0ZWQuIDotKQ0KDQpXaGF0IEkgbWVhbnQgd2FzIHRoaXM6DQoNCnN0YXRpYyB2b2lk
-IGVzZGhjaV9vZl9hZG1hX3dvcmthcm91bmQoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsIHUzMiBp
-bnRtYXNrKSB7DQoJdTMyIHZlbmRvcjsNCglib29sIGFwcGxpY2FibGU7DQoJZG1hX2FkZHJfdCBk
-bWFzdGFydDsNCglkbWFfYWRkcl90IGRtYW5vdzsNCg0KCXZlbmRvciA9IGluX2JlMzIoaG9zdC0+
-aW9hZGRyICsgU0RIQ0lfU0xPVF9JTlRfU1RBVFVTKTsNCgl2ZW5kb3IgPSAodmVuZG9yICYgU0RI
-Q0lfVkVORE9SX1ZFUl9NQVNLKSA+PiBTREhDSV9WRU5ET1JfVkVSX1NISUZUOw0KDQoJYXBwbGlj
-YWJsZSA9IGludG1hc2sgJiBTREhDSV9JTlRfREFUQV9FTkQgJiYNCgkJICAgICBpbnRtYXNrICYg
-U0RIQ0lfSU5UX0JMS19HQVAgJiYNCgkJICAgICB2ZW5kb3IgPT0gVkVORE9SX1ZfMjM7DQoJaWYg
-KCFhcHBsaWNhYmxlKQ0KCQlyZXR1cm47DQoNCglob3N0LT5kYXRhLT5lcnJvciA9IDA7DQoJZG1h
-c3RhcnQgPSBzZ19kbWFfYWRkcmVzcyhob3N0LT5kYXRhLT5zZyk7DQoJZG1hbm93ID0gZG1hc3Rh
-cnQgKyBob3N0LT5kYXRhLT5ieXRlc194ZmVyZWQ7DQoJLi4uDQoJLi4uDQp9DQoNClRoaXMgaXMg
-aHVtYW4tcmVhZGFibGUgYW5kIHRoZXJlJ3Mgbm8gYWRkaXRpb25hbCBpbmRlbnRhdGlvbi4NCg0K
-VGhhbmtzLA0KDQpBbnRvbi4NCg0K
+Hi Chris,
 
+On Wednesday 19 of September 2012 01:42:01 Chris Ball wrote:
+> On Tue, Sep 04 2012, Tomasz Figa wrote:
+> > Some boards use fixed voltage regulator for vmmc supply (e.g. for eMMC
+> > memories). MMC_CAP2_BROKEN_VOLTAGE must be enabled for them to operate
+> > correctly.
+>>
+> Is there a reason we can't make this a property on the regulator instead?
+
+Is there a reason we can't make this a property of the mmc subsystem? ;)
+
+Now, seriously, could you elaborate on this a bit more? Do you mean that a 
+regulator should provide a dummy set voltage operation that would accept 
+any voltage?
+
+Best regards,
+-- 
+Tomasz Figa
+Samsung Poland R&D Center
