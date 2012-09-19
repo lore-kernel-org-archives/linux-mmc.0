@@ -1,65 +1,35 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 4/4] drivers/mmc/host/mxs-mmc.c: fix error return code
-Date: Wed, 19 Sep 2012 10:25:53 +0800
-Message-ID: <20120919022550.GA6145@S2100-06.ap.freescale.net>
-References: <1347869728-2696-1-git-send-email-peter.senna@gmail.com>
- <1347869728-2696-4-git-send-email-peter.senna@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1347869728-2696-4-git-send-email-peter.senna@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Senna Tschudin <peter.senna@gmail.com>
-Cc: cjb@laptop.org, marex@denx.de, broonie@opensource.wolfsonmicro.com, vinod.koul@linux.intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: [PATCH 0/6] mmc: sdhci: fixes and enhancements
+Date: Wed, 19 Sep 2012 10:12:36 +0800
+Message-ID: <1348020762-12932-1-git-send-email-keyuan.liu@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog119.obsmtp.com ([74.125.149.246]:49107 "EHLO
+	na3sys009aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751650Ab2ISCR7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Sep 2012 22:17:59 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu
+Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-On Mon, Sep 17, 2012 at 10:15:28AM +0200, Peter Senna Tschudin wrote:
-> From: Peter Senna Tschudin <peter.senna@gmail.com>
-> 
-> Convert a nonnegative error return code to a negative one, as returned
-> elsewhere in the function.
-> 
-> A simplified version of the semantic match that finds this problem is as
-> follows: (http://coccinelle.lip6.fr/)
-> 
-> // <smpl>
-> (
-> if@p1 (\(ret < 0\|ret != 0\))
->  { ... return ret; }
-> |
-> ret@p1 = 0
-> )
-> ... when != ret = e1
->     when != &ret
-> *if(...)
-> {
->   ... when != ret = e2
->       when forall
->  return ret;
-> }
-> // </smpl>
-> 
-> Signed-off-by: Peter Senna Tschudin <peter.senna@gmail.com>
 
-Acked-by: Shawn Guo <shawn.guo@linaro.org>
+This patchset does as follows:
+[PATCH 1/6] mmc: sdhci-pxav3: fix build error
+[PATCH 2/6] mmc: sdhci: fix transfer mode setting bug for cmds w/o data transfer
+[PATCH 3/6] mmc: sdhci: set regulator min/max voltage according to spec
+[PATCH 4/6] mmc: sdhci: refine code for sd clock disable/enable in set ios
+[PATCH 5/6] mmc: sdhci: keep the saved clock var up to date
+[PATCH 6/6] mmc: sdhci: fix null return check of regulator_get
 
-> ---
->  drivers/mmc/host/mxs-mmc.c | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index 80d1e6d..afd8fdd 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -674,6 +674,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
->  	if (!ssp->dmach) {
->  		dev_err(mmc_dev(host->mmc),
->  			"%s: failed to request dma\n", __func__);
-> +		ret = -ENODEV;
->  		goto out_clk_put;
->  	}
->  
-> -- 
-> 1.7.11.4
-> 
+Kevin Liu (6):
+ mmc: sdhci-pxav3: fix build error
+ mmc: sdhci: fix transfer mode setting bug for cmds w/o data transfer
+ mmc: sdhci: set regulator min/max voltage according to spec
+ mmc: sdhci: refine code for sd clock disable/enable in set ios
+ mmc: sdhci: keep the saved clock var up to date
+ mmc: sdhci: fix null return check of regulator_get
+
+ drivers/mmc/host/sdhci-pxav3.c |    2 +
+ drivers/mmc/host/sdhci.c       |   79 ++++++++++++++++++++--------------------
+ 2 files changed, 41 insertions(+), 40 deletions(-)
+
