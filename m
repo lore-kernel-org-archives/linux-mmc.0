@@ -1,45 +1,77 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sh-mmcif: properly handle MMC_WRITE_MULTIPLE_BLOCK completion IRQ
-Date: Wed, 19 Sep 2012 02:25:41 -0400
-Message-ID: <m37grqil5m.fsf@pullcord.laptop.org>
-References: <Pine.LNX.4.64.1209190105080.31203@axis700.grange>
-	<505932E9.8050202@kmckk.co.jp>
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: Re: [PATCH v6 0/9] mmc: dw_mmc: add support for device tree based instantiation
+Date: Wed, 19 Sep 2012 11:57:32 +0530
+Message-ID: <CAJuYYwSBtjtEvTMUw9UNZRTbMoMwLio_YLKbTu=daaamS5t5Lg@mail.gmail.com>
+References: <1347905803-22742-1-git-send-email-thomas.abraham@linaro.org>
+	<CAJuYYwRcoOv5X=XK8wiVb9fzSAdY_d=+kvJhqMdiT1Fey0JCLw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <505932E9.8050202@kmckk.co.jp> (Tetsuyuki Kobayashi's message of
-	"Wed, 19 Sep 2012 11:50:17 +0900")
-Sender: linux-sh-owner@vger.kernel.org
-To: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, yusuke.goda.sx@renesas.com, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:44890 "EHLO
+	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755405Ab2ISG1e (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 02:27:34 -0400
+Received: by lagy9 with SMTP id y9so452536lag.19
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Sep 2012 23:27:32 -0700 (PDT)
+In-Reply-To: <CAJuYYwRcoOv5X=XK8wiVb9fzSAdY_d=+kvJhqMdiT1Fey0JCLw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
+Cc: will.newton@imgtec.com, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, patches@linaro.org
 
-Hi,
-
-On Tue, Sep 18 2012, Tetsuyuki Kobayashi wrote:
-> (2012/09/19 8:10), Guennadi Liakhovetski wrote:
->> Upon completion of a MMC_WRITE_MULTIPLE_BLOCK command MMCIF issues an IRQ
->> with the DTRANE bit set and often with one or several of CMD12 bits set.
->> If those interrupts are not acknowledged, an additional interrupt can be
->> produced and will be delivered later, possibly, when the transaction has
->> already been completed. To prevent this from happening, CMD12 completion
->> interrupt sources have to be cleared too upon reception of an DTRANE IRQ.
+On 18 September 2012 07:22, Thomas Abraham <thomas.abraham@linaro.org> wrote:
+> On 17 September 2012 23:46, Thomas Abraham <thomas.abraham@linaro.org> wrote:
+>> This series add device tree support for Synopsis Designware IP - Mobile Storage
+>> Host Controller (MSHC). I had addressed all comments for the v5 version of this
+>> patch series and had reposted only those patches that were modified. The version
+>> number of those reposted patches was maintained as v5 as the changes did not
+>> need any major rework.
 >>
->> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
->> ---
+>> This is mainly a repost of the v5 patches with all patches marked as v6. The
+>> only new change in this series is adding a comment about bus_hz in platform
+>> data structure of the driver as suggested by Seungwon Jeon.
 >>
->> Tested on kzm9g and mackerel. Kobayashi-san, this fixes spurious
->> interrupts, that you are observing.
+>> Thomas Abraham (9):
+>>   mmc: dw_mmc: convert copy of struct device in struct dw_mci to a reference
+>>   mmc: dw_mmc: Use devm_* functions in dw_mmc platform driver
+>>   mmc: dw_mmc: allow probe to succeed even if one slot is initialized
+>>   mmc: dw_mmc: lookup for optional biu and ciu clocks
+>>   mmc: dw_mmc: add quirk to indicate missing write protect line
+>>   mmc: dw_mmc: add device tree support
+>>   mmc: dw_mmc: prepare functions in dw_mmc-pltfm for reuse
+>>   mmc: dw_mmc: add support for implementation specific callbacks
+>>   mmc: dw_mmc: add support for exynos specific implementation of dw-mshc
+>>
+>>  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   87 ++++++
+>>  .../devicetree/bindings/mmc/synposis-dw-mshc.txt   |   79 +++++
+>>  drivers/mmc/host/Kconfig                           |    9 +
+>>  drivers/mmc/host/Makefile                          |    1 +
+>>  drivers/mmc/host/dw_mmc-exynos.c                   |  253 ++++++++++++++++
+>>  drivers/mmc/host/dw_mmc-pci.c                      |    2 +-
+>>  drivers/mmc/host/dw_mmc-pltfm.c                    |   60 +++--
+>>  drivers/mmc/host/dw_mmc-pltfm.h                    |   20 ++
+>>  drivers/mmc/host/dw_mmc.c                          |  308 +++++++++++++++++---
+>>  drivers/mmc/host/dw_mmc.h                          |   24 ++
+>>  include/linux/mmc/dw_mmc.h                         |   15 +-
+>>  11 files changed, 782 insertions(+), 76 deletions(-)
+>>  create mode 100644 Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+>>  create mode 100644 Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
+>>  create mode 100644 drivers/mmc/host/dw_mmc-exynos.c
+>>  create mode 100644 drivers/mmc/host/dw_mmc-pltfm.h
 >
-> I verified on kzm9g.
-> This works with
-> [PATCH] mmc: sh-mmcif: avoid Oops on spurious interrupts
+> Hi Jaehoon, Seungwon,
 >
-> Tested-by: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
+> All the changes you have suggested for this patch series has been
+> completed. If you could ack this series, it would be great.
+>
+> Thanks,
+> Thomas.
 
-Thanks, pushed to mmc-next for 3.7.
+Hi Chris,
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+I have addressed all the comments received for the v5 of the dw-mmc
+device tree support patch series. Will Newton has acked this patch
+series. Can this series be merged for v3.7 ?
+
+Thanks,
+Thomas.
