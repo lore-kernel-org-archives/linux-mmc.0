@@ -1,93 +1,118 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH V3] Powerpc eSDHC Recover from the ADMA error
-Date: Wed, 19 Sep 2012 08:41:40 -0700
-Message-ID: <20120919154140.GA1743@lizard>
-References: <1348046559-13215-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC/PATCH 3/3] mmc: sdhci: add asynchronous interrupt support
+Date: Wed, 19 Sep 2012 17:56:03 +0200
+Message-ID: <CAPDyKFqcX7kv2hc7bbpNFBLQzE2T7BGqysrJjns7vN_MEWzppw@mail.gmail.com>
+References: <1348024372-32073-1-git-send-email-keyuan.liu@gmail.com>
+	<1348024372-32073-4-git-send-email-keyuan.liu@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:46312 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755550Ab2ISPoU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 11:44:20 -0400
-Received: by pbbrr13 with SMTP id rr13so2755032pbb.19
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Sep 2012 08:44:20 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <1348046559-13215-1-git-send-email-Haijun.Zhang@freescale.com>
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:56090 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756364Ab2ISP5A (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 11:57:00 -0400
+Received: by wibhi8 with SMTP id hi8so5770710wib.1
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Sep 2012 08:56:59 -0700 (PDT)
+In-Reply-To: <1348024372-32073-4-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haijun.Zhang@freescale.com
-Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-On Wed, Sep 19, 2012 at 05:22:39PM +0800, Haijun.Zhang@freescale.com wrote:
-> From: Haijun Zhang <Haijun.Zhang@freescale.com>
-> 
-> Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> CC: Anton Vorontsov <cbouatmailru@gmail.com>
-[...]
+Hi Kevin,
+
+On 19 September 2012 05:12, Kevin Liu <keyuan.liu@gmail.com> wrote:
+> From: Kevin Liu <kliu5@marvell.com>
+>
+> If host support asynchronous interrupt and sdio device has enabled it,
+> then enable/disable asynchronous interrupt on host when enable/disable
+> sdio irq.
+>
+> Signed-off-by: Kevin Liu <kliu5@marvell.com>
 > ---
-> changes for v3:
->         - Correct the if statement in function workground
-> 
-> changes for v2:
->         - Invert the condition of the if statement in function workground
-
-Just two minor cosmetic comments...
-
->  drivers/mmc/host/sdhci-of-esdhc.c |   53 ++++++++++++++++++++++++++++++++++++-
->  drivers/mmc/host/sdhci.c          |    2 +
->  drivers/mmc/host/sdhci.h          |    5 +++-
->  3 files changed, 58 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 1cba55a..7a4c410 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -21,6 +21,7 @@
->  #include "sdhci-esdhc.h"
->  
->  #define VENDOR_V_22	0x12
-> +#define VENDOR_V_23    0x13
-
-The above line uses tab, but you add spaces.
-A bit inconsistent.
-
-[...]
-> +static void esdhci_of_adma_workaround(struct sdhci_host *host, u32 intmask)
-> +{
-> +	u32 tmp;
-> +	bool applicable;
-> +	dma_addr_t dmastart;
-> +	dma_addr_t dmanow;
+>  drivers/mmc/host/sdhci.c |   16 ++++++++++++++++
+>  drivers/mmc/host/sdhci.h |    2 ++
+>  2 files changed, 18 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 0e15c79..f6136e2 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1575,6 +1575,8 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+>
+>  static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
+>  {
+> +       u16 ctrl;
 > +
-> +	tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
-> +	tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+>         if (host->flags & SDHCI_DEVICE_DEAD)
+>                 goto out;
+>
+> @@ -1583,6 +1585,16 @@ static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
+>         else
+>                 host->flags &= ~SDHCI_SDIO_IRQ_ENABLED;
+>
+> +       if ((host->mmc->caps2 & MMC_CAP2_ASYNC_INT) &&
+> +               (host->mmc->card->cccr.async_int)) {
+
+It is a quite special card bit value you are checking for. Can you be
+sure that the cccr struct exist here?
+
+Maybe it could be a good idea to implement something similar as for
+example mmc_card_highspeed | mmc_card_set_highspeed functions.
+Thus add a new card state, which is set accordingly when this bit is
+set and instead check for this state here. In this case you would not
+have to check the caps2 here, since that is already done by the
+protocol layer.
+
+> +               ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +               if (enable)
+> +                       ctrl |= SDHCI_CTRL_ASYNC_INT_ENABLE;
+> +               else
+> +                       ctrl &= ~SDHCI_CTRL_ASYNC_INT_ENABLE;
+> +               sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> +       }
 > +
-> +	applicable = (intmask & SDHCI_INT_DATA_END) &&
-> +			(intmask & SDHCI_INT_BLK_GAP) &&
-> +			(tmp == VENDOR_V_23);
-> +	if (!applicable)
-> +		return;
+>         /* SDIO IRQ will be enabled as appropriate in runtime resume */
+>         if (host->runtime_suspended)
+>                 goto out;
+> @@ -2895,6 +2907,10 @@ int sdhci_add_host(struct sdhci_host *host)
+>         else
+>                 mmc->power_notify_type = MMC_HOST_PW_NOTIFY_NONE;
+>
+> +       /* Does the host support async int? */
+> +       if (caps[0] & SDHCI_CAN_ASYNC_INT)
+> +               mmc->caps2 |= MMC_CAP2_ASYNC_INT;
 > +
-> +	host->data->error = 0;
-> +	dmastart = sg_dma_address(host->data->sg);
-> +	dmanow = dmastart + host->data->bytes_xfered;
-> +	/*
-> +	 * Force update to the next DMA block boundary.
-> +	 */
-> +	dmanow = (dmanow &
-> +		~(SDHCI_DEFAULT_BOUNDARY_SIZE - 1)) +
+>         /* Initial value for re-tuning timer count */
+>         host->tuning_count = (caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
+>                               SDHCI_RETUNING_TIMER_COUNT_SHIFT;
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 97653ea..2e89dac 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -167,6 +167,7 @@
+>  #define   SDHCI_CTRL_DRV_TYPE_D                0x0030
+>  #define  SDHCI_CTRL_EXEC_TUNING                0x0040
+>  #define  SDHCI_CTRL_TUNED_CLK          0x0080
+> +#define  SDHCI_CTRL_ASYNC_INT_ENABLE   0x4000
+>  #define  SDHCI_CTRL_PRESET_VAL_ENABLE  0x8000
+>
+>  #define SDHCI_CAPABILITIES     0x40
+> @@ -187,6 +188,7 @@
+>  #define  SDHCI_CAN_VDD_300     0x02000000
+>  #define  SDHCI_CAN_VDD_180     0x04000000
+>  #define  SDHCI_CAN_64BIT       0x10000000
+> +#define  SDHCI_CAN_ASYNC_INT   0x20000000
+>
+>  #define  SDHCI_SUPPORT_SDR50   0x00000001
+>  #define  SDHCI_SUPPORT_SDR104  0x00000002
+> --
+> 1.7.0.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-These two lines can be put into one.
-
-> +		SDHCI_DEFAULT_BOUNDARY_SIZE;
-> +	host->data->bytes_xfered = dmanow - dmastart;
-> +	sdhci_writel(host, dmanow, SDHCI_DMA_ADDRESS);
-> +}
-
-The rest looks OK, so for of-esdhc part, feel free to add:
-
-Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
-
-Thanks!
+Kind regards
+Ulf Hansson
