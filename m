@@ -1,85 +1,65 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH V2] Powerpc eSDHC Recover from the ADMA error
-Date: Tue, 18 Sep 2012 23:08:48 -0700
-Message-ID: <20120919060848.GA25261@lizard>
-References: <1348031113-19583-1-git-send-email-B42677@freescale.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 2/3] mmc: sdhci-s3c: Fix crash on module insertion for second time
+Date: Wed, 19 Sep 2012 02:13:20 -0400
+Message-ID: <m3k3vqilq7.fsf@pullcord.laptop.org>
+References: <1347613731-29428-1-git-send-email-chander.kashyap@linaro.org>
+	<1347613731-29428-3-git-send-email-chander.kashyap@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:64270 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755558Ab2ISGL1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 02:11:27 -0400
-Received: by pbbrr13 with SMTP id rr13so1678071pbb.19
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Sep 2012 23:11:27 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <1348031113-19583-1-git-send-email-B42677@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1347613731-29428-3-git-send-email-chander.kashyap@linaro.org>
+	(Chander Kashyap's message of "Fri, 14 Sep 2012 14:38:50 +0530")
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Chander Kashyap <chander.kashyap@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, ben@simtec.co.uk, broonie@opensource.wolfsonmicro.com, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: B42677@freescale.com
-Cc: linux-mmc@vger.kernel.org, Haijun Zhang <Haijun.Zhang@freescale.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-On Wed, Sep 19, 2012 at 01:05:13PM +0800, B42677@freescale.com wrote:
-> From: Haijun Zhang <Haijun.Zhang@freescale.com>
-> 
-> A-003500: False ADMA Error might be reported when ADMA is used for
-> multiple block read command with Stop at Block Gap. If PROCTL[SABGREQ]
-> is set when the particular block's data is received by the System side
-> logic before entire block(with CRC) data is received by the SD side logic,
-> and also if ADMA descriptor line is fetched at the same time,
-> then DMA engine might report false ADMA error. eSDHC might not be able
-> to Continue(PROCTL[CREQ]=1)after Stop at Block Gap.
-> This issue will impact the eSDHC IP VVN2.3.
-> 
-> 
-> Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> CC: Anton Vorontsov <cbouatmailru@gmail.com>
+Hi,
+
+On Fri, Sep 14 2012, Chander Kashyap wrote:
+> If sdhci-s3c driver is built as module, it gives following error if inserted
+> again after removing. This was happening as pm_runtime_use_autosuspend() is
+> called in sdhci_s3c_probe() function but in sdhci_s3c_remove() its complementry
+> pm_runtime_dont_use_autosuspend() is not called.
+>
+> BUG: spinlock bad magic on CPU#1, insmod/955
+>  lock: 0xee771368, .magic: 00000000, .owner: insmod/955, .owner_cpu: 1
+> [<c00147e0>] (unwind_backtrace+0x0/0xf8) from [<c0136b40>] (do_raw_spin_unlock+0xa4/0xe4)
+> [<c0136b40>] (do_raw_spin_unlock+0xa4/0xe4) from [<c01be508>] (_raw_spin_unlock_irqrestore+0xc/0x38)
+> [<c01be508>] (_raw_spin_unlock_irqrestore+0xc/0x38) from [<c01a9334>] (sdhci_runtime_suspend_host+0x54/0x80)
+> [<c01a9334>] (sdhci_runtime_suspend_host+0x54/0x80) from [<bf0060a8>] (sdhci_s3c_runtime_suspend+0x14/0x38 [sdhci_s3c])
+> [<bf0060a8>] (sdhci_s3c_runtime_suspend+0x14/0x38 [sdhci_s3c]) from [<c016cb00>] (pm_generic_runtime_suspend+0x2c/0x40)
+> [<c016cb00>] (pm_generic_runtime_suspend+0x2c/0x40) from [<c0170090>] (__rpm_callback+0x70/0x98)
+> [<c0170090>] (__rpm_callback+0x70/0x98) from [<c01703f0>] (rpm_suspend+0xf0/0x534)
+> [<c01703f0>] (rpm_suspend+0xf0/0x534) from [<c0171670>] (__pm_runtime_suspend+0x5c/0x74)
+> [<c0171670>] (__pm_runtime_suspend+0x5c/0x74) from [<c016d018>] (pm_generic_runtime_idle+0x44/0x4c)
+> [<c016d018>] (pm_generic_runtime_idle+0x44/0x4c) from [<c0170090>] (__rpm_callback+0x70/0x98)
+> [<c0170090>] (__rpm_callback+0x70/0x98) from [<c0170984>] (rpm_idle+0xdc/0x18c)
+> [<c0170984>] (rpm_idle+0xdc/0x18c) from [<c0171608>] (pm_runtime_set_autosuspend_delay+0x30/0x3c)
+> [<c0171608>] (pm_runtime_set_autosuspend_delay+0x30/0x3c) from [<bf0069c4>] (sdhci_s3c_probe+0x35c/0x52c [sdhci_s3c])
+> [<bf0069c4>] (sdhci_s3c_probe+0x35c/0x52c [sdhci_s3c]) from [<c016a014>] (platform_drv_probe+0x18/0x1c)
+>
+> Signed-off-by: Chander Kashyap <chander.kashyap@linaro.org>
 > ---
-> changes for v2:
-> 	- Invert the condition of the if statement in function workground
+>  drivers/mmc/host/sdhci-s3c.c |    1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 0cbb4c2..3f4518d 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -658,6 +658,7 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+>  
+>  	sdhci_remove_host(host, 1);
+>  
+> +	pm_runtime_dont_use_autosuspend(&pdev->dev);
+>  	pm_runtime_disable(&pdev->dev);
+>  
+>  	clk_disable(sc->clk_bus[sc->cur_clk]);
 
-Hm.
+Thanks, pushed to mmc-next for 3.7.
 
-[...]
-> +static void esdhci_of_adma_workaround(struct sdhci_host *host, u32 intmask)
-> +{
-> +	u32 tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
-> +
-> +	tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
-> +	if ((intmask & SDHCI_INT_DATA_END) &&
-> +		(intmask & SDHCI_INT_BLK_GAP) &&
-> +		(tmp == VENDOR_V_23)) {
-
-I really don't see it inverted. :-)
-
-What I meant was this:
-
-static void esdhci_of_adma_workaround(struct sdhci_host *host, u32 intmask)
-{
-	u32 vendor;
-	bool applicable;
-	dma_addr_t dmastart;
-	dma_addr_t dmanow;
-
-	vendor = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
-	vendor = (vendor & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
-
-	applicable = intmask & SDHCI_INT_DATA_END &&
-		     intmask & SDHCI_INT_BLK_GAP &&
-		     vendor == VENDOR_V_23;
-	if (!applicable)
-		return;
-
-	host->data->error = 0;
-	dmastart = sg_dma_address(host->data->sg);
-	dmanow = dmastart + host->data->bytes_xfered;
-	...
-	...
-}
-
-This is human-readable and there's no additional indentation.
-
-Thanks,
-
-Anton.
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
