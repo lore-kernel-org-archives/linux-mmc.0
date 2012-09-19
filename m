@@ -1,174 +1,72 @@
-From: <B42677@freescale.com>
-Subject: [PATCH V2] Powerpc eSDHC Recover from the ADMA error
-Date: Wed, 19 Sep 2012 13:05:13 +0800
-Message-ID: <1348031113-19583-1-git-send-email-B42677@freescale.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v2 1/5] mmc: host: sdhci-s3c: Add broken-voltage DT property for broken voltage quirk
+Date: Wed, 19 Sep 2012 01:42:01 -0400
+Message-ID: <m38vc6k1qu.fsf@pullcord.laptop.org>
+References: <1346748609-11115-1-git-send-email-t.figa@samsung.com>
+	<1346748609-11115-2-git-send-email-t.figa@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe005.messaging.microsoft.com ([216.32.180.188]:12685
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752097Ab2ISFbT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 01:31:19 -0400
+Received: from void.printf.net ([89.145.121.20]:57331 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752901Ab2ISFln (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 19 Sep 2012 01:41:43 -0400
+In-Reply-To: <1346748609-11115-2-git-send-email-t.figa@samsung.com> (Tomasz
+	Figa's message of "Tue, 04 Sep 2012 10:50:05 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Haijun Zhang <Haijun.Zhang@freescale.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
+To: Tomasz Figa <t.figa@samsung.com>
+Cc: linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kyungmin.park@samsung.com, jy0922.shim@samsung.com, kgene.kim@samsung.com, thomas.abraham@linaro.org, Ben Dooks <ben-linux@fluff.org>, linux-mmc@vger.kernel.org
 
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
+Hi,
 
-A-003500: False ADMA Error might be reported when ADMA is used for
-multiple block read command with Stop at Block Gap. If PROCTL[SABGREQ]
-is set when the particular block's data is received by the System side
-logic before entire block(with CRC) data is received by the SD side logic,
-and also if ADMA descriptor line is fetched at the same time,
-then DMA engine might report false ADMA error. eSDHC might not be able
-to Continue(PROCTL[CREQ]=1)after Stop at Block Gap.
-This issue will impact the eSDHC IP VVN2.3.
+On Tue, Sep 04 2012, Tomasz Figa wrote:
+> Some boards use fixed voltage regulator for vmmc supply (e.g. for eMMC
+> memories). MMC_CAP2_BROKEN_VOLTAGE must be enabled for them to operate
+> correctly.
+>
+> Cc: Ben Dooks <ben-linux@fluff.org>
+> Cc: Chris Ball <cjb@laptop.org>
+> CC: linux-mmc@vger.kernel.org
+> Signed-off-by: Tomasz Figa <t.figa@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc.txt | 1 +
+>  drivers/mmc/host/sdhci-s3c.c                  | 3 +++
+>  2 files changed, 4 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> index 8a6811f..ecbde68 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> @@ -16,6 +16,7 @@ Optional properties:
+>  - wp-inverted: when present, polarity on the wp gpio line is inverted
+>  - non-removable: non-removable slot (like eMMC)
+>  - max-frequency: maximum operating clock frequency
+> +- broken-voltage: vmmc regulator does not allow voltage control
+>  
+>  Example:
+>  
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 445910e..39715b8 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -443,6 +443,9 @@ static int __devinit sdhci_s3c_parse_dt(struct device *dev,
+>  	if (!ourhost->gpios)
+>  		return -ENOMEM;
+>  
+> +	if (of_get_property(node, "broken-voltage", 0))
+> +		pdata->host_caps2 |= MMC_CAP2_BROKEN_VOLTAGE;
+> +
+>  	/* get the card detection method */
+>  	if (of_get_property(node, "broken-cd", 0)) {
+>  		pdata->cd_type = S3C_SDHCI_CD_NONE;
 
+Is there a reason we can't make this a property on the regulator instead?
 
-Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
-Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-CC: Anton Vorontsov <cbouatmailru@gmail.com>
----
-changes for v2:
-	- Invert the condition of the if statement in function workground
+Thanks,
 
- drivers/mmc/host/sdhci-of-esdhc.c |   49 ++++++++++++++++++++++++++++++++++++-
- drivers/mmc/host/sdhci.c          |    2 +
- drivers/mmc/host/sdhci.h          |    5 +++-
- 3 files changed, 54 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 1cba55a..a38fd62 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -21,6 +21,7 @@
- #include "sdhci-esdhc.h"
- 
- #define VENDOR_V_22	0x12
-+#define VENDOR_V_23    0x13
- static u32 esdhc_readl(struct sdhci_host *host, int reg)
- {
- 	u32 ret;
-@@ -83,6 +84,18 @@ static u8 esdhc_readb(struct sdhci_host *host, int reg)
- 	return ret;
- }
- 
-+static void esdhc_writel(struct sdhci_host *host, u32 val, int reg)
-+{
-+	/*
-+	 * Enable IRQSTATEN[BGESEN] is just to set IRQSTAT[BGE]
-+	 * when SYSCTL[RSTD]) is set for some special operations.
-+	 * No any impact other operation.
-+	 */
-+	if (reg == SDHCI_INT_ENABLE)
-+		val |= SDHCI_INT_BLK_GAP;
-+	sdhci_be32bs_writel(host, val, reg);
-+}
-+
- static void esdhc_writew(struct sdhci_host *host, u16 val, int reg)
- {
- 	if (reg == SDHCI_BLOCK_SIZE) {
-@@ -138,6 +151,39 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
- 	return of_host->clock / 256 / 16;
- }
- 
-+/*
-+ * For Abort or Suspend after Stop at Block Gap, ignore the ADMA
-+ * error(IRQSTAT[ADMAE]) if both Transfer Complete(IRQSTAT[TC])
-+ * and Block Gap Event(IRQSTAT[BGE]) are also set.
-+ * For Continue, apply soft reset for data(SYSCTL[RSTD]);
-+ * and re-issue the entire read
-+ * transaction from beginning.
-+ */
-+static void esdhci_of_adma_workaround(struct sdhci_host *host, u32 intmask)
-+{
-+	u32 tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
-+
-+	tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
-+	if ((intmask & SDHCI_INT_DATA_END) &&
-+		(intmask & SDHCI_INT_BLK_GAP) &&
-+		(tmp == VENDOR_V_23)) {
-+		dma_addr_t dmastart;
-+		dma_addr_t dmanow;
-+
-+		host->data->error = 0;
-+		dmastart = sg_dma_address(host->data->sg);
-+		dmanow = dmastart + host->data->bytes_xfered;
-+		/*
-+		 * Force update to the next DMA block boundary.
-+		 */
-+		dmanow = (dmanow &
-+			~(SDHCI_DEFAULT_BOUNDARY_SIZE - 1)) +
-+			SDHCI_DEFAULT_BOUNDARY_SIZE;
-+		host->data->bytes_xfered = dmanow - dmastart;
-+		sdhci_writel(host, dmanow, SDHCI_DMA_ADDRESS);
-+	}
-+}
-+
- #ifdef CONFIG_PM
- static u32 esdhc_proctl;
- static void esdhc_of_suspend(struct sdhci_host *host)
-@@ -164,7 +210,7 @@ struct sdhci_of_data sdhci_esdhc = {
- 		.read_l = esdhc_readl,
- 		.read_w = esdhc_readw,
- 		.read_b = esdhc_readb,
--		.write_l = sdhci_be32bs_writel,
-+		.write_l = esdhc_writel,
- 		.write_w = esdhc_writew,
- 		.write_b = esdhc_writeb,
- 		.set_clock = esdhc_set_clock,
-@@ -175,5 +221,6 @@ struct sdhci_of_data sdhci_esdhc = {
- 		.platform_suspend = esdhc_of_suspend,
- 		.platform_resume = esdhc_of_resume,
- #endif
-+		.adma_workaround = esdhci_of_adma_workaround,
- 	},
- };
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 684f1a4..3d9365a 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2143,6 +2143,8 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 		printk(KERN_ERR "%s: ADMA error\n", mmc_hostname(host->mmc));
- 		sdhci_show_adma_error(host);
- 		host->data->error = -EIO;
-+		if (host->ops->adma_workaround)
-+			host->ops->adma_workaround(host, intmask);
- 	}
- 
- 	if (host->data->error)
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 209f707..138d8fc 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -120,6 +120,7 @@
- #define SDHCI_SIGNAL_ENABLE	0x38
- #define  SDHCI_INT_RESPONSE	0x00000001
- #define  SDHCI_INT_DATA_END	0x00000002
-+#define  SDHCI_INT_BLK_GAP	0x00000004
- #define  SDHCI_INT_DMA_END	0x00000008
- #define  SDHCI_INT_SPACE_AVAIL	0x00000010
- #define  SDHCI_INT_DATA_AVAIL	0x00000020
-@@ -146,7 +147,8 @@
- #define  SDHCI_INT_DATA_MASK	(SDHCI_INT_DATA_END | SDHCI_INT_DMA_END | \
- 		SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL | \
- 		SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_DATA_CRC | \
--		SDHCI_INT_DATA_END_BIT | SDHCI_INT_ADMA_ERROR)
-+		SDHCI_INT_DATA_END_BIT | SDHCI_INT_ADMA_ERROR | \
-+		SDHCI_INT_BLK_GAP)
- #define SDHCI_INT_ALL_MASK	((unsigned int)-1)
- 
- #define SDHCI_ACMD12_ERR	0x3C
-@@ -275,6 +277,7 @@ struct sdhci_ops {
- 	int	(*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);
- 	void	(*platform_suspend)(struct sdhci_host *host);
- 	void	(*platform_resume)(struct sdhci_host *host);
-+	void	(*adma_workaround)(struct sdhci_host *host, u32 intmask);
- 
- };
- 
+- Chris.
 -- 
-1.7.0.4
-
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
