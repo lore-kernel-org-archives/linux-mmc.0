@@ -1,171 +1,64 @@
-From: <Haijun.Zhang@freescale.com>
-Subject: [PATCH V3] Powerpc eSDHC Recover from the ADMA error
-Date: Wed, 19 Sep 2012 17:22:39 +0800
-Message-ID: <1348046559-13215-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Zhang Haijun-B42677 <B42677@freescale.com>
+Subject: RE: [PATCH V2] Powerpc eSDHC Recover from the ADMA error
+Date: Wed, 19 Sep 2012 09:52:08 +0000
+Message-ID: <99E897753B6F7048BD8CCDB4661D02E1100B3C@039-SN2MPN1-021.039d.mgd.msft.net>
+References: <1348031113-19583-1-git-send-email-B42677@freescale.com>
+ <20120919060848.GA25261@lizard>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe005.messaging.microsoft.com ([65.55.88.15]:4372 "EHLO
-	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755606Ab2ISJsQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 05:48:16 -0400
+Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:58221
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755586Ab2ISJwN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 05:52:13 -0400
+In-Reply-To: <20120919060848.GA25261@lizard>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Haijun Zhang <Haijun.Zhang@freescale.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Huang Changming-R66093 <r66093@freescale.com>
 
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-
-Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
-Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-CC: Anton Vorontsov <cbouatmailru@gmail.com>
----
-changes for v3:
-        - Correct the if statement in function workground
-
-changes for v2:
-        - Invert the condition of the if statement in function workground
-
- drivers/mmc/host/sdhci-of-esdhc.c |   53 ++++++++++++++++++++++++++++++++++++-
- drivers/mmc/host/sdhci.c          |    2 +
- drivers/mmc/host/sdhci.h          |    5 +++-
- 3 files changed, 58 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 1cba55a..7a4c410 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -21,6 +21,7 @@
- #include "sdhci-esdhc.h"
- 
- #define VENDOR_V_22	0x12
-+#define VENDOR_V_23    0x13
- static u32 esdhc_readl(struct sdhci_host *host, int reg)
- {
- 	u32 ret;
-@@ -83,6 +84,18 @@ static u8 esdhc_readb(struct sdhci_host *host, int reg)
- 	return ret;
- }
- 
-+static void esdhc_writel(struct sdhci_host *host, u32 val, int reg)
-+{
-+	/*
-+	 * Enable IRQSTATEN[BGESEN] is just to set IRQSTAT[BGE]
-+	 * when SYSCTL[RSTD]) is set for some special operations.
-+	 * No any impact other operation.
-+	 */
-+	if (reg == SDHCI_INT_ENABLE)
-+		val |= SDHCI_INT_BLK_GAP;
-+	sdhci_be32bs_writel(host, val, reg);
-+}
-+
- static void esdhc_writew(struct sdhci_host *host, u16 val, int reg)
- {
- 	if (reg == SDHCI_BLOCK_SIZE) {
-@@ -138,6 +151,43 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
- 	return of_host->clock / 256 / 16;
- }
- 
-+/*
-+ * For Abort or Suspend after Stop at Block Gap, ignore the ADMA
-+ * error(IRQSTAT[ADMAE]) if both Transfer Complete(IRQSTAT[TC])
-+ * and Block Gap Event(IRQSTAT[BGE]) are also set.
-+ * For Continue, apply soft reset for data(SYSCTL[RSTD]);
-+ * and re-issue the entire read
-+ * transaction from beginning.
-+ */
-+static void esdhci_of_adma_workaround(struct sdhci_host *host, u32 intmask)
-+{
-+	u32 tmp;
-+	bool applicable;
-+	dma_addr_t dmastart;
-+	dma_addr_t dmanow;
-+
-+	tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
-+	tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
-+
-+	applicable = (intmask & SDHCI_INT_DATA_END) &&
-+			(intmask & SDHCI_INT_BLK_GAP) &&
-+			(tmp == VENDOR_V_23);
-+	if (!applicable)
-+		return;
-+
-+	host->data->error = 0;
-+	dmastart = sg_dma_address(host->data->sg);
-+	dmanow = dmastart + host->data->bytes_xfered;
-+	/*
-+	 * Force update to the next DMA block boundary.
-+	 */
-+	dmanow = (dmanow &
-+		~(SDHCI_DEFAULT_BOUNDARY_SIZE - 1)) +
-+		SDHCI_DEFAULT_BOUNDARY_SIZE;
-+	host->data->bytes_xfered = dmanow - dmastart;
-+	sdhci_writel(host, dmanow, SDHCI_DMA_ADDRESS);
-+}
-+
- #ifdef CONFIG_PM
- static u32 esdhc_proctl;
- static void esdhc_of_suspend(struct sdhci_host *host)
-@@ -164,7 +214,7 @@ struct sdhci_of_data sdhci_esdhc = {
- 		.read_l = esdhc_readl,
- 		.read_w = esdhc_readw,
- 		.read_b = esdhc_readb,
--		.write_l = sdhci_be32bs_writel,
-+		.write_l = esdhc_writel,
- 		.write_w = esdhc_writew,
- 		.write_b = esdhc_writeb,
- 		.set_clock = esdhc_set_clock,
-@@ -175,5 +225,6 @@ struct sdhci_of_data sdhci_esdhc = {
- 		.platform_suspend = esdhc_of_suspend,
- 		.platform_resume = esdhc_of_resume,
- #endif
-+		.adma_workaround = esdhci_of_adma_workaround,
- 	},
- };
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 684f1a4..3d9365a 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2143,6 +2143,8 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 		printk(KERN_ERR "%s: ADMA error\n", mmc_hostname(host->mmc));
- 		sdhci_show_adma_error(host);
- 		host->data->error = -EIO;
-+		if (host->ops->adma_workaround)
-+			host->ops->adma_workaround(host, intmask);
- 	}
- 
- 	if (host->data->error)
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 209f707..138d8fc 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -120,6 +120,7 @@
- #define SDHCI_SIGNAL_ENABLE	0x38
- #define  SDHCI_INT_RESPONSE	0x00000001
- #define  SDHCI_INT_DATA_END	0x00000002
-+#define  SDHCI_INT_BLK_GAP	0x00000004
- #define  SDHCI_INT_DMA_END	0x00000008
- #define  SDHCI_INT_SPACE_AVAIL	0x00000010
- #define  SDHCI_INT_DATA_AVAIL	0x00000020
-@@ -146,7 +147,8 @@
- #define  SDHCI_INT_DATA_MASK	(SDHCI_INT_DATA_END | SDHCI_INT_DMA_END | \
- 		SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL | \
- 		SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_DATA_CRC | \
--		SDHCI_INT_DATA_END_BIT | SDHCI_INT_ADMA_ERROR)
-+		SDHCI_INT_DATA_END_BIT | SDHCI_INT_ADMA_ERROR | \
-+		SDHCI_INT_BLK_GAP)
- #define SDHCI_INT_ALL_MASK	((unsigned int)-1)
- 
- #define SDHCI_ACMD12_ERR	0x3C
-@@ -275,6 +277,7 @@ struct sdhci_ops {
- 	int	(*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);
- 	void	(*platform_suspend)(struct sdhci_host *host);
- 	void	(*platform_resume)(struct sdhci_host *host);
-+	void	(*adma_workaround)(struct sdhci_host *host, u32 intmask);
- 
- };
- 
--- 
-1.7.0.4
-
+VGhhbmsgeW91IHZlcnkgbXVjaC4NClBscyByZXZpZXcuDQoNCg0KLS0tLS1PcmlnaW5hbCBNZXNz
+YWdlLS0tLS0NCkZyb206IEFudG9uIFZvcm9udHNvdiBbbWFpbHRvOmNib3VhdG1haWxydUBnbWFp
+bC5jb21dIA0KU2VudDogV2VkbmVzZGF5LCBTZXB0ZW1iZXIgMTksIDIwMTIgMjowOSBBTQ0KVG86
+IFpoYW5nIEhhaWp1bi1CNDI2NzcNCkNjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBaaGFu
+ZyBIYWlqdW4tQjQyNjc3OyBIdWFuZyBDaGFuZ21pbmctUjY2MDkzDQpTdWJqZWN0OiBSZTogW1BB
+VENIIFYyXSBQb3dlcnBjIGVTREhDIFJlY292ZXIgZnJvbSB0aGUgQURNQSBlcnJvcg0KDQpPbiBX
+ZWQsIFNlcCAxOSwgMjAxMiBhdCAwMTowNToxM1BNICswODAwLCBCNDI2NzdAZnJlZXNjYWxlLmNv
+bSB3cm90ZToNCj4gRnJvbTogSGFpanVuIFpoYW5nIDxIYWlqdW4uWmhhbmdAZnJlZXNjYWxlLmNv
+bT4NCj4gDQo+IEEtMDAzNTAwOiBGYWxzZSBBRE1BIEVycm9yIG1pZ2h0IGJlIHJlcG9ydGVkIHdo
+ZW4gQURNQSBpcyB1c2VkIGZvciANCj4gbXVsdGlwbGUgYmxvY2sgcmVhZCBjb21tYW5kIHdpdGgg
+U3RvcCBhdCBCbG9jayBHYXAuIElmIFBST0NUTFtTQUJHUkVRXSANCj4gaXMgc2V0IHdoZW4gdGhl
+IHBhcnRpY3VsYXIgYmxvY2sncyBkYXRhIGlzIHJlY2VpdmVkIGJ5IHRoZSBTeXN0ZW0gc2lkZSAN
+Cj4gbG9naWMgYmVmb3JlIGVudGlyZSBibG9jayh3aXRoIENSQykgZGF0YSBpcyByZWNlaXZlZCBi
+eSB0aGUgU0Qgc2lkZSANCj4gbG9naWMsIGFuZCBhbHNvIGlmIEFETUEgZGVzY3JpcHRvciBsaW5l
+IGlzIGZldGNoZWQgYXQgdGhlIHNhbWUgdGltZSwgDQo+IHRoZW4gRE1BIGVuZ2luZSBtaWdodCBy
+ZXBvcnQgZmFsc2UgQURNQSBlcnJvci4gZVNESEMgbWlnaHQgbm90IGJlIGFibGUgDQo+IHRvIENv
+bnRpbnVlKFBST0NUTFtDUkVRXT0xKWFmdGVyIFN0b3AgYXQgQmxvY2sgR2FwLg0KPiBUaGlzIGlz
+c3VlIHdpbGwgaW1wYWN0IHRoZSBlU0RIQyBJUCBWVk4yLjMuDQo+IA0KPiANCj4gU2lnbmVkLW9m
+Zi1ieTogSGFpanVuIFpoYW5nIDxIYWlqdW4uWmhhbmdAZnJlZXNjYWxlLmNvbT4NCj4gU2lnbmVk
+LW9mZi1ieTogSmVycnkgSHVhbmcgPENoYW5nLU1pbmcuSHVhbmdAZnJlZXNjYWxlLmNvbT4NCj4g
+Q0M6IEFudG9uIFZvcm9udHNvdiA8Y2JvdWF0bWFpbHJ1QGdtYWlsLmNvbT4NCj4gLS0tDQo+IGNo
+YW5nZXMgZm9yIHYyOg0KPiAJLSBJbnZlcnQgdGhlIGNvbmRpdGlvbiBvZiB0aGUgaWYgc3RhdGVt
+ZW50IGluIGZ1bmN0aW9uIHdvcmtncm91bmQNCg0KSG0uDQoNClsuLi5dDQo+ICtzdGF0aWMgdm9p
+ZCBlc2RoY2lfb2ZfYWRtYV93b3JrYXJvdW5kKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0LCB1MzIg
+DQo+ICtpbnRtYXNrKSB7DQo+ICsJdTMyIHRtcCA9IGluX2JlMzIoaG9zdC0+aW9hZGRyICsgU0RI
+Q0lfU0xPVF9JTlRfU1RBVFVTKTsNCj4gKw0KPiArCXRtcCA9ICh0bXAgJiBTREhDSV9WRU5ET1Jf
+VkVSX01BU0spID4+IFNESENJX1ZFTkRPUl9WRVJfU0hJRlQ7DQo+ICsJaWYgKChpbnRtYXNrICYg
+U0RIQ0lfSU5UX0RBVEFfRU5EKSAmJg0KPiArCQkoaW50bWFzayAmIFNESENJX0lOVF9CTEtfR0FQ
+KSAmJg0KPiArCQkodG1wID09IFZFTkRPUl9WXzIzKSkgew0KDQpJIHJlYWxseSBkb24ndCBzZWUg
+aXQgaW52ZXJ0ZWQuIDotKQ0KDQpXaGF0IEkgbWVhbnQgd2FzIHRoaXM6DQoNCnN0YXRpYyB2b2lk
+IGVzZGhjaV9vZl9hZG1hX3dvcmthcm91bmQoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsIHUzMiBp
+bnRtYXNrKSB7DQoJdTMyIHZlbmRvcjsNCglib29sIGFwcGxpY2FibGU7DQoJZG1hX2FkZHJfdCBk
+bWFzdGFydDsNCglkbWFfYWRkcl90IGRtYW5vdzsNCg0KCXZlbmRvciA9IGluX2JlMzIoaG9zdC0+
+aW9hZGRyICsgU0RIQ0lfU0xPVF9JTlRfU1RBVFVTKTsNCgl2ZW5kb3IgPSAodmVuZG9yICYgU0RI
+Q0lfVkVORE9SX1ZFUl9NQVNLKSA+PiBTREhDSV9WRU5ET1JfVkVSX1NISUZUOw0KDQoJYXBwbGlj
+YWJsZSA9IGludG1hc2sgJiBTREhDSV9JTlRfREFUQV9FTkQgJiYNCgkJICAgICBpbnRtYXNrICYg
+U0RIQ0lfSU5UX0JMS19HQVAgJiYNCgkJICAgICB2ZW5kb3IgPT0gVkVORE9SX1ZfMjM7DQoJaWYg
+KCFhcHBsaWNhYmxlKQ0KCQlyZXR1cm47DQoNCglob3N0LT5kYXRhLT5lcnJvciA9IDA7DQoJZG1h
+c3RhcnQgPSBzZ19kbWFfYWRkcmVzcyhob3N0LT5kYXRhLT5zZyk7DQoJZG1hbm93ID0gZG1hc3Rh
+cnQgKyBob3N0LT5kYXRhLT5ieXRlc194ZmVyZWQ7DQoJLi4uDQoJLi4uDQp9DQoNClRoaXMgaXMg
+aHVtYW4tcmVhZGFibGUgYW5kIHRoZXJlJ3Mgbm8gYWRkaXRpb25hbCBpbmRlbnRhdGlvbi4NCg0K
+VGhhbmtzLA0KDQpBbnRvbi4NCg0K
 
