@@ -1,85 +1,57 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 2/2] mmc: atmel-mci: AP700x PDC is not connected to MCI
-Date: Wed, 19 Sep 2012 01:21:31 -0400
-Message-ID: <m3d31ik2p0.fsf@pullcord.laptop.org>
-References: <503F9613.5060007@yahoo.es>
+From: Jan Engelhardt <jengelh@inai.de>
+Subject: Re: [RFC/PATCH 2/2] block: Adding ROW scheduling algorithm
+Date: Wed, 19 Sep 2012 07:29:29 +0200 (CEST)
+Message-ID: <alpine.LNX.2.01.1209190718030.29967@nerf07.vanv.qr>
+References: <1344166241-18708-1-git-send-email-tlinder@codeaurora.org> <1344166241-18708-3-git-send-email-tlinder@codeaurora.org> <x49wr1cdlmg.fsf@segfault.boston.devel.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57339 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750862Ab2ISFVJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 19 Sep 2012 01:21:09 -0400
-In-Reply-To: <503F9613.5060007@yahoo.es> (Hein Tibosch's message of "Fri, 31
-	Aug 2012 00:34:27 +0800")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <x49wr1cdlmg.fsf@segfault.boston.devel.redhat.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Jeff Moyer <jmoyer@redhat.com>
+Cc: Tatyana Brokhman <tlinder@codeaurora.org>, axboe@kernel.dk, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Hein Tibosch <hein_tibosch@yahoo.es>
-Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, "ludovic.desroches" <ludovic.desroches@atmel.com>, Hans-Christian Egtvedt <egtvedt@samfundet.no>, Havard Skinnemoen <havard@skinnemoen.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel@lists.infradead.org
 
-Hi,
 
-On Thu, Aug 30 2012, Hein Tibosch wrote:
-> Earlier, atmel-mci was adapted to make use of the peripheral DMA
-> controller (PDC), in case normal DMA wouldn't work.
-> ( http://comments.gmane.org/gmane.linux.kernel.mmc/9403 )
-> This works OK on ARM platforms (AT91), but it broke the driver
-> for AVR32, the AP700x.
-> Although the MCI has PDC support, the connection is not done for
-> AVR chips
+On Monday 2012-08-06 18:35, Jeff Moyer wrote:
+>Tatyana Brokhman writes:
 >
-> This patch makes the use of PDC depend on CONFIG_AVR32
+>> This patch adds the implementation of a new scheduling algorithm - R=
+OW.
+>> The policy of this algorithm is to prioritize READ requests over WRI=
+TE
+>> as much as possible without starving the WRITE requests.
 >
-> Signed-off-by: Hein Tibosch <hein_tibosch@yahoo.es>
->
-> ---
->  drivers/mmc/host/atmel-mci-regs.h |    7 +++++++
->  drivers/mmc/host/atmel-mci.c      |    2 +-
->  2 files changed, 8 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/host/atmel-mci-regs.h b/drivers/mmc/host/atmel-mci-regs.h
-> index ab56f7d..c97001e 100644
-> --- a/drivers/mmc/host/atmel-mci-regs.h
-> +++ b/drivers/mmc/host/atmel-mci-regs.h
-> @@ -140,6 +140,13 @@
->  #define atmci_writel(port,reg,value)			\
->  	__raw_writel((value), (port)->regs + reg)
->  
-> +/* On AVR chips the Peripheral DMA Controller is not connected to MCI. */
-> +#ifdef CONFIG_AVR32
-> +#	define ATMCI_PDC_CONNECTED	0
-> +#else
-> +#	define ATMCI_PDC_CONNECTED	1
-> +#endif
-> +
->  /*
->   * Fix sconfig's burst size according to atmel MCI. We need to convert them as:
->   * 1 -> 0, 4 -> 1, 8 -> 2, 16 -> 3.
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index a6a5593..b8de891 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -2208,7 +2208,7 @@ static void __init atmci_get_cap(struct atmel_mci *host)
->  			"version: 0x%x\n", version);
->  
->  	host->caps.has_dma_conf_reg = 0;
-> -	host->caps.has_pdc = 1;
-> +	host->caps.has_pdc = ATMCI_PDC_CONNECTED;
->  	host->caps.has_cfg_reg = 0;
->  	host->caps.has_cstor_reg = 0;
->  	host->caps.has_highspeed = 0;
+>Perhaps you could start off by describing the workload, and describing
+>why the existing I/O schedulers do not perform well.
 
-Thanks, pushed to mmc-next for 3.7.
+My setup is a 1=C2=A0GB RAM Atom N450 netbook, combined with the use of
+dm-crypt for the 5400 rpm disk, which limits the effective write
+throughput to somewhere around 20=E2=80=9326 MB/s. Now try this:
 
-I changed the commit message text to reflect my understanding of what
-the patch does better, from:
-  This patch makes the use of PDC depend on CONFIG_AVR32.
-to:
-  This patch makes the use of PDC depend on !CONFIG_AVR32.
+  ddrescue /dev/zero ~/bluntfile (or)
 
-(Ludovic, perhaps you could give an ACK for this patch?)
+  (remote)# >nullfile
+  (remote)# truncate -s 10G nullfile
+  (local)# rsync -HPavz remote:nullfile .
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+The transfer rates of ddrescue/rsync first show 50=E2=80=9360 MB/s. Wai=
+t
+until writeout is forced - which is after ~700=E2=80=93800 MB in my cas=
+e when
+all buffers are full. The transfer rates then drop to the
+aforementioned 20=E2=80=9326 MB/s.
+
+In the so-loaded system, try to start an xterm (preferably by the use
+of a shortcut, or starting one from another xterm). The wait time for
+the shell prompt to appear is then the measure for interactivity,
+with lower being better.
+
+I have casually observed that ROW has 1/4th of the wait time in this
+heavy disk write scenario (around 5=C2=A0s) for the shell to start up t=
+han
+with CFQ (20=E2=80=9321=C2=A0s). "Casual" meaning I had a clock with 1.=
+0=C2=A0s
+granularity beside me and ran this for like 3 times for each
+scheduler, averaging it out.
