@@ -1,77 +1,51 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: Re: [PATCH v6 0/9] mmc: dw_mmc: add support for device tree based instantiation
-Date: Wed, 19 Sep 2012 11:57:32 +0530
-Message-ID: <CAJuYYwSBtjtEvTMUw9UNZRTbMoMwLio_YLKbTu=daaamS5t5Lg@mail.gmail.com>
-References: <1347905803-22742-1-git-send-email-thomas.abraham@linaro.org>
-	<CAJuYYwRcoOv5X=XK8wiVb9fzSAdY_d=+kvJhqMdiT1Fey0JCLw@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: sdhci-s3c: fix the wrong number of max bus clock
+Date: Wed, 19 Sep 2012 02:46:07 -0400
+Message-ID: <m3392eik7k.fsf@pullcord.laptop.org>
+References: <5057F695.5080601@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:44890 "EHLO
-	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755405Ab2ISG1e (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 02:27:34 -0400
-Received: by lagy9 with SMTP id y9so452536lag.19
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Sep 2012 23:27:32 -0700 (PDT)
-In-Reply-To: <CAJuYYwRcoOv5X=XK8wiVb9fzSAdY_d=+kvJhqMdiT1Fey0JCLw@mail.gmail.com>
+Received: from void.printf.net ([89.145.121.20]:51018 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751728Ab2ISGpo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 19 Sep 2012 02:45:44 -0400
+In-Reply-To: <5057F695.5080601@samsung.com> (Jaehoon Chung's message of "Tue,
+	18 Sep 2012 13:20:37 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
-Cc: will.newton@imgtec.com, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, patches@linaro.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-On 18 September 2012 07:22, Thomas Abraham <thomas.abraham@linaro.org> wrote:
-> On 17 September 2012 23:46, Thomas Abraham <thomas.abraham@linaro.org> wrote:
->> This series add device tree support for Synopsis Designware IP - Mobile Storage
->> Host Controller (MSHC). I had addressed all comments for the v5 version of this
->> patch series and had reposted only those patches that were modified. The version
->> number of those reposted patches was maintained as v5 as the changes did not
->> need any major rework.
->>
->> This is mainly a repost of the v5 patches with all patches marked as v6. The
->> only new change in this series is adding a comment about bus_hz in platform
->> data structure of the driver as suggested by Seungwon Jeon.
->>
->> Thomas Abraham (9):
->>   mmc: dw_mmc: convert copy of struct device in struct dw_mci to a reference
->>   mmc: dw_mmc: Use devm_* functions in dw_mmc platform driver
->>   mmc: dw_mmc: allow probe to succeed even if one slot is initialized
->>   mmc: dw_mmc: lookup for optional biu and ciu clocks
->>   mmc: dw_mmc: add quirk to indicate missing write protect line
->>   mmc: dw_mmc: add device tree support
->>   mmc: dw_mmc: prepare functions in dw_mmc-pltfm for reuse
->>   mmc: dw_mmc: add support for implementation specific callbacks
->>   mmc: dw_mmc: add support for exynos specific implementation of dw-mshc
->>
->>  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   87 ++++++
->>  .../devicetree/bindings/mmc/synposis-dw-mshc.txt   |   79 +++++
->>  drivers/mmc/host/Kconfig                           |    9 +
->>  drivers/mmc/host/Makefile                          |    1 +
->>  drivers/mmc/host/dw_mmc-exynos.c                   |  253 ++++++++++++++++
->>  drivers/mmc/host/dw_mmc-pci.c                      |    2 +-
->>  drivers/mmc/host/dw_mmc-pltfm.c                    |   60 +++--
->>  drivers/mmc/host/dw_mmc-pltfm.h                    |   20 ++
->>  drivers/mmc/host/dw_mmc.c                          |  308 +++++++++++++++++---
->>  drivers/mmc/host/dw_mmc.h                          |   24 ++
->>  include/linux/mmc/dw_mmc.h                         |   15 +-
->>  11 files changed, 782 insertions(+), 76 deletions(-)
->>  create mode 100644 Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
->>  create mode 100644 Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
->>  create mode 100644 drivers/mmc/host/dw_mmc-exynos.c
->>  create mode 100644 drivers/mmc/host/dw_mmc-pltfm.h
+Hi,
+
+On Tue, Sep 18 2012, Jaehoon Chung wrote:
+> We can use the four bus-clock at sdhci-s3c.c
+> But when removed, didn't check the fourth bus clock.
 >
-> Hi Jaehoon, Seungwon,
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+>  drivers/mmc/host/sdhci-s3c.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
 >
-> All the changes you have suggested for this patch series has been
-> completed. If you could ack this series, it would be great.
->
-> Thanks,
-> Thomas.
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 0c77b10..f2b76ef 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -788,7 +788,7 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+>  
+>  	pm_runtime_disable(&pdev->dev);
+>  
+> -	for (ptr = 0; ptr < 3; ptr++) {
+> +	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+>  		if (sc->clk_bus[ptr]) {
+>  			clk_disable(sc->clk_bus[ptr]);
+>  			clk_put(sc->clk_bus[ptr]);
 
-Hi Chris,
+Thanks, pushed to mmc-next for 3.7 with a stable@ tag.
 
-I have addressed all the comments received for the v5 of the dw-mmc
-device tree support patch series. Will Newton has acked this patch
-series. Can this series be merged for v3.7 ?
-
-Thanks,
-Thomas.
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
