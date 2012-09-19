@@ -1,61 +1,40 @@
-From: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
-Subject: Re: [PATCH] mmc: sh-mmcif: properly handle MMC_WRITE_MULTIPLE_BLOCK
- completion IRQ
-Date: Wed, 19 Sep 2012 11:50:17 +0900
-Message-ID: <505932E9.8050202@kmckk.co.jp>
-References: <Pine.LNX.4.64.1209190105080.31203@axis700.grange>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 0/6] mmc: sdhci: fixes and enhancements
+Date: Tue, 18 Sep 2012 22:53:47 -0400
+Message-ID: <m31uhylo3o.fsf@pullcord.laptop.org>
+References: <1348020762-12932-1-git-send-email-keyuan.liu@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from vrgw7.firstserver.ne.jp ([164.46.1.105]:44023 "EHLO
-	vrgw7.firstserver.ne.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750908Ab2ISCug (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Sep 2012 22:50:36 -0400
-In-Reply-To: <Pine.LNX.4.64.1209190105080.31203@axis700.grange>
+Received: from void.printf.net ([89.145.121.20]:50057 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751310Ab2ISCxZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 18 Sep 2012 22:53:25 -0400
+In-Reply-To: <1348020762-12932-1-git-send-email-keyuan.liu@gmail.com> (Kevin
+	Liu's message of "Wed, 19 Sep 2012 10:12:36 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, yusuke.goda.sx@renesas.com, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, koba@kmckk.co.jp
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: linux-mmc@vger.kernel.org, pierre@ossman.eu, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-(2012/09/19 8:10), Guennadi Liakhovetski wrote:
-> Upon completion of a MMC_WRITE_MULTIPLE_BLOCK command MMCIF issues an IRQ
-> with the DTRANE bit set and often with one or several of CMD12 bits set.
-> If those interrupts are not acknowledged, an additional interrupt can be
-> produced and will be delivered later, possibly, when the transaction has
-> already been completed. To prevent this from happening, CMD12 completion
-> interrupt sources have to be cleared too upon reception of an DTRANE IRQ.
->
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> ---
->
-> Tested on kzm9g and mackerel. Kobayashi-san, this fixes spurious
-> interrupts, that you are observing.
+Hi,
 
-I verified on kzm9g.
-This works with
-[PATCH] mmc: sh-mmcif: avoid Oops on spurious interrupts
+On Tue, Sep 18 2012, Kevin Liu wrote:
+> This patchset does as follows:
+> [PATCH 1/6] mmc: sdhci-pxav3: fix build error
+> [PATCH 2/6] mmc: sdhci: fix transfer mode setting bug for cmds w/o data transfer
+> [PATCH 3/6] mmc: sdhci: set regulator min/max voltage according to spec
+> [PATCH 4/6] mmc: sdhci: refine code for sd clock disable/enable in set ios
+> [PATCH 5/6] mmc: sdhci: keep the saved clock var up to date
+> [PATCH 6/6] mmc: sdhci: fix null return check of regulator_get
 
-Tested-by: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
+I'm worried that 2-5 might cause regressions for unexpected reasons, so
+I'll plan on merging these for 3.8 instead of 3.7 (assuming that no-one
+objects to them); hope that's okay.
 
->
->   drivers/mmc/host/sh_mmcif.c |    4 +++-
->   1 files changed, 3 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 82bf921..387bf63 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -1213,7 +1213,9 @@ static irqreturn_t sh_mmcif_intr(int irq, void *dev_id)
->   		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~INT_BUFRE);
->   		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MBUFRE);
->   	} else if (state & INT_DTRANE) {
-> -		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~INT_DTRANE);
-> +		sh_mmcif_writel(host->addr, MMCIF_CE_INT,
-> +			~(INT_CMD12DRE | INT_CMD12RBE |
-> +			  INT_CMD12CRE | INT_DTRANE));
->   		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MDTRANE);
->   	} else if (state & INT_CMD12RBE) {
->   		sh_mmcif_writel(host->addr, MMCIF_CE_INT,
->
+Thanks,
 
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
