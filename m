@@ -1,118 +1,74 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC/PATCH 3/3] mmc: sdhci: add asynchronous interrupt support
-Date: Wed, 19 Sep 2012 17:56:03 +0200
-Message-ID: <CAPDyKFqcX7kv2hc7bbpNFBLQzE2T7BGqysrJjns7vN_MEWzppw@mail.gmail.com>
-References: <1348024372-32073-1-git-send-email-keyuan.liu@gmail.com>
-	<1348024372-32073-4-git-send-email-keyuan.liu@gmail.com>
+Subject: Re: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off notify
+Date: Wed, 19 Sep 2012 18:06:08 +0200
+Message-ID: <CAPDyKFoJn=NrzxXsLyp_ygQj=09faa_p0Q8i7M+MEypF7Y_ACQ@mail.gmail.com>
+References: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com>
+	<CAGxe1ZFJhc-c8rS0KGdfTvejs27jjpz7T4Z2AVwoB-=7QOMemg@mail.gmail.com>
+	<CACRpkdaV_PDaYH+RgM2pa9f9Gp97-D9xbxfDkPUBfXSR+-csAg@mail.gmail.com>
+	<201209141504.14658.arnd@arndb.de>
+	<CAGxe1ZEYgs3va6SR83UeN02Lnjr4Wd-dGWsPqTputcaiSJW6mA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:56090 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756364Ab2ISP5A (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 11:57:00 -0400
-Received: by wibhi8 with SMTP id hi8so5770710wib.1
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Sep 2012 08:56:59 -0700 (PDT)
-In-Reply-To: <1348024372-32073-4-git-send-email-keyuan.liu@gmail.com>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:59356 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756619Ab2ISQGK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 12:06:10 -0400
+Received: by weyx8 with SMTP id x8so672708wey.19
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Sep 2012 09:06:09 -0700 (PDT)
+In-Reply-To: <CAGxe1ZEYgs3va6SR83UeN02Lnjr4Wd-dGWsPqTputcaiSJW6mA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Liu <keyuan.liu@gmail.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
+To: Girish K S <girish.shivananjappa@linaro.org>, Chris Ball <cjb@laptop.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Saugata Das <saugata.das@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>
 
-Hi Kevin,
+Hi Chris,
 
-On 19 September 2012 05:12, Kevin Liu <keyuan.liu@gmail.com> wrote:
-> From: Kevin Liu <kliu5@marvell.com>
->
-> If host support asynchronous interrupt and sdio device has enabled it,
-> then enable/disable asynchronous interrupt on host when enable/disable
-> sdio irq.
->
-> Signed-off-by: Kevin Liu <kliu5@marvell.com>
-> ---
->  drivers/mmc/host/sdhci.c |   16 ++++++++++++++++
->  drivers/mmc/host/sdhci.h |    2 ++
->  2 files changed, 18 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 0e15c79..f6136e2 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1575,6 +1575,8 @@ static int sdhci_get_ro(struct mmc_host *mmc)
->
->  static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
->  {
-> +       u16 ctrl;
-> +
->         if (host->flags & SDHCI_DEVICE_DEAD)
->                 goto out;
->
-> @@ -1583,6 +1585,16 @@ static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
->         else
->                 host->flags &= ~SDHCI_SDIO_IRQ_ENABLED;
->
-> +       if ((host->mmc->caps2 & MMC_CAP2_ASYNC_INT) &&
-> +               (host->mmc->card->cccr.async_int)) {
+Just pinging you to see if you have an opinion in merging this without
+full testing on eMMC4.5 device?
 
-It is a quite special card bit value you are checking for. Can you be
-sure that the cccr struct exist here?
-
-Maybe it could be a good idea to implement something similar as for
-example mmc_card_highspeed | mmc_card_set_highspeed functions.
-Thus add a new card state, which is set accordingly when this bit is
-set and instead check for this state here. In this case you would not
-have to check the caps2 here, since that is already done by the
-protocol layer.
-
-> +               ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +               if (enable)
-> +                       ctrl |= SDHCI_CTRL_ASYNC_INT_ENABLE;
-> +               else
-> +                       ctrl &= ~SDHCI_CTRL_ASYNC_INT_ENABLE;
-> +               sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-> +       }
-> +
->         /* SDIO IRQ will be enabled as appropriate in runtime resume */
->         if (host->runtime_suspended)
->                 goto out;
-> @@ -2895,6 +2907,10 @@ int sdhci_add_host(struct sdhci_host *host)
->         else
->                 mmc->power_notify_type = MMC_HOST_PW_NOTIFY_NONE;
->
-> +       /* Does the host support async int? */
-> +       if (caps[0] & SDHCI_CAN_ASYNC_INT)
-> +               mmc->caps2 |= MMC_CAP2_ASYNC_INT;
-> +
->         /* Initial value for re-tuning timer count */
->         host->tuning_count = (caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
->                               SDHCI_RETUNING_TIMER_COUNT_SHIFT;
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 97653ea..2e89dac 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -167,6 +167,7 @@
->  #define   SDHCI_CTRL_DRV_TYPE_D                0x0030
->  #define  SDHCI_CTRL_EXEC_TUNING                0x0040
->  #define  SDHCI_CTRL_TUNED_CLK          0x0080
-> +#define  SDHCI_CTRL_ASYNC_INT_ENABLE   0x4000
->  #define  SDHCI_CTRL_PRESET_VAL_ENABLE  0x8000
->
->  #define SDHCI_CAPABILITIES     0x40
-> @@ -187,6 +188,7 @@
->  #define  SDHCI_CAN_VDD_300     0x02000000
->  #define  SDHCI_CAN_VDD_180     0x04000000
->  #define  SDHCI_CAN_64BIT       0x10000000
-> +#define  SDHCI_CAN_ASYNC_INT   0x20000000
->
->  #define  SDHCI_SUPPORT_SDR50   0x00000001
->  #define  SDHCI_SUPPORT_SDR104  0x00000002
-> --
-> 1.7.0.4
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I am kind of eager to fixup the broken suspend for eMMC with sleep,
+which this does. :-)
 
 Kind regards
 Ulf Hansson
+
+On 17 September 2012 06:50, Girish K S <girish.shivananjappa@linaro.org> wrote:
+> On 14 September 2012 20:34, Arnd Bergmann <arnd@arndb.de> wrote:
+>> On Friday 14 September 2012, Linus Walleij wrote:
+>>> On Fri, Sep 14, 2012 at 10:25 AM, Girish K S
+>>> <girish.shivananjappa@linaro.org> wrote:
+>>> > On 14 September 2012 12:37, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>> >> Hi Girish,
+>>> >>
+>>> >> I should also have stated that this patch has not been tested with an
+>>> >> eMMC 4.5 device, thus the power off notification is not fully tested.
+>>> >> Unfortunate I don't have such a device available right now. What I did
+>>> >> test was that patch must not break anything and tested that the
+>>> >> suspend/resume sequence is fixed for eMMC with sleep support. I also
+>>> >> tested this with MMC_CAP2_POWEROFF_NOTIFY enabled.
+>>> >>
+>>> >> Are you able to help out in testing with a eMMC 4.5 device with
+>>> >> POWER_OFF_NOTIFY support?
+>>> >
+>>> > I am also facing the same  problem. The board that i used earlier to
+>>> > upstream 4.5 patches is not functioning. Thats the reason for the
+>>> > delay in upstreaming or sending the patch. Once i get it repaired i ll
+>>> > definitely do it.
+>>> > It would be helpful if somebody in the list can do this in the mean time.
+>>>
+>>> Let's page Arnd, I was under the impression that he has a eMMC 4.5
+>>> board so maybe he can test it?
+>>
+>> I have a few eMMC samples but am only using them with my (slow) thinkpad
+>> SD card reader. I also don't know which eMMC-4.5 features they implement,
+>> as some may be early prototypes.
+>>
+>> What exactly do you need tested?
+> Poweroff Notify feature with the above patch in suspend to ram.
+>>
+>>         Arnd
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
