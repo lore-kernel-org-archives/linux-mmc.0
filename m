@@ -1,64 +1,44 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 1/5] mmc: host: sdhci-s3c: Add broken-voltage DT
- property for broken voltage quirk
-Date: Wed, 19 Sep 2012 20:02:37 +0900
-Message-ID: <5059A64D.6000700@samsung.com>
-References: <1346748609-11115-1-git-send-email-t.figa@samsung.com>
- <1587150.uFGRdL0s8e@amdc1227> <m3a9wmgvip.fsf@pullcord.laptop.org>
- <1907099.4JSZthrgh2@amdc1227> <m3627aguhl.fsf@pullcord.laptop.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Javier Martin <javier.martin@vista-silicon.com>
+Subject: [PATCH] mmc: mxcmmc: fix SD cards not being detected sometimes.
+Date: Wed, 19 Sep 2012 13:21:07 +0200
+Message-ID: <1348053667-10389-1-git-send-email-javier.martin@vista-silicon.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:34283 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752852Ab2ISLC6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 07:02:58 -0400
-In-reply-to: <m3627aguhl.fsf@pullcord.laptop.org>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:40672 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752232Ab2ISLVW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 07:21:22 -0400
+Received: by weyx8 with SMTP id x8so513629wey.19
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Sep 2012 04:21:20 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Tomasz Figa <t.figa@samsung.com>, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kyungmin.park@samsung.com, jy0922.shim@samsung.com, kgene.kim@samsung.com, thomas.abraham@linaro.org, Ben Dooks <ben-linux@fluff.org>, linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
+To: linux-mmc@vger.kernel.org
+Cc: viresh.linux@gmail.com, g.liakhovetski@gmx.de, vinod.koul@linux.intel.com, s.hauer@pengutronix.de, cjb@laptop.org, Javier Martin <javier.martin@vista-silicon.com>
 
-Hi,
+When a SD card is initialized some data transfers of 64 and 8 bytes
+are issued. It seems the DMA has some problems dealing with these kind
+of "short" transfers, leading sometimes to the SD card not being detected.
 
-On 09/19/2012 07:47 PM, Chris Ball wrote:
-> Hi,
-> 
-> On Wed, Sep 19 2012, Tomasz Figa wrote:
->> We could just check if the regulator provides the capability to change the 
->> voltage.
->>
->> I don't see any direct way of querying the regulator for provided 
->> capabilities (correct me if I'm just blind), but calling 
->> regulator_count_voltages() on the regulator and checking if the returned 
->> value is 1 should be enough to assume that the regulator is fixed.
-> 
-> Sounds good, I agree.  Are you able to test that the obvious patch below
-> works on your fixed-regulator board?
-> 
-> Jaehoon and Adrian, can you think of any reason why we shouldn't replace
-> MMC_CAP2_BROKEN_VOLTAGE with the regulator_count_voltages() call below?
-> Thanks.
-I think this is better than using MMC_CAP2_BROKEN_VOLTAGE.
-I tested with this..and working fine.
+In order to solve this problem, do not use DMA for transfer sizes lower
+than the sector size.
 
-Best Regards,
-Jaehoon Chung
-> 
-> 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 044cd01..a3cc740 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1132,7 +1132,7 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
->  		 */
->  		voltage = regulator_get_voltage(supply);
->  
-> -		if (mmc->caps2 & MMC_CAP2_BROKEN_VOLTAGE)
-> +		if (regulator_count_voltages(supply) == 1)
->  			min_uV = max_uV = voltage;
->  
->  		if (voltage < 0)
-> 
+Signed-off-by: Javier Martin <javier.martin@vista-silicon.com>
+---
+ drivers/mmc/host/mxcmmc.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index fc42a2e..a09637f 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -240,7 +240,7 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
+ 		return 0;
+ 
+ 	for_each_sg(data->sg, sg, data->sg_len, i) {
+-		if (sg->offset & 3 || sg->length & 3) {
++		if (sg->offset & 3 || sg->length < 512) {
+ 			host->do_dma = 0;
+ 			return 0;
+ 		}
+-- 
+1.7.9.5
 
