@@ -1,34 +1,92 @@
-From: Shawn Guo <shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 00/34] i.MX multi-platform support
-Date: Thu, 20 Sep 2012 22:53:44 +0800
-Message-ID: <20120920145342.GI2450@S2101-09.ap.freescale.net>
-References: <1348123547-31082-1-git-send-email-shawn.guo@linaro.org>
- <201209200739.34899.arnd@arndb.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC/PATCH 3/3] mmc: sdhci: add asynchronous interrupt support
+Date: Thu, 20 Sep 2012 17:37:32 +0200
+Message-ID: <CAPDyKFowEdO6ET6oy2OsKXc-i6ZCjJGy5rYxyXSWS=xbhuk9RA@mail.gmail.com>
+References: <1348024372-32073-1-git-send-email-keyuan.liu@gmail.com>
+	<1348024372-32073-4-git-send-email-keyuan.liu@gmail.com>
+	<CAPDyKFqcX7kv2hc7bbpNFBLQzE2T7BGqysrJjns7vN_MEWzppw@mail.gmail.com>
+	<CADz5_gJg185MUyNkDt4BfvpWpC8Da3tHrHZYnVwGafk7X7ZAWg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <201209200739.34899.arnd-r2nGTMty4D4@public.gmane.org>
-Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Javier Martin <javier.martin-N4RbWZIug12MkV8/HQOAswC/G2K4zDHf@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, Florian Tobias Schandinat <FlorianSchandinat-Mmb7MZpHnFY@public.gmane.org>, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Artem Bityutskiy <artem.bityutskiy-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Wolfram Sang <w.sang-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Wim Van Sebroeck <wim-IQzOog9fTRqzQB+pC5nmwQ@public.gmane.org>, linux-watchdog-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Vinod Koul <vinod.koul-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Paulius
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:37025 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755826Ab2ITPhd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 11:37:33 -0400
+Received: by wibhi8 with SMTP id hi8so891828wib.1
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Sep 2012 08:37:32 -0700 (PDT)
+In-Reply-To: <CADz5_gJg185MUyNkDt4BfvpWpC8Da3tHrHZYnVwGafk7X7ZAWg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-On Thu, Sep 20, 2012 at 07:39:34AM +0000, Arnd Bergmann wrote:
-> The first five branches are scheduled to go through the arm-soc tree, so
-> I'm fine with that. For the sound/for-3.7 branch, I'd like to know when
-> to expect that hitting mainline. If it always gets in very early during the
-> merge window, it's probably ok to put the imx/multi-platform patches into
-> the same branch as the other ones in arm-soc and wait for the sound stuff
-> to hit mainline first, otherwise I'd suggest we start a second
-> next/multiplatform-2 branch for imx and send the first part early on
-> but then wait with the second batch before sound gets in.
-> 
-It seems that we will have to go with next/multiplatform-2.  I just
-tried to merge the series with linux-next together, and got some
-non-trivial conflicts with media and mtd tree.  I might have to rebase
-my series on top of these trees to sort out those conflicts.  That said,
-I will have several dependencies outside arm-soc tree, and have to pend
-my series until all those trees get merged into mainline.
+On 20 September 2012 13:33, Kevin Liu <keyuan.liu@gmail.com> wrote:
+> Hi, Ulf
+>
+> 2012/9/19 Ulf Hansson <ulf.hansson@linaro.org>:
+>> Hi Kevin,
+>>
+>> On 19 September 2012 05:12, Kevin Liu <keyuan.liu@gmail.com> wrote:
+>>> From: Kevin Liu <kliu5@marvell.com>
+>>>
+>>> If host support asynchronous interrupt and sdio device has enabled it,
+>>> then enable/disable asynchronous interrupt on host when enable/disable
+>>> sdio irq.
+>>>
+>>> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+>>> ---
+>>>  drivers/mmc/host/sdhci.c |   16 ++++++++++++++++
+>>>  drivers/mmc/host/sdhci.h |    2 ++
+>>>  2 files changed, 18 insertions(+), 0 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index 0e15c79..f6136e2 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -1575,6 +1575,8 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+>>>
+>>>  static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
+>>>  {
+>>> +       u16 ctrl;
+>>> +
+>>>         if (host->flags & SDHCI_DEVICE_DEAD)
+>>>                 goto out;
+>>>
+>>> @@ -1583,6 +1585,16 @@ static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
+>>>         else
+>>>                 host->flags &= ~SDHCI_SDIO_IRQ_ENABLED;
+>>>
+>>> +       if ((host->mmc->caps2 & MMC_CAP2_ASYNC_INT) &&
+>>> +               (host->mmc->card->cccr.async_int)) {
+>>
+>> It is a quite special card bit value you are checking for. Can you be
+>> sure that the cccr struct exist here?
+>>
+> The bit async_int is added to struct sdio_cccr by my previous patch 0002.
+> If EAI is enabled, this bit will be set.
+>
+>> Maybe it could be a good idea to implement something similar as for
+>> example mmc_card_highspeed | mmc_card_set_highspeed functions.
+>> Thus add a new card state, which is set accordingly when this bit is
+>> set and instead check for this state here. In this case you would not
+>> have to check the caps2 here, since that is already done by the
+>> protocol layer.
+>>
+> I think you want to replace the check for host->mmc->card->cccr.async_int with
+> mmc_card_xxx, right? It's a good idea.
 
-Shawn
+Correct!
+
+> It's not reasonable to replace caps2 with such function since they are
+> for card status
+> rather than host.
+> How do you think?
+
+I mean in the sdio framework, you already consider the new CAP before
+setting cccr.async and thus the "mmc_card_xxx" depend on this CAP as
+well. This will mean that the host driver does not need to check the
+CAP here, mmc_card_xxx is enough.
+
+Kind regards
+Ulf Hansson
