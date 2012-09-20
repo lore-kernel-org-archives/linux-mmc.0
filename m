@@ -1,45 +1,65 @@
-From: "Tanya Brokhman" <tlinder@codeaurora.org>
-Subject: RE: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off notify
-Date: Thu, 20 Sep 2012 10:58:51 +0300
-Message-ID: <003301cd9705$c874a250$595de6f0$@codeaurora.org>
-References: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com> <CAGxe1ZFJhc-c8rS0KGdfTvejs27jjpz7T4Z2AVwoB-=7QOMemg@mail.gmail.com> <CACRpkdaV_PDaYH+RgM2pa9f9Gp97-D9xbxfDkPUBfXSR+-csAg@mail.gmail.com> <201209141504.14658.arnd@arndb.de>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] ARM: exynos: remove the MMC_CAP2_BROKEN_VOLTAGE
+Date: Thu, 20 Sep 2012 17:52:56 +0900
+Message-ID: <505AD968.9070106@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:64286 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751221Ab2ITH7L (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 03:59:11 -0400
-In-Reply-To: <201209141504.14658.arnd@arndb.de>
-Content-language: he
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-samsung-soc@vger.kernel.org
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, 'kgene kim' <kgene.kim@samsung.com>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Tomasz Figa <t.figa@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: 'Arnd Bergmann' <arnd@arndb.de>, 'Linus Walleij' <linus.walleij@linaro.org>
-Cc: 'Girish K S' <girish.shivananjappa@linaro.org>, 'Ulf Hansson' <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Per Forlin' <per.forlin@stericsson.com>, 'Johan Rudholm' <johan.rudholm@stericsson.com>, 'Lee Jones' <lee.jones@linaro.org>, 'Saugata Das' <saugata.das@linaro.org>, 'Asutosh Das' <asutoshd@codeaurora.org>
 
-> >
-> > Let's page Arnd, I was under the impression that he has a eMMC 4.5
-> > board so maybe he can test it?
-> 
-> I have a few eMMC samples but am only using them with my (slow) thinkpad
-> SD card reader. I also don't know which eMMC-4.5 features they implement,
-> as some may be early prototypes.
-> 
-> What exactly do you need tested?
-> 
-> 	Arnd
-> --
+This patch is dependency with Chris's patch.
+"[PATCH] mmc: core: Replace MMC_CAP2_BROKEN_VOLTAGE with test for fixed regulator"
+http://git.kernel.org/?p=linux/kernel/git/cjb/mmc.git;a=commit;h=421fc8e70079b8b9e473a55a6267302695641dcc
 
-Hi 
+After applied that patch, it needs not to set MMC_CAP2_BROKEN_VOLTAGE.
 
-We have eMMC4.5 board and can help with the testing. 
-Are there other patches besides this one I should take in?
-
-Thanks,
-Tanya Brokhman
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 ---
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
-of Code Aurora Forum, hosted by The Linux Foundation
+ arch/arm/mach-exynos/mach-nuri.c           |    1 -
+ arch/arm/mach-exynos/mach-universal_c210.c |    1 -
+ arch/arm/mach-s5pv210/mach-goni.c          |    1 -
+ 3 files changed, 0 insertions(+), 3 deletions(-)
 
+diff --git a/arch/arm/mach-exynos/mach-nuri.c b/arch/arm/mach-exynos/mach-nuri.c
+index 90d8daa..6e0b0fa 100644
+--- a/arch/arm/mach-exynos/mach-nuri.c
++++ b/arch/arm/mach-exynos/mach-nuri.c
+@@ -113,7 +113,6 @@ static struct s3c_sdhci_platdata nuri_hsmmc0_data __initdata = {
+ 	.host_caps		= (MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA |
+ 				MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+ 				MMC_CAP_ERASE),
+-	.host_caps2		= MMC_CAP2_BROKEN_VOLTAGE,
+ 	.cd_type		= S3C_SDHCI_CD_PERMANENT,
+ };
+ 
+diff --git a/arch/arm/mach-exynos/mach-universal_c210.c b/arch/arm/mach-exynos/mach-universal_c210.c
+index 8139cd2..865be0a 100644
+--- a/arch/arm/mach-exynos/mach-universal_c210.c
++++ b/arch/arm/mach-exynos/mach-universal_c210.c
+@@ -754,7 +754,6 @@ static struct s3c_sdhci_platdata universal_hsmmc0_data __initdata = {
+ 	.max_width		= 8,
+ 	.host_caps		= (MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA |
+ 				MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED),
+-	.host_caps2		= MMC_CAP2_BROKEN_VOLTAGE,
+ 	.cd_type		= S3C_SDHCI_CD_PERMANENT,
+ };
+ 
+diff --git a/arch/arm/mach-s5pv210/mach-goni.c b/arch/arm/mach-s5pv210/mach-goni.c
+index c552581..239e896 100644
+--- a/arch/arm/mach-s5pv210/mach-goni.c
++++ b/arch/arm/mach-s5pv210/mach-goni.c
+@@ -774,7 +774,6 @@ static void __init goni_pmic_init(void)
+ /* MoviNAND */
+ static struct s3c_sdhci_platdata goni_hsmmc0_data __initdata = {
+ 	.max_width		= 4,
+-	.host_caps2		= MMC_CAP2_BROKEN_VOLTAGE,
+ 	.cd_type		= S3C_SDHCI_CD_PERMANENT,
+ };
+ 
+-- 
+1.7.4.1
