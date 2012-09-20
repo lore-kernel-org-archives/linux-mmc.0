@@ -1,11 +1,13 @@
 From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [RFC PATCH 00/13] DMA Engine support for AM33xx
-Date: Thu, 20 Sep 2012 10:43:33 -0400
-Message-ID: <1348152226-13588-1-git-send-email-mporter@ti.com>
+Subject: [RFC PATCH 06/13] ARM: omap: add hsmmc am33xx specific init
+Date: Thu, 20 Sep 2012 10:43:39 -0400
+Message-ID: <1348152226-13588-7-git-send-email-mporter@ti.com>
+References: <1348152226-13588-1-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+In-Reply-To: <1348152226-13588-1-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
 	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
@@ -18,101 +20,46 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This series adds DMA Engine support for AM33xx, which uses
-an EDMA DMAC. The EDMA DMAC has been previously supported by only
-a private API implementation (much like the situation with OMAP
-DMA) found on the DaVinci family of SoCs.
+AM33xx requires special handling in hsmmc initialization
+platform glue.
 
-There are a mind-boggling number of dependencies for this series:
+Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+---
+ arch/arm/mach-omap2/hsmmc.c |    7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-	- Jon Hunter's OF DMA helpers series
-	  https://patchwork.kernel.org/patch/1461061/
-	  https://patchwork.kernel.org/patch/1461051/
-	- Patch to address OF DMA helpers naming issues:
-	  https://patchwork.kernel.org/patch/1477921/
-	- EDMA DMA Engine wrapper driver in linux-next
-	  c2dde5f8f2095d7c623ff3565c1462e190272273
-	- EDMA DMA Engine wrapper driver bug fix:
-	  https://patchwork.kernel.org/patch/1474411/  
-	- A huge number of patches in linux-next for AM33xx boot
-	  (too numerous to list)
-
-The approach taken is similar to how OMAP DMA is being converted to
-DMA Engine support. With the functional EDMA private API already
-existing in mach-davinci/dma.c, we first move that to an ARM common
-area so it can be shared. Adding DT and runtime PM support to the
-private EDMA API implementation allows it to run on AM33xx. AM33xx
-*only* boots using DT so we leverage Jon's generic DT DMA helpers to
-register EDMA DMAC with the of_dma framework and then add support
-for calling the dma_request_slave_channel() API to both the mmc
-and spi drivers.
-
-What works? Well, with this series we now have MMC and SPI support
-on AM33xx. The only caveat for MMC is that the mmc3 controller has
-its events on the crossbar and is not usable right now.
-
-This is tested on BeagleBone with a SPI framebuffer driver and SD
-card.
-
-After this series, the plan is to convert the last in-tree user
-of the private EDMA API (davinci-pcm/mcasp) and then eliminate
-the private EDMA API by folding its functionality into
-drivers/dma/edma.c.
-
-TODO:
-	add AM33xx crossbar support to the private EDMA API
-	(any EDMA events on the crossbar are not supported)
-
-Matt Porter (13):
-  ARM: davinci: move private EDMA API to arm/common
-  ARM: edma: remove unused transfer controller handlers
-  ARM: edma: add DT and runtime PM support for AM335x
-  dmaengine: edma: enable build for AM335x
-  dma: Add TI EDMA device tree binding
-  ARM: omap: add hsmmc am33xx specific init
-  mmc: omap_hsmmc: dma_request_slave_channel() support for DT platforms
-  mmc: omap_hsmmc: limit max_segs with the EDMA DMAC
-  mmc: omap_hsmmc: add generic DMA request support to the DT binding
-  spi: omap2-mcspi: dma_request_slave_channel() support for DT
-    platforms
-  spi: omap2-mcspi: add generic DMA request support to the DT binding
-  ARM: dts: add am33xx EDMA support
-  Documentation: add schedule for removing private EDMA API
-
- Documentation/devicetree/bindings/dma/ti-edma.txt  |   49 +
- .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   25 +-
- Documentation/devicetree/bindings/spi/omap-spi.txt |   27 +-
- Documentation/feature-removal-schedule.txt         |   10 +
- arch/arm/Kconfig                                   |    1 +
- arch/arm/boot/dts/am33xx.dtsi                      |   46 +
- arch/arm/common/Kconfig                            |    3 +
- arch/arm/common/Makefile                           |    1 +
- arch/arm/common/edma.c                             | 1779 ++++++++++++++++++++
- arch/arm/include/asm/mach/edma.h                   |  267 +++
- arch/arm/mach-davinci/Makefile                     |    2 +-
- arch/arm/mach-davinci/devices.c                    |    3 +-
- arch/arm/mach-davinci/dm355.c                      |    2 +-
- arch/arm/mach-davinci/dm365.c                      |    2 +-
- arch/arm/mach-davinci/dm644x.c                     |    2 +-
- arch/arm/mach-davinci/dm646x.c                     |    2 +-
- arch/arm/mach-davinci/dma.c                        | 1588 -----------------
- arch/arm/mach-davinci/include/mach/asp.h           |    2 +-
- arch/arm/mach-davinci/include/mach/da8xx.h         |    3 +-
- arch/arm/mach-davinci/include/mach/edma.h          |  267 ---
- arch/arm/mach-davinci/include/mach/spi.h           |    2 +-
- arch/arm/mach-omap2/hsmmc.c                        |    7 +-
- arch/arm/plat-omap/Kconfig                         |    1 +
- drivers/dma/Kconfig                                |    2 +-
- drivers/dma/edma.c                                 |    2 +-
- drivers/mmc/host/omap_hsmmc.c                      |   26 +-
- drivers/spi/spi-omap2-mcspi.c                      |   68 +-
- 27 files changed, 2296 insertions(+), 1893 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/dma/ti-edma.txt
- create mode 100644 arch/arm/common/edma.c
- create mode 100644 arch/arm/include/asm/mach/edma.h
- delete mode 100644 arch/arm/mach-davinci/dma.c
- delete mode 100644 arch/arm/mach-davinci/include/mach/edma.h
-
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index a9675d8..679fb43 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -364,7 +364,7 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
+ 	else
+ 		mmc->slots[0].ocr_mask = c->ocr_mask;
+ 
+-	if (!soc_is_am35xx())
++	if (!soc_is_am35xx() && !soc_is_am33xx())
+ 		mmc->slots[0].features |= HSMMC_HAS_PBIAS;
+ 
+ 	if (cpu_is_omap44xx() && (omap_rev() > OMAP4430_REV_ES1_0))
+@@ -387,7 +387,7 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
+ 			}
+ 		}
+ 
+-		if (soc_is_am35xx())
++		if (soc_is_am35xx() || soc_is_am33xx())
+ 			mmc->slots[0].set_power = nop_mmc_set_power;
+ 
+ 		/* OMAP3630 HSMMC1 supports only 4-bit */
+@@ -488,7 +488,8 @@ static void __init omap_hsmmc_init_one(struct omap2_hsmmc_info *hsmmcinfo,
+ 	if (res < 0)
+ 		goto free_mmc;
+ 
+-	omap_hsmmc_mux(mmc_data, (ctrl_nr - 1));
++	if (!soc_is_am33xx())
++		omap_hsmmc_mux(mmc_data, (ctrl_nr - 1));
+ 
+ 	name = "omap_hsmmc";
+ 	res = snprintf(oh_name, MAX_OMAP_MMC_HWMOD_NAME_LEN,
 -- 
 1.7.9.5
 
