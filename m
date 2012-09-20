@@ -1,82 +1,40 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: [RFC/PATCH 3/3] mmc: sdhci: add asynchronous interrupt support
-Date: Thu, 20 Sep 2012 19:33:47 +0800
-Message-ID: <CADz5_gJg185MUyNkDt4BfvpWpC8Da3tHrHZYnVwGafk7X7ZAWg@mail.gmail.com>
-References: <1348024372-32073-1-git-send-email-keyuan.liu@gmail.com>
-	<1348024372-32073-4-git-send-email-keyuan.liu@gmail.com>
-	<CAPDyKFqcX7kv2hc7bbpNFBLQzE2T7BGqysrJjns7vN_MEWzppw@mail.gmail.com>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH v2 00/34] i.MX multi-platform support
+Date: Thu, 20 Sep 2012 07:41:50 -0400
+Message-ID: <20120920114148.GH17666@opensource.wolfsonmicro.com>
+References: <1348123547-31082-1-git-send-email-shawn.guo@linaro.org>
+ <201209200739.34899.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:63264 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753949Ab2ITLds (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 07:33:48 -0400
-Received: by weyx8 with SMTP id x8so1192237wey.19
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Sep 2012 04:33:47 -0700 (PDT)
-In-Reply-To: <CAPDyKFqcX7kv2hc7bbpNFBLQzE2T7BGqysrJjns7vN_MEWzppw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <alsa-devel-bounces@alsa-project.org>
+Content-Disposition: inline
+In-Reply-To: <201209200739.34899.arnd@arndb.de>
+List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
+List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
+List-Post: <mailto:alsa-devel@alsa-project.org>
+List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
+List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
+Errors-To: alsa-devel-bounces@alsa-project.org
+Sender: alsa-devel-bounces@alsa-project.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: alsa-devel@alsa-project.org, Artem Bityutskiy <artem.bityutskiy@linux.intel.com>, linux-fbdev@vger.kernel.org, Wim Van Sebroeck <wim@iguana.be>, linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org, Florian Tobias Schandinat <FlorianSchandinat@gmx.de>, Paulius Zaleckas <paulius.zaleckas@teltonika.lt>, Chris Ball <cjb@laptop.org>, linux-media@vger.kernel.org, linux-watchdog@vger.kernel.org, rtc-linux@googlegroups.com, Sascha Hauer <s.hauer@pengutronix.de>, Rob Herring <rob.herring@calxeda.com>, linux-arm-kernel@lists.infradead.org, Vinod Koul <vinod.koul@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, Javier Martin <javier.martin@vista-silicon.com>, Andrew Morton <akpm@linux-foundation.org>, Shawn Guo <shawn.guo@linaro.org>, Guennadi Liakhovetski <g.liakhove>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-Hi, Ulf
+On Thu, Sep 20, 2012 at 07:39:34AM +0000, Arnd Bergmann wrote:
 
-2012/9/19 Ulf Hansson <ulf.hansson@linaro.org>:
-> Hi Kevin,
->
-> On 19 September 2012 05:12, Kevin Liu <keyuan.liu@gmail.com> wrote:
->> From: Kevin Liu <kliu5@marvell.com>
->>
->> If host support asynchronous interrupt and sdio device has enabled it,
->> then enable/disable asynchronous interrupt on host when enable/disable
->> sdio irq.
->>
->> Signed-off-by: Kevin Liu <kliu5@marvell.com>
->> ---
->>  drivers/mmc/host/sdhci.c |   16 ++++++++++++++++
->>  drivers/mmc/host/sdhci.h |    2 ++
->>  2 files changed, 18 insertions(+), 0 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 0e15c79..f6136e2 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1575,6 +1575,8 @@ static int sdhci_get_ro(struct mmc_host *mmc)
->>
->>  static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
->>  {
->> +       u16 ctrl;
->> +
->>         if (host->flags & SDHCI_DEVICE_DEAD)
->>                 goto out;
->>
->> @@ -1583,6 +1585,16 @@ static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
->>         else
->>                 host->flags &= ~SDHCI_SDIO_IRQ_ENABLED;
->>
->> +       if ((host->mmc->caps2 & MMC_CAP2_ASYNC_INT) &&
->> +               (host->mmc->card->cccr.async_int)) {
->
-> It is a quite special card bit value you are checking for. Can you be
-> sure that the cccr struct exist here?
->
-The bit async_int is added to struct sdio_cccr by my previous patch 0002.
-If EAI is enabled, this bit will be set.
+> The first five branches are scheduled to go through the arm-soc tree, so
+> I'm fine with that. For the sound/for-3.7 branch, I'd like to know when
+> to expect that hitting mainline. If it always gets in very early during the
+> merge window, it's probably ok to put the imx/multi-platform patches into
+> the same branch as the other ones in arm-soc and wait for the sound stuff
+> to hit mainline first, otherwise I'd suggest we start a second
+> next/multiplatform-2 branch for imx and send the first part early on
+> but then wait with the second batch before sound gets in.
 
-> Maybe it could be a good idea to implement something similar as for
-> example mmc_card_highspeed | mmc_card_set_highspeed functions.
-> Thus add a new card state, which is set accordingly when this bit is
-> set and instead check for this state here. In this case you would not
-> have to check the caps2 here, since that is already done by the
-> protocol layer.
->
-I think you want to replace the check for host->mmc->card->cccr.async_int with
-mmc_card_xxx, right? It's a good idea.
-It's not reasonable to replace caps2 with such function since they are
-for card status
-rather than host.
-How do you think?
-
-Thanks
-Kevin
+It's usually pretty early but Takashi will be on holiday this time so
+I'm not sure if things might be different (he was going to send the pull
+request from holiday).  I also didn't guarantee that it'll be stable
+yet, can someone please tell me what the depenency is here?
