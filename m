@@ -1,8 +1,7 @@
 From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [RFC PATCH 07/13] mmc: omap_hsmmc: dma_request_slave_channel()
-	support for DT platforms
-Date: Thu, 20 Sep 2012 10:43:40 -0400
-Message-ID: <1348152226-13588-8-git-send-email-mporter@ti.com>
+Subject: [RFC PATCH 04/13] dmaengine: edma: enable build for AM335x
+Date: Thu, 20 Sep 2012 10:43:37 -0400
+Message-ID: <1348152226-13588-5-git-send-email-mporter@ti.com>
 References: <1348152226-13588-1-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,50 +20,42 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-For platforms with DT populated, use dma_request_slave_channel()
-to acquire the DMA channel. For !DT platforms, we fall back to
-explicitly passing the omap_dma_filter_fn() to dma_request_channel().
-Once all platforms boot from DT, the dma_request_channel() path can
-be dropped.
+Enable config option on OMAP and adjust the
+private EDMA API header to match the move
+of the private EDMA API out of mach-davinci/
 
 Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 ---
- drivers/mmc/host/omap_hsmmc.c |   16 ++++++++++++++--
- 1 file changed, 14 insertions(+), 2 deletions(-)
+ drivers/dma/Kconfig |    2 +-
+ drivers/dma/edma.c  |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 3a09f93..c82d0ab 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1923,14 +1923,26 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
- 	dma_cap_zero(mask);
- 	dma_cap_set(DMA_SLAVE, mask);
+diff --git a/drivers/dma/Kconfig b/drivers/dma/Kconfig
+index 0351719..24cd403 100644
+--- a/drivers/dma/Kconfig
++++ b/drivers/dma/Kconfig
+@@ -210,7 +210,7 @@ config SIRF_DMA
  
--	host->rx_chan = dma_request_channel(mask, omap_dma_filter_fn, &rx_req);
-+	if (pdev->dev.of_node)
-+		host->rx_chan =
-+			dma_request_slave_channel(&pdev->dev, "rx");
-+	else
-+		host->rx_chan = dma_request_channel(mask,
-+						    omap_dma_filter_fn,
-+						    &rx_req);
- 	if (!host->rx_chan) {
- 		dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
- 		ret = -ENXIO;
- 		goto err_irq;
- 	}
+ config TI_EDMA
+ 	tristate "TI EDMA support"
+-	depends on ARCH_DAVINCI
++	depends on ARCH_DAVINCI || ARCH_OMAP
+ 	select DMA_ENGINE
+ 	select DMA_VIRTUAL_CHANNELS
+ 	default n
+diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
+index fdcf079..9f8f2fa 100644
+--- a/drivers/dma/edma.c
++++ b/drivers/dma/edma.c
+@@ -24,7 +24,7 @@
+ #include <linux/slab.h>
+ #include <linux/spinlock.h>
  
--	host->tx_chan = dma_request_channel(mask, omap_dma_filter_fn, &tx_req);
-+	if (pdev->dev.of_node)
-+		host->tx_chan =
-+			dma_request_slave_channel(&pdev->dev, "tx");
-+	else
-+		host->tx_chan = dma_request_channel(mask,
-+						    omap_dma_filter_fn,
-+						    &tx_req);
- 	if (!host->tx_chan) {
- 		dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel %u\n", tx_req);
- 		ret = -ENXIO;
+-#include <mach/edma.h>
++#include <asm/mach/edma.h>
+ 
+ #include "dmaengine.h"
+ #include "virt-dma.h"
 -- 
 1.7.9.5
 
