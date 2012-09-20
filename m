@@ -1,48 +1,42 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: Re: [PATCH v6 0/9] mmc: dw_mmc: add support for device tree based instantiation
-Date: Thu, 20 Sep 2012 10:15:03 +0530
-Message-ID: <CAJuYYwQfi1pevQ31To1n3qDMxNER=8tsPcyO2sChdGcBXNQbSg@mail.gmail.com>
-References: <1347905803-22742-1-git-send-email-thomas.abraham@linaro.org>
-	<CAJuYYwRcoOv5X=XK8wiVb9fzSAdY_d=+kvJhqMdiT1Fey0JCLw@mail.gmail.com>
-	<CAJuYYwSBtjtEvTMUw9UNZRTbMoMwLio_YLKbTu=daaamS5t5Lg@mail.gmail.com>
-	<m3y5k6h4qj.fsf@pullcord.laptop.org>
-	<001201cd966c$25b18e00$7114aa00$%jun@samsung.com>
+From: Lauri Hintsala <lauri.hintsala@bluegiga.com>
+Subject: Re: [PATCH] mmc: mxs-mmc: implement broken-cd
+Date: Thu, 20 Sep 2012 07:45:39 +0300
+Message-ID: <505A9F73.7090702@bluegiga.com>
+References: <1347018317-2222-1-git-send-email-lauri.hintsala@bluegiga.com> <20120910060840.GT26709@S2101-09.ap.freescale.net> <504DBB10.9030702@bluegiga.com> <20120910135034.GD13076@S2101-09.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <001201cd966c$25b18e00$7114aa00$%jun@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, will.newton@imgtec.com, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, patches@linaro.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from [194.100.31.45] ([194.100.31.45]:37387 "EHLO
+	darkblue.bluegiga.com" rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org
+	with ESMTP id S1751856Ab2ITEqC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 00:46:02 -0400
+In-Reply-To: <20120910135034.GD13076@S2101-09.ap.freescale.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, veli-pekka.peltola@bluegiga.com
 
-On 19 September 2012 19:09, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> Hi Thomas,
->>
->> On Wed, Sep 19 2012, Thomas Abraham wrote:
->> >> Hi Jaehoon, Seungwon,
->> >>
->> >> All the changes you have suggested for this patch series has been
->> >> completed. If you could ack this series, it would be great.
->> >>
->> >> Thanks,
->> >> Thomas.
->> >
->> > Hi Chris,
->> >
->> > I have addressed all the comments received for the v5 of the dw-mmc
->> > device tree support patch series. Will Newton has acked this patch
->> > series. Can this series be merged for v3.7 ?
->>
->> Yes, looks good; pushed to mmc-next for 3.7.  Jaehoon and Seungwon,
->> if you reply soon with your ACK then I'll add it to this patchset.
->
->
-> Also, looks good to me.
-> But please check several patches before merging.
-> Sorry for late review.
+Hi,
 
-Thank you Seungwon for your review.
+On 09/10/2012 04:50 PM, Shawn Guo wrote:
+> On Mon, Sep 10, 2012 at 01:04:00PM +0300, Lauri Hintsala wrote:
+>>>> @@ -187,6 +188,9 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+>>>>   {
+>>>>   	struct mxs_mmc_host *host = mmc_priv(mmc);
+>>>>
+>>>> +	if (host->broken_cd)
+>>>> +		return -ENOSYS;
+>>>> +
+
+...
+
+> But for this patch:
+>
+> Acked-by: Shawn Guo <shawn.guo@linaro.org>
+
+Any chance to get this patch for 3.7? It makes possible to use the 
+driver without a card detect signal.
 
 Regards,
-Thomas.
+Lauri
