@@ -1,67 +1,41 @@
-From: Zhang Haijun-B42677 <B42677@freescale.com>
-Subject: RE: [PATCH V3] Powerpc eSDHC Recover from the ADMA error
-Date: Thu, 20 Sep 2012 02:46:47 +0000
-Message-ID: <99E897753B6F7048BD8CCDB4661D02E11013DF@039-SN2MPN1-021.039d.mgd.msft.net>
-References: <1348046559-13215-1-git-send-email-Haijun.Zhang@freescale.com>
- <20120919154140.GA1743@lizard>
+From: Anton Vorontsov <cbouatmailru@gmail.com>
+Subject: Re: [PATCH V4] Powerpc eSDHC Recover from the ADMA error
+Date: Wed, 19 Sep 2012 19:57:03 -0700
+Message-ID: <20120920025702.GA13639@lizard>
+References: <1348107563-16545-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [216.32.180.189] ([216.32.180.189]:19657 "EHLO
-	co1outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1753889Ab2ITCsR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 22:48:17 -0400
-In-Reply-To: <20120919154140.GA1743@lizard>
-Content-Language: en-US
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:51542 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751929Ab2ITC7k (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Sep 2012 22:59:40 -0400
+Received: by pbbrr13 with SMTP id rr13so3991054pbb.19
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Sep 2012 19:59:40 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1348107563-16545-1-git-send-email-Haijun.Zhang@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Huang Changming-R66093 <r66093@freescale.com>
+To: Haijun.Zhang@freescale.com
+Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-QW5vdGhlciBwYXRjaCBWNCBoYWQgc2VuZC4NCg0KVGhhbmtzLg0KDQotLS0tLU9yaWdpbmFsIE1l
-c3NhZ2UtLS0tLQ0KRnJvbTogQW50b24gVm9yb250c292IFttYWlsdG86Y2JvdWF0bWFpbHJ1QGdt
-YWlsLmNvbV0gDQpTZW50OiBXZWRuZXNkYXksIFNlcHRlbWJlciAxOSwgMjAxMiAxMTo0MiBBTQ0K
-VG86IFpoYW5nIEhhaWp1bi1CNDI2NzcNCkNjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBI
-dWFuZyBDaGFuZ21pbmctUjY2MDkzDQpTdWJqZWN0OiBSZTogW1BBVENIIFYzXSBQb3dlcnBjIGVT
-REhDIFJlY292ZXIgZnJvbSB0aGUgQURNQSBlcnJvcg0KDQpPbiBXZWQsIFNlcCAxOSwgMjAxMiBh
-dCAwNToyMjozOVBNICswODAwLCBIYWlqdW4uWmhhbmdAZnJlZXNjYWxlLmNvbSB3cm90ZToNCj4g
-RnJvbTogSGFpanVuIFpoYW5nIDxIYWlqdW4uWmhhbmdAZnJlZXNjYWxlLmNvbT4NCj4gDQo+IFNp
-Z25lZC1vZmYtYnk6IEhhaWp1biBaaGFuZyA8SGFpanVuLlpoYW5nQGZyZWVzY2FsZS5jb20+DQo+
-IFNpZ25lZC1vZmYtYnk6IEplcnJ5IEh1YW5nIDxDaGFuZy1NaW5nLkh1YW5nQGZyZWVzY2FsZS5j
-b20+DQo+IENDOiBBbnRvbiBWb3JvbnRzb3YgPGNib3VhdG1haWxydUBnbWFpbC5jb20+DQpbLi4u
-XQ0KPiAtLS0NCj4gY2hhbmdlcyBmb3IgdjM6DQo+ICAgICAgICAgLSBDb3JyZWN0IHRoZSBpZiBz
-dGF0ZW1lbnQgaW4gZnVuY3Rpb24gd29ya2dyb3VuZA0KPiANCj4gY2hhbmdlcyBmb3IgdjI6DQo+
-ICAgICAgICAgLSBJbnZlcnQgdGhlIGNvbmRpdGlvbiBvZiB0aGUgaWYgc3RhdGVtZW50IGluIGZ1
-bmN0aW9uIA0KPiB3b3JrZ3JvdW5kDQoNCkp1c3QgdHdvIG1pbm9yIGNvc21ldGljIGNvbW1lbnRz
-Li4uDQoNCj4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYyB8ICAgNTMgKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrLQ0KPiAgZHJpdmVycy9tbWMvaG9zdC9zZGhj
-aS5jICAgICAgICAgIHwgICAgMiArDQo+ICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLmggICAgICAg
-ICAgfCAgICA1ICsrKy0NCj4gIDMgZmlsZXMgY2hhbmdlZCwgNTggaW5zZXJ0aW9ucygrKSwgMiBk
-ZWxldGlvbnMoLSkNCj4gDQo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9m
-LWVzZGhjLmMgDQo+IGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jDQo+IGluZGV4
-IDFjYmE1NWEuLjdhNGM0MTAgMTAwNjQ0DQo+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kt
-b2YtZXNkaGMuYw0KPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMNCj4g
-QEAgLTIxLDYgKzIxLDcgQEANCj4gICNpbmNsdWRlICJzZGhjaS1lc2RoYy5oIg0KPiAgDQo+ICAj
-ZGVmaW5lIFZFTkRPUl9WXzIyCTB4MTINCj4gKyNkZWZpbmUgVkVORE9SX1ZfMjMgICAgMHgxMw0K
-DQpUaGUgYWJvdmUgbGluZSB1c2VzIHRhYiwgYnV0IHlvdSBhZGQgc3BhY2VzLg0KQSBiaXQgaW5j
-b25zaXN0ZW50Lg0KDQpbLi4uXQ0KPiArc3RhdGljIHZvaWQgZXNkaGNpX29mX2FkbWFfd29ya2Fy
-b3VuZChzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCwgdTMyIA0KPiAraW50bWFzaykgew0KPiArCXUz
-MiB0bXA7DQo+ICsJYm9vbCBhcHBsaWNhYmxlOw0KPiArCWRtYV9hZGRyX3QgZG1hc3RhcnQ7DQo+
-ICsJZG1hX2FkZHJfdCBkbWFub3c7DQo+ICsNCj4gKwl0bXAgPSBpbl9iZTMyKGhvc3QtPmlvYWRk
-ciArIFNESENJX1NMT1RfSU5UX1NUQVRVUyk7DQo+ICsJdG1wID0gKHRtcCAmIFNESENJX1ZFTkRP
-Ul9WRVJfTUFTSykgPj4gU0RIQ0lfVkVORE9SX1ZFUl9TSElGVDsNCj4gKw0KPiArCWFwcGxpY2Fi
-bGUgPSAoaW50bWFzayAmIFNESENJX0lOVF9EQVRBX0VORCkgJiYNCj4gKwkJCShpbnRtYXNrICYg
-U0RIQ0lfSU5UX0JMS19HQVApICYmDQo+ICsJCQkodG1wID09IFZFTkRPUl9WXzIzKTsNCj4gKwlp
-ZiAoIWFwcGxpY2FibGUpDQo+ICsJCXJldHVybjsNCj4gKw0KPiArCWhvc3QtPmRhdGEtPmVycm9y
-ID0gMDsNCj4gKwlkbWFzdGFydCA9IHNnX2RtYV9hZGRyZXNzKGhvc3QtPmRhdGEtPnNnKTsNCj4g
-KwlkbWFub3cgPSBkbWFzdGFydCArIGhvc3QtPmRhdGEtPmJ5dGVzX3hmZXJlZDsNCj4gKwkvKg0K
-PiArCSAqIEZvcmNlIHVwZGF0ZSB0byB0aGUgbmV4dCBETUEgYmxvY2sgYm91bmRhcnkuDQo+ICsJ
-ICovDQo+ICsJZG1hbm93ID0gKGRtYW5vdyAmDQo+ICsJCX4oU0RIQ0lfREVGQVVMVF9CT1VOREFS
-WV9TSVpFIC0gMSkpICsNCg0KVGhlc2UgdHdvIGxpbmVzIGNhbiBiZSBwdXQgaW50byBvbmUuDQoN
-Cj4gKwkJU0RIQ0lfREVGQVVMVF9CT1VOREFSWV9TSVpFOw0KPiArCWhvc3QtPmRhdGEtPmJ5dGVz
-X3hmZXJlZCA9IGRtYW5vdyAtIGRtYXN0YXJ0Ow0KPiArCXNkaGNpX3dyaXRlbChob3N0LCBkbWFu
-b3csIFNESENJX0RNQV9BRERSRVNTKTsgfQ0KDQpUaGUgcmVzdCBsb29rcyBPSywgc28gZm9yIG9m
-LWVzZGhjIHBhcnQsIGZlZWwgZnJlZSB0byBhZGQ6DQoNCkFja2VkLWJ5OiBBbnRvbiBWb3JvbnRz
-b3YgPGNib3VhdG1haWxydUBnbWFpbC5jb20+DQoNClRoYW5rcyENCg0K
+On Thu, Sep 20, 2012 at 10:19:23AM +0800, Haijun.Zhang@freescale.com wrote:
+> From: Haijun Zhang <Haijun.Zhang@freescale.com>
+> 
+> Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
+> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> CC: Anton Vorontsov <cbouatmailru@gmail.com>
+> ---
 
+This one looks perfect, thanks!
+
+Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
+
+> changes for v4:
+> 	- Correct inconsistent issue
+> 
+> changes for v3:
+>         - Correct the if statement in function workground
+> 
+> changes for v2:
+>         - Invert the condition of the if statement in function workground
