@@ -1,109 +1,107 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 1/5] mmc: host: sdhci-s3c: Add broken-voltage DT
- property for broken voltage quirk
-Date: Thu, 20 Sep 2012 14:57:44 +0900
-Message-ID: <505AB058.7060203@samsung.com>
-References: <1346748609-11115-1-git-send-email-t.figa@samsung.com>
- <1587150.uFGRdL0s8e@amdc1227> <m3a9wmgvip.fsf@pullcord.laptop.org>
- <1907099.4JSZthrgh2@amdc1227> <m3627aguhl.fsf@pullcord.laptop.org>
- <5059A64D.6000700@samsung.com> <m3wqzqf557.fsf@pullcord.laptop.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:24399 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753137Ab2ITF6I (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 01:58:08 -0400
-In-reply-to: <m3wqzqf557.fsf@pullcord.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Maya Erez <merez@codeaurora.org>
+Subject: [RFC/PATCH 0/2] Handling urgent and new request notifications
+Date: Thu, 20 Sep 2012 09:02:30 +0300
+Message-ID: <1348120954-6937-1-git-send-email-merez@codeaurora.org>
+References: <n>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <n>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Konstantin Dorfman <kdorfman@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Tomasz Figa <t.figa@samsung.com>, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kyungmin.park@samsung.com, jy0922.shim@samsung.com, kgene.kim@samsung.com, thomas.abraham@linaro.org, Ben Dooks <ben-linux@fluff.org>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>
 
-On 09/19/2012 11:39 PM, Chris Ball wrote:
-> Hi,
-> 
-> On Wed, Sep 19 2012, Jaehoon Chung wrote:
->>> On Wed, Sep 19 2012, Tomasz Figa wrote:
->>>> We could just check if the regulator provides the capability to change the 
->>>> voltage.
->>>>
->>>> I don't see any direct way of querying the regulator for provided 
->>>> capabilities (correct me if I'm just blind), but calling 
->>>> regulator_count_voltages() on the regulator and checking if the returned 
->>>> value is 1 should be enough to assume that the regulator is fixed.
->>>
->>> Sounds good, I agree.  Are you able to test that the obvious patch below
->>> works on your fixed-regulator board?
->>>
->>> Jaehoon and Adrian, can you think of any reason why we shouldn't replace
->>> MMC_CAP2_BROKEN_VOLTAGE with the regulator_count_voltages() call below?
->>> Thanks.
->>
->> I think this is better than using MMC_CAP2_BROKEN_VOLTAGE.
->> I tested with this..and working fine.
-> 
-> Great, here's the patch.  Jaehoon, once this is merged, maybe you could
-> help remove the uses of MMC_CAP2_BROKEN_VOLTAGE from arch/arm/mach-exynos
-> and arch/arm/mach-s5pv210 now that they're no longer needed?
-Right, I will remove them and send the patch.
+From: Konstantin Dorfman <kdorfman@codeaurora.org>
 
-Best Regards,
-Jaehoon Chung
-> 
-> Thanks,
-> 
-> - Chris.
-> 
-> 
-> Subject: [PATCH] mmc: core: Replace MMC_CAP2_BROKEN_VOLTAGE with test for fixed regulator
-> 
-> Before this patch, we were using MMC_CAP2_BROKEN_VOLTAGE as a way to
-> avoid calling regulator_set_voltage() on a fixed regulator, but that's
-> just duplicating information that already exists -- we should test
-> whether the regulator is fixed directly, instead of via a capability.
-> 
-> This patch implements that test.  We can't reclaim the capability bit
-> just yet, since there are still boards in arch/arm/ that reference it;
-> those references can be removed now.
-> 
-> Reported-by: Tomasz Figa <t.figa@samsung.com>
-> Signed-off-by: Chris Ball <cjb@laptop.org>
-> ---
->  drivers/mmc/core/core.c | 10 ++++++----
->  1 file changed, 6 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 044cd01..6612163 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1113,7 +1113,8 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
->  		int		tmp;
->  		int		voltage;
->  
-> -		/* REVISIT mmc_vddrange_to_ocrmask() may have set some
-> +		/*
-> +		 * REVISIT mmc_vddrange_to_ocrmask() may have set some
->  		 * bits this regulator doesn't quite support ... don't
->  		 * be too picky, most cards and regulators are OK with
->  		 * a 0.1V range goof (it's a small error percentage).
-> @@ -1127,12 +1128,13 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
->  			max_uV = min_uV + 100 * 1000;
->  		}
->  
-> -		/* avoid needless changes to this voltage; the regulator
-> -		 * might not allow this operation
-> +		/*
-> +		 * If we're using a fixed/static regulator, don't call
-> +		 * regulator_set_voltage; it would fail.
->  		 */
->  		voltage = regulator_get_voltage(supply);
->  
-> -		if (mmc->caps2 & MMC_CAP2_BROKEN_VOLTAGE)
-> +		if (regulator_count_voltages(supply) == 1)
->  			min_uV = max_uV = voltage;
->  
->  		if (voltage < 0)
-> 
+   In this patch we propose a way to handle urgent requests in the MMC driver.
+The decision whether a request is urgent or not is done within the I/O scheduler
+at the block layer. In this patch we propose a way for the MMC driver to handle
+urgent requests that are triggered while the driver issues packed commands.
+That is, we propose a solution to stop an ongoing packed commands transaction in
+order to serve an urgent request as well as stopping the packing process due to
+an urgent request. This solution may be extended in the future to stop single
+request transaction for serving urgent one.
 
+In order to support urgent requests, a callback is added to the queue
+structure, q->urgent_request_fn. It is used by the block layer to notify the
+device driver that an urgent request just arrived and it is pending to be
+fetched. The decision when the urgent request will be fetched is taken by the
+device driver. That is, the device driver can decide to stop immediately any
+ongoing transaction and fetching the urgent request, but it can also decide to
+ignore the urgent request notification and continue the current transaction,
+so the urgent request will be fetched like any other normal request when all
+prior transactions are finished.
+
+In additional we added a new block layer API, blk_reinsert_request.
+If a device driver decides to stop an ongoing transaction in order to fetch and
+serve an urgent request, it should keep aside the interrupted request and any
+other un-served fetched requests in order to serve them later on.
+This situation is problematic in the manner of creating a new scheduling policy
+inside the device driver itself. For example, assuming a normal request was
+interrupted by an urgent request and saved aside by the device driver for future
+execution. Now,every time the device driver tries to execute the normal request,
+it keeps getting urgent requests and the normal request is starved.
+This situation may happen since the I/O scheduler is not aware of the
+interrupted normal request that was saved aside. In order to solve such
+scenarios, the device driver may re-insert the interrupted request as well as
+any other fetched request that wasn't served yet, back into the I/O scheduler
+by calling blk_reinsert_request. Using such a scheme, returns the scheduling
+decisions to a single managing center  - the I/O scheduler. The new added RAW
+I/O scheduler supports re-insert API.
+
+An urgent request notification from the block layer may arrive to the MMC
+driver in one of the following states: when the MMC driver is waiting to the
+completion of an ongoing transaction, when the MMC driver prepares the next
+request to be sent or when the MMC driver sleeps. If the MMC driver is in the
+middle of preparing the next request or if it sleeps then the urgent
+notification is not important since the queue_thread will fetch the urgent
+request anyhow. However, if the queue_thread is blocked, waiting to the
+completion of an ongoing transaction, then the urgent notification should wake
+it up in order to stop the current transmission, fetch the urgent request and
+re-insert the unfinished blocks of the interrupted request back to the
+I/O scheduler. Moreover, if there is also a pending request (as part of the
+async request scheme) then this request should also be re-inserted back to
+the I/O scheduler.
+
+Even when the queue_thread is woken by the urgent request notification,
+it may decide not to stop the current transmission. For example, if the current
+transmission is about to finish there is no point in triggering the whole stop
+transmission sequence (which is not a zero time process). Nevertheless, the
+driver should still re-insert the pending request, if there is any, to the I/O
+scheduler.
+
+This patch also resolves an issue in the async request mechanism.
+Our tests found out, that in most cases new request is inserted after mmc layer
+fetched NULL and was blocked on waiting for the previous request completion.
+The new event new_packet_flag wakes mmc layer and allows it to immediately fetch
+the new inserted request.
+
+This patch depends on the following patches:
+[PATCH v8 1/3] mmc: core: Add packed command feature of eMMC4.5
+[PATCH v8 2/3] mmc: core: Support packed write command for eMMC4.5 device
+[PATCH v5] mmc: block: Add write packing control
+[RFC/PATCH 1/2] block: Add support for reinsert a dispatched req
+[RFC/PATCH 2/2] block: Add API for urgent request handling
+
+Please look into ROW I/O scheduler as example of implementing reinsert API:
+[RFC/PATCH/RESEND 2/2] block: Adding ROW scheduling algorithm
+
+Konstantin Dorfman (2):
+  mmc: Urgent data request flow
+  mmc: new packet notification
+
+ drivers/mmc/card/block.c |  182 +++++++++++++++++++++++---
+ drivers/mmc/card/queue.c |   67 +++++++++-
+ drivers/mmc/card/queue.h |    1 +
+ drivers/mmc/core/core.c  |  327 +++++++++++++++++++++++++++++++++++++++++++++-
+ include/linux/mmc/card.h |   15 ++
+ include/linux/mmc/core.h |   22 +++
+ include/linux/mmc/host.h |    4 +
+ include/linux/mmc/mmc.h  |    1 +
+ 8 files changed, 590 insertions(+), 29 deletions(-)
+
+-- 
+1.7.6
+-- 
+QUALCOMM ISRAEL,
+on behalf of Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+hosted by The Linux Foundation
