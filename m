@@ -1,53 +1,45 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v2 00/34] i.MX multi-platform support
-Date: Thu, 20 Sep 2012 07:39:34 +0000
-Message-ID: <201209200739.34899.arnd@arndb.de>
-References: <1348123547-31082-1-git-send-email-shawn.guo@linaro.org>
+From: "Tanya Brokhman" <tlinder@codeaurora.org>
+Subject: RE: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off notify
+Date: Thu, 20 Sep 2012 10:58:51 +0300
+Message-ID: <003301cd9705$c874a250$595de6f0$@codeaurora.org>
+References: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com> <CAGxe1ZFJhc-c8rS0KGdfTvejs27jjpz7T4Z2AVwoB-=7QOMemg@mail.gmail.com> <CACRpkdaV_PDaYH+RgM2pa9f9Gp97-D9xbxfDkPUBfXSR+-csAg@mail.gmail.com> <201209141504.14658.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
+Content-Type: text/plain;
+	charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:53915 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752944Ab2ITHjl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 03:39:41 -0400
-In-Reply-To: <1348123547-31082-1-git-send-email-shawn.guo@linaro.org>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:64286 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751221Ab2ITH7L (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 03:59:11 -0400
+In-Reply-To: <201209141504.14658.arnd@arndb.de>
+Content-language: he
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-arm-kernel@lists.infradead.org, Sascha Hauer <s.hauer@pengutronix.de>, Javier Martin <javier.martin@vista-silicon.com>, Rob Herring <rob.herring@calxeda.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, alsa-devel@alsa-project.org, Florian Tobias Schandinat <FlorianSchandinat@gmx.de>, linux-fbdev@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-media@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, rtc-linux@googlegroups.com, Artem Bityutskiy <artem.bityutskiy@linux.intel.com>, linux-mtd@lists.infradead.org, Wolfram Sang <w.sang@pengutronix.de>, linux-i2c@vger.kernel.org, Wim Van Sebroeck <wim@iguana.be>, linux-watchdog@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-usb@vger.kernel.org, Vinod Koul <vinod.koul@linux.intel.com>, Paulius
+To: 'Arnd Bergmann' <arnd@arndb.de>, 'Linus Walleij' <linus.walleij@linaro.org>
+Cc: 'Girish K S' <girish.shivananjappa@linaro.org>, 'Ulf Hansson' <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Per Forlin' <per.forlin@stericsson.com>, 'Johan Rudholm' <johan.rudholm@stericsson.com>, 'Lee Jones' <lee.jones@linaro.org>, 'Saugata Das' <saugata.das@linaro.org>, 'Asutosh Das' <asutoshd@codeaurora.org>
 
-On Thursday 20 September 2012, Shawn Guo wrote:
+> >
+> > Let's page Arnd, I was under the impression that he has a eMMC 4.5
+> > board so maybe he can test it?
 > 
-> Here is the second post, which should have addressed the comments that
-> reviewers put on v1.
+> I have a few eMMC samples but am only using them with my (slow) thinkpad
+> SD card reader. I also don't know which eMMC-4.5 features they implement,
+> as some may be early prototypes.
 > 
-> It's available on branch below.
+> What exactly do you need tested?
 > 
->   git://git.linaro.org/people/shawnguo/linux-2.6.git imx/multi-platform-v2
-> 
-> And it's based on the following branches.
-> 
->   calxeda/multi-plat
->   arm-soc/multiplatform/platform-data
->   arm-soc/multiplatform/smp_ops
->   arm-soc/imx/cleanup
->   arm-soc/imx/dt
->   sound/for-3.7
-> 
-> Subsystem maintainers,
-> 
-> I plan to send the whole series for 3.7 via arm-soc tree.  Please let
-> me know if you have problem with that.  Thanks.
+> 	Arnd
+> --
 
-The first five branches are scheduled to go through the arm-soc tree, so
-I'm fine with that. For the sound/for-3.7 branch, I'd like to know when
-to expect that hitting mainline. If it always gets in very early during the
-merge window, it's probably ok to put the imx/multi-platform patches into
-the same branch as the other ones in arm-soc and wait for the sound stuff
-to hit mainline first, otherwise I'd suggest we start a second
-next/multiplatform-2 branch for imx and send the first part early on
-but then wait with the second batch before sound gets in.
+Hi 
 
-	Arnd
+We have eMMC4.5 board and can help with the testing. 
+Are there other patches besides this one I should take in?
+
+Thanks,
+Tanya Brokhman
+---
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
+of Code Aurora Forum, hosted by The Linux Foundation
+
