@@ -1,92 +1,51 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC/PATCH 3/3] mmc: sdhci: add asynchronous interrupt support
-Date: Thu, 20 Sep 2012 17:37:32 +0200
-Message-ID: <CAPDyKFowEdO6ET6oy2OsKXc-i6ZCjJGy5rYxyXSWS=xbhuk9RA@mail.gmail.com>
-References: <1348024372-32073-1-git-send-email-keyuan.liu@gmail.com>
-	<1348024372-32073-4-git-send-email-keyuan.liu@gmail.com>
-	<CAPDyKFqcX7kv2hc7bbpNFBLQzE2T7BGqysrJjns7vN_MEWzppw@mail.gmail.com>
-	<CADz5_gJg185MUyNkDt4BfvpWpC8Da3tHrHZYnVwGafk7X7ZAWg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off notify
+Date: Thu, 20 Sep 2012 17:39:57 +0200
+Message-ID: <CAPDyKFr0guahzweekZrmY3EQ2KyBev9OKbyF88CeOiaH5JtJYg@mail.gmail.com>
+References: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com>
+	<CAGxe1ZFJhc-c8rS0KGdfTvejs27jjpz7T4Z2AVwoB-=7QOMemg@mail.gmail.com>
+	<CACRpkdaV_PDaYH+RgM2pa9f9Gp97-D9xbxfDkPUBfXSR+-csAg@mail.gmail.com>
+	<201209141504.14658.arnd@arndb.de>
+	<003301cd9705$c874a250$595de6f0$@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:37025 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755826Ab2ITPhd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 11:37:33 -0400
-Received: by wibhi8 with SMTP id hi8so891828wib.1
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Sep 2012 08:37:32 -0700 (PDT)
-In-Reply-To: <CADz5_gJg185MUyNkDt4BfvpWpC8Da3tHrHZYnVwGafk7X7ZAWg@mail.gmail.com>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:59916 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752375Ab2ITPj7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 11:39:59 -0400
+Received: by wgbdr13 with SMTP id dr13so571552wgb.1
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Sep 2012 08:39:58 -0700 (PDT)
+In-Reply-To: <003301cd9705$c874a250$595de6f0$@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Liu <keyuan.liu@gmail.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
+To: Tanya Brokhman <tlinder@codeaurora.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>, Girish K S <girish.shivananjappa@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Saugata Das <saugata.das@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>
 
-On 20 September 2012 13:33, Kevin Liu <keyuan.liu@gmail.com> wrote:
-> Hi, Ulf
+Hi Tanya,
+
+On 20 September 2012 09:58, Tanya Brokhman <tlinder@codeaurora.org> wrote:
+>> >
+>> > Let's page Arnd, I was under the impression that he has a eMMC 4.5
+>> > board so maybe he can test it?
+>>
+>> I have a few eMMC samples but am only using them with my (slow) thinkpad
+>> SD card reader. I also don't know which eMMC-4.5 features they implement,
+>> as some may be early prototypes.
+>>
+>> What exactly do you need tested?
+>>
+>>       Arnd
+>> --
 >
-> 2012/9/19 Ulf Hansson <ulf.hansson@linaro.org>:
->> Hi Kevin,
->>
->> On 19 September 2012 05:12, Kevin Liu <keyuan.liu@gmail.com> wrote:
->>> From: Kevin Liu <kliu5@marvell.com>
->>>
->>> If host support asynchronous interrupt and sdio device has enabled it,
->>> then enable/disable asynchronous interrupt on host when enable/disable
->>> sdio irq.
->>>
->>> Signed-off-by: Kevin Liu <kliu5@marvell.com>
->>> ---
->>>  drivers/mmc/host/sdhci.c |   16 ++++++++++++++++
->>>  drivers/mmc/host/sdhci.h |    2 ++
->>>  2 files changed, 18 insertions(+), 0 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 0e15c79..f6136e2 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -1575,6 +1575,8 @@ static int sdhci_get_ro(struct mmc_host *mmc)
->>>
->>>  static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
->>>  {
->>> +       u16 ctrl;
->>> +
->>>         if (host->flags & SDHCI_DEVICE_DEAD)
->>>                 goto out;
->>>
->>> @@ -1583,6 +1585,16 @@ static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
->>>         else
->>>                 host->flags &= ~SDHCI_SDIO_IRQ_ENABLED;
->>>
->>> +       if ((host->mmc->caps2 & MMC_CAP2_ASYNC_INT) &&
->>> +               (host->mmc->card->cccr.async_int)) {
->>
->> It is a quite special card bit value you are checking for. Can you be
->> sure that the cccr struct exist here?
->>
-> The bit async_int is added to struct sdio_cccr by my previous patch 0002.
-> If EAI is enabled, this bit will be set.
+> Hi
 >
->> Maybe it could be a good idea to implement something similar as for
->> example mmc_card_highspeed | mmc_card_set_highspeed functions.
->> Thus add a new card state, which is set accordingly when this bit is
->> set and instead check for this state here. In this case you would not
->> have to check the caps2 here, since that is already done by the
->> protocol layer.
->>
-> I think you want to replace the check for host->mmc->card->cccr.async_int with
-> mmc_card_xxx, right? It's a good idea.
+> We have eMMC4.5 board and can help with the testing.
+> Are there other patches besides this one I should take in?
+>
 
-Correct!
-
-> It's not reasonable to replace caps2 with such function since they are
-> for card status
-> rather than host.
-> How do you think?
-
-I mean in the sdio framework, you already consider the new CAP before
-setting cccr.async and thus the "mmc_card_xxx" depend on this CAP as
-well. This will mean that the host driver does not need to check the
-CAP here, mmc_card_xxx is enough.
+Nope, this is the only one needed.
+Thanks a lot for helping out!
 
 Kind regards
 Ulf Hansson
