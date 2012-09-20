@@ -1,8 +1,7 @@
 From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [RFC PATCH 10/13] spi: omap2-mcspi: dma_request_slave_channel()
-	support for DT platforms
-Date: Thu, 20 Sep 2012 10:43:43 -0400
-Message-ID: <1348152226-13588-11-git-send-email-mporter@ti.com>
+Subject: [RFC PATCH 12/13] ARM: dts: add am33xx EDMA support
+Date: Thu, 20 Sep 2012 10:43:45 -0400
+Message-ID: <1348152226-13588-13-git-send-email-mporter@ti.com>
 References: <1348152226-13588-1-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,121 +20,99 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-For platforms with DT populated, use dma_request_slave_channel()
-to acquire the DMA channel. For !DT platforms, we fall back to
-explicitly passing the omap_dma_filter_fn() to dma_request_channel().
-Once all platforms boot from DT, the dma_request_channel() path can
-be dropped.
+Adds support for the defined EDMA, generic DMA controller, and
+DMA request bindings for mmc and spi.
 
 Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 ---
- drivers/spi/spi-omap2-mcspi.c |   68 +++++++++++++++++++++++++++++------------
- 1 file changed, 48 insertions(+), 20 deletions(-)
+ arch/arm/boot/dts/am33xx.dtsi |   46 +++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 46 insertions(+)
 
-diff --git a/drivers/spi/spi-omap2-mcspi.c b/drivers/spi/spi-omap2-mcspi.c
-index 9502566..1cf1072 100644
---- a/drivers/spi/spi-omap2-mcspi.c
-+++ b/drivers/spi/spi-omap2-mcspi.c
-@@ -104,6 +104,9 @@ struct omap2_mcspi_dma {
+diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+index e8033eb..c14a61d 100644
+--- a/arch/arm/boot/dts/am33xx.dtsi
++++ b/arch/arm/boot/dts/am33xx.dtsi
+@@ -86,6 +86,36 @@
+ 			reg = <0x48200000 0x1000>;
+ 		};
  
- 	struct completion dma_tx_completion;
- 	struct completion dma_rx_completion;
++		edma: edma@49000000 {
++			compatible = "ti,edma3";
++			ti,hwmods = "tpcc", "tptc0", "tptc1", "tptc2";
++			reg = <0x49000000 0x10000>;
++			interrupt-parent = <&intc>;
++			interrupts = <12 13 14>;
++			#dma-cells = <1>;
++			dma-channels = <64>;
++			ti,edma-regions = <4>;
++			ti,edma-slots = <256>;
++			ti,edma-reserved-channels = <0  2
++					     14 2
++					     26 6
++					     48 4
++					     56 8>;
++			ti,edma-reserved-slots = <0  2
++					  14 2
++					  26 6
++					  48 4
++					  56 8
++					  64 127>;
++			ti,edma-queue-tc-map = <0 0
++					1 1
++					2 2>;
++			ti,edma-queue-priority-map = <0 0
++					      1 1
++					      2 2>;
++			ti,edma-default-queue = <0>;
++		};
 +
-+	char dma_rx_ch_name[14];
-+	char dma_tx_ch_name[14];
- };
+ 		gpio0: gpio@44e07000 {
+ 			compatible = "ti,omap4-gpio";
+ 			ti,hwmods = "gpio1";
+@@ -290,6 +320,9 @@
+ 			ti,hwmods = "mmc1";
+ 			ti,dual-volt;
+ 			ti,needs-special-reset;
++			dmas = <&edma 24
++				&edma 25>;
++			dma-names = "tx", "rx";
+ 		};
  
- /* use PIO for small transfers, avoiding DMA setup/teardown overhead and
-@@ -798,14 +801,26 @@ static int omap2_mcspi_request_dma(struct spi_device *spi)
- 	dma_cap_zero(mask);
- 	dma_cap_set(DMA_SLAVE, mask);
- 	sig = mcspi_dma->dma_rx_sync_dev;
--	mcspi_dma->dma_rx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
-+	if (spi->dev.of_node)
-+		mcspi_dma->dma_rx =
-+			dma_request_slave_channel(&master->dev,
-+						  mcspi_dma->dma_rx_ch_name);
-+	else
-+		mcspi_dma->dma_rx =
-+			dma_request_channel(mask, omap_dma_filter_fn, &sig);
- 	if (!mcspi_dma->dma_rx) {
- 		dev_err(&spi->dev, "no RX DMA engine channel for McSPI\n");
- 		return -EAGAIN;
- 	}
+ 		mmc2: mmc@481D8000 {
+@@ -297,6 +330,9 @@
+ 			ti,hwmods = "mmc2";
+ 			ti,needs-special-reset;
+ 			status = "disabled";
++			dmas = <&edma 2
++				&edma 3>;
++			dma-names = "tx", "rx";
+ 		};
  
- 	sig = mcspi_dma->dma_tx_sync_dev;
--	mcspi_dma->dma_tx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
-+	if (spi->dev.of_node)
-+		mcspi_dma->dma_tx =
-+			dma_request_slave_channel(&master->dev,
-+						  mcspi_dma->dma_tx_ch_name);
-+	else
-+		mcspi_dma->dma_tx =
-+			dma_request_channel(mask, omap_dma_filter_fn, &sig);
- 	if (!mcspi_dma->dma_tx) {
- 		dev_err(&spi->dev, "no TX DMA engine channel for McSPI\n");
- 		dma_release_channel(mcspi_dma->dma_rx);
-@@ -1194,29 +1209,42 @@ static int __devinit omap2_mcspi_probe(struct platform_device *pdev)
- 		goto free_master;
- 
- 	for (i = 0; i < master->num_chipselect; i++) {
--		char dma_ch_name[14];
-+		char *dma_rx_ch_name = mcspi->dma_channels[i].dma_rx_ch_name;
-+		char *dma_tx_ch_name = mcspi->dma_channels[i].dma_tx_ch_name;
- 		struct resource *dma_res;
- 
--		sprintf(dma_ch_name, "rx%d", i);
--		dma_res = platform_get_resource_byname(pdev, IORESOURCE_DMA,
--							dma_ch_name);
--		if (!dma_res) {
--			dev_dbg(&pdev->dev, "cannot get DMA RX channel\n");
--			status = -ENODEV;
--			break;
--		}
-+		sprintf(dma_rx_ch_name, "rx%d", i);
-+		if (!pdev->dev.of_node) {
-+			dma_res =
-+				platform_get_resource_byname(pdev,
-+							     IORESOURCE_DMA,
-+							     dma_rx_ch_name);
-+			if (!dma_res) {
-+				dev_dbg(&pdev->dev,
-+					"cannot get DMA RX channel\n");
-+				status = -ENODEV;
-+				break;
-+			}
- 
--		mcspi->dma_channels[i].dma_rx_sync_dev = dma_res->start;
--		sprintf(dma_ch_name, "tx%d", i);
--		dma_res = platform_get_resource_byname(pdev, IORESOURCE_DMA,
--							dma_ch_name);
--		if (!dma_res) {
--			dev_dbg(&pdev->dev, "cannot get DMA TX channel\n");
--			status = -ENODEV;
--			break;
-+			mcspi->dma_channels[i].dma_rx_sync_dev =
-+				dma_res->start;
- 		}
-+		sprintf(dma_tx_ch_name, "tx%d", i);
-+		if (!pdev->dev.of_node) {
-+			dma_res =
-+				platform_get_resource_byname(pdev,
-+							     IORESOURCE_DMA,
-+							     dma_tx_ch_name);
-+			if (!dma_res) {
-+				dev_dbg(&pdev->dev,
-+					"cannot get DMA TX channel\n");
-+				status = -ENODEV;
-+				break;
-+			}
- 
--		mcspi->dma_channels[i].dma_tx_sync_dev = dma_res->start;
-+			mcspi->dma_channels[i].dma_tx_sync_dev =
-+				dma_res->start;
-+		}
- 	}
- 
- 	if (status < 0)
+ 		mmc3: mmc@47810000 {
+@@ -339,6 +375,11 @@
+ 			reg = <0x48030000 0x400>;
+ 			interrupt-parent = <&intc>;
+ 			interrupt = <65>;
++			dmas = <&edma 16
++				&edma 17
++				&edma 18
++				&edma 19>;
++			dma-names = "tx0", "rx0", "tx1", "rx1";
+ 			ti,spi-num-cs = <2>;
+ 			ti,hwmods = "spi0";
+ 			status = "disabled";
+@@ -351,6 +392,11 @@
+ 			reg = <0x481a0000 0x400>;
+ 			interrupt-parent = <&intc>;
+ 			interrupt = <125>;
++			dmas = <&edma 42
++				&edma 43
++				&edma 44
++				&edma 45>;
++			dma-names = "tx0", "rx0", "tx1", "rx1";
+ 			ti,spi-num-cs = <2>;
+ 			ti,hwmods = "spi1";
+ 			status = "disabled";
 -- 
 1.7.9.5
 
