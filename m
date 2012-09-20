@@ -1,39 +1,48 @@
 From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: Re: [PATCH v6 9/9] mmc: dw_mmc: add support for exynos specific
- implementation of dw-mshc
-Date: Thu, 20 Sep 2012 10:14:13 +0530
-Message-ID: <CAJuYYwQpjhA0O7bg7AVGOvi2Np9kEdbv4xqjFDB4p_XTDD+CjA@mail.gmail.com>
+Subject: Re: [PATCH v6 0/9] mmc: dw_mmc: add support for device tree based instantiation
+Date: Thu, 20 Sep 2012 10:15:03 +0530
+Message-ID: <CAJuYYwQfi1pevQ31To1n3qDMxNER=8tsPcyO2sChdGcBXNQbSg@mail.gmail.com>
 References: <1347905803-22742-1-git-send-email-thomas.abraham@linaro.org>
-	<1347905803-22742-10-git-send-email-thomas.abraham@linaro.org>
-	<001501cd966c$ab1ef6e0$015ce4a0$%jun@samsung.com>
+	<CAJuYYwRcoOv5X=XK8wiVb9fzSAdY_d=+kvJhqMdiT1Fey0JCLw@mail.gmail.com>
+	<CAJuYYwSBtjtEvTMUw9UNZRTbMoMwLio_YLKbTu=daaamS5t5Lg@mail.gmail.com>
+	<m3y5k6h4qj.fsf@pullcord.laptop.org>
+	<001201cd966c$25b18e00$7114aa00$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <001501cd966c$ab1ef6e0$015ce4a0$%jun@samsung.com>
+In-Reply-To: <001201cd966c$25b18e00$7114aa00$%jun@samsung.com>
 Sender: linux-samsung-soc-owner@vger.kernel.org
 To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, will.newton@imgtec.com, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, patches@linaro.org, Thomas Abraham <thomas.ab@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, will.newton@imgtec.com, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 19 September 2012 19:12, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> On Tuesday, September 18, 2012, Thomas Abraham <thomas.abraham@linaro.org> wrote:
->> +int dw_mci_exynos_probe(struct platform_device *pdev)
->> +{
->> +     struct dw_mci_drv_data *drv_data;
->> +     const struct of_device_id *match;
->> +
->> +     match = of_match_node(dw_mci_exynos_match, pdev->dev.of_node);
->> +     drv_data = match->data;
-> In non-dt case, match has NULL.
-> Needed to check "pdev->dev.of_node"
+On 19 September 2012 19:09, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> Hi Thomas,
+>>
+>> On Wed, Sep 19 2012, Thomas Abraham wrote:
+>> >> Hi Jaehoon, Seungwon,
+>> >>
+>> >> All the changes you have suggested for this patch series has been
+>> >> completed. If you could ack this series, it would be great.
+>> >>
+>> >> Thanks,
+>> >> Thomas.
+>> >
+>> > Hi Chris,
+>> >
+>> > I have addressed all the comments received for the v5 of the dw-mmc
+>> > device tree support patch series. Will Newton has acked this patch
+>> > series. Can this series be merged for v3.7 ?
+>>
+>> Yes, looks good; pushed to mmc-next for 3.7.  Jaehoon and Seungwon,
+>> if you reply soon with your ACK then I'll add it to this patchset.
+>
+>
+> Also, looks good to me.
+> But please check several patches before merging.
+> Sorry for late review.
 
-Since all current users in mainline of this driver on Exynos platforms
-are device tree based, and since Exynos4 and Exynos5 have device tree
-support, I have mainly been adding device tree support here. Only for
-non-exynos portions of the code, I have ensured that both dt and
-legacy modes are supported.
+Thank you Seungwon for your review.
 
-Thanks,
+Regards,
 Thomas.
-
-[...]
