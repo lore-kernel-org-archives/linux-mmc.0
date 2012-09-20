@@ -1,87 +1,71 @@
-From: Johan Rudholm <johan.rudholm@stericsson.com>
-Subject: [PATCH 1/2] mmc: core: Proper signal voltage switch
-Date: Thu, 20 Sep 2012 20:40:54 +0200
-Message-ID: <1348166454-3210-1-git-send-email-johan.rudholm@stericsson.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [RFC PATCH 10/13] spi: omap2-mcspi:
+ dma_request_slave_channel() support for DT platforms
+Date: Thu, 20 Sep 2012 15:09:31 -0700
+Message-ID: <20120920220931.GJ28835@atomide.com>
+References: <1348152226-13588-1-git-send-email-mporter@ti.com>
+ <1348152226-13588-11-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog101.obsmtp.com ([207.126.144.111]:33933 "EHLO
-	eu1sys200aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754046Ab2ITTF3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 15:05:29 -0400
+Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:54944 "EHLO
+	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752211Ab2ITWJq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 18:09:46 -0400
+Content-Disposition: inline
+In-Reply-To: <1348152226-13588-11-git-send-email-mporter@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>
+To: Matt Porter <mporter@ti.com>
+Cc: Sekhar Nori <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Arnd Bergmann <arnd@arndb.de>, Dan Williams <djbw@fb.com>, Rob Herring <rob.herring@calxeda.com>
 
-When switching SD and SDIO cards from 3.3V to 1.8V signal levels, the
-clock should be gated for 5 ms during the step. Failure by the card to
-switch is indicated by dat0 being pulled low. The host should check for
-this condition and power-cycle the card if failure is indicated.
+* Matt Porter <mporter@ti.com> [120920 07:43]:
+> For platforms with DT populated, use dma_request_slave_channel()
+> to acquire the DMA channel. For !DT platforms, we fall back to
+> explicitly passing the omap_dma_filter_fn() to dma_request_channel().
+> Once all platforms boot from DT, the dma_request_channel() path can
+> be dropped.
+> 
+> Signed-off-by: Matt Porter <mporter@ti.com>
+> ---
+>  drivers/spi/spi-omap2-mcspi.c |   68 +++++++++++++++++++++++++++++------------
+>  1 file changed, 48 insertions(+), 20 deletions(-)
+> 
+> diff --git a/drivers/spi/spi-omap2-mcspi.c b/drivers/spi/spi-omap2-mcspi.c
+> index 9502566..1cf1072 100644
+> --- a/drivers/spi/spi-omap2-mcspi.c
+> +++ b/drivers/spi/spi-omap2-mcspi.c
+> @@ -104,6 +104,9 @@ struct omap2_mcspi_dma {
+>  
+>  	struct completion dma_tx_completion;
+>  	struct completion dma_rx_completion;
+> +
+> +	char dma_rx_ch_name[14];
+> +	char dma_tx_ch_name[14];
+>  };
+>  
+>  /* use PIO for small transfers, avoiding DMA setup/teardown overhead and
+> @@ -798,14 +801,26 @@ static int omap2_mcspi_request_dma(struct spi_device *spi)
+>  	dma_cap_zero(mask);
+>  	dma_cap_set(DMA_SLAVE, mask);
+>  	sig = mcspi_dma->dma_rx_sync_dev;
+> -	mcspi_dma->dma_rx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
+> +	if (spi->dev.of_node)
+> +		mcspi_dma->dma_rx =
+> +			dma_request_slave_channel(&master->dev,
+> +						  mcspi_dma->dma_rx_ch_name);
+> +	else
+> +		mcspi_dma->dma_rx =
+> +			dma_request_channel(mask, omap_dma_filter_fn, &sig);
+>  	if (!mcspi_dma->dma_rx) {
+>  		dev_err(&spi->dev, "no RX DMA engine channel for McSPI\n");
+>  		return -EAGAIN;
+>  	}
+>  
 
-Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
----
- drivers/mmc/core/core.c  |   24 ++++++++++++++++++++++--
- include/linux/mmc/host.h |    3 +++
- 2 files changed, 25 insertions(+), 2 deletions(-)
+Hmm this does not look nice.. We should be able to somehow not to care about
+the configuration at the mcspi driver level.
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 6612163..3779431 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1220,6 +1220,7 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
- {
- 	struct mmc_command cmd = {0};
- 	int err = 0;
-+	unsigned char old_voltage = host->ios.signal_voltage;
- 
- 	BUG_ON(!host);
- 
-@@ -1243,9 +1244,28 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
- 	host->ios.signal_voltage = signal_voltage;
- 
- 	if (host->ops->start_signal_voltage_switch) {
--		mmc_host_clk_hold(host);
-+		u32 clock = host->ios.clock;
-+
-+		host->ios.clock = 0;
-+		mmc_set_ios(host);
- 		err = host->ops->start_signal_voltage_switch(host, &host->ios);
--		mmc_host_clk_release(host);
-+
-+		/* Hold clock for at least 5 ms according to spec */
-+		mmc_delay(5);
-+		host->ios.clock = clock;
-+		mmc_set_ios(host);
-+
-+		/* Wait for at least 1 ms until we check if card is ready */
-+		mmc_delay(1);
-+
-+		/* Check busy */
-+		if (cmd11 && host->ops->card_busy &&
-+						host->ops->card_busy(host)) {
-+			host->ios.signal_voltage = old_voltage;
-+			host->ops->start_signal_voltage_switch(host,
-+							&host->ios);
-+			err = -EAGAIN;
-+		}
- 	}
- 
- 	return err;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index d5d9bd4..b58641a 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -131,6 +131,9 @@ struct mmc_host_ops {
- 
- 	int	(*start_signal_voltage_switch)(struct mmc_host *host, struct mmc_ios *ios);
- 
-+	/* Check if the card is pulling dat0 low */
-+	int	(*card_busy)(struct mmc_host *host);
-+
- 	/* The tuning command opcode value is different for SD and eMMC cards */
- 	int	(*execute_tuning)(struct mmc_host *host, u32 opcode);
- 	void	(*enable_preset_value)(struct mmc_host *host, bool enable);
--- 
-1.7.10
+Regards,
 
+Tony
