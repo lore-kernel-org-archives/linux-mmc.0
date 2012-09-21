@@ -1,131 +1,150 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH v2] powerpc/esdhc: disable CMD23 for some Freescale SoCs
-Date: Fri, 21 Sep 2012 15:26:03 +0530
-Message-ID: <CAGxe1ZFRm6BVY3zYyQOjAkgONuL2oijUxZjYgwGuboRg4a8EyA@mail.gmail.com>
-References: <1348218514-30655-1-git-send-email-r66093@freescale.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc-util: add the method to enable the bkops
+Date: Fri, 21 Sep 2012 19:08:05 +0900
+Message-ID: <505C3C85.3070505@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:49495 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932966Ab2IUJ4F (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Sep 2012 05:56:05 -0400
-Received: by vbbff1 with SMTP id ff1so3632966vbb.19
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Sep 2012 02:56:03 -0700 (PDT)
-In-Reply-To: <1348218514-30655-1-git-send-email-r66093@freescale.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:56065 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933013Ab2IUKIa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Sep 2012 06:08:30 -0400
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MAP002CF2U0QPB0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 21 Sep 2012 19:08:28 +0900 (KST)
+Received: from [10.90.51.55] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0MAP0022G2U3C670@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 21 Sep 2012 19:08:28 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: r66093@freescale.com
-Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Shaohui Xie <Shaohui.Xie@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Maya Erez <merez@codeaurora.org>
 
-On 21 September 2012 14:38,  <r66093@freescale.com> wrote:
-> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
->
-> CMD23 causes lots of errors in kernel on some freescale SoCs
-> (P1020, P1021, P1022, P1024, P1025 and P4080)
-> when mmc card used, which is because these controllers does
-> not support CMD23, but even on SoCs which declare CMD23 is supported,
-> so we'll not use CMD23.
->
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
-> CC: Anton Vorontsov <cbouatmailru@gmail.com>
-> ---
-> changes for v2:
->         - discard the property mode and add the processor detection
->
->  drivers/mmc/host/sdhci-pltfm.c |   32 ++++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci.c       |    3 +++
->  include/linux/mmc/sdhci.h      |    1 +
->  3 files changed, 36 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index d9a4ef4..ad55181 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -93,6 +93,36 @@ void sdhci_get_of_property(struct platform_device *pdev) {}
->  #endif /* CONFIG_OF */
->  EXPORT_SYMBOL_GPL(sdhci_get_of_property);
->
-> +static const u32 processor_table[] = {
-> +       /* P1020 Dual/Single core */
-> +       0x80EC00, 0x80E400, 0x80ED00, 0x80E500,
-> +       /* P1021 Dual/Single core */
-> +       0x80EC01, 0x80E401, 0x80ED01, 0x80E501,
-> +       /* P1022 Dual/Single core */
-> +       0x80EE00, 0x80E600, 0x80EF00, 0x80E700,
-> +       /* P1024 Dual/Single core */
-> +       0x80EC02, 0x80E402, 0x80ED02, 0x80E502,
-> +       /* P1025 Dual/Single core */
-> +       0x80EC03, 0x80E403, 0x80ED03, 0x80E503,
-> +       /* P4080 and P4040 */
-> +       0x820000, 0x820800, 0x820100, 0x820900
-> +};
-> +
-> +void sdhci_detect_limitation(struct platform_device *pdev)
-> +{
-> +       struct sdhci_host *host = platform_get_drvdata(pdev);
-> +       u32 svr = mfspr(SPRN_SVR) >> 8;
-> +       u32 table_size = ARRAY_SIZE(processor_table);
-> +       int i;
-> +
-> +       for (i = 0; i < table_size; i++) {
-> +               if (processor_table[i] == svr) {
-> +                       host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
-> +                       break;
-> +               }
-> +       }
-> +}
-> +
-These changes are specific to powerpc platform. And sdhci-pltfm.c is a
-generic sdhci file. adding platform Soc code into this is not good.
-You can find how other Socs are making use of this file by creating a
-new Soc specific extension file.
- Similarly you can have something like sdhci-powerpc.c
+This patch added the method to enable the bkops.
+In ext_csd register, BKOPS_EN bit is one-time programable.
+So if you want to use the bkops, use the this command.
 
->  struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
->                                     struct sdhci_pltfm_data *pdata)
->  {
-> @@ -185,6 +215,8 @@ int sdhci_pltfm_register(struct platform_device *pdev,
->
->         sdhci_get_of_property(pdev);
->
-> +       sdhci_detect_limitation(pdev);
-> +
->         ret = sdhci_add_host(host);
->         if (ret)
->                 sdhci_pltfm_free(pdev);
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 9a11dc3..6208a8b 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2795,6 +2795,9 @@ int sdhci_add_host(struct sdhci_host *host)
->         if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
->                 mmc->caps |= MMC_CAP_4_BIT_DATA;
->
-> +       if (host->quirks2 & SDHCI_QUIRK2_HOST_NO_CMD23)
-> +               mmc->caps &= ~MMC_CAP_CMD23;
-> +
->         if (caps[0] & SDHCI_CAN_DO_HISPD)
->                 mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
->
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index ac83b10..97c73f5 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -91,6 +91,7 @@ struct sdhci_host {
->         unsigned int quirks2;   /* More deviations from spec. */
->
->  #define SDHCI_QUIRK2_HOST_OFF_CARD_ON                  (1<<0)
-> +#define SDHCI_QUIRK2_HOST_NO_CMD23                     (1<<1)
->
->         int irq;                /* Device IRQ */
->         void __iomem *ioaddr;   /* Mapped address */
-> --
-> 1.7.9.5
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+<usage>
+#mmc bkops enable /dev/mmcblk0
+
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+Reviewd-by: Venkatraman S <svenkatr@ti.com>
+---
+ mmc.c      |    5 +++++
+ mmc.h      |    7 +++++++
+ mmc_cmds.c |   39 +++++++++++++++++++++++++++++++++++++++
+ mmc_cmds.h |    1 +
+ 4 files changed, 52 insertions(+), 0 deletions(-)
+
+diff --git a/mmc.c b/mmc.c
+index 379d667..d5ef2bb 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -75,6 +75,11 @@ static struct Command commands[] = {
+ 		"Enable the boot partition for the <device>.\nTo receive acknowledgment of boot from the card set <send_ack>\nto 1, else set it to 0.",
+ 	  NULL
+ 	},
++	{ do_write_bkops_en, -1,
++	  "bkops enable", "<device>\n"
++		"Enable the eMMC BKOPS feature on <device>.",
++	  NULL
++	},
+ 	{ 0, 0, 0, 0 }
+ };
+ 
+diff --git a/mmc.h b/mmc.h
+index 0a521a8..3d77b38 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -31,12 +31,14 @@
+  */
+ #define EXT_CSD_S_CMD_SET		504
+ #define EXT_CSD_HPI_FEATURE		503
++#define EXT_CSD_BKOPS_SUPPORT		502	/* RO */
+ #define EXT_CSD_BOOT_INFO		228	/* R/W */
+ #define EXT_CSD_PART_SWITCH_TIME	199
+ #define EXT_CSD_BOOT_CFG		179
+ #define EXT_CSD_PART_CONFIG		179
+ #define EXT_CSD_BOOT_WP			173
+ #define EXT_CSD_WR_REL_PARAM		166
++#define EXT_CSD_BKOPS_EN		163	/* R/W */
+ #define EXT_CSD_NATIVE_SECTOR_SIZE	63 /* R */
+ #define EXT_CSD_USE_NATIVE_SECTOR	62 /* R/W */
+ #define EXT_CSD_DATA_SECTOR_SIZE	61 /* R */
+@@ -48,6 +50,11 @@
+ #define EN_REL_WR	(1<<2)
+ 
+ /*
++ * BKOPS_EN field definition
++ */
++#define BKOPS_ENABLE	(1<<0)
++
++/*
+  * EXT_CSD field definitions
+  */
+ #define EXT_CSD_HPI_SUPP		(1<<0)
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 90619db..4c935e0 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -280,6 +280,45 @@ int do_write_boot_en(int nargs, char **argv)
+ 	return ret;
+ }
+ 
++int do_write_bkops_en(int nargs, char **argv)
++{
++	__u8 ext_csd[512], value = 0;
++	int fd, ret;
++	char *device;
++
++	CHECK(nargs != 2, "Usage: mmc bkops enable </path/to/mmcblkX>\n",
++			exit(1));
++
++	device = argv[1];
++
++	fd = open(device, O_RDWR);
++	if (fd < 0) {
++		perror("open");
++		exit(1);
++	}
++
++	ret = read_extcsd(fd, ext_csd);
++	if (ret) {
++		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
++		exit(1);
++	}
++
++	if (!(ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1)) {
++		fprintf(stderr, "%s dosen't support BKOPS\n", device);
++		exit(1);
++	}
++
++	ret = write_extcsd_value(fd, EXT_CSD_BKOPS_EN, BKOPS_ENABLE);
++	if (ret) {
++		fprintf(stderr, "Could not write 0x%02x to "
++			"EXT_CSD[%d] in %s\n",
++			value, EXT_CSD_BKOPS_EN, device);
++		exit(1);
++	}
++
++	return ret;
++}
++
+ int do_read_extcsd(int nargs, char **argv)
+ {
+ 	__u8 ext_csd[512], ext_csd_rev, reg;
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index 2eb1df5..1dd4324 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -21,3 +21,4 @@ int do_writeprotect_get(int nargs, char **argv);
+ int do_writeprotect_set(int nargs, char **argv);
+ int do_disable_512B_emulation(int nargs, char **argv);
+ int do_write_boot_en(int nargs, char **argv);
++int do_write_bkops_en(int nargs, char **argv);
+-- 1.7.4.1 --
