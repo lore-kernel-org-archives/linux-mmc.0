@@ -1,91 +1,108 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: [RFC/PATCH v2 3/3] mmc: sdhci: add asynchronous interrupt support
-Date: Fri, 21 Sep 2012 11:07:47 +0800
-Message-ID: <1348196867-15145-4-git-send-email-keyuan.liu@gmail.com>
-References: <1348196867-15145-1-git-send-email-keyuan.liu@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog104.obsmtp.com ([74.125.149.73]:60561 "EHLO
-	na3sys009aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932102Ab2IUDMr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 23:12:47 -0400
-In-Reply-To: <1348196867-15145-1-git-send-email-keyuan.liu@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Chander Kashyap <chander.kashyap@linaro.org>
+Subject: [PATCH v2 3/3] mmc: sdhci-s3c: Add clk_(enable/disable) in runtime suspend/resume
+Date: Fri, 21 Sep 2012 11:12:08 +0530
+Message-ID: <1348206128-11083-1-git-send-email-chander.kashyap@linaro.org>
+References: <1347613731-29428-4-git-send-email-chander.kashyap@linaro.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1347613731-29428-4-git-send-email-chander.kashyap@linaro.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org
+Cc: cjb@laptop.org, ben@simtec.co.uk, broonie@opensource.wolfsonmicro.com, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, patches@linaro.org, Chander Kashyap <chander.kashyap@gmail.com>, Chander Kashyap <chander.kashyap@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org
-Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-From: Kevin Liu <kliu5@marvell.com>
+From: Chander Kashyap <chander.kashyap@gmail.com>
 
-If host support asynchronous interrupt and sdio device has enabled it,
-then enable/disable asynchronous interrupt on host when enable/disable
-sdio irq.
+Perform clock disable/enable in runtime suspend/resume.
 
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
+Signed-off-by: Chander Kashyap <chander.kashyap@linaro.org>
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/host/sdhci.c |   15 +++++++++++++++
- drivers/mmc/host/sdhci.h |    2 ++
- 2 files changed, 17 insertions(+), 0 deletions(-)
+Changelog:
+v2:
+- Wrapped clk_disable in probe and clk_enable in remove with
+  #ifdef CONFIG_PM_RUNTIME conditional check.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index e01536a..cd74009 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1634,6 +1634,8 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+ drivers/mmc/host/sdhci-s3c.c |   29 +++++++++++++++++++++++++++--
+ 1 file changed, 27 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index e019672..3726c18 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -637,7 +637,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 		goto err_no_busclks;
+ 	}
  
- static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
++#ifndef CONFIG_PM_RUNTIME
+ 	clk_enable(sc->clk_bus[sc->cur_clk]);
++#endif
+ 
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	host->ioaddr = devm_request_and_ioremap(&pdev->dev, res);
+@@ -744,10 +746,15 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	    gpio_is_valid(pdata->ext_cd_gpio))
+ 		sdhci_s3c_setup_card_detect_gpio(sc);
+ 
++#ifdef CONFIG_PM_RUNTIME
++	clk_disable(sc->clk_io);
++#endif
+ 	return 0;
+ 
+  err_req_regs:
++#ifndef CONFIG_PM_RUNTIME
+ 	clk_disable(sc->clk_bus[sc->cur_clk]);
++#endif
+ 	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+ 		if (sc->clk_bus[ptr]) {
+ 			clk_put(sc->clk_bus[ptr]);
+@@ -786,12 +793,17 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+ 	if (gpio_is_valid(sc->ext_cd_gpio))
+ 		gpio_free(sc->ext_cd_gpio);
+ 
++#ifdef CONFIG_PM_RUNTIME
++	clk_enable(sc->clk_io);
++#endif
+ 	sdhci_remove_host(host, 1);
+ 
+ 	pm_runtime_dont_use_autosuspend(&pdev->dev);
+ 	pm_runtime_disable(&pdev->dev);
+ 
++#ifndef CONFIG_PM_RUNTIME
+ 	clk_disable(sc->clk_bus[sc->cur_clk]);
++#endif
+ 	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+ 		if (sc->clk_bus[ptr]) {
+ 			clk_put(sc->clk_bus[ptr]);
+@@ -831,15 +843,28 @@ static int sdhci_s3c_resume(struct device *dev)
+ static int sdhci_s3c_runtime_suspend(struct device *dev)
  {
-+	u16 ctrl;
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_s3c *ourhost = to_s3c(host);
++	struct clk *busclk = ourhost->clk_io;
++	int ret;
 +
- 	if (host->flags & SDHCI_DEVICE_DEAD)
- 		goto out;
++	ret = sdhci_runtime_suspend_host(host);
  
-@@ -1642,6 +1644,15 @@ static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
- 	else
- 		host->flags &= ~SDHCI_SDIO_IRQ_ENABLED;
+-	return sdhci_runtime_suspend_host(host);
++	clk_disable(ourhost->clk_bus[ourhost->cur_clk]);
++	clk_disable(busclk);
++	return ret;
+ }
  
-+	if (mmc_card_async_int(host->mmc->card)) {
-+		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+		if (enable)
-+			ctrl |= SDHCI_CTRL_ASYNC_INT_ENABLE;
-+		else
-+			ctrl &= ~SDHCI_CTRL_ASYNC_INT_ENABLE;
-+		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-+	}
-+
- 	/* SDIO IRQ will be enabled as appropriate in runtime resume */
- 	if (host->runtime_suspended)
- 		goto out;
-@@ -2952,6 +2963,10 @@ int sdhci_add_host(struct sdhci_host *host)
- 	else
- 		mmc->power_notify_type = MMC_HOST_PW_NOTIFY_NONE;
+ static int sdhci_s3c_runtime_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_s3c *ourhost = to_s3c(host);
++	struct clk *busclk = ourhost->clk_io;
++	int ret;
  
-+	/* Does the host support async int? */
-+	if (caps[0] & SDHCI_CAN_ASYNC_INT)
-+		mmc->caps2 |= MMC_CAP2_ASYNC_INT;
-+
- 	/* Initial value for re-tuning timer count */
- 	host->tuning_count = (caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
- 			      SDHCI_RETUNING_TIMER_COUNT_SHIFT;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 5eb27bf..f9de65e 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -167,6 +167,7 @@
- #define   SDHCI_CTRL_DRV_TYPE_D		0x0030
- #define  SDHCI_CTRL_EXEC_TUNING		0x0040
- #define  SDHCI_CTRL_TUNED_CLK		0x0080
-+#define  SDHCI_CTRL_ASYNC_INT_ENABLE	0x4000
- #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
+-	return sdhci_runtime_resume_host(host);
++	clk_enable(busclk);
++	clk_enable(ourhost->clk_bus[ourhost->cur_clk]);
++	ret = sdhci_runtime_resume_host(host);
++	return ret;
+ }
+ #endif
  
- #define SDHCI_CAPABILITIES	0x40
-@@ -187,6 +188,7 @@
- #define  SDHCI_CAN_VDD_300	0x02000000
- #define  SDHCI_CAN_VDD_180	0x04000000
- #define  SDHCI_CAN_64BIT	0x10000000
-+#define  SDHCI_CAN_ASYNC_INT	0x20000000
- 
- #define  SDHCI_SUPPORT_SDR50	0x00000001
- #define  SDHCI_SUPPORT_SDR104	0x00000002
 -- 
-1.7.0.4
-
+1.7.9.5
