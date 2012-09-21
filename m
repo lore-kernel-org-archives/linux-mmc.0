@@ -1,57 +1,54 @@
-From: Kumar Gala <galak@kernel.crashing.org>
-Subject: Re: [PATCH v3] powerpc/esdhc: disable CMD23 for some Freescale SoCs
-Date: Fri, 21 Sep 2012 13:36:12 -0500
-Message-ID: <6A474F70-46DB-43ED-92C0-5D111AA64D48@kernel.crashing.org>
-References: <1348223135-6435-1-git-send-email-r66093@freescale.com> <m3y5k3e4tq.fsf@pullcord.laptop.org>
-Mime-Version: 1.0 (Apple Message framework v1278)
+From: Matt Porter <mporter@ti.com>
+Subject: Re: [RFC PATCH 08/13] mmc: omap_hsmmc: limit max_segs with the EDMA
+ DMAC
+Date: Fri, 21 Sep 2012 14:42:56 -0400
+Message-ID: <20120921184256.GJ16522@beef>
+References: <1348152226-13588-1-git-send-email-mporter@ti.com>
+ <1348152226-13588-9-git-send-email-mporter@ti.com>
+ <CANfBPZ81anOy8fWgKM1PgCtB4V2pEp2x1Qi4x1uPsq7QieMN5g@mail.gmail.com>
+ <CANfBPZ-h7MD4X_NRYfwOmMnEyOKy0bTNNLNRmdbef2pe=2aHyg@mail.gmail.com>
+Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gate.crashing.org ([63.228.1.57]:50997 "EHLO gate.crashing.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757577Ab2IUSg3 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Sep 2012 14:36:29 -0400
-In-Reply-To: <m3y5k3e4tq.fsf@pullcord.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CANfBPZ-h7MD4X_NRYfwOmMnEyOKy0bTNNLNRmdbef2pe=2aHyg@mail.gmail.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: "S, Venkatraman" <svenkatr@ti.com>
+Cc: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infrad>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: r66093@freescale.com, linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Shaohui Xie <Shaohui.Xie@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
 
-
-On Sep 21, 2012, at 11:08 AM, Chris Ball wrote:
-
-> Hi,
+On Fri, Sep 21, 2012 at 10:47:30PM +0530, S, Venkatraman wrote:
+> On Fri, Sep 21, 2012 at 10:45 PM, S, Venkatraman <svenkatr@ti.com> wrote:
+> > On Thu, Sep 20, 2012 at 8:13 PM, Matt Porter <mporter@ti.com> wrote:
+> >> The EDMA DMAC has a hardware limitation that prevents supporting
+> >> scatter gather lists with any number of segments. Since the EDMA
+> >> DMA Engine driver sets the maximum segments to 16, we do the
+> >> same.
+> >>
+> >> Note: this can be removed once the DMA Engine API supports an
+> >> API to query the DMAC's segment limitations.
+> >>
+> >
+> > I wouldn't want to bind the properties of EDMA to omap_hsmmc as this patch
+> > suggests. Why don't we have a max_segs property, which when explicitly specified
+> > in DT, will override the default ?
 > 
-> On Fri, Sep 21 2012, r66093@freescale.com wrote:
->> --- a/drivers/mmc/host/sdhci-of-esdhc.c
->> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
->> @@ -143,6 +143,35 @@ static void esdhc_of_resume(struct sdhci_host *host)
->> }
->> #endif
->> 
->> +static const u32 non_cmd23_processor_table[] = {
->> +	/* P1020 Dual/Single core */
->> +	0x80EC00, 0x80E400, 0x80ED00, 0x80E500,
->> +	/* P1021 Dual/Single core */
->> +	0x80EC01, 0x80E401, 0x80ED01, 0x80E501,
->> +	/* P1022 Dual/Single core */
->> +	0x80EE00, 0x80E600, 0x80EF00, 0x80E700,
->> +	/* P1024 Dual/Single core */
->> +	0x80EC02, 0x80E402, 0x80ED02, 0x80E502,
->> +	/* P1025 Dual/Single core */
->> +	0x80EC03, 0x80E403, 0x80ED03, 0x80E503,
->> +	/* P4080 and P4040 */
->> +	0x820000, 0x820800, 0x820100, 0x820900
-> 
-> I don't see how this method improves on either of the previous two we've
-> discussed.  If anything, Kumar's suggested method seems better than this
-> one:  it detected the MMC IP revision, which I'd expect to be more
-> reliable than building a list of which SoCs contain that IP.
-> 
-> Why is this better than using DT or detecting the MMC revision?
-> 
-> Thanks,
+> If you are adventurous, this can be a generic mmc DT binding instead
+> of restricting it to OMAP.
 
-I feel like I missed this patch, but I'd rather we go with the version I sent since the # of IP versions we have is 3 or 4, instead of the 30 or 40 SoCs we have.
+I think it's bad practice to add something to a binding that is not part
+of the hardware definition for the device. In this case, the limitations
+comes strictly from the DMAC. As I noted, the proper fix for this is to
+have the DMA Engine API extended to allow querying the DMAC SG
+capabilities before setting up a DMA transfer. I brought this up
+previously in the thread where the actual EDMA dmaengine wrapper driver
+was discussed and Vinod indicated that he was open to dmaengine
+providing this information.
 
-- k
+It makes sense as DMA Engine should tell the slave driver everything it
+needs to know to set up a transfer...this is just a missing piece right
+now. FWIW, we have this issue in davinci_mmc.c as well...it just was
+already hardcoded with a value to satisfy the EDMA DMAC. However, I'd
+like to see that go away as well.
+
+-Matt
