@@ -1,33 +1,55 @@
 From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: [RFC/PATCH v2 0/3] mmc: sdio: add asynchronous interrupt support
-Date: Fri, 21 Sep 2012 11:07:44 +0800
-Message-ID: <1348196867-15145-1-git-send-email-keyuan.liu@gmail.com>
+Subject: [RFC/PATCH v2 1/3] mmc: sdio: correct the name of SDIO_CCCR_IF[5] to avoid confusion
+Date: Fri, 21 Sep 2012 11:07:45 +0800
+Message-ID: <1348196867-15145-2-git-send-email-keyuan.liu@gmail.com>
+References: <1348196867-15145-1-git-send-email-keyuan.liu@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog104.obsmtp.com ([74.125.149.73]:51639 "EHLO
+Received: from na3sys009aog104.obsmtp.com ([74.125.149.73]:44293 "EHLO
 	na3sys009aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932414Ab2IUDMb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 23:12:31 -0400
+	by vger.kernel.org with ESMTP id S932414Ab2IUDMh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 23:12:37 -0400
+In-Reply-To: <1348196867-15145-1-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org
 Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
+From: Kevin Liu <kliu5@marvell.com>
 
-This patchset add asynchronous interrupt support for both sdio device and sdhci host.
+SDIO_CCCR_IF[5] should be ECSI rather than ASYNC_INT
 
-changelog v1 -> v2:
-        - add mmc_card_set_async_int()/mmc_card_async_int()
-        - delete async_int bit in cccr structure
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
+---
+ drivers/mmc/core/sdio.c  |    2 +-
+ include/linux/mmc/sdio.h |    2 --
+ 2 files changed, 1 insertions(+), 3 deletions(-)
 
-Kevin Liu (3):
-mmc: sdio: correct the name of SDIO_CCCR_IF[5] to avoid confusion
-mmc: sdio: add asynchronous interrupt support on device
-mmc: sdhci: add asynchronous interrupt support
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index d4619e2..909c835 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -279,7 +279,7 @@ static int sdio_disable_wide(struct mmc_card *card)
+ 		return 0;
+ 
+ 	ctrl &= ~SDIO_BUS_WIDTH_4BIT;
+-	ctrl |= SDIO_BUS_ASYNC_INT;
++	ctrl |= SDIO_BUS_ECSI;
+ 
+ 	ret = mmc_io_rw_direct(card, 1, 0, SDIO_CCCR_IF, ctrl, NULL);
+ 	if (ret)
+diff --git a/include/linux/mmc/sdio.h b/include/linux/mmc/sdio.h
+index 17446d3..47e579d 100644
+--- a/include/linux/mmc/sdio.h
++++ b/include/linux/mmc/sdio.h
+@@ -105,8 +105,6 @@
+ #define  SDIO_BUS_ECSI		0x20	/* Enable continuous SPI interrupt */
+ #define  SDIO_BUS_SCSI		0x40	/* Support continuous SPI interrupt */
+ 
+-#define  SDIO_BUS_ASYNC_INT	0x20
+-
+ #define  SDIO_BUS_CD_DISABLE     0x80	/* disable pull-up on DAT3 (pin 1) */
+ 
+ #define SDIO_CCCR_CAPS		0x08
+-- 
+1.7.0.4
 
- drivers/mmc/core/sdio.c  |   24 ++++++++++++++++++++----
- drivers/mmc/host/sdhci.c |   15 +++++++++++++++
- drivers/mmc/host/sdhci.h |    2 ++
- include/linux/mmc/card.h |    3 +++
- include/linux/mmc/host.h |    1 +
- include/linux/mmc/sdio.h |    7 +++++--
- 6 files changed, 46 insertions(+), 6 deletions(-)
