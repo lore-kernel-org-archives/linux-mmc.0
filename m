@@ -1,13 +1,14 @@
 From: "Hebbar, Gururaja" <gururaja.hebbar-l0cyMroinI0@public.gmane.org>
-Subject: RE: [RFC PATCH 00/13] DMA Engine support for AM33xx
-Date: Fri, 21 Sep 2012 08:27:07 +0000
-Message-ID: <1BAFE6F6C881BF42822005164F1491C33EA8A79D@DBDE01.ent.ti.com>
+Subject: RE: [RFC PATCH 05/13] dma: Add TI EDMA device tree binding
+Date: Fri, 21 Sep 2012 08:45:53 +0000
+Message-ID: <1BAFE6F6C881BF42822005164F1491C33EA8A819@DBDE01.ent.ti.com>
 References: <1348152226-13588-1-git-send-email-mporter@ti.com>
+	<1348152226-13588-6-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <1348152226-13588-1-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
+In-Reply-To: <1348152226-13588-6-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
 Content-Language: en-US
 List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
 	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
@@ -22,146 +23,91 @@ To: "Porter, Matt" <mporter-l0cyMroinI0@public.gmane.org>, Tony Lindgren <tony-4
 Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Dan, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Sep 20, 2012 at 20:13:33, Porter, Matt wrote:
-> This series adds DMA Engine support for AM33xx, which uses
-> an EDMA DMAC. The EDMA DMAC has been previously supported by only
-> a private API implementation (much like the situation with OMAP
-> DMA) found on the DaVinci family of SoCs.
-> =
-
-> There are a mind-boggling number of dependencies for this series:
-> =
-
-> 	- Jon Hunter's OF DMA helpers series
-> 	  https://patchwork.kernel.org/patch/1461061/
-> 	  https://patchwork.kernel.org/patch/1461051/
-> 	- Patch to address OF DMA helpers naming issues:
-> 	  https://patchwork.kernel.org/patch/1477921/
-> 	- EDMA DMA Engine wrapper driver in linux-next
-> 	  c2dde5f8f2095d7c623ff3565c1462e190272273
-> 	- EDMA DMA Engine wrapper driver bug fix:
-> 	  https://patchwork.kernel.org/patch/1474411/  =
-
-> 	- A huge number of patches in linux-next for AM33xx boot
-> 	  (too numerous to list)
-> =
-
-> The approach taken is similar to how OMAP DMA is being converted to
-> DMA Engine support. With the functional EDMA private API already
-> existing in mach-davinci/dma.c, we first move that to an ARM common
-> area so it can be shared. Adding DT and runtime PM support to the
-> private EDMA API implementation allows it to run on AM33xx. AM33xx
-> *only* boots using DT so we leverage Jon's generic DT DMA helpers to
-> register EDMA DMAC with the of_dma framework and then add support
-> for calling the dma_request_slave_channel() API to both the mmc
-> and spi drivers.
-> =
-
-> What works? Well, with this series we now have MMC and SPI support
-> on AM33xx. The only caveat for MMC is that the mmc3 controller has
-> its events on the crossbar and is not usable right now.
-> =
-
-> This is tested on BeagleBone with a SPI framebuffer driver and SD
-> card.
-> =
-
-> After this series, the plan is to convert the last in-tree user
-> of the private EDMA API (davinci-pcm/mcasp) and then eliminate
-> the private EDMA API by folding its functionality into
-> drivers/dma/edma.c.
-> =
-
-> TODO:
-> 	add AM33xx crossbar support to the private EDMA API
-> 	(any EDMA events on the crossbar are not supported)
-> =
-
-
-
-Can you please mention the base repo you have taken as starting point.
-(repo + extra patches ...).
-
-This will help us to test the code.
-
-This is because I looked at the patch 12/13 and I see that mmc
-device-node is modified. But in mainline I don=92t see device =
-
-node for mmc (yet).
-
-> Matt Porter (13):
->   ARM: davinci: move private EDMA API to arm/common
->   ARM: edma: remove unused transfer controller handlers
->   ARM: edma: add DT and runtime PM support for AM335x
->   dmaengine: edma: enable build for AM335x
->   dma: Add TI EDMA device tree binding
->   ARM: omap: add hsmmc am33xx specific init
->   mmc: omap_hsmmc: dma_request_slave_channel() support for DT platforms
->   mmc: omap_hsmmc: limit max_segs with the EDMA DMAC
->   mmc: omap_hsmmc: add generic DMA request support to the DT binding
->   spi: omap2-mcspi: dma_request_slave_channel() support for DT
->     platforms
->   spi: omap2-mcspi: add generic DMA request support to the DT binding
->   ARM: dts: add am33xx EDMA support
->   Documentation: add schedule for removing private EDMA API
-> =
-
->  Documentation/devicetree/bindings/dma/ti-edma.txt  |   49 +
->  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   25 +-
->  Documentation/devicetree/bindings/spi/omap-spi.txt |   27 +-
->  Documentation/feature-removal-schedule.txt         |   10 +
->  arch/arm/Kconfig                                   |    1 +
->  arch/arm/boot/dts/am33xx.dtsi                      |   46 +
->  arch/arm/common/Kconfig                            |    3 +
->  arch/arm/common/Makefile                           |    1 +
->  arch/arm/common/edma.c                             | 1779 ++++++++++++++=
-++++++
->  arch/arm/include/asm/mach/edma.h                   |  267 +++
->  arch/arm/mach-davinci/Makefile                     |    2 +-
->  arch/arm/mach-davinci/devices.c                    |    3 +-
->  arch/arm/mach-davinci/dm355.c                      |    2 +-
->  arch/arm/mach-davinci/dm365.c                      |    2 +-
->  arch/arm/mach-davinci/dm644x.c                     |    2 +-
->  arch/arm/mach-davinci/dm646x.c                     |    2 +-
->  arch/arm/mach-davinci/dma.c                        | 1588 --------------=
----
->  arch/arm/mach-davinci/include/mach/asp.h           |    2 +-
->  arch/arm/mach-davinci/include/mach/da8xx.h         |    3 +-
->  arch/arm/mach-davinci/include/mach/edma.h          |  267 ---
->  arch/arm/mach-davinci/include/mach/spi.h           |    2 +-
->  arch/arm/mach-omap2/hsmmc.c                        |    7 +-
->  arch/arm/plat-omap/Kconfig                         |    1 +
->  drivers/dma/Kconfig                                |    2 +-
->  drivers/dma/edma.c                                 |    2 +-
->  drivers/mmc/host/omap_hsmmc.c                      |   26 +-
->  drivers/spi/spi-omap2-mcspi.c                      |   68 +-
->  27 files changed, 2296 insertions(+), 1893 deletions(-)
+On Thu, Sep 20, 2012 at 20:13:38, Porter, Matt wrote:
+> The binding definition is based on the generic DMA controller
+> binding.
+> 
+> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+> ---
+>  Documentation/devicetree/bindings/dma/ti-edma.txt |   49 +++++++++++++++++++++
+>  1 file changed, 49 insertions(+)
 >  create mode 100644 Documentation/devicetree/bindings/dma/ti-edma.txt
->  create mode 100644 arch/arm/common/edma.c
->  create mode 100644 arch/arm/include/asm/mach/edma.h
->  delete mode 100644 arch/arm/mach-davinci/dma.c
->  delete mode 100644 arch/arm/mach-davinci/include/mach/edma.h
-> =
+> 
+> diff --git a/Documentation/devicetree/bindings/dma/ti-edma.txt b/Documentation/devicetree/bindings/dma/ti-edma.txt
+> new file mode 100644
+> index 0000000..06402eb
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/dma/ti-edma.txt
+> @@ -0,0 +1,49 @@
+> +TI EDMA
+> +
+> +Required properties:
+> +- compatible : "ti,edma3"
+> +- ti,hwmods: Name of the hwmods associated to the EDMA
+> +- ti,edma-regions: Number of regions
+> +- ti,edma-slots: Number of slots
+> +- ti,edma-queue-tc-map: List of transfer control to queue mappings
+> +- ti,edma-queue-priority-map: List of queue priority mappings
+> +- ti,edma-default-queue: Default queue value
+> +
+> +Optional properties:
+> +- ti,edma-reserved-channels: List of reserved channel regions
+> +- ti,edma-reserved-slots: List of reserved slot regions
+> +
+> +Example:
+> +
+> +edma: edma@49000000 {
+> +	#address-cells = <1>;
+> +	#size-cells = <0>;
 
-> -- =
+address-cells & size-cells are only required when current node is a parent 
+node & it has sibling/child nodes (that too if the child node uses "reg" 
+property).
 
+
+> +	reg = <0x49000000 0x10000>;
+> +	interrupt-parent = <&intc>;
+> +	interrupts = <12 13 14>;
+> +	compatible = "ti,edma3";
+> +	ti,hwmods = "tpcc", "tptc0", "tptc1", "tptc2";
+> +	#dma-cells = <1>;
+> +	dma-channels = <64>;
+> +	ti,edma-regions = <4>;
+> +	ti,edma-slots = <256>;
+> +	ti,edma-reserved-channels = <0  2
+> +				     14 2
+> +				     26 6
+> +				     48 4
+> +				     56 8>;
+> +	ti,edma-reserved-slots = <0  2
+> +				  14 2
+> +				  26 6
+> +				  48 4
+> +				  56 8
+> +				  64 127>;
+> +	ti,edma-queue-tc-map = <0 0
+> +				1 1
+> +				2 2>;
+> +	ti,edma-queue-priority-map = <0 0
+> +				      1 1
+> +				      2 2>;
+> +	ti,edma-default-queue = <0>;
+> +};
+> +
+> -- 
 > 1.7.9.5
-> =
-
+> 
 > _______________________________________________
 > Davinci-linux-open-source mailing list
 > Davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
 > http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source
-> =
+> 
 
 
-
-Regards, =
-
+Regards, 
 Gururaja
 
----------------------------------------------------------------------------=
----
+------------------------------------------------------------------------------
 Got visibility?
 Most devs has no idea what their production app looks like.
 Find out how fast your code is with AppDynamics Lite.
