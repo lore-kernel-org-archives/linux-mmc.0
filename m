@@ -1,104 +1,96 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] ARM: exynos: remove the MMC_CAP2_BROKEN_VOLTAGE
-Date: Fri, 21 Sep 2012 10:19:36 +0900
-Message-ID: <505BC0A8.7050408@samsung.com>
-References: <505AD968.9070106@samsung.com>
- <0ad401cd9788$c6a41180$53ec3480$%kim@samsung.com>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: [RFC/PATCH 3/3] mmc: sdhci: add asynchronous interrupt support
+Date: Fri, 21 Sep 2012 10:19:47 +0800
+Message-ID: <CADz5_gLOTJ9J_epGk=FX3X=pjthn+m_JxEnoWaHcKaGLm6p6=Q@mail.gmail.com>
+References: <1348024372-32073-1-git-send-email-keyuan.liu@gmail.com>
+	<1348024372-32073-4-git-send-email-keyuan.liu@gmail.com>
+	<CAPDyKFqcX7kv2hc7bbpNFBLQzE2T7BGqysrJjns7vN_MEWzppw@mail.gmail.com>
+	<CADz5_gJg185MUyNkDt4BfvpWpC8Da3tHrHZYnVwGafk7X7ZAWg@mail.gmail.com>
+	<CAPDyKFowEdO6ET6oy2OsKXc-i6ZCjJGy5rYxyXSWS=xbhuk9RA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <0ad401cd9788$c6a41180$53ec3480$%kim@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Kukjin Kim <kgene.kim@samsung.com>
-Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-samsung-soc@vger.kernel.org, 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, 'Kyungmin Park' <kyungmin.park@samsung.com>, 'Tomasz Figa' <t.figa@samsung.com>, 'Adrian Hunter' <adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:36487 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755899Ab2IUCTs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 22:19:48 -0400
+Received: by weyx8 with SMTP id x8so1672880wey.19
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Sep 2012 19:19:47 -0700 (PDT)
+In-Reply-To: <CAPDyKFowEdO6ET6oy2OsKXc-i6ZCjJGy5rYxyXSWS=xbhuk9RA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-Thanks Kukjin.
+2012/9/20 Ulf Hansson <ulf.hansson@linaro.org>:
+> On 20 September 2012 13:33, Kevin Liu <keyuan.liu@gmail.com> wrote:
+>> Hi, Ulf
+>>
+>> 2012/9/19 Ulf Hansson <ulf.hansson@linaro.org>:
+>>> Hi Kevin,
+>>>
+>>> On 19 September 2012 05:12, Kevin Liu <keyuan.liu@gmail.com> wrote:
+>>>> From: Kevin Liu <kliu5@marvell.com>
+>>>>
+>>>> If host support asynchronous interrupt and sdio device has enabled it,
+>>>> then enable/disable asynchronous interrupt on host when enable/disable
+>>>> sdio irq.
+>>>>
+>>>> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+>>>> ---
+>>>>  drivers/mmc/host/sdhci.c |   16 ++++++++++++++++
+>>>>  drivers/mmc/host/sdhci.h |    2 ++
+>>>>  2 files changed, 18 insertions(+), 0 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>> index 0e15c79..f6136e2 100644
+>>>> --- a/drivers/mmc/host/sdhci.c
+>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>> @@ -1575,6 +1575,8 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+>>>>
+>>>>  static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
+>>>>  {
+>>>> +       u16 ctrl;
+>>>> +
+>>>>         if (host->flags & SDHCI_DEVICE_DEAD)
+>>>>                 goto out;
+>>>>
+>>>> @@ -1583,6 +1585,16 @@ static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
+>>>>         else
+>>>>                 host->flags &= ~SDHCI_SDIO_IRQ_ENABLED;
+>>>>
+>>>> +       if ((host->mmc->caps2 & MMC_CAP2_ASYNC_INT) &&
+>>>> +               (host->mmc->card->cccr.async_int)) {
+>>>
+>>> It is a quite special card bit value you are checking for. Can you be
+>>> sure that the cccr struct exist here?
+>>>
+>> The bit async_int is added to struct sdio_cccr by my previous patch 0002.
+>> If EAI is enabled, this bit will be set.
+>>
+>>> Maybe it could be a good idea to implement something similar as for
+>>> example mmc_card_highspeed | mmc_card_set_highspeed functions.
+>>> Thus add a new card state, which is set accordingly when this bit is
+>>> set and instead check for this state here. In this case you would not
+>>> have to check the caps2 here, since that is already done by the
+>>> protocol layer.
+>>>
+>> I think you want to replace the check for host->mmc->card->cccr.async_int with
+>> mmc_card_xxx, right? It's a good idea.
+>
+> Correct!
+>
+>> It's not reasonable to replace caps2 with such function since they are
+>> for card status
+>> rather than host.
+>> How do you think?
+>
+> I mean in the sdio framework, you already consider the new CAP before
+> setting cccr.async and thus the "mmc_card_xxx" depend on this CAP as
+> well. This will mean that the host driver does not need to check the
+> CAP here, mmc_card_xxx is enough.
+>
+Righit, I will update the patch.
 
-Best Regards,
-Jaehoon Chung
-
-On 09/21/2012 08:36 AM, Kukjin Kim wrote:
-> Jaehoon Chung wrote:
->>
->> This patch is dependency with Chris's patch.
->> "[PATCH] mmc: core: Replace MMC_CAP2_BROKEN_VOLTAGE with test for fixed
->> regulator"
->> http://git.kernel.org/?p=linux/kernel/git/cjb/mmc.git;a=commit;h=421fc8e70
->> 079b8b9e473a55a6267302695641dcc
->>
->> After applied that patch, it needs not to set MMC_CAP2_BROKEN_VOLTAGE.
->>
-> Yeah, we don't need more this. This will be queued into -late branch for
-> v3.7 or can be queued into cleanup for next merge window because this is not
-> critical.
-> 
-> Thanks.
-> 
-> Best regards,
-> Kgene.
-> --
-> Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-> SW Solution Development Team, Samsung Electronics Co., Ltd.
-> 
-> 
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->> ---
->>  arch/arm/mach-exynos/mach-nuri.c           |    1 -
->>  arch/arm/mach-exynos/mach-universal_c210.c |    1 -
->>  arch/arm/mach-s5pv210/mach-goni.c          |    1 -
->>  3 files changed, 0 insertions(+), 3 deletions(-)
->>
->> diff --git a/arch/arm/mach-exynos/mach-nuri.c b/arch/arm/mach-exynos/mach-
->> nuri.c
->> index 90d8daa..6e0b0fa 100644
->> --- a/arch/arm/mach-exynos/mach-nuri.c
->> +++ b/arch/arm/mach-exynos/mach-nuri.c
->> @@ -113,7 +113,6 @@ static struct s3c_sdhci_platdata nuri_hsmmc0_data
->> __initdata = {
->>  	.host_caps		= (MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA |
->>  				MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED
-> |
->>  				MMC_CAP_ERASE),
->> -	.host_caps2		= MMC_CAP2_BROKEN_VOLTAGE,
->>  	.cd_type		= S3C_SDHCI_CD_PERMANENT,
->>  };
->>
->> diff --git a/arch/arm/mach-exynos/mach-universal_c210.c b/arch/arm/mach-
->> exynos/mach-universal_c210.c
->> index 8139cd2..865be0a 100644
->> --- a/arch/arm/mach-exynos/mach-universal_c210.c
->> +++ b/arch/arm/mach-exynos/mach-universal_c210.c
->> @@ -754,7 +754,6 @@ static struct s3c_sdhci_platdata universal_hsmmc0_data
->> __initdata = {
->>  	.max_width		= 8,
->>  	.host_caps		= (MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA |
->>  				MMC_CAP_MMC_HIGHSPEED |
-> MMC_CAP_SD_HIGHSPEED),
->> -	.host_caps2		= MMC_CAP2_BROKEN_VOLTAGE,
->>  	.cd_type		= S3C_SDHCI_CD_PERMANENT,
->>  };
->>
->> diff --git a/arch/arm/mach-s5pv210/mach-goni.c b/arch/arm/mach-
->> s5pv210/mach-goni.c
->> index c552581..239e896 100644
->> --- a/arch/arm/mach-s5pv210/mach-goni.c
->> +++ b/arch/arm/mach-s5pv210/mach-goni.c
->> @@ -774,7 +774,6 @@ static void __init goni_pmic_init(void)
->>  /* MoviNAND */
->>  static struct s3c_sdhci_platdata goni_hsmmc0_data __initdata = {
->>  	.max_width		= 4,
->> -	.host_caps2		= MMC_CAP2_BROKEN_VOLTAGE,
->>  	.cd_type		= S3C_SDHCI_CD_PERMANENT,
->>  };
->>
->> --
->> 1.7.4.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Thanks
+Kevin
