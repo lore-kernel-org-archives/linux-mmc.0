@@ -1,71 +1,69 @@
-From: Matt Porter <mporter@ti.com>
+From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 Subject: Re: [RFC PATCH 08/13] mmc: omap_hsmmc: limit max_segs with the EDMA
- DMAC
-Date: Fri, 21 Sep 2012 14:54:05 -0400
-Message-ID: <20120921185405.GK16522@beef>
+	DMAC
+Date: Fri, 21 Sep 2012 15:03:12 -0400
+Message-ID: <20120921190312.GL16522@beef>
 References: <1348152226-13588-1-git-send-email-mporter@ti.com>
- <1348152226-13588-9-git-send-email-mporter@ti.com>
- <CANfBPZ81anOy8fWgKM1PgCtB4V2pEp2x1Qi4x1uPsq7QieMN5g@mail.gmail.com>
- <CANfBPZ-h7MD4X_NRYfwOmMnEyOKy0bTNNLNRmdbef2pe=2aHyg@mail.gmail.com>
- <20120921171840.GB10409@arwen.pp.htv.fi>
+	<1348152226-13588-9-git-send-email-mporter@ti.com>
+	<CANfBPZ81anOy8fWgKM1PgCtB4V2pEp2x1Qi4x1uPsq7QieMN5g@mail.gmail.com>
+	<20120921184721.GD31374@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:53543 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756780Ab2IUSwV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Sep 2012 14:52:21 -0400
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20120921171840.GB10409@arwen.pp.htv.fi>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <20120921184721.GD31374-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, "S, Venkatraman" <svenkatr-l0cyMroinI0@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Felipe Balbi <balbi@ti.com>
-Cc: "S, Venkatraman" <svenkatr@ti.com>, Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux OMAP List <linux-omap@vger.kernel.org>Linux
 
-On Fri, Sep 21, 2012 at 08:18:41PM +0300, Felipe Balbi wrote:
-> On Fri, Sep 21, 2012 at 10:47:30PM +0530, S, Venkatraman wrote:
-> > On Fri, Sep 21, 2012 at 10:45 PM, S, Venkatraman <svenkatr@ti.com> wrote:
-> > > On Thu, Sep 20, 2012 at 8:13 PM, Matt Porter <mporter@ti.com> wrote:
-> > >> The EDMA DMAC has a hardware limitation that prevents supporting
-> > >> scatter gather lists with any number of segments. Since the EDMA
-> > >> DMA Engine driver sets the maximum segments to 16, we do the
-> > >> same.
-> > >>
-> > >> Note: this can be removed once the DMA Engine API supports an
-> > >> API to query the DMAC's segment limitations.
-> > >>
+On Fri, Sep 21, 2012 at 07:47:21PM +0100, Russell King wrote:
+> On Fri, Sep 21, 2012 at 10:45:29PM +0530, S, Venkatraman wrote:
+> > On Thu, Sep 20, 2012 at 8:13 PM, Matt Porter <mporter-l0cyMroinI0@public.gmane.org> wrote:
+> > > The EDMA DMAC has a hardware limitation that prevents supporting
+> > > scatter gather lists with any number of segments. Since the EDMA
+> > > DMA Engine driver sets the maximum segments to 16, we do the
+> > > same.
 > > >
-> > > I wouldn't want to bind the properties of EDMA to omap_hsmmc as this patch
-> > > suggests. Why don't we have a max_segs property, which when explicitly specified
-> > > in DT, will override the default ?
+> > > Note: this can be removed once the DMA Engine API supports an
+> > > API to query the DMAC's segment limitations.
+> > >
 > > 
-> > If you are adventurous, this can be a generic mmc DT binding instead
-> > of restricting it to OMAP.
+> > I wouldn't want to bind the properties of EDMA to omap_hsmmc as this patch
+> > suggests. Why don't we have a max_segs property, which when explicitly specified
+> > in DT, will override the default ?
 > 
-> I say if it's a limitation in the DMAC, then DMAC's driver should handle
-> it, no ? Meaning that in this case you would copy from one multi-segment
-> sg into a one-segment sg and when transfer is complete, before calling
-> user's callback, copy data the other way around (?)
+> Why not have a generic way that DMA engine can export these kinds of
+> properties?
 
-With this DMAC, we would have to do a CPU-based copy or a series of
-smaller DMA-based 16 segment copies with completion interrupts in between.
+That's exactly what my note above is suggesting...
 
-The reason the EDMA DMA Engine driver sets this limit is that we have
-a hardware limitation preventing setting up a large multi-segment
-transfer. The limitation is set by how many EDMA PaRaM slots are
-available (varies based on how the hwmod is instantiated) but on AM335x
-it's 256. You can't use all of those for just one slave device and so
-the EDMA dmaengine driver arbitrarily hardcodes (atm) 16 as the max
-any one channel can claim.  Even if you could use all of them, it's
-common for an unrestricted scatter gather transfer to exceed even our
-best case hardware limitation.
+Something along the lines of:
 
-This is a case where asking the DMA Engine driver to handle any length
-SG is going to result in a big peformance hit, since the MMC subsystem
-provides this hook for a reason, we just need the proper DMA Engine API
-to find out how to set it.
+	struct slave_sg_caps
+	{
+		int max_segs;	/* <0 is no limit */
+	}
 
-So I guess I'm going to need to write up an API proposal unless Vinod
-has already been thinking about this...
+	struct slave_sg_cap *
+	dmaengine_get_slave_sg_caps(struct dma_chan *chan);
+
+I'm sure there are or will be other characteristics worth providing to
+slave drivers.
 
 -Matt
+
+------------------------------------------------------------------------------
+Got visibility?
+Most devs has no idea what their production app looks like.
+Find out how fast your code is with AppDynamics Lite.
+http://ad.doubleclick.net/clk;262219671;13503038;y?
+http://info.appdynamics.com/FreeJavaPerformanceDownload.html
