@@ -1,59 +1,39 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v6 9/9] mmc: dw_mmc: add support for exynos specific
- implementation of dw-mshc
-Date: Fri, 21 Sep 2012 11:27:11 +0900
-Message-ID: <003601cd97a0$9af71ce0$d0e556a0$%jun@samsung.com>
-References: <1347905803-22742-1-git-send-email-thomas.abraham@linaro.org>
- <1347905803-22742-10-git-send-email-thomas.abraham@linaro.org>
- <001501cd966c$ab1ef6e0$015ce4a0$%jun@samsung.com>
- <CAJuYYwQpjhA0O7bg7AVGOvi2Np9kEdbv4xqjFDB4p_XTDD+CjA@mail.gmail.com>
+From: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
+Subject: Re: [PATCH] mmc: sh-mmcif: avoid Oops on spurious interrupts
+Date: Fri, 21 Sep 2012 11:35:43 +0900
+Message-ID: <505BD27F.4040800@kmckk.co.jp>
+References: <878vdxd3mq.wl%kuninori.morimoto.gx@renesas.com> <20120803050039.GA1614@linux-sh.org> <20120809042844.GF1614@linux-sh.org> <87hasc3bv5.wl%kuninori.morimoto.gx@renesas.com> <874nobqntv.wl%kuninori.morimoto.gx@renesas.com> <20120810123804.GK1614@linux-sh.org> <502DDC97.5080501@kmckk.co.jp> <87wr0us6tg.wl%kuninori.morimoto.gx@renesas.com> <20120820031352.GC25767@linux-sh.org> <87obm6ry98.wl%kuninori.morimoto.gx@renesas.com> <20120820043853.GD25767@linux-sh.org> <87mx1qrx1x.wl%kuninori.morimoto.gx@renesas.com> <5031D9FF.8060801@kmckk.co.jp> <Pine.LNX.4.64.1208220840400.26767@axis700.grange> <m3boh2il85.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
+Content-Type: text/plain; charset=ISO-2022-JP
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:28573 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932627Ab2IUC1N (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 22:27:13 -0400
-In-reply-to: <CAJuYYwQpjhA0O7bg7AVGOvi2Np9kEdbv4xqjFDB4p_XTDD+CjA@mail.gmail.com>
-Content-language: ko
+Received: from vrgw2.firstserver.ne.jp ([164.46.1.45]:51735 "EHLO
+	vrgw2.firstserver.ne.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756852Ab2IUCgA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 22:36:00 -0400
+In-Reply-To: <m3boh2il85.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Thomas Abraham' <thomas.abraham@linaro.org>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, will.newton@imgtec.com, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, patches@linaro.org, 'Thomas Abraham' <thomas.ab@samsung.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, yusuke.goda.sx@renesas.com, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org, koba@kmckk.co.jp
 
-On Thursday, September 20, 2012, Thomas Abraham <thomas.abraham@linaro.org> wrote:
-> On 19 September 2012 19:12, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> > On Tuesday, September 18, 2012, Thomas Abraham <thomas.abraham@linaro.org> wrote:
-> >> +int dw_mci_exynos_probe(struct platform_device *pdev)
-> >> +{
-> >> +     struct dw_mci_drv_data *drv_data;
-> >> +     const struct of_device_id *match;
-> >> +
-> >> +     match = of_match_node(dw_mci_exynos_match, pdev->dev.of_node);
-> >> +     drv_data = match->data;
-> > In non-dt case, match has NULL.
-> > Needed to check "pdev->dev.of_node"
-> 
-> Since all current users in mainline of this driver on Exynos platforms
-> are device tree based, and since Exynos4 and Exynos5 have device tree
-> support, I have mainly been adding device tree support here. Only for
-> non-exynos portions of the code, I have ensured that both dt and
-> legacy modes are supported.
-Yes. I know, then dw_mmc-exynos.c should have a dependency of CONFIG_OF?
-It needs to prevent kernel panic at least.
+Hello, Chris
 
-Thanks,
-Seungwon Jeon
-Thanks,
-Seungwon Jeon
+(2012/09/19 15:24), Chris Ball wrote:
+> Hi,
 > 
-> Thanks,
-> Thomas.
+> On Wed, Aug 22 2012, Guennadi Liakhovetski wrote:
+>> On some systems, e.g., kzm9g, MMCIF interfaces can produce spurious
+>> interrupts without any active request. To prevent the Oops, that results
+>> in such cases, don't dereference the mmc request pointer until we make
+>> sure, that we are indeed processing such a request.
+>>
+>> Reported-by: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
+>> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 > 
-> [...]
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Thanks, pushed to mmc-next for 3.7.
+
+It needs this patch for kzm9g board to boot kernel 3.6-rc6 successfully.
+Can I ask you to queue this patch for 3.6-rc7 ?
+
 
