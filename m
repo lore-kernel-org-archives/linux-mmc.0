@@ -1,63 +1,161 @@
-From: "S, Venkatraman" <svenkatr-l0cyMroinI0@public.gmane.org>
-Subject: Re: [RFC PATCH 08/13] mmc: omap_hsmmc: limit max_segs with the EDMA
-	DMAC
-Date: Fri, 21 Sep 2012 23:03:42 +0530
-Message-ID: <CANfBPZ-q68qqpF0TvrY9HXH4mOjVE2j1T7+J0-aKKpg2ZaR+4g@mail.gmail.com>
+From: Matt Porter <mporter@ti.com>
+Subject: Re: [RFC PATCH 00/13] DMA Engine support for AM33xx
+Date: Fri, 21 Sep 2012 14:22:11 -0400
+Message-ID: <20120921182211.GE16522@beef>
 References: <1348152226-13588-1-git-send-email-mporter@ti.com>
-	<1348152226-13588-9-git-send-email-mporter@ti.com>
-	<CANfBPZ81anOy8fWgKM1PgCtB4V2pEp2x1Qi4x1uPsq7QieMN5g@mail.gmail.com>
-	<CANfBPZ-h7MD4X_NRYfwOmMnEyOKy0bTNNLNRmdbef2pe=2aHyg@mail.gmail.com>
-	<20120921171840.GB10409@arwen.pp.htv.fi>
+ <1BAFE6F6C881BF42822005164F1491C33EA8A79D@DBDE01.ent.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <20120921171840.GB10409-S8G//mZuvNWo5Im9Ml3/Zg@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: balbi-l0cyMroinI0@public.gmane.org
-Cc: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1BAFE6F6C881BF42822005164F1491C33EA8A79D@DBDE01.ent.ti.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
+Cc: Tony Lindgren <tony@atomide.com>, "Nori, Sekhar" <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Mark Brown <broonie@opensource.wolfsonmicro.com>, "Cousson, Benoit" <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Sep 21, 2012 at 10:48 PM, Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org> wrote:
-> On Fri, Sep 21, 2012 at 10:47:30PM +0530, S, Venkatraman wrote:
->> On Fri, Sep 21, 2012 at 10:45 PM, S, Venkatraman <svenkatr-l0cyMroinI0@public.gmane.org> wrote:
->> > On Thu, Sep 20, 2012 at 8:13 PM, Matt Porter <mporter-l0cyMroinI0@public.gmane.org> wrote:
->> >> The EDMA DMAC has a hardware limitation that prevents supporting
->> >> scatter gather lists with any number of segments. Since the EDMA
->> >> DMA Engine driver sets the maximum segments to 16, we do the
->> >> same.
->> >>
->> >> Note: this can be removed once the DMA Engine API supports an
->> >> API to query the DMAC's segment limitations.
->> >>
->> >
->> > I wouldn't want to bind the properties of EDMA to omap_hsmmc as this patch
->> > suggests. Why don't we have a max_segs property, which when explicitly specified
->> > in DT, will override the default ?
->>
->> If you are adventurous, this can be a generic mmc DT binding instead
->> of restricting it to OMAP.
->
-> I say if it's a limitation in the DMAC, then DMAC's driver should handle
-> it, no ? Meaning that in this case you would copy from one multi-segment
-> sg into a one-segment sg and when transfer is complete, before calling
-> user's callback, copy data the other way around (?)
->
+On Fri, Sep 21, 2012 at 08:27:07AM +0000, Hebbar, Gururaja wrote:
+> On Thu, Sep 20, 2012 at 20:13:33, Porter, Matt wrote:
+> > This series adds DMA Engine support for AM33xx, which uses
+> > an EDMA DMAC. The EDMA DMAC has been previously supported by only
+> > a private API implementation (much like the situation with OMAP
+> > DMA) found on the DaVinci family of SoCs.
+> >=20
+> > There are a mind-boggling number of dependencies for this series:
+> >=20
+> > 	- Jon Hunter's OF DMA helpers series
+> > 	  https://patchwork.kernel.org/patch/1461061/
+> > 	  https://patchwork.kernel.org/patch/1461051/
+> > 	- Patch to address OF DMA helpers naming issues:
+> > 	  https://patchwork.kernel.org/patch/1477921/
+> > 	- EDMA DMA Engine wrapper driver in linux-next
+> > 	  c2dde5f8f2095d7c623ff3565c1462e190272273
+> > 	- EDMA DMA Engine wrapper driver bug fix:
+> > 	  https://patchwork.kernel.org/patch/1474411/ =20
+> > 	- A huge number of patches in linux-next for AM33xx boot
+> > 	  (too numerous to list)
+> >=20
+> > The approach taken is similar to how OMAP DMA is being converted to
+> > DMA Engine support. With the functional EDMA private API already
+> > existing in mach-davinci/dma.c, we first move that to an ARM common
+> > area so it can be shared. Adding DT and runtime PM support to the
+> > private EDMA API implementation allows it to run on AM33xx. AM33xx
+> > *only* boots using DT so we leverage Jon's generic DT DMA helpers t=
+o
+> > register EDMA DMAC with the of_dma framework and then add support
+> > for calling the dma_request_slave_channel() API to both the mmc
+> > and spi drivers.
+> >=20
+> > What works? Well, with this series we now have MMC and SPI support
+> > on AM33xx. The only caveat for MMC is that the mmc3 controller has
+> > its events on the crossbar and is not usable right now.
+> >=20
+> > This is tested on BeagleBone with a SPI framebuffer driver and SD
+> > card.
+> >=20
+> > After this series, the plan is to convert the last in-tree user
+> > of the private EDMA API (davinci-pcm/mcasp) and then eliminate
+> > the private EDMA API by folding its functionality into
+> > drivers/dma/edma.c.
+> >=20
+> > TODO:
+> > 	add AM33xx crossbar support to the private EDMA API
+> > 	(any EDMA events on the crossbar are not supported)
+> >=20
+>=20
+>=20
+> Can you please mention the base repo you have taken as starting point=
+=2E
+> (repo + extra patches ...).
 
-Right ! So even if the property is defined for MMC, Matt will end up coding the
-limitation into every peripheral driver that uses EMAC, which doesn't scale.
-Your solution is better.
+It's mainline 3.6-rc6 and you can see the complete set of patches
+at https://github.com/ohporter/linux/tree/edma-dmaengine-am33xx-rfc-v1
+after commit 5698bd757d55b1bb87edd1a9744ab09c142abfc2
 
-------------------------------------------------------------------------------
-Got visibility?
-Most devs has no idea what their production app looks like.
-Find out how fast your code is with AppDynamics Lite.
-http://ad.doubleclick.net/clk;262219671;13503038;y?
-http://info.appdynamics.com/FreeJavaPerformanceDownload.html
+> This will help us to test the code.
+>=20
+> This is because I looked at the patch 12/13 and I see that mmc
+> device-node is modified. But in mainline I don=E2=80=99t see device=20
+> node for mmc (yet).
+
+Oops. You'll need e62a3333ae450bcdefbe22229d7bc277ae0ef645 and
+fe97304557d2c6f7d0aaf1ea028ea48ffca366a9 which I forgot to include
+in this series. I'll have them in for v2.
+
+-Matt
+
+> > Matt Porter (13):
+> >   ARM: davinci: move private EDMA API to arm/common
+> >   ARM: edma: remove unused transfer controller handlers
+> >   ARM: edma: add DT and runtime PM support for AM335x
+> >   dmaengine: edma: enable build for AM335x
+> >   dma: Add TI EDMA device tree binding
+> >   ARM: omap: add hsmmc am33xx specific init
+> >   mmc: omap_hsmmc: dma_request_slave_channel() support for DT platf=
+orms
+> >   mmc: omap_hsmmc: limit max_segs with the EDMA DMAC
+> >   mmc: omap_hsmmc: add generic DMA request support to the DT bindin=
+g
+> >   spi: omap2-mcspi: dma_request_slave_channel() support for DT
+> >     platforms
+> >   spi: omap2-mcspi: add generic DMA request support to the DT bindi=
+ng
+> >   ARM: dts: add am33xx EDMA support
+> >   Documentation: add schedule for removing private EDMA API
+> >=20
+> >  Documentation/devicetree/bindings/dma/ti-edma.txt  |   49 +
+> >  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   25 +-
+> >  Documentation/devicetree/bindings/spi/omap-spi.txt |   27 +-
+> >  Documentation/feature-removal-schedule.txt         |   10 +
+> >  arch/arm/Kconfig                                   |    1 +
+> >  arch/arm/boot/dts/am33xx.dtsi                      |   46 +
+> >  arch/arm/common/Kconfig                            |    3 +
+> >  arch/arm/common/Makefile                           |    1 +
+> >  arch/arm/common/edma.c                             | 1779 ++++++++=
+++++++++++++
+> >  arch/arm/include/asm/mach/edma.h                   |  267 +++
+> >  arch/arm/mach-davinci/Makefile                     |    2 +-
+> >  arch/arm/mach-davinci/devices.c                    |    3 +-
+> >  arch/arm/mach-davinci/dm355.c                      |    2 +-
+> >  arch/arm/mach-davinci/dm365.c                      |    2 +-
+> >  arch/arm/mach-davinci/dm644x.c                     |    2 +-
+> >  arch/arm/mach-davinci/dm646x.c                     |    2 +-
+> >  arch/arm/mach-davinci/dma.c                        | 1588 --------=
+---------
+> >  arch/arm/mach-davinci/include/mach/asp.h           |    2 +-
+> >  arch/arm/mach-davinci/include/mach/da8xx.h         |    3 +-
+> >  arch/arm/mach-davinci/include/mach/edma.h          |  267 ---
+> >  arch/arm/mach-davinci/include/mach/spi.h           |    2 +-
+> >  arch/arm/mach-omap2/hsmmc.c                        |    7 +-
+> >  arch/arm/plat-omap/Kconfig                         |    1 +
+> >  drivers/dma/Kconfig                                |    2 +-
+> >  drivers/dma/edma.c                                 |    2 +-
+> >  drivers/mmc/host/omap_hsmmc.c                      |   26 +-
+> >  drivers/spi/spi-omap2-mcspi.c                      |   68 +-
+> >  27 files changed, 2296 insertions(+), 1893 deletions(-)
+> >  create mode 100644 Documentation/devicetree/bindings/dma/ti-edma.t=
+xt
+> >  create mode 100644 arch/arm/common/edma.c
+> >  create mode 100644 arch/arm/include/asm/mach/edma.h
+> >  delete mode 100644 arch/arm/mach-davinci/dma.c
+> >  delete mode 100644 arch/arm/mach-davinci/include/mach/edma.h
+> >=20
+> > --=20
+> > 1.7.9.5
+> >=20
+> > _______________________________________________
+> > Davinci-linux-open-source mailing list
+> > Davinci-linux-open-source@linux.davincidsp.com
+> > http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-sou=
+rce
+> >=20
+>=20
+>=20
+> Regards,=20
+> Gururaja
+> _______________________________________________
+> Davinci-linux-open-source mailing list
+> Davinci-linux-open-source@linux.davincidsp.com
+> http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-sourc=
+e
