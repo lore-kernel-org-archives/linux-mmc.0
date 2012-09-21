@@ -1,76 +1,63 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH v2 00/34] i.MX multi-platform support
-Date: Sat, 22 Sep 2012 00:53:08 +0800
-Message-ID: <20120921165305.GB5394@S2101-09.ap.freescale.net>
-References: <1348123547-31082-1-git-send-email-shawn.guo@linaro.org>
- <201209200739.34899.arnd@arndb.de>
- <20120920145342.GI2450@S2101-09.ap.freescale.net>
- <201209201556.57171.arnd@arndb.de>
- <20120921080123.GM2450@S2101-09.ap.freescale.net>
- <CAOesGMi6CbvFikycJVdE8W-DxLD3W7+CyScz+YT103dxR31U9g@mail.gmail.com>
- <20120921164622.GA5394@S2101-09.ap.freescale.net>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: fix max value of clkd
+Date: Fri, 21 Sep 2012 22:28:00 +0530
+Message-ID: <CANfBPZ8wpbMeePM8wOJ59gN0LKx3Ed+qRfnBeez18Nyq2DJ2Jg@mail.gmail.com>
+References: <1348240872-16068-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <alsa-devel-bounces@alsa-project.org>
-Content-Disposition: inline
-In-Reply-To: <20120921164622.GA5394@S2101-09.ap.freescale.net>
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Errors-To: alsa-devel-bounces@alsa-project.org
-Sender: alsa-devel-bounces@alsa-project.org
-To: Olof Johansson <olof@lixom.net>
-Cc: alsa-devel@alsa-project.org, linux-usb@vger.kernel.org, Artem Bityutskiy <artem.bityutskiy@linux.intel.com>, linux-fbdev@vger.kernel.org, Wim Van Sebroeck <wim@iguana.be>, linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org, rtc-linux@googlegroups.com, Florian Tobias Schandinat <FlorianSchandinat@gmx.de>, Paulius Zaleckas <paulius.zaleckas@teltonika.lt>, Chris Ball <cjb@laptop.org>, linux-media@vger.kernel.org, linux-watchdog@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Sascha Hauer <s.hauer@pengutronix.de>, Rob Herring <rob.herring@calxeda.com>, linux-arm-kernel@lists.infradead.org, Vinod Koul <vinod.koul@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, Javier Martin <javier.martin@vista-silicon.com>, Andrew Morton <akpm@linux-fo>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog136.obsmtp.com ([74.125.149.85]:33087 "EHLO
+	na3sys009aog136.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750755Ab2IUQ6W (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Sep 2012 12:58:22 -0400
+Received: by qaas11 with SMTP id s11so1421650qaa.19
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Sep 2012 09:58:21 -0700 (PDT)
+In-Reply-To: <1348240872-16068-1-git-send-email-balajitk@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-omap@vger.kernel.org
 
-On Sat, Sep 22, 2012 at 12:46:26AM +0800, Shawn Guo wrote:
-> I just published the branch below with this series rebased on top of
-> the necessary dependant branches.
-> 
->   git://git.linaro.org/people/shawnguo/linux-2.6.git staging/imx-multiplatform
-> 
-> The dependant branches include:
-> 
+On Fri, Sep 21, 2012 at 8:51 PM, Balaji T K <balajitk@ti.com> wrote:
+> clock divisor can take a max value of 1023
+> update code as per TRM so that card init can be handled with
+> higher IP clock frequencies from which clock to the card is
+> derived.
+>
+This is difficult to read without some punctuation / capitalization.
 
-Forgot the base:
+> Signed-off-by: Balaji T K <balajitk@ti.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c |    5 +++--
+>  1 files changed, 3 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index d9af5f1..073b9ff 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -75,6 +75,7 @@
+>  #define ICE                    0x1
+>  #define ICS                    0x2
+>  #define CEN                    (1 << 2)
+> +#define CLKD_MAX               0x3FF
 
-  * arm-soc/next/multiplatform
+It'd be nice to have a comment on what 3FF stands for and it's
+relation to clock in MHz.
 
-Shawn
+>  #define CLKD_MASK              0x0000FFC0
+>  #define CLKD_SHIFT             6
+>  #define DTO_MASK               0x000F0000
+> @@ -478,8 +479,8 @@ static u16 calc_divisor(struct omap_hsmmc_host *host, struct mmc_ios *ios)
+>
+>         if (ios->clock) {
+>                 dsor = DIV_ROUND_UP(clk_get_rate(host->fclk), ios->clock);
+> -               if (dsor > 250)
+> -                       dsor = 250;
+> +               if (dsor > CLKD_MAX)
+> +                       dsor = CLKD_MAX;
 
-> * arm-soc/multiplatform/platform-data
-> 
-> * arm-soc/multiplatform/smp_ops
-> 
-> * git://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git for-3.7
-> 
->   It contains dependant patch "ASoC: mx27vis: retrieve gpio numbers
->   from platform_data"
-> 
-> * git://git.infradead.org/mtd-2.6.git master
-> 
->   The series is based on this tree to solve some non-trivial conflicts
->   on mxc_nand driver.  Because mtd tree completely missed 3.6 merge
->   window, having the series base on 3.6-rc actually means 3.5 code base
->   in term of mtd support.  There are currently two cycles changes
->   accumulated on mtd, and we need to base the series on it to sort out
->   the conflicts.
-> 
-> * git://linuxtv.org/mchehab/media-next.git master
-> 
->   The media tree renames mx2/mx3 camera drivers twice.  I'm not sure
->   if git merge can detect them, so I just rebased the series on media
->   tree to solve that.  The bonus point is that a number of trivial
->   conflicts with imx27-coda support on media tree gets solved as well.
-> 
-> I'm not requesting you to pull the branch into arm-soc as a stable
-> branch but staging one, because the external dependencies which might
-> not be stable.  I attempt to use it for exposing the series on
-> linux-next, so that we can send it to Linus for 3.7 if there is chance
-> for us to (e.g. all the dependant branches hit mainline early during
-> 3.7 merge window).
+Can these two lines be written in one line as
+"dsor &= CLKD_MAX; " ?
+
+>         }
+>
