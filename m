@@ -1,49 +1,100 @@
-From: "S, Venkatraman" <svenkatr-l0cyMroinI0@public.gmane.org>
-Subject: Re: [RFC PATCH 08/13] mmc: omap_hsmmc: limit max_segs with the EDMA
-	DMAC
-Date: Fri, 21 Sep 2012 22:47:30 +0530
-Message-ID: <CANfBPZ-h7MD4X_NRYfwOmMnEyOKy0bTNNLNRmdbef2pe=2aHyg@mail.gmail.com>
-References: <1348152226-13588-1-git-send-email-mporter@ti.com>
-	<1348152226-13588-9-git-send-email-mporter@ti.com>
-	<CANfBPZ81anOy8fWgKM1PgCtB4V2pEp2x1Qi4x1uPsq7QieMN5g@mail.gmail.com>
+From: Felipe Balbi <balbi@ti.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: fix max value of clkd
+Date: Fri, 21 Sep 2012 20:14:59 +0300
+Message-ID: <20120921171458.GA10409@arwen.pp.htv.fi>
+References: <1348240872-16068-1-git-send-email-balajitk@ti.com>
+ <CANfBPZ8wpbMeePM8wOJ59gN0LKx3Ed+qRfnBeez18Nyq2DJ2Jg@mail.gmail.com>
+Reply-To: balbi@ti.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <CANfBPZ81anOy8fWgKM1PgCtB4V2pEp2x1Qi4x1uPsq7QieMN5g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="UlVJffcvxoiEqYs2"
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CANfBPZ8wpbMeePM8wOJ59gN0LKx3Ed+qRfnBeez18Nyq2DJ2Jg@mail.gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: "S, Venkatraman" <svenkatr@ti.com>
+Cc: Balaji T K <balajitk@ti.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Sep 21, 2012 at 10:45 PM, S, Venkatraman <svenkatr-l0cyMroinI0@public.gmane.org> wrote:
-> On Thu, Sep 20, 2012 at 8:13 PM, Matt Porter <mporter-l0cyMroinI0@public.gmane.org> wrote:
->> The EDMA DMAC has a hardware limitation that prevents supporting
->> scatter gather lists with any number of segments. Since the EDMA
->> DMA Engine driver sets the maximum segments to 16, we do the
->> same.
->>
->> Note: this can be removed once the DMA Engine API supports an
->> API to query the DMAC's segment limitations.
->>
->
-> I wouldn't want to bind the properties of EDMA to omap_hsmmc as this patch
-> suggests. Why don't we have a max_segs property, which when explicitly specified
-> in DT, will override the default ?
 
-If you are adventurous, this can be a generic mmc DT binding instead
-of restricting it to OMAP.
+--UlVJffcvxoiEqYs2
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-------------------------------------------------------------------------------
-Got visibility?
-Most devs has no idea what their production app looks like.
-Find out how fast your code is with AppDynamics Lite.
-http://ad.doubleclick.net/clk;262219671;13503038;y?
-http://info.appdynamics.com/FreeJavaPerformanceDownload.html
+On Fri, Sep 21, 2012 at 10:28:00PM +0530, S, Venkatraman wrote:
+> On Fri, Sep 21, 2012 at 8:51 PM, Balaji T K <balajitk@ti.com> wrote:
+> > clock divisor can take a max value of 1023
+> > update code as per TRM so that card init can be handled with
+> > higher IP clock frequencies from which clock to the card is
+> > derived.
+> >
+> This is difficult to read without some punctuation / capitalization.
+>=20
+> > Signed-off-by: Balaji T K <balajitk@ti.com>
+> > ---
+> >  drivers/mmc/host/omap_hsmmc.c |    5 +++--
+> >  1 files changed, 3 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmm=
+c.c
+> > index d9af5f1..073b9ff 100644
+> > --- a/drivers/mmc/host/omap_hsmmc.c
+> > +++ b/drivers/mmc/host/omap_hsmmc.c
+> > @@ -75,6 +75,7 @@
+> >  #define ICE                    0x1
+> >  #define ICS                    0x2
+> >  #define CEN                    (1 << 2)
+> > +#define CLKD_MAX               0x3FF
+>=20
+> It'd be nice to have a comment on what 3FF stands for and it's
+> relation to clock in MHz.
+>=20
+> >  #define CLKD_MASK              0x0000FFC0
+> >  #define CLKD_SHIFT             6
+> >  #define DTO_MASK               0x000F0000
+> > @@ -478,8 +479,8 @@ static u16 calc_divisor(struct omap_hsmmc_host *hos=
+t, struct mmc_ios *ios)
+> >
+> >         if (ios->clock) {
+> >                 dsor =3D DIV_ROUND_UP(clk_get_rate(host->fclk), ios->cl=
+ock);
+> > -               if (dsor > 250)
+> > -                       dsor =3D 250;
+> > +               if (dsor > CLKD_MAX)
+> > +                       dsor =3D CLKD_MAX;
+>=20
+> Can these two lines be written in one line as
+> "dsor &=3D CLKD_MAX; " ?
+
+maybe:
+
+dsor =3D DIV_ROUND_UP(clk_get_rate(host->fclk), ios->clock);
+dsor =3D clamp_t(u16, dsor, 0, CLKD_MAX);
+
+--=20
+balbi
+
+--UlVJffcvxoiEqYs2
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJQXKCSAAoJEIaOsuA1yqREnBMP/AzJL1THvHMfBvMInl7+kJGu
+QSR0p4z8Gm3KsildNVt+7wcf5XfWGOtt2lwimw7w62EBni47lj6XrIe5fiFC7Ksm
+kD0vkO762RenHEnLJI15QQL4+TB/HIDZsL1uFwswDdmrlZZTbMRnlMGH/2luqhvx
+qGSS+bvANTbHPNWGm+7os4COo8Nlmnft4UVLDI41z/by7QhYvNS/MCguL2nzWDxq
+9W9QvKsbnHOpu41YXggEPDEMCLEHgV3WqD9NjJnmUQ3xI5/z2Vjb95hZXtEoU3Op
+7zs4UGjhKYw9sLKwGzSfUVnPqBCrkkyoAF2NY7KsklUrts9S0WkKQWAtdnW/wvda
+r6CZMufcjr7ikT8fPsIYLP737E3xC8RN5k/EOe+M7q6vf9kPu76l98h/rNEH9KoL
+q2O4N3tmw7lwgeYPzaErX7adDKnLhpSw+jJvaYjXzUCd4aznFsSqlS5BiPV44Guu
+OPT/gFfICCL/SpzInlQY18CeDh8o2k/T4rCphc6I/Kg/ogYypt7Pcr8OaKRNfdC/
+eeWLnzCcwIJ6lGLO5w/c02ZoSCSXu92Bi/GzhdWfY1l4zStl14pVAyi8AnKvGsMz
+lvQ6+jxfbo0V+TIy3N8Bo2y4bYxlWB1f8X2DNk762rcYU5s3Fa3W5l3zZh7e0J4m
+0nOyeizL/f3ghnsYMLHl
+=Mo2L
+-----END PGP SIGNATURE-----
+
+--UlVJffcvxoiEqYs2--
