@@ -1,69 +1,66 @@
-From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: Re: [RFC PATCH 08/13] mmc: omap_hsmmc: limit max_segs with the EDMA
-	DMAC
-Date: Fri, 21 Sep 2012 15:03:12 -0400
-Message-ID: <20120921190312.GL16522@beef>
-References: <1348152226-13588-1-git-send-email-mporter@ti.com>
-	<1348152226-13588-9-git-send-email-mporter@ti.com>
-	<CANfBPZ81anOy8fWgKM1PgCtB4V2pEp2x1Qi4x1uPsq7QieMN5g@mail.gmail.com>
-	<20120921184721.GD31374@n2100.arm.linux.org.uk>
+From: =?utf-8?B?5q+P5aSp5LuFMTDlhYM=?= <test@xzetc.gov.cn>
+Subject: =?utf-8?B?MjAxMuaYpeWtozExMeWxiuW5v+S6pOS8muS5sOWutu+8jEIyQuivog==?=
+	=?utf-8?B?55uY5Lmw5a6244CBdGhvbWFzbmV0IOmHh+i0reWVhizmtbflhbM=?=
+	=?utf-8?B?5pWw5o2uLOe+pOWPkei9r+S7tu+8jOWxleS8muS5sOWutiDku4UzMDDlhYMh?=
+Date: Fri, 21 Sep 2012 23:06:17 +0000 (UTC)
+Message-ID: <20240919150830116362@xzetc.gov.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20120921184721.GD31374-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, "S, Venkatraman" <svenkatr-l0cyMroinI0@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from [58.218.194.252] ([58.218.194.252]:2097 "HELO xzetc.gov.cn"
+	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with SMTP
+	id S1758265Ab2IUXGM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 21 Sep 2012 19:06:12 -0400
+Date: Thu, 19 Sep 2024 15:08:21 +0800
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, luana1846s@aol.com, linqiaoli0705@gmail.com, linqingdun@163.com, luangongsi1@163.com, linqz168@yeah.net, linrj@yeah.net, linrui@126.com, lins_sime@hotmail.com, linsay_l@hotmail.com
 
-On Fri, Sep 21, 2012 at 07:47:21PM +0100, Russell King wrote:
-> On Fri, Sep 21, 2012 at 10:45:29PM +0530, S, Venkatraman wrote:
-> > On Thu, Sep 20, 2012 at 8:13 PM, Matt Porter <mporter-l0cyMroinI0@public.gmane.org> wrote:
-> > > The EDMA DMAC has a hardware limitation that prevents supporting
-> > > scatter gather lists with any number of segments. Since the EDMA
-> > > DMA Engine driver sets the maximum segments to 16, we do the
-> > > same.
-> > >
-> > > Note: this can be removed once the DMA Engine API supports an
-> > > API to query the DMAC's segment limitations.
-> > >
-> > 
-> > I wouldn't want to bind the properties of EDMA to omap_hsmmc as this patch
-> > suggests. Why don't we have a max_segs property, which when explicitly specified
-> > in DT, will override the default ?
-> 
-> Why not have a generic way that DMA engine can export these kinds of
-> properties?
+MjAxMuaYpeWtozExMeWxiuW5v+S6pOS8muS5sOWutu+8jOa1t+WFs+aVsOaNruaPkOWNlXBpZXJz
+54mI77yMMjAwOC0yMDEy5bm0OeWxiuW5v+S6pOS8muaVsOaNruOAgg0KDQrkuIDlhbExMOS4quWM
+hSjmlbDmja7mmK/lhajooYzkuJrnmoTvvIzlj6/ku6XmjInnhaflhbPplK7or43mj5Dlj5blh7rm
+naXnmoQp77yaIA0KMe+8jDIwMTLmmKXlraMxMTHlsYrlub/kuqTkvJrkubDlrrbnjrDlnLror6Ln
+m5jmlbDmja7lupPmlrDpspzlh7rngonvvIzotoXnuqfmlrDpspzkubDlrrbvvIzmlrDpspzmlbDm
+ja7vvIzlrrnmmJPmiJDljZXvvIEgDQoy77yM6LSt5Lmw5ZCO5Y+v5Lul5YWN6LS55pu05pawMjAx
+Mueni+Wto+W5v+S6pOS8muS5sOWutuaVsOaNruOAguWkqui2heWAvOS6huOAgg0KM++8jDIwMTLm
+nIDmlrDlhajnkIPlsZXkvJrnjrDlnLrkubDlrrblupMo5LiO6LS45Y+R5ZCM5q2lKSzlhbE0NuS4
+h+adoeaVsOaNruOAgiAo5oyJ54Wn6KGM5Lia5YiG57G7KQ0KNO+8jDIwMTEsMjAxMOW5tCwyMDA5
+5bm0LDIwMDjlubQg5pil5a2jK+eni+Wto+W5v+S6pOS8muS5sOWutuWQjeW9le+8jDEwMyAxMDQg
+MTA1IDEwNiAxMDcgMTA4LDEwOSwxMTAg5YWx5YWt5bGKIOWFsTEyMC425LiH5pWw5o2u44CCDQo1
+77yMNDguNjjkuIfmnaHmnIDmlrDkubDlrrbor6Lnm5jvvIzpg73luKbmnIlFbWFpbO+8jOacgOac
+ieS7t+WAvOeahOivouebmOOAgg0KNu+8jDIwMTHmnIDmlrAgQjJCIOiLseaWh+WbvemZheermTYw
+5LiH5bim6IGU57uc5pa55byP6K+i55uYIOacgOacieS7t+WAvOivouebmOS5i+S4gC4NCjfvvIwy
+MDEw5rW35YWz5o+Q5Y2VcGllcnPniYgxMDAw5LiH5pWw5o2uLg0KOO+8jDIwMTHlubTliLDpppnm
+uK/ph4fotK3nmoTlm73lpJblrqLkurrlkI3lvZUo6aaZ5riv6LS45Y+R5bGA5o+Q5L6bKe+8jOi2
+hee6p+mHjeimgeeahOS5sOWutuOAgg0KOe+8jDIwMTHlubTmlrDlop7liqDnmoQt576O5Zu9QjJC
+IHRob21hc25ldCDph4fotK3llYblkI3ljZXjgIINCjEw77yM576k5Y+R6L2v5Lu25a6J6KOF5LiO
+6YOo572y5pyN5Yqh44CCDQoNCui/meS6m+WFqOacie+8jOWFsTEyODDkuIcg5pWw5o2u44CCDQoN
+CiANCuimgeeahOaKk+e0p+iBlOezu1FROiA0NjAxMjI2NDEg5oiW6ICF56uL5Y2z5Zue5aSN6YKu
+566xOiA0NjAxMjI2NDFAcXEuY29tDQropoHnmoTmipPntKfogZTns7tRUTogNDYwMTIyNjQxIOaI
+luiAheeri+WNs+WbnuWkjemCrueusTogNDYwMTIyNjQxQHFxLmNvbQ0K6KaB55qE5oqT57Sn6IGU
+57O7UVE6IDQ2MDEyMjY0MSDmiJbogIXnq4vljbPlm57lpI3pgq7nrrE6IDQ2MDEyMjY0MUBxcS5j
+b20NCg0K6K+a5L+h5Li65pys77yM5aaC5p6c5LiN5L+h5Lu75pys5Lq6LOWPr+S7pei1sOa3mOWu
+neS6pOaYkyzmlLbliLDmlbDmja7pqozor4Ez5aSp5ZCO5YaN5LuY5qy+LOi/meaYr+WvueaCqOac
+gOWlveeahOS/nemanOS6huOAgiANCg0KDQoNCuWwj+aKgOW3p++8miANCuaKijUwMOS4h+S5sOWu
+tue+pOWPkeS7peS4gOmBje+8jOWdh+S8muacieaVsOWNg+S4quWbnuWkjeeahO+8jOi/meS6m+Ww
+seaYr+mdnuW4uOmrmOi0qOmHj+eahOS5sOWutuOAgiANCuS9v+eUqOaIkeS7rOmAgeeahOe+pOWP
+kei9r+S7tu+8jDEtMuWRqOWwseWPr+WujOWFqOWPkeWujOOAgg0KDQoNCg0KDQoNCuW5v+S6pOS8
+muS5sOWutuaMieS6p+WTgeexu+WIq+WIhuexu++8jOWIhuS4uuS7peS4i+WHoOexu++8mg0KMSDl
+ip7lhazorr7lpIcNCjIg57yW57uH5Y+K6Jek6ZOB5bel6Im65ZOBDQozIOeOu+eSgw0KNCDppJDl
+jqjnlKjlhbcNCjUg6L2m6L6GDQo2IOWkp+Wei+acuuaisOWPiuiuvuWkhw0KNyDnlLXlrZDnlLXm
+sJQNCjgg55S15a2Q5raI6LS55ZOBDQo5IOe6uue7hw0KMTAg5pyN6KOFDQoxMSDkuKrkurrmiqTn
+kIYNCjEyIOW3peeoi+acuuaisA0KMTMg5bel5YW3DQoxNCDljJblt6UNCjE1IOiuoeeul+acuuWP
+iumAmuiurw0KMTYg5a625bGF55So5ZOBDQoxNyDlrrblsYXoo4XppbANCjE4IOWutuWFtw0KMTkg
+5a6255So55S15ZmoDQoyMCDlu7rnrZHlj4roo4XppbDmnZDmlpkNCjIxIOiKguaXpeeUqOWTgQ0K
+MjIg56S85ZOB5Y+K6LWg5ZOBDQoyMyDmkanmiZjovaYNCjI0IOaxvei9pumFjeS7tg0KMjUg6aOf
+5ZOBDQoyNiDpmbbnk7cNCjI3IOmTgeefsw0KMjgg546p5YW3DQoyOSDljavmtbQNCjMwIOS6lOmH
+kQ0KMzEg5bCP5Z6L5py65qKwDQozMiDpnosNCjMzIOS8kemXsueUqOWTgQ0KMzQg5Yy755aXDQoz
+NSDmtbTlrqTkuqflk4ENCjM2IOWbreaelw0KMzcg54Wn5piO5Lqn5ZOBDQozOCDpkp/ooajnnLzp
+lZwNCjM5IOiHquihjOi9pg0KNDAg5YyFDQoNCg0K5paw6bKc5pWw5o2uLeaIkOWNleeOh+aegemr
+mA0K5paw6bKc5pWw5o2uLeaIkOWNleeOh+aegemrmA0K5paw6bKc5pWw5o2uLeaIkOWNleeOh+ae
+gemrmA0K5paw6bKc5pWw5o2uLeaIkOWNleeOh+aegemrmA0K5paw6bKc5pWw5o2uLeaIkOWNleeO
+h+aegemrmA0K
 
-That's exactly what my note above is suggesting...
 
-Something along the lines of:
-
-	struct slave_sg_caps
-	{
-		int max_segs;	/* <0 is no limit */
-	}
-
-	struct slave_sg_cap *
-	dmaengine_get_slave_sg_caps(struct dma_chan *chan);
-
-I'm sure there are or will be other characteristics worth providing to
-slave drivers.
-
--Matt
-
-------------------------------------------------------------------------------
-Got visibility?
-Most devs has no idea what their production app looks like.
-Find out how fast your code is with AppDynamics Lite.
-http://ad.doubleclick.net/clk;262219671;13503038;y?
-http://info.appdynamics.com/FreeJavaPerformanceDownload.html
