@@ -1,39 +1,88 @@
-From: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
-Subject: Re: [PATCH] mmc: sh-mmcif: avoid Oops on spurious interrupts
-Date: Fri, 21 Sep 2012 11:35:43 +0900
-Message-ID: <505BD27F.4040800@kmckk.co.jp>
-References: <878vdxd3mq.wl%kuninori.morimoto.gx@renesas.com> <20120803050039.GA1614@linux-sh.org> <20120809042844.GF1614@linux-sh.org> <87hasc3bv5.wl%kuninori.morimoto.gx@renesas.com> <874nobqntv.wl%kuninori.morimoto.gx@renesas.com> <20120810123804.GK1614@linux-sh.org> <502DDC97.5080501@kmckk.co.jp> <87wr0us6tg.wl%kuninori.morimoto.gx@renesas.com> <20120820031352.GC25767@linux-sh.org> <87obm6ry98.wl%kuninori.morimoto.gx@renesas.com> <20120820043853.GD25767@linux-sh.org> <87mx1qrx1x.wl%kuninori.morimoto.gx@renesas.com> <5031D9FF.8060801@kmckk.co.jp> <Pine.LNX.4.64.1208220840400.26767@axis700.grange> <m3boh2il85.fsf@pullcord.laptop.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v6 6/9] mmc: dw_mmc: add device tree support
+Date: Fri, 21 Sep 2012 11:43:06 +0900
+Message-ID: <505BD43A.9020608@samsung.com>
+References: <1347905803-22742-1-git-send-email-thomas.abraham@linaro.org>
+ <1347905803-22742-7-git-send-email-thomas.abraham@linaro.org>
+ <001301cd966c$3f99f0a0$becdd1e0$%jun@samsung.com>
+ <CAJuYYwQOCLPsVjGYQFTnTaqDeWnaDONGMHPEF5TB3htYc5SsJA@mail.gmail.com>
+ <003501cd97a0$98a7fcc0$c9f7f640$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-2022-JP
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from vrgw2.firstserver.ne.jp ([164.46.1.45]:51735 "EHLO
-	vrgw2.firstserver.ne.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756852Ab2IUCgA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 22:36:00 -0400
-In-Reply-To: <m3boh2il85.fsf@pullcord.laptop.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:31926 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754877Ab2IUCnb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Sep 2012 22:43:31 -0400
+In-reply-to: <003501cd97a0$98a7fcc0$c9f7f640$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, yusuke.goda.sx@renesas.com, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org, koba@kmckk.co.jp
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Thomas Abraham' <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, will.newton@imgtec.com, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, patches@linaro.org
 
-Hello, Chris
-
-(2012/09/19 15:24), Chris Ball wrote:
-> Hi,
-> 
-> On Wed, Aug 22 2012, Guennadi Liakhovetski wrote:
->> On some systems, e.g., kzm9g, MMCIF interfaces can produce spurious
->> interrupts without any active request. To prevent the Oops, that results
->> in such cases, don't dereference the mmc request pointer until we make
->> sure, that we are indeed processing such a request.
+>>>> +#else /* CONFIG_OF */
+>>>> +static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>>>> +{
+>>>> +     return ERR_PTR(-EINVAL);
+>>>> +}
+>>>> +#endif /* CONFIG_OF */
+>>>> +
+>>>>  int dw_mci_probe(struct dw_mci *host)
+>>>>  {
+>>>>       int width, i, ret = 0;
+>>>>       u32 fifo_size;
+>>>>       int init_slots = 0;
+>>>>
+>>>> -     if (!host->pdata || !host->pdata->init) {
+>>> "!host->pdata->init" is removed.
+>>> Please check it.
 >>
->> Reported-by: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
->> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+>> I have checked again in mmc-next branch and "init" is still there.
+> I mean that there is no condition whether "host->pdata->init" is present or not, unlike origin code.
+> In this patch this condition is removed. We don't need it anymore?
+Actually i didn't know why need the pdata->init.
+Why need host->pdata->init? In case of exynos, just return 1.
+I didn't know how use this at other-soc.
+
+Best Regards,
+Jaehoon Chung
 > 
-> Thanks, pushed to mmc-next for 3.7.
-
-It needs this patch for kzm9g board to boot kernel 3.6-rc6 successfully.
-Can I ask you to queue this patch for 3.6-rc7 ?
-
+>>
+>> Thanks,
+>> Thomas.
+>>
+>>
+>>>
+>>> Thanks,
+>>> Seungwon Jeon
+>>>
+>>>> -             dev_err(host->dev,
+>>>> -                     "Platform data must supply init function\n");
+>>>> -             return -ENODEV;
+>>>> +     if (!host->pdata) {
+>>>> +             host->pdata = dw_mci_parse_dt(host);
+>>>> +             if (IS_ERR(host->pdata)) {
+>>>> +                     dev_err(host->dev, "platform data not available\n");
+>>>> +                     return -EINVAL;
+>>>> +             }
+>>>>       }
+>>>>
+>>>>       if (!host->pdata->select_slot && host->pdata->num_slots > 1) {
+>>>> --
+>>>> 1.6.6.rc2
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+>> [...]
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
 
