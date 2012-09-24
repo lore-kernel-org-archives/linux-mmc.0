@@ -1,20 +1,19 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC/PATCH v2 2/3] mmc: sdio: add asynchronous interrupt support
- on device
-Date: Mon, 24 Sep 2012 11:54:01 +0200
-Message-ID: <CAPDyKFqRWxGfxJw6UPESz52imOC72m08Aw6PwBSecw0k5hYeWg@mail.gmail.com>
+Subject: Re: [RFC/PATCH v2 3/3] mmc: sdhci: add asynchronous interrupt support
+Date: Mon, 24 Sep 2012 11:55:40 +0200
+Message-ID: <CAPDyKFoO1kRKFFGESdrNh1fdAcO1Jp4PnkMnkDgqmaafEvApfA@mail.gmail.com>
 References: <1348196867-15145-1-git-send-email-keyuan.liu@gmail.com>
-	<1348196867-15145-3-git-send-email-keyuan.liu@gmail.com>
+	<1348196867-15145-4-git-send-email-keyuan.liu@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:64753 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752252Ab2IXJyD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Sep 2012 05:54:03 -0400
-Received: by wgbdr13 with SMTP id dr13so3555604wgb.1
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Sep 2012 02:54:01 -0700 (PDT)
-In-Reply-To: <1348196867-15145-3-git-send-email-keyuan.liu@gmail.com>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:51041 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752993Ab2IXJzl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Sep 2012 05:55:41 -0400
+Received: by weyt9 with SMTP id t9so93134wey.19
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Sep 2012 02:55:40 -0700 (PDT)
+In-Reply-To: <1348196867-15145-4-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Kevin Liu <keyuan.liu@gmail.com>
@@ -23,130 +22,76 @@ Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, hzhuang1@marvel
 On 21 September 2012 05:07, Kevin Liu <keyuan.liu@gmail.com> wrote:
 > From: Kevin Liu <kliu5@marvell.com>
 >
-> Enable asynchronous interrupt on device by default if both host
-> and device support it and clock gating is allowed.
->
-> If asynchronous interrupt is enabled, then no need to switch bus
-> width to 1bit before suspend.
+> If host support asynchronous interrupt and sdio device has enabled it,
+> then enable/disable asynchronous interrupt on host when enable/disable
+> sdio irq.
 >
 > Signed-off-by: Kevin Liu <kliu5@marvell.com>
 > ---
->  drivers/mmc/core/sdio.c  |   22 +++++++++++++++++++---
->  include/linux/mmc/card.h |    3 +++
->  include/linux/mmc/host.h |    1 +
->  include/linux/mmc/sdio.h |    5 +++++
->  4 files changed, 28 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/sdhci.c |   15 +++++++++++++++
+>  drivers/mmc/host/sdhci.h |    2 ++
+>  2 files changed, 17 insertions(+), 0 deletions(-)
 >
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index 909c835..b3a3ca8 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -199,6 +199,21 @@ static int sdio_read_cccr(struct mmc_card *card, u32 ocr)
->                 }
->         }
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index e01536a..cd74009 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1634,6 +1634,8 @@ static int sdhci_get_ro(struct mmc_host *mmc)
 >
-> +       if (cccr_vsn >= SDIO_CCCR_REV_3_00) {
-> +               if (!(card->quirks & MMC_QUIRK_BROKEN_CLK_GATING) &&
-> +                       (card->host->caps2 & MMC_CAP2_ASYNC_INT)) {
-> +                       if (mmc_io_rw_direct(card, 0, 0,
-> +                               SDIO_CCCR_INT_EXT, 0, &data))
-> +                               goto out;
-> +                       if (data & SDIO_INT_SAI) {
-> +                               data |= SDIO_INT_EAI;
-> +                               if (mmc_io_rw_direct(card, 1, 0,
-> +                                       SDIO_CCCR_INT_EXT, data, NULL))
-> +                                       goto out;
-> +                               mmc_card_set_async_int(card);
-> +                       }
-> +               }
-> +       }
->  out:
->         return ret;
->  }
-> @@ -290,7 +305,6 @@ static int sdio_disable_wide(struct mmc_card *card)
->         return 0;
->  }
->
-> -
->  static int sdio_enable_4bit_bus(struct mmc_card *card)
+>  static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
 >  {
->         int err;
-> @@ -917,7 +931,8 @@ static int mmc_sdio_suspend(struct mmc_host *host)
->                 }
->         }
->
-> -       if (!err && mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
-> +       if (!err && mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)
-> +               && !mmc_card_async_int(host->card)) {
->                 mmc_claim_host(host);
->                 sdio_disable_wide(host->card);
->                 mmc_release_host(host);
-> @@ -940,7 +955,8 @@ static int mmc_sdio_resume(struct mmc_host *host)
->         if (mmc_card_is_removable(host) || !mmc_card_keep_power(host))
->                 err = mmc_sdio_init_card(host, host->ocr, host->card,
->                                         mmc_card_keep_power(host));
-> -       else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
-> +       else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)
-> +               && !mmc_card_async_int(host->card)) {
->                 /* We may have switched to 1-bit mode during suspend */
->                 err = sdio_enable_4bit_bus(host->card);
->                 if (err > 0) {
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 78cc3be..4f0f554 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -231,6 +231,7 @@ struct mmc_card {
->  #define MMC_STATE_HIGHSPEED_200        (1<<8)          /* card is in HS200 mode */
->  #define MMC_STATE_SLEEP                (1<<9)          /* card is in sleep state */
->  #define MMC_STATE_DOING_BKOPS  (1<<10)         /* card is doing BKOPS */
-> +#define MMC_STATE_ASYNC_INT    (1<<11)         /* card is async int enabled */
->         unsigned int            quirks;         /* card quirks */
->  #define MMC_QUIRK_LENIENT_FN0  (1<<0)          /* allow SDIO FN0 writes outside of the VS CCCR range */
->  #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)   /* use func->cur_blksize */
-> @@ -399,6 +400,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
->  #define mmc_card_removed(c)    ((c) && ((c)->state & MMC_CARD_REMOVED))
->  #define mmc_card_is_sleep(c)   ((c)->state & MMC_STATE_SLEEP)
->  #define mmc_card_doing_bkops(c)        ((c)->state & MMC_STATE_DOING_BKOPS)
-> +#define mmc_card_async_int(c)  ((c)->state & MMC_STATE_ASYNC_INT)
->
->  #define mmc_card_set_present(c)        ((c)->state |= MMC_STATE_PRESENT)
->  #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
-> @@ -412,6 +414,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
->  #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
->  #define mmc_card_set_sleep(c)  ((c)->state |= MMC_STATE_SLEEP)
->  #define mmc_card_set_doing_bkops(c)    ((c)->state |= MMC_STATE_DOING_BKOPS)
-> +#define mmc_card_set_async_int(c)      ((c)->state |= MMC_STATE_ASYNC_INT)
->
->  #define mmc_card_clr_doing_bkops(c)    ((c)->state &= ~MMC_STATE_DOING_BKOPS)
->  #define mmc_card_clr_sleep(c)  ((c)->state &= ~MMC_STATE_SLEEP)
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index d5d9bd4..78fd877 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -257,6 +257,7 @@ struct mmc_host {
->  #define MMC_CAP2_HC_ERASE_SZ   (1 << 9)        /* High-capacity erase size */
->  #define MMC_CAP2_CD_ACTIVE_HIGH        (1 << 10)       /* Card-detect signal active high */
->  #define MMC_CAP2_RO_ACTIVE_HIGH        (1 << 11)       /* Write-protect signal active high */
-> +#define MMC_CAP2_ASYNC_INT     (1 << 12)       /* Asynchronous interrupt support */
->
->         mmc_pm_flag_t           pm_caps;        /* supported pm features */
->         unsigned int        power_notify_type;
-> diff --git a/include/linux/mmc/sdio.h b/include/linux/mmc/sdio.h
-> index 47e579d..abbb6c8 100644
-> --- a/include/linux/mmc/sdio.h
-> +++ b/include/linux/mmc/sdio.h
-> @@ -161,6 +161,11 @@
->  #define  SDIO_DTSx_SET_TYPE_A  (1 << SDIO_DRIVE_DTSx_SHIFT)
->  #define  SDIO_DTSx_SET_TYPE_C  (2 << SDIO_DRIVE_DTSx_SHIFT)
->  #define  SDIO_DTSx_SET_TYPE_D  (3 << SDIO_DRIVE_DTSx_SHIFT)
+> +       u16 ctrl;
 > +
-> +#define SDIO_CCCR_INT_EXT      0x16
-> +#define SDIO_INT_SAI           0x01
-> +#define SDIO_INT_EAI           0x02
+>         if (host->flags & SDHCI_DEVICE_DEAD)
+>                 goto out;
+>
+> @@ -1642,6 +1644,15 @@ static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
+>         else
+>                 host->flags &= ~SDHCI_SDIO_IRQ_ENABLED;
+>
+> +       if (mmc_card_async_int(host->mmc->card)) {
+> +               ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +               if (enable)
+> +                       ctrl |= SDHCI_CTRL_ASYNC_INT_ENABLE;
+> +               else
+> +                       ctrl &= ~SDHCI_CTRL_ASYNC_INT_ENABLE;
+> +               sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+> +       }
 > +
->  /*
->   * Function Basic Registers (FBR)
->   */
+>         /* SDIO IRQ will be enabled as appropriate in runtime resume */
+>         if (host->runtime_suspended)
+>                 goto out;
+> @@ -2952,6 +2963,10 @@ int sdhci_add_host(struct sdhci_host *host)
+>         else
+>                 mmc->power_notify_type = MMC_HOST_PW_NOTIFY_NONE;
+>
+> +       /* Does the host support async int? */
+> +       if (caps[0] & SDHCI_CAN_ASYNC_INT)
+> +               mmc->caps2 |= MMC_CAP2_ASYNC_INT;
+> +
+>         /* Initial value for re-tuning timer count */
+>         host->tuning_count = (caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
+>                               SDHCI_RETUNING_TIMER_COUNT_SHIFT;
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 5eb27bf..f9de65e 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -167,6 +167,7 @@
+>  #define   SDHCI_CTRL_DRV_TYPE_D                0x0030
+>  #define  SDHCI_CTRL_EXEC_TUNING                0x0040
+>  #define  SDHCI_CTRL_TUNED_CLK          0x0080
+> +#define  SDHCI_CTRL_ASYNC_INT_ENABLE   0x4000
+>  #define  SDHCI_CTRL_PRESET_VAL_ENABLE  0x8000
+>
+>  #define SDHCI_CAPABILITIES     0x40
+> @@ -187,6 +188,7 @@
+>  #define  SDHCI_CAN_VDD_300     0x02000000
+>  #define  SDHCI_CAN_VDD_180     0x04000000
+>  #define  SDHCI_CAN_64BIT       0x10000000
+> +#define  SDHCI_CAN_ASYNC_INT   0x20000000
+>
+>  #define  SDHCI_SUPPORT_SDR50   0x00000001
+>  #define  SDHCI_SUPPORT_SDR104  0x00000002
 > --
 > 1.7.0.4
 >
