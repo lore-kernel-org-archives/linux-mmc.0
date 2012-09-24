@@ -1,349 +1,157 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: [PATCH v2 8/8] mmc: sdhci: enhance preset value function
-Date: Mon, 24 Sep 2012 16:15:58 +0800
-Message-ID: <1348474558-23088-9-git-send-email-keyuan.liu@gmail.com>
-References: <1348474558-23088-1-git-send-email-keyuan.liu@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC/PATCH v2 2/3] mmc: sdio: add asynchronous interrupt support
+ on device
+Date: Mon, 24 Sep 2012 11:54:01 +0200
+Message-ID: <CAPDyKFqRWxGfxJw6UPESz52imOC72m08Aw6PwBSecw0k5hYeWg@mail.gmail.com>
+References: <1348196867-15145-1-git-send-email-keyuan.liu@gmail.com>
+	<1348196867-15145-3-git-send-email-keyuan.liu@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aob106.obsmtp.com ([74.125.149.76]:49483 "EHLO
-	na3sys009aog106.obsmtp.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1755406Ab2IXIZE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Sep 2012 04:25:04 -0400
-In-Reply-To: <1348474558-23088-1-git-send-email-keyuan.liu@gmail.com>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:64753 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752252Ab2IXJyD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Sep 2012 05:54:03 -0400
+Received: by wgbdr13 with SMTP id dr13so3555604wgb.1
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Sep 2012 02:54:01 -0700 (PDT)
+In-Reply-To: <1348196867-15145-3-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu
-Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-From: Kevin Liu <kliu5@marvell.com>
+On 21 September 2012 05:07, Kevin Liu <keyuan.liu@gmail.com> wrote:
+> From: Kevin Liu <kliu5@marvell.com>
+>
+> Enable asynchronous interrupt on device by default if both host
+> and device support it and clock gating is allowed.
+>
+> If asynchronous interrupt is enabled, then no need to switch bus
+> width to 1bit before suspend.
+>
+> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+> ---
+>  drivers/mmc/core/sdio.c  |   22 +++++++++++++++++++---
+>  include/linux/mmc/card.h |    3 +++
+>  include/linux/mmc/host.h |    1 +
+>  include/linux/mmc/sdio.h |    5 +++++
+>  4 files changed, 28 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index 909c835..b3a3ca8 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -199,6 +199,21 @@ static int sdio_read_cccr(struct mmc_card *card, u32 ocr)
+>                 }
+>         }
+>
+> +       if (cccr_vsn >= SDIO_CCCR_REV_3_00) {
+> +               if (!(card->quirks & MMC_QUIRK_BROKEN_CLK_GATING) &&
+> +                       (card->host->caps2 & MMC_CAP2_ASYNC_INT)) {
+> +                       if (mmc_io_rw_direct(card, 0, 0,
+> +                               SDIO_CCCR_INT_EXT, 0, &data))
+> +                               goto out;
+> +                       if (data & SDIO_INT_SAI) {
+> +                               data |= SDIO_INT_EAI;
+> +                               if (mmc_io_rw_direct(card, 1, 0,
+> +                                       SDIO_CCCR_INT_EXT, data, NULL))
+> +                                       goto out;
+> +                               mmc_card_set_async_int(card);
+> +                       }
+> +               }
+> +       }
+>  out:
+>         return ret;
+>  }
+> @@ -290,7 +305,6 @@ static int sdio_disable_wide(struct mmc_card *card)
+>         return 0;
+>  }
+>
+> -
+>  static int sdio_enable_4bit_bus(struct mmc_card *card)
+>  {
+>         int err;
+> @@ -917,7 +931,8 @@ static int mmc_sdio_suspend(struct mmc_host *host)
+>                 }
+>         }
+>
+> -       if (!err && mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
+> +       if (!err && mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)
+> +               && !mmc_card_async_int(host->card)) {
+>                 mmc_claim_host(host);
+>                 sdio_disable_wide(host->card);
+>                 mmc_release_host(host);
+> @@ -940,7 +955,8 @@ static int mmc_sdio_resume(struct mmc_host *host)
+>         if (mmc_card_is_removable(host) || !mmc_card_keep_power(host))
+>                 err = mmc_sdio_init_card(host, host->ocr, host->card,
+>                                         mmc_card_keep_power(host));
+> -       else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
+> +       else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)
+> +               && !mmc_card_async_int(host->card)) {
+>                 /* We may have switched to 1-bit mode during suspend */
+>                 err = sdio_enable_4bit_bus(host->card);
+>                 if (err > 0) {
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 78cc3be..4f0f554 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -231,6 +231,7 @@ struct mmc_card {
+>  #define MMC_STATE_HIGHSPEED_200        (1<<8)          /* card is in HS200 mode */
+>  #define MMC_STATE_SLEEP                (1<<9)          /* card is in sleep state */
+>  #define MMC_STATE_DOING_BKOPS  (1<<10)         /* card is doing BKOPS */
+> +#define MMC_STATE_ASYNC_INT    (1<<11)         /* card is async int enabled */
+>         unsigned int            quirks;         /* card quirks */
+>  #define MMC_QUIRK_LENIENT_FN0  (1<<0)          /* allow SDIO FN0 writes outside of the VS CCCR range */
+>  #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)   /* use func->cur_blksize */
+> @@ -399,6 +400,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+>  #define mmc_card_removed(c)    ((c) && ((c)->state & MMC_CARD_REMOVED))
+>  #define mmc_card_is_sleep(c)   ((c)->state & MMC_STATE_SLEEP)
+>  #define mmc_card_doing_bkops(c)        ((c)->state & MMC_STATE_DOING_BKOPS)
+> +#define mmc_card_async_int(c)  ((c)->state & MMC_STATE_ASYNC_INT)
+>
+>  #define mmc_card_set_present(c)        ((c)->state |= MMC_STATE_PRESENT)
+>  #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
+> @@ -412,6 +414,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+>  #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
+>  #define mmc_card_set_sleep(c)  ((c)->state |= MMC_STATE_SLEEP)
+>  #define mmc_card_set_doing_bkops(c)    ((c)->state |= MMC_STATE_DOING_BKOPS)
+> +#define mmc_card_set_async_int(c)      ((c)->state |= MMC_STATE_ASYNC_INT)
+>
+>  #define mmc_card_clr_doing_bkops(c)    ((c)->state &= ~MMC_STATE_DOING_BKOPS)
+>  #define mmc_card_clr_sleep(c)  ((c)->state &= ~MMC_STATE_SLEEP)
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index d5d9bd4..78fd877 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -257,6 +257,7 @@ struct mmc_host {
+>  #define MMC_CAP2_HC_ERASE_SZ   (1 << 9)        /* High-capacity erase size */
+>  #define MMC_CAP2_CD_ACTIVE_HIGH        (1 << 10)       /* Card-detect signal active high */
+>  #define MMC_CAP2_RO_ACTIVE_HIGH        (1 << 11)       /* Write-protect signal active high */
+> +#define MMC_CAP2_ASYNC_INT     (1 << 12)       /* Asynchronous interrupt support */
+>
+>         mmc_pm_flag_t           pm_caps;        /* supported pm features */
+>         unsigned int        power_notify_type;
+> diff --git a/include/linux/mmc/sdio.h b/include/linux/mmc/sdio.h
+> index 47e579d..abbb6c8 100644
+> --- a/include/linux/mmc/sdio.h
+> +++ b/include/linux/mmc/sdio.h
+> @@ -161,6 +161,11 @@
+>  #define  SDIO_DTSx_SET_TYPE_A  (1 << SDIO_DRIVE_DTSx_SHIFT)
+>  #define  SDIO_DTSx_SET_TYPE_C  (2 << SDIO_DRIVE_DTSx_SHIFT)
+>  #define  SDIO_DTSx_SET_TYPE_D  (3 << SDIO_DRIVE_DTSx_SHIFT)
+> +
+> +#define SDIO_CCCR_INT_EXT      0x16
+> +#define SDIO_INT_SAI           0x01
+> +#define SDIO_INT_EAI           0x02
+> +
+>  /*
+>   * Function Basic Registers (FBR)
+>   */
+> --
+> 1.7.0.4
+>
 
-Preset value support was added by 4d55c5a1.
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-But preset value is enabled after setting clock finished,
-which means the clock is still set by driver firstly and
-then switch to preset value at this point. So the
-driver setting beforehand is useless and unnecessary.
-What's more, driver is still using the old value which may
-differ from the preset one. The better way is enable preset
-value just after switch to UHS mode so the preset value can
-be used directly. So move preset value enable from
-mmc_sd_init_card to sdhci_set_ios which will be called during
-set timing.
-
-And preset value is disabled at the begining of mmc_attach_sd.
-It's a bit late since low freq should be set in mmc_power_up.
-So move preset value disable to sdhci_set_ios which will be
-called during power up.
-
-Also update host->clock and ios->drv_type according to the
-preset value.
-
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
----
- drivers/mmc/core/sd.c     |   17 ------
- drivers/mmc/host/sdhci.c  |  127 +++++++++++++++++++++++++++++++--------------
- drivers/mmc/host/sdhci.h  |   12 ++++
- include/linux/mmc/host.h  |    1 -
- include/linux/mmc/sdhci.h |    2 +-
- 5 files changed, 100 insertions(+), 59 deletions(-)
-
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 74972c2..3dafb54 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -960,16 +960,6 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 
- 		/* Card is an ultra-high-speed card */
- 		mmc_card_set_uhs(card);
--
--		/*
--		 * Since initialization is now complete, enable preset
--		 * value registers for UHS-I cards.
--		 */
--		if (host->ops->enable_preset_value) {
--			mmc_host_clk_hold(card->host);
--			host->ops->enable_preset_value(host, true);
--			mmc_host_clk_release(card->host);
--		}
- 	} else {
- 		/*
- 		 * Attempt to change to high-speed (if supported)
-@@ -1148,13 +1138,6 @@ int mmc_attach_sd(struct mmc_host *host)
- 	BUG_ON(!host);
- 	WARN_ON(!host->claimed);
- 
--	/* Disable preset value enable if already set since last time */
--	if (host->ops->enable_preset_value) {
--		mmc_host_clk_hold(host);
--		host->ops->enable_preset_value(host, false);
--		mmc_host_clk_release(host);
--	}
--
- 	err = mmc_send_app_op_cond(host, 0, &ocr);
- 	if (err)
- 		return err;
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7c85e49..920178a 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -53,6 +53,7 @@ static void sdhci_send_command(struct sdhci_host *, struct mmc_command *);
- static void sdhci_finish_command(struct sdhci_host *);
- static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
- static void sdhci_tuning_timer(unsigned long data);
-+static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
- 
- #ifdef CONFIG_PM_RUNTIME
- static int sdhci_runtime_pm_get(struct sdhci_host *host);
-@@ -1095,6 +1096,34 @@ static void sdhci_finish_command(struct sdhci_host *host)
- 	}
- }
- 
-+static u16 sdhci_get_preset_value(struct sdhci_host *host)
-+{
-+	u16 ctrl, preset = 0;
-+
-+	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+
-+	switch (ctrl & SDHCI_CTRL_UHS_MASK) {
-+	case SDHCI_CTRL_UHS_SDR12:
-+		preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR12);
-+		break;
-+	case SDHCI_CTRL_UHS_SDR25:
-+		preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR25);
-+		break;
-+	case SDHCI_CTRL_UHS_SDR50:
-+		preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR50);
-+		break;
-+	case SDHCI_CTRL_UHS_SDR104:
-+		preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR104);
-+		break;
-+	case SDHCI_CTRL_UHS_DDR50:
-+		preset = sdhci_readw(host, SDHCI_PRESET_FOR_DDR50);
-+		break;
-+	default:
-+		BUG();
-+	}
-+	return preset;
-+}
-+
- static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	int div = 0; /* Initialized for compiler warning */
-@@ -1119,35 +1148,45 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 		goto out;
- 
- 	if (host->version >= SDHCI_SPEC_300) {
-+		if (sdhci_readw(host, SDHCI_HOST_CONTROL2) &
-+			SDHCI_CTRL_PRESET_VAL_ENABLE) {
-+			u16 pre_val;
-+
-+			clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+			pre_val = sdhci_get_preset_value(host);
-+			div = (pre_val & SDHCI_PRESET_SDCLK_FREQ_MASK)
-+				>> SDHCI_PRESET_SDCLK_FREQ_SHIFT;
-+			if (host->clk_mul &&
-+				(pre_val & SDHCI_PRESET_CLKGEN_SEL_MASK)) {
-+				clk = SDHCI_PROG_CLOCK_MODE;
-+				real_div = div + 1;
-+				clk_mul = host->clk_mul;
-+			} else {
-+				if (div == 0)
-+					real_div = 1;
-+				else
-+					real_div = div << 1;
-+			}
-+			goto preset;
-+		}
- 		/*
- 		 * Check if the Host Controller supports Programmable Clock
- 		 * Mode.
- 		 */
- 		if (host->clk_mul) {
--			u16 ctrl;
--
-+			for (div = 1; div <= 1024; div++) {
-+				if (((host->max_clk * host->clk_mul) /
-+							div) <= clock)
-+					break;
-+			}
- 			/*
--			 * We need to figure out whether the Host Driver needs
--			 * to select Programmable Clock Mode, or the value can
--			 * be set automatically by the Host Controller based on
--			 * the Preset Value registers.
-+			 * Set Programmable Clock Mode in the Clock
-+			 * Control register.
- 			 */
--			ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
--			if (!(ctrl & SDHCI_CTRL_PRESET_VAL_ENABLE)) {
--				for (div = 1; div <= 1024; div++) {
--					if (((host->max_clk * host->clk_mul) /
--					      div) <= clock)
--						break;
--				}
--				/*
--				 * Set Programmable Clock Mode in the Clock
--				 * Control register.
--				 */
--				clk = SDHCI_PROG_CLOCK_MODE;
--				real_div = div;
--				clk_mul = host->clk_mul;
--				div--;
--			}
-+			clk = SDHCI_PROG_CLOCK_MODE;
-+			real_div = div;
-+			clk_mul = host->clk_mul;
-+			div--;
- 		} else {
- 			/* Version 3.00 divisors must be a multiple of 2. */
- 			if (host->max_clk <= clock)
-@@ -1172,6 +1211,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 		div >>= 1;
- 	}
- 
-+preset:
- 	if (real_div)
- 		host->mmc->actual_clock = (host->max_clk * clk_mul) / real_div;
- 
-@@ -1377,6 +1417,10 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 		sdhci_reinit(host);
- 	}
- 
-+	if (host->version >= SDHCI_SPEC_300 &&
-+		(ios->power_mode == MMC_POWER_UP))
-+		sdhci_enable_preset_value(host, false);
-+
- 	sdhci_set_clock(host, ios->clock);
- 	ios->clock = host->clock;
- 
-@@ -1489,7 +1533,19 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 				ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
- 			sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
- 		}
--
-+		if (!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN) &&
-+			((ios->timing == MMC_TIMING_UHS_SDR12) ||
-+			 (ios->timing == MMC_TIMING_UHS_SDR25) ||
-+			 (ios->timing == MMC_TIMING_UHS_SDR50) ||
-+			 (ios->timing == MMC_TIMING_UHS_SDR104) ||
-+			 (ios->timing == MMC_TIMING_UHS_DDR50))) {
-+			u16 preset;
-+
-+			sdhci_enable_preset_value(host, true);
-+			preset = sdhci_get_preset_value(host);
-+			ios->drv_type = (preset & SDHCI_PRESET_DRV_MASK)
-+					>> SDHCI_PRESET_DRV_SHIFT;
-+		}
- 		/* Re-enable SD Clock */
- 		clock = host->clock;
- 		host->clock = 0;
-@@ -1951,7 +2007,8 @@ out:
- 	return err;
- }
- 
--static void sdhci_do_enable_preset_value(struct sdhci_host *host, bool enable)
-+
-+static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
- {
- 	u16 ctrl;
- 	unsigned long flags;
-@@ -1960,8 +2017,6 @@ static void sdhci_do_enable_preset_value(struct sdhci_host *host, bool enable)
- 	if (host->version < SDHCI_SPEC_300)
- 		return;
- 
--	spin_lock_irqsave(&host->lock, flags);
--
- 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 
- 	/*
-@@ -1977,17 +2032,6 @@ static void sdhci_do_enable_preset_value(struct sdhci_host *host, bool enable)
- 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
- 		host->flags &= ~SDHCI_PV_ENABLED;
- 	}
--
--	spin_unlock_irqrestore(&host->lock, flags);
--}
--
--static void sdhci_enable_preset_value(struct mmc_host *mmc, bool enable)
--{
--	struct sdhci_host *host = mmc_priv(mmc);
--
--	sdhci_runtime_pm_get(host);
--	sdhci_do_enable_preset_value(host, enable);
--	sdhci_runtime_pm_put(host);
- }
- 
- static const struct mmc_host_ops sdhci_ops = {
-@@ -1998,7 +2042,6 @@ static const struct mmc_host_ops sdhci_ops = {
- 	.enable_sdio_irq = sdhci_enable_sdio_irq,
- 	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
- 	.execute_tuning			= sdhci_execute_tuning,
--	.enable_preset_value		= sdhci_enable_preset_value,
- };
- 
- /*****************************************************************************\
-@@ -2588,8 +2631,12 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
- 	sdhci_do_set_ios(host, &host->mmc->ios);
- 
- 	sdhci_do_start_signal_voltage_switch(host, &host->mmc->ios);
--	if (host_flags & SDHCI_PV_ENABLED)
--		sdhci_do_enable_preset_value(host, true);
-+	if ((host_flags & SDHCI_PV_ENABLED) &&
-+		!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN)) {
-+		spin_lock_irqsave(&host->lock, flags);
-+		sdhci_enable_preset_value(host, true);
-+		spin_unlock_irqrestore(&host->lock, flags);
-+	}
- 
- 	/* Set the re-tuning expiration flag */
- 	if (host->flags & SDHCI_USING_RETUNING_TIMER)
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 97653ea..5eb27bf 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -227,6 +227,18 @@
- 
- /* 60-FB reserved */
- 
-+#define SDHCI_PRESET_FOR_SDR12 0x66
-+#define SDHCI_PRESET_FOR_SDR25 0x68
-+#define SDHCI_PRESET_FOR_SDR50 0x6A
-+#define SDHCI_PRESET_FOR_SDR104        0x6C
-+#define SDHCI_PRESET_FOR_DDR50 0x6E
-+#define SDHCI_PRESET_DRV_MASK  0xC000
-+#define SDHCI_PRESET_DRV_SHIFT  14
-+#define SDHCI_PRESET_CLKGEN_SEL_MASK   0x400
-+#define SDHCI_PRESET_CLKGEN_SEL_SHIFT	10
-+#define SDHCI_PRESET_SDCLK_FREQ_MASK   0x3FF
-+#define SDHCI_PRESET_SDCLK_FREQ_SHIFT	0
-+
- #define SDHCI_SLOT_INT_STATUS	0xFC
- 
- #define SDHCI_HOST_VERSION	0xFE
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 036a5cc..0ee92d2 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -133,7 +133,6 @@ struct mmc_host_ops {
- 
- 	/* The tuning command opcode value is different for SD and eMMC cards */
- 	int	(*execute_tuning)(struct mmc_host *host, u32 opcode);
--	void	(*enable_preset_value)(struct mmc_host *host, bool enable);
- 	int	(*select_drive_strength)(unsigned int max_dtr, int host_drv, int card_drv);
- 	void	(*hw_reset)(struct mmc_host *host);
- };
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index fa8529a..d09c20d 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -91,7 +91,7 @@ struct sdhci_host {
- 	unsigned int quirks2;	/* More deviations from spec. */
- 
- #define SDHCI_QUIRK2_HOST_OFF_CARD_ON			(1<<0)
--
-+#define SDHCI_QUIRK2_PRESET_VALUE_BROKEN		(1<<1)
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
- 
--- 
-1.7.0.4
-
+Kind regards
+Ulf Hansson
