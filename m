@@ -1,50 +1,75 @@
 From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: [PATCH v2 0/8] mmc: sdhci: fixes and enhancements
-Date: Mon, 24 Sep 2012 16:15:50 +0800
-Message-ID: <1348474558-23088-1-git-send-email-keyuan.liu@gmail.com>
+Subject: [PATCH v2 1/8] mmc: sdhci: fix transfer mode setting bug for cmds w/o data transfer
+Date: Mon, 24 Sep 2012 16:15:51 +0800
+Message-ID: <1348474558-23088-2-git-send-email-keyuan.liu@gmail.com>
+References: <1348474558-23088-1-git-send-email-keyuan.liu@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:50699 "EHLO
+Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:43024 "EHLO
 	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755245Ab2IXIU7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Sep 2012 04:20:59 -0400
+	by vger.kernel.org with ESMTP id S1755272Ab2IXIVI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Sep 2012 04:21:08 -0400
+In-Reply-To: <1348474558-23088-1-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu
-Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
+Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com, Jialing Fu <jlfu@marvell.com>, Tim Wang <wangtt@marvell.com>
 
+From: Kevin Liu <kliu5@marvell.com>
 
-This patchset does as follows:
-[PATCH v2 1/8] mmc: sdhci: fix transfer mode setting bug for cmds w/o data transfer
-[PATCH v2 2/8] mmc: sdhci: set regulator min/max voltage according to spec
-[PATCH v2 3/8] mmc: sdhci: refine code for sd clock disable/enable in set ios
-[PATCH v2 4/8] mmc: sdhci: keep the saved clock var up to date
-[PATCH v2 5/8] mmc: sdhci: fix null return check of regulator_get
-[PATCH v2 6/8] mmc: sdhci-pxav3: controller can't get base clock
-[PATCH v2 7/8] mmc: host: adjust uhs timing value
-[PATCH v2 8/8] mmc: sdhci: enhance preset value function
+Commands without data transfer like cmd5/cmd7 will use previous
+transfer mode setting, which may lead to error since some bits
+may have been set unexpectedly.
+For example, cmd5 following cmd18/cmd25 will have timeout error
+since audo cmd23 has been enabled.
 
-changelog v1->v2:
-	- remove the patch "mmc: sdhci-pxav3: fix build error"
-	- update the patch "mmc: sdhci: fix null return check of regulator_get"
-	- add the patch "mmc: sdhci-pxav3: controller can't get base clock"
-	- add the patch "mmc: host: adjust uhs timing value"
-	- add the patch "mmc: sdhci: enhance preset value function"
+Signed-off-by: Jialing Fu <jlfu@marvell.com>
+Signed-off-by: Tim Wang <wangtt@marvell.com>
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
+---
+ drivers/mmc/host/sdhci.c |   22 ++++++++++++++--------
+ 1 files changed, 14 insertions(+), 8 deletions(-)
 
-Kevin Liu (8):
- mmc: sdhci: fix transfer mode setting bug for cmds w/o data transfer
- mmc: sdhci: set regulator min/max voltage according to spec
- mmc: sdhci: refine code for sd clock disable/enable in set ios
- mmc: sdhci: keep the saved clock var up to date
- mmc: sdhci: fix null return check of regulator_get
- mmc: sdhci-pxav3: controller can't get base clock
- mmc: host: adjust uhs timing value
- mmc: sdhci: enhance preset value function
-
- drivers/mmc/core/sd.c          |   17 ---
- drivers/mmc/host/sdhci-pxav3.c |    3 +-
- drivers/mmc/host/sdhci.c       |  220 +++++++++++++++++++++++++---------------
- drivers/mmc/host/sdhci.h       |   12 ++
- include/linux/mmc/host.h       |   13 +--
- include/linux/mmc/sdhci.h      |    2 +-
- 6 files changed, 157 insertions(+), 110 deletions(-)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 0e15c79..2f844e5 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -886,8 +886,21 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+ 	u16 mode;
+ 	struct mmc_data *data = cmd->data;
+ 
+-	if (data == NULL)
++	if (data == NULL) {
++		if (cmd->opcode == MMC_SEND_TUNING_BLOCK ||
++			cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
++			/*
++			 * The tuning block is sent by the card to the host
++			 * controller. So we set the TRNS_READ bit in the
++			 * Transfer Mode register. This also takes care of
++			 * setting DMA Enable and Multi Block Select in the
++			 * same register to 0.
++			 */
++			sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
++		else
++			sdhci_writew(host, 0, SDHCI_TRANSFER_MODE);
+ 		return;
++	}
+ 
+ 	WARN_ON(!host->data);
+ 
+@@ -1850,13 +1863,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 				     SDHCI_BLOCK_SIZE);
+ 		}
+ 
+-		/*
+-		 * The tuning block is sent by the card to the host controller.
+-		 * So we set the TRNS_READ bit in the Transfer Mode register.
+-		 * This also takes care of setting DMA Enable and Multi Block
+-		 * Select in the same register to 0.
+-		 */
+-		sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
+ 
+ 		sdhci_send_command(host, &cmd);
+ 
+-- 
+1.7.0.4
 
