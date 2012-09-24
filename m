@@ -1,60 +1,67 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: Tracking down suspend/resume ext3/mmc issues on imx233
-Date: Sat, 22 Sep 2012 21:59:13 +0200
-Message-ID: <20120922195912.GA25644@elf.ucw.cz>
-References: <CAEOSq-O3SfuAEhMsjX1y1ZgQuWBKef+XZzMR1b4yJhKhaRdymA@mail.gmail.com>
- <20120907060552.GL26709@S2101-09.ap.freescale.net>
- <CAEOSq-PV+7c2nvu3uauOLJcV7WKa1jmd-df0a1H0qY5K4CM5MA@mail.gmail.com>
- <CAKGA1bnug8nqcideOBZyLQZmiVo=G5L3aRHq4k4SNZyH132Y=g@mail.gmail.com>
- <20120910163345.GB3942@thunk.org>
- <20120919232349.GA24132@elf.ucw.cz>
- <20120920000110.GA16672@thunk.org>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH v3] powerpc/esdhc: disable CMD23 for some Freescale SoCs
+Date: Mon, 24 Sep 2012 02:30:05 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C191DD3@039-SN1MPN1-004.039d.mgd.msft.net>
+References: <1348223135-6435-1-git-send-email-r66093@freescale.com>
+ <m3y5k3e4tq.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:54315 "EHLO
-	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751954Ab2IVT7X (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Sep 2012 15:59:23 -0400
-Content-Disposition: inline
-In-Reply-To: <20120920000110.GA16672@thunk.org>
+Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:2098
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751588Ab2IXCaN convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 23 Sep 2012 22:30:13 -0400
+In-Reply-To: <m3y5k3e4tq.fsf@pullcord.laptop.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>, Matt Sealey <matt@genesi-usa.com>, Mike Thompson <mpthompson@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Linux-Arm-Kernel <linux-arm-kernel@lists.infradead.org>, linux-ext4@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xie Shaohui-B21989 <B21989@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>, Kumar Gala <galak@kernel.crashing.org>
 
-Hi!
 
-On Wed 2012-09-19 20:01:10, Theodore Ts'o wrote:
-> On Thu, Sep 20, 2012 at 01:23:49AM +0200, Pavel Machek wrote:
-> > 
-> > I'm not sure I agree.
-> > 
-> > If you treat root fs as removable, you'll get "crash". You'll need to
-> > replay the journal, but data is safe.
-> > 
-> > If you treat it as non-removable, and someone manages to remove it,
-> > mount, and reinsert, you'll get silent data corruption.
+
+> -----Original Message-----
+> From: Chris Ball [mailto:cjb@laptop.org]
+> Sent: Saturday, September 22, 2012 12:09 AM
+> To: Huang Changming-R66093
+> Cc: linux-mmc@vger.kernel.org; Huang Changming-R66093; Xie Shaohui-B21989;
+> Anton Vorontsov; Kumar Gala
+> Subject: Re: [PATCH v3] powerpc/esdhc: disable CMD23 for some Freescale
+> SoCs
 > 
-> We could detect this case; if the file system gets mounted, the last
-> mount time will change.  So one of the things we could do is have the
-> file system code freeze the file system at suspend time, so the file
-> system is consistent (which will reduce the probability of data loss
-> if the system never comes back up after the suspend), and save the
-> last mount time and last write time in memory.  When the system comes
-> back from resume, have the file system code check the last mount and
-> last write time, and if they have changed, it can refuse the resume
-> and abort the system to avoid data corruption.  It would require
-> making ext3/ext4 suspend-aware, but it would be doable, if we really
-> wanted to support this.
+> Hi,
+> 
+> On Fri, Sep 21 2012, r66093@freescale.com wrote:
+> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> > @@ -143,6 +143,35 @@ static void esdhc_of_resume(struct sdhci_host
+> > *host)  }  #endif
+> >
+> > +static const u32 non_cmd23_processor_table[] = {
+> > +	/* P1020 Dual/Single core */
+> > +	0x80EC00, 0x80E400, 0x80ED00, 0x80E500,
+> > +	/* P1021 Dual/Single core */
+> > +	0x80EC01, 0x80E401, 0x80ED01, 0x80E501,
+> > +	/* P1022 Dual/Single core */
+> > +	0x80EE00, 0x80E600, 0x80EF00, 0x80E700,
+> > +	/* P1024 Dual/Single core */
+> > +	0x80EC02, 0x80E402, 0x80ED02, 0x80E502,
+> > +	/* P1025 Dual/Single core */
+> > +	0x80EC03, 0x80E403, 0x80ED03, 0x80E503,
+> > +	/* P4080 and P4040 */
+> > +	0x820000, 0x820800, 0x820100, 0x820900
+> 
+> I don't see how this method improves on either of the previous two we've
+> discussed.  If anything, Kumar's suggested method seems better than this
+> one:  it detected the MMC IP revision, which I'd expect to be more
+> reliable than building a list of which SoCs contain that IP.
+> 
+> Why is this better than using DT or detecting the MMC revision?
+> 
+The first version, I use the DT, but someone don't like it.
+MPC8536 and P4080 have the same version: VVN1.0, but MPC8536 supports CMD23, P4080 can't support.
+no anyone can make sure all future silicones can support CMD23.
+So, I think if DT can't be used, it is the better way to detect the processor.
 
-Yes please; I'd love to see this done.
-
-We used to do sync() to get filesystem in consistent state, and I
-believe that these days we are doing filesystem freeze; but code
-validating the last mount time is certainly missing.
-
-Looking forward,
-									Pavel
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
