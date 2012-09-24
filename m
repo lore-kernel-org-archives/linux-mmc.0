@@ -1,141 +1,200 @@
-From: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
-Subject: RE: [RFC PATCH 00/13] DMA Engine support for AM33xx
-Date: Mon, 24 Sep 2012 11:26:55 +0000
-Message-ID: <1BAFE6F6C881BF42822005164F1491C33EA8E07D@DBDE01.ent.ti.com>
+From: Matt Porter <mporter@ti.com>
+Subject: Re: [RFC PATCH 00/13] DMA Engine support for AM33xx
+Date: Mon, 24 Sep 2012 08:05:12 -0400
+Message-ID: <20120924120512.GM16522@beef>
 References: <1348152226-13588-1-git-send-email-mporter@ti.com>
  <1BAFE6F6C881BF42822005164F1491C33EA8A79D@DBDE01.ent.ti.com>
  <20120921182211.GE16522@beef>
+ <1BAFE6F6C881BF42822005164F1491C33EA8E07D@DBDE01.ent.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <20120921182211.GE16522@beef>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <1BAFE6F6C881BF42822005164F1491C33EA8E07D@DBDE01.ent.ti.com>
 Sender: linux-doc-owner@vger.kernel.org
-To: "Porter, Matt" <mporter@ti.com>
-Cc: Tony Lindgren <tony@atomide.com>, "Nori, Sekhar" <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Mark Brown <broonie@opensource.wolfsonmicro.com>, "Cousson, Benoit" <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.>
+To: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, "Cousson, Benoit" <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Chris Ball <cjb@laptop.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-T24gRnJpLCBTZXAgMjEsIDIwMTIgYXQgMjM6NTI6MTEsIFBvcnRlciwgTWF0dCB3cm90ZToNCj4g
-T24gRnJpLCBTZXAgMjEsIDIwMTIgYXQgMDg6Mjc6MDdBTSArMDAwMCwgSGViYmFyLCBHdXJ1cmFq
-YSB3cm90ZToNCj4gPiBPbiBUaHUsIFNlcCAyMCwgMjAxMiBhdCAyMDoxMzozMywgUG9ydGVyLCBN
-YXR0IHdyb3RlOg0KPiA+ID4gVGhpcyBzZXJpZXMgYWRkcyBETUEgRW5naW5lIHN1cHBvcnQgZm9y
-IEFNMzN4eCwgd2hpY2ggdXNlcw0KPiA+ID4gYW4gRURNQSBETUFDLiBUaGUgRURNQSBETUFDIGhh
-cyBiZWVuIHByZXZpb3VzbHkgc3VwcG9ydGVkIGJ5IG9ubHkNCj4gPiA+IGEgcHJpdmF0ZSBBUEkg
-aW1wbGVtZW50YXRpb24gKG11Y2ggbGlrZSB0aGUgc2l0dWF0aW9uIHdpdGggT01BUA0KPiA+ID4g
-RE1BKSBmb3VuZCBvbiB0aGUgRGFWaW5jaSBmYW1pbHkgb2YgU29Dcy4NCj4gPiA+IA0KPiA+ID4g
-VGhlcmUgYXJlIGEgbWluZC1ib2dnbGluZyBudW1iZXIgb2YgZGVwZW5kZW5jaWVzIGZvciB0aGlz
-IHNlcmllczoNCj4gPiA+IA0KPiA+ID4gCS0gSm9uIEh1bnRlcidzIE9GIERNQSBoZWxwZXJzIHNl
-cmllcw0KPiA+ID4gCSAgaHR0cHM6Ly9wYXRjaHdvcmsua2VybmVsLm9yZy9wYXRjaC8xNDYxMDYx
-Lw0KPiA+ID4gCSAgaHR0cHM6Ly9wYXRjaHdvcmsua2VybmVsLm9yZy9wYXRjaC8xNDYxMDUxLw0K
-PiA+ID4gCS0gUGF0Y2ggdG8gYWRkcmVzcyBPRiBETUEgaGVscGVycyBuYW1pbmcgaXNzdWVzOg0K
-PiA+ID4gCSAgaHR0cHM6Ly9wYXRjaHdvcmsua2VybmVsLm9yZy9wYXRjaC8xNDc3OTIxLw0KPiA+
-ID4gCS0gRURNQSBETUEgRW5naW5lIHdyYXBwZXIgZHJpdmVyIGluIGxpbnV4LW5leHQNCj4gPiA+
-IAkgIGMyZGRlNWY4ZjIwOTVkN2M2MjNmZjM1NjVjMTQ2MmUxOTAyNzIyNzMNCj4gPiA+IAktIEVE
-TUEgRE1BIEVuZ2luZSB3cmFwcGVyIGRyaXZlciBidWcgZml4Og0KPiA+ID4gCSAgaHR0cHM6Ly9w
-YXRjaHdvcmsua2VybmVsLm9yZy9wYXRjaC8xNDc0NDExLyAgDQo+ID4gPiAJLSBBIGh1Z2UgbnVt
-YmVyIG9mIHBhdGNoZXMgaW4gbGludXgtbmV4dCBmb3IgQU0zM3h4IGJvb3QNCj4gPiA+IAkgICh0
-b28gbnVtZXJvdXMgdG8gbGlzdCkNCj4gPiA+IA0KPiA+ID4gVGhlIGFwcHJvYWNoIHRha2VuIGlz
-IHNpbWlsYXIgdG8gaG93IE9NQVAgRE1BIGlzIGJlaW5nIGNvbnZlcnRlZCB0bw0KPiA+ID4gRE1B
-IEVuZ2luZSBzdXBwb3J0LiBXaXRoIHRoZSBmdW5jdGlvbmFsIEVETUEgcHJpdmF0ZSBBUEkgYWxy
-ZWFkeQ0KPiA+ID4gZXhpc3RpbmcgaW4gbWFjaC1kYXZpbmNpL2RtYS5jLCB3ZSBmaXJzdCBtb3Zl
-IHRoYXQgdG8gYW4gQVJNIGNvbW1vbg0KPiA+ID4gYXJlYSBzbyBpdCBjYW4gYmUgc2hhcmVkLiBB
-ZGRpbmcgRFQgYW5kIHJ1bnRpbWUgUE0gc3VwcG9ydCB0byB0aGUNCj4gPiA+IHByaXZhdGUgRURN
-QSBBUEkgaW1wbGVtZW50YXRpb24gYWxsb3dzIGl0IHRvIHJ1biBvbiBBTTMzeHguIEFNMzN4eA0K
-PiA+ID4gKm9ubHkqIGJvb3RzIHVzaW5nIERUIHNvIHdlIGxldmVyYWdlIEpvbidzIGdlbmVyaWMg
-RFQgRE1BIGhlbHBlcnMgdG8NCj4gPiA+IHJlZ2lzdGVyIEVETUEgRE1BQyB3aXRoIHRoZSBvZl9k
-bWEgZnJhbWV3b3JrIGFuZCB0aGVuIGFkZCBzdXBwb3J0DQo+ID4gPiBmb3IgY2FsbGluZyB0aGUg
-ZG1hX3JlcXVlc3Rfc2xhdmVfY2hhbm5lbCgpIEFQSSB0byBib3RoIHRoZSBtbWMNCj4gPiA+IGFu
-ZCBzcGkgZHJpdmVycy4NCj4gPiA+IA0KPiA+ID4gV2hhdCB3b3Jrcz8gV2VsbCwgd2l0aCB0aGlz
-IHNlcmllcyB3ZSBub3cgaGF2ZSBNTUMgYW5kIFNQSSBzdXBwb3J0DQo+ID4gPiBvbiBBTTMzeHgu
-IFRoZSBvbmx5IGNhdmVhdCBmb3IgTU1DIGlzIHRoYXQgdGhlIG1tYzMgY29udHJvbGxlciBoYXMN
-Cj4gPiA+IGl0cyBldmVudHMgb24gdGhlIGNyb3NzYmFyIGFuZCBpcyBub3QgdXNhYmxlIHJpZ2h0
-IG5vdy4NCj4gPiA+IA0KPiA+ID4gVGhpcyBpcyB0ZXN0ZWQgb24gQmVhZ2xlQm9uZSB3aXRoIGEg
-U1BJIGZyYW1lYnVmZmVyIGRyaXZlciBhbmQgU0QNCj4gPiA+IGNhcmQuDQo+ID4gPiANCj4gPiA+
-IEFmdGVyIHRoaXMgc2VyaWVzLCB0aGUgcGxhbiBpcyB0byBjb252ZXJ0IHRoZSBsYXN0IGluLXRy
-ZWUgdXNlcg0KPiA+ID4gb2YgdGhlIHByaXZhdGUgRURNQSBBUEkgKGRhdmluY2ktcGNtL21jYXNw
-KSBhbmQgdGhlbiBlbGltaW5hdGUNCj4gPiA+IHRoZSBwcml2YXRlIEVETUEgQVBJIGJ5IGZvbGRp
-bmcgaXRzIGZ1bmN0aW9uYWxpdHkgaW50bw0KPiA+ID4gZHJpdmVycy9kbWEvZWRtYS5jLg0KPiA+
-ID4gDQo+ID4gPiBUT0RPOg0KPiA+ID4gCWFkZCBBTTMzeHggY3Jvc3NiYXIgc3VwcG9ydCB0byB0
-aGUgcHJpdmF0ZSBFRE1BIEFQSQ0KPiA+ID4gCShhbnkgRURNQSBldmVudHMgb24gdGhlIGNyb3Nz
-YmFyIGFyZSBub3Qgc3VwcG9ydGVkKQ0KPiA+ID4gDQo+ID4gDQo+ID4gDQo+ID4gQ2FuIHlvdSBw
-bGVhc2UgbWVudGlvbiB0aGUgYmFzZSByZXBvIHlvdSBoYXZlIHRha2VuIGFzIHN0YXJ0aW5nIHBv
-aW50Lg0KPiA+IChyZXBvICsgZXh0cmEgcGF0Y2hlcyAuLi4pLg0KPiANCj4gSXQncyBtYWlubGlu
-ZSAzLjYtcmM2IGFuZCB5b3UgY2FuIHNlZSB0aGUgY29tcGxldGUgc2V0IG9mIHBhdGNoZXMNCj4g
-YXQgaHR0cHM6Ly9naXRodWIuY29tL29ocG9ydGVyL2xpbnV4L3RyZWUvZWRtYS1kbWFlbmdpbmUt
-YW0zM3h4LXJmYy12MQ0KPiBhZnRlciBjb21taXQgNTY5OGJkNzU3ZDU1YjFiYjg3ZWRkMWE5NzQ0
-YWIwOWMxNDJhYmZjMg0KDQoNClRoYW5rcyBmb3IgdGhlIGxpbmsuIEhvd2V2ZXIsIEkgd2FzIGxv
-b2tpbmcgZm9yIHRoZSBtYWlubGluZSBrZXJuZWwgcmVwby9icmFuY2gNClRoYXQgeW91IGZpcnN0
-IHVzZWQgYXMgYmFzZWxpbmUuIA0KDQo+IA0KPiA+IFRoaXMgd2lsbCBoZWxwIHVzIHRvIHRlc3Qg
-dGhlIGNvZGUuDQo+ID4gDQo+ID4gVGhpcyBpcyBiZWNhdXNlIEkgbG9va2VkIGF0IHRoZSBwYXRj
-aCAxMi8xMyBhbmQgSSBzZWUgdGhhdCBtbWMNCj4gPiBkZXZpY2Utbm9kZSBpcyBtb2RpZmllZC4g
-QnV0IGluIG1haW5saW5lIEkgZG9u4oCZdCBzZWUgZGV2aWNlIA0KPiA+IG5vZGUgZm9yIG1tYyAo
-eWV0KS4NCj4gDQo+IE9vcHMuIFlvdSdsbCBuZWVkIGU2MmEzMzMzYWU0NTBiY2RlZmJlMjIyMjlk
-N2JjMjc3YWUwZWY2NDUgYW5kDQo+IGZlOTczMDQ1NTdkMmM2ZjdkMGFhZjFlYTAyOGVhNDhmZmNh
-MzY2YTkgd2hpY2ggSSBmb3Jnb3QgdG8gaW5jbHVkZQ0KPiBpbiB0aGlzIHNlcmllcy4gSSdsbCBo
-YXZlIHRoZW0gaW4gZm9yIHYyLg0KPiANCj4gLU1hdHQNCj4gDQo+ID4gPiBNYXR0IFBvcnRlciAo
-MTMpOg0KPiA+ID4gICBBUk06IGRhdmluY2k6IG1vdmUgcHJpdmF0ZSBFRE1BIEFQSSB0byBhcm0v
-Y29tbW9uDQo+ID4gPiAgIEFSTTogZWRtYTogcmVtb3ZlIHVudXNlZCB0cmFuc2ZlciBjb250cm9s
-bGVyIGhhbmRsZXJzDQo+ID4gPiAgIEFSTTogZWRtYTogYWRkIERUIGFuZCBydW50aW1lIFBNIHN1
-cHBvcnQgZm9yIEFNMzM1eA0KPiA+ID4gICBkbWFlbmdpbmU6IGVkbWE6IGVuYWJsZSBidWlsZCBm
-b3IgQU0zMzV4DQo+ID4gPiAgIGRtYTogQWRkIFRJIEVETUEgZGV2aWNlIHRyZWUgYmluZGluZw0K
-PiA+ID4gICBBUk06IG9tYXA6IGFkZCBoc21tYyBhbTMzeHggc3BlY2lmaWMgaW5pdA0KPiA+ID4g
-ICBtbWM6IG9tYXBfaHNtbWM6IGRtYV9yZXF1ZXN0X3NsYXZlX2NoYW5uZWwoKSBzdXBwb3J0IGZv
-ciBEVCBwbGF0Zm9ybXMNCj4gPiA+ICAgbW1jOiBvbWFwX2hzbW1jOiBsaW1pdCBtYXhfc2VncyB3
-aXRoIHRoZSBFRE1BIERNQUMNCj4gPiA+ICAgbW1jOiBvbWFwX2hzbW1jOiBhZGQgZ2VuZXJpYyBE
-TUEgcmVxdWVzdCBzdXBwb3J0IHRvIHRoZSBEVCBiaW5kaW5nDQo+ID4gPiAgIHNwaTogb21hcDIt
-bWNzcGk6IGRtYV9yZXF1ZXN0X3NsYXZlX2NoYW5uZWwoKSBzdXBwb3J0IGZvciBEVA0KPiA+ID4g
-ICAgIHBsYXRmb3Jtcw0KPiA+ID4gICBzcGk6IG9tYXAyLW1jc3BpOiBhZGQgZ2VuZXJpYyBETUEg
-cmVxdWVzdCBzdXBwb3J0IHRvIHRoZSBEVCBiaW5kaW5nDQo+ID4gPiAgIEFSTTogZHRzOiBhZGQg
-YW0zM3h4IEVETUEgc3VwcG9ydA0KPiA+ID4gICBEb2N1bWVudGF0aW9uOiBhZGQgc2NoZWR1bGUg
-Zm9yIHJlbW92aW5nIHByaXZhdGUgRURNQSBBUEkNCj4gPiA+IA0KPiA+ID4gIERvY3VtZW50YXRp
-b24vZGV2aWNldHJlZS9iaW5kaW5ncy9kbWEvdGktZWRtYS50eHQgIHwgICA0OSArDQo+ID4gPiAg
-Li4uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL3RpLW9tYXAtaHNtbWMudHh0ICAgICAgfCAgIDI1
-ICstDQo+ID4gPiAgRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL3NwaS9vbWFwLXNw
-aS50eHQgfCAgIDI3ICstDQo+ID4gPiAgRG9jdW1lbnRhdGlvbi9mZWF0dXJlLXJlbW92YWwtc2No
-ZWR1bGUudHh0ICAgICAgICAgfCAgIDEwICsNCj4gPiA+ICBhcmNoL2FybS9LY29uZmlnICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAgIDEgKw0KPiA+ID4gIGFyY2gvYXJtL2Jv
-b3QvZHRzL2FtMzN4eC5kdHNpICAgICAgICAgICAgICAgICAgICAgIHwgICA0NiArDQo+ID4gPiAg
-YXJjaC9hcm0vY29tbW9uL0tjb25maWcgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgICAz
-ICsNCj4gPiA+ICBhcmNoL2FybS9jb21tb24vTWFrZWZpbGUgICAgICAgICAgICAgICAgICAgICAg
-ICAgICB8ICAgIDEgKw0KPiA+ID4gIGFyY2gvYXJtL2NvbW1vbi9lZG1hLmMgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgIHwgMTc3OSArKysrKysrKysrKysrKysrKysrKw0KPiA+ID4gIGFyY2gv
-YXJtL2luY2x1ZGUvYXNtL21hY2gvZWRtYS5oICAgICAgICAgICAgICAgICAgIHwgIDI2NyArKysN
-Cj4gPiA+ICBhcmNoL2FybS9tYWNoLWRhdmluY2kvTWFrZWZpbGUgICAgICAgICAgICAgICAgICAg
-ICB8ICAgIDIgKy0NCj4gPiA+ICBhcmNoL2FybS9tYWNoLWRhdmluY2kvZGV2aWNlcy5jICAgICAg
-ICAgICAgICAgICAgICB8ICAgIDMgKy0NCj4gPiA+ICBhcmNoL2FybS9tYWNoLWRhdmluY2kvZG0z
-NTUuYyAgICAgICAgICAgICAgICAgICAgICB8ICAgIDIgKy0NCj4gPiA+ICBhcmNoL2FybS9tYWNo
-LWRhdmluY2kvZG0zNjUuYyAgICAgICAgICAgICAgICAgICAgICB8ICAgIDIgKy0NCj4gPiA+ICBh
-cmNoL2FybS9tYWNoLWRhdmluY2kvZG02NDR4LmMgICAgICAgICAgICAgICAgICAgICB8ICAgIDIg
-Ky0NCj4gPiA+ICBhcmNoL2FybS9tYWNoLWRhdmluY2kvZG02NDZ4LmMgICAgICAgICAgICAgICAg
-ICAgICB8ICAgIDIgKy0NCj4gPiA+ICBhcmNoL2FybS9tYWNoLWRhdmluY2kvZG1hLmMgICAgICAg
-ICAgICAgICAgICAgICAgICB8IDE1ODggLS0tLS0tLS0tLS0tLS0tLS0NCj4gPiA+ICBhcmNoL2Fy
-bS9tYWNoLWRhdmluY2kvaW5jbHVkZS9tYWNoL2FzcC5oICAgICAgICAgICB8ICAgIDIgKy0NCj4g
-PiA+ICBhcmNoL2FybS9tYWNoLWRhdmluY2kvaW5jbHVkZS9tYWNoL2RhOHh4LmggICAgICAgICB8
-ICAgIDMgKy0NCj4gPiA+ICBhcmNoL2FybS9tYWNoLWRhdmluY2kvaW5jbHVkZS9tYWNoL2VkbWEu
-aCAgICAgICAgICB8ICAyNjcgLS0tDQo+ID4gPiAgYXJjaC9hcm0vbWFjaC1kYXZpbmNpL2luY2x1
-ZGUvbWFjaC9zcGkuaCAgICAgICAgICAgfCAgICAyICstDQo+ID4gPiAgYXJjaC9hcm0vbWFjaC1v
-bWFwMi9oc21tYy5jICAgICAgICAgICAgICAgICAgICAgICAgfCAgICA3ICstDQo+ID4gPiAgYXJj
-aC9hcm0vcGxhdC1vbWFwL0tjb25maWcgICAgICAgICAgICAgICAgICAgICAgICAgfCAgICAxICsN
-Cj4gPiA+ICBkcml2ZXJzL2RtYS9LY29uZmlnICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICB8ICAgIDIgKy0NCj4gPiA+ICBkcml2ZXJzL2RtYS9lZG1hLmMgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICB8ICAgIDIgKy0NCj4gPiA+ICBkcml2ZXJzL21tYy9ob3N0L29tYXBfaHNt
-bWMuYyAgICAgICAgICAgICAgICAgICAgICB8ICAgMjYgKy0NCj4gPiA+ICBkcml2ZXJzL3NwaS9z
-cGktb21hcDItbWNzcGkuYyAgICAgICAgICAgICAgICAgICAgICB8ICAgNjggKy0NCj4gPiA+ICAy
-NyBmaWxlcyBjaGFuZ2VkLCAyMjk2IGluc2VydGlvbnMoKyksIDE4OTMgZGVsZXRpb25zKC0pDQo+
-ID4gPiAgY3JlYXRlIG1vZGUgMTAwNjQ0IERvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5n
-cy9kbWEvdGktZWRtYS50eHQNCj4gPiA+ICBjcmVhdGUgbW9kZSAxMDA2NDQgYXJjaC9hcm0vY29t
-bW9uL2VkbWEuYw0KPiA+ID4gIGNyZWF0ZSBtb2RlIDEwMDY0NCBhcmNoL2FybS9pbmNsdWRlL2Fz
-bS9tYWNoL2VkbWEuaA0KPiA+ID4gIGRlbGV0ZSBtb2RlIDEwMDY0NCBhcmNoL2FybS9tYWNoLWRh
-dmluY2kvZG1hLmMNCj4gPiA+ICBkZWxldGUgbW9kZSAxMDA2NDQgYXJjaC9hcm0vbWFjaC1kYXZp
-bmNpL2luY2x1ZGUvbWFjaC9lZG1hLmgNCj4gPiA+IA0KPiA+ID4gLS0gDQo+ID4gPiAxLjcuOS41
-DQo+ID4gPiANCj4gPiA+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fDQo+ID4gPiBEYXZpbmNpLWxpbnV4LW9wZW4tc291cmNlIG1haWxpbmcgbGlzdA0KPiA+
-ID4gRGF2aW5jaS1saW51eC1vcGVuLXNvdXJjZUBsaW51eC5kYXZpbmNpZHNwLmNvbQ0KPiA+ID4g
-aHR0cDovL2xpbnV4LmRhdmluY2lkc3AuY29tL21haWxtYW4vbGlzdGluZm8vZGF2aW5jaS1saW51
-eC1vcGVuLXNvdXJjZQ0KPiA+ID4gDQo+ID4gDQo+ID4gDQo+ID4gUmVnYXJkcywgDQo+ID4gR3Vy
-dXJhamENCj4gPiBfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-Xw0KPiA+IERhdmluY2ktbGludXgtb3Blbi1zb3VyY2UgbWFpbGluZyBsaXN0DQo+ID4gRGF2aW5j
-aS1saW51eC1vcGVuLXNvdXJjZUBsaW51eC5kYXZpbmNpZHNwLmNvbQ0KPiA+IGh0dHA6Ly9saW51
-eC5kYXZpbmNpZHNwLmNvbS9tYWlsbWFuL2xpc3RpbmZvL2RhdmluY2ktbGludXgtb3Blbi1zb3Vy
-Y2UNCj4gDQoNCg0KUmVnYXJkcywgDQpHdXJ1cmFqYQ0K
+On Mon, Sep 24, 2012 at 11:26:55AM +0000, Hebbar, Gururaja wrote:
+> On Fri, Sep 21, 2012 at 23:52:11, Porter, Matt wrote:
+> > On Fri, Sep 21, 2012 at 08:27:07AM +0000, Hebbar, Gururaja wrote:
+> > > On Thu, Sep 20, 2012 at 20:13:33, Porter, Matt wrote:
+> > > > This series adds DMA Engine support for AM33xx, which uses
+> > > > an EDMA DMAC. The EDMA DMAC has been previously supported by on=
+ly
+> > > > a private API implementation (much like the situation with OMAP
+> > > > DMA) found on the DaVinci family of SoCs.
+> > > >=20
+> > > > There are a mind-boggling number of dependencies for this serie=
+s:
+> > > >=20
+> > > > 	- Jon Hunter's OF DMA helpers series
+> > > > 	  https://patchwork.kernel.org/patch/1461061/
+> > > > 	  https://patchwork.kernel.org/patch/1461051/
+> > > > 	- Patch to address OF DMA helpers naming issues:
+> > > > 	  https://patchwork.kernel.org/patch/1477921/
+> > > > 	- EDMA DMA Engine wrapper driver in linux-next
+> > > > 	  c2dde5f8f2095d7c623ff3565c1462e190272273
+> > > > 	- EDMA DMA Engine wrapper driver bug fix:
+> > > > 	  https://patchwork.kernel.org/patch/1474411/ =20
+> > > > 	- A huge number of patches in linux-next for AM33xx boot
+> > > > 	  (too numerous to list)
+> > > >=20
+> > > > The approach taken is similar to how OMAP DMA is being converte=
+d to
+> > > > DMA Engine support. With the functional EDMA private API alread=
+y
+> > > > existing in mach-davinci/dma.c, we first move that to an ARM co=
+mmon
+> > > > area so it can be shared. Adding DT and runtime PM support to t=
+he
+> > > > private EDMA API implementation allows it to run on AM33xx. AM3=
+3xx
+> > > > *only* boots using DT so we leverage Jon's generic DT DMA helpe=
+rs to
+> > > > register EDMA DMAC with the of_dma framework and then add suppo=
+rt
+> > > > for calling the dma_request_slave_channel() API to both the mmc
+> > > > and spi drivers.
+> > > >=20
+> > > > What works? Well, with this series we now have MMC and SPI supp=
+ort
+> > > > on AM33xx. The only caveat for MMC is that the mmc3 controller =
+has
+> > > > its events on the crossbar and is not usable right now.
+> > > >=20
+> > > > This is tested on BeagleBone with a SPI framebuffer driver and =
+SD
+> > > > card.
+> > > >=20
+> > > > After this series, the plan is to convert the last in-tree user
+> > > > of the private EDMA API (davinci-pcm/mcasp) and then eliminate
+> > > > the private EDMA API by folding its functionality into
+> > > > drivers/dma/edma.c.
+> > > >=20
+> > > > TODO:
+> > > > 	add AM33xx crossbar support to the private EDMA API
+> > > > 	(any EDMA events on the crossbar are not supported)
+> > > >=20
+> > >=20
+> > >=20
+> > > Can you please mention the base repo you have taken as starting p=
+oint.
+> > > (repo + extra patches ...).
+> >=20
+> > It's mainline 3.6-rc6 and you can see the complete set of patches
+> > at https://github.com/ohporter/linux/tree/edma-dmaengine-am33xx-rfc=
+-v1
+> > after commit 5698bd757d55b1bb87edd1a9744ab09c142abfc2
+
+>=20
+> Thanks for the link. However, I was looking for the mainline kernel r=
+epo/branch
+> That you first used as baseline.=20
+
+Linus 3.6-rc6 is the baseline. This inital version was created before a=
+ny
+of the am33xx base support patches got pulled to linux-next. v2 is bein=
+g
+rebased against that to slim down the stack of patches necessary for
+testing.
+
+> > > This will help us to test the code.
+> > >=20
+> > > This is because I looked at the patch 12/13 and I see that mmc
+> > > device-node is modified. But in mainline I don=E2=80=99t see devi=
+ce=20
+> > > node for mmc (yet).
+> >=20
+> > Oops. You'll need e62a3333ae450bcdefbe22229d7bc277ae0ef645 and
+> > fe97304557d2c6f7d0aaf1ea028ea48ffca366a9 which I forgot to include
+> > in this series. I'll have them in for v2.
+> >=20
+> > -Matt
+> >=20
+> > > > Matt Porter (13):
+> > > >   ARM: davinci: move private EDMA API to arm/common
+> > > >   ARM: edma: remove unused transfer controller handlers
+> > > >   ARM: edma: add DT and runtime PM support for AM335x
+> > > >   dmaengine: edma: enable build for AM335x
+> > > >   dma: Add TI EDMA device tree binding
+> > > >   ARM: omap: add hsmmc am33xx specific init
+> > > >   mmc: omap_hsmmc: dma_request_slave_channel() support for DT p=
+latforms
+> > > >   mmc: omap_hsmmc: limit max_segs with the EDMA DMAC
+> > > >   mmc: omap_hsmmc: add generic DMA request support to the DT bi=
+nding
+> > > >   spi: omap2-mcspi: dma_request_slave_channel() support for DT
+> > > >     platforms
+> > > >   spi: omap2-mcspi: add generic DMA request support to the DT b=
+inding
+> > > >   ARM: dts: add am33xx EDMA support
+> > > >   Documentation: add schedule for removing private EDMA API
+> > > >=20
+> > > >  Documentation/devicetree/bindings/dma/ti-edma.txt  |   49 +
+> > > >  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   25 +-
+> > > >  Documentation/devicetree/bindings/spi/omap-spi.txt |   27 +-
+> > > >  Documentation/feature-removal-schedule.txt         |   10 +
+> > > >  arch/arm/Kconfig                                   |    1 +
+> > > >  arch/arm/boot/dts/am33xx.dtsi                      |   46 +
+> > > >  arch/arm/common/Kconfig                            |    3 +
+> > > >  arch/arm/common/Makefile                           |    1 +
+> > > >  arch/arm/common/edma.c                             | 1779 ++++=
+++++++++++++++++
+> > > >  arch/arm/include/asm/mach/edma.h                   |  267 +++
+> > > >  arch/arm/mach-davinci/Makefile                     |    2 +-
+> > > >  arch/arm/mach-davinci/devices.c                    |    3 +-
+> > > >  arch/arm/mach-davinci/dm355.c                      |    2 +-
+> > > >  arch/arm/mach-davinci/dm365.c                      |    2 +-
+> > > >  arch/arm/mach-davinci/dm644x.c                     |    2 +-
+> > > >  arch/arm/mach-davinci/dm646x.c                     |    2 +-
+> > > >  arch/arm/mach-davinci/dma.c                        | 1588 ----=
+-------------
+> > > >  arch/arm/mach-davinci/include/mach/asp.h           |    2 +-
+> > > >  arch/arm/mach-davinci/include/mach/da8xx.h         |    3 +-
+> > > >  arch/arm/mach-davinci/include/mach/edma.h          |  267 ---
+> > > >  arch/arm/mach-davinci/include/mach/spi.h           |    2 +-
+> > > >  arch/arm/mach-omap2/hsmmc.c                        |    7 +-
+> > > >  arch/arm/plat-omap/Kconfig                         |    1 +
+> > > >  drivers/dma/Kconfig                                |    2 +-
+> > > >  drivers/dma/edma.c                                 |    2 +-
+> > > >  drivers/mmc/host/omap_hsmmc.c                      |   26 +-
+> > > >  drivers/spi/spi-omap2-mcspi.c                      |   68 +-
+> > > >  27 files changed, 2296 insertions(+), 1893 deletions(-)
+> > > >  create mode 100644 Documentation/devicetree/bindings/dma/ti-ed=
+ma.txt
+> > > >  create mode 100644 arch/arm/common/edma.c
+> > > >  create mode 100644 arch/arm/include/asm/mach/edma.h
+> > > >  delete mode 100644 arch/arm/mach-davinci/dma.c
+> > > >  delete mode 100644 arch/arm/mach-davinci/include/mach/edma.h
+> > > >=20
+> > > > --=20
+> > > > 1.7.9.5
+> > > >=20
+> > > > _______________________________________________
+> > > > Davinci-linux-open-source mailing list
+> > > > Davinci-linux-open-source@linux.davincidsp.com
+> > > > http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open=
+-source
+> > > >=20
+> > >=20
+> > >=20
+> > > Regards,=20
+> > > Gururaja
+> > > _______________________________________________
+> > > Davinci-linux-open-source mailing list
+> > > Davinci-linux-open-source@linux.davincidsp.com
+> > > http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-s=
+ource
+> >=20
+>=20
+>=20
+> Regards,=20
+> Gururaja
+> _______________________________________________
+> Davinci-linux-open-source mailing list
+> Davinci-linux-open-source@linux.davincidsp.com
+> http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-sourc=
+e
