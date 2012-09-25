@@ -1,69 +1,154 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off notify
-Date: Tue, 25 Sep 2012 11:19:33 +0200
-Message-ID: <CAPDyKFrt4sB2PM8JuOODy7B7ME2wRx9Dy5yKPK23E47E-OMwmA@mail.gmail.com>
-References: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com>
-	<CAGxe1ZFJhc-c8rS0KGdfTvejs27jjpz7T4Z2AVwoB-=7QOMemg@mail.gmail.com>
-	<CACRpkdaV_PDaYH+RgM2pa9f9Gp97-D9xbxfDkPUBfXSR+-csAg@mail.gmail.com>
-	<201209141504.14658.arnd@arndb.de>
-	<CAGxe1ZEYgs3va6SR83UeN02Lnjr4Wd-dGWsPqTputcaiSJW6mA@mail.gmail.com>
-	<CAPDyKFoJn=NrzxXsLyp_ygQj=09faa_p0Q8i7M+MEypF7Y_ACQ@mail.gmail.com>
-	<m3sjadfpdh.fsf@pullcord.laptop.org>
+From: <r66093@freescale.com>
+Subject: [PATCH v4] powerpc/esdhc: disable CMD23 for some Freescale SoCs
+Date: Tue, 25 Sep 2012 17:00:32 +0800
+Message-ID: <1348563632-23659-1-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:36788 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754371Ab2IYJTf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 05:19:35 -0400
-Received: by wibhr7 with SMTP id hr7so320461wib.1
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Sep 2012 02:19:33 -0700 (PDT)
-In-Reply-To: <m3sjadfpdh.fsf@pullcord.laptop.org>
+Received: from co1ehsobe004.messaging.microsoft.com ([216.32.180.187]:54306
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751790Ab2IYJgX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 05:36:23 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Girish K S <girish.shivananjappa@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Saugata Das <saugata.das@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>
+To: linux-mmc@vger.kernel.org
+Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Shaohui Xie <Shaohui.Xie@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
 
-On 20 September 2012 03:35, Chris Ball <cjb@laptop.org> wrote:
-> Hi,
->
-> On Wed, Sep 19 2012, Ulf Hansson wrote:
->> Just pinging you to see if you have an opinion in merging this without
->> full testing on eMMC4.5 device?
->>
->> I am kind of eager to fixup the broken suspend for eMMC with sleep,
->> which this does. :-)
->
-> Well, we don't need "full testing", but I don't think it's a good idea
-> to merge this without any testing at all on eMMC 4.5.  Might as well
-> just wait a little longer and send it as a 3.7 fix with a stable@ tag?
-> Do we have any ETA on when someone will be able to test?
->
+From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-Unfortunately still no progress for testing for eMMC 4.5. Sorry for that.
+CMD23 causes lots of errors in kernel on some freescale SoCs
+(P1020, P1021, P1022, P1024, P1025 and P4080) when MMC card used,
+which is because these controllers does not support CMD23,
+even on the SoCs which declares CMD23 is supported.
+Therefore, we'll not use CMD23.
 
-Tanya Brokhman and possibly Arnd Bergman is trying to help out, which
-is really great. Although I have yet not received an answer. Hopefully
-soon. :-)
-My self is trying to get a hold of an eMMC 4.5 device, so I can do the
-test myself.
+Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
+CC: Anton Vorontsov <cbouatmailru@gmail.com>
+CC: Chris Ball <cjb@laptop.org>
+---
+changes for v4:
+	- change to detect the IP version
+	- don't use callback function
+changes for v3:
+	- move the limitation detect function to eSDHC file
+	- add the callback funtion to do this limitation detect
+changes for v2:
+	- discard the property mode and add the processor detection
 
-I am not sure how long we should wait for eMMC 4.5 to be tested. Until
-testing is resolved the eMMC 4.3 and onwards are having a broken
-suspend sequence using SLEEP, which I think is really bad. This also
-includes eMMC4.5 devices, for which hosts is not using the new
-POWER_OFF _NOTIFY CAP.
+ drivers/mmc/host/sdhci-of-esdhc.c |   33 +++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pltfm.c    |    4 +++-
+ drivers/mmc/host/sdhci-pltfm.h    |    1 +
+ drivers/mmc/host/sdhci.c          |    3 +++
+ include/linux/mmc/sdhci.h         |    1 +
+ 5 files changed, 41 insertions(+), 1 deletion(-)
 
-Kind regards
-Ulf Hansson
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index ae5fcbf..231672b 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -169,6 +169,38 @@ static void esdhc_of_resume(struct sdhci_host *host)
+ }
+ #endif
+ 
++static void esdhc_of_detect_limitation(struct platform_device *pdev,
++	struct sdhci_pltfm_data *pdata)
++{
++	void __iomem *ioaddr;
++	struct resource *iomem;
++	u32 vvn;
++
++	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	if (!iomem) {
++		dev_err(&pdev->dev, "failed to get resource\n");
++		goto err;
++	}
++	if (resource_size(iomem) < 0x100)
++		dev_err(&pdev->dev, "Invalid iomem size!\n");
++
++	ioaddr = ioremap(iomem->start, resource_size(iomem));
++	if (!ioaddr) {
++		dev_err(&pdev->dev, "failed to remap registers\n");
++		goto err;
++	}
++
++	/* P102x and P4080 has IP version VVN2.2, CMD23 is not supported */
++	vvn = in_be32(ioaddr + SDHCI_SLOT_INT_STATUS);
++	vvn = (vvn & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
++	if (vvn == VENDOR_V_22)
++		pdata->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
++
++	iounmap(ioaddr);
++err:
++	return;
++}
++
+ static struct sdhci_ops sdhci_esdhc_ops = {
+ 	.read_l = esdhc_readl,
+ 	.read_w = esdhc_readw,
+@@ -199,6 +231,7 @@ static struct sdhci_pltfm_data sdhci_esdhc_pdata = {
+ 
+ static int __devinit sdhci_esdhc_probe(struct platform_device *pdev)
+ {
++	esdhc_of_detect_limitation(pdev, &sdhci_esdhc_pdata);
+ 	return sdhci_pltfm_register(pdev, &sdhci_esdhc_pdata);
+ }
+ 
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index 65551a9..4dd5770 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -132,8 +132,10 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+ 		host->ops = pdata->ops;
+ 	else
+ 		host->ops = &sdhci_pltfm_ops;
+-	if (pdata)
++	if (pdata) {
+ 		host->quirks = pdata->quirks;
++		host->quirks2 = pdata->quirks2;
++	}
+ 	host->irq = platform_get_irq(pdev, 0);
+ 
+ 	if (!request_mem_region(iomem->start, resource_size(iomem),
+diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+index 37e0e18..283d54a 100644
+--- a/drivers/mmc/host/sdhci-pltfm.h
++++ b/drivers/mmc/host/sdhci-pltfm.h
+@@ -18,6 +18,7 @@
+ struct sdhci_pltfm_data {
+ 	struct sdhci_ops *ops;
+ 	unsigned int quirks;
++	unsigned int quirks2;
+ };
+ 
+ struct sdhci_pltfm_host {
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 0e15c79..b0b7cad 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2837,6 +2837,9 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+ 		mmc->caps |= MMC_CAP_4_BIT_DATA;
+ 
++	if (host->quirks2 & SDHCI_QUIRK2_HOST_NO_CMD23)
++		mmc->caps &= ~MMC_CAP_CMD23;
++
+ 	if (caps[0] & SDHCI_CAN_DO_HISPD)
+ 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+ 
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index fa8529a..1edcb4d 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -91,6 +91,7 @@ struct sdhci_host {
+ 	unsigned int quirks2;	/* More deviations from spec. */
+ 
+ #define SDHCI_QUIRK2_HOST_OFF_CARD_ON			(1<<0)
++#define SDHCI_QUIRK2_HOST_NO_CMD23			(1<<1)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
+-- 
+1.7.9.5
 
-> Thanks,
->
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
