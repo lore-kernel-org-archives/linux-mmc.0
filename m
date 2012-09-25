@@ -1,41 +1,74 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 3/3] mmc: esdhc i.MX: Support 8bit mode
-Date: Tue, 25 Sep 2012 15:33:19 +0800
-Message-ID: <20120925073317.GI27291@S2101-09.ap.freescale.net>
-References: <1348471345-30785-1-git-send-email-s.hauer@pengutronix.de>
- <1348471345-30785-4-git-send-email-s.hauer@pengutronix.de>
- <20120925071505.GG27291@S2101-09.ap.freescale.net>
- <20120925072714.GY1322@pengutronix.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 7/8] mmc: host: adjust uhs timing value
+Date: Tue, 25 Sep 2012 09:36:58 +0200
+Message-ID: <CAPDyKFrTig8SsBoPkQXyYFihOZ+cWs58FGhCdSsz8OGZwmbVjQ@mail.gmail.com>
+References: <1348474558-23088-1-git-send-email-keyuan.liu@gmail.com>
+	<1348474558-23088-8-git-send-email-keyuan.liu@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:58998 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753380Ab2IYHdI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 03:33:08 -0400
-Received: by pbbrr4 with SMTP id rr4so8602935pbb.19
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Sep 2012 00:33:07 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20120925072714.GY1322@pengutronix.de>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:47268 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750839Ab2IYHg7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 03:36:59 -0400
+Received: by weyt9 with SMTP id t9so715497wey.19
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Sep 2012 00:36:58 -0700 (PDT)
+In-Reply-To: <1348474558-23088-8-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Eric =?iso-8859-1?Q?B=E9nard?= <eric@eukrea.com>, kernel@pengutronix.de
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-On Tue, Sep 25, 2012 at 09:27:15AM +0200, Sascha Hauer wrote:
-> > >  Optional properties:
-> > >  - fsl,cd-controller : Indicate to use controller internal card detection
-> > >  - fsl,wp-controller : Indicate to use controller internal write protection
-> > > +- bus-width : Maximum supported bus width. Defaults to 4 if omitted
-> > >
-> > This is a common mmc property documented in bindings/mmc/mmc.txt.
-> > Instead of duplicating the documentation, we should try to make our
-> > implementation conform to the common definition of the property.
-> 
-> It is conform to the common definition, so all I have to do is drop the
-> line duplicating the docs. That's easy ;)
-> 
-Maybe not.  The common binding defines it as a required property while
-the patch implements it as an optional one.
+Hi Kevin,
 
-Shawn
+This make sense to me.
+
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+Kind regards
+Ulf Hansson
+
+On 24 September 2012 10:15, Kevin Liu <keyuan.liu@gmail.com> wrote:
+> From: Kevin Liu <kliu5@marvell.com>
+>
+> Both of MMC_TIMING_LEGACY and MMC_TIMING_UHS_SDR12 are defined
+> to 0. And ios->timing is set to MMC_TIMING_LEGACY during power up.
+> But set_ios can't distinguish these two timing if host support
+> spec 3.0. Just adjust timing values to be different can resolve
+> this issue without any other impact.
+>
+> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+> ---
+>  include/linux/mmc/host.h |   12 ++++++------
+>  1 files changed, 6 insertions(+), 6 deletions(-)
+>
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index d5d9bd4..036a5cc 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -53,12 +53,12 @@ struct mmc_ios {
+>  #define MMC_TIMING_LEGACY      0
+>  #define MMC_TIMING_MMC_HS      1
+>  #define MMC_TIMING_SD_HS       2
+> -#define MMC_TIMING_UHS_SDR12   MMC_TIMING_LEGACY
+> -#define MMC_TIMING_UHS_SDR25   MMC_TIMING_SD_HS
+> -#define MMC_TIMING_UHS_SDR50   3
+> -#define MMC_TIMING_UHS_SDR104  4
+> -#define MMC_TIMING_UHS_DDR50   5
+> -#define MMC_TIMING_MMC_HS200   6
+> +#define MMC_TIMING_UHS_SDR12   3
+> +#define MMC_TIMING_UHS_SDR25   4
+> +#define MMC_TIMING_UHS_SDR50   5
+> +#define MMC_TIMING_UHS_SDR104  6
+> +#define MMC_TIMING_UHS_DDR50   7
+> +#define MMC_TIMING_MMC_HS200   8
+>
+>  #define MMC_SDR_MODE           0
+>  #define MMC_1_2V_DDR_MODE      1
+> --
+> 1.7.0.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
