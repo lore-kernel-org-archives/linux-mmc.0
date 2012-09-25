@@ -1,104 +1,173 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH v3] powerpc/esdhc: disable CMD23 for some Freescale SoCs
-Date: Tue, 25 Sep 2012 02:05:46 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C193731@039-SN1MPN1-004.039d.mgd.msft.net>
-References: <1348223135-6435-1-git-send-email-r66093@freescale.com>
- <m3y5k3e4tq.fsf@pullcord.laptop.org>
- <6A474F70-46DB-43ED-92C0-5D111AA64D48@kernel.crashing.org>
- <110EED8CC96DFC488B7E717A2027A27C191E05@039-SN1MPN1-004.039d.mgd.msft.net>
- <110EED8CC96DFC488B7E717A2027A27C191EAD@039-SN1MPN1-004.039d.mgd.msft.net>
- <EAF14FF4-2EFA-4A3E-BE72-3319FABBA1F5@kernel.crashing.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 1/3] mmc: sdhci: rename platform_8bit_width to
+ platform_bus_width
+Date: Tue, 25 Sep 2012 11:35:14 +0900
+Message-ID: <50611862.7010201@samsung.com>
+References: <1348471345-30785-1-git-send-email-s.hauer@pengutronix.de>
+ <1348471345-30785-2-git-send-email-s.hauer@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe003.messaging.microsoft.com ([216.32.180.186]:26842
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751677Ab2IYCFw convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 24 Sep 2012 22:05:52 -0400
-In-Reply-To: <EAF14FF4-2EFA-4A3E-BE72-3319FABBA1F5@kernel.crashing.org>
-Content-Language: en-US
+Received: from mailout1.samsung.com ([203.254.224.24]:40619 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752118Ab2IYCf1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Sep 2012 22:35:27 -0400
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MAV00LI9WGA5JQ0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 25 Sep 2012 11:35:18 +0900 (KST)
+Received: from [10.90.51.55] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0MAV004NPWIT7F80@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 25 Sep 2012 11:35:18 +0900 (KST)
+In-reply-to: <1348471345-30785-2-git-send-email-s.hauer@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kumar Gala <galak@kernel.crashing.org>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xie Shaohui-B21989 <B21989@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
+To: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, =?ISO-8859-1?Q?Eric_B=E9nard?= <eric@eukrea.com>, kernel@pengutronix.de
 
-> >>>> Hi,
-> >>>>
-> >>>> On Fri, Sep 21 2012, r66093@freescale.com wrote:
-> >>>>> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> >>>>> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> >>>>> @@ -143,6 +143,35 @@ static void esdhc_of_resume(struct sdhci_host
-> >>>>> *host) } #endif
-> >>>>>
-> >>>>> +static const u32 non_cmd23_processor_table[] = {
-> >>>>> +	/* P1020 Dual/Single core */
-> >>>>> +	0x80EC00, 0x80E400, 0x80ED00, 0x80E500,
-> >>>>> +	/* P1021 Dual/Single core */
-> >>>>> +	0x80EC01, 0x80E401, 0x80ED01, 0x80E501,
-> >>>>> +	/* P1022 Dual/Single core */
-> >>>>> +	0x80EE00, 0x80E600, 0x80EF00, 0x80E700,
-> >>>>> +	/* P1024 Dual/Single core */
-> >>>>> +	0x80EC02, 0x80E402, 0x80ED02, 0x80E502,
-> >>>>> +	/* P1025 Dual/Single core */
-> >>>>> +	0x80EC03, 0x80E403, 0x80ED03, 0x80E503,
-> >>>>> +	/* P4080 and P4040 */
-> >>>>> +	0x820000, 0x820800, 0x820100, 0x820900
-> >>>>
-> >>>> I don't see how this method improves on either of the previous two
-> >>>> we've discussed.  If anything, Kumar's suggested method seems
-> >>>> better than this
-> >>>> one:  it detected the MMC IP revision, which I'd expect to be more
-> >>>> reliable than building a list of which SoCs contain that IP.
-> >>>>
-> >>>> Why is this better than using DT or detecting the MMC revision?
-> >>>>
-> >>>> Thanks,
-> >>>
-> >>> I feel like I missed this patch, but I'd rather we go with the
-> >>> version I sent since the # of IP versions we have is 3 or 4, instead
-> >>> of the 30 or
-> >>> 40 SoCs we have.
-> >>>
-> >> MPC8536 and P4080 have the same IP version (VVN1.0), but MPC8536
-> >> support CMD23, P4080 can't, how to handle these two silicones?
-> >> For the future silicones, no one can make sure all silicones support
-> >> CMD23.
-> >> don't say almost 0%, which just is the assumption, otherwise, why
-> >> p4080 can't support it and mpc8536 can?
-> > MPC837x has the same VVN1.0 as the MPC8536 and p4080, which supports
-> CMD23, too.
+On 09/24/2012 04:22 PM, Sascha Hauer wrote:
+> The 8bit in the function name is misleading. When set, it will be
+> used to set the bus width, regardless of whether 8bit or another
+> bus width is requested, so change the function name to
+> platform_bus_width.
 > 
-> So I checked on actual boards and got:
+> Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+> ---
+>  drivers/mmc/host/sdhci-pci.c   |    4 ++--
+>  drivers/mmc/host/sdhci-pxav2.c |    2 +-
+>  drivers/mmc/host/sdhci-s3c.c   |    8 ++++----
+>  drivers/mmc/host/sdhci-tegra.c |    4 ++--
+>  drivers/mmc/host/sdhci.c       |    8 ++++----
+>  drivers/mmc/host/sdhci.h       |    2 +-
+>  6 files changed, 14 insertions(+), 14 deletions(-)
 > 
-> MPC8536 - 00000001
-> MPC837x - 00000001
-> P4080   - 00001201
-> 
-> So I don't think you are correct about them reporting the same version
-> number. (I think the manual for P4080 may be incorrect).
-> 
-> Here's the other SoCs that I verified:
-> 
-> 8536 = 00000001
-> 
-> 2020 = 00000101
-> 8569 = 00000101
-> 
-> 4080 = 00001201
-> 1021 = 00001201
-> 1022 = 00001201
-> 
-> 5040 = 00001301
-> 2041 = 00001301
-> 5020 = 00001301
-> 1010 = 00001301
-> 9131 = 00001301
-> 
-Thank, I double check the version on p4080, it is 0x00001201.
-Then, I will send the patch to check the IP version.
-BTW:
-It is 0x00000001 in p4040 RM, I think the RM should be checked carefully before releasing to customer.
+> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+> index 504da715..cf34b8d 100644
+> --- a/drivers/mmc/host/sdhci-pci.c
+> +++ b/drivers/mmc/host/sdhci-pci.c
+> @@ -934,7 +934,7 @@ static int sdhci_pci_enable_dma(struct sdhci_host *host)
+>  	return 0;
+>  }
+>  
+> -static int sdhci_pci_8bit_width(struct sdhci_host *host, int width)
+> +static int sdhci_pci_bus_width(struct sdhci_host *host, int width)
+>  {
+>  	u8 ctrl;
+>  
+> @@ -976,7 +976,7 @@ static void sdhci_pci_hw_reset(struct sdhci_host *host)
+>  
+>  static struct sdhci_ops sdhci_pci_ops = {
+>  	.enable_dma	= sdhci_pci_enable_dma,
+> -	.platform_8bit_width	= sdhci_pci_8bit_width,
+> +	.platform_bus_width	= sdhci_pci_bus_width,
+>  	.hw_reset		= sdhci_pci_hw_reset,
+>  };
+>  
+> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+> index b6ee885..f380de8 100644
+> --- a/drivers/mmc/host/sdhci-pxav2.c
+> +++ b/drivers/mmc/host/sdhci-pxav2.c
+> @@ -121,7 +121,7 @@ static u32 pxav2_get_max_clock(struct sdhci_host *host)
+>  static struct sdhci_ops pxav2_sdhci_ops = {
+>  	.get_max_clock = pxav2_get_max_clock,
+>  	.platform_reset_exit = pxav2_set_private_registers,
+> -	.platform_8bit_width = pxav2_mmc_set_width,
+> +	.platform_bus_width = pxav2_mmc_set_width,
+>  };
+>  
+>  #ifdef CONFIG_OF
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index a50c205..776ef3a 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -322,14 +322,14 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
+>  }
+>  
+>  /**
+> - * sdhci_s3c_platform_8bit_width - support 8bit buswidth
+> + * sdhci_s3c_platform_bus_width - support 8bit buswidth
+>   * @host: The SDHCI host being queried
+>   * @width: MMC_BUS_WIDTH_ macro for the bus width being requested
+>   *
+>   * We have 8-bit width support but is not a v3 controller.
+> - * So we add platform_8bit_width() and support 8bit width.
+> + * So we add platform_bus_width() and support 8bit width.
+>   */
+> -static int sdhci_s3c_platform_8bit_width(struct sdhci_host *host, int width)
+> +static int sdhci_s3c_platform_bus_width(struct sdhci_host *host, int width)
+>  {
+>  	u8 ctrl;
+>  
+> @@ -359,7 +359,7 @@ static struct sdhci_ops sdhci_s3c_ops = {
+>  	.get_max_clock		= sdhci_s3c_get_max_clk,
+>  	.set_clock		= sdhci_s3c_set_clock,
+>  	.get_min_clock		= sdhci_s3c_get_min_clock,
+> -	.platform_8bit_width	= sdhci_s3c_platform_8bit_width,
+> +	.platform_bus_width	= sdhci_s3c_platform_bus_width,
+>  };
+>  
+>  static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 0810ccc..1f51667 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -144,7 +144,7 @@ static void tegra_sdhci_reset_exit(struct sdhci_host *host, u8 mask)
+>  	}
+>  }
+>  
+> -static int tegra_sdhci_8bit(struct sdhci_host *host, int bus_width)
+> +static int tegra_sdhci_buswidth(struct sdhci_host *host, int bus_width)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_tegra *tegra_host = pltfm_host->priv;
+> @@ -171,7 +171,7 @@ static struct sdhci_ops tegra_sdhci_ops = {
+>  	.read_l     = tegra_sdhci_readl,
+>  	.read_w     = tegra_sdhci_readw,
+>  	.write_l    = tegra_sdhci_writel,
+> -	.platform_8bit_width = tegra_sdhci_8bit,
+> +	.platform_bus_width = tegra_sdhci_buswidth,
+>  	.platform_reset_exit = tegra_sdhci_reset_exit,
+>  };
+>  
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 9a11dc3..9043a3c 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1372,11 +1372,11 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+>  	/*
+>  	 * If your platform has 8-bit width support but is not a v3 controller,
+>  	 * or if it requires special setup code, you should implement that in
+> -	 * platform_8bit_width().
+> +	 * platform_bus_width().
+>  	 */
+> -	if (host->ops->platform_8bit_width)
+> -		host->ops->platform_8bit_width(host, ios->bus_width);
+> -	else {
+> +	if (host->ops->platform_bus_width) {
+> +		host->ops->platform_bus_width(host, ios->bus_width);
+> +	} else {
+Why add the brackets? 
 
+Best Regards,
+Jaehoon Chung
+>  		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+>  		if (ios->bus_width == MMC_BUS_WIDTH_8) {
+>  			ctrl &= ~SDHCI_CTRL_4BITBUS;
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 97653ea..efce211 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -267,7 +267,7 @@ struct sdhci_ops {
+>  	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+>  	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+>  	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
+> -	int		(*platform_8bit_width)(struct sdhci_host *host,
+> +	int		(*platform_bus_width)(struct sdhci_host *host,
+>  					       int width);
+>  	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
+>  					     u8 power_mode);
+> 
 
