@@ -1,74 +1,93 @@
-From: Johan Rudholm <jrudholm@gmail.com>
-Subject: Re: [PATCH v2 2/2] mmc: core: Power cycle card on voltage switch fail
-Date: Tue, 25 Sep 2012 10:52:10 +0200
-Message-ID: <CA+20K0AVGG7zX3H596f+iHYB_1C7Jxm+xa0eGjrNFTC9sBwn1g@mail.gmail.com>
-References: <1348556654-2119-1-git-send-email-johan.rudholm@stericsson.com>
-	<CAPDyKFqr9COJ0oGQE_G99zscFXpRztQ3nN8o3_Vn-sQOxegB5Q@mail.gmail.com>
+From: Yong Ding <yongd@marvell.com>
+Subject: RE: [PATCH] mmc: remove MMC_CAP_NEEDS_POLL setting in sdhci_add_host
+Date: Tue, 25 Sep 2012 02:13:10 -0700
+Message-ID: <89813612683626448B837EE5A0B6A7CB30384F5CAD@SC-VEXCH4.marvell.com>
+References: <1348554847-14190-1-git-send-email-yongd@marvell.com>
+ <20120925070401.GA32230@lizard>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:44017 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753105Ab2IYIwL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 04:52:11 -0400
-Received: by ieak13 with SMTP id k13so13259857iea.19
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Sep 2012 01:52:10 -0700 (PDT)
-In-Reply-To: <CAPDyKFqr9COJ0oGQE_G99zscFXpRztQ3nN8o3_Vn-sQOxegB5Q@mail.gmail.com>
+Received: from na3sys009aog121.obsmtp.com ([74.125.149.145]:53325 "EHLO
+	na3sys009aog121.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751552Ab2IYJPp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 05:15:45 -0400
+In-Reply-To: <20120925070401.GA32230@lizard>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Johan Rudholm <johan.rudholm@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
+To: Anton Vorontsov <anton.vorontsov@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Daniel Drake <dsd@laptop.org>, Zhangfei Gao <zgao6@marvell.com>
 
-Hi Ulf,
-
-2012/9/25 Ulf Hansson <ulf.hansson@linaro.org>:
-> Hi Johan,
->
-> An overall comment; would it be possible to include this patch as a
-> piece of patch 1/2 "mmc: core: Proper signal voltage switch".
-> They seems like quite tight connected.
-
-Sure, I can do this. Let me see what comes out of the SDIO patch first though...
-
->> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
->> index 74972c2..9a165451 100644
->> --- a/drivers/mmc/core/sd.c
->> +++ b/drivers/mmc/core/sd.c
->> @@ -720,6 +720,7 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
->>          * state.  We wait 1ms to give cards time to
->>          * respond.
->>          */
->> +try_again:
->>         mmc_go_idle(host);
->>
->>         /*
->> @@ -748,7 +749,6 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
->>         if (max_current > 150)
->>                 ocr |= SD_OCR_XPC;
->>
->> -try_again:
->>         err = mmc_send_app_op_cond(host, ocr, rocr);
->>         if (err)
->>                 return err;
->> @@ -761,7 +761,11 @@ try_again:
->>            ((*rocr & 0x41000000) == 0x41000000)) {
->>                 err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180, true);
->>                 if (err) {
->> -                       ocr &= ~SD_OCR_S18R;
->> +                       /* Power cycle card */
->> +                       pr_warning("%s: Signal voltage switch failed, "
->> +                               "power cycling card\n", mmc_hostname(host));
->> +                       mmc_power_off(host);
->> +                       mmc_power_up(host);
->
-> This mean you will retry forever even if the card is not capable of
-> 1.8V. I doubt this really what you want?
-
-The card has already ACKed that it supports 1.8V, and according to the
-SD spec it should be power-cycled if the voltage swich fails, but I
-guess it would be more robust to bail out after a number of retries.
-Our 16 GB Verbatim card that started all this has been observed to
-sometimes require five power cycles until it accepts the voltage
-switch, so I'll have to pick a high enough number.
-
-Kind regards, Johan
+QW50b24sDQpUaGFua3MgYSBsb3QgZm9yIHlvdXIgY29tbWVudHMuIEkndmUganVzdCByZXZpZXdl
+ZCB0aG9zZSBob3N0IGRyaXZlcnMgdW5kZXIgZHJpdmVycy9tbWMvaG9zdCB3aG8gdXNlIFNESENJ
+X1FVSVJLX0JST0tFTl9DQVJEX0RFVEVDVElPTi4gQW5kIGhlcmUgYXJlIHRoZSBkZXRhaWxzLA0K
+DQoxLiBzZGhjaS1weGF2Mi8zLmMNCkFjdHVhbGx5IHRoZXkgc2V0ICJTREhDSV9RVUlSS19CUk9L
+RU5fQ0FSRF9ERVRFQ1RJT04gYW5kIE1NQ19DQVBfTk9OUkVNT1ZBQkxFIiB0b2dldGhlciBmb3Ig
+YSBwZXJtYW5lbnQgY2FyZCB3aG8gaXMgYWx3YXlzIHdpcmVkIHRvIGhvc3QgYW5kIHdpdGggcG93
+ZXIgYWx3YXlzIG9uLCBlZywgZW1tYyBjYXJkLiBTbywgdGhleSBkb24ndCBzZXQgU0RIQ0lfUVVJ
+UktfQlJPS0VOX0NBUkRfREVURUNUSU9OIGZvciBwb2xsaW5nOi0pDQoNCjIuIHNkaGNpLXMzYy5j
+DQpJZiB0aGUgY2FyZCBkZXRlY3Rpb24gdHlwZSBpcyBTM0NfU0RIQ0lfQ0RfTk9ORSwgdGhleSBh
+cmUgZXhwZWN0aW5nIHBvbGxpbmcgbWV0aG9kIHRvIGRldGVjdCBjYXJkLiBBbmQgaW4gdGhlIGN1
+cnJlbnQgY29kZSBsb2dpYywgc2RoY2ktczNjLmMgZG9lcyBub3Qgc2V0IE1NQ19DQVBfTkVFRFNf
+UE9MTCBpdHNlbGYsIGJ1dCBkZXBlbmRzIG9uIHRoZSBjb2RlIHdoaWNoIEkgYW0gcHJlZmVycmlu
+ZyB0byByZW1vdmUuIFNvLCB5b3UgYXJlIHJpZ2h0IHRoaXMgaXMgbm90IHNvIHRoYXQgc2ltcGxl
+Lg0KDQozLiBzZGhjaS1lc2RoYy1pbXguYw0KQnkgZGVmYXVsdCwgaXQgc2V0cyBTREhDSV9RVUlS
+S19CUk9LRU5fQ0FSRF9ERVRFQ1RJT04gZm9yIGFsbCBob3N0cy4gDQpBbmQgdGhlbiBpZiB0aGUg
+Y2FyZCBkZXRlY3Rpb24gdHlwZSBpcyBFU0RIQ19DRF9DT05UUk9MTEVSKGluZGljYXRpbmcgd2Ug
+dXNlIHRoZSBob3N0IGludGVybmFsIGNhcmQgZGV0ZWN0aW9uKSwgaXQgd2lsbCBjbGVhciB0aGlz
+IGZsYWcuIE5vIGlzc3VlLg0KSWYgdGhlIGNkX3R5cGUgaXMgRVNESENfQ0RfUEVSTUFORU5ULCBp
+dCB3aWxsIHN0aWxsIGtlZXAgdGhlIHNldCBvZiB0aGUgZmxhZy4gVGhpcyBpcyBqdXN0IGV4YWN0
+bHkgdGhlIHNhbWUgY2FzZSBhcyBzZGhjaS1weGF2Mi8zLmMuIE5vIGlzc3VlLg0KSWYgdGhlIGNk
+X3R5cGUgaXMgRVNESENfQ0RfR1BJTyh1c2luZyBleHRlcm5hbCBHUElPIGZvciBDRCksIGl0IHdp
+bGwga2VlcCB0aGUgc2V0IG9mIHRoaXMgZmxhZywgYW5kIEkgdGhpbmsgdGhpcyBpcyB0aGUgcmln
+aHQgbG9naWMgc2luY2Ugd2UgZG9uJ3QgdXNlIGhvc3QgaW50ZXJuYWwgY2FyZCBkZXRlY3Rpb24u
+IEJ1dCB0aGlzIHdpbGwgZXZlbnR1YWxseSBjYXVzZXMgdGhlIGVuYWJsaW5nIG9mIHBvbGxpbmcg
+bWV0aG9kLCB3aGljaCBpcyByaWdodGx5IHRoZSBjYXNlIG1lbnRpb25lZCBpbiBteSBwYXRjaCBj
+b21tZW50LiBBICsxIGZvciBteSBwYXRjaC4NCklmIHRoZSBjZF90eXBlIGlzIEVTREhDX0NEX05P
+TkUsIHRoaXMgaXMgdGhlIHNhbWUgY2FzZSBhcyBzZGhjaS1zM2MuYy4gQSArMSBmb3IgeW91ciBn
+dWVzcy9jb25jZXJuOi0pDQoNCjQuIHNkaGNpLW9mLWVzZGhjLmMgYW5kIHNkaGNpLXBjaS5jDQpD
+YXNlZCBhcmUgYWxyZWFkeSBpbmNsdWRlZCBpbiB0aGUgYWJvdmUgMyBzYW1wbGVzLiBTbyBub3Ro
+aW5nIG1vcmUgaGVyZS4NCg0KU28sIGluIGFsbCwgdSBhcmUgcmlnaHQgaWYgd2l0aCBteSBjdXJy
+ZW50IHBhdGNoLCBzb21lIGhvc3QgZHJpdmVycyBuZWVkIHNvbWUgaW1wcm92ZW1lbnQgdG8gYWRk
+IE1NQ19DQVBfTkVFRFNfUE9MTCB3aGVuIGl0IGlzIGFjdHVhbGx5IG5lZWRlZC4gQnV0IEkgdGhp
+bmsgdGhpcyBzaGFsbCBiZSB0aGUgcmlnaHQgd2F5IHRvIGZvbGxvdy4gT3IsIHdlIG1pZ2h0IGVu
+YWJsZSBwb2xsaW5nIGZvciBzb21lIGNhc2VzIGluIHdoaWNoIGl0IGlzIHVubmVjZXNzYXJ5LCBh
+bmQgbWF5YmUgdGhpcyBpcyBhIHBvdGVudGlhbCBpc3N1ZS1ib21iLiBIb3cgZG8gdSB0aGluaz8N
+Cg0KDQpCZXN0IFdpc2hlcywNCg0KWW9uZyBEaW5nDQpPcGVyYXRpbmcgU3lzdGVtcyBFbmdpbmVl
+cmluZywNCkFwcGxpY2F0aW9uIFByb2Nlc3NvciBTeXN0ZW1zIEVuZ2luZWVyaW5nDQoNCj4gLS0t
+LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQW50b24gVm9yb250c292IFttYWlsdG86
+YW50b24udm9yb250c292QGxpbmFyby5vcmddDQo+IFNlbnQ6IFR1ZXNkYXksIFNlcHRlbWJlciAy
+NSwgMjAxMiAzOjA0IFBNDQo+IFRvOiBZb25nIERpbmcNCj4gQ2M6IENocmlzIEJhbGw7IGxpbnV4
+LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IERhbmllbCBEcmFrZTsgWmhhbmdmZWkgR2FvDQo+IFN1Ympl
+Y3Q6IFJlOiBbUEFUQ0hdIG1tYzogcmVtb3ZlIE1NQ19DQVBfTkVFRFNfUE9MTCBzZXR0aW5nIGlu
+DQo+IHNkaGNpX2FkZF9ob3N0DQo+IA0KPiBPbiBUdWUsIFNlcCAyNSwgMjAxMiBhdCAwMjozNDow
+N1BNICswODAwLCB5b25nZCB3cm90ZToNCj4gPiBGcm9tOiB5b25nZCA8eW9uZ2RAbWFydmVsbC5j
+b20+DQo+IFsuLi5dDQo+ID4gQW5kIHRoZSBiZXR0ZXIgb25lIHRvIGRlY2lkZSB3aGV0aGVyIHdl
+IHVzZSBwb2xsaW5nIG9yIG5vdCBzaG91bGQgYmUNCj4gPiB0aGUgaG9zdCBkcml2ZXIgaXRzZWxm
+LiBBY3R1YWxseSwgc29tZSBob3N0IGRyaXZlciBoYXMgYWxyZWFkeSBiZWVuDQo+ID4gbGlrZSB0
+aGlzLiBFZywgaW4gZHJpdmVycy9tbWMvaG9zdC9BdTF4bW1jLmMsIHBvbGxpbmcgd2lsbCBiZSBl
+bmFibGVkDQo+ID4gb25seSBhZnRlciB0aGUgYm9hcmQtc3BlY2lmaWMgY2FyZCBkZXRlY3Rpb24g
+Y2FuJ3QgYmUgc2V0IHVwDQo+IHN1Y2Nlc3NmdWxseS4NCj4gDQo+IEkgZ3Vlc3MgaXQncyBub3Qg
+dGhhdCBzaW1wbGUuIElmIHlvdSByZW1vdmUgdGhpcywgeW91IGhhdmUgdG8gYWRkDQo+IGFwcHJv
+cHJpYXRlIENBUF9ORUVEU19QT0xMIGZvciB0aGVzZSBkcml2ZXJzOg0KPiANCj4gIGxpbnV4L2Ry
+aXZlcnMvbW1jL2hvc3QkIGdpdCBncmVwIC1sIFNESENJX1FVSVJLX0JST0tFTl9DQVJEX0RFVEVD
+VElPTg0KPiB8IHhhcmdzIGdyZXAgLUwgTkVFRFNfUE9MTA0KPiAgc2RoY2ktZXNkaGMtaW14LmMN
+Cj4gIHNkaGNpLW9mLWVzZGhjLmMNCj4gIHNkaGNpLXBjaS5jDQo+ICBzZGhjaS1weGF2Mi5jDQo+
+ICBzZGhjaS1weGF2My5jDQo+ICBzZGhjaS1zM2MuYw0KPiANCj4gPiBDaGFuZ2UtSWQ6IEkyNzc3
+NDQ4OGE3YjkxOTFkN2JjMzk2OTlmZDdkNjJlZTIxYmJmMTU3DQo+ID4gU2lnbmVkLW9mZi1ieTog
+eW9uZ2QgPHlvbmdkQG1hcnZlbGwuY29tPg0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJzL21tYy9ob3N0
+L3NkaGNpLmMgfCAgICA0IC0tLS0NCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDQgZGVsZXRpb25zKC0p
+DQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jIGIvZHJpdmVy
+cy9tbWMvaG9zdC9zZGhjaS5jDQo+ID4gaW5kZXggMGUxNWM3OS4uOTAwZDVmNCAxMDA2NDQNCj4g
+PiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLmMNCj4gPiArKysgYi9kcml2ZXJzL21tYy9o
+b3N0L3NkaGNpLmMNCj4gPiBAQCAtMjg0MCwxMCArMjg0MCw2IEBAIGludCBzZGhjaV9hZGRfaG9z
+dChzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCkNCj4gPiAgCWlmIChjYXBzWzBdICYgU0RIQ0lfQ0FO
+X0RPX0hJU1BEKQ0KPiA+ICAJCW1tYy0+Y2FwcyB8PSBNTUNfQ0FQX1NEX0hJR0hTUEVFRCB8IE1N
+Q19DQVBfTU1DX0hJR0hTUEVFRDsNCj4gPg0KPiA+IC0JaWYgKChob3N0LT5xdWlya3MgJiBTREhD
+SV9RVUlSS19CUk9LRU5fQ0FSRF9ERVRFQ1RJT04pICYmDQo+ID4gLQkgICAgIShob3N0LT5tbWMt
+PmNhcHMgJiBNTUNfQ0FQX05PTlJFTU9WQUJMRSkpDQo+ID4gLQkJbW1jLT5jYXBzIHw9IE1NQ19D
+QVBfTkVFRFNfUE9MTDsNCj4gPiAtDQo+ID4gIAkvKiBJZiB2cW1tYyByZWd1bGF0b3IgYW5kIG5v
+IDEuOFYgc2lnbmFsbGluZywgdGhlbiB0aGVyZSdzIG5vIFVIUw0KPiAqLw0KPiA+ICAJaG9zdC0+
+dnFtbWMgPSByZWd1bGF0b3JfZ2V0KG1tY19kZXYobW1jKSwgInZxbW1jIik7DQo+ID4gIAlpZiAo
+SVNfRVJSKGhvc3QtPnZxbW1jKSkgew0KPiA+IC0tDQo+ID4gMS43LjkuNQ0K
