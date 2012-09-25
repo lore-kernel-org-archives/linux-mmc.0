@@ -1,54 +1,35 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: [PATCH 3/3] mmc: esdhc i.MX: Support 8bit mode
-Date: Tue, 25 Sep 2012 10:05:25 +0200
-Message-ID: <20120925080525.GA1322@pengutronix.de>
-References: <1348471345-30785-1-git-send-email-s.hauer@pengutronix.de>
- <1348471345-30785-4-git-send-email-s.hauer@pengutronix.de>
- <20120925071505.GG27291@S2101-09.ap.freescale.net>
- <20120925072714.GY1322@pengutronix.de>
- <20120925073317.GI27291@S2101-09.ap.freescale.net>
- <20120925073808.GZ1322@pengutronix.de>
- <20120925074548.GJ27291@S2101-09.ap.freescale.net>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: [PATCH v2 7/8] mmc: host: adjust uhs timing value
+Date: Tue, 25 Sep 2012 16:31:37 +0800
+Message-ID: <CADz5_gJaAVvm8nQOCqOSK8Z=J+eqRLLFF4vfnHqE2vkHOQXz6A@mail.gmail.com>
+References: <1348474558-23088-1-git-send-email-keyuan.liu@gmail.com>
+	<1348474558-23088-8-git-send-email-keyuan.liu@gmail.com>
+	<CAPDyKFrTig8SsBoPkQXyYFihOZ+cWs58FGhCdSsz8OGZwmbVjQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:40099 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751548Ab2IYIF2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 04:05:28 -0400
-Content-Disposition: inline
-In-Reply-To: <20120925074548.GJ27291@S2101-09.ap.freescale.net>
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:52381 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752760Ab2IYIbi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 04:31:38 -0400
+Received: by wibhr7 with SMTP id hr7so259504wib.1
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Sep 2012 01:31:37 -0700 (PDT)
+In-Reply-To: <CAPDyKFrTig8SsBoPkQXyYFihOZ+cWs58FGhCdSsz8OGZwmbVjQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Eric =?iso-8859-15?Q?B=E9nard?= <eric@eukrea.com>, kernel@pengutronix.de
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-On Tue, Sep 25, 2012 at 03:45:50PM +0800, Shawn Guo wrote:
-> On Tue, Sep 25, 2012 at 09:38:08AM +0200, Sascha Hauer wrote:
-> > So you want to make the code conform to the common spec which has
-> > bus-width as a required property. Is this really worth it to add an
-> > incompatible change to our devicetrees?
-> > 
-> I do want to have our implementation conform to common spec.  At the
-> current stage devicetrees are not stable anyway, so we should make
-> them right as much as possible before they start getting maintained
-> separately from kernel tree, where we will be asked to maintain
-> devicetree compatibility a lot harder.
+Hi, Ulf
 
-Ok, how about this:
+2012/9/25 Ulf Hansson <ulf.hansson@linaro.org>:
+> Hi Kevin,
+>
+> This make sense to me.
+>
+> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+>
 
-- I add a bus-width = <4> property to all i.MX dtsi files
-- we merge the patch adding bus-width as an optional property
-- Make the bus-width option mandatory in the next step.
+Thanks for the review.
 
-This way we can merge the mmc related patches through the mmc tree and
-the dts changes through arm-soc.
-
-Sascha
-
-
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+Kevin
