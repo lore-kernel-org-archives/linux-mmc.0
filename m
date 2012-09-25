@@ -1,60 +1,59 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH] mmc: sdhci / i.MX esdhc buswidth patches
-Date: Tue, 25 Sep 2012 08:44:43 +0200
-Message-ID: <20120925064443.GA8655@pengutronix.de>
-References: <1348471345-30785-1-git-send-email-s.hauer@pengutronix.de>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="CE+1k2dSO48ffgeK"
+From: yongd <yongd@marvell.com>
+Subject: [PATCH] mmc: remove MMC_CAP_NEEDS_POLL setting in sdhci_add_host
+Date: Tue, 25 Sep 2012 14:34:07 +0800
+Message-ID: <1348554847-14190-1-git-send-email-yongd@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:51225 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753230Ab2IYGor (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 02:44:47 -0400
-Content-Disposition: inline
-In-Reply-To: <1348471345-30785-1-git-send-email-s.hauer@pengutronix.de>
+Received: from na3sys009aog129.obsmtp.com ([74.125.149.142]:37493 "EHLO
+	na3sys009aog129.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750884Ab2IYGuz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 02:50:55 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Eric =?iso-8859-15?Q?B=E9nard?= <eric@eukrea.com>, kernel@pengutronix.de
+To: Chris Ball <cjb@laptop.org>, Anton Vorontsov <avorontsov@ru.mvista.com>
+Cc: linux-mmc@vger.kernel.org, Daniel Drake <dsd@laptop.org>, Zhangfei Gao <zhangfei.gao@marvell.com>, yongd <yongd@marvell.com>
 
+From: yongd <yongd@marvell.com>
 
---CE+1k2dSO48ffgeK
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In the current code logic, sdhci_add_host() will enable the polling
+method (set MMC_CAP_NEEDS_POLL) for a removable card (MMC_CAP_
+NONREMOVABLE is not set) whose host's internal card detection method
+is disabled for some reason (SDHCI_QUIRK_BROKEN_CARD_DETECTION is set).
 
-On Mon, Sep 24, 2012 at 09:22:22AM +0200, Sascha Hauer wrote:
-> The first patch is a generic sdhci driver cleanup change, the others
-> are i.MX specific, adding 8bit bus support and fix version register
-> readout.
->=20
-> Sascha
->=20
-> ----------------------------------------------------------------
-> Sascha Hauer (3):
->       mmc: sdhci: rename platform_8bit_width to platform_bus_width
->       mmc: esdhc i.MX: Fix version register read
->       mmc: esdhc i.MX: Support 8bit mode
+However, this is improper since we can have some other card detection
+methods besides host internal card detection and the polling method.
+For example, we might use an external GPIO pin's interrupt to detect
+a removable SD card, so we shall set SDHCI_QUIRK_BROKEN_CARD_DETECTION
+since we don't use the internal card detection, and not set MMC_CAP_
+NONREMOVABLE since the SD card is physically removable. As a result,
+with the current code, the polling method will also be enabled.
+Apparently, this is redundant and not what we want.
 
-Whole series:
+And the better one to decide whether we use polling or not should be
+the host driver itself. Actually, some host driver has already been
+like this. Eg, in drivers/mmc/host/Au1xmmc.c, polling will be enabled
+only after the board-specific card detection can't be set up successfully.
 
-Acked-by: Wolfram Sang <w.sang@pengutronix.de>
+Change-Id: I27774488a7b9191d7bc39699fd7d62ee21bbf157
+Signed-off-by: yongd <yongd@marvell.com>
+---
+ drivers/mmc/host/sdhci.c |    4 ----
+ 1 file changed, 4 deletions(-)
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 0e15c79..900d5f4 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2840,10 +2840,6 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (caps[0] & SDHCI_CAN_DO_HISPD)
+ 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+ 
+-	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
+-	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
+-		mmc->caps |= MMC_CAP_NEEDS_POLL;
+-
+ 	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
+ 	host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
+ 	if (IS_ERR(host->vqmmc)) {
+-- 
+1.7.9.5
 
---CE+1k2dSO48ffgeK
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iEYEARECAAYFAlBhUtsACgkQD27XaX1/VRuUYACfSRKotH5PVpI1WVsX+m3Pbd9K
-I9AAn0FfuqlItK42B7SEyozpFBUN3qM0
-=lcfC
------END PGP SIGNATURE-----
-
---CE+1k2dSO48ffgeK--
