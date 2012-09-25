@@ -1,98 +1,123 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH v3 02/11] mmc: sdhci: set regulator min/max voltage
- according to spec
-Date: Tue, 25 Sep 2012 23:55:19 +0900
-Message-ID: <CAGxe1ZGuUe3Z1hmUEGzkcRMmfyuQyZcoff_aTf=4ptqniFLE-w@mail.gmail.com>
-References: <1348569546-13242-1-git-send-email-keyuan.liu@gmail.com>
-	<1348569546-13242-3-git-send-email-keyuan.liu@gmail.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH v2 2/2] mmc: core: Power cycle card on voltage switch
+ fail
+Date: Tue, 25 Sep 2012 08:27:30 -0700
+Message-ID: <6903B09F-6665-4E4F-9398-2BC93E2BE061@marvell.com>
+References: <1348556654-2119-1-git-send-email-johan.rudholm@stericsson.com>
+ <CAPDyKFqr9COJ0oGQE_G99zscFXpRztQ3nN8o3_Vn-sQOxegB5Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:45909 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754165Ab2IYOzU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 10:55:20 -0400
-Received: by vbbff1 with SMTP id ff1so7463307vbb.19
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Sep 2012 07:55:19 -0700 (PDT)
-In-Reply-To: <1348569546-13242-3-git-send-email-keyuan.liu@gmail.com>
+Received: from na3sys009aob106.obsmtp.com ([74.125.149.76]:57489 "EHLO
+	na3sys009aog106.obsmtp.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1755138Ab2IYPaA convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 25 Sep 2012 11:30:00 -0400
+In-Reply-To: <CAPDyKFqr9COJ0oGQE_G99zscFXpRztQ3nN8o3_Vn-sQOxegB5Q@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Liu <keyuan.liu@gmail.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com, Jialing Fu <jlfu@marvell.com>
+To: Johan Rudholm <johan.rudholm@stericsson.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On 25 September 2012 19:38, Kevin Liu <keyuan.liu@gmail.com> wrote:
-> From: Kevin Liu <kliu5@marvell.com>
->
-> Use voltage range as below rather than a specific value
-> 3.3v: (3.2v, 3.4v)
-> 3.0v: (2.9v, 3.1v)
-> 1.8v: (1.65v, 1.95v)
-Any specific reason to give range and not specific value?
->
-> Signed-off-by: Jialing Fu <jlfu@marvell.com>
-> Signed-off-by: Kevin Liu <kliu5@marvell.com>
-> ---
->  drivers/mmc/host/sdhci.c |   18 +++++++++---------
->  1 files changed, 9 insertions(+), 9 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 2f844e5..f50efa6 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1628,7 +1628,7 @@ static int sdhci_do_3_3v_signal_voltage_switch(struct sdhci_host *host,
->         sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
->
->         if (host->vqmmc) {
-> -               ret = regulator_set_voltage(host->vqmmc, 3300000, 3300000);
-> +               ret = regulator_set_voltage(host->vqmmc, 3200000, 3400000);
->                 if (ret) {
->                         pr_warning("%s: Switching to 3.3V signalling voltage "
->                                    " failed\n", mmc_hostname(host->mmc));
-> @@ -1672,7 +1672,7 @@ static int sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
->                  */
->                 if (host->vqmmc)
->                         ret = regulator_set_voltage(host->vqmmc,
-> -                               1800000, 1800000);
-> +                               1650000, 1950000);
->                 else
->                         ret = 0;
->
-> @@ -2856,7 +2856,7 @@ int sdhci_add_host(struct sdhci_host *host)
->                 pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
->                 host->vqmmc = NULL;
->         }
-> -       else if (regulator_is_supported_voltage(host->vqmmc, 1800000, 1800000))
-> +       else if (regulator_is_supported_voltage(host->vqmmc, 1650000, 1950000))
->                 regulator_enable(host->vqmmc);
->         else
->                 caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
-> @@ -2927,16 +2927,16 @@ int sdhci_add_host(struct sdhci_host *host)
->
->  #ifdef CONFIG_REGULATOR
->         if (host->vmmc) {
-> -               ret = regulator_is_supported_voltage(host->vmmc, 3300000,
-> -                       3300000);
-> +               ret = regulator_is_supported_voltage(host->vmmc, 3200000,
-> +                       3400000);
->                 if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
->                         caps[0] &= ~SDHCI_CAN_VDD_330;
-> -               ret = regulator_is_supported_voltage(host->vmmc, 3000000,
-> -                       3000000);
-> +               ret = regulator_is_supported_voltage(host->vmmc, 2900000,
-> +                       3100000);
->                 if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_300)))
->                         caps[0] &= ~SDHCI_CAN_VDD_300;
-> -               ret = regulator_is_supported_voltage(host->vmmc, 1800000,
-> -                       1800000);
-> +               ret = regulator_is_supported_voltage(host->vmmc, 1650000,
-> +                       1950000);
->                 if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_180)))
->                         caps[0] &= ~SDHCI_CAN_VDD_180;
->         }
-> --
-> 1.7.0.4
->
+
+
+On Sep 25, 2012, at 12:30 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+
+> Hi Johan,
+> 
+> An overall comment; would it be possible to include this patch as a
+> piece of patch 1/2 "mmc: core: Proper signal voltage switch".
+> They seems like quite tight connected.
+> 
+> Anyway, some comment below.
+> 
+> On 25 September 2012 09:04, Johan Rudholm <johan.rudholm@stericsson.com> wrote:
+>> Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
+>> ---
+>> drivers/mmc/core/core.c |    2 +-
+>> drivers/mmc/core/core.h |    1 +
+>> drivers/mmc/core/sd.c   |    8 ++++++--
+>> 3 files changed, 8 insertions(+), 3 deletions(-)
+>> 
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index dae6744..fb03bd9 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1348,7 +1348,7 @@ static void mmc_poweroff_notify(struct mmc_host *host)
+>>  * If a host does all the power sequencing itself, ignore the
+>>  * initial MMC_POWER_UP stage.
+>>  */
+>> -static void mmc_power_up(struct mmc_host *host)
+>> +void mmc_power_up(struct mmc_host *host)
+>> {
+>>        int bit;
+>> 
+>> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+>> index 3bdafbc..5a5170d 100644
+>> --- a/drivers/mmc/core/core.h
+>> +++ b/drivers/mmc/core/core.h
+>> @@ -45,6 +45,7 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage,
+>> void mmc_set_timing(struct mmc_host *host, unsigned int timing);
+>> void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
+>> void mmc_power_off(struct mmc_host *host);
+>> +void mmc_power_up(struct mmc_host *host);
+>> 
+>> static inline void mmc_delay(unsigned int ms)
+>> {
+>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+>> index 74972c2..9a165451 100644
+>> --- a/drivers/mmc/core/sd.c
+>> +++ b/drivers/mmc/core/sd.c
+>> @@ -720,6 +720,7 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
+>>         * state.  We wait 1ms to give cards time to
+>>         * respond.
+>>         */
+>> +try_again:
+>>        mmc_go_idle(host);
+>> 
+>>        /*
+>> @@ -748,7 +749,6 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
+>>        if (max_current > 150)
+>>                ocr |= SD_OCR_XPC;
+>> 
+>> -try_again:
+>>        err = mmc_send_app_op_cond(host, ocr, rocr);
+>>        if (err)
+>>                return err;
+>> @@ -761,7 +761,11 @@ try_again:
+>>           ((*rocr & 0x41000000) == 0x41000000)) {
+>>                err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180, true);
+>>                if (err) {
+>> -                       ocr &= ~SD_OCR_S18R;
+>> +                       /* Power cycle card */
+>> +                       pr_warning("%s: Signal voltage switch failed, "
+>> +                               "power cycling card\n", mmc_hostname(host));
+>> +                       mmc_power_off(host);
+>> +                       mmc_power_up(host);
+> 
+> This mean you will retry forever even if the card is not capable of
+> 1.8V. I doubt this really what you want?
+> 
+>>                        goto try_again;
+>>                }
+>>        }
+>> --
+>> 1.7.10
+>> 
+
+
+ I did a patch for this problem in sdhci.c when voltage switch failed.  It turned off and then
+turned on the regulator.  The patch worked on the UHS cards I was testing.  The fix
+has been pulled upstream.
+
+ 
+> 
+> Kind regards
+> Ulf Hansson
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
