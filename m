@@ -1,165 +1,86 @@
 From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH v4] powerpc/esdhc: disable CMD23 for some Freescale SoCs
-Date: Tue, 25 Sep 2012 23:45:21 +0900
-Message-ID: <CAGxe1ZG_5bcG1fJhPE0jsHYWDLK6eww9sa29H8E1gSFBQ36aXQ@mail.gmail.com>
-References: <1348563632-23659-1-git-send-email-r66093@freescale.com>
+Subject: Re: [PATCH v3 01/11] mmc: sdhci: fix transfer mode setting bug for
+ cmds w/o data transfer
+Date: Tue, 25 Sep 2012 23:52:59 +0900
+Message-ID: <CAGxe1ZH-7Gvydqy3vBrpXEzFmkU1EOOL75OTVOgUdA8f+OOpSw@mail.gmail.com>
+References: <1348569546-13242-1-git-send-email-keyuan.liu@gmail.com>
+	<1348569546-13242-2-git-send-email-keyuan.liu@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:39199 "EHLO
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:32769 "EHLO
 	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755497Ab2IYOpW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 10:45:22 -0400
-Received: by vcbfo13 with SMTP id fo13so7715542vcb.19
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Sep 2012 07:45:21 -0700 (PDT)
-In-Reply-To: <1348563632-23659-1-git-send-email-r66093@freescale.com>
+	with ESMTP id S1755281Ab2IYOxA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 10:53:00 -0400
+Received: by vcbfo13 with SMTP id fo13so7726899vcb.19
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Sep 2012 07:52:59 -0700 (PDT)
+In-Reply-To: <1348569546-13242-2-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: r66093@freescale.com
-Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Shaohui Xie <Shaohui.Xie@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com, Jialing Fu <jlfu@marvell.com>, Tim Wang <wangtt@marvell.com>
 
-On 25 September 2012 18:00,  <r66093@freescale.com> wrote:
-> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+On 25 September 2012 19:38, Kevin Liu <keyuan.liu@gmail.com> wrote:
+> From: Kevin Liu <kliu5@marvell.com>
 >
-> CMD23 causes lots of errors in kernel on some freescale SoCs
-> (P1020, P1021, P1022, P1024, P1025 and P4080) when MMC card used,
-> which is because these controllers does not support CMD23,
-> even on the SoCs which declares CMD23 is supported.
-> Therefore, we'll not use CMD23.
+> Commands without data transfer like cmd5/cmd7 will use previous
+> transfer mode setting, which may lead to error since some bits
+> may have been set unexpectedly.
+> For example, cmd5 following cmd18/cmd25 will have timeout error
+> since audo cmd23 has been enabled.
 >
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
-> CC: Anton Vorontsov <cbouatmailru@gmail.com>
-> CC: Chris Ball <cjb@laptop.org>
+> Signed-off-by: Jialing Fu <jlfu@marvell.com>
+> Signed-off-by: Tim Wang <wangtt@marvell.com>
+> Signed-off-by: Kevin Liu <kliu5@marvell.com>
 > ---
-> changes for v4:
->         - change to detect the IP version
->         - don't use callback function
-> changes for v3:
->         - move the limitation detect function to eSDHC file
->         - add the callback funtion to do this limitation detect
-> changes for v2:
->         - discard the property mode and add the processor detection
+>  drivers/mmc/host/sdhci.c |   22 ++++++++++++++--------
+>  1 files changed, 14 insertions(+), 8 deletions(-)
 >
->  drivers/mmc/host/sdhci-of-esdhc.c |   33 +++++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci-pltfm.c    |    4 +++-
->  drivers/mmc/host/sdhci-pltfm.h    |    1 +
->  drivers/mmc/host/sdhci.c          |    3 +++
->  include/linux/mmc/sdhci.h         |    1 +
->  5 files changed, 41 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index ae5fcbf..231672b 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -169,6 +169,38 @@ static void esdhc_of_resume(struct sdhci_host *host)
->  }
->  #endif
->
-> +static void esdhc_of_detect_limitation(struct platform_device *pdev,
-> +       struct sdhci_pltfm_data *pdata)
-> +{
-> +       void __iomem *ioaddr;
-> +       struct resource *iomem;
-> +       u32 vvn;
-> +
-> +       iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> +       if (!iomem) {
-> +               dev_err(&pdev->dev, "failed to get resource\n");
-> +               goto err;
-> +       }
-> +       if (resource_size(iomem) < 0x100)
-> +               dev_err(&pdev->dev, "Invalid iomem size!\n");
-> +
-> +       ioaddr = ioremap(iomem->start, resource_size(iomem));
-> +       if (!ioaddr) {
-> +               dev_err(&pdev->dev, "failed to remap registers\n");
-> +               goto err;
-> +       }
-> +
-> +       /* P102x and P4080 has IP version VVN2.2, CMD23 is not supported */
-> +       vvn = in_be32(ioaddr + SDHCI_SLOT_INT_STATUS);
-> +       vvn = (vvn & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
-> +       if (vvn == VENDOR_V_22)
-> +               pdata->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
-> +
-> +       iounmap(ioaddr);
-> +err:
-> +       return;
-return a err value so that it is checked when called. If err then dont
-have to proceed further.
-> +}
-> +
->  static struct sdhci_ops sdhci_esdhc_ops = {
->         .read_l = esdhc_readl,
->         .read_w = esdhc_readw,
-> @@ -199,6 +231,7 @@ static struct sdhci_pltfm_data sdhci_esdhc_pdata = {
->
->  static int __devinit sdhci_esdhc_probe(struct platform_device *pdev)
->  {
-> +       esdhc_of_detect_limitation(pdev, &sdhci_esdhc_pdata);
-In the above function there is a err value returned. Do you have to
-proceed further even though there is a error?
->         return sdhci_pltfm_register(pdev, &sdhci_esdhc_pdata);
->  }
->
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index 65551a9..4dd5770 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -132,8 +132,10 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
->                 host->ops = pdata->ops;
->         else
->                 host->ops = &sdhci_pltfm_ops;
-> -       if (pdata)
-> +       if (pdata) {
->                 host->quirks = pdata->quirks;
-> +               host->quirks2 = pdata->quirks2;
-> +       }
->         host->irq = platform_get_irq(pdev, 0);
->
->         if (!request_mem_region(iomem->start, resource_size(iomem),
-> diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-> index 37e0e18..283d54a 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.h
-> +++ b/drivers/mmc/host/sdhci-pltfm.h
-> @@ -18,6 +18,7 @@
->  struct sdhci_pltfm_data {
->         struct sdhci_ops *ops;
->         unsigned int quirks;
-> +       unsigned int quirks2;
->  };
->
->  struct sdhci_pltfm_host {
 > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 0e15c79..b0b7cad 100644
+> index 0e15c79..2f844e5 100644
 > --- a/drivers/mmc/host/sdhci.c
 > +++ b/drivers/mmc/host/sdhci.c
-> @@ -2837,6 +2837,9 @@ int sdhci_add_host(struct sdhci_host *host)
->         if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
->                 mmc->caps |= MMC_CAP_4_BIT_DATA;
+> @@ -886,8 +886,21 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+>         u16 mode;
+>         struct mmc_data *data = cmd->data;
 >
-> +       if (host->quirks2 & SDHCI_QUIRK2_HOST_NO_CMD23)
-> +               mmc->caps &= ~MMC_CAP_CMD23;
-> +
->         if (caps[0] & SDHCI_CAN_DO_HISPD)
->                 mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+> -       if (data == NULL)
+> +       if (data == NULL) {
+Even though its kept as it is in the prev code. avoid explicit check
+for NULL. can use !data which is commonly used
+> +               if (cmd->opcode == MMC_SEND_TUNING_BLOCK ||
+> +                       cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
+> +                       /*
+> +                        * The tuning block is sent by the card to the host
+> +                        * controller. So we set the TRNS_READ bit in the
+> +                        * Transfer Mode register. This also takes care of
+> +                        * setting DMA Enable and Multi Block Select in the
+> +                        * same register to 0.
+> +                        */
+> +                       sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
+> +               else
+> +                       sdhci_writew(host, 0, SDHCI_TRANSFER_MODE);
+>                 return;
+> +       }
 >
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index fa8529a..1edcb4d 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -91,6 +91,7 @@ struct sdhci_host {
->         unsigned int quirks2;   /* More deviations from spec. */
+>         WARN_ON(!host->data);
 >
->  #define SDHCI_QUIRK2_HOST_OFF_CARD_ON                  (1<<0)
-> +#define SDHCI_QUIRK2_HOST_NO_CMD23                     (1<<1)
+> @@ -1850,13 +1863,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>                                      SDHCI_BLOCK_SIZE);
+>                 }
 >
->         int irq;                /* Device IRQ */
->         void __iomem *ioaddr;   /* Mapped address */
+> -               /*
+> -                * The tuning block is sent by the card to the host controller.
+> -                * So we set the TRNS_READ bit in the Transfer Mode register.
+> -                * This also takes care of setting DMA Enable and Multi Block
+> -                * Select in the same register to 0.
+> -                */
+> -               sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
+>
+>                 sdhci_send_command(host, &cmd);
+>
 > --
-> 1.7.9.5
->
+> 1.7.0.4
 >
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
