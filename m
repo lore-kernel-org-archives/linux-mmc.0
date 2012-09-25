@@ -1,89 +1,84 @@
 From: Johan Rudholm <johan.rudholm@stericsson.com>
-Subject: [PATCH v2 1/2] mmc: core: Proper signal voltage switch
-Date: Tue, 25 Sep 2012 09:03:42 +0200
-Message-ID: <1348556622-2068-1-git-send-email-johan.rudholm@stericsson.com>
+Subject: [PATCH v2 2/2] mmc: core: Power cycle card on voltage switch fail
+Date: Tue, 25 Sep 2012 09:04:14 +0200
+Message-ID: <1348556654-2119-1-git-send-email-johan.rudholm@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog106.obsmtp.com ([207.126.144.121]:36614 "EHLO
-	eu1sys200aog106.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750884Ab2IYHER (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 03:04:17 -0400
+Received: from eu1sys200aog107.obsmtp.com ([207.126.144.123]:46188 "EHLO
+	eu1sys200aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751270Ab2IYHEc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 03:04:32 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 Cc: Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>
 
-When switching SD and SDIO cards from 3.3V to 1.8V signal levels, the
-clock should be gated for 5 ms during the step. Failure by the card to
-switch is indicated by dat0 being pulled low. The host should check for
-this condition and power-cycle the card if failure is indicated.
-
 Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
 ---
-Changelog v2:
-	- Keep calls to mmc_host_clk_hold / mmc_host_clk_release
----
- drivers/mmc/core/core.c  |   22 ++++++++++++++++++++++
- include/linux/mmc/host.h |    3 +++
- 2 files changed, 25 insertions(+)
+ drivers/mmc/core/core.c |    2 +-
+ drivers/mmc/core/core.h |    1 +
+ drivers/mmc/core/sd.c   |    8 ++++++--
+ 3 files changed, 8 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 6612163..dae6744 100644
+index dae6744..fb03bd9 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -1220,6 +1220,7 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
+@@ -1348,7 +1348,7 @@ static void mmc_poweroff_notify(struct mmc_host *host)
+  * If a host does all the power sequencing itself, ignore the
+  * initial MMC_POWER_UP stage.
+  */
+-static void mmc_power_up(struct mmc_host *host)
++void mmc_power_up(struct mmc_host *host)
  {
- 	struct mmc_command cmd = {0};
- 	int err = 0;
-+	unsigned char old_voltage = host->ios.signal_voltage;
+ 	int bit;
  
- 	BUG_ON(!host);
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 3bdafbc..5a5170d 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -45,6 +45,7 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage,
+ void mmc_set_timing(struct mmc_host *host, unsigned int timing);
+ void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
+ void mmc_power_off(struct mmc_host *host);
++void mmc_power_up(struct mmc_host *host);
  
-@@ -1243,8 +1244,29 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
- 	host->ios.signal_voltage = signal_voltage;
+ static inline void mmc_delay(unsigned int ms)
+ {
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 74972c2..9a165451 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -720,6 +720,7 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
+ 	 * state.  We wait 1ms to give cards time to
+ 	 * respond.
+ 	 */
++try_again:
+ 	mmc_go_idle(host);
  
- 	if (host->ops->start_signal_voltage_switch) {
-+		u32 clock = host->ios.clock;
-+
- 		mmc_host_clk_hold(host);
-+		host->ios.clock = 0;
-+		mmc_set_ios(host);
- 		err = host->ops->start_signal_voltage_switch(host, &host->ios);
-+
-+		/* Hold clock for at least 5 ms according to spec */
-+		mmc_delay(5);
-+		host->ios.clock = clock;
-+		mmc_set_ios(host);
-+
-+		/* Wait for at least 1 ms until we check if card is ready */
-+		mmc_delay(1);
-+
-+		/* Check busy */
-+		if (cmd11 && host->ops->card_busy &&
-+						host->ops->card_busy(host)) {
-+			host->ios.signal_voltage = old_voltage;
-+			host->ops->start_signal_voltage_switch(host,
-+							&host->ios);
-+			err = -EAGAIN;
-+		}
- 		mmc_host_clk_release(host);
+ 	/*
+@@ -748,7 +749,6 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
+ 	if (max_current > 150)
+ 		ocr |= SD_OCR_XPC;
+ 
+-try_again:
+ 	err = mmc_send_app_op_cond(host, ocr, rocr);
+ 	if (err)
+ 		return err;
+@@ -761,7 +761,11 @@ try_again:
+ 	   ((*rocr & 0x41000000) == 0x41000000)) {
+ 		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180, true);
+ 		if (err) {
+-			ocr &= ~SD_OCR_S18R;
++			/* Power cycle card */
++			pr_warning("%s: Signal voltage switch failed, "
++				"power cycling card\n", mmc_hostname(host));
++			mmc_power_off(host);
++			mmc_power_up(host);
+ 			goto try_again;
+ 		}
  	}
- 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index d5d9bd4..b58641a 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -131,6 +131,9 @@ struct mmc_host_ops {
- 
- 	int	(*start_signal_voltage_switch)(struct mmc_host *host, struct mmc_ios *ios);
- 
-+	/* Check if the card is pulling dat0 low */
-+	int	(*card_busy)(struct mmc_host *host);
-+
- 	/* The tuning command opcode value is different for SD and eMMC cards */
- 	int	(*execute_tuning)(struct mmc_host *host, u32 opcode);
- 	void	(*enable_preset_value)(struct mmc_host *host, bool enable);
 -- 
 1.7.10
 
