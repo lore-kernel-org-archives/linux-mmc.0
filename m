@@ -1,59 +1,89 @@
-From: yongd <yongd@marvell.com>
-Subject: [PATCH] mmc: remove MMC_CAP_NEEDS_POLL setting in sdhci_add_host
-Date: Tue, 25 Sep 2012 14:34:07 +0800
-Message-ID: <1348554847-14190-1-git-send-email-yongd@marvell.com>
+From: Johan Rudholm <johan.rudholm@stericsson.com>
+Subject: [PATCH v2 1/2] mmc: core: Proper signal voltage switch
+Date: Tue, 25 Sep 2012 09:03:42 +0200
+Message-ID: <1348556622-2068-1-git-send-email-johan.rudholm@stericsson.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog129.obsmtp.com ([74.125.149.142]:37493 "EHLO
-	na3sys009aog129.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750884Ab2IYGuz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 02:50:55 -0400
+Received: from eu1sys200aog106.obsmtp.com ([207.126.144.121]:36614 "EHLO
+	eu1sys200aog106.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750884Ab2IYHER (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Sep 2012 03:04:17 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Anton Vorontsov <avorontsov@ru.mvista.com>
-Cc: linux-mmc@vger.kernel.org, Daniel Drake <dsd@laptop.org>, Zhangfei Gao <zhangfei.gao@marvell.com>, yongd <yongd@marvell.com>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>
 
-From: yongd <yongd@marvell.com>
+When switching SD and SDIO cards from 3.3V to 1.8V signal levels, the
+clock should be gated for 5 ms during the step. Failure by the card to
+switch is indicated by dat0 being pulled low. The host should check for
+this condition and power-cycle the card if failure is indicated.
 
-In the current code logic, sdhci_add_host() will enable the polling
-method (set MMC_CAP_NEEDS_POLL) for a removable card (MMC_CAP_
-NONREMOVABLE is not set) whose host's internal card detection method
-is disabled for some reason (SDHCI_QUIRK_BROKEN_CARD_DETECTION is set).
-
-However, this is improper since we can have some other card detection
-methods besides host internal card detection and the polling method.
-For example, we might use an external GPIO pin's interrupt to detect
-a removable SD card, so we shall set SDHCI_QUIRK_BROKEN_CARD_DETECTION
-since we don't use the internal card detection, and not set MMC_CAP_
-NONREMOVABLE since the SD card is physically removable. As a result,
-with the current code, the polling method will also be enabled.
-Apparently, this is redundant and not what we want.
-
-And the better one to decide whether we use polling or not should be
-the host driver itself. Actually, some host driver has already been
-like this. Eg, in drivers/mmc/host/Au1xmmc.c, polling will be enabled
-only after the board-specific card detection can't be set up successfully.
-
-Change-Id: I27774488a7b9191d7bc39699fd7d62ee21bbf157
-Signed-off-by: yongd <yongd@marvell.com>
+Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
 ---
- drivers/mmc/host/sdhci.c |    4 ----
- 1 file changed, 4 deletions(-)
+Changelog v2:
+	- Keep calls to mmc_host_clk_hold / mmc_host_clk_release
+---
+ drivers/mmc/core/core.c  |   22 ++++++++++++++++++++++
+ include/linux/mmc/host.h |    3 +++
+ 2 files changed, 25 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 0e15c79..900d5f4 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2840,10 +2840,6 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (caps[0] & SDHCI_CAN_DO_HISPD)
- 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 6612163..dae6744 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1220,6 +1220,7 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
+ {
+ 	struct mmc_command cmd = {0};
+ 	int err = 0;
++	unsigned char old_voltage = host->ios.signal_voltage;
  
--	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
--	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
--		mmc->caps |= MMC_CAP_NEEDS_POLL;
--
- 	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
- 	host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
- 	if (IS_ERR(host->vqmmc)) {
+ 	BUG_ON(!host);
+ 
+@@ -1243,8 +1244,29 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
+ 	host->ios.signal_voltage = signal_voltage;
+ 
+ 	if (host->ops->start_signal_voltage_switch) {
++		u32 clock = host->ios.clock;
++
+ 		mmc_host_clk_hold(host);
++		host->ios.clock = 0;
++		mmc_set_ios(host);
+ 		err = host->ops->start_signal_voltage_switch(host, &host->ios);
++
++		/* Hold clock for at least 5 ms according to spec */
++		mmc_delay(5);
++		host->ios.clock = clock;
++		mmc_set_ios(host);
++
++		/* Wait for at least 1 ms until we check if card is ready */
++		mmc_delay(1);
++
++		/* Check busy */
++		if (cmd11 && host->ops->card_busy &&
++						host->ops->card_busy(host)) {
++			host->ios.signal_voltage = old_voltage;
++			host->ops->start_signal_voltage_switch(host,
++							&host->ios);
++			err = -EAGAIN;
++		}
+ 		mmc_host_clk_release(host);
+ 	}
+ 
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index d5d9bd4..b58641a 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -131,6 +131,9 @@ struct mmc_host_ops {
+ 
+ 	int	(*start_signal_voltage_switch)(struct mmc_host *host, struct mmc_ios *ios);
+ 
++	/* Check if the card is pulling dat0 low */
++	int	(*card_busy)(struct mmc_host *host);
++
+ 	/* The tuning command opcode value is different for SD and eMMC cards */
+ 	int	(*execute_tuning)(struct mmc_host *host, u32 opcode);
+ 	void	(*enable_preset_value)(struct mmc_host *host, bool enable);
 -- 
-1.7.9.5
+1.7.10
 
