@@ -1,107 +1,191 @@
-From: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
-Subject: Re: [PATCH] mmc: sh-mmcif: avoid Oops on spurious interrupts
-Date: Wed, 26 Sep 2012 10:47:55 +0900
-Message-ID: <50625ECB.6020601@kmckk.co.jp>
-References: <878vdxd3mq.wl%kuninori.morimoto.gx@renesas.com> <20120803050039.GA1614@linux-sh.org> <20120809042844.GF1614@linux-sh.org> <87hasc3bv5.wl%kuninori.morimoto.gx@renesas.com> <874nobqntv.wl%kuninori.morimoto.gx@renesas.com> <20120810123804.GK1614@linux-sh.org> <502DDC97.5080501@kmckk.co.jp> <87wr0us6tg.wl%kuninori.morimoto.gx@renesas.com> <20120820031352.GC25767@linux-sh.org> <87obm6ry98.wl%kuninori.morimoto.gx@renesas.com> <20120820043853.GD25767@linux-sh.org> <87mx1qrx1x.wl%kuninori.morimoto.gx@renesas.com> <5031D9FF.8060801@kmckk.co.jp> <Pine.LNX.4.64.1208220840400.26767@axis700.grange> <505932DD.8010703@kmckk.co.jp>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH v4] powerpc/esdhc: disable CMD23 for some Freescale SoCs
+Date: Wed, 26 Sep 2012 02:39:51 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C194AFB@039-SN1MPN1-004.039d.mgd.msft.net>
+References: <1348563632-23659-1-git-send-email-r66093@freescale.com>
+ <CAGxe1ZG_5bcG1fJhPE0jsHYWDLK6eww9sa29H8E1gSFBQ36aXQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <505932DD.8010703@kmckk.co.jp>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, yusuke.goda.sx@renesas.com, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Paul Mundt <lethal@linux-sh.org>, Magnus <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, cjb@laptop.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from co1ehsobe002.messaging.microsoft.com ([216.32.180.185]:38726
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751051Ab2IZCj4 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 25 Sep 2012 22:39:56 -0400
+In-Reply-To: <CAGxe1ZG_5bcG1fJhPE0jsHYWDLK6eww9sa29H8E1gSFBQ36aXQ@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xie Shaohui-B21989 <B21989@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
 
-Dear linux-mmc maintainer,
 
-(09/19/2012 11:50 AM), Tetsuyuki Kobayashi wrote:
-> (2012/08/22 15:49), Guennadi Liakhovetski wrote:
->> On some systems, e.g., kzm9g, MMCIF interfaces can produce spurious
->> interrupts without any active request. To prevent the Oops, that results
->> in such cases, don't dereference the mmc request pointer until we make
->> sure, that we are indeed processing such a request.
->>
->> Reported-by: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
->> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+
+Best Regards
+Jerry Huang
+
+
+> -----Original Message-----
+> From: Girish K S [mailto:girish.shivananjappa@linaro.org]
+> Sent: Tuesday, September 25, 2012 10:45 PM
+> To: Huang Changming-R66093
+> Cc: linux-mmc@vger.kernel.org; Huang Changming-R66093; Xie Shaohui-B21989;
+> Anton Vorontsov; Chris Ball
+> Subject: Re: [PATCH v4] powerpc/esdhc: disable CMD23 for some Freescale
+> SoCs
 > 
-> I verified on kzm9g.
-> This works with
-> [PATCH] mmc: sh-mmcif: properly handle MMC_WRITE_MULTIPLE_BLOCK 
-> completion IRQ
-> 
-> Tested-by: Tetsuyuki Kobayashi <koba@kmckk.co.jp>
-> 
->> ---
-[snip]
->>
->>   drivers/mmc/host/sh_mmcif.c |    4 ++--
->>   1 files changed, 2 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
->> index 5d81427..82bf921 100644
->> --- a/drivers/mmc/host/sh_mmcif.c
->> +++ b/drivers/mmc/host/sh_mmcif.c
->> @@ -1104,7 +1104,6 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
->>   {
->>   	struct sh_mmcif_host *host = dev_id;
->>   	struct mmc_request *mrq = host->mrq;
->> -	struct mmc_data *data = mrq->data;
->>
->>   	cancel_delayed_work_sync(&host->timeout_work);
->>
->> @@ -1152,13 +1151,14 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
->>   	case MMCIF_WAIT_FOR_READ_END:
->>   	case MMCIF_WAIT_FOR_WRITE_END:
->>   		if (host->sd_error)
->> -			data->error = sh_mmcif_error_manage(host);
->> +			mrq->data->error = sh_mmcif_error_manage(host);
->>   		break;
->>   	default:
->>   		BUG();
->>   	}
->>
->>   	if (host->wait_for != MMCIF_WAIT_FOR_STOP) {
->> +		struct mmc_data *data = mrq->data;
->>   		if (!mrq->cmd->error && data && !data->error)
->>   			data->bytes_xfered =
->>   				data->blocks * data->blksz;
->>
-> 
+> On 25 September 2012 18:00,  <r66093@freescale.com> wrote:
+> > From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> >
+> > CMD23 causes lots of errors in kernel on some freescale SoCs (P1020,
+> > P1021, P1022, P1024, P1025 and P4080) when MMC card used, which is
+> > because these controllers does not support CMD23, even on the SoCs
+> > which declares CMD23 is supported.
+> > Therefore, we'll not use CMD23.
+> >
+> > Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> > Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
+> > CC: Anton Vorontsov <cbouatmailru@gmail.com>
+> > CC: Chris Ball <cjb@laptop.org>
+> > ---
+> > changes for v4:
+> >         - change to detect the IP version
+> >         - don't use callback function
+> > changes for v3:
+> >         - move the limitation detect function to eSDHC file
+> >         - add the callback funtion to do this limitation detect
+> > changes for v2:
+> >         - discard the property mode and add the processor detection
+> >
+> >  drivers/mmc/host/sdhci-of-esdhc.c |   33
+> +++++++++++++++++++++++++++++++++
+> >  drivers/mmc/host/sdhci-pltfm.c    |    4 +++-
+> >  drivers/mmc/host/sdhci-pltfm.h    |    1 +
+> >  drivers/mmc/host/sdhci.c          |    3 +++
+> >  include/linux/mmc/sdhci.h         |    1 +
+> >  5 files changed, 41 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c
+> > b/drivers/mmc/host/sdhci-of-esdhc.c
+> > index ae5fcbf..231672b 100644
+> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> > @@ -169,6 +169,38 @@ static void esdhc_of_resume(struct sdhci_host
+> > *host)  }  #endif
+> >
+> > +static void esdhc_of_detect_limitation(struct platform_device *pdev,
+> > +       struct sdhci_pltfm_data *pdata) {
+> > +       void __iomem *ioaddr;
+> > +       struct resource *iomem;
+> > +       u32 vvn;
+> > +
+> > +       iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> > +       if (!iomem) {
+> > +               dev_err(&pdev->dev, "failed to get resource\n");
+> > +               goto err;
+> > +       }
+> > +       if (resource_size(iomem) < 0x100)
+> > +               dev_err(&pdev->dev, "Invalid iomem size!\n");
+> > +
+> > +       ioaddr = ioremap(iomem->start, resource_size(iomem));
+> > +       if (!ioaddr) {
+> > +               dev_err(&pdev->dev, "failed to remap registers\n");
+> > +               goto err;
+> > +       }
+> > +
+> > +       /* P102x and P4080 has IP version VVN2.2, CMD23 is not
+> supported */
+> > +       vvn = in_be32(ioaddr + SDHCI_SLOT_INT_STATUS);
+> > +       vvn = (vvn & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+> > +       if (vvn == VENDOR_V_22)
+> > +               pdata->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+> > +
+> > +       iounmap(ioaddr);
+> > +err:
+> > +       return;
+> return a err value so that it is checked when called. If err then dont
+> have to proceed further.
+I don't care the return value, and just report to user there is one error when checking CMD23 limitation. of_device_is_compatible
 
-Without this patch, the following Oops occurs. (kzm9g on v3.6-rc7)
-Please push this to v3.6, not only 3.7-next.
-
-
-[   20.273437] Unable to handle kernel NULL pointer dereference at virtual address 00000008
-[   20.281250] pgd = c0004000
-[   20.281250] [00000008] *pgd=00000000
-[   20.281250] Internal error: Oops: 17 [#1] PREEMPT SMP ARM
-[   20.281250] Modules linked in:
-[   20.281250] CPU: 1    Not tainted  (3.6.0-rc7 #28)
-[   20.281250] PC is at sh_mmcif_irqt+0x18/0xb1c
-[   20.281250] LR is at irq_thread+0x90/0x15c
-[   20.281250] pc : [<c0250250>]    lr : [<c005f180>]    psr: 60000113
-[   20.281250] sp : de23df58  ip : 00000000  fp : 00000000
-[   20.281250] r10: 00000000  r9 : de1dcab4  r8 : dd9f6360
-[   20.281250] r7 : de23c000  r6 : de23c000  r5 : 00000000  r4 : de1dca80
-[   20.281250] r3 : c0250238  r2 : 00000000  r1 : de1dca80  r0 : de1dcab4
-[   20.281250] Flags: nZCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment kernel
-[   20.281250] Control: 10c5387d  Table: 5eb4804a  DAC: 00000015
-[   20.281250] Process irq/173-sh_mmc: (pid: 406, stack limit = 0xde23c2f0)
-[   20.281250] Stack: (0xde23df58 to 0xde23e000)
-[   20.281250] df40:                                                       00000003 00000000
-[   20.281250] df60: c0331f6c de1dca80 c046634c c0468190 dd9ca800 00000001 00000000 dd9f6340
-[   20.281250] df80: de00bc40 de23c000 de23c000 dd9f6360 00000000 00000000 00000000 c005f180
-[   20.281250] dfa0: 00000000 de23dfa4 c005f02c de043e3c dd9f6340 de043e3c dd9f6340 c005f0f0
-[   20.281250] dfc0: 00000013 00000000 00000000 c00387ac 00000000 dd9f6340 00000000 00000000
-[   20.281250] dfe0: de23dfe0 de23dfe0 de043e3c c0038728 c000f178 c000f178 00000000 00000000
-[   20.281250] [<c0250250>] (sh_mmcif_irqt+0x18/0xb1c) from [<c005f180>] (irq_thread+0x90/0x15c)
-[   20.281250] [<c005f180>] (irq_thread+0x90/0x15c) from [<c00387ac>] (kthread+0x84/0x90)
-[   20.281250] [<c00387ac>] (kthread+0x84/0x90) from [<c000f178>] (kernel_thread_exit+0x0/0x8)
-[   20.281250] Code: e5915004 e1a04001 e24dd024 e1a00009 (e595a008)
-[   20.281250] ---[ end trace 6efe730b0884a251 ]---
-
-
+> > +}
+> > +
+> >  static struct sdhci_ops sdhci_esdhc_ops = {
+> >         .read_l = esdhc_readl,
+> >         .read_w = esdhc_readw,
+> > @@ -199,6 +231,7 @@ static struct sdhci_pltfm_data sdhci_esdhc_pdata =
+> > {
+> >
+> >  static int __devinit sdhci_esdhc_probe(struct platform_device *pdev)
+> > {
+> > +       esdhc_of_detect_limitation(pdev, &sdhci_esdhc_pdata);
+> In the above function there is a err value returned. Do you have to
+> proceed further even though there is a error?
+> >         return sdhci_pltfm_register(pdev, &sdhci_esdhc_pdata);  }
+> >
+> > diff --git a/drivers/mmc/host/sdhci-pltfm.c
+> > b/drivers/mmc/host/sdhci-pltfm.c index 65551a9..4dd5770 100644
+> > --- a/drivers/mmc/host/sdhci-pltfm.c
+> > +++ b/drivers/mmc/host/sdhci-pltfm.c
+> > @@ -132,8 +132,10 @@ struct sdhci_host *sdhci_pltfm_init(struct
+> platform_device *pdev,
+> >                 host->ops = pdata->ops;
+> >         else
+> >                 host->ops = &sdhci_pltfm_ops;
+> > -       if (pdata)
+> > +       if (pdata) {
+> >                 host->quirks = pdata->quirks;
+> > +               host->quirks2 = pdata->quirks2;
+> > +       }
+> >         host->irq = platform_get_irq(pdev, 0);
+> >
+> >         if (!request_mem_region(iomem->start, resource_size(iomem),
+> > diff --git a/drivers/mmc/host/sdhci-pltfm.h
+> > b/drivers/mmc/host/sdhci-pltfm.h index 37e0e18..283d54a 100644
+> > --- a/drivers/mmc/host/sdhci-pltfm.h
+> > +++ b/drivers/mmc/host/sdhci-pltfm.h
+> > @@ -18,6 +18,7 @@
+> >  struct sdhci_pltfm_data {
+> >         struct sdhci_ops *ops;
+> >         unsigned int quirks;
+> > +       unsigned int quirks2;
+> >  };
+> >
+> >  struct sdhci_pltfm_host {
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
+> > 0e15c79..b0b7cad 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -2837,6 +2837,9 @@ int sdhci_add_host(struct sdhci_host *host)
+> >         if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+> >                 mmc->caps |= MMC_CAP_4_BIT_DATA;
+> >
+> > +       if (host->quirks2 & SDHCI_QUIRK2_HOST_NO_CMD23)
+> > +               mmc->caps &= ~MMC_CAP_CMD23;
+> > +
+> >         if (caps[0] & SDHCI_CAN_DO_HISPD)
+> >                 mmc->caps |= MMC_CAP_SD_HIGHSPEED |
+> > MMC_CAP_MMC_HIGHSPEED;
+> >
+> > diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> > index fa8529a..1edcb4d 100644
+> > --- a/include/linux/mmc/sdhci.h
+> > +++ b/include/linux/mmc/sdhci.h
+> > @@ -91,6 +91,7 @@ struct sdhci_host {
+> >         unsigned int quirks2;   /* More deviations from spec. */
+> >
+> >  #define SDHCI_QUIRK2_HOST_OFF_CARD_ON                  (1<<0)
+> > +#define SDHCI_QUIRK2_HOST_NO_CMD23                     (1<<1)
+> >
+> >         int irq;                /* Device IRQ */
+> >         void __iomem *ioaddr;   /* Mapped address */
+> > --
+> > 1.7.9.5
+> >
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at  http://vger.kernel.org/majordomo-info.html
 
 
