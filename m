@@ -1,66 +1,59 @@
 From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: [PATCH v4 05/15] mmc: sdhci: fix null return check of regulator_get
-Date: Wed, 26 Sep 2012 19:38:37 +0800
-Message-ID: <1348659527-4200-6-git-send-email-keyuan.liu@gmail.com>
+Subject: [PATCH v4 09/15] mmc: sdhci-pxav3: add quirks2
+Date: Wed, 26 Sep 2012 19:38:41 +0800
+Message-ID: <1348659527-4200-10-git-send-email-keyuan.liu@gmail.com>
 References: <1348659527-4200-1-git-send-email-keyuan.liu@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:57343 "EHLO
+Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:33842 "EHLO
 	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756000Ab2IZLoT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Sep 2012 07:44:19 -0400
+	by vger.kernel.org with ESMTP id S1754671Ab2IZLoa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Sep 2012 07:44:30 -0400
 In-Reply-To: <1348659527-4200-1-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com
-Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com, Bin Wang <binw@marvell.com>
+Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
 From: Kevin Liu <kliu5@marvell.com>
 
-regulator_get() returns NULL when CONFIG_REGULATOR not defined,
-which should not print out the warning.
-
-Reviewed-by: Philip Rakity <prakity@marvell.com>
-Signed-off-by: Bin Wang <binw@marvell.com>
 Signed-off-by: Kevin Liu <kliu5@marvell.com>
 ---
- drivers/mmc/host/sdhci.c |   18 ++++++++++++------
- 1 files changed, 12 insertions(+), 6 deletions(-)
+ drivers/mmc/host/sdhci-pxav3.c          |    2 ++
+ include/linux/platform_data/pxa_sdhci.h |    2 ++
+ 2 files changed, 4 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 0eed3dd..0a0aff4 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2845,9 +2845,12 @@ int sdhci_add_host(struct sdhci_host *host)
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index 75cc79b..04db9f1 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -272,6 +272,8 @@ static int __devinit sdhci_pxav3_probe(struct platform_device *pdev)
  
- 	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
- 	host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
--	if (IS_ERR(host->vqmmc)) {
--		pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
--		host->vqmmc = NULL;
-+	if (IS_ERR_OR_NULL(host->vqmmc)) {
-+		if (PTR_ERR(host->vqmmc) < 0) {
-+			pr_info("%s: no vqmmc regulator found\n",
-+				mmc_hostname(mmc));
-+			host->vqmmc = NULL;
-+		}
- 	}
- 	else if (regulator_is_supported_voltage(host->vqmmc, 1650000, 1950000))
- 		regulator_enable(host->vqmmc);
-@@ -2912,9 +2915,12 @@ int sdhci_add_host(struct sdhci_host *host)
- 	ocr_avail = 0;
- 
- 	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
--	if (IS_ERR(host->vmmc)) {
--		pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
--		host->vmmc = NULL;
-+	if (IS_ERR_OR_NULL(host->vmmc)) {
-+		if (PTR_ERR(host->vmmc) < 0) {
-+			pr_info("%s: no vmmc regulator found\n",
-+				mmc_hostname(mmc));
-+			host->vmmc = NULL;
-+		}
- 	} else
- 		regulator_enable(host->vmmc);
+ 		if (pdata->quirks)
+ 			host->quirks |= pdata->quirks;
++		if (pdata->quirks2)
++			host->quirks2 |= pdata->quirks2;
+ 		if (pdata->host_caps)
+ 			host->mmc->caps |= pdata->host_caps;
+ 		if (pdata->host_caps2)
+diff --git a/include/linux/platform_data/pxa_sdhci.h b/include/linux/platform_data/pxa_sdhci.h
+index 59acd98..fdf38d6 100644
+--- a/include/linux/platform_data/pxa_sdhci.h
++++ b/include/linux/platform_data/pxa_sdhci.h
+@@ -38,6 +38,7 @@
+  * @max_speed: the maximum speed supported
+  * @host_caps: Standard MMC host capabilities bit field.
+  * @quirks: quirks of platfrom
++ * @quirks2: quirks2 of platfrom
+  * @pm_caps: pm_caps of platfrom
+  */
+ struct sdhci_pxa_platdata {
+@@ -51,6 +52,7 @@ struct sdhci_pxa_platdata {
+ 	unsigned int	host_caps;
+ 	unsigned int	host_caps2;
+ 	unsigned int	quirks;
++	unsigned int	quirks2;
+ 	unsigned int	pm_caps;
+ };
  
 -- 
 1.7.0.4
