@@ -1,69 +1,86 @@
 From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: [PATCH v4 00/15] mmc: sdhci: fixes and enhancements
-Date: Wed, 26 Sep 2012 19:38:32 +0800
-Message-ID: <1348659527-4200-1-git-send-email-keyuan.liu@gmail.com>
+Subject: [PATCH v4 02/15] mmc: sdhci: set regulator min/max voltage according to spec
+Date: Wed, 26 Sep 2012 19:38:34 +0800
+Message-ID: <1348659527-4200-3-git-send-email-keyuan.liu@gmail.com>
+References: <1348659527-4200-1-git-send-email-keyuan.liu@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog132.obsmtp.com ([74.125.149.250]:42545 "EHLO
+Received: from na3sys009aog132.obsmtp.com ([74.125.149.250]:41513 "EHLO
 	na3sys009aog132.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755853Ab2IZLoE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Sep 2012 07:44:04 -0400
+	by vger.kernel.org with ESMTP id S1755228Ab2IZLoK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Sep 2012 07:44:10 -0400
+In-Reply-To: <1348659527-4200-1-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com
-Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
+Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com, Jialing Fu <jlfu@marvell.com>
 
+From: Kevin Liu <kliu5@marvell.com>
 
-This patchset does as follows:
-[PATCH v4 01/15] mmc: sdhci: fix transfer mode setting bug for cmds w/o data transfer
-[PATCH v4 02/15] mmc: sdhci: set regulator min/max voltage according to spec
-[PATCH v4 03/15] mmc: sdhci: refine code for sd clock disable/enable in set ios
-[PATCH v4 04/15] mmc: sdhci: keep the saved clock var up to date
-[PATCH v4 05/15] mmc: sdhci: fix null return check of regulator_get
-[PATCH v4 06/15] mmc: sdhci-pxav3: controller can't get base clock
-[PATCH v4 07/15] mmc: host: adjust uhs timing value
-[PATCH v4 08/15] mmc: sdhci: enhance preset value function
-[PATCH v4 09/15] mmc: sdhci-pxav3: add quirks2
-[PATCH v4 10/15] mmc: sdhci: introduce signal_voltage_switch callback function
-[PATCH v4 11/15] mmc: sdhci-pxav3: add signal_voltage_switch function
-[PATCH v4 12/15] mmc: core: add new 1.8v flag for mmc
-[PATCH v4 13/15] mmc: sdhci: add mmc 1.8v signal voltage switch function
-[PATCH v4 14/15] mmc: sdhci: fix the bug that DDR50 can't work for emmc
-[PATCH v4 15/15] mmc: sdhci-pxav3: remove set_uhs_signaling function
+Use voltage range as below rather than a specific value
+3.3v: (3.2v, 3.4v)
+3.0v: (2.9v, 3.1v)
+1.8v: (1.65v, 1.95v)
 
-changelog v1->v2:
-	- remove the patch "mmc: sdhci-pxav3: fix build error"
-	- update the patch 05/15 by avoid warning with return null
-	- add patches 06/15 ~ 08/15
-changelog v2->v3:
-	- update some comments
-	- add patches 09/15 ~ 11/15
-changelog v3->v4:
-	- update the patch 01/15 with data null check
-	- add patches 12/15 ~ 15/15
+Signed-off-by: Jialing Fu <jlfu@marvell.com>
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
+---
+ drivers/mmc/host/sdhci.c |   18 +++++++++---------
+ 1 files changed, 9 insertions(+), 9 deletions(-)
 
-Kevin Liu (15):
- mmc: sdhci: fix transfer mode setting bug for cmds w/o data transfer
- mmc: sdhci: set regulator min/max voltage according to spec
- mmc: sdhci: refine code for sd clock disable/enable in set ios
- mmc: sdhci: keep the saved clock var up to date
- mmc: sdhci: fix null return check of regulator_get
- mmc: sdhci-pxav3: controller can't get base clock
- mmc: host: adjust uhs timing value
- mmc: sdhci: enhance preset value function
- mmc: sdhci-pxav3: add quirks2
- mmc: sdhci: introduce signal_voltage_switch callback function
- mmc: sdhci-pxav3: add signal_voltage_switch function
- mmc: core: add new 1.8v flag for mmc
- mmc: sdhci: add mmc 1.8v signal voltage switch function
- mmc: sdhci: fix the bug that DDR50 can't work for emmc
- mmc: sdhci-pxav3: remove set_uhs_signaling function
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9be6a8c..8e5e196 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1628,7 +1628,7 @@ static int sdhci_do_3_3v_signal_voltage_switch(struct sdhci_host *host,
+ 	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 
+ 	if (host->vqmmc) {
+-		ret = regulator_set_voltage(host->vqmmc, 3300000, 3300000);
++		ret = regulator_set_voltage(host->vqmmc, 3200000, 3400000);
+ 		if (ret) {
+ 			pr_warning("%s: Switching to 3.3V signalling voltage "
+ 				   " failed\n", mmc_hostname(host->mmc));
+@@ -1672,7 +1672,7 @@ static int sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
+ 		 */
+ 		if (host->vqmmc)
+ 			ret = regulator_set_voltage(host->vqmmc,
+-				1800000, 1800000);
++				1650000, 1950000);
+ 		else
+ 			ret = 0;
+ 
+@@ -2856,7 +2856,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
+ 		host->vqmmc = NULL;
+ 	}
+-	else if (regulator_is_supported_voltage(host->vqmmc, 1800000, 1800000))
++	else if (regulator_is_supported_voltage(host->vqmmc, 1650000, 1950000))
+ 		regulator_enable(host->vqmmc);
+ 	else
+ 		caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+@@ -2927,16 +2927,16 @@ int sdhci_add_host(struct sdhci_host *host)
+ 
+ #ifdef CONFIG_REGULATOR
+ 	if (host->vmmc) {
+-		ret = regulator_is_supported_voltage(host->vmmc, 3300000,
+-			3300000);
++		ret = regulator_is_supported_voltage(host->vmmc, 3200000,
++			3400000);
+ 		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
+ 			caps[0] &= ~SDHCI_CAN_VDD_330;
+-		ret = regulator_is_supported_voltage(host->vmmc, 3000000,
+-			3000000);
++		ret = regulator_is_supported_voltage(host->vmmc, 2900000,
++			3100000);
+ 		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_300)))
+ 			caps[0] &= ~SDHCI_CAN_VDD_300;
+-		ret = regulator_is_supported_voltage(host->vmmc, 1800000,
+-			1800000);
++		ret = regulator_is_supported_voltage(host->vmmc, 1650000,
++			1950000);
+ 		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_180)))
+ 			caps[0] &= ~SDHCI_CAN_VDD_180;
+ 	}
+-- 
+1.7.0.4
 
- drivers/mmc/core/mmc.c                  |    3 +-
- drivers/mmc/core/sd.c                   |   17 --
- drivers/mmc/host/sdhci-pxav3.c          |   53 +++----
- drivers/mmc/host/sdhci.c                |  293 ++++++++++++++++++++++---------
- drivers/mmc/host/sdhci.h                |   13 ++
- include/linux/mmc/host.h                |   14 +-
- include/linux/mmc/sdhci.h               |    2 +-
- include/linux/platform_data/pxa_sdhci.h |    4 +
- 8 files changed, 254 insertions(+), 145 deletions(-)
