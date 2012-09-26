@@ -1,84 +1,68 @@
 From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH v4 01/15] mmc: sdhci: fix transfer mode setting bug for
- cmds w/o data transfer
-Date: Wed, 26 Sep 2012 21:16:28 +0900
-Message-ID: <CAGxe1ZEtz9O9-qSHOxXW88vKVhrSR-Aot80zWNE=1TCwpv8Mtw@mail.gmail.com>
+Subject: Re: [PATCH v4 14/15] mmc: sdhci: fix the bug that DDR50 can't work
+ for emmc
+Date: Wed, 26 Sep 2012 21:40:43 +0900
+Message-ID: <CAGxe1ZHbBVPyA5rCLS2r02O+2hO7SFUmH69rZuykv7nhPuEbKA@mail.gmail.com>
 References: <1348659527-4200-1-git-send-email-keyuan.liu@gmail.com>
-	<1348659527-4200-2-git-send-email-keyuan.liu@gmail.com>
+	<1348659527-4200-15-git-send-email-keyuan.liu@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:34583 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753549Ab2IZMQ3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Sep 2012 08:16:29 -0400
-Received: by vcbfo13 with SMTP id fo13so517516vcb.19
-        for <linux-mmc@vger.kernel.org>; Wed, 26 Sep 2012 05:16:28 -0700 (PDT)
-In-Reply-To: <1348659527-4200-2-git-send-email-keyuan.liu@gmail.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:49927 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755934Ab2IZMko (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Sep 2012 08:40:44 -0400
+Received: by vbbff1 with SMTP id ff1so529108vbb.19
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Sep 2012 05:40:44 -0700 (PDT)
+In-Reply-To: <1348659527-4200-15-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Kevin Liu <keyuan.liu@gmail.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com, Jialing Fu <jlfu@marvell.com>, Tim Wang <wangtt@marvell.com>
-
-Reviewed By: Girish K S <girish.shivananjappa@linaro.org>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
 On 26 September 2012 20:38, Kevin Liu <keyuan.liu@gmail.com> wrote:
 > From: Kevin Liu <kliu5@marvell.com>
 >
-> Commands without data transfer like cmd5/cmd7 will use previous
-> transfer mode setting, which may lead to error since some bits
-> may have been set unexpectedly.
-> For example, cmd5 following cmd18/cmd25 will have timeout error
-> since audo cmd23 has been enabled.
+> Host controller must enable 1.8v signal for UHS modes.
+> Otherwise UHS modes won't take effect.
+> But mmc core does NOT switch to 1.8v for DDR50 mode.
+> So enable the 1.8v signal for mmc DDR50 mode in host
+> driver.
 >
-> Signed-off-by: Jialing Fu <jlfu@marvell.com>
-> Signed-off-by: Tim Wang <wangtt@marvell.com>
 > Signed-off-by: Kevin Liu <kliu5@marvell.com>
 > ---
->  drivers/mmc/host/sdhci.c |   22 ++++++++++++++--------
->  1 files changed, 14 insertions(+), 8 deletions(-)
+>  drivers/mmc/host/sdhci.c |    9 ++++++++-
+>  1 files changed, 8 insertions(+), 1 deletions(-)
 >
 > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 0e15c79..9be6a8c 100644
+> index 50e7a54..e3de041 100644
 > --- a/drivers/mmc/host/sdhci.c
 > +++ b/drivers/mmc/host/sdhci.c
-> @@ -886,8 +886,21 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
->         u16 mode;
->         struct mmc_data *data = cmd->data;
->
-> -       if (data == NULL)
-> +       if (!data) {
-> +               if (cmd->opcode == MMC_SEND_TUNING_BLOCK ||
-> +                       cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
-> +                       /*
-> +                        * The tuning block is sent by the card to the host
-> +                        * controller. So we set the TRNS_READ bit in the
-> +                        * Transfer Mode register. This also takes care of
-> +                        * setting DMA Enable and Multi Block Select in the
-> +                        * same register to 0.
-> +                        */
-> +                       sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
-> +               else
-> +                       sdhci_writew(host, 0, SDHCI_TRANSFER_MODE);
->                 return;
-> +       }
->
->         WARN_ON(!host->data);
->
-> @@ -1850,13 +1863,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->                                      SDHCI_BLOCK_SIZE);
+> @@ -1529,8 +1529,15 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+>                                 ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
+>                         else if (ios->timing == MMC_TIMING_UHS_SDR104)
+>                                 ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
+> -                       else if (ios->timing == MMC_TIMING_UHS_DDR50)
+> +                       else if (ios->timing == MMC_TIMING_UHS_DDR50) {
+> +                               struct mmc_card *card;
+> +
+>                                 ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
+> +                               card = container_of(&(host->mmc),
+> +                                       struct mmc_card, host);
+> +                               if (mmc_card_mmc(card))
+> +                                       ctrl_2 |= SDHCI_CTRL_VDD_180;
+> +                       }
+If you want to set the voltage to 1.8. It has to be done from the core
+layer using the api mmc_set_signal_voltage during the mmc card init.
+as it is done for 1.2 volts switch. In the comment (mmc_card_init
+function) it is explicitly mentioned
+* 1.8V vccq at 3.3V core voltage (vcc) is not required
+* in the JEDEC spec for DDR.
+can you please check it. Still if you feel its necessary to change the
+voltage to 1.8 v, you can do it from mmc_init_card function
+>                         sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
 >                 }
->
-> -               /*
-> -                * The tuning block is sent by the card to the host controller.
-> -                * So we set the TRNS_READ bit in the Transfer Mode register.
-> -                * This also takes care of setting DMA Enable and Multi Block
-> -                * Select in the same register to 0.
-> -                */
-> -               sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
->
->                 sdhci_send_command(host, &cmd);
->
+>                 if (!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN) &&
 > --
 > 1.7.0.4
 >
