@@ -1,41 +1,82 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off notify
-Date: Wed, 26 Sep 2012 13:19:09 +0200
-Message-ID: <CACRpkda65BcOtKLrEdx+TE7yw8+tk2B+PyP84X6=sLx09VAUPQ@mail.gmail.com>
-References: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com>
-	<CAGxe1ZFJhc-c8rS0KGdfTvejs27jjpz7T4Z2AVwoB-=7QOMemg@mail.gmail.com>
-	<CACRpkdaV_PDaYH+RgM2pa9f9Gp97-D9xbxfDkPUBfXSR+-csAg@mail.gmail.com>
-	<201209141504.14658.arnd@arndb.de>
-	<CAGxe1ZEYgs3va6SR83UeN02Lnjr4Wd-dGWsPqTputcaiSJW6mA@mail.gmail.com>
-	<CAPDyKFoJn=NrzxXsLyp_ygQj=09faa_p0Q8i7M+MEypF7Y_ACQ@mail.gmail.com>
-	<m3sjadfpdh.fsf@pullcord.laptop.org>
-	<CAPDyKFrt4sB2PM8JuOODy7B7ME2wRx9Dy5yKPK23E47E-OMwmA@mail.gmail.com>
+From: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
+Subject: RE: [PATCH] mmc: omap_hsmmc: Enable HSPE bit for high speed cards
+Date: Wed, 26 Sep 2012 11:37:08 +0000
+Message-ID: <1BAFE6F6C881BF42822005164F1491C33EA8FF90@DBDE01.ent.ti.com>
+References: <1346764151-21323-1-git-send-email-gururaja.hebbar@ti.com>
+ <CANfBPZ-Wb7HE45DTmwsMt-hpJRUevjbjm9-aCR61B4JFULb8Mw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:54288 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754076Ab2IZLTK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Sep 2012 07:19:10 -0400
-Received: by vcbfo13 with SMTP id fo13so463915vcb.19
-        for <linux-mmc@vger.kernel.org>; Wed, 26 Sep 2012 04:19:10 -0700 (PDT)
-In-Reply-To: <CAPDyKFrt4sB2PM8JuOODy7B7ME2wRx9Dy5yKPK23E47E-OMwmA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: "S, Venkatraman" <svenkatr@ti.com>
+Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "cjb@laptop.org" <cjb@laptop.org>, "Nori, Sekhar" <nsekhar@ti.com>, "Rajashekhara, Sudhakar" <sudhakar.raj@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, Girish K S <girish.shivananjappa@linaro.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Saugata Das <saugata.das@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>
 
-On Tue, Sep 25, 2012 at 11:19 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+On Wed, Sep 12, 2012 at 17:32:38, Hebbar, Gururaja wrote:
+> On Wed, Sep 12, 2012 at 14:19:51, S, Venkatraman wrote:
+> > On Tue, Sep 4, 2012 at 6:39 PM, Hebbar, Gururaja <gururaja.hebbar@ti.com> wrote:
+> > > HSMMC IP on AM33xx need a special setting to handle High-speed cards.
+> > > Other platforms like TI81xx, OMAP4 may need this as-well. This depends
+> > > on the HSMMC IP timing closure done for the high speed cards.
+> > >
+> > > From AM335x TRM (SPRUH73F - 18.3.12 Output Signals Generation)
+> > >
+> > > The MMC/SD/SDIO output signals can be driven on either falling edge or
+> > > rising edge depending on the SD_HCTL[2] HSPE bit. This feature allows
+> > > to reach better timing performance, and thus to increase data transfer
+> > > frequency.
+> > >
+> > > There are few pre-requisites for enabling the HSPE bit
+> > > - Controller should support High-Speed-Enable Bit and
+> > > - Controller should not be using DDR Mode and
+> > > - Controller should advertise that it supports High Speed in
+> > >   capabilities register and
+> > > - MMC/SD clock coming out of controller > 25MHz
+> > >
+> > 
+> > The patch is well written. But then, I don't see a need for a DT
+> > binding for this feature.
+> 
+> My reasons for DT Binding
+> 1. Not all platforms using this driver has this bit (OMAP2)
+> 2. Not all platforms using this driver needs this bit to be enabled (OMAP4)
+> 3. Platforms which require this bit this to be set needs a method to inform 
+> driver.
+> 
+> In order to not disturb old/unsupported platforms, I chose this DT method.
+> 
+> > By definition, HS implies 25MHz or above, so that check seems to be
+> > redundant as well.
+> 
+> There are chances that the platform Max Clock output from HSMMC IP is < than 
+> 25 MHz even if the card is High Speed. In such cases it would be better to
+> Confirm that the Clock output is actually > 25 MHz
+> 
+> Kindly correct me if I am wrong.
+> 
+> > Meanwhile, I'll check with HSPE enabled on OMAP.
+> > 
 
-> I am not sure how long we should wait for eMMC 4.5 to be tested. Until
-> testing is resolved the eMMC 4.3 and onwards are having a broken
-> suspend sequence using SLEEP, which I think is really bad.
+Gentle Ping. 
 
-To me this sounds like a case for even adding Cc: stable@kernel.org
-to this when merged.
+Matt Poter recently submitted EDMA related patches as RFC. He confirmed that
+basic mmc is working on AM335x with his edma patches. 
 
-Breaking existing devices is worse than breaking future devices, so:
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
+Above patch is required to get High-speed cards working on AM335x.
 
-Yours,
-Linus Walleij
+I haven't seen any review comments for this. Can this be pulled in for 3.7?
+
+> > Regards,
+> > Venkat.
+> > 
+> 
+> 
+> Regards, 
+> Gururaja
+> 
+
+
+Regards, 
+Gururaja
