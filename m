@@ -1,75 +1,77 @@
 From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: [PATCH v4 01/15] mmc: sdhci: fix transfer mode setting bug for cmds w/o data transfer
-Date: Wed, 26 Sep 2012 19:38:33 +0800
-Message-ID: <1348659527-4200-2-git-send-email-keyuan.liu@gmail.com>
+Subject: [PATCH v4 03/15] mmc: sdhci: refine code for sd clock disable/enable in set ios
+Date: Wed, 26 Sep 2012 19:38:35 +0800
+Message-ID: <1348659527-4200-4-git-send-email-keyuan.liu@gmail.com>
 References: <1348659527-4200-1-git-send-email-keyuan.liu@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:49179 "EHLO
+Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:33475 "EHLO
 	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755853Ab2IZLoJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Sep 2012 07:44:09 -0400
+	by vger.kernel.org with ESMTP id S1755853Ab2IZLoO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Sep 2012 07:44:14 -0400
 In-Reply-To: <1348659527-4200-1-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com
-Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com, Jialing Fu <jlfu@marvell.com>, Tim Wang <wangtt@marvell.com>
+Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
 From: Kevin Liu <kliu5@marvell.com>
 
-Commands without data transfer like cmd5/cmd7 will use previous
-transfer mode setting, which may lead to error since some bits
-may have been set unexpectedly.
-For example, cmd5 following cmd18/cmd25 will have timeout error
-since audo cmd23 has been enabled.
+With preset value enabled, there are two continuous times
+of sd clock disable/enable. They can be combined into one
+to save time and make code cleaner.
 
-Signed-off-by: Jialing Fu <jlfu@marvell.com>
-Signed-off-by: Tim Wang <wangtt@marvell.com>
 Signed-off-by: Kevin Liu <kliu5@marvell.com>
 ---
- drivers/mmc/host/sdhci.c |   22 ++++++++++++++--------
- 1 files changed, 14 insertions(+), 8 deletions(-)
+ drivers/mmc/host/sdhci.c |   29 +++++++++--------------------
+ 1 files changed, 9 insertions(+), 20 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 0e15c79..9be6a8c 100644
+index 8e5e196..3eceb48 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -886,8 +886,21 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
- 	u16 mode;
- 	struct mmc_data *data = cmd->data;
+@@ -1449,33 +1449,22 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 				ctrl_2 |= SDHCI_CTRL_DRV_TYPE_C;
  
--	if (data == NULL)
-+	if (!data) {
-+		if (cmd->opcode == MMC_SEND_TUNING_BLOCK ||
-+			cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
-+			/*
-+			 * The tuning block is sent by the card to the host
-+			 * controller. So we set the TRNS_READ bit in the
-+			 * Transfer Mode register. This also takes care of
-+			 * setting DMA Enable and Multi Block Select in the
-+			 * same register to 0.
-+			 */
-+			sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
-+		else
-+			sdhci_writew(host, 0, SDHCI_TRANSFER_MODE);
- 		return;
-+	}
- 
- 	WARN_ON(!host->data);
- 
-@@ -1850,13 +1863,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 				     SDHCI_BLOCK_SIZE);
+ 			sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+-		} else {
+-			/*
+-			 * According to SDHC Spec v3.00, if the Preset Value
+-			 * Enable in the Host Control 2 register is set, we
+-			 * need to reset SD Clock Enable before changing High
+-			 * Speed Enable to avoid generating clock gliches.
+-			 */
+-
+-			/* Reset SD Clock Enable */
+-			clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+-			clk &= ~SDHCI_CLOCK_CARD_EN;
+-			sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+-
+-			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+-
+-			/* Re-enable SD Clock */
+-			clock = host->clock;
+-			host->clock = 0;
+-			sdhci_set_clock(host, clock);
  		}
  
--		/*
--		 * The tuning block is sent by the card to the host controller.
--		 * So we set the TRNS_READ bit in the Transfer Mode register.
--		 * This also takes care of setting DMA Enable and Multi Block
--		 * Select in the same register to 0.
--		 */
--		sdhci_writew(host, SDHCI_TRNS_READ, SDHCI_TRANSFER_MODE);
+-
+ 		/* Reset SD Clock Enable */
+ 		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+ 		clk &= ~SDHCI_CLOCK_CARD_EN;
+ 		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
  
- 		sdhci_send_command(host, &cmd);
- 
++		/*
++		 * According to SDHC Spec v3.00, if the Preset Value
++		 * Enable in the Host Control 2 register is set, we
++		 * need to reset SD Clock Enable before changing High
++		 * Speed Enable to avoid generating clock gliches.
++		 */
++		if (ctrl_2 & SDHCI_CTRL_PRESET_VAL_ENABLE)
++			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
++
+ 		if (host->ops->set_uhs_signaling)
+ 			host->ops->set_uhs_signaling(host, ios->timing);
+ 		else {
 -- 
 1.7.0.4
 
