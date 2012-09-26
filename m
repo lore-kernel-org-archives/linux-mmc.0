@@ -1,132 +1,125 @@
-From: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
-Subject: RE: [RFC PATCH 00/13] DMA Engine support for AM33xx
-Date: Wed, 26 Sep 2012 08:26:19 +0000
-Message-ID: <1BAFE6F6C881BF42822005164F1491C33EA8FDA9@DBDE01.ent.ti.com>
-References: <1348152226-13588-1-git-send-email-mporter@ti.com>
- <1BAFE6F6C881BF42822005164F1491C33EA8A79D@DBDE01.ent.ti.com>
- <20120921182211.GE16522@beef>
+From: Johan Rudholm <jrudholm@gmail.com>
+Subject: Re: [PATCH v2 2/2] mmc: core: Power cycle card on voltage switch fail
+Date: Wed, 26 Sep 2012 10:54:32 +0200
+Message-ID: <CA+20K0BUZ2xL3hW5oKzzYG8R3Z1oetZikkYRZ5AeG1LtyCCxgA@mail.gmail.com>
+References: <1348556654-2119-1-git-send-email-johan.rudholm@stericsson.com>
+	<CAPDyKFqr9COJ0oGQE_G99zscFXpRztQ3nN8o3_Vn-sQOxegB5Q@mail.gmail.com>
+	<6903B09F-6665-4E4F-9398-2BC93E2BE061@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20120921182211.GE16522@beef>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: "Porter, Matt" <mporter@ti.com>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, "Cousson, Benoit" <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, "Nori,
- Sekhar" <nsekhar@ti.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Chris Ball <cjb@laptop.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infrad>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:46851 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754840Ab2IZIyc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Sep 2012 04:54:32 -0400
+Received: by ieak13 with SMTP id k13so810090iea.19
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Sep 2012 01:54:32 -0700 (PDT)
+In-Reply-To: <6903B09F-6665-4E4F-9398-2BC93E2BE061@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: Johan Rudholm <johan.rudholm@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-T24gRnJpLCBTZXAgMjEsIDIwMTIgYXQgMjM6NTI6MTEsIFBvcnRlciwgTWF0dCB3cm90ZToNCj4g
-T24gRnJpLCBTZXAgMjEsIDIwMTIgYXQgMDg6Mjc6MDdBTSArMDAwMCwgSGViYmFyLCBHdXJ1cmFq
-YSB3cm90ZToNCj4gPiBPbiBUaHUsIFNlcCAyMCwgMjAxMiBhdCAyMDoxMzozMywgUG9ydGVyLCBN
-YXR0IHdyb3RlOg0KPiA+ID4gVGhpcyBzZXJpZXMgYWRkcyBETUEgRW5naW5lIHN1cHBvcnQgZm9y
-IEFNMzN4eCwgd2hpY2ggdXNlcw0KPiA+ID4gYW4gRURNQSBETUFDLiBUaGUgRURNQSBETUFDIGhh
-cyBiZWVuIHByZXZpb3VzbHkgc3VwcG9ydGVkIGJ5IG9ubHkNCj4gPiA+IGEgcHJpdmF0ZSBBUEkg
-aW1wbGVtZW50YXRpb24gKG11Y2ggbGlrZSB0aGUgc2l0dWF0aW9uIHdpdGggT01BUA0KPiA+ID4g
-RE1BKSBmb3VuZCBvbiB0aGUgRGFWaW5jaSBmYW1pbHkgb2YgU29Dcy4NCj4gPiA+IA0KPiA+ID4g
-VGhlcmUgYXJlIGEgbWluZC1ib2dnbGluZyBudW1iZXIgb2YgZGVwZW5kZW5jaWVzIGZvciB0aGlz
-IHNlcmllczoNCj4gPiA+IA0KPiA+ID4gCS0gSm9uIEh1bnRlcidzIE9GIERNQSBoZWxwZXJzIHNl
-cmllcw0KPiA+ID4gCSAgaHR0cHM6Ly9wYXRjaHdvcmsua2VybmVsLm9yZy9wYXRjaC8xNDYxMDYx
-Lw0KPiA+ID4gCSAgaHR0cHM6Ly9wYXRjaHdvcmsua2VybmVsLm9yZy9wYXRjaC8xNDYxMDUxLw0K
-PiA+ID4gCS0gUGF0Y2ggdG8gYWRkcmVzcyBPRiBETUEgaGVscGVycyBuYW1pbmcgaXNzdWVzOg0K
-PiA+ID4gCSAgaHR0cHM6Ly9wYXRjaHdvcmsua2VybmVsLm9yZy9wYXRjaC8xNDc3OTIxLw0KPiA+
-ID4gCS0gRURNQSBETUEgRW5naW5lIHdyYXBwZXIgZHJpdmVyIGluIGxpbnV4LW5leHQNCj4gPiA+
-IAkgIGMyZGRlNWY4ZjIwOTVkN2M2MjNmZjM1NjVjMTQ2MmUxOTAyNzIyNzMNCj4gPiA+IAktIEVE
-TUEgRE1BIEVuZ2luZSB3cmFwcGVyIGRyaXZlciBidWcgZml4Og0KPiA+ID4gCSAgaHR0cHM6Ly9w
-YXRjaHdvcmsua2VybmVsLm9yZy9wYXRjaC8xNDc0NDExLyAgDQo+ID4gPiAJLSBBIGh1Z2UgbnVt
-YmVyIG9mIHBhdGNoZXMgaW4gbGludXgtbmV4dCBmb3IgQU0zM3h4IGJvb3QNCj4gPiA+IAkgICh0
-b28gbnVtZXJvdXMgdG8gbGlzdCkNCj4gPiA+IA0KPiA+ID4gVGhlIGFwcHJvYWNoIHRha2VuIGlz
-IHNpbWlsYXIgdG8gaG93IE9NQVAgRE1BIGlzIGJlaW5nIGNvbnZlcnRlZCB0bw0KPiA+ID4gRE1B
-IEVuZ2luZSBzdXBwb3J0LiBXaXRoIHRoZSBmdW5jdGlvbmFsIEVETUEgcHJpdmF0ZSBBUEkgYWxy
-ZWFkeQ0KPiA+ID4gZXhpc3RpbmcgaW4gbWFjaC1kYXZpbmNpL2RtYS5jLCB3ZSBmaXJzdCBtb3Zl
-IHRoYXQgdG8gYW4gQVJNIGNvbW1vbg0KPiA+ID4gYXJlYSBzbyBpdCBjYW4gYmUgc2hhcmVkLiBB
-ZGRpbmcgRFQgYW5kIHJ1bnRpbWUgUE0gc3VwcG9ydCB0byB0aGUNCj4gPiA+IHByaXZhdGUgRURN
-QSBBUEkgaW1wbGVtZW50YXRpb24gYWxsb3dzIGl0IHRvIHJ1biBvbiBBTTMzeHguIEFNMzN4eA0K
-PiA+ID4gKm9ubHkqIGJvb3RzIHVzaW5nIERUIHNvIHdlIGxldmVyYWdlIEpvbidzIGdlbmVyaWMg
-RFQgRE1BIGhlbHBlcnMgdG8NCj4gPiA+IHJlZ2lzdGVyIEVETUEgRE1BQyB3aXRoIHRoZSBvZl9k
-bWEgZnJhbWV3b3JrIGFuZCB0aGVuIGFkZCBzdXBwb3J0DQo+ID4gPiBmb3IgY2FsbGluZyB0aGUg
-ZG1hX3JlcXVlc3Rfc2xhdmVfY2hhbm5lbCgpIEFQSSB0byBib3RoIHRoZSBtbWMNCj4gPiA+IGFu
-ZCBzcGkgZHJpdmVycy4NCj4gPiA+IA0KPiA+ID4gV2hhdCB3b3Jrcz8gV2VsbCwgd2l0aCB0aGlz
-IHNlcmllcyB3ZSBub3cgaGF2ZSBNTUMgYW5kIFNQSSBzdXBwb3J0DQo+ID4gPiBvbiBBTTMzeHgu
-IFRoZSBvbmx5IGNhdmVhdCBmb3IgTU1DIGlzIHRoYXQgdGhlIG1tYzMgY29udHJvbGxlciBoYXMN
-Cj4gPiA+IGl0cyBldmVudHMgb24gdGhlIGNyb3NzYmFyIGFuZCBpcyBub3QgdXNhYmxlIHJpZ2h0
-IG5vdy4NCj4gPiA+IA0KPiA+ID4gVGhpcyBpcyB0ZXN0ZWQgb24gQmVhZ2xlQm9uZSB3aXRoIGEg
-U1BJIGZyYW1lYnVmZmVyIGRyaXZlciBhbmQgU0QNCj4gPiA+IGNhcmQuDQo+ID4gPiANCj4gPiA+
-IEFmdGVyIHRoaXMgc2VyaWVzLCB0aGUgcGxhbiBpcyB0byBjb252ZXJ0IHRoZSBsYXN0IGluLXRy
-ZWUgdXNlcg0KPiA+ID4gb2YgdGhlIHByaXZhdGUgRURNQSBBUEkgKGRhdmluY2ktcGNtL21jYXNw
-KSBhbmQgdGhlbiBlbGltaW5hdGUNCj4gPiA+IHRoZSBwcml2YXRlIEVETUEgQVBJIGJ5IGZvbGRp
-bmcgaXRzIGZ1bmN0aW9uYWxpdHkgaW50bw0KPiA+ID4gZHJpdmVycy9kbWEvZWRtYS5jLg0KPiA+
-ID4gDQo+ID4gPiBUT0RPOg0KPiA+ID4gCWFkZCBBTTMzeHggY3Jvc3NiYXIgc3VwcG9ydCB0byB0
-aGUgcHJpdmF0ZSBFRE1BIEFQSQ0KPiA+ID4gCShhbnkgRURNQSBldmVudHMgb24gdGhlIGNyb3Nz
-YmFyIGFyZSBub3Qgc3VwcG9ydGVkKQ0KPiA+ID4gDQo+ID4gDQo+ID4gDQo+ID4gQ2FuIHlvdSBw
-bGVhc2UgbWVudGlvbiB0aGUgYmFzZSByZXBvIHlvdSBoYXZlIHRha2VuIGFzIHN0YXJ0aW5nIHBv
-aW50Lg0KPiA+IChyZXBvICsgZXh0cmEgcGF0Y2hlcyAuLi4pLg0KPiANCj4gSXQncyBtYWlubGlu
-ZSAzLjYtcmM2IGFuZCB5b3UgY2FuIHNlZSB0aGUgY29tcGxldGUgc2V0IG9mIHBhdGNoZXMNCj4g
-YXQgaHR0cHM6Ly9naXRodWIuY29tL29ocG9ydGVyL2xpbnV4L3RyZWUvZWRtYS1kbWFlbmdpbmUt
-YW0zM3h4LXJmYy12MQ0KPiBhZnRlciBjb21taXQgNTY5OGJkNzU3ZDU1YjFiYjg3ZWRkMWE5NzQ0
-YWIwOWMxNDJhYmZjMg0KPiANCj4gPiBUaGlzIHdpbGwgaGVscCB1cyB0byB0ZXN0IHRoZSBjb2Rl
-Lg0KPiA+IA0KPiA+IFRoaXMgaXMgYmVjYXVzZSBJIGxvb2tlZCBhdCB0aGUgcGF0Y2ggMTIvMTMg
-YW5kIEkgc2VlIHRoYXQgbW1jDQo+ID4gZGV2aWNlLW5vZGUgaXMgbW9kaWZpZWQuIEJ1dCBpbiBt
-YWlubGluZSBJIGRvbuKAmXQgc2VlIGRldmljZSANCj4gPiBub2RlIGZvciBtbWMgKHlldCkuDQo+
-IA0KPiBPb3BzLiBZb3UnbGwgbmVlZCBlNjJhMzMzM2FlNDUwYmNkZWZiZTIyMjI5ZDdiYzI3N2Fl
-MGVmNjQ1IGFuZA0KPiBmZTk3MzA0NTU3ZDJjNmY3ZDBhYWYxZWEwMjhlYTQ4ZmZjYTM2NmE5IHdo
-aWNoIEkgZm9yZ290IHRvIGluY2x1ZGUNCj4gaW4gdGhpcyBzZXJpZXMuIEknbGwgaGF2ZSB0aGVt
-IGluIGZvciB2Mi4NCg0KWWVzdGVyZGF5IEkgdGVzdGVkIGVkbWEgcGF0Y2hlcyBvbiBsYXRlc3Qg
-bGludXgtbmV4dC9tYXN0ZXIgKyBtZXJnZSBvZiANCmxpbnV4LW9tYXAvZm9yXzMuNy9kdHNfcGFy
-dDIuIEJlbG93IGFyZSBteSBvYnNlcnZhdGlvbnMNCg0KMS4gYmFzZWxpbmUgPSBsaW51eC1uZXh0
-L21hc3RlciArIG1lcmdlIG9mIGxpbnV4LW9tYXAvZm9yXzMuNy9kdHNfcGFydDINCjIuIG9uIHRv
-cCBvZiBhYm92ZSBicmFuY2gsIEkgYXBwbGllZCBwYXRjaGVzIFsxLTldLzEzIG9mIHlvdXIgZWRt
-YSANCiAgIHBhdGNoZXMNCjMuIGZldyBwYXRjaGVzIHJlcXVpcmVkIHRyaXZpYWwgY2hhbmdlcyBi
-ZWZvcmUgYXBwbHlpbmcNCjQuIEFwcGxpZWQgZG1hIG9mIHBhdGNoZXMgYXMgeW91IG1lbnRpb25l
-ZA0KNS4gYWRkIGN1c3RvbSBwYXRjaCAoQVJNOiBDVVNUT006IEJ1aWxkIGEgdUltYWdlIHdpdGgg
-ZHRiIGFscmVhZHkgDQogICBhcHBlbmRlZCkNCiAgIEZyb20gaHR0cHM6Ly9naXRodWIuY29tL2h2
-YWliaGF2L2FtMzM1eC1saW51eC9jb21taXQvDQogICAgICAgIDdlNzJmNWVkNGI3MDJjOTM3M2Qx
-OWY3NjI2ZjA3YWUzMWEzODFkNTMjYXJjaC9hcm0vTWFrZWZpbGUNCg0KNi4gTW9kaWZpZWQgOS8x
-MyBwYXRjaCB0byBhcHBseSBwcm9wZXJseSBvbiBsYXRlc3QgYW0zM3h4LmR0c2kuDQoJYS4gRWRt
-YSBwb3J0aW9uIGFzIGl0IGlzDQoJYi4gbW1jIHBvcnRpb24gYXMgYmVsb3cNCgkJbW1jMTogbW1j
-QDQ4MDYwMDAwIHsNCgkJCWNvbXBhdGlibGUgPSAidGksb21hcDMtaHNtbWMiOw0KCQkJdGksaHdt
-b2RzID0gIm1tYzEiOw0KCQkJdGksZHVhbC12b2x0Ow0KCQkJdGksbmVlZHMtc3BlY2lhbC1yZXNl
-dDsNCgkJCWJ1cy13aWR0aCA9IDw0PjsNCgkJCXZtbWMtc3VwcGx5ID0gPCZ2bW1jX3JlZz47DQoJ
-CQlkbWFzID0gPCZlZG1hIDI0DQoJCQkJJmVkbWEgMjU+Ow0KCQkJZG1hLW5hbWVzID0gInR4Iiwg
-InJ4IjsNCgkJfTsNCgljLiBhZGRlZCBtbWMgcGlubXV4IGFzLXdlbGwNCg0KNy4gbWFrZSBDUk9T
-U19DT01QSUxFPWFybS1hcmFnby1saW51eC1nbnVlYWJpLSBBUkNIPWFybSBkaXN0Y2xlYW4NCiAg
-IG1ha2UgQ1JPU1NfQ09NUElMRT1hcm0tYXJhZ28tbGludXgtZ251ZWFiaS0gQVJDSD1hcm0gDQog
-ICBvbWFwMnBsdXNfZGVmY29uZmlnDQoNCjguIGVuYWJsZWQgVElfRURNQSBmcm9tIG1lbnVjb25m
-aWcgKHNpbmNlIGl0IHdhcyBub3QgZW5hYmxlZCBmb3IgDQogICBvbWFwMnBsdXNfZGVmY29uZmln
-DQoNCjkuIG1ha2UgQ1JPU1NfQ09NUElMRT1hcm0tYXJhZ28tbGludXgtZ251ZWFiaS0gQVJDSD1h
-cm0gdUltYWdlDQogICBtYWtlIENST1NTX0NPTVBJTEU9YXJtLWFyYWdvLWxpbnV4LWdudWVhYmkt
-IEFSQ0g9YXJtIA0KICAgdUltYWdlLWR0Yi5hbTMzNXgtZXZtDQoNCldpdGggYWJvdmUgY2hhbmdl
-cywgZWRtYSBwcm9iZSB3YXMgZmFpbGluZyBhdCByZXF1ZXN0X21lbV9yZWdpb24oKSANCkluc2lk
-ZSBsaW51eC1uZXh0L2FyY2gvYXJtL2NvbW1vbi9lZG1hLmMgLS0+IGVkbWFfcHJvYmUoKQ0KDQpJ
-IGhhZCB0byBtb2RpZnkgZWRtYV9wcm9iZSBhcyBiZWxvdw0KDQoNCmRpZmYgLS1naXQgYS9hcmNo
-L2FybS9jb21tb24vZWRtYS5jIGIvYXJjaC9hcm0vY29tbW9uL2VkbWEuYw0KaW5kZXggZjMzN2Y4
-MS4uZWZlMjY3MyAxMDA2NDQNCi0tLSBhL2FyY2gvYXJtL2NvbW1vbi9lZG1hLmMNCisrKyBiL2Fy
-Y2gvYXJtL2NvbW1vbi9lZG1hLmMNCkBAIC0xNTg5LDExICsxNTg5LDExIEBAIHN0YXRpYyBpbnQg
-X19pbml0IGVkbWFfcHJvYmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikNCiAgICAgICAg
-Zm9yIChqID0gMDsgaiA8IEVETUFfTUFYX0NDOyBqKyspIHsNCiAgICAgICAgICAgICAgICBpZiAo
-bm9kZSkgew0KICAgICAgICAgICAgICAgICAgICAgICAgaW50IGVycjsNCi0gICAgICAgICAgICAg
-ICAgICAgICAgIGVyciA9IG9mX2FkZHJlc3NfdG9fcmVzb3VyY2Uobm9kZSwgMCwgJnJlc1tqXSk7
-DQorICAgICAgICAgICAgICAgICAgICAgICBlcnIgPSBvZl9hZGRyZXNzX3RvX3Jlc291cmNlKG5v
-ZGUsIGosICZyZXNbal0pOw0KICAgICAgICAgICAgICAgICAgICAgICAgaWYgKGVycikgew0KICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICBkZXZfZXJyKGRldiwNCiAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAidW5hYmxlIHRvIGZpbmQgJ3JlZycgcHJvcGVydHlc
-biIpOw0KLSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZXR1cm4gLUVJTzsNCisgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgLy9yZXR1cm4gLUVJTzsNCiAgICAgICAgICAgICAg
-ICAgICAgICAgIH0NCiAgICAgICAgICAgICAgICAgICAgICAgIHJbal0gPSAmcmVzW2pdOw0KDQoN
-Cg0KV2l0aCB0aGlzIEkgd2FzIGFibGUgdG8gYm9vdCBvbiBhbTMzNXgtZXZtIGFuZCBkbyBhIHN1
-Y2Nlc3NmdWwgTU1DIA0KY29weS1tZDVzdW0tY29tcGFyZSB0ZXN0Lg0KDQpJIGJlbGlldmUgeW91
-IGFyZSBsb29raW5nIGludG8gYWJvdmUgaXNzdWUgaW4geW91ciB2MiB2ZXJzaW9uLg0KDQo+IA0K
-PiAtTWF0dA0KPiANCg0KLi4uc25pcC4uLg0KLi4uc25pcC4uLg0KLi4uc25pcC4uLg0KDQoNClJl
-Z2FyZHMsIA0KR3VydXJhamENCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFybS1rZXJuZWxA
-bGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xp
-c3RpbmZvL2xpbnV4LWFybS1rZXJuZWwK
+Hi Philip,
+
+2012/9/25 Philip Rakity <prakity@marvell.com>:
+>
+>
+> On Sep 25, 2012, at 12:30 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+>> Hi Johan,
+>>
+>> An overall comment; would it be possible to include this patch as a
+>> piece of patch 1/2 "mmc: core: Proper signal voltage switch".
+>> They seems like quite tight connected.
+>>
+>> Anyway, some comment below.
+>>
+>> On 25 September 2012 09:04, Johan Rudholm <johan.rudholm@stericsson.com> wrote:
+>>> Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
+>>> ---
+>>> drivers/mmc/core/core.c |    2 +-
+>>> drivers/mmc/core/core.h |    1 +
+>>> drivers/mmc/core/sd.c   |    8 ++++++--
+>>> 3 files changed, 8 insertions(+), 3 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>> index dae6744..fb03bd9 100644
+>>> --- a/drivers/mmc/core/core.c
+>>> +++ b/drivers/mmc/core/core.c
+>>> @@ -1348,7 +1348,7 @@ static void mmc_poweroff_notify(struct mmc_host *host)
+>>>  * If a host does all the power sequencing itself, ignore the
+>>>  * initial MMC_POWER_UP stage.
+>>>  */
+>>> -static void mmc_power_up(struct mmc_host *host)
+>>> +void mmc_power_up(struct mmc_host *host)
+>>> {
+>>>        int bit;
+>>>
+>>> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+>>> index 3bdafbc..5a5170d 100644
+>>> --- a/drivers/mmc/core/core.h
+>>> +++ b/drivers/mmc/core/core.h
+>>> @@ -45,6 +45,7 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage,
+>>> void mmc_set_timing(struct mmc_host *host, unsigned int timing);
+>>> void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
+>>> void mmc_power_off(struct mmc_host *host);
+>>> +void mmc_power_up(struct mmc_host *host);
+>>>
+>>> static inline void mmc_delay(unsigned int ms)
+>>> {
+>>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+>>> index 74972c2..9a165451 100644
+>>> --- a/drivers/mmc/core/sd.c
+>>> +++ b/drivers/mmc/core/sd.c
+>>> @@ -720,6 +720,7 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
+>>>         * state.  We wait 1ms to give cards time to
+>>>         * respond.
+>>>         */
+>>> +try_again:
+>>>        mmc_go_idle(host);
+>>>
+>>>        /*
+>>> @@ -748,7 +749,6 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
+>>>        if (max_current > 150)
+>>>                ocr |= SD_OCR_XPC;
+>>>
+>>> -try_again:
+>>>        err = mmc_send_app_op_cond(host, ocr, rocr);
+>>>        if (err)
+>>>                return err;
+>>> @@ -761,7 +761,11 @@ try_again:
+>>>           ((*rocr & 0x41000000) == 0x41000000)) {
+>>>                err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180, true);
+>>>                if (err) {
+>>> -                       ocr &= ~SD_OCR_S18R;
+>>> +                       /* Power cycle card */
+>>> +                       pr_warning("%s: Signal voltage switch failed, "
+>>> +                               "power cycling card\n", mmc_hostname(host));
+>>> +                       mmc_power_off(host);
+>>> +                       mmc_power_up(host);
+>>
+>> This mean you will retry forever even if the card is not capable of
+>> 1.8V. I doubt this really what you want?
+>>
+>>>                        goto try_again;
+>>>                }
+>>>        }
+>>> --
+>>> 1.7.10
+>>>
+>
+>
+>  I did a patch for this problem in sdhci.c when voltage switch failed.  It turned off and then
+> turned on the regulator.  The patch worked on the UHS cards I was testing.  The fix
+> has been pulled upstream.
+
+We looked at this code for inspiration actually :) However, wouldn't
+it be a good idea to include this functionality in the protocol layer
+since it's a part of the SD spec?
+
+The work on the SDIO patch required some more restructuring in the
+code, so I'll drop this patch series now and push a new series in the
+form of an RFC.
+
+Kind regards, Johan
