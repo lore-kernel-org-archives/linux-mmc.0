@@ -1,54 +1,37 @@
-From: Anton Vorontsov <anton.vorontsov@linaro.org>
-Subject: Re: [PATCH] mmc: remove MMC_CAP_NEEDS_POLL setting in sdhci_add_host
-Date: Wed, 26 Sep 2012 16:49:36 -0700
-Message-ID: <20120926234936.GB7203@lizard>
-References: <1348554847-14190-1-git-send-email-yongd@marvell.com>
- <20120925070401.GA32230@lizard>
- <89813612683626448B837EE5A0B6A7CB30384F5CAD@SC-VEXCH4.marvell.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH v4 01/15] mmc: sdhci: fix transfer mode setting bug for
+ cmds w/o data transfer
+Date: Thu, 27 Sep 2012 13:13:37 +0800
+Message-ID: <CAMj5BkjN3gk02GTkt-AhZHR0MAh0uNhjLsm0mCS_Ms=mvcYrqg@mail.gmail.com>
+References: <1348659527-4200-1-git-send-email-keyuan.liu@gmail.com>
+	<1348659527-4200-2-git-send-email-keyuan.liu@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:47808 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751054Ab2IZXwf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Sep 2012 19:52:35 -0400
-Received: by yenm12 with SMTP id m12so353245yen.19
-        for <linux-mmc@vger.kernel.org>; Wed, 26 Sep 2012 16:52:35 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <89813612683626448B837EE5A0B6A7CB30384F5CAD@SC-VEXCH4.marvell.com>
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:45409 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751475Ab2I0FNj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Sep 2012 01:13:39 -0400
+Received: by wibhq12 with SMTP id hq12so5720550wib.1
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Sep 2012 22:13:37 -0700 (PDT)
+In-Reply-To: <1348659527-4200-2-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yong Ding <yongd@marvell.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Daniel Drake <dsd@laptop.org>, Zhangfei Gao <zgao6@marvell.com>
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com, Jialing Fu <jlfu@marvell.com>, Tim Wang <wangtt@marvell.com>
 
-On Tue, Sep 25, 2012 at 02:13:10AM -0700, Yong Ding wrote:
-[...]
-> So, in all, u are right if with my current patch, some host drivers need
-> some improvement to add MMC_CAP_NEEDS_POLL when it is actually needed.
-> But I think this shall be the right way to follow. Or, we might enable
-> polling for some cases in which it is unnecessary, and maybe this is a
-> potential issue-bomb. How do u think?
+On Wed, Sep 26, 2012 at 7:38 PM, Kevin Liu <keyuan.liu@gmail.com> wrote:
+> From: Kevin Liu <kliu5@marvell.com>
+>
+> Commands without data transfer like cmd5/cmd7 will use previous
+> transfer mode setting, which may lead to error since some bits
+> may have been set unexpectedly.
+> For example, cmd5 following cmd18/cmd25 will have timeout error
+> since audo cmd23 has been enabled.
+>
+> Signed-off-by: Jialing Fu <jlfu@marvell.com>
+> Signed-off-by: Tim Wang <wangtt@marvell.com>
+> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+> ---
 
-I think if you carefully review and fixup all the drivers, it will be
-fine.
-
-But you'd have to add MMC_CAP_NEEDS_POLL into drivers' code (while w/ the
-quirk it's less lines of code for drivers).
-
-So, here is another idea: how about something like this
-
-#define SDHCI_QUIRK_NEEDS_POLL \
-	(SDHCI_QUIRK_BROKEN_CARD_DETECTION | (1 << NN))
-
-And changing the logic to:
-
-	if ((host->quirks & SDHCI_QUIRK_NEEDS_POLL) &&
-	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
-		mmc->caps |= MMC_CAP_NEEDS_POLL;
-
-And then, you'd just convert all the current drivers to
-SDHCI_QUIRK_NEEDS_POLL (which would be 100% safe), and for your driver,
-you'd only set SDHCI_QUIRK_BROKEN_CARD_DETECTION.
-
-Thanks,
-Anton.
+Reviewed-by: Zhangfei Gao <zhangfei.gao@marvell.com>
