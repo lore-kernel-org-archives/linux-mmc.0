@@ -1,86 +1,69 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH v4 14/15] mmc: sdhci: fix the bug that DDR50 can't work
- for emmc
-Date: Thu, 27 Sep 2012 21:50:48 +0900
-Message-ID: <CAGxe1ZFpTQf-L=83A4NobKe3K6a9=hrtofg=p3m4cCqdzo88Vw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4 12/15] mmc: core: add new 1.8v flag for mmc
+Date: Thu, 27 Sep 2012 16:28:49 +0200
+Message-ID: <CAPDyKFoVt_5xaGXUBbPO4hT8j_rC106U4y-FUb_7m_Ps9VVvbw@mail.gmail.com>
 References: <1348659527-4200-1-git-send-email-keyuan.liu@gmail.com>
-	<1348659527-4200-15-git-send-email-keyuan.liu@gmail.com>
-	<CAGxe1ZHbBVPyA5rCLS2r02O+2hO7SFUmH69rZuykv7nhPuEbKA@mail.gmail.com>
-	<CADz5_g+nT_erUMk9+9XBcOGHeneco5WOuSP5PBsp-NzqQXqxjQ@mail.gmail.com>
+	<1348659527-4200-13-git-send-email-keyuan.liu@gmail.com>
+	<CAPDyKFoMJrunn1WSiif84xbTzp+4ssZV8WdqsrC6FyUtdZC6bw@mail.gmail.com>
+	<CADz5_gKsKBaM1SQvnganS9rgp6y9ctYmR69H5wrrHyUMd8u9oQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:50307 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752273Ab2I0Mus (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Sep 2012 08:50:48 -0400
-Received: by pbbrr4 with SMTP id rr4so3538631pbb.19
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Sep 2012 05:50:48 -0700 (PDT)
-In-Reply-To: <CADz5_g+nT_erUMk9+9XBcOGHeneco5WOuSP5PBsp-NzqQXqxjQ@mail.gmail.com>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:56026 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753614Ab2I0O2v (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Sep 2012 10:28:51 -0400
+Received: by weyt9 with SMTP id t9so659962wey.19
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Sep 2012 07:28:50 -0700 (PDT)
+In-Reply-To: <CADz5_gKsKBaM1SQvnganS9rgp6y9ctYmR69H5wrrHyUMd8u9oQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Kevin Liu <keyuan.liu@gmail.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, zgao6@marvell.com, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com, Johan Rudholm <johan.rudholm@stericsson.com>
 
-On 27 September 2012 00:04, Kevin Liu <keyuan.liu@gmail.com> wrote:
-> 2012/9/26 Girish K S <girish.shivananjappa@linaro.org>:
->> On 26 September 2012 20:38, Kevin Liu <keyuan.liu@gmail.com> wrote:
+On 27 September 2012 12:39, Kevin Liu <keyuan.liu@gmail.com> wrote:
+> Hi, Ulf
+>
+> 2012/9/27 Ulf Hansson <ulf.hansson@linaro.org>:
+>> Hi Kevin,
+>>
+>> On 26 September 2012 13:38, Kevin Liu <keyuan.liu@gmail.com> wrote:
 >>> From: Kevin Liu <kliu5@marvell.com>
 >>>
->>> Host controller must enable 1.8v signal for UHS modes.
->>> Otherwise UHS modes won't take effect.
->>> But mmc core does NOT switch to 1.8v for DDR50 mode.
->>> So enable the 1.8v signal for mmc DDR50 mode in host
->>> driver.
->>>
->>> Signed-off-by: Kevin Liu <kliu5@marvell.com>
->>> ---
->>>  drivers/mmc/host/sdhci.c |    9 ++++++++-
->>>  1 files changed, 8 insertions(+), 1 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 50e7a54..e3de041 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -1529,8 +1529,15 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
->>>                                 ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
->>>                         else if (ios->timing == MMC_TIMING_UHS_SDR104)
->>>                                 ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
->>> -                       else if (ios->timing == MMC_TIMING_UHS_DDR50)
->>> +                       else if (ios->timing == MMC_TIMING_UHS_DDR50) {
->>> +                               struct mmc_card *card;
->>> +
->>>                                 ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
->>> +                               card = container_of(&(host->mmc),
->>> +                                       struct mmc_card, host);
->>> +                               if (mmc_card_mmc(card))
->>> +                                       ctrl_2 |= SDHCI_CTRL_VDD_180;
->>> +                       }
->> If you want to set the voltage to 1.8. It has to be done from the core
->> layer using the api mmc_set_signal_voltage during the mmc card init.
->> as it is done for 1.2 volts switch. In the comment (mmc_card_init
->> function) it is explicitly mentioned
->> * 1.8V vccq at 3.3V core voltage (vcc) is not required
->> * in the JEDEC spec for DDR.
->> can you please check it. Still if you feel its necessary to change the
->> voltage to 1.8 v, you can do it from mmc_init_card function
->
-> In JEDEC spec, there are two emmc device types which support DDR50.
-> One type can work under signal 1.2v while the other type work under
-> signal 1.8v or 3v. So current code just keep 3v for the second device
-> type.
->
-> But in SD host spec, 1.8v signal must be enabled for all UHS modes
-> taking effect.
-> So the fact is, if we use SD host to work with emmc chip, we have to
-> select 1.8v in order to enable DDR50. Current code missed this.
->
-> Because DDR50 shall can work under both signal 1.8v and 3v according
-> to JEDEC spec,  So I don't want to switch to 1.8v in mmc core code.
-> It's the host controller requirement that 1.8v signal must be enabled
-> in order to enable DDR50, which conflict with emmc spec. So I added
-> this in host driver.
-I understand. Thanks
+>>> Mmc does NOT have special sequence requirements for 1.8v
+>>> signal voltage setting compared to sd and sdio.
+>>> Add a new 1.8v flag for mmc so as to use the same
+>>> start_signal_voltage_switch interface.
+>>
+>> This problem is protocol issue and should not be solved in the host
+>> driver. We have more issues for signal_voltage switch as well.
+>>
+>> Please have a look at Johan Rudholms patches:
+>> [PATCH v2 1/2] mmc: core: Proper signal voltage switch
+>> [PATCH v2 2/2] mmc: core: Power cycle card on voltage switch fail
+>>
+> I agree that we should do more things in protocal driver.
+> But the real voltage switch work is still done in host driver. If we
+> keep only one voltage switch interface, then we need to add a flag to
+> distinguish sd/sdio or emmc. Or we should define two interfaces to
+> call different host functions to handle this.
+> Johan's patches can't solve my issue.
+
+I understand that your driver today take care of specific things for
+sd/sdio. The reason for that is because of the protocol layer is not
+doing the voltage switch properly.
+The idea with Johans patches is resolve all these issues. Thus the
+host driver will just be responsible for the actual voltage switch to
+happen. So in the end your voltage switch function in the host is
+supposed to be rather simple.
+
+If you still think you need to handle sd/sdio/eMMC in a specific
+manner in your driver, there are always mmc_card_sdio|sd|mmc functions
+you can use.
+
 >
 > Thanks
 > Kevin
+
+Kind regards
+Ulf Hansson
