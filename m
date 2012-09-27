@@ -1,99 +1,86 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off notify
-Date: Thu, 27 Sep 2012 13:45:00 +0200
-Message-ID: <CAPDyKFqJRvuTA61m+SyOR4HV8sMdRGmbj46rmeLsVTMN6GSD+g@mail.gmail.com>
-References: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com>
-	<CAGxe1ZFJhc-c8rS0KGdfTvejs27jjpz7T4Z2AVwoB-=7QOMemg@mail.gmail.com>
-	<CACRpkdaV_PDaYH+RgM2pa9f9Gp97-D9xbxfDkPUBfXSR+-csAg@mail.gmail.com>
-	<201209141504.14658.arnd@arndb.de>
-	<003301cd9705$c874a250$595de6f0$@codeaurora.org>
-	<CAPDyKFr0guahzweekZrmY3EQ2KyBev9OKbyF88CeOiaH5JtJYg@mail.gmail.com>
-	<005801cd9ca3$0c539920$24facb60$@codeaurora.org>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH v4 14/15] mmc: sdhci: fix the bug that DDR50 can't work
+ for emmc
+Date: Thu, 27 Sep 2012 21:50:48 +0900
+Message-ID: <CAGxe1ZFpTQf-L=83A4NobKe3K6a9=hrtofg=p3m4cCqdzo88Vw@mail.gmail.com>
+References: <1348659527-4200-1-git-send-email-keyuan.liu@gmail.com>
+	<1348659527-4200-15-git-send-email-keyuan.liu@gmail.com>
+	<CAGxe1ZHbBVPyA5rCLS2r02O+2hO7SFUmH69rZuykv7nhPuEbKA@mail.gmail.com>
+	<CADz5_g+nT_erUMk9+9XBcOGHeneco5WOuSP5PBsp-NzqQXqxjQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:54027 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750918Ab2I0LpB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Sep 2012 07:45:01 -0400
-Received: by wgbdr13 with SMTP id dr13so1332464wgb.1
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Sep 2012 04:45:00 -0700 (PDT)
-In-Reply-To: <005801cd9ca3$0c539920$24facb60$@codeaurora.org>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:50307 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752273Ab2I0Mus (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Sep 2012 08:50:48 -0400
+Received: by pbbrr4 with SMTP id rr4so3538631pbb.19
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Sep 2012 05:50:48 -0700 (PDT)
+In-Reply-To: <CADz5_g+nT_erUMk9+9XBcOGHeneco5WOuSP5PBsp-NzqQXqxjQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tanya Brokhman <tlinder@codeaurora.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>, Girish K S <girish.shivananjappa@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Saugata Das <saugata.das@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-Hi Tanya,
-
-Thanks a lot for helping out!!!
-
-Testing suspend to ram, and then resuming back again is the key use
-case to test.
-
-Kind regards
-Ulf Hansson
-
-On 27 September 2012 13:27, Tanya Brokhman <tlinder@codeaurora.org> wrote:
-> Hi Ulf
+On 27 September 2012 00:04, Kevin Liu <keyuan.liu@gmail.com> wrote:
+> 2012/9/26 Girish K S <girish.shivananjappa@linaro.org>:
+>> On 26 September 2012 20:38, Kevin Liu <keyuan.liu@gmail.com> wrote:
+>>> From: Kevin Liu <kliu5@marvell.com>
+>>>
+>>> Host controller must enable 1.8v signal for UHS modes.
+>>> Otherwise UHS modes won't take effect.
+>>> But mmc core does NOT switch to 1.8v for DDR50 mode.
+>>> So enable the 1.8v signal for mmc DDR50 mode in host
+>>> driver.
+>>>
+>>> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+>>> ---
+>>>  drivers/mmc/host/sdhci.c |    9 ++++++++-
+>>>  1 files changed, 8 insertions(+), 1 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index 50e7a54..e3de041 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -1529,8 +1529,15 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+>>>                                 ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
+>>>                         else if (ios->timing == MMC_TIMING_UHS_SDR104)
+>>>                                 ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
+>>> -                       else if (ios->timing == MMC_TIMING_UHS_DDR50)
+>>> +                       else if (ios->timing == MMC_TIMING_UHS_DDR50) {
+>>> +                               struct mmc_card *card;
+>>> +
+>>>                                 ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
+>>> +                               card = container_of(&(host->mmc),
+>>> +                                       struct mmc_card, host);
+>>> +                               if (mmc_card_mmc(card))
+>>> +                                       ctrl_2 |= SDHCI_CTRL_VDD_180;
+>>> +                       }
+>> If you want to set the voltage to 1.8. It has to be done from the core
+>> layer using the api mmc_set_signal_voltage during the mmc card init.
+>> as it is done for 1.2 volts switch. In the comment (mmc_card_init
+>> function) it is explicitly mentioned
+>> * 1.8V vccq at 3.3V core voltage (vcc) is not required
+>> * in the JEDEC spec for DDR.
+>> can you please check it. Still if you feel its necessary to change the
+>> voltage to 1.8 v, you can do it from mmc_init_card function
 >
-> We've tested your change. It seems to be working fine. We mainly focused on
-> testing stability and that the performance wasn't decreased. All tests
-> passed.
-> As far as performance improvement: it wasn't affected because of BKOPs
-> feature.
-> Please let me know if there is any specific test scenario you want me to
-> run.
+> In JEDEC spec, there are two emmc device types which support DDR50.
+> One type can work under signal 1.2v while the other type work under
+> signal 1.8v or 3v. So current code just keep 3v for the second device
+> type.
 >
-> (Sorry it took me some time to get back to you. It's holiday season in
-> Israel)
+> But in SD host spec, 1.8v signal must be enabled for all UHS modes
+> taking effect.
+> So the fact is, if we use SD host to work with emmc chip, we have to
+> select 1.8v in order to enable DDR50. Current code missed this.
 >
-> Thanks,
-> Tanya Brokhman
-> ---
-> QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
-> of Code Aurora Forum, hosted by The Linux Foundation
+> Because DDR50 shall can work under both signal 1.8v and 3v according
+> to JEDEC spec,  So I don't want to switch to 1.8v in mmc core code.
+> It's the host controller requirement that 1.8v signal must be enabled
+> in order to enable DDR50, which conflict with emmc spec. So I added
+> this in host driver.
+I understand. Thanks
 >
->
->> -----Original Message-----
->> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
->> Sent: Thursday, September 20, 2012 6:40 PM
->> To: Tanya Brokhman
->> Cc: Arnd Bergmann; Linus Walleij; Girish K S; linux-mmc@vger.kernel.org;
->> Chris Ball; Per Forlin; Johan Rudholm; Lee Jones; Saugata Das; Asutosh Das
->> Subject: Re: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off
->> notify
->>
->> Hi Tanya,
->>
->> On 20 September 2012 09:58, Tanya Brokhman <tlinder@codeaurora.org>
->> wrote:
->> >> >
->> >> > Let's page Arnd, I was under the impression that he has a eMMC 4.5
->> >> > board so maybe he can test it?
->> >>
->> >> I have a few eMMC samples but am only using them with my (slow)
->> >> thinkpad SD card reader. I also don't know which eMMC-4.5 features
->> >> they implement, as some may be early prototypes.
->> >>
->> >> What exactly do you need tested?
->> >>
->> >>       Arnd
->> >> --
->> >
->> > Hi
->> >
->> > We have eMMC4.5 board and can help with the testing.
->> > Are there other patches besides this one I should take in?
->> >
->>
->> Nope, this is the only one needed.
->> Thanks a lot for helping out!
->>
->> Kind regards
->> Ulf Hansson
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Thanks
+> Kevin
