@@ -1,32 +1,78 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: convert the variable type of irq
-Date: Fri, 28 Sep 2012 11:00:24 +0100
-Message-ID: <CAFbHwiSZ9Wi+cTxvMWLm2U84jOVstrZNhwjDgXJZzW3ZSCB8gg@mail.gmail.com>
-References: <00f901cd9d39$2f84c720$8e8e5560$%jun@samsung.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: mmc: queue: amend buffer swap for non-blocking transfer
+Date: Fri, 28 Sep 2012 19:12:53 +0900
+Message-ID: <00fe01cd9d61$d2f6f180$78e4d480$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:48905 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757182Ab2I1KAZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Sep 2012 06:00:25 -0400
-Received: by bkcjk13 with SMTP id jk13so3105367bkc.19
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Sep 2012 03:00:24 -0700 (PDT)
-In-Reply-To: <00f901cd9d39$2f84c720$8e8e5560$%jun@samsung.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:55497 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751138Ab2I1KMz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Sep 2012 06:12:55 -0400
+Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MB2004RA1PI6IZ0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 28 Sep 2012 19:12:54 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0MB200H2M1PHWAB0@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 28 Sep 2012 19:12:53 +0900 (KST)
+References: 
+In-reply-to: 
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Per Forlin' <per.forlin@linaro.org>
 
-On Fri, Sep 28, 2012 at 6:21 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> Even though platform_get_irq returns error, 'host->irq'
-> always has an unsigned value. Less-than-zero comparison
-> of an unsigned value is never true. Type of 'unsigned int'
-> will be changed for 'int'.
->
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> ---
->  include/linux/mmc/dw_mmc.h |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
+In case both 'req' and 'mq->mqrq_prev->req' are null, there is no request
+to be processed. That means there is no need to switch buffer.
+Switching buffer is required only after finishing 'issue_fn'.
 
-Acked-by: Will Newton <will.newton@imgtec.com>
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+---
+ drivers/mmc/card/queue.c |   17 ++++++++++-------
+ 1 files changed, 10 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index e360a97..fadf52e 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -68,6 +68,16 @@ static int mmc_queue_thread(void *d)
+ 		if (req || mq->mqrq_prev->req) {
+ 			set_current_state(TASK_RUNNING);
+ 			mq->issue_fn(mq, req);
++
++			/*
++			 * Current request becomes previous request
++			 * and vice versa.
++			 */
++			mq->mqrq_prev->brq.mrq.data = NULL;
++			mq->mqrq_prev->req = NULL;
++			tmp = mq->mqrq_prev;
++			mq->mqrq_prev = mq->mqrq_cur;
++			mq->mqrq_cur = tmp;
+ 		} else {
+ 			if (kthread_should_stop()) {
+ 				set_current_state(TASK_RUNNING);
+@@ -77,13 +87,6 @@ static int mmc_queue_thread(void *d)
+ 			schedule();
+ 			down(&mq->thread_sem);
+ 		}
+-
+-		/* Current request becomes previous request and vice versa. */
+-		mq->mqrq_prev->brq.mrq.data = NULL;
+-		mq->mqrq_prev->req = NULL;
+-		tmp = mq->mqrq_prev;
+-		mq->mqrq_prev = mq->mqrq_cur;
+-		mq->mqrq_cur = tmp;
+ 	} while (1);
+ 	up(&mq->thread_sem);
+ 
+-- 
+1.7.0.4
+
+
