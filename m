@@ -1,59 +1,31 @@
-From: Yong Ding <yongd@marvell.com>
-Subject: RE: [PATCH] mmc: remove MMC_CAP_NEEDS_POLL setting in sdhci_add_host
-Date: Fri, 28 Sep 2012 03:39:25 -0700
-Message-ID: <89813612683626448B837EE5A0B6A7CB303861C46C@SC-VEXCH4.marvell.com>
-References: <1348554847-14190-1-git-send-email-yongd@marvell.com>
- <20120925070401.GA32230@lizard>
- <89813612683626448B837EE5A0B6A7CB30384F5CAD@SC-VEXCH4.marvell.com>
- <20120926234936.GB7203@lizard>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: mmc: dw_mmc: remove the compiling warning
+Date: Fri, 28 Sep 2012 11:42:57 +0100
+Message-ID: <CAFbHwiQ0qhA_-oqG_q-fQuem2gODL-51Wed-ERfHjj70yCpaFw@mail.gmail.com>
+References: <00ff01cd9d61$dd516520$97f42f60$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:58609 "EHLO
-	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753736Ab2I1KlL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Sep 2012 06:41:11 -0400
-In-Reply-To: <20120926234936.GB7203@lizard>
-Content-Language: en-US
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:48682 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757109Ab2I1Km7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Sep 2012 06:42:59 -0400
+Received: by bkcjk13 with SMTP id jk13so3154746bkc.19
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Sep 2012 03:42:58 -0700 (PDT)
+In-Reply-To: <00ff01cd9d61$dd516520$97f42f60$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <anton.vorontsov@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Daniel Drake <dsd@laptop.org>, Zhangfei Gao <zgao6@marvell.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>
 
-QW50b24sDQpGb3IgYWRkaW5nIGEgbmV3IFFVSUNLIHdoaWNoIGlzIHNvbWV0aGluZyBsaWtlIFNE
-SENJX1FVSUNLX05FRURTX1BPTEwsIEkgdGhpbmsgaXQgaXMgdW5uZWNlc3Nhcnkgc2luY2UgaXQg
-YWN0dWFsbHkgaGFzIHRoZSBzYW1lIG1lYW5pbmcgYXMgTU1DX0NBUF9ORUVEU19QT0xMSU5HLiBB
-Y3R1YWxseSwgd2UgY2FuIGRpcmVjdGx5IHNldCBNTUNfQ0FQX05FRURTX1BPTEwgaW4gaG9zdCBk
-cml2ZXIuDQoNClNvIEkgcHJlZmVyIHRvIHJldmlldyBhbGwgdGhlIGhvc3QgZHJpdmVycywgYW5k
-IHByb3Bvc2VkIHJlbGV2YW50IGNoYW5nZXMuIEFuZCBzb21lIHZlbmRvcnMgYWxyZWFkeSBoYXZl
-IGJlZW4gbGlrZSB0aGlzKHNldHRpbmcgcG9sbGluZyBieSB0aGVtc2VsdmVzKS4gQW5kIGFzIHUg
-Y2FuIHNlZSwgSSBoYXZlIGFscmVhZHkgc2VudCB0aGUgbmV3IHBhdGNoIHNldC4gUGxzIGFsc28g
-aGVscCByZXZpZXcuIFRoYW5rcyBhIGxvdC4NCg0KDQpCZXN0IFdpc2hlcywNCg0KWW9uZyBEaW5n
-DQpPcGVyYXRpbmcgU3lzdGVtcyBFbmdpbmVlcmluZywNCkFwcGxpY2F0aW9uIFByb2Nlc3NvciBT
-eXN0ZW1zIEVuZ2luZWVyaW5nDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBB
-bnRvbiBWb3JvbnRzb3YgW21haWx0bzphbnRvbi52b3JvbnRzb3ZAbGluYXJvLm9yZ10gDQpTZW50
-OiBUaHVyc2RheSwgU2VwdGVtYmVyIDI3LCAyMDEyIDc6NTAgQU0NClRvOiBZb25nIERpbmcNCkNj
-OiBDaHJpcyBCYWxsOyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBEYW5pZWwgRHJha2U7IFpo
-YW5nZmVpIEdhbw0KU3ViamVjdDogUmU6IFtQQVRDSF0gbW1jOiByZW1vdmUgTU1DX0NBUF9ORUVE
-U19QT0xMIHNldHRpbmcgaW4gc2RoY2lfYWRkX2hvc3QNCg0KT24gVHVlLCBTZXAgMjUsIDIwMTIg
-YXQgMDI6MTM6MTBBTSAtMDcwMCwgWW9uZyBEaW5nIHdyb3RlOg0KWy4uLl0NCj4gU28sIGluIGFs
-bCwgdSBhcmUgcmlnaHQgaWYgd2l0aCBteSBjdXJyZW50IHBhdGNoLCBzb21lIGhvc3QgZHJpdmVy
-cyBuZWVkDQo+IHNvbWUgaW1wcm92ZW1lbnQgdG8gYWRkIE1NQ19DQVBfTkVFRFNfUE9MTCB3aGVu
-IGl0IGlzIGFjdHVhbGx5IG5lZWRlZC4NCj4gQnV0IEkgdGhpbmsgdGhpcyBzaGFsbCBiZSB0aGUg
-cmlnaHQgd2F5IHRvIGZvbGxvdy4gT3IsIHdlIG1pZ2h0IGVuYWJsZQ0KPiBwb2xsaW5nIGZvciBz
-b21lIGNhc2VzIGluIHdoaWNoIGl0IGlzIHVubmVjZXNzYXJ5LCBhbmQgbWF5YmUgdGhpcyBpcyBh
-DQo+IHBvdGVudGlhbCBpc3N1ZS1ib21iLiBIb3cgZG8gdSB0aGluaz8NCg0KSSB0aGluayBpZiB5
-b3UgY2FyZWZ1bGx5IHJldmlldyBhbmQgZml4dXAgYWxsIHRoZSBkcml2ZXJzLCBpdCB3aWxsIGJl
-DQpmaW5lLg0KDQpCdXQgeW91J2QgaGF2ZSB0byBhZGQgTU1DX0NBUF9ORUVEU19QT0xMIGludG8g
-ZHJpdmVycycgY29kZSAod2hpbGUgdy8gdGhlDQpxdWlyayBpdCdzIGxlc3MgbGluZXMgb2YgY29k
-ZSBmb3IgZHJpdmVycykuDQoNClNvLCBoZXJlIGlzIGFub3RoZXIgaWRlYTogaG93IGFib3V0IHNv
-bWV0aGluZyBsaWtlIHRoaXMNCg0KI2RlZmluZSBTREhDSV9RVUlSS19ORUVEU19QT0xMIFwNCgko
-U0RIQ0lfUVVJUktfQlJPS0VOX0NBUkRfREVURUNUSU9OIHwgKDEgPDwgTk4pKQ0KDQpBbmQgY2hh
-bmdpbmcgdGhlIGxvZ2ljIHRvOg0KDQoJaWYgKChob3N0LT5xdWlya3MgJiBTREhDSV9RVUlSS19O
-RUVEU19QT0xMKSAmJg0KCSAgICAhKGhvc3QtPm1tYy0+Y2FwcyAmIE1NQ19DQVBfTk9OUkVNT1ZB
-QkxFKSkNCgkJbW1jLT5jYXBzIHw9IE1NQ19DQVBfTkVFRFNfUE9MTDsNCg0KQW5kIHRoZW4sIHlv
-dSdkIGp1c3QgY29udmVydCBhbGwgdGhlIGN1cnJlbnQgZHJpdmVycyB0bw0KU0RIQ0lfUVVJUktf
-TkVFRFNfUE9MTCAod2hpY2ggd291bGQgYmUgMTAwJSBzYWZlKSwgYW5kIGZvciB5b3VyIGRyaXZl
-ciwNCnlvdSdkIG9ubHkgc2V0IFNESENJX1FVSVJLX0JST0tFTl9DQVJEX0RFVEVDVElPTi4NCg0K
-VGhhbmtzLA0KQW50b24uDQo=
+On Fri, Sep 28, 2012 at 11:13 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> This patch removes the following warning.
+> drivers/mmc/host/dw_mmc.c:1976: warning: passing argument 1 of
+> '_dev_info' from incompatible pointer type
+>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+
+Acked-by: Will Newton <will.newton@imgtec.com>
