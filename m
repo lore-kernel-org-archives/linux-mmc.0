@@ -1,89 +1,84 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V2 2/2] mmc: sdhci-spear: Add clk_{un}prepare() support
-Date: Fri, 28 Sep 2012 06:59:13 -0400
-Message-ID: <87wqzetnum.fsf@octavius.laptop.org>
-References: <cb66033bd923920daefc57570381f978d6e37168.1348828070.git.viresh.kumar@linaro.org>
-	<cb66033bd923920daefc57570381f978d6e37168.1348828070.git.viresh.kumar@linaro.org>
-	<a5ffa125606bf00e558145364281e9ea8551ff77.1348828070.git.viresh.kumar@linaro.org>
+From: Per Forlin <per.lkml@gmail.com>
+Subject: Re: mmc: queue: amend buffer swap for non-blocking transfer
+Date: Fri, 28 Sep 2012 13:28:21 +0200
+Message-ID: <CAFEEs1=R6zMykxxybkSaWOx2eVhQE+eEcZUzdkrT9qYyoZENiw@mail.gmail.com>
+References: <00fe01cd9d61$d2f6f180$78e4d480$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:38560 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751294Ab2I1K7T (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 28 Sep 2012 06:59:19 -0400
-In-Reply-To: <a5ffa125606bf00e558145364281e9ea8551ff77.1348828070.git.viresh.kumar@linaro.org>
-	(Viresh Kumar's message of "Fri, 28 Sep 2012 15:58:23 +0530")
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:37014 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756942Ab2I1L2W (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Sep 2012 07:28:22 -0400
+Received: by mail-bk0-f46.google.com with SMTP id jk13so3207762bkc.19
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Sep 2012 04:28:22 -0700 (PDT)
+In-Reply-To: <00fe01cd9d61$d2f6f180$78e4d480$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Viresh Kumar <viresh.kumar@linaro.org>
-Cc: spear-devel@list.st.com, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, sr@denx.de
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
 Hi,
 
-On Fri, Sep 28 2012, Viresh Kumar wrote:
-> clk_{un}prepare is mandatory for platforms using common clock framework. Since
-> this driver is used by SPEAr platform, which supports common clock framework,
-> add clk_{un}prepare() support for it.
+This is really a micro optimization. Still the patch looks correct.
+CUR and PREV will have the same values before and after this patch.
+Before this patch, NULL was assigned to NULL which is not necessary of course.
+
+Reviewed-by: Per Forlin <per.forlin@stericsson.com>
+
+Thanks,
+Per
+
+On Fri, Sep 28, 2012 at 12:12 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> In case both 'req' and 'mq->mqrq_prev->req' are null, there is no request
+> to be processed. That means there is no need to switch buffer.
+> Switching buffer is required only after finishing 'issue_fn'.
 >
-> Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 > ---
->  drivers/mmc/host/sdhci-spear.c | 10 +++++-----
->  1 file changed, 5 insertions(+), 5 deletions(-)
+>  drivers/mmc/card/queue.c |   17 ++++++++++-------
+>  1 files changed, 10 insertions(+), 7 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-> index ecad282..6be89c0 100644
-> --- a/drivers/mmc/host/sdhci-spear.c
-> +++ b/drivers/mmc/host/sdhci-spear.c
-> @@ -140,7 +140,7 @@ static int __devinit sdhci_probe(struct platform_device *pdev)
->  		goto err;
->  	}
->  
-> -	ret = clk_enable(sdhci->clk);
-> +	ret = clk_prepare_enable(sdhci->clk);
->  	if (ret) {
->  		dev_dbg(&pdev->dev, "Error enabling clock\n");
->  		goto put_clk;
-> @@ -260,7 +260,7 @@ set_drvdata:
->  free_host:
->  	sdhci_free_host(host);
->  disable_clk:
-> -	clk_disable(sdhci->clk);
-> +	clk_disable_unprepare(sdhci->clk);
->  put_clk:
->  	clk_put(sdhci->clk);
->  err:
-> @@ -282,7 +282,7 @@ static int __devexit sdhci_remove(struct platform_device *pdev)
->  
->  	sdhci_remove_host(host, dead);
->  	sdhci_free_host(host);
-> -	clk_disable(sdhci->clk);
-> +	clk_disable_unprepare(sdhci->clk);
->  	clk_put(sdhci->clk);
->  
->  	return 0;
-> @@ -297,7 +297,7 @@ static int sdhci_suspend(struct device *dev)
->  
->  	ret = sdhci_suspend_host(host);
->  	if (!ret)
-> -		clk_disable(sdhci->clk);
-> +		clk_disable_unprepare(sdhci->clk);
->  
->  	return ret;
->  }
-> @@ -308,7 +308,7 @@ static int sdhci_resume(struct device *dev)
->  	struct spear_sdhci *sdhci = dev_get_platdata(dev);
->  	int ret;
->  
-> -	ret = clk_enable(sdhci->clk);
-> +	ret = clk_prepare_enable(sdhci->clk);
->  	if (ret) {
->  		dev_dbg(dev, "Resume: Error enabling clock\n");
->  		return ret;
-
-Thanks, pushed to mmc-next for 3.7.
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index e360a97..fadf52e 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -68,6 +68,16 @@ static int mmc_queue_thread(void *d)
+>                 if (req || mq->mqrq_prev->req) {
+>                         set_current_state(TASK_RUNNING);
+>                         mq->issue_fn(mq, req);
+> +
+> +                       /*
+> +                        * Current request becomes previous request
+> +                        * and vice versa.
+> +                        */
+> +                       mq->mqrq_prev->brq.mrq.data = NULL;
+> +                       mq->mqrq_prev->req = NULL;
+> +                       tmp = mq->mqrq_prev;
+> +                       mq->mqrq_prev = mq->mqrq_cur;
+> +                       mq->mqrq_cur = tmp;
+>                 } else {
+>                         if (kthread_should_stop()) {
+>                                 set_current_state(TASK_RUNNING);
+> @@ -77,13 +87,6 @@ static int mmc_queue_thread(void *d)
+>                         schedule();
+>                         down(&mq->thread_sem);
+>                 }
+> -
+> -               /* Current request becomes previous request and vice versa. */
+> -               mq->mqrq_prev->brq.mrq.data = NULL;
+> -               mq->mqrq_prev->req = NULL;
+> -               tmp = mq->mqrq_prev;
+> -               mq->mqrq_prev = mq->mqrq_cur;
+> -               mq->mqrq_cur = tmp;
+>         } while (1);
+>         up(&mq->thread_sem);
+>
+> --
+> 1.7.0.4
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
