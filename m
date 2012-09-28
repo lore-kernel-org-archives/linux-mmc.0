@@ -1,85 +1,100 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: [PATCH v5 13/13] mmc: sdhci-pxav3: remove set_uhs_signaling function
-Date: Fri, 28 Sep 2012 15:56:12 +0800
-Message-ID: <1348818972-26711-14-git-send-email-keyuan.liu@gmail.com>
-References: <1348818972-26711-1-git-send-email-keyuan.liu@gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH Resend 1/2] mmc: sdhci-spear: add device tree bindings
+Date: Fri, 28 Sep 2012 05:03:41 -0400
+Message-ID: <87lifuv7rm.fsf@octavius.laptop.org>
+References: <viresh.kumar@linaro.org>
+	<a42729885c593f61bb62c45f229174d9f7370c40.1348809217.git.viresh.kumar2@arm.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog136.obsmtp.com ([74.125.149.85]:55288 "EHLO
-	na3sys009aog136.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756617Ab2I1ICS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Sep 2012 04:02:18 -0400
-In-Reply-To: <1348818972-26711-1-git-send-email-keyuan.liu@gmail.com>
+Received: from void.printf.net ([89.145.121.20]:46462 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752619Ab2I1JDu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 28 Sep 2012 05:03:50 -0400
+In-Reply-To: <a42729885c593f61bb62c45f229174d9f7370c40.1348809217.git.viresh.kumar2@arm.com>
+	(Viresh Kumar's message of "Fri, 28 Sep 2012 10:48:08 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com
-Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
+To: Viresh Kumar <viresh.kumar@linaro.org>
+Cc: spear-devel@list.st.com, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, sr@denx.de
 
-From: Kevin Liu <kliu5@marvell.com>
+Hi Viresh,
 
-Because sdhci can do the same thing so no need to implement this.
+On Fri, Sep 28 2012, Viresh Kumar wrote:
+> This adds simple DT bindings for SDHCI SPEAr controller. It uses cd-gpios from
+> common mmc bindings.
+>
+> This also fixes spear300-evb.dts with correct name for card detect binding.
+>
+> Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+> ---
+> V1->resend:
+> - Use cd-gpios instead of int-gpio as binding for card detect gpio.
+> - Fix spear300-evb.dts binding name for cd-gpios
+>
+> .../devicetree/bindings/mmc/sdhci-spear.txt        | 28 +++++++++
+>  arch/arm/boot/dts/spear300-evb.dts                 |  2 +-
+>  drivers/mmc/host/sdhci-spear.c                     | 71 +++++++++++++++++++++-
+>  3 files changed, 98 insertions(+), 3 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-spear.txt
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-spear.txt b/Documentation/devicetree/bindings/mmc/sdhci-spear.txt
+> new file mode 100644
+> index 0000000..cd34a05
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-spear.txt
+> @@ -0,0 +1,28 @@
+> +* SPEAr SDHCI Controller
+> +
+> +Required properties:
+> +- compatible : "st,spear300-sdhci"
+> +- reg : Address range of the sdhci
+> +- interrupt-parent: Should be the phandle for the interrupt controller
+> +  that services interrupts for this device
+> +- interrupt: Should contain the sdhci interrupt number
 
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
----
- drivers/mmc/host/sdhci-pxav3.c |   39 ---------------------------------------
- 1 files changed, 0 insertions(+), 39 deletions(-)
+You don't have to mention reg/interrupts, because they're already
+covered in mmc.txt.
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 60829c9..6aecc91 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -125,44 +125,6 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
- 	pxa->power_mode = power_mode;
- }
- 
--static int pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
--{
--	u16 ctrl_2;
--
--	/*
--	 * Set V18_EN -- UHS modes do not work without this.
--	 * does not change signaling voltage
--	 */
--	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
--
--	/* Select Bus Speed Mode for host */
--	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
--	switch (uhs) {
--	case MMC_TIMING_UHS_SDR12:
--		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
--		break;
--	case MMC_TIMING_UHS_SDR25:
--		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
--		break;
--	case MMC_TIMING_UHS_SDR50:
--		ctrl_2 |= SDHCI_CTRL_UHS_SDR50 | SDHCI_CTRL_VDD_180;
--		break;
--	case MMC_TIMING_UHS_SDR104:
--		ctrl_2 |= SDHCI_CTRL_UHS_SDR104 | SDHCI_CTRL_VDD_180;
--		break;
--	case MMC_TIMING_UHS_DDR50:
--		ctrl_2 |= SDHCI_CTRL_UHS_DDR50 | SDHCI_CTRL_VDD_180;
--		break;
--	}
--
--	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
--	dev_dbg(mmc_dev(host->mmc),
--		"%s uhs = %d, ctrl_2 = %04X\n",
--		__func__, uhs, ctrl_2);
--
--	return 0;
--}
--
- static u32 pxav3_get_max_clock(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -172,7 +134,6 @@ static u32 pxav3_get_max_clock(struct sdhci_host *host)
- 
- static struct sdhci_ops pxav3_sdhci_ops = {
- 	.platform_reset_exit = pxav3_set_private_registers,
--	.set_uhs_signaling = pxav3_set_uhs_signaling,
- 	.platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
- 	.get_max_clock = pxav3_get_max_clock,
- };
+> +Optional Properties:
+> +- cd-gpios: card detect gpio, with zero flags.
+> +- power-gpio: specifies the power gpio pin with flags: active low:1, active
+> +  high:0
+> +- power_always_enb: power should be on before inserting the card and so can't be
+> +  switched off. Only valid when power gpio is supported.
+
+power-gpio should be "power-gpios" (even though there's only one), and
+power_always_enb should use hyphens instead of underscores, but I have
+a more fundamental request:
+
+You should use a fixed regulator instead of this power-gpio hack.
+It's easy to hook up a fixed regulator to a gpio:
+
+        vmmc1: fixedregulator@0 {
+                compatible = "regulator-fixed";
+                regulator-name = "fixed-supply";
+                regulator-min-microvolt = <1800000>;
+                regulator-max-microvolt = <1800000>;
+                gpio = <&gpio1 16 0>;
+                startup-delay-us = <70000>;
+                vin-supply = <&parent_reg>;
+        };
+
+and then you can encode the regulator inside your SD host:
+
+	sdhci@fc000000 {
+		compatible = "st,spear300-sdhci";
+		reg = <0xfc000000 0x1000>;
+		cd-gpios = <&gpio0 6 0>;
+		vmmc-supply = <&vmmc1>;
+	};
+
+and the MMC core will take care of making sure that it's powered up
+only when needed.  What do you think?
+
+Thanks,
+
+- Chris.
 -- 
-1.7.0.4
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
