@@ -1,13 +1,13 @@
 From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: [PATCH v5 10/13] mmc: sdhci-pxav3: add quirks2
-Date: Fri, 28 Sep 2012 15:56:09 +0800
-Message-ID: <1348818972-26711-11-git-send-email-keyuan.liu@gmail.com>
+Subject: [PATCH v5 12/13] mmc: sdhci: fix the bug that DDR50 can't work for emmc
+Date: Fri, 28 Sep 2012 15:56:11 +0800
+Message-ID: <1348818972-26711-13-git-send-email-keyuan.liu@gmail.com>
 References: <1348818972-26711-1-git-send-email-keyuan.liu@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog136.obsmtp.com ([74.125.149.85]:47607 "EHLO
-	na3sys009aog136.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756777Ab2I1ICD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Sep 2012 04:02:03 -0400
+Received: from na3sys009aog134.obsmtp.com ([74.125.149.83]:56648 "EHLO
+	na3sys009aog134.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756685Ab2I1ICJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Sep 2012 04:02:09 -0400
 In-Reply-To: <1348818972-26711-1-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -16,45 +16,53 @@ Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.
 
 From: Kevin Liu <kliu5@marvell.com>
 
+Host controller must enable 1.8v signal for UHS modes. Otherwise
+UHS modes won't take effect. But mmc core does NOT switch to 1.8v
+for DDR50 mode. So enable the 1.8v signal for mmc DDR50 mode in host
+driver.
+
+In JEDEC spec, there are two emmc device types which support DDR50.
+One type can work under signal 1.2v while the other type work under
+signal 1.8v or 3v. So current code just keep 3v for the second device
+type.
+
+But in SD host spec, 1.8v signal must be enabled for all UHS modes
+taking effect. So the fact is, if using SD host to work with emmc chip,
+then 1.8v signal must be selected in order to enable DDR50.
+Current code missed this.
+
+Because DDR50 shall can work under both signal 1.8v and 3v according
+to JEDEC spec,  So should not switch to 1.8v in mmc core code.
+It's the host controller requirement that 1.8v signal must be enabled
+in order to enable DDR50, which conflict with emmc spec. So add this
+in host driver.
+
 Signed-off-by: Kevin Liu <kliu5@marvell.com>
 ---
- drivers/mmc/host/sdhci-pxav3.c          |    2 ++
- include/linux/platform_data/pxa_sdhci.h |    2 ++
- 2 files changed, 4 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci.c |    9 ++++++++-
+ 1 files changed, 8 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index ccd1906..60829c9 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -280,6 +280,8 @@ static int __devinit sdhci_pxav3_probe(struct platform_device *pdev)
- 
- 		if (pdata->quirks)
- 			host->quirks |= pdata->quirks;
-+		if (pdata->quirks2)
-+			host->quirks2 |= pdata->quirks2;
- 		if (pdata->host_caps)
- 			host->mmc->caps |= pdata->host_caps;
- 		if (pdata->host_caps2)
-diff --git a/include/linux/platform_data/pxa_sdhci.h b/include/linux/platform_data/pxa_sdhci.h
-index 59acd98..fdf38d6 100644
---- a/include/linux/platform_data/pxa_sdhci.h
-+++ b/include/linux/platform_data/pxa_sdhci.h
-@@ -38,6 +38,7 @@
-  * @max_speed: the maximum speed supported
-  * @host_caps: Standard MMC host capabilities bit field.
-  * @quirks: quirks of platfrom
-+ * @quirks2: quirks2 of platfrom
-  * @pm_caps: pm_caps of platfrom
-  */
- struct sdhci_pxa_platdata {
-@@ -51,6 +52,7 @@ struct sdhci_pxa_platdata {
- 	unsigned int	host_caps;
- 	unsigned int	host_caps2;
- 	unsigned int	quirks;
-+	unsigned int	quirks2;
- 	unsigned int	pm_caps;
- };
- 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 1faa5ec..fbf94b0 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1529,8 +1529,15 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 				ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
+ 			else if (ios->timing == MMC_TIMING_UHS_SDR104)
+ 				ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
+-			else if (ios->timing == MMC_TIMING_UHS_DDR50)
++			else if (ios->timing == MMC_TIMING_UHS_DDR50) {
++				struct mmc_card	*card;
++
+ 				ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
++				card = container_of(&(host->mmc),
++					struct mmc_card, host);
++				if (mmc_card_mmc(card))
++					ctrl_2 |= SDHCI_CTRL_VDD_180;
++			}
+ 			sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+ 		}
+ 		if (!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN) &&
 -- 
 1.7.0.4
 
