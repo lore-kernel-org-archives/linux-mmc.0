@@ -1,70 +1,67 @@
 From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: [PATCH v5 07/13] mmc: sdhci-pxav3: controller can't get base clock
-Date: Fri, 28 Sep 2012 15:56:06 +0800
-Message-ID: <1348818972-26711-8-git-send-email-keyuan.liu@gmail.com>
+Subject: [PATCH v5 06/13] mmc: sdhci: fix null return check of regulator_get
+Date: Fri, 28 Sep 2012 15:56:05 +0800
+Message-ID: <1348818972-26711-7-git-send-email-keyuan.liu@gmail.com>
 References: <1348818972-26711-1-git-send-email-keyuan.liu@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog136.obsmtp.com ([74.125.149.85]:55594 "EHLO
-	na3sys009aog136.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756923Ab2I1IB6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Sep 2012 04:01:58 -0400
+Received: from na3sys009aog134.obsmtp.com ([74.125.149.83]:46253 "EHLO
+	na3sys009aog134.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756777Ab2I1IB5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Sep 2012 04:01:57 -0400
 In-Reply-To: <1348818972-26711-1-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com
-Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
+Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com, Bin Wang <binw@marvell.com>
 
 From: Kevin Liu <kliu5@marvell.com>
 
-Enable the quirk SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN since
-SD_CAPABILITIES_1[15:8](BASE_FREQ) can't get correct base
-clock value. It return a fixed pre-set value like 200 on
-some sdhci-pxav3 based platforms like MMP3 while return 0
-on the other sdhci-pxav3 based platforms.
-So we enable the quirk and get the base clock via function
-get_max_clock.
-Also add get_max_clock.
+regulator_get() returns NULL when CONFIG_REGULATOR not defined,
+which should not print out the warning.
 
-Reported-by: Philip Rakity <prakity@marvell.com>
-Reviewed-by: Philip Rakity <prakity@Marvell.com>
+Reviewed-by: Philip Rakity <prakity@marvell.com>
+Signed-off-by: Bin Wang <binw@marvell.com>
 Signed-off-by: Kevin Liu <kliu5@marvell.com>
 ---
- drivers/mmc/host/sdhci-pxav3.c |   11 ++++++++++-
- 1 files changed, 10 insertions(+), 1 deletions(-)
+ drivers/mmc/host/sdhci.c |   18 ++++++++++++------
+ 1 files changed, 12 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index e918a2b..ccd1906 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -163,10 +163,18 @@ static int pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
- 	return 0;
- }
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index f763154..54ca556 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2845,9 +2845,12 @@ int sdhci_add_host(struct sdhci_host *host)
  
-+static u32 pxav3_get_max_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	return clk_get_rate(pltfm_host->clk);
-+}
-+
- static struct sdhci_ops pxav3_sdhci_ops = {
- 	.platform_reset_exit = pxav3_set_private_registers,
- 	.set_uhs_signaling = pxav3_set_uhs_signaling,
- 	.platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
-+	.get_max_clock = pxav3_get_max_clock,
- };
+ 	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
+ 	host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
+-	if (IS_ERR(host->vqmmc)) {
+-		pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
+-		host->vqmmc = NULL;
++	if (IS_ERR_OR_NULL(host->vqmmc)) {
++		if (PTR_ERR(host->vqmmc) < 0) {
++			pr_info("%s: no vqmmc regulator found\n",
++				mmc_hostname(mmc));
++			host->vqmmc = NULL;
++		}
+ 	}
+ 	else if (regulator_is_supported_voltage(host->vqmmc, 1700000, 1950000))
+ 		regulator_enable(host->vqmmc);
+@@ -2912,9 +2915,12 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	ocr_avail = 0;
  
- #ifdef CONFIG_OF
-@@ -249,7 +257,8 @@ static int __devinit sdhci_pxav3_probe(struct platform_device *pdev)
+ 	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
+-	if (IS_ERR(host->vmmc)) {
+-		pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
+-		host->vmmc = NULL;
++	if (IS_ERR_OR_NULL(host->vmmc)) {
++		if (PTR_ERR(host->vmmc) < 0) {
++			pr_info("%s: no vmmc regulator found\n",
++				mmc_hostname(mmc));
++			host->vmmc = NULL;
++		}
+ 	} else
+ 		regulator_enable(host->vmmc);
  
- 	host->quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
- 		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
--		| SDHCI_QUIRK_32BIT_ADMA_SIZE;
-+		| SDHCI_QUIRK_32BIT_ADMA_SIZE
-+		| SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN;
- 
- 	/* enable 1/8V DDR capable */
- 	host->mmc->caps |= MMC_CAP_1_8V_DDR;
 -- 
 1.7.0.4
 
