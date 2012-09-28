@@ -1,53 +1,59 @@
-From: yongd <yongd@marvell.com>
-Subject: [PATCH 1/3] mmc: esdhc: enable polling to detect card by itself
-Date: Fri, 28 Sep 2012 18:28:31 +0800
-Message-ID: <1348828113-19668-2-git-send-email-yongd@marvell.com>
-References: <1348828113-19668-1-git-send-email-yongd@marvell.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1348828113-19668-1-git-send-email-yongd@marvell.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Anton Vorontsov <anton.vorontsov@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Daniel Drake <dsd@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Wilson Callan <wilson.callan@savantsystems.com>, Ben Dooks <ben-linux@fluff.org>
-Cc: zhangfei.gao@marvell.com, kevin.liu@marvell.com, jlfu@marvell.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, yongd <yongd@marvell.com>
+From: Yong Ding <yongd@marvell.com>
+Subject: RE: [PATCH] mmc: remove MMC_CAP_NEEDS_POLL setting in sdhci_add_host
+Date: Fri, 28 Sep 2012 03:39:25 -0700
+Message-ID: <89813612683626448B837EE5A0B6A7CB303861C46C@SC-VEXCH4.marvell.com>
+References: <1348554847-14190-1-git-send-email-yongd@marvell.com>
+ <20120925070401.GA32230@lizard>
+ <89813612683626448B837EE5A0B6A7CB30384F5CAD@SC-VEXCH4.marvell.com>
+ <20120926234936.GB7203@lizard>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:58609 "EHLO
+	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753736Ab2I1KlL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Sep 2012 06:41:11 -0400
+In-Reply-To: <20120926234936.GB7203@lizard>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Anton Vorontsov <anton.vorontsov@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Daniel Drake <dsd@laptop.org>, Zhangfei Gao <zgao6@marvell.com>
 
-In the current code logic, sdhci_add_host() will enable the polling
-method (set MMC_CAP_NEEDS_POLL) for a removable card (MMC_CAP_
-NONREMOVABLE is not set) whose host's internal card detection method
-is disabled for some reason (SDHCI_QUIRK_BROKEN_CARD_DETECTION is set).
-
-However, this is improper since we can have some other card detection
-methods besides host internal card detection and polling method. For
-example, if the card detection type is ESDHC_CD_GPIO (external gpio pin
-for CD), we will keep SDHCI_QUIRK_BROKEN_CARD_DETECTION set. This is right.
-But, just as above said, sdhci_add_host() will also enable polling for such
-a card. This is redundant.
-
-On the other hand, for the card with ESDHC_CD_NONE detection type(no CD, neither
-controller nor gpio, so use polling), we currently rely on sdhci_add_host() to
-enable polling for us.
-
-Here proposed a solution for such an embarrassing case. 1st, this patch will
-de-couple polling enabling with sdhci_add_host() by doing this in host driver
-itself, just as some other vendors. 2nd, one more patch will remove such improper
-MMC_CAP_NEEDS_POLL enabling in sdhci_add_host().
-
-Change-Id: Ia7525009d8fd188e3f0169f225e4a76ff9e94b47
-Signed-off-by: yongd <yongd@marvell.com>
----
- drivers/mmc/host/sdhci-esdhc-imx.c |    1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index e23f813..f70079c 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -569,6 +569,7 @@ static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 		break;
- 
- 	case ESDHC_CD_NONE:
-+		host->mmc->caps = MMC_CAP_NEEDS_POLL;
- 		break;
- 	}
- 
--- 
-1.7.9.5
+QW50b24sDQpGb3IgYWRkaW5nIGEgbmV3IFFVSUNLIHdoaWNoIGlzIHNvbWV0aGluZyBsaWtlIFNE
+SENJX1FVSUNLX05FRURTX1BPTEwsIEkgdGhpbmsgaXQgaXMgdW5uZWNlc3Nhcnkgc2luY2UgaXQg
+YWN0dWFsbHkgaGFzIHRoZSBzYW1lIG1lYW5pbmcgYXMgTU1DX0NBUF9ORUVEU19QT0xMSU5HLiBB
+Y3R1YWxseSwgd2UgY2FuIGRpcmVjdGx5IHNldCBNTUNfQ0FQX05FRURTX1BPTEwgaW4gaG9zdCBk
+cml2ZXIuDQoNClNvIEkgcHJlZmVyIHRvIHJldmlldyBhbGwgdGhlIGhvc3QgZHJpdmVycywgYW5k
+IHByb3Bvc2VkIHJlbGV2YW50IGNoYW5nZXMuIEFuZCBzb21lIHZlbmRvcnMgYWxyZWFkeSBoYXZl
+IGJlZW4gbGlrZSB0aGlzKHNldHRpbmcgcG9sbGluZyBieSB0aGVtc2VsdmVzKS4gQW5kIGFzIHUg
+Y2FuIHNlZSwgSSBoYXZlIGFscmVhZHkgc2VudCB0aGUgbmV3IHBhdGNoIHNldC4gUGxzIGFsc28g
+aGVscCByZXZpZXcuIFRoYW5rcyBhIGxvdC4NCg0KDQpCZXN0IFdpc2hlcywNCg0KWW9uZyBEaW5n
+DQpPcGVyYXRpbmcgU3lzdGVtcyBFbmdpbmVlcmluZywNCkFwcGxpY2F0aW9uIFByb2Nlc3NvciBT
+eXN0ZW1zIEVuZ2luZWVyaW5nDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBB
+bnRvbiBWb3JvbnRzb3YgW21haWx0bzphbnRvbi52b3JvbnRzb3ZAbGluYXJvLm9yZ10gDQpTZW50
+OiBUaHVyc2RheSwgU2VwdGVtYmVyIDI3LCAyMDEyIDc6NTAgQU0NClRvOiBZb25nIERpbmcNCkNj
+OiBDaHJpcyBCYWxsOyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBEYW5pZWwgRHJha2U7IFpo
+YW5nZmVpIEdhbw0KU3ViamVjdDogUmU6IFtQQVRDSF0gbW1jOiByZW1vdmUgTU1DX0NBUF9ORUVE
+U19QT0xMIHNldHRpbmcgaW4gc2RoY2lfYWRkX2hvc3QNCg0KT24gVHVlLCBTZXAgMjUsIDIwMTIg
+YXQgMDI6MTM6MTBBTSAtMDcwMCwgWW9uZyBEaW5nIHdyb3RlOg0KWy4uLl0NCj4gU28sIGluIGFs
+bCwgdSBhcmUgcmlnaHQgaWYgd2l0aCBteSBjdXJyZW50IHBhdGNoLCBzb21lIGhvc3QgZHJpdmVy
+cyBuZWVkDQo+IHNvbWUgaW1wcm92ZW1lbnQgdG8gYWRkIE1NQ19DQVBfTkVFRFNfUE9MTCB3aGVu
+IGl0IGlzIGFjdHVhbGx5IG5lZWRlZC4NCj4gQnV0IEkgdGhpbmsgdGhpcyBzaGFsbCBiZSB0aGUg
+cmlnaHQgd2F5IHRvIGZvbGxvdy4gT3IsIHdlIG1pZ2h0IGVuYWJsZQ0KPiBwb2xsaW5nIGZvciBz
+b21lIGNhc2VzIGluIHdoaWNoIGl0IGlzIHVubmVjZXNzYXJ5LCBhbmQgbWF5YmUgdGhpcyBpcyBh
+DQo+IHBvdGVudGlhbCBpc3N1ZS1ib21iLiBIb3cgZG8gdSB0aGluaz8NCg0KSSB0aGluayBpZiB5
+b3UgY2FyZWZ1bGx5IHJldmlldyBhbmQgZml4dXAgYWxsIHRoZSBkcml2ZXJzLCBpdCB3aWxsIGJl
+DQpmaW5lLg0KDQpCdXQgeW91J2QgaGF2ZSB0byBhZGQgTU1DX0NBUF9ORUVEU19QT0xMIGludG8g
+ZHJpdmVycycgY29kZSAod2hpbGUgdy8gdGhlDQpxdWlyayBpdCdzIGxlc3MgbGluZXMgb2YgY29k
+ZSBmb3IgZHJpdmVycykuDQoNClNvLCBoZXJlIGlzIGFub3RoZXIgaWRlYTogaG93IGFib3V0IHNv
+bWV0aGluZyBsaWtlIHRoaXMNCg0KI2RlZmluZSBTREhDSV9RVUlSS19ORUVEU19QT0xMIFwNCgko
+U0RIQ0lfUVVJUktfQlJPS0VOX0NBUkRfREVURUNUSU9OIHwgKDEgPDwgTk4pKQ0KDQpBbmQgY2hh
+bmdpbmcgdGhlIGxvZ2ljIHRvOg0KDQoJaWYgKChob3N0LT5xdWlya3MgJiBTREhDSV9RVUlSS19O
+RUVEU19QT0xMKSAmJg0KCSAgICAhKGhvc3QtPm1tYy0+Y2FwcyAmIE1NQ19DQVBfTk9OUkVNT1ZB
+QkxFKSkNCgkJbW1jLT5jYXBzIHw9IE1NQ19DQVBfTkVFRFNfUE9MTDsNCg0KQW5kIHRoZW4sIHlv
+dSdkIGp1c3QgY29udmVydCBhbGwgdGhlIGN1cnJlbnQgZHJpdmVycyB0bw0KU0RIQ0lfUVVJUktf
+TkVFRFNfUE9MTCAod2hpY2ggd291bGQgYmUgMTAwJSBzYWZlKSwgYW5kIGZvciB5b3VyIGRyaXZl
+ciwNCnlvdSdkIG9ubHkgc2V0IFNESENJX1FVSVJLX0JST0tFTl9DQVJEX0RFVEVDVElPTi4NCg0K
+VGhhbmtzLA0KQW50b24uDQo=
