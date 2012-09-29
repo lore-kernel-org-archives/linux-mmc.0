@@ -1,58 +1,38 @@
-From: Phil Turmel <philip@turmel.org>
-Subject: Re: [PATCH v6 0/3] Add modules to support realtek PCIE card reader
-Date: Fri, 28 Sep 2012 21:00:04 -0400
-Message-ID: <50664814.30407@turmel.org>
-References: <cover.1347330871.git.wei_wang@realsil.com.cn>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH v5 07/13] mmc: sdhci-pxav3: controller can't get base clock
+Date: Sat, 29 Sep 2012 15:44:41 +0800
+Message-ID: <CAMj5Bki99AZuEsrj7LjcWguuf7s4gk7Wc_w2sXuD2ouDKeK1-Q@mail.gmail.com>
+References: <1348818972-26711-1-git-send-email-keyuan.liu@gmail.com>
+	<1348818972-26711-8-git-send-email-keyuan.liu@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atl.turmel.org ([74.117.157.138]:38966 "EHLO atl.turmel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S964989Ab2I2BP5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 28 Sep 2012 21:15:57 -0400
-In-Reply-To: <cover.1347330871.git.wei_wang@realsil.com.cn>
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:63534 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759045Ab2I2Hon (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 29 Sep 2012 03:44:43 -0400
+Received: by wibhr7 with SMTP id hr7so673015wib.1
+        for <linux-mmc@vger.kernel.org>; Sat, 29 Sep 2012 00:44:42 -0700 (PDT)
+In-Reply-To: <1348818972-26711-8-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: wei_wang@realsil.com.cn
-Cc: cjb@laptop.org, sameo@linux.intel.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com, bp@alien8.de
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-On 09/11/2012 12:54 AM, wei_wang@realsil.com.cn wrote:
-> From: Wei WANG <wei_wang@realsil.com.cn>
-> 
-> Support for Realtek PCI-Express driver-based card readers including rts5209 and rts5229.
-> 
-> v2:
-> 1. Using platform device to replace realtek slot bus
-> 
-> v3:
-> 1. Fix a bug that DMA out of SW-IOMMU space in Lenovo Thinkpad x121e
-> 2. Tested by Borislav Petkov <bp@alien8.de>
-> 
-> v4:
-> 1. Fulfill power management callbacks
-> 
-> v5:
-> 1. Support Memstick card
-> 
-> v6:
-> 1. Fix some coding style
-> 
-> Wei WANG (3):
->   drivers/mfd: Add realtek pcie card reader driver
->   drivers/mmc: Add realtek pcie sdmmc host driver
->   drivers/memstick: Add realtek pcie memstick host driver
+On Fri, Sep 28, 2012 at 3:56 PM, Kevin Liu <keyuan.liu@gmail.com> wrote:
+> From: Kevin Liu <kliu5@marvell.com>
+>
+> Enable the quirk SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN since
+> SD_CAPABILITIES_1[15:8](BASE_FREQ) can't get correct base
+> clock value. It return a fixed pre-set value like 200 on
+> some sdhci-pxav3 based platforms like MMP3 while return 0
+> on the other sdhci-pxav3 based platforms.
+> So we enable the quirk and get the base clock via function
+> get_max_clock.
+> Also add get_max_clock.
+>
+> Reported-by: Philip Rakity <prakity@marvell.com>
+> Reviewed-by: Philip Rakity <prakity@Marvell.com>
+> Signed-off-by: Kevin Liu <kliu5@marvell.com>
 
-I have a recent HP Pavilion dv6 with this card reader, 10ec:5209
-(rev 01).  I just applied these patches on top of 3.6-rc7.  Appears
-to work properly with a SanDisk 8GB SDHC card.  I don't have a
-memstick to test.
-
-For patches 1 & 2, feel free to add my:
-
-Tested-by: Philip J. Turmel <philip@turmel.org>
-
-Regards,
-
-Phil
-
+Acked-by:  Zhangfei Gao <zhangfei.gao@marvell.com>
