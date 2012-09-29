@@ -1,34 +1,52 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [PATCH v5 13/13] mmc: sdhci-pxav3: remove set_uhs_signaling function
-Date: Sat, 29 Sep 2012 16:03:53 +0800
-Message-ID: <CAMj5BkhO3-YW6Nfi0Ke15fj7bPi=YKNieDp6kc2P1VFxQ+vMKQ@mail.gmail.com>
-References: <1348818972-26711-1-git-send-email-keyuan.liu@gmail.com>
-	<1348818972-26711-14-git-send-email-keyuan.liu@gmail.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v6 0/3] Add modules to support realtek PCIE card reader
+Date: Sat, 29 Sep 2012 13:07:30 +0200
+Message-ID: <20120929110730.GA27797@liondog.tnic>
+References: <cover.1347330871.git.wei_wang@realsil.com.cn>
+ <50664814.30407@turmel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:51113 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755222Ab2I2IDz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 29 Sep 2012 04:03:55 -0400
-Received: by mail-wi0-f172.google.com with SMTP id hq12so703636wib.1
-        for <linux-mmc@vger.kernel.org>; Sat, 29 Sep 2012 01:03:53 -0700 (PDT)
-In-Reply-To: <1348818972-26711-14-git-send-email-keyuan.liu@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <50664814.30407@turmel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: gregkh@linuxfoundation.org, Andrew Morton <akpm@linux-foundation.org>
+Cc: Phil Turmel <philip@turmel.org>, wei_wang@realsil.com.cn, cjb@laptop.org, sameo@linux.intel.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, arnd@arndb.de, oakad@yahoo.com
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Liu <keyuan.liu@gmail.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-On Fri, Sep 28, 2012 at 3:56 PM, Kevin Liu <keyuan.liu@gmail.com> wrote:
-> From: Kevin Liu <kliu5@marvell.com>
->
-> Because sdhci can do the same thing so no need to implement this.
->
-> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+On Fri, Sep 28, 2012 at 09:00:04PM -0400, Phil Turmel wrote:
+> > Wei WANG (3):
+> >   drivers/mfd: Add realtek pcie card reader driver
+> >   drivers/mmc: Add realtek pcie sdmmc host driver
+> >   drivers/memstick: Add realtek pcie memstick host driver
+> 
+> I have a recent HP Pavilion dv6 with this card reader, 10ec:5209
+> (rev 01).  I just applied these patches on top of 3.6-rc7.  Appears
+> to work properly with a SanDisk 8GB SDHC card.  I don't have a
+> memstick to test.
+> 
+> For patches 1 & 2, feel free to add my:
+> 
+> Tested-by: Philip J. Turmel <philip@turmel.org>
 
-Acked-by:  Zhangfei Gao <zhangfei.gao@marvell.com>
+Ok, good. Thanks for doing that.
 
-If so, (*set_uhs_signaling) can be removed from sdhci.h.
-"int     (*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);"
+So, I think that this driver has seen a bunch of testing and reviewing
+and we might start considering upstreaming it. There are a bunch of
+laptops integrating those readers and maybe a single three-month-ish -rc
+period of testing wouldn't hurt before it appears upstream.
 
-/Zhangfei
+Now, AFAICT, there is another driver in staging which supports the same
+or a subset of the cardreaders this driver does so I don't know what
+Realsil want to do with that. Wei?
+
+And since this driver touches multiple drivers/{mfd,mmc,memstick}
+subdirs, maybe akpm would like to merge it? At least I haven't seen any
+other maintainers complaining about its design or wanting to take it so
+...
+
+Thanks.
+
+-- 
+Regards/Gruss,
+    Boris.
