@@ -1,52 +1,56 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v6 0/3] Add modules to support realtek PCIE card reader
-Date: Sat, 29 Sep 2012 17:29:42 +0200
-Message-ID: <20120929152942.GA11412@liondog.tnic>
-References: <cover.1347330871.git.wei_wang@realsil.com.cn>
- <50664814.30407@turmel.org>
- <20120929110730.GA27797@liondog.tnic>
- <87d315osjm.fsf@octavius.laptop.org>
+From: "Tanya Brokhman" <tlinder@codeaurora.org>
+Subject: RE: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off notify
+Date: Sun, 30 Sep 2012 08:48:56 +0200
+Message-ID: <005901cd9ed7$aca95c30$05fc1490$@codeaurora.org>
+References: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com>	<CAGxe1ZFJhc-c8rS0KGdfTvejs27jjpz7T4Z2AVwoB-=7QOMemg@mail.gmail.com>	<CACRpkdaV_PDaYH+RgM2pa9f9Gp97-D9xbxfDkPUBfXSR+-csAg@mail.gmail.com>	<201209141504.14658.arnd@arndb.de>	<003301cd9705$c874a250$595de6f0$@codeaurora.org>	<CAPDyKFr0guahzweekZrmY3EQ2KyBev9OKbyF88CeOiaH5JtJYg@mail.gmail.com>	<005801cd9ca3$0c539920$24facb60$@codeaurora.org> <CAPDyKFqJRvuTA61m+SyOR4HV8sMdRGmbj46rmeLsVTMN6GSD+g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.skyhub.de ([78.46.96.112]:59432 "EHLO mail.skyhub.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754143Ab2I2P3p (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 29 Sep 2012 11:29:45 -0400
-Content-Disposition: inline
-In-Reply-To: <87d315osjm.fsf@octavius.laptop.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:6008 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751616Ab2I3GtR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 30 Sep 2012 02:49:17 -0400
+In-Reply-To: <CAPDyKFqJRvuTA61m+SyOR4HV8sMdRGmbj46rmeLsVTMN6GSD+g@mail.gmail.com>
+Content-language: he
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: wei_wang@realsil.com.cn, gregkh@linuxfoundation.org, Andrew Morton <akpm@linux-foundation.org>, Phil Turmel <philip@turmel.org>, sameo@linux.intel.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, arnd@arndb.de, oakad@yahoo.com
+To: 'Ulf Hansson' <ulf.hansson@linaro.org>
+Cc: 'Arnd Bergmann' <arnd@arndb.de>, 'Linus Walleij' <linus.walleij@linaro.org>, 'Girish K S' <girish.shivananjappa@linaro.org>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Per Forlin' <per.forlin@stericsson.com>, 'Johan Rudholm' <johan.rudholm@stericsson.com>, 'Lee Jones' <lee.jones@linaro.org>, 'Saugata Das' <saugata.das@linaro.org>, 'Asutosh Das' <asutoshd@codeaurora.org>
 
-On Sat, Sep 29, 2012 at 09:41:17AM -0400, Chris Ball wrote:
-> On Sat, Sep 29 2012, Borislav Petkov wrote:
-> > So, I think that this driver has seen a bunch of testing and reviewing
-> > and we might start considering upstreaming it. There are a bunch of
-> > laptops integrating those readers and maybe a single three-month-ish -rc
-> > period of testing wouldn't hurt before it appears upstream.
-> >
-> > Now, AFAICT, there is another driver in staging which supports the same
-> > or a subset of the cardreaders this driver does so I don't know what
-> > Realsil want to do with that. Wei?
-> > 
-> > And since this driver touches multiple drivers/{mfd,mmc,memstick}
-> > subdirs, maybe akpm would like to merge it? At least I haven't seen any
-> > other maintainers complaining about its design or wanting to take it so
+Hi Ulf,
+
 > 
-> I think you've missed the mails -- Alex Dubov has acked the memstick
-> portion, Samuel Ortiz has said he'll push the MFD driver for 3.7,
-> and I've pushed the MMC driver into mmc-next for 3.7.  So, I think
-> we should merge it.  I don't think we need akpm, since there are no
-> build-time dependencies involved.
+> Hi Tanya,
+> 
+> Thanks a lot for helping out!!!
 
-Great, all is taken care of then.
+NP. 
+> 
+> Testing suspend to ram, and then resuming back again is the key use case
+to
+> test.
 
-Only the staging driver remains, I believe the CONFIG_RTS_PSTOR one. Wei?
 
-Thanks.
+Is there a special scenario to trigger suspend or just leaving the system
+idle? I did that. Added prints in the code to verify that the PON was sent
+to the card.... It feels a bit superficial to me that's why I'm asking if
+there is a specific scenario I can try.
+Other than that, as I already mentioned we ran our test suit that includes
+various user-use cases such as playing a game, reading a web page, email
+etc. And of course I tried lmdd both ways.
 
--- 
-Regards/Gruss,
-    Boris.
+> 
+> Kind regards
+> Ulf Hansson
+> 
+
+
+Thanks,
+Tanya Brokhman
+---
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
+of Code Aurora Forum, hosted by The Linux Foundation
+
+
