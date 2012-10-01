@@ -1,50 +1,27 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH 03/12] mmc: dw_mmc: fix building exynos driver as a module
-Date: Mon, 1 Oct 2012 12:05:45 +0100
-Message-ID: <CAFbHwiRGnhEf-3XJJJPrHwmQRj_YE2kCZaGURHDQcu=cj0zSHw@mail.gmail.com>
-References: <1348868177-21205-1-git-send-email-arnd@arndb.de>
-	<1348868177-21205-4-git-send-email-arnd@arndb.de>
+From: "Mrs. Maria Bristow" <no-reply@mx2.4shared.com>
+Subject: RE: Please am dying of breast cancer !!!
+Date: Mon, 01 Oct 2012 14:09:14 +0200
+Message-ID: <201210011213.q91CCjvb031201__20669.2061307423$1349093475$gmane$org@srv1.iexpress.com.br>
+Reply-To: maria.bristow@1email.eu
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:45864 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751945Ab2JALFr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Oct 2012 07:05:47 -0400
-In-Reply-To: <1348868177-21205-4-git-send-email-arnd@arndb.de>
+Received: from c906f44f.static.virtua.com.br ([201.6.244.79]:57835 "EHLO
+	srv1.iexpress.com.br" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751913Ab2JAMK2 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Oct 2012 08:10:28 -0400
+Content-Description: Mail message body
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, arm@kernel.org, Chris Ball <cjb@laptop.org>, Thomas Abraham <thomas.abraham@linaro.org>, Will Newton <will.newton@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc@vger.kernel.org
+To: Recipients <no-reply@mx2.4shared.com>
 
-On Fri, Sep 28, 2012 at 10:36 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> The MODULE_DEVICE_TABLE() entry in the dw_mmc_exynos driver
-> points to the wrong symbol which results in a link error
-> when building as a loadable module.
->
-> Further, we get a warning about the driver_data being
-> marked constant, which requires annotating a few pointers
-> as const.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> Cc: Chris Ball <cjb@laptop.org>
-> Cc: Thomas Abraham <thomas.abraham@linaro.org>
-> Cc: Will Newton <will.newton@imgtec.com>
-> Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> Cc: Seungwon Jeon <tgih.jun@samsung.com>
-> Cc: Kyungmin Park <kyungmin.park@samsung.com>
-> Cc: linux-mmc@vger.kernel.org
-> ---
->  drivers/mmc/host/dw_mmc-exynos.c |    4 ++--
->  drivers/mmc/host/dw_mmc-pltfm.c  |    2 +-
->  drivers/mmc/host/dw_mmc-pltfm.h  |    2 +-
->  drivers/mmc/host/dw_mmc.c        |    2 +-
->  include/linux/mmc/dw_mmc.h       |    2 +-
->  5 files changed, 6 insertions(+), 6 deletions(-)
+Hello,
 
-This looks ok to me, but I'll let one of the Exynos guys ack those
-specific changes as I don't have the hardware.
+Am dying of breast cancer and I need your assistance to help me carry o=
+ut my dream charity work with my funds =E2=82=AC2.8M Euros with a Secur=
+ity firm, if you are interested please reach me for more details on thi=
+s email: maria.bristow@1email.eu
 
-There's already a patch for the dev_info warning in dw_mmc.c frm
-Seungwon Jeon, and it seems to me like a separate change but I don't
-really mind how it gets merged.
+Yours Sincerely,
+Mrs. Maria Bristow
