@@ -1,216 +1,50 @@
-From: Samuel Ortiz <sameo@linux.intel.com>
-Subject: Re: [PATCH v6 1/3] drivers/mfd: Add realtek pcie card reader driver
-Date: Mon, 1 Oct 2012 00:49:33 +0200
-Message-ID: <20120930224933.GB12231@sortiz-mobl>
-References: <cover.1347330871.git.wei_wang@realsil.com.cn>
- <b3b7a3d03d9591c1f393f4c4f488efbd15756c7c.1347330871.git.wei_wang@realsil.com.cn>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH 03/12] mmc: dw_mmc: fix building exynos driver as a module
+Date: Mon, 1 Oct 2012 12:05:45 +0100
+Message-ID: <CAFbHwiRGnhEf-3XJJJPrHwmQRj_YE2kCZaGURHDQcu=cj0zSHw@mail.gmail.com>
+References: <1348868177-21205-1-git-send-email-arnd@arndb.de>
+	<1348868177-21205-4-git-send-email-arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:8190 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751754Ab2I3Wti (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 30 Sep 2012 18:49:38 -0400
-Content-Disposition: inline
-In-Reply-To: <b3b7a3d03d9591c1f393f4c4f488efbd15756c7c.1347330871.git.wei_wang@realsil.com.cn>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:45864 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751945Ab2JALFr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Oct 2012 07:05:47 -0400
+In-Reply-To: <1348868177-21205-4-git-send-email-arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: wei_wang@realsil.com.cn
-Cc: cjb@laptop.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com, bp@alien8.de
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, arm@kernel.org, Chris Ball <cjb@laptop.org>, Thomas Abraham <thomas.abraham@linaro.org>, Will Newton <will.newton@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc@vger.kernel.org
 
-Hi Wei,
-
-On Tue, Sep 11, 2012 at 12:54:22PM +0800, wei_wang@realsil.com.cn wrote:
-> From: Wei WANG <wei_wang@realsil.com.cn>
-> 
-> Realtek PCI-E card reader driver adapts requests from upper-level
-> sdmmc/memstick layer to the real physical card reader.
-> 
-> Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
-> Reviewed-by: Arnd Bergmann <arnd@arndb.de>
-> Tested-by: Borislav Petkov <bp@alien8.de>
+On Fri, Sep 28, 2012 at 10:36 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> The MODULE_DEVICE_TABLE() entry in the dw_mmc_exynos driver
+> points to the wrong symbol which results in a link error
+> when building as a loadable module.
+>
+> Further, we get a warning about the driver_data being
+> marked constant, which requires annotating a few pointers
+> as const.
+>
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> Cc: Chris Ball <cjb@laptop.org>
+> Cc: Thomas Abraham <thomas.abraham@linaro.org>
+> Cc: Will Newton <will.newton@imgtec.com>
+> Cc: Jaehoon Chung <jh80.chung@samsung.com>
+> Cc: Seungwon Jeon <tgih.jun@samsung.com>
+> Cc: Kyungmin Park <kyungmin.park@samsung.com>
+> Cc: linux-mmc@vger.kernel.org
 > ---
->  drivers/mfd/Kconfig             |    9 +
->  drivers/mfd/Makefile            |    4 +
->  drivers/mfd/rts5209.c           |  188 ++++++
->  drivers/mfd/rts5229.c           |  179 ++++++
->  drivers/mfd/rtsx_pcr.c          | 1345 +++++++++++++++++++++++++++++++++++++++
->  drivers/mfd/rtsx_pcr.h          |   31 +
->  include/linux/mfd/rtsx_common.h |   47 ++
->  include/linux/mfd/rtsx_pci.h    |  773 ++++++++++++++++++++++
->  8 files changed, 2576 insertions(+)
->  create mode 100644 drivers/mfd/rts5209.c
->  create mode 100644 drivers/mfd/rts5229.c
->  create mode 100644 drivers/mfd/rtsx_pcr.c
->  create mode 100644 drivers/mfd/rtsx_pcr.h
->  create mode 100644 include/linux/mfd/rtsx_common.h
->  create mode 100644 include/linux/mfd/rtsx_pci.h
-Although  pretty big, the patch looks mostly good to me.
-I only have a few comments:
+>  drivers/mmc/host/dw_mmc-exynos.c |    4 ++--
+>  drivers/mmc/host/dw_mmc-pltfm.c  |    2 +-
+>  drivers/mmc/host/dw_mmc-pltfm.h  |    2 +-
+>  drivers/mmc/host/dw_mmc.c        |    2 +-
+>  include/linux/mmc/dw_mmc.h       |    2 +-
+>  5 files changed, 6 insertions(+), 6 deletions(-)
 
-> diff --git a/drivers/mfd/Kconfig b/drivers/mfd/Kconfig
-> index d1facef..4c07a34 100644
-> --- a/drivers/mfd/Kconfig
-> +++ b/drivers/mfd/Kconfig
-> @@ -63,6 +63,15 @@ config MFD_SM501_GPIO
->  	 lines on the SM501. The platform data is used to supply the
->  	 base number for the first GPIO line to register.
->  
-> +config MFD_RTSX_PCI
-> +	tristate "Support for Realtek PCI-E driver-based card reader"
-> +	depends on PCI
-> +	help
-> +	  This supports for Realtek PCI-Express driver-based card reader including
-> +	  rts5209, rts5229, etc. Realtek driver-based card reader supports access
-driver-based ?
+This looks ok to me, but I'll let one of the Exynos guys ack those
+specific changes as I don't have the hardware.
 
-> diff --git a/drivers/mfd/rts5209.c b/drivers/mfd/rts5209.c
-> new file mode 100644
-> index 0000000..6680d6d
-> --- /dev/null
-> +++ b/drivers/mfd/rts5209.c
-> @@ -0,0 +1,188 @@
-> +/* Driver for Realtek PCI-Express card reader
-> + *
-> + * Copyright(c) 2009 Realtek Semiconductor Corp. All rights reserved.
-> + *
-> + * This program is free software; you can redistribute it and/or modify it
-> + * under the terms of the GNU General Public License as published by the
-> + * Free Software Foundation; either version 2, or (at your option) any
-> + * later version.
-> + *
-> + * This program is distributed in the hope that it will be useful, but
-> + * WITHOUT ANY WARRANTY; without even the implied warranty of
-> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-> + * General Public License for more details.
-> + *
-> + * You should have received a copy of the GNU General Public License along
-> + * with this program; if not, see <http://www.gnu.org/licenses/>.
-> + *
-> + * Author:
-> + *   Wei WANG <wei_wang@realsil.com.cn>
-> + *   No. 450, Shenhu Road, Suzhou Industry Park, Suzhou, China
-> + */
-> +
-> +#include <linux/module.h>
-> +#include <linux/mfd/rtsx_pci.h>
-> +
-> +#include "rtsx_pcr.h"
-> +
-> +static u8 rts5209_get_ic_version(struct rtsx_pcr *pcr)
-> +{
-> +	u8 val;
-> +
-> +	val = rtsx_pci_readb(pcr, 0x1C);
-> +	return val & 0x0F;
-For your IO accesses, it would e worth looking at the regmap MMIO routines. It
-would also simplify your main probe routine.
-
-
-> +static int rts5209_turn_on_led(struct rtsx_pcr *pcr)
-> +{
-> +	return rtsx_pci_write_register(pcr, 0xFD58, 0x01, 0x00);
-You have many hardcoded register adresses around this code. Defining them in
-your header file wouldn't hurt.
-
-
-> +static struct platform_device *rtsx_pci_create_subdev(struct rtsx_pcr *pcr,
-> +		const char *name, int slot_id)
-> +{
-> +	struct platform_device *p_dev;
-> +	int err;
-> +
-> +	p_dev = platform_device_alloc(name, pcr->id);
-> +	if (p_dev == NULL) {
-> +		dev_dbg(&(pcr->pci->dev), "alloc platform device fail!\n");
-> +		return NULL;
-> +	}
-> +
-> +	p_dev->dev.parent = &(pcr->pci->dev);
-> +	platform_set_drvdata(p_dev, pcr);
-> +	pcr->slots[slot_id].p_dev = p_dev;
-> +
-> +	err = platform_device_add(p_dev);
-> +	if (err) {
-> +		dev_dbg(&(pcr->pci->dev), "add platform device fail!\n");
-> +		pcr->slots[slot_id].p_dev = NULL;
-> +		platform_device_put(p_dev);
-> +		return NULL;
-> +	}
-> +
-> +	return p_dev;
-> +}
-Please use the MFD device addition API for that.
-
-
-> +static irqreturn_t rtsx_pci_isr(int irq, void *dev_id)
-> +{
-> +	struct rtsx_pcr *pcr = dev_id;
-> +	u32 int_reg;
-> +
-> +	if (!pcr)
-> +		return IRQ_NONE;
-> +
-> +	spin_lock(&pcr->lock);
-> +
-> +	int_reg = rtsx_pci_readl(pcr, RTSX_BIPR);
-> +	/* Clear interrupt flag */
-> +	rtsx_pci_writel(pcr, RTSX_BIPR, int_reg);
-> +	if ((int_reg & pcr->bier) == 0) {
-> +		spin_unlock(&pcr->lock);
-> +		return IRQ_NONE;
-> +	}
-> +	if (int_reg == 0xFFFFFFFF) {
-> +		spin_unlock(&pcr->lock);
-> +		return IRQ_HANDLED;
-> +	}
-> +
-> +	int_reg &= (pcr->bier | 0x7FFFFF);
-> +
-> +	if (int_reg & SD_INT) {
-> +		if (int_reg & SD_EXIST) {
-> +			pcr->need_reset |= SD_EXIST;
-> +		} else {
-> +			pcr->need_release |= SD_EXIST;
-> +			pcr->need_reset &= ~SD_EXIST;
-> +		}
-> +	}
-> +
-> +	if (int_reg & MS_INT) {
-> +		if (int_reg & MS_EXIST) {
-> +			pcr->need_reset |= MS_EXIST;
-> +		} else {
-> +			pcr->need_release |= MS_EXIST;
-> +			pcr->need_reset &= ~MS_EXIST;
-> +		}
-> +	}
-> +
-> +	if (pcr->need_reset || pcr->need_release)
-> +		queue_delayed_work(workqueue, &pcr->carddet_work,
-> +				msecs_to_jiffies(200));
-Why do we need a delayed work here ?
-
-
-> +static void rtsx_pci_enter_idle(unsigned long __data)
-> +{
-> +	struct rtsx_pcr *pcr = (struct rtsx_pcr *)__data;
-> +
-> +	queue_work(workqueue, &pcr->idle_work);
-> +}
-OT: We need threaded timers...
-
-
-> +static int __init rtsx_pci_drv_init(void)
-> +{
-> +	workqueue = create_freezable_workqueue("rtsx_pci_wq");
-> +	if (!workqueue)
-> +		return -ENOMEM;
-Are you sure you really need to create your won workqueue ? My guess is that
-you probably don't.
-
-Cheers,
-Samuel.
-
--- 
-Intel Open Source Technology Centre
-http://oss.intel.com/
+There's already a patch for the dev_info warning in dw_mmc.c frm
+Seungwon Jeon, and it seems to me like a separate change but I don't
+really mind how it gets merged.
