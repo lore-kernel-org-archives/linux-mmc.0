@@ -1,46 +1,50 @@
 From: Matt Porter <mporter@ti.com>
-Subject: Re: [RFC PATCH 10/13] spi: omap2-mcspi: dma_request_slave_channel()
- support for DT platforms
-Date: Mon, 1 Oct 2012 12:37:24 -0400
-Message-ID: <20121001163723.GN5641@beef>
+Subject: Re: [RFC PATCH 08/13] mmc: omap_hsmmc: limit max_segs with the EDMA
+ DMAC
+Date: Mon, 1 Oct 2012 12:39:55 -0400
+Message-ID: <20121001163955.GO5641@beef>
 References: <1348152226-13588-1-git-send-email-mporter@ti.com>
- <1348152226-13588-11-git-send-email-mporter@ti.com>
- <20120920220931.GJ28835@atomide.com>
- <201209210816.01473.arnd@arndb.de>
- <20120921154247.GZ28835@atomide.com>
- <20120921183729.GI16522@beef>
- <1348738594.1648.9.camel@vkoul-udesk3>
+ <1348152226-13588-9-git-send-email-mporter@ti.com>
+ <CANfBPZ81anOy8fWgKM1PgCtB4V2pEp2x1Qi4x1uPsq7QieMN5g@mail.gmail.com>
+ <20120921184721.GD31374@n2100.arm.linux.org.uk>
+ <1348738868.1648.13.camel@vkoul-udesk3>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-doc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1348738594.1648.9.camel@vkoul-udesk3>
+In-Reply-To: <1348738868.1648.13.camel@vkoul-udesk3>
 Sender: linux-doc-owner@vger.kernel.org
 To: Vinod Koul <vinod.koul@linux.intel.com>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>, Benoit Cousson <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, "S, Venkatraman" <svenkatr@ti.com>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Benoit Cousson <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Sekhar Nori <nsekhar@ti.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Chris Ball <cjb@laptop.org>, Linux ARM Kernel List <linux-arm-kerne>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Sep 27, 2012 at 03:06:34PM +0530, Vinod Koul wrote:
-> On Fri, 2012-09-21 at 14:37 -0400, Matt Porter wrote:
-> > On Fri, Sep 21, 2012 at 08:42:47AM -0700, Tony Lindgren wrote:
+On Thu, Sep 27, 2012 at 03:11:08PM +0530, Vinod Koul wrote:
+> On Fri, 2012-09-21 at 19:47 +0100, Russell King - ARM Linux wrote:
+> > On Fri, Sep 21, 2012 at 10:45:29PM +0530, S, Venkatraman wrote:
+> > > On Thu, Sep 20, 2012 at 8:13 PM, Matt Porter <mporter@ti.com> wrote:
+> > > > The EDMA DMAC has a hardware limitation that prevents supporting
+> > > > scatter gather lists with any number of segments. Since the EDMA
+> > > > DMA Engine driver sets the maximum segments to 16, we do the
+> > > > same.
+> > > >
+> > > > Note: this can be removed once the DMA Engine API supports an
+> > > > API to query the DMAC's segment limitations.
+> > > >
 > > > 
-> > > Can't we come up with a version of dma_request_slave_channel that works
-> > > both ways for now:
-> > > 
-> > > 	mcspi_dma->dma_rx =
-> > > 		dma_request_slave_channel_compat(mask, omap_dma_filter_fn, &sig,
-> > > 					&master->dev, mcspi_dma->dma_rx_ch_name);
-> > > 	...			
-> > > 
-> > > Then it's just question of patching away two lines later on rather than
-> > > having to add all this if else to all the drivers first, then patching
-> > > it away again.
+> > > I wouldn't want to bind the properties of EDMA to omap_hsmmc as this patch
+> > > suggests. Why don't we have a max_segs property, which when explicitly specified
+> > > in DT, will override the default ?
 > > 
-> > I think that something like that is workable with the implementation
-> > simply checking for of_node to do the right thing.
-> Yes, I think it would be better to have common API but underneath two
-> implementations in transitional phase.
+> > Why not have a generic way that DMA engine can export these kinds of
+> > properties?
+> We discussed this at KS. I was of opinion that  DMA engine should export
+> controller and channel capabilities as part of the channel it returns.
+> 
+> Some folks had an opinion that they already know how to use controller
+> so may not be very helpful, but if it is going to help (which I think),
+> i have a patch for this :)
 
-Ok, I'll implement something for discussion in the v2 series.
+Anything you can show at this point? ;) I'd be happy to drop the half-hack
+for a real API. If not, I'm going to carry that to v2 atm.
 
 -Matt
