@@ -1,38 +1,46 @@
-From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Subject: Re: sdhci-tegra and power-gpios
-Date: Mon, 01 Oct 2012 10:05:55 -0600
-Message-ID: <5069BF63.20104@wwwdotorg.org>
-References: <87vceunrzi.fsf@octavius.laptop.org>
+From: Matt Porter <mporter@ti.com>
+Subject: Re: [RFC PATCH 10/13] spi: omap2-mcspi: dma_request_slave_channel()
+ support for DT platforms
+Date: Mon, 1 Oct 2012 12:37:24 -0400
+Message-ID: <20121001163723.GN5641@beef>
+References: <1348152226-13588-1-git-send-email-mporter@ti.com>
+ <1348152226-13588-11-git-send-email-mporter@ti.com>
+ <20120920220931.GJ28835@atomide.com>
+ <201209210816.01473.arnd@arndb.de>
+ <20120921154247.GZ28835@atomide.com>
+ <20120921183729.GI16522@beef>
+ <1348738594.1648.9.camel@vkoul-udesk3>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <87vceunrzi.fsf-DGHOrqG7t0YzNDMTQreKSUB+6BGkLq7r@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Pavan Kunapuli <pkunapuli-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Cc: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1348738594.1648.9.camel@vkoul-udesk3>
+Sender: linux-doc-owner@vger.kernel.org
+To: Vinod Koul <vinod.koul@linux.intel.com>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>, Benoit Cousson <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 10/01/2012 09:15 AM, Chris Ball wrote:
-> Hi Stephen, tegra folks,
-> 
-> sdhci-tegra uses a power-gpios property in the DT:
-> 
->         sdhci@c8000400 {
-...
->                 power-gpios = <&gpio 70 0>; /* gpio PI6 */
-...
-> It's quite easy to set up a regulator and attach it to an MMC node:
-...
->         sdhci@c8000400 {
-...
-> 		vmmc-supply = <&vmmc1>;
-...
-> Any interest in making this change?
+On Thu, Sep 27, 2012 at 03:06:34PM +0530, Vinod Koul wrote:
+> On Fri, 2012-09-21 at 14:37 -0400, Matt Porter wrote:
+> > On Fri, Sep 21, 2012 at 08:42:47AM -0700, Tony Lindgren wrote:
+> > > 
+> > > Can't we come up with a version of dma_request_slave_channel that works
+> > > both ways for now:
+> > > 
+> > > 	mcspi_dma->dma_rx =
+> > > 		dma_request_slave_channel_compat(mask, omap_dma_filter_fn, &sig,
+> > > 					&master->dev, mcspi_dma->dma_rx_ch_name);
+> > > 	...			
+> > > 
+> > > Then it's just question of patching away two lines later on rather than
+> > > having to add all this if else to all the drivers first, then patching
+> > > it away again.
+> > 
+> > I think that something like that is workable with the implementation
+> > simply checking for of_node to do the right thing.
+> Yes, I think it would be better to have common API but underneath two
+> implementations in transitional phase.
 
-Yes, it's certainly something we should be doing. Most Tegra boards will
-only have all the regulators defined in device tree for the first time
-in kernel 3.7, and so we've been holding off making any of the client
-nodes use regulators because of that. Now that we have all the
-regulators defined, I do hope we will quickly move to using them for
-SDHCI. Pavan (now CC'd) will hopefully be doing this.
+Ok, I'll implement something for discussion in the v2 series.
+
+-Matt
