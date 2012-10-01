@@ -1,27 +1,73 @@
-From: "Mrs. Maria Bristow" <no-reply@mx2.4shared.com>
-Subject: RE: Please am dying of breast cancer !!!
-Date: Mon, 01 Oct 2012 14:09:14 +0200
-Message-ID: <201210011213.q91CCjvb031201__20669.2061307423$1349093475$gmane$org@srv1.iexpress.com.br>
-Reply-To: maria.bristow@1email.eu
+From: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Subject: sdhci-tegra and power-gpios
+Date: Mon, 01 Oct 2012 11:15:29 -0400
+Message-ID: <87vceunrzi.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from c906f44f.static.virtua.com.br ([201.6.244.79]:57835 "EHLO
-	srv1.iexpress.com.br" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751913Ab2JAMK2 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Oct 2012 08:10:28 -0400
-Content-Description: Mail message body
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Cc: linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Recipients <no-reply@mx2.4shared.com>
 
-Hello,
+Hi Stephen, tegra folks,
 
-Am dying of breast cancer and I need your assistance to help me carry o=
-ut my dream charity work with my funds =E2=82=AC2.8M Euros with a Secur=
-ity firm, if you are interested please reach me for more details on thi=
-s email: maria.bristow@1email.eu
+sdhci-tegra uses a power-gpios property in the DT:
 
-Yours Sincerely,
-Mrs. Maria Bristow
+        sdhci@c8000400 {
+                status = "okay";
+                cd-gpios = <&gpio 69 0>; /* gpio PI5 */
+                wp-gpios = <&gpio 57 0>; /* gpio PH1 */
+                power-gpios = <&gpio 70 0>; /* gpio PI6 */
+                bus-width = <4>;
+        };
+
+which it turns on at probe-time in the driver:
+
+        plat->power_gpio = of_get_named_gpio(np, "power-gpios", 0);
+        ...
+	if (gpio_is_valid(plat->power_gpio)) {
+		rc = gpio_request(plat->power_gpio, "sdhci_power");
+		if (rc) {
+			dev_err(mmc_dev(host->mmc),
+				"failed to allocate power gpio\n");
+			goto err_power_req;
+		}
+		gpio_direction_output(plat->power_gpio, 1);
+	}
+
+and then leaves on forever.  Seems like this should instead be a fixed
+regulator (vmmc-supply) -- the MMC core would handle powering it up and
+down as needed, and it's cleaner to let the regulator subsystem handle
+power changes like this.  It might save you some power, too.
+
+It's quite easy to set up a regulator and attach it to an MMC node:
+
+        vmmc1: fixedregulator@0 {
+                compatible = "regulator-fixed";
+                regulator-name = "fixed-supply";
+                regulator-min-microvolt = <2200000>;
+                regulator-max-microvolt = <2200000>;
+                gpio = <&gpio 70 0>; /* gpio PI6 */
+                startup-delay-us = <70000>;
+                vin-supply = <&parent_reg>;
+        };
+..
+        sdhci@c8000400 {
+                status = "okay";
+                cd-gpios = <&gpio 69 0>; /* gpio PI5 */
+                wp-gpios = <&gpio 57 0>; /* gpio PH1 */
+		vmmc-supply = <&vmmc1>;
+                bus-width = <4>;
+        };
+
+Any interest in making this change?  I've asked other drivers
+(sdhci-pxav3 and sdhci-spear) to do the same thing (although
+they hadn't merged their use of power-gpios yet and tegra has).
+
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>   <http://printf.net/>
+One Laptop Per Child
