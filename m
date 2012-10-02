@@ -1,60 +1,126 @@
-From: Konstantin Dorfman <kdorfman@codeaurora.org>
-Subject: [PATCH] mmc: fix async request mechanism for sequential read scenarios
-Date: Tue,  2 Oct 2012 17:39:37 +0200
-Message-ID: <1349192378-1676-1-git-send-email-kdorfman@codeaurora.org>
-References: <n>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <n>
-Sender: linux-arm-msm-owner@vger.kernel.org
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: [PATCH] mmc: sdhci-s3c: use clk_prepare_enable and clk_disable_unprepare
+Date: Wed,  3 Oct 2012 08:35:43 +0900
+Message-ID: <1349220943-2636-1-git-send-email-thomas.abraham@linaro.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, Konstantin Dorfman <kdorfman@codeaurora.org>
+Cc: cjb@laptop.org, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-The main assumption of the async request design is that the file
-system adds block requests to the block device queue asynchronously
-without waiting for completion (see the Rationale section of
-https://wiki.linaro.org/WorkingGroups/Kernel/Specs/StoragePerfMMC-async-req).
+Convert clk_enable/clk_disable to clk_prepare_enable/clk_disable_unprepare
+calls as required by common clock framework.
 
-We found out that in case of sequential read operations this is not
-the case, due to the read ahead mechanism.
-When mmcqt reports on completion of a request there should be
-a context switch to allow the insertion of the next read ahead BIOs
-to the block layer. Since the mmcqd tries to fetch another request
-immediately after the completion of the previous request it gets NULL
-and starts waiting for the completion of the previous request.
-This wait on completion gives the FS the opportunity to insert the next
-request but the MMC layer is already blocked on the previous request
-completion and is not aware of the new request waiting to be fetched.
+Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+---
+ drivers/mmc/host/sdhci-s3c.c |   28 ++++++++++++++--------------
+ 1 files changed, 14 insertions(+), 14 deletions(-)
 
-This patch fixes the above behavior and allows the async request mechanism
-to work in case of sequential read scenarios.
-The main idea is to replace the blocking wait for a completion with an
-event driven mechanism and add a new event of new_request.
-When the block layer notifies the MMC layer on a new request, we check
-for the above case where MMC layer is waiting on a previous request
-completion and the current request is NULL.
-In such a case the new_request event will be triggered to wakeup
-the waiting thread. MMC layer will then fetch the new request
-and after its preparation will go back to waiting on the completion.
-
-Our tests showed that this fix improves the read sequential throughput
-by 16%.
-
-Konstantin Dorfman (1):
-  mmc: fix async request mechanism for sequential read scenarios
-
- drivers/mmc/card/block.c |   30 ++++-----
- drivers/mmc/card/queue.c |   34 ++++++++-
- drivers/mmc/card/queue.h |    1 +
- drivers/mmc/core/core.c  |  165 ++++++++++++++++++++++++++++++++++++++++++++++
- include/linux/mmc/card.h |   12 ++++
- include/linux/mmc/core.h |   21 ++++++
- 6 files changed, 243 insertions(+), 20 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 2903949..a093e2e 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -211,8 +211,8 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	if (ourhost->cur_clk != best_src) {
+ 		struct clk *clk = ourhost->clk_bus[best_src];
+ 
+-		clk_enable(clk);
+-		clk_disable(ourhost->clk_bus[ourhost->cur_clk]);
++		clk_prepare_enable(clk);
++		clk_disable_unprepare(ourhost->clk_bus[ourhost->cur_clk]);
+ 
+ 		/* turn clock off to card before changing clock source */
+ 		writew(0, host->ioaddr + SDHCI_CLOCK_CONTROL);
+@@ -607,7 +607,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	/* enable the local io clock and keep it running for the moment. */
+-	clk_enable(sc->clk_io);
++	clk_prepare_enable(sc->clk_io);
+ 
+ 	for (clks = 0, ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+ 		struct clk *clk;
+@@ -638,7 +638,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	}
+ 
+ #ifndef CONFIG_PM_RUNTIME
+-	clk_enable(sc->clk_bus[sc->cur_clk]);
++	clk_prepare_enable(sc->clk_bus[sc->cur_clk]);
+ #endif
+ 
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+@@ -747,13 +747,13 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 		sdhci_s3c_setup_card_detect_gpio(sc);
+ 
+ #ifdef CONFIG_PM_RUNTIME
+-	clk_disable(sc->clk_io);
++	clk_disable_unprepare(sc->clk_io);
+ #endif
+ 	return 0;
+ 
+  err_req_regs:
+ #ifndef CONFIG_PM_RUNTIME
+-	clk_disable(sc->clk_bus[sc->cur_clk]);
++	clk_disable_unprepare(sc->clk_bus[sc->cur_clk]);
+ #endif
+ 	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+ 		if (sc->clk_bus[ptr]) {
+@@ -762,7 +762,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	}
+ 
+  err_no_busclks:
+-	clk_disable(sc->clk_io);
++	clk_disable_unprepare(sc->clk_io);
+ 	clk_put(sc->clk_io);
+ 
+  err_io_clk:
+@@ -794,7 +794,7 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+ 		gpio_free(sc->ext_cd_gpio);
+ 
+ #ifdef CONFIG_PM_RUNTIME
+-	clk_enable(sc->clk_io);
++	clk_prepare_enable(sc->clk_io);
+ #endif
+ 	sdhci_remove_host(host, 1);
+ 
+@@ -802,14 +802,14 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+ 	pm_runtime_disable(&pdev->dev);
+ 
+ #ifndef CONFIG_PM_RUNTIME
+-	clk_disable(sc->clk_bus[sc->cur_clk]);
++	clk_disable_unprepare(sc->clk_bus[sc->cur_clk]);
+ #endif
+ 	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+ 		if (sc->clk_bus[ptr]) {
+ 			clk_put(sc->clk_bus[ptr]);
+ 		}
+ 	}
+-	clk_disable(sc->clk_io);
++	clk_disable_unprepare(sc->clk_io);
+ 	clk_put(sc->clk_io);
+ 
+ 	if (pdev->dev.of_node) {
+@@ -849,8 +849,8 @@ static int sdhci_s3c_runtime_suspend(struct device *dev)
+ 
+ 	ret = sdhci_runtime_suspend_host(host);
+ 
+-	clk_disable(ourhost->clk_bus[ourhost->cur_clk]);
+-	clk_disable(busclk);
++	clk_disable_unprepare(ourhost->clk_bus[ourhost->cur_clk]);
++	clk_disable_unprepare(busclk);
+ 	return ret;
+ }
+ 
+@@ -861,8 +861,8 @@ static int sdhci_s3c_runtime_resume(struct device *dev)
+ 	struct clk *busclk = ourhost->clk_io;
+ 	int ret;
+ 
+-	clk_enable(busclk);
+-	clk_enable(ourhost->clk_bus[ourhost->cur_clk]);
++	clk_prepare_enable(busclk);
++	clk_prepare_enable(ourhost->clk_bus[ourhost->cur_clk]);
+ 	ret = sdhci_runtime_resume_host(host);
+ 	return ret;
+ }
 -- 
-1.7.6
-
---
-Konstantin Dorfman,
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc.
-is a member of Code Aurora Forum, hosted by The Linux Foundation
+1.7.4.1
