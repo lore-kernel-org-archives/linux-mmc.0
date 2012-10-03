@@ -1,60 +1,64 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCHv2] mmc: dw_mmc: use __devexit_p macro for .remove()
-Date: Wed, 3 Oct 2012 22:59:19 +0900
-Message-ID: <CAGxe1ZGs9yZhNX_REhzzoNB0aCDW0H65jfdevAYyfv=_66+=Ww@mail.gmail.com>
-References: <CAGxe1ZHF--qR68A4PGBwmFe85DZUK3gxQWE+05PT9yKBUWOPrg@mail.gmail.com>
-	<1349271927-6260-1-git-send-email-andriy.shevchenko@linux.intel.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off notify
+Date: Wed, 03 Oct 2012 17:03:11 -0400
+Message-ID: <87k3v7i7zk.fsf@octavius.laptop.org>
+References: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:48294 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755942Ab2JCN7U (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Oct 2012 09:59:20 -0400
-Received: by vbbff1 with SMTP id ff1so7853491vbb.19
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Oct 2012 06:59:19 -0700 (PDT)
-In-Reply-To: <1349271927-6260-1-git-send-email-andriy.shevchenko@linux.intel.com>
+Received: from void.printf.net ([89.145.121.20]:37194 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754971Ab2JCVDW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 3 Oct 2012 17:03:22 -0400
+In-Reply-To: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com>
+	(Ulf Hansson's message of "Thu, 13 Sep 2012 11:20:53 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Saugata Das <saugata.das@linaro.org>, Girish K S <girish.shivananjappa@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>
 
-Reviewed By:- Girish K S <girish.shivananjappa@linaro.org>
+Hi Ulf,
 
-On 3 October 2012 22:45, Andy Shevchenko
-<andriy.shevchenko@linux.intel.com> wrote:
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> ---
->  drivers/mmc/host/dw_mmc-pci.c   |    2 +-
->  drivers/mmc/host/dw_mmc-pltfm.c |    2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
+On Thu, Sep 13 2012, Ulf Hansson wrote:
+> From: Ulf Hansson <ulf.hansson@linaro.org>
 >
-> diff --git a/drivers/mmc/host/dw_mmc-pci.c b/drivers/mmc/host/dw_mmc-pci.c
-> index edb37e9..53a09cb 100644
-> --- a/drivers/mmc/host/dw_mmc-pci.c
-> +++ b/drivers/mmc/host/dw_mmc-pci.c
-> @@ -134,7 +134,7 @@ static struct pci_driver dw_mci_pci_driver = {
->         .name           = "dw_mmc_pci",
->         .id_table       = dw_mci_pci_id,
->         .probe          = dw_mci_pci_probe,
-> -       .remove         = dw_mci_pci_remove,
-> +       .remove         = __devexit_p(dw_mci_pci_remove),
->         .driver         =       {
->                 .pm =   &dw_mci_pci_pmops
->         },
-> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-> index c960ca7..777c585 100644
-> --- a/drivers/mmc/host/dw_mmc-pltfm.c
-> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
-> @@ -119,7 +119,7 @@ static const struct of_device_id dw_mci_pltfm_match[] = {
->  MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
+> This patch fixup the broken suspend sequence for eMMC
+> with sleep support. Additionally it reworks the eMMC4.5
+> Power Off Notification feature so it fits together with
+> the existing sleep feature.
 >
->  static struct platform_driver dw_mci_pltfm_driver = {
-> -       .remove         = __exit_p(dw_mci_pltfm_remove),
-> +       .remove         = __devexit_p(dw_mci_pltfm_remove),
->         .driver         = {
->                 .name           = "dw_mmc",
->                 .of_match_table = of_match_ptr(dw_mci_pltfm_match),
-> --
-> 1.7.10.4
+> The CMD0 based re-initialization of the eMMC at resume
+> is re-introduced to maintain compatiblity for devices
+> using sleep.
 >
+> A host shall use MMC_CAP2_POWEROFF_NOTIFY to enable the
+> Power Off Notification feature. We might be able to
+> remove this cap later on, if we think that Power Off
+> Notification always is preferred over sleep, even if the
+> host is not able to cut the eMMC VCCQ power.
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Saugata Das <saugata.das@linaro.org>
+> CC: Girish K S <girish.shivananjappa@linaro.org>
+> CC: Asutosh Das <asutoshd@codeaurora.org>
+
+I gave this patch a try on a board with an eMMC 4.41, but it didn't
+resolve the crash that I see.  After applying the patch, I still see:
+
+[   25.191917] Freezing remaining freezable tasks ... (elapsed 0.01 seconds) done.
+[   25.319299] mmc1: Got data interrupt 0x00000002 even though no data operation was in progress.
+[   25.335054] PM: Device d4281000.sdhci failed to suspend: error -110
+[   25.341461] PM: Some devices failed to suspend
+
+and the suspend aborts.  If I modify mmc_card_can_sleep() to always
+return false, the suspend completes without errors, so I know that
+something in the sleep code is responsible for my crash.
+
+Any suggestions?  Perhaps it's a different bug in the eMMC sleep code.
+
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
