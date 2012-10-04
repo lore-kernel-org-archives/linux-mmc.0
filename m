@@ -1,32 +1,54 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: use helper macro module_platform_driver()
-Date: Thu, 4 Oct 2012 13:10:57 +0100
-Message-ID: <CAFbHwiQQ9KJ_hddRng54THBQ5E=8L5ge=Pkcv3pak2MKnoavHg@mail.gmail.com>
-References: <1349270797-19189-1-git-send-email-andriy.shevchenko@linux.intel.com>
-	<1349270797-19189-2-git-send-email-andriy.shevchenko@linux.intel.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v6 8/9] mmc: dw_mmc: add support for implementation
+ specific callbacks
+Date: Thu, 04 Oct 2012 21:41:07 +0900
+Message-ID: <001e01cda22d$86383130$92a89390$%jun@samsung.com>
+References: <1347905803-22742-1-git-send-email-thomas.abraham@linaro.org>
+ <1347905803-22742-9-git-send-email-thomas.abraham@linaro.org>
+ <001401cd966c$5fe94590$1fbbd0b0$%jun@samsung.com>
+ <CAJuYYwRUhK858ixLfZPz9UVmqJBe0=LdgjhLfazPNHE3zckDjQ@mail.gmail.com>
+ <m3haqodsvb.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:34272 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755571Ab2JDMK7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Oct 2012 08:10:59 -0400
-Received: by mail-lb0-f174.google.com with SMTP id n3so294444lbo.19
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Oct 2012 05:10:57 -0700 (PDT)
-In-Reply-To: <1349270797-19189-2-git-send-email-andriy.shevchenko@linux.intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <m3haqodsvb.fsf@pullcord.laptop.org>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Chris Ball' <cjb@laptop.org>, 'Thomas Abraham' <thomas.abraham@linaro.org>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, will.newton@imgtec.com, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On Wed, Oct 3, 2012 at 2:26 PM, Andy Shevchenko
-<andriy.shevchenko@linux.intel.com> wrote:
-> Since v3.2 we have nice macro to define the platform driver's init and exit
-> calls. This patch simplifies the dw_mmc platform driver by using that macro.
->
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> ---
->  drivers/mmc/host/dw_mmc-pltfm.c |   14 ++------------
->  1 file changed, 2 insertions(+), 12 deletions(-)
+Monday, September 24, Chris Ball <cjb@laptop.org>
+> Hi,
+> 
+> On Thu, Sep 20 2012, Thomas Abraham wrote:
+> >> In non-Exynos platform, host->drv_data has NULL.
+> >
+> > Yes, sorry, I missed that.
+> >
+> > Chris, should I fix this and send the updated patch or shall I send a
+> > separate fix patch.
+> 
+> A separate fix patch would be good, please.
+> 
+> (I'd normally take an updated patch but Stephen Rothwell's asked for
+> people to hold off rebasing now that -rc7 is out, which is reasonable.)
+Thomas,
 
-Acked-by: Will Newton <will.newton@imgtec.com>
+Is there any work for fix?
+
+Thanks,
+Seungwon Jeon
+
+> 
+> Thanks,
+> 
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
