@@ -1,54 +1,84 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v6 8/9] mmc: dw_mmc: add support for implementation
- specific callbacks
-Date: Thu, 04 Oct 2012 21:41:07 +0900
-Message-ID: <001e01cda22d$86383130$92a89390$%jun@samsung.com>
-References: <1347905803-22742-1-git-send-email-thomas.abraham@linaro.org>
- <1347905803-22742-9-git-send-email-thomas.abraham@linaro.org>
- <001401cd966c$5fe94590$1fbbd0b0$%jun@samsung.com>
- <CAJuYYwRUhK858ixLfZPz9UVmqJBe0=LdgjhLfazPNHE3zckDjQ@mail.gmail.com>
- <m3haqodsvb.fsf@pullcord.laptop.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off notify
+Date: Thu, 4 Oct 2012 13:46:02 +0200
+Message-ID: <CAPDyKFr4jny9E7u7vD1O-ULVv1qQC8GQXU_D+ja3vca+SwGRTQ@mail.gmail.com>
+References: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com>
+	<87k3v7i7zk.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <m3haqodsvb.fsf@pullcord.laptop.org>
-Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>, 'Thomas Abraham' <thomas.abraham@linaro.org>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, will.newton@imgtec.com, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, patches@linaro.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:43577 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755128Ab2JDLqF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Oct 2012 07:46:05 -0400
+Received: by mail-wi0-f172.google.com with SMTP id hq12so4132074wib.1
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Oct 2012 04:46:03 -0700 (PDT)
+In-Reply-To: <87k3v7i7zk.fsf@octavius.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Saugata Das <saugata.das@linaro.org>, Girish K S <girish.shivananjappa@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>
 
-Monday, September 24, Chris Ball <cjb@laptop.org>
-> Hi,
-> 
-> On Thu, Sep 20 2012, Thomas Abraham wrote:
-> >> In non-Exynos platform, host->drv_data has NULL.
-> >
-> > Yes, sorry, I missed that.
-> >
-> > Chris, should I fix this and send the updated patch or shall I send a
-> > separate fix patch.
-> 
-> A separate fix patch would be good, please.
-> 
-> (I'd normally take an updated patch but Stephen Rothwell's asked for
-> people to hold off rebasing now that -rc7 is out, which is reasonable.)
-Thomas,
+Hi Chris,
 
-Is there any work for fix?
+On 3 October 2012 23:03, Chris Ball <cjb@laptop.org> wrote:
+> Hi Ulf,
+>
+> On Thu, Sep 13 2012, Ulf Hansson wrote:
+>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>
+>> This patch fixup the broken suspend sequence for eMMC
+>> with sleep support. Additionally it reworks the eMMC4.5
+>> Power Off Notification feature so it fits together with
+>> the existing sleep feature.
+>>
+>> The CMD0 based re-initialization of the eMMC at resume
+>> is re-introduced to maintain compatiblity for devices
+>> using sleep.
+>>
+>> A host shall use MMC_CAP2_POWEROFF_NOTIFY to enable the
+>> Power Off Notification feature. We might be able to
+>> remove this cap later on, if we think that Power Off
+>> Notification always is preferred over sleep, even if the
+>> host is not able to cut the eMMC VCCQ power.
+>>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> Signed-off-by: Saugata Das <saugata.das@linaro.org>
+>> CC: Girish K S <girish.shivananjappa@linaro.org>
+>> CC: Asutosh Das <asutoshd@codeaurora.org>
+>
+> I gave this patch a try on a board with an eMMC 4.41, but it didn't
+> resolve the crash that I see.  After applying the patch, I still see:
+>
+> [   25.191917] Freezing remaining freezable tasks ... (elapsed 0.01 seconds) done.
+> [   25.319299] mmc1: Got data interrupt 0x00000002 even though no data operation was in progress.
+> [   25.335054] PM: Device d4281000.sdhci failed to suspend: error -110
+> [   25.341461] PM: Some devices failed to suspend
+>
+> and the suspend aborts.  If I modify mmc_card_can_sleep() to always
+> return false, the suspend completes without errors, so I know that
+> something in the sleep code is responsible for my crash.
 
-Thanks,
-Seungwon Jeon
+This patch restores the sequence for how the sleep sequence is
+executed, before the poweroff notify patches was merged at all.
+So in principle I guess the problem for sdhci has been there for quite
+a while, unless some patch in the sdhci driver has screwed something
+up recently.
 
-> 
-> Thanks,
-> 
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> Any suggestions?  Perhaps it's a different bug in the eMMC sleep code.
+
+Well, actually there is not so much that can be wrong in the sleep
+code in the protocol layer. I believe we need to debug the sdhci
+driver, to see what happens during the suspend operation instead.
+
+The sleep code from the protocol layer is requesting sdhci to run a
+request (sleep cmd and "deselect" cmd). This request is not data
+requests but cmd requests. Due to the prints from you log it indicates
+that sdhci believes that there are an ongoing data request to handle.
+This is not the case, so I think the sdhci has screwed up something.
+
+Although, I am not an sdhci expert, so just guessing. :-)
+
+Kind regards
+Ulf Hansson
