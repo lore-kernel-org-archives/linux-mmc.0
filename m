@@ -1,487 +1,491 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: [PATCH 09/16] ARM: OMAP: Split plat/mmc.h into local headers and
- platform_data
-Date: Thu, 04 Oct 2012 15:04:54 -0700
-Message-ID: <20121004220454.26676.10131.stgit@muffinssi.local>
-References: <20121004213950.26676.21898.stgit@muffinssi.local>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:11222 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752187Ab2JDWE4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Oct 2012 18:04:56 -0400
-In-Reply-To: <20121004213950.26676.21898.stgit@muffinssi.local>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Maya Erez <merez@codeaurora.org>
+Subject: [PATCH v2] mmc: core: Add support for idle time BKOPS
+Date: Fri,  5 Oct 2012 00:28:39 +0200
+Message-ID: <1349389748-815-1-git-send-email-merez@codeaurora.org>
+References: <n>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <n>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>
 
-We need to remove this from plat for ARM common zImage
-support.
+Devices have various maintenance operations need to perform internally.
+In order to reduce latencies during time critical operations like read
+and write, it is better to execute maintenance operations in other
+times - when the host is not being serviced. Such operations are called
+Background operations (BKOPS).
+The device notifies the status of the BKOPS need by updating BKOPS_STATUS
+(EXT_CSD byte [246]).
 
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Venkatraman S <svenkatr@ti.com>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Tony Lindgren <tony@atomide.com>
+According to the standard a host that supports BKOPS shall check the
+status periodically and start background operations as needed, so that
+the device has enough time for its maintenance operations.
+
+This patch adds support for this periodic check of the BKOPS status.
+Since foreground operations are of higher priority than background
+operations the host will check the need for BKOPS when it is idle,
+and in case of an incoming request the BKOPS operation will be
+interrupted.
+
+When the mmcqd thread is idle, a delayed work is created to check the
+need for BKOPS. The time to start the delayed work is calculated based
+on the host controller suspend timeout, in case it was set. If not, a
+default time is used.
+If BKOPS are required in level 1, which is non-blocking, there will be
+polling of the card status to wait for the BKOPS completion and prevent
+suspend that will interrupt the BKOPS.
+If the card raised an exception, the need for urgent BKOPS (level 2/3)
+will be checked immediately and if needed, the BKOPS will be performed
+without waiting for the next idle time.
+
+Signed-off-by: Maya Erez <merez@codeaurora.org>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- arch/arm/mach-omap1/board-h2-mmc.c         |    5 +--
- arch/arm/mach-omap1/board-h3-mmc.c         |    3 +-
- arch/arm/mach-omap1/board-htcherald.c      |    2 +
- arch/arm/mach-omap1/board-innovator.c      |    2 +
- arch/arm/mach-omap1/board-nokia770.c       |    2 +
- arch/arm/mach-omap1/board-sx1-mmc.c        |    3 +-
- arch/arm/mach-omap1/devices.c              |    2 +
- arch/arm/mach-omap1/mmc.h                  |   18 +++++++++++
- arch/arm/mach-omap2/board-4430sdp.c        |    2 +
- arch/arm/mach-omap2/board-n8x0.c           |    2 +
- arch/arm/mach-omap2/board-omap4panda.c     |    2 +
- arch/arm/mach-omap2/board-rm680.c          |    2 +
- arch/arm/mach-omap2/hsmmc.c                |    2 +
- arch/arm/mach-omap2/mmc.h                  |   23 ++++++++++++++
- arch/arm/mach-omap2/msdi.c                 |    2 +
- arch/arm/mach-omap2/omap4-common.c         |    2 +
- arch/arm/mach-omap2/omap_hwmod_2420_data.c |    2 +
- arch/arm/mach-omap2/omap_hwmod_2430_data.c |    2 +
- arch/arm/mach-omap2/omap_hwmod_33xx_data.c |    2 +
- arch/arm/mach-omap2/omap_hwmod_3xxx_data.c |    2 +
- arch/arm/mach-omap2/omap_hwmod_44xx_data.c |    2 +
- drivers/mmc/host/omap.c                    |    3 +-
- drivers/mmc/host/omap_hsmmc.c              |    2 +
- include/linux/platform_data/mmc-omap.h     |   45 +---------------------------
- 24 files changed, 67 insertions(+), 67 deletions(-)
- create mode 100644 arch/arm/mach-omap1/mmc.h
- create mode 100644 arch/arm/mach-omap2/mmc.h
- rename arch/arm/plat-omap/include/plat/mmc.h => include/linux/platform_data/mmc-omap.h (80%)
-
-diff --git a/arch/arm/mach-omap1/board-h2-mmc.c b/arch/arm/mach-omap1/board-h2-mmc.c
-index e1362ce..7119ef2 100644
---- a/arch/arm/mach-omap1/board-h2-mmc.c
-+++ b/arch/arm/mach-omap1/board-h2-mmc.c
-@@ -13,12 +13,11 @@
-  */
- #include <linux/gpio.h>
- #include <linux/platform_device.h>
--
-+#include <linux/platform_data/gpio-omap.h>
- #include <linux/i2c/tps65010.h>
+This patch is based on the periodic BKOPS implementation in version 8 of "support BKOPS feature for eMMC" patch.
+The patch was modified to answer the following issues:
+- In order to prevent a race condition between going into suspend and starting BKOPS, 
+  the suspend timeout of the host controller is taking into accound in determination of the start time 
+  of the delayed work
+- Since mmc_start_bkops is called from two contexts now, mmc_claim_host was moved to the beginning of the function
+- Also, the check of doing_bkops should be protected when determing if an HPI is needed due to the same reason.
+- Starting and canceling the delayed work in each idle caused degradation of iozone performance. Therefore,
+  the delayed work is not started on each idle. The amount of sectors changed (written or discard) from the last 
+  delayed work is the trigger for starting the delayed BKOPS work.
+---
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 172a768..ed040d5 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -827,6 +827,9 @@ static int mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+ 	from = blk_rq_pos(req);
+ 	nr = blk_rq_sectors(req);
  
--#include <plat/mmc.h>
--
- #include "board-h2.h"
-+#include "mmc.h"
- 
- #if defined(CONFIG_MMC_OMAP) || defined(CONFIG_MMC_OMAP_MODULE)
- 
-diff --git a/arch/arm/mach-omap1/board-h3-mmc.c b/arch/arm/mach-omap1/board-h3-mmc.c
-index c74daac..17d7791 100644
---- a/arch/arm/mach-omap1/board-h3-mmc.c
-+++ b/arch/arm/mach-omap1/board-h3-mmc.c
-@@ -16,9 +16,8 @@
- 
- #include <linux/i2c/tps65010.h>
- 
--#include <plat/mmc.h>
--
- #include "board-h3.h"
-+#include "mmc.h"
- 
- #if defined(CONFIG_MMC_OMAP) || defined(CONFIG_MMC_OMAP_MODULE)
- 
-diff --git a/arch/arm/mach-omap1/board-htcherald.c b/arch/arm/mach-omap1/board-htcherald.c
-index 87ab208..f23200c 100644
---- a/arch/arm/mach-omap1/board-htcherald.c
-+++ b/arch/arm/mach-omap1/board-htcherald.c
-@@ -43,7 +43,7 @@
- #include <asm/mach/arch.h>
- 
- #include <mach/omap7xx.h>
--#include <plat/mmc.h>
-+#include "mmc.h"
- 
- #include <mach/irqs.h>
- #include <mach/usb.h>
-diff --git a/arch/arm/mach-omap1/board-innovator.c b/arch/arm/mach-omap1/board-innovator.c
-index 06eb4e6..2b8977f 100644
---- a/arch/arm/mach-omap1/board-innovator.c
-+++ b/arch/arm/mach-omap1/board-innovator.c
-@@ -36,13 +36,13 @@
- #include <../plat-omap/fpga.h>
- #include <mach/tc.h>
- #include <linux/platform_data/keypad-omap.h>
--#include <plat/mmc.h>
- 
- #include <mach/hardware.h>
- #include <mach/usb.h>
- 
- #include "iomap.h"
- #include "common.h"
-+#include "mmc.h"
- 
- /* At OMAP1610 Innovator the Ethernet is directly connected to CS1 */
- #define INNOVATOR1610_ETHR_START	0x04000300
-diff --git a/arch/arm/mach-omap1/board-nokia770.c b/arch/arm/mach-omap1/board-nokia770.c
-index 7d5c06d..cb72f24 100644
---- a/arch/arm/mach-omap1/board-nokia770.c
-+++ b/arch/arm/mach-omap1/board-nokia770.c
-@@ -29,13 +29,13 @@
- #include <asm/mach/map.h>
- 
- #include <mach/mux.h>
--#include <plat/mmc.h>
- #include <plat/clock.h>
- 
- #include <mach/hardware.h>
- #include <mach/usb.h>
- 
- #include "common.h"
-+#include "mmc.h"
- 
- #define ADS7846_PENDOWN_GPIO	15
- 
-diff --git a/arch/arm/mach-omap1/board-sx1-mmc.c b/arch/arm/mach-omap1/board-sx1-mmc.c
-index 5932d56..4fcf19c 100644
---- a/arch/arm/mach-omap1/board-sx1-mmc.c
-+++ b/arch/arm/mach-omap1/board-sx1-mmc.c
-@@ -16,9 +16,10 @@
- #include <linux/platform_device.h>
- 
- #include <mach/hardware.h>
--#include <plat/mmc.h>
- #include <mach/board-sx1.h>
- 
-+#include "mmc.h"
++	if (card->ext_csd.bkops_en)
++		card->bkops_info.sectors_changed += blk_rq_sectors(req);
 +
- #if defined(CONFIG_MMC_OMAP) || defined(CONFIG_MMC_OMAP_MODULE)
+ 	if (mmc_can_discard(card))
+ 		arg = MMC_DISCARD_ARG;
+ 	else if (mmc_can_trim(card))
+@@ -1268,6 +1271,9 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 	if (!rqc && !mq->mqrq_prev->req)
+ 		return 0;
  
- static int mmc_set_power(struct device *dev, int slot, int power_on,
-diff --git a/arch/arm/mach-omap1/devices.c b/arch/arm/mach-omap1/devices.c
-index 552bda0..1cc4e18 100644
---- a/arch/arm/mach-omap1/devices.c
-+++ b/arch/arm/mach-omap1/devices.c
-@@ -22,7 +22,6 @@
- #include <mach/tc.h>
- #include <mach/mux.h>
- #include <plat/dma.h>
--#include <plat/mmc.h>
- 
- #include <mach/omap7xx.h>
- #include <mach/camera.h>
-@@ -32,6 +31,7 @@
- 
- #include "common.h"
- #include "clock.h"
-+#include "mmc.h"
- 
- #if defined(CONFIG_SND_SOC) || defined(CONFIG_SND_SOC_MODULE)
- 
-diff --git a/arch/arm/mach-omap1/mmc.h b/arch/arm/mach-omap1/mmc.h
-new file mode 100644
-index 0000000..39c2b13
---- /dev/null
-+++ b/arch/arm/mach-omap1/mmc.h
-@@ -0,0 +1,18 @@
-+#include <linux/mmc/host.h>
-+#include <linux/platform_data/mmc-omap.h>
++	if (rqc && (card->ext_csd.bkops_en) && (rq_data_dir(rqc) == WRITE))
++			card->bkops_info.sectors_changed += blk_rq_sectors(rqc);
 +
-+#define OMAP15XX_NR_MMC		1
-+#define OMAP16XX_NR_MMC		2
-+#define OMAP1_MMC_SIZE		0x080
-+#define OMAP1_MMC1_BASE		0xfffb7800
-+#define OMAP1_MMC2_BASE		0xfffb7c00	/* omap16xx only */
+ 	do {
+ 		if (rqc) {
+ 			/*
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index e360a97..e96f5cf 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -51,6 +51,7 @@ static int mmc_queue_thread(void *d)
+ {
+ 	struct mmc_queue *mq = d;
+ 	struct request_queue *q = mq->queue;
++	struct mmc_card *card = mq->card;
+ 
+ 	current->flags |= PF_MEMALLOC;
+ 
+@@ -66,6 +67,17 @@ static int mmc_queue_thread(void *d)
+ 		spin_unlock_irq(q->queue_lock);
+ 
+ 		if (req || mq->mqrq_prev->req) {
++			/*
++			 * If this is the first request, BKOPs might be in
++			 * progress and needs to be stopped before issuing the
++			 * request
++			 */
++			if (card->ext_csd.bkops_en &&
++			    card->bkops_info.started_delayed_bkops) {
++				card->bkops_info.started_delayed_bkops = false;
++				mmc_stop_bkops(card);
++			}
 +
-+#if defined(CONFIG_MMC_OMAP) || defined(CONFIG_MMC_OMAP_MODULE)
-+void omap1_init_mmc(struct omap_mmc_platform_data **mmc_data,
-+				int nr_controllers);
-+#else
-+static inline void omap1_init_mmc(struct omap_mmc_platform_data **mmc_data,
-+				int nr_controllers)
+ 			set_current_state(TASK_RUNNING);
+ 			mq->issue_fn(mq, req);
+ 		} else {
+@@ -73,6 +85,7 @@ static int mmc_queue_thread(void *d)
+ 				set_current_state(TASK_RUNNING);
+ 				break;
+ 			}
++			mmc_start_delayed_bkops(card);
+ 			up(&mq->thread_sem);
+ 			schedule();
+ 			down(&mq->thread_sem);
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 6612163..fd8783d 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -253,9 +253,42 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ }
+ 
+ /**
++ * mmc_start_delayed_bkops() - Start a delayed work to check for
++ *      the need of non urgent BKOPS
++ *
++ * @card: MMC card to start BKOPS on
++ */
++void mmc_start_delayed_bkops(struct mmc_card *card)
 +{
++	if (!card || !card->ext_csd.bkops_en || mmc_card_doing_bkops(card))
++		return;
++
++	if (card->bkops_info.sectors_changed <
++	    BKOPS_MIN_SECTORS_TO_QUEUE_DELAYED_WORK)
++		return;
++
++	pr_debug("%s: %s: queueing delayed_bkops_work\n",
++		 mmc_hostname(card->host), __func__);
++
++	card->bkops_info.sectors_changed = 0;
++
++	/*
++	 * cancel_delayed_bkops_work will prevent a race condition between
++	 * fetching a request by the mmcqd and the delayed work, in case
++	 * it was removed from the queue work but not started yet
++	 */
++	card->bkops_info.cancel_delayed_work = false;
++	card->bkops_info.started_delayed_bkops = true;
++	queue_delayed_work(system_nrt_wq, &card->bkops_info.dw,
++			   msecs_to_jiffies(
++				   card->bkops_info.delay_ms));
 +}
-+#endif
-diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-omap2/board-4430sdp.c
-index 50188b6..1de82f8 100644
---- a/arch/arm/mach-omap2/board-4430sdp.c
-+++ b/arch/arm/mach-omap2/board-4430sdp.c
-@@ -35,7 +35,7 @@
- 
- #include "common.h"
- #include <plat/usb.h>
--#include <plat/mmc.h>
-+#include "mmc.h"
- #include "omap4-keypad.h"
- #include <video/omapdss.h>
- #include <video/omap-panel-nokia-dsi.h>
-diff --git a/arch/arm/mach-omap2/board-n8x0.c b/arch/arm/mach-omap2/board-n8x0.c
-index e3e8325..b36b158 100644
---- a/arch/arm/mach-omap2/board-n8x0.c
-+++ b/arch/arm/mach-omap2/board-n8x0.c
-@@ -29,7 +29,7 @@
- #include <asm/mach-types.h>
- 
- #include "common.h"
--#include <plat/mmc.h>
-+#include "mmc.h"
- 
- #include "mux.h"
- 
-diff --git a/arch/arm/mach-omap2/board-omap4panda.c b/arch/arm/mach-omap2/board-omap4panda.c
-index 9d83780..9c49030 100644
---- a/arch/arm/mach-omap2/board-omap4panda.c
-+++ b/arch/arm/mach-omap2/board-omap4panda.c
-@@ -40,7 +40,7 @@
- 
- #include "common.h"
- #include <plat/usb.h>
--#include <plat/mmc.h>
-+#include "mmc.h"
- #include <video/omap-panel-tfp410.h>
- 
- #include "soc.h"
-diff --git a/arch/arm/mach-omap2/board-rm680.c b/arch/arm/mach-omap2/board-rm680.c
-index a57ed21..4250229 100644
---- a/arch/arm/mach-omap2/board-rm680.c
-+++ b/arch/arm/mach-omap2/board-rm680.c
-@@ -22,7 +22,7 @@
- #include <asm/mach/arch.h>
- #include <asm/mach-types.h>
- 
--#include <plat/mmc.h>
-+#include "mmc.h"
- #include <plat/usb.h>
- #include <plat/gpmc.h>
- #include "common.h"
-diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-index 03ebf47..dd8e694 100644
---- a/arch/arm/mach-omap2/hsmmc.c
-+++ b/arch/arm/mach-omap2/hsmmc.c
-@@ -17,7 +17,7 @@
- #include <mach/hardware.h>
- #include <linux/platform_data/gpio-omap.h>
- 
--#include <plat/mmc.h>
-+#include "mmc.h"
- #include <plat/omap-pm.h>
- #include <plat/omap_device.h>
- 
-diff --git a/arch/arm/mach-omap2/mmc.h b/arch/arm/mach-omap2/mmc.h
-new file mode 100644
-index 0000000..0cd4b08
---- /dev/null
-+++ b/arch/arm/mach-omap2/mmc.h
-@@ -0,0 +1,23 @@
-+#include <linux/mmc/host.h>
-+#include <linux/platform_data/mmc-omap.h>
++EXPORT_SYMBOL(mmc_start_delayed_bkops);
 +
-+#define OMAP24XX_NR_MMC		2
-+#define OMAP2420_MMC_SIZE	OMAP1_MMC_SIZE
-+#define OMAP2_MMC1_BASE		0x4809c000
++/**
+  *	mmc_start_bkops - start BKOPS for supported cards
+  *	@card: MMC card to start BKOPS
+- *	@form_exception: A flag to indicate if this function was
++ *	@from_exception: A flag to indicate if this function was
+  *			 called due to an exception raised by the card
+  *
+  *	Start background operations whenever requested.
+@@ -269,25 +302,47 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
+ 	bool use_busy_signal;
+ 
+ 	BUG_ON(!card);
+-
+-	if (!card->ext_csd.bkops_en || mmc_card_doing_bkops(card))
++	if (!card->ext_csd.bkops_en)
+ 		return;
+ 
++	mmc_claim_host(card->host);
 +
-+#define OMAP4_MMC_REG_OFFSET	0x100
++	if ((card->bkops_info.cancel_delayed_work) && !from_exception) {
++		pr_debug("%s: %s: cancel_delayed_work was set, exit\n",
++			 mmc_hostname(card->host), __func__);
++		card->bkops_info.cancel_delayed_work = false;
++		goto out;
++	}
 +
-+#if defined(CONFIG_MMC_OMAP) || defined(CONFIG_MMC_OMAP_MODULE)
-+void omap242x_init_mmc(struct omap_mmc_platform_data **mmc_data);
-+#else
-+static inline void omap242x_init_mmc(struct omap_mmc_platform_data **mmc_data)
++	if (mmc_card_doing_bkops(card)) {
++		pr_debug("%s: %s: already doing bkops, exit\n",
++			 mmc_hostname(card->host), __func__);
++		goto out;
++	}
++
+ 	err = mmc_read_bkops_status(card);
+ 	if (err) {
+ 		pr_err("%s: Failed to read bkops status: %d\n",
+ 		       mmc_hostname(card->host), err);
+-		return;
++		goto out;
+ 	}
+ 
+ 	if (!card->ext_csd.raw_bkops_status)
+-		return;
++		goto out;
++
++	pr_info("%s: %s: card->ext_csd.raw_bkops_status = 0x%x\n",
++		mmc_hostname(card->host), __func__,
++		card->ext_csd.raw_bkops_status);
+ 
++	/*
++	 * If the function was called due to exception but there is no need
++	 * for urgent BKOPS, BKOPs will be performed by the delayed BKOPs
++	 * work, before going to suspend
++	 */
+ 	if (card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2 &&
+ 	    from_exception)
+-		return;
++		goto out;
+ 
+-	mmc_claim_host(card->host);
+ 	if (card->ext_csd.raw_bkops_status >= EXT_CSD_BKOPS_LEVEL_2) {
+ 		timeout = MMC_BKOPS_MAX_TIMEOUT;
+ 		use_busy_signal = true;
+@@ -309,13 +364,108 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
+ 	 * bkops executed synchronously, otherwise
+ 	 * the operation is in progress
+ 	 */
+-	if (!use_busy_signal)
++	if (!use_busy_signal) {
+ 		mmc_card_set_doing_bkops(card);
++		pr_debug("%s: %s: starting the polling thread\n",
++			 mmc_hostname(card->host), __func__);
++		queue_work(system_nrt_wq,
++			   &card->bkops_info.poll_for_completion);
++	}
++
+ out:
+ 	mmc_release_host(card->host);
+ }
+ EXPORT_SYMBOL(mmc_start_bkops);
+ 
++/**
++ * mmc_bkops_completion_polling() - Poll on the card status to
++ * wait for the non-blocking BKOPS completion
++ * @work:	The completion polling work
++ *
++ * The on-going reading of the card status will prevent the card
++ * from getting into suspend while it is in the middle of
++ * performing BKOPS.
++ * Since the non blocking BKOPS can be interrupted by a fetched
++ * request we also check IF mmc_card_doing_bkops in each
++ * iteration.
++ */
++void mmc_bkops_completion_polling(struct work_struct *work)
 +{
++	struct mmc_card *card = container_of(work, struct mmc_card,
++			bkops_info.poll_for_completion);
++	unsigned long timeout_jiffies = jiffies +
++		msecs_to_jiffies(BKOPS_COMPLETION_POLLING_TIMEOUT_MS);
++	u32 status;
++	int err;
++
++	/*
++	 * Wait for the BKOPs to complete. Keep reading the status to prevent
++	 * the host from getting into suspend
++	 */
++	do {
++		mmc_claim_host(card->host);
++
++		if (!mmc_card_doing_bkops(card))
++			goto out;
++
++		err = mmc_send_status(card, &status);
++		if (err) {
++			pr_err("%s: error %d requesting status\n",
++			       mmc_hostname(card->host), err);
++			goto out;
++		}
++
++		/*
++		 * Some cards mishandle the status bits, so make sure to check
++		 * both the busy indication and the card state.
++		 */
++		if ((status & R1_READY_FOR_DATA) &&
++		    (R1_CURRENT_STATE(status) != R1_STATE_PRG)) {
++			pr_debug("%s: %s: completed BKOPs, exit polling\n",
++				 mmc_hostname(card->host), __func__);
++			mmc_card_clr_doing_bkops(card);
++			card->bkops_info.started_delayed_bkops = false;
++			goto out;
++		}
++
++		mmc_release_host(card->host);
++
++		/*
++		 * Sleep before checking the card status again to allow the
++		 * card to complete the BKOPs operation
++		 */
++		msleep(BKOPS_COMPLETION_POLLING_INTERVAL_MS);
++	} while (time_before(jiffies, timeout_jiffies));
++
++	pr_err("%s: %s: exit polling due to timeout\n",
++	       mmc_hostname(card->host), __func__);
++
++	return;
++out:
++	mmc_release_host(card->host);
 +}
-+#endif
 +
-+struct omap_hwmod;
-+int omap_msdi_reset(struct omap_hwmod *oh);
++/**
++ * mmc_start_idle_time_bkops() - check if a non urgent BKOPS is
++ * needed
++ * @work:	The idle time BKOPS work
++ */
++void mmc_start_idle_time_bkops(struct work_struct *work)
++{
++	struct mmc_card *card = container_of(work, struct mmc_card,
++			bkops_info.dw.work);
 +
-+/* called from board-specific card detection service routine */
-+extern void omap_mmc_notify_cover_event(struct device *dev, int slot,
-+					int is_closed);
-diff --git a/arch/arm/mach-omap2/msdi.c b/arch/arm/mach-omap2/msdi.c
-index 9e57b4a..4c80334 100644
---- a/arch/arm/mach-omap2/msdi.c
-+++ b/arch/arm/mach-omap2/msdi.c
-@@ -27,7 +27,7 @@
++	/*
++	 * Prevent a race condition between mmc_stop_bkops and the delayed
++	 * BKOPS work in case the delayed work is executed on another CPU
++	 */
++	if (card->bkops_info.cancel_delayed_work)
++		return;
++
++	mmc_start_bkops(card, false);
++}
++EXPORT_SYMBOL(mmc_start_idle_time_bkops);
++
+ static void mmc_wait_done(struct mmc_request *mrq)
+ {
+ 	complete(&mrq->completion);
+@@ -582,6 +732,19 @@ int mmc_stop_bkops(struct mmc_card *card)
+ 	int err = 0;
  
- #include <plat/omap_hwmod.h>
- #include <plat/omap_device.h>
--#include <plat/mmc.h>
-+#include "mmc.h"
+ 	BUG_ON(!card);
++
++	mmc_claim_host(card->host);
++
++	/*
++	 * Notify the delayed work to be cancelled, in case it was already
++	 * removed from the queue, but was not started yet
++	 */
++	card->bkops_info.cancel_delayed_work = true;
++	if (delayed_work_pending(&card->bkops_info.dw))
++		cancel_delayed_work_sync(&card->bkops_info.dw);
++	if (!mmc_card_doing_bkops(card))
++		goto out;
++
+ 	err = mmc_interrupt_hpi(card);
  
- #include "common.h"
- #include "control.h"
-diff --git a/arch/arm/mach-omap2/omap4-common.c b/arch/arm/mach-omap2/omap4-common.c
-index 21992d8..9895574 100644
---- a/arch/arm/mach-omap2/omap4-common.c
-+++ b/arch/arm/mach-omap2/omap4-common.c
-@@ -26,7 +26,7 @@
- #include <asm/memblock.h>
+ 	/*
+@@ -593,6 +756,8 @@ int mmc_stop_bkops(struct mmc_card *card)
+ 		err = 0;
+ 	}
  
- #include <plat/omap-secure.h>
--#include <plat/mmc.h>
-+#include "mmc.h"
++out:
++	mmc_release_host(card->host);
+ 	return err;
+ }
+ EXPORT_SYMBOL(mmc_stop_bkops);
+@@ -2566,15 +2731,13 @@ int mmc_pm_notify(struct notifier_block *notify_block,
+ 	switch (mode) {
+ 	case PM_HIBERNATION_PREPARE:
+ 	case PM_SUSPEND_PREPARE:
+-		if (host->card && mmc_card_mmc(host->card) &&
+-		    mmc_card_doing_bkops(host->card)) {
++		if (host->card && mmc_card_mmc(host->card)) {
+ 			err = mmc_stop_bkops(host->card);
+ 			if (err) {
+ 				pr_err("%s: didn't stop bkops\n",
+ 					mmc_hostname(host));
+ 				return err;
+ 			}
+-			mmc_card_clr_doing_bkops(host->card);
+ 		}
  
- #include "../plat-omap/sram.h"
+ 		spin_lock_irqsave(&host->lock, flags);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 7509de1..f8ff640 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1258,6 +1258,30 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		}
+ 	}
  
-diff --git a/arch/arm/mach-omap2/omap_hwmod_2420_data.c b/arch/arm/mach-omap2/omap_hwmod_2420_data.c
-index 1821109..b913ddf 100644
---- a/arch/arm/mach-omap2/omap_hwmod_2420_data.c
-+++ b/arch/arm/mach-omap2/omap_hwmod_2420_data.c
-@@ -22,7 +22,7 @@
- #include <plat/dmtimer.h>
- #include "l3_2xxx.h"
- #include "l4_2xxx.h"
--#include <plat/mmc.h>
-+#include "mmc.h"
++	if (!oldcard) {
++		if (card->ext_csd.bkops_en) {
++			INIT_DELAYED_WORK(&card->bkops_info.dw,
++					  mmc_start_idle_time_bkops);
++			INIT_WORK(&card->bkops_info.poll_for_completion,
++				  mmc_bkops_completion_polling);
++
++			/*
++			 * Calculate the time to start the BKOPs checking.
++			 * The idle time of the host controller should be taken
++			 * into account in order to prevent a race condition
++			 * before starting BKOPs and going into suspend.
++			 * If the host controller didn't set its idle time,
++			 * a default value is used.
++			 */
++			card->bkops_info.delay_ms = MMC_IDLE_BKOPS_TIME_MS;
++			if (card->bkops_info.host_suspend_tout_ms)
++				card->bkops_info.delay_ms = min(
++					card->bkops_info.delay_ms,
++				      card->bkops_info.host_suspend_tout_ms/2);
++
++		}
++	}
++
+ 	if (!oldcard)
+ 		host->card = card;
  
- #include "omap_hwmod_common_data.h"
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 78cc3be..0e4d55a 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -207,6 +207,48 @@ struct mmc_part {
+ #define MMC_BLK_DATA_AREA_GP	(1<<2)
+ };
  
-diff --git a/arch/arm/mach-omap2/omap_hwmod_2430_data.c b/arch/arm/mach-omap2/omap_hwmod_2430_data.c
-index f902a18..bcda2fa5 100644
---- a/arch/arm/mach-omap2/omap_hwmod_2430_data.c
-+++ b/arch/arm/mach-omap2/omap_hwmod_2430_data.c
-@@ -21,7 +21,7 @@
- #include <plat/dma.h>
- #include <plat/serial.h>
- #include <plat/dmtimer.h>
--#include <plat/mmc.h>
-+#include "mmc.h"
- #include "l3_2xxx.h"
- 
- #include "soc.h"
-diff --git a/arch/arm/mach-omap2/omap_hwmod_33xx_data.c b/arch/arm/mach-omap2/omap_hwmod_33xx_data.c
-index 67f1ac4..76449f9 100644
---- a/arch/arm/mach-omap2/omap_hwmod_33xx_data.c
-+++ b/arch/arm/mach-omap2/omap_hwmod_33xx_data.c
-@@ -21,7 +21,7 @@
- #include <linux/platform_data/gpio-omap.h>
- #include <linux/platform_data/spi-omap2-mcspi.h>
- #include <plat/dma.h>
--#include <plat/mmc.h>
-+#include "mmc.h"
- 
- #include "omap_hwmod_common_data.h"
- 
-diff --git a/arch/arm/mach-omap2/omap_hwmod_3xxx_data.c b/arch/arm/mach-omap2/omap_hwmod_3xxx_data.c
-index e72ccdc..d8aa3c1 100644
---- a/arch/arm/mach-omap2/omap_hwmod_3xxx_data.c
-+++ b/arch/arm/mach-omap2/omap_hwmod_3xxx_data.c
-@@ -24,7 +24,7 @@
- #include <plat/serial.h>
- #include "l3_3xxx.h"
- #include "l4_3xxx.h"
--#include <plat/mmc.h>
-+#include "mmc.h"
- #include <linux/platform_data/asoc-ti-mcbsp.h>
- #include <linux/platform_data/spi-omap2-mcspi.h>
- #include <plat/dmtimer.h>
-diff --git a/arch/arm/mach-omap2/omap_hwmod_44xx_data.c b/arch/arm/mach-omap2/omap_hwmod_44xx_data.c
-index d59c5ea..8364cc9 100644
---- a/arch/arm/mach-omap2/omap_hwmod_44xx_data.c
-+++ b/arch/arm/mach-omap2/omap_hwmod_44xx_data.c
-@@ -27,7 +27,7 @@
- #include <plat/dma.h>
- #include <linux/platform_data/spi-omap2-mcspi.h>
- #include <linux/platform_data/asoc-ti-mcbsp.h>
--#include <plat/mmc.h>
-+#include "mmc.h"
- #include <plat/dmtimer.h>
- #include <plat/iommu.h>
- #include "../plat-omap/common.h"
-diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index 48ad361..e7c61b9 100644
---- a/drivers/mmc/host/omap.c
-+++ b/drivers/mmc/host/omap.c
-@@ -28,8 +28,9 @@
- #include <linux/clk.h>
- #include <linux/scatterlist.h>
- #include <linux/slab.h>
-+#include <linux/platform_data/mmc-omap.h>
- 
--#include <plat/mmc.h>
-+#include <plat/cpu.h>
- #include <plat/dma.h>
- 
- #define	OMAP_MMC_REG_CMD	0x00
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 54bfd0c..85b164e 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -38,8 +38,8 @@
- #include <linux/gpio.h>
- #include <linux/regulator/consumer.h>
- #include <linux/pm_runtime.h>
-+#include <linux/platform_data/mmc-omap.h>
- #include <mach/hardware.h>
--#include <plat/mmc.h>
- #include <plat/cpu.h>
- 
- /* OMAP HSMMC Host Controller Registers */
-diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/include/linux/platform_data/mmc-omap.h
-similarity index 80%
-rename from arch/arm/plat-omap/include/plat/mmc.h
-rename to include/linux/platform_data/mmc-omap.h
-index 8b4e4f2..39a7abc 100644
---- a/arch/arm/plat-omap/include/plat/mmc.h
-+++ b/include/linux/platform_data/mmc-omap.h
-@@ -8,27 +8,6 @@
-  * published by the Free Software Foundation.
++/**
++ * struct mmc_bkops_info - BKOPS data
++ * @dw:	Idle time bkops delayed work
++ * @host_suspend_tout_ms:	The host controller idle time,
++ * before getting into suspend
++ * @delay_ms:	The time to start the BKOPS
++ *        delayed work once MMC thread is idle
++ * @poll_for_completion:	Poll on BKOPS completion
++ * @cancel_delayed_work: A flag to indicate if the delayed work
++ *        should be cancelled
++ * @started_delayed_bkops:  A flag to indicate if the delayed
++ *        work was scheduled
++ * @sectors_changed:  number of  sectors written or
++ *       discard since the last idle BKOPS were scheduled
++ */
++struct mmc_bkops_info {
++	struct delayed_work	dw;
++	unsigned int		host_suspend_tout_ms;
++	unsigned int		delay_ms;
++/*
++ * A default time for checking the need for non urgent BKOPS once mmcqd
++ * is idle.
++ */
++#define MMC_IDLE_BKOPS_TIME_MS 2000
++	struct work_struct	poll_for_completion;
++/* Polling timeout and interval for waiting on non-blocking BKOPs completion */
++#define BKOPS_COMPLETION_POLLING_TIMEOUT_MS 10000 /* in ms */
++#define BKOPS_COMPLETION_POLLING_INTERVAL_MS 1000 /* in ms */
++	bool			cancel_delayed_work;
++	bool			started_delayed_bkops;
++	unsigned int		sectors_changed;
++/*
++ * Since canceling the delayed work might have significant effect on the
++ * performance of small requests we won't queue the delayed work every time
++ * mmcqd thread is idle.
++ * The delayed work for idle BKOPS will be scheduled only after a significant
++ * amount of write or discard data.
++ * 100MB is chosen based on benchmark tests.
++ */
++#define BKOPS_MIN_SECTORS_TO_QUEUE_DELAYED_WORK 204800 /* 100MB */
++};
++
+ /*
+  * MMC device
   */
- 
--#ifndef __OMAP2_MMC_H
--#define __OMAP2_MMC_H
--
--#include <linux/types.h>
--#include <linux/device.h>
--#include <linux/mmc/host.h>
--
--#include <plat/omap_hwmod.h>
--
--#define OMAP15XX_NR_MMC		1
--#define OMAP16XX_NR_MMC		2
--#define OMAP1_MMC_SIZE		0x080
--#define OMAP1_MMC1_BASE		0xfffb7800
--#define OMAP1_MMC2_BASE		0xfffb7c00	/* omap16xx only */
--
--#define OMAP24XX_NR_MMC		2
--#define OMAP2420_MMC_SIZE	OMAP1_MMC_SIZE
--#define OMAP2_MMC1_BASE		0x4809c000
--
--#define OMAP4_MMC_REG_OFFSET	0x100
--
- #define OMAP_MMC_MAX_SLOTS	2
+@@ -281,6 +323,8 @@ struct mmc_card {
+ 	struct dentry		*debugfs_root;
+ 	struct mmc_part	part[MMC_NUM_PHY_PARTITION]; /* physical partitions */
+ 	unsigned int    nr_parts;
++
++	struct mmc_bkops_info	bkops_info;
+ };
  
  /*
-@@ -50,6 +29,8 @@
- #define OMAP_HSMMC_SUPPORTS_DUAL_VOLT		BIT(0)
- #define OMAP_HSMMC_BROKEN_MULTIBLOCK_READ	BIT(1)
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 9b9cdaf..665d345 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -145,6 +145,9 @@ extern int mmc_app_cmd(struct mmc_host *, struct mmc_card *);
+ extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
+ 	struct mmc_command *, int);
+ extern void mmc_start_bkops(struct mmc_card *card, bool from_exception);
++extern void mmc_start_delayed_bkops(struct mmc_card *card);
++extern void mmc_start_idle_time_bkops(struct work_struct *work);
++extern void mmc_bkops_completion_polling(struct work_struct *work);
+ extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool);
+ extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
  
-+struct mmc_card;
-+
- struct omap_mmc_dev_attr {
- 	u8 flags;
- };
-@@ -164,25 +145,3 @@ struct omap_mmc_platform_data {
- 
- 	} slots[OMAP_MMC_MAX_SLOTS];
- };
--
--/* called from board-specific card detection service routine */
--extern void omap_mmc_notify_cover_event(struct device *dev, int slot,
--					int is_closed);
--
--#if defined(CONFIG_MMC_OMAP) || defined(CONFIG_MMC_OMAP_MODULE)
--void omap1_init_mmc(struct omap_mmc_platform_data **mmc_data,
--				int nr_controllers);
--void omap242x_init_mmc(struct omap_mmc_platform_data **mmc_data);
--#else
--static inline void omap1_init_mmc(struct omap_mmc_platform_data **mmc_data,
--				int nr_controllers)
--{
--}
--static inline void omap242x_init_mmc(struct omap_mmc_platform_data **mmc_data)
--{
--}
--#endif
--
--extern int omap_msdi_reset(struct omap_hwmod *oh);
--
--#endif
-
+-- 
+1.7.6
+-- 
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
+of Code Aurora Forum, hosted by The Linux Foundation
