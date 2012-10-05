@@ -1,58 +1,51 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: [RFT/PATCH] mmc: core: Fix to enable DDR on MMC for non-UHS controllers
-Date: Fri, 5 Oct 2012 21:03:40 +0530
-Message-ID: <1349451220-24484-1-git-send-email-balajitk@ti.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off notify
+Date: Fri, 05 Oct 2012 12:50:29 -0400
+Message-ID: <87r4pcg8x6.fsf@octavius.laptop.org>
+References: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:48147 "EHLO arroyo.ext.ti.com"
+Received: from void.printf.net ([89.145.121.20]:45865 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756606Ab2JEPd5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 5 Oct 2012 11:33:57 -0400
+	id S1756721Ab2JEQuj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 5 Oct 2012 12:50:39 -0400
+In-Reply-To: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com>
+	(Ulf Hansson's message of "Thu, 13 Sep 2012 11:20:53 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: prakity@marvell.com, Viswanath Puttagunta <vishp@ti.com>, Balaji T K <balajitk@ti.com>
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Saugata Das <saugata.das@linaro.org>, Girish K S <girish.shivananjappa@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>
 
-From: Viswanath Puttagunta <vishp@ti.com>
+Hi Ulf,
 
-MMC_CAP_UHS_DDR50 is SD card feature and not
-eMMC feature. We don't have to check for this flag
-to enable DDR on MMC. Checking for MMC_CAP_1_8V_DDR host capability
-is sufficient.
+On Thu, Sep 13 2012, Ulf Hansson wrote:
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+>
+> This patch fixup the broken suspend sequence for eMMC
+> with sleep support. Additionally it reworks the eMMC4.5
+> Power Off Notification feature so it fits together with
+> the existing sleep feature.
+>
+> The CMD0 based re-initialization of the eMMC at resume
+> is re-introduced to maintain compatiblity for devices
+> using sleep.
+>
+> A host shall use MMC_CAP2_POWEROFF_NOTIFY to enable the
+> Power Off Notification feature. We might be able to
+> remove this cap later on, if we think that Power Off
+> Notification always is preferred over sleep, even if the
+> host is not able to cut the eMMC VCCQ power.
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Saugata Das <saugata.das@linaro.org>
+> CC: Girish K S <girish.shivananjappa@linaro.org>
+> CC: Asutosh Das <asutoshd@codeaurora.org>
 
-This patch is needed for OMAP4 platforms as hsmmc can support DDR
-with eMMC but does not support UHS speed mode for SD card.
+Thanks, I've merged this now.  I've got an eMMC 4.5 sample on the way
+to me, I'll help out with making sure that suspend/resume is tested.
 
-Signed-off-by: Viswanath Puttagunta <vishp@ti.com>
-Signed-off-by: Balaji T K <balajitk@ti.com>
----
- drivers/mmc/core/mmc.c |   10 ++++------
- 1 files changed, 4 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 7509de1..9937c91 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1062,14 +1062,12 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	 */
- 	if (mmc_card_highspeed(card)) {
- 		if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_8V)
--			&& ((host->caps & (MMC_CAP_1_8V_DDR |
--			     MMC_CAP_UHS_DDR50))
--				== (MMC_CAP_1_8V_DDR | MMC_CAP_UHS_DDR50)))
-+			&& (host->caps & (MMC_CAP_1_8V_DDR |
-+			     MMC_CAP_UHS_DDR50)))
- 				ddr = MMC_1_8V_DDR_MODE;
- 		else if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_2V)
--			&& ((host->caps & (MMC_CAP_1_2V_DDR |
--			     MMC_CAP_UHS_DDR50))
--				== (MMC_CAP_1_2V_DDR | MMC_CAP_UHS_DDR50)))
-+			&& (host->caps & (MMC_CAP_1_2V_DDR |
-+			     MMC_CAP_UHS_DDR50)))
- 				ddr = MMC_1_2V_DDR_MODE;
- 	}
- 
+- Chris.
 -- 
-1.7.5.4
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
