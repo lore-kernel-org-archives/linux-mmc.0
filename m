@@ -1,208 +1,74 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 09.5/16] mmc: omap: Remove cpu_is_omap usage from the
- driver
-Date: Fri, 5 Oct 2012 12:47:37 -0700
-Message-ID: <20121005194737.GP3874@atomide.com>
-References: <20121004213950.26676.21898.stgit@muffinssi.local>
- <20121004220454.26676.10131.stgit@muffinssi.local>
- <20121005180840.GN3874@atomide.com>
- <87ipaog4mp.fsf@octavius.laptop.org>
+From: wwang <wei_wang@realsil.com.cn>
+Subject: Re: [PATCH v6 0/3] Add modules to support realtek PCIE card reader
+Date: Sat, 6 Oct 2012 15:23:56 +0800
+Message-ID: <506FDC8C.3030707@realsil.com.cn>
+References: <cover.1347330871.git.wei_wang@realsil.com.cn> <50664814.30407@turmel.org> <20120929110730.GA27797@liondog.tnic> <87d315osjm.fsf@octavius.laptop.org> <20120929152942.GA11412@liondog.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <87ipaog4mp.fsf@octavius.laptop.org>
-Sender: linux-omap-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from rtits2.realtek.com ([60.250.210.242]:50675 "EHLO
+	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751438Ab2JFHYt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 6 Oct 2012 03:24:49 -0400
+In-Reply-To: <20120929152942.GA11412@liondog.tnic>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>, Chris Ball <cjb@laptop.org>, gregkh@linuxfoundation.org, Andrew Morton <akpm@linux-foundation.org>, Phil Turmel <philip@turmel.org>, sameo@linux.intel.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, arnd@arndb.de, oakad@yahoo.com
 
-* Chris Ball <cjb@laptop.org> [121005 11:24]:
-> Hi Tony,
-> 
-> On Fri, Oct 05 2012, Tony Lindgren wrote:
-> > This is needed for the ARM common zImage support.
-> >
-> > We can use the existing slot features to pass omap1
-> > specific options to the driver. For omap2 we don't
-> > want to pass anything new as that will be eventually
-> > moved to use device tree based init.
-> >
-> > Note that this patch depends on earlier patch that
-> > moves plat/mmc.h into include/linux/platform_data.
-> >
-> > Cc: Chris Ball <cjb@laptop.org>
-> > Cc: Venkatraman S <svenkatr@ti.com>
-> > Cc: linux-mmc@vger.kernel.org
-> > Signed-off-by: Tony Lindgren <tony@atomide.com>
-> >
-> > ---
-> >
-> > Chris, I can set up a minimal immutable branch with omap
-> > header changes that you can also pull into MMC tree if these
-> > two MMC patches look ackable to you.
-> 
-> Thanks, sounds good.
-> 
-> Acked-by: Chris Ball <cjb@laptop.org>
+=E4=BA=8E 2012=E5=B9=B409=E6=9C=8829=E6=97=A5 23:29, Borislav Petkov =E5=
+=86=99=E9=81=93:
+> On Sat, Sep 29, 2012 at 09:41:17AM -0400, Chris Ball wrote:
+>> On Sat, Sep 29 2012, Borislav Petkov wrote:
+>>> So, I think that this driver has seen a bunch of testing and review=
+ing
+>>> and we might start considering upstreaming it. There are a bunch of
+>>> laptops integrating those readers and maybe a single three-month-is=
+h -rc
+>>> period of testing wouldn't hurt before it appears upstream.
+>>>
+>>> Now, AFAICT, there is another driver in staging which supports the =
+same
+>>> or a subset of the cardreaders this driver does so I don't know wha=
+t
+>>> Realsil want to do with that. Wei?
+>>>
+>>> And since this driver touches multiple drivers/{mfd,mmc,memstick}
+>>> subdirs, maybe akpm would like to merge it? At least I haven't seen=
+ any
+>>> other maintainers complaining about its design or wanting to take i=
+t so
+>> I think you've missed the mails -- Alex Dubov has acked the memstick
+>> portion, Samuel Ortiz has said he'll push the MFD driver for 3.7,
+>> and I've pushed the MMC driver into mmc-next for 3.7.  So, I think
+>> we should merge it.  I don't think we need akpm, since there are no
+>> build-time dependencies involved.
+> Great, all is taken care of then.
+>
+> Only the staging driver remains, I believe the CONFIG_RTS_PSTOR one. =
+Wei?
+>
+> Thanks.
+>
+Hi all:
 
-Thanks will do when -rc1 is available.
+Sorry for my late reply. I'm on my vacation these days.
 
-Looks like I posted a version before running stg refresh
-that was missing two compile fixes: MMC_OMAP7XXX should be
-MMC_OMAP7XX and !mmc_omap1 should be !mmc_omap1().
-Updated patch below.
+At first I want to explain the relationship between the staging driver=20
+"rts_pstor" with this one here.
+Initially, we tried to build a SCSI driver for Realtek PCI-E card=20
+reader, which has the same architecture and code base with our Windows=20
+driver. And I pushed rts_pstor to staging tree last year. But Realtek=20
+PCI-E card reader is not a real SCSI device, which doesn't  understand=20
+SCSI command at all. So SCSI subsystem won't accept rts_pstor, and I=20
+can't find a proper subsystem to push it to.  That's why I create this=20
+series of drivers, which are more compatible with the whole Linux=20
+architecture.
+We are still maintaining the SCSI driver for Realtek card reader, and=20
+will release the latest source code in the Github in the future.  But=20
+maybe we won't push it to the staging tree any more.
 
-Regards,
+BR,
+Wei WANG
 
-Tony
-
-
-From: Tony Lindgren <tony@atomide.com>
-Date: Thu, 4 Oct 2012 19:01:53 -0700
-Subject: [PATCH] mmc: omap: Remove cpu_is_omap usage from the driver
-
-This is needed for the ARM common zImage support.
-
-We can use the existing slot features to pass omap1
-specific options to the driver. For omap2 we don't
-want to pass anything new as that will be eventually
-moved to use device tree based init.
-
-Note that this patch depends on earlier patch that
-moves plat/mmc.h into include/linux/platform_data.
-
-Cc: linux-mmc@vger.kernel.org
-Cc: Venkatraman S <svenkatr@ti.com>
-Acked-by: Chris Ball <cjb@laptop.org>
-Signed-off-by: Tony Lindgren <tony@atomide.com>
-
-diff --git a/arch/arm/mach-omap1/devices.c b/arch/arm/mach-omap1/devices.c
-index 1cc4e18..f9c4fb9 100644
---- a/arch/arm/mach-omap1/devices.c
-+++ b/arch/arm/mach-omap1/devices.c
-@@ -177,6 +177,13 @@ static int __init omap_mmc_add(const char *name, int id, unsigned long base,
- 	res[3].name = "tx";
- 	res[3].flags = IORESOURCE_DMA;
- 
-+	if (cpu_is_omap7xx())
-+		data->slots[0].features = MMC_OMAP7XX;
-+	if (cpu_is_omap15xx())
-+		data->slots[0].features = MMC_OMAP15XX;
-+	if (cpu_is_omap16xx())
-+		data->slots[0].features = MMC_OMAP16XX;
-+
- 	ret = platform_device_add_resources(pdev, res, ARRAY_SIZE(res));
- 	if (ret == 0)
- 		ret = platform_device_add_data(pdev, data, sizeof(*data));
-diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index e7c61b9..9f0e26f 100644
---- a/drivers/mmc/host/omap.c
-+++ b/drivers/mmc/host/omap.c
-@@ -30,7 +30,6 @@
- #include <linux/slab.h>
- #include <linux/platform_data/mmc-omap.h>
- 
--#include <plat/cpu.h>
- #include <plat/dma.h>
- 
- #define	OMAP_MMC_REG_CMD	0x00
-@@ -73,6 +72,13 @@
- #define	OMAP_MMC_STAT_CARD_BUSY		(1 <<  2)
- #define	OMAP_MMC_STAT_END_OF_CMD	(1 <<  0)
- 
-+#define mmc_omap7xx()	(host->features & MMC_OMAP7XX)
-+#define mmc_omap15xx()	(host->features & MMC_OMAP15XX)
-+#define mmc_omap16xx()	(host->features & MMC_OMAP16XX)
-+#define MMC_OMAP1_MASK	(MMC_OMAP7XX | MMC_OMAP15XX | MMC_OMAP16XX)
-+#define mmc_omap1()	(host->features & MMC_OMAP1_MASK)
-+#define mmc_omap2()	(!mmc_omap1())
-+
- #define OMAP_MMC_REG(host, reg)		(OMAP_MMC_REG_##reg << (host)->reg_shift)
- #define OMAP_MMC_READ(host, reg)	__raw_readw((host)->virt_base + OMAP_MMC_REG(host, reg))
- #define OMAP_MMC_WRITE(host, reg, val)	__raw_writew((val), (host)->virt_base + OMAP_MMC_REG(host, reg))
-@@ -148,6 +154,7 @@ struct mmc_omap_host {
- 	u32			buffer_bytes_left;
- 	u32			total_bytes_left;
- 
-+	unsigned		features;
- 	unsigned		use_dma:1;
- 	unsigned		brs_received:1, dma_done:1;
- 	unsigned		dma_in_use:1;
-@@ -989,7 +996,7 @@ mmc_omap_prepare_data(struct mmc_omap_host *host, struct mmc_request *req)
- 		 * blocksize is at least that large. Blocksize is
- 		 * usually 512 bytes; but not for some SD reads.
- 		 */
--		burst = cpu_is_omap15xx() ? 32 : 64;
-+		burst = mmc_omap15xx() ? 32 : 64;
- 		if (burst > data->blksz)
- 			burst = data->blksz;
- 
-@@ -1105,8 +1112,7 @@ static void mmc_omap_set_power(struct mmc_omap_slot *slot, int power_on,
- 	if (slot->pdata->set_power != NULL)
- 		slot->pdata->set_power(mmc_dev(slot->mmc), slot->id, power_on,
- 					vdd);
--
--	if (cpu_is_omap24xx()) {
-+	if (mmc_omap2()) {
- 		u16 w;
- 
- 		if (power_on) {
-@@ -1240,7 +1246,7 @@ static int __devinit mmc_omap_new_slot(struct mmc_omap_host *host, int id)
- 	mmc->ops = &mmc_omap_ops;
- 	mmc->f_min = 400000;
- 
--	if (cpu_class_is_omap2())
-+	if (mmc_omap2())
- 		mmc->f_max = 48000000;
- 	else
- 		mmc->f_max = 24000000;
-@@ -1360,6 +1366,7 @@ static int __devinit mmc_omap_probe(struct platform_device *pdev)
- 	init_waitqueue_head(&host->slot_wq);
- 
- 	host->pdata = pdata;
-+	host->features = host->pdata->slots[0].features;
- 	host->dev = &pdev->dev;
- 	platform_set_drvdata(pdev, host);
- 
-@@ -1392,7 +1399,7 @@ static int __devinit mmc_omap_probe(struct platform_device *pdev)
- 	host->dma_tx_burst = -1;
- 	host->dma_rx_burst = -1;
- 
--	if (cpu_is_omap24xx())
-+	if (mmc_omap2())
- 		sig = host->id == 0 ? OMAP24XX_DMA_MMC1_TX : OMAP24XX_DMA_MMC2_TX;
- 	else
- 		sig = host->id == 0 ? OMAP_DMA_MMC_TX : OMAP_DMA_MMC2_TX;
-@@ -1408,7 +1415,7 @@ static int __devinit mmc_omap_probe(struct platform_device *pdev)
- 		dev_warn(host->dev, "unable to obtain TX DMA engine channel %u\n",
- 			sig);
- #endif
--	if (cpu_is_omap24xx())
-+	if (mmc_omap2())
- 		sig = host->id == 0 ? OMAP24XX_DMA_MMC1_RX : OMAP24XX_DMA_MMC2_RX;
- 	else
- 		sig = host->id == 0 ? OMAP_DMA_MMC_RX : OMAP_DMA_MMC2_RX;
-@@ -1436,7 +1443,7 @@ static int __devinit mmc_omap_probe(struct platform_device *pdev)
- 	}
- 
- 	host->nr_slots = pdata->nr_slots;
--	host->reg_shift = (cpu_is_omap7xx() ? 1 : 2);
-+	host->reg_shift = (mmc_omap7xx() ? 1 : 2);
- 
- 	host->mmc_omap_wq = alloc_workqueue("mmc_omap", 0, 0);
- 	if (!host->mmc_omap_wq)
-diff --git a/include/linux/platform_data/mmc-omap.h b/include/linux/platform_data/mmc-omap.h
-index 39a7abc..2bf6ea82 100644
---- a/include/linux/platform_data/mmc-omap.h
-+++ b/include/linux/platform_data/mmc-omap.h
-@@ -107,6 +107,9 @@ struct omap_mmc_platform_data {
- 		/* we can put the features above into this variable */
- #define HSMMC_HAS_PBIAS		(1 << 0)
- #define HSMMC_HAS_UPDATED_RESET	(1 << 1)
-+#define MMC_OMAP7XX		(1 << 2)
-+#define MMC_OMAP15XX		(1 << 3)
-+#define MMC_OMAP16XX		(1 << 4)
- 		unsigned features;
- 
- 		int switch_pin;			/* gpio (card detect) */
