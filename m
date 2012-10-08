@@ -1,70 +1,63 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 1/3] mmc: esdhc: enable polling to detect card by itself
-Date: Sun, 7 Oct 2012 22:06:50 +0800
-Message-ID: <20121007140648.GA10148@S2101-09.ap.freescale.net>
-References: <1348828113-19668-1-git-send-email-yongd@marvell.com>
- <1348828113-19668-2-git-send-email-yongd@marvell.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: Fixup broken suspend and eMMC4.5 power off notify
+Date: Mon, 8 Oct 2012 09:31:02 +0200
+Message-ID: <CAPDyKFpNCw9PKExfJ52uK5Vm7K6xfn+KTigwD78cx-SYy4A6VA@mail.gmail.com>
+References: <1347528053-8521-1-git-send-email-ulf.hansson@stericsson.com>
+	<87r4pcg8x6.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:59353 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753236Ab2JGOGx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Oct 2012 10:06:53 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so3199673pad.19
-        for <linux-mmc@vger.kernel.org>; Sun, 07 Oct 2012 07:06:53 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <1348828113-19668-2-git-send-email-yongd@marvell.com>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:53853 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753750Ab2JHHbF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Oct 2012 03:31:05 -0400
+Received: by mail-we0-f174.google.com with SMTP id t9so2377754wey.19
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Oct 2012 00:31:03 -0700 (PDT)
+In-Reply-To: <87r4pcg8x6.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: yongd <yongd@marvell.com>
-Cc: Chris Ball <cjb@laptop.org>, Anton Vorontsov <anton.vorontsov@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Wolfram Sang <w.sang@pengutronix.de>, Daniel Drake <dsd@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Wilson Callan <wilson.callan@savantsystems.com>, Ben Dooks <ben-linux@fluff.org>, zhangfei.gao@marvell.com, kevin.liu@marvell.com, jlfu@marvell.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Saugata Das <saugata.das@linaro.org>, Girish K S <girish.shivananjappa@linaro.org>, Asutosh Das <asutoshd@codeaurora.org>
 
-On Fri, Sep 28, 2012 at 06:28:31PM +0800, yongd wrote:
-> In the current code logic, sdhci_add_host() will enable the polling
-> method (set MMC_CAP_NEEDS_POLL) for a removable card (MMC_CAP_
-> NONREMOVABLE is not set) whose host's internal card detection method
-> is disabled for some reason (SDHCI_QUIRK_BROKEN_CARD_DETECTION is set).
-> 
-> However, this is improper since we can have some other card detection
-> methods besides host internal card detection and polling method. For
-> example, if the card detection type is ESDHC_CD_GPIO (external gpio pin
-> for CD), we will keep SDHCI_QUIRK_BROKEN_CARD_DETECTION set. This is right.
-> But, just as above said, sdhci_add_host() will also enable polling for such
-> a card. This is redundant.
-> 
-At least for sdhci-esdhc-imx, SDHCI_QUIRK_BROKEN_CARD_DETECTION will
-be set only when neither ESDHC_CD_GPIO nor ESDHC_CD_CONTROLLER works.
+On 5 October 2012 18:50, Chris Ball <cjb@laptop.org> wrote:
+> Hi Ulf,
+>
+> On Thu, Sep 13 2012, Ulf Hansson wrote:
+>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>
+>> This patch fixup the broken suspend sequence for eMMC
+>> with sleep support. Additionally it reworks the eMMC4.5
+>> Power Off Notification feature so it fits together with
+>> the existing sleep feature.
+>>
+>> The CMD0 based re-initialization of the eMMC at resume
+>> is re-introduced to maintain compatiblity for devices
+>> using sleep.
+>>
+>> A host shall use MMC_CAP2_POWEROFF_NOTIFY to enable the
+>> Power Off Notification feature. We might be able to
+>> remove this cap later on, if we think that Power Off
+>> Notification always is preferred over sleep, even if the
+>> host is not able to cut the eMMC VCCQ power.
+>>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> Signed-off-by: Saugata Das <saugata.das@linaro.org>
+>> CC: Girish K S <girish.shivananjappa@linaro.org>
+>> CC: Asutosh Das <asutoshd@codeaurora.org>
+>
+> Thanks, I've merged this now.  I've got an eMMC 4.5 sample on the way
+> to me, I'll help out with making sure that suspend/resume is tested.
+>
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
 
-Shawn
+Sounds great! Thanks for helping out! Juts ping me if you need some
+further assistance around this.
 
-> On the other hand, for the card with ESDHC_CD_NONE detection type(no CD, neither
-> controller nor gpio, so use polling), we currently rely on sdhci_add_host() to
-> enable polling for us.
-> 
-> Here proposed a solution for such an embarrassing case. 1st, this patch will
-> de-couple polling enabling with sdhci_add_host() by doing this in host driver
-> itself, just as some other vendors. 2nd, one more patch will remove such improper
-> MMC_CAP_NEEDS_POLL enabling in sdhci_add_host().
-> 
-> Change-Id: Ia7525009d8fd188e3f0169f225e4a76ff9e94b47
-> Signed-off-by: yongd <yongd@marvell.com>
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c |    1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index e23f813..f70079c 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -569,6 +569,7 @@ static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
->  		break;
->  
->  	case ESDHC_CD_NONE:
-> +		host->mmc->caps = MMC_CAP_NEEDS_POLL;
->  		break;
->  	}
->  
-> -- 
-> 1.7.9.5
-> 
+Myself is also waiting for a eMMC 4.5 device, should probably show up
+this week. I will try to test it as soon as I can.
+
+Kind regards
+Ulf Hansson
