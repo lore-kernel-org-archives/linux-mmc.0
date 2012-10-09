@@ -1,66 +1,45 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 1/2] ARM: OMAP: Trivial driver changes to
- remove include plat/cpu.h
-Date: Mon, 8 Oct 2012 11:09:00 -0700
-Message-ID: <20121008180900.GL3874@atomide.com>
-References: <20121008173452.10603.53886.stgit@muffinssi>
- <20121008173557.10603.18539.stgit@muffinssi>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [GIT PULL] MMC updates for 3.7-rc1
+Date: Mon, 08 Oct 2012 23:36:25 -0400
+Message-ID: <87pq4sco5i.fsf@octavius.laptop.org>
+References: <87a9vxdsia.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <alsa-devel-bounces@alsa-project.org>
-Content-Disposition: inline
-In-Reply-To: <20121008173557.10603.18539.stgit@muffinssi>
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Errors-To: alsa-devel-bounces@alsa-project.org
-Sender: alsa-devel-bounces@alsa-project.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: alsa-devel@alsa-project.org, Deepak Saxena <dsaxena@plexity.net>, Herbert Xu <herbert@gondor.apana.org.au>, Venkatraman S <svenkatr@ti.com>, Vinod Koul <vinod.koul@intel.com>, Matt Mackall <mpm@selenic.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "David S. Miller" <davem@davemloft.net>, Peter Ujfalusi <peter.ujfalusi@ti.com>, Chris Ball <cjb@laptop.org>, Dan Williams <djbw@fb.com>, linux-omap@vger.kernel.org, Liam Girdwood <lrg@ti.com>, Jarkko Nikula <jarkko.nikula@bitmer.com>, linux-crypto@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:50780 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751893Ab2JIDgb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 8 Oct 2012 23:36:31 -0400
+In-Reply-To: <87a9vxdsia.fsf@octavius.laptop.org> (Chris Ball's message of
+	"Mon, 08 Oct 2012 09:04:45 -0400")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Vinod Koul <vinod.koul@linux.intel.com>
 
-* Tony Lindgren <tony@atomide.com> [121008 10:37]:
-> Drivers should not use cpu_is_omap or cpu_class_is_omap macros,
-> they should be private to the platform init code. And we'll be
-> removing plat/cpu.h and only have a private soc.h for the
-> arch/arm/*omap* code.
-> 
-> This patch is intended as preparation for the core omap changes
-> and removes the need to include plat/cpu.h from several drivers.
-> This is needed for the ARM common zImage support.
-> 
-> These changes are OK to do because:
-> 
-> - omap-rng.c and hsmmc.c don't need plat/cpu.h
-> 
-> - omap-aes.c and omap-sham.c get the proper platform_data
->   passed to them so they don't need extra checks in the driver
-> 
-> - omap-dma.c and omap-pcm.c can test the arch locally as
->   omap1 and omap2 cannot be compiled together because of
->   conflicting compiler flags
+Hi Linus,
 
+On Mon, Oct 08 2012, Chris Ball wrote:
+> Please pull from:
+>
+>   git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-merge-for-3.7-rc1
+>
+> to receive the MMC merge for 3.7.  There are currently two conflicts
+> due to header renames for the ARM single zImage work; they should be
+> resolved by taking the changes already in your tree.  Thanks.
 
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -40,7 +40,6 @@
->  #include <linux/pm_runtime.h>
->  #include <linux/platform_data/mmc-omap.h>
->  #include <mach/hardware.h>
-> -#include <plat/cpu.h>
->  
->  /* OMAP HSMMC Host Controller Registers */
->  #define OMAP_HSMMC_SYSSTATUS	0x0014
+Sorry, the merge isn't so one-sided -- here's my resolution for you to
+compare with:
 
-Actually I'll fold this mmc change into an earlier patch
-I've posted as "ARM: OMAP: Split plat/mmc.h into local headers
-and platform_data".
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-merge-for-3.7-rc1-merged
 
-Regards,
+davinci_mmc.c now uses <linux/edma.h> which is provided by a commit
+in the slave-dmaengine tree, which hasn't sent in a pull request yet.
+Vinod, please can you do that soon?
 
-Tony
+Let me know if I should do anything else.  Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
