@@ -1,51 +1,51 @@
-From: David Howells <dhowells@redhat.com>
-Subject: [GIT PULL] Disintegrate UAPI for mmc
-Date: Tue, 09 Oct 2012 14:30:29 +0100
-Message-ID: <30707.1349789429@warthog.procyon.org.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: cjb@laptop.org
-Cc: dhowells@redhat.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] mmc: mxs: fix build regression from mismerge
+Date: Tue, 9 Oct 2012 15:37:23 +0000
+Message-ID: <201210091537.23659.arnd@arndb.de>
+Mime-Version: 1.0
+Content-Type: Text/Plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.10]:63045 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754063Ab2JIPh3 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Oct 2012 11:37:29 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Attila Kinali <attila@kinali.ch>, Lauri Hintsala <lauri.hintsala@bluegiga.com>, Marek Vasut <marex@denx.de>, Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>
 
-Can you merge the following branch into the mmc tree please.
+>From all I can tell, the patches
 
-This is to complete part of the Userspace API (UAPI) disintegration for which
-the preparatory patches were pulled recently.  After these patches, userspace
-headers will be segregated into:
+fc108d24 "mmc: mxs-mmc: fix deadlock caused by recursion loop"
+829c1bf4 "mmc: spi: Pull out parts shared between MMC and SPI"
 
-	include/uapi/linux/.../foo.h
+came in through separate branches and cause this build error when
+combined.
 
-for the userspace interface stuff, and:
+drivers/mmc/host/mxs-mmc.c: In function 'mxs_mmc_enable_sdio_irq':
+drivers/mmc/host/mxs-mmc.c:527:78: error: 'struct mxs_mmc_host' has no member named 'base'
+drivers/mmc/host/mxs-mmc.c:527:95: error: 'struct mxs_mmc_host' has no member named 'devid'
 
-	include/linux/.../foo.h
+This does the obvious missing change.
 
-for the strictly kernel internal stuff.
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Cc: Attila Kinali <attila@kinali.ch>
+Cc: Lauri Hintsala <lauri.hintsala@bluegiga.com>
+Cc: Marek Vasut <marex@denx.de>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Shawn Guo <shawn.guo@linaro.org>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>
 
----
-The following changes since commit 9e2d8656f5e8aa214e66b462680cf86b210b74a8:
-
-  Merge branch 'akpm' (Andrew's patch-bomb) (2012-10-09 16:23:15 +0900)
-
-are available in the git repository at:
-
-
-  git://git.infradead.org/users/dhowells/linux-headers.git tags/disintegrate-mmc-20121009
-
-for you to fetch changes up to ad1cfdcef1378adc7215a74772f7d06c4cc6ef50:
-
-  UAPI: (Scripted) Disintegrate include/linux/mmc (2012-10-09 09:48:45 +0100)
-
-----------------------------------------------------------------
-UAPI Disintegration 2012-10-09
-
-----------------------------------------------------------------
-David Howells (1):
-      UAPI: (Scripted) Disintegrate include/linux/mmc
-
- include/linux/mmc/Kbuild             | 1 -
- include/uapi/linux/mmc/Kbuild        | 1 +
- include/{ => uapi}/linux/mmc/ioctl.h | 0
- 3 files changed, 1 insertion(+), 1 deletion(-)
- rename include/{ => uapi}/linux/mmc/ioctl.h (100%)
-.
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index bb4c2bf..80d1e6d 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -525,7 +525,7 @@ static void mxs_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ 		writel(BM_SSP_CTRL0_SDIO_IRQ_CHECK,
+ 		       ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_SET);
+ 		writel(BM_SSP_CTRL1_SDIO_IRQ_EN,
+-		       host->base + HW_SSP_CTRL1(host) + STMP_OFFSET_REG_SET);
++		       ssp->base + HW_SSP_CTRL1(ssp) + STMP_OFFSET_REG_SET);
+ 	} else {
+ 		writel(BM_SSP_CTRL0_SDIO_IRQ_CHECK,
+ 		       ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_CLR);
