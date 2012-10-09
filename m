@@ -1,27 +1,51 @@
-From: =?UTF-8?B?UMOpdGVyIFVqZmFsdXNp?= <peter.ujfalusi@ti.com>
-Subject: Re: [PATCH 1/2] ARM: OMAP: Trivial driver changes to remove include
- plat/cpu.h
-Date: Tue, 09 Oct 2012 11:03:10 +0200
-Message-ID: <5073E84E.4090408@ti.com>
-References: <20121008173452.10603.53886.stgit@muffinssi> <20121008173557.10603.18539.stgit@muffinssi>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-crypto-owner@vger.kernel.org>
-In-Reply-To: <20121008173557.10603.18539.stgit@muffinssi>
-Sender: linux-crypto-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-arm-kernel@lists.infradead.org, alsa-devel@alsa-project.org, linux-omap@vger.kernel.org, Mark Brown <broonie@opensource.wolfsonmicro.com>, Herbert Xu <herbert@gondor.hengli.com.au>, Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Liam Girdwood <lrg@ti.com>, Deepak Saxena <dsaxena@plexity.net>, Chris Ball <cjb@laptop.org>, Matt Mackall <mpm@selenic.com>, Venkatraman S <svenkatr@ti.com>, "David S. Miller" <davem@davemloft.net>, Jarkko Nikula <jarkko.nikula@bitmer.com>, linux-crypto@vger.kernel.org
+From: David Howells <dhowells@redhat.com>
+Subject: [GIT PULL] Disintegrate UAPI for mmc
+Date: Tue, 09 Oct 2012 14:30:29 +0100
+Message-ID: <30707.1349789429@warthog.procyon.org.uk>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: cjb@laptop.org
+Cc: dhowells@redhat.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 10/08/2012 07:35 PM, Tony Lindgren wrote:
+Can you merge the following branch into the mmc tree please.
 
-> - omap-dma.c and omap-pcm.c can test the arch locally as
->   omap1 and omap2 cannot be compiled together because of
->   conflicting compiler flags
+This is to complete part of the Userspace API (UAPI) disintegration for which
+the preparatory patches were pulled recently.  After these patches, userspace
+headers will be segregated into:
 
->  sound/soc/omap/omap-pcm.c         |    9 +++++++--
+	include/uapi/linux/.../foo.h
 
-Tony: is this going to be included in 3.7?
+for the userspace interface stuff, and:
 
-Acked-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
+	include/linux/.../foo.h
+
+for the strictly kernel internal stuff.
+
+---
+The following changes since commit 9e2d8656f5e8aa214e66b462680cf86b210b74a8:
+
+  Merge branch 'akpm' (Andrew's patch-bomb) (2012-10-09 16:23:15 +0900)
+
+are available in the git repository at:
+
+
+  git://git.infradead.org/users/dhowells/linux-headers.git tags/disintegrate-mmc-20121009
+
+for you to fetch changes up to ad1cfdcef1378adc7215a74772f7d06c4cc6ef50:
+
+  UAPI: (Scripted) Disintegrate include/linux/mmc (2012-10-09 09:48:45 +0100)
+
+----------------------------------------------------------------
+UAPI Disintegration 2012-10-09
+
+----------------------------------------------------------------
+David Howells (1):
+      UAPI: (Scripted) Disintegrate include/linux/mmc
+
+ include/linux/mmc/Kbuild             | 1 -
+ include/uapi/linux/mmc/Kbuild        | 1 +
+ include/{ => uapi}/linux/mmc/ioctl.h | 0
+ 3 files changed, 1 insertion(+), 1 deletion(-)
+ rename include/{ => uapi}/linux/mmc/ioctl.h (100%)
+.
