@@ -1,37 +1,38 @@
-From: Fabio Estevam <fabio.estevam@freescale.com>
-Subject: [PATCH] mmc: mxcmmc: Fix MODULE_ALIAS
-Date: Tue, 9 Oct 2012 16:26:05 -0300
-Message-ID: <1349810765-12351-1-git-send-email-fabio.estevam@freescale.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 1/2] ARM: OMAP: Trivial driver changes to remove
+ include plat/cpu.h
+Date: Tue, 9 Oct 2012 17:19:44 -0700
+Message-ID: <20121010001943.GK12552@atomide.com>
+References: <20121008173452.10603.53886.stgit@muffinssi>
+ <20121008173557.10603.18539.stgit@muffinssi>
+ <5073E84E.4090408@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe002.messaging.microsoft.com ([213.199.154.205]:3719
-	"EHLO am1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754876Ab2JIT0j (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Oct 2012 15:26:39 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-crypto-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <5073E84E.4090408@ti.com>
+Sender: linux-crypto-owner@vger.kernel.org
+To: =?utf-8?B?UMOpdGVy?= Ujfalusi <peter.ujfalusi@ti.com>
+Cc: linux-arm-kernel@lists.infradead.org, alsa-devel@alsa-project.org, linux-omap@vger.kernel.org, Mark Brown <broonie@opensource.wolfsonmicro.com>, Herbert Xu <herbert@gondor.hengli.com.au>, Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Liam Girdwood <lrg@ti.com>, Deepak Saxena <dsaxena@plexity.net>, Chris Ball <cjb@laptop.org>, Matt Mackall <mpm@selenic.com>, Venkatraman S <svenkatr@ti.com>, "David S. Miller" <davem@davemloft.net>, Jarkko Nikula <jarkko.nikula@bitmer.com>, linux-crypto@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: s.hauer@pengutronix.de, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
 
-The correct name for the driver is "mxc-mmc".
+* P=C3=A9ter Ujfalusi <peter.ujfalusi@ti.com> [121009 02:03]:
+> On 10/08/2012 07:35 PM, Tony Lindgren wrote:
+>=20
+> > - omap-dma.c and omap-pcm.c can test the arch locally as
+> >   omap1 and omap2 cannot be compiled together because of
+> >   conflicting compiler flags
+>=20
+> >  sound/soc/omap/omap-pcm.c         |    9 +++++++--
+>=20
+> Tony: is this going to be included in 3.7?
 
-Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
----
- drivers/mmc/host/mxcmmc.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Hmm I guess we could try to get this out of the way
+to cut down the dependencies. Let's if maintainers
+of the other affected drivers this is OK for the
+-rc series.
 
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index 565c2e4..6290b7f 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -1134,4 +1134,4 @@ module_platform_driver(mxcmci_driver);
- MODULE_DESCRIPTION("i.MX Multimedia Card Interface Driver");
- MODULE_AUTHOR("Sascha Hauer, Pengutronix");
- MODULE_LICENSE("GPL");
--MODULE_ALIAS("platform:imx-mmc");
-+MODULE_ALIAS("platform:mxc-mmc");
--- 
-1.7.9.5
+Regards,
 
-
+Tony
