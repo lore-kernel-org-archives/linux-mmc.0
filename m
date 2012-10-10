@@ -1,20 +1,22 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 2/2] mmc: mmci: Switching off HWFC for SDIO depends on MCLK
-Date: Wed, 10 Oct 2012 17:43:45 +0200
-Message-ID: <1349883825-22517-2-git-send-email-ulf.hansson@stericsson.com>
-References: <1349883825-22517-1-git-send-email-ulf.hansson@stericsson.com>
+Subject: [RESEND PATCH 2/2] mmc: mmci: Switching off HWFC for SDIO depends on MCLK
+Date: Wed, 10 Oct 2012 18:03:20 +0200
+Message-ID: <1349885000-22887-2-git-send-email-ulf.hansson@stericsson.com>
+References: <1349885000-22887-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:50733 "EHLO
-	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752302Ab2JJPo0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Oct 2012 11:44:26 -0400
-In-Reply-To: <1349883825-22517-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from eu1sys200aog112.obsmtp.com ([207.126.144.133]:51546 "EHLO
+	eu1sys200aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752303Ab2JJQDn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Oct 2012 12:03:43 -0400
+In-Reply-To: <1349885000-22887-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
 For writes, HWFC shall be switched off when transfer size <= 8
 bytes and when MCLK rate is above 50 MHz. For 50MHz and below
