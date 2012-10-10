@@ -1,169 +1,88 @@
-From: =?UTF-8?B?TWFyZWsgVmHFoXV0?= <marek.vasut@gmail.com>
-Subject: Re: [PATCH] mmc: mxs: fix build regression from mismerge
-Date: Tue, 9 Oct 2012 17:42:14 +0200
-Message-ID: <CAMqi2ZPvgu8M4F_fW01v5N6USn8=QP9brdMAEL34v_y69t8pbQ@mail.gmail.com>
-References: <201210091537.23659.arnd@arndb.de>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH 1/2] mmc: mmci: Fix incorrect handling of HW flow control for SDIO
+Date: Wed, 10 Oct 2012 17:43:44 +0200
+Message-ID: <1349883825-22517-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============2659645958222121645=="
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <201210091537.23659.arnd@arndb.de>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Marek Vasut <marex@denx.de>, Shawn Guo <shawn.guo@linaro.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, Attila Kinali <attila@kinali.ch>, Lauri Hintsala <lauri.hintsala@bluegiga.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog101.obsmtp.com ([207.126.144.111]:36276 "EHLO
+	eu1sys200aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752278Ab2JJPoZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Oct 2012 11:44:25 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
---===============2659645958222121645==
-Content-Type: multipart/alternative; boundary=20cf307cfd4aad24de04cba22e82
+From: Ulf Hansson <(address hidden)>
 
---20cf307cfd4aad24de04cba22e82
-Content-Type: text/plain; charset=UTF-8
+For data writes <= 8 bytes, HW flow control was disabled but
+never re-enabled when the transfer was completed. This meant
+that a following read request would give buffer overrun errors.
 
-I sent a patch for that already, Chris was cced on it recently by Shawn
-too. (Sorry for top posting, Android mail client)
-Dne 9.10.2012 17:39 "Arnd Bergmann" <arnd@arndb.de> napsal(a):
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/mmci.c |   38 +++++++++++++++++++++-----------------
+ 1 file changed, 21 insertions(+), 17 deletions(-)
 
-> From all I can tell, the patches
->
-> fc108d24 "mmc: mxs-mmc: fix deadlock caused by recursion loop"
-> 829c1bf4 "mmc: spi: Pull out parts shared between MMC and SPI"
->
-> came in through separate branches and cause this build error when
-> combined.
->
-> drivers/mmc/host/mxs-mmc.c: In function 'mxs_mmc_enable_sdio_irq':
-> drivers/mmc/host/mxs-mmc.c:527:78: error: 'struct mxs_mmc_host' has no
-> member named 'base'
-> drivers/mmc/host/mxs-mmc.c:527:95: error: 'struct mxs_mmc_host' has no
-> member named 'devid'
->
-> This does the obvious missing change.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> Cc: Attila Kinali <attila@kinali.ch>
-> Cc: Lauri Hintsala <lauri.hintsala@bluegiga.com>
-> Cc: Marek Vasut <marex@denx.de>
-> Cc: Chris Ball <cjb@laptop.org>
-> Cc: Shawn Guo <shawn.guo@linaro.org>
-> Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>
->
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index bb4c2bf..80d1e6d 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -525,7 +525,7 @@ static void mxs_mmc_enable_sdio_irq(struct mmc_host
-> *mmc, int enable)
->                 writel(BM_SSP_CTRL0_SDIO_IRQ_CHECK,
->                        ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_SET);
->                 writel(BM_SSP_CTRL1_SDIO_IRQ_EN,
-> -                      host->base + HW_SSP_CTRL1(host) +
-> STMP_OFFSET_REG_SET);
-> +                      ssp->base + HW_SSP_CTRL1(ssp) +
-> STMP_OFFSET_REG_SET);
->         } else {
->                 writel(BM_SSP_CTRL0_SDIO_IRQ_CHECK,
->                        ssp->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_CLR);
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
->
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index edc3e9b..877079e 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -654,9 +654,29 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ 
+ 	/* The ST Micro variants has a special bit to enable SDIO */
+ 	if (variant->sdio && host->mmc->card)
+-		if (mmc_card_sdio(host->mmc->card))
++		if (mmc_card_sdio(host->mmc->card)) {
++			/*
++			 * The ST Micro variants has a special bit
++			 * to enable SDIO.
++			 */
++			u32 clk;
++
+ 			datactrl |= MCI_ST_DPSM_SDIOEN;
+ 
++			/*
++			 * The ST Micro variant for SDIO transfer sizes
++			 * less then 8 bytes should have clock H/W flow
++			 * control disabled.
++			 */
++			if ((host->size < 8) &&
++			    (data->flags & MMC_DATA_WRITE))
++				clk = host->clk_reg & ~variant->clkreg_enable;
++			else
++				clk = host->clk_reg | variant->clkreg_enable;
++
++			mmci_write_clkreg(host, clk);
++		}
++
+ 	/*
+ 	 * Attempt to use DMA operation mode, if this
+ 	 * should fail, fall back to PIO mode
+@@ -877,22 +897,6 @@ static int mmci_pio_write(struct mmci_host *host, char *buffer, unsigned int rem
+ 		count = min(remain, maxcnt);
+ 
+ 		/*
+-		 * The ST Micro variant for SDIO transfer sizes
+-		 * less then 8 bytes should have clock H/W flow
+-		 * control disabled.
+-		 */
+-		if (variant->sdio &&
+-		    mmc_card_sdio(host->mmc->card)) {
+-			u32 clk;
+-			if (count < 8)
+-				clk = host->clk_reg & ~variant->clkreg_enable;
+-			else
+-				clk = host->clk_reg | variant->clkreg_enable;
+-
+-			mmci_write_clkreg(host, clk);
+-		}
+-
+-		/*
+ 		 * SDIO especially may want to send something that is
+ 		 * not divisible by 4 (as opposed to card sectors
+ 		 * etc), and the FIFO only accept full 32-bit writes.
+-- 
+1.7.10
 
---20cf307cfd4aad24de04cba22e82
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<p dir=3D"ltr">I sent a patch for that already, Chris was cced on it recent=
-ly by Shawn too. (Sorry for top posting, Android mail client)</p>
-<div class=3D"gmail_quote">Dne 9.10.2012 17:39 &quot;Arnd Bergmann&quot; &l=
-t;<a href=3D"mailto:arnd@arndb.de">arnd@arndb.de</a>&gt; napsal(a):<br type=
-=3D"attribution"><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8=
-ex;border-left:1px #ccc solid;padding-left:1ex">
->From all I can tell, the patches<br>
-<br>
-fc108d24 &quot;mmc: mxs-mmc: fix deadlock caused by recursion loop&quot;<br=
->
-829c1bf4 &quot;mmc: spi: Pull out parts shared between MMC and SPI&quot;<br=
->
-<br>
-came in through separate branches and cause this build error when<br>
-combined.<br>
-<br>
-drivers/mmc/host/mxs-mmc.c: In function &#39;mxs_mmc_enable_sdio_irq&#39;:<=
-br>
-drivers/mmc/host/mxs-mmc.c:527:78: error: &#39;struct mxs_mmc_host&#39; has=
- no member named &#39;base&#39;<br>
-drivers/mmc/host/mxs-mmc.c:527:95: error: &#39;struct mxs_mmc_host&#39; has=
- no member named &#39;devid&#39;<br>
-<br>
-This does the obvious missing change.<br>
-<br>
-Signed-off-by: Arnd Bergmann &lt;<a href=3D"mailto:arnd@arndb.de">arnd@arnd=
-b.de</a>&gt;<br>
-Cc: Attila Kinali &lt;<a href=3D"mailto:attila@kinali.ch">attila@kinali.ch<=
-/a>&gt;<br>
-Cc: Lauri Hintsala &lt;<a href=3D"mailto:lauri.hintsala@bluegiga.com">lauri=
-.hintsala@bluegiga.com</a>&gt;<br>
-Cc: Marek Vasut &lt;<a href=3D"mailto:marex@denx.de">marex@denx.de</a>&gt;<=
-br>
-Cc: Chris Ball &lt;<a href=3D"mailto:cjb@laptop.org">cjb@laptop.org</a>&gt;=
-<br>
-Cc: Shawn Guo &lt;<a href=3D"mailto:shawn.guo@linaro.org">shawn.guo@linaro.=
-org</a>&gt;<br>
-Cc: Mark Brown &lt;<a href=3D"mailto:broonie@opensource.wolfsonmicro.com">b=
-roonie@opensource.wolfsonmicro.com</a>&gt;<br>
-<br>
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c<br>
-index bb4c2bf..80d1e6d 100644<br>
---- a/drivers/mmc/host/mxs-mmc.c<br>
-+++ b/drivers/mmc/host/mxs-mmc.c<br>
-@@ -525,7 +525,7 @@ static void mxs_mmc_enable_sdio_irq(struct mmc_host *mm=
-c, int enable)<br>
-=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 writel(BM_SSP_CTRL0=
-_SDIO_IRQ_CHECK,<br>
-=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0ssp-&gt;base + HW_SSP_CTRL0 + STMP_OFFSET_REG_SET);<br>
-=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 writel(BM_SSP_CTRL1=
-_SDIO_IRQ_EN,<br>
-- =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0host-&gt;base + HW_SSP_CTRL1(host) + STMP_OFFSET_REG_SET);<br>
-+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0ssp-&gt;base + HW_SSP_CTRL1(ssp) + STMP_OFFSET_REG_SET);<br>
-=C2=A0 =C2=A0 =C2=A0 =C2=A0 } else {<br>
-=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 writel(BM_SSP_CTRL0=
-_SDIO_IRQ_CHECK,<br>
-=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0ssp-&gt;base + HW_SSP_CTRL0 + STMP_OFFSET_REG_CLR);<br>
-<br>
-_______________________________________________<br>
-linux-arm-kernel mailing list<br>
-<a href=3D"mailto:linux-arm-kernel@lists.infradead.org">linux-arm-kernel@li=
-sts.infradead.org</a><br>
-<a href=3D"http://lists.infradead.org/mailman/listinfo/linux-arm-kernel" ta=
-rget=3D"_blank">http://lists.infradead.org/mailman/listinfo/linux-arm-kerne=
-l</a><br>
-</blockquote></div>
-
---20cf307cfd4aad24de04cba22e82--
-
-
---===============2659645958222121645==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============2659645958222121645==--
