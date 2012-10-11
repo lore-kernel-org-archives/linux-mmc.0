@@ -1,8 +1,7 @@
 From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [RFC PATCH v2 12/16] mmc: omap_hsmmc: add generic DMA request support
-	to the DT binding
-Date: Thu, 11 Oct 2012 15:04:37 -0400
-Message-ID: <1349982281-10785-13-git-send-email-mporter@ti.com>
+Subject: [RFC PATCH v2 13/16] ARM: dts: add AM33XX MMC support
+Date: Thu, 11 Oct 2012 15:04:38 -0400
+Message-ID: <1349982281-10785-14-git-send-email-mporter@ti.com>
 References: <1349982281-10785-1-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,55 +20,74 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The binding definition is based on the generic DMA request binding.
+Adds AM33XX MMC support to the am33xx.dtsi and the BeagleBone
+dts.
 
 Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 ---
- .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   25 +++++++++++++++++++-
- 1 file changed, 24 insertions(+), 1 deletion(-)
+ arch/arm/boot/dts/am335x-bone.dts |    6 ++++++
+ arch/arm/boot/dts/am33xx.dtsi     |   27 +++++++++++++++++++++++++++
+ 2 files changed, 33 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-index be76a23..d1b8932 100644
---- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-@@ -19,8 +19,28 @@ ti,dual-volt: boolean, supports dual voltage cards
- "supply-name" examples are "vmmc", "vmmc_aux" etc
- ti,non-removable: non-removable slot (like eMMC)
- ti,needs-special-reset: Requires a special softreset sequence
-+dmas: DMA controller phandle and DMA request value ordered pair
-+One tx and one rx pair is required.
-+dma-names: DMA request names. These strings correspond 1:1 with
-+the ordered pairs in dmas. The RX request must be "rx" and the
-+TX request must be "tx".
-+
-+Examples:
-+
-+[hwmod populated DMA resources]
-+
-+	mmc1: mmc@0x4809c000 {
-+		compatible = "ti,omap4-hsmmc";
-+		reg = <0x4809c000 0x400>;
-+		ti,hwmods = "mmc1";
-+		ti,dual-volt;
-+		bus-width = <4>;
-+		vmmc-supply = <&vmmc>; /* phandle to regulator node */
-+		ti,non-removable;
-+	};
-+
-+[generic DMA request binding]
+diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
+index c634f87..5510979 100644
+--- a/arch/arm/boot/dts/am335x-bone.dts
++++ b/arch/arm/boot/dts/am335x-bone.dts
+@@ -70,6 +70,8 @@
+ 		};
  
--Example:
- 	mmc1: mmc@0x4809c000 {
- 		compatible = "ti,omap4-hsmmc";
- 		reg = <0x4809c000 0x400>;
-@@ -29,4 +49,7 @@ Example:
- 		bus-width = <4>;
- 		vmmc-supply = <&vmmc>; /* phandle to regulator node */
- 		ti,non-removable;
-+		dmas = <&edma 24
-+			&edma 25>;
-+		dma-names = "tx", "rx";
+ 		ldo3_reg: regulator@5 {
++			regulator-min-microvolt = <1800000>;
++			regulator-max-microvolt = <3300000>;
+ 			regulator-always-on;
+ 		};
+ 
+@@ -78,3 +80,7 @@
+ 		};
  	};
+ };
++
++&mmc1 {
++	vmmc-supply = <&ldo3_reg>;
++};
+diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+index 2ddb31b..ef8e105 100644
+--- a/arch/arm/boot/dts/am33xx.dtsi
++++ b/arch/arm/boot/dts/am33xx.dtsi
+@@ -233,6 +233,33 @@
+ 			status = "disabled";
+ 		};
+ 
++		mmc1: mmc@48060000 {
++			compatible = "ti,omap3-hsmmc";
++			ti,hwmods = "mmc1";
++			ti,dual-volt;
++			ti,needs-special-reset;
++			dmas = <&edma 24
++				&edma 25>;
++			dma-names = "tx", "rx";
++		};
++
++		mmc2: mmc@481d8000 {
++			compatible = "ti,omap3-hsmmc";
++			ti,hwmods = "mmc2";
++			ti,needs-special-reset;
++			dmas = <&edma 2
++				&edma 3>;
++			dma-names = "tx", "rx";
++			status = "disabled";
++		};
++
++		mmc3: mmc@47810000 {
++			compatible = "ti,omap3-hsmmc";
++			ti,hwmods = "mmc3";
++			ti,needs-special-reset;
++			status = "disabled";
++		};
++
+ 		wdt2: wdt@44e35000 {
+ 			compatible = "ti,omap3-wdt";
+ 			ti,hwmods = "wd_timer2";
 -- 
 1.7.9.5
 
