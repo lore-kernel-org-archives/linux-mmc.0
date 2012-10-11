@@ -1,153 +1,97 @@
-From: Matt Porter <mporter@ti.com>
-Subject: [RFC PATCH v2 01/16] dmaengine: edma: fix slave config dependency on direction
-Date: Thu, 11 Oct 2012 15:04:26 -0400
-Message-ID: <1349982281-10785-2-git-send-email-mporter@ti.com>
+From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+Subject: [RFC PATCH v2 03/16] ARM: edma: remove unused transfer controller
+	handlers
+Date: Thu, 11 Oct 2012 15:04:28 -0400
+Message-ID: <1349982281-10785-4-git-send-email-mporter@ti.com>
 References: <1349982281-10785-1-git-send-email-mporter@ti.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1349982281-10785-1-git-send-email-mporter@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>
-Cc: Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Arnd Bergmann <arnd@arndb.de>, Dan Williams <djbw@fb.com>, Rob Herring <rob.herring@calxeda.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+In-Reply-To: <1349982281-10785-1-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The edma_slave_config() implementation depends on the
-direction field such that it will not properly configure
-a slave channel when called without direction set.
+Fix build on OMAP, the irqs are undefined on AM33xx.
+These error interrupt handlers were hardcoded as disabled
+so since they are unused code, simply remove them.
 
-This fixes the implementation so that the slave config
-is copied as is and prep_slave_sg() handles the
-direction dependent handling. spi-omap2-mcspi and
-omap_hsmmc both expose this bug as they configure the
-slave channel config from a common path with an unconfigured
-direction field.
-
-Signed-off-by: Matt Porter <mporter@ti.com>
+Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 ---
- drivers/dma/edma.c |   55 ++++++++++++++++++++++++++--------------------------
- 1 file changed, 27 insertions(+), 28 deletions(-)
+ arch/arm/common/edma.c |   37 -------------------------------------
+ 1 file changed, 37 deletions(-)
 
-diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
-index 05aea3c..fdcf079 100644
---- a/drivers/dma/edma.c
-+++ b/drivers/dma/edma.c
-@@ -69,9 +69,7 @@ struct edma_chan {
- 	int				ch_num;
- 	bool				alloced;
- 	int				slot[EDMA_MAX_SLOTS];
--	dma_addr_t			addr;
--	int				addr_width;
--	int				maxburst;
-+	struct dma_slave_config		cfg;
- };
- 
- struct edma_cc {
-@@ -178,29 +176,14 @@ static int edma_terminate_all(struct edma_chan *echan)
- 	return 0;
+diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+index 4411087..a3d189d 100644
+--- a/arch/arm/common/edma.c
++++ b/arch/arm/common/edma.c
+@@ -494,26 +494,6 @@ static irqreturn_t dma_ccerr_handler(int irq, void *data)
+ 	return IRQ_HANDLED;
  }
  
+-/******************************************************************************
+- *
+- * Transfer controller error interrupt handlers
+- *
+- *****************************************************************************/
 -
- static int edma_slave_config(struct edma_chan *echan,
--	struct dma_slave_config *config)
-+	struct dma_slave_config *cfg)
- {
--	if ((config->src_addr_width > DMA_SLAVE_BUSWIDTH_4_BYTES) ||
--	    (config->dst_addr_width > DMA_SLAVE_BUSWIDTH_4_BYTES))
-+	if (cfg->src_addr_width == DMA_SLAVE_BUSWIDTH_8_BYTES ||
-+	    cfg->dst_addr_width == DMA_SLAVE_BUSWIDTH_8_BYTES)
- 		return -EINVAL;
- 
--	if (config->direction == DMA_MEM_TO_DEV) {
--		if (config->dst_addr)
--			echan->addr = config->dst_addr;
--		if (config->dst_addr_width)
--			echan->addr_width = config->dst_addr_width;
--		if (config->dst_maxburst)
--			echan->maxburst = config->dst_maxburst;
--	} else if (config->direction == DMA_DEV_TO_MEM) {
--		if (config->src_addr)
--			echan->addr = config->src_addr;
--		if (config->src_addr_width)
--			echan->addr_width = config->src_addr_width;
--		if (config->src_maxburst)
--			echan->maxburst = config->src_maxburst;
--	}
-+	memcpy(&echan->cfg, cfg, sizeof(echan->cfg));
- 
- 	return 0;
- }
-@@ -235,6 +218,9 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
- 	struct edma_chan *echan = to_edma_chan(chan);
- 	struct device *dev = chan->device->dev;
- 	struct edma_desc *edesc;
-+	dma_addr_t dev_addr;
-+	enum dma_slave_buswidth dev_width;
-+	u32 burst;
- 	struct scatterlist *sg;
- 	int i;
- 	int acnt, bcnt, ccnt, src, dst, cidx;
-@@ -243,7 +229,20 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
- 	if (unlikely(!echan || !sgl || !sg_len))
- 		return NULL;
- 
--	if (echan->addr_width == DMA_SLAVE_BUSWIDTH_UNDEFINED) {
-+	if (direction == DMA_DEV_TO_MEM) {
-+		dev_addr = echan->cfg.src_addr;
-+		dev_width = echan->cfg.src_addr_width;
-+		burst = echan->cfg.src_maxburst;
-+	} else if (direction == DMA_MEM_TO_DEV) {
-+		dev_addr = echan->cfg.dst_addr;
-+		dev_width = echan->cfg.dst_addr_width;
-+		burst = echan->cfg.dst_maxburst;
-+	} else {
-+		dev_err(dev, "%s: bad direction?\n", __func__);
-+		return NULL;
-+	}
-+
-+	if (dev_width == DMA_SLAVE_BUSWIDTH_UNDEFINED) {
- 		dev_err(dev, "Undefined slave buswidth\n");
- 		return NULL;
+-#define tc_errs_handled	false	/* disabled as long as they're NOPs */
+-
+-static irqreturn_t dma_tc0err_handler(int irq, void *data)
+-{
+-	dev_dbg(data, "dma_tc0err_handler\n");
+-	return IRQ_HANDLED;
+-}
+-
+-static irqreturn_t dma_tc1err_handler(int irq, void *data)
+-{
+-	dev_dbg(data, "dma_tc1err_handler\n");
+-	return IRQ_HANDLED;
+-}
+-
+ static int reserve_contiguous_slots(int ctlr, unsigned int id,
+ 				     unsigned int num_slots,
+ 				     unsigned int start_slot)
+@@ -1538,23 +1518,6 @@ static int __init edma_probe(struct platform_device *pdev)
+ 		arch_num_cc++;
  	}
-@@ -275,14 +274,14 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
- 			}
- 		}
  
--		acnt = echan->addr_width;
-+		acnt = dev_width;
+-	if (tc_errs_handled) {
+-		status = request_irq(IRQ_TCERRINT0, dma_tc0err_handler, 0,
+-					"edma_tc0", &pdev->dev);
+-		if (status < 0) {
+-			dev_dbg(&pdev->dev, "request_irq %d failed --> %d\n",
+-				IRQ_TCERRINT0, status);
+-			return status;
+-		}
+-		status = request_irq(IRQ_TCERRINT, dma_tc1err_handler, 0,
+-					"edma_tc1", &pdev->dev);
+-		if (status < 0) {
+-			dev_dbg(&pdev->dev, "request_irq %d --> %d\n",
+-				IRQ_TCERRINT, status);
+-			return status;
+-		}
+-	}
+-
+ 	return 0;
  
- 		/*
- 		 * If the maxburst is equal to the fifo width, use
- 		 * A-synced transfers. This allows for large contiguous
- 		 * buffer transfers using only one PaRAM set.
- 		 */
--		if (echan->maxburst == 1) {
-+		if (burst == 1) {
- 			edesc->absync = false;
- 			ccnt = sg_dma_len(sg) / acnt / (SZ_64K - 1);
- 			bcnt = sg_dma_len(sg) / acnt - ccnt * (SZ_64K - 1);
-@@ -302,7 +301,7 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
- 		 */
- 		} else {
- 			edesc->absync = true;
--			bcnt = echan->maxburst;
-+			bcnt = burst;
- 			ccnt = sg_dma_len(sg) / (acnt * bcnt);
- 			if (ccnt > (SZ_64K - 1)) {
- 				dev_err(dev, "Exceeded max SG segment size\n");
-@@ -313,13 +312,13 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
- 
- 		if (direction == DMA_MEM_TO_DEV) {
- 			src = sg_dma_address(sg);
--			dst = echan->addr;
-+			dst = dev_addr;
- 			src_bidx = acnt;
- 			src_cidx = cidx;
- 			dst_bidx = 0;
- 			dst_cidx = 0;
- 		} else {
--			src = echan->addr;
-+			src = dev_addr;
- 			dst = sg_dma_address(sg);
- 			src_bidx = 0;
- 			src_cidx = 0;
+ fail:
 -- 
 1.7.9.5
+
+
+------------------------------------------------------------------------------
+Don't let slow site performance ruin your business. Deploy New Relic APM
+Deploy New Relic app performance management and know exactly
+what is happening inside your Ruby, Python, PHP, Java, and .NET app
+Try New Relic at no cost today and get our sweet Data Nerd shirt too!
+http://p.sf.net/sfu/newrelic-dev2dev
