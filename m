@@ -1,8 +1,8 @@
 From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [RFC PATCH v2 10/16] mmc: omap_hsmmc: convert to
+Subject: [RFC PATCH v2 14/16] spi: omap2-mcspi: convert to
 	dma_request_slave_channel_compat()
-Date: Thu, 11 Oct 2012 15:04:35 -0400
-Message-ID: <1349982281-10785-11-git-send-email-mporter@ti.com>
+Date: Thu, 11 Oct 2012 15:04:39 -0400
+Message-ID: <1349982281-10785-15-git-send-email-mporter@ti.com>
 References: <1349982281-10785-1-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -30,36 +30,110 @@ filter.
 
 Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 ---
- drivers/mmc/host/omap_hsmmc.c |   10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
+ drivers/spi/spi-omap2-mcspi.c |   65 ++++++++++++++++++++++++++++-------------
+ 1 file changed, 45 insertions(+), 20 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 54bfd0c..b327cd0 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1866,14 +1866,20 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
+diff --git a/drivers/spi/spi-omap2-mcspi.c b/drivers/spi/spi-omap2-mcspi.c
+index 3542fdc..793ae8c 100644
+--- a/drivers/spi/spi-omap2-mcspi.c
++++ b/drivers/spi/spi-omap2-mcspi.c
+@@ -103,6 +103,9 @@ struct omap2_mcspi_dma {
+ 
+ 	struct completion dma_tx_completion;
+ 	struct completion dma_rx_completion;
++
++	char dma_rx_ch_name[14];
++	char dma_tx_ch_name[14];
+ };
+ 
+ /* use PIO for small transfers, avoiding DMA setup/teardown overhead and
+@@ -819,14 +822,23 @@ static int omap2_mcspi_request_dma(struct spi_device *spi)
  	dma_cap_zero(mask);
  	dma_cap_set(DMA_SLAVE, mask);
- 
--	host->rx_chan = dma_request_channel(mask, omap_dma_filter_fn, &rx_req);
-+	host->rx_chan =
-+		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
-+						 &rx_req, &pdev->dev, "rx");
+ 	sig = mcspi_dma->dma_rx_sync_dev;
+-	mcspi_dma->dma_rx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
 +
- 	if (!host->rx_chan) {
- 		dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
- 		ret = -ENXIO;
- 		goto err_irq;
++	mcspi_dma->dma_rx =
++		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
++						 &sig, &master->dev,
++						 mcspi_dma->dma_rx_ch_name);
++
+ 	if (!mcspi_dma->dma_rx) {
+ 		dev_err(&spi->dev, "no RX DMA engine channel for McSPI\n");
+ 		return -EAGAIN;
  	}
  
--	host->tx_chan = dma_request_channel(mask, omap_dma_filter_fn, &tx_req);
-+	host->tx_chan =
+ 	sig = mcspi_dma->dma_tx_sync_dev;
+-	mcspi_dma->dma_tx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
++	mcspi_dma->dma_tx =
 +		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
-+						 &tx_req, &pdev->dev, "tx");
++						 &sig, &master->dev,
++						 mcspi_dma->dma_tx_ch_name);
 +
- 	if (!host->tx_chan) {
- 		dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel %u\n", tx_req);
- 		ret = -ENXIO;
+ 	if (!mcspi_dma->dma_tx) {
+ 		dev_err(&spi->dev, "no TX DMA engine channel for McSPI\n");
+ 		dma_release_channel(mcspi_dma->dma_rx);
+@@ -1217,29 +1229,42 @@ static int __devinit omap2_mcspi_probe(struct platform_device *pdev)
+ 		goto free_master;
+ 
+ 	for (i = 0; i < master->num_chipselect; i++) {
+-		char dma_ch_name[14];
++		char *dma_rx_ch_name = mcspi->dma_channels[i].dma_rx_ch_name;
++		char *dma_tx_ch_name = mcspi->dma_channels[i].dma_tx_ch_name;
+ 		struct resource *dma_res;
+ 
+-		sprintf(dma_ch_name, "rx%d", i);
+-		dma_res = platform_get_resource_byname(pdev, IORESOURCE_DMA,
+-							dma_ch_name);
+-		if (!dma_res) {
+-			dev_dbg(&pdev->dev, "cannot get DMA RX channel\n");
+-			status = -ENODEV;
+-			break;
+-		}
++		sprintf(dma_rx_ch_name, "rx%d", i);
++		if (!pdev->dev.of_node) {
++			dma_res =
++				platform_get_resource_byname(pdev,
++							     IORESOURCE_DMA,
++							     dma_rx_ch_name);
++			if (!dma_res) {
++				dev_dbg(&pdev->dev,
++					"cannot get DMA RX channel\n");
++				status = -ENODEV;
++				break;
++			}
+ 
+-		mcspi->dma_channels[i].dma_rx_sync_dev = dma_res->start;
+-		sprintf(dma_ch_name, "tx%d", i);
+-		dma_res = platform_get_resource_byname(pdev, IORESOURCE_DMA,
+-							dma_ch_name);
+-		if (!dma_res) {
+-			dev_dbg(&pdev->dev, "cannot get DMA TX channel\n");
+-			status = -ENODEV;
+-			break;
++			mcspi->dma_channels[i].dma_rx_sync_dev =
++				dma_res->start;
+ 		}
++		sprintf(dma_tx_ch_name, "tx%d", i);
++		if (!pdev->dev.of_node) {
++			dma_res =
++				platform_get_resource_byname(pdev,
++							     IORESOURCE_DMA,
++							     dma_tx_ch_name);
++			if (!dma_res) {
++				dev_dbg(&pdev->dev,
++					"cannot get DMA TX channel\n");
++				status = -ENODEV;
++				break;
++			}
+ 
+-		mcspi->dma_channels[i].dma_tx_sync_dev = dma_res->start;
++			mcspi->dma_channels[i].dma_tx_sync_dev =
++				dma_res->start;
++		}
+ 	}
+ 
+ 	if (status < 0)
 -- 
 1.7.9.5
 
