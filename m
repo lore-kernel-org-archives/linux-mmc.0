@@ -1,8 +1,7 @@
 From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [RFC PATCH v2 15/16] spi: omap2-mcspi: add generic DMA request
-	support to the DT binding
-Date: Thu, 11 Oct 2012 15:04:40 -0400
-Message-ID: <1349982281-10785-16-git-send-email-mporter@ti.com>
+Subject: [RFC PATCH v2 16/16] ARM: dts: add AM33XX SPI support
+Date: Thu, 11 Oct 2012 15:04:41 -0400
+Message-ID: <1349982281-10785-17-git-send-email-mporter@ti.com>
 References: <1349982281-10785-1-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,56 +20,108 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The binding definition is based on the generic DMA request binding.
+Adds AM33XX SPI support to the am33xx.dtsi and the BeagleBone
+dts.
 
 Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 ---
- Documentation/devicetree/bindings/spi/omap-spi.txt |   27 +++++++++++++++++++-
- 1 file changed, 26 insertions(+), 1 deletion(-)
+ arch/arm/boot/dts/am335x-bone.dts |   17 +++++++++++++++
+ arch/arm/boot/dts/am33xx.dtsi     |   43 +++++++++++++++++++++++++++++++++++++
+ 2 files changed, 60 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/spi/omap-spi.txt b/Documentation/devicetree/bindings/spi/omap-spi.txt
-index 81df374..11aff04 100644
---- a/Documentation/devicetree/bindings/spi/omap-spi.txt
-+++ b/Documentation/devicetree/bindings/spi/omap-spi.txt
-@@ -7,8 +7,18 @@ Required properties:
- - ti,spi-num-cs : Number of chipselect supported  by the instance.
- - ti,hwmods: Name of the hwmod associated to the McSPI
+diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
+index 5510979..23edfd8 100644
+--- a/arch/arm/boot/dts/am335x-bone.dts
++++ b/arch/arm/boot/dts/am335x-bone.dts
+@@ -18,6 +18,17 @@
+ 		reg = <0x80000000 0x10000000>; /* 256 MB */
+ 	};
  
-+Optional properties:
-+- dmas: List of DMA controller phandle and DMA request ordered
-+	pairs. One tx and one rx pair is required for each chip
-+	select.
-+- dma-names: List of DMA request names. These strings correspond
-+	1:1 with the ordered pairs in dmas. The string naming is
-+	to be "rxN" and "txN" for RX and TX requests,
-+	respectively, where N equals the chip select number.
- 
--Example:
-+Examples:
++	am3358_pinmux: pinmux@44e10800 {
++		spi1_pins: pinmux_spi1_pins {
++			pinctrl-single,pins = <
++				0x190 0x13	/* mcasp0_aclkx.spi1_sclk, OUTPUT_PULLUP | MODE3 */
++				0x194 0x33	/* mcasp0_fsx.spi1_d0, INPUT_PULLUP | MODE3 */
++				0x198 0x13	/* mcasp0_axr0.spi1_d1, OUTPUT_PULLUP | MODE3 */
++				0x19c 0x13	/* mcasp0_ahclkr.spi1_cs0, OUTPUT_PULLUP | MODE3 */
++			>;
++		};
++	};
 +
-+[hwmod populated DMA resources]
- 
- mcspi1: mcspi@1 {
-     #address-cells = <1>;
-@@ -18,3 +28,18 @@ mcspi1: mcspi@1 {
-     ti,spi-num-cs = <4>;
+ 	ocp {
+ 		uart1: serial@44e09000 {
+ 			status = "okay";
+@@ -84,3 +95,9 @@
+ &mmc1 {
+ 	vmmc-supply = <&ldo3_reg>;
  };
- 
-+[generic DMA request binding]
 +
-+mcspi1: mcspi@1 {
-+    #address-cells = <1>;
-+    #size-cells = <0>;
-+    compatible = "ti,omap4-mcspi";
-+    ti,hwmods = "mcspi1";
-+    ti,spi-num-cs = <2>;
-+    dmas = <&edma 42
-+	    &edma 43
-+	    &edma 44
-+	    &edma 45>;
-+    dma-names = "tx0", "rx0", "tx1", "rx1";
++&spi1 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&spi1_pins>;
 +};
+diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+index ef8e105..854235e 100644
+--- a/arch/arm/boot/dts/am33xx.dtsi
++++ b/arch/arm/boot/dts/am33xx.dtsi
+@@ -40,6 +40,15 @@
+ 		};
+ 	};
+ 
++	am3358_pinmux: pinmux@44e10800 {
++		compatible = "pinctrl-single";
++		reg = <0x44e10800 0x0238>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		pinctrl-single,register-width = <32>;
++		pinctrl-single,function-mask = <0x7f>;
++	};
 +
+ 	/*
+ 	 * XXX: Use a flat representation of the AM33XX interconnect.
+ 	 * The real AM33XX interconnect network is quite complex.Since
+@@ -260,6 +269,40 @@
+ 			status = "disabled";
+ 		};
+ 
++		spi0: spi@48030000 {
++			compatible = "ti,omap4-mcspi";
++			ti,hwmods = "spi0";
++			#address-cells = <1>;
++			#size-cells = <0>;
++			reg = <0x48030000 0x400>;
++			interrupt-parent = <&intc>;
++			interrupt = <65>;
++			dmas = <&edma 16
++				&edma 17
++				&edma 18
++				&edma 19>;
++			dma-names = "tx0", "rx0", "tx1", "rx1";
++			ti,spi-num-cs = <2>;
++			status = "disabled";
++		};
++
++		spi1: spi@481a0000 {
++			compatible = "ti,omap4-mcspi";
++			ti,hwmods = "spi1";
++			#address-cells = <1>;
++			#size-cells = <0>;
++			reg = <0x481a0000 0x400>;
++			interrupt-parent = <&intc>;
++			interrupt = <125>;
++			dmas = <&edma 42
++				&edma 43
++				&edma 44
++				&edma 45>;
++			dma-names = "tx0", "rx0", "tx1", "rx1";
++			ti,spi-num-cs = <2>;
++			status = "disabled";
++		};
++
+ 		wdt2: wdt@44e35000 {
+ 			compatible = "ti,omap3-wdt";
+ 			ti,hwmods = "wd_timer2";
 -- 
 1.7.9.5
 
