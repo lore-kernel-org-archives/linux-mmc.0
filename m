@@ -1,44 +1,56 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RESEND PATCH 1/2] mmc: mmci: Fix incorrect handling of HW flow
- control for SDIO
-Date: Fri, 12 Oct 2012 14:39:14 +0200
-Message-ID: <CAPDyKFpLfJ87j9HnC2eKVDbPArgnLoTUZy-2wGxUZJ70VF=SUw@mail.gmail.com>
-References: <1349885000-22887-1-git-send-email-ulf.hansson@stericsson.com>
-	<20121012091322.GC21164@n2100.arm.linux.org.uk>
-	<20121012115448.GH21164@n2100.arm.linux.org.uk>
-	<50780BF0.3070907@stericsson.com>
-	<20121012123536.GJ21164@n2100.arm.linux.org.uk>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [GIT PULL] Disintegrate UAPI for mmc
+Date: Fri, 12 Oct 2012 09:12:55 -0400
+Message-ID: <87626f3kbs.fsf@octavius.laptop.org>
+References: <30707.1349789429@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:60586 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933584Ab2JLMjP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Oct 2012 08:39:15 -0400
-Received: by mail-wi0-f172.google.com with SMTP id hq12so370024wib.1
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Oct 2012 05:39:14 -0700 (PDT)
-In-Reply-To: <20121012123536.GJ21164@n2100.arm.linux.org.uk>
+Received: from void.printf.net ([89.145.121.20]:52383 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755616Ab2JLNNB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 12 Oct 2012 09:13:01 -0400
+In-Reply-To: <30707.1349789429@warthog.procyon.org.uk> (David Howells's
+	message of "Tue, 09 Oct 2012 14:30:29 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Ulf Hansson <ulf.hansson@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: David Howells <dhowells@redhat.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 12 October 2012 14:35, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> On Fri, Oct 12, 2012 at 02:24:16PM +0200, Ulf Hansson wrote:
->> Hi Russell,
->>
->> Our IT department is slow, too slow. :-)
->>
->> As an option, would it be possible for you to "manually" send me a new
->> password? Another option would be to change the mail for my account to
->> ulf.hansson@linaro.org
+Hi David,
+
+On Tue, Oct 09 2012, David Howells wrote:
+> Can you merge the following branch into the mmc tree please.
 >
-> Updated the email address; that's easier than trying to generate a new
-> password manually.  Please ask the site for a replacement password using
-> your linaro address and hopefully you should get it.
+> This is to complete part of the Userspace API (UAPI) disintegration for which
+> the preparatory patches were pulled recently.  After these patches, userspace
+> headers will be segregated into:
+>
+> 	include/uapi/linux/.../foo.h
+>
+> for the userspace interface stuff, and:
+>
+> 	include/linux/.../foo.h
+>
+> for the strictly kernel internal stuff.
+>
+> ---
+> The following changes since commit 9e2d8656f5e8aa214e66b462680cf86b210b74a8:
+>
+>   Merge branch 'akpm' (Andrew's patch-bomb) (2012-10-09 16:23:15 +0900)
+>
+> are available in the git repository at:
+>
+>
+>   git://git.infradead.org/users/dhowells/linux-headers.git tags/disintegrate-mmc-20121009
+>
+> for you to fetch changes up to ad1cfdcef1378adc7215a74772f7d06c4cc6ef50:
+>
+>   UAPI: (Scripted) Disintegrate include/linux/mmc (2012-10-09 09:48:45 +0100)
 
-Thanks a lot for helping out. I got a new pwd now!
+Thanks, I've sent this to Linus now.
 
-Kind regards
-Ulf Hansson
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
