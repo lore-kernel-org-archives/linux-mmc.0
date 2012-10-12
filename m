@@ -1,43 +1,64 @@
-From: Matt Porter <mporter@ti.com>
-Subject: Re: [RFC PATCH v2 00/16] DMA Engine support for AM33xx
-Date: Thu, 11 Oct 2012 17:49:30 -0400
-Message-ID: <20121011214930.GF13724@beef>
-References: <1349982281-10785-1-git-send-email-mporter@ti.com>
- <CACxGe6vL2ieaYN_YhZn9=e7=prwdfwZtgPr4Ei3VMNnViib6XA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Aaron Lu <aaron.lu@intel.com>
+Subject: [RFC PATCH 0/4] Enable setting of sdio device power state with ACPI
+Date: Fri, 12 Oct 2012 11:12:37 +0800
+Message-ID: <1350011561-21039-1-git-send-email-aaron.lu@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:56228 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759414Ab2JKVsf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Oct 2012 17:48:35 -0400
-Content-Disposition: inline
-In-Reply-To: <CACxGe6vL2ieaYN_YhZn9=e7=prwdfwZtgPr4Ei3VMNnViib6XA@mail.gmail.com>
+Received: from mga09.intel.com ([134.134.136.24]:56528 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752808Ab2JLDMu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 11 Oct 2012 23:12:50 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, Benoit Cousson <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Robert Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, spi-devel-general@lists.sourceforge.net, Chris Ball <cjb@laptop.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+To: Chris Ball <cjb@laptop.org>, "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-acpi@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
 
-On Thu, Oct 11, 2012 at 10:31:58PM +0100, Grant Likely wrote:
-> Hey Matt,
-> 
-> Do you know now similar are the EDMA engines on the am33xx and am389x? I've
-> been working on am389x upstreaming and I'll try these patches out if it is
-> the same engine.
+This patchset enables setting of acpi power state for sdio device
+when it is runtime suspended/resumed. SDIO function drivers can use
+the interfaces too introduced in patch 3 when there is such a need.
 
-Hi Grant,
+Patch 1 adds slot number information to the sdhci_host structure,
+the slot number will be used to bind the sdio device with acpi node.
 
-It's the same one. am389x/ti816x and am387x/ti814x are part of the same
-architectural family as am33xx. They've just never had a lot of upstream
-support from TI. I heard rumors that you might be working with am389x
-and I'm glad you're confirming that for me! ;)
+Patch 2 does the actual binding.
 
-The only differences between am33xx's implementation and the others is
-going to be the number PaRAM slots, number of TCs, the channel mapping,
-and then the crossbar mapping. As you can see from the TODO list, I
-don't yet support the crossbar, but it'll be in the next version of this
-series. The other items are already covered in the DT binding so it
-should be straightforward to hook this up for am389x assuming your hwmod
-and clock data is good for that part.
+Patch 3 introduces a platform power management operation structure,
+in which 4 callbacks are defined. The reason this structure is used is
+that in addition to ACPI, there may be other platform mechanisms to
+place a device into a low power state. And a implementation of this
+structure is done for ACPI in this patch. The idea and the definition
+of this structure is heavily based on the one used in PCI subsystem.
 
--Matt
+Patch 4 utilizes the newly added platform pm api to set the device
+into a low power state after its driver's runtime suspend callback.
+Its runtime wakeup capability is also enabled, and for this to work,
+driver must call device_set_run_wake(dev, true) somewhere when wakeup
+is desired. Please note that this wakeup mentioned here is realized
+through a sideband signal, it's not done by a SDIO interrupt. So
+platform support code is needed.
+
+Aaron Lu (4):
+  sdhci: add slot number into sdhci_host structure
+  mmc: sdio: bind sdio device with acpi device
+  sdio: introduce sdio_platform_pm_ops
+  sdio: pm: set device's power state after driver runtime suspended it
+
+ drivers/mmc/core/Makefile      |  1 +
+ drivers/mmc/core/sdio.c        | 37 +++++++++++++++++++
+ drivers/mmc/core/sdio.h        | 28 +++++++++++++++
+ drivers/mmc/core/sdio_acpi.c   | 81 ++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/sdio_bus.c    | 63 +++++++++++++++++++++++++++++---
+ drivers/mmc/core/sdio_bus.h    |  2 ++
+ drivers/mmc/host/sdhci-pci.c   |  2 +-
+ drivers/mmc/host/sdhci-pltfm.c |  4 +--
+ drivers/mmc/host/sdhci-s3c.c   |  2 +-
+ drivers/mmc/host/sdhci-spear.c |  4 +--
+ drivers/mmc/host/sdhci.c       |  3 +-
+ drivers/mmc/host/sdhci.h       |  2 +-
+ include/linux/mmc/sdhci.h      |  1 +
+ 13 files changed, 218 insertions(+), 12 deletions(-)
+ create mode 100644 drivers/mmc/core/sdio.h
+ create mode 100644 drivers/mmc/core/sdio_acpi.c
+
+-- 
+1.7.12.21.g871e293
+
