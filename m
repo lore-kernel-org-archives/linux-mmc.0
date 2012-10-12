@@ -1,64 +1,132 @@
 From: Aaron Lu <aaron.lu@intel.com>
-Subject: [RFC PATCH 0/4] Enable setting of sdio device power state with ACPI
-Date: Fri, 12 Oct 2012 11:12:37 +0800
-Message-ID: <1350011561-21039-1-git-send-email-aaron.lu@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:56528 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752808Ab2JLDMu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 11 Oct 2012 23:12:50 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [RFC PATCH 2/4] mmc: sdio: bind sdio device with acpi device
+Date: Fri, 12 Oct 2012 11:12:39 +0800
+Message-ID: <1350011561-21039-3-git-send-email-aaron.lu@intel.com>
+References: <1350011561-21039-1-git-send-email-aaron.lu@intel.com>
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <1350011561-21039-1-git-send-email-aaron.lu@intel.com>
+Sender: linux-acpi-owner@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>, "Rafael J. Wysocki" <rjw@sisk.pl>
 Cc: linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-acpi@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
 
-This patchset enables setting of acpi power state for sdio device
-when it is runtime suspended/resumed. SDIO function drivers can use
-the interfaces too introduced in patch 3 when there is such a need.
+ACPI spec defines the _ADDR encoding for sdio bus as:
+High word - slot number (0 based)
+Low word  - function number
 
-Patch 1 adds slot number information to the sdhci_host structure,
-the slot number will be used to bind the sdio device with acpi node.
+This patch adds support for sdio device binding with acpi using the
+generic ACPI glue framework.
 
-Patch 2 does the actual binding.
-
-Patch 3 introduces a platform power management operation structure,
-in which 4 callbacks are defined. The reason this structure is used is
-that in addition to ACPI, there may be other platform mechanisms to
-place a device into a low power state. And a implementation of this
-structure is done for ACPI in this patch. The idea and the definition
-of this structure is heavily based on the one used in PCI subsystem.
-
-Patch 4 utilizes the newly added platform pm api to set the device
-into a low power state after its driver's runtime suspend callback.
-Its runtime wakeup capability is also enabled, and for this to work,
-driver must call device_set_run_wake(dev, true) somewhere when wakeup
-is desired. Please note that this wakeup mentioned here is realized
-through a sideband signal, it's not done by a SDIO interrupt. So
-platform support code is needed.
-
-Aaron Lu (4):
-  sdhci: add slot number into sdhci_host structure
-  mmc: sdio: bind sdio device with acpi device
-  sdio: introduce sdio_platform_pm_ops
-  sdio: pm: set device's power state after driver runtime suspended it
-
- drivers/mmc/core/Makefile      |  1 +
- drivers/mmc/core/sdio.c        | 37 +++++++++++++++++++
- drivers/mmc/core/sdio.h        | 28 +++++++++++++++
- drivers/mmc/core/sdio_acpi.c   | 81 ++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/sdio_bus.c    | 63 +++++++++++++++++++++++++++++---
- drivers/mmc/core/sdio_bus.h    |  2 ++
- drivers/mmc/host/sdhci-pci.c   |  2 +-
- drivers/mmc/host/sdhci-pltfm.c |  4 +--
- drivers/mmc/host/sdhci-s3c.c   |  2 +-
- drivers/mmc/host/sdhci-spear.c |  4 +--
- drivers/mmc/host/sdhci.c       |  3 +-
- drivers/mmc/host/sdhci.h       |  2 +-
- include/linux/mmc/sdhci.h      |  1 +
- 13 files changed, 218 insertions(+), 12 deletions(-)
- create mode 100644 drivers/mmc/core/sdio.h
+Signed-off-by: Aaron Lu <aaron.lu@intel.com>
+---
+ drivers/mmc/core/Makefile    |  1 +
+ drivers/mmc/core/sdio_acpi.c | 35 +++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/sdio_bus.c  | 14 ++++++++++++--
+ drivers/mmc/core/sdio_bus.h  |  2 ++
+ 4 files changed, 50 insertions(+), 2 deletions(-)
  create mode 100644 drivers/mmc/core/sdio_acpi.c
 
+diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
+index 38ed210..c8300aa 100644
+--- a/drivers/mmc/core/Makefile
++++ b/drivers/mmc/core/Makefile
+@@ -10,3 +10,4 @@ mmc_core-y			:= core.o bus.o host.o \
+ 				   quirks.o slot-gpio.o
+ 
+ mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
++mmc_core-$(CONFIG_ACPI)		+= sdio_acpi.o
+diff --git a/drivers/mmc/core/sdio_acpi.c b/drivers/mmc/core/sdio_acpi.c
+new file mode 100644
+index 0000000..0f92e90
+--- /dev/null
++++ b/drivers/mmc/core/sdio_acpi.c
+@@ -0,0 +1,35 @@
++#include <linux/mmc/host.h>
++#include <linux/mmc/card.h>
++#include <linux/mmc/sdhci.h>
++#include <linux/mmc/sdio_func.h>
++#include <linux/acpi.h>
++#include <acpi/acpi_bus.h>
++#include "sdio_bus.h"
++
++static int acpi_sdio_find_device(struct device *dev, acpi_handle *handle)
++{
++	struct sdio_func *func;
++	struct sdhci_host *host;
++	u64 addr;
++
++	func = dev_to_sdio_func(dev);
++	host = mmc_priv(func->card->host);
++
++	addr = (host->slotno << 16) | func->num;
++
++	*handle = acpi_get_child(DEVICE_ACPI_HANDLE(dev), addr);
++	if (!*handle)
++		return -ENODEV;
++
++	return 0;
++}
++
++static struct acpi_bus_type acpi_sdio_bus = {
++	.bus = &sdio_bus_type,
++	.find_device = acpi_sdio_find_device,
++};
++
++int sdio_acpi_register(void)
++{
++	return register_acpi_bus_type(&acpi_sdio_bus);
++}
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index 6bf6879..aaec9e2 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -23,6 +23,7 @@
+ 
+ #include "sdio_cis.h"
+ #include "sdio_bus.h"
++#include "sdio_acpi.h"
+ 
+ /* show configuration fields */
+ #define sdio_config_attr(field, format_string)				\
+@@ -209,7 +210,7 @@ static const struct dev_pm_ops sdio_bus_pm_ops = {
+ 
+ #endif /* !CONFIG_PM */
+ 
+-static struct bus_type sdio_bus_type = {
++struct bus_type sdio_bus_type = {
+ 	.name		= "sdio",
+ 	.dev_attrs	= sdio_dev_attrs,
+ 	.match		= sdio_bus_match,
+@@ -221,7 +222,16 @@ static struct bus_type sdio_bus_type = {
+ 
+ int sdio_register_bus(void)
+ {
+-	return bus_register(&sdio_bus_type);
++	int ret;
++
++	ret = bus_register(&sdio_bus_type);
++	if (ret)
++		goto out;
++
++	ret = sdio_acpi_register();
++
++out:
++	return ret;
+ }
+ 
+ void sdio_unregister_bus(void)
+diff --git a/drivers/mmc/core/sdio_bus.h b/drivers/mmc/core/sdio_bus.h
+index 567a768..91c0e93 100644
+--- a/drivers/mmc/core/sdio_bus.h
++++ b/drivers/mmc/core/sdio_bus.h
+@@ -18,5 +18,7 @@ void sdio_remove_func(struct sdio_func *func);
+ int sdio_register_bus(void);
+ void sdio_unregister_bus(void);
+ 
++extern struct bus_type sdio_bus_type;
++
+ #endif
+ 
 -- 
 1.7.12.21.g871e293
 
