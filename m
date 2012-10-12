@@ -1,141 +1,210 @@
 From: Aaron Lu <aaron.lu@intel.com>
-Subject: [RFC PATCH 1/4] sdhci: add slot number into sdhci_host structure
-Date: Fri, 12 Oct 2012 11:12:38 +0800
-Message-ID: <1350011561-21039-2-git-send-email-aaron.lu@intel.com>
+Subject: [RFC PATCH 3/4] sdio: introduce sdio_platform_pm_ops
+Date: Fri, 12 Oct 2012 11:12:40 +0800
+Message-ID: <1350011561-21039-4-git-send-email-aaron.lu@intel.com>
 References: <1350011561-21039-1-git-send-email-aaron.lu@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:56528 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754087Ab2JLDMv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 11 Oct 2012 23:12:51 -0400
+Return-path: <linux-acpi-owner@vger.kernel.org>
 In-Reply-To: <1350011561-21039-1-git-send-email-aaron.lu@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-acpi-owner@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>, "Rafael J. Wysocki" <rjw@sisk.pl>
 Cc: linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-acpi@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Per the SDHCI spec, a SD host controller can have multiple slots, and
-each slot corresponds to a sdhci_host structure.
+Some platform has the ability to set the sdio device into a low power
+state with some specific method, e.g. ACPI on x86 based system can use
+acpi control methods to change the device's power state.
 
-This patch adds the slot number information to the sdhci_host structure,
-this will be used in the following patch to bind a sdio card to an acpi
-node.
+Considering there may be different platforms utilizing different
+mechanisms to achieve this, a new structure is introduced to let
+individual platform to use these callbacks to do the job.
+
+The structure contains 4 callbacks:
+- is_manageable
+  return true when the platform can manage the device's power;
+  return false otherwise.
+- choose_state
+  Choose a proper power state for the device
+- set_state
+  Set the device's power state
+- run_wake
+  Enable the device's runtime wakeup capability from the platform's
+  perspective.
+
+And 4 functions to wrap these callbacks:
+- bool platform_sdio_power_manageable(struct device *dev)
+- int platform_sdio_choose_power_state(struct device *dev)
+- int platform_sdio_set_power_state(struct device *dev, int state)
+- int platform_sdio_run_wake(struct device *dev, bool enable)
+So when these callbacks are desired, these wrapper functions should be
+used. And if someday some sdio function driver which lives out of the
+mmc subsystem has a need to use these wrapper functions, they can be
+exported.
+
+sdio_acpi.c implements these callbacks utilizing ACPI code.
+
+The idea of this patch and the definition/wrapper of these callbacks
+are heavily based on the one used in PCI subsystem.
 
 Signed-off-by: Aaron Lu <aaron.lu@intel.com>
 ---
- drivers/mmc/host/sdhci-pci.c   | 2 +-
- drivers/mmc/host/sdhci-pltfm.c | 4 ++--
- drivers/mmc/host/sdhci-s3c.c   | 2 +-
- drivers/mmc/host/sdhci-spear.c | 4 ++--
- drivers/mmc/host/sdhci.c       | 3 ++-
- drivers/mmc/host/sdhci.h       | 2 +-
- include/linux/mmc/sdhci.h      | 1 +
- 7 files changed, 10 insertions(+), 8 deletions(-)
+ drivers/mmc/core/sdio.c      | 37 ++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/sdio.h      | 28 ++++++++++++++++++++++++++
+ drivers/mmc/core/sdio_acpi.c | 48 +++++++++++++++++++++++++++++++++++++++++++-
+ 3 files changed, 112 insertions(+), 1 deletion(-)
+ create mode 100644 drivers/mmc/core/sdio.h
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 3f0794e..f9da09f 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -1211,7 +1211,7 @@ static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
- 		return ERR_PTR(-ENODEV);
- 	}
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index d4619e2..84b01b2 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -27,6 +27,7 @@
+ #include "sd_ops.h"
+ #include "sdio_ops.h"
+ #include "sdio_cis.h"
++#include "sdio.h"
  
--	host = sdhci_alloc_host(&pdev->dev, sizeof(struct sdhci_pci_slot));
-+	host = sdhci_alloc_host(&pdev->dev, sizeof(struct sdhci_pci_slot), slotno);
- 	if (IS_ERR(host)) {
- 		dev_err(&pdev->dev, "cannot allocate host\n");
- 		return ERR_CAST(host);
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index 65551a9..9a07b86 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -116,9 +116,9 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
- 
- 	/* Some PCI-based MFD need the parent here */
- 	if (pdev->dev.parent != &platform_bus && !np)
--		host = sdhci_alloc_host(pdev->dev.parent, sizeof(*pltfm_host));
-+		host = sdhci_alloc_host(pdev->dev.parent, sizeof(*pltfm_host), 0);
- 	else
--		host = sdhci_alloc_host(&pdev->dev, sizeof(*pltfm_host));
-+		host = sdhci_alloc_host(&pdev->dev, sizeof(*pltfm_host), 0);
- 
- 	if (IS_ERR(host)) {
- 		ret = PTR_ERR(host);
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 2903949..d689a8a 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -569,7 +569,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 		return irq;
- 	}
- 
--	host = sdhci_alloc_host(dev, sizeof(struct sdhci_s3c));
-+	host = sdhci_alloc_host(dev, sizeof(struct sdhci_s3c), 0);
- 	if (IS_ERR(host)) {
- 		dev_err(dev, "sdhci_alloc_host() failed\n");
- 		return PTR_ERR(host);
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index 423da81..4825bef 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -115,9 +115,9 @@ static int __devinit sdhci_probe(struct platform_device *pdev)
- 	pdev->dev.platform_data = sdhci;
- 
- 	if (pdev->dev.parent)
--		host = sdhci_alloc_host(pdev->dev.parent, 0);
-+		host = sdhci_alloc_host(pdev->dev.parent, 0, 0);
- 	else
--		host = sdhci_alloc_host(&pdev->dev, 0);
-+		host = sdhci_alloc_host(&pdev->dev, 0, 0);
- 
- 	if (IS_ERR(host)) {
- 		ret = PTR_ERR(host);
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 0e15c79..f4f51d1a 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2622,7 +2622,7 @@ EXPORT_SYMBOL_GPL(sdhci_runtime_resume_host);
- \*****************************************************************************/
- 
- struct sdhci_host *sdhci_alloc_host(struct device *dev,
--	size_t priv_size)
-+	size_t priv_size, int slotno)
+ static int sdio_read_fbr(struct sdio_func *func)
  {
- 	struct mmc_host *mmc;
- 	struct sdhci_host *host;
-@@ -2635,6 +2635,7 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
- 
- 	host = mmc_priv(mmc);
- 	host->mmc = mmc;
-+	host->slotno = slotno;
- 
- 	return host;
+@@ -1178,3 +1179,39 @@ err:
+ 	return err;
  }
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 97653ea..86d7ec6 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -365,7 +365,7 @@ static inline u8 sdhci_readb(struct sdhci_host *host, int reg)
- #endif /* CONFIG_MMC_SDHCI_IO_ACCESSORS */
  
- extern struct sdhci_host *sdhci_alloc_host(struct device *dev,
--	size_t priv_size);
-+	size_t priv_size, int slotno);
- extern void sdhci_free_host(struct sdhci_host *host);
++static struct sdio_platform_pm_ops *sdio_platform_pm;
++
++int sdio_set_platform_pm(struct sdio_platform_pm_ops *ops)
++{
++	if (!ops->is_manageable || !ops->choose_state ||
++			!ops->set_state || !ops->run_wake)
++		return -EINVAL;
++
++	sdio_platform_pm = ops;
++
++	return 0;
++}
++
++bool platform_sdio_power_manageable(struct device *dev)
++{
++	return sdio_platform_pm ?
++		sdio_platform_pm->is_manageable(dev) : false;
++}
++
++int platform_sdio_run_wake(struct device *dev, bool enable)
++{
++	return sdio_platform_pm ?
++		sdio_platform_pm->run_wake(dev, enable) : -ENODEV;
++}
++
++int platform_sdio_choose_power_state(struct device *dev)
++{
++	return sdio_platform_pm ?
++		sdio_platform_pm->choose_state(dev) : SDIO_POWER_ERROR;
++}
++
++int platform_sdio_set_power_state(struct device *dev, int state)
++{
++	return sdio_platform_pm ?
++		sdio_platform_pm->set_state(dev, state) : -ENOSYS;
++}
+diff --git a/drivers/mmc/core/sdio.h b/drivers/mmc/core/sdio.h
+new file mode 100644
+index 0000000..a95929e
+--- /dev/null
++++ b/drivers/mmc/core/sdio.h
+@@ -0,0 +1,28 @@
++#ifndef __SDIO_H
++#define __SDIO_H
++
++typedef int __bitwise sdio_power_t;
++
++#define SDIO_D0          ((sdio_power_t __force) 0)
++#define SDIO_D1          ((sdio_power_t __force) 1)
++#define SDIO_D2          ((sdio_power_t __force) 2)
++#define SDIO_D3hot       ((sdio_power_t __force) 3)
++#define SDIO_D3cold      ((sdio_power_t __force) 4)
++#define SDIO_UNKNOWN     ((sdio_power_t __force) 5)
++#define SDIO_POWER_ERROR ((sdio_power_t __force) -1)
++
++struct sdio_platform_pm_ops {
++	bool (*is_manageable)(struct device *dev);
++	int (*choose_state)(struct device *dev);
++	int (*set_state)(struct device *dev, sdio_power_t state);
++	int (*run_wake)(struct device *dev, bool enabel);
++};
++
++int sdio_set_platform_pm(struct sdio_platform_pm_ops *ops);
++
++bool platform_sdio_power_manageable(struct device *dev);
++sdio_power_t platform_sdio_choose_power_state(struct device *dev);
++int platform_sdio_set_power_state(struct device *dev, sdio_power_t state);
++int platform_sdio_run_wake(struct device *dev, bool enable);
++
++#endif
+diff --git a/drivers/mmc/core/sdio_acpi.c b/drivers/mmc/core/sdio_acpi.c
+index 0f92e90..a5b3012 100644
+--- a/drivers/mmc/core/sdio_acpi.c
++++ b/drivers/mmc/core/sdio_acpi.c
+@@ -4,8 +4,45 @@
+ #include <linux/mmc/sdio_func.h>
+ #include <linux/acpi.h>
+ #include <acpi/acpi_bus.h>
++#include "sdio.h"
+ #include "sdio_bus.h"
  
- static inline void *sdhci_priv(struct sdhci_host *host)
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index fa8529a..3f3a508 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -18,6 +18,7 @@
- #include <linux/mmc/host.h>
++static bool acpi_sdio_power_manageable(struct device *dev)
++{
++	acpi_handle handle = DEVICE_ACPI_HANDLE(dev);
++	return handle ? acpi_bus_power_manageable(handle) : false;
++}
++
++static int acpi_sdio_choose_power_state(struct device *dev)
++{
++	return acpi_pm_device_sleep_state(dev, NULL, ACPI_STATE_D3);
++}
++
++static int acpi_sdio_set_power_state(struct device *dev, int state)
++{
++	acpi_handle handle = DEVICE_ACPI_HANDLE(dev);
++
++	if (state < ACPI_STATE_D0 || state > ACPI_STATE_D3_COLD)
++		return -EINVAL;
++
++	if (!handle)
++		return -ENODEV;
++
++	return acpi_bus_set_power(handle, state);
++}
++
++static int acpi_sdio_run_wake(struct device *dev, bool enable)
++{
++	return acpi_pm_device_run_wake(dev, enable);
++}
++
++struct sdio_platform_pm_ops acpi_sdio_platform_pm = {
++	.is_manageable = acpi_sdio_power_manageable,
++	.choose_state = acpi_sdio_choose_power_state,
++	.set_state = acpi_sdio_set_power_state,
++	.run_wake = acpi_sdio_run_wake,
++};
++
+ static int acpi_sdio_find_device(struct device *dev, acpi_handle *handle)
+ {
+ 	struct sdio_func *func;
+@@ -31,5 +68,14 @@ static struct acpi_bus_type acpi_sdio_bus = {
  
- struct sdhci_host {
-+	int slotno;	/* slot number of this host */
- 	/* Data set by hardware interface driver */
- 	const char *hw_name;	/* Hardware bus name */
- 
+ int sdio_acpi_register(void)
+ {
+-	return register_acpi_bus_type(&acpi_sdio_bus);
++	int ret;
++
++	ret = register_acpi_bus_type(&acpi_sdio_bus);
++	if (ret)
++		goto out;
++
++	sdio_set_platform_pm(&acpi_sdio_platform_pm);
++
++out:
++	return ret;
+ }
 -- 
 1.7.12.21.g871e293
 
