@@ -1,44 +1,62 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: mmci: Fixup and cleanup code for DMA handling
-Date: Fri, 12 Oct 2012 23:32:31 +0200
-Message-ID: <CACRpkdZqe3uB9wGM5g5LUJuZEtzeBW=Hs5RF=5_CKU0CBWJRyA@mail.gmail.com>
-References: <1350056012-18625-1-git-send-email-ulf.hansson@stericsson.com>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [PATCH 1/4] MMC: omap_hsmmc: set platform data after probe from DT node
+Date: Sat, 13 Oct 2012 01:05:01 +0100
+Message-ID: <ae718323-6d65-4e69-b8f9-6382c6299294@email.android.com>
+References: <1350039495-360-1-git-send-email-zonque@gmail.com> <1350039495-360-2-git-send-email-zonque@gmail.com> <5078295E.2090803@gmail.com> <50782F82.8060206@ti.com> <507833ED.8060903@gmail.com> <507835E9.9020200@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:63869 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752414Ab2JLVcc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Oct 2012 17:32:32 -0400
-Received: by mail-vc0-f174.google.com with SMTP id fo13so3980294vcb.19
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Oct 2012 14:32:31 -0700 (PDT)
-In-Reply-To: <1350056012-18625-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:52628 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751437Ab2JMAFL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Oct 2012 20:05:11 -0400
+Received: by mail-wi0-f178.google.com with SMTP id hr7so59207wib.1
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Oct 2012 17:05:09 -0700 (PDT)
+In-Reply-To: <507835E9.9020200@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Per Forlin <per.forlin@stericsson.com>
+To: Balaji T K <balajitk@ti.com>, Daniel Mack <zonque@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Chris Ball <cjb@laptop.org>, Rob Herring <rob.herring@calxeda.com>, linux-omap@vger.kernel.org
 
-On Fri, Oct 12, 2012 at 5:33 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
 
-> From: Ulf Hansson <ulf.hansson@linaro.org>
+
+Balaji T K <balajitk@ti.com> wrote:
+
+>On Friday 12 October 2012 08:44 PM, Daniel Mack wrote:
+>> On 12.10.2012 16:56, Balaji T K wrote:
+>>> On Friday 12 October 2012 07:59 PM, Daniel Mack wrote:
+>>>> On 12.10.2012 12:58, Daniel Mack wrote:
+>>>>> diff --git a/drivers/mmc/host/omap_hsmmc.c
+>b/drivers/mmc/host/omap_hsmmc.c
+>>>>> index 19ccb59..4b70823 100644
+>>>>> --- a/drivers/mmc/host/omap_hsmmc.c
+>>>>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>>>>> @@ -1728,6 +1728,7 @@ static int __devinit omap_hsmmc_probe(struct
+>platform_device *pdev)
+>>>>>    			const u16 *offsetp = match->data;
+>>>>>    			pdata->reg_offset = *offsetp;
+>>>>>    		}
+>>>>> +		pdev->dev.platform_data = pdata;
+>>>>>    	}
+>>>>>
+>>>>>    	if (pdata == NULL) {
+>>>>>
+>>>>
+>>>> FWIW, this is the Oops I see without this patch:
+>>> Hi,
+>>> Shouldn't pdev->dev.platform_data be set to NULL on _remove ?
+>>
+>> Why?
 >
-> The cookie is now used to indicate if dma_unmap_sg shall be
-> done in post_request. At DMA errors, the DMA job is immediately
-> not only terminated but also unmapped. To indicate that this
-> has been done the cookie is reset to zero. post_request will
-> thus only do dma_umap_sg for requests which has a cookie not set
-> to zero.
->
-> Some corresponding duplicated code could then be removed and
-> moreover some corrections at DMA errors for terminating the same
-> DMA job twice has also been fixed.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Per Forlin <per.forlin@stericsson.com>
+>To make sure on second insmod it is NULL, When built as module,
+>So that of_get_hsmmc_pdata is called to create pdata.
 
-It looks like it's both factoring out code and also adding some unmapping
-in hithereto unhandled cases, correct? It looks OK to me now atleast so
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
+Actually the driver should *never* modify the value of dev->platform_data. Ever. Make a copy instead.
 
-Yours,
-Linus Walleij
+g.
+
+-- 
+Grant Likely, P.Eng.
+Secret Lab Technologies Ltd.
