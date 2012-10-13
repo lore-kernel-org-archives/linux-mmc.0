@@ -1,70 +1,68 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] sdhci: put regulator if probe fails
-Date: Sat, 13 Oct 2012 16:01:14 +0900
-Message-ID: <507911BA.3080204@samsung.com>
-References: <1350089717-4050-1-git-send-email-cascardo@holoscopio.com>
+From: Daniel Mack <zonque@gmail.com>
+Subject: Re: [PATCH 1/4] MMC: omap_hsmmc: set platform data after probe from
+ DT node
+Date: Sat, 13 Oct 2012 10:05:52 +0200
+Message-ID: <507920E0.2050104@gmail.com>
+References: <1350039495-360-1-git-send-email-zonque@gmail.com> <1350039495-360-2-git-send-email-zonque@gmail.com> <5078295E.2090803@gmail.com> <50782F82.8060206@ti.com> <507833ED.8060903@gmail.com> <507835E9.9020200@ti.com> <ae718323-6d65-4e69-b8f9-6382c6299294@email.android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:28668 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750975Ab2JMHBe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 13 Oct 2012 03:01:34 -0400
-In-reply-to: <1350089717-4050-1-git-send-email-cascardo@holoscopio.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <ae718323-6d65-4e69-b8f9-6382c6299294@email.android.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: Balaji T K <balajitk@ti.com>, linux-mmc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Chris Ball <cjb@laptop.org>, Rob Herring <rob.herring@calxeda.com>, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Thadeu Lima de Souza Cascardo <cascardo@holoscopio.com>
-Cc: linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On 10/13/2012 09:55 AM, Thadeu Lima de Souza Cascardo wrote:
-> When using the dummy regulator, SDHCI may fail its probing because the
-> regulator does not support any voltages.
-> 
-> When reloading the driver, you will get a warning about a duplicate
-> sysfs link.
-> 
-> [72211.963386] 0000:03:00.0 supply vmmc not found, using dummy regulator
-> [72211.963409] ------------[ cut here ]------------
-> [72211.963420] WARNING: at fs/sysfs/dir.c:536 sysfs_add_one+0x99/0xad()
-> [72211.963424] Hardware name:
-> [72211.963429] sysfs: cannot create duplicate filename '/devices/platform/reg-dummy/regulator/regulator.0/0000:03:00.0-vmmc'
-> 
-> Avoid this by properly cleaning up when the probe fails calling
-> regulator_put. Other fail paths get fixed as well.
-> 
-> Signed-off-by: Thadeu Lima de Souza Cascardo <cascardo@holoscopio.com>
-> ---
->  drivers/mmc/host/sdhci.c |    6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 7922adb..dd6bc26 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2992,7 +2992,8 @@ int sdhci_add_host(struct sdhci_host *host)
->  	if (mmc->ocr_avail == 0) {
->  		pr_err("%s: Hardware doesn't report any "
->  			"support voltages.\n", mmc_hostname(mmc));
-> -		return -ENODEV;
-> +		ret = -ENODEV;
-> +		goto out_vmmc;
->  	}
->  
->  	spin_lock_init(&host->lock);
-> @@ -3121,6 +3122,9 @@ reset:
->  untasklet:
->  	tasklet_kill(&host->card_tasklet);
->  	tasklet_kill(&host->finish_tasklet);
-> +out_vmmc:
-> +	if (host->vmmc)
-> +		regulator_put(host->vmmc);
-If fall down to untasklet, need not to disable regulator for vmmc?
+Hi Grant,
 
-Best Regards,
-Jaehoon Chung
->  
->  	return ret;
->  }
+On 13.10.2012 02:05, Grant Likely wrote:
 > 
+> 
+> Balaji T K <balajitk@ti.com> wrote:
+> 
+>> On Friday 12 October 2012 08:44 PM, Daniel Mack wrote:
+>>> On 12.10.2012 16:56, Balaji T K wrote:
+>>>> On Friday 12 October 2012 07:59 PM, Daniel Mack wrote:
+>>>>> On 12.10.2012 12:58, Daniel Mack wrote:
+>>>>>> diff --git a/drivers/mmc/host/omap_hsmmc.c
+>> b/drivers/mmc/host/omap_hsmmc.c
+>>>>>> index 19ccb59..4b70823 100644 ---
+>>>>>> a/drivers/mmc/host/omap_hsmmc.c +++
+>>>>>> b/drivers/mmc/host/omap_hsmmc.c @@ -1728,6 +1728,7 @@
+>>>>>> static int __devinit omap_hsmmc_probe(struct
+>> platform_device *pdev)
+>>>>>> const u16 *offsetp = match->data; pdata->reg_offset =
+>>>>>> *offsetp; } +		pdev->dev.platform_data = pdata; }
+>>>>>> 
+>>>>>> if (pdata == NULL) {
+>>>>>> 
+>>>>> 
+>>>>> FWIW, this is the Oops I see without this patch:
+>>>> Hi, Shouldn't pdev->dev.platform_data be set to NULL on _remove
+>>>> ?
+>>> 
+>>> Why?
+>> 
+>> To make sure on second insmod it is NULL, When built as module, So
+>> that of_get_hsmmc_pdata is called to create pdata.
+> 
+> Actually the driver should *never* modify the value of
+> dev->platform_data. Ever.
+
+That's interesting, because many drivers do this, especially since they
+were converted to DT probing. Mostly because that way, the platform data
+logic in callback functions can be reused, and often the platform
+specific data is only stored in pdata and taken from there during the
+lifetime of a device.
+
+Is there any particular reason why this approach is frowned upon?
+
+> Make a copy instead.
+
+A copy of what exactly? Of all members of the legacy pdata you mean?
+
+
+Thanks,
+Daniel
 
