@@ -1,128 +1,70 @@
-From: Johan Rudholm <jrudholm@gmail.com>
-Subject: Re: [PATCH 2/2] mmc: core: Power cycle card on voltage switch fail
-Date: Wed, 24 Oct 2012 12:56:42 +0200
-Message-ID: <CA+20K0BQD51dQCLxQhzU+A5-Pt5Jg76HoTjOAm7GBgq4DwqW6Q@mail.gmail.com>
-References: <1348166542-3247-1-git-send-email-johan.rudholm@stericsson.com>
-	<87bofsj52p.fsf@octavius.laptop.org>
-	<CAMLZHHRdz-==wgqvkoest61eaAdSHWTA0x-JTBgLWdO3B2gKJQ@mail.gmail.com>
+From: Konstantin Dorfman <kdorfman@codeaurora.org>
+Subject: Re: [PATCH] mmc: fix async request mechanism for sequential read scenarios
+Date: Sun, 14 Oct 2012 18:12:51 +0200
+Message-ID: <sval785hvhevse18konsgf63l8s106eor2@4ax.com>
+References: <1349192378-1676-1-git-send-email-kdorfman@codeaurora.org> <1349192378-1676-2-git-send-email-kdorfman@codeaurora.org> <CAFEEs1=zU88dwY1K0+Q9PxdqyOpsNMtj6mZ3YkwebPugofyEEw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:45794 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758162Ab2JXK4m (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Oct 2012 06:56:42 -0400
-Received: by mail-ie0-f174.google.com with SMTP id k13so415105iea.19
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Oct 2012 03:56:42 -0700 (PDT)
-In-Reply-To: <CAMLZHHRdz-==wgqvkoest61eaAdSHWTA0x-JTBgLWdO3B2gKJQ@mail.gmail.com>
+Received: from plane.gmane.org ([80.91.229.3]:49542 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756212Ab2JXNKB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 24 Oct 2012 09:10:01 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1TR0ih-00006K-Ho
+	for linux-mmc@vger.kernel.org; Wed, 24 Oct 2012 15:10:03 +0200
+Received: from 212.199.104.198.static.012.net.il ([212.199.104.198])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Oct 2012 15:10:03 +0200
+Received: from kdorfman by 212.199.104.198.static.012.net.il with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Oct 2012 15:10:03 +0200
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <dsd@laptop.org>
-Cc: Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>
+To: linux-mmc@vger.kernel.org
 
-Hi Chris and Daniel,
+On Thu, 11 Oct 2012 17:19:01 +0200, Per Forlin <per.lkml@gmail.com>
+wrote:
+Hello Per,
 
-Chris: Thank you for commenting on this patch! Yes, the sdhci power
-cycle code needs to be removed just as Daniel's patch does, and as I
-suggested in another patch: [RFC] mmc: sdhci: Let core handle UHS
-switch failure (https://patchwork.kernel.org/patch/1517211/).
-
-Daniel: Thank you for testing the patch! Comments below.
-
-2012/10/24 Daniel Drake <dsd@laptop.org>:
-> On Tue, Oct 23, 2012 at 2:39 PM, Chris Ball <cjb@laptop.org> wrote:
->> Dan, maybe you could see if this patch (there's a 1/2 patch too) solves
->> your UHS problem?
+>I would like to start with some basic comments.
 >
-> I tested [RFC/PATCH] mmc: core: Fixup signal voltage switch
-> https://patchwork.kernel.org/patch/1514691/
+>1. Is this read sequential issue specific to MMC?
+>2. Or is it common with all other block-drivers that gets data from
+>the block layer (SCSI/SATA etc) ?
+>If (#2) can the issue be addressed inside the block layer instead?
 >
-> This was previously failing on both XO-1.75 (kernel 3.0) and XO-4
-> (kernel 3.5) - the 1.8V switch would fail, but it would not
-> successfully switch back to 3.3V.
+>BR
+>Per
+This issue specific to MMC, others block drivers probably not using
+MMC mechanism for async request (or have more kernel threads for
+processing incoming blk requests). 
+I think, since MMC actively fetches requests from block layer queue,
+the solution has nothing to do with block layer context.
 
-Can you enlighten me a bit; what is XO? :) Host controller hardware?
-
-> Testing on XO-4, it worked fine: the 1.8V failed switch was detected,
-> it came back as 3.3V and everything was fine.
-
-Ok, so since you didn't have the card_busy function at this point, the
-failure was detected by the sdhci code, right? It power-cycles the
-card, returns -EAGAIN, the new code in mmc_sd_get_cid will try 10
-times and then come back to 3.3V. Is this what happened, did you get
-this print?
-
-                pr_warning("%s: Skipping voltage switch\n",
-                        mmc_hostname(host));
-
-> Testing on XO-1.75, it didn't work: it thought that the 1.8V switch
-> was successful so it left it at that, then the card reacted in a very
-> unstable manner (failed/retried reads, huge amount of kernel log spam,
-> etc).
-
-This points to that the way of checking if the card is busy or not may
-not work on XO-1.75? But then it seems strange that the card was
-semi-usable...
-
-> So I came up with the attached sdhci patch. That fixes the XO-1.75
-> case, which now correctly detects the 1.8V switch failure and goes to
-> 3.3V. However, that broke XO-4, which now just does:
->   mmc2: Signal voltage switch failed, power cycling card (retries = 10)
->   mmc2: error -110 whilst initialising SD card
-> (no more time to debug exactly whats happening)
-
-Ok, so failure is detected in mmc_set_signal_voltage by your card_busy
-function, good. Then the card is power cycled, and should be
-initialized again, but this fails, it's probably mmc_send_app_op_cond
-which returns -110. Maybe the power cycle fails?
-
-So the strange thing here is that on kernel 3.5, without my patch,
-1.8V switch fails and fall-back to 3.3V fails. With my patch, 1.8V
-fails and fall-back to 3.3V succeeds. But, when we move the detection
-and error-handling to my patch (the upper layer), the fall-back fails.
-
-I'm thinking of a couple of things that could have gone wrong here...
-If you used v2 of the patch, is assumes that the signal voltage is
-reset to 3.30 V in mmc_power_up, but this was introduced quite
-recently, in v3.6 (mmc: core: reset signal voltage on power up), but
-you used v1, right? So then there are at least two other differences:
-
-1) The way the card is power cycled.
-    sdhci toggles the SDHCI_POWER_ON bit in SDHCI_POWER_CONTROL, but
-my patch calls mmc_power_off / mmc_power_up.
-    Do you know if mmc_power_off / up is a good way to power-cycle the card?
-
-2) The way the clock is stopped.
-    sdhci clears SDHCI_CLOCK_CARD_EN in SDHCI_CLOCK_CONTROL, my patch
-sets ios.clock = 0 and calls mmc_set_ios.
-    But maybe this is not the issue, since the 1.8V switch fails in all cases.
-
-I don't really know how to proceed. Do you have the complete dmesgs
-from the 3.5 kernel: with my patch and without your patch + with my
-patch and with your patch? With these I could try to do a deeper
-analysis.
-
-By the way, in your patch
-0001-update-sdhci-for-voltage-changing-fixes.txt you don't check if
-the signal voltage switch succeeds electrically:
-
-                        ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-                        if (ctrl & SDHCI_CTRL_VDD_180) {
-
-but maybe we can assume that this will be fine after the delay of 5 ms
-in mmc_set_signal_voltage? Also in sdhci_card_busy you don't do
-runtime_pm_get before you check the busy status, but since the busy
-check returns busy, perhaps this is not the issue here either.
-
-> All tests with the same 32GB SD storage card.
 >
-> I wonder if this difference in behaviour is related to the difference
-> in kernel versions on each platform (3.0 vs 3.5). I would like to test
-> with 3.5 or newer running on both, but this requires a bit of setup
-> work for the XO-1.75 first (long story). And I'm out of time at this
-> point :( this was a borrowed SD card.
+>On Tue, Oct 2, 2012 at 5:39 PM, Konstantin Dorfman
+><kdorfman@codeaurora.org> wrote:
+>> The main assumption of the async request design is that the file
+>> system adds block requests to the block device queue asynchronously
+>> without waiting for completion (see the Rationale section of
+>> https://wiki.linaro.org/WorkingGroups/Kernel/Specs
+>> /StoragePerfMMC-async-req).
+>>
+>> We found out that in case of sequential read operations this is not
+>> the case, due to the read ahead mechanism.
+>Would it be possible to improve this mechanism to achieve the same result?
+>Allow an outstanding read ahead request on top of the current ongoing one.
+>
 
-Ok, I hope you'll be able to get time and SD-card in the future. :)
-Btw, what brand was the SD-card?
+I need to look on this mechanism,  but from first glance such
+behaviour may be result of libc/vfs/fs decisions and too complex
+comparing to the patch we are talking about.
 
-Kind regards, Johan
+Konstantin Dorfman,
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc.
+is a member of Code Aurora Forum, hosted by The Linux Foundation
+
