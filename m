@@ -1,53 +1,60 @@
-From: Madhvapathi Sriram <Madhvapathi.Sriram@csr.com>
-Subject: [PATCH 1/1] mmc: sdhci-pci: Enable SDHCI_CAN_DO_HISPD for ricoh
- SDHCI controller
-Date: Mon, 15 Oct 2012 04:47:30 +0000
-Message-ID: <AAD401B65941D44692B7183E6577180803927CA6@banasiexm01.ASIA.ROOT.PRI>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Tony Prisk <linux@prisktech.co.nz>
+Subject: [RFC PATCH 1/2] MMC: DTS: Add binding for Wondermedia WM8505 SDHC
+Date: Mon, 15 Oct 2012 21:24:52 +1300
+Message-ID: <1350289493-30533-2-git-send-email-linux@prisktech.co.nz>
+References: <1350289493-30533-1-git-send-email-linux@prisktech.co.nz>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cluster-d.mailcontrol.com ([85.115.60.190]:44682 "EHLO
-	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751870Ab2JOFbt convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Oct 2012 01:31:49 -0400
-Received: from rly14d.srv.mailcontrol.com (localhost.localdomain [127.0.0.1])
-	by rly14d.srv.mailcontrol.com (MailControl) with ESMTP id q9F4m2dI008724
-	for <linux-mmc@vger.kernel.org>; Mon, 15 Oct 2012 05:48:03 +0100
-Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
-	by rly14d.srv.mailcontrol.com (MailControl) id q9F4lbBp007493
-	for <linux-mmc@vger.kernel.org>; Mon, 15 Oct 2012 05:47:37 +0100
-Content-Language: en-US
+Received: from server.prisktech.co.nz ([115.188.14.127]:65158 "EHLO
+	server.prisktech.co.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751364Ab2JOIdd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Oct 2012 04:33:33 -0400
+In-Reply-To: <1350289493-30533-1-git-send-email-linux@prisktech.co.nz>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "'cjb@laptop.org'" <cjb@laptop.org>
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Tony Prisk <linux@prisktech.co.nz>
 
-The ricoh SDHCI controller supports Highspeed clocks as evident from
-the ricoh_mmc_probe_slot() settings. Hence, SDHCI_CAN_DO_HISPD needs
-to be set to enable SDIO client drivers to set/enable high speed clock
-settings
+Binding documentation for WMT SD/MMC Host Controller found on
+Wondermedia 8xxx series SoCs.
 
-Signed-off-by: Madhvapathi Sriram <Madhvapathi.Sriram@csr.com>
+Based on mmc.txt binding with additional properties.
+
+Signed-off-by: Tony Prisk <linux@prisktech.co.nz>
 ---
- drivers/mmc/host/sdhci-pci.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+ .../devicetree/bindings/mmc/vt8500-sdmmc.txt       |   24 ++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/vt8500-sdmmc.txt
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 4bb74b0..0245666 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -114,6 +114,7 @@ static int ricoh_mmc_probe_slot(struct sdhci_pci_slot *slot)
- 
- 		SDHCI_TIMEOUT_CLK_UNIT |
- 		SDHCI_CAN_VDD_330 |
-+		SDHCI_CAN_DO_HISPD |
- 		SDHCI_CAN_DO_SDMA;
- 	return 0;
- }
+diff --git a/Documentation/devicetree/bindings/mmc/vt8500-sdmmc.txt b/Documentation/devicetree/bindings/mmc/vt8500-sdmmc.txt
+new file mode 100644
+index 0000000..69a817e
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/vt8500-sdmmc.txt
+@@ -0,0 +1,24 @@
++* Wondermedia WM8505/WM8650 SD/MMC Host Controller
++
++Required properties:
++- compatible: Should be "wm,wm8505-sdhc".
++- reg: Memory for sdhc controller.
++- interrupts: Two interrupts are required - regular irq and dma irq.
++- clocks: pHandle to clock for controller.
++- bus-width: <1>,<4> or <8> data lines connected
++
++Optional properties:
++- sdon-inverted: SD_ON bit is inverted on the controller
++- cd-inverted: CD bit is inverted on the controller
++
++Examples:
++
++sdhc@d800a000 {
++	compatible = "wm,wm8505-sdhc";
++	reg = <0xd800a000 0x1000>;
++	interrupts = <20 21>;
++	clocks = <&sdhc>;
++	bus-width = <4>;
++	sdon-inverted;
++};
++
 -- 
-1.7.4.1
+1.7.9.5
 
-
-Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
-More information can be found at www.csr.com. Follow CSR on Twitter at http://twitter.com/CSR_PLC and read our blog at www.csr.com/blog
