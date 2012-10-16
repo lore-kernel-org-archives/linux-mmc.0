@@ -1,44 +1,53 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 1/2] ARM: OMAP: Trivial driver changes to
- remove include plat/cpu.h
-Date: Mon, 15 Oct 2012 17:07:23 -0700
-Message-ID: <20121016000722.GH15569@atomide.com>
-References: <20121008173452.10603.53886.stgit@muffinssi>
- <20121008173557.10603.18539.stgit@muffinssi>
- <5073E84E.4090408@ti.com> <20121010001943.GK12552@atomide.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: mmci: Fixup and cleanup code for DMA handling
+Date: Tue, 16 Oct 2012 09:16:17 +0200
+Message-ID: <CAPDyKFr=aN+MN+VCvbAqNa7mu+fxTTeHdcA1oCv8QWqpdT8MGQ@mail.gmail.com>
+References: <1350056012-18625-1-git-send-email-ulf.hansson@stericsson.com>
+	<CACRpkdZqe3uB9wGM5g5LUJuZEtzeBW=Hs5RF=5_CKU0CBWJRyA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <alsa-devel-bounces@alsa-project.org>
-Content-Disposition: inline
-In-Reply-To: <20121010001943.GK12552@atomide.com>
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Errors-To: alsa-devel-bounces@alsa-project.org
-Sender: alsa-devel-bounces@alsa-project.org
-To: =?utf-8?B?UMOpdGVy?= Ujfalusi <peter.ujfalusi@ti.com>
-Cc: alsa-devel@alsa-project.org, Deepak Saxena <dsaxena@plexity.net>, Venkatraman S <svenkatr@ti.com>, Vinod Koul <vinod.koul@intel.com>, Matt Mackall <mpm@selenic.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "David S. Miller" <davem@davemloft.net>, Herbert Xu <herbert@gondor.hengli.com.au>, Jarkko Nikula <jarkko.nikula@bitmer.com>, Chris Ball <cjb@laptop.org>, Dan Williams <djbw@fb.com>, linux-omap@vger.kernel.org, Liam Girdwood <lrg@ti.com>, linux-arm-kernel@lists.infradead.org, linux-crypto@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:41144 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754227Ab2JPHQT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Oct 2012 03:16:19 -0400
+Received: by mail-we0-f174.google.com with SMTP id t9so3537287wey.19
+        for <linux-mmc@vger.kernel.org>; Tue, 16 Oct 2012 00:16:17 -0700 (PDT)
+In-Reply-To: <CACRpkdZqe3uB9wGM5g5LUJuZEtzeBW=Hs5RF=5_CKU0CBWJRyA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, Per Forlin <per.forlin@stericsson.com>
 
-KiBUb255IExpbmRncmVuIDx0b255QGF0b21pZGUuY29tPiBbMTIxMDA5IDE3OjIxXToKPiAqIFDD
-qXRlciBVamZhbHVzaSA8cGV0ZXIudWpmYWx1c2lAdGkuY29tPiBbMTIxMDA5IDAyOjAzXToKPiA+
-IE9uIDEwLzA4LzIwMTIgMDc6MzUgUE0sIFRvbnkgTGluZGdyZW4gd3JvdGU6Cj4gPiAKPiA+ID4g
-LSBvbWFwLWRtYS5jIGFuZCBvbWFwLXBjbS5jIGNhbiB0ZXN0IHRoZSBhcmNoIGxvY2FsbHkgYXMK
-PiA+ID4gICBvbWFwMSBhbmQgb21hcDIgY2Fubm90IGJlIGNvbXBpbGVkIHRvZ2V0aGVyIGJlY2F1
-c2Ugb2YKPiA+ID4gICBjb25mbGljdGluZyBjb21waWxlciBmbGFncwo+ID4gCj4gPiA+ICBzb3Vu
-ZC9zb2Mvb21hcC9vbWFwLXBjbS5jICAgICAgICAgfCAgICA5ICsrKysrKystLQo+ID4gCj4gPiBU
-b255OiBpcyB0aGlzIGdvaW5nIHRvIGJlIGluY2x1ZGVkIGluIDMuNz8KPiAKPiBIbW0gSSBndWVz
-cyB3ZSBjb3VsZCB0cnkgdG8gZ2V0IHRoaXMgb3V0IG9mIHRoZSB3YXkKPiB0byBjdXQgZG93biB0
-aGUgZGVwZW5kZW5jaWVzLiBMZXQncyBpZiBtYWludGFpbmVycwo+IG9mIHRoZSBvdGhlciBhZmZl
-Y3RlZCBkcml2ZXJzIHRoaXMgaXMgT0sgZm9yIHRoZQo+IC1yYyBzZXJpZXMuCgpJdCBzZWVtcyB0
-aGF0IG5vYm9keSBuZWVkcyB0aGVzZSB1bnRpbCBmb3IgdjMuOCwgc28gSSdsbApiZSBhcHBseWlu
-ZyB0aGlzIGludG8gb21hcC1mb3ItdjMuOC9jbGVhbnVwLWhlYWRlcnMtcHJlcGFyZQpicmFuY2gg
-c29vbi4KCkFueWJvZHkgZWxzZSBjYXJlIHRvIGFjaz8KClJlZ2FyZHMsCgpUb255Cl9fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCkFsc2EtZGV2ZWwgbWFpbGlu
-ZyBsaXN0CkFsc2EtZGV2ZWxAYWxzYS1wcm9qZWN0Lm9yZwpodHRwOi8vbWFpbG1hbi5hbHNhLXBy
-b2plY3Qub3JnL21haWxtYW4vbGlzdGluZm8vYWxzYS1kZXZlbAo=
+Hi Linus,
+
+On 12 October 2012 23:32, Linus Walleij <linus.walleij@linaro.org> wrote:
+> On Fri, Oct 12, 2012 at 5:33 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
+>
+>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>
+>> The cookie is now used to indicate if dma_unmap_sg shall be
+>> done in post_request. At DMA errors, the DMA job is immediately
+>> not only terminated but also unmapped. To indicate that this
+>> has been done the cookie is reset to zero. post_request will
+>> thus only do dma_umap_sg for requests which has a cookie not set
+>> to zero.
+>>
+>> Some corresponding duplicated code could then be removed and
+>> moreover some corrections at DMA errors for terminating the same
+>> DMA job twice has also been fixed.
+>>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> Signed-off-by: Per Forlin <per.forlin@stericsson.com>
+>
+> It looks like it's both factoring out code and also adding some unmapping
+> in hithereto unhandled cases, correct? It looks OK to me now atleast so
+> Acked-by: Linus Walleij <linus.walleij@linaro.org>
+
+This code has not been tested on a "legacy" ARM PL180 but only for
+ux500 boards. Even if it should affect DMA handling we should test
+this properly. Would be great if you were able to help out, I guess
+you still have available hardware for these tests?
+
+Kind regards
+Ulf Hansson
