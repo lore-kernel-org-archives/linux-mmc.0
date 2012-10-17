@@ -1,13 +1,13 @@
 From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: [PATCH v6 04/14] mmc: sdhci: keep the saved clock var up to date
-Date: Wed, 17 Oct 2012 19:04:43 +0800
-Message-ID: <1350471893-29633-5-git-send-email-keyuan.liu@gmail.com>
+Subject: [PATCH v6 05/14] mmc: sdhci: fix null return check of regulator_get
+Date: Wed, 17 Oct 2012 19:04:44 +0800
+Message-ID: <1350471893-29633-6-git-send-email-keyuan.liu@gmail.com>
 References: <1350471893-29633-1-git-send-email-keyuan.liu@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:56129 "EHLO
-	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755580Ab2JQLFT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Oct 2012 07:05:19 -0400
+Received: from na3sys009aog117.obsmtp.com ([74.125.149.242]:38628 "EHLO
+	na3sys009aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756261Ab2JQLFW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Oct 2012 07:05:22 -0400
 In-Reply-To: <1350471893-29633-1-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -16,43 +16,52 @@ Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.
 
 From: Kevin Liu <kliu5@marvell.com>
 
-The clock rate set to the sdh controller may not exactly as requested
-by the mmc core, this patch make the clock rate saved in the mmc_ios
-and sdhci_host updated with the actual setting as in the controller. Thus
-"/sys/kernel/debug/mmcx/ios" and card detect prints can show the correct
-clock rate.
-Otherwise, mmc power class may be set to wrong value with wrong ios.clock
+regulator_get() returns NULL when CONFIG_REGULATOR not defined,
+which should not print out the warning.
 
+Reviewed-by: Philip Rakity <prakity@marvell.com>
 Signed-off-by: Bin Wang <binw@marvell.com>
 Signed-off-by: Kevin Liu <kliu5@marvell.com>
 ---
- drivers/mmc/host/sdhci.c |    6 +++++-
- 1 files changed, 5 insertions(+), 1 deletions(-)
+ drivers/mmc/host/sdhci.c |   18 ++++++++++++------
+ 1 files changed, 12 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index eb621dd..8e6a6f0 100644
+index 8e6a6f0..0104ae9 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1199,7 +1199,10 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+@@ -2845,9 +2845,12 @@ int sdhci_add_host(struct sdhci_host *host)
  
- out:
--	host->clock = clock;
-+	if (real_div)
-+		host->clock = host->mmc->actual_clock;
-+	else
-+		host->clock = clock;
- }
- 
- static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
-@@ -1375,6 +1378,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
+ 	host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
+-	if (IS_ERR(host->vqmmc)) {
+-		pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
+-		host->vqmmc = NULL;
++	if (IS_ERR_OR_NULL(host->vqmmc)) {
++		if (PTR_ERR(host->vqmmc) < 0) {
++			pr_info("%s: no vqmmc regulator found\n",
++				mmc_hostname(mmc));
++			host->vqmmc = NULL;
++		}
  	}
+ 	else if (regulator_is_supported_voltage(host->vqmmc, 1800000, 1800000))
+ 		regulator_enable(host->vqmmc);
+@@ -2903,9 +2906,12 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	ocr_avail = 0;
  
- 	sdhci_set_clock(host, ios->clock);
-+	ios->clock = host->clock;
+ 	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
+-	if (IS_ERR(host->vmmc)) {
+-		pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
+-		host->vmmc = NULL;
++	if (IS_ERR_OR_NULL(host->vmmc)) {
++		if (PTR_ERR(host->vmmc) < 0) {
++			pr_info("%s: no vmmc regulator found\n",
++				mmc_hostname(mmc));
++			host->vmmc = NULL;
++		}
+ 	} else
+ 		regulator_enable(host->vmmc);
  
- 	if (ios->power_mode == MMC_POWER_OFF)
- 		vdd_bit = sdhci_set_power(host, -1);
 -- 
 1.7.0.4
 
