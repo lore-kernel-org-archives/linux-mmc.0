@@ -1,80 +1,86 @@
 From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: [PATCH v6 10/14] mmc: sdhci: introduce signal_voltage_switch callback function
-Date: Wed, 17 Oct 2012 19:04:49 +0800
-Message-ID: <1350471893-29633-11-git-send-email-keyuan.liu@gmail.com>
+Subject: [PATCH v6 12/14] mmc: sdhci-pxav3: remove set_uhs_signaling function
+Date: Wed, 17 Oct 2012 19:04:51 +0800
+Message-ID: <1350471893-29633-13-git-send-email-keyuan.liu@gmail.com>
 References: <1350471893-29633-1-git-send-email-keyuan.liu@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog117.obsmtp.com ([74.125.149.242]:57914 "EHLO
-	na3sys009aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756587Ab2JQLFe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Oct 2012 07:05:34 -0400
+Received: from na3sys009aog138.obsmtp.com ([74.125.149.19]:42941 "EHLO
+	na3sys009aog138.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756597Ab2JQLFj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Oct 2012 07:05:39 -0400
 In-Reply-To: <1350471893-29633-1-git-send-email-keyuan.liu@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com
-Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com, Bin Wang <binw@marvell.com>
+Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
 From: Kevin Liu <kliu5@marvell.com>
 
-Some soc/platform need specific handling for signal voltage
-switch. For example, mmp2/mmp3 need to set the AIB IO domain
-control register accordingly.
+Because sdhci can do the same thing so no need to implement this.
 
-Signed-off-by: Bin Wang <binw@marvell.com>
-Signed-off-by: Philip Rakity <prakity@marvell.com>
+Acked-by:  Zhangfei Gao <zhangfei.gao@marvell.com>
 Signed-off-by: Kevin Liu <kliu5@marvell.com>
 ---
- drivers/mmc/host/sdhci.c |   17 +++++++++++++++++
- drivers/mmc/host/sdhci.h |    1 +
- 2 files changed, 18 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci-pxav3.c |   39 ---------------------------------------
+ 1 files changed, 0 insertions(+), 39 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a662640..c3e786d 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1684,6 +1684,15 @@ static int sdhci_do_3_3v_signal_voltage_switch(struct sdhci_host *host,
- 			return -EIO;
- 		}
- 	}
-+
-+	/*
-+	 * May need to apply soc/platfrom settings for the
-+	 * voltage switch
-+	 */
-+	if (host->ops->signal_voltage_switch)
-+		host->ops->signal_voltage_switch(host,
-+				host->mmc->ios.signal_voltage);
-+
- 	/* Wait for 5ms */
- 	usleep_range(5000, 5500);
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index 60829c9..6aecc91 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -125,44 +125,6 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
+ 	pxa->power_mode = power_mode;
+ }
  
-@@ -1726,6 +1735,14 @@ static int sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
- 			ret = 0;
+-static int pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+-{
+-	u16 ctrl_2;
+-
+-	/*
+-	 * Set V18_EN -- UHS modes do not work without this.
+-	 * does not change signaling voltage
+-	 */
+-	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+-
+-	/* Select Bus Speed Mode for host */
+-	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
+-	switch (uhs) {
+-	case MMC_TIMING_UHS_SDR12:
+-		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
+-		break;
+-	case MMC_TIMING_UHS_SDR25:
+-		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
+-		break;
+-	case MMC_TIMING_UHS_SDR50:
+-		ctrl_2 |= SDHCI_CTRL_UHS_SDR50 | SDHCI_CTRL_VDD_180;
+-		break;
+-	case MMC_TIMING_UHS_SDR104:
+-		ctrl_2 |= SDHCI_CTRL_UHS_SDR104 | SDHCI_CTRL_VDD_180;
+-		break;
+-	case MMC_TIMING_UHS_DDR50:
+-		ctrl_2 |= SDHCI_CTRL_UHS_DDR50 | SDHCI_CTRL_VDD_180;
+-		break;
+-	}
+-
+-	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+-	dev_dbg(mmc_dev(host->mmc),
+-		"%s uhs = %d, ctrl_2 = %04X\n",
+-		__func__, uhs, ctrl_2);
+-
+-	return 0;
+-}
+-
+ static u32 pxav3_get_max_clock(struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -172,7 +134,6 @@ static u32 pxav3_get_max_clock(struct sdhci_host *host)
  
- 		if (!ret) {
-+			/*
-+			 * May need to apply soc/platfrom settings for the
-+			 * voltage switch
-+			 */
-+			if (host->ops->signal_voltage_switch)
-+				host->ops->signal_voltage_switch(host,
-+					host->mmc->ios.signal_voltage);
-+
- 			ctrl |= SDHCI_CTRL_VDD_180;
- 			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
- 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 5eb27bf..5f20d32 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -290,6 +290,7 @@ struct sdhci_ops {
- 	void	(*hw_reset)(struct sdhci_host *host);
- 	void	(*platform_suspend)(struct sdhci_host *host);
- 	void	(*platform_resume)(struct sdhci_host *host);
-+	void	(*signal_voltage_switch)(struct sdhci_host *host, u8 vol);
+ static struct sdhci_ops pxav3_sdhci_ops = {
+ 	.platform_reset_exit = pxav3_set_private_registers,
+-	.set_uhs_signaling = pxav3_set_uhs_signaling,
+ 	.platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
+ 	.get_max_clock = pxav3_get_max_clock,
  };
- 
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 -- 
 1.7.0.4
 
