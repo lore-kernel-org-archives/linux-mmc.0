@@ -1,51 +1,76 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 1/2] ARM: OMAP: Trivial driver changes to remove
- include plat/cpu.h
-Date: Wed, 17 Oct 2012 11:13:31 -0700
-Message-ID: <20121017181330.GV15569@atomide.com>
-References: <20121008173452.10603.53886.stgit@muffinssi>
- <20121008173557.10603.18539.stgit@muffinssi>
- <5073E84E.4090408@ti.com>
- <20121010001943.GK12552@atomide.com>
- <20121016000722.GH15569@atomide.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: core: Support all MMC capabilities when booting
+ from Device Tree
+Date: Wed, 17 Oct 2012 20:53:00 +0200
+Message-ID: <CAPDyKFq6YfpjCs-3Wh=RPGc-4ukUinuhVWaZ0=+WCLsc0JBWbQ@mail.gmail.com>
+References: <1350306959-5843-1-git-send-email-lee.jones@linaro.org>
+	<201210151420.29930.arnd@arndb.de>
+	<20121015160740.GC7662@gmail.com>
+	<201210171338.01011.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-crypto-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20121016000722.GH15569@atomide.com>
-Sender: linux-crypto-owner@vger.kernel.org
-To: =?utf-8?B?UMOpdGVy?= Ujfalusi <peter.ujfalusi@ti.com>
-Cc: linux-arm-kernel@lists.infradead.org, alsa-devel@alsa-project.org, linux-omap@vger.kernel.org, Mark Brown <broonie@opensource.wolfsonmicro.com>, Herbert Xu <herbert@gondor.hengli.com.au>, Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Liam Girdwood <lrg@ti.com>, Deepak Saxena <dsaxena@plexity.net>, Chris Ball <cjb@laptop.org>, Matt Mackall <mpm@selenic.com>, Venkatraman S <svenkatr@ti.com>, "David S. Miller" <davem@davemloft.net>, Jarkko Nikula <jarkko.nikula@bitmer.com>, linux-crypto@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:52530 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757623Ab2JQSxC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Oct 2012 14:53:02 -0400
+Received: by mail-wg0-f44.google.com with SMTP id dr13so6562953wgb.1
+        for <linux-mmc@vger.kernel.org>; Wed, 17 Oct 2012 11:53:01 -0700 (PDT)
+In-Reply-To: <201210171338.01011.arnd@arndb.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Lee Jones <lee.jones@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linus.walleij@stericsson.com, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@stericsson.com>
 
-* Tony Lindgren <tony@atomide.com> [121015 17:09]:
-> * Tony Lindgren <tony@atomide.com> [121009 17:21]:
-> > * P=C3=A9ter Ujfalusi <peter.ujfalusi@ti.com> [121009 02:03]:
-> > > On 10/08/2012 07:35 PM, Tony Lindgren wrote:
-> > >=20
-> > > > - omap-dma.c and omap-pcm.c can test the arch locally as
-> > > >   omap1 and omap2 cannot be compiled together because of
-> > > >   conflicting compiler flags
-> > >=20
-> > > >  sound/soc/omap/omap-pcm.c         |    9 +++++++--
-> > >=20
-> > > Tony: is this going to be included in 3.7?
-> >=20
-> > Hmm I guess we could try to get this out of the way
-> > to cut down the dependencies. Let's if maintainers
-> > of the other affected drivers this is OK for the
-> > -rc series.
->=20
-> It seems that nobody needs these until for v3.8, so I'll
-> be applying this into omap-for-v3.8/cleanup-headers-prepare
-> branch soon.
->=20
-> Anybody else care to ack?
+On 17 October 2012 15:38, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Monday 15 October 2012, Lee Jones wrote:
+>> > and so on. What are you actually missing in the properties that
+>> > are already there?
+>>
+>> MMC_CAP_ERASE
+>
+> This one seems to be set unconditionally on some controllers but
+> not on others. Why would it need to be configurable?
+>
+>> MMC_CAP_UHS_SDR12
+>> MMC_CAP_UHS_SDR25
+>> MMC_CAP_UHS_DDR50
+>
+> Could this be derived from max-frequency?
 
-OK pushed out now with just that patch in the branch in case
-driver branches need to merge it in too to avoid conflicts.
+No, this is likely depending on what the hw controller supports. Not
+connected to the freq.
+UHS also means 1.8 V I/O voltage.
 
-Regards,
+>
+>> MMC_CAP_1_8V_DDR
+>
+> Right, I suppose we need this. Should we have a minimum and maximum
+> voltage added to the common properties for this?
+>
+>> MMC_CAP2_DETECT_ON_ERR
+>> MMC_CAP2_NO_SLEEP_CMD
+>
+> I don't see these ones being set anywhere, but they were both
+> added by Ulf. Maybe he can comment on if or why they are needed
+> in devicetree, rather than being set by the driver unconditionally
+> or for specific versions of the host controller.
 
-Tony
+>From ux500 perspective there are patches not been up-streamed yet
+which are using these host caps, for whatever it is worth for you to
+know and consider.
+
+Actually, I think quite a few of the host caps in mmc could be debated
+whether those should exist at all.
+Some are directly mapped to what the host controller hw support, some
+are purely what the host driver (sw) support, but then there are
+others kind of "mmc/sd/sdio software support configuration" which are
+kind of strange host caps to me. For example MMC_CAP2_DETECT_ON_ERR
+which I invented. :-). I think it especially these "software support
+configuration" caps that might be causing this dt issues.
+
+Would be very interesting to hear if someone is sharing my thoughts
+around the host caps. Or if I am totally wrong here.
+
+Kind regards
+Ulf Hansson
