@@ -1,83 +1,176 @@
-From: Yong Ding <yongd@marvell.com>
-Subject: RE: [PATCH 1/3] mmc: esdhc: enable polling to detect card by itself
-Date: Tue, 16 Oct 2012 21:01:40 -0700
-Message-ID: <89813612683626448B837EE5A0B6A7CB30388601C9@SC-VEXCH4.marvell.com>
-References: <1348828113-19668-1-git-send-email-yongd@marvell.com>
- <1348828113-19668-2-git-send-email-yongd@marvell.com>,<20121007140648.GA10148@S2101-09.ap.freescale.net>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH] dw_mmc: fix multiple drv_data NULL dereferences
+Date: Wed, 17 Oct 2012 10:11:39 +0100
+Message-ID: <CAFbHwiSUoP_W=CK1hF+CYjxrJ1P6BR9=y_grEogmo5br6R_zuw@mail.gmail.com>
+References: <1350376988-27477-1-git-send-email-james.hogan@imgtec.com>
+	<507E129D.8000401@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:38675 "EHLO
-	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750715Ab2JQEFO convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 17 Oct 2012 00:05:14 -0400
-In-Reply-To: <20121007140648.GA10148@S2101-09.ap.freescale.net>
-Content-Language: en-US
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:60530 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753234Ab2JQJLk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Oct 2012 05:11:40 -0400
+In-Reply-To: <507E129D.8000401@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, Anton Vorontsov <anton.vorontsov@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Wolfram Sang <w.sang@pengutronix.de>, Daniel Drake <dsd@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Wilson Callan <wilson.callan@savantsystems.com>, Ben Dooks <ben-linux@fluff.org>, Zhangfei Gao <zgao6@marvell.com>, Kevin Liu <kliu5@marvell.com>, Jialing Fu <jlfu@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: James Hogan <james.hogan@imgtec.com>, Chris Ball <cjb@laptop.org>, Thomas Abraham <thomas.abraham@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Shawn,
-Thanks for your comment. And sorry for my so late due to illness:-)
-SDHCI_QUIRK_BROKEN_CARD_DETECTION is used for notifying we don't use the host internal card detection method so that we don't need enable/disable those relevant interrupt bits of host(sdhci_set_card_detection in sdhci.c). 
-And as I double-checked the latest kernel code, actually sdhci-esdhc-imx sets this flag by default, and then will clear it only when the detection type is ESDHC_CD_CONTROLLER. So this aligns with my understanding. 
-What I want to do is that 1st we shall set MMC_CAP_NEEDS_POLL by our host driver itself and 2nd remove the improper logic in sdhci_add_host() . How do u think? Thanks.
+Looks good to me too.
 
-________________________________________
-From: Shawn Guo [shawn.guo@linaro.org]
-Sent: Sunday, October 07, 2012 22:06
-To: Yong Ding
-Cc: Chris Ball; Anton Vorontsov; Marek Szyprowski; Wolfram Sang; Daniel Drake; Sascha Hauer; Wilson Callan; Ben Dooks; Zhangfei Gao; Kevin Liu; Jialing Fu; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 1/3] mmc: esdhc: enable polling to detect card by itself
+Acked-by: Will Newton <will.newton@imgtec.com>
 
-On Fri, Sep 28, 2012 at 06:28:31PM +0800, yongd wrote:
-> In the current code logic, sdhci_add_host() will enable the polling
-> method (set MMC_CAP_NEEDS_POLL) for a removable card (MMC_CAP_
-> NONREMOVABLE is not set) whose host's internal card detection method
-> is disabled for some reason (SDHCI_QUIRK_BROKEN_CARD_DETECTION is set).
+On Wed, Oct 17, 2012 at 3:06 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Looks good to me.
 >
-> However, this is improper since we can have some other card detection
-> methods besides host internal card detection and polling method. For
-> example, if the card detection type is ESDHC_CD_GPIO (external gpio pin
-> for CD), we will keep SDHCI_QUIRK_BROKEN_CARD_DETECTION set. This is right.
-> But, just as above said, sdhci_add_host() will also enable polling for such
-> a card. This is redundant.
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 >
-At least for sdhci-esdhc-imx, SDHCI_QUIRK_BROKEN_CARD_DETECTION will
-be set only when neither ESDHC_CD_GPIO nor ESDHC_CD_CONTROLLER works.
-
-Shawn
-
-> On the other hand, for the card with ESDHC_CD_NONE detection type(no CD, neither
-> controller nor gpio, so use polling), we currently rely on sdhci_add_host() to
-> enable polling for us.
->
-> Here proposed a solution for such an embarrassing case. 1st, this patch will
-> de-couple polling enabling with sdhci_add_host() by doing this in host driver
-> itself, just as some other vendors. 2nd, one more patch will remove such improper
-> MMC_CAP_NEEDS_POLL enabling in sdhci_add_host().
->
-> Change-Id: Ia7525009d8fd188e3f0169f225e4a76ff9e94b47
-> Signed-off-by: yongd <yongd@marvell.com>
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c |    1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index e23f813..f70079c 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -569,6 +569,7 @@ static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
->               break;
->
->       case ESDHC_CD_NONE:
-> +             host->mmc->caps = MMC_CAP_NEEDS_POLL;
->               break;
->       }
+> On 10/16/2012 05:43 PM, James Hogan wrote:
+>> Commit 800d78bfccb3d38116abfda2a5b9c8afdbd5ea21 ("mmc: dw_mmc: add
+>> support for implementation specific callbacks") merged in v3.7-rc1.
+>>
+>> The above commit introduced multiple NULL pointer dereferences when
+>> the default dw_mci_pltfm_probe() is used, as it sets host->drv_data to
+>> NULL, and that's only checked against NULL in 1 out of the 7 cases where
+>> it is dereferenced.
+>>
+>> Signed-off-by: James Hogan <james.hogan@imgtec.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc-pltfm.c |    4 ++--
+>>  drivers/mmc/host/dw_mmc.c       |   29 +++++++++++++++++------------
+>>  2 files changed, 19 insertions(+), 14 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+>> index c960ca7..e595721 100644
+>> --- a/drivers/mmc/host/dw_mmc-pltfm.c
+>> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
+>> @@ -50,8 +50,8 @@ int dw_mci_pltfm_register(struct platform_device *pdev,
+>>       if (!host->regs)
+>>               return -ENOMEM;
+>>
+>> -     if (host->drv_data->init) {
+>> -             ret = host->drv_data->init(host);
+>> +     if (drv_data && drv_data->init) {
+>> +             ret = drv_data->init(host);
+>>               if (ret)
+>>                       return ret;
+>>       }
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index c2828f3..0dc6e33 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -232,6 +232,7 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+>>  {
+>>       struct mmc_data *data;
+>>       struct dw_mci_slot *slot = mmc_priv(mmc);
+>> +     struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+>>       u32 cmdr;
+>>       cmd->error = -EINPROGRESS;
+>>
+>> @@ -261,8 +262,8 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+>>                       cmdr |= SDMMC_CMD_DAT_WR;
+>>       }
+>>
+>> -     if (slot->host->drv_data->prepare_command)
+>> -             slot->host->drv_data->prepare_command(slot->host, &cmdr);
+>> +     if (drv_data && drv_data->prepare_command)
+>> +             drv_data->prepare_command(slot->host, &cmdr);
+>>
+>>       return cmdr;
+>>  }
+>> @@ -772,6 +773,7 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>  static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>  {
+>>       struct dw_mci_slot *slot = mmc_priv(mmc);
+>> +     struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+>>       u32 regs;
+>>
+>>       /* set default 1 bit mode */
+>> @@ -807,8 +809,8 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>               slot->clock = ios->clock;
+>>       }
+>>
+>> -     if (slot->host->drv_data->set_ios)
+>> -             slot->host->drv_data->set_ios(slot->host, ios);
+>> +     if (drv_data && drv_data->set_ios)
+>> +             drv_data->set_ios(slot->host, ios);
+>>
+>>       switch (ios->power_mode) {
+>>       case MMC_POWER_UP:
+>> @@ -1815,6 +1817,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>  {
+>>       struct mmc_host *mmc;
+>>       struct dw_mci_slot *slot;
+>> +     struct dw_mci_drv_data *drv_data = host->drv_data;
+>>       int ctrl_id, ret;
+>>       u8 bus_width;
+>>
+>> @@ -1854,8 +1857,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>       } else {
+>>               ctrl_id = to_platform_device(host->dev)->id;
+>>       }
+>> -     if (host->drv_data && host->drv_data->caps)
+>> -             mmc->caps |= host->drv_data->caps[ctrl_id];
+>> +     if (drv_data && drv_data->caps)
+>> +             mmc->caps |= drv_data->caps[ctrl_id];
+>>
+>>       if (host->pdata->caps2)
+>>               mmc->caps2 = host->pdata->caps2;
+>> @@ -1867,10 +1870,10 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>       else
+>>               bus_width = 1;
+>>
+>> -     if (host->drv_data->setup_bus) {
+>> +     if (drv_data && drv_data->setup_bus) {
+>>               struct device_node *slot_np;
+>>               slot_np = dw_mci_of_find_slot_node(host->dev, slot->id);
+>> -             ret = host->drv_data->setup_bus(host, slot_np, bus_width);
+>> +             ret = drv_data->setup_bus(host, slot_np, bus_width);
+>>               if (ret)
+>>                       goto err_setup_bus;
+>>       }
+>> @@ -2035,6 +2038,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>>       struct dw_mci_board *pdata;
+>>       struct device *dev = host->dev;
+>>       struct device_node *np = dev->of_node;
+>> +     struct dw_mci_drv_data *drv_data = host->drv_data;
+>>       int idx, ret;
+>>
+>>       pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+>> @@ -2062,8 +2066,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>>
+>>       of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
+>>
+>> -     if (host->drv_data->parse_dt) {
+>> -             ret = host->drv_data->parse_dt(host);
+>> +     if (drv_data && drv_data->parse_dt) {
+>> +             ret = drv_data->parse_dt(host);
+>>               if (ret)
+>>                       return ERR_PTR(ret);
+>>       }
+>> @@ -2080,6 +2084,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>>
+>>  int dw_mci_probe(struct dw_mci *host)
+>>  {
+>> +     struct dw_mci_drv_data *drv_data = host->drv_data;
+>>       int width, i, ret = 0;
+>>       u32 fifo_size;
+>>       int init_slots = 0;
+>> @@ -2127,8 +2132,8 @@ int dw_mci_probe(struct dw_mci *host)
+>>       else
+>>               host->bus_hz = clk_get_rate(host->ciu_clk);
+>>
+>> -     if (host->drv_data->setup_clock) {
+>> -             ret = host->drv_data->setup_clock(host);
+>> +     if (drv_data && drv_data->setup_clock) {
+>> +             ret = drv_data->setup_clock(host);
+>>               if (ret) {
+>>                       dev_err(host->dev,
+>>                               "implementation specific clock setup failed\n");
+>>
 >
 > --
-> 1.7.9.5
->
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
