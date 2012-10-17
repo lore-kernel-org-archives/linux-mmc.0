@@ -1,77 +1,78 @@
 From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: [PATCH v6 03/14] mmc: sdhci: refine code for sd clock disable/enable in set ios
-Date: Wed, 17 Oct 2012 19:04:42 +0800
-Message-ID: <1350471893-29633-4-git-send-email-keyuan.liu@gmail.com>
-References: <1350471893-29633-1-git-send-email-keyuan.liu@gmail.com>
+Subject: mmc: sdhci: fixes and enhancements
+Date: Wed, 17 Oct 2012 19:04:39 +0800
+Message-ID: <1350471893-29633-1-git-send-email-keyuan.liu@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog128.obsmtp.com ([74.125.149.141]:34549 "EHLO
+Received: from na3sys009aog128.obsmtp.com ([74.125.149.141]:58807 "EHLO
 	na3sys009aog128.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755580Ab2JQLFL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Oct 2012 07:05:11 -0400
-In-Reply-To: <1350471893-29633-1-git-send-email-keyuan.liu@gmail.com>
+	by vger.kernel.org with ESMTP id S1756022Ab2JQLFF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Oct 2012 07:05:05 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, cjb@laptop.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com
 Cc: hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-From: Kevin Liu <kliu5@marvell.com>
 
-With preset value enabled, there are two continuous times
-of sd clock disable/enable. They can be combined into one
-to save time and make code cleaner.
+This patchset does as follows:
+[PATCH v6 01/14] mmc: sdhci: fix transfer mode setting bug for cmds w/o data transfer
+[PATCH v6 02/14] mmc: sdhci: refine voltage support caps setting
+[PATCH v6 03/14] mmc: sdhci: refine code for sd clock disable/enable in set ios
+[PATCH v6 04/14] mmc: sdhci: keep the saved clock var up to date
+[PATCH v6 05/14] mmc: sdhci: fix null return check of regulator_get
+[PATCH v6 06/14] mmc: sdhci-pxav3: controller can't get base clock
+[PATCH v6 07/14] mmc: host: adjust uhs timing value
+[PATCH v6 08/14] mmc: sdhci: enhance preset value function
+[PATCH v6 09/14] mmc: sdhci-pxav3: add quirks2
+[PATCH v6 10/14] mmc: sdhci: introduce signal_voltage_switch callback function
+[PATCH v6 11/14] mmc: sdhci: fix the bug that DDR50 can't work for emmc
+[PATCH v6 12/14] mmc: sdhci-pxav3: remove set_uhs_signaling function
+[PATCH v6 13/14] mmc: sdhci: solve several vmmc/vqmmc regulator issues
+[PATCH v6 14/14] mmc: sdhci: add function to get retunig timer count
 
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
----
- drivers/mmc/host/sdhci.c |   29 +++++++++--------------------
- 1 files changed, 9 insertions(+), 20 deletions(-)
+changelog v1->v2:
+        - remove the patch "mmc: sdhci-pxav3: fix build error"
+        - update the patch 05/15 by avoid warning with return null
+        - add patches 06/15 ~ 08/15
+changelog v2->v3:
+        - update some comments
+        - add patches 09/15 ~ 11/15
+changelog v3->v4:
+        - update the patch 01/15 with data null check
+        - add patches 12/15 ~ 15/15
+changelog v4->v5:
+        - drop below two patches since Johan is updating voltage switch code:
+        - drop the patch "mmc: core: add new 1.8v flag for mmc"
+        - drop the patch "mmc: sdhci: add mmc 1.8v signal voltage switch function"
+        - drop the patch "mmc: sdhci-pxav3: add signal_voltage_switch function" which calls plat callback function
+        - update the patch 07/13 with adding function get_max_clock
+        - update the patch 03/13 with voltage setting
+        - add patch 02/13
+changelog v5->v6:
+	- drop the patch "mmc: sdhci: use regulator min/max voltage range according to spec"
+	- add patch 13/14
+	- add patch 14/14
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 94dab9c..eb621dd 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1449,33 +1449,22 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 				ctrl_2 |= SDHCI_CTRL_DRV_TYPE_C;
- 
- 			sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
--		} else {
--			/*
--			 * According to SDHC Spec v3.00, if the Preset Value
--			 * Enable in the Host Control 2 register is set, we
--			 * need to reset SD Clock Enable before changing High
--			 * Speed Enable to avoid generating clock gliches.
--			 */
--
--			/* Reset SD Clock Enable */
--			clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
--			clk &= ~SDHCI_CLOCK_CARD_EN;
--			sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
--
--			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
--
--			/* Re-enable SD Clock */
--			clock = host->clock;
--			host->clock = 0;
--			sdhci_set_clock(host, clock);
- 		}
- 
--
- 		/* Reset SD Clock Enable */
- 		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
- 		clk &= ~SDHCI_CLOCK_CARD_EN;
- 		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
- 
-+		/*
-+		 * According to SDHC Spec v3.00, if the Preset Value
-+		 * Enable in the Host Control 2 register is set, we
-+		 * need to reset SD Clock Enable before changing High
-+		 * Speed Enable to avoid generating clock gliches.
-+		 */
-+		if (ctrl_2 & SDHCI_CTRL_PRESET_VAL_ENABLE)
-+			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+
- 		if (host->ops->set_uhs_signaling)
- 			host->ops->set_uhs_signaling(host, ios->timing);
- 		else {
--- 
-1.7.0.4
+Kevin Liu (14)
+ mmc: sdhci: fix transfer mode setting bug for cmds w/o data transfer
+ mmc: sdhci: refine voltage support caps setting
+ mmc: sdhci: refine code for sd clock disable/enable in set ios
+ mmc: sdhci: keep the saved clock var up to date
+ mmc: sdhci: fix null return check of regulator_get
+ mmc: sdhci-pxav3: controller can't get base clock
+ mmc: host: adjust uhs timing value
+ mmc: sdhci: enhance preset value function
+ mmc: sdhci-pxav3: add quirks2
+ mmc: sdhci: introduce signal_voltage_switch callback function
+ mmc: sdhci: fix the bug that DDR50 can't work for emmc
+ mmc: sdhci-pxav3: remove set_uhs_signaling function
+ mmc: sdhci: solve several vmmc/vqmmc regulator issues
+ mmc: sdhci: add function to get retunig timer count
 
+ drivers/mmc/core/sd.c                   |   17 --
+ drivers/mmc/host/sdhci-pxav3.c          |   44 +-----
+ drivers/mmc/host/sdhci.c                |  260 ++++++++++++++++++++-----------
+ drivers/mmc/host/sdhci.h                |   14 ++
+ include/linux/mmc/host.h                |   13 +-
+ include/linux/mmc/sdhci.h               |    2 +-
+ include/linux/platform_data/pxa_sdhci.h |    2 +
+ 7 files changed, 202 insertions(+), 150 deletions(-)
