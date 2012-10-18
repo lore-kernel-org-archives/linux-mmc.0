@@ -1,7 +1,7 @@
 From: Sangho Yi <antiroot@gmail.com>
-Subject: [PATCH 4/6] mmc: core: sdio_bus.c: Removed space between func name and ()
-Date: Fri, 19 Oct 2012 01:58:21 +0900
-Message-ID: <1350579503-3100-4-git-send-email-antiroot@gmail.com>
+Subject: [PATCH 6/6] mmc: core: sdio_bus.c: Removed unnecessary NULL check routine
+Date: Fri, 19 Oct 2012 01:58:23 +0900
+Message-ID: <1350579503-3100-6-git-send-email-antiroot@gmail.com>
 References: <n>
  <1350579503-3100-1-git-send-email-antiroot@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
@@ -11,37 +11,27 @@ To: paul.gortmaker@windriver.com, stefan.xk.nilsson@stericsson.com, linus.wallei
 Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sangho Yi <antiroot@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Fixed a coding style warning like this:
-from foo (arg) --> to foo(arg)
+kfree(something) is safe function, so I removed the NULL check routine
+for the input of kfree.
 
 Signed-off-by: Sangho Yi <antiroot@gmail.com>
 ---
- drivers/mmc/core/sdio_bus.c |    6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/mmc/core/sdio_bus.c |    3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index efa30eb..1a1d96c 100644
+index e5b7197..cf02146 100644
 --- a/drivers/mmc/core/sdio_bus.c
 +++ b/drivers/mmc/core/sdio_bus.c
-@@ -31,8 +31,8 @@ field##_show(struct device *dev, struct device_attribute *attr, char *buf)\
- {									\
- 	struct sdio_func *func;						\
- 									\
--	func = dev_to_sdio_func (dev);					\
--	return sprintf (buf, format_string, func->field);		\
-+	func = dev_to_sdio_func(dev);					\
-+	return sprintf(buf, format_string, func->field);		\
+@@ -259,8 +259,7 @@ static void sdio_release_func(struct device *dev)
+ 
+ 	sdio_free_func_cis(func);
+ 
+-	if (func->info)
+-		kfree(func->info);
++	kfree(func->info);
+ 
+ 	kfree(func);
  }
- 
- sdio_config_attr(class, "0x%02x\n");
-@@ -42,7 +42,7 @@ sdio_config_attr(device, "0x%04x\n");
- static ssize_t modalias_show(struct device *dev, struct device_attribute *attr,
- 		char *buf)
- {
--	struct sdio_func *func = dev_to_sdio_func (dev);
-+	struct sdio_func *func = dev_to_sdio_func(dev);
- 
- 	return sprintf(buf, "sdio:c%02Xv%04Xd%04X\n",
- 			func->class, func->vendor, func->device);
 -- 
 1.7.9.5
