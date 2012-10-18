@@ -1,72 +1,63 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 3/3] mmc: sdhci-s3c: Add clk_(enable/disable) in runtime
- suspend/resume
-Date: Thu, 18 Oct 2012 11:04:42 +0900
-Message-ID: <507F63BA.7040809@samsung.com>
-References: <1347613731-29428-1-git-send-email-chander.kashyap@linaro.org>
- <1347613731-29428-4-git-send-email-chander.kashyap@linaro.org>
- <201210171115.48401.heiko@sntech.de>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH 1/3] mmc: esdhc: enable polling to detect card by itself
+Date: Thu, 18 Oct 2012 13:50:33 +0800
+Message-ID: <20121018054053.GA4513@S2101-09.ap.freescale.net>
+References: <1348828113-19668-1-git-send-email-yongd@marvell.com>
+ <1348828113-19668-2-git-send-email-yongd@marvell.com>
+ <20121007140648.GA10148@S2101-09.ap.freescale.net>
+ <89813612683626448B837EE5A0B6A7CB30388601C9@SC-VEXCH4.marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:46457 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753430Ab2JRCFM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Oct 2012 22:05:12 -0400
-In-reply-to: <201210171115.48401.heiko@sntech.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <89813612683626448B837EE5A0B6A7CB30388601C9@SC-VEXCH4.marvell.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Yong Ding <yongd@marvell.com>
+Cc: Chris Ball <cjb@laptop.org>, Anton Vorontsov <anton.vorontsov@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Wolfram Sang <w.sang@pengutronix.de>, Daniel Drake <dsd@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Wilson Callan <wilson.callan@savantsystems.com>, Ben Dooks <ben-linux@fluff.org>, Zhangfei Gao <zgao6@marvell.com>, Kevin Liu <kliu5@marvell.com>, Jialing Fu <jlfu@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-15?Q?Heiko_St=FCbner?= <heiko@sntech.de>
-Cc: Chander Kashyap <chander.kashyap@linaro.org>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, ben@simtec.co.uk, broonie@opensource.wolfsonmicro.com, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, patches@linaro.org
 
-Hi Heiko,
+On Tue, Oct 16, 2012 at 09:01:40PM -0700, Yong Ding wrote:
+> Shawn,
+> Thanks for your comment. And sorry for my so late due to illness:-)
+> SDHCI_QUIRK_BROKEN_CARD_DETECTION is used for notifying we don't use the host internal card detection method so that we don't need enable/disable those relevant interrupt bits of host(sdhci_set_card_detection in sdhci.c). 
+> And as I double-checked the latest kernel code, actually sdhci-esdhc-imx sets this flag by default, and then will clear it only when the detection type is ESDHC_CD_CONTROLLER. So this aligns with my understanding. 
 
-Sorry, i didn't check this patch with s3c2416.
-(i didn't have the s3c2416 board.)
-If you have a problem, i think good that revert this patch for fixing y=
-our problem.
-Also, i will check and share the result.
+What I was saying is the bit will be cleared when the detection type is
+ESDHC_CD_CONTROLLE or ESDHC_CD_GPIO.  You may have missed the fact that
+there is no "break" in case ESDHC_CD_GPIO but a "fall through" comment.
 
-Best Regards,
-Jaehoon Chung
+        switch (boarddata->cd_type) {
+        case ESDHC_CD_GPIO:
+                err = gpio_request_one(boarddata->cd_gpio, GPIOF_IN, "ESDHC_CD");
+                if (err) {
+                        dev_err(mmc_dev(host->mmc),
+                                "no card-detect pin available!\n");
+                        goto no_card_detect_pin;
+                }
 
-On 10/17/2012 06:15 PM, Heiko St=FCbner wrote:
-> Hi,
->=20
-> Am Freitag, 14. September 2012, 11:08:51 schrieb Chander Kashyap:
->> Perform clock disable/enable in runtime suspend/resume.
->>
->> Signed-off-by: Chander Kashyap <chander.kashyap@linaro.org>
->=20
-> It seems this patch breaks my S3C2416 based machine with 3.7-rc1. I'm=
- not=20
-> yet sure why, but the only response I get is loop of:
->=20
-> 	mmc0: Timeout waiting for hardware interrupt.
-> 	mmc0: Internal clock never stabilised.
-> 	mmc0: Timeout waiting for hardware interrupt.
-> 	mmc0: Internal clock never stabilised.
->=20
->=20
-> This only happens on the hsmmc channel using the gpio-based card dete=
-ct and=20
-> even prevents the card from beeing fully detected. The other hsmmc ch=
-annel=20
-> using a permanent emmc seems to be working fine.
->=20
-> And of course, when I revert this patch everything works fine again.
->=20
-> I'll investigate further, but it'd be also ok if someone has a fix fo=
-r this=20
-> before me :-) .
->=20
->=20
-> Heiko
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+                err = request_irq(gpio_to_irq(boarddata->cd_gpio), cd_irq,
+                                 IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
+                                 mmc_hostname(host->mmc), host);
+                if (err) {
+                        dev_err(mmc_dev(host->mmc), "request irq error\n");
+                        goto no_card_detect_irq;
+                }
+                /* fall through */
 
+        case ESDHC_CD_CONTROLLER:
+                /* we have a working card_detect back */
+                host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+                break;
+
+        case ESDHC_CD_PERMANENT:
+                host->mmc->caps = MMC_CAP_NONREMOVABLE;
+                break;
+
+        case ESDHC_CD_NONE:
+                break;
+        }
+
+Shawn
+
+> What I want to do is that 1st we shall set MMC_CAP_NEEDS_POLL by our host driver itself and 2nd remove the improper logic in sdhci_add_host() . How do u think? Thanks.
+> 
