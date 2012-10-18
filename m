@@ -1,8 +1,7 @@
 From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [RFC PATCH v3 11/16] mmc: omap_hsmmc: limit max_segs with the EDMA
-	DMAC
-Date: Thu, 18 Oct 2012 09:26:50 -0400
-Message-ID: <1350566815-409-12-git-send-email-mporter@ti.com>
+Subject: [RFC PATCH v3 09/16] dmaengine: add dma_request_slave_channel_compat()
+Date: Thu, 18 Oct 2012 09:26:48 -0400
+Message-ID: <1350566815-409-10-git-send-email-mporter@ti.com>
 References: <1350566815-409-1-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,40 +20,43 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The EDMA DMAC has a hardware limitation that prevents supporting
-scatter gather lists with any number of segments. Since the EDMA
-DMA Engine driver sets the maximum segments to 16, we do the
-same.
+Adds a dma_request_slave_channel_compat() wrapper which accepts
+both the arguments from dma_request_channel() and
+dma_request_slave_channel(). Based on whether the driver is
+instantiated via DT, the appropriate channel request call will be
+made.
 
-TODO: this will be replaced once the DMA Engine API supports an
-API to query the DMAC's segment size limit.
+This allows for a much cleaner migration of drivers to the
+dmaengine DT API as platforms continue to be mixed between those
+that boot using DT and those that do not.
 
+Suggested-by: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
 Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 ---
- drivers/mmc/host/omap_hsmmc.c |   10 ++++++++++
+ include/linux/dmaengine.h |   10 ++++++++++
  1 file changed, 10 insertions(+)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index b327cd0..52bab01 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1828,6 +1828,16 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
- 	 * as we want. */
- 	mmc->max_segs = 1024;
+diff --git a/include/linux/dmaengine.h b/include/linux/dmaengine.h
+index c88f302..11d9e25 100644
+--- a/include/linux/dmaengine.h
++++ b/include/linux/dmaengine.h
+@@ -1007,6 +1007,16 @@ void dma_run_dependencies(struct dma_async_tx_descriptor *tx);
+ struct dma_chan *dma_find_channel(enum dma_transaction_type tx_type);
+ struct dma_chan *net_dma_find_channel(void);
+ #define dma_request_channel(mask, x, y) __dma_request_channel(&(mask), x, y)
++static inline struct dma_chan
++*dma_request_slave_channel_compat(dma_cap_mask_t mask, dma_filter_fn fn,
++				  void *fn_param, struct device *dev,
++				  char *name)
++{
++	if (dev->of_node)
++		return dma_request_slave_channel(dev, name);
++	else
++		return dma_request_channel(mask, fn, fn_param);
++}
  
-+	/* Eventually we should get our max_segs limitation for EDMA by
-+	 * querying the dmaengine API */
-+	if (pdev->dev.of_node) {
-+		struct device_node *parent = pdev->dev.of_node->parent;
-+		struct device_node *node;
-+		node = of_find_node_by_name(parent, "edma");
-+		if (node)
-+			mmc->max_segs = 16;
-+	}
-+
- 	mmc->max_blk_size = 512;       /* Block Length at max can be 1024 */
- 	mmc->max_blk_count = 0xFFFF;    /* No. of Blocks is 16 bits */
- 	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+ /* --- Helper iov-locking functions --- */
+ 
 -- 
 1.7.9.5
 
