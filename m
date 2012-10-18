@@ -1,60 +1,50 @@
-From: Philip Rakity <prakity@nvidia.com>
-Subject: Re: [PATCH 2/3] drivers: mmc: core: sdio.c: fixed coding style
- error on for() statement
-Date: Thu, 18 Oct 2012 18:10:25 +0200
-Message-ID: <8B292373-3C73-41EF-A193-0ECF614BE06E@nvidia.com>
-References: <n> <1350576394-2008-1-git-send-email-antiroot@gmail.com>
- <1350576394-2008-2-git-send-email-antiroot@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1350576394-2008-2-git-send-email-antiroot@gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sangho Yi <antiroot@gmail.com>
-Cc: "prakity@marvell.com" <prakity@marvell.com>, "aaron.lu@amd.com" <aaron.lu@amd.com>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "ulf.hansson@stericsson.com" <ulf.hansson@stericsson.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+From: Sangho Yi <antiroot@gmail.com>
+Subject: [PATCH 1/6] mmc: core: sdio_io.c: Fixed lines with > 80 chars
+Date: Fri, 19 Oct 2012 01:31:54 +0900
+Message-ID: <1350577919-2750-1-git-send-email-antiroot@gmail.com>
+References: <n>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:46044 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755012Ab2JRQd2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Oct 2012 12:33:28 -0400
+In-Reply-To: <n>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: paul.gortmaker@windriver.com, stefan.xk.nilsson@stericsson.com, linus.walleij@linaro.org, ulf.hansson@stericsson.com, rjw@sisk.pl, girish.shivananjappa@linaro.org, cjb@laptop.org
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sangho Yi <antiroot@gmail.com>
 
+I fixed lines over 80 characters per line.
 
-On 18 Oct 2012, at 17:06, Sangho Yi <antiroot@gmail.com> wrote:
+Signed-off-by: Sangho Yi <antiroot@gmail.com>
+---
+ drivers/mmc/core/sdio_io.c |    6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-> add a whitespace after ";" on for statement, to follow a coding style guideline.
-> 
-> Signed-off-by: Sangho Yi <antiroot@gmail.com>
-> ---
-> drivers/mmc/core/sdio.c |    4 ++--
-> 1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index 14326e8..df09b63 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -819,7 +819,7 @@ static void mmc_sdio_remove(struct mmc_host *host)
-> 	BUG_ON(!host);
-> 	BUG_ON(!host->card);
-> 
-> -	for (i = 0;i < host->card->sdio_funcs;i++) {
-> +	for (i = 0; i < host->card->sdio_funcs; i++) {
-> 		if (host->card->sdio_func[i]) {
-> 			sdio_remove_func(host->card->sdio_func[i]);
-> 			host->card->sdio_func[i] = NULL;
-> @@ -1151,7 +1151,7 @@ int mmc_attach_sdio(struct mmc_host *host)
-> 	/*
-> 	 * ...then the SDIO functions.
-> 	 */
-> -	for (i = 0;i < funcs;i++) {
-> +	for (i = 0; i < funcs; i++) {
-> 		err = sdio_add_func(host->card->sdio_func[i]);
-> 		if (err)
-> 			goto remove_added;
-> -- 
-> 1.7.9.5
-> 
-> --
+diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+index 8f6f5ac..c5f53d8 100644
+--- a/drivers/mmc/core/sdio_io.c
++++ b/drivers/mmc/core/sdio_io.c
+@@ -80,7 +80,8 @@ int sdio_enable_func(struct sdio_func *func)
+ 	timeout = jiffies + msecs_to_jiffies(func->enable_timeout);
+ 
+ 	while (1) {
+-		ret = mmc_io_rw_direct(func->card, 0, 0, SDIO_CCCR_IORx, 0, &reg);
++		ret = mmc_io_rw_direct(func->card, 0, 0, SDIO_CCCR_IORx, 0,
++				&reg);
+ 		if (ret)
+ 			goto err;
+ 		if (reg & (1 << func->num))
+@@ -664,7 +665,8 @@ void sdio_f0_writeb(struct sdio_func *func, unsigned char b, unsigned int addr,
+ 
+ 	BUG_ON(!func);
+ 
+-	if ((addr < 0xF0 || addr > 0xFF) && (!mmc_card_lenient_fn0(func->card))) {
++	if ((addr < 0xF0 || addr > 0xFF) &&
++			(!mmc_card_lenient_fn0(func->card))) {
+ 		if (err_ret)
+ 			*err_ret = -EINVAL;
+ 		return;
+-- 
+1.7.9.5
 
-Reviewed-by: Philip Rakity <prakity@nvidia.com>
-
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
