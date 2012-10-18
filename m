@@ -1,7 +1,7 @@
 From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [RFC PATCH v3 07/16] dmaengine: edma: Add TI EDMA device tree binding
-Date: Thu, 18 Oct 2012 09:26:46 -0400
-Message-ID: <1350566815-409-8-git-send-email-mporter@ti.com>
+Subject: [RFC PATCH v3 05/16] ARM: edma: add AM33XX crossbar event support
+Date: Thu, 18 Oct 2012 09:26:44 -0400
+Message-ID: <1350566815-409-6-git-send-email-mporter@ti.com>
 References: <1350566815-409-1-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -20,72 +20,129 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The binding definition is based on the generic DMA controller
-binding.
+Adds support for the per-EDMA channel event mux. This is required
+for any peripherals using DMA crossbar mapped events.
 
 Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 ---
- Documentation/devicetree/bindings/dma/ti-edma.txt |   51 +++++++++++++++++++++
- 1 file changed, 51 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/dma/ti-edma.txt
+ arch/arm/common/edma.c             |   63 +++++++++++++++++++++++++++++++++++-
+ include/linux/platform_data/edma.h |    1 +
+ 2 files changed, 63 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/dma/ti-edma.txt b/Documentation/devicetree/bindings/dma/ti-edma.txt
-new file mode 100644
-index 0000000..3344345
---- /dev/null
-+++ b/Documentation/devicetree/bindings/dma/ti-edma.txt
-@@ -0,0 +1,51 @@
-+TI EDMA
+diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+index 6d2a590..b761b7a 100644
+--- a/arch/arm/common/edma.c
++++ b/arch/arm/common/edma.c
+@@ -1425,6 +1425,53 @@ static int edma_of_read_u32_to_s16_array(const struct device_node *np,
+ 	return 0;
+ }
+ 
++static int edma_xbar_event_map(struct device *dev,
++			       struct device_node *node,
++			       struct edma_soc_info *pdata, int len)
++{
++	int ret = 0;
++	int i;
++	struct resource res;
++	void *xbar;
++	s16 (*xbar_chans)[2];
++	u32 shift, offset, mux;
 +
-+Required properties:
-+- compatible : "ti,edma3"
-+- ti,hwmods: Name of the hwmods associated to the EDMA
-+- ti,edma-regions: Number of regions
-+- ti,edma-slots: Number of slots
-+- ti,edma-queue-tc-map: List of transfer control to queue mappings
-+- ti,edma-queue-priority-map: List of queue priority mappings
-+- ti,edma-default-queue: Default queue value
++	xbar_chans = devm_kzalloc(dev,
++				  len/sizeof(s16) + 2*sizeof(s16),
++				  GFP_KERNEL);
++	if (!xbar_chans)
++		return -ENOMEM;
 +
-+Optional properties:
-+- ti,edma-reserved-channels: List of reserved channel regions
-+- ti,edma-reserved-slots: List of reserved slot regions
-+- ti,edma-xbar-event-map: Crossbar event to channel map
++	ret = of_address_to_resource(node, 1, &res);
++	if (IS_ERR_VALUE(ret))
++		return -EIO;
 +
-+Example:
++	xbar = devm_ioremap(dev, res.start, resource_size(&res));
++	if (!xbar)
++		return -EIO;
 +
-+edma: edma@49000000 {
-+	#address-cells = <1>;
-+	#size-cells = <0>;
-+	reg = <0x49000000 0x10000>;
-+	interrupt-parent = <&intc>;
-+	interrupts = <12 13 14>;
-+	compatible = "ti,edma3";
-+	ti,hwmods = "tpcc", "tptc0", "tptc1", "tptc2";
-+	#dma-cells = <1>;
-+	dma-channels = <64>;
-+	ti,edma-regions = <4>;
-+	ti,edma-slots = <256>;
-+	ti,edma-reserved-channels = <0  2
-+				     14 2
-+				     26 6
-+				     48 4
-+				     56 8>;
-+	ti,edma-reserved-slots = <0  2
-+				  14 2
-+				  26 6
-+				  48 4
-+				  56 8
-+				  64 127>;
-+	ti,edma-queue-tc-map = <0 0
-+				1 1
-+				2 2>;
-+	ti,edma-queue-priority-map = <0 0
-+				      1 1
-+				      2 2>;
-+	ti,edma-default-queue = <0>;
-+	ti,edma-xbar-event-map = <1 12
-+				  2 13>;
-+};
++	ret = edma_of_read_u32_to_s16_array(node,
++					    "ti,edma-xbar-event-map",
++					    (s16 *)xbar_chans,
++					    len/sizeof(u32));
++	if (IS_ERR_VALUE(ret))
++		return -EIO;
++
++	for (i = 0; xbar_chans[i][0] != -1; i++) {
++		shift = (xbar_chans[i][1] % 4) * 8;
++		offset = xbar_chans[i][1] >> 2;
++		offset <<= 2;
++		mux = __raw_readl((void *)((u32)xbar + offset));
++		mux &= (~(0xff << shift));
++		mux |= (xbar_chans[i][0] << shift);
++		__raw_writel(mux, (void *)((u32)xbar + offset));
++	}
++
++	pdata->xbar_chans = xbar_chans;
++
++	return 0;
++}
++
+ static int edma_of_parse_dt(struct device *dev,
+ 			    struct device_node *node,
+ 			    struct edma_soc_info *pdata)
+@@ -1453,7 +1500,6 @@ static int edma_of_parse_dt(struct device *dev,
+ 	pdata->n_slot = value;
+ 
+ 	pdata->n_cc = 1;
+-	/* This is unused */
+ 	pdata->n_tc = 3;
+ 
+ 	rsv_info =
+@@ -1538,6 +1584,10 @@ static int edma_of_parse_dt(struct device *dev,
+ 		return ret;
+ 	pdata->default_queue = value;
+ 
++	prop = of_find_property(node, "ti,edma-xbar-event-map", &sz);
++	if (prop)
++		ret = edma_xbar_event_map(dev, node, pdata, sz);
++
+ 	return ret;
+ }
+ 
+@@ -1554,6 +1604,7 @@ static int __init edma_probe(struct platform_device *pdev)
+ 	int			status = -1;
+ 	s16			(*rsv_chans)[2];
+ 	s16			(*rsv_slots)[2];
++	s16			(*xbar_chans)[2];
+ 	int			irq[EDMA_MAX_CC] = {0, 0};
+ 	int			err_irq[EDMA_MAX_CC] = {0, 0};
+ 	struct resource		*r[EDMA_MAX_CC] = {NULL, NULL};
+@@ -1678,6 +1729,16 @@ static int __init edma_probe(struct platform_device *pdev)
+ 			}
+ 		}
+ 
++		/* Clear the xbar mapped channels in unused list */
++		xbar_chans = info[j]->xbar_chans;
++		if (xbar_chans) {
++			for (i = 0; xbar_chans[i][1] != -1; i++) {
++				off = xbar_chans[i][1];
++				clear_bits(off, 1,
++					edma_cc[j]->edma_unused);
++			}
++		}
++
+ 		if (node)
+ 			irq[j] = irq_of_parse_and_map(node, 0);
+ 		else {
+diff --git a/include/linux/platform_data/edma.h b/include/linux/platform_data/edma.h
+index b20b586..888a3c6 100644
+--- a/include/linux/platform_data/edma.h
++++ b/include/linux/platform_data/edma.h
+@@ -191,6 +191,7 @@ struct edma_soc_info {
+ 	/* Resource reservation for other cores */
+ 	struct edma_rsv_info	*rsv;
+ 
++	s16	(*xbar_chans)[2];
+ 	s8	(*queue_tc_mapping)[2];
+ 	s8	(*queue_priority_mapping)[2];
+ };
 -- 
 1.7.9.5
 
