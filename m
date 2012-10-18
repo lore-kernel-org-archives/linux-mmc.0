@@ -1,66 +1,42 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH] mmc: sdhci-s3c: fix the card detection in runtime-pm
-Date: Thu, 18 Oct 2012 18:59:39 +0900
-Message-ID: <004801cdad17$498d9140$dca8b3c0$%jun@samsung.com>
+From: Marek Vasut <marex-ynQEQJNshbs@public.gmane.org>
+Subject: Re: [PATCH] dma: add new DMA control commands
+Date: Thu, 18 Oct 2012 12:51:14 +0200
+Message-ID: <201210181251.15116.marex@denx.de>
+References: <1350538335-29026-1-git-send-email-b32955@freescale.com> <201210181049.21556.marex@denx.de> <507FC827.40601@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:16669 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753275Ab2JRJ7l (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Oct 2012 05:59:41 -0400
-Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MC3008202FFLE20@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 18 Oct 2012 18:59:39 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0MC300LGZ2FFL7F0@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 18 Oct 2012 18:59:39 +0900 (KST)
-References: 
-In-reply-to: 
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: Text/Plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <507FC827.40601-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Huang Shijie <b32955-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+Cc: Vinod Koul <vinod.koul-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, djbw-b10kYP2dOMg@public.gmane.org, khali-PUYAD+kWke1g9hUCZPvPmw@public.gmane.org, ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org, w.sang-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, lrg-l0cyMroinI0@public.gmane.org, broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org, perex-/Fr2/VpizcU@public.gmane.org, tiwai-l3A5Bk7waGM@public.gmane.org, shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, artem.bityutskiy-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, Huang Shijie <shijie8-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Fabio Estevam <fabio.estevam-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: =?utf-8?Q?'Heiko_St=C3=BCbner'?= <heiko@sntech.de>, 'Chander Kashyap' <chander.kashyap@linaro.org>, 'Chris Ball' <cjb@laptop.org>
 
-If host clock is disabled, host cannot detect a card
-in case of using CD internal for detection.
+Dear Huang Shijie,
 
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
----
- drivers/mmc/host/sdhci-s3c.c |    6 ++++--
- 1 files changed, 4 insertions(+), 2 deletions(-)
+> =E4=BA=8E 2012=E5=B9=B410=E6=9C=8818=E6=97=A5 16:49, Marek Vasut =E5=86=
+=99=E9=81=93:
+> > Dear Huang Shijie,
+> >=20
+> >> =E4=BA=8E 2012=E5=B9=B410=E6=9C=8818=E6=97=A5 16:16, Marek Vasut =E5=
+=86=99=E9=81=93:
+> >>> So we can't stream data from the chip? About time to adjust the M=
+TD
+> >>> framework to allow that. Maybe implement a command queue?
+> >>=20
+> >> IMHO, it's not possible. Because the READ-PAGE(00h-30h) command ne=
+eds to
+> >> check the busy status
+> >> which means we have to stop in the middle, so we can not chain the=
+ all
+> >> the read-pages DMA commands.
+> >=20
+> > Can the DMA not branch?
+>=20
+> it's too complicated to the MTD layer, as well as the gpmi driver.
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 2903949..e57f200 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -747,7 +747,8 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 		sdhci_s3c_setup_card_detect_gpio(sc);
- 
- #ifdef CONFIG_PM_RUNTIME
--	clk_disable(sc->clk_io);
-+	if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
-+		clk_disable(sc->clk_io);
- #endif
- 	return 0;
- 
-@@ -794,7 +795,8 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
- 		gpio_free(sc->ext_cd_gpio);
- 
- #ifdef CONFIG_PM_RUNTIME
--	clk_enable(sc->clk_io);
-+	if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
-+		clk_enable(sc->clk_io);
- #endif
- 	sdhci_remove_host(host, 1);
- 
--- 
-1.7.0.4
+Can you please elaborate ?
 
-
+Best regards,
+Marek Vasut
