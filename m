@@ -1,117 +1,62 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [RFC PATCH 4/4] sdio: pm: set device's power state after driver runtime suspended it
-Date: Fri, 19 Oct 2012 01:39:25 +0200
-Message-ID: <8682251.Y8RZX4ziBd@vostro.rjw.lan>
-References: <1350011561-21039-1-git-send-email-aaron.lu@intel.com> <1350011561-21039-5-git-send-email-aaron.lu@intel.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 3/6] mmc: core: sdio_bus.c: Fixed lines > 80 chars
+Date: Fri, 19 Oct 2012 08:54:34 +0900
+Message-ID: <508096BA.6070706@samsung.com>
+References: <n@samsung.com>
+ <1350577919-2750-1-git-send-email-antiroot@gmail.com>
+ <1350577919-2750-3-git-send-email-antiroot@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([193.178.161.156]:53769 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751515Ab2JRXfk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 18 Oct 2012 19:35:40 -0400
-In-Reply-To: <1350011561-21039-5-git-send-email-aaron.lu@intel.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:43363 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751096Ab2JRXzH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Oct 2012 19:55:07 -0400
+In-reply-to: <1350577919-2750-3-git-send-email-antiroot@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lu@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-acpi@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
+To: Sangho Yi <antiroot@gmail.com>
+Cc: paul.gortmaker@windriver.com, stefan.xk.nilsson@stericsson.com, linus.walleij@linaro.org, ulf.hansson@stericsson.com, rjw@sisk.pl, girish.shivananjappa@linaro.org, cjb@laptop.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Friday 12 of October 2012 11:12:41 Aaron Lu wrote:
-> In sdio bus level runtime callback function, after call the driver's
-> runtime suspend callback, we will check if the device supports a
-> platform level power management, and if so, a proper power state is
-> chosen by the corresponding platform callback and then set.
+Hi,
+
+your patch[1/3] is also "Fixed lines > 80chars".
+Why do you separate with patch[1/6] and patch[3/6]?
+
+Best Regards,
+Jaehoon Chung
+
+On 10/19/2012 01:31 AM, Sangho Yi wrote:
+> I fixed lines over 80 characters per line.
 > 
-> Platform level runtime wakeup is also set, if device is enabled for
-> runtime wakeup by its driver, it will be armed the ability to generate
-> a wakeup event by the platform.
-> 
-> Signed-off-by: Aaron Lu <aaron.lu@intel.com>
+> Signed-off-by: Sangho Yi <antiroot@gmail.com>
 > ---
->  drivers/mmc/core/sdio_bus.c | 49 +++++++++++++++++++++++++++++++++++++++++++--
->  1 file changed, 47 insertions(+), 2 deletions(-)
+>  drivers/mmc/core/sdio_bus.c |    5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
 > 
 > diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-> index aaec9e2..d83dea8 100644
+> index 13146d2..efa30eb 100644
 > --- a/drivers/mmc/core/sdio_bus.c
 > +++ b/drivers/mmc/core/sdio_bus.c
-> @@ -23,6 +23,7 @@
->  
->  #include "sdio_cis.h"
->  #include "sdio_bus.h"
-> +#include "sdio.h"
->  #include "sdio_acpi.h"
->  
+> @@ -27,7 +27,7 @@
 >  /* show configuration fields */
-> @@ -194,10 +195,54 @@ static int sdio_bus_remove(struct device *dev)
->  }
+>  #define sdio_config_attr(field, format_string)				\
+>  static ssize_t								\
+> -field##_show(struct device *dev, struct device_attribute *attr, char *buf)				\
+> +field##_show(struct device *dev, struct device_attribute *attr, char *buf)\
+>  {									\
+>  	struct sdio_func *func;						\
+>  									\
+> @@ -39,7 +39,8 @@ sdio_config_attr(class, "0x%02x\n");
+>  sdio_config_attr(vendor, "0x%04x\n");
+>  sdio_config_attr(device, "0x%04x\n");
 >  
->  #ifdef CONFIG_PM
-> +
-> +static int sdio_bus_runtime_suspend(struct device *dev)
-> +{
-> +	int ret;
-> +	sdio_power_t state;
-> +
-> +	ret = pm_generic_runtime_suspend(dev);
-> +	if (ret)
-> +		goto out;
-> +
-> +	if (!platform_sdio_power_manageable(dev))
-> +		goto out;
-> +
-> +	platform_sdio_run_wake(dev, true);
-> +
-> +	state = platform_sdio_choose_power_state(dev);
-> +	if (state == SDIO_POWER_ERROR) {
-> +		ret = -EIO;
-> +		goto out;
-> +	}
-> +
-> +	ret = platform_sdio_set_power_state(dev, state);
-> +
-> +out:
-> +	return ret;
-> +}
-> +
-> +static int sdio_bus_runtime_resume(struct device *dev)
-> +{
-> +	int ret;
-> +
-> +	if (platform_sdio_power_manageable(dev)) {
-> +		platform_sdio_run_wake(dev, false);
-> +		ret = platform_sdio_set_power_state(dev, SDIO_D0);
-> +		if (ret)
-> +			goto out;
-> +	}
-> +
-> +	ret = pm_generic_runtime_resume(dev);
-> +
-> +out:
-> +	return ret;
-> +}
-> +
+> -static ssize_t modalias_show(struct device *dev, struct device_attribute *attr, char *buf)
+> +static ssize_t modalias_show(struct device *dev, struct device_attribute *attr,
+> +		char *buf)
+>  {
+>  	struct sdio_func *func = dev_to_sdio_func (dev);
+>  
+> 
 
-Most likely we will need to make analogous changes for other bus types that
-don't support power management natively, like platform, SPI, I2C etc.  In all
-of them the _runtime_suspend() and _runtime_resume() routine will look
-almost exactly the same except for the platform_sdio_ prefix.
-
-For this reason, I think it would be better to simply define two functions
-acpi_pm_runtime_suspend() and acpi_pm_runtime_resume() that will do all of
-the ACPI-specific operations related to runtime suspend/resume.  Then, we
-will be able to use these functions for all of the bus types in question
-in the same way (we may also need to add analogous functions for system
-suspend/resume handling).
-
-If we do that, then the sdio_platform_pm_ops structure from the previous
-patch won't be necessary any more.
-
-Thanks,
-Rafael
-
-
--- 
-I speak only for myself.
-Rafael J. Wysocki, Intel Open Source Technology Center.
