@@ -1,7 +1,7 @@
 From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [RFC PATCH v3 06/16] dmaengine: edma: enable build for AM33XX
-Date: Thu, 18 Oct 2012 09:26:45 -0400
-Message-ID: <1350566815-409-7-git-send-email-mporter@ti.com>
+Subject: [RFC PATCH v3 07/16] dmaengine: edma: Add TI EDMA device tree binding
+Date: Thu, 18 Oct 2012 09:26:46 -0400
+Message-ID: <1350566815-409-8-git-send-email-mporter@ti.com>
 References: <1350566815-409-1-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -20,26 +20,72 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Enable TI EDMA option on OMAP.
+The binding definition is based on the generic DMA controller
+binding.
 
 Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 ---
- drivers/dma/Kconfig |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ Documentation/devicetree/bindings/dma/ti-edma.txt |   51 +++++++++++++++++++++
+ 1 file changed, 51 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/dma/ti-edma.txt
 
-diff --git a/drivers/dma/Kconfig b/drivers/dma/Kconfig
-index 677cd6e..eaea1c2 100644
---- a/drivers/dma/Kconfig
-+++ b/drivers/dma/Kconfig
-@@ -210,7 +210,7 @@ config SIRF_DMA
- 
- config TI_EDMA
- 	tristate "TI EDMA support"
--	depends on ARCH_DAVINCI
-+	depends on ARCH_DAVINCI || ARCH_OMAP
- 	select DMA_ENGINE
- 	select DMA_VIRTUAL_CHANNELS
- 	default n
+diff --git a/Documentation/devicetree/bindings/dma/ti-edma.txt b/Documentation/devicetree/bindings/dma/ti-edma.txt
+new file mode 100644
+index 0000000..3344345
+--- /dev/null
++++ b/Documentation/devicetree/bindings/dma/ti-edma.txt
+@@ -0,0 +1,51 @@
++TI EDMA
++
++Required properties:
++- compatible : "ti,edma3"
++- ti,hwmods: Name of the hwmods associated to the EDMA
++- ti,edma-regions: Number of regions
++- ti,edma-slots: Number of slots
++- ti,edma-queue-tc-map: List of transfer control to queue mappings
++- ti,edma-queue-priority-map: List of queue priority mappings
++- ti,edma-default-queue: Default queue value
++
++Optional properties:
++- ti,edma-reserved-channels: List of reserved channel regions
++- ti,edma-reserved-slots: List of reserved slot regions
++- ti,edma-xbar-event-map: Crossbar event to channel map
++
++Example:
++
++edma: edma@49000000 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	reg = <0x49000000 0x10000>;
++	interrupt-parent = <&intc>;
++	interrupts = <12 13 14>;
++	compatible = "ti,edma3";
++	ti,hwmods = "tpcc", "tptc0", "tptc1", "tptc2";
++	#dma-cells = <1>;
++	dma-channels = <64>;
++	ti,edma-regions = <4>;
++	ti,edma-slots = <256>;
++	ti,edma-reserved-channels = <0  2
++				     14 2
++				     26 6
++				     48 4
++				     56 8>;
++	ti,edma-reserved-slots = <0  2
++				  14 2
++				  26 6
++				  48 4
++				  56 8
++				  64 127>;
++	ti,edma-queue-tc-map = <0 0
++				1 1
++				2 2>;
++	ti,edma-queue-priority-map = <0 0
++				      1 1
++				      2 2>;
++	ti,edma-default-queue = <0>;
++	ti,edma-xbar-event-map = <1 12
++				  2 13>;
++};
 -- 
 1.7.9.5
 
