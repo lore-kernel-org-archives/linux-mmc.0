@@ -1,50 +1,35 @@
 From: Sangho Yi <antiroot@gmail.com>
-Subject: [PATCH 1/6] mmc: core: sdio_io.c: Fixed lines with > 80 chars
-Date: Fri, 19 Oct 2012 01:31:54 +0900
-Message-ID: <1350577919-2750-1-git-send-email-antiroot@gmail.com>
+Subject: [PATCH 2/6] mmc: core: sdio_bus.c: Removed trailing whitespace error
+Date: Fri, 19 Oct 2012 01:31:55 +0900
+Message-ID: <1350577919-2750-2-git-send-email-antiroot@gmail.com>
 References: <n>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:46044 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755012Ab2JRQd2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Oct 2012 12:33:28 -0400
-In-Reply-To: <n>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+ <1350577919-2750-1-git-send-email-antiroot@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1350577919-2750-1-git-send-email-antiroot@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: paul.gortmaker@windriver.com, stefan.xk.nilsson@stericsson.com, linus.walleij@linaro.org, ulf.hansson@stericsson.com, rjw@sisk.pl, girish.shivananjappa@linaro.org, cjb@laptop.org
 Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sangho Yi <antiroot@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
 
-I fixed lines over 80 characters per line.
+Removed the one unnecessary whitespace error from sdio_bus.c
 
 Signed-off-by: Sangho Yi <antiroot@gmail.com>
 ---
- drivers/mmc/core/sdio_io.c |    6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ drivers/mmc/core/sdio_bus.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-index 8f6f5ac..c5f53d8 100644
---- a/drivers/mmc/core/sdio_io.c
-+++ b/drivers/mmc/core/sdio_io.c
-@@ -80,7 +80,8 @@ int sdio_enable_func(struct sdio_func *func)
- 	timeout = jiffies + msecs_to_jiffies(func->enable_timeout);
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index 6bf6879..13146d2 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -105,7 +105,7 @@ sdio_bus_uevent(struct device *dev, struct kobj_uevent_env *env)
+ 			"SDIO_CLASS=%02X", func->class))
+ 		return -ENOMEM;
  
- 	while (1) {
--		ret = mmc_io_rw_direct(func->card, 0, 0, SDIO_CCCR_IORx, 0, &reg);
-+		ret = mmc_io_rw_direct(func->card, 0, 0, SDIO_CCCR_IORx, 0,
-+				&reg);
- 		if (ret)
- 			goto err;
- 		if (reg & (1 << func->num))
-@@ -664,7 +665,8 @@ void sdio_f0_writeb(struct sdio_func *func, unsigned char b, unsigned int addr,
+-	if (add_uevent_var(env, 
++	if (add_uevent_var(env,
+ 			"SDIO_ID=%04X:%04X", func->vendor, func->device))
+ 		return -ENOMEM;
  
- 	BUG_ON(!func);
- 
--	if ((addr < 0xF0 || addr > 0xFF) && (!mmc_card_lenient_fn0(func->card))) {
-+	if ((addr < 0xF0 || addr > 0xFF) &&
-+			(!mmc_card_lenient_fn0(func->card))) {
- 		if (err_ret)
- 			*err_ret = -EINVAL;
- 		return;
 -- 
 1.7.9.5
-
