@@ -1,42 +1,120 @@
-From: Marek Vasut <marex-ynQEQJNshbs@public.gmane.org>
-Subject: Re: [PATCH] dma: add new DMA control commands
-Date: Thu, 18 Oct 2012 12:51:14 +0200
-Message-ID: <201210181251.15116.marex@denx.de>
-References: <1350538335-29026-1-git-send-email-b32955@freescale.com> <201210181049.21556.marex@denx.de> <507FC827.40601@freescale.com>
+From: Heiko =?utf-8?q?St=C3=BCbner?= <heiko@sntech.de>
+Subject: [PATCH v2] mmc: sdhci-s3c: ensure non-transaction of bus before clk_disable
+Date: Thu, 18 Oct 2012 13:01:20 +0200
+Message-ID: <201210181301.20819.heiko@sntech.de>
+References: <004701cdad16$6886e890$3994b9b0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <507FC827.40601-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Huang Shijie <b32955-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Cc: Vinod Koul <vinod.koul-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, djbw-b10kYP2dOMg@public.gmane.org, khali-PUYAD+kWke1g9hUCZPvPmw@public.gmane.org, ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org, w.sang-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, lrg-l0cyMroinI0@public.gmane.org, broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org, perex-/Fr2/VpizcU@public.gmane.org, tiwai-l3A5Bk7waGM@public.gmane.org, shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, artem.bityutskiy-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, Huang Shijie <shijie8-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Fabio Estevam <fabio.estevam-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+Content-Type: Text/Plain;
+  charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gloria.sntech.de ([95.129.55.99]:36760 "EHLO gloria.sntech.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932590Ab2JRLBY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 18 Oct 2012 07:01:24 -0400
+In-Reply-To: <004701cdad16$6886e890$3994b9b0$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, 'Chander Kashyap' <chander.kashyap@linaro.org>, 'Chris Ball' <cjb@laptop.org>
 
-Dear Huang Shijie,
+Clock should be supplied during bus transaction. This patch defers
+clk_disabe in runtime_suspend if CMD/DATA line is used.
 
-> =E4=BA=8E 2012=E5=B9=B410=E6=9C=8818=E6=97=A5 16:49, Marek Vasut =E5=86=
-=99=E9=81=93:
-> > Dear Huang Shijie,
-> >=20
-> >> =E4=BA=8E 2012=E5=B9=B410=E6=9C=8818=E6=97=A5 16:16, Marek Vasut =E5=
-=86=99=E9=81=93:
-> >>> So we can't stream data from the chip? About time to adjust the M=
-TD
-> >>> framework to allow that. Maybe implement a command queue?
-> >>=20
-> >> IMHO, it's not possible. Because the READ-PAGE(00h-30h) command ne=
-eds to
-> >> check the busy status
-> >> which means we have to stop in the middle, so we can not chain the=
- all
-> >> the read-pages DMA commands.
-> >=20
-> > Can the DMA not branch?
->=20
-> it's too complicated to the MTD layer, as well as the gpmi driver.
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+Acked-by: Heiko Stuebner <heiko@sntech.de>
+---
+It's also necessary to destaticise the forward declarations in the top of
+sdhci.c, which I've done in this v2.
 
-Can you please elaborate ?
+ drivers/mmc/host/sdhci-s3c.c |   13 +++++++++----
+ drivers/mmc/host/sdhci.c     |   14 ++++++++------
+ drivers/mmc/host/sdhci.h     |    2 ++
+ 3 files changed, 19 insertions(+), 10 deletions(-)
 
-Best regards,
-Marek Vasut
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 30e3d01..0cabf18 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -848,12 +848,17 @@ static int sdhci_s3c_runtime_suspend(struct device *dev)
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_s3c *ourhost = to_s3c(host);
+ 	struct clk *busclk = ourhost->clk_io;
+-	int ret;
++	int ret = 0;
+ 
+-	ret = sdhci_runtime_suspend_host(host);
++	if (!(readl(host->ioaddr + SDHCI_PRESENT_STATE) &
++			(SDHCI_CMD_INHIBIT | SDHCI_DATA_INHIBIT))) {
++		ret = sdhci_runtime_suspend_host(host);
++		clk_disable(ourhost->clk_bus[ourhost->cur_clk]);
++		clk_disable(busclk);
++	} else {
++		sdhci_runtime_pm_put(host);
++	}
+ 
+-	clk_disable(ourhost->clk_bus[ourhost->cur_clk]);
+-	clk_disable(busclk);
+ 	return ret;
+ }
+ 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 7922adb..57de949 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -55,14 +55,14 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
+ static void sdhci_tuning_timer(unsigned long data);
+ 
+ #ifdef CONFIG_PM_RUNTIME
+-static int sdhci_runtime_pm_get(struct sdhci_host *host);
+-static int sdhci_runtime_pm_put(struct sdhci_host *host);
++int sdhci_runtime_pm_get(struct sdhci_host *host);
++int sdhci_runtime_pm_put(struct sdhci_host *host);
+ #else
+-static inline int sdhci_runtime_pm_get(struct sdhci_host *host)
++inline int sdhci_runtime_pm_get(struct sdhci_host *host)
+ {
+ 	return 0;
+ }
+-static inline int sdhci_runtime_pm_put(struct sdhci_host *host)
++inline int sdhci_runtime_pm_put(struct sdhci_host *host)
+ {
+ 	return 0;
+ }
+@@ -2535,16 +2535,18 @@ EXPORT_SYMBOL_GPL(sdhci_enable_irq_wakeups);
+ 
+ #ifdef CONFIG_PM_RUNTIME
+ 
+-static int sdhci_runtime_pm_get(struct sdhci_host *host)
++int sdhci_runtime_pm_get(struct sdhci_host *host)
+ {
+ 	return pm_runtime_get_sync(host->mmc->parent);
+ }
++EXPORT_SYMBOL_GPL(sdhci_runtime_pm_get);
+ 
+-static int sdhci_runtime_pm_put(struct sdhci_host *host)
++int sdhci_runtime_pm_put(struct sdhci_host *host)
+ {
+ 	pm_runtime_mark_last_busy(host->mmc->parent);
+ 	return pm_runtime_put_autosuspend(host->mmc->parent);
+ }
++EXPORT_SYMBOL_GPL(sdhci_runtime_pm_put);
+ 
+ int sdhci_runtime_suspend_host(struct sdhci_host *host)
+ {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 97653ea..fbf9a08 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -384,6 +384,8 @@ extern void sdhci_enable_irq_wakeups(struct sdhci_host *host);
+ #endif
+ 
+ #ifdef CONFIG_PM_RUNTIME
++extern int sdhci_runtime_pm_get(struct sdhci_host *host);
++extern int sdhci_runtime_pm_put(struct sdhci_host *host);
+ extern int sdhci_runtime_suspend_host(struct sdhci_host *host);
+ extern int sdhci_runtime_resume_host(struct sdhci_host *host);
+ #endif
+-- 
+1.7.2.3
+
