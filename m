@@ -1,63 +1,72 @@
-From: Philip Rakity <prakity@nvidia.com>
-Subject: Re: [PATCH 1/2] mmc: core: Support all MMC capabilities when
- booting from Device Tree
-Date: Wed, 17 Oct 2012 21:56:32 +0200
-Message-ID: <1B3089FB-EDBE-4145-83A6-1DFA4B0A2FDF@nvidia.com>
-References: <1350306959-5843-1-git-send-email-lee.jones@linaro.org>
- <201210151420.29930.arnd@arndb.de> <20121015160740.GC7662@gmail.com>
- <201210171338.01011.arnd@arndb.de>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 3/3] mmc: sdhci-s3c: Add clk_(enable/disable) in runtime
+ suspend/resume
+Date: Thu, 18 Oct 2012 11:04:42 +0900
+Message-ID: <507F63BA.7040809@samsung.com>
+References: <1347613731-29428-1-git-send-email-chander.kashyap@linaro.org>
+ <1347613731-29428-4-git-send-email-chander.kashyap@linaro.org>
+ <201210171115.48401.heiko@sntech.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate03.nvidia.com ([216.228.121.140]:11577 "EHLO
-	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756407Ab2JQT4t convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Oct 2012 15:56:49 -0400
-In-Reply-To: <201210171338.01011.arnd@arndb.de>
-Content-Language: en-US
+Received: from mailout1.samsung.com ([203.254.224.24]:46457 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753430Ab2JRCFM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Oct 2012 22:05:12 -0400
+In-reply-to: <201210171115.48401.heiko@sntech.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Lee Jones <lee.jones@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linus.walleij@stericsson.com" <linus.walleij@stericsson.com>, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@stericsson.com>
+To: =?ISO-8859-15?Q?Heiko_St=FCbner?= <heiko@sntech.de>
+Cc: Chander Kashyap <chander.kashyap@linaro.org>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, ben@simtec.co.uk, broonie@opensource.wolfsonmicro.com, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, patches@linaro.org
 
+Hi Heiko,
 
-On 17 Oct 2012, at 14:38, Arnd Bergmann <arnd@arndb.de> wrote:
+Sorry, i didn't check this patch with s3c2416.
+(i didn't have the s3c2416 board.)
+If you have a problem, i think good that revert this patch for fixing y=
+our problem.
+Also, i will check and share the result.
 
-> On Monday 15 October 2012, Lee Jones wrote:
->>> and so on. What are you actually missing in the properties that
->>> are already there?
->> 
->> MMC_CAP_ERASE
-> 
-> This one seems to be set unconditionally on some controllers but
-> not on others. Why would it need to be configurable?
-> 
->> MMC_CAP_UHS_SDR12
->> MMC_CAP_UHS_SDR25
->> MMC_CAP_UHS_DDR50
-> 
-> Could this be derived from max-frequency?
+Best Regards,
+Jaehoon Chung
 
-The problem is the controller may signal it supports DDR but the host cannot.  For example no voltage at correct level.
-Same issue with 8 bit support.  Controller could say supports it but board has only 4 "wires"
-> 
->> MMC_CAP_1_8V_DDR
-> 
-> Right, I suppose we need this. Should we have a minimum and maximum
-> voltage added to the common properties for this?
-> 
->> MMC_CAP2_DETECT_ON_ERR
->> MMC_CAP2_NO_SLEEP_CMD
-> 
-> I don't see these ones being set anywhere, but they were both
-> added by Ulf. Maybe he can comment on if or why they are needed
-> in devicetree, rather than being set by the driver unconditionally
-> or for specific versions of the host controller.
-> 
-> 	Arnd
+On 10/17/2012 06:15 PM, Heiko St=FCbner wrote:
+> Hi,
+>=20
+> Am Freitag, 14. September 2012, 11:08:51 schrieb Chander Kashyap:
+>> Perform clock disable/enable in runtime suspend/resume.
+>>
+>> Signed-off-by: Chander Kashyap <chander.kashyap@linaro.org>
+>=20
+> It seems this patch breaks my S3C2416 based machine with 3.7-rc1. I'm=
+ not=20
+> yet sure why, but the only response I get is loop of:
+>=20
+> 	mmc0: Timeout waiting for hardware interrupt.
+> 	mmc0: Internal clock never stabilised.
+> 	mmc0: Timeout waiting for hardware interrupt.
+> 	mmc0: Internal clock never stabilised.
+>=20
+>=20
+> This only happens on the hsmmc channel using the gpio-based card dete=
+ct and=20
+> even prevents the card from beeing fully detected. The other hsmmc ch=
+annel=20
+> using a permanent emmc seems to be working fine.
+>=20
+> And of course, when I revert this patch everything works fine again.
+>=20
+> I'll investigate further, but it'd be also ok if someone has a fix fo=
+r this=20
+> before me :-) .
+>=20
+>=20
+> Heiko
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
 
