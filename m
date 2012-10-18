@@ -1,155 +1,252 @@
-From: Sangho Yi <antiroot@gmail.com>
-Subject: [PATCH 3/4] mmc: core: sd.c: Modified pr_warning to pr_warn
-Date: Fri, 19 Oct 2012 02:19:19 +0900
-Message-ID: <1350580760-3886-3-git-send-email-antiroot@gmail.com>
-References: <n>
- <1350580760-3886-1-git-send-email-antiroot@gmail.com>
+From: Joe Perches <joe@perches.com>
+Subject: Re: [PATCH 1/4] mmc: core: sd.c: Added a space after comma on an
+ argument definition
+Date: Thu, 18 Oct 2012 10:55:41 -0700
+Message-ID: <1350582941.3072.78.camel@joe-AO722>
+References: <n> <1350580760-3886-1-git-send-email-antiroot@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:43236 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932747Ab2JRRVA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Oct 2012 13:21:00 -0400
+Received: from perches-mx.perches.com ([206.117.179.246]:33237 "EHLO
+	labridge.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932125Ab2JRRzm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 18 Oct 2012 13:55:42 -0400
 In-Reply-To: <1350580760-3886-1-git-send-email-antiroot@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: prakity@marvell.com, aaron.lu@amd.com, linus.walleij@linaro.org, ulf.hansson@stericsson.com, cjb@laptop.org
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sangho Yi <antiroot@gmail.com>
+To: Sangho Yi <antiroot@gmail.com>
+Cc: prakity@marvell.com, aaron.lu@amd.com, linus.walleij@linaro.org, ulf.hansson@stericsson.com, cjb@laptop.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Fixed the coding style warning;
-from pr_warning(...) to pr_warn(...)
+On Fri, 2012-10-19 at 02:19 +0900, Sangho Yi wrote:
+> Added a space between comma and an argument on the function definition
 
-Signed-off-by: Sangho Yi <antiroot@gmail.com>
----
- drivers/mmc/core/sd.c |   41 ++++++++++++++++++++---------------------
- 1 file changed, 20 insertions(+), 21 deletions(-)
+Hi Sangho.
+
+Please don't just be a checkpatch robot, but look at the
+code and see if you can improve it.
+
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 74972c2..91a73d7 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -44,7 +44,7 @@ static const unsigned int tacc_mant[] = {
+>  	35,	40,	45,	50,	55,	60,	70,	80,
+>  };
+>  
+> -#define UNSTUFF_BITS(resp,start,size)					\
+> +#define UNSTUFF_BITS(resp, start, size)					\
+>  	({								\
+>  		const int __size = size;				\
+>  		const u32 __mask = (__size < 32 ? 1 << __size : 0) - 1;	\
+
+I'd prefer that UNSTUFF_BITS be converted from
+a statement expression macro to a proper function.
+
+Something like:
+
+ drivers/mmc/core/sd.c | 118 +++++++++++++++++++++++++-------------------------
+ 1 file changed, 59 insertions(+), 59 deletions(-)
 
 diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 7c6b38e..0622b9b 100644
+index 74972c2..ec32ba48 100644
 --- a/drivers/mmc/core/sd.c
 +++ b/drivers/mmc/core/sd.c
-@@ -219,7 +219,7 @@ static int mmc_read_ssr(struct mmc_card *card)
- 	u32 *ssr;
+@@ -44,19 +44,19 @@ static const unsigned int tacc_mant[] = {
+ 	35,	40,	45,	50,	55,	60,	70,	80,
+ };
  
- 	if (!(card->csd.cmdclass & CCC_APP_SPEC)) {
--		pr_warning("%s: card lacks mandatory SD Status "
-+		pr_warn("%s: card lacks mandatory SD Status "
- 			"function.\n", mmc_hostname(card->host));
- 		return 0;
- 	}
-@@ -230,7 +230,7 @@ static int mmc_read_ssr(struct mmc_card *card)
+-#define UNSTUFF_BITS(resp,start,size)					\
+-	({								\
+-		const int __size = size;				\
+-		const u32 __mask = (__size < 32 ? 1 << __size : 0) - 1;	\
+-		const int __off = 3 - ((start) / 32);			\
+-		const int __shft = (start) & 31;			\
+-		u32 __res;						\
+-									\
+-		__res = resp[__off] >> __shft;				\
+-		if (__size + __shft > 32)				\
+-			__res |= resp[__off-1] << ((32 - __shft) % 32);	\
+-		__res & __mask;						\
+-	})
++static __always_inline u32 unstuff_bits(u32 resp[4], int start, int size)
++{
++	const u32 mask = (size < 32 ? 1 << size : 0) - 1;
++	const int offset = 3 - (start / 32);
++	const int shift = start & 31;
++	u32 res;
++
++	res = resp[offset] >> shift;
++	if (size + shift > 32)
++		res |= resp[offset - 1] << ((32 - shift) % 32);
++
++	return res & mask;
++}
  
- 	err = mmc_app_sd_status(card, ssr);
- 	if (err) {
--		pr_warning("%s: problem reading SD Status "
-+		pr_warn("%s: problem reading SD Status "
- 			"register.\n", mmc_hostname(card->host));
- 		err = 0;
- 		goto out;
-@@ -254,7 +254,7 @@ static int mmc_read_ssr(struct mmc_card *card)
- 			card->ssr.erase_offset = eo * 1000;
- 		}
- 	} else {
--		pr_warning("%s: SD Status: Invalid Allocation Unit "
-+		pr_warn("%s: SD Status: Invalid Allocation Unit "
- 			"size.\n", mmc_hostname(card->host));
- 	}
- out:
-@@ -274,7 +274,7 @@ static int mmc_read_switch(struct mmc_card *card)
- 		return 0;
- 
- 	if (!(card->csd.cmdclass & CCC_SWITCH)) {
--		pr_warning("%s: card lacks mandatory switch "
-+		pr_warn("%s: card lacks mandatory switch "
- 			"function, performance might suffer.\n",
- 			mmc_hostname(card->host));
- 		return 0;
-@@ -304,8 +304,8 @@ static int mmc_read_switch(struct mmc_card *card)
- 		if (err != -EINVAL && err != -ENOSYS && err != -EFAULT)
- 			goto out;
- 
--		pr_warning("%s: problem reading Bus Speed modes.\n",
--			   mmc_hostname(card->host));
-+		pr_warn("%s: problem reading Bus Speed modes.\n",
-+			mmc_hostname(card->host));
- 		err = 0;
- 
- 		goto out;
-@@ -360,8 +360,7 @@ int mmc_sd_switch_hs(struct mmc_card *card)
- 		goto out;
- 
- 	if ((status[16] & 0xF) != 1) {
--		pr_warning("%s: Problem switching card "
--			"into high-speed mode!\n",
-+		pr_warn("%s: Problem switching card into high-speed mode!\n",
- 			mmc_hostname(card->host));
- 		err = 0;
- 	} else {
-@@ -428,8 +427,8 @@ static int sd_select_driver_type(struct mmc_card *card, u8 *status)
- 		return err;
- 
- 	if ((status[15] & 0xF) != drive_strength) {
--		pr_warning("%s: Problem setting drive strength!\n",
--			   mmc_hostname(card->host));
-+		pr_warn("%s: Problem setting drive strength!\n",
-+			mmc_hostname(card->host));
- 		return 0;
- 	}
- 
-@@ -507,8 +506,8 @@ static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
- 		return err;
- 
- 	if ((status[16] & 0xF) != card->sd_bus_speed)
--		pr_warning("%s: Problem setting bus speed mode!\n",
--			   mmc_hostname(card->host));
-+		pr_warn("%s: Problem setting bus speed mode!\n",
-+			mmc_hostname(card->host));
- 	else {
- 		mmc_set_timing(card->host, timing);
- 		mmc_set_clock(card->host, card->sw_caps.uhs_max_dtr);
-@@ -587,8 +586,8 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
- 			return err;
- 
- 		if (((status[15] >> 4) & 0x0F) != current_limit)
--			pr_warning("%s: Problem setting current limit!\n",
--				   mmc_hostname(card->host));
-+			pr_warn("%s: Problem setting current limit!\n",
-+				mmc_hostname(card->host));
- 
- 	}
- 
-@@ -852,7 +851,7 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
- 		}
- 
- 		if (ro < 0) {
--			pr_warning("%s: host does not "
-+			pr_warn("%s: host does not "
- 				"support reading read-only "
- 				"switch. assuming write-enable.\n",
- 				mmc_hostname(host));
-@@ -1179,17 +1178,17 @@ int mmc_attach_sd(struct mmc_host *host)
- 	 * support.
+ /*
+  * Given the decoded CSD structure, decode the raw CID to our CID structure.
+@@ -71,18 +71,18 @@ void mmc_decode_cid(struct mmc_card *card)
+ 	 * SD doesn't currently have a version field so we will
+ 	 * have to assume we can parse this.
  	 */
- 	if (ocr & 0x7F) {
--		pr_warning("%s: card claims to support voltages "
--		       "below the defined range. These will be ignored.\n",
--		       mmc_hostname(host));
-+		pr_warn("%s: card claims to support voltages "
-+			"below the defined range. These will be ignored.\n",
-+			mmc_hostname(host));
- 		ocr &= ~0x7F;
+-	card->cid.manfid		= UNSTUFF_BITS(resp, 120, 8);
+-	card->cid.oemid			= UNSTUFF_BITS(resp, 104, 16);
+-	card->cid.prod_name[0]		= UNSTUFF_BITS(resp, 96, 8);
+-	card->cid.prod_name[1]		= UNSTUFF_BITS(resp, 88, 8);
+-	card->cid.prod_name[2]		= UNSTUFF_BITS(resp, 80, 8);
+-	card->cid.prod_name[3]		= UNSTUFF_BITS(resp, 72, 8);
+-	card->cid.prod_name[4]		= UNSTUFF_BITS(resp, 64, 8);
+-	card->cid.hwrev			= UNSTUFF_BITS(resp, 60, 4);
+-	card->cid.fwrev			= UNSTUFF_BITS(resp, 56, 4);
+-	card->cid.serial		= UNSTUFF_BITS(resp, 24, 32);
+-	card->cid.year			= UNSTUFF_BITS(resp, 12, 8);
+-	card->cid.month			= UNSTUFF_BITS(resp, 8, 4);
++	card->cid.manfid		= unstuff_bits(resp, 120, 8);
++	card->cid.oemid			= unstuff_bits(resp, 104, 16);
++	card->cid.prod_name[0]		= unstuff_bits(resp, 96, 8);
++	card->cid.prod_name[1]		= unstuff_bits(resp, 88, 8);
++	card->cid.prod_name[2]		= unstuff_bits(resp, 80, 8);
++	card->cid.prod_name[3]		= unstuff_bits(resp, 72, 8);
++	card->cid.prod_name[4]		= unstuff_bits(resp, 64, 8);
++	card->cid.hwrev			= unstuff_bits(resp, 60, 4);
++	card->cid.fwrev			= unstuff_bits(resp, 56, 4);
++	card->cid.serial		= unstuff_bits(resp, 24, 32);
++	card->cid.year			= unstuff_bits(resp, 12, 8);
++	card->cid.month			= unstuff_bits(resp, 8, 4);
+ 
+ 	card->cid.year += 2000; /* SD cards year offset */
+ }
+@@ -96,36 +96,36 @@ static int mmc_decode_csd(struct mmc_card *card)
+ 	unsigned int e, m, csd_struct;
+ 	u32 *resp = card->raw_csd;
+ 
+-	csd_struct = UNSTUFF_BITS(resp, 126, 2);
++	csd_struct = unstuff_bits(resp, 126, 2);
+ 
+ 	switch (csd_struct) {
+ 	case 0:
+-		m = UNSTUFF_BITS(resp, 115, 4);
+-		e = UNSTUFF_BITS(resp, 112, 3);
++		m = unstuff_bits(resp, 115, 4);
++		e = unstuff_bits(resp, 112, 3);
+ 		csd->tacc_ns	 = (tacc_exp[e] * tacc_mant[m] + 9) / 10;
+-		csd->tacc_clks	 = UNSTUFF_BITS(resp, 104, 8) * 100;
++		csd->tacc_clks	 = unstuff_bits(resp, 104, 8) * 100;
+ 
+-		m = UNSTUFF_BITS(resp, 99, 4);
+-		e = UNSTUFF_BITS(resp, 96, 3);
++		m = unstuff_bits(resp, 99, 4);
++		e = unstuff_bits(resp, 96, 3);
+ 		csd->max_dtr	  = tran_exp[e] * tran_mant[m];
+-		csd->cmdclass	  = UNSTUFF_BITS(resp, 84, 12);
++		csd->cmdclass	  = unstuff_bits(resp, 84, 12);
+ 
+-		e = UNSTUFF_BITS(resp, 47, 3);
+-		m = UNSTUFF_BITS(resp, 62, 12);
++		e = unstuff_bits(resp, 47, 3);
++		m = unstuff_bits(resp, 62, 12);
+ 		csd->capacity	  = (1 + m) << (e + 2);
+ 
+-		csd->read_blkbits = UNSTUFF_BITS(resp, 80, 4);
+-		csd->read_partial = UNSTUFF_BITS(resp, 79, 1);
+-		csd->write_misalign = UNSTUFF_BITS(resp, 78, 1);
+-		csd->read_misalign = UNSTUFF_BITS(resp, 77, 1);
+-		csd->r2w_factor = UNSTUFF_BITS(resp, 26, 3);
+-		csd->write_blkbits = UNSTUFF_BITS(resp, 22, 4);
+-		csd->write_partial = UNSTUFF_BITS(resp, 21, 1);
++		csd->read_blkbits = unstuff_bits(resp, 80, 4);
++		csd->read_partial = unstuff_bits(resp, 79, 1);
++		csd->write_misalign = unstuff_bits(resp, 78, 1);
++		csd->read_misalign = unstuff_bits(resp, 77, 1);
++		csd->r2w_factor = unstuff_bits(resp, 26, 3);
++		csd->write_blkbits = unstuff_bits(resp, 22, 4);
++		csd->write_partial = unstuff_bits(resp, 21, 1);
+ 
+-		if (UNSTUFF_BITS(resp, 46, 1)) {
++		if (unstuff_bits(resp, 46, 1)) {
+ 			csd->erase_size = 1;
+ 		} else if (csd->write_blkbits >= 9) {
+-			csd->erase_size = UNSTUFF_BITS(resp, 39, 7) + 1;
++			csd->erase_size = unstuff_bits(resp, 39, 7) + 1;
+ 			csd->erase_size <<= csd->write_blkbits - 9;
+ 		}
+ 		break;
+@@ -141,17 +141,17 @@ static int mmc_decode_csd(struct mmc_card *card)
+ 		csd->tacc_ns	 = 0; /* Unused */
+ 		csd->tacc_clks	 = 0; /* Unused */
+ 
+-		m = UNSTUFF_BITS(resp, 99, 4);
+-		e = UNSTUFF_BITS(resp, 96, 3);
++		m = unstuff_bits(resp, 99, 4);
++		e = unstuff_bits(resp, 96, 3);
+ 		csd->max_dtr	  = tran_exp[e] * tran_mant[m];
+-		csd->cmdclass	  = UNSTUFF_BITS(resp, 84, 12);
+-		csd->c_size	  = UNSTUFF_BITS(resp, 48, 22);
++		csd->cmdclass	  = unstuff_bits(resp, 84, 12);
++		csd->c_size	  = unstuff_bits(resp, 48, 22);
+ 
+ 		/* SDXC cards have a minimum C_SIZE of 0x00FFFF */
+ 		if (csd->c_size >= 0xFFFF)
+ 			mmc_card_set_ext_capacity(card);
+ 
+-		m = UNSTUFF_BITS(resp, 48, 22);
++		m = unstuff_bits(resp, 48, 22);
+ 		csd->capacity     = (1 + m) << 10;
+ 
+ 		csd->read_blkbits = 9;
+@@ -186,26 +186,26 @@ static int mmc_decode_scr(struct mmc_card *card)
+ 	resp[3] = card->raw_scr[1];
+ 	resp[2] = card->raw_scr[0];
+ 
+-	scr_struct = UNSTUFF_BITS(resp, 60, 4);
++	scr_struct = unstuff_bits(resp, 60, 4);
+ 	if (scr_struct != 0) {
+ 		pr_err("%s: unrecognised SCR structure version %d\n",
+ 			mmc_hostname(card->host), scr_struct);
+ 		return -EINVAL;
  	}
  
- 	if ((ocr & MMC_VDD_165_195) &&
- 	    !(host->ocr_avail_sd & MMC_VDD_165_195)) {
--		pr_warning("%s: SD card claims to support the "
--		       "incompletely defined 'low voltage range'. This "
--		       "will be ignored.\n", mmc_hostname(host));
-+		pr_warn("%s: SD card claims to support the "
-+			"incompletely defined 'low voltage range'. This "
-+			"will be ignored.\n", mmc_hostname(host));
- 		ocr &= ~MMC_VDD_165_195;
- 	}
+-	scr->sda_vsn = UNSTUFF_BITS(resp, 56, 4);
+-	scr->bus_widths = UNSTUFF_BITS(resp, 48, 4);
++	scr->sda_vsn = unstuff_bits(resp, 56, 4);
++	scr->bus_widths = unstuff_bits(resp, 48, 4);
+ 	if (scr->sda_vsn == SCR_SPEC_VER_2)
+ 		/* Check if Physical Layer Spec v3.0 is supported */
+-		scr->sda_spec3 = UNSTUFF_BITS(resp, 47, 1);
++		scr->sda_spec3 = unstuff_bits(resp, 47, 1);
  
--- 
-1.7.9.5
+-	if (UNSTUFF_BITS(resp, 55, 1))
++	if (unstuff_bits(resp, 55, 1))
+ 		card->erased_byte = 0xFF;
+ 	else
+ 		card->erased_byte = 0x0;
+ 
+ 	if (scr->sda_spec3)
+-		scr->cmds = UNSTUFF_BITS(resp, 32, 2);
++		scr->cmds = unstuff_bits(resp, 32, 2);
+ 	return 0;
+ }
+ 
+@@ -240,15 +240,15 @@ static int mmc_read_ssr(struct mmc_card *card)
+ 		ssr[i] = be32_to_cpu(ssr[i]);
+ 
+ 	/*
+-	 * UNSTUFF_BITS only works with four u32s so we have to offset the
++	 * unstuff_bits only works with four u32s so we have to offset the
+ 	 * bitfield positions accordingly.
+ 	 */
+-	au = UNSTUFF_BITS(ssr, 428 - 384, 4);
++	au = unstuff_bits(ssr, 428 - 384, 4);
+ 	if (au > 0 && au <= 9) {
+ 		card->ssr.au = 1 << (au + 4);
+-		es = UNSTUFF_BITS(ssr, 408 - 384, 16);
+-		et = UNSTUFF_BITS(ssr, 402 - 384, 6);
+-		eo = UNSTUFF_BITS(ssr, 400 - 384, 2);
++		es = unstuff_bits(ssr, 408 - 384, 16);
++		et = unstuff_bits(ssr, 402 - 384, 6);
++		eo = unstuff_bits(ssr, 400 - 384, 2);
+ 		if (es && et) {
+ 			card->ssr.erase_timeout = (et * 1000) / es;
+ 			card->ssr.erase_offset = eo * 1000;
+
 
