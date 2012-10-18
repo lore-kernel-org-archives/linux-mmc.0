@@ -1,49 +1,60 @@
-From: Sangho Yi <antiroot@gmail.com>
-Subject: [PATCH 3/3] drivers: mmc: core: sdio.c: fixed from pr_warning(... to pr_warn(...
-Date: Fri, 19 Oct 2012 01:06:34 +0900
-Message-ID: <1350576394-2008-3-git-send-email-antiroot@gmail.com>
-References: <n>
- <1350576394-2008-1-git-send-email-antiroot@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-da0-f46.google.com ([209.85.210.46]:60959 "EHLO
-	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754948Ab2JRQIN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Oct 2012 12:08:13 -0400
-In-Reply-To: <1350576394-2008-1-git-send-email-antiroot@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Philip Rakity <prakity@nvidia.com>
+Subject: Re: [PATCH 2/3] drivers: mmc: core: sdio.c: fixed coding style
+ error on for() statement
+Date: Thu, 18 Oct 2012 18:10:25 +0200
+Message-ID: <8B292373-3C73-41EF-A193-0ECF614BE06E@nvidia.com>
+References: <n> <1350576394-2008-1-git-send-email-antiroot@gmail.com>
+ <1350576394-2008-2-git-send-email-antiroot@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1350576394-2008-2-git-send-email-antiroot@gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sangho Yi <antiroot@gmail.com>
+Cc: "prakity@marvell.com" <prakity@marvell.com>, "aaron.lu@amd.com" <aaron.lu@amd.com>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "ulf.hansson@stericsson.com" <ulf.hansson@stericsson.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: prakity@marvell.com, aaron.lu@amd.com, linus.walleij@linaro.org, ulf.hansson@stericsson.com, cjb@laptop.org
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sangho Yi <antiroot@gmail.com>
 
-Replaced pr_warning(... to pr_warn(... on sdio.c
 
-Signed-off-by: Sangho Yi <antiroot@gmail.com>
----
- drivers/mmc/core/sdio.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+On 18 Oct 2012, at 17:06, Sangho Yi <antiroot@gmail.com> wrote:
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index df09b63..889d3da 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -220,7 +220,7 @@ static int sdio_enable_wide(struct mmc_card *card)
- 		return ret;
- 
- 	if ((ctrl & SDIO_BUS_WIDTH_MASK) == SDIO_BUS_WIDTH_RESERVED)
--		pr_warning("%s: SDIO_CCCR_IF is invalid: 0x%02x\n",
-+		pr_warn("%s: SDIO_CCCR_IF is invalid: 0x%02x\n",
- 			   mmc_hostname(card->host), ctrl);
- 
- 	/* set as 4-bit bus width */
-@@ -1068,7 +1068,7 @@ int mmc_attach_sdio(struct mmc_host *host)
- 	 * support.
- 	 */
- 	if (ocr & 0x7F) {
--		pr_warning("%s: card claims to support voltages "
-+		pr_warn("%s: card claims to support voltages "
- 		       "below the defined range. These will be ignored.\n",
- 		       mmc_hostname(host));
- 		ocr &= ~0x7F;
--- 
-1.7.9.5
+> add a whitespace after ";" on for statement, to follow a coding style guideline.
+> 
+> Signed-off-by: Sangho Yi <antiroot@gmail.com>
+> ---
+> drivers/mmc/core/sdio.c |    4 ++--
+> 1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index 14326e8..df09b63 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -819,7 +819,7 @@ static void mmc_sdio_remove(struct mmc_host *host)
+> 	BUG_ON(!host);
+> 	BUG_ON(!host->card);
+> 
+> -	for (i = 0;i < host->card->sdio_funcs;i++) {
+> +	for (i = 0; i < host->card->sdio_funcs; i++) {
+> 		if (host->card->sdio_func[i]) {
+> 			sdio_remove_func(host->card->sdio_func[i]);
+> 			host->card->sdio_func[i] = NULL;
+> @@ -1151,7 +1151,7 @@ int mmc_attach_sdio(struct mmc_host *host)
+> 	/*
+> 	 * ...then the SDIO functions.
+> 	 */
+> -	for (i = 0;i < funcs;i++) {
+> +	for (i = 0; i < funcs; i++) {
+> 		err = sdio_add_func(host->card->sdio_func[i]);
+> 		if (err)
+> 			goto remove_added;
+> -- 
+> 1.7.9.5
+> 
+> --
 
+Reviewed-by: Philip Rakity <prakity@nvidia.com>
+
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
