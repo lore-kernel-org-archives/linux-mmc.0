@@ -1,40 +1,42 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 1/3] mmc: esdhc: enable polling to detect card by itself
-Date: Thu, 18 Oct 2012 14:38:27 +0800
-Message-ID: <20121018063825.GC4513@S2101-09.ap.freescale.net>
-References: <1348828113-19668-1-git-send-email-yongd@marvell.com>
- <1348828113-19668-2-git-send-email-yongd@marvell.com>
- <20121007140648.GA10148@S2101-09.ap.freescale.net>
- <89813612683626448B837EE5A0B6A7CB30388601C9@SC-VEXCH4.marvell.com>
- <20121018054053.GA4513@S2101-09.ap.freescale.net>
- <89813612683626448B837EE5A0B6A7CB3038855FF9@SC-VEXCH4.marvell.com>
+From: Huang Shijie <b32955-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+Subject: Re: [PATCH] dma: add new DMA control commands
+Date: Thu, 18 Oct 2012 14:45:41 +0800
+Message-ID: <507FA595.4020507@freescale.com>
+References: <1350538335-29026-1-git-send-email-b32955@freescale.com> <1350541111.5263.3.camel@vkoul-udesk3>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:54550 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754445Ab2JRGiK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Oct 2012 02:38:10 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so7989137pad.19
-        for <linux-mmc@vger.kernel.org>; Wed, 17 Oct 2012 23:38:10 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <89813612683626448B837EE5A0B6A7CB3038855FF9@SC-VEXCH4.marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1350541111.5263.3.camel@vkoul-udesk3>
+Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Vinod Koul <vinod.koul-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: djbw-b10kYP2dOMg@public.gmane.org, khali-PUYAD+kWke1g9hUCZPvPmw@public.gmane.org, ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org, w.sang-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, lrg-l0cyMroinI0@public.gmane.org, broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org, perex-/Fr2/VpizcU@public.gmane.org, tiwai-l3A5Bk7waGM@public.gmane.org, shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, marex-ynQEQJNshbs@public.gmane.org, artem.bityutskiy-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, Huang Shijie <shijie8-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Yong Ding <yongd@marvell.com>
-Cc: Chris Ball <cjb@laptop.org>, Anton Vorontsov <anton.vorontsov@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Wolfram Sang <w.sang@pengutronix.de>, Daniel Drake <dsd@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Wilson Callan <wilson.callan@savantsystems.com>, Ben Dooks <ben-linux@fluff.org>, Zhangfei Gao <zgao6@marvell.com>, Kevin Liu <kliu5@marvell.com>, Jialing Fu <jlfu@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Can you fix your mailer to use bottom posting rather than top posting,
-and have texts wrap around column 70?  Otherwise, you message stands
-a good chance to be ignored by people.
+=E4=BA=8E 2012=E5=B9=B410=E6=9C=8818=E6=97=A5 14:18, Vinod Koul =E5=86=99=
+=E9=81=93:
+> Why cant you do start (prepare clock etc) when you submit the descrip=
+tor
+> to dmaengine. Can be done in tx_submit callback.
+> Similarly remove the clock when dma transaction gets completed.
+I ever thought this method too.
 
-On Wed, Oct 17, 2012 at 11:27:17PM -0700, Yong Ding wrote:
-> Shawn,
-> Thanks. Oh, sorry I really have missed the fact u mentioned. U are right in the current code, the bit will also be cleared for ESDHC_CD_GPIO. 
-> But I think this is improper since for GPIO detection type, we don't use the host controller internal card detection(ESDHC_CD_CONTROLLER), but with SDHCI_QUIRK_BROKEN_CARD_DETECTION cleared, we'll still enable/disable relevant INT bits (in sdhci_set_card_detection in sdhci.c). This is my biggest concern. And I think the SDHCI_QUIRK_BROKEN_CARD_DETECTION shall be purely used to notify whether the host controller detection method is used or not. So even for the ESDHC_CD_GPIO type, we should still set this flag. How do u think?
-> 
-I'm fine with that.  Just remind you a fact you seem missed in case
-you need to change sdhci-esdhc-imx.c to adapt the changes you are going
-to make on sdhci.c.
+But it will become low efficient in the following case:
 
-Shawn 
+   Assuming the gpmi-nand driver has to read out 1024 pages in one=20
+_SINGLE_ read operation.
+The gpmi-nand will submit the descriptor to dmaengine per page. So with=
+=20
+your method,
+the system will repeat the enable/disable dma clock 1024 time. At every=
+=20
+enable/disable dma clock,
+the system has to enable the clock chain and it's parents ...
+
+But with this patch, we only need to enable/disable dma clock one time,=
+=20
+just at we select the nand chip.
+
+thanks
+Huang Shijie
