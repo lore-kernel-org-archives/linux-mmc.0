@@ -1,35 +1,55 @@
-From: Huang Shijie <b32955@freescale.com>
+From: Jassi Brar <jaswinder.singh@linaro.org>
 Subject: Re: [PATCH] dma: add new DMA control commands
-Date: Thu, 18 Oct 2012 17:13:11 +0800
-Message-ID: <507FC827.40601@freescale.com>
-References: <1350538335-29026-1-git-send-email-b32955@freescale.com> <201210181016.06782.marex@denx.de> <507FC290.10205@freescale.com> <201210181049.21556.marex@denx.de>
+Date: Thu, 18 Oct 2012 14:59:10 +0530
+Message-ID: <CAJe_ZhfarH-HpJkEOpH=jY1Gc-UPEyuA4bJ4LSQES7Uyea2BQw@mail.gmail.com>
+References: <1350538335-29026-1-git-send-email-b32955@freescale.com>
+	<1350541111.5263.3.camel@vkoul-udesk3>
+	<507FA595.4020507@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
+Content-Type: text/plain; charset=GB2312
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <201210181049.21556.marex@denx.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Marek Vasut <marex@denx.de>
-Cc: Vinod Koul <vinod.koul@linux.intel.com>, djbw@fb.com, khali@linux-fr.org, ben-linux@fluff.org, w.sang@pengutronix.de, cjb@laptop.org, dwmw2@infradead.org, lrg@ti.com, broonie@opensource.wolfsonmicro.com, perex@perex.cz, tiwai@suse.de, shawn.guo@linaro.org, artem.bityutskiy@linux.intel.com, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, alsa-devel@alsa-project.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Huang Shijie <shijie8@gmail.com>, Fabio Estevam <fabio.estevam@freescale.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:46047 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752937Ab2JRJ3M convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Oct 2012 05:29:12 -0400
+Received: by mail-vc0-f174.google.com with SMTP id fk26so5125658vcb.19
+        for <linux-mmc@vger.kernel.org>; Thu, 18 Oct 2012 02:29:11 -0700 (PDT)
+In-Reply-To: <507FA595.4020507@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Huang Shijie <b32955@freescale.com>
+Cc: Vinod Koul <vinod.koul@linux.intel.com>, marex@denx.de, Huang Shijie <shijie8@gmail.com>, alsa-devel@alsa-project.org, shawn.guo@linaro.org, linux@arm.linux.org.uk, tiwai@suse.de, artem.bityutskiy@linux.intel.com, broonie@opensource.wolfsonmicro.com, linux-mmc@vger.kernel.org, w.sang@pengutronix.de, perex@perex.cz, linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org, ben-linux@fluff.org, djbw@fb.com, khali@linux-fr.org, cjb@laptop.org, dwmw2@infradead.org, lrg@ti.com, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-=E4=BA=8E 2012=E5=B9=B410=E6=9C=8818=E6=97=A5 16:49, Marek Vasut =E5=86=
-=99=E9=81=93:
-> Dear Huang Shijie,
+On 18 October 2012 12:15, Huang Shijie <b32955@freescale.com> wrote:
+> =D3=DA 2012=C4=EA10=D4=C218=C8=D5 14:18, Vinod Koul =D0=B4=B5=C0:
 >
->> =E4=BA=8E 2012=E5=B9=B410=E6=9C=8818=E6=97=A5 16:16, Marek Vasut =E5=
-=86=99=E9=81=93:
->>> So we can't stream data from the chip? About time to adjust the MTD
->>> framework to allow that. Maybe implement a command queue?
->> IMHO, it's not possible. Because the READ-PAGE(00h-30h) command need=
-s to
->> check the busy status
->> which means we have to stop in the middle, so we can not chain the a=
-ll
->> the read-pages DMA commands.
-> Can the DMA not branch?
-it's too complicated to the MTD layer, as well as the gpmi driver.
-
-Best Regards
-Huang Shijie
+>> Why cant you do start (prepare clock etc) when you submit the descri=
+ptor
+>> to dmaengine. Can be done in tx_submit callback.
+>> Similarly remove the clock when dma transaction gets completed.
+>
+> I ever thought this method too.
+>
+> But it will become low efficient in the following case:
+>
+>   Assuming the gpmi-nand driver has to read out 1024 pages in one _SI=
+NGLE_
+> read operation.
+> The gpmi-nand will submit the descriptor to dmaengine per page. So wi=
+th your
+> method,
+> the system will repeat the enable/disable dma clock 1024 time. At eve=
+ry
+> enable/disable dma clock,
+> the system has to enable the clock chain and it's parents ...
+>
+> But with this patch, we only need to enable/disable dma clock one tim=
+e, just
+> at we select the nand chip.
+>
+If the clock is the dmac's property (not channels'), the toggling
+seems too aggressive.
+You could try using runtime_suspend/resume for clock
+disabling/enabling. How about employing autosuspend with a few ms
+delay?
