@@ -1,7 +1,8 @@
 From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [RFC PATCH v3 09/16] dmaengine: add dma_request_slave_channel_compat()
-Date: Thu, 18 Oct 2012 09:26:48 -0400
-Message-ID: <1350566815-409-10-git-send-email-mporter@ti.com>
+Subject: [RFC PATCH v3 10/16] mmc: omap_hsmmc: convert to
+	dma_request_slave_channel_compat()
+Date: Thu, 18 Oct 2012 09:26:49 -0400
+Message-ID: <1350566815-409-11-git-send-email-mporter@ti.com>
 References: <1350566815-409-1-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -20,43 +21,45 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Adds a dma_request_slave_channel_compat() wrapper which accepts
-both the arguments from dma_request_channel() and
-dma_request_slave_channel(). Based on whether the driver is
-instantiated via DT, the appropriate channel request call will be
-made.
+Convert dmaengine channel requests to use
+dma_request_slave_channel_compat(). This supports the DT case of
+platforms requiring channel selection from either the OMAP DMA or
+the EDMA engine. AM33xx only boots from DT and is the only user
+implementing EDMA so in the !DT case we can default to the OMAP DMA
+filter.
 
-This allows for a much cleaner migration of drivers to the
-dmaengine DT API as platforms continue to be mixed between those
-that boot using DT and those that do not.
-
-Suggested-by: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
 Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 ---
- include/linux/dmaengine.h |   10 ++++++++++
- 1 file changed, 10 insertions(+)
+ drivers/mmc/host/omap_hsmmc.c |   10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/dmaengine.h b/include/linux/dmaengine.h
-index c88f302..11d9e25 100644
---- a/include/linux/dmaengine.h
-+++ b/include/linux/dmaengine.h
-@@ -1007,6 +1007,16 @@ void dma_run_dependencies(struct dma_async_tx_descriptor *tx);
- struct dma_chan *dma_find_channel(enum dma_transaction_type tx_type);
- struct dma_chan *net_dma_find_channel(void);
- #define dma_request_channel(mask, x, y) __dma_request_channel(&(mask), x, y)
-+static inline struct dma_chan
-+*dma_request_slave_channel_compat(dma_cap_mask_t mask, dma_filter_fn fn,
-+				  void *fn_param, struct device *dev,
-+				  char *name)
-+{
-+	if (dev->of_node)
-+		return dma_request_slave_channel(dev, name);
-+	else
-+		return dma_request_channel(mask, fn, fn_param);
-+}
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 54bfd0c..b327cd0 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1866,14 +1866,20 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
+ 	dma_cap_zero(mask);
+ 	dma_cap_set(DMA_SLAVE, mask);
  
- /* --- Helper iov-locking functions --- */
+-	host->rx_chan = dma_request_channel(mask, omap_dma_filter_fn, &rx_req);
++	host->rx_chan =
++		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
++						 &rx_req, &pdev->dev, "rx");
++
+ 	if (!host->rx_chan) {
+ 		dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
+ 		ret = -ENXIO;
+ 		goto err_irq;
+ 	}
  
+-	host->tx_chan = dma_request_channel(mask, omap_dma_filter_fn, &tx_req);
++	host->tx_chan =
++		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
++						 &tx_req, &pdev->dev, "tx");
++
+ 	if (!host->tx_chan) {
+ 		dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel %u\n", tx_req);
+ 		ret = -ENXIO;
 -- 
 1.7.9.5
 
