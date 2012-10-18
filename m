@@ -1,7 +1,8 @@
 From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [RFC PATCH v3 08/16] ARM: dts: add AM33XX EDMA support
-Date: Thu, 18 Oct 2012 09:26:47 -0400
-Message-ID: <1350566815-409-9-git-send-email-mporter@ti.com>
+Subject: [RFC PATCH v3 11/16] mmc: omap_hsmmc: limit max_segs with the EDMA
+	DMAC
+Date: Thu, 18 Oct 2012 09:26:50 -0400
+Message-ID: <1350566815-409-12-git-send-email-mporter@ti.com>
 References: <1350566815-409-1-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -20,56 +21,40 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Adds AM33XX EDMA support to the am33xx.dtsi as documented in
-Documentation/devicetree/bindings/dma/ti-edma.txt
+The EDMA DMAC has a hardware limitation that prevents supporting
+scatter gather lists with any number of segments. Since the EDMA
+DMA Engine driver sets the maximum segments to 16, we do the
+same.
+
+TODO: this will be replaced once the DMA Engine API supports an
+API to query the DMAC's segment size limit.
 
 Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 ---
- arch/arm/boot/dts/am33xx.dtsi |   31 +++++++++++++++++++++++++++++++
- 1 file changed, 31 insertions(+)
+ drivers/mmc/host/omap_hsmmc.c |   10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
-index bb31bff..ab9c78f 100644
---- a/arch/arm/boot/dts/am33xx.dtsi
-+++ b/arch/arm/boot/dts/am33xx.dtsi
-@@ -62,6 +62,37 @@
- 			reg = <0x48200000 0x1000>;
- 		};
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index b327cd0..52bab01 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1828,6 +1828,16 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
+ 	 * as we want. */
+ 	mmc->max_segs = 1024;
  
-+		edma: edma@49000000 {
-+			compatible = "ti,edma3";
-+			ti,hwmods = "tpcc", "tptc0", "tptc1", "tptc2";
-+			reg =	<0x49000000 0x10000>,
-+				<0x44e10f90 0x10>;
-+			interrupt-parent = <&intc>;
-+			interrupts = <12 13 14>;
-+			#dma-cells = <1>;
-+			dma-channels = <64>;
-+			ti,edma-regions = <4>;
-+			ti,edma-slots = <256>;
-+			ti,edma-reserved-channels = <0  2
-+						     14 2
-+						     26 6
-+						     48 4
-+						     56 8>;
-+			ti,edma-reserved-slots = <0  2
-+						  14 2
-+						  26 6
-+						  48 4
-+						  56 8
-+						  64 127>;
-+			ti,edma-queue-tc-map = <0 0
-+						1 1
-+						2 2>;
-+			ti,edma-queue-priority-map = <0 0
-+						      1 1
-+						      2 2>;
-+			ti,edma-default-queue = <0>;
-+		};
++	/* Eventually we should get our max_segs limitation for EDMA by
++	 * querying the dmaengine API */
++	if (pdev->dev.of_node) {
++		struct device_node *parent = pdev->dev.of_node->parent;
++		struct device_node *node;
++		node = of_find_node_by_name(parent, "edma");
++		if (node)
++			mmc->max_segs = 16;
++	}
 +
- 		gpio1: gpio@44e07000 {
- 			compatible = "ti,omap4-gpio";
- 			ti,hwmods = "gpio1";
+ 	mmc->max_blk_size = 512;       /* Block Length at max can be 1024 */
+ 	mmc->max_blk_count = 0xFFFF;    /* No. of Blocks is 16 bits */
+ 	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
 -- 
 1.7.9.5
 
