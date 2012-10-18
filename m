@@ -1,69 +1,51 @@
-From: Jassi Brar <jaswinder.singh@linaro.org>
-Subject: Re: [PATCH] dma: add new DMA control commands
-Date: Thu, 18 Oct 2012 20:55:30 +0530
-Message-ID: <CAJe_ZheWd3scXDhWukeZMuOOz8+bZRwZOw_ftDW8wmkqq9H45Q@mail.gmail.com>
-References: <1350538335-29026-1-git-send-email-b32955@freescale.com>
-	<1350541111.5263.3.camel@vkoul-udesk3>
-	<507FA595.4020507@freescale.com>
-	<CAJe_ZhfarH-HpJkEOpH=jY1Gc-UPEyuA4bJ4LSQES7Uyea2BQw@mail.gmail.com>
-	<CAMiH66H=VMEgHFMdEhCTqA5AtVw6iN97-cbwUd86Ghd77OLcWA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Sangho Yi <antiroot@gmail.com>
+Subject: [PATCH 1/3] drivers: mmc: core: sdio.c: fixed lines with > 80 chars
+Date: Fri, 19 Oct 2012 01:06:32 +0900
+Message-ID: <1350576394-2008-1-git-send-email-antiroot@gmail.com>
+References: <n>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:52148 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755823Ab2JRPZb convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Oct 2012 11:25:31 -0400
-Received: by mail-vb0-f46.google.com with SMTP id ff1so8936215vbb.19
-        for <linux-mmc@vger.kernel.org>; Thu, 18 Oct 2012 08:25:31 -0700 (PDT)
-In-Reply-To: <CAMiH66H=VMEgHFMdEhCTqA5AtVw6iN97-cbwUd86Ghd77OLcWA@mail.gmail.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:49616 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753681Ab2JRQIF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Oct 2012 12:08:05 -0400
+In-Reply-To: <n>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Shijie <shijie8@gmail.com>
-Cc: Huang Shijie <b32955@freescale.com>, Vinod Koul <vinod.koul@linux.intel.com>, marex@denx.de, alsa-devel@alsa-project.org, shawn.guo@linaro.org, linux@arm.linux.org.uk, tiwai@suse.de, artem.bityutskiy@linux.intel.com, broonie@opensource.wolfsonmicro.com, linux-mmc@vger.kernel.org, w.sang@pengutronix.de, perex@perex.cz, linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org, ben-linux@fluff.org, djbw@fb.com, khali@linux-fr.org, cjb@laptop.org, dwmw2@infradead.org, lrg@ti.com, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: prakity@marvell.com, aaron.lu@amd.com, linus.walleij@linaro.org, ulf.hansson@stericsson.com, cjb@laptop.org
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Sangho Yi <antiroot@gmail.com>
 
-On 18 October 2012 20:48, Huang Shijie <shijie8@gmail.com> wrote:
-> On Thu, Oct 18, 2012 at 5:29 AM, Jassi Brar <jaswinder.singh@linaro.o=
-rg> wrote:
->> On 18 October 2012 12:15, Huang Shijie <b32955@freescale.com> wrote:
->>> =D3=DA 2012=C4=EA10=D4=C218=C8=D5 14:18, Vinod Koul =D0=B4=B5=C0:
->>>
->>>> Why cant you do start (prepare clock etc) when you submit the desc=
-riptor
->>>> to dmaengine. Can be done in tx_submit callback.
->>>> Similarly remove the clock when dma transaction gets completed.
->>>
->>> I ever thought this method too.
->>>
->>> But it will become low efficient in the following case:
->>>
->>>   Assuming the gpmi-nand driver has to read out 1024 pages in one _=
-SINGLE_
->>> read operation.
->>> The gpmi-nand will submit the descriptor to dmaengine per page. So =
-with your
->>> method,
->>> the system will repeat the enable/disable dma clock 1024 time. At e=
-very
->>> enable/disable dma clock,
->>> the system has to enable the clock chain and it's parents ...
->>>
->>> But with this patch, we only need to enable/disable dma clock one t=
-ime, just
->>> at we select the nand chip.
->>>
->> If the clock is the dmac's property (not channels'), the toggling
->> seems too aggressive.
->> You could try using runtime_suspend/resume for clock
->> disabling/enabling. How about employing autosuspend with a few ms
->> delay?
->
-> Yes, employing the autosuspend is workable method too.o
-> But it's a little more complicated then this patch. You have to creat=
-e
-> a thread or workqueue to
-> do the job.
->
-I am not sure why you would need to create any thread/workqueue ?
-Just pm_runtime_put_autosuspend() in drivers/ to see how it works.
+Fixed coding style warning cases for exceeding 80 chars per line on
+sdio.c.
+
+Signed-off-by: Sangho Yi <antiroot@gmail.com>
+---
+ drivers/mmc/core/sdio.c |    6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 2273ce6..14326e8 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -47,7 +47,8 @@ static int sdio_read_fbr(struct sdio_func *func)
+ 
+ 	if (data == 0x0f) {
+ 		ret = mmc_io_rw_direct(func->card, 0, 0,
+-			SDIO_FBR_BASE(func->num) + SDIO_FBR_STD_IF_EXT, 0, &data);
++			SDIO_FBR_BASE(func->num) + SDIO_FBR_STD_IF_EXT,
++			0, &data);
+ 		if (ret)
+ 			goto out;
+ 	}
+@@ -619,7 +620,8 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 		card->type = MMC_TYPE_SD_COMBO;
+ 
+ 		if (oldcard && (oldcard->type != MMC_TYPE_SD_COMBO ||
+-		    memcmp(card->raw_cid, oldcard->raw_cid, sizeof(card->raw_cid)) != 0)) {
++			memcmp(card->raw_cid, oldcard->raw_cid,
++				sizeof(card->raw_cid)) != 0)) {
+ 			mmc_remove_card(card);
+ 			return -ENOENT;
+ 		}
+-- 
+1.7.9.5
+
