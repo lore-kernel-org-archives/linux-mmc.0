@@ -1,114 +1,209 @@
-From: Matt Porter <mporter@ti.com>
-Subject: Re: [RFC PATCH v3 00/16] DMA Engine support for AM33XX
-Date: Fri, 19 Oct 2012 12:46:15 -0400
-Message-ID: <20121019164615.GH25164@beef>
-References: <1350566815-409-1-git-send-email-mporter@ti.com>
- <B5906170F1614E41A8A28DE3B8D121433EBD29FC@DBDE01.ent.ti.com>
- <20121019111558.GD25164@beef>
- <B5906170F1614E41A8A28DE3B8D121433EBD2CE1@DBDE01.ent.ti.com>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: [RFC PATCH 4/4] sdio: pm: set device's power state after driver runtime suspended it
+Date: Fri, 19 Oct 2012 20:08:38 +0200
+Message-ID: <96495050.e1u1tibeG9@vostro.rjw.lan>
+References: <1350011561-21039-1-git-send-email-aaron.lu@intel.com> <1350011561-21039-5-git-send-email-aaron.lu@intel.com> <8682251.Y8RZX4ziBd@vostro.rjw.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <B5906170F1614E41A8A28DE3B8D121433EBD2CE1@DBDE01.ent.ti.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: "Bedia, Vaibhav" <vaibhav.bedia@ti.com>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, "Cousson, Benoit" <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Chris Ball <cjb@laptop.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ogre.sisk.pl ([193.178.161.156]:55572 "EHLO ogre.sisk.pl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754313Ab2JSSEx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 19 Oct 2012 14:04:53 -0400
+In-Reply-To: <8682251.Y8RZX4ziBd@vostro.rjw.lan>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Aaron Lu <aaron.lu@intel.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-acpi@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
 
-On Fri, Oct 19, 2012 at 12:02:42PM +0000, Bedia, Vaibhav wrote:
-> On Fri, Oct 19, 2012 at 16:45:58, Porter, Matt wrote:
-> > On Fri, Oct 19, 2012 at 10:26:20AM +0000, Bedia, Vaibhav wrote:
-> [...]
-> > > 
-> > > I didn't see all the patches that you posted on edma-dmaengine-v3
-> > > but I do seem them on edma-dmaengine-am33xx-v3 branch.
+On Friday 19 of October 2012 01:39:25 Rafael J. Wysocki wrote:
+> On Friday 12 of October 2012 11:12:41 Aaron Lu wrote:
+> > In sdio bus level runtime callback function, after call the driver's
+> > runtime suspend callback, we will check if the device supports a
+> > platform level power management, and if so, a proper power state is
+> > chosen by the corresponding platform callback and then set.
 > > 
-> > I see I referenced the wrong branch in the cover letter. Thanks for
-> > testing and noticing this. Sorry to make you hunt for the correct
-> > branch in that repo. ;) 
+> > Platform level runtime wakeup is also set, if device is enabled for
+> > runtime wakeup by its driver, it will be armed the ability to generate
+> > a wakeup event by the platform.
 > > 
+> > Signed-off-by: Aaron Lu <aaron.lu@intel.com>
+> > ---
+> >  drivers/mmc/core/sdio_bus.c | 49 +++++++++++++++++++++++++++++++++++++++++++--
+> >  1 file changed, 47 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+> > index aaec9e2..d83dea8 100644
+> > --- a/drivers/mmc/core/sdio_bus.c
+> > +++ b/drivers/mmc/core/sdio_bus.c
+> > @@ -23,6 +23,7 @@
+> >  
+> >  #include "sdio_cis.h"
+> >  #include "sdio_bus.h"
+> > +#include "sdio.h"
+> >  #include "sdio_acpi.h"
+> >  
+> >  /* show configuration fields */
+> > @@ -194,10 +195,54 @@ static int sdio_bus_remove(struct device *dev)
+> >  }
+> >  
+> >  #ifdef CONFIG_PM
+> > +
+> > +static int sdio_bus_runtime_suspend(struct device *dev)
+> > +{
+> > +	int ret;
+> > +	sdio_power_t state;
+> > +
+> > +	ret = pm_generic_runtime_suspend(dev);
+> > +	if (ret)
+> > +		goto out;
+> > +
+> > +	if (!platform_sdio_power_manageable(dev))
+> > +		goto out;
+> > +
+> > +	platform_sdio_run_wake(dev, true);
+> > +
+> > +	state = platform_sdio_choose_power_state(dev);
+> > +	if (state == SDIO_POWER_ERROR) {
+> > +		ret = -EIO;
+> > +		goto out;
+> > +	}
+> > +
+> > +	ret = platform_sdio_set_power_state(dev, state);
+> > +
+> > +out:
+> > +	return ret;
+> > +}
+> > +
+> > +static int sdio_bus_runtime_resume(struct device *dev)
+> > +{
+> > +	int ret;
+> > +
+> > +	if (platform_sdio_power_manageable(dev)) {
+> > +		platform_sdio_run_wake(dev, false);
+> > +		ret = platform_sdio_set_power_state(dev, SDIO_D0);
+> > +		if (ret)
+> > +			goto out;
+> > +	}
+> > +
+> > +	ret = pm_generic_runtime_resume(dev);
+> > +
+> > +out:
+> > +	return ret;
+> > +}
+> > +
 > 
-> No problem.
+> Most likely we will need to make analogous changes for other bus types that
+> don't support power management natively, like platform, SPI, I2C etc.  In all
+> of them the _runtime_suspend() and _runtime_resume() routine will look
+> almost exactly the same except for the platform_sdio_ prefix.
 > 
-> > https://github.com/ohporter/linux/tree/edma-dmaengine-am33xx-v3
-> > is indeed the correct branch for those wanting to pull this in or
-> > grab some of the not-to-be-merged drivers I used for testing.
-> > 
-> > > I added a couple of patches to enable earlyprintk and build the DTB
-> > > appended kernel image uImage-dtb.am335x-evm
-> > > 
-> > > Here's what i see
-> > > 
-> > > [...]
-> > 
-> > <snip>
-> > 
-> > > [    0.175354] edma: probe of 49000000.edma failed with error -16
-> > 
-> > I missed an uninitialized pdata case in the bug fixes mentioned in
-> > the changelog and the folks previously failing the same way didn't
-> > hit the case I suspect you are hitting. Can you try this and let me
-> > know how it works?
-> > 
-> 
-> That doesn't help :(
+> For this reason, I think it would be better to simply define two functions
+> acpi_pm_runtime_suspend() and acpi_pm_runtime_resume() that will do all of
+> the ACPI-specific operations related to runtime suspend/resume.  Then, we
+> will be able to use these functions for all of the bus types in question
+> in the same way (we may also need to add analogous functions for system
+> suspend/resume handling).
 
-Ok, so I dumped my Linaro toolchain which was masking this issue that
-you got unlucky with on EVM, whereas I was lucky. Switching toolchains I
-was able to reproduce the problem. Pantelis Antoniou suggested some
-changes and the following fixes this issue for me...verified on both
-BeagleBone and EVM. Let me know if that works on your end and I'll
-incorporate some version of it in the next update.
+Something like in the (totally untested) patch below.
 
-diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
-index b761b7a..6ed394f 100644
---- a/arch/arm/common/edma.c
-+++ b/arch/arm/common/edma.c
-@@ -1598,6 +1598,8 @@ static struct of_dma_filter_info edma_filter_info = {
- static int __init edma_probe(struct platform_device *pdev)
- {
- 	struct edma_soc_info	**info = pdev->dev.platform_data;
-+	struct edma_soc_info	*ninfo[EDMA_MAX_CC] = {NULL, NULL};
-+	struct edma_soc_info	tmpinfo;
- 	s8			(*queue_priority_mapping)[2];
- 	s8			(*queue_tc_mapping)[2];
- 	int			i, j, off, ln, found = 0;
-@@ -1614,15 +1616,13 @@ static int __init edma_probe(struct platform_device *pdev)
- 	char			irq_name[10];
- 	struct device_node	*node = pdev->dev.of_node;
- 	struct device		*dev = &pdev->dev;
--	struct edma_soc_info	*pdata;
- 	int			ret;
- 
- 	if (node) {
--		pdata = devm_kzalloc(dev,
--				     sizeof(struct edma_soc_info),
--				     GFP_KERNEL);
--		edma_of_parse_dt(dev, node, pdata);
--		info = &pdata;
-+		info = ninfo;
-+		edma_of_parse_dt(dev, node, &tmpinfo);
-+		info[0] = &tmpinfo;
+With this code the SDIO bus type should be able to use
+acpi_subsys_runtime_suspend() and acpi_subsys_runtime_resume() as its
+bus-type-level runtime suspend/resume callback routines, respectively.
+
+Thanks,
+Rafael
+
+
+Prototype, no sign-off.
+---
+ drivers/acpi/dev_pm.c |   54 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/acpi.h  |   12 +++++++++++
+ 2 files changed, 66 insertions(+)
+
+Index: linux-pm/drivers/acpi/dev_pm.c
+===================================================================
+--- /dev/null
++++ linux-pm/drivers/acpi/dev_pm.c
+@@ -0,0 +1,54 @@
++#include <linux/acpi.h>
++#include <linux/device.h>
++#include <linux/kernel.h>
++#include <linux/pm_qos.h>
++#include <linux/pm_runtime.h>
 +
- 		dma_cap_set(DMA_SLAVE, edma_filter_info.dma_cap);
- 		of_dma_controller_register(dev->of_node,
- 					   of_dma_simple_xlate,
++#include <acpi/acpi_bus.h>
++
++int acpi_dev_runtime_suspend(struct device *dev)
++{
++	acpi_handle handle = DEVICE_ACPI_HANDLE(dev);
++	bool enable_wakeup;
++	int power_state;
++
++	if (!handle || !acpi_bus_power_manageable(handle))
++		return 0;
++
++	enable_wakeup = dev_pm_qos_flags(dev, PM_QOS_FLAG_REMOTE_WAKEUP))
++				!= PM_QOS_FLAGS_NONE;
++	acpi_pm_device_run_wake(dev, enable_wakeup);
++
++	power_state = acpi_pm_device_sleep_state(dev, NULL, ACPI_STATE_D3);
++	if (power_state < ACPI_STATE_D0 || power_state > ACPI_STATE_D3)
++		return -EIO;
++
++	return acpi_bus_set_power(handle, power_state);
++}
++EXPORT_SYMBOL_GPL(acpi_dev_runtime_suspend);
++
++int acpi_dev_runtime_resume(struct device *dev)
++{
++	acpi_handle handle = DEVICE_ACPI_HANDLE(dev);
++
++	if (!handle || !acpi_bus_power_manageable(handle))
++		return 0;
++
++	acpi_pm_device_run_wake(dev, false);
++	return acpi_bus_set_power(handle, ACPI_STATE_D0);
++}
++EXPORT_SYMBOL_GPL(acpi_dev_runtime_resume);
++
++int acpi_subsys_runtime_suspend(struct device *dev)
++{
++	int ret = pm_generic_runtime_suspend(dev);
++	return ret ? ret : acpi_dev_runtime_suspend(dev);
++}
++EXPORT_SYMBOL_GPL(acpi_subsys_runtime_suspend);
++
++int acpi_subsys_runtime_resume(struct device *dev)
++{
++	int ret = acpi_dev_runtime_resume(dev);
++	return ret ? ret : pm_generic_runtime_resume(dev);
++}
++EXPORT_SYMBOL_GPL(acpi_subsys_runtime_resume);
+Index: linux-pm/include/linux/acpi.h
+===================================================================
+--- linux-pm.orig/include/linux/acpi.h
++++ linux-pm/include/linux/acpi.h
+@@ -434,4 +434,16 @@ acpi_status acpi_os_prepare_sleep(u8 sle
+ #define acpi_os_set_prepare_sleep(func, pm1a_ctrl, pm1b_ctrl) do { } while (0)
+ #endif
+ 
++#if defined(CONFIG_ACPI) && defined (CONFIG_PM_RUNTIME)
++int acpi_dev_runtime_suspend(struct device *dev);
++int acpi_dev_runtime_resume(struct device *dev);
++int acpi_subsys_runtime_suspend(struct device *dev);
++int acpi_subsys_runtime_resume(struct device *dev);
++#else
++static inline acpi_dev_runtime_suspend(struct device *dev) { return 0; }
++static inline acpi_dev_runtime_resume(struct device *dev) { return 0; }
++static inline acpi_subsys_runtime_suspend(struct device *dev) { return 0; }
++static inline acpi_subsys_runtime_resume(struct device *dev) { return 0; }
++#endif
++
+ #endif	/*_LINUX_ACPI_H*/
 
-> Looking at the original crash log, I suspect something is not correct
-> with the irq portion, probably in the DT or the driver. 
-> 
-> "genirq: Flags mismatch irq 28. 00000000 (edma) vs. 00000000 (edma)"
-> 
-> The warning below that is coming due to fail case in edma_probe not tracking
-> the request_irq status properly and but IMO that's a separate issue.
 
-It is a separate issue, indeed. My ideal goal was to avoid changing
-anything in this existing davinci dma implementation, that's why the
-error paths were unmodified. Since I'm having to rework a few more things
-I'll look at those and generate an improved version.
-
-Russ Dill also made some good simplification/cleanup suggestions for the
-of parsing on irc which I'll incorporate in the next version.
-
--Matt
+-- 
+I speak only for myself.
+Rafael J. Wysocki, Intel Open Source Technology Center.
