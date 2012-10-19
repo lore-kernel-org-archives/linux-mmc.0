@@ -1,62 +1,61 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 3/6] mmc: core: sdio_bus.c: Fixed lines > 80 chars
-Date: Fri, 19 Oct 2012 08:54:34 +0900
-Message-ID: <508096BA.6070706@samsung.com>
-References: <n@samsung.com>
- <1350577919-2750-1-git-send-email-antiroot@gmail.com>
- <1350577919-2750-3-git-send-email-antiroot@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:43363 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751096Ab2JRXzH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Oct 2012 19:55:07 -0400
-In-reply-to: <1350577919-2750-3-git-send-email-antiroot@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Matt Porter <mporter@ti.com>
+Subject: [RFC PATCH 0/3] dmaengine: add per channel capabilities api
+Date: Thu, 18 Oct 2012 22:51:25 -0400
+Message-ID: <1350615088-14562-1-git-send-email-mporter@ti.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Vinod Koul <vinod.koul@intel.com>
+Cc: Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Sangho Yi <antiroot@gmail.com>
-Cc: paul.gortmaker@windriver.com, stefan.xk.nilsson@stericsson.com, linus.walleij@linaro.org, ulf.hansson@stericsson.com, rjw@sisk.pl, girish.shivananjappa@linaro.org, cjb@laptop.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi,
+This series adds a new dmaengine api, dma_get_channels_caps(), which
+may be used by a driver to get channel-specific capabilities. This is
+based on a starting point suggested by Vinod Koul, but only implements
+the minimal sets of channel capabilities to fulfill the needs of the
+EDMA DMA Engine driver at this time.
 
-your patch[1/3] is also "Fixed lines > 80chars".
-Why do you separate with patch[1/6] and patch[3/6]?
+Specifically, this implementation supports reporting of a set of
+transfer type operations, maximum number of SG segments, and the
+maximum size of an SG segment that a channel can support.
 
-Best Regards,
-Jaehoon Chung
+The call is implemented as follows:
 
-On 10/19/2012 01:31 AM, Sangho Yi wrote:
-> I fixed lines over 80 characters per line.
-> 
-> Signed-off-by: Sangho Yi <antiroot@gmail.com>
-> ---
->  drivers/mmc/core/sdio_bus.c |    5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-> index 13146d2..efa30eb 100644
-> --- a/drivers/mmc/core/sdio_bus.c
-> +++ b/drivers/mmc/core/sdio_bus.c
-> @@ -27,7 +27,7 @@
->  /* show configuration fields */
->  #define sdio_config_attr(field, format_string)				\
->  static ssize_t								\
-> -field##_show(struct device *dev, struct device_attribute *attr, char *buf)				\
-> +field##_show(struct device *dev, struct device_attribute *attr, char *buf)\
->  {									\
->  	struct sdio_func *func;						\
->  									\
-> @@ -39,7 +39,8 @@ sdio_config_attr(class, "0x%02x\n");
->  sdio_config_attr(vendor, "0x%04x\n");
->  sdio_config_attr(device, "0x%04x\n");
->  
-> -static ssize_t modalias_show(struct device *dev, struct device_attribute *attr, char *buf)
-> +static ssize_t modalias_show(struct device *dev, struct device_attribute *attr,
-> +		char *buf)
->  {
->  	struct sdio_func *func = dev_to_sdio_func (dev);
->  
-> 
+	struct dmaengine_chan_caps
+	*dma_get_channel_caps(struct dma_chan *chan,
+			      enum dma_transfer_direction dir);
 
+The dma transfer direction parameter may appear a bit out of place
+but it is necessary since the direction field in struct
+dma_slave_config was deprecated. In some cases, EDMA for one, it
+is necessary for the dmaengine driver to have the burst and address
+width slave configuration parameters available in order to compute
+the maximum segment size that can be handle. Due to this requirement,
+the calling order of this api is as follows:
+
+1. Allocate a DMA slave channel
+1a. [Optionally] Get channel capabilities
+2. Set slave and controller specific parameters
+3. Get a descriptor for transaction
+4. Submit the transaction
+5. Issue pending requests and wait for callback notification
+
+Along with the API implementation, this series implements the
+backend device_channel_caps() in the EDMA DMA Engine driver and
+converts the davinci_mmc driver to use dma_get_channel_caps() to
+replace hardcoded limits.
+
+This is tested on the AM1808-EVM.
+
+Matt Porter (3):
+  dmaengine: add dma_get_channel_caps()
+  dma: edma: add device_channel_caps() support
+  mmc: davinci: get SG segment limits with dma_get_channel_caps()
+
+ drivers/dma/edma.c                        |   26 ++++++++++++
+ drivers/mmc/host/davinci_mmc.c            |   66 +++++++++--------------------
+ include/linux/dmaengine.h                 |   52 +++++++++++++++++++++++
+ include/linux/platform_data/mmc-davinci.h |    3 --
+ 4 files changed, 99 insertions(+), 48 deletions(-)
+
+-- 
+1.7.9.5
