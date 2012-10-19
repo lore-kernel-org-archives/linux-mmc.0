@@ -1,59 +1,114 @@
-From: Michal Hocko <mhocko@suse.cz>
-Subject: Re: process hangs on do_exit when oom happens
-Date: Fri, 19 Oct 2012 18:04:25 +0200
-Message-ID: <20121019160425.GA10175@dhcp22.suse.cz>
-References: <op.wmbi5kbrn27o5l@gaoqiang-d1.corp.qihoo.net>
+From: Matt Porter <mporter@ti.com>
+Subject: Re: [RFC PATCH v3 00/16] DMA Engine support for AM33XX
+Date: Fri, 19 Oct 2012 12:46:15 -0400
+Message-ID: <20121019164615.GH25164@beef>
+References: <1350566815-409-1-git-send-email-mporter@ti.com>
+ <B5906170F1614E41A8A28DE3B8D121433EBD29FC@DBDE01.ent.ti.com>
+ <20121019111558.GD25164@beef>
+ <B5906170F1614E41A8A28DE3B8D121433EBD2CE1@DBDE01.ent.ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:60167 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752406Ab2JSQE1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 19 Oct 2012 12:04:27 -0400
+Return-path: <linux-doc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <op.wmbi5kbrn27o5l@gaoqiang-d1.corp.qihoo.net>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <B5906170F1614E41A8A28DE3B8D121433EBD2CE1@DBDE01.ent.ti.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: "Bedia, Vaibhav" <vaibhav.bedia@ti.com>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, "Cousson, Benoit" <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Chris Ball <cjb@laptop.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: gaoqiang <gaoqiangscut@gmail.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cgroups@vger.kernel.org" <cgroups@vger.kernel.org>, linux-mm@kvack.org
 
-On Wed 17-10-12 18:23:34, gaoqiang wrote:
-> I looked up nothing useful with google,so I'm here for help..
+On Fri, Oct 19, 2012 at 12:02:42PM +0000, Bedia, Vaibhav wrote:
+> On Fri, Oct 19, 2012 at 16:45:58, Porter, Matt wrote:
+> > On Fri, Oct 19, 2012 at 10:26:20AM +0000, Bedia, Vaibhav wrote:
+> [...]
+> > > 
+> > > I didn't see all the patches that you posted on edma-dmaengine-v3
+> > > but I do seem them on edma-dmaengine-am33xx-v3 branch.
+> > 
+> > I see I referenced the wrong branch in the cover letter. Thanks for
+> > testing and noticing this. Sorry to make you hunt for the correct
+> > branch in that repo. ;) 
+> > 
 > 
-> when this happens:  I use memcg to limit the memory use of a
-> process,and when the memcg cgroup was out of memory,
-> the process was oom-killed   however,it cannot really complete the
-> exiting. here is the some information
-
-How many tasks are in the group and what kind of memory do they use?
-Is it possible that you were hit by the same issue as described in 
-79dfdacc memcg: make oom_lock 0 and 1 based rather than counter.
-
-> OS version:  centos6.2    2.6.32.220.7.1
-
-Your kernel is quite old and you should be probably asking your
-distribution to help you out. There were many fixes since 2.6.32.
-Are you able to reproduce the same issue with the current vanila kernel?
-
-> /proc/pid/stack
-> ---------------------------------------------------------------
+> No problem.
 > 
-> [<ffffffff810597ca>] __cond_resched+0x2a/0x40
-> [<ffffffff81121569>] unmap_vmas+0xb49/0xb70
-> [<ffffffff8112822e>] exit_mmap+0x7e/0x140
-> [<ffffffff8105b078>] mmput+0x58/0x110
-> [<ffffffff81061aad>] exit_mm+0x11d/0x160
-> [<ffffffff81061c9d>] do_exit+0x1ad/0x860
-> [<ffffffff81062391>] do_group_exit+0x41/0xb0
-> [<ffffffff81077cd8>] get_signal_to_deliver+0x1e8/0x430
-> [<ffffffff8100a4c4>] do_notify_resume+0xf4/0x8b0
-> [<ffffffff8100b281>] int_signal+0x12/0x17
-> [<ffffffffffffffff>] 0xffffffffffffffff
+> > https://github.com/ohporter/linux/tree/edma-dmaengine-am33xx-v3
+> > is indeed the correct branch for those wanting to pull this in or
+> > grab some of the not-to-be-merged drivers I used for testing.
+> > 
+> > > I added a couple of patches to enable earlyprintk and build the DTB
+> > > appended kernel image uImage-dtb.am335x-evm
+> > > 
+> > > Here's what i see
+> > > 
+> > > [...]
+> > 
+> > <snip>
+> > 
+> > > [    0.175354] edma: probe of 49000000.edma failed with error -16
+> > 
+> > I missed an uninitialized pdata case in the bug fixes mentioned in
+> > the changelog and the folks previously failing the same way didn't
+> > hit the case I suspect you are hitting. Can you try this and let me
+> > know how it works?
+> > 
+> 
+> That doesn't help :(
 
-This looks strange because this is just an exit part which shouldn't
-deadlock or anything. Is this stack stable? Have you tried to take check
-it more times?
+Ok, so I dumped my Linaro toolchain which was masking this issue that
+you got unlucky with on EVM, whereas I was lucky. Switching toolchains I
+was able to reproduce the problem. Pantelis Antoniou suggested some
+changes and the following fixes this issue for me...verified on both
+BeagleBone and EVM. Let me know if that works on your end and I'll
+incorporate some version of it in the next update.
 
--- 
-Michal Hocko
-SUSE Labs
+diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+index b761b7a..6ed394f 100644
+--- a/arch/arm/common/edma.c
++++ b/arch/arm/common/edma.c
+@@ -1598,6 +1598,8 @@ static struct of_dma_filter_info edma_filter_info = {
+ static int __init edma_probe(struct platform_device *pdev)
+ {
+ 	struct edma_soc_info	**info = pdev->dev.platform_data;
++	struct edma_soc_info	*ninfo[EDMA_MAX_CC] = {NULL, NULL};
++	struct edma_soc_info	tmpinfo;
+ 	s8			(*queue_priority_mapping)[2];
+ 	s8			(*queue_tc_mapping)[2];
+ 	int			i, j, off, ln, found = 0;
+@@ -1614,15 +1616,13 @@ static int __init edma_probe(struct platform_device *pdev)
+ 	char			irq_name[10];
+ 	struct device_node	*node = pdev->dev.of_node;
+ 	struct device		*dev = &pdev->dev;
+-	struct edma_soc_info	*pdata;
+ 	int			ret;
+ 
+ 	if (node) {
+-		pdata = devm_kzalloc(dev,
+-				     sizeof(struct edma_soc_info),
+-				     GFP_KERNEL);
+-		edma_of_parse_dt(dev, node, pdata);
+-		info = &pdata;
++		info = ninfo;
++		edma_of_parse_dt(dev, node, &tmpinfo);
++		info[0] = &tmpinfo;
++
+ 		dma_cap_set(DMA_SLAVE, edma_filter_info.dma_cap);
+ 		of_dma_controller_register(dev->of_node,
+ 					   of_dma_simple_xlate,
+
+> Looking at the original crash log, I suspect something is not correct
+> with the irq portion, probably in the DT or the driver. 
+> 
+> "genirq: Flags mismatch irq 28. 00000000 (edma) vs. 00000000 (edma)"
+> 
+> The warning below that is coming due to fail case in edma_probe not tracking
+> the request_irq status properly and but IMO that's a separate issue.
+
+It is a separate issue, indeed. My ideal goal was to avoid changing
+anything in this existing davinci dma implementation, that's why the
+error paths were unmodified. Since I'm having to rework a few more things
+I'll look at those and generate an improved version.
+
+Russ Dill also made some good simplification/cleanup suggestions for the
+of parsing on irc which I'll incorporate in the next version.
+
+-Matt
