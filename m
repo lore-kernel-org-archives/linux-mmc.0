@@ -1,209 +1,158 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [RFC PATCH 4/4] sdio: pm: set device's power state after driver runtime suspended it
-Date: Fri, 19 Oct 2012 20:08:38 +0200
-Message-ID: <96495050.e1u1tibeG9@vostro.rjw.lan>
-References: <1350011561-21039-1-git-send-email-aaron.lu@intel.com> <1350011561-21039-5-git-send-email-aaron.lu@intel.com> <8682251.Y8RZX4ziBd@vostro.rjw.lan>
+From: Chris Ball <cjb@laptop.org>
+Subject: [PATCH] mmc-utils: Support enable/disable of eMMC H/W Reset function
+Date: Fri, 19 Oct 2012 17:29:07 -0400
+Message-ID: <87lif2tal8.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([193.178.161.156]:55572 "EHLO ogre.sisk.pl"
+Received: from void.printf.net ([89.145.121.20]:53887 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754313Ab2JSSEx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 19 Oct 2012 14:04:53 -0400
-In-Reply-To: <8682251.Y8RZX4ziBd@vostro.rjw.lan>
+	id S1759345Ab2JSV3O (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 19 Oct 2012 17:29:14 -0400
+Received: from c-76-24-28-220.hsd1.ma.comcast.net ([76.24.28.220] helo=octavius.laptop.org)
+	by void.printf.net with esmtpsa (TLS1.0:DHE_RSA_AES_128_CBC_SHA1:16)
+	(Exim 4.69)
+	(envelope-from <cjb@laptop.org>)
+	id 1TPK7x-0001xd-Us
+	for linux-mmc@vger.kernel.org; Fri, 19 Oct 2012 22:29:10 +0100
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lu@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-acpi@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
+To: linux-mmc@vger.kernel.org
 
-On Friday 19 of October 2012 01:39:25 Rafael J. Wysocki wrote:
-> On Friday 12 of October 2012 11:12:41 Aaron Lu wrote:
-> > In sdio bus level runtime callback function, after call the driver's
-> > runtime suspend callback, we will check if the device supports a
-> > platform level power management, and if so, a proper power state is
-> > chosen by the corresponding platform callback and then set.
-> > 
-> > Platform level runtime wakeup is also set, if device is enabled for
-> > runtime wakeup by its driver, it will be armed the ability to generate
-> > a wakeup event by the platform.
-> > 
-> > Signed-off-by: Aaron Lu <aaron.lu@intel.com>
-> > ---
-> >  drivers/mmc/core/sdio_bus.c | 49 +++++++++++++++++++++++++++++++++++++++++++--
-> >  1 file changed, 47 insertions(+), 2 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-> > index aaec9e2..d83dea8 100644
-> > --- a/drivers/mmc/core/sdio_bus.c
-> > +++ b/drivers/mmc/core/sdio_bus.c
-> > @@ -23,6 +23,7 @@
-> >  
-> >  #include "sdio_cis.h"
-> >  #include "sdio_bus.h"
-> > +#include "sdio.h"
-> >  #include "sdio_acpi.h"
-> >  
-> >  /* show configuration fields */
-> > @@ -194,10 +195,54 @@ static int sdio_bus_remove(struct device *dev)
-> >  }
-> >  
-> >  #ifdef CONFIG_PM
-> > +
-> > +static int sdio_bus_runtime_suspend(struct device *dev)
-> > +{
-> > +	int ret;
-> > +	sdio_power_t state;
-> > +
-> > +	ret = pm_generic_runtime_suspend(dev);
-> > +	if (ret)
-> > +		goto out;
-> > +
-> > +	if (!platform_sdio_power_manageable(dev))
-> > +		goto out;
-> > +
-> > +	platform_sdio_run_wake(dev, true);
-> > +
-> > +	state = platform_sdio_choose_power_state(dev);
-> > +	if (state == SDIO_POWER_ERROR) {
-> > +		ret = -EIO;
-> > +		goto out;
-> > +	}
-> > +
-> > +	ret = platform_sdio_set_power_state(dev, state);
-> > +
-> > +out:
-> > +	return ret;
-> > +}
-> > +
-> > +static int sdio_bus_runtime_resume(struct device *dev)
-> > +{
-> > +	int ret;
-> > +
-> > +	if (platform_sdio_power_manageable(dev)) {
-> > +		platform_sdio_run_wake(dev, false);
-> > +		ret = platform_sdio_set_power_state(dev, SDIO_D0);
-> > +		if (ret)
-> > +			goto out;
-> > +	}
-> > +
-> > +	ret = pm_generic_runtime_resume(dev);
-> > +
-> > +out:
-> > +	return ret;
-> > +}
-> > +
-> 
-> Most likely we will need to make analogous changes for other bus types that
-> don't support power management natively, like platform, SPI, I2C etc.  In all
-> of them the _runtime_suspend() and _runtime_resume() routine will look
-> almost exactly the same except for the platform_sdio_ prefix.
-> 
-> For this reason, I think it would be better to simply define two functions
-> acpi_pm_runtime_suspend() and acpi_pm_runtime_resume() that will do all of
-> the ACPI-specific operations related to runtime suspend/resume.  Then, we
-> will be able to use these functions for all of the bus types in question
-> in the same way (we may also need to add analogous functions for system
-> suspend/resume handling).
+(Note: one-time programmable fuse.)
 
-Something like in the (totally untested) patch below.
-
-With this code the SDIO bus type should be able to use
-acpi_subsys_runtime_suspend() and acpi_subsys_runtime_resume() as its
-bus-type-level runtime suspend/resume callback routines, respectively.
-
-Thanks,
-Rafael
-
-
-Prototype, no sign-off.
+$ mmc hwreset enable /dev/mmcblk0
+$ mmc hwreset disable /dev/mmcblk0
 ---
- drivers/acpi/dev_pm.c |   54 ++++++++++++++++++++++++++++++++++++++++++++++++++
- include/linux/acpi.h  |   12 +++++++++++
- 2 files changed, 66 insertions(+)
+ mmc.c      | 10 ++++++++++
+ mmc.h      |  4 ++++
+ mmc_cmds.c | 59 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ mmc_cmds.h |  2 ++
+ 4 files changed, 75 insertions(+)
 
-Index: linux-pm/drivers/acpi/dev_pm.c
-===================================================================
---- /dev/null
-+++ linux-pm/drivers/acpi/dev_pm.c
-@@ -0,0 +1,54 @@
-+#include <linux/acpi.h>
-+#include <linux/device.h>
-+#include <linux/kernel.h>
-+#include <linux/pm_qos.h>
-+#include <linux/pm_runtime.h>
-+
-+#include <acpi/acpi_bus.h>
-+
-+int acpi_dev_runtime_suspend(struct device *dev)
-+{
-+	acpi_handle handle = DEVICE_ACPI_HANDLE(dev);
-+	bool enable_wakeup;
-+	int power_state;
-+
-+	if (!handle || !acpi_bus_power_manageable(handle))
-+		return 0;
-+
-+	enable_wakeup = dev_pm_qos_flags(dev, PM_QOS_FLAG_REMOTE_WAKEUP))
-+				!= PM_QOS_FLAGS_NONE;
-+	acpi_pm_device_run_wake(dev, enable_wakeup);
-+
-+	power_state = acpi_pm_device_sleep_state(dev, NULL, ACPI_STATE_D3);
-+	if (power_state < ACPI_STATE_D0 || power_state > ACPI_STATE_D3)
-+		return -EIO;
-+
-+	return acpi_bus_set_power(handle, power_state);
-+}
-+EXPORT_SYMBOL_GPL(acpi_dev_runtime_suspend);
-+
-+int acpi_dev_runtime_resume(struct device *dev)
-+{
-+	acpi_handle handle = DEVICE_ACPI_HANDLE(dev);
-+
-+	if (!handle || !acpi_bus_power_manageable(handle))
-+		return 0;
-+
-+	acpi_pm_device_run_wake(dev, false);
-+	return acpi_bus_set_power(handle, ACPI_STATE_D0);
-+}
-+EXPORT_SYMBOL_GPL(acpi_dev_runtime_resume);
-+
-+int acpi_subsys_runtime_suspend(struct device *dev)
-+{
-+	int ret = pm_generic_runtime_suspend(dev);
-+	return ret ? ret : acpi_dev_runtime_suspend(dev);
-+}
-+EXPORT_SYMBOL_GPL(acpi_subsys_runtime_suspend);
-+
-+int acpi_subsys_runtime_resume(struct device *dev)
-+{
-+	int ret = acpi_dev_runtime_resume(dev);
-+	return ret ? ret : pm_generic_runtime_resume(dev);
-+}
-+EXPORT_SYMBOL_GPL(acpi_subsys_runtime_resume);
-Index: linux-pm/include/linux/acpi.h
-===================================================================
---- linux-pm.orig/include/linux/acpi.h
-+++ linux-pm/include/linux/acpi.h
-@@ -434,4 +434,16 @@ acpi_status acpi_os_prepare_sleep(u8 sle
- #define acpi_os_set_prepare_sleep(func, pm1a_ctrl, pm1b_ctrl) do { } while (0)
- #endif
+diff --git a/mmc.c b/mmc.c
+index 56f621c..a2de863 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -80,6 +80,16 @@ static struct Command commands[] = {
+ 		"Enable the eMMC BKOPS feature on <device>.\nNOTE!  This is a one-time programmable (unreversible) change.",
+ 	  NULL
+ 	},
++	{ do_hwreset_en, -1,
++	  "hwreset enable", "<device>\n"
++		"Permanently enable the eMMC H/W Reset feature on <device>.\nNOTE!  This is a one-time programmable (unreversible) change.",
++	  NULL
++	},
++	{ do_hwreset_dis, -1,
++	  "hwreset disable", "<device>\n"
++		"Permanently disable the eMMC H/W Reset feature on <device>.\nNOTE!  This is a one-time programmable (unreversible) change.",
++	  NULL
++	},
+ 	{ 0, 0, 0, 0 }
+ };
  
-+#if defined(CONFIG_ACPI) && defined (CONFIG_PM_RUNTIME)
-+int acpi_dev_runtime_suspend(struct device *dev);
-+int acpi_dev_runtime_resume(struct device *dev);
-+int acpi_subsys_runtime_suspend(struct device *dev);
-+int acpi_subsys_runtime_resume(struct device *dev);
-+#else
-+static inline acpi_dev_runtime_suspend(struct device *dev) { return 0; }
-+static inline acpi_dev_runtime_resume(struct device *dev) { return 0; }
-+static inline acpi_subsys_runtime_suspend(struct device *dev) { return 0; }
-+static inline acpi_subsys_runtime_resume(struct device *dev) { return 0; }
-+#endif
+diff --git a/mmc.h b/mmc.h
+index 3d77b38..c863751 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -39,6 +39,7 @@
+ #define EXT_CSD_BOOT_WP			173
+ #define EXT_CSD_WR_REL_PARAM		166
+ #define EXT_CSD_BKOPS_EN		163	/* R/W */
++#define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
+ #define EXT_CSD_NATIVE_SECTOR_SIZE	63 /* R */
+ #define EXT_CSD_USE_NATIVE_SECTOR	62 /* R/W */
+ #define EXT_CSD_DATA_SECTOR_SIZE	61 /* R */
+@@ -70,6 +71,9 @@
+ #define EXT_CSD_BOOT_CFG_ACK		(1<<6)
+ #define EXT_CSD_BOOT_CFG_EN		(0x38)
+ #define EXT_CSD_BOOT_CFG_ACC		(0x03)
++#define EXT_CSD_RST_N_EN_MASK		(0x03)
++#define EXT_CSD_HW_RESET_EN		(0x01)
++#define EXT_CSD_HW_RESET_DIS		(0x02)
+ #define EXT_CSD_PART_CONFIG_ACC_MASK	  (0x7)
+ #define EXT_CSD_PART_CONFIG_ACC_BOOT0	  (0x1)
+ #define EXT_CSD_PART_CONFIG_ACC_BOOT1	  (0x2)
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 05d7e13..b407f65 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -280,6 +280,65 @@ int do_write_boot_en(int nargs, char **argv)
+ 	return ret;
+ }
+ 
++int do_hwreset(int value, int nargs, char **argv)
++{
++	__u8 ext_csd[512];
++	int fd, ret;
++	char *device;
 +
- #endif	/*_LINUX_ACPI_H*/
-
-
++	CHECK(nargs != 2, "Usage: mmc hwreset enable </path/to/mmcblkX>\n",
++			  exit(1));
++
++	device = argv[1];
++
++	fd = open(device, O_RDWR);
++	if (fd < 0) {
++		perror("open");
++		exit(1);
++	}
++
++	ret = read_extcsd(fd, ext_csd);
++	if (ret) {
++		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
++		exit(1);
++	}
++
++	if ((ext_csd[EXT_CSD_RST_N_FUNCTION] & EXT_CSD_RST_N_EN_MASK) ==
++	    EXT_CSD_HW_RESET_EN) {
++		fprintf(stderr,
++			"H/W Reset is already permanently enabled on %s\n",
++			device);
++		exit(1);
++	}
++	if ((ext_csd[EXT_CSD_RST_N_FUNCTION] & EXT_CSD_RST_N_EN_MASK) ==
++	    EXT_CSD_HW_RESET_DIS) {
++		fprintf(stderr,
++			"H/W Reset is already permanently disabled on %s\n",
++			device);
++		exit(1);
++	}
++
++	ret = write_extcsd_value(fd, EXT_CSD_RST_N_FUNCTION, value);
++	if (ret) {
++		fprintf(stderr,
++			"Could not write 0x%02x to EXT_CSD[%d] in %s\n",
++			value, EXT_CSD_RST_N_FUNCTION, device);
++		exit(1);
++	}
++
++	return ret;
++}
++
++int do_hwreset_en(int nargs, char **argv)
++{
++	return do_hwreset(EXT_CSD_HW_RESET_EN, nargs, argv);
++}
++
++int do_hwreset_dis(int nargs, char **argv)
++{
++	return do_hwreset(EXT_CSD_HW_RESET_DIS, nargs, argv);
++}
++
+ int do_write_bkops_en(int nargs, char **argv)
+ {
+ 	__u8 ext_csd[512], value = 0;
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index 1dd4324..e52d622 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -22,3 +22,5 @@ int do_writeprotect_set(int nargs, char **argv);
+ int do_disable_512B_emulation(int nargs, char **argv);
+ int do_write_boot_en(int nargs, char **argv);
+ int do_write_bkops_en(int nargs, char **argv);
++int do_hwreset_en(int nargs, char **argv);
++int do_hwreset_dis(int nargs, char **argv);
 -- 
-I speak only for myself.
-Rafael J. Wysocki, Intel Open Source Technology Center.
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
