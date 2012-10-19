@@ -1,123 +1,81 @@
-From: Matt Porter <mporter@ti.com>
-Subject: Re: [RFC PATCH v3 00/16] DMA Engine support for AM33XX
-Date: Fri, 19 Oct 2012 07:15:58 -0400
-Message-ID: <20121019111558.GD25164@beef>
+From: "Bedia, Vaibhav" <vaibhav.bedia-l0cyMroinI0@public.gmane.org>
+Subject: RE: [RFC PATCH v3 00/16] DMA Engine support for AM33XX
+Date: Fri, 19 Oct 2012 12:02:42 +0000
+Message-ID: <B5906170F1614E41A8A28DE3B8D121433EBD2CE1@DBDE01.ent.ti.com>
 References: <1350566815-409-1-git-send-email-mporter@ti.com>
- <B5906170F1614E41A8A28DE3B8D121433EBD29FC@DBDE01.ent.ti.com>
+	<B5906170F1614E41A8A28DE3B8D121433EBD29FC@DBDE01.ent.ti.com>
+	<20121019111558.GD25164@beef>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <B5906170F1614E41A8A28DE3B8D121433EBD29FC@DBDE01.ent.ti.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: "Bedia, Vaibhav" <vaibhav.bedia@ti.com>
-Cc: Tony Lindgren <tony@atomide.com>, "Nori, Sekhar" <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Mark Brown <broonie@opensource.wolfsonmicro.com>, "Cousson, Benoit" <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+In-Reply-To: <20121019111558.GD25164@beef>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: "Porter, Matt" <mporter-l0cyMroinI0@public.gmane.org>
+Cc: Grant, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, "Nori, Sekhar" <nsekhar-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Williams <djbw-b10kYP2dOMg@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, "Cousson,
+	Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>Rob, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>Linux, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Oct 19, 2012 at 10:26:20AM +0000, Bedia, Vaibhav wrote:
-> Hi Matt,
+On Fri, Oct 19, 2012 at 16:45:58, Porter, Matt wrote:
+> On Fri, Oct 19, 2012 at 10:26:20AM +0000, Bedia, Vaibhav wrote:
+[...]
+> > 
+> > I didn't see all the patches that you posted on edma-dmaengine-v3
+> > but I do seem them on edma-dmaengine-am33xx-v3 branch.
 > 
-> On Thu, Oct 18, 2012 at 18:56:39, Porter, Matt wrote:
-> > Changes since v2:
-> > 	- Rebased on 3.7-rc1
-> > 	- Fixed bug in DT/pdata parsing first found by Gururaja
-> > 	  that turned out to be masked by some toolchains
-> > 	- Dropped unused mach-omap2/devices.c hsmmc patch
-> > 	- Added AM33XX crossbar DMA event mux support
-> > 	- Added am335x-evm support
-> > 
-> > Changes since v1:
-> > 	- Rebased on top of mainline from 12250d8
-> > 	- Dropped the feature removal schedule patch
-> > 	- Implemented dma_request_slave_channel_compat() and
-> > 	  converted the mmc and spi drivers to use it
-> > 	- Dropped unneeded #address-cells and #size-cells from
-> > 	  EDMA DT support
-> > 	- Moved private EDMA header to linux/platform_data/ and
-> > 	  removed some unneeded definitions
-> > 	- Fixed parsing of optional properties
-> > 
-> > TODO:
-> > 	- Add dmaengine support for per-channel caps so the
-> > 	  hack to set the maximum segments can be replaced with
-> > 	  a query to the dmaengine driver
-> > 
-> > This series adds DMA Engine support for AM33xx, which uses
-> > an EDMA DMAC. The EDMA DMAC has been previously supported by only
-> > a private API implementation (much like the situation with OMAP
-> > DMA) found on the DaVinci family of SoCs.
-> > 
-> > The series applies on top of 3.7-rc1 and the following patches:
-> > 
-> > 	- GPMC fails to reserve memory fix:
-> > 	  http://www.spinics.net/lists/linux-omap/msg79675.html
-> > 	- TPS65910 regulator fix:
-> > 	  https://patchwork.kernel.org/patch/1593651/
-> > 	- dmaengine DT support from Vinod's dmaengine_dt branch in
-> > 	  git://git.infradead.org/users/vkoul/slave-dma.git since
-> > 	  027478851791df751176398be02a3b1c5f6aa824
-> > 
-> > The approach taken is similar to how OMAP DMA is being converted to
-> > DMA Engine support. With the functional EDMA private API already
-> > existing in mach-davinci/dma.c, we first move that to an ARM common
-> > area so it can be shared. Adding DT and runtime PM support to the
-> > private EDMA API implementation allows it to run on AM33xx. AM33xx
-> > *only* boots using DT so we leverage Jon's generic DT DMA helpers to
-> > register EDMA DMAC with the of_dma framework and then add support
-> > for calling the dma_request_slave_channel() API to both the mmc
-> > and spi drivers.
-> > 
-> > With this series both BeagleBone and the AM335x EVM have working
-> > MMC and SPI support.
-> > 
-> > This is tested on BeagleBone with a SPI framebuffer driver and MMC
-> > rootfs. A trivial gpio DMA event misc driver was used to test the
-> > crossbar DMA event support. It is also tested on the AM335x EVM
-> > with the onboard SPI flash and MMC rootfs. The branch at
-> > https://github.com/ohporter/linux/tree/edma-dmaengine-v3 has the
-> > complete series, dependencies, and some test drivers/defconfigs.
-> > 
+> I see I referenced the wrong branch in the cover letter. Thanks for
+> testing and noticing this. Sorry to make you hunt for the correct
+> branch in that repo. ;) 
 > 
-> I didn't see all the patches that you posted on edma-dmaengine-v3
-> but I do seem them on edma-dmaengine-am33xx-v3 branch.
 
-I see I referenced the wrong branch in the cover letter. Thanks for
-testing and noticing this. Sorry to make you hunt for the correct
-branch in that repo. ;) 
+No problem.
 
-https://github.com/ohporter/linux/tree/edma-dmaengine-am33xx-v3
-is indeed the correct branch for those wanting to pull this in or
-grab some of the not-to-be-merged drivers I used for testing.
-
-> I added a couple of patches to enable earlyprintk and build the DTB
-> appended kernel image uImage-dtb.am335x-evm
+> https://github.com/ohporter/linux/tree/edma-dmaengine-am33xx-v3
+> is indeed the correct branch for those wanting to pull this in or
+> grab some of the not-to-be-merged drivers I used for testing.
 > 
-> Here's what i see
+> > I added a couple of patches to enable earlyprintk and build the DTB
+> > appended kernel image uImage-dtb.am335x-evm
+> > 
+> > Here's what i see
+> > 
+> > [...]
 > 
-> [...]
+> <snip>
+> 
+> > [    0.175354] edma: probe of 49000000.edma failed with error -16
+> 
+> I missed an uninitialized pdata case in the bug fixes mentioned in
+> the changelog and the folks previously failing the same way didn't
+> hit the case I suspect you are hitting. Can you try this and let me
+> know how it works?
+> 
 
-<snip>
+That doesn't help :(
 
-> [    0.175354] edma: probe of 49000000.edma failed with error -16
+Looking at the original crash log, I suspect something is not correct
+with the irq portion, probably in the DT or the driver. 
 
-I missed an uninitialized pdata case in the bug fixes mentioned in
-the changelog and the folks previously failing the same way didn't
-hit the case I suspect you are hitting. Can you try this and let me
-know how it works?
+"genirq: Flags mismatch irq 28. 00000000 (edma) vs. 00000000 (edma)"
 
-Thanks,
-Matt
+The warning below that is coming due to fail case in edma_probe not tracking
+the request_irq status properly and but IMO that's a separate issue.
 
-diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
-index b761b7a..b43b327 100644
---- a/arch/arm/common/edma.c
-+++ b/arch/arm/common/edma.c
-@@ -1619,7 +1619,7 @@ static int __init edma_probe(struct platform_device *pdev)
- 
- 	if (node) {
- 		pdata = devm_kzalloc(dev,
--				     sizeof(struct edma_soc_info),
-+				     EDMA_MAX_CC*sizeof(struct edma_soc_info),
- 				     GFP_KERNEL);
- 		edma_of_parse_dt(dev, node, pdata);
- 		info = &pdata;
+BTW, I am trying this on the EVM.
+
+Regards,
+Vaibhav
+
+------------------------------------------------------------------------------
+Everyone hates slow websites. So do we.
+Make your web apps faster with AppDynamics
+Download AppDynamics Lite for free today:
+http://p.sf.net/sfu/appdyn_sfd2d_oct
