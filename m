@@ -1,38 +1,159 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [PATCH v6 0/3] Add modules to support realtek PCIE card reader
-Date: Sat, 20 Oct 2012 06:46:15 +0300
-Message-ID: <20121020034615.GT5685@mwanda>
-References: <cover.1347330871.git.wei_wang@realsil.com.cn>
- <50664814.30407@turmel.org> <20120929110730.GA27797@liondog.tnic>
- <87d315osjm.fsf@octavius.laptop.org>
- <20120929152942.GA11412@liondog.tnic>
- <506FDC8C.3030707@realsil.com.cn>
+From: Aaron Lu <aaron.lu@intel.com>
+Subject: Re: [RFC PATCH 2/4] mmc: sdio: bind sdio device with acpi device
+Date: Sat, 20 Oct 2012 15:12:47 +0800
+Message-ID: <20121020071244.GA4798@localhost.localdomain>
+References: <1350011561-21039-1-git-send-email-aaron.lu@intel.com>
+ <1350011561-21039-3-git-send-email-aaron.lu@intel.com>
+ <1834995.5UHtKnYTb2@vostro.rjw.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devel-bounces@linuxdriverproject.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-acpi-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <506FDC8C.3030707@realsil.com.cn>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/devel>,
- <mailto:devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/devel/>
-List-Post: <mailto:devel@linuxdriverproject.org>
-List-Help: <mailto:devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/devel>,
- <mailto:devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: devel-bounces@linuxdriverproject.org
-Sender: "devel" <devel-bounces@linuxdriverproject.org>
-To: wwang <wei_wang@realsil.com.cn>
-Cc: Phil Turmel <philip@turmel.org>, sameo@linux.intel.com, arnd@arndb.de, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Borislav Petkov <bp@alien8.de>, devel@linuxdriverproject.org, Andrew Morton <akpm@linux-foundation.org>, Chris Ball <cjb@laptop.org>, oakad@yahoo.com
+In-Reply-To: <1834995.5UHtKnYTb2@vostro.rjw.lan>
+Sender: linux-acpi-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-acpi@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, Oct 06, 2012 at 03:23:56PM +0800, wwang wrote:
-> We are still maintaining the SCSI driver for Realtek card reader,
-> and will release the latest source code in the Github in the future.
-> But maybe we won't push it to the staging tree any more.
+On Fri, Oct 19, 2012 at 01:25:46AM +0200, Rafael J. Wysocki wrote:
+> On Friday 12 of October 2012 11:12:39 Aaron Lu wrote:
+> > ACPI spec defines the _ADDR encoding for sdio bus as:
+> > High word - slot number (0 based)
+> > Low word  - function number
+> > 
+> > This patch adds support for sdio device binding with acpi using the
+> > generic ACPI glue framework.
+> > 
+> > Signed-off-by: Aaron Lu <aaron.lu@intel.com>
+> > ---
+> >  drivers/mmc/core/Makefile    |  1 +
+> >  drivers/mmc/core/sdio_acpi.c | 35 +++++++++++++++++++++++++++++++++++
+> >  drivers/mmc/core/sdio_bus.c  | 14 ++++++++++++--
+> >  drivers/mmc/core/sdio_bus.h  |  2 ++
+> >  4 files changed, 50 insertions(+), 2 deletions(-)
+> >  create mode 100644 drivers/mmc/core/sdio_acpi.c
+> > 
+> > diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
+> > index 38ed210..c8300aa 100644
+> > --- a/drivers/mmc/core/Makefile
+> > +++ b/drivers/mmc/core/Makefile
+> > @@ -10,3 +10,4 @@ mmc_core-y			:= core.o bus.o host.o \
+> >  				   quirks.o slot-gpio.o
+> >  
+> >  mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
+> > +mmc_core-$(CONFIG_ACPI)		+= sdio_acpi.o
+> > diff --git a/drivers/mmc/core/sdio_acpi.c b/drivers/mmc/core/sdio_acpi.c
+> > new file mode 100644
+> > index 0000000..0f92e90
+> > --- /dev/null
+> > +++ b/drivers/mmc/core/sdio_acpi.c
+> > @@ -0,0 +1,35 @@
+> > +#include <linux/mmc/host.h>
+> > +#include <linux/mmc/card.h>
+> > +#include <linux/mmc/sdhci.h>
+> > +#include <linux/mmc/sdio_func.h>
+> > +#include <linux/acpi.h>
+> > +#include <acpi/acpi_bus.h>
+> > +#include "sdio_bus.h"
+> > +
+> > +static int acpi_sdio_find_device(struct device *dev, acpi_handle *handle)
+> > +{
+> > +	struct sdio_func *func;
+> > +	struct sdhci_host *host;
+> > +	u64 addr;
+> > +
+> > +	func = dev_to_sdio_func(dev);
+> > +	host = mmc_priv(func->card->host);
+> > +
+> > +	addr = (host->slotno << 16) | func->num;
+> > +
+> > +	*handle = acpi_get_child(DEVICE_ACPI_HANDLE(dev), addr);
+> > +	if (!*handle)
+> > +		return -ENODEV;
+> > +
+> > +	return 0;
+> > +}
+> > +
+> > +static struct acpi_bus_type acpi_sdio_bus = {
+> > +	.bus = &sdio_bus_type,
+> > +	.find_device = acpi_sdio_find_device,
+> > +};
+> > +
+> > +int sdio_acpi_register(void)
+> 
+> I'd call it sdio_acpi_register_bus().
 
-Maybe we should just remove the staging code if it won't be fixed.
-That's sort of the point of staging.
+OK, will update this in v2.
 
-regards,
-dan carpenter
+> 
+> > +{
+> > +	return register_acpi_bus_type(&acpi_sdio_bus);
+> > +}
+> > diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+> > index 6bf6879..aaec9e2 100644
+> > --- a/drivers/mmc/core/sdio_bus.c
+> > +++ b/drivers/mmc/core/sdio_bus.c
+> > @@ -23,6 +23,7 @@
+> >  
+> >  #include "sdio_cis.h"
+> >  #include "sdio_bus.h"
+> > +#include "sdio_acpi.h"
+> >  
+> >  /* show configuration fields */
+> >  #define sdio_config_attr(field, format_string)				\
+> > @@ -209,7 +210,7 @@ static const struct dev_pm_ops sdio_bus_pm_ops = {
+> >  
+> >  #endif /* !CONFIG_PM */
+> >  
+> > -static struct bus_type sdio_bus_type = {
+> > +struct bus_type sdio_bus_type = {
+> >  	.name		= "sdio",
+> >  	.dev_attrs	= sdio_dev_attrs,
+> >  	.match		= sdio_bus_match,
+> > @@ -221,7 +222,16 @@ static struct bus_type sdio_bus_type = {
+> >  
+> >  int sdio_register_bus(void)
+> >  {
+> > -	return bus_register(&sdio_bus_type);
+> > +	int ret;
+> > +
+> > +	ret = bus_register(&sdio_bus_type);
+> > +	if (ret)
+> > +		goto out;
+> > +
+> > +	ret = sdio_acpi_register();
+> 
+> What happens if this fails?
+
+Oh, yes, it shouldn't affect the sdio_register_bus function. So I'll not
+check its return value in v2.
+
+Thanks,
+Aaron
+
+> 
+> > +
+> > +out:
+> > +	return ret;
+> >  }
+> >  
+> >  void sdio_unregister_bus(void)
+> > diff --git a/drivers/mmc/core/sdio_bus.h b/drivers/mmc/core/sdio_bus.h
+> > index 567a768..91c0e93 100644
+> > --- a/drivers/mmc/core/sdio_bus.h
+> > +++ b/drivers/mmc/core/sdio_bus.h
+> > @@ -18,5 +18,7 @@ void sdio_remove_func(struct sdio_func *func);
+> >  int sdio_register_bus(void);
+> >  void sdio_unregister_bus(void);
+> >  
+> > +extern struct bus_type sdio_bus_type;
+> > +
+> >  #endif
+> 
+> Thanks,
+> Rafael
+> 
+> 
+> -- 
+> I speak only for myself.
+> Rafael J. Wysocki, Intel Open Source Technology Center.
