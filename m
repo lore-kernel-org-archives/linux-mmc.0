@@ -1,61 +1,123 @@
-From: Paul Walmsley <paul@pwsan.com>
-Subject: Re: OMAP baseline test results for v3.7-rc1
-Date: Sat, 20 Oct 2012 17:20:43 +0000 (UTC)
-Message-ID: <alpine.DEB.2.00.1210201628420.24497@utopia.booyaka.com>
-References: <alpine.DEB.2.00.1210180517450.8674@utopia.booyaka.com>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: [RFC PATCH 4/4] sdio: pm: set device's power state after driver runtime suspended it
+Date: Sun, 21 Oct 2012 21:57:16 +0200
+Message-ID: <1729978.qEmlCqSTY2@vostro.rjw.lan>
+References: <1350011561-21039-1-git-send-email-aaron.lu@intel.com> <96495050.e1u1tibeG9@vostro.rjw.lan> <20121020071539.GB4798@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from utopia.booyaka.com ([74.50.51.50]:53691 "EHLO
-	utopia.booyaka.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756248Ab2JTRUo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 20 Oct 2012 13:20:44 -0400
-In-Reply-To: <alpine.DEB.2.00.1210180517450.8674@utopia.booyaka.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <20121020071539.GB4798@localhost.localdomain>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Aaron Lu <aaron.lu@intel.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-acpi@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, khilman@ti.com, Felipe Balbi <balbi@ti.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Hello Venkatraman,
-
-On Thu, 18 Oct 2012, Paul Walmsley wrote:
-
-> Here are some basic OMAP test results for Linux v3.7-rc1.
-> Logs and other details at http://www.pwsan.com/omap/testlogs/test_v3.7-rc1/
-
-...
-
-> Failing tests: needing investigation
-> ------------------------------------
-
-...
-
-> PM tests:
+On Saturday 20 of October 2012 15:15:41 Aaron Lu wrote:
+> On Fri, Oct 19, 2012 at 08:08:38PM +0200, Rafael J. Wysocki wrote:
+> > On Friday 19 of October 2012 01:39:25 Rafael J. Wysocki wrote:
+> > > On Friday 12 of October 2012 11:12:41 Aaron Lu wrote:
+> > > > In sdio bus level runtime callback function, after call the driver's
+> > > > runtime suspend callback, we will check if the device supports a
+> > > > platform level power management, and if so, a proper power state is
+> > > > chosen by the corresponding platform callback and then set.
+> > > > 
+> > > > Platform level runtime wakeup is also set, if device is enabled for
+> > > > runtime wakeup by its driver, it will be armed the ability to generate
+> > > > a wakeup event by the platform.
+> > > > 
+> > > > Signed-off-by: Aaron Lu <aaron.lu@intel.com>
+> > > > ---
+> > > >  drivers/mmc/core/sdio_bus.c | 49 +++++++++++++++++++++++++++++++++++++++++++--
+> > > >  1 file changed, 47 insertions(+), 2 deletions(-)
+> > > > 
+> > > > diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+> > > > index aaec9e2..d83dea8 100644
+> > > > --- a/drivers/mmc/core/sdio_bus.c
+> > > > +++ b/drivers/mmc/core/sdio_bus.c
+> > > > @@ -23,6 +23,7 @@
+> > > >  
+> > > >  #include "sdio_cis.h"
+> > > >  #include "sdio_bus.h"
+> > > > +#include "sdio.h"
+> > > >  #include "sdio_acpi.h"
+> > > >  
+> > > >  /* show configuration fields */
+> > > > @@ -194,10 +195,54 @@ static int sdio_bus_remove(struct device *dev)
+> > > >  }
+> > > >  
+> > > >  #ifdef CONFIG_PM
+> > > > +
+> > > > +static int sdio_bus_runtime_suspend(struct device *dev)
+> > > > +{
+> > > > +	int ret;
+> > > > +	sdio_power_t state;
+> > > > +
+> > > > +	ret = pm_generic_runtime_suspend(dev);
+> > > > +	if (ret)
+> > > > +		goto out;
+> > > > +
+> > > > +	if (!platform_sdio_power_manageable(dev))
+> > > > +		goto out;
+> > > > +
+> > > > +	platform_sdio_run_wake(dev, true);
+> > > > +
+> > > > +	state = platform_sdio_choose_power_state(dev);
+> > > > +	if (state == SDIO_POWER_ERROR) {
+> > > > +		ret = -EIO;
+> > > > +		goto out;
+> > > > +	}
+> > > > +
+> > > > +	ret = platform_sdio_set_power_state(dev, state);
+> > > > +
+> > > > +out:
+> > > > +	return ret;
+> > > > +}
+> > > > +
+> > > > +static int sdio_bus_runtime_resume(struct device *dev)
+> > > > +{
+> > > > +	int ret;
+> > > > +
+> > > > +	if (platform_sdio_power_manageable(dev)) {
+> > > > +		platform_sdio_run_wake(dev, false);
+> > > > +		ret = platform_sdio_set_power_state(dev, SDIO_D0);
+> > > > +		if (ret)
+> > > > +			goto out;
+> > > > +	}
+> > > > +
+> > > > +	ret = pm_generic_runtime_resume(dev);
+> > > > +
+> > > > +out:
+> > > > +	return ret;
+> > > > +}
+> > > > +
+> > > 
+> > > Most likely we will need to make analogous changes for other bus types that
+> > > don't support power management natively, like platform, SPI, I2C etc.  In all
+> > > of them the _runtime_suspend() and _runtime_resume() routine will look
+> > > almost exactly the same except for the platform_sdio_ prefix.
+> > > 
+> > > For this reason, I think it would be better to simply define two functions
+> > > acpi_pm_runtime_suspend() and acpi_pm_runtime_resume() that will do all of
+> > > the ACPI-specific operations related to runtime suspend/resume.  Then, we
+> > > will be able to use these functions for all of the bus types in question
+> > > in the same way (we may also need to add analogous functions for system
+> > > suspend/resume handling).
+> > 
+> > Something like in the (totally untested) patch below.
 > 
-> * 3530es3beagle: hangs during off-mode dynamic idle test
->   - Unknown cause; not investigated
+> Looks good to me.
+> I'll test the code and put it into v2 of the patchset with your
+> sign-off, is it OK?
 
-Looks like this commit is causing some of our power management tests to 
-fail on v3.7-rc1:
+I'd rather do it a bit differently in the signed-off version (I'm working
+on these patches, they should be ready around Tuesday), but if you can test
+it in its current form, that'd be useful too.
 
-commit 6c31b2150ff96755d24e0ab6d6fea08a7bf5c44c
-Author: Venkatraman S <svenkatr@ti.com>
-Date:   Wed Aug 8 14:26:52 2012 +0530
-
-    mmc: omap_hsmmc: remove access to SYSCONFIG register
-
-...
-
-The failure can be seen in the following test log:
-
-http://www.pwsan.com/omap/transcripts/20121020-3530es3beagle-off-mode-fail-pre-revert.txt
-
-and with commit 6c31b215 reverted, the test succeeds:
-
-http://www.pwsan.com/omap/transcripts/20121020-3530es3beagle-off-mode-fail-post-revert.txt
+Thanks,
+Rafael
 
 
-Could you please take a look and fix the problem?
-
-
-- Paul
+-- 
+I speak only for myself.
+Rafael J. Wysocki, Intel Open Source Technology Center.
