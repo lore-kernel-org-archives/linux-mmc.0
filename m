@@ -1,60 +1,73 @@
-From: Alexander Stein <alexander.stein@systec-electronic.com>
-Subject: reading from eMMC boot partions: timeout or ECC error?
-Date: Mon, 22 Oct 2012 16:59:50 +0200
-Message-ID: <17562013.0KIQZolflN@ws-stein>
+From: Tero Kristo <t-kristo@ti.com>
+Subject: Re: OMAP baseline test results for v3.7-rc1
+Date: Mon, 22 Oct 2012 19:13:55 +0300
+Message-ID: <1350922435.2143.66.camel@sokoban>
+References: <alpine.DEB.2.00.1210180517450.8674@utopia.booyaka.com>
+	 <alpine.DEB.2.00.1210201628420.24497@utopia.booyaka.com>
+Reply-To: <t-kristo@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from webbox1416.server-home.net ([77.236.96.61]:36428 "EHLO
-	webbox1416.server-home.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755157Ab2JVPHI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Oct 2012 11:07:08 -0400
-Received: from comm.systec-electronic.de (95-91-85-164-dynip.superkabel.de [95.91.85.164])
-	by webbox1416.server-home.net (Postfix) with ESMTPA id 629B427A6C1
-	for <linux-mmc@vger.kernel.org>; Mon, 22 Oct 2012 17:05:47 +0200 (CEST)
-Received: from ws-stein.localnet (unknown [192.168.10.70])
-	by comm.systec-electronic.de (Postfix) with ESMTP id 2B1ED97C275
-	for <linux-mmc@vger.kernel.org>; Mon, 22 Oct 2012 16:59:53 +0200 (CEST)
+Received: from comal.ext.ti.com ([198.47.26.152]:57342 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755563Ab2JVQOG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 22 Oct 2012 12:14:06 -0400
+In-Reply-To: <alpine.DEB.2.00.1210201628420.24497@utopia.booyaka.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Paul Walmsley <paul@pwsan.com>
+Cc: Venkatraman S <svenkatr@ti.com>, khilman@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Felipe Balbi <balbi@ti.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 
-Hello,
+On Sat, 2012-10-20 at 17:20 +0000, Paul Walmsley wrote:
+> Hello Venkatraman,
+> 
+> On Thu, 18 Oct 2012, Paul Walmsley wrote:
+> 
+> > Here are some basic OMAP test results for Linux v3.7-rc1.
+> > Logs and other details at http://www.pwsan.com/omap/testlogs/test_v3.7-rc1/
+> 
+> ...
+> 
+> > Failing tests: needing investigation
+> > ------------------------------------
+> 
+> ...
+> 
+> > PM tests:
+> > 
+> > * 3530es3beagle: hangs during off-mode dynamic idle test
+> >   - Unknown cause; not investigated
+> 
+> Looks like this commit is causing some of our power management tests to 
+> fail on v3.7-rc1:
+> 
+> commit 6c31b2150ff96755d24e0ab6d6fea08a7bf5c44c
+> Author: Venkatraman S <svenkatr@ti.com>
+> Date:   Wed Aug 8 14:26:52 2012 +0530
+> 
+>     mmc: omap_hsmmc: remove access to SYSCONFIG register
+> 
+> ...
+> 
+> The failure can be seen in the following test log:
+> 
+> http://www.pwsan.com/omap/transcripts/20121020-3530es3beagle-off-mode-fail-pre-revert.txt
+> 
+> and with commit 6c31b215 reverted, the test succeeds:
+> 
+> http://www.pwsan.com/omap/transcripts/20121020-3530es3beagle-off-mode-fail-post-revert.txt
+> 
+> 
+> Could you please take a look and fix the problem?
 
-I'm currently investigating problems during accessing /dev/mmcblk1boot0 and
-/dev/mmcblk0 simultaneously. Currenty I'm running a 3.6.2 kernel and enter the
-following command directly after bootup:
-> # dd if=/dev/mmcblk1boot0 of=/dev/null bs=4096 (bs is chosen arbitrary)
-and get the following output:
-> 64+0 records in
-> 64+0 records out
-> 262144 bytes (256.0KB) copied, 0.022922 seconds, 10.9MB/s
-If I redo this, i get
-> # dd if=/dev/mmcblk1boot0 of=/dev/null bs=4096
-> 64+0 records in
-> 64+0 records out
-> 262144 bytes (256.0KB) copied, 0.719781 seconds, 355.7KB/s
+Root cause for this issue is that the MMC IP is reset during off-mode,
+but the driver doesn't expect this in its current form. There are a
+couple of alternative ways to fix this. Either add a reset timeout to
+the MMC driver code (which was removed by the bisected patch), or
+alternatively add a global reset check to the hwmod code. I'll send a
+patch for the global reset purpose in a bit for commenting.
 
-And the following 2 lines in dmesg:
-> [   39.794510] mmcblk1boot0: error -110 transferring data, sector 0, nr 32, cmd response 0x900, card status 0xb00
-> [   39.805648] mmcblk1boot0: retrying using single block read
+-Tero
 
-It seems the first read was successful and pretty fast and the 2nd one
-eventually finished but it seems it got a timeout. The above message are
-printed when the request status is MMC_BLK_ECC_ERR which in turn is set
-when the following conditions is met:
-drivers/mmc/card/block.c 726-728
-> if ((status & R1_CARD_ECC_FAILED) ||
->     (brq->stop.resp[0] & R1_CARD_ECC_FAILED) ||
->     (brq->cmd.resp[0] & R1_CARD_ECC_FAILED))
-
-So is this an ECC error or a timeout? Why doesn't it happen the 1st time?
-Any hints?
-
-Best regards,
-Alexander
-
-PS: Is arbitrary switching bewteen mmcblk1boot0 and mmcblk1 supported/intended?
-Once I acces mmcblk1boot0 readin from mmcblk1 results in different errors.
 
