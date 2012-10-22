@@ -1,81 +1,68 @@
-From: Linus Walleij <linus.walleij@stericsson.com>
-Subject: [PATCH] MMCI: fetch pinctrl handle and set default state
-Date: Mon, 22 Oct 2012 09:52:06 +0200
-Message-ID: <1350892326-5125-1-git-send-email-linus.walleij@stericsson.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/6] mmc: core: sdio_io.c: Fixed lines with > 80 chars
+Date: Mon, 22 Oct 2012 10:18:27 +0200
+Message-ID: <CAPDyKFonNQGwQBjM4Tgo7i1q50qRVRTWMYYarqo2=VC9=ExCjw@mail.gmail.com>
+References: <1350579503-3100-1-git-send-email-antiroot@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog102.obsmtp.com ([207.126.144.113]:44241 "EHLO
-	eu1sys200aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750816Ab2JVHwg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Oct 2012 03:52:36 -0400
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:62205 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750913Ab2JVIS2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Oct 2012 04:18:28 -0400
+Received: by mail-wi0-f170.google.com with SMTP id hm2so1897960wib.1
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Oct 2012 01:18:27 -0700 (PDT)
+In-Reply-To: <1350579503-3100-1-git-send-email-antiroot@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Anmar Oueja <anmar.oueja@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
+To: Sangho Yi <antiroot@gmail.com>
+Cc: paul.gortmaker@windriver.com, stefan.xk.nilsson@stericsson.com, linus.walleij@linaro.org, ulf.hansson@stericsson.com, rjw@sisk.pl, girish.shivananjappa@linaro.org, cjb@laptop.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-From: Linus Walleij <linus.walleij@linaro.org>
+Hi Sangho,
 
-This fetches the pinctrl resource for the MMCI driver, and if
-a "default" state is found, it is activated.
+If you really must do this kind of clean up patches; from my point of
+view I would suggest you to collect them in one "mmc: core: Code
+cleanup" patch instead.
 
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
- drivers/mmc/host/mmci.c | 18 ++++++++++++++++++
- drivers/mmc/host/mmci.h |  4 ++++
- 2 files changed, 22 insertions(+)
+Kind regards
+Ulf Hansson
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index edc3e9b..269566d 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -33,6 +33,7 @@
- #include <linux/amba/mmci.h>
- #include <linux/pm_runtime.h>
- #include <linux/types.h>
-+#include <linux/pinctrl/consumer.h>
- 
- #include <asm/div64.h>
- #include <asm/io.h>
-@@ -1360,6 +1361,23 @@ static int __devinit mmci_probe(struct amba_device *dev,
- 		mmc->f_max = min(host->mclk, fmax);
- 	dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
- 
-+	host->pinctrl = devm_pinctrl_get(&dev->dev);
-+	if (IS_ERR(host->pinctrl)) {
-+		ret = PTR_ERR(host->pinctrl);
-+		goto clk_disable;
-+	}
-+
-+	host->pins_default = pinctrl_lookup_state(host->pinctrl,
-+			PINCTRL_STATE_DEFAULT);
-+
-+	/* enable pins to be muxed in and configured */
-+	if (!IS_ERR(host->pins_default)) {
-+		ret = pinctrl_select_state(host->pinctrl, host->pins_default);
-+		if (ret)
-+			dev_err(&dev->dev, "could not set default pins\n");
-+	} else
-+		dev_err(&dev->dev, "could not get default pinstate\n");
-+
- #ifdef CONFIG_REGULATOR
- 	/* If we're using the regulator framework, try to fetch a regulator */
- 	host->vcc = regulator_get(&dev->dev, "vmmc");
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index d437ccf..d34d8c0 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -195,6 +195,10 @@ struct mmci_host {
- 	unsigned int		size;
- 	struct regulator	*vcc;
- 
-+	/* pinctrl handles */
-+	struct pinctrl		*pinctrl;
-+	struct pinctrl_state	*pins_default;
-+
- #ifdef CONFIG_DMA_ENGINE
- 	/* DMA stuff */
- 	struct dma_chan		*dma_current;
--- 
-1.7.11.3
-
+On 18 October 2012 18:58, Sangho Yi <antiroot@gmail.com> wrote:
+> I fixed lines over 80 characters per line.
+>
+> Signed-off-by: Sangho Yi <antiroot@gmail.com>
+> ---
+>  drivers/mmc/core/sdio_io.c |    6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+> index 8f6f5ac..c5f53d8 100644
+> --- a/drivers/mmc/core/sdio_io.c
+> +++ b/drivers/mmc/core/sdio_io.c
+> @@ -80,7 +80,8 @@ int sdio_enable_func(struct sdio_func *func)
+>         timeout = jiffies + msecs_to_jiffies(func->enable_timeout);
+>
+>         while (1) {
+> -               ret = mmc_io_rw_direct(func->card, 0, 0, SDIO_CCCR_IORx, 0, &reg);
+> +               ret = mmc_io_rw_direct(func->card, 0, 0, SDIO_CCCR_IORx, 0,
+> +                               &reg);
+>                 if (ret)
+>                         goto err;
+>                 if (reg & (1 << func->num))
+> @@ -664,7 +665,8 @@ void sdio_f0_writeb(struct sdio_func *func, unsigned char b, unsigned int addr,
+>
+>         BUG_ON(!func);
+>
+> -       if ((addr < 0xF0 || addr > 0xFF) && (!mmc_card_lenient_fn0(func->card))) {
+> +       if ((addr < 0xF0 || addr > 0xFF) &&
+> +           (!mmc_card_lenient_fn0(func->card))) {
+>                 if (err_ret)
+>                         *err_ret = -EINVAL;
+>                 return;
+> --
+> 1.7.9.5
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
