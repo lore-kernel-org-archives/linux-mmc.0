@@ -1,52 +1,140 @@
-From: Balbir Singh <bsingharora-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: process hangs on do_exit when oom happens
-Date: Mon, 22 Oct 2012 11:08:40 +0530
-Message-ID: <CAKTCnzmDhSd-POHSC0wx-ziVPUg9wFverK33Q1_SvCx3Gzuugg@mail.gmail.com>
-References: <op.wmbi5kbrn27o5l@gaoqiang-d1.corp.qihoo.net>
-	<20121019160425.GA10175@dhcp22.suse.cz>
-	<CAKWKT+Z-SZb1=3rwLm+urs3fghQ3M6pdOR_rzXKCevoad11a5g@mail.gmail.com>
+From: "Bedia, Vaibhav" <vaibhav.bedia-l0cyMroinI0@public.gmane.org>
+Subject: RE: [RFC PATCH v3 00/16] DMA Engine support for AM33XX
+Date: Mon, 22 Oct 2012 05:53:32 +0000
+Message-ID: <B5906170F1614E41A8A28DE3B8D121433EBD580F@DBDE01.ent.ti.com>
+References: <1350566815-409-1-git-send-email-mporter@ti.com>
+	<B5906170F1614E41A8A28DE3B8D121433EBD29FC@DBDE01.ent.ti.com>
+	<20121019111558.GD25164@beef>
+	<B5906170F1614E41A8A28DE3B8D121433EBD2CE1@DBDE01.ent.ti.com>
+	<20121019164615.GH25164@beef>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKWKT+Z-SZb1=3rwLm+urs3fghQ3M6pdOR_rzXKCevoad11a5g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Qiang Gao <gaoqiangscut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Michal Hocko <mhocko-AlSwsSmVLrQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+In-Reply-To: <20121019164615.GH25164@beef>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: "Porter, Matt" <mporter-l0cyMroinI0@public.gmane.org>
+Cc: Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Grant, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, "Cousson,
+	Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>Rob, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree, Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>Linux, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Oct 22, 2012 at 7:46 AM, Qiang Gao <gaoqiangscut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> I don't know whether  the process will exit finally, bug this stack lasts
-> for hours, which is obviously unnormal.
-> The situation:  we use a command calld "cglimit" to fork-and-exec the worker
-> process,and the "cglimit" will
-> set some limitation on the worker with cgroup. for now,we limit the
-> memory,and we also use cpu cgroup,but with
-> no limiation,so when the worker is running, the cgroup directory looks like
-> following:
->
-> /cgroup/memory/worker : this directory limit the memory
-> /cgroup/cpu/worker :with no limit,but worker process is in.
->
-> for some reason(some other process we didn't consider),  the worker process
-> invoke global oom-killer,
-> not cgroup-oom-killer.  then the worker process hangs there.
->
-> Actually, if we didn't set the worker process into the cpu cgroup, this will
-> never happens.
->
+On Fri, Oct 19, 2012 at 22:16:15, Porter, Matt wrote:
+> On Fri, Oct 19, 2012 at 12:02:42PM +0000, Bedia, Vaibhav wrote:
+> > On Fri, Oct 19, 2012 at 16:45:58, Porter, Matt wrote:
+> > > On Fri, Oct 19, 2012 at 10:26:20AM +0000, Bedia, Vaibhav wrote:
+> > [...]
+> > > > 
+> > > > I didn't see all the patches that you posted on edma-dmaengine-v3
+> > > > but I do seem them on edma-dmaengine-am33xx-v3 branch.
+> > > 
+> > > I see I referenced the wrong branch in the cover letter. Thanks for
+> > > testing and noticing this. Sorry to make you hunt for the correct
+> > > branch in that repo. ;) 
+> > > 
+> > 
+> > No problem.
+> > 
+> > > https://github.com/ohporter/linux/tree/edma-dmaengine-am33xx-v3
+> > > is indeed the correct branch for those wanting to pull this in or
+> > > grab some of the not-to-be-merged drivers I used for testing.
+> > > 
+> > > > I added a couple of patches to enable earlyprintk and build the DTB
+> > > > appended kernel image uImage-dtb.am335x-evm
+> > > > 
+> > > > Here's what i see
+> > > > 
+> > > > [...]
+> > > 
+> > > <snip>
+> > > 
+> > > > [    0.175354] edma: probe of 49000000.edma failed with error -16
+> > > 
+> > > I missed an uninitialized pdata case in the bug fixes mentioned in
+> > > the changelog and the folks previously failing the same way didn't
+> > > hit the case I suspect you are hitting. Can you try this and let me
+> > > know how it works?
+> > > 
+> > 
+> > That doesn't help :(
+> 
+> Ok, so I dumped my Linaro toolchain which was masking this issue that
+> you got unlucky with on EVM, whereas I was lucky. Switching toolchains I
+> was able to reproduce the problem. Pantelis Antoniou suggested some
+> changes and the following fixes this issue for me...verified on both
+> BeagleBone and EVM. Let me know if that works on your end and I'll
+> incorporate some version of it in the next update.
 
-You said you don't use CPU limits right? can you also send in the
-output of /proc/sched_debug. Can you also send in your
-/etc/cgconfig.conf? If the OOM is not caused by cgroup memory limit
-and the global system is under pressure in 2.6.32, it can trigger an
-OOM.
+Heh I would not have suspected the toolchain so early ;)
 
-Also
+> 
+> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+> index b761b7a..6ed394f 100644
+> --- a/arch/arm/common/edma.c
+> +++ b/arch/arm/common/edma.c
+> @@ -1598,6 +1598,8 @@ static struct of_dma_filter_info edma_filter_info = {
+>  static int __init edma_probe(struct platform_device *pdev)
+>  {
+>  	struct edma_soc_info	**info = pdev->dev.platform_data;
+> +	struct edma_soc_info	*ninfo[EDMA_MAX_CC] = {NULL, NULL};
+> +	struct edma_soc_info	tmpinfo;
+>  	s8			(*queue_priority_mapping)[2];
+>  	s8			(*queue_tc_mapping)[2];
+>  	int			i, j, off, ln, found = 0;
+> @@ -1614,15 +1616,13 @@ static int __init edma_probe(struct platform_device *pdev)
+>  	char			irq_name[10];
+>  	struct device_node	*node = pdev->dev.of_node;
+>  	struct device		*dev = &pdev->dev;
+> -	struct edma_soc_info	*pdata;
+>  	int			ret;
+>  
+>  	if (node) {
+> -		pdata = devm_kzalloc(dev,
+> -				     sizeof(struct edma_soc_info),
+> -				     GFP_KERNEL);
+> -		edma_of_parse_dt(dev, node, pdata);
+> -		info = &pdata;
+> +		info = ninfo;
+> +		edma_of_parse_dt(dev, node, &tmpinfo);
+> +		info[0] = &tmpinfo;
+> +
+>  		dma_cap_set(DMA_SLAVE, edma_filter_info.dma_cap);
+>  		of_dma_controller_register(dev->of_node,
+>  					   of_dma_simple_xlate,
+> 
 
-1. Have you turned off swapping (seems like it) right?
-2. Do you have a NUMA policy setup for this task?
+With the above diff, the kernel boots fine on the EVM.
 
-Can you also share the .config (not sure if any special patches are
-being used) in the version you've mentioned.
+> > Looking at the original crash log, I suspect something is not correct
+> > with the irq portion, probably in the DT or the driver. 
+> > 
+> > "genirq: Flags mismatch irq 28. 00000000 (edma) vs. 00000000 (edma)"
+> > 
+> > The warning below that is coming due to fail case in edma_probe not tracking
+> > the request_irq status properly and but IMO that's a separate issue.
+> 
+> It is a separate issue, indeed. My ideal goal was to avoid changing
+> anything in this existing davinci dma implementation, that's why the
+> error paths were unmodified. Since I'm having to rework a few more things
+> I'll look at those and generate an improved version.
+> 
+> Russ Dill also made some good simplification/cleanup suggestions for the
+> of parsing on irc which I'll incorporate in the next version.
 
-Balbir
+Ok, sounds good.
+
+Regards,
+Vaibhav
+
+------------------------------------------------------------------------------
+Everyone hates slow websites. So do we.
+Make your web apps faster with AppDynamics
+Download AppDynamics Lite for free today:
+http://p.sf.net/sfu/appdyn_sfd2d_oct
