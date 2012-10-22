@@ -1,127 +1,158 @@
-From: Aaron Lu <aaron.lu@intel.com>
-Subject: Re: [RFC PATCH 4/4] sdio: pm: set device's power state after driver
- runtime suspended it
-Date: Mon, 22 Oct 2012 08:49:15 +0800
-Message-ID: <5084980B.9090004@intel.com>
-References: <1350011561-21039-1-git-send-email-aaron.lu@intel.com> <96495050.e1u1tibeG9@vostro.rjw.lan> <20121020071539.GB4798@localhost.localdomain> <1729978.qEmlCqSTY2@vostro.rjw.lan>
+From: Qiang Gao <gaoqiangscut@gmail.com>
+Subject: Re: process hangs on do_exit when oom happens
+Date: Mon, 22 Oct 2012 10:16:43 +0800
+Message-ID: <CAKWKT+Z-SZb1=3rwLm+urs3fghQ3M6pdOR_rzXKCevoad11a5g@mail.gmail.com>
+References: <op.wmbi5kbrn27o5l@gaoqiang-d1.corp.qihoo.net>
+	<20121019160425.GA10175@dhcp22.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <1729978.qEmlCqSTY2@vostro.rjw.lan>
-Sender: linux-acpi-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-acpi@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
+Content-Type: multipart/alternative; boundary=20cf3071c812d2c6b304cc9c7134
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20121019160425.GA10175@dhcp22.suse.cz>
+Sender: owner-linux-mm@kvack.org
+To: Michal Hocko <mhocko@suse.cz>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cgroups@vger.kernel.org" <cgroups@vger.kernel.org>, linux-mm@kvack.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 10/22/2012 03:57 AM, Rafael J. Wysocki wrote:
-> On Saturday 20 of October 2012 15:15:41 Aaron Lu wrote:
->> On Fri, Oct 19, 2012 at 08:08:38PM +0200, Rafael J. Wysocki wrote:
->>> On Friday 19 of October 2012 01:39:25 Rafael J. Wysocki wrote:
->>>> On Friday 12 of October 2012 11:12:41 Aaron Lu wrote:
->>>>> In sdio bus level runtime callback function, after call the driver's
->>>>> runtime suspend callback, we will check if the device supports a
->>>>> platform level power management, and if so, a proper power state is
->>>>> chosen by the corresponding platform callback and then set.
->>>>>
->>>>> Platform level runtime wakeup is also set, if device is enabled for
->>>>> runtime wakeup by its driver, it will be armed the ability to generate
->>>>> a wakeup event by the platform.
->>>>>
->>>>> Signed-off-by: Aaron Lu <aaron.lu@intel.com>
->>>>> ---
->>>>>  drivers/mmc/core/sdio_bus.c | 49 +++++++++++++++++++++++++++++++++++++++++++--
->>>>>  1 file changed, 47 insertions(+), 2 deletions(-)
->>>>>
->>>>> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
->>>>> index aaec9e2..d83dea8 100644
->>>>> --- a/drivers/mmc/core/sdio_bus.c
->>>>> +++ b/drivers/mmc/core/sdio_bus.c
->>>>> @@ -23,6 +23,7 @@
->>>>>  
->>>>>  #include "sdio_cis.h"
->>>>>  #include "sdio_bus.h"
->>>>> +#include "sdio.h"
->>>>>  #include "sdio_acpi.h"
->>>>>  
->>>>>  /* show configuration fields */
->>>>> @@ -194,10 +195,54 @@ static int sdio_bus_remove(struct device *dev)
->>>>>  }
->>>>>  
->>>>>  #ifdef CONFIG_PM
->>>>> +
->>>>> +static int sdio_bus_runtime_suspend(struct device *dev)
->>>>> +{
->>>>> +	int ret;
->>>>> +	sdio_power_t state;
->>>>> +
->>>>> +	ret = pm_generic_runtime_suspend(dev);
->>>>> +	if (ret)
->>>>> +		goto out;
->>>>> +
->>>>> +	if (!platform_sdio_power_manageable(dev))
->>>>> +		goto out;
->>>>> +
->>>>> +	platform_sdio_run_wake(dev, true);
->>>>> +
->>>>> +	state = platform_sdio_choose_power_state(dev);
->>>>> +	if (state == SDIO_POWER_ERROR) {
->>>>> +		ret = -EIO;
->>>>> +		goto out;
->>>>> +	}
->>>>> +
->>>>> +	ret = platform_sdio_set_power_state(dev, state);
->>>>> +
->>>>> +out:
->>>>> +	return ret;
->>>>> +}
->>>>> +
->>>>> +static int sdio_bus_runtime_resume(struct device *dev)
->>>>> +{
->>>>> +	int ret;
->>>>> +
->>>>> +	if (platform_sdio_power_manageable(dev)) {
->>>>> +		platform_sdio_run_wake(dev, false);
->>>>> +		ret = platform_sdio_set_power_state(dev, SDIO_D0);
->>>>> +		if (ret)
->>>>> +			goto out;
->>>>> +	}
->>>>> +
->>>>> +	ret = pm_generic_runtime_resume(dev);
->>>>> +
->>>>> +out:
->>>>> +	return ret;
->>>>> +}
->>>>> +
->>>>
->>>> Most likely we will need to make analogous changes for other bus types that
->>>> don't support power management natively, like platform, SPI, I2C etc.  In all
->>>> of them the _runtime_suspend() and _runtime_resume() routine will look
->>>> almost exactly the same except for the platform_sdio_ prefix.
->>>>
->>>> For this reason, I think it would be better to simply define two functions
->>>> acpi_pm_runtime_suspend() and acpi_pm_runtime_resume() that will do all of
->>>> the ACPI-specific operations related to runtime suspend/resume.  Then, we
->>>> will be able to use these functions for all of the bus types in question
->>>> in the same way (we may also need to add analogous functions for system
->>>> suspend/resume handling).
->>>
->>> Something like in the (totally untested) patch below.
->>
->> Looks good to me.
->> I'll test the code and put it into v2 of the patchset with your
->> sign-off, is it OK?
-> 
-> I'd rather do it a bit differently in the signed-off version (I'm working
-> on these patches, they should be ready around Tuesday), but if you can test
+--20cf3071c812d2c6b304cc9c7134
+Content-Type: text/plain; charset=ISO-8859-1
 
-OK, thanks.
+I don't know whether  the process will exit finally, bug this stack lasts
+for hours, which is obviously unnormal.
+The situation:  we use a command calld "cglimit" to fork-and-exec the
+worker process,and the "cglimit" will
+set some limitation on the worker with cgroup. for now,we limit the
+memory,and we also use cpu cgroup,but with
+no limiation,so when the worker is running, the cgroup directory looks like
+following:
 
-> it in its current form, that'd be useful too.
+/cgroup/memory/worker : this directory limit the memory
+/cgroup/cpu/worker :with no limit,but worker process is in.
 
-I was planning to test it some time later, so looks like I can directly
-test your signed-off version :-)
+for some reason(some other process we didn't consider),  the worker process
+invoke global oom-killer,
+not cgroup-oom-killer.  then the worker process hangs there.
 
-Thanks,
-Aaron
+Actually, if we didn't set the worker process into the cpu cgroup, this
+will never happens.
 
+
+
+On Sat, Oct 20, 2012 at 12:04 AM, Michal Hocko <mhocko@suse.cz> wrote:
+
+> On Wed 17-10-12 18:23:34, gaoqiang wrote:
+> > I looked up nothing useful with google,so I'm here for help..
+> >
+> > when this happens:  I use memcg to limit the memory use of a
+> > process,and when the memcg cgroup was out of memory,
+> > the process was oom-killed   however,it cannot really complete the
+> > exiting. here is the some information
+>
+> How many tasks are in the group and what kind of memory do they use?
+> Is it possible that you were hit by the same issue as described in
+> 79dfdacc memcg: make oom_lock 0 and 1 based rather than counter.
+>
+> > OS version:  centos6.2    2.6.32.220.7.1
+>
+> Your kernel is quite old and you should be probably asking your
+> distribution to help you out. There were many fixes since 2.6.32.
+> Are you able to reproduce the same issue with the current vanila kernel?
+>
+> > /proc/pid/stack
+> > ---------------------------------------------------------------
+> >
+> > [<ffffffff810597ca>] __cond_resched+0x2a/0x40
+> > [<ffffffff81121569>] unmap_vmas+0xb49/0xb70
+> > [<ffffffff8112822e>] exit_mmap+0x7e/0x140
+> > [<ffffffff8105b078>] mmput+0x58/0x110
+> > [<ffffffff81061aad>] exit_mm+0x11d/0x160
+> > [<ffffffff81061c9d>] do_exit+0x1ad/0x860
+> > [<ffffffff81062391>] do_group_exit+0x41/0xb0
+> > [<ffffffff81077cd8>] get_signal_to_deliver+0x1e8/0x430
+> > [<ffffffff8100a4c4>] do_notify_resume+0xf4/0x8b0
+> > [<ffffffff8100b281>] int_signal+0x12/0x17
+> > [<ffffffffffffffff>] 0xffffffffffffffff
+>
+> This looks strange because this is just an exit part which shouldn't
+> deadlock or anything. Is this stack stable? Have you tried to take check
+> it more times?
+>
+> --
+> Michal Hocko
+> SUSE Labs
+>
+
+--20cf3071c812d2c6b304cc9c7134
+Content-Type: text/html; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+<div>I don&#39;t know whether=A0 the process will exit finally, bug this st=
+ack lasts for hours, which is obviously unnormal.<br></div><div>The situati=
+on: =A0we use a command calld &quot;cglimit&quot; to fork-and-exec the work=
+er process,and the &quot;cglimit&quot; will=A0</div>
+<div>set some limitation on the worker with cgroup. for now,we limit the me=
+mory,and we also use cpu cgroup,but with</div><div>no limiation,so when the=
+ worker is running, the cgroup directory looks like following:</div><div>
+<br></div><div>/cgroup/memory/worker : this directory limit the memory</div=
+><div>/cgroup/cpu/worker :with no limit,but worker process is in.</div><div=
+><br></div><div>for some reason(some other process we didn&#39;t consider),=
+ =A0the worker process invoke global oom-killer, </div>
+<div>not cgroup-oom-killer. =A0then the worker process hangs there.</div><d=
+iv><br></div><div>Actually, if we didn&#39;t set the worker process into th=
+e cpu cgroup, this will never happens.</div><div><br></div><div><br></div>
+<br><div class=3D"gmail_quote">On Sat, Oct 20, 2012 at 12:04 AM, Michal Hoc=
+ko <span dir=3D"ltr">&lt;<a href=3D"mailto:mhocko@suse.cz" target=3D"_blank=
+">mhocko@suse.cz</a>&gt;</span> wrote:<br><blockquote class=3D"gmail_quote"=
+ style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
+On Wed 17-10-12 18:23:34, gaoqiang wrote:<br>
+&gt; I looked up nothing useful with google,so I&#39;m here for help..<br>
+&gt;<br>
+&gt; when this happens: =A0I use memcg to limit the memory use of a<br>
+&gt; process,and when the memcg cgroup was out of memory,<br>
+&gt; the process was oom-killed =A0 however,it cannot really complete the<b=
+r>
+&gt; exiting. here is the some information<br>
+<br>
+How many tasks are in the group and what kind of memory do they use?<br>
+Is it possible that you were hit by the same issue as described in<br>
+79dfdacc memcg: make oom_lock 0 and 1 based rather than counter.<br>
+<br>
+&gt; OS version: =A0centos6.2 =A0 =A02.6.32.220.7.1<br>
+<br>
+Your kernel is quite old and you should be probably asking your<br>
+distribution to help you out. There were many fixes since 2.6.32.<br>
+Are you able to reproduce the same issue with the current vanila kernel?<br=
+>
+<br>
+&gt; /proc/pid/stack<br>
+&gt; ---------------------------------------------------------------<br>
+&gt;<br>
+&gt; [&lt;ffffffff810597ca&gt;] __cond_resched+0x2a/0x40<br>
+&gt; [&lt;ffffffff81121569&gt;] unmap_vmas+0xb49/0xb70<br>
+&gt; [&lt;ffffffff8112822e&gt;] exit_mmap+0x7e/0x140<br>
+&gt; [&lt;ffffffff8105b078&gt;] mmput+0x58/0x110<br>
+&gt; [&lt;ffffffff81061aad&gt;] exit_mm+0x11d/0x160<br>
+&gt; [&lt;ffffffff81061c9d&gt;] do_exit+0x1ad/0x860<br>
+&gt; [&lt;ffffffff81062391&gt;] do_group_exit+0x41/0xb0<br>
+&gt; [&lt;ffffffff81077cd8&gt;] get_signal_to_deliver+0x1e8/0x430<br>
+&gt; [&lt;ffffffff8100a4c4&gt;] do_notify_resume+0xf4/0x8b0<br>
+&gt; [&lt;ffffffff8100b281&gt;] int_signal+0x12/0x17<br>
+&gt; [&lt;ffffffffffffffff&gt;] 0xffffffffffffffff<br>
+<br>
+This looks strange because this is just an exit part which shouldn&#39;t<br=
+>
+deadlock or anything. Is this stack stable? Have you tried to take check<br=
+>
+it more times?<br>
+<span class=3D"HOEnZb"><font color=3D"#888888"><br>
+--<br>
+Michal Hocko<br>
+SUSE Labs<br>
+</font></span></blockquote></div><br>
+
+--20cf3071c812d2c6b304cc9c7134--
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
