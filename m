@@ -1,79 +1,234 @@
 From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH] powerpc/esdhc: enable the card insert/remove interrupt
-Date: Tue, 23 Oct 2012 08:39:44 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C1C68D9@039-SN1MPN1-003.039d.mgd.msft.net>
-References: <1350975677-8195-1-git-send-email-r66093@freescale.com>
- <20121023082648.GA21690@lizard>
+Subject: RE: [PATCH v5] powerpc/esdhc: disable CMD23 for some Freescale SoCs
+Date: Tue, 23 Oct 2012 08:41:12 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C1C68F1@039-SN1MPN1-003.039d.mgd.msft.net>
+References: <1348639360-5757-1-git-send-email-r66093@freescale.com>
+ <CAGxe1ZHuhpmfeokBLiNyVaj_JMQikwZdSDsoV11TPnB9Ea6bqA@mail.gmail.com>
+ <110EED8CC96DFC488B7E717A2027A27C1B3F5A@039-SN1MPN1-003.039d.mgd.msft.net>
+ <110EED8CC96DFC488B7E717A2027A27C1BB0B0@039-SN1MPN1-003.039d.mgd.msft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:19809
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754227Ab2JWIjs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Oct 2012 04:39:48 -0400
-In-Reply-To: <20121023082648.GA21690@lizard>
+Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:24382 "EHLO
+	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754183Ab2JWIlP convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 23 Oct 2012 04:41:15 -0400
+In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C1BB0B0@039-SN1MPN1-003.039d.mgd.msft.net>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kumar Gala <galak@kernel.crashing.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xie Shaohui-B21989 <B21989@freescale.com>, Girish K S <girish.shivananjappa@linaro.org>, Chris Ball <cjb@laptop.org>
 
-SGksIEFudG9uDQpGb3IgRlNMIFNPQ3MsIHRoZSBpbnRlcnJ1cHQgbW9kZSBpcyBzdXBwb3J0IGZv
-ciBjYXJkIGRldGVjdC4NCkZvciBzb21lIHJlYXNvbnMsIHNvbWUgYm9hcmQgY2FuJ3Qgc3VwcG9y
-dCB0aGlzIGZlYXR1cmUsIHN1Y2ggYXMgbXBjODM3eG1kcyBib2FyZCwNCmJ1dCBtcGM4Mzd4cmRi
-IGJvYXJkIHN1cHBvcnQgaXQuDQoNCkkgc2VlIHlvdXIgbGlua3MsIGl0IGlzIGFib3V0IHRoZSBE
-TUEgKHRoZSBmaXJzdCB2ZXJzaW9uIG9mIHAyMDIwIGRvbid0IHN1cHBvcnQgRE1BLCBuZWVkIHRv
-IGVuYWJsZSB0aGUgUElPIG1vZGUsIGJ1dCB0aGUgbGF0ZXIgdmVyc2lvbiBoYXMgZml4ZWQgdGhp
-cyBpc3N1ZSkuDQoNCkJlc3QgUmVnYXJkcw0KSmVycnkgSHVhbmcNCg0KDQo+IC0tLS0tT3JpZ2lu
-YWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5vcmcg
-W21haWx0bzpsaW51eC1tbWMtDQo+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9m
-IEFudG9uIFZvcm9udHNvdg0KPiBTZW50OiBUdWVzZGF5LCBPY3RvYmVyIDIzLCAyMDEyIDQ6Mjcg
-UE0NCj4gVG86IEh1YW5nIENoYW5nbWluZy1SNjYwOTMNCj4gQ2M6IGxpbnV4LW1tY0B2Z2VyLmtl
-cm5lbC5vcmc7IEh1YW5nIENoYW5nbWluZy1SNjYwOTM7IENocmlzIEJhbGw7IEt1bWFyDQo+IEdh
-bGE7IGxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0hd
-IHBvd2VycGMvZXNkaGM6IGVuYWJsZSB0aGUgY2FyZCBpbnNlcnQvcmVtb3ZlDQo+IGludGVycnVw
-dA0KPiANCj4gT24gVHVlLCBPY3QgMjMsIDIwMTIgYXQgMDM6MDE6MTdQTSArMDgwMCwgcjY2MDkz
-QGZyZWVzY2FsZS5jb20gd3JvdGU6DQo+ID4gRnJvbTogSmVycnkgSHVhbmcgPENoYW5nLU1pbmcu
-SHVhbmdAZnJlZXNjYWxlLmNvbT4NCj4gPg0KPiA+IFRoZSBjdXJyZW50IGVTREhDIGRyaXZlciB1
-c2UgdGhlIHBvbGwgbW9kZSB0byBkZXRlY3QgaWYgdGhlIFNEL01NQw0KPiA+IGNhcmQgaXMgaW5z
-ZXJ0ZWQgb3IgcmVtb3ZlZCwgd2hpY2ggd2lsbCBnZW5lcmF0ZSBtYW55IGludGVycnVwdHMgYW5k
-DQo+ID4gaW1wYWN0IHRoZSBwZXJmb3JtYW5jZS4NCj4gPiBUaGVyZWZvcmUsIGNoYW5nZSB0aGUg
-ZGVmYXVsdCBjYXJkIGRldGVjdCB0byBpbnRlcnJ1cHQgbW9kZSwgaWYgdGhlDQo+ID4gYm9hcmQg
-Y2FuJ3Qgc3VwcG9ydCB0aGlzIG1vZGUsIHdlIHN0aWxsIHVzZSB0aGUgcG9sbCBtb2RlLg0KPiA+
-DQo+ID4gU2lnbmVkLW9mZi1ieTogSmVycnkgSHVhbmcgPENoYW5nLU1pbmcuSHVhbmdAZnJlZXNj
-YWxlLmNvbT4NCj4gPiBDQzogQW50b24gVm9yb250c292IDxjYm91YXRtYWlscnVAZ21haWwuY29t
-Pg0KPiA+IENDOiBDaHJpcyBCYWxsIDxjamJAbGFwdG9wLm9yZz4NCj4gPiAtLS0NCj4gDQo+IElJ
-UkMsIHRoZSBjYXJkIGRldGVjdGlvbiBpcyBicm9rZW4gU09DLXJldmlzaW9uLXdpc2UsIG5vdCBi
-b2FyZC13aXNlLiBTbw0KPiB0aGUgY2hhbmdlIHNlZW1zIHdyb25nLg0KPiANCj4gQWxzbywgdGFr
-ZSBhIGxvb2sgYXQgdGhpczoNCj4gDQo+IAlodHRwOi8vbGttbC5vcmcvbGttbC8yMDEwLzcvMTQv
-MTI3DQo+IA0KPiBJIHN0YXJ0ZWQgdGhlIHdvcmsgYnV0IG5ldmVyIGZpbmlzaGVkLCB1bmZvcnR1
-bmF0ZWx5IGl0IGNhdXNlZCBzb21lDQo+IHJlZ3Jlc3Npb25zIGZvciBub24tRlNMIGhhcmR3YXJl
-Li4uDQo+IA0KPiA+ICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMgfCAgICA3ICsr
-KysrKy0NCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDYgaW5zZXJ0aW9ucygrKSwgMSBkZWxldGlvbigt
-KQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMu
-Yw0KPiA+IGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jDQo+ID4gaW5kZXggZmZj
-MTIyNi4uNWRjMzYyZiAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9m
-LWVzZGhjLmMNCj4gPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMNCj4g
-PiBAQCAtMTk2LDYgKzE5NiwxMSBAQCBzdGF0aWMgdm9pZCBlc2RoY19vZl9kZXRlY3RfbGltaXRh
-dGlvbihzdHJ1Y3QNCj4gcGxhdGZvcm1fZGV2aWNlICpwZGV2LA0KPiA+ICAJaWYgKHZ2biA9PSBW
-RU5ET1JfVl8yMikNCj4gPiAgCQlwZGF0YS0+cXVpcmtzMiB8PSBTREhDSV9RVUlSSzJfSE9TVF9O
-T19DTUQyMzsNCj4gPg0KPiA+ICsJLyogUDQwODBEUyBhbmQgTVBDODM3WE1EUyBib2FyZCBkb24n
-dCBzdXBwb3J0IGludGVycnVwdCBtb2RlICovDQo+ID4gKwlpZiAob2ZfbWFjaGluZV9pc19jb21w
-YXRpYmxlKCJmc2wsbXBjODM3eG1kcyIpIHx8DQo+ID4gKwkgICAgb2ZfbWFjaGluZV9pc19jb21w
-YXRpYmxlKCJmc2wsUDQwODBEUyIpKQ0KPiA+ICsJCXBkYXRhLT5xdWlya3MgfD0gU0RIQ0lfUVVJ
-UktfQlJPS0VOX0NBUkRfREVURUNUSU9OOw0KPiA+ICsNCj4gPiAgCWlvdW5tYXAoaW9hZGRyKTsN
-Cj4gPiAgZW5kOg0KPiA+ICAJcmV0dXJuOw0KPiA+IEBAIC0yMjMsNyArMjI4LDcgQEAgc3RhdGlj
-IHN0cnVjdCBzZGhjaV9wbHRmbV9kYXRhIHNkaGNpX2VzZGhjX3BkYXRhID0NCj4gew0KPiA+ICAJ
-ICogY2FyZCBkZXRlY3Rpb24gY291bGQgYmUgaGFuZGxlZCB2aWEgR1BJTw0KPiA+ICAJICogZVNE
-SEMgY2Fubm90IHN1cHBvcnQgRW5kIEF0dHJpYnV0ZSBpbiBOT1AgQURNQSBkZXNjcmlwdG9yDQo+
-ID4gIAkgKi8NCj4gPiAtCS5xdWlya3MgPSBFU0RIQ19ERUZBVUxUX1FVSVJLUyB8IFNESENJX1FV
-SVJLX0JST0tFTl9DQVJEX0RFVEVDVElPTg0KPiA+ICsJLnF1aXJrcyA9IEVTREhDX0RFRkFVTFRf
-UVVJUktTDQo+ID4gIAkJfCBTREhDSV9RVUlSS19OT19DQVJEX05PX1JFU0VUDQo+ID4gIAkJfCBT
-REhDSV9RVUlSS19OT19FTkRBVFRSX0lOX05PUERFU0MsDQo+ID4gIAkub3BzID0gJnNkaGNpX2Vz
-ZGhjX29wcywNCj4gPiAtLQ0KPiA+IDEuNy45LjUNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJv
-bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LW1tYyIgaW4NCj4g
-dGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBt
-YWpvcmRvbW8gaW5mbyBhdA0KPiBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
-Lmh0bWwNCg0K
+Anton, 
+could you give some comment about this patch?
+Reviewed by Girish last month.
+
+Best Regards
+Jerry Huang
+
+
+> -----Original Message-----
+> From: Huang Changming-R66093
+> Sent: Monday, October 15, 2012 11:07 AM
+> To: Huang Changming-R66093; Anton Vorontsov; Chris Ball
+> Cc: linux-mmc@vger.kernel.org; Xie Shaohui-B21989; Girish K S
+> Subject: RE: [PATCH v5] powerpc/esdhc: disable CMD23 for some Freescale
+> SoCs
+> 
+> Anton,
+> Have you any comment about this patch?
+> 
+> Best Regards
+> Jerry Huang
+> 
+> 
+> > -----Original Message-----
+> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > owner@vger.kernel.org] On Behalf Of Huang Changming-R66093
+> > Sent: Tuesday, October 09, 2012 2:24 PM
+> > To: Anton Vorontsov; Chris Ball
+> > Cc: linux-mmc@vger.kernel.org; Xie Shaohui-B21989; Girish K S
+> > Subject: RE: [PATCH v5] powerpc/esdhc: disable CMD23 for some
+> > Freescale SoCs
+> >
+> > Hi, Anto and Chris
+> > This version was created with the feedback from Kumar and all of you.
+> > Have you any comment about this patch?
+> > Could it be merged into kernel?
+> >
+> > Best Regards
+> > Jerry Huang
+> >
+> > > -----Original Message-----
+> > > From: Girish K S [mailto:girish.shivananjappa@linaro.org]
+> > > Sent: Wednesday, September 26, 2012 9:04 PM
+> > > To: Huang Changming-R66093
+> > > Cc: linux-mmc@vger.kernel.org; Huang Changming-R66093; Xie
+> > > Shaohui-B21989; Anton Vorontsov; Chris Ball
+> > > Subject: Re: [PATCH v5] powerpc/esdhc: disable CMD23 for some
+> > > Freescale SoCs
+> > >
+> > > Looks good
+> > > Reviewed By:- Girish K S <girish.shivananjappa@linaro.org>
+> > >
+> > > On 26 September 2012 15:02,  <r66093@freescale.com> wrote:
+> > > > From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> > > >
+> > > > CMD23 causes lots of errors in kernel on some freescale SoCs
+> > > > (P1020, P1021, P1022, P1024, P1025 and P4080) when MMC card used,
+> > > > which is because these controllers does not support CMD23, even on
+> > > > the SoCs which declares CMD23 is supported.
+> > > > Therefore, we'll not use CMD23.
+> > > >
+> > > > Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> > > > Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
+> > > > CC: Anton Vorontsov <cbouatmailru@gmail.com>
+> > > > CC: Chris Ball <cjb@laptop.org>
+> > > > ---
+> > > > changes for v5:
+> > > >         - change the error to warning information changes for v4:
+> > > >         - change to detect the IP version
+> > > >         - don't use callback function changes for v3:
+> > > >         - move the limitation detect function to eSDHC file
+> > > >         - add the callback funtion to do this limitation detect
+> > > > changes for v2:
+> > > >         - discard the property mode and add the processor
+> > > > detection
+> > > >
+> > > >  drivers/mmc/host/sdhci-of-esdhc.c |   33
+> > > +++++++++++++++++++++++++++++++++
+> > > >  drivers/mmc/host/sdhci-pltfm.c    |    4 +++-
+> > > >  drivers/mmc/host/sdhci-pltfm.h    |    1 +
+> > > >  drivers/mmc/host/sdhci.c          |    3 +++
+> > > >  include/linux/mmc/sdhci.h         |    1 +
+> > > >  5 files changed, 41 insertions(+), 1 deletion(-)
+> > > >
+> > > > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c
+> > > > b/drivers/mmc/host/sdhci-of-esdhc.c
+> > > > index ae5fcbf..ffc1226 100644
+> > > > --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> > > > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> > > > @@ -169,6 +169,38 @@ static void esdhc_of_resume(struct sdhci_host
+> > > > *host)  }  #endif
+> > > >
+> > > > +static void esdhc_of_detect_limitation(struct platform_device
+> *pdev,
+> > > > +       struct sdhci_pltfm_data *pdata) {
+> > > > +       void __iomem *ioaddr;
+> > > > +       struct resource *iomem;
+> > > > +       u32 vvn;
+> > > > +
+> > > > +       iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> > > > +       if (!iomem) {
+> > > > +               dev_warn(&pdev->dev, "failed to get resource\n");
+> > > > +               goto end;
+> > > > +       }
+> > > > +       if (resource_size(iomem) < 0x100)
+> > > > +               dev_warn(&pdev->dev, "Invalid iomem size!\n");
+> > > > +
+> > > > +       ioaddr = ioremap(iomem->start, resource_size(iomem));
+> > > > +       if (!ioaddr) {
+> > > > +               dev_warn(&pdev->dev, "failed to remap registers\n");
+> > > > +               goto end;
+> > > > +       }
+> > > > +
+> > > > +       /* P102x and P4080 has IP version VVN2.2, CMD23 is not
+> > > supported */
+> > > > +       vvn = in_be32(ioaddr + SDHCI_SLOT_INT_STATUS);
+> > > > +       vvn = (vvn & SDHCI_VENDOR_VER_MASK) >>
+> SDHCI_VENDOR_VER_SHIFT;
+> > > > +       if (vvn == VENDOR_V_22)
+> > > > +               pdata->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+> > > > +
+> > > > +       iounmap(ioaddr);
+> > > > +end:
+> > > > +       return;
+> > > > +}
+> > > > +
+> > > >  static struct sdhci_ops sdhci_esdhc_ops = {
+> > > >         .read_l = esdhc_readl,
+> > > >         .read_w = esdhc_readw,
+> > > > @@ -199,6 +231,7 @@ static struct sdhci_pltfm_data
+> > > > sdhci_esdhc_pdata = {
+> > > >
+> > > >  static int __devinit sdhci_esdhc_probe(struct platform_device
+> > > > *pdev) {
+> > > > +       esdhc_of_detect_limitation(pdev, &sdhci_esdhc_pdata);
+> > > >         return sdhci_pltfm_register(pdev, &sdhci_esdhc_pdata);  }
+> > > >
+> > > > diff --git a/drivers/mmc/host/sdhci-pltfm.c
+> > > > b/drivers/mmc/host/sdhci-pltfm.c index 65551a9..4dd5770 100644
+> > > > --- a/drivers/mmc/host/sdhci-pltfm.c
+> > > > +++ b/drivers/mmc/host/sdhci-pltfm.c
+> > > > @@ -132,8 +132,10 @@ struct sdhci_host *sdhci_pltfm_init(struct
+> > > platform_device *pdev,
+> > > >                 host->ops = pdata->ops;
+> > > >         else
+> > > >                 host->ops = &sdhci_pltfm_ops;
+> > > > -       if (pdata)
+> > > > +       if (pdata) {
+> > > >                 host->quirks = pdata->quirks;
+> > > > +               host->quirks2 = pdata->quirks2;
+> > > > +       }
+> > > >         host->irq = platform_get_irq(pdev, 0);
+> > > >
+> > > >         if (!request_mem_region(iomem->start,
+> > > > resource_size(iomem), diff --git a/drivers/mmc/host/sdhci-pltfm.h
+> > > > b/drivers/mmc/host/sdhci-pltfm.h index 37e0e18..283d54a 100644
+> > > > --- a/drivers/mmc/host/sdhci-pltfm.h
+> > > > +++ b/drivers/mmc/host/sdhci-pltfm.h
+> > > > @@ -18,6 +18,7 @@
+> > > >  struct sdhci_pltfm_data {
+> > > >         struct sdhci_ops *ops;
+> > > >         unsigned int quirks;
+> > > > +       unsigned int quirks2;
+> > > >  };
+> > > >
+> > > >  struct sdhci_pltfm_host {
+> > > > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > > > index 0e15c79..b0b7cad 100644
+> > > > --- a/drivers/mmc/host/sdhci.c
+> > > > +++ b/drivers/mmc/host/sdhci.c
+> > > > @@ -2837,6 +2837,9 @@ int sdhci_add_host(struct sdhci_host *host)
+> > > >         if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+> > > >                 mmc->caps |= MMC_CAP_4_BIT_DATA;
+> > > >
+> > > > +       if (host->quirks2 & SDHCI_QUIRK2_HOST_NO_CMD23)
+> > > > +               mmc->caps &= ~MMC_CAP_CMD23;
+> > > > +
+> > > >         if (caps[0] & SDHCI_CAN_DO_HISPD)
+> > > >                 mmc->caps |= MMC_CAP_SD_HIGHSPEED |
+> > > > MMC_CAP_MMC_HIGHSPEED;
+> > > >
+> > > > diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> > > > index fa8529a..1edcb4d 100644
+> > > > --- a/include/linux/mmc/sdhci.h
+> > > > +++ b/include/linux/mmc/sdhci.h
+> > > > @@ -91,6 +91,7 @@ struct sdhci_host {
+> > > >         unsigned int quirks2;   /* More deviations from spec. */
+> > > >
+> > > >  #define SDHCI_QUIRK2_HOST_OFF_CARD_ON                  (1<<0)
+> > > > +#define SDHCI_QUIRK2_HOST_NO_CMD23                     (1<<1)
+> > > >
+> > > >         int irq;                /* Device IRQ */
+> > > >         void __iomem *ioaddr;   /* Mapped address */
+> > > > --
+> > > > 1.7.9.5
+> > > >
+> > > >
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe linux-
+> mmc"
+> > > > in the body of a message to majordomo@vger.kernel.org More
+> > > > majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at http://vger.kernel.org/majordomo-info.html
+
 
