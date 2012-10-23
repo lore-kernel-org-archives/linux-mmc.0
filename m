@@ -1,60 +1,97 @@
-From: <r66093@freescale.com>
-Subject: [PATCH] powerpc/esdhc: enable the card insert/remove interrupt
-Date: Tue, 23 Oct 2012 15:01:17 +0800
-Message-ID: <1350975677-8195-1-git-send-email-r66093@freescale.com>
+From: Lucas Stach <dev@lynxeye.de>
+Subject: Re: [PATCH 2/2] mmc: sdhci: Defer probe if regulator_get fails
+Date: Tue, 23 Oct 2012 09:57:27 +0200
+Message-ID: <1350979047.20572.6.camel@tellur>
+References: <1350976740-19284-1-git-send-email-pkunapuli@nvidia.com>
+ <1350976740-19284-3-git-send-email-pkunapuli@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe003.messaging.microsoft.com ([216.32.180.186]:27213
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752355Ab2JWHm0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Oct 2012 03:42:26 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1350976740-19284-3-git-send-email-pkunapuli@nvidia.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Pavan Kunapuli <pkunapuli@nvidia.com>
+Cc: linux@arm.linux.org.uk, swarren@wwwdotorg.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
 
-From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+Am Dienstag, den 23.10.2012, 12:49 +0530 schrieb Pavan Kunapuli:
+> vmmc and vqmmc regulators control the voltage to
+> the host and device. Defer the probe if either of
+> them is not registered.
+> 
+Does this work with boards where we don't have any MMC supplies? Or are
+we just deferring the probe indefinitely there?
 
-The current eSDHC driver use the poll mode to detect
-if the SD/MMC card is inserted or removed, which will generate
-many interrupts and impact the performance. 
-Therefore, change the default card detect to interrupt mode,
-if the board can't support this mode, we still use the poll mode.
+For boards that power MMC unconditionally, are we supposed to add dummy
+regulators to make them work with this patchset?
 
-Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-CC: Anton Vorontsov <cbouatmailru@gmail.com>
-CC: Chris Ball <cjb@laptop.org>
----
- drivers/mmc/host/sdhci-of-esdhc.c |    7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index ffc1226..5dc362f 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -196,6 +196,11 @@ static void esdhc_of_detect_limitation(struct platform_device *pdev,
- 	if (vvn == VENDOR_V_22)
- 		pdata->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
- 
-+	/* P4080DS and MPC837XMDS board don't support interrupt mode */
-+	if (of_machine_is_compatible("fsl,mpc837xmds") ||
-+	    of_machine_is_compatible("fsl,P4080DS"))
-+		pdata->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-+
- 	iounmap(ioaddr);
- end:
- 	return;
-@@ -223,7 +228,7 @@ static struct sdhci_pltfm_data sdhci_esdhc_pdata = {
- 	 * card detection could be handled via GPIO
- 	 * eSDHC cannot support End Attribute in NOP ADMA descriptor
- 	 */
--	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_CARD_DETECTION
-+	.quirks = ESDHC_DEFAULT_QUIRKS
- 		| SDHCI_QUIRK_NO_CARD_NO_RESET
- 		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
- 	.ops = &sdhci_esdhc_ops,
--- 
-1.7.9.5
-
-
+> Signed-off-by: Pavan Kunapuli <pkunapuli@nvidia.com>
+> ---
+>  drivers/mmc/host/sdhci.c |   25 ++++++++++++++++++++++---
+>  1 files changed, 22 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 7922adb..925c403 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2844,11 +2844,17 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
+>  		mmc->caps |= MMC_CAP_NEEDS_POLL;
+>  
+> -	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
+> +	/*
+> +	 * If vqmmc regulator and no 1.8V signalling, then there's no UHS.
+> +	 * vqmmc regulator should be present. If it's not present,
+> +	 * assume the regulator driver registration is not yet done and
+> +	 * defer the probe.
+> +	 */
+>  	host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
+>  	if (IS_ERR(host->vqmmc)) {
+> -		pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
+> +		pr_err("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
+>  		host->vqmmc = NULL;
+> +		return -EPROBE_DEFER;
+>  	}
+>  	else if (regulator_is_supported_voltage(host->vqmmc, 1800000, 1800000))
+>  		regulator_enable(host->vqmmc);
+> @@ -2903,10 +2909,17 @@ int sdhci_add_host(struct sdhci_host *host)
+>  
+>  	ocr_avail = 0;
+>  
+> +	/*
+> +	 * vmmc regulator should be present. If it's not present,
+> +	 * assume the regulator driver registration is not yet done
+> +	 * and defer the probe.
+> +	 */
+>  	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
+>  	if (IS_ERR(host->vmmc)) {
+> -		pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
+> +		pr_err("%s: no vmmc regulator found\n", mmc_hostname(mmc));
+>  		host->vmmc = NULL;
+> +		ret = -EPROBE_DEFER;
+> +		goto vmmc_err;
+>  	} else
+>  		regulator_enable(host->vmmc);
+>  
+> @@ -3121,7 +3134,13 @@ reset:
+>  untasklet:
+>  	tasklet_kill(&host->card_tasklet);
+>  	tasklet_kill(&host->finish_tasklet);
+> +vmmc_err:
+> +	if (host->vqmmc) {
+> +		if (regulator_is_enabled(host->vqmmc))
+> +			regulator_disable(host->vqmmc);
+>  
+> +		regulator_put(host->vqmmc);
+> +	}
+>  	return ret;
+>  }
+>  
