@@ -1,68 +1,59 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci: Defer probe if regulator_get fails
-Date: Tue, 23 Oct 2012 18:07:39 +0100
-Message-ID: <20121023170723.GD4477@opensource.wolfsonmicro.com>
-References: <1350976740-19284-1-git-send-email-pkunapuli@nvidia.com>
- <1350976740-19284-3-git-send-email-pkunapuli@nvidia.com>
- <1350979047.20572.6.camel@tellur>
- <5086C5F5.4070801@wwwdotorg.org>
+From: Balbir Singh <bsingharora@gmail.com>
+Subject: Re: process hangs on do_exit when oom happens
+Date: Tue, 23 Oct 2012 23:13:54 +0530
+Message-ID: <CAKTCnzkiabWK8tAORkhg6oW11VvXS-YqBwDzED_3=J1buhaQnQ@mail.gmail.com>
+References: <op.wmbi5kbrn27o5l@gaoqiang-d1.corp.qihoo.net>
+	<20121019160425.GA10175@dhcp22.suse.cz>
+	<CAKWKT+ZRMHzgCLJ1quGnw-_T1b9OboYKnQdRc2_Z=rdU_PFVtw@mail.gmail.com>
+	<CAKTCnzkMQQXRdx=ikydsD9Pm3LuRgf45_=m7ozuFmSZyxazXyA@mail.gmail.com>
+	<CAKWKT+bYOf0cEDuiibf6eV2raMxe481y-D+nrBgPWR3R+53zvg@mail.gmail.com>
+	<20121023095028.GD15397@dhcp22.suse.cz>
+	<CAKWKT+b2s4E7Nne5d0UJwfLGiCXqAUgrCzuuZi6ZPdjszVSmWg@mail.gmail.com>
+	<20121023101500.GE15397@dhcp22.suse.cz>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="kUmo4NyTJbuJZ752"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:56497 "EHLO
-	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754731Ab2JWRHm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Oct 2012 13:07:42 -0400
-Content-Disposition: inline
-In-Reply-To: <5086C5F5.4070801@wwwdotorg.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20121023101500.GE15397@dhcp22.suse.cz>
+Sender: owner-linux-mm@kvack.org
+To: Michal Hocko <mhocko@suse.cz>
+Cc: Qiang Gao <gaoqiangscut@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cgroups@vger.kernel.org" <cgroups@vger.kernel.org>, linux-mm@kvack.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Lucas Stach <dev@lynxeye.de>, Pavan Kunapuli <pkunapuli@nvidia.com>, linux@arm.linux.org.uk, cjb@laptop.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+
+On Tue, Oct 23, 2012 at 3:45 PM, Michal Hocko <mhocko@suse.cz> wrote:
+> On Tue 23-10-12 18:10:33, Qiang Gao wrote:
+>> On Tue, Oct 23, 2012 at 5:50 PM, Michal Hocko <mhocko@suse.cz> wrote:
+>> > On Tue 23-10-12 15:18:48, Qiang Gao wrote:
+>> >> This process was moved to RT-priority queue when global oom-killer
+>> >> happened to boost the recovery of the system..
+>> >
+>> > Who did that? oom killer doesn't boost the priority (scheduling class)
+>> > AFAIK.
+>> >
+>> >> but it wasn't get properily dealt with. I still have no idea why where
+>> >> the problem is ..
+>> >
+>> > Well your configuration says that there is no runtime reserved for the
+>> > group.
+>> > Please refer to Documentation/scheduler/sched-rt-group.txt for more
+>> > information.
+>> >
+> [...]
+>> maybe this is not a upstream-kernel bug. the centos/redhat kernel
+>> would boost the process to RT prio when the process was selected
+>> by oom-killer.
+>
+> This still looks like your cpu controller is misconfigured. Even if the
+> task is promoted to be realtime.
 
 
---kUmo4NyTJbuJZ752
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Precisely! You need to have rt bandwidth enabled for RT tasks to run,
+as a workaround please give the groups some RT bandwidth and then work
+out the migration to RT and what should be the defaults on the distro.
 
-On Tue, Oct 23, 2012 at 10:29:41AM -0600, Stephen Warren wrote:
-> On 10/23/2012 01:57 AM, Lucas Stach wrote:
+Balbir
 
-> > Does this work with boards where we don't have any MMC supplies? Or are
-> > we just deferring the probe indefinitely there?
-
-> > For boards that power MMC unconditionally, are we supposed to add dummy
-> > regulators to make them work with this patchset?
-
-> I believe that dummy (fixed) regulators are supposed to be provided in
-> all cases where the platform doesn't actually have one. The fact that
-> everything worked OK without them before this patch was most likely a
-> mistake/accident.
-
-That's the general idea; clearly there *are* supplies here, they're just
-not software controlled supplies.
-
---kUmo4NyTJbuJZ752
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJQhs7SAAoJELSic+t+oim9susP/0AssZKAu0Kc9VvmhgVgu3fo
-uP6TknKZf5pfa+U+Up9rlmjzxgmbOHIjGL1joJpUVpbL9iHuuYqqU9S4/sw/bOpy
-0yJTrJzrRYWdIK0bx5g+EW6F3RPcPWc7B2ZLPiSHcPFIe6jTSrgQAPCTqAnRYnDv
-GvDoy+Oya1Ztjim+uIMTuNDJ29t3xrdvwP+Ds7r/Dkz0P3fPCcbleS0NMhbctiNg
-hP6jOr+roHou+TRPwok5XAoN3j/C9/6riZGy+C1TpRzMR/YLNzuTcLShxG33Pm+l
-85PNQLzo27XQBn2ZOX1UyX1FKAkxK3JQ8UavR6TtkEjE5PeCiFP6sqtKdOb3gB+1
-kAvK8fbhf8O7JMREFjKNVhOssFQQWOCI5IMlOtAnfuBEl/P1b1S2RXZByUX3KsOu
-laI1Z3VfSMUfYiklbarHO5CCCzP1TUNpgqnboK3IJjWf0haIuLeTtUDro11lSP8V
-z+zUckY+AHDilo6IUN6lFRyL8cZU/ohZUE/Snw8NiFzKevubqDQ269usWvKR6kWh
-pZCisbrU29U0SYwnOH3Zf7VcpuVwjaEUjtinHrprsQhiOs0JvFcTemWYXrabhA8U
-xTb158lEF1AV9MuFiZe+RBTAiTVuF1ZNnQ3mWgIBoMI8mEv3weu4ncwBz5IC+1xh
-EVqnpeuK56wfTi+EMHfL
-=9GG4
------END PGP SIGNATURE-----
-
---kUmo4NyTJbuJZ752--
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
