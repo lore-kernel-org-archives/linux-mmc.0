@@ -1,59 +1,88 @@
-From: Balbir Singh <bsingharora@gmail.com>
-Subject: Re: process hangs on do_exit when oom happens
-Date: Tue, 23 Oct 2012 23:13:54 +0530
-Message-ID: <CAKTCnzkiabWK8tAORkhg6oW11VvXS-YqBwDzED_3=J1buhaQnQ@mail.gmail.com>
-References: <op.wmbi5kbrn27o5l@gaoqiang-d1.corp.qihoo.net>
-	<20121019160425.GA10175@dhcp22.suse.cz>
-	<CAKWKT+ZRMHzgCLJ1quGnw-_T1b9OboYKnQdRc2_Z=rdU_PFVtw@mail.gmail.com>
-	<CAKTCnzkMQQXRdx=ikydsD9Pm3LuRgf45_=m7ozuFmSZyxazXyA@mail.gmail.com>
-	<CAKWKT+bYOf0cEDuiibf6eV2raMxe481y-D+nrBgPWR3R+53zvg@mail.gmail.com>
-	<20121023095028.GD15397@dhcp22.suse.cz>
-	<CAKWKT+b2s4E7Nne5d0UJwfLGiCXqAUgrCzuuZi6ZPdjszVSmWg@mail.gmail.com>
-	<20121023101500.GE15397@dhcp22.suse.cz>
+From: Marc Dietrich <marvin24-Mmb7MZpHnFY@public.gmane.org>
+Subject: Re: [PATCH 1/2] ARM: dt: tegra: Add sdhci regulators
+Date: Tue, 23 Oct 2012 20:07:59 +0200
+Message-ID: <4346406.Jy2o1pWcOR@ax5200p>
+References: <1350976740-19284-1-git-send-email-pkunapuli@nvidia.com> <1350976740-19284-2-git-send-email-pkunapuli@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20121023101500.GE15397@dhcp22.suse.cz>
-Sender: owner-linux-mm@kvack.org
-To: Michal Hocko <mhocko@suse.cz>
-Cc: Qiang Gao <gaoqiangscut@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cgroups@vger.kernel.org" <cgroups@vger.kernel.org>, linux-mm@kvack.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1350976740-19284-2-git-send-email-pkunapuli-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Pavan Kunapuli <pkunapuli-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Cc: swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Oct 23, 2012 at 3:45 PM, Michal Hocko <mhocko@suse.cz> wrote:
-> On Tue 23-10-12 18:10:33, Qiang Gao wrote:
->> On Tue, Oct 23, 2012 at 5:50 PM, Michal Hocko <mhocko@suse.cz> wrote:
->> > On Tue 23-10-12 15:18:48, Qiang Gao wrote:
->> >> This process was moved to RT-priority queue when global oom-killer
->> >> happened to boost the recovery of the system..
->> >
->> > Who did that? oom killer doesn't boost the priority (scheduling class)
->> > AFAIK.
->> >
->> >> but it wasn't get properily dealt with. I still have no idea why where
->> >> the problem is ..
->> >
->> > Well your configuration says that there is no runtime reserved for the
->> > group.
->> > Please refer to Documentation/scheduler/sched-rt-group.txt for more
->> > information.
->> >
-> [...]
->> maybe this is not a upstream-kernel bug. the centos/redhat kernel
->> would boost the process to RT prio when the process was selected
->> by oom-killer.
->
-> This still looks like your cpu controller is misconfigured. Even if the
-> task is promoted to be realtime.
+Pavan,
 
+On Tuesday 23 October 2012 12:48:59 Pavan Kunapuli wrote:
+> Adding vmmc and vmmcq supplies for sdhci nodes
+> in tegra dt files.
 
-Precisely! You need to have rt bandwidth enabled for RT tasks to run,
-as a workaround please give the groups some RT bandwidth and then work
-out the migration to RT and what should be the defaults on the distro.
+<...>
 
-Balbir
+> diff --git a/arch/arm/boot/dts/tegra20-paz00.dts
+> b/arch/arm/boot/dts/tegra20-paz00.dts index 6a93d14..e161b65 100644
+> --- a/arch/arm/boot/dts/tegra20-paz00.dts
+> +++ b/arch/arm/boot/dts/tegra20-paz00.dts
+> @@ -422,13 +422,17 @@
+>  		status = "okay";
+>  		cd-gpios = <&gpio 173 0>; /* gpio PV5 */
+>  		wp-gpios = <&gpio 57 0>;  /* gpio PH1 */
+> -		power-gpios = <&gpio 169 0>; /* gpio PV1 */
+>  		bus-width = <4>;
+> +		vmmc-supply = <&vddio_sd_reg>;
+> +		vqmmc-supply = <&vddio_sd_reg>;
+>  	};
+> 
+>  	sdhci@c8000600 {
+>  		status = "okay";
+>  		bus-width = <8>;
+> +		vmmc-supply = <&vddio_sdmmc_reg>;
+> +		vqmmc-supply = <&vddio_sdmmc_reg>;
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+to make it better, this should be:
+
+vmmc-supply = <&vcore_mmc_reg>; and
+vqmmc-supply = <&vddio_nand_reg>;
+
+with vcore_mmc_reg is ldo5 and vddio_nand_reg is the fixed regulator below.
+
+By doing so, I get "sdhci-tegra sdhci-tegra.3: could not set regulator OCR 
+(-1)". MMC subsys wants to set ldo5 to 3.3V but it is fixed. I guess that's 
+harmless for now. 
+
+>  	};
+> 
+>  	gpio-keys {
+> @@ -465,6 +469,24 @@
+>  			regulator-max-microvolt = <5000000>;
+>  			regulator-always-on;
+>  		};
+> +
+> +		vddio_sd_reg: regulator@1 {
+> +			compatible = "regulator-fixed";
+> +			reg = <1>;
+> +			regulator-name = "vddio_sd";
+> +			regulator-min-microvolt = <3300000>;
+> +			regulator-max-microvolt = <3300000>;
+> +			enable-active-high;
+> +			gpio = <&gpio 169 0>; /* gpio PV1 */
+> +		};
+> +
+> +		vddio_sdmmc_reg: regulator@2 {
+
+       ^^ vddio_nand_reg acording to schematics
+
+> +			compatible = "regulator-fixed";
+> +			reg = <2>;
+> +			regulator-name  = "vddio_sdmmc";
+
+also here
+
+> +			regulator-min-microvolt = <3300000>;
+> +			regulator-max-microvolt = <3300000>;
+> +		};
+>  	};
+> 
+>  	sound {
