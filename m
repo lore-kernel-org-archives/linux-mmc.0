@@ -1,40 +1,37 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: use helper macro module_platform_driver()
-Date: Tue, 23 Oct 2012 17:14:55 -0400
-Message-ID: <87liewhovk.fsf@octavius.laptop.org>
-References: <1349270797-19189-1-git-send-email-andriy.shevchenko@linux.intel.com>
-	<1349270797-19189-2-git-send-email-andriy.shevchenko@linux.intel.com>
-	<CAFbHwiQQ9KJ_hddRng54THBQ5E=8L5ge=Pkcv3pak2MKnoavHg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: enable controller interrupt  before calling mmc_start_host
+Date: Tue, 23 Oct 2012 17:19:00 -0400
+Message-ID: <87hapkhoor.fsf@octavius.laptop.org>
+References: <1349686791-19652-1-git-send-email-yuvaraj.cd@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:40144 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:40188 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933639Ab2JWVO6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 23 Oct 2012 17:14:58 -0400
-In-Reply-To: <CAFbHwiQQ9KJ_hddRng54THBQ5E=8L5ge=Pkcv3pak2MKnoavHg@mail.gmail.com>
-	(Will Newton's message of "Thu, 4 Oct 2012 13:10:57 +0100")
+	id S933357Ab2JWVTI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 23 Oct 2012 17:19:08 -0400
+In-Reply-To: <1349686791-19652-1-git-send-email-yuvaraj.cd@samsung.com>
+	(Yuvaraj CD's message of "Mon, 8 Oct 2012 14:29:51 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Will Newton <will.newton@gmail.com>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, linux-mmc@vger.kernel.org
+To: Yuvaraj CD <yuvaraj.cd@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, will.newton@imgtec.com, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, thomas.abraham@linaro.org, patches@linaro.org, Yuvaraj CD <yuvaraj.cd@samsung.com>
 
 Hi,
 
-On Thu, Oct 04 2012, Will Newton wrote:
-> On Wed, Oct 3, 2012 at 2:26 PM, Andy Shevchenko
-> <andriy.shevchenko@linux.intel.com> wrote:
->> Since v3.2 we have nice macro to define the platform driver's init and exit
->> calls. This patch simplifies the dw_mmc platform driver by using that macro.
->>
->> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
->> ---
->>  drivers/mmc/host/dw_mmc-pltfm.c |   14 ++------------
->>  1 file changed, 2 insertions(+), 12 deletions(-)
+On Mon, Oct 08 2012, Yuvaraj CD wrote:
+> As mmc_start_host is getting called before enabling the dw_mmc controller
+> interrupt, there is a problem of missing the SDMMC_INT_CMD_DONE for the
+> very first command sent by the sdio_reset.
+> This problem occurs only when we disable MMC debugging i.e, MMC_DEBUG [=n].
+> Hence this patch enables the dw_mmc controller interrupt before mmc_start_host.
 >
-> Acked-by: Will Newton <will.newton@imgtec.com>
+> Signed-off-by: Yuvaraj CD <yuvaraj.cd@samsung.com>
 
-Thanks, pushed to mmc-next for 3.8.
+Is "Yuvaraj CD" your legal name?  We should use your full name so that
+we can track copyright attribution properly.
+
+Thanks!
 
 - Chris.
 -- 
