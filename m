@@ -1,142 +1,75 @@
-From: Michal Hocko <mhocko@suse.cz>
-Subject: Re: process hangs on do_exit when oom happens
-Date: Tue, 23 Oct 2012 11:50:28 +0200
-Message-ID: <20121023095028.GD15397@dhcp22.suse.cz>
-References: <op.wmbi5kbrn27o5l@gaoqiang-d1.corp.qihoo.net>
- <20121019160425.GA10175@dhcp22.suse.cz>
- <CAKWKT+ZRMHzgCLJ1quGnw-_T1b9OboYKnQdRc2_Z=rdU_PFVtw@mail.gmail.com>
- <CAKTCnzkMQQXRdx=ikydsD9Pm3LuRgf45_=m7ozuFmSZyxazXyA@mail.gmail.com>
- <CAKWKT+bYOf0cEDuiibf6eV2raMxe481y-D+nrBgPWR3R+53zvg@mail.gmail.com>
+From: Wen Congyang <wency@cn.fujitsu.com>
+Subject: Re: [PATCH] mm: make zone_pcp_reset independ on MEMORY_HOTREMOVE
+Date: Tue, 23 Oct 2012 18:14:28 +0800
+Message-ID: <50866E04.4040005@cn.fujitsu.com>
+References: <1350985047-23148-1-git-send-email-mhocko@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <CAKWKT+bYOf0cEDuiibf6eV2raMxe481y-D+nrBgPWR3R+53zvg@mail.gmail.com>
-Sender: owner-linux-mm@kvack.org
-To: Qiang Gao <gaoqiangscut@gmail.com>
-Cc: Balbir Singh <bsingharora@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cgroups@vger.kernel.org" <cgroups@vger.kernel.org>, linux-mm@kvack.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from cn.fujitsu.com ([222.73.24.84]:51663 "EHLO song.cn.fujitsu.com"
+	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S1753027Ab2JWKI4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 23 Oct 2012 06:08:56 -0400
+In-Reply-To: <1350985047-23148-1-git-send-email-mhocko@suse.cz>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Michal Hocko <mhocko@suse.cz>
+Cc: akpm@linux-foundation.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, David Rientjes <rientjes@google.com>, Jiang Liu <liuj97@gmail.com>, Len Brown <len.brown@intel.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Christoph Lameter <cl@linux.com>, Minchan Kim <minchan.kim@gmail.com>, KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>, Yasuaki Ishimatsu <isimatu.yasuaki@jp.fujitsu.com>, Dave Hansen <dave@linux.vnet.ibm.com>, Mel Gorman <mel@csn.ul.ie>
 
-On Tue 23-10-12 15:18:48, Qiang Gao wrote:
-> This process was moved to RT-priority queue when global oom-killer
-> happened to boost the recovery of the system..
+At 10/23/2012 05:37 PM, Michal Hocko Wrote:
+> 340175b7 (mm/hotplug: free zone->pageset when a zone becomes empty)
+> introduced zone_pcp_reset and hided it inside CONFIG_MEMORY_HOTREMOVE.
+> The function is since 506e5fb7 (memory-hotplug: allocate zone's pcp
+> before onlining pages) called also called from online_pages which
 
-Who did that? oom killer doesn't boost the priority (scheduling class)
-AFAIK.
+This patch is still in -mm tree, and I have received a report from
+Liu Yuanhan.
 
-> but it wasn't get properily dealt with. I still have no idea why where
-> the problem is ..
+> is called outside CONFIG_MEMORY_HOTREMOVE which causes a linkage error.
+> 
+> The function, although not used outside of MEMORY_{HOTPLUT,HOTREMOVE},
+> seems like universal enough so let's keep it at its current location
+> and only remove the HOTREMOVE guard.
+> 
+> Signed-off-by: Michal Hocko <mhocko@suse.cz>
+> Cc: David Rientjes <rientjes@google.com>
+> Cc: Jiang Liu <liuj97@gmail.com>
+> Cc: Len Brown <len.brown@intel.com>
+> Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+> Cc: Paul Mackerras <paulus@samba.org>
+> Cc: Christoph Lameter <cl@linux.com>
+> Cc: Minchan Kim <minchan.kim@gmail.com>
+> Cc: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
+> Cc: Yasuaki Ishimatsu <isimatu.yasuaki@jp.fujitsu.com>
+> Cc: Dave Hansen <dave@linux.vnet.ibm.com>
+> Cc: Mel Gorman <mel@csn.ul.ie>
+> ---
+>  mm/page_alloc.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/mm/page_alloc.c b/mm/page_alloc.c
+> index e29912e..30e359c 100644
+> --- a/mm/page_alloc.c
+> +++ b/mm/page_alloc.c
+> @@ -5981,7 +5981,6 @@ void __meminit zone_pcp_update(struct zone *zone)
+>  }
+>  #endif
+>  
+> -#ifdef CONFIG_MEMORY_HOTREMOVE
+>  void zone_pcp_reset(struct zone *zone)
+>  {
+>  	unsigned long flags;
+> @@ -6001,6 +6000,7 @@ void zone_pcp_reset(struct zone *zone)
+>  	local_irq_restore(flags);
+>  }
+>  
+> +#ifdef CONFIG_MEMORY_HOTREMOVE
+>  /*
+>   * All pages in the range must be isolated before calling this.
+>   */
 
-Well your configuration says that there is no runtime reserved for the
-group.
-Please refer to Documentation/scheduler/sched-rt-group.txt for more
-information.
+This patch looks find to me.
 
-> On Tue, Oct 23, 2012 at 12:40 PM, Balbir Singh <bsingharora@gmail.com> wrote:
-> > On Tue, Oct 23, 2012 at 9:05 AM, Qiang Gao <gaoqiangscut@gmail.com> wrote:
-> >> information about the system is in the attach file "information.txt"
-> >>
-> >> I can not reproduce it in the upstream 3.6.0 kernel..
-> >>
-> >> On Sat, Oct 20, 2012 at 12:04 AM, Michal Hocko <mhocko@suse.cz> wrote:
-> >>> On Wed 17-10-12 18:23:34, gaoqiang wrote:
-> >>>> I looked up nothing useful with google,so I'm here for help..
-> >>>>
-> >>>> when this happens:  I use memcg to limit the memory use of a
-> >>>> process,and when the memcg cgroup was out of memory,
-> >>>> the process was oom-killed   however,it cannot really complete the
-> >>>> exiting. here is the some information
-> >>>
-> >>> How many tasks are in the group and what kind of memory do they use?
-> >>> Is it possible that you were hit by the same issue as described in
-> >>> 79dfdacc memcg: make oom_lock 0 and 1 based rather than counter.
-> >>>
-> >>>> OS version:  centos6.2    2.6.32.220.7.1
-> >>>
-> >>> Your kernel is quite old and you should be probably asking your
-> >>> distribution to help you out. There were many fixes since 2.6.32.
-> >>> Are you able to reproduce the same issue with the current vanila kernel?
-> >>>
-> >>>> /proc/pid/stack
-> >>>> ---------------------------------------------------------------
-> >>>>
-> >>>> [<ffffffff810597ca>] __cond_resched+0x2a/0x40
-> >>>> [<ffffffff81121569>] unmap_vmas+0xb49/0xb70
-> >>>> [<ffffffff8112822e>] exit_mmap+0x7e/0x140
-> >>>> [<ffffffff8105b078>] mmput+0x58/0x110
-> >>>> [<ffffffff81061aad>] exit_mm+0x11d/0x160
-> >>>> [<ffffffff81061c9d>] do_exit+0x1ad/0x860
-> >>>> [<ffffffff81062391>] do_group_exit+0x41/0xb0
-> >>>> [<ffffffff81077cd8>] get_signal_to_deliver+0x1e8/0x430
-> >>>> [<ffffffff8100a4c4>] do_notify_resume+0xf4/0x8b0
-> >>>> [<ffffffff8100b281>] int_signal+0x12/0x17
-> >>>> [<ffffffffffffffff>] 0xffffffffffffffff
-> >>>
-> >>> This looks strange because this is just an exit part which shouldn't
-> >>> deadlock or anything. Is this stack stable? Have you tried to take check
-> >>> it more times?
-> >
-> > Looking at information.txt, I found something interesting
-> >
-> > rt_rq[0]:/1314
-> >   .rt_nr_running                 : 1
-> >   .rt_throttled                  : 1
-> >   .rt_time                       : 0.856656
-> >   .rt_runtime                    : 0.000000
-> >
-> >
-> > cfs_rq[0]:/1314
-> >   .exec_clock                    : 8738.133429
-> >   .MIN_vruntime                  : 0.000001
-> >   .min_vruntime                  : 8739.371271
-> >   .max_vruntime                  : 0.000001
-> >   .spread                        : 0.000000
-> >   .spread0                       : -9792.255554
-> >   .nr_spread_over                : 1
-> >   .nr_running                    : 0
-> >   .load                          : 0
-> >   .load_avg                      : 7376.722880
-> >   .load_period                   : 7.203830
-> >   .load_contrib                  : 1023
-> >   .load_tg                       : 1023
-> >   .se->exec_start                : 282004.715064
-> >   .se->vruntime                  : 18435.664560
-> >   .se->sum_exec_runtime          : 8738.133429
-> >   .se->wait_start                : 0.000000
-> >   .se->sleep_start               : 0.000000
-> >   .se->block_start               : 0.000000
-> >   .se->sleep_max                 : 0.000000
-> >   .se->block_max                 : 0.000000
-> >   .se->exec_max                  : 77.977054
-> >   .se->slice_max                 : 0.000000
-> >   .se->wait_max                  : 2.664779
-> >   .se->wait_sum                  : 29.970575
-> >   .se->wait_count                : 102
-> >   .se->load.weight               : 2
-> >
-> > So 1314 is a real time process and
-> >
-> > cpu.rt_period_us:
-> > 1000000
-> > ----------------------
-> > cpu.rt_runtime_us:
-> > 0
-> >
-> > When did tt move to being a Real Time process (hint: see nr_running
-> > and nr_throttled)?
-> >
-> > Balbir
-> --
-> To unsubscribe from this list: send the line "unsubscribe cgroups" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Reviewed-by: Wen Congyang <wency@cn.fujitsu.com>
 
--- 
-Michal Hocko
-SUSE Labs
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
