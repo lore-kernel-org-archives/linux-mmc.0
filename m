@@ -1,97 +1,84 @@
-From: Lucas Stach <dev@lynxeye.de>
-Subject: Re: [PATCH 2/2] mmc: sdhci: Defer probe if regulator_get fails
-Date: Tue, 23 Oct 2012 09:57:27 +0200
-Message-ID: <1350979047.20572.6.camel@tellur>
+From: Pavan Kunapuli <pkunapuli@nvidia.com>
+Subject: RE: [PATCH 2/2] mmc: sdhci: Defer probe if regulator_get fails
+Date: Tue, 23 Oct 2012 13:46:36 +0530
+Message-ID: <C79B248886DD134989C8FF6B096A91AB7EC6B8C78B@BGMAIL01.nvidia.com>
 References: <1350976740-19284-1-git-send-email-pkunapuli@nvidia.com>
- <1350976740-19284-3-git-send-email-pkunapuli@nvidia.com>
+	 <1350976740-19284-3-git-send-email-pkunapuli@nvidia.com>
+ <1350979047.20572.6.camel@tellur>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1350976740-19284-3-git-send-email-pkunapuli@nvidia.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Pavan Kunapuli <pkunapuli@nvidia.com>
-Cc: linux@arm.linux.org.uk, swarren@wwwdotorg.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from hqemgate03.nvidia.com ([216.228.121.140]:16466 "EHLO
+	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751728Ab2JWIQr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Oct 2012 04:16:47 -0400
+In-Reply-To: <1350979047.20572.6.camel@tellur>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Lucas Stach <dev@lynxeye.de>
+Cc: "swarren@wwwdotorg.org" <swarren@wwwdotorg.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "cjb@laptop.org" <cjb@laptop.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Pavan Kunapuli <pkunapuli@nvidia.com>
 
-Am Dienstag, den 23.10.2012, 12:49 +0530 schrieb Pavan Kunapuli:
-> vmmc and vqmmc regulators control the voltage to
-> the host and device. Defer the probe if either of
-> them is not registered.
-> 
-Does this work with boards where we don't have any MMC supplies? Or are
-we just deferring the probe indefinitely there?
-
-For boards that power MMC unconditionally, are we supposed to add dummy
-regulators to make them work with this patchset?
-
-> Signed-off-by: Pavan Kunapuli <pkunapuli@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci.c |   25 ++++++++++++++++++++++---
->  1 files changed, 22 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 7922adb..925c403 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2844,11 +2844,17 @@ int sdhci_add_host(struct sdhci_host *host)
->  	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
->  		mmc->caps |= MMC_CAP_NEEDS_POLL;
->  
-> -	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
-> +	/*
-> +	 * If vqmmc regulator and no 1.8V signalling, then there's no UHS.
-> +	 * vqmmc regulator should be present. If it's not present,
-> +	 * assume the regulator driver registration is not yet done and
-> +	 * defer the probe.
-> +	 */
->  	host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
->  	if (IS_ERR(host->vqmmc)) {
-> -		pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
-> +		pr_err("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
->  		host->vqmmc = NULL;
-> +		return -EPROBE_DEFER;
->  	}
->  	else if (regulator_is_supported_voltage(host->vqmmc, 1800000, 1800000))
->  		regulator_enable(host->vqmmc);
-> @@ -2903,10 +2909,17 @@ int sdhci_add_host(struct sdhci_host *host)
->  
->  	ocr_avail = 0;
->  
-> +	/*
-> +	 * vmmc regulator should be present. If it's not present,
-> +	 * assume the regulator driver registration is not yet done
-> +	 * and defer the probe.
-> +	 */
->  	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
->  	if (IS_ERR(host->vmmc)) {
-> -		pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
-> +		pr_err("%s: no vmmc regulator found\n", mmc_hostname(mmc));
->  		host->vmmc = NULL;
-> +		ret = -EPROBE_DEFER;
-> +		goto vmmc_err;
->  	} else
->  		regulator_enable(host->vmmc);
->  
-> @@ -3121,7 +3134,13 @@ reset:
->  untasklet:
->  	tasklet_kill(&host->card_tasklet);
->  	tasklet_kill(&host->finish_tasklet);
-> +vmmc_err:
-> +	if (host->vqmmc) {
-> +		if (regulator_is_enabled(host->vqmmc))
-> +			regulator_disable(host->vqmmc);
->  
-> +		regulator_put(host->vqmmc);
-> +	}
->  	return ret;
->  }
->  
+Pj4gRG9lcyB0aGlzIHdvcmsgd2l0aCBib2FyZHMgd2hlcmUgd2UgZG9uJ3QgaGF2ZSBhbnkgTU1D
+IHN1cHBsaWVzPyBPciBhcmUgd2UganVzdCBkZWZlcnJpbmcgdGhlIHByb2JlIGluZGVmaW5pdGVs
+eSB0aGVyZT8NClRoZSBwcm9iZSB3aWxsIGJlIGRlZmVycmVkIGluZGVmaW5pdGVseS4NCg0KPj4g
+Rm9yIGJvYXJkcyB0aGF0IHBvd2VyIE1NQyB1bmNvbmRpdGlvbmFsbHksIGFyZSB3ZSBzdXBwb3Nl
+ZCB0byBhZGQgZHVtbXkgcmVndWxhdG9ycyB0byBtYWtlIHRoZW0gd29yayB3aXRoIHRoaXMgcGF0
+Y2hzZXQ/DQpZZXMuIFdlIG5lZWQgdG8gYWRkIGR1bW15IHJlZ3VsYXRvcnMgZm9yIGJvYXJkcyB0
+aGF0IHBvd2VyIE1NQyB1bmNvbmRpdGlvbmFsbHkuIEkgYW0gbm90IHN1cmUgaWYgdGhlcmUgaXMg
+YW55IG90aGVyIHNvbHV0aW9uIG90aGVyIHRoYW4gdXNpbmcgZGVmZXJyZWQgcHJvYmUgdGhhdCB3
+b3VsZCBndWFyYW50ZWUgcmVndWxhdG9ycyBhdmFpbGFiaWxpdHkuDQoNCi0tLS0tT3JpZ2luYWwg
+TWVzc2FnZS0tLS0tDQpGcm9tOiBMdWNhcyBTdGFjaCBbbWFpbHRvOmRldkBseW54ZXllLmRlXSAN
+ClNlbnQ6IDIzIE9jdG9iZXIgMjAxMiAxMzoyNw0KVG86IFBhdmFuIEt1bmFwdWxpDQpDYzogc3dh
+cnJlbkB3d3dkb3Rvcmcub3JnOyBsaW51eEBhcm0ubGludXgub3JnLnVrOyBjamJAbGFwdG9wLm9y
+ZzsgbGludXgtdGVncmFAdmdlci5rZXJuZWwub3JnOyBsaW51eC1hcm0ta2VybmVsQGxpc3RzLmlu
+ZnJhZGVhZC5vcmc7IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LW1tY0B2Z2Vy
+Lmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBbUEFUQ0ggMi8yXSBtbWM6IHNkaGNpOiBEZWZlciBw
+cm9iZSBpZiByZWd1bGF0b3JfZ2V0IGZhaWxzDQoNCkFtIERpZW5zdGFnLCBkZW4gMjMuMTAuMjAx
+MiwgMTI6NDkgKzA1MzAgc2NocmllYiBQYXZhbiBLdW5hcHVsaToNCj4gdm1tYyBhbmQgdnFtbWMg
+cmVndWxhdG9ycyBjb250cm9sIHRoZSB2b2x0YWdlIHRvIHRoZSBob3N0IGFuZCBkZXZpY2UuIA0K
+PiBEZWZlciB0aGUgcHJvYmUgaWYgZWl0aGVyIG9mIHRoZW0gaXMgbm90IHJlZ2lzdGVyZWQuDQo+
+IA0KRG9lcyB0aGlzIHdvcmsgd2l0aCBib2FyZHMgd2hlcmUgd2UgZG9uJ3QgaGF2ZSBhbnkgTU1D
+IHN1cHBsaWVzPyBPciBhcmUgd2UganVzdCBkZWZlcnJpbmcgdGhlIHByb2JlIGluZGVmaW5pdGVs
+eSB0aGVyZT8NCg0KRm9yIGJvYXJkcyB0aGF0IHBvd2VyIE1NQyB1bmNvbmRpdGlvbmFsbHksIGFy
+ZSB3ZSBzdXBwb3NlZCB0byBhZGQgZHVtbXkgcmVndWxhdG9ycyB0byBtYWtlIHRoZW0gd29yayB3
+aXRoIHRoaXMgcGF0Y2hzZXQ/DQoNCj4gU2lnbmVkLW9mZi1ieTogUGF2YW4gS3VuYXB1bGkgPHBr
+dW5hcHVsaUBudmlkaWEuY29tPg0KPiAtLS0NCj4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyB8
+ICAgMjUgKysrKysrKysrKysrKysrKysrKysrKy0tLQ0KPiAgMSBmaWxlcyBjaGFuZ2VkLCAyMiBp
+bnNlcnRpb25zKCspLCAzIGRlbGV0aW9ucygtKQ0KPiANCj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMv
+bW1jL2hvc3Qvc2RoY2kuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyBpbmRleCANCj4gNzky
+MmFkYi4uOTI1YzQwMyAxMDA2NDQNCj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jDQo+
+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYw0KPiBAQCAtMjg0NCwxMSArMjg0NCwxNyBA
+QCBpbnQgc2RoY2lfYWRkX2hvc3Qoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QpDQo+ICAJICAgICEo
+aG9zdC0+bW1jLT5jYXBzICYgTU1DX0NBUF9OT05SRU1PVkFCTEUpKQ0KPiAgCQltbWMtPmNhcHMg
+fD0gTU1DX0NBUF9ORUVEU19QT0xMOw0KPiAgDQo+IC0JLyogSWYgdnFtbWMgcmVndWxhdG9yIGFu
+ZCBubyAxLjhWIHNpZ25hbGxpbmcsIHRoZW4gdGhlcmUncyBubyBVSFMgKi8NCj4gKwkvKg0KPiAr
+CSAqIElmIHZxbW1jIHJlZ3VsYXRvciBhbmQgbm8gMS44ViBzaWduYWxsaW5nLCB0aGVuIHRoZXJl
+J3Mgbm8gVUhTLg0KPiArCSAqIHZxbW1jIHJlZ3VsYXRvciBzaG91bGQgYmUgcHJlc2VudC4gSWYg
+aXQncyBub3QgcHJlc2VudCwNCj4gKwkgKiBhc3N1bWUgdGhlIHJlZ3VsYXRvciBkcml2ZXIgcmVn
+aXN0cmF0aW9uIGlzIG5vdCB5ZXQgZG9uZSBhbmQNCj4gKwkgKiBkZWZlciB0aGUgcHJvYmUuDQo+
+ICsJICovDQo+ICAJaG9zdC0+dnFtbWMgPSByZWd1bGF0b3JfZ2V0KG1tY19kZXYobW1jKSwgInZx
+bW1jIik7DQo+ICAJaWYgKElTX0VSUihob3N0LT52cW1tYykpIHsNCj4gLQkJcHJfaW5mbygiJXM6
+IG5vIHZxbW1jIHJlZ3VsYXRvciBmb3VuZFxuIiwgbW1jX2hvc3RuYW1lKG1tYykpOw0KPiArCQlw
+cl9lcnIoIiVzOiBubyB2cW1tYyByZWd1bGF0b3IgZm91bmRcbiIsIG1tY19ob3N0bmFtZShtbWMp
+KTsNCj4gIAkJaG9zdC0+dnFtbWMgPSBOVUxMOw0KPiArCQlyZXR1cm4gLUVQUk9CRV9ERUZFUjsN
+Cj4gIAl9DQo+ICAJZWxzZSBpZiAocmVndWxhdG9yX2lzX3N1cHBvcnRlZF92b2x0YWdlKGhvc3Qt
+PnZxbW1jLCAxODAwMDAwLCAxODAwMDAwKSkNCj4gIAkJcmVndWxhdG9yX2VuYWJsZShob3N0LT52
+cW1tYyk7DQo+IEBAIC0yOTAzLDEwICsyOTA5LDE3IEBAIGludCBzZGhjaV9hZGRfaG9zdChzdHJ1
+Y3Qgc2RoY2lfaG9zdCAqaG9zdCkNCj4gIA0KPiAgCW9jcl9hdmFpbCA9IDA7DQo+ICANCj4gKwkv
+Kg0KPiArCSAqIHZtbWMgcmVndWxhdG9yIHNob3VsZCBiZSBwcmVzZW50LiBJZiBpdCdzIG5vdCBw
+cmVzZW50LA0KPiArCSAqIGFzc3VtZSB0aGUgcmVndWxhdG9yIGRyaXZlciByZWdpc3RyYXRpb24g
+aXMgbm90IHlldCBkb25lDQo+ICsJICogYW5kIGRlZmVyIHRoZSBwcm9iZS4NCj4gKwkgKi8NCj4g
+IAlob3N0LT52bW1jID0gcmVndWxhdG9yX2dldChtbWNfZGV2KG1tYyksICJ2bW1jIik7DQo+ICAJ
+aWYgKElTX0VSUihob3N0LT52bW1jKSkgew0KPiAtCQlwcl9pbmZvKCIlczogbm8gdm1tYyByZWd1
+bGF0b3IgZm91bmRcbiIsIG1tY19ob3N0bmFtZShtbWMpKTsNCj4gKwkJcHJfZXJyKCIlczogbm8g
+dm1tYyByZWd1bGF0b3IgZm91bmRcbiIsIG1tY19ob3N0bmFtZShtbWMpKTsNCj4gIAkJaG9zdC0+
+dm1tYyA9IE5VTEw7DQo+ICsJCXJldCA9IC1FUFJPQkVfREVGRVI7DQo+ICsJCWdvdG8gdm1tY19l
+cnI7DQo+ICAJfSBlbHNlDQo+ICAJCXJlZ3VsYXRvcl9lbmFibGUoaG9zdC0+dm1tYyk7DQo+ICAN
+Cj4gQEAgLTMxMjEsNyArMzEzNCwxMyBAQCByZXNldDoNCj4gIHVudGFza2xldDoNCj4gIAl0YXNr
+bGV0X2tpbGwoJmhvc3QtPmNhcmRfdGFza2xldCk7DQo+ICAJdGFza2xldF9raWxsKCZob3N0LT5m
+aW5pc2hfdGFza2xldCk7DQo+ICt2bW1jX2VycjoNCj4gKwlpZiAoaG9zdC0+dnFtbWMpIHsNCj4g
+KwkJaWYgKHJlZ3VsYXRvcl9pc19lbmFibGVkKGhvc3QtPnZxbW1jKSkNCj4gKwkJCXJlZ3VsYXRv
+cl9kaXNhYmxlKGhvc3QtPnZxbW1jKTsNCj4gIA0KPiArCQlyZWd1bGF0b3JfcHV0KGhvc3QtPnZx
+bW1jKTsNCj4gKwl9DQo+ICAJcmV0dXJuIHJldDsNCj4gIH0NCj4gIA0KDQoNCg==
