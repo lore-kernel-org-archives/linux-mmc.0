@@ -1,104 +1,80 @@
-From: Pavan Kunapuli <pkunapuli@nvidia.com>
-Subject: RE: [PATCH 2/2] mmc: sdhci: Defer probe if regulator_get fails
-Date: Tue, 23 Oct 2012 15:47:37 +0530
-Message-ID: <C79B248886DD134989C8FF6B096A91AB7EC6B8C7C9@BGMAIL01.nvidia.com>
-References: <1350976709-19248-1-git-send-email-pkunapuli@nvidia.com>
- <1350976709-19248-3-git-send-email-pkunapuli@nvidia.com>
- <50866D29.1040709@samsung.com>
+From: Michal Hocko <mhocko@suse.cz>
+Subject: Re: [PATCH] mm: make zone_pcp_reset independ on MEMORY_HOTREMOVE
+Date: Tue, 23 Oct 2012 12:21:27 +0200
+Message-ID: <20121023102127.GF15397@dhcp22.suse.cz>
+References: <1350985047-23148-1-git-send-email-mhocko@suse.cz>
+ <50866E04.4040005@cn.fujitsu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate04.nvidia.com ([216.228.121.35]:7933 "EHLO
-	hqemgate04.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751753Ab2JWKRo convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Oct 2012 06:17:44 -0400
-In-Reply-To: <50866D29.1040709@samsung.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <50866E04.4040005@cn.fujitsu.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Wen Congyang <wency@cn.fujitsu.com>
+Cc: akpm@linux-foundation.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, David Rientjes <rientjes@google.com>, Jiang Liu <liuj97@gmail.com>, Len Brown <len.brown@intel.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Christoph Lameter <cl@linux.com>, Minchan Kim <minchan.kim@gmail.com>, KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>, Yasuaki Ishimatsu <isimatu.yasuaki@jp.fujitsu.com>, Dave Hansen <dave@linux.vnet.ibm.com>, Mel Gorman <mel@csn.ul.ie>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "swarren@wwwdotorg.org" <swarren@wwwdotorg.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "cjb@laptop.org" <cjb@laptop.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Pavan Kunapuli <pkunapuli@nvidia.com>
 
-For platforms where the board can control vmmc or vqmmc, if the regulator supplies registration is not done before sdhci probe, deferring sdhci probe would ensure that the regulators are available the next time around. For platforms where the board can't control vmmc or vqmmc, we can have a dummy regulator to make sure probe will never get deferred.
-
------Original Message-----
-From: Jaehoon Chung [mailto:jh80.chung@samsung.com] 
-Sent: 23 October 2012 15:41
-To: Pavan Kunapuli
-Cc: swarren@wwwdotorg.org; linux@arm.linux.org.uk; cjb@laptop.org; linux-kernel@vger.kernel.org; linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 2/2] mmc: sdhci: Defer probe if regulator_get fails
-
-I didn't understand why defer the probe?
-I think that some board can't control vqmmc or vmmc.
-
-Best Regards,
-Jaehoon Chung
-On 10/23/2012 04:18 PM, Pavan Kunapuli wrote:
-> vmmc and vqmmc regulators control the voltage to the host and device. 
-> Defer the probe if either of them is not registered.
+On Tue 23-10-12 18:14:28, Wen Congyang wrote:
+> At 10/23/2012 05:37 PM, Michal Hocko Wrote:
+> > 340175b7 (mm/hotplug: free zone->pageset when a zone becomes empty)
+> > introduced zone_pcp_reset and hided it inside CONFIG_MEMORY_HOTREMOVE.
+> > The function is since 506e5fb7 (memory-hotplug: allocate zone's pcp
+> > before onlining pages) called also called from online_pages which
 > 
-> Signed-off-by: Pavan Kunapuli <pkunapuli@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci.c |   25 ++++++++++++++++++++++---
->  1 files changed, 22 insertions(+), 3 deletions(-)
+> This patch is still in -mm tree, and I have received a report from
+> Liu Yuanhan.
+
+Yes you are right. I will resend it and ask Andrew to fold it into the
+offending patch. Thanks for catching that!
+
+> > is called outside CONFIG_MEMORY_HOTREMOVE which causes a linkage error.
+> > 
+> > The function, although not used outside of MEMORY_{HOTPLUT,HOTREMOVE},
+> > seems like universal enough so let's keep it at its current location
+> > and only remove the HOTREMOVE guard.
+> > 
+> > Signed-off-by: Michal Hocko <mhocko@suse.cz>
+> > Cc: David Rientjes <rientjes@google.com>
+> > Cc: Jiang Liu <liuj97@gmail.com>
+> > Cc: Len Brown <len.brown@intel.com>
+> > Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+> > Cc: Paul Mackerras <paulus@samba.org>
+> > Cc: Christoph Lameter <cl@linux.com>
+> > Cc: Minchan Kim <minchan.kim@gmail.com>
+> > Cc: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
+> > Cc: Yasuaki Ishimatsu <isimatu.yasuaki@jp.fujitsu.com>
+> > Cc: Dave Hansen <dave@linux.vnet.ibm.com>
+> > Cc: Mel Gorman <mel@csn.ul.ie>
+> > ---
+> >  mm/page_alloc.c |    2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > diff --git a/mm/page_alloc.c b/mm/page_alloc.c
+> > index e29912e..30e359c 100644
+> > --- a/mm/page_alloc.c
+> > +++ b/mm/page_alloc.c
+> > @@ -5981,7 +5981,6 @@ void __meminit zone_pcp_update(struct zone *zone)
+> >  }
+> >  #endif
+> >  
+> > -#ifdef CONFIG_MEMORY_HOTREMOVE
+> >  void zone_pcp_reset(struct zone *zone)
+> >  {
+> >  	unsigned long flags;
+> > @@ -6001,6 +6000,7 @@ void zone_pcp_reset(struct zone *zone)
+> >  	local_irq_restore(flags);
+> >  }
+> >  
+> > +#ifdef CONFIG_MEMORY_HOTREMOVE
+> >  /*
+> >   * All pages in the range must be isolated before calling this.
+> >   */
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index 
-> 7922adb..925c403 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2844,11 +2844,17 @@ int sdhci_add_host(struct sdhci_host *host)
->  	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
->  		mmc->caps |= MMC_CAP_NEEDS_POLL;
->  
-> -	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
-> +	/*
-> +	 * If vqmmc regulator and no 1.8V signalling, then there's no UHS.
-> +	 * vqmmc regulator should be present. If it's not present,
-> +	 * assume the regulator driver registration is not yet done and
-> +	 * defer the probe.
-> +	 */
->  	host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
->  	if (IS_ERR(host->vqmmc)) {
-> -		pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
-> +		pr_err("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
->  		host->vqmmc = NULL;
-> +		return -EPROBE_DEFER;
->  	}
->  	else if (regulator_is_supported_voltage(host->vqmmc, 1800000, 1800000))
->  		regulator_enable(host->vqmmc);
-> @@ -2903,10 +2909,17 @@ int sdhci_add_host(struct sdhci_host *host)
->  
->  	ocr_avail = 0;
->  
-> +	/*
-> +	 * vmmc regulator should be present. If it's not present,
-> +	 * assume the regulator driver registration is not yet done
-> +	 * and defer the probe.
-> +	 */
->  	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
->  	if (IS_ERR(host->vmmc)) {
-> -		pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
-> +		pr_err("%s: no vmmc regulator found\n", mmc_hostname(mmc));
->  		host->vmmc = NULL;
-> +		ret = -EPROBE_DEFER;
-> +		goto vmmc_err;
->  	} else
->  		regulator_enable(host->vmmc);
->  
-> @@ -3121,7 +3134,13 @@ reset:
->  untasklet:
->  	tasklet_kill(&host->card_tasklet);
->  	tasklet_kill(&host->finish_tasklet);
-> +vmmc_err:
-> +	if (host->vqmmc) {
-> +		if (regulator_is_enabled(host->vqmmc))
-> +			regulator_disable(host->vqmmc);
->  
-> +		regulator_put(host->vqmmc);
-> +	}
->  	return ret;
->  }
->  
+> This patch looks find to me.
+> 
+> Reviewed-by: Wen Congyang <wency@cn.fujitsu.com>
 > 
 
+-- 
+Michal Hocko
+SUSE Labs
