@@ -1,65 +1,31 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
 Subject: Re: [PATCH 2/2] mmc: sdhci: Defer probe if regulator_get fails
-Date: Tue, 23 Oct 2012 10:23:58 -0600
-Message-ID: <5086C49E.8040809@wwwdotorg.org>
-References: <1350976709-19248-1-git-send-email-pkunapuli@nvidia.com> <1350976709-19248-3-git-send-email-pkunapuli@nvidia.com>
+Date: Tue, 23 Oct 2012 10:29:41 -0600
+Message-ID: <5086C5F5.4070801@wwwdotorg.org>
+References: <1350976740-19284-1-git-send-email-pkunapuli@nvidia.com>  <1350976740-19284-3-git-send-email-pkunapuli@nvidia.com> <1350979047.20572.6.camel@tellur>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:51648 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754531Ab2JWQYB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Oct 2012 12:24:01 -0400
-In-Reply-To: <1350976709-19248-3-git-send-email-pkunapuli@nvidia.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1350979047.20572.6.camel@tellur>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>
+Cc: Pavan Kunapuli <pkunapuli-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Pavan Kunapuli <pkunapuli@nvidia.com>
-Cc: linux@arm.linux.org.uk, cjb@laptop.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On 10/23/2012 01:18 AM, Pavan Kunapuli wrote:
-> vmmc and vqmmc regulators control the voltage to
-> the host and device. Defer the probe if either of
-> them is not registered.
+On 10/23/2012 01:57 AM, Lucas Stach wrote:
+> Am Dienstag, den 23.10.2012, 12:49 +0530 schrieb Pavan Kunapuli:
+>> vmmc and vqmmc regulators control the voltage to
+>> the host and device. Defer the probe if either of
+>> them is not registered.
+>
+> Does this work with boards where we don't have any MMC supplies? Or are
+> we just deferring the probe indefinitely there?
 > 
-> Signed-off-by: Pavan Kunapuli <pkunapuli@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci.c |   25 ++++++++++++++++++++++---
->  1 files changed, 22 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 7922adb..925c403 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2844,11 +2844,17 @@ int sdhci_add_host(struct sdhci_host *host)
->  	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
->  		mmc->caps |= MMC_CAP_NEEDS_POLL;
->  
-> -	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
-> +	/*
-> +	 * If vqmmc regulator and no 1.8V signalling, then there's no UHS.
-> +	 * vqmmc regulator should be present. If it's not present,
-> +	 * assume the regulator driver registration is not yet done and
-> +	 * defer the probe.
-> +	 */
->  	host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
->  	if (IS_ERR(host->vqmmc)) {
-> -		pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
-> +		pr_err("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
->  		host->vqmmc = NULL;
-> +		return -EPROBE_DEFER;
->  	}
+> For boards that power MMC unconditionally, are we supposed to add dummy
+> regulators to make them work with this patchset?
 
-Right now, the regulator is optional, and any failure to acquire the
-regulator is just ignored.
-
-Instead, I think the behaviour we want is:
-
-Attempt to get regulator.
-1) If no error -> OK
-2) If deferred probe error -> return -EPROBE_DEFER
-3) If any other error -> ignore it
-
-Assuming that regulator_get() can explicitly detect and return the
-difference between cases (1) and (2) above. If it can't, it seems like
-it should be able to.
+I believe that dummy (fixed) regulators are supposed to be provided in
+all cases where the platform doesn't actually have one. The fact that
+everything worked OK without them before this patch was most likely a
+mistake/accident.
