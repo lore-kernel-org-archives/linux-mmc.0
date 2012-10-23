@@ -1,84 +1,75 @@
-From: Pavan Kunapuli <pkunapuli@nvidia.com>
-Subject: RE: [PATCH 2/2] mmc: sdhci: Defer probe if regulator_get fails
-Date: Tue, 23 Oct 2012 13:46:36 +0530
-Message-ID: <C79B248886DD134989C8FF6B096A91AB7EC6B8C78B@BGMAIL01.nvidia.com>
-References: <1350976740-19284-1-git-send-email-pkunapuli@nvidia.com>
-	 <1350976740-19284-3-git-send-email-pkunapuli@nvidia.com>
- <1350979047.20572.6.camel@tellur>
+From: Anton Vorontsov <cbouatmailru@gmail.com>
+Subject: Re: [PATCH] powerpc/esdhc: enable the card insert/remove interrupt
+Date: Tue, 23 Oct 2012 01:26:48 -0700
+Message-ID: <20121023082648.GA21690@lizard>
+References: <1350975677-8195-1-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate03.nvidia.com ([216.228.121.140]:16466 "EHLO
-	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751728Ab2JWIQr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Oct 2012 04:16:47 -0400
-In-Reply-To: <1350979047.20572.6.camel@tellur>
-Content-Language: en-US
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:48722 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753450Ab2JWI3r (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Oct 2012 04:29:47 -0400
+Received: by mail-pa0-f46.google.com with SMTP id hz1so2585453pad.19
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Oct 2012 01:29:47 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1350975677-8195-1-git-send-email-r66093@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lucas Stach <dev@lynxeye.de>
-Cc: "swarren@wwwdotorg.org" <swarren@wwwdotorg.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "cjb@laptop.org" <cjb@laptop.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Pavan Kunapuli <pkunapuli@nvidia.com>
+To: r66093@freescale.com
+Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Chris Ball <cjb@laptop.org>, Kumar Gala <galak@kernel.crashing.org>, linuxppc-dev@lists.ozlabs.org
 
-Pj4gRG9lcyB0aGlzIHdvcmsgd2l0aCBib2FyZHMgd2hlcmUgd2UgZG9uJ3QgaGF2ZSBhbnkgTU1D
-IHN1cHBsaWVzPyBPciBhcmUgd2UganVzdCBkZWZlcnJpbmcgdGhlIHByb2JlIGluZGVmaW5pdGVs
-eSB0aGVyZT8NClRoZSBwcm9iZSB3aWxsIGJlIGRlZmVycmVkIGluZGVmaW5pdGVseS4NCg0KPj4g
-Rm9yIGJvYXJkcyB0aGF0IHBvd2VyIE1NQyB1bmNvbmRpdGlvbmFsbHksIGFyZSB3ZSBzdXBwb3Nl
-ZCB0byBhZGQgZHVtbXkgcmVndWxhdG9ycyB0byBtYWtlIHRoZW0gd29yayB3aXRoIHRoaXMgcGF0
-Y2hzZXQ/DQpZZXMuIFdlIG5lZWQgdG8gYWRkIGR1bW15IHJlZ3VsYXRvcnMgZm9yIGJvYXJkcyB0
-aGF0IHBvd2VyIE1NQyB1bmNvbmRpdGlvbmFsbHkuIEkgYW0gbm90IHN1cmUgaWYgdGhlcmUgaXMg
-YW55IG90aGVyIHNvbHV0aW9uIG90aGVyIHRoYW4gdXNpbmcgZGVmZXJyZWQgcHJvYmUgdGhhdCB3
-b3VsZCBndWFyYW50ZWUgcmVndWxhdG9ycyBhdmFpbGFiaWxpdHkuDQoNCi0tLS0tT3JpZ2luYWwg
-TWVzc2FnZS0tLS0tDQpGcm9tOiBMdWNhcyBTdGFjaCBbbWFpbHRvOmRldkBseW54ZXllLmRlXSAN
-ClNlbnQ6IDIzIE9jdG9iZXIgMjAxMiAxMzoyNw0KVG86IFBhdmFuIEt1bmFwdWxpDQpDYzogc3dh
-cnJlbkB3d3dkb3Rvcmcub3JnOyBsaW51eEBhcm0ubGludXgub3JnLnVrOyBjamJAbGFwdG9wLm9y
-ZzsgbGludXgtdGVncmFAdmdlci5rZXJuZWwub3JnOyBsaW51eC1hcm0ta2VybmVsQGxpc3RzLmlu
-ZnJhZGVhZC5vcmc7IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LW1tY0B2Z2Vy
-Lmtlcm5lbC5vcmcNClN1YmplY3Q6IFJlOiBbUEFUQ0ggMi8yXSBtbWM6IHNkaGNpOiBEZWZlciBw
-cm9iZSBpZiByZWd1bGF0b3JfZ2V0IGZhaWxzDQoNCkFtIERpZW5zdGFnLCBkZW4gMjMuMTAuMjAx
-MiwgMTI6NDkgKzA1MzAgc2NocmllYiBQYXZhbiBLdW5hcHVsaToNCj4gdm1tYyBhbmQgdnFtbWMg
-cmVndWxhdG9ycyBjb250cm9sIHRoZSB2b2x0YWdlIHRvIHRoZSBob3N0IGFuZCBkZXZpY2UuIA0K
-PiBEZWZlciB0aGUgcHJvYmUgaWYgZWl0aGVyIG9mIHRoZW0gaXMgbm90IHJlZ2lzdGVyZWQuDQo+
-IA0KRG9lcyB0aGlzIHdvcmsgd2l0aCBib2FyZHMgd2hlcmUgd2UgZG9uJ3QgaGF2ZSBhbnkgTU1D
-IHN1cHBsaWVzPyBPciBhcmUgd2UganVzdCBkZWZlcnJpbmcgdGhlIHByb2JlIGluZGVmaW5pdGVs
-eSB0aGVyZT8NCg0KRm9yIGJvYXJkcyB0aGF0IHBvd2VyIE1NQyB1bmNvbmRpdGlvbmFsbHksIGFy
-ZSB3ZSBzdXBwb3NlZCB0byBhZGQgZHVtbXkgcmVndWxhdG9ycyB0byBtYWtlIHRoZW0gd29yayB3
-aXRoIHRoaXMgcGF0Y2hzZXQ/DQoNCj4gU2lnbmVkLW9mZi1ieTogUGF2YW4gS3VuYXB1bGkgPHBr
-dW5hcHVsaUBudmlkaWEuY29tPg0KPiAtLS0NCj4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyB8
-ICAgMjUgKysrKysrKysrKysrKysrKysrKysrKy0tLQ0KPiAgMSBmaWxlcyBjaGFuZ2VkLCAyMiBp
-bnNlcnRpb25zKCspLCAzIGRlbGV0aW9ucygtKQ0KPiANCj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMv
-bW1jL2hvc3Qvc2RoY2kuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyBpbmRleCANCj4gNzky
-MmFkYi4uOTI1YzQwMyAxMDA2NDQNCj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jDQo+
-ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYw0KPiBAQCAtMjg0NCwxMSArMjg0NCwxNyBA
-QCBpbnQgc2RoY2lfYWRkX2hvc3Qoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QpDQo+ICAJICAgICEo
-aG9zdC0+bW1jLT5jYXBzICYgTU1DX0NBUF9OT05SRU1PVkFCTEUpKQ0KPiAgCQltbWMtPmNhcHMg
-fD0gTU1DX0NBUF9ORUVEU19QT0xMOw0KPiAgDQo+IC0JLyogSWYgdnFtbWMgcmVndWxhdG9yIGFu
-ZCBubyAxLjhWIHNpZ25hbGxpbmcsIHRoZW4gdGhlcmUncyBubyBVSFMgKi8NCj4gKwkvKg0KPiAr
-CSAqIElmIHZxbW1jIHJlZ3VsYXRvciBhbmQgbm8gMS44ViBzaWduYWxsaW5nLCB0aGVuIHRoZXJl
-J3Mgbm8gVUhTLg0KPiArCSAqIHZxbW1jIHJlZ3VsYXRvciBzaG91bGQgYmUgcHJlc2VudC4gSWYg
-aXQncyBub3QgcHJlc2VudCwNCj4gKwkgKiBhc3N1bWUgdGhlIHJlZ3VsYXRvciBkcml2ZXIgcmVn
-aXN0cmF0aW9uIGlzIG5vdCB5ZXQgZG9uZSBhbmQNCj4gKwkgKiBkZWZlciB0aGUgcHJvYmUuDQo+
-ICsJICovDQo+ICAJaG9zdC0+dnFtbWMgPSByZWd1bGF0b3JfZ2V0KG1tY19kZXYobW1jKSwgInZx
-bW1jIik7DQo+ICAJaWYgKElTX0VSUihob3N0LT52cW1tYykpIHsNCj4gLQkJcHJfaW5mbygiJXM6
-IG5vIHZxbW1jIHJlZ3VsYXRvciBmb3VuZFxuIiwgbW1jX2hvc3RuYW1lKG1tYykpOw0KPiArCQlw
-cl9lcnIoIiVzOiBubyB2cW1tYyByZWd1bGF0b3IgZm91bmRcbiIsIG1tY19ob3N0bmFtZShtbWMp
-KTsNCj4gIAkJaG9zdC0+dnFtbWMgPSBOVUxMOw0KPiArCQlyZXR1cm4gLUVQUk9CRV9ERUZFUjsN
-Cj4gIAl9DQo+ICAJZWxzZSBpZiAocmVndWxhdG9yX2lzX3N1cHBvcnRlZF92b2x0YWdlKGhvc3Qt
-PnZxbW1jLCAxODAwMDAwLCAxODAwMDAwKSkNCj4gIAkJcmVndWxhdG9yX2VuYWJsZShob3N0LT52
-cW1tYyk7DQo+IEBAIC0yOTAzLDEwICsyOTA5LDE3IEBAIGludCBzZGhjaV9hZGRfaG9zdChzdHJ1
-Y3Qgc2RoY2lfaG9zdCAqaG9zdCkNCj4gIA0KPiAgCW9jcl9hdmFpbCA9IDA7DQo+ICANCj4gKwkv
-Kg0KPiArCSAqIHZtbWMgcmVndWxhdG9yIHNob3VsZCBiZSBwcmVzZW50LiBJZiBpdCdzIG5vdCBw
-cmVzZW50LA0KPiArCSAqIGFzc3VtZSB0aGUgcmVndWxhdG9yIGRyaXZlciByZWdpc3RyYXRpb24g
-aXMgbm90IHlldCBkb25lDQo+ICsJICogYW5kIGRlZmVyIHRoZSBwcm9iZS4NCj4gKwkgKi8NCj4g
-IAlob3N0LT52bW1jID0gcmVndWxhdG9yX2dldChtbWNfZGV2KG1tYyksICJ2bW1jIik7DQo+ICAJ
-aWYgKElTX0VSUihob3N0LT52bW1jKSkgew0KPiAtCQlwcl9pbmZvKCIlczogbm8gdm1tYyByZWd1
-bGF0b3IgZm91bmRcbiIsIG1tY19ob3N0bmFtZShtbWMpKTsNCj4gKwkJcHJfZXJyKCIlczogbm8g
-dm1tYyByZWd1bGF0b3IgZm91bmRcbiIsIG1tY19ob3N0bmFtZShtbWMpKTsNCj4gIAkJaG9zdC0+
-dm1tYyA9IE5VTEw7DQo+ICsJCXJldCA9IC1FUFJPQkVfREVGRVI7DQo+ICsJCWdvdG8gdm1tY19l
-cnI7DQo+ICAJfSBlbHNlDQo+ICAJCXJlZ3VsYXRvcl9lbmFibGUoaG9zdC0+dm1tYyk7DQo+ICAN
-Cj4gQEAgLTMxMjEsNyArMzEzNCwxMyBAQCByZXNldDoNCj4gIHVudGFza2xldDoNCj4gIAl0YXNr
-bGV0X2tpbGwoJmhvc3QtPmNhcmRfdGFza2xldCk7DQo+ICAJdGFza2xldF9raWxsKCZob3N0LT5m
-aW5pc2hfdGFza2xldCk7DQo+ICt2bW1jX2VycjoNCj4gKwlpZiAoaG9zdC0+dnFtbWMpIHsNCj4g
-KwkJaWYgKHJlZ3VsYXRvcl9pc19lbmFibGVkKGhvc3QtPnZxbW1jKSkNCj4gKwkJCXJlZ3VsYXRv
-cl9kaXNhYmxlKGhvc3QtPnZxbW1jKTsNCj4gIA0KPiArCQlyZWd1bGF0b3JfcHV0KGhvc3QtPnZx
-bW1jKTsNCj4gKwl9DQo+ICAJcmV0dXJuIHJldDsNCj4gIH0NCj4gIA0KDQoNCg==
+On Tue, Oct 23, 2012 at 03:01:17PM +0800, r66093@freescale.com wrote:
+> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> 
+> The current eSDHC driver use the poll mode to detect
+> if the SD/MMC card is inserted or removed, which will generate
+> many interrupts and impact the performance. 
+> Therefore, change the default card detect to interrupt mode,
+> if the board can't support this mode, we still use the poll mode.
+> 
+> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> CC: Anton Vorontsov <cbouatmailru@gmail.com>
+> CC: Chris Ball <cjb@laptop.org>
+> ---
+
+IIRC, the card detection is broken SOC-revision-wise, not board-wise. So
+the change seems wrong.
+
+Also, take a look at this:
+
+	http://lkml.org/lkml/2010/7/14/127
+
+I started the work but never finished, unfortunately it caused some
+regressions for non-FSL hardware...
+
+>  drivers/mmc/host/sdhci-of-esdhc.c |    7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index ffc1226..5dc362f 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -196,6 +196,11 @@ static void esdhc_of_detect_limitation(struct platform_device *pdev,
+>  	if (vvn == VENDOR_V_22)
+>  		pdata->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+>  
+> +	/* P4080DS and MPC837XMDS board don't support interrupt mode */
+> +	if (of_machine_is_compatible("fsl,mpc837xmds") ||
+> +	    of_machine_is_compatible("fsl,P4080DS"))
+> +		pdata->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> +
+>  	iounmap(ioaddr);
+>  end:
+>  	return;
+> @@ -223,7 +228,7 @@ static struct sdhci_pltfm_data sdhci_esdhc_pdata = {
+>  	 * card detection could be handled via GPIO
+>  	 * eSDHC cannot support End Attribute in NOP ADMA descriptor
+>  	 */
+> -	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_CARD_DETECTION
+> +	.quirks = ESDHC_DEFAULT_QUIRKS
+>  		| SDHCI_QUIRK_NO_CARD_NO_RESET
+>  		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+>  	.ops = &sdhci_esdhc_ops,
+> -- 
+> 1.7.9.5
