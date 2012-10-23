@@ -1,134 +1,137 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: Re: [PATCH 2/2] mmc: core: Power cycle card on voltage switch fail
-Date: Tue, 23 Oct 2012 16:48:10 -0600
-Message-ID: <CAMLZHHRdz-==wgqvkoest61eaAdSHWTA0x-JTBgLWdO3B2gKJQ@mail.gmail.com>
-References: <1348166542-3247-1-git-send-email-johan.rudholm@stericsson.com>
-	<87bofsj52p.fsf@octavius.laptop.org>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [RFC PATCH 1/3] dmaengine: add dma_get_channel_caps()
+Date: Tue, 23 Oct 2012 23:49:33 +0100
+Message-ID: <CACxGe6sUrXPc2wtLfOy8_LvRMM+e=9=sSDNLkeszfe=JX_ipbw@mail.gmail.com>
+References: <1350615088-14562-1-git-send-email-mporter@ti.com> <1350615088-14562-2-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=047d7b2ee7dbaa6af204ccc1c39a
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:48378 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933543Ab2JWWsK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Oct 2012 18:48:10 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so3095379pad.19
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Oct 2012 15:48:10 -0700 (PDT)
-In-Reply-To: <87bofsj52p.fsf@octavius.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Johan Rudholm <johan.rudholm@stericsson.com>, linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>
-
---047d7b2ee7dbaa6af204ccc1c39a
 Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1350615088-14562-2-git-send-email-mporter@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Porter <mporter@ti.com>
+Cc: Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Oct 23, 2012 at 2:39 PM, Chris Ball <cjb@laptop.org> wrote:
-> Dan, maybe you could see if this patch (there's a 1/2 patch too) solves
-> your UHS problem?
+On Fri, Oct 19, 2012 at 3:51 AM, Matt Porter <mporter@ti.com> wrote:
+> Add a dmaengine API to retrieve per channel capabilities.
+> Currently, only channel ops and SG segment limitations are
+> implemented caps.
+>
+> The API is optionally implemented by drivers and when
+> unimplemented will return a NULL pointer. It is intended
+> to be executed after a channel has been requested and, if
+> the channel is intended to be used with slave SG transfers,
+> then it may only be called after dmaengine_slave_config()
+> has executed. The slave driver provides parameters such as
+> burst size and address width which may be necessary for
+> the dmaengine driver to use in order to properly return SG
+> segment limit caps.
+>
+> Suggested-by: Vinod Koul <vinod.koul@intel.com>
+> Signed-off-by: Matt Porter <mporter@ti.com>
+> ---
+>  include/linux/dmaengine.h |   52 +++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 52 insertions(+)
+>
+> diff --git a/include/linux/dmaengine.h b/include/linux/dmaengine.h
+> index 11d9e25..0181887 100644
+> --- a/include/linux/dmaengine.h
+> +++ b/include/linux/dmaengine.h
+> @@ -371,6 +371,38 @@ struct dma_slave_config {
+>         unsigned int slave_id;
+>  };
+>
+> +enum dmaengine_apis {
+> +       DMAENGINE_MEMCPY        = 0x0001,
+> +       DMAENGINE_XOR           = 0x0002,
+> +       DMAENGINE_XOR_VAL       = 0x0004,
+> +       DMAENGINE_PQ            = 0x0008,
+> +       DMAENGINE_PQ_VAL        = 0x0010,
+> +       DMAENGINE_MEMSET        = 0x0020,
+> +       DMAENGINE_SLAVE         = 0x0040,
+> +       DMAENGINE_CYCLIC        = 0x0080,
+> +       DMAENGINE_INTERLEAVED   = 0x0100,
+> +       DMAENGINE_SG            = 0x0200,
+> +};
 
-I tested [RFC/PATCH] mmc: core: Fixup signal voltage switch
-https://patchwork.kernel.org/patch/1514691/
+Actually, one more comment. Why the new enum? Why can't the
+dma_transaction_type enum be used directly along with dma_cap_mask_t?
 
-This was previously failing on both XO-1.75 (kernel 3.0) and XO-4
-(kernel 3.5) - the 1.8V switch would fail, but it would not
-successfully switch back to 3.3V.
+> +
+> +/* struct dmaengine_chan_caps - expose capability of a channel
+> + * Note: each channel can have same or different capabilities
+> + *
+> + * This primarily classifies capabilities into
+> + * a) APIs/ops supported
+> + * b) channel physical capabilities
+> + *
+> + * @ops: or'ed api capability
+> + * @seg_nr: maximum number of SG segments supported on a SG/SLAVE
+> + *         channel (0 for no maximum or not a SG/SLAVE channel)
+> + * @seg_len: maximum length of SG segments supported on a SG/SLAVE
+> + *          channel (0 for no maximum or not a SG/SLAVE channel)
+> + */
+> +struct dmaengine_chan_caps {
+> +       enum dmaengine_apis ops;
+> +       int seg_nr;
+> +       int seg_len;
+> +};
+> +
+>  static inline const char *dma_chan_name(struct dma_chan *chan)
+>  {
+>         return dev_name(&chan->dev->device);
+> @@ -534,6 +566,7 @@ struct dma_tx_state {
+>   *     struct with auxiliary transfer status information, otherwise the call
+>   *     will just return a simple status code
+>   * @device_issue_pending: push pending transactions to hardware
+> + * @device_channel_caps: return the channel capabilities
+>   */
+>  struct dma_device {
+>
+> @@ -602,6 +635,8 @@ struct dma_device {
+>                                             dma_cookie_t cookie,
+>                                             struct dma_tx_state *txstate);
+>         void (*device_issue_pending)(struct dma_chan *chan);
+> +       struct dmaengine_chan_caps *(*device_channel_caps)(
+> +               struct dma_chan *chan, enum dma_transfer_direction direction);
+>  };
+>
+>  static inline int dmaengine_device_control(struct dma_chan *chan,
+> @@ -969,6 +1004,23 @@ dma_set_tx_state(struct dma_tx_state *st, dma_cookie_t last, dma_cookie_t used,
+>         }
+>  }
+>
+> +/**
+> + * dma_get_channel_caps - flush pending transactions to HW
+> + * @chan: target DMA channel
+> + * @dir: direction of transfer
+> + *
+> + * Get the channel-specific capabilities. If the dmaengine
+> + * driver does not implement per channel capbilities then
+> + * NULL is returned.
+> + */
+> +static inline struct dmaengine_chan_caps
+> +*dma_get_channel_caps(struct dma_chan *chan, enum dma_transfer_direction dir)
+> +{
+> +       if (chan->device->device_channel_caps)
+> +               return chan->device->device_channel_caps(chan, dir);
+> +       return NULL;
+> +}
+> +
+>  enum dma_status dma_sync_wait(struct dma_chan *chan, dma_cookie_t cookie);
+>  #ifdef CONFIG_DMA_ENGINE
+>  enum dma_status dma_wait_for_async_tx(struct dma_async_tx_descriptor *tx);
+> --
+> 1.7.9.5
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
 
-Testing on XO-4, it worked fine: the 1.8V failed switch was detected,
-it came back as 3.3V and everything was fine.
 
-Testing on XO-1.75, it didn't work: it thought that the 1.8V switch
-was successful so it left it at that, then the card reacted in a very
-unstable manner (failed/retried reads, huge amount of kernel log spam,
-etc).
 
-So I came up with the attached sdhci patch. That fixes the XO-1.75
-case, which now correctly detects the 1.8V switch failure and goes to
-3.3V. However, that broke XO-4, which now just does:
-  mmc2: Signal voltage switch failed, power cycling card (retries = 10)
-  mmc2: error -110 whilst initialising SD card
-(no more time to debug exactly whats happening)
-
-All tests with the same 32GB SD storage card.
-
-I wonder if this difference in behaviour is related to the difference
-in kernel versions on each platform (3.0 vs 3.5). I would like to test
-with 3.5 or newer running on both, but this requires a bit of setup
-work for the XO-1.75 first (long story). And I'm out of time at this
-point :( this was a borrowed SD card.
-
-Daniel
-
---047d7b2ee7dbaa6af204ccc1c39a
-Content-Type: text/plain; charset=US-ASCII;
-	name="0001-update-sdhci-for-voltage-changing-fixes.txt"
-Content-Disposition: attachment;
-	filename="0001-update-sdhci-for-voltage-changing-fixes.txt"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_h8nlpegm0
-
-RnJvbSA2NjRhZmU0ZGUyOTVkMzc4M2QzMzVhNzM3Y2UyMzljZWJmNTg4NWYyIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBEYW5pZWwgRHJha2UgPGRzZEBsYXB0b3Aub3JnPgpEYXRlOiBU
-dWUsIDIzIE9jdCAyMDEyIDE1OjU4OjMzIC0wNjAwClN1YmplY3Q6IFtQQVRDSF0gdXBkYXRlIHNk
-aGNpIGZvciB2b2x0YWdlIGNoYW5naW5nIGZpeGVzCgotLS0KIGRyaXZlcnMvbW1jL2hvc3Qvc2Ro
-Y2kuYyB8IDcyICsrKysrKysrKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LQogMSBmaWxlIGNoYW5nZWQsIDEzIGluc2VydGlvbnMoKyksIDU5IGRlbGV0aW9ucygtKQoKZGlm
-ZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2Ro
-Y2kuYwppbmRleCAwN2E1MzQ2Li4xOTU1NDA2IDEwMDY0NAotLS0gYS9kcml2ZXJzL21tYy9ob3N0
-L3NkaGNpLmMKKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jCkBAIC0xNTg3LDkgKzE1ODcs
-NyBAQCBzdGF0aWMgdm9pZCBzZGhjaV9lbmFibGVfc2Rpb19pcnEoc3RydWN0IG1tY19ob3N0ICpt
-bWMsIGludCBlbmFibGUpCiBzdGF0aWMgaW50IHNkaGNpX2RvX3N0YXJ0X3NpZ25hbF92b2x0YWdl
-X3N3aXRjaChzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCwKIAkJCQkJCXN0cnVjdCBtbWNfaW9zICpp
-b3MpCiB7Ci0JdTggcHdyOwotCXUxNiBjbGssIGN0cmw7Ci0JdTMyIHByZXNlbnRfc3RhdGU7CisJ
-dTE2IGN0cmw7CiAKIAkvKgogCSAqIFNpZ25hbCBWb2x0YWdlIFN3aXRjaGluZyBpcyBvbmx5IGFw
-cGxpY2FibGUgZm9yIEhvc3QgQ29udHJvbGxlcnMKQEAgLTE2MjIsNjIgKzE2MjAsOSBAQCBzdGF0
-aWMgaW50IHNkaGNpX2RvX3N0YXJ0X3NpZ25hbF92b2x0YWdlX3N3aXRjaChzdHJ1Y3Qgc2RoY2lf
-aG9zdCAqaG9zdCwKIAkJfQogCX0gZWxzZSBpZiAoIShjdHJsICYgU0RIQ0lfQ1RSTF9WRERfMTgw
-KSAmJgogCQkgIChpb3MtPnNpZ25hbF92b2x0YWdlID09IE1NQ19TSUdOQUxfVk9MVEFHRV8xODAp
-KSB7Ci0JCS8qIFN0b3AgU0RDTEsgKi8KLQkJY2xrID0gc2RoY2lfcmVhZHcoaG9zdCwgU0RIQ0lf
-Q0xPQ0tfQ09OVFJPTCk7Ci0JCWNsayAmPSB+U0RIQ0lfQ0xPQ0tfQ0FSRF9FTjsKLQkJc2RoY2lf
-d3JpdGV3KGhvc3QsIGNsaywgU0RIQ0lfQ0xPQ0tfQ09OVFJPTCk7Ci0KLQkJLyogQ2hlY2sgd2hl
-dGhlciBEQVRbMzowXSBpcyAwMDAwICovCi0JCXByZXNlbnRfc3RhdGUgPSBzZGhjaV9yZWFkbCho
-b3N0LCBTREhDSV9QUkVTRU5UX1NUQVRFKTsKLQkJaWYgKCEoKHByZXNlbnRfc3RhdGUgJiBTREhD
-SV9EQVRBX0xWTF9NQVNLKSA+PgotCQkgICAgICAgU0RIQ0lfREFUQV9MVkxfU0hJRlQpKSB7Ci0J
-CQkvKgotCQkJICogRW5hYmxlIDEuOFYgU2lnbmFsIEVuYWJsZSBpbiB0aGUgSG9zdCBDb250cm9s
-MgotCQkJICogcmVnaXN0ZXIKLQkJCSAqLwotCQkJY3RybCB8PSBTREhDSV9DVFJMX1ZERF8xODA7
-Ci0JCQlzZGhjaV93cml0ZXcoaG9zdCwgY3RybCwgU0RIQ0lfSE9TVF9DT05UUk9MMik7Ci0KLQkJ
-CS8qIFdhaXQgZm9yIDVtcyAqLwotCQkJdXNsZWVwX3JhbmdlKDUwMDAsIDU1MDApOwotCi0JCQlj
-dHJsID0gc2RoY2lfcmVhZHcoaG9zdCwgU0RIQ0lfSE9TVF9DT05UUk9MMik7Ci0JCQlpZiAoY3Ry
-bCAmIFNESENJX0NUUkxfVkREXzE4MCkgewotCQkJCS8qIFByb3ZpZGUgU0RDTEsgYWdhaW4gYW5k
-IHdhaXQgZm9yIDFtcyovCi0JCQkJY2xrID0gc2RoY2lfcmVhZHcoaG9zdCwgU0RIQ0lfQ0xPQ0tf
-Q09OVFJPTCk7Ci0JCQkJY2xrIHw9IFNESENJX0NMT0NLX0NBUkRfRU47Ci0JCQkJc2RoY2lfd3Jp
-dGV3KGhvc3QsIGNsaywgU0RIQ0lfQ0xPQ0tfQ09OVFJPTCk7Ci0JCQkJdXNsZWVwX3JhbmdlKDEw
-MDAsIDE1MDApOwotCi0JCQkJLyoKLQkJCQkgKiBJZiBEQVRbMzowXSBsZXZlbCBpcyAxMTExYiwg
-dGhlbiB0aGUgY2FyZAotCQkJCSAqIHdhcyBzdWNjZXNzZnVsbHkgc3dpdGNoZWQgdG8gMS44ViBz
-aWduYWxpbmcuCi0JCQkJICovCi0JCQkJcHJlc2VudF9zdGF0ZSA9IHNkaGNpX3JlYWRsKGhvc3Qs
-Ci0JCQkJCQkJU0RIQ0lfUFJFU0VOVF9TVEFURSk7Ci0JCQkJaWYgKChwcmVzZW50X3N0YXRlICYg
-U0RIQ0lfREFUQV9MVkxfTUFTSykgPT0KLQkJCQkgICAgIFNESENJX0RBVEFfTFZMX01BU0spCi0J
-CQkJCXJldHVybiAwOwotCQkJfQotCQl9Ci0KLQkJLyoKLQkJICogSWYgd2UgYXJlIGhlcmUsIHRo
-YXQgbWVhbnMgdGhlIHN3aXRjaCB0byAxLjhWIHNpZ25hbGluZwotCQkgKiBmYWlsZWQuIFdlIHBv
-d2VyIGN5Y2xlIHRoZSBjYXJkLCBhbmQgcmV0cnkgaW5pdGlhbGl6YXRpb24KLQkJICogc2VxdWVu
-Y2UgYnkgc2V0dGluZyBTMThSIHRvIDAuCi0JCSAqLwotCQlwd3IgPSBzZGhjaV9yZWFkYihob3N0
-LCBTREhDSV9QT1dFUl9DT05UUk9MKTsKLQkJcHdyICY9IH5TREhDSV9QT1dFUl9PTjsKLQkJc2Ro
-Y2lfd3JpdGViKGhvc3QsIHB3ciwgU0RIQ0lfUE9XRVJfQ09OVFJPTCk7Ci0KLQkJLyogV2FpdCBm
-b3IgMW1zIGFzIHBlciB0aGUgc3BlYyAqLwotCQl1c2xlZXBfcmFuZ2UoMTAwMCwgMTUwMCk7Ci0J
-CXB3ciB8PSBTREhDSV9QT1dFUl9PTjsKLQkJc2RoY2lfd3JpdGViKGhvc3QsIHB3ciwgU0RIQ0lf
-UE9XRVJfQ09OVFJPTCk7Ci0KLQkJcHJfaW5mbyhEUklWRVJfTkFNRSAiOiBTd2l0Y2hpbmcgdG8g
-MS44ViBzaWduYWxsaW5nICIKLQkJCSJ2b2x0YWdlIGZhaWxlZCwgcmV0cnlpbmcgd2l0aCBTMThS
-IHNldCB0byAwXG4iKTsKLQkJcmV0dXJuIC1FQUdBSU47CisJCWN0cmwgfD0gU0RIQ0lfQ1RSTF9W
-RERfMTgwOworCQlzZGhjaV93cml0ZXcoaG9zdCwgY3RybCwgU0RIQ0lfSE9TVF9DT05UUk9MMik7
-CisJCXJldHVybiAwOwogCX0gZWxzZQogCQkvKiBObyBzaWduYWwgdm9sdGFnZSBzd2l0Y2ggcmVx
-dWlyZWQgKi8KIAkJcmV0dXJuIDA7CkBAIC0xOTMxLDExICsxODc2LDIwIEBAIHN0YXRpYyB2b2lk
-IHNkaGNpX2VuYWJsZV9wcmVzZXRfdmFsdWUoc3RydWN0IG1tY19ob3N0ICptbWMsIGJvb2wgZW5h
-YmxlKQogCXNkaGNpX3J1bnRpbWVfcG1fcHV0KGhvc3QpOwogfQogCitzdGF0aWMgaW50IHNkaGNp
-X2NhcmRfYnVzeShzdHJ1Y3QgbW1jX2hvc3QgKm1tYywgaW50IGtlZXBfYnVzeSkKK3sKKwlzdHJ1
-Y3Qgc2RoY2lfaG9zdCAqaG9zdCA9IG1tY19wcml2KG1tYyk7CisJdTMyIHByZXNlbnRfc3RhdGUg
-PSBzZGhjaV9yZWFkbChob3N0LCBTREhDSV9QUkVTRU5UX1NUQVRFKTsKKworCXJldHVybiAocHJl
-c2VudF9zdGF0ZSAmIFNESENJX0RBVEFfTFZMX01BU0spICE9IFNESENJX0RBVEFfTFZMX01BU0s7
-Cit9CisKIHN0YXRpYyBjb25zdCBzdHJ1Y3QgbW1jX2hvc3Rfb3BzIHNkaGNpX29wcyA9IHsKIAku
-cmVxdWVzdAk9IHNkaGNpX3JlcXVlc3QsCiAJLnNldF9pb3MJPSBzZGhjaV9zZXRfaW9zLAogCS5n
-ZXRfcm8JCT0gc2RoY2lfZ2V0X3JvLAogCS5od19yZXNldAk9IHNkaGNpX2h3X3Jlc2V0LAorCS5j
-YXJkX2J1c3kJPSBzZGhjaV9jYXJkX2J1c3ksCiAJLmVuYWJsZV9zZGlvX2lycSA9IHNkaGNpX2Vu
-YWJsZV9zZGlvX2lycSwKIAkuc3RhcnRfc2lnbmFsX3ZvbHRhZ2Vfc3dpdGNoCT0gc2RoY2lfc3Rh
-cnRfc2lnbmFsX3ZvbHRhZ2Vfc3dpdGNoLAogCS5leGVjdXRlX3R1bmluZwkJCT0gc2RoY2lfZXhl
-Y3V0ZV90dW5pbmcsCi0tIAoxLjcuMTEuNwoK
---047d7b2ee7dbaa6af204ccc1c39a--
+-- 
+Grant Likely, B.Sc., P.Eng.
+Secret Lab Technologies Ltd.
