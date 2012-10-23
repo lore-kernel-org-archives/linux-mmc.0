@@ -1,37 +1,79 @@
-From: Michal Hocko <mhocko@suse.cz>
-Subject: Re: process hangs on do_exit when oom happens
-Date: Tue, 23 Oct 2012 10:35:58 +0200
-Message-ID: <20121023083556.GB15397@dhcp22.suse.cz>
-References: <op.wmbi5kbrn27o5l@gaoqiang-d1.corp.qihoo.net>
- <20121019160425.GA10175@dhcp22.suse.cz>
- <CAKWKT+ZRMHzgCLJ1quGnw-_T1b9OboYKnQdRc2_Z=rdU_PFVtw@mail.gmail.com>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH] powerpc/esdhc: enable the card insert/remove interrupt
+Date: Tue, 23 Oct 2012 08:39:44 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C1C68D9@039-SN1MPN1-003.039d.mgd.msft.net>
+References: <1350975677-8195-1-git-send-email-r66093@freescale.com>
+ <20121023082648.GA21690@lizard>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <CAKWKT+ZRMHzgCLJ1quGnw-_T1b9OboYKnQdRc2_Z=rdU_PFVtw@mail.gmail.com>
-Sender: owner-linux-mm@kvack.org
-To: Qiang Gao <gaoqiangscut@gmail.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cgroups@vger.kernel.org" <cgroups@vger.kernel.org>, linux-mm@kvack.org, bsingharora@gmail.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:19809
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754227Ab2JWIjs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Oct 2012 04:39:48 -0400
+In-Reply-To: <20121023082648.GA21690@lizard>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kumar Gala <galak@kernel.crashing.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 
-On Tue 23-10-12 11:35:52, Qiang Gao wrote:
-> I'm sure this is a global-oom,not cgroup-oom. [the dmesg output in the end]
+SGksIEFudG9uDQpGb3IgRlNMIFNPQ3MsIHRoZSBpbnRlcnJ1cHQgbW9kZSBpcyBzdXBwb3J0IGZv
+ciBjYXJkIGRldGVjdC4NCkZvciBzb21lIHJlYXNvbnMsIHNvbWUgYm9hcmQgY2FuJ3Qgc3VwcG9y
+dCB0aGlzIGZlYXR1cmUsIHN1Y2ggYXMgbXBjODM3eG1kcyBib2FyZCwNCmJ1dCBtcGM4Mzd4cmRi
+IGJvYXJkIHN1cHBvcnQgaXQuDQoNCkkgc2VlIHlvdXIgbGlua3MsIGl0IGlzIGFib3V0IHRoZSBE
+TUEgKHRoZSBmaXJzdCB2ZXJzaW9uIG9mIHAyMDIwIGRvbid0IHN1cHBvcnQgRE1BLCBuZWVkIHRv
+IGVuYWJsZSB0aGUgUElPIG1vZGUsIGJ1dCB0aGUgbGF0ZXIgdmVyc2lvbiBoYXMgZml4ZWQgdGhp
+cyBpc3N1ZSkuDQoNCkJlc3QgUmVnYXJkcw0KSmVycnkgSHVhbmcNCg0KDQo+IC0tLS0tT3JpZ2lu
+YWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IGxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5vcmcg
+W21haWx0bzpsaW51eC1tbWMtDQo+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9m
+IEFudG9uIFZvcm9udHNvdg0KPiBTZW50OiBUdWVzZGF5LCBPY3RvYmVyIDIzLCAyMDEyIDQ6Mjcg
+UE0NCj4gVG86IEh1YW5nIENoYW5nbWluZy1SNjYwOTMNCj4gQ2M6IGxpbnV4LW1tY0B2Z2VyLmtl
+cm5lbC5vcmc7IEh1YW5nIENoYW5nbWluZy1SNjYwOTM7IENocmlzIEJhbGw7IEt1bWFyDQo+IEdh
+bGE7IGxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0hd
+IHBvd2VycGMvZXNkaGM6IGVuYWJsZSB0aGUgY2FyZCBpbnNlcnQvcmVtb3ZlDQo+IGludGVycnVw
+dA0KPiANCj4gT24gVHVlLCBPY3QgMjMsIDIwMTIgYXQgMDM6MDE6MTdQTSArMDgwMCwgcjY2MDkz
+QGZyZWVzY2FsZS5jb20gd3JvdGU6DQo+ID4gRnJvbTogSmVycnkgSHVhbmcgPENoYW5nLU1pbmcu
+SHVhbmdAZnJlZXNjYWxlLmNvbT4NCj4gPg0KPiA+IFRoZSBjdXJyZW50IGVTREhDIGRyaXZlciB1
+c2UgdGhlIHBvbGwgbW9kZSB0byBkZXRlY3QgaWYgdGhlIFNEL01NQw0KPiA+IGNhcmQgaXMgaW5z
+ZXJ0ZWQgb3IgcmVtb3ZlZCwgd2hpY2ggd2lsbCBnZW5lcmF0ZSBtYW55IGludGVycnVwdHMgYW5k
+DQo+ID4gaW1wYWN0IHRoZSBwZXJmb3JtYW5jZS4NCj4gPiBUaGVyZWZvcmUsIGNoYW5nZSB0aGUg
+ZGVmYXVsdCBjYXJkIGRldGVjdCB0byBpbnRlcnJ1cHQgbW9kZSwgaWYgdGhlDQo+ID4gYm9hcmQg
+Y2FuJ3Qgc3VwcG9ydCB0aGlzIG1vZGUsIHdlIHN0aWxsIHVzZSB0aGUgcG9sbCBtb2RlLg0KPiA+
+DQo+ID4gU2lnbmVkLW9mZi1ieTogSmVycnkgSHVhbmcgPENoYW5nLU1pbmcuSHVhbmdAZnJlZXNj
+YWxlLmNvbT4NCj4gPiBDQzogQW50b24gVm9yb250c292IDxjYm91YXRtYWlscnVAZ21haWwuY29t
+Pg0KPiA+IENDOiBDaHJpcyBCYWxsIDxjamJAbGFwdG9wLm9yZz4NCj4gPiAtLS0NCj4gDQo+IElJ
+UkMsIHRoZSBjYXJkIGRldGVjdGlvbiBpcyBicm9rZW4gU09DLXJldmlzaW9uLXdpc2UsIG5vdCBi
+b2FyZC13aXNlLiBTbw0KPiB0aGUgY2hhbmdlIHNlZW1zIHdyb25nLg0KPiANCj4gQWxzbywgdGFr
+ZSBhIGxvb2sgYXQgdGhpczoNCj4gDQo+IAlodHRwOi8vbGttbC5vcmcvbGttbC8yMDEwLzcvMTQv
+MTI3DQo+IA0KPiBJIHN0YXJ0ZWQgdGhlIHdvcmsgYnV0IG5ldmVyIGZpbmlzaGVkLCB1bmZvcnR1
+bmF0ZWx5IGl0IGNhdXNlZCBzb21lDQo+IHJlZ3Jlc3Npb25zIGZvciBub24tRlNMIGhhcmR3YXJl
+Li4uDQo+IA0KPiA+ICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMgfCAgICA3ICsr
+KysrKy0NCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDYgaW5zZXJ0aW9ucygrKSwgMSBkZWxldGlvbigt
+KQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMu
+Yw0KPiA+IGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jDQo+ID4gaW5kZXggZmZj
+MTIyNi4uNWRjMzYyZiAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9m
+LWVzZGhjLmMNCj4gPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMNCj4g
+PiBAQCAtMTk2LDYgKzE5NiwxMSBAQCBzdGF0aWMgdm9pZCBlc2RoY19vZl9kZXRlY3RfbGltaXRh
+dGlvbihzdHJ1Y3QNCj4gcGxhdGZvcm1fZGV2aWNlICpwZGV2LA0KPiA+ICAJaWYgKHZ2biA9PSBW
+RU5ET1JfVl8yMikNCj4gPiAgCQlwZGF0YS0+cXVpcmtzMiB8PSBTREhDSV9RVUlSSzJfSE9TVF9O
+T19DTUQyMzsNCj4gPg0KPiA+ICsJLyogUDQwODBEUyBhbmQgTVBDODM3WE1EUyBib2FyZCBkb24n
+dCBzdXBwb3J0IGludGVycnVwdCBtb2RlICovDQo+ID4gKwlpZiAob2ZfbWFjaGluZV9pc19jb21w
+YXRpYmxlKCJmc2wsbXBjODM3eG1kcyIpIHx8DQo+ID4gKwkgICAgb2ZfbWFjaGluZV9pc19jb21w
+YXRpYmxlKCJmc2wsUDQwODBEUyIpKQ0KPiA+ICsJCXBkYXRhLT5xdWlya3MgfD0gU0RIQ0lfUVVJ
+UktfQlJPS0VOX0NBUkRfREVURUNUSU9OOw0KPiA+ICsNCj4gPiAgCWlvdW5tYXAoaW9hZGRyKTsN
+Cj4gPiAgZW5kOg0KPiA+ICAJcmV0dXJuOw0KPiA+IEBAIC0yMjMsNyArMjI4LDcgQEAgc3RhdGlj
+IHN0cnVjdCBzZGhjaV9wbHRmbV9kYXRhIHNkaGNpX2VzZGhjX3BkYXRhID0NCj4gew0KPiA+ICAJ
+ICogY2FyZCBkZXRlY3Rpb24gY291bGQgYmUgaGFuZGxlZCB2aWEgR1BJTw0KPiA+ICAJICogZVNE
+SEMgY2Fubm90IHN1cHBvcnQgRW5kIEF0dHJpYnV0ZSBpbiBOT1AgQURNQSBkZXNjcmlwdG9yDQo+
+ID4gIAkgKi8NCj4gPiAtCS5xdWlya3MgPSBFU0RIQ19ERUZBVUxUX1FVSVJLUyB8IFNESENJX1FV
+SVJLX0JST0tFTl9DQVJEX0RFVEVDVElPTg0KPiA+ICsJLnF1aXJrcyA9IEVTREhDX0RFRkFVTFRf
+UVVJUktTDQo+ID4gIAkJfCBTREhDSV9RVUlSS19OT19DQVJEX05PX1JFU0VUDQo+ID4gIAkJfCBT
+REhDSV9RVUlSS19OT19FTkRBVFRSX0lOX05PUERFU0MsDQo+ID4gIAkub3BzID0gJnNkaGNpX2Vz
+ZGhjX29wcywNCj4gPiAtLQ0KPiA+IDEuNy45LjUNCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJv
+bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LW1tYyIgaW4NCj4g
+dGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBt
+YWpvcmRvbW8gaW5mbyBhdA0KPiBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
+Lmh0bWwNCg0K
 
-Yes this is the global oom killer because:
-> cglimit -M 700M ./tt 
-> then after global-oom,the process hangs..
-
-> 179184 pages RAM
-
-So you have ~700M of RAM so the memcg limit is basically pointless as it
-cannot be reached...
--- 
-Michal Hocko
-SUSE Labs
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
