@@ -1,234 +1,78 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH v5] powerpc/esdhc: disable CMD23 for some Freescale SoCs
-Date: Tue, 23 Oct 2012 08:41:12 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C1C68F1@039-SN1MPN1-003.039d.mgd.msft.net>
-References: <1348639360-5757-1-git-send-email-r66093@freescale.com>
- <CAGxe1ZHuhpmfeokBLiNyVaj_JMQikwZdSDsoV11TPnB9Ea6bqA@mail.gmail.com>
- <110EED8CC96DFC488B7E717A2027A27C1B3F5A@039-SN1MPN1-003.039d.mgd.msft.net>
- <110EED8CC96DFC488B7E717A2027A27C1BB0B0@039-SN1MPN1-003.039d.mgd.msft.net>
+From: Sha Zhengju <handai.szj-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: process hangs on do_exit when oom happens
+Date: Tue, 23 Oct 2012 17:01:58 +0800
+Message-ID: <50865D06.5090605@gmail.com>
+References: <op.wmbi5kbrn27o5l@gaoqiang-d1.corp.qihoo.net>	<20121019160425.GA10175@dhcp22.suse.cz> <CAKWKT+ZRMHzgCLJ1quGnw-_T1b9OboYKnQdRc2_Z=rdU_PFVtw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:24382 "EHLO
-	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754183Ab2JWIlP convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 23 Oct 2012 04:41:15 -0400
-In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C1BB0B0@039-SN1MPN1-003.039d.mgd.msft.net>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAKWKT+ZRMHzgCLJ1quGnw-_T1b9OboYKnQdRc2_Z=rdU_PFVtw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Qiang Gao <gaoqiangscut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Michal Hocko <mhocko-AlSwsSmVLrQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, bsingharora-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xie Shaohui-B21989 <B21989@freescale.com>, Girish K S <girish.shivananjappa@linaro.org>, Chris Ball <cjb@laptop.org>
 
-Anton, 
-could you give some comment about this patch?
-Reviewed by Girish last month.
+On 10/23/2012 11:35 AM, Qiang Gao wrote:
+> information about the system is in the attach file "information.txt"
+>
+> I can not reproduce it in the upstream 3.6.0 kernel..
+>
+> On Sat, Oct 20, 2012 at 12:04 AM, Michal Hocko<mhocko-AlSwsSmVLrQ@public.gmane.org>  wrote:
+>> On Wed 17-10-12 18:23:34, gaoqiang wrote:
+>>> I looked up nothing useful with google,so I'm here for help..
+>>>
+>>> when this happens:  I use memcg to limit the memory use of a
+>>> process,and when the memcg cgroup was out of memory,
+>>> the process was oom-killed   however,it cannot really complete the
+>>> exiting. here is the some information
+>> How many tasks are in the group and what kind of memory do they use?
+>> Is it possible that you were hit by the same issue as described in
+>> 79dfdacc memcg: make oom_lock 0 and 1 based rather than counter.
+>>
+>>> OS version:  centos6.2    2.6.32.220.7.1
+>> Your kernel is quite old and you should be probably asking your
+>> distribution to help you out. There were many fixes since 2.6.32.
+>> Are you able to reproduce the same issue with the current vanila kernel?
+>>
+>>> /proc/pid/stack
+>>> ---------------------------------------------------------------
+>>>
+>>> [<ffffffff810597ca>] __cond_resched+0x2a/0x40
+>>> [<ffffffff81121569>] unmap_vmas+0xb49/0xb70
+>>> [<ffffffff8112822e>] exit_mmap+0x7e/0x140
+>>> [<ffffffff8105b078>] mmput+0x58/0x110
+>>> [<ffffffff81061aad>] exit_mm+0x11d/0x160
+>>> [<ffffffff81061c9d>] do_exit+0x1ad/0x860
+>>> [<ffffffff81062391>] do_group_exit+0x41/0xb0
+>>> [<ffffffff81077cd8>] get_signal_to_deliver+0x1e8/0x430
+>>> [<ffffffff8100a4c4>] do_notify_resume+0xf4/0x8b0
+>>> [<ffffffff8100b281>] int_signal+0x12/0x17
+>>> [<ffffffffffffffff>] 0xffffffffffffffff
+>> This looks strange because this is just an exit part which shouldn't
+>> deadlock or anything. Is this stack stable? Have you tried to take check
+>> it more times?
+>>
 
-Best Regards
-Jerry Huang
+Does the machine only have about 700M memory? I also find something
+in the log file:
 
-
-> -----Original Message-----
-> From: Huang Changming-R66093
-> Sent: Monday, October 15, 2012 11:07 AM
-> To: Huang Changming-R66093; Anton Vorontsov; Chris Ball
-> Cc: linux-mmc@vger.kernel.org; Xie Shaohui-B21989; Girish K S
-> Subject: RE: [PATCH v5] powerpc/esdhc: disable CMD23 for some Freescale
-> SoCs
-> 
-> Anton,
-> Have you any comment about this patch?
-> 
-> Best Regards
-> Jerry Huang
-> 
-> 
-> > -----Original Message-----
-> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > owner@vger.kernel.org] On Behalf Of Huang Changming-R66093
-> > Sent: Tuesday, October 09, 2012 2:24 PM
-> > To: Anton Vorontsov; Chris Ball
-> > Cc: linux-mmc@vger.kernel.org; Xie Shaohui-B21989; Girish K S
-> > Subject: RE: [PATCH v5] powerpc/esdhc: disable CMD23 for some
-> > Freescale SoCs
-> >
-> > Hi, Anto and Chris
-> > This version was created with the feedback from Kumar and all of you.
-> > Have you any comment about this patch?
-> > Could it be merged into kernel?
-> >
-> > Best Regards
-> > Jerry Huang
-> >
-> > > -----Original Message-----
-> > > From: Girish K S [mailto:girish.shivananjappa@linaro.org]
-> > > Sent: Wednesday, September 26, 2012 9:04 PM
-> > > To: Huang Changming-R66093
-> > > Cc: linux-mmc@vger.kernel.org; Huang Changming-R66093; Xie
-> > > Shaohui-B21989; Anton Vorontsov; Chris Ball
-> > > Subject: Re: [PATCH v5] powerpc/esdhc: disable CMD23 for some
-> > > Freescale SoCs
-> > >
-> > > Looks good
-> > > Reviewed By:- Girish K S <girish.shivananjappa@linaro.org>
-> > >
-> > > On 26 September 2012 15:02,  <r66093@freescale.com> wrote:
-> > > > From: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> > > >
-> > > > CMD23 causes lots of errors in kernel on some freescale SoCs
-> > > > (P1020, P1021, P1022, P1024, P1025 and P4080) when MMC card used,
-> > > > which is because these controllers does not support CMD23, even on
-> > > > the SoCs which declares CMD23 is supported.
-> > > > Therefore, we'll not use CMD23.
-> > > >
-> > > > Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> > > > Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
-> > > > CC: Anton Vorontsov <cbouatmailru@gmail.com>
-> > > > CC: Chris Ball <cjb@laptop.org>
-> > > > ---
-> > > > changes for v5:
-> > > >         - change the error to warning information changes for v4:
-> > > >         - change to detect the IP version
-> > > >         - don't use callback function changes for v3:
-> > > >         - move the limitation detect function to eSDHC file
-> > > >         - add the callback funtion to do this limitation detect
-> > > > changes for v2:
-> > > >         - discard the property mode and add the processor
-> > > > detection
-> > > >
-> > > >  drivers/mmc/host/sdhci-of-esdhc.c |   33
-> > > +++++++++++++++++++++++++++++++++
-> > > >  drivers/mmc/host/sdhci-pltfm.c    |    4 +++-
-> > > >  drivers/mmc/host/sdhci-pltfm.h    |    1 +
-> > > >  drivers/mmc/host/sdhci.c          |    3 +++
-> > > >  include/linux/mmc/sdhci.h         |    1 +
-> > > >  5 files changed, 41 insertions(+), 1 deletion(-)
-> > > >
-> > > > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c
-> > > > b/drivers/mmc/host/sdhci-of-esdhc.c
-> > > > index ae5fcbf..ffc1226 100644
-> > > > --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> > > > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> > > > @@ -169,6 +169,38 @@ static void esdhc_of_resume(struct sdhci_host
-> > > > *host)  }  #endif
-> > > >
-> > > > +static void esdhc_of_detect_limitation(struct platform_device
-> *pdev,
-> > > > +       struct sdhci_pltfm_data *pdata) {
-> > > > +       void __iomem *ioaddr;
-> > > > +       struct resource *iomem;
-> > > > +       u32 vvn;
-> > > > +
-> > > > +       iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> > > > +       if (!iomem) {
-> > > > +               dev_warn(&pdev->dev, "failed to get resource\n");
-> > > > +               goto end;
-> > > > +       }
-> > > > +       if (resource_size(iomem) < 0x100)
-> > > > +               dev_warn(&pdev->dev, "Invalid iomem size!\n");
-> > > > +
-> > > > +       ioaddr = ioremap(iomem->start, resource_size(iomem));
-> > > > +       if (!ioaddr) {
-> > > > +               dev_warn(&pdev->dev, "failed to remap registers\n");
-> > > > +               goto end;
-> > > > +       }
-> > > > +
-> > > > +       /* P102x and P4080 has IP version VVN2.2, CMD23 is not
-> > > supported */
-> > > > +       vvn = in_be32(ioaddr + SDHCI_SLOT_INT_STATUS);
-> > > > +       vvn = (vvn & SDHCI_VENDOR_VER_MASK) >>
-> SDHCI_VENDOR_VER_SHIFT;
-> > > > +       if (vvn == VENDOR_V_22)
-> > > > +               pdata->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
-> > > > +
-> > > > +       iounmap(ioaddr);
-> > > > +end:
-> > > > +       return;
-> > > > +}
-> > > > +
-> > > >  static struct sdhci_ops sdhci_esdhc_ops = {
-> > > >         .read_l = esdhc_readl,
-> > > >         .read_w = esdhc_readw,
-> > > > @@ -199,6 +231,7 @@ static struct sdhci_pltfm_data
-> > > > sdhci_esdhc_pdata = {
-> > > >
-> > > >  static int __devinit sdhci_esdhc_probe(struct platform_device
-> > > > *pdev) {
-> > > > +       esdhc_of_detect_limitation(pdev, &sdhci_esdhc_pdata);
-> > > >         return sdhci_pltfm_register(pdev, &sdhci_esdhc_pdata);  }
-> > > >
-> > > > diff --git a/drivers/mmc/host/sdhci-pltfm.c
-> > > > b/drivers/mmc/host/sdhci-pltfm.c index 65551a9..4dd5770 100644
-> > > > --- a/drivers/mmc/host/sdhci-pltfm.c
-> > > > +++ b/drivers/mmc/host/sdhci-pltfm.c
-> > > > @@ -132,8 +132,10 @@ struct sdhci_host *sdhci_pltfm_init(struct
-> > > platform_device *pdev,
-> > > >                 host->ops = pdata->ops;
-> > > >         else
-> > > >                 host->ops = &sdhci_pltfm_ops;
-> > > > -       if (pdata)
-> > > > +       if (pdata) {
-> > > >                 host->quirks = pdata->quirks;
-> > > > +               host->quirks2 = pdata->quirks2;
-> > > > +       }
-> > > >         host->irq = platform_get_irq(pdev, 0);
-> > > >
-> > > >         if (!request_mem_region(iomem->start,
-> > > > resource_size(iomem), diff --git a/drivers/mmc/host/sdhci-pltfm.h
-> > > > b/drivers/mmc/host/sdhci-pltfm.h index 37e0e18..283d54a 100644
-> > > > --- a/drivers/mmc/host/sdhci-pltfm.h
-> > > > +++ b/drivers/mmc/host/sdhci-pltfm.h
-> > > > @@ -18,6 +18,7 @@
-> > > >  struct sdhci_pltfm_data {
-> > > >         struct sdhci_ops *ops;
-> > > >         unsigned int quirks;
-> > > > +       unsigned int quirks2;
-> > > >  };
-> > > >
-> > > >  struct sdhci_pltfm_host {
-> > > > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > > > index 0e15c79..b0b7cad 100644
-> > > > --- a/drivers/mmc/host/sdhci.c
-> > > > +++ b/drivers/mmc/host/sdhci.c
-> > > > @@ -2837,6 +2837,9 @@ int sdhci_add_host(struct sdhci_host *host)
-> > > >         if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
-> > > >                 mmc->caps |= MMC_CAP_4_BIT_DATA;
-> > > >
-> > > > +       if (host->quirks2 & SDHCI_QUIRK2_HOST_NO_CMD23)
-> > > > +               mmc->caps &= ~MMC_CAP_CMD23;
-> > > > +
-> > > >         if (caps[0] & SDHCI_CAN_DO_HISPD)
-> > > >                 mmc->caps |= MMC_CAP_SD_HIGHSPEED |
-> > > > MMC_CAP_MMC_HIGHSPEED;
-> > > >
-> > > > diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> > > > index fa8529a..1edcb4d 100644
-> > > > --- a/include/linux/mmc/sdhci.h
-> > > > +++ b/include/linux/mmc/sdhci.h
-> > > > @@ -91,6 +91,7 @@ struct sdhci_host {
-> > > >         unsigned int quirks2;   /* More deviations from spec. */
-> > > >
-> > > >  #define SDHCI_QUIRK2_HOST_OFF_CARD_ON                  (1<<0)
-> > > > +#define SDHCI_QUIRK2_HOST_NO_CMD23                     (1<<1)
-> > > >
-> > > >         int irq;                /* Device IRQ */
-> > > >         void __iomem *ioaddr;   /* Mapped address */
-> > > > --
-> > > > 1.7.9.5
-> > > >
-> > > >
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe linux-
-> mmc"
-> > > > in the body of a message to majordomo@vger.kernel.org More
-> > > > majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> > in the body of a message to majordomo@vger.kernel.org More majordomo
-> > info at http://vger.kernel.org/majordomo-info.html
+Node 0 DMA free:2772kB min:72kB low:88kB high:108kB present:15312kB..
+lowmem_reserve[]: 0 674 674 674
+Node 0 DMA32 free:*3172kB* min:3284kB low:4104kB high:4924kB present:690712kB ..
+lowmem_reserve[]: 0 0 0 0
+0 pages in swap cache
+Swap cache stats: add 0, delete 0, find 0/0
+Free swap  = 0kB
+Total swap = 0kB
+179184 pages RAM  ==>  179184 * 4 / 1024 = *700M*
+6773 pages reserved
 
 
+Note that the free memory of DMA32(3172KB) is lower than min watermark,
+which means the global is under pressure now. What's more the swap is off,
+so the global oom is normal behavior.
+
+
+Thanks,
+Sha
