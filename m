@@ -1,89 +1,52 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci: Defer probe if regulator_get fails
-Date: Tue, 23 Oct 2012 19:10:49 +0900
-Message-ID: <50866D29.1040709@samsung.com>
-References: <1350976709-19248-1-git-send-email-pkunapuli@nvidia.com>
- <1350976709-19248-3-git-send-email-pkunapuli@nvidia.com>
+From: Michal Hocko <mhocko@suse.cz>
+Subject: Re: process hangs on do_exit when oom happens
+Date: Tue, 23 Oct 2012 12:15:00 +0200
+Message-ID: <20121023101500.GE15397@dhcp22.suse.cz>
+References: <op.wmbi5kbrn27o5l@gaoqiang-d1.corp.qihoo.net>
+ <20121019160425.GA10175@dhcp22.suse.cz>
+ <CAKWKT+ZRMHzgCLJ1quGnw-_T1b9OboYKnQdRc2_Z=rdU_PFVtw@mail.gmail.com>
+ <CAKTCnzkMQQXRdx=ikydsD9Pm3LuRgf45_=m7ozuFmSZyxazXyA@mail.gmail.com>
+ <CAKWKT+bYOf0cEDuiibf6eV2raMxe481y-D+nrBgPWR3R+53zvg@mail.gmail.com>
+ <20121023095028.GD15397@dhcp22.suse.cz>
+ <CAKWKT+b2s4E7Nne5d0UJwfLGiCXqAUgrCzuuZi6ZPdjszVSmWg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <1350976709-19248-3-git-send-email-pkunapuli@nvidia.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Pavan Kunapuli <pkunapuli@nvidia.com>
-Cc: swarren@wwwdotorg.org, linux@arm.linux.org.uk, cjb@laptop.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from cantor2.suse.de ([195.135.220.15]:49767 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751402Ab2JWKPD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 23 Oct 2012 06:15:03 -0400
+Content-Disposition: inline
+In-Reply-To: <CAKWKT+b2s4E7Nne5d0UJwfLGiCXqAUgrCzuuZi6ZPdjszVSmWg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Qiang Gao <gaoqiangscut@gmail.com>
+Cc: Balbir Singh <bsingharora@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cgroups@vger.kernel.org" <cgroups@vger.kernel.org>, linux-mm@kvack.org
 
-I didn't understand why defer the probe?
-I think that some board can't control vqmmc or vmmc.
+On Tue 23-10-12 18:10:33, Qiang Gao wrote:
+> On Tue, Oct 23, 2012 at 5:50 PM, Michal Hocko <mhocko@suse.cz> wrote:
+> > On Tue 23-10-12 15:18:48, Qiang Gao wrote:
+> >> This process was moved to RT-priority queue when global oom-killer
+> >> happened to boost the recovery of the system..
+> >
+> > Who did that? oom killer doesn't boost the priority (scheduling class)
+> > AFAIK.
+> >
+> >> but it wasn't get properily dealt with. I still have no idea why where
+> >> the problem is ..
+> >
+> > Well your configuration says that there is no runtime reserved for the
+> > group.
+> > Please refer to Documentation/scheduler/sched-rt-group.txt for more
+> > information.
+> >
+[...]
+> maybe this is not a upstream-kernel bug. the centos/redhat kernel
+> would boost the process to RT prio when the process was selected
+> by oom-killer.
 
-Best Regards,
-Jaehoon Chung
-On 10/23/2012 04:18 PM, Pavan Kunapuli wrote:
-> vmmc and vqmmc regulators control the voltage to
-> the host and device. Defer the probe if either of
-> them is not registered.
-> 
-> Signed-off-by: Pavan Kunapuli <pkunapuli@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci.c |   25 ++++++++++++++++++++++---
->  1 files changed, 22 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 7922adb..925c403 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2844,11 +2844,17 @@ int sdhci_add_host(struct sdhci_host *host)
->  	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
->  		mmc->caps |= MMC_CAP_NEEDS_POLL;
->  
-> -	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
-> +	/*
-> +	 * If vqmmc regulator and no 1.8V signalling, then there's no UHS.
-> +	 * vqmmc regulator should be present. If it's not present,
-> +	 * assume the regulator driver registration is not yet done and
-> +	 * defer the probe.
-> +	 */
->  	host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
->  	if (IS_ERR(host->vqmmc)) {
-> -		pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
-> +		pr_err("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
->  		host->vqmmc = NULL;
-> +		return -EPROBE_DEFER;
->  	}
->  	else if (regulator_is_supported_voltage(host->vqmmc, 1800000, 1800000))
->  		regulator_enable(host->vqmmc);
-> @@ -2903,10 +2909,17 @@ int sdhci_add_host(struct sdhci_host *host)
->  
->  	ocr_avail = 0;
->  
-> +	/*
-> +	 * vmmc regulator should be present. If it's not present,
-> +	 * assume the regulator driver registration is not yet done
-> +	 * and defer the probe.
-> +	 */
->  	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
->  	if (IS_ERR(host->vmmc)) {
-> -		pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
-> +		pr_err("%s: no vmmc regulator found\n", mmc_hostname(mmc));
->  		host->vmmc = NULL;
-> +		ret = -EPROBE_DEFER;
-> +		goto vmmc_err;
->  	} else
->  		regulator_enable(host->vmmc);
->  
-> @@ -3121,7 +3134,13 @@ reset:
->  untasklet:
->  	tasklet_kill(&host->card_tasklet);
->  	tasklet_kill(&host->finish_tasklet);
-> +vmmc_err:
-> +	if (host->vqmmc) {
-> +		if (regulator_is_enabled(host->vqmmc))
-> +			regulator_disable(host->vqmmc);
->  
-> +		regulator_put(host->vqmmc);
-> +	}
->  	return ret;
->  }
->  
-> 
+This still looks like your cpu controller is misconfigured. Even if the
+task is promoted to be realtime.
+-- 
+Michal Hocko
+SUSE Labs
