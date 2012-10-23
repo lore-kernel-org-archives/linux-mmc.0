@@ -1,18 +1,23 @@
-From: Grant Likely <grant.likely@secretlab.ca>
+From: Dan Williams <djbw@fb.com>
 Subject: Re: [RFC PATCH 1/3] dmaengine: add dma_get_channel_caps()
-Date: Tue, 23 Oct 2012 23:49:33 +0100
-Message-ID: <CACxGe6sUrXPc2wtLfOy8_LvRMM+e=9=sSDNLkeszfe=JX_ipbw@mail.gmail.com>
-References: <1350615088-14562-1-git-send-email-mporter@ti.com> <1350615088-14562-2-git-send-email-mporter@ti.com>
+Date: Tue, 23 Oct 2012 15:54:25 -0700
+Message-ID: <CAA9_cmdVfbO+T0iSEf4uTPcejx1Mx+aQ5LidYZkJ89dVR=ydXw@mail.gmail.com>
+References: <1350615088-14562-1-git-send-email-mporter@ti.com>
+	<1350615088-14562-2-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:61635 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757462Ab2JWWy0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Oct 2012 18:54:26 -0400
 In-Reply-To: <1350615088-14562-2-git-send-email-mporter@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Porter <mporter@ti.com>
-Cc: Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Matt Porter <mporter@ti.com>
+Cc: Vinod Koul <vinod.koul@intel.com>, Chris Ball <cjb@laptop.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 
-On Fri, Oct 19, 2012 at 3:51 AM, Matt Porter <mporter@ti.com> wrote:
+On Thu, Oct 18, 2012 at 7:51 PM, Matt Porter <mporter@ti.com> wrote:
 > Add a dmaengine API to retrieve per channel capabilities.
 > Currently, only channel ops and SG segment limitations are
 > implemented caps.
@@ -53,10 +58,6 @@ On Fri, Oct 19, 2012 at 3:51 AM, Matt Porter <mporter@ti.com> wrote:
 > +       DMAENGINE_INTERLEAVED   = 0x0100,
 > +       DMAENGINE_SG            = 0x0200,
 > +};
-
-Actually, one more comment. Why the new enum? Why can't the
-dma_transaction_type enum be used directly along with dma_cap_mask_t?
-
 > +
 > +/* struct dmaengine_chan_caps - expose capability of a channel
 > + * Note: each channel can have same or different capabilities
@@ -76,62 +77,10 @@ dma_transaction_type enum be used directly along with dma_cap_mask_t?
 > +       int seg_nr;
 > +       int seg_len;
 > +};
-> +
->  static inline const char *dma_chan_name(struct dma_chan *chan)
->  {
->         return dev_name(&chan->dev->device);
-> @@ -534,6 +566,7 @@ struct dma_tx_state {
->   *     struct with auxiliary transfer status information, otherwise the call
->   *     will just return a simple status code
->   * @device_issue_pending: push pending transactions to hardware
-> + * @device_channel_caps: return the channel capabilities
->   */
->  struct dma_device {
->
-> @@ -602,6 +635,8 @@ struct dma_device {
->                                             dma_cookie_t cookie,
->                                             struct dma_tx_state *txstate);
->         void (*device_issue_pending)(struct dma_chan *chan);
-> +       struct dmaengine_chan_caps *(*device_channel_caps)(
-> +               struct dma_chan *chan, enum dma_transfer_direction direction);
->  };
->
->  static inline int dmaengine_device_control(struct dma_chan *chan,
-> @@ -969,6 +1004,23 @@ dma_set_tx_state(struct dma_tx_state *st, dma_cookie_t last, dma_cookie_t used,
->         }
->  }
->
-> +/**
-> + * dma_get_channel_caps - flush pending transactions to HW
-> + * @chan: target DMA channel
-> + * @dir: direction of transfer
-> + *
-> + * Get the channel-specific capabilities. If the dmaengine
-> + * driver does not implement per channel capbilities then
-> + * NULL is returned.
-> + */
-> +static inline struct dmaengine_chan_caps
-> +*dma_get_channel_caps(struct dma_chan *chan, enum dma_transfer_direction dir)
-> +{
-> +       if (chan->device->device_channel_caps)
-> +               return chan->device->device_channel_caps(chan, dir);
-> +       return NULL;
-> +}
-> +
->  enum dma_status dma_sync_wait(struct dma_chan *chan, dma_cookie_t cookie);
->  #ifdef CONFIG_DMA_ENGINE
->  enum dma_status dma_wait_for_async_tx(struct dma_async_tx_descriptor *tx);
-> --
-> 1.7.9.5
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
 
+This makes sense for the potentially dynamic capability properties
+that get set after configuration, but why do we need the operation
+types here?  They can be retrieved from the parent device.
 
-
--- 
-Grant Likely, B.Sc., P.Eng.
-Secret Lab Technologies Ltd.
+--
+Dan
