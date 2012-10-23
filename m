@@ -1,87 +1,37 @@
 From: Pavan Kunapuli <pkunapuli@nvidia.com>
-Subject: [PATCH 2/2] mmc: sdhci: Defer probe if regulator_get fails
-Date: Tue, 23 Oct 2012 12:48:29 +0530
-Message-ID: <1350976709-19248-3-git-send-email-pkunapuli@nvidia.com>
-References: <1350976709-19248-1-git-send-email-pkunapuli@nvidia.com>
+Subject: [PATCH 0/2] mmc: sdhci: Defer probe if regulators are not registered
+Date: Tue, 23 Oct 2012 12:48:58 +0530
+Message-ID: <1350976740-19284-1-git-send-email-pkunapuli@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate03.nvidia.com ([216.228.121.140]:12955 "EHLO
+Received: from hqemgate03.nvidia.com ([216.228.121.140]:12991 "EHLO
 	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756666Ab2JWHS7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Oct 2012 03:18:59 -0400
-In-Reply-To: <1350976709-19248-1-git-send-email-pkunapuli@nvidia.com>
+	with ESMTP id S1756770Ab2JWHT2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Oct 2012 03:19:28 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: swarren@wwwdotorg.org, linux@arm.linux.org.uk, cjb@laptop.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: swarren@wwwdotorg.org, linux@arm.linux.org.uk, cjb@laptop.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 Cc: Pavan Kunapuli <pkunapuli@nvidia.com>
 
-vmmc and vqmmc regulators control the voltage to
-the host and device. Defer the probe if either of
-them is not registered.
+Regulator driver registration may sometimes be done after
+mmc driver registration. In such cases, defer mmc probe
+to obtain vmmc and vmmcq regulators.
+Added vmmc and vmmcq supplies to tegra dt files.
 
-Signed-off-by: Pavan Kunapuli <pkunapuli@nvidia.com>
----
- drivers/mmc/host/sdhci.c |   25 ++++++++++++++++++++++---
- 1 files changed, 22 insertions(+), 3 deletions(-)
+Pavan Kunapuli (2):
+  ARM: dt: tegra: Add sdhci regulators
+  mmc: sdhci: Defer probe if regulator_get fails
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7922adb..925c403 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2844,11 +2844,17 @@ int sdhci_add_host(struct sdhci_host *host)
- 	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
- 		mmc->caps |= MMC_CAP_NEEDS_POLL;
- 
--	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
-+	/*
-+	 * If vqmmc regulator and no 1.8V signalling, then there's no UHS.
-+	 * vqmmc regulator should be present. If it's not present,
-+	 * assume the regulator driver registration is not yet done and
-+	 * defer the probe.
-+	 */
- 	host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
- 	if (IS_ERR(host->vqmmc)) {
--		pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
-+		pr_err("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
- 		host->vqmmc = NULL;
-+		return -EPROBE_DEFER;
- 	}
- 	else if (regulator_is_supported_voltage(host->vqmmc, 1800000, 1800000))
- 		regulator_enable(host->vqmmc);
-@@ -2903,10 +2909,17 @@ int sdhci_add_host(struct sdhci_host *host)
- 
- 	ocr_avail = 0;
- 
-+	/*
-+	 * vmmc regulator should be present. If it's not present,
-+	 * assume the regulator driver registration is not yet done
-+	 * and defer the probe.
-+	 */
- 	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
- 	if (IS_ERR(host->vmmc)) {
--		pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
-+		pr_err("%s: no vmmc regulator found\n", mmc_hostname(mmc));
- 		host->vmmc = NULL;
-+		ret = -EPROBE_DEFER;
-+		goto vmmc_err;
- 	} else
- 		regulator_enable(host->vmmc);
- 
-@@ -3121,7 +3134,13 @@ reset:
- untasklet:
- 	tasklet_kill(&host->card_tasklet);
- 	tasklet_kill(&host->finish_tasklet);
-+vmmc_err:
-+	if (host->vqmmc) {
-+		if (regulator_is_enabled(host->vqmmc))
-+			regulator_disable(host->vqmmc);
- 
-+		regulator_put(host->vqmmc);
-+	}
- 	return ret;
- }
- 
--- 
-1.7.1.1
+ arch/arm/boot/dts/tegra20-harmony.dts    |   27 ++++++++++++++++++++-
+ arch/arm/boot/dts/tegra20-paz00.dts      |   24 +++++++++++++++++++-
+ arch/arm/boot/dts/tegra20-seaboard.dts   |   35 ++++++++++++++++++++++++++++-
+ arch/arm/boot/dts/tegra20-tamonten.dtsi  |   10 ++++++++
+ arch/arm/boot/dts/tegra20-ventana.dts    |   36 ++++++++++++++++++++++++++++-
+ arch/arm/boot/dts/tegra20-whistler.dts   |    9 +++++-
+ arch/arm/boot/dts/tegra30-cardhu-a02.dts |    2 +
+ arch/arm/boot/dts/tegra30-cardhu-a04.dts |    2 +
+ arch/arm/boot/dts/tegra30-cardhu.dtsi    |   19 ++++++++++++++-
+ drivers/mmc/host/sdhci.c                 |   25 ++++++++++++++++++--
+ 10 files changed, 176 insertions(+), 13 deletions(-)
 
