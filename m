@@ -1,86 +1,67 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH v5] powerpc/esdhc: disable CMD23 for some Freescale SoCs
-Date: Wed, 24 Oct 2012 01:39:24 -0700
-Message-ID: <20121024083924.GA4118@lizard>
-References: <1348639360-5757-1-git-send-email-r66093@freescale.com>
- <CAGxe1ZHuhpmfeokBLiNyVaj_JMQikwZdSDsoV11TPnB9Ea6bqA@mail.gmail.com>
- <110EED8CC96DFC488B7E717A2027A27C1B3F5A@039-SN1MPN1-003.039d.mgd.msft.net>
+From: "Konstantin Dorfman" <kdorfman@codeaurora.org>
+Subject: Re: [PATCH v1] mmc: fix async request mechanism for sequential
+     read scenarios
+Date: Wed, 24 Oct 2012 11:41:36 +0200 (IST)
+Message-ID: <f67543901d54b344c8bb401e363e6b80.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:34291 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757974Ab2JXImX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Oct 2012 04:42:23 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so218232pad.19
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Oct 2012 01:42:23 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C1B3F5A@039-SN1MPN1-003.039d.mgd.msft.net>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:62126 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755841Ab2JXJlw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Oct 2012 05:41:52 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Changming-R66093 <r66093@freescale.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xie Shaohui-B21989 <B21989@freescale.com>, Girish K S <girish.shivananjappa@linaro.org>
+To: Per Forlin <per.lkml@gmail.com>
+Cc: Konstantin Dorfman <kdorfman@codeaurora.org>, cjb@laptop.org, linux-mmc@vger.kernel.org
 
-Sorry for the late reply, Huang.
+Hello Per,
 
-On Tue, Oct 09, 2012 at 06:24:13AM +0000, Huang Changming-R66093 wrote:
-[...]
-> > > +static void esdhc_of_detect_limitation(struct platform_device *pdev,
-> > > +       struct sdhci_pltfm_data *pdata) {
+On Mon, October 22, 2012 1:02 am, Per Forlin wrote:
+>> When mmcqt reports on completion of a request there should be
+>> a context switch to allow the insertion of the next read ahead BIOs
+>> to the block layer. Since the mmcqd tries to fetch another request
+>> immediately after the completion of the previous request it gets NULL
+>> and starts waiting for the completion of the previous request.
+>> This wait on completion gives the FS the opportunity to insert the next
+>> request but the MMC layer is already blocked on the previous request
+>> completion and is not aware of the new request waiting to be fetched.
+> I thought that I could trigger a context switch in order to give
+> execution time for FS to add the new request to the MMC queue.
+> I made a simple hack to call yield() in case the request gets NULL. I
+> thought it may give the FS layer enough time to add a new request to
+> the MMC queue. This would not delay the MMC transfer since the yield()
+> is done in parallel with an ongoing transfer. Anyway it was just meant
+> to be a simple test.
+>
+> One yield was not enough. Just for sanity check I added a msleep as
+> well and that was enough to let FS add a new request,
+> Would it be possible to gain throughput by delaying the fetch of new
+> request? Too avoid unnecessary NULL requests
+>
+> If (ongoing request is read AND size is max read ahead AND new request
+> is NULL) yield();
+>
+> BR
+> Per
+We did the same experiment and it will not give maximum possible
+performance. There is no guarantee that the context switch which was
+manually caused by the MMC layer comes just in time: when it was early
+then next fetch still results in NULL, when it was later, then we miss
+possibility to fetch/prepare new request.
 
-Wrong indentation. Should be one more tab, at least (or align to opening
-brace).
+Any delay in fetch of the new request that comes after the new request has
+arrived hits throughput and latency.
 
-> > > +       void __iomem *ioaddr;
-> > > +       struct resource *iomem;
-> > > +       u32 vvn;
-> > > +
-> > > +       iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> > > +       if (!iomem) {
-> > > +               dev_warn(&pdev->dev, "failed to get resource\n");
-> > > +               goto end;
-> > > +       }
-> > > +       if (resource_size(iomem) < 0x100)
-> > > +               dev_warn(&pdev->dev, "Invalid iomem size!\n");
-> > > +
-> > > +       ioaddr = ioremap(iomem->start, resource_size(iomem));
-> > > +       if (!ioaddr) {
-> > > +               dev_warn(&pdev->dev, "failed to remap registers\n");
-> > > +               goto end;
-> > > +       }
-> > > +
-> > > +       /* P102x and P4080 has IP version VVN2.2, CMD23 is not
-> > supported */
-> > > +       vvn = in_be32(ioaddr + SDHCI_SLOT_INT_STATUS);
-> > > +       vvn = (vvn & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
-> > > +       if (vvn == VENDOR_V_22)
-> > > +               pdata->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
-> > > +
-> > > +       iounmap(ioaddr);
-> > > +end:
-> > > +       return;
-
-No need for the 'end' label.
-
-> > > +}
-> > > +
-> > >  static struct sdhci_ops sdhci_esdhc_ops = {
-> > >         .read_l = esdhc_readl,
-> > >         .read_w = esdhc_readw,
-> > > @@ -199,6 +231,7 @@ static struct sdhci_pltfm_data sdhci_esdhc_pdata =
-> > > {
-> > >
-> > >  static int __devinit sdhci_esdhc_probe(struct platform_device *pdev)
-> > > {
-> > > +       esdhc_of_detect_limitation(pdev, &sdhci_esdhc_pdata);
-
-I would rather prefer it to be in sdhci_ops (i.e. introduce
-sdhci_ops->platform_init), so that way you wouldn't need to ioremap()
-stuff by yourself. And make drivers/mmc/host/sdhci-pltfm.c call
-platform_init after ioremap().
-
-Then your detect_limitation() function would only need to check revision
-and set additional quirks.
+The solution we are talking about here will fix not only situation with FS
+read ahead mechanism, but also it will remove penalty of the MMC context
+waiting on completion while any new request arrives.
 
 Thanks,
-Anton.
+
+-- 
+Konstantin Dorfman,
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
+of Code Aurora Forum, hosted by The Linux Foundation
+
