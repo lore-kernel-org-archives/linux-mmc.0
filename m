@@ -1,70 +1,82 @@
-From: Konstantin Dorfman <kdorfman@codeaurora.org>
-Subject: Re: [PATCH] mmc: fix async request mechanism for sequential read scenarios
-Date: Sun, 14 Oct 2012 18:12:51 +0200
-Message-ID: <sval785hvhevse18konsgf63l8s106eor2@4ax.com>
-References: <1349192378-1676-1-git-send-email-kdorfman@codeaurora.org> <1349192378-1676-2-git-send-email-kdorfman@codeaurora.org> <CAFEEs1=zU88dwY1K0+Q9PxdqyOpsNMtj6mZ3YkwebPugofyEEw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:49542 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756212Ab2JXNKB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 24 Oct 2012 09:10:01 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <glkm-linux-mmc@m.gmane.org>)
-	id 1TR0ih-00006K-Ho
-	for linux-mmc@vger.kernel.org; Wed, 24 Oct 2012 15:10:03 +0200
-Received: from 212.199.104.198.static.012.net.il ([212.199.104.198])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Oct 2012 15:10:03 +0200
-Received: from kdorfman by 212.199.104.198.static.012.net.il with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Oct 2012 15:10:03 +0200
-Sender: linux-mmc-owner@vger.kernel.org
+From: Lee Jones <lee.jones@linaro.org>
+Subject: [PATCH 1/1] mmc: Standardise capability type
+Date: Wed, 24 Oct 2012 14:17:44 +0100
+Message-ID: <1351084664-30526-1-git-send-email-lee.jones@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc: arnd@arndb.de, linus.walleij@stericsson.com, Lee Jones <lee.jones@linaro.org>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-On Thu, 11 Oct 2012 17:19:01 +0200, Per Forlin <per.lkml@gmail.com>
-wrote:
-Hello Per,
+There are discrepancies with regards to how MMC capabilities
+are carried throughout the subsystem. Let's standardise them
+to elevate any confusion.
 
->I would like to start with some basic comments.
->
->1. Is this read sequential issue specific to MMC?
->2. Or is it common with all other block-drivers that gets data from
->the block layer (SCSI/SATA etc) ?
->If (#2) can the issue be addressed inside the block layer instead?
->
->BR
->Per
-This issue specific to MMC, others block drivers probably not using
-MMC mechanism for async request (or have more kernel threads for
-processing incoming blk requests). 
-I think, since MMC actively fetches requests from block layer queue,
-the solution has nothing to do with block layer context.
+Cc: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
+Signed-off-by: Lee Jones <lee.jones@linaro.org>
+---
+ drivers/mmc/core/mmc.c     |    2 +-
+ include/linux/mmc/dw_mmc.h |    4 ++--
+ include/linux/mmc/host.h   |    2 +-
+ include/linux/mmc/sdhci.h  |    4 ++--
+ 4 files changed, 6 insertions(+), 6 deletions(-)
 
->
->On Tue, Oct 2, 2012 at 5:39 PM, Konstantin Dorfman
-><kdorfman@codeaurora.org> wrote:
->> The main assumption of the async request design is that the file
->> system adds block requests to the block device queue asynchronously
->> without waiting for completion (see the Rationale section of
->> https://wiki.linaro.org/WorkingGroups/Kernel/Specs
->> /StoragePerfMMC-async-req).
->>
->> We found out that in case of sequential read operations this is not
->> the case, due to the read ahead mechanism.
->Would it be possible to improve this mechanism to achieve the same result?
->Allow an outstanding read ahead request on top of the current ongoing one.
->
-
-I need to look on this mechanism,  but from first glance such
-behaviour may be result of libc/vfs/fs decisions and too complex
-comparing to the patch we are talking about.
-
-Konstantin Dorfman,
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc.
-is a member of Code Aurora Forum, hosted by The Linux Foundation
-
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 7cc4638..f31bf80 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -239,7 +239,7 @@ static void mmc_select_card_type(struct mmc_card *card)
+ {
+ 	struct mmc_host *host = card->host;
+ 	u8 card_type = card->ext_csd.raw_card_type & EXT_CSD_CARD_TYPE_MASK;
+-	unsigned int caps = host->caps, caps2 = host->caps2;
++	unsigned long caps = host->caps, caps2 = host->caps2;
+ 	unsigned int hs_max_dtr = 0;
+ 
+ 	if (card_type & EXT_CSD_CARD_TYPE_26)
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 7c6a113..60b71ae 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -229,8 +229,8 @@ struct dw_mci_board {
+ 	u32 quirks; /* Workaround / Quirk flags */
+ 	unsigned int bus_hz; /* Clock speed at the cclk_in pad */
+ 
+-	unsigned int caps;	/* Capabilities */
+-	unsigned int caps2;	/* More capabilities */
++	unsigned long caps;	/* Capabilities */
++	unsigned long caps2;	/* More capabilities */
+ 	/*
+ 	 * Override fifo depth. If 0, autodetect it from the FIFOTH register,
+ 	 * but note that this may not be reliable after a bootloader has used
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 7abb0e1..f89c968 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -241,7 +241,7 @@ struct mmc_host {
+ #define MMC_CAP_CMD23		(1 << 30)	/* CMD23 supported. */
+ #define MMC_CAP_HW_RESET	(1 << 31)	/* Hardware reset */
+ 
+-	unsigned int		caps2;		/* More host capabilities */
++	unsigned long		caps2;		/* More host capabilities */
+ 
+ #define MMC_CAP2_BOOTPART_NOACC	(1 << 0)	/* Boot partition no access */
+ #define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index fa8529a..8c20910 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -157,8 +157,8 @@ struct sdhci_host {
+ 
+ 	struct timer_list timer;	/* Timer for timeouts */
+ 
+-	unsigned int caps;	/* Alternative CAPABILITY_0 */
+-	unsigned int caps1;	/* Alternative CAPABILITY_1 */
++	unsigned long caps;	/* Alternative CAPABILITY_0 */
++	unsigned long caps1;	/* Alternative CAPABILITY_1 */
+ 
+ 	unsigned int            ocr_avail_sdio;	/* OCR bit masks */
+ 	unsigned int            ocr_avail_sd;
+-- 
+1.7.9.5
