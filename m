@@ -1,47 +1,64 @@
-From: Vinod Koul <vkoul@infradead.org>
-Subject: Re: [RFC PATCH 1/3] dmaengine: add dma_get_channel_caps()
-Date: Wed, 24 Oct 2012 08:43:27 +0530
-Message-ID: <1351048407.5263.10.camel@vkoul-udesk3>
-References: <1350615088-14562-1-git-send-email-mporter@ti.com>
-	 <1350615088-14562-2-git-send-email-mporter@ti.com>
-	 <CACxGe6sUrXPc2wtLfOy8_LvRMM+e=9=sSDNLkeszfe=JX_ipbw@mail.gmail.com>
+From: Qiang Gao <gaoqiangscut@gmail.com>
+Subject: Re: process hangs on do_exit when oom happens
+Date: Wed, 24 Oct 2012 11:44:17 +0800
+Message-ID: <CAKWKT+ZahFTnPRJ4FCebxfcrcYEBf+PL9Wa_Foygep_gFst4_g@mail.gmail.com>
+References: <op.wmbi5kbrn27o5l@gaoqiang-d1.corp.qihoo.net>
+	<20121019160425.GA10175@dhcp22.suse.cz>
+	<CAKWKT+ZRMHzgCLJ1quGnw-_T1b9OboYKnQdRc2_Z=rdU_PFVtw@mail.gmail.com>
+	<CAKTCnzkMQQXRdx=ikydsD9Pm3LuRgf45_=m7ozuFmSZyxazXyA@mail.gmail.com>
+	<CAKWKT+bYOf0cEDuiibf6eV2raMxe481y-D+nrBgPWR3R+53zvg@mail.gmail.com>
+	<20121023095028.GD15397@dhcp22.suse.cz>
+	<CAKWKT+b2s4E7Nne5d0UJwfLGiCXqAUgrCzuuZi6ZPdjszVSmWg@mail.gmail.com>
+	<20121023101500.GE15397@dhcp22.suse.cz>
+	<CAKTCnzkiabWK8tAORkhg6oW11VvXS-YqBwDzED_3=J1buhaQnQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from casper.infradead.org ([85.118.1.10]:54332 "EHLO
-	casper.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934238Ab2JXDZo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Oct 2012 23:25:44 -0400
-In-Reply-To: <CACxGe6sUrXPc2wtLfOy8_LvRMM+e=9=sSDNLkeszfe=JX_ipbw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <CAKTCnzkiabWK8tAORkhg6oW11VvXS-YqBwDzED_3=J1buhaQnQ@mail.gmail.com>
+Sender: owner-linux-mm@kvack.org
+To: Balbir Singh <bsingharora@gmail.com>
+Cc: Michal Hocko <mhocko@suse.cz>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cgroups@vger.kernel.org" <cgroups@vger.kernel.org>, linux-mm@kvack.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: vinod.koul@intel.com, Matt Porter <mporter@ti.com>, Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 
-On Tue, 2012-10-23 at 23:49 +0100, Grant Likely wrote:
-> > +enum dmaengine_apis {
-> > +       DMAENGINE_MEMCPY        = 0x0001,
-> > +       DMAENGINE_XOR           = 0x0002,
-> > +       DMAENGINE_XOR_VAL       = 0x0004,
-> > +       DMAENGINE_PQ            = 0x0008,
-> > +       DMAENGINE_PQ_VAL        = 0x0010,
-> > +       DMAENGINE_MEMSET        = 0x0020,
-> > +       DMAENGINE_SLAVE         = 0x0040,
-> > +       DMAENGINE_CYCLIC        = 0x0080,
-> > +       DMAENGINE_INTERLEAVED   = 0x0100,
-> > +       DMAENGINE_SG            = 0x0200,
-> > +};
-> 
-> Actually, one more comment. Why the new enum? Why can't the
-> dma_transaction_type enum be used directly along with dma_cap_mask_t? 
-Some of the capabilities above are not there in dma_caps_t like DMA_SG.
-Also DMA_INTERRUPT and DMA_PRIVATE would not make much sense here.
+On Wed, Oct 24, 2012 at 1:43 AM, Balbir Singh <bsingharora@gmail.com> wrote:
+> On Tue, Oct 23, 2012 at 3:45 PM, Michal Hocko <mhocko@suse.cz> wrote:
+>> On Tue 23-10-12 18:10:33, Qiang Gao wrote:
+>>> On Tue, Oct 23, 2012 at 5:50 PM, Michal Hocko <mhocko@suse.cz> wrote:
+>>> > On Tue 23-10-12 15:18:48, Qiang Gao wrote:
+>>> >> This process was moved to RT-priority queue when global oom-killer
+>>> >> happened to boost the recovery of the system..
+>>> >
+>>> > Who did that? oom killer doesn't boost the priority (scheduling class)
+>>> > AFAIK.
+>>> >
+>>> >> but it wasn't get properily dealt with. I still have no idea why where
+>>> >> the problem is ..
+>>> >
+>>> > Well your configuration says that there is no runtime reserved for the
+>>> > group.
+>>> > Please refer to Documentation/scheduler/sched-rt-group.txt for more
+>>> > information.
+>>> >
+>> [...]
+>>> maybe this is not a upstream-kernel bug. the centos/redhat kernel
+>>> would boost the process to RT prio when the process was selected
+>>> by oom-killer.
+>>
+>> This still looks like your cpu controller is misconfigured. Even if the
+>> task is promoted to be realtime.
+>
+>
+> Precisely! You need to have rt bandwidth enabled for RT tasks to run,
+> as a workaround please give the groups some RT bandwidth and then work
+> out the migration to RT and what should be the defaults on the distro.
+>
+> Balbir
 
-BUT would help to keep things simpler if have one definition which
-includes all.
- 
--- 
-Vinod Koul
-Intel Corp.
 
+see https://patchwork.kernel.org/patch/719411/
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
