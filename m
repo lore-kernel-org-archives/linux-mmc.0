@@ -1,54 +1,72 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH 1/1] mmc: Standardise capability type
-Date: Wed, 24 Oct 2012 15:53:08 +0100
-Message-ID: <20121024145308.GE3537@gmail.com>
-References: <1351084664-30526-1-git-send-email-lee.jones@linaro.org>
- <201210241321.26878.arnd@arndb.de>
+From: =?ISO-8859-1?Q?Per_F=F6rlin?= <per.forlin@stericsson.com>
+Subject: Re: [PATCH v1] mmc: fix async request mechanism for sequential read
+ scenarios
+Date: Wed, 24 Oct 2012 19:07:56 +0200
+Message-ID: <5088206C.7080101@stericsson.com>
+References: <f67543901d54b344c8bb401e363e6b80.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:50533 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934915Ab2JXOxO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Oct 2012 10:53:14 -0400
-Received: by mail-bk0-f46.google.com with SMTP id jk13so299509bkc.19
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Oct 2012 07:53:12 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <201210241321.26878.arnd@arndb.de>
+Received: from eu1sys200aog103.obsmtp.com ([207.126.144.115]:57288 "EHLO
+	eu1sys200aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756505Ab2JXRI7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Oct 2012 13:08:59 -0400
+In-Reply-To: <f67543901d54b344c8bb401e363e6b80.squirrel@www.codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linus.walleij@stericsson.com, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Konstantin Dorfman <kdorfman@codeaurora.org>
+Cc: Per Forlin <per.lkml@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Wed, 24 Oct 2012, Arnd Bergmann wrote:
+On 10/24/2012 11:41 AM, Konstantin Dorfman wrote:
+> Hello Per,
+>
+> On Mon, October 22, 2012 1:02 am, Per Forlin wrote:
+>>> When mmcqt reports on completion of a request there should be
+>>> a context switch to allow the insertion of the next read ahead BIOs
+>>> to the block layer. Since the mmcqd tries to fetch another request
+>>> immediately after the completion of the previous request it gets NULL
+>>> and starts waiting for the completion of the previous request.
+>>> This wait on completion gives the FS the opportunity to insert the next
+>>> request but the MMC layer is already blocked on the previous request
+>>> completion and is not aware of the new request waiting to be fetched.
+>> I thought that I could trigger a context switch in order to give
+>> execution time for FS to add the new request to the MMC queue.
+>> I made a simple hack to call yield() in case the request gets NULL. I
+>> thought it may give the FS layer enough time to add a new request to
+>> the MMC queue. This would not delay the MMC transfer since the yield()
+>> is done in parallel with an ongoing transfer. Anyway it was just meant
+>> to be a simple test.
+>>
+>> One yield was not enough. Just for sanity check I added a msleep as
+>> well and that was enough to let FS add a new request,
+>> Would it be possible to gain throughput by delaying the fetch of new
+>> request? Too avoid unnecessary NULL requests
+>>
+>> If (ongoing request is read AND size is max read ahead AND new request
+>> is NULL) yield();
+>>
+>> BR
+>> Per
+> We did the same experiment and it will not give maximum possible
+> performance. There is no guarantee that the context switch which was
+> manually caused by the MMC layer comes just in time: when it was early
+> then next fetch still results in NULL, when it was later, then we miss
+> possibility to fetch/prepare new request.
+>
+> Any delay in fetch of the new request that comes after the new request has
+> arrived hits throughput and latency.
+>
+> The solution we are talking about here will fix not only situation with FS
+> read ahead mechanism, but also it will remove penalty of the MMC context
+> waiting on completion while any new request arrives.
+>
+> Thanks,
+>
 
-> On Wednesday 24 October 2012, Lee Jones wrote:
-> >=20
-> > There are discrepancies with regards to how MMC capabilities
-> > are carried throughout the subsystem. Let's standardise them
-> > to elevate any confusion.
-> >=20
-> > Cc: Chris Ball <cjb@laptop.org>
-> > Cc: linux-mmc@vger.kernel.org
-> > Signed-off-by: Lee Jones <lee.jones@linaro.org>
->=20
-> Why make it "unsigned long" then? I think that adds to the
-> confusion because it's sometimes 32 bits and sometimes 64 bits,
-> depending on the CPU. Since it's a bitmask, I would suggest
-> using u32 to make the size explicit.
+It seems strange that the block layer cannot keep up with relatively slow flash media devices. There must be a limitation on number of outstanding request towards MMC.
+I need to make up my mind if it's the best way to address this issue in the MMC framework or block layer. I have started to look into the block layer code but it will take some time to dig out the relevant parts.
 
-I'm not sure that it leaves any confusion. It perhaps wastes a little
-space on 64bit architectures, but that also applies to a great deal
-of other bitmasks floating around.
+BR
+Per
 
-I can do it if you feel that passionate about it, but it's a bigger
-job to hunt down all occurrences and change them over. I only felt
-strongly enough about it to craft this patch because I noticed the
-inconsistency as I created new populate caps for OF functionality.
-
---=20
-Lee Jones
-Linaro ST-Ericsson Landing Team Lead
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
