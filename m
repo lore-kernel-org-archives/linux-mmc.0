@@ -1,74 +1,38 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH v5] powerpc/esdhc: disable CMD23 for some Freescale SoCs
-Date: Thu, 25 Oct 2012 06:29:45 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C1D5EC2@039-SN1MPN1-003.039d.mgd.msft.net>
-References: <1348639360-5757-1-git-send-email-r66093@freescale.com>
- <CAGxe1ZHuhpmfeokBLiNyVaj_JMQikwZdSDsoV11TPnB9Ea6bqA@mail.gmail.com>
- <110EED8CC96DFC488B7E717A2027A27C1B3F5A@039-SN1MPN1-003.039d.mgd.msft.net>
- <20121024083924.GA4118@lizard>
+From: Anton Vorontsov <cbouatmailru@gmail.com>
+Subject: Re: [PATCH v6] powerpc/esdhc: disable CMD23 for some Freescale SoCs
+Date: Thu, 25 Oct 2012 01:01:20 -0700
+Message-ID: <20121025080120.GA23807@lizard>
+References: <1351144039-30588-1-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe006.messaging.microsoft.com ([216.32.180.189]:11543
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753372Ab2JYG3t (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Oct 2012 02:29:49 -0400
-In-Reply-To: <20121024083924.GA4118@lizard>
-Content-Language: en-US
+Received: from mail-da0-f46.google.com ([209.85.210.46]:51952 "EHLO
+	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161033Ab2JYIES (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Oct 2012 04:04:18 -0400
+Received: by mail-da0-f46.google.com with SMTP id n41so664672dak.19
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Oct 2012 01:04:18 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1351144039-30588-1-git-send-email-r66093@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xie Shaohui-B21989 <B21989@freescale.com>, Girish K S <girish.shivananjappa@linaro.org>
+To: r66093@freescale.com
+Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Shaohui Xie <Shaohui.Xie@freescale.com>, Chris Ball <cjb@laptop.org>
 
-SGksIGFudG9uLCANCkkgaGF2ZSByZXNlbnQgdGhpcyBwYXRjaCBhY2NvcmRpbmcgdG8geW91ciBz
-dWdnZXN0aW9uLg0KUGxlYXNlIHJldmlldy4NClRoYW5rcy4NCg0KQmVzdCBSZWdhcmRzDQpKZXJy
-eSBIdWFuZw0KDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQW50b24g
-Vm9yb250c292IFttYWlsdG86Y2JvdWF0bWFpbHJ1QGdtYWlsLmNvbV0NCj4gU2VudDogV2VkbmVz
-ZGF5LCBPY3RvYmVyIDI0LCAyMDEyIDQ6MzkgUE0NCj4gVG86IEh1YW5nIENoYW5nbWluZy1SNjYw
-OTMNCj4gQ2M6IENocmlzIEJhbGw7IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IFhpZSBTaGFv
-aHVpLUIyMTk4OTsgR2lyaXNoIEsgUw0KPiBTdWJqZWN0OiBSZTogW1BBVENIIHY1XSBwb3dlcnBj
-L2VzZGhjOiBkaXNhYmxlIENNRDIzIGZvciBzb21lIEZyZWVzY2FsZQ0KPiBTb0NzDQo+IA0KPiBT
-b3JyeSBmb3IgdGhlIGxhdGUgcmVwbHksIEh1YW5nLg0KPiANCj4gT24gVHVlLCBPY3QgMDksIDIw
-MTIgYXQgMDY6MjQ6MTNBTSArMDAwMCwgSHVhbmcgQ2hhbmdtaW5nLVI2NjA5MyB3cm90ZToNCj4g
-Wy4uLl0NCj4gPiA+ID4gK3N0YXRpYyB2b2lkIGVzZGhjX29mX2RldGVjdF9saW1pdGF0aW9uKHN0
-cnVjdCBwbGF0Zm9ybV9kZXZpY2UNCj4gKnBkZXYsDQo+ID4gPiA+ICsgICAgICAgc3RydWN0IHNk
-aGNpX3BsdGZtX2RhdGEgKnBkYXRhKSB7DQo+IA0KPiBXcm9uZyBpbmRlbnRhdGlvbi4gU2hvdWxk
-IGJlIG9uZSBtb3JlIHRhYiwgYXQgbGVhc3QgKG9yIGFsaWduIHRvIG9wZW5pbmcNCj4gYnJhY2Up
-Lg0KPiANCj4gPiA+ID4gKyAgICAgICB2b2lkIF9faW9tZW0gKmlvYWRkcjsNCj4gPiA+ID4gKyAg
-ICAgICBzdHJ1Y3QgcmVzb3VyY2UgKmlvbWVtOw0KPiA+ID4gPiArICAgICAgIHUzMiB2dm47DQo+
-ID4gPiA+ICsNCj4gPiA+ID4gKyAgICAgICBpb21lbSA9IHBsYXRmb3JtX2dldF9yZXNvdXJjZShw
-ZGV2LCBJT1JFU09VUkNFX01FTSwgMCk7DQo+ID4gPiA+ICsgICAgICAgaWYgKCFpb21lbSkgew0K
-PiA+ID4gPiArICAgICAgICAgICAgICAgZGV2X3dhcm4oJnBkZXYtPmRldiwgImZhaWxlZCB0byBn
-ZXQgcmVzb3VyY2VcbiIpOw0KPiA+ID4gPiArICAgICAgICAgICAgICAgZ290byBlbmQ7DQo+ID4g
-PiA+ICsgICAgICAgfQ0KPiA+ID4gPiArICAgICAgIGlmIChyZXNvdXJjZV9zaXplKGlvbWVtKSA8
-IDB4MTAwKQ0KPiA+ID4gPiArICAgICAgICAgICAgICAgZGV2X3dhcm4oJnBkZXYtPmRldiwgIklu
-dmFsaWQgaW9tZW0gc2l6ZSFcbiIpOw0KPiA+ID4gPiArDQo+ID4gPiA+ICsgICAgICAgaW9hZGRy
-ID0gaW9yZW1hcChpb21lbS0+c3RhcnQsIHJlc291cmNlX3NpemUoaW9tZW0pKTsNCj4gPiA+ID4g
-KyAgICAgICBpZiAoIWlvYWRkcikgew0KPiA+ID4gPiArICAgICAgICAgICAgICAgZGV2X3dhcm4o
-JnBkZXYtPmRldiwgImZhaWxlZCB0byByZW1hcCByZWdpc3RlcnNcbiIpOw0KPiA+ID4gPiArICAg
-ICAgICAgICAgICAgZ290byBlbmQ7DQo+ID4gPiA+ICsgICAgICAgfQ0KPiA+ID4gPiArDQo+ID4g
-PiA+ICsgICAgICAgLyogUDEwMnggYW5kIFA0MDgwIGhhcyBJUCB2ZXJzaW9uIFZWTjIuMiwgQ01E
-MjMgaXMgbm90DQo+ID4gPiBzdXBwb3J0ZWQgKi8NCj4gPiA+ID4gKyAgICAgICB2dm4gPSBpbl9i
-ZTMyKGlvYWRkciArIFNESENJX1NMT1RfSU5UX1NUQVRVUyk7DQo+ID4gPiA+ICsgICAgICAgdnZu
-ID0gKHZ2biAmIFNESENJX1ZFTkRPUl9WRVJfTUFTSykgPj4NCj4gU0RIQ0lfVkVORE9SX1ZFUl9T
-SElGVDsNCj4gPiA+ID4gKyAgICAgICBpZiAodnZuID09IFZFTkRPUl9WXzIyKQ0KPiA+ID4gPiAr
-ICAgICAgICAgICAgICAgcGRhdGEtPnF1aXJrczIgfD0gU0RIQ0lfUVVJUksyX0hPU1RfTk9fQ01E
-MjM7DQo+ID4gPiA+ICsNCj4gPiA+ID4gKyAgICAgICBpb3VubWFwKGlvYWRkcik7DQo+ID4gPiA+
-ICtlbmQ6DQo+ID4gPiA+ICsgICAgICAgcmV0dXJuOw0KPiANCj4gTm8gbmVlZCBmb3IgdGhlICdl
-bmQnIGxhYmVsLg0KPiANCj4gPiA+ID4gK30NCj4gPiA+ID4gKw0KPiA+ID4gPiAgc3RhdGljIHN0
-cnVjdCBzZGhjaV9vcHMgc2RoY2lfZXNkaGNfb3BzID0gew0KPiA+ID4gPiAgICAgICAgIC5yZWFk
-X2wgPSBlc2RoY19yZWFkbCwNCj4gPiA+ID4gICAgICAgICAucmVhZF93ID0gZXNkaGNfcmVhZHcs
-DQo+ID4gPiA+IEBAIC0xOTksNiArMjMxLDcgQEAgc3RhdGljIHN0cnVjdCBzZGhjaV9wbHRmbV9k
-YXRhDQo+ID4gPiA+IHNkaGNpX2VzZGhjX3BkYXRhID0gew0KPiA+ID4gPg0KPiA+ID4gPiAgc3Rh
-dGljIGludCBfX2RldmluaXQgc2RoY2lfZXNkaGNfcHJvYmUoc3RydWN0IHBsYXRmb3JtX2Rldmlj
-ZQ0KPiA+ID4gPiAqcGRldikgew0KPiA+ID4gPiArICAgICAgIGVzZGhjX29mX2RldGVjdF9saW1p
-dGF0aW9uKHBkZXYsICZzZGhjaV9lc2RoY19wZGF0YSk7DQo+IA0KPiBJIHdvdWxkIHJhdGhlciBw
-cmVmZXIgaXQgdG8gYmUgaW4gc2RoY2lfb3BzIChpLmUuIGludHJvZHVjZSBzZGhjaV9vcHMtDQo+
-ID5wbGF0Zm9ybV9pbml0KSwgc28gdGhhdCB3YXkgeW91IHdvdWxkbid0IG5lZWQgdG8gaW9yZW1h
-cCgpIHN0dWZmIGJ5DQo+IHlvdXJzZWxmLiBBbmQgbWFrZSBkcml2ZXJzL21tYy9ob3N0L3NkaGNp
-LXBsdGZtLmMgY2FsbCBwbGF0Zm9ybV9pbml0DQo+IGFmdGVyIGlvcmVtYXAoKS4NCj4gDQo+IFRo
-ZW4geW91ciBkZXRlY3RfbGltaXRhdGlvbigpIGZ1bmN0aW9uIHdvdWxkIG9ubHkgbmVlZCB0byBj
-aGVjayByZXZpc2lvbg0KPiBhbmQgc2V0IGFkZGl0aW9uYWwgcXVpcmtzLg0KPiANCj4gVGhhbmtz
-LA0KPiBBbnRvbi4NCg0K
+On Thu, Oct 25, 2012 at 01:47:19PM +0800, r66093@freescale.com wrote:
+> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> 
+> CMD23 causes lots of errors in kernel on some freescale SoCs
+> (P1020, P1021, P1022, P1024, P1025 and P4080) when MMC card used,
+> which is because these controllers does not support CMD23,
+> even on the SoCs which declares CMD23 is supported.
+> Therefore, we'll not use CMD23.
+> 
+> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
+> CC: Chris Ball <cjb@laptop.org>
+> ---
 
+Looks perfect, thanks a lot!
+
+Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
