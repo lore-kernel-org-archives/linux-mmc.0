@@ -1,94 +1,42 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH] powerpc/esdhc: enable the card insert/remove interrupt
-Date: Thu, 25 Oct 2012 10:05:44 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C1D7A42@039-SN1MPN1-003.039d.mgd.msft.net>
-References: <1350975677-8195-1-git-send-email-r66093@freescale.com>
- <20121023082648.GA21690@lizard>
- <110EED8CC96DFC488B7E717A2027A27C1C68D9@039-SN1MPN1-003.039d.mgd.msft.net>
+From: Yuvaraj CD <yuvaraj.lkml@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: enable controller interrupt before calling mmc_start_host
+Date: Thu, 25 Oct 2012 15:39:50 +0530
+Message-ID: <CA+NduCBvB6kx3ZGhrUTiRJ4hTY4a0NV4Q8GYeBYWGvzTM=ccEQ@mail.gmail.com>
+References: <1349686791-19652-1-git-send-email-yuvaraj.cd@samsung.com>
+	<87hapkhoor.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:33405
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1422716Ab2JYKFt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Oct 2012 06:05:49 -0400
-In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C1C68D9@039-SN1MPN1-003.039d.mgd.msft.net>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <87hapkhoor.fsf@octavius.laptop.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Yuvaraj CD <yuvaraj.cd@gmail.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, will.newton@imgtec.com, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, thomas.abraham@linaro.org, patches@linaro.org, Yuvaraj CD <yuvaraj.cd@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kumar Gala <galak@kernel.crashing.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 
-SGksIEFudG9uLg0KQ291bGQgeW91IGhhdmUgYW55IGNvbW1lbnQgYWJvdXQgaXQ/DQpJZiBub3Qs
-IEkgd2lsbCByZXNlbmQgdGhpcyBwYXRjaCB3aXRoIHYyLg0KDQpCZXN0IFJlZ2FyZHMNCkplcnJ5
-IEh1YW5nDQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBsaW51eC1t
-bWMtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86bGludXgtbW1jLQ0KPiBvd25lckB2Z2Vy
-Lmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBIdWFuZyBDaGFuZ21pbmctUjY2MDkzDQo+IFNlbnQ6
-IFR1ZXNkYXksIE9jdG9iZXIgMjMsIDIwMTIgNDo0MCBQTQ0KPiBUbzogQW50b24gVm9yb250c292
-DQo+IENjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBDaHJpcyBCYWxsOyBLdW1hciBHYWxh
-OyBsaW51eHBwYy0NCj4gZGV2QGxpc3RzLm96bGFicy5vcmcNCj4gU3ViamVjdDogUkU6IFtQQVRD
-SF0gcG93ZXJwYy9lc2RoYzogZW5hYmxlIHRoZSBjYXJkIGluc2VydC9yZW1vdmUNCj4gaW50ZXJy
-dXB0DQo+IA0KPiBIaSwgQW50b24NCj4gRm9yIEZTTCBTT0NzLCB0aGUgaW50ZXJydXB0IG1vZGUg
-aXMgc3VwcG9ydCBmb3IgY2FyZCBkZXRlY3QuDQo+IEZvciBzb21lIHJlYXNvbnMsIHNvbWUgYm9h
-cmQgY2FuJ3Qgc3VwcG9ydCB0aGlzIGZlYXR1cmUsIHN1Y2ggYXMNCj4gbXBjODM3eG1kcyBib2Fy
-ZCwgYnV0IG1wYzgzN3hyZGIgYm9hcmQgc3VwcG9ydCBpdC4NCj4gDQo+IEkgc2VlIHlvdXIgbGlu
-a3MsIGl0IGlzIGFib3V0IHRoZSBETUEgKHRoZSBmaXJzdCB2ZXJzaW9uIG9mIHAyMDIwIGRvbid0
-DQo+IHN1cHBvcnQgRE1BLCBuZWVkIHRvIGVuYWJsZSB0aGUgUElPIG1vZGUsIGJ1dCB0aGUgbGF0
-ZXIgdmVyc2lvbiBoYXMgZml4ZWQNCj4gdGhpcyBpc3N1ZSkuDQo+IA0KPiBCZXN0IFJlZ2FyZHMN
-Cj4gSmVycnkgSHVhbmcNCj4gDQo+IA0KPiA+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+
-ID4gRnJvbTogbGludXgtbW1jLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmxpbnV4LW1t
-Yy0NCj4gPiBvd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBBbnRvbiBWb3JvbnRz
-b3YNCj4gPiBTZW50OiBUdWVzZGF5LCBPY3RvYmVyIDIzLCAyMDEyIDQ6MjcgUE0NCj4gPiBUbzog
-SHVhbmcgQ2hhbmdtaW5nLVI2NjA5Mw0KPiA+IENjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3Jn
-OyBIdWFuZyBDaGFuZ21pbmctUjY2MDkzOyBDaHJpcyBCYWxsOw0KPiA+IEt1bWFyIEdhbGE7IGxp
-bnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnDQo+ID4gU3ViamVjdDogUmU6IFtQQVRDSF0gcG93
-ZXJwYy9lc2RoYzogZW5hYmxlIHRoZSBjYXJkIGluc2VydC9yZW1vdmUNCj4gPiBpbnRlcnJ1cHQN
-Cj4gPg0KPiA+IE9uIFR1ZSwgT2N0IDIzLCAyMDEyIGF0IDAzOjAxOjE3UE0gKzA4MDAsIHI2NjA5
-M0BmcmVlc2NhbGUuY29tIHdyb3RlOg0KPiA+ID4gRnJvbTogSmVycnkgSHVhbmcgPENoYW5nLU1p
-bmcuSHVhbmdAZnJlZXNjYWxlLmNvbT4NCj4gPiA+DQo+ID4gPiBUaGUgY3VycmVudCBlU0RIQyBk
-cml2ZXIgdXNlIHRoZSBwb2xsIG1vZGUgdG8gZGV0ZWN0IGlmIHRoZSBTRC9NTUMNCj4gPiA+IGNh
-cmQgaXMgaW5zZXJ0ZWQgb3IgcmVtb3ZlZCwgd2hpY2ggd2lsbCBnZW5lcmF0ZSBtYW55IGludGVy
-cnVwdHMgYW5kDQo+ID4gPiBpbXBhY3QgdGhlIHBlcmZvcm1hbmNlLg0KPiA+ID4gVGhlcmVmb3Jl
-LCBjaGFuZ2UgdGhlIGRlZmF1bHQgY2FyZCBkZXRlY3QgdG8gaW50ZXJydXB0IG1vZGUsIGlmIHRo
-ZQ0KPiA+ID4gYm9hcmQgY2FuJ3Qgc3VwcG9ydCB0aGlzIG1vZGUsIHdlIHN0aWxsIHVzZSB0aGUg
-cG9sbCBtb2RlLg0KPiA+ID4NCj4gPiA+IFNpZ25lZC1vZmYtYnk6IEplcnJ5IEh1YW5nIDxDaGFu
-Zy1NaW5nLkh1YW5nQGZyZWVzY2FsZS5jb20+DQo+ID4gPiBDQzogQW50b24gVm9yb250c292IDxj
-Ym91YXRtYWlscnVAZ21haWwuY29tPg0KPiA+ID4gQ0M6IENocmlzIEJhbGwgPGNqYkBsYXB0b3Au
-b3JnPg0KPiA+ID4gLS0tDQo+ID4NCj4gPiBJSVJDLCB0aGUgY2FyZCBkZXRlY3Rpb24gaXMgYnJv
-a2VuIFNPQy1yZXZpc2lvbi13aXNlLCBub3QgYm9hcmQtd2lzZS4NCj4gPiBTbyB0aGUgY2hhbmdl
-IHNlZW1zIHdyb25nLg0KPiA+DQo+ID4gQWxzbywgdGFrZSBhIGxvb2sgYXQgdGhpczoNCj4gPg0K
-PiA+IAlodHRwOi8vbGttbC5vcmcvbGttbC8yMDEwLzcvMTQvMTI3DQo+ID4NCj4gPiBJIHN0YXJ0
-ZWQgdGhlIHdvcmsgYnV0IG5ldmVyIGZpbmlzaGVkLCB1bmZvcnR1bmF0ZWx5IGl0IGNhdXNlZCBz
-b21lDQo+ID4gcmVncmVzc2lvbnMgZm9yIG5vbi1GU0wgaGFyZHdhcmUuLi4NCj4gPg0KPiA+ID4g
-IGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYyB8ICAgIDcgKysrKysrLQ0KPiA+ID4g
-IDEgZmlsZSBjaGFuZ2VkLCA2IGluc2VydGlvbnMoKyksIDEgZGVsZXRpb24oLSkNCj4gPiA+DQo+
-ID4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jDQo+ID4g
-PiBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYw0KPiA+ID4gaW5kZXggZmZjMTIy
-Ni4uNWRjMzYyZiAxMDA2NDQNCj4gPiA+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2Yt
-ZXNkaGMuYw0KPiA+ID4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jDQo+
-ID4gPiBAQCAtMTk2LDYgKzE5NiwxMSBAQCBzdGF0aWMgdm9pZCBlc2RoY19vZl9kZXRlY3RfbGlt
-aXRhdGlvbihzdHJ1Y3QNCj4gPiBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYsDQo+ID4gPiAgCWlmICh2
-dm4gPT0gVkVORE9SX1ZfMjIpDQo+ID4gPiAgCQlwZGF0YS0+cXVpcmtzMiB8PSBTREhDSV9RVUlS
-SzJfSE9TVF9OT19DTUQyMzsNCj4gPiA+DQo+ID4gPiArCS8qIFA0MDgwRFMgYW5kIE1QQzgzN1hN
-RFMgYm9hcmQgZG9uJ3Qgc3VwcG9ydCBpbnRlcnJ1cHQgbW9kZSAqLw0KPiA+ID4gKwlpZiAob2Zf
-bWFjaGluZV9pc19jb21wYXRpYmxlKCJmc2wsbXBjODM3eG1kcyIpIHx8DQo+ID4gPiArCSAgICBv
-Zl9tYWNoaW5lX2lzX2NvbXBhdGlibGUoImZzbCxQNDA4MERTIikpDQo+ID4gPiArCQlwZGF0YS0+
-cXVpcmtzIHw9IFNESENJX1FVSVJLX0JST0tFTl9DQVJEX0RFVEVDVElPTjsNCj4gPiA+ICsNCj4g
-PiA+ICAJaW91bm1hcChpb2FkZHIpOw0KPiA+ID4gIGVuZDoNCj4gPiA+ICAJcmV0dXJuOw0KPiA+
-ID4gQEAgLTIyMyw3ICsyMjgsNyBAQCBzdGF0aWMgc3RydWN0IHNkaGNpX3BsdGZtX2RhdGEgc2Ro
-Y2lfZXNkaGNfcGRhdGENCj4gPiA+ID0NCj4gPiB7DQo+ID4gPiAgCSAqIGNhcmQgZGV0ZWN0aW9u
-IGNvdWxkIGJlIGhhbmRsZWQgdmlhIEdQSU8NCj4gPiA+ICAJICogZVNESEMgY2Fubm90IHN1cHBv
-cnQgRW5kIEF0dHJpYnV0ZSBpbiBOT1AgQURNQSBkZXNjcmlwdG9yDQo+ID4gPiAgCSAqLw0KPiA+
-ID4gLQkucXVpcmtzID0gRVNESENfREVGQVVMVF9RVUlSS1MgfCBTREhDSV9RVUlSS19CUk9LRU5f
-Q0FSRF9ERVRFQ1RJT04NCj4gPiA+ICsJLnF1aXJrcyA9IEVTREhDX0RFRkFVTFRfUVVJUktTDQo+
-ID4gPiAgCQl8IFNESENJX1FVSVJLX05PX0NBUkRfTk9fUkVTRVQNCj4gPiA+ICAJCXwgU0RIQ0lf
-UVVJUktfTk9fRU5EQVRUUl9JTl9OT1BERVNDLA0KPiA+ID4gIAkub3BzID0gJnNkaGNpX2VzZGhj
-X29wcywNCj4gPiA+IC0tDQo+ID4gPiAxLjcuOS41DQo+ID4gLS0NCj4gPiBUbyB1bnN1YnNjcmli
-ZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIg0K
-PiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3Jn
-IE1vcmUgbWFqb3Jkb21vDQo+ID4gaW5mbyBhdCBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9y
-ZG9tby1pbmZvLmh0bWwNCj4gDQo+IE4gICAgIHIgIHkgICBiIFggIMendiBeICneunsubiArICAg
-IHsgIGciICBebiByICAgeiAaICBoICAgICYgIB4gRyAgIGgNCj4gAygg6ZqOIN2iaiIgIBogG20g
-ICAgIHog3pYgICBmICAgaCAgIH4gbQ0K
+Yes,its legal name."Yuvaraj C D".
 
+On Wed, Oct 24, 2012 at 2:49 AM, Chris Ball <cjb@laptop.org> wrote:
+> Hi,
+>
+> On Mon, Oct 08 2012, Yuvaraj CD wrote:
+>> As mmc_start_host is getting called before enabling the dw_mmc controller
+>> interrupt, there is a problem of missing the SDMMC_INT_CMD_DONE for the
+>> very first command sent by the sdio_reset.
+>> This problem occurs only when we disable MMC debugging i.e, MMC_DEBUG [=n].
+>> Hence this patch enables the dw_mmc controller interrupt before mmc_start_host.
+>>
+>> Signed-off-by: Yuvaraj CD <yuvaraj.cd@samsung.com>
+>
+> Is "Yuvaraj CD" your legal name?  We should use your full name so that
+> we can track copyright attribution properly.
+>
+> Thanks!
+>
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-samsung-soc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
