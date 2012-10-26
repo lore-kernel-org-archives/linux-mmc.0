@@ -1,173 +1,79 @@
-From: Venkatraman S <svenkatr@gmail.com>
-Subject: Re: [PATCH v1] mmc: fix async request mechanism for sequential read scenarios
-Date: Fri, 26 Oct 2012 17:37:20 +0530
-Message-ID: <CAOyx1Lq9D2RN5KmvgxU+Z4W3aNHuyA2D5cdFJhz0sf+WU2ZZ=Q@mail.gmail.com>
-References: <f67543901d54b344c8bb401e363e6b80.squirrel@www.codeaurora.org>
-	<5088206C.7080101@stericsson.com>
-	<50893E88.9000908@codeaurora.org>
-	<5089549D.3060507@stericsson.com>
+From: "Hebbar, Gururaja" <gururaja.hebbar-l0cyMroinI0@public.gmane.org>
+Subject: RE: [RFC PATCH v3 05/16] ARM: edma: add AM33XX crossbar event support
+Date: Fri, 26 Oct 2012 12:53:45 +0000
+Message-ID: <1BAFE6F6C881BF42822005164F1491C33EAB5BC7@DBDE01.ent.ti.com>
+References: <1350566815-409-1-git-send-email-mporter@ti.com>
+	<1350566815-409-6-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f170.google.com ([209.85.212.170]:47691 "EHLO
-	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932469Ab2JZMHW convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Oct 2012 08:07:22 -0400
-Received: by mail-wi0-f170.google.com with SMTP id hm2so345127wib.1
-        for <linux-mmc@vger.kernel.org>; Fri, 26 Oct 2012 05:07:20 -0700 (PDT)
-In-Reply-To: <5089549D.3060507@stericsson.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+In-Reply-To: <1350566815-409-6-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: "Porter, Matt" <mporter-l0cyMroinI0@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "Cousson,
+	Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, "Nori, Sekhar" <nsekhar-l0cyMroinI0@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Dan, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-1?Q?Per_F=F6rlin?= <per.forlin@stericsson.com>
-Cc: Konstantin Dorfman <kdorfman@codeaurora.org>, Per Forlin <per.lkml@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Thu, Oct 25, 2012 at 8:32 PM, Per F=F6rlin <per.forlin@stericsson.co=
-m> wrote:
-> On 10/25/2012 03:28 PM, Konstantin Dorfman wrote:
->> On 10/24/2012 07:07 PM, Per F=F6rlin wrote:
->>> On 10/24/2012 11:41 AM, Konstantin Dorfman wrote:
->>>> Hello Per,
->>>>
->>>> On Mon, October 22, 2012 1:02 am, Per Forlin wrote:
->>>>>> When mmcqt reports on completion of a request there should be
->>>>>> a context switch to allow the insertion of the next read ahead B=
-IOs
->>>>>> to the block layer. Since the mmcqd tries to fetch another reque=
-st
->>>>>> immediately after the completion of the previous request it gets=
- NULL
->>>>>> and starts waiting for the completion of the previous request.
->>>>>> This wait on completion gives the FS the opportunity to insert t=
-he next
->>>>>> request but the MMC layer is already blocked on the previous req=
-uest
->>>>>> completion and is not aware of the new request waiting to be fet=
-ched.
->>>>> I thought that I could trigger a context switch in order to give
->>>>> execution time for FS to add the new request to the MMC queue.
->>>>> I made a simple hack to call yield() in case the request gets NUL=
-L. I
->>>>> thought it may give the FS layer enough time to add a new request=
- to
->>>>> the MMC queue. This would not delay the MMC transfer since the yi=
-eld()
->>>>> is done in parallel with an ongoing transfer. Anyway it was just =
-meant
->>>>> to be a simple test.
->>>>>
->>>>> One yield was not enough. Just for sanity check I added a msleep =
-as
->>>>> well and that was enough to let FS add a new request,
->>>>> Would it be possible to gain throughput by delaying the fetch of =
-new
->>>>> request? Too avoid unnecessary NULL requests
->>>>>
->>>>> If (ongoing request is read AND size is max read ahead AND new re=
-quest
->>>>> is NULL) yield();
->>>>>
->>>>> BR
->>>>> Per
->>>> We did the same experiment and it will not give maximum possible
->>>> performance. There is no guarantee that the context switch which w=
-as
->>>> manually caused by the MMC layer comes just in time: when it was e=
-arly
->>>> then next fetch still results in NULL, when it was later, then we =
-miss
->>>> possibility to fetch/prepare new request.
->>>>
->>>> Any delay in fetch of the new request that comes after the new req=
-uest has
->>>> arrived hits throughput and latency.
->>>>
->>>> The solution we are talking about here will fix not only situation=
- with FS
->>>> read ahead mechanism, but also it will remove penalty of the MMC c=
-ontext
->>>> waiting on completion while any new request arrives.
->>>>
->>>> Thanks,
->>>>
->>> It seems strange that the block layer cannot keep up with relativel=
-y slow flash media devices. There must be a limitation on number of out=
-standing request towards MMC.
->>> I need to make up my mind if it's the best way to address this issu=
-e in the MMC framework or block layer. I have started to look into the =
-block layer code but it will take some time to dig out the relevant par=
-ts.
->>>
->>> BR
->>> Per
->>>
->> The root cause of the issue in incompletion of the current design wi=
-th
->> well known producer-consumer problem solution (producer is block lay=
-er,
->> consumer is mmc layer).
->> Classic definitions states that the buffer is fix size, in our case =
-we
->> have queue, so Producer always capable to put new request into the q=
-ueue.
->> Consumer context blocked when both buffers (curr and prev) are busy
->> (first started its execution on the bus, second is fetched and waiti=
-ng
->> for the first).
-> This happens but I thought that the block layer would continue to add=
- request to the MMC queue while the consumer is busy.
-> When consumer fetches request from the queue again there should be se=
-veral requests available in the queue, but there is only one.
->
->> Producer context considered to be blocked when FS (or others bio
->> sources) has no requests to put into queue.
-> Does the block layer ever wait for outstanding request to finish? Cou=
-ld this be another reason why the producer doesn't add new requests on =
-the MMC queue?
->
+On Thu, Oct 18, 2012 at 18:56:44, Porter, Matt wrote:
+> Adds support for the per-EDMA channel event mux. This is required
+> for any peripherals using DMA crossbar mapped events.
+> 
+> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+> ---
+>  arch/arm/common/edma.c             |   63 +++++++++++++++++++++++++++++++++++-
+>  include/linux/platform_data/edma.h |    1 +
+>  2 files changed, 63 insertions(+), 1 deletion(-)
+> 
 
-Actually there could a lot of reasons why block layer or CFQ would not =
-have
-inserted the request into the queue. i.e. you can see a lot of exit pat=
-hs
-where blk_peek_request returns NULL, even though there could be any req=
-uest
-pending in one of the CFQ requests queues.
+..snip..
+..snip..
 
-Essentially you need to check what makes blk_fetch_request
-(cfq_dispatch_requests() ) return NULL when there is an element in
-queue, if at all.
+> +
+> +	for (i = 0; xbar_chans[i][0] != -1; i++) {
+> +		shift = (xbar_chans[i][1] % 4) * 8;
+> +		offset = xbar_chans[i][1] >> 2;
+> +		offset <<= 2;
+> +		mux = __raw_readl((void *)((u32)xbar + offset));
+> +		mux &= (~(0xff << shift));
+> +		mux |= (xbar_chans[i][0] << shift);
+> +		__raw_writel(mux, (void *)((u32)xbar + offset));
 
->> To maximize performance there are 2 notifications should be used:
->> 1. Producer notifies Consumer about new item to proceed.
->> 2. Consumer notifies Producer about free place.
->>
->> In our case 2nd notification not need since as I said before - it is
->> always free space in the queue.
->> There is no such notification as 1st, i.e. block layer has no way to
->> notify mmc layer about new request arrived.
->>
->> What you suggesting is to resolve specific case, when FS READ_AHEAD
->> mechanism behavior causes delays in producing new requests.
->> Probably you can resolve this specific case, but do you have guarant=
-ee
->> that this is only case that causes delays between new requests event=
-s?
->> Flash memory devices these days constantly improved on all levels: N=
-AND,
->> firmware, bus speed and host controller capabilities, this makes any
->> yield/sleep/timeouts solution only temporary hacks.
-> I never meant yield or sleep to be a permanent fix. I was only curiou=
-s of how if would affect the performance in order to gain a better know=
-ledge of the root cause.
-> My impression is that even if the SD card is very slow you will see t=
-he same affect. The behavior of the block layer in this case is not rel=
-ated to the speed for the flash memory.
-> On a slow card the MMC-queue runs empty just like it does for a fast =
-eMMC.
-> According to you the block layer should have a better chance to feed =
-the MMC queue if the card is slow (more time for the block layer to pre=
-pare next requests).
->
-> BR
-> Per
+This method of calculating Xbar Channel offset has a bug that
+the code breaks with unaligned access trap error when requested 
+channel to be mapped is odd.
+
+This was fixed in Arago tree [1]. Kindly verify
+
+
+> +	}
+> +
+> +	pdata->xbar_chans = xbar_chans;
+> +
+> +	return 0;
+> +}
+> +
+
+..snip..
+..snip..
+
+[1]
+http://arago-project.org/git/projects/?p=linux-am33x.git;a=commitdiff;
+h=c08d3cb557adf71c79aeefb38888395455824e83
+
+Regards, 
+Gururaja
+
+------------------------------------------------------------------------------
+Everyone hates slow websites. So do we.
+Make your web apps faster with AppDynamics
+Download AppDynamics Lite for free today:
+http://p.sf.net/sfu/appdyn_sfd2d_oct
