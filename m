@@ -1,43 +1,78 @@
-From: wwang <wei_wang@realsil.com.cn>
-Subject: Re: [PATCH v6 0/3] Add modules to support realtek PCIE card reader
-Date: Fri, 26 Oct 2012 09:10:45 +0800
-Message-ID: <5089E315.1010708@realsil.com.cn>
-References: <cover.1347330871.git.wei_wang@realsil.com.cn> <50664814.30407@turmel.org> <20120929110730.GA27797@liondog.tnic> <87d315osjm.fsf@octavius.laptop.org> <20120929152942.GA11412@liondog.tnic> <506FDC8C.3030707@realsil.com.cn> <20121020034615.GT5685@mwanda> <20121025185041.GB22114@kroah.com>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH v6] powerpc/esdhc: disable CMD23 for some Freescale SoCs
+Date: Fri, 26 Oct 2012 02:04:27 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C1DEAE5@039-SN1MPN1-004.039d.mgd.msft.net>
+References: <1351144039-30588-1-git-send-email-r66093@freescale.com>
+	<20121025080120.GA23807@lizard> <87ehkmenp3.fsf@octavius.laptop.org>
+ <87sj92d88e.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rtits2.realtek.com ([60.250.210.242]:60024 "EHLO
-	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752347Ab2JZBL5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Oct 2012 21:11:57 -0400
-In-Reply-To: <20121025185041.GB22114@kroah.com>
+Received: from db3ehsobe003.messaging.microsoft.com ([213.199.154.141]:17258
+	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751059Ab2JZCEf convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 25 Oct 2012 22:04:35 -0400
+In-Reply-To: <87sj92d88e.fsf@octavius.laptop.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Greg KH <gregkh@linuxfoundation.org>
-Cc: Dan Carpenter <dan.carpenter@oracle.com>, Phil Turmel <philip@turmel.org>, "sameo@linux.intel.com" <sameo@linux.intel.com>, "arnd@arndb.de" <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@alien8.de>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, Andrew Morton <akpm@linux-foundation.org>, Chris Ball <cjb@laptop.org>, "oakad@yahoo.com" <oakad@yahoo.com>
+To: Chris Ball <cjb@laptop.org>, Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xie Shaohui-B21989 <B21989@freescale.com>
 
-=D3=DA 2012=C4=EA10=D4=C226=C8=D5 02:50, Greg KH =D0=B4=B5=C0:
-> On Sat, Oct 20, 2012 at 06:46:15AM +0300, Dan Carpenter wrote:
->> On Sat, Oct 06, 2012 at 03:23:56PM +0800, wwang wrote:
->>> We are still maintaining the SCSI driver for Realtek card reader,
->>> and will release the latest source code in the Github in the future=
-=2E
->>> But maybe we won't push it to the staging tree any more.
->> Maybe we should just remove the staging code if it won't be fixed.
->> That's sort of the point of staging.
-> I agree.  wwang, want me to delet the staging driver now?  I don't wa=
-nt
-> "dead" code in the tree, especially as you don't want to maintain it
-> anymore.
->
-> thanks,
->
-> greg k-h
-Hi Greg:
+No problem, thanks a lot, Chris.
 
-OK. You can delete it now, please.
-And I will push my new driver to MFD and MMC subsystem.
+Best Regards
+Jerry Huang
 
-Best Regards,
-wwang
+
+> -----Original Message-----
+> From: Chris Ball [mailto:cjb@laptop.org]
+> Sent: Thursday, October 25, 2012 8:53 PM
+> To: Anton Vorontsov
+> Cc: Huang Changming-R66093; linux-mmc@vger.kernel.org; Huang Changming-
+> R66093; Xie Shaohui-B21989
+> Subject: Re: [PATCH v6] powerpc/esdhc: disable CMD23 for some Freescale
+> SoCs
+> 
+> Hi,
+> 
+> On Thu, Oct 25 2012, Chris Ball wrote:
+> > Hi,
+> >
+> > On Thu, Oct 25 2012, Anton Vorontsov wrote:
+> >> On Thu, Oct 25, 2012 at 01:47:19PM +0800, r66093@freescale.com wrote:
+> >>> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> >>>
+> >>> CMD23 causes lots of errors in kernel on some freescale SoCs (P1020,
+> >>> P1021, P1022, P1024, P1025 and P4080) when MMC card used, which is
+> >>> because these controllers does not support CMD23, even on the SoCs
+> >>> which declares CMD23 is supported.
+> >>> Therefore, we'll not use CMD23.
+> >>>
+> >>> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> >>> Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
+> >>> CC: Chris Ball <cjb@laptop.org>
+> >>> ---
+> >>
+> >> Looks perfect, thanks a lot!
+> >>
+> >> Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
+> >
+> > Thanks, pushed to mmc-next for 3.7.
+> >
+> > - Chris.
+> 
+> In the version I merged, I've changed the callback name from
+> platform_caps() to platform_init() (as Anton had suggested) so that it
+> has a chance of being useful to other platforms too.
+> 
+> Thanks,
+> 
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+
+
