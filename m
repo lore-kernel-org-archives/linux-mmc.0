@@ -1,73 +1,102 @@
-From: Greg KH <gregkh@linuxfoundation.org>
-Subject: Re: [PATCH v6 0/3] Add modules to support realtek PCIE card reader
-Date: Fri, 26 Oct 2012 09:04:59 -0700
-Message-ID: <20121026160459.GA16813@kroah.com>
-References: <50664814.30407@turmel.org>
- <20120929110730.GA27797@liondog.tnic>
- <87d315osjm.fsf@octavius.laptop.org>
- <20120929152942.GA11412@liondog.tnic>
- <506FDC8C.3030707@realsil.com.cn>
- <20121020034615.GT5685@mwanda>
- <20121025185041.GB22114@kroah.com>
- <5089E315.1010708@realsil.com.cn>
- <20121026024556.GA9545@kroah.com>
- <5089FAAB.500@realsil.com.cn>
+From: Mike Galbraith <efault-Mmb7MZpHnFY@public.gmane.org>
+Subject: Re: process hangs on do_exit when oom happens
+Date: Fri, 26 Oct 2012 10:03:10 -0700
+Message-ID: <1351270990.16639.92.camel@maggy.simpson.net>
+References: <op.wmbi5kbrn27o5l@gaoqiang-d1.corp.qihoo.net>
+	 <20121019160425.GA10175@dhcp22.suse.cz>
+	 <CAKWKT+ZRMHzgCLJ1quGnw-_T1b9OboYKnQdRc2_Z=rdU_PFVtw@mail.gmail.com>
+	 <CAKTCnzkMQQXRdx=ikydsD9Pm3LuRgf45_=m7ozuFmSZyxazXyA@mail.gmail.com>
+	 <CAKWKT+bYOf0cEDuiibf6eV2raMxe481y-D+nrBgPWR3R+53zvg@mail.gmail.com>
+	 <20121023095028.GD15397@dhcp22.suse.cz>
+	 <CAKWKT+b2s4E7Nne5d0UJwfLGiCXqAUgrCzuuZi6ZPdjszVSmWg@mail.gmail.com>
+	 <20121023101500.GE15397@dhcp22.suse.cz>
+	 <CAKTCnzkiabWK8tAORkhg6oW11VvXS-YqBwDzED_3=J1buhaQnQ@mail.gmail.com>
+	 <CAKWKT+ZahFTnPRJ4FCebxfcrcYEBf+PL9Wa_Foygep_gFst4_g@mail.gmail.com>
+	 <20121025095719.GA11105@dhcp22.suse.cz>
+	 <CAKWKT+ZRTUwer8qhjWGjkra63e10R67UQzezdaCaStz+rvGjxw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:63163 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933948Ab2JZQES (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Oct 2012 12:04:18 -0400
-Received: by mail-pa0-f46.google.com with SMTP id hz1so2022081pad.19
-        for <linux-mmc@vger.kernel.org>; Fri, 26 Oct 2012 09:04:18 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <5089FAAB.500@realsil.com.cn>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAKWKT+ZRTUwer8qhjWGjkra63e10R67UQzezdaCaStz+rvGjxw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Qiang Gao <gaoqiangscut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Michal Hocko <mhocko-AlSwsSmVLrQ@public.gmane.org>, Balbir Singh <bsingharora-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: wwang <wei_wang@realsil.com.cn>
-Cc: Phil Turmel <philip@turmel.org>, "sameo@linux.intel.com" <sameo@linux.intel.com>, "arnd@arndb.de" <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@alien8.de>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, Andrew Morton <akpm@linux-foundation.org>, Chris Ball <cjb@laptop.org>, "oakad@yahoo.com" <oakad@yahoo.com>, Dan Carpenter <dan.carpenter@oracle.com>
 
-On Fri, Oct 26, 2012 at 10:51:23AM +0800, wwang wrote:
-> =E4=BA=8E 2012=E5=B9=B410=E6=9C=8826=E6=97=A5 10:45, Greg KH =E5=86=99=
-=E9=81=93:
-> >On Fri, Oct 26, 2012 at 09:10:45AM +0800, wwang wrote:
-> >>=E4=BA=8E 2012=E5=B9=B410=E6=9C=8826=E6=97=A5 02:50, Greg KH =E5=86=
-=99=E9=81=93:
-> >>>On Sat, Oct 20, 2012 at 06:46:15AM +0300, Dan Carpenter wrote:
-> >>>>On Sat, Oct 06, 2012 at 03:23:56PM +0800, wwang wrote:
-> >>>>>We are still maintaining the SCSI driver for Realtek card reader=
-,
-> >>>>>and will release the latest source code in the Github in the fut=
-ure.
-> >>>>>But maybe we won't push it to the staging tree any more.
-> >>>>Maybe we should just remove the staging code if it won't be fixed=
-=2E
-> >>>>That's sort of the point of staging.
-> >>>I agree.  wwang, want me to delet the staging driver now?  I don't=
- want
-> >>>"dead" code in the tree, especially as you don't want to maintain =
-it
-> >>>anymore.
-> >>>
-> >>>thanks,
-> >>>
-> >>>greg k-h
-> >>Hi Greg:
+On Fri, 2012-10-26 at 10:42 +0800, Qiang Gao wrote: 
+> On Thu, Oct 25, 2012 at 5:57 PM, Michal Hocko <mhocko-AlSwsSmVLrQ@public.gmane.org> wrote:
+> > On Wed 24-10-12 11:44:17, Qiang Gao wrote:
+> >> On Wed, Oct 24, 2012 at 1:43 AM, Balbir Singh <bsingharora-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> >> > On Tue, Oct 23, 2012 at 3:45 PM, Michal Hocko <mhocko-AlSwsSmVLrQ@public.gmane.org> wrote:
+> >> >> On Tue 23-10-12 18:10:33, Qiang Gao wrote:
+> >> >>> On Tue, Oct 23, 2012 at 5:50 PM, Michal Hocko <mhocko-AlSwsSmVLrQ@public.gmane.org> wrote:
+> >> >>> > On Tue 23-10-12 15:18:48, Qiang Gao wrote:
+> >> >>> >> This process was moved to RT-priority queue when global oom-killer
+> >> >>> >> happened to boost the recovery of the system..
+> >> >>> >
+> >> >>> > Who did that? oom killer doesn't boost the priority (scheduling class)
+> >> >>> > AFAIK.
+> >> >>> >
+> >> >>> >> but it wasn't get properily dealt with. I still have no idea why where
+> >> >>> >> the problem is ..
+> >> >>> >
+> >> >>> > Well your configuration says that there is no runtime reserved for the
+> >> >>> > group.
+> >> >>> > Please refer to Documentation/scheduler/sched-rt-group.txt for more
+> >> >>> > information.
+> >> >>> >
+> >> >> [...]
+> >> >>> maybe this is not a upstream-kernel bug. the centos/redhat kernel
+> >> >>> would boost the process to RT prio when the process was selected
+> >> >>> by oom-killer.
+> >> >>
+> >> >> This still looks like your cpu controller is misconfigured. Even if the
+> >> >> task is promoted to be realtime.
+> >> >
+> >> >
+> >> > Precisely! You need to have rt bandwidth enabled for RT tasks to run,
+> >> > as a workaround please give the groups some RT bandwidth and then work
+> >> > out the migration to RT and what should be the defaults on the distro.
+> >> >
+> >> > Balbir
 > >>
-> >>OK. You can delete it now, please.
-> >>And I will push my new driver to MFD and MMC subsystem.
-> >Ok, just to confirm, you want me to delete the
-> >drivers/staging/rts_pstor/* code, right?
+> >>
+> >> see https://patchwork.kernel.org/patch/719411/
 > >
-> >thanks,
+> > The patch surely "fixes" your problem but the primary fault here is the
+> > mis-configured cpu cgroup. If the value for the bandwidth is zero by
+> > default then all realtime processes in the group a screwed. The value
+> > should be set to something more reasonable.
+> > I am not familiar with the cpu controller but it seems that
+> > alloc_rt_sched_group needs some treat. Care to look into it and send a
+> > patch to the cpu controller and cgroup maintainers, please?
 > >
-> >greg k-h
-> Hi Greg:
->=20
-> Yes, you can delete drivers/staging/rts_pstor
+> > --
+> > Michal Hocko
+> > SUSE Labs
+> 
+> I'm trying to fix the problem. but no substantive progress yet.
 
-Thanks, now done.
+The throttle tracks a finite resource for an arbitrary number of groups,
+so there's no sane rt_runtime default other than zero.
 
-greg k-h
+Most folks only want the top level throttle warm fuzzy, so a complete
+runtime RT_GROUP_SCHED on/off switch with default to off, ie rt tasks
+cannot be moved until switched on would fix some annoying "Oopsie, I
+forgot" allocation troubles.  If you turn it on, shame on you if you
+fail to allocate, you asked for it, you're not just stuck with it
+because your distro enabled it in their config.
+
+Or, perhaps just make zero rt_runtime always mean traverse up to first
+non-zero rt_runtime, ie zero allocation children may consume parental
+runtime as they see fit on first come first served basis, when it's
+gone, tough, parent/children all wait for refill.
+
+Or whatever, as long as you don't bust distribution/tracking for those
+crazy people who intentionally use RT_GROUP_SCHED ;-)
+
+The bug is in the patch that used sched_setscheduler_nocheck().  Plain
+sched_setscheduler() would have replied -EGOAWAY.
+
+-Mike
