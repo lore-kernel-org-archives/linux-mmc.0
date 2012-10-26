@@ -1,59 +1,63 @@
-From: wwang <wei_wang@realsil.com.cn>
-Subject: Re: [PATCH v6 0/3] Add modules to support realtek PCIE card reader
-Date: Fri, 26 Oct 2012 10:51:23 +0800
-Message-ID: <5089FAAB.500@realsil.com.cn>
-References: <cover.1347330871.git.wei_wang@realsil.com.cn> <50664814.30407@turmel.org> <20120929110730.GA27797@liondog.tnic> <87d315osjm.fsf@octavius.laptop.org> <20120929152942.GA11412@liondog.tnic> <506FDC8C.3030707@realsil.com.cn> <20121020034615.GT5685@mwanda> <20121025185041.GB22114@kroah.com> <5089E315.1010708@realsil.com.cn> <20121026024556.GA9545@kroah.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: dw-mmc: relocate the position called dw_mci_setup_bus()
+Date: Fri, 26 Oct 2012 11:57:13 +0900
+Message-ID: <5089FC09.6090101@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rtits2.realtek.com ([60.250.210.242]:37094 "EHLO
-	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751284Ab2JZCwa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Oct 2012 22:52:30 -0400
-In-Reply-To: <20121026024556.GA9545@kroah.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:58553 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755319Ab2JZC57 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Oct 2012 22:57:59 -0400
+Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MCH003D5C7WX3L0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 26 Oct 2012 11:57:57 +0900 (KST)
+Received: from [10.90.51.55] by mmp1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0MCH00HYOC8K8670@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 26 Oct 2012 11:57:57 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Greg KH <gregkh@linuxfoundation.org>
-Cc: Phil Turmel <philip@turmel.org>, "sameo@linux.intel.com" <sameo@linux.intel.com>, "arnd@arndb.de" <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@alien8.de>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, Andrew Morton <akpm@linux-foundation.org>, Chris Ball <cjb@laptop.org>, "oakad@yahoo.com" <oakad@yahoo.com>, Dan Carpenter <dan.carpenter@oracle.com>
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <James.Hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-=E4=BA=8E 2012=E5=B9=B410=E6=9C=8826=E6=97=A5 10:45, Greg KH =E5=86=99=E9=
-=81=93:
-> On Fri, Oct 26, 2012 at 09:10:45AM +0800, wwang wrote:
->> =E4=BA=8E 2012=E5=B9=B410=E6=9C=8826=E6=97=A5 02:50, Greg KH =E5=86=99=
-=E9=81=93:
->>> On Sat, Oct 20, 2012 at 06:46:15AM +0300, Dan Carpenter wrote:
->>>> On Sat, Oct 06, 2012 at 03:23:56PM +0800, wwang wrote:
->>>>> We are still maintaining the SCSI driver for Realtek card reader,
->>>>> and will release the latest source code in the Github in the futu=
-re.
->>>>> But maybe we won't push it to the staging tree any more.
->>>> Maybe we should just remove the staging code if it won't be fixed.
->>>> That's sort of the point of staging.
->>> I agree.  wwang, want me to delet the staging driver now?  I don't =
-want
->>> "dead" code in the tree, especially as you don't want to maintain i=
-t
->>> anymore.
->>>
->>> thanks,
->>>
->>> greg k-h
->> Hi Greg:
->>
->> OK. You can delete it now, please.
->> And I will push my new driver to MFD and MMC subsystem.
-> Ok, just to confirm, you want me to delete the
-> drivers/staging/rts_pstor/* code, right?
->
-> thanks,
->
-> greg k-h
-Hi Greg:
+I think right that dw_mci_setup_bus() is called into set_ios().
+Actually clock is enabled at dw_mci_setup_bus() in now.
+Then didn't ensure to wait the 74clock.
+To stable clock is relocated the position into dw_mci_set_ios().
 
-Yes, you can delete drivers/staging/rts_pstor
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
 
-BR,
-wwang
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 250aa18..9001844 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -682,9 +682,6 @@ static void __dw_mci_start_request(struct dw_mci *host,
+ 	if (host->pdata->select_slot)
+ 		host->pdata->select_slot(slot->id);
+ 
+-	/* Slot specific timing and width adjustment */
+-	dw_mci_setup_bus(slot);
+-
+ 	host->cur_slot = slot;
+ 	host->mrq = mrq;
+ 
+@@ -810,6 +807,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	if (slot->host->drv_data->set_ios)
+ 		slot->host->drv_data->set_ios(slot->host, ios);
+ 
++	/* Slot specific timing and width adjustment */
++	dw_mci_setup_bus(slot);
++
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_UP:
+ 		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+-- 
+1.7.4.1
