@@ -1,72 +1,84 @@
-From: Philip Rakity <prakity@nvidia.com>
-Subject: Re: [PATCH] mmc: core: debugfs: Add signal_voltage to ios dump
-Date: Fri, 26 Oct 2012 11:44:36 +0200
-Message-ID: <C5E82048-310E-414C-A772-F05862041AD5@nvidia.com>
-References: <1351243915-30190-1-git-send-email-johan.rudholm@stericsson.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH] mmc: dw-mmc: relocate the position called
+ dw_mci_setup_bus()
+Date: Fri, 26 Oct 2012 19:20:09 +0900
+Message-ID: <007001cdb363$7a131ea0$6e395be0$%jun@samsung.com>
+References: <5089FC09.6090101@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate04.nvidia.com ([216.228.121.35]:2982 "EHLO
-	hqemgate04.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752349Ab2JZJoo convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Oct 2012 05:44:44 -0400
-In-Reply-To: <1351243915-30190-1-git-send-email-johan.rudholm@stericsson.com>
-Content-Language: en-US
+Received: from mailout3.samsung.com ([203.254.224.33]:17192 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755391Ab2JZKUL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Oct 2012 06:20:11 -0400
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MCH00HNAWPFZWP0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 26 Oct 2012 19:20:09 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0MCH00F94WPL4450@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 26 Oct 2012 19:20:09 +0900 (KST)
+In-reply-to: <5089FC09.6090101@samsung.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <johan.rudholm@stericsson.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <James.Hogan@imgtec.com>, 'Kyungmin Park' <kyungmin.park@samsung.com>
 
+Friday, October 26, 2012, Jaehoon Chung <jh80.chung@samsung.com>
+> I think right that dw_mci_setup_bus() is called into set_ios().
+> Actually clock is enabled at dw_mci_setup_bus() in now.
+> Then didn't ensure to wait the 74clock.
+This will be ensured when first command is sent
+with 'send_initialization' flag of CMD register.
+But I feel this change is reasonable.
+Looks good to me if commit message is modified.
 
-On Oct 26, 2012, at 11:31 AM, Johan Rudholm <johan.rudholm@stericsson.com> wrote:
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
-> Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
+Thanks.
+Seungwon Jeon
+
+> To stable clock is relocated the position into dw_mci_set_ios().
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 > ---
-> drivers/mmc/core/debugfs.c |   16 ++++++++++++++++
-> 1 file changed, 16 insertions(+)
+>  drivers/mmc/host/dw_mmc.c |    6 +++---
+>  1 files changed, 3 insertions(+), 3 deletions(-)
 > 
-> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-> index d96c643..35c2f85 100644
-> --- a/drivers/mmc/core/debugfs.c
-> +++ b/drivers/mmc/core/debugfs.c
-> @@ -144,6 +144,22 @@ static int mmc_ios_show(struct seq_file *s, void *data)
-> 	}
-> 	seq_printf(s, "timing spec:\t%u (%s)\n", ios->timing, str);
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 250aa18..9001844 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -682,9 +682,6 @@ static void __dw_mci_start_request(struct dw_mci *host,
+>  	if (host->pdata->select_slot)
+>  		host->pdata->select_slot(slot->id);
 > 
-> +	switch (ios->signal_voltage) {
-> +	case MMC_SIGNAL_VOLTAGE_330:
-> +		str = "3.30 V";
-> +		break;
-> +	case MMC_SIGNAL_VOLTAGE_180:
-> +		str = "1.80 V";
-> +		break;
-> +	case MMC_SIGNAL_VOLTAGE_120:
-> +		str = "1.20 V";
-> +		break;
-> +	default:
-> +		str = "invalid";
-
-would "is unknown"  be a better str ?
-> +		break;
-> +	}
-> +	seq_printf(s, "signal voltage:\t%u (%s)\n", ios->chip_select, str);
+> -	/* Slot specific timing and width adjustment */
+> -	dw_mci_setup_bus(slot);
+> -
+>  	host->cur_slot = slot;
+>  	host->mrq = mrq;
+> 
+> @@ -810,6 +807,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	if (slot->host->drv_data->set_ios)
+>  		slot->host->drv_data->set_ios(slot->host, ios);
+> 
+> +	/* Slot specific timing and width adjustment */
+> +	dw_mci_setup_bus(slot);
 > +
-> 	return 0;
-> }
-> 
-Reviewed-by: Philip Rakity <prakity@nvidia.com>
-> -- 
-> 1.7.10
-> 
+>  	switch (ios->power_mode) {
+>  	case MMC_POWER_UP:
+>  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+> --
+> 1.7.4.1
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
------------------------------------------------------------------------------------
-This email message is for the sole use of the intended recipient(s) and may contain
-confidential information.  Any unauthorized review, use, disclosure or distribution
-is prohibited.  If you are not the intended recipient, please contact the sender by
-reply email and destroy all copies of the original message.
------------------------------------------------------------------------------------
