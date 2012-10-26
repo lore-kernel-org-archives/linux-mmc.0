@@ -1,7 +1,7 @@
 From: Mike Galbraith <efault-Mmb7MZpHnFY@public.gmane.org>
 Subject: Re: process hangs on do_exit when oom happens
-Date: Fri, 26 Oct 2012 10:03:10 -0700
-Message-ID: <1351270990.16639.92.camel@maggy.simpson.net>
+Date: Fri, 26 Oct 2012 13:04:37 -0700
+Message-ID: <1351281877.16639.98.camel@maggy.simpson.net>
 References: <op.wmbi5kbrn27o5l@gaoqiang-d1.corp.qihoo.net>
 	 <20121019160425.GA10175@dhcp22.suse.cz>
 	 <CAKWKT+ZRMHzgCLJ1quGnw-_T1b9OboYKnQdRc2_Z=rdU_PFVtw@mail.gmail.com>
@@ -14,89 +14,83 @@ References: <op.wmbi5kbrn27o5l@gaoqiang-d1.corp.qihoo.net>
 	 <CAKWKT+ZahFTnPRJ4FCebxfcrcYEBf+PL9Wa_Foygep_gFst4_g@mail.gmail.com>
 	 <20121025095719.GA11105@dhcp22.suse.cz>
 	 <CAKWKT+ZRTUwer8qhjWGjkra63e10R67UQzezdaCaStz+rvGjxw@mail.gmail.com>
+	 <1351270990.16639.92.camel@maggy.simpson.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKWKT+ZRTUwer8qhjWGjkra63e10R67UQzezdaCaStz+rvGjxw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1351270990.16639.92.camel-sZ+7a5bGyC/1wTEvPJ5Q0F6hYfS7NtTn@public.gmane.org>
 Sender: cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Qiang Gao <gaoqiangscut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Michal Hocko <mhocko-AlSwsSmVLrQ@public.gmane.org>, Balbir Singh <bsingharora-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org
+Cc: Michal Hocko <mhocko-AlSwsSmVLrQ@public.gmane.org>, Balbir Singh <bsingharora-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Peter Zijlstra <a.p.zijlstra-/NLkJaSkS4VmR6Xm/wNWPw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 2012-10-26 at 10:42 +0800, Qiang Gao wrote: 
-> On Thu, Oct 25, 2012 at 5:57 PM, Michal Hocko <mhocko-AlSwsSmVLrQ@public.gmane.org> wrote:
-> > On Wed 24-10-12 11:44:17, Qiang Gao wrote:
-> >> On Wed, Oct 24, 2012 at 1:43 AM, Balbir Singh <bsingharora-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> >> > On Tue, Oct 23, 2012 at 3:45 PM, Michal Hocko <mhocko-AlSwsSmVLrQ@public.gmane.org> wrote:
-> >> >> On Tue 23-10-12 18:10:33, Qiang Gao wrote:
-> >> >>> On Tue, Oct 23, 2012 at 5:50 PM, Michal Hocko <mhocko-AlSwsSmVLrQ@public.gmane.org> wrote:
-> >> >>> > On Tue 23-10-12 15:18:48, Qiang Gao wrote:
-> >> >>> >> This process was moved to RT-priority queue when global oom-killer
-> >> >>> >> happened to boost the recovery of the system..
-> >> >>> >
-> >> >>> > Who did that? oom killer doesn't boost the priority (scheduling class)
-> >> >>> > AFAIK.
-> >> >>> >
-> >> >>> >> but it wasn't get properily dealt with. I still have no idea why where
-> >> >>> >> the problem is ..
-> >> >>> >
-> >> >>> > Well your configuration says that there is no runtime reserved for the
-> >> >>> > group.
-> >> >>> > Please refer to Documentation/scheduler/sched-rt-group.txt for more
-> >> >>> > information.
-> >> >>> >
-> >> >> [...]
-> >> >>> maybe this is not a upstream-kernel bug. the centos/redhat kernel
-> >> >>> would boost the process to RT prio when the process was selected
-> >> >>> by oom-killer.
-> >> >>
-> >> >> This still looks like your cpu controller is misconfigured. Even if the
-> >> >> task is promoted to be realtime.
-> >> >
-> >> >
-> >> > Precisely! You need to have rt bandwidth enabled for RT tasks to run,
-> >> > as a workaround please give the groups some RT bandwidth and then work
-> >> > out the migration to RT and what should be the defaults on the distro.
-> >> >
-> >> > Balbir
-> >>
-> >>
-> >> see https://patchwork.kernel.org/patch/719411/
-> >
-> > The patch surely "fixes" your problem but the primary fault here is the
-> > mis-configured cpu cgroup. If the value for the bandwidth is zero by
-> > default then all realtime processes in the group a screwed. The value
-> > should be set to something more reasonable.
-> > I am not familiar with the cpu controller but it seems that
-> > alloc_rt_sched_group needs some treat. Care to look into it and send a
-> > patch to the cpu controller and cgroup maintainers, please?
-> >
-> > --
-> > Michal Hocko
-> > SUSE Labs
-> 
-> I'm trying to fix the problem. but no substantive progress yet.
+On Fri, 2012-10-26 at 10:03 -0700, Mike Galbraith wrote:
 
-The throttle tracks a finite resource for an arbitrary number of groups,
-so there's no sane rt_runtime default other than zero.
+> The bug is in the patch that used sched_setscheduler_nocheck().  Plain
+> sched_setscheduler() would have replied -EGOAWAY.
 
-Most folks only want the top level throttle warm fuzzy, so a complete
-runtime RT_GROUP_SCHED on/off switch with default to off, ie rt tasks
-cannot be moved until switched on would fix some annoying "Oopsie, I
-forgot" allocation troubles.  If you turn it on, shame on you if you
-fail to allocate, you asked for it, you're not just stuck with it
-because your distro enabled it in their config.
+sched_setscheduler_nocheck() should say go away too methinks.  This
+isn't about permissions, it's about not being stupid in general.
 
-Or, perhaps just make zero rt_runtime always mean traverse up to first
-non-zero rt_runtime, ie zero allocation children may consume parental
-runtime as they see fit on first come first served basis, when it's
-gone, tough, parent/children all wait for refill.
+sched: fix __sched_setscheduler() RT_GROUP_SCHED conditionals
 
-Or whatever, as long as you don't bust distribution/tracking for those
-crazy people who intentionally use RT_GROUP_SCHED ;-)
+Remove user and rt_bandwidth_enabled() RT_GROUP_SCHED conditionals in
+__sched_setscheduler().  The end result of kernel OR user promoting a
+task in a group with zero rt_runtime allocated is the same bad thing,
+and throttle switch position matters little.  It's safer to just say
+no solely based upon bandwidth existence, may save the user a nasty
+surprise if he later flips the throttle switch to 'on'.
 
-The bug is in the patch that used sched_setscheduler_nocheck().  Plain
-sched_setscheduler() would have replied -EGOAWAY.
+The commit below came about due to sched_setscheduler_nocheck()
+allowing a task in a task group with zero rt_runtime allocated to
+be promoted by the kernel oom logic, thus marooning it forever.
 
--Mike
+<quote>
+commit 341aea2bc48bf652777fb015cc2b3dfa9a451817
+Author: KOSAKI Motohiro <kosaki.motohiro-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Date:   Thu Apr 14 15:22:13 2011 -0700
+
+    oom-kill: remove boost_dying_task_prio()
+    
+    This is an almost-revert of commit 93b43fa ("oom: give the dying task a
+    higher priority").
+    
+    That commit dramatically improved oom killer logic when a fork-bomb
+    occurs.  But I've found that it has nasty corner case.  Now cpu cgroup has
+    strange default RT runtime.  It's 0!  That said, if a process under cpu
+    cgroup promote RT scheduling class, the process never run at all.
+</quote>
+
+Signed-off-by: Mike Galbraith <efault-Mmb7MZpHnFY@public.gmane.org>
+
+diff --git a/kernel/sched/core.c b/kernel/sched/core.c
+index 2d8927f..d3a35f8 100644
+--- a/kernel/sched/core.c
++++ b/kernel/sched/core.c
+@@ -3810,17 +3810,14 @@ recheck:
+ 	}
+ 
+ #ifdef CONFIG_RT_GROUP_SCHED
+-	if (user) {
+-		/*
+-		 * Do not allow realtime tasks into groups that have no runtime
+-		 * assigned.
+-		 */
+-		if (rt_bandwidth_enabled() && rt_policy(policy) &&
+-				task_group(p)->rt_bandwidth.rt_runtime == 0 &&
+-				!task_group_is_autogroup(task_group(p))) {
+-			task_rq_unlock(rq, p, &flags);
+-			return -EPERM;
+-		}
++	/*
++	 * Do not allow realtime tasks into groups that have no runtime
++	 * assigned.
++	 */
++	if (rt_policy(policy) && task_group(p)->rt_bandwidth.rt_runtime == 0 &&
++			!task_group_is_autogroup(task_group(p))) {
++		task_rq_unlock(rq, p, &flags);
++		return -EPERM;
+ 	}
+ #endif
+ 
