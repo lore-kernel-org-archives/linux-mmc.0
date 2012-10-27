@@ -1,96 +1,40 @@
-From: Mike Galbraith <efault-Mmb7MZpHnFY@public.gmane.org>
-Subject: Re: process hangs on do_exit when oom happens
-Date: Fri, 26 Oct 2012 13:04:37 -0700
-Message-ID: <1351281877.16639.98.camel@maggy.simpson.net>
-References: <op.wmbi5kbrn27o5l@gaoqiang-d1.corp.qihoo.net>
-	 <20121019160425.GA10175@dhcp22.suse.cz>
-	 <CAKWKT+ZRMHzgCLJ1quGnw-_T1b9OboYKnQdRc2_Z=rdU_PFVtw@mail.gmail.com>
-	 <CAKTCnzkMQQXRdx=ikydsD9Pm3LuRgf45_=m7ozuFmSZyxazXyA@mail.gmail.com>
-	 <CAKWKT+bYOf0cEDuiibf6eV2raMxe481y-D+nrBgPWR3R+53zvg@mail.gmail.com>
-	 <20121023095028.GD15397@dhcp22.suse.cz>
-	 <CAKWKT+b2s4E7Nne5d0UJwfLGiCXqAUgrCzuuZi6ZPdjszVSmWg@mail.gmail.com>
-	 <20121023101500.GE15397@dhcp22.suse.cz>
-	 <CAKTCnzkiabWK8tAORkhg6oW11VvXS-YqBwDzED_3=J1buhaQnQ@mail.gmail.com>
-	 <CAKWKT+ZahFTnPRJ4FCebxfcrcYEBf+PL9Wa_Foygep_gFst4_g@mail.gmail.com>
-	 <20121025095719.GA11105@dhcp22.suse.cz>
-	 <CAKWKT+ZRTUwer8qhjWGjkra63e10R67UQzezdaCaStz+rvGjxw@mail.gmail.com>
-	 <1351270990.16639.92.camel@maggy.simpson.net>
+From: Anton Vorontsov <cbouatmailru@gmail.com>
+Subject: Re: [PATCH] powerpc/esdhc: enable the card insert/remove interrupt
+Date: Fri, 26 Oct 2012 18:12:50 -0700
+Message-ID: <20121027011249.GB9152@lizard>
+References: <1350975677-8195-1-git-send-email-r66093@freescale.com>
+ <20121023082648.GA21690@lizard>
+ <110EED8CC96DFC488B7E717A2027A27C1C68D9@039-SN1MPN1-003.039d.mgd.msft.net>
+ <110EED8CC96DFC488B7E717A2027A27C1D7A42@039-SN1MPN1-003.039d.mgd.msft.net>
+ <20121025103038.GA5107@lizard>
+ <110EED8CC96DFC488B7E717A2027A27C1DFBFB@039-SN1MPN1-004.039d.mgd.msft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1351270990.16639.92.camel-sZ+7a5bGyC/1wTEvPJ5Q0F6hYfS7NtTn@public.gmane.org>
-Sender: cgroups-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Qiang Gao <gaoqiangscut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Michal Hocko <mhocko-AlSwsSmVLrQ@public.gmane.org>, Balbir Singh <bsingharora-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <cgroups-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Peter Zijlstra <a.p.zijlstra-/NLkJaSkS4VmR6Xm/wNWPw@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-da0-f46.google.com ([209.85.210.46]:48408 "EHLO
+	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758292Ab2J0BPw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Oct 2012 21:15:52 -0400
+Received: by mail-da0-f46.google.com with SMTP id n41so1541516dak.19
+        for <linux-mmc@vger.kernel.org>; Fri, 26 Oct 2012 18:15:51 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C1DFBFB@039-SN1MPN1-004.039d.mgd.msft.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Huang Changming-R66093 <r66093@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kumar Gala <galak@kernel.crashing.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 
-On Fri, 2012-10-26 at 10:03 -0700, Mike Galbraith wrote:
+Hello Huang,
 
-> The bug is in the patch that used sched_setscheduler_nocheck().  Plain
-> sched_setscheduler() would have replied -EGOAWAY.
+On Fri, Oct 26, 2012 at 02:42:36AM +0000, Huang Changming-R66093 wrote:
+> For the current polling mode, driver will send CMD13 to poll the card status periodically , which will cause too many interrupts.
+> Once I sent patches to detect the card when using polling mode last year: read the state register, instead of send CMD13. But, these patches were not accepted. Now I attach them for you.
 
-sched_setscheduler_nocheck() should say go away too methinks.  This
-isn't about permissions, it's about not being stupid in general.
+Was there any specific reason why the patches didn't get accepted?
 
-sched: fix __sched_setscheduler() RT_GROUP_SCHED conditionals
+I very briefly looked at them, and they seem to be OK (there are a few
+cosmetic details I'd comment on, tho -- but please send them in a normal
+way (i.e. not as attachments).
 
-Remove user and rt_bandwidth_enabled() RT_GROUP_SCHED conditionals in
-__sched_setscheduler().  The end result of kernel OR user promoting a
-task in a group with zero rt_runtime allocated is the same bad thing,
-and throttle switch position matters little.  It's safer to just say
-no solely based upon bandwidth existence, may save the user a nasty
-surprise if he later flips the throttle switch to 'on'.
-
-The commit below came about due to sched_setscheduler_nocheck()
-allowing a task in a task group with zero rt_runtime allocated to
-be promoted by the kernel oom logic, thus marooning it forever.
-
-<quote>
-commit 341aea2bc48bf652777fb015cc2b3dfa9a451817
-Author: KOSAKI Motohiro <kosaki.motohiro-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
-Date:   Thu Apr 14 15:22:13 2011 -0700
-
-    oom-kill: remove boost_dying_task_prio()
-    
-    This is an almost-revert of commit 93b43fa ("oom: give the dying task a
-    higher priority").
-    
-    That commit dramatically improved oom killer logic when a fork-bomb
-    occurs.  But I've found that it has nasty corner case.  Now cpu cgroup has
-    strange default RT runtime.  It's 0!  That said, if a process under cpu
-    cgroup promote RT scheduling class, the process never run at all.
-</quote>
-
-Signed-off-by: Mike Galbraith <efault-Mmb7MZpHnFY@public.gmane.org>
-
-diff --git a/kernel/sched/core.c b/kernel/sched/core.c
-index 2d8927f..d3a35f8 100644
---- a/kernel/sched/core.c
-+++ b/kernel/sched/core.c
-@@ -3810,17 +3810,14 @@ recheck:
- 	}
- 
- #ifdef CONFIG_RT_GROUP_SCHED
--	if (user) {
--		/*
--		 * Do not allow realtime tasks into groups that have no runtime
--		 * assigned.
--		 */
--		if (rt_bandwidth_enabled() && rt_policy(policy) &&
--				task_group(p)->rt_bandwidth.rt_runtime == 0 &&
--				!task_group_is_autogroup(task_group(p))) {
--			task_rq_unlock(rq, p, &flags);
--			return -EPERM;
--		}
-+	/*
-+	 * Do not allow realtime tasks into groups that have no runtime
-+	 * assigned.
-+	 */
-+	if (rt_policy(policy) && task_group(p)->rt_bandwidth.rt_runtime == 0 &&
-+			!task_group_is_autogroup(task_group(p))) {
-+		task_rq_unlock(rq, p, &flags);
-+		return -EPERM;
- 	}
- #endif
- 
+Thanks,
+Anton.
