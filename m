@@ -1,66 +1,116 @@
-From: =?utf-8?B?5q+P5aSp5LuFMTDlhYM=?= <admin@yunwi.com>
-Subject: =?utf-8?B?MjAxMuaYpeWtozExMeWxiuW5v+S6pOS8muS5sOWutu+8jEIyQuivog==?=
-	=?utf-8?B?55uY5Lmw5a6244CBdGhvbWFzbmV0IOmHh+i0reWVhizmtbflhbM=?=
-	=?utf-8?B?5pWw5o2uLOe+pOWPkei9r+S7tu+8jOWxleS8muS5sOWutiDku4UzMDDlhYMh?=
-Date: Sat, 27 Oct 2012 12:21:23 +0000 (UTC)
-Message-ID: <20191023014248476713@yunwi.com>
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: Re: [RFC PATCH v3 02/16] ARM: davinci: move private EDMA API to
+ arm/common
+Date: Sun, 28 Oct 2012 13:47:09 +0530
+Message-ID: <508CEA05.8060200@ti.com>
+References: <1350566815-409-1-git-send-email-mporter@ti.com>
+ <1350566815-409-3-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [222.178.152.93] ([222.178.152.93]:1657 "HELO yunwi.com"
-	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with SMTP
-	id S1751874Ab2J0MVU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 27 Oct 2012 08:21:20 -0400
-Date: Wed, 23 Oct 2019 01:42:40 +0800
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <1350566815-409-3-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux@youmustbejoking.demon.co.uk, lucaferrara76@virgilio.it, lucalu@163.net, lucanyouthservice@gmail.com, lucas.conor@msn.com, lucas.matias.87@gmail.com, linux-mmc@vger.kernel.org, linux-security@dell.com, linuxwiza@c-98-213-226-152.hsd1.il.com, lucas_grant@live.com
 
-MjAxMuaYpeWtozExMeWxiuW5v+S6pOS8muS5sOWutu+8jOa1t+WFs+aVsOaNruaPkOWNlXBpZXJz
-54mI77yMMjAwOC0yMDEy5bm0OeWxiuW5v+S6pOS8muaVsOaNruOAgg0KDQrkuIDlhbExMOS4quWM
-hSjmlbDmja7mmK/lhajooYzkuJrnmoTvvIzlj6/ku6XmjInnhaflhbPplK7or43mj5Dlj5blh7rm
-naXnmoQp77yaIA0KMe+8jDIwMTLmmKXlraMxMTHlsYrlub/kuqTkvJrkubDlrrbnjrDlnLror6Ln
-m5jmlbDmja7lupPmlrDpspzlh7rngonvvIzotoXnuqfmlrDpspzkubDlrrbvvIzmlrDpspzmlbDm
-ja7vvIzlrrnmmJPmiJDljZXvvIEgDQoy77yM6LSt5Lmw5ZCO5Y+v5Lul5YWN6LS55pu05pawMjAx
-Mueni+Wto+W5v+S6pOS8muS5sOWutuaVsOaNruOAguWkqui2heWAvOS6huOAgg0KM++8jDIwMTLm
-nIDmlrDlhajnkIPlsZXkvJrnjrDlnLrkubDlrrblupMo5LiO6LS45Y+R5ZCM5q2lKSzlhbE0NuS4
-h+adoeaVsOaNruOAgiAo5oyJ54Wn6KGM5Lia5YiG57G7KQ0KNO+8jDIwMTEsMjAxMOW5tCwyMDA5
-5bm0LDIwMDjlubQg5pil5a2jK+eni+Wto+W5v+S6pOS8muS5sOWutuWQjeW9le+8jDEwMyAxMDQg
-MTA1IDEwNiAxMDcgMTA4LDEwOSwxMTAg5YWx5YWt5bGKIOWFsTEyMC425LiH5pWw5o2u44CCDQo1
-77yMNDguNjjkuIfmnaHmnIDmlrDkubDlrrbor6Lnm5jvvIzpg73luKbmnIlFbWFpbO+8jOacgOac
-ieS7t+WAvOeahOivouebmOOAgg0KNu+8jDIwMTHmnIDmlrAgQjJCIOiLseaWh+WbvemZheermTYw
-5LiH5bim6IGU57uc5pa55byP6K+i55uYIOacgOacieS7t+WAvOivouebmOS5i+S4gC4NCjfvvIwy
-MDEw5rW35YWz5o+Q5Y2VcGllcnPniYgxMDAw5LiH5pWw5o2uLg0KOO+8jDIwMTHlubTliLDpppnm
-uK/ph4fotK3nmoTlm73lpJblrqLkurrlkI3lvZUo6aaZ5riv6LS45Y+R5bGA5o+Q5L6bKe+8jOi2
-hee6p+mHjeimgeeahOS5sOWutuOAgg0KOe+8jDIwMTHlubTmlrDlop7liqDnmoQt576O5Zu9QjJC
-IHRob21hc25ldCDph4fotK3llYblkI3ljZXjgIINCjEw77yM576k5Y+R6L2v5Lu25a6J6KOF5LiO
-6YOo572y5pyN5Yqh44CCDQoNCui/meS6m+WFqOacie+8jOWFsTEyODDkuIcg5pWw5o2u44CCDQoN
-CiANCuimgeeahOaKk+e0p+iBlOezu1FROiA0NjAxMjI2NDEg5oiW6ICF56uL5Y2z5Zue5aSN6YKu
-566xOiA0NjAxMjI2NDFAcXEuY29tDQropoHnmoTmipPntKfogZTns7tRUTogNDYwMTIyNjQxIOaI
-luiAheeri+WNs+WbnuWkjemCrueusTogNDYwMTIyNjQxQHFxLmNvbQ0K6KaB55qE5oqT57Sn6IGU
-57O7UVE6IDQ2MDEyMjY0MSDmiJbogIXnq4vljbPlm57lpI3pgq7nrrE6IDQ2MDEyMjY0MUBxcS5j
-b20NCg0K6K+a5L+h5Li65pys77yM5aaC5p6c5LiN5L+h5Lu75pys5Lq6LOWPr+S7pei1sOa3mOWu
-neS6pOaYkyzmlLbliLDmlbDmja7pqozor4Ez5aSp5ZCO5YaN5LuY5qy+LOi/meaYr+WvueaCqOac
-gOWlveeahOS/nemanOS6huOAgiANCg0KDQoNCuWwj+aKgOW3p++8miANCuaKijUwMOS4h+S5sOWu
-tue+pOWPkeS7peS4gOmBje+8jOWdh+S8muacieaVsOWNg+S4quWbnuWkjeeahO+8jOi/meS6m+Ww
-seaYr+mdnuW4uOmrmOi0qOmHj+eahOS5sOWutuOAgiANCuS9v+eUqOaIkeS7rOmAgeeahOe+pOWP
-kei9r+S7tu+8jDEtMuWRqOWwseWPr+WujOWFqOWPkeWujOOAgg0KDQoNCg0KDQoNCuW5v+S6pOS8
-muS5sOWutuaMieS6p+WTgeexu+WIq+WIhuexu++8jOWIhuS4uuS7peS4i+WHoOexu++8mg0KMSDl
-ip7lhazorr7lpIcNCjIg57yW57uH5Y+K6Jek6ZOB5bel6Im65ZOBDQozIOeOu+eSgw0KNCDppJDl
-jqjnlKjlhbcNCjUg6L2m6L6GDQo2IOWkp+Wei+acuuaisOWPiuiuvuWkhw0KNyDnlLXlrZDnlLXm
-sJQNCjgg55S15a2Q5raI6LS55ZOBDQo5IOe6uue7hw0KMTAg5pyN6KOFDQoxMSDkuKrkurrmiqTn
-kIYNCjEyIOW3peeoi+acuuaisA0KMTMg5bel5YW3DQoxNCDljJblt6UNCjE1IOiuoeeul+acuuWP
-iumAmuiurw0KMTYg5a625bGF55So5ZOBDQoxNyDlrrblsYXoo4XppbANCjE4IOWutuWFtw0KMTkg
-5a6255So55S15ZmoDQoyMCDlu7rnrZHlj4roo4XppbDmnZDmlpkNCjIxIOiKguaXpeeUqOWTgQ0K
-MjIg56S85ZOB5Y+K6LWg5ZOBDQoyMyDmkanmiZjovaYNCjI0IOaxvei9pumFjeS7tg0KMjUg6aOf
-5ZOBDQoyNiDpmbbnk7cNCjI3IOmTgeefsw0KMjgg546p5YW3DQoyOSDljavmtbQNCjMwIOS6lOmH
-kQ0KMzEg5bCP5Z6L5py65qKwDQozMiDpnosNCjMzIOS8kemXsueUqOWTgQ0KMzQg5Yy755aXDQoz
-NSDmtbTlrqTkuqflk4ENCjM2IOWbreaelw0KMzcg54Wn5piO5Lqn5ZOBDQozOCDpkp/ooajnnLzp
-lZwNCjM5IOiHquihjOi9pg0KNDAg5YyFDQoNCg0K5paw6bKc5pWw5o2uLeaIkOWNleeOh+aegemr
-mA0K5paw6bKc5pWw5o2uLeaIkOWNleeOh+aegemrmA0K5paw6bKc5pWw5o2uLeaIkOWNleeOh+ae
-gemrmA0K5paw6bKc5pWw5o2uLeaIkOWNleeOh+aegemrmA0K5paw6bKc5pWw5o2uLeaIkOWNleeO
-h+aegemrmA0K
+On 10/18/2012 6:56 PM, Matt Porter wrote:
+> Move mach-davinci/dma.c to common/edma.c so it can be used
+> by OMAP (specifically AM33xx) as well. This just moves the
+> private EDMA API but does not support OMAP.
+> 
+> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+> ---
 
+> diff --git a/arch/arm/mach-davinci/devices.c b/arch/arm/mach-davinci/devices.c
+> index 4c48a36..f45d591 100644
+> --- a/arch/arm/mach-davinci/devices.c
+> +++ b/arch/arm/mach-davinci/devices.c
+> @@ -19,9 +19,10 @@
+>  #include <mach/irqs.h>
+>  #include <mach/cputype.h>
+>  #include <mach/mux.h>
+> -#include <mach/edma.h>
+>  #include <linux/platform_data/mmc-davinci.h>
+>  #include <mach/time.h>
+> +#include <linux/platform_data/edma.h>
 
+Can you please introduce a patch to clean this mixture of linux/ and
+mach/ includes?
+
+> +
+>  
+>  #include "davinci.h"
+>  #include "clock.h"
+> @@ -141,10 +142,10 @@ static struct resource mmcsd0_resources[] = {
+>  	},
+>  	/* DMA channels: RX, then TX */
+>  	{
+> -		.start = EDMA_CTLR_CHAN(0, DAVINCI_DMA_MMCRXEVT),
+> +		.start = EDMA_CTLR_CHAN(0, 26),
+
+Instead of just replacing the event #defines with plain numbers, can you
+introduce a mach-davinci local edma.h which can then be included in the
+davinci platform files which refer to edma channel numbers?
+
+> diff --git a/arch/arm/plat-omap/Kconfig b/arch/arm/plat-omap/Kconfig
+> index 7cd56ed..153fab8 100644
+> --- a/arch/arm/plat-omap/Kconfig
+> +++ b/arch/arm/plat-omap/Kconfig
+> @@ -28,6 +28,7 @@ config ARCH_OMAP2PLUS
+>  	select OMAP_DM_TIMER
+>  	select PROC_DEVICETREE if PROC_FS
+>  	select SPARSE_IRQ
+> +	select TI_PRIV_EDMA
+
+This hunk does not seem to belong to subject of this patch.
+
+>  	select USE_OF
+>  	help
+>  	  "Systems based on OMAP2, OMAP3, OMAP4 or OMAP5"
+
+> diff --git a/include/linux/platform_data/edma.h b/include/linux/platform_data/edma.h
+> new file mode 100644
+> index 0000000..7396f0b3
+> --- /dev/null
+> +++ b/include/linux/platform_data/edma.h
+> @@ -0,0 +1,198 @@
+> +/*
+> + *  TI DAVINCI dma definitions
+> + *
+> + *  Copyright (C) 2006-2009 Texas Instruments.
+> + *
+> + *  This program is free software; you can redistribute  it and/or modify it
+> + *  under  the terms of  the GNU General  Public License as published by the
+> + *  Free Software Foundation;  either version 2 of the  License, or (at your
+> + *  option) any later version.
+> + *
+> + *  THIS  SOFTWARE  IS PROVIDED   ``AS  IS'' AND   ANY  EXPRESS OR IMPLIED
+> + *  WARRANTIES,   INCLUDING, BUT NOT  LIMITED  TO, THE IMPLIED WARRANTIES OF
+> + *  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN
+> + *  NO  EVENT  SHALL   THE AUTHOR  BE    LIABLE FOR ANY   DIRECT, INDIRECT,
+> + *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+> + *  NOT LIMITED   TO, PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS OF
+> + *  USE, DATA,  OR PROFITS; OR  BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+> + *  ANY THEORY OF LIABILITY, WHETHER IN  CONTRACT, STRICT LIABILITY, OR TORT
+> + *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+> + *  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+> + *  You should have received a copy of the  GNU General Public License along
+> + *  with this program; if not, write  to the Free Software Foundation, Inc.,
+> + *  675 Mass Ave, Cambridge, MA 02139, USA.
+
+This part can be dropped, I suppose ;-)
+
+Thanks,
+Sekhar
