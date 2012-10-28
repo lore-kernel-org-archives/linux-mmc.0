@@ -1,15 +1,15 @@
 From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [RFC PATCH v3 02/16] ARM: davinci: move private EDMA API to
- arm/common
-Date: Sun, 28 Oct 2012 13:47:09 +0530
-Message-ID: <508CEA05.8060200@ti.com>
+Subject: Re: [RFC PATCH v3 04/16] ARM: edma: add DT and runtime PM support
+ for AM33XX
+Date: Sun, 28 Oct 2012 16:33:39 +0530
+Message-ID: <508D110B.8010908@ti.com>
 References: <1350566815-409-1-git-send-email-mporter@ti.com>
- <1350566815-409-3-git-send-email-mporter@ti.com>
+ <1350566815-409-5-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <1350566815-409-3-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
+In-Reply-To: <1350566815-409-5-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
 List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
  <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
@@ -25,92 +25,123 @@ Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1a
 List-Id: linux-mmc@vger.kernel.org
 
 On 10/18/2012 6:56 PM, Matt Porter wrote:
-> Move mach-davinci/dma.c to common/edma.c so it can be used
-> by OMAP (specifically AM33xx) as well. This just moves the
-> private EDMA API but does not support OMAP.
+> Adds support for parsing the TI EDMA DT data into the required
+> EDMA private API platform data.
+> 
+> Calls runtime PM API only in the DT case in order to unidle the
+> associated hwmods on AM33XX.
+
+Runtime PM is supported on DaVinci now, so if that was the reason for
+this choice, then it doesn't need to be that way.
+
 > 
 > Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 > ---
-
-> diff --git a/arch/arm/mach-davinci/devices.c b/arch/arm/mach-davinci/devices.c
-> index 4c48a36..f45d591 100644
-> --- a/arch/arm/mach-davinci/devices.c
-> +++ b/arch/arm/mach-davinci/devices.c
-> @@ -19,9 +19,10 @@
->  #include <mach/irqs.h>
->  #include <mach/cputype.h>
->  #include <mach/mux.h>
-> -#include <mach/edma.h>
->  #include <linux/platform_data/mmc-davinci.h>
->  #include <mach/time.h>
-> +#include <linux/platform_data/edma.h>
-
-Can you please introduce a patch to clean this mixture of linux/ and
-mach/ includes?
-
-> +
+>  arch/arm/common/edma.c                      |  255 +++++++++++++++++++++++++--
+>  arch/arm/mach-davinci/board-da830-evm.c     |    4 +-
+>  arch/arm/mach-davinci/board-da850-evm.c     |    8 +-
+>  arch/arm/mach-davinci/board-dm646x-evm.c    |    4 +-
+>  arch/arm/mach-davinci/board-omapl138-hawk.c |    8 +-
+>  arch/arm/mach-davinci/devices-da8xx.c       |    8 +-
+>  arch/arm/mach-davinci/devices-tnetv107x.c   |    4 +-
+>  arch/arm/mach-davinci/dm355.c               |    4 +-
+>  arch/arm/mach-davinci/dm365.c               |    4 +-
+>  arch/arm/mach-davinci/dm644x.c              |    4 +-
+>  arch/arm/mach-davinci/dm646x.c              |    4 +-
+>  include/linux/platform_data/edma.h          |    8 +-
+>  12 files changed, 272 insertions(+), 43 deletions(-)
+> 
+> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+> index a3d189d..6d2a590 100644
+> --- a/arch/arm/common/edma.c
+> +++ b/arch/arm/common/edma.c
+> @@ -24,6 +24,13 @@
+>  #include <linux/platform_device.h>
+>  #include <linux/io.h>
+>  #include <linux/slab.h>
+> +#include <linux/edma.h>
+> +#include <linux/err.h>
+> +#include <linux/of_address.h>
+> +#include <linux/of_device.h>
+> +#include <linux/of_dma.h>
+> +#include <linux/of_irq.h>
+> +#include <linux/pm_runtime.h>
 >  
->  #include "davinci.h"
->  #include "clock.h"
-> @@ -141,10 +142,10 @@ static struct resource mmcsd0_resources[] = {
->  	},
->  	/* DMA channels: RX, then TX */
->  	{
-> -		.start = EDMA_CTLR_CHAN(0, DAVINCI_DMA_MMCRXEVT),
-> +		.start = EDMA_CTLR_CHAN(0, 26),
+>  #include <linux/platform_data/edma.h>
+>  
+> @@ -1366,31 +1373,237 @@ void edma_clear_event(unsigned channel)
+>  EXPORT_SYMBOL(edma_clear_event);
+>  
+>  /*-----------------------------------------------------------------------*/
+> +static int edma_of_read_u32_to_s8_array(const struct device_node *np,
+> +					 const char *propname, s8 *out_values,
+> +					 size_t sz)
+> +{
+> +	struct property *prop = of_find_property(np, propname, NULL);
+> +	const __be32 *val;
+> +
+> +	if (!prop)
+> +		return -EINVAL;
+> +	if (!prop->value)
+> +		return -ENODATA;
+> +	if ((sz * sizeof(u32)) > prop->length)
+> +		return -EOVERFLOW;
+> +
+> +	val = prop->value;
+> +
+> +	while (sz--)
+> +		*out_values++ = (s8)(be32_to_cpup(val++) & 0xff);
+> +
+> +	/* Terminate it */
+> +	*out_values++ = -1;
+> +	*out_values++ = -1;
+> +
+> +	return 0;
+> +}
+> +
+> +static int edma_of_read_u32_to_s16_array(const struct device_node *np,
+> +					 const char *propname, s16 *out_values,
+> +					 size_t sz)
+> +{
+> +	struct property *prop = of_find_property(np, propname, NULL);
+> +	const __be32 *val;
+> +
+> +	if (!prop)
+> +		return -EINVAL;
+> +	if (!prop->value)
+> +		return -ENODATA;
+> +	if ((sz * sizeof(u32)) > prop->length)
+> +		return -EOVERFLOW;
+> +
+> +	val = prop->value;
+> +
+> +	while (sz--)
+> +		*out_values++ = (s16)(be32_to_cpup(val++) & 0xffff);
+> +
+> +	/* Terminate it */
+> +	*out_values++ = -1;
+> +	*out_values++ = -1;
+> +
+> +	return 0;
+> +}
 
-Instead of just replacing the event #defines with plain numbers, can you
-introduce a mach-davinci local edma.h which can then be included in the
-davinci platform files which refer to edma channel numbers?
+I think these helper functions will have some general use beyond EDMA
+and can be kept in drivers/of/base.c. Grant/Rob need to agree though.
 
-> diff --git a/arch/arm/plat-omap/Kconfig b/arch/arm/plat-omap/Kconfig
-> index 7cd56ed..153fab8 100644
-> --- a/arch/arm/plat-omap/Kconfig
-> +++ b/arch/arm/plat-omap/Kconfig
-> @@ -28,6 +28,7 @@ config ARCH_OMAP2PLUS
->  	select OMAP_DM_TIMER
->  	select PROC_DEVICETREE if PROC_FS
->  	select SPARSE_IRQ
-> +	select TI_PRIV_EDMA
+> diff --git a/arch/arm/mach-davinci/board-da830-evm.c b/arch/arm/mach-davinci/board-da830-evm.c
+> index 95b5e10..ffcbec1 100644
+> --- a/arch/arm/mach-davinci/board-da830-evm.c
+> +++ b/arch/arm/mach-davinci/board-da830-evm.c
+> @@ -512,7 +512,7 @@ static struct davinci_i2c_platform_data da830_evm_i2c_0_pdata = {
+>   * example: Timer, GPIO, UART events etc) on da830/omap-l137 EVM, hence
+>   * they are being reserved for codecs on the DSP side.
+>   */
+> -static const s16 da830_dma_rsv_chans[][2] = {
+> +static s16 da830_dma_rsv_chans[][2] = {
 
-This hunk does not seem to belong to subject of this patch.
-
->  	select USE_OF
->  	help
->  	  "Systems based on OMAP2, OMAP3, OMAP4 or OMAP5"
-
-> diff --git a/include/linux/platform_data/edma.h b/include/linux/platform_data/edma.h
-> new file mode 100644
-> index 0000000..7396f0b3
-> --- /dev/null
-> +++ b/include/linux/platform_data/edma.h
-> @@ -0,0 +1,198 @@
-> +/*
-> + *  TI DAVINCI dma definitions
-> + *
-> + *  Copyright (C) 2006-2009 Texas Instruments.
-> + *
-> + *  This program is free software; you can redistribute  it and/or modify it
-> + *  under  the terms of  the GNU General  Public License as published by the
-> + *  Free Software Foundation;  either version 2 of the  License, or (at your
-> + *  option) any later version.
-> + *
-> + *  THIS  SOFTWARE  IS PROVIDED   ``AS  IS'' AND   ANY  EXPRESS OR IMPLIED
-> + *  WARRANTIES,   INCLUDING, BUT NOT  LIMITED  TO, THE IMPLIED WARRANTIES OF
-> + *  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN
-> + *  NO  EVENT  SHALL   THE AUTHOR  BE    LIABLE FOR ANY   DIRECT, INDIRECT,
-> + *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-> + *  NOT LIMITED   TO, PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS OF
-> + *  USE, DATA,  OR PROFITS; OR  BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-> + *  ANY THEORY OF LIABILITY, WHETHER IN  CONTRACT, STRICT LIABILITY, OR TORT
-> + *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-> + *  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-> + *  You should have received a copy of the  GNU General Public License along
-> + *  with this program; if not, write  to the Free Software Foundation, Inc.,
-> + *  675 Mass Ave, Cambridge, MA 02139, USA.
-
-This part can be dropped, I suppose ;-)
+I wonder why you had to remove const here and in other places. You seem
+to be allocating new memory for DT case anyway. Its also not a good idea
+to modify the passed platform data.
 
 Thanks,
 Sekhar
