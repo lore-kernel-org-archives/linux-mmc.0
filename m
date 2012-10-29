@@ -1,89 +1,45 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH] MMCI: fetch pinctrl handle and set default state
-Date: Mon, 29 Oct 2012 14:28:39 +0100
-Message-ID: <1351517319-22357-1-git-send-email-linus.walleij@linaro.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] dw_mmc: fix multiple drv_data NULL dereferences
+Date: Mon, 29 Oct 2012 09:39:48 -0400
+Message-ID: <87a9v5xuqj.fsf@octavius.laptop.org>
+References: <1350376988-27477-1-git-send-email-james.hogan@imgtec.com>
+	<507E129D.8000401@samsung.com>
+	<CAFbHwiSUoP_W=CK1hF+CYjxrJ1P6BR9=y_grEogmo5br6R_zuw@mail.gmail.com>
+	<508E4DB6.20504@imgtec.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:60460 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755105Ab2J2Nj7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 29 Oct 2012 09:39:59 -0400
+In-Reply-To: <508E4DB6.20504@imgtec.com> (James Hogan's message of "Mon, 29
+	Oct 2012 09:34:46 +0000")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: James Hogan <james.hogan@imgtec.com>
+Cc: Will Newton <will.newton@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-This fetches the pinctrl resource for the MMCI driver, and if
-a "default" state is found, it is activated.
+Hi,
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
-ChangeLog v1->v2:
-- Change dev_err() to dev_warn() when grabbing the default pins
-  since being unable to obtain the default state is not in any
-  way fatal.
----
- drivers/mmc/host/mmci.c |   18 ++++++++++++++++++
- drivers/mmc/host/mmci.h |    4 ++++
- 2 files changed, 22 insertions(+), 0 deletions(-)
+On Mon, Oct 29 2012, James Hogan wrote:
+> On 17/10/12 10:11, Will Newton wrote:
+>> Looks good to me too.
+>> 
+>> Acked-by: Will Newton <will.newton@imgtec.com>
+>> 
+>> On Wed, Oct 17, 2012 at 3:06 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>>> Looks good to me.
+>>>
+>>> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+>
+> Thanks for the acks Thomas, Seungwon, Jaehoon and Will.
+>
+> Chris: Any chance of queueing this patch for v3.7?
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index edc3e9b..9a36226 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -33,6 +33,7 @@
- #include <linux/amba/mmci.h>
- #include <linux/pm_runtime.h>
- #include <linux/types.h>
-+#include <linux/pinctrl/consumer.h>
- 
- #include <asm/div64.h>
- #include <asm/io.h>
-@@ -1360,6 +1361,23 @@ static int __devinit mmci_probe(struct amba_device *dev,
- 		mmc->f_max = min(host->mclk, fmax);
- 	dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
- 
-+	host->pinctrl = devm_pinctrl_get(&dev->dev);
-+	if (IS_ERR(host->pinctrl)) {
-+		ret = PTR_ERR(host->pinctrl);
-+		goto clk_disable;
-+	}
-+
-+	host->pins_default = pinctrl_lookup_state(host->pinctrl,
-+			PINCTRL_STATE_DEFAULT);
-+
-+	/* enable pins to be muxed in and configured */
-+	if (!IS_ERR(host->pins_default)) {
-+		ret = pinctrl_select_state(host->pinctrl, host->pins_default);
-+		if (ret)
-+			dev_warn(&dev->dev, "could not set default pins\n");
-+	} else
-+		dev_warn(&dev->dev, "could not get default pinstate\n");
-+
- #ifdef CONFIG_REGULATOR
- 	/* If we're using the regulator framework, try to fetch a regulator */
- 	host->vcc = regulator_get(&dev->dev, "vmmc");
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index d437ccf..d34d8c0 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -195,6 +195,10 @@ struct mmci_host {
- 	unsigned int		size;
- 	struct regulator	*vcc;
- 
-+	/* pinctrl handles */
-+	struct pinctrl		*pinctrl;
-+	struct pinctrl_state	*pins_default;
-+
- #ifdef CONFIG_DMA_ENGINE
- 	/* DMA stuff */
- 	struct dma_chan		*dma_current;
+Yes, certainly -- pushed to mmc-next for 3.7, thanks.
+
+- Chris.
 -- 
-1.7.7.6
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
