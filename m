@@ -1,44 +1,34 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 00/26] pstore, mmc: add mmc as backend for pstore
-Date: Mon, 29 Oct 2012 16:50:42 -0400
-Message-ID: <87390xroil.fsf@octavius.laptop.org>
-References: <1351000104-13015-1-git-send-email-irina.tirdea@intel.com>
-	<20121029202820.GA21660@shutemov.name>
+Subject: Re: [PATCH] mmc: mxcmmc: Fix MODULE_ALIAS
+Date: Mon, 29 Oct 2012 16:53:16 -0400
+Message-ID: <87y5ipq9tv.fsf@octavius.laptop.org>
+References: <1349810765-12351-1-git-send-email-fabio.estevam@freescale.com>
+	<20121029204253.GT1641@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20121029202820.GA21660@shutemov.name> (Kirill A. Shutemov's
-	message of "Mon, 29 Oct 2012 22:28:20 +0200")
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Kirill A. Shutemov" <kirill@shutemov.name>
-Cc: Anton Vorontsov <cbouatmailru@gmail.com>, Colin Cross <ccross@android.com>, Kees Cook <keescook@chromium.org>, Tony Luck <tony.luck@intel.com>, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Octavian Purdila <octavian.purdila@intel.com>, Irina Tirdea <irina.tirdea@intel.com>, linux-mmc@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:57027 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932203Ab2J2UxY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 29 Oct 2012 16:53:24 -0400
+In-Reply-To: <20121029204253.GT1641@pengutronix.de> (Sascha Hauer's message of
+	"Mon, 29 Oct 2012 21:42:53 +0100")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: Fabio Estevam <fabio.estevam@freescale.com>, linux-mmc@vger.kernel.org
 
 Hi,
 
-On Mon, Oct 29 2012, Kirill A. Shutemov wrote:
-> On Tue, Oct 23, 2012 at 04:47:58PM +0300, Irina Tirdea wrote:
->> These patches enable using the mmc card to store panic information.
+On Mon, Oct 29 2012, Sascha Hauer wrote:
+> On Tue, Oct 09, 2012 at 04:26:05PM -0300, Fabio Estevam wrote:
+>> The correct name for the driver is "mxc-mmc".
 >> 
->> They include changes for pstore and mmc:
->>  - add block device backend for pstore
->>  - add logic in mmc for writing in panic mode
+>> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
 >
-> Chris, any feedback on mmc/sdhci part?
+> Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
 
-Looks like the patchset hasn't been sent to linux-mmc@vger.kernel.org
-yet -- could you send a v2 with that address included, please?
-
-It would also be great to see descriptive commit messages, rather than
-just patch subject lines.
-
-Documentation-wise, the patchset mentions that host controller support
-is required for this to work, but doesn't explain what kind of support
-that is, and the sdhci-pci support seems unconditional on type of host
-controller -- why wouldn't every controller work?  Is it (just) because
-other controller drivers use msleep?
-
-Thanks,
+Thanks, pushed to mmc-next for 3.8.
 
 - Chris.
 -- 
