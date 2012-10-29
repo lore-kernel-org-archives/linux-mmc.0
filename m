@@ -1,51 +1,30 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 3/4] mmc: omap_hsmmc: fix host reference after mmc_free_host
-Date: Mon, 29 Oct 2012 12:56:20 -0400
-Message-ID: <87pq41tdxn.fsf@octavius.laptop.org>
-References: <1350317108-10657-1-git-send-email-svenkatr@ti.com>
-	<1350317108-10657-3-git-send-email-svenkatr@ti.com>
+From: "Kirill A. Shutemov" <kirill@shutemov.name>
+Subject: Re: [PATCH 00/26] pstore, mmc: add mmc as backend for pstore
+Date: Mon, 29 Oct 2012 22:28:20 +0200
+Message-ID: <20121029202820.GA21660@shutemov.name>
+References: <1351000104-13015-1-git-send-email-irina.tirdea@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1350317108-10657-3-git-send-email-svenkatr@ti.com> (Venkatraman
-	S.'s message of "Mon, 15 Oct 2012 21:35:07 +0530")
-Sender: linux-omap-owner@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from shutemov.name ([176.9.204.213]:60025 "EHLO shutemov.name"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750746Ab2J2U04 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 29 Oct 2012 16:26:56 -0400
+Content-Disposition: inline
+In-Reply-To: <1351000104-13015-1-git-send-email-irina.tirdea@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Anton Vorontsov <cbouatmailru@gmail.com>, Colin Cross <ccross@android.com>, Kees Cook <keescook@chromium.org>, Tony Luck <tony.luck@intel.com>, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Octavian Purdila <octavian.purdila@intel.com>, Irina Tirdea <irina.tirdea@intel.com>, linux-mmc@vger.kernel.org
 
-Hi,
+On Tue, Oct 23, 2012 at 04:47:58PM +0300, Irina Tirdea wrote:
+> These patches enable using the mmc card to store panic information.
+> 
+> They include changes for pstore and mmc:
+>  - add block device backend for pstore
+>  - add logic in mmc for writing in panic mode
 
-On Mon, Oct 15 2012, Venkatraman S wrote:
-> From: Balaji T K <balajitk@ti.com>
->
-> struct omap_hsmmc_host *host should not be accessed after mmc_free_host().
-> Reorder mmc_free_host() after iounmap(host->base).
->
-> Signed-off-by: Balaji T K <balajitk@ti.com>
-> Signed-off-by: Venkatraman S <svenkatr@ti.com>
-> ---
->  drivers/mmc/host/omap_hsmmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index a33ab74..a3929b7 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -2019,8 +2019,8 @@ static int __devexit omap_hsmmc_remove(struct platform_device *pdev)
->  		clk_put(host->dbclk);
->  	}
->  
-> -	mmc_free_host(host->mmc);
->  	iounmap(host->base);
-> +	mmc_free_host(host->mmc);
->  	omap_hsmmc_gpio_free(pdev->dev.platform_data);
->  
->  	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+Chris, any feedback on mmc/sdhci part?
 
-Thanks, pushed to mmc-next for 3.7.
-
-- Chris.
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+ Kirill A. Shutemov
