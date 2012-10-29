@@ -1,186 +1,97 @@
-From: James Hogan <james.hogan@imgtec.com>
-Subject: Re: [PATCH] dw_mmc: fix multiple drv_data NULL dereferences
-Date: Mon, 29 Oct 2012 09:34:46 +0000
-Message-ID: <508E4DB6.20504@imgtec.com>
-References: <1350376988-27477-1-git-send-email-james.hogan@imgtec.com> <507E129D.8000401@samsung.com> <CAFbHwiSUoP_W=CK1hF+CYjxrJ1P6BR9=y_grEogmo5br6R_zuw@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2] mmc: dw-mmc: relocate the position called
+ dw_mci_setup_bus()
+Date: Mon, 29 Oct 2012 18:38:55 +0900
+Message-ID: <508E4EAF.2060409@samsung.com>
+References: <508E11E8.2040609@samsung.com>
+ <009e01cdb5b4$fb55b010$f2011030$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from multi.imgtec.com ([194.200.65.239]:54348 "EHLO multi.imgtec.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752556Ab2J2Jet (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 29 Oct 2012 05:34:49 -0400
-In-Reply-To: <CAFbHwiSUoP_W=CK1hF+CYjxrJ1P6BR9=y_grEogmo5br6R_zuw@mail.gmail.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:50635 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750753Ab2J2Ji5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Oct 2012 05:38:57 -0400
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MCN002KJESTY6J0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 29 Oct 2012 18:38:56 +0900 (KST)
+Received: from [10.90.51.55] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0MCN00DQOESVTD70@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 29 Oct 2012 18:38:56 +0900 (KST)
+In-reply-to: <009e01cdb5b4$fb55b010$f2011030$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Will Newton <will.newton@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <James.Hogan@imgtec.com>, 'Kyungmin Park' <kyungmin.park@samsung.com>
 
-On 17/10/12 10:11, Will Newton wrote:
-> Looks good to me too.
+On 10/29/2012 06:08 PM, Seungwon Jeon wrote:
+> Monday, October 29, 2012, Jaehoon Chung <jh80.chung@samsung.com>
+>> After power-on, must be ensured at least 74~80 clocks before sending any first command.
+>> To ensure, it's good that dw_mci_setup_bus() is located at dw_mci_set_ios
+>> instead of __dw_mci_start_request()
+> After power-up, host driver sets 'DW_MMC_CARD_NEED_INIT' flag, right?
+> And then, this flag help to add SDMMC_CMD_INIT flag into CMD, when __dw_mci_start_request is executed.
+> 74~80 clocks is ensured with SDMMC_CMD_INIT regardless location change, isn't it?
+> I mentioned this part in previous mail. Could you check it?
+According to eMMC spec, after power-on, need to wait for 74-clock before sending first command
+You can see code that after mmc_set_ios(), waiting for mmc_delay(10) into mmc_power_up().
+(You can read the comment at mmc_power_up(), Maybe mmc_delay(10) didn't ensure the 74-clock).
+
+Best Regards,
+Jaehoon Chung
 > 
-> Acked-by: Will Newton <will.newton@imgtec.com>
+> Thanks,
+> Seungwon Jeon
 > 
-> On Wed, Oct 17, 2012 at 3:06 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Looks good to me.
 >>
->> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-Thanks for the acks Thomas, Seungwon, Jaehoon and Will.
-
-Chris: Any chance of queueing this patch for v3.7?
-
-Thanks
-James
-
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+>> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+>> ------
+>> Changelog V2:
+>> 	- Modified the commit-message.
+>> ---
+>>  drivers/mmc/host/dw_mmc.c |    6 +++---
+>>  1 files changed, 3 insertions(+), 3 deletions(-)
 >>
->> On 10/16/2012 05:43 PM, James Hogan wrote:
->>> Commit 800d78bfccb3d38116abfda2a5b9c8afdbd5ea21 ("mmc: dw_mmc: add
->>> support for implementation specific callbacks") merged in v3.7-rc1.
->>>
->>> The above commit introduced multiple NULL pointer dereferences when
->>> the default dw_mci_pltfm_probe() is used, as it sets host->drv_data to
->>> NULL, and that's only checked against NULL in 1 out of the 7 cases where
->>> it is dereferenced.
->>>
->>> Signed-off-by: James Hogan <james.hogan@imgtec.com>
->>> ---
->>>  drivers/mmc/host/dw_mmc-pltfm.c |    4 ++--
->>>  drivers/mmc/host/dw_mmc.c       |   29 +++++++++++++++++------------
->>>  2 files changed, 19 insertions(+), 14 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
->>> index c960ca7..e595721 100644
->>> --- a/drivers/mmc/host/dw_mmc-pltfm.c
->>> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
->>> @@ -50,8 +50,8 @@ int dw_mci_pltfm_register(struct platform_device *pdev,
->>>       if (!host->regs)
->>>               return -ENOMEM;
->>>
->>> -     if (host->drv_data->init) {
->>> -             ret = host->drv_data->init(host);
->>> +     if (drv_data && drv_data->init) {
->>> +             ret = drv_data->init(host);
->>>               if (ret)
->>>                       return ret;
->>>       }
->>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>> index c2828f3..0dc6e33 100644
->>> --- a/drivers/mmc/host/dw_mmc.c
->>> +++ b/drivers/mmc/host/dw_mmc.c
->>> @@ -232,6 +232,7 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
->>>  {
->>>       struct mmc_data *data;
->>>       struct dw_mci_slot *slot = mmc_priv(mmc);
->>> +     struct dw_mci_drv_data *drv_data = slot->host->drv_data;
->>>       u32 cmdr;
->>>       cmd->error = -EINPROGRESS;
->>>
->>> @@ -261,8 +262,8 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
->>>                       cmdr |= SDMMC_CMD_DAT_WR;
->>>       }
->>>
->>> -     if (slot->host->drv_data->prepare_command)
->>> -             slot->host->drv_data->prepare_command(slot->host, &cmdr);
->>> +     if (drv_data && drv_data->prepare_command)
->>> +             drv_data->prepare_command(slot->host, &cmdr);
->>>
->>>       return cmdr;
->>>  }
->>> @@ -772,6 +773,7 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>>  static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>>  {
->>>       struct dw_mci_slot *slot = mmc_priv(mmc);
->>> +     struct dw_mci_drv_data *drv_data = slot->host->drv_data;
->>>       u32 regs;
->>>
->>>       /* set default 1 bit mode */
->>> @@ -807,8 +809,8 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>>               slot->clock = ios->clock;
->>>       }
->>>
->>> -     if (slot->host->drv_data->set_ios)
->>> -             slot->host->drv_data->set_ios(slot->host, ios);
->>> +     if (drv_data && drv_data->set_ios)
->>> +             drv_data->set_ios(slot->host, ios);
->>>
->>>       switch (ios->power_mode) {
->>>       case MMC_POWER_UP:
->>> @@ -1815,6 +1817,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->>>  {
->>>       struct mmc_host *mmc;
->>>       struct dw_mci_slot *slot;
->>> +     struct dw_mci_drv_data *drv_data = host->drv_data;
->>>       int ctrl_id, ret;
->>>       u8 bus_width;
->>>
->>> @@ -1854,8 +1857,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->>>       } else {
->>>               ctrl_id = to_platform_device(host->dev)->id;
->>>       }
->>> -     if (host->drv_data && host->drv_data->caps)
->>> -             mmc->caps |= host->drv_data->caps[ctrl_id];
->>> +     if (drv_data && drv_data->caps)
->>> +             mmc->caps |= drv_data->caps[ctrl_id];
->>>
->>>       if (host->pdata->caps2)
->>>               mmc->caps2 = host->pdata->caps2;
->>> @@ -1867,10 +1870,10 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->>>       else
->>>               bus_width = 1;
->>>
->>> -     if (host->drv_data->setup_bus) {
->>> +     if (drv_data && drv_data->setup_bus) {
->>>               struct device_node *slot_np;
->>>               slot_np = dw_mci_of_find_slot_node(host->dev, slot->id);
->>> -             ret = host->drv_data->setup_bus(host, slot_np, bus_width);
->>> +             ret = drv_data->setup_bus(host, slot_np, bus_width);
->>>               if (ret)
->>>                       goto err_setup_bus;
->>>       }
->>> @@ -2035,6 +2038,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->>>       struct dw_mci_board *pdata;
->>>       struct device *dev = host->dev;
->>>       struct device_node *np = dev->of_node;
->>> +     struct dw_mci_drv_data *drv_data = host->drv_data;
->>>       int idx, ret;
->>>
->>>       pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
->>> @@ -2062,8 +2066,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->>>
->>>       of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
->>>
->>> -     if (host->drv_data->parse_dt) {
->>> -             ret = host->drv_data->parse_dt(host);
->>> +     if (drv_data && drv_data->parse_dt) {
->>> +             ret = drv_data->parse_dt(host);
->>>               if (ret)
->>>                       return ERR_PTR(ret);
->>>       }
->>> @@ -2080,6 +2084,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->>>
->>>  int dw_mci_probe(struct dw_mci *host)
->>>  {
->>> +     struct dw_mci_drv_data *drv_data = host->drv_data;
->>>       int width, i, ret = 0;
->>>       u32 fifo_size;
->>>       int init_slots = 0;
->>> @@ -2127,8 +2132,8 @@ int dw_mci_probe(struct dw_mci *host)
->>>       else
->>>               host->bus_hz = clk_get_rate(host->ciu_clk);
->>>
->>> -     if (host->drv_data->setup_clock) {
->>> -             ret = host->drv_data->setup_clock(host);
->>> +     if (drv_data && drv_data->setup_clock) {
->>> +             ret = drv_data->setup_clock(host);
->>>               if (ret) {
->>>                       dev_err(host->dev,
->>>                               "implementation specific clock setup failed\n");
->>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 4b2bedc..de79093 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -682,9 +682,6 @@ static void __dw_mci_start_request(struct dw_mci *host,
+>>  	if (host->pdata->select_slot)
+>>  		host->pdata->select_slot(slot->id);
 >>
+>> -	/* Slot specific timing and width adjustment */
+>> -	dw_mci_setup_bus(slot);
+>> -
+>>  	host->cur_slot = slot;
+>>  	host->mrq = mrq;
+>>
+>> @@ -810,6 +807,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>  	if (slot->host->drv_data->set_ios)
+>>  		slot->host->drv_data->set_ios(slot->host, ios);
+>>
+>> +	/* Slot specific timing and width adjustment */
+>> +	dw_mci_setup_bus(slot);
+>> +
+>>  	switch (ios->power_mode) {
+>>  	case MMC_POWER_UP:
+>>  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+>> --
+>> 1.7.4.1
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
