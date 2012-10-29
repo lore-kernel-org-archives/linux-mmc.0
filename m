@@ -1,177 +1,186 @@
-From: "Philip, Avinash" <avinashphilip-l0cyMroinI0@public.gmane.org>
-Subject: RE: [RFC PATCH v3 16/16] ARM: dts: add AM33XX SPI support
-Date: Mon, 29 Oct 2012 09:11:34 +0000
-Message-ID: <518397C60809E147AF5323E0420B992E3E9D526E@DBDE01.ent.ti.com>
-References: <1350566815-409-1-git-send-email-mporter@ti.com>
-	<1350566815-409-17-git-send-email-mporter@ti.com>
+From: James Hogan <james.hogan@imgtec.com>
+Subject: Re: [PATCH] dw_mmc: fix multiple drv_data NULL dereferences
+Date: Mon, 29 Oct 2012 09:34:46 +0000
+Message-ID: <508E4DB6.20504@imgtec.com>
+References: <1350376988-27477-1-git-send-email-james.hogan@imgtec.com> <507E129D.8000401@samsung.com> <CAFbHwiSUoP_W=CK1hF+CYjxrJ1P6BR9=y_grEogmo5br6R_zuw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <1350566815-409-17-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: "Porter, Matt" <mporter-l0cyMroinI0@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, "Nori,
-	Sekhar" <nsekhar-l0cyMroinI0@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, "Cousson, Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Dan, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from multi.imgtec.com ([194.200.65.239]:54348 "EHLO multi.imgtec.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752556Ab2J2Jet (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 29 Oct 2012 05:34:49 -0400
+In-Reply-To: <CAFbHwiSUoP_W=CK1hF+CYjxrJ1P6BR9=y_grEogmo5br6R_zuw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Will Newton <will.newton@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Thu, Oct 18, 2012 at 18:56:55, Porter, Matt wrote:
-> Adds AM33XX SPI support for am335x-bone and am335x-evm.
+On 17/10/12 10:11, Will Newton wrote:
+> Looks good to me too.
 > 
-> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-> ---
->  arch/arm/boot/dts/am335x-bone.dts |   17 +++++++++++++++
->  arch/arm/boot/dts/am335x-evm.dts  |    9 ++++++++
->  arch/arm/boot/dts/am33xx.dtsi     |   43 +++++++++++++++++++++++++++++++++++++
->  3 files changed, 69 insertions(+)
+> Acked-by: Will Newton <will.newton@imgtec.com>
 > 
-> diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
-> index 5510979..23edfd8 100644
-> --- a/arch/arm/boot/dts/am335x-bone.dts
-> +++ b/arch/arm/boot/dts/am335x-bone.dts
-> @@ -18,6 +18,17 @@
->  		reg = <0x80000000 0x10000000>; /* 256 MB */
->  	};
->  
-> +	am3358_pinmux: pinmux@44e10800 {
-> +		spi1_pins: pinmux_spi1_pins {
-> +			pinctrl-single,pins = <
-> +				0x190 0x13	/* mcasp0_aclkx.spi1_sclk, OUTPUT_PULLUP | MODE3 */
-> +				0x194 0x33	/* mcasp0_fsx.spi1_d0, INPUT_PULLUP | MODE3 */
-> +				0x198 0x13	/* mcasp0_axr0.spi1_d1, OUTPUT_PULLUP | MODE3 */
-> +				0x19c 0x13	/* mcasp0_ahclkr.spi1_cs0, OUTPUT_PULLUP | MODE3 */
-> +			>;
-> +		};
-> +	};
-> +
+> On Wed, Oct 17, 2012 at 3:06 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> Looks good to me.
+>>
+>> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Change to am33xx_pinmux.
+Thanks for the acks Thomas, Seungwon, Jaehoon and Will.
 
->  	ocp {
->  		uart1: serial@44e09000 {
->  			status = "okay";
-> @@ -84,3 +95,9 @@
->  &mmc1 {
->  	vmmc-supply = <&ldo3_reg>;
->  };
-> +
-> +&spi1 {
-> +	status = "okay";
-> +	pinctrl-names = "default";
-> +	pinctrl-0 = <&spi1_pins>;
-> +};
-> diff --git a/arch/arm/boot/dts/am335x-evm.dts b/arch/arm/boot/dts/am335x-evm.dts
-> index d63fce8..8d5f660 100644
-> --- a/arch/arm/boot/dts/am335x-evm.dts
-> +++ b/arch/arm/boot/dts/am335x-evm.dts
-> @@ -124,3 +124,12 @@
->  &mmc1 {
->  	vmmc-supply = <&vmmc_reg>;
->  };
-> +
-> +&spi0 {
-> +	status = "okay";
-> +	spi-flash@0 {
-> +		compatible = "spansion,s25fl064k", "m25p80";
-> +		spi-max-frequency = <24000000>;
-> +		reg = <0>;
-> +	};
-> +};
-
-In AM335x-evm, SPI flash available in profile #2 (am335x evm specific profiles).
-So can you drop this changes as if I understood correctly, am335x-evm.dts will be
-populated for devices present only on profile #0.
-
-> diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
-> index 26a6af7..063ecea 100644
-> --- a/arch/arm/boot/dts/am33xx.dtsi
-> +++ b/arch/arm/boot/dts/am33xx.dtsi
-> @@ -40,6 +40,15 @@
->  		};
->  	};
->  
-> +	am3358_pinmux: pinmux@44e10800 {
-> +		compatible = "pinctrl-single";
-> +		reg = <0x44e10800 0x0238>;
-> +		#address-cells = <1>;
-> +		#size-cells = <0>;
-> +		pinctrl-single,register-width = <32>;
-> +		pinctrl-single,function-mask = <0x7f>;
-> +	};
-> +
-
-Pin ctrl support already submitted
-http://git.kernel.org/?p=linux/kernel/git/bcousson/linux-omap-dt.git;a=commitdiff;h=3e0603e905d9ba662e8c1885ecb1d28bc454e448
+Chris: Any chance of queueing this patch for v3.7?
 
 Thanks
-Avinash
+James
 
->  	/*
->  	 * XXX: Use a flat representation of the AM33XX interconnect.
->  	 * The real AM33XX interconnect network is quite complex.Since
-> @@ -261,6 +270,40 @@
->  			status = "disabled";
->  		};
->  
-> +		spi0: spi@48030000 {
-> +			compatible = "ti,omap4-mcspi";
-> +			ti,hwmods = "spi0";
-> +			#address-cells = <1>;
-> +			#size-cells = <0>;
-> +			reg = <0x48030000 0x400>;
-> +			interrupt-parent = <&intc>;
-> +			interrupt = <65>;
-> +			dmas = <&edma 16
-> +				&edma 17
-> +				&edma 18
-> +				&edma 19>;
-> +			dma-names = "tx0", "rx0", "tx1", "rx1";
-> +			ti,spi-num-cs = <2>;
-> +			status = "disabled";
-> +		};
-> +
-> +		spi1: spi@481a0000 {
-> +			compatible = "ti,omap4-mcspi";
-> +			ti,hwmods = "spi1";
-> +			#address-cells = <1>;
-> +			#size-cells = <0>;
-> +			reg = <0x481a0000 0x400>;
-> +			interrupt-parent = <&intc>;
-> +			interrupt = <125>;
-> +			dmas = <&edma 42
-> +				&edma 43
-> +				&edma 44
-> +				&edma 45>;
-> +			dma-names = "tx0", "rx0", "tx1", "rx1";
-> +			ti,spi-num-cs = <2>;
-> +			status = "disabled";
-> +		};
-> +
->  		wdt2: wdt@44e35000 {
->  			compatible = "ti,omap3-wdt";
->  			ti,hwmods = "wd_timer2";
-> -- 
-> 1.7.9.5
-> 
-> 
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-> 
+>>
+>> On 10/16/2012 05:43 PM, James Hogan wrote:
+>>> Commit 800d78bfccb3d38116abfda2a5b9c8afdbd5ea21 ("mmc: dw_mmc: add
+>>> support for implementation specific callbacks") merged in v3.7-rc1.
+>>>
+>>> The above commit introduced multiple NULL pointer dereferences when
+>>> the default dw_mci_pltfm_probe() is used, as it sets host->drv_data to
+>>> NULL, and that's only checked against NULL in 1 out of the 7 cases where
+>>> it is dereferenced.
+>>>
+>>> Signed-off-by: James Hogan <james.hogan@imgtec.com>
+>>> ---
+>>>  drivers/mmc/host/dw_mmc-pltfm.c |    4 ++--
+>>>  drivers/mmc/host/dw_mmc.c       |   29 +++++++++++++++++------------
+>>>  2 files changed, 19 insertions(+), 14 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+>>> index c960ca7..e595721 100644
+>>> --- a/drivers/mmc/host/dw_mmc-pltfm.c
+>>> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
+>>> @@ -50,8 +50,8 @@ int dw_mci_pltfm_register(struct platform_device *pdev,
+>>>       if (!host->regs)
+>>>               return -ENOMEM;
+>>>
+>>> -     if (host->drv_data->init) {
+>>> -             ret = host->drv_data->init(host);
+>>> +     if (drv_data && drv_data->init) {
+>>> +             ret = drv_data->init(host);
+>>>               if (ret)
+>>>                       return ret;
+>>>       }
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index c2828f3..0dc6e33 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -232,6 +232,7 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+>>>  {
+>>>       struct mmc_data *data;
+>>>       struct dw_mci_slot *slot = mmc_priv(mmc);
+>>> +     struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+>>>       u32 cmdr;
+>>>       cmd->error = -EINPROGRESS;
+>>>
+>>> @@ -261,8 +262,8 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+>>>                       cmdr |= SDMMC_CMD_DAT_WR;
+>>>       }
+>>>
+>>> -     if (slot->host->drv_data->prepare_command)
+>>> -             slot->host->drv_data->prepare_command(slot->host, &cmdr);
+>>> +     if (drv_data && drv_data->prepare_command)
+>>> +             drv_data->prepare_command(slot->host, &cmdr);
+>>>
+>>>       return cmdr;
+>>>  }
+>>> @@ -772,6 +773,7 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>>  static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>  {
+>>>       struct dw_mci_slot *slot = mmc_priv(mmc);
+>>> +     struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+>>>       u32 regs;
+>>>
+>>>       /* set default 1 bit mode */
+>>> @@ -807,8 +809,8 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>               slot->clock = ios->clock;
+>>>       }
+>>>
+>>> -     if (slot->host->drv_data->set_ios)
+>>> -             slot->host->drv_data->set_ios(slot->host, ios);
+>>> +     if (drv_data && drv_data->set_ios)
+>>> +             drv_data->set_ios(slot->host, ios);
+>>>
+>>>       switch (ios->power_mode) {
+>>>       case MMC_POWER_UP:
+>>> @@ -1815,6 +1817,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>>  {
+>>>       struct mmc_host *mmc;
+>>>       struct dw_mci_slot *slot;
+>>> +     struct dw_mci_drv_data *drv_data = host->drv_data;
+>>>       int ctrl_id, ret;
+>>>       u8 bus_width;
+>>>
+>>> @@ -1854,8 +1857,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>>       } else {
+>>>               ctrl_id = to_platform_device(host->dev)->id;
+>>>       }
+>>> -     if (host->drv_data && host->drv_data->caps)
+>>> -             mmc->caps |= host->drv_data->caps[ctrl_id];
+>>> +     if (drv_data && drv_data->caps)
+>>> +             mmc->caps |= drv_data->caps[ctrl_id];
+>>>
+>>>       if (host->pdata->caps2)
+>>>               mmc->caps2 = host->pdata->caps2;
+>>> @@ -1867,10 +1870,10 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>>       else
+>>>               bus_width = 1;
+>>>
+>>> -     if (host->drv_data->setup_bus) {
+>>> +     if (drv_data && drv_data->setup_bus) {
+>>>               struct device_node *slot_np;
+>>>               slot_np = dw_mci_of_find_slot_node(host->dev, slot->id);
+>>> -             ret = host->drv_data->setup_bus(host, slot_np, bus_width);
+>>> +             ret = drv_data->setup_bus(host, slot_np, bus_width);
+>>>               if (ret)
+>>>                       goto err_setup_bus;
+>>>       }
+>>> @@ -2035,6 +2038,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>>>       struct dw_mci_board *pdata;
+>>>       struct device *dev = host->dev;
+>>>       struct device_node *np = dev->of_node;
+>>> +     struct dw_mci_drv_data *drv_data = host->drv_data;
+>>>       int idx, ret;
+>>>
+>>>       pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+>>> @@ -2062,8 +2066,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>>>
+>>>       of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
+>>>
+>>> -     if (host->drv_data->parse_dt) {
+>>> -             ret = host->drv_data->parse_dt(host);
+>>> +     if (drv_data && drv_data->parse_dt) {
+>>> +             ret = drv_data->parse_dt(host);
+>>>               if (ret)
+>>>                       return ERR_PTR(ret);
+>>>       }
+>>> @@ -2080,6 +2084,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>>>
+>>>  int dw_mci_probe(struct dw_mci *host)
+>>>  {
+>>> +     struct dw_mci_drv_data *drv_data = host->drv_data;
+>>>       int width, i, ret = 0;
+>>>       u32 fifo_size;
+>>>       int init_slots = 0;
+>>> @@ -2127,8 +2132,8 @@ int dw_mci_probe(struct dw_mci *host)
+>>>       else
+>>>               host->bus_hz = clk_get_rate(host->ciu_clk);
+>>>
+>>> -     if (host->drv_data->setup_clock) {
+>>> -             ret = host->drv_data->setup_clock(host);
+>>> +     if (drv_data && drv_data->setup_clock) {
+>>> +             ret = drv_data->setup_clock(host);
+>>>               if (ret) {
+>>>                       dev_err(host->dev,
+>>>                               "implementation specific clock setup failed\n");
+>>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-
-------------------------------------------------------------------------------
-The Windows 8 Center - In partnership with Sourceforge
-Your idea - your app - 30 days.
-Get started!
-http://windows8center.sourceforge.net/
-what-html-developers-need-to-know-about-coding-windows-8-metro-style-apps/
