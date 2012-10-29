@@ -1,85 +1,177 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v2] mmc: dw-mmc: relocate the position called
- dw_mci_setup_bus()
-Date: Mon, 29 Oct 2012 18:08:37 +0900
-Message-ID: <009e01cdb5b4$fb55b010$f2011030$%jun@samsung.com>
-References: <508E11E8.2040609@samsung.com>
+From: "Philip, Avinash" <avinashphilip-l0cyMroinI0@public.gmane.org>
+Subject: RE: [RFC PATCH v3 16/16] ARM: dts: add AM33XX SPI support
+Date: Mon, 29 Oct 2012 09:11:34 +0000
+Message-ID: <518397C60809E147AF5323E0420B992E3E9D526E@DBDE01.ent.ti.com>
+References: <1350566815-409-1-git-send-email-mporter@ti.com>
+	<1350566815-409-17-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:54782 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755245Ab2J2JIk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Oct 2012 05:08:40 -0400
-Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout3.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MCN007AKDEEBKM0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 29 Oct 2012 18:08:38 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0MCN00DGQDED4I30@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 29 Oct 2012 18:08:38 +0900 (KST)
-In-reply-to: <508E11E8.2040609@samsung.com>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+In-Reply-To: <1350566815-409-17-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: "Porter, Matt" <mporter-l0cyMroinI0@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, "Nori,
+	Sekhar" <nsekhar-l0cyMroinI0@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, "Cousson, Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Dan, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <James.Hogan@imgtec.com>, 'Kyungmin Park' <kyungmin.park@samsung.com>
 
-Monday, October 29, 2012, Jaehoon Chung <jh80.chung@samsung.com>
-> After power-on, must be ensured at least 74~80 clocks before sending any first command.
-> To ensure, it's good that dw_mci_setup_bus() is located at dw_mci_set_ios
-> instead of __dw_mci_start_request()
-After power-up, host driver sets 'DW_MMC_CARD_NEED_INIT' flag, right?
-And then, this flag help to add SDMMC_CMD_INIT flag into CMD, when __dw_mci_start_request is executed.
-74~80 clocks is ensured with SDMMC_CMD_INIT regardless location change, isn't it?
-I mentioned this part in previous mail. Could you check it?
-
-Thanks,
-Seungwon Jeon
-
+On Thu, Oct 18, 2012 at 18:56:55, Porter, Matt wrote:
+> Adds AM33XX SPI support for am335x-bone and am335x-evm.
 > 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
-> ------
-> Changelog V2:
-> 	- Modified the commit-message.
+> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 > ---
->  drivers/mmc/host/dw_mmc.c |    6 +++---
->  1 files changed, 3 insertions(+), 3 deletions(-)
+>  arch/arm/boot/dts/am335x-bone.dts |   17 +++++++++++++++
+>  arch/arm/boot/dts/am335x-evm.dts  |    9 ++++++++
+>  arch/arm/boot/dts/am33xx.dtsi     |   43 +++++++++++++++++++++++++++++++++++++
+>  3 files changed, 69 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 4b2bedc..de79093 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -682,9 +682,6 @@ static void __dw_mci_start_request(struct dw_mci *host,
->  	if (host->pdata->select_slot)
->  		host->pdata->select_slot(slot->id);
-> 
-> -	/* Slot specific timing and width adjustment */
-> -	dw_mci_setup_bus(slot);
-> -
->  	host->cur_slot = slot;
->  	host->mrq = mrq;
-> 
-> @@ -810,6 +807,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  	if (slot->host->drv_data->set_ios)
->  		slot->host->drv_data->set_ios(slot->host, ios);
-> 
-> +	/* Slot specific timing and width adjustment */
-> +	dw_mci_setup_bus(slot);
+> diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
+> index 5510979..23edfd8 100644
+> --- a/arch/arm/boot/dts/am335x-bone.dts
+> +++ b/arch/arm/boot/dts/am335x-bone.dts
+> @@ -18,6 +18,17 @@
+>  		reg = <0x80000000 0x10000000>; /* 256 MB */
+>  	};
+>  
+> +	am3358_pinmux: pinmux@44e10800 {
+> +		spi1_pins: pinmux_spi1_pins {
+> +			pinctrl-single,pins = <
+> +				0x190 0x13	/* mcasp0_aclkx.spi1_sclk, OUTPUT_PULLUP | MODE3 */
+> +				0x194 0x33	/* mcasp0_fsx.spi1_d0, INPUT_PULLUP | MODE3 */
+> +				0x198 0x13	/* mcasp0_axr0.spi1_d1, OUTPUT_PULLUP | MODE3 */
+> +				0x19c 0x13	/* mcasp0_ahclkr.spi1_cs0, OUTPUT_PULLUP | MODE3 */
+> +			>;
+> +		};
+> +	};
 > +
->  	switch (ios->power_mode) {
->  	case MMC_POWER_UP:
->  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
-> --
-> 1.7.4.1
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
+Change to am33xx_pinmux.
+
+>  	ocp {
+>  		uart1: serial@44e09000 {
+>  			status = "okay";
+> @@ -84,3 +95,9 @@
+>  &mmc1 {
+>  	vmmc-supply = <&ldo3_reg>;
+>  };
+> +
+> +&spi1 {
+> +	status = "okay";
+> +	pinctrl-names = "default";
+> +	pinctrl-0 = <&spi1_pins>;
+> +};
+> diff --git a/arch/arm/boot/dts/am335x-evm.dts b/arch/arm/boot/dts/am335x-evm.dts
+> index d63fce8..8d5f660 100644
+> --- a/arch/arm/boot/dts/am335x-evm.dts
+> +++ b/arch/arm/boot/dts/am335x-evm.dts
+> @@ -124,3 +124,12 @@
+>  &mmc1 {
+>  	vmmc-supply = <&vmmc_reg>;
+>  };
+> +
+> +&spi0 {
+> +	status = "okay";
+> +	spi-flash@0 {
+> +		compatible = "spansion,s25fl064k", "m25p80";
+> +		spi-max-frequency = <24000000>;
+> +		reg = <0>;
+> +	};
+> +};
+
+In AM335x-evm, SPI flash available in profile #2 (am335x evm specific profiles).
+So can you drop this changes as if I understood correctly, am335x-evm.dts will be
+populated for devices present only on profile #0.
+
+> diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+> index 26a6af7..063ecea 100644
+> --- a/arch/arm/boot/dts/am33xx.dtsi
+> +++ b/arch/arm/boot/dts/am33xx.dtsi
+> @@ -40,6 +40,15 @@
+>  		};
+>  	};
+>  
+> +	am3358_pinmux: pinmux@44e10800 {
+> +		compatible = "pinctrl-single";
+> +		reg = <0x44e10800 0x0238>;
+> +		#address-cells = <1>;
+> +		#size-cells = <0>;
+> +		pinctrl-single,register-width = <32>;
+> +		pinctrl-single,function-mask = <0x7f>;
+> +	};
+> +
+
+Pin ctrl support already submitted
+http://git.kernel.org/?p=linux/kernel/git/bcousson/linux-omap-dt.git;a=commitdiff;h=3e0603e905d9ba662e8c1885ecb1d28bc454e448
+
+Thanks
+Avinash
+
+>  	/*
+>  	 * XXX: Use a flat representation of the AM33XX interconnect.
+>  	 * The real AM33XX interconnect network is quite complex.Since
+> @@ -261,6 +270,40 @@
+>  			status = "disabled";
+>  		};
+>  
+> +		spi0: spi@48030000 {
+> +			compatible = "ti,omap4-mcspi";
+> +			ti,hwmods = "spi0";
+> +			#address-cells = <1>;
+> +			#size-cells = <0>;
+> +			reg = <0x48030000 0x400>;
+> +			interrupt-parent = <&intc>;
+> +			interrupt = <65>;
+> +			dmas = <&edma 16
+> +				&edma 17
+> +				&edma 18
+> +				&edma 19>;
+> +			dma-names = "tx0", "rx0", "tx1", "rx1";
+> +			ti,spi-num-cs = <2>;
+> +			status = "disabled";
+> +		};
+> +
+> +		spi1: spi@481a0000 {
+> +			compatible = "ti,omap4-mcspi";
+> +			ti,hwmods = "spi1";
+> +			#address-cells = <1>;
+> +			#size-cells = <0>;
+> +			reg = <0x481a0000 0x400>;
+> +			interrupt-parent = <&intc>;
+> +			interrupt = <125>;
+> +			dmas = <&edma 42
+> +				&edma 43
+> +				&edma 44
+> +				&edma 45>;
+> +			dma-names = "tx0", "rx0", "tx1", "rx1";
+> +			ti,spi-num-cs = <2>;
+> +			status = "disabled";
+> +		};
+> +
+>  		wdt2: wdt@44e35000 {
+>  			compatible = "ti,omap3-wdt";
+>  			ti,hwmods = "wd_timer2";
+> -- 
+> 1.7.9.5
+> 
+> 
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+> 
+
+
+------------------------------------------------------------------------------
+The Windows 8 Center - In partnership with Sourceforge
+Your idea - your app - 30 days.
+Get started!
+http://windows8center.sourceforge.net/
+what-html-developers-need-to-know-about-coding-windows-8-metro-style-apps/
