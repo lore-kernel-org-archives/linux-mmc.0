@@ -1,37 +1,45 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/1] mmc: omap_hsmmc: remove warning message for debounce clock
-Date: Mon, 29 Oct 2012 17:26:02 -0400
-Message-ID: <874nldq8b9.fsf@octavius.laptop.org>
-References: <1351180715-26761-1-git-send-email-balajitk@ti.com>
-	<20121025161231.GO11928@atomide.com>
+Subject: Re: [PATCH] mmc: core: debugfs: Add signal_voltage to ios dump
+Date: Mon, 29 Oct 2012 17:28:38 -0400
+Message-ID: <87zk35otmh.fsf@octavius.laptop.org>
+References: <1351243915-30190-1-git-send-email-johan.rudholm@stericsson.com>
+	<C5E82048-310E-414C-A772-F05862041AD5@nvidia.com>
+	<CA+20K0D2H__UR8kN7RvMt612c2g-JmR8MB7_45YXoNqHcv8owA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20121025161231.GO11928@atomide.com> (Tony Lindgren's message of
-	"Thu, 25 Oct 2012 09:12:32 -0700")
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Balaji T K <balajitk@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, svenkatr@ti.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:44885 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758079Ab2J2V2r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 29 Oct 2012 17:28:47 -0400
+In-Reply-To: <CA+20K0D2H__UR8kN7RvMt612c2g-JmR8MB7_45YXoNqHcv8owA@mail.gmail.com>
+	(Johan Rudholm's message of "Fri, 26 Oct 2012 13:27:11 +0200")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Johan Rudholm <jrudholm@gmail.com>
+Cc: Philip Rakity <prakity@nvidia.com>, Johan Rudholm <johan.rudholm@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
 
 Hi,
 
-On Thu, Oct 25 2012, Tony Lindgren wrote:
-> * Balaji T K <balajitk@ti.com> [121025 09:00]:
->> MMC debounce clock is applicable only for omap2430, warning message gets
->> printed when enable fails for debounce clock. Remove the get debounce clock
->> failure message as it is noisy for other platforms.
->> 
->> Signed-off-by: Balaji T K <balajitk@ti.com>
->> Reported-by: Russell King <rmk+kernel@arm.linux.org.uk>
+On Fri, Oct 26 2012, Johan Rudholm wrote:
+> 2012/10/26 Philip Rakity <prakity@nvidia.com>:
+>>
+>> On Oct 26, 2012, at 11:31 AM, Johan Rudholm
+>> <johan.rudholm@stericsson.com> wrote:
+>>
+>>> +     default:
+>>> +             str = "invalid";
+>>
+>> would "is unknown"  be a better str ?
 >
-> This would be good to get in during the -rc cycle if possible to remove
-> the bogus warnings on non-2430 omaps. But since it's been there for a
-> long time, we can wait too if needed.
->
-> Acked-by: Tony Lindgren <tony@atomide.com>
+> Maybe... Actually, I just followed the standard in the function, all
+> other strings default to "invalid" when the definition is missing. So
+> if I change this, then I should also change the rest of the strings in
+> the function. I will do this if we think it's worth the effort, but is
+> it?
 
-Thanks; pushed to mmc-next, I'll send it for 3.7.
+Thanks, pushed to mmc-next for 3.8 -- let's handle string renaming
+separately to this patch.
 
 - Chris.
 -- 
