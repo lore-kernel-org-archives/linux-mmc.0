@@ -1,135 +1,56 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: dw-mmc: check whether card is busy or not,
- before disabling clock
-Date: Mon, 29 Oct 2012 16:51:20 +0900
-Message-ID: <508E3578.9050007@samsung.com>
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: Re: [RFC PATCH v3 11/16] mmc: omap_hsmmc: limit max_segs with the
+ EDMA DMAC
+Date: Mon, 29 Oct 2012 13:48:46 +0530
+Message-ID: <508E3BE6.3070609@ti.com>
+References: <1350566815-409-1-git-send-email-mporter@ti.com>
+ <1350566815-409-12-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:31262 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755432Ab2J2HvX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Oct 2012 03:51:23 -0400
-Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout4.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MCN004729TF2VU0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 29 Oct 2012 16:51:21 +0900 (KST)
-Received: from [10.90.51.55] by mmp1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0MCN009IO9TLIZ30@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 29 Oct 2012 16:51:21 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <1350566815-409-12-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <James.Hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
 
-Before disabling clock, need to check whether card is busy on not.
+On 10/18/2012 6:56 PM, Matt Porter wrote:
+> The EDMA DMAC has a hardware limitation that prevents supporting
+> scatter gather lists with any number of segments. Since the EDMA
+> DMA Engine driver sets the maximum segments to 16, we do the
+> same.
+> 
+> TODO: this will be replaced once the DMA Engine API supports an
+> API to query the DMAC's segment size limit.
+> 
+> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c |   10 ++++++++++
+>  1 file changed, 10 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index b327cd0..52bab01 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1828,6 +1828,16 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
+>  	 * as we want. */
+>  	mmc->max_segs = 1024;
+>  
+> +	/* Eventually we should get our max_segs limitation for EDMA by
+> +	 * querying the dmaengine API */
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |   53 +++++++++++++++++++++++++++-----------------
- drivers/mmc/host/dw_mmc.h |    1 +
- 2 files changed, 33 insertions(+), 21 deletions(-)
+Nit picking: This is not as per multi-line comment style in
+Documentation/CodingStyle.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 4b2bedc..5707bb6 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -228,6 +228,27 @@ static void dw_mci_set_timeout(struct dw_mci *host)
- 	mci_writel(host, TMOUT, 0xffffffff);
- }
- 
-+static bool mci_wait_reset(struct device *dev, struct dw_mci *host)
-+{
-+	unsigned long timeout = jiffies + msecs_to_jiffies(500);
-+	unsigned int ctrl;
-+
-+	mci_writel(host, CTRL, (SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET |
-+				SDMMC_CTRL_DMA_RESET));
-+
-+	/* wait till resets clear */
-+	do {
-+		ctrl = mci_readl(host, CTRL);
-+		if (!(ctrl & (SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET |
-+			      SDMMC_CTRL_DMA_RESET)))
-+			return true;
-+	} while (time_before(jiffies, timeout));
-+
-+	dev_err(dev, "Timeout resetting block (ctrl %#x)\n", ctrl);
-+
-+	return false;
-+}
-+
- static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
- {
- 	struct mmc_data	*data;
-@@ -621,6 +642,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
- 	struct dw_mci *host = slot->host;
- 	u32 div;
- 	u32 clk_en_a;
-+	int timeout = 1000;
- 
- 	if (slot->clock != host->current_speed) {
- 		div = host->bus_hz / slot->clock;
-@@ -637,6 +659,16 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
- 			 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ"
- 			 " div = %d)\n", slot->id, host->bus_hz, slot->clock,
- 			 div ? ((host->bus_hz / div) >> 1) : host->bus_hz, div);
-+		do {
-+			if (!(mci_readl(host, STATUS) & SDMMC_DATA_BUSY))
-+				break;
-+			if (timeout-- < 0) {
-+				dev_err(host->dev, "Can't disable clock"
-+					"because Card is busy!!\n");
-+				return;
-+			}
-+			mci_wait_reset(host->dev, host);
-+		} while (1);
- 
- 		/* disable clock */
- 		mci_writel(host, CLKENA, 0);
-@@ -1995,27 +2027,6 @@ no_dma:
- 	return;
- }
- 
--static bool mci_wait_reset(struct device *dev, struct dw_mci *host)
--{
--	unsigned long timeout = jiffies + msecs_to_jiffies(500);
--	unsigned int ctrl;
--
--	mci_writel(host, CTRL, (SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET |
--				SDMMC_CTRL_DMA_RESET));
--
--	/* wait till resets clear */
--	do {
--		ctrl = mci_readl(host, CTRL);
--		if (!(ctrl & (SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET |
--			      SDMMC_CTRL_DMA_RESET)))
--			return true;
--	} while (time_before(jiffies, timeout));
--
--	dev_err(dev, "Timeout resetting block (ctrl %#x)\n", ctrl);
--
--	return false;
--}
--
- #ifdef CONFIG_OF
- static struct dw_mci_of_quirks {
- 	char *quirk;
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 53b8fd9..4f27357 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -127,6 +127,7 @@
- #define SDMMC_CMD_INDX(n)		((n) & 0x1F)
- /* Status register defines */
- #define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FFF)
-+#define SDMMC_DATA_BUSY			BIT(9)
- /* Internal DMAC interrupt defines */
- #define SDMMC_IDMAC_INT_AI		BIT(9)
- #define SDMMC_IDMAC_INT_NI		BIT(8)
--- 
-1.7.4.1
+Thanks,
+Sekhar
