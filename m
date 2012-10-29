@@ -1,47 +1,89 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: core: debugfs: Add signal_voltage to ios dump
-Date: Mon, 29 Oct 2012 17:28:38 -0400
-Message-ID: <87zk35otmh.fsf@octavius.laptop.org>
-References: <1351243915-30190-1-git-send-email-johan.rudholm@stericsson.com>
-	<C5E82048-310E-414C-A772-F05862041AD5@nvidia.com>
-	<CA+20K0D2H__UR8kN7RvMt612c2g-JmR8MB7_45YXoNqHcv8owA@mail.gmail.com>
+From: Per Forlin <per.lkml@gmail.com>
+Subject: Re: [PATCH v1] mmc: fix async request mechanism for sequential read scenarios
+Date: Mon, 29 Oct 2012 22:40:23 +0100
+Message-ID: <CAFEEs1m6VwDO8N1Tc8J4Q+aXysgxd77+oZr=M7QK7rgycQuEFw@mail.gmail.com>
+References: <f67543901d54b344c8bb401e363e6b80.squirrel@www.codeaurora.org>
+	<5088206C.7080101@stericsson.com>
+	<50893E88.9000908@codeaurora.org>
+	<5089549D.3060507@stericsson.com>
+	<CAOyx1Lq9D2RN5KmvgxU+Z4W3aNHuyA2D5cdFJhz0sf+WU2ZZ=Q@mail.gmail.com>
+	<508D2F2E.3020006@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:44885 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758079Ab2J2V2r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 29 Oct 2012 17:28:47 -0400
-In-Reply-To: <CA+20K0D2H__UR8kN7RvMt612c2g-JmR8MB7_45YXoNqHcv8owA@mail.gmail.com>
-	(Johan Rudholm's message of "Fri, 26 Oct 2012 13:27:11 +0200")
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:65022 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761316Ab2J2VkZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Oct 2012 17:40:25 -0400
+Received: by mail-lb0-f174.google.com with SMTP id n3so3417347lbo.19
+        for <linux-mmc@vger.kernel.org>; Mon, 29 Oct 2012 14:40:24 -0700 (PDT)
+In-Reply-To: <508D2F2E.3020006@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <jrudholm@gmail.com>
-Cc: Philip Rakity <prakity@nvidia.com>, Johan Rudholm <johan.rudholm@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
+To: Konstantin Dorfman <kdorfman@codeaurora.org>
+Cc: Venkatraman S <svenkatr@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 Hi,
 
-On Fri, Oct 26 2012, Johan Rudholm wrote:
-> 2012/10/26 Philip Rakity <prakity@nvidia.com>:
->>
->> On Oct 26, 2012, at 11:31 AM, Johan Rudholm
->> <johan.rudholm@stericsson.com> wrote:
->>
->>> +     default:
->>> +             str = "invalid";
->>
->> would "is unknown"  be a better str ?
+I would like to move the focus of my concerns from root cause analysis
+to the actual patch,
+My first reflection is that the patch is relatively complex and some
+of the code looks duplicated.
+Would it be possible to simplify it and re-use  the current execution flow.
+
+Is the following flow feasible?
+
+in mmc_start_req():
+--------------
+if (rqc == NULL && not_resend)
+  wait_for_both_mmc_and_arrival_of_new_req
+else
+  wait_only_for_mmc
+
+if (arrival_of_new_req) {
+   set flag to indicate fetch-new_req
+  return NULL;
+}
+-----------------
+
+in queue.c:
+if (fetch-new_req)
+  don't overwrite previous req.
+
+BR
+Per
+
+
+
+On Sun, Oct 28, 2012 at 2:12 PM, Konstantin Dorfman
+<kdorfman@codeaurora.org> wrote:
+> Hello,
 >
-> Maybe... Actually, I just followed the standard in the function, all
-> other strings default to "invalid" when the definition is missing. So
-> if I change this, then I should also change the rest of the strings in
-> the function. I will do this if we think it's worth the effort, but is
-> it?
-
-Thanks, pushed to mmc-next for 3.8 -- let's handle string renaming
-separately to this patch.
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> On 10/26/2012 02:07 PM, Venkatraman S wrote:
+>
+>>
+>> Actually there could a lot of reasons why block layer or CFQ would not have
+>> inserted the request into the queue. i.e. you can see a lot of exit paths
+>> where blk_peek_request returns NULL, even though there could be any request
+>> pending in one of the CFQ requests queues.
+>>
+>> Essentially you need to check what makes blk_fetch_request
+>> (cfq_dispatch_requests() ) return NULL when there is an element in
+>> queue, if at all.
+>>
+>
+> This is not important why block layer causes to blk_fetch_request() (or
+> blk_peek_request()) to return NULL to the MMC layer, but what is really
+> important - MMC layer should always be able to fetch the new arrived
+> request ASAP, after block layer notification (mmc_request() ) and this
+> is what my fix goes to implement.
+>
+> And the fix is not changing block layer behavior.
+>
+> Thanks
+>
+> --
+> Konstantin Dorfman,
+> QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center,
+> Inc. is a member of Code Aurora Forum,
+> hosted by The Linux Foundation
