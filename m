@@ -1,53 +1,46 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: [PATCH] mmc: mxcmmc: Fix MODULE_ALIAS
-Date: Mon, 29 Oct 2012 21:42:53 +0100
-Message-ID: <20121029204253.GT1641@pengutronix.de>
-References: <1349810765-12351-1-git-send-email-fabio.estevam@freescale.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 00/26] pstore, mmc: add mmc as backend for pstore
+Date: Mon, 29 Oct 2012 16:50:42 -0400
+Message-ID: <87390xroil.fsf@octavius.laptop.org>
+References: <1351000104-13015-1-git-send-email-irina.tirdea@intel.com>
+	<20121029202820.GA21660@shutemov.name>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:53473 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760824Ab2J2Um5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Oct 2012 16:42:57 -0400
-Content-Disposition: inline
-In-Reply-To: <1349810765-12351-1-git-send-email-fabio.estevam@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20121029202820.GA21660@shutemov.name> (Kirill A. Shutemov's
+	message of "Mon, 29 Oct 2012 22:28:20 +0200")
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Kirill A. Shutemov" <kirill@shutemov.name>
+Cc: Anton Vorontsov <cbouatmailru@gmail.com>, Colin Cross <ccross@android.com>, Kees Cook <keescook@chromium.org>, Tony Luck <tony.luck@intel.com>, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Octavian Purdila <octavian.purdila@intel.com>, Irina Tirdea <irina.tirdea@intel.com>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <fabio.estevam@freescale.com>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org
 
-On Tue, Oct 09, 2012 at 04:26:05PM -0300, Fabio Estevam wrote:
-> The correct name for the driver is "mxc-mmc".
-> 
-> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+Hi,
 
-Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
+On Mon, Oct 29 2012, Kirill A. Shutemov wrote:
+> On Tue, Oct 23, 2012 at 04:47:58PM +0300, Irina Tirdea wrote:
+>> These patches enable using the mmc card to store panic information.
+>> 
+>> They include changes for pstore and mmc:
+>>  - add block device backend for pstore
+>>  - add logic in mmc for writing in panic mode
+>
+> Chris, any feedback on mmc/sdhci part?
 
-Sascha
+Looks like the patchset hasn't been sent to linux-mmc@vger.kernel.org
+yet -- could you send a v2 with that address included, please?
 
-> ---
->  drivers/mmc/host/mxcmmc.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index 565c2e4..6290b7f 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -1134,4 +1134,4 @@ module_platform_driver(mxcmci_driver);
->  MODULE_DESCRIPTION("i.MX Multimedia Card Interface Driver");
->  MODULE_AUTHOR("Sascha Hauer, Pengutronix");
->  MODULE_LICENSE("GPL");
-> -MODULE_ALIAS("platform:imx-mmc");
-> +MODULE_ALIAS("platform:mxc-mmc");
-> -- 
-> 1.7.9.5
-> 
-> 
-> 
+It would also be great to see descriptive commit messages, rather than
+just patch subject lines.
 
+Documentation-wise, the patchset mentions that host controller support
+is required for this to work, but doesn't explain what kind of support
+that is, and the sdhci-pci support seems unconditional on type of host
+controller -- why wouldn't every controller work?  Is it (just) because
+other controller drivers use msleep?
+
+Thanks,
+
+- Chris.
 -- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
