@@ -1,56 +1,85 @@
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [RFC PATCH v3 11/16] mmc: omap_hsmmc: limit max_segs with the
- EDMA DMAC
-Date: Mon, 29 Oct 2012 13:48:46 +0530
-Message-ID: <508E3BE6.3070609@ti.com>
-References: <1350566815-409-1-git-send-email-mporter@ti.com>
- <1350566815-409-12-git-send-email-mporter@ti.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v2] mmc: dw-mmc: relocate the position called
+ dw_mci_setup_bus()
+Date: Mon, 29 Oct 2012 18:08:37 +0900
+Message-ID: <009e01cdb5b4$fb55b010$f2011030$%jun@samsung.com>
+References: <508E11E8.2040609@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <1350566815-409-12-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:54782 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755245Ab2J2JIk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Oct 2012 05:08:40 -0400
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MCN007AKDEEBKM0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 29 Oct 2012 18:08:38 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0MCN00DGQDED4I30@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 29 Oct 2012 18:08:38 +0900 (KST)
+In-reply-to: <508E11E8.2040609@samsung.com>
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <James.Hogan@imgtec.com>, 'Kyungmin Park' <kyungmin.park@samsung.com>
 
-On 10/18/2012 6:56 PM, Matt Porter wrote:
-> The EDMA DMAC has a hardware limitation that prevents supporting
-> scatter gather lists with any number of segments. Since the EDMA
-> DMA Engine driver sets the maximum segments to 16, we do the
-> same.
-> 
-> TODO: this will be replaced once the DMA Engine API supports an
-> API to query the DMAC's segment size limit.
-> 
-> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-> ---
->  drivers/mmc/host/omap_hsmmc.c |   10 ++++++++++
->  1 file changed, 10 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index b327cd0..52bab01 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1828,6 +1828,16 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
->  	 * as we want. */
->  	mmc->max_segs = 1024;
->  
-> +	/* Eventually we should get our max_segs limitation for EDMA by
-> +	 * querying the dmaengine API */
-
-Nit picking: This is not as per multi-line comment style in
-Documentation/CodingStyle.
+Monday, October 29, 2012, Jaehoon Chung <jh80.chung@samsung.com>
+> After power-on, must be ensured at least 74~80 clocks before sending any first command.
+> To ensure, it's good that dw_mci_setup_bus() is located at dw_mci_set_ios
+> instead of __dw_mci_start_request()
+After power-up, host driver sets 'DW_MMC_CARD_NEED_INIT' flag, right?
+And then, this flag help to add SDMMC_CMD_INIT flag into CMD, when __dw_mci_start_request is executed.
+74~80 clocks is ensured with SDMMC_CMD_INIT regardless location change, isn't it?
+I mentioned this part in previous mail. Could you check it?
 
 Thanks,
-Sekhar
+Seungwon Jeon
+
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ------
+> Changelog V2:
+> 	- Modified the commit-message.
+> ---
+>  drivers/mmc/host/dw_mmc.c |    6 +++---
+>  1 files changed, 3 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 4b2bedc..de79093 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -682,9 +682,6 @@ static void __dw_mci_start_request(struct dw_mci *host,
+>  	if (host->pdata->select_slot)
+>  		host->pdata->select_slot(slot->id);
+> 
+> -	/* Slot specific timing and width adjustment */
+> -	dw_mci_setup_bus(slot);
+> -
+>  	host->cur_slot = slot;
+>  	host->mrq = mrq;
+> 
+> @@ -810,6 +807,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	if (slot->host->drv_data->set_ios)
+>  		slot->host->drv_data->set_ios(slot->host, ios);
+> 
+> +	/* Slot specific timing and width adjustment */
+> +	dw_mci_setup_bus(slot);
+> +
+>  	switch (ios->power_mode) {
+>  	case MMC_POWER_UP:
+>  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+> --
+> 1.7.4.1
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
