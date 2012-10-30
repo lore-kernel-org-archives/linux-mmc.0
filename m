@@ -1,116 +1,146 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v2] mmc: dw-mmc: relocate the position called
- dw_mci_setup_bus()
-Date: Tue, 30 Oct 2012 14:27:53 +0900
-Message-ID: <00ae01cdb65f$4f5fa8f0$ee1efad0$%jun@samsung.com>
-References: <508E11E8.2040609@samsung.com>
- <009e01cdb5b4$fb55b010$f2011030$%jun@samsung.com>
- <508E4EAF.2060409@samsung.com>
+Subject: [PATCH v2 1/2] mmc: sdhci-s3c: ensure non-transaction of bus before
+ clk_disable
+Date: Tue, 30 Oct 2012 14:28:27 +0900
+Message-ID: <00af01cdb65f$64009300$2c01b900$%jun@samsung.com>
+References: <004801cdad17$498d9140$dca8b3c0$%jun@samsung.com>
+ <201210191010.48776.heiko@sntech.de> <87liepq8qo.fsf@octavius.laptop.org>
+ <201210292337.35620.heiko@sntech.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:55342 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753328Ab2J3F1z (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 01:27:55 -0400
+Received: from mailout3.samsung.com ([203.254.224.33]:65124 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753736Ab2J3F23 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 01:28:29 -0400
 Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout4.samsung.com
+ by mailout3.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MCO00FMSXRZMB70@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 30 Oct 2012 14:27:53 +0900 (KST)
+ 17 2011)) with ESMTP id <0MCO00AKHXUTQ8N0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 30 Oct 2012 14:28:28 +0900 (KST)
 Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0MCO000V8XUHAN50@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 30 Oct 2012 14:27:53 +0900 (KST)
-In-reply-to: <508E4EAF.2060409@samsung.com>
+ with ESMTPA id <0MCO00MI8XVFJTC0@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 30 Oct 2012 14:28:28 +0900 (KST)
+In-reply-to: 
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>
-Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <James.Hogan@imgtec.com>, 'Kyungmin Park' <kyungmin.park@samsung.com>
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, =?utf-8?Q?'Heiko_St=C3=BCbner'?= <heiko@sntech.de>, 'Chander Kashyap' <chander.kashyap@linaro.org>
 
-Monday, October 29, 2012, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> On 10/29/2012 06:08 PM, Seungwon Jeon wrote:
-> > Monday, October 29, 2012, Jaehoon Chung <jh80.chung@samsung.com>
-> >> After power-on, must be ensured at least 74~80 clocks before sending any first command.
-> >> To ensure, it's good that dw_mci_setup_bus() is located at dw_mci_set_ios
-> >> instead of __dw_mci_start_request()
-> > After power-up, host driver sets 'DW_MMC_CARD_NEED_INIT' flag, right?
-> > And then, this flag help to add SDMMC_CMD_INIT flag into CMD, when __dw_mci_start_request is
-> executed.
-> > 74~80 clocks is ensured with SDMMC_CMD_INIT regardless location change, isn't it?
-> > I mentioned this part in previous mail. Could you check it?
-> According to eMMC spec, after power-on, need to wait for 74-clock before sending first command
-> You can see code that after mmc_set_ios(), waiting for mmc_delay(10) into mmc_power_up().
-> (You can read the comment at mmc_power_up(), Maybe mmc_delay(10) didn't ensure the 74-clock).
-There is 'send_initialization' bit in CMD register.
-If this bit set with CMD0, it will guarantee 80 clocks by host controller.
-Currently this is applied in driver.
-I agree change the location of dw_mci_setup_bus.
-But commit message seem not proper for it.
-Please let me know, if I miss something.
+clock shoud be supplied during bus transaction. This patch defers
+clk_disabe in runtime_suspend if cmd/data line is used.
 
-Thanks,
-Seungwon Jeon
-> 
-> Best Regards,
-> Jaehoon Chung
-> >
-> > Thanks,
-> > Seungwon Jeon
-> >
-> >>
-> >> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> >> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> >> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
-> >> ------
-> >> Changelog V2:
-> >> 	- Modified the commit-message.
-> >> ---
-> >>  drivers/mmc/host/dw_mmc.c |    6 +++---
-> >>  1 files changed, 3 insertions(+), 3 deletions(-)
-> >>
-> >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> >> index 4b2bedc..de79093 100644
-> >> --- a/drivers/mmc/host/dw_mmc.c
-> >> +++ b/drivers/mmc/host/dw_mmc.c
-> >> @@ -682,9 +682,6 @@ static void __dw_mci_start_request(struct dw_mci *host,
-> >>  	if (host->pdata->select_slot)
-> >>  		host->pdata->select_slot(slot->id);
-> >>
-> >> -	/* Slot specific timing and width adjustment */
-> >> -	dw_mci_setup_bus(slot);
-> >> -
-> >>  	host->cur_slot = slot;
-> >>  	host->mrq = mrq;
-> >>
-> >> @@ -810,6 +807,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >>  	if (slot->host->drv_data->set_ios)
-> >>  		slot->host->drv_data->set_ios(slot->host, ios);
-> >>
-> >> +	/* Slot specific timing and width adjustment */
-> >> +	dw_mci_setup_bus(slot);
-> >> +
-> >>  	switch (ios->power_mode) {
-> >>  	case MMC_POWER_UP:
-> >>  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
-> >> --
-> >> 1.7.4.1
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+Acked-by: Heiko Stuebner <heiko@sntech.de>
+---
+Rebased with mmc-next.
+
+ drivers/mmc/host/sdhci-s3c.c |   13 +++++++++----
+ drivers/mmc/host/sdhci.c     |   20 ++++----------------
+ drivers/mmc/host/sdhci.h     |   11 +++++++++++
+ 3 files changed, 24 insertions(+), 20 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index a093e2e..a79b153 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -845,12 +845,17 @@ static int sdhci_s3c_runtime_suspend(struct device *dev)
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_s3c *ourhost = to_s3c(host);
+ 	struct clk *busclk = ourhost->clk_io;
+-	int ret;
++	int ret = 0;
+ 
+-	ret = sdhci_runtime_suspend_host(host);
++	if (!(readl(host->ioaddr + SDHCI_PRESENT_STATE) &
++			(SDHCI_CMD_INHIBIT | SDHCI_DATA_INHIBIT))) {
++		ret = sdhci_runtime_suspend_host(host);
++		clk_disable_unprepare(ourhost->clk_bus[ourhost->cur_clk]);
++		clk_disable_unprepare(busclk);
++	} else {
++		sdhci_runtime_pm_put(host);
++	}
+ 
+-	clk_disable_unprepare(ourhost->clk_bus[ourhost->cur_clk]);
+-	clk_disable_unprepare(busclk);
+ 	return ret;
+ }
+ 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index f05a377..d62646d 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -54,20 +54,6 @@ static void sdhci_finish_command(struct sdhci_host *);
+ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
+ static void sdhci_tuning_timer(unsigned long data);
+ 
+-#ifdef CONFIG_PM_RUNTIME
+-static int sdhci_runtime_pm_get(struct sdhci_host *host);
+-static int sdhci_runtime_pm_put(struct sdhci_host *host);
+-#else
+-static inline int sdhci_runtime_pm_get(struct sdhci_host *host)
+-{
+-	return 0;
+-}
+-static inline int sdhci_runtime_pm_put(struct sdhci_host *host)
+-{
+-	return 0;
+-}
+-#endif
+-
+ static void sdhci_dumpregs(struct sdhci_host *host)
+ {
+ 	pr_debug(DRIVER_NAME ": =========== REGISTER DUMP (%s)===========\n",
+@@ -2535,16 +2521,18 @@ EXPORT_SYMBOL_GPL(sdhci_enable_irq_wakeups);
+ 
+ #ifdef CONFIG_PM_RUNTIME
+ 
+-static int sdhci_runtime_pm_get(struct sdhci_host *host)
++int sdhci_runtime_pm_get(struct sdhci_host *host)
+ {
+ 	return pm_runtime_get_sync(host->mmc->parent);
+ }
++EXPORT_SYMBOL_GPL(sdhci_runtime_pm_get);
+ 
+-static int sdhci_runtime_pm_put(struct sdhci_host *host)
++int sdhci_runtime_pm_put(struct sdhci_host *host)
+ {
+ 	pm_runtime_mark_last_busy(host->mmc->parent);
+ 	return pm_runtime_put_autosuspend(host->mmc->parent);
+ }
++EXPORT_SYMBOL_GPL(sdhci_runtime_pm_put);
+ 
+ int sdhci_runtime_suspend_host(struct sdhci_host *host)
+ {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 71a4a7e..a42a192 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -385,8 +385,19 @@ extern void sdhci_enable_irq_wakeups(struct sdhci_host *host);
+ #endif
+ 
+ #ifdef CONFIG_PM_RUNTIME
++extern int sdhci_runtime_pm_get(struct sdhci_host *host);
++extern int sdhci_runtime_pm_put(struct sdhci_host *host);
+ extern int sdhci_runtime_suspend_host(struct sdhci_host *host);
+ extern int sdhci_runtime_resume_host(struct sdhci_host *host);
++#else
++inline int sdhci_runtime_pm_get(struct sdhci_host *host)
++{
++	return 0;
++}
++inline int sdhci_runtime_pm_put(struct sdhci_host *host)
++{
++	return 0;
++}
+ #endif
+ 
+ #endif /* __SDHCI_HW_H */
+-- 
+1.7.0.4
+
 
