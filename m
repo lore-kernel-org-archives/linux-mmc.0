@@ -1,135 +1,106 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2] mmc: dw-mmc: relocate the position called
- dw_mci_setup_bus()
-Date: Tue, 30 Oct 2012 14:50:00 +0900
-Message-ID: <508F6A88.6090900@samsung.com>
-References: <508E11E8.2040609@samsung.com>
- <009e01cdb5b4$fb55b010$f2011030$%jun@samsung.com>
- <508E4EAF.2060409@samsung.com>
- <00ae01cdb65f$4f5fa8f0$ee1efad0$%jun@samsung.com>
+From: Per Forlin <per.lkml@gmail.com>
+Subject: Re: [PATCH v1] mmc: fix async request mechanism for sequential read scenarios
+Date: Tue, 30 Oct 2012 08:45:27 +0100
+Message-ID: <CAFEEs1kX+n=TeuqMfP7tgm1agCMb1BCR23Oen0i=jKFXh3Hopw@mail.gmail.com>
+References: <f67543901d54b344c8bb401e363e6b80.squirrel@www.codeaurora.org>
+	<5088206C.7080101@stericsson.com>
+	<50893E88.9000908@codeaurora.org>
+	<5089549D.3060507@stericsson.com>
+	<CAOyx1Lq9D2RN5KmvgxU+Z4W3aNHuyA2D5cdFJhz0sf+WU2ZZ=Q@mail.gmail.com>
+	<508D2F2E.3020006@codeaurora.org>
+	<CAFEEs1m6VwDO8N1Tc8J4Q+aXysgxd77+oZr=M7QK7rgycQuEFw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:59431 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753443Ab2J3FuF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 01:50:05 -0400
-Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout4.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MCO00FXJYV67B80@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 30 Oct 2012 14:50:04 +0900 (KST)
-Received: from [10.90.51.55] by mmp2.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0MCO000P7YVFW170@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 30 Oct 2012 14:50:03 +0900 (KST)
-In-reply-to: <00ae01cdb65f$4f5fa8f0$ee1efad0$%jun@samsung.com>
+Received: from mail-la0-f46.google.com ([209.85.215.46]:50127 "EHLO
+	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755863Ab2J3Hp2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 03:45:28 -0400
+Received: by mail-la0-f46.google.com with SMTP id h6so4404216lag.19
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Oct 2012 00:45:27 -0700 (PDT)
+In-Reply-To: <CAFEEs1m6VwDO8N1Tc8J4Q+aXysgxd77+oZr=M7QK7rgycQuEFw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <James.Hogan@imgtec.com>, 'Kyungmin Park' <kyungmin.park@samsung.com>
+To: Konstantin Dorfman <kdorfman@codeaurora.org>
+Cc: Venkatraman S <svenkatr@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Dear Seungwon,
+minor clarification,
 
-On 10/30/2012 02:27 PM, Seungwon Jeon wrote:
-> Monday, October 29, 2012, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> On 10/29/2012 06:08 PM, Seungwon Jeon wrote:
->>> Monday, October 29, 2012, Jaehoon Chung <jh80.chung@samsung.com>
->>>> After power-on, must be ensured at least 74~80 clocks before sending any first command.
->>>> To ensure, it's good that dw_mci_setup_bus() is located at dw_mci_set_ios
->>>> instead of __dw_mci_start_request()
->>> After power-up, host driver sets 'DW_MMC_CARD_NEED_INIT' flag, right?
->>> And then, this flag help to add SDMMC_CMD_INIT flag into CMD, when __dw_mci_start_request is
->> executed.
->>> 74~80 clocks is ensured with SDMMC_CMD_INIT regardless location change, isn't it?
->>> I mentioned this part in previous mail. Could you check it?
->> According to eMMC spec, after power-on, need to wait for 74-clock before sending first command
->> You can see code that after mmc_set_ios(), waiting for mmc_delay(10) into mmc_power_up().
->> (You can read the comment at mmc_power_up(), Maybe mmc_delay(10) didn't ensure the 74-clock).
-> There is 'send_initialization' bit in CMD register.
-> If this bit set with CMD0, it will guarantee 80 clocks by host controller.
-Is it guaranteed 80-clocks by host-controller? So I understood something wrong.
-My understanding is that "if flags is set, need to wait for 80-clock."
-If host-controller can ensure the 80-clock, location is not important.
+On Mon, Oct 29, 2012 at 10:40 PM, Per Forlin <per.lkml@gmail.com> wrote:
+> Hi,
+>
+> I would like to move the focus of my concerns from root cause analysis
+> to the actual patch,
+> My first reflection is that the patch is relatively complex and some
+> of the code looks duplicated.
+> Would it be possible to simplify it and re-use  the current execution flow.
+>
+> Is the following flow feasible?
+>
+> in mmc_start_req():
+> --------------
+> if (rqc == NULL && not_resend)
+&& request_is_ongoing (in case of resend request is never ongoing
 
-My point was just entire sequence with core.c and dw_mmc.c
-Anyway, thank you for review.
-If i miss other thing. let me know, plz.
+>   wait_for_both_mmc_and_arrival_of_new_req
+We should wake up if any of the two events occur.
 
-Best Regards,
-Jaehoon Chung
+> else
+>   wait_only_for_mmc
+>
+> if (arrival_of_new_req) {
+>    set flag to indicate fetch-new_req
+>   return NULL;
+> }
+> -----------------
+>
+> in queue.c:
+> if (fetch-new_req)
+>   don't overwrite previous req.
+>
 
-> Currently this is applied in driver.
-> I agree change the location of dw_mci_setup_bus.
-> But commit message seem not proper for it.
-> Please let me know, if I miss something.
-> 
-> Thanks,
-> Seungwon Jeon
+This is somewhat a subset of the your patch. Maybe I'm missing parts
+of the complexity.
+I haven't figured out why a new mmc_start_data_req() is needed. A new
+mechanism for waiting is required.
+
+BR
+Per
+
+> BR
+> Per
+>
+>
+>
+> On Sun, Oct 28, 2012 at 2:12 PM, Konstantin Dorfman
+> <kdorfman@codeaurora.org> wrote:
+>> Hello,
 >>
->> Best Regards,
->> Jaehoon Chung
+>> On 10/26/2012 02:07 PM, Venkatraman S wrote:
+>>
 >>>
->>> Thanks,
->>> Seungwon Jeon
+>>> Actually there could a lot of reasons why block layer or CFQ would not have
+>>> inserted the request into the queue. i.e. you can see a lot of exit paths
+>>> where blk_peek_request returns NULL, even though there could be any request
+>>> pending in one of the CFQ requests queues.
 >>>
->>>>
->>>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->>>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->>>> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
->>>> ------
->>>> Changelog V2:
->>>> 	- Modified the commit-message.
->>>> ---
->>>>  drivers/mmc/host/dw_mmc.c |    6 +++---
->>>>  1 files changed, 3 insertions(+), 3 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>> index 4b2bedc..de79093 100644
->>>> --- a/drivers/mmc/host/dw_mmc.c
->>>> +++ b/drivers/mmc/host/dw_mmc.c
->>>> @@ -682,9 +682,6 @@ static void __dw_mci_start_request(struct dw_mci *host,
->>>>  	if (host->pdata->select_slot)
->>>>  		host->pdata->select_slot(slot->id);
->>>>
->>>> -	/* Slot specific timing and width adjustment */
->>>> -	dw_mci_setup_bus(slot);
->>>> -
->>>>  	host->cur_slot = slot;
->>>>  	host->mrq = mrq;
->>>>
->>>> @@ -810,6 +807,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>>>  	if (slot->host->drv_data->set_ios)
->>>>  		slot->host->drv_data->set_ios(slot->host, ios);
->>>>
->>>> +	/* Slot specific timing and width adjustment */
->>>> +	dw_mci_setup_bus(slot);
->>>> +
->>>>  	switch (ios->power_mode) {
->>>>  	case MMC_POWER_UP:
->>>>  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
->>>> --
->>>> 1.7.4.1
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> Essentially you need to check what makes blk_fetch_request
+>>> (cfq_dispatch_requests() ) return NULL when there is an element in
+>>> queue, if at all.
 >>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
+>>
+>> This is not important why block layer causes to blk_fetch_request() (or
+>> blk_peek_request()) to return NULL to the MMC layer, but what is really
+>> important - MMC layer should always be able to fetch the new arrived
+>> request ASAP, after block layer notification (mmc_request() ) and this
+>> is what my fix goes to implement.
+>>
+>> And the fix is not changing block layer behavior.
+>>
+>> Thanks
 >>
 >> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+>> Konstantin Dorfman,
+>> QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center,
+>> Inc. is a member of Code Aurora Forum,
+>> hosted by The Linux Foundation
