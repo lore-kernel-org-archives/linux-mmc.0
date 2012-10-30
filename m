@@ -1,55 +1,68 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sh_mmcif: fix use after free
-Date: Tue, 30 Oct 2012 18:37:19 -0400
-Message-ID: <878vanio2o.fsf@octavius.laptop.org>
-References: <Pine.LNX.4.64.1210231406080.13115@axis700.grange>
-	<878vapq8fj.fsf@octavius.laptop.org>
-	<Pine.LNX.4.64.1210302306190.29432@axis700.grange>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/4 v3] MMC/core: Add f_min to mmc_power_on()
+Date: Wed, 31 Oct 2012 00:08:32 +0100
+Message-ID: <CAPDyKFqM0cUkDDadm8MBK=+wHHYOSH3CVEHyiY1ybLkmPqSX7w@mail.gmail.com>
+References: <1351584769-16662-1-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1210302306190.29432@axis700.grange> (Guennadi
-	Liakhovetski's message of "Tue, 30 Oct 2012 23:08:57 +0100 (CET)")
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:55976 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759732Ab2J3XId (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 19:08:33 -0400
+Received: by mail-we0-f174.google.com with SMTP id t9so383466wey.19
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Oct 2012 16:08:32 -0700 (PDT)
+In-Reply-To: <1351584769-16662-1-git-send-email-r66093@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: r66093@freescale.com
+Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
 
-Hi Guennadi,
-
-On Tue, Oct 30 2012, Guennadi Liakhovetski wrote:
->> In future, feel free to note the
->> stable@ situation by adding:
->> 
->>    Cc: stable@vger.kernel.org [3.6]
+On 30 October 2012 09:12,  <r66093@freescale.com> wrote:
+> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 >
-> Hm, a bit confused. I seem to remember, that one of subsystem maintainers, 
-> to whom I also submitted a patch, that should also have been forwarded to 
-> stable, told me, that adding this "Cc: stable@..." tag was a task of 
-> subsystem maintainers, in that case his task, and not of individual 
-> submitters, which might only indicate their opinion in this respect. Am I 
-> wrong?
+> When f_init is zero, the SDHC can't work correctly. So f_min will replace
+> f_init, when f_init is zero.
+>
+> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> CC: Anton Vorontsov <cbouatmailru@gmail.com>
+> CC: Chris Ball <cjb@laptop.org>
+> ---
+> changes for v2:
+>         - add the CC
+> changes for v3:
+>         - enalbe the controller clock in platform, instead of core
+>
+>  drivers/mmc/core/core.c |    5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 06c42cf..9c162cd 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1319,7 +1319,10 @@ static void mmc_power_up(struct mmc_host *host)
+>          */
+>         mmc_delay(10);
+>
+> -       host->ios.clock = host->f_init;
+> +       if (host->f_init)
+> +               host->ios.clock = host->f_init;
+> +       else
+> +               host->ios.clock = host->f_min;
 
-Oh, interesting; I haven't seen that complaint myself.  I don't think
-there's a kernel-wide rule about this, but I might be wrong.
+This should not be needed. host->f_init should never become zero, I believe.
 
-Personally, I'm happy with receiving the stable@ tag because I like it
-when patch authors think about -stable and I want to encourage them to
-do so.  (Often they know whether a patch is needed in -stable better
-than I do.)
+>
+>         host->ios.power_mode = MMC_POWER_ON;
+>         mmc_set_ios(host);
+> --
+> 1.7.9.5
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Of course, the stable@ team isn't going to do anything until the patch
-enters mainline, and the patch is only going to enter mainline through
-my tree after I've had a chance to change the stable@ tag if necessary,
-so there's no problem for me there.
-
-Sorry to leave you in the middle of conflicting advice. :-)  The stable@
-hint is appreciated in either form; I was just trying to save you some
-typing.
-
-Thanks!
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Kind regards
+Ulf Hansson
