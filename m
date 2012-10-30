@@ -1,78 +1,47 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] mmc: sh_mmcif: fix use after free
-Date: Tue, 30 Oct 2012 23:08:57 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1210302306190.29432@axis700.grange>
-References: <Pine.LNX.4.64.1210231406080.13115@axis700.grange>
- <878vapq8fj.fsf@octavius.laptop.org>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Sergei Trofimovich <slyich@gmail.com>
+Subject: [PATCH] exynos: mmc: use correct variable for MODULE_DEVICE_TABLE
+Date: Wed, 31 Oct 2012 01:21:52 +0300
+Message-ID: <1351635712-17214-1-git-send-email-slyich@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:51634 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932978Ab2J3WJB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 18:09:01 -0400
-In-Reply-To: <878vapq8fj.fsf@octavius.laptop.org>
+Received: from smtp.gentoo.org ([140.211.166.183]:45460 "EHLO smtp.gentoo.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753590Ab2J3WWI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 30 Oct 2012 18:22:08 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
+Cc: Sergei Trofimovich <slyfox@gentoo.org>, Thomas Abraham <thomas.abraham@linaro.org>, Will Newton <will.newton@imgtec.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Chris
+From: Sergei Trofimovich <slyfox@gentoo.org>
 
-On Mon, 29 Oct 2012, Chris Ball wrote:
+Found by gcc:
 
-> Hi Guennadi,
-> 
-> On Tue, Oct 23 2012, Guennadi Liakhovetski wrote:
-> > A recent commit "mmc: sh_mmcif: fix clock management" has introduced a use
-> > after free bug in sh_mmcif.c: in sh_mmcif_remove() the call to
-> > mmc_free_host() frees private driver data, therefore using it afterwards
-> > is a bug. Revert that hunk.
-> >
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > ---
-> >
-> > Chris, the offending patch appeared in 3.6, so, this has to go to 
-> > 3.6.stable, as well as to 3.7-rc.
-> >
-> >  drivers/mmc/host/sh_mmcif.c |    2 +-
-> >  1 files changed, 1 insertions(+), 1 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> > index 11d2bc3..d25bc97 100644
-> > --- a/drivers/mmc/host/sh_mmcif.c
-> > +++ b/drivers/mmc/host/sh_mmcif.c
-> > @@ -1466,9 +1466,9 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
-> >  
-> >  	platform_set_drvdata(pdev, NULL);
-> >  
-> > +	clk_disable(host->hclk);
-> >  	mmc_free_host(host->mmc);
-> >  	pm_runtime_put_sync(&pdev->dev);
-> > -	clk_disable(host->hclk);
-> >  	pm_runtime_disable(&pdev->dev);
-> >  
-> >  	return 0;
-> 
-> Thanks, pushed to mmc-next for 3.7.
+    linux-2.6/drivers/mmc/host/dw_mmc-exynos.c: At top level:
+    linux-2.6/drivers/mmc/host/dw_mmc-exynos.c:226:1: error: '__mod_of_device_table' aliased to undefined symbol 'dw_mci_pltfm_match'
 
-Thanks!
-
-> In future, feel free to note the
-> stable@ situation by adding:
-> 
->    Cc: stable@vger.kernel.org [3.6]
-
-Hm, a bit confused. I seem to remember, that one of subsystem maintainers, 
-to whom I also submitted a patch, that should also have been forwarded to 
-stable, told me, that adding this "Cc: stable@..." tag was a task of 
-subsystem maintainers, in that case his task, and not of individual 
-submitters, which might only indicate their opinion in this respect. Am I 
-wrong?
-
-Thanks
-Guennadi
+CC: Chris Ball <cjb@laptop.org>
+CC: Thomas Abraham <thomas.abraham@linaro.org>
+CC: Will Newton <will.newton@imgtec.com>
+CC: linux-mmc@vger.kernel.org
+CC: linux-kernel@vger.kernel.org
+Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
 ---
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+ drivers/mmc/host/dw_mmc-exynos.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index 660bbc5..0147ac3a 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -223,7 +223,7 @@ static const struct of_device_id dw_mci_exynos_match[] = {
+ 			.data = (void *)&exynos5250_drv_data, },
+ 	{},
+ };
+-MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
++MODULE_DEVICE_TABLE(of, dw_mci_exynos_match);
+ 
+ int dw_mci_exynos_probe(struct platform_device *pdev)
+ {
+-- 
+1.7.12.4
+
