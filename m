@@ -1,70 +1,140 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH v2 2/2] mmc: sdhci-s3c: fix the card detection in runtime-pm
-Date: Tue, 30 Oct 2012 14:28:36 +0900
-Message-ID: <00b001cdb65f$6958fb80$3c0af280$%jun@samsung.com>
-References: <004801cdad17$498d9140$dca8b3c0$%jun@samsung.com>
- <201210181302.30843.heiko@sntech.de>
- <006501cdadd0$548d1f70$fda75e50$%jun@samsung.com>
- <201210191010.48776.heiko@sntech.de> <87liepq8qo.fsf@octavius.laptop.org>
+From: "AnilKumar, Chimata" <anilkumar-l0cyMroinI0@public.gmane.org>
+Subject: RE: [RFC PATCH v3 13/16] ARM: dts: add AM33XX MMC support
+Date: Tue, 30 Oct 2012 05:33:40 +0000
+Message-ID: <331ABD5ECB02734CA317220B2BBEABC13EA5AE57@DBDE01.ent.ti.com>
+References: <1350566815-409-1-git-send-email-mporter@ti.com>
+ <1350566815-409-14-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:53400 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753740Ab2J3F2i (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 01:28:38 -0400
-Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MCO004VWXVDISM0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 30 Oct 2012 14:28:37 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0MCO000ZNXVOEI30@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 30 Oct 2012 14:28:37 +0900 (KST)
-In-reply-to: <87liepq8qo.fsf@octavius.laptop.org>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <1350566815-409-14-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: "Porter, Matt" <mporter-l0cyMroinI0@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, "Nori,
+ Sekhar" <nsekhar-l0cyMroinI0@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, "Cousson, Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, =?utf-8?Q?'Heiko_St=C3=BCbner'?= <heiko@sntech.de>, 'Chander Kashyap' <chander.kashyap@linaro.org>
 
-If host clock is disabled, host cannot detect a card
-in case of using CD internal for detection.
+On Thu, Oct 18, 2012 at 18:56:52, Porter, Matt wrote:
+> Adds AM33XX MMC support for am335x-bone and am335x-evm.
+> 
+> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+> ---
+>  arch/arm/boot/dts/am335x-bone.dts |    6 ++++++
+>  arch/arm/boot/dts/am335x-evm.dts  |    6 ++++++
+>  arch/arm/boot/dts/am33xx.dtsi     |   27 +++++++++++++++++++++++++++
+>  3 files changed, 39 insertions(+)
+> 
+> diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
+> index c634f87..5510979 100644
+> --- a/arch/arm/boot/dts/am335x-bone.dts
+> +++ b/arch/arm/boot/dts/am335x-bone.dts
+> @@ -70,6 +70,8 @@
+>  		};
+>  
+>  		ldo3_reg: regulator@5 {
+> +			regulator-min-microvolt = <1800000>;
+> +			regulator-max-microvolt = <3300000>;
 
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
----
-Rebased with mmc-next.
+I think these min & max limits are regulator limits. Are these fields
+required? Add details of these additions. AFAIK fine-tuned (board
+specific) min/max limits should be add here(like mpu and core
+regulator nodes)
 
- drivers/mmc/host/sdhci-s3c.c |    6 ++++--
- 1 files changed, 4 insertions(+), 2 deletions(-)
+>  			regulator-always-on;
+>  		};
+>  
+> @@ -78,3 +80,7 @@
+>  		};
+>  	};
+>  };
+> +
+> +&mmc1 {
+> +	vmmc-supply = <&ldo3_reg>;
+> +};
+> diff --git a/arch/arm/boot/dts/am335x-evm.dts b/arch/arm/boot/dts/am335x-evm.dts
+> index 185d632..d63fce8 100644
+> --- a/arch/arm/boot/dts/am335x-evm.dts
+> +++ b/arch/arm/boot/dts/am335x-evm.dts
+> @@ -114,7 +114,13 @@
+>  		};
+>  
+>  		vmmc_reg: regulator@12 {
+> +			regulator-min-microvolt = <1800000>;
+> +			regulator-max-microvolt = <3300000>;
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index a79b153..d680c0b 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -747,7 +747,8 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 		sdhci_s3c_setup_card_detect_gpio(sc);
- 
- #ifdef CONFIG_PM_RUNTIME
--	clk_disable_unprepare(sc->clk_io);
-+	if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
-+		clk_disable_unprepare(sc->clk_io);
- #endif
- 	return 0;
- 
-@@ -794,7 +795,8 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
- 		gpio_free(sc->ext_cd_gpio);
- 
- #ifdef CONFIG_PM_RUNTIME
--	clk_prepare_enable(sc->clk_io);
-+	if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
-+		clk_prepare_enable(sc->clk_io);
- #endif
- 	sdhci_remove_host(host, 1);
- 
--- 
-1.7.0.4
+=same=
 
+>  			regulator-always-on;
+>  		};
+>  	};
+>  };
+> +
+> +&mmc1 {
+> +	vmmc-supply = <&vmmc_reg>;
+> +};
+> diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+> index ab9c78f..26a6af7 100644
+> --- a/arch/arm/boot/dts/am33xx.dtsi
+> +++ b/arch/arm/boot/dts/am33xx.dtsi
+> @@ -234,6 +234,33 @@
+>  			status = "disabled";
+>  		};
+>  
+> +		mmc1: mmc@48060000 {
+> +			compatible = "ti,omap3-hsmmc";
+> +			ti,hwmods = "mmc1";
+> +			ti,dual-volt;
+> +			ti,needs-special-reset;
+> +			dmas = <&edma 24
+> +				&edma 25>;
+> +			dma-names = "tx", "rx";
 
+Add status = "disabled" here and "okay" in corresponding
+.dts file
+
+> +		};
+> +
+> +		mmc2: mmc@481d8000 {
+> +			compatible = "ti,omap3-hsmmc";
+> +			ti,hwmods = "mmc2";
+> +			ti,needs-special-reset;
+> +			dmas = <&edma 2
+> +				&edma 3>;
+> +			dma-names = "tx", "rx";
+> +			status = "disabled";
+> +		};
+> +
+> +		mmc3: mmc@47810000 {
+> +			compatible = "ti,omap3-hsmmc";
+> +			ti,hwmods = "mmc3";
+> +			ti,needs-special-reset;
+
+What about DMA resources for mmc3?
+
+AnilKumar
+
+> +			status = "disabled";
+> +		};
+> +
+>  		wdt2: wdt@44e35000 {
+>  			compatible = "ti,omap3-wdt";
+>  			ti,hwmods = "wd_timer2";
+> -- 
+> 1.7.9.5
+> 
+> _______________________________________________
+> devicetree-discuss mailing list
+> devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+> https://lists.ozlabs.org/listinfo/devicetree-discuss
+> 
