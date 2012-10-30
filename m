@@ -1,68 +1,44 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/4 v3] MMC/core: Add f_min to mmc_power_on()
-Date: Wed, 31 Oct 2012 00:08:32 +0100
-Message-ID: <CAPDyKFqM0cUkDDadm8MBK=+wHHYOSH3CVEHyiY1ybLkmPqSX7w@mail.gmail.com>
-References: <1351584769-16662-1-git-send-email-r66093@freescale.com>
+From: Anton Vorontsov <cbouatmailru@gmail.com>
+Subject: Re: [PATCH V2 0/3] mmc: remove MMC_CAP_NEEDS_POLL setting in
+ sdhci_add_host
+Date: Tue, 30 Oct 2012 16:11:25 -0700
+Message-ID: <20121030231124.GA2902@lizard>
+References: <1351589403-26398-1-git-send-email-yongd@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:55976 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759732Ab2J3XId (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 19:08:33 -0400
-Received: by mail-we0-f174.google.com with SMTP id t9so383466wey.19
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Oct 2012 16:08:32 -0700 (PDT)
-In-Reply-To: <1351584769-16662-1-git-send-email-r66093@freescale.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:40853 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932400Ab2J3XO0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 19:14:26 -0400
+Content-Disposition: inline
+In-Reply-To: <1351589403-26398-1-git-send-email-yongd@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: r66093@freescale.com
-Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
+To: yongd <yongd@marvell.com>
+Cc: Chris Ball <cjb@laptop.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Daniel Drake <dsd@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Wilson Callan <wilson.callan@savantsystems.com>, Ben Dooks <ben-linux@fluff.org>, zhangfei.gao@marvell.com, kevin.liu@marvell.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 30 October 2012 09:12,  <r66093@freescale.com> wrote:
-> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
->
-> When f_init is zero, the SDHC can't work correctly. So f_min will replace
-> f_init, when f_init is zero.
->
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> CC: Anton Vorontsov <cbouatmailru@gmail.com>
-> CC: Chris Ball <cjb@laptop.org>
-> ---
-> changes for v2:
->         - add the CC
-> changes for v3:
->         - enalbe the controller clock in platform, instead of core
->
->  drivers/mmc/core/core.c |    5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 06c42cf..9c162cd 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1319,7 +1319,10 @@ static void mmc_power_up(struct mmc_host *host)
->          */
->         mmc_delay(10);
->
-> -       host->ios.clock = host->f_init;
-> +       if (host->f_init)
-> +               host->ios.clock = host->f_init;
-> +       else
-> +               host->ios.clock = host->f_min;
+On Tue, Oct 30, 2012 at 05:30:00PM +0800, yongd wrote:
+> Sorry for my so late. And eventually these updated patches are here for your
+> review. Thanks in advance.
+> For patch 1, add SDHCI_QUIRK_BROKEN_CARD_DETECTION setting for ESDHC_CD_GPIO type,
+> or the host controller detection interrupts will be redundantly enabled. And its
+> comment is correspondingly updated.
+> For patch 2, broaden SDHCI_QUIRK_BROKEN_CARD_DETECTION setting for all detection
+> types except S3C_SDHCI_CD_INTERNAL. Then also update the comment.
+> For patch 3, no update.
 
-This should not be needed. host->f_init should never become zero, I believe.
+They all look OK, but note that I did not check drivers' logic, so I hope
+you carefully reviewed all the drivers yourself. :)
 
->
->         host->ios.power_mode = MMC_POWER_ON;
->         mmc_set_ios(host);
-> --
-> 1.7.9.5
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Unfortunately, you decided to go the dangerous way, instead of taking my
+100%-safe approach (i.e.
+http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg16555.html ),
+which, to me, still makes more sense (of course :).
 
-Kind regards
-Ulf Hansson
+Anyways, I'm not opposed either, so hopefully it works:
+
+	Reviewed-by: Anton Vorontsov <cbouatmailru@gmail.com>
+
+Thanks!
+Anton.
