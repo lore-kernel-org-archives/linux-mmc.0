@@ -1,54 +1,114 @@
-From: Philip Rakity <prakity@nvidia.com>
-Subject: Re: sdhci vccq regulator support drops UHS-I flags
-Date: Tue, 30 Oct 2012 22:07:02 +0100
-Message-ID: <548D1E66-2AAF-4ACC-B08D-4F5B2719605F@nvidia.com>
-References: <CAMLZHHS-xSEEFpKOEZyxG8CLQqwzwCYw8k=bbO3psEeZ78ZeNQ@mail.gmail.com>
- <E4ECCB94-95A7-4350-8FBD-1CB0D6D52ED6@nvidia.com>
- <CAMLZHHTDrzMc8J89dbyuvy6P_Qe0ynoQW7RFje9_8ppYNkFOSw@mail.gmail.com>
+From: Daniel Drake <dsd@laptop.org>
+Subject: UHS-I voltage switching on OLPC XO-1.75
+Date: Tue, 30 Oct 2012 15:11:13 -0600
+Message-ID: <CAMLZHHQfQ26E+BH2sqV9CGyso+uuKHC=WMaqehzBo9_Gr_kyPQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate03.nvidia.com ([216.228.121.140]:19122 "EHLO
-	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934562Ab2J3VHE convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 17:07:04 -0400
-In-Reply-To: <CAMLZHHTDrzMc8J89dbyuvy6P_Qe0ynoQW7RFje9_8ppYNkFOSw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:44041 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934561Ab2J3VLN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 17:11:13 -0400
+Received: by mail-pa0-f46.google.com with SMTP id hz1so442655pad.19
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Oct 2012 14:11:13 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <dsd@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Johan Rudholm <jrudholm@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-The intent is if there is no regulator should hit this if statement.
+Hi,
 
-+       if (IS_ERR(host->vqmmc)) {
-+               pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
-+               host->vqmmc = NULL;
+Following on from the recent thread
+  [PATCH 2/2] mmc: core: Power cycle card on voltage switch fail
+I have tried to get a better grip on the problems being faced.
+
+Test setup:
+OLPC XO-1.75 laptop, based on Marvell MMP2 ARM SoC (includes sdhci-pxa
+interface)
+32GB Sandisk Ultra SD card being inserted into external SD slot
+
+The SoC apparently has support for 1.8V, but we physically do not have
+the right power lines wired on the motherboard, so we need to detect
+the 1.8V failure and go back to 3.3V mode.
+
+Before patching anything, inserting this card results in:
+  sdhci: Switching to 1.8V signalling voltage failed, retrying with
+S18R set to 0
+  mmc0: error -110 whilst initialising SD card
+
+Now, working on Linux-3.5.4, I add these patches:
+
+    mmc: core: reset sigal voltage on power up
+    [RFC/PATCH,v2] mmc: core: Fixup signal voltage switch
+    regulator: add missing defintion regulator_is_supported_voltage
+    mmc: sdhci: Add regulator support for vccq (voltage regualor)
+    mmc: sdhci: Let core handle UHS switch failure
+
+I also tweaked the sdhci code so that UHS-I flags are not
+unconditionally disabled by the vccq commit (as explained in "sdhci
+vccq regulator support drops UHS-I flags").
 
 
-On Oct 30, 2012, at 9:56 PM, Daniel Drake <dsd@laptop.org> wrote:
+Under this setup, the first problem encountered is that the system no
+longer identifies the fact that the 1.8V voltage failed. Things are
+not happy afterwards. The card_busy check in sdhci is saying that the
+card is not busy.
+Full kernel logs: http://dev.laptop.org/~dsd/20121030/mmc1.log
 
-> On Tue, Oct 30, 2012 at 2:37 PM, Philip Rakity <prakity@nvidia.com> wrote:
->> Intentional.
->> 
->> if no vqmmc regulator then just assume it will work.
-> 
-> When you say "it", do you mean "UHS-I support"?
-> The code in this case will *disable* UHS-I support, because these lines are hit.
-> +               caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
-> +                      SDHCI_SUPPORT_DDR50);
-> 
->> if there is a regulator it needs to support 1.8V.  (If I remember correctly UHS mode require 1.8V vccq)  I need to check if we 1.2V should be allowed but it was not in the spec that I had.
-> 
-> I'm asking about the case when there is no regulator.
-> 
-> Thanks
-> Daniel
+I tracked down what causes this regression. In order to get the
+failure detection working again, I have to make the following change
+in mmc_set_signal_voltage():
+                if (cmd11) {
+                        host->ios.clock = 0;
+-                       mmc_set_ios(host);
++                       //mmc_set_ios(host);
+                }
+(i.e. don't mess with ios before asking sdhci to do the voltage switch)
 
------------------------------------------------------------------------------------
-This email message is for the sole use of the intended recipient(s) and may contain
-confidential information.  Any unauthorized review, use, disclosure or distribution
-is prohibited.  If you are not the intended recipient, please contact the sender by
-reply email and destroy all copies of the original message.
------------------------------------------------------------------------------------
+and at the top of sdhci_do_1_8v_signal_voltage_switch:
++       /* Stop SDCLK */
++       clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++       clk &= ~SDHCI_CLOCK_CARD_EN;
++       sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+(i.e. add the equivalent clock disabling code here)
+
+
+With that change, I now get:
+  mmc2: Signal voltage switch failed, power cycling card (retries = 10)
+  mmc2: error -110 whilst initialising SD card
+
+The -110 error comes from mmc_send_app_op_cond(), but its worth noting
+that mmc_send_if_cond() (called immediately above) silently failed
+with -110 too. Neither of these failed the first time around before
+1.8V was tried.
+
+Full patch that I'm testing with: http://dev.laptop.org/~dsd/20121030/mmc.patch
+
+So, now the question is: why is the card not responding to
+if_cond/app_op_cond after being powered down and up again? Is the
+power down/up sequence OK?
+I tried inserting the mmc_power_off, mmc_power_up, mmc_send_if_cond
+sequence into various points in the codepaths being discussed.
+Measuring success as the card responding to mmc_send_if_cond(0x30080)
+without error (0x30080 is a known good value from when before 1.8V is
+tried), I find that this "reset sequence" works just fine up until the
+point when CMD11 is run.
+CMD11 is sent and returns successfully without error, but from this
+point, running the reset sequence will fail (send_if_cond will fail
+with -110).
+
+Is this kind of test valid? Does this suggest that something is wrong
+with the host controller hardware? My assumption is that whatever
+state is modified by CMD11 should be erased here, and of course the
+hope is that mmc_power_off and mmc_power_up will do a full power cycle
+anyway. But whatever is happening, it looks like the effects of CMD11
+are persisting past the reset sequence and are breaking later
+communication.
+
+In the mail last week, I think we found some kind of configuration (on
+Linux-3.0) where this same setup successfully detected the 1.8V
+switching failure, and successfully switched back to 3.3V. I plan to
+go back and test that, maybe there is some kind of sequence that
+doesn't make the hardware die.
+
+Daniel
