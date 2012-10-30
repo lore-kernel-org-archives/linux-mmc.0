@@ -1,140 +1,135 @@
-From: "AnilKumar, Chimata" <anilkumar-l0cyMroinI0@public.gmane.org>
-Subject: RE: [RFC PATCH v3 13/16] ARM: dts: add AM33XX MMC support
-Date: Tue, 30 Oct 2012 05:33:40 +0000
-Message-ID: <331ABD5ECB02734CA317220B2BBEABC13EA5AE57@DBDE01.ent.ti.com>
-References: <1350566815-409-1-git-send-email-mporter@ti.com>
- <1350566815-409-14-git-send-email-mporter@ti.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2] mmc: dw-mmc: relocate the position called
+ dw_mci_setup_bus()
+Date: Tue, 30 Oct 2012 14:50:00 +0900
+Message-ID: <508F6A88.6090900@samsung.com>
+References: <508E11E8.2040609@samsung.com>
+ <009e01cdb5b4$fb55b010$f2011030$%jun@samsung.com>
+ <508E4EAF.2060409@samsung.com>
+ <00ae01cdb65f$4f5fa8f0$ee1efad0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <1350566815-409-14-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: "Porter, Matt" <mporter-l0cyMroinI0@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, "Nori,
- Sekhar" <nsekhar-l0cyMroinI0@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, "Cousson, Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:59431 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753443Ab2J3FuF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 01:50:05 -0400
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MCO00FXJYV67B80@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 30 Oct 2012 14:50:04 +0900 (KST)
+Received: from [10.90.51.55] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0MCO000P7YVFW170@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 30 Oct 2012 14:50:03 +0900 (KST)
+In-reply-to: <00ae01cdb65f$4f5fa8f0$ee1efad0$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <James.Hogan@imgtec.com>, 'Kyungmin Park' <kyungmin.park@samsung.com>
 
-On Thu, Oct 18, 2012 at 18:56:52, Porter, Matt wrote:
-> Adds AM33XX MMC support for am335x-bone and am335x-evm.
+Dear Seungwon,
+
+On 10/30/2012 02:27 PM, Seungwon Jeon wrote:
+> Monday, October 29, 2012, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> On 10/29/2012 06:08 PM, Seungwon Jeon wrote:
+>>> Monday, October 29, 2012, Jaehoon Chung <jh80.chung@samsung.com>
+>>>> After power-on, must be ensured at least 74~80 clocks before sending any first command.
+>>>> To ensure, it's good that dw_mci_setup_bus() is located at dw_mci_set_ios
+>>>> instead of __dw_mci_start_request()
+>>> After power-up, host driver sets 'DW_MMC_CARD_NEED_INIT' flag, right?
+>>> And then, this flag help to add SDMMC_CMD_INIT flag into CMD, when __dw_mci_start_request is
+>> executed.
+>>> 74~80 clocks is ensured with SDMMC_CMD_INIT regardless location change, isn't it?
+>>> I mentioned this part in previous mail. Could you check it?
+>> According to eMMC spec, after power-on, need to wait for 74-clock before sending first command
+>> You can see code that after mmc_set_ios(), waiting for mmc_delay(10) into mmc_power_up().
+>> (You can read the comment at mmc_power_up(), Maybe mmc_delay(10) didn't ensure the 74-clock).
+> There is 'send_initialization' bit in CMD register.
+> If this bit set with CMD0, it will guarantee 80 clocks by host controller.
+Is it guaranteed 80-clocks by host-controller? So I understood something wrong.
+My understanding is that "if flags is set, need to wait for 80-clock."
+If host-controller can ensure the 80-clock, location is not important.
+
+My point was just entire sequence with core.c and dw_mmc.c
+Anyway, thank you for review.
+If i miss other thing. let me know, plz.
+
+Best Regards,
+Jaehoon Chung
+
+> Currently this is applied in driver.
+> I agree change the location of dw_mci_setup_bus.
+> But commit message seem not proper for it.
+> Please let me know, if I miss something.
 > 
-> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-> ---
->  arch/arm/boot/dts/am335x-bone.dts |    6 ++++++
->  arch/arm/boot/dts/am335x-evm.dts  |    6 ++++++
->  arch/arm/boot/dts/am33xx.dtsi     |   27 +++++++++++++++++++++++++++
->  3 files changed, 39 insertions(+)
+> Thanks,
+> Seungwon Jeon
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>>
+>>> Thanks,
+>>> Seungwon Jeon
+>>>
+>>>>
+>>>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>>>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+>>>> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+>>>> ------
+>>>> Changelog V2:
+>>>> 	- Modified the commit-message.
+>>>> ---
+>>>>  drivers/mmc/host/dw_mmc.c |    6 +++---
+>>>>  1 files changed, 3 insertions(+), 3 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>>> index 4b2bedc..de79093 100644
+>>>> --- a/drivers/mmc/host/dw_mmc.c
+>>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>>> @@ -682,9 +682,6 @@ static void __dw_mci_start_request(struct dw_mci *host,
+>>>>  	if (host->pdata->select_slot)
+>>>>  		host->pdata->select_slot(slot->id);
+>>>>
+>>>> -	/* Slot specific timing and width adjustment */
+>>>> -	dw_mci_setup_bus(slot);
+>>>> -
+>>>>  	host->cur_slot = slot;
+>>>>  	host->mrq = mrq;
+>>>>
+>>>> @@ -810,6 +807,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>>  	if (slot->host->drv_data->set_ios)
+>>>>  		slot->host->drv_data->set_ios(slot->host, ios);
+>>>>
+>>>> +	/* Slot specific timing and width adjustment */
+>>>> +	dw_mci_setup_bus(slot);
+>>>> +
+>>>>  	switch (ios->power_mode) {
+>>>>  	case MMC_POWER_UP:
+>>>>  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+>>>> --
+>>>> 1.7.4.1
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
-> index c634f87..5510979 100644
-> --- a/arch/arm/boot/dts/am335x-bone.dts
-> +++ b/arch/arm/boot/dts/am335x-bone.dts
-> @@ -70,6 +70,8 @@
->  		};
->  
->  		ldo3_reg: regulator@5 {
-> +			regulator-min-microvolt = <1800000>;
-> +			regulator-max-microvolt = <3300000>;
-
-I think these min & max limits are regulator limits. Are these fields
-required? Add details of these additions. AFAIK fine-tuned (board
-specific) min/max limits should be add here(like mpu and core
-regulator nodes)
-
->  			regulator-always-on;
->  		};
->  
-> @@ -78,3 +80,7 @@
->  		};
->  	};
->  };
-> +
-> +&mmc1 {
-> +	vmmc-supply = <&ldo3_reg>;
-> +};
-> diff --git a/arch/arm/boot/dts/am335x-evm.dts b/arch/arm/boot/dts/am335x-evm.dts
-> index 185d632..d63fce8 100644
-> --- a/arch/arm/boot/dts/am335x-evm.dts
-> +++ b/arch/arm/boot/dts/am335x-evm.dts
-> @@ -114,7 +114,13 @@
->  		};
->  
->  		vmmc_reg: regulator@12 {
-> +			regulator-min-microvolt = <1800000>;
-> +			regulator-max-microvolt = <3300000>;
-
-=same=
-
->  			regulator-always-on;
->  		};
->  	};
->  };
-> +
-> +&mmc1 {
-> +	vmmc-supply = <&vmmc_reg>;
-> +};
-> diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
-> index ab9c78f..26a6af7 100644
-> --- a/arch/arm/boot/dts/am33xx.dtsi
-> +++ b/arch/arm/boot/dts/am33xx.dtsi
-> @@ -234,6 +234,33 @@
->  			status = "disabled";
->  		};
->  
-> +		mmc1: mmc@48060000 {
-> +			compatible = "ti,omap3-hsmmc";
-> +			ti,hwmods = "mmc1";
-> +			ti,dual-volt;
-> +			ti,needs-special-reset;
-> +			dmas = <&edma 24
-> +				&edma 25>;
-> +			dma-names = "tx", "rx";
-
-Add status = "disabled" here and "okay" in corresponding
-.dts file
-
-> +		};
-> +
-> +		mmc2: mmc@481d8000 {
-> +			compatible = "ti,omap3-hsmmc";
-> +			ti,hwmods = "mmc2";
-> +			ti,needs-special-reset;
-> +			dmas = <&edma 2
-> +				&edma 3>;
-> +			dma-names = "tx", "rx";
-> +			status = "disabled";
-> +		};
-> +
-> +		mmc3: mmc@47810000 {
-> +			compatible = "ti,omap3-hsmmc";
-> +			ti,hwmods = "mmc3";
-> +			ti,needs-special-reset;
-
-What about DMA resources for mmc3?
-
-AnilKumar
-
-> +			status = "disabled";
-> +		};
-> +
->  		wdt2: wdt@44e35000 {
->  			compatible = "ti,omap3-wdt";
->  			ti,hwmods = "wd_timer2";
-> -- 
-> 1.7.9.5
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> _______________________________________________
-> devicetree-discuss mailing list
-> devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-> https://lists.ozlabs.org/listinfo/devicetree-discuss
-> 
+
