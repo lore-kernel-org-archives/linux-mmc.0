@@ -1,64 +1,70 @@
 From: yongd <yongd@marvell.com>
-Subject: [PATCH V2 2/3] mmc: sdhci-s3c: enable polling to detect card by itself
-Date: Tue, 30 Oct 2012 17:30:02 +0800
-Message-ID: <1351589403-26398-3-git-send-email-yongd@marvell.com>
+Subject: [PATCH V2 1/3] mmc: esdhc: enable polling to detect card by itself
+Date: Tue, 30 Oct 2012 17:30:01 +0800
+Message-ID: <1351589403-26398-2-git-send-email-yongd@marvell.com>
 References: <1351589403-26398-1-git-send-email-yongd@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:41034 "EHLO
-	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756993Ab2J3Jaj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 05:30:39 -0400
+Received: from na3sys009aog105.obsmtp.com ([74.125.149.75]:47412 "EHLO
+	na3sys009aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756562Ab2J3JaX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 05:30:23 -0400
 In-Reply-To: <1351589403-26398-1-git-send-email-yongd@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>, Anton Vorontsov <anton.vorontsov@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Daniel Drake <dsd@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Wilson Callan <wilson.callan@savantsystems.com>, Ben Dooks <ben-linux@fluff.org>
 Cc: zhangfei.gao@marvell.com, kevin.liu@marvell.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, yongd <yongd@marvell.com>
 
-SDHCI_QUIRK_BROKEN_CARD_DETECTION is used to disable host internal
-card detection method. So it should be set for all card detection types
-except S3C_SDHCI_CD_INTERNAL, or host internal card detection interrupts
-will be redundantly enabled. So, the 1st change of this patch expands such
-flag setting.
+In the current code logic, sdhci_add_host() will enable the polling
+method (set MMC_CAP_NEEDS_POLL) for a removable card (MMC_CAP_
+NONREMOVABLE is not set) whose host's internal card detection method
+is disabled for some reason (SDHCI_QUIRK_BROKEN_CARD_DETECTION is set).
 
-Moreover, we need move further after the above change.
+However, this is improper since we can have some other card detection
+methods besides host internal card detection and polling method. For
+example, if the card detection type is ESDHC_CD_GPIO (external gpio pin
+for CD), we should keep SDHCI_QUIRK_BROKEN_CARD_DETECTION set, or host
+internal card detection interrupt will still be enabled. So, here comes
+the 1st change in this patch to keep SDHCI_QUIRK_BROKEN_CARD_DETECTION
+set for ESDHC_CD_GPIO type. But, after the 1st change, just as above
+said, sdhci_add_host() will still enable polling for such a card.This
+is redundant.
 
-In the current code logic, sdhci_add_host() will enable the polling method
-(set MMC_CAP_NEEDS_POLL) for a removable card (MMC_CAP_NONREMOVABLE is not
-set) whose host's internal card detection method is disabled.
+On the other hand, for the card with ESDHC_CD_NONE detection type(no CD,
+neither controller nor gpio, so use polling), we currently rely on
+sdhci_add_host() to enable polling for us.
 
-Apparently, this is arbitrary since we can have some other detection types.
-As a result, sdhci_add_host() will redundantly enable polling for a card with
-S3C_SDHCI_CD_GPIO/S3C_SDHCI_CD_EXTERNAL type.
+Here propose the 2nd change in this patch for such an embarrassing case.
+1st, this patch will de-couple polling enabling with sdhci_add_host() by
+doing this in host driver itself, just as some other vendors. 2nd, one
+more patch will remove such improper MMC_CAP_NEEDS_POLL enabling in
+sdhci_add_host().
 
-So, we plan to remove such improper setting in sdhci_add_host(). But
-before this, this 2nd change of this patch is a MUST, which enables polling
-in host driver itself for S3C_SDHCI_CD_NONE type. Currently, we rely on the
-above improper logic for this.
-
-Change-Id: I28bd6765e6c6a9dd6c288ff4ca6ecf7268a2d8ed
+Change-Id: Ia7525009d8fd188e3f0169f225e4a76ff9e94b47
 Signed-off-by: yongd <yongd@marvell.com>
 ---
- drivers/mmc/host/sdhci-s3c.c |    6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index a093e2e..a669616 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -683,10 +683,12 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	/* Samsung SoCs need BROKEN_ADMA_ZEROLEN_DESC */
- 	host->quirks |= SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC;
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index effc2ac..ff201a5 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -557,7 +557,7 @@ static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 			dev_err(mmc_dev(host->mmc), "request irq error\n");
+ 			goto no_card_detect_irq;
+ 		}
+-		/* fall through */
++		break;
  
--	if (pdata->cd_type == S3C_SDHCI_CD_NONE ||
--	    pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
-+	if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
- 		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+ 	case ESDHC_CD_CONTROLLER:
+ 		/* we have a working card_detect back */
+@@ -569,6 +569,7 @@ static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		break;
  
-+	if (pdata->cd_type == S3C_SDHCI_CD_NONE)
+ 	case ESDHC_CD_NONE:
 +		host->mmc->caps = MMC_CAP_NEEDS_POLL;
-+
- 	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
- 		host->mmc->caps = MMC_CAP_NONREMOVABLE;
+ 		break;
+ 	}
  
 -- 
 1.7.9.5
