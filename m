@@ -1,85 +1,65 @@
-From: <r66093@freescale.com>
-Subject: [PATCH 4/4 v4] ESDHC: add callback esdhc_of_get_cd to detect card
-Date: Tue, 30 Oct 2012 16:12:49 +0800
-Message-ID: <1351584769-16662-4-git-send-email-r66093@freescale.com>
-References: <1351584769-16662-1-git-send-email-r66093@freescale.com>
- <1351584769-16662-2-git-send-email-r66093@freescale.com>
- <1351584769-16662-3-git-send-email-r66093@freescale.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: yongd <yongd@marvell.com>
+Subject: [PATCH V2 2/3] mmc: sdhci-s3c: enable polling to detect card by itself
+Date: Tue, 30 Oct 2012 17:30:02 +0800
+Message-ID: <1351589403-26398-3-git-send-email-yongd@marvell.com>
+References: <1351589403-26398-1-git-send-email-yongd@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:28597
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756587Ab2J3Izq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 04:55:46 -0400
-In-Reply-To: <1351584769-16662-3-git-send-email-r66093@freescale.com>
+Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:41034 "EHLO
+	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756993Ab2J3Jaj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 05:30:39 -0400
+In-Reply-To: <1351589403-26398-1-git-send-email-yongd@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
+To: Chris Ball <cjb@laptop.org>, Anton Vorontsov <anton.vorontsov@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Daniel Drake <dsd@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Wilson Callan <wilson.callan@savantsystems.com>, Ben Dooks <ben-linux@fluff.org>
+Cc: zhangfei.gao@marvell.com, kevin.liu@marvell.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, yongd <yongd@marvell.com>
 
-From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+SDHCI_QUIRK_BROKEN_CARD_DETECTION is used to disable host internal
+card detection method. So it should be set for all card detection types
+except S3C_SDHCI_CD_INTERNAL, or host internal card detection interrupts
+will be redundantly enabled. So, the 1st change of this patch expands such
+flag setting.
 
-In order to check if the card is present, we will read the PRESENT STATE
-register and check the bit13(Card detect pin level) and bit15(CINS).
+Moreover, we need move further after the above change.
 
-Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-CC: Anton Vorontsov <cbouatmailru@gmail.com>
-CC: Chris Ball <cjb@laptop.org>
+In the current code logic, sdhci_add_host() will enable the polling method
+(set MMC_CAP_NEEDS_POLL) for a removable card (MMC_CAP_NONREMOVABLE is not
+set) whose host's internal card detection method is disabled.
+
+Apparently, this is arbitrary since we can have some other detection types.
+As a result, sdhci_add_host() will redundantly enable polling for a card with
+S3C_SDHCI_CD_GPIO/S3C_SDHCI_CD_EXTERNAL type.
+
+So, we plan to remove such improper setting in sdhci_add_host(). But
+before this, this 2nd change of this patch is a MUST, which enables polling
+in host driver itself for S3C_SDHCI_CD_NONE type. Currently, we rely on the
+above improper logic for this.
+
+Change-Id: I28bd6765e6c6a9dd6c288ff4ca6ecf7268a2d8ed
+Signed-off-by: yongd <yongd@marvell.com>
 ---
-changes for v2:
-	- add new callback for esdhc to detect the card state
-	- add the CC
-changes for v3:
-	- enable the controller clock when detect the card state, not core
-changes for v4:
-	- based on the latest version
+ drivers/mmc/host/sdhci-s3c.c |    6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
- drivers/mmc/host/sdhci-of-esdhc.c |   23 +++++++++++++++++++++++
- 1 file changed, 23 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 63d219f..7053218 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -179,6 +179,28 @@ static void esdhc_of_platform_init(struct sdhci_host *host)
- 		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
- }
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index a093e2e..a669616 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -683,10 +683,12 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	/* Samsung SoCs need BROKEN_ADMA_ZEROLEN_DESC */
+ 	host->quirks |= SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC;
  
-+/* Return: none zero - the card is presetn; 0 - card is absent */
-+static int esdhc_of_get_cd(struct sdhci_host *host)
-+{
-+	int present;
+-	if (pdata->cd_type == S3C_SDHCI_CD_NONE ||
+-	    pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
++	if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
+ 		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+ 
++	if (pdata->cd_type == S3C_SDHCI_CD_NONE)
++		host->mmc->caps = MMC_CAP_NEEDS_POLL;
 +
-+	if (host->flags & SDHCI_DEVICE_DEAD)
-+		present = 0;
-+	else {
-+		int sysctl = sdhci_be32bs_readl(host, SDHCI_CLOCK_CONTROL);
-+		/* Enable the controller clock to update the present state */
-+		sdhci_be32bs_writel(host, sysctl | SDHCI_CLOCK_INT_EN,
-+				SDHCI_CLOCK_CONTROL);
-+		/* Detect the card present or absent */
-+		present = sdhci_be32bs_readl(host, SDHCI_PRESENT_STATE);
-+		present &= (SDHCI_CARD_PRESENT | SDHCI_CARD_CDPL);
-+		/* Resve the previous to System control register */
-+		sdhci_be32bs_writel(host, sysctl, SDHCI_CLOCK_CONTROL);
-+	}
-+
-+	return present;
-+}
-+
- static struct sdhci_ops sdhci_esdhc_ops = {
- 	.read_l = esdhc_readl,
- 	.read_w = esdhc_readw,
-@@ -191,6 +213,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
- 	.get_max_clock = esdhc_of_get_max_clock,
- 	.get_min_clock = esdhc_of_get_min_clock,
- 	.platform_init = esdhc_of_platform_init,
-+	.get_cd = esdhc_of_get_cd,
- #ifdef CONFIG_PM
- 	.platform_suspend = esdhc_of_suspend,
- 	.platform_resume = esdhc_of_resume,
+ 	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
+ 		host->mmc->caps = MMC_CAP_NONREMOVABLE;
+ 
 -- 
 1.7.9.5
-
 
