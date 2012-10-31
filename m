@@ -1,105 +1,167 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: [PATCH v2] mmc: mxs-mmc: Remove platform data
-Date: Wed, 31 Oct 2012 09:22:58 -0200
-Message-ID: <1351682578-12922-1-git-send-email-festevam@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ye0-f174.google.com ([209.85.213.174]:56548 "EHLO
-	mail-ye0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965465Ab2JaLXH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Oct 2012 07:23:07 -0400
-Received: by mail-ye0-f174.google.com with SMTP id m12so234421yen.19
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Oct 2012 04:23:06 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
+Subject: [PATCH V3] mmc: omap_hsmmc: Enable HSPE bit for high speed cards
+Date: Wed, 31 Oct 2012 17:27:36 +0530
+Message-ID: <1351684656-30275-1-git-send-email-gururaja.hebbar@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: balbi@ti.com, svenkatr@ti.com, cjb@laptop.org, balajitk@ti.com, grant.likely@secretlab.ca
+Cc: nsekhar@ti.com, sudhakar.raj@ti.com, gururaja.hebbar@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, rob.herring@calxeda.com, rob@landley.net, tony@atomide.com, linux-arm-kernel@lists.infradead.org, linux-doc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: shawn.guo@linaro.org, marex@denx.de, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
 
-From: Fabio Estevam <fabio.estevam@freescale.com>
+HSMMC IP on AM33xx need a special setting to handle High-speed cards.
+Other platforms like TI81xx, OMAP4 may need this as-well. This depends
+on the HSMMC IP timing closure done for the high speed cards.
 
-All MXS users have been converted to device tree and the board files have been
-removed.
+>From AM335x TRM (SPRUH73F - 18.3.12 Output Signals Generation)
 
-No need to keep platform data in the driver.
+The MMC/SD/SDIO output signals can be driven on either falling edge or
+rising edge depending on the SD_HCTL[2] HSPE bit. This feature allows
+to reach better timing performance, and thus to increase data transfer
+frequency.
 
-Also move bus_width declaration in the beggining of mxs_mmc_probe() to avoid:
-'warning: ISO C90 forbids mixed declarations and code'.
-  
-Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
-----
-Changes since v1:
-- Also remove mxs_mmc_platform_data and linux/mmc/mxs-mmc.h, which was used only
-to include mxs_mmc_platform_data definition.
+There are few pre-requisites for enabling the HSPE bit
+- Controller should support High-Speed-Enable Bit and
+- Controller should not be using DDR Mode and
+- Controller should advertise that it supports High Speed in
+  capabilities register and
+- MMC/SD clock coming out of controller > 25MHz
 
- drivers/mmc/host/mxs-mmc.c  |   31 ++++++++++---------------------
- include/linux/mmc/mxs-mmc.h |   19 -------------------
- 2 files changed, 10 insertions(+), 40 deletions(-)
- delete mode 100644 include/linux/mmc/mxs-mmc.h
+Note:
+The implementation reuses the output of calc_divisor() so as to reduce
+code addition.
 
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 80d1e6d..206fe49 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -43,7 +43,6 @@
- #include <linux/module.h>
- #include <linux/pinctrl/consumer.h>
- #include <linux/stmp_device.h>
--#include <linux/mmc/mxs-mmc.h>
- #include <linux/spi/mxs-spi.h>
+Signed-off-by: Hebbar, Gururaja <gururaja.hebbar@ti.com>
+---
+Rebased on mmc-next (v3.7.0-rc1)
+Only Build tested since EDMA support for AM335x is not yet added
+
+Changes in V2
+	- Added note in commit message about code re-use
+	- replaced ((a & BIT(n) == BIT(n))) with (a & BIT(n)) since
+	  effectively both are same.
+
+Changes in V3
+	- use symbolic define for hardcoded value (25000000)
+	- use of_property_read_bool() instead of of_find_property()
+
+:100644 100644 be76a23... ed271fc... M	Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+:100644 100644 8b4e4f2... 346af5b... M	arch/arm/plat-omap/include/plat/mmc.h
+:100644 100644 5434fd8... 4f7fcee... M	drivers/mmc/host/omap_hsmmc.c
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    1 +
+ arch/arm/plat-omap/include/plat/mmc.h              |    1 +
+ drivers/mmc/host/omap_hsmmc.c                      |   31 +++++++++++++++++++-
+ 3 files changed, 32 insertions(+), 1 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+index be76a23..ed271fc 100644
+--- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
++++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+@@ -19,6 +19,7 @@ ti,dual-volt: boolean, supports dual voltage cards
+ "supply-name" examples are "vmmc", "vmmc_aux" etc
+ ti,non-removable: non-removable slot (like eMMC)
+ ti,needs-special-reset: Requires a special softreset sequence
++ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
  
- #define DRIVER_NAME	"mxs-mmc"
-@@ -593,13 +592,13 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 	struct mxs_mmc_host *host;
- 	struct mmc_host *mmc;
- 	struct resource *iores, *dmares;
--	struct mxs_mmc_platform_data *pdata;
- 	struct pinctrl *pinctrl;
- 	int ret = 0, irq_err, irq_dma;
- 	dma_cap_mask_t mask;
- 	struct regulator *reg_vmmc;
- 	enum of_gpio_flags flags;
- 	struct mxs_ssp *ssp;
-+	u32 bus_width = 0;
+ Example:
+ 	mmc1: mmc@0x4809c000 {
+diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+index 8b4e4f2..346af5b 100644
+--- a/arch/arm/plat-omap/include/plat/mmc.h
++++ b/arch/arm/plat-omap/include/plat/mmc.h
+@@ -126,6 +126,7 @@ struct omap_mmc_platform_data {
+ 		/* we can put the features above into this variable */
+ #define HSMMC_HAS_PBIAS		(1 << 0)
+ #define HSMMC_HAS_UPDATED_RESET	(1 << 1)
++#define HSMMC_HAS_HSPE_SUPPORT	(1 << 2)
+ 		unsigned features;
  
- 	iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	dmares = platform_get_resource(pdev, IORESOURCE_DMA, 0);
-@@ -682,25 +681,15 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 	mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
- 		    MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL;
+ 		int switch_pin;			/* gpio (card detect) */
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 5434fd8..4f7fcee 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -63,6 +63,7 @@
  
--	pdata =	mmc_dev(host->mmc)->platform_data;
--	if (!pdata) {
--		u32 bus_width = 0;
--		of_property_read_u32(np, "bus-width", &bus_width);
--		if (bus_width == 4)
--			mmc->caps |= MMC_CAP_4_BIT_DATA;
--		else if (bus_width == 8)
--			mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
--		host->wp_gpio = of_get_named_gpio_flags(np, "wp-gpios", 0,
--							&flags);
--		if (flags & OF_GPIO_ACTIVE_LOW)
--			host->wp_inverted = 1;
--	} else {
--		if (pdata->flags & SLOTF_8_BIT_CAPABLE)
--			mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
--		if (pdata->flags & SLOTF_4_BIT_CAPABLE)
--			mmc->caps |= MMC_CAP_4_BIT_DATA;
--		host->wp_gpio = pdata->wp_gpio;
--	}
-+	of_property_read_u32(np, "bus-width", &bus_width);
-+	if (bus_width == 4)
-+		mmc->caps |= MMC_CAP_4_BIT_DATA;
-+	else if (bus_width == 8)
-+		mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
-+	host->wp_gpio = of_get_named_gpio_flags(np, "wp-gpios", 0, &flags);
+ #define VS18			(1 << 26)
+ #define VS30			(1 << 25)
++#define HSS			(1 << 21)
+ #define SDVS18			(0x5 << 9)
+ #define SDVS30			(0x6 << 9)
+ #define SDVS33			(0x7 << 9)
+@@ -90,6 +91,7 @@
+ #define MSBS			(1 << 5)
+ #define BCE			(1 << 1)
+ #define FOUR_BIT		(1 << 1)
++#define HSPE			(1 << 2)
+ #define DDR			(1 << 19)
+ #define DW8			(1 << 5)
+ #define CC			0x1
+@@ -113,6 +115,7 @@
+ #define MMC_TIMEOUT_MS		20
+ #define OMAP_MMC_MIN_CLOCK	400000
+ #define OMAP_MMC_MAX_CLOCK	52000000
++#define HSMMC_CLKOUT	25000000
+ #define DRIVER_NAME		"omap_hsmmc"
+ 
+ /*
+@@ -495,6 +498,7 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
+ 	struct mmc_ios *ios = &host->mmc->ios;
+ 	unsigned long regval;
+ 	unsigned long timeout;
++	unsigned long clkdiv;
+ 
+ 	dev_vdbg(mmc_dev(host->mmc), "Set clock to %uHz\n", ios->clock);
+ 
+@@ -502,7 +506,8 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
+ 
+ 	regval = OMAP_HSMMC_READ(host->base, SYSCTL);
+ 	regval = regval & ~(CLKD_MASK | DTO_MASK);
+-	regval = regval | (calc_divisor(host, ios) << 6) | (DTO << 16);
++	clkdiv = calc_divisor(host, ios);
++	regval = regval | (clkdiv << 6) | (DTO << 16);
+ 	OMAP_HSMMC_WRITE(host->base, SYSCTL, regval);
+ 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
+ 		OMAP_HSMMC_READ(host->base, SYSCTL) | ICE);
+@@ -513,6 +518,27 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
+ 		&& time_before(jiffies, timeout))
+ 		cpu_relax();
+ 
++	/*
++	 * Enable High-Speed Support
++	 * Pre-Requisites
++	 *	- Controller should support High-Speed-Enable Bit
++	 *	- Controller should not be using DDR Mode
++	 *	- Controller should advertise that it supports High Speed
++	 *	  in capabilities register
++	 *	- MMC/SD clock coming out of controller > 25MHz
++	 */
++	if ((mmc_slot(host).features & HSMMC_HAS_HSPE_SUPPORT) &&
++	    (ios->timing != MMC_TIMING_UHS_DDR50) &&
++	    (OMAP_HSMMC_READ(host->base, CAPA) & HSS)) {
++		regval = OMAP_HSMMC_READ(host->base, HCTL);
++		if (clkdiv && (clk_get_rate(host->fclk)/clkdiv) > HSMMC_CLKOUT)
++			regval |= HSPE;
++		else
++			regval &= ~HSPE;
 +
-+	if (flags & OF_GPIO_ACTIVE_LOW)
-+		host->wp_inverted = 1;
++		OMAP_HSMMC_WRITE(host->base, HCTL, regval);
++	}
++
+ 	omap_hsmmc_start_clock(host);
+ }
  
- 	mmc->f_min = 400000;
- 	mmc->f_max = 288000000;
-diff --git a/include/linux/mmc/mxs-mmc.h b/include/linux/mmc/mxs-mmc.h
-deleted file mode 100644
-index 7c2ad3a..0000000
+@@ -1709,6 +1735,9 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
+ 	if (!of_property_read_u32(np, "max-frequency", &max_freq))
+ 		pdata->max_freq = max_freq;
+ 
++	if (of_property_read_bool(np, "ti,needs-special-hs-handling"))
++		pdata->slots[0].features |= HSMMC_HAS_HSPE_SUPPORT;
++
+ 	return pdata;
+ }
+ #else
 -- 
-1.7.9.5
+1.7.0.4
 
