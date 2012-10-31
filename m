@@ -1,90 +1,211 @@
-From: yongd <yongd@marvell.com>
-Subject: Re: [PATCH V2 0/3] mmc: remove MMC_CAP_NEEDS_POLL setting in sdhci_add_host
-Date: Wed, 31 Oct 2012 18:14:50 +0800
-Message-ID: <5090FA1A.2070605@marvell.com>
-References: <1351589403-26398-1-git-send-email-yongd@marvell.com> <20121030231124.GA2902@lizard>
+From: Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>
+Subject: Re: [RFC PATCH v3 16/16] ARM: dts: add AM33XX SPI support
+Date: Wed, 31 Oct 2012 11:16:50 +0100
+Message-ID: <5090FA92.1080400@ti.com>
+References: <1350566815-409-1-git-send-email-mporter@ti.com>
+	<1350566815-409-17-git-send-email-mporter@ti.com>
+	<518397C60809E147AF5323E0420B992E3E9D597B@DBDE01.ent.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:52038 "EHLO
-	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932975Ab2JaKPh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Oct 2012 06:15:37 -0400
-In-Reply-To: <20121030231124.GA2902@lizard>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+In-Reply-To: <518397C60809E147AF5323E0420B992E3E9D597B-Er742YJ7I/eIQmiDNMet8wC/G2K4zDHf@public.gmane.org>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: "Philip, Avinash" <avinashphilip-l0cyMroinI0@public.gmane.org>
+Cc: Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, "Nori,
+	Sekhar" <nsekhar-l0cyMroinI0@public.gmane.org>, Mark, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "Porter, Matt" <mporter-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Daniel Drake <dsd@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Wilson Callan <wilson.callan@savantsystems.com>, Ben Dooks <ben-linux@fluff.org>, Zhangfei Gao <zgao6@marvell.com>, Kevin Liu <kliu5@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 2012=E5=B9=B410=E6=9C=8831=E6=97=A5 07:11, Anton Vorontsov wrote:
-> On Tue, Oct 30, 2012 at 05:30:00PM +0800, yongd wrote:
->> Sorry for my so late. And eventually these updated patches are here =
-for your
->> review. Thanks in advance.
->> For patch 1, add SDHCI_QUIRK_BROKEN_CARD_DETECTION setting for ESDHC=
-_CD_GPIO type,
->> or the host controller detection interrupts will be redundantly enab=
-led. And its
->> comment is correspondingly updated.
->> For patch 2, broaden SDHCI_QUIRK_BROKEN_CARD_DETECTION setting for a=
-ll detection
->> types except S3C_SDHCI_CD_INTERNAL. Then also update the comment.
->> For patch 3, no update.
-> They all look OK, but note that I did not check drivers' logic, so I =
-hope
-> you carefully reviewed all the drivers yourself. :)
->
-> Unfortunately, you decided to go the dangerous way, instead of taking=
- my
-> 100%-safe approach (i.e.
-> http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg16555.html )=
-,
-> which, to me, still makes more sense (of course :).
->
-> Anyways, I'm not opposed either, so hopefully it works:
->
-> 	Reviewed-by: Anton Vorontsov <cbouatmailru@gmail.com>
->
-> Thanks!
-> Anton.
+Hi Avinash,
 
-Anton,
-Thanks for your kindly review:-)
+On 10/30/2012 10:41 AM, Philip, Avinash wrote:
+> On Mon, Oct 29, 2012 at 14:40:02, Philip, Avinash wrote:
+>> On Thu, Oct 18, 2012 at 18:56:55, Porter, Matt wrote:
+>>> Adds AM33XX SPI support for am335x-bone and am335x-evm.
+> 
+> Matt,
+> 
+> Can you build SPI DT patch with DMA support on top of SPI DT patch
+> I submitted [1]. With the patch [1] SPI can work on PIO mode.
+> So we can have basic SPI support available in 3.8.
+> 
+> Benoit,
+> Can you accept the SPI DT patch [1]
 
-Just as I replied to u in the past (maybe got missed due to my previous=
-=20
-improper mail setting.
-Thanks for Shawn Guo again:-)), I don't think your approach is proper.=20
-Pls forgive me, ha ha...
+Yes, I've just applied it in for_3.8/dts branch
 
-Something like SDHCI_QUIRK_NEEDS_POLL means all the other detection=20
-types are unavailable
-except polling, and then if the card is removable, polling will be=20
-enabled. Based on such meaning,
-host driver will need set this flag if the host and card are of the=20
-case. That is exactly of the detection
-type like  ESDHC_CD_NONE or S3C_SDHCI_CD_NONE, etc. So, why not directl=
-y=20
-set the existing
-MMC_CAP_NEEDS_POLL in host driver itself (just like Au1xmmc.c, etc)? I=20
-think it is better than achieving
-this indirectly through one more flag and some more logic code. Yes, on=
-e=20
-more line for each host driver,
-but it is very clear and save one unnecessary flag, isn't it?
+> In case if you want I will resubmit a patch with subject line modified.
 
-BTW, currently not all SDHCI_QUIRK_BROKEN_CARD_DETECTION flags in other=
-=20
-host drivers are set to
-notify we shall use polling since this flag has its own pure usage. So=20
-we can not simply convert them
-to the new flag u mentioned. Hope I've gotten your idea:-)
+No, that's fine.
 
-So I think my patches are the proper way:-) BTW, I've carefully review=20
-those patches. Thanks for your
-reminding.
+Thanks,
+Benoit
 
-Shawn,
-Could u pls help review those patches again? Thanks in advance.
+> 
+> Current subject line
+> arm/dts: AM33XX: Add SPI device tree data
+> 
+> 1. https://patchwork.kernel.org/patch/1470661/
+> 
+> Thanks
+> Avinash
+> 
+>>>
+>>> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+>>> ---
+>>>  arch/arm/boot/dts/am335x-bone.dts |   17 +++++++++++++++
+>>>  arch/arm/boot/dts/am335x-evm.dts  |    9 ++++++++
+>>>  arch/arm/boot/dts/am33xx.dtsi     |   43 +++++++++++++++++++++++++++++++++++++
+>>>  3 files changed, 69 insertions(+)
+>>>
+>>> diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
+>>> index 5510979..23edfd8 100644
+>>> --- a/arch/arm/boot/dts/am335x-bone.dts
+>>> +++ b/arch/arm/boot/dts/am335x-bone.dts
+>>> @@ -18,6 +18,17 @@
+>>>  		reg = <0x80000000 0x10000000>; /* 256 MB */
+>>>  	};
+>>>  
+>>> +	am3358_pinmux: pinmux@44e10800 {
+>>> +		spi1_pins: pinmux_spi1_pins {
+>>> +			pinctrl-single,pins = <
+>>> +				0x190 0x13	/* mcasp0_aclkx.spi1_sclk, OUTPUT_PULLUP | MODE3 */
+>>> +				0x194 0x33	/* mcasp0_fsx.spi1_d0, INPUT_PULLUP | MODE3 */
+>>> +				0x198 0x13	/* mcasp0_axr0.spi1_d1, OUTPUT_PULLUP | MODE3 */
+>>> +				0x19c 0x13	/* mcasp0_ahclkr.spi1_cs0, OUTPUT_PULLUP | MODE3 */
+>>> +			>;
+>>> +		};
+>>> +	};
+>>> +
+>>
+>> Change to am33xx_pinmux.
+>>
+>>>  	ocp {
+>>>  		uart1: serial@44e09000 {
+>>>  			status = "okay";
+>>> @@ -84,3 +95,9 @@
+>>>  &mmc1 {
+>>>  	vmmc-supply = <&ldo3_reg>;
+>>>  };
+>>> +
+>>> +&spi1 {
+>>> +	status = "okay";
+>>> +	pinctrl-names = "default";
+>>> +	pinctrl-0 = <&spi1_pins>;
+>>> +};
+>>> diff --git a/arch/arm/boot/dts/am335x-evm.dts b/arch/arm/boot/dts/am335x-evm.dts
+>>> index d63fce8..8d5f660 100644
+>>> --- a/arch/arm/boot/dts/am335x-evm.dts
+>>> +++ b/arch/arm/boot/dts/am335x-evm.dts
+>>> @@ -124,3 +124,12 @@
+>>>  &mmc1 {
+>>>  	vmmc-supply = <&vmmc_reg>;
+>>>  };
+>>> +
+>>> +&spi0 {
+>>> +	status = "okay";
+>>> +	spi-flash@0 {
+>>> +		compatible = "spansion,s25fl064k", "m25p80";
+>>> +		spi-max-frequency = <24000000>;
+>>> +		reg = <0>;
+>>> +	};
+>>> +};
+>>
+>> In AM335x-evm, SPI flash available in profile #2 (am335x evm specific profiles).
+>> So can you drop this changes as if I understood correctly, am335x-evm.dts will be
+>> populated for devices present only on profile #0.
+>>
+>>> diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+>>> index 26a6af7..063ecea 100644
+>>> --- a/arch/arm/boot/dts/am33xx.dtsi
+>>> +++ b/arch/arm/boot/dts/am33xx.dtsi
+>>> @@ -40,6 +40,15 @@
+>>>  		};
+>>>  	};
+>>>  
+>>> +	am3358_pinmux: pinmux@44e10800 {
+>>> +		compatible = "pinctrl-single";
+>>> +		reg = <0x44e10800 0x0238>;
+>>> +		#address-cells = <1>;
+>>> +		#size-cells = <0>;
+>>> +		pinctrl-single,register-width = <32>;
+>>> +		pinctrl-single,function-mask = <0x7f>;
+>>> +	};
+>>> +
+>>
+>> Pin ctrl support already submitted
+>> http://git.kernel.org/?p=linux/kernel/git/bcousson/linux-omap-dt.git;a=commitdiff;h=3e0603e905d9ba662e8c1885ecb1d28bc454e448
+>>
+>> Thanks
+>> Avinash
+>>
+>>>  	/*
+>>>  	 * XXX: Use a flat representation of the AM33XX interconnect.
+>>>  	 * The real AM33XX interconnect network is quite complex.Since
+>>> @@ -261,6 +270,40 @@
+>>>  			status = "disabled";
+>>>  		};
+>>>  
+>>> +		spi0: spi@48030000 {
+>>> +			compatible = "ti,omap4-mcspi";
+>>> +			ti,hwmods = "spi0";
+>>> +			#address-cells = <1>;
+>>> +			#size-cells = <0>;
+>>> +			reg = <0x48030000 0x400>;
+>>> +			interrupt-parent = <&intc>;
+>>> +			interrupt = <65>;
+>>> +			dmas = <&edma 16
+>>> +				&edma 17
+>>> +				&edma 18
+>>> +				&edma 19>;
+>>> +			dma-names = "tx0", "rx0", "tx1", "rx1";
+>>> +			ti,spi-num-cs = <2>;
+>>> +			status = "disabled";
+>>> +		};
+>>> +
+>>> +		spi1: spi@481a0000 {
+>>> +			compatible = "ti,omap4-mcspi";
+>>> +			ti,hwmods = "spi1";
+>>> +			#address-cells = <1>;
+>>> +			#size-cells = <0>;
+>>> +			reg = <0x481a0000 0x400>;
+>>> +			interrupt-parent = <&intc>;
+>>> +			interrupt = <125>;
+>>> +			dmas = <&edma 42
+>>> +				&edma 43
+>>> +				&edma 44
+>>> +				&edma 45>;
+>>> +			dma-names = "tx0", "rx0", "tx1", "rx1";
+>>> +			ti,spi-num-cs = <2>;
+>>> +			status = "disabled";
+>>> +		};
+>>> +
+>>>  		wdt2: wdt@44e35000 {
+>>>  			compatible = "ti,omap3-wdt";
+>>>  			ti,hwmods = "wd_timer2";
+>>> -- 
+>>> 1.7.9.5
+>>>
+>>>
+>>> _______________________________________________
+>>> linux-arm-kernel mailing list
+>>> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+>>> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+>>>
+>>
+>>
+> 
+
+
+------------------------------------------------------------------------------
+Everyone hates slow websites. So do we.
+Make your web apps faster with AppDynamics
+Download AppDynamics Lite for free today:
+http://p.sf.net/sfu/appdyn_sfd2d_oct
