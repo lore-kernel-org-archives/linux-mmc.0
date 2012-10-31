@@ -1,159 +1,89 @@
-From: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
-Subject: [RESEND PATCH V2] mmc: omap_hsmmc: Enable HSPE bit for high speed cards
-Date: Wed, 31 Oct 2012 13:58:35 +0530
-Message-ID: <1351672116-17309-1-git-send-email-gururaja.hebbar@ti.com>
+From: yongd <yongd@marvell.com>
+Subject: Re: [PATCH V2 0/3] mmc: remove MMC_CAP_NEEDS_POLL setting in sdhci_add_host
+Date: Wed, 31 Oct 2012 18:07:19 +0800
+Message-ID: <5090F857.8000008@marvell.com>
+References: <1351589403-26398-1-git-send-email-yongd@marvell.com> <20121030231124.GA2902@lizard>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:44735 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S935029Ab2JaI2x (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Oct 2012 04:28:53 -0400
+Received: from na3sys009aog102.obsmtp.com ([74.125.149.69]:57306 "EHLO
+	na3sys009aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750963Ab2JaKHw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Oct 2012 06:07:52 -0400
+In-Reply-To: <20121030231124.GA2902@lizard>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: balbi@ti.com, svenkatr@ti.com, cjb@laptop.org, balajitk@ti.com, grant.likely@secretlab.ca
-Cc: nsekhar@ti.com, sudhakar.raj@ti.com, gururaja.hebbar@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, rob.herring@calxeda.com
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Daniel Drake <dsd@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Wilson Callan <wilson.callan@savantsystems.com>, Ben Dooks <ben-linux@fluff.org>, Zhangfei Gao <zgao6@marvell.com>, Kevin Liu <kliu5@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-HSMMC IP on AM33xx need a special setting to handle High-speed cards.
-Other platforms like TI81xx, OMAP4 may need this as-well. This depends
-on the HSMMC IP timing closure done for the high speed cards.
+On 2012=E5=B9=B410=E6=9C=8831=E6=97=A5 07:11, Anton Vorontsov wrote:
+> On Tue, Oct 30, 2012 at 05:30:00PM +0800, yongd wrote:
+>> Sorry for my so late. And eventually these updated patches are here =
+for your
+>> review. Thanks in advance.
+>> For patch 1, add SDHCI_QUIRK_BROKEN_CARD_DETECTION setting for ESDHC=
+_CD_GPIO type,
+>> or the host controller detection interrupts will be redundantly enab=
+led. And its
+>> comment is correspondingly updated.
+>> For patch 2, broaden SDHCI_QUIRK_BROKEN_CARD_DETECTION setting for a=
+ll detection
+>> types except S3C_SDHCI_CD_INTERNAL. Then also update the comment.
+>> For patch 3, no update.
+> They all look OK, but note that I did not check drivers' logic, so I =
+hope
+> you carefully reviewed all the drivers yourself. :)
+>
+> Unfortunately, you decided to go the dangerous way, instead of taking=
+ my
+> 100%-safe approach (i.e.
+> http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg16555.html )=
+,
+> which, to me, still makes more sense (of course :).
+>
+> Anyways, I'm not opposed either, so hopefully it works:
+>
+> 	Reviewed-by: Anton Vorontsov <cbouatmailru@gmail.com>
+>
+> Thanks!
+> Anton.
+Anton,
+Thanks for your kindly review:-)
 
->From AM335x TRM (SPRUH73F - 18.3.12 Output Signals Generation)
+Just as I replied to u in the past (maybe got missed due to my previous=
+=20
+improper mail setting.
+Thanks for Shawn Guo again:-)), I don't think your approach is proper.=20
+Pls forgive me, ha ha...
 
-The MMC/SD/SDIO output signals can be driven on either falling edge or
-rising edge depending on the SD_HCTL[2] HSPE bit. This feature allows
-to reach better timing performance, and thus to increase data transfer
-frequency.
+Something like SDHCI_QUIRK_NEEDS_POLL means all the other detection=20
+types are unavailable
+except polling, and then if the card is removable, polling will be=20
+enabled. Based on such meaning,
+host driver will need set this flag if the host and card are of the=20
+case. That is exactly of the detection
+type like  ESDHC_CD_NONE or S3C_SDHCI_CD_NONE, etc. So, why not directl=
+y=20
+set the existing
+MMC_CAP_NEEDS_POLL in host driver itself (just like Au1xmmc.c, etc)? I=20
+think it is better than achieving
+this indirectly through one more flag and some more logic code. Yes, on=
+e=20
+more line for each host driver,
+but it is very clear and save one unnecessary flag, isn't it?
 
-There are few pre-requisites for enabling the HSPE bit
-- Controller should support High-Speed-Enable Bit and
-- Controller should not be using DDR Mode and
-- Controller should advertise that it supports High Speed in
-  capabilities register and
-- MMC/SD clock coming out of controller > 25MHz
+BTW, currently not all SDHCI_QUIRK_BROKEN_CARD_DETECTION flags in other=
+=20
+host drivers are set to
+notify we shall use polling since this flag has its own pure usage. So=20
+we can not simply convert them
+to the new flag u mentioned. Hope I've gotten your idea:-)
 
-Note:
-The implementation reuses the output of calc_divisor() so as to reduce
-code addition.
+So I think my patches are the proper way:-) BTW, I've carefully review=20
+those patches. Thanks for your
+reminding.
 
-Signed-off-by: Hebbar, Gururaja <gururaja.hebbar@ti.com>
----
-Rebased on mmc-next (v3.7.0-rc1)
-Only Build tested since EDMA support for AM335x is not yet added
-
-Changes in V2
-	- Added note in commit message about code re-use
-	- replaced ((a & BIT(n) == BIT(n))) with (a & BIT(n)) since
-	  effectively both are same.
-
-:100644 100644 be76a23... ed271fc... M	Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-:100644 100644 8b4e4f2... 346af5b... M	arch/arm/plat-omap/include/plat/mmc.h
-:100644 100644 54bfd0c... 5ea4c9d... M	drivers/mmc/host/omap_hsmmc.c
- .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    1 +
- arch/arm/plat-omap/include/plat/mmc.h              |    1 +
- drivers/mmc/host/omap_hsmmc.c                      |   30 +++++++++++++++++++-
- 3 files changed, 31 insertions(+), 1 deletions(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-index be76a23..ed271fc 100644
---- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-@@ -19,6 +19,7 @@ ti,dual-volt: boolean, supports dual voltage cards
- "supply-name" examples are "vmmc", "vmmc_aux" etc
- ti,non-removable: non-removable slot (like eMMC)
- ti,needs-special-reset: Requires a special softreset sequence
-+ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
- 
- Example:
- 	mmc1: mmc@0x4809c000 {
-diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
-index 8b4e4f2..346af5b 100644
---- a/arch/arm/plat-omap/include/plat/mmc.h
-+++ b/arch/arm/plat-omap/include/plat/mmc.h
-@@ -126,6 +126,7 @@ struct omap_mmc_platform_data {
- 		/* we can put the features above into this variable */
- #define HSMMC_HAS_PBIAS		(1 << 0)
- #define HSMMC_HAS_UPDATED_RESET	(1 << 1)
-+#define HSMMC_HAS_HSPE_SUPPORT	(1 << 2)
- 		unsigned features;
- 
- 		int switch_pin;			/* gpio (card detect) */
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 54bfd0c..5ea4c9d 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -62,6 +62,7 @@
- 
- #define VS18			(1 << 26)
- #define VS30			(1 << 25)
-+#define HSS			(1 << 21)
- #define SDVS18			(0x5 << 9)
- #define SDVS30			(0x6 << 9)
- #define SDVS33			(0x7 << 9)
-@@ -89,6 +90,7 @@
- #define MSBS			(1 << 5)
- #define BCE			(1 << 1)
- #define FOUR_BIT		(1 << 1)
-+#define HSPE			(1 << 2)
- #define DDR			(1 << 19)
- #define DW8			(1 << 5)
- #define CC			0x1
-@@ -489,6 +491,7 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
- 	struct mmc_ios *ios = &host->mmc->ios;
- 	unsigned long regval;
- 	unsigned long timeout;
-+	unsigned long clkdiv;
- 
- 	dev_vdbg(mmc_dev(host->mmc), "Set clock to %uHz\n", ios->clock);
- 
-@@ -496,7 +499,8 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
- 
- 	regval = OMAP_HSMMC_READ(host->base, SYSCTL);
- 	regval = regval & ~(CLKD_MASK | DTO_MASK);
--	regval = regval | (calc_divisor(host, ios) << 6) | (DTO << 16);
-+	clkdiv = calc_divisor(host, ios);
-+	regval = regval | (clkdiv << 6) | (DTO << 16);
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL, regval);
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
- 		OMAP_HSMMC_READ(host->base, SYSCTL) | ICE);
-@@ -507,6 +511,27 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
- 		&& time_before(jiffies, timeout))
- 		cpu_relax();
- 
-+	/*
-+	 * Enable High-Speed Support
-+	 * Pre-Requisites
-+	 *	- Controller should support High-Speed-Enable Bit
-+	 *	- Controller should not be using DDR Mode
-+	 *	- Controller should advertise that it supports High Speed
-+	 *	  in capabilities register
-+	 *	- MMC/SD clock coming out of controller > 25MHz
-+	 */
-+	if ((mmc_slot(host).features & HSMMC_HAS_HSPE_SUPPORT) &&
-+	    (ios->timing != MMC_TIMING_UHS_DDR50) &&
-+	    (OMAP_HSMMC_READ(host->base, CAPA) & HSS)) {
-+		regval = OMAP_HSMMC_READ(host->base, HCTL);
-+		if (clkdiv && (clk_get_rate(host->fclk)/clkdiv) > 25000000)
-+			regval |= HSPE;
-+		else
-+			regval &= ~HSPE;
-+
-+		OMAP_HSMMC_WRITE(host->base, HCTL, regval);
-+	}
-+
- 	omap_hsmmc_start_clock(host);
- }
- 
-@@ -1700,6 +1725,9 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
- 	if (of_find_property(np, "ti,needs-special-reset", NULL))
- 		pdata->slots[0].features |= HSMMC_HAS_UPDATED_RESET;
- 
-+	if (of_find_property(np, "ti,needs-special-hs-handling", NULL))
-+		pdata->slots[0].features |= HSMMC_HAS_HSPE_SUPPORT;
-+
- 	return pdata;
- }
- #else
--- 
-1.7.0.4
-
+Shawn,
+Could u pls help review those patches again? Thanks in advance:-)
