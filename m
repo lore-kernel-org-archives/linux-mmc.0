@@ -1,88 +1,85 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: [PATCH] mmc: mxs-mmc: Remove platform data
-Date: Wed, 31 Oct 2012 01:35:47 -0200
-Message-ID: <1351654547-615-1-git-send-email-festevam@gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 1/4 v3] MMC/core: Add f_min to mmc_power_on()
+Date: Wed, 31 Oct 2012 13:21:19 +0900
+Message-ID: <5090A73F.2020103@samsung.com>
+References: <1351584769-16662-1-git-send-email-r66093@freescale.com>
+ <CAPDyKFqM0cUkDDadm8MBK=+wHHYOSH3CVEHyiY1ybLkmPqSX7w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yh0-f46.google.com ([209.85.213.46]:60617 "EHLO
-	mail-yh0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758722Ab2JaDgK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Oct 2012 23:36:10 -0400
-Received: by mail-yh0-f46.google.com with SMTP id m54so201997yhm.19
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Oct 2012 20:36:10 -0700 (PDT)
+Received: from mailout1.samsung.com ([203.254.224.24]:32814 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750777Ab2JaEV0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Oct 2012 00:21:26 -0400
+Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MCQ00KUYPFH2BO0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 31 Oct 2012 13:21:25 +0900 (KST)
+Received: from [10.90.51.55] by mmp1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0MCQ00GCWPFOSJC0@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 31 Oct 2012 13:21:24 +0900 (KST)
+In-reply-to: <CAPDyKFqM0cUkDDadm8MBK=+wHHYOSH3CVEHyiY1ybLkmPqSX7w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: shawn.guo@linaro.org, marex@denx.de, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: r66093@freescale.com, linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
 
-From: Fabio Estevam <fabio.estevam@freescale.com>
-
-All MXS users have been converted to device tree and the board files have been
-removed.
-
-No need to keep platform data in the driver.
-
-Also move bus_width declaration in the beggining of mxs_mmc_probe() to avoid:
-'warning: ISO C90 forbids mixed declarations and code'.
-  
-Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
----
- drivers/mmc/host/mxs-mmc.c |   30 ++++++++++--------------------
- 1 file changed, 10 insertions(+), 20 deletions(-)
-
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 80d1e6d..37fd9fc 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -593,13 +593,13 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 	struct mxs_mmc_host *host;
- 	struct mmc_host *mmc;
- 	struct resource *iores, *dmares;
--	struct mxs_mmc_platform_data *pdata;
- 	struct pinctrl *pinctrl;
- 	int ret = 0, irq_err, irq_dma;
- 	dma_cap_mask_t mask;
- 	struct regulator *reg_vmmc;
- 	enum of_gpio_flags flags;
- 	struct mxs_ssp *ssp;
-+	u32 bus_width = 0;
- 
- 	iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	dmares = platform_get_resource(pdev, IORESOURCE_DMA, 0);
-@@ -682,25 +682,15 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 	mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
- 		    MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL;
- 
--	pdata =	mmc_dev(host->mmc)->platform_data;
--	if (!pdata) {
--		u32 bus_width = 0;
--		of_property_read_u32(np, "bus-width", &bus_width);
--		if (bus_width == 4)
--			mmc->caps |= MMC_CAP_4_BIT_DATA;
--		else if (bus_width == 8)
--			mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
--		host->wp_gpio = of_get_named_gpio_flags(np, "wp-gpios", 0,
--							&flags);
--		if (flags & OF_GPIO_ACTIVE_LOW)
--			host->wp_inverted = 1;
--	} else {
--		if (pdata->flags & SLOTF_8_BIT_CAPABLE)
--			mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
--		if (pdata->flags & SLOTF_4_BIT_CAPABLE)
--			mmc->caps |= MMC_CAP_4_BIT_DATA;
--		host->wp_gpio = pdata->wp_gpio;
--	}
-+	of_property_read_u32(np, "bus-width", &bus_width);
-+	if (bus_width == 4)
-+		mmc->caps |= MMC_CAP_4_BIT_DATA;
-+	else if (bus_width == 8)
-+		mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
-+	host->wp_gpio = of_get_named_gpio_flags(np, "wp-gpios", 0, &flags);
-+
-+	if (flags & OF_GPIO_ACTIVE_LOW)
-+		host->wp_inverted = 1;
- 
- 	mmc->f_min = 400000;
- 	mmc->f_max = 288000000;
--- 
-1.7.9.5
+On 10/31/2012 08:08 AM, Ulf Hansson wrote:
+> On 30 October 2012 09:12,  <r66093@freescale.com> wrote:
+>> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+>>
+>> When f_init is zero, the SDHC can't work correctly. So f_min will replace
+>> f_init, when f_init is zero.
+>>
+>> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+>> CC: Anton Vorontsov <cbouatmailru@gmail.com>
+>> CC: Chris Ball <cjb@laptop.org>
+>> ---
+>> changes for v2:
+>>         - add the CC
+>> changes for v3:
+>>         - enalbe the controller clock in platform, instead of core
+>>
+>>  drivers/mmc/core/core.c |    5 ++++-
+>>  1 file changed, 4 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 06c42cf..9c162cd 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1319,7 +1319,10 @@ static void mmc_power_up(struct mmc_host *host)
+>>          */
+>>         mmc_delay(10);
+>>
+>> -       host->ios.clock = host->f_init;
+>> +       if (host->f_init)
+>> +               host->ios.clock = host->f_init;
+>> +       else
+>> +               host->ios.clock = host->f_min;
+> 
+> This should not be needed. host->f_init should never become zero, I believe.
+I agree for Ulf's comment.
+> 
+>>
+>>         host->ios.power_mode = MMC_POWER_ON;
+>>         mmc_set_ios(host);
+>> --
+>> 1.7.9.5
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> Kind regards
+> Ulf Hansson
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
