@@ -1,167 +1,224 @@
-From: Gururaja Hebbar <gururaja.hebbar@ti.com>
-Subject: Re: [RESEND PATCH V2] mmc: omap_hsmmc: Enable HSPE bit for high speed
- cards
-Date: Wed, 31 Oct 2012 16:18:02 +0530
-Message-ID: <509101E2.5050606@ti.com>
-References: <1351672116-17309-1-git-send-email-gururaja.hebbar@ti.com> <20121031100422.GA10094@arwen.pp.htv.fi>
+From: "Philip, Avinash" <avinashphilip@ti.com>
+Subject: RE: [RFC PATCH v3 16/16] ARM: dts: add AM33XX SPI support
+Date: Wed, 31 Oct 2012 11:03:51 +0000
+Message-ID: <518397C60809E147AF5323E0420B992E3E9D6275@DBDE01.ent.ti.com>
+References: <1350566815-409-1-git-send-email-mporter@ti.com>
+ <1350566815-409-17-git-send-email-mporter@ti.com>
+ <518397C60809E147AF5323E0420B992E3E9D597B@DBDE01.ent.ti.com>
+ <5090FA92.1080400@ti.com> <5090FEE1.5070206@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20121031100422.GA10094@arwen.pp.htv.fi>
-Sender: linux-omap-owner@vger.kernel.org
-To: balbi@ti.com
-Cc: svenkatr@ti.com, cjb@laptop.org, balajitk@ti.com, grant.likely@secretlab.ca, nsekhar@ti.com, sudhakar.raj@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, rob.herring@calxeda.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:48821 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752711Ab2JaLFn convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Oct 2012 07:05:43 -0400
+In-Reply-To: <5090FEE1.5070206@ti.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Cousson, Benoit" <b-cousson@ti.com>
+Cc: "Porter, Matt" <mporter@ti.com>, Tony Lindgren <tony@atomide.com>, "Nori, Sekhar" <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infra>
 
-On 10/31/2012 3:34 PM, Felipe Balbi wrote:
-> Hi,
->
-> On Wed, Oct 31, 2012 at 01:58:35PM +0530, Hebbar, Gururaja wrote:
->> HSMMC IP on AM33xx need a special setting to handle High-speed cards.
->> Other platforms like TI81xx, OMAP4 may need this as-well. This depends
->> on the HSMMC IP timing closure done for the high speed cards.
->>
->>  From AM335x TRM (SPRUH73F - 18.3.12 Output Signals Generation)
->>
->> The MMC/SD/SDIO output signals can be driven on either falling edge or
->> rising edge depending on the SD_HCTL[2] HSPE bit. This feature allows
->> to reach better timing performance, and thus to increase data transfer
->> frequency.
->>
->> There are few pre-requisites for enabling the HSPE bit
->> - Controller should support High-Speed-Enable Bit and
->> - Controller should not be using DDR Mode and
->> - Controller should advertise that it supports High Speed in
->>    capabilities register and
->> - MMC/SD clock coming out of controller > 25MHz
->>
->> Note:
->> The implementation reuses the output of calc_divisor() so as to reduce
->> code addition.
->>
->> Signed-off-by: Hebbar, Gururaja <gururaja.hebbar@ti.com>
->> ---
->> Rebased on mmc-next (v3.7.0-rc1)
->> Only Build tested since EDMA support for AM335x is not yet added
->>
->> Changes in V2
->> 	- Added note in commit message about code re-use
->> 	- replaced ((a & BIT(n) == BIT(n))) with (a & BIT(n)) since
->> 	  effectively both are same.
->>
->> :100644 100644 be76a23... ed271fc... M	Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->> :100644 100644 8b4e4f2... 346af5b... M	arch/arm/plat-omap/include/plat/mmc.h
->> :100644 100644 54bfd0c... 5ea4c9d... M	drivers/mmc/host/omap_hsmmc.c
->>   .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    1 +
->>   arch/arm/plat-omap/include/plat/mmc.h              |    1 +
->>   drivers/mmc/host/omap_hsmmc.c                      |   30 +++++++++++++++++++-
->>   3 files changed, 31 insertions(+), 1 deletions(-)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->> index be76a23..ed271fc 100644
->> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->> @@ -19,6 +19,7 @@ ti,dual-volt: boolean, supports dual voltage cards
->>   "supply-name" examples are "vmmc", "vmmc_aux" etc
->>   ti,non-removable: non-removable slot (like eMMC)
->>   ti,needs-special-reset: Requires a special softreset sequence
->> +ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
->>   
->>   Example:
->>   	mmc1: mmc@0x4809c000 {
->> diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
->> index 8b4e4f2..346af5b 100644
->> --- a/arch/arm/plat-omap/include/plat/mmc.h
->> +++ b/arch/arm/plat-omap/include/plat/mmc.h
->> @@ -126,6 +126,7 @@ struct omap_mmc_platform_data {
->>   		/* we can put the features above into this variable */
->>   #define HSMMC_HAS_PBIAS		(1 << 0)
->>   #define HSMMC_HAS_UPDATED_RESET	(1 << 1)
->> +#define HSMMC_HAS_HSPE_SUPPORT	(1 << 2)
->>   		unsigned features;
->>   
->>   		int switch_pin;			/* gpio (card detect) */
->> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
->> index 54bfd0c..5ea4c9d 100644
->> --- a/drivers/mmc/host/omap_hsmmc.c
->> +++ b/drivers/mmc/host/omap_hsmmc.c
->> @@ -62,6 +62,7 @@
->>   
->>   #define VS18			(1 << 26)
->>   #define VS30			(1 << 25)
->> +#define HSS			(1 << 21)
->>   #define SDVS18			(0x5 << 9)
->>   #define SDVS30			(0x6 << 9)
->>   #define SDVS33			(0x7 << 9)
->> @@ -89,6 +90,7 @@
->>   #define MSBS			(1 << 5)
->>   #define BCE			(1 << 1)
->>   #define FOUR_BIT		(1 << 1)
->> +#define HSPE			(1 << 2)
->>   #define DDR			(1 << 19)
->>   #define DW8			(1 << 5)
->>   #define CC			0x1
->> @@ -489,6 +491,7 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
->>   	struct mmc_ios *ios = &host->mmc->ios;
->>   	unsigned long regval;
->>   	unsigned long timeout;
->> +	unsigned long clkdiv;
->>   
->>   	dev_vdbg(mmc_dev(host->mmc), "Set clock to %uHz\n", ios->clock);
->>   
->> @@ -496,7 +499,8 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
->>   
->>   	regval = OMAP_HSMMC_READ(host->base, SYSCTL);
->>   	regval = regval & ~(CLKD_MASK | DTO_MASK);
->> -	regval = regval | (calc_divisor(host, ios) << 6) | (DTO << 16);
->> +	clkdiv = calc_divisor(host, ios);
->> +	regval = regval | (clkdiv << 6) | (DTO << 16);
->>   	OMAP_HSMMC_WRITE(host->base, SYSCTL, regval);
->>   	OMAP_HSMMC_WRITE(host->base, SYSCTL,
->>   		OMAP_HSMMC_READ(host->base, SYSCTL) | ICE);
->> @@ -507,6 +511,27 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
->>   		&& time_before(jiffies, timeout))
->>   		cpu_relax();
->>   
->> +	/*
->> +	 * Enable High-Speed Support
->> +	 * Pre-Requisites
->> +	 *	- Controller should support High-Speed-Enable Bit
->> +	 *	- Controller should not be using DDR Mode
->> +	 *	- Controller should advertise that it supports High Speed
->> +	 *	  in capabilities register
->> +	 *	- MMC/SD clock coming out of controller > 25MHz
->> +	 */
->> +	if ((mmc_slot(host).features & HSMMC_HAS_HSPE_SUPPORT) &&
->> +	    (ios->timing != MMC_TIMING_UHS_DDR50) &&
->> +	    (OMAP_HSMMC_READ(host->base, CAPA) & HSS)) {
->> +		regval = OMAP_HSMMC_READ(host->base, HCTL);
->> +		if (clkdiv && (clk_get_rate(host->fclk)/clkdiv) > 25000000)
-> that clk rate could be a symbolic define.
+On Wed, Oct 31, 2012 at 16:05:13, Cousson, Benoit wrote:
+> 
+> On 10/31/2012 11:16 AM, Benoit Cousson wrote:
+> > Hi Avinash,
+> > 
+> > On 10/30/2012 10:41 AM, Philip, Avinash wrote:
+> >> On Mon, Oct 29, 2012 at 14:40:02, Philip, Avinash wrote:
+> >>> On Thu, Oct 18, 2012 at 18:56:55, Porter, Matt wrote:
+> >>>> Adds AM33XX SPI support for am335x-bone and am335x-evm.
+> >>
+> >> Matt,
+> >>
+> >> Can you build SPI DT patch with DMA support on top of SPI DT patch
+> >> I submitted [1]. With the patch [1] SPI can work on PIO mode.
+> >> So we can have basic SPI support available in 3.8.
+> >>
+> >> Benoit,
+> >> Can you accept the SPI DT patch [1]
+> > 
+> > Yes, I've just applied it in for_3.8/dts branch
+> 
+> Well, in fact I did not, it does not apply :-(
+> 
+> Can you rebase on top of the for_3.8/dts branch? I've just applied the
+> RTC patch on top that was OK.
 
-Ok will update as below and re-use
+Ok.
 
-#define OMAP_HSMMC_CLKOUT   25000000
->
->> +			regval |= HSPE;
->> +		else
->> +			regval &= ~HSPE;
->> +
->> +		OMAP_HSMMC_WRITE(host->base, HCTL, regval);
->> +	}
->> +
->>   	omap_hsmmc_start_clock(host);
->>   }
->>   
->> @@ -1700,6 +1725,9 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
->>   	if (of_find_property(np, "ti,needs-special-reset", NULL))
->>   		pdata->slots[0].features |= HSMMC_HAS_UPDATED_RESET;
->>   
->> +	if (of_find_property(np, "ti,needs-special-hs-handling", NULL))
->> +		pdata->slots[0].features |= HSMMC_HAS_HSPE_SUPPORT;
-> this could be of_property_read_bool().
-Ok will change.
+Thanks
+Avinash
 
->
+> 
+> Thanks,
+> Benoit
+> 
+> > 
+> >> In case if you want I will resubmit a patch with subject line modified.
+> > 
+> > No, that's fine.
+> > 
+> > Thanks,
+> > Benoit
+> > 
+> >>
+> >> Current subject line
+> >> arm/dts: AM33XX: Add SPI device tree data
+> >>
+> >> 1. https://patchwork.kernel.org/patch/1470661/
+> >>
+> >> Thanks
+> >> Avinash
+> >>
+> >>>>
+> >>>> Signed-off-by: Matt Porter <mporter@ti.com>
+> >>>> ---
+> >>>>  arch/arm/boot/dts/am335x-bone.dts |   17 +++++++++++++++
+> >>>>  arch/arm/boot/dts/am335x-evm.dts  |    9 ++++++++
+> >>>>  arch/arm/boot/dts/am33xx.dtsi     |   43 +++++++++++++++++++++++++++++++++++++
+> >>>>  3 files changed, 69 insertions(+)
+> >>>>
+> >>>> diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
+> >>>> index 5510979..23edfd8 100644
+> >>>> --- a/arch/arm/boot/dts/am335x-bone.dts
+> >>>> +++ b/arch/arm/boot/dts/am335x-bone.dts
+> >>>> @@ -18,6 +18,17 @@
+> >>>>  		reg = <0x80000000 0x10000000>; /* 256 MB */
+> >>>>  	};
+> >>>>  
+> >>>> +	am3358_pinmux: pinmux@44e10800 {
+> >>>> +		spi1_pins: pinmux_spi1_pins {
+> >>>> +			pinctrl-single,pins = <
+> >>>> +				0x190 0x13	/* mcasp0_aclkx.spi1_sclk, OUTPUT_PULLUP | MODE3 */
+> >>>> +				0x194 0x33	/* mcasp0_fsx.spi1_d0, INPUT_PULLUP | MODE3 */
+> >>>> +				0x198 0x13	/* mcasp0_axr0.spi1_d1, OUTPUT_PULLUP | MODE3 */
+> >>>> +				0x19c 0x13	/* mcasp0_ahclkr.spi1_cs0, OUTPUT_PULLUP | MODE3 */
+> >>>> +			>;
+> >>>> +		};
+> >>>> +	};
+> >>>> +
+> >>>
+> >>> Change to am33xx_pinmux.
+> >>>
+> >>>>  	ocp {
+> >>>>  		uart1: serial@44e09000 {
+> >>>>  			status = "okay";
+> >>>> @@ -84,3 +95,9 @@
+> >>>>  &mmc1 {
+> >>>>  	vmmc-supply = <&ldo3_reg>;
+> >>>>  };
+> >>>> +
+> >>>> +&spi1 {
+> >>>> +	status = "okay";
+> >>>> +	pinctrl-names = "default";
+> >>>> +	pinctrl-0 = <&spi1_pins>;
+> >>>> +};
+> >>>> diff --git a/arch/arm/boot/dts/am335x-evm.dts b/arch/arm/boot/dts/am335x-evm.dts
+> >>>> index d63fce8..8d5f660 100644
+> >>>> --- a/arch/arm/boot/dts/am335x-evm.dts
+> >>>> +++ b/arch/arm/boot/dts/am335x-evm.dts
+> >>>> @@ -124,3 +124,12 @@
+> >>>>  &mmc1 {
+> >>>>  	vmmc-supply = <&vmmc_reg>;
+> >>>>  };
+> >>>> +
+> >>>> +&spi0 {
+> >>>> +	status = "okay";
+> >>>> +	spi-flash@0 {
+> >>>> +		compatible = "spansion,s25fl064k", "m25p80";
+> >>>> +		spi-max-frequency = <24000000>;
+> >>>> +		reg = <0>;
+> >>>> +	};
+> >>>> +};
+> >>>
+> >>> In AM335x-evm, SPI flash available in profile #2 (am335x evm specific profiles).
+> >>> So can you drop this changes as if I understood correctly, am335x-evm.dts will be
+> >>> populated for devices present only on profile #0.
+> >>>
+> >>>> diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+> >>>> index 26a6af7..063ecea 100644
+> >>>> --- a/arch/arm/boot/dts/am33xx.dtsi
+> >>>> +++ b/arch/arm/boot/dts/am33xx.dtsi
+> >>>> @@ -40,6 +40,15 @@
+> >>>>  		};
+> >>>>  	};
+> >>>>  
+> >>>> +	am3358_pinmux: pinmux@44e10800 {
+> >>>> +		compatible = "pinctrl-single";
+> >>>> +		reg = <0x44e10800 0x0238>;
+> >>>> +		#address-cells = <1>;
+> >>>> +		#size-cells = <0>;
+> >>>> +		pinctrl-single,register-width = <32>;
+> >>>> +		pinctrl-single,function-mask = <0x7f>;
+> >>>> +	};
+> >>>> +
+> >>>
+> >>> Pin ctrl support already submitted
+> >>> http://git.kernel.org/?p=linux/kernel/git/bcousson/linux-omap-dt.git;a=commitdiff;h=3e0603e905d9ba662e8c1885ecb1d28bc454e448
+> >>>
+> >>> Thanks
+> >>> Avinash
+> >>>
+> >>>>  	/*
+> >>>>  	 * XXX: Use a flat representation of the AM33XX interconnect.
+> >>>>  	 * The real AM33XX interconnect network is quite complex.Since
+> >>>> @@ -261,6 +270,40 @@
+> >>>>  			status = "disabled";
+> >>>>  		};
+> >>>>  
+> >>>> +		spi0: spi@48030000 {
+> >>>> +			compatible = "ti,omap4-mcspi";
+> >>>> +			ti,hwmods = "spi0";
+> >>>> +			#address-cells = <1>;
+> >>>> +			#size-cells = <0>;
+> >>>> +			reg = <0x48030000 0x400>;
+> >>>> +			interrupt-parent = <&intc>;
+> >>>> +			interrupt = <65>;
+> >>>> +			dmas = <&edma 16
+> >>>> +				&edma 17
+> >>>> +				&edma 18
+> >>>> +				&edma 19>;
+> >>>> +			dma-names = "tx0", "rx0", "tx1", "rx1";
+> >>>> +			ti,spi-num-cs = <2>;
+> >>>> +			status = "disabled";
+> >>>> +		};
+> >>>> +
+> >>>> +		spi1: spi@481a0000 {
+> >>>> +			compatible = "ti,omap4-mcspi";
+> >>>> +			ti,hwmods = "spi1";
+> >>>> +			#address-cells = <1>;
+> >>>> +			#size-cells = <0>;
+> >>>> +			reg = <0x481a0000 0x400>;
+> >>>> +			interrupt-parent = <&intc>;
+> >>>> +			interrupt = <125>;
+> >>>> +			dmas = <&edma 42
+> >>>> +				&edma 43
+> >>>> +				&edma 44
+> >>>> +				&edma 45>;
+> >>>> +			dma-names = "tx0", "rx0", "tx1", "rx1";
+> >>>> +			ti,spi-num-cs = <2>;
+> >>>> +			status = "disabled";
+> >>>> +		};
+> >>>> +
+> >>>>  		wdt2: wdt@44e35000 {
+> >>>>  			compatible = "ti,omap3-wdt";
+> >>>>  			ti,hwmods = "wd_timer2";
+> >>>> -- 
+> >>>> 1.7.9.5
+> >>>>
+> >>>>
+> >>>> _______________________________________________
+> >>>> linux-arm-kernel mailing list
+> >>>> linux-arm-kernel@lists.infradead.org
+> >>>> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+> >>>>
+> >>>
+> >>>
+> >>
+> > 
+> 
+> 
 
