@@ -1,65 +1,98 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
-Date: Wed, 31 Oct 2012 05:52:18 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C204553@039-SN1MPN1-003.039d.mgd.msft.net>
-References: <1351584769-16662-1-git-send-email-r66093@freescale.com>
- <1351584769-16662-2-git-send-email-r66093@freescale.com>
- <CAGxe1ZEs=3Y9+mdvt1kp2oQ4DXAdUqC0crH2oZAi-j3DKCbAPA@mail.gmail.com>
- <110EED8CC96DFC488B7E717A2027A27C2042CA@039-SN1MPN1-003.039d.mgd.msft.net>
- <5090A927.2050708@samsung.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH] mmc: mxs-mmc: Remove platform data
+Date: Wed, 31 Oct 2012 14:43:09 +0800
+Message-ID: <20121031064307.GD8100@S2100-06.ap.freescale.net>
+References: <1351654547-615-1-git-send-email-festevam@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe006.messaging.microsoft.com ([213.199.154.144]:19451
-	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752867Ab2JaFwX convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 31 Oct 2012 01:52:23 -0400
-In-Reply-To: <5090A927.2050708@samsung.com>
-Content-Language: en-US
+Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:2156
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750899Ab2JaGRz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Oct 2012 02:17:55 -0400
+Content-Disposition: inline
+In-Reply-To: <1351654547-615-1-git-send-email-festevam@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Girish K S <girish.shivananjappa@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
+To: Fabio Estevam <festevam@gmail.com>
+Cc: cjb@laptop.org, marex@denx.de, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
 
-
-
-Best Regards
-Jerry Huang
-
-
-> -----Original Message-----
-> From: Jaehoon Chung [mailto:jh80.chung@samsung.com]
-> Sent: Wednesday, October 31, 2012 12:29 PM
-> To: Huang Changming-R66093
-> Cc: Girish K S; linux-mmc@vger.kernel.org; Anton Vorontsov; Chris Ball
-> Subject: Re: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
+On Wed, Oct 31, 2012 at 01:35:47AM -0200, Fabio Estevam wrote:
+> From: Fabio Estevam <fabio.estevam@freescale.com>
 > 
-> Hi,
+> All MXS users have been converted to device tree and the board files have been
+> removed.
 > 
-> >> *host)
-> >>>         if (!host->card || mmc_card_removed(host->card))
-> >>>                 return 1;
-> >>>
-> >>> -       ret = host->bus_ops->alive(host);
-> >>> +       if (host->ops->get_cd) {
-> >>> +               ret = host->ops->get_cd(host);
-> >>> +               if (ret >= 0)
-> >>> +                       ret = !ret;
-> >>> +       }
-> >>> +       if (ret < 0)
-> >>> +               ret = host->bus_ops->alive(host);
-> >> why should we check for negative here? can move this code into else
-> >> path of   if (host->ops->get_cd).
-> >>>         if (ret) {
-> >
-> > I did this comment:
-> > If the card is present, 1 will return, if the card is absent, 0 will
-> return.
-> > If the controller will not support this feature, -ENOSYS will return.
-> If checked whether card is absent or not with get_cd(), need to check the
-> host->bus_ops->alive?
+> No need to keep platform data in the driver.
+> 
+> Also move bus_width declaration in the beggining of mxs_mmc_probe() to avoid:
+> 'warning: ISO C90 forbids mixed declarations and code'.
+>   
+> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+> ---
+>  drivers/mmc/host/mxs-mmc.c |   30 ++++++++++--------------------
+>  1 file changed, 10 insertions(+), 20 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index 80d1e6d..37fd9fc 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -593,13 +593,13 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>  	struct mxs_mmc_host *host;
+>  	struct mmc_host *mmc;
+>  	struct resource *iores, *dmares;
+> -	struct mxs_mmc_platform_data *pdata;
 
-When get_cd is not supported, need to check it.
+Remove the struct definition altogether?
+
+Shawn
+
+>  	struct pinctrl *pinctrl;
+>  	int ret = 0, irq_err, irq_dma;
+>  	dma_cap_mask_t mask;
+>  	struct regulator *reg_vmmc;
+>  	enum of_gpio_flags flags;
+>  	struct mxs_ssp *ssp;
+> +	u32 bus_width = 0;
+>  
+>  	iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>  	dmares = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+> @@ -682,25 +682,15 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>  	mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
+>  		    MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL;
+>  
+> -	pdata =	mmc_dev(host->mmc)->platform_data;
+> -	if (!pdata) {
+> -		u32 bus_width = 0;
+> -		of_property_read_u32(np, "bus-width", &bus_width);
+> -		if (bus_width == 4)
+> -			mmc->caps |= MMC_CAP_4_BIT_DATA;
+> -		else if (bus_width == 8)
+> -			mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
+> -		host->wp_gpio = of_get_named_gpio_flags(np, "wp-gpios", 0,
+> -							&flags);
+> -		if (flags & OF_GPIO_ACTIVE_LOW)
+> -			host->wp_inverted = 1;
+> -	} else {
+> -		if (pdata->flags & SLOTF_8_BIT_CAPABLE)
+> -			mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
+> -		if (pdata->flags & SLOTF_4_BIT_CAPABLE)
+> -			mmc->caps |= MMC_CAP_4_BIT_DATA;
+> -		host->wp_gpio = pdata->wp_gpio;
+> -	}
+> +	of_property_read_u32(np, "bus-width", &bus_width);
+> +	if (bus_width == 4)
+> +		mmc->caps |= MMC_CAP_4_BIT_DATA;
+> +	else if (bus_width == 8)
+> +		mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
+> +	host->wp_gpio = of_get_named_gpio_flags(np, "wp-gpios", 0, &flags);
+> +
+> +	if (flags & OF_GPIO_ACTIVE_LOW)
+> +		host->wp_inverted = 1;
+>  
+>  	mmc->f_min = 400000;
+>  	mmc->f_max = 288000000;
+> -- 
+> 1.7.9.5
+> 
 
