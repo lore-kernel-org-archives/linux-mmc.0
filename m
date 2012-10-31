@@ -1,63 +1,56 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
-Date: Wed, 31 Oct 2012 13:29:27 +0900
-Message-ID: <5090A927.2050708@samsung.com>
-References: <1351584769-16662-1-git-send-email-r66093@freescale.com>
- <1351584769-16662-2-git-send-email-r66093@freescale.com>
- <CAGxe1ZEs=3Y9+mdvt1kp2oQ4DXAdUqC0crH2oZAi-j3DKCbAPA@mail.gmail.com>
- <110EED8CC96DFC488B7E717A2027A27C2042CA@039-SN1MPN1-003.039d.mgd.msft.net>
+Subject: Re: [PATCH] exynos: mmc: use correct variable for MODULE_DEVICE_TABLE
+Date: Wed, 31 Oct 2012 13:33:34 +0900
+Message-ID: <5090AA1E.1040005@samsung.com>
+References: <1351635712-17214-1-git-send-email-slyich@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:34091 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750796Ab2JaE3d (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Oct 2012 00:29:33 -0400
-Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MCQ00A8TPSKSD00@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 31 Oct 2012 13:29:31 +0900 (KST)
-Received: from [10.90.51.55] by mmp2.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0MCQ00H9SPT7FQ90@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 31 Oct 2012 13:29:31 +0900 (KST)
-In-reply-to: <110EED8CC96DFC488B7E717A2027A27C2042CA@039-SN1MPN1-003.039d.mgd.msft.net>
+Received: from mailout4.samsung.com ([203.254.224.34]:37006 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750824Ab2JaEdw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Oct 2012 00:33:52 -0400
+In-reply-to: <1351635712-17214-1-git-send-email-slyich@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Changming-R66093 <r66093@freescale.com>
-Cc: Girish K S <girish.shivananjappa@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
+To: Sergei Trofimovich <slyich@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, Sergei Trofimovich <slyfox@gentoo.org>, Thomas Abraham <thomas.abraham@linaro.org>, Will Newton <will.newton@imgtec.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi,
+Looks good to me.
 
->> *host)
->>>         if (!host->card || mmc_card_removed(host->card))
->>>                 return 1;
->>>
->>> -       ret = host->bus_ops->alive(host);
->>> +       if (host->ops->get_cd) {
->>> +               ret = host->ops->get_cd(host);
->>> +               if (ret >= 0)
->>> +                       ret = !ret;
->>> +       }
->>> +       if (ret < 0)
->>> +               ret = host->bus_ops->alive(host);
->> why should we check for negative here? can move this code into else
->> path of   if (host->ops->get_cd).
->>>         if (ret) {
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+
+On 10/31/2012 07:21 AM, Sergei Trofimovich wrote:
+> From: Sergei Trofimovich <slyfox@gentoo.org>
 > 
-> I did this comment:
-> If the card is present, 1 will return, if the card is absent, 0 will return.
-> If the controller will not support this feature, -ENOSYS will return.
-If checked whether card is absent or not with get_cd(), need to check the host->bus_ops->alive?
+> Found by gcc:
 > 
-> Can't move to other address, because these codes check the card present state.
+>     linux-2.6/drivers/mmc/host/dw_mmc-exynos.c: At top level:
+>     linux-2.6/drivers/mmc/host/dw_mmc-exynos.c:226:1: error: '__mod_of_device_table' aliased to undefined symbol 'dw_mci_pltfm_match'
 > 
+> CC: Chris Ball <cjb@laptop.org>
+> CC: Thomas Abraham <thomas.abraham@linaro.org>
+> CC: Will Newton <will.newton@imgtec.com>
+> CC: linux-mmc@vger.kernel.org
+> CC: linux-kernel@vger.kernel.org
+> Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+> ---
+>  drivers/mmc/host/dw_mmc-exynos.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 660bbc5..0147ac3a 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -223,7 +223,7 @@ static const struct of_device_id dw_mci_exynos_match[] = {
+>  			.data = (void *)&exynos5250_drv_data, },
+>  	{},
+>  };
+> -MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
+> +MODULE_DEVICE_TABLE(of, dw_mci_exynos_match);
+>  
+>  int dw_mci_exynos_probe(struct platform_device *pdev)
+>  {
 > 
 
