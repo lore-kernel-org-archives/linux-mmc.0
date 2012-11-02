@@ -1,65 +1,52 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: [PATCH v2] mmc: mxcmmc: fix SD cards not being detected
- sometimes.
-Date: Fri, 2 Nov 2012 09:25:50 +0100
-Message-ID: <20121102082550.GE1641@pengutronix.de>
-References: <1351612447-18982-1-git-send-email-javier.martin@vista-silicon.com>
+From: Johan Rudholm <jrudholm@gmail.com>
+Subject: Re: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
+Date: Fri, 2 Nov 2012 11:33:24 +0100
+Message-ID: <CA+20K0A3myrosOGK2dcstX06QOS1SRHaaz-zYqoFSA7ZYcEJvQ@mail.gmail.com>
+References: <1351584769-16662-1-git-send-email-r66093@freescale.com>
+	<1351584769-16662-2-git-send-email-r66093@freescale.com>
+	<CA+20K0AfmJSrPO9-_-yNk4HhEVYPj8cMaa+jCZAZhp23Vb817g@mail.gmail.com>
+	<110EED8CC96DFC488B7E717A2027A27C210A6D@039-SN1MPN1-004.039d.mgd.msft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:46322 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753909Ab2KBIZz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Nov 2012 04:25:55 -0400
-Content-Disposition: inline
-In-Reply-To: <1351612447-18982-1-git-send-email-javier.martin@vista-silicon.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:48703 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750773Ab2KBKdZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Nov 2012 06:33:25 -0400
+Received: by mail-ie0-f174.google.com with SMTP id k13so4806907iea.19
+        for <linux-mmc@vger.kernel.org>; Fri, 02 Nov 2012 03:33:24 -0700 (PDT)
+In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C210A6D@039-SN1MPN1-004.039d.mgd.msft.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Javier Martin <javier.martin@vista-silicon.com>
-Cc: linux-mmc@vger.kernel.org, viresh.linux@gmail.com, g.liakhovetski@gmx.de, vinod.koul@linux.intel.com, cjb@laptop.org
+To: Huang Changming-R66093 <r66093@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
 
-On Tue, Oct 30, 2012 at 04:54:07PM +0100, Javier Martin wrote:
-> When a SD card is initialized some data transfers of 64 and 8 bytes
-> are issued. It seems the DMA has some problems dealing with these kind
-> of "short" transfers, leading sometimes to the SD card not being detected.
-> 
-> In order to solve this problem, do not use DMA for transfer sizes lower
-> than the sector size.
-> 
-> Signed-off-by: Javier Martin <javier.martin@vista-silicon.com>
+Hi Jerry,
 
-Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
+2012/11/2 Huang Changming-R66093 <r66093@freescale.com>:
+> Hi, Johan,
+> When quicks SDHCI_QUIRK_BROKEN_CARD_DETECTION is set, the driver will poll the card status with the command CMD13 periodically, then many interrupts will be generated, which affect the performance.
 
-Sascha
+Ok, just to see if I understand the scenario correctly:
+SDHCI_QUIRK_BROKEN_CARD_DETECTION causes the MMC_CAP_NEEDS_POLL cap to
+be set, which will cause mmc_rescan to be run at a one second
+interval. mmc_rescan calls bus_ops->detect (mmc_sd_detect) and this in
+turn calls _mmc_detect_card_removed, which will do the bus_ops->alive
+and send CMD13. So in this case, one CMD13 is sent per second, right?
+Is this the cause of the performance issue?
 
-> ---
-> Changes since v1:
->  - Do not remove the check "sg->length & 3".
-> 
-> ---
->  drivers/mmc/host/mxcmmc.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index fc42a2e..a09637f 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -240,7 +240,7 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
->  		return 0;
->  
->  	for_each_sg(data->sg, sg, data->sg_len, i) {
-> -		if (sg->offset & 3 || sg->length & 3) {
-> +		if (sg->offset & 3 || sg->length & 3 || sg->length < 512) {
->  			host->do_dma = 0;
->  			return 0;
->  		}
-> -- 
-> 1.7.9.5
-> 
-> 
+A thought: if the host hardware does have a GPIO card detect pin
+hooked up, would it not be possible to make this pin generate an IRQ
+whenever a card is inserted or removed? This is what we do in the MMCI
+driver, for instance (mmci_cd_irq).
 
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+> Yes, some cases to detect GPIO can't be trusted, so I only just implement this callback in eSDHC-of driver. that is to say, just when the platform support it, this callback can be implement, if not, continue to send the command CMD13.
+
+I'm just wondering how this will affect our system, where we use the
+cd GPIO to generate detect jobs on card insert/remove, but where the
+cd pin is not 100% synchronized with the electrical connection of the
+power and cmd line of the SD-card. So if I remember correctly, the cd
+pin may report that the card has been removed, but there is still an
+electric connection and the card is alive...
+
+Kind regards, Johan
