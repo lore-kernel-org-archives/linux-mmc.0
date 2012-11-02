@@ -1,52 +1,176 @@
-From: Johan Rudholm <jrudholm@gmail.com>
-Subject: Re: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
-Date: Fri, 2 Nov 2012 11:33:24 +0100
-Message-ID: <CA+20K0A3myrosOGK2dcstX06QOS1SRHaaz-zYqoFSA7ZYcEJvQ@mail.gmail.com>
-References: <1351584769-16662-1-git-send-email-r66093@freescale.com>
-	<1351584769-16662-2-git-send-email-r66093@freescale.com>
-	<CA+20K0AfmJSrPO9-_-yNk4HhEVYPj8cMaa+jCZAZhp23Vb817g@mail.gmail.com>
-	<110EED8CC96DFC488B7E717A2027A27C210A6D@039-SN1MPN1-004.039d.mgd.msft.net>
+From: yongd <yongd@marvell.com>
+Subject: Re: [PATCH V2 1/3] mmc: esdhc: enable polling to detect card by itself
+Date: Fri, 02 Nov 2012 20:37:41 +0800
+Message-ID: <5093BE95.6040709@marvell.com>
+References: <1351589403-26398-1-git-send-email-yongd@marvell.com> <1351589403-26398-2-git-send-email-yongd@marvell.com> <20121031152030.GE8100@S2100-06.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:48703 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750773Ab2KBKdZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Nov 2012 06:33:25 -0400
-Received: by mail-ie0-f174.google.com with SMTP id k13so4806907iea.19
-        for <linux-mmc@vger.kernel.org>; Fri, 02 Nov 2012 03:33:24 -0700 (PDT)
-In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C210A6D@039-SN1MPN1-004.039d.mgd.msft.net>
+Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:52206 "EHLO
+	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751275Ab2KBMiy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Nov 2012 08:38:54 -0400
+In-Reply-To: <20121031152030.GE8100@S2100-06.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Changming-R66093 <r66093@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, Anton Vorontsov <anton.vorontsov@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Wolfram Sang <w.sang@pengutronix.de>, Daniel Drake <dsd@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Wilson Callan <wilson.callan@savantsystems.com>, Ben Dooks <ben-linux@fluff.org>, Zhangfei Gao <zgao6@marvell.com>, Kevin Liu <kliu5@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi Jerry,
+On 2012=E5=B9=B410=E6=9C=8831=E6=97=A5 23:20, Shawn Guo wrote:
+> On Tue, Oct 30, 2012 at 05:30:01PM +0800, yongd wrote:
+>> In the current code logic, sdhci_add_host() will enable the polling
+>> method (set MMC_CAP_NEEDS_POLL) for a removable card (MMC_CAP_
+>> NONREMOVABLE is not set) whose host's internal card detection method
+>> is disabled for some reason (SDHCI_QUIRK_BROKEN_CARD_DETECTION is se=
+t).
+>>
+>> However, this is improper since we can have some other card detectio=
+n
+>> methods besides host internal card detection and polling method. For
+>> example, if the card detection type is ESDHC_CD_GPIO (external gpio =
+pin
+>> for CD), we should keep SDHCI_QUIRK_BROKEN_CARD_DETECTION set, or ho=
+st
+>> internal card detection interrupt will still be enabled. So, here co=
+mes
+>> the 1st change in this patch to keep SDHCI_QUIRK_BROKEN_CARD_DETECTI=
+ON
+>> set for ESDHC_CD_GPIO type. But, after the 1st change, just as above
+>> said, sdhci_add_host() will still enable polling for such a card.Thi=
+s
+>> is redundant.
+>>
+> This actually results in an unpleasant rather than redundant behavior=
+=2E
+> Right after this patch gets applied and before patch #3 gets applied,
+> driver sdhci-esdhc-imx will use polling even for ESDHC_CD_GPIO case.
 
-2012/11/2 Huang Changming-R66093 <r66093@freescale.com>:
-> Hi, Johan,
-> When quicks SDHCI_QUIRK_BROKEN_CARD_DETECTION is set, the driver will poll the card status with the command CMD13 periodically, then many interrupts will be generated, which affect the performance.
+Shawn,
+I got it. So how do you think of such below partition/reorganization?
 
-Ok, just to see if I understand the scenario correctly:
-SDHCI_QUIRK_BROKEN_CARD_DETECTION causes the MMC_CAP_NEEDS_POLL cap to
-be set, which will cause mmc_rescan to be run at a one second
-interval. mmc_rescan calls bus_ops->detect (mmc_sd_detect) and this in
-turn calls _mmc_detect_card_removed, which will do the bus_ops->alive
-and send CMD13. So in this case, one CMD13 is sent per second, right?
-Is this the cause of the performance issue?
+Patch-1:
+=46or sdhci-esdhc-imx.c, only add MMC_CAP_NEEDS_POLL for ESDHC_CD_NONE.=
+ With that
+improper logic of sdhci_add_host(), this is redundant, but shall be bet=
+ter
+than something unpleasant you mentioned.
 
-A thought: if the host hardware does have a GPIO card detect pin
-hooked up, would it not be possible to make this pin generate an IRQ
-whenever a card is inserted or removed? This is what we do in the MMCI
-driver, for instance (mmci_cd_irq).
+Patch-2:
+=46or sdhci-s3c.c, do exactly the same thing as Patch-1.
 
-> Yes, some cases to detect GPIO can't be trusted, so I only just implement this callback in eSDHC-of driver. that is to say, just when the platform support it, this callback can be implement, if not, continue to send the command CMD13.
+Patch-3:
+=46or sdhci.c, remove that improper logic of sdhci_add_host().
 
-I'm just wondering how this will affect our system, where we use the
-cd GPIO to generate detect jobs on card insert/remove, but where the
-cd pin is not 100% synchronized with the electrical connection of the
-power and cmd line of the SD-card. So if I remember correctly, the cd
-pin may report that the card has been removed, but there is still an
-electric connection and the card is alive...
+Patch-4:
+=46or sdhci-esdhc-imx.c, set SDHCI_QUIRK_BROKEN_CARD_DETECTION for ESDH=
+C_CD_GPIO.
 
-Kind regards, Johan
+Patch-5:
+=46or sdhci-s3c.c, broaden SDHCI_QUIRK_BROKEN_CARD_DETECTION range for =
+all detection
+types except S3C_SDHCI_CD_INTERNAL.
+
+
+>> On the other hand, for the card with ESDHC_CD_NONE detection type(no=
+ CD,
+>> neither controller nor gpio, so use polling), we currently rely on
+>> sdhci_add_host() to enable polling for us.
+>>
+>> Here propose the 2nd change in this patch for such an embarrassing c=
+ase.
+> Besides above, this is another sign that the patch (and series) shoul=
+d
+> be better partitioned.
+>
+>> 1st, this patch will de-couple polling enabling with sdhci_add_host(=
+) by
+>> doing this in host driver itself, just as some other vendors. 2nd, o=
+ne
+>> more patch will remove such improper MMC_CAP_NEEDS_POLL enabling in
+>> sdhci_add_host().
+>>
+>> Change-Id: Ia7525009d8fd188e3f0169f225e4a76ff9e94b47
+> Remove this, please.
+
+Shawn,
+I got it, and will remove such thing in updated patches. Thanks.
+
+>> Signed-off-by: yongd <yongd@marvell.com>
+>> ---
+>>   drivers/mmc/host/sdhci-esdhc-imx.c |    3 ++-
+>>   1 file changed, 2 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/s=
+dhci-esdhc-imx.c
+>> index effc2ac..ff201a5 100644
+>> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+>> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+>> @@ -557,7 +557,7 @@ static int __devinit sdhci_esdhc_imx_probe(struc=
+t platform_device *pdev)
+>>   			dev_err(mmc_dev(host->mmc), "request irq error\n");
+>>   			goto no_card_detect_irq;
+>>   		}
+>> -		/* fall through */
+>> +		break;
+> The current sdhci-esdhc-imx implementation clears flag
+> SDHCI_QUIRK_BROKEN_CARD_DETECTION even for ESDHC_CD_GPIO case
+> and then emulate flag SDHCI_CARD_PRESENT by reading CD gpio state in
+> esdhc_readl_le().  Obviously, simply setting the flag for gpio case
+> does not provide an equal behavior as before.
+>
+> Shawn
+>
+
+Shawn,
+Yes, not equal as before. But you just remind me of one more improper p=
+lace in our current sdhci.c.
+Let's review those lines in sdhci_request() which are added by Anton lo=
+ng long ago in commit
+68d1fb7e229c6f95be4fbbe3eb46b24e41184924(sdhci: Add support for card-de=
+tection polling),
+
+	/* If polling, assume that the card is always present. */
+	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+		present =3D true;
+	else
+		present =3D sdhci_readl(host, SDHCI_PRESENT_STATE) &
+				SDHCI_CARD_PRESENT;
+
+Here before sending command, if we can confirm the card dose not exist,=
+ we will return quickly without
+sending this command.This is a good optimization. But if polling, we ca=
+n't do such checking, so we can
+only assume the card is always present.
+Here is another improper example of using SDHCI_QUIRK_BROKEN_CARD_DETEC=
+TION. Exactly the same as
+sdhci_add_host(), it thinks only polling and host internal card detecti=
+on methods exist.
+ =20
+Maybe we can determine whether and how we can do such card-existence-ch=
+ecking optimization based on our
+detection type directly rather than an indirect flag which should have =
+its own pure meaning. But Let's
+do such similar further improvement in future since currently with my p=
+atch of setting
+SDHCI_QUIRK_BROKEN_CARD_DETECTION for ESDHC_CD_GPIO, functionality is O=
+K as before. How do u think?
+
+
+>>  =20
+>>   	case ESDHC_CD_CONTROLLER:
+>>   		/* we have a working card_detect back */
+>> @@ -569,6 +569,7 @@ static int __devinit sdhci_esdhc_imx_probe(struc=
+t platform_device *pdev)
+>>   		break;
+>>  =20
+>>   	case ESDHC_CD_NONE:
+>> +		host->mmc->caps =3D MMC_CAP_NEEDS_POLL;
+>>   		break;
+>>   	}
+>>  =20
+>> --=20
+>> 1.7.9.5
+>>
+
