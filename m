@@ -1,153 +1,98 @@
-From: Pavan Kunapuli <pkunapuli@nvidia.com>
-Subject: Deferring sdhci probe if regulators are not found
-Date: Tue, 23 Oct 2012 12:58:13 +0530
-Message-ID: <C79B248886DD134989C8FF6B096A91AB7EC6B8C76D@BGMAIL01.nvidia.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v6 05/14] mmc: sdhci: fix null return check of regulator_get
+Date: Mon, 05 Nov 2012 08:56:32 -0500
+Message-ID: <878vagb1bj.fsf@octavius.laptop.org>
+References: <1350471893-29633-1-git-send-email-keyuan.liu@gmail.com>
+	<1350471893-29633-6-git-send-email-keyuan.liu@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0183800859106485564=="
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: "cjb@laptop.org" <cjb@laptop.org>, "swarren@wwwdotorg.org" <swarren@wwwdotorg.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>
-Cc: "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Pavan Kunapuli <pkunapuli@nvidia.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:38061 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753654Ab2KEN4n (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 5 Nov 2012 08:56:43 -0500
+In-Reply-To: <1350471893-29633-6-git-send-email-keyuan.liu@gmail.com> (Kevin
+	Liu's message of "Wed, 17 Oct 2012 19:04:44 +0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-
---===============0183800859106485564==
-Content-Language: en-US
-Content-Type: multipart/alternative;
-	boundary="_000_C79B248886DD134989C8FF6B096A91AB7EC6B8C76DBGMAIL01nvidi_"
-
---_000_C79B248886DD134989C8FF6B096A91AB7EC6B8C76DBGMAIL01nvidi_
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: linux-mmc@vger.kernel.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com, Bin Wang <binw@marvell.com>, dsd@laptop.org
 
 Hi,
 
-Tegra sdhci platform driver currently enables the necessary gpios which wil=
-l power on the SD host and sd/emmc cards. I have made changes to use vmmc a=
-nd vqmmc regulators for the same.
+On Wed, Oct 17 2012, Kevin Liu wrote:
+> From: Kevin Liu <kliu5@marvell.com>
+>
+> regulator_get() returns NULL when CONFIG_REGULATOR not defined,
+> which should not print out the warning.
+>
+> Reviewed-by: Philip Rakity <prakity@marvell.com>
+> Signed-off-by: Bin Wang <binw@marvell.com>
+> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+> ---
+>  drivers/mmc/host/sdhci.c |   18 ++++++++++++------
+>  1 files changed, 12 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 8e6a6f0..0104ae9 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2845,9 +2845,12 @@ int sdhci_add_host(struct sdhci_host *host)
+>  
+>  	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
+>  	host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
+> -	if (IS_ERR(host->vqmmc)) {
+> -		pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
+> -		host->vqmmc = NULL;
+> +	if (IS_ERR_OR_NULL(host->vqmmc)) {
+> +		if (PTR_ERR(host->vqmmc) < 0) {
+> +			pr_info("%s: no vqmmc regulator found\n",
+> +				mmc_hostname(mmc));
+> +			host->vqmmc = NULL;
+> +		}
+>  	}
+>  	else if (regulator_is_supported_voltage(host->vqmmc, 1800000, 1800000))
+>  		regulator_enable(host->vqmmc);
+> @@ -2903,9 +2906,12 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	ocr_avail = 0;
+>  
+>  	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
+> -	if (IS_ERR(host->vmmc)) {
+> -		pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
+> -		host->vmmc = NULL;
+> +	if (IS_ERR_OR_NULL(host->vmmc)) {
+> +		if (PTR_ERR(host->vmmc) < 0) {
+> +			pr_info("%s: no vmmc regulator found\n",
+> +				mmc_hostname(mmc));
+> +			host->vmmc = NULL;
+> +		}
+>  	} else
+>  		regulator_enable(host->vmmc);
 
-During testing on some platforms, I observed that the there is a possibilit=
-y of regulator driver probe being deferred due to dependencies on other mod=
-ules like gpio etc. In such case, the vmmc and vqmmc regulators will not be=
- available. MMC/SD cards will not work without enabling the regulators. To =
-fix this, I am deferring sdhci probe if regulator_get() calls fail. The pro=
-be will continue when the regulators are present. With this change, mmc and=
- SD cards are working properly.
+Pushed to mmc-next for 3.7 with this commit message:
 
-However, this patch would require vmmc, vqmmc supplies to be registered eit=
-her with a valid entry or a using dummy regulator entry for all platforms t=
-hat use sdhci driver. I am aware of tegra platforms details and can add ent=
-ries for the same. I don't know the details of other platforms which are us=
-ing sdhci driver. I can try adding regulator_get() calls in the sdhci tegra=
- platform driver and bypass the regulator_get calls in sdhci driver if the =
-regulator structures are already present. This wouldn't effect non-tegra pl=
-atforms. But, this is more of a hack and not a proper solution. I need sugg=
-estions on how to fix the issue properly without affecting other platforms.=
- I have pushed patches with the above mentioned changes. I hope it helps in=
- understanding better on what I am trying to do.
+Author: Kevin Liu <kliu5@marvell.com>
+Date:   Wed Oct 17 19:04:44 2012 +0800
 
-Regards,
-Pavan.
+    mmc: sdhci: fix IS_ERR() checking of regulator_get()
+    
+    There are two problems here:
+    
+    The check for vmmc was printing an unnecessary pr_info() when
+    host->vmmc is NULL.
+    
+    The intent of the check for vqmmc was to only remove UHS if we have a
+    regulator that doesn't support the required voltage, but since IS_ERR()
+    doesn't catch NULL, we were actually removing UHS modes if vqmmc isn't
+    present at all -- since it isn't present for most users, this breaks
+    UHS for them.  This patch fixes that UHS regression in 3.7-rc1.
+    
+    Signed-off-by: Kevin Liu <kliu5@marvell.com>
+    Signed-off-by: Bin Wang <binw@marvell.com>
+    Reviewed-by: Philip Rakity <prakity@marvell.com>
+    Signed-off-by: Chris Ball <cjb@laptop.org>
 
---_000_C79B248886DD134989C8FF6B096A91AB7EC6B8C76DBGMAIL01nvidi_
-Content-Type: text/html; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-
-<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
-osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
-xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
-//www.w3.org/TR/REC-html40"><head><meta http-equiv=3DContent-Type content=
-=3D"text/html; charset=3Dus-ascii"><meta name=3DGenerator content=3D"Micros=
-oft Word 14 (filtered medium)"><style><!--
-/* Font Definitions */
-@font-face
-	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;}
-/* Style Definitions */
-p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{margin:0cm;
-	margin-bottom:.0001pt;
-	font-size:11.0pt;
-	font-family:"Calibri","sans-serif";
-	mso-fareast-language:EN-US;}
-a:link, span.MsoHyperlink
-	{mso-style-priority:99;
-	color:blue;
-	text-decoration:underline;}
-a:visited, span.MsoHyperlinkFollowed
-	{mso-style-priority:99;
-	color:purple;
-	text-decoration:underline;}
-span.EmailStyle17
-	{mso-style-type:personal-compose;
-	font-family:"Calibri","sans-serif";
-	color:windowtext;}
-.MsoChpDefault
-	{mso-style-type:export-only;
-	font-family:"Calibri","sans-serif";
-	mso-fareast-language:EN-US;}
-@page WordSection1
-	{size:612.0pt 792.0pt;
-	margin:72.0pt 72.0pt 72.0pt 72.0pt;}
-div.WordSection1
-	{page:WordSection1;}
---></style><!--[if gte mso 9]><xml>
-<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
-</xml><![endif]--><!--[if gte mso 9]><xml>
-<o:shapelayout v:ext=3D"edit">
-<o:idmap v:ext=3D"edit" data=3D"1" />
-</o:shapelayout></xml><![endif]--></head><body lang=3DEN-IN link=3Dblue vli=
-nk=3Dpurple><div class=3DWordSection1><p class=3DMsoNormal><span lang=3DEN-=
-US>Hi,<o:p></o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US><o:p>&n=
-bsp;</o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US>Tegra sdhci pl=
-atform driver currently enables the necessary gpios which will power on the=
- SD host and sd/emmc cards. I have made changes to use vmmc and vqmmc regul=
-ators for the same.<o:p></o:p></span></p><p class=3DMsoNormal><span lang=3D=
-EN-US><o:p>&nbsp;</o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US>D=
-uring testing on some platforms, I observed that the there is a possibility=
- of regulator driver probe being deferred due to dependencies on other modu=
-les like gpio etc. In such case, the vmmc and vqmmc regulators will not be =
-available. MMC/SD cards will not work without enabling the regulators. To f=
-ix this, I am deferring sdhci probe if regulator_get() calls fail. The prob=
-e will continue when the regulators are present. With this change, mmc and =
-SD cards are working properly.<o:p></o:p></span></p><p class=3DMsoNormal><s=
-pan lang=3DEN-US><o:p>&nbsp;</o:p></span></p><p class=3DMsoNormal><span lan=
-g=3DEN-US>However, this patch would require vmmc, vqmmc supplies to be regi=
-stered either with a valid entry or a using dummy regulator entry for all p=
-latforms that use sdhci driver. I am aware of tegra platforms details and c=
-an add entries for the same. I don&#8217;t know the details of other platfo=
-rms which are using sdhci driver. I can try adding regulator_get() calls in=
- the sdhci tegra platform driver and bypass the regulator_get calls in sdhc=
-i driver if the regulator structures are already present. This wouldn&#8217=
-;t effect non-tegra platforms. But, this is more of a hack and not a proper=
- solution. I need suggestions on how to fix the issue properly without affe=
-cting other platforms. I have pushed patches with the above mentioned chang=
-es. I hope it helps in understanding better on what I am trying to do.<o:p>=
-</o:p></span></p><p class=3DMsoNormal><span lang=3DEN-US><o:p>&nbsp;</o:p><=
-/span></p><p class=3DMsoNormal><span lang=3DEN-US>Regards,<o:p></o:p></span=
-></p><p class=3DMsoNormal><span lang=3DEN-US>Pavan.<o:p></o:p></span></p></=
-div></body></html>=
-
---_000_C79B248886DD134989C8FF6B096A91AB7EC6B8C76DBGMAIL01nvidi_--
-
-
---===============0183800859106485564==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============0183800859106485564==--
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
