@@ -1,57 +1,141 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH V2 1/3] mmc: esdhc: enable polling to detect card by
- itself
-Date: Mon, 5 Nov 2012 20:48:11 +0800
-Message-ID: <20121105124809.GA27260@S2100-06.ap.freescale.net>
-References: <1351589403-26398-1-git-send-email-yongd@marvell.com>
- <1351589403-26398-2-git-send-email-yongd@marvell.com>
- <20121031152030.GE8100@S2100-06.ap.freescale.net>
- <5093BE95.6040709@marvell.com>
- <20121105015421.GA26512@S2100-06.ap.freescale.net>
- <509733D9.2060807@marvell.com>
+From: Philip Rakity <prakity@nvidia.com>
+Subject: Re: UHS-I voltage switching on OLPC XO-1.75
+Date: Mon, 5 Nov 2012 13:49:43 +0100
+Message-ID: <10400F30-0A08-4B95-9C62-018A3AD4068B@nvidia.com>
+References: <CAMLZHHQfQ26E+BH2sqV9CGyso+uuKHC=WMaqehzBo9_Gr_kyPQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe004.messaging.microsoft.com ([216.32.180.187]:17672
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753342Ab2KEMWw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Nov 2012 07:22:52 -0500
-Content-Disposition: inline
-In-Reply-To: <509733D9.2060807@marvell.com>
+Received: from hqemgate04.nvidia.com ([216.228.121.35]:2924 "EHLO
+	hqemgate04.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751197Ab2KEMvh convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Nov 2012 07:51:37 -0500
+In-Reply-To: <CAMLZHHQfQ26E+BH2sqV9CGyso+uuKHC=WMaqehzBo9_Gr_kyPQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: yongd <yongd@marvell.com>
-Cc: Chris Ball <cjb@laptop.org>, Anton Vorontsov <anton.vorontsov@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Wolfram Sang <w.sang@pengutronix.de>, Daniel Drake <dsd@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Wilson Callan <wilson.callan@savantsystems.com>, Ben Dooks <ben-linux@fluff.org>, Zhangfei Gao <zgao6@marvell.com>, Kevin Liu <kliu5@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Daniel Drake <dsd@laptop.org>, Chris Ball <cjb@laptop.org>
+Cc: Johan Rudholm <jrudholm@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Mon, Nov 05, 2012 at 11:34:49AM +0800, yongd wrote:
-> From the code logic, without SDHCI_QUIRK_BROKEN_CARD_DETECTION for ESDHC_CD_GPIO, when your card (using
-> GPIO detection) is removed, we can know the card's absence through the fake CARD_PRESENT flag in esdhc_readl_le().
-> As a result, we can quickly return ENOMEDIUM error without command sending. Finally mmc_rescan can know the card
-> is removed.
+
+Hi Daneil, Chris,
+
+I reviewed kevin's patch in September which fixes this issue.  Chris -- can we pull it into mmc-next ?  This patch is okay as a standalone change.
+
+From: Philip Rakity <prakity <at> marvell.com>
+Subject: Re: [PATCH v2 5/8] mmc: sdhci: fix null return check of regulator_get
+Newsgroups: gmane.linux.kernel.mmc
+Date: 2012-09-24 15:02:34 GMT (5 weeks, 6 days, 21 hours and 44 minutes ago)
+
+Philip
+
+On Oct 30, 2012, at 9:11 PM, Daniel Drake <dsd@laptop.org> wrote:
+
+> Hi,
 > 
-Yes, that's the existing implementation, which does not require retry
-sending MMC_SEND_STATUS to know if card is removed.
-
-> On the other hand, with SDHCI_QUIRK_BROKEN_CARD_DETECTION for ESDHC_CD_GPIO, we will just send MMC_SEND_STATUS
-> command (cd_irq->sdhci_tasklet_card->mmc_recan->mmc_sd_detect->mmc_sd_alive), and we will find error since the card
-> is already gone. Finally, we shall also know the card is removed.
+> Following on from the recent thread
+>  [PATCH 2/2] mmc: core: Power cycle card on voltage switch fail
+> I have tried to get a better grip on the problems being faced.
 > 
-> This is really strange why the removal message shows up together with the next card inserting message.
-> Could u pls tell us more about what actually happened when the card is removed with my patches? Did the GPIO interrupt
-> happen? Was mmc_rescan() called? Did mmc_sd_detect() finally find error when it sent MMC_SEND_STATUS? What step did
-> the card removing procedure arrive at? Really really thanks a lot:-)
+> Test setup:
+> OLPC XO-1.75 laptop, based on Marvell MMP2 ARM SoC (includes sdhci-pxa
+> interface)
+> 32GB Sandisk Ultra SD card being inserted into external SD slot
 > 
-I just tracked it down a little bit.  Interesting enough, it depends on
-how I remove the card.  If I do it slowly, when the gpio interrupt
-triggers the MMC_SEND_STATUS query, the command can still retrieve
-the card status successfully.  Thus driver does not detect the card
-removal.  If I remove the card from slot quickly, I can see the removal
-message.
+> The SoC apparently has support for 1.8V, but we physically do not have
+> the right power lines wired on the motherboard, so we need to detect
+> the 1.8V failure and go back to 3.3V mode.
+> 
+> Before patching anything, inserting this card results in:
+>  sdhci: Switching to 1.8V signalling voltage failed, retrying with
+> S18R set to 0
+>  mmc0: error -110 whilst initialising SD card
+> 
+> Now, working on Linux-3.5.4, I add these patches:
+> 
+>    mmc: core: reset sigal voltage on power up
+>    [RFC/PATCH,v2] mmc: core: Fixup signal voltage switch
+>    regulator: add missing defintion regulator_is_supported_voltage
+>    mmc: sdhci: Add regulator support for vccq (voltage regualor)
+>    mmc: sdhci: Let core handle UHS switch failure
+> 
+> I also tweaked the sdhci code so that UHS-I flags are not
+> unconditionally disabled by the vccq commit (as explained in "sdhci
+> vccq regulator support drops UHS-I flags").
+> 
+> 
+> Under this setup, the first problem encountered is that the system no
+> longer identifies the fact that the 1.8V voltage failed. Things are
+> not happy afterwards. The card_busy check in sdhci is saying that the
+> card is not busy.
+> Full kernel logs: http://dev.laptop.org/~dsd/20121030/mmc1.log
+> 
+> I tracked down what causes this regression. In order to get the
+> failure detection working again, I have to make the following change
+> in mmc_set_signal_voltage():
+>                if (cmd11) {
+>                        host->ios.clock = 0;
+> -                       mmc_set_ios(host);
+> +                       //mmc_set_ios(host);
+>                }
+> (i.e. don't mess with ios before asking sdhci to do the voltage switch)
+> 
+> and at the top of sdhci_do_1_8v_signal_voltage_switch:
+> +       /* Stop SDCLK */
+> +       clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +       clk &= ~SDHCI_CLOCK_CARD_EN;
+> +       sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> (i.e. add the equivalent clock disabling code here)
+> 
+> 
+> With that change, I now get:
+>  mmc2: Signal voltage switch failed, power cycling card (retries = 10)
+>  mmc2: error -110 whilst initialising SD card
+> 
+> The -110 error comes from mmc_send_app_op_cond(), but its worth noting
+> that mmc_send_if_cond() (called immediately above) silently failed
+> with -110 too. Neither of these failed the first time around before
+> 1.8V was tried.
+> 
+> Full patch that I'm testing with: http://dev.laptop.org/~dsd/20121030/mmc.patch
+> 
+> So, now the question is: why is the card not responding to
+> if_cond/app_op_cond after being powered down and up again? Is the
+> power down/up sequence OK?
+> I tried inserting the mmc_power_off, mmc_power_up, mmc_send_if_cond
+> sequence into various points in the codepaths being discussed.
+> Measuring success as the card responding to mmc_send_if_cond(0x30080)
+> without error (0x30080 is a known good value from when before 1.8V is
+> tried), I find that this "reset sequence" works just fine up until the
+> point when CMD11 is run.
+> CMD11 is sent and returns successfully without error, but from this
+> point, running the reset sequence will fail (send_if_cond will fail
+> with -110).
+> 
+> Is this kind of test valid? Does this suggest that something is wrong
+> with the host controller hardware? My assumption is that whatever
+> state is modified by CMD11 should be erased here, and of course the
+> hope is that mmc_power_off and mmc_power_up will do a full power cycle
+> anyway. But whatever is happening, it looks like the effects of CMD11
+> are persisting past the reset sequence and are breaking later
+> communication.
+> 
+> In the mail last week, I think we found some kind of configuration (on
+> Linux-3.0) where this same setup successfully detected the 1.8V
+> switching failure, and successfully switched back to 3.3V. I plan to
+> go back and test that, maybe there is some kind of sequence that
+> doesn't make the hardware die.
+> 
+> Daniel
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-With your patch series, in ESDHC_CD_GPIO case the driver will have
-to send MMC_SEND_STATUS (with retry) to card for knowing its presence.
-This is also an unpleasant behavior comparing to the existing code.
-I think we should query gpio state to know card presence for this case.
-
-Shawn
-
+-----------------------------------------------------------------------------------
+This email message is for the sole use of the intended recipient(s) and may contain
+confidential information.  Any unauthorized review, use, disclosure or distribution
+is prohibited.  If you are not the intended recipient, please contact the sender by
+reply email and destroy all copies of the original message.
+-----------------------------------------------------------------------------------
