@@ -1,16 +1,16 @@
 From: Philip Rakity <prakity@nvidia.com>
 Subject: Re: UHS-I voltage switching on OLPC XO-1.75
-Date: Mon, 5 Nov 2012 13:49:43 +0100
-Message-ID: <10400F30-0A08-4B95-9C62-018A3AD4068B@nvidia.com>
+Date: Mon, 5 Nov 2012 13:50:43 +0100
+Message-ID: <9DACC000-8DE6-4129-A65F-8E75E2ABD7AF@nvidia.com>
 References: <CAMLZHHQfQ26E+BH2sqV9CGyso+uuKHC=WMaqehzBo9_Gr_kyPQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate04.nvidia.com ([216.228.121.35]:2924 "EHLO
-	hqemgate04.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751197Ab2KEMvh convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Nov 2012 07:51:37 -0500
+Received: from hqemgate03.nvidia.com ([216.228.121.140]:8220 "EHLO
+	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751197Ab2KEMvl convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Nov 2012 07:51:41 -0500
 In-Reply-To: <CAMLZHHQfQ26E+BH2sqV9CGyso+uuKHC=WMaqehzBo9_Gr_kyPQ@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
@@ -35,7 +35,7 @@ On Oct 30, 2012, at 9:11 PM, Daniel Drake <dsd@laptop.org> wrote:
 > Hi,
 > 
 > Following on from the recent thread
->  [PATCH 2/2] mmc: core: Power cycle card on voltage switch fail
+> [PATCH 2/2] mmc: core: Power cycle card on voltage switch fail
 > I have tried to get a better grip on the problems being faced.
 > 
 > Test setup:
@@ -48,17 +48,17 @@ On Oct 30, 2012, at 9:11 PM, Daniel Drake <dsd@laptop.org> wrote:
 > the 1.8V failure and go back to 3.3V mode.
 > 
 > Before patching anything, inserting this card results in:
->  sdhci: Switching to 1.8V signalling voltage failed, retrying with
+> sdhci: Switching to 1.8V signalling voltage failed, retrying with
 > S18R set to 0
->  mmc0: error -110 whilst initialising SD card
+> mmc0: error -110 whilst initialising SD card
 > 
 > Now, working on Linux-3.5.4, I add these patches:
 > 
->    mmc: core: reset sigal voltage on power up
->    [RFC/PATCH,v2] mmc: core: Fixup signal voltage switch
->    regulator: add missing defintion regulator_is_supported_voltage
->    mmc: sdhci: Add regulator support for vccq (voltage regualor)
->    mmc: sdhci: Let core handle UHS switch failure
+>  mmc: core: reset sigal voltage on power up
+>  [RFC/PATCH,v2] mmc: core: Fixup signal voltage switch
+>  regulator: add missing defintion regulator_is_supported_voltage
+>  mmc: sdhci: Add regulator support for vccq (voltage regualor)
+>  mmc: sdhci: Let core handle UHS switch failure
 > 
 > I also tweaked the sdhci code so that UHS-I flags are not
 > unconditionally disabled by the vccq commit (as explained in "sdhci
@@ -74,11 +74,11 @@ On Oct 30, 2012, at 9:11 PM, Daniel Drake <dsd@laptop.org> wrote:
 > I tracked down what causes this regression. In order to get the
 > failure detection working again, I have to make the following change
 > in mmc_set_signal_voltage():
->                if (cmd11) {
->                        host->ios.clock = 0;
+>              if (cmd11) {
+>                      host->ios.clock = 0;
 > -                       mmc_set_ios(host);
 > +                       //mmc_set_ios(host);
->                }
+>              }
 > (i.e. don't mess with ios before asking sdhci to do the voltage switch)
 > 
 > and at the top of sdhci_do_1_8v_signal_voltage_switch:
@@ -90,8 +90,8 @@ On Oct 30, 2012, at 9:11 PM, Daniel Drake <dsd@laptop.org> wrote:
 > 
 > 
 > With that change, I now get:
->  mmc2: Signal voltage switch failed, power cycling card (retries = 10)
->  mmc2: error -110 whilst initialising SD card
+> mmc2: Signal voltage switch failed, power cycling card (retries = 10)
+> mmc2: error -110 whilst initialising SD card
 > 
 > The -110 error comes from mmc_send_app_op_cond(), but its worth noting
 > that mmc_send_if_cond() (called immediately above) silently failed
