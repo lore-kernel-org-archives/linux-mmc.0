@@ -1,95 +1,75 @@
-From: merez@codeaurora.org
-Subject: RE: [PATCH v8 2/2] mmc: support packed write command for eMMC4.5
-     device
-Date: Sat, 3 Nov 2012 22:05:18 -0700 (PDT)
-Message-ID: <37d6acd1dfb6cc6436a3047b1e17d823.squirrel@www.codeaurora.org>
-References: <ed6366950474fb35cac89881648fb9e9.squirrel@www.codeaurora.org>
-    <009701cd5d64$c7dc2aa0$57947fe0$%jun@samsung.com>
-    <fc9caa907c442ce8390e774744d9dae7.squirrel@www.codeaurora.org>
-    <00c401cd5dbb$6d605630$48210290$%jun@samsung.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH V2 1/3] mmc: esdhc: enable polling to detect card by
+ itself
+Date: Mon, 5 Nov 2012 09:54:22 +0800
+Message-ID: <20121105015421.GA26512@S2100-06.ap.freescale.net>
+References: <1351589403-26398-1-git-send-email-yongd@marvell.com>
+ <1351589403-26398-2-git-send-email-yongd@marvell.com>
+ <20121031152030.GE8100@S2100-06.ap.freescale.net>
+ <5093BE95.6040709@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:61526 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750747Ab2KDFFd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Nov 2012 01:05:33 -0400
-In-Reply-To: <00c401cd5dbb$6d605630$48210290$%jun@samsung.com>
+Received: from co1ehsobe005.messaging.microsoft.com ([216.32.180.188]:21745
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750905Ab2KEB3A (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Nov 2012 20:29:00 -0500
+Content-Disposition: inline
+In-Reply-To: <5093BE95.6040709@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: merez@codeaurora.org, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>, 'Saugata Das' <saugata.das@linaro.org>, 'Namjae Jeon' <linkinjeon@gmail.com>
+To: yongd <yongd@marvell.com>
+Cc: Chris Ball <cjb@laptop.org>, Anton Vorontsov <anton.vorontsov@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Wolfram Sang <w.sang@pengutronix.de>, Daniel Drake <dsd@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Wilson Callan <wilson.callan@savantsystems.com>, Ben Dooks <ben-linux@fluff.org>, Zhangfei Gao <zgao6@marvell.com>, Kevin Liu <kliu5@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi Chris,
+On Fri, Nov 02, 2012 at 08:37:41PM +0800, yongd wrote:
+> I got it. So how do you think of such below partition/reorganization?
+> 
+It looks fine to me for imx.
 
-Packed commands is a mandatory eMMC4.5 feature and is supported by all the
-card vendors.
-It wa proven to be beneficial for eMMC4.5 cards and harmless for non
-eMMC4.5 cards.
-I don't see a point to hold it back while it can be enabled or disabled by
-a flag and most of the code it adds is guarded in specific functions and
-is not active when packed commands is disabled.
+> Patch-1:
+> For sdhci-esdhc-imx.c, only add MMC_CAP_NEEDS_POLL for ESDHC_CD_NONE. With that
+> improper logic of sdhci_add_host(), this is redundant, but shall be better
+> than something unpleasant you mentioned.
+> 
+> Patch-2:
+> For sdhci-s3c.c, do exactly the same thing as Patch-1.
+> 
+> Patch-3:
+> For sdhci.c, remove that improper logic of sdhci_add_host().
+> 
+> Patch-4:
+> For sdhci-esdhc-imx.c, set SDHCI_QUIRK_BROKEN_CARD_DETECTION for ESDHC_CD_GPIO.
+> 
+> Patch-5:
+> For sdhci-s3c.c, broaden SDHCI_QUIRK_BROKEN_CARD_DETECTION range for all detection
+> types except S3C_SDHCI_CD_INTERNAL.
 
-Thanks,
-Maya
-On Mon, July 9, 2012 3:13 am, Seungwon Jeon wrote:
-> Monday, July 09, 2012, Maya <merez@codeaurora.org> wrote:
->> On Sun, July 8, 2012 4:52 pm, Seungwon Jeon wrote:
->> > Sunday, July 08, 2012, Maya <merez@codeaurora.org> wrote:
->> >> One minor comment below:
->> >>
->> >> > @@ -1278,9 +1609,15 @@ static int mmc_blk_issue_rw_rq(struct
->> mmc_queue
->> >> *mq, struct request *rqc)
->> >> >  			    (card->ext_csd.data_sector_size == 4096)) {
->> >> You can use mmc_large_sec here (instead of
->> >> card->ext_csd.data_sector_size
->> >> == 4096)
->> > Yes, but this line is kept due to another issue related with 4KB
->> sector.
->> >
->> > Thanks,
->> > Seungwon Jeon
->> Hi,
->>
->> I'm not sure I understand your reply. mmc_large_sec does exactly what
->> the
->> if here does.
->> My suggestion is to replace the code with the new function you added.
->> I agree it's an old code but this way the code will be consistent and
->> mmc_large_sec will be used in every place we would like to check if the
->> sector size is 4K.
-> I just remained. The code you pointed can be replaced.
-> Regardless this review, I'll rework.
-> eMMC 4.51 spec was updated in June and there is some changes.
-> Spec mentions packed header is 8 blocks in 4KB native device.
-> I'll apply this change.
->
-> Thanks,
-> Seungwon Jeon
->
->>
->> Thanks,
->> Maya
->>
->> --
->> Sent by consultant of Qualcomm Innovation Center, Inc.
->> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+<snip>
 
+> Yes, not equal as before. But you just remind me of one more improper place in our current sdhci.c.
+> Let's review those lines in sdhci_request() which are added by Anton long long ago in commit
+> 68d1fb7e229c6f95be4fbbe3eb46b24e41184924(sdhci: Add support for card-detection polling),
+> 
+> 	/* If polling, assume that the card is always present. */
+> 	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+> 		present = true;
+> 	else
+> 		present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+> 				SDHCI_CARD_PRESENT;
+> 
+> Here before sending command, if we can confirm the card dose not exist, we will return quickly without
+> sending this command.This is a good optimization. But if polling, we can't do such checking, so we can
+> only assume the card is always present.
+> Here is another improper example of using SDHCI_QUIRK_BROKEN_CARD_DETECTION. Exactly the same as
+> sdhci_add_host(), it thinks only polling and host internal card detection methods exist.
+> Maybe we can determine whether and how we can do such card-existence-checking optimization based on our
+> detection type directly rather than an indirect flag which should have its own pure meaning. But Let's
+> do such similar further improvement in future since currently with my patch of setting
+> SDHCI_QUIRK_BROKEN_CARD_DETECTION for ESDHC_CD_GPIO, functionality is OK as before. How do u think?
+> 
+I'm not sure it will function same as before.  When I was testing your
+v2 series, I can not see card removal message with removing card, but
+can see it show up together with the next card inserting message.
 
--- 
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
-of Code Aurora Forum, hosted by The Linux Foundation
+Shawn
 
