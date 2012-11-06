@@ -1,126 +1,149 @@
 From: Venkatraman S <svenkatr@ti.com>
-Subject: [PATCH 3/5] mmc: omap_hsmmc: introduce omap_hsmmc_prepare/complete
-Date: Tue, 6 Nov 2012 22:22:14 +0530
-Message-ID: <1352220737-14071-4-git-send-email-svenkatr@ti.com>
+Subject: [PATCH 2/5] mmc: omap_hsmmc: Enable HSPE bit for high speed cards
+Date: Tue, 6 Nov 2012 22:22:13 +0530
+Message-ID: <1352220737-14071-3-git-send-email-svenkatr@ti.com>
 References: <1352220737-14071-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from devils.ext.ti.com ([198.47.26.153]:59738 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750867Ab2KFQwi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Nov 2012 11:52:38 -0500
 In-Reply-To: <1352220737-14071-1-git-send-email-svenkatr@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: cjb@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Felipe Balbi <balbi@ti.com>, Venkatraman S <svenkatr@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, "Hebbar, Gururaja" <gururaja.hebbar@ti.com>, Venkatraman S <svenkatr@ti.com>
 
-From: Felipe Balbi <balbi@ti.com>
+From: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
 
-prepare() is supposed to prevent new children from
-being registered. On the MMC subsystem, children
-(new cards) registration starts with the card
-detect IRQ.
+HSMMC IP on AM33xx need a special setting to handle High-speed cards.
+Other platforms like TI81xx, OMAP4 may need this as-well. This depends
+on the HSMMC IP timing closure done for the high speed cards.
 
-Move card detect IRQ disabling to prepare() so that
-no new cards will be registered while we're trying
-to suspend.
+>From AM335x TRM (SPRUH73F - 18.3.12 Output Signals Generation)
 
-Likewise, move card detect IRQ enabling to complete()
-so we only try to register new children after our MMC
-IP is back up.
+The MMC/SD/SDIO output signals can be driven on either falling edge or
+rising edge depending on the SD_HCTL[2] HSPE bit. This feature allows
+to reach better timing performance, and thus to increase data transfer
+frequency.
 
-Signed-off-by: Felipe Balbi <balbi@ti.com>
+There are few pre-requisites for enabling the HSPE bit
+- Controller should support High-Speed-Enable Bit and
+- Controller should not be using DDR Mode and
+- Controller should advertise that it supports High Speed in
+  capabilities register and
+- MMC/SD clock coming out of controller > 25MHz
+
+Signed-off-by: Hebbar, Gururaja <gururaja.hebbar@ti.com>
 Signed-off-by: Venkatraman S <svenkatr@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c | 44 +++++++++++++++++++++++--------------------
- 1 file changed, 24 insertions(+), 20 deletions(-)
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |  1 +
+ arch/arm/plat-omap/include/plat/mmc.h              |  1 +
+ drivers/mmc/host/omap_hsmmc.c                      | 30 +++++++++++++++++++++-
+ 3 files changed, 31 insertions(+), 1 deletion(-)
 
+diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+index be76a23..ed271fc 100644
+--- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
++++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+@@ -19,6 +19,7 @@ ti,dual-volt: boolean, supports dual voltage cards
+ "supply-name" examples are "vmmc", "vmmc_aux" etc
+ ti,non-removable: non-removable slot (like eMMC)
+ ti,needs-special-reset: Requires a special softreset sequence
++ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
+ 
+ Example:
+ 	mmc1: mmc@0x4809c000 {
+diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+index 8b4e4f2..346af5b 100644
+--- a/arch/arm/plat-omap/include/plat/mmc.h
++++ b/arch/arm/plat-omap/include/plat/mmc.h
+@@ -126,6 +126,7 @@ struct omap_mmc_platform_data {
+ 		/* we can put the features above into this variable */
+ #define HSMMC_HAS_PBIAS		(1 << 0)
+ #define HSMMC_HAS_UPDATED_RESET	(1 << 1)
++#define HSMMC_HAS_HSPE_SUPPORT	(1 << 2)
+ 		unsigned features;
+ 
+ 		int switch_pin;			/* gpio (card detect) */
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index c277da4..e91e85a 100644
+index 06d2e03..c277da4 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -2065,6 +2065,25 @@ static int __devexit omap_hsmmc_remove(struct platform_device *pdev)
+@@ -63,6 +63,7 @@
+ 
+ #define VS18			(1 << 26)
+ #define VS30			(1 << 25)
++#define HSS			(1 << 21)
+ #define SDVS18			(0x5 << 9)
+ #define SDVS30			(0x6 << 9)
+ #define SDVS33			(0x7 << 9)
+@@ -90,6 +91,7 @@
+ #define MSBS			(1 << 5)
+ #define BCE			(1 << 1)
+ #define FOUR_BIT		(1 << 1)
++#define HSPE			(1 << 2)
+ #define DDR			(1 << 19)
+ #define DW8			(1 << 5)
+ #define CC			0x1
+@@ -495,6 +497,7 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
+ 	struct mmc_ios *ios = &host->mmc->ios;
+ 	unsigned long regval;
+ 	unsigned long timeout;
++	unsigned long clkdiv;
+ 
+ 	dev_vdbg(mmc_dev(host->mmc), "Set clock to %uHz\n", ios->clock);
+ 
+@@ -502,7 +505,8 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
+ 
+ 	regval = OMAP_HSMMC_READ(host->base, SYSCTL);
+ 	regval = regval & ~(CLKD_MASK | DTO_MASK);
+-	regval = regval | (calc_divisor(host, ios) << 6) | (DTO << 16);
++	clkdiv = calc_divisor(host, ios);
++	regval = regval | (clkdiv << 6) | (DTO << 16);
+ 	OMAP_HSMMC_WRITE(host->base, SYSCTL, regval);
+ 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
+ 		OMAP_HSMMC_READ(host->base, SYSCTL) | ICE);
+@@ -513,6 +517,27 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
+ 		&& time_before(jiffies, timeout))
+ 		cpu_relax();
+ 
++	/*
++	 * Enable High-Speed Support
++	 * Pre-Requisites
++	 *	- Controller should support High-Speed-Enable Bit
++	 *	- Controller should not be using DDR Mode
++	 *	- Controller should advertise that it supports High Speed
++	 *	  in capabilities register
++	 *	- MMC/SD clock coming out of controller > 25MHz
++	 */
++	if ((mmc_slot(host).features & HSMMC_HAS_HSPE_SUPPORT) &&
++	    (ios->timing != MMC_TIMING_UHS_DDR50) &&
++	    ((OMAP_HSMMC_READ(host->base, CAPA) & HSS) == HSS)) {
++		regval = OMAP_HSMMC_READ(host->base, HCTL);
++		if (clkdiv && (clk_get_rate(host->fclk)/clkdiv) > 25000000)
++			regval |= HSPE;
++		else
++			regval &= ~HSPE;
++
++		OMAP_HSMMC_WRITE(host->base, HCTL, regval);
++	}
++
+ 	omap_hsmmc_start_clock(host);
  }
  
- #ifdef CONFIG_PM
-+static int omap_hsmmc_prepare(struct device *dev)
-+{
-+	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
-+
-+	if (host->pdata->suspend)
-+		return host->pdata->suspend(dev, host->slot_id);
-+
-+	return 0;
-+}
-+
-+static void omap_hsmmc_complete(struct device *dev)
-+{
-+	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
-+
-+	if (host->pdata->resume)
-+		host->pdata->resume(dev, host->slot_id);
-+
-+}
-+
- static int omap_hsmmc_suspend(struct device *dev)
- {
- 	int ret = 0;
-@@ -2078,23 +2097,10 @@ static int omap_hsmmc_suspend(struct device *dev)
+@@ -1710,6 +1735,9 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
+ 	if (!of_property_read_u32(np, "max-frequency", &max_freq))
+ 		pdata->max_freq = max_freq;
  
- 	pm_runtime_get_sync(host->dev);
- 	host->suspended = 1;
--	if (host->pdata->suspend) {
--		ret = host->pdata->suspend(dev, host->slot_id);
--		if (ret) {
--			dev_dbg(dev, "Unable to handle MMC board"
--					" level suspend\n");
--			host->suspended = 0;
--			return ret;
--		}
--	}
- 	ret = mmc_suspend_host(host->mmc);
- 
- 	if (ret) {
- 		host->suspended = 0;
--		if (host->pdata->resume) {
--			if (host->pdata->resume(dev, host->slot_id))
--				dev_dbg(dev, "Unmask interrupt failed\n");
--		}
- 		goto err;
- 	}
- 
-@@ -2131,12 +2137,6 @@ static int omap_hsmmc_resume(struct device *dev)
- 	if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER))
- 		omap_hsmmc_conf_bus_power(host);
- 
--	if (host->pdata->resume) {
--		ret = host->pdata->resume(dev, host->slot_id);
--		if (ret)
--			dev_dbg(dev, "Unmask interrupt failed\n");
--	}
--
- 	omap_hsmmc_protect_card(host);
- 
- 	/* Notify the core to resume the host */
-@@ -2152,8 +2152,10 @@ static int omap_hsmmc_resume(struct device *dev)
++	if (of_find_property(np, "ti,needs-special-hs-handling", NULL))
++		pdata->slots[0].features |= HSMMC_HAS_HSPE_SUPPORT;
++
+ 	return pdata;
  }
- 
  #else
-+#define omap_hsmmc_prepare	NULL
-+#define omap_hsmmc_complete	NULL
- #define omap_hsmmc_suspend	NULL
--#define omap_hsmmc_resume		NULL
-+#define omap_hsmmc_resume	NULL
- #endif
- 
- static int omap_hsmmc_runtime_suspend(struct device *dev)
-@@ -2181,6 +2183,8 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
- static struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
- 	.suspend	= omap_hsmmc_suspend,
- 	.resume		= omap_hsmmc_resume,
-+	.prepare	= omap_hsmmc_prepare,
-+	.complete	= omap_hsmmc_complete,
- 	.runtime_suspend = omap_hsmmc_runtime_suspend,
- 	.runtime_resume = omap_hsmmc_runtime_resume,
- };
 -- 
 1.8.0
 
