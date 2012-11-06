@@ -1,7 +1,7 @@
 From: Huang Changming-R66093 <r66093@freescale.com>
 Subject: RE: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
-Date: Tue, 6 Nov 2012 01:55:21 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C215336@039-SN1MPN1-004.039d.mgd.msft.net>
+Date: Tue, 6 Nov 2012 01:55:36 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C21533F@039-SN1MPN1-004.039d.mgd.msft.net>
 References: <1351584769-16662-1-git-send-email-r66093@freescale.com>
 	<1351584769-16662-2-git-send-email-r66093@freescale.com>
 	<CA+20K0AfmJSrPO9-_-yNk4HhEVYPj8cMaa+jCZAZhp23Vb817g@mail.gmail.com>
@@ -13,19 +13,21 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [216.32.181.182] ([216.32.181.182]:45912 "EHLO
-	ch1outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S933487Ab2KFB4g convert rfc822-to-8bit
+Received: from [216.32.180.185] ([216.32.180.185]:38519 "EHLO
+	co1outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-OK)
+	by vger.kernel.org with ESMTP id S933487Ab2KFB4u convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 5 Nov 2012 20:56:36 -0500
+	Mon, 5 Nov 2012 20:56:50 -0500
 In-Reply-To: <CA+20K0DmMPDv0SJgd6-zoHN+eZr1fROT7=HY-mEWgAO9-gmSPg@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <jrudholm@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
+To: Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Johan Rudholm <jrudholm@gmail.com>
 
-Thanks a lot, Johan.
+Hi, Anton and Chris
+Have you any comment about the serial patch [patch 2/3/4, please ignore patch1]?
+Reviewed-By: Johan Rudholm <johan.rudholm@stericsson.com>
 
 Best Regards
 Jerry Huang
