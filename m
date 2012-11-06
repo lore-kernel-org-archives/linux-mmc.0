@@ -1,91 +1,108 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2] mmc: sdhci: fix incorrect command used in tuning
-Date: Mon, 05 Nov 2012 14:45:16 -0500
-Message-ID: <87wqxzal6b.fsf@octavius.laptop.org>
-References: <1341307669-20834-1-git-send-email-aaron.lu@amd.com>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
+Date: Tue, 6 Nov 2012 01:55:21 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C215336@039-SN1MPN1-004.039d.mgd.msft.net>
+References: <1351584769-16662-1-git-send-email-r66093@freescale.com>
+	<1351584769-16662-2-git-send-email-r66093@freescale.com>
+	<CA+20K0AfmJSrPO9-_-yNk4HhEVYPj8cMaa+jCZAZhp23Vb817g@mail.gmail.com>
+	<110EED8CC96DFC488B7E717A2027A27C210A6D@039-SN1MPN1-004.039d.mgd.msft.net>
+	<CA+20K0A3myrosOGK2dcstX06QOS1SRHaaz-zYqoFSA7ZYcEJvQ@mail.gmail.com>
+	<110EED8CC96DFC488B7E717A2027A27C213E8A@039-SN1MPN1-004.039d.mgd.msft.net>
+ <CA+20K0DmMPDv0SJgd6-zoHN+eZr1fROT7=HY-mEWgAO9-gmSPg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56855 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752677Ab2KETpX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 5 Nov 2012 14:45:23 -0500
-In-Reply-To: <1341307669-20834-1-git-send-email-aaron.lu@amd.com> (Aaron Lu's
-	message of "Tue, 3 Jul 2012 17:27:49 +0800")
+Received: from [216.32.181.182] ([216.32.181.182]:45912 "EHLO
+	ch1outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-OK)
+	by vger.kernel.org with ESMTP id S933487Ab2KFB4g convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 5 Nov 2012 20:56:36 -0500
+In-Reply-To: <CA+20K0DmMPDv0SJgd6-zoHN+eZr1fROT7=HY-mEWgAO9-gmSPg@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lu@amd.com>
-Cc: Girish K S <girish.shivananjappa@linaro.org>, Subhash Jadavani <subhashj@codeaurora.org>, Philip Rakity <prakity@marvell.com>, linux-mmc@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
+To: Johan Rudholm <jrudholm@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
 
-Hi Aaron,
+Thanks a lot, Johan.
 
-On Tue, Jul 03 2012, Aaron Lu wrote:
->  		 */
->  		if ((host->flags & SDHCI_NEEDS_RETUNING) &&
->  		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
-> +			/* eMMC uses cmd21 while sd and sdio use cmd19 */
-> +			tuning_opcode = mmc->card->type == MMC_TYPE_MMC ?
-> +				MMC_SEND_TUNING_BLOCK_HS200 :
-> +				MMC_SEND_TUNING_BLOCK;
-
-This is causing a NULL deref crash here when run on host controllers
-with no card inserted -- mmc->card is NULL, as you'd expect, yet it's
-dereferenced anyway.  Maybe the system you tested it on only has an
-eMMC, so you never noticed that it crashes if there's no card present?
-Or maybe it's abnormal for host controllers to set SDHCI_NEEDS_RETUNING
-when there's no card present?
-
-In any case, this has hit 3.[345]-stable now, so we're causing crashes
-for people who weren't seeing a crash before they pulled -stable.  :(
-The patch below just checks mmc->card before dereferencing it -- does
-this look like the correct fix to you?
+Best Regards
+Jerry Huang
 
 
-Subject: [PATCH] mmc: sdhci: Fix NULL dereference in sdhci_request() tuning code
+> -----Original Message-----
+> From: Johan Rudholm [mailto:jrudholm@gmail.com]
+> Sent: Monday, November 05, 2012 10:08 PM
+> To: Huang Changming-R66093
+> Cc: linux-mmc@vger.kernel.org; Anton Vorontsov; Chris Ball
+> Subject: Re: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
+> 
+> Hi,
+> 
+> 2012/11/5 Huang Changming-R66093 <r66093@freescale.com>:
+> >>
+> >> 2012/11/2 Huang Changming-R66093 <r66093@freescale.com>:
+> >> > Hi, Johan,
+> >> > When quicks SDHCI_QUIRK_BROKEN_CARD_DETECTION is set, the driver
+> will
+> >> poll the card status with the command CMD13 periodically, then many
+> >> interrupts will be generated, which affect the performance.
+> >>
+> >> Ok, just to see if I understand the scenario correctly:
+> >> SDHCI_QUIRK_BROKEN_CARD_DETECTION causes the MMC_CAP_NEEDS_POLL cap to
+> be
+> >> set, which will cause mmc_rescan to be run at a one second interval.
+> >> mmc_rescan calls bus_ops->detect (mmc_sd_detect) and this in turn
+> calls
+> >> _mmc_detect_card_removed, which will do the bus_ops->alive and send
+> CMD13.
+> >> So in this case, one CMD13 is sent per second, right?
+> >> Is this the cause of the performance issue?
+> >
+> > Yes, You are right.
+> 
+> Ok, it's a bit hard to understand how this can lead to a noticeable
+> performance impact, but OK. :)
+> 
+> >> A thought: if the host hardware does have a GPIO card detect pin
+> hooked
+> >> up, would it not be possible to make this pin generate an IRQ whenever
+> a
+> >> card is inserted or removed? This is what we do in the MMCI driver,
+> for
+> >> instance (mmci_cd_irq).
+> >
+> > Our silicones has this pin to do card detect, but some boards don't
+> generate the interrupt when card is inserted or removed. So I have to use
+> the poll mode.
+> >
+> >> > Yes, some cases to detect GPIO can't be trusted, so I only just
+> >> implement this callback in eSDHC-of driver. that is to say, just when
+> the
+> >> platform support it, this callback can be implement, if not, continue
+> to
+> >> send the command CMD13.
+> >>
+> >> I'm just wondering how this will affect our system, where we use the
+> cd
+> >> GPIO to generate detect jobs on card insert/remove, but where the cd
+> pin
+> >> is not 100% synchronized with the electrical connection of the power
+> and
+> >> cmd line of the SD-card. So if I remember correctly, the cd pin may
+> >> report that the card has been removed, but there is still an electric
+> >> connection and the card is alive...
+> >>
+> > I don't see this on our board, when card is inserted or removed, the
+> register field can reflect this state correctly.
+> 
+> We see a difference on our boards with this patch, but no functional
+> change (actually a removed card is detected earlier now), so from my
+> perspective:
+> 
+> Reviewed-By: Johan Rudholm <johan.rudholm@stericsson.com>
+> 
+> //Johan
 
-Commit 473b095a72a9 ("mmc: sdhci: fix incorrect command used in tuning")
-introduced a NULL dereference if an SD 3.0 host controller raises the
-SDHCI_NEEDS_TUNING flag while no card is inserted.
 
-Signed-off-by: Chris Ball <cjb@laptop.org>
----
- drivers/mmc/host/sdhci.c | 23 +++++++++++++----------
- 1 file changed, 13 insertions(+), 10 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 07a5346..2e1175d 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1294,16 +1294,19 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		 */
- 		if ((host->flags & SDHCI_NEEDS_RETUNING) &&
- 		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
--			/* eMMC uses cmd21 while sd and sdio use cmd19 */
--			tuning_opcode = mmc->card->type == MMC_TYPE_MMC ?
--				MMC_SEND_TUNING_BLOCK_HS200 :
--				MMC_SEND_TUNING_BLOCK;
--			spin_unlock_irqrestore(&host->lock, flags);
--			sdhci_execute_tuning(mmc, tuning_opcode);
--			spin_lock_irqsave(&host->lock, flags);
--
--			/* Restore original mmc_request structure */
--			host->mrq = mrq;
-+			if (mmc->card) {
-+				/* eMMC uses cmd21 but sd and sdio use cmd19 */
-+				tuning_opcode =
-+					mmc->card->type == MMC_TYPE_MMC ?
-+					MMC_SEND_TUNING_BLOCK_HS200 :
-+					MMC_SEND_TUNING_BLOCK;
-+				spin_unlock_irqrestore(&host->lock, flags);
-+				sdhci_execute_tuning(mmc, tuning_opcode);
-+				spin_lock_irqsave(&host->lock, flags);
-+
-+				/* Restore original mmc_request structure */
-+				host->mrq = mrq;
-+			}
- 		}
- 
- 		if (mrq->sbc && !(host->flags & SDHCI_AUTO_CMD23))
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
