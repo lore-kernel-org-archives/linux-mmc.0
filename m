@@ -1,129 +1,155 @@
-From: Felipe Balbi <balbi@ti.com>
-Subject: [PATCH v2] mmc: omap_hsmmc: introduce omap_hsmmc_prepare/complete
-Date: Tue, 6 Nov 2012 18:34:09 +0200
-Message-ID: <1352219649-4460-1-git-send-email-balbi@ti.com>
-References: <CAOyx1Lr1g=5RrOZdUiUcgWU0wjoNnpzH6Hr5JfqK8s0n5uoShw@mail.gmail.com>
+From: Venkatraman S <svenkatr@ti.com>
+Subject: [PATCH 4/5] mmc: omap_hsmmc: cleanup the bitmap definitions of Interrupt Register
+Date: Tue, 6 Nov 2012 22:22:15 +0530
+Message-ID: <1352220737-14071-5-git-send-email-svenkatr@ti.com>
+References: <1352220737-14071-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:48802 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752131Ab2KFQkT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 6 Nov 2012 11:40:19 -0500
-In-Reply-To: <CAOyx1Lr1g=5RrOZdUiUcgWU0wjoNnpzH6Hr5JfqK8s0n5uoShw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1352220737-14071-1-git-send-email-svenkatr@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: cjb@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Venkatraman S <svenkatr@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "\\\"Venkatraman S.\\\"" <svenkatr@ti.com>
-Cc: Balaji T K <balajitk@ti.com>, cjb@laptop.org, Tony Lindgren <tony@atomide.com>, linux-mmc@vger.kernel.org, Linux OMAP Mailing List <linux-omap@vger.kernel.org>, Linux ARM Kernel Mailing List <linux-arm-kernel@lists.infradead.org>, Felipe Balbi <balbi@ti.com>
 
-prepare() is supposed to prevent new children from
-being registered. On the MMC subsystem, children
-(new cards) registration starts with the card
-detect IRQ.
+Define the most frequently used bitmasks of the Interrupt Enable /
+Interrupt Status register with consistent naming ( with _EN suffix).
 
-Move card detect IRQ disabling to prepare() so that
-no new cards will be registered while we're trying
-to suspend.
+Use meaningful concatenation of bitfields for INT_EN_MASK, which shows
+which interrupts are enabled by default.
+No functional changes.
 
-Likewise, move card detect IRQ enabling to complete()
-so we only try to register new children after our MMC
-IP is back up.
-
-Signed-off-by: Felipe Balbi <balbi@ti.com>
+Signed-off-by: Venkatraman S <svenkatr@ti.com>
+Acked-by: Felipe Balbi <balbi@ti.com>
 ---
-
-Fixed ->complete() prototype.
-
- drivers/mmc/host/omap_hsmmc.c | 43 +++++++++++++++++++++++--------------------
- 1 file changed, 23 insertions(+), 20 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c | 54 +++++++++++++++++++++++++------------------
+ 1 file changed, 31 insertions(+), 23 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 54bfd0c..d2d6a56 100644
+index e91e85a..d16ef0f 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -2022,6 +2022,24 @@ static int __devexit omap_hsmmc_remove(struct platform_device *pdev)
- }
+@@ -80,29 +80,17 @@
+ #define CLKD_SHIFT		6
+ #define DTO_MASK		0x000F0000
+ #define DTO_SHIFT		16
+-#define INT_EN_MASK		0x307F0033
+-#define BWR_ENABLE		(1 << 4)
+-#define BRR_ENABLE		(1 << 5)
+-#define DTO_ENABLE		(1 << 20)
+ #define INIT_STREAM		(1 << 1)
+ #define DP_SELECT		(1 << 21)
+ #define DDIR			(1 << 4)
+-#define DMA_EN			0x1
++#define DMAE			0x1
+ #define MSBS			(1 << 5)
+ #define BCE			(1 << 1)
+ #define FOUR_BIT		(1 << 1)
+ #define HSPE			(1 << 2)
+ #define DDR			(1 << 19)
+ #define DW8			(1 << 5)
+-#define CC			0x1
+-#define TC			0x02
+ #define OD			0x1
+-#define ERR			(1 << 15)
+-#define CMD_TIMEOUT		(1 << 16)
+-#define DATA_TIMEOUT		(1 << 20)
+-#define CMD_CRC			(1 << 17)
+-#define DATA_CRC		(1 << 21)
+-#define CARD_ERR		(1 << 28)
+ #define STAT_CLEAR		0xFFFFFFFF
+ #define INIT_STREAM_CMD		0x00000000
+ #define DUAL_VOLT_OCR_BIT	7
+@@ -111,6 +99,26 @@
+ #define SOFTRESET		(1 << 1)
+ #define RESETDONE		(1 << 0)
  
- #ifdef CONFIG_PM
-+static int omap_hsmmc_prepare(struct device *dev)
-+{
-+	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
++/* Interrupt masks for IE and ISE register */
++#define CC_EN			(1 << 0)
++#define TC_EN			(1 << 1)
++#define BWR_EN			(1 << 4)
++#define BRR_EN			(1 << 5)
++#define ERR_EN			(1 << 15)
++#define CTO_EN			(1 << 16)
++#define CCRC_EN			(1 << 17)
++#define CEB_EN			(1 << 18)
++#define CIE_EN			(1 << 19)
++#define DTO_EN			(1 << 20)
++#define DCRC_EN			(1 << 21)
++#define DEB_EN			(1 << 22)
++#define CERR_EN			(1 << 28)
++#define BADA_EN			(1 << 29)
 +
-+	if (host->pdata->suspend)
-+		return host->pdata->suspend(dev, host->slot_id);
++#define INT_EN_MASK		(BADA_EN | CERR_EN | DEB_EN | DCRC_EN |\
++		DTO_EN | CIE_EN | CEB_EN | CCRC_EN | CTO_EN | ERR_EN |\
++		BRR_EN | BWR_EN | TC_EN | CC_EN)
 +
-+	return 0;
-+}
-+
-+static void omap_hsmmc_complete(struct device *dev)
-+{
-+	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
-+
-+	if (host->pdata->resume)
-+		host->pdata->resume(dev, host->slot_id);
-+}
-+
- static int omap_hsmmc_suspend(struct device *dev)
- {
- 	int ret = 0;
-@@ -2035,23 +2053,10 @@ static int omap_hsmmc_suspend(struct device *dev)
+ #define MMC_AUTOSUSPEND_DELAY	100
+ #define MMC_TIMEOUT_MS		20
+ #define OMAP_MMC_MIN_CLOCK	400000
+@@ -458,13 +466,13 @@ static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
+ 	unsigned int irq_mask;
  
- 	pm_runtime_get_sync(host->dev);
- 	host->suspended = 1;
--	if (host->pdata->suspend) {
--		ret = host->pdata->suspend(dev, host->slot_id);
--		if (ret) {
--			dev_dbg(dev, "Unable to handle MMC board"
--					" level suspend\n");
--			host->suspended = 0;
--			return ret;
--		}
--	}
- 	ret = mmc_suspend_host(host->mmc);
+ 	if (host->use_dma)
+-		irq_mask = INT_EN_MASK & ~(BRR_ENABLE | BWR_ENABLE);
++		irq_mask = INT_EN_MASK & ~(BRR_EN | BWR_EN);
+ 	else
+ 		irq_mask = INT_EN_MASK;
  
- 	if (ret) {
- 		host->suspended = 0;
--		if (host->pdata->resume) {
--			if (host->pdata->resume(dev, host->slot_id))
--				dev_dbg(dev, "Unmask interrupt failed\n");
--		}
- 		goto err;
+ 	/* Disable timeout for erases */
+ 	if (cmd->opcode == MMC_ERASE)
+-		irq_mask &= ~DTO_ENABLE;
++		irq_mask &= ~DTO_EN;
+ 
+ 	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+ 	OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
+@@ -702,8 +710,8 @@ static void send_init_stream(struct omap_hsmmc_host *host)
+ 	OMAP_HSMMC_WRITE(host->base, CMD, INIT_STREAM_CMD);
+ 
+ 	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+-	while ((reg != CC) && time_before(jiffies, timeout))
+-		reg = OMAP_HSMMC_READ(host->base, STAT) & CC;
++	while ((reg != CC_EN) && time_before(jiffies, timeout))
++		reg = OMAP_HSMMC_READ(host->base, STAT) & CC_EN;
+ 
+ 	OMAP_HSMMC_WRITE(host->base, CON,
+ 		OMAP_HSMMC_READ(host->base, CON) & ~INIT_STREAM);
+@@ -794,7 +802,7 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
  	}
  
-@@ -2088,12 +2093,6 @@ static int omap_hsmmc_resume(struct device *dev)
- 	if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER))
- 		omap_hsmmc_conf_bus_power(host);
+ 	if (host->use_dma)
+-		cmdreg |= DMA_EN;
++		cmdreg |= DMAE;
  
--	if (host->pdata->resume) {
--		ret = host->pdata->resume(dev, host->slot_id);
--		if (ret)
--			dev_dbg(dev, "Unmask interrupt failed\n");
--	}
--
- 	omap_hsmmc_protect_card(host);
+ 	host->req_in_progress = 1;
  
- 	/* Notify the core to resume the host */
-@@ -2109,8 +2108,10 @@ static int omap_hsmmc_resume(struct device *dev)
+@@ -1014,11 +1022,11 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
+ 	data = host->data;
+ 	dev_vdbg(mmc_dev(host->mmc), "IRQ Status is %x\n", status);
+ 
+-	if (status & ERR) {
++	if (status & ERR_EN) {
+ 		omap_hsmmc_dbg_report_irq(host, status);
+-		if (status & (CMD_TIMEOUT | DATA_TIMEOUT))
++		if (status & (CTO_EN | DTO_EN))
+ 			hsmmc_command_incomplete(host, -ETIMEDOUT);
+-		else if (status & (CMD_CRC | DATA_CRC))
++		else if (status & (CCRC_EN | DCRC_EN))
+ 			hsmmc_command_incomplete(host, -EILSEQ);
+ 
+ 		if (host->cmd)
+@@ -1029,9 +1037,9 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
+ 		}
+ 	}
+ 
+-	if (end_cmd || ((status & CC) && host->cmd))
++	if (end_cmd || ((status & CC_EN) && host->cmd))
+ 		omap_hsmmc_cmd_done(host, host->cmd);
+-	if ((end_trans || (status & TC)) && host->mrq)
++	if ((end_trans || (status & TC_EN)) && host->mrq)
+ 		omap_hsmmc_xfer_done(host, data);
  }
  
- #else
-+#define omap_hsmmc_prepare	NULL
-+#define omap_hsmmc_complete	NULL
- #define omap_hsmmc_suspend	NULL
--#define omap_hsmmc_resume		NULL
-+#define omap_hsmmc_resume	NULL
- #endif
- 
- static int omap_hsmmc_runtime_suspend(struct device *dev)
-@@ -2138,6 +2139,8 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
- static struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
- 	.suspend	= omap_hsmmc_suspend,
- 	.resume		= omap_hsmmc_resume,
-+	.prepare	= omap_hsmmc_prepare,
-+	.complete	= omap_hsmmc_complete,
- 	.runtime_suspend = omap_hsmmc_runtime_suspend,
- 	.runtime_resume = omap_hsmmc_runtime_resume,
- };
 -- 
 1.8.0
 
