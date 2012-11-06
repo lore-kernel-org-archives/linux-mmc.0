@@ -1,60 +1,68 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH V2 1/3] mmc: esdhc: enable polling to detect card by
- itself
-Date: Tue, 6 Nov 2012 20:52:54 +0800
-Message-ID: <20121106125253.GC27643@S2100-06.ap.freescale.net>
-References: <1351589403-26398-1-git-send-email-yongd@marvell.com>
- <1351589403-26398-2-git-send-email-yongd@marvell.com>
- <20121031152030.GE8100@S2100-06.ap.freescale.net>
- <5093BE95.6040709@marvell.com>
- <20121105015421.GA26512@S2100-06.ap.freescale.net>
- <509733D9.2060807@marvell.com>
- <20121105124809.GA27260@S2100-06.ap.freescale.net>
- <5098CF26.3060202@marvell.com>
+From: Venkatraman S <svenkatr@ti.com>
+Subject: Re: [RFC/PATCH] mmc: omap_hsmmc: introduce omap_hsmmc_prepare/complete
+Date: Tue, 6 Nov 2012 21:20:04 +0530
+Message-ID: <CAOyx1Lr1g=5RrOZdUiUcgWU0wjoNnpzH6Hr5JfqK8s0n5uoShw@mail.gmail.com>
+References: <1350910768-8522-1-git-send-email-balbi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:3047
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750772Ab2KFM1Z (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Nov 2012 07:27:25 -0500
-Content-Disposition: inline
-In-Reply-To: <5098CF26.3060202@marvell.com>
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:41231 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751154Ab2KFPuF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Nov 2012 10:50:05 -0500
+In-Reply-To: <1350910768-8522-1-git-send-email-balbi@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: yongd <yongd@marvell.com>
-Cc: Chris Ball <cjb@laptop.org>, Anton Vorontsov <anton.vorontsov@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Wolfram Sang <w.sang@pengutronix.de>, Daniel Drake <dsd@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Wilson Callan <wilson.callan@savantsystems.com>, Ben Dooks <ben-linux@fluff.org>, Zhangfei Gao <zgao6@marvell.com>, Kevin Liu <kliu5@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Felipe Balbi <balbi@ti.com>
+Cc: Linux OMAP Mailing List <linux-omap@vger.kernel.org>, linux-mmc@vger.kernel.org, cjb@laptop.org, Tony Lindgren <tony@atomide.com>, Balaji T K <balajitk@ti.com>, Linux ARM Kernel Mailing List <linux-arm-kernel@lists.infradead.org>
 
-On Tue, Nov 06, 2012 at 04:49:42PM +0800, yongd wrote:
-> From your info, we can see that on your platform, those pins (including
-> power, clk, DATA) necessary for MMC_SEND_STATUS transaction still keep
-> connected for some time just after the GPIO's level changes due to card
-> removable. And if we remove the card very slowly, such time duration can be
-> such long that the MMC_SEND_STATUS query can still succeed.
-> 
-I was not removing the card as slowly as you think. It's actually
-a normal speed.  That's why I thought your patch breaks the
-card-detection functionality before I found the cause.
+On Mon, Oct 22, 2012 at 6:29 PM, Felipe Balbi <balbi@ti.com> wrote:
+> prepare() is supposed to prevent new children from
+> being registered. On the MMC subsystem, children
+> (new cards) registration starts with the card
+> detect IRQ.
+>
+> Move card detect IRQ disabling to prepare() so that
+> no new cards will be registered while we're trying
+> to suspend.
+>
+> Likewise, move card detect IRQ enabling to complete()
+> so we only try to register new children after our MMC
+> IP is back up.
+>
+> Signed-off-by: Felipe Balbi <balbi@ti.com>
+> ---
+>
+> Venkat, do you think the patch below makes sense ?
 
-> So I think we can add a proper delay(maybe 100ms) before the gpio interrupt
-> triggers the MMC_SEND_STATUS query, and maybe this can probably fix this issue:-)
-> 
-I do not think it's a proper fixing.
+Except for the minor nit mentioned below, it works well.
+I'll include it in my patch series.
 
-<snip>
+>
+> cheers
+>
+>  drivers/mmc/host/omap_hsmmc.c | 45 ++++++++++++++++++++++++-------------------
+>  1 file changed, 25 insertions(+), 20 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 54bfd0c..4c8b41e 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -2022,6 +2022,26 @@ static int __devexit omap_hsmmc_remove(struct platform_device *pdev)
+>  }
+>
+>  #ifdef CONFIG_PM
+> +static int omap_hsmmc_prepare(struct device *dev)
+> +{
+> +       struct omap_hsmmc_host *host = dev_get_drvdata(dev);
+> +
+> +       if (host->pdata->suspend)
+> +               return host->pdata->suspend(dev, host->slot_id);
+> +
+> +       return 0;
+> +}
+> +
+> +static int omap_hsmmc_complete(struct device *dev)
 
-> Anyway, I 100% agree with you that for a ESDHC_CD_GPIO card, we shall query gpio
-> state to know such card's presence rather than sending MMC_SEND_STATUS rudely.
-> 
-> But just as I mentioned before, I don't think using SDHCI_QUIRK_BROKEN_CARD_DETECTION
-> as the flag to determine whether and how we can know card's presence before sending
-> command is a proper way.
-> 
-> I haven't gotten any good idea. Do u have any idea on this?
-> 
-I guess what we need is to call mmc_gpio_get_cd() trying to know card's
-presence before sending MMC_SEND_STATUS command.  sdhci-esdhc-imx
-driver will surely need some changes to cope with that.
-
-Shawn
-
+The .complete() function prototype requires to return void.
+This one emits a compilation warning.
