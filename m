@@ -1,49 +1,115 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [mmc:mmc-next 17/28] sdhci-pltfm.c:(.text+0x80): multiple definition of `sdhci_runtime_pm_get'
-Date: Wed, 07 Nov 2012 15:43:05 -0500
-Message-ID: <87ip9h6t5y.fsf@octavius.laptop.org>
-References: <509ac6c4.cYfNNpMXVvvrRu6C%fengguang.wu@intel.com>
+From: Heiko =?iso-8859-1?q?St=FCbner?= <heiko@sntech.de>
+Subject: [PATCH] Revert "mmc: sdhci-s3c: Add clk_(enable/disable) in runtime  suspend/resume"
+Date: Wed, 7 Nov 2012 23:57:15 +0100
+Message-ID: <201211072357.15572.heiko@sntech.de>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: Text/Plain;
+  charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:45455 "EHLO void.printf.net"
+Received: from gloria.sntech.de ([95.129.55.99]:55110 "EHLO gloria.sntech.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751727Ab2KGUnM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 7 Nov 2012 15:43:12 -0500
-In-Reply-To: <509ac6c4.cYfNNpMXVvvrRu6C%fengguang.wu@intel.com> (kbuild test
-	robot's message of "Thu, 08 Nov 2012 04:38:28 +0800")
+	id S1754186Ab2KGXiZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 7 Nov 2012 18:38:25 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: kbuild test robot <fengguang.wu@intel.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Chander Kashyap <chander.kashyap@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>
 
-Hi,
+This reverts commit 2abeb5c5ded2e7f7d288058426fb0ae852adc77f, as it breaks
+machines using the gpio-based card-detect option with a loop of
 
-On Wed, Nov 07 2012, kbuild test robot wrote:
-> tree:   git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git mmc-next
-> head:   a6a567a4c25762e36228d2d0c8c1859085132e15
-> commit: 90ba86ed414e8ab4d84fe3342f10948c607efa7a [17/28] mmc:
-> sdhci-s3c: ensure non-transaction of bus before clk_disable
-> config: i386-randconfig-b646 (attached as .config)
->
-> All error/warnings:
->
-> drivers/mmc/host/sdhci-pltfm.o: In function `sdhci_runtime_pm_get':
-> sdhci-pltfm.c:(.text+0x80): multiple definition of `sdhci_runtime_pm_get'
-> drivers/mmc/host/sdhci.o:sdhci.c:(.text+0x7550): first defined here
-> drivers/mmc/host/sdhci-pltfm.o: In function `sdhci_runtime_pm_put':
-> sdhci-pltfm.c:(.text+0xa0): multiple definition of `sdhci_runtime_pm_put'
-> drivers/mmc/host/sdhci.o:sdhci.c:(.text+0x7570): first defined here
+        mmc0: Timeout waiting for hardware interrupt.
+        mmc0: Internal clock never stabilised.
+        mmc0: Timeout waiting for hardware interrupt.
+        mmc0: Internal clock never stabilised.
 
-Yay for buildbots.  Seungwon, I've dropped this patch from mmc-next now,
-please investigate and fix.
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+This is of course meant for 3.7-rc
 
-(Wu, are you sure that this is the correct config?  It's i386 without
-MMC_SDHCI_S3C=y, and MMC_SDHCI_S3C depends on PLAT_SAMSUNG/ARM.)
+ drivers/mmc/host/sdhci-s3c.c |   29 ++---------------------------
+ 1 file changed, 2 insertions(+), 27 deletions(-)
 
-Thanks,
-
-- Chris.
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 2903949..e019672 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -637,9 +637,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 		goto err_no_busclks;
+ 	}
+ 
+-#ifndef CONFIG_PM_RUNTIME
+ 	clk_enable(sc->clk_bus[sc->cur_clk]);
+-#endif
+ 
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	host->ioaddr = devm_request_and_ioremap(&pdev->dev, res);
+@@ -746,15 +744,10 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	    gpio_is_valid(pdata->ext_cd_gpio))
+ 		sdhci_s3c_setup_card_detect_gpio(sc);
+ 
+-#ifdef CONFIG_PM_RUNTIME
+-	clk_disable(sc->clk_io);
+-#endif
+ 	return 0;
+ 
+  err_req_regs:
+-#ifndef CONFIG_PM_RUNTIME
+ 	clk_disable(sc->clk_bus[sc->cur_clk]);
+-#endif
+ 	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+ 		if (sc->clk_bus[ptr]) {
+ 			clk_put(sc->clk_bus[ptr]);
+@@ -793,17 +786,12 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+ 	if (gpio_is_valid(sc->ext_cd_gpio))
+ 		gpio_free(sc->ext_cd_gpio);
+ 
+-#ifdef CONFIG_PM_RUNTIME
+-	clk_enable(sc->clk_io);
+-#endif
+ 	sdhci_remove_host(host, 1);
+ 
+ 	pm_runtime_dont_use_autosuspend(&pdev->dev);
+ 	pm_runtime_disable(&pdev->dev);
+ 
+-#ifndef CONFIG_PM_RUNTIME
+ 	clk_disable(sc->clk_bus[sc->cur_clk]);
+-#endif
+ 	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+ 		if (sc->clk_bus[ptr]) {
+ 			clk_put(sc->clk_bus[ptr]);
+@@ -843,28 +831,15 @@ static int sdhci_s3c_resume(struct device *dev)
+ static int sdhci_s3c_runtime_suspend(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+-	struct sdhci_s3c *ourhost = to_s3c(host);
+-	struct clk *busclk = ourhost->clk_io;
+-	int ret;
+-
+-	ret = sdhci_runtime_suspend_host(host);
+ 
+-	clk_disable(ourhost->clk_bus[ourhost->cur_clk]);
+-	clk_disable(busclk);
+-	return ret;
++	return sdhci_runtime_suspend_host(host);
+ }
+ 
+ static int sdhci_s3c_runtime_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+-	struct sdhci_s3c *ourhost = to_s3c(host);
+-	struct clk *busclk = ourhost->clk_io;
+-	int ret;
+ 
+-	clk_enable(busclk);
+-	clk_enable(ourhost->clk_bus[ourhost->cur_clk]);
+-	ret = sdhci_runtime_resume_host(host);
+-	return ret;
++	return sdhci_runtime_resume_host(host);
+ }
+ #endif
+ 
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.10.4
+
