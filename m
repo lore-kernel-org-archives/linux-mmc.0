@@ -1,7 +1,7 @@
 From: dragos.tatulea@intel.com
-Subject: [PATCH v2 24/26] mmc: sdhci: panic write: abort request in progress
-Date: Thu,  8 Nov 2012 15:06:22 +0200
-Message-ID: <1352379984-18381-25-git-send-email-dragos.tatulea@intel.com>
+Subject: [PATCH v2 23/26] mmc: sdhci: panic write: resume suspended host
+Date: Thu,  8 Nov 2012 15:06:21 +0200
+Message-ID: <1352379984-18381-24-git-send-email-dragos.tatulea@intel.com>
 References: <1352379984-18381-1-git-send-email-dragos.tatulea@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1352379984-18381-1-git-send-email-dragos.tatulea@intel.com>
@@ -12,27 +12,45 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Adrian Hunter <adrian.hunter@intel.com>
 
+Resume host when entering panic mode.
+
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Irina Tirdea <irina.tirdea@intel.com>
 ---
- drivers/mmc/host/sdhci.c |    5 +++++
- 1 file changed, 5 insertions(+)
+ drivers/mmc/host/sdhci.c |   14 ++++++++++----
+ 1 file changed, 10 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 496adc8..9a24417 100644
+index ab3f5ce..496adc8 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1351,6 +1351,11 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+@@ -2231,6 +2231,10 @@ static void sdhci_panic_begin(struct mmc_host *mmc)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
  
- 	sdhci_lock_irqsave(host, flags);
++	if (host->runtime_suspended)
++		sdhci_runtime_resume_host(host);
++	else if (mmc->ios.vdd == 0)
++		sdhci_resume_host(host);
+ 	sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
+ }
  
-+	if (mmc_am_panic_task(mmc) && host->mrq) {
-+		host->mrq->cmd->error = -EILSEQ;
-+		sdhci_sched_tasklet(host, finish);
+@@ -2741,10 +2745,12 @@ int sdhci_resume_host(struct sdhci_host *host)
+ 			host->ops->enable_dma(host);
+ 	}
+ 
+-	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+-			  mmc_hostname(host->mmc), host);
+-	if (ret)
+-		return ret;
++	if (!mmc_am_panic_task(host->mmc)) {
++		ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
++				  mmc_hostname(host->mmc), host);
++		if (ret)
++			return ret;
 +	}
-+
- 	WARN_ON(host->mrq != NULL);
  
- #ifndef SDHCI_USE_LEDS_CLASS
+ 	if ((host->mmc->pm_flags & MMC_PM_KEEP_POWER) &&
+ 	    (host->quirks2 & SDHCI_QUIRK2_HOST_OFF_CARD_ON)) {
 -- 
 1.7.9.5
