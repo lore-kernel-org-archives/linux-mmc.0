@@ -1,101 +1,168 @@
 From: dragos.tatulea@intel.com
-Subject: [PATCH v2 16/26] mmc: sdhci: panic write: no sleeping
-Date: Thu,  8 Nov 2012 15:06:14 +0200
-Message-ID: <1352379984-18381-17-git-send-email-dragos.tatulea@intel.com>
+Subject: [PATCH v2 25/26] mmc: sdhci: panic write: trap nonpanic tasks
+Date: Thu,  8 Nov 2012 15:06:23 +0200
+Message-ID: <1352379984-18381-26-git-send-email-dragos.tatulea@intel.com>
 References: <1352379984-18381-1-git-send-email-dragos.tatulea@intel.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:24988 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755880Ab2KHNEj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 8 Nov 2012 08:04:39 -0500
 In-Reply-To: <1352379984-18381-1-git-send-email-dragos.tatulea@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org
 Cc: kirill.shutemov@linux.intel.com, irina.tirdea@intel.com, octavian.purdila@intel.com, tony.luck@intel.com, keescook@chromium.org, dragos.tatulea@gmail.com, Adrian Hunter <adrian.hunter@intel.com>
-List-Id: linux-mmc@vger.kernel.org
 
 From: Adrian Hunter <adrian.hunter@intel.com>
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Irina Tirdea <irina.tirdea@intel.com>
 ---
- drivers/mmc/host/sdhci.c |   26 +++++++++++++++++++++-----
- 1 file changed, 21 insertions(+), 5 deletions(-)
+ drivers/mmc/host/sdhci.c  |   47 +++++++++++++++++++++++++++++++++++++++++----
+ include/linux/mmc/sdhci.h |    1 +
+ 2 files changed, 44 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 1ed78f0..827e34f 100644
+index 9a24417..db12fad 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1536,6 +1536,14 @@ static int sdhci_check_ro(struct sdhci_host *host)
+@@ -2204,8 +2204,12 @@ static void sdhci_panic_cleanup(struct mmc_host *mmc)
  
- #define SAMPLE_COUNT	5
- 
-+static void sdhci_msleep(struct sdhci_host *host, unsigned int ms)
-+{
-+	if (mmc_am_panic_task(host->mmc))
-+		mdelay(ms);
-+	else
-+		msleep(ms);
-+}
-+
- static int sdhci_do_get_ro(struct sdhci_host *host)
+ void sdhci_lock(struct sdhci_host *host)
  {
- 	int i, ro_count;
-@@ -1549,7 +1557,7 @@ static int sdhci_do_get_ro(struct sdhci_host *host)
- 			if (++ro_count > SAMPLE_COUNT / 2)
- 				return 1;
- 		}
--		msleep(30);
-+		sdhci_msleep(host, 30);
- 	}
- 	return 0;
- }
-@@ -1605,6 +1613,14 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	sdhci_unlock_irqrestore(host, flags);
+-	if (mmc_am_panic_task(host->mmc))
+-		return;
++	if (mmc_panic_task_active(host->mmc)) {
++		if (mmc_am_panic_task(host->mmc))
++			return;
++		while (mmc_am_nonpanic_task(host->mmc))
++			cpu_relax();
++	}
+ 	spin_lock(&host->lock);
  }
  
-+#define sdhci_usleep_range(host, min, max)		\
-+do {							\
-+	if (mmc_am_panic_task((host)->mmc))		\
-+		mdelay(DIV_ROUND_UP(min, 1000));	\
-+	else						\
-+		usleep_range(min, max);			\
-+} while (0)
-+
- static int sdhci_do_3_3v_signal_voltage_switch(struct sdhci_host *host,
- 						u16 ctrl)
+@@ -2219,8 +2223,12 @@ void _sdhci_lock_irqsave(struct sdhci_host *host, unsigned long *flags_ptr)
  {
-@@ -1623,7 +1639,7 @@ static int sdhci_do_3_3v_signal_voltage_switch(struct sdhci_host *host,
- 		}
- 	}
- 	/* Wait for 5ms */
--	usleep_range(5000, 5500);
-+	sdhci_usleep_range(host, 5000, 5500);
+ 	unsigned long flags;
  
- 	/* 3.3V regulator output should be stable within 5 ms */
- 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-@@ -1668,7 +1684,7 @@ static int sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
- 			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+-	if (mmc_am_panic_task(host->mmc))
+-		return;
++	if (mmc_panic_task_active(host->mmc)) {
++		if (mmc_am_panic_task(host->mmc))
++			return;
++		while (mmc_am_nonpanic_task(host->mmc))
++			cpu_relax();
++	}
  
- 			/* Wait for 5ms */
--			usleep_range(5000, 5500);
-+			sdhci_usleep_range(host, 5000, 5500);
+ 	spin_lock_irqsave(&host->lock, flags);
+ 	*flags_ptr = flags;
+@@ -2235,6 +2243,16 @@ void sdhci_unlock_irqrestore(struct sdhci_host *host, unsigned long flags)
+ static void sdhci_panic_begin(struct mmc_host *mmc)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
++	int i;
++
++	/* Wait a bit for other users to go away */
++	for (i = 0; i < 10000; i++) {
++		if (spin_trylock(&host->lock)) {
++			host->locked = 1;
++			break;
++		}
++		udelay(1);
++	}
  
- 			ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 			if (ctrl & SDHCI_CTRL_VDD_180) {
-@@ -1676,7 +1692,7 @@ static int sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
- 				clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
- 				clk |= SDHCI_CLOCK_CARD_EN;
- 				sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
--				usleep_range(1000, 1500);
-+				sdhci_usleep_range(host, 1000, 1500);
+ 	if (host->runtime_suspended)
+ 		sdhci_runtime_resume_host(host);
+@@ -2250,6 +2268,10 @@ static void sdhci_panic_end(struct mmc_host *mmc)
  
- 				/*
- 				 * If DAT[3:0] level is 1111b, then the card
-@@ -1703,7 +1719,7 @@ static int sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
- 		regulator_disable(host->vmmc);
+ 	ier = sdhci_readl(host, SDHCI_INT_ENABLE);
+ 	sdhci_writel(host, ier, SDHCI_SIGNAL_ENABLE);
++	if (host->locked) {
++		host->locked = 0;
++		spin_unlock(&host->lock);
++	}
+ }
  
- 	/* Wait for 1ms as per the spec */
--	usleep_range(1000, 1500);
-+	sdhci_usleep_range(host, 1000, 1500);
- 	pwr |= SDHCI_POWER_ON;
- 	sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
- 	if (host->vmmc)
+ static const struct mmc_panic_ops sdhci_pops = {
+@@ -2368,6 +2390,9 @@ static void sdhci_timeout_timer(unsigned long data)
+ 
+ 	host = (struct sdhci_host*)data;
+ 
++	if (mmc_am_nonpanic_task(host->mmc))
++		return;
++
+ 	sdhci_lock_irqsave(host, flags);
+ 
+ 	if (host->mrq) {
+@@ -2399,6 +2424,9 @@ static void sdhci_tuning_timer(unsigned long data)
+ 
+ 	host = (struct sdhci_host *)data;
+ 
++	if (mmc_am_nonpanic_task(host->mmc))
++		return;
++
+ 	sdhci_lock_irqsave(host, flags);
+ 
+ 	host->flags |= SDHCI_NEEDS_RETUNING;
+@@ -2596,6 +2624,9 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ 	u32 intmask, unexpected = 0;
+ 	int cardint = 0, max_loops = 16;
+ 
++	if (mmc_am_nonpanic_task(host->mmc))
++		return IRQ_HANDLED;
++
+ 	sdhci_lock(host);
+ 
+ 
+@@ -2713,6 +2744,8 @@ int sdhci_suspend_host(struct sdhci_host *host)
+ 	if (host->ops->platform_suspend)
+ 		host->ops->platform_suspend(host);
+ 
++	mmc_trap_nonpanic_tasks(host->mmc);
++
+ 	sdhci_disable_card_detection(host);
+ 
+ 	/* Disable tuning since we are suspending */
+@@ -2745,6 +2778,8 @@ int sdhci_resume_host(struct sdhci_host *host)
+ {
+ 	int ret;
+ 
++	mmc_trap_nonpanic_tasks(host->mmc);
++
+ 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+ 		if (host->ops->enable_dma)
+ 			host->ops->enable_dma(host);
+@@ -2820,6 +2855,8 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
+ 	unsigned long flags;
+ 	int ret = 0;
+ 
++	mmc_trap_nonpanic_tasks(host->mmc);
++
+ 	/* Disable tuning since we are suspending */
+ 	if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+ 		del_timer_sync(&host->tuning_timer);
+@@ -2845,6 +2882,8 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
+ 	unsigned long flags;
+ 	int ret = 0, host_flags = host->flags;
+ 
++	mmc_trap_nonpanic_tasks(host->mmc);
++
+ 	if (host_flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+ 		if (host->ops->enable_dma)
+ 			host->ops->enable_dma(host);
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 873e41d..13cc598 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -173,6 +173,7 @@ struct sdhci_host {
+ 	struct timer_list	tuning_timer;	/* Timer for tuning */
+ 
+ #ifdef CONFIG_MMC_BLOCK_PANIC_WRITE
++	int			locked;		/* panic task has the lock */
+ 	void			*panic_buf;	/* buffer for panic requests */
+ 	size_t			panic_bufsize;	/* panic buffer size */
+ 	dma_addr_t		panic_dma_addr;	/* panic buffer dma address */
 -- 
 1.7.9.5
+
