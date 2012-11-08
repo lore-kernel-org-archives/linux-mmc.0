@@ -1,7 +1,7 @@
 From: dragos.tatulea@intel.com
-Subject: [PATCH v2 13/26] mmc: panic write: trap non panic tasks
-Date: Thu,  8 Nov 2012 15:06:11 +0200
-Message-ID: <1352379984-18381-14-git-send-email-dragos.tatulea@intel.com>
+Subject: [PATCH v2 16/26] mmc: sdhci: panic write: no sleeping
+Date: Thu,  8 Nov 2012 15:06:14 +0200
+Message-ID: <1352379984-18381-17-git-send-email-dragos.tatulea@intel.com>
 References: <1352379984-18381-1-git-send-email-dragos.tatulea@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1352379984-18381-1-git-send-email-dragos.tatulea@intel.com>
@@ -12,77 +12,90 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Adrian Hunter <adrian.hunter@intel.com>
 
-If in panic, wait for task to come into context.
-
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Irina Tirdea <irina.tirdea@intel.com>
 ---
- drivers/mmc/core/core.c |   10 +++++++++-
- drivers/mmc/core/host.c |    2 ++
- 2 files changed, 11 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci.c |   26 +++++++++++++++++++++-----
+ 1 file changed, 21 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index d3caa7e..4fd7061 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -252,6 +252,7 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 	}
- 	mmc_host_clk_hold(host);
- 	led_trigger_event(host->led, LED_FULL);
-+	mmc_trap_nonpanic_tasks(host);
- 	host->ops->request(host, mrq);
- }
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 1ed78f0..827e34f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1536,6 +1536,14 @@ static int sdhci_check_ro(struct sdhci_host *host)
  
-@@ -344,8 +345,10 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
+ #define SAMPLE_COUNT	5
  
- 	while (1) {
- 		/* Panic task requests must be completed in ->request() */
--		if (!mmc_am_panic_task(host))
-+		if (!mmc_am_panic_task(host)) {
- 			wait_for_completion(&mrq->completion);
-+			mmc_trap_nonpanic_tasks(host);
-+		}
- 
- 		cmd = mrq->cmd;
- 		if (!cmd->error || !cmd->retries ||
-@@ -774,6 +777,8 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
- 
- 	if (mmc_am_panic_task(host))
- 		return 0;
++static void sdhci_msleep(struct sdhci_host *host, unsigned int ms)
++{
++	if (mmc_am_panic_task(host->mmc))
++		mdelay(ms);
 +	else
-+		mmc_trap_nonpanic_tasks(host);
- 
- 	might_sleep();
- 
-@@ -817,6 +822,8 @@ int mmc_try_claim_host(struct mmc_host *host)
- 
- 	if (mmc_am_panic_task(host))
- 		return 1;
-+	else
-+		mmc_trap_nonpanic_tasks(host);
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 	if (!host->claimed || host->claimer == current) {
-@@ -880,6 +887,7 @@ static inline void mmc_set_ios(struct mmc_host *host)
- 
- 	if (ios->clock > 0)
- 		mmc_set_ungated(host);
-+	mmc_trap_nonpanic_tasks(host);
- 	host->ops->set_ios(host, ios);
- }
- 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 6eda5a1..b76bfc8 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -90,6 +90,8 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
- 	unsigned long freq = host->ios.clock;
- 	unsigned long flags;
- 
-+	mmc_trap_nonpanic_tasks(host);
++		msleep(ms);
++}
 +
- 	if (!freq) {
- 		pr_debug("%s: frequency set to 0 in disable function, "
- 			 "this means the clock is already disabled.\n",
+ static int sdhci_do_get_ro(struct sdhci_host *host)
+ {
+ 	int i, ro_count;
+@@ -1549,7 +1557,7 @@ static int sdhci_do_get_ro(struct sdhci_host *host)
+ 			if (++ro_count > SAMPLE_COUNT / 2)
+ 				return 1;
+ 		}
+-		msleep(30);
++		sdhci_msleep(host, 30);
+ 	}
+ 	return 0;
+ }
+@@ -1605,6 +1613,14 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ 	sdhci_unlock_irqrestore(host, flags);
+ }
+ 
++#define sdhci_usleep_range(host, min, max)		\
++do {							\
++	if (mmc_am_panic_task((host)->mmc))		\
++		mdelay(DIV_ROUND_UP(min, 1000));	\
++	else						\
++		usleep_range(min, max);			\
++} while (0)
++
+ static int sdhci_do_3_3v_signal_voltage_switch(struct sdhci_host *host,
+ 						u16 ctrl)
+ {
+@@ -1623,7 +1639,7 @@ static int sdhci_do_3_3v_signal_voltage_switch(struct sdhci_host *host,
+ 		}
+ 	}
+ 	/* Wait for 5ms */
+-	usleep_range(5000, 5500);
++	sdhci_usleep_range(host, 5000, 5500);
+ 
+ 	/* 3.3V regulator output should be stable within 5 ms */
+ 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+@@ -1668,7 +1684,7 @@ static int sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
+ 			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 
+ 			/* Wait for 5ms */
+-			usleep_range(5000, 5500);
++			sdhci_usleep_range(host, 5000, 5500);
+ 
+ 			ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 			if (ctrl & SDHCI_CTRL_VDD_180) {
+@@ -1676,7 +1692,7 @@ static int sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
+ 				clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+ 				clk |= SDHCI_CLOCK_CARD_EN;
+ 				sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+-				usleep_range(1000, 1500);
++				sdhci_usleep_range(host, 1000, 1500);
+ 
+ 				/*
+ 				 * If DAT[3:0] level is 1111b, then the card
+@@ -1703,7 +1719,7 @@ static int sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
+ 		regulator_disable(host->vmmc);
+ 
+ 	/* Wait for 1ms as per the spec */
+-	usleep_range(1000, 1500);
++	sdhci_usleep_range(host, 1000, 1500);
+ 	pwr |= SDHCI_POWER_ON;
+ 	sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+ 	if (host->vmmc)
 -- 
 1.7.9.5
