@@ -1,7 +1,7 @@
 From: dragos.tatulea@intel.com
-Subject: [PATCH v2 17/26] mmc: sdhci: panic write: call tasklets inline
-Date: Thu,  8 Nov 2012 15:06:15 +0200
-Message-ID: <1352379984-18381-18-git-send-email-dragos.tatulea@intel.com>
+Subject: [PATCH v2 22/26] mmc: sdhci: panic write: no dma mapping
+Date: Thu,  8 Nov 2012 15:06:20 +0200
+Message-ID: <1352379984-18381-23-git-send-email-dragos.tatulea@intel.com>
 References: <1352379984-18381-1-git-send-email-dragos.tatulea@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1352379984-18381-1-git-send-email-dragos.tatulea@intel.com>
@@ -12,125 +12,232 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Adrian Hunter <adrian.hunter@intel.com>
 
-When in panic task, we need to schedule other tasklets than normally.
+Implement simple dma ops to avoid usage dma mapping in panic mode.
+Init & cleanup pave the way for the dma ops implemented through
+pre and post functions.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Irina Tirdea <irina.tirdea@intel.com>
 ---
- drivers/mmc/host/sdhci.c |   31 +++++++++++++++++++++----------
- 1 file changed, 21 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sdhci.c  |  158 ++++++++++++++++++++++++++++++++++++++++++++-
+ include/linux/mmc/sdhci.h |    8 +++
+ 2 files changed, 164 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 827e34f..ff72e98 100644
+index d85e9d5..ab3f5ce 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -914,6 +914,17 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
- 	sdhci_writew(host, mode, SDHCI_TRANSFER_MODE);
+@@ -649,6 +649,69 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
+ 		data->sg_len, direction);
  }
  
-+static void sdhci_tasklet_card(unsigned long param);
-+static void sdhci_tasklet_finish(unsigned long param);
++#ifdef CONFIG_MMC_BLOCK_PANIC_WRITE
 +
-+#define sdhci_sched_tasklet(host, name)				\
-+{								\
-+	if (mmc_am_panic_task(host->mmc))			\
-+		sdhci_tasklet_##name((unsigned long)host);	\
-+	else							\
-+		tasklet_schedule(&host->name##_tasklet);	\
++static void sdhci_panic_dma_pre(struct sdhci_host *host, struct mmc_data *data)
++{
++	struct scatterlist *sg;
++	int i, len;
++	dma_addr_t addr;
++	u8 *desc;
++
++	if (host->flags & SDHCI_USE_ADMA) {
++		if (data->sg_len != 1) {
++			WARN_ON(1);
++			host->flags &= ~SDHCI_REQ_USE_DMA;
++			return;
++		}
++		desc = host->panic_adma_desc;
++		for_each_sg(data->sg, sg, 1, i) {
++			addr = host->panic_dma_addr;
++			len = sg->length;
++			sdhci_set_adma_desc(desc, addr, len, 0x21);
++			desc += 8;
++		}
++		if (host->quirks & SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC) {
++			if (desc != host->panic_adma_desc) {
++				desc -= 8;
++				desc[0] |= 0x2;
++			}
++		} else {
++			sdhci_set_adma_desc(desc, 0, 0, 0x3);
++		}
++		sdhci_writel(host, host->panic_adma_addr, SDHCI_ADMA_ADDRESS);
++	} else {
++		sdhci_writel(host, host->panic_dma_addr, SDHCI_DMA_ADDRESS);
++	}
++
++	if (data->flags & MMC_DATA_WRITE) {
++		sg_copy_to_buffer(data->sg, data->sg_len, host->panic_buf,
++				  host->panic_bufsize);
++	}
 +}
 +
- static void sdhci_finish_data(struct sdhci_host *host)
++static void sdhci_panic_dma_post(struct sdhci_host *host, struct mmc_data *data)
++{
++	if (data->flags & MMC_DATA_READ) {
++		sg_copy_from_buffer(data->sg, data->sg_len, host->panic_buf,
++				    host->panic_bufsize);
++	}
++}
++
++#else
++
++static inline void sdhci_panic_dma_pre(struct sdhci_host *host,
++				       struct mmc_data *data)
++{
++}
++
++static inline void sdhci_panic_dma_post(struct sdhci_host *host,
++					struct mmc_data *data)
++{
++}
++
++#endif
++
+ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
  {
- 	struct mmc_data *data;
-@@ -965,7 +976,7 @@ static void sdhci_finish_data(struct sdhci_host *host)
+ 	u8 count;
+@@ -810,7 +873,9 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 	}
  
- 		sdhci_send_command(host, data->stop);
- 	} else
--		tasklet_schedule(&host->finish_tasklet);
-+		sdhci_sched_tasklet(host, finish);
+ 	if (host->flags & SDHCI_REQ_USE_DMA) {
+-		if (host->flags & SDHCI_USE_ADMA) {
++		if (mmc_am_panic_task(host->mmc)) {
++			sdhci_panic_dma_pre(host, data);
++		} else if (host->flags & SDHCI_USE_ADMA) {
+ 			ret = sdhci_adma_table_pre(host, data);
+ 			if (ret) {
+ 				/*
+@@ -937,7 +1002,9 @@ static void sdhci_finish_data(struct sdhci_host *host)
+ 	host->data = NULL;
+ 
+ 	if (host->flags & SDHCI_REQ_USE_DMA) {
+-		if (host->flags & SDHCI_USE_ADMA)
++		if (mmc_am_panic_task(host->mmc))
++			sdhci_panic_dma_post(host, data);
++		else if (host->flags & SDHCI_USE_ADMA)
+ 			sdhci_adma_table_post(host, data);
+ 		else {
+ 			dma_unmap_sg(mmc_dev(host->mmc), data->sg,
+@@ -2045,6 +2112,91 @@ static const struct mmc_host_ops sdhci_ops = {
+ 
+ #ifdef CONFIG_MMC_BLOCK_PANIC_WRITE
+ 
++/*
++ * Arbitrary maximum DMA buffer size and hence maximum request size when using
++ * DMA.
++ */
++#define SDHCI_PANIC_DMA_BUFSIZE (32 * 1024)
++
++/*
++ * We DMA at most one segment which is aligned. Plus we need an end descriptor.
++ * We allow for a 8 byte (32-bit address) descriptor size.
++ */
++#define SDHCI_PANIC_ADMA_DESC_SZ ((1 + 1) * 12)
++
++static void sdhci_panic_dma_cleanup(struct sdhci_host *host)
++{
++	if (host->panic_adma_desc) {
++		dma_free_coherent(mmc_dev(host->mmc), SDHCI_PANIC_ADMA_DESC_SZ,
++				  host->panic_adma_desc, host->panic_adma_addr);
++		host->panic_adma_desc = NULL;
++	}
++
++	if (host->panic_buf) {
++		dma_free_coherent(mmc_dev(host->mmc), host->panic_bufsize,
++				  host->panic_buf, host->panic_dma_addr);
++		host->panic_buf = NULL;
++	}
++}
++
++static int sdhci_panic_dma_init(struct sdhci_host *host)
++{
++	size_t size;
++
++	size = min_t(size_t, SDHCI_PANIC_DMA_BUFSIZE, host->mmc->max_seg_size);
++	while (size > PAGE_SIZE) {
++		host->panic_buf = dma_alloc_coherent(mmc_dev(host->mmc), size,
++						     &host->panic_dma_addr,
++						     GFP_KERNEL | __GFP_NOWARN);
++		if (host->panic_buf)
++			break;
++		size >>= 1;
++	}
++	if (!host->panic_buf) {
++		host->panic_buf = dma_alloc_coherent(mmc_dev(host->mmc), size,
++						     &host->panic_dma_addr,
++						     GFP_KERNEL);
++	}
++	if (!host->panic_buf)
++		return -ENOMEM;
++
++	host->panic_bufsize = size;
++	host->mmc->panic_max_size = size;
++
++	if (host->flags & SDHCI_USE_ADMA) {
++		size = SDHCI_PANIC_ADMA_DESC_SZ;
++		host->panic_adma_desc = dma_alloc_coherent(mmc_dev(host->mmc),
++							size,
++							&host->panic_adma_addr,
++							GFP_KERNEL);
++		if (!host->panic_adma_desc) {
++			sdhci_panic_dma_cleanup(host);
++			return -ENOMEM;
++		}
++	}
++
++	return 0;
++}
++
++static int sdhci_panic_init(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	mmc->panic_max_size = mmc->max_seg_size;
++
++	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA))
++		return sdhci_panic_dma_init(host);
++
++	return 0;
++}
++
++static void sdhci_panic_cleanup(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	sdhci_panic_dma_cleanup(host);
++}
++
+ void sdhci_lock(struct sdhci_host *host)
+ {
+ 	if (mmc_am_panic_task(host->mmc))
+@@ -2092,6 +2244,8 @@ static void sdhci_panic_end(struct mmc_host *mmc)
  }
  
- static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
-@@ -994,7 +1005,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 				"inhibit bit(s).\n", mmc_hostname(host->mmc));
- 			sdhci_dumpregs(host);
- 			cmd->error = -EIO;
--			tasklet_schedule(&host->finish_tasklet);
-+			sdhci_sched_tasklet(host, finish);
- 			return;
- 		}
- 		timeout--;
-@@ -1015,7 +1026,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 		pr_err("%s: Unsupported response type!\n",
- 			mmc_hostname(host->mmc));
- 		cmd->error = -EINVAL;
--		tasklet_schedule(&host->finish_tasklet);
-+		sdhci_sched_tasklet(host, finish);
- 		return;
- 	}
+ static const struct mmc_panic_ops sdhci_pops = {
++	.init		= sdhci_panic_init,
++	.cleanup	= sdhci_panic_cleanup,
+ 	.begin		= sdhci_panic_begin,
+ 	.end		= sdhci_panic_end,
+ };
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index fa8529a..873e41d 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -172,6 +172,14 @@ struct sdhci_host {
+ #define SDHCI_TUNING_MODE_1	0
+ 	struct timer_list	tuning_timer;	/* Timer for tuning */
  
-@@ -1076,7 +1087,7 @@ static void sdhci_finish_command(struct sdhci_host *host)
- 			sdhci_finish_data(host);
- 
- 		if (!host->cmd->data)
--			tasklet_schedule(&host->finish_tasklet);
-+			sdhci_sched_tasklet(host, finish);
- 
- 		host->cmd = NULL;
- 	}
-@@ -1303,7 +1314,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
- 		host->mrq->cmd->error = -ENOMEDIUM;
--		tasklet_schedule(&host->finish_tasklet);
-+		sdhci_sched_tasklet(host, finish);
- 	} else {
- 		u32 present_state;
- 
-@@ -2079,7 +2090,7 @@ static void sdhci_tasklet_card(unsigned long param)
- 		sdhci_reset(host, SDHCI_RESET_DATA);
- 
- 		host->mrq->cmd->error = -ENOMEDIUM;
--		tasklet_schedule(&host->finish_tasklet);
-+		sdhci_sched_tasklet(host, finish);
- 	}
- 
- 	sdhci_unlock_irqrestore(host, flags);
-@@ -2174,7 +2185,7 @@ static void sdhci_timeout_timer(unsigned long data)
- 			else
- 				host->mrq->cmd->error = -ETIMEDOUT;
- 
--			tasklet_schedule(&host->finish_tasklet);
-+			sdhci_sched_tasklet(host, finish);
- 		}
- 	}
- 
-@@ -2221,7 +2232,7 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
- 		host->cmd->error = -EILSEQ;
- 
- 	if (host->cmd->error) {
--		tasklet_schedule(&host->finish_tasklet);
-+		sdhci_sched_tasklet(host, finish);
- 		return;
- 	}
- 
-@@ -2429,7 +2440,7 @@ again:
- 		sdhci_writel(host, intmask & (SDHCI_INT_CARD_INSERT |
- 			     SDHCI_INT_CARD_REMOVE), SDHCI_INT_STATUS);
- 		intmask &= ~(SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE);
--		tasklet_schedule(&host->card_tasklet);
-+		sdhci_sched_tasklet(host, card);
- 	}
- 
- 	if (intmask & SDHCI_INT_CMD_MASK) {
-@@ -3192,7 +3203,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 				" transfer!\n", mmc_hostname(host->mmc));
- 
- 			host->mrq->cmd->error = -ENOMEDIUM;
--			tasklet_schedule(&host->finish_tasklet);
-+			sdhci_sched_tasklet(host, finish);
- 		}
- 
- 		sdhci_unlock_irqrestore(host, flags);
++#ifdef CONFIG_MMC_BLOCK_PANIC_WRITE
++	void			*panic_buf;	/* buffer for panic requests */
++	size_t			panic_bufsize;	/* panic buffer size */
++	dma_addr_t		panic_dma_addr;	/* panic buffer dma address */
++	u8			*panic_adma_desc;	/* adma desc buffer */
++	dma_addr_t		panic_adma_addr;	/* adma desc address */
++#endif
++
+ 	unsigned long private[0] ____cacheline_aligned;
+ };
+ #endif /* LINUX_MMC_SDHCI_H */
 -- 
 1.7.9.5
