@@ -1,42 +1,46 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] dw_mmc: fix more const pointer warnings
-Date: Thu, 08 Nov 2012 09:35:09 -0500
-Message-ID: <87zk2s5fj6.fsf@octavius.laptop.org>
-References: <1350376988-27477-1-git-send-email-james.hogan@imgtec.com>
-	<508E4DB6.20504@imgtec.com> <87a9v5xuqj.fsf@octavius.laptop.org>
-	<201211081426.12208.arnd@arndb.de>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Viresh Kumar <viresh.kumar@linaro.org>
+Subject: [PATCH 1/2] mmc: sdhci-spear: Initialize sdhci clk to 50 MHz
+Date: Thu,  8 Nov 2012 20:39:09 +0530
+Message-ID: <fd576f198e6f3dc4031bb905247ed9c0a0b66a20.1352387305.git.viresh.kumar@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:60270 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751317Ab2KHOfR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 8 Nov 2012 09:35:17 -0500
-In-Reply-To: <201211081426.12208.arnd@arndb.de> (Arnd Bergmann's message of
-	"Thu, 8 Nov 2012 14:26:11 +0000")
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:33299 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752626Ab2KHPJS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Nov 2012 10:09:18 -0500
+Received: by mail-pa0-f46.google.com with SMTP id hz1so2045988pad.19
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Nov 2012 07:09:18 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: James Hogan <james.hogan@imgtec.com>, Will Newton <will.newton@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, spear-devel@list.st.com, Vipul Kumar Samar <vipulkumar.samar@st.com>, Viresh Kumar <viresh.kumar@linaro.org>
 
-Hi Arnd,
+From: Vipul Kumar Samar <vipulkumar.samar@st.com>
 
-On Thu, Nov 08 2012, Arnd Bergmann wrote:
-> The patch "dw_mmc: fix multiple drv_data NULL dereferences" has
-> unfortunately clashed with my "mmc: dw_mmc: constify
-> dw_mci_idmac_ops in exynos back-end" patch, causing new warnings
-> to appear.
->
-> This should hopefully fix the issue for good.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+SPEAr sdhci driver expects the clock to be set to 50 MHz for proper functioning.
+This patch sets clk to 50 MHz in probe.
 
-Thanks, pushed to mmc-next for 3.7.
+Signed-off-by: Vipul Kumar Samar <vipulkumar.samar@st.com>
+Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+---
+ drivers/mmc/host/sdhci-spear.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-(Jaehoon also sent a patch to fix these last night, but yours applies to
-current mmc-next and his doesn't, so I'll take this one instead.)
-
-- Chris.
+diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
+index 6be89c0..fea8bf9 100644
+--- a/drivers/mmc/host/sdhci-spear.c
++++ b/drivers/mmc/host/sdhci-spear.c
+@@ -146,6 +146,11 @@ static int __devinit sdhci_probe(struct platform_device *pdev)
+ 		goto put_clk;
+ 	}
+ 
++	ret = clk_set_rate(sdhci->clk, 50000000);
++	if (ret)
++		dev_dbg(&pdev->dev, "Error setting desired clk, clk=%lu\n",
++				clk_get_rate(sdhci->clk));
++
+ 	if (np) {
+ 		sdhci->data = sdhci_probe_config_dt(pdev);
+ 		if (IS_ERR(sdhci->data)) {
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.12.rc2.18.g61b472e
+
