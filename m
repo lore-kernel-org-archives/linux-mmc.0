@@ -1,7 +1,7 @@
 From: dragos.tatulea@intel.com
-Subject: [PATCH v2 19/26] mmc: sdhci: panic write: no runtime pm
-Date: Thu,  8 Nov 2012 15:06:17 +0200
-Message-ID: <1352379984-18381-20-git-send-email-dragos.tatulea@intel.com>
+Subject: [PATCH v2 20/26] mmc: sdhci: panic write: no tuning
+Date: Thu,  8 Nov 2012 15:06:18 +0200
+Message-ID: <1352379984-18381-21-git-send-email-dragos.tatulea@intel.com>
 References: <1352379984-18381-1-git-send-email-dragos.tatulea@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1352379984-18381-1-git-send-email-dragos.tatulea@intel.com>
@@ -15,30 +15,23 @@ From: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Irina Tirdea <irina.tirdea@intel.com>
 ---
- drivers/mmc/host/sdhci.c |    6 ++++++
- 1 file changed, 6 insertions(+)
+ drivers/mmc/host/sdhci.c |    4 ++++
+ 1 file changed, 4 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 3653494..fcedcec 100644
+index fcedcec..e096526 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -2601,11 +2601,17 @@ EXPORT_SYMBOL_GPL(sdhci_enable_irq_wakeups);
+@@ -1794,6 +1794,10 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	int err = 0;
+ 	bool requires_tuning_nonuhs = false;
  
- static int sdhci_runtime_pm_get(struct sdhci_host *host)
- {
-+	if (mmc_am_panic_task(host->mmc))
-+		return 0;
++	/* Tuning may need a timer so it is not supported by the panic task */
++	if (mmc_am_panic_task(mmc))
++		return -EINVAL;
 +
- 	return pm_runtime_get_sync(host->mmc->parent);
- }
+ 	host = mmc_priv(mmc);
  
- static int sdhci_runtime_pm_put(struct sdhci_host *host)
- {
-+	if (mmc_am_panic_task(host->mmc))
-+		return 0;
-+
- 	pm_runtime_mark_last_busy(host->mmc->parent);
- 	return pm_runtime_put_autosuspend(host->mmc->parent);
- }
+ 	sdhci_runtime_pm_get(host);
 -- 
 1.7.9.5
