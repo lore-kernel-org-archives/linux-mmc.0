@@ -1,168 +1,136 @@
 From: dragos.tatulea@intel.com
-Subject: [PATCH v2 25/26] mmc: sdhci: panic write: trap nonpanic tasks
-Date: Thu,  8 Nov 2012 15:06:23 +0200
-Message-ID: <1352379984-18381-26-git-send-email-dragos.tatulea@intel.com>
+Subject: [PATCH v2 17/26] mmc: sdhci: panic write: call tasklets inline
+Date: Thu,  8 Nov 2012 15:06:15 +0200
+Message-ID: <1352379984-18381-18-git-send-email-dragos.tatulea@intel.com>
 References: <1352379984-18381-1-git-send-email-dragos.tatulea@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:24988 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755880Ab2KHNEj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 8 Nov 2012 08:04:39 -0500
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1352379984-18381-1-git-send-email-dragos.tatulea@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org
 Cc: kirill.shutemov@linux.intel.com, irina.tirdea@intel.com, octavian.purdila@intel.com, tony.luck@intel.com, keescook@chromium.org, dragos.tatulea@gmail.com, Adrian Hunter <adrian.hunter@intel.com>
+List-Id: linux-mmc@vger.kernel.org
 
 From: Adrian Hunter <adrian.hunter@intel.com>
+
+When in panic task, we need to schedule other tasklets than normally.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Irina Tirdea <irina.tirdea@intel.com>
 ---
- drivers/mmc/host/sdhci.c  |   47 +++++++++++++++++++++++++++++++++++++++++----
- include/linux/mmc/sdhci.h |    1 +
- 2 files changed, 44 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci.c |   31 +++++++++++++++++++++----------
+ 1 file changed, 21 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 9a24417..db12fad 100644
+index 827e34f..ff72e98 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -2204,8 +2204,12 @@ static void sdhci_panic_cleanup(struct mmc_host *mmc)
- 
- void sdhci_lock(struct sdhci_host *host)
- {
--	if (mmc_am_panic_task(host->mmc))
--		return;
-+	if (mmc_panic_task_active(host->mmc)) {
-+		if (mmc_am_panic_task(host->mmc))
-+			return;
-+		while (mmc_am_nonpanic_task(host->mmc))
-+			cpu_relax();
-+	}
- 	spin_lock(&host->lock);
+@@ -914,6 +914,17 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+ 	sdhci_writew(host, mode, SDHCI_TRANSFER_MODE);
  }
  
-@@ -2219,8 +2223,12 @@ void _sdhci_lock_irqsave(struct sdhci_host *host, unsigned long *flags_ptr)
- {
- 	unsigned long flags;
- 
--	if (mmc_am_panic_task(host->mmc))
--		return;
-+	if (mmc_panic_task_active(host->mmc)) {
-+		if (mmc_am_panic_task(host->mmc))
-+			return;
-+		while (mmc_am_nonpanic_task(host->mmc))
-+			cpu_relax();
-+	}
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 	*flags_ptr = flags;
-@@ -2235,6 +2243,16 @@ void sdhci_unlock_irqrestore(struct sdhci_host *host, unsigned long flags)
- static void sdhci_panic_begin(struct mmc_host *mmc)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-+	int i;
++static void sdhci_tasklet_card(unsigned long param);
++static void sdhci_tasklet_finish(unsigned long param);
 +
-+	/* Wait a bit for other users to go away */
-+	for (i = 0; i < 10000; i++) {
-+		if (spin_trylock(&host->lock)) {
-+			host->locked = 1;
-+			break;
-+		}
-+		udelay(1);
-+	}
++#define sdhci_sched_tasklet(host, name)				\
++{								\
++	if (mmc_am_panic_task(host->mmc))			\
++		sdhci_tasklet_##name((unsigned long)host);	\
++	else							\
++		tasklet_schedule(&host->name##_tasklet);	\
++}
++
+ static void sdhci_finish_data(struct sdhci_host *host)
+ {
+ 	struct mmc_data *data;
+@@ -965,7 +976,7 @@ static void sdhci_finish_data(struct sdhci_host *host)
  
- 	if (host->runtime_suspended)
- 		sdhci_runtime_resume_host(host);
-@@ -2250,6 +2268,10 @@ static void sdhci_panic_end(struct mmc_host *mmc)
- 
- 	ier = sdhci_readl(host, SDHCI_INT_ENABLE);
- 	sdhci_writel(host, ier, SDHCI_SIGNAL_ENABLE);
-+	if (host->locked) {
-+		host->locked = 0;
-+		spin_unlock(&host->lock);
-+	}
+ 		sdhci_send_command(host, data->stop);
+ 	} else
+-		tasklet_schedule(&host->finish_tasklet);
++		sdhci_sched_tasklet(host, finish);
  }
  
- static const struct mmc_panic_ops sdhci_pops = {
-@@ -2368,6 +2390,9 @@ static void sdhci_timeout_timer(unsigned long data)
+ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+@@ -994,7 +1005,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 				"inhibit bit(s).\n", mmc_hostname(host->mmc));
+ 			sdhci_dumpregs(host);
+ 			cmd->error = -EIO;
+-			tasklet_schedule(&host->finish_tasklet);
++			sdhci_sched_tasklet(host, finish);
+ 			return;
+ 		}
+ 		timeout--;
+@@ -1015,7 +1026,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 		pr_err("%s: Unsupported response type!\n",
+ 			mmc_hostname(host->mmc));
+ 		cmd->error = -EINVAL;
+-		tasklet_schedule(&host->finish_tasklet);
++		sdhci_sched_tasklet(host, finish);
+ 		return;
+ 	}
  
- 	host = (struct sdhci_host*)data;
+@@ -1076,7 +1087,7 @@ static void sdhci_finish_command(struct sdhci_host *host)
+ 			sdhci_finish_data(host);
  
-+	if (mmc_am_nonpanic_task(host->mmc))
-+		return;
-+
- 	sdhci_lock_irqsave(host, flags);
+ 		if (!host->cmd->data)
+-			tasklet_schedule(&host->finish_tasklet);
++			sdhci_sched_tasklet(host, finish);
  
- 	if (host->mrq) {
-@@ -2399,6 +2424,9 @@ static void sdhci_tuning_timer(unsigned long data)
+ 		host->cmd = NULL;
+ 	}
+@@ -1303,7 +1314,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
  
- 	host = (struct sdhci_host *)data;
+ 	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
+ 		host->mrq->cmd->error = -ENOMEDIUM;
+-		tasklet_schedule(&host->finish_tasklet);
++		sdhci_sched_tasklet(host, finish);
+ 	} else {
+ 		u32 present_state;
  
-+	if (mmc_am_nonpanic_task(host->mmc))
-+		return;
-+
- 	sdhci_lock_irqsave(host, flags);
+@@ -2079,7 +2090,7 @@ static void sdhci_tasklet_card(unsigned long param)
+ 		sdhci_reset(host, SDHCI_RESET_DATA);
  
- 	host->flags |= SDHCI_NEEDS_RETUNING;
-@@ -2596,6 +2624,9 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 	u32 intmask, unexpected = 0;
- 	int cardint = 0, max_loops = 16;
+ 		host->mrq->cmd->error = -ENOMEDIUM;
+-		tasklet_schedule(&host->finish_tasklet);
++		sdhci_sched_tasklet(host, finish);
+ 	}
  
-+	if (mmc_am_nonpanic_task(host->mmc))
-+		return IRQ_HANDLED;
-+
- 	sdhci_lock(host);
+ 	sdhci_unlock_irqrestore(host, flags);
+@@ -2174,7 +2185,7 @@ static void sdhci_timeout_timer(unsigned long data)
+ 			else
+ 				host->mrq->cmd->error = -ETIMEDOUT;
  
+-			tasklet_schedule(&host->finish_tasklet);
++			sdhci_sched_tasklet(host, finish);
+ 		}
+ 	}
  
-@@ -2713,6 +2744,8 @@ int sdhci_suspend_host(struct sdhci_host *host)
- 	if (host->ops->platform_suspend)
- 		host->ops->platform_suspend(host);
+@@ -2221,7 +2232,7 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
+ 		host->cmd->error = -EILSEQ;
  
-+	mmc_trap_nonpanic_tasks(host->mmc);
-+
- 	sdhci_disable_card_detection(host);
+ 	if (host->cmd->error) {
+-		tasklet_schedule(&host->finish_tasklet);
++		sdhci_sched_tasklet(host, finish);
+ 		return;
+ 	}
  
- 	/* Disable tuning since we are suspending */
-@@ -2745,6 +2778,8 @@ int sdhci_resume_host(struct sdhci_host *host)
- {
- 	int ret;
+@@ -2429,7 +2440,7 @@ again:
+ 		sdhci_writel(host, intmask & (SDHCI_INT_CARD_INSERT |
+ 			     SDHCI_INT_CARD_REMOVE), SDHCI_INT_STATUS);
+ 		intmask &= ~(SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE);
+-		tasklet_schedule(&host->card_tasklet);
++		sdhci_sched_tasklet(host, card);
+ 	}
  
-+	mmc_trap_nonpanic_tasks(host->mmc);
-+
- 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
- 		if (host->ops->enable_dma)
- 			host->ops->enable_dma(host);
-@@ -2820,6 +2855,8 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
- 	unsigned long flags;
- 	int ret = 0;
+ 	if (intmask & SDHCI_INT_CMD_MASK) {
+@@ -3192,7 +3203,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 				" transfer!\n", mmc_hostname(host->mmc));
  
-+	mmc_trap_nonpanic_tasks(host->mmc);
-+
- 	/* Disable tuning since we are suspending */
- 	if (host->flags & SDHCI_USING_RETUNING_TIMER) {
- 		del_timer_sync(&host->tuning_timer);
-@@ -2845,6 +2882,8 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
- 	unsigned long flags;
- 	int ret = 0, host_flags = host->flags;
+ 			host->mrq->cmd->error = -ENOMEDIUM;
+-			tasklet_schedule(&host->finish_tasklet);
++			sdhci_sched_tasklet(host, finish);
+ 		}
  
-+	mmc_trap_nonpanic_tasks(host->mmc);
-+
- 	if (host_flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
- 		if (host->ops->enable_dma)
- 			host->ops->enable_dma(host);
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 873e41d..13cc598 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -173,6 +173,7 @@ struct sdhci_host {
- 	struct timer_list	tuning_timer;	/* Timer for tuning */
- 
- #ifdef CONFIG_MMC_BLOCK_PANIC_WRITE
-+	int			locked;		/* panic task has the lock */
- 	void			*panic_buf;	/* buffer for panic requests */
- 	size_t			panic_bufsize;	/* panic buffer size */
- 	dma_addr_t		panic_dma_addr;	/* panic buffer dma address */
+ 		sdhci_unlock_irqrestore(host, flags);
 -- 
 1.7.9.5
-
