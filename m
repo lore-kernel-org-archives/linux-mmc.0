@@ -1,50 +1,98 @@
-From: "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>
-Subject: Re: [PATCH v7 0/3] Add modules to support realtek PCIE card reader
-Date: Thu, 8 Nov 2012 14:20:58 +0100
-Message-ID: <20121108132058.GB1385@kroah.com>
-References: <cover.1351481260.git.wei_wang@realsil.com.cn>
- <508F4A88.8010207@realsil.com.cn>
- <87r4o56w1f.fsf@octavius.laptop.org>
- <509B1FEA.1040505@realsil.com.cn>
- <1352347282.60054.YahooMailNeo@web121002.mail.ne1.yahoo.com>
- <509B4363.7080905@realsil.com.cn>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] dw_mmc: fix more const pointer warnings
+Date: Thu, 8 Nov 2012 14:26:11 +0000
+Message-ID: <201211081426.12208.arnd@arndb.de>
+References: <1350376988-27477-1-git-send-email-james.hogan@imgtec.com> <508E4DB6.20504@imgtec.com> <87a9v5xuqj.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:54085 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755537Ab2KHNUm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Nov 2012 08:20:42 -0500
-Received: by mail-wg0-f44.google.com with SMTP id dr13so1824212wgb.1
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Nov 2012 05:20:40 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <509B4363.7080905@realsil.com.cn>
+Received: from moutng.kundenserver.de ([212.227.17.8]:65084 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755976Ab2KHO0R (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Nov 2012 09:26:17 -0500
+In-Reply-To: <87a9v5xuqj.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: wwang <wei_wang@realsil.com.cn>
-Cc: Alex Dubov <oakad@yahoo.com>, "sameo@linux.intel.com" <sameo@linux.intel.com>, "arnd@arndb.de" <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "bp@alien8.de" <bp@alien8.de>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, Chris Ball <cjb@laptop.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: James Hogan <james.hogan@imgtec.com>, Will Newton <will.newton@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Thu, Nov 08, 2012 at 01:30:11PM +0800, wwang wrote:
-> =E4=BA=8E 2012=E5=B9=B411=E6=9C=8808=E6=97=A5 12:01, Alex Dubov =E5=86=
-=99=E9=81=93:
-> >Hi,
-> >>Do you have any comment on the MEMSTICK part in this v7 patchset? C=
-an
-> >>you help to merge the patch to the kernel tree?
-> >
-> >I'm afraid that presently I don't have much time to look at the mems=
-tick related stuff any further. Hopefully, somebody else can step in an=
-d take a look at your submission.
-> >
-> >Sorry for that.
-> >
-> Hi Greg & Arnd:
->=20
-> Can you help to review the MEMSTICK part in my patch and merge it to
-> the kernel tree? Alex is a little busy now and I can't find any
-> other maintainer who can take care of MEMSTICK subsystem.
+The patch "dw_mmc: fix multiple drv_data NULL dereferences" has
+unfortunately clashed with my "mmc: dw_mmc: constify
+dw_mci_idmac_ops in exynos back-end" patch, causing new warnings
+to appear.
 
-I don't have the patches around anymore, sorry, care to resend them?
+This should hopefully fix the issue for good.
 
-greg k-h
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+---
+On Monday 29 October 2012, Chris Ball wrote:
+> Hi,
+> 
+> On Mon, Oct 29 2012, James Hogan wrote:
+> > On 17/10/12 10:11, Will Newton wrote:
+> >> Looks good to me too.
+> >> 
+> >> Acked-by: Will Newton <will.newton@imgtec.com>
+> >> 
+> >> On Wed, Oct 17, 2012 at 3:06 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> >>> Looks good to me.
+> >>>
+> >>> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+> >
+> > Thanks for the acks Thomas, Seungwon, Jaehoon and Will.
+> >
+> > Chris: Any chance of queueing this patch for v3.7?
+> 
+> Yes, certainly -- pushed to mmc-next for 3.7, thanks.
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index c0667c8..5b41348 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -232,7 +232,7 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+ {
+ 	struct mmc_data	*data;
+ 	struct dw_mci_slot *slot = mmc_priv(mmc);
+-	struct dw_mci_drv_data *drv_data = slot->host->drv_data;
++	const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+ 	u32 cmdr;
+ 	cmd->error = -EINPROGRESS;
+ 
+@@ -773,7 +773,7 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct dw_mci_slot *slot = mmc_priv(mmc);
+-	struct dw_mci_drv_data *drv_data = slot->host->drv_data;
++	const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+ 	u32 regs;
+ 
+ 	/* set default 1 bit mode */
+@@ -1817,7 +1817,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ {
+ 	struct mmc_host *mmc;
+ 	struct dw_mci_slot *slot;
+-	struct dw_mci_drv_data *drv_data = host->drv_data;
++	const struct dw_mci_drv_data *drv_data = host->drv_data;
+ 	int ctrl_id, ret;
+ 	u8 bus_width;
+ 
+@@ -2038,7 +2038,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ 	struct dw_mci_board *pdata;
+ 	struct device *dev = host->dev;
+ 	struct device_node *np = dev->of_node;
+-	struct dw_mci_drv_data *drv_data = host->drv_data;
++	const struct dw_mci_drv_data *drv_data = host->drv_data;
+ 	int idx, ret;
+ 
+ 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+@@ -2084,7 +2084,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ 
+ int dw_mci_probe(struct dw_mci *host)
+ {
+-	struct dw_mci_drv_data *drv_data = host->drv_data;
++	const struct dw_mci_drv_data *drv_data = host->drv_data;
+ 	int width, i, ret = 0;
+ 	u32 fifo_size;
+ 	int init_slots = 0;
