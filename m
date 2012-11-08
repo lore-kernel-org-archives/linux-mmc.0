@@ -1,43 +1,65 @@
-From: wwang <wei_wang@realsil.com.cn>
-Subject: Re: [PATCH v7 0/3] Add modules to support realtek PCIE card reader
-Date: Thu, 8 Nov 2012 13:30:11 +0800
-Message-ID: <509B4363.7080905@realsil.com.cn>
-References: <cover.1351481260.git.wei_wang@realsil.com.cn> <508F4A88.8010207@realsil.com.cn> <87r4o56w1f.fsf@octavius.laptop.org> <509B1FEA.1040505@realsil.com.cn> <1352347282.60054.YahooMailNeo@web121002.mail.ne1.yahoo.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH v3 1/4] mmc: dw-mmc: relocate the position called
+ dw_mci_setup_bus()
+Date: Thu, 08 Nov 2012 17:35:29 +0900
+Message-ID: <509B6ED1.7030707@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rtits2.realtek.com ([60.250.210.242]:54871 "EHLO
-	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751400Ab2KHFa4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Nov 2012 00:30:56 -0500
-In-Reply-To: <1352347282.60054.YahooMailNeo@web121002.mail.ne1.yahoo.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:56560 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751549Ab2KHIfp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Nov 2012 03:35:45 -0500
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MD500II1UJGAMI0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 08 Nov 2012 17:35:44 +0900 (KST)
+Received: from [10.90.51.55] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0MD500LVNUJJG180@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 08 Nov 2012 17:35:43 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Dubov <oakad@yahoo.com>
-Cc: Chris Ball <cjb@laptop.org>, "sameo@linux.intel.com" <sameo@linux.intel.com>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "arnd@arndb.de" <arnd@arndb.de>, "bp@alien8.de" <bp@alien8.de>
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <James.Hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>
 
-=E4=BA=8E 2012=E5=B9=B411=E6=9C=8808=E6=97=A5 12:01, Alex Dubov =E5=86=99=
-=E9=81=93:
-> Hi,
->> Do you have any comment on the MEMSTICK part in this v7 patchset? Ca=
-n
->> you help to merge the patch to the kernel tree?
->
-> I'm afraid that presently I don't have much time to look at the memst=
-ick related stuff any further. Hopefully, somebody else can step in and=
- take a look at your submission.
->
-> Sorry for that.
->
-Hi Greg & Arnd:
+To ensure the stable clock need to enable before set the DW_MMC_CARD_NEED_INIT flag.
+If set DW_MMC_CARD_NEED_INIT flag, wait for 80-clock before first command after power-up.
 
-Can you help to review the MEMSTICK part in my patch and merge it to th=
-e=20
-kernel tree? Alex is a little busy now and I can't find any other=20
-maintainer who can take care of MEMSTICK subsystem.
-
-Best regards,
-Wei WANG
-
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+---
+Changelog v2-v3:
+	- Modified the commit-message
+ drivers/mmc/host/dw_mmc.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+---
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index c0667c8..a1369aa 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -683,9 +683,6 @@ static void __dw_mci_start_request(struct dw_mci *host,
+ 	if (host->pdata->select_slot)
+ 		host->pdata->select_slot(slot->id);
+ 
+-	/* Slot specific timing and width adjustment */
+-	dw_mci_setup_bus(slot);
+-
+ 	host->cur_slot = slot;
+ 	host->mrq = mrq;
+ 
+@@ -812,6 +809,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	if (drv_data && drv_data->set_ios)
+ 		drv_data->set_ios(slot->host, ios);
+ 
++	/* Slot specific timing and width adjustment */
++	dw_mci_setup_bus(slot);
++
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_UP:
+ 		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+-- 
+1.7.4.1
