@@ -1,51 +1,29 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH 1/5] mmc: omap_hsmmc: Avoid host->cmd dereference during
- data transfer failures
-Date: Fri, 9 Nov 2012 21:18:24 +0530
-Message-ID: <509D25C8.5010609@ti.com>
-References: <1352220737-14071-1-git-send-email-svenkatr@ti.com> <1352220737-14071-2-git-send-email-svenkatr@ti.com>
+Subject: [PATCH v2 0/3] mmc: omap_hsmmc: fixes for irq error handler
+Date: Fri, 9 Nov 2012 21:36:13 +0530
+Message-ID: <1352477176-6673-1-git-send-email-balajitk@ti.com>
+References: <20121109145218.GA10873@arwen.pp.htv.fi>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1352220737-14071-2-git-send-email-svenkatr@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>, Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:37323 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752914Ab2KIQGX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 9 Nov 2012 11:06:23 -0500
+In-Reply-To: <20121109145218.GA10873@arwen.pp.htv.fi>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: linux-omap@vger.kernel.org, svenkatr@ti.com, Balaji T K <balajitk@ti.com>
 
-On Tuesday 06 November 2012 10:22 PM, Venkatraman S wrote:
-> Sometimes, a error occurs just after the Command has been reported
-> to be successful (CC=1) but before data transfer completes (TC=1).
-> Setting end_cmd=1 here leads to a NULL pointer dereference of
-> host->cmd as the command complete has previously been handled.
->
-> Set end_cmd only when command complete has not been handled
-> before, else a NULL pointer dereference occurs.
->
-> CC: stable@vger.kernel.org
+Balaji T K (3):
+  mmc: omap_hsmmc: Fix Oops in case of data errors
+  mmc: omap_hsmmc: no reset of cmd state machine for DCRC
+  mmc: omap_hsmmc: update error code for response_busy cmd
 
-Removing stable list as this is not applicable for previous major
-release. Sent a patch to fix the same in different way.
+ drivers/mmc/host/omap_hsmmc.c |   24 +++++++++++++++---------
+ 1 files changed, 15 insertions(+), 9 deletions(-)
 
-> Signed-off-by: Venkatraman S <svenkatr@ti.com>
-> ---
->   drivers/mmc/host/omap_hsmmc.c | 3 ++-
->   1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 5434fd8..06d2e03 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -996,7 +996,8 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
->   		else if (status & (CMD_CRC | DATA_CRC))
->   			hsmmc_command_incomplete(host, -EILSEQ);
->
-> -		end_cmd = 1;
-> +		if (host->cmd)
-> +			end_cmd = 1;
->   		if (host->data || host->response_busy) {
->   			end_trans = 1;
->   			host->response_busy = 0;
->
+-- 
+1.7.5.4
 
