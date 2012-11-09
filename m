@@ -1,51 +1,51 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v7 0/3] Add modules to support realtek PCIE card reader
-Date: Fri, 09 Nov 2012 10:34:48 -0500
-Message-ID: <87mwyqrdrb.fsf@octavius.laptop.org>
-References: <cover.1351481260.git.wei_wang@realsil.com.cn>
-	<508F4A88.8010207@realsil.com.cn> <87r4o56w1f.fsf@octavius.laptop.org>
-	<509D1C25.9040909@realsil.com.cn>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH 1/5] mmc: omap_hsmmc: Avoid host->cmd dereference during
+ data transfer failures
+Date: Fri, 9 Nov 2012 21:18:24 +0530
+Message-ID: <509D25C8.5010609@ti.com>
+References: <1352220737-14071-1-git-send-email-svenkatr@ti.com> <1352220737-14071-2-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:48607 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752944Ab2KIPfB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 9 Nov 2012 10:35:01 -0500
-In-Reply-To: <509D1C25.9040909@realsil.com.cn> (wwang's message of "Fri, 9 Nov
-	2012 23:07:17 +0800")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1352220737-14071-2-git-send-email-svenkatr@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Venkatraman S <svenkatr@ti.com>, Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: wwang <wei_wang@realsil.com.cn>
-Cc: "sameo@linux.intel.com" <sameo@linux.intel.com>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "arnd@arndb.de" <arnd@arndb.de>, "oakad@yahoo.com" <oakad@yahoo.com>, "bp@alien8.de" <bp@alien8.de>
 
-Hi,
-
-On Fri, Nov 09 2012, wwang wrote:
-> I have noticed that the file rtsx_pci_sdmmc.c in your mmc-next branch
-> is still v6 patch.  In v7 patch, this MMC part has also been modified
-> to comply with my MFD portion.  So please update to this version.
+On Tuesday 06 November 2012 10:22 PM, Venkatraman S wrote:
+> Sometimes, a error occurs just after the Command has been reported
+> to be successful (CC=1) but before data transfer completes (TC=1).
+> Setting end_cmd=1 here leads to a NULL pointer dereference of
+> host->cmd as the command complete has previously been handled.
 >
-> And one more question. Samuel have merged all of my patch set in his
-> for-next branch, including the MMC part.  I don't know whether this
-> will conflict with your tree in the next merge.
+> Set end_cmd only when command complete has not been handled
+> before, else a NULL pointer dereference occurs.
 >
-> Hi Samuel:
+> CC: stable@vger.kernel.org
+
+Removing stable list as this is not applicable for previous major
+release. Sent a patch to fix the same in different way.
+
+> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+> ---
+>   drivers/mmc/host/omap_hsmmc.c | 3 ++-
+>   1 file changed, 2 insertions(+), 1 deletion(-)
 >
-> Since the whole patch set has been merged in your for-next branch,
-> does it mean that you will help to merge all of the three parts to
-> linus's tree?
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 5434fd8..06d2e03 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -996,7 +996,8 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
+>   		else if (status & (CMD_CRC | DATA_CRC))
+>   			hsmmc_command_incomplete(host, -EILSEQ);
+>
+> -		end_cmd = 1;
+> +		if (host->cmd)
+> +			end_cmd = 1;
+>   		if (host->data || host->response_busy) {
+>   			end_trans = 1;
+>   			host->response_busy = 0;
+>
 
-I've removed the patch from my tree to avoid conflicting with Samuel.
-I'm happy to either have the MMC patch go through the MFD tree with:
-
-Acked-by: Chris Ball <cjb@laptop.org>
-
-or to merge the MMC side of v7 myself, whichever Samuel prefers.
-
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
