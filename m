@@ -1,49 +1,41 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2] mmc: sdhci: fix incorrect command used in tuning
-Date: Thu, 08 Nov 2012 20:46:54 -0500
-Message-ID: <87zk2reeep.fsf@octavius.laptop.org>
-References: <1341307669-20834-1-git-send-email-aaron.lu@amd.com>
-	<87wqxzal6b.fsf@octavius.laptop.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] dw_mmc: fix more const pointer warnings
+Date: Fri, 09 Nov 2012 14:44:59 +0900
+Message-ID: <509C985B.8060206@samsung.com>
+References: <1350376988-27477-1-git-send-email-james.hogan@imgtec.com>
+ <508E4DB6.20504@imgtec.com> <87a9v5xuqj.fsf@octavius.laptop.org>
+ <201211081426.12208.arnd@arndb.de> <87zk2s5fj6.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:32895 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1422644Ab2KIBrD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 8 Nov 2012 20:47:03 -0500
-In-Reply-To: <87wqxzal6b.fsf@octavius.laptop.org> (Chris Ball's message of
-	"Mon, 05 Nov 2012 14:45:16 -0500")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <87zk2s5fj6.fsf@octavius.laptop.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, James Hogan <james.hogan@imgtec.com>, Will Newton <will.newton@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lu@amd.com>
-Cc: Girish K S <girish.shivananjappa@linaro.org>, Subhash Jadavani <subhashj@codeaurora.org>, Philip Rakity <prakity@marvell.com>, linux-mmc@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
 
-Hi Aaron,
+Great..Thanks Arnd and Chris.
 
-On Mon, Nov 05 2012, Chris Ball wrote:
-> On Tue, Jul 03 2012, Aaron Lu wrote:
->>  		 */
->>  		if ((host->flags & SDHCI_NEEDS_RETUNING) &&
->>  		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
->> +			/* eMMC uses cmd21 while sd and sdio use cmd19 */
->> +			tuning_opcode = mmc->card->type == MMC_TYPE_MMC ?
->> +				MMC_SEND_TUNING_BLOCK_HS200 :
->> +				MMC_SEND_TUNING_BLOCK;
->
-> This is causing a NULL deref crash here when run on host controllers
-> with no card inserted -- mmc->card is NULL, as you'd expect, yet it's
-> dereferenced anyway.  Maybe the system you tested it on only has an
-> eMMC, so you never noticed that it crashes if there's no card present?
-> Or maybe it's abnormal for host controllers to set SDHCI_NEEDS_RETUNING
-> when there's no card present?
-
-I'm going to send my fix to Linus (and hence stable@) tomorrow morning,
-since it's important to remove this crash.  Let me know what you think
-when you get a chance.
-
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Best Regards,
+Jaehoon Chung
+On 11/08/2012 11:35 PM, Chris Ball wrote:
+> Hi Arnd,
+> 
+> On Thu, Nov 08 2012, Arnd Bergmann wrote:
+>> The patch "dw_mmc: fix multiple drv_data NULL dereferences" has
+>> unfortunately clashed with my "mmc: dw_mmc: constify
+>> dw_mci_idmac_ops in exynos back-end" patch, causing new warnings
+>> to appear.
+>>
+>> This should hopefully fix the issue for good.
+>>
+>> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> 
+> Thanks, pushed to mmc-next for 3.7.
+> 
+> (Jaehoon also sent a patch to fix these last night, but yours applies to
+> current mmc-next and his doesn't, so I'll take this one instead.)
+> 
+> - Chris.
+> 
