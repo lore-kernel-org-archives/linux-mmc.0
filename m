@@ -1,119 +1,76 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Fix Oops in case of data errors
-Date: Fri, 9 Nov 2012 20:58:02 +0530
-Message-ID: <509D2102.4040702@ti.com>
-References: <1352472079-1512-1-git-send-email-balajitk@ti.com> <20121109145218.GA10873@arwen.pp.htv.fi>
+From: Artem Bityutskiy <dedekind1@gmail.com>
+Subject: Re: [PATCH] dma: add new DMA control commands
+Date: Fri, 09 Nov 2012 17:29:11 +0200
+Message-ID: <1352474951.1814.40.camel@sauron.fi.intel.com>
+References: <1350538335-29026-1-git-send-email-b32955@freescale.com>
+	 <201210180914.58527.marex@denx.de> <507FB495.7050104@freescale.com>
+	 <201210181016.06782.marex@denx.de> <507FBDF1.5050602@freescale.com>
+Reply-To: dedekind1@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20121109145218.GA10873@arwen.pp.htv.fi>
-Sender: linux-omap-owner@vger.kernel.org
-To: balbi@ti.com
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-omap@vger.kernel.org, svenkatr@ti.com
+Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature";
+	boundary="=-1Ho9I/5vx63xnID433oO"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:63488 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754319Ab2KIP2o (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 9 Nov 2012 10:28:44 -0500
+In-Reply-To: <507FBDF1.5050602@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Huang Shijie <b32955@freescale.com>
+Cc: Marek Vasut <marex@denx.de>, Vinod Koul <vinod.koul@linux.intel.com>, djbw@fb.com, khali@linux-fr.org, ben-linux@fluff.org, w.sang@pengutronix.de, cjb@laptop.org, dwmw2@infradead.org, lrg@ti.com, broonie@opensource.wolfsonmicro.com, perex@perex.cz, tiwai@suse.de, shawn.guo@linaro.org, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, alsa-devel@alsa-project.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, Huang Shijie <shijie8@gmail.com>, Fabio Estevam <fabio.estevam@freescale.com>
 
-On Friday 09 November 2012 08:22 PM, Felipe Balbi wrote:
-> On Fri, Nov 09, 2012 at 08:11:19PM +0530, Balaji T K wrote:
->> Setting end_cmd to 1 for Data Timeout/CRC leads to NULL pointer dereference of
->> host->cmd as the command complete has previously been handled.
->> Set end_cmd only in case of Data Timeout/CRC.
->
-> this comment doesnt match code as code is setting end_cmd for cmd
-> timeout and cmd crc, not data timeout/crc.
 
-yes, you are right
-s/Data/Cmd :-)
+--=-1Ho9I/5vx63xnID433oO
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
->
->> While at it restore error handling behaviour as was before the
->> "commit ae4bf788ee9bf7c2d51b0309117d1fcccbdd50a2
->> mmc: omap_hsmmc: consolidate error report handling of HSMMC IRQ"
->>
->> host->cmd->error should not be updated on data error case, only
->> host->data->error needs to be updated.
->> end_trans and end_crc should not to be set together, to avoid
->> mmc_request_done being called twice in case of Command CRC or command
->> Timeout.
->> Avoid soft reset of command internal state machine on data errors.
->
-> looks to me you're doing to many changes in a single patch. Perhaps it
-> deserves some splitting...
->
+On Thu, 2012-10-18 at 16:29 +0800, Huang Shijie wrote:
+> =E4=BA=8E 2012=E5=B9=B410=E6=9C=8818=E6=97=A5 16:16, Marek Vasut =E5=86=
+=99=E9=81=93:
+> > So we can't stream data from the chip? About time to adjust the MTD fra=
+mework to
+> > allow that. Maybe implement a command queue?
+> >
+>=20
+> to Artem & David:
+>     is this possible to stream the data out with a command queue?
 
-Let me check if I can split
+Well, I think there was no HW which supported reading multiple pages
+with DMA before, are your sure yours support this? Usually reading a
+NAND page consists of 2 phases - loading the NAND array contents to a
+controller buffer, and then copying that to RAM. And the second part is
+something people sometimes do with DMA, AFAIU.
 
->>
->> Signed-off-by: Balaji T K <balajitk@ti.com>
->> ---
->> based on mmc-fixes-for-3.7-rc5 in mmc_next
->>
->>   drivers/mmc/host/omap_hsmmc.c |   23 +++++++++++++++--------
->>   1 files changed, 15 insertions(+), 8 deletions(-)
->>
->> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
->> index fedd258..6ea1da3 100644
->> --- a/drivers/mmc/host/omap_hsmmc.c
->> +++ b/drivers/mmc/host/omap_hsmmc.c
->> @@ -968,15 +968,20 @@ static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
->>   			__func__);
->>   }
->>
->> -static void hsmmc_command_incomplete(struct omap_hsmmc_host *host, int err)
->> +static void hsmmc_command_incomplete(struct omap_hsmmc_host *host,
->> +					int err, int end_cmd)
->>   {
->> -	omap_hsmmc_reset_controller_fsm(host, SRC);
+If your HW supports this, sure the MTD framework can be re-worked. Or
+you may write your own 'mtd->_read()' / 'mtd->_write()' implementation.
 
-This conditional reset can be separate patch if needed.
+--=20
+Best Regards,
+Artem Bityutskiy
 
->> -	host->cmd->error = err;
->> +	if (end_cmd) {
->> +		omap_hsmmc_reset_controller_fsm(host, SRC);
->> +		if (host->cmd)
->> +			host->cmd->error = err;
->> +	}
->>
->>   	if (host->data) {
->>   		omap_hsmmc_reset_controller_fsm(host, SRD);
->>   		omap_hsmmc_dma_cleanup(host, err);
->> -	}
->> +	} else if (host->mrq && host->mrq->cmd)
->> +		host->mrq->cmd->error = err;
+--=-1Ho9I/5vx63xnID433oO
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+Content-Transfer-Encoding: 7bit
 
-Updating the error code can also be split.
-Let me know If you are Ok with this, I can send new series.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
 
->>
->>   }
->>
->> @@ -990,14 +995,16 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
->>
->>   	if (status & ERR) {
->>   		omap_hsmmc_dbg_report_irq(host, status);
->> +
->> +		if (status & (CMD_TIMEOUT | CMD_CRC))
->> +			end_cmd = 1;
->>   		if (status & (CMD_TIMEOUT | DATA_TIMEOUT))
->> -			hsmmc_command_incomplete(host, -ETIMEDOUT);
->> +			hsmmc_command_incomplete(host, -ETIMEDOUT, end_cmd);
->>   		else if (status & (CMD_CRC | DATA_CRC))
->> -			hsmmc_command_incomplete(host, -EILSEQ);
->> +			hsmmc_command_incomplete(host, -EILSEQ, end_cmd);
->>
->> -		end_cmd = 1;
->>   		if (host->data || host->response_busy) {
->> -			end_trans = 1;
->> +			end_trans = !end_cmd;
->>   			host->response_busy = 0;
->>   		}
->>   	}
->> --
->> 1.7.5.4
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+iQIcBAABAgAGBQJQnSFHAAoJECmIfjd9wqK0GowP/jz3M70GMjElaOIdPUtV+TZf
+UlaiLpjwY5JNIa/2J5OHP8JA7mEsaG9QXFPHkHXbc0hdNODY1R/+l1db82JPH1WL
+9Fw3ka9+9HuZ5m4OEm4XkWH9e8eodM6Ixm0mYok5yzKdQ+ToHnacaS92z6mIdH5T
+SBZtH1+Lh7bRzdVDY9MlwlmrCoQ+aUx4Du1NKyXE2bh8zoEc5Z2t6URd6gT8bbWC
+7OelYPHKbKIIsAgSNYpoNFjnX0zdLWHU4UT2nS8ES7bz7TR47HHCHZVKBwK7R5P5
+UFqBNA7uufMRNuyAGM1/REtfIdtvcphEJZGlPWwQnN89Hu3oPZCCJn4rBUHnCiiK
+aPKeOQI4QrzxcnUjvkmpgAvaLrxWpKLNWDxzCYaXBmUvxSl/LcLgMtOBXbHtaaA/
+lt2DX7E8qpyWVznf+xlT+oMMHLzvcFk3yz5fM6wGkMpxogHRRf1bTUZJqx6HH0wF
+mJWyp1vSr66RUMb0s2ThRrTx/AaCBWxAIuaD3laId024p89tADeu9KLOrV7V1Qvs
+msZSb5D/P5laJyiaFkUP+pA23xP27sfzvascsF56ArwX1UvDL5ZI46HMBMFc4zRb
+sHhGI8FO5IOum5GcfEW5ABvS0WvN8G1bIP8yy/405UutCnkC/puzQiKTvCgv/AC3
+26iBTNS6y+1KA3BwgAm8
+=ZOe9
+-----END PGP SIGNATURE-----
+
+--=-1Ho9I/5vx63xnID433oO--
 
