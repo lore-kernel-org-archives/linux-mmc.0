@@ -1,70 +1,86 @@
-From: Tushar Behera <tushar.behera@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: only support voltage (vdd) that regulator agree's
- with
-Date: Fri, 09 Nov 2012 15:20:37 +0530
-Message-ID: <509CD1ED.5050402@linaro.org>
-References: <prakity@marvell.com> <1339183573-21688-1-git-send-email-prakity@marvell.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [mmc:mmc-next 17/28] sdhci-pltfm.c:(.text+0x80): multiple
+ definition of `sdhci_runtime_pm_get'
+Date: Fri, 09 Nov 2012 19:24:25 +0900
+Message-ID: <019401cdbe64$64d26710$2e773530$%jun@samsung.com>
+References: <509ac6c4.cYfNNpMXVvvrRu6C%fengguang.wu@intel.com>
+ <87ip9h6t5y.fsf@octavius.laptop.org> <20121108120833.GA8199@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-da0-f46.google.com ([209.85.210.46]:44834 "EHLO
-	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750976Ab2KIJuJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Nov 2012 04:50:09 -0500
-Received: by mail-da0-f46.google.com with SMTP id n41so1601736dak.19
-        for <linux-mmc@vger.kernel.org>; Fri, 09 Nov 2012 01:50:08 -0800 (PST)
-In-Reply-To: <1339183573-21688-1-git-send-email-prakity@marvell.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:17869 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752087Ab2KIKY2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Nov 2012 05:24:28 -0500
+Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MD7007MDU8MYI41@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 09 Nov 2012 19:24:26 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0MD70012JU8PI530@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 09 Nov 2012 19:24:26 +0900 (KST)
+In-reply-to: <20121108120833.GA8199@localhost>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: philipspatches@gmail.com
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, aaron.lu@amd.com, mark.brown314@gmail.com, Philip Rakity <prakity@marvell.com>
+To: 'Fengguang Wu' <fengguang.wu@intel.com>, 'Chris Ball' <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-On 06/09/2012 12:56 AM, philipspatches@gmail.com wrote:
-> From: Philip Rakity <prakity@marvell.com>
+Fengguang Wu <fengguang.wu@intel.com> wrote:
+> On Wed, Nov 07, 2012 at 03:43:05PM -0500, Chris Ball wrote:
+> > Hi,
+> >
+> > On Wed, Nov 07 2012, kbuild test robot wrote:
+> > > tree:   git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git mmc-next
+> > > head:   a6a567a4c25762e36228d2d0c8c1859085132e15
+> > > commit: 90ba86ed414e8ab4d84fe3342f10948c607efa7a [17/28] mmc:
+> > > sdhci-s3c: ensure non-transaction of bus before clk_disable
+> > > config: i386-randconfig-b646 (attached as .config)
+> > >
+> > > All error/warnings:
+> > >
+> > > drivers/mmc/host/sdhci-pltfm.o: In function `sdhci_runtime_pm_get':
+> > > sdhci-pltfm.c:(.text+0x80): multiple definition of `sdhci_runtime_pm_get'
+> > > drivers/mmc/host/sdhci.o:sdhci.c:(.text+0x7550): first defined here
+> > > drivers/mmc/host/sdhci-pltfm.o: In function `sdhci_runtime_pm_put':
+> > > sdhci-pltfm.c:(.text+0xa0): multiple definition of `sdhci_runtime_pm_put'
+> > > drivers/mmc/host/sdhci.o:sdhci.c:(.text+0x7570): first defined here
+> >
+> > Yay for buildbots.  Seungwon, I've dropped this patch from mmc-next now,
+> > please investigate and fix.
+> >
+> > (Wu, are you sure that this is the correct config?  It's i386 without
+> > MMC_SDHCI_S3C=y, and MMC_SDHCI_S3C depends on PLAT_SAMSUNG/ARM.)
 > 
-> If we are using a regulator the SD Host Controller and the
-> regulator should agree about the voltages supported.  Use
-> the common subset that is supported.
+> Sorry I don't understand that. MMC_SDHCI_S3C seems to not matter at all?
 > 
-> Signed-off-by: Philip Rakity <prakity@marvell.com>
-> ---
->  drivers/mmc/host/sdhci.c |   15 +++++++++++++++
->  1 files changed, 15 insertions(+), 0 deletions(-)
+> Looking at the patch, these inline functions in .h should be prefixed
+> with "static":
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 248f68b..78be427 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2894,6 +2894,21 @@ int sdhci_add_host(struct sdhci_host *host)
->  	 * register is set. The actual current value is 4 times the register
->  	 * value.
->  	 */
-> +	if (host->vmmc) {
-> +		ret = regulator_is_supported_voltage(host->vmmc, 3300000,
-> +			3300000);
-> +		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
-> +			caps[0] &= ~SDHCI_CAN_VDD_330;
-> +		ret = regulator_is_supported_voltage(host->vmmc, 3000000,
-> +			3000000);
-> +		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_300)))
-> +			caps[0] &= ~SDHCI_CAN_VDD_300;
-> +		ret = regulator_is_supported_voltage(host->vmmc, 1800000,
-> +			1800000);
-> +		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_180)))
-> +			caps[0] &= ~SDHCI_CAN_VDD_180;
-> +	}
-> +
->  	max_current_caps = sdhci_readl(host, SDHCI_MAX_CURRENT);
->  	if (!max_current_caps && host->vmmc) {
->  		u32 curr = regulator_get_current_limit(host->vmmc);
+> +inline int sdhci_runtime_pm_get(struct sdhci_host *host)
+> +{
+> +       return 0;
+> +}
+> +inline int sdhci_runtime_pm_put(struct sdhci_host *host)
+> +{
+> +       return 0;
+> +}
 > 
+Sorry, I have missed it.
+Fengguang, Thank you for detection.
+Chris, I'll send a fixed version.
 
-Does the above code mean that 2.8V for vmmc regulator is not a valid value?
+Thanks,
+Seungwon Jeon
 
-Currently I am working on a board for which vmmc regulator voltage is
-set as 2.8V and the SD/MMC card is working fine (by not defining vmmc in
-platform code).
+> Thanks,
+> Fengguang
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
--- 
-Tushar Behera
