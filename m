@@ -1,41 +1,571 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] dw_mmc: fix more const pointer warnings
-Date: Fri, 09 Nov 2012 14:44:59 +0900
-Message-ID: <509C985B.8060206@samsung.com>
-References: <1350376988-27477-1-git-send-email-james.hogan@imgtec.com>
- <508E4DB6.20504@imgtec.com> <87a9v5xuqj.fsf@octavius.laptop.org>
- <201211081426.12208.arnd@arndb.de> <87zk2s5fj6.fsf@octavius.laptop.org>
+Subject: Re: [PATCH v2] mmc: fix async request mechanism for sequential read
+ scenarios
+Date: Fri, 09 Nov 2012 14:46:36 +0900
+Message-ID: <509C98BC.9020900@samsung.com>
+References: <n@samsung.com>
+ <1351780852-1293-1-git-send-email-kdorfman@codeaurora.org>
+ <50975AA8.8030304@stericsson.com> <509B8C45.7040307@samsung.com>
+ <f201e203dd801314e12ef491c9f1cf2a.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <87zk2s5fj6.fsf@octavius.laptop.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, James Hogan <james.hogan@imgtec.com>, Will Newton <will.newton@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:28029 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750810Ab2KIFqm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Nov 2012 00:46:42 -0500
+Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MD700A9ZHDA6JP0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 09 Nov 2012 14:46:39 +0900 (KST)
+Received: from [10.90.51.55] by mmp1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0MD700BJRHDQW570@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 09 Nov 2012 14:46:39 +0900 (KST)
+In-reply-to: <f201e203dd801314e12ef491c9f1cf2a.squirrel@www.codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: merez@codeaurora.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, =?windows-1252?Q?Per_F=F6rl?= =?windows-1252?Q?in?= <per.forlin@stericsson.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "per.lkml@gmail.com" <per.lkml@gmail.com>
 
-Great..Thanks Arnd and Chris.
+Hi Maya,
+
+Thank you for reply. I will check the patch v1 and share the result.
 
 Best Regards,
 Jaehoon Chung
-On 11/08/2012 11:35 PM, Chris Ball wrote:
-> Hi Arnd,
-> 
-> On Thu, Nov 08 2012, Arnd Bergmann wrote:
->> The patch "dw_mmc: fix multiple drv_data NULL dereferences" has
->> unfortunately clashed with my "mmc: dw_mmc: constify
->> dw_mci_idmac_ops in exynos back-end" patch, causing new warnings
->> to appear.
+
+On 11/08/2012 09:51 PM, merez@codeaurora.org wrote:
+> Hi Jaehoon,
+>=20
+> While sending patch V2 the wrong version was sent, that doen't includ=
+e the
+> lock.
+> This causes the crash that you have seen.
+> Konstantin is currently at the Linux Embedded Conference and would be=
+ able
+> to send the new patch only early next week.
+> Until then you can use patch V1 to check the performance improvement.
+>=20
+> Thanks,
+> Maya
+> On Thu, November 8, 2012 2:41 am, Jaehoon Chung wrote:
+>> Hi,
 >>
->> This should hopefully fix the issue for good.
+>> I tested with this patch.
+>> But i got some problem. So i want to get your opinion.
+>> I used eMMC4.5 card, and using ddr mode, dw-mmc controller.
+>> Also use the post/pre-request() in controller.
 >>
->> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> 
-> Thanks, pushed to mmc-next for 3.7.
-> 
-> (Jaehoon also sent a patch to fix these last night, but yours applies to
-> current mmc-next and his doesn't, so I'll take this one instead.)
-> 
-> - Chris.
-> 
+>> Then i got this message every time.
+>> [    7.735520] mmc0: new request while areq =3D eda3046c
+>>
+>> What's wrong?
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>> On 11/05/2012 03:20 PM, Per F=F6rlin wrote:
+>>> Hi Konstantin,
+>>>
+>>> On 11/01/2012 03:40 PM, Konstantin Dorfman wrote:
+>>>> When current request is running on the bus and if next request fet=
+ched
+>>>> by mmcqd is NULL, mmc context (mmcqd thread) gets blocked until th=
+e
+>>>> current request completes. This means if new request comes in whil=
+e
+>>>> the mmcqd thread is blocked, this new request can not be prepared =
+in
+>>>> parallel to current ongoing request. This may result in latency to
+>>>> start new request.
+>>>>
+>>>> This change allows to wake up the MMC thread (which
+>>>> is waiting for the current running request to complete). Now once =
+the
+>>>> MMC thread is woken up, new request can be fetched and prepared in
+>>>> parallel to current running request which means this new request c=
+an
+>>>> be started immediately after the current running request completes=
+=2E
+>>>>
+>>>> With this change read throughput is improved by 16%.
+>>> What HW and what test cases have you been running?
+>>>
+>>>>
+>>>> Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
+>>>> ---
+>>> Please add a change log here with a brief description of the change=
+s
+>>> since last version
+>>>
+>>>>  drivers/mmc/card/block.c |   26 +++++-------
+>>>>  drivers/mmc/card/queue.c |   26 ++++++++++-
+>>>>  drivers/mmc/card/queue.h |    3 +
+>>>>  drivers/mmc/core/core.c  |  102
+>>>> ++++++++++++++++++++++++++++++++++++++++++++-
+>>>>  include/linux/mmc/card.h |   12 +++++
+>>>>  include/linux/mmc/core.h |   15 +++++++
+>>>>  6 files changed, 163 insertions(+), 21 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>>>> index 172a768..0e9bedb 100644
+>>>> --- a/drivers/mmc/card/block.c
+>>>> +++ b/drivers/mmc/card/block.c
+>>>> @@ -112,17 +112,6 @@ struct mmc_blk_data {
+>>>>
+>>>>  static DEFINE_MUTEX(open_lock);
+>>>>
+>>>> -enum mmc_blk_status {
+>>>> -       MMC_BLK_SUCCESS =3D 0,
+>>>> -       MMC_BLK_PARTIAL,
+>>>> -       MMC_BLK_CMD_ERR,
+>>>> -       MMC_BLK_RETRY,
+>>>> -       MMC_BLK_ABORT,
+>>>> -       MMC_BLK_DATA_ERR,
+>>>> -       MMC_BLK_ECC_ERR,
+>>>> -       MMC_BLK_NOMEDIUM,
+>>>> -};
+>>>> -
+>>>>  module_param(perdev_minors, int, 0444);
+>>>>  MODULE_PARM_DESC(perdev_minors, "Minors numbers to allocate per
+>>>> device");
+>>>>
+>>>> @@ -1225,6 +1214,7 @@ static void mmc_blk_rw_rq_prep(struct
+>>>> mmc_queue_req *mqrq,
+>>>>
+>>>>         mqrq->mmc_active.mrq =3D &brq->mrq;
+>>>>         mqrq->mmc_active.err_check =3D mmc_blk_err_check;
+>>>> +       mqrq->mmc_active.mrq->context_info =3D &mq->context_info;
+>>>>
+>>>>         mmc_queue_bounce_pre(mqrq);
+>>>>  }
+>>>> @@ -1284,9 +1274,12 @@ static int mmc_blk_issue_rw_rq(struct mmc_q=
+ueue
+>>>> *mq, struct request *rqc)
+>>>>                         areq =3D &mq->mqrq_cur->mmc_active;
+>>>>                 } else
+>>>>                         areq =3D NULL;
+>>>> -               areq =3D mmc_start_req(card->host, areq, (int *)
+>>>> &status);
+>>>> -               if (!areq)
+>>>> +               areq =3D mmc_start_req(card->host, areq, (int *)&s=
+tatus);
+>>>> +               if (!areq) {
+>>>> +                       if (status =3D=3D MMC_BLK_NEW_REQUEST)
+>>>> +                               mq->flags |=3D MMC_QUEUE_NEW_REQUE=
+ST;
+>>>>                         return 0;
+>>>> +               }
+>>>>
+>>>>                 mq_rq =3D container_of(areq, struct mmc_queue_req,
+>>>> mmc_active);
+>>>>                 brq =3D &mq_rq->brq;
+>>>> @@ -1295,6 +1288,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_qu=
+eue
+>>>> *mq, struct request *rqc)
+>>>>                 mmc_queue_bounce_post(mq_rq);
+>>>>
+>>>>                 switch (status) {
+>>>> +               case MMC_BLK_NEW_REQUEST:
+>>>> +                       BUG_ON(1); /* should never get here */
+>>>>                 case MMC_BLK_SUCCESS:
+>>>>                 case MMC_BLK_PARTIAL:
+>>>>                         /*
+>>>> @@ -1367,7 +1362,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_qu=
+eue
+>>>> *mq, struct request *rqc)
+>>>>                          * prepare it again and resend.
+>>>>                          */
+>>>>                         mmc_blk_rw_rq_prep(mq_rq, card, disable_mu=
+lti,
+>>>> mq);
+>>>> -                       mmc_start_req(card->host, &mq_rq->mmc_acti=
+ve,
+>>>> NULL);
+>>>> +                       mmc_start_req(card->host, &mq_rq->mmc_acti=
+ve,
+>>>> (int *)&status);
+>>>>                 }
+>>>>         } while (ret);
+>>>>
+>>>> @@ -1406,6 +1401,7 @@ static int mmc_blk_issue_rq(struct mmc_queue=
+ *mq,
+>>>> struct request *req)
+>>>>                 ret =3D 0;
+>>>>                 goto out;
+>>>>         }
+>>>> +       mq->flags &=3D ~MMC_QUEUE_NEW_REQUEST;
+>>>>
+>>>>         if (req && req->cmd_flags & REQ_DISCARD) {
+>>>>                 /* complete ongoing async transfer before issuing
+>>>> discard */
+>>>> @@ -1426,7 +1422,7 @@ static int mmc_blk_issue_rq(struct mmc_queue=
+ *mq,
+>>>> struct request *req)
+>>>>         }
+>>>>
+>>>>  out:
+>>>> -       if (!req)
+>>>> +       if (!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST))
+>>>>                 /* release host only when there are no more reques=
+ts */
+>>>>                 mmc_release_host(card->host);
+>>>>         return ret;
+>>>> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+>>>> index fadf52e..7375476 100644
+>>>> --- a/drivers/mmc/card/queue.c
+>>>> +++ b/drivers/mmc/card/queue.c
+>>>> @@ -22,7 +22,6 @@
+>>>>
+>>>>  #define MMC_QUEUE_BOUNCESZ     65536
+>>>>
+>>>> -#define MMC_QUEUE_SUSPENDED    (1 << 0)
+>>>>
+>>>>  /*
+>>>>   * Prepare a MMC request. This just filters out odd stuff.
+>>>> @@ -63,11 +62,17 @@ static int mmc_queue_thread(void *d)
+>>>>                 set_current_state(TASK_INTERRUPTIBLE);
+>>>>                 req =3D blk_fetch_request(q);
+>>>>                 mq->mqrq_cur->req =3D req;
+>>>> +               if (!req && mq->mqrq_prev->req)
+>>>> +                       mq->context_info.is_waiting_last_req =3D t=
+rue;
+>>>>                 spin_unlock_irq(q->queue_lock);
+>>>>
+>>>>                 if (req || mq->mqrq_prev->req) {
+>>>>                         set_current_state(TASK_RUNNING);
+>>>>                         mq->issue_fn(mq, req);
+>>>> +                       if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
+>>>> +                               mq->flags &=3D ~MMC_QUEUE_NEW_REQU=
+EST;
+>>>> +                               continue; /* fetch again */
+>>>> +                       }
+>>>>
+>>>>                         /*
+>>>>                          * Current request becomes previous reques=
+t
+>>>> @@ -111,8 +116,19 @@ static void mmc_request_fn(struct request_que=
+ue
+>>>> *q)
+>>>>                 }
+>>>>                 return;
+>>>>         }
+>>>> -
+>>>> -       if (!mq->mqrq_cur->req && !mq->mqrq_prev->req)
+>>>> +       if (!mq->mqrq_cur->req && mq->mqrq_prev->req &&
+>>>> +           !(mq->mqrq_prev->req->cmd_flags & REQ_FLUSH) &&
+>>>> +           !(mq->mqrq_prev->req->cmd_flags & REQ_DISCARD)) {
+>>>> +               /*
+>>>> +                * New MMC request arrived when MMC thread may be
+>>>> +                * blocked on the previous request to be complete
+>>>> +                * with no current request fetched
+>>>> +                */
+>>>> +               if (mq->context_info.is_waiting_last_req) {
+>>>> +                       mq->context_info.is_new_req =3D true;
+>>>> +                       wake_up_interruptible(&mq->context_info.wa=
+it);
+>>>> +               }
+>>>> +       } else if (!mq->mqrq_cur->req && !mq->mqrq_prev->req)
+>>>>                 wake_up_process(mq->thread);
+>>>>  }
+>>>>
+>>>> @@ -262,6 +278,10 @@ int mmc_init_queue(struct mmc_queue *mq, stru=
+ct
+>>>> mmc_card *card,
+>>>>         }
+>>>>
+>>>>         sema_init(&mq->thread_sem, 1);
+>>>> +       mq->context_info.is_new_req =3D false;
+>>>> +       mq->context_info.is_done_rcv =3D false;
+>>>> +       mq->context_info.is_waiting_last_req =3D false;
+>>>> +       init_waitqueue_head(&mq->context_info.wait);
+>>>>
+>>>>         mq->thread =3D kthread_run(mmc_queue_thread, mq, "mmcqd/%d=
+%s",
+>>>>                 host->index, subname ? subname : "");
+>>>> diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+>>>> index d2a1eb4..f5885e9 100644
+>>>> --- a/drivers/mmc/card/queue.h
+>>>> +++ b/drivers/mmc/card/queue.h
+>>>> @@ -26,6 +26,8 @@ struct mmc_queue {
+>>>>         struct mmc_card         *card;
+>>>>         struct task_struct      *thread;
+>>>>         struct semaphore        thread_sem;
+>>>> +#define MMC_QUEUE_SUSPENDED    (1 << 0)
+>>>> +#define MMC_QUEUE_NEW_REQUEST  (1 << 1)
+>>>>         unsigned int            flags;
+>>>>         int                     (*issue_fn)(struct mmc_queue *, st=
+ruct
+>>>> request *);
+>>>>         void                    *data;
+>>>> @@ -33,6 +35,7 @@ struct mmc_queue {
+>>>>         struct mmc_queue_req    mqrq[2];
+>>>>         struct mmc_queue_req    *mqrq_cur;
+>>>>         struct mmc_queue_req    *mqrq_prev;
+>>>> +       struct mmc_context_info context_info;
+>>>>  };
+>>>>
+>>>>  extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *,
+>>>> spinlock_t *,
+>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>>> index 06c42cf..a24d298 100644
+>>>> --- a/drivers/mmc/core/core.c
+>>>> +++ b/drivers/mmc/core/core.c
+>>>> @@ -316,11 +316,43 @@ out:
+>>>>  }
+>>>>  EXPORT_SYMBOL(mmc_start_bkops);
+>>>>
+>>>> +/*
+>>>> + * mmc_wait_data_done() - done callback for data request
+>>>> + * @mrq: done data request
+>>>> + *
+>>>> + * Wakes up mmc context, passed as callback to host controller dr=
+iver
+>>>> + */
+>>>> +static void mmc_wait_data_done(struct mmc_request *mrq)
+>>>> +{
+>>>> +       mrq->context_info->is_done_rcv =3D true;
+>>>> +       wake_up_interruptible(&mrq->context_info->wait);
+>>>> +}
+>>>> +
+>>>>  static void mmc_wait_done(struct mmc_request *mrq)
+>>>>  {
+>>>>         complete(&mrq->completion);
+>>>>  }
+>>>>
+>>>> +/*
+>>>> + *__mmc_start_data_req() - starts data request
+>>>> + * @host: MMC host to start the request
+>>>> + * @mrq: data request to start
+>>>> + *
+>>>> + * Fills done callback that will be used when request are done by
+>>>> card.
+>>>> + * Starts data mmc request execution
+>>>> + */
+>>>> +static int __mmc_start_data_req(struct mmc_host *host, struct
+>>>> mmc_request *mrq)
+>>>> +{
+>>>> +       mrq->done =3D mmc_wait_data_done;
+>>>> +       if (mmc_card_removed(host->card)) {
+>>>> +               mrq->cmd->error =3D -ENOMEDIUM;
+>>>> +               return -ENOMEDIUM;
+>>>> +       }
+>>>> +       mmc_start_request(host, mrq);
+>>>> +
+>>>> +       return 0;
+>>>> +}
+>>>> +
+>>>>  static int __mmc_start_req(struct mmc_host *host, struct mmc_requ=
+est
+>>>> *mrq)
+>>>>  {
+>>>>         init_completion(&mrq->completion);
+>>>> @@ -334,6 +366,57 @@ static int __mmc_start_req(struct mmc_host *h=
+ost,
+>>>> struct mmc_request *mrq)
+>>>>         return 0;
+>>>>  }
+>>>>
+>>>> +/*
+>>>> + * mmc_wait_for_data_req_done() - wait for request completed or n=
+ew
+>>>> + *                               request notification arrives
+>>>> + * @host: MMC host to prepare the command.
+>>>> + * @mrq: MMC request to wait for
+>>>> + *
+>>>> + * Blocks MMC context till host controller will ack end of data
+>>>> request
+>>>> + * execution or new request arrives from block layer. Handles
+>>>> + * command retries.
+>>>> + *
+>>>> + * Returns enum mmc_blk_status after checking errors.
+>>>> + */
+>>>> +static int mmc_wait_for_data_req_done(struct mmc_host *host,
+>>>> +                                     struct mmc_request *mrq)
+>>>> +{
+>>>> +       struct mmc_command *cmd;
+>>>> +       struct mmc_context_info *context_info =3D mrq->context_inf=
+o;
+>>>> +       int err;
+>>>> +
+>>>> +       while (1) {
+>>>> +               wait_event_interruptible(context_info->wait,
+>>>> +                               (context_info->is_done_rcv ||
+>>>> +                                context_info->is_new_req));
+>>>> +               context_info->is_waiting_last_req =3D false;
+>>>> +               if (context_info->is_done_rcv) {
+>>>> +                       context_info->is_done_rcv =3D false;
+>>>> +                       context_info->is_new_req =3D false;
+>>>> +                       cmd =3D mrq->cmd;
+>>>> +                       if (!cmd->error || !cmd->retries ||
+>>>> +                                       mmc_card_removed(host->car=
+d)) {
+>>>> +                               err =3D host->areq->err_check(host=
+->card,
+>>>> +                                               host->areq);
+>>>> +                               break; /* return err */
+>>>> +                       } else {
+>>>> +                               pr_info("%s: req failed (CMD%u): %=
+d,
+>>>> retrying...\n",
+>>>> +                                               mmc_hostname(host)=
+,
+>>>> +                                               cmd->opcode,
+>>>> cmd->error);
+>>>> +                               cmd->retries--;
+>>>> +                               cmd->error =3D 0;
+>>>> +                               host->ops->request(host, mrq);
+>>>> +                               continue; /* wait for done/new eve=
+nt
+>>>> again */
+>>>> +                       }
+>>>> +               } else if (context_info->is_new_req) {
+>>>> +                       context_info->is_new_req =3D false;
+>>>> +                       err =3D MMC_BLK_NEW_REQUEST;
+>>>> +                       break; /* return err */
+>>>> +               }
+>>>> +       } /* while */
+>>>> +       return err;
+>>>> +}
+>>>> +
+>>>>  static void mmc_wait_for_req_done(struct mmc_host *host,
+>>>>                                   struct mmc_request *mrq)
+>>>>  {
+>>>> @@ -423,8 +506,20 @@ struct mmc_async_req *mmc_start_req(struct
+>>>> mmc_host *host,
+>>>>                 mmc_pre_req(host, areq->mrq, !host->areq);
+>>>>
+>>>>         if (host->areq) {
+>>>> -               mmc_wait_for_req_done(host, host->areq->mrq);
+>>>> -               err =3D host->areq->err_check(host->card, host->ar=
+eq);
+>>>> +               err =3D mmc_wait_for_data_req_done(host,
+>>>> host->areq->mrq);
+>>>> +               if (err =3D=3D MMC_BLK_NEW_REQUEST) {
+>>>> +                       if (areq) {
+>>>> +                               pr_err("%s: new request while areq=
+ =3D
+>>>> %p",
+>>>> +                                               mmc_hostname(host)=
+,
+>>>> areq);
+>>>> +                               BUG_ON(1);
+>>>> +                       }
+>>>> +                       *error =3D err;
+>>>> +                       /*
+>>>> +                        * The previous request was not completed,
+>>>> +                        * nothing to return
+>>>> +                        */
+>>>> +                       return NULL;
+>>>> +               }
+>>>>                 /*
+>>>>                  * Check BKOPS urgency for each R1 response
+>>>>                  */
+>>>> @@ -436,7 +531,7 @@ struct mmc_async_req *mmc_start_req(struct mmc=
+_host
+>>>> *host,
+>>>>         }
+>>>>
+>>>>         if (!err && areq)
+>>>> -               start_err =3D __mmc_start_req(host, areq->mrq);
+>>>> +               start_err =3D __mmc_start_data_req(host, areq->mrq=
+);
+>>>>
+>>>>         if (host->areq)
+>>>>                 mmc_post_req(host, host->areq->mrq, 0);
+>>>> @@ -452,6 +547,7 @@ struct mmc_async_req *mmc_start_req(struct mmc=
+_host
+>>>> *host,
+>>>>
+>>>>         if (error)
+>>>>                 *error =3D err;
+>>>> +
+>>>>         return data;
+>>>>  }
+>>>>  EXPORT_SYMBOL(mmc_start_req);
+>>>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+>>>> index 943550d..9681d8f 100644
+>>>> --- a/include/linux/mmc/card.h
+>>>> +++ b/include/linux/mmc/card.h
+>>>> @@ -186,6 +186,18 @@ struct sdio_func_tuple;
+>>>>
+>>>>  #define SDIO_MAX_FUNCS         7
+>>>>
+>>>> +enum mmc_blk_status {
+>>>> +       MMC_BLK_SUCCESS =3D 0,
+>>>> +       MMC_BLK_PARTIAL,
+>>>> +       MMC_BLK_CMD_ERR,
+>>>> +       MMC_BLK_RETRY,
+>>>> +       MMC_BLK_ABORT,
+>>>> +       MMC_BLK_DATA_ERR,
+>>>> +       MMC_BLK_ECC_ERR,
+>>>> +       MMC_BLK_NOMEDIUM,
+>>>> +       MMC_BLK_NEW_REQUEST,
+>>>> +};
+>>>> +
+>>>>  /* The number of MMC physical partitions.  These consist of:
+>>>>   * boot partitions (2), general purpose partitions (4) in MMC v4.=
+4.
+>>>>   */
+>>>> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+>>>> index 9b9cdaf..fc2d095 100644
+>>>> --- a/include/linux/mmc/core.h
+>>>> +++ b/include/linux/mmc/core.h
+>>>> @@ -120,6 +120,20 @@ struct mmc_data {
+>>>>         s32                     host_cookie;    /* host private da=
+ta */
+>>>>  };
+>>>>
+>>>> +/**
+>>>> + * mmc_context_info - synchronization details for mmc context
+>>>> + * @is_done_rcv                wake up reason was done request
+>>>> + * @is_new_req wake up reason was new request
+>>>> + * @is_waiting_last_req        mmc context waiting for single run=
+ning
+>>>> request
+>>>> + * @wait               wait queue
+>>>> + */
+>>>> +struct mmc_context_info {
+>>>> +       bool                    is_done_rcv;
+>>>> +       bool                    is_new_req;
+>>>> +       bool                    is_waiting_last_req;
+>>>> +       wait_queue_head_t       wait;
+>>>> +};
+>>>> +
+>>>>  struct mmc_request {
+>>>>         struct mmc_command      *sbc;           /* SET_BLOCK_COUNT=
+ for
+>>>> multiblock */
+>>>>         struct mmc_command      *cmd;
+>>>> @@ -128,6 +142,7 @@ struct mmc_request {
+>>>>
+>>>>         struct completion       completion;
+>>>>         void                    (*done)(struct mmc_request *);/*
+>>>> completion function */
+>>>> +       struct mmc_context_info    *context_info;
+>>>>  };
+>>>>
+>>>>  struct mmc_host;
+>>>> --
+>>>> 1.7.6
+>>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc=
+" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>=20
+>=20
+
