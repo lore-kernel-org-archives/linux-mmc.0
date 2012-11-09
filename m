@@ -1,61 +1,49 @@
-From: Philip Rakity <prakity@nvidia.com>
-Subject: Re: UHS-I voltage switching on OLPC XO-1.75
-Date: Thu, 8 Nov 2012 23:23:46 +0100
-Message-ID: <44A4EFC4-F11F-483D-B897-AD2DF7382FAA@nvidia.com>
-References: <5817E66E-3B94-42E1-AB06-699935D83379@nvidia.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v2] mmc: sdhci: fix incorrect command used in tuning
+Date: Thu, 08 Nov 2012 20:46:54 -0500
+Message-ID: <87zk2reeep.fsf@octavius.laptop.org>
+References: <1341307669-20834-1-git-send-email-aaron.lu@amd.com>
+	<87wqxzal6b.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate03.nvidia.com ([216.228.121.140]:18610 "EHLO
-	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756707Ab2KHWXv convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Nov 2012 17:23:51 -0500
-In-Reply-To: <5817E66E-3B94-42E1-AB06-699935D83379@nvidia.com>
-Content-Language: en-US
+Received: from void.printf.net ([89.145.121.20]:32895 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1422644Ab2KIBrD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 8 Nov 2012 20:47:03 -0500
+In-Reply-To: <87wqxzal6b.fsf@octavius.laptop.org> (Chris Ball's message of
+	"Mon, 05 Nov 2012 14:45:16 -0500")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <dsd@laptop.org>
-Cc: Johan Rudholm <jrudholm@gmail.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Aaron Lu <aaron.lu@amd.com>
+Cc: Girish K S <girish.shivananjappa@linaro.org>, Subhash Jadavani <subhashj@codeaurora.org>, Philip Rakity <prakity@marvell.com>, linux-mmc@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
 
+Hi Aaron,
 
-On Nov 8, 2012, at 7:03 PM, Philip Rakity <prakity@nvidia.com> wrote:
+On Mon, Nov 05 2012, Chris Ball wrote:
+> On Tue, Jul 03 2012, Aaron Lu wrote:
+>>  		 */
+>>  		if ((host->flags & SDHCI_NEEDS_RETUNING) &&
+>>  		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
+>> +			/* eMMC uses cmd21 while sd and sdio use cmd19 */
+>> +			tuning_opcode = mmc->card->type == MMC_TYPE_MMC ?
+>> +				MMC_SEND_TUNING_BLOCK_HS200 :
+>> +				MMC_SEND_TUNING_BLOCK;
+>
+> This is causing a NULL deref crash here when run on host controllers
+> with no card inserted -- mmc->card is NULL, as you'd expect, yet it's
+> dereferenced anyway.  Maybe the system you tested it on only has an
+> eMMC, so you never noticed that it crashes if there's no card present?
+> Or maybe it's abnormal for host controllers to set SDHCI_NEEDS_RETUNING
+> when there's no card present?
 
-> Don't know enough about the device tree to help.  Originally I suggested a quirk simular to what you are suggesting but it was felt to be too specific since the bits in caps2 achieve the same effect.  Maybe your board specific code can check if the regulator is capable of switching and can be turned on and off.  Not sure how to do the later.  Checking the usage count does not help.  You want exclusive access.  Mark Brown might know how to do this else perhaps the regulator framework needs extending.
+I'm going to send my fix to Linus (and hence stable@) tomorrow morning,
+since it's important to remove this crash.  Let me know what you think
+when you get a chance.
 
-upon reflection you can configure the regulator supply with the name of the specific device.  That should make it exclusive to the mmc subsystem.  In the general case I do not know how one can test for this (in say sdhci.c).
-> 
-> ----- Reply message -----
-> From: "Daniel Drake" <dsd@laptop.org>
-> To: "Philip Rakity" <prakity@nvidia.com>
-> Cc: "Johan Rudholm" <jrudholm@gmail.com>, "Chris Ball" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-> Subject: UHS-I voltage switching on OLPC XO-1.75
-> Date: Thu, Nov 8, 2012 19:52
-> 
-> 
-> 
-> On Thu, Nov 8, 2012 at 12:48 PM, Philip Rakity <prakity@nvidia.com> wrote:
-> > This is already there.  Use broken caps and in the board code clear out the
-> > nits in caps2.
-> 
-> There is no board code; we're working with device tree. So I'm still
-> not exactly clear on the best way to work this.
-> 
-> Maybe something like this: "sdhci,disable-1-8v" property in the device
-> tree, would trigger the sdhci-pxa2 code to:
-> 1. sdhci_readl() to retrieve caps and caps1
-> 2. Drop the 1.8v flag from caps1
-> 3. Set the BROKEN_CAPS quirk
-> 
-> It would work but I'm not too fond of it, and I can't really think of
-> an approach I do like (except maybe having a specific "1.8v broken"
-> sdhci quirk).
-> 
-> Daniel
+Thanks,
 
------------------------------------------------------------------------------------
-This email message is for the sole use of the intended recipient(s) and may contain
-confidential information.  Any unauthorized review, use, disclosure or distribution
-is prohibited.  If you are not the intended recipient, please contact the sender by
-reply email and destroy all copies of the original message.
------------------------------------------------------------------------------------
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
