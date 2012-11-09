@@ -1,7 +1,7 @@
 From: Tushar Behera <tushar.behera@linaro.org>
-Subject: [PATCH 3/8] mmc: sdhci: fix coding style in sdhci_finish_data
-Date: Fri,  9 Nov 2012 17:09:53 +0530
-Message-ID: <1352461198-21941-4-git-send-email-tushar.behera@linaro.org>
+Subject: [PATCH 7/8] mmc: sdhci: fix coding style in sdhci_data_irq
+Date: Fri,  9 Nov 2012 17:09:57 +0530
+Message-ID: <1352461198-21941-8-git-send-email-tushar.behera@linaro.org>
 References: <1352461198-21941-1-git-send-email-tushar.behera@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1352461198-21941-1-git-send-email-tushar.behera@linaro.org>
@@ -12,35 +12,24 @@ List-Id: linux-mmc@vger.kernel.org
 
 Signed-off-by: Tushar Behera <tushar.behera@linaro.org>
 ---
- drivers/mmc/host/sdhci.c |    7 ++++---
- 1 files changed, 4 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 2d3d76e..73bb41f 100644
+index 4bed582..47cac71 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -924,9 +924,9 @@ static void sdhci_finish_data(struct sdhci_host *host)
- 	host->data = NULL;
+@@ -2286,9 +2286,9 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 		host->data->error = -EIO;
+ 	}
  
- 	if (host->flags & SDHCI_REQ_USE_DMA) {
--		if (host->flags & SDHCI_USE_ADMA)
-+		if (host->flags & SDHCI_USE_ADMA) {
- 			sdhci_adma_table_post(host, data);
--		else {
-+		} else {
- 			dma_unmap_sg(mmc_dev(host->mmc), data->sg,
- 				data->sg_len, (data->flags & MMC_DATA_READ) ?
- 					DMA_FROM_DEVICE : DMA_TO_DEVICE);
-@@ -964,8 +964,9 @@ static void sdhci_finish_data(struct sdhci_host *host)
- 		}
- 
- 		sdhci_send_command(host, data->stop);
--	} else
+-	if (host->data->error)
++	if (host->data->error) {
+ 		sdhci_finish_data(host);
+-	else {
 +	} else {
- 		tasklet_schedule(&host->finish_tasklet);
-+	}
- }
+ 		if (intmask & (SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL))
+ 			sdhci_transfer_pio(host);
  
- static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
 -- 
 1.7.4.1
