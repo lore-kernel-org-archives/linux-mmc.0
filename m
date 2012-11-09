@@ -1,107 +1,91 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [GIT PULL] MMC fixes for 3.7-rc5
-Date: Fri, 09 Nov 2012 08:44:19 -0500
-Message-ID: <87fw4ic2mk.fsf@octavius.laptop.org>
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCH] mmc: omap_hsmmc: Fix Oops in case of data errors
+Date: Fri, 9 Nov 2012 20:11:19 +0530
+Message-ID: <1352472079-1512-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:33034 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752851Ab2KIOlg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 9 Nov 2012 09:41:36 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: linux-omap@vger.kernel.org, svenkatr@ti.com, Balaji T K <balajitk@ti.com>
 
-Hi Linus,
+Setting end_cmd to 1 for Data Timeout/CRC leads to NULL pointer dereference of
+host->cmd as the command complete has previously been handled.
+Set end_cmd only in case of Data Timeout/CRC.
 
-Please pull from:
+While at it restore error handling behaviour as was before the
+"commit ae4bf788ee9bf7c2d51b0309117d1fcccbdd50a2
+mmc: omap_hsmmc: consolidate error report handling of HSMMC IRQ"
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-fixes-for-3.7-rc5
+host->cmd->error should not be updated on data error case, only
+host->data->error needs to be updated.
+end_trans and end_crc should not to be set together, to avoid
+mmc_request_done being called twice in case of Command CRC or command
+Timeout.
+Avoid soft reset of command internal state machine on data errors.
 
-to receive MMC fixes for 3.7-rc5.  There are no merge conflicts, and the
-patches have been tested in linux-next.  Thanks.
+Signed-off-by: Balaji T K <balajitk@ti.com>
+---
+based on mmc-fixes-for-3.7-rc5 in mmc_next
 
+ drivers/mmc/host/omap_hsmmc.c |   23 +++++++++++++++--------
+ 1 files changed, 15 insertions(+), 8 deletions(-)
 
-The following changes since commit ddffeb8c4d0331609ef2581d84de4d763607bd37:
-
-  Linux 3.7-rc1 (2012-10-14 14:41:04 -0700)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-fixes-for-3.7-rc5
-
-for you to fetch changes up to 0aa55c2367f082876f92660312214cd20c6a024b:
-
-  mmc: sdhci-s3c: fix the card detection in runtime-pm (2012-11-07 15:40:52 -0500)
-
-----------------------------------------------------------------
-MMC fixes for 3.7-rc5:
- - sdhci: fix a NULL dereference at resume-time, seen on OLPC XO-4
- - sdhci: fix against 3.7-rc1 for UHS modes without a vqmmc regulator
- - sdhci-of-esdhc: disable CMD23 on boards where it's broken
- - sdhci-s3c: fix against 3.7-rc1 for card detection with runtime PM
- - dw_mmc, omap_hsmmc: fix potential NULL derefs, compiler warnings
-
-----------------------------------------------------------------
-Adrian Hunter (1):
-      mmc: sdhci-pci: fix 'Invalid iomem size' error message condition
-
-Arnd Bergmann (2):
-      mmc: dw_mmc: fix modular build for exynos back-end
-      mmc: dw_mmc: constify dw_mci_idmac_ops in exynos back-end
-
-Balaji T K (2):
-      mmc: omap_hsmmc: fix host reference after mmc_free_host
-      mmc: omap_hsmmc: fix NULL pointer dereference for dt boot
-
-Chris Ball (1):
-      mmc: sdhci: fix NULL dereference in sdhci_request() tuning
-
-Fabio Estevam (1):
-      mmc: mxcmmc: Fix MODULE_ALIAS
-
-Guennadi Liakhovetski (1):
-      mmc: sh_mmcif: fix use after free
-
-James Hogan (1):
-      mmc: dw_mmc: fix multiple drv_data NULL dereferences
-
-Jerry Huang (1):
-      mmc: sdhci-of-esdhc: disable CMD23 for some Freescale SoCs
-
-Kevin Liu (1):
-      mmc: sdhci: fix IS_ERR() checking of regulator_get()
-
-Russell King - ARM Linux (1):
-      mmc: fix sdhci-dove probe/removal
-
-Seungwon Jeon (3):
-      mmc: dw_mmc: convert the variable type of irq
-      mmc: dw_mmc: remove _dev_info compile warning
-      mmc: sdhci-s3c: fix the card detection in runtime-pm
-
-Thomas Abraham (1):
-      mmc: sdhci-s3c: use clk_prepare_enable and clk_disable_unprepare
-
-Yuvaraj CD (1):
-      mmc: dw_mmc: enable controller interrupt before calling mmc_start_host
-
- drivers/mmc/host/dw_mmc-exynos.c  |  8 ++---
- drivers/mmc/host/dw_mmc-pltfm.c   |  6 ++--
- drivers/mmc/host/dw_mmc-pltfm.h   |  2 +-
- drivers/mmc/host/dw_mmc.c         | 62 +++++++++++++++++++++------------------
- drivers/mmc/host/mxcmmc.c         |  2 +-
- drivers/mmc/host/omap_hsmmc.c     | 19 +++++++-----
- drivers/mmc/host/sdhci-dove.c     | 38 ++++++++++++------------
- drivers/mmc/host/sdhci-of-esdhc.c | 11 +++++++
- drivers/mmc/host/sdhci-pci.c      |  2 +-
- drivers/mmc/host/sdhci-pltfm.c    |  7 +++++
- drivers/mmc/host/sdhci-s3c.c      | 30 ++++++++++---------
- drivers/mmc/host/sdhci.c          | 44 +++++++++++++++++----------
- drivers/mmc/host/sdhci.h          |  1 +
- drivers/mmc/host/sh_mmcif.c       |  2 +-
- include/linux/mmc/dw_mmc.h        |  6 ++--
- include/linux/mmc/sdhci.h         |  1 +
- 16 files changed, 144 insertions(+), 97 deletions(-)
-
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index fedd258..6ea1da3 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -968,15 +968,20 @@ static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
+ 			__func__);
+ }
+ 
+-static void hsmmc_command_incomplete(struct omap_hsmmc_host *host, int err)
++static void hsmmc_command_incomplete(struct omap_hsmmc_host *host,
++					int err, int end_cmd)
+ {
+-	omap_hsmmc_reset_controller_fsm(host, SRC);
+-	host->cmd->error = err;
++	if (end_cmd) {
++		omap_hsmmc_reset_controller_fsm(host, SRC);
++		if (host->cmd)
++			host->cmd->error = err;
++	}
+ 
+ 	if (host->data) {
+ 		omap_hsmmc_reset_controller_fsm(host, SRD);
+ 		omap_hsmmc_dma_cleanup(host, err);
+-	}
++	} else if (host->mrq && host->mrq->cmd)
++		host->mrq->cmd->error = err;
+ 
+ }
+ 
+@@ -990,14 +995,16 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
+ 
+ 	if (status & ERR) {
+ 		omap_hsmmc_dbg_report_irq(host, status);
++
++		if (status & (CMD_TIMEOUT | CMD_CRC))
++			end_cmd = 1;
+ 		if (status & (CMD_TIMEOUT | DATA_TIMEOUT))
+-			hsmmc_command_incomplete(host, -ETIMEDOUT);
++			hsmmc_command_incomplete(host, -ETIMEDOUT, end_cmd);
+ 		else if (status & (CMD_CRC | DATA_CRC))
+-			hsmmc_command_incomplete(host, -EILSEQ);
++			hsmmc_command_incomplete(host, -EILSEQ, end_cmd);
+ 
+-		end_cmd = 1;
+ 		if (host->data || host->response_busy) {
+-			end_trans = 1;
++			end_trans = !end_cmd;
+ 			host->response_busy = 0;
+ 		}
+ 	}
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.5.4
+
