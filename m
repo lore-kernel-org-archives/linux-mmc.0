@@ -1,61 +1,134 @@
-From: Tushar Behera <tushar.behera@linaro.org>
-Subject: Re: [PATCH 0/8] Fix coding style in sdhci.c
-Date: Mon, 12 Nov 2012 10:08:08 +0530
-Message-ID: <50A07D30.4030705@linaro.org>
-References: <1352461198-21941-1-git-send-email-tushar.behera@linaro.org> <50A05DE9.8070907@samsung.com>
+From: Haijun Zhang <Haijun.Zhang@freescale.com>
+Subject: [PATCH] Powerpc eSDHC: Use u64 to calculate the timeout value to avoid overflow
+Date: Mon, 12 Nov 2012 12:45:28 +0800
+Message-ID: <1352695528-6457-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-da0-f46.google.com ([209.85.210.46]:59759 "EHLO
-	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751471Ab2KLEhk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Nov 2012 23:37:40 -0500
-Received: by mail-da0-f46.google.com with SMTP id n41so2562010dak.19
-        for <linux-mmc@vger.kernel.org>; Sun, 11 Nov 2012 20:37:40 -0800 (PST)
-In-Reply-To: <50A05DE9.8070907@samsung.com>
+Received: from [216.32.180.11] ([216.32.180.11]:26748 "EHLO
+	va3outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-OK)
+	by vger.kernel.org with ESMTP id S1750709Ab2KLFI0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Nov 2012 00:08:26 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, patches@linaro.org
+To: linux-mmc@vger.kernel.org
+Cc: Haijun Zhang <Haijun.Zhang@freescale.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
 
-On 11/12/2012 07:54 AM, Jaehoon Chung wrote:
-> Hi Tushar,
-> 
-> Could you make one patch? Why do you separate patches?
-> 
+As some mmc cards need large timeout value usually a few seconds,
+so data timeout nanosecond will overflow with u32 variable and
+give the wrong timeout value, so use u64 will be safe.
 
-Yes, I can do that. I did split it specifically so that we could drop
-any patches if required.
+Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
+CC: Anton Vorontsov <cbouatmailru@gmail.com>
+---
+ drivers/mmc/core/core.c  |   21 ++++++++-------------
+ drivers/mmc/host/sdhci.c |    6 +++---
+ include/linux/mmc/core.h |    2 +-
+ 3 files changed, 12 insertions(+), 17 deletions(-)
 
-I will wait for a word from Chris regarding what he prefers.
-
-
-> Best Regards,
-> Jaehoon Chung
-> 
-> On 11/09/2012 08:39 PM, Tushar Behera wrote:
->> Documents/CodingStyle Chapter 3 recommends usage of braces for both
->> if and else statements if any of the branches contains multiple
->> statements.
->>
->> Cleaning up drivers/mmc/host/sdhci.c for all these occurrences.
->>
->> Tushar Behera (8):
->>   mmc: sdhci: fix coding style in sdhci_calc_timeout
->>   mmc: sdhci: fix coding style in sdhci_set_transfer_mode
->>   mmc: sdhci: fix coding style in sdhci_finish_data
->>   mmc: sdhci: fix coding style in sdhci_set_clock
->>   mmc: sdhci: fix coding style in sdhci_do_set_ios
->>   mmc: sdhci: fix coding style in sdhci_execute_tuning
->>   mmc: sdhci: fix coding style in sdhci_data_irq
->>   mmc: sdhci: fix coding style in sdhci_add_host
->>
->>  drivers/mmc/host/sdhci.c |   58 +++++++++++++++++++++++++--------------------
->>  1 files changed, 32 insertions(+), 26 deletions(-)
->>
-> 
-
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 06c42cf..c241fc1 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -208,10 +208,10 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 
+ 	if (mrq->data) {
+ 		pr_debug("%s:     blksz %d blocks %d flags %08x "
+-			"tsac %d ms nsac %d\n",
++			"tsac %lld ms nsac %d\n",
+ 			mmc_hostname(host), mrq->data->blksz,
+ 			mrq->data->blocks, mrq->data->flags,
+-			mrq->data->timeout_ns / 1000000,
++			div_u64(mrq->data->timeout_ns, 1000000),
+ 			mrq->data->timeout_clks);
+ 	}
+ 
+@@ -659,16 +659,16 @@ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
+ 	if (data->flags & MMC_DATA_WRITE)
+ 		mult <<= card->csd.r2w_factor;
+ 
+-	data->timeout_ns = card->csd.tacc_ns * mult;
++	data->timeout_ns = (u64)card->csd.tacc_ns * (u64)mult;
+ 	data->timeout_clks = card->csd.tacc_clks * mult;
+ 
+ 	/*
+ 	 * SD cards also have an upper limit on the timeout.
+ 	 */
+ 	if (mmc_card_sd(card)) {
+-		unsigned int timeout_us, limit_us;
++		u64 timeout_us, limit_us;
+ 
+-		timeout_us = data->timeout_ns / 1000;
++		timeout_us = div_u64(data->timeout_ns, 1000);
+ 		if (mmc_host_clk_rate(card->host))
+ 			timeout_us += data->timeout_clks * 1000 /
+ 				(mmc_host_clk_rate(card->host) / 1000);
+@@ -1545,14 +1545,9 @@ static unsigned int mmc_mmc_erase_timeout(struct mmc_card *card,
+ 		/* CSD Erase Group Size uses write timeout */
+ 		unsigned int mult = (10 << card->csd.r2w_factor);
+ 		unsigned int timeout_clks = card->csd.tacc_clks * mult;
+-		unsigned int timeout_us;
+-
+-		/* Avoid overflow: e.g. tacc_ns=80000000 mult=1280 */
+-		if (card->csd.tacc_ns < 1000000)
+-			timeout_us = (card->csd.tacc_ns * mult) / 1000;
+-		else
+-			timeout_us = (card->csd.tacc_ns / 1000) * mult;
++		u64 timeout_us;
+ 
++		timeout_us = (u64)(card->csd.tacc_ns / 1000) * (u64)mult;
+ 		/*
+ 		 * ios.clock is only a target.  The real clock rate might be
+ 		 * less but not that much less, so fudge it by multiplying by 2.
+@@ -1561,7 +1556,7 @@ static unsigned int mmc_mmc_erase_timeout(struct mmc_card *card,
+ 		timeout_us += (timeout_clks * 1000) /
+ 			      (mmc_host_clk_rate(card->host) / 1000);
+ 
+-		erase_timeout = timeout_us / 1000;
++		erase_timeout = div_u64(timeout_us, 1000);
+ 
+ 		/*
+ 		 * Theoretically, the calculation could underflow so round up
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index f05a377..a5adc9f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -651,7 +651,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ {
+ 	u8 count;
+ 	struct mmc_data *data = cmd->data;
+-	unsigned target_timeout, current_timeout;
++	u64 target_timeout, current_timeout;
+ 
+ 	/*
+ 	 * If the host controller provides us with an incorrect timeout
+@@ -668,9 +668,9 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ 
+ 	/* timeout in us */
+ 	if (!data)
+-		target_timeout = cmd->cmd_timeout_ms * 1000;
++		target_timeout = (u64)cmd->cmd_timeout_ms * 1000;
+ 	else {
+-		target_timeout = data->timeout_ns / 1000;
++		target_timeout = div_u64(data->timeout_ns, 1000);
+ 		if (host->clock)
+ 			target_timeout += data->timeout_clks / host->clock;
+ 	}
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 9b9cdaf..a2ff2e9 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -99,7 +99,7 @@ struct mmc_command {
+ };
+ 
+ struct mmc_data {
+-	unsigned int		timeout_ns;	/* data timeout (in ns, max 80ms) */
++	u64			timeout_ns;	/* data timeout (in ns) */
+ 	unsigned int		timeout_clks;	/* data timeout (in clocks) */
+ 	unsigned int		blksz;		/* data block size */
+ 	unsigned int		blocks;		/* number of blocks */
 -- 
-Tushar Behera
+1.7.0.4
+
+
