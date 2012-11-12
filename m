@@ -1,45 +1,42 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v3 3/3] mmc: omap_hsmmc: update error code for response_busy cmd
-Date: Mon, 12 Nov 2012 18:36:44 +0530
-Message-ID: <1352725604-20390-4-git-send-email-balajitk@ti.com>
-References: <1352477176-6673-1-git-send-email-balajitk@ti.com>
- <1352725604-20390-1-git-send-email-balajitk@ti.com>
+Subject: Re: [PATCH] mmc: hsmmc: Fix NULL pointer dereference on unload when
+ booted with device tree
+Date: Mon, 12 Nov 2012 18:50:12 +0530
+Message-ID: <50A0F78C.6030600@ti.com>
+References: <20121109182534.GR6801@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:44856 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752402Ab2KLNGw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 12 Nov 2012 08:06:52 -0500
-In-Reply-To: <1352725604-20390-1-git-send-email-balajitk@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20121109182534.GR6801@atomide.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: linux-omap@vger.kernel.org, svenkatr@ti.com, balbi@ti.com, Balaji T K <balajitk@ti.com>
 
-update error code to cmd->error for commands with response_busy and no data
+On Friday 09 November 2012 11:55 PM, Tony Lindgren wrote:
+> When booting with device tree, we don't have any pdata, and will
+> get the following when trying to unload omap_hsmmc:
+>
+> Unable to handle kernel NULL pointer dereference at virtual address 00000044
+> pgd = edafc000
+> *pgd=adbbd831, *pte=00000000, *ppte=00000000
+> SMP ARM
+> Modules linked in: omap_hsmmc(-) omap_serial pinctrl_single
+> CPU: 1    Not tainted  (3.7.0-rc4-00044-g8ca5f6a-dirty #245)
+> PC is at omap_hsmmc_gpio_free+0x8/0x3c [omap_hsmmc]
+> LR is at omap_hsmmc_remove+0xf0/0x174 [omap_hsmmc]
+<snip>
+>
+> Signed-off-by: Tony Lindgren <tony@atomide.com>
+>
+> ---
+>
+> This is against v3.7-rc4, would be nice to get in during the -rc cycle.
+>
+Hi Tony,
 
-Signed-off-by: Balaji T K <balajitk@ti.com>
-Reviewed-by: Felipe Balbi <balbi@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
+Got fixed by below commit, merged in rc5
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index d931e08..352e18e 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -980,8 +980,9 @@ static void hsmmc_command_incomplete(struct omap_hsmmc_host *host,
- 	if (host->data) {
- 		omap_hsmmc_reset_controller_fsm(host, SRD);
- 		omap_hsmmc_dma_cleanup(host, err);
-+	} else if (host->mrq && host->mrq->cmd) {
-+		host->mrq->cmd->error = err;
- 	}
--
- }
- 
- static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
--- 
-1.7.5.4
+http://git.kernel.org/?p=linux/kernel/git/cjb/mmc.git;a=commit;h=9ea28ecbeb090159a3383ff60b29dee00c489774
 
