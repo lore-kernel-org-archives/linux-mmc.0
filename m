@@ -1,54 +1,81 @@
-From: Konstantin Dorfman <kdorfman@codeaurora.org>
-Subject: Re: [PATCH v2] mmc: fix async request mechanism for sequential read
- scenarios
-Date: Mon, 12 Nov 2012 14:49:00 +0200
-Message-ID: <50A0F03C.10502@codeaurora.org>
-References: <n> <1351780852-1293-1-git-send-email-kdorfman@codeaurora.org> <50975AA8.8030304@stericsson.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCH v3 1/3] mmc: omap_hsmmc: Fix Oops in case of data errors
+Date: Mon, 12 Nov 2012 18:36:42 +0530
+Message-ID: <1352725604-20390-2-git-send-email-balajitk@ti.com>
+References: <1352477176-6673-1-git-send-email-balajitk@ti.com>
+ <1352725604-20390-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:55468 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752398Ab2KLMtE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Nov 2012 07:49:04 -0500
-In-Reply-To: <50975AA8.8030304@stericsson.com>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:41252 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752004Ab2KLNGw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 12 Nov 2012 08:06:52 -0500
+In-Reply-To: <1352725604-20390-1-git-send-email-balajitk@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-1?Q?Per_F=F6rlin?= <per.forlin@stericsson.com>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "per.lkml@gmail.com" <per.lkml@gmail.com>
+To: linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: linux-omap@vger.kernel.org, svenkatr@ti.com, balbi@ti.com, Balaji T K <balajitk@ti.com>
 
-On 11/05/2012 08:20 AM, Per F=F6rlin wrote:
-> Hi Konstantin,
->=20
-> On 11/01/2012 03:40 PM, Konstantin Dorfman wrote:
->> When current request is running on the bus and if next request fetch=
-ed
->> by mmcqd is NULL, mmc context (mmcqd thread) gets blocked until the
->> current request completes. This means if new request comes in while
->> the mmcqd thread is blocked, this new request can not be prepared in
->> parallel to current ongoing request. This may result in latency to
->> start new request.
->>
->> This change allows to wake up the MMC thread (which
->> is waiting for the current running request to complete). Now once th=
-e
->> MMC thread is woken up, new request can be fetched and prepared in
->> parallel to current running request which means this new request can
->> be started immediately after the current running request completes.
->>
->> With this change read throughput is improved by 16%.
-> What HW and what test cases have you been running?
+"commit ae4bf788ee9bf7c2d51b0309117d1fcccbdd50a2
+mmc: omap_hsmmc: consolidate error report handling of HSMMC IRQ"
+sets both end_cmd and end_trans to 1.
 
-I use the msm_sdcc controller and ran lmdd, tiotest, iozone benchmark
-tool (details were on other mail in this thread).
+Setting end_cmd to 1 for Data Timeout/CRC leads to NULL pointer dereference of
+host->cmd as the command complete has previously been handled.
+Set end_cmd only in case of command Timeout/CRC.
 
-I ran it on Qualcomm=AE SnapdragonT S4 ProAPQ8064
+Moreover host->cmd->error should not be updated on data error case, only
+host->data->error needs to be updated.
 
-Thanks,
+Signed-off-by: Balaji T K <balajitk@ti.com>
+Reviewed-by: Felipe Balbi <balbi@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |   18 ++++++++++++------
+ 1 files changed, 12 insertions(+), 6 deletions(-)
 
---=20
-Konstantin Dorfman,
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center,
-Inc. is a member of Code Aurora Forum,
-hosted by The Linux Foundation
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index fedd258..245d7b5 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -968,10 +968,14 @@ static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
+ 			__func__);
+ }
+ 
+-static void hsmmc_command_incomplete(struct omap_hsmmc_host *host, int err)
++static void hsmmc_command_incomplete(struct omap_hsmmc_host *host,
++					int err, int end_cmd)
+ {
+ 	omap_hsmmc_reset_controller_fsm(host, SRC);
+-	host->cmd->error = err;
++	if (end_cmd) {
++		if (host->cmd)
++			host->cmd->error = err;
++	}
+ 
+ 	if (host->data) {
+ 		omap_hsmmc_reset_controller_fsm(host, SRD);
+@@ -990,14 +994,16 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
+ 
+ 	if (status & ERR) {
+ 		omap_hsmmc_dbg_report_irq(host, status);
++
++		if (status & (CMD_TIMEOUT | CMD_CRC))
++			end_cmd = 1;
+ 		if (status & (CMD_TIMEOUT | DATA_TIMEOUT))
+-			hsmmc_command_incomplete(host, -ETIMEDOUT);
++			hsmmc_command_incomplete(host, -ETIMEDOUT, end_cmd);
+ 		else if (status & (CMD_CRC | DATA_CRC))
+-			hsmmc_command_incomplete(host, -EILSEQ);
++			hsmmc_command_incomplete(host, -EILSEQ, end_cmd);
+ 
+-		end_cmd = 1;
+ 		if (host->data || host->response_busy) {
+-			end_trans = 1;
++			end_trans = !end_cmd;
+ 			host->response_busy = 0;
+ 		}
+ 	}
+-- 
+1.7.5.4
+
