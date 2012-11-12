@@ -1,57 +1,47 @@
-From: Samuel Ortiz <sameo@linux.intel.com>
-Subject: Re: [PATCH v7 0/3] Add modules to support realtek PCIE card reader
-Date: Mon, 12 Nov 2012 00:51:52 +0100
-Message-ID: <20121111235152.GH27828@sortiz-mobl>
-References: <cover.1351481260.git.wei_wang@realsil.com.cn>
- <508F4A88.8010207@realsil.com.cn>
- <87r4o56w1f.fsf@octavius.laptop.org>
- <509D1C25.9040909@realsil.com.cn>
- <87mwyqrdrb.fsf@octavius.laptop.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 0/8] Fix coding style in sdhci.c
+Date: Mon, 12 Nov 2012 11:24:41 +0900
+Message-ID: <50A05DE9.8070907@samsung.com>
+References: <1352461198-21941-1-git-send-email-tushar.behera@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:19774 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751245Ab2KKXv4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 11 Nov 2012 18:51:56 -0500
-Content-Disposition: inline
-In-Reply-To: <87mwyqrdrb.fsf@octavius.laptop.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:16167 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751942Ab2KLCYo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Nov 2012 21:24:44 -0500
+In-reply-to: <1352461198-21941-1-git-send-email-tushar.behera@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: wwang <wei_wang@realsil.com.cn>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "arnd@arndb.de" <arnd@arndb.de>, "oakad@yahoo.com" <oakad@yahoo.com>, "bp@alien8.de" <bp@alien8.de>
+To: Tushar Behera <tushar.behera@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, patches@linaro.org
 
-Hi Chris,
+Hi Tushar,
 
-On Fri, Nov 09, 2012 at 10:34:48AM -0500, Chris Ball wrote:
-> Hi,
-> 
-> On Fri, Nov 09 2012, wwang wrote:
-> > I have noticed that the file rtsx_pci_sdmmc.c in your mmc-next branch
-> > is still v6 patch.  In v7 patch, this MMC part has also been modified
-> > to comply with my MFD portion.  So please update to this version.
-> >
-> > And one more question. Samuel have merged all of my patch set in his
-> > for-next branch, including the MMC part.  I don't know whether this
-> > will conflict with your tree in the next merge.
-> >
-> > Hi Samuel:
-> >
-> > Since the whole patch set has been merged in your for-next branch,
-> > does it mean that you will help to merge all of the three parts to
-> > linus's tree?
-> 
-> I've removed the patch from my tree to avoid conflicting with Samuel.
-> I'm happy to either have the MMC patch go through the MFD tree with:
-> 
-> Acked-by: Chris Ball <cjb@laptop.org>
-> 
-> or to merge the MMC side of v7 myself, whichever Samuel prefers.
-I'm taking the patch through my tree, thanks for the ACK.
+Could you make one patch? Why do you separate patches?
 
-Cheers,
-Samuel.
+Best Regards,
+Jaehoon Chung
 
--- 
-Intel Open Source Technology Centre
-http://oss.intel.com/
+On 11/09/2012 08:39 PM, Tushar Behera wrote:
+> Documents/CodingStyle Chapter 3 recommends usage of braces for both
+> if and else statements if any of the branches contains multiple
+> statements.
+> 
+> Cleaning up drivers/mmc/host/sdhci.c for all these occurrences.
+> 
+> Tushar Behera (8):
+>   mmc: sdhci: fix coding style in sdhci_calc_timeout
+>   mmc: sdhci: fix coding style in sdhci_set_transfer_mode
+>   mmc: sdhci: fix coding style in sdhci_finish_data
+>   mmc: sdhci: fix coding style in sdhci_set_clock
+>   mmc: sdhci: fix coding style in sdhci_do_set_ios
+>   mmc: sdhci: fix coding style in sdhci_execute_tuning
+>   mmc: sdhci: fix coding style in sdhci_data_irq
+>   mmc: sdhci: fix coding style in sdhci_add_host
+> 
+>  drivers/mmc/host/sdhci.c |   58 +++++++++++++++++++++++++--------------------
+>  1 files changed, 32 insertions(+), 26 deletions(-)
+> 
+
