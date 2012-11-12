@@ -1,42 +1,98 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH] mmc: hsmmc: Fix NULL pointer dereference on unload when
- booted with device tree
-Date: Mon, 12 Nov 2012 18:50:12 +0530
-Message-ID: <50A0F78C.6030600@ti.com>
-References: <20121109182534.GR6801@atomide.com>
+From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Subject: Re: [PATCH 02/10] arm: at91: move platfarm_data to
+ include/linux/platform_data/atmel.h
+Date: Mon, 12 Nov 2012 15:06:46 +0100
+Message-ID: <20121112140646.GK4576@game.jcrosoft.org>
+References: <20121107111235.GH20063@game.jcrosoft.org>
+ <1352287374-25176-1-git-send-email-plagnioj@jcrosoft.com>
+ <1352287374-25176-2-git-send-email-plagnioj@jcrosoft.com>
+ <CAGhQ9VxgbCGzOPVtQq-LYsEPuyyGjRDfB3jHPtvbHr1xLgntXA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20121109182534.GR6801@atomide.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <netdev-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAGhQ9VxgbCGzOPVtQq-LYsEPuyyGjRDfB3jHPtvbHr1xLgntXA@mail.gmail.com>
+Sender: netdev-owner@vger.kernel.org
+To: Joachim Eastwood <manabian@gmail.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-fbdev@vger.kernel.org, linux-usb@vger.kernel.org, rtc-linux@googlegroups.com, linux-mmc@vger.kernel.org, linux-pcmcia@lists.infradead.org, Nicolas Ferre <nicolas.ferre@atmel.com>, linux-can@vger.kernel.org, linux-ide@vger.kernel.org, netdev@vger.kernel.org, linux-serial@vger.kernel.org, linux-input@vger.kernel.org, spi-devel-general@lists.sourceforge.net
 List-Id: linux-mmc@vger.kernel.org
 
-On Friday 09 November 2012 11:55 PM, Tony Lindgren wrote:
-> When booting with device tree, we don't have any pdata, and will
-> get the following when trying to unload omap_hsmmc:
->
-> Unable to handle kernel NULL pointer dereference at virtual address 00000044
-> pgd = edafc000
-> *pgd=adbbd831, *pte=00000000, *ppte=00000000
-> SMP ARM
-> Modules linked in: omap_hsmmc(-) omap_serial pinctrl_single
-> CPU: 1    Not tainted  (3.7.0-rc4-00044-g8ca5f6a-dirty #245)
-> PC is at omap_hsmmc_gpio_free+0x8/0x3c [omap_hsmmc]
-> LR is at omap_hsmmc_remove+0xf0/0x174 [omap_hsmmc]
-<snip>
->
-> Signed-off-by: Tony Lindgren <tony@atomide.com>
->
-> ---
->
-> This is against v3.7-rc4, would be nice to get in during the -rc cycle.
->
-Hi Tony,
+On 11:54 Sat 10 Nov     , Joachim Eastwood wrote:
+> Hi Jean-Christophe,
+> 
+> On 7 November 2012 12:22, Jean-Christophe PLAGNIOL-VILLARD
+> <plagnioj@jcrosoft.com> wrote:
+> > Signed-off-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+> > Cc: Nicolas Ferre <nicolas.ferre@atmel.com>
+> > Cc: linux-ide@vger.kernel.org
+> > Cc: linux-input@vger.kernel.org
+> > Cc: linux-mmc@vger.kernel.org
+> > Cc: linux-can@vger.kernel.org
+> > Cc: netdev@vger.kernel.org
+> > Cc: linux-pcmcia@lists.infradead.org
+> > Cc: rtc-linux@googlegroups.com
+> > Cc: spi-devel-general@lists.sourceforge.net
+> > Cc: linux-serial@vger.kernel.org
+> > Cc: linux-usb@vger.kernel.org
+> > Cc: linux-fbdev@vger.kernel.org
+> > ---
+> > HI all,
+> >
+> >         If it's ok with everyone this will go via at91
+> >         with the patch serie than clean up the include/mach
+> >
+> >         For preparation to switch to arm multiarch kernel
+> >
+> > Best Regards,
+> > J.
+> >  arch/arm/mach-at91/include/mach/board.h     |   55 ----------------------
+> >  arch/avr32/mach-at32ap/include/mach/board.h |    7 ---
+> >  drivers/ata/pata_at91.c                     |    2 +-
+> >  drivers/input/touchscreen/atmel_tsadcc.c    |    2 +-
+> >  drivers/mmc/host/atmel-mci.c                |    2 +-
+> >  drivers/net/can/at91_can.c                  |    3 +-
+> >  drivers/net/ethernet/cadence/at91_ether.c   |    2 +-
+> >  drivers/pcmcia/at91_cf.c                    |    2 +-
+> >  drivers/rtc/rtc-at91sam9.c                  |    2 +-
+> >  drivers/spi/spi-atmel.c                     |    2 +-
+> >  drivers/tty/serial/atmel_serial.c           |    2 +-
+> >  drivers/usb/gadget/at91_udc.c               |    2 +-
+> >  drivers/usb/gadget/atmel_usba_udc.c         |    2 +-
+> >  drivers/usb/host/ohci-at91.c                |    2 +-
+> >  drivers/video/atmel_lcdfb.c                 |    2 +-
+> >  include/linux/platform_data/atmel.h         |   67 +++++++++++++++++++++++++++
+> >  16 files changed, 80 insertions(+), 76 deletions(-)
+> 
+> <snip>
+> 
+> > diff --git a/drivers/net/ethernet/cadence/at91_ether.c b/drivers/net/ethernet/cadence/at91_ether.c
+> > index 4e980a7..35fc6edb 100644
+> > --- a/drivers/net/ethernet/cadence/at91_ether.c
+> > +++ b/drivers/net/ethernet/cadence/at91_ether.c
+> > @@ -31,6 +31,7 @@
+> >  #include <linux/clk.h>
+> >  #include <linux/gfp.h>
+> >  #include <linux/phy.h>
+> > +#include <linux/platform_data/atmel.h>
+> >
+> >  #include <asm/io.h>
+> >  #include <asm/uaccess.h>
+> > @@ -38,7 +39,6 @@
+> >
+> >  #include <mach/at91rm9200_emac.h>
+> >  #include <asm/gpio.h>
+> > -#include <mach/board.h>
+> >
+> >  #include "at91_ether.h"
+> 
+> The at91_ether driver in net-next does not need to be change since it
+> all mach includes has already been removed by other patches and it
+> includes linux/platform_data/macb.h directly.
+> 
+> What tree was these patches based on?
+> The at91_ether driver changes has been in linux-next for a long while now.
+the conflict is minor easy to handle and the cleanup need to go first on arm soc so this is
+based on rc3
 
-Got fixed by below commit, merged in rc5
-
-http://git.kernel.org/?p=linux/kernel/git/cjb/mmc.git;a=commit;h=9ea28ecbeb090159a3383ff60b29dee00c489774
-
+Best Regards,
+J.
