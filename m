@@ -1,56 +1,87 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH 1/3] regulator: fix voltage check in
- regulator_is_supported_voltage()
-Date: Tue, 13 Nov 2012 18:01:06 +0900
-Message-ID: <20121113090104.GT18224@opensource.wolfsonmicro.com>
-References: <1352796533-12350-1-git-send-email-m.szyprowski@samsung.com>
- <1352796533-12350-2-git-send-email-m.szyprowski@samsung.com>
+From: Haijun Zhang <Haijun.Zhang@freescale.com>
+Subject: [PATCH 2/2 V2] Powerpc/eSDHC: Add limit to data and erase timeout value calculation
+Date: Tue, 13 Nov 2012 17:09:21 +0800
+Message-ID: <1352797762-30526-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="MT9SxUWSsctiw0kG"
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:51861 "EHLO
-	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750811Ab2KMJBO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Nov 2012 04:01:14 -0500
-Content-Disposition: inline
-In-Reply-To: <1352796533-12350-2-git-send-email-m.szyprowski@samsung.com>
+Received: from co1ehsobe005.messaging.microsoft.com ([216.32.180.188]:12581
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752003Ab2KMJaU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Nov 2012 04:30:20 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>
+To: linux-mmc@vger.kernel.org
+Cc: Haijun Zhang <Haijun.Zhang@freescale.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
+
+Some cards apply too larg timeout value for host to response,
+So limit the maximum data transfer timeout value and maximum erase
+timeout value to aviod timeout issue.
+
+Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
+Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+CC: Anton Vorontsov <cbouatmailru@gmail.com>
+---
+changes for v2:
+        - Add limit to data and erase timeout value calculation
+        - split the V1 patch into two V2 patchs.
+
+ drivers/mmc/core/core.c |   27 ++++++++++++++++-----------
+ 1 files changed, 16 insertions(+), 11 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index c241fc1..c90b791 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -721,6 +721,10 @@ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
+ 				data->timeout_ns =  100000000;	/* 100ms */
+ 		}
+ 	}
++
++	if (card->host->max_discard_to &&
++		card->host->max_discard_to < div_u64(data->timeout_ns, 1000000))
++		data->timeout_ns = (u64)card->host->max_discard_to * 1000000;
+ }
+ EXPORT_SYMBOL(mmc_set_data_timeout);
+ 
+@@ -1880,7 +1884,7 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
+ 		return 0;
+ 
+ 	if (qty == 1)
+-		return 1;
++		return 1 << card->erase_shift;
+ 
+ 	/* Convert qty to sectors */
+ 	if (card->erase_shift)
+@@ -1898,16 +1902,17 @@ unsigned int mmc_calc_max_discard(struct mmc_card *card)
+ 	struct mmc_host *host = card->host;
+ 	unsigned int max_discard, max_trim;
+ 
+-	if (!host->max_discard_to)
+-		return UINT_MAX;
+-
+-	/*
+-	 * Without erase_group_def set, MMC erase timeout depends on clock
+-	 * frequence which can change.  In that case, the best choice is
+-	 * just the preferred erase size.
+-	 */
+-	if (mmc_card_mmc(card) && !(card->ext_csd.erase_group_def & 1))
+-		return card->pref_erase;
++	if (!host->max_discard_to) {
++		if (mmc_card_sd(card))
++			return UINT_MAX;
++		/*
++		 * Without erase_group_def set, MMC erase timeout depends on
++		 * clock frequence which can change.  In that case, the best
++		 * choice is just the preferred erase size.
++		 */
++		if (mmc_card_mmc(card) && !(card->ext_csd.erase_group_def & 1))
++			return card->pref_erase;
++	}
+ 
+ 	max_discard = mmc_do_calc_max_discard(card, MMC_ERASE_ARG);
+ 	if (mmc_can_trim(card)) {
+-- 
+1.7.0.4
 
 
---MT9SxUWSsctiw0kG
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-
-On Tue, Nov 13, 2012 at 09:48:51AM +0100, Marek Szyprowski wrote:
-> regulator_is_supported_voltage() should return true only if the voltage
-> of fixed/constant regulator is between min_uV and max_uV.
-
-Applied, thanks.
-
---MT9SxUWSsctiw0kG
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJQogw4AAoJELSic+t+oim9AG8P/0oGKHrupzuwhI9oXF0yZrcb
-3426KLB2ce5qwM4Io9GWN82CX41qRpscKbKDePV5StsRclsEWrmHdd/p2XHvbCpc
-OtyDmub1yV2hF4gqchcqR9U6t2AI9ESmcHQyGUhqRZFPvKAlWO2X4+ZkdEpsLAL5
-IM80RaQQe//9o3Ck8Sx7nN12hv2xMLexZzmZLH/B/zYL0uOiY7RlTzlOxdwZ3u2O
-cPCkBRD6YjEEaZsiPWHiUoRHYHQCiZ5yaX4fc+yldnlP66Pp/QAwrTrXdao4Vpki
-g8eSdgkTIG90x9E+95ZLMhd2Gh9ffrs+94DemC6eQsnF3BOrze1vezx58PxgSKlQ
-VttX2H/QRRSYndSAuynha63faGGsUjndseUtMtBzY9+UnMamMdYUrZO5U5VmSk73
-W7QwyX1SCsQ7suI7KkbKcaTqm6MZ/EINdxmI8e4wW9Rcw96rJ5EqFLjTt6sJRhXH
-O/WxNPYQSC0D4H9RU/1BLUhwjsQ1CxzxSwVN+bgVxvah22k+DEio1mGEuw1BVJjq
-wttKMksSGmK8BhydZgPk3o8jOoqInxzcK57a9LACaJzUasmmnvhjGUtJe3Y3ZJz8
-DsAI9RsCgtmpB0N7vvAo7jDN5zZF3yJ1Cnq20BViaOQrnbUCYxvmUtLopcXXPIs0
-vekEDBeQ+dg/0EAcoX2m
-=xyDO
------END PGP SIGNATURE-----
-
---MT9SxUWSsctiw0kG--
