@@ -1,82 +1,45 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH 1/2 V2] Powerpc/eSDHC: Calculate the applicable mmc erase timeout value
-Date: Tue, 13 Nov 2012 17:09:22 +0800
-Message-ID: <1352797762-30526-2-git-send-email-Haijun.Zhang@freescale.com>
-References: <1352797762-30526-1-git-send-email-Haijun.Zhang@freescale.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+Subject: [PATCH v2] regulator: treat regulators with constant volatage as fixed
+Date: Tue, 13 Nov 2012 10:35:34 +0100
+Message-ID: <1352799334-13898-1-git-send-email-m.szyprowski@samsung.com>
+References: <20121113090007.GS18224@opensource.wolfsonmicro.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe005.messaging.microsoft.com ([216.32.180.188]:20714
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754412Ab2KMJaZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Nov 2012 04:30:25 -0500
-In-Reply-To: <1352797762-30526-1-git-send-email-Haijun.Zhang@freescale.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:62538 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754470Ab2KMJfv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Nov 2012 04:35:51 -0500
+In-reply-to: <20121113090007.GS18224@opensource.wolfsonmicro.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Haijun Zhang <Haijun.Zhang@freescale.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Marek Szyprowski <m.szyprowski@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>
 
-As large area erase needs long time usually a few minutes,
-which the host can't wait will bring about timeout error.
-So we need to split the large area to small sections which
-only need short erase time to avoid timeout error.
+Some drivers has additional logic for fixed regulators. Let regulator core
+to treat regulators which cannot change their voltage due to applied
+constraints as fixed.
 
-Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
-Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-CC: Anton Vorontsov <cbouatmailru@gmail.com>
+Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
 ---
-changes for v2:
-        - Recompute the timeout value and max_discard_to for mmc erase
-	- split the V1 patch into two V2 patchs.
+ drivers/regulator/core.c |    6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
- drivers/mmc/host/sdhci-esdhc.h    |    1 -
- drivers/mmc/host/sdhci-of-esdhc.c |   13 +++++++++++++
- 2 files changed, 13 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index d25f9ab..bb6d664 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -21,7 +21,6 @@
- #define ESDHC_DEFAULT_QUIRKS	(SDHCI_QUIRK_FORCE_BLK_SZ_2048 | \
- 				SDHCI_QUIRK_NO_BUSY_IRQ | \
- 				SDHCI_QUIRK_NONSTANDARD_CLOCK | \
--				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK | \
- 				SDHCI_QUIRK_PIO_NEEDS_DELAY | \
- 				SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
+diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
+index 042c1ff..78b34b7 100644
+--- a/drivers/regulator/core.c
++++ b/drivers/regulator/core.c
+@@ -1872,7 +1872,11 @@ int regulator_count_voltages(struct regulator *regulator)
+ {
+ 	struct regulator_dev	*rdev = regulator->rdev;
  
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 63d219f..a09ea67 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -154,6 +154,18 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
- 	/* Set the clock */
- 	esdhc_set_clock(host, clock);
+-	return rdev->desc->n_voltages ? : -EINVAL;
++	if (rdev->constraints->valid_ops_mask & REGULATOR_CHANGE_VOLTAGE)
++		return rdev->desc->n_voltages ? rdev->desc->n_voltages :
++		       -EINVAL;
++	else
++		return 1;
  }
-+/*
-+ * As host dosn't supply us the method to calculate the timeout value,
-+ * we assigned one for high speed SDHC card. So we can use this to calculate
-+ * the max discard timeout value to limit the max discard sectors to avoid the
-+ * timeout issue during large area erase.
-+ */
-+static unsigned int esdhc_of_get_timeout_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	return pltfm_host->clock / 1000 / 32;
-+}
+ EXPORT_SYMBOL_GPL(regulator_count_voltages);
  
- #ifdef CONFIG_PM
- static u32 esdhc_proctl;
-@@ -190,6 +202,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
- 	.enable_dma = esdhc_of_enable_dma,
- 	.get_max_clock = esdhc_of_get_max_clock,
- 	.get_min_clock = esdhc_of_get_min_clock,
-+	.get_timeout_clock = esdhc_of_get_timeout_clock,
- 	.platform_init = esdhc_of_platform_init,
- #ifdef CONFIG_PM
- 	.platform_suspend = esdhc_of_suspend,
 -- 
-1.7.0.4
-
+1.7.9.5
 
