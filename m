@@ -1,92 +1,46 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2] mmc: sdhci: apply voltage range check only for non-fixed regulators
-Date: Tue, 13 Nov 2012 09:14:18 -0500
-Message-ID: <877gppmvyd.fsf@octavius.laptop.org>
-References: <87fw4dn030.fsf@octavius.laptop.org>
-	<1352813534-6795-1-git-send-email-m.szyprowski@samsung.com>
-	<87bof1mx9m.fsf@octavius.laptop.org> <50A254A0.8000403@samsung.com>
+Subject: Re: drivers/mmc/card/block.c infinite loop in mmc_blk_err_check waiting on R1_READY_FOR_DATA
+Date: Tue, 13 Nov 2012 15:48:24 -0500
+Message-ID: <87k3tpkz53.fsf@octavius.laptop.org>
+References: <50917DB7.6040503@linux.vnet.ibm.com>
+	<87k3u6id1j.fsf@octavius.laptop.org>
+	<50A2A08D.5000601@linux.vnet.ibm.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57102 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:44681 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754230Ab2KMOOa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 13 Nov 2012 09:14:30 -0500
-In-Reply-To: <50A254A0.8000403@samsung.com> (Marek Szyprowski's message of
-	"Tue, 13 Nov 2012 15:09:36 +0100")
+	id S1755680Ab2KMUsc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 13 Nov 2012 15:48:32 -0500
+In-Reply-To: <50A2A08D.5000601@linux.vnet.ibm.com> (Trey Ramsay's message of
+	"Tue, 13 Nov 2012 13:33:33 -0600")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@ti.com>, Philip Rakity <prakity@nvidia.com>
+To: Trey Ramsay <tramsay@linux.vnet.ibm.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Rich Rattanni <rattanni@gmail.com>, Radovan Lekanovic <lekanovic@gmail.com>
 
-Hi,
+Hi Trey,
 
-On Tue, Nov 13 2012, Marek Szyprowski wrote:
->> On Tue, Nov 13 2012, Marek Szyprowski wrote:
->> > Fixed regulators cannot change their voltage, so disable all voltage
->> > range checking for them, otherwise the driver fails to operate with
->> > fixed regulators. Up to now it worked only by luck, because
->> > regulator_is_supported_voltage() function returned incorrect values.
->> > Commit "regulator: fix voltage check in regulator_is_supported_voltage()"
->> > fixed that function and now additional check is needed for fixed
->> > regulators.
->> >
->> > Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
->> > ---
->> >  drivers/mmc/host/sdhci.c |    2 +-
->> >  1 file changed, 1 insertion(+), 1 deletion(-)
->> >
->> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> > index c7851c0..6f6534e 100644
->> > --- a/drivers/mmc/host/sdhci.c
->> > +++ b/drivers/mmc/host/sdhci.c
->> > @@ -2923,7 +2923,7 @@ int sdhci_add_host(struct sdhci_host *host)
->> >  		regulator_enable(host->vmmc);
->> >
->> >  #ifdef CONFIG_REGULATOR
->> > -	if (host->vmmc) {
->> > +	if (host->vmmc && regulator_count_voltages(host->vmmc) > 1) {
->> >  		ret = regulator_is_supported_voltage(host->vmmc, 3300000,
->> >  			3300000);
->> >  		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
->>
->> Thanks for the longer explanation.  I'm still missing something, though;
->> what's wrong with running the check as it was with the new regulator code?
->> (I haven't tried it yet.)
->>
->> #ifdef CONFIG_REGULATOR
->>          if (host->vmmc) {
->>                  ret = regulator_is_supported_voltage(host->vmmc, 3300000,
->>                          3300000);
->>                  if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
->>                          caps[0] &= ~SDHCI_CAN_VDD_330;
->>                  ret = regulator_is_supported_voltage(host->vmmc, 3000000,
->>                          3000000);
->>                  if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_300)))
->>                          caps[0] &= ~SDHCI_CAN_VDD_300;
->>                  ret = regulator_is_supported_voltage(host->vmmc, 1800000,
->>                          1800000);
->>                  if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_180)))
->>                          caps[0] &= ~SDHCI_CAN_VDD_180;
->>          }
->> #endif /* CONFIG_REGULATOR */
->>
->> The point is to remove unsupported voltages, so if someone sets up a
->> fixed regulator at 3300000, all of the other caps are disabled.  Why
->> wouldn't that work without this change, and how are we supposed to
->> remove those caps on a fixed regulator after your patchset?
->>
->> Thanks, sorry if I'm missing something obvious,
->
-> On our boards eMMC is connected to fixed 2.8V regulator, what results in
-> clearing all available voltages and fail. The same situation is when one
-> enable dummy regulator and try to use sdhci with it. My patch fixes this
-> and restores sdhci to working state as it was before (before fixing
-> regulator regulator_is_supported_voltage() function and earlier when
-> MMC_BROKEN_VOLATGE capability was used).
+On Tue, Nov 13 2012, Trey Ramsay wrote:
+> Thanks Chris. Any idea how long the timeout should be? It could
+> cause problems if we timeout to early. This what I have so far with a
+> 10 minute timeout. The code is based off of v3.7-rc3
 
-I see.  Sounds like a separate bug -- Philip (or anyone else), any
-idea how we should be treating eMMCs with a fixed voltage here?
+Ten minutes sounds excessive, which is actually fine for our purpose; I
+don't think we need to make the value tunable.  Thanks!  Please can you:
+
+* resend in plain text instead of HTML, with no line-wrapping corrupting
+  the patch
+
+* include a commit message and "Signed-off-by" (see SubmittingPatches
+  in the Documentation/ directory)
+
+* change the pr_err()s to include the MMC hostname, and give an English
+  description of the error instead of the line number -- most users
+  don't have their kernel source available to find line numbers in.
+  Something like "Card stuck in programming state!" sounds good.
+
+After that, I'll merge the patch for testing.
 
 Thanks,
 
