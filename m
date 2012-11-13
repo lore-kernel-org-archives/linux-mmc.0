@@ -1,47 +1,89 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH] mmc: hsmmc: Fix NULL pointer dereference on unload
- when booted with device tree
-Date: Mon, 12 Nov 2012 14:16:09 -0800
-Message-ID: <20121112221608.GS6801@atomide.com>
-References: <20121109182534.GR6801@atomide.com>
- <50A0F78C.6030600@ti.com>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: [PATCH v6 05/14] mmc: sdhci: fix null return check of regulator_get
+Date: Tue, 13 Nov 2012 11:00:18 +0800
+Message-ID: <CADz5_gJsTBeb4eDjBGkGFmnQr_Z7ZtFqe5G12cYEtCwyXyKSag@mail.gmail.com>
+References: <1350471893-29633-1-git-send-email-keyuan.liu@gmail.com>
+	<1350471893-29633-6-git-send-email-keyuan.liu@gmail.com>
+	<878vagb1bj.fsf@octavius.laptop.org>
+	<CADz5_gJ5pdN+pUOkORCahkcKxcwxho7BP7pDZaMx2zBjnKHHKw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <50A0F78C.6030600@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:38120 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753126Ab2KMDAT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Nov 2012 22:00:19 -0500
+Received: by mail-wg0-f44.google.com with SMTP id dr13so4619146wgb.1
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Nov 2012 19:00:18 -0800 (PST)
+In-Reply-To: <CADz5_gJ5pdN+pUOkORCahkcKxcwxho7BP7pDZaMx2zBjnKHHKw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com, haojian.zhuang@gmail.com, cxie4@marvell.com, prakity@nvidia.com, kliu5@marvell.com, Bin Wang <binw@marvell.com>, dsd@laptop.org
 
-* Balaji T K <balajitk@ti.com> [121112 05:22]:
-> On Friday 09 November 2012 11:55 PM, Tony Lindgren wrote:
-> >When booting with device tree, we don't have any pdata, and will
-> >get the following when trying to unload omap_hsmmc:
-> >
-> >Unable to handle kernel NULL pointer dereference at virtual address 00000044
-> >pgd = edafc000
-> >*pgd=adbbd831, *pte=00000000, *ppte=00000000
-> >SMP ARM
-> >Modules linked in: omap_hsmmc(-) omap_serial pinctrl_single
-> >CPU: 1    Not tainted  (3.7.0-rc4-00044-g8ca5f6a-dirty #245)
-> >PC is at omap_hsmmc_gpio_free+0x8/0x3c [omap_hsmmc]
-> >LR is at omap_hsmmc_remove+0xf0/0x174 [omap_hsmmc]
-> <snip>
-> >
-> >Signed-off-by: Tony Lindgren <tony@atomide.com>
-> >
-> >---
-> >
-> >This is against v3.7-rc4, would be nice to get in during the -rc cycle.
-> >
-> Hi Tony,
-> 
-> Got fixed by below commit, merged in rc5
-> 
-> http://git.kernel.org/?p=linux/kernel/git/cjb/mmc.git;a=commit;h=9ea28ecbeb090159a3383ff60b29dee00c489774
+Updated Haojian and Philip's mail address.
 
-OK thanks!
-
-Tony 
+2012/11/12 Kevin Liu <keyuan.liu@gmail.com>:
+> 2012/11/5 Chris Ball <cjb@laptop.org>:
+>> Hi,
+>>
+>> On Wed, Oct 17 2012, Kevin Liu wrote:
+>>> From: Kevin Liu <kliu5@marvell.com>
+>>>
+>>> regulator_get() returns NULL when CONFIG_REGULATOR not defined,
+>>> which should not print out the warning.
+>>>
+>>> Reviewed-by: Philip Rakity <prakity@marvell.com>
+>>> Signed-off-by: Bin Wang <binw@marvell.com>
+>>> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+>>> ---
+>>>  drivers/mmc/host/sdhci.c |   18 ++++++++++++------
+>>>  1 files changed, 12 insertions(+), 6 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index 8e6a6f0..0104ae9 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -2845,9 +2845,12 @@ int sdhci_add_host(struct sdhci_host *host)
+>>>
+>>>       /* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
+>>>       host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
+>>> -     if (IS_ERR(host->vqmmc)) {
+>>> -             pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
+>>> -             host->vqmmc = NULL;
+>>> +     if (IS_ERR_OR_NULL(host->vqmmc)) {
+>>> +             if (PTR_ERR(host->vqmmc) < 0) {
+>>> +                     pr_info("%s: no vqmmc regulator found\n",
+>>> +                             mmc_hostname(mmc));
+>>> +                     host->vqmmc = NULL;
+>>> +             }
+>>>       }
+>>>       else if (regulator_is_supported_voltage(host->vqmmc, 1800000, 1800000))
+>>>               regulator_enable(host->vqmmc);
+>>> @@ -2903,9 +2906,12 @@ int sdhci_add_host(struct sdhci_host *host)
+>>>       ocr_avail = 0;
+>>>
+>>>       host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
+>>> -     if (IS_ERR(host->vmmc)) {
+>>> -             pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
+>>> -             host->vmmc = NULL;
+>>> +     if (IS_ERR_OR_NULL(host->vmmc)) {
+>>> +             if (PTR_ERR(host->vmmc) < 0) {
+>>> +                     pr_info("%s: no vmmc regulator found\n",
+>>> +                             mmc_hostname(mmc));
+>>> +                     host->vmmc = NULL;
+>>> +             }
+>>>       } else
+>>>               regulator_enable(host->vmmc);
+>>
+>> Pushed to mmc-next for 3.7 with this commit message:
+>>
+>
+> Chris,
+>
+> Thanks for the push.
+> But how about the other 13 patches in the same patchset ([PATCH v6
+> 00/14] mmc: sdhci: mmc: sdhci: fixes and enhancements)?
+> Most of them also aim to fix bugs.
+>
+> Kevin
