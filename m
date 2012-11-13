@@ -1,141 +1,50 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
-Date: Tue, 13 Nov 2012 07:50:02 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C21CCD6@039-SN1MPN1-004.039d.mgd.msft.net>
-References: <1351584769-16662-1-git-send-email-r66093@freescale.com>
-	<1351584769-16662-2-git-send-email-r66093@freescale.com>
-	<CA+20K0AfmJSrPO9-_-yNk4HhEVYPj8cMaa+jCZAZhp23Vb817g@mail.gmail.com>
-	<110EED8CC96DFC488B7E717A2027A27C210A6D@039-SN1MPN1-004.039d.mgd.msft.net>
-	<CA+20K0A3myrosOGK2dcstX06QOS1SRHaaz-zYqoFSA7ZYcEJvQ@mail.gmail.com>
-	<110EED8CC96DFC488B7E717A2027A27C213E8A@039-SN1MPN1-004.039d.mgd.msft.net>
- <CA+20K0DmMPDv0SJgd6-zoHN+eZr1fROT7=HY-mEWgAO9-gmSPg@mail.gmail.com>
- <110EED8CC96DFC488B7E717A2027A27C21533F@039-SN1MPN1-004.039d.mgd.msft.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+Subject: [PATCH 0/3] Fix fixed regulators support
+Date: Tue, 13 Nov 2012 09:48:50 +0100
+Message-ID: <1352796533-12350-1-git-send-email-m.szyprowski@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [213.199.154.209] ([213.199.154.209]:3347 "EHLO
-	am1outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1753461Ab2KMHxu convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 13 Nov 2012 02:53:50 -0500
-In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C21533F@039-SN1MPN1-004.039d.mgd.msft.net>
-Content-Language: en-US
+Received: from mailout2.samsung.com ([203.254.224.25]:55213 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754089Ab2KMItQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Nov 2012 03:49:16 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Johan Rudholm <jrudholm@gmail.com>
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Marek Szyprowski <m.szyprowski@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>
 
-Hi, Anton and Chris
-Have you any comment about this serial patches[patch 2/3/4, except 1]?
+Hello,
 
-Best Regards
-Jerry Huang
+I've noticed that the voltage check in regulator_is_supported_voltage()
+function was inverted, what resulted in strange side effects. One of
+such side effects appeared in sdhci driver, which has some build-in
+support for special case of fixed regulators. 
+
+Now, after fixing regulator_is_supported_voltage(), the sdhci driver
+stopped working with fixed regulators. The provided patch series fixes
+regulator_is_supported_voltage() function and updates sdhci driver to
+correctly operate with fixed voltage regulators. The second patch
+unifies handling of fixed regulators and regulators with disabled
+voltage change due to their constraints. This restores support for such
+regulators in sdhci driver (such case is present on Samsung GONI board).
+
+If possible, I would recomment to push those patches to v3.7-rc series.
+
+Best regards
+Marek Szyprowski
+Samsung Poland R&D Center
 
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Huang Changming-R66093
-> Sent: Tuesday, November 06, 2012 9:56 AM
-> To: Anton Vorontsov; Chris Ball
-> Cc: linux-mmc@vger.kernel.org; Johan Rudholm
-> Subject: RE: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
-> 
-> Hi, Anton and Chris
-> Have you any comment about the serial patch [patch 2/3/4, please ignore
-> patch1]?
-> Reviewed-By: Johan Rudholm <johan.rudholm@stericsson.com>
-> 
-> Best Regards
-> Jerry Huang
-> 
-> 
-> > -----Original Message-----
-> > From: Johan Rudholm [mailto:jrudholm@gmail.com]
-> > Sent: Monday, November 05, 2012 10:08 PM
-> > To: Huang Changming-R66093
-> > Cc: linux-mmc@vger.kernel.org; Anton Vorontsov; Chris Ball
-> > Subject: Re: [PATCH 2/4 v4] MMC/SD: Add callback function to detect
-> > card
-> >
-> > Hi,
-> >
-> > 2012/11/5 Huang Changming-R66093 <r66093@freescale.com>:
-> > >>
-> > >> 2012/11/2 Huang Changming-R66093 <r66093@freescale.com>:
-> > >> > Hi, Johan,
-> > >> > When quicks SDHCI_QUIRK_BROKEN_CARD_DETECTION is set, the driver
-> > will
-> > >> poll the card status with the command CMD13 periodically, then many
-> > >> interrupts will be generated, which affect the performance.
-> > >>
-> > >> Ok, just to see if I understand the scenario correctly:
-> > >> SDHCI_QUIRK_BROKEN_CARD_DETECTION causes the MMC_CAP_NEEDS_POLL cap
-> > >> to
-> > be
-> > >> set, which will cause mmc_rescan to be run at a one second interval.
-> > >> mmc_rescan calls bus_ops->detect (mmc_sd_detect) and this in turn
-> > calls
-> > >> _mmc_detect_card_removed, which will do the bus_ops->alive and send
-> > CMD13.
-> > >> So in this case, one CMD13 is sent per second, right?
-> > >> Is this the cause of the performance issue?
-> > >
-> > > Yes, You are right.
-> >
-> > Ok, it's a bit hard to understand how this can lead to a noticeable
-> > performance impact, but OK. :)
-> >
-> > >> A thought: if the host hardware does have a GPIO card detect pin
-> > hooked
-> > >> up, would it not be possible to make this pin generate an IRQ
-> > >> whenever
-> > a
-> > >> card is inserted or removed? This is what we do in the MMCI driver,
-> > for
-> > >> instance (mmci_cd_irq).
-> > >
-> > > Our silicones has this pin to do card detect, but some boards don't
-> > generate the interrupt when card is inserted or removed. So I have to
-> > use the poll mode.
-> > >
-> > >> > Yes, some cases to detect GPIO can't be trusted, so I only just
-> > >> implement this callback in eSDHC-of driver. that is to say, just
-> > >> when
-> > the
-> > >> platform support it, this callback can be implement, if not,
-> > >> continue
-> > to
-> > >> send the command CMD13.
-> > >>
-> > >> I'm just wondering how this will affect our system, where we use
-> > >> the
-> > cd
-> > >> GPIO to generate detect jobs on card insert/remove, but where the
-> > >> cd
-> > pin
-> > >> is not 100% synchronized with the electrical connection of the
-> > >> power
-> > and
-> > >> cmd line of the SD-card. So if I remember correctly, the cd pin may
-> > >> report that the card has been removed, but there is still an
-> > >> electric connection and the card is alive...
-> > >>
-> > > I don't see this on our board, when card is inserted or removed, the
-> > register field can reflect this state correctly.
-> >
-> > We see a difference on our boards with this patch, but no functional
-> > change (actually a removed card is detected earlier now), so from my
-> > perspective:
-> >
-> > Reviewed-By: Johan Rudholm <johan.rudholm@stericsson.com>
-> >
-> > //Johan
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
+Patch summary:
 
+Marek Szyprowski (3):
+  regulator: fix voltage check in regulator_is_supported_voltage()
+  regulator: threat regulators with constant volatage as fixed
+  mmc: sdhci: apply voltage range check only for non-fixed regulators
+
+ drivers/mmc/host/sdhci.c |    2 +-
+ drivers/regulator/core.c |    7 +++++--
+ 2 files changed, 6 insertions(+), 3 deletions(-)
+
+-- 
+1.7.9.5
 
