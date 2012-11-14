@@ -1,73 +1,90 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH v3] regulator: treat regulators with constant volatage as
- fixed
-Date: Wed, 14 Nov 2012 11:01:25 +0900
-Message-ID: <20121114020124.GH4415@opensource.wolfsonmicro.com>
-References: <20121113094255.GW18224@opensource.wolfsonmicro.com>
- <1352800177-16139-1-git-send-email-m.szyprowski@samsung.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v8 2/2] mmc: support packed write command for eMMC4.5  device
+Date: Tue, 13 Nov 2012 21:54:08 -0500
+Message-ID: <87mwykdhdb.fsf@octavius.laptop.org>
+References: <ed6366950474fb35cac89881648fb9e9.squirrel@www.codeaurora.org>
+	<009701cd5d64$c7dc2aa0$57947fe0$%jun@samsung.com>
+	<fc9caa907c442ce8390e774744d9dae7.squirrel@www.codeaurora.org>
+	<00c401cd5dbb$6d605630$48210290$%jun@samsung.com>
+	<37d6acd1dfb6cc6436a3047b1e17d823.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="82evfD9Ogz2JrdWZ"
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:43956 "EHLO
-	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756139Ab2KNCBc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Nov 2012 21:01:32 -0500
-Content-Disposition: inline
-In-Reply-To: <1352800177-16139-1-git-send-email-m.szyprowski@samsung.com>
+Received: from void.printf.net ([89.145.121.20]:47811 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932494Ab2KNCyS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 13 Nov 2012 21:54:18 -0500
+In-Reply-To: <37d6acd1dfb6cc6436a3047b1e17d823.squirrel@www.codeaurora.org>
+	(merez@codeaurora.org's message of "Sat, 3 Nov 2012 22:05:18 -0700
+	(PDT)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>
+To: merez@codeaurora.org
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>, 'Saugata Das' <saugata.das@linaro.org>, 'Namjae Jeon' <linkinjeon@gmail.com>
 
+Hi Maya,
 
---82evfD9Ogz2JrdWZ
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Sun, Nov 04 2012, merez@codeaurora.org wrote:
+> Packed commands is a mandatory eMMC4.5 feature and is supported by all
+> the card vendors.
 
-On Tue, Nov 13, 2012 at 10:49:37AM +0100, Marek Szyprowski wrote:
+We're still only talking about using packed writes, though, right?
 
-> +	if (rdev->constraints->valid_ops_mask & REGULATOR_CHANGE_VOLTAGE) {
-> +		if (rdev->desc->n_voltages)
-> +			return rdev->desc->n_voltages;
-> +		else
-> +			return -EINVAL;
-> +	} else {
-> +		return 1;
-> +	}
+> It wa proven to be beneficial for eMMC4.5 cards and harmless for non
+> eMMC4.5 cards.
 
-Hrm, now I can read the logic I'm not convinced this is a good idea.
-This will report that we have an available voltage for devices which
-don't know their voltage (things like battery supplies often do this as
-the voltage is unregulated) and it will mean that we are doing something=20
-different for the case where there's only one voltage (reporting the
-restricted count instead of the physically supported count).
+My understanding is that write packing causes a regression in read
+performance that can be tuned/fixed by your num_wr_reqs_to_start_packing
+tunable (and read packing causes a read regression with current eMMC 4.5
+cards).  Is that wrong?
 
-I think we want a regulator_can_change_voltage() or possibly a count
-function (though I can't see any use cases except this) which answers
-the question directly instead of layering on top of this function.
+> I don't see a point to hold it back while it can be enabled or
+> disabled by a flag and most of the code it adds is guarded in specific
+> functions and is not active when packed commands is disabled.
 
---82evfD9Ogz2JrdWZ
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+Earlier in the thread I wrote:
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
+>> * I still don't have a good set of representative benchmarks showing
+>>   what kind of performance changes come with this patchset. It seems
+>>   like we've had a small amount of testing on one controller/eMMC
+>>   part combo from Seungwon, and an entirely different test from Maya,
+>>   and the results aren't documented fully anywhere to the level of
+>>   describing what the hardware was, what the test was, and what the
+>>   results were before and after the patchset.
 
-iQIcBAEBAgAGBQJQovtnAAoJELSic+t+oim9I6IP/1Oa1xhT7Tqmxt2WKaZdJt38
-Qhzidhi14/mfYlfje0ryY+uf3Vaqi3m9i+1lbfF9sliZrLW4lnINHdjbLWC6arwL
-CTpG159zB8mz68nU8U4B65ezJvgS1RXyS6s0vQYl73Lq6xVPALM+i7mEkXrbbDtU
-Rao/3MMn26LpGpPjojH+bAsp+5ahr3I3VRhFnz+ANgTxBFFRg89e1q5MVo8gFfc6
-K8XkXnTIIclh2LrBcxfiXrxVTz1Q11ZEVcJsrfah6gMmdrrX3Xlo/ZNGdd3uJIb8
-cpYBUQaPBA+toQgBJcHXvuARaSc1bW+wvlPV5gRz5avbgq3LXtb8PKjpiBcQjXdc
-iKD76FRwVePaPMzrRX6Z7kG/37K2luqBriROFLHfrqMK3oOJdtN1QMjVr4gCxg4t
-ZvoReTXvLhptxhA/SeP06Yn20L1fkk318bE+EORaY+jtK5PAB87oK7LIyGIOnakd
-ml+jp0i7Hxmmzzw9JrE08HEbVKx7lVH93G3Sz94pdhOpGRvjzoqf686KdQ7HmPfD
-NESi3lMORFGdSS2WYnurhpcuYcVtvDFby54mUAG3apo42wOUzP2zBUH4LhNqKlh/
-EZDaNvNdPbgCrXgamipBMjwxSKnVZ2B38x7KfkjffiBb+x2dHI8997BN5vUL5by+
-laklvDPGw1/ZON9SC0oo
-=uxOk
------END PGP SIGNATURE-----
+I still feel this way.  I'm worried that we might be merging code that
+works well on your controller/card but causes large regressions for
+everyone else.  I don't want to handle this by making a tunable that
+everyone has to tune for their system, because I don't think anyone will
+tune it.  I don't think that shipping a capability that will probably
+lead to performance regressions if you turn it on is a good idea.
 
---82evfD9Ogz2JrdWZ--
+I'm in a better position to help now, though -- I have some motherboards
+with Marvell SoCs and a socketed eMMC slot, and I have eMMC 4.5 parts
+from Sandisk and Toshiba.  So I can try to help work out how
+generalizable your results are across other controllers and cards.
+
+So far I've only tried the Sandisk part, but it didn't show any write
+improvement with write packing.  I've verified that the switch command
+to turn on packed_event_en happens and succeeds, and that the caps are
+set correctly, so I'm not sure what's wrong yet.  With iozone I get:
+
+                       KB  reclen   write rewrite
+Unpacked writes:    10240    8192   17250   16794 
+Packed writes:      10240    8192   16930   17353
+
+I'll try the Toshiba part next, and I'll start using lmdd as well as
+iozone.  Any ideas on why I might not be seeing improvements with
+Sandisk?
+
+I'm not opposed to merging packed write support in principle, I just
+want to be convinced that we're not causing regressions for most users
+who turn it on.  (And more than that, I want to see that it leads to
+improvements that make it worth adding the code complexity for.)
+
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
