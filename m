@@ -1,179 +1,64 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
 Subject: Re: FW: [PATCH v2] mmc: sdhci: apply voltage range check only for
  non-fixed regulators
-Date: Wed, 14 Nov 2012 15:11:37 +0800
-Message-ID: <CADz5_gLC=z_VYrNq8q3dU7L6im7shSz-Sn6Tzym2mRZONwpgUg@mail.gmail.com>
+Date: Wed, 14 Nov 2012 16:28:56 +0900
+Message-ID: <20121114072855.GF7407@opensource.wolfsonmicro.com>
 References: <25B60CDC2F704E4E9D88FFD52780CB4C060FBEA29A@SC-VEXCH1.marvell.com>
+ <CADz5_gLC=z_VYrNq8q3dU7L6im7shSz-Sn6Tzym2mRZONwpgUg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="9ADF8FXzFeE7X4jE"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:37248 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753811Ab2KNHLi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Nov 2012 02:11:38 -0500
-In-Reply-To: <25B60CDC2F704E4E9D88FFD52780CB4C060FBEA29A@SC-VEXCH1.marvell.com>
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:46589 "EHLO
+	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752332Ab2KNH3O (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Nov 2012 02:29:14 -0500
+Content-Disposition: inline
+In-Reply-To: <CADz5_gLC=z_VYrNq8q3dU7L6im7shSz-Sn6Tzym2mRZONwpgUg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: m.szyprowski@samsung.com, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kyungmin.park@samsung.com, Mark Brown <broonie@opensource.wolfsonmicro.com>, lrg@ti.com, Philip Rakity <prakity@nvidia.com>
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: m.szyprowski@samsung.com, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kyungmin.park@samsung.com, lrg@ti.com, Philip Rakity <prakity@nvidia.com>
 
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chris Ball
-> Sent: Tuesday, November 13, 2012 10:14 PM
-> To: Marek Szyprowski
-> Cc: linux-kernel@vger.kernel.org; linux-mmc@vger.kernel.org; Kyungmin Park; Mark Brown; Liam Girdwood; Philip Rakity
-> Subject: Re: [PATCH v2] mmc: sdhci: apply voltage range check only for non-fixed regulators
->
-> Hi,
->
-> On Tue, Nov 13 2012, Marek Szyprowski wrote:
->>> On Tue, Nov 13 2012, Marek Szyprowski wrote:
->>> > Fixed regulators cannot change their voltage, so disable all voltage
->>> > range checking for them, otherwise the driver fails to operate with
->>> > fixed regulators. Up to now it worked only by luck, because
->>> > regulator_is_supported_voltage() function returned incorrect values.
->>> > Commit "regulator: fix voltage check in regulator_is_supported_voltage()"
->>> > fixed that function and now additional check is needed for fixed
->>> > regulators.
->>> >
->>> > Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
->>> > ---
->>> >  drivers/mmc/host/sdhci.c |    2 +-
->>> >  1 file changed, 1 insertion(+), 1 deletion(-)
->>> >
->>> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> > index c7851c0..6f6534e 100644
->>> > --- a/drivers/mmc/host/sdhci.c
->>> > +++ b/drivers/mmc/host/sdhci.c
->>> > @@ -2923,7 +2923,7 @@ int sdhci_add_host(struct sdhci_host *host)
->>> >            regulator_enable(host->vmmc);
->>> >
->>> >  #ifdef CONFIG_REGULATOR
->>> > -  if (host->vmmc) {
->>> > +  if (host->vmmc && regulator_count_voltages(host->vmmc) > 1) {
->>> >            ret = regulator_is_supported_voltage(host->vmmc, 3300000,
->>> >                    3300000);
->>> >            if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
->>>
->>> Thanks for the longer explanation.  I'm still missing something, though;
->>> what's wrong with running the check as it was with the new regulator code?
->>> (I haven't tried it yet.)
->>>
->>> #ifdef CONFIG_REGULATOR
->>>          if (host->vmmc) {
->>>                  ret = regulator_is_supported_voltage(host->vmmc, 3300000,
->>>                          3300000);
->>>                  if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
->>>                          caps[0] &= ~SDHCI_CAN_VDD_330;
->>>                  ret = regulator_is_supported_voltage(host->vmmc, 3000000,
->>>                          3000000);
->>>                  if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_300)))
->>>                          caps[0] &= ~SDHCI_CAN_VDD_300;
->>>                  ret = regulator_is_supported_voltage(host->vmmc, 1800000,
->>>                          1800000);
->>>                  if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_180)))
->>>                          caps[0] &= ~SDHCI_CAN_VDD_180;
->>>          }
->>> #endif /* CONFIG_REGULATOR */
->>>
->>> The point is to remove unsupported voltages, so if someone sets up a
->>> fixed regulator at 3300000, all of the other caps are disabled.  Why
->>> wouldn't that work without this change, and how are we supposed to
->>> remove those caps on a fixed regulator after your patchset?
->>>
->>> Thanks, sorry if I'm missing something obvious,
->>
->> On our boards eMMC is connected to fixed 2.8V regulator, what results in
->> clearing all available voltages and fail. The same situation is when one
->> enable dummy regulator and try to use sdhci with it. My patch fixes this
->> and restores sdhci to working state as it was before (before fixing
->> regulator regulator_is_supported_voltage() function and earlier when
->> MMC_BROKEN_VOLATGE capability was used).
->
-> I see.  Sounds like a separate bug -- Philip (or anyone else), any
-> idea how we should be treating eMMCs with a fixed voltage here?
->
 
-I think we should check the voltage range rather than the voltage
-point accoring to the spec.
-Otherwise some valid voltage like 2.8v will be discarded by mistake.
-My below old patch aim to fix this issue.
-How do you think?
+--9ADF8FXzFeE7X4jE
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
------Original Message-----
-From: Kevin Liu [mailto:keyuan.liu@gmail.com]
-Sent: Friday, September 28, 2012 3:56 PM
-To: linux-mmc@vger.kernel.org; cjb@laptop.org; pierre@ossman.eu;
-ulf.hansson@linaro.org; Zhangfei Gao
-Cc: Haojian Zhuang; Chao Xie; Philip Rakity; Kevin Liu; Jialing Fu
-Subject: [PATCH v5 03/13] mmc: sdhci: use regulator min/max voltage
-range according to spec
+On Wed, Nov 14, 2012 at 03:11:37PM +0800, Kevin Liu wrote:
 
-From: Kevin Liu <kliu5@marvell.com>
+> -		ret = regulator_set_voltage(host->vqmmc, 3300000, 3300000);
+> +		ret = regulator_set_voltage(host->vqmmc, 2700000, 3600000);
 
-For regulator vmmc/vmmcq, use voltage range as below
-3.3v/3.0v: (2.7v, 3.6v)
-1.8v: (1.7v, 1.95v)
-Original code use the specific value which may fail in regulator
-driver if it does NOT support the specific voltage.
+Should this be regulator_set_voltage_tol()?  Otherwise it'd be good to
+explain where the numbers come from.
 
-Signed-off-by: Jialing Fu <jlfu@marvell.com>
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
----
- drivers/mmc/host/sdhci.c |   16 +++++++---------
- 1 files changed, 7 insertions(+), 9 deletions(-)
+> +		ret = regulator_is_supported_voltage(host->vmmc, 1700000,
+> +			1950000);
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 3aef580..36afd47 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1628,7 +1628,7 @@ static int
-sdhci_do_3_3v_signal_voltage_switch(struct sdhci_host *host,
- 	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+We should really add a regulator_is_supported_voltage_tol...  let me
+just do that.
 
- 	if (host->vqmmc) {
--		ret = regulator_set_voltage(host->vqmmc, 3300000, 3300000);
-+		ret = regulator_set_voltage(host->vqmmc, 2700000, 3600000);
- 		if (ret) {
- 			pr_warning("%s: Switching to 3.3V signalling voltage "
- 				   " failed\n", mmc_hostname(host->mmc));
-@@ -1672,7 +1672,7 @@ static int
-sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
- 		 */
- 		if (host->vqmmc)
- 			ret = regulator_set_voltage(host->vqmmc,
--				1800000, 1800000);
-+				1700000, 1950000);
- 		else
- 			ret = 0;
+--9ADF8FXzFeE7X4jE
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
-@@ -2856,7 +2856,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 		pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
- 		host->vqmmc = NULL;
- 	}
--	else if (regulator_is_supported_voltage(host->vqmmc, 1800000, 1800000))
-+	else if (regulator_is_supported_voltage(host->vqmmc, 1700000, 1950000))
- 		regulator_enable(host->vqmmc);
- 	else
- 		caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
-@@ -2927,16 +2927,14 @@ int sdhci_add_host(struct sdhci_host *host)
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
 
- #ifdef CONFIG_REGULATOR
- 	if (host->vmmc) {
--		ret = regulator_is_supported_voltage(host->vmmc, 3300000,
--			3300000);
-+		ret = regulator_is_supported_voltage(host->vmmc, 2700000,
-+			3600000);
- 		if ((ret <= 0) && (caps[0] & SDHCI_CAN_VDD_330))
- 			caps[0] &= ~SDHCI_CAN_VDD_330;
--		ret = regulator_is_supported_voltage(host->vmmc, 3000000,
--			3000000);
- 		if ((ret <= 0) && (caps[0] & SDHCI_CAN_VDD_300))
- 			caps[0] &= ~SDHCI_CAN_VDD_300;
--		ret = regulator_is_supported_voltage(host->vmmc, 1800000,
--			1800000);
-+		ret = regulator_is_supported_voltage(host->vmmc, 1700000,
-+			1950000);
- 		if ((ret <= 0) && (caps[0] & SDHCI_CAN_VDD_180))
- 			caps[0] &= ~SDHCI_CAN_VDD_180;
- 	}
--- 
-1.7.0.4
+iQIcBAEBAgAGBQJQo0ftAAoJELSic+t+oim9F2gP/0YoaO/BX4RA/oHyCBZkprGv
+W3hwQRxDEpvkr6+CNMKK/Bo6U2NgsuXQTAh1YrFwon1VIhQ3/eDekIJ+9mn+o7pI
+biEmJC5Uy4U6KRua8r386vbJ6CqHJFzNCjtbM/yaDnkrUxQm0KmxK0pRRQXxmk0i
+e/l2jnyXOY/ujfNNo8jDk/VOTc638SdwAkHxAwUoz93zeAKCmUW1A9V2rF0tjsDS
+tcJKGX4ahppWCC05Y6jp/fCD0Tn9HFu4VaRdZ8N2cNtuFq8BspxyLAZsSPFQubTx
+aBkAW63IKozfaQNGYBCWt3Vgg0LhxQL9jCra80InfSs5cjA8OdikwqbofaBeCxBp
+5ClnTwGRMpd5t0juztarkrE6Buqj8hm4V8PZUyyDS9Id6nSTafwTbyKDdLd00oEh
+tbmPKVg8KJQw7aVr85/lTpSudQ/Na16+IHj2k3u2CBg1X8l5Yhu+Z8N35/ypXC1c
+g9W6VKhD6YWHk1sSasyQRyZBOazDbQapyYx+zy5fJy4VjvJ+HZfTKWlfK7Bi52sX
+nmX5YSGfuVMVl2yKiSfWW/ZOS6t9E0Ug0GbjKABlCBz8LKMNhQmj3egjFGrjHdBk
+g4Zzzfzcuhk+h09CmWwNjo4/66J6M48P/FJjtTdXroiPs/srZVf0zwS7IN3N1Gfy
+KC+gaqZmSFQI9yknEdHp
+=gFcK
+-----END PGP SIGNATURE-----
+
+--9ADF8FXzFeE7X4jE--
