@@ -1,61 +1,114 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci: apply voltage range check only for
- non-fixed regulators
-Date: Wed, 14 Nov 2012 20:05:23 +0800
-Message-ID: <CADz5_gKrcCyRe8q_x4a-K5wCFdTjD-0E8VJUktE6yvn1CaMsZA@mail.gmail.com>
-References: <25B60CDC2F704E4E9D88FFD52780CB4C060FBEA29A@SC-VEXCH1.marvell.com>
-	<CADz5_gLC=z_VYrNq8q3dU7L6im7shSz-Sn6Tzym2mRZONwpgUg@mail.gmail.com>
-	<20121114072855.GF7407@opensource.wolfsonmicro.com>
-	<CADz5_gLb5ZRHLZHw1sDDWzu4QgOR7JXnaRMEXxETNzVsu1Wq1A@mail.gmail.com>
-	<20121114084105.GG7407@opensource.wolfsonmicro.com>
-	<CADz5_gJDHeZNoWRF18YJKY3kT1vN0=d-eLcP1wgWxYhLNnbpDQ@mail.gmail.com>
-	<6D68C9EB-485C-44E8-B6C3-A988C12EFF0A@nvidia.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Lee Jones <lee.jones@linaro.org>
+Subject: [PATCH] mmc: Standardise capability type
+Date: Wed, 14 Nov 2012 12:35:51 +0000
+Message-ID: <1352896551-17948-1-git-send-email-lee.jones@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f170.google.com ([209.85.212.170]:57441 "EHLO
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:41298 "EHLO
 	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755341Ab2KNMFZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Nov 2012 07:05:25 -0500
-In-Reply-To: <6D68C9EB-485C-44E8-B6C3-A988C12EFF0A@nvidia.com>
+	with ESMTP id S1422702Ab2KNMgE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Nov 2012 07:36:04 -0500
+Received: by mail-wi0-f170.google.com with SMTP id cb5so422069wib.1
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Nov 2012 04:36:02 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@nvidia.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, "m.szyprowski@samsung.com" <m.szyprowski@samsung.com>, "linux-kernel@vger.kernel.org List" <linux-kernel@vger.kernel.org>, "kyungmin.park@samsung.com" <kyungmin.park@samsung.com>, "lrg@ti.com" <lrg@ti.com>
+To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc: arnd@arndb.de, linus.walleij@stericsson.com, Lee Jones <lee.jones@linaro.org>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-2012/11/14 Philip Rakity <prakity@nvidia.com>:
->
-> On Nov 14, 2012, at 8:57 AM, Kevin Liu <keyuan.liu@gmail.com> wrote:
->
->> 2012/11/14 Mark Brown <broonie@opensource.wolfsonmicro.com>:
->>> On Wed, Nov 14, 2012 at 04:36:28PM +0800, Kevin Liu wrote:
->>>> 2012/11/14 Mark Brown <broonie@opensource.wolfsonmicro.com>:
->>>
->>>>> Should this be regulator_set_voltage_tol()?  Otherwise it'd be good to
->>>>> explain where the numbers come from.
->>>
->>>> In SD physical layer spec 3.01 chapter 6.6.1, the threshold level for
->>>> voltage range is defined as below:
->>>> Vdd(min) = 2.7V while Vdd(max) = 3.6V.
->>>> The card should work within the voltage range.
->>>
->>>> If you are afraid the voltage value is too aggressive, maybe we can
->>>> use regulator_set_voltage_tol() to set a smaller range.
->>>> But which range should be reasonable?
->>>
->>> The above makes total sense - thanks!  I just wasn't aware that the
->>> range was specified in this fashion in the spec.  Might be worth a
->>> comment in the code if you need to respin.
->>
->> Sure, I will update the patch. Thanks!
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
-> re-read spec.  Please apply Kevin;s patch.
->
-> Reviewed-by: Philip Rakity <prakity@nvidia.com>
+There are discrepancies with regards to how MMC capabilities
+are carried throughout the subsystem. Let's standardise them
+to elevate any confusion.
 
-Philip, thanks!
+Cc: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
+Signed-off-by: Lee Jones <lee.jones@linaro.org>
+---
+ drivers/mmc/core/mmc.c                  |    2 +-
+ include/linux/mmc/dw_mmc.h              |    4 ++--
+ include/linux/mmc/host.h                |    4 ++--
+ include/linux/mmc/sdhci.h               |    4 ++--
+ include/linux/platform_data/pxa_sdhci.h |    4 ++--
+ 5 files changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 7cc4638..8c2fa80 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -239,7 +239,7 @@ static void mmc_select_card_type(struct mmc_card *card)
+ {
+ 	struct mmc_host *host = card->host;
+ 	u8 card_type = card->ext_csd.raw_card_type & EXT_CSD_CARD_TYPE_MASK;
+-	unsigned int caps = host->caps, caps2 = host->caps2;
++	u32 caps = host->caps, caps2 = host->caps2;
+ 	unsigned int hs_max_dtr = 0;
+ 
+ 	if (card_type & EXT_CSD_CARD_TYPE_26)
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 7c6a113..f825379 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -229,8 +229,8 @@ struct dw_mci_board {
+ 	u32 quirks; /* Workaround / Quirk flags */
+ 	unsigned int bus_hz; /* Clock speed at the cclk_in pad */
+ 
+-	unsigned int caps;	/* Capabilities */
+-	unsigned int caps2;	/* More capabilities */
++	u32 caps;	/* Capabilities */
++	u32 caps2;	/* More capabilities */
+ 	/*
+ 	 * Override fifo depth. If 0, autodetect it from the FIFOTH register,
+ 	 * but note that this may not be reliable after a bootloader has used
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 7abb0e1..37442b2 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -211,7 +211,7 @@ struct mmc_host {
+ #define MMC_VDD_34_35		0x00400000	/* VDD voltage 3.4 ~ 3.5 */
+ #define MMC_VDD_35_36		0x00800000	/* VDD voltage 3.5 ~ 3.6 */
+ 
+-	unsigned long		caps;		/* Host capabilities */
++	u32			caps;		/* Host capabilities */
+ 
+ #define MMC_CAP_4_BIT_DATA	(1 << 0)	/* Can the host do 4 bit transfers */
+ #define MMC_CAP_MMC_HIGHSPEED	(1 << 1)	/* Can do MMC high-speed timing */
+@@ -241,7 +241,7 @@ struct mmc_host {
+ #define MMC_CAP_CMD23		(1 << 30)	/* CMD23 supported. */
+ #define MMC_CAP_HW_RESET	(1 << 31)	/* Hardware reset */
+ 
+-	unsigned int		caps2;		/* More host capabilities */
++	u32			caps2;		/* More host capabilities */
+ 
+ #define MMC_CAP2_BOOTPART_NOACC	(1 << 0)	/* Boot partition no access */
+ #define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index fa8529a..c76b4a3 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -157,8 +157,8 @@ struct sdhci_host {
+ 
+ 	struct timer_list timer;	/* Timer for timeouts */
+ 
+-	unsigned int caps;	/* Alternative CAPABILITY_0 */
+-	unsigned int caps1;	/* Alternative CAPABILITY_1 */
++	u32 caps;		/* Alternative CAPABILITY_0 */
++	u32 caps1;		/* Alternative CAPABILITY_1 */
+ 
+ 	unsigned int            ocr_avail_sdio;	/* OCR bit masks */
+ 	unsigned int            ocr_avail_sd;
+diff --git a/include/linux/platform_data/pxa_sdhci.h b/include/linux/platform_data/pxa_sdhci.h
+index 59acd98..0d75008 100644
+--- a/include/linux/platform_data/pxa_sdhci.h
++++ b/include/linux/platform_data/pxa_sdhci.h
+@@ -48,8 +48,8 @@ struct sdhci_pxa_platdata {
+ 	unsigned int	ext_cd_gpio;
+ 	bool		ext_cd_gpio_invert;
+ 	unsigned int	max_speed;
+-	unsigned int	host_caps;
+-	unsigned int	host_caps2;
++	u32		host_caps;
++	u32		host_caps2;
+ 	unsigned int	quirks;
+ 	unsigned int	pm_caps;
+ };
+-- 
+1.7.9.5
+
