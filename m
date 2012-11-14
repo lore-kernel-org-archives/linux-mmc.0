@@ -1,90 +1,179 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v8 2/2] mmc: support packed write command for eMMC4.5  device
-Date: Tue, 13 Nov 2012 21:54:08 -0500
-Message-ID: <87mwykdhdb.fsf@octavius.laptop.org>
-References: <ed6366950474fb35cac89881648fb9e9.squirrel@www.codeaurora.org>
-	<009701cd5d64$c7dc2aa0$57947fe0$%jun@samsung.com>
-	<fc9caa907c442ce8390e774744d9dae7.squirrel@www.codeaurora.org>
-	<00c401cd5dbb$6d605630$48210290$%jun@samsung.com>
-	<37d6acd1dfb6cc6436a3047b1e17d823.squirrel@www.codeaurora.org>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: FW: [PATCH v2] mmc: sdhci: apply voltage range check only for
+ non-fixed regulators
+Date: Wed, 14 Nov 2012 15:11:37 +0800
+Message-ID: <CADz5_gLC=z_VYrNq8q3dU7L6im7shSz-Sn6Tzym2mRZONwpgUg@mail.gmail.com>
+References: <25B60CDC2F704E4E9D88FFD52780CB4C060FBEA29A@SC-VEXCH1.marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:47811 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932494Ab2KNCyS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 13 Nov 2012 21:54:18 -0500
-In-Reply-To: <37d6acd1dfb6cc6436a3047b1e17d823.squirrel@www.codeaurora.org>
-	(merez@codeaurora.org's message of "Sat, 3 Nov 2012 22:05:18 -0700
-	(PDT)")
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:37248 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753811Ab2KNHLi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Nov 2012 02:11:38 -0500
+In-Reply-To: <25B60CDC2F704E4E9D88FFD52780CB4C060FBEA29A@SC-VEXCH1.marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: merez@codeaurora.org
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>, 'Saugata Das' <saugata.das@linaro.org>, 'Namjae Jeon' <linkinjeon@gmail.com>
+To: m.szyprowski@samsung.com, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kyungmin.park@samsung.com, Mark Brown <broonie@opensource.wolfsonmicro.com>, lrg@ti.com, Philip Rakity <prakity@nvidia.com>
 
-Hi Maya,
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chris Ball
+> Sent: Tuesday, November 13, 2012 10:14 PM
+> To: Marek Szyprowski
+> Cc: linux-kernel@vger.kernel.org; linux-mmc@vger.kernel.org; Kyungmin Park; Mark Brown; Liam Girdwood; Philip Rakity
+> Subject: Re: [PATCH v2] mmc: sdhci: apply voltage range check only for non-fixed regulators
+>
+> Hi,
+>
+> On Tue, Nov 13 2012, Marek Szyprowski wrote:
+>>> On Tue, Nov 13 2012, Marek Szyprowski wrote:
+>>> > Fixed regulators cannot change their voltage, so disable all voltage
+>>> > range checking for them, otherwise the driver fails to operate with
+>>> > fixed regulators. Up to now it worked only by luck, because
+>>> > regulator_is_supported_voltage() function returned incorrect values.
+>>> > Commit "regulator: fix voltage check in regulator_is_supported_voltage()"
+>>> > fixed that function and now additional check is needed for fixed
+>>> > regulators.
+>>> >
+>>> > Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+>>> > ---
+>>> >  drivers/mmc/host/sdhci.c |    2 +-
+>>> >  1 file changed, 1 insertion(+), 1 deletion(-)
+>>> >
+>>> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> > index c7851c0..6f6534e 100644
+>>> > --- a/drivers/mmc/host/sdhci.c
+>>> > +++ b/drivers/mmc/host/sdhci.c
+>>> > @@ -2923,7 +2923,7 @@ int sdhci_add_host(struct sdhci_host *host)
+>>> >            regulator_enable(host->vmmc);
+>>> >
+>>> >  #ifdef CONFIG_REGULATOR
+>>> > -  if (host->vmmc) {
+>>> > +  if (host->vmmc && regulator_count_voltages(host->vmmc) > 1) {
+>>> >            ret = regulator_is_supported_voltage(host->vmmc, 3300000,
+>>> >                    3300000);
+>>> >            if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
+>>>
+>>> Thanks for the longer explanation.  I'm still missing something, though;
+>>> what's wrong with running the check as it was with the new regulator code?
+>>> (I haven't tried it yet.)
+>>>
+>>> #ifdef CONFIG_REGULATOR
+>>>          if (host->vmmc) {
+>>>                  ret = regulator_is_supported_voltage(host->vmmc, 3300000,
+>>>                          3300000);
+>>>                  if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
+>>>                          caps[0] &= ~SDHCI_CAN_VDD_330;
+>>>                  ret = regulator_is_supported_voltage(host->vmmc, 3000000,
+>>>                          3000000);
+>>>                  if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_300)))
+>>>                          caps[0] &= ~SDHCI_CAN_VDD_300;
+>>>                  ret = regulator_is_supported_voltage(host->vmmc, 1800000,
+>>>                          1800000);
+>>>                  if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_180)))
+>>>                          caps[0] &= ~SDHCI_CAN_VDD_180;
+>>>          }
+>>> #endif /* CONFIG_REGULATOR */
+>>>
+>>> The point is to remove unsupported voltages, so if someone sets up a
+>>> fixed regulator at 3300000, all of the other caps are disabled.  Why
+>>> wouldn't that work without this change, and how are we supposed to
+>>> remove those caps on a fixed regulator after your patchset?
+>>>
+>>> Thanks, sorry if I'm missing something obvious,
+>>
+>> On our boards eMMC is connected to fixed 2.8V regulator, what results in
+>> clearing all available voltages and fail. The same situation is when one
+>> enable dummy regulator and try to use sdhci with it. My patch fixes this
+>> and restores sdhci to working state as it was before (before fixing
+>> regulator regulator_is_supported_voltage() function and earlier when
+>> MMC_BROKEN_VOLATGE capability was used).
+>
+> I see.  Sounds like a separate bug -- Philip (or anyone else), any
+> idea how we should be treating eMMCs with a fixed voltage here?
+>
 
-On Sun, Nov 04 2012, merez@codeaurora.org wrote:
-> Packed commands is a mandatory eMMC4.5 feature and is supported by all
-> the card vendors.
+I think we should check the voltage range rather than the voltage
+point accoring to the spec.
+Otherwise some valid voltage like 2.8v will be discarded by mistake.
+My below old patch aim to fix this issue.
+How do you think?
 
-We're still only talking about using packed writes, though, right?
+-----Original Message-----
+From: Kevin Liu [mailto:keyuan.liu@gmail.com]
+Sent: Friday, September 28, 2012 3:56 PM
+To: linux-mmc@vger.kernel.org; cjb@laptop.org; pierre@ossman.eu;
+ulf.hansson@linaro.org; Zhangfei Gao
+Cc: Haojian Zhuang; Chao Xie; Philip Rakity; Kevin Liu; Jialing Fu
+Subject: [PATCH v5 03/13] mmc: sdhci: use regulator min/max voltage
+range according to spec
 
-> It wa proven to be beneficial for eMMC4.5 cards and harmless for non
-> eMMC4.5 cards.
+From: Kevin Liu <kliu5@marvell.com>
 
-My understanding is that write packing causes a regression in read
-performance that can be tuned/fixed by your num_wr_reqs_to_start_packing
-tunable (and read packing causes a read regression with current eMMC 4.5
-cards).  Is that wrong?
+For regulator vmmc/vmmcq, use voltage range as below
+3.3v/3.0v: (2.7v, 3.6v)
+1.8v: (1.7v, 1.95v)
+Original code use the specific value which may fail in regulator
+driver if it does NOT support the specific voltage.
 
-> I don't see a point to hold it back while it can be enabled or
-> disabled by a flag and most of the code it adds is guarded in specific
-> functions and is not active when packed commands is disabled.
+Signed-off-by: Jialing Fu <jlfu@marvell.com>
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
+---
+ drivers/mmc/host/sdhci.c |   16 +++++++---------
+ 1 files changed, 7 insertions(+), 9 deletions(-)
 
-Earlier in the thread I wrote:
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 3aef580..36afd47 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1628,7 +1628,7 @@ static int
+sdhci_do_3_3v_signal_voltage_switch(struct sdhci_host *host,
+ 	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
 
->> * I still don't have a good set of representative benchmarks showing
->>   what kind of performance changes come with this patchset. It seems
->>   like we've had a small amount of testing on one controller/eMMC
->>   part combo from Seungwon, and an entirely different test from Maya,
->>   and the results aren't documented fully anywhere to the level of
->>   describing what the hardware was, what the test was, and what the
->>   results were before and after the patchset.
+ 	if (host->vqmmc) {
+-		ret = regulator_set_voltage(host->vqmmc, 3300000, 3300000);
++		ret = regulator_set_voltage(host->vqmmc, 2700000, 3600000);
+ 		if (ret) {
+ 			pr_warning("%s: Switching to 3.3V signalling voltage "
+ 				   " failed\n", mmc_hostname(host->mmc));
+@@ -1672,7 +1672,7 @@ static int
+sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
+ 		 */
+ 		if (host->vqmmc)
+ 			ret = regulator_set_voltage(host->vqmmc,
+-				1800000, 1800000);
++				1700000, 1950000);
+ 		else
+ 			ret = 0;
 
-I still feel this way.  I'm worried that we might be merging code that
-works well on your controller/card but causes large regressions for
-everyone else.  I don't want to handle this by making a tunable that
-everyone has to tune for their system, because I don't think anyone will
-tune it.  I don't think that shipping a capability that will probably
-lead to performance regressions if you turn it on is a good idea.
+@@ -2856,7 +2856,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
+ 		host->vqmmc = NULL;
+ 	}
+-	else if (regulator_is_supported_voltage(host->vqmmc, 1800000, 1800000))
++	else if (regulator_is_supported_voltage(host->vqmmc, 1700000, 1950000))
+ 		regulator_enable(host->vqmmc);
+ 	else
+ 		caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+@@ -2927,16 +2927,14 @@ int sdhci_add_host(struct sdhci_host *host)
 
-I'm in a better position to help now, though -- I have some motherboards
-with Marvell SoCs and a socketed eMMC slot, and I have eMMC 4.5 parts
-from Sandisk and Toshiba.  So I can try to help work out how
-generalizable your results are across other controllers and cards.
-
-So far I've only tried the Sandisk part, but it didn't show any write
-improvement with write packing.  I've verified that the switch command
-to turn on packed_event_en happens and succeeds, and that the caps are
-set correctly, so I'm not sure what's wrong yet.  With iozone I get:
-
-                       KB  reclen   write rewrite
-Unpacked writes:    10240    8192   17250   16794 
-Packed writes:      10240    8192   16930   17353
-
-I'll try the Toshiba part next, and I'll start using lmdd as well as
-iozone.  Any ideas on why I might not be seeing improvements with
-Sandisk?
-
-I'm not opposed to merging packed write support in principle, I just
-want to be convinced that we're not causing regressions for most users
-who turn it on.  (And more than that, I want to see that it leads to
-improvements that make it worth adding the code complexity for.)
-
-Thanks,
-
-- Chris.
+ #ifdef CONFIG_REGULATOR
+ 	if (host->vmmc) {
+-		ret = regulator_is_supported_voltage(host->vmmc, 3300000,
+-			3300000);
++		ret = regulator_is_supported_voltage(host->vmmc, 2700000,
++			3600000);
+ 		if ((ret <= 0) && (caps[0] & SDHCI_CAN_VDD_330))
+ 			caps[0] &= ~SDHCI_CAN_VDD_330;
+-		ret = regulator_is_supported_voltage(host->vmmc, 3000000,
+-			3000000);
+ 		if ((ret <= 0) && (caps[0] & SDHCI_CAN_VDD_300))
+ 			caps[0] &= ~SDHCI_CAN_VDD_300;
+-		ret = regulator_is_supported_voltage(host->vmmc, 1800000,
+-			1800000);
++		ret = regulator_is_supported_voltage(host->vmmc, 1700000,
++			1950000);
+ 		if ((ret <= 0) && (caps[0] & SDHCI_CAN_VDD_180))
+ 			caps[0] &= ~SDHCI_CAN_VDD_180;
+ 	}
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.0.4
