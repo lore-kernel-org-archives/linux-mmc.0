@@ -1,98 +1,73 @@
-From: Haojian Zhuang <haojian.zhuang@gmail.com>
-Subject: Re: [PATCH v6 05/14] mmc: sdhci: fix null return check of regulator_get
-Date: Wed, 14 Nov 2012 09:49:36 +0800
-Message-ID: <CAN1soZxNr0+zY4WW8g1OADy86ktFJ1KUC2PLEK4cR11GW3tyKQ@mail.gmail.com>
-References: <1350471893-29633-1-git-send-email-keyuan.liu@gmail.com>
-	<1350471893-29633-6-git-send-email-keyuan.liu@gmail.com>
-	<878vagb1bj.fsf@octavius.laptop.org>
-	<CADz5_gJ5pdN+pUOkORCahkcKxcwxho7BP7pDZaMx2zBjnKHHKw@mail.gmail.com>
-	<CADz5_gJsTBeb4eDjBGkGFmnQr_Z7ZtFqe5G12cYEtCwyXyKSag@mail.gmail.com>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH v3] regulator: treat regulators with constant volatage as
+ fixed
+Date: Wed, 14 Nov 2012 11:01:25 +0900
+Message-ID: <20121114020124.GH4415@opensource.wolfsonmicro.com>
+References: <20121113094255.GW18224@opensource.wolfsonmicro.com>
+ <1352800177-16139-1-git-send-email-m.szyprowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="82evfD9Ogz2JrdWZ"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ea0-f174.google.com ([209.85.215.174]:64533 "EHLO
-	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756115Ab2KNBth (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Nov 2012 20:49:37 -0500
-Received: by mail-ea0-f174.google.com with SMTP id e13so168348eaa.19
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Nov 2012 17:49:36 -0800 (PST)
-In-Reply-To: <CADz5_gJsTBeb4eDjBGkGFmnQr_Z7ZtFqe5G12cYEtCwyXyKSag@mail.gmail.com>
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:43956 "EHLO
+	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756139Ab2KNCBc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Nov 2012 21:01:32 -0500
+Content-Disposition: inline
+In-Reply-To: <1352800177-16139-1-git-send-email-m.szyprowski@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Liu <keyuan.liu@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, pierre@ossman.eu, ulf.hansson@linaro.org, Gao Zhangfei <zgao6@marvell.com>, cxie4@marvell.com, prakity@nvidia.com, Kevin Liu <kliu5@marvell.com>, Bin Wang <binw@marvell.com>, dsd@laptop.org
+To: Marek Szyprowski <m.szyprowski@samsung.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>
 
-On Tue, Nov 13, 2012 at 11:00 AM, Kevin Liu <keyuan.liu@gmail.com> wrote:
-> Updated Haojian and Philip's mail address.
->
-> 2012/11/12 Kevin Liu <keyuan.liu@gmail.com>:
->> 2012/11/5 Chris Ball <cjb@laptop.org>:
->>> Hi,
->>>
->>> On Wed, Oct 17 2012, Kevin Liu wrote:
->>>> From: Kevin Liu <kliu5@marvell.com>
->>>>
->>>> regulator_get() returns NULL when CONFIG_REGULATOR not defined,
->>>> which should not print out the warning.
->>>>
->>>> Reviewed-by: Philip Rakity <prakity@marvell.com>
->>>> Signed-off-by: Bin Wang <binw@marvell.com>
->>>> Signed-off-by: Kevin Liu <kliu5@marvell.com>
->>>> ---
->>>>  drivers/mmc/host/sdhci.c |   18 ++++++++++++------
->>>>  1 files changed, 12 insertions(+), 6 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>> index 8e6a6f0..0104ae9 100644
->>>> --- a/drivers/mmc/host/sdhci.c
->>>> +++ b/drivers/mmc/host/sdhci.c
->>>> @@ -2845,9 +2845,12 @@ int sdhci_add_host(struct sdhci_host *host)
->>>>
->>>>       /* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
->>>>       host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
->>>> -     if (IS_ERR(host->vqmmc)) {
->>>> -             pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
->>>> -             host->vqmmc = NULL;
->>>> +     if (IS_ERR_OR_NULL(host->vqmmc)) {
->>>> +             if (PTR_ERR(host->vqmmc) < 0) {
->>>> +                     pr_info("%s: no vqmmc regulator found\n",
->>>> +                             mmc_hostname(mmc));
->>>> +                     host->vqmmc = NULL;
->>>> +             }
->>>>       }
->>>>       else if (regulator_is_supported_voltage(host->vqmmc, 1800000, 1800000))
->>>>               regulator_enable(host->vqmmc);
->>>> @@ -2903,9 +2906,12 @@ int sdhci_add_host(struct sdhci_host *host)
->>>>       ocr_avail = 0;
->>>>
->>>>       host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
->>>> -     if (IS_ERR(host->vmmc)) {
->>>> -             pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
->>>> -             host->vmmc = NULL;
->>>> +     if (IS_ERR_OR_NULL(host->vmmc)) {
->>>> +             if (PTR_ERR(host->vmmc) < 0) {
->>>> +                     pr_info("%s: no vmmc regulator found\n",
->>>> +                             mmc_hostname(mmc));
->>>> +                     host->vmmc = NULL;
->>>> +             }
->>>>       } else
->>>>               regulator_enable(host->vmmc);
->>>
->>> Pushed to mmc-next for 3.7 with this commit message:
->>>
->>
->> Chris,
->>
->> Thanks for the push.
->> But how about the other 13 patches in the same patchset ([PATCH v6
->> 00/14] mmc: sdhci: mmc: sdhci: fixes and enhancements)?
->> Most of them also aim to fix bugs.
->>
->> Kevin
 
-Hi Chris,
+--82evfD9Ogz2JrdWZ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-How do you think about other patches in this patch set?
+On Tue, Nov 13, 2012 at 10:49:37AM +0100, Marek Szyprowski wrote:
 
-Regards
-Haojian
+> +	if (rdev->constraints->valid_ops_mask & REGULATOR_CHANGE_VOLTAGE) {
+> +		if (rdev->desc->n_voltages)
+> +			return rdev->desc->n_voltages;
+> +		else
+> +			return -EINVAL;
+> +	} else {
+> +		return 1;
+> +	}
+
+Hrm, now I can read the logic I'm not convinced this is a good idea.
+This will report that we have an available voltage for devices which
+don't know their voltage (things like battery supplies often do this as
+the voltage is unregulated) and it will mean that we are doing something=20
+different for the case where there's only one voltage (reporting the
+restricted count instead of the physically supported count).
+
+I think we want a regulator_can_change_voltage() or possibly a count
+function (though I can't see any use cases except this) which answers
+the question directly instead of layering on top of this function.
+
+--82evfD9Ogz2JrdWZ
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJQovtnAAoJELSic+t+oim9I6IP/1Oa1xhT7Tqmxt2WKaZdJt38
+Qhzidhi14/mfYlfje0ryY+uf3Vaqi3m9i+1lbfF9sliZrLW4lnINHdjbLWC6arwL
+CTpG159zB8mz68nU8U4B65ezJvgS1RXyS6s0vQYl73Lq6xVPALM+i7mEkXrbbDtU
+Rao/3MMn26LpGpPjojH+bAsp+5ahr3I3VRhFnz+ANgTxBFFRg89e1q5MVo8gFfc6
+K8XkXnTIIclh2LrBcxfiXrxVTz1Q11ZEVcJsrfah6gMmdrrX3Xlo/ZNGdd3uJIb8
+cpYBUQaPBA+toQgBJcHXvuARaSc1bW+wvlPV5gRz5avbgq3LXtb8PKjpiBcQjXdc
+iKD76FRwVePaPMzrRX6Z7kG/37K2luqBriROFLHfrqMK3oOJdtN1QMjVr4gCxg4t
+ZvoReTXvLhptxhA/SeP06Yn20L1fkk318bE+EORaY+jtK5PAB87oK7LIyGIOnakd
+ml+jp0i7Hxmmzzw9JrE08HEbVKx7lVH93G3Sz94pdhOpGRvjzoqf686KdQ7HmPfD
+NESi3lMORFGdSS2WYnurhpcuYcVtvDFby54mUAG3apo42wOUzP2zBUH4LhNqKlh/
+EZDaNvNdPbgCrXgamipBMjwxSKnVZ2B38x7KfkjffiBb+x2dHI8997BN5vUL5by+
+laklvDPGw1/ZON9SC0oo
+=uxOk
+-----END PGP SIGNATURE-----
+
+--82evfD9Ogz2JrdWZ--
