@@ -1,113 +1,75 @@
-From: Philip Rakity <prakity@nvidia.com>
-Subject: Re: [PATCH v2] mmc: sdhci: apply voltage range check only for
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH 3/3] mmc: sdhci: apply voltage range check only for
  non-fixed regulators
-Date: Tue, 13 Nov 2012 22:23:17 +0100
-Message-ID: <DB83372B-7C12-4670-8C46-207C4A56F8BD@nvidia.com>
-References: <87fw4dn030.fsf@octavius.laptop.org>
- <1352813534-6795-1-git-send-email-m.szyprowski@samsung.com>
- <87bof1mx9m.fsf@octavius.laptop.org> <50A254A0.8000403@samsung.com>
- <877gppmvyd.fsf@octavius.laptop.org>
+Date: Wed, 14 Nov 2012 10:10:43 +0900
+Message-ID: <20121114011042.GC4415@opensource.wolfsonmicro.com>
+References: <1352796533-12350-1-git-send-email-m.szyprowski@samsung.com>
+ <1352796533-12350-4-git-send-email-m.szyprowski@samsung.com>
+ <87fw4dn030.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="oJ71EGRlYNjSvfq7"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate04.nvidia.com ([216.228.121.35]:3605 "EHLO
-	hqemgate04.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755850Ab2KMVXn convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Nov 2012 16:23:43 -0500
-In-Reply-To: <877gppmvyd.fsf@octavius.laptop.org>
-Content-Language: en-US
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:54061 "EHLO
+	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932161Ab2KNBKv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Nov 2012 20:10:51 -0500
+Content-Disposition: inline
+In-Reply-To: <87fw4dn030.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: "linux-kernel@vger.kernel.org List" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: Marek Szyprowski <m.szyprowski@samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Liam Girdwood <lrg@ti.com>
 
 
-Hi Marek,
+--oJ71EGRlYNjSvfq7
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Is the regulator dedicated ?  or is it shared ?   Is it used for eMMC ?
-
-If it cannot be turned off -- then just don't list it in the regulators list for vmmc.  
-
-If it CAN be turned off then need to get back to you.
-
-Philip 
-
-On Nov 13, 2012, at 2:14 PM, Chris Ball <cjb@laptop.org> wrote:
-
-> Hi,
-> 
+On Tue, Nov 13, 2012 at 07:45:07AM -0500, Chris Ball wrote:
 > On Tue, Nov 13 2012, Marek Szyprowski wrote:
->>> On Tue, Nov 13 2012, Marek Szyprowski wrote:
->>>> Fixed regulators cannot change their voltage, so disable all voltage
->>>> range checking for them, otherwise the driver fails to operate with
->>>> fixed regulators. Up to now it worked only by luck, because
->>>> regulator_is_supported_voltage() function returned incorrect values.
->>>> Commit "regulator: fix voltage check in regulator_is_supported_voltage()"
->>>> fixed that function and now additional check is needed for fixed
->>>> regulators.
->>>> 
->>>> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
->>>> ---
->>>> drivers/mmc/host/sdhci.c |    2 +-
->>>> 1 file changed, 1 insertion(+), 1 deletion(-)
->>>> 
->>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>> index c7851c0..6f6534e 100644
->>>> --- a/drivers/mmc/host/sdhci.c
->>>> +++ b/drivers/mmc/host/sdhci.c
->>>> @@ -2923,7 +2923,7 @@ int sdhci_add_host(struct sdhci_host *host)
->>>> 		regulator_enable(host->vmmc);
->>>> 
->>>> #ifdef CONFIG_REGULATOR
->>>> -	if (host->vmmc) {
->>>> +	if (host->vmmc && regulator_count_voltages(host->vmmc) > 1) {
->>>> 		ret = regulator_is_supported_voltage(host->vmmc, 3300000,
->>>> 			3300000);
->>>> 		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
->>> 
->>> Thanks for the longer explanation.  I'm still missing something, though;
->>> what's wrong with running the check as it was with the new regulator code?
->>> (I haven't tried it yet.)
->>> 
->>> #ifdef CONFIG_REGULATOR
->>>         if (host->vmmc) {
->>>                 ret = regulator_is_supported_voltage(host->vmmc, 3300000,
->>>                         3300000);
->>>                 if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
->>>                         caps[0] &= ~SDHCI_CAN_VDD_330;
->>>                 ret = regulator_is_supported_voltage(host->vmmc, 3000000,
->>>                         3000000);
->>>                 if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_300)))
->>>                         caps[0] &= ~SDHCI_CAN_VDD_300;
->>>                 ret = regulator_is_supported_voltage(host->vmmc, 1800000,
->>>                         1800000);
->>>                 if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_180)))
->>>                         caps[0] &= ~SDHCI_CAN_VDD_180;
->>>         }
->>> #endif /* CONFIG_REGULATOR */
->>> 
->>> The point is to remove unsupported voltages, so if someone sets up a
->>> fixed regulator at 3300000, all of the other caps are disabled.  Why
->>> wouldn't that work without this change, and how are we supposed to
->>> remove those caps on a fixed regulator after your patchset?
->>> 
->>> Thanks, sorry if I'm missing something obvious,
->> 
->> On our boards eMMC is connected to fixed 2.8V regulator, what results in
->> clearing all available voltages and fail. The same situation is when one
->> enable dummy regulator and try to use sdhci with it. My patch fixes this
->> and restores sdhci to working state as it was before (before fixing
->> regulator regulator_is_supported_voltage() function and earlier when
->> MMC_BROKEN_VOLATGE capability was used).
-> 
-> I see.  Sounds like a separate bug -- Philip (or anyone else), any
-> idea how we should be treating eMMCs with a fixed voltage here?
-> 
-> Thanks,
-> 
-> - Chris.
-> -- 
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
+> > Fixed regulators cannot change their voltage, so disable all voltage range
+> > checking for them, otherwise the driver fails to operate with fixed
+> > regulators.
 
+> > Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+
+> Perhaps it's a good idea to mention that the regulator API is changing
+> (being fixed) at the same time, and that's why this patch is necessary.
+
+This should be totally unrelated to any externally visible change in the
+regulator API, if anything I would expect fixes in the API to *improve*
+the ability of clients to work with fixed voltage regulators.  What's
+missing here is some explanation as to what the problem is and how it's
+being fixed.
+
+As I understand it this should really be a workaround for hardware which
+runs cards at out of spec voltages; we have a fixed voltage regulator
+which claims to not support any of the voltages that are in spec (due to
+this being what the hardware does) so if we try to use the voltage
+management stuff in the MMC API it gets upset.  As a workaround if we
+can't change the voltage we just ignore the voltage aspects of the API.
+
+--oJ71EGRlYNjSvfq7
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJQou6gAAoJELSic+t+oim9T5MP/02aQy+TIolpJeCNOGDIY1wC
+Lvzelv4UVUoF5LEUPyQkXbm5hlbLe0EI2Ctol4Ll3IP++qDWVfi90LUzc/zUonzh
+2h0GwJswhVSmzsDBxvTmKO775oqWNs2LDApJGyNoYQ633eknFQSzlr8xHRT1+C+P
+Zar9Q7WMulOZaP/L+UwNIZWYjoslxQgPICilXhxg1k97gabpj+2/Et1YpQCJg/Kg
+FP9z2CvwXenWk7hYpeKUmHusDyGNoWtAytd5VmQEEWM+8uFe8wucQ7+zxNttTGDx
++wfDEQ5iYHNcVvJPsaVOfG+fhGUDO2qJL+Z4rzLnKdLf2NTcYIwysZZxRZuwU7Fw
+Lc9Y/Y3VBonzqiMfLU3OqiVUZ6SZk5vhU50zw1JuCrjqJWUYaNLW3I8bZyo1hIij
+mIC7kiGeHf+W1eP5ko9R622dwgtoW2rw1uzYIDavUp8ao7uvIjrSP7QkV5a0PWs0
+4ipnG0uujjqB8kWQwaw4TFHH3vM9cV4sSsGFQ07R1rMfSO+mKubCQUAccpmKHsMv
+RF/MusXYGK7xsIcsKi07LtayxP0fZL+PrjNc0SwO0bOdSx/SSVfSqy70vtHeQOOm
+8dPy36OrzHqEJljcia8iMpJYrVUu6Xe8Nh9PQlavkNjlN1OVOBBvPjMVjv3jGSFt
+nnM0mxS2SkXyTxq8fKmX
+=nkFo
+-----END PGP SIGNATURE-----
+
+--oJ71EGRlYNjSvfq7--
