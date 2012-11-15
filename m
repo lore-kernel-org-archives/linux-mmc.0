@@ -1,244 +1,523 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v8 2/2] mmc: support packed write command for eMMC4.5 device
-Date: Thu, 15 Nov 2012 19:05:28 +0900
-Message-ID: <002901cdc318$bd9c7030$38d55090$%jun@samsung.com>
-References: <c990a66b72acaaf514c4ff2cbbcd6236.squirrel@www.codeaurora.org>
+Subject: RE: [PATCH v3] mmc: fix async request mechanism for sequential read
+ scenarios
+Date: Thu, 15 Nov 2012 19:23:58 +0900
+Message-ID: <002c01cdc31b$5303be60$f90b3b20$%jun@samsung.com>
+References: <n@samsung.com>
+ <1352739112-19208-1-git-send-email-kdorfman@codeaurora.org>
+ <002001cdc1a4$a96a5d90$fc3f18b0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:45018 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S2992967Ab2KOKFb convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Nov 2012 05:05:31 -0500
-Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout3.samsung.com
+Received: from mailout1.samsung.com ([203.254.224.24]:25109 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1423250Ab2KOKYB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Nov 2012 05:24:01 -0500
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout1.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MDI0077RXCLEC10@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 15 Nov 2012 19:05:30 +0900 (KST)
+ 17 2011)) with ESMTP id <0MDI004AAY7NR9N0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 15 Nov 2012 19:23:59 +0900 (KST)
 Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0MDI00IXRXD5XZ40@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 15 Nov 2012 19:05:29 +0900 (KST)
-In-reply-to: <c990a66b72acaaf514c4ff2cbbcd6236.squirrel@www.codeaurora.org>
+ with ESMTPA id <0MDI00LK8Y7YPR30@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 15 Nov 2012 19:23:59 +0900 (KST)
+In-reply-to: <002001cdc1a4$a96a5d90$fc3f18b0$%jun@samsung.com>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: merez@codeaurora.org, 'Chris Ball' <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>, 'Saugata Das' <saugata.das@linaro.org>, 'Namjae Jeon' <linkinjeon@gmail.com>
+To: 'Seungwon Jeon' <tgih.jun@samsung.com>, 'Konstantin Dorfman' <kdorfman@codeaurora.org>, cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, per.lkml@gmail.com, jh80.chung@samsung.com
 
-Hi Maya,
+I checked this commit.
+v3 doesn't work in dw_mmc host driver.
+It makes some driver warning while v1 is fine.
+I'm finding the reason. And could you check minor one below?
 
-Thanks to remind it.
-I'm struggling with something. I didn't check more since v8.
-
-Hi Chris,
-
-As we know, nand flash write is slower than read, because write is cost=
-ly operation.
-Write operation need block erase operation. Of course, if there is free=
- block to write, erase will not happen.
-In worst case, write operation may include copy exiting data as well as=
- block erase block.
-So, in the block management of nand, several data of small size is disa=
-dvantageous for write.
-That is when writing large amounts of data, eMMC give it a significant =
-speed advantage.
-Packed write can help it by gathering the data. Actually we got the per=
-formance gain.
-
-There are several bus speed mode. Such as HS200 mode, clock speed is up=
- to 200MHz.
-However, with little or no effect for write performance. ASYNC transfer=
- patch is the same.
-I think packed wrtie is a candidate which can improve write performance=
- just now.
-
-If you want to find the write improvement, you need to check the follow=
-ing two parameters.
-	/sys/block/mmcblk0/queue/max_hw_sectors_kb
-	/sys/block/mmcblk0/queue/max_sectors_kb
-'max_hw_sectors_kb' is maximum size which host controller can gather in=
- device driver.
-If this size is large enough, performance effect may not be shown notic=
-eably.
+On Tuesday, November 13, 2012, Seungwon Jeon <tgih.jun@samsung.com>
+> Hi Konstantin,
+> 
+> I'm looking into this patch.
+> Idea looks good as a whole.
+> 
+> On Tuesday, November 13, 2012, Konstantin Dorfman <kdorfman@codeaurora.org> wrote:
+> > When current request is running on the bus and if next request fetched
+> > by mmcqd is NULL, mmc context (mmcqd thread) gets blocked until the
+> > current request completes. This means if new request comes in while
+> > the mmcqd thread is blocked, this new request can not be prepared in
+> > parallel to current ongoing request. This may result in latency to
+> > start new request.
+> >
+> > This change allows to wake up the MMC thread (which
+> > is waiting for the current running request to complete). Now once the
+> > MMC thread is woken up, new request can be fetched and prepared in
+> > parallel to current running request which means this new request can
+> > be started immediately after the current running request completes.
+> >
+> > With this change read throughput is improved by 16%.
+> >
+> > Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
+> > ---
+> > v3:
+> > 	- new MMC_QUEUE_NEW_REQUEST flag to mark new request case
+> > 	- lock added to update is_new_req flag
+> > 	- condition for sending new req notification changed
+> > 	- Moved start waiting for new req notification after
+> > 	  fetching NULL
+> > v2:
+> > 	- Removed synchronization flags
+> > 	- removed lock from done()
+> > 	- flags names changed
+> > v1:
+> > 	- Initial submit
+> >
+> > diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> > index 172a768..34d8bd9 100644
+> > --- a/drivers/mmc/card/block.c
+> > +++ b/drivers/mmc/card/block.c
+> > @@ -112,17 +112,6 @@ struct mmc_blk_data {
+> >
+> >  static DEFINE_MUTEX(open_lock);
+> >
+> > -enum mmc_blk_status {
+> > -	MMC_BLK_SUCCESS = 0,
+> > -	MMC_BLK_PARTIAL,
+> > -	MMC_BLK_CMD_ERR,
+> > -	MMC_BLK_RETRY,
+> > -	MMC_BLK_ABORT,
+> > -	MMC_BLK_DATA_ERR,
+> > -	MMC_BLK_ECC_ERR,
+> > -	MMC_BLK_NOMEDIUM,
+> > -};
+> > -
+> >  module_param(perdev_minors, int, 0444);
+> >  MODULE_PARM_DESC(perdev_minors, "Minors numbers to allocate per device");
+> >
+> > @@ -1225,6 +1214,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+> >
+> >  	mqrq->mmc_active.mrq = &brq->mrq;
+> >  	mqrq->mmc_active.err_check = mmc_blk_err_check;
+> > +	mqrq->mmc_active.mrq->context_info = &mq->context_info;
+> >
+> >  	mmc_queue_bounce_pre(mqrq);
+> >  }
+> > @@ -1284,9 +1274,12 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+> >  			areq = &mq->mqrq_cur->mmc_active;
+> >  		} else
+> >  			areq = NULL;
+> > -		areq = mmc_start_req(card->host, areq, (int *) &status);
+> > -		if (!areq)
+> > +		areq = mmc_start_req(card->host, areq, (int *)&status);
+> > +		if (!areq) {
+> > +			if (status == MMC_BLK_NEW_REQUEST)
+> > +				mq->flags |= MMC_QUEUE_NEW_REQUEST;
+> >  			return 0;
+> > +		}
+> >
+> >  		mq_rq = container_of(areq, struct mmc_queue_req, mmc_active);
+> >  		brq = &mq_rq->brq;
+> > @@ -1295,6 +1288,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+> >  		mmc_queue_bounce_post(mq_rq);
+> >
+> >  		switch (status) {
+> > +		case MMC_BLK_NEW_REQUEST:
+> > +			BUG(); /* should never get here */
+> >  		case MMC_BLK_SUCCESS:
+> >  		case MMC_BLK_PARTIAL:
+> >  			/*
+> > @@ -1367,7 +1362,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+> >  			 * prepare it again and resend.
+> >  			 */
+> >  			mmc_blk_rw_rq_prep(mq_rq, card, disable_multi, mq);
+> > -			mmc_start_req(card->host, &mq_rq->mmc_active, NULL);
+> > +			mmc_start_req(card->host, &mq_rq->mmc_active,
+> > +					(int *)&status);
+> Here, we'll try to send previous request  which is not completed successfully.
+> And then at the top of do~while, mmc_start_req will be called for current request and get the status.
+> Above change looks like unnecessary. Is there any reason?
+> 
+> Thanks,
+> Seungwon Jeon
+> 
+> >  		}
+> >  	} while (ret);
+> >
+> > @@ -1407,6 +1403,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+> >  		goto out;
+> >  	}
+> >
+> > +	mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
+> > +
+> >  	if (req && req->cmd_flags & REQ_DISCARD) {
+> >  		/* complete ongoing async transfer before issuing discard */
+> >  		if (card->host->areq)
+> > @@ -1426,9 +1424,10 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+> >  	}
+> >
+> >  out:
+> > -	if (!req)
+> > +	if (!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST))
+> >  		/* release host only when there are no more requests */
+> >  		mmc_release_host(card->host);
+> > +
+> >  	return ret;
+> >  }
+> >
+> > diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> > index fadf52e..ef575ac 100644
+> > --- a/drivers/mmc/card/queue.c
+> > +++ b/drivers/mmc/card/queue.c
+> > @@ -22,7 +22,6 @@
+> >
+> >  #define MMC_QUEUE_BOUNCESZ	65536
+> >
+> > -#define MMC_QUEUE_SUSPENDED	(1 << 0)
+> >
+> >  /*
+> >   * Prepare a MMC request. This just filters out odd stuff.
+> > @@ -63,11 +62,20 @@ static int mmc_queue_thread(void *d)
+> >  		set_current_state(TASK_INTERRUPTIBLE);
+> >  		req = blk_fetch_request(q);
+> >  		mq->mqrq_cur->req = req;
+> > +		if (!req && mq->mqrq_prev->req &&
+> > +			!(mq->mqrq_prev->req->cmd_flags & REQ_FLUSH) &&
+> > +			!(mq->mqrq_prev->req->cmd_flags & REQ_DISCARD)) {
+> > +			mq->context_info.is_waiting_last_req = true;
+> > +		}
+> >  		spin_unlock_irq(q->queue_lock);
+> >
+> >  		if (req || mq->mqrq_prev->req) {
+> >  			set_current_state(TASK_RUNNING);
+> >  			mq->issue_fn(mq, req);
+> > +			if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
+> > +				mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
+> > +				continue; /* fetch again */
+> > +			}
+> >
+> >  			/*
+> >  			 * Current request becomes previous request
+> > @@ -103,6 +111,7 @@ static void mmc_request_fn(struct request_queue *q)
+> >  {
+> >  	struct mmc_queue *mq = q->queuedata;
+> >  	struct request *req;
+> > +	unsigned long flags;
+> >
+> >  	if (!mq) {
+> >  		while ((req = blk_fetch_request(q)) != NULL) {
+> > @@ -111,8 +120,19 @@ static void mmc_request_fn(struct request_queue *q)
+> >  		}
+> >  		return;
+> >  	}
+> > -
+> > -	if (!mq->mqrq_cur->req && !mq->mqrq_prev->req)
+> > +	if (!mq->mqrq_cur->req && mq->mqrq_prev->req) {
+> > +		/*
+> > +		 * New MMC request arrived when MMC thread may be
+> > +		 * blocked on the previous request to be complete
+> > +		 * with no current request fetched
+> > +		 */
+> > +		spin_lock_irqsave(&mq->context_info.lock, flags);
+> > +		if (mq->context_info.is_waiting_last_req) {
+> > +			mq->context_info.is_new_req = true;
+> > +			wake_up_interruptible(&mq->context_info.wait);
+> > +		}
+> > +		spin_unlock_irqrestore(&mq->context_info.lock, flags);
+> > +	} else if (!mq->mqrq_cur->req && !mq->mqrq_prev->req)
+> >  		wake_up_process(mq->thread);
+> >  }
+> >
+> > @@ -262,6 +282,11 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+> >  	}
+> >
+> >  	sema_init(&mq->thread_sem, 1);
+> > +	spin_lock_init(&mq->context_info.lock);
+> > +	mq->context_info.is_new_req = false;
+> > +	mq->context_info.is_done_rcv = false;
+> > +	mq->context_info.is_waiting_last_req = false;
+> > +	init_waitqueue_head(&mq->context_info.wait);
+> >
+> >  	mq->thread = kthread_run(mmc_queue_thread, mq, "mmcqd/%d%s",
+> >  		host->index, subname ? subname : "");
+> > diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+> > index d2a1eb4..f5885e9 100644
+> > --- a/drivers/mmc/card/queue.h
+> > +++ b/drivers/mmc/card/queue.h
+> > @@ -26,6 +26,8 @@ struct mmc_queue {
+> >  	struct mmc_card		*card;
+> >  	struct task_struct	*thread;
+> >  	struct semaphore	thread_sem;
+> > +#define MMC_QUEUE_SUSPENDED	(1 << 0)
+> > +#define MMC_QUEUE_NEW_REQUEST	(1 << 1)
+> >  	unsigned int		flags;
+> >  	int			(*issue_fn)(struct mmc_queue *, struct request *);
+> >  	void			*data;
+> > @@ -33,6 +35,7 @@ struct mmc_queue {
+> >  	struct mmc_queue_req	mqrq[2];
+> >  	struct mmc_queue_req	*mqrq_cur;
+> >  	struct mmc_queue_req	*mqrq_prev;
+> > +	struct mmc_context_info	context_info;
+> >  };
+> >
+> >  extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
+> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > index 06c42cf..3374195 100644
+> > --- a/drivers/mmc/core/core.c
+> > +++ b/drivers/mmc/core/core.c
+> > @@ -316,11 +316,43 @@ out:
+> >  }
+> >  EXPORT_SYMBOL(mmc_start_bkops);
+> >
+> > +/*
+> > + * mmc_wait_data_done() - done callback for data request
+> > + * @mrq: done data request
+> > + *
+> > + * Wakes up mmc context, passed as callback to host controller driver
+> > + */
+> > +static void mmc_wait_data_done(struct mmc_request *mrq)
+> > +{
+> > +	mrq->context_info->is_done_rcv = true;
+> > +	wake_up_interruptible(&mrq->context_info->wait);
+> > +}
+> > +
+> >  static void mmc_wait_done(struct mmc_request *mrq)
+> >  {
+> >  	complete(&mrq->completion);
+> >  }
+> >
+> > +/*
+> > + *__mmc_start_data_req() - starts data request
+> > + * @host: MMC host to start the request
+> > + * @mrq: data request to start
+> > + *
+> > + * Fills done callback that will be used when request are done by card.
+> > + * Starts data mmc request execution
+> > + */
+> > +static int __mmc_start_data_req(struct mmc_host *host, struct mmc_request *mrq)
+> > +{
+> > +	mrq->done = mmc_wait_data_done;
+> > +	if (mmc_card_removed(host->card)) {
+> > +		mrq->cmd->error = -ENOMEDIUM;
+> > +		return -ENOMEDIUM;
+> > +	}
+> > +	mmc_start_request(host, mrq);
+> > +
+> > +	return 0;
+> > +}
+> > +
+> >  static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
+> >  {
+> >  	init_completion(&mrq->completion);
+> > @@ -334,6 +366,60 @@ static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
+> >  	return 0;
+> >  }
+> >
+> > +/*
+> > + * mmc_wait_for_data_req_done() - wait for request completed or new
+> > + *				  request notification arrives
+> > + * @host: MMC host to prepare the command.
+> > + * @mrq: MMC request to wait for
+> > + *
+> > + * Blocks MMC context till host controller will ack end of data request
+> > + * execution or new request arrives from block layer. Handles
+> > + * command retries.
+> > + *
+> > + * Returns enum mmc_blk_status after checking errors.
+> > + */
+> > +static int mmc_wait_for_data_req_done(struct mmc_host *host,
+> > +				      struct mmc_request *mrq)
+> > +{
+> > +	struct mmc_command *cmd;
+> > +	struct mmc_context_info *context_info = mrq->context_info;
+> > +	int err;
+> > +	unsigned long flags;
+> > +
+> > +	while (1) {
+> > +		wait_event_interruptible(context_info->wait,
+> > +				(context_info->is_done_rcv ||
+> > +				 context_info->is_new_req));
+> > +		spin_lock_irqsave(&context_info->lock, flags);
+> > +		context_info->is_waiting_last_req = false;
+> > +		spin_unlock_irqrestore(&context_info->lock, flags);
+> > +		if (context_info->is_done_rcv) {
+> > +			context_info->is_done_rcv = false;
+> > +			context_info->is_new_req = false;
+> > +			cmd = mrq->cmd;
+> > +			if (!cmd->error || !cmd->retries ||
+> > +					mmc_card_removed(host->card)) {
+> > +				err = host->areq->err_check(host->card,
+> > +						host->areq);
+> > +				break; /* return err */
+> > +			} else {
+> > +				pr_info("%s: req failed (CMD%u): %d, retrying...\n",
+> > +						mmc_hostname(host),
+> > +						cmd->opcode, cmd->error);
+> > +				cmd->retries--;
+> > +				cmd->error = 0;
+> > +				host->ops->request(host, mrq);
+> > +				continue; /* wait for done/new event again */
+> > +			}
+> > +		} else if (context_info->is_new_req) {
+> > +			context_info->is_new_req = false;
+> > +			err = MMC_BLK_NEW_REQUEST;
+> > +			break; /* return err */
+> > +		}
+> > +	} /* while */
+> > +	return err;
+> > +}
+> > +
+> >  static void mmc_wait_for_req_done(struct mmc_host *host,
+> >  				  struct mmc_request *mrq)
+> >  {
+> > @@ -396,23 +482,17 @@ static void mmc_post_req(struct mmc_host *host, struct mmc_request *mrq,
+> >  }
+> >
+> >  /**
+> > - *	mmc_start_req - start a non-blocking request
+> > - *	@host: MMC host to start command
+> > - *	@areq: async request to start
+> > - *	@error: out parameter returns 0 for success, otherwise non zero
+> > - *
+> > - *	Start a new MMC custom command request for a host.
+> > - *	If there is on ongoing async request wait for completion
+> > - *	of that request and start the new one and return.
+> > - *	Does not wait for the new request to complete.
+> > + * mmc_start_req - start a non-blocking data request
+> > + * @host: MMC host to start the command
+> > + * @areq: async request to start
+> > + * @error: out parameter; returns 0 for success, otherwise non zero
+> >   *
+> > - *      Returns the completed request, NULL in case of none completed.
+> > - *	Wait for the an ongoing request (previoulsy started) to complete and
+> > - *	return the completed request. If there is no ongoing request, NULL
+> > - *	is returned without waiting. NULL is not an error condition.
+> > + * Wait for the ongoing request (previoulsy started) to complete and
+> > + * return the completed request. If there is no ongoing request, NULL
+> > + * is returned without waiting. NULL is not an error condition.
+> >   */
+> >  struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+> > -				    struct mmc_async_req *areq, int *error)
+> > +					 struct mmc_async_req *areq, int *error)
+> >  {
+> >  	int err = 0;
+> >  	int start_err = 0;
+> > @@ -423,8 +503,20 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+> >  		mmc_pre_req(host, areq->mrq, !host->areq);
+> >
+> >  	if (host->areq) {
+> > -		mmc_wait_for_req_done(host, host->areq->mrq);
+> > -		err = host->areq->err_check(host->card, host->areq);
+> > +		err = mmc_wait_for_data_req_done(host, host->areq->mrq);
+> > +		if (err == MMC_BLK_NEW_REQUEST) {
+> > +			if (areq) {
+> > +				pr_err("%s: new request while areq = %p",
+> > +						mmc_hostname(host), areq);
+> > +				BUG();
+> > +			}
+> > +			*error = err;
+Need to check NULL of error.
+if (error)
 
 Thanks,
 Seungwon Jeon
-On Wednesday, November 14, 2012, merez@codeaurora.org wrote:
-> Hi Chris,
->=20
-> The amount of improvement from the packed commands, as from any other
-> eMMC4.5 feature, depends on several parameters:
-> 1. The card support of this feature. If the card supports only the fe=
-ature
-> interface, then you'll see no improvement when using the feature.
-> 2. The benchmark tool used. Since the packed command preparation is
-> stopped due to a FLUSH request, a benchmark that issues many FLUSH
-> requests can result in a small amount of packing and you will see no
-> improvement.
->=20
-> You can use the following patch to get the packed commands statistics=
-:
-> http://marc.info/?l=3Dlinux-mmc&m=3D134374508625826&w=3D2
-> With this patch you will be able to see the amount of packing and wha=
-t
-> caused the packed preparation to stop.
->=20
-> We tested the packed commands feature with SanDisk cards and got
-> improvement of 30% when using lmdd and tiotest. We don't use iozone f=
-or
-> sequential tests but if you'll send me the exact command that you use=
- we
-> can try it as well.
->=20
-> It is true that packed commands can cause degradation of read in
-> read-write collisions. However, it is only nature that when having lo=
-nger
-> write request a read request has to wait for a longer time and its la=
-tency
-> will increase. I believe that it is not our duty to decide if this is=
- a
-> reason to exclude this feature. Everyone should take its own decision=
- if
-> he wants to benefit from the write improvement, while risking the
-> read-write collisions scenarios.
-> eMMC4.5 introduces the HPI and stop transmission to overcome the
-> degradation of read latency due to write (regardless of the packed
-> commands).
-> The packing control is our own enhancement that we believe can also b=
-e
-> used to overcome this degradation. It is tunable and requires a speci=
-fic
-> enabling, so it can be the developer=92s decision whether to use it o=
-r not.
-> Since it is not a standard feature we can discuss separately if it sh=
-ould
-> be accepted or not and what is the best way to use it.
->=20
-> Packed commands is not the only eMMC4.5 feature that can cause degrad=
-ation
-> in specific scenarios. If we will look at the cache feature, it cause=
-s
-> degradation by almost a half in random operations when FLUSH is being
-> used.
-> When using the following iozone command when cache is enabled, you wi=
-ll
-> see degradation in the iozone results:
-> ./data/iozone -i0 -i2 -r4k -s50m -O -o -I -f /data/mmc0/file3
-> However, cache support was accepted regardless of this degradation an=
-d it
-> is the developer=92s responsibility to decide if to use this feature =
-or not.
->=20
-> To summarize, all eMMC4.5 features that were added are tunable and
-> disabled by default.
-> I believe that when someone would enable a certain feature he will do=
- all
-> the required testing for determining if he can benefit from this feat=
-ure
-> or not in his own environment.
->=20
-> Thanks,
-> Maya
->=20
-> On Tue, November 13, 2012 6:54 pm, Chris Ball wrote:
-> > Hi Maya,
+> > +			/*
+> > +			 * The previous request was not completed,
+> > +			 * nothing to return
+> > +			 */
+> > +			return NULL;
+> > +		}
+> >  		/*
+> >  		 * Check BKOPS urgency for each R1 response
+> >  		 */
+> > @@ -436,7 +528,7 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+> >  	}
 > >
-> > On Sun, Nov 04 2012, merez@codeaurora.org wrote:
-> >> Packed commands is a mandatory eMMC4.5 feature and is supported by=
- all
-> the card vendors.
+> >  	if (!err && areq)
+> > -		start_err = __mmc_start_req(host, areq->mrq);
+> > +		start_err = __mmc_start_data_req(host, areq->mrq);
 > >
-> > We're still only talking about using packed writes, though, right?
+> >  	if (host->areq)
+> >  		mmc_post_req(host, host->areq->mrq, 0);
+> > @@ -452,6 +544,7 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
 > >
-> >> It wa proven to be beneficial for eMMC4.5 cards and harmless for n=
-on
-> eMMC4.5 cards.
+> >  	if (error)
+> >  		*error = err;
+> > +
+> >  	return data;
+> >  }
+> >  EXPORT_SYMBOL(mmc_start_req);
+> > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> > index 943550d..9681d8f 100644
+> > --- a/include/linux/mmc/card.h
+> > +++ b/include/linux/mmc/card.h
+> > @@ -186,6 +186,18 @@ struct sdio_func_tuple;
 > >
-> > My understanding is that write packing causes a regression in read
-> performance that can be tuned/fixed by your num_wr_reqs_to_start_pack=
-ing
-> tunable (and read packing causes a read regression with current eMMC =
-4.5
-> cards).  Is that wrong?
+> >  #define SDIO_MAX_FUNCS		7
 > >
-> >> I don't see a point to hold it back while it can be enabled or
-> >> disabled by a flag and most of the code it adds is guarded in spec=
-ific
-> functions and is not active when packed commands is disabled.
+> > +enum mmc_blk_status {
+> > +	MMC_BLK_SUCCESS = 0,
+> > +	MMC_BLK_PARTIAL,
+> > +	MMC_BLK_CMD_ERR,
+> > +	MMC_BLK_RETRY,
+> > +	MMC_BLK_ABORT,
+> > +	MMC_BLK_DATA_ERR,
+> > +	MMC_BLK_ECC_ERR,
+> > +	MMC_BLK_NOMEDIUM,
+> > +	MMC_BLK_NEW_REQUEST,
+> > +};
+> > +
+> >  /* The number of MMC physical partitions.  These consist of:
+> >   * boot partitions (2), general purpose partitions (4) in MMC v4.4.
+> >   */
+> > diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> > index 9b9cdaf..aa17096 100644
+> > --- a/include/linux/mmc/core.h
+> > +++ b/include/linux/mmc/core.h
+> > @@ -120,6 +120,21 @@ struct mmc_data {
+> >  	s32			host_cookie;	/* host private data */
+> >  };
 > >
-> > Earlier in the thread I wrote:
+> > +/**
+> > + * mmc_context_info - synchronization details for mmc context
+> > + * @is_done_rcv		wake up reason was done request
+> > + * @is_new_req	wake up reason was new request
+> > + * @is_waiting_last_req	mmc context waiting for single running request
+> > + * @wait		wait queue
+> > + */
+> > +struct mmc_context_info {
+> > +	bool			is_done_rcv;
+> > +	bool			is_new_req;
+> > +	bool			is_waiting_last_req;
+> > +	wait_queue_head_t	wait;
+> > +	spinlock_t		lock;
+> > +};
+> > +
+> >  struct mmc_request {
+> >  	struct mmc_command	*sbc;		/* SET_BLOCK_COUNT for multiblock */
+> >  	struct mmc_command	*cmd;
+> > @@ -128,6 +143,7 @@ struct mmc_request {
 > >
-> >>> * I still don't have a good set of representative benchmarks show=
-ing
-> >>>   what kind of performance changes come with this patchset. It se=
-ems
-> like we've had a small amount of testing on one controller/eMMC part
-> combo from Seungwon, and an entirely different test from Maya, and
-> the results aren't documented fully anywhere to the level of
-> describing what the hardware was, what the test was, and what the
-> results were before and after the patchset.
+> >  	struct completion	completion;
+> >  	void			(*done)(struct mmc_request *);/* completion function */
+> > +	struct mmc_context_info    *context_info;
+> >  };
 > >
-> > I still feel this way.  I'm worried that we might be merging code t=
-hat
-> works well on your controller/card but causes large regressions for
-> everyone else.  I don't want to handle this by making a tunable that
-> everyone has to tune for their system, because I don't think anyone w=
-ill
-> tune it.  I don't think that shipping a capability that will probably
-> lead to performance regressions if you turn it on is a good idea.
-> >
-> > I'm in a better position to help now, though -- I have some motherb=
-oards
-> with Marvell SoCs and a socketed eMMC slot, and I have eMMC 4.5 parts
-> from Sandisk and Toshiba.  So I can try to help work out how
-> > generalizable your results are across other controllers and cards.
-> >
-> > So far I've only tried the Sandisk part, but it didn't show any wri=
-te
-> improvement with write packing.  I've verified that the switch comman=
-d
-> to turn on packed_event_en happens and succeeds, and that the caps ar=
-e
-> set correctly, so I'm not sure what's wrong yet.  With iozone I get:
-> >
-> >                        KB  reclen   write rewrite
-> > Unpacked writes:    10240    8192   17250   16794
-> > Packed writes:      10240    8192   16930   17353
-> >
-> > I'll try the Toshiba part next, and I'll start using lmdd as well a=
-s
-> iozone.  Any ideas on why I might not be seeing improvements with
-> Sandisk?
-> >
-> > I'm not opposed to merging packed write support in principle, I jus=
-t
-> want to be convinced that we're not causing regressions for most user=
-s
-> who turn it on.  (And more than that, I want to see that it leads to
-> improvements that make it worth adding the code complexity for.)
-> >
-> > Thanks,
-> >
-> > - Chris.
+> >  struct mmc_host;
 > > --
-> > Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> > One Laptop Per Child
+> > 1.7.6
+> > --
+> > Konstantin Dorfman,
+> > QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
+> > of Code Aurora Forum, hosted by The Linux Foundation
 > >
->=20
->=20
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 > --
-> QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a m=
-ember
-> of Code Aurora Forum, hosted by The Linux Foundation
->=20
->=20
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
