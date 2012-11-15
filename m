@@ -1,41 +1,57 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: Fwd: [PATCH v3 0/5] mmc: Add access to RPMB partition
-Date: Thu, 15 Nov 2012 09:04:03 +0100
-Message-ID: <CACRpkdaPOczX3xMA2jXPwH03oOMHmmPKO8-dAFzL-NyO2Nr1Jg@mail.gmail.com>
-References: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
-	<CAJOk3oGMtZvrkw9ic306BKNSKCAzPQCYmJrvq5=zDi1pHjjQxg@mail.gmail.com>
-	<1352927648.5856.14.camel@kkonda-linux.qualcomm.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: sdhci: check the quirk HISPD_BIT for SD3.0 card
+Date: Thu, 15 Nov 2012 17:15:31 +0900
+Message-ID: <50A4A4A3.90903@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:62075 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S2992684Ab2KOIEE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Nov 2012 03:04:04 -0500
-Received: by mail-ee0-f46.google.com with SMTP id b15so788304eek.19
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Nov 2012 00:04:03 -0800 (PST)
-In-Reply-To: <1352927648.5856.14.camel@kkonda-linux.qualcomm.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:27251 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750801Ab2KOIPk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Nov 2012 03:15:40 -0500
+Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MDI00J2NS9EFU30@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 15 Nov 2012 17:15:38 +0900 (KST)
+Received: from [10.90.51.55] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0MDI00D5HSA14G90@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 15 Nov 2012 17:15:38 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Krishna Konda <kkonda@codeaurora.org>, Chris Ball <cjb@laptop.org>
-Cc: loic.pallardy-ext@stericsson.com, linux-mmc@vger.kernel.org, STEricsson_nomadik_linux@list.st.com, ulf.hansson@stericcson.com
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-On Wed, Nov 14, 2012 at 10:14 PM, Krishna Konda <kkonda@codeaurora.org> wrote:
-> On Wed, 2012-11-14 at 12:58 -0800, Krishna Konda wrote:
->
->> The goal of this patchserie is to offer access to MMC RPMB
->> (Replay Protected Memory Block) partition.
->> The RPMB partition is used in general to store some secure data.
->> It is accessible through a trusted mechanism described in
->> JEDEC standard JESD84-A441.
->
-> Hi Loic, Chris, are there any plans to merge these patchsets? I did not
-> see this in mmc-next.
+If SD-card is more than SD3.0 card, set to ctrl with UHS-I modes.
+But in case of Samsung-SoC, didn't use the SDHCI_CTRL_HISPD.
+So need to check the quirk for SDHCI_QUIRK_NO_HISPD_BIT.
 
-I was sort of wondering the same.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/sdhci.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
 
-Krishna, could you provide your Acked-by/Reviewed-by
-tag so as to convince Chris that this is a nice feature?
-
-Yours,
-Linus Walleij
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 6f6534e..b42d551 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1418,11 +1418,12 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 		unsigned int clock;
+ 
+ 		/* In case of UHS-I modes, set High Speed Enable */
+-		if ((ios->timing == MMC_TIMING_MMC_HS200) ||
++		if (((ios->timing == MMC_TIMING_MMC_HS200) ||
+ 		    (ios->timing == MMC_TIMING_UHS_SDR50) ||
+ 		    (ios->timing == MMC_TIMING_UHS_SDR104) ||
+ 		    (ios->timing == MMC_TIMING_UHS_DDR50) ||
+-		    (ios->timing == MMC_TIMING_UHS_SDR25))
++		    (ios->timing == MMC_TIMING_UHS_SDR25)) &&
++		    !(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT))
+ 			ctrl |= SDHCI_CTRL_HISPD;
+ 
+ 		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+-- 
+1.7.4.1
