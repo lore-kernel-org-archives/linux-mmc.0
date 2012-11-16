@@ -1,12 +1,12 @@
 From: Srinivas KANDAGATLA <srinivas.kandagatla@st.com>
-Subject: [RFC RESEND PATCH 3.7.0-rc4 3/4] mmc:sdhci-spear: use of_simple_module_id_table macro.
-Date: Fri, 16 Nov 2012 13:28:02 +0000
-Message-ID: <1353072482-22612-1-git-send-email-srinivas.kandagatla@st.com>
+Subject: [RFC RESEND PATCH 3.7.0-rc4 4/4] mmc:shmobile: use of_simple_module_id_table macro.
+Date: Fri, 16 Nov 2012 13:28:11 +0000
+Message-ID: <1353072491-22650-1-git-send-email-srinivas.kandagatla@st.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog118.obsmtp.com ([207.126.144.145]:47745 "EHLO
-	eu1sys200aog118.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751450Ab2KPN3Y (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Nov 2012 08:29:24 -0500
+Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:36549 "EHLO
+	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751584Ab2KPN3e (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Nov 2012 08:29:34 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: grant.likely@secretlab.ca, rob.herring@calxeda.com, viresh.linux@gmail.com, g.liakhovetski@gmx.de, ian@mnementh.co.uk, thomas.ab@samsung.com
@@ -27,28 +27,26 @@ with
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@st.com>
 ---
- drivers/mmc/host/sdhci-spear.c |    8 +-------
- 1 files changed, 1 insertions(+), 7 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c |    6 +-----
+ 1 files changed, 1 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index 6be89c0..accf4f4 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -320,13 +320,7 @@ static int sdhci_resume(struct device *dev)
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 0bdc146..7535ee4 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -316,11 +316,7 @@ static const struct dev_pm_ops tmio_mmc_dev_pm_ops = {
+ 	.runtime_resume = tmio_mmc_host_runtime_resume,
+ };
  
- static SIMPLE_DEV_PM_OPS(sdhci_pm_ops, sdhci_suspend, sdhci_resume);
- 
--#ifdef CONFIG_OF
--static const struct of_device_id sdhci_spear_id_table[] = {
--	{ .compatible = "st,spear300-sdhci" },
--	{}
+-static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+-	{ .compatible = "renesas,shmobile-sdhi" },
+-	{ }
 -};
--MODULE_DEVICE_TABLE(of, sdhci_spear_id_table);
--#endif
-+of_simple_module_id_table(sdhci_spear_id_table, "st,spear300-sdhci");
+-MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
++of_simple_module_id_table(sh_mobile_sdhi_of_match, "renesas,shmobile-sdhi");
  
- static struct platform_driver sdhci_driver = {
- 	.driver = {
+ static struct platform_driver sh_mobile_sdhi_driver = {
+ 	.driver		= {
 -- 
 1.7.0.4
 
