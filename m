@@ -1,12 +1,12 @@
 From: Srinivas KANDAGATLA <srinivas.kandagatla@st.com>
-Subject: [RFC RESEND PATCH 3.7.0-rc4 1/4] of: introduce of_simple_module_id_table macro.
-Date: Fri, 16 Nov 2012 13:27:42 +0000
-Message-ID: <1353072462-22535-1-git-send-email-srinivas.kandagatla@st.com>
+Subject: [RFC RESEND PATCH 3.7.0-rc4 2/4] mmc:exynos: use of_simple_module_id_table macro.
+Date: Fri, 16 Nov 2012 13:27:50 +0000
+Message-ID: <1353072470-22574-1-git-send-email-srinivas.kandagatla@st.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog107.obsmtp.com ([207.126.144.123]:44171 "EHLO
-	eu1sys200aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751570Ab2KPN3D (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Nov 2012 08:29:03 -0500
+Received: from eu1sys200aog103.obsmtp.com ([207.126.144.115]:41484 "EHLO
+	eu1sys200aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751450Ab2KPN3N (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Nov 2012 08:29:13 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: grant.likely@secretlab.ca, rob.herring@calxeda.com, viresh.linux@gmail.com, g.liakhovetski@gmx.de, ian@mnementh.co.uk, thomas.ab@samsung.com
@@ -14,57 +14,41 @@ Cc: srinivas.kandagatla@st.com, spear-devel@list.st.com, linux-mmc@vger.kernel.o
 
 From: Srinivas Kandagatla <srinivas.kandagatla@st.com>
 
-Most of the drivers have of_device_id table setup with single compatible
-entry, this use case is very simple and common.
+This patch uses of_simple_module_id_table macro to replace code like:
 
-static struct of_device_id xxx_of_match[] = {
-	{ .compatible = "yyy,zzz" },
-	{ },
-};
-MODULE_DEVICE_TABLE(of, xxx_of_match);
+    static struct of_device_id xxx_of_match[] = {
+        { .compatible = "yyy,xxx" },
+        { },
+    };
+    MODULE_DEVICE_TABLE(of, xxx_of_match);
 
-This patch adds a macro for this simple type of device table.
-Other subsystems like pm, platform, have similar macros in kernel for
-simplest cases.
-Now the user can just replace the above code with
+with
 
-of_simple_module_id_table(xxx_of_match, "yyy,zzz");
-
-macro without worrrying about ifdef'ng it.
+	of_simple_module_id_table(xxx_of_match, "yyy,zzz");
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@st.com>
 ---
- include/linux/of.h |   10 ++++++++++
- 1 files changed, 10 insertions(+), 0 deletions(-)
+ drivers/mmc/host/dw_mmc-exynos.c |    7 +------
+ 1 files changed, 1 insertions(+), 6 deletions(-)
 
-diff --git a/include/linux/of.h b/include/linux/of.h
-index b4e50d5..adb812b 100644
---- a/include/linux/of.h
-+++ b/include/linux/of.h
-@@ -280,6 +280,15 @@ extern void of_detach_node(struct device_node *);
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index 660bbc5..1e9596a 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -218,12 +218,7 @@ static struct dw_mci_drv_data exynos5250_drv_data = {
+ 	.setup_bus		= dw_mci_exynos_setup_bus,
+ };
  
- #define of_match_ptr(_ptr)	(_ptr)
+-static const struct of_device_id dw_mci_exynos_match[] = {
+-	{ .compatible = "samsung,exynos5250-dw-mshc",
+-			.data = (void *)&exynos5250_drv_data, },
+-	{},
+-};
+-MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
++of_simple_module_id_table(dw_mci_pltfm_match, "samsung,exynos5250-dw-mshc");
  
-+#define of_simple_module_id_table(name, compat) \
-+	static struct of_device_id name[] = { \
-+	{ \
-+		.compatible = compat, \
-+	}, \
-+	{} \
-+}; \
-+MODULE_DEVICE_TABLE(of, name)
-+
- /*
-  * struct property *prop;
-  * const __be32 *p;
-@@ -438,6 +447,7 @@ static inline int of_machine_is_compatible(const char *compat)
- }
- 
- #define of_match_ptr(_ptr)	NULL
-+#define of_simple_module_id_table(name, compat)
- #define of_match_node(_matches, _node)	NULL
- #define of_property_for_each_u32(np, propname, prop, p, u) \
- 	while (0)
+ int dw_mci_exynos_probe(struct platform_device *pdev)
+ {
 -- 
 1.7.0.4
 
