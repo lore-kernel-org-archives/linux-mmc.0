@@ -1,135 +1,172 @@
-From: Tomasz Figa <t.figa@samsung.com>
-Subject: [PATCH v2 2/2] mmc: host: sdhci-s3c: Add support for pinctrl
-Date: Fri, 16 Nov 2012 15:28:17 +0100
-Message-ID: <1353076097-22498-3-git-send-email-t.figa@samsung.com>
-References: <1353076097-22498-1-git-send-email-t.figa@samsung.com>
+From: Trey Ramsay <tramsay@linux.vnet.ibm.com>
+Subject: [PATCH 1/1] mmc: Bad device can cause mmc driver to hang
+Date: Fri, 16 Nov 2012 09:31:41 -0600
+Message-ID: <1353079901-8773-1-git-send-email-tramsay@linux.vnet.ibm.com>
+References: <87k3tpkz53.fsf@octavius.laptop.org> (Chris Ball's message of "Tue, 13 Nov 2012 15:48:24 -0500")>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:59105 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751662Ab2KPO26 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Nov 2012 09:28:58 -0500
-In-reply-to: <1353076097-22498-1-git-send-email-t.figa@samsung.com>
+Received: from e34.co.us.ibm.com ([32.97.110.152]:49723 "EHLO
+	e34.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752181Ab2KPPb4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Nov 2012 10:31:56 -0500
+Received: from /spool/local
+	by e34.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	for <linux-mmc@vger.kernel.org> from <tramsay@linux.vnet.ibm.com>;
+	Fri, 16 Nov 2012 08:31:55 -0700
+In-Reply-To: <87k3tpkz53.fsf@octavius.laptop.org> (Chris Ball's message of "Tue, 13 Nov 2012 15:48:24 -0500")>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, cjb@laptop.org, ben-linux@fluff.org, kyungmin.park@samsung.com, m.szyprowski@samsung.com, t.figa@samsung.com, tomasz.figa@gmail.com
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Rich Rattanni <rattanni@gmail.com>, Radovan Lekanovic <lekanovic@gmail.com>, Trey Ramsay <tramsay@linux.vnet.ibm.com>
 
-This patch adds support for pin configuration using pinctrl subsystem
-to the sdhci-s3c driver.
+There are infinite loops in the mmc code that can be caused by bad hardware.
+The code will loop forever if the device never comes back from program mode,
+R1_STATE_PRG, and it is not ready for data, R1_READY_FOR_DATA.
 
-Signed-off-by: Tomasz Figa <t.figa@samsung.com>
+A long timeout will be added to prevent the code from looping forever.
+The timeout will occur if the device never comes back from program
+state or the device never becomes ready for data.
+
+Signed-off-by: Trey Ramsay <tramsay@linux.vnet.ibm.com>
 ---
- .../devicetree/bindings/mmc/samsung-sdhci.txt        | 20 +++++++++++++-------
- drivers/mmc/host/sdhci-s3c.c                         | 12 ++++++++++--
- 2 files changed, 23 insertions(+), 9 deletions(-)
+ drivers/mmc/card/block.c   |   15 +++++++++++++++
+ drivers/mmc/core/core.c    |   18 +++++++++++++++++-
+ drivers/mmc/core/mmc_ops.c |   11 +++++++++++
+ 3 files changed, 43 insertions(+), 1 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt b/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
-index 630a7d7..97e9e31 100644
---- a/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
-@@ -12,10 +12,6 @@ is used. The Samsung's SDHCI controller bindings extends this as listed below.
- [A] The property "samsung,cd-pinmux-gpio" can be used as stated in the
-     "Optional Board Specific Properties" section below.
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 172a768..8e60508 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -57,6 +57,7 @@ MODULE_ALIAS("mmc:block");
+ #define INAND_CMD38_ARG_SECERASE 0x80
+ #define INAND_CMD38_ARG_SECTRIM1 0x81
+ #define INAND_CMD38_ARG_SECTRIM2 0x88
++#define MMC_BLK_TIMEOUT_MS  (10 * 60 * 1000)        /* 10 minute timeout */
  
--[B] If core card-detect bindings and "samsung,cd-pinmux-gpio" property
--    is not specified, it is assumed that there is no card detection
--    mechanism used.
--
- Required SoC Specific Properties:
- - compatible: should be one of the following
-   - "samsung,s3c6410-sdhci": For controllers compatible with s3c6410 sdhci
-@@ -24,14 +20,18 @@ Required SoC Specific Properties:
-     controller.
+ static DEFINE_MUTEX(block_mutex);
  
- Required Board Specific Properties:
--- gpios: Should specify the gpios used for clock, command and data lines. The
--  gpio specifier format depends on the gpio controller.
-+- Samsung GPIO variant (will be completely replaced by pinctrl):
-+  - gpios: Should specify the gpios used for clock, command and data lines. The
-+    gpio specifier format depends on the gpio controller.
-+- Pinctrl variant (preferred if available):
-+  - pinctrl-0: Should specify pin control groups used for this controller.
-+  - pinctrl-names: Should contain only one value - "default".
- 
- Optional Board Specific Properties:
- - samsung,cd-pinmux-gpio: Specifies the card detect line that is routed
-   through a pinmux to the card-detect pin of the card slot. This property
-   should be used only if none of the mmc core card-detect properties are
--  used.
-+  used. Only for Samsung GPIO variant.
- 
- Example:
- 	sdhci@12530000 {
-@@ -40,12 +40,18 @@ Example:
- 		interrupts = <0 75 0>;
- 		bus-width = <4>;
- 		cd-gpios = <&gpk2 2 2 3 3>;
+@@ -1034,6 +1035,9 @@ static int mmc_blk_err_check(struct mmc_card *card,
+ 	 */
+ 	if (!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ) {
+ 		u32 status;
++		unsigned long timeout;
 +
-+		/* Samsung GPIO variant */
- 		gpios = <&gpk2 0 2 0 3>,  /* clock line */
- 			<&gpk2 1 2 0 3>,  /* command line */
- 			<&gpk2 3 2 3 3>,  /* data line 0 */
- 			<&gpk2 4 2 3 3>,  /* data line 1 */
- 			<&gpk2 5 2 3 3>,  /* data line 2 */
- 			<&gpk2 6 2 3 3>;  /* data line 3 */
++		timeout = jiffies + msecs_to_jiffies(MMC_BLK_TIMEOUT_MS);
+ 		do {
+ 			int err = get_card_status(card, &status, 5);
+ 			if (err) {
+@@ -1041,6 +1045,17 @@ static int mmc_blk_err_check(struct mmc_card *card,
+ 				       req->rq_disk->disk_name, err);
+ 				return MMC_BLK_CMD_ERR;
+ 			}
 +
-+		/* Pinctrl variant */
-+		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4>;
-+		pinctrl-names = "default";
- 	};
- 
- 	Note: This example shows both SoC specific and board specific properties
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 75f85fd..6161162 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -24,6 +24,7 @@
- #include <linux/of_gpio.h>
- #include <linux/pm.h>
- #include <linux/pm_runtime.h>
-+#include <linux/pinctrl/consumer.h>
- 
- #include <linux/mmc/host.h>
- 
-@@ -57,6 +58,7 @@ struct sdhci_s3c {
- 	int			ext_cd_irq;
- 	int			ext_cd_gpio;
- 	int			*gpios;
-+	struct pinctrl          *pctrl;
- 
- 	struct clk		*clk_io;
- 	struct clk		*clk_bus[MAX_BUS_CLK];
-@@ -477,8 +479,9 @@ static int __devinit sdhci_s3c_parse_dt(struct device *dev,
- 		return -EINVAL;
- 	}
- 
--	dev_info(dev, "assuming no card detect line available\n");
--	pdata->cd_type = S3C_SDHCI_CD_NONE;
-+	/* assuming internal card detect that will be configured by pinctrl */
-+	pdata->cd_type = S3C_SDHCI_CD_INTERNAL;
-+	goto setup_bus;
- 
-  found_cd:
- 	if (pdata->cd_type == S3C_SDHCI_CD_GPIO) {
-@@ -496,6 +499,9 @@ static int __devinit sdhci_s3c_parse_dt(struct device *dev,
- 	}
- 
-  setup_bus:
-+	if (!IS_ERR(ourhost->pctrl))
-+		return 0;
++			/* Timeout if the device never becomes ready for data
++			 * and never leaves the program state.
++			 */
++			if (time_after(jiffies, timeout)) {
++				pr_err("%s: Card stuck in programming state!"\
++					" %s %s\n", mmc_hostname(card->host),
++					req->rq_disk->disk_name, __func__);
 +
- 	/* get the gpios for command, clock and data lines */
- 	for (cnt = 0; cnt < NUM_GPIOS(pdata->max_width); cnt++) {
- 		gpio = of_get_gpio(node, cnt);
-@@ -574,6 +580,8 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 		goto err_pdata_io_clk;
- 	}
++				return MMC_BLK_CMD_ERR;
++			}
+ 			/*
+ 			 * Some cards mishandle the status bits,
+ 			 * so make sure to check both the busy
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 06c42cf..bccfd18 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -42,6 +42,9 @@
+ #include "sd_ops.h"
+ #include "sdio_ops.h"
  
-+	sc->pctrl = devm_pinctrl_get_select_default(&pdev->dev);
++/* If the device is not responding */
++#define MMC_CORE_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
 +
- 	if (pdev->dev.of_node) {
- 		ret = sdhci_s3c_parse_dt(&pdev->dev, host, pdata);
- 		if (ret)
+ /*
+  * Background operations can take a long time, depending on the housekeeping
+  * operations the card has to perform.
+@@ -1631,6 +1634,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+ {
+ 	struct mmc_command cmd = {0};
+ 	unsigned int qty = 0;
++	unsigned long timeout;
+ 	int err;
+ 
+ 	/*
+@@ -1708,6 +1712,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+ 	if (mmc_host_is_spi(card->host))
+ 		goto out;
+ 
++	timeout = jiffies + msecs_to_jiffies(MMC_CORE_TIMEOUT_MS);
+ 	do {
+ 		memset(&cmd, 0, sizeof(struct mmc_command));
+ 		cmd.opcode = MMC_SEND_STATUS;
+@@ -1721,8 +1726,19 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+ 			err = -EIO;
+ 			goto out;
+ 		}
++
++		/* Timeout if the device never becomes ready for data and
++		 * never leaves the program state.
++		 */
++		if (time_after(jiffies, timeout)) {
++			pr_err("%s: Card stuck in programming state! %s\n",
++				mmc_hostname(card->host), __func__);
++			err =  -EIO;
++			goto out;
++		}
++
+ 	} while (!(cmd.resp[0] & R1_READY_FOR_DATA) ||
+-		 R1_CURRENT_STATE(cmd.resp[0]) == R1_STATE_PRG);
++		 (R1_CURRENT_STATE(cmd.resp[0]) == R1_STATE_PRG));
+ out:
+ 	return err;
+ }
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index a0e1720..6d8f701 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -21,6 +21,8 @@
+ #include "core.h"
+ #include "mmc_ops.h"
+ 
++#define MMC_OPS_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
++
+ static int _mmc_select_card(struct mmc_host *host, struct mmc_card *card)
+ {
+ 	int err;
+@@ -409,6 +411,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ {
+ 	int err;
+ 	struct mmc_command cmd = {0};
++	unsigned long timeout;
+ 	u32 status;
+ 
+ 	BUG_ON(!card);
+@@ -437,6 +440,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 		return 0;
+ 
+ 	/* Must check status to be sure of no errors */
++	timeout = jiffies + msecs_to_jiffies(MMC_OPS_TIMEOUT_MS);
+ 	do {
+ 		err = mmc_send_status(card, &status);
+ 		if (err)
+@@ -445,6 +449,13 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 			break;
+ 		if (mmc_host_is_spi(card->host))
+ 			break;
++
++		/* Timeout if the device never leaves the program state. */
++		if (time_after(jiffies, timeout)) {
++			pr_err("%s: Card stuck in programming state! %s\n",
++				mmc_hostname(card->host), __func__);
++			return -ETIMEDOUT;
++		}
+ 	} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
+ 
+ 	if (mmc_host_is_spi(card->host)) {
 -- 
-1.8.0
+1.7.1
 
