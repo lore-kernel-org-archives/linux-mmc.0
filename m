@@ -1,12 +1,12 @@
 From: Srinivas KANDAGATLA <srinivas.kandagatla@st.com>
-Subject: [RFC RESEND PATCH 3.7.0-rc4 2/4] mmc:exynos: use of_simple_module_id_table macro.
-Date: Fri, 16 Nov 2012 13:27:50 +0000
-Message-ID: <1353072470-22574-1-git-send-email-srinivas.kandagatla@st.com>
+Subject: [RFC RESEND PATCH 3.7.0-rc4 3/4] mmc:sdhci-spear: use of_simple_module_id_table macro.
+Date: Fri, 16 Nov 2012 13:28:02 +0000
+Message-ID: <1353072482-22612-1-git-send-email-srinivas.kandagatla@st.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog103.obsmtp.com ([207.126.144.115]:41484 "EHLO
-	eu1sys200aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751450Ab2KPN3N (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Nov 2012 08:29:13 -0500
+Received: from eu1sys200aog118.obsmtp.com ([207.126.144.145]:47745 "EHLO
+	eu1sys200aog118.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751450Ab2KPN3Y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Nov 2012 08:29:24 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: grant.likely@secretlab.ca, rob.herring@calxeda.com, viresh.linux@gmail.com, g.liakhovetski@gmx.de, ian@mnementh.co.uk, thomas.ab@samsung.com
@@ -16,39 +16,39 @@ From: Srinivas Kandagatla <srinivas.kandagatla@st.com>
 
 This patch uses of_simple_module_id_table macro to replace code like:
 
-    static struct of_device_id xxx_of_match[] = {
-        { .compatible = "yyy,xxx" },
-        { },
-    };
-    MODULE_DEVICE_TABLE(of, xxx_of_match);
+	static struct of_device_id xxx_of_match[] = {
+		{ .compatible = "yyy,zzz" },
+		{ },
+	};
+	MODULE_DEVICE_TABLE(of, xxx_of_match);
 
 with
-
 	of_simple_module_id_table(xxx_of_match, "yyy,zzz");
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@st.com>
 ---
- drivers/mmc/host/dw_mmc-exynos.c |    7 +------
- 1 files changed, 1 insertions(+), 6 deletions(-)
+ drivers/mmc/host/sdhci-spear.c |    8 +-------
+ 1 files changed, 1 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 660bbc5..1e9596a 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -218,12 +218,7 @@ static struct dw_mci_drv_data exynos5250_drv_data = {
- 	.setup_bus		= dw_mci_exynos_setup_bus,
- };
+diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
+index 6be89c0..accf4f4 100644
+--- a/drivers/mmc/host/sdhci-spear.c
++++ b/drivers/mmc/host/sdhci-spear.c
+@@ -320,13 +320,7 @@ static int sdhci_resume(struct device *dev)
  
--static const struct of_device_id dw_mci_exynos_match[] = {
--	{ .compatible = "samsung,exynos5250-dw-mshc",
--			.data = (void *)&exynos5250_drv_data, },
--	{},
+ static SIMPLE_DEV_PM_OPS(sdhci_pm_ops, sdhci_suspend, sdhci_resume);
+ 
+-#ifdef CONFIG_OF
+-static const struct of_device_id sdhci_spear_id_table[] = {
+-	{ .compatible = "st,spear300-sdhci" },
+-	{}
 -};
--MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
-+of_simple_module_id_table(dw_mci_pltfm_match, "samsung,exynos5250-dw-mshc");
+-MODULE_DEVICE_TABLE(of, sdhci_spear_id_table);
+-#endif
++of_simple_module_id_table(sdhci_spear_id_table, "st,spear300-sdhci");
  
- int dw_mci_exynos_probe(struct platform_device *pdev)
- {
+ static struct platform_driver sdhci_driver = {
+ 	.driver = {
 -- 
 1.7.0.4
 
