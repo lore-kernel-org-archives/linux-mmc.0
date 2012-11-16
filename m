@@ -1,60 +1,123 @@
-From: Krishna Konda <kkonda@codeaurora.org>
-Subject: Re: Fwd: [PATCH v3 1/5] mmc: core: Expose access to RPMB partition
-Date: Fri, 16 Nov 2012 13:32:32 -0800
-Message-ID: <1353101552.6697.9.camel@kkonda-linux.qualcomm.com>
-References: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
-	 <1344265951-22437-2-git-send-email-loic.pallardy-ext@stericsson.com>
-	 <CAJOk3oHfTMr7-esASZKV0kmiFmeGzD1OjgwMZrTtz8Pk61Lswg@mail.gmail.com>
+From: Trey Ramsay <tramsay@linux.vnet.ibm.com>
+Subject: Re: [PATCH 1/1] mmc: Bad device can cause mmc driver to hang
+Date: Fri, 16 Nov 2012 17:52:39 -0600
+Message-ID: <50A6D1C7.302@linux.vnet.ibm.com>
+References: <87k3tpkz53.fsf@octavius.laptop.org> <1353079901-8773-1-git-send-email-tramsay@linux.vnet.ibm.com> <876255bluf.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:60133 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753682Ab2KPVcd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Nov 2012 16:32:33 -0500
-In-Reply-To: <CAJOk3oHfTMr7-esASZKV0kmiFmeGzD1OjgwMZrTtz8Pk61Lswg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <876255bluf.fsf@octavius.laptop.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Rich Rattanni <rattanni@gmail.com>, Radovan Lekanovic <lekanovic@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: loic.pallardy-ext@stericsson.com, linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: linus.walleij@linaro.org, STEricsson_nomadik_linux@list.st.com, ulf.hansson@stericcson.com, alex.macro@stericsson.com
 
-On Fri, 2012-11-16 at 13:16 -0800, Krishna Konda wrote:
+On 11/16/2012 09:37 AM, Chris Ball wrote:
+> Hi Trey,
 > 
+> On Fri, Nov 16 2012, Trey Ramsay wrote:
+>> There are infinite loops in the mmc code that can be caused by bad hardware.
+>> The code will loop forever if the device never comes back from program mode,
+>> R1_STATE_PRG, and it is not ready for data, R1_READY_FOR_DATA.
+>>
+>> A long timeout will be added to prevent the code from looping forever.
+>> The timeout will occur if the device never comes back from program
+>> state or the device never becomes ready for data.
+>>
+>> Signed-off-by: Trey Ramsay <tramsay@linux.vnet.ibm.com>
 > 
-> From: Loic Pallardy <loic.pallardy-ext@stericsson.com>
-> Date: Mon, Aug 6, 2012 at 8:12 AM
-> Subject: [PATCH v3 1/5] mmc: core: Expose access to RPMB partition
-> To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-> Cc: Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux
-> <STEricsson_nomadik_linux@list.st.com>, Ulf Hansson
-> <ulf.hansson@stericcson.com>, Loic Pallardy
-> <loic.pallardy-ext@stericsson.com>, Alex Macro
-> <alex.macro@stericsson.com>, Loic Pallardy
-> <loic.pallardy@stericsson.com>
+> Thanks, looks good!
 > 
+> Have you thought about what's going to happen after this path is hit?
+> Are we just going to start a new request that begins a new ten-minute
+> hang, or do we notice the bad card state somewhere and refuse to start
+> new I/O?
 > 
-> Following JEDEC standard, if the mmc support RPMB partition,
-> a new interface is created and exposed via /dev/block.
-> Users will be able to access RPMB partition using standard
-> mmc IOCTL command.
+> - Chris.
 > 
-> Signed-off-by: Alex Macro <alex.macro@stericsson.com>
-> Signed-off-by: Loic Pallardy <loic.pallardy@stericsson.com>
-> Acked-by: Linus Walleij <linus.walleij@linaro.org>
-> Acked-by: Johan Rudholm <johan.rudholm@stericsson.com>
-> Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
 
-Acked-by: Krishna Konda <kkonda@codeaurora.org>
+You're welcome, and thanks for the help!
+
+Good question.  In regards to the original problem were it was hung in
+mmc_blk_err_check, the new code path will timeout after 10 minutes, log
+an error, issue a hardware reset and abort the request. Is the hardware
+reset enough or will that even work when the device isn't coming out of
+program state? Should we try to refuse all new I/O?
 
 
--- 
+Below are just some notes I took about the code path for
+mmc_blk_err_check and mmc_do_erase.
+=============================
+mmc_blk_err_check
+                        int err = get_card_status(card, &status, 5);
+                        if (err) {
+                                pr_err("%s: error %d requesting status\n",
+                                       req->rq_disk->disk_name, err);
+                                return MMC_BLK_CMD_ERR;
+                        }
++
++                       /* Timeout if the device never becomes ready for
+data
++                        * and never leaves the program state.
++                        */
++                       if (time_after(jiffies, timeout)) {
++                               pr_err("%s: Card stuck in programming
+state!"\
++                                       " %s %s\n",
+mmc_hostname(card->host),
++                                       req->rq_disk->disk_name, __func__);
++
++                               return MMC_BLK_CMD_ERR;
++                       }
 
-Thanks,
-Krishna Konda
------------------------------------------------------------------------
-Sent by an employee of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
-hosted by The Linux Foundation
------------------------------------------------------------------------
+Stack
+-----------------
+mmc_blk_err_check
+mmc_start_req
+mmc_blk_issue_rw_rq
+mmc_blk_issue_rq
+mmc_queue_thread
 
+We return MMC_BLK_CMD_ERR the same way as we return MMC_BLK_CMD_ERR if
+the get_card_status failed. The code which returns to mmc_start_req
+which sets the error status and returns to mmc_blk_issue_rw_rq with a
+status of MMC_BLK_CMD_ERR where it calls mmc_blk_reset which calls
+mmc_hw_reset. The code then return so mmc_queue_thread which does not
+check the return code.
+
+=============================
+mmc_do_erase
++
++               /* Timeout if the device never becomes ready for data and
++                * never leaves the program state.
++                */
++               if (time_after(jiffies, timeout)) {
++                       pr_err("%s: Card stuck in programming state! %s\n",
++                               mmc_hostname(card->host), __func__);
++                       err =  -EIO;
++                       goto out;
++               }
++
+
+        err = mmc_erase(card, from, nr, arg);
+out:
+        if (err == -EIO && !mmc_blk_reset(md, card->host, type))
+                goto retry;
+
+
+The mmc_do_erase function is called by mmc_erase which is called from 3
+locations in the block.c code.
+
+    1) mmc_blk_issue_discard_rq--->mmc_erase--->mmc_do_erase    line 848
+    2) mmc_blk_issue_secdiscard_rq--->mmc_erase--->mmc_do_erase line 884
+    3) mmc_blk_issue_secdiscard_rq--->mmc_erase--->mmc_do_erase line 904
+
+    This applies to 1, 2 and 3 above.
+    Since we return -EIO, mmc_blk_issue_discard_rq or
+    mmc_blk_issue_secdiscard will do a mmc_blk_reset which will call
+    mmc_hw_reset. If hardware reset is successfull, it will retry the
+    command.  If the hardware reset is unsuccessfull, it will call
+    blk_end_request and will return 0 if there is
+    an err and will return to the mmc_queue_thread function which does
+    not check the return code.
