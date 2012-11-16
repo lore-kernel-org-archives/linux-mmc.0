@@ -1,42 +1,44 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH] mmc,sdio: Fix the panic due to devname NULL when calling pm_runtime_set_active()
-Date: Fri, 16 Nov 2012 21:33:18 +0200
-Message-ID: <CAK=WgbYiKFpSeyKZU3OWvbq4VDKRMFQvxwPbyxsBbEYJGQU1sA@mail.gmail.com>
-References: <1353070447.15558.1681.camel@cliu38-desktop-build>
+From: Krishna Konda <kkonda@codeaurora.org>
+Subject: Re: Fwd: [PATCH v3 0/5] mmc: Add access to RPMB partition
+Date: Fri, 16 Nov 2012 13:11:14 -0800
+Message-ID: <1353100274.9096.5.camel@kkonda-linux.qualcomm.com>
+References: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
+	 <CAJOk3oGMtZvrkw9ic306BKNSKCAzPQCYmJrvq5=zDi1pHjjQxg@mail.gmail.com>
+	 <1352927648.5856.14.camel@kkonda-linux.qualcomm.com>
+	 <CACRpkdaPOczX3xMA2jXPwH03oOMHmmPKO8-dAFzL-NyO2Nr1Jg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:49737 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752562Ab2KPTdi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Nov 2012 14:33:38 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k13so4138818iea.19
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Nov 2012 11:33:38 -0800 (PST)
-In-Reply-To: <1353070447.15558.1681.camel@cliu38-desktop-build>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:49359 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751712Ab2KPVL3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Nov 2012 16:11:29 -0500
+In-Reply-To: <CACRpkdaPOczX3xMA2jXPwH03oOMHmmPKO8-dAFzL-NyO2Nr1Jg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chuansheng Liu <chuansheng.liu@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, loic.pallardy-ext@stericsson.com, linux-mmc@vger.kernel.org, STEricsson_nomadik_linux@list.st.com, ulf.hansson@stericcson.com
 
-Hi Liu,
+On Thu, 2012-11-15 at 09:04 +0100, Linus Walleij wrote:
+> > Hi Loic, Chris, are there any plans to merge these patchsets? I did not
+> > see this in mmc-next.
+> 
+> I was sort of wondering the same.
+> 
+> Krishna, could you provide your Acked-by/Reviewed-by
+> tag so as to convince Chris that this is a nice feature?
+> 
 
-On Fri, Nov 16, 2012 at 2:54 PM, Chuansheng Liu
-<chuansheng.liu@intel.com> wrote:
-> So when calling pm_runtime_set_active(), it will hit the strlen(devname==0)
-> which trigger the panic.
+Sure thing.
 
-Can you please point to the exact line of code that triggers this panic ?
-
-> Here before calling pm_runtime_set_active(), set the dev name, although
-> it is duplicated with mmc_add_card(), but it do not break the original
-> design(commit 81968561b).
-
-Normally we'd like to avoid such a solution, so let's first make sure
-we understand the problem.
-
-Have you tried thinking how come this shows up only now - has any of
-the relevant code been changed lately ? Are you using a vanilla Linux
-tree ?
+-- 
 
 Thanks,
-Ohad.
+Krishna Konda
+-----------------------------------------------------------------------
+Sent by an employee of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
+hosted by The Linux Foundation
+-----------------------------------------------------------------------
+
