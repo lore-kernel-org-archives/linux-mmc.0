@@ -1,39 +1,42 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/1] mmc: Bad device can cause mmc driver to hang
-Date: Sat, 17 Nov 2012 09:34:50 -0500
-Message-ID: <87ehjs9u2d.fsf@octavius.laptop.org>
-References: <87k3tpkz53.fsf@octavius.laptop.org>
-	<1353079901-8773-1-git-send-email-tramsay@linux.vnet.ibm.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: Fwd: [PATCH v3 0/5] mmc: Add access to RPMB partition
+Date: Sat, 17 Nov 2012 21:19:10 +0100
+Message-ID: <CACRpkdZodea6QJ7-TAVRhsC-yjYiywVUEY4MfQpN6CJbZLy3iA@mail.gmail.com>
+References: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
+	<CAJOk3oGMtZvrkw9ic306BKNSKCAzPQCYmJrvq5=zDi1pHjjQxg@mail.gmail.com>
+	<1352927648.5856.14.camel@kkonda-linux.qualcomm.com>
+	<CACRpkdaPOczX3xMA2jXPwH03oOMHmmPKO8-dAFzL-NyO2Nr1Jg@mail.gmail.com>
+	<1353100274.9096.5.camel@kkonda-linux.qualcomm.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:39345 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751585Ab2KQOe5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 17 Nov 2012 09:34:57 -0500
-In-Reply-To: <1353079901-8773-1-git-send-email-tramsay@linux.vnet.ibm.com>
-	(Trey Ramsay's message of "Fri, 16 Nov 2012 09:31:41 -0600")
+Received: from mail-ea0-f174.google.com ([209.85.215.174]:61757 "EHLO
+	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752131Ab2KQUTL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Nov 2012 15:19:11 -0500
+Received: by mail-ea0-f174.google.com with SMTP id e13so1502291eaa.19
+        for <linux-mmc@vger.kernel.org>; Sat, 17 Nov 2012 12:19:10 -0800 (PST)
+In-Reply-To: <1353100274.9096.5.camel@kkonda-linux.qualcomm.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Trey Ramsay <tramsay@linux.vnet.ibm.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Rich Rattanni <rattanni@gmail.com>, Radovan Lekanovic <lekanovic@gmail.com>
+To: Krishna Konda <kkonda@codeaurora.org>, Chris Ball <cjb@laptop.org>
+Cc: loic.pallardy-ext@stericsson.com, linux-mmc@vger.kernel.org, STEricsson_nomadik_linux@list.st.com, ulf.hansson@stericcson.com
 
-Hi,
-
-On Fri, Nov 16 2012, Trey Ramsay wrote:
-> There are infinite loops in the mmc code that can be caused by bad hardware.
-> The code will loop forever if the device never comes back from program mode,
-> R1_STATE_PRG, and it is not ready for data, R1_READY_FOR_DATA.
+On Fri, Nov 16, 2012 at 10:11 PM, Krishna Konda <kkonda@codeaurora.org> wrote:
+> On Thu, 2012-11-15 at 09:04 +0100, Linus Walleij wrote:
+>> > Hi Loic, Chris, are there any plans to merge these patchsets? I did not
+>> > see this in mmc-next.
+>>
+>> I was sort of wondering the same.
+>>
+>> Krishna, could you provide your Acked-by/Reviewed-by
+>> tag so as to convince Chris that this is a nice feature?
 >
-> A long timeout will be added to prevent the code from looping forever.
-> The timeout will occur if the device never comes back from program
-> state or the device never becomes ready for data.
->
-> Signed-off-by: Trey Ramsay <tramsay@linux.vnet.ibm.com>
+> Sure thing.
 
-Thanks for doing this; pushed to mmc-next for 3.8.
+Thanks, Chris you have both ST-Ericsson and CodeAurora ACKs
+on this patch set, and no technical remarks seen on v3, can
+it be applied?
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Yours,
+Linus Walleij
