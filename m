@@ -1,39 +1,67 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V4] Powerpc eSDHC Recover from the ADMA error
-Date: Sat, 17 Nov 2012 15:56:03 -0500
-Message-ID: <871ufs9cf0.fsf@octavius.laptop.org>
-References: <1348107563-16545-1-git-send-email-Haijun.Zhang@freescale.com>
-	<20120920025702.GA13639@lizard>
-	<110EED8CC96DFC488B7E717A2027A27C21CCE3@039-SN1MPN1-004.039d.mgd.msft.net>
+Subject: Re: [PATCH] dt: Document: Add optional dw_mmc pm bindings
+Date: Sat, 17 Nov 2012 16:05:43 -0500
+Message-ID: <87txso7xeg.fsf@octavius.laptop.org>
+References: <1352286460-13925-1-git-send-email-a.kesavan@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43209 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:41788 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752183Ab2KQU4I (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 17 Nov 2012 15:56:08 -0500
-In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C21CCE3@039-SN1MPN1-004.039d.mgd.msft.net>
-	(Huang Changming-R's message of "Tue, 13 Nov 2012 07:51:38 +0000")
+	id S1752137Ab2KQVFs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 17 Nov 2012 16:05:48 -0500
+In-Reply-To: <1352286460-13925-1-git-send-email-a.kesavan@samsung.com>
+	(Abhilash Kesavan's message of "Wed, 07 Nov 2012 16:37:39 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Changming-R66093 <r66093@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Zhang Haijun-B42677 <B42677@freescale.com>
+To: Abhilash Kesavan <a.kesavan@samsung.com>
+Cc: linux-arm-kernel@lists.infradead.org, kgene.kim@samsung.com, linux-mmc@vger.kernel.org, will.newton@imgtec.com
 
-Hi,
+Hi Abhilash,
 
-On Tue, Nov 13 2012, Huang Changming-R66093 wrote:
-> Hi, Chris,
-> This patch has been ACKed by Anton  on Sep 20.
-> Have you any comment about it?
+On Wed, Nov 07 2012, Abhilash Kesavan wrote:
+> Add documentation for pm capabilties such as MMC_PM_KEEP_POWER
+> and MMC_PM_WAKE_SDIO_IRQ.
+>
+> Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
+> ---
+>  .../devicetree/bindings/mmc/synposis-dw-mshc.txt   |    7 +++++++
 
-Something weird has happened with this patch -- the latest version has
-no commit message even though an earlier version did, and there seem
-to be two separate runs of v2-v3-v4 with the same subject but with
-different changes in each.
+(Ugh, I just noticed the typo in that filename.  We should fix that.)
 
-Could you merge the changelog into a single list of changes, rebase
-against mmc-next, add the full commit message and Anton's ACK, and
-resend?  Then I'll merge it.
+>  1 files changed, 7 insertions(+), 0 deletions(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
+> index 06cd32d..fa6806d 100644
+> --- a/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
+> @@ -47,6 +47,11 @@ Optional properties:
+>  
+>  * broken-cd: as documented in mmc core bindings.
+>  
+> +* keep-power-in-suspend: Preserves card power during a suspend/resume cycle.
+> +
+> +* enable-sdio-wakeup: Enables wake up of host system on SDIO IRQ assertion.
+> +
+> + Samsung Exynos5250 specific properties:
+>  Aliases:
+>  
+>  - All the MSHC controller nodes should be represented in the aliases node using
+> @@ -69,6 +74,8 @@ board specific portions as listed below.
+>  		num-slots = <1>;
+>  		supports-highspeed;
+>  		broken-cd;
+> +		keep-power-in-suspend;
+> +		enable-sdio-wakeup;
+>  		fifo-depth = <0x80>;
+>  		card-detect-delay = <200>;
+
+Let's make these core optional properties, documented in
+Documentation/devicetree/bindings/mmc/mmc.txt instead of in
+synposis-dw-mshc.txt, and also add support for them in sdhci_pltfm.c
+by adding your "host->pm_caps |= .." lines to sdhci_get_of_property().
+
+Please could you do that and resend?  The dw_mmc patch looks fine.
 
 Thanks,
 
