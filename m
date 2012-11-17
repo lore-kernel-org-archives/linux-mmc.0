@@ -1,43 +1,49 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v6 13/14] mmc: sdhci: solve several vmmc/vqmmc regulator issues
-Date: Sat, 17 Nov 2012 18:02:55 -0500
-Message-ID: <87r4nr7rz4.fsf@octavius.laptop.org>
-References: <1350471893-29633-1-git-send-email-keyuan.liu@gmail.com>
-	<1350471893-29633-14-git-send-email-keyuan.liu@gmail.com>
+Subject: Re: [PATCH v3 0/5] mmc: Add access to RPMB partition
+Date: Sat, 17 Nov 2012 18:12:10 -0500
+Message-ID: <87mwyf7rjp.fsf@octavius.laptop.org>
+References: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54562 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:50209 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752420Ab2KQXDC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 17 Nov 2012 18:03:02 -0500
-In-Reply-To: <1350471893-29633-14-git-send-email-keyuan.liu@gmail.com> (Kevin
-	Liu's message of "Wed, 17 Oct 2012 19:04:52 +0800")
+	id S1752372Ab2KQXMR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 17 Nov 2012 18:12:17 -0500
+In-Reply-To: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
+	(Loic Pallardy's message of "Mon, 6 Aug 2012 17:12:26 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Liu <keyuan.liu@gmail.com>
-Cc: linux-mmc@vger.kernel.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
+To: Loic Pallardy <loic.pallardy-ext@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Ulf Hansson <ulf.hansson@stericcson.com>, Krishna Konda <kkonda@codeaurora.org>
 
-Hi,
+Hi Loic,
 
-On Wed, Oct 17 2012, Kevin Liu wrote:
-> From: Kevin Liu <kliu5@marvell.com>
+On Mon, Aug 06 2012, Loic Pallardy wrote:
+> The goal of this patchserie is to offer access to MMC RPMB 
+> (Replay Protected Memory Block) partition.
+> The RPMB partition is used in general to store some secure data.
+> It is accessible through a trusted mechanism described in 
+> JEDEC standard JESD84-A441.
 >
-> 1. The vmmc regulator enable in sdhci_add_host is NOT necessary since
-> it can be enabled during mmc_power_up by function mmc_regulator_set_ocr.
-> And this extra enable will make regulator_enable/regulator_disable
-> unbalanced. Consequently, vmmc can't be disabled during mmc_power_off.
+> This patchserie proposes following modifications:
+> - detect RPMB capability and create RPMB block device if supported
+> - extend MMC sysfs to provide access to RPMB partition size and 
+>   reliable write sector count (information needed by user space to 
+>   acces RPMB partition)
+> - update IOCTL to support RPMB access. This includes automatic partition
+>   switch and sending of Set Block Count (CMD23) message.
 >
-> 2. If regulator vqmmc exist, it should be enabled regardless it support
-> 1.8v or not.
->
-> 3. If regulator framework is disabled, regulator_get will return NULL.
-> So the CONFIG_REGULATOR judgement can be removed.
+> RPMB partition becomes accessible using standard IOCTL interface.
+> Patches don't include trusted mechanism or any verification. 
+> It is user space or secure application responsability to provide the right 
+> command and the entire data frame as defined by JEDEC standard.
 
-Pushed to mmc-next for 3.8 without "3." above, because it causes a
-compile error -- now we use regulator_count_voltages() inside that
-block and it's not a stub function in the regulator API, so the
-ifdef is required.
+I've merged this to mmc-next for 3.8 now; thanks to everyone who Acked.
+
+If you have any userspace sample code that could be added to mmc-utils
+to show how the interface can be used, feel free to send a patch.
+Thanks,
 
 - Chris.
 -- 
