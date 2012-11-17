@@ -1,40 +1,41 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2] mmc: mxs-mmc: Remove platform data
-Date: Sat, 17 Nov 2012 15:32:44 -0500
-Message-ID: <8762549dhv.fsf@octavius.laptop.org>
-References: <1351682578-12922-1-git-send-email-festevam@gmail.com>
-	<20121031154458.GB8358@S2100-06.ap.freescale.net>
+Subject: Re: [PATCH V4] Powerpc eSDHC Recover from the ADMA error
+Date: Sat, 17 Nov 2012 15:56:03 -0500
+Message-ID: <871ufs9cf0.fsf@octavius.laptop.org>
+References: <1348107563-16545-1-git-send-email-Haijun.Zhang@freescale.com>
+	<20120920025702.GA13639@lizard>
+	<110EED8CC96DFC488B7E717A2027A27C21CCE3@039-SN1MPN1-004.039d.mgd.msft.net>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:48103 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:43209 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752102Ab2KQUct (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 17 Nov 2012 15:32:49 -0500
-In-Reply-To: <20121031154458.GB8358@S2100-06.ap.freescale.net> (Shawn Guo's
-	message of "Wed, 31 Oct 2012 23:45:00 +0800")
+	id S1752183Ab2KQU4I (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 17 Nov 2012 15:56:08 -0500
+In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C21CCE3@039-SN1MPN1-004.039d.mgd.msft.net>
+	(Huang Changming-R's message of "Tue, 13 Nov 2012 07:51:38 +0000")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Fabio Estevam <festevam@gmail.com>, marex@denx.de, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
+To: Huang Changming-R66093 <r66093@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Zhang Haijun-B42677 <B42677@freescale.com>
 
 Hi,
 
-On Wed, Oct 31 2012, Shawn Guo wrote:
-> On Wed, Oct 31, 2012 at 09:22:58AM -0200, Fabio Estevam wrote:
->> From: Fabio Estevam <fabio.estevam@freescale.com>
->> 
->> All MXS users have been converted to device tree and the board files have been
->> removed.
->> 
->> No need to keep platform data in the driver.
->> 
->> Also move bus_width declaration in the beggining of mxs_mmc_probe() to avoid:
->> 'warning: ISO C90 forbids mixed declarations and code'.
->>   
->> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+On Tue, Nov 13 2012, Huang Changming-R66093 wrote:
+> Hi, Chris,
+> This patch has been ACKed by Anton  on Sep 20.
+> Have you any comment about it?
 
-Thanks, pushed to mmc-next for 3.8 with ACKs from Marek and Shawn.
+Something weird has happened with this patch -- the latest version has
+no commit message even though an earlier version did, and there seem
+to be two separate runs of v2-v3-v4 with the same subject but with
+different changes in each.
+
+Could you merge the changelog into a single list of changes, rebase
+against mmc-next, add the full commit message and Anton's ACK, and
+resend?  Then I'll merge it.
+
+Thanks,
 
 - Chris.
 -- 
