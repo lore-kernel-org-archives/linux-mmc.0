@@ -1,91 +1,60 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH 1/2 v3] Powerpc/eSDHC: Calculate the applicable mmc erase timeout value
-Date: Mon, 19 Nov 2012 13:31:01 +0800
-Message-ID: <1353303061-16679-3-git-send-email-Haijun.Zhang@freescale.com>
-References: <1353303061-16679-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Zhang Haijun-B42677 <B42677@freescale.com>
+Subject: RE: [PATCH 2/2] Powerpc/eSDHC: Add limit to data and erase timeout
+ value calculation
+Date: Mon, 19 Nov 2012 05:57:10 +0000
+Message-ID: <99E897753B6F7048BD8CCDB4661D02E11659BE@039-SN2MPN1-023.039d.mgd.msft.net>
+References: <1353296310-10786-1-git-send-email-Haijun.Zhang@freescale.com>
+ <1353296310-10786-2-git-send-email-Haijun.Zhang@freescale.com>
+ <20121119050439.GA29095@lizard>
+ <99E897753B6F7048BD8CCDB4661D02E1165888@039-SN2MPN1-023.039d.mgd.msft.net>
+ <20121119053338.GA32383@lizard>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co9ehsobe001.messaging.microsoft.com ([207.46.163.24]:40449
-	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751248Ab2KSFvk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Nov 2012 00:51:40 -0500
-Received: from mail54-co9 (localhost [127.0.0.1])	by mail54-co9-R.bigfish.com
- (Postfix) with ESMTP id E8CF0C801CC	for <linux-mmc@vger.kernel.org>; Mon, 19
- Nov 2012 05:51:38 +0000 (UTC)
-Received: from CO9EHSMHS003.bigfish.com (unknown [10.236.132.240])	by
- mail54-co9.bigfish.com (Postfix) with ESMTP id 4903090004D	for
- <linux-mmc@vger.kernel.org>; Mon, 19 Nov 2012 05:51:37 +0000 (UTC)
-In-Reply-To: <1353303061-16679-1-git-send-email-Haijun.Zhang@freescale.com>
+Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:17090 "EHLO
+	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751248Ab2KSF5N (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Nov 2012 00:57:13 -0500
+In-Reply-To: <20121119053338.GA32383@lizard>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Haijun Zhang <Haijun.Zhang@freescale.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Huang Changming-R66093 <r66093@freescale.com>
 
-As large area erase needs long time usually a few minutes,
-which the host can't wait will bring about timeout error.
-So we need to split the large area to small sections which
-only need short erase time to avoid timeout error.
-
-Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
-Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
----
-changes for v3:
-	- Add an empty line
-changes for v2:
-	- Recompute the timeout value and max_discard_to for mmc erase
-
- drivers/mmc/host/sdhci-esdhc.h    |    1 -
- drivers/mmc/host/sdhci-of-esdhc.c |   15 +++++++++++++++
- 2 files changed, 15 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index d25f9ab..bb6d664 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -21,7 +21,6 @@
- #define ESDHC_DEFAULT_QUIRKS	(SDHCI_QUIRK_FORCE_BLK_SZ_2048 | \
- 				SDHCI_QUIRK_NO_BUSY_IRQ | \
- 				SDHCI_QUIRK_NONSTANDARD_CLOCK | \
--				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK | \
- 				SDHCI_QUIRK_PIO_NEEDS_DELAY | \
- 				SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
- 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 63d219f..eb8e0a9 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -155,6 +155,20 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
- 	esdhc_set_clock(host, clock);
- }
- 
-+/*
-+ * As host dosn't supply us the method to calculate the timeout value,
-+ * we assigned one for high speed SDHC card. So we can use this to calculate
-+ * the max discard timeout value to limit the max discard sectors to avoid the
-+ * timeout issue during large area erase.
-+ */
-+
-+static unsigned int esdhc_of_get_timeout_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	return pltfm_host->clock / 1000 / 32;
-+}
-+
- #ifdef CONFIG_PM
- static u32 esdhc_proctl;
- static void esdhc_of_suspend(struct sdhci_host *host)
-@@ -190,6 +204,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
- 	.enable_dma = esdhc_of_enable_dma,
- 	.get_max_clock = esdhc_of_get_max_clock,
- 	.get_min_clock = esdhc_of_get_min_clock,
-+	.get_timeout_clock = esdhc_of_get_timeout_clock,
- 	.platform_init = esdhc_of_platform_init,
- #ifdef CONFIG_PM
- 	.platform_suspend = esdhc_of_suspend,
--- 
-1.7.0.4
-
+QWxsIGNvcnJlY3RlZCwgbWFueSB0aGFua3MuDQoNCg0KUmVnYXJkcw0KSGFpanVuLg0KDQoNCj4g
+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQW50b24gVm9yb250c292IFttYWls
+dG86Y2JvdWF0bWFpbHJ1QGdtYWlsLmNvbV0NCj4gU2VudDogTW9uZGF5LCBOb3ZlbWJlciAxOSwg
+MjAxMiAxOjM0IFBNDQo+IFRvOiBaaGFuZyBIYWlqdW4tQjQyNjc3DQo+IENjOiBsaW51eC1tbWNA
+dmdlci5rZXJuZWwub3JnOyBIdWFuZyBDaGFuZ21pbmctUjY2MDkzDQo+IFN1YmplY3Q6IFJlOiBb
+UEFUQ0ggMi8yXSBQb3dlcnBjL2VTREhDOiBBZGQgbGltaXQgdG8gZGF0YSBhbmQgZXJhc2UNCj4g
+dGltZW91dCB2YWx1ZSBjYWxjdWxhdGlvbg0KPiANCj4gT24gTW9uLCBOb3YgMTksIDIwMTIgYXQg
+MDU6MjM6MjFBTSArMDAwMCwgWmhhbmcgSGFpanVuLUI0MjY3NyB3cm90ZToNCj4gPiA+IFN1Ympl
+Y3Q6IFJlOiBbUEFUQ0ggMi8yXSBQb3dlcnBjL2VTREhDOiBBZGQgbGltaXQgdG8gZGF0YSBhbmQg
+ZXJhc2UNCj4gPiA+IHRpbWVvdXQgdmFsdWUgY2FsY3VsYXRpb24NCj4gPiA+DQo+ID4gPiBPbiBN
+b24sIE5vdiAxOSwgMjAxMiBhdCAxMTozODoyOUFNICswODAwLCBIYWlqdW4gWmhhbmcgd3JvdGU6
+DQo+ID4gPiA+IFNvbWUgY2FyZHMgYXBwbHkgdG9vIGxhcmcgdGltZW91dCB2YWx1ZSBmb3IgaG9z
+dCB0byByZXNwb25zZSwgU28NCj4gbGltaXQNCj4gPiA+ID4gdGhlIG1heGltdW0gZGF0YSB0cmFu
+c2ZlciB0aW1lb3V0IHZhbHVlIGFuZCBtYXhpbXVtIGVyYXNlIHRpbWVvdXQNCj4gPiA+ID4gdmFs
+dWUgdG8gYXZpb2QgdGltZW91dCBpc3N1ZS4NCj4gPiA+ID4NCj4gPiA+ID4gU2lnbmVkLW9mZi1i
+eTogSGFpanVuIFpoYW5nIDxIYWlqdW4uWmhhbmdAZnJlZXNjYWxlLmNvbT4NCj4gPiA+ID4gU2ln
+bmVkLW9mZi1ieTogSmVycnkgSHVhbmcgPENoYW5nLU1pbmcuSHVhbmdAZnJlZXNjYWxlLmNvbT4N
+Cj4gPiA+ID4gU2lnbmVkLW9mZi1ieTogQW50b24gVm9yb250c292IDxjYm91YXRtYWlscnVAZ21h
+aWwuY29tPg0KPiA+ID4NCj4gPiA+IERpdHRvIGFib3V0IHRoZSBzaWduLW9mZiwgaXQncyBpbmFw
+cHJvcHJpYXRlIGluIHRoaXMgY2FzZS4NCj4gPg0KPiA+DQo+ID4gW0hhaWp1bjogXSBTb3JyeS4N
+Cj4gPiBTbywgcmVwbGFjZSBzaWduZWQtb2ZmLWJ5IHdpdGggQWNrZWQtYnk/DQo+IA0KPiBGb3Ig
+cGF0Y2hlcyB0aGF0IGdvdCBteSBBY2tlZC1ieSwgcGxhY2UgdGhlIEFja2VkLWJ5IHRhZy4NCj4g
+Rm9yIHBhdGNoZXMgdGhhdCBnb3QgbXkgUmV2aWV3ZWQtYnksIHBsYWNlIHRoZSBSZXZpZXdlZC1i
+eSB0YWcuDQo+IA0KPiA+ID4gWy4uLl0NCj4gPiA+ID4gQEAgLTcyMSw2ICs3MjIsMTAgQEAgdm9p
+ZCBtbWNfc2V0X2RhdGFfdGltZW91dChzdHJ1Y3QgbW1jX2RhdGENCj4gKmRhdGEsDQo+ID4gPiBj
+b25zdCBzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQpDQo+ID4gPiA+ICAJCQkJZGF0YS0+dGltZW91dF9u
+cyA9ICAxMDAwMDAwMDA7CS8qDQo+IDEwMG1zICovDQo+ID4gPiA+ICAJCX0NCj4gPiA+ID4gIAl9
+DQo+ID4gPiA+ICsNCj4gPiA+ID4gKwlpZiAoaG9zdC0+bWF4X2Rpc2NhcmRfdG8gJiYNCj4gPiA+
+ID4gKwkJaG9zdC0+bWF4X2Rpc2NhcmRfdG8gPCBkaXZfdTY0KGRhdGEtPnRpbWVvdXRfbnMsDQo+
+IDEwMDAwMDApKQ0KPiA+ID4NCj4gPiA+IFN0aWxsIHdyb25nIGluZGVudGF0aW9uLg0KPiA+DQo+
+ID4gW0hhaWp1bjogXSBEaWQgeW91IG1lYW4gaGVyZSBuZWVkIHR3byB0YWJzIG5vdCBvbmUgPw0K
+PiANCj4gWWVzLg0KPiANCj4gPiA+DQo+ID4gPiA+ICsJCWRhdGEtPnRpbWVvdXRfbnMgPSAodTY0
+KWhvc3QtPm1heF9kaXNjYXJkX3RvICogMTAwMDAwMDsNCj4gPiA+ID4gIH0NCj4gPiA+ID4gIEVY
+UE9SVF9TWU1CT0wobW1jX3NldF9kYXRhX3RpbWVvdXQpOw0KDQo=
 
