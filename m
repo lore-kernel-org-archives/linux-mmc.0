@@ -1,65 +1,97 @@
 From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH] Powerpc/esdhc: Calculate the applicable timeout value
- for mmc erase
-Date: Sun, 18 Nov 2012 16:32:44 -0800
-Message-ID: <20121119003244.GI29066@lizard.sbx05977.paloaca.wayport.net>
-References: <1351576856-32012-1-git-send-email-Haijun.Zhang@freescale.com>
+Subject: Re: [PATCH] Powerpc eSDHC: Use u64 to calculate the timeout value to
+ avoid overflow
+Date: Sun, 18 Nov 2012 16:39:39 -0800
+Message-ID: <20121119003938.GJ29066@lizard.sbx05977.paloaca.wayport.net>
+References: <1352695528-6457-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:56144 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752757Ab2KSAgF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Nov 2012 19:36:05 -0500
-Received: by mail-pa0-f46.google.com with SMTP id bh2so43992pad.19
-        for <linux-mmc@vger.kernel.org>; Sun, 18 Nov 2012 16:36:05 -0800 (PST)
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:63166 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752732Ab2KSAnC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Nov 2012 19:43:02 -0500
+Received: by mail-pb0-f46.google.com with SMTP id wy7so3062696pbc.19
+        for <linux-mmc@vger.kernel.org>; Sun, 18 Nov 2012 16:43:01 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <1351576856-32012-1-git-send-email-Haijun.Zhang@freescale.com>
+In-Reply-To: <1352695528-6457-1-git-send-email-Haijun.Zhang@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Haijun.Zhang" <Haijun.Zhang@freescale.com>
+To: Haijun Zhang <Haijun.Zhang@freescale.com>
 Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-On Tue, Oct 30, 2012 at 02:00:55PM +0800, Haijun.Zhang wrote:
-> As large area erase needs long time usually a few minutes,
-> which the host can't wait will bring about timeout error.
-> So we need to split the large area to small sections which
-> only need short erase time to avoid timeout error.
+On Mon, Nov 12, 2012 at 12:45:28PM +0800, Haijun Zhang wrote:
+> As some mmc cards need large timeout value usually a few seconds,
+> so data timeout nanosecond will overflow with u32 variable and
+> give the wrong timeout value, so use u64 will be safe.
 > 
-> Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
 > Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
 > CC: Anton Vorontsov <cbouatmailru@gmail.com>
 > ---
-[...]
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2560,6 +2560,16 @@ int sdhci_add_host(struct sdhci_host *host)
->  	} else
->  		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
+>  drivers/mmc/core/core.c  |   21 ++++++++-------------
+>  drivers/mmc/host/sdhci.c |    6 +++---
+>  include/linux/mmc/core.h |    2 +-
+>  3 files changed, 12 insertions(+), 17 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 06c42cf..c241fc1 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -208,10 +208,10 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
 >  
-> +	/*
-> +	 * Calculate the max discard timeout  to limit the size one
+>  	if (mrq->data) {
+>  		pr_debug("%s:     blksz %d blocks %d flags %08x "
+> -			"tsac %d ms nsac %d\n",
+> +			"tsac %lld ms nsac %d\n",
+>  			mmc_hostname(host), mrq->data->blksz,
+>  			mrq->data->blocks, mrq->data->flags,
+> -			mrq->data->timeout_ns / 1000000,
+> +			div_u64(mrq->data->timeout_ns, 1000000),
+>  			mrq->data->timeout_clks);
+>  	}
+>  
+> @@ -659,16 +659,16 @@ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
+>  	if (data->flags & MMC_DATA_WRITE)
+>  		mult <<= card->csd.r2w_factor;
+>  
+> -	data->timeout_ns = card->csd.tacc_ns * mult;
+> +	data->timeout_ns = (u64)card->csd.tacc_ns * (u64)mult;
 
-Unneeded whitespace.
+one cast would be enough.
 
-> +	 * discard request can issue.Just subtract the minimum timeout
+>  	data->timeout_clks = card->csd.tacc_clks * mult;
+>  
+>  	/*
+>  	 * SD cards also have an upper limit on the timeout.
+>  	 */
+>  	if (mmc_card_sd(card)) {
+> -		unsigned int timeout_us, limit_us;
+> +		u64 timeout_us, limit_us;
+>  
+> -		timeout_us = data->timeout_ns / 1000;
+> +		timeout_us = div_u64(data->timeout_ns, 1000);
+>  		if (mmc_host_clk_rate(card->host))
+>  			timeout_us += data->timeout_clks * 1000 /
+>  				(mmc_host_clk_rate(card->host) / 1000);
+> @@ -1545,14 +1545,9 @@ static unsigned int mmc_mmc_erase_timeout(struct mmc_card *card,
+>  		/* CSD Erase Group Size uses write timeout */
+>  		unsigned int mult = (10 << card->csd.r2w_factor);
+>  		unsigned int timeout_clks = card->csd.tacc_clks * mult;
+> -		unsigned int timeout_us;
+> -
+> -		/* Avoid overflow: e.g. tacc_ns=80000000 mult=1280 */
+> -		if (card->csd.tacc_ns < 1000000)
+> -			timeout_us = (card->csd.tacc_ns * mult) / 1000;
+> -		else
+> -			timeout_us = (card->csd.tacc_ns / 1000) * mult;
+> +		u64 timeout_us;
+>  
+> +		timeout_us = (u64)(card->csd.tacc_ns / 1000) * (u64)mult;
 
-Missing whitespace after the dot.
+Ditto.
 
-> +	 * value to avoid the circumstance the timeout value just equal to 0xF.
-> +	 */
-> +	if (host->timeout_clk &&
-> +		!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK))
-
-Wrong indentation on the second line (should be at least one more tab).
-
-> +		mmc->max_discard_to = ((1 << 27) - (1 << 13) * 1000) /
-> +			host->timeout_clk;
-
-Is this some kind of generic formula? If not, it's better to place the
-calculation into esdhc driver itself... Plus, where 27 and 13 came from?..
-
-Otherwise, it looks good.
+Otherwise it looks good.
 
 Thanks,
 Anton.
