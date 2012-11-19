@@ -1,38 +1,39 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v3 0/5] mmc: Add access to RPMB partition
-Date: Mon, 19 Nov 2012 11:09:19 +0100
-Message-ID: <CACRpkdYdkUudmkzz3MnmQYv_wqB++T7cxEf=qH9bzpiAS4vYJQ@mail.gmail.com>
-References: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
-	<87mwyf7rjp.fsf@octavius.laptop.org>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: [PATCH v6 12/14] mmc: sdhci-pxav3: remove set_uhs_signaling function
+Date: Mon, 19 Nov 2012 19:23:34 +0800
+Message-ID: <CADz5_g+VWWqS6gsmqoD8qhmWxkLBvgt5PjytkCh866Xc58LW3A@mail.gmail.com>
+References: <1350471893-29633-1-git-send-email-keyuan.liu@gmail.com>
+	<1350471893-29633-13-git-send-email-keyuan.liu@gmail.com>
+	<87vcd37t2u.fsf@octavius.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ea0-f174.google.com ([209.85.215.174]:62185 "EHLO
-	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753112Ab2KSKJU convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Nov 2012 05:09:20 -0500
-Received: by mail-ea0-f174.google.com with SMTP id e13so1909150eaa.19
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Nov 2012 02:09:19 -0800 (PST)
-In-Reply-To: <87mwyf7rjp.fsf@octavius.laptop.org>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:64274 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751265Ab2KSLXg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Nov 2012 06:23:36 -0500
+Received: by mail-wg0-f44.google.com with SMTP id dr13so2772115wgb.1
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Nov 2012 03:23:34 -0800 (PST)
+In-Reply-To: <87vcd37t2u.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Loic PALLARDY <loic.pallardy@st.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Per Forlin <per.forlin@stericsson.com>
-Cc: Loic Pallardy <loic.pallardy-ext@stericsson.com>, linux-mmc@vger.kernel.org, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Ulf Hansson <ulf.hansson@stericcson.com>, Krishna Konda <kkonda@codeaurora.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, pierre@ossman.eu, ulf.hansson@linaro.org, Haojian Zhuang <haojian.zhuang@gmail.com>, cxie4@marvell.com, Philip Rakity <prakity@nvidia.com>, kliu5@marvell.com
 
-On Sun, Nov 18, 2012 at 12:12 AM, Chris Ball <cjb@laptop.org> wrote:
+2012/11/18 Chris Ball <cjb@laptop.org>:
+> Hi,
+>
+> On Wed, Oct 17 2012, Kevin Liu wrote:
+>> From: Kevin Liu <kliu5@marvell.com>
+>>
+>> Because sdhci can do the same thing so no need to implement this.
+>>
+>> Acked-by:  Zhangfei Gao <zhangfei.gao@marvell.com>
+>> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+>
+> In that case, we can remove the callbacks from sdhci.c/sdhci.h too --
+> sdhci-pxav3 was the only user.
+>
+updated the patch in v8. thanks!
 
-> I've merged this to mmc-next for 3.8 now; thanks to everyone who Acke=
-d.
-
-Thanks Chris :-)
-
-> If you have any userspace sample code that could be added to mmc-util=
-s
-> to show how the interface can be used, feel free to send a patch.
-
-Lo=EFc, Johan: do you have an RPMB example at hand, or could you
-cook some nice patch for mmc-utils?
-
-Yours,
-Linus Walleij
+Kevin
