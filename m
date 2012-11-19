@@ -1,7 +1,7 @@
 From: Bill Pemberton <wfp5p@virginia.edu>
-Subject: =?UTF-8?q?=5BPATCH=20414/493=5D=20mmc=3A=20remove=20use=20of=20=5F=5Fdevexit?=
-Date: Mon, 19 Nov 2012 13:26:03 -0500
-Message-ID: <1353349642-3677-414-git-send-email-wfp5p@virginia.edu>
+Subject: =?UTF-8?q?=5BPATCH=20077/493=5D=20mmc=3A=20remove=20use=20of=20=5F=5Fdevexit=5Fp?=
+Date: Mon, 19 Nov 2012 13:20:26 -0500
+Message-ID: <1353349642-3677-77-git-send-email-wfp5p@virginia.edu>
 References: <1353349642-3677-1-git-send-email-wfp5p@virginia.edu>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -10,14 +10,13 @@ Return-path: <linux-omap-owner@vger.kernel.org>
 In-Reply-To: <1353349642-3677-1-git-send-email-wfp5p@virginia.edu>
 Sender: linux-omap-owner@vger.kernel.org
 To: gregkh@linuxfoundation.org
-Cc: Manuel Lauss <manuel.lauss@gmail.com>, Chris Ball <cjb@laptop.org>, =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Venkatraman S <svenkatr@ti.com>, Viresh Kumar <viresh.linux@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org, uclinux-dist-devel@blackfin.uclinux.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, spear-devel@list.st.com
+Cc: Chris Ball <cjb@laptop.org>, =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Venkatraman S <svenkatr@ti.com>, Viresh Kumar <viresh.linux@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, Pierre Ossman <pierre@ossman.eu>, uclinux-dist-devel@blackfin.uclinux.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, spear-devel@list.st.com
 List-Id: linux-mmc@vger.kernel.org
 
-CONFIG_HOTPLUG is going away as an option so __devexit is no
-longer needed.
+CONFIG_HOTPLUG is going away as an option so __devexit_p is no longer
+needed.
 
 Signed-off-by: Bill Pemberton <wfp5p@virginia.edu>
-Cc: Manuel Lauss <manuel.lauss@gmail.com>=20
 Cc: Chris Ball <cjb@laptop.org>=20
 Cc: "Micha=C5=82 Miros=C5=82aw" <mirq-linux@rere.qmqm.pl>=20
 Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>=20
@@ -28,21 +27,19 @@ Cc: Ian Molton <ian@mnementh.co.uk>=20
 Cc: Bruce Chang <brucechang@via.com.tw>=20
 Cc: Harald Welte <HaraldWelte@viatech.com>=20
 Cc: Pierre Ossman <pierre@ossman.eu>=20
-Cc: linux-mmc@vger.kernel.org=20
 Cc: uclinux-dist-devel@blackfin.uclinux.org=20
+Cc: linux-mmc@vger.kernel.org=20
 Cc: linux-omap@vger.kernel.org=20
 Cc: linux-arm-kernel@lists.infradead.org=20
 Cc: spear-devel@list.st.com=20
 ---
- drivers/mmc/host/au1xmmc.c         | 2 +-
  drivers/mmc/host/bfin_sdh.c        | 2 +-
  drivers/mmc/host/cb710-mmc.c       | 2 +-
  drivers/mmc/host/dw_mmc-pci.c      | 2 +-
  drivers/mmc/host/dw_mmc-pltfm.c    | 2 +-
- drivers/mmc/host/dw_mmc-pltfm.h    | 2 +-
  drivers/mmc/host/jz4740_mmc.c      | 2 +-
  drivers/mmc/host/mmc_spi.c         | 2 +-
- drivers/mmc/host/mmci.c            | 4 ++--
+ drivers/mmc/host/mmci.c            | 2 +-
  drivers/mmc/host/omap.c            | 2 +-
  drivers/mmc/host/omap_hsmmc.c      | 2 +-
  drivers/mmc/host/s3cmci.c          | 2 +-
@@ -51,436 +48,381 @@ Cc: spear-devel@list.st.com=20
  drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
  drivers/mmc/host/sdhci-of-esdhc.c  | 2 +-
  drivers/mmc/host/sdhci-of-hlwd.c   | 2 +-
- drivers/mmc/host/sdhci-pci.c       | 4 ++--
+ drivers/mmc/host/sdhci-pci.c       | 2 +-
  drivers/mmc/host/sdhci-pxav2.c     | 2 +-
  drivers/mmc/host/sdhci-pxav3.c     | 2 +-
  drivers/mmc/host/sdhci-s3c.c       | 2 +-
  drivers/mmc/host/sdhci-spear.c     | 2 +-
  drivers/mmc/host/sdhci-tegra.c     | 2 +-
- drivers/mmc/host/sh_mmcif.c        | 2 +-
+ drivers/mmc/host/sh_mobile_sdhi.c  | 2 +-
  drivers/mmc/host/tmio_mmc.c        | 2 +-
  drivers/mmc/host/via-sdmmc.c       | 2 +-
- drivers/mmc/host/wbsd.c            | 6 +++---
- 27 files changed, 31 insertions(+), 31 deletions(-)
+ drivers/mmc/host/wbsd.c            | 4 ++--
+ 25 files changed, 26 insertions(+), 26 deletions(-)
 
-diff --git a/drivers/mmc/host/au1xmmc.c b/drivers/mmc/host/au1xmmc.c
-index 606c16a..127a8fa 100644
---- a/drivers/mmc/host/au1xmmc.c
-+++ b/drivers/mmc/host/au1xmmc.c
-@@ -1114,7 +1114,7 @@ out0:
- 	return ret;
- }
-=20
--static int __devexit au1xmmc_remove(struct platform_device *pdev)
-+static int au1xmmc_remove(struct platform_device *pdev)
- {
- 	struct au1xmmc_host *host =3D platform_get_drvdata(pdev);
-=20
 diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
-index 4ef3901..fb4348c 100644
+index b9b463e..156ebe7 100644
 --- a/drivers/mmc/host/bfin_sdh.c
 +++ b/drivers/mmc/host/bfin_sdh.c
-@@ -617,7 +617,7 @@ out1:
- 	return ret;
- }
+@@ -680,7 +680,7 @@ static int sdh_resume(struct platform_device *dev)
 =20
--static int __devexit sdh_remove(struct platform_device *pdev)
-+static int sdh_remove(struct platform_device *pdev)
- {
- 	struct mmc_host *mmc =3D platform_get_drvdata(pdev);
-=20
+ static struct platform_driver sdh_driver =3D {
+ 	.probe   =3D sdh_probe,
+-	.remove  =3D __devexit_p(sdh_remove),
++	.remove  =3D sdh_remove,
+ 	.suspend =3D sdh_suspend,
+ 	.resume  =3D sdh_resume,
+ 	.driver  =3D {
 diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mmc.=
 c
-index c12a561..777ca20 100644
+index 83693fd..39280b5 100644
 --- a/drivers/mmc/host/cb710-mmc.c
 +++ b/drivers/mmc/host/cb710-mmc.c
-@@ -746,7 +746,7 @@ err_free_mmc:
- 	return err;
- }
-=20
--static int __devexit cb710_mmc_exit(struct platform_device *pdev)
-+static int cb710_mmc_exit(struct platform_device *pdev)
- {
- 	struct cb710_slot *slot =3D cb710_pdev_to_slot(pdev);
- 	struct mmc_host *mmc =3D cb710_slot_to_mmc(slot);
+@@ -773,7 +773,7 @@ static int __devexit cb710_mmc_exit(struct platform=
+_device *pdev)
+ static struct platform_driver cb710_mmc_driver =3D {
+ 	.driver.name =3D "cb710-mmc",
+ 	.probe =3D cb710_mmc_init,
+-	.remove =3D __devexit_p(cb710_mmc_exit),
++	.remove =3D cb710_mmc_exit,
+ #ifdef CONFIG_PM
+ 	.suspend =3D cb710_mmc_suspend,
+ 	.resume =3D cb710_mmc_resume,
 diff --git a/drivers/mmc/host/dw_mmc-pci.c b/drivers/mmc/host/dw_mmc-pc=
 i.c
-index 324c8bf..083fcd2 100644
+index 53a09cb..edb37e9 100644
 --- a/drivers/mmc/host/dw_mmc-pci.c
 +++ b/drivers/mmc/host/dw_mmc-pci.c
-@@ -85,7 +85,7 @@ err_disable_dev:
- 	return ret;
- }
-=20
--static void __devexit dw_mci_pci_remove(struct pci_dev *pdev)
-+static void dw_mci_pci_remove(struct pci_dev *pdev)
- {
- 	struct dw_mci *host =3D pci_get_drvdata(pdev);
-=20
+@@ -134,7 +134,7 @@ static struct pci_driver dw_mci_pci_driver =3D {
+ 	.name		=3D "dw_mmc_pci",
+ 	.id_table	=3D dw_mci_pci_id,
+ 	.probe		=3D dw_mci_pci_probe,
+-	.remove		=3D __devexit_p(dw_mci_pci_remove),
++	.remove		=3D dw_mci_pci_remove,
+ 	.driver		=3D	{
+ 		.pm =3D   &dw_mci_pci_pmops
+ 	},
 diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-=
 pltfm.c
-index ff73a87..5e1fb1d 100644
+index 4e13370..4c1b1df 100644
 --- a/drivers/mmc/host/dw_mmc-pltfm.c
 +++ b/drivers/mmc/host/dw_mmc-pltfm.c
-@@ -67,7 +67,7 @@ static int dw_mci_pltfm_probe(struct platform_device =
-*pdev)
- 	return dw_mci_pltfm_register(pdev, NULL);
- }
+@@ -120,7 +120,7 @@ MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
 =20
--static int __devexit dw_mci_pltfm_remove(struct platform_device *pdev)
-+static int dw_mci_pltfm_remove(struct platform_device *pdev)
- {
- 	struct dw_mci *host =3D platform_get_drvdata(pdev);
-=20
-diff --git a/drivers/mmc/host/dw_mmc-pltfm.h b/drivers/mmc/host/dw_mmc-=
-pltfm.h
-index 2ac37b8..68e7fd2 100644
---- a/drivers/mmc/host/dw_mmc-pltfm.h
-+++ b/drivers/mmc/host/dw_mmc-pltfm.h
-@@ -14,7 +14,7 @@
-=20
- extern int dw_mci_pltfm_register(struct platform_device *pdev,
- 				const struct dw_mci_drv_data *drv_data);
--extern int __devexit dw_mci_pltfm_remove(struct platform_device *pdev)=
-;
-+extern int dw_mci_pltfm_remove(struct platform_device *pdev);
- extern const struct dev_pm_ops dw_mci_pltfm_pmops;
-=20
- #endif /* _DW_MMC_PLTFM_H_ */
+ static struct platform_driver dw_mci_pltfm_driver =3D {
+ 	.probe		=3D dw_mci_pltfm_probe,
+-	.remove		=3D __devexit_p(dw_mci_pltfm_remove),
++	.remove		=3D dw_mci_pltfm_remove,
+ 	.driver		=3D {
+ 		.name		=3D "dw_mmc",
+ 		.of_match_table	=3D of_match_ptr(dw_mci_pltfm_match),
 diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mm=
 c.c
-index 81826be..2391c6b 100644
+index c8852a8..31cf20f 100644
 --- a/drivers/mmc/host/jz4740_mmc.c
 +++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -938,7 +938,7 @@ err_free_host:
- 	return ret;
- }
+@@ -1004,7 +1004,7 @@ const struct dev_pm_ops jz4740_mmc_pm_ops =3D {
 =20
--static int __devexit jz4740_mmc_remove(struct platform_device *pdev)
-+static int jz4740_mmc_remove(struct platform_device *pdev)
- {
- 	struct jz4740_mmc_host *host =3D platform_get_drvdata(pdev);
-=20
+ static struct platform_driver jz4740_mmc_driver =3D {
+ 	.probe =3D jz4740_mmc_probe,
+-	.remove =3D __devexit_p(jz4740_mmc_remove),
++	.remove =3D jz4740_mmc_remove,
+ 	.driver =3D {
+ 		.name =3D "jz4740-mmc",
+ 		.owner =3D THIS_MODULE,
 diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index 1e2256b..74145d1 100644
+index a600eab..f7df798 100644
 --- a/drivers/mmc/host/mmc_spi.c
 +++ b/drivers/mmc/host/mmc_spi.c
-@@ -1485,7 +1485,7 @@ nomem:
- }
+@@ -1529,7 +1529,7 @@ static struct spi_driver mmc_spi_driver =3D {
+ 		.of_match_table =3D mmc_spi_of_match_table,
+ 	},
+ 	.probe =3D	mmc_spi_probe,
+-	.remove =3D	__devexit_p(mmc_spi_remove),
++	.remove =3D	mmc_spi_remove,
+ };
 =20
-=20
--static int __devexit mmc_spi_remove(struct spi_device *spi)
-+static int mmc_spi_remove(struct spi_device *spi)
- {
- 	struct mmc_host		*mmc =3D dev_get_drvdata(&spi->dev);
- 	struct mmc_spi_host	*host;
+ module_spi_driver(mmc_spi_driver);
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index bf5f7a5..aa04b42 100644
+index 9446c17..705c3be 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -338,7 +338,7 @@ static void mmci_dma_setup(struct mmci_host *host)
- }
-=20
- /*
-- * This is used in or __devexit so inline it
-+ * This is used in or so inline it
-  * so it can be discarded.
-  */
- static inline void mmci_dma_release(struct mmci_host *host)
-@@ -1546,7 +1546,7 @@ static int mmci_probe(struct amba_device *dev,
- 	return ret;
- }
-=20
--static int __devexit mmci_remove(struct amba_device *dev)
-+static int mmci_remove(struct amba_device *dev)
- {
- 	struct mmc_host *mmc =3D amba_get_drvdata(dev);
+@@ -1693,7 +1693,7 @@ static struct amba_driver mmci_driver =3D {
+ 		.pm	=3D &mmci_dev_pm_ops,
+ 	},
+ 	.probe		=3D mmci_probe,
+-	.remove		=3D __devexit_p(mmci_remove),
++	.remove		=3D mmci_remove,
+ 	.id_table	=3D mmci_ids,
+ };
 =20
 diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index 5cd976a..4254975 100644
+index ae115c0..f65ec26 100644
 --- a/drivers/mmc/host/omap.c
 +++ b/drivers/mmc/host/omap.c
-@@ -1495,7 +1495,7 @@ err_free_mem_region:
- 	return ret;
- }
+@@ -1583,7 +1583,7 @@ static int mmc_omap_resume(struct platform_device=
+ *pdev)
 =20
--static int __devexit mmc_omap_remove(struct platform_device *pdev)
-+static int mmc_omap_remove(struct platform_device *pdev)
- {
- 	struct mmc_omap_host *host =3D platform_get_drvdata(pdev);
- 	int i;
+ static struct platform_driver mmc_omap_driver =3D {
+ 	.probe		=3D mmc_omap_probe,
+-	.remove		=3D __devexit_p(mmc_omap_remove),
++	.remove		=3D mmc_omap_remove,
+ 	.suspend	=3D mmc_omap_suspend,
+ 	.resume		=3D mmc_omap_resume,
+ 	.driver		=3D {
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmm=
 c.c
-index 492d8cf..fca9b5f 100644
+index 7546cb2..8f5c7e2 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1993,7 +1993,7 @@ err:
- 	return ret;
- }
-=20
--static int __devexit omap_hsmmc_remove(struct platform_device *pdev)
-+static int omap_hsmmc_remove(struct platform_device *pdev)
+@@ -2156,7 +2156,7 @@ static struct dev_pm_ops omap_hsmmc_dev_pm_ops =3D=
  {
- 	struct omap_hsmmc_host *host =3D platform_get_drvdata(pdev);
- 	struct resource *res;
+=20
+ static struct platform_driver omap_hsmmc_driver =3D {
+ 	.probe		=3D omap_hsmmc_probe,
+-	.remove		=3D __devexit_p(omap_hsmmc_remove),
++	.remove		=3D omap_hsmmc_remove,
+ 	.driver		=3D {
+ 		.name =3D DRIVER_NAME,
+ 		.owner =3D THIS_MODULE,
 diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-index b846a97..63fb265 100644
+index 4638dda..a5fe5b2 100644
 --- a/drivers/mmc/host/s3cmci.c
 +++ b/drivers/mmc/host/s3cmci.c
-@@ -1819,7 +1819,7 @@ static void s3cmci_shutdown(struct platform_devic=
-e *pdev)
- 	clk_disable(host->clk);
- }
+@@ -1906,7 +1906,7 @@ static struct platform_driver s3cmci_driver =3D {
+ 	},
+ 	.id_table	=3D s3cmci_driver_ids,
+ 	.probe		=3D s3cmci_probe,
+-	.remove		=3D __devexit_p(s3cmci_remove),
++	.remove		=3D s3cmci_remove,
+ 	.shutdown	=3D s3cmci_shutdown,
+ };
 =20
--static int __devexit s3cmci_remove(struct platform_device *pdev)
-+static int s3cmci_remove(struct platform_device *pdev)
- {
- 	struct mmc_host		*mmc  =3D platform_get_drvdata(pdev);
- 	struct s3cmci_host	*host =3D mmc_priv(mmc);
 diff --git a/drivers/mmc/host/sdhci-cns3xxx.c b/drivers/mmc/host/sdhci-=
 cns3xxx.c
-index ce959dcf..30bfdc4 100644
+index 28a8708..9236fa9 100644
 --- a/drivers/mmc/host/sdhci-cns3xxx.c
 +++ b/drivers/mmc/host/sdhci-cns3xxx.c
-@@ -100,7 +100,7 @@ static int sdhci_cns3xxx_probe(struct platform_devi=
-ce *pdev)
- 	return sdhci_pltfm_register(pdev, &sdhci_cns3xxx_pdata);
- }
+@@ -112,7 +112,7 @@ static struct platform_driver sdhci_cns3xxx_driver =
+=3D {
+ 		.pm	=3D SDHCI_PLTFM_PMOPS,
+ 	},
+ 	.probe		=3D sdhci_cns3xxx_probe,
+-	.remove		=3D __devexit_p(sdhci_cns3xxx_remove),
++	.remove		=3D sdhci_cns3xxx_remove,
+ };
 =20
--static int __devexit sdhci_cns3xxx_remove(struct platform_device *pdev=
-)
-+static int sdhci_cns3xxx_remove(struct platform_device *pdev)
- {
- 	return sdhci_pltfm_unregister(pdev);
- }
+ module_platform_driver(sdhci_cns3xxx_driver);
 diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dov=
 e.c
-index 73c0eb8..5f4d033 100644
+index 8fd50a2..7ad1bb6 100644
 --- a/drivers/mmc/host/sdhci-dove.c
 +++ b/drivers/mmc/host/sdhci-dove.c
-@@ -114,7 +114,7 @@ sdhci_dove_register_fail:
- 	return ret;
- }
-=20
--static int __devexit sdhci_dove_remove(struct platform_device *pdev)
-+static int sdhci_dove_remove(struct platform_device *pdev)
+@@ -143,7 +143,7 @@ static struct platform_driver sdhci_dove_driver =3D=
  {
- 	struct sdhci_host *host =3D platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+ 		.of_match_table =3D of_match_ptr(sdhci_dove_of_match_table),
+ 	},
+ 	.probe		=3D sdhci_dove_probe,
+-	.remove		=3D __devexit_p(sdhci_dove_remove),
++	.remove		=3D sdhci_dove_remove,
+ };
+=20
+ module_platform_driver(sdhci_dove_driver);
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhc=
 i-esdhc-imx.c
-index cd741bb..8d54fd7 100644
+index effc2ac..6a4e98e 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -599,7 +599,7 @@ err_imx_data:
- 	return err;
- }
+@@ -637,7 +637,7 @@ static struct platform_driver sdhci_esdhc_imx_drive=
+r =3D {
+ 	},
+ 	.id_table	=3D imx_esdhc_devtype,
+ 	.probe		=3D sdhci_esdhc_imx_probe,
+-	.remove		=3D __devexit_p(sdhci_esdhc_imx_remove),
++	.remove		=3D sdhci_esdhc_imx_remove,
+ };
 =20
--static int __devexit sdhci_esdhc_imx_remove(struct platform_device *pd=
-ev)
-+static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
- {
- 	struct sdhci_host *host =3D platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+ module_platform_driver(sdhci_esdhc_imx_driver);
 diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci=
 -of-esdhc.c
-index 1aceed7..6617d67 100644
+index 63d219f..d7eb4ed 100644
 --- a/drivers/mmc/host/sdhci-of-esdhc.c
 +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -213,7 +213,7 @@ static int sdhci_esdhc_probe(struct platform_device=
- *pdev)
- 	return sdhci_pltfm_register(pdev, &sdhci_esdhc_pdata);
- }
-=20
--static int __devexit sdhci_esdhc_remove(struct platform_device *pdev)
-+static int sdhci_esdhc_remove(struct platform_device *pdev)
+@@ -234,7 +234,7 @@ static struct platform_driver sdhci_esdhc_driver =3D=
  {
- 	return sdhci_pltfm_unregister(pdev);
- }
+ 		.pm =3D SDHCI_PLTFM_PMOPS,
+ 	},
+ 	.probe =3D sdhci_esdhc_probe,
+-	.remove =3D __devexit_p(sdhci_esdhc_remove),
++	.remove =3D sdhci_esdhc_remove,
+ };
+=20
+ module_platform_driver(sdhci_esdhc_driver);
 diff --git a/drivers/mmc/host/sdhci-of-hlwd.c b/drivers/mmc/host/sdhci-=
 of-hlwd.c
-index aa78f3c..c3d3715 100644
+index 0ce088ae..3b68069 100644
 --- a/drivers/mmc/host/sdhci-of-hlwd.c
 +++ b/drivers/mmc/host/sdhci-of-hlwd.c
-@@ -71,7 +71,7 @@ static int sdhci_hlwd_probe(struct platform_device *p=
-dev)
- 	return sdhci_pltfm_register(pdev, &sdhci_hlwd_pdata);
- }
+@@ -90,7 +90,7 @@ static struct platform_driver sdhci_hlwd_driver =3D {
+ 		.pm =3D SDHCI_PLTFM_PMOPS,
+ 	},
+ 	.probe =3D sdhci_hlwd_probe,
+-	.remove =3D __devexit_p(sdhci_hlwd_remove),
++	.remove =3D sdhci_hlwd_remove,
+ };
 =20
--static int __devexit sdhci_hlwd_remove(struct platform_device *pdev)
-+static int sdhci_hlwd_remove(struct platform_device *pdev)
- {
- 	return sdhci_pltfm_unregister(pdev);
- }
+ module_platform_driver(sdhci_hlwd_driver);
 diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.=
 c
-index 3844771..d01aa61 100644
+index 04936f3..7bc2270 100644
 --- a/drivers/mmc/host/sdhci-pci.c
 +++ b/drivers/mmc/host/sdhci-pci.c
-@@ -1347,7 +1347,7 @@ static void sdhci_pci_runtime_pm_allow(struct dev=
-ice *dev)
- 	pm_suspend_ignore_children(dev, 1);
- }
-=20
--static void __devexit sdhci_pci_runtime_pm_forbid(struct device *dev)
-+static void sdhci_pci_runtime_pm_forbid(struct device *dev)
- {
- 	pm_runtime_forbid(dev);
- 	pm_runtime_get_noresume(dev);
-@@ -1445,7 +1445,7 @@ err:
- 	return ret;
- }
-=20
--static void __devexit sdhci_pci_remove(struct pci_dev *pdev)
-+static void sdhci_pci_remove(struct pci_dev *pdev)
- {
- 	int i;
- 	struct sdhci_pci_chip *chip;
+@@ -1470,7 +1470,7 @@ static struct pci_driver sdhci_driver =3D {
+ 	.name =3D		"sdhci-pci",
+ 	.id_table =3D	pci_ids,
+ 	.probe =3D	sdhci_pci_probe,
+-	.remove =3D	__devexit_p(sdhci_pci_remove),
++	.remove =3D	sdhci_pci_remove,
+ 	.driver =3D	{
+ 		.pm =3D   &sdhci_pci_pm_ops
+ 	},
 diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-px=
 av2.c
-index 7d4dc19..ac854aa 100644
+index 8e63a9c..964fc6d 100644
 --- a/drivers/mmc/host/sdhci-pxav2.c
 +++ b/drivers/mmc/host/sdhci-pxav2.c
-@@ -247,7 +247,7 @@ err_clk_get:
- 	return ret;
- }
-=20
--static int __devexit sdhci_pxav2_remove(struct platform_device *pdev)
-+static int sdhci_pxav2_remove(struct platform_device *pdev)
+@@ -275,7 +275,7 @@ static struct platform_driver sdhci_pxav2_driver =3D=
  {
- 	struct sdhci_host *host =3D platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+ 		.pm	=3D SDHCI_PLTFM_PMOPS,
+ 	},
+ 	.probe		=3D sdhci_pxav2_probe,
+-	.remove		=3D __devexit_p(sdhci_pxav2_remove),
++	.remove		=3D sdhci_pxav2_remove,
+ };
+=20
+ module_platform_driver(sdhci_pxav2_driver);
 diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-px=
 av3.c
-index e89c809..186dfc3 100644
+index e918a2b..a46cb67 100644
 --- a/drivers/mmc/host/sdhci-pxav3.c
 +++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -313,7 +313,7 @@ err_clk_get:
- 	return ret;
- }
-=20
--static int __devexit sdhci_pxav3_remove(struct platform_device *pdev)
-+static int sdhci_pxav3_remove(struct platform_device *pdev)
+@@ -346,7 +346,7 @@ static struct platform_driver sdhci_pxav3_driver =3D=
  {
- 	struct sdhci_host *host =3D platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+ 		.pm	=3D SDHCI_PLTFM_PMOPS,
+ 	},
+ 	.probe		=3D sdhci_pxav3_probe,
+-	.remove		=3D __devexit_p(sdhci_pxav3_remove),
++	.remove		=3D sdhci_pxav3_remove,
+ };
+=20
+ module_platform_driver(sdhci_pxav3_driver);
 diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.=
 c
-index f5dde9e..fe21ed4 100644
+index a54dd5d..b62a0c1 100644
 --- a/drivers/mmc/host/sdhci-s3c.c
 +++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -778,7 +778,7 @@ static int sdhci_s3c_probe(struct platform_device *=
-pdev)
- 	return ret;
- }
+@@ -916,7 +916,7 @@ MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
 =20
--static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
-+static int sdhci_s3c_remove(struct platform_device *pdev)
- {
- 	struct sdhci_host *host =3D  platform_get_drvdata(pdev);
- 	struct sdhci_s3c *sc =3D sdhci_priv(host);
+ static struct platform_driver sdhci_s3c_driver =3D {
+ 	.probe		=3D sdhci_s3c_probe,
+-	.remove		=3D __devexit_p(sdhci_s3c_remove),
++	.remove		=3D sdhci_s3c_remove,
+ 	.id_table	=3D sdhci_s3c_driver_ids,
+ 	.driver		=3D {
+ 		.owner	=3D THIS_MODULE,
 diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-sp=
 ear.c
-index 3fd1896..df2379a 100644
+index 6be89c0..3ba9479 100644
 --- a/drivers/mmc/host/sdhci-spear.c
 +++ b/drivers/mmc/host/sdhci-spear.c
-@@ -266,7 +266,7 @@ err:
- 	return ret;
- }
+@@ -336,7 +336,7 @@ static struct platform_driver sdhci_driver =3D {
+ 		.of_match_table =3D of_match_ptr(sdhci_spear_id_table),
+ 	},
+ 	.probe		=3D sdhci_probe,
+-	.remove		=3D __devexit_p(sdhci_remove),
++	.remove		=3D sdhci_remove,
+ };
 =20
--static int __devexit sdhci_remove(struct platform_device *pdev)
-+static int sdhci_remove(struct platform_device *pdev)
- {
- 	struct sdhci_host *host =3D platform_get_drvdata(pdev);
- 	struct spear_sdhci *sdhci =3D dev_get_platdata(&pdev->dev);
+ module_platform_driver(sdhci_driver);
 diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-te=
 gra.c
-index d3936d0..3695b2e 100644
+index f9eb916..f284354 100644
 --- a/drivers/mmc/host/sdhci-tegra.c
 +++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -370,7 +370,7 @@ err_no_plat:
- 	return rc;
- }
-=20
--static int __devexit sdhci_tegra_remove(struct platform_device *pdev)
-+static int sdhci_tegra_remove(struct platform_device *pdev)
+@@ -407,7 +407,7 @@ static struct platform_driver sdhci_tegra_driver =3D=
  {
- 	struct sdhci_host *host =3D platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 9872b52..9b8efac 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1430,7 +1430,7 @@ ealloch:
- 	return ret;
- }
+ 		.pm	=3D SDHCI_PLTFM_PMOPS,
+ 	},
+ 	.probe		=3D sdhci_tegra_probe,
+-	.remove		=3D __devexit_p(sdhci_tegra_remove),
++	.remove		=3D sdhci_tegra_remove,
+ };
 =20
--static int __devexit sh_mmcif_remove(struct platform_device *pdev)
-+static int sh_mmcif_remove(struct platform_device *pdev)
- {
- 	struct sh_mmcif_host *host =3D platform_get_drvdata(pdev);
- 	struct sh_mmcif_plat_data *pd =3D pdev->dev.platform_data;
+ module_platform_driver(sdhci_tegra_driver);
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mo=
+bile_sdhi.c
+index 0bdc146..6a9a625 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -330,7 +330,7 @@ static struct platform_driver sh_mobile_sdhi_driver=
+ =3D {
+ 		.of_match_table =3D sh_mobile_sdhi_of_match,
+ 	},
+ 	.probe		=3D sh_mobile_sdhi_probe,
+-	.remove		=3D __devexit_p(sh_mobile_sdhi_remove),
++	.remove		=3D sh_mobile_sdhi_remove,
+ };
+=20
+ module_platform_driver(sh_mobile_sdhi_driver);
 diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index f415be8..139212e 100644
+index 113ce6c..2f9bbdf 100644
 --- a/drivers/mmc/host/tmio_mmc.c
 +++ b/drivers/mmc/host/tmio_mmc.c
-@@ -107,7 +107,7 @@ out:
- 	return ret;
- }
-=20
--static int __devexit tmio_mmc_remove(struct platform_device *pdev)
-+static int tmio_mmc_remove(struct platform_device *pdev)
- {
- 	const struct mfd_cell *cell =3D mfd_get_cell(pdev);
- 	struct mmc_host *mmc =3D platform_get_drvdata(pdev);
+@@ -133,7 +133,7 @@ static struct platform_driver tmio_mmc_driver =3D {
+ 		.owner =3D THIS_MODULE,
+ 	},
+ 	.probe =3D tmio_mmc_probe,
+-	.remove =3D __devexit_p(tmio_mmc_remove),
++	.remove =3D tmio_mmc_remove,
+ 	.suspend =3D tmio_mmc_suspend,
+ 	.resume =3D tmio_mmc_resume,
+ };
 diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.=
 c
-index 1f1a252..4f84586 100644
+index f18bece..d8f8a5e 100644
 --- a/drivers/mmc/host/via-sdmmc.c
 +++ b/drivers/mmc/host/via-sdmmc.c
-@@ -1176,7 +1176,7 @@ disable:
- 	return ret;
- }
-=20
--static void __devexit via_sd_remove(struct pci_dev *pcidev)
-+static void via_sd_remove(struct pci_dev *pcidev)
- {
- 	struct via_crdr_mmc_host *sdhost =3D pci_get_drvdata(pcidev);
- 	unsigned long flags;
+@@ -1332,7 +1332,7 @@ static struct pci_driver via_sd_driver =3D {
+ 	.name =3D DRV_NAME,
+ 	.id_table =3D via_ids,
+ 	.probe =3D via_sd_probe,
+-	.remove =3D __devexit_p(via_sd_remove),
++	.remove =3D via_sd_remove,
+ 	.suspend =3D via_sd_suspend,
+ 	.resume =3D via_sd_resume,
+ };
 diff --git a/drivers/mmc/host/wbsd.c b/drivers/mmc/host/wbsd.c
-index d71358a..e954b77 100644
+index 64acd9c..3c8ef59 100644
 --- a/drivers/mmc/host/wbsd.c
 +++ b/drivers/mmc/host/wbsd.c
-@@ -1735,7 +1735,7 @@ static int wbsd_init(struct device *dev, int base=
-, int irq, int dma,
- 	return 0;
- }
+@@ -1941,7 +1941,7 @@ static struct platform_device *wbsd_device;
 =20
--static void __devexit wbsd_shutdown(struct device *dev, int pnp)
-+static void wbsd_shutdown(struct device *dev, int pnp)
- {
- 	struct mmc_host *mmc =3D dev_get_drvdata(dev);
- 	struct wbsd_host *host;
-@@ -1768,7 +1768,7 @@ static int wbsd_probe(struct platform_device *dev=
-)
- 	return wbsd_init(&dev->dev, param_io, param_irq, param_dma, 0);
- }
+ static struct platform_driver wbsd_driver =3D {
+ 	.probe		=3D wbsd_probe,
+-	.remove		=3D __devexit_p(wbsd_remove),
++	.remove		=3D wbsd_remove,
 =20
--static int __devexit wbsd_remove(struct platform_device *dev)
-+static int wbsd_remove(struct platform_device *dev)
- {
- 	wbsd_shutdown(&dev->dev, 0);
+ 	.suspend	=3D wbsd_platform_suspend,
+ 	.resume		=3D wbsd_platform_resume,
+@@ -1957,7 +1957,7 @@ static struct pnp_driver wbsd_pnp_driver =3D {
+ 	.name		=3D DRIVER_NAME,
+ 	.id_table	=3D pnp_dev_table,
+ 	.probe		=3D wbsd_pnp_probe,
+-	.remove		=3D __devexit_p(wbsd_pnp_remove),
++	.remove		=3D wbsd_pnp_remove,
 =20
-@@ -1801,7 +1801,7 @@ wbsd_pnp_probe(struct pnp_dev *pnpdev, const stru=
-ct pnp_device_id *dev_id)
- 	return wbsd_init(&pnpdev->dev, io, irq, dma, 1);
- }
-=20
--static void __devexit wbsd_pnp_remove(struct pnp_dev *dev)
-+static void wbsd_pnp_remove(struct pnp_dev *dev)
- {
- 	wbsd_shutdown(&dev->dev, 1);
- }
+ 	.suspend	=3D wbsd_pnp_suspend,
+ 	.resume		=3D wbsd_pnp_resume,
 --=20
 1.8.0
 
