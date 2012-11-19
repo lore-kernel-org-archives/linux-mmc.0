@@ -1,67 +1,50 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH 2/2] Powerpc/eSDHC: Add limit to data and erase timeout
+From: Zhang Haijun-B42677 <B42677@freescale.com>
+Subject: RE: [PATCH 2/2] Powerpc/eSDHC: Add limit to data and erase timeout
  value calculation
-Date: Sun, 18 Nov 2012 21:33:39 -0800
-Message-ID: <20121119053338.GA32383@lizard>
+Date: Mon, 19 Nov 2012 05:23:21 +0000
+Message-ID: <99E897753B6F7048BD8CCDB4661D02E1165888@039-SN2MPN1-023.039d.mgd.msft.net>
 References: <1353296310-10786-1-git-send-email-Haijun.Zhang@freescale.com>
  <1353296310-10786-2-git-send-email-Haijun.Zhang@freescale.com>
  <20121119050439.GA29095@lizard>
- <99E897753B6F7048BD8CCDB4661D02E1165888@039-SN2MPN1-023.039d.mgd.msft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:45984 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750758Ab2KSFgt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Nov 2012 00:36:49 -0500
-Received: by mail-pa0-f46.google.com with SMTP id bh2so187467pad.19
-        for <linux-mmc@vger.kernel.org>; Sun, 18 Nov 2012 21:36:48 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <99E897753B6F7048BD8CCDB4661D02E1165888@039-SN2MPN1-023.039d.mgd.msft.net>
+Received: from co9ehsobe001.messaging.microsoft.com ([207.46.163.24]:48850
+	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753302Ab2KSFi1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Nov 2012 00:38:27 -0500
+In-Reply-To: <20121119050439.GA29095@lizard>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhang Haijun-B42677 <B42677@freescale.com>
+To: Anton Vorontsov <cbouatmailru@gmail.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Huang Changming-R66093 <r66093@freescale.com>
 
-On Mon, Nov 19, 2012 at 05:23:21AM +0000, Zhang Haijun-B42677 wrote:
-> > Subject: Re: [PATCH 2/2] Powerpc/eSDHC: Add limit to data and erase
-> > timeout value calculation
-> > 
-> > On Mon, Nov 19, 2012 at 11:38:29AM +0800, Haijun Zhang wrote:
-> > > Some cards apply too larg timeout value for host to response, So limit
-> > > the maximum data transfer timeout value and maximum erase timeout
-> > > value to aviod timeout issue.
-> > >
-> > > Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
-> > > Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> > > Signed-off-by: Anton Vorontsov <cbouatmailru@gmail.com>
-> > 
-> > Ditto about the sign-off, it's inappropriate in this case.
-> 
-> 
-> [Haijun: ] Sorry.
-> So, replace signed-off-by with Acked-by?
+DQoNClJlZ2FyZHMNCkhhaWp1bi4NCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+
+IEZyb206IEFudG9uIFZvcm9udHNvdiBbbWFpbHRvOmNib3VhdG1haWxydUBnbWFpbC5jb21dDQo+
+IFNlbnQ6IE1vbmRheSwgTm92ZW1iZXIgMTksIDIwMTIgMTowNSBQTQ0KPiBUbzogWmhhbmcgSGFp
+anVuLUI0MjY3Nw0KPiBDYzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgSHVhbmcgQ2hhbmdt
+aW5nLVI2NjA5Mw0KPiBTdWJqZWN0OiBSZTogW1BBVENIIDIvMl0gUG93ZXJwYy9lU0RIQzogQWRk
+IGxpbWl0IHRvIGRhdGEgYW5kIGVyYXNlDQo+IHRpbWVvdXQgdmFsdWUgY2FsY3VsYXRpb24NCj4g
+DQo+IE9uIE1vbiwgTm92IDE5LCAyMDEyIGF0IDExOjM4OjI5QU0gKzA4MDAsIEhhaWp1biBaaGFu
+ZyB3cm90ZToNCj4gPiBTb21lIGNhcmRzIGFwcGx5IHRvbyBsYXJnIHRpbWVvdXQgdmFsdWUgZm9y
+IGhvc3QgdG8gcmVzcG9uc2UsIFNvIGxpbWl0DQo+ID4gdGhlIG1heGltdW0gZGF0YSB0cmFuc2Zl
+ciB0aW1lb3V0IHZhbHVlIGFuZCBtYXhpbXVtIGVyYXNlIHRpbWVvdXQNCj4gPiB2YWx1ZSB0byBh
+dmlvZCB0aW1lb3V0IGlzc3VlLg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogSGFpanVuIFpoYW5n
+IDxIYWlqdW4uWmhhbmdAZnJlZXNjYWxlLmNvbT4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBKZXJyeSBI
+dWFuZyA8Q2hhbmctTWluZy5IdWFuZ0BmcmVlc2NhbGUuY29tPg0KPiA+IFNpZ25lZC1vZmYtYnk6
+IEFudG9uIFZvcm9udHNvdiA8Y2JvdWF0bWFpbHJ1QGdtYWlsLmNvbT4NCj4gDQo+IERpdHRvIGFi
+b3V0IHRoZSBzaWduLW9mZiwgaXQncyBpbmFwcHJvcHJpYXRlIGluIHRoaXMgY2FzZS4NCg0KDQpb
+SGFpanVuOiBdIFNvcnJ5Lg0KU28sIHJlcGxhY2Ugc2lnbmVkLW9mZi1ieSB3aXRoIEFja2VkLWJ5
+Pw0KDQo+IA0KPiBbLi4uXQ0KPiA+IEBAIC03MjEsNiArNzIyLDEwIEBAIHZvaWQgbW1jX3NldF9k
+YXRhX3RpbWVvdXQoc3RydWN0IG1tY19kYXRhICpkYXRhLA0KPiBjb25zdCBzdHJ1Y3QgbW1jX2Nh
+cmQgKmNhcmQpDQo+ID4gIAkJCQlkYXRhLT50aW1lb3V0X25zID0gIDEwMDAwMDAwMDsJLyogMTAw
+bXMgKi8NCj4gPiAgCQl9DQo+ID4gIAl9DQo+ID4gKw0KPiA+ICsJaWYgKGhvc3QtPm1heF9kaXNj
+YXJkX3RvICYmDQo+ID4gKwkJaG9zdC0+bWF4X2Rpc2NhcmRfdG8gPCBkaXZfdTY0KGRhdGEtPnRp
+bWVvdXRfbnMsIDEwMDAwMDApKQ0KPiANCj4gU3RpbGwgd3JvbmcgaW5kZW50YXRpb24uDQoNCltI
+YWlqdW46IF0gRGlkIHlvdSBtZWFuIGhlcmUgbmVlZCB0d28gdGFicyBub3Qgb25lID8NCg0KPiAN
+Cj4gPiArCQlkYXRhLT50aW1lb3V0X25zID0gKHU2NClob3N0LT5tYXhfZGlzY2FyZF90byAqIDEw
+MDAwMDA7DQo+ID4gIH0NCj4gPiAgRVhQT1JUX1NZTUJPTChtbWNfc2V0X2RhdGFfdGltZW91dCk7
+DQoNCg==
 
-For patches that got my Acked-by, place the Acked-by tag.
-For patches that got my Reviewed-by, place the Reviewed-by tag.
-
-> > [...]
-> > > @@ -721,6 +722,10 @@ void mmc_set_data_timeout(struct mmc_data *data,
-> > const struct mmc_card *card)
-> > >  				data->timeout_ns =  100000000;	/* 100ms */
-> > >  		}
-> > >  	}
-> > > +
-> > > +	if (host->max_discard_to &&
-> > > +		host->max_discard_to < div_u64(data->timeout_ns, 1000000))
-> > 
-> > Still wrong indentation.
-> 
-> [Haijun: ] Did you mean here need two tabs not one ?
-
-Yes.
-
-> > 
-> > > +		data->timeout_ns = (u64)host->max_discard_to * 1000000;
-> > >  }
-> > >  EXPORT_SYMBOL(mmc_set_data_timeout);
