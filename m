@@ -1,83 +1,88 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH 1/2 v3] Powerpc/eSDHC: Calculate the applicable mmc erase timeout value
-Date: Mon, 19 Nov 2012 11:46:18 +0800
-Message-ID: <1353296778-11352-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Zhang Haijun-B42677 <B42677@freescale.com>
+Subject: RE: [PATCH 1/2 V2] Powerpc/eSDHC: Calculate the applicable mmc
+ erase timeout value
+Date: Mon, 19 Nov 2012 04:10:17 +0000
+Message-ID: <99E897753B6F7048BD8CCDB4661D02E1165611@039-SN2MPN1-023.039d.mgd.msft.net>
+References: <1352797762-30526-1-git-send-email-Haijun.Zhang@freescale.com>
+ <1352797762-30526-2-git-send-email-Haijun.Zhang@freescale.com>
+ <20121119004328.GK29066@lizard.sbx05977.paloaca.wayport.net>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe004.messaging.microsoft.com ([216.32.180.187]:17251
+Received: from co1ehsobe002.messaging.microsoft.com ([216.32.180.185]:19039
 	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752191Ab2KSEGo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Nov 2012 23:06:44 -0500
+	by vger.kernel.org with ESMTP id S1752191Ab2KSEKW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Nov 2012 23:10:22 -0500
+In-Reply-To: <20121119004328.GK29066@lizard.sbx05977.paloaca.wayport.net>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Haijun Zhang <Haijun.Zhang@freescale.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Huang Changming-R66093 <r66093@freescale.com>
 
-As large area erase needs long time usually a few minutes,
-which the host can't wait will bring about timeout error.
-So we need to split the large area to small sections which
-only need short erase time to avoid timeout error.
-
-Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
-Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-Signed-off-by: Anton Vorontsov <cbouatmailru@gmail.com>
----
-changes for v3:
-	- Add an empty line
-changes for v2:
-	- Recompute the timeout value and max_discard_to for mmc erase
-
- drivers/mmc/host/sdhci-esdhc.h    |    1 -
- drivers/mmc/host/sdhci-of-esdhc.c |   15 +++++++++++++++
- 2 files changed, 15 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index d25f9ab..bb6d664 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -21,7 +21,6 @@
- #define ESDHC_DEFAULT_QUIRKS	(SDHCI_QUIRK_FORCE_BLK_SZ_2048 | \
- 				SDHCI_QUIRK_NO_BUSY_IRQ | \
- 				SDHCI_QUIRK_NONSTANDARD_CLOCK | \
--				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK | \
- 				SDHCI_QUIRK_PIO_NEEDS_DELAY | \
- 				SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
- 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 63d219f..eb8e0a9 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -155,6 +155,20 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
- 	esdhc_set_clock(host, clock);
- }
- 
-+/*
-+ * As host dosn't supply us the method to calculate the timeout value,
-+ * we assigned one for high speed SDHC card. So we can use this to calculate
-+ * the max discard timeout value to limit the max discard sectors to avoid the
-+ * timeout issue during large area erase.
-+ */
-+
-+static unsigned int esdhc_of_get_timeout_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	return pltfm_host->clock / 1000 / 32;
-+}
-+
- #ifdef CONFIG_PM
- static u32 esdhc_proctl;
- static void esdhc_of_suspend(struct sdhci_host *host)
-@@ -190,6 +204,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
- 	.enable_dma = esdhc_of_enable_dma,
- 	.get_max_clock = esdhc_of_get_max_clock,
- 	.get_min_clock = esdhc_of_get_min_clock,
-+	.get_timeout_clock = esdhc_of_get_timeout_clock,
- 	.platform_init = esdhc_of_platform_init,
- #ifdef CONFIG_PM
- 	.platform_suspend = esdhc_of_suspend,
--- 
-1.7.0.4
-
+VGhhbmtzIGEgbG90Lg0KSSBoYWQgY29ycmVjdGVkIGFjY29yZGluZyB0byB5b3VyIHN1Z2dlc3Rp
+b24uIA0KVGhyZWUgbmV3IHBhdGNoIGhhZCBzZW5kLg0KDQpSZWdhcmRzDQpIYWlqdW4uDQoNCj4g
+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogbGludXgtbW1jLW93bmVyQHZnZXIu
+a2VybmVsLm9yZyBbbWFpbHRvOmxpbnV4LW1tYy0NCj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBP
+biBCZWhhbGYgT2YgQW50b24gVm9yb250c292DQo+IFNlbnQ6IE1vbmRheSwgTm92ZW1iZXIgMTks
+IDIwMTIgODo0MyBBTQ0KPiBUbzogWmhhbmcgSGFpanVuLUI0MjY3Nw0KPiBDYzogbGludXgtbW1j
+QHZnZXIua2VybmVsLm9yZzsgSHVhbmcgQ2hhbmdtaW5nLVI2NjA5Mw0KPiBTdWJqZWN0OiBSZTog
+W1BBVENIIDEvMiBWMl0gUG93ZXJwYy9lU0RIQzogQ2FsY3VsYXRlIHRoZSBhcHBsaWNhYmxlIG1t
+Yw0KPiBlcmFzZSB0aW1lb3V0IHZhbHVlDQo+IA0KPiBPbiBUdWUsIE5vdiAxMywgMjAxMiBhdCAw
+NTowOToyMlBNICswODAwLCBIYWlqdW4gWmhhbmcgd3JvdGU6DQo+ID4gQXMgbGFyZ2UgYXJlYSBl
+cmFzZSBuZWVkcyBsb25nIHRpbWUgdXN1YWxseSBhIGZldyBtaW51dGVzLCB3aGljaCB0aGUNCj4g
+PiBob3N0IGNhbid0IHdhaXQgd2lsbCBicmluZyBhYm91dCB0aW1lb3V0IGVycm9yLg0KPiA+IFNv
+IHdlIG5lZWQgdG8gc3BsaXQgdGhlIGxhcmdlIGFyZWEgdG8gc21hbGwgc2VjdGlvbnMgd2hpY2gg
+b25seSBuZWVkDQo+ID4gc2hvcnQgZXJhc2UgdGltZSB0byBhdm9pZCB0aW1lb3V0IGVycm9yLg0K
+PiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogSGFpanVuIFpoYW5nIDxIYWlqdW4uWmhhbmdAZnJlZXNj
+YWxlLmNvbT4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBKZXJyeSBIdWFuZyA8Q2hhbmctTWluZy5IdWFu
+Z0BmcmVlc2NhbGUuY29tPg0KPiA+IENDOiBBbnRvbiBWb3JvbnRzb3YgPGNib3VhdG1haWxydUBn
+bWFpbC5jb20+DQo+ID4gLS0tDQo+ID4gY2hhbmdlcyBmb3IgdjI6DQo+ID4gICAgICAgICAtIFJl
+Y29tcHV0ZSB0aGUgdGltZW91dCB2YWx1ZSBhbmQgbWF4X2Rpc2NhcmRfdG8gZm9yIG1tYyBlcmFz
+ZQ0KPiA+IAktIHNwbGl0IHRoZSBWMSBwYXRjaCBpbnRvIHR3byBWMiBwYXRjaHMuDQo+IA0KPiBP
+aCwgSSBzZWUuIEEgbmV3IHZlcnNpb24hIDopDQo+IA0KPiA+ICBkcml2ZXJzL21tYy9ob3N0L3Nk
+aGNpLWVzZGhjLmggICAgfCAgICAxIC0NCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1l
+c2RoYy5jIHwgICAxMyArKysrKysrKysrKysrDQo+ID4gIDIgZmlsZXMgY2hhbmdlZCwgMTMgaW5z
+ZXJ0aW9ucygrKSwgMSBkZWxldGlvbnMoLSkNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJz
+L21tYy9ob3N0L3NkaGNpLWVzZGhjLmgNCj4gPiBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktZXNk
+aGMuaCBpbmRleCBkMjVmOWFiLi5iYjZkNjY0IDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZlcnMvbW1j
+L2hvc3Qvc2RoY2ktZXNkaGMuaA0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktZXNk
+aGMuaA0KPiA+IEBAIC0yMSw3ICsyMSw2IEBADQo+ID4gICNkZWZpbmUgRVNESENfREVGQVVMVF9R
+VUlSS1MJKFNESENJX1FVSVJLX0ZPUkNFX0JMS19TWl8yMDQ4IHwgXA0KPiA+ICAJCQkJU0RIQ0lf
+UVVJUktfTk9fQlVTWV9JUlEgfCBcDQo+ID4gIAkJCQlTREhDSV9RVUlSS19OT05TVEFOREFSRF9D
+TE9DSyB8IFwNCj4gPiAtCQkJCVNESENJX1FVSVJLX0RBVEFfVElNRU9VVF9VU0VTX1NEQ0xLIHwg
+XA0KPiA+ICAJCQkJU0RIQ0lfUVVJUktfUElPX05FRURTX0RFTEFZIHwgXA0KPiA+ICAJCQkJU0RI
+Q0lfUVVJUktfUkVTVE9SRV9JUlFTX0FGVEVSX1JFU0VUKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBh
+L2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYw0KPiA+IGIvZHJpdmVycy9tbWMvaG9z
+dC9zZGhjaS1vZi1lc2RoYy5jDQo+ID4gaW5kZXggNjNkMjE5Zi4uYTA5ZWE2NyAxMDA2NDQNCj4g
+PiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMNCj4gPiArKysgYi9kcml2
+ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMNCj4gPiBAQCAtMTU0LDYgKzE1NCwxOCBAQCBz
+dGF0aWMgdm9pZCBlc2RoY19vZl9zZXRfY2xvY2soc3RydWN0IHNkaGNpX2hvc3QNCj4gKmhvc3Qs
+IHVuc2lnbmVkIGludCBjbG9jaykNCj4gPiAgCS8qIFNldCB0aGUgY2xvY2sgKi8NCj4gPiAgCWVz
+ZGhjX3NldF9jbG9jayhob3N0LCBjbG9jayk7DQo+ID4gIH0NCj4gPiArLyoNCj4gDQo+IEFuIGVt
+cHR5IGxpbmUgaXMgbWlzc2luZyBhZnRlciB0aGUgY2xvc2luZyBjdXJseSBicmFjZS4NCj4gDQo+
+IE90aGVyd2lzZSwgaXQgbG9va3MgZ29vZA0KPiANCj4gQWNrZWQtYnk6IEFudG9uIFZvcm9udHNv
+diA8Y2JvdWF0bWFpbHJ1QGdtYWlsLmNvbT4NCj4gDQo+ID4gKyAqIEFzIGhvc3QgZG9zbid0IHN1
+cHBseSB1cyB0aGUgbWV0aG9kIHRvIGNhbGN1bGF0ZSB0aGUgdGltZW91dA0KPiA+ICt2YWx1ZSwN
+Cj4gPiArICogd2UgYXNzaWduZWQgb25lIGZvciBoaWdoIHNwZWVkIFNESEMgY2FyZC4gU28gd2Ug
+Y2FuIHVzZSB0aGlzIHRvDQo+ID4gK2NhbGN1bGF0ZQ0KPiA+ICsgKiB0aGUgbWF4IGRpc2NhcmQg
+dGltZW91dCB2YWx1ZSB0byBsaW1pdCB0aGUgbWF4IGRpc2NhcmQgc2VjdG9ycyB0bw0KPiA+ICth
+dm9pZCB0aGUNCj4gPiArICogdGltZW91dCBpc3N1ZSBkdXJpbmcgbGFyZ2UgYXJlYSBlcmFzZS4N
+Cj4gPiArICovDQo+ID4gK3N0YXRpYyB1bnNpZ25lZCBpbnQgZXNkaGNfb2ZfZ2V0X3RpbWVvdXRf
+Y2xvY2soc3RydWN0IHNkaGNpX2hvc3QNCj4gPiArKmhvc3QpIHsNCj4gPiArCXN0cnVjdCBzZGhj
+aV9wbHRmbV9ob3N0ICpwbHRmbV9ob3N0ID0gc2RoY2lfcHJpdihob3N0KTsNCj4gPiArDQo+ID4g
+KwlyZXR1cm4gcGx0Zm1faG9zdC0+Y2xvY2sgLyAxMDAwIC8gMzI7IH0NCj4gPg0KPiA+ICAjaWZk
+ZWYgQ09ORklHX1BNDQo+ID4gIHN0YXRpYyB1MzIgZXNkaGNfcHJvY3RsOw0KPiA+IEBAIC0xOTAs
+NiArMjAyLDcgQEAgc3RhdGljIHN0cnVjdCBzZGhjaV9vcHMgc2RoY2lfZXNkaGNfb3BzID0gew0K
+PiA+ICAJLmVuYWJsZV9kbWEgPSBlc2RoY19vZl9lbmFibGVfZG1hLA0KPiA+ICAJLmdldF9tYXhf
+Y2xvY2sgPSBlc2RoY19vZl9nZXRfbWF4X2Nsb2NrLA0KPiA+ICAJLmdldF9taW5fY2xvY2sgPSBl
+c2RoY19vZl9nZXRfbWluX2Nsb2NrLA0KPiA+ICsJLmdldF90aW1lb3V0X2Nsb2NrID0gZXNkaGNf
+b2ZfZ2V0X3RpbWVvdXRfY2xvY2ssDQo+ID4gIAkucGxhdGZvcm1faW5pdCA9IGVzZGhjX29mX3Bs
+YXRmb3JtX2luaXQsICAjaWZkZWYgQ09ORklHX1BNDQo+ID4gIAkucGxhdGZvcm1fc3VzcGVuZCA9
+IGVzZGhjX29mX3N1c3BlbmQsDQo+ID4gLS0NCj4gPiAxLjcuMC40DQo+IC0tDQo+IFRvIHVuc3Vi
+c2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1t
+bWMiIGluDQo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
+b3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQNCj4gaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpv
+cmRvbW8taW5mby5odG1sDQoNCg==
 
