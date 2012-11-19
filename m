@@ -1,27 +1,68 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH] mmc,sdio: Fix the panic due to devname NULL when calling pm_runtime_set_active()
-Date: Mon, 19 Nov 2012 10:50:14 +0200
-Message-ID: <CAK=WgbaPFC-FaFjzPBPy5kreS4kj6ZAqkH9P85zNqTS0aU=ksQ@mail.gmail.com>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH] mmc,sdio: advancing the setting of dev name in
+ mmc_sdio_init_card()
+Date: Mon, 19 Nov 2012 08:51:18 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C22535E@039-SN1MPN1-004.039d.mgd.msft.net>
 References: <1353070447.15558.1681.camel@cliu38-desktop-build>
- <CAK=WgbYiKFpSeyKZU3OWvbq4VDKRMFQvxwPbyxsBbEYJGQU1sA@mail.gmail.com>
- <27240C0AC20F114CBF8149A2696CBE4A1D4191@SHSMSX101.ccr.corp.intel.com>
- <CAK=WgbYFbewu4bw5fhgjiG83oWiAcmBtRQF3_Jeba0CYKg75Qg@mail.gmail.com> <27240C0AC20F114CBF8149A2696CBE4A1D445F@SHSMSX101.ccr.corp.intel.com>
+ <1353346703.15558.1686.camel@cliu38-desktop-build>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <27240C0AC20F114CBF8149A2696CBE4A1D445F@SHSMSX101.ccr.corp.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Liu, Chuansheng" <chuansheng.liu@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:16500
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753302Ab2KSIvW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Nov 2012 03:51:22 -0500
+In-Reply-To: <1353346703.15558.1686.camel@cliu38-desktop-build>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chuansheng Liu <chuansheng.liu@intel.com>, "cjb@laptop.org" <cjb@laptop.org>, "ohad@wizery.com" <ohad@wizery.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Mon, Nov 19, 2012 at 10:01 AM, Liu, Chuansheng
-<chuansheng.liu@intel.com> wrote:
->> > Rechecked these codes, the trace event runtime_pm_status is added newly,
->> this is different with vanilla
->> > Linux.
->>
->> Not sure I'm following - can you point out which tree are you working with ?
-> Sorry, it is added internally for debugging purpose.
+VGhpcyBpcyBuZXcgdmVyc2lvbj8NCk1heWJlIHlvdSBzaG91bGQgYWRkIHByZWZpeCB2MiBpbiBz
+dWJqZWN0IGFuZCB0aGUgdmVyc2lvbiBoaXN0b3J5Lg0KDQpCZXN0IFJlZ2FyZHMNCkplcnJ5IEh1
+YW5nDQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBsaW51eC1tbWMt
+b3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86bGludXgtbW1jLQ0KPiBvd25lckB2Z2VyLmtl
+cm5lbC5vcmddIE9uIEJlaGFsZiBPZiBDaHVhbnNoZW5nIExpdQ0KPiBTZW50OiBUdWVzZGF5LCBO
+b3ZlbWJlciAyMCwgMjAxMiAxOjM4IEFNDQo+IFRvOiBjamJAbGFwdG9wLm9yZzsgb2hhZEB3aXpl
+cnkuY29tDQo+IENjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBsaW51eC1rZXJuZWxAdmdl
+ci5rZXJuZWwub3JnOw0KPiBjaHVhbnNoZW5nLmxpdUBpbnRlbC5jb20NCj4gU3ViamVjdDogW1BB
+VENIXSBtbWMsc2RpbzogYWR2YW5jaW5nIHRoZSBzZXR0aW5nIG9mIGRldiBuYW1lIGluDQo+IG1t
+Y19zZGlvX2luaXRfY2FyZCgpDQo+IA0KPiANCj4gSW4gYmVsb3cgY2FsbCB0cmFjZToNCj4gICAg
+IG1tY19yZXNjYW4NCj4gICAgIC0+IG1tY19yZXNjYW5fdHJ5X2ZyZXEoKQ0KPiAgICAgLT4gbW1j
+X2F0dGFjaF9zZGlvKCkNCj4gICAgIC0+IG1tY19zZGlvX2luaXRfY2FyZCgpDQo+ICAgICAgICAu
+Li4NCj4gICAgICAgIHBtX3J1bnRpbWVfc2V0X2FjdGl2ZSgpDQo+ICAgICAgICAuLi4NCj4gICAg
+ICAgIG1tY19hZGRfY2FyZCgpDQo+IA0KPiBUaGUgZGV2IG5hbWUgaXMgc2V0IHVudGlsIGluIG1t
+Y19hZGRfY2FyZCgpLCBidXQgYmVmb3JlIHRoYXQsIGl0IGlzDQo+IHBvc3NpYmxlIHRoZSBkZXYg
+bmFtZSBpcyBuZWVkZWQsIGZvciBleGFtcGxlIGluIHBtX3J1bnRpbWVfc2V0X2FjdGl2ZSgpLA0K
+PiB3ZSBjYW4gY2FsbCB0cmFjZSBldmVudCB0byB0cmFjZSB3aGljaCBkZXYgaXMgY2hhbmdpbmcg
+dGhlIHJ1bnRpbWUgc3RhdHVzLg0KPiANCj4gU28gaGVyZSBhZHZhbmNlIGl0IGludG8gbW1jX3Nk
+aW9faW5pdF9jYXJkKCkgdG8gYmVuZWZpdCBvdGhlcnMuDQo+IA0KPiBTaWduZWQtb2ZmLWJ5OiBs
+aXUgY2h1YW5zaGVuZyA8Y2h1YW5zaGVuZy5saXVAaW50ZWwuY29tPg0KPiAtLS0NCj4gIGRyaXZl
+cnMvbW1jL2NvcmUvYnVzLmMgIHwgICAgNSArKystLQ0KPiAgZHJpdmVycy9tbWMvY29yZS9zZGlv
+LmMgfCAgICA1ICsrKystDQo+ICAyIGZpbGVzIGNoYW5nZWQsIDcgaW5zZXJ0aW9ucygrKSwgMyBk
+ZWxldGlvbnMoLSkNCj4gDQo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL2J1cy5jIGIv
+ZHJpdmVycy9tbWMvY29yZS9idXMuYyBpbmRleA0KPiA5YjY4OTMzLi40ODg0ZDZlIDEwMDY0NA0K
+PiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL2J1cy5jDQo+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUv
+YnVzLmMNCj4gQEAgLTI3MCw4ICsyNzAsOSBAQCBpbnQgbW1jX2FkZF9jYXJkKHN0cnVjdCBtbWNf
+Y2FyZCAqY2FyZCkNCj4gIAkJW1VIU19ERFI1MF9CVVNfU1BFRURdID0gIkREUjUwICIsDQo+ICAJ
+fTsNCj4gDQo+IC0NCj4gLQlkZXZfc2V0X25hbWUoJmNhcmQtPmRldiwgIiVzOiUwNHgiLCBtbWNf
+aG9zdG5hbWUoY2FyZC0+aG9zdCksIGNhcmQtDQo+ID5yY2EpOw0KPiArCWlmICghZGV2X25hbWUo
+JmNhcmQtPmRldikpDQo+ICsJCWRldl9zZXRfbmFtZSgmY2FyZC0+ZGV2LCAiJXM6JTA0eCIsIG1t
+Y19ob3N0bmFtZShjYXJkLT5ob3N0KSwNCj4gKwkJCWNhcmQtPnJjYSk7DQo+IA0KPiAgCXN3aXRj
+aCAoY2FyZC0+dHlwZSkgew0KPiAgCWNhc2UgTU1DX1RZUEVfTU1DOg0KPiBkaWZmIC0tZ2l0IGEv
+ZHJpdmVycy9tbWMvY29yZS9zZGlvLmMgYi9kcml2ZXJzL21tYy9jb3JlL3NkaW8uYyBpbmRleA0K
+PiAyMjczY2U2Li5hOWY2ZjAyIDEwMDY0NA0KPiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL3NkaW8u
+Yw0KPiArKysgYi9kcml2ZXJzL21tYy9jb3JlL3NkaW8uYw0KPiBAQCAtNzk1LDggKzc5NSwxMSBA
+QCBzdGF0aWMgaW50IG1tY19zZGlvX2luaXRfY2FyZChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QsDQo+
+IHUzMiBvY3IsDQo+ICAJCQlnb3RvIHJlbW92ZTsNCj4gIAl9DQo+ICBmaW5pc2g6DQo+IC0JaWYg
+KCFvbGRjYXJkKQ0KPiArCWlmICghb2xkY2FyZCkgew0KPiAgCQlob3N0LT5jYXJkID0gY2FyZDsN
+Cj4gKwkJZGV2X3NldF9uYW1lKCZjYXJkLT5kZXYsICIlczolMDR4IiwgbW1jX2hvc3RuYW1lKGNh
+cmQtPmhvc3QpLA0KPiArCQkJY2FyZC0+cmNhKTsNCj4gKwl9DQo+ICAJcmV0dXJuIDA7DQo+IA0K
+PiAgcmVtb3ZlOg0KPiAtLQ0KPiAxLjcuMC40DQo+IA0KPiANCj4gDQo+IC0tDQo+IFRvIHVuc3Vi
+c2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1t
+bWMiIGluDQo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
+b3JnDQo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFq
+b3Jkb21vLWluZm8uaHRtbA0KDQo=
 
-Maybe keep this patch internally too then ?
