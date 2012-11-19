@@ -1,64 +1,39 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: [GIT PULL] at91: fixes for 3.7-rc7
-Date: Mon, 19 Nov 2012 17:31:17 +0100
-Message-ID: <50AA5ED5.8090901@atmel.com>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [GIT PULL] at91: fixes for 3.7-rc7
+Date: Mon, 19 Nov 2012 08:52:42 -0800
+Message-ID: <CAOesGMjAYtEkmEYnzCQ4G821BWG9D6LHvgt5aOMJgus_hzFkRA@mail.gmail.com>
+References: <50AA5ED5.8090901@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Linux Kernel list <linux-kernel@vger.kernel.org>
-Cc: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:57314 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753942Ab2KSQwp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Nov 2012 11:52:45 -0500
+Received: by mail-ie0-f174.google.com with SMTP id k13so7070842iea.19
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Nov 2012 08:52:43 -0800 (PST)
+In-Reply-To: <50AA5ED5.8090901@atmel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Linux Kernel list <linux-kernel@vger.kernel.org>, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Arnd, Olof,
+Hi Nicolas,
 
-Here is another "fixes" pull request for AT91. It enables the sd/mmc driver
-for Device Tree enabled platforms. Those patches where part of a series that
-was split in two for reaching upstream: the MMC part is already in Linus' tree
-and this is the arm-soc part.
-I have placed these patches on top of the fixes that you already have for AT91.
+On Mon, Nov 19, 2012 at 8:31 AM, Nicolas Ferre <nicolas.ferre@atmel.com> wrote:
+> Arnd, Olof,
+>
+> Here is another "fixes" pull request for AT91. It enables the sd/mmc driver
+> for Device Tree enabled platforms. Those patches where part of a series that
+> was split in two for reaching upstream: the MMC part is already in Linus' tree
+> and this is the arm-soc part.
+> I have placed these patches on top of the fixes that you already have for AT91.
 
-The following changes since commit 641f3ce64b050961d454a0716bb6dbf528315aac:
+What regressions do these fixes resolve?
 
-  ARM: at91/usbh: fix overcurrent gpio setup (2012-11-16 10:46:29 +0100)
+It looks more like they are DT-enablement patches to me, and thus 3.8
+material, not 3.7. I'll be happy to queue them up in next/dt though.
 
-are available in the git repository at:
+Thanks,
 
-  git://github.com/at91linux/linux-at91.git tags/at91-fixes
-
-for you to fetch changes up to 83ce1c55cfb639438c2516cb05f3b8ee472023e5:
-
-  ARM: at91/dts: add nodes for atmel hsmci controllers for atmel boards (2012-11-19 17:02:40 +0100)
-
-----------------------------------------------------------------
-Add entries for enabling the use of sd/mmc driver on AT91.
-Those entries where missing for device tree use on these
-platforms.
-
-----------------------------------------------------------------
-Ludovic Desroches (3):
-      ARM: at91: add clocks for DT entries
-      ARM: at91/dts: add nodes for atmel hsmci controllers for atmel SOCs
-      ARM: at91/dts: add nodes for atmel hsmci controllers for atmel boards
-
- arch/arm/boot/dts/at91sam9260.dtsi          |  9 +++++++++
- arch/arm/boot/dts/at91sam9263.dtsi          | 18 ++++++++++++++++++
- arch/arm/boot/dts/at91sam9263ek.dts         | 10 ++++++++++
- arch/arm/boot/dts/at91sam9g20ek_2mmc.dts    | 12 ++++++++++++
- arch/arm/boot/dts/at91sam9g20ek_common.dtsi |  9 +++++++++
- arch/arm/boot/dts/at91sam9g25ek.dts         | 18 ++++++++++++++++++
- arch/arm/boot/dts/at91sam9g45.dtsi          | 18 ++++++++++++++++++
- arch/arm/boot/dts/at91sam9m10g45ek.dts      | 19 +++++++++++++++++++
- arch/arm/boot/dts/at91sam9n12.dtsi          |  9 +++++++++
- arch/arm/boot/dts/at91sam9n12ek.dts         |  9 +++++++++
- arch/arm/boot/dts/at91sam9x5.dtsi           | 18 ++++++++++++++++++
- arch/arm/mach-at91/at91sam9260.c            |  1 +
- arch/arm/mach-at91/at91sam9263.c            |  2 ++
- arch/arm/mach-at91/at91sam9g45.c            |  2 ++
- arch/arm/mach-at91/at91sam9n12.c            |  1 +
- arch/arm/mach-at91/at91sam9x5.c             |  2 ++
- 16 files changed, 157 insertions(+)
-
--- 
-Nicolas Ferre
+-Olof
