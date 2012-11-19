@@ -1,109 +1,130 @@
 From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
-Date: Mon, 19 Nov 2012 02:48:27 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C224F7A@039-SN1MPN1-004.039d.mgd.msft.net>
+Subject: RE: [PATCH 3/4 v5] SDHCI: add sdhci_get_cd callback to detect the
+ card
+Date: Mon, 19 Nov 2012 02:50:18 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C224F8F@039-SN1MPN1-004.039d.mgd.msft.net>
 References: <1351584769-16662-1-git-send-email-r66093@freescale.com>
-	<1351584769-16662-2-git-send-email-r66093@freescale.com>
-	<CA+20K0AfmJSrPO9-_-yNk4HhEVYPj8cMaa+jCZAZhp23Vb817g@mail.gmail.com>
-	<110EED8CC96DFC488B7E717A2027A27C210A6D@039-SN1MPN1-004.039d.mgd.msft.net>
-	<CA+20K0A3myrosOGK2dcstX06QOS1SRHaaz-zYqoFSA7ZYcEJvQ@mail.gmail.com>
-	<110EED8CC96DFC488B7E717A2027A27C213E8A@039-SN1MPN1-004.039d.mgd.msft.net>
- <CA+20K0DmMPDv0SJgd6-zoHN+eZr1fROT7=HY-mEWgAO9-gmSPg@mail.gmail.com>
+ <1351584769-16662-2-git-send-email-r66093@freescale.com>
+ <1351584769-16662-3-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:44802
+Received: from va3ehsobe003.messaging.microsoft.com ([216.32.180.13]:26667
 	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752786Ab2KSCsb convert rfc822-to-8bit
+	by vger.kernel.org with ESMTP id S1752825Ab2KSCuX convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 18 Nov 2012 21:48:31 -0500
-In-Reply-To: <CA+20K0DmMPDv0SJgd6-zoHN+eZr1fROT7=HY-mEWgAO9-gmSPg@mail.gmail.com>
+	Sun, 18 Nov 2012 21:50:23 -0500
+In-Reply-To: <1351584769-16662-3-git-send-email-r66093@freescale.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Johan Rudholm <jrudholm@gmail.com>
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi, Anton and Chris
-This patch has been Reviewed-By: Johan Rudholm <johan.rudholm@stericsson.com> on Nov 05.
+Anton,
+No any feedback since posted.
 Could you give some comment about it?
 
 Best Regards
 Jerry Huang
 
+
 > -----Original Message-----
-> From: Johan Rudholm [mailto:jrudholm@gmail.com]
-> Sent: Monday, November 05, 2012 10:08 PM
-> To: Huang Changming-R66093
-> Cc: linux-mmc@vger.kernel.org; Anton Vorontsov; Chris Ball
-> Subject: Re: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
+> From: Huang Changming-R66093
+> Sent: Tuesday, October 30, 2012 4:13 PM
+> To: linux-mmc@vger.kernel.org
+> Cc: Huang Changming-R66093; Anton Vorontsov; Chris Ball
+> Subject: [PATCH 3/4 v5] SDHCI: add sdhci_get_cd callback to detect the
+> card
 > 
-> Hi,
+> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 > 
-> 2012/11/5 Huang Changming-R66093 <r66093@freescale.com>:
-> >>
-> >> 2012/11/2 Huang Changming-R66093 <r66093@freescale.com>:
-> >> > Hi, Johan,
-> >> > When quicks SDHCI_QUIRK_BROKEN_CARD_DETECTION is set, the driver
-> will
-> >> poll the card status with the command CMD13 periodically, then many
-> >> interrupts will be generated, which affect the performance.
-> >>
-> >> Ok, just to see if I understand the scenario correctly:
-> >> SDHCI_QUIRK_BROKEN_CARD_DETECTION causes the MMC_CAP_NEEDS_POLL cap to
-> be
-> >> set, which will cause mmc_rescan to be run at a one second interval.
-> >> mmc_rescan calls bus_ops->detect (mmc_sd_detect) and this in turn
-> calls
-> >> _mmc_detect_card_removed, which will do the bus_ops->alive and send
-> CMD13.
-> >> So in this case, one CMD13 is sent per second, right?
-> >> Is this the cause of the performance issue?
-> >
-> > Yes, You are right.
+> Add callback function sdhci_get_cd to detect the card.
+> And one new callback added to implement the card detect in sdhci
+> struncture.
+> If special platform has the card detect callback, it will return the card
+> state, the value zero is for absent cardi and one is for present card.
+> If the controller don't support card detect, sdhci_get_cd will return -
+> ENOSYS.
 > 
-> Ok, it's a bit hard to understand how this can lead to a noticeable
-> performance impact, but OK. :)
+> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> CC: Anton Vorontsov <cbouatmailru@gmail.com>
+> CC: Chris Ball <cjb@laptop.org>
+> ---
+> changes for v2:
+> 	- when controller don't support get_cd, return -ENOSYS
+> 	- add new callback for sdhci to detect the card
+> 	- add the CC
+> changes for v3:
+> 	- use pin_lock only when get_cd defined changes for v4:
+> 	- enalbe the controller clock in platform, instead of core changes
+> for v5:
+> 	- remove the copyright
 > 
-> >> A thought: if the host hardware does have a GPIO card detect pin
-> hooked
-> >> up, would it not be possible to make this pin generate an IRQ whenever
-> a
-> >> card is inserted or removed? This is what we do in the MMCI driver,
-> for
-> >> instance (mmci_cd_irq).
-> >
-> > Our silicones has this pin to do card detect, but some boards don't
-> generate the interrupt when card is inserted or removed. So I have to use
-> the poll mode.
-> >
-> >> > Yes, some cases to detect GPIO can't be trusted, so I only just
-> >> implement this callback in eSDHC-of driver. that is to say, just when
-> the
-> >> platform support it, this callback can be implement, if not, continue
-> to
-> >> send the command CMD13.
-> >>
-> >> I'm just wondering how this will affect our system, where we use the
-> cd
-> >> GPIO to generate detect jobs on card insert/remove, but where the cd
-> pin
-> >> is not 100% synchronized with the electrical connection of the power
-> and
-> >> cmd line of the SD-card. So if I remember correctly, the cd pin may
-> >> report that the card has been removed, but there is still an electric
-> >> connection and the card is alive...
-> >>
-> > I don't see this on our board, when card is inserted or removed, the
-> register field can reflect this state correctly.
+>  drivers/mmc/host/sdhci.c |   21 +++++++++++++++++++++
+>  drivers/mmc/host/sdhci.h |    2 ++
+>  2 files changed, 23 insertions(+)
 > 
-> We see a difference on our boards with this patch, but no functional
-> change (actually a removed card is detected earlier now), so from my
-> perspective:
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
+> f05a377..cc9c8a6 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1573,6 +1573,26 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+>  	return ret;
+>  }
 > 
-> Reviewed-By: Johan Rudholm <johan.rudholm@stericsson.com>
+> +/* Return values for the sdjco_get_cd callback:
+> + *   0 for a absent card
+> + *   1 for a present card
+> + *   -ENOSYS when not supported (equal to NULL callback)
+> + */
+> +static int sdhci_get_cd(struct mmc_host *mmc) {
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	unsigned long flags;
+> +	int present = -ENOSYS;
+> +
+> +	if (host->ops->get_cd) {
+> +		spin_lock_irqsave(&host->lock, flags);
+> +		present = host->ops->get_cd(host);
+> +		spin_unlock_irqrestore(&host->lock, flags);
+> +	}
+> +
+> +	return present;
+> +}
+> +
+>  static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int
+> enable)  {
+>  	if (host->flags & SDHCI_DEVICE_DEAD)
+> @@ -1995,6 +2015,7 @@ static const struct mmc_host_ops sdhci_ops = {
+>  	.request	= sdhci_request,
+>  	.set_ios	= sdhci_set_ios,
+>  	.get_ro		= sdhci_get_ro,
+> +	.get_cd		= sdhci_get_cd,
+>  	.hw_reset	= sdhci_hw_reset,
+>  	.enable_sdio_irq = sdhci_enable_sdio_irq,
+>  	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h index
+> 71a4a7e..7c8f08d 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -69,6 +69,7 @@
+>  #define  SDHCI_SPACE_AVAILABLE	0x00000400
+>  #define  SDHCI_DATA_AVAILABLE	0x00000800
+>  #define  SDHCI_CARD_PRESENT	0x00010000
+> +#define  SDHCI_CARD_CDPL	0x00040000
+>  #define  SDHCI_WRITE_PROTECT	0x00080000
+>  #define  SDHCI_DATA_LVL_MASK	0x00F00000
+>  #define   SDHCI_DATA_LVL_SHIFT	20
+> @@ -263,6 +264,7 @@ struct sdhci_ops {
 > 
-> //Johan
+>  	void	(*set_clock)(struct sdhci_host *host, unsigned int clock);
+> 
+> +	int		(*get_cd)(struct sdhci_host *host);
+>  	int		(*enable_dma)(struct sdhci_host *host);
+>  	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+>  	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+> --
+> 1.7.9.5
 
 
