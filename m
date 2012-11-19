@@ -1,99 +1,49 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH 2/2 V2] Powerpc/eSDHC: Add limit to data and erase
- timeout value calculation
-Date: Sun, 18 Nov 2012 16:46:18 -0800
-Message-ID: <20121119004618.GL29066@lizard.sbx05977.paloaca.wayport.net>
-References: <1352797762-30526-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: [PATCH v6 09/14] mmc: sdhci-pxav3: add quirks2
+Date: Mon, 19 Nov 2012 10:34:00 +0800
+Message-ID: <CADz5_g+rhJzRxAOyCe3CpW+ZywcwCQVH3MU8e0Z3JAdk+JStGw@mail.gmail.com>
+References: <1350471893-29633-1-git-send-email-keyuan.liu@gmail.com>
+	<1350471893-29633-10-git-send-email-keyuan.liu@gmail.com>
+	<874nkn9916.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:55436 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752722Ab2KSAt2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Nov 2012 19:49:28 -0500
-Received: by mail-pb0-f46.google.com with SMTP id wy7so3064935pbc.19
-        for <linux-mmc@vger.kernel.org>; Sun, 18 Nov 2012 16:49:28 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <1352797762-30526-1-git-send-email-Haijun.Zhang@freescale.com>
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:42619 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752821Ab2KSCeC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Nov 2012 21:34:02 -0500
+Received: by mail-wi0-f172.google.com with SMTP id hj6so3297258wib.1
+        for <linux-mmc@vger.kernel.org>; Sun, 18 Nov 2012 18:34:00 -0800 (PST)
+In-Reply-To: <874nkn9916.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haijun Zhang <Haijun.Zhang@freescale.com>
-Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
 
-On Tue, Nov 13, 2012 at 05:09:21PM +0800, Haijun Zhang wrote:
-> Some cards apply too larg timeout value for host to response,
-> So limit the maximum data transfer timeout value and maximum erase
-> timeout value to aviod timeout issue.
-> 
-> Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> CC: Anton Vorontsov <cbouatmailru@gmail.com>
-> ---
-> changes for v2:
->         - Add limit to data and erase timeout value calculation
->         - split the V1 patch into two V2 patchs.
-> 
->  drivers/mmc/core/core.c |   27 ++++++++++++++++-----------
->  1 files changed, 16 insertions(+), 11 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index c241fc1..c90b791 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -721,6 +721,10 @@ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
->  				data->timeout_ns =  100000000;	/* 100ms */
->  		}
->  	}
-> +
-> +	if (card->host->max_discard_to &&
-> +		card->host->max_discard_to < div_u64(data->timeout_ns, 1000000))
+2012/11/18 Chris Ball <cjb@laptop.org>:
+> Hi,
+>
+> On Wed, Oct 17 2012, Kevin Liu wrote:
+>> From: Kevin Liu <kliu5@marvell.com>
+>>
+>> Acked-by:  Zhangfei Gao <zhangfei.gao@marvell.com>
+>> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+>> ---
+>>  drivers/mmc/host/sdhci-pxav3.c          |    2 ++
+>>  include/linux/platform_data/pxa_sdhci.h |    2 ++
+>>  2 files changed, 4 insertions(+), 0 deletions(-)
+>
+> It looks like you aren't using any of the quirks in quirks2, is that
+> right?  I'm still hoping we might be able to get rid of quirks2, so
+> I'd rather wait until you need it (or we get rid of it) before applying
+> this.
+>
 
-Incorrect indentation, please add one more tab.
+My previous patch "[PATCH v6 08/14] mmc: sdhci: enhance preset value
+function" introduced a quirk SDHCI_QUIRK2_PRESET_VALUE_BROKEN, which
+aim to disable preset feature since the preset setting is fixed only
+for 200Mhz base clock on pxav3 platform. So we should disable preset
+if the base clock is other than 200Mhz.
 
-Otherwise, the patch looks OK to me.
-
-Reviewed-by: Anton Vorontsov <cbouatmailru@gmail.com>
-
-> +		data->timeout_ns = (u64)card->host->max_discard_to * 1000000;
->  }
->  EXPORT_SYMBOL(mmc_set_data_timeout);
->  
-> @@ -1880,7 +1884,7 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
->  		return 0;
->  
->  	if (qty == 1)
-> -		return 1;
-> +		return 1 << card->erase_shift;
->  
->  	/* Convert qty to sectors */
->  	if (card->erase_shift)
-> @@ -1898,16 +1902,17 @@ unsigned int mmc_calc_max_discard(struct mmc_card *card)
->  	struct mmc_host *host = card->host;
->  	unsigned int max_discard, max_trim;
->  
-> -	if (!host->max_discard_to)
-> -		return UINT_MAX;
-> -
-> -	/*
-> -	 * Without erase_group_def set, MMC erase timeout depends on clock
-> -	 * frequence which can change.  In that case, the best choice is
-> -	 * just the preferred erase size.
-> -	 */
-> -	if (mmc_card_mmc(card) && !(card->ext_csd.erase_group_def & 1))
-> -		return card->pref_erase;
-> +	if (!host->max_discard_to) {
-> +		if (mmc_card_sd(card))
-> +			return UINT_MAX;
-> +		/*
-> +		 * Without erase_group_def set, MMC erase timeout depends on
-> +		 * clock frequence which can change.  In that case, the best
-> +		 * choice is just the preferred erase size.
-> +		 */
-> +		if (mmc_card_mmc(card) && !(card->ext_csd.erase_group_def & 1))
-> +			return card->pref_erase;
-> +	}
->  
->  	max_discard = mmc_do_calc_max_discard(card, MMC_ERASE_ARG);
->  	if (mmc_can_trim(card)) {
-> -- 
-> 1.7.0.4
+Thanks
+Kevin
