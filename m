@@ -1,60 +1,79 @@
-From: Zhang Haijun-B42677 <B42677@freescale.com>
-Subject: RE: [PATCH 2/2] Powerpc/eSDHC: Add limit to data and erase timeout
- value calculation
-Date: Mon, 19 Nov 2012 05:57:10 +0000
-Message-ID: <99E897753B6F7048BD8CCDB4661D02E11659BE@039-SN2MPN1-023.039d.mgd.msft.net>
-References: <1353296310-10786-1-git-send-email-Haijun.Zhang@freescale.com>
- <1353296310-10786-2-git-send-email-Haijun.Zhang@freescale.com>
- <20121119050439.GA29095@lizard>
- <99E897753B6F7048BD8CCDB4661D02E1165888@039-SN2MPN1-023.039d.mgd.msft.net>
- <20121119053338.GA32383@lizard>
+From: "Liu, Chuansheng" <chuansheng.liu@intel.com>
+Subject: RE: [PATCH] mmc,sdio: Fix the panic due to devname NULL when
+ calling pm_runtime_set_active()
+Date: Mon, 19 Nov 2012 05:57:48 +0000
+Message-ID: <27240C0AC20F114CBF8149A2696CBE4A1D4191@SHSMSX101.ccr.corp.intel.com>
+References: <1353070447.15558.1681.camel@cliu38-desktop-build>
+ <CAK=WgbYiKFpSeyKZU3OWvbq4VDKRMFQvxwPbyxsBbEYJGQU1sA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:17090 "EHLO
-	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751248Ab2KSF5N (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Nov 2012 00:57:13 -0500
-In-Reply-To: <20121119053338.GA32383@lizard>
+Received: from mga11.intel.com ([192.55.52.93]:25920 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752442Ab2KSF5u convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Nov 2012 00:57:50 -0500
+In-Reply-To: <CAK=WgbYiKFpSeyKZU3OWvbq4VDKRMFQvxwPbyxsBbEYJGQU1sA@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Huang Changming-R66093 <r66093@freescale.com>
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-QWxsIGNvcnJlY3RlZCwgbWFueSB0aGFua3MuDQoNCg0KUmVnYXJkcw0KSGFpanVuLg0KDQoNCj4g
-LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQW50b24gVm9yb250c292IFttYWls
-dG86Y2JvdWF0bWFpbHJ1QGdtYWlsLmNvbV0NCj4gU2VudDogTW9uZGF5LCBOb3ZlbWJlciAxOSwg
-MjAxMiAxOjM0IFBNDQo+IFRvOiBaaGFuZyBIYWlqdW4tQjQyNjc3DQo+IENjOiBsaW51eC1tbWNA
-dmdlci5rZXJuZWwub3JnOyBIdWFuZyBDaGFuZ21pbmctUjY2MDkzDQo+IFN1YmplY3Q6IFJlOiBb
-UEFUQ0ggMi8yXSBQb3dlcnBjL2VTREhDOiBBZGQgbGltaXQgdG8gZGF0YSBhbmQgZXJhc2UNCj4g
-dGltZW91dCB2YWx1ZSBjYWxjdWxhdGlvbg0KPiANCj4gT24gTW9uLCBOb3YgMTksIDIwMTIgYXQg
-MDU6MjM6MjFBTSArMDAwMCwgWmhhbmcgSGFpanVuLUI0MjY3NyB3cm90ZToNCj4gPiA+IFN1Ympl
-Y3Q6IFJlOiBbUEFUQ0ggMi8yXSBQb3dlcnBjL2VTREhDOiBBZGQgbGltaXQgdG8gZGF0YSBhbmQg
-ZXJhc2UNCj4gPiA+IHRpbWVvdXQgdmFsdWUgY2FsY3VsYXRpb24NCj4gPiA+DQo+ID4gPiBPbiBN
-b24sIE5vdiAxOSwgMjAxMiBhdCAxMTozODoyOUFNICswODAwLCBIYWlqdW4gWmhhbmcgd3JvdGU6
-DQo+ID4gPiA+IFNvbWUgY2FyZHMgYXBwbHkgdG9vIGxhcmcgdGltZW91dCB2YWx1ZSBmb3IgaG9z
-dCB0byByZXNwb25zZSwgU28NCj4gbGltaXQNCj4gPiA+ID4gdGhlIG1heGltdW0gZGF0YSB0cmFu
-c2ZlciB0aW1lb3V0IHZhbHVlIGFuZCBtYXhpbXVtIGVyYXNlIHRpbWVvdXQNCj4gPiA+ID4gdmFs
-dWUgdG8gYXZpb2QgdGltZW91dCBpc3N1ZS4NCj4gPiA+ID4NCj4gPiA+ID4gU2lnbmVkLW9mZi1i
-eTogSGFpanVuIFpoYW5nIDxIYWlqdW4uWmhhbmdAZnJlZXNjYWxlLmNvbT4NCj4gPiA+ID4gU2ln
-bmVkLW9mZi1ieTogSmVycnkgSHVhbmcgPENoYW5nLU1pbmcuSHVhbmdAZnJlZXNjYWxlLmNvbT4N
-Cj4gPiA+ID4gU2lnbmVkLW9mZi1ieTogQW50b24gVm9yb250c292IDxjYm91YXRtYWlscnVAZ21h
-aWwuY29tPg0KPiA+ID4NCj4gPiA+IERpdHRvIGFib3V0IHRoZSBzaWduLW9mZiwgaXQncyBpbmFw
-cHJvcHJpYXRlIGluIHRoaXMgY2FzZS4NCj4gPg0KPiA+DQo+ID4gW0hhaWp1bjogXSBTb3JyeS4N
-Cj4gPiBTbywgcmVwbGFjZSBzaWduZWQtb2ZmLWJ5IHdpdGggQWNrZWQtYnk/DQo+IA0KPiBGb3Ig
-cGF0Y2hlcyB0aGF0IGdvdCBteSBBY2tlZC1ieSwgcGxhY2UgdGhlIEFja2VkLWJ5IHRhZy4NCj4g
-Rm9yIHBhdGNoZXMgdGhhdCBnb3QgbXkgUmV2aWV3ZWQtYnksIHBsYWNlIHRoZSBSZXZpZXdlZC1i
-eSB0YWcuDQo+IA0KPiA+ID4gWy4uLl0NCj4gPiA+ID4gQEAgLTcyMSw2ICs3MjIsMTAgQEAgdm9p
-ZCBtbWNfc2V0X2RhdGFfdGltZW91dChzdHJ1Y3QgbW1jX2RhdGENCj4gKmRhdGEsDQo+ID4gPiBj
-b25zdCBzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQpDQo+ID4gPiA+ICAJCQkJZGF0YS0+dGltZW91dF9u
-cyA9ICAxMDAwMDAwMDA7CS8qDQo+IDEwMG1zICovDQo+ID4gPiA+ICAJCX0NCj4gPiA+ID4gIAl9
-DQo+ID4gPiA+ICsNCj4gPiA+ID4gKwlpZiAoaG9zdC0+bWF4X2Rpc2NhcmRfdG8gJiYNCj4gPiA+
-ID4gKwkJaG9zdC0+bWF4X2Rpc2NhcmRfdG8gPCBkaXZfdTY0KGRhdGEtPnRpbWVvdXRfbnMsDQo+
-IDEwMDAwMDApKQ0KPiA+ID4NCj4gPiA+IFN0aWxsIHdyb25nIGluZGVudGF0aW9uLg0KPiA+DQo+
-ID4gW0hhaWp1bjogXSBEaWQgeW91IG1lYW4gaGVyZSBuZWVkIHR3byB0YWJzIG5vdCBvbmUgPw0K
-PiANCj4gWWVzLg0KPiANCj4gPiA+DQo+ID4gPiA+ICsJCWRhdGEtPnRpbWVvdXRfbnMgPSAodTY0
-KWhvc3QtPm1heF9kaXNjYXJkX3RvICogMTAwMDAwMDsNCj4gPiA+ID4gIH0NCj4gPiA+ID4gIEVY
-UE9SVF9TWU1CT0wobW1jX3NldF9kYXRhX3RpbWVvdXQpOw0KDQo=
 
+
+> -----Original Message-----
+> From: Ohad Ben-Cohen [mailto:ohad@wizery.com]
+> Sent: Saturday, November 17, 2012 3:33 AM
+> To: Liu, Chuansheng
+> Cc: Chris Ball; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
+> Subject: Re: [PATCH] mmc,sdio: Fix the panic due to devname NULL when
+> calling pm_runtime_set_active()
+> 
+> Hi Liu,
+> 
+> On Fri, Nov 16, 2012 at 2:54 PM, Chuansheng Liu
+> <chuansheng.liu@intel.com> wrote:
+> > So when calling pm_runtime_set_active(), it will hit the strlen(devname==0)
+> > which trigger the panic.
+> 
+> Can you please point to the exact line of code that triggers this panic ?
+    The call trace is as below:
+    mmc_rescan
+    -> mmc_rescan_try_freq
+    -> mmc_attach_sdio
+    -> pm_runtime_set_active
+    -> __pm_runtime_set_status
+    -> __update_runtime_status
+    -> trace_runtime_pm_status
+      This function is corresponding to the below code in trace/events/power.h:
+    TRACE_EVENT(runtime_pm_status,
+    
+        TP_PROTO(struct device *dev, int status),
+    
+        TP_ARGS(dev, status),
+    
+        TP_STRUCT__entry(
+                __string(devname, dev_name(dev))
+
+Rechecked these codes, the trace event runtime_pm_status is added newly, this is different with vanilla
+Linux. But it is just a new trace event.
+
+So I still think that calling pm_runtime_set_active is not safe when dev_name is NULL.
+If you agree this point, I can refine the code that moving "init the dev_name " from mmc_add_card
+to mmc_sdio_init_card. Thanks.
+
+> 
+> > Here before calling pm_runtime_set_active(), set the dev name, although
+> > it is duplicated with mmc_add_card(), but it do not break the original
+> > design(commit 81968561b).
+> 
+> Normally we'd like to avoid such a solution, so let's first make sure
+> we understand the problem.
+> 
+> Have you tried thinking how come this shows up only now - has any of
+> the relevant code been changed lately ? Are you using a vanilla Linux
+> tree ?
+> 
+> Thanks,
+> Ohad.
