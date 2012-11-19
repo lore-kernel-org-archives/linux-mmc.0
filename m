@@ -1,49 +1,109 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: [PATCH v6 09/14] mmc: sdhci-pxav3: add quirks2
-Date: Mon, 19 Nov 2012 10:34:00 +0800
-Message-ID: <CADz5_g+rhJzRxAOyCe3CpW+ZywcwCQVH3MU8e0Z3JAdk+JStGw@mail.gmail.com>
-References: <1350471893-29633-1-git-send-email-keyuan.liu@gmail.com>
-	<1350471893-29633-10-git-send-email-keyuan.liu@gmail.com>
-	<874nkn9916.fsf@octavius.laptop.org>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
+Date: Mon, 19 Nov 2012 02:48:27 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C224F7A@039-SN1MPN1-004.039d.mgd.msft.net>
+References: <1351584769-16662-1-git-send-email-r66093@freescale.com>
+	<1351584769-16662-2-git-send-email-r66093@freescale.com>
+	<CA+20K0AfmJSrPO9-_-yNk4HhEVYPj8cMaa+jCZAZhp23Vb817g@mail.gmail.com>
+	<110EED8CC96DFC488B7E717A2027A27C210A6D@039-SN1MPN1-004.039d.mgd.msft.net>
+	<CA+20K0A3myrosOGK2dcstX06QOS1SRHaaz-zYqoFSA7ZYcEJvQ@mail.gmail.com>
+	<110EED8CC96DFC488B7E717A2027A27C213E8A@039-SN1MPN1-004.039d.mgd.msft.net>
+ <CA+20K0DmMPDv0SJgd6-zoHN+eZr1fROT7=HY-mEWgAO9-gmSPg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:42619 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752821Ab2KSCeC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Nov 2012 21:34:02 -0500
-Received: by mail-wi0-f172.google.com with SMTP id hj6so3297258wib.1
-        for <linux-mmc@vger.kernel.org>; Sun, 18 Nov 2012 18:34:00 -0800 (PST)
-In-Reply-To: <874nkn9916.fsf@octavius.laptop.org>
+Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:44802
+	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752786Ab2KSCsb convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 18 Nov 2012 21:48:31 -0500
+In-Reply-To: <CA+20K0DmMPDv0SJgd6-zoHN+eZr1fROT7=HY-mEWgAO9-gmSPg@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com, hzhuang1@marvell.com, cxie4@marvell.com, prakity@marvell.com, kliu5@marvell.com
+To: Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Johan Rudholm <jrudholm@gmail.com>
 
-2012/11/18 Chris Ball <cjb@laptop.org>:
+Hi, Anton and Chris
+This patch has been Reviewed-By: Johan Rudholm <johan.rudholm@stericsson.com> on Nov 05.
+Could you give some comment about it?
+
+Best Regards
+Jerry Huang
+
+> -----Original Message-----
+> From: Johan Rudholm [mailto:jrudholm@gmail.com]
+> Sent: Monday, November 05, 2012 10:08 PM
+> To: Huang Changming-R66093
+> Cc: linux-mmc@vger.kernel.org; Anton Vorontsov; Chris Ball
+> Subject: Re: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
+> 
 > Hi,
->
-> On Wed, Oct 17 2012, Kevin Liu wrote:
->> From: Kevin Liu <kliu5@marvell.com>
->>
->> Acked-by:  Zhangfei Gao <zhangfei.gao@marvell.com>
->> Signed-off-by: Kevin Liu <kliu5@marvell.com>
->> ---
->>  drivers/mmc/host/sdhci-pxav3.c          |    2 ++
->>  include/linux/platform_data/pxa_sdhci.h |    2 ++
->>  2 files changed, 4 insertions(+), 0 deletions(-)
->
-> It looks like you aren't using any of the quirks in quirks2, is that
-> right?  I'm still hoping we might be able to get rid of quirks2, so
-> I'd rather wait until you need it (or we get rid of it) before applying
-> this.
->
+> 
+> 2012/11/5 Huang Changming-R66093 <r66093@freescale.com>:
+> >>
+> >> 2012/11/2 Huang Changming-R66093 <r66093@freescale.com>:
+> >> > Hi, Johan,
+> >> > When quicks SDHCI_QUIRK_BROKEN_CARD_DETECTION is set, the driver
+> will
+> >> poll the card status with the command CMD13 periodically, then many
+> >> interrupts will be generated, which affect the performance.
+> >>
+> >> Ok, just to see if I understand the scenario correctly:
+> >> SDHCI_QUIRK_BROKEN_CARD_DETECTION causes the MMC_CAP_NEEDS_POLL cap to
+> be
+> >> set, which will cause mmc_rescan to be run at a one second interval.
+> >> mmc_rescan calls bus_ops->detect (mmc_sd_detect) and this in turn
+> calls
+> >> _mmc_detect_card_removed, which will do the bus_ops->alive and send
+> CMD13.
+> >> So in this case, one CMD13 is sent per second, right?
+> >> Is this the cause of the performance issue?
+> >
+> > Yes, You are right.
+> 
+> Ok, it's a bit hard to understand how this can lead to a noticeable
+> performance impact, but OK. :)
+> 
+> >> A thought: if the host hardware does have a GPIO card detect pin
+> hooked
+> >> up, would it not be possible to make this pin generate an IRQ whenever
+> a
+> >> card is inserted or removed? This is what we do in the MMCI driver,
+> for
+> >> instance (mmci_cd_irq).
+> >
+> > Our silicones has this pin to do card detect, but some boards don't
+> generate the interrupt when card is inserted or removed. So I have to use
+> the poll mode.
+> >
+> >> > Yes, some cases to detect GPIO can't be trusted, so I only just
+> >> implement this callback in eSDHC-of driver. that is to say, just when
+> the
+> >> platform support it, this callback can be implement, if not, continue
+> to
+> >> send the command CMD13.
+> >>
+> >> I'm just wondering how this will affect our system, where we use the
+> cd
+> >> GPIO to generate detect jobs on card insert/remove, but where the cd
+> pin
+> >> is not 100% synchronized with the electrical connection of the power
+> and
+> >> cmd line of the SD-card. So if I remember correctly, the cd pin may
+> >> report that the card has been removed, but there is still an electric
+> >> connection and the card is alive...
+> >>
+> > I don't see this on our board, when card is inserted or removed, the
+> register field can reflect this state correctly.
+> 
+> We see a difference on our boards with this patch, but no functional
+> change (actually a removed card is detected earlier now), so from my
+> perspective:
+> 
+> Reviewed-By: Johan Rudholm <johan.rudholm@stericsson.com>
+> 
+> //Johan
 
-My previous patch "[PATCH v6 08/14] mmc: sdhci: enhance preset value
-function" introduced a quirk SDHCI_QUIRK2_PRESET_VALUE_BROKEN, which
-aim to disable preset feature since the preset setting is fixed only
-for 200Mhz base clock on pxav3 platform. So we should disable preset
-if the base clock is other than 200Mhz.
 
-Thanks
-Kevin
