@@ -1,88 +1,42 @@
-From: Zhang Haijun-B42677 <B42677@freescale.com>
-Subject: RE: [PATCH 1/2 V2] Powerpc/eSDHC: Calculate the applicable mmc
- erase timeout value
-Date: Mon, 19 Nov 2012 04:10:17 +0000
-Message-ID: <99E897753B6F7048BD8CCDB4661D02E1165611@039-SN2MPN1-023.039d.mgd.msft.net>
-References: <1352797762-30526-1-git-send-email-Haijun.Zhang@freescale.com>
- <1352797762-30526-2-git-send-email-Haijun.Zhang@freescale.com>
- <20121119004328.GK29066@lizard.sbx05977.paloaca.wayport.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Abhilash Kesavan <a.kesavan@samsung.com>
+Subject: [PATCH 0/4] Support for optional MMC PM capabilities
+Date: Mon, 19 Nov 2012 10:26:17 +0530
+Message-ID: <1353300981-24652-1-git-send-email-a.kesavan@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe002.messaging.microsoft.com ([216.32.180.185]:19039
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752191Ab2KSEKW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Nov 2012 23:10:22 -0500
-In-Reply-To: <20121119004328.GK29066@lizard.sbx05977.paloaca.wayport.net>
-Content-Language: en-US
+Received: from mailout1.samsung.com ([203.254.224.24]:18294 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752785Ab2KSEv0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Nov 2012 23:51:26 -0500
+Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MDP00E1BXGUS1J0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 19 Nov 2012 13:51:25 +0900 (KST)
+Received: from localhost.localdomain ([107.108.73.92])
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0MDP00338XGFP3E0@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 19 Nov 2012 13:51:25 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Huang Changming-R66093 <r66093@freescale.com>
+To: cjb@laptop.org, linux-mmc@vger.kernel.org
 
-VGhhbmtzIGEgbG90Lg0KSSBoYWQgY29ycmVjdGVkIGFjY29yZGluZyB0byB5b3VyIHN1Z2dlc3Rp
-b24uIA0KVGhyZWUgbmV3IHBhdGNoIGhhZCBzZW5kLg0KDQpSZWdhcmRzDQpIYWlqdW4uDQoNCj4g
-LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogbGludXgtbW1jLW93bmVyQHZnZXIu
-a2VybmVsLm9yZyBbbWFpbHRvOmxpbnV4LW1tYy0NCj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBP
-biBCZWhhbGYgT2YgQW50b24gVm9yb250c292DQo+IFNlbnQ6IE1vbmRheSwgTm92ZW1iZXIgMTks
-IDIwMTIgODo0MyBBTQ0KPiBUbzogWmhhbmcgSGFpanVuLUI0MjY3Nw0KPiBDYzogbGludXgtbW1j
-QHZnZXIua2VybmVsLm9yZzsgSHVhbmcgQ2hhbmdtaW5nLVI2NjA5Mw0KPiBTdWJqZWN0OiBSZTog
-W1BBVENIIDEvMiBWMl0gUG93ZXJwYy9lU0RIQzogQ2FsY3VsYXRlIHRoZSBhcHBsaWNhYmxlIG1t
-Yw0KPiBlcmFzZSB0aW1lb3V0IHZhbHVlDQo+IA0KPiBPbiBUdWUsIE5vdiAxMywgMjAxMiBhdCAw
-NTowOToyMlBNICswODAwLCBIYWlqdW4gWmhhbmcgd3JvdGU6DQo+ID4gQXMgbGFyZ2UgYXJlYSBl
-cmFzZSBuZWVkcyBsb25nIHRpbWUgdXN1YWxseSBhIGZldyBtaW51dGVzLCB3aGljaCB0aGUNCj4g
-PiBob3N0IGNhbid0IHdhaXQgd2lsbCBicmluZyBhYm91dCB0aW1lb3V0IGVycm9yLg0KPiA+IFNv
-IHdlIG5lZWQgdG8gc3BsaXQgdGhlIGxhcmdlIGFyZWEgdG8gc21hbGwgc2VjdGlvbnMgd2hpY2gg
-b25seSBuZWVkDQo+ID4gc2hvcnQgZXJhc2UgdGltZSB0byBhdm9pZCB0aW1lb3V0IGVycm9yLg0K
-PiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogSGFpanVuIFpoYW5nIDxIYWlqdW4uWmhhbmdAZnJlZXNj
-YWxlLmNvbT4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBKZXJyeSBIdWFuZyA8Q2hhbmctTWluZy5IdWFu
-Z0BmcmVlc2NhbGUuY29tPg0KPiA+IENDOiBBbnRvbiBWb3JvbnRzb3YgPGNib3VhdG1haWxydUBn
-bWFpbC5jb20+DQo+ID4gLS0tDQo+ID4gY2hhbmdlcyBmb3IgdjI6DQo+ID4gICAgICAgICAtIFJl
-Y29tcHV0ZSB0aGUgdGltZW91dCB2YWx1ZSBhbmQgbWF4X2Rpc2NhcmRfdG8gZm9yIG1tYyBlcmFz
-ZQ0KPiA+IAktIHNwbGl0IHRoZSBWMSBwYXRjaCBpbnRvIHR3byBWMiBwYXRjaHMuDQo+IA0KPiBP
-aCwgSSBzZWUuIEEgbmV3IHZlcnNpb24hIDopDQo+IA0KPiA+ICBkcml2ZXJzL21tYy9ob3N0L3Nk
-aGNpLWVzZGhjLmggICAgfCAgICAxIC0NCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1l
-c2RoYy5jIHwgICAxMyArKysrKysrKysrKysrDQo+ID4gIDIgZmlsZXMgY2hhbmdlZCwgMTMgaW5z
-ZXJ0aW9ucygrKSwgMSBkZWxldGlvbnMoLSkNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJz
-L21tYy9ob3N0L3NkaGNpLWVzZGhjLmgNCj4gPiBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktZXNk
-aGMuaCBpbmRleCBkMjVmOWFiLi5iYjZkNjY0IDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZlcnMvbW1j
-L2hvc3Qvc2RoY2ktZXNkaGMuaA0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktZXNk
-aGMuaA0KPiA+IEBAIC0yMSw3ICsyMSw2IEBADQo+ID4gICNkZWZpbmUgRVNESENfREVGQVVMVF9R
-VUlSS1MJKFNESENJX1FVSVJLX0ZPUkNFX0JMS19TWl8yMDQ4IHwgXA0KPiA+ICAJCQkJU0RIQ0lf
-UVVJUktfTk9fQlVTWV9JUlEgfCBcDQo+ID4gIAkJCQlTREhDSV9RVUlSS19OT05TVEFOREFSRF9D
-TE9DSyB8IFwNCj4gPiAtCQkJCVNESENJX1FVSVJLX0RBVEFfVElNRU9VVF9VU0VTX1NEQ0xLIHwg
-XA0KPiA+ICAJCQkJU0RIQ0lfUVVJUktfUElPX05FRURTX0RFTEFZIHwgXA0KPiA+ICAJCQkJU0RI
-Q0lfUVVJUktfUkVTVE9SRV9JUlFTX0FGVEVSX1JFU0VUKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBh
-L2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYw0KPiA+IGIvZHJpdmVycy9tbWMvaG9z
-dC9zZGhjaS1vZi1lc2RoYy5jDQo+ID4gaW5kZXggNjNkMjE5Zi4uYTA5ZWE2NyAxMDA2NDQNCj4g
-PiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMNCj4gPiArKysgYi9kcml2
-ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMNCj4gPiBAQCAtMTU0LDYgKzE1NCwxOCBAQCBz
-dGF0aWMgdm9pZCBlc2RoY19vZl9zZXRfY2xvY2soc3RydWN0IHNkaGNpX2hvc3QNCj4gKmhvc3Qs
-IHVuc2lnbmVkIGludCBjbG9jaykNCj4gPiAgCS8qIFNldCB0aGUgY2xvY2sgKi8NCj4gPiAgCWVz
-ZGhjX3NldF9jbG9jayhob3N0LCBjbG9jayk7DQo+ID4gIH0NCj4gPiArLyoNCj4gDQo+IEFuIGVt
-cHR5IGxpbmUgaXMgbWlzc2luZyBhZnRlciB0aGUgY2xvc2luZyBjdXJseSBicmFjZS4NCj4gDQo+
-IE90aGVyd2lzZSwgaXQgbG9va3MgZ29vZA0KPiANCj4gQWNrZWQtYnk6IEFudG9uIFZvcm9udHNv
-diA8Y2JvdWF0bWFpbHJ1QGdtYWlsLmNvbT4NCj4gDQo+ID4gKyAqIEFzIGhvc3QgZG9zbid0IHN1
-cHBseSB1cyB0aGUgbWV0aG9kIHRvIGNhbGN1bGF0ZSB0aGUgdGltZW91dA0KPiA+ICt2YWx1ZSwN
-Cj4gPiArICogd2UgYXNzaWduZWQgb25lIGZvciBoaWdoIHNwZWVkIFNESEMgY2FyZC4gU28gd2Ug
-Y2FuIHVzZSB0aGlzIHRvDQo+ID4gK2NhbGN1bGF0ZQ0KPiA+ICsgKiB0aGUgbWF4IGRpc2NhcmQg
-dGltZW91dCB2YWx1ZSB0byBsaW1pdCB0aGUgbWF4IGRpc2NhcmQgc2VjdG9ycyB0bw0KPiA+ICth
-dm9pZCB0aGUNCj4gPiArICogdGltZW91dCBpc3N1ZSBkdXJpbmcgbGFyZ2UgYXJlYSBlcmFzZS4N
-Cj4gPiArICovDQo+ID4gK3N0YXRpYyB1bnNpZ25lZCBpbnQgZXNkaGNfb2ZfZ2V0X3RpbWVvdXRf
-Y2xvY2soc3RydWN0IHNkaGNpX2hvc3QNCj4gPiArKmhvc3QpIHsNCj4gPiArCXN0cnVjdCBzZGhj
-aV9wbHRmbV9ob3N0ICpwbHRmbV9ob3N0ID0gc2RoY2lfcHJpdihob3N0KTsNCj4gPiArDQo+ID4g
-KwlyZXR1cm4gcGx0Zm1faG9zdC0+Y2xvY2sgLyAxMDAwIC8gMzI7IH0NCj4gPg0KPiA+ICAjaWZk
-ZWYgQ09ORklHX1BNDQo+ID4gIHN0YXRpYyB1MzIgZXNkaGNfcHJvY3RsOw0KPiA+IEBAIC0xOTAs
-NiArMjAyLDcgQEAgc3RhdGljIHN0cnVjdCBzZGhjaV9vcHMgc2RoY2lfZXNkaGNfb3BzID0gew0K
-PiA+ICAJLmVuYWJsZV9kbWEgPSBlc2RoY19vZl9lbmFibGVfZG1hLA0KPiA+ICAJLmdldF9tYXhf
-Y2xvY2sgPSBlc2RoY19vZl9nZXRfbWF4X2Nsb2NrLA0KPiA+ICAJLmdldF9taW5fY2xvY2sgPSBl
-c2RoY19vZl9nZXRfbWluX2Nsb2NrLA0KPiA+ICsJLmdldF90aW1lb3V0X2Nsb2NrID0gZXNkaGNf
-b2ZfZ2V0X3RpbWVvdXRfY2xvY2ssDQo+ID4gIAkucGxhdGZvcm1faW5pdCA9IGVzZGhjX29mX3Bs
-YXRmb3JtX2luaXQsICAjaWZkZWYgQ09ORklHX1BNDQo+ID4gIAkucGxhdGZvcm1fc3VzcGVuZCA9
-IGVzZGhjX29mX3N1c3BlbmQsDQo+ID4gLS0NCj4gPiAxLjcuMC40DQo+IC0tDQo+IFRvIHVuc3Vi
-c2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1t
-bWMiIGluDQo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
-b3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQNCj4gaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpv
-cmRvbW8taW5mby5odG1sDQoNCg==
+This patchset adds optional PM properties to the core MMC bindings. It also
+makes the appropriate changes in the sdhci platform and dw_mmc driver files.
+Based on git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git : for-next.
+Note: Patch 3 has only been compile tested.
+
+Abhilash Kesavan (4):
+  mmc: dt: Fix typo in filename
+  mmc: dt: Add optional pm properties to core binding
+  mmc: sdhci-pltfm: Support optional pm properties
+  mmc: dw_mmc: Add sdio power bindings
+
+ Documentation/devicetree/bindings/mmc/mmc.txt      |    4 ++++
+ .../{synposis-dw-mshc.txt => synopsis-dw-mshc.txt} |    0
+ drivers/mmc/host/dw_mmc.c                          |   20 +++++++++++++++++---
+ drivers/mmc/host/sdhci-pltfm.c                     |    6 ++++++
+ include/linux/mmc/dw_mmc.h                         |    1 +
+ 5 files changed, 28 insertions(+), 3 deletions(-)
+ rename Documentation/devicetree/bindings/mmc/{synposis-dw-mshc.txt => synopsis-dw-mshc.txt} (100%)
 
