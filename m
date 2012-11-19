@@ -1,66 +1,52 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
-Date: Sun, 18 Nov 2012 19:05:41 -0800
-Message-ID: <20121119030541.GA6603@lizard>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH 2/4 v4] MMC/SD: Add callback function to detect card
+Date: Mon, 19 Nov 2012 03:11:53 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C225016@039-SN1MPN1-004.039d.mgd.msft.net>
 References: <1351584769-16662-1-git-send-email-r66093@freescale.com>
  <1351584769-16662-2-git-send-email-r66093@freescale.com>
+ <20121119030541.GA6603@lizard>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:38638 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751867Ab2KSDIw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Nov 2012 22:08:52 -0500
-Received: by mail-pa0-f46.google.com with SMTP id bh2so111975pad.19
-        for <linux-mmc@vger.kernel.org>; Sun, 18 Nov 2012 19:08:51 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <1351584769-16662-2-git-send-email-r66093@freescale.com>
+Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:49428
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751867Ab2KSDMA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Nov 2012 22:12:00 -0500
+In-Reply-To: <20121119030541.GA6603@lizard>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: r66093@freescale.com
-Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Chris Ball <cjb@laptop.org>
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
 
-On Tue, Oct 30, 2012 at 04:12:47PM +0800, r66093@freescale.com wrote:
-[..]
-> If the card is present, 1 will return, if the card is absent, 0 will return.
-> If the controller will not support this feature, -ENOSYS will return.
-> 
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> CC: Anton Vorontsov <cbouatmailru@gmail.com>
-> CC: Chris Ball <cjb@laptop.org>
-> ---
-[...]
->  int _mmc_detect_card_removed(struct mmc_host *host)
->  {
-> -	int ret;
-> +	int ret = -ENOSYS;
->  
->  	if ((host->caps & MMC_CAP_NONREMOVABLE) || !host->bus_ops->alive)
->  		return 0;
-> @@ -2081,7 +2081,13 @@ int _mmc_detect_card_removed(struct mmc_host *host)
->  	if (!host->card || mmc_card_removed(host->card))
->  		return 1;
->  
-> -	ret = host->bus_ops->alive(host);
-> +	if (host->ops->get_cd) {
-> +		ret = host->ops->get_cd(host);
-> +		if (ret >= 0)
-> +			ret = !ret;
+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEFudG9uIFZvcm9udHNvdiBb
+bWFpbHRvOmNib3VhdG1haWxydUBnbWFpbC5jb21dDQo+IFNlbnQ6IE1vbmRheSwgTm92ZW1iZXIg
+MTksIDIwMTIgMTE6MDYgQU0NCj4gVG86IEh1YW5nIENoYW5nbWluZy1SNjYwOTMNCj4gQ2M6IGxp
+bnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IEh1YW5nIENoYW5nbWluZy1SNjYwOTM7IENocmlzIEJh
+bGwNCj4gU3ViamVjdDogUmU6IFtQQVRDSCAyLzQgdjRdIE1NQy9TRDogQWRkIGNhbGxiYWNrIGZ1
+bmN0aW9uIHRvIGRldGVjdCBjYXJkDQo+IA0KPiBPbiBUdWUsIE9jdCAzMCwgMjAxMiBhdCAwNDox
+Mjo0N1BNICswODAwLCByNjYwOTNAZnJlZXNjYWxlLmNvbSB3cm90ZToNCj4gWy4uXQ0KPiA+IElm
+IHRoZSBjYXJkIGlzIHByZXNlbnQsIDEgd2lsbCByZXR1cm4sIGlmIHRoZSBjYXJkIGlzIGFic2Vu
+dCwgMCB3aWxsDQo+IHJldHVybi4NCj4gPiBJZiB0aGUgY29udHJvbGxlciB3aWxsIG5vdCBzdXBw
+b3J0IHRoaXMgZmVhdHVyZSwgLUVOT1NZUyB3aWxsIHJldHVybi4NCj4gPg0KPiA+IFNpZ25lZC1v
+ZmYtYnk6IEplcnJ5IEh1YW5nIDxDaGFuZy1NaW5nLkh1YW5nQGZyZWVzY2FsZS5jb20+DQo+ID4g
+Q0M6IEFudG9uIFZvcm9udHNvdiA8Y2JvdWF0bWFpbHJ1QGdtYWlsLmNvbT4NCj4gPiBDQzogQ2hy
+aXMgQmFsbCA8Y2piQGxhcHRvcC5vcmc+DQo+ID4gLS0tDQo+IFsuLi5dDQo+ID4gIGludCBfbW1j
+X2RldGVjdF9jYXJkX3JlbW92ZWQoc3RydWN0IG1tY19ob3N0ICpob3N0KQ0KPiA+ICB7DQo+ID4g
+LQlpbnQgcmV0Ow0KPiA+ICsJaW50IHJldCA9IC1FTk9TWVM7DQo+ID4NCj4gPiAgCWlmICgoaG9z
+dC0+Y2FwcyAmIE1NQ19DQVBfTk9OUkVNT1ZBQkxFKSB8fCAhaG9zdC0+YnVzX29wcy0+YWxpdmUp
+DQo+ID4gIAkJcmV0dXJuIDA7DQo+ID4gQEAgLTIwODEsNyArMjA4MSwxMyBAQCBpbnQgX21tY19k
+ZXRlY3RfY2FyZF9yZW1vdmVkKHN0cnVjdCBtbWNfaG9zdA0KPiAqaG9zdCkNCj4gPiAgCWlmICgh
+aG9zdC0+Y2FyZCB8fCBtbWNfY2FyZF9yZW1vdmVkKGhvc3QtPmNhcmQpKQ0KPiA+ICAJCXJldHVy
+biAxOw0KPiA+DQo+ID4gLQlyZXQgPSBob3N0LT5idXNfb3BzLT5hbGl2ZShob3N0KTsNCj4gPiAr
+CWlmIChob3N0LT5vcHMtPmdldF9jZCkgew0KPiA+ICsJCXJldCA9IGhvc3QtPm9wcy0+Z2V0X2Nk
+KGhvc3QpOw0KPiA+ICsJCWlmIChyZXQgPj0gMCkNCj4gPiArCQkJcmV0ID0gIXJldDsNCj4gDQo+
+IG9fTw0KPiANCj4gT2gsIEkgc2VlLi4uDQo+IA0KPiBSZXZpZXdlZC1ieTogQW50b24gVm9yb250
+c292IDxjYm91YXRtYWlscnVAZ21haWwuY29tPg0KPiANCj4gKEJ1dCBJIG11c3QgY29uZmVzcyBJ
+IGRpZG4ndCBmb2xsb3cgdGhlIHdob2xlIGRpc2N1c3Npb24gYWJvdXQNCj4gZ2V0X2NkKCktdmlh
+LWdwaW8gYmVpbmcgdW5yZWxpYWJsZS4gSSdtIGFzc3VtaW5nIHlvdSBmaXhlZCB0aGlzPykNCj4g
+DQpJZiB0aGUgR1BJTyBpcyB1bnJlbGlhYmxlLCB0aGUgcmVsYXRlZCBkcml2ZXIgbWF5IG5vdCBp
+bXBsZW1lbnQgdGhlIGNhbGxiYWNrIGZ1bmN0aW9uIGdldF9jZC4NCkZvciBlU0RIQywgdGhlIEdQ
+SU8gaXMgcmVsaWFibGUsIHNvIEkgZG8gaXQuDQo=
 
-o_O
-
-Oh, I see...
-
-Reviewed-by: Anton Vorontsov <cbouatmailru@gmail.com>
-
-(But I must confess I didn't follow the whole discussion about
-get_cd()-via-gpio being unreliable. I'm assuming you fixed this?)
-
-> +	}
-> +	if (ret < 0)
-> +		ret = host->bus_ops->alive(host);
->  	if (ret) {
->  		mmc_card_set_removed(host->card);
->  		pr_debug("%s: card remove detected\n", mmc_hostname(host));
-> -- 
-> 1.7.9.5
