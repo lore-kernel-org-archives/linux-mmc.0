@@ -1,99 +1,231 @@
-From: Johan Rudholm <jrudholm@gmail.com>
-Subject: Re: UHS-I voltage switching on OLPC XO-1.75
-Date: Tue, 20 Nov 2012 09:53:35 +0100
-Message-ID: <CA+20K0Cfmpe46S8pS2QOn4ac0x=Uab0MsDHX_=SSraaqyA1c3A@mail.gmail.com>
-References: <CAMLZHHQfQ26E+BH2sqV9CGyso+uuKHC=WMaqehzBo9_Gr_kyPQ@mail.gmail.com>
-	<CA+20K0CQmFHNruQv5-7D=2kxqxp=Vt1h2rXXuKF0-JOm8jyoJQ@mail.gmail.com>
-	<CAMLZHHRAq7NHrDeA6d3JLsALGgVgfBxL8Y=DMNCLSDvFOFVw2Q@mail.gmail.com>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: FW: [PATCH v2] mmc: sdhci: apply voltage range check only for
+ non-fixed regulators
+Date: Tue, 20 Nov 2012 16:59:28 +0800
+Message-ID: <CADz5_gKdUq8bjuMr1=yo65ysHzLNvKnrfVuSpLk-Q6ek-TWpNA@mail.gmail.com>
+References: <25B60CDC2F704E4E9D88FFD52780CB4C060FBEA29A@SC-VEXCH1.marvell.com>
+	<CADz5_gLC=z_VYrNq8q3dU7L6im7shSz-Sn6Tzym2mRZONwpgUg@mail.gmail.com>
+	<50AB34E2.1010206@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:59820 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752457Ab2KTIxg convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Nov 2012 03:53:36 -0500
-Received: by mail-ia0-f174.google.com with SMTP id y25so4063315iay.19
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Nov 2012 00:53:35 -0800 (PST)
-In-Reply-To: <CAMLZHHRAq7NHrDeA6d3JLsALGgVgfBxL8Y=DMNCLSDvFOFVw2Q@mail.gmail.com>
+Received: from mail-la0-f46.google.com ([209.85.215.46]:64890 "EHLO
+	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752463Ab2KTI7a (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Nov 2012 03:59:30 -0500
+In-Reply-To: <50AB34E2.1010206@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <dsd@laptop.org>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Marek Szyprowski <m.szyprowski@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kyungmin.park@samsung.com, Mark Brown <broonie@opensource.wolfsonmicro.com>, lrg@ti.com, Philip Rakity <prakity@nvidia.com>
 
-Hi!
-
-2012/11/18 Daniel Drake <dsd@laptop.org>:
-> On Fri, Nov 2, 2012 at 8:35 AM, Johan Rudholm <jrudholm@gmail.com> wr=
-ote:
->> Good question. I=92d guess that mmc_power_off/up does not work as
->> expected here, that the card is not at all power cycled.
+2012/11/20 Marek Szyprowski <m.szyprowski@samsung.com>:
+> Hello,
 >
-> Before going further on the "find a way to quirk it" route, there is
-> something else we could look into.
 >
-> According to our hardware engineers, the external SD card power has
-> been "always-on" until now. It is actually controlled by our embedded
-> controller, separate from the CPU.
+> On 11/14/2012 8:11 AM, Kevin Liu wrote:
+>>
+>> > From: linux-mmc-owner@vger.kernel.org
+>> > [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chris Ball
+>> > Sent: Tuesday, November 13, 2012 10:14 PM
+>> > To: Marek Szyprowski
+>> > Cc: linux-kernel@vger.kernel.org; linux-mmc@vger.kernel.org; Kyungmin
+>> > Park; Mark Brown; Liam Girdwood; Philip Rakity
+>> > Subject: Re: [PATCH v2] mmc: sdhci: apply voltage range check only for
+>> > non-fixed regulators
+>> >
+>> > Hi,
+>> >
+>> > On Tue, Nov 13 2012, Marek Szyprowski wrote:
+>> >>> On Tue, Nov 13 2012, Marek Szyprowski wrote:
+>> >>> > Fixed regulators cannot change their voltage, so disable all voltage
+>> >>> > range checking for them, otherwise the driver fails to operate with
+>> >>> > fixed regulators. Up to now it worked only by luck, because
+>> >>> > regulator_is_supported_voltage() function returned incorrect values.
+>> >>> > Commit "regulator: fix voltage check in
+>> >>> > regulator_is_supported_voltage()"
+>> >>> > fixed that function and now additional check is needed for fixed
+>> >>> > regulators.
+>> >>> >
+>> >>> > Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+>> >>> > ---
+>> >>> >  drivers/mmc/host/sdhci.c |    2 +-
+>> >>> >  1 file changed, 1 insertion(+), 1 deletion(-)
+>> >>> >
+>> >>> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> >>> > index c7851c0..6f6534e 100644
+>> >>> > --- a/drivers/mmc/host/sdhci.c
+>> >>> > +++ b/drivers/mmc/host/sdhci.c
+>> >>> > @@ -2923,7 +2923,7 @@ int sdhci_add_host(struct sdhci_host *host)
+>> >>> >            regulator_enable(host->vmmc);
+>> >>> >
+>> >>> >  #ifdef CONFIG_REGULATOR
+>> >>> > -  if (host->vmmc) {
+>> >>> > +  if (host->vmmc && regulator_count_voltages(host->vmmc) > 1) {
+>> >>> >            ret = regulator_is_supported_voltage(host->vmmc, 3300000,
+>> >>> >                    3300000);
+>> >>> >            if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
+>> >>>
+>> >>> Thanks for the longer explanation.  I'm still missing something,
+>> >>> though;
+>> >>> what's wrong with running the check as it was with the new regulator
+>> >>> code?
+>> >>> (I haven't tried it yet.)
+>> >>>
+>> >>> #ifdef CONFIG_REGULATOR
+>> >>>          if (host->vmmc) {
+>> >>>                  ret = regulator_is_supported_voltage(host->vmmc,
+>> >>> 3300000,
+>> >>>                          3300000);
+>> >>>                  if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
+>> >>>                          caps[0] &= ~SDHCI_CAN_VDD_330;
+>> >>>                  ret = regulator_is_supported_voltage(host->vmmc,
+>> >>> 3000000,
+>> >>>                          3000000);
+>> >>>                  if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_300)))
+>> >>>                          caps[0] &= ~SDHCI_CAN_VDD_300;
+>> >>>                  ret = regulator_is_supported_voltage(host->vmmc,
+>> >>> 1800000,
+>> >>>                          1800000);
+>> >>>                  if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_180)))
+>> >>>                          caps[0] &= ~SDHCI_CAN_VDD_180;
+>> >>>          }
+>> >>> #endif /* CONFIG_REGULATOR */
+>> >>>
+>> >>> The point is to remove unsupported voltages, so if someone sets up a
+>> >>> fixed regulator at 3300000, all of the other caps are disabled.  Why
+>> >>> wouldn't that work without this change, and how are we supposed to
+>> >>> remove those caps on a fixed regulator after your patchset?
+>> >>>
+>> >>> Thanks, sorry if I'm missing something obvious,
+>> >>
+>> >> On our boards eMMC is connected to fixed 2.8V regulator, what results
+>> >> in
+>> >> clearing all available voltages and fail. The same situation is when
+>> >> one
+>> >> enable dummy regulator and try to use sdhci with it. My patch fixes
+>> >> this
+>> >> and restores sdhci to working state as it was before (before fixing
+>> >> regulator regulator_is_supported_voltage() function and earlier when
+>> >> MMC_BROKEN_VOLATGE capability was used).
+>> >
+>> > I see.  Sounds like a separate bug -- Philip (or anyone else), any
+>> > idea how we should be treating eMMCs with a fixed voltage here?
+>> >
+>>
+>> I think we should check the voltage range rather than the voltage
+>> point accoring to the spec.
+>> Otherwise some valid voltage like 2.8v will be discarded by mistake.
+>> My below old patch aim to fix this issue.
+>> How do you think?
+>>
+>> -----Original Message-----
+>> From: Kevin Liu [mailto:keyuan.liu@gmail.com]
+>> Sent: Friday, September 28, 2012 3:56 PM
+>> To: linux-mmc@vger.kernel.org; cjb@laptop.org; pierre@ossman.eu;
+>> ulf.hansson@linaro.org; Zhangfei Gao
+>> Cc: Haojian Zhuang; Chao Xie; Philip Rakity; Kevin Liu; Jialing Fu
+>> Subject: [PATCH v5 03/13] mmc: sdhci: use regulator min/max voltage
+>> range according to spec
+>>
+>> From: Kevin Liu <kliu5@marvell.com>
+>>
+>> For regulator vmmc/vmmcq, use voltage range as below
+>> 3.3v/3.0v: (2.7v, 3.6v)
+>> 1.8v: (1.7v, 1.95v)
+>> Original code use the specific value which may fail in regulator
+>> driver if it does NOT support the specific voltage.
+>>
+>> Signed-off-by: Jialing Fu <jlfu@marvell.com>
+>> Signed-off-by: Kevin Liu <kliu5@marvell.com>
 >
-> In a test firmware, I can now control the SD card power via our "OLPC
-> EC" interface, I call into that from mmc_power_up and mmc_power_down.
-> And, with your hacky patch to make the voltage switch failure
-> detection work, this fixes it: it tries 10 times at 1.8v then falls
-> back to 3.3 successfully. No more problems with the power cycle.
-
-Ah, great! Then we know what the issue was at least. Then I guess that
-this code did not work with your driver:
-
-			host->ios.clock =3D 0;
-			mmc_set_ios(host);
-
-so with my original patch ([RFC/PATCH,v2] mmc: core: Fixup signal
-voltage switch), the clock was actually never stopped during the
-signal voltage switch? I guess this will need some further
-investigation also.
-
-> So we have the option of fixing it that way: if we can fix the voltag=
-e
-> switch failure detection, we could implement a custom vmmc regulator
-> driver that uses our EC interface to enable and disable the SD power
-> appropriately, solving our ability to power cycle.
-
-Being able to power cycle the SD-card might also come in handy in
-other situations, perhaps if a poor SD-card misbehaves in some way?
-SD-cards have no "reset cord" like eMMCs, so being able to power cycle
-the card feels like a good thing.
-
-> On the other hand, we may have a good basis to add a quirk, triggered
-> by the device tree, for when the hardware physically does not have
-> 1.8v capabilities.
-
-This also seems proper, if we know we can't get 1.8V, then we
-shouldn't even try for it. In this way the detection will also be
-faster (no 10 retries).
-
-> I'm also curious if there is a 3rd option. It seems like in the case
-> of our SoC, the SoC design mandates that the SD card power is separat=
-e
-> from the SDHCI interface - requiring either a GPIO or some other
-> mechanism (e.g. OLPC EC) to be able to control it.
 >
-> I'm wondering if this is the same for all sdhci-pxa devices. And the
-> same for all sdhci devices? Maybe the SDHCI specs would help here, bu=
-t
-> I guess they aren't public.
+> Tested-by: Marek Szyprowski <m.szyprowski@samsung.com>
 >
-> If this is the case, the driver could have another heuristic: if ther=
-e
-> is no vmmc regulator, there is no way of cutting the card power,
-> therefore we could avoid even trying 1.8v on the basis that we know w=
-e
-> can't recover if things go wrong.
+> This patch restores sdhci devices to working state on Samsung boards
+> (tested on GONI and UniversalC210) after merging "regulator: fix voltage
+> check in regulator_is_supported_voltage()" patch to v3.7-rc6 (commit
+> f0f98b19e23d4426ca185e3d4ca80e6aff5ef51b). Would be great to have it
+> merged before the final v3.7 is out.
+>
+Marek,
 
-So the driver could for instance drop the MMC_CAP_UHS_DDR50 cap if
-there is no way to power cycle the card? I think that sounds
-reasonable and according to spec, although also a little bit hard
-since there probably are cards out there that never require a power
-cycle to perform a proper voltage switch?
+thanks a lot for the verification!
+And your patch "mmc: sdhci: apply voltage range check only for
+non-fixed regulators" (commit
+d5b5205f2d480a47863dda0772d2d9dc47c2b51b, which has been merged in
+mmc-next) can be reverted if this patch merged?
 
-Kind regards, Johan
+Kevin
+>> ---
+>>   drivers/mmc/host/sdhci.c |   16 +++++++---------
+>>   1 files changed, 7 insertions(+), 9 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 3aef580..36afd47 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -1628,7 +1628,7 @@ static int
+>> sdhci_do_3_3v_signal_voltage_switch(struct sdhci_host *host,
+>>         sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+>>
+>>         if (host->vqmmc) {
+>> -               ret = regulator_set_voltage(host->vqmmc, 3300000,
+>> 3300000);
+>> +               ret = regulator_set_voltage(host->vqmmc, 2700000,
+>> 3600000);
+>>                 if (ret) {
+>>                         pr_warning("%s: Switching to 3.3V signalling
+>> voltage "
+>>                                    " failed\n", mmc_hostname(host->mmc));
+>> @@ -1672,7 +1672,7 @@ static int
+>> sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
+>>                  */
+>>                 if (host->vqmmc)
+>>                         ret = regulator_set_voltage(host->vqmmc,
+>> -                               1800000, 1800000);
+>> +                               1700000, 1950000);
+>>                 else
+>>                         ret = 0;
+>>
+>> @@ -2856,7 +2856,7 @@ int sdhci_add_host(struct sdhci_host *host)
+>>                 pr_info("%s: no vqmmc regulator found\n",
+>> mmc_hostname(mmc));
+>>                 host->vqmmc = NULL;
+>>         }
+>> -       else if (regulator_is_supported_voltage(host->vqmmc, 1800000,
+>> 1800000))
+>> +       else if (regulator_is_supported_voltage(host->vqmmc, 1700000,
+>> 1950000))
+>>                 regulator_enable(host->vqmmc);
+>>         else
+>>                 caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+>> @@ -2927,16 +2927,14 @@ int sdhci_add_host(struct sdhci_host *host)
+>>
+>>   #ifdef CONFIG_REGULATOR
+>>         if (host->vmmc) {
+>> -               ret = regulator_is_supported_voltage(host->vmmc, 3300000,
+>> -                       3300000);
+>> +               ret = regulator_is_supported_voltage(host->vmmc, 2700000,
+>> +                       3600000);
+>>                 if ((ret <= 0) && (caps[0] & SDHCI_CAN_VDD_330))
+>>                         caps[0] &= ~SDHCI_CAN_VDD_330;
+>> -               ret = regulator_is_supported_voltage(host->vmmc, 3000000,
+>> -                       3000000);
+>>                 if ((ret <= 0) && (caps[0] & SDHCI_CAN_VDD_300))
+>>                         caps[0] &= ~SDHCI_CAN_VDD_300;
+>> -               ret = regulator_is_supported_voltage(host->vmmc, 1800000,
+>> -                       1800000);
+>> +               ret = regulator_is_supported_voltage(host->vmmc, 1700000,
+>> +                       1950000);
+>>                 if ((ret <= 0) && (caps[0] & SDHCI_CAN_VDD_180))
+>>                         caps[0] &= ~SDHCI_CAN_VDD_180;
+>>         }
+>
+>
+> Best regards
+> --
+> Marek Szyprowski
+> Samsung Poland R&D Center
+>
+>
