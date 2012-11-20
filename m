@@ -1,54 +1,90 @@
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: Re: [PATCH v3] regulator: treat regulators with constant volatage as
- fixed
-Date: Tue, 20 Nov 2012 14:20:20 +0100
-Message-ID: <50AB8394.1010207@samsung.com>
-References: <20121113094255.GW18224@opensource.wolfsonmicro.com>
- <1352800177-16139-1-git-send-email-m.szyprowski@samsung.com>
- <20121114020124.GH4415@opensource.wolfsonmicro.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: FW: [PATCH v2] mmc: sdhci: apply voltage range check only for non-fixed regulators
+Date: Tue, 20 Nov 2012 08:27:05 -0500
+Message-ID: <878v9wflqu.fsf@octavius.laptop.org>
+References: <25B60CDC2F704E4E9D88FFD52780CB4C060FBEA29A@SC-VEXCH1.marvell.com>
+	<CADz5_gLC=z_VYrNq8q3dU7L6im7shSz-Sn6Tzym2mRZONwpgUg@mail.gmail.com>
+	<50AB34E2.1010206@samsung.com>
+	<CADz5_gKdUq8bjuMr1=yo65ysHzLNvKnrfVuSpLk-Q6ek-TWpNA@mail.gmail.com>
+	<50AB587F.3040405@samsung.com>
+	<CADz5_gJ1hV3n-4BPgBNT9LDp2-E=vNNzMGx=_9PmzT0RJ9+TsA@mail.gmail.com>
+	<50AB81C8.4090300@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <20121114020124.GH4415@opensource.wolfsonmicro.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:56686 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752250Ab2KTN1S (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 20 Nov 2012 08:27:18 -0500
+In-Reply-To: <50AB81C8.4090300@samsung.com> (Marek Szyprowski's message of
+	"Tue, 20 Nov 2012 14:12:40 +0100")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Marek Szyprowski <m.szyprowski@samsung.com>
+Cc: Kevin Liu <keyuan.liu@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kyungmin.park@samsung.com, Mark Brown <broonie@opensource.wolfsonmicro.com>, lrg@ti.com, Philip Rakity <prakity@nvidia.com>
 
-Hello,
+Hi,
 
-On 11/14/2012 3:01 AM, Mark Brown wrote:
-> On Tue, Nov 13, 2012 at 10:49:37AM +0100, Marek Szyprowski wrote:
+On Tue, Nov 20 2012, Marek Szyprowski wrote:
+>> >> >> Subject: [PATCH v5 03/13] mmc: sdhci: use regulator min/max voltage
+>> >> >> range according to spec
+>> >> >>
+>> >> >> From: Kevin Liu <kliu5@marvell.com>
+>> >> >>
+>> >> >> For regulator vmmc/vmmcq, use voltage range as below
+>> >> >> 3.3v/3.0v: (2.7v, 3.6v)
+>> >> >> 1.8v: (1.7v, 1.95v)
+>> >> >> Original code use the specific value which may fail in regulator
+>> >> >> driver if it does NOT support the specific voltage.
+>> >> >>
+>> >> >> Signed-off-by: Jialing Fu <jlfu@marvell.com>
+>> >> >> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+>> >> >
+>> >> >
+>> >> > Tested-by: Marek Szyprowski <m.szyprowski@samsung.com>
+>> >> >
+>> >> > This patch restores sdhci devices to working state on Samsung boards
+>> >> > (tested on GONI and UniversalC210) after merging "regulator: fix voltage
+>> >> > check in regulator_is_supported_voltage()" patch to v3.7-rc6 (commit
+>> >> > f0f98b19e23d4426ca185e3d4ca80e6aff5ef51b). Would be great to have it
+>> >> > merged before the final v3.7 is out.
+>> >> >
+>> >> Marek,
+>> >>
+>> >> thanks a lot for the verification!
+>> >> And your patch "mmc: sdhci: apply voltage range check only for
+>> >> non-fixed regulators" (commit
+>> >> d5b5205f2d480a47863dda0772d2d9dc47c2b51b, which has been merged in
+>> >> mmc-next) can be reverted if this patch merged?
+>> >
+>> >
+>> > Yes, it can be replaced with it, although there is still an issue that need
+>> > to be resolved somehow. Right now SDHCI driver fails to initialize if
+>> > support
+>> > for dummy regulator is enabled.
+>> >
+>> Then I think the dummy issue can be resolved with your patch merged
+>> and if you can just update your patch from
+>>       "regulator_count_voltages(host->vmmc) > 1"
+>> to
+>>       "regulator_count_voltages(host->vmmc) > 0"
+>> to let fix regulator work.
 >
-> > +	if (rdev->constraints->valid_ops_mask & REGULATOR_CHANGE_VOLTAGE) {
-> > +		if (rdev->desc->n_voltages)
-> > +			return rdev->desc->n_voltages;
-> > +		else
-> > +			return -EINVAL;
-> > +	} else {
-> > +		return 1;
-> > +	}
+> regulator_count_voltages() returns 1 for both fixed regulators and for
+> virtual dummy regulator, so the above change makes no sense.
 >
-> Hrm, now I can read the logic I'm not convinced this is a good idea.
-> This will report that we have an available voltage for devices which
-> don't know their voltage (things like battery supplies often do this as
-> the voltage is unregulated) and it will mean that we are doing something
-> different for the case where there's only one voltage (reporting the
-> restricted count instead of the physically supported count).
+> However I was so focused on fixing the 2.8V supply case that I missed the
+> fact that my "mmc: sdhci: apply voltage range check only for non-fixed
+> regulators" patch also fixed the dummy regulator case.
 >
-> I think we want a regulator_can_change_voltage() or possibly a count
-> function (though I can't see any use cases except this) which answers
-> the question directly instead of layering on top of this function.
+> The conclusion is that applying both patches should finally fix the
+> regulator issues with for the Samsung boards (2.8V supply for eMMC) and
+> 'dummy-regulators' cases.
 
-Right, regulator_can_change_voltage() sounds much better than my hacky
-approach. The first client would be probably sdhci/mmc driver, as
-'can_change_voltage' check sounds much more appropriate than counting
-available voltage values.
+Thanks, I've pushed v5 of "mmc: sdhci: use regulator min/max voltage
+range according to spec" to mmc-next for 3.7 with Marek's Tested-by now.
 
-I will prepare patches soon.
-
-Best regards
+- Chris.
 -- 
-Marek Szyprowski
-Samsung Poland R&D Center
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
