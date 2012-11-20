@@ -1,43 +1,48 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 1/2] mmc/host/rtsx: Configure SD_CFG2 register in sd_rw_multi
-Date: Mon, 19 Nov 2012 22:09:01 -0500
-Message-ID: <87ehjpezsi.fsf@octavius.laptop.org>
-References: <cover.1353377266.git.wei_wang@realsil.com.cn>
-	<00fb063304a0720f3ba9db6f79bb67263d450356.1353377266.git.wei_wang@realsil.com.cn>
-	<87ip91f1zo.fsf@octavius.laptop.org> <50AAED8E.4030201@realsil.com.cn>
+From: viresh kumar <viresh.kumar@linaro.org>
+Subject: Re: [PATCH 237/493] mmc: remove use of __devinit
+Date: Tue, 20 Nov 2012 08:39:48 +0530
+Message-ID: <CAOh2x=mjF7fuptahGhSfbaonTMSDLg3VFYxxmG=K8yCbUcezuA@mail.gmail.com>
+References: <1353349642-3677-1-git-send-email-wfp5p@virginia.edu>
+	<1353349642-3677-237-git-send-email-wfp5p@virginia.edu>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56836 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752869Ab2KTDJN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 19 Nov 2012 22:09:13 -0500
-In-Reply-To: <50AAED8E.4030201@realsil.com.cn> (wwang's message of "Tue, 20
-	Nov 2012 10:40:14 +0800")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1353349642-3677-237-git-send-email-wfp5p@virginia.edu>
+Sender: linux-omap-owner@vger.kernel.org
+To: Bill Pemberton <wfp5p@virginia.edu>
+Cc: gregkh@linuxfoundation.org, Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <cjb@laptop.org>, Manuel Lauss <manuel.lauss@gmail.com>, =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Venkatraman S <svenkatr@ti.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org, uclinux-dist-devel@blackfin.uclinux.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, spear-devel@list.st.com
 List-Id: linux-mmc@vger.kernel.org
-To: wwang <wei_wang@realsil.com.cn>
-Cc: "sameo@linux.intel.com" <sameo@linux.intel.com>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "arnd@arndb.de" <arnd@arndb.de>, "oakad@yahoo.com" <oakad@yahoo.com>, "bp@alien8.de" <bp@alien8.de>
 
-Hi,
-
-On Mon, Nov 19 2012, wwang wrote:
-> It's about compatibility issue. The default value of SD_CFG2 is proper
-> for writing data. But for reading sequence, the timing is not good
-> enough. So in some extreme circumstance,  card reader may sample the
-> response data from the card as good even if the data is wrong. And
-> this will cause the bad consequence.
+On Mon, Nov 19, 2012 at 11:53 PM, Bill Pemberton <wfp5p@virginia.edu> w=
+rote:
+> CONFIG_HOTPLUG is going away as an option so __devinit is no longer
+> needed.
 >
-> Shall I modify the commit and resend the patchset again?
+> Signed-off-by: Bill Pemberton <wfp5p@virginia.edu>
+> Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
+> Cc: Chris Ball <cjb@laptop.org>
+> Cc: Manuel Lauss <manuel.lauss@gmail.com>
+> Cc: "Micha=C5=82 Miros=C5=82aw" <mirq-linux@rere.qmqm.pl>
+> Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>
+> Cc: Venkatraman S <svenkatr@ti.com>
+> Cc: Viresh Kumar <viresh.linux@gmail.com>
+> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> Cc: Ian Molton <ian@mnementh.co.uk>
+> Cc: Bruce Chang <brucechang@via.com.tw>
+> Cc: Harald Welte <HaraldWelte@viatech.com>
+> Cc: Pierre Ossman <pierre@ossman.eu>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: uclinux-dist-devel@blackfin.uclinux.org
+> Cc: linux-omap@vger.kernel.org
+> Cc: linux-arm-kernel@lists.infradead.org
+> Cc: spear-devel@list.st.com
+> ---
+>  drivers/mmc/host/sdhci-spear.c     |  8 +++-----
 
-Thanks!  Yes, please resend.
-
-I won't be merging this one because Samuel is merging the initial
-patchset, but I'll merge patches for the MMC side after 3.8.  For these:
-
-Acked-by: Chris Ball <cjb@laptop.org>
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Acked-by: Viresh Kumar <viresh.kumar@linaro.org>
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
