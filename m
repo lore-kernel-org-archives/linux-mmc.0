@@ -1,57 +1,199 @@
-From: Venkatraman S <svenkatr@ti.com>
-Subject: Re: [PATCH 1/3] mmc: omap_hsmmc: NULL pointer upon DTO after CC.
-Date: Tue, 20 Nov 2012 13:06:43 +0530
-Message-ID: <50AB330B.1080500@ti.com>
-References: <1353361379-21002-1-git-send-email-andreas.fenkart@streamunlimited.com> <1353361379-21002-2-git-send-email-andreas.fenkart@streamunlimited.com>
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+Subject: Re: FW: [PATCH v2] mmc: sdhci: apply voltage range check only for
+ non-fixed regulators
+Date: Tue, 20 Nov 2012 08:44:34 +0100
+Message-ID: <50AB34E2.1010206@samsung.com>
+References: <25B60CDC2F704E4E9D88FFD52780CB4C060FBEA29A@SC-VEXCH1.marvell.com>
+ <CADz5_gLC=z_VYrNq8q3dU7L6im7shSz-Sn6Tzym2mRZONwpgUg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:35335 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751595Ab2KTHhB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 20 Nov 2012 02:37:01 -0500
-In-Reply-To: <1353361379-21002-2-git-send-email-andreas.fenkart@streamunlimited.com>
+Received: from mailout1.w1.samsung.com ([210.118.77.11]:65069 "EHLO
+	mailout1.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751781Ab2KTHoq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Nov 2012 02:44:46 -0500
+In-reply-to: <CADz5_gLC=z_VYrNq8q3dU7L6im7shSz-Sn6Tzym2mRZONwpgUg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andreas Fenkart <andreas.fenkart@streamunlimited.com>
-Cc: linux-mmc@vger.kernel.org, david.vrabel@csr.com, daniel@zonque.org
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kyungmin.park@samsung.com, Mark Brown <broonie@opensource.wolfsonmicro.com>, lrg@ti.com, Philip Rakity <prakity@nvidia.com>
 
-On Tuesday 20 November 2012 03:12 AM, Andreas Fenkart wrote:
-> Signed-off-by: Andreas Fenkart <andreas.fenkart@streamunlimited.com>
-> ---
->   drivers/mmc/host/omap_hsmmc.c |    7 +++++--
->   1 file changed, 5 insertions(+), 2 deletions(-)
+Hello,
+
+On 11/14/2012 8:11 AM, Kevin Liu wrote:
+> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chris Ball
+> > Sent: Tuesday, November 13, 2012 10:14 PM
+> > To: Marek Szyprowski
+> > Cc: linux-kernel@vger.kernel.org; linux-mmc@vger.kernel.org; Kyungmin Park; Mark Brown; Liam Girdwood; Philip Rakity
+> > Subject: Re: [PATCH v2] mmc: sdhci: apply voltage range check only for non-fixed regulators
+> >
+> > Hi,
+> >
+> > On Tue, Nov 13 2012, Marek Szyprowski wrote:
+> >>> On Tue, Nov 13 2012, Marek Szyprowski wrote:
+> >>> > Fixed regulators cannot change their voltage, so disable all voltage
+> >>> > range checking for them, otherwise the driver fails to operate with
+> >>> > fixed regulators. Up to now it worked only by luck, because
+> >>> > regulator_is_supported_voltage() function returned incorrect values.
+> >>> > Commit "regulator: fix voltage check in regulator_is_supported_voltage()"
+> >>> > fixed that function and now additional check is needed for fixed
+> >>> > regulators.
+> >>> >
+> >>> > Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+> >>> > ---
+> >>> >  drivers/mmc/host/sdhci.c |    2 +-
+> >>> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >>> >
+> >>> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> >>> > index c7851c0..6f6534e 100644
+> >>> > --- a/drivers/mmc/host/sdhci.c
+> >>> > +++ b/drivers/mmc/host/sdhci.c
+> >>> > @@ -2923,7 +2923,7 @@ int sdhci_add_host(struct sdhci_host *host)
+> >>> >            regulator_enable(host->vmmc);
+> >>> >
+> >>> >  #ifdef CONFIG_REGULATOR
+> >>> > -  if (host->vmmc) {
+> >>> > +  if (host->vmmc && regulator_count_voltages(host->vmmc) > 1) {
+> >>> >            ret = regulator_is_supported_voltage(host->vmmc, 3300000,
+> >>> >                    3300000);
+> >>> >            if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
+> >>>
+> >>> Thanks for the longer explanation.  I'm still missing something, though;
+> >>> what's wrong with running the check as it was with the new regulator code?
+> >>> (I haven't tried it yet.)
+> >>>
+> >>> #ifdef CONFIG_REGULATOR
+> >>>          if (host->vmmc) {
+> >>>                  ret = regulator_is_supported_voltage(host->vmmc, 3300000,
+> >>>                          3300000);
+> >>>                  if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
+> >>>                          caps[0] &= ~SDHCI_CAN_VDD_330;
+> >>>                  ret = regulator_is_supported_voltage(host->vmmc, 3000000,
+> >>>                          3000000);
+> >>>                  if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_300)))
+> >>>                          caps[0] &= ~SDHCI_CAN_VDD_300;
+> >>>                  ret = regulator_is_supported_voltage(host->vmmc, 1800000,
+> >>>                          1800000);
+> >>>                  if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_180)))
+> >>>                          caps[0] &= ~SDHCI_CAN_VDD_180;
+> >>>          }
+> >>> #endif /* CONFIG_REGULATOR */
+> >>>
+> >>> The point is to remove unsupported voltages, so if someone sets up a
+> >>> fixed regulator at 3300000, all of the other caps are disabled.  Why
+> >>> wouldn't that work without this change, and how are we supposed to
+> >>> remove those caps on a fixed regulator after your patchset?
+> >>>
+> >>> Thanks, sorry if I'm missing something obvious,
+> >>
+> >> On our boards eMMC is connected to fixed 2.8V regulator, what results in
+> >> clearing all available voltages and fail. The same situation is when one
+> >> enable dummy regulator and try to use sdhci with it. My patch fixes this
+> >> and restores sdhci to working state as it was before (before fixing
+> >> regulator regulator_is_supported_voltage() function and earlier when
+> >> MMC_BROKEN_VOLATGE capability was used).
+> >
+> > I see.  Sounds like a separate bug -- Philip (or anyone else), any
+> > idea how we should be treating eMMCs with a fixed voltage here?
+> >
 >
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 21ca331..13ef4a0 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -991,9 +991,12 @@ static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
->   static void hsmmc_command_incomplete(struct omap_hsmmc_host *host, int err)
->   {
->   	omap_hsmmc_reset_controller_fsm(host, SRC);
-> -	host->cmd->error = err;
-> +
-> +	if (host->cmd)
-> +		host->cmd->error = err;
->   
->   	if (host->data) {
-> +		host->data->error = err;
->   		omap_hsmmc_reset_controller_fsm(host, SRD);
->   		omap_hsmmc_dma_cleanup(host, err);
+> I think we should check the voltage range rather than the voltage
+> point accoring to the spec.
+> Otherwise some valid voltage like 2.8v will be discarded by mistake.
+> My below old patch aim to fix this issue.
+> How do you think?
+>
+> -----Original Message-----
+> From: Kevin Liu [mailto:keyuan.liu@gmail.com]
+> Sent: Friday, September 28, 2012 3:56 PM
+> To: linux-mmc@vger.kernel.org; cjb@laptop.org; pierre@ossman.eu;
+> ulf.hansson@linaro.org; Zhangfei Gao
+> Cc: Haojian Zhuang; Chao Xie; Philip Rakity; Kevin Liu; Jialing Fu
+> Subject: [PATCH v5 03/13] mmc: sdhci: use regulator min/max voltage
+> range according to spec
+>
+> From: Kevin Liu <kliu5@marvell.com>
+>
+> For regulator vmmc/vmmcq, use voltage range as below
+> 3.3v/3.0v: (2.7v, 3.6v)
+> 1.8v: (1.7v, 1.95v)
+> Original code use the specific value which may fail in regulator
+> driver if it does NOT support the specific voltage.
+>
+> Signed-off-by: Jialing Fu <jlfu@marvell.com>
+> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+
+Tested-by: Marek Szyprowski <m.szyprowski@samsung.com>
+
+This patch restores sdhci devices to working state on Samsung boards
+(tested on GONI and UniversalC210) after merging "regulator: fix voltage
+check in regulator_is_supported_voltage()" patch to v3.7-rc6 (commit
+f0f98b19e23d4426ca185e3d4ca80e6aff5ef51b). Would be great to have it
+merged before the final v3.7 is out.
+
+> ---
+>   drivers/mmc/host/sdhci.c |   16 +++++++---------
+>   1 files changed, 7 insertions(+), 9 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 3aef580..36afd47 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1628,7 +1628,7 @@ static int
+> sdhci_do_3_3v_signal_voltage_switch(struct sdhci_host *host,
+>   	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+>
+>   	if (host->vqmmc) {
+> -		ret = regulator_set_voltage(host->vqmmc, 3300000, 3300000);
+> +		ret = regulator_set_voltage(host->vqmmc, 2700000, 3600000);
+>   		if (ret) {
+>   			pr_warning("%s: Switching to 3.3V signalling voltage "
+>   				   " failed\n", mmc_hostname(host->mmc));
+> @@ -1672,7 +1672,7 @@ static int
+> sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
+>   		 */
+>   		if (host->vqmmc)
+>   			ret = regulator_set_voltage(host->vqmmc,
+> -				1800000, 1800000);
+> +				1700000, 1950000);
+>   		else
+>   			ret = 0;
+>
+> @@ -2856,7 +2856,7 @@ int sdhci_add_host(struct sdhci_host *host)
+>   		pr_info("%s: no vqmmc regulator found\n", mmc_hostname(mmc));
+>   		host->vqmmc = NULL;
 >   	}
-> @@ -1022,7 +1025,7 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
->   		}
+> -	else if (regulator_is_supported_voltage(host->vqmmc, 1800000, 1800000))
+> +	else if (regulator_is_supported_voltage(host->vqmmc, 1700000, 1950000))
+>   		regulator_enable(host->vqmmc);
+>   	else
+>   		caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+> @@ -2927,16 +2927,14 @@ int sdhci_add_host(struct sdhci_host *host)
+>
+>   #ifdef CONFIG_REGULATOR
+>   	if (host->vmmc) {
+> -		ret = regulator_is_supported_voltage(host->vmmc, 3300000,
+> -			3300000);
+> +		ret = regulator_is_supported_voltage(host->vmmc, 2700000,
+> +			3600000);
+>   		if ((ret <= 0) && (caps[0] & SDHCI_CAN_VDD_330))
+>   			caps[0] &= ~SDHCI_CAN_VDD_330;
+> -		ret = regulator_is_supported_voltage(host->vmmc, 3000000,
+> -			3000000);
+>   		if ((ret <= 0) && (caps[0] & SDHCI_CAN_VDD_300))
+>   			caps[0] &= ~SDHCI_CAN_VDD_300;
+> -		ret = regulator_is_supported_voltage(host->vmmc, 1800000,
+> -			1800000);
+> +		ret = regulator_is_supported_voltage(host->vmmc, 1700000,
+> +			1950000);
+>   		if ((ret <= 0) && (caps[0] & SDHCI_CAN_VDD_180))
+>   			caps[0] &= ~SDHCI_CAN_VDD_180;
 >   	}
->   
-> -	if (end_cmd || ((status & CC) && host->cmd))
-> +	if ((end_cmd || (status & CC)) && host->cmd)
->   		omap_hsmmc_cmd_done(host, host->cmd);
->   	if ((end_trans || (status & TC)) && host->mrq)
->   		omap_hsmmc_xfer_done(host, data);
-Hi Andreas,
-   Thanks for this, but it's been fixed already with Balaji's patches 
-which I reposted a few hours ago.
-Can you please check if it fixes your issues ?
-~V
+
+Best regards
+-- 
+Marek Szyprowski
+Samsung Poland R&D Center
+
+
