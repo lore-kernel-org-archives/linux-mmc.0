@@ -1,70 +1,60 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: [GIT PULL v2] at91: fixes for 3.7-rc7
-Date: Tue, 20 Nov 2012 09:59:27 +0100
-Message-ID: <50AB466F.5010500@atmel.com>
-References: <50AA5ED5.8090901@atmel.com> <CAOesGMjAYtEkmEYnzCQ4G821BWG9D6LHvgt5aOMJgus_hzFkRA@mail.gmail.com> <50AA6C76.3000606@atmel.com>
+From: James Hogan <james.hogan@imgtec.com>
+Subject: Re: [PATCH v3 4/4] mmc: dw-mmc: remove complier warning
+Date: Tue, 20 Nov 2012 09:06:01 +0000
+Message-ID: <50AB47F9.5050501@imgtec.com>
+References: <509B6ED5.6070101@samsung.com> <50AA24B1.8050303@imgtec.com> <50AA2BD0.90200@imgtec.com> <50AADF8A.2080804@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <50AA6C76.3000606@atmel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>
-Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, linux-mmc@vger.kernel.org, Linux Kernel list <linux-kernel@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <cjb@laptop.org>, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from multi.imgtec.com ([194.200.65.239]:51642 "EHLO multi.imgtec.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752080Ab2KTJGF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 20 Nov 2012 04:06:05 -0500
+In-Reply-To: <50AADF8A.2080804@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>
 
-Arnd, Olof,
+On 20/11/12 01:40, Jaehoon Chung wrote:
+> Hi James,
+> 
+> This patch has already merged with Arnd's patch.
+> He also sent the same patch.
 
-Just for the record, I do not want to put pressure at a such late time in
-the 3.7-rc process. So, I just reworked that pull-request because the previous
-one was wrong:
-- wrong patch content (DT nodes with wrong size)
-- not all tags in patches (Jean-Christophe and Arnd tags were missing...)
+Ah yes :-)
 
-Just to start from a sane base if I have to rebase this work for 3.8, I let you know
-that I have updated this tag...
+Thanks
+James
 
-The following changes since commit 641f3ce64b050961d454a0716bb6dbf528315aac:
+> 
+> Best Regards,
+> Jaehoon Chung
+> 
+> On 11/19/2012 09:53 PM, James Hogan wrote:
+>> On 19/11/12 12:23, James Hogan wrote:
+>>> On 08/11/12 08:35, Jaehoon Chung wrote:
+>>>> drivers/mmc/host/dw_mmc.c: In function 'dw_mci_prepare_command':
+>>>> drivers/mmc/host/dw_mmc.c:256:37: warning: initialization discards 'const' qualifier from pointer target type [enabled by default]
+>>>> drivers/mmc/host/dw_mmc.c: In function 'dw_mci_set_ios':
+>>>> drivers/mmc/host/dw_mmc.c:805:37: warning: initialization discards 'const' qualifier from pointer target type [enabled by default]
+>>>> drivers/mmc/host/dw_mmc.c: In function 'dw_mci_init_slot':
+>>>> drivers/mmc/host/dw_mmc.c:1849:37: warning: initialization discards 'const' qualifier from pointer target type [enabled by default]
+>>>> drivers/mmc/host/dw_mmc.c: In function 'dw_mci_parse_dt':
+>>>> drivers/mmc/host/dw_mmc.c:2049:37: warning: initialization discards 'const' qualifier from pointer target type [enabled by default]
+>>>> drivers/mmc/host/dw_mmc.c: In function 'dw_mci_probe':
+>>>> drivers/mmc/host/dw_mmc.c:2095:37: warning: initialization discards 'const' qualifier from pointer target type [enabled by default]
+>>>>
+>>>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>>>
+>>> Acked-by: James Hogan <james.hogan@imgtec.com>
+>>
+>> Chris: Is it okay to get this patch into v3.7?
+>>
+>> Thanks
+>> James
+>>
+>>
+> 
 
-  ARM: at91/usbh: fix overcurrent gpio setup (2012-11-16 10:46:29 +0100)
-
-are available in the git repository at:
-
-  git://github.com/at91linux/linux-at91.git tags/at91-fixes
-
-for you to fetch changes up to 6a342d1ee6ff7d5b3e5a0665457f1772e7fe640a:
-
-  ARM: at91/dts: add nodes for atmel hsmci controllers for atmel boards (2012-11-20 09:51:07 +0100)
-
-----------------------------------------------------------------
-Add entries for enabling the use of sd/mmc driver on AT91.
-Those entries where missing for device tree use on these
-platforms.
-
-----------------------------------------------------------------
-Ludovic Desroches (3):
-      ARM: at91: add clocks for DT entries
-      ARM: at91/dts: add nodes for atmel hsmci controllers for atmel SOCs
-      ARM: at91/dts: add nodes for atmel hsmci controllers for atmel boards
-
- arch/arm/boot/dts/at91sam9260.dtsi          |  9 +++++++++
- arch/arm/boot/dts/at91sam9263.dtsi          | 18 ++++++++++++++++++
- arch/arm/boot/dts/at91sam9263ek.dts         | 10 ++++++++++
- arch/arm/boot/dts/at91sam9g20ek_2mmc.dts    | 12 ++++++++++++
- arch/arm/boot/dts/at91sam9g20ek_common.dtsi |  9 +++++++++
- arch/arm/boot/dts/at91sam9g25ek.dts         | 18 ++++++++++++++++++
- arch/arm/boot/dts/at91sam9g45.dtsi          | 18 ++++++++++++++++++
- arch/arm/boot/dts/at91sam9m10g45ek.dts      | 19 +++++++++++++++++++
- arch/arm/boot/dts/at91sam9n12.dtsi          |  9 +++++++++
- arch/arm/boot/dts/at91sam9n12ek.dts         |  9 +++++++++
- arch/arm/boot/dts/at91sam9x5.dtsi           | 18 ++++++++++++++++++
- arch/arm/mach-at91/at91sam9260.c            |  1 +
- arch/arm/mach-at91/at91sam9263.c            |  2 ++
- arch/arm/mach-at91/at91sam9g45.c            |  2 ++
- arch/arm/mach-at91/at91sam9n12.c            |  1 +
- arch/arm/mach-at91/at91sam9x5.c             |  2 ++
- 16 files changed, 157 insertions(+)
-
-Bye,
--- 
-Nicolas Ferre
