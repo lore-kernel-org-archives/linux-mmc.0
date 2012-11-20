@@ -1,285 +1,178 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: FW: [PATCH v2] mmc: sdhci: apply voltage range check only for
- non-fixed regulators
-Date: Tue, 20 Nov 2012 23:24:50 +0800
-Message-ID: <CADz5_gLfy69YksiFuxEKeAv387go_8cOcK_uxbKuhrTBrXdjdQ@mail.gmail.com>
-References: <25B60CDC2F704E4E9D88FFD52780CB4C060FBEA29A@SC-VEXCH1.marvell.com>
-	<CADz5_gLC=z_VYrNq8q3dU7L6im7shSz-Sn6Tzym2mRZONwpgUg@mail.gmail.com>
-	<50AB34E2.1010206@samsung.com>
-	<CADz5_gKdUq8bjuMr1=yo65ysHzLNvKnrfVuSpLk-Q6ek-TWpNA@mail.gmail.com>
-	<50AB587F.3040405@samsung.com>
-	<CADz5_gJ1hV3n-4BPgBNT9LDp2-E=vNNzMGx=_9PmzT0RJ9+TsA@mail.gmail.com>
-	<50AB81C8.4090300@samsung.com>
-	<CADz5_gL3uHbvhb2ccp03=9P88u1Catxe9+Xffs3KmJsZGWmWvA@mail.gmail.com>
-	<50AB9B90.1030404@samsung.com>
+From: Konstantin Dorfman <kdorfman@codeaurora.org>
+Subject: Re: [PATCH v1] mmc: fix async request mechanism for sequential read
+ scenarios
+Date: Tue, 20 Nov 2012 18:26:13 +0200
+Message-ID: <50ABAF25.7010708@codeaurora.org>
+References: <f67543901d54b344c8bb401e363e6b80.squirrel@www.codeaurora.org> <5088206C.7080101@stericsson.com>	<50893E88.9000908@codeaurora.org> <5089549D.3060507@stericsson.com> <CAOyx1Lq9D2RN5KmvgxU+Z4W3aNHuyA2D5cdFJhz0sf+WU2ZZ=Q@mail.gmail.com> <508D2F2E.3020006@codeaurora.org> <CAFEEs1m6VwDO8N1Tc8J4Q+aXysgxd77+oZr=M7QK7rgycQuEFw@mail.gmail.com> <508FC5E4.8010906@codeaurora.org> <CAFEEs1=+xD+jkydx7O-MLcvbyNkZ7BQbi=Q10c_Ln0XyXdRPmQ@mail.gmail.com> <50A3B598.4030702@codeaurora.org> <50A51A9E.9020004@stericsson.com> <50AA005B.8050903@codeaurora.org> <50AA4312.5000703@stericsson.com> <50AAA5F2.6000200@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <50AB9B90.1030404@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kyungmin.park@samsung.com, Mark Brown <broonie@opensource.wolfsonmicro.com>, lrg@ti.com, Philip Rakity <prakity@nvidia.com>
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:33449 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751789Ab2KTQ0Z (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Nov 2012 11:26:25 -0500
+In-Reply-To: <50AAA5F2.6000200@stericsson.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: =?ISO-8859-1?Q?Per_F=F6rlin?= <per.forlin@stericsson.com>
+Cc: Per Forlin <per.lkml@gmail.com>, Venkatraman S <svenkatr@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-2012/11/20 Marek Szyprowski <m.szyprowski@samsung.com>:
-> Hello,
->
->
-> On 11/20/2012 3:14 PM, Kevin Liu wrote:
->>
->> 2012/11/20 Marek Szyprowski <m.szyprowski@samsung.com>:
->> > Hello,
->> >
->> >
->> > On 11/20/2012 12:36 PM, Kevin Liu wrote:
->> >>
->> >> 2012/11/20 Marek Szyprowski <m.szyprowski@samsung.com>:
->> >> > On 11/20/2012 9:59 AM, Kevin Liu wrote:
->> >> >> 2012/11/20 Marek Szyprowski <m.szyprowski@samsung.com>:
->> >> >> > On 11/14/2012 8:11 AM, Kevin Liu wrote:
->> >> >> >>
->> >> >> >> > From: linux-mmc-owner@vger.kernel.org
->> >> >> >> > [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chris
->> >> >> >> > Ball
->> >> >> >> > Sent: Tuesday, November 13, 2012 10:14 PM
->> >> >> >> > To: Marek Szyprowski
->> >> >> >> > Cc: linux-kernel@vger.kernel.org; linux-mmc@vger.kernel.org;
->> >> >> >> > Kyungmin
->> >> >> >> > Park; Mark Brown; Liam Girdwood; Philip Rakity
->> >> >> >> > Subject: Re: [PATCH v2] mmc: sdhci: apply voltage range check
->> >> >> >> > only
->> >> >> >> > for non-fixed regulators
->> >> >> >> > On Tue, Nov 13 2012, Marek Szyprowski wrote:
->> >> >> >> >>> On Tue, Nov 13 2012, Marek Szyprowski wrote:
->> >> >> >> >>> > Fixed regulators cannot change their voltage, so disable
->> >> >> >> >>> > all
->> >> >> >> >>> > voltage
->> >> >> >> >>> > range checking for them, otherwise the driver fails to
->> >> >> >> >>> > operate
->> >> >> >> >>> > with
->> >> >> >> >>> > fixed regulators. Up to now it worked only by luck, because
->> >> >> >> >>> > regulator_is_supported_voltage() function returned
->> >> >> >> >>> > incorrect
->> >> >> >> >>> > values.
->> >> >> >> >>> > Commit "regulator: fix voltage check in
->> >> >> >> >>> > regulator_is_supported_voltage()"
->> >> >> >> >>> > fixed that function and now additional check is needed for
->> >> >> >> >>> > fixed
->> >> >> >> >>> > regulators.
->> >> >> >> >>> >
->> >> >> >> >>> > Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
->> >> >> >> >>> > ---
->> >> >> >> >>> >  drivers/mmc/host/sdhci.c |    2 +-
->> >> >> >> >>> >  1 file changed, 1 insertion(+), 1 deletion(-)
->> >> >> >> >>> >
->> >> >> >> >>> > diff --git a/drivers/mmc/host/sdhci.c
->> >> >> >> >>> > b/drivers/mmc/host/sdhci.c
->> >> >> >> >>> > index c7851c0..6f6534e 100644
->> >> >> >> >>> > --- a/drivers/mmc/host/sdhci.c
->> >> >> >> >>> > +++ b/drivers/mmc/host/sdhci.c
->> >> >> >> >>> > @@ -2923,7 +2923,7 @@ int sdhci_add_host(struct sdhci_host
->> >> >> >> >>> > *host)
->> >> >> >> >>> >            regulator_enable(host->vmmc);
->> >> >> >> >>> >
->> >> >> >> >>> >  #ifdef CONFIG_REGULATOR
->> >> >> >> >>> > -  if (host->vmmc) {
->> >> >> >> >>> > +  if (host->vmmc && regulator_count_voltages(host->vmmc) >
->> >> >> >> >>> > 1)
->> >> >> >> >>> > {
->> >> >> >> >>> >            ret = regulator_is_supported_voltage(host->vmmc,
->> >> >> >> >>> > 3300000,
->> >> >> >> >>> >                    3300000);
->> >> >> >> >>> >            if ((ret <= 0) || (!(caps[0] &
->> >> >> >> >>> > SDHCI_CAN_VDD_330)))
->> >> >> >> >>>
->> >> >> >> >>> Thanks for the longer explanation.  I'm still missing
->> >> >> >> >>> something,
->> >> >> >> >>> though;
->> >> >> >> >>> what's wrong with running the check as it was with the new
->> >> >> >> >>> regulator
->> >> >> >> >>> code?
->> >> >> >> >>> (I haven't tried it yet.)
->> >> >> >> >>>
->> >> >> >> >>> #ifdef CONFIG_REGULATOR
->> >> >> >> >>>          if (host->vmmc) {
->> >> >> >> >>>                  ret =
->> >> >> >> >>> regulator_is_supported_voltage(host->vmmc,
->> >> >> >> >>> 3300000,
->> >> >> >> >>>                          3300000);
->> >> >> >> >>>                  if ((ret <= 0) || (!(caps[0] &
->> >> >> >> >>> SDHCI_CAN_VDD_330)))
->> >> >> >> >>>                          caps[0] &= ~SDHCI_CAN_VDD_330;
->> >> >> >> >>>                  ret =
->> >> >> >> >>> regulator_is_supported_voltage(host->vmmc,
->> >> >> >> >>> 3000000,
->> >> >> >> >>>                          3000000);
->> >> >> >> >>>                  if ((ret <= 0) || (!(caps[0] &
->> >> >> >> >>> SDHCI_CAN_VDD_300)))
->> >> >> >> >>>                          caps[0] &= ~SDHCI_CAN_VDD_300;
->> >> >> >> >>>                  ret =
->> >> >> >> >>> regulator_is_supported_voltage(host->vmmc,
->> >> >> >> >>> 1800000,
->> >> >> >> >>>                          1800000);
->> >> >> >> >>>                  if ((ret <= 0) || (!(caps[0] &
->> >> >> >> >>> SDHCI_CAN_VDD_180)))
->> >> >> >> >>>                          caps[0] &= ~SDHCI_CAN_VDD_180;
->> >> >> >> >>>          }
->> >> >> >> >>> #endif /* CONFIG_REGULATOR */
->> >> >> >> >>>
->> >> >> >> >>> The point is to remove unsupported voltages, so if someone
->> >> >> >> >>> sets
->> >> >> >> >>> up
->> >> >> >> >>> a
->> >> >> >> >>> fixed regulator at 3300000, all of the other caps are
->> >> >> >> >>> disabled.
->> >> >> >> >>> Why
->> >> >> >> >>> wouldn't that work without this change, and how are we
->> >> >> >> >>> supposed
->> >> >> >> >>> to
->> >> >> >> >>> remove those caps on a fixed regulator after your patchset?
->> >> >> >> >>>
->> >> >> >> >>> Thanks, sorry if I'm missing something obvious,
->> >> >> >> >>
->> >> >> >> >> On our boards eMMC is connected to fixed 2.8V regulator, what
->> >> >> >> >> results
->> >> >> >> >> in
->> >> >> >> >> clearing all available voltages and fail. The same situation
->> >> >> >> >> is
->> >> >> >> >> when
->> >> >> >> >> one
->> >> >> >> >> enable dummy regulator and try to use sdhci with it. My patch
->> >> >> >> >> fixes
->> >> >> >> >> this
->> >> >> >> >> and restores sdhci to working state as it was before (before
->> >> >> >> >> fixing
->> >> >> >> >> regulator regulator_is_supported_voltage() function and
->> >> >> >> >> earlier
->> >> >> >> >> when
->> >> >> >> >> MMC_BROKEN_VOLATGE capability was used).
->> >> >> >> >
->> >> >> >> > I see.  Sounds like a separate bug -- Philip (or anyone else),
->> >> >> >> > any
->> >> >> >> > idea how we should be treating eMMCs with a fixed voltage here?
->> >> >> >> >
->> >> >> >>
->> >> >> >> I think we should check the voltage range rather than the voltage
->> >> >> >> point accoring to the spec.
->> >> >> >> Otherwise some valid voltage like 2.8v will be discarded by
->> >> >> >> mistake.
->> >> >> >> My below old patch aim to fix this issue.
->> >> >> >> How do you think?
->> >> >> >>
->> >> >> >> -----Original Message-----
->> >> >> >> From: Kevin Liu [mailto:keyuan.liu@gmail.com]
->> >> >> >> Sent: Friday, September 28, 2012 3:56 PM
->> >> >> >> To: linux-mmc@vger.kernel.org; cjb@laptop.org; pierre@ossman.eu;
->> >> >> >> ulf.hansson@linaro.org; Zhangfei Gao
->> >> >> >> Cc: Haojian Zhuang; Chao Xie; Philip Rakity; Kevin Liu; Jialing
->> >> >> >> Fu
->> >> >> >> Subject: [PATCH v5 03/13] mmc: sdhci: use regulator min/max
->> >> >> >> voltage
->> >> >> >> range according to spec
->> >> >> >>
->> >> >> >> From: Kevin Liu <kliu5@marvell.com>
->> >> >> >>
->> >> >> >> For regulator vmmc/vmmcq, use voltage range as below
->> >> >> >> 3.3v/3.0v: (2.7v, 3.6v)
->> >> >> >> 1.8v: (1.7v, 1.95v)
->> >> >> >> Original code use the specific value which may fail in regulator
->> >> >> >> driver if it does NOT support the specific voltage.
->> >> >> >>
->> >> >> >> Signed-off-by: Jialing Fu <jlfu@marvell.com>
->> >> >> >> Signed-off-by: Kevin Liu <kliu5@marvell.com>
->> >> >> >
->> >> >> >
->> >> >> > Tested-by: Marek Szyprowski <m.szyprowski@samsung.com>
->> >> >> >
->> >> >> > This patch restores sdhci devices to working state on Samsung
->> >> >> > boards
->> >> >> > (tested on GONI and UniversalC210) after merging "regulator: fix
->> >> >> > voltage
->> >> >> > check in regulator_is_supported_voltage()" patch to v3.7-rc6
->> >> >> > (commit
->> >> >> > f0f98b19e23d4426ca185e3d4ca80e6aff5ef51b). Would be great to have
->> >> >> > it
->> >> >> > merged before the final v3.7 is out.
->> >> >> >
->> >> >> Marek,
->> >> >>
->> >> >> thanks a lot for the verification!
->> >> >> And your patch "mmc: sdhci: apply voltage range check only for
->> >> >> non-fixed regulators" (commit
->> >> >> d5b5205f2d480a47863dda0772d2d9dc47c2b51b, which has been merged in
->> >> >> mmc-next) can be reverted if this patch merged?
->> >> >
->> >> >
->> >> > Yes, it can be replaced with it, although there is still an issue
->> >> > that
->> >> > need
->> >> > to be resolved somehow. Right now SDHCI driver fails to initialize if
->> >> > support
->> >> > for dummy regulator is enabled.
->> >> >
->> >> Then I think the dummy issue can be resolved with your patch merged
->> >> and if you can just update your patch from
->> >>       "regulator_count_voltages(host->vmmc) > 1"
->> >> to
->> >>       "regulator_count_voltages(host->vmmc) > 0"
->> >> to let fix regulator work.
->> >
->> >
->> > regulator_count_voltages() returns 1 for both fixed regulators and for
->> > virtual dummy regulator, so the above change makes no sense.
->>
->> I think regulator_count_voltage should return -EINVAL for dummy
->> regulator since n_voltages is not defined for dummy regulator:
->> int regulator_count_voltages(struct regulator *regulator)
->> {
->>          struct regulator_dev    *rdev = regulator->rdev;
->>
->>          return rdev->desc->n_voltages ? : -EINVAL;
->> }
->> can you double check this?
->
->
-> Err, right. I looked at the wrong SDHCI device :/ I have 3 of them on my
-> board - one with fixed regulator, one with 'real' and one without (with
-> virtual dummy regulator). I've applied my earlier patch and noticed that
-> it cured sdhci driver with dummy regulator, so I concluded that it did
-> the right job. Sorry for the confusion.
->
-No problem, thanks for the check.
+Hello,
 
->> > However I was so focused on fixing the 2.8V supply case that I missed
->> > the
->> > fact that my "mmc: sdhci: apply voltage range check only for non-fixed
->> > regulators" patch also fixed the dummy regulator case.
->> >
->> > The conclusion is that applying both patches should finally fix the
->> > regulator issues with for the Samsung boards (2.8V supply for eMMC) and
->> > 'dummy-regulators' cases.
->> >
->>
->> After thinking again, I think we don't need the check for
->> regulator_count_voltages.
->> In fact, dummy regulator should NOT be used for the sd/mmc power
->> supply. We should use controllable or fixed regulator. If dummy
->> regulator is used, then it means we won't control it and we don't know
->> its voltage. It's not reasonable for sd/mmc power supply. If dummy
->> regulator is used, I think it's ok to return error and disable all
->> voltage support caps.
->
->
-> The problem with dummy regulator is the fact that it can be enabled only
-> globally for all devices in the system. I think that the best solution
-> would be to introduce regulator_can_change_voltage() as Mark suggested.
-> I will post patches soon.
->
-I think both controllable and fixed regulator should check the voltage
-range (fixed regulator also need to check its voltage whether resides
-in the valid range). But regulator_can_change_voltage will return
-false for both fixed and dummy regulator while return true for
-controllable regulator.
+On 11/19/2012 11:34 PM, Per F=F6rlin wrote:
 
-Thanks
-Kevin
+>>>>>>        if (host->areq) {
+>>>>>> +             if (!areq)
+>>>>>> +                     mmc_prefetch_init(host->areq,
+>>>>>> +                                       &host->areq->mrq->comple=
+tion);
+>>>>>>                mmc_wait_for_req_done(host, host->areq->mrq);
+>>>>>> +             if (!areq) {
+>>>>>> +                     mmc_prefetch_start(host->areq, false);
+>>>>>> +                     if (mmc_prefetch_pending(host->areq))
+>>>>>> +                             return NULL;
+>>> In this case, mmc thread may be unblocked because done() arrived fo=
+r
+>>> current request and not because new request notification. In such a=
+ case
+>>> we would like the done request to be handled before fetching the ne=
+w
+>>> request.
+>> I agree. We wake up and there is no pending new request execution sh=
+ould proceed normally by handling the completed request.
+>>
+>>> In my code is_done_rcv flag used along with is_new_req flag in
+>>> order to differentiate the reason for mmc thread awake.
+>> In my patch the return value of "mmc_prefetch_pending()" specifies i=
+f thee is a pending request.what should happen.
+>> If both current request is done and mmc_prefetch_pending is done at =
+the same time I see there is a problem with my patch. There needs to be=
+ a flag to indicate if current request is done.
+There is race between done() and NEW_REQUEST events, also when we got=20
+both of them, the order is to complete current and then to fetch new.
+
+
+>>>>> I understand your motivation and idea for re-structure the patch.=
+ It is
+>>>>> still not clear for me how exactly mmc thread will be awaken on n=
+ew
+>>>>> request notification in your version, but I have another problem:
+>>>>>
+>>>> mmc_request_fn() is called and it calls complete(mq->prefetch_comp=
+letion) which wakes up the current thread.
+>>>> My patch is just an example. The intention is to make the patch cl=
+eaner. But I may have missed some of the HPI aspects.
+>>>
+>>> Is it the lack of functions wrappers that you are using in your exa=
+mple?
+>> It's fine to skip the functions wrappers if it makes no sense.
+>> What I want to avoid is to create new functions for data_req_start a=
+nd data_req_wait.
+>> I would rather add this to the existing functions in core.c and keep=
+ changes in block.c and the flow minimal.
+>>
+>>> As I understand your example, you mean to implement generic logic o=
+n
+>>> core/core.c level by using wrapper functions and leave final
+>>> implementation for MMC to card/queue.c and for SDIO layer to
+>>> card/..sdio.. (I'm not too familiar with sdio protocol implementati=
+on).
+>>> Well, it is make a lot of sense.
+>>>
+>> I still have "plans" to add pre/post/async support in the SDIO frame=
+work too but I have not got to it.
+>> I would be nice to add your NEW_REQ feature along with the other mmc=
+-async features, to make it usable from SDIO.
+>>
+>>
+>>> But the devil is in details - there is a lot of work in
+>>> mmc_wait_for_data_req_done(), done() callback and also error handli=
+ng
+>>> changes for card/block.c
+>> Things in core.c could be re-used in the SDIO case. In block.c there=
+ are only FS specific implementation not relevant for SDIO.
+>>
+>>>
+>>> Do you think, that wait_event() API used not suits the same semanti=
+c as
+>>> completion API?
+>> The waiting mechanims may be wait_event or completion.
+>> I'm not in favor of using both. Better to replace completion with wa=
+it_event if you prefer.
+>>
+> I'm fine with wait_event() (block request transfers) combined with co=
+mpletion (for other transfer), as long as the core.c API is intact. I d=
+on't see a reason for a new start_data_req()
+>
+> mmc_start_req() is only used by the mmc block transfers.
+The main idea is to change start_req() waiting point=20
+(mmc_wait_for_data_req_done() function) in such way that external event=
+s=20
+(in the MMC case it is coming from block layer) may awake MMC context=20
+from waiting for current request. This is done by change the original=20
+mmc_start_req() function and not changing its signature of mmc_start_re=
+q().
+
+May I ask you to see [PATCH v2] patch? I think that is is no change in=20
+core.c API (by core.c API you mean all functions from core.h?).
+
+Also to use new request feature of core.c one need to implement=20
+notification similar to mmc_request_fn() and I do not see difficulties=20
+to do it from SDIO.
+
+
+> Making a test case in mmc_test.c is a good way to stress test the fea=
+ture (e.g. random timing of incoming new requests) and it will show how=
+ the API works too.
+>
+> BR
+> Per
+>
+>> My main concern is to avoid adding new API to core.c in order to add=
+ the NEW_REQ feature. My patch is an example of changes to be done in c=
+ore.c without adding new functions.
+>>
+>>>
+>>> We would like to have a generic capability to handle additional eve=
+nts,
+>>> such as HPI/stop flow, in addition to the NEW_REQUEST notification.
+>>> Therefore, an event mechanism seems to be a better design than comp=
+letion.
+>>>
+>>> I've looked at SDIO code and from what I can understand, right now =
+SDIO
+>>> is not using async request mechanism and works from 'wait_for_cmd()=
+`
+>>> level. This means that such work as exposing MMC core API's is majo=
+r
+>>> change and definitely should be separate design and implementation
+>>> effort, while my current patch right now will fix mmc thread behavi=
+or
+>>> and give better performance for upper layers.
+>> You are right. There is no support in the SDIO implementation for pr=
+e/post/async feature. Still I had it in mind design the "struct mmc_asy=
+nc". It's possible to re-use the mmc core parts in order to utilize thi=
+s support in the SDIO case. I'm not saying we should design for SDIO bu=
+t at least keep the API in a way that it's potential usable from SDIO t=
+oo. The API of core.c (start/wait of requests) should make sense withou=
+t the existence of MMC block driver (block/queue).
+>>
+>> One way to test the design is to add a test in mmc_test.c for pengin=
+g NEW_REQ. In mmc_test.c there is not block.c or queue.c.
+>> If the test case if simple to write in mmc_test.c it's means that th=
+e API is on a good level.
+I have plans to implement new test in mmc_test.c, but current patch was=
+=20
+tested using special test I/O scheduler, that is used instead of cfq I/=
+O=20
+scheduler: "[PATCH v5 1/3] block: Add test-iosched scheduler"
+
+This gives us great power to create any ut scenarios.
+
+--=20
+Konstantin Dorfman,
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center,
+Inc. is a member of Code Aurora Forum,
+hosted by The Linux Foundation
