@@ -1,53 +1,52 @@
-From: <wei_wang@realsil.com.cn>
-Subject: [PATCH v3 2/2] mmc/host/rtsx: Explicitely include slab.h in rtsx_pci_sdmmc.c
-Date: Tue, 20 Nov 2012 11:24:44 +0800
-Message-ID: <e46f49551ee089dfac863c7f1d9e02cb9b42e1ff.1353381810.git.wei_wang@realsil.com.cn>
-References: <cover.1353381810.git.wei_wang@realsil.com.cn>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Tushar Behera <tushar.behera@linaro.org>
+Subject: [PATCH] mmc: sdhci-s3c: Use NULL instead of 0 for pointers
+Date: Tue, 20 Nov 2012 09:41:53 +0530
+Message-ID: <1353384713-21969-1-git-send-email-tushar.behera@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rtits2.realtek.com ([60.250.210.242]:34483 "EHLO
-	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753001Ab2KTDZU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Nov 2012 22:25:20 -0500
-In-Reply-To: <cover.1353381810.git.wei_wang@realsil.com.cn>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:40174 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752397Ab2KTESE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Nov 2012 23:18:04 -0500
+Received: by mail-pa0-f46.google.com with SMTP id bh2so947073pad.19
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Nov 2012 20:18:03 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, sameo@linux.intel.com
-Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com, bp@alien8.de, Wei WANG <wei_wang@realsil.com.cn>
+To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
+Cc: cjb@laptop.org, thomas.abraham@linaro.org, patches@linaro.org
 
-From: Wei WANG <wei_wang@realsil.com.cn>
+The third argument for of_get_property() is a pointer, hence pass
+NULL instead of 0.
 
-This fixes the following build error on some architectures (parisc at least):
+Fixes following sparse warning.
+drivers/mmc/host/sdhci-s3c.c:452:48: warning: Using plain integer as
+NULL pointer
+drivers/mmc/host/sdhci-s3c.c:457:52: warning: Using plain integer as
+NULL pointer
 
-drivers/mmc/host/rtsx_pci_sdmmc.c: In function 'sd_normal_rw':
-drivers/mmc/host/rtsx_pci_sdmmc.c:448:2: error: implicit
-declaration of function 'kzalloc'
-[-Werror=implicit-function-declaration]
-drivers/mmc/host/rtsx_pci_sdmmc.c:448:6: warning: assignment
-makes pointer from integer without a cast [enabled by default]
-drivers/mmc/host/rtsx_pci_sdmmc.c:472:2: error: implicit
-declaration of function 'kfree'
-[-Werror=implicit-function-declaration]
-
-Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
-Acked-by: Chris Ball <cjb@laptop.org>
+Signed-off-by: Tushar Behera <tushar.behera@linaro.org>
 ---
- drivers/mmc/host/rtsx_pci_sdmmc.c |    1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/sdhci-s3c.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 067dd46..571915d 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -21,6 +21,7 @@
-  */
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index a54dd5d..80b10f2 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -449,12 +449,12 @@ static int __devinit sdhci_s3c_parse_dt(struct device *dev,
+ 		return -ENOMEM;
  
- #include <linux/module.h>
-+#include <linux/slab.h>
- #include <linux/highmem.h>
- #include <linux/delay.h>
- #include <linux/platform_device.h>
+ 	/* get the card detection method */
+-	if (of_get_property(node, "broken-cd", 0)) {
++	if (of_get_property(node, "broken-cd", NULL)) {
+ 		pdata->cd_type = S3C_SDHCI_CD_NONE;
+ 		goto setup_bus;
+ 	}
+ 
+-	if (of_get_property(node, "non-removable", 0)) {
++	if (of_get_property(node, "non-removable", NULL)) {
+ 		pdata->cd_type = S3C_SDHCI_CD_PERMANENT;
+ 		goto setup_bus;
+ 	}
 -- 
-1.7.9.5
+1.7.4.1
 
