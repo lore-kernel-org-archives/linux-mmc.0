@@ -1,47 +1,38 @@
-From: <wei_wang@realsil.com.cn>
-Subject: [PATCH v2 2/2] mmc/host/rtsx: Explicitely include slab.h in rtsx_pci_sdmmc.c
-Date: Tue, 20 Nov 2012 10:09:23 +0800
-Message-ID: <1c626d24c0fde1778afea0b5883b6da70d6ec135.1353377266.git.wei_wang@realsil.com.cn>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v2 1/2] mmc/host/rtsx: Configure SD_CFG2 register in sd_rw_multi
+Date: Mon, 19 Nov 2012 21:21:31 -0500
+Message-ID: <87ip91f1zo.fsf@octavius.laptop.org>
 References: <cover.1353377266.git.wei_wang@realsil.com.cn>
+	<00fb063304a0720f3ba9db6f79bb67263d450356.1353377266.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1353377266.git.wei_wang@realsil.com.cn>
-Sender: linux-kernel-owner@vger.kernel.org
-To: cjb@laptop.org, sameo@linux.intel.com
-Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com, bp@alien8.de, Wei WANG <wei_wang@realsil.com.cn>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:59612 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753029Ab2KTCVo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 19 Nov 2012 21:21:44 -0500
+In-Reply-To: <00fb063304a0720f3ba9db6f79bb67263d450356.1353377266.git.wei_wang@realsil.com.cn>
+	(wei wang's message of "Tue, 20 Nov 2012 10:09:16 +0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: wei_wang@realsil.com.cn
+Cc: sameo@linux.intel.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com, bp@alien8.de
 
-From: Wei WANG <wei_wang@realsil.com.cn>
+Hi,
 
-This fixes the following build error on some architectures (parisc at least):
+Sorry to be pedantic, but:
 
-drivers/mmc/host/rtsx_pci_sdmmc.c: In function 'sd_normal_rw':
-drivers/mmc/host/rtsx_pci_sdmmc.c:448:2: error: implicit
-declaration of function 'kzalloc'
-[-Werror=implicit-function-declaration]
-drivers/mmc/host/rtsx_pci_sdmmc.c:448:6: warning: assignment
-makes pointer from integer without a cast [enabled by default]
-drivers/mmc/host/rtsx_pci_sdmmc.c:472:2: error: implicit
-declaration of function 'kfree'
-[-Werror=implicit-function-declaration]
+On Mon, Nov 19 2012, wei_wang@realsil.com.cn wrote:
+> For Realtek card reader, internal regsiter SD_CFG2 should be configured
+> before transferring data. In the prior version, the value of this register
+> has been calculated, but forgotten to write back to the internal register.
 
-Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
----
- drivers/mmc/host/rtsx_pci_sdmmc.c |    1 +
- 1 file changed, 1 insertion(+)
+With what consequences?  Was the  data transfer failing?  Under which
+circumstances?
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 067dd46..571915d 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -21,6 +21,7 @@
-  */
- 
- #include <linux/module.h>
-+#include <linux/slab.h>
- #include <linux/highmem.h>
- #include <linux/delay.h>
- #include <linux/platform_device.h>
+Thanks,
+
+- Chris.
 -- 
-1.7.9.5
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
