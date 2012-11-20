@@ -1,42 +1,154 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: [PATCH 2/2] mmc: Remove redundant null check before kfree in bus.c
-Date: Tue, 20 Nov 2012 14:43:17 +0530
-Message-ID: <1353402797-6785-2-git-send-email-sachin.kamat@linaro.org>
-References: <1353402797-6785-1-git-send-email-sachin.kamat@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-da0-f46.google.com ([209.85.210.46]:58140 "EHLO
-	mail-da0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752566Ab2KTJTa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Nov 2012 04:19:30 -0500
-Received: by mail-da0-f46.google.com with SMTP id p5so1160372dak.19
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Nov 2012 01:19:30 -0800 (PST)
-In-Reply-To: <1353402797-6785-1-git-send-email-sachin.kamat@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: James Hogan <james.hogan@imgtec.com>
+Subject: Re: [PATCH] mmc: dw_mmc: enable controller interrupt before calling
+ mmc_start_host
+Date: Tue, 20 Nov 2012 09:39:43 +0000
+Message-ID: <50AB4FDF.7080602@imgtec.com>
+References: <1349686791-19652-1-git-send-email-yuvaraj.cd@samsung.com> <CAAG0J9_ngZm7uGopaW6rdBUDQZhQWqt6gd=y1i5BifsGrZg-hg@mail.gmail.com> <50AA322A.1060604@imgtec.com> <CAKuRcOLfaX=fNML9RYdOyD3AFRdaaAipQDXo-SHapGkNVwzH2Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CAKuRcOLfaX=fNML9RYdOyD3AFRdaaAipQDXo-SHapGkNVwzH2Q@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Yuvaraj Kumar <yuvaraj.cd@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org, "Chris Ball (laptop.org)" <cjb@laptop.org>, Will <will.newton@imgtec.com>, kgene.kim@samsung.com, "Girish K S (Linaro)" <girish.shivananjappa@linaro.org>, "Thomas Abraham (Linaro)" <thomas.abraham@linaro.org>, patches@linaro.org, Yuvaraj CD <yuvaraj.cd@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, sachin.kamat@linaro.org, patches@linaro.org
 
-kfree on a null pointer is a no-op.
+Hi Yuvaraj,
 
-Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
----
- drivers/mmc/core/bus.c |    3 +--
- 1 files changed, 1 insertions(+), 2 deletions(-)
+On 20/11/12 05:35, Yuvaraj Kumar wrote:
+> Its not sufficient.In my case, sdio_reset command was submitted to
+> dw_mmc controller before interrupts are enabled.
+> By looking at your log,it seems something wrong with frequency set by
+> your U-boot.
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 9b68933..420cb67 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -225,8 +225,7 @@ static void mmc_release_card(struct device *dev)
- 
- 	sdio_free_common_cis(card);
- 
--	if (card->info)
--		kfree(card->info);
-+	kfree(card->info);
- 
- 	kfree(card);
- }
--- 
-1.7.4.1
+I'm not using U-boot, I'm booting with JTAG. In any case it works if I
+revert your patch so I think the clocks are fine. I'll continue
+debugging it and see if I can figure out what's happening.
 
+Cheers
+James
+
+> 
+> Best Regards
+> Yuvaraj
+> 
+> On Mon, Nov 19, 2012 at 6:50 PM, James Hogan <james.hogan@imgtec.com> wrote:
+>> On 19/11/12 13:01, Yuvaraj CD wrote:
+>>> As mmc_start_host is getting called before enabling the dw_mmc controller
+>>> interrupt, there is a problem of missing the SDMMC_INT_CMD_DONE for the
+>>> very first command sent by the sdio_reset.
+>>> This problem occurs only when we disable MMC debugging i.e, MMC_DEBUG [=n].
+>>> Hence this patch enables the dw_mmc controller interrupt before mmc_start_host.
+>>>
+>>> Signed-off-by: Yuvaraj CD <yuvaraj.cd@samsung.com>
+>>
+>> Hi Yuvaraj,
+>>
+>> I get the following errors after this patch is applied
+>> (2da1d7f2948900cd50d38643db39f790edb3cc96, merged in v3.7-rc5) and the
+>> driver doesn't work as a result. Reverting it fixes the problem.
+>>
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 200000Hz, actual 199680HZ div = 250)
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 195765Hz, actual 195764HZ div = 255)
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 400000Hz, actual 399360HZ div = 125)
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 200000Hz, actual 199680HZ div = 250)
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 195765Hz, actual 195764HZ div = 255)
+>> mmc0: error -110 whilst initialising SD card
+>>
+>> The interrupts are already cleared and disabled at the beginning of the
+>> probe function, so is the following sufficient (after reverting your
+>> patch) to fix the problem you've been observing?
+>>
+>> Thanks
+>> James
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index ec9b5a8..2be9899 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -2266,7 +2266,6 @@ int dw_mci_probe(struct dw_mci *host)
+>>          * Enable interrupts for command done, data over, data empty, card det,
+>>          * receive ready and error such as transmit, receive timeout, crc error
+>>          */
+>> -       mci_writel(host, RINTSTS, 0xFFFFFFFF);
+>>         mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+>>                    SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+>>                    DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
+>>
+>>
+>>> ---
+>>>  drivers/mmc/host/dw_mmc.c |   29 +++++++++++++++--------------
+>>>  1 file changed, 15 insertions(+), 14 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index a23af77..729c031 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -2233,6 +2233,21 @@ int dw_mci_probe(struct dw_mci *host)
+>>>         else
+>>>                 host->num_slots = ((mci_readl(host, HCON) >> 1) & 0x1F) + 1;
+>>>
+>>> +       /*
+>>> +        * Enable interrupts for command done, data over, data empty, card det,
+>>> +        * receive ready and error such as transmit, receive timeout, crc error
+>>> +        */
+>>> +       mci_writel(host, RINTSTS, 0xFFFFFFFF);
+>>> +       mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+>>> +                  SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+>>> +                  DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
+>>> +       mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE); /* Enable mci
+>>> interrupt */
+>>> +
+>>> +       dev_info(host->dev, "DW MMC controller at irq %d, "
+>>> +                "%d bit host data width, "
+>>> +                "%u deep fifo\n",
+>>> +                host->irq, width, fifo_size);
+>>> +
+>>>         /* We need at least one slot to succeed */
+>>>         for (i = 0; i < host->num_slots; i++) {
+>>>                 ret = dw_mci_init_slot(host, i);
+>>> @@ -2262,20 +2277,6 @@ int dw_mci_probe(struct dw_mci *host)
+>>>         else
+>>>                 host->data_offset = DATA_240A_OFFSET;
+>>>
+>>> -       /*
+>>> -        * Enable interrupts for command done, data over, data empty, card det,
+>>> -        * receive ready and error such as transmit, receive timeout, crc error
+>>> -        */
+>>> -       mci_writel(host, RINTSTS, 0xFFFFFFFF);
+>>> -       mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+>>> -                  SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+>>> -                  DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
+>>> -       mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE); /* Enable mci
+>>> interrupt */
+>>> -
+>>> -       dev_info(host->dev, "DW MMC controller at irq %d, "
+>>> -                "%d bit host data width, "
+>>> -                "%u deep fifo\n",
+>>> -                host->irq, width, fifo_size);
+>>>         if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO)
+>>>                 dev_info(host->dev, "Internal DMAC interrupt fix enabled.\n");
+>>>
+>>> --
+>>> 1.7.9.5
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>> --
+>>> James Hogan
+>>>
+>>
