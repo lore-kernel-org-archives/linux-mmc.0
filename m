@@ -1,86 +1,59 @@
-From: Loic PALLARDY <loic.pallardy@st.com>
-Subject: Re: [PATCH v3 0/5] mmc: Add access to RPMB partition
-Date: Wed, 21 Nov 2012 10:55:55 +0100
-Message-ID: <50ACA52B.4040201@st.com>
-References: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
-  <87mwyf7rjp.fsf@octavius.laptop.org>
-  <1353348746.25586.1.camel@kkonda-linux.qualcomm.com>
-  <50AB3E5F.3010906@st.com>
- <1353437680.18639.737.camel@kkonda-linux.qualcomm.com>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH] regulator: add missing prototype for
+ regulator_is_supported_voltage
+Date: Wed, 21 Nov 2012 19:05:17 +0900
+Message-ID: <20121121100515.GA18117@opensource.wolfsonmicro.com>
+References: <CAMPhdO8uuNmdiaejcypOH77rsU2ZR+dov73KXyAsbAfW0tKmcA@mail.gmail.com>
+ <20121121094350.GQ4673@opensource.wolfsonmicro.com>
+ <CAMPhdO_FoZ6f6twvvse56JVA-J5hB7fQ21LisTCN2hKYdL0fyg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="Nq2Wo0NMKNjxTN9z"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog103.obsmtp.com ([207.126.144.115]:32771 "EHLO
-	eu1sys200aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751915Ab2KUJ4l (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Nov 2012 04:56:41 -0500
-In-Reply-To: <1353437680.18639.737.camel@kkonda-linux.qualcomm.com>
-Content-Language: en-US
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:46651 "EHLO
+	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751915Ab2KUKFd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Nov 2012 05:05:33 -0500
+Content-Disposition: inline
+In-Reply-To: <CAMPhdO_FoZ6f6twvvse56JVA-J5hB7fQ21LisTCN2hKYdL0fyg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Krishna Konda <kkonda@codeaurora.org>
-Cc: Chris Ball <cjb@laptop.org>, Loic PALLARDY STE <loic.pallardy-ext@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>
+To: Eric Miao <eric.y.miao@gmail.com>
+Cc: Philip Rakity <prakity@gmail.com>, Philip Rakity <prakity@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-SGkgS3Jpc2huYSwNCg0KT24gMTEvMjAvMjAxMiAwNzo1NCBQTSwgS3Jpc2huYSBLb25kYSB3cm90
-ZToNCj4NCj4gTG9pYy9MaW51cy9DaHJpcywgSSB0aGluayB0aGUgSU9DVEwgaXMgbm90IGNvbXBs
-ZXRlIGluIHRlcm1zIG9mIGhhbmRsaW5nDQo+IHRoZSBSUE1CIHJlcXVlc3RzLiBIZXJlIGlzIHdo
-eSBJIHRoaW5rIHRoYXQgaXMgLSBsZXQgbWUga25vdyB5b3VyDQo+IG9waW5pb24NCj4NCj4gVGhl
-cmUgYXJlIGZvdXIgcmVxdWVzdCB0eXBlcyB0aGF0IGFyZSBuZWVkZWQgdG8gYmUgc3VwcG9ydGVk
-IC0gdHdvIHVuZGVyDQo+IHJlYWQgY2F0ZWdvcnkgYW5kIHR3byB1bmRlciB3cml0ZS4gVGhleSBh
-cmUNCj4NCj4gUmVhZHMNCj4gLS0tLS0tLQ0KPiAxLiBSZWFkIFdyaXRlIENvdW50ZXINCj4gMi4g
-QXV0aGVudGljYXRlZCBkYXRhIHJlYWQNCj4NCj4NCj4gV3JpdGVzDQo+IC0tLS0tLS0NCj4gMS4g
-UHJvdmlzaW9uIFJQTUIga2V5ICh0aG91Z2ggaXQgbWlnaHQgYmUgZG9uZSBpbiBhIHNlY3VyZSBl
-bnZpcm9ubWVudCkNCj4gMi4gQXV0aGVudGljYXRlZCBkYXRhIHJlYWQNCkFncmVlDQo+DQo+IFdo
-aWxlIGl0cyBnaXZlbiB0aGF0IHRoZSBycG1iIGRhdGEgZnJhbWVzIGFyZSBnb2luZyB0byBoYXZl
-IHRoYXQNCj4gaW5mb3JtYXRpb24gZW5jb2RlZCBpbiBpdCBhbmQgdGhlIGZyYW1lcyB3aWxsIGJl
-IGdlbmVyYXRlZCBieSBhIHNlY3VyZQ0KPiBwaWVjZSBvZiBjb2RlLCB0aGUgcmVxdWVzdCB0eXBl
-cyBjYW4gYmUgY2xhc3NpZmllZCBhcyBhYm92ZS4NCj4NCj4gVGhlIGlvY3RsIGludGVyZmFjZSB0
-byBkbyB0aGlzIGJ1dCBjdXJyZW50bHkgdGhhdCBkb2VzIHRoZSBmb2xsb3dpbmcNCj4gMS4gU3dp
-dGNoIHBhcnRpdGlvbg0KPiAyLiBTZXQgYmxvY2sgY291bnQNCj4gMy4gT25lIGNvbW1hbmQgLSB3
-aGF0ZXZlciBpcyBwYXNzZWQgaW4gYnkgdGhlIHVzZXJzcGFjZSBhcHBsaWNhdGlvbi4NCj4NCj4g
-U28gaGVyZSBhcmUgdGhlIHNldCBvZiBjb21tYW5kcyB0aGF0IG5lZWQgdG8gaGFwcGVuIGluIGEg
-cnBtYiByZWFkDQo+IG9wZXJhdGlvbg0KPiAxLiBTd2l0Y2ggcGFydGl0aW9uDQo+IDIuIFNldCBi
-bG9jayBjb3VudA0KPiAzLiBXcml0ZSBkYXRhIGZyYW1lIC0gQ01EMjUgdG8gd3JpdGUgdGhlIHJw
-bWIgZGF0YSBmcmFtZQ0KPiA0LiBTZXQgYmxvY2sgY291bnQNCj4gNS4gUmVhZCB0aGUgZGF0YSAt
-IENNRDE4IHRvIGRvIHRoZSBhY3R1YWwgcmVhZA0KPg0KPiBJIGFtIGd1ZXNzaW5nIHRoYXQgeW91
-IHdvdWxkIGV4cGVjdCB0aGUgdXNlcnNwYWNlIGFwcGxpY2F0aW9uIHRvbyBjYWxsDQo+IGludG8g
-dGhlIGlvY3RsIHR3aWNlIHRvIHRha2UgY2FyZSBvZiB0aGUgNCYgIDUNClllcyBleGFjdGx5LCB5
-b3UgaGF2ZSB0byBmaXJzdCBzZW5kIHlvdXIgY29tbWFuZCBhbmQgdGhlbiB0byByZWFkIHRoZSAN
-CnJlc3VsdCwgMiBJT0NUTHMgYXJlIG5lZWRlZA0KDQo+IGFuZCB0aGF0IG1pZ2h0IG5vdCBiZSBh
-bg0KPiBpc3N1ZSBpZiB0aGVyZSB3YXMgbm8gcmVxdWVzdCBwcm9jZXNzZWQgZm9yIG1tY3FkIGku
-ZS4gbm8gb3RoZXINCj4gcHJvY2Vzcy90aHJlYWQgY2xhaW1zIHRoZSBob3N0LiBCdXQgaWYgdGhh
-dCB3ZXJlIHRvIGhhcHBlbiwgdGhlbiB0aGUNCj4gcnBtYiBvcGVyYXRpb24gd2lsbCBmYWlsIC0g
-cGxlYXNlIGxldCBtZSBrbm93IGlmIHRoaXMgYXNzdW1wdGlvbiBvciBteQ0KPiB1bmRlcnN0YW5k
-aW5nIG9mIHRoZSBzcGVjIGlzIHdyb25nLg0KSSB0ZXN0ZWQgdGhpcyBhbmQgSSBkb24ndCBpZGVu
-dGlmeSBpc3N1ZS4NCkkgaGF2ZSBBbmRyb2lkIHJ1bm5pbmcgaW4gcGFyYWxsZWwgb2YgbXkgdGVz
-dCBhbmQgbG90IG9mIG90aGVyIG1tYyANCmFjY2Vzc2VzIGFyZSBwZXJmb3JtZWQgaW4gcGFyYWxs
-ZWwsIHNvIG15IHRlc3Qgc3VpdGUgZG9lc24ndCBndWFyYW50ZWUgDQp0aGF0IHRoZSAyIGlvY3Rs
-cyBhcmUgY29udGlndW91cy4NCkkgaGFkIHRoZSBzYW1lIHVuZGVyc3RhbmRpbmcgb2YgdGhlIFJQ
-TUIgc3BlY2lmaWNhdGlvbiwgYnV0IGFmdGVyIHRlc3RzIA0KYW5kIGRpc2N1c3Npb24gd2l0aCBv
-dXIgZU1NQyBwcm92aWRlciwgaXQgYXBwZWFycyB0aGF0IFJQTUIgc3RhdGUgDQptYWNoaW5lIGlz
-IGluZGVwZW5kZW50IG9mIHRoZSByZXN0Lg0KPg0KPiBTaW1pbGFybHkgZm9yIHJwbWIgd3JpdGUg
-b3BlcmF0aW9uLCB0aGVzZSBhcmUgdGhlIHN0ZXAgaW52b2x2ZWQNCj4gMS4gU3dpdGNoIHBhcnRp
-dGlvbg0KPiAyLiBTZXQgYmxvY2sgY291bnQNCj4gMy4gV3JpdGUgZGF0YSBmcmFtZSAtIENNRDI1
-IHRvIHdyaXRlIHRoZSBycG1iIGRhdGEgZnJhbWUgd2l0aCBkYXRhDQo+IDQuIFNldCBibG9jayBj
-b3VudA0KPiA1LiBSZWFkIHRoZSBkYXRhIC0gQ01EMjUgdG8gd3JpdGUgcnBtYiBkYXRhIGZyYW1l
-IGluZGljYXRpbmcgdGhhdCBycG1iDQo+IHJlc3VsdCByZWdpc3RlciBpcyBhYm91dCB0byBiZSBy
-ZWFkDQo+IDYuIFNldCBibG9jayBjb3VudA0KPiA3LiBSZWFkIHJwbWIgcmVzdWx0IC0gQ01EMTgg
-dG8gcmVhZCB0aGUgcnBtYiByZXN1bHQgcmVnaXN0ZXINCj4NCj4gSW4gdGhlIGNhc2Ugb2Ygd3Jp
-dGUsIHRoZXJlIGFyZSBhbiBhZGRpdGlvbmFsIHR3byBjb21tYW5kcyBjb21wYXJlZCB0bw0KPiBy
-ZWFkcy4gU2luY2UgYWxsIG9mIHRoZXNlIG5lZWRzIHRvIGJlIGRvbmUgaW4gb25lIHNob3QsIEkg
-YmVsaWV2ZSB0aGUNCj4gY3VycmVudCBpb2N0bCBpcyBub3Qgc3VmZmljaWVudCBhbmQgdGhpcyBj
-YW4gYmUgaGFuZGxlZCBpbiB0aGUgZm9sbG93aW5nDQo+IHdheXMNCg0KTm8gbmVlZGVkIHRvIGRv
-IGl0IGluIG9uZSBzaG90LiBZb3UgY2FuIHNlbmQgdGhlIHdyaXRlIGFuZCBjaGVjayBzdGF0dXMg
-DQpsYXRlci4NCkkgdGVzdGVkIGl0LCBkaWRuJ3QgZGV0ZWN0IGFueSBwcm9ibGVtLg0KPg0KPiAx
-LiBFeHRlbmQgdGhlIGN1cnJlbnQgaW9jdGwgdG8gaGFuZGxlIGJvdGggY2FzZXMNCj4gMi4gQWRk
-IGEgbmV3IGlvY3RsIGNtZCBmb3IgcnBtYiByZXF1ZXN0cw0KSXQgd2FzIG15IGZpcnN0IGltcGxl
-bWVudGF0aW9uLCBidXQgYWZ0ZXIgaW50ZXJuYWwgU1RFIHJldmlldyBhbmQgZU1NQyANCmNoZWNr
-IEkgbWVyZ2UgaXQgaW4gZXhpc3RpbmcgaW9jdGwuDQoNClBsZWFzZSBsZXQgbWUga25vdyBpZiB5
-b3UgZGV0ZWN0IGFueSBpc3N1ZS4NCg0KUmVnYXJkcywNCkxvaWMNCj4NCj4gUGVyc29uYWxseSBJ
-IHRoaW5rIGFkZGluZyBhbm90aGVyIGlvY3RsIGlzIGEgYmV0dGVyIHdheSB0byBkbyB0aGlzIHNp
-bmNlDQo+IHRoZSBjdXJyZW50IGlvY3RsIHdpbGwgZ2V0IGN1bWJlcnNvbWUgYW5kIHRlY2huaWNh
-bGx5IHRoZSBycG1iIHJlcXVlc3RzDQo+IGFyZSBkaWZmZXJlbnQga2luZCBvZiByZXF1ZXN0cyB0
-aGF0IG5lZWQgdG8gYmUgZG9uZSBhdG9taWNhbGx5LiBJICBhbQ0KPiBjb2RpbmcgdGhpcyB1cCBh
-cyBhIHNlcGFyYXRlIGlvY3RsIGJ1dCBiZWZvcmUgSSBwb3N0IHRoZSBwYXRjaCwgSSB3YW50ZWQN
-Cj4gZmVlZGJhY2sgb24gdGhpcyBhcHByb2FjaC4NCj4NCj4=
+
+--Nq2Wo0NMKNjxTN9z
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+On Wed, Nov 21, 2012 at 05:45:57PM +0800, Eric Miao wrote:
+> git-send-email stopped working so I have to use the web interface.
+> Could you help
+> try the attached one?
+
+OK.  I take it's OK to add your signoff as well (you should always add
+this for patches you forward)?
+
+--Nq2Wo0NMKNjxTN9z
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJQrKdKAAoJELSic+t+oim9CYAP/3A2dEo+YClays8lUy50Qklk
+wiIn7ph+qot1RamqmtjAkTyOBBqztaUEy4PD9KhpWinIeE1iklBfhS8pwHcAxmwm
+JIT61mkw0VbI4KtcPNiIMuX7KX30q4jRIzp8/6NBjNlafa5/zT3Ei4/D/O9ZlfAe
++UEU86BbOZQnI1jaeULhWZyWgTaZSmzIR0ynA7uri4Ykj63UqqQLcFBtjNBLAScp
+1huDVtFiMrUMeuqSkbf/TdjcN/DjI52E4h+viP3E9wVrUkpz8CLh9yQBNdzDprK3
+4bP+2FrFlT7e2BgDdlX2l2XUfCwPc+ZuRTKEzA008kCwWeVJvotbmIanKKP4R7zK
+dO364DoaKMjlHiUw9VkVWrMgEcGjRp1P0qH1hWHno5zD4HQeGCUJd8Lrip1UVEM2
+/rbj6QqPmd3ryGlyTo2h2JTgq2AJ4iheL9/24zIUK4vnw2V49WKia0AX3De4rLyc
+o9z1zG2yYy+qMbXzQr+Gu0YFb60lp4qtZrT+pmeuDoqx/FMCdYCBqTBUq8GRCqXp
+gSkzFCkJZ6SPuE/AbJamCuCa4Osg9KaXLbczzqfYvGWuNJ2lnkj6vXvt5Cwd/1QO
+c1SGs3usbhdE9MNRDuIaHRJSVOcCuxE/nFOorl0VOAUKODTFpPbvWRnc2jhTyQAS
+S3VYY5P8nC9LJVNSeVJm
+=0Int
+-----END PGP SIGNATURE-----
+
+--Nq2Wo0NMKNjxTN9z--
