@@ -1,178 +1,52 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: enable controller interrupt before calling
- mmc_start_host
-Date: Wed, 21 Nov 2012 12:21:00 +0900
-Message-ID: <50AC489C.7070002@samsung.com>
-References: <1349686791-19652-1-git-send-email-yuvaraj.cd@samsung.com>
- <CAAG0J9_ngZm7uGopaW6rdBUDQZhQWqt6gd=y1i5BifsGrZg-hg@mail.gmail.com>
- <50AA322A.1060604@imgtec.com>
- <CAKuRcOLfaX=fNML9RYdOyD3AFRdaaAipQDXo-SHapGkNVwzH2Q@mail.gmail.com>
- <50AB4FDF.7080602@imgtec.com>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [GIT PULL v2] at91: fixes for 3.7-rc7
+Date: Tue, 20 Nov 2012 23:03:03 -0800
+Message-ID: <20121121070303.GD7615@quad.lixom.net>
+References: <50AA5ED5.8090901@atmel.com>
+ <CAOesGMjAYtEkmEYnzCQ4G821BWG9D6LHvgt5aOMJgus_hzFkRA@mail.gmail.com>
+ <50AA6C76.3000606@atmel.com>
+ <50AB466F.5010500@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <50AB4FDF.7080602@imgtec.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: James Hogan <james.hogan@imgtec.com>
-Cc: Yuvaraj Kumar <yuvaraj.cd@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org, "Chris Ball (laptop.org)" <cjb@laptop.org>, Will <will.newton@imgtec.com>, kgene.kim@samsung.com, "Girish K S (Linaro)" <girish.shivananjappa@linaro.org>, "Thomas Abraham (Linaro)" <thomas.abraham@linaro.org>, patches@linaro.org, Yuvaraj CD <yuvaraj.cd@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <50AB466F.5010500@atmel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, Linux Kernel list <linux-kernel@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <cjb@laptop.org>, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi All,
+Hi,
 
-Well, i didn't find the James's error message.
-But i confused about the clock value.
 
-Bus speed : 99840000Hz
-request   : 200000Hz
-Div : 250
+On Tue, Nov 20, 2012 at 09:59:27AM +0100, Nicolas Ferre wrote:
+> Arnd, Olof,
+> 
+> Just for the record, I do not want to put pressure at a such late time in
+> the 3.7-rc process. So, I just reworked that pull-request because the previous
+> one was wrong:
+> - wrong patch content (DT nodes with wrong size)
+> - not all tags in patches (Jean-Christophe and Arnd tags were missing...)
+> 
+> Just to start from a sane base if I have to rebase this work for 3.8, I let you know
+> that I have updated this tag...
+> 
+> The following changes since commit 641f3ce64b050961d454a0716bb6dbf528315aac:
+> 
+>   ARM: at91/usbh: fix overcurrent gpio setup (2012-11-16 10:46:29 +0100)
+> 
+> are available in the git repository at:
+> 
+>   git://github.com/at91linux/linux-at91.git tags/at91-fixes
 
-If bus_speed is divided with div, then actual value should be 399360Hz.
-But this log is produced 199680Hz. What's wrong?
+The new patches seem to belong in an at91/dt branch, not in a fixes one.
 
-I think this message can be confused to debug.
+I can pull in the previous fixes branch as an at91/fixes-non-critical for 3.8
+if you want. There's no need to rebase them for this, is there? What is the
+pinctrl dependency that you are talking about, are some of these patches needed
+as prerequisites for pinctrl changes or the other way around?
 
-Best Regards,
-Jaehoon Chung
+Sorry if I've missed more elaborate emails on this and are asking repeat
+questions. ;)
 
-On 11/20/2012 06:39 PM, James Hogan wrote:
-> Hi Yuvaraj,
-> 
-> On 20/11/12 05:35, Yuvaraj Kumar wrote:
->> Its not sufficient.In my case, sdio_reset command was submitted to
->> dw_mmc controller before interrupts are enabled.
->> By looking at your log,it seems something wrong with frequency set by
->> your U-boot.
-> 
-> I'm not using U-boot, I'm booting with JTAG. In any case it works if I
-> revert your patch so I think the clocks are fine. I'll continue
-> debugging it and see if I can figure out what's happening.
-> 
-> Cheers
-> James
-> 
->>
->> Best Regards
->> Yuvaraj
->>
->> On Mon, Nov 19, 2012 at 6:50 PM, James Hogan <james.hogan@imgtec.com> wrote:
->>> On 19/11/12 13:01, Yuvaraj CD wrote:
->>>> As mmc_start_host is getting called before enabling the dw_mmc controller
->>>> interrupt, there is a problem of missing the SDMMC_INT_CMD_DONE for the
->>>> very first command sent by the sdio_reset.
->>>> This problem occurs only when we disable MMC debugging i.e, MMC_DEBUG [=n].
->>>> Hence this patch enables the dw_mmc controller interrupt before mmc_start_host.
->>>>
->>>> Signed-off-by: Yuvaraj CD <yuvaraj.cd@samsung.com>
->>>
->>> Hi Yuvaraj,
->>>
->>> I get the following errors after this patch is applied
->>> (2da1d7f2948900cd50d38643db39f790edb3cc96, merged in v3.7-rc5) and the
->>> driver doesn't work as a result. Reverting it fixes the problem.
->>>
->>> mmc0: error -110 whilst initialising SD card
->>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
->>> mmc0: error -110 whilst initialising SD card
->>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 200000Hz, actual 199680HZ div = 250)
->>> mmc0: error -110 whilst initialising SD card
->>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 195765Hz, actual 195764HZ div = 255)
->>> mmc0: error -110 whilst initialising SD card
->>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 400000Hz, actual 399360HZ div = 125)
->>> mmc0: error -110 whilst initialising SD card
->>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
->>> mmc0: error -110 whilst initialising SD card
->>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 200000Hz, actual 199680HZ div = 250)
->>> mmc0: error -110 whilst initialising SD card
->>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 195765Hz, actual 195764HZ div = 255)
->>> mmc0: error -110 whilst initialising SD card
->>>
->>> The interrupts are already cleared and disabled at the beginning of the
->>> probe function, so is the following sufficient (after reverting your
->>> patch) to fix the problem you've been observing?
->>>
->>> Thanks
->>> James
->>>
->>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>> index ec9b5a8..2be9899 100644
->>> --- a/drivers/mmc/host/dw_mmc.c
->>> +++ b/drivers/mmc/host/dw_mmc.c
->>> @@ -2266,7 +2266,6 @@ int dw_mci_probe(struct dw_mci *host)
->>>          * Enable interrupts for command done, data over, data empty, card det,
->>>          * receive ready and error such as transmit, receive timeout, crc error
->>>          */
->>> -       mci_writel(host, RINTSTS, 0xFFFFFFFF);
->>>         mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
->>>                    SDMMC_INT_TXDR | SDMMC_INT_RXDR |
->>>                    DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
->>>
->>>
->>>> ---
->>>>  drivers/mmc/host/dw_mmc.c |   29 +++++++++++++++--------------
->>>>  1 file changed, 15 insertions(+), 14 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>> index a23af77..729c031 100644
->>>> --- a/drivers/mmc/host/dw_mmc.c
->>>> +++ b/drivers/mmc/host/dw_mmc.c
->>>> @@ -2233,6 +2233,21 @@ int dw_mci_probe(struct dw_mci *host)
->>>>         else
->>>>                 host->num_slots = ((mci_readl(host, HCON) >> 1) & 0x1F) + 1;
->>>>
->>>> +       /*
->>>> +        * Enable interrupts for command done, data over, data empty, card det,
->>>> +        * receive ready and error such as transmit, receive timeout, crc error
->>>> +        */
->>>> +       mci_writel(host, RINTSTS, 0xFFFFFFFF);
->>>> +       mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
->>>> +                  SDMMC_INT_TXDR | SDMMC_INT_RXDR |
->>>> +                  DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
->>>> +       mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE); /* Enable mci
->>>> interrupt */
->>>> +
->>>> +       dev_info(host->dev, "DW MMC controller at irq %d, "
->>>> +                "%d bit host data width, "
->>>> +                "%u deep fifo\n",
->>>> +                host->irq, width, fifo_size);
->>>> +
->>>>         /* We need at least one slot to succeed */
->>>>         for (i = 0; i < host->num_slots; i++) {
->>>>                 ret = dw_mci_init_slot(host, i);
->>>> @@ -2262,20 +2277,6 @@ int dw_mci_probe(struct dw_mci *host)
->>>>         else
->>>>                 host->data_offset = DATA_240A_OFFSET;
->>>>
->>>> -       /*
->>>> -        * Enable interrupts for command done, data over, data empty, card det,
->>>> -        * receive ready and error such as transmit, receive timeout, crc error
->>>> -        */
->>>> -       mci_writel(host, RINTSTS, 0xFFFFFFFF);
->>>> -       mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
->>>> -                  SDMMC_INT_TXDR | SDMMC_INT_RXDR |
->>>> -                  DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
->>>> -       mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE); /* Enable mci
->>>> interrupt */
->>>> -
->>>> -       dev_info(host->dev, "DW MMC controller at irq %d, "
->>>> -                "%d bit host data width, "
->>>> -                "%u deep fifo\n",
->>>> -                host->irq, width, fifo_size);
->>>>         if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO)
->>>>                 dev_info(host->dev, "Internal DMAC interrupt fix enabled.\n");
->>>>
->>>> --
->>>> 1.7.9.5
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>>> --
->>>> James Hogan
->>>>
->>>
-> 
-> 
+-Olof
