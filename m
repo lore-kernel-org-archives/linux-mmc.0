@@ -1,65 +1,86 @@
-From: Eric Miao <eric.y.miao@gmail.com>
-Subject: Re: [PATCH] regulator: add missing prototype for regulator_is_supported_voltage
-Date: Wed, 21 Nov 2012 17:45:57 +0800
-Message-ID: <CAMPhdO_FoZ6f6twvvse56JVA-J5hB7fQ21LisTCN2hKYdL0fyg@mail.gmail.com>
-References: <CAMPhdO8uuNmdiaejcypOH77rsU2ZR+dov73KXyAsbAfW0tKmcA@mail.gmail.com>
- <20121121094350.GQ4673@opensource.wolfsonmicro.com>
+From: Loic PALLARDY <loic.pallardy@st.com>
+Subject: Re: [PATCH v3 0/5] mmc: Add access to RPMB partition
+Date: Wed, 21 Nov 2012 10:55:55 +0100
+Message-ID: <50ACA52B.4040201@st.com>
+References: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
+  <87mwyf7rjp.fsf@octavius.laptop.org>
+  <1353348746.25586.1.camel@kkonda-linux.qualcomm.com>
+  <50AB3E5F.3010906@st.com>
+ <1353437680.18639.737.camel@kkonda-linux.qualcomm.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=f46d04071167d1c51e04cefe38f8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:47559 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753308Ab2KUJqS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Nov 2012 04:46:18 -0500
-Received: by mail-la0-f46.google.com with SMTP id p5so2657887lag.19
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Nov 2012 01:46:17 -0800 (PST)
-In-Reply-To: <20121121094350.GQ4673@opensource.wolfsonmicro.com>
+Received: from eu1sys200aog103.obsmtp.com ([207.126.144.115]:32771 "EHLO
+	eu1sys200aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751915Ab2KUJ4l (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Nov 2012 04:56:41 -0500
+In-Reply-To: <1353437680.18639.737.camel@kkonda-linux.qualcomm.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Philip Rakity <prakity@gmail.com>, Philip Rakity <prakity@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Krishna Konda <kkonda@codeaurora.org>
+Cc: Chris Ball <cjb@laptop.org>, Loic PALLARDY STE <loic.pallardy-ext@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>
 
---f46d04071167d1c51e04cefe38f8
-Content-Type: text/plain; charset=UTF-8
-
-git-send-email stopped working so I have to use the web interface.
-Could you help
-try the attached one?
-
-On Wed, Nov 21, 2012 at 5:43 PM, Mark Brown
-<broonie@opensource.wolfsonmicro.com> wrote:
-> On Wed, Nov 21, 2012 at 05:22:02PM +0800, Eric Miao wrote:
->
->> +static inline int regulator_count_voltages(struct regulator *regulator)
->> +{
->> + return 0;
->> +}
->
-> Looks like your mailer has mangled everything so this won't apply.
-
---f46d04071167d1c51e04cefe38f8
-Content-Type: application/octet-stream;
-	name="0001-regulator-add-missing-prototype-for-regulator_is_sup.patch"
-Content-Disposition: attachment;
-	filename="0001-regulator-add-missing-prototype-for-regulator_is_sup.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_h9s9ok0b1
-
-RnJvbSBkMDE1MTM5YWM2MjFlMTBkNWQ5YzBkM2U0MjdlOTUxN2IwOGZlNzcyIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBQaGlsaXAgUmFraXR5IDxwcmFraXR5QG52aWRpYS5jb20+CkRh
-dGU6IFR1ZSwgMjAgTm92IDIwMTIgMTg6MDc6NDEgKzAxMDAKU3ViamVjdDogW1BBVENIXSByZWd1
-bGF0b3I6IGFkZCBtaXNzaW5nIHByb3RvdHlwZSBmb3IgcmVndWxhdG9yX2lzX3N1cHBvcnRlZF92
-b2x0YWdlCgphdm9pZHMgbmVlZHMgZm9yIENPTkZJR19SRUdVTEFUT1IgaW4gc2RoY2kuYwoKU2ln
-bmVkLW9mZi1ieTogUGhpbGlwIFJha2l0eSA8cHJha2l0eUBudmlkaWEuY29tPgpSZXZpZXdlZC1i
-eTogRXJpYyBNaWFvIDxlcmljLnkubWlhb0BnbWFpbC5jb20+Ci0tLQogaW5jbHVkZS9saW51eC9y
-ZWd1bGF0b3IvY29uc3VtZXIuaCB8ICAgIDQgKysrKwogMSBmaWxlcyBjaGFuZ2VkLCA0IGluc2Vy
-dGlvbnMoKyksIDAgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51eC9yZWd1
-bGF0b3IvY29uc3VtZXIuaCBiL2luY2x1ZGUvbGludXgvcmVndWxhdG9yL2NvbnN1bWVyLmgKaW5k
-ZXggYzQzY2QzNS4uNGUzZWM5MSAxMDA2NDQKLS0tIGEvaW5jbHVkZS9saW51eC9yZWd1bGF0b3Iv
-Y29uc3VtZXIuaAorKysgYi9pbmNsdWRlL2xpbnV4L3JlZ3VsYXRvci9jb25zdW1lci5oCkBAIC0z
-NTgsNiArMzU4LDEwIEBAIHN0YXRpYyBpbmxpbmUgdm9pZCByZWd1bGF0b3Jfc2V0X2RydmRhdGEo
-c3RydWN0IHJlZ3VsYXRvciAqcmVndWxhdG9yLAogewogfQogCitzdGF0aWMgaW5saW5lIGludCBy
-ZWd1bGF0b3JfY291bnRfdm9sdGFnZXMoc3RydWN0IHJlZ3VsYXRvciAqcmVndWxhdG9yKQorewor
-CXJldHVybiAwOworfQogI2VuZGlmCiAKIHN0YXRpYyBpbmxpbmUgaW50IHJlZ3VsYXRvcl9zZXRf
-dm9sdGFnZV90b2woc3RydWN0IHJlZ3VsYXRvciAqcmVndWxhdG9yLAotLSAKMS43LjAuNAoK
---f46d04071167d1c51e04cefe38f8--
+SGkgS3Jpc2huYSwNCg0KT24gMTEvMjAvMjAxMiAwNzo1NCBQTSwgS3Jpc2huYSBLb25kYSB3cm90
+ZToNCj4NCj4gTG9pYy9MaW51cy9DaHJpcywgSSB0aGluayB0aGUgSU9DVEwgaXMgbm90IGNvbXBs
+ZXRlIGluIHRlcm1zIG9mIGhhbmRsaW5nDQo+IHRoZSBSUE1CIHJlcXVlc3RzLiBIZXJlIGlzIHdo
+eSBJIHRoaW5rIHRoYXQgaXMgLSBsZXQgbWUga25vdyB5b3VyDQo+IG9waW5pb24NCj4NCj4gVGhl
+cmUgYXJlIGZvdXIgcmVxdWVzdCB0eXBlcyB0aGF0IGFyZSBuZWVkZWQgdG8gYmUgc3VwcG9ydGVk
+IC0gdHdvIHVuZGVyDQo+IHJlYWQgY2F0ZWdvcnkgYW5kIHR3byB1bmRlciB3cml0ZS4gVGhleSBh
+cmUNCj4NCj4gUmVhZHMNCj4gLS0tLS0tLQ0KPiAxLiBSZWFkIFdyaXRlIENvdW50ZXINCj4gMi4g
+QXV0aGVudGljYXRlZCBkYXRhIHJlYWQNCj4NCj4NCj4gV3JpdGVzDQo+IC0tLS0tLS0NCj4gMS4g
+UHJvdmlzaW9uIFJQTUIga2V5ICh0aG91Z2ggaXQgbWlnaHQgYmUgZG9uZSBpbiBhIHNlY3VyZSBl
+bnZpcm9ubWVudCkNCj4gMi4gQXV0aGVudGljYXRlZCBkYXRhIHJlYWQNCkFncmVlDQo+DQo+IFdo
+aWxlIGl0cyBnaXZlbiB0aGF0IHRoZSBycG1iIGRhdGEgZnJhbWVzIGFyZSBnb2luZyB0byBoYXZl
+IHRoYXQNCj4gaW5mb3JtYXRpb24gZW5jb2RlZCBpbiBpdCBhbmQgdGhlIGZyYW1lcyB3aWxsIGJl
+IGdlbmVyYXRlZCBieSBhIHNlY3VyZQ0KPiBwaWVjZSBvZiBjb2RlLCB0aGUgcmVxdWVzdCB0eXBl
+cyBjYW4gYmUgY2xhc3NpZmllZCBhcyBhYm92ZS4NCj4NCj4gVGhlIGlvY3RsIGludGVyZmFjZSB0
+byBkbyB0aGlzIGJ1dCBjdXJyZW50bHkgdGhhdCBkb2VzIHRoZSBmb2xsb3dpbmcNCj4gMS4gU3dp
+dGNoIHBhcnRpdGlvbg0KPiAyLiBTZXQgYmxvY2sgY291bnQNCj4gMy4gT25lIGNvbW1hbmQgLSB3
+aGF0ZXZlciBpcyBwYXNzZWQgaW4gYnkgdGhlIHVzZXJzcGFjZSBhcHBsaWNhdGlvbi4NCj4NCj4g
+U28gaGVyZSBhcmUgdGhlIHNldCBvZiBjb21tYW5kcyB0aGF0IG5lZWQgdG8gaGFwcGVuIGluIGEg
+cnBtYiByZWFkDQo+IG9wZXJhdGlvbg0KPiAxLiBTd2l0Y2ggcGFydGl0aW9uDQo+IDIuIFNldCBi
+bG9jayBjb3VudA0KPiAzLiBXcml0ZSBkYXRhIGZyYW1lIC0gQ01EMjUgdG8gd3JpdGUgdGhlIHJw
+bWIgZGF0YSBmcmFtZQ0KPiA0LiBTZXQgYmxvY2sgY291bnQNCj4gNS4gUmVhZCB0aGUgZGF0YSAt
+IENNRDE4IHRvIGRvIHRoZSBhY3R1YWwgcmVhZA0KPg0KPiBJIGFtIGd1ZXNzaW5nIHRoYXQgeW91
+IHdvdWxkIGV4cGVjdCB0aGUgdXNlcnNwYWNlIGFwcGxpY2F0aW9uIHRvbyBjYWxsDQo+IGludG8g
+dGhlIGlvY3RsIHR3aWNlIHRvIHRha2UgY2FyZSBvZiB0aGUgNCYgIDUNClllcyBleGFjdGx5LCB5
+b3UgaGF2ZSB0byBmaXJzdCBzZW5kIHlvdXIgY29tbWFuZCBhbmQgdGhlbiB0byByZWFkIHRoZSAN
+CnJlc3VsdCwgMiBJT0NUTHMgYXJlIG5lZWRlZA0KDQo+IGFuZCB0aGF0IG1pZ2h0IG5vdCBiZSBh
+bg0KPiBpc3N1ZSBpZiB0aGVyZSB3YXMgbm8gcmVxdWVzdCBwcm9jZXNzZWQgZm9yIG1tY3FkIGku
+ZS4gbm8gb3RoZXINCj4gcHJvY2Vzcy90aHJlYWQgY2xhaW1zIHRoZSBob3N0LiBCdXQgaWYgdGhh
+dCB3ZXJlIHRvIGhhcHBlbiwgdGhlbiB0aGUNCj4gcnBtYiBvcGVyYXRpb24gd2lsbCBmYWlsIC0g
+cGxlYXNlIGxldCBtZSBrbm93IGlmIHRoaXMgYXNzdW1wdGlvbiBvciBteQ0KPiB1bmRlcnN0YW5k
+aW5nIG9mIHRoZSBzcGVjIGlzIHdyb25nLg0KSSB0ZXN0ZWQgdGhpcyBhbmQgSSBkb24ndCBpZGVu
+dGlmeSBpc3N1ZS4NCkkgaGF2ZSBBbmRyb2lkIHJ1bm5pbmcgaW4gcGFyYWxsZWwgb2YgbXkgdGVz
+dCBhbmQgbG90IG9mIG90aGVyIG1tYyANCmFjY2Vzc2VzIGFyZSBwZXJmb3JtZWQgaW4gcGFyYWxs
+ZWwsIHNvIG15IHRlc3Qgc3VpdGUgZG9lc24ndCBndWFyYW50ZWUgDQp0aGF0IHRoZSAyIGlvY3Rs
+cyBhcmUgY29udGlndW91cy4NCkkgaGFkIHRoZSBzYW1lIHVuZGVyc3RhbmRpbmcgb2YgdGhlIFJQ
+TUIgc3BlY2lmaWNhdGlvbiwgYnV0IGFmdGVyIHRlc3RzIA0KYW5kIGRpc2N1c3Npb24gd2l0aCBv
+dXIgZU1NQyBwcm92aWRlciwgaXQgYXBwZWFycyB0aGF0IFJQTUIgc3RhdGUgDQptYWNoaW5lIGlz
+IGluZGVwZW5kZW50IG9mIHRoZSByZXN0Lg0KPg0KPiBTaW1pbGFybHkgZm9yIHJwbWIgd3JpdGUg
+b3BlcmF0aW9uLCB0aGVzZSBhcmUgdGhlIHN0ZXAgaW52b2x2ZWQNCj4gMS4gU3dpdGNoIHBhcnRp
+dGlvbg0KPiAyLiBTZXQgYmxvY2sgY291bnQNCj4gMy4gV3JpdGUgZGF0YSBmcmFtZSAtIENNRDI1
+IHRvIHdyaXRlIHRoZSBycG1iIGRhdGEgZnJhbWUgd2l0aCBkYXRhDQo+IDQuIFNldCBibG9jayBj
+b3VudA0KPiA1LiBSZWFkIHRoZSBkYXRhIC0gQ01EMjUgdG8gd3JpdGUgcnBtYiBkYXRhIGZyYW1l
+IGluZGljYXRpbmcgdGhhdCBycG1iDQo+IHJlc3VsdCByZWdpc3RlciBpcyBhYm91dCB0byBiZSBy
+ZWFkDQo+IDYuIFNldCBibG9jayBjb3VudA0KPiA3LiBSZWFkIHJwbWIgcmVzdWx0IC0gQ01EMTgg
+dG8gcmVhZCB0aGUgcnBtYiByZXN1bHQgcmVnaXN0ZXINCj4NCj4gSW4gdGhlIGNhc2Ugb2Ygd3Jp
+dGUsIHRoZXJlIGFyZSBhbiBhZGRpdGlvbmFsIHR3byBjb21tYW5kcyBjb21wYXJlZCB0bw0KPiBy
+ZWFkcy4gU2luY2UgYWxsIG9mIHRoZXNlIG5lZWRzIHRvIGJlIGRvbmUgaW4gb25lIHNob3QsIEkg
+YmVsaWV2ZSB0aGUNCj4gY3VycmVudCBpb2N0bCBpcyBub3Qgc3VmZmljaWVudCBhbmQgdGhpcyBj
+YW4gYmUgaGFuZGxlZCBpbiB0aGUgZm9sbG93aW5nDQo+IHdheXMNCg0KTm8gbmVlZGVkIHRvIGRv
+IGl0IGluIG9uZSBzaG90LiBZb3UgY2FuIHNlbmQgdGhlIHdyaXRlIGFuZCBjaGVjayBzdGF0dXMg
+DQpsYXRlci4NCkkgdGVzdGVkIGl0LCBkaWRuJ3QgZGV0ZWN0IGFueSBwcm9ibGVtLg0KPg0KPiAx
+LiBFeHRlbmQgdGhlIGN1cnJlbnQgaW9jdGwgdG8gaGFuZGxlIGJvdGggY2FzZXMNCj4gMi4gQWRk
+IGEgbmV3IGlvY3RsIGNtZCBmb3IgcnBtYiByZXF1ZXN0cw0KSXQgd2FzIG15IGZpcnN0IGltcGxl
+bWVudGF0aW9uLCBidXQgYWZ0ZXIgaW50ZXJuYWwgU1RFIHJldmlldyBhbmQgZU1NQyANCmNoZWNr
+IEkgbWVyZ2UgaXQgaW4gZXhpc3RpbmcgaW9jdGwuDQoNClBsZWFzZSBsZXQgbWUga25vdyBpZiB5
+b3UgZGV0ZWN0IGFueSBpc3N1ZS4NCg0KUmVnYXJkcywNCkxvaWMNCj4NCj4gUGVyc29uYWxseSBJ
+IHRoaW5rIGFkZGluZyBhbm90aGVyIGlvY3RsIGlzIGEgYmV0dGVyIHdheSB0byBkbyB0aGlzIHNp
+bmNlDQo+IHRoZSBjdXJyZW50IGlvY3RsIHdpbGwgZ2V0IGN1bWJlcnNvbWUgYW5kIHRlY2huaWNh
+bGx5IHRoZSBycG1iIHJlcXVlc3RzDQo+IGFyZSBkaWZmZXJlbnQga2luZCBvZiByZXF1ZXN0cyB0
+aGF0IG5lZWQgdG8gYmUgZG9uZSBhdG9taWNhbGx5LiBJICBhbQ0KPiBjb2RpbmcgdGhpcyB1cCBh
+cyBhIHNlcGFyYXRlIGlvY3RsIGJ1dCBiZWZvcmUgSSBwb3N0IHRoZSBwYXRjaCwgSSB3YW50ZWQN
+Cj4gZmVlZGJhY2sgb24gdGhpcyBhcHByb2FjaC4NCj4NCj4=
