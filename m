@@ -1,146 +1,151 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: Re: [PATCH v2 2/2] mmc: host: sdhci-s3c: Add support for pinctrl
-Date: Wed, 21 Nov 2012 16:28:38 +0530
-Message-ID: <CAJuYYwSt9pGuFz7iqWJvrmx0cVW+wgqhtJdnx0hnxdATPRGpbA@mail.gmail.com>
-References: <1353076097-22498-1-git-send-email-t.figa@samsung.com>
-	<1353076097-22498-3-git-send-email-t.figa@samsung.com>
+From: "Sundar J. Dev" <sundarjdev@gmail.com>
+Subject: Re: [PATCH v3 0/5] mmc: Add access to RPMB partition
+Date: Wed, 21 Nov 2012 16:32:33 +0530
+Message-ID: <CAAexSFT-dwRzmH6SOroAPC7y1JZkG63V0yWW9L57L8w-=MjhOA@mail.gmail.com>
+References: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
+	<87mwyf7rjp.fsf@octavius.laptop.org>
+	<1353348746.25586.1.camel@kkonda-linux.qualcomm.com>
+	<50AB3E5F.3010906@st.com>
+	<1353437680.18639.737.camel@kkonda-linux.qualcomm.com>
+	<50ACA52B.4040201@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:43382 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754526Ab2KUK6j (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Nov 2012 05:58:39 -0500
-Received: by mail-ia0-f174.google.com with SMTP id y25so4944545iay.19
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Nov 2012 02:58:38 -0800 (PST)
-In-Reply-To: <1353076097-22498-3-git-send-email-t.figa@samsung.com>
+Received: from mail-ea0-f174.google.com ([209.85.215.174]:33466 "EHLO
+	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751051Ab2KULCe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Nov 2012 06:02:34 -0500
+Received: by mail-ea0-f174.google.com with SMTP id e13so2744610eaa.19
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Nov 2012 03:02:33 -0800 (PST)
+In-Reply-To: <50ACA52B.4040201@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tomasz Figa <t.figa@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, cjb@laptop.org, ben-linux@fluff.org, kyungmin.park@samsung.com, m.szyprowski@samsung.com, tomasz.figa@gmail.com
+To: Loic PALLARDY <loic.pallardy@st.com>
+Cc: Krishna Konda <kkonda@codeaurora.org>, Chris Ball <cjb@laptop.org>, Loic PALLARDY STE <loic.pallardy-ext@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>
 
-On 16 November 2012 19:58, Tomasz Figa <t.figa@samsung.com> wrote:
-> This patch adds support for pin configuration using pinctrl subsystem
-> to the sdhci-s3c driver.
->
-> Signed-off-by: Tomasz Figa <t.figa@samsung.com>
-> ---
->  .../devicetree/bindings/mmc/samsung-sdhci.txt        | 20 +++++++++++++-------
->  drivers/mmc/host/sdhci-s3c.c                         | 12 ++++++++++--
->  2 files changed, 23 insertions(+), 9 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt b/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
-> index 630a7d7..97e9e31 100644
-> --- a/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
-> @@ -12,10 +12,6 @@ is used. The Samsung's SDHCI controller bindings extends this as listed below.
->  [A] The property "samsung,cd-pinmux-gpio" can be used as stated in the
->      "Optional Board Specific Properties" section below.
->
-> -[B] If core card-detect bindings and "samsung,cd-pinmux-gpio" property
-> -    is not specified, it is assumed that there is no card detection
-> -    mechanism used.
-> -
->  Required SoC Specific Properties:
->  - compatible: should be one of the following
->    - "samsung,s3c6410-sdhci": For controllers compatible with s3c6410 sdhci
-> @@ -24,14 +20,18 @@ Required SoC Specific Properties:
->      controller.
->
->  Required Board Specific Properties:
-> -- gpios: Should specify the gpios used for clock, command and data lines. The
-> -  gpio specifier format depends on the gpio controller.
-> +- Samsung GPIO variant (will be completely replaced by pinctrl):
-> +  - gpios: Should specify the gpios used for clock, command and data lines. The
-> +    gpio specifier format depends on the gpio controller.
-> +- Pinctrl variant (preferred if available):
-> +  - pinctrl-0: Should specify pin control groups used for this controller.
-> +  - pinctrl-names: Should contain only one value - "default".
->
->  Optional Board Specific Properties:
->  - samsung,cd-pinmux-gpio: Specifies the card detect line that is routed
->    through a pinmux to the card-detect pin of the card slot. This property
->    should be used only if none of the mmc core card-detect properties are
-> -  used.
-> +  used. Only for Samsung GPIO variant.
->
->  Example:
->         sdhci@12530000 {
-> @@ -40,12 +40,18 @@ Example:
->                 interrupts = <0 75 0>;
->                 bus-width = <4>;
->                 cd-gpios = <&gpk2 2 2 3 3>;
-> +
-> +               /* Samsung GPIO variant */
->                 gpios = <&gpk2 0 2 0 3>,  /* clock line */
->                         <&gpk2 1 2 0 3>,  /* command line */
->                         <&gpk2 3 2 3 3>,  /* data line 0 */
->                         <&gpk2 4 2 3 3>,  /* data line 1 */
->                         <&gpk2 5 2 3 3>,  /* data line 2 */
->                         <&gpk2 6 2 3 3>;  /* data line 3 */
-> +
-> +               /* Pinctrl variant */
-> +               pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4>;
-> +               pinctrl-names = "default";
->         };
+Hi Loic,
 
-nit: there could have been one example each for gpio and pinctrl
-variant instead of putting both into one example node.
+On Wed, Nov 21, 2012 at 3:25 PM, Loic PALLARDY <loic.pallardy@st.com> wrote:
+>
+> Hi Krishna,
+>
+> On 11/20/2012 07:54 PM, Krishna Konda wrote:
+> >
+> > Loic/Linus/Chris, I think the IOCTL is not complete in terms of handling
+> > the RPMB requests. Here is why I think that is - let me know your
+> > opinion
+> >
+> > There are four request types that are needed to be supported - two under
+> > read category and two under write. They are
+> >
+> > Reads
+> > -------
+> > 1. Read Write Counter
+> > 2. Authenticated data read
+> >
+> >
+> > Writes
+> > -------
+> > 1. Provision RPMB key (though it might be done in a secure environment)
+> > 2. Authenticated data read
+> Agree
+> >
+> > While its given that the rpmb data frames are going to have that
+> > information encoded in it and the frames will be generated by a secure
+> > piece of code, the request types can be classified as above.
+> >
+> > The ioctl interface to do this but currently that does the following
+> > 1. Switch partition
+> > 2. Set block count
+> > 3. One command - whatever is passed in by the userspace application.
+> >
+> > So here are the set of commands that need to happen in a rpmb read
+> > operation
+> > 1. Switch partition
+> > 2. Set block count
+> > 3. Write data frame - CMD25 to write the rpmb data frame
+> > 4. Set block count
+> > 5. Read the data - CMD18 to do the actual read
+> >
+> > I am guessing that you would expect the userspace application too call
+> > into the ioctl twice to take care of the 4&  5
+> Yes exactly, you have to first send your command and then to read the
+> result, 2 IOCTLs are needed
+>
+> > and that might not be an
+> > issue if there was no request processed for mmcqd i.e. no other
+> > process/thread claims the host. But if that were to happen, then the
+> > rpmb operation will fail - please let me know if this assumption or my
+> > understanding of the spec is wrong.
+> I tested this and I don't identify issue.
+> I have Android running in parallel of my test and lot of other mmc
+> accesses are performed in parallel, so my test suite doesn't guarantee
+> that the 2 ioctls are contiguous.
+> I had the same understanding of the RPMB specification, but after tests
+> and discussion with our eMMC provider, it appears that RPMB state
+> machine is independent of the rest.
+I have seen the issue described by Krishna in one of the Micron eMMC
+parts that I tested on. I captured the below CMD snapshot to explain
+this better:
+    -------> ***** START RPMB TRANSACTION *****
+        --> RPMB CMD6 - Switch to RPMB partition
+        --> RPMB CMD23 - Set BLK_CNT
+        --> RPMB CMD25 - Issue a Mult Blk Write
+        -->     RPMB CMD13 - Issue Status CMD and and check for Write completion
+    -------> ***** RPMB TRANSACTION ABORTED BY NON-RPMB ACCESS *****
+        --> NON-RPMB CMD6 - Switch to Userdata partition
+        --> NON-RPMB CMD23 - Set BLK_CNT
+        --> NON-RPMB CMD25 - Issue Mutl Blk Write
+        --> NON-RPMB CMD12 - Issue Status CMD and and check for completion
+    -------> ***** SWITCH BACK TO RPMB PARTITION *****
+        --> RPMB CMD6 - Switch back to RPMB partition
+        --> RPMB CMD23 - Set BLK_CNT
+        --> RPMB CMD18 - Issue a Mult Blk Read
+    The RPMB device returns GENERAL FAILURE in the Read data Packet.
 
+Actually, the eMMC JEDEC spec is not very clear on what is the expected
+behavior from eMMC chip if a rpmb sequence is interrupted by a non-rpmb
+command sequence. It works fine on most Samsung and Toshiba
+eMMC parts that I tested rpmb on. But this one Micron eMMC part showed
+this problem.
+> >
+> > Similarly for rpmb write operation, these are the step involved
+> > 1. Switch partition
+> > 2. Set block count
+> > 3. Write data frame - CMD25 to write the rpmb data frame with data
+> > 4. Set block count
+> > 5. Read the data - CMD25 to write rpmb data frame indicating that rpmb
+> > result register is about to be read
+> > 6. Set block count
+> > 7. Read rpmb result - CMD18 to read the rpmb result register
+> >
+> > In the case of write, there are an additional two commands compared to
+> > reads. Since all of these needs to be done in one shot, I believe the
+> > current ioctl is not sufficient and this can be handled in the following
+> > ways
 >
->         Note: This example shows both SoC specific and board specific properties
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 75f85fd..6161162 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -24,6 +24,7 @@
->  #include <linux/of_gpio.h>
->  #include <linux/pm.h>
->  #include <linux/pm_runtime.h>
-> +#include <linux/pinctrl/consumer.h>
+> No needed to do it in one shot. You can send the write and check status
+> later.
+> I tested it, didn't detect any problem.
+> >
+> > 1. Extend the current ioctl to handle both cases
+> > 2. Add a new ioctl cmd for rpmb requests
+> It was my first implementation, but after internal STE review and eMMC
+> check I merge it in existing ioctl.
 >
->  #include <linux/mmc/host.h>
+> Please let me know if you detect any issue.
 >
-> @@ -57,6 +58,7 @@ struct sdhci_s3c {
->         int                     ext_cd_irq;
->         int                     ext_cd_gpio;
->         int                     *gpios;
-> +       struct pinctrl          *pctrl;
->
->         struct clk              *clk_io;
->         struct clk              *clk_bus[MAX_BUS_CLK];
-> @@ -477,8 +479,9 @@ static int __devinit sdhci_s3c_parse_dt(struct device *dev,
->                 return -EINVAL;
->         }
->
-> -       dev_info(dev, "assuming no card detect line available\n");
-> -       pdata->cd_type = S3C_SDHCI_CD_NONE;
-> +       /* assuming internal card detect that will be configured by pinctrl */
-> +       pdata->cd_type = S3C_SDHCI_CD_INTERNAL;
-> +       goto setup_bus;
->
->   found_cd:
->         if (pdata->cd_type == S3C_SDHCI_CD_GPIO) {
-> @@ -496,6 +499,9 @@ static int __devinit sdhci_s3c_parse_dt(struct device *dev,
->         }
->
->   setup_bus:
-> +       if (!IS_ERR(ourhost->pctrl))
-> +               return 0;
-> +
->         /* get the gpios for command, clock and data lines */
->         for (cnt = 0; cnt < NUM_GPIOS(pdata->max_width); cnt++) {
->                 gpio = of_get_gpio(node, cnt);
-> @@ -574,6 +580,8 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->                 goto err_pdata_io_clk;
->         }
->
-> +       sc->pctrl = devm_pinctrl_get_select_default(&pdev->dev);
-> +
->         if (pdev->dev.of_node) {
->                 ret = sdhci_s3c_parse_dt(&pdev->dev, host, pdata);
->                 if (ret)
-> --
-> 1.8.0
+> Regards,
+> Loic
+> >
+> > Personally I think adding another ioctl is a better way to do this since
+> > the current ioctl will get cumbersome and technically the rpmb requests
+> > are different kind of requests that need to be done atomically. I  am
+> > coding this up as a separate ioctl but before I post the patch, I wanted
+> > feedback on this approach.
+> >
+> >
 
-Acked-by: Thomas Abraham <thomas.abraham@linaro.org>
+Thanks,
+--
+Sundar Jayakumar Dev
