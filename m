@@ -1,69 +1,28 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: Re: [GIT PULL v2] at91: fixes for 3.7-rc7
-Date: Wed, 21 Nov 2012 12:25:42 +0100
-Message-ID: <50ACBA36.4030101@atmel.com>
-References: <50AA5ED5.8090901@atmel.com> <CAOesGMjAYtEkmEYnzCQ4G821BWG9D6LHvgt5aOMJgus_hzFkRA@mail.gmail.com> <50AA6C76.3000606@atmel.com> <50AB466F.5010500@atmel.com> <20121121070303.GD7615@quad.lixom.net>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: =?UTF-8?q?=5BPATCH=20077/493=5D=20mmc=3A=20remove=20use=20of=20=5F=5Fdevexit=5Fp?=
+Date: Wed, 21 Nov 2012 13:05:39 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1211211303120.842@axis700.grange>
+References: <1353349642-3677-1-git-send-email-wfp5p@virginia.edu>
+ <1353349642-3677-77-git-send-email-wfp5p@virginia.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:57668 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754056Ab2KULZo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Nov 2012 06:25:44 -0500
-In-Reply-To: <20121121070303.GD7615@quad.lixom.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1353349642-3677-77-git-send-email-wfp5p@virginia.edu>
+Sender: linux-omap-owner@vger.kernel.org
+To: Bill Pemberton <wfp5p@virginia.edu>
+Cc: gregkh@linuxfoundation.org, Chris Ball <cjb@laptop.org>, =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Venkatraman S <svenkatr@ti.com>, Viresh Kumar <viresh.linux@gmail.com>, Ian Molton <ian@mnementh.co.uk>, Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, Pierre Ossman <pierre@ossman.eu>, uclinux-dist-devel@blackfin.uclinux.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, spear-devel@list.st.com
 List-Id: linux-mmc@vger.kernel.org
-To: Olof Johansson <olof@lixom.net>
-Cc: Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, Linux Kernel list <linux-kernel@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <cjb@laptop.org>, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Linus Walleij <linus.walleij@linaro.org>
 
-On 11/21/2012 08:03 AM, Olof Johansson :
-> Hi,
-> 
-> 
-> On Tue, Nov 20, 2012 at 09:59:27AM +0100, Nicolas Ferre wrote:
->> Arnd, Olof,
->>
->> Just for the record, I do not want to put pressure at a such late time in
->> the 3.7-rc process. So, I just reworked that pull-request because the previous
->> one was wrong:
->> - wrong patch content (DT nodes with wrong size)
->> - not all tags in patches (Jean-Christophe and Arnd tags were missing...)
->>
->> Just to start from a sane base if I have to rebase this work for 3.8, I let you know
->> that I have updated this tag...
->>
->> The following changes since commit 641f3ce64b050961d454a0716bb6dbf528315aac:
->>
->>   ARM: at91/usbh: fix overcurrent gpio setup (2012-11-16 10:46:29 +0100)
->>
->> are available in the git repository at:
->>
->>   git://github.com/at91linux/linux-at91.git tags/at91-fixes
-> 
-> The new patches seem to belong in an at91/dt branch, not in a fixes one.
-> 
-> I can pull in the previous fixes branch as an at91/fixes-non-critical for 3.8
-> if you want. There's no need to rebase them for this, is there? What is the
-> pinctrl dependency that you are talking about, are some of these patches needed
-> as prerequisites for pinctrl changes or the other way around?
-> 
-> Sorry if I've missed more elaborate emails on this and are asking repeat
-> questions. ;)
+On Mon, 19 Nov 2012, Bill Pemberton wrote:
 
-No worries Olof, I might have been more precise in the subject of my
-email: I have made up my mind and consider this material for 3.8.
+ drivers/mmc/host/sh_mobile_sdhi.c  | 2 +-
+ drivers/mmc/host/tmio_mmc.c        | 2 +-
 
-As for the relation with pinctrl, we have made big modification to the
-layout of some dtsi/dts there and it would make everyones' life easier
-if we queue these dt/mmc changes on top of the current pinctrl tree...
-Moreover, Jean-Christophe plans to add the pinctrl part of these
-additions on top of the modification present in this pull-request: one
-more reason to queue them in pinctrl git tree.
+Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de> 
 
-So, in brief: forget this pull-request (and the one that it replaces
-obviously).
-
-Thanks, bye,
--- 
-Nicolas Ferre
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
