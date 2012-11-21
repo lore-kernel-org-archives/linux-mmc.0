@@ -1,58 +1,65 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH] regulator: add missing prototype for
- regulator_is_supported_voltage
-Date: Wed, 21 Nov 2012 18:43:53 +0900
-Message-ID: <20121121094350.GQ4673@opensource.wolfsonmicro.com>
+From: Eric Miao <eric.y.miao@gmail.com>
+Subject: Re: [PATCH] regulator: add missing prototype for regulator_is_supported_voltage
+Date: Wed, 21 Nov 2012 17:45:57 +0800
+Message-ID: <CAMPhdO_FoZ6f6twvvse56JVA-J5hB7fQ21LisTCN2hKYdL0fyg@mail.gmail.com>
 References: <CAMPhdO8uuNmdiaejcypOH77rsU2ZR+dov73KXyAsbAfW0tKmcA@mail.gmail.com>
+ <20121121094350.GQ4673@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="pwWdILMQNxDD/Cps"
+Content-Type: multipart/mixed; boundary=f46d04071167d1c51e04cefe38f8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:56404 "EHLO
-	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754076Ab2KUJoD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Nov 2012 04:44:03 -0500
-Content-Disposition: inline
-In-Reply-To: <CAMPhdO8uuNmdiaejcypOH77rsU2ZR+dov73KXyAsbAfW0tKmcA@mail.gmail.com>
+Received: from mail-la0-f46.google.com ([209.85.215.46]:47559 "EHLO
+	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753308Ab2KUJqS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Nov 2012 04:46:18 -0500
+Received: by mail-la0-f46.google.com with SMTP id p5so2657887lag.19
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Nov 2012 01:46:17 -0800 (PST)
+In-Reply-To: <20121121094350.GQ4673@opensource.wolfsonmicro.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Eric Miao <eric.y.miao@gmail.com>
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
 Cc: Philip Rakity <prakity@gmail.com>, Philip Rakity <prakity@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
+--f46d04071167d1c51e04cefe38f8
+Content-Type: text/plain; charset=UTF-8
 
---pwWdILMQNxDD/Cps
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+git-send-email stopped working so I have to use the web interface.
+Could you help
+try the attached one?
 
-On Wed, Nov 21, 2012 at 05:22:02PM +0800, Eric Miao wrote:
+On Wed, Nov 21, 2012 at 5:43 PM, Mark Brown
+<broonie@opensource.wolfsonmicro.com> wrote:
+> On Wed, Nov 21, 2012 at 05:22:02PM +0800, Eric Miao wrote:
+>
+>> +static inline int regulator_count_voltages(struct regulator *regulator)
+>> +{
+>> + return 0;
+>> +}
+>
+> Looks like your mailer has mangled everything so this won't apply.
 
-> +static inline int regulator_count_voltages(struct regulator *regulator)
-> +{
-> + return 0;
-> +}
+--f46d04071167d1c51e04cefe38f8
+Content-Type: application/octet-stream;
+	name="0001-regulator-add-missing-prototype-for-regulator_is_sup.patch"
+Content-Disposition: attachment;
+	filename="0001-regulator-add-missing-prototype-for-regulator_is_sup.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_h9s9ok0b1
 
-Looks like your mailer has mangled everything so this won't apply.
-
---pwWdILMQNxDD/Cps
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJQrKI5AAoJELSic+t+oim9C/UP/As7Zhe+4TLAXpmM9gLkqYeB
-+nzNLZPAeYIyQY1tLDo/0FLTn+Uob4kOA47JwmIl80MpPq1WILvkjg5ktmJC8vMK
-Wl850GMqCMfTRPigZ5gUXVhsHdTt+HVX4ahpoUgWcUWiaKYFnUNV76VsagV+wj0a
-wo2BYfRa0o5KzrRWiFXIDFisFpjqbkv8Him5INAXfCe28eje6vAC9/rm7qRDd8b3
-7Rbx3l6ptbC0nP4uJTlyZhYd+Rh0LzjvIXMVUyQAWSDV/MnO2b1SiRj12aXbHEsl
-RngiVOYKe3IpJJqggatq1XUaQjdKsabN2L8Tt4wzoaIZ7NifiIJp6S8WLHIZ/wp0
-FjkQsGoY39fqXAlL4eoKpLCVI8PAkPOrvY24mWvmhW5TAt1yy8TjOgpUT/RiwNfF
-3gSUWYHDSYyOsG46CTXnfgX3K0mUKScsgf7KzLmn4gT2A4ds+1h3q943xMALHgkf
-FbFmQyUIpTVBQtV28ghHZAa2YayjyFWQT3KuQnH+irwbNLQU3alkfc+EnlL6MmLy
-zjgV0alNfZNT9gG98SFE9oHmiNN3ZTL1PHG74hSuWTf9hcO2Mfxw918ul1TfuerZ
-NOhmebn/Ut9F8LjsvjUYXWjlamu46ojjj8IEFb/GHesDHP8iguc+yYYaWdgQlvHx
-reGmcoDLeABO3YoR9yZi
-=qLJa
------END PGP SIGNATURE-----
-
---pwWdILMQNxDD/Cps--
+RnJvbSBkMDE1MTM5YWM2MjFlMTBkNWQ5YzBkM2U0MjdlOTUxN2IwOGZlNzcyIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBQaGlsaXAgUmFraXR5IDxwcmFraXR5QG52aWRpYS5jb20+CkRh
+dGU6IFR1ZSwgMjAgTm92IDIwMTIgMTg6MDc6NDEgKzAxMDAKU3ViamVjdDogW1BBVENIXSByZWd1
+bGF0b3I6IGFkZCBtaXNzaW5nIHByb3RvdHlwZSBmb3IgcmVndWxhdG9yX2lzX3N1cHBvcnRlZF92
+b2x0YWdlCgphdm9pZHMgbmVlZHMgZm9yIENPTkZJR19SRUdVTEFUT1IgaW4gc2RoY2kuYwoKU2ln
+bmVkLW9mZi1ieTogUGhpbGlwIFJha2l0eSA8cHJha2l0eUBudmlkaWEuY29tPgpSZXZpZXdlZC1i
+eTogRXJpYyBNaWFvIDxlcmljLnkubWlhb0BnbWFpbC5jb20+Ci0tLQogaW5jbHVkZS9saW51eC9y
+ZWd1bGF0b3IvY29uc3VtZXIuaCB8ICAgIDQgKysrKwogMSBmaWxlcyBjaGFuZ2VkLCA0IGluc2Vy
+dGlvbnMoKyksIDAgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51eC9yZWd1
+bGF0b3IvY29uc3VtZXIuaCBiL2luY2x1ZGUvbGludXgvcmVndWxhdG9yL2NvbnN1bWVyLmgKaW5k
+ZXggYzQzY2QzNS4uNGUzZWM5MSAxMDA2NDQKLS0tIGEvaW5jbHVkZS9saW51eC9yZWd1bGF0b3Iv
+Y29uc3VtZXIuaAorKysgYi9pbmNsdWRlL2xpbnV4L3JlZ3VsYXRvci9jb25zdW1lci5oCkBAIC0z
+NTgsNiArMzU4LDEwIEBAIHN0YXRpYyBpbmxpbmUgdm9pZCByZWd1bGF0b3Jfc2V0X2RydmRhdGEo
+c3RydWN0IHJlZ3VsYXRvciAqcmVndWxhdG9yLAogewogfQogCitzdGF0aWMgaW5saW5lIGludCBy
+ZWd1bGF0b3JfY291bnRfdm9sdGFnZXMoc3RydWN0IHJlZ3VsYXRvciAqcmVndWxhdG9yKQorewor
+CXJldHVybiAwOworfQogI2VuZGlmCiAKIHN0YXRpYyBpbmxpbmUgaW50IHJlZ3VsYXRvcl9zZXRf
+dm9sdGFnZV90b2woc3RydWN0IHJlZ3VsYXRvciAqcmVndWxhdG9yLAotLSAKMS43LjAuNAoK
+--f46d04071167d1c51e04cefe38f8--
