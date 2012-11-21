@@ -1,28 +1,38 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: =?UTF-8?q?=5BPATCH=20077/493=5D=20mmc=3A=20remove=20use=20of=20=5F=5Fdevexit=5Fp?=
-Date: Wed, 21 Nov 2012 13:05:39 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1211211303120.842@axis700.grange>
-References: <1353349642-3677-1-git-send-email-wfp5p@virginia.edu>
- <1353349642-3677-77-git-send-email-wfp5p@virginia.edu>
+From: Philip Rakity <prakity@nvidia.com>
+Subject: RFC: eMMC
+Date: Wed, 21 Nov 2012 13:41:51 +0100
+Message-ID: <10BF00FE-B50A-4CF0-B4E9-75C8172C1727@nvidia.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1353349642-3677-77-git-send-email-wfp5p@virginia.edu>
-Sender: linux-omap-owner@vger.kernel.org
-To: Bill Pemberton <wfp5p@virginia.edu>
-Cc: gregkh@linuxfoundation.org, Chris Ball <cjb@laptop.org>, =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Venkatraman S <svenkatr@ti.com>, Viresh Kumar <viresh.linux@gmail.com>, Ian Molton <ian@mnementh.co.uk>, Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, Pierre Ossman <pierre@ossman.eu>, uclinux-dist-devel@blackfin.uclinux.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, spear-devel@list.st.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from hqemgate04.nvidia.com ([216.228.121.35]:13046 "EHLO
+	hqemgate04.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751136Ab2KUMlw convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Nov 2012 07:41:52 -0500
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Mon, 19 Nov 2012, Bill Pemberton wrote:
+Recently there have been a number of patches to sdhci.c and discussions on regulators for folks using eMMC.
 
- drivers/mmc/host/sh_mobile_sdhi.c  | 2 +-
- drivers/mmc/host/tmio_mmc.c        | 2 +-
+I would appreciate any feedback.  The opinions below are my own.
 
-Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de> 
+eMMC is a hardware device.  It is NOT voltage configurable in any real sense other then turning on/off the voltage,
+The board designer is supposed to read the data sheet and hook things up.  It is somewhat unclear to me how having a dummy regulator really helps.
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Given that -- voltage checking for vmmc or vmmcq is not meaningful. eMMC either works or does not.
+The testing for vccq/vcc has no meaning since it cannot be changed.  In fact the samsung eMMC we used for DDR worked at 2.8v.
+Given this -- we have a chicken and egg situation in sdhci.c
+if we are in this code and the kernel was on eMMC obviously the system is working.
+If we booted the kernel from say SPI then hopefully the boot code has set up the voltage rails correctly.
+I would argue that for eMMC the regulator structure should not be exposed to sdhci.c and everything would just work.
+
+SD/UHS cards are a completely different matter and regulators make complete sense.
+-----------------------------------------------------------------------------------
+This email message is for the sole use of the intended recipient(s) and may contain
+confidential information.  Any unauthorized review, use, disclosure or distribution
+is prohibited.  If you are not the intended recipient, please contact the sender by
+reply email and destroy all copies of the original message.
+-----------------------------------------------------------------------------------
