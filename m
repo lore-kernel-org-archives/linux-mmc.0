@@ -1,59 +1,109 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH] regulator: add missing prototype for
- regulator_is_supported_voltage
-Date: Wed, 21 Nov 2012 19:09:28 +0900
-Message-ID: <20121121100926.GB18117@opensource.wolfsonmicro.com>
-References: <CAMPhdO8uuNmdiaejcypOH77rsU2ZR+dov73KXyAsbAfW0tKmcA@mail.gmail.com>
- <20121121094350.GQ4673@opensource.wolfsonmicro.com>
- <CAMPhdO_FoZ6f6twvvse56JVA-J5hB7fQ21LisTCN2hKYdL0fyg@mail.gmail.com>
- <20121121100515.GA18117@opensource.wolfsonmicro.com>
- <CAMPhdO_YtAEgxWD8YfXE-6V4NYodJf8+FfrNuriakrPiEEVQmA@mail.gmail.com>
+From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Subject: [PATCH 1/1] mmc:atmel-mci: use devm_gpio_request/free and configure
+ the pin corrently
+Date: Wed, 21 Nov 2012 11:29:22 +0100
+Message-ID: <1353493762-31137-1-git-send-email-plagnioj@jcrosoft.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="DKU6Jbt7q3WqK7+M"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:51557 "EHLO
-	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754473Ab2KUKJg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Nov 2012 05:09:36 -0500
-Content-Disposition: inline
-In-Reply-To: <CAMPhdO_YtAEgxWD8YfXE-6V4NYodJf8+FfrNuriakrPiEEVQmA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: linux-mmc@vger.kernel.org, Ludovic Desroches <ludovic.desroches@atmel.com>, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Eric Miao <eric.y.miao@gmail.com>
-Cc: Philip Rakity <prakity@gmail.com>, Philip Rakity <prakity@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
+as on DT we do not configure the pin via AT91 custom pinmux as before
 
---DKU6Jbt7q3WqK7+M
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Signed-off-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Cc: linux-mmc@vger.kernel.org
+Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
 
-On Wed, Nov 21, 2012 at 06:06:12PM +0800, Eric Miao wrote:
+based on next-20121115
 
-> Yep, that's fine.
+Best Regards,
+J.
+ drivers/mmc/host/atmel-mci.c |   39 ++++++++++++++++++++++++++++-----------
+ 1 file changed, 28 insertions(+), 11 deletions(-)
 
-Applied, thanks.
-
---DKU6Jbt7q3WqK7+M
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJQrKhPAAoJELSic+t+oim9JioP/1/zJAOPtKqHRT0sLQ+ElDM1
-+QmDWMenFltst6VsWMRChpe7h+BpLbkFczHeQkjA9BZoGcu8DXyB3kSG7eAaQClG
-BtvKcMbV4HVlFvVGQF1A4eBSwMqUgmfq86akJSzdXtzth2NgHbZY7flGs9M1/BeF
-4uQA/qRA8RGvLPMkWfehUgLUnP0/UrSrKuoGDkFb1kiKB57GiWQ3SrTUq2ZEZ89H
-nPbdAQilap+1BlQHzpDHTuImjGDCQXQNcGpC3fXTZjjrJ4NfRiSGf8ENXxFYLZCM
-QzWpYyWrqv6OqNRLFEFL/TGsu4w9FakVW/tDtoaB9oSM3sL0BNYowoX+QXcChbFv
-7WHtUZtz2DEOG9Kttzm3isl3Ryc7u47GrEXA82qL3gJ0nP/2EciM4HmgUEf5IerK
-/xNHYermrLoy2qcd2fBmeQB3ud66pI12DIPhjn22M99MTF+2sHUp3xSTLn6dEw8N
-8btNiO6up+vvMyxG0NCPSQeLouzDxsoqWWFiSM33JjKlHOyTzIBNwmog55wnX6ei
-jHosn9uHtvQPn7jeDQ81jznN+buVRrIxbN0/XGVJ2Lde6eSYfD0z6afh7KDIeKg4
-dglDBX0IwnopydnGjukL+6mzoJE8SrqVWjGrP+zkdUfiggPE0beml/MCe1sWDWxz
-s6g2Ha0ZTA+HrV6UVkY9
-=B32w
------END PGP SIGNATURE-----
-
---DKU6Jbt7q3WqK7+M--
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 767706b..d97771d 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -2108,6 +2108,7 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+ {
+ 	struct mmc_host			*mmc;
+ 	struct atmel_mci_slot		*slot;
++	int ret;
+ 
+ 	mmc = mmc_alloc_host(sizeof(struct atmel_mci_slot), &host->pdev->dev);
+ 	if (!mmc)
+@@ -2161,12 +2162,20 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+ 	/* Assume card is present initially */
+ 	set_bit(ATMCI_CARD_PRESENT, &slot->flags);
+ 	if (gpio_is_valid(slot->detect_pin)) {
+-		if (gpio_request(slot->detect_pin, "mmc_detect")) {
+-			dev_dbg(&mmc->class_dev, "no detect pin available\n");
+-			slot->detect_pin = -EBUSY;
+-		} else if (gpio_get_value(slot->detect_pin) ^
+-				slot->detect_is_active_high) {
+-			clear_bit(ATMCI_CARD_PRESENT, &slot->flags);
++		ret = devm_gpio_request(&mmc->class_dev, slot->detect_pin, "mmc_detect");
++		if (ret) {
++			dev_warn(&mmc->class_dev, "can't request detect pin\n");
++			slot->detect_pin = ret;
++		} else {
++			ret = gpio_direction_input(slot->detect_pin);
++			if (ret) {
++				dev_err(&mmc->class_dev, "can't set detect pin direction\n");
++				devm_gpio_free(&mmc->class_dev, slot->detect_pin);
++				slot->detect_pin = -ret;
++			} else if (gpio_get_value(slot->detect_pin) ^
++					slot->detect_is_active_high) {
++				clear_bit(ATMCI_CARD_PRESENT, &slot->flags);
++			}
+ 		}
+ 	}
+ 
+@@ -2174,9 +2183,17 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+ 		mmc->caps |= MMC_CAP_NEEDS_POLL;
+ 
+ 	if (gpio_is_valid(slot->wp_pin)) {
+-		if (gpio_request(slot->wp_pin, "mmc_wp")) {
+-			dev_dbg(&mmc->class_dev, "no WP pin available\n");
+-			slot->wp_pin = -EBUSY;
++		ret = devm_gpio_request(&mmc->class_dev, slot->wp_pin, "mmc_wp");
++		if (ret) {
++			dev_warn(&mmc->class_dev, "no WP pin available\n");
++			slot->wp_pin = ret;
++		} else {
++			ret = gpio_direction_output(slot->wp_pin, 0);
++			if (ret) {
++				dev_err(&mmc->class_dev, "can't set WP pin direction\n");
++				devm_gpio_free(&mmc->class_dev, slot->wp_pin);
++				slot->wp_pin = ret;
++			}
+ 		}
+ 	}
+ 
+@@ -2197,8 +2214,8 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+ 			dev_dbg(&mmc->class_dev,
+ 				"could not request IRQ %d for detect pin\n",
+ 				gpio_to_irq(slot->detect_pin));
+-			gpio_free(slot->detect_pin);
+-			slot->detect_pin = -EBUSY;
++			devm_gpio_free(&mmc->class_dev, slot->detect_pin);
++			slot->detect_pin = ret;
+ 		}
+ 	}
+ 
+-- 
+1.7.10.4
