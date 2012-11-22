@@ -1,40 +1,32 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: =?UTF-8?q?=5BPATCH=20414/493=5D=20mmc=3A=20remove=20use=20of=20=5F=5Fdevexit?=
-Date: Fri, 23 Nov 2012 00:04:41 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1211230002530.11581@axis700.grange>
-References: <1353349642-3677-1-git-send-email-wfp5p@virginia.edu>
- <1353349642-3677-414-git-send-email-wfp5p@virginia.edu>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: [PATCH 0/3] sdhci-dove GPIO support for card detection
+Date: Thu, 22 Nov 2012 23:54:26 +0000
+Message-ID: <20121122235426.GT3332@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1353349642-3677-414-git-send-email-wfp5p@virginia.edu>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Bill Pemberton <wfp5p@virginia.edu>
-Cc: Bruce Chang <brucechang@via.com.tw>, linux-omap@vger.kernel.org, gregkh@linuxfoundation.org, spear-devel@list.st.com, linux-mmc@vger.kernel.org, Harald Welte <HaraldWelte@viatech.com>, =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>, Ian Molton <ian@mnementh.co.uk>, Viresh Kumar <viresh.linux@gmail.com>, uclinux-dist-devel@blackfin.uclinux.org, Manuel Lauss <manuel.lauss@gmail.com>, Pierre Ossman <pierre@ossman.eu>, Chris Ball <cjb@laptop.org>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:49183 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751487Ab2KVXz5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Nov 2012 18:55:57 -0500
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Mike Rapoport <mike@compulab.co.il>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Mon, 19 Nov 2012, Bill Pemberton wrote:
+The following three patches allow sdhci-dove to use a GPIO for card
+presence detection.  This is a three stage process:
 
-> CONFIG_HOTPLUG is going away as an option so __devexit is no
-> longer needed.
+1. Clean up error paths by using devm_clk_get().
+2. Use the two-stage sdhci initialization.
+3. Implement the GPIO card detection support.
 
->  drivers/mmc/host/sh_mmcif.c        | 2 +-
->  drivers/mmc/host/tmio_mmc.c        | 2 +-
+A very similar patch has been tested by Sebastian on the cubox; since
+that version, I've changed the error printing slightly and dropped the
+non-DT support for this feature as mainline doesn't have non-DT cubox
+support.
 
-Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+ drivers/mmc/host/sdhci-dove.c |  108 +++++++++++++++++++++++++++++++++--------
+ 1 files changed, 88 insertions(+), 20 deletions(-)
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
