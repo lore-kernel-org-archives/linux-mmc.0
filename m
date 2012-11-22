@@ -1,108 +1,64 @@
-From: Loic PALLARDY <loic.pallardy@st.com>
-Subject: Re: [PATCH v3 0/5] mmc: Add access to RPMB partition
-Date: Wed, 21 Nov 2012 18:32:46 +0100
-Message-ID: <50AD103E.1070804@st.com>
-References: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
- <87mwyf7rjp.fsf@octavius.laptop.org>
- <1353348746.25586.1.camel@kkonda-linux.qualcomm.com>
- <50AB3E5F.3010906@st.com>
- <1353437680.18639.737.camel@kkonda-linux.qualcomm.com>
- <50ACA52B.4040201@st.com>
- <CAAexSFT-dwRzmH6SOroAPC7y1JZkG63V0yWW9L57L8w-=MjhOA@mail.gmail.com>
+From: Chunhe Lan <Chunhe.Lan@freescale.com>
+Subject: [PATCH] mmc: esdhi: Add SDHCI_QUIRK_QORIQ_CIRCUIT_SUPPORT_VS33 quirk
+ support
+Date: Thu, 22 Nov 2012 16:14:44 +0800
+Message-ID: <1353572084-3196-1-git-send-email-Chunhe.Lan@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog104.obsmtp.com ([207.126.144.117]:38528 "EHLO
-	eu1sys200aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755199Ab2KURdC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Nov 2012 12:33:02 -0500
-In-Reply-To: <CAAexSFT-dwRzmH6SOroAPC7y1JZkG63V0yWW9L57L8w-=MjhOA@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: linux-mmc@vger.kernel.org
+Cc: kumar.gala@freescale.com, cjb@laptop.org, linuxppc-dev@lists.ozlabs.org, Chunhe Lan <Chunhe.Lan@freescale.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "Sundar J. Dev" <sundarjdev@gmail.com>
-Cc: Krishna Konda <kkonda@codeaurora.org>, Chris Ball <cjb@laptop.org>, Loic PALLARDY STE <loic.pallardy-ext@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>
 
-SGkgU3VuZGFyLA0KDQpPbiAxMS8yMS8yMDEyIDEyOjAyIFBNLCBTdW5kYXIgSi4gRGV2IHdyb3Rl
-Og0KPiBIaSBMb2ljLA0KPg0KPiBPbiBXZWQsIE5vdiAyMSwgMjAxMiBhdCAzOjI1IFBNLCBMb2lj
-IFBBTExBUkRZPGxvaWMucGFsbGFyZHlAc3QuY29tPiAgd3JvdGU6DQo+Pg0KPj4+DQo+Pj4gSSBh
-bSBndWVzc2luZyB0aGF0IHlvdSB3b3VsZCBleHBlY3QgdGhlIHVzZXJzcGFjZSBhcHBsaWNhdGlv
-biB0b28gY2FsbA0KPj4+IGludG8gdGhlIGlvY3RsIHR3aWNlIHRvIHRha2UgY2FyZSBvZiB0aGUg
-NCYgICA1DQo+PiBZZXMgZXhhY3RseSwgeW91IGhhdmUgdG8gZmlyc3Qgc2VuZCB5b3VyIGNvbW1h
-bmQgYW5kIHRoZW4gdG8gcmVhZCB0aGUNCj4+IHJlc3VsdCwgMiBJT0NUTHMgYXJlIG5lZWRlZA0K
-Pj4NCj4+PiBhbmQgdGhhdCBtaWdodCBub3QgYmUgYW4NCj4+PiBpc3N1ZSBpZiB0aGVyZSB3YXMg
-bm8gcmVxdWVzdCBwcm9jZXNzZWQgZm9yIG1tY3FkIGkuZS4gbm8gb3RoZXINCj4+PiBwcm9jZXNz
-L3RocmVhZCBjbGFpbXMgdGhlIGhvc3QuIEJ1dCBpZiB0aGF0IHdlcmUgdG8gaGFwcGVuLCB0aGVu
-IHRoZQ0KPj4+IHJwbWIgb3BlcmF0aW9uIHdpbGwgZmFpbCAtIHBsZWFzZSBsZXQgbWUga25vdyBp
-ZiB0aGlzIGFzc3VtcHRpb24gb3IgbXkNCj4+PiB1bmRlcnN0YW5kaW5nIG9mIHRoZSBzcGVjIGlz
-IHdyb25nLg0KPj4gSSB0ZXN0ZWQgdGhpcyBhbmQgSSBkb24ndCBpZGVudGlmeSBpc3N1ZS4NCj4+
-IEkgaGF2ZSBBbmRyb2lkIHJ1bm5pbmcgaW4gcGFyYWxsZWwgb2YgbXkgdGVzdCBhbmQgbG90IG9m
-IG90aGVyIG1tYw0KPj4gYWNjZXNzZXMgYXJlIHBlcmZvcm1lZCBpbiBwYXJhbGxlbCwgc28gbXkg
-dGVzdCBzdWl0ZSBkb2Vzbid0IGd1YXJhbnRlZQ0KPj4gdGhhdCB0aGUgMiBpb2N0bHMgYXJlIGNv
-bnRpZ3VvdXMuDQo+PiBJIGhhZCB0aGUgc2FtZSB1bmRlcnN0YW5kaW5nIG9mIHRoZSBSUE1CIHNw
-ZWNpZmljYXRpb24sIGJ1dCBhZnRlciB0ZXN0cw0KPj4gYW5kIGRpc2N1c3Npb24gd2l0aCBvdXIg
-ZU1NQyBwcm92aWRlciwgaXQgYXBwZWFycyB0aGF0IFJQTUIgc3RhdGUNCj4+IG1hY2hpbmUgaXMg
-aW5kZXBlbmRlbnQgb2YgdGhlIHJlc3QuDQo+IEkgaGF2ZSBzZWVuIHRoZSBpc3N1ZSBkZXNjcmli
-ZWQgYnkgS3Jpc2huYSBpbiBvbmUgb2YgdGhlIE1pY3JvbiBlTU1DDQo+IHBhcnRzIHRoYXQgSSB0
-ZXN0ZWQgb24uIEkgY2FwdHVyZWQgdGhlIGJlbG93IENNRCBzbmFwc2hvdCB0byBleHBsYWluDQo+
-IHRoaXMgYmV0dGVyOg0KPiAgICAgIC0tLS0tLS0+ICAqKioqKiBTVEFSVCBSUE1CIFRSQU5TQUNU
-SU9OICoqKioqDQo+ICAgICAgICAgIC0tPiAgUlBNQiBDTUQ2IC0gU3dpdGNoIHRvIFJQTUIgcGFy
-dGl0aW9uDQo+ICAgICAgICAgIC0tPiAgUlBNQiBDTUQyMyAtIFNldCBCTEtfQ05UDQo+ICAgICAg
-ICAgIC0tPiAgUlBNQiBDTUQyNSAtIElzc3VlIGEgTXVsdCBCbGsgV3JpdGUNCj4gICAgICAgICAg
-LS0+ICAgICAgUlBNQiBDTUQxMyAtIElzc3VlIFN0YXR1cyBDTUQgYW5kIGFuZCBjaGVjayBmb3Ig
-V3JpdGUgY29tcGxldGlvbg0KPiAgICAgIC0tLS0tLS0+ICAqKioqKiBSUE1CIFRSQU5TQUNUSU9O
-IEFCT1JURUQgQlkgTk9OLVJQTUIgQUNDRVNTICoqKioqDQo+ICAgICAgICAgIC0tPiAgTk9OLVJQ
-TUIgQ01ENiAtIFN3aXRjaCB0byBVc2VyZGF0YSBwYXJ0aXRpb24NCj4gICAgICAgICAgLS0+ICBO
-T04tUlBNQiBDTUQyMyAtIFNldCBCTEtfQ05UDQo+ICAgICAgICAgIC0tPiAgTk9OLVJQTUIgQ01E
-MjUgLSBJc3N1ZSBNdXRsIEJsayBXcml0ZQ0KPiAgICAgICAgICAtLT4gIE5PTi1SUE1CIENNRDEy
-IC0gSXNzdWUgU3RhdHVzIENNRCBhbmQgYW5kIGNoZWNrIGZvciBjb21wbGV0aW9uDQo+ICAgICAg
-LS0tLS0tLT4gICoqKioqIFNXSVRDSCBCQUNLIFRPIFJQTUIgUEFSVElUSU9OICoqKioqDQo+ICAg
-ICAgICAgIC0tPiAgUlBNQiBDTUQ2IC0gU3dpdGNoIGJhY2sgdG8gUlBNQiBwYXJ0aXRpb24NCj4g
-ICAgICAgICAgLS0+ICBSUE1CIENNRDIzIC0gU2V0IEJMS19DTlQNCj4gICAgICAgICAgLS0+ICBS
-UE1CIENNRDE4IC0gSXNzdWUgYSBNdWx0IEJsayBSZWFkDQo+ICAgICAgVGhlIFJQTUIgZGV2aWNl
-IHJldHVybnMgR0VORVJBTCBGQUlMVVJFIGluIHRoZSBSZWFkIGRhdGEgUGFja2V0Lg0KPg0KSHVt
-bSB5ZXMgbG9nIGlzIGNsZWFyLiBNaWNyb24gZU1NQyBkb2Vzbid0IHNlZW0gdG8gYWNjZXB0IGlu
-dGVycnVwdGlvbiANCmR1cmluZyBSUE1CIHNlcXVlbmNlLg0KSXMgaXQgd29ya2luZyB3aGVuIHRy
-YW5zZmVyIGlzIG5vdCBpbnRlcnJ1cHRlZD8NCkkgdGVzdGVkIG9uIFRvc2hpYmEgYW5kIFNhbmRp
-c2sgd2l0aG91dCBpc3N1ZSBidXQgaXQgaXMgbm90IGV4aGF1c3RpdmUgDQplbm91Z2guDQpJbiB5
-b3VyIHRlc3QsIGhvdyBtYW55IGhhbGYgc2VjdG9ycyAoMjU2QikgYXJlIHlvdSBwcm9ncmFtbWlu
-Zz8NCkkgZ290IHNvbWUgZ2VuZXJhbCBmYWlsdXJlIHdoZW4gd3JpdGluZyBtb3JlIHRoYW4gb25l
-IGhhbGYgc2VjdG9yIG9uIA0Kc29tZSBkZXZpY2VzLCBidXQgaXQgaGFzIGJlZW4gZXhwbGFpbmVk
-IGJ5IHZlbmRvci4NCg0KPiBBY3R1YWxseSwgdGhlIGVNTUMgSkVERUMgc3BlYyBpcyBub3QgdmVy
-eSBjbGVhciBvbiB3aGF0IGlzIHRoZSBleHBlY3RlZA0KPiBiZWhhdmlvciBmcm9tIGVNTUMgY2hp
-cCBpZiBhIHJwbWIgc2VxdWVuY2UgaXMgaW50ZXJydXB0ZWQgYnkgYSBub24tcnBtYg0KPiBjb21t
-YW5kIHNlcXVlbmNlLiBJdCB3b3JrcyBmaW5lIG9uIG1vc3QgU2Ftc3VuZyBhbmQgVG9zaGliYQ0K
-PiBlTU1DIHBhcnRzIHRoYXQgSSB0ZXN0ZWQgcnBtYiBvbi4gQnV0IHRoaXMgb25lIE1pY3JvbiBl
-TU1DIHBhcnQgc2hvd2VkDQo+IHRoaXMgcHJvYmxlbS4NClllcyB1bmNsZWFyIGVNTUMgSkVERUMg
-c3BlYyBhYm91dCBSUE1CIHdhcyByZXBvcnRlZCBieSBvdXIgZU1NQyBwcm92aWRlci4NCg0KPj4+
-DQo+Pj4gU2ltaWxhcmx5IGZvciBycG1iIHdyaXRlIG9wZXJhdGlvbiwgdGhlc2UgYXJlIHRoZSBz
-dGVwIGludm9sdmVkDQo+Pj4gMS4gU3dpdGNoIHBhcnRpdGlvbg0KPj4+IDIuIFNldCBibG9jayBj
-b3VudA0KPj4+IDMuIFdyaXRlIGRhdGEgZnJhbWUgLSBDTUQyNSB0byB3cml0ZSB0aGUgcnBtYiBk
-YXRhIGZyYW1lIHdpdGggZGF0YQ0KPj4+IDQuIFNldCBibG9jayBjb3VudA0KPj4+IDUuIFJlYWQg
-dGhlIGRhdGEgLSBDTUQyNSB0byB3cml0ZSBycG1iIGRhdGEgZnJhbWUgaW5kaWNhdGluZyB0aGF0
-IHJwbWINCj4+PiByZXN1bHQgcmVnaXN0ZXIgaXMgYWJvdXQgdG8gYmUgcmVhZA0KPj4+IDYuIFNl
-dCBibG9jayBjb3VudA0KPj4+IDcuIFJlYWQgcnBtYiByZXN1bHQgLSBDTUQxOCB0byByZWFkIHRo
-ZSBycG1iIHJlc3VsdCByZWdpc3Rlcg0KPj4+DQo+Pj4gSW4gdGhlIGNhc2Ugb2Ygd3JpdGUsIHRo
-ZXJlIGFyZSBhbiBhZGRpdGlvbmFsIHR3byBjb21tYW5kcyBjb21wYXJlZCB0bw0KPj4+IHJlYWRz
-LiBTaW5jZSBhbGwgb2YgdGhlc2UgbmVlZHMgdG8gYmUgZG9uZSBpbiBvbmUgc2hvdCwgSSBiZWxp
-ZXZlIHRoZQ0KPj4+IGN1cnJlbnQgaW9jdGwgaXMgbm90IHN1ZmZpY2llbnQgYW5kIHRoaXMgY2Fu
-IGJlIGhhbmRsZWQgaW4gdGhlIGZvbGxvd2luZw0KPj4+IHdheXMNCj4+DQo+PiBObyBuZWVkZWQg
-dG8gZG8gaXQgaW4gb25lIHNob3QuIFlvdSBjYW4gc2VuZCB0aGUgd3JpdGUgYW5kIGNoZWNrIHN0
-YXR1cw0KPj4gbGF0ZXIuDQo+PiBJIHRlc3RlZCBpdCwgZGlkbid0IGRldGVjdCBhbnkgcHJvYmxl
-bS4NCj4+Pg0KPj4+IDEuIEV4dGVuZCB0aGUgY3VycmVudCBpb2N0bCB0byBoYW5kbGUgYm90aCBj
-YXNlcw0KPj4+IDIuIEFkZCBhIG5ldyBpb2N0bCBjbWQgZm9yIHJwbWIgcmVxdWVzdHMNCj4+IEl0
-IHdhcyBteSBmaXJzdCBpbXBsZW1lbnRhdGlvbiwgYnV0IGFmdGVyIGludGVybmFsIFNURSByZXZp
-ZXcgYW5kIGVNTUMNCj4+IGNoZWNrIEkgbWVyZ2UgaXQgaW4gZXhpc3RpbmcgaW9jdGwuDQo+Pg0K
-Pj4gUGxlYXNlIGxldCBtZSBrbm93IGlmIHlvdSBkZXRlY3QgYW55IGlzc3VlLg0KPj4NCj4+IFJl
-Z2FyZHMsDQo+PiBMb2ljDQo+Pj4NCj4+PiBQZXJzb25hbGx5IEkgdGhpbmsgYWRkaW5nIGFub3Ro
-ZXIgaW9jdGwgaXMgYSBiZXR0ZXIgd2F5IHRvIGRvIHRoaXMgc2luY2UNCj4+PiB0aGUgY3VycmVu
-dCBpb2N0bCB3aWxsIGdldCBjdW1iZXJzb21lIGFuZCB0ZWNobmljYWxseSB0aGUgcnBtYiByZXF1
-ZXN0cw0KPj4+IGFyZSBkaWZmZXJlbnQga2luZCBvZiByZXF1ZXN0cyB0aGF0IG5lZWQgdG8gYmUg
-ZG9uZSBhdG9taWNhbGx5LiBJICBhbQ0KPj4+IGNvZGluZyB0aGlzIHVwIGFzIGEgc2VwYXJhdGUg
-aW9jdGwgYnV0IGJlZm9yZSBJIHBvc3QgdGhlIHBhdGNoLCBJIHdhbnRlZA0KPj4+IGZlZWRiYWNr
-IG9uIHRoaXMgYXBwcm9hY2guDQo+Pj4NClNvbHV0aW9uIG11c3QgYmUgZHJpdmVuIGJ5IHRoZSBt
-b3N0IGNvbnN0cmFpbmVkIGRldmljZS4NCkluIHRoYXQgY2FzZSwgSSBhZ3JlZSB3aXRoIEtyaXNo
-bmEsIGluIHRoYXQgY2FzZSBhIG5ldyBpb2N0bCBzZWVtcyB0byBiZSANCnRoZSBiZXR0ZXIgYXBw
-cm9hY2guDQoNClJlZ2FyZHMsDQpMb2ljDQo+Pj4NCj4NCj4gVGhhbmtzLA0KPiAtLQ0KPiBTdW5k
-YXIgSmF5YWt1bWFyIERldg==
+On the some platforms of Freescale, sdhci controller can only
+support 1.8V voltage, but the peripheral hardware circuit has
+capability to support 3.3V voltage.
+
+Signed-off-by: Chunhe Lan <Chunhe.Lan@freescale.com>
+---
+ drivers/mmc/host/sdhci.c  |    3 +++
+ include/linux/mmc/sdhci.h |    4 ++++
+ 2 files changed, 7 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 4fe2de8..e4a537d 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2682,6 +2682,9 @@ int sdhci_add_host(struct sdhci_host *host)
+ 			host->caps1 :
+ 			sdhci_readl(host, SDHCI_CAPABILITIES_1);
+ 
++	if (host->quirks & SDHCI_QUIRK_QORIQ_CIRCUIT_SUPPORT_VS33)
++		caps[0] = caps[0] | SDHCI_CAN_VDD_330;
++
+ 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+ 		host->flags |= SDHCI_USE_SDMA;
+ 	else if (!(caps[0] & SDHCI_CAN_DO_SDMA))
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 1edcb4d..78eced5 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -87,6 +87,10 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC		(1<<30)
+ /* The read-only detection via SDHCI_PRESENT_STATE register is unstable */
+ #define SDHCI_QUIRK_UNSTABLE_RO_DETECT			(1<<31)
++/* Controller can only supports 1.8V, but the peripheral hardware
++ * circuit has capability to support 3.3V
++ */
++#define SDHCI_QUIRK_QORIQ_CIRCUIT_SUPPORT_VS33		(1U<<32)
+ 
+ 	unsigned int quirks2;	/* More deviations from spec. */
+ 
+-- 
+1.7.6.5
