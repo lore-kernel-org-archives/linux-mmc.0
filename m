@@ -1,151 +1,150 @@
-From: "Sundar J. Dev" <sundarjdev@gmail.com>
-Subject: Re: [PATCH v3 0/5] mmc: Add access to RPMB partition
-Date: Thu, 22 Nov 2012 10:02:30 +0530
-Message-ID: <CAAexSFQLp=X9dyxNnK=dyMEQrnEBF0KF7Uo-tMaLsS28RH=t7Q@mail.gmail.com>
-References: <1344265951-22437-1-git-send-email-loic.pallardy-ext@stericsson.com>
-	<87mwyf7rjp.fsf@octavius.laptop.org>
-	<1353348746.25586.1.camel@kkonda-linux.qualcomm.com>
-	<50AB3E5F.3010906@st.com>
-	<1353437680.18639.737.camel@kkonda-linux.qualcomm.com>
-	<50ACA52B.4040201@st.com>
-	<CAAexSFT-dwRzmH6SOroAPC7y1JZkG63V0yWW9L57L8w-=MjhOA@mail.gmail.com>
-	<50AD103E.1070804@st.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: Handle wp-gpios from device tree
+Date: Wed, 21 Nov 2012 20:43:57 -0800
+Message-ID: <CAD=FV=W9injFAP+Qx9Ge9zK8DxwuWBCPHc4w4Jyn3PKuX_3vkg@mail.gmail.com>
+References: <1353535387-32106-1-git-send-email-dianders@chromium.org>
+	<1353535387-32106-2-git-send-email-dianders@chromium.org>
+	<50AD862D.40302@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ea0-f174.google.com ([209.85.215.174]:59044 "EHLO
-	mail-ea0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753908Ab2KVU3T (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Nov 2012 15:29:19 -0500
-Received: by mail-ea0-f174.google.com with SMTP id e13so3342193eaa.19
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Nov 2012 12:29:18 -0800 (PST)
-In-Reply-To: <50AD103E.1070804@st.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:35861 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755517Ab2KVUrN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Nov 2012 15:47:13 -0500
+Received: by mail-bk0-f46.google.com with SMTP id q16so3619039bkw.19
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Nov 2012 12:47:11 -0800 (PST)
+In-Reply-To: <50AD862D.40302@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Loic PALLARDY <loic.pallardy@st.com>
-Cc: Krishna Konda <kkonda@codeaurora.org>, Chris Ball <cjb@laptop.org>, Loic PALLARDY STE <loic.pallardy-ext@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-samsung-soc@vger.kernel.org, Thomas Abraham <thomas.abraham@linaro.org>, Kukjin Kim <kgene.kim@samsung.com>, Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>, Will Newton <will.newton@imgtec.com>, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Loic,
+Jaehoon,
 
-On Wed, Nov 21, 2012 at 11:02 PM, Loic PALLARDY <loic.pallardy@st.com> wrote:
-> Hi Sundar,
->
-> On 11/21/2012 12:02 PM, Sundar J. Dev wrote:
->> Hi Loic,
+Thanks for the review.  See below for comments.  I'll plan on a new
+patch either Monday or Tuesday when I have a chance to spin and
+re-test.
+
+
+On Wed, Nov 21, 2012 at 5:55 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> On 11/22/2012 07:03 AM, Doug Anderson wrote:
+>> On some SoCs (like exynos5250) you need to use an external GPIO for
+>> write protect.  Add support for wp-gpios to the core dw_mmc driver
+>> since it could be useful across multiple SoCs.
 >>
->> On Wed, Nov 21, 2012 at 3:25 PM, Loic PALLARDY<loic.pallardy@st.com>  wrote:
->>>
->>>>
->>>> I am guessing that you would expect the userspace application too call
->>>> into the ioctl twice to take care of the 4&   5
->>> Yes exactly, you have to first send your command and then to read the
->>> result, 2 IOCTLs are needed
->>>
->>>> and that might not be an
->>>> issue if there was no request processed for mmcqd i.e. no other
->>>> process/thread claims the host. But if that were to happen, then the
->>>> rpmb operation will fail - please let me know if this assumption or my
->>>> understanding of the spec is wrong.
->>> I tested this and I don't identify issue.
->>> I have Android running in parallel of my test and lot of other mmc
->>> accesses are performed in parallel, so my test suite doesn't guarantee
->>> that the 2 ioctls are contiguous.
->>> I had the same understanding of the RPMB specification, but after tests
->>> and discussion with our eMMC provider, it appears that RPMB state
->>> machine is independent of the rest.
->> I have seen the issue described by Krishna in one of the Micron eMMC
->> parts that I tested on. I captured the below CMD snapshot to explain
->> this better:
->>      ------->  ***** START RPMB TRANSACTION *****
->>          -->  RPMB CMD6 - Switch to RPMB partition
->>          -->  RPMB CMD23 - Set BLK_CNT
->>          -->  RPMB CMD25 - Issue a Mult Blk Write
->>          -->      RPMB CMD13 - Issue Status CMD and and check for Write completion
->>      ------->  ***** RPMB TRANSACTION ABORTED BY NON-RPMB ACCESS *****
->>          -->  NON-RPMB CMD6 - Switch to Userdata partition
->>          -->  NON-RPMB CMD23 - Set BLK_CNT
->>          -->  NON-RPMB CMD25 - Issue Mutl Blk Write
->>          -->  NON-RPMB CMD12 - Issue Status CMD and and check for completion
->>      ------->  ***** SWITCH BACK TO RPMB PARTITION *****
->>          -->  RPMB CMD6 - Switch back to RPMB partition
->>          -->  RPMB CMD23 - Set BLK_CNT
->>          -->  RPMB CMD18 - Issue a Mult Blk Read
->>      The RPMB device returns GENERAL FAILURE in the Read data Packet.
+>> With this change I am able to make use of the write protect for the
+>> external SD slot on exynos5250-snow.
 >>
-> Humm yes log is clear. Micron eMMC doesn't seem to accept interruption
-> during RPMB sequence.
-> Is it working when transfer is not interrupted?
-Yes, it was working when the rpmb transaction is not interrupted by
-non-rpmb access.
-
-> I tested on Toshiba and Sandisk without issue but it is not exhaustive
-> enough.
-> In your test, how many half sectors (256B) are you programming?
-I was programming one half sector.
-
-> I got some general failure when writing more than one half sector on
-> some devices, but it has been explained by vendor.
->
->> Actually, the eMMC JEDEC spec is not very clear on what is the expected
->> behavior from eMMC chip if a rpmb sequence is interrupted by a non-rpmb
->> command sequence. It works fine on most Samsung and Toshiba
->> eMMC parts that I tested rpmb on. But this one Micron eMMC part showed
->> this problem.
-> Yes unclear eMMC JEDEC spec about RPMB was reported by our eMMC provider.
->
->>>>
->>>> Similarly for rpmb write operation, these are the step involved
->>>> 1. Switch partition
->>>> 2. Set block count
->>>> 3. Write data frame - CMD25 to write the rpmb data frame with data
->>>> 4. Set block count
->>>> 5. Read the data - CMD25 to write rpmb data frame indicating that rpmb
->>>> result register is about to be read
->>>> 6. Set block count
->>>> 7. Read rpmb result - CMD18 to read the rpmb result register
->>>>
->>>> In the case of write, there are an additional two commands compared to
->>>> reads. Since all of these needs to be done in one shot, I believe the
->>>> current ioctl is not sufficient and this can be handled in the following
->>>> ways
->>>
->>> No needed to do it in one shot. You can send the write and check status
->>> later.
->>> I tested it, didn't detect any problem.
->>>>
->>>> 1. Extend the current ioctl to handle both cases
->>>> 2. Add a new ioctl cmd for rpmb requests
->>> It was my first implementation, but after internal STE review and eMMC
->>> check I merge it in existing ioctl.
->>>
->>> Please let me know if you detect any issue.
->>>
->>> Regards,
->>> Loic
->>>>
->>>> Personally I think adding another ioctl is a better way to do this since
->>>> the current ioctl will get cumbersome and technically the rpmb requests
->>>> are different kind of requests that need to be done atomically. I  am
->>>> coding this up as a separate ioctl but before I post the patch, I wanted
->>>> feedback on this approach.
->>>>
-> Solution must be driven by the most constrained device.
-> In that case, I agree with Krishna, in that case a new ioctl seems to be
-> the better approach.
-
-I second that. This must be the right way to do it. I can help test the patch
-on this Micron eMMC if needed.
-
->
-> Regards,
-> Loic
->>>>
+>> Signed-off-by: Doug Anderson <dianders@chromium.org>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c |   35 +++++++++++++++++++++++++++++++++++
+>>  1 files changed, 35 insertions(+), 0 deletions(-)
 >>
->> Thanks,
->> --
->> Sundar Jayakumar Dev
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 5b41348..9c79870 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -34,6 +34,7 @@
+>>  #include <linux/regulator/consumer.h>
+>>  #include <linux/workqueue.h>
+>>  #include <linux/of.h>
+>> +#include <linux/of_gpio.h>
+>>
+>>  #include "dw_mmc.h"
+>>
+>> @@ -74,6 +75,7 @@ struct idmac_desc {
+>>   * struct dw_mci_slot - MMC slot state
+>>   * @mmc: The mmc_host representing this slot.
+>>   * @host: The MMC controller this slot is using.
+>> + * @wp_gpio: If gpio_is_valid() we'll use this to read write protect.
+>>   * @ctype: Card type for this slot.
+>>   * @mrq: mmc_request currently being processed or waiting to be
+>>   *   processed, or NULL when the slot is idle.
+>> @@ -88,6 +90,8 @@ struct dw_mci_slot {
+>>       struct mmc_host         *mmc;
+>>       struct dw_mci           *host;
+>>
+>> +     int                     wp_gpio;
+>> +
+>>       u32                     ctype;
+>>
+>>       struct mmc_request      *mrq;
+>> @@ -832,6 +836,8 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
+>>               read_only = 0;
+>>       else if (brd->get_ro)
+>>               read_only = brd->get_ro(slot->id);
+>> +     else if (gpio_is_valid(slot->wp_gpio))
+>> +             read_only = gpio_get_value(slot->wp_gpio);
+>>       else
+>>               read_only =
+>>                       mci_readl(slot->host, WRTPRT) & (1 << slot->id) ? 1 : 0;
+>> @@ -1802,6 +1808,29 @@ static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
+>>                              " as 1\n");
+>>       return bus_wd;
+>>  }
+>> +
+>> +/* find the write protect gpio for a given slot; or -1 if none specified */
+>> +static u32 dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
+>> +{
+>> +     struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
+>> +     int gpio;
+>> +
+>> +     if (!np)
+>> +             return -1;
+> I think good that use the error number instead of -1. Also the below code.
 
+In this case it's not really returning an error code which is why I
+chose -1.  It's returning a gpio number or anything that is a sentinel
+value indicating that the GPIO is not valid.
 
-Thanks,
--- 
-Sundar Jayakumar Dev
+...but you're right, an error code would work.  I'll replace with
+"-EINVAL" in my next patch.
+
+>
+>> +
+>> +     gpio = of_get_named_gpio(np, "wp-gpios", 0);
+>> +
+>> +     /* Having a missing entry is valid; return silently */
+>> +     if (!gpio_is_valid(gpio))
+>> +             return -1;
+>> +
+>> +     if (devm_gpio_request(dev, gpio, "dw-mci-wp")) {
+>> +             dev_warn(dev, "gpio [%d] request failed\n", gpio);
+>> +             return -1;
+>> +     }
+>> +
+>> +     return gpio;
+> gpio is int type, but return type is u32?
+
+Good catch.  Will fix.
+
+>
+> Best Regards,
+> Jaehoon Chung
+>> +}
+>>  #else /* CONFIG_OF */
+>>  static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
+>>  {
+>> @@ -1811,6 +1840,10 @@ static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
+>>  {
+>>       return NULL;
+>>  }
+>> +static u32 dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
+>> +{
+>> +     return -1;
+>> +}
+>>  #endif /* CONFIG_OF */
+>>
+>>  static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>> @@ -1923,6 +1956,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>       else
+>>               clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+>>
+>> +     slot->wp_gpio = dw_mci_of_get_wp_gpio(host->dev, slot->id);
+>> +
+>>       mmc_add_host(mmc);
+>>
+>>  #if defined(CONFIG_DEBUG_FS)
+>>
+>
