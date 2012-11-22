@@ -1,55 +1,55 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH 0/3] Add SDHCI ACPI driver
-Date: Thu, 22 Nov 2012 22:24:33 +0100
-Message-ID: <3578053.jWYihc5IJI@vostro.rjw.lan>
-References: <1353573830-13006-1-git-send-email-adrian.hunter@intel.com> <87k3tdagim.fsf@octavius.laptop.org> <50AE3AB2.2070307@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7Bit
+From: Doug Anderson <dianders@chromium.org>
+Subject: [PATCH v2 1/2] mmc: dw_mmc: exynos: Stop claiming wp-gpio
+Date: Thu, 22 Nov 2012 14:53:49 -0800
+Message-ID: <1353624835-19137-1-git-send-email-dianders@chromium.org>
+References: <1353535387-32106-1-git-send-email-dianders@chromium.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <50AE3AB2.2070307@intel.com>
+In-Reply-To: <1353535387-32106-1-git-send-email-dianders@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, linux-mmc@vger.kernel.org, linux-acpi@vger.kernel.org, linux-kernel@vger.kernel.org
+To: linux-samsung-soc@vger.kernel.org, Thomas Abraham <thomas.abraham@linaro.org>, Kukjin Kim <kgene.kim@samsung.com>
+Cc: Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>, Will Newton <will.newton@imgtec.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thursday, November 22, 2012 04:46:10 PM Adrian Hunter wrote:
-> On 22/11/12 15:55, Chris Ball wrote:
-> > Hi,
-> > 
-> > On Thu, Nov 22 2012, Adrian Hunter wrote:
-> >> Here is SDHCI ACPI driver.  It is dependent on new ACPI Platform support
-> >> so I suggest Rafael takes the patches with Chris' Ack.
-> >>
-> >> Please note that I would prefer this to be queued for 3.8
-> > 
-> > Looks fine:
-> > 
-> > Acked-by: Chris Ball <cjb@laptop.org>
-> 
-> Thank you!
-> 
-> > 
-> > I have some dumb questions, though -- what kind of platforms ship with
-> > these devices?  Do they ever have the controller on PCI too, and what
-> > happens with sdhci-pci vs. sdhci-acpi in that case?
-> 
-> Since the arrival of ACPI5, platform devices can be configured using ACPI
-> tables.  PCI can also be used, but the firmware ensures that the same
-> device is not enumerated via both ACPI and PCI.
-> 
-> Rafael can you take these patches?
+The exynos code claimed wp-gpio with devm_gpio_request() but never did
+anything with it.  That meant that anyone using a write protect GPIO
+would effectively be write protected all the time.
 
-Well, I'd prefer pnpacpi/core.c to actually use acpi_platform_device_ids[]
-directly in addition to excluded_id_list[], so that duplicate entries don't
-have to be added to the both of them.
+A future change will move the wp-gpio support to the core dw_mmc.c
+file.  Now the exynos-specific code won't claim the GPIO but will
+just set the DW_MCI_QUIRK_NO_WRITE_PROTECT quirk if write protect
+won't be used.
 
-Also, I wonder if you really don't want to use ACPI PM and if you don't,
-then why?
+Signed-off-by: Doug Anderson <dianders@chromium.org>
 
-Rafael
+---
+Changes in v2:
+- Nothing new in this patch
 
+ drivers/mmc/host/dw_mmc-exynos.c |   12 ++++++------
+ 1 files changed, 6 insertions(+), 6 deletions(-)
 
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index 4d50da6..58cc03e 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -175,12 +175,12 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
+ 		}
+ 	}
+ 
+-	gpio = of_get_named_gpio(slot_np, "wp-gpios", 0);
+-	if (gpio_is_valid(gpio)) {
+-		if (devm_gpio_request(host->dev, gpio, "dw-mci-wp"))
+-			dev_info(host->dev, "gpio [%d] request failed\n",
+-						gpio);
+-	} else {
++	/*
++	 * If there are no write-protect GPIOs present then we assume no write
++	 * protect.  The mci_readl() in dw_mmc.c won't work since it's not
++	 * hooked up on exynos.
++	 */
++	if (!of_find_property(slot_np, "wp-gpios", NULL)) {
+ 		dev_info(host->dev, "wp gpio not available");
+ 		host->pdata->quirks |= DW_MCI_QUIRK_NO_WRITE_PROTECT;
+ 	}
 -- 
-I speak only for myself.
-Rafael J. Wysocki, Intel Open Source Technology Center.
+1.7.7.3
