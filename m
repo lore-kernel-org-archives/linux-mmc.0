@@ -1,46 +1,80 @@
-From: Mika Westerberg <mika.westerberg@linux.intel.com>
-Subject: Re: [PATCH 3/3] mmc: sdhci-acpi: add SDHCI ACPI driver
-Date: Fri, 23 Nov 2012 11:44:06 +0200
-Message-ID: <20121123094406.GS3867@intel.com>
-References: <1353573830-13006-1-git-send-email-adrian.hunter@intel.com>
- <1353573830-13006-4-git-send-email-adrian.hunter@intel.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 0/3] Add SDHCI ACPI driver
+Date: Fri, 23 Nov 2012 12:13:13 +0200
+Message-ID: <50AF4C39.4040209@intel.com>
+References: <1353573830-13006-1-git-send-email-adrian.hunter@intel.com> <87k3tdagim.fsf@octavius.laptop.org> <50AE3AB2.2070307@intel.com> <3578053.jWYihc5IJI@vostro.rjw.lan> <20121123093416.GR3867@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:30368 "EHLO mga09.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:24775 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1759092Ab2KWJkt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 23 Nov 2012 04:40:49 -0500
-Content-Disposition: inline
-In-Reply-To: <1353573830-13006-4-git-send-email-adrian.hunter@intel.com>
+	id S1161082Ab2KWKKn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 23 Nov 2012 05:10:43 -0500
+In-Reply-To: <20121123093416.GR3867@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-acpi@vger.kernel.org, linux-kernel@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: Mika Westerberg <mika.westerberg@linux.intel.com>, Chris Ball <cjb@laptop.org>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, linux-mmc@vger.kernel.org, linux-acpi@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Thu, Nov 22, 2012 at 10:43:50AM +0200, Adrian Hunter wrote:
-> +static int __devinit sdhci_acpi_probe(struct platform_device *pdev)
-> +{
-> +	struct device *dev = &pdev->dev;
-> +	acpi_handle handle = dev->acpi_handle;
+On 23/11/12 11:34, Mika Westerberg wrote:
+> On Thu, Nov 22, 2012 at 10:24:33PM +0100, Rafael J. Wysocki wrote:
+>> On Thursday, November 22, 2012 04:46:10 PM Adrian Hunter wrote:
+>>> On 22/11/12 15:55, Chris Ball wrote:
+>>>> Hi,
+>>>>
+>>>> On Thu, Nov 22 2012, Adrian Hunter wrote:
+>>>>> Here is SDHCI ACPI driver.  It is dependent on new ACPI Platform support
+>>>>> so I suggest Rafael takes the patches with Chris' Ack.
+>>>>>
+>>>>> Please note that I would prefer this to be queued for 3.8
+>>>>
+>>>> Looks fine:
+>>>>
+>>>> Acked-by: Chris Ball <cjb@laptop.org>
+>>>
+>>> Thank you!
+>>>
+>>>>
+>>>> I have some dumb questions, though -- what kind of platforms ship with
+>>>> these devices?  Do they ever have the controller on PCI too, and what
+>>>> happens with sdhci-pci vs. sdhci-acpi in that case?
+>>>
+>>> Since the arrival of ACPI5, platform devices can be configured using ACPI
+>>> tables.  PCI can also be used, but the firmware ensures that the same
+>>> device is not enumerated via both ACPI and PCI.
+>>>
+>>> Rafael can you take these patches?
+>>
+>> Well, I'd prefer pnpacpi/core.c to actually use acpi_platform_device_ids[]
+>> directly in addition to excluded_id_list[], so that duplicate entries don't
+>> have to be added to the both of them.
+> 
+> How about having pnpacpi to check if the ACPI device is already bound to a
+> physical device and skip the device creation? Then we don't need to expose
+> the acpi_platform_device_ids[] list, and this is what the ->find_device()
+> code already does so why create the device in the first place?
 
-This is not going to work anymore, you'll have to use ACPI_HANDLE(dev) for
-this (there was a new macro introduced with the struct acpi_dev_node).
+Yes, I was going to suggest that too.  AFAICS pnpacpi has no concept of
+multiple physical nodes.  Any objections?
 
-> +	struct acpi_device *device;
-> +	struct sdhci_acpi_host *c;
-> +	struct sdhci_host *host;
-> +	struct resource *iomem;
-> +	resource_size_t len;
-> +	const char *hid;
-> +	int err;
+
+> 
+> diff --git a/drivers/pnp/pnpacpi/core.c b/drivers/pnp/pnpacpi/core.c
+> index 5b17cc8..4dc2e64 100644
+> --- a/drivers/pnp/pnpacpi/core.c
+> +++ b/drivers/pnp/pnpacpi/core.c
+> @@ -243,6 +243,10 @@ static int __init pnpacpi_add_device(struct acpi_device *device)
+>  	char *pnpid;
+>  	struct acpi_hardware_id *id;
+>  
+> +	/* Skip devices that are already bound */
+> +	if (device->physical_node_count)
+> +		return 0;
 > +
-> +	if (acpi_bus_get_device(handle, &device))
-> +		return -ENODEV;
-> +
-> +	if (acpi_bus_get_status(device) || !device->status.present)
-> +		return -ENODEV;
+>  	/*
+>  	 * If a PnPacpi device is not present , the device
+>  	 * driver should not be loaded.
+> 
+> 
 
-This is a bit redundant as the platform code already checks whether the
-device is present or not and only creates the platform device in case it is
-present.
