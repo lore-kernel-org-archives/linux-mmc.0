@@ -1,110 +1,70 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 3/3] MMC: sdhci-dove: allow GPIOs to be used for card
-	detection on Dove
-Date: Fri, 23 Nov 2012 08:57:26 +0000
-Message-ID: <20121123085726.GK5764@n2100.arm.linux.org.uk>
-References: <20121122235426.GT3332@n2100.arm.linux.org.uk> <E1TbgcZ-0007Kt-35@rmk-PC.arm.linux.org.uk> <20121123083117.GA25754@S2100-06.ap.freescale.net>
+From: Mika Westerberg <mika.westerberg@linux.intel.com>
+Subject: Re: [PATCH 0/3] Add SDHCI ACPI driver
+Date: Fri, 23 Nov 2012 11:34:16 +0200
+Message-ID: <20121123093416.GR3867@intel.com>
+References: <1353573830-13006-1-git-send-email-adrian.hunter@intel.com>
+ <87k3tdagim.fsf@octavius.laptop.org>
+ <50AE3AB2.2070307@intel.com>
+ <3578053.jWYihc5IJI@vostro.rjw.lan>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:49457 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753467Ab2KWJCx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Nov 2012 04:02:53 -0500
+Return-path: <linux-acpi-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20121123083117.GA25754@S2100-06.ap.freescale.net>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <3578053.jWYihc5IJI@vostro.rjw.lan>
+Sender: linux-acpi-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Chris Ball <cjb@laptop.org>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, linux-mmc@vger.kernel.org, linux-acpi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Mike Rapoport <mike@compulab.co.il>, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On Fri, Nov 23, 2012 at 04:31:20PM +0800, Shawn Guo wrote:
-> On Thu, Nov 22, 2012 at 11:55:51PM +0000, Russell King wrote:
-> > This commit taken from Rabeeh's Cubox kernel and re-worked for DT;
-> > Sebastian Hasselbrath is believed to be the original author.
+On Thu, Nov 22, 2012 at 10:24:33PM +0100, Rafael J. Wysocki wrote:
+> On Thursday, November 22, 2012 04:46:10 PM Adrian Hunter wrote:
+> > On 22/11/12 15:55, Chris Ball wrote:
+> > > Hi,
+> > > 
+> > > On Thu, Nov 22 2012, Adrian Hunter wrote:
+> > >> Here is SDHCI ACPI driver.  It is dependent on new ACPI Platform support
+> > >> so I suggest Rafael takes the patches with Chris' Ack.
+> > >>
+> > >> Please note that I would prefer this to be queued for 3.8
+> > > 
+> > > Looks fine:
+> > > 
+> > > Acked-by: Chris Ball <cjb@laptop.org>
 > > 
-> > Some Cuboxes require a GPIO for card detection; this implements the
-> > optional GPIO support for card detection.  This GPIO is logic 0 for
-> > card inserted.
+> > Thank you!
 > > 
-> > Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
-> > ---
-> >  drivers/mmc/host/sdhci-dove.c |   73 +++++++++++++++++++++++++++++++++++++---
-> >  1 files changed, 67 insertions(+), 6 deletions(-)
+> > > 
+> > > I have some dumb questions, though -- what kind of platforms ship with
+> > > these devices?  Do they ever have the controller on PCI too, and what
+> > > happens with sdhci-pci vs. sdhci-acpi in that case?
 > > 
-> > diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
-> > index 4af64f3..e621448 100644
-> > --- a/drivers/mmc/host/sdhci-dove.c
-> > +++ b/drivers/mmc/host/sdhci-dove.c
-> > @@ -19,20 +19,30 @@
-> >   * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-> >   */
-> >  
-> > -#include <linux/err.h>
-> > -#include <linux/io.h>
-> >  #include <linux/clk.h>
-> >  #include <linux/err.h>
-> > -#include <linux/module.h>
-> > +#include <linux/gpio.h>
-> > +#include <linux/io.h>
-> >  #include <linux/mmc/host.h>
-> > +#include <linux/module.h>
-> >  #include <linux/of.h>
-> > +#include <linux/of_gpio.h>
-> >  
-> >  #include "sdhci-pltfm.h"
-> >  
-> >  struct sdhci_dove_priv {
-> >  	struct clk *clk;
-> > +	int gpio_cd;
-> >  };
-> >  
-> > +static irqreturn_t sdhci_dove_carddetect_irq(int irq, void *data)
-> > +{
-> > +	struct sdhci_host *host = data;
-> > +
-> > +	tasklet_schedule(&host->card_tasklet);
-> > +	return IRQ_HANDLED;
-> > +}
-> > +
-> >  static u16 sdhci_dove_readw(struct sdhci_host *host, int reg)
-> >  {
-> >  	u16 ret;
-> > @@ -50,16 +60,25 @@ static u16 sdhci_dove_readw(struct sdhci_host *host, int reg)
-> >  
-> >  static u32 sdhci_dove_readl(struct sdhci_host *host, int reg)
-> >  {
-> > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +	struct sdhci_dove_priv *priv = pltfm_host->priv;
-> >  	u32 ret;
-> >  
-> > +	ret = readl(host->ioaddr + reg);
-> > +
-> >  	switch (reg) {
-> >  	case SDHCI_CAPABILITIES:
-> > -		ret = readl(host->ioaddr + reg);
-> >  		/* Mask the support for 3.0V */
-> >  		ret &= ~SDHCI_CAN_VDD_300;
-> >  		break;
-> > -	default:
-> > -		ret = readl(host->ioaddr + reg);
-> > +	case SDHCI_PRESENT_STATE:
-> > +		if (gpio_is_valid(priv->gpio_cd)) {
-> > +			if (gpio_get_value(priv->gpio_cd) == 0)
-> > +				ret |= SDHCI_CARD_PRESENT;
-> > +			else
-> > +				ret &= ~SDHCI_CARD_PRESENT;
-> > +		}
-> > +		break;
+> > Since the arrival of ACPI5, platform devices can be configured using ACPI
+> > tables.  PCI can also be used, but the firmware ensures that the same
+> > device is not enumerated via both ACPI and PCI.
+> > 
+> > Rafael can you take these patches?
 > 
-> It seems that the helpers in drivers/mmc/core/slot-gpio.c can help to
-> simplify the patch a lot.  With sdhci core code being calling
-> mmc_gpio_get_cd() to query card present, the fake SDHCI_PRESENT_STATE
-> implementation above can be totally saved.
+> Well, I'd prefer pnpacpi/core.c to actually use acpi_platform_device_ids[]
+> directly in addition to excluded_id_list[], so that duplicate entries don't
+> have to be added to the both of them.
 
-Does this work with the sdhci stuff?  I notice that sdhci does some
-special additional resetting of the host when it detects that a card
-is removed; this would be lost if that were to be used because the
-tasklet in sdhci.c would be bypassed.
+How about having pnpacpi to check if the ACPI device is already bound to a
+physical device and skip the device creation? Then we don't need to expose
+the acpi_platform_device_ids[] list, and this is what the ->find_device()
+code already does so why create the device in the first place?
 
-So no, I don't think slot-gpio.c can be used here.
+diff --git a/drivers/pnp/pnpacpi/core.c b/drivers/pnp/pnpacpi/core.c
+index 5b17cc8..4dc2e64 100644
+--- a/drivers/pnp/pnpacpi/core.c
++++ b/drivers/pnp/pnpacpi/core.c
+@@ -243,6 +243,10 @@ static int __init pnpacpi_add_device(struct acpi_device *device)
+ 	char *pnpid;
+ 	struct acpi_hardware_id *id;
+ 
++	/* Skip devices that are already bound */
++	if (device->physical_node_count)
++		return 0;
++
+ 	/*
+ 	 * If a PnPacpi device is not present , the device
+ 	 * driver should not be loaded.
