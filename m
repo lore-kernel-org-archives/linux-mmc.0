@@ -1,53 +1,39 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] SDHC: support command with busy response expecting for TC
-Date: Sun, 25 Nov 2012 15:31:08 -0500
-Message-ID: <87wqx977cj.fsf@octavius.laptop.org>
-References: <1353662703-27594-1-git-send-email-r66093@freescale.com>
+Subject: Re: [PATCH 1/7] mmc: omap_hsmmc: Fix Oops in case of data errors
+Date: Sun, 25 Nov 2012 15:49:50 -0500
+Message-ID: <87sj7x76hd.fsf@octavius.laptop.org>
+References: <1353342601-15210-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:60181 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753384Ab2KYUbO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 25 Nov 2012 15:31:14 -0500
-In-Reply-To: <1353662703-27594-1-git-send-email-r66093@freescale.com>
-	(r66093@freescale.com's message of "Fri, 23 Nov 2012 17:25:03 +0800")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1353342601-15210-1-git-send-email-svenkatr@ti.com> (Venkatraman
+	S.'s message of "Mon, 19 Nov 2012 21:59:55 +0530")
+Sender: linux-omap-owner@vger.kernel.org
+To: Venkatraman S <svenkatr@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: r66093@freescale.com
-Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
 
-Hi,
+Hi Venkat,
 
-On Fri, Nov 23 2012, r66093@freescale.com wrote:
-> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+On Mon, Nov 19 2012, Venkatraman S wrote:
+> From: Balaji T K <balajitk@ti.com>
 >
-> The IP verions older than 2.3 didn't support the command with busy response
-> which expect for TC bit set. But after the VVN2.3, eSDHC IP has supported it.
+> "commit ae4bf788ee9bf7c2d51b0309117d1fcccbdd50a2
+> mmc: omap_hsmmc: consolidate error report handling of HSMMC IRQ"
+> sets both end_cmd and end_trans to 1.
 >
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> CC: Anton Vorontsov <cbouatmailru@gmail.com>
-> CC: Chris Ball <cjb@laptop.org>
-> ---
->  drivers/mmc/host/sdhci-of-esdhc.c |    3 +++
->  1 file changed, 3 insertions(+)
+> Setting end_cmd to 1 for Data Timeout/CRC leads to NULL pointer dereference of
+> host->cmd as the command complete has previously been handled.
+> Set end_cmd only in case of command Timeout/CRC.
 >
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 63d219f..cfabc43 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -177,6 +177,9 @@ static void esdhc_of_platform_init(struct sdhci_host *host)
->  	vvn = (vvn & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
->  	if (vvn == VENDOR_V_22)
->  		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
-> +
-> +	if (vvn > VENDOR_V_22)
-> +		host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
->  }
->  
->  static struct sdhci_ops sdhci_esdhc_ops = {
+> Moreover host->cmd->error should not be updated on data error case, only
+> host->data->error needs to be updated.
+>
+> Signed-off-by: Balaji T K <balajitk@ti.com>
+> Reviewed-by: Felipe Balbi <balbi@ti.com>
+> Signed-off-by: Venkatraman S <svenkatr@ti.com>
 
-Thanks, pushed to mmc-next for 3.8.
+Thanks, pushed all 7 patches to mmc-next for 3.8.
 
 - Chris.
 -- 
