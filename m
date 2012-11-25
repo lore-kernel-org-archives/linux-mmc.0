@@ -1,90 +1,82 @@
-From: Philip Rakity <prakity@nvidia.com>
-Subject: Re: [PATCH 1/2] sdhci: add quirk for lack of 1.8v support
-Date: Sun, 25 Nov 2012 21:26:02 +0100
-Message-ID: <66CF5EBE-E77D-4172-833E-8B392FBE6443@nvidia.com>
-References: <20121125180121.31FB3FACF5@dev.laptop.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 3/3] MMC: sdhci-dove: allow GPIOs to be used for card detection on Dove
+Date: Sun, 25 Nov 2012 15:29:45 -0500
+Message-ID: <871ufh8lza.fsf@octavius.laptop.org>
+References: <20121122235426.GT3332@n2100.arm.linux.org.uk>
+	<E1TbgcZ-0007Kt-35@rmk-PC.arm.linux.org.uk>
+	<20121123083117.GA25754@S2100-06.ap.freescale.net>
+	<20121123085726.GK5764@n2100.arm.linux.org.uk>
+	<20121123121422.GA26168@S2100-06.ap.freescale.net>
+	<20121123125507.GO5764@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate03.nvidia.com ([216.228.121.140]:9666 "EHLO
-	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753370Ab2KYU0J convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Nov 2012 15:26:09 -0500
-In-Reply-To: <20121125180121.31FB3FACF5@dev.laptop.org>
-Content-Language: en-US
+Received: from void.printf.net ([89.145.121.20]:48914 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753376Ab2KYU3v (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 25 Nov 2012 15:29:51 -0500
+In-Reply-To: <20121123125507.GO5764@n2100.arm.linux.org.uk> (Russell King's
+	message of "Fri, 23 Nov 2012 12:55:07 +0000")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <dsd@laptop.org>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "jrudholm@gmail.com" <jrudholm@gmail.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Shawn Guo <shawn.guo@linaro.org>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Mike Rapoport <mike@compulab.co.il>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
+Hi, adding Guennadi,
 
-On Nov 25, 2012, at 6:01 PM, Daniel Drake <dsd@laptop.org> wrote:
+On Fri, Nov 23 2012, Russell King - ARM Linux wrote:
+> On Fri, Nov 23, 2012 at 08:14:27PM +0800, Shawn Guo wrote:
+>> On Fri, Nov 23, 2012 at 08:57:26AM +0000, Russell King - ARM Linux wrote:
+>> > Does this work with the sdhci stuff?
+>> 
+>> Honestly, I'm not sure, but I guess it does, since I have seen
+>> sdhci-pxav3 driver using the helpers.  Anyway, I'm going to adopt
+>> the helpers for sdhci-esdhc-imx driver to find it out.
+>
+> The thing that worries me is this:
+>
+> static void sdhci_tasklet_card(unsigned long param)
+> {
+> ...
+>         /* Check host->mrq first in case we are runtime suspended */
+>         if (host->mrq &&
+>             !(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT)) {
+>                 pr_err("%s: Card removed during transfer!\n",
+>                         mmc_hostname(host->mmc));
+>                 pr_err("%s: Resetting controller.\n",
+>                         mmc_hostname(host->mmc));
+>
+>                 sdhci_reset(host, SDHCI_RESET_CMD);
+>                 sdhci_reset(host, SDHCI_RESET_DATA);
+>
+>                 host->mrq->cmd->error = -ENOMEDIUM;
+>                 tasklet_schedule(&host->finish_tasklet);
+>         }
+> ...
+>         mmc_detect_change(host->mmc, msecs_to_jiffies(200));
+> }
+>
+>
+> That gets called whenever a card is inserted/removed by the SDHCI code (if
+> the SDHCI card detect is wired), or in my case by the interrupt routine
+> the code in my patch adds.
+>
+> The slot-gpio.c stuff directly calls into mmc_detect_change (a) with a
+> shorter delay, and (b) completely omits the above handling and resetting.
+> My guess from the above code is that it'll work fine 90% of the time
+> (because you'll remove the card without an active request), but the above
+> code looks like it's addressing a corner case which will be omitted with
+> the "generic" slot-gpio.c solution.
+>
+> So I don't think it's a good idea to use slot-gpio.c in this case.
 
-> The OLPC XO-1.75 laptop includes a SDHCI controller which is 1.8v
-> capable, and it truthfully reports so in its capabilities. This
-> alternate voltage is used for driving new "UHS-I" SD cards at their
-> full speed.
-> 
-> However, what the controller doesn't know is that the motherboard
-> physically doesn't have a 1.8v supply available.
-> 
-> Add a quirk so that systems such as this one can override disable
-> 1.8v support, adding support for UHS-I cards (by running them at
-> 3.3v).
-> 
-> This avoids a problem where the system would first try to run the
-> card at 1.8v, fail, and then not be able to fully reset the card
-> to retry at the normal 3.3v voltage.
-> 
-> This is more appropriate than using the MISSING_CAPS quirk, which
-> is intended for cases where the SDHCI controller is actually lying
-> about its capabilities, and would force us to somehow override both
-> caps words from another source.
-> 
-> Signed-off-by: Daniel Drake <dsd@laptop.org>
-> ---
-> drivers/mmc/host/sdhci.c  | 4 ++++
-> include/linux/mmc/sdhci.h | 2 ++
-> 2 files changed, 6 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index c7851c0..7273523 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2865,6 +2865,10 @@ int sdhci_add_host(struct sdhci_host *host)
-> 		caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
-> 		       SDHCI_SUPPORT_DDR50);
-> 
-> +	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)
-> +		caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
-> +		       SDHCI_SUPPORT_DDR50);
-> +
-> 	/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
-> 	if (caps[1] & (SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
-> 		       SDHCI_SUPPORT_DDR50))
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index 1edcb4d..1a42747 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -92,6 +92,8 @@ struct sdhci_host {
-> 
-> #define SDHCI_QUIRK2_HOST_OFF_CARD_ON			(1<<0)
-> #define SDHCI_QUIRK2_HOST_NO_CMD23			(1<<1)
-> +/* The system physically doesn't support 1.8v, even if the host does */
-> +#define SDHCI_QUIRK2_NO_1_8_V				(1<<2)
-> 
-> 	int irq;		/* Device IRQ */
-> 	void __iomem *ioaddr;	/* Mapped address */
-> -- 
-> 1.7.11.7
-> 
+Guennadi, what are your thoughts about consolidating this reset logic
+between the sdhci tasklet and slot-gpio?  It would certainly be nice to
+use slot-gpio in cases like this one, so it's worth fixing.
 
-Reviewed-by:  Philip Rakity <prakity@nvidia.com>
+Thanks,
 
------------------------------------------------------------------------------------
-This email message is for the sole use of the intended recipient(s) and may contain
-confidential information.  Any unauthorized review, use, disclosure or distribution
-is prohibited.  If you are not the intended recipient, please contact the sender by
-reply email and destroy all copies of the original message.
------------------------------------------------------------------------------------
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
