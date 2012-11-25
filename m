@@ -1,39 +1,31 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 2/2] mmc: host: sdhci-s3c: Add support for pinctrl
-Date: Sun, 25 Nov 2012 15:01:56 -0500
-Message-ID: <87ehjh8n9n.fsf@octavius.laptop.org>
-References: <1353076097-22498-1-git-send-email-t.figa@samsung.com>
-	<CAJuYYwSt9pGuFz7iqWJvrmx0cVW+wgqhtJdnx0hnxdATPRGpbA@mail.gmail.com>
-	<87vcct8p2z.fsf@octavius.laptop.org> <1596167.a5zz5Y1i9B@flatron>
+Subject: Re: [PATCH 0/4] Support for optional MMC PM capabilities
+Date: Sun, 25 Nov 2012 15:06:57 -0500
+Message-ID: <87a9u58n1a.fsf@octavius.laptop.org>
+References: <1353300981-24652-1-git-send-email-a.kesavan@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1596167.a5zz5Y1i9B@flatron> (Tomasz Figa's message of "Sun, 25
-	Nov 2012 20:37:39 +0100")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Tomasz Figa <tomasz.figa@gmail.com>
-Cc: Thomas Abraham <thomas.abraham@linaro.org>, Tomasz Figa <t.figa@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org, kyungmin.park@samsung.com, m.szyprowski@samsung.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:48868 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753370Ab2KYUHA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 25 Nov 2012 15:07:00 -0500
+In-Reply-To: <1353300981-24652-1-git-send-email-a.kesavan@samsung.com>
+	(Abhilash Kesavan's message of "Mon, 19 Nov 2012 10:26:17 +0530")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Abhilash Kesavan <a.kesavan@samsung.com>
+Cc: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Sun, Nov 25 2012, Tomasz Figa wrote:
-> Hi Chris,
->
-> On Sunday 25 of November 2012 14:22:44 Chris Ball wrote:
->> Hi,
->> 
->> On Wed, Nov 21 2012, Thomas Abraham wrote:
->> > nit: there could have been one example each for gpio and pinctrl
->> > variant instead of putting both into one example node.
->> 
->> Tomasz, do you want to reply to this review comment?
->
-> Well, since Thomas already gave his Acked-by for this patch and the 
-> comment was only about a minor thing in the documentation, I considered it 
-> a thing that could be adjusted with further patch if needed.
+On Sun, Nov 18 2012, Abhilash Kesavan wrote:
+> This patchset adds optional PM properties to the core MMC bindings. It also
+> makes the appropriate changes in the sdhci platform and dw_mmc driver files.
+> Based on git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git : for-next.
+> Note: Patch 3 has only been compile tested.
 
-Okay, that's reasonable -- I'll take it as-is for now.  Thanks,
+Perfect, thanks for doing that -- pushed to mmc-next for 3.8.
 
 - Chris.
 -- 
