@@ -1,11 +1,11 @@
 From: Daniel Drake <dsd@laptop.org>
-Subject: [PATCH 2/2] mmc: add no-1-8-v device tree flag
-Date: Sun, 25 Nov 2012 13:02:54 -0500 (EST)
-Message-ID: <20121125180255.DB8ADFAD06@dev.laptop.org>
+Subject: [PATCH 1/2] sdhci: add quirk for lack of 1.8v support
+Date: Sun, 25 Nov 2012 13:01:19 -0500 (EST)
+Message-ID: <20121125180121.31FB3FACF5@dev.laptop.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from swan.laptop.org ([18.85.2.166]:55245 "EHLO swan.laptop.org"
+Received: from swan.laptop.org ([18.85.2.166]:52689 "EHLO swan.laptop.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752943Ab2KYSJV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	id S1751742Ab2KYSJV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
 	Sun, 25 Nov 2012 13:09:21 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -18,46 +18,55 @@ alternate voltage is used for driving new "UHS-I" SD cards at their
 full speed.
 
 However, what the controller doesn't know is that the motherboard
-physically doesn't have a 1.8v supply available, so attempting to
-switch to the 1.8v level will result in a situation that cannot be
-recovered from without physically replugging the SD card.
+physically doesn't have a 1.8v supply available.
 
-Add a device tree flag that can be used on systems like these,
-and hook it up to the equivalent SDHCI quirk.
+Add a quirk so that systems such as this one can override disable
+1.8v support, adding support for UHS-I cards (by running them at
+3.3v).
+
+This avoids a problem where the system would first try to run the
+card at 1.8v, fail, and then not be able to fully reset the card
+to retry at the normal 3.3v voltage.
+
+This is more appropriate than using the MISSING_CAPS quirk, which
+is intended for cases where the SDHCI controller is actually lying
+about its capabilities, and would force us to somehow override both
+caps words from another source.
 
 Signed-off-by: Daniel Drake <dsd@laptop.org>
 ---
- Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
- drivers/mmc/host/sdhci-pltfm.c                | 3 +++
- 2 files changed, 5 insertions(+)
+ drivers/mmc/host/sdhci.c  | 4 ++++
+ include/linux/mmc/sdhci.h | 2 ++
+ 2 files changed, 6 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index 8e2e0ba..3f13702 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -21,6 +21,8 @@ Optional properties:
- - cd-inverted: when present, polarity on the cd gpio line is inverted
- - wp-inverted: when present, polarity on the wp gpio line is inverted
- - max-frequency: maximum operating clock frequency
-+- no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
-+  this system, even if the controller claims it is.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c7851c0..7273523 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2865,6 +2865,10 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+ 		       SDHCI_SUPPORT_DDR50);
  
- Example:
- 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index 2716445..0a16534 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -78,6 +78,9 @@ void sdhci_get_of_property(struct platform_device *pdev)
- 		if (of_get_property(np, "broken-cd", NULL))
- 			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
- 
-+		if (of_get_property(np, "no-1-8-v", NULL))
-+			host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
++	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)
++		caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
++		       SDHCI_SUPPORT_DDR50);
 +
- 		if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
- 			host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
+ 	/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
+ 	if (caps[1] & (SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+ 		       SDHCI_SUPPORT_DDR50))
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 1edcb4d..1a42747 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -92,6 +92,8 @@ struct sdhci_host {
  
+ #define SDHCI_QUIRK2_HOST_OFF_CARD_ON			(1<<0)
+ #define SDHCI_QUIRK2_HOST_NO_CMD23			(1<<1)
++/* The system physically doesn't support 1.8v, even if the host does */
++#define SDHCI_QUIRK2_NO_1_8_V				(1<<2)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
 -- 
 1.7.11.7
 
