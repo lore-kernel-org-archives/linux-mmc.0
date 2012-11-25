@@ -1,41 +1,31 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/7] mmc: omap_hsmmc: Fix Oops in case of data errors
-Date: Sun, 25 Nov 2012 15:49:50 -0500
-Message-ID: <87sj7x76hd.fsf@octavius.laptop.org>
-References: <1353342601-15210-1-git-send-email-svenkatr@ti.com>
+From: kbuild test robot <fengguang.wu@intel.com>
+Subject: [mmc:mmc-next 45/63] of_iommu.c:(.text+0x114dbc): undefined
+ reference to `__aeabi_uldivmod'
+Date: Mon, 26 Nov 2012 07:13:48 +0800
+Message-ID: <50b2a62c.slEE/d1mNq4kUCUf%fengguang.wu@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1353342601-15210-1-git-send-email-svenkatr@ti.com> (Venkatraman
-	S.'s message of "Mon, 19 Nov 2012 21:59:55 +0530")
-Sender: linux-omap-owner@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:11076 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753625Ab2KYXOQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 25 Nov 2012 18:14:16 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Haijun Zhang <Haijun.Zhang@freescale.com>
+Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Chris Ball <cjb@laptop.org>
 
-Hi Venkat,
+tree:   git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git mmc-next
+head:   b1dc46e6cd5f314f52a9864cc7ba1b7624b54bd7
+commit: d29254e21ddddee37b3c8525817398d96d6403f3 [45/63] mmc: core: Use u64 to calculate the timeout value to avoid overflow
+config: make ARCH=arm omap2plus_defconfig
 
-On Mon, Nov 19 2012, Venkatraman S wrote:
-> From: Balaji T K <balajitk@ti.com>
->
-> "commit ae4bf788ee9bf7c2d51b0309117d1fcccbdd50a2
-> mmc: omap_hsmmc: consolidate error report handling of HSMMC IRQ"
-> sets both end_cmd and end_trans to 1.
->
-> Setting end_cmd to 1 for Data Timeout/CRC leads to NULL pointer dereference of
-> host->cmd as the command complete has previously been handled.
-> Set end_cmd only in case of command Timeout/CRC.
->
-> Moreover host->cmd->error should not be updated on data error case, only
-> host->data->error needs to be updated.
->
-> Signed-off-by: Balaji T K <balajitk@ti.com>
-> Reviewed-by: Felipe Balbi <balbi@ti.com>
-> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+All error/warnings:
 
-Thanks, pushed all 7 patches to mmc-next for 3.8.
+drivers/built-in.o: In function `mmc_omap_start_request':
+of_iommu.c:(.text+0x114dbc): undefined reference to `__aeabi_uldivmod'
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+---
+0-DAY kernel build testing backend         Open Source Technology Center
+Fengguang Wu, Yuanhan Liu                              Intel Corporation
