@@ -1,54 +1,32 @@
-From: Chris Ball <cjb@laptop.org>
+From: Viresh Kumar <viresh.kumar@linaro.org>
 Subject: Re: [PATCH 1/2] mmc: sdhci-spear: Initialize sdhci clk to 50 MHz
-Date: Mon, 26 Nov 2012 10:09:01 -0500
-Message-ID: <87obik9zaq.fsf@octavius.laptop.org>
+Date: Mon, 26 Nov 2012 20:40:07 +0530
+Message-ID: <CAKohpomnN3eLUTU2zoHP-8G_YfzKokXx8qB92_6dqTnTW5WZAg@mail.gmail.com>
 References: <fd576f198e6f3dc4031bb905247ed9c0a0b66a20.1352387305.git.viresh.kumar@linaro.org>
+	<87obik9zaq.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <fd576f198e6f3dc4031bb905247ed9c0a0b66a20.1352387305.git.viresh.kumar@linaro.org>
-	(Viresh Kumar's message of "Thu, 8 Nov 2012 20:39:09 +0530")
+In-Reply-To: <87obik9zaq.fsf@octavius.laptop.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Viresh Kumar <viresh.kumar@linaro.org>
+To: Chris Ball <cjb@laptop.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, spear-devel@list.st.com, Vipul Kumar Samar <vipulkumar.samar@st.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
-
-On Thu, Nov 08 2012, Viresh Kumar wrote:
-> From: Vipul Kumar Samar <vipulkumar.samar@st.com>
+On 26 November 2012 20:39, Chris Ball <cjb@laptop.org> wrote:
+> On Thu, Nov 08 2012, Viresh Kumar wrote:
+>> +     ret = clk_set_rate(sdhci->clk, 50000000);
+>> +     if (ret)
+>> +             dev_dbg(&pdev->dev, "Error setting desired clk, clk=%lu\n",
+>> +                             clk_get_rate(sdhci->clk));
+>> +
+>>       if (np) {
+>>               sdhci->data = sdhci_probe_config_dt(pdev);
+>>               if (IS_ERR(sdhci->data)) {
 >
-> SPEAr sdhci driver expects the clock to be set to 50 MHz for proper functioning.
-> This patch sets clk to 50 MHz in probe.
->
-> Signed-off-by: Vipul Kumar Samar <vipulkumar.samar@st.com>
-> Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
-> ---
->  drivers/mmc/host/sdhci-spear.c | 5 +++++
->  1 file changed, 5 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-> index 6be89c0..fea8bf9 100644
-> --- a/drivers/mmc/host/sdhci-spear.c
-> +++ b/drivers/mmc/host/sdhci-spear.c
-> @@ -146,6 +146,11 @@ static int __devinit sdhci_probe(struct platform_device *pdev)
->  		goto put_clk;
->  	}
->  
-> +	ret = clk_set_rate(sdhci->clk, 50000000);
-> +	if (ret)
-> +		dev_dbg(&pdev->dev, "Error setting desired clk, clk=%lu\n",
-> +				clk_get_rate(sdhci->clk));
-> +
->  	if (np) {
->  		sdhci->data = sdhci_probe_config_dt(pdev);
->  		if (IS_ERR(sdhci->data)) {
+> Can I change this to a dev_err()?  No-one's going to see a dev_dbg().
 
-Can I change this to a dev_err()?  No-one's going to see a dev_dbg().
+Yes and thanks :)
 
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+--
+viresh
