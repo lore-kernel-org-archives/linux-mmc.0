@@ -1,73 +1,107 @@
-From: Zhang Haijun-B42677 <B42677@freescale.com>
-Subject: RE: [mmc:mmc-next 45/63] of_iommu.c:(.text+0x114dbc): undefined
- reference to `__aeabi_uldivmod'
-Date: Mon, 26 Nov 2012 10:02:49 +0000
-Message-ID: <99E897753B6F7048BD8CCDB4661D02E117694E@039-SN2MPN1-022.039d.mgd.msft.net>
-References: <50b2a62c.slEE/d1mNq4kUCUf%fengguang.wu@intel.com>
- <87sj7x9r89.fsf@octavius.laptop.org>
+From: =?ISO-8859-1?Q?Per_F=F6rlin?= <per.forlin@stericsson.com>
+Subject: Re: [PATCH] mmc: mmci: Support non-power-of-two block sizes for ux500v2
+ variant
+Date: Mon, 26 Nov 2012 11:20:32 +0100
+Message-ID: <50B34270.7070403@stericsson.com>
+References: <1350050522-8852-1-git-send-email-ulf.hansson@stericsson.com> <20121121153811.GN3290@n2100.arm.linux.org.uk> <CAFEEs1kzJUgsvnzgWwU4i7o1jkE=8iTq5+NJ_t1jdiHEm7b-RQ@mail.gmail.com> <20121121165048.GO3290@n2100.arm.linux.org.uk> <CAFEEs1nb+UD+8_jsKvGKhyFqGDogN5wsmV30PnELqahTMDyRVA@mail.gmail.com> <20121122173708.GJ5764@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe004.messaging.microsoft.com ([216.32.180.14]:24308
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753959Ab2KZKC6 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 26 Nov 2012 05:02:58 -0500
-In-Reply-To: <87sj7x9r89.fsf@octavius.laptop.org>
-Content-Language: en-US
+Received: from eu1sys200aog111.obsmtp.com ([207.126.144.131]:51350 "EHLO
+	eu1sys200aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753709Ab2KZKV0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Nov 2012 05:21:26 -0500
+In-Reply-To: <20121122173708.GJ5764@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, kbuild test robot <fengguang.wu@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Huang Changming-R66093 <r66093@freescale.com>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Per Forlin <per.lkml@gmail.com>, Ulf HANSSON <ulf.hansson@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Hi Chris
-
-I see patches modified the public C file and Powerpc Host C file. But it also used by other host C file.
-So need to replace all the u64 division by macro div_u64 to avoid this error.
-Two new patches had send and reviewed by Anton.
-I think they can fix the `__aeabi_uldivmod' error.
-All the patches work fine on my branch.
-
-Regards
-Haijun.
-
-
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Chris Ball
-> Sent: Monday, November 26, 2012 7:51 AM
-> To: kbuild test robot
-> Cc: Zhang Haijun-B42677; linux-mmc@vger.kernel.org; Huang Changming-
-> R66093
-> Subject: Re: [mmc:mmc-next 45/63] of_iommu.c:(.text+0x114dbc): undefined
-> reference to `__aeabi_uldivmod'
+On 11/22/2012 06:37 PM, Russell King - ARM Linux wrote:
+> On Thu, Nov 22, 2012 at 06:28:30PM +0100, Per Forlin wrote:
+>> On Wed, Nov 21, 2012 at 5:50 PM, Russell King - ARM Linux
+>> <linux@arm.linux.org.uk> wrote:
+>>> On Wed, Nov 21, 2012 at 05:13:55PM +0100, Per Forlin wrote:
+>>>> On Wed, Nov 21, 2012 at 4:38 PM, Russell King - ARM Linux
+>>>> <linux@arm.linux.org.uk> wrote:
+>>>>> On Fri, Oct 12, 2012 at 04:02:02PM +0200, Ulf Hansson wrote:
+>>>>>>  /*
+>>>>>> + * Validate mmc prerequisites
+>>>>>> + */
+>>>>>> +static int mmci_validate_data(struct mmci_host *host,
+>>>>>> +                           struct mmc_data *data)
+>>>>>> +{
+>>>>>> +     if (!data)
+>>>>>> +             return 0;
+>>>>>> +
+>>>>>> +     if (!host->variant->non_power_of_2_blksize &&
+>>>>>> +         !is_power_of_2(data->blksz)) {
+>>>>>> +             dev_err(mmc_dev(host->mmc),
+>>>>>> +                     "unsupported block size (%d bytes)\n", data->blksz);
+>>>>>> +             return -EINVAL;
+>>>>>> +     }
+>>>>>> +
+>>>>>> +     if (data->sg->offset & 3) {
+>>>>>> +             dev_err(mmc_dev(host->mmc),
+>>>>>> +                     "unsupported alginment (0x%x)\n", data->sg->offset);
+>>>>>> +             return -EINVAL;
+>>>>>> +     }
+>>>>>
+>>>>> Why?  What's the reasoning behind this suddenly introduced restriction?
+>>>>> readsl()/writesl() copes just fine with non-aligned pointers.  It may be
+>>>>> that your DMA engine can not, but that's no business interfering with
+>>>>> non-DMA transfers, and no reason to fail such transfers.
+>>>>>
+>>>>> If your DMA engine can't do that then its your DMA engine code which
+>>>>> should refuse to prepare the transfer.
+>>>>>
+>>>>> Yes, that means problems with the way things are ordered - or it needs a
+>>>>> proper API where DMA engine can export these kinds of properties.
+>>>> The alignment constraint is related to PIO, sg_miter and that FIFO
+>>>> access must be done with 4 bytes.
+>>>
+>>> Total claptrap.  No it isn't.
+>>>
+>>> - sg_miter just deals with bytes, and number of bytes transferred; there
+>>>   is no word assumptions in that code.  Indeed many ATA disks transfer
+>>>   by half-word accesses so such a restriction would be insane.
+>>>
+>>> - the FIFO access itself needs to be 32-bit words, so readsl or writesl
+>>>   (or their io* equivalents must be used).
+>>>
+>>> - but - and this is the killer item to your argument as I said above -
+>>>   readsl and writesl _can_ take misaligned pointers and cope with them
+>>>   fine.
+>>>
+>>> The actual alignment of the buffer address is totally irrelevant here.
+>>>
+>>> What isn't irrelevant is the _number_ of bytes to be transferred, but
+>>> that's something totally different and completely unrelated from
+>>> data->sg->offset.
+>> Let's try again :)
+>>
+>> Keep in mind that the mmc -block layer is aligned so from that aspect
+>> everything is fine.
+>> SDIO may have any length or alignment but sg-len is always 1.
+>>
+>> There is just one sg-element and one continues buffer.
+>>
+>> sg-miter splits the continues buffer in chunks that may not be aligned
+>> with 4 byte size. It depends on the start address alignment of the
+>> buffer.
+>>
+>> Is it more clear now?
 > 
-> Hi,
+> Is this more clear: you may be passed a single buffer which is misaligned.
+> We cope with that just fine.  There is *no* reason to reject that transfer
+> because readsl/writesl cope just fine with it.
 > 
-> On Sun, Nov 25 2012, kbuild test robot wrote:
-> > tree:   git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git mmc-
-> next
-> > head:   b1dc46e6cd5f314f52a9864cc7ba1b7624b54bd7
-> > commit: d29254e21ddddee37b3c8525817398d96d6403f3 [45/63] mmc: core:
-> > Use u64 to calculate the timeout value to avoid overflow
-> > config: make ARCH=arm omap2plus_defconfig
-> >
-> > All error/warnings:
-> >
-> > drivers/built-in.o: In function `mmc_omap_start_request':
-> > of_iommu.c:(.text+0x114dbc): undefined reference to `__aeabi_uldivmod'
-> 
-> I've removed Haijun's three patches from mmc-next while they're reworked
-> to fix this.  Thanks!
-> 
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
+The MMCI driver doesn't support alignment smaller than 4 bytes (it may result in data corruption).
+There are two options
+1. Either one should fix the driver to support it. Currently the driver only supports miss-alignment of the last sg-miter buffer.
+2. Or be kind to inform the user that the alignment is not supported.
 
+BR
+Per
 
