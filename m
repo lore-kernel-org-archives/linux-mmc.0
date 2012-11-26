@@ -1,55 +1,52 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH] Powerpc eSDHC: Convert the cmd_timeou_ms to u64 to avoid
- overflow
-Date: Mon, 26 Nov 2012 01:12:12 -0800
-Message-ID: <20121126091212.GB11065@lizard>
+From: Zhang Haijun-B42677 <B42677@freescale.com>
+Subject: RE: [PATCH] Powerpc eSDHC: Convert the cmd_timeou_ms to u64 to
+ avoid overflow
+Date: Mon, 26 Nov 2012 09:35:41 +0000
+Message-ID: <99E897753B6F7048BD8CCDB4661D02E11768BD@039-SN2MPN1-022.039d.mgd.msft.net>
 References: <1353918959-12146-1-git-send-email-Haijun.Zhang@freescale.com>
+ <20121126091212.GB11065@lizard>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:45696 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753833Ab2KZJPb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Nov 2012 04:15:31 -0500
-Received: by mail-pb0-f46.google.com with SMTP id wy7so7870843pbc.19
-        for <linux-mmc@vger.kernel.org>; Mon, 26 Nov 2012 01:15:30 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <1353918959-12146-1-git-send-email-Haijun.Zhang@freescale.com>
+Received: from co9ehsobe005.messaging.microsoft.com ([207.46.163.28]:20559
+	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754585Ab2KZJfp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Nov 2012 04:35:45 -0500
+In-Reply-To: <20121126091212.GB11065@lizard>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haijun Zhang <Haijun.Zhang@freescale.com>
-Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Chris Ball <cjb@laptop.org>
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Huang Changming-R66093 <r66093@freescale.com>, Chris Ball <cjb@laptop.org>
 
-On Mon, Nov 26, 2012 at 04:35:58PM +0800, Haijun Zhang wrote:
-> Convert the cmd_timeou_ms to u64 to avoid overflow
-> 
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
+SGksIEFudG9uDQoNClRoaXMgcGF0Y2ggd2FzIGZvciBwdWJsaWMgQyBmaWxlLiBUaGF0IHdhcyBm
+b3IgZGlmZmVyZW50IEhvc3QgY29udHJvbGxlci4NCkkgdGhpbmsgbGV0IHRoZW0gc3RhbmRhbG9u
+ZSB3aWxsIGJlIGJldHRlci4NCg0KVGhlIHUzMiBjb252ZXJzaW9uIHdpbGwgYmUgcmVtb3ZlZC4N
+ClRoYW5rcy4gDQoNCg0KUmVnYXJkcw0KSGFpanVuLg0KDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNz
+YWdlLS0tLS0NCj4gRnJvbTogQW50b24gVm9yb250c292IFttYWlsdG86Y2JvdWF0bWFpbHJ1QGdt
+YWlsLmNvbV0NCj4gU2VudDogTW9uZGF5LCBOb3ZlbWJlciAyNiwgMjAxMiA1OjEyIFBNDQo+IFRv
+OiBaaGFuZyBIYWlqdW4tQjQyNjc3DQo+IENjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBI
+dWFuZyBDaGFuZ21pbmctUjY2MDkzOyBDaHJpcyBCYWxsDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0hd
+IFBvd2VycGMgZVNESEM6IENvbnZlcnQgdGhlIGNtZF90aW1lb3VfbXMgdG8gdTY0IHRvDQo+IGF2
+b2lkIG92ZXJmbG93DQo+IA0KPiBPbiBNb24sIE5vdiAyNiwgMjAxMiBhdCAwNDozNTo1OFBNICsw
+ODAwLCBIYWlqdW4gWmhhbmcgd3JvdGU6DQo+ID4gQ29udmVydCB0aGUgY21kX3RpbWVvdV9tcyB0
+byB1NjQgdG8gYXZvaWQgb3ZlcmZsb3cNCj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IEplcnJ5IEh1
+YW5nIDxDaGFuZy1NaW5nLkh1YW5nQGZyZWVzY2FsZS5jb20+DQo+ID4gU2lnbmVkLW9mZi1ieTog
+SGFpanVuIFpoYW5nIDxIYWlqdW4uWmhhbmdAZnJlZXNjYWxlLmNvbT4NCj4gDQo+IFJldmlld2Vk
+LWJ5OiBBbnRvbiBWb3JvbnRzb3YgPGNib3VhdG1haWxydUBnbWFpbC5jb20+DQo+IA0KPiBCdXQg
+SSB0aGluayB5b3Ugc2hvdWxkIG1lcmdlIHRoZSB0d28gcGF0Y2hlcy4uLg0KPiANCj4gVGhhbmtz
+LA0KPiANCj4gPiBDQzogQ2hyaXMgQmFsbCA8Y2piQGxhcHRvcC5vcmc+DQo+ID4gLS0tDQo+ID4g
+IGRyaXZlcnMvbW1jL2NhcmQvYmxvY2suYyB8ICAgIDMgKystDQo+ID4gIDEgZmlsZXMgY2hhbmdl
+ZCwgMiBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9ucygtKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBh
+L2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYyBiL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYyBpbmRl
+eA0KPiA+IDIxMDU2YjkuLjUxOTAzZGUgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMvY2Fy
+ZC9ibG9jay5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jDQo+ID4gQEAgLTQ2
+OSw3ICs0NjksOCBAQCBzdGF0aWMgaW50IG1tY19ibGtfaW9jdGxfY21kKHN0cnVjdCBibG9ja19k
+ZXZpY2UNCj4gKmJkZXYsDQo+ID4gIAkJCSAqICAgICBtcnEuZGF0YSA9IE5VTEw7DQo+ID4gIAkJ
+CSAqICAgICBjbWQuY21kX3RpbWVvdXQgPSBpZGF0YS0+aWMuY21kX3RpbWVvdXRfbXM7DQo+ID4g
+IAkJCSAqLw0KPiA+IC0JCQlkYXRhLnRpbWVvdXRfbnMgPSBpZGF0YS0+aWMuY21kX3RpbWVvdXRf
+bXMgKiAxMDAwMDAwOw0KPiA+ICsJCQlkYXRhLnRpbWVvdXRfbnMgPSAodTY0KWlkYXRhLT5pYy5j
+bWRfdGltZW91dF9tcyAqDQo+ID4gKwkJCQkJCTEwMDAwMDA7DQo+ID4gIAkJfQ0KPiA+DQo+ID4g
+IAkJbXJxLmRhdGEgPSAmZGF0YTsNCj4gPiAtLQ0KPiA+IDEuNy4wLjQNCg0K
 
-Reviewed-by: Anton Vorontsov <cbouatmailru@gmail.com>
-
-But I think you should merge the two patches...
-
-Thanks,
-
-> CC: Chris Ball <cjb@laptop.org>
-> ---
->  drivers/mmc/card/block.c |    3 ++-
->  1 files changed, 2 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 21056b9..51903de 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -469,7 +469,8 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
->  			 *     mrq.data = NULL;
->  			 *     cmd.cmd_timeout = idata->ic.cmd_timeout_ms;
->  			 */
-> -			data.timeout_ns = idata->ic.cmd_timeout_ms * 1000000;
-> +			data.timeout_ns = (u64)idata->ic.cmd_timeout_ms *
-> +						1000000;
->  		}
->  
->  		mrq.data = &data;
-> -- 
-> 1.7.0.4
