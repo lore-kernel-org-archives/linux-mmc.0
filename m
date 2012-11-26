@@ -1,98 +1,198 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 3/3] MMC: sdhci-dove: allow GPIOs to be used for card
- detection on Dove
-Date: Mon, 26 Nov 2012 10:43:10 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1211260955070.11501@axis700.grange>
-References: <20121122235426.GT3332@n2100.arm.linux.org.uk>
- <E1TbgcZ-0007Kt-35@rmk-PC.arm.linux.org.uk> <20121123083117.GA25754@S2100-06.ap.freescale.net>
- <20121123085726.GK5764@n2100.arm.linux.org.uk> <20121123121422.GA26168@S2100-06.ap.freescale.net>
- <20121123125507.GO5764@n2100.arm.linux.org.uk> <871ufh8lza.fsf@octavius.laptop.org>
+From: Haijun Zhang <Haijun.Zhang@freescale.com>
+Subject: [PATCH 2/2 V2] mmc:host: Use u64 to calculate the timeout value to avoid overflow
+Date: Mon, 26 Nov 2012 17:34:42 +0800
+Message-ID: <1353922482-25739-2-git-send-email-Haijun.Zhang@freescale.com>
+References: <1353922482-25739-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:55190 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753624Ab2KZJnR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Nov 2012 04:43:17 -0500
-In-Reply-To: <871ufh8lza.fsf@octavius.laptop.org>
+Received: from co1ehsobe003.messaging.microsoft.com ([216.32.180.186]:12476
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753671Ab2KZJyc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Nov 2012 04:54:32 -0500
+In-Reply-To: <1353922482-25739-1-git-send-email-Haijun.Zhang@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Shawn Guo <shawn.guo@linaro.org>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Mike Rapoport <mike@compulab.co.il>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Haijun Zhang <Haijun.Zhang@freescale.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Chris Ball <cjb@laptop.org>
 
-Hi Chris
+As data timeout_ns use u64 to avoid overflow.
+So we use macro div_u64 to perform a division.
+Below C file modified:
+ - drivers/mmc/host/atmel-mci.c
+ - drivers/mmc/host/bfin_sdh.c
+ - drivers/mmc/host/davinci_mmc.c
+ - drivers/mmc/host/mmci.c
+ - drivers/mmc/host/mvsdio.c
+ - drivers/mmc/host/mxs-mmc.c
+ - drivers/mmc/host/omap.c
+ - drivers/mmc/host/tifm_sd.c
+ - drivers/mmc/host/wbsd.c
 
-On Sun, 25 Nov 2012, Chris Ball wrote:
-
-> Hi, adding Guennadi,
-> 
-> On Fri, Nov 23 2012, Russell King - ARM Linux wrote:
-> > On Fri, Nov 23, 2012 at 08:14:27PM +0800, Shawn Guo wrote:
-> >> On Fri, Nov 23, 2012 at 08:57:26AM +0000, Russell King - ARM Linux wrote:
-> >> > Does this work with the sdhci stuff?
-> >> 
-> >> Honestly, I'm not sure, but I guess it does, since I have seen
-> >> sdhci-pxav3 driver using the helpers.  Anyway, I'm going to adopt
-> >> the helpers for sdhci-esdhc-imx driver to find it out.
-> >
-> > The thing that worries me is this:
-> >
-> > static void sdhci_tasklet_card(unsigned long param)
-> > {
-> > ...
-> >         /* Check host->mrq first in case we are runtime suspended */
-> >         if (host->mrq &&
-> >             !(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT)) {
-> >                 pr_err("%s: Card removed during transfer!\n",
-> >                         mmc_hostname(host->mmc));
-> >                 pr_err("%s: Resetting controller.\n",
-> >                         mmc_hostname(host->mmc));
-> >
-> >                 sdhci_reset(host, SDHCI_RESET_CMD);
-> >                 sdhci_reset(host, SDHCI_RESET_DATA);
-> >
-> >                 host->mrq->cmd->error = -ENOMEDIUM;
-> >                 tasklet_schedule(&host->finish_tasklet);
-> >         }
-> > ...
-> >         mmc_detect_change(host->mmc, msecs_to_jiffies(200));
-> > }
-> >
-> >
-> > That gets called whenever a card is inserted/removed by the SDHCI code (if
-> > the SDHCI card detect is wired), or in my case by the interrupt routine
-> > the code in my patch adds.
-> >
-> > The slot-gpio.c stuff directly calls into mmc_detect_change (a) with a
-> > shorter delay, and (b) completely omits the above handling and resetting.
-> > My guess from the above code is that it'll work fine 90% of the time
-> > (because you'll remove the card without an active request), but the above
-> > code looks like it's addressing a corner case which will be omitted with
-> > the "generic" slot-gpio.c solution.
-> >
-> > So I don't think it's a good idea to use slot-gpio.c in this case.
-> 
-> Guennadi, what are your thoughts about consolidating this reset logic
-> between the sdhci tasklet and slot-gpio?  It would certainly be nice to
-> use slot-gpio in cases like this one, so it's worth fixing.
-
-Sure, this can be added. As for how - I see at least two possibilities: 
-(1) put the complete above block in a new mmc host operation and just call 
-it from the GPIO card-detect ISR, (2) taking into account, that many 
-(nearly all? all?) host drivers keep a pointer to the current mrq in their 
-private data struct, we could instead add such a pointer to struct 
-mmc_host, then the check "request in progress" could also be generalised, 
-and the operation would just have to reset the host and complete the 
-request (in the sdhci case schedule the task).
-
-Note, that there's already a .hw_reset() operation, used by sdhci-pci only 
-so far, still, it seems we cannot (easily) hijack it.
-
-So, what would be the preferred way?
-
-Thanks
-Guennadi
+Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
+Reviewed-by: Anton Vorontsov <cbouatmailru@gmail.com>
+CC: Chris Ball <cjb@laptop.org>
 ---
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+changes for v2:
+	- Remove the needless type convertion.
+
+ drivers/mmc/host/atmel-mci.c   |    7 +++----
+ drivers/mmc/host/bfin_sdh.c    |    2 +-
+ drivers/mmc/host/davinci_mmc.c |    4 ++--
+ drivers/mmc/host/mmci.c        |    2 +-
+ drivers/mmc/host/mvsdio.c      |    2 +-
+ drivers/mmc/host/mxs-mmc.c     |    4 ++--
+ drivers/mmc/host/omap.c        |    2 +-
+ drivers/mmc/host/tifm_sd.c     |    4 ++--
+ drivers/mmc/host/wbsd.c        |    2 +-
+ 9 files changed, 14 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index ddf096e..ae16ed4 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -593,17 +593,16 @@ static void atmci_timeout_timer(unsigned long data)
+ 	tasklet_schedule(&host->tasklet);
+ }
+ 
+-static inline unsigned int atmci_ns_to_clocks(struct atmel_mci *host,
+-					unsigned int ns)
++static inline unsigned int atmci_ns_to_clocks(struct atmel_mci *host, u64 ns)
+ {
+ 	/*
+ 	 * It is easier here to use us instead of ns for the timeout,
+ 	 * it prevents from overflows during calculation.
+ 	 */
+-	unsigned int us = DIV_ROUND_UP(ns, 1000);
++	u64 us = DIV_ROUND_UP_ULL(ns, 1000);
+ 
+ 	/* Maximum clock frequency is host->bus_hz/2 */
+-	return us * (DIV_ROUND_UP(host->bus_hz, 2000000));
++	return us * (DIV_ROUND_UP_ULL(host->bus_hz, 2000000));
+ }
+ 
+ static void atmci_set_timeout(struct atmel_mci *host,
+diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
+index b9b463e..88e0abb 100644
+--- a/drivers/mmc/host/bfin_sdh.c
++++ b/drivers/mmc/host/bfin_sdh.c
+@@ -143,7 +143,7 @@ static int sdh_setup_data(struct sdh_host *host, struct mmc_data *data)
+ 	bfin_write_SDH_DATA_CTL(data_ctl);
+ 	/* the time of a host clock period in ns */
+ 	cycle_ns = 1000000000 / (host->sclk / (2 * (host->clk_div + 1)));
+-	timeout = data->timeout_ns / cycle_ns;
++	timeout = div_u64(data->timeout_ns, cycle_ns);
+ 	timeout += data->timeout_clks;
+ 	bfin_write_SDH_DATA_TIMER(timeout);
+ 	SSYNC();
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index 2063677..a48b475 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -568,10 +568,10 @@ mmc_davinci_prepare_data(struct mmc_davinci_host *host, struct mmc_request *req)
+ 		(data->flags & MMC_DATA_STREAM) ? "stream" : "block",
+ 		(data->flags & MMC_DATA_WRITE) ? "write" : "read",
+ 		data->blocks, data->blksz);
+-	dev_dbg(mmc_dev(host->mmc), "  DTO %d cycles + %d ns\n",
++	dev_dbg(mmc_dev(host->mmc), "  DTO %d cycles + %lld ns\n",
+ 		data->timeout_clks, data->timeout_ns);
+ 	timeout = data->timeout_clks +
+-		(data->timeout_ns / host->ns_in_one_cycle);
++		div_u64(data->timeout_ns, host->ns_in_one_cycle);
+ 	if (timeout > 0xffff)
+ 		timeout = 0xffff;
+ 
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index edc3e9b..09fe317 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -632,7 +632,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ 	host->size = data->blksz * data->blocks;
+ 	data->bytes_xfered = 0;
+ 
+-	clks = (unsigned long long)data->timeout_ns * host->cclk;
++	clks = data->timeout_ns * host->cclk;
+ 	do_div(clks, 1000000000UL);
+ 
+ 	timeout = data->timeout_clks + (unsigned int)clks;
+diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+index de4c20b..3badc4f 100644
+--- a/drivers/mmc/host/mvsdio.c
++++ b/drivers/mmc/host/mvsdio.c
+@@ -92,7 +92,7 @@ static int mvsd_setup_data(struct mvsd_host *host, struct mmc_data *data)
+ 	}
+ 
+ 	/* If timeout=0 then maximum timeout index is used. */
+-	tmout = DIV_ROUND_UP(data->timeout_ns, host->ns_per_clk);
++	tmout = DIV_ROUND_UP_ULL(data->timeout_ns, host->ns_per_clk);
+ 	tmout += data->timeout_clks;
+ 	tmout_index = fls(tmout - 1) - 12;
+ 	if (tmout_index < 0)
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index 206fe49..9f3617b 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -331,7 +331,7 @@ out:
+ 		 "%s: failed to prep dma\n", __func__);
+ }
+ 
+-static unsigned short mxs_ns_to_ssp_ticks(unsigned clock_rate, unsigned ns)
++static unsigned short mxs_ns_to_ssp_ticks(unsigned clock_rate, u64 ns)
+ {
+ 	const unsigned int ssp_timeout_mul = 4096;
+ 	/*
+@@ -339,7 +339,7 @@ static unsigned short mxs_ns_to_ssp_ticks(unsigned clock_rate, unsigned ns)
+ 	 * and might overflow
+ 	 */
+ 	const unsigned int clock_per_ms = clock_rate / 1000;
+-	const unsigned int ms = ns / 1000;
++	const unsigned int ms = div_u64(ns, 1000);
+ 	const unsigned int ticks = ms * clock_per_ms;
+ 	const unsigned int ssp_ticks = ticks / ssp_timeout_mul;
+ 
+diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+index 48ad361..daf0636 100644
+--- a/drivers/mmc/host/omap.c
++++ b/drivers/mmc/host/omap.c
+@@ -921,7 +921,7 @@ static inline void set_data_timeout(struct mmc_omap_host *host, struct mmc_reque
+ 	u16 reg;
+ 
+ 	cycle_ns = 1000000000 / host->current_slot->fclk_freq;
+-	timeout = req->data->timeout_ns / cycle_ns;
++	timeout = div_u64(req->data->timeout_ns, cycle_ns);
+ 	timeout += req->data->timeout_clks;
+ 
+ 	/* Check if we need to use timeout multiplier register */
+diff --git a/drivers/mmc/host/tifm_sd.c b/drivers/mmc/host/tifm_sd.c
+index 43d9628..4552d2b 100644
+--- a/drivers/mmc/host/tifm_sd.c
++++ b/drivers/mmc/host/tifm_sd.c
+@@ -599,8 +599,8 @@ static void tifm_sd_set_data_timeout(struct tifm_sd *host,
+ 	if (fixed_timeout)
+ 		return;
+ 
+-	data_timeout += data->timeout_ns /
+-			((1000000000UL / host->clk_freq) * host->clk_div);
++	data_timeout += div_u64(data->timeout_ns,
++			((1000000000UL / host->clk_freq) * host->clk_div));
+ 
+ 	if (data_timeout < 0xffff) {
+ 		writel(data_timeout, sock->addr + SOCK_MMCSD_DATA_TO);
+diff --git a/drivers/mmc/host/wbsd.c b/drivers/mmc/host/wbsd.c
+index 64acd9c..dc31295 100644
+--- a/drivers/mmc/host/wbsd.c
++++ b/drivers/mmc/host/wbsd.c
+@@ -558,7 +558,7 @@ static void wbsd_prepare_data(struct wbsd_host *host, struct mmc_data *data)
+ 		wbsd_write_index(host, WBSD_IDX_TAAC, 127);
+ 	else {
+ 		wbsd_write_index(host, WBSD_IDX_TAAC,
+-			data->timeout_ns / 1000000);
++			div_u64(data->timeout_ns, 1000000));
+ 	}
+ 
+ 	if (data->timeout_clks > 255)
+-- 
+1.7.0.4
+
+
