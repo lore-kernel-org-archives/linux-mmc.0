@@ -1,36 +1,54 @@
-From: Viresh Kumar <viresh.kumar@linaro.org>
+From: Chris Ball <cjb@laptop.org>
 Subject: Re: [PATCH 1/2] mmc: sdhci-spear: Initialize sdhci clk to 50 MHz
-Date: Mon, 26 Nov 2012 20:34:49 +0530
-Message-ID: <CAKohponQ-9gYQznnaxyhvgd0AMVHHt_s6wByOoTQpdhRmqBwPQ@mail.gmail.com>
+Date: Mon, 26 Nov 2012 10:09:01 -0500
+Message-ID: <87obik9zaq.fsf@octavius.laptop.org>
 References: <fd576f198e6f3dc4031bb905247ed9c0a0b66a20.1352387305.git.viresh.kumar@linaro.org>
-	<CAKohpo=m-MZDL8B7vkrF4aQP74QCgw3uEsTnsr1k2X4p9FdHcQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:37078 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754878Ab2KZPEu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Nov 2012 10:04:50 -0500
-Received: by mail-ie0-f174.google.com with SMTP id k11so6431079iea.19
-        for <linux-mmc@vger.kernel.org>; Mon, 26 Nov 2012 07:04:50 -0800 (PST)
-In-Reply-To: <CAKohpo=m-MZDL8B7vkrF4aQP74QCgw3uEsTnsr1k2X4p9FdHcQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <fd576f198e6f3dc4031bb905247ed9c0a0b66a20.1352387305.git.viresh.kumar@linaro.org>
+	(Viresh Kumar's message of "Thu, 8 Nov 2012 20:39:09 +0530")
+Sender: linux-kernel-owner@vger.kernel.org
+To: Viresh Kumar <viresh.kumar@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, spear-devel@list.st.com, Vipul Kumar Samar <vipulkumar.samar@st.com>
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, spear-devel@list.st.com, Vipul Kumar Samar <vipulkumar.samar@st.com>, Viresh Kumar <viresh.kumar@linaro.org>
 
-On 20 November 2012 12:11, Viresh Kumar <viresh.kumar@linaro.org> wrote:
-> On 8 November 2012 20:39, Viresh Kumar <viresh.kumar@linaro.org> wrote:
->> From: Vipul Kumar Samar <vipulkumar.samar@st.com>
->>
->> SPEAr sdhci driver expects the clock to be set to 50 MHz for proper functioning.
->> This patch sets clk to 50 MHz in probe.
->>
->> Signed-off-by: Vipul Kumar Samar <vipulkumar.samar@st.com>
->> Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+Hi,
+
+On Thu, Nov 08 2012, Viresh Kumar wrote:
+> From: Vipul Kumar Samar <vipulkumar.samar@st.com>
 >
-> Ping!!
+> SPEAr sdhci driver expects the clock to be set to 50 MHz for proper functioning.
+> This patch sets clk to 50 MHz in probe.
+>
+> Signed-off-by: Vipul Kumar Samar <vipulkumar.samar@st.com>
+> Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci-spear.c | 5 +++++
+>  1 file changed, 5 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
+> index 6be89c0..fea8bf9 100644
+> --- a/drivers/mmc/host/sdhci-spear.c
+> +++ b/drivers/mmc/host/sdhci-spear.c
+> @@ -146,6 +146,11 @@ static int __devinit sdhci_probe(struct platform_device *pdev)
+>  		goto put_clk;
+>  	}
+>  
+> +	ret = clk_set_rate(sdhci->clk, 50000000);
+> +	if (ret)
+> +		dev_dbg(&pdev->dev, "Error setting desired clk, clk=%lu\n",
+> +				clk_get_rate(sdhci->clk));
+> +
+>  	if (np) {
+>  		sdhci->data = sdhci_probe_config_dt(pdev);
+>  		if (IS_ERR(sdhci->data)) {
 
-Hi Chris,
+Can I change this to a dev_err()?  No-one's going to see a dev_dbg().
 
-Are you taking these for v3.8?
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
