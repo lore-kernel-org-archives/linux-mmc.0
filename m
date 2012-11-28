@@ -1,86 +1,66 @@
-From: James Hogan <james.hogan@imgtec.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: make sure of clearing HLE interrupt
-Date: Wed, 28 Nov 2012 10:45:12 +0000
-Message-ID: <50B5EB38.9030401@imgtec.com>
-References: <001c01cdcd52$e58a2260$b09e6720$%jun@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: mmci: Fixup and cleanup code for DMA handling
+Date: Wed, 28 Nov 2012 15:00:54 +0100
+Message-ID: <CAPDyKFoC=j1JUY=NAUdAH8gDGrc7MCZFvs3wCdkxWi=yLbk3LQ@mail.gmail.com>
+References: <1350056012-18625-1-git-send-email-ulf.hansson@stericsson.com>
+	<CACRpkdZqe3uB9wGM5g5LUJuZEtzeBW=Hs5RF=5_CKU0CBWJRyA@mail.gmail.com>
+	<CAPDyKFr=aN+MN+VCvbAqNa7mu+fxTTeHdcA1oCv8QWqpdT8MGQ@mail.gmail.com>
+	<CACRpkdZPbrvfk0QNB7x8YZ+DVibPJMTLsLDSf310CcBEeOTuww@mail.gmail.com>
+	<CAPDyKFqfjaDcj361eoMtp3BwQMAW5JcUcyoovFPzXdL0a3dzUg@mail.gmail.com>
+	<CAPDyKFqt-yaA9LNAMEH0bE+109bceAuO94B+W5UbMmGUsVWFKw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from multi.imgtec.com ([194.200.65.239]:56902 "EHLO multi.imgtec.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754230Ab2K1KqR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 28 Nov 2012 05:46:17 -0500
-In-Reply-To: <001c01cdcd52$e58a2260$b09e6720$%jun@samsung.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:63022 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754825Ab2K1OAz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Nov 2012 09:00:55 -0500
+Received: by mail-ie0-f174.google.com with SMTP id k11so10081415iea.19
+        for <linux-mmc@vger.kernel.org>; Wed, 28 Nov 2012 06:00:54 -0800 (PST)
+In-Reply-To: <CAPDyKFqt-yaA9LNAMEH0bE+109bceAuO94B+W5UbMmGUsVWFKw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, Per Forlin <per.forlin@stericsson.com>
 
-Hi,
+On 21 November 2012 16:22, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 16 October 2012 13:44, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 16 October 2012 10:17, Linus Walleij <linus.walleij@linaro.org> wrote:
+>>> On Tue, Oct 16, 2012 at 9:16 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>
+>>>> This code has not been tested on a "legacy" ARM PL180 but only for
+>>>> ux500 boards. Even if it should affect DMA handling we should test
+>>>> this properly. Would be great if you were able to help out, I guess
+>>>> you still have available hardware for these tests?
+>>>
+>>> I can test the Integrator/CP and Realview in IRQ/PIO mode and
+>>> the U300 in DMA mode.
+>>
+>> Great!
+>>
+>>>
+>>> I need some help to provoke errorpath in DMA mode though,
+>>> so any hints are welcome...
+>>
+>> One good option could be to stress test card insert/removal sequences,
+>> while at the same time doing read/write requests.
+>>
+>>>
+>>> Yours,
+>>> Linus Walleij
+>>
+>> Kind regards
+>> Ulf Hansson
+>
+> Just a kind reminder for Linus; did you manage to do some tests for
+> these patches?
+>
+> Kind regards
+> Ulf Hansson
 
-On 28/11/12 10:26, Seungwon Jeon wrote:
-> Even though HLE interrupt is enabled, there is no touch.
-> This patch clears HLE interrupt which is not unhandled.
+I have now tested these patches for ARM-RealView PB1176. Looks good! I
+stress tested card insert/remove at the same time you write/read to
+the card. Error handling is stable.
 
-It's not entirely clear from this description what the patch is trying
-to do. I presume from the patch you're trying to say something like:
-"Even though the HLE interrupt is enabled, it isn't handled, so handle
-the HLE interrupt by printing an error message."
-
-According to the TRM though, in the section Error Handling (HLE is also
-mentioned elsewhere):
->  Hardware locked error =E2=80=93 Set when the DWC_mobile_storage cann=
-ot load a command issued by
-> software. When software sets the start_cmd bit in the CMD register, t=
-he DWC_mobile_storage tries
-> to load the command. If the command buffer is already filled with a c=
-ommand, this error is raised.
-> The software then has to reload the command.
-
-So it sounds like the last command should be reloaded (either on
-interrupt or the interrupt status should be checked after starting a
-command). Is this done elsewhere already?
-
-Cheers
-James
-
->=20
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc.c |   11 +++++++++++
->  1 files changed, 11 insertions(+), 0 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 6785d62..b6db0ae 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1009,6 +1009,11 @@ static void dw_mci_tasklet_func(unsigned long =
-priv)
->  	state =3D host->state;
->  	data =3D host->data;
-> =20
-> +	if (host->cmd_status & SDMMC_INT_HLE) {
-> +		dev_err(host->dev, "hardware locked write error\n");
-> +		goto unlock;
-> +	}
-> +
->  	do {
->  		prev_state =3D state;
-> =20
-> @@ -1577,6 +1582,12 @@ static irqreturn_t dw_mci_interrupt(int irq, v=
-oid *dev_id)
->  		if (!pending)
->  			break;
-> =20
-> +		if (pending & SDMMC_INT_HLE) {
-> +			mci_writel(host, RINTSTS, SDMMC_INT_HLE);
-> +			host->cmd_status =3D pending;
-> +			tasklet_schedule(&host->tasklet);
-> +		}
-> +
->  		if (pending & DW_MCI_CMD_ERROR_FLAGS) {
->  			mci_writel(host, RINTSTS, DW_MCI_CMD_ERROR_FLAGS);
->  			host->cmd_status =3D pending;
->=20
-
+Kind regards
+Ulf Hansson
