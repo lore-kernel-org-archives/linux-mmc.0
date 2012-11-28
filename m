@@ -1,73 +1,178 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v2 1/2] mmc: dw_mmc: exynos: Stop claiming wp-gpio
-Date: Wed, 28 Nov 2012 18:29:04 +0900
-Message-ID: <001a01cdcd4a$cf01ad40$6d0507c0$%jun@samsung.com>
-References: <1353535387-32106-1-git-send-email-dianders@chromium.org>
- <1353624835-19137-1-git-send-email-dianders@chromium.org>
+Subject: [PATCH 1/2] mmc: dw_mmc: use devres functions in dw_mmc
+Date: Wed, 28 Nov 2012 19:26:03 +0900
+Message-ID: <001b01cdcd52$c4b85700$4e290500$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1353624835-19137-1-git-send-email-dianders@chromium.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:11802 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753868Ab2K1K0F (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Nov 2012 05:26:05 -0500
+Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0ME700FJE0ZFFKZ0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 28 Nov 2012 19:26:03 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0ME7007580ZFOCA0@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 28 Nov 2012 19:26:03 +0900 (KST)
+References: 
+In-reply-to: 
 Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Doug Anderson' <dianders@chromium.org>, linux-samsung-soc@vger.kernel.org, 'Thomas Abraham' <thomas.abraham@linaro.org>, 'Kukjin Kim' <kgene.kim@samsung.com>
-Cc: 'Olof Johansson' <olof@lixom.net>, 'Arnd Bergmann' <arnd@arndb.de>, 'Will Newton' <will.newton@imgtec.com>, 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>
 
-Yes. pin of write protection is common property.
-This change is good. I have some suggestion below.
-Could you check it?
+Use managed device resource functions for easy handling.
+This makes driver simpler in the routine of error and exit.
 
-On Friday, November 23, 2012, Doug Anderson wrote:
-> The exynos code claimed wp-gpio with devm_gpio_request() but never did
-> anything with it.  That meant that anyone using a write protect GPIO
-> would effectively be write protected all the time.
-> 
-> A future change will move the wp-gpio support to the core dw_mmc.c
-> file.  Now the exynos-specific code won't claim the GPIO but will
-> just set the DW_MCI_QUIRK_NO_WRITE_PROTECT quirk if write protect
-> won't be used.
-> 
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> 
-> ---
-> Changes in v2:
-> - Nothing new in this patch
-> 
->  drivers/mmc/host/dw_mmc-exynos.c |   12 ++++++------
->  1 files changed, 6 insertions(+), 6 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index 4d50da6..58cc03e 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -175,12 +175,12 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
->  		}
->  	}
-> 
-> -	gpio = of_get_named_gpio(slot_np, "wp-gpios", 0);
-> -	if (gpio_is_valid(gpio)) {
-> -		if (devm_gpio_request(host->dev, gpio, "dw-mci-wp"))
-> -			dev_info(host->dev, "gpio [%d] request failed\n",
-> -						gpio);
-> -	} else {
-> +	/*
-> +	 * If there are no write-protect GPIOs present then we assume no write
-> +	 * protect.  The mci_readl() in dw_mmc.c won't work since it's not
-> +	 * hooked up on exynos.
-> +	 */
-> +	if (!of_find_property(slot_np, "wp-gpios", NULL)) {
->  		dev_info(host->dev, "wp gpio not available");
->  		host->pdata->quirks |= DW_MCI_QUIRK_NO_WRITE_PROTECT;
->  	}
-All card types need this quirk in case wp-gpio property is empty?
-I think wp-pin is valid for SD card, not eMMC/SDIO.
-Of course, I know origin code did it.
-How about removing whole checking routine?
-Instead, new definition for this quirk can be added into 'dw_mci_of_quirks'(dw_mmc.c) and dts file.
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c |   43 ++++++++++++++-----------------------------
+ 1 files changed, 14 insertions(+), 29 deletions(-)
 
-Thanks,
-Seungwon Jeon
-> --
-> 1.7.7.3
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 7342029..6785d62 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1914,7 +1914,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ #endif /* CONFIG_MMC_DW_IDMAC */
+ 	}
+ 
+-	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
++	host->vmmc = devm_regulator_get(mmc_dev(mmc), "vmmc");
+ 	if (IS_ERR(host->vmmc)) {
+ 		pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
+ 		host->vmmc = NULL;
+@@ -1963,7 +1963,7 @@ static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
+ static void dw_mci_init_dma(struct dw_mci *host)
+ {
+ 	/* Alloc memory for sg translation */
+-	host->sg_cpu = dma_alloc_coherent(host->dev, PAGE_SIZE,
++	host->sg_cpu = dmam_alloc_coherent(host->dev, PAGE_SIZE,
+ 					  &host->sg_dma, GFP_KERNEL);
+ 	if (!host->sg_cpu) {
+ 		dev_err(host->dev, "%s: could not alloc DMA memory\n",
+@@ -2112,26 +2112,24 @@ int dw_mci_probe(struct dw_mci *host)
+ 		return -ENODEV;
+ 	}
+ 
+-	host->biu_clk = clk_get(host->dev, "biu");
++	host->biu_clk = devm_clk_get(host->dev, "biu");
+ 	if (IS_ERR(host->biu_clk)) {
+ 		dev_dbg(host->dev, "biu clock not available\n");
+ 	} else {
+ 		ret = clk_prepare_enable(host->biu_clk);
+ 		if (ret) {
+ 			dev_err(host->dev, "failed to enable biu clock\n");
+-			clk_put(host->biu_clk);
+ 			return ret;
+ 		}
+ 	}
+ 
+-	host->ciu_clk = clk_get(host->dev, "ciu");
++	host->ciu_clk = devm_clk_get(host->dev, "ciu");
+ 	if (IS_ERR(host->ciu_clk)) {
+ 		dev_dbg(host->dev, "ciu clock not available\n");
+ 	} else {
+ 		ret = clk_prepare_enable(host->ciu_clk);
+ 		if (ret) {
+ 			dev_err(host->dev, "failed to enable ciu clock\n");
+-			clk_put(host->ciu_clk);
+ 			goto err_clk_biu;
+ 		}
+ 	}
+@@ -2233,7 +2231,8 @@ int dw_mci_probe(struct dw_mci *host)
+ 	if (!host->card_workqueue)
+ 		goto err_dmaunmap;
+ 	INIT_WORK(&host->card_work, dw_mci_work_routine_card);
+-	ret = request_irq(host->irq, dw_mci_interrupt, host->irq_flags, "dw-mci", host);
++	ret = devm_request_irq(host->dev, host->irq, dw_mci_interrupt,
++			       host->irq_flags, "dw-mci", host);
+ 	if (ret)
+ 		goto err_workqueue;
+ 
+@@ -2271,7 +2270,7 @@ int dw_mci_probe(struct dw_mci *host)
+ 	} else {
+ 		dev_dbg(host->dev, "attempted to initialize %d slots, "
+ 					"but failed on all\n", host->num_slots);
+-		goto err_init_slot;
++		goto err_workqueue;
+ 	}
+ 
+ 	/*
+@@ -2291,33 +2290,24 @@ int dw_mci_probe(struct dw_mci *host)
+ 
+ 	return 0;
+ 
+-err_init_slot:
+-	free_irq(host->irq, host);
+-
+ err_workqueue:
+ 	destroy_workqueue(host->card_workqueue);
+ 
+ err_dmaunmap:
+ 	if (host->use_dma && host->dma_ops->exit)
+ 		host->dma_ops->exit(host);
+-	dma_free_coherent(host->dev, PAGE_SIZE,
+-			  host->sg_cpu, host->sg_dma);
+ 
+-	if (host->vmmc) {
++	if (host->vmmc)
+ 		regulator_disable(host->vmmc);
+-		regulator_put(host->vmmc);
+-	}
+ 
+ err_clk_ciu:
+-	if (!IS_ERR(host->ciu_clk)) {
++	if (!IS_ERR(host->ciu_clk))
+ 		clk_disable_unprepare(host->ciu_clk);
+-		clk_put(host->ciu_clk);
+-	}
++
+ err_clk_biu:
+-	if (!IS_ERR(host->biu_clk)) {
++	if (!IS_ERR(host->biu_clk))
+ 		clk_disable_unprepare(host->biu_clk);
+-		clk_put(host->biu_clk);
+-	}
++
+ 	return ret;
+ }
+ EXPORT_SYMBOL(dw_mci_probe);
+@@ -2339,24 +2329,19 @@ void dw_mci_remove(struct dw_mci *host)
+ 	mci_writel(host, CLKENA, 0);
+ 	mci_writel(host, CLKSRC, 0);
+ 
+-	free_irq(host->irq, host);
+ 	destroy_workqueue(host->card_workqueue);
+-	dma_free_coherent(host->dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
+ 
+ 	if (host->use_dma && host->dma_ops->exit)
+ 		host->dma_ops->exit(host);
+ 
+-	if (host->vmmc) {
++	if (host->vmmc)
+ 		regulator_disable(host->vmmc);
+-		regulator_put(host->vmmc);
+-	}
+ 
+ 	if (!IS_ERR(host->ciu_clk))
+ 		clk_disable_unprepare(host->ciu_clk);
++
+ 	if (!IS_ERR(host->biu_clk))
+ 		clk_disable_unprepare(host->biu_clk);
+-	clk_put(host->ciu_clk);
+-	clk_put(host->biu_clk);
+ }
+ EXPORT_SYMBOL(dw_mci_remove);
+ 
+-- 
+1.7.0.4
+
+
