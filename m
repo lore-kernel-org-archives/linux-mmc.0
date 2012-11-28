@@ -1,7 +1,7 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH] mmc: sh_mmcif: remove unneeded clock connection ID
-Date: Wed, 28 Nov 2012 10:24:27 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1211281006340.1710@axis700.grange>
+Subject: [PATCH] mmc: sh_mobile_sdhi: fix clock frequency printing
+Date: Wed, 28 Nov 2012 10:24:13 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1211281023310.1710@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sh-owner@vger.kernel.org>
@@ -10,41 +10,28 @@ To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
 
-MMCIF only uses one clock, all ARM and SuperH platforms register MMCIF
-clock lookup entries with no connection ID, hence it can be dropped in
-the driver too.
+During its probing the SDHI driver prints out the clock frequency, but
+does it wrongly, always reporting 0Hz. Use the MMC host frequency value
+to fix this issue.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mmcif.c |    6 ++----
- 1 files changed, 2 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index d25bc97..358295e 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1310,7 +1310,6 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 	struct sh_mmcif_plat_data *pd = pdev->dev.platform_data;
- 	struct resource *res;
- 	void __iomem *reg;
--	char clk_name[8];
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 22ac8e7..d6ff853 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -248,7 +248,7 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	dev_info(&pdev->dev, "%s base at 0x%08lx clock rate %u MHz\n",
+ 		 mmc_hostname(host->mmc), (unsigned long)
+ 		 (platform_get_resource(pdev, IORESOURCE_MEM, 0)->start),
+-		 mmc_data->hclk / 1000000);
++		 host->mmc->f_max / 1000000);
  
- 	irq[0] = platform_get_irq(pdev, 0);
- 	irq[1] = platform_get_irq(pdev, 1);
-@@ -1360,11 +1359,10 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 	pm_runtime_enable(&pdev->dev);
- 	host->power = false;
+ 	return ret;
  
--	snprintf(clk_name, sizeof(clk_name), "mmc%d", pdev->id);
--	host->hclk = clk_get(&pdev->dev, clk_name);
-+	host->hclk = clk_get(&pdev->dev, NULL);
- 	if (IS_ERR(host->hclk)) {
- 		ret = PTR_ERR(host->hclk);
--		dev_err(&pdev->dev, "cannot get clock \"%s\": %d\n", clk_name, ret);
-+		dev_err(&pdev->dev, "cannot get clock: %d\n", ret);
- 		goto eclkget;
- 	}
- 	ret = sh_mmcif_clk_update(host);
 -- 
 1.7.2.5
 
