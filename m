@@ -1,136 +1,114 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v2 1/2] mmc: dw_mmc: exynos: Stop claiming wp-gpio
-Date: Thu, 29 Nov 2012 16:46:24 +0900
-Message-ID: <001301cdce05$a1ab0330$e5010990$%jun@samsung.com>
-References: <1353535387-32106-1-git-send-email-dianders@chromium.org>
- <1353624835-19137-1-git-send-email-dianders@chromium.org>
- <001a01cdcd4a$cf01ad40$6d0507c0$%jun@samsung.com>
- <CAD=FV=Xdb5W_WrDPgxaTzMOYNP7DpD6Gztq9k2B85z1boUV+3w@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: mmci: Support non-power-of-two block sizes for
+ ux500v2 variant
+Date: Thu, 29 Nov 2012 12:38:27 +0100
+Message-ID: <CAPDyKFoq2f2tZqoKAjMjhA3yJFinXM25rJPCyiGaqHw=fEUoMg@mail.gmail.com>
+References: <1350050522-8852-1-git-send-email-ulf.hansson@stericsson.com>
+	<20121121153811.GN3290@n2100.arm.linux.org.uk>
+	<CAFEEs1kzJUgsvnzgWwU4i7o1jkE=8iTq5+NJ_t1jdiHEm7b-RQ@mail.gmail.com>
+	<20121121165048.GO3290@n2100.arm.linux.org.uk>
+	<CAFEEs1nb+UD+8_jsKvGKhyFqGDogN5wsmV30PnELqahTMDyRVA@mail.gmail.com>
+	<20121122173708.GJ5764@n2100.arm.linux.org.uk>
+	<50B34270.7070403@stericsson.com>
+	<20121126102712.GC19440@n2100.arm.linux.org.uk>
+	<50B349D3.2050806@stericsson.com>
+	<CAFEEs1nZboGyAfpYQ2hUvp366FiS0=8u5zL6Vr1RfXac_Ls_dw@mail.gmail.com>
+	<20121128171221.GF19440@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:31655 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751100Ab2K2Hqh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Nov 2012 02:46:37 -0500
-In-reply-to: <CAD=FV=Xdb5W_WrDPgxaTzMOYNP7DpD6Gztq9k2B85z1boUV+3w@mail.gmail.com>
-Content-language: ko
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:61863 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752645Ab2K2Li1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Nov 2012 06:38:27 -0500
+Received: by mail-ie0-f174.google.com with SMTP id k11so11850515iea.19
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Nov 2012 03:38:27 -0800 (PST)
+In-Reply-To: <20121128171221.GF19440@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Doug Anderson' <dianders@chromium.org>
-Cc: linux-samsung-soc@vger.kernel.org, 'Thomas Abraham' <thomas.abraham@linaro.org>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'Olof Johansson' <olof@lixom.net>, 'Arnd Bergmann' <arnd@arndb.de>, 'Will Newton' <will.newton@imgtec.com>, 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Per Forlin <per.lkml@gmail.com>, Ulf HANSSON <ulf.hansson@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Linus Walleij <linus.walleij@linaro.org>
 
-Hi Doug,
+On 28 November 2012 18:12, Russell King - ARM Linux
+<linux@arm.linux.org.uk> wrote:
+> On Wed, Nov 28, 2012 at 05:55:13PM +0100, Per Forlin wrote:
+>> I have tried to work out an if-statement to check this properly. Here
+>> is my conclusion,
+>> This only works if sg len is 1 (in the SDIO case)
+>>
+>> if (WRITE)
+>>   align = sg->offset & 3
+>> else if (READ)
+>>   align = 0
+>>
+>> if (sg->offset & 3 && (PAGE_SIZE - (sg->offset + align) < host->size))
+>>    error; /* cannot be handled by mmci driver */
+>
+> This looks wrong.  For starters, why in the write case do you _add_ the
+> byte offset in the word to sg->offset ?  So, if we're offset by one byte,
+> it becomes two bytes.  Makes no sense.
+>
+> Secondly, (PAGE_SIZE - whatever) < host->size will be mostly always true.
+> What that means is the check is effectively just "sg->offset & 3".
+>
+> Ah, maybe that's what you're trying to do - obfuscate the code in the hope
+> that I won't analyse it so you can get your check past me and then remove
+> all the obfuscation later... but maybe I'm just paranoid. :)
+>
+>> Is this if-statement align with your view of the alignment issue ?
+>
+> I've no idea why you're making it soo complicated.
+>
+> Let's review.  It copes fine with aligned buffers.  It copes fine with
+> misaligned buffers that don't cross a page boundary.  It also copes
+> fine with transfers that end with a non-word sized number of bytes
+> (which we don't need a check for).
+>
+> So:
+>
+>         /* We can't cope with a misaligned transfer which crosses a page */
+>         if (sg->offset & 3 && (sg->offset + sg->len > PAGE_SIZE ||
+>                                data->sg_len > 1))
+>                 bad;
 
-On Thursday, November 29, 2012, Doug Anderson wrote:
-> Seungwon,
-> 
-> Thanks for the review.  See below for comments.  If you'd like me to
-> respin then please let me know.  Otherwise I look forward to your ack.
-> 
-> On Wed, Nov 28, 2012 at 1:29 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> > Yes. pin of write protection is common property.
-> > This change is good. I have some suggestion below.
-> > Could you check it?
-> >
-> > On Friday, November 23, 2012, Doug Anderson wrote:
-> >> The exynos code claimed wp-gpio with devm_gpio_request() but never did
-> >> anything with it.  That meant that anyone using a write protect GPIO
-> >> would effectively be write protected all the time.
-> >>
-> >> A future change will move the wp-gpio support to the core dw_mmc.c
-> >> file.  Now the exynos-specific code won't claim the GPIO but will
-> >> just set the DW_MCI_QUIRK_NO_WRITE_PROTECT quirk if write protect
-> >> won't be used.
-> >>
-> >> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> >>
-> >> ---
-> >> Changes in v2:
-> >> - Nothing new in this patch
-> >>
-> >>  drivers/mmc/host/dw_mmc-exynos.c |   12 ++++++------
-> >>  1 files changed, 6 insertions(+), 6 deletions(-)
-> >>
-> >> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> >> index 4d50da6..58cc03e 100644
-> >> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> >> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> >> @@ -175,12 +175,12 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
-> >>               }
-> >>       }
-> >>
-> >> -     gpio = of_get_named_gpio(slot_np, "wp-gpios", 0);
-> >> -     if (gpio_is_valid(gpio)) {
-> >> -             if (devm_gpio_request(host->dev, gpio, "dw-mci-wp"))
-> >> -                     dev_info(host->dev, "gpio [%d] request failed\n",
-> >> -                                             gpio);
-> >> -     } else {
-> >> +     /*
-> >> +      * If there are no write-protect GPIOs present then we assume no write
-> >> +      * protect.  The mci_readl() in dw_mmc.c won't work since it's not
-> >> +      * hooked up on exynos.
-> >> +      */
-> >> +     if (!of_find_property(slot_np, "wp-gpios", NULL)) {
-> >>               dev_info(host->dev, "wp gpio not available");
-> >>               host->pdata->quirks |= DW_MCI_QUIRK_NO_WRITE_PROTECT;
-> >>       }
-> > All card types need this quirk in case wp-gpio property is empty?
-> > I think wp-pin is valid for SD card, not eMMC/SDIO.
-> 
-> Right.  It is only checked right now by the SD code (mmc/core/sd.c).
-> It doesn't particularly hurt to set it the quirk in other cases though
-> and it seems nice not to add special cases.  I could imagine someone
-> extending the MMC code at some point to support write protect (via
-> GPIO) for eMMC, so there's even a slight justification for avoiding
-> the special case.
-> 
-> 
-> > Of course, I know origin code did it.
-> > How about removing whole checking routine?
-> > Instead, new definition for this quirk can be added into 'dw_mci_of_quirks'(dw_mmc.c) and dts file.
-> 
-> On _exynos_ all SD cards need this quirk if there is no wp-gpio
-> property.  However this is not generally true for all users of dw_mmc.
->  The DesignWare IP Block actually has a write protect input that can
-> be read with "mci_readl(slot->host, WRTPRT)" but on exynos the
-> DesignWare write protect line isn't exposed on any physical pins.
-> That means that the only possible way to do write protect on exynos is
-> using a GPIO.
-> 
-> The above means that on exynos if the GPIO isn't defined we will
-> assume no write protect.  On other platforms if the GPIO isn't defined
-> we'll assume that the "mci_readl" will work and we'll use that.
-> 
-> If people would prefer it I can code up an alternate solution that
-> doesn't touch any exynos code but that would introduce a new device
-> tree binding.  We could accomplish what's needed for exynos using a
-> property like "broken-internal-wp".
-> 
-> Please let me know if you'd like me to submit a new patch with this
-> solution or if you like the existing solution.
-> 
-Write protect is additional interface related with SD socket. 
-WP switch appears in SD standard size card. 
-In case EMMC/SDIO spec, there is no mentions about this WP pin.
-As you mentioned above, that's why 'ger_ro' is called only in sd path(mmc/core/sd.c).
-So, I meant that we don't need to consider WP pin status about non-SD type.
+This is ok for read but not for write. If your data also resides in
+any of the last 3 bytes of the PAGE, you might get page faults since
+at the final writesl you will access data outside the PAGE. That is
+what pseudo code was trying to accomplish as well.
 
-Such as exynos5250, there is no exposed interface from host controller for write protection pin.
-In that case, if general gpio pin is connected like your board environment, we can define wp-gpio.
-Otherwise, 'broken-internal-wp' property will be good solution.
+You might want to solve this similarly as we did for pio_read with a
+local cache buffer in pio_write. That should not be that hard to fix.
+Do you think this is what we want?
 
-Please feel free to modify.
-If you will do, I'll be happy.
+>
+> See what I've done there?  I've taken the English and converted it directly
+> to code.  And the comment also matches the code.
+>
+> And this way we continue to allow buffers that the string-IO operations
+> can cope with just fine, but avoid the issue of a word crossing a page
+> boundary.
 
-Thanks,
-Seungwon Jeon
-> >> --
-> >> 1.7.7.3
-> >
+Some overall ideas we might want to consider, maybe as a the second step.
+
+>From mmci perspective it is good that we can cope with any constraints
+at all from alignment perspective. Although, that will require a quite
+extensive hacks in both pio_read and pio_write. By looking into how
+other host drives has solved this, for example "dw_mci_push*"
+functions gives you an idea. In the end this will mean complicated
+code which will be affecting "hot path" and maybe performance. Do we
+think this is ok? Is it worth a try?
+
+Per and myself was kind of going in the opposite direction, thus keep
+code simple and make sure it is optimized. On the other hand it means
+putting constraints on buffer alignment. Right now there is no SDIO
+API to tell SDIO clients about alignments constraints. Additionally
+drivers is normally interested in using buffers that can be handled in
+an optimized manner.
+
+Kind regards
+Ulf Hansson
+
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
