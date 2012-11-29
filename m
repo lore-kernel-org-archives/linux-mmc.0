@@ -1,176 +1,83 @@
 From: Jae hoon Chung <jh80.chung@gmail.com>
-Subject: Re: [PATCH v3 3/4] mmc: dw-mmc: check whether card is busy or not,
- before disabling clock
-Date: Fri, 30 Nov 2012 00:02:37 +0900
-Message-ID: <CAELcNGQenH5vXuSiO5=WPDAi=n7DZAxntn0sB8DCpsJMUAeE=Q@mail.gmail.com>
-References: <509B6ED4.703@samsung.com>
-	<001601cdcc75$82685d10$87391730$%jun@samsung.com>
-	<50B554FF.2050905@samsung.com>
-	<001501cdcd2d$d124ba80$736e2f80$%jun@samsung.com>
+Subject: Re: [PATCH v3 2/4] mmc: dw-mmc: remove the duplicated code
+Date: Fri, 30 Nov 2012 00:03:55 +0900
+Message-ID: <CAELcNGRR3NuOtBrm+_nQ3K99hZfhKKE+82NrwbBShsOE8_TksA@mail.gmail.com>
+References: <509B6ED3.2000003@samsung.com>
+	<001501cdcc75$5cb15d60$16141820$%jun@samsung.com>
+	<50B48AC4.2050606@imgtec.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:48976 "EHLO
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:39644 "EHLO
 	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751213Ab2K2PCi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Nov 2012 10:02:38 -0500
-Received: by mail-ob0-f174.google.com with SMTP id wc20so13098698obb.19
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Nov 2012 07:02:38 -0800 (PST)
-In-Reply-To: <001501cdcd2d$d124ba80$736e2f80$%jun@samsung.com>
+	with ESMTP id S1751336Ab2K2PD4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Nov 2012 10:03:56 -0500
+Received: by mail-ob0-f174.google.com with SMTP id wc20so13100662obb.19
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Nov 2012 07:03:55 -0800 (PST)
+In-Reply-To: <50B48AC4.2050606@imgtec.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <James.Hogan@imgtec.com>
+To: James Hogan <james.hogan@imgtec.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>
 
-2012/11/28 Seungwon Jeon <tgih.jun@samsung.com>:
-> On Wednesday, November 28, 2012, Jaehoon Chung wrote:
->> On 11/27/2012 05:02 PM, Seungwon Jeon wrote:
->> > On Thursday, November 08, 2012, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> >> Before disabling clock, need to check whether card is busy on not.
->> >>
->> >> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> >> ---
->> >>  drivers/mmc/host/dw_mmc.c |   53 +++++++++++++++++++++++++++-----------------
->> >>  drivers/mmc/host/dw_mmc.h |    1 +
->> >>  2 files changed, 33 insertions(+), 21 deletions(-)
->> >>
->> >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> >> index 0a80b5c..9704b09 100644
->> >> --- a/drivers/mmc/host/dw_mmc.c
->> >> +++ b/drivers/mmc/host/dw_mmc.c
->> >> @@ -228,6 +228,27 @@ static void dw_mci_set_timeout(struct dw_mci *host)
->> >>    mci_writel(host, TMOUT, 0xffffffff);
->> >>  }
->> >>
->> >> +static bool mci_wait_reset(struct device *dev, struct dw_mci *host)
->> >> +{
->> >> +  unsigned long timeout = jiffies + msecs_to_jiffies(500);
->> >> +  unsigned int ctrl;
->> >> +
->> >> +  mci_writel(host, CTRL, (SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET |
->> >> +                          SDMMC_CTRL_DMA_RESET));
->> >> +
->> >> +  /* wait till resets clear */
->> >> +  do {
->> >> +          ctrl = mci_readl(host, CTRL);
->> >> +          if (!(ctrl & (SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET |
->> >> +                        SDMMC_CTRL_DMA_RESET)))
->> >> +                  return true;
->> >> +  } while (time_before(jiffies, timeout));
->> >> +
->> >> +  dev_err(dev, "Timeout resetting block (ctrl %#x)\n", ctrl);
->> >> +
->> >> +  return false;
->> >> +}
->> >> +
->> >>  static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
->> >>  {
->> >>    struct mmc_data *data;
->> >> @@ -622,6 +643,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
->> >>    struct dw_mci *host = slot->host;
->> >>    u32 div;
->> >>    u32 clk_en_a;
->> >> +  int timeout = 1000;
->> >>
->> >>    if (slot->clock != host->current_speed) {
->> >>            div = host->bus_hz / slot->clock;
->> >> @@ -638,6 +660,16 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
->> >>                     "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ"
->> >>                     " div = %d)\n", slot->id, host->bus_hz, slot->clock,
->> >>                     div ? ((host->bus_hz / div) >> 1) : host->bus_hz, div);
->> >> +          do {
->> >> +                  if (!(mci_readl(host, STATUS) & SDMMC_DATA_BUSY))
->> >> +                          break;
->> >> +                  if (timeout-- < 0) {
->> >> +                          dev_err(host->dev, "Can't disable clock"
->> >> +                                  "because Card is busy!!\n");
->> >> +                          return;
->> >> +                  }
->> >> +                  mci_wait_reset(host->dev, host);
->> > Should 'mci_wait_reset' be called every loop?
->> > Only if card status is still busy at the end of while, one time is enough.
->> >
->> >> +          } while (1);
->> > How about counting jiffies for while-loop with usleep_range?
->> > do {
->> > ...
->> >     usleep_range(10, 20)
->> > } while (time_before())
->> Is there reason that use "usleep_range()"?
-> If we should wait busy status with long time,
-> it would be better sleep-wait rather than just busy-wait.
-Thank you for review.
-well..it will use the sleep-wait. why use the 10~20? just example?
-Then i will check this and resend the patch.
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Best Regards,
-Jaehoon Chung
->
-> Thanks,
-> Seungwon Jeon
->> >
->> > Thanks,
->> > Seungwon Jeon
->> >>
->> >>            /* disable clock */
->> >>            mci_writel(host, CLKENA, 0);
->> >> @@ -1995,27 +2027,6 @@ no_dma:
->> >>    return;
->> >>  }
->> >>
->> >> -static bool mci_wait_reset(struct device *dev, struct dw_mci *host)
->> >> -{
->> >> -  unsigned long timeout = jiffies + msecs_to_jiffies(500);
->> >> -  unsigned int ctrl;
->> >> -
->> >> -  mci_writel(host, CTRL, (SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET |
->> >> -                          SDMMC_CTRL_DMA_RESET));
->> >> -
->> >> -  /* wait till resets clear */
->> >> -  do {
->> >> -          ctrl = mci_readl(host, CTRL);
->> >> -          if (!(ctrl & (SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET |
->> >> -                        SDMMC_CTRL_DMA_RESET)))
->> >> -                  return true;
->> >> -  } while (time_before(jiffies, timeout));
->> >> -
->> >> -  dev_err(dev, "Timeout resetting block (ctrl %#x)\n", ctrl);
->> >> -
->> >> -  return false;
->> >> -}
->> >> -
->> >>  #ifdef CONFIG_OF
->> >>  static struct dw_mci_of_quirks {
->> >>    char *quirk;
->> >> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
->> >> index 53b8fd9..4f27357 100644
->> >> --- a/drivers/mmc/host/dw_mmc.h
->> >> +++ b/drivers/mmc/host/dw_mmc.h
->> >> @@ -127,6 +127,7 @@
->> >>  #define SDMMC_CMD_INDX(n)         ((n) & 0x1F)
->> >>  /* Status register defines */
->> >>  #define SDMMC_GET_FCNT(x)         (((x)>>17) & 0x1FFF)
->> >> +#define SDMMC_DATA_BUSY                   BIT(9)
->> >>  /* Internal DMAC interrupt defines */
->> >>  #define SDMMC_IDMAC_INT_AI                BIT(9)
->> >>  #define SDMMC_IDMAC_INT_NI                BIT(8)
->> >> --
->> >> 1.7.4.1
->> >> --
->> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> >> the body of a message to majordomo@vger.kernel.org
->> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> > the body of a message to majordomo@vger.kernel.org
->> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >
+2012/11/27 James Hogan <james.hogan@imgtec.com>:
+> On 27/11/12 08:01, Seungwon Jeon wrote:
+>> This is minor change.
 >>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+>>
+>> Thanks,
+>> Seungwon Jeon
+>
+> Looks good to me too.
+> Acked-by: James Hogan <james.hogan@imgtec.com>
+>
+>>
+>> On Thursday, November 08, 2012, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>>> ctype is used 1-bit buswidth mode by default.
+>>>
+>>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+>>> ---
+>>>  drivers/mmc/host/dw_mmc.c |    9 +++------
+>>>  1 files changed, 3 insertions(+), 6 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index a1369aa..0a80b5c 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -773,19 +773,16 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>      struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+>>>      u32 regs;
+>>>
+>>> -    /* set default 1 bit mode */
+>>> -    slot->ctype = SDMMC_CTYPE_1BIT;
+>>> -
+>>>      switch (ios->bus_width) {
+>>> -    case MMC_BUS_WIDTH_1:
+>>> -            slot->ctype = SDMMC_CTYPE_1BIT;
+>>> -            break;
+>>>      case MMC_BUS_WIDTH_4:
+>>>              slot->ctype = SDMMC_CTYPE_4BIT;
+>>>              break;
+>>>      case MMC_BUS_WIDTH_8:
+>>>              slot->ctype = SDMMC_CTYPE_8BIT;
+>>>              break;
+>>> +    default:
+>>> +            /* set default 1 bit mode */
+>>> +            slot->ctype = SDMMC_CTYPE_1BIT;
+>>>      }
+>>>
+>>>      regs = mci_readl(slot->host, UHS_REG);
+>>> --
+>>> 1.7.4.1
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 >
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
