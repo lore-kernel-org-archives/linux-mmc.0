@@ -1,131 +1,178 @@
 From: Jae hoon Chung <jh80.chung@gmail.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: make sure of clearing HLE interrupt
-Date: Thu, 29 Nov 2012 23:59:08 +0900
-Message-ID: <CAELcNGRK7tU_+NgAkSGsyn-SNTFkDNYRFMeypdkvMiwsafYV5w@mail.gmail.com>
-References: <001c01cdcd52$e58a2260$b09e6720$%jun@samsung.com>
-	<50B5EB38.9030401@imgtec.com>
-	<001201cdce04$187dc8a0$497959e0$%jun@samsung.com>
+Subject: Re: [PATCH v3 3/4] mmc: dw-mmc: check whether card is busy or not,
+ before disabling clock
+Date: Fri, 30 Nov 2012 00:02:37 +0900
+Message-ID: <CAELcNGQenH5vXuSiO5=WPDAi=n7DZAxntn0sB8DCpsJMUAeE=Q@mail.gmail.com>
+References: <509B6ED4.703@samsung.com>
+	<001601cdcc75$82685d10$87391730$%jun@samsung.com>
+	<50B554FF.2050905@samsung.com>
+	<001501cdcd2d$d124ba80$736e2f80$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:57560 "EHLO
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:48976 "EHLO
 	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755146Ab2K2O7J convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Nov 2012 09:59:09 -0500
-Received: by mail-ob0-f174.google.com with SMTP id wc20so13093941obb.19
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Nov 2012 06:59:09 -0800 (PST)
-In-Reply-To: <001201cdce04$187dc8a0$497959e0$%jun@samsung.com>
+	with ESMTP id S1751213Ab2K2PCi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Nov 2012 10:02:38 -0500
+Received: by mail-ob0-f174.google.com with SMTP id wc20so13098698obb.19
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Nov 2012 07:02:38 -0800 (PST)
+In-Reply-To: <001501cdcd2d$d124ba80$736e2f80$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: James Hogan <james.hogan@imgtec.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <James.Hogan@imgtec.com>
 
-2012/11/29 Seungwon Jeon <tgih.jun@samsung.com>:
-> Hi James,
->
-> On Wednesday, November 28, 2012, James Hogan wrote:
->> Hi,
->>
->> On 28/11/12 10:26, Seungwon Jeon wrote:
->> > Even though HLE interrupt is enabled, there is no touch.
->> > This patch clears HLE interrupt which is not unhandled.
->>
->> It's not entirely clear from this description what the patch is tryi=
-ng
->> to do. I presume from the patch you're trying to say something like:
->> "Even though the HLE interrupt is enabled, it isn't handled, so hand=
-le
->> the HLE interrupt by printing an error message."
-> Currently, there is no code to clean the HLE interrupt, when it happe=
-ns.
-> So, interrupt will signaled permanently and then system is affected b=
-adly.
-> The purpose of this patch to prevent this. Printing an message is jus=
-t to inform error.
->
->>
->> According to the TRM though, in the section Error Handling (HLE is a=
-lso
->> mentioned elsewhere):
->> >  Hardware locked error =96 Set when the DWC_mobile_storage cannot =
-load a command issued by
->> > software. When software sets the start_cmd bit in the CMD register=
-, the DWC_mobile_storage tries
->> > to load the command. If the command buffer is already filled with =
-a command, this error is raised.
->> > The software then has to reload the command.
->>
->> So it sounds like the last command should be reloaded (either on
->> interrupt or the interrupt status should be checked after starting a
->> command). Is this done elsewhere already?
-> I didn't see that for normal command.
-> We need to investigate about HLE case more. It's difficult to meet HL=
-E.
-> For this, I think this patch is effective at least.
-> If you have any good idea, please let me know.
-As mentioned at spec, if raised HLE when buffer is already filled with
-a command and try to load the other command,
-how about the clear the buffer and reload the command?
-If we need to consider others, i will also think this problem.
+2012/11/28 Seungwon Jeon <tgih.jun@samsung.com>:
+> On Wednesday, November 28, 2012, Jaehoon Chung wrote:
+>> On 11/27/2012 05:02 PM, Seungwon Jeon wrote:
+>> > On Thursday, November 08, 2012, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> >> Before disabling clock, need to check whether card is busy on not.
+>> >>
+>> >> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> >> ---
+>> >>  drivers/mmc/host/dw_mmc.c |   53 +++++++++++++++++++++++++++-----------------
+>> >>  drivers/mmc/host/dw_mmc.h |    1 +
+>> >>  2 files changed, 33 insertions(+), 21 deletions(-)
+>> >>
+>> >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> >> index 0a80b5c..9704b09 100644
+>> >> --- a/drivers/mmc/host/dw_mmc.c
+>> >> +++ b/drivers/mmc/host/dw_mmc.c
+>> >> @@ -228,6 +228,27 @@ static void dw_mci_set_timeout(struct dw_mci *host)
+>> >>    mci_writel(host, TMOUT, 0xffffffff);
+>> >>  }
+>> >>
+>> >> +static bool mci_wait_reset(struct device *dev, struct dw_mci *host)
+>> >> +{
+>> >> +  unsigned long timeout = jiffies + msecs_to_jiffies(500);
+>> >> +  unsigned int ctrl;
+>> >> +
+>> >> +  mci_writel(host, CTRL, (SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET |
+>> >> +                          SDMMC_CTRL_DMA_RESET));
+>> >> +
+>> >> +  /* wait till resets clear */
+>> >> +  do {
+>> >> +          ctrl = mci_readl(host, CTRL);
+>> >> +          if (!(ctrl & (SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET |
+>> >> +                        SDMMC_CTRL_DMA_RESET)))
+>> >> +                  return true;
+>> >> +  } while (time_before(jiffies, timeout));
+>> >> +
+>> >> +  dev_err(dev, "Timeout resetting block (ctrl %#x)\n", ctrl);
+>> >> +
+>> >> +  return false;
+>> >> +}
+>> >> +
+>> >>  static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+>> >>  {
+>> >>    struct mmc_data *data;
+>> >> @@ -622,6 +643,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+>> >>    struct dw_mci *host = slot->host;
+>> >>    u32 div;
+>> >>    u32 clk_en_a;
+>> >> +  int timeout = 1000;
+>> >>
+>> >>    if (slot->clock != host->current_speed) {
+>> >>            div = host->bus_hz / slot->clock;
+>> >> @@ -638,6 +660,16 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+>> >>                     "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ"
+>> >>                     " div = %d)\n", slot->id, host->bus_hz, slot->clock,
+>> >>                     div ? ((host->bus_hz / div) >> 1) : host->bus_hz, div);
+>> >> +          do {
+>> >> +                  if (!(mci_readl(host, STATUS) & SDMMC_DATA_BUSY))
+>> >> +                          break;
+>> >> +                  if (timeout-- < 0) {
+>> >> +                          dev_err(host->dev, "Can't disable clock"
+>> >> +                                  "because Card is busy!!\n");
+>> >> +                          return;
+>> >> +                  }
+>> >> +                  mci_wait_reset(host->dev, host);
+>> > Should 'mci_wait_reset' be called every loop?
+>> > Only if card status is still busy at the end of while, one time is enough.
+>> >
+>> >> +          } while (1);
+>> > How about counting jiffies for while-loop with usleep_range?
+>> > do {
+>> > ...
+>> >     usleep_range(10, 20)
+>> > } while (time_before())
+>> Is there reason that use "usleep_range()"?
+> If we should wait busy status with long time,
+> it would be better sleep-wait rather than just busy-wait.
+Thank you for review.
+well..it will use the sleep-wait. why use the 10~20? just example?
+Then i will check this and resend the patch.
 
 Best Regards,
 Jaehoon Chung
 >
 > Thanks,
 > Seungwon Jeon
->>
->> Cheers
->> James
->>
 >> >
->> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->> > ---
->> >  drivers/mmc/host/dw_mmc.c |   11 +++++++++++
->> >  1 files changed, 11 insertions(+), 0 deletions(-)
+>> > Thanks,
+>> > Seungwon Jeon
+>> >>
+>> >>            /* disable clock */
+>> >>            mci_writel(host, CLKENA, 0);
+>> >> @@ -1995,27 +2027,6 @@ no_dma:
+>> >>    return;
+>> >>  }
+>> >>
+>> >> -static bool mci_wait_reset(struct device *dev, struct dw_mci *host)
+>> >> -{
+>> >> -  unsigned long timeout = jiffies + msecs_to_jiffies(500);
+>> >> -  unsigned int ctrl;
+>> >> -
+>> >> -  mci_writel(host, CTRL, (SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET |
+>> >> -                          SDMMC_CTRL_DMA_RESET));
+>> >> -
+>> >> -  /* wait till resets clear */
+>> >> -  do {
+>> >> -          ctrl = mci_readl(host, CTRL);
+>> >> -          if (!(ctrl & (SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET |
+>> >> -                        SDMMC_CTRL_DMA_RESET)))
+>> >> -                  return true;
+>> >> -  } while (time_before(jiffies, timeout));
+>> >> -
+>> >> -  dev_err(dev, "Timeout resetting block (ctrl %#x)\n", ctrl);
+>> >> -
+>> >> -  return false;
+>> >> -}
+>> >> -
+>> >>  #ifdef CONFIG_OF
+>> >>  static struct dw_mci_of_quirks {
+>> >>    char *quirk;
+>> >> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+>> >> index 53b8fd9..4f27357 100644
+>> >> --- a/drivers/mmc/host/dw_mmc.h
+>> >> +++ b/drivers/mmc/host/dw_mmc.h
+>> >> @@ -127,6 +127,7 @@
+>> >>  #define SDMMC_CMD_INDX(n)         ((n) & 0x1F)
+>> >>  /* Status register defines */
+>> >>  #define SDMMC_GET_FCNT(x)         (((x)>>17) & 0x1FFF)
+>> >> +#define SDMMC_DATA_BUSY                   BIT(9)
+>> >>  /* Internal DMAC interrupt defines */
+>> >>  #define SDMMC_IDMAC_INT_AI                BIT(9)
+>> >>  #define SDMMC_IDMAC_INT_NI                BIT(8)
+>> >> --
+>> >> 1.7.4.1
+>> >> --
+>> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> >> the body of a message to majordomo@vger.kernel.org
+>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >> >
->> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> > index 6785d62..b6db0ae 100644
->> > --- a/drivers/mmc/host/dw_mmc.c
->> > +++ b/drivers/mmc/host/dw_mmc.c
->> > @@ -1009,6 +1009,11 @@ static void dw_mci_tasklet_func(unsigned lo=
-ng priv)
->> >     state =3D host->state;
->> >     data =3D host->data;
->> >
->> > +   if (host->cmd_status & SDMMC_INT_HLE) {
->> > +           dev_err(host->dev, "hardware locked write error\n");
->> > +           goto unlock;
->> > +   }
->> > +
->> >     do {
->> >             prev_state =3D state;
->> >
->> > @@ -1577,6 +1582,12 @@ static irqreturn_t dw_mci_interrupt(int irq=
-, void *dev_id)
->> >             if (!pending)
->> >                     break;
->> >
->> > +           if (pending & SDMMC_INT_HLE) {
->> > +                   mci_writel(host, RINTSTS, SDMMC_INT_HLE);
->> > +                   host->cmd_status =3D pending;
->> > +                   tasklet_schedule(&host->tasklet);
->> > +           }
->> > +
->> >             if (pending & DW_MCI_CMD_ERROR_FLAGS) {
->> >                     mci_writel(host, RINTSTS, DW_MCI_CMD_ERROR_FLA=
-GS);
->> >                     host->cmd_status =3D pending;
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >> >
 >>
 >> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
- in
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
