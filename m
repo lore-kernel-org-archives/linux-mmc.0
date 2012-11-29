@@ -1,16 +1,14 @@
 From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH] Powerpc/eSDHC: Calculate the applicable mmc erase timeout value
-Date: Thu, 29 Nov 2012 13:22:25 +0800
-Message-ID: <1354166545-19235-2-git-send-email-Haijun.Zhang@freescale.com>
-References: <1354166545-19235-1-git-send-email-Haijun.Zhang@freescale.com>
+Subject: [PATCH 1/2 V5] Powerpc/eSDHC: Calculate the applicable mmc erase timeout value
+Date: Thu, 29 Nov 2012 13:25:04 +0800
+Message-ID: <1354166704-19320-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [65.55.88.12] ([65.55.88.12]:14400 "EHLO
+Received: from [65.55.88.11] ([65.55.88.11]:15576 "EHLO
 	tx2outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1750847Ab2K2Fn3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Nov 2012 00:43:29 -0500
-In-Reply-To: <1354166545-19235-1-git-send-email-Haijun.Zhang@freescale.com>
+	by vger.kernel.org with ESMTP id S1750837Ab2K2FqT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Nov 2012 00:46:19 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
