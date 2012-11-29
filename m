@@ -1,104 +1,70 @@
 From: Zhang Haijun-B42677 <B42677@freescale.com>
-Subject: RE: [PATCH] Powerpc/eSDHC: Calculate the applicable mmc erase
- timeout value
-Date: Thu, 29 Nov 2012 05:46:23 +0000
-Message-ID: <99E897753B6F7048BD8CCDB4661D02E1179F50@039-SN2MPN1-022.039d.mgd.msft.net>
-References: <1354166545-19235-1-git-send-email-Haijun.Zhang@freescale.com>
- <1354166545-19235-2-git-send-email-Haijun.Zhang@freescale.com>
+Subject: RE: [PATCH V4] Powerpc eSDHC Recover from the ADMA error
+Date: Thu, 29 Nov 2012 05:49:50 +0000
+Message-ID: <99E897753B6F7048BD8CCDB4661D02E1179F63@039-SN2MPN1-022.039d.mgd.msft.net>
+References: <1348107563-16545-1-git-send-email-Haijun.Zhang@freescale.com>
+	<20120920025702.GA13639@lizard>
+	<110EED8CC96DFC488B7E717A2027A27C21CCE3@039-SN1MPN1-004.039d.mgd.msft.net>
+ <871ufs9cf0.fsf@octavius.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [216.32.181.183] ([216.32.181.183]:10151 "EHLO
-	ch1outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1750847Ab2K2FrD convert rfc822-to-8bit
+Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:59345
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750727Ab2K2Ftz convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 29 Nov 2012 00:47:03 -0500
-In-Reply-To: <1354166545-19235-2-git-send-email-Haijun.Zhang@freescale.com>
+	Thu, 29 Nov 2012 00:49:55 -0500
+In-Reply-To: <871ufs9cf0.fsf@octavius.laptop.org>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhang Haijun-B42677 <B42677@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Huang Changming-R66093 <r66093@freescale.com>, Chris Ball <cjb@laptop.org>
+To: Chris Ball <cjb@laptop.org>, Huang Changming-R66093 <r66093@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Anton Vorontsov <cbouatmailru@gmail.com>
 
-Sorry, I forget to add patch version.
-Discard this patch. Another had send.
+Hi chris,
 
+Sorry to miss this mail.
+Patch V4 for this patch had resend. Pls review.
+Thanks.
 
 Regards
 Haijun.
 
 
 > -----Original Message-----
-> From: Zhang Haijun-B42677
-> Sent: Thursday, November 29, 2012 1:22 PM
-> To: linux-mmc@vger.kernel.org
-> Cc: Zhang Haijun-B42677; Huang Changming-R66093; Chris Ball
-> Subject: [PATCH] Powerpc/eSDHC: Calculate the applicable mmc erase
-> timeout value
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Chris Ball
+> Sent: Sunday, November 18, 2012 4:56 AM
+> To: Huang Changming-R66093
+> Cc: linux-mmc@vger.kernel.org; Anton Vorontsov; Zhang Haijun-B42677
+> Subject: Re: [PATCH V4] Powerpc eSDHC Recover from the ADMA error
 > 
-> As large area erase needs long time usually a few minutes, So we use
-> max_discard_to to limit the size one request can issue to avoid timeout.
-> As our controller had the quirk SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK so we
-> need to assign the timeout_clk and max_discard_to according to the
-> max_dtr which can be read after the card had setup and decoded, As esdhc-
-> imx also use this func and this quirk so this patch will also work on
-> esdhci-imx, but this patch only test on powerpc platform, if there are
-> any negative impact on esdhc-imx please let me know.
+> Hi,
 > 
-> Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> Reviewed-by: Anton Vorontsov <cbouatmailru@gmail.com>
-> CC: Chris Ball <cjb@laptop.org>
-> ---
-> changes for v5:
-> 	- Split two variable in their own line
-> changes for v4:
-> 	- Apply the timeout clk after the card setup and reuse quirk
-> changes for v3:
-> 	- Add an empty line
+> On Tue, Nov 13 2012, Huang Changming-R66093 wrote:
+> > Hi, Chris,
+> > This patch has been ACKed by Anton  on Sep 20.
+> > Have you any comment about it?
 > 
->  drivers/mmc/host/sdhci-esdhc.h |    9 +++++++++
->  1 files changed, 9 insertions(+), 0 deletions(-)
+> Something weird has happened with this patch -- the latest version has no
+> commit message even though an earlier version did, and there seem to be
+> two separate runs of v2-v3-v4 with the same subject but with different
+> changes in each.
 > 
-> diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-
-> esdhc.h index d25f9ab..a9968e3 100644
-> --- a/drivers/mmc/host/sdhci-esdhc.h
-> +++ b/drivers/mmc/host/sdhci-esdhc.h
-> @@ -47,6 +47,7 @@ static inline void esdhc_set_clock(struct sdhci_host
-> *host, unsigned int clock)
->  	int pre_div = 2;
->  	int div = 1;
->  	u32 temp;
-> +	u32 actual_clk;
+> Could you merge the changelog into a single list of changes, rebase
+> against mmc-next, add the full commit message and Anton's ACK, and resend?
+> Then I'll merge it.
 > 
->  	if (clock == 0)
->  		goto out;
-> @@ -65,6 +66,8 @@ static inline void esdhc_set_clock(struct sdhci_host
-> *host, unsigned int clock)
->  	dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
->  		clock, host->max_clk / pre_div / div);
+> Thanks,
 > 
-> +	actual_clk = host->max_clk / pre_div / div;
-> +
->  	pre_div >>= 1;
->  	div--;
-> 
-> @@ -74,6 +77,12 @@ static inline void esdhc_set_clock(struct sdhci_host
-> *host, unsigned int clock)
->  		| (pre_div << ESDHC_PREDIV_SHIFT));
->  	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
->  	mdelay(1);
-> +
-> +	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK) {
-> +		host->timeout_clk = actual_clk / 1000;
-> +		host->mmc->max_discard_to = (1 << 27) / host->timeout_clk;
-> +	}
-> +
->  out:
->  	host->clock = clock;
->  }
+> - Chris.
 > --
-> 1.7.0.4
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
 
 
