@@ -1,126 +1,62 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH v3 4/4] mmc: dw_mmc: Handle wp-gpios from device tree
-Date: Thu, 29 Nov 2012 21:04:17 -0800
-Message-ID: <1354251857-21587-4-git-send-email-dianders@chromium.org>
-References: <1353624835-19137-1-git-send-email-dianders@chromium.org>
- <1354251857-21587-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f202.google.com ([209.85.223.202]:58541 "EHLO
-	mail-ie0-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752200Ab2K3FHa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Nov 2012 00:07:30 -0500
-Received: by mail-ie0-f202.google.com with SMTP id s9so24425iec.1
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Nov 2012 21:07:30 -0800 (PST)
-In-Reply-To: <1354251857-21587-1-git-send-email-dianders@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH] mmc: sh_mmcif: remove unneeded clock connection ID
+Date: Fri, 30 Nov 2012 18:02:24 +0900
+Message-ID: <20121130090224.GG4501@verge.net.au>
+References: <Pine.LNX.4.64.1211281006340.1710@axis700.grange>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1211281006340.1710@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-samsung-soc@vger.kernel.org, Thomas Abraham <thomas.abraham@linaro.org>, Kukjin Kim <kgene.kim@samsung.com>, Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>, Will Newton <will.newton@imgtec.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>
 
-On some SoCs (like exynos5250) you need to use an external GPIO for
-write protect.  Add support for wp-gpios to the core dw_mmc driver
-since it could be useful across multiple SoCs.
+On Wed, Nov 28, 2012 at 10:24:27AM +0100, Guennadi Liakhovetski wrote:
+> MMCIF only uses one clock, all ARM and SuperH platforms register MMCIF
+> clock lookup entries with no connection ID, hence it can be dropped in
+> the driver too.
+> 
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-With this change I am able to make use of the write protect for the
-external SD slot on exynos5250-snow.
+Reviewed-by: Simon Horman <horms+renesas@verge.net.au>
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
-Changes in v3: None
-Changes in v2:
-- Fixed return type from u32 to int
-- Return -EINVAL instead of -1
-
- drivers/mmc/host/dw_mmc.c |   34 ++++++++++++++++++++++++++++++++++
- 1 files changed, 34 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index b47b1e9..8f8bac5 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -34,6 +34,7 @@
- #include <linux/regulator/consumer.h>
- #include <linux/workqueue.h>
- #include <linux/of.h>
-+#include <linux/of_gpio.h>
- 
- #include "dw_mmc.h"
- 
-@@ -75,6 +76,7 @@ struct idmac_desc {
-  * @mmc: The mmc_host representing this slot.
-  * @host: The MMC controller this slot is using.
-  * @quirks: Slot-level quirks (DW_MCI_SLOT_QUIRK_XXX)
-+ * @wp_gpio: If gpio_is_valid() we'll use this to read write protect.
-  * @ctype: Card type for this slot.
-  * @mrq: mmc_request currently being processed or waiting to be
-  *	processed, or NULL when the slot is idle.
-@@ -90,6 +92,7 @@ struct dw_mci_slot {
- 	struct dw_mci		*host;
- 
- 	int			quirks;
-+	int			wp_gpio;
- 
- 	u32			ctype;
- 
-@@ -836,6 +839,8 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
- 		read_only = 0;
- 	else if (brd->get_ro)
- 		read_only = brd->get_ro(slot->id);
-+	else if (gpio_is_valid(slot->wp_gpio))
-+		read_only = gpio_get_value(slot->wp_gpio);
- 	else
- 		read_only =
- 			mci_readl(slot->host, WRTPRT) & (1 << slot->id) ? 1 : 0;
-@@ -1830,6 +1835,29 @@ static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
- 			       " as 1\n");
- 	return bus_wd;
- }
-+
-+/* find the write protect gpio for a given slot; or -1 if none specified */
-+static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
-+{
-+	struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
-+	int gpio;
-+
-+	if (!np)
-+		return -EINVAL;
-+
-+	gpio = of_get_named_gpio(np, "wp-gpios", 0);
-+
-+	/* Having a missing entry is valid; return silently */
-+	if (!gpio_is_valid(gpio))
-+		return -EINVAL;
-+
-+	if (devm_gpio_request(dev, gpio, "dw-mci-wp")) {
-+		dev_warn(dev, "gpio [%d] request failed\n", gpio);
-+		return -EINVAL;
-+	}
-+
-+	return gpio;
-+}
- #else /* CONFIG_OF */
- static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
- {
-@@ -1843,6 +1871,10 @@ static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
- {
- 	return NULL;
- }
-+static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
-+{
-+	return -EINVAL;
-+}
- #endif /* CONFIG_OF */
- 
- static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
-@@ -1960,6 +1992,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	else
- 		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
- 
-+	slot->wp_gpio = dw_mci_of_get_wp_gpio(host->dev, slot->id);
-+
- 	mmc_add_host(mmc);
- 
- #if defined(CONFIG_DEBUG_FS)
--- 
-1.7.7.3
-
+> ---
+>  drivers/mmc/host/sh_mmcif.c |    6 ++----
+>  1 files changed, 2 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index d25bc97..358295e 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -1310,7 +1310,6 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+>  	struct sh_mmcif_plat_data *pd = pdev->dev.platform_data;
+>  	struct resource *res;
+>  	void __iomem *reg;
+> -	char clk_name[8];
+>  
+>  	irq[0] = platform_get_irq(pdev, 0);
+>  	irq[1] = platform_get_irq(pdev, 1);
+> @@ -1360,11 +1359,10 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+>  	pm_runtime_enable(&pdev->dev);
+>  	host->power = false;
+>  
+> -	snprintf(clk_name, sizeof(clk_name), "mmc%d", pdev->id);
+> -	host->hclk = clk_get(&pdev->dev, clk_name);
+> +	host->hclk = clk_get(&pdev->dev, NULL);
+>  	if (IS_ERR(host->hclk)) {
+>  		ret = PTR_ERR(host->hclk);
+> -		dev_err(&pdev->dev, "cannot get clock \"%s\": %d\n", clk_name, ret);
+> +		dev_err(&pdev->dev, "cannot get clock: %d\n", ret);
+>  		goto eclkget;
+>  	}
+>  	ret = sh_mmcif_clk_update(host);
+> -- 
+> 1.7.2.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-sh" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
