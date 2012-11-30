@@ -1,199 +1,184 @@
-From: Philip Rakity <prakity-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 1/2] sdhci: add quirk for lack of 1.8v support
-Date: Sun, 25 Nov 2012 20:14:05 +0100
-Message-ID: <4D2A8E52-FCBE-49A4-8A73-87D95B2308BC@nvidia.com>
+From: Haijun Zhang <Haijun.Zhang@freescale.com>
+Subject: [PATCH V5] Powerpc eSDHC Recover from the ADMA error
+Date: Fri, 30 Nov 2012 10:14:40 +0800
+Message-ID: <1354241680-13903-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============8447539137616594696=="
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Daniel Drake <dsd-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: "jrudholm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" <jrudholm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org" <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:4320
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754109Ab2K3CeO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Nov 2012 21:34:14 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Haijun Zhang <Haijun.Zhang@freescale.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Chris Ball <cjb@laptop.org>
 
---===============8447539137616594696==
-Content-Language: en-US
-Content-Type: multipart/alternative;
-	boundary="_000_4D2A8E52FCBE49A48A7387D95B2308BCnvidiacom_"
+A-003500: False ADMA Error might be reported when ADMA is used for 
+multiple block read command with Stop at Block Gap. If PROCTL[SABGREQ] 
+is set when the particular block's data is received by the System side 
+logic before entire block(with CRC) data is received by the SD side 
+logic, and also if ADMA descriptor line is fetched at the same time, 
+then DMA engine might report false ADMA error. eSDHC might not be able 
+to Continue(PROCTL[CREQ]=1)after Stop at Block Gap.
+This issue will impact the eSDHC IP VVN2.3.
 
---_000_4D2A8E52FCBE49A48A7387D95B2308BCnvidiacom_
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
+Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
+CC: Chris Ball <cjb@laptop.org>
+---
+changes for v5:
+	- Add comment, no other changes
 
-Reviewed-by. Philip Rakity <prakity-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+changes for v4:
+	- Correct inconsistent issue
 
------ Reply message -----
-From: "Daniel Drake" <dsd-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-To: "Philip Rakity" <prakity-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Cc: "cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org" <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux=
--mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jrudholm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" <jrudholm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "device=
-tree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-Subject: [PATCH 1/2] sdhci: add quirk for lack of 1.8v support
-Date: Sun, Nov 25, 2012 18:50
+changes for v3:
+        - Correct the if statement in function workground
+
+changes for v2:
+        - Invert the condition of the if statement in function workground
+
+ drivers/mmc/host/sdhci-of-esdhc.c |   52 ++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/sdhci.c          |    2 +
+ drivers/mmc/host/sdhci.h          |    5 +++-
+ 3 files changed, 57 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 1cba55a..9c6bf78 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -21,6 +21,7 @@
+ #include "sdhci-esdhc.h"
+ 
+ #define VENDOR_V_22	0x12
++#define VENDOR_V_23	0x13
+ static u32 esdhc_readl(struct sdhci_host *host, int reg)
+ {
+ 	u32 ret;
+@@ -83,6 +84,18 @@ static u8 esdhc_readb(struct sdhci_host *host, int reg)
+ 	return ret;
+ }
+ 
++static void esdhc_writel(struct sdhci_host *host, u32 val, int reg)
++{
++	/*
++	 * Enable IRQSTATEN[BGESEN] is just to set IRQSTAT[BGE]
++	 * when SYSCTL[RSTD]) is set for some special operations.
++	 * No any impact other operation.
++	 */
++	if (reg == SDHCI_INT_ENABLE)
++		val |= SDHCI_INT_BLK_GAP;
++	sdhci_be32bs_writel(host, val, reg);
++}
++
+ static void esdhc_writew(struct sdhci_host *host, u16 val, int reg)
+ {
+ 	if (reg == SDHCI_BLOCK_SIZE) {
+@@ -138,6 +151,42 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
+ 	return of_host->clock / 256 / 16;
+ }
+ 
++/*
++ * For Abort or Suspend after Stop at Block Gap, ignore the ADMA
++ * error(IRQSTAT[ADMAE]) if both Transfer Complete(IRQSTAT[TC])
++ * and Block Gap Event(IRQSTAT[BGE]) are also set.
++ * For Continue, apply soft reset for data(SYSCTL[RSTD]);
++ * and re-issue the entire read
++ * transaction from beginning.
++ */
++static void esdhci_of_adma_workaround(struct sdhci_host *host, u32 intmask)
++{
++	u32 tmp;
++	bool applicable;
++	dma_addr_t dmastart;
++	dma_addr_t dmanow;
++
++	tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
++	tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
++
++	applicable = (intmask & SDHCI_INT_DATA_END) &&
++			(intmask & SDHCI_INT_BLK_GAP) &&
++			(tmp == VENDOR_V_23);
++	if (!applicable)
++		return;
++
++	host->data->error = 0;
++	dmastart = sg_dma_address(host->data->sg);
++	dmanow = dmastart + host->data->bytes_xfered;
++	/*
++	 * Force update to the next DMA block boundary.
++	 */
++	dmanow = (dmanow & ~(SDHCI_DEFAULT_BOUNDARY_SIZE - 1)) +
++		SDHCI_DEFAULT_BOUNDARY_SIZE;
++	host->data->bytes_xfered = dmanow - dmastart;
++	sdhci_writel(host, dmanow, SDHCI_DMA_ADDRESS);
++}
++
+ #ifdef CONFIG_PM
+ static u32 esdhc_proctl;
+ static void esdhc_of_suspend(struct sdhci_host *host)
+@@ -164,7 +213,7 @@ struct sdhci_of_data sdhci_esdhc = {
+ 		.read_l = esdhc_readl,
+ 		.read_w = esdhc_readw,
+ 		.read_b = esdhc_readb,
+-		.write_l = sdhci_be32bs_writel,
++		.write_l = esdhc_writel,
+ 		.write_w = esdhc_writew,
+ 		.write_b = esdhc_writeb,
+ 		.set_clock = esdhc_set_clock,
+@@ -175,5 +224,6 @@ struct sdhci_of_data sdhci_esdhc = {
+ 		.platform_suspend = esdhc_of_suspend,
+ 		.platform_resume = esdhc_of_resume,
+ #endif
++		.adma_workaround = esdhci_of_adma_workaround,
+ 	},
+ };
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 684f1a4..3d9365a 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2143,6 +2143,8 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 		printk(KERN_ERR "%s: ADMA error\n", mmc_hostname(host->mmc));
+ 		sdhci_show_adma_error(host);
+ 		host->data->error = -EIO;
++		if (host->ops->adma_workaround)
++			host->ops->adma_workaround(host, intmask);
+ 	}
+ 
+ 	if (host->data->error)
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 209f707..138d8fc 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -120,6 +120,7 @@
+ #define SDHCI_SIGNAL_ENABLE	0x38
+ #define  SDHCI_INT_RESPONSE	0x00000001
+ #define  SDHCI_INT_DATA_END	0x00000002
++#define  SDHCI_INT_BLK_GAP	0x00000004
+ #define  SDHCI_INT_DMA_END	0x00000008
+ #define  SDHCI_INT_SPACE_AVAIL	0x00000010
+ #define  SDHCI_INT_DATA_AVAIL	0x00000020
+@@ -146,7 +147,8 @@
+ #define  SDHCI_INT_DATA_MASK	(SDHCI_INT_DATA_END | SDHCI_INT_DMA_END | \
+ 		SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL | \
+ 		SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_DATA_CRC | \
+-		SDHCI_INT_DATA_END_BIT | SDHCI_INT_ADMA_ERROR)
++		SDHCI_INT_DATA_END_BIT | SDHCI_INT_ADMA_ERROR | \
++		SDHCI_INT_BLK_GAP)
+ #define SDHCI_INT_ALL_MASK	((unsigned int)-1)
+ 
+ #define SDHCI_ACMD12_ERR	0x3C
+@@ -275,6 +277,7 @@ struct sdhci_ops {
+ 	int	(*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);
+ 	void	(*platform_suspend)(struct sdhci_host *host);
+ 	void	(*platform_resume)(struct sdhci_host *host);
++	void	(*adma_workaround)(struct sdhci_host *host, u32 intmask);
+ 
+ };
+ 
+-- 
+1.7.0.4
 
 
-
-On Sun, Nov 25, 2012 at 12:36 PM, Philip Rakity <prakity-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org> wrot=
-e:
-> The same effect can be achieved by setting the quirk
-> SDHCI_QUIRK_MISSING_CAPS
-> reading caps[0] and removing from caps[1] the UHS values in the control=
-ler specific code for your board.
->
-> What is the reason you cannot do this ?
-
-The same reasons we already touched upon in the other thread.
-http://marc.info/?l=3Dlinux-mmc&m=3D135240077826454&w=3D2
-http://marc.info/?l=3Dlinux-mmc&m=3D135240181826846&w=3D2
-
-To reiterate (I know this has been broken out over a couple of weeks):
-
-There is no controller-specific or board-specific code. We are working
-with the device tree. It must be done generically.
-
-SDHCI_QUIRK_MISSING_CAPS seems to be aimed at cases where the
-controller does not report caps, or it is lying about the caps it
-does/doesn't support. In this case our controller is being truthful,
-so this does not feel appropriate.
-
-Also, the only realistic way that I can see to combine
-SDHCI_QUIRK_MISSING_CAPS with the device tree would be to put the
-caps/caps1 override data in the device tree. This just seems ugly, and
-feels like it is taking the wrong approach of again suggesting that
-the controller is providing bad data, when in this case actually it is
-correctly saying that 1.8v is supported (by the controller - it
-obviously cannot speak for external components).
-
-We don't have a regulator to work with here.
-
-Thanks
-Daniel
-
--------------------------------------------------------------------------=
-----------
-This email message is for the sole use of the intended recipient(s) and m=
-ay contain
-confidential information.  Any unauthorized review, use, disclosure or di=
-stribution
-is prohibited.  If you are not the intended recipient, please contact the=
-=20sender by
-reply email and destroy all copies of the original message.
--------------------------------------------------------------------------=
-----------
-
---_000_4D2A8E52FCBE49A48A7387D95B2308BCnvidiacom_
-Content-Type: text/html; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-
-<html><head>
-<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Diso-885=
-9-1">
-<meta name=3D"Generator" content=3D"Microsoft Exchange Server">
-<!-- converted from text -->
-<style><!-- .EmailQuote { margin-left: 1pt; padding-left: 4pt; border-lef=
-t: #800000 2px solid; } --></style></head>
-<body>
-<style>
-<!--
-.EmailQuote
-=09{margin-left:1pt;
-=09padding-left:4pt;
-=09border-left:#800000 2px solid}
--->
-</style><body><span style=3D"font-family:Arial">Reviewed-by. Philip Rakit=
-y &lt;prakity-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org&gt;<br><br><div id=3D"htc_header" style=3D"">---=
--- Reply message -----<br>From: &quot;Daniel Drake&quot; &lt;dsd@laptop.o=
-rg&gt;<br>To: &quot;Philip Rakity&quot; &lt;prakity-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org&gt;<br>Cc:=
-=20&quot;cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org&quot; &lt;cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org&gt;, &quot;linux-mmc@vge=
-r.kernel.org&quot; &lt;linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org&gt;, &quot;jrudholm@gmai=
-l.com&quot; &lt;jrudholm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org&gt;, &quot;devicetree-discuss-uLR06cmDAlY@public.gmane.org=
-labs.org&quot; &lt;devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org&gt;<br>Subject: [P=
-ATCH 1/2] sdhci: add quirk for lack of 1.8v support<br>Date: Sun, Nov 25,=
-=202012 18:50<br><br></div></span><br><br>
-<DIV>
-<HR>
-</DIV>
-<DIV>This email message is for the sole use of the intended recipient(s) =
-and may=20
-contain confidential information.&nbsp; Any unauthorized review, use, dis=
-closure=20
-or distribution is prohibited.&nbsp; If you are not the intended recipien=
-t,=20
-please contact the sender by reply email and destroy all copies of the or=
-iginal=20
-message. </DIV>
-<DIV>
-<HR>
-</DIV>
-<P></P>
-</body>
-<font size=3D"2"><div class=3D"PlainText">On Sun, Nov 25, 2012 at 12:36 P=
-M, Philip Rakity &lt;prakity-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org&gt; wrote:<br>
-&gt; The same effect can be achieved by setting the quirk<br>
-&gt; SDHCI_QUIRK_MISSING_CAPS<br>
-&gt; reading caps[0] and removing from caps[1] the UHS values in the cont=
-roller specific code for your board.<br>
-&gt;<br>
-&gt; What is the reason you cannot do this ?<br>
-<br>
-The same reasons we already touched upon in the other thread.<br>
-<a href=3D"http://marc.info/?l=3Dlinux-mmc&amp;m=3D135240077826454&amp;w=3D=
-2">http://marc.info/?l=3Dlinux-mmc&amp;m=3D135240077826454&amp;w=3D2</a><=
-br>
-<a href=3D"http://marc.info/?l=3Dlinux-mmc&amp;m=3D135240181826846&amp;w=3D=
-2">http://marc.info/?l=3Dlinux-mmc&amp;m=3D135240181826846&amp;w=3D2</a><=
-br>
-<br>
-To reiterate (I know this has been broken out over a couple of weeks):<br=
->
-<br>
-There is no controller-specific or board-specific code. We are working<br=
->
-with the device tree. It must be done generically.<br>
-<br>
-SDHCI_QUIRK_MISSING_CAPS seems to be aimed at cases where the<br>
-controller does not report caps, or it is lying about the caps it<br>
-does/doesn't support. In this case our controller is being truthful,<br>
-so this does not feel appropriate.<br>
-<br>
-Also, the only realistic way that I can see to combine<br>
-SDHCI_QUIRK_MISSING_CAPS with the device tree would be to put the<br>
-caps/caps1 override data in the device tree. This just seems ugly, and<br=
->
-feels like it is taking the wrong approach of again suggesting that<br>
-the controller is providing bad data, when in this case actually it is<br=
->
-correctly saying that 1.8v is supported (by the controller - it<br>
-obviously cannot speak for external components).<br>
-<br>
-We don't have a regulator to work with here.<br>
-<br>
-Thanks<br>
-Daniel<br>
-</div></font>
-</body>
-</html>
-
---_000_4D2A8E52FCBE49A48A7387D95B2308BCnvidiacom_--
-
---===============8447539137616594696==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-devicetree-discuss mailing list
-devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-https://lists.ozlabs.org/listinfo/devicetree-discuss
-
---===============8447539137616594696==--
