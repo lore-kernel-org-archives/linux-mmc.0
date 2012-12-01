@@ -1,18 +1,14 @@
 From: Andy Lutomirski <luto@amacapital.net>
 Subject: [PATCH] pci: Add a quirk for the Ricoh 0xe22 SD card reader
-Date: Sat,  1 Dec 2012 10:21:18 -0800
-Message-ID: <33c411da9bb44eae8a5f9e0609f8eb0aa4eda600.1354385950.git.luto@amacapital.net>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:44093 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752919Ab2LASVZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Dec 2012 13:21:25 -0500
-Received: by mail-pa0-f46.google.com with SMTP id bh2so1051396pad.19
-        for <linux-mmc@vger.kernel.org>; Sat, 01 Dec 2012 10:21:25 -0800 (PST)
-Sender: linux-mmc-owner@vger.kernel.org
+Date: Sat,  1 Dec 2012 12:37:20 -0800
+Message-ID: <33c411da9bb44eae8a5f9e0609f8eb0aa4eda601.1354385950.git.luto@amacapital.net>
+References: <33c411da9bb44eae8a5f9e0609f8eb0aa4eda600.1354385950.git.luto@amacapital.net>
+Return-path: <linux-pci-owner@vger.kernel.org>
+In-Reply-To: <33c411da9bb44eae8a5f9e0609f8eb0aa4eda600.1354385950.git.luto@amacapital.net>
+Sender: linux-pci-owner@vger.kernel.org
+To: linux-pci@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>
+Cc: Chris Ball <cjb@laptop.org>, Andy Lutomirski <luto@amacapital.net>, linux-mmc@vger.kernel.org, Manoj Iyer <manoj.iyer@canonical.com>, stable@kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
-Cc: Andy Lutomirski <luto@amacapital.net>, Manoj Iyer <manoj.iyer@canonical.com>, stable@kernel.org
 
 Otherwise it fails like this on cards like the Transcend 16GB SDHC card:
 mmc0: new SDHC card at address b368
@@ -24,6 +20,8 @@ e 0x900, card status 0xb0
 Tested on my Lenovo x200 laptop.
 
 Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+Acked-by: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 Cc: Manoj Iyer <manoj.iyer@canonical.com>
 Cc: <stable@kernel.org>
 ---
@@ -77,4 +75,3 @@ index 9d36b82..d16ad56 100644
  #define PCI_DEVICE_ID_RICOH_R5C843	0x0843
 -- 
 1.7.11.7
-
