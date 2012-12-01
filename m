@@ -1,20 +1,80 @@
-From: "vivian suah" <viviann_123@Safe-mail.net>
-Subject: How are you doing?
-Date: Sat, 1 Dec 2012 10:10:28 -0500
-Message-ID: <N1-tPXVM0ZvMA@Safe-mail.net>
-Reply-To: viviansuah5@hotmail.com
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+From: Andy Lutomirski <luto@amacapital.net>
+Subject: [PATCH] pci: Add a quirk for the Ricoh 0xe22 SD card reader
+Date: Sat,  1 Dec 2012 10:21:18 -0800
+Message-ID: <33c411da9bb44eae8a5f9e0609f8eb0aa4eda600.1354385950.git.luto@amacapital.net>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tapuz.safe-mail.net ([213.8.161.230]:37408 "EHLO
-	tapuz.safe-mail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752679Ab2LARnH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Dec 2012 12:43:07 -0500
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:44093 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752919Ab2LASVZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Dec 2012 13:21:25 -0500
+Received: by mail-pa0-f46.google.com with SMTP id bh2so1051396pad.19
+        for <linux-mmc@vger.kernel.org>; Sat, 01 Dec 2012 10:21:25 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: viviansuah5@hotmail.com
+To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Cc: Andy Lutomirski <luto@amacapital.net>, Manoj Iyer <manoj.iyer@canonical.com>, stable@kernel.org
 
-How are you doing?
-I am Miss Vivian, to be brief, I came across your contact, while looking for a good relationship and business  foreign partnership, I want to know more about you, possibly you can write me back here so I shall send you my pictures and tell you more about my self thanks 
-Vivian
+Otherwise it fails like this on cards like the Transcend 16GB SDHC card:
+mmc0: new SDHC card at address b368
+mmcblk0: mmc0:b368 SDC   15.0 GiB
+mmcblk0: error -110 sending status command, retrying
+mmcblk0: error -84 transferring data, sector 0, nr 8, cmd respons
+e 0x900, card status 0xb0
+
+Tested on my Lenovo x200 laptop.
+
+Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+Cc: Manoj Iyer <manoj.iyer@canonical.com>
+Cc: <stable@kernel.org>
+---
+ drivers/pci/quirks.c    | 7 +++++--
+ include/linux/pci_ids.h | 1 +
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
+index 7a451ff..7165f2a 100644
+--- a/drivers/pci/quirks.c
++++ b/drivers/pci/quirks.c
+@@ -2686,7 +2686,7 @@ static void ricoh_mmc_fixup_r5c832(struct pci_dev *dev)
+ 	if (PCI_FUNC(dev->devfn))
+ 		return;
+ 	/*
+-	 * RICOH 0xe823 SD/MMC card reader fails to recognize
++	 * RICOH 0xe822 and 0xe823 SD/MMC card readers fails to recognize
+ 	 * certain types of SD/MMC cards. Lowering the SD base
+ 	 * clock frequency from 200Mhz to 50Mhz fixes this issue.
+ 	 *
+@@ -2697,7 +2697,8 @@ static void ricoh_mmc_fixup_r5c832(struct pci_dev *dev)
+ 	 * 0xf9  - Key register for 0x150
+ 	 * 0xfc  - key register for 0xe1
+ 	 */
+-	if (dev->device == PCI_DEVICE_ID_RICOH_R5CE823) {
++	if (dev->device == PCI_DEVICE_ID_RICOH_R5CE822 ||
++	    dev->device == PCI_DEVICE_ID_RICOH_R5CE823) {
+ 		pci_write_config_byte(dev, 0xf9, 0xfc);
+ 		pci_write_config_byte(dev, 0x150, 0x10);
+ 		pci_write_config_byte(dev, 0xf9, 0x00);
+@@ -2724,6 +2725,8 @@ static void ricoh_mmc_fixup_r5c832(struct pci_dev *dev)
+ }
+ DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832, ricoh_mmc_fixup_r5c832);
+ DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832, ricoh_mmc_fixup_r5c832);
++DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5CE822, ricoh_mmc_fixup_r5c832);
++DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5CE822, ricoh_mmc_fixup_r5c832);
+ DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5CE823, ricoh_mmc_fixup_r5c832);
+ DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5CE823, ricoh_mmc_fixup_r5c832);
+ #endif /*CONFIG_MMC_RICOH_MMC*/
+diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h
+index 9d36b82..d16ad56 100644
+--- a/include/linux/pci_ids.h
++++ b/include/linux/pci_ids.h
+@@ -1568,6 +1568,7 @@
+ #define PCI_DEVICE_ID_RICOH_RL5C476	0x0476
+ #define PCI_DEVICE_ID_RICOH_RL5C478	0x0478
+ #define PCI_DEVICE_ID_RICOH_R5C822	0x0822
++#define PCI_DEVICE_ID_RICOH_R5CE822	0xe822
+ #define PCI_DEVICE_ID_RICOH_R5CE823	0xe823
+ #define PCI_DEVICE_ID_RICOH_R5C832	0x0832
+ #define PCI_DEVICE_ID_RICOH_R5C843	0x0843
+-- 
+1.7.11.7
+
