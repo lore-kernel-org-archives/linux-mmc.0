@@ -1,27 +1,29 @@
-From: NeilBrown <neilb@suse.de>
+From: Thierry Reding <thierry.reding@avionic-design.de>
 Subject: Re: [PATCH] SDIO / PM: Add empty bus-level suspend/resume callbacks
-Date: Mon, 3 Dec 2012 06:54:57 +1100
-Message-ID: <20121203065457.0bd12fc6@notabene.brown>
+Date: Sun, 2 Dec 2012 22:01:06 +0100
+Message-ID: <20121202210106.GB22086@avionic-0098.adnet.avionic-design.de>
 References: <20120325203849.7a908e32@notabene.brown>
-	<201203260029.24826.rjw@sisk.pl>
-	<20121202194625.5d66e239@notabene.brown>
-	<2147450.LFoExqrKEF@vostro.rjw.lan>
+ <201203260029.24826.rjw@sisk.pl>
+ <20121202194625.5d66e239@notabene.brown>
+ <2147450.LFoExqrKEF@vostro.rjw.lan>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=PGP-SHA1;
- boundary="Sig_/npdZKBa0_l4gKjTxK3MZwOQ"; protocol="application/pgp-signature"
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="b5gNqxB1S1yM7hjW"
+Return-path: <linux-pm-owner@vger.kernel.org>
+Content-Disposition: inline
 In-Reply-To: <2147450.LFoExqrKEF@vostro.rjw.lan>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-pm-owner@vger.kernel.org
 To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: Chris Ball <cjb@laptop.org>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Linux PM mailing list <linux-pm@vger.kernel.org>, Thierry Reding <thierry.reding@avionic-design.de>
+Cc: NeilBrown <neilb@suse.de>, Chris Ball <cjb@laptop.org>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Linux PM mailing list <linux-pm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
---Sig_/npdZKBa0_l4gKjTxK3MZwOQ
-Content-Type: text/plain; charset=US-ASCII
+
+--b5gNqxB1S1yM7hjW
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Sun, 02 Dec 2012 14:48:50 +0100 "Rafael J. Wysocki" <rjw@sisk.pl> wrote:
-
+On Sun, Dec 02, 2012 at 02:48:50PM +0100, Rafael J. Wysocki wrote:
 > On Sunday, December 02, 2012 07:46:25 PM NeilBrown wrote:
 > > On Mon, 26 Mar 2012 00:29:24 +0200 "Rafael J. Wysocki" <rjw@sisk.pl> wr=
 ote:
@@ -76,11 +78,6 @@ es
 > What about applying the appended patch (hopefully, the build warnings sho=
 uld
 > be fixed properly this time)?
-
-Looks good to me - thanks!
-
-NeilBrown
-
 >=20
 > Rafael
 >=20
@@ -142,29 +139,32 @@ NeilBrown
 >  		pm_generic_runtime_suspend,
 >  		pm_generic_runtime_resume,
 >=20
->=20
 
+Hehe... if my memory serves me well, that's exactly (well, modulo the
+comment) what my initial patch did before somebody suggested that the
+empty callbacks should just be removed altogether. =3D)
 
---Sig_/npdZKBa0_l4gKjTxK3MZwOQ
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Disposition: attachment; filename=signature.asc
+Thierry
+
+--b5gNqxB1S1yM7hjW
+Content-Type: application/pgp-signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.19 (GNU/Linux)
 
-iQIVAwUBULuyETnsnt1WYoG5AQLY5Q//TI530zPPtHXubF/0HVnmcbOH7Kpqyrzj
-oqwjMErbAmeOjEi4kDFqjjnopRYyHhdTo26BrFt0Jtz9BUKsoJoD2/kUX9wURaFW
-3x+slSSDSXe8+bTmQPfua2Dpj3yROUJJbWlUHnbDbLSnkXhJRgNCALsM6XErIm+5
-cxSrKaahrJSN7cGnPa0c2EtVa7EDyBeyR+Ne9S4FeGXJ3kV/ZSyw8BAEjIQLKzCK
-9ZEJxeRkzieb9y1NeDoPA4QmtIIbhba8XnbR6XAQV7Z5/mLyRmtKY0kojBjfQ6Ko
-a/BRZoZEG6lLgpn941SYppVcmv7lExHgTfwovt76ik8Exkc4wJwXtty1XBLtcp16
-+/EO4o3rAQbtPPSWUofMcCDPpm1YhPSK3GhAjirjE197A6zXqA4kb0SxuikxzyZV
-/+K3T0aedj/PA1dAjb8OGFXaMUzVKGd3fSTb/3bIyjI0w6awfIRNNPgv1Epu9+uv
-gPeZAhcLvWCeyQSYy07VwEbaveMxgkqT6iHPYAHEAQ6O9lHoHzGwdy4fXefzuwVC
-k9qpbuSfnV3D9IbY2x7yqdlZCDDCrwwsKpcQpS9s1xmwJ3/0IaUBJKRkLAf/B0RZ
-6YtuKVnLas1mxDz2tIrD04zvimoZ4HC7f+Psr/o/aQleYLLzCXKaNoNLyCSu2N6q
-qlu+zOU7920=
-=SYzC
+iQIcBAEBAgAGBQJQu8GSAAoJEN0jrNd/PrOhmsMP/AvZGjZDGAyNPdU6Z+JFMLJf
+qnDpGfVDPG6lAdAVWhDtQQX49Y0/lLNSf2FnRZeAwHmMGzCClP1Las0umCtvcqVt
+cGWSW65hF6E2q+pb1BLkcfaW1m+2thxx658Il/U7k/UOy4d9eIWoT1q6PPnQKOth
+ZrGHzrgAm1TKEUXa0zhhgVleapxSO9Fluk5QkXnHYCVz9RSu/ETXx+1nJ1q1OFKI
+a/WCTKHBaddlQ9Xh6QY2i3suweUghBt6k3cTOvL+BmaPxWxp00cpXd35DaS0uxCz
+5dbC+bXn+CHLYG7IsUjee3H+9n0ORumDzDiJ+5mu3xjdYYcgUlA8fpaM/syq0sgy
+a387RSoCANxet2K0Csj3bZC7k9eOj/PzWRctroDjH24fMkj/sDlI/jEoHh+kUzko
+B5inX/abN6zZIvezFmPCzzTNjmfocBI2l35JJyQ0N0feQ5h6YNP/2MBcgpoaP//2
+DDzVNRqvpA8rvtpH63TYpJ8xV8ETz73F4Xp2l1XBkrdX3JxIExsugjkeFiINjUar
+F46/Kllj8M3e5KRLoHEINUQ31JIBn/qDKnLGTffthPNSgkHFVfOAUsOBi3yNxS+4
+rvjJBgLmCMj5Hovi2LyvcrSEwmOHq2iKW8EkU9pdk06xPUrspYM4X4scp49Egbmd
+w/PAxqoJl6pTFVkGySyT
+=7Iq6
 -----END PGP SIGNATURE-----
 
---Sig_/npdZKBa0_l4gKjTxK3MZwOQ--
+--b5gNqxB1S1yM7hjW--
