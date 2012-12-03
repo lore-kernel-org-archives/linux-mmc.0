@@ -1,33 +1,47 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] SDIO / PM: Add empty bus-level suspend/resume callbacks
-Date: Sun, 02 Dec 2012 16:49:32 -0500
-Message-ID: <87y5hgcefn.fsf@octavius.laptop.org>
-References: <20120325203849.7a908e32@notabene.brown>
-	<201203260029.24826.rjw@sisk.pl>
-	<20121202194625.5d66e239@notabene.brown>
-	<2147450.LFoExqrKEF@vostro.rjw.lan>
-	<20121203065457.0bd12fc6@notabene.brown>
+From: Sachin Kamat <sachin.kamat@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: Remove redundant null check before kfree in sdio_bus.c
+Date: Mon, 3 Dec 2012 14:37:27 +0530
+Message-ID: <CAK9yfHzwxFg0xMd55hDjkvXRmnWFFk6xFhNB92Reh5dswVkF2g@mail.gmail.com>
+References: <1353402797-6785-1-git-send-email-sachin.kamat@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <20121203065457.0bd12fc6@notabene.brown> (NeilBrown's message of
-	"Mon, 3 Dec 2012 06:54:57 +1100")
-Sender: linux-pm-owner@vger.kernel.org
-To: NeilBrown <neilb@suse.de>
-Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Linux PM mailing list <linux-pm@vger.kernel.org>, Thierry Reding <thierry.reding@avionic-design.de>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:38141 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753184Ab2LCJH2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Dec 2012 04:07:28 -0500
+Received: by mail-vb0-f46.google.com with SMTP id b13so1352983vby.19
+        for <linux-mmc@vger.kernel.org>; Mon, 03 Dec 2012 01:07:28 -0800 (PST)
+In-Reply-To: <1353402797-6785-1-git-send-email-sachin.kamat@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, sachin.kamat@linaro.org, patches@linaro.org
 
-Hi,
-
-On Sun, Dec 02 2012, NeilBrown wrote:
->> What about applying the appended patch (hopefully, the build warnings should
->> be fixed properly this time)?
+On 20 November 2012 14:43, Sachin Kamat <sachin.kamat@linaro.org> wrote:
+> kfree on a null pointer is a no-op.
 >
-> Looks good to me - thanks!
+> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+> ---
+>  drivers/mmc/core/sdio_bus.c |    3 +--
+>  1 files changed, 1 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+> index 6bf6879..fdcf9e3 100644
+> --- a/drivers/mmc/core/sdio_bus.c
+> +++ b/drivers/mmc/core/sdio_bus.c
+> @@ -258,8 +258,7 @@ static void sdio_release_func(struct device *dev)
+>
+>         sdio_free_func_cis(func);
+>
+> -       if (func->info)
+> -               kfree(func->info);
+> +       kfree(func->info);
+>
+>         kfree(func);
+>  }
+> --
+> 1.7.4.1
+>
 
-Thanks, both of you, pushed to mmc-next for 3.8.
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+ping...
