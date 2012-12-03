@@ -1,26 +1,30 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sh_mobile_sdhi: fix clock frequency printing
-Date: Mon, 03 Dec 2012 14:21:48 -0500
-Message-ID: <87lidfhrg3.fsf@octavius.laptop.org>
-References: <Pine.LNX.4.64.1211281023310.1710@axis700.grange>
-	<20121130090238.GH4501@verge.net.au>
+Subject: Re: [PATCH] mmc: sh_mobile_sdhi: remove unneeded clock connection ID
+Date: Mon, 03 Dec 2012 14:23:10 -0500
+Message-ID: <87hao3hrdt.fsf@octavius.laptop.org>
+References: <Pine.LNX.4.64.1211281016550.1710@axis700.grange>
+	<20121130085903.GF4501@verge.net.au>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20121130090238.GH4501@verge.net.au> (Simon Horman's message of
-	"Fri, 30 Nov 2012 18:02:39 +0900")
-Sender: linux-sh-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:56599 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751738Ab2LCTXO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 3 Dec 2012 14:23:14 -0500
+In-Reply-To: <20121130085903.GF4501@verge.net.au> (Simon Horman's message of
+	"Fri, 30 Nov 2012 17:59:04 +0900")
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Simon Horman <horms@verge.net.au>
 Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
 
 Hi,
 
 On Fri, Nov 30 2012, Simon Horman wrote:
-> On Wed, Nov 28, 2012 at 10:24:13AM +0100, Guennadi Liakhovetski wrote:
->> During its probing the SDHI driver prints out the clock frequency, but
->> does it wrongly, always reporting 0Hz. Use the MMC host frequency value
->> to fix this issue.
+> On Wed, Nov 28, 2012 at 10:24:21AM +0100, Guennadi Liakhovetski wrote:
+>> SDHI only uses one clock, all ARM and SuperH platform register SDHI clock
+>> lookup entries with no connection ID, hence it can be dropped in the
+>> driver too.
 >> 
 >> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 >
