@@ -1,43 +1,44 @@
-From: Zhang Haijun-B42677 <B42677@freescale.com>
-Subject: Powerpc : patches sent
-Date: Tue, 4 Dec 2012 02:24:19 +0000
-Message-ID: <99E897753B6F7048BD8CCDB4661D02E117C636@039-SN2MPN1-022.039d.mgd.msft.net>
-References: <1354161616-15486-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH V5] Powerpc eSDHC Recover from the ADMA error
+Date: Mon, 03 Dec 2012 21:47:47 -0500
+Message-ID: <87obiah6ss.fsf@octavius.laptop.org>
+References: <1354241680-13903-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe001.messaging.microsoft.com ([213.199.154.204]:40092
-	"EHLO am1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750812Ab2LDCYY convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 3 Dec 2012 21:24:24 -0500
-In-Reply-To: <1354161616-15486-1-git-send-email-Haijun.Zhang@freescale.com>
-Content-Language: en-US
+Received: from void.printf.net ([89.145.121.20]:42099 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751340Ab2LDCrw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 3 Dec 2012 21:47:52 -0500
+In-Reply-To: <1354241680-13903-1-git-send-email-Haijun.Zhang@freescale.com>
+	(Haijun Zhang's message of "Fri, 30 Nov 2012 10:14:40 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Huang Changming-R66093 <r66093@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Haijun Zhang <Haijun.Zhang@freescale.com>
+Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-Hi  Chris
+Hi,
 
-I had sent six patches list below, they all Acked-by  or Reviewed-by Anton. 
-Could you please help review these patches again?  If resending these patches is needed  Pls let me know.
-They are sorted by date.
-Thanks in advance.
+On Thu, Nov 29 2012, Haijun Zhang wrote:
+> A-003500: False ADMA Error might be reported when ADMA is used for 
+> multiple block read command with Stop at Block Gap. If PROCTL[SABGREQ] 
+> is set when the particular block's data is received by the System side 
+> logic before entire block(with CRC) data is received by the SD side 
+> logic, and also if ADMA descriptor line is fetched at the same time, 
+> then DMA engine might report false ADMA error. eSDHC might not be able 
+> to Continue(PROCTL[CREQ]=1)after Stop at Block Gap.
+> This issue will impact the eSDHC IP VVN2.3.
+>
+> Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
+> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
+> CC: Chris Ball <cjb@laptop.org>
 
-1)	Subject: [PATCH V5] Powerpc eSDHC Recover from the ADMA error
+This doesn't apply to mmc-next; please fix and resend.
 
-2)	Subject: [PATCH] Powerpc eSDHC: Use u64 to calculate the timeout value to avoid overflow
+Thanks,
 
-3)	Subject: [PATCH 2/2 v3] mmc:core: Add limit to data and erase timeout value calculation
-4)	Subject: [PATCH 1/2 v5] Powerpc/eSDHC: Calculate the applicable mmc erase timeout value
-5)	
-6)	Subject: [PATCH 1/2 V2] mmc:block : Convert the cmd_timeou_ms to u64 to avoid overflow
-7)	Subject: [PATCH 2/2 V2] mmc:host: Use u64 to calculate the timeout value to avoid overflow
-
-
-Regards
-Haijun.
-
-
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
