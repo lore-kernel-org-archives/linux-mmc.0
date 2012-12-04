@@ -1,50 +1,57 @@
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: Re: FW: [PATCH v2] mmc: sdhci: apply voltage range check only for
- non-fixed regulators
-Date: Tue, 04 Dec 2012 15:07:34 +0100
-Message-ID: <50BE03A6.6010504@samsung.com>
-References: <25B60CDC2F704E4E9D88FFD52780CB4C060FBEA29A@SC-VEXCH1.marvell.com>
- <CADz5_gLC=z_VYrNq8q3dU7L6im7shSz-Sn6Tzym2mRZONwpgUg@mail.gmail.com>
- <50AB34E2.1010206@samsung.com>
- <CADz5_gKdUq8bjuMr1=yo65ysHzLNvKnrfVuSpLk-Q6ek-TWpNA@mail.gmail.com>
- <50AB587F.3040405@samsung.com>
- <CADz5_gJ1hV3n-4BPgBNT9LDp2-E=vNNzMGx=_9PmzT0RJ9+TsA@mail.gmail.com>
- <50AB81C8.4090300@samsung.com>
- <CADz5_gL3uHbvhb2ccp03=9P88u1Catxe9+Xffs3KmJsZGWmWvA@mail.gmail.com>
- <50AB9B90.1030404@samsung.com> <87hao7f344.fsf@octavius.laptop.org>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: [PATCH 3/3] mmc: sdhci: check voltage range only on regulators
+ aware of voltage value
+Date: Tue, 4 Dec 2012 22:50:03 +0800
+Message-ID: <CADz5_gLAWyD-3nYEV5HJad11wxEmxO867LkWOXDBn1_XmcOA_w@mail.gmail.com>
+References: <1354629663-29091-1-git-send-email-m.szyprowski@samsung.com>
+	<1354629663-29091-4-git-send-email-m.szyprowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <87hao7f344.fsf@octavius.laptop.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Kevin Liu <keyuan.liu@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kyungmin.park@samsung.com, Mark Brown <broonie@opensource.wolfsonmicro.com>, lrg@ti.com, Philip Rakity <prakity@nvidia.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wg0-f46.google.com ([74.125.82.46]:45522 "EHLO
+	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752879Ab2LDOuF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Dec 2012 09:50:05 -0500
+In-Reply-To: <1354629663-29091-4-git-send-email-m.szyprowski@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Marek Szyprowski <m.szyprowski@samsung.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>
 
-Hello,
-
-On 11/30/2012 5:48 PM, Chris Ball wrote:
-> On Tue, Nov 20 2012, Marek Szyprowski wrote:
-> > The problem with dummy regulator is the fact that it can be enabled only
-> > globally for all devices in the system. I think that the best solution
-> > would be to introduce regulator_can_change_voltage() as Mark suggested.
-> > I will post patches soon.
+2012/12/4 Marek Szyprowski <m.szyprowski@samsung.com>:
+> Some regulators don't report any voltage values, so checking supported
+> voltage range results in disabling all SDHCI_CAN_VDD_* flags and
+> registration failure. This patch finally provides a correct fix for the
+> registration of SDHCI driver with all possible voltage regulators:
+> dummy, fixed and regulated without using regulator_count_voltages()
+> hacks.
 >
-> Does this mean that I shouldn't merge either yours or Kevin's patch for
-> 3.8, while we wait for this?  Any ETA on it?
+> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+> ---
+>  drivers/mmc/host/sdhci.c |    6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index a9ad2cd..d244dc0 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2930,7 +2930,11 @@ int sdhci_add_host(struct sdhci_host *host)
+>         }
+>
+>  #ifdef CONFIG_REGULATOR
+> -       if (host->vmmc && regulator_count_voltages(host->vmmc) > 1) {
+> +       /*
+> +        * Voltage range check makes sense only if regulator reports
+> +        * any voltage value.
+> +        */
+> +       if (host->vmmc && regulator_get_voltage(host->vmmc) > 0) {
+>                 ret = regulator_is_supported_voltage(host->vmmc, 2700000,
+>                         3600000);
+>                 if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
 
-I've just posted an updated patches to solve those issues. I'm sorry for the
-delay as I was terribly busy with other stuff. Kevin's patch is still
-required and it should stay in the tree because it indeed fixes other, in
-some cases related issues.
+Good idea. But how about the regulator is disabled at this point? So I
+suggest to change to
+     if (host->vmmc && regulator_get_voltage(host->vmmc) >= 0)
 
-However my earlier patch "mmc: sdhci: apply voltage range check only for
-non-fixed regulators" can be replaced with the new patches from the
-"[PATCH v2 0/3] Fix fixed regulators support" thread posted a few minutes
-ago (those patches are based on mmc-next branch).
-
-Best regards
--- 
-Marek Szyprowski
-Samsung Poland R&D Center
+Thanks
+Kevin
