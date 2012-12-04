@@ -1,58 +1,51 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v3 1/4] mmc: dw-mmc: relocate the position called
- dw_mci_setup_bus()
-Date: Tue, 04 Dec 2012 13:03:07 +0900
-Message-ID: <50BD75FB.7070109@samsung.com>
-References: <509B6ED1.7030707@samsung.com> <87zk1uhqem.fsf@octavius.laptop.org>
+Subject: [PATCH] mmc: dw-mmc: fix the error for a few argument
+Date: Tue, 04 Dec 2012 13:12:11 +0900
+Message-ID: <50BD781B.4050609@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:48276 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751393Ab2LDEDZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Dec 2012 23:03:25 -0500
+Received: from mailout2.samsung.com ([203.254.224.25]:38604 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751687Ab2LDEMb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Dec 2012 23:12:31 -0500
 Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout4.samsung.com
+ by mailout2.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MEH008RWN8XNHO0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 04 Dec 2012 13:03:24 +0900 (KST)
-Received: from [10.90.51.55] by mmp1.samsung.com
+ 17 2011)) with ESMTP id <0MEH00M7CNO3WBQ0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 04 Dec 2012 13:12:27 +0900 (KST)
+Received: from [10.90.51.55] by mmp2.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0MEH00BFQN9NS7A0@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 04 Dec 2012 13:03:23 +0900 (KST)
-In-reply-to: <87zk1uhqem.fsf@octavius.laptop.org>
+ 17 2011)) with ESMTPA id <0MEH00AP3NORVG50@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 04 Dec 2012 13:12:27 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <James.Hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <James.Hogan@imgtec.com>
 
-Hi Chris,
+The argument of dw_mci_setup_bus is modified.
+(Abhilash's patch: mmc: dw-mc: Add sdio power binding)
+This patch used the dw_mci_setup_bus(slot, false) instead of
+dw_mci_setup_bus(slot)
 
-This patch has dependency with Abhilash's patch(mmc:dw-mmc: Add sdio power binding)
-That patch is modified the dw_mci_setup_bus's argument.
-So it is produced the compiler error.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Do you modify the dw_mci_bus_setup(slot, false) instead of dw_mci_bus_setup(slot)?
-Otherwise, i will resend the patch after modify.
-
-Best Regards,
-Jaehoon Chung
-
-
-On 12/04/2012 04:44 AM, Chris Ball wrote:
-> Hi,
-> 
-> On Thu, Nov 08 2012, Jaehoon Chung wrote:
->> To ensure the stable clock need to enable before set the DW_MMC_CARD_NEED_INIT flag.
->> If set DW_MMC_CARD_NEED_INIT flag, wait for 80-clock before first command after power-up.
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
-> 
-> Thanks, pushed to mmc-next for 3.8 with Will's ACK.
-> 
-> - Chris.
-> 
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 069ca70..323c502 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -807,7 +807,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		drv_data->set_ios(slot->host, ios);
+ 
+ 	/* Slot specific timing and width adjustment */
+-	dw_mci_setup_bus(slot);
++	dw_mci_setup_bus(slot, false);
+ 
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_UP:
+-- 
+1.7.5.4
