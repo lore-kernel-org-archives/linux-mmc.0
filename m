@@ -1,57 +1,31 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: [PATCH 3/3] mmc: sdhci: check voltage range only on regulators
- aware of voltage value
-Date: Tue, 4 Dec 2012 22:50:03 +0800
-Message-ID: <CADz5_gLAWyD-3nYEV5HJad11wxEmxO867LkWOXDBn1_XmcOA_w@mail.gmail.com>
-References: <1354629663-29091-1-git-send-email-m.szyprowski@samsung.com>
-	<1354629663-29091-4-git-send-email-m.szyprowski@samsung.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 0/3] mmc: add a card-event host call-back
+Date: Tue, 4 Dec 2012 16:51:28 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1212041633470.26918@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f46.google.com ([74.125.82.46]:45522 "EHLO
-	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752879Ab2LDOuF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Dec 2012 09:50:05 -0500
-In-Reply-To: <1354629663-29091-4-git-send-email-m.szyprowski@samsung.com>
+Received: from moutng.kundenserver.de ([212.227.126.171]:49368 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752198Ab2LDPvg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Dec 2012 10:51:36 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>
+To: linux-mmc@vger.kernel.org
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Shawn Guo <shawn.guo@linaro.org>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Mike Rapoport <mike@compulab.co.il>, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>
 
-2012/12/4 Marek Szyprowski <m.szyprowski@samsung.com>:
-> Some regulators don't report any voltage values, so checking supported
-> voltage range results in disabling all SDHCI_CAN_VDD_* flags and
-> registration failure. This patch finally provides a correct fix for the
-> registration of SDHCI driver with all possible voltage regulators:
-> dummy, fixed and regulated without using regulator_count_voltages()
-> hacks.
->
-> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
-> ---
->  drivers/mmc/host/sdhci.c |    6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index a9ad2cd..d244dc0 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2930,7 +2930,11 @@ int sdhci_add_host(struct sdhci_host *host)
->         }
->
->  #ifdef CONFIG_REGULATOR
-> -       if (host->vmmc && regulator_count_voltages(host->vmmc) > 1) {
-> +       /*
-> +        * Voltage range check makes sense only if regulator reports
-> +        * any voltage value.
-> +        */
-> +       if (host->vmmc && regulator_get_voltage(host->vmmc) > 0) {
->                 ret = regulator_is_supported_voltage(host->vmmc, 2700000,
->                         3600000);
->                 if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
+In a recent thread [1] an extension to the slot-gpio MMC API, adding a 
+host call-back for card detection events, has been proposed. This 
+extension shall be used by the SDHCI driver to reset the host if the card 
+is ejected during a running request. These patches add such a call-back.
 
-Good idea. But how about the regulator is disabled at this point? So I
-suggest to change to
-     if (host->vmmc && regulator_get_voltage(host->vmmc) >= 0)
 
 Thanks
-Kevin
+Guennadi
+
+[1] http://thread.gmane.org/gmane.linux.kernel.mmc/17924/focus=17927
+
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
