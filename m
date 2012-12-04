@@ -1,52 +1,49 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: [PATCH 1/1] mmc: sdhci-s3c: Fix compilation warning
-Date: Tue,  4 Dec 2012 17:03:07 +0530
-Message-ID: <1354620787-20575-1-git-send-email-sachin.kamat@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+Subject: [PATCH v2 0/3] Fix fixed regulators support
+Date: Tue, 04 Dec 2012 15:01:00 +0100
+Message-ID: <1354629663-29091-1-git-send-email-m.szyprowski@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:38270 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750765Ab2LDLjy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Dec 2012 06:39:54 -0500
-Received: by mail-pb0-f46.google.com with SMTP id wy7so2778207pbc.19
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Dec 2012 03:39:53 -0800 (PST)
+Received: from mailout1.samsung.com ([203.254.224.24]:31788 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751613Ab2LDOB0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Dec 2012 09:01:26 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, ben-linux@fluff.org, sachin.kamat@linaro.org, patches@linaro.org
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Marek Szyprowski <m.szyprowski@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>, Kevin Liu <keyuan.liu@gmail.com>
 
-'sc' is used only when CONFIG_PM_RUNTIME is defined. Hence define it
-conditionally.
+Hello,
 
-Silences the following warning:
-drivers/mmc/host/sdhci-s3c.c: In function =E2=80=98sdhci_s3c_notify_cha=
-nge=E2=80=99:
-drivers/mmc/host/sdhci-s3c.c:378:20: warning: unused variable =E2=80=98=
-sc=E2=80=99 [-Wunused-variable]
+Commit f0f98b19e23d4426ca185e3d4ca80e6aff5ef51b revealed that the support for
+fixed regulators in SDHCI driver was working only by pure luck. My previous
+patch set for fixing this issue resulted in a discussion, which has been
+concluded that this issue should by fixed by extending regulators core by
+regualtor_can_change_voltage() function and using it in the mmc/sdhci drivers.
 
-Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
----
- drivers/mmc/host/sdhci-s3c.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+For more information, please refer to the following threads:
+http://thread.gmane.org/gmane.linux.kernel.mmc/17643
+https://patchwork.kernel.org/patch/1739061/
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.=
-c
-index 7ea3aea..82a8de1 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -375,7 +375,9 @@ static struct sdhci_ops sdhci_s3c_ops =3D {
- static void sdhci_s3c_notify_change(struct platform_device *dev, int s=
-tate)
- {
- 	struct sdhci_host *host =3D platform_get_drvdata(dev);
-+#ifdef CONFIG_PM_RUNTIME
- 	struct sdhci_s3c *sc =3D sdhci_priv(host);
-+#endif
- 	unsigned long flags;
-=20
- 	if (host) {
---=20
-1.7.4.1
+Best regards
+Marek Szyprowski
+Samsung Poland R&D Center
+
+
+Patch summary:
+
+Marek Szyprowski (3):
+  regulators: add regulator_can_change_voltage() function
+  mmc: use regulator_can_change_voltage() instead of
+    regulator_count_voltages() hacks
+  mmc: sdhci: check voltage range only on regulators aware of voltage
+    value
+
+ drivers/mmc/core/core.c            |    2 +-
+ drivers/mmc/host/sdhci.c           |    6 +++++-
+ drivers/regulator/core.c           |   22 ++++++++++++++++++++++
+ include/linux/regulator/consumer.h |    1 +
+ 4 files changed, 29 insertions(+), 2 deletions(-)
+
+-- 
+1.7.9.5
 
