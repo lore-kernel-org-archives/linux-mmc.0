@@ -1,32 +1,47 @@
 From: Subhash Jadavani <subhashj@codeaurora.org>
-Subject: [PATCH v1 0/3] SDIO fixes
-Date: Tue,  4 Dec 2012 17:06:17 +0530
-Message-ID: <1354620980-23764-1-git-send-email-subhashj@codeaurora.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:52436 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751807Ab2LDLgc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Dec 2012 06:36:32 -0500
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH v1 1/3] mmc: sdio: fix resume failure
+Date: Tue,  4 Dec 2012 17:06:18 +0530
+Message-ID: <1354620980-23764-2-git-send-email-subhashj@codeaurora.org>
+References: <1354620980-23764-1-git-send-email-subhashj@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1354620980-23764-1-git-send-email-subhashj@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-msm@vger.kernel.org, Subhash Jadavani <subhashj@codeaurora.org>
+List-Id: linux-mmc@vger.kernel.org
 
-This patch-series is having 1 fix for SDIO resume and 2 fixes related
-to SDIO3.0 card detection
+If SDIO keep power flag (MMC_PM_KEEP_POWER) is not set, card would
+be reinitialized during resume but as we are not resetting
+(CMD52 reset) the SDIO card during this reinitialization, card may
+fail to respond back to subsequent commands (CMD5 etc...).
 
-Subhash Jadavani (2):
-  mmc: sdio: fix resume failure
-  mmc: sdio: print correct UHS mode during card detection
+This change resets the card before the reinitialization of card
+during resume.
 
-Sujit Reddy Thumma (1):
-  mmc: sdio: Fix SDIO 3.0 UHS-I initialization sequence
+Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+---
+ drivers/mmc/core/sdio.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
 
- drivers/mmc/core/sdio.c  |   33 ++++++++++++++++++++-------------
- include/linux/mmc/host.h |    8 ++++++++
- 2 files changed, 28 insertions(+), 13 deletions(-)
-
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 2273ce6..34ad4c8 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -937,10 +937,12 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 	mmc_claim_host(host);
+ 
+ 	/* No need to reinitialize powered-resumed nonremovable cards */
+-	if (mmc_card_is_removable(host) || !mmc_card_keep_power(host))
++	if (mmc_card_is_removable(host) || !mmc_card_keep_power(host)) {
++		sdio_reset(host);
++		mmc_go_idle(host);
+ 		err = mmc_sdio_init_card(host, host->ocr, host->card,
+ 					mmc_card_keep_power(host));
+-	else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
++	} else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
+ 		/* We may have switched to 1-bit mode during suspend */
+ 		err = sdio_enable_4bit_bus(host->card);
+ 		if (err > 0) {
 -- 
 --
 QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, hosted by The Linux Foundation
-
