@@ -1,75 +1,47 @@
-From: Subhash Jadavani <subhashj@codeaurora.org>
-Subject: Re: [PATCH v1 1/3] mmc: sdio: fix resume failure
-Date: Thu, 06 Dec 2012 20:55:25 +0530
-Message-ID: <50C0B8E5.4020502@codeaurora.org>
-References: <1354620980-23764-1-git-send-email-subhashj@codeaurora.org> <1354620980-23764-2-git-send-email-subhashj@codeaurora.org> <CAPDyKFowKZcUXr-4Qug_Awww6wPGXsAm-gMaKs7oOrTwN9RFVw@mail.gmail.com>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: [PATCH v9 00/10] mmc: sdhci: fixes and enhancements
+Date: Thu, 6 Dec 2012 23:36:26 +0800
+Message-ID: <CADz5_gKxK8aS-2uoVdiqnccQLcoFfmzaqrsjG44T39ybbz_Z4Q@mail.gmail.com>
+References: <1354597799-9957-1-git-send-email-keyuan.liu@gmail.com>
+	<25B60CDC2F704E4E9D88FFD52780CB4C08AFCECD1E@SC-VEXCH1.marvell.com>
+	<CADz5_gK6W1Ri763uZpB00h5N-OFy8i+NG9+50bOQym56bR9QyA@mail.gmail.com>
+	<87624fdxap.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:28812 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755144Ab2LFPZa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Dec 2012 10:25:30 -0500
-In-Reply-To: <CAPDyKFowKZcUXr-4Qug_Awww6wPGXsAm-gMaKs7oOrTwN9RFVw@mail.gmail.com>
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:59060 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932241Ab2LFPg2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Dec 2012 10:36:28 -0500
+Received: by mail-wi0-f170.google.com with SMTP id hq7so640986wib.1
+        for <linux-mmc@vger.kernel.org>; Thu, 06 Dec 2012 07:36:26 -0800 (PST)
+In-Reply-To: <87624fdxap.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, arindam.nath@amd.com, peppe.cavallaro@st.com, Ulf Hansson <ulf.hansson@linaro.org>, andriy.shevchenko@linux.intel.com, Philip Rakity <prakity@nvidia.com>, zhangfei gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <kliu5@marvell.com>
 
-
-On 12/6/2012 4:03 PM, Ulf Hansson wrote:
-> On 4 December 2012 12:36, Subhash Jadavani <subhashj@codeaurora.org> wrote:
->> If SDIO keep power flag (MMC_PM_KEEP_POWER) is not set, card would
->> be reinitialized during resume but as we are not resetting
->> (CMD52 reset) the SDIO card during this reinitialization, card may
->> fail to respond back to subsequent commands (CMD5 etc...).
->>
->> This change resets the card before the reinitialization of card
->> during resume.
->>
->> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
->> ---
->>   drivers/mmc/core/sdio.c |    6 ++++--
->>   1 files changed, 4 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
->> index 2273ce6..34ad4c8 100644
->> --- a/drivers/mmc/core/sdio.c
->> +++ b/drivers/mmc/core/sdio.c
->> @@ -937,10 +937,12 @@ static int mmc_sdio_resume(struct mmc_host *host)
->>          mmc_claim_host(host);
->>
->>          /* No need to reinitialize powered-resumed nonremovable cards */
->> -       if (mmc_card_is_removable(host) || !mmc_card_keep_power(host))
->> +       if (mmc_card_is_removable(host) || !mmc_card_keep_power(host)) {
->> +               sdio_reset(host);
->> +               mmc_go_idle(host);
-> If the card has lost power, why is this needed? Could it be that the
-> host is not capable of cutting the power to card?
-
-Yes, the regulator powering the card is always on in this case which 
-means SDIO VDD is not powered off during the suspend.
-
+2012/12/6 Chris Ball <cjb@laptop.org>:
+> Hi,
 >
-> It might be more safe to do this but I would like to understand more,
-> before you get my ack on this patch.
+> On Thu, Dec 06 2012, Kevin Liu wrote:
+>>> From: Kevin Liu [keyuan.liu@gmail.com]
+>>> Sent: Monday, December 03, 2012 9:09 PM
+>>> To: linux-mmc@vger.kernel.org; cjb@laptop.org; arindam.nath@amd.com; peppe.cavallaro@st.com; ulf.hansson@linaro.org; andriy.shevchenko@linux.intel.com; prakity@nvidia.com
+>>> Cc: zhangfei.gao@gmail.com; haojian.zhuang@gmail.com; Chao Xie; Kevin Liu
+>>> Subject: [PATCH v9 00/10] mmc: sdhci: fixes and enhancements
+>>>
+>>> This patchset aim to fix bugs and do some code enhancement for sdhci.c
+>>> Most patches are quite small.
+>>> I will highly appreciate if you can pay a few minutes to review them.
+>>> Any comments are welcome.
 >
->>                  err = mmc_sdio_init_card(host, host->ocr, host->card,
->>                                          mmc_card_keep_power(host));
->> -       else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
->> +       } else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
->>                  /* We may have switched to 1-bit mode during suspend */
->>                  err = sdio_enable_4bit_bus(host->card);
->>                  if (err > 0) {
->> --
->> --
->> QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, hosted by The Linux Foundation
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Kind regards
-> Ulf Hansson
+> Weird, I didn't get the original copy of this e-mail.  Any idea what
+> happened?  I don't think it's on the MMC list either.  The last patchset
+> I see on the list is v6, not v9.
+>
+So strange, maybe my mail server has some issue or my original mail
+format is wrong...Then I will resend v9 tomorrow.
+Chris, thanks for the feedback.
 
+Kevin
