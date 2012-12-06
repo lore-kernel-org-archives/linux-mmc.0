@@ -1,58 +1,76 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v1 1/3] mmc: sdio: fix resume failure
-Date: Thu, 6 Dec 2012 11:33:24 +0100
-Message-ID: <CAPDyKFowKZcUXr-4Qug_Awww6wPGXsAm-gMaKs7oOrTwN9RFVw@mail.gmail.com>
+Subject: Re: [PATCH v1 3/3] mmc: sdio: print correct UHS mode during card detection
+Date: Thu, 6 Dec 2012 11:41:59 +0100
+Message-ID: <CAPDyKFqAkL+N3Zz2Lo7hj92QZoVJVn+UhbCSpqZLtSVG-eN3=Q@mail.gmail.com>
 References: <1354620980-23764-1-git-send-email-subhashj@codeaurora.org>
-	<1354620980-23764-2-git-send-email-subhashj@codeaurora.org>
+	<1354620980-23764-4-git-send-email-subhashj@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1354620980-23764-2-git-send-email-subhashj@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f180.google.com ([209.85.212.180]:61787 "EHLO
+	mail-wi0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752447Ab2LFKmB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Dec 2012 05:42:01 -0500
+Received: by mail-wi0-f180.google.com with SMTP id hj13so384002wib.1
+        for <linux-mmc@vger.kernel.org>; Thu, 06 Dec 2012 02:42:00 -0800 (PST)
+In-Reply-To: <1354620980-23764-4-git-send-email-subhashj@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Subhash Jadavani <subhashj@codeaurora.org>
 Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
 
 On 4 December 2012 12:36, Subhash Jadavani <subhashj@codeaurora.org> wrote:
-> If SDIO keep power flag (MMC_PM_KEEP_POWER) is not set, card would
-> be reinitialized during resume but as we are not resetting
-> (CMD52 reset) the SDIO card during this reinitialization, card may
-> fail to respond back to subsequent commands (CMD5 etc...).
+> When SDIO3.0 card is detected, incorrect bus speed mode
+> is printed as part of card detection print in kernel logs.
 >
-> This change resets the card before the reinitialization of card
-> during resume.
+> This change fixes it so that user won't be confused by
+> looking at incorrect card detection message in logs.
 >
 > Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
 > ---
->  drivers/mmc/core/sdio.c |    6 ++++--
->  1 files changed, 4 insertions(+), 2 deletions(-)
+>  drivers/mmc/core/sdio.c |    5 +++++
+>  1 files changed, 5 insertions(+), 0 deletions(-)
 >
 > diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index 2273ce6..34ad4c8 100644
+> index 9565d38..3a64933 100644
 > --- a/drivers/mmc/core/sdio.c
 > +++ b/drivers/mmc/core/sdio.c
-> @@ -937,10 +937,12 @@ static int mmc_sdio_resume(struct mmc_host *host)
->         mmc_claim_host(host);
+> @@ -485,23 +485,27 @@ static int sdio_set_bus_speed_mode(struct mmc_card *card)
+>                         bus_speed = SDIO_SPEED_SDR104;
+>                         timing = MMC_TIMING_UHS_SDR104;
+>                         card->sw_caps.uhs_max_dtr = UHS_SDR104_MAX_DTR;
+> +                       card->sd_bus_speed = UHS_SDR104_BUS_SPEED;
+>         } else if ((card->host->caps & MMC_CAP_UHS_DDR50) &&
+>                    (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_DDR50)) {
+>                         bus_speed = SDIO_SPEED_DDR50;
+>                         timing = MMC_TIMING_UHS_DDR50;
+>                         card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
+> +                       card->sd_bus_speed = UHS_DDR50_BUS_SPEED;
+>         } else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
+>                     MMC_CAP_UHS_SDR50)) && (card->sw_caps.sd3_bus_mode &
+>                     SD_MODE_UHS_SDR50)) {
+>                         bus_speed = SDIO_SPEED_SDR50;
+>                         timing = MMC_TIMING_UHS_SDR50;
+>                         card->sw_caps.uhs_max_dtr = UHS_SDR50_MAX_DTR;
+> +                       card->sd_bus_speed = UHS_SDR50_BUS_SPEED;
+>         } else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
+>                     MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR25)) &&
+>                    (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR25)) {
+>                         bus_speed = SDIO_SPEED_SDR25;
+>                         timing = MMC_TIMING_UHS_SDR25;
+>                         card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
+> +                       card->sd_bus_speed = UHS_SDR25_BUS_SPEED;
+>         } else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
+>                     MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR25 |
+>                     MMC_CAP_UHS_SDR12)) && (card->sw_caps.sd3_bus_mode &
+> @@ -509,6 +513,7 @@ static int sdio_set_bus_speed_mode(struct mmc_card *card)
+>                         bus_speed = SDIO_SPEED_SDR12;
+>                         timing = MMC_TIMING_UHS_SDR12;
+>                         card->sw_caps.uhs_max_dtr = UHS_SDR12_MAX_DTR;
+> +                       card->sd_bus_speed = UHS_SDR12_BUS_SPEED;
+>         }
 >
->         /* No need to reinitialize powered-resumed nonremovable cards */
-> -       if (mmc_card_is_removable(host) || !mmc_card_keep_power(host))
-> +       if (mmc_card_is_removable(host) || !mmc_card_keep_power(host)) {
-> +               sdio_reset(host);
-> +               mmc_go_idle(host);
-
-If the card has lost power, why is this needed? Could it be that the
-host is not capable of cutting the power to card?
-
-It might be more safe to do this but I would like to understand more,
-before you get my ack on this patch.
-
->                 err = mmc_sdio_init_card(host, host->ocr, host->card,
->                                         mmc_card_keep_power(host));
-> -       else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
-> +       } else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
->                 /* We may have switched to 1-bit mode during suspend */
->                 err = sdio_enable_4bit_bus(host->card);
->                 if (err > 0) {
+>         err = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_SPEED, 0, &speed);
 > --
 > --
 > QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, hosted by The Linux Foundation
@@ -62,5 +80,4 @@ before you get my ack on this patch.
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Kind regards
-Ulf Hansson
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
