@@ -1,57 +1,104 @@
-From: Konstantin Dorfman <kdorfman@codeaurora.org>
-Subject: Re: [PATCH v4] mmc: fix async request mechanism for sequential read
- scenarios
-Date: Thu, 06 Dec 2012 16:23:12 +0200
-Message-ID: <50C0AA50.90707@codeaurora.org>
-References: <n@samsung.com> <1354714708-17942-1-git-send-email-kdorfman@codeaurora.org> <001301cdd371$e7beaa90$b73bffb0$%jun@samsung.com>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: [PATCH v9 00/10] mmc: sdhci: fixes and enhancements
+Date: Thu, 6 Dec 2012 23:07:42 +0800
+Message-ID: <CADz5_gK6W1Ri763uZpB00h5N-OFy8i+NG9+50bOQym56bR9QyA@mail.gmail.com>
+References: <1354597799-9957-1-git-send-email-keyuan.liu@gmail.com>
+	<25B60CDC2F704E4E9D88FFD52780CB4C08AFCECD1E@SC-VEXCH1.marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=EUC-KR
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:53377 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751321Ab2LFOXQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Dec 2012 09:23:16 -0500
-In-Reply-To: <001301cdd371$e7beaa90$b73bffb0$%jun@samsung.com>
+Received: from mail-wi0-f180.google.com ([209.85.212.180]:42327 "EHLO
+	mail-wi0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1423588Ab2LFPHn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Dec 2012 10:07:43 -0500
+Received: by mail-wi0-f180.google.com with SMTP id hj13so600648wib.1
+        for <linux-mmc@vger.kernel.org>; Thu, 06 Dec 2012 07:07:42 -0800 (PST)
+In-Reply-To: <25B60CDC2F704E4E9D88FFD52780CB4C08AFCECD1E@SC-VEXCH1.marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, per.lkml@gmail.com
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, arindam.nath@amd.com, peppe.cavallaro@st.com, Ulf Hansson <ulf.hansson@linaro.org>, andriy.shevchenko@linux.intel.com, Philip Rakity <prakity@nvidia.com>
+Cc: zhangfei gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <kliu5@marvell.com>
 
-On 12/06/2012 07:24 AM, Seungwon Jeon wrote:
-> Hi,
-> 
-> Doesn't it consider SD path?
-> It have a problem with uninitialized 'context_info'.
-> 'context_info' is moved into mmc_host struct in v4.
-> Please, could you explain the reason in brief?
-> 
+> From: Kevin Liu [keyuan.liu@gmail.com]
+> Sent: Monday, December 03, 2012 9:09 PM
+> To: linux-mmc@vger.kernel.org; cjb@laptop.org; arindam.nath@amd.com; peppe.cavallaro@st.com; ulf.hansson@linaro.org; andriy.shevchenko@linux.intel.com; prakity@nvidia.com
+> Cc: zhangfei.gao@gmail.com; haojian.zhuang@gmail.com; Chao Xie; Kevin Liu
+> Subject: [PATCH v9 00/10] mmc: sdhci: fixes and enhancements
+>
+> This patchset aim to fix bugs and do some code enhancement for sdhci.c
+> Most patches are quite small.
+> I will highly appreciate if you can pay a few minutes to review them.
+> Any comments are welcome.
+>
+> [PATCH v9 01/10] mmc: sdhci: fix transfer mode setting bug for cmds w/o data transfer
+> [PATCH v9 02/10] mmc: sdhci: refine code for clock disable/enable in set ios
+> [PATCH v9 03/10] mmc: sdhci: keep the saved clock var up to date
+> [PATCH v9 04/10] mmc: sdhci: enhance preset value function
+> [PATCH v9 05/10] mmc: sdhci: introduce signal_voltage_switch callback function
+> [PATCH v9 06/10] mmc: sdhci: fix the bug that DDR50 can't work for emmc in default code
+> [PATCH v9 07/10] mmc: sdhci: remove set_uhs_signaling function
+> [PATCH v9 08/10] mmc: sdhci: add function to get retunig timer count
+> [PATCH v9 09/10] mmc: sdhci: correct voltage support caps setting
+> [PATCH v9 10/10] mmc: sdhci: clean code for SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK selected
+>
+> changelog v1->v2:
+>         - remove the patch "mmc: sdhci-pxav3: fix build error"
+>         - update the patch 05/15 by avoid warning with return null
+>         - add patches 06/15 ~ 08/15
+> changelog v2->v3:
+>         - update some comments
+>         - add patches 09/15 ~ 11/15
+> changelog v3->v4:
+>         - update the patch 01/15 with data null check
+>         - add patches 12/15 ~ 15/15
+> changelog v4->v5:
+>         - drop below two patches since Johan is updating voltage switch code:
+>         - drop the patch "mmc: core: add new 1.8v flag for mmc"
+>         - drop the patch "mmc: sdhci: add mmc 1.8v signal voltage switch function"
+>         - drop the patch "mmc: sdhci-pxav3: add signal_voltage_switch function" which calls plat callback function
+>         - update the patch 07/13 with adding function get_max_clock
+>         - update the patch 03/13 with voltage setting
+>         - add patch 02/13
+> changelog v5->v6:
+>         - drop the patch "mmc: sdhci: use regulator min/max voltage range according to spec"
+>         - add patch 13/14
+>         - add patch 14/14
+> changelog v6->v7:
+>         - remove the patch "mmc: sdhci: fix null return check of regulator_get" which has been merged
+>         - restore the patch "mmc: sdhci: use regulator min/max voltage range according to spec"
+> changelog v7->v8:
+>         - remove the merged patch "mmc: sdhci-pxav3: controller can't get base clock"
+>         - remove the merged patch "mmc: host: adjust uhs timing value"
+>         - remove the merged patch "mmc: sdhci: solve several vmmc/vqmmc regulator issues"
+>         - update the patch "mmc: sdhci-pxav3: remove set_uhs_signaling function"
+> changelog v8->v9:
+>         - remove the merged patch "mmc: sdhci-pxav3: add quirks2"
+>         - remove the merged patch "mmc: sdhci: use regulator min/max voltage range according to spec"
+>         - add patch 10/10
+>
+> Kevin Liu (10)
+> [PATCH v9 01/10] mmc: sdhci: fix transfer mode setting bug for cmds w/o data transfer
+> [PATCH v9 02/10] mmc: sdhci: refine code for clock disable/enable in set ios
+> [PATCH v9 03/10] mmc: sdhci: keep the saved clock var up to date
+> [PATCH v9 04/10] mmc: sdhci: enhance preset value function
+> [PATCH v9 05/10] mmc: sdhci: introduce signal_voltage_switch callback function
+> [PATCH v9 06/10] mmc: sdhci: fix the bug that DDR50 can't work for emmc in default code
+> [PATCH v9 07/10] mmc: sdhci: remove set_uhs_signaling function
+> [PATCH v9 08/10] mmc: sdhci: add function to get retunig timer count
+> [PATCH v9 09/10] mmc: sdhci: correct voltage support caps setting
+> [PATCH v9 10/10] mmc: sdhci: clean code for SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK selected
+>
+>  drivers/mmc/core/sd.c          |   17 ---
+>  drivers/mmc/host/sdhci-pxav3.c |   39 ------
+>  drivers/mmc/host/sdhci.c       |  289 +++++++++++++++++++++++++---------------
+>  drivers/mmc/host/sdhci.h       |   15 ++-
+>  include/linux/mmc/host.h       |    1 -
+>  include/linux/mmc/sdhci.h      |    1 +
+>  6 files changed, 197 insertions(+), 165 deletions(-)
 
-The problem I'm trying to resolve with the v4 change is: there should be
-no core/core.c API change from upper layers point of view.
+Chris,
 
-There was such violation, when the synchronization mechanism of async
-request for data commands was changed (from "completion" to "wait_event"
-+ number of flags to pass event reason).
+Any comments?
 
-Before v4, the 'context_info' initialized by mmc_init_queue() function
-and this is valid only for mmcblk. For example when running the mmc_test
-module, the code for card/queue.c, card/block.c layers is not run at all
-and the struct remains uninitialized.
-
-In the current version the initialization was moved into
-mmc_attach_mmc(), but now, I understand, that this initialization should
-be moved even before mmc_attach_XXX() (XXX is sdio/sd/mmc...) - it may
-be placed in  mmc_rescan_try_freq().
-
-Will resend v4 after the testing.
-
-'mmc_host' structure contains a host information for all sdio/sd/mmc, so
-'context_info' may be accessed by any protocol willing to use
-NEW_REQUEST notification (when async request mechanism is used).
-
--- 
-Konstantin Dorfman,
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center,
-Inc. is a member of Code Aurora Forum,
-hosted by The Linux Foundation
+Thanks
+Kevin
