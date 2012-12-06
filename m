@@ -1,107 +1,65 @@
-From: Bing Zhao <bzhao@marvell.com>
-Subject: RE: [PATCH v1 2/3] mmc: sdio: Fix SDIO 3.0 UHS-I initialization
- sequence
-Date: Wed, 5 Dec 2012 19:33:15 -0800
-Message-ID: <477F20668A386D41ADCC57781B1F70430D13A09FAE@SC-VEXCH1.marvell.com>
-References: <1354620980-23764-1-git-send-email-subhashj@codeaurora.org>
- <1354620980-23764-3-git-send-email-subhashj@codeaurora.org>
- <477F20668A386D41ADCC57781B1F70430D13A09A1A@SC-VEXCH1.marvell.com>
- <0C8FBB70FF40A94D98BE847F9C171A98033FE4EE@SCYBEXDAG04.amd.com>
- <477F20668A386D41ADCC57781B1F70430D13A09DC6@SC-VEXCH1.marvell.com>
- <0C8FBB70FF40A94D98BE847F9C171A98033FE94B@SCYBEXDAG04.amd.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 1/1] mmc: sdhci-s3c: Fix compilation warning
+Date: Thu, 06 Dec 2012 13:13:57 +0900
+Message-ID: <50C01B85.5060502@samsung.com>
+References: <1354620787-20575-1-git-send-email-sachin.kamat@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog126.obsmtp.com ([74.125.149.155]:44211 "EHLO
-	na3sys009aog126.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752101Ab2LFDeU convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 5 Dec 2012 22:34:20 -0500
-In-Reply-To: <0C8FBB70FF40A94D98BE847F9C171A98033FE94B@SCYBEXDAG04.amd.com>
-Content-Language: en-US
+Received: from mailout4.samsung.com ([203.254.224.34]:39530 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751909Ab2LFEOU convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Dec 2012 23:14:20 -0500
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MEL002GSD3U62L0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 06 Dec 2012 13:14:18 +0900 (KST)
+Received: from [10.90.51.55] by mmp1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0MEL005NKD3TKCX0@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 06 Dec 2012 13:14:18 +0900 (KST)
+In-reply-to: <1354620787-20575-1-git-send-email-sachin.kamat@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Shen, Jackey" <Jackey.Shen@amd.com>, Subhash Jadavani <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Sujit Reddy Thumma <sthumma@codeaurora.org>
+To: Sachin Kamat <sachin.kamat@linaro.org>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, ben-linux@fluff.org, patches@linaro.org
 
-Hi Jackey,
+It looks good to me.
 
-> Hi Bing,
-> 
-> sdhci_add_host() reads host controller's capabilities and initialize host->caps of function
-> mmc_host_uhs(). So mmc_host_uhs() only return this cached values.
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-So, it does represent host controller's capabilities, not the capabilities of the card.
-What happens if I have a UHS capable controller and a 2.0 card?
-The S18R bit will be set in this case, which might cause problem for the card?
-
-Thanks,
-Bing
-
-> 
-> Thanks,
-> Jackey
-> 
-> -----Original Message-----
-> From: Bing Zhao [mailto:bzhao@marvell.com]
-> Sent: Thursday, December 06, 2012 3:14 AM
-> To: Shen, Jackey; Subhash Jadavani; linux-mmc@vger.kernel.org
-> Cc: linux-arm-msm@vger.kernel.org; Sujit Reddy Thumma
-> Subject: RE: [PATCH v1 2/3] mmc: sdio: Fix SDIO 3.0 UHS-I initialization sequence
-> 
-> Hi Jackey,
-> 
-> > Hi Bing,
-> >
-> > The function mmc_host_uhs() will return false and never set bit[24] (S18R) for SDIO 2.0 cards.
-> 
-> I thought mmc_host_uhs() will return host controller's capabilities, no?
-> 
-> Thanks,
-> Bing
-> 
-> >
-> > Thanks,
-> > Jackey
-> >
-> > -----Original Message-----
-> > From: linux-mmc-owner@vger.kernel.org
-> > [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Bing Zhao
-> > Sent: Wednesday, December 05, 2012 5:14 AM
-> > To: Subhash Jadavani; linux-mmc@vger.kernel.org
-> > Cc: linux-arm-msm@vger.kernel.org; Sujit Reddy Thumma
-> > Subject: RE: [PATCH v1 2/3] mmc: sdio: Fix SDIO 3.0 UHS-I
-> > initialization sequence
-> >
-> > Hi,
-> >
-> > > From: Sujit Reddy Thumma <sthumma@codeaurora.org>
-> > >
-> > > According to UHS-I initialization sequence for SDIO 3.0 cards, the
-> > > host must set bit[24] (S18R) of OCR register during OCR handshake to
-> > > know whether the SDIO card is capable of doing 1.8V I/O.
-> >
-> > In SDIO 2.0 spec, bit[24] is reserved, "shall be set to 0".
-> > Setting it to 1 might cause side effect to 2.0 cards.
-> > Perhaps using a quirk for S18R is more suitable for all combinations.
-> >
-> > Regards,
-> > Bing
-> >
-> > >
-> > > Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
-> > > Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
-> > > ---
-> > >  drivers/mmc/core/sdio.c  |   22 +++++++++++-----------
-> > >  include/linux/mmc/host.h |    8 ++++++++
-> > >  2 files changed, 19 insertions(+), 11 deletions(-)
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> > in the body of a message to majordomo@vger.kernel.org More majordomo
-> > info at  http://vger.kernel.org/majordomo-info.html
-> >
-> 
-> 
+On 12/04/2012 08:33 PM, Sachin Kamat wrote:
+> 'sc' is used only when CONFIG_PM_RUNTIME is defined. Hence define it
+> conditionally.
+>=20
+> Silences the following warning:
+> drivers/mmc/host/sdhci-s3c.c: In function =E2=80=98sdhci_s3c_notify_c=
+hange=E2=80=99:
+> drivers/mmc/host/sdhci-s3c.c:378:20: warning: unused variable =E2=80=98=
+sc=E2=80=99 [-Wunused-variable]
+>=20
+> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci-s3c.c |    2 ++
+>  1 files changed, 2 insertions(+), 0 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3=
+c.c
+> index 7ea3aea..82a8de1 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -375,7 +375,9 @@ static struct sdhci_ops sdhci_s3c_ops =3D {
+>  static void sdhci_s3c_notify_change(struct platform_device *dev, int=
+ state)
+>  {
+>  	struct sdhci_host *host =3D platform_get_drvdata(dev);
+> +#ifdef CONFIG_PM_RUNTIME
+>  	struct sdhci_s3c *sc =3D sdhci_priv(host);
+> +#endif
+>  	unsigned long flags;
+> =20
+>  	if (host) {
+>=20
 
