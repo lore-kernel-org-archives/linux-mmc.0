@@ -1,35 +1,68 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v1 2/3] mmc: sdio: Fix SDIO 3.0 UHS-I initialization sequence
-Date: Fri, 7 Dec 2012 10:57:36 +0100
-Message-ID: <CAPDyKFq2XNpx6RLqyJg+OvAOuTHvAMUOVrKxP-JBBf3hXYWDAQ@mail.gmail.com>
-References: <1354620980-23764-1-git-send-email-subhashj@codeaurora.org>
-	<1354620980-23764-3-git-send-email-subhashj@codeaurora.org>
-	<CA+20K0BRmEC5=SySHE3SxF=VU-uD0WATrgsUGYOLN2ZrAcL-nA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CA+20K0BRmEC5=SySHE3SxF=VU-uD0WATrgsUGYOLN2ZrAcL-nA@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Johan Rudholm <jrudholm@gmail.com>
-Cc: Subhash Jadavani <subhashj@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Sujit Reddy Thumma <sthumma@codeaurora.org>
+From: Kevin Liu <kliu5@marvell.com>
+Subject: [PATCH v10 10/10] mmc: sdhci: clean code for SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK selected
+Date: Fri,  7 Dec 2012 18:23:41 +0800
+Message-ID: <1354875821-1777-1-git-send-email-kliu5@marvell.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog117.obsmtp.com ([74.125.149.242]:34249 "EHLO
+	na3sys009aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755554Ab2LGKVZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Dec 2012 05:21:25 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, arindam.nath@amd.com, peppe.cavallaro@st.com, ulf.hansson@linaro.org, andriy.shevchenko@linux.intel.com, prakity@nvidia.com, B42677@freescale.com
+Cc: zhangfei.gao@gmail.com, haojian.zhuang@gmail.com, cxie4@marvell.com, keyuan.liu@gmail.com, Kevin Liu <kliu5@marvell.com>
 
-On 7 December 2012 09:42, Johan Rudholm <jrudholm@gmail.com> wrote:
-> Hi,
->
-> 2012/12/4 Subhash Jadavani <subhashj@codeaurora.org>:
->> From: Sujit Reddy Thumma <sthumma@codeaurora.org>
->>
->> According to UHS-I initialization sequence for SDIO 3.0 cards,
->> the host must set bit[24] (S18R) of OCR register during OCR
->> handshake to know whether the SDIO card is capable of doing
->> 1.8V I/O.
->>
->
-> Reviewed-By: Johan Rudholm <johan.rudholm@stericsson.com>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+If SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK is selected, getting timeout
+through register or callback function is useless.
 
-Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
+---
+ drivers/mmc/host/sdhci.c |   30 +++++++++++++++---------------
+ 1 files changed, 15 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 28bf9fc..c03fcf5 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2861,23 +2861,23 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	} else
+ 		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
+ 
+-	host->timeout_clk =
+-		(caps[0] & SDHCI_TIMEOUT_CLK_MASK) >> SDHCI_TIMEOUT_CLK_SHIFT;
+-	if (host->timeout_clk == 0) {
+-		if (host->ops->get_timeout_clock) {
+-			host->timeout_clk = host->ops->get_timeout_clock(host);
+-		} else if (!(host->quirks &
+-				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
+-			pr_err("%s: Hardware doesn't specify timeout clock "
+-			       "frequency.\n", mmc_hostname(mmc));
+-			return -ENODEV;
++	if (!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
++		host->timeout_clk = (caps[0] & SDHCI_TIMEOUT_CLK_MASK) >>
++					SDHCI_TIMEOUT_CLK_SHIFT;
++		if (host->timeout_clk == 0) {
++			if (host->ops->get_timeout_clock) {
++				host->timeout_clk = host->ops->get_timeout_clock(host);
++			} else {
++				pr_err("%s: Hardware doesn't specify timeout clock "
++					"frequency.\n", mmc_hostname(mmc));
++				return -ENODEV;
++			}
+ 		}
+-	}
+-	if (caps[0] & SDHCI_TIMEOUT_CLK_UNIT)
+-		host->timeout_clk *= 1000;
+-
+-	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
++		if (caps[0] & SDHCI_TIMEOUT_CLK_UNIT)
++			host->timeout_clk *= 1000;
++	} else {
+ 		host->timeout_clk = mmc->f_max / 1000;
++	}
+ 
+ 	mmc->max_discard_to = (1 << 27) / host->timeout_clk;
+ 
+-- 
+1.7.0.4
+
