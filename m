@@ -1,106 +1,35 @@
-From: Philip Rakity <prakity@nvidia.com>
-Subject: Re: [PATCH v9 05/10] mmc: sdhci: introduce signal_voltage_switch
- callback function
-Date: Fri, 7 Dec 2012 10:51:20 +0100
-Message-ID: <F2FC4FCA-47C4-421E-86E9-292BE6648DA0@nvidia.com>
-References: <1354847790-18690-1-git-send-email-kliu5@marvell.com>
- <1354847790-18690-6-git-send-email-kliu5@marvell.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v1 2/3] mmc: sdio: Fix SDIO 3.0 UHS-I initialization sequence
+Date: Fri, 7 Dec 2012 10:57:36 +0100
+Message-ID: <CAPDyKFq2XNpx6RLqyJg+OvAOuTHvAMUOVrKxP-JBBf3hXYWDAQ@mail.gmail.com>
+References: <1354620980-23764-1-git-send-email-subhashj@codeaurora.org>
+	<1354620980-23764-3-git-send-email-subhashj@codeaurora.org>
+	<CA+20K0BRmEC5=SySHE3SxF=VU-uD0WATrgsUGYOLN2ZrAcL-nA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate03.nvidia.com ([216.228.121.140]:3951 "EHLO
-	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964789Ab2LGJvb convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Dec 2012 04:51:31 -0500
-In-Reply-To: <1354847790-18690-6-git-send-email-kliu5@marvell.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CA+20K0BRmEC5=SySHE3SxF=VU-uD0WATrgsUGYOLN2ZrAcL-nA@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Johan Rudholm <jrudholm@gmail.com>
+Cc: Subhash Jadavani <subhashj@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Sujit Reddy Thumma <sthumma@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Liu <kliu5@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "arindam.nath@amd.com" <arindam.nath@amd.com>, "peppe.cavallaro@st.com" <peppe.cavallaro@st.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "andriy.shevchenko@linux.intel.com" <andriy.shevchenko@linux.intel.com>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "haojian.zhuang@gmail.com" <haojian.zhuang@gmail.com>, "cxie4@marvell.com" <cxie4@marvell.com>, "keyuan.liu@gmail.com" <keyuan.liu@gmail.com>, Bin Wang <binw@marvell.com>, Philip Rakity <prakity@marvell.com>
 
+On 7 December 2012 09:42, Johan Rudholm <jrudholm@gmail.com> wrote:
+> Hi,
+>
+> 2012/12/4 Subhash Jadavani <subhashj@codeaurora.org>:
+>> From: Sujit Reddy Thumma <sthumma@codeaurora.org>
+>>
+>> According to UHS-I initialization sequence for SDIO 3.0 cards,
+>> the host must set bit[24] (S18R) of OCR register during OCR
+>> handshake to know whether the SDIO card is capable of doing
+>> 1.8V I/O.
+>>
+>
+> Reviewed-By: Johan Rudholm <johan.rudholm@stericsson.com>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-On Dec 7, 2012, at 2:36 AM, Kevin Liu <kliu5@marvell.com> wrote:
-
-> Some soc/platform need specific handling for signal voltage
-> switch. For example, mmp2/mmp3 need to set the AIB IO domain
-> control register accordingly.
-> 
-> Signed-off-by: Bin Wang <binw@marvell.com>
-> Signed-off-by: Philip Rakity <prakity@marvell.com>
-> Signed-off-by: Kevin Liu <kliu5@marvell.com>
-> ---
-> drivers/mmc/host/sdhci.c |   17 +++++++++++++++++
-> drivers/mmc/host/sdhci.h |    1 +
-> 2 files changed, 18 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 50d0382..10d06fd 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1687,6 +1687,15 @@ static int sdhci_do_3_3v_signal_voltage_switch(struct sdhci_host *host,
-> 			return -EIO;
-> 		}
-> 	}
-> +
-> +	/*
-> +	 * May need to apply soc/platfrom settings for the
-> +	 * voltage switch
-> +	 */
-> +	if (host->ops->signal_voltage_switch)
-> +		host->ops->signal_voltage_switch(host,
-> +				host->mmc->ios.signal_voltage);
-> +
-> 	/* Wait for 5ms */
-> 	usleep_range(5000, 5500);
-> 
-> @@ -1729,6 +1738,14 @@ static int sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
-> 			ret = 0;
-> 
-> 		if (!ret) {
-> +			/*
-> +			 * May need to apply soc/platfrom settings for the
-> +			 * voltage switch
-> +			 */
-> +			if (host->ops->signal_voltage_switch)
-> +				host->ops->signal_voltage_switch(host,
-> +					host->mmc->ios.signal_voltage);
-> +
-> 			ctrl |= SDHCI_CTRL_VDD_180;
-> 			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-> 
-
-I am wondering if this is needed.  
-
-A better way would be to install a notifier for voltage switch notification from the regulator in the platform code for sdhci-pxav2 or -pxav3.
-When the regulator changes the voltage the notifier is called and one can tell
-a) The new voltage
-b) The device asking for the voltage switch (passed in via the void data parameter on the request notitifer)
-
-The only issue I can see is for voltage changes that occur via a SD Host Controller that handles voltage changes.
-
-
-
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 7c659dd..cc408c4 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -291,6 +291,7 @@ struct sdhci_ops {
-> 	void	(*platform_suspend)(struct sdhci_host *host);
-> 	void	(*platform_resume)(struct sdhci_host *host);
-> 	void	(*platform_init)(struct sdhci_host *host);
-> +	void    (*signal_voltage_switch)(struct sdhci_host *host, u8 vol);
-> };
-> 
-> #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> -- 
-> 1.7.0.4
-> 
-
------------------------------------------------------------------------------------
-This email message is for the sole use of the intended recipient(s) and may contain
-confidential information.  Any unauthorized review, use, disclosure or distribution
-is prohibited.  If you are not the intended recipient, please contact the sender by
-reply email and destroy all copies of the original message.
------------------------------------------------------------------------------------
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
