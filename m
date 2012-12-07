@@ -1,61 +1,43 @@
 From: Johan Rudholm <johan.rudholm@stericsson.com>
-Subject: [PATCH 1/3] mmc: core: Add mmc_power_cycle
-Date: Fri, 7 Dec 2012 17:19:34 +0100
-Message-ID: <1354897176-15307-2-git-send-email-johan.rudholm@stericsson.com>
+Subject: [PATCH 2/3] mmc: core: Add card_busy to host_ops
+Date: Fri, 7 Dec 2012 17:19:35 +0100
+Message-ID: <1354897176-15307-3-git-send-email-johan.rudholm@stericsson.com>
 References: <1354897176-15307-1-git-send-email-johan.rudholm@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog105.obsmtp.com ([207.126.144.119]:56583 "EHLO
-	eu1sys200aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1422695Ab2LGQUu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Dec 2012 11:20:50 -0500
+Received: from eu1sys200aog104.obsmtp.com ([207.126.144.117]:35285 "EHLO
+	eu1sys200aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1422698Ab2LGQUv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Dec 2012 11:20:51 -0500
 In-Reply-To: <1354897176-15307-1-git-send-email-johan.rudholm@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 Cc: Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Kevin Liu <keyuan.liu@gmail.com>, Philip Rakity <prakity@marvell.com>, Daniel Drake <dsd@laptop.org>, Aaron <leafy.myeh@allwinnertech.com>, Subhash Jadavani <subhashj@codeaurora.org>, Johan Rudholm <johan.rudholm@stericsson.com>
 
-Add mmc_power_cycle which can be used to power cycle for instance
-SD-cards.
+This host_ops member is used to test if the card is signaling busy by
+pulling dat[0:3] low.
 
 Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
 ---
- drivers/mmc/core/core.c |    8 ++++++++
- drivers/mmc/core/core.h |    1 +
- 2 files changed, 9 insertions(+)
+ include/linux/mmc/host.h |    3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index aaed768..285f064 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1372,6 +1372,14 @@ void mmc_power_off(struct mmc_host *host)
- 	mmc_host_clk_release(host);
- }
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 23df21e..e2ed8c5 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -131,6 +131,9 @@ struct mmc_host_ops {
  
-+void mmc_power_cycle(struct mmc_host *host)
-+{
-+	mmc_power_off(host);
-+	/* Wait at least 1 ms according to SD spec */
-+	mmc_delay(1);
-+	mmc_power_up(host);
-+}
+ 	int	(*start_signal_voltage_switch)(struct mmc_host *host, struct mmc_ios *ios);
+ 
++	/* Check if the card is pulling dat[0:3] low */
++	int	(*card_busy)(struct mmc_host *host);
 +
- /*
-  * Cleanup when the last reference to the bus operator is dropped.
-  */
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 3bdafbc..4a90067 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -45,6 +45,7 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage,
- void mmc_set_timing(struct mmc_host *host, unsigned int timing);
- void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
- void mmc_power_off(struct mmc_host *host);
-+void mmc_power_cycle(struct mmc_host *host);
- 
- static inline void mmc_delay(unsigned int ms)
- {
+ 	/* The tuning command opcode value is different for SD and eMMC cards */
+ 	int	(*execute_tuning)(struct mmc_host *host, u32 opcode);
+ 	void	(*enable_preset_value)(struct mmc_host *host, bool enable);
 -- 
 1.7.10
 
