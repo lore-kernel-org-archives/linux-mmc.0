@@ -1,93 +1,142 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: [PATCH v6 11/14] mmc: sdhci: fix the bug that DDR50 can't work
- for emmc
-Date: Sat, 8 Dec 2012 11:14:50 +0800
-Message-ID: <CADz5_gLgQ1pT7=X=mDOZyRhpw0rmuMonOr9+Zx_qEc=eZ5jX5w@mail.gmail.com>
-References: <1350471893-29633-1-git-send-email-keyuan.liu@gmail.com>
-	<1350471893-29633-12-git-send-email-keyuan.liu@gmail.com>
-	<87zk2f7t8h.fsf@octavius.laptop.org>
-	<CADz5_gJq9vA1mhabMtupBaBqfNcwGV6TnkaOZwoLocwNgmLPFw@mail.gmail.com>
-	<CADz5_g+ncZdBLQwSh2Vkia+OD7VtXuLtKFsp-z2bM8JJu10Sog@mail.gmail.com>
-	<87r4n1bruo.fsf@octavius.laptop.org>
-	<CADz5_gJfx6iZqx_007OKen+HviM2FJP5rnNbtnJoEPdqBg3SEw@mail.gmail.com>
+From: Subhash Jadavani <subhashj@codeaurora.org>
+Subject: Re: [PATCH v1 1/3] mmc: sdio: fix resume failure
+Date: Sat, 08 Dec 2012 11:25:12 +0530
+Message-ID: <50C2D640.6010800@codeaurora.org>
+References: <1354620980-23764-1-git-send-email-subhashj@codeaurora.org> <1354620980-23764-2-git-send-email-subhashj@codeaurora.org> <CAPDyKFowKZcUXr-4Qug_Awww6wPGXsAm-gMaKs7oOrTwN9RFVw@mail.gmail.com> <50C0B8E5.4020502@codeaurora.org> <CAPDyKFrNEKMDpKLZno2WqExrbdjeK8axjLW9bTuJXf+OygChHg@mail.gmail.com> <50C1DDFB.2060005@codeaurora.org> <CAPDyKFoBVFoUXJ48GdOmgzasOP7zvVAkjzCHCZ7ZdUxgJMBSxQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f174.google.com ([209.85.212.174]:44080 "EHLO
-	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932496Ab2LHDOv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Dec 2012 22:14:51 -0500
-Received: by mail-wi0-f174.google.com with SMTP id hm9so67132wib.1
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Dec 2012 19:14:50 -0800 (PST)
-In-Reply-To: <CADz5_gJfx6iZqx_007OKen+HviM2FJP5rnNbtnJoEPdqBg3SEw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFoBVFoUXJ48GdOmgzasOP7zvVAkjzCHCZ7ZdUxgJMBSxQ@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, pierre@ossman.eu, ulf.hansson@linaro.org, zgao6@marvell.com, Haojian Zhuang <haojian.zhuang@gmail.com>, cxie4@marvell.com, Philip Rakity <prakity@nvidia.com>, kliu5@marvell.com
 
-2012/12/8 Kevin Liu <keyuan.liu@gmail.com>:
-> 2012/12/8 Chris Ball <cjb@laptop.org>:
->> Hi,
->>
->> On Mon, Nov 19 2012, Kevin Liu wrote:
->>> In fact, I don't think 3.3v vccq for emmc can work under DDR50 mode
->>> with SD host.
->>
->> I've checked on the scope that we're reaching DDR50 with our 3.3V vccq
->> eMMC, so it looks like this isn't true.
->>
+On 12/7/2012 8:21 PM, Ulf Hansson wrote:
+> On 7 December 2012 13:15, Subhash Jadavani <subhashj@codeaurora.org> wrote:
+>> On 12/7/2012 3:40 AM, Ulf Hansson wrote:
+>>> On 6 December 2012 16:25, Subhash Jadavani <subhashj@codeaurora.org>
+>>> wrote:
+>>>> On 12/6/2012 4:03 PM, Ulf Hansson wrote:
+>>>>> On 4 December 2012 12:36, Subhash Jadavani <subhashj@codeaurora.org>
+>>>>> wrote:
+>>>>>> If SDIO keep power flag (MMC_PM_KEEP_POWER) is not set, card would
+>>>>>> be reinitialized during resume but as we are not resetting
+>>>>>> (CMD52 reset) the SDIO card during this reinitialization, card may
+>>>>>> fail to respond back to subsequent commands (CMD5 etc...).
+>>>>>>
+>>>>>> This change resets the card before the reinitialization of card
+>>>>>> during resume.
+>>>>>>
+>>>>>> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+>>>>>> ---
+>>>>>>     drivers/mmc/core/sdio.c |    6 ++++--
+>>>>>>     1 files changed, 4 insertions(+), 2 deletions(-)
+>>>>>>
+>>>>>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+>>>>>> index 2273ce6..34ad4c8 100644
+>>>>>> --- a/drivers/mmc/core/sdio.c
+>>>>>> +++ b/drivers/mmc/core/sdio.c
+>>>>>> @@ -937,10 +937,12 @@ static int mmc_sdio_resume(struct mmc_host *host)
+>>>>>>            mmc_claim_host(host);
+>>>>>>
+>>>>>>            /* No need to reinitialize powered-resumed nonremovable cards
+>>>>>> */
+>>>>>> -       if (mmc_card_is_removable(host) || !mmc_card_keep_power(host))
+>>>>>> +       if (mmc_card_is_removable(host) || !mmc_card_keep_power(host))
+>>>>>> {
+>>>>>> +               sdio_reset(host);
+>>>>>> +               mmc_go_idle(host);
+>>>>> If the card has lost power, why is this needed? Could it be that the
+>>>>> host is not capable of cutting the power to card?
+>>>>
+>>>> Yes, the regulator powering the card is always on in this case which
+>>>> means
+>>>> SDIO VDD is not powered off during the suspend.
+>>>>
+>>> So in principle the host should be able to notify the protocol layer
+>>> about that mmc_card_keep_power will always be set somehow.
+>>> That could be a more proper way of solving this maybe? What do you think?
+>> Ok.
+>> Basically this would be the suspend/resume sequence with Keep Power flag
+>> cleared.
+> I mean the exact opposite. :-)
 >
-> Chris,
+> mmc_keep_power should be _set_ during suspend/resume sequence.
 >
-> Thanks for the check.
-> If you are using sdhci-pxav3.c, 3.3v vccq can work since it enabled
-> the 1.8v signaling in the callback function set_uhs_signaling.
-> What I want to say is if you don't enable the 1.8v signaling bit while
-> using 3.3v vccq, DDR50 on emmc should NOT work. (Use default sdhci
-> code without implementing set_uhs_signaling as the other drivers.)
-> You can just remove the set_uhs_signaling in sdhci-pxav3.c and try again.
-> So we should do this in sdhci.c by default and remove the callback
-> function, which only aim to enabling the 1.8v signaling bit.
+> That will mean at suspend; sdio_disable_4bit_bus will be called and
+> mmc_power_off will not.
+> At resume, sdio_enable_4bit_bus will be called, without doing
+> mmc_power_up and mmc_sdio_init_card.
 >
+> Do note that there is no API for the setting mmc_keep_power from a
+> host. It exist only in the SDIO API. (sdio_set_host_pm_flags).
+> So I guess we should invent this API for the host to use.
 
-Chris,
+Thanks Ulf. I got your point. Will try out your suggestion and will 
+update (with patch & result) soon.
+On the other hand,
+Do you see it's worth to have this current patch as well? I guess it's 
+safe to do sdio_reset() before SDIO card init and we are already playing 
+safe even in mmc_rescan*() by calling sdio_reset() before card detection.
 
-I would like to say more about my undersanding of 1.8v signaling bit
-and UHS mode select. (Host Control 2 register, offset 0x3E<3:0>)
-According to spec, when 1.8v signaling bit is set, the signaling
-voltage will be changed from 3.3v to 1.8v. But we still provide 3.3v
-vccq in current code. So originally I think it's conflictable in logic
-and we must change to 1.8v vccq. But the fact is both 1.8v and 3.3v
-vccq can work with 1.8v signaling bit set. The reason is below:
-The host controller can't provide and totally control the card power by itself.
-In actual implementation, the card power is supplied by external
-regulator on board (vmmc and vmmcq) rather than host controller. So
-for the 1.8v signaling bit, it will NOT impact signal voltage as spec
-said either. It's just a flag but MUST be checked when UHS-I mode
-selected. That's why we can enable 1.8v signaling bit while using 3.3v
-vccq regulator for emmc DDR50 working. I confirmed this with mmp3 sdh
-owner.
+Regards,
+Subhash
 
-So we just enable the 1.8v signaling bit in host while keep 1.8v or
-3.3v vccq regulator since emmc support DDR50 with both 1.8v and 3.3v
-vccq. In other words, we make use of the incomplete feature of 1.8v
-signaling bit (not matched with sd host spec that this bit should
-control the signal voltage) to let both 3.3v and 1.8v signaling work
-(well matched with JEDEC spec that DDR50 can work under both 1.8v and
-3.3v vccq). I think it's good, otherwise only 1.8v can work which make
-things complex and add limitation for board hardware.
-
-So there are below conslusions:
-1. If card power is supplied by external regulator, then setting 1.8v
-signaling bit with both 1.8v and 3.3v vccq can work for emmc DDR50.
-2. If host controller provide and totally control the card power, then
-setting 1.8v signaling bit with only 1.8v vccq can work.
-3. no matter which one of above two, 1.8v signaling bit MUST be set
-for DDR50 working.
-My patch assure item 3 in sdhci.c by default rather than adding
-callback function to do this.
-
-How do you think?
-
-Thanks
-Kevin
+>
+>> Suspend:
+>> 1. Execute Function driver suspend
+>> 2. mmc_power_off()
+>>      2.1 As this is regulator powering card SDIO VDD line is always on
+>> regulator, it will stay on.
+>>
+>> Resume:
+>> 1. mmc_power_up()
+>>       1.1 Regulator was anyway on so nothing change here.
+>> 2.  mmc_sdio_init_card() - reinitialize the card
+>>       2.1 CMD5 gets the commands response timeout which means card doesn't
+>> respond back.
+>>
+>> My understanding is that behaviour seen in 2.1 (resume) is because during
+>> suspend, function driver suspend might have done something with the SDIO
+>> card (as keep power flag was disabled) and that's the reason during resume,
+>> card fails to respond back to CMD5 (unless we send the CMD52 to reset the
+>> card). It's an athros SDIO wifi card here.
+>>
+>>
+>>>> So in principle the host should be able to notify the protocol layer
+>>>> about that mmc_card_keep_power will always be set somehow.
+>> Given the above issue, i am not sure how is this suggestion going to help in
+>> this case?
+>>
+>> Regards,
+>> Subhash
+>>
+>>
+>>>>> It might be more safe to do this but I would like to understand more,
+>>>>> before you get my ack on this patch.
+>>>>>
+>>>>>>                    err = mmc_sdio_init_card(host, host->ocr, host->card,
+>>>>>>                                            mmc_card_keep_power(host));
+>>>>>> -       else if (mmc_card_keep_power(host) &&
+>>>>>> mmc_card_wake_sdio_irq(host)) {
+>>>>>> +       } else if (mmc_card_keep_power(host) &&
+>>>>>> mmc_card_wake_sdio_irq(host)) {
+>>>>>>                    /* We may have switched to 1-bit mode during suspend
+>>>>>> */
+>>>>>>                    err = sdio_enable_4bit_bus(host->card);
+>>>>>>                    if (err > 0) {
+>>>>>> --
+>>>>>> --
+>>>>>> QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a
+>>>>>> member
+>>>>>> of Code Aurora Forum, hosted by The Linux Foundation
+>>>>>>
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>> Kind regards
+>>>>> Ulf Hansson
+>>>>
