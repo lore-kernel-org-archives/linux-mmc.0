@@ -1,142 +1,217 @@
 From: Subhash Jadavani <subhashj@codeaurora.org>
-Subject: Re: [PATCH v1 1/3] mmc: sdio: fix resume failure
-Date: Sat, 08 Dec 2012 11:25:12 +0530
-Message-ID: <50C2D640.6010800@codeaurora.org>
-References: <1354620980-23764-1-git-send-email-subhashj@codeaurora.org> <1354620980-23764-2-git-send-email-subhashj@codeaurora.org> <CAPDyKFowKZcUXr-4Qug_Awww6wPGXsAm-gMaKs7oOrTwN9RFVw@mail.gmail.com> <50C0B8E5.4020502@codeaurora.org> <CAPDyKFrNEKMDpKLZno2WqExrbdjeK8axjLW9bTuJXf+OygChHg@mail.gmail.com> <50C1DDFB.2060005@codeaurora.org> <CAPDyKFoBVFoUXJ48GdOmgzasOP7zvVAkjzCHCZ7ZdUxgJMBSxQ@mail.gmail.com>
+Subject: Re: [PATCH 3/3] mmc: core: Fixup signal voltage switch
+Date: Sat, 08 Dec 2012 11:39:13 +0530
+Message-ID: <50C2D989.5060901@codeaurora.org>
+References: <1354897176-15307-1-git-send-email-johan.rudholm@stericsson.com> <1354897176-15307-4-git-send-email-johan.rudholm@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoBVFoUXJ48GdOmgzasOP7zvVAkjzCHCZ7ZdUxgJMBSxQ@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:20575 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757891Ab2LHGJU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Dec 2012 01:09:20 -0500
+In-Reply-To: <1354897176-15307-4-git-send-email-johan.rudholm@stericsson.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Johan Rudholm <johan.rudholm@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Kevin Liu <keyuan.liu@gmail.com>, Philip Rakity <prakity@marvell.com>, Daniel Drake <dsd@laptop.org>, Aaron <leafy.myeh@allwinnertech.com>
 
-On 12/7/2012 8:21 PM, Ulf Hansson wrote:
-> On 7 December 2012 13:15, Subhash Jadavani <subhashj@codeaurora.org> wrote:
->> On 12/7/2012 3:40 AM, Ulf Hansson wrote:
->>> On 6 December 2012 16:25, Subhash Jadavani <subhashj@codeaurora.org>
->>> wrote:
->>>> On 12/6/2012 4:03 PM, Ulf Hansson wrote:
->>>>> On 4 December 2012 12:36, Subhash Jadavani <subhashj@codeaurora.org>
->>>>> wrote:
->>>>>> If SDIO keep power flag (MMC_PM_KEEP_POWER) is not set, card would
->>>>>> be reinitialized during resume but as we are not resetting
->>>>>> (CMD52 reset) the SDIO card during this reinitialization, card may
->>>>>> fail to respond back to subsequent commands (CMD5 etc...).
->>>>>>
->>>>>> This change resets the card before the reinitialization of card
->>>>>> during resume.
->>>>>>
->>>>>> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
->>>>>> ---
->>>>>>     drivers/mmc/core/sdio.c |    6 ++++--
->>>>>>     1 files changed, 4 insertions(+), 2 deletions(-)
->>>>>>
->>>>>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
->>>>>> index 2273ce6..34ad4c8 100644
->>>>>> --- a/drivers/mmc/core/sdio.c
->>>>>> +++ b/drivers/mmc/core/sdio.c
->>>>>> @@ -937,10 +937,12 @@ static int mmc_sdio_resume(struct mmc_host *host)
->>>>>>            mmc_claim_host(host);
->>>>>>
->>>>>>            /* No need to reinitialize powered-resumed nonremovable cards
->>>>>> */
->>>>>> -       if (mmc_card_is_removable(host) || !mmc_card_keep_power(host))
->>>>>> +       if (mmc_card_is_removable(host) || !mmc_card_keep_power(host))
->>>>>> {
->>>>>> +               sdio_reset(host);
->>>>>> +               mmc_go_idle(host);
->>>>> If the card has lost power, why is this needed? Could it be that the
->>>>> host is not capable of cutting the power to card?
->>>>
->>>> Yes, the regulator powering the card is always on in this case which
->>>> means
->>>> SDIO VDD is not powered off during the suspend.
->>>>
->>> So in principle the host should be able to notify the protocol layer
->>> about that mmc_card_keep_power will always be set somehow.
->>> That could be a more proper way of solving this maybe? What do you think?
->> Ok.
->> Basically this would be the suspend/resume sequence with Keep Power flag
->> cleared.
-> I mean the exact opposite. :-)
+On 12/7/2012 9:49 PM, Johan Rudholm wrote:
+> When switching SD and SDIO cards from 3.3V to 1.8V signal levels, the
+> clock should be gated for 5 ms during the step. After enabling the
+> clock, the host should wait for at least 1 ms before checking for
+> failure. Failure by the card to switch is indicated by dat[0:3] being
+> pulled low. The host should check for this condition and power-cycle
+> the card if failure is indicated.
 >
-> mmc_keep_power should be _set_ during suspend/resume sequence.
+> Add a retry mechanism for the SDIO case.
 >
-> That will mean at suspend; sdio_disable_4bit_bus will be called and
-> mmc_power_off will not.
-> At resume, sdio_enable_4bit_bus will be called, without doing
-> mmc_power_up and mmc_sdio_init_card.
+> If the voltage switch fails repeatedly, give up and continue the
+> initialization using the original voltage.
 >
-> Do note that there is no API for the setting mmc_keep_power from a
-> host. It exist only in the SDIO API. (sdio_set_host_pm_flags).
-> So I guess we should invent this API for the host to use.
+> This patch places a couple of requirements on the host driver:
+>
+>   1) mmc_set_ios with ios.clock = 0 must gate the clock
+>   2) mmc_power_off must actually cut the power to the card
+>
+> if these requirements are not fulfilled, the 1.8V signal voltage switch
+> may not be successful.
+>
+> Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
+> ---
+>   drivers/mmc/core/core.c |   35 +++++++++++++++++++++++++++++++++++
+>   drivers/mmc/core/sd.c   |   26 +++++++++++++++++++++-----
+>   drivers/mmc/core/sdio.c |   25 +++++++++++++++++++++++--
+>   3 files changed, 79 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 285f064..c9a7a8a 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1246,8 +1246,43 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
+>   	host->ios.signal_voltage = signal_voltage;
+>   
+>   	if (host->ops->start_signal_voltage_switch) {
+> +		u32 clock;
+> +
+>   		mmc_host_clk_hold(host);
+> +		/*
+> +		 * During a signal voltage level switch, the clock must be gated
+> +		 * for a certain period of time according to the SD spec
+> +		 */
+> +		if (cmd11) {
+> +			clock = host->ios.clock;
+> +			host->ios.clock = 0;
+> +			mmc_set_ios(host);
+> +		}
+> +
+>   		err = host->ops->start_signal_voltage_switch(host, &host->ios);
 
-Thanks Ulf. I got your point. Will try out your suggestion and will 
-update (with patch & result) soon.
-On the other hand,
-Do you see it's worth to have this current patch as well? I guess it's 
-safe to do sdio_reset() before SDIO card init and we are already playing 
-safe even in mmc_rescan*() by calling sdio_reset() before card detection.
+Shouldn't you fix all the existing host drivers who have already 
+implemented start_signal_voltage_switch host ops? If you don't change 
+them as part of this patch then
+i afraid UHS functionality would be broken on those platforms. Also, 
+it's not just changing the start_signal_voltage_switch hot op 
+implementation, you may also need to add card_busy() host op 
+implementation for those drivers.
 
-Regards,
-Subhash
+> +
+> +		if (err && cmd11) {
+> +			host->ios.clock = clock;
+> +			mmc_set_ios(host);
+> +		} else if (cmd11) {
+> +			/* Keep clock gated for at least 5 ms */
+> +			mmc_delay(5);
+> +			host->ios.clock = clock;
+> +			mmc_set_ios(host);
+> +
+> +			/* Wait for at least 1 ms according to spec */
+> +			mmc_delay(1);
+> +
+> +			/*
+> +			 * Failure to switch is indicated by the card holding
+> +			 * dat[0:3] low
+> +			 */
+> +			if (!host->ops->card_busy)
+> +				pr_warning("%s: cannot verify signal voltage switch\n",
+> +					mmc_hostname(host));
+> +			else if (host->ops->card_busy(host))
+> +				err = -EAGAIN;
+> +		}
+>   		mmc_host_clk_release(host);
+>   	}
+>   
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 74972c2..eb299bc 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -713,6 +713,14 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
+>   {
+>   	int err;
+>   	u32 max_current;
+> +	int retries = 10;
+> +
+> +try_again:
+> +	if (!retries) {
+> +		ocr &= ~SD_OCR_S18R;
+> +		pr_warning("%s: Skipping voltage switch\n",
+> +			mmc_hostname(host));
+> +	}
+>   
+>   	/*
+>   	 * Since we're changing the OCR value, we seem to
+> @@ -734,9 +742,10 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
+>   
+>   	/*
+>   	 * If the host supports one of UHS-I modes, request the card
+> -	 * to switch to 1.8V signaling level.
+> +	 * to switch to 1.8V signaling level. If the card has failed
+> +	 * repeatedly to switch however, skip this.
+>   	 */
+> -	if (host->caps & (MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
+> +	if (retries && host->caps & (MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
+>   	    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_DDR50))
+>   		ocr |= SD_OCR_S18R;
+>   
+> @@ -748,7 +757,6 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
+>   	if (max_current > 150)
+>   		ocr |= SD_OCR_XPC;
+>   
+> -try_again:
+>   	err = mmc_send_app_op_cond(host, ocr, rocr);
+>   	if (err)
+>   		return err;
+> @@ -760,8 +768,16 @@ try_again:
+>   	if (!mmc_host_is_spi(host) && rocr &&
+>   	   ((*rocr & 0x41000000) == 0x41000000)) {
+>   		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180, true);
+> -		if (err) {
+> -			ocr &= ~SD_OCR_S18R;
+> +		if (err == -EAGAIN) {
+> +			/* Power cycle card */
+> +			pr_debug("%s: Signal voltage switch failed, "
+> +				"power cycling card (retries = %d)\n",
+> +				mmc_hostname(host), retries);
+> +			mmc_power_cycle(host);
+> +			retries--;
+> +			goto try_again;
+> +		} else if (err) {
+> +			retries = 0;
+>   			goto try_again;
+>   		}
+>   	}
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index 2273ce6..573ab06 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -583,10 +583,19 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+>   {
+>   	struct mmc_card *card;
+>   	int err;
+> +	int retries = 10;
+>   
+>   	BUG_ON(!host);
+>   	WARN_ON(!host->claimed);
+>   
+> +try_again:
+> +	if (!retries) {
+> +		pr_warning("%s: Skipping voltage switch\n",
+> +				mmc_hostname(host));
+> +		ocr &= ~R4_18V_PRESENT;
+> +		host->ocr &= ~R4_18V_PRESENT;
+> +	}
+> +
+>   	/*
+>   	 * Inform the card of the voltage
+>   	 */
+> @@ -645,14 +654,26 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+>   	 * systems that claim 1.8v signalling in fact do not support
+>   	 * it.
+>   	 */
+> -	if ((ocr & R4_18V_PRESENT) &&
+> +	if (!powered_resume && (ocr & R4_18V_PRESENT) &&
+>   		(host->caps &
+>   			(MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
+>   			 MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
+>   			 MMC_CAP_UHS_DDR50))) {
+>   		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180,
+>   				true);
+> -		if (err) {
+> +		if (err == -EAGAIN) {
+> +			/* Power cycle card */
+> +			pr_debug("%s: Signal voltage switch failed, "
+> +				"power cycling card (retries = %d)\n",
+> +				mmc_hostname(host), retries);
+> +			mmc_power_cycle(host);
+> +			sdio_reset(host);
+> +			mmc_go_idle(host);
+> +			mmc_send_if_cond(host, host->ocr_avail);
+> +			mmc_remove_card(card);
+> +			retries--;
+> +			goto try_again;
+> +		} else if (err) {
+>   			ocr &= ~R4_18V_PRESENT;
+>   			host->ocr &= ~R4_18V_PRESENT;
+>   		}
 
->
->> Suspend:
->> 1. Execute Function driver suspend
->> 2. mmc_power_off()
->>      2.1 As this is regulator powering card SDIO VDD line is always on
->> regulator, it will stay on.
->>
->> Resume:
->> 1. mmc_power_up()
->>       1.1 Regulator was anyway on so nothing change here.
->> 2.  mmc_sdio_init_card() - reinitialize the card
->>       2.1 CMD5 gets the commands response timeout which means card doesn't
->> respond back.
->>
->> My understanding is that behaviour seen in 2.1 (resume) is because during
->> suspend, function driver suspend might have done something with the SDIO
->> card (as keep power flag was disabled) and that's the reason during resume,
->> card fails to respond back to CMD5 (unless we send the CMD52 to reset the
->> card). It's an athros SDIO wifi card here.
->>
->>
->>>> So in principle the host should be able to notify the protocol layer
->>>> about that mmc_card_keep_power will always be set somehow.
->> Given the above issue, i am not sure how is this suggestion going to help in
->> this case?
->>
->> Regards,
->> Subhash
->>
->>
->>>>> It might be more safe to do this but I would like to understand more,
->>>>> before you get my ack on this patch.
->>>>>
->>>>>>                    err = mmc_sdio_init_card(host, host->ocr, host->card,
->>>>>>                                            mmc_card_keep_power(host));
->>>>>> -       else if (mmc_card_keep_power(host) &&
->>>>>> mmc_card_wake_sdio_irq(host)) {
->>>>>> +       } else if (mmc_card_keep_power(host) &&
->>>>>> mmc_card_wake_sdio_irq(host)) {
->>>>>>                    /* We may have switched to 1-bit mode during suspend
->>>>>> */
->>>>>>                    err = sdio_enable_4bit_bus(host->card);
->>>>>>                    if (err > 0) {
->>>>>> --
->>>>>> --
->>>>>> QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a
->>>>>> member
->>>>>> of Code Aurora Forum, hosted by The Linux Foundation
->>>>>>
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>> Kind regards
->>>>> Ulf Hansson
->>>>
