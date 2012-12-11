@@ -1,55 +1,41 @@
 From: Tanya Brokhman <tlinder@codeaurora.org>
-Subject: =?UTF-8?q?=5BPATCH=20v4=200/2=5D=20ROW=20scheduling=20Algorithm?=
-Date: Tue, 11 Dec 2012 15:41:18 +0200
-Message-ID: <1355233280-25923-1-git-send-email-tlinder@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: jaxboe@fusionio.com
-Cc: linux-arm-msm@vger.kernel.org, philippedeswert@gmail.com, jengelh@inai.de, jh80.chung@samsung.com, tgih.jun@samsung.com, arnd.bergmann@linaro.org, venkat@linaro.org, linux-mmc@vger.kernel.org, Tanya Brokhman <tlinder@codeaurora.org>
+Subject: [PATCH/RESEND v4 2/2] block: compile ROW statically into the kernel
+Date: Tue, 11 Dec 2012 15:41:20 +0200
+Message-ID: <1355233280-25923-3-git-send-email-tlinder@codeaurora.org>
+References: <1355233280-25923-1-git-send-email-tlinder@codeaurora.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:14863 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753551Ab2LKNlu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Dec 2012 08:41:50 -0500
+In-Reply-To: <1355233280-25923-1-git-send-email-tlinder@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: jaxboe@fusionio.com
+Cc: linux-arm-msm@vger.kernel.org, philippedeswert@gmail.com, jengelh@inai.de, jh80.chung@samsung.com, tgih.jun@samsung.com, arnd.bergmann@linaro.org, venkat@linaro.org, linux-mmc@vger.kernel.org, Tatyana Brokhman <tlinder@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
 
-The ROW scheduling algorithm will be used in mobile devices as default
-block layer IO scheduling algorithm. ROW stands for "READ Over WRITE"
-which is the main requests dispatch policy of this algorithm.
+From: Tatyana Brokhman <tlinder@codeaurora.org>
 
-The ROW IO scheduler was developed with the mobile devices needs in
-mind. In mobile devices we favor user experience upon everything else,
-thus we want to give READ IO requests as much priority as possible.
-In mobile devices we won=E2=80=99t have AS much parallel threads as on =
-desktops.
-Usually it=E2=80=99s a single thread or at most 2 simultaneous working =
-threads
-for read & write. Favoring READ requests over WRITEs decreases the READ
-latency greatly.
+ROW is a new scheduling algorithm. Similar to the existing scheduling
+algorithms it should be compiled to the kernel statically giving the user
+the ability to switch to it without kernel recompilation.
 
-The main idea of the ROW scheduling policy is:
-Give READ requests priority over WRITE with WRITE starvation in mind
+Signed-off-by: Tatyana Brokhman <tlinder@codeaurora.org>
 
-With ROW set as the scheduling algorithm we were able to:
-- Reduce the worst case READ latency by 41%
-- Improve the READ throughput by 63%
-(All in read&write coalition scenarios)
-
-Tanya Brokhman (1):
-  block: Adding ROW scheduling algorithm
-
-Tatyana Brokhman (1):
-  block: compile ROW statically into the kernel
-
- Documentation/block/row-iosched.txt |  134 +++++++
- block/Kconfig.iosched               |   22 ++
- block/Makefile                      |    1 +
- block/row-iosched.c                 |  694 +++++++++++++++++++++++++++=
-++++++++
- 4 files changed, 851 insertions(+), 0 deletions(-)
- create mode 100644 Documentation/block/row-iosched.txt
- create mode 100644 block/row-iosched.c
-
---=20
+diff --git a/block/Kconfig.iosched b/block/Kconfig.iosched
+index 5a747e2..401f42d 100644
+--- a/block/Kconfig.iosched
++++ b/block/Kconfig.iosched
+@@ -23,6 +23,7 @@ config IOSCHED_DEADLINE
+ 
+ config IOSCHED_ROW
+ 	tristate "ROW I/O scheduler"
++	default y
+ 	---help---
+ 	  The ROW I/O scheduler gives priority to READ requests over the
+ 	  WRITE requests when dispatching, without starving WRITE requests.
+-- 
 1.7.6
 --
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc.=20
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. 
 Is a member of Code Aurora Forum, hosted by the Linux Foundation
