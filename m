@@ -1,113 +1,155 @@
 From: Shawn Guo <shawn.guo@linaro.org>
-Subject: [PATCH v2 2/3] mmc: remove unncessary mmc_gpio_free_cd() call from slot-gpio users
-Date: Tue, 11 Dec 2012 22:32:19 +0800
-Message-ID: <1355236340-21304-3-git-send-email-shawn.guo@linaro.org>
+Subject: [PATCH v2 1/3] mmc: slot-gpio: use devm_* managed functions to ease users
+Date: Tue, 11 Dec 2012 22:32:18 +0800
+Message-ID: <1355236340-21304-2-git-send-email-shawn.guo@linaro.org>
 References: <1355236340-21304-1-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe005.messaging.microsoft.com ([216.32.180.31]:55108
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753114Ab2LKOcd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Dec 2012 09:32:33 -0500
+Received: from co1ehsobe003.messaging.microsoft.com ([216.32.180.186]:43299
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753114Ab2LKOdX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Dec 2012 09:33:23 -0500
 In-Reply-To: <1355236340-21304-1-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Shawn Guo <shawn.guo@linaro.org>
 
-Since slot-gpio uses devm_* managed functions in mmc_gpio_request_cd()
-now, we can remove those mmc_gpio_free_cd() call from host drivers'
-.probe() error path and .remove().
+Use devm_* managed functions, so that slot-gpio users do not have to
+call mmc_gpio_free_ro/cd to free up resources requested in
+mmc_gpio_request_ro/cd.
 
 Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
 ---
- drivers/mmc/host/sdhci-pxav3.c  |    5 -----
- drivers/mmc/host/sh_mmcif.c     |    6 ------
- drivers/mmc/host/tmio_mmc_pio.c |    8 --------
- 3 files changed, 19 deletions(-)
+ drivers/mmc/core/slot-gpio.c |   57 +++++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 51 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index fad0966..b7ee776 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -316,7 +316,6 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- err_add_host:
- 	clk_disable_unprepare(clk);
- 	clk_put(clk);
--	mmc_gpio_free_cd(host->mmc);
- err_cd_req:
- err_clk_get:
- 	sdhci_pltfm_free(pdev);
-@@ -329,16 +328,12 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_pxa *pxa = pltfm_host->priv;
--	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
+diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+index 16a1c0b..3242351 100644
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -92,6 +92,20 @@ int mmc_gpio_get_cd(struct mmc_host *host)
+ }
+ EXPORT_SYMBOL(mmc_gpio_get_cd);
  
- 	sdhci_remove_host(host, 1);
- 
- 	clk_disable_unprepare(pltfm_host->clk);
- 	clk_put(pltfm_host->clk);
- 
--	if (gpio_is_valid(pdata->ext_cd_gpio))
--		mmc_gpio_free_cd(host->mmc);
--
- 	sdhci_pltfm_free(pdev);
- 	kfree(pxa);
- 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 9b8efac..2f229e0 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1410,8 +1410,6 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 	return ret;
- 
- emmcaddh:
--	if (pd && pd->use_cd_gpio)
--		mmc_gpio_free_cd(mmc);
- erqcd:
- 	free_irq(irq[1], host);
- ereqirq1:
-@@ -1433,7 +1431,6 @@ ealloch:
- static int sh_mmcif_remove(struct platform_device *pdev)
++/**
++ * mmc_gpio_request_ro - request a gpio for write-protection
++ * @host: mmc host
++ * @gpio: gpio number requested
++ *
++ * As devm_* managed functions are used in mmc_gpio_request_ro(), client
++ * drivers do not need to explicitly call mmc_gpio_free_ro() for freeing up,
++ * if the requesting and freeing are only needed at probing and unbinding time
++ * for once.  However, if client drivers do something special like runtime
++ * switching for write-protection, they are responsible for calling
++ * mmc_gpio_request_ro() and mmc_gpio_free_ro() as a pair on their own.
++ *
++ * Returns zero on success, else an error.
++ */
+ int mmc_gpio_request_ro(struct mmc_host *host, unsigned int gpio)
  {
- 	struct sh_mmcif_host *host = platform_get_drvdata(pdev);
--	struct sh_mmcif_plat_data *pd = pdev->dev.platform_data;
- 	int irq[2];
+ 	struct mmc_gpio *ctx;
+@@ -106,7 +120,8 @@ int mmc_gpio_request_ro(struct mmc_host *host, unsigned int gpio)
  
- 	host->dying = true;
-@@ -1442,9 +1439,6 @@ static int sh_mmcif_remove(struct platform_device *pdev)
+ 	ctx = host->slot.handler_priv;
  
- 	dev_pm_qos_hide_latency_limit(&pdev->dev);
+-	ret = gpio_request_one(gpio, GPIOF_DIR_IN, ctx->ro_label);
++	ret = devm_gpio_request_one(&host->class_dev, gpio, GPIOF_DIR_IN,
++				    ctx->ro_label);
+ 	if (ret < 0)
+ 		return ret;
  
--	if (pd && pd->use_cd_gpio)
--		mmc_gpio_free_cd(host->mmc);
--
- 	mmc_remove_host(host->mmc);
- 	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
+@@ -116,6 +131,20 @@ int mmc_gpio_request_ro(struct mmc_host *host, unsigned int gpio)
+ }
+ EXPORT_SYMBOL(mmc_gpio_request_ro);
  
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 50bf495..0f992e9 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -1060,16 +1060,8 @@ EXPORT_SYMBOL(tmio_mmc_host_probe);
- void tmio_mmc_host_remove(struct tmio_mmc_host *host)
++/**
++ * mmc_gpio_request_cd - request a gpio for card-detection
++ * @host: mmc host
++ * @gpio: gpio number requested
++ *
++ * As devm_* managed functions are used in mmc_gpio_request_cd(), client
++ * drivers do not need to explicitly call mmc_gpio_free_cd() for freeing up,
++ * if the requesting and freeing are only needed at probing and unbinding time
++ * for once.  However, if client drivers do something special like runtime
++ * switching for card-detection, they are responsible for calling
++ * mmc_gpio_request_cd() and mmc_gpio_free_cd() as a pair on their own.
++ *
++ * Returns zero on success, else an error.
++ */
+ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
  {
- 	struct platform_device *pdev = host->pdev;
--	struct tmio_mmc_data *pdata = host->pdata;
- 	struct mmc_host *mmc = host->mmc;
+ 	struct mmc_gpio *ctx;
+@@ -128,7 +157,8 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
  
--	if (pdata->flags & TMIO_MMC_USE_GPIO_CD)
--		/*
--		 * This means we can miss a card-eject, but this is anyway
--		 * possible, because of delayed processing of hotplug events.
--		 */
--		mmc_gpio_free_cd(mmc);
--
- 	if (!host->native_hotplug)
- 		pm_runtime_get_sync(&pdev->dev);
+ 	ctx = host->slot.handler_priv;
  
+-	ret = gpio_request_one(gpio, GPIOF_DIR_IN, ctx->cd_label);
++	ret = devm_gpio_request_one(&host->class_dev, gpio, GPIOF_DIR_IN,
++				    ctx->cd_label);
+ 	if (ret < 0)
+ 		/*
+ 		 * don't bother freeing memory. It might still get used by other
+@@ -146,7 +176,8 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
+ 		irq = -EINVAL;
+ 
+ 	if (irq >= 0) {
+-		ret = request_threaded_irq(irq, NULL, mmc_gpio_cd_irqt,
++		ret = devm_request_threaded_irq(&host->class_dev, irq,
++			NULL, mmc_gpio_cd_irqt,
+ 			IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT,
+ 			ctx->cd_label, host);
+ 		if (ret < 0)
+@@ -164,6 +195,13 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
+ }
+ EXPORT_SYMBOL(mmc_gpio_request_cd);
+ 
++/**
++ * mmc_gpio_free_ro - free the write-protection gpio
++ * @host: mmc host
++ *
++ * It's provided only for cases that client drivers need to manually free
++ * up the write-protection gpio requested by mmc_gpio_request_ro().
++ */
+ void mmc_gpio_free_ro(struct mmc_host *host)
+ {
+ 	struct mmc_gpio *ctx = host->slot.handler_priv;
+@@ -175,10 +213,17 @@ void mmc_gpio_free_ro(struct mmc_host *host)
+ 	gpio = ctx->ro_gpio;
+ 	ctx->ro_gpio = -EINVAL;
+ 
+-	gpio_free(gpio);
++	devm_gpio_free(&host->class_dev, gpio);
+ }
+ EXPORT_SYMBOL(mmc_gpio_free_ro);
+ 
++/**
++ * mmc_gpio_free_cd - free the card-detection gpio
++ * @host: mmc host
++ *
++ * It's provided only for cases that client drivers need to manually free
++ * up the card-detection gpio requested by mmc_gpio_request_cd().
++ */
+ void mmc_gpio_free_cd(struct mmc_host *host)
+ {
+ 	struct mmc_gpio *ctx = host->slot.handler_priv;
+@@ -188,13 +233,13 @@ void mmc_gpio_free_cd(struct mmc_host *host)
+ 		return;
+ 
+ 	if (host->slot.cd_irq >= 0) {
+-		free_irq(host->slot.cd_irq, host);
++		devm_free_irq(&host->class_dev, host->slot.cd_irq, host);
+ 		host->slot.cd_irq = -EINVAL;
+ 	}
+ 
+ 	gpio = ctx->cd_gpio;
+ 	ctx->cd_gpio = -EINVAL;
+ 
+-	gpio_free(gpio);
++	devm_gpio_free(&host->class_dev, gpio);
+ }
+ EXPORT_SYMBOL(mmc_gpio_free_cd);
 -- 
 1.7.9.5
 
