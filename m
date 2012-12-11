@@ -1,99 +1,72 @@
-From: Tanya Brokhman <tlinder@codeaurora.org>
-Subject: [PATCH/RESEND v3 2/2] row: Add support for urgent request handling
-Date: Tue, 11 Dec 2012 15:43:20 +0200
-Message-ID: <1355233400-26269-3-git-send-email-tlinder@codeaurora.org>
-References: <1355233400-26269-1-git-send-email-tlinder@codeaurora.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1355233400-26269-1-git-send-email-tlinder@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: jaxboe@fusionio.com
-Cc: linux-arm-msm@vger.kernel.org, philippedeswert@gmail.com, jengelh@inai.de, jh80.chung@samsung.com, tgih.jun@samsung.com, arnd.bergmann@linaro.org, venkat@linaro.org, linux-mmc@vger.kernel.org, Tanya Brokhman <tlinder@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH] mmc: mmci: Gate the clock in runtime suspend to save power
+Date: Tue, 11 Dec 2012 15:17:54 +0100
+Message-ID: <1355235474-12783-1-git-send-email-ulf.hansson@stericsson.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog102.obsmtp.com ([207.126.144.113]:34370 "EHLO
+	eu1sys200aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753656Ab2LKOST (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Dec 2012 09:18:19 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-This patch add support for handling urgent requests.
-ROW queue can be marked as "urgent". If an urgent queue was
-un-served in a previous dispatch cycle and a request was added
-to it - it will trigger issuing urgent request to the device driver.
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-Signed-off-by: Tatyana Brokhman <tlinder@codeaurora.org>
+The amba bus is already performing same actions but for the apb_pclk.
+So here we just make sure the clock to card is gated as well to save
+more power. At runtime resume we will thus restore the clock again.
 
-diff --git a/block/row-iosched.c b/block/row-iosched.c
-index b3204d6..41cc028 100644
---- a/block/row-iosched.c
-+++ b/block/row-iosched.c
-@@ -58,6 +58,17 @@ static const bool queue_idling_enabled[] = {
- 	false,	/* ROWQ_PRIO_LOW_SWRITE */
- };
- 
-+/* Flags indicating whether the queue can notify on urgent requests */
-+static const bool urgent_queues[] = {
-+	true,	/* ROWQ_PRIO_HIGH_READ */
-+	true,	/* ROWQ_PRIO_REG_READ */
-+	false,	/* ROWQ_PRIO_HIGH_SWRITE */
-+	false,	/* ROWQ_PRIO_REG_SWRITE */
-+	false,	/* ROWQ_PRIO_REG_WRITE */
-+	false,	/* ROWQ_PRIO_LOW_READ */
-+	false,	/* ROWQ_PRIO_LOW_SWRITE */
-+};
-+
- /* Default values for row queues quantums in each dispatch cycle */
- static const int queue_quantum[] = {
- 	100,	/* ROWQ_PRIO_HIGH_READ */
-@@ -271,7 +282,13 @@ static void row_add_request(struct request_queue *q,
- 
- 		rqueue->idle_data.last_insert_time = ktime_get();
- 	}
--	row_log_rowq(rd, rqueue->prio, "added request");
-+	if (urgent_queues[rqueue->prio] &&
-+	    row_rowq_unserved(rd, rqueue->prio)) {
-+		row_log_rowq(rd, rqueue->prio,
-+			     "added urgent req curr_queue = %d",
-+			     rd->curr_queue);
-+	} else
-+		row_log_rowq(rd, rqueue->prio, "added request");
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/mmci.c |   29 +++++++++++++++++++++++++++++
+ 1 file changed, 29 insertions(+)
+
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index aa04b42..0f397a2 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1636,8 +1636,37 @@ static int mmci_resume(struct device *dev)
  }
+ #endif
  
- /**
-@@ -306,6 +323,29 @@ static int row_reinsert_req(struct request_queue *q,
- 	return 0;
- }
- 
-+/*
-+ * row_urgent_pending() - Return TRUE if there is an urgent
-+ *			  request on scheduler
-+ * @q:	requests queue
-+ *
-+ */
-+static bool row_urgent_pending(struct request_queue *q)
++#ifdef CONFIG_PM_RUNTIME
++static int mmci_runtime_suspend(struct device *dev)
 +{
-+	struct row_data *rd = q->elevator->elevator_data;
-+	int i;
++	struct amba_device *adev = to_amba_device(dev);
++	struct mmc_host *mmc = amba_get_drvdata(adev);
 +
-+	for (i = 0; i < ROWQ_MAX_PRIO; i++)
-+		if (urgent_queues[i] && row_rowq_unserved(rd, i) &&
-+		    !list_empty(&rd->row_queues[i].rqueue.fifo)) {
-+			row_log_rowq(rd, i,
-+				     "Urgent request pending (curr=%i)",
-+				     rd->curr_queue);
-+			return true;
-+		}
++	if (mmc) {
++		struct mmci_host *host = mmc_priv(mmc);
++		clk_disable_unprepare(host->clk);
++	}
 +
-+	return false;
++	return 0;
 +}
 +
- /**
-  * row_remove_request() -  Remove given request from scheduler
-  * @q:	requests queue
-@@ -697,6 +737,7 @@ static struct elevator_type iosched_row = {
- 		.elevator_dispatch_fn		= row_dispatch_requests,
- 		.elevator_add_req_fn		= row_add_request,
- 		.elevator_reinsert_req_fn	= row_reinsert_req,
-+		.elevator_is_urgent_fn		= row_urgent_pending,
- 		.elevator_former_req_fn		= elv_rb_former_request,
- 		.elevator_latter_req_fn		= elv_rb_latter_request,
- 		.elevator_set_req_fn		= row_set_request,
++static int mmci_runtime_resume(struct device *dev)
++{
++	struct amba_device *adev = to_amba_device(dev);
++	struct mmc_host *mmc = amba_get_drvdata(adev);
++
++	if (mmc) {
++		struct mmci_host *host = mmc_priv(mmc);
++		clk_prepare_enable(host->clk);
++	}
++
++	return 0;
++}
++#endif
++
+ static const struct dev_pm_ops mmci_dev_pm_ops = {
+ 	SET_SYSTEM_SLEEP_PM_OPS(mmci_suspend, mmci_resume)
++	SET_RUNTIME_PM_OPS(mmci_runtime_suspend, mmci_runtime_resume, NULL)
+ };
+ 
+ static struct amba_id mmci_ids[] = {
 -- 
-1.7.6
---
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. 
-Is a member of Code Aurora Forum, hosted by the Linux Foundation
+1.7.10
+
