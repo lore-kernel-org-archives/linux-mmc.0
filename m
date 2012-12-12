@@ -1,7 +1,7 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 11/14] mmc: sh-mmcif: reset error code for any opcode
-Date: Wed, 12 Dec 2012 15:38:15 +0100
-Message-ID: <1355323098-18061-12-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 13/14] mmc: sh-mmcif: fix I/O errors
+Date: Wed, 12 Dec 2012 15:38:17 +0100
+Message-ID: <1355323098-18061-14-git-send-email-g.liakhovetski@gmx.de>
 References: <1355323098-18061-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1355323098-18061-1-git-send-email-g.liakhovetski@gmx.de>
@@ -10,34 +10,34 @@ To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
 
-If a command execution has produced an error, it has to be reset as a part
-of the error handling.
+The INT_BUFWEN IRQ often arrives with other bits set too. If they are not
+cleared, an additional IRQ can be triggered, sometimes also after the MMC
+request has already been completed. This leads to block I/O errors. Earlier
+Teppei Kamijou also observed these additional interrupts and proposed to
+explicitly wait for them. This patch chooses an alternative approach of
+clearing all active bits immediately, when processing the main interrupt.
 
+Reported-by: Teppei Kamijou <teppei.kamijou.yb@renesas.com>
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mmcif.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ drivers/mmc/host/sh_mmcif.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
 
 diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 96ab2e1..03493e4 100644
+index 1dd7fc0..36eee8d 100644
 --- a/drivers/mmc/host/sh_mmcif.c
 +++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1041,7 +1041,6 @@ static bool sh_mmcif_end_cmd(struct sh_mmcif_host *host)
- 		case MMC_SELECT_CARD:
- 		case MMC_APP_CMD:
- 			cmd->error = -ETIMEDOUT;
--			host->sd_error = false;
- 			break;
- 		default:
- 			cmd->error = sh_mmcif_error_manage(host);
-@@ -1049,6 +1048,7 @@ static bool sh_mmcif_end_cmd(struct sh_mmcif_host *host)
- 				cmd->opcode, cmd->error);
- 			break;
- 		}
-+		host->sd_error = false;
- 		return false;
- 	}
- 	if (!(cmd->flags & MMC_RSP_PRESENT)) {
+@@ -1238,7 +1238,9 @@ static irqreturn_t sh_mmcif_intr(int irq, void *dev_id)
+ 		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~INT_BUFREN);
+ 		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
+ 	} else if (state & INT_BUFWEN) {
+-		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~INT_BUFWEN);
++		sh_mmcif_writel(host->addr, MMCIF_CE_INT,
++				~(INT_BUFWEN | INT_DTRANE | INT_CMD12DRE |
++				  INT_CMD12RBE | INT_CMD12CRE));
+ 		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
+ 	} else if (state & INT_CMD12DRE) {
+ 		sh_mmcif_writel(host->addr, MMCIF_CE_INT,
 -- 
 1.7.2.5
 
