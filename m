@@ -1,88 +1,77 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 08/14] mmc: sh-mmcif: Terminate DMA transactions when detecting timeout or error
-Date: Wed, 12 Dec 2012 15:38:12 +0100
-Message-ID: <1355323098-18061-9-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 04/14] mmc: sh_mmcif: Add support for eMMC Dual Data Rate
+Date: Wed, 12 Dec 2012 15:38:08 +0100
+Message-ID: <1355323098-18061-5-git-send-email-g.liakhovetski@gmx.de>
 References: <1355323098-18061-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.126.171]:52177 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754586Ab2LLOia (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Dec 2012 09:38:30 -0500
 In-Reply-To: <1355323098-18061-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-sh-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, Teppei Kamijou <teppei.kamijou.yb@renesas.com>, Shinya Kuribayashi <shinya.kuribayashi.px@renesas.com>
-List-Id: linux-mmc@vger.kernel.org
 
 From: Teppei Kamijou <teppei.kamijou.yb@renesas.com>
 
-If a DMA transaction fails, terminate all outstanding DMA transfers and
-unmap buffers.
+Some MMCIF implementations support the Dual Data Rate. With this patch,
+platforms can set the MMC_CAP_UHS_DDR50 capability flag in MMCIF platform
+data. This will let the MMC core to actually use the DDR mode.
 
 Signed-off-by: Teppei Kamijou <teppei.kamijou.yb@renesas.com>
 Signed-off-by: Shinya Kuribayashi <shinya.kuribayashi.px@renesas.com>
-[g.liakhovetski@gmx.de: forward-port, add dma_unmap_sg() in error cases]
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mmcif.c |   31 +++++++++++++++++--------------
- 1 files changed, 17 insertions(+), 14 deletions(-)
+ drivers/mmc/host/sh_mmcif.c |   14 ++++++++++++++
+ 1 files changed, 14 insertions(+), 0 deletions(-)
 
 diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index ac4c3c3..d8d65c0 100644
+index d80c294..1ec3339 100644
 --- a/drivers/mmc/host/sh_mmcif.c
 +++ b/drivers/mmc/host/sh_mmcif.c
-@@ -263,15 +263,6 @@ static void mmcif_dma_complete(void *arg)
- 		 dev_name(&host->pd->dev)))
- 		return;
+@@ -88,6 +88,7 @@
+ #define CMD_SET_TBIT		(1 << 7) /* 1: tran mission bit "Low" */
+ #define CMD_SET_OPDM		(1 << 6) /* 1: open/drain */
+ #define CMD_SET_CCSH		(1 << 5)
++#define CMD_SET_DARS		(1 << 2) /* Dual Data Rate */
+ #define CMD_SET_DATW_1		((0 << 1) | (0 << 0)) /* 1bit */
+ #define CMD_SET_DATW_4		((0 << 1) | (1 << 0)) /* 4bit */
+ #define CMD_SET_DATW_8		((1 << 1) | (0 << 0)) /* 8bit */
+@@ -216,6 +217,7 @@ struct sh_mmcif_host {
+ 	struct clk *hclk;
+ 	unsigned int clk;
+ 	int bus_width;
++	unsigned char timing;
+ 	bool sd_error;
+ 	bool dying;
+ 	long timeout;
+@@ -781,6 +783,17 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
+ 			dev_err(&host->pd->dev, "Unsupported bus width.\n");
+ 			break;
+ 		}
++		switch (host->timing) {
++		case MMC_TIMING_UHS_DDR50:
++			/*
++			 * MMC core will only set this timing, if the host
++			 * advertises the MMC_CAP_UHS_DDR50 capability. MMCIF
++			 * implementations with this capability, e.g. sh73a0,
++			 * will have to set it in their platform data.
++			 */
++			tmp |= CMD_SET_DARS;
++			break;
++		}
+ 	}
+ 	/* DWEN */
+ 	if (opc == MMC_WRITE_BLOCK || opc == MMC_WRITE_MULTIPLE_BLOCK)
+@@ -1002,6 +1015,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		sh_mmcif_clock_control(host, ios->clock);
+ 	}
  
--	if (data->flags & MMC_DATA_READ)
--		dma_unmap_sg(host->chan_rx->device->dev,
--			     data->sg, data->sg_len,
--			     DMA_FROM_DEVICE);
--	else
--		dma_unmap_sg(host->chan_tx->device->dev,
--			     data->sg, data->sg_len,
--			     DMA_TO_DEVICE);
--
- 	complete(&host->dma_complete);
- }
- 
-@@ -1088,14 +1079,20 @@ static bool sh_mmcif_end_cmd(struct sh_mmcif_host *host)
- 	/* Running in the IRQ thread, can sleep */
- 	time = wait_for_completion_interruptible_timeout(&host->dma_complete,
- 							 host->timeout);
-+
-+	if (data->flags & MMC_DATA_READ)
-+		dma_unmap_sg(host->chan_rx->device->dev,
-+			     data->sg, data->sg_len,
-+			     DMA_FROM_DEVICE);
-+	else
-+		dma_unmap_sg(host->chan_tx->device->dev,
-+			     data->sg, data->sg_len,
-+			     DMA_TO_DEVICE);
-+
- 	if (host->sd_error) {
- 		dev_err(host->mmc->parent,
- 			"Error IRQ while waiting for DMA completion!\n");
- 		/* Woken up by an error IRQ: abort DMA */
--		if (data->flags & MMC_DATA_READ)
--			dmaengine_terminate_all(host->chan_rx);
--		else
--			dmaengine_terminate_all(host->chan_tx);
- 		data->error = sh_mmcif_error_manage(host);
- 	} else if (!time) {
- 		data->error = -ETIMEDOUT;
-@@ -1106,8 +1103,14 @@ static bool sh_mmcif_end_cmd(struct sh_mmcif_host *host)
- 			BUF_ACC_DMAREN | BUF_ACC_DMAWEN);
- 	host->dma_active = false;
- 
--	if (data->error)
-+	if (data->error) {
- 		data->bytes_xfered = 0;
-+		/* Abort DMA */
-+		if (data->flags & MMC_DATA_READ)
-+			dmaengine_terminate_all(host->chan_rx);
-+		else
-+			dmaengine_terminate_all(host->chan_tx);
-+	}
- 
- 	return false;
++	host->timing = ios->timing;
+ 	host->bus_width = ios->bus_width;
+ 	host->state = STATE_IDLE;
  }
 -- 
 1.7.2.5
