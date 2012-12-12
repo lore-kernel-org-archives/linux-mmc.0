@@ -1,96 +1,63 @@
-From: Andy Lutomirski <luto@amacapital.net>
-Subject: [ping for 3.8 for pci tree] Re: [PATCH] pci: Add a quirk for the
- Ricoh 0xe22 SD card reader
-Date: Tue, 11 Dec 2012 18:38:12 -0800
-Message-ID: <CALCETrXz00nPJ80COqdo-LDC-+=ma9pZ_jds3aKObLFqUxnojA@mail.gmail.com>
-References: <33c411da9bb44eae8a5f9e0609f8eb0aa4eda600.1354385950.git.luto@amacapital.net>
- <33c411da9bb44eae8a5f9e0609f8eb0aa4eda601.1354385950.git.luto@amacapital.net>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: mmci: Gate the clock in runtime suspend to save power
+Date: Wed, 12 Dec 2012 07:53:37 +0100
+Message-ID: <CACRpkdbZSFQ1HvXZ3Op093CediAm9rPHwHX38h_sxwE9ARSe5A@mail.gmail.com>
+References: <1355235474-12783-1-git-send-email-ulf.hansson@stericsson.com>
+ <20121211145243.GQ14363@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-pci-owner@vger.kernel.org>
-In-Reply-To: <33c411da9bb44eae8a5f9e0609f8eb0aa4eda601.1354385950.git.luto@amacapital.net>
-Sender: linux-pci-owner@vger.kernel.org
-To: linux-pci@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>
-Cc: Chris Ball <cjb@laptop.org>, Andy Lutomirski <luto@amacapital.net>, linux-mmc@vger.kernel.org, Manoj Iyer <manoj.iyer@canonical.com>, stable@kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20121211145243.GQ14363@n2100.arm.linux.org.uk>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Bjorn-
-
-I want to make sure this doesn't get lost.  It's a patch for pci, not
-for mmc, despite the subject.
-
---Andy
-
-On Sat, Dec 1, 2012 at 12:37 PM, Andy Lutomirski <luto@amacapital.net> wrote:
-> Otherwise it fails like this on cards like the Transcend 16GB SDHC card:
-> mmc0: new SDHC card at address b368
-> mmcblk0: mmc0:b368 SDC   15.0 GiB
-> mmcblk0: error -110 sending status command, retrying
-> mmcblk0: error -84 transferring data, sector 0, nr 8, cmd respons
-> e 0x900, card status 0xb0
+On Tue, Dec 11, 2012 at 3:52 PM, Russell King - ARM Linux
+<linux@arm.linux.org.uk> wrote:
+> On Tue, Dec 11, 2012 at 03:17:54PM +0100, Ulf Hansson wrote:
+>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>
+>> The amba bus is already performing same actions but for the apb_pclk.
+>> So here we just make sure the clock to card is gated as well to save
+>> more power. At runtime resume we will thus restore the clock again.
 >
-> Tested on my Lenovo x200 laptop.
->
-> Signed-off-by: Andy Lutomirski <luto@amacapital.net>
-> Acked-by: Chris Ball <cjb@laptop.org>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: Manoj Iyer <manoj.iyer@canonical.com>
-> Cc: <stable@kernel.org>
-> ---
->  drivers/pci/quirks.c    | 7 +++++--
->  include/linux/pci_ids.h | 1 +
->  2 files changed, 6 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-> index 7a451ff..7165f2a 100644
-> --- a/drivers/pci/quirks.c
-> +++ b/drivers/pci/quirks.c
-> @@ -2686,7 +2686,7 @@ static void ricoh_mmc_fixup_r5c832(struct pci_dev *dev)
->         if (PCI_FUNC(dev->devfn))
->                 return;
->         /*
-> -        * RICOH 0xe823 SD/MMC card reader fails to recognize
-> +        * RICOH 0xe822 and 0xe823 SD/MMC card readers fails to recognize
->          * certain types of SD/MMC cards. Lowering the SD base
->          * clock frequency from 200Mhz to 50Mhz fixes this issue.
->          *
-> @@ -2697,7 +2697,8 @@ static void ricoh_mmc_fixup_r5c832(struct pci_dev *dev)
->          * 0xf9  - Key register for 0x150
->          * 0xfc  - key register for 0xe1
->          */
-> -       if (dev->device == PCI_DEVICE_ID_RICOH_R5CE823) {
-> +       if (dev->device == PCI_DEVICE_ID_RICOH_R5CE822 ||
-> +           dev->device == PCI_DEVICE_ID_RICOH_R5CE823) {
->                 pci_write_config_byte(dev, 0xf9, 0xfc);
->                 pci_write_config_byte(dev, 0x150, 0x10);
->                 pci_write_config_byte(dev, 0xf9, 0x00);
-> @@ -2724,6 +2725,8 @@ static void ricoh_mmc_fixup_r5c832(struct pci_dev *dev)
->  }
->  DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832, ricoh_mmc_fixup_r5c832);
->  DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832, ricoh_mmc_fixup_r5c832);
-> +DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5CE822, ricoh_mmc_fixup_r5c832);
-> +DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5CE822, ricoh_mmc_fixup_r5c832);
->  DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5CE823, ricoh_mmc_fixup_r5c832);
->  DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5CE823, ricoh_mmc_fixup_r5c832);
->  #endif /*CONFIG_MMC_RICOH_MMC*/
-> diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h
-> index 9d36b82..d16ad56 100644
-> --- a/include/linux/pci_ids.h
-> +++ b/include/linux/pci_ids.h
-> @@ -1568,6 +1568,7 @@
->  #define PCI_DEVICE_ID_RICOH_RL5C476    0x0476
->  #define PCI_DEVICE_ID_RICOH_RL5C478    0x0478
->  #define PCI_DEVICE_ID_RICOH_R5C822     0x0822
-> +#define PCI_DEVICE_ID_RICOH_R5CE822    0xe822
->  #define PCI_DEVICE_ID_RICOH_R5CE823    0xe823
->  #define PCI_DEVICE_ID_RICOH_R5C832     0x0832
->  #define PCI_DEVICE_ID_RICOH_R5C843     0x0843
-> --
-> 1.7.11.7
->
+> And how exactly do you ensure the requirement that a certain number of
+> clocks is supplied to the card after the last command before you cut
+> the clock?
 
+Oh, that's gonna be a problem.
 
+So I can see a quite straight-forward way to do this actually:
 
--- 
-Andy Lutomirski
-AMA Capital Management, LLC
+1) Turn on MMC_CLKGATE for this driver (select from Kconfig)
+which means that the ios will be called with f=0 whenever
+the card is unused, taking into account the required number
+of clocks to the card.
+
+2) Implement handling of f=0 from the ios in the ios callback.
+Then clk_disable(host->clk). I did a hack at this some months
+back but never got around to finish it, sorry for not doing
+that even though this clock gating was invented for the MMCI
+in the first place :-(
+
+3) In the suspend() callback, sleep until the clock indicates
+that the card is declocked with something like:
+while (clk_is_enabled(host->clk)) { sleep(1) }
+However the clk framework does not have clk_is_enabled()
+so you'd either have to add that or use a local atomic
+variable host_clk_enabled set in (2).
+
+Should work, I think?
+
+Yours,
+Linus Walleij
