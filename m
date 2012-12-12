@@ -1,130 +1,54 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH/RFC] mmc: sh-mmcif: simplify IRQ processing
-Date: Wed, 12 Dec 2012 15:45:14 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1212121540250.10522@axis700.grange>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH] mmc: mmci: Support for DDR mode
+Date: Wed, 12 Dec 2012 15:59:08 +0100
+Message-ID: <1355324348-11481-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog102.obsmtp.com ([207.126.144.113]:46436 "EHLO
+	eu1sys200aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754535Ab2LLO7n (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Dec 2012 09:59:43 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-The classical way to process IRQs is read out the status, ack all triggered
-IRQs, possibly mask them, then process them. Follow this simple procesure
-instead of the current complex custom algorithm.
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Add support for DDR mode which may be used for the ux500v2 variant.
+Corresponding capabilities to enable the DDR support must be set in
+the platform struct to enable the functionality.
+
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
+ drivers/mmc/host/mmci.c |    6 ++++++
+ 1 file changed, 6 insertions(+)
 
-Hi Chris
-
-Attention: this patch is __NOT__ for 3.8, please, let it simmer in -next 
-until 3.9. It modifies the driver's interrupt handling significantly, so, 
-we want to have it tested over a longer period.
-
-Thanks
-Guennadi
-
- drivers/mmc/host/sh_mmcif.c |   65 ++++++++++++------------------------------
- 1 files changed, 19 insertions(+), 46 deletions(-)
-
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 90a9255..bbccc12 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -128,6 +128,10 @@
- 				 INT_CCSTO | INT_CRCSTO | INT_WDATTO |	  \
- 				 INT_RDATTO | INT_RBSYTO | INT_RSPTO)
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index aa04b42..4e4f5f1 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -202,6 +202,9 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
+ 	if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_8)
+ 		clk |= MCI_ST_8BIT_BUS;
  
-+#define INT_ALL			(INT_RBSYE | INT_CRSPE | INT_BUFREN |	 \
-+				 INT_BUFWEN | INT_CMD12DRE | INT_BUFRE | \
-+				 INT_DTRANE | INT_CMD12RBE | INT_CMD12CRE)
++	if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
++		clk |= MCI_ST_UX500_NEG_EDGE;
 +
- /* CE_INT_MASK */
- #define MASK_ALL		0x00000000
- #define MASK_MCCSDE		(1 << 29)
-@@ -159,6 +163,11 @@
- 				 MASK_MCCSTO | MASK_MCRCSTO | MASK_MWDATTO | \
- 				 MASK_MRDATTO | MASK_MRBSYTO | MASK_MRSPTO)
+ 	mmci_write_clkreg(host, clk);
+ }
  
-+#define MASK_CLEAN		(INT_ERR_STS | MASK_MRBSYE | MASK_MCRSPE |	\
-+				 MASK_MBUFREN | MASK_MBUFWEN |			\
-+				 MASK_MCMD12DRE | MASK_MBUFRE | MASK_MDTRANE |	\
-+				 MASK_MCMD12RBE | MASK_MCMD12CRE)
+@@ -680,6 +683,9 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ 			mmci_write_clkreg(host, clk);
+ 		}
+ 
++	if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
++		datactrl |= MCI_ST_DPSM_DDRMODE;
 +
- /* CE_HOST_STS1 */
- #define STS1_CMDSEQ		(1 << 31)
- 
-@@ -1201,58 +1210,22 @@ static irqreturn_t sh_mmcif_intr(int irq, void *dev_id)
- {
- 	struct sh_mmcif_host *host = dev_id;
- 	u32 state;
--	int err = 0;
- 
- 	state = sh_mmcif_readl(host->addr, MMCIF_CE_INT);
-+	sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~state);
-+	sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, state & MASK_CLEAN);
- 
--	if (state & INT_ERR_STS) {
--		/* error interrupts - process first */
--		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~state);
--		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, state);
--		err = 1;
--	} else if (state & INT_RBSYE) {
--		sh_mmcif_writel(host->addr, MMCIF_CE_INT,
--				~(INT_RBSYE | INT_CRSPE));
--		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MRBSYE);
--	} else if (state & INT_CRSPE) {
--		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~INT_CRSPE);
--		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MCRSPE);
--	} else if (state & INT_BUFREN) {
--		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~INT_BUFREN);
--		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
--	} else if (state & INT_BUFWEN) {
--		sh_mmcif_writel(host->addr, MMCIF_CE_INT,
--				~(INT_BUFWEN | INT_DTRANE | INT_CMD12DRE |
--				  INT_CMD12RBE | INT_CMD12CRE));
--		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
--	} else if (state & INT_CMD12DRE) {
--		sh_mmcif_writel(host->addr, MMCIF_CE_INT,
--			~(INT_CMD12DRE | INT_CMD12RBE |
--			  INT_CMD12CRE | INT_BUFRE));
--		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MCMD12DRE);
--	} else if (state & INT_BUFRE) {
--		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~INT_BUFRE);
--		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MBUFRE);
--	} else if (state & INT_DTRANE) {
--		sh_mmcif_writel(host->addr, MMCIF_CE_INT,
--			~(INT_CMD12DRE | INT_CMD12RBE |
--			  INT_CMD12CRE | INT_DTRANE));
--		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MDTRANE);
--	} else if (state & INT_CMD12RBE) {
--		sh_mmcif_writel(host->addr, MMCIF_CE_INT,
--				~(INT_CMD12RBE | INT_CMD12CRE));
--		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MCMD12RBE);
--	} else {
--		dev_dbg(&host->pd->dev, "Unsupported interrupt: 0x%x\n", state);
--		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~state);
--		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, state);
--		err = 1;
--	}
--	if (err) {
-+	if (state & ~MASK_CLEAN)
-+		dev_dbg(&host->pd->dev, "IRQ state = 0x%08x incompletely cleared\n",
-+			state);
-+
-+	if (state & INT_ERR_STS || state & ~INT_ALL) {
- 		host->sd_error = true;
--		dev_dbg(&host->pd->dev, "int err state = %08x\n", state);
-+		dev_dbg(&host->pd->dev, "int err state = 0x%08x\n", state);
- 	}
- 	if (state & ~(INT_CMD12RBE | INT_CMD12CRE)) {
-+		if (!host->mrq)
-+			dev_dbg(&host->pd->dev, "NULL IRQ state = 0x%08x\n", state);
- 		if (!host->dma_active)
- 			return IRQ_WAKE_THREAD;
- 		else if (host->sd_error)
+ 	/*
+ 	 * Attempt to use DMA operation mode, if this
+ 	 * should fail, fall back to PIO mode
 -- 
-1.7.2.5
+1.7.10
 
