@@ -1,52 +1,61 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 00/14] mmc: sh-mmcif: 3.8 fixes and improvements
-Date: Wed, 12 Dec 2012 15:38:04 +0100
-Message-ID: <1355323098-18061-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-sh-owner@vger.kernel.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>
+Subject: [PATCH 06/14] mmc: sh_mmcif: Avoid unnecessary mmc_delay() at mmc_card_sleepawake()
+Date: Wed, 12 Dec 2012 15:38:10 +0100
+Message-ID: <1355323098-18061-7-git-send-email-g.liakhovetski@gmx.de>
+References: <1355323098-18061-1-git-send-email-g.liakhovetski@gmx.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.126.186]:56316 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754333Ab2LLOiZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Dec 2012 09:38:25 -0500
+In-Reply-To: <1355323098-18061-1-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, Teppei Kamijou <teppei.kamijou.yb@renesas.com>, Shinya Kuribayashi <shinya.kuribayashi.px@renesas.com>
 
-This patch series fixes several bugs in the sh_mmcif.c driver, that showed 
-up on SMP with DMA (patches 10, 13), adds new features (3, 4) and adds 
-multiple further improvements and minor fixes. Even though these bugs 
-currently exist in the mainline, this patch series is not considered to 
-be suitable for @stable. Patches are rather experimental and it is better 
-to test them over a complete development cycle. They also are easier 
-implemented on top of preparatory cosmetic patches.
+From: Teppei Kamijou <teppei.kamijou.yb@renesas.com>
 
-Guennadi Liakhovetski (6):
-  mmc: sh-mmcif: fix missing and consolidate IO completion timeouts
-  mmc: sh-mmcif: (cosmetic) simplify boolean return blocks
-  mmc: sh-mmcif: fix a race, causing an Oops on SMP
-  mmc: sh-mmcif: reset error code for any opcode
-  mmc: sh-mmcif: reset DMA completion immediately before starting DMA
-  mmc: sh-mmcif: fix I/O errors
+SH/R-Mobile MMCIF host controller can wait while the card signals busy.
+Set MMC_CAP_WAIT_WHILE_BUSY to inform an upper layer (core/mmc_ops.c)
+not to insert unnecessary mmc_delay().
 
-Shinya Kuribayashi (1):
-  mmc: sh_mmcif: add support for bundled MMCIF IRQs
+Signed-off-by: Teppei Kamijou <teppei.kamijou.yb@renesas.com>
+Signed-off-by: Shinya Kuribayashi <shinya.kuribayashi.px@renesas.com>
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
+ drivers/mmc/host/sh_mmcif.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
 
-Teppei Kamijou (7):
-  mmc: sh_mmcif: force to fail CMD52 immediately
-  mmc: sh_mmcif: ensure run-time suspend call is processed before
-    suspend
-  mmc: sh_mmcif: Add support for eMMC Dual Data Rate
-  mmc: sh_mmcif: Use msecs_to_jiffies() for host->timeout
-  mmc: sh_mmcif: Avoid unnecessary mmc_delay() at mmc_card_sleepawake()
-  mmc: sh-mmcif: Terminate DMA transactions when detecting timeout or
-    error
-  mmc: sh-mmcif: report all errors
-
- drivers/mmc/host/sh_mmcif.c |  215 +++++++++++++++++++++++++++++--------------
- 1 files changed, 145 insertions(+), 70 deletions(-)
-
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 1665ae4..092c415 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -758,6 +758,7 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
+ 	}
+ 	switch (opc) {
+ 	/* RBSY */
++	case MMC_SLEEP_AWAKE:
+ 	case MMC_SWITCH:
+ 	case MMC_STOP_TRANSMISSION:
+ 	case MMC_SET_WRITE_PROT:
+@@ -851,6 +852,7 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
+ 
+ 	switch (opc) {
+ 	/* response busy check */
++	case MMC_SLEEP_AWAKE:
+ 	case MMC_SWITCH:
+ 	case MMC_STOP_TRANSMISSION:
+ 	case MMC_SET_WRITE_PROT:
+@@ -1357,7 +1359,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 	mmc->ops = &sh_mmcif_ops;
+ 	sh_mmcif_init_ocr(host);
+ 
+-	mmc->caps = MMC_CAP_MMC_HIGHSPEED;
++	mmc->caps = MMC_CAP_MMC_HIGHSPEED | MMC_CAP_WAIT_WHILE_BUSY;
+ 	if (pd && pd->caps)
+ 		mmc->caps |= pd->caps;
+ 	mmc->max_segs = 32;
 -- 
 1.7.2.5
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
