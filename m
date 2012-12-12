@@ -1,43 +1,157 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 05/14] mmc: sh_mmcif: Use msecs_to_jiffies() for host->timeout
-Date: Wed, 12 Dec 2012 15:38:09 +0100
-Message-ID: <1355323098-18061-6-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 10/14] mmc: sh-mmcif: fix a race, causing an Oops on SMP
+Date: Wed, 12 Dec 2012 15:38:14 +0100
+Message-ID: <1355323098-18061-11-git-send-email-g.liakhovetski@gmx.de>
 References: <1355323098-18061-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:57914 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754268Ab2LLOiZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Dec 2012 09:38:25 -0500
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1355323098-18061-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, Teppei Kamijou <teppei.kamijou.yb@renesas.com>, Shinya Kuribayashi <shinya.kuribayashi.px@renesas.com>
+Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>
+List-Id: linux-mmc@vger.kernel.org
 
-From: Teppei Kamijou <teppei.kamijou.yb@renesas.com>
+Oopses have been observed on SMP in the sh-mmcif IRQ thread, when the two
+IRQ threads run simultaneously on two CPUs. Also take care to guard the
+timeout work and the DMA completion callback from possible NULL-pointer
+dereferences and races.
 
-Timeout period should be properly normalized using msecs_to_jiffies().
-
-Signed-off-by: Teppei Kamijou <teppei.kamijou.yb@renesas.com>
-Signed-off-by: Shinya Kuribayashi <shinya.kuribayashi.px@renesas.com>
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mmcif.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ drivers/mmc/host/sh_mmcif.c |   39 ++++++++++++++++++++++++++++++++++++---
+ 1 files changed, 36 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 1ec3339..1665ae4 100644
+index 1a7c602..96ab2e1 100644
 --- a/drivers/mmc/host/sh_mmcif.c
 +++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1348,7 +1348,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 	host		= mmc_priv(mmc);
- 	host->mmc	= mmc;
- 	host->addr	= reg;
--	host->timeout	= 1000;
-+	host->timeout	= msecs_to_jiffies(1000);
+@@ -56,6 +56,7 @@
+ #include <linux/mmc/sh_mmcif.h>
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/mod_devicetable.h>
++#include <linux/mutex.h>
+ #include <linux/pagemap.h>
+ #include <linux/platform_device.h>
+ #include <linux/pm_qos.h>
+@@ -196,6 +197,7 @@ enum mmcif_state {
+ 	STATE_IDLE,
+ 	STATE_REQUEST,
+ 	STATE_IOS,
++	STATE_TIMEOUT,
+ };
  
- 	host->pd = pdev;
+ enum mmcif_wait_for {
+@@ -232,6 +234,7 @@ struct sh_mmcif_host {
+ 	int sg_blkidx;
+ 	bool power;
+ 	bool card_present;
++	struct mutex thread_lock;
  
+ 	/* DMA support */
+ 	struct dma_chan		*chan_rx;
+@@ -255,11 +258,11 @@ static inline void sh_mmcif_bitclr(struct sh_mmcif_host *host,
+ static void mmcif_dma_complete(void *arg)
+ {
+ 	struct sh_mmcif_host *host = arg;
+-	struct mmc_data *data = host->mrq->data;
++	struct mmc_request *mrq = host->mrq;
+ 
+ 	dev_dbg(&host->pd->dev, "Command completed\n");
+ 
+-	if (WARN(!data, "%s: NULL data in DMA completion!\n",
++	if (WARN(!mrq || !mrq->data, "%s: NULL data in DMA completion!\n",
+ 		 dev_name(&host->pd->dev)))
+ 		return;
+ 
+@@ -1113,11 +1116,21 @@ static bool sh_mmcif_end_cmd(struct sh_mmcif_host *host)
+ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+ {
+ 	struct sh_mmcif_host *host = dev_id;
+-	struct mmc_request *mrq = host->mrq;
++	struct mmc_request *mrq;
+ 	bool wait = false;
+ 
+ 	cancel_delayed_work_sync(&host->timeout_work);
+ 
++	mutex_lock(&host->thread_lock);
++
++	mrq = host->mrq;
++	if (!mrq) {
++		dev_dbg(&host->pd->dev, "IRQ thread state %u, wait %u: NULL mrq!\n",
++			host->state, host->wait_for);
++		mutex_unlock(&host->thread_lock);
++		return IRQ_HANDLED;
++	}
++
+ 	/*
+ 	 * All handlers return true, if processing continues, and false, if the
+ 	 * request has to be completed - successfully or not
+@@ -1125,6 +1138,7 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+ 	switch (host->wait_for) {
+ 	case MMCIF_WAIT_FOR_REQUEST:
+ 		/* We're too late, the timeout has already kicked in */
++		mutex_unlock(&host->thread_lock);
+ 		return IRQ_HANDLED;
+ 	case MMCIF_WAIT_FOR_CMD:
+ 		/* Wait for data? */
+@@ -1166,6 +1180,7 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+ 	if (wait) {
+ 		schedule_delayed_work(&host->timeout_work, host->timeout);
+ 		/* Wait for more data */
++		mutex_unlock(&host->thread_lock);
+ 		return IRQ_HANDLED;
+ 	}
+ 
+@@ -1179,6 +1194,7 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+ 			sh_mmcif_stop_cmd(host, mrq);
+ 			if (!mrq->stop->error) {
+ 				schedule_delayed_work(&host->timeout_work, host->timeout);
++				mutex_unlock(&host->thread_lock);
+ 				return IRQ_HANDLED;
+ 			}
+ 		}
+@@ -1189,6 +1205,8 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+ 	host->mrq = NULL;
+ 	mmc_request_done(host->mmc, mrq);
+ 
++	mutex_unlock(&host->thread_lock);
++
+ 	return IRQ_HANDLED;
+ }
+ 
+@@ -1262,11 +1280,24 @@ static void mmcif_timeout_work(struct work_struct *work)
+ 	struct delayed_work *d = container_of(work, struct delayed_work, work);
+ 	struct sh_mmcif_host *host = container_of(d, struct sh_mmcif_host, timeout_work);
+ 	struct mmc_request *mrq = host->mrq;
++	unsigned long flags;
+ 
+ 	if (host->dying)
+ 		/* Don't run after mmc_remove_host() */
+ 		return;
+ 
++	dev_dbg(&host->pd->dev, "Timeout waiting for %u, opcode %u\n",
++		host->wait_for, mrq->cmd->opcode);
++
++	spin_lock_irqsave(&host->lock, flags);
++	if (host->state == STATE_IDLE) {
++		spin_unlock_irqrestore(&host->lock, flags);
++		return;
++	}
++
++	host->state = STATE_TIMEOUT;
++	spin_unlock_irqrestore(&host->lock, flags);
++
+ 	/*
+ 	 * Handle races with cancel_delayed_work(), unless
+ 	 * cancel_delayed_work_sync() is used
+@@ -1410,6 +1441,8 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 			goto erqcd;
+ 	}
+ 
++	mutex_init(&host->thread_lock);
++
+ 	clk_disable(host->hclk);
+ 	ret = mmc_add_host(mmc);
+ 	if (ret < 0)
 -- 
 1.7.2.5
 
