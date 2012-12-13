@@ -1,37 +1,63 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: mmci: Gate the clock when freq is 0
-Date: Wed, 12 Dec 2012 19:57:16 +0100
-Message-ID: <CACRpkdabPfZ0mmU3XYh_NT-w6ZYZeJaGLiQK8__1H9qA-dWAAw@mail.gmail.com>
-References: <1355327421-20187-1-git-send-email-ulf.hansson@stericsson.com>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: FW: [PATCH] mmc: mmci: Gate the clock in runtime suspend to save power
+Date: Thu, 13 Dec 2012 09:51:38 +0800
+Message-ID: <CADz5_gJ70KrHL5NoSPQbFdeHnQxWLh87zq6N+-V7J7Yq7t+aPQ@mail.gmail.com>
+References: <25B60CDC2F704E4E9D88FFD52780CB4C08B00BD3B1@SC-VEXCH1.marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:36420 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754212Ab2LLS5R (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Dec 2012 13:57:17 -0500
-Received: by mail-ee0-f46.google.com with SMTP id e53so715946eek.19
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Dec 2012 10:57:16 -0800 (PST)
-In-Reply-To: <1355327421-20187-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from mail-wg0-f46.google.com ([74.125.82.46]:61707 "EHLO
+	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755020Ab2LMBvk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Dec 2012 20:51:40 -0500
+Received: by mail-wg0-f46.google.com with SMTP id dr13so545691wgb.1
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Dec 2012 17:51:38 -0800 (PST)
+In-Reply-To: <25B60CDC2F704E4E9D88FFD52780CB4C08B00BD3B1@SC-VEXCH1.marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, Johan Rudholm <johan.rudholm@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: linus.walleij@linaro.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux@arm.linux.org.uk, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 
-On Wed, Dec 12, 2012 at 4:50 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
-
-> From: Johan Rudholm <johan.rudholm@stericsson.com>
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Linus Walleij
+> Sent: Thursday, December 13, 2012 2:54 AM
+> To: Ulf Hansson
+> Cc: Russell King - ARM Linux; Ulf Hansson; linux-mmc@vger.kernel.org; Chris Ball; linux-arm-kernel@lists.infradead.org
+> Subject: Re: [PATCH] mmc: mmci: Gate the clock in runtime suspend to save power
 >
-> In the ST Micro variant, the MMCI_CLOCK register should not be used to
-> gate the clock. Use MMCI_POWER to do this.
+> On Wed, Dec 12, 2012 at 12:02 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 12 December 2012 07:53, Linus Walleij <linus.walleij@linaro.org> wrote:
 >
-> Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>> 1) Turn on MMC_CLKGATE for this driver (select from Kconfig)
+>>> which means that the ios will be called with f=0 whenever
+>>> the card is unused, taking into account the required number
+>>> of clocks to the card.
+>>
+>> I think MMC_CLKGATE was a good initiative in the past. But that was
+>> before runtime pm was there to use. Runtime pm suits much better for
+>> handling clock gating and other runtime power save actions that could
+>> be possible for a host driver to do.
+>>
+>> I would even suggest the MMC_CLKGATE should be removed from the
+>> protocol layer, once we see that all host drivers that used it has
+>> switch to runtime pm.
+>
+> Ah now I remember that you've actually even explained this to me ...
+> memory is too short sometimes. But I follow this idea.
+>
+> Then we have only the coordination between runtime suspend
+> and suspend proper to iron out.
+>
+> Russell's concern is valid if suspend() will not wait for runtime_suspend()
+> to complete the last cycle before suspending.
+>
 
-I don't know if I'm qualified to ACK anything more today after
-misunderstanding so many patches, but this seems correct to
-me and won't affect any non-ST IP, so:
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
+pm_runtime_get_noresume is called before suspend and there are
+sdhci_runtime_pm_get/sdhci_runtime_pm_put within sdhci suspend/resume
+function. So the actual runtime_suspend won't be called after suspend
+finished. So it's same as original code without pm_runtime during
+suspend/resume.
 
-Yours,
-Linus Walleij
+> Hm this sounds scaringly familiar to what we've discussed with
+> Kevin Hilman et al recently...
+>
