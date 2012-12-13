@@ -1,42 +1,77 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: FW: [PATCH] mmc: mmci: Gate the clock in runtime suspend to save power
-Date: Thu, 13 Dec 2012 11:22:24 +0100
-Message-ID: <CAPDyKFrkNnudy_rCL4P3GjRjh3zZ0aGVLti8uLJaW4FfuXm9JQ@mail.gmail.com>
-References: <25B60CDC2F704E4E9D88FFD52780CB4C08B00BD3B1@SC-VEXCH1.marvell.com>
-	<CADz5_gJ70KrHL5NoSPQbFdeHnQxWLh87zq6N+-V7J7Yq7t+aPQ@mail.gmail.com>
-	<CAPDyKFrt4zWmhyO-UJAFPOH=90n4OwRPv3nczr4jPGBnc_jT5w@mail.gmail.com>
-	<20121213101117.GF14363@n2100.arm.linux.org.uk>
+Subject: Re: [PATCH] mmc: mmci: Fixup and cleanup code for DMA handling
+Date: Thu, 13 Dec 2012 11:59:28 +0100
+Message-ID: <CAPDyKFrG3UfExRtonBtSGMz6s1Ad5Ck0CjkkXyUdLb4c0MpZrA@mail.gmail.com>
+References: <1350056012-18625-1-git-send-email-ulf.hansson@stericsson.com>
+	<CACRpkdZqe3uB9wGM5g5LUJuZEtzeBW=Hs5RF=5_CKU0CBWJRyA@mail.gmail.com>
+	<CAPDyKFr=aN+MN+VCvbAqNa7mu+fxTTeHdcA1oCv8QWqpdT8MGQ@mail.gmail.com>
+	<CACRpkdZPbrvfk0QNB7x8YZ+DVibPJMTLsLDSf310CcBEeOTuww@mail.gmail.com>
+	<CAPDyKFqfjaDcj361eoMtp3BwQMAW5JcUcyoovFPzXdL0a3dzUg@mail.gmail.com>
+	<CAPDyKFqt-yaA9LNAMEH0bE+109bceAuO94B+W5UbMmGUsVWFKw@mail.gmail.com>
+	<CAPDyKFoC=j1JUY=NAUdAH8gDGrc7MCZFvs3wCdkxWi=yLbk3LQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:63615 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752800Ab2LMKWZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Dec 2012 05:22:25 -0500
-Received: by mail-we0-f174.google.com with SMTP id x10so786463wey.19
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Dec 2012 02:22:24 -0800 (PST)
-In-Reply-To: <20121213101117.GF14363@n2100.arm.linux.org.uk>
+Received: from mail-wi0-f180.google.com ([209.85.212.180]:55598 "EHLO
+	mail-wi0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752802Ab2LMK7a (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Dec 2012 05:59:30 -0500
+Received: by mail-wi0-f180.google.com with SMTP id hj13so1472245wib.1
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Dec 2012 02:59:29 -0800 (PST)
+In-Reply-To: <CAPDyKFoC=j1JUY=NAUdAH8gDGrc7MCZFvs3wCdkxWi=yLbk3LQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Kevin Liu <keyuan.liu@gmail.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, Per Forlin <per.forlin@stericsson.com>
 
-On 13 December 2012 11:11, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> On Thu, Dec 13, 2012 at 10:04:46AM +0100, Ulf Hansson wrote:
->> Anyway, this need to be thought of as future step, since this patch is
->> not changing anything to that sequence as Kevin also is pointing out.
+On 28 November 2012 15:00, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 21 November 2012 16:22, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 16 October 2012 13:44, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>> On 16 October 2012 10:17, Linus Walleij <linus.walleij@linaro.org> wrote:
+>>>> On Tue, Oct 16, 2012 at 9:16 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>>
+>>>>> This code has not been tested on a "legacy" ARM PL180 but only for
+>>>>> ux500 boards. Even if it should affect DMA handling we should test
+>>>>> this properly. Would be great if you were able to help out, I guess
+>>>>> you still have available hardware for these tests?
+>>>>
+>>>> I can test the Integrator/CP and Realview in IRQ/PIO mode and
+>>>> the U300 in DMA mode.
+>>>
+>>> Great!
+>>>
+>>>>
+>>>> I need some help to provoke errorpath in DMA mode though,
+>>>> so any hints are welcome...
+>>>
+>>> One good option could be to stress test card insert/removal sequences,
+>>> while at the same time doing read/write requests.
+>>>
+>>>>
+>>>> Yours,
+>>>> Linus Walleij
+>>>
+>>> Kind regards
+>>> Ulf Hansson
+>>
+>> Just a kind reminder for Linus; did you manage to do some tests for
+>> these patches?
+>>
+>> Kind regards
+>> Ulf Hansson
 >
-> Given that Kevin is talking about stuff in sdhci as if it affects MMCI,
-> and that neither of you have picked that up, you're *still* not gaining
-> any confidence from me that you're actually thinking about the changes
-> you're making.  So I'm not really caring about how many acks your patches
-> get, I'm still going to be reluctant to apply them without thinking about
-> them for a bit.
+> I have now tested these patches for ARM-RealView PB1176. Looks good! I
+> stress tested card insert/remove at the same time you write/read to
+> the card. Error handling is stable.
+>
+> Kind regards
+> Ulf Hansson
 
-MMCI is doing "pm_runtime_get_sync" in it suspend. So the same
-principles as Kevin is describing for sdhci goes for MMCI. Sorry if
-this was not clearly pointed out.
+For clarification. Skip this patch.
+
+The next version is rebased on top of 3.7 and is thus not based on
+"mmc: mmci: Support non-power-of-two block sizes for ux500v2 variant",
+which needs some rework.
 
 Kind regards
 Ulf Hansson
