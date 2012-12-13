@@ -1,48 +1,154 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: FW: [PATCH] mmc: mmci: Gate the clock in runtime suspend to save power
-Date: Thu, 13 Dec 2012 19:45:36 +0800
-Message-ID: <CADz5_gJ+8D_vm8SnfsnbheFpwarAxGSmY27FW_cvc7YdDH9pow@mail.gmail.com>
-References: <25B60CDC2F704E4E9D88FFD52780CB4C08B00BD3B1@SC-VEXCH1.marvell.com>
-	<CADz5_gJ70KrHL5NoSPQbFdeHnQxWLh87zq6N+-V7J7Yq7t+aPQ@mail.gmail.com>
-	<CAPDyKFrt4zWmhyO-UJAFPOH=90n4OwRPv3nczr4jPGBnc_jT5w@mail.gmail.com>
-	<20121213101117.GF14363@n2100.arm.linux.org.uk>
-	<CAPDyKFrkNnudy_rCL4P3GjRjh3zZ0aGVLti8uLJaW4FfuXm9JQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: dromede@gmail.com
+Subject: [PATCH] [ARM] pxamci: Refactor regulator support
+Date: Thu, 13 Dec 2012 17:56:27 +0100
+Message-ID: <1355417787-8681-1-git-send-email-dromede@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f170.google.com ([209.85.212.170]:60547 "EHLO
-	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750819Ab2LMLpi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Dec 2012 06:45:38 -0500
-Received: by mail-wi0-f170.google.com with SMTP id hq7so4081356wib.1
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Dec 2012 03:45:36 -0800 (PST)
-In-Reply-To: <CAPDyKFrkNnudy_rCL4P3GjRjh3zZ0aGVLti8uLJaW4FfuXm9JQ@mail.gmail.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:44661 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753702Ab2LMQ4p (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Dec 2012 11:56:45 -0500
+Received: by mail-bk0-f46.google.com with SMTP id q16so1215135bkw.19
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Dec 2012 08:56:44 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: linux-mmc@vger.kernel.org, linux@arm.linux.org.uk, cjb@laptop.org, viresh.kumar@linaro.org, g.liakhovetski@gmx.de, gregkh@linuxfoundation.org, Marko Katic <dromede@gmail.com>
 
-2012/12/13 Ulf Hansson <ulf.hansson@linaro.org>:
-> On 13 December 2012 11:11, Russell King - ARM Linux
-> <linux@arm.linux.org.uk> wrote:
->> On Thu, Dec 13, 2012 at 10:04:46AM +0100, Ulf Hansson wrote:
->>> Anyway, this need to be thought of as future step, since this patch is
->>> not changing anything to that sequence as Kevin also is pointing out.
->>
->> Given that Kevin is talking about stuff in sdhci as if it affects MMCI,
->> and that neither of you have picked that up, you're *still* not gaining
->> any confidence from me that you're actually thinking about the changes
->> you're making.  So I'm not really caring about how many acks your patches
->> get, I'm still going to be reluctant to apply them without thinking about
->> them for a bit.
->
-> MMCI is doing "pm_runtime_get_sync" in it suspend. So the same
-> principles as Kevin is describing for sdhci goes for MMCI. Sorry if
-> this was not clearly pointed out.
->
-sorry for my unclear words. I just use sdhci directly to explain this.
-It's similar for sdhci and mmci on this point. pm_runtime is
-temporarily disabled during suspend/resume.
+From: Marko Katic <dromede.gmail.com>
 
-Thanks
-Kevin
+Here's an interesting scenario. The spitz machine has an
+Intersil 6271A voltage regulator and an ADS7846 touchscreen
+controller.
+
+The ADS7846 driver _requires_ the use of a voltage regulator
+or if not present, CONFIG_REGULATOR_DUMMY should be used for proper operation.
+This was made mandatory by the following commit:
+
+========================================
+91143379b01b2020d8878d627ebe9dfb9d6eb4c8
+Input: ads7846 - add regulator support
+
+The ADS7846/TSC2046 touchscreen controllers can (and usually are)
+connected to various regulators for power, so add regulator support.
+
+Valid regulator will now be required, so boards without complete
+regulator setup should either disable regulator framework or enable
+CONFIG_REGULATOR_DUMMY.
+========================================
+
+The ADS7846 in spitz machines is not connected to
+any power regulator so it needs CONFIG_REGULATOR_DUMMY enabled.
+So to support both the Intersil 6271A regulator and
+the ADS7846 controller, CONFIG_REGULATOR and CONFIG_REGULATOR_DUMMY have
+to be defined.
+
+However, enabling CONFIG_REGULATOR and CONFIG_REGULATOR_DUMMY
+will break pxamci driver and cause the following error output:
+
+pxa2xx-mci.0 supply vmmc not found, using dummy regulator
+pxa2xx-mci pxa2xx-mci.0: ocr_mask/setpower will not be used
+pxa2xx-mci pxa2xx-mci.0: could not set regulator OCR (-22)
+pxa2xx-mci pxa2xx-mci.0: unable to set power
+pxa2xx-mci pxa2xx-mci.0: could not set regulator OCR (-22)
+pxa2xx-mci pxa2xx-mci.0: unable to set power
+
+Above failures occur in two functions;
+pxamci_init_ocr() and pxamci_set_power().
+
+Regulator support in pxamci_init_ocr() is not
+written with the existence of the dummy regulator driver in
+mind. It does not check the return value of mmc_regulator_get_ocrmask()
+and it will only fall back to platform data if no regulator was found.
+
+pxamci_set_power() fails because it does not even try to fall back
+to platform data if mmc_regulator_set_ocr() fails. It
+expects a proper regulator or no regulator at all. It will
+only fall back to platform data if no regulator was found. It does
+not properly handle the possible existence of the dummy regulator.
+
+This patch refactors pxamci_init_ocr() and  pxamci_set_power() regulator
+support to be more modular, to do more checks and to always fall back
+to platform data.
+
+Signed-off-by: Marko Katic <dromede@gmail.com>
+---
+ drivers/mmc/host/pxamci.c |   37 ++++++++++++++++++++++++-------------
+ 1 file changed, 24 insertions(+), 13 deletions(-)
+
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index 2b2f65a..6ec1566 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -83,18 +83,24 @@ struct pxamci_host {
+ static inline void pxamci_init_ocr(struct pxamci_host *host)
+ {
+ #ifdef CONFIG_REGULATOR
++	int ocr_mask;
+ 	host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
+ 
+ 	if (IS_ERR(host->vcc))
+ 		host->vcc = NULL;
+ 	else {
+-		host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
+-		if (host->pdata && host->pdata->ocr_mask)
++		ocr_mask = mmc_regulator_get_ocrmask(host->vcc);
++		if (ocr_mask <= 0)
++			host->mmc->ocr_avail = 0;
++		else
++			host->mmc->ocr_avail = ocr_mask;
++
++		if (host->pdata && host->pdata->ocr_mask && host->mmc->ocr_avail)
+ 			dev_warn(mmc_dev(host->mmc),
+ 				"ocr_mask/setpower will not be used\n");
+ 	}
+ #endif
+-	if (host->vcc == NULL) {
++	if (host->vcc == NULL || host->mmc->ocr_avail == 0) {
+ 		/* fall-back to platform data */
+ 		host->mmc->ocr_avail = host->pdata ?
+ 			host->pdata->ocr_mask :
+@@ -108,26 +114,31 @@ static inline int pxamci_set_power(struct pxamci_host *host,
+ {
+ 	int on;
+ 
++#ifdef CONFIG_REGULATOR
+ 	if (host->vcc) {
+-		int ret;
++		int ret = 0;
+ 
+-		if (power_mode == MMC_POWER_UP) {
++		if (power_mode == MMC_POWER_UP)
+ 			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
+-			if (ret)
+-				return ret;
+-		} else if (power_mode == MMC_POWER_OFF) {
++
++		if (power_mode == MMC_POWER_OFF)
+ 			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, 0);
+-			if (ret)
+-				return ret;
+-		}
++
++		if (ret == 0)
++			return 0;
++		else
++			dev_warn(mmc_dev(host->mmc),
++			 "mmc_regulator_set_ocr failed, falling back to platform data\n");
+ 	}
+-	if (!host->vcc && host->pdata &&
++#endif
++
++	if (host->pdata &&
+ 	    gpio_is_valid(host->pdata->gpio_power)) {
+ 		on = ((1 << vdd) & host->pdata->ocr_mask);
+ 		gpio_set_value(host->pdata->gpio_power,
+ 			       !!on ^ host->pdata->gpio_power_invert);
+ 	}
+-	if (!host->vcc && host->pdata && host->pdata->setpower)
++	if (host->pdata && host->pdata->setpower)
+ 		host->pdata->setpower(mmc_dev(host->mmc), vdd);
+ 
+ 	return 0;
+-- 
+1.7.10.4
+
