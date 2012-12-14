@@ -1,173 +1,143 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/3] mmc: core: enhance the code for signal voltage setting
-Date: Fri, 14 Dec 2012 14:52:48 +0100
-Message-ID: <CAPDyKFpvRtODqR_rxjh+p0Tefytpph85HS5aX0Fe1csqnsvgBQ@mail.gmail.com>
-References: <1355482438-16836-1-git-send-email-kliu5@marvell.com>
-	<1355482438-16836-2-git-send-email-kliu5@marvell.com>
-	<CAPDyKFrLxOHLVwcR11f89ubO5GX64uFBzsd_aPq+regWSpFhSQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH 1/2] mmc: mmci: Convert to use mmc_regulator_get_supply
+Date: Fri, 14 Dec 2012 15:30:28 +0100
+Message-ID: <1355495429-12510-2-git-send-email-ulf.hansson@stericsson.com>
+References: <1355495429-12510-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ia0-f174.google.com ([209.85.210.174]:49890 "EHLO
-	mail-ia0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753952Ab2LNNwt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 08:52:49 -0500
-Received: by mail-ia0-f174.google.com with SMTP id y25so3129346iay.19
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Dec 2012 05:52:48 -0800 (PST)
-In-Reply-To: <CAPDyKFrLxOHLVwcR11f89ubO5GX64uFBzsd_aPq+regWSpFhSQ@mail.gmail.com>
+Received: from eu1sys200aog101.obsmtp.com ([207.126.144.111]:57716 "EHLO
+	eu1sys200aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753579Ab2LNObL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 09:31:11 -0500
+In-Reply-To: <1355495429-12510-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Liu <kliu5@marvell.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, johan.rudholm@stericsson.com, per.forlin@stericsson.com, fredrik.soderstedt@stericsson.com, dsd@laptop.org, leafy.myeh@allwinnertech.com, subhashj@codeaurora.org, prakity@nvidia.com, zhangfei.gao@gmail.com, haojian.zhuang@gmail.com, cxie4@marvell.com, keyuan.liu@gmail.com
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, Linus Walleij <linus.walleij@linaro.org>, Lee Jones <lee.jones@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On 14 December 2012 14:40, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 14 December 2012 11:53, Kevin Liu <kliu5@marvell.com> wrote:
->> 1. if host does NOT implement signal voltage setting function,
->> should return error.
->> 2. add the check for data signal before voltage change according
->> to the spec. If host does NOT detect a low signal level, the host
->> should abort the voltage switch sequence. (phisical layer spec 4.2.4.2(4))
->> 3. if voltage change failed then no need to restore the clock
->> before cycle power the card.
->> 4. call mmc_power_cycle here since it's a part of voltage switch.
->> besides -EAGAIN, any other error returned should also cycle power the card.
->>
->> Signed-off-by: Kevin Liu <kliu5@marvell.com>
->> ---
->>  drivers/mmc/core/core.c |   71 ++++++++++++++++++++++++++++------------------
->>  1 files changed, 43 insertions(+), 28 deletions(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index d1aa8ab..da93186 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -1226,6 +1226,9 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
->>
->>         BUG_ON(!host);
->>
->> +       if (!host->ops->start_signal_voltage_switch)
->> +               return -EPERM;
->> +
->
-> No, this is not OK.
-> For example, eMMC might default use 1.8V as I/O voltage, you don't
-> want to force host drivers implementing this function to make this
-> work.
->
->>         /*
->>          * Send CMD11 only if the request is to switch the card to
->>          * 1.8V signalling.
->> @@ -1245,47 +1248,59 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
->>
->>         host->ios.signal_voltage = signal_voltage;
->>
->> -       if (host->ops->start_signal_voltage_switch) {
->> -               u32 clock;
->> +       u32 clock;
->> +
->> +       mmc_host_clk_hold(host);
->> +
->> +       if (cmd11) {
->> +               if (!host->ops->card_busy)
->> +                       pr_warning("%s: cannot verify signal voltage switch\n",
->> +                                       mmc_hostname(host));
->>
->> -               mmc_host_clk_hold(host);
->>                 /*
->>                  * During a signal voltage level switch, the clock must be gated
->>                  * for a certain period of time according to the SD spec
->>                  */
->> -               if (cmd11) {
->> -                       clock = host->ios.clock;
->> -                       host->ios.clock = 0;
->> -                       mmc_set_ios(host);
->> -               }
->> +               clock = host->ios.clock;
->> +               host->ios.clock = 0;
->> +               mmc_set_ios(host);
->>
->> -               err = host->ops->start_signal_voltage_switch(host, &host->ios);
->> +               if (host->ops->card_busy && !host->ops->card_busy(host)) {
->> +                       err = -EAGAIN;
->> +               } else {
->
-> Great that you spotted this! We should check busy before we do the
-> actual voltage switch.
->
-> Although, I think it would make sense to do this before the clock is
-> set to 0. Especially important for those host controllers that do
-> support busy-detection, a qualified guess would be that those also
-> could require the clock to be on to detect this. Or what do you think?
-> From spec point of view it shall be safe to do it before setting clk
-> to 0.
->
->>
->> -               if (err && cmd11) {
->> -                       host->ios.clock = clock;
->> -                       mmc_set_ios(host);
->> -               } else if (cmd11) {
->> -                       /* Keep clock gated for at least 5 ms */
->> -                       mmc_delay(5);
->> -                       host->ios.clock = clock;
->> -                       mmc_set_ios(host);
->> +                       err = host->ops->start_signal_voltage_switch(host, &host->ios);
->>
->> -                       /* Wait for at least 1 ms according to spec */
->> -                       mmc_delay(1);
->> +                       if (!err) {
->> +                               /* Keep clock gated for at least 5 ms */
->> +                               mmc_delay(5);
->> +                               host->ios.clock = clock;
->> +                               mmc_set_ios(host);
->>
->> -                       /*
->> -                        * Failure to switch is indicated by the card holding
->> -                        * dat[0:3] low
->> -                        */
->> -                       if (!host->ops->card_busy)
->> -                               pr_warning("%s: cannot verify signal voltage switch\n",
->> +                               /* Wait for at least 1 ms according to spec */
->> +                               mmc_delay(1);
->> +
->> +                               /*
->> +                                * Failure to switch is indicated by the card holding
->> +                                * dat[0:3] low
->> +                                */
->> +                               if (host->ops->card_busy && host->ops->card_busy(host))
->> +                                       err = -EAGAIN;
->> +                       }
->> +               }
->> +               if (err) {
->> +                       /* Power cycle card */
->> +                       pr_debug("%s: Signal voltage switch failed, "
->> +                                       "power cycling card \n",
->>                                         mmc_hostname(host));
->> -                       else if (host->ops->card_busy(host))
->> -                               err = -EAGAIN;
->> +                       mmc_power_cycle(host);
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-I definitely agree, that this should be done here!
+By using the mmc_regulator_get_supply API we are able to do some
+cleanups of the regulator code. Additionally let the regulator
+API handle the error printing.
 
-Although, this will break the SDIO case, so we need to fix that in the
-sdio.c as well.
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Russell King <linux@arm.linux.org.uk>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/mmci.c |   54 ++++++++++-------------------------------------
+ drivers/mmc/host/mmci.h |    1 -
+ 2 files changed, 11 insertions(+), 44 deletions(-)
 
->>                 }
->> -               mmc_host_clk_release(host);
->> +       } else {
->> +               err = host->ops->start_signal_voltage_switch(host, &host->ios);
->>         }
->>
->> +       mmc_host_clk_release(host);
->> +
->>         return err;
->>  }
->>
->> --
->> 1.7.0.4
->>
->
-> Kind regards
-> Ulf Hansson
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index aa04b42..9da5f24 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1086,7 +1086,6 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	struct variant_data *variant = host->variant;
+ 	u32 pwr = 0;
+ 	unsigned long flags;
+-	int ret;
+ 
+ 	pm_runtime_get_sync(mmc_dev(mmc));
+ 
+@@ -1096,23 +1095,13 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_OFF:
+-		if (host->vcc)
+-			ret = mmc_regulator_set_ocr(mmc, host->vcc, 0);
++		if (!IS_ERR(mmc->supply.vmmc))
++			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+ 		break;
+ 	case MMC_POWER_UP:
+-		if (host->vcc) {
+-			ret = mmc_regulator_set_ocr(mmc, host->vcc, ios->vdd);
+-			if (ret) {
+-				dev_err(mmc_dev(mmc), "unable to set OCR\n");
+-				/*
+-				 * The .set_ios() function in the mmc_host_ops
+-				 * struct return void, and failing to set the
+-				 * power should be rare so we print an error
+-				 * and return here.
+-				 */
+-				goto out;
+-			}
+-		}
++		if (!IS_ERR(mmc->supply.vmmc))
++			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
++
+ 		/*
+ 		 * The ST Micro variant doesn't have the PL180s MCI_PWR_UP
+ 		 * and instead uses MCI_PWR_ON so apply whatever value is
+@@ -1161,7 +1150,6 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+- out:
+ 	pm_runtime_mark_last_busy(mmc_dev(mmc));
+ 	pm_runtime_put_autosuspend(mmc_dev(mmc));
+ }
+@@ -1384,29 +1372,13 @@ static int mmci_probe(struct amba_device *dev,
+ 	} else
+ 		dev_warn(&dev->dev, "could not get default pinstate\n");
+ 
+-#ifdef CONFIG_REGULATOR
+-	/* If we're using the regulator framework, try to fetch a regulator */
+-	host->vcc = regulator_get(&dev->dev, "vmmc");
+-	if (IS_ERR(host->vcc))
+-		host->vcc = NULL;
+-	else {
+-		int mask = mmc_regulator_get_ocrmask(host->vcc);
+-
+-		if (mask < 0)
+-			dev_err(&dev->dev, "error getting OCR mask (%d)\n",
+-				mask);
+-		else {
+-			host->mmc->ocr_avail = (u32) mask;
+-			if (plat->ocr_mask)
+-				dev_warn(&dev->dev,
+-				 "Provided ocr_mask/setpower will not be used "
+-				 "(using regulator instead)\n");
+-		}
+-	}
+-#endif
+-	/* Fall back to platform data if no regulator is found */
+-	if (host->vcc == NULL)
++	/* Get regulators and the supported OCR mask */
++	mmc_regulator_get_supply(mmc);
++	if (!mmc->ocr_avail)
+ 		mmc->ocr_avail = plat->ocr_mask;
++	else if (plat->ocr_mask)
++		dev_warn(mmc_dev(mmc), "Platform OCR mask is ignored\n");
++
+ 	mmc->caps = plat->capabilities;
+ 	mmc->caps2 = plat->capabilities2;
+ 
+@@ -1585,10 +1557,6 @@ static int mmci_remove(struct amba_device *dev)
+ 		clk_disable_unprepare(host->clk);
+ 		clk_put(host->clk);
+ 
+-		if (host->vcc)
+-			mmc_regulator_set_ocr(mmc, host->vcc, 0);
+-		regulator_put(host->vcc);
+-
+ 		mmc_free_host(mmc);
+ 
+ 		amba_release_regions(dev);
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index d34d8c0..a22213e 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -193,7 +193,6 @@ struct mmci_host {
+ 	/* pio stuff */
+ 	struct sg_mapping_iter	sg_miter;
+ 	unsigned int		size;
+-	struct regulator	*vcc;
+ 
+ 	/* pinctrl handles */
+ 	struct pinctrl		*pinctrl;
+-- 
+1.7.10
 
-Kind regards
-Ulf Hansson
