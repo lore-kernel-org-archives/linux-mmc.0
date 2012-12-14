@@ -1,66 +1,83 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: [PATCH 0/3] mmc: Signal voltage switch procedure for UHS mode (sdhci)
-Date: Fri, 14 Dec 2012 23:33:44 +0800
-Message-ID: <CADz5_gJZdmGDEwrBopw8uxvooPvwdnKUM=uyYVzizpyD64ca7A@mail.gmail.com>
-References: <1355482438-16836-1-git-send-email-kliu5@marvell.com>
-	<CAPDyKFqWjZQkEGh2-AmOx+9+sC2GJg-J8RybOEHY9DZqCCZjbQ@mail.gmail.com>
-	<CADz5_gLCOS8=t9MBVxCo5jJCQibMG8gM-sXg1e5one1TXD+D0w@mail.gmail.com>
-	<CA+20K0A3RWaMTavMxeYYOH8w1+3QKwXTUidSP7Vgvt9vKEzpog@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Pawel Moll <pawel.moll@arm.com>
+Subject: [PATCH] mmc: mmci: Add new VE MMCI variant
+Date: Fri, 14 Dec 2012 15:38:46 +0000
+Message-ID: <1355499526-13790-1-git-send-email-pawel.moll@arm.com>
+Content-Type: text/plain; charset=WINDOWS-1252
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f170.google.com ([209.85.212.170]:47473 "EHLO
-	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755955Ab2LNPdp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 10:33:45 -0500
-Received: by mail-wi0-f170.google.com with SMTP id hq7so643096wib.1
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Dec 2012 07:33:44 -0800 (PST)
-In-Reply-To: <CA+20K0A3RWaMTavMxeYYOH8w1+3QKwXTUidSP7Vgvt9vKEzpog@mail.gmail.com>
+Received: from service87.mimecast.com ([91.220.42.44]:43378 "EHLO
+	service87.mimecast.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756217Ab2LNPjJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 10:39:09 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <jrudholm@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Liu <kliu5@marvell.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, johan.rudholm@stericsson.com, per.forlin@stericsson.com, fredrik.soderstedt@stericsson.com, dsd@laptop.org, leafy.myeh@allwinnertech.com, subhashj@codeaurora.org, prakity@nvidia.com, zhangfei.gao@gmail.com, haojian.zhuang@gmail.com, cxie4@marvell.com
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Russell King <rmk+kernel@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, Pawel Moll <pawel.moll@arm.com>
 
-2012/12/14 Johan Rudholm <jrudholm@gmail.com>:
-> Hi Kevin and Ulf,
->
-> 2012/12/14 Kevin Liu <keyuan.liu@gmail.com>:
->> 2012/12/14 Ulf Hansson <ulf.hansson@linaro.org>:
->>> Hi Kevin,
->>>
->>> Thanks for looking into this for SDHCI.
->>>
->>> On 14 December 2012 11:53, Kevin Liu <kliu5@marvell.com> wrote:
->>>>
->>>> This patchset is based on Johan's below patch series submitted recently:
->>>>   mmc: core: Add mmc_power_cycle
->>>>   mmc: core: Add card_busy to host_ops
->>>>   mmc: core: Fixup signal voltage switch
->>>>
->>>> This patchset mainly update sdhci.c to co-work with Johan's above patches.
->>>> The first two patches are some update for the core stack with Johan's patch.
->>>> The third patch add the card_busy function and change the voltage_switch function in sdhci driver to work with the new code.
->>>>
->>>> Kevin Liu (3):
->>>>  mmc: core: enhance the code for signal voltage setting
->>>>  mmc: core: cycle power the card in voltage switch rather than mmc_sd_get_cid
->>>
->>> Regarding you patches on the core layer. I think it would make sense
->>> to instead of patching on top of Johan patchset, if needed, it is
->>> better that you put review comment directly on Johans patches. Would
->>> that be possible for you?
->>>
->>
->> Sure, it's better to integrate related change into one patch.
->> I can update my patch, then Johan can just integrate my patch if he agree.
->> Or Johan change his patch directly if needed.
->
-> I'll try to have an updated patchset by Monday next week which
-> integrates your changes and adds your Signed-off-by if that's OK with
-> you. Thank you for testing this stuff!
->
+The Versatile Express IOFPGA as shipped on VECD 5.0 (bitfiles v108/208
+and v116/216) contains a modified version of the PL180 MMCI, with
+PeriphID Configuration value changed to 0x2.
 
-I'm ok.
+This version adds an optional "hardware flow control" feature. When
+enabled MMC card clock will be automatically disabled when FIFO is
+about to over/underflow and re-enabled once the host retrieved some
+data. This makes the controller immune to over/underrun errors caused
+by big interrupt handling latencies.
 
-Thanks
-Kevin
+This patch adds relevant device variant in the driver.
+
+Signed-off-by: Pawel Moll <pawel.moll@arm.com>
+---
+ drivers/mmc/host/mmci.c |   13 +++++++++++++
+ drivers/mmc/host/mmci.h |    2 ++
+ 2 files changed, 15 insertions(+)
+
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index edc3e9b..b2b550f 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -86,6 +86,14 @@ static struct variant_data variant_arm_extended_fifo =3D=
+ {
+ =09.pwrreg_powerup=09=09=3D MCI_PWR_UP,
+ };
+=20
++static struct variant_data variant_arm_extended_fifo_hwfc =3D {
++=09.fifosize=09=09=3D 128 * 4,
++=09.fifohalfsize=09=09=3D 64 * 4,
++=09.clkreg_enable=09=09=3D MCI_ARM_HWFCEN,
++=09.datalength_bits=09=3D 16,
++=09.pwrreg_powerup=09=09=3D MCI_PWR_UP,
++};
++
+ static struct variant_data variant_u300 =3D {
+ =09.fifosize=09=09=3D 16 * 4,
+ =09.fifohalfsize=09=09=3D 8 * 4,
+@@ -1628,6 +1636,11 @@ static struct amba_id mmci_ids[] =3D {
+ =09=09.data=09=3D &variant_arm_extended_fifo,
+ =09},
+ =09{
++=09=09.id=09=3D 0x02041180,
++=09=09.mask=09=3D 0xff0fffff,
++=09=09.data=09=3D &variant_arm_extended_fifo_hwfc,
++=09},
++=09{
+ =09=09.id=09=3D 0x00041181,
+ =09=09.mask=09=3D 0x000fffff,
+ =09=09.data=09=3D &variant_arm,
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index d437ccf..00d6d0c 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -28,6 +28,8 @@
+ #define MCI_ST_UX500_NEG_EDGE=09(1 << 13)
+ #define MCI_ST_UX500_HWFCEN=09(1 << 14)
+ #define MCI_ST_UX500_CLK_INV=09(1 << 15)
++/* Modified PL180 on Versatile Express platform */
++#define MCI_ARM_HWFCEN=09=09(1 << 12)
+=20
+ #define MMCIARGUMENT=09=090x008
+ #define MMCICOMMAND=09=090x00c
+--=20
+1.7.10.4
+
+
