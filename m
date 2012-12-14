@@ -1,36 +1,53 @@
-From: Johan Rudholm <jrudholm@gmail.com>
-Subject: Re: [PATCH 3/3] mmc: core: Fixup signal voltage switch
-Date: Fri, 14 Dec 2012 13:58:41 +0100
-Message-ID: <CA+20K0CQgHxnXprjHD8nDR6sDp7yVfjk0i3W3ZAu9sJ7Gucd=A@mail.gmail.com>
-References: <1354897176-15307-1-git-send-email-johan.rudholm@stericsson.com>
-	<1354897176-15307-4-git-send-email-johan.rudholm@stericsson.com>
-	<50C2D989.5060901@codeaurora.org>
-	<CA+20K0CQjvK1O9Lwci86xLom0G1aHQcKemz1zXdqz5YKFQiRpg@mail.gmail.com>
-	<50C6D858.4020509@codeaurora.org>
-	<CA+20K0BtApW9e+AFVqm4HMqvq=tCn1N2Ejc2LgK8h1AgYkJ-ng@mail.gmail.com>
-	<CADz5_gL8faTe170sz1MoOX8EyijAth6d0K8LdXy87yqTV0afcg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 0/3] mmc: Signal voltage switch procedure for UHS mode (sdhci)
+Date: Fri, 14 Dec 2012 14:16:07 +0100
+Message-ID: <CAPDyKFqWjZQkEGh2-AmOx+9+sC2GJg-J8RybOEHY9DZqCCZjbQ@mail.gmail.com>
+References: <1355482438-16836-1-git-send-email-kliu5@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f46.google.com ([209.85.216.46]:36219 "EHLO
-	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753952Ab2LNM6m (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 07:58:42 -0500
-Received: by mail-qa0-f46.google.com with SMTP id r4so653609qaq.19
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Dec 2012 04:58:41 -0800 (PST)
-In-Reply-To: <CADz5_gL8faTe170sz1MoOX8EyijAth6d0K8LdXy87yqTV0afcg@mail.gmail.com>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:63474 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753419Ab2LNNQI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 08:16:08 -0500
+Received: by mail-ie0-f174.google.com with SMTP id c11so5794896ieb.19
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Dec 2012 05:16:08 -0800 (PST)
+In-Reply-To: <1355482438-16836-1-git-send-email-kliu5@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Liu <keyuan.liu@gmail.com>
-Cc: Subhash Jadavani <subhashj@codeaurora.org>, Johan Rudholm <johan.rudholm@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Philip Rakity <prakity@marvell.com>, Daniel Drake <dsd@laptop.org>, Aaron <leafy.myeh@allwinnertech.com>
+To: Kevin Liu <kliu5@marvell.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, johan.rudholm@stericsson.com, per.forlin@stericsson.com, fredrik.soderstedt@stericsson.com, dsd@laptop.org, leafy.myeh@allwinnertech.com, subhashj@codeaurora.org, prakity@nvidia.com, zhangfei.gao@gmail.com, haojian.zhuang@gmail.com, cxie4@marvell.com, keyuan.liu@gmail.com
 
 Hi Kevin,
 
-2012/12/14 Kevin Liu <keyuan.liu@gmail.com>:
+Thanks for looking into this for SDHCI.
+
+On 14 December 2012 11:53, Kevin Liu <kliu5@marvell.com> wrote:
 >
-> Just sent a patchset for sdhci based on your patch. Please help to review.
-> Tested with both UHS and non-UHS sd card on sdhci-pxav3 platform.
+> This patchset is based on Johan's below patch series submitted recently:
+>   mmc: core: Add mmc_power_cycle
+>   mmc: core: Add card_busy to host_ops
+>   mmc: core: Fixup signal voltage switch
+>
+> This patchset mainly update sdhci.c to co-work with Johan's above patches.
+> The first two patches are some update for the core stack with Johan's patch.
+> The third patch add the card_busy function and change the voltage_switch function in sdhci driver to work with the new code.
+>
+> Kevin Liu (3):
+>  mmc: core: enhance the code for signal voltage setting
+>  mmc: core: cycle power the card in voltage switch rather than mmc_sd_get_cid
 
-Great! I'll get on it right away.
+Regarding you patches on the core layer. I think it would make sense
+to instead of patching on top of Johan patchset, if needed, it is
+better that you put review comment directly on Johans patches. Would
+that be possible for you?
 
-Kind regards, Johan
+>  mmc: sdhci: update signal voltage switch code
+>
+>  drivers/mmc/core/core.c  |   71 +++++++++++-------
+>  drivers/mmc/core/sd.c    |   16 +---
+>  drivers/mmc/host/sdhci.c |  188 +++++++++++++++++++---------------------------
+>  3 files changed, 125 insertions(+), 150 deletions(-)
+
+Kind regards
+Ulf Hansson
