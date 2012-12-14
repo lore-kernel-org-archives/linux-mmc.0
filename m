@@ -1,61 +1,66 @@
 From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: [PATCH 3/3] mmc: sdhci: update signal voltage switch code
-Date: Fri, 14 Dec 2012 23:32:05 +0800
-Message-ID: <CADz5_gKkybVUU9R8gKiDSotNWHdb5buQbvoZT6ghFKy1eDkF-Q@mail.gmail.com>
+Subject: Re: [PATCH 0/3] mmc: Signal voltage switch procedure for UHS mode (sdhci)
+Date: Fri, 14 Dec 2012 23:33:44 +0800
+Message-ID: <CADz5_gJZdmGDEwrBopw8uxvooPvwdnKUM=uyYVzizpyD64ca7A@mail.gmail.com>
 References: <1355482438-16836-1-git-send-email-kliu5@marvell.com>
-	<1355482438-16836-4-git-send-email-kliu5@marvell.com>
-	<CA+20K0B02KJeJZ54j3DqzstWUO2B_CiUBd0+9NCr-=ZxX2YMCQ@mail.gmail.com>
+	<CAPDyKFqWjZQkEGh2-AmOx+9+sC2GJg-J8RybOEHY9DZqCCZjbQ@mail.gmail.com>
+	<CADz5_gLCOS8=t9MBVxCo5jJCQibMG8gM-sXg1e5one1TXD+D0w@mail.gmail.com>
+	<CA+20K0A3RWaMTavMxeYYOH8w1+3QKwXTUidSP7Vgvt9vKEzpog@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:57528 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755955Ab2LNPcH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 10:32:07 -0500
-Received: by mail-we0-f174.google.com with SMTP id x10so1559725wey.19
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Dec 2012 07:32:05 -0800 (PST)
-In-Reply-To: <CA+20K0B02KJeJZ54j3DqzstWUO2B_CiUBd0+9NCr-=ZxX2YMCQ@mail.gmail.com>
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:47473 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755955Ab2LNPdp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 10:33:45 -0500
+Received: by mail-wi0-f170.google.com with SMTP id hq7so643096wib.1
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Dec 2012 07:33:44 -0800 (PST)
+In-Reply-To: <CA+20K0A3RWaMTavMxeYYOH8w1+3QKwXTUidSP7Vgvt9vKEzpog@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Johan Rudholm <jrudholm@gmail.com>
-Cc: Kevin Liu <kliu5@marvell.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, johan.rudholm@stericsson.com, per.forlin@stericsson.com, ulf.hansson@linaro.org, fredrik.soderstedt@stericsson.com, dsd@laptop.org, leafy.myeh@allwinnertech.com, subhashj@codeaurora.org, prakity@nvidia.com, zhangfei.gao@gmail.com, haojian.zhuang@gmail.com, cxie4@marvell.com
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Liu <kliu5@marvell.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, johan.rudholm@stericsson.com, per.forlin@stericsson.com, fredrik.soderstedt@stericsson.com, dsd@laptop.org, leafy.myeh@allwinnertech.com, subhashj@codeaurora.org, prakity@nvidia.com, zhangfei.gao@gmail.com, haojian.zhuang@gmail.com, cxie4@marvell.com
 
 2012/12/14 Johan Rudholm <jrudholm@gmail.com>:
-> Hi Kevin,
+> Hi Kevin and Ulf,
 >
-> 2012/12/14 Kevin Liu <kliu5@marvell.com>:
->> The protocal related code is moved to core stack. So update the host
->> driver accordingly.
+> 2012/12/14 Kevin Liu <keyuan.liu@gmail.com>:
+>> 2012/12/14 Ulf Hansson <ulf.hansson@linaro.org>:
+>>> Hi Kevin,
+>>>
+>>> Thanks for looking into this for SDHCI.
+>>>
+>>> On 14 December 2012 11:53, Kevin Liu <kliu5@marvell.com> wrote:
+>>>>
+>>>> This patchset is based on Johan's below patch series submitted recently:
+>>>>   mmc: core: Add mmc_power_cycle
+>>>>   mmc: core: Add card_busy to host_ops
+>>>>   mmc: core: Fixup signal voltage switch
+>>>>
+>>>> This patchset mainly update sdhci.c to co-work with Johan's above patches.
+>>>> The first two patches are some update for the core stack with Johan's patch.
+>>>> The third patch add the card_busy function and change the voltage_switch function in sdhci driver to work with the new code.
+>>>>
+>>>> Kevin Liu (3):
+>>>>  mmc: core: enhance the code for signal voltage setting
+>>>>  mmc: core: cycle power the card in voltage switch rather than mmc_sd_get_cid
+>>>
+>>> Regarding you patches on the core layer. I think it would make sense
+>>> to instead of patching on top of Johan patchset, if needed, it is
+>>> better that you put review comment directly on Johans patches. Would
+>>> that be possible for you?
+>>>
 >>
->> Signed-off-by: Kevin Liu <kliu5@marvell.com>
->> ---
->>  drivers/mmc/host/sdhci.c |  188 +++++++++++++++++++---------------------------
->>  1 files changed, 77 insertions(+), 111 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 6f0bfc0..d19b2aa 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
+>> Sure, it's better to integrate related change into one patch.
+>> I can update my patch, then Johan can just integrate my patch if he agree.
+>> Or Johan change his patch directly if needed.
 >
-> ...
->
->> +static int sdhci_card_busy(struct mmc_host *mmc)
->> +{
->> +       struct sdhci_host *host = mmc_priv(mmc);
->> +       u32 present_state;
->> +
->> +       /* Check whether DAT[3:0] is 0000 */
->> +       present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
->> +
->> +       return !(present_state & SDHCI_DATA_LVL_MASK);
->> +}
->> +
->
-> I'm not that familiar with SDHCI, but don't you need some calls to
-> sdhci_runtime_pm_get / put here?
+> I'll try to have an updated patchset by Monday next week which
+> integrates your changes and adds your Signed-off-by if that's OK with
+> you. Thank you for testing this stuff!
 >
 
-Oh, yes. I will add this.
+I'm ok.
 
 Thanks
 Kevin
