@@ -1,264 +1,118 @@
-From: Kevin Liu <kliu5@marvell.com>
-Subject: [PATCH 3/3] mmc: sdhci: update signal voltage switch code
-Date: Fri, 14 Dec 2012 18:53:58 +0800
-Message-ID: <1355482438-16836-4-git-send-email-kliu5@marvell.com>
-References: <1355482438-16836-1-git-send-email-kliu5@marvell.com>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: [PATCH 3/3] mmc: core: Fixup signal voltage switch
+Date: Fri, 14 Dec 2012 18:55:23 +0800
+Message-ID: <CADz5_gL8faTe170sz1MoOX8EyijAth6d0K8LdXy87yqTV0afcg@mail.gmail.com>
+References: <1354897176-15307-1-git-send-email-johan.rudholm@stericsson.com>
+	<1354897176-15307-4-git-send-email-johan.rudholm@stericsson.com>
+	<50C2D989.5060901@codeaurora.org>
+	<CA+20K0CQjvK1O9Lwci86xLom0G1aHQcKemz1zXdqz5YKFQiRpg@mail.gmail.com>
+	<50C6D858.4020509@codeaurora.org>
+	<CA+20K0BtApW9e+AFVqm4HMqvq=tCn1N2Ejc2LgK8h1AgYkJ-ng@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:40868 "EHLO
-	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754138Ab2LNKve (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 05:51:34 -0500
-In-Reply-To: <1355482438-16836-1-git-send-email-kliu5@marvell.com>
+Received: from mail-wg0-f42.google.com ([74.125.82.42]:48281 "EHLO
+	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751309Ab2LNKzY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 05:55:24 -0500
+Received: by mail-wg0-f42.google.com with SMTP id dr1so333667wgb.1
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Dec 2012 02:55:23 -0800 (PST)
+In-Reply-To: <CA+20K0BtApW9e+AFVqm4HMqvq=tCn1N2Ejc2LgK8h1AgYkJ-ng@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org, johan.rudholm@stericsson.com
-Cc: per.forlin@stericsson.com, ulf.hansson@linaro.org, fredrik.soderstedt@stericsson.com, dsd@laptop.org, leafy.myeh@allwinnertech.com, subhashj@codeaurora.org, prakity@nvidia.com, zhangfei.gao@gmail.com, haojian.zhuang@gmail.com, cxie4@marvell.com, keyuan.liu@gmail.com, Kevin Liu <kliu5@marvell.com>
+To: Johan Rudholm <jrudholm@gmail.com>
+Cc: Subhash Jadavani <subhashj@codeaurora.org>, Johan Rudholm <johan.rudholm@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Philip Rakity <prakity@marvell.com>, Daniel Drake <dsd@laptop.org>, Aaron <leafy.myeh@allwinnertech.com>
 
-The protocal related code is moved to core stack. So update the host
-driver accordingly.
+2012/12/14 Johan Rudholm <jrudholm@gmail.com>:
+> Hi Subhash,
+>
+> 2012/12/11 Subhash Jadavani <subhashj@codeaurora.org>:
+>> On 12/10/2012 1:51 PM, Johan Rudholm wrote:
+>>>
+>>> 2012/12/8 Subhash Jadavani <subhashj@codeaurora.org>:
+>>>>
+>>>> On 12/7/2012 9:49 PM, Johan Rudholm wrote:
+>>>>>
+>>>>> When switching SD and SDIO cards from 3.3V to 1.8V signal levels, the
+>>>>> clock should be gated for 5 ms during the step. After enabling the
+>>>>> clock, the host should wait for at least 1 ms before checking for
+>>>>> failure. Failure by the card to switch is indicated by dat[0:3] being
+>>>>> pulled low. The host should check for this condition and power-cycle
+>>>>> the card if failure is indicated.
+>>>>>
+>>>>> Add a retry mechanism for the SDIO case.
+>>>>>
+>>>>> If the voltage switch fails repeatedly, give up and continue the
+>>>>> initialization using the original voltage.
+>>>>>
+>>>>> This patch places a couple of requirements on the host driver:
+>>>>>
+>>>>>    1) mmc_set_ios with ios.clock = 0 must gate the clock
+>>>>>    2) mmc_power_off must actually cut the power to the card
+>>>>>
+>>>>> if these requirements are not fulfilled, the 1.8V signal voltage switch
+>>>>> may not be successful.
+>>>
+>>> <snip>
+>>>
+>>>>>                  err = host->ops->start_signal_voltage_switch(host,
+>>>>> &host->ios);
+>>>>
+>>>>
+>>>> Shouldn't you fix all the existing host drivers who have already
+>>>> implemented
+>>>> start_signal_voltage_switch host ops? If you don't change them as part of
+>>>> this patch then
+>>>> i afraid UHS functionality would be broken on those platforms. Also, it's
+>>>> not just changing the start_signal_voltage_switch hot op implementation,
+>>>> you
+>>>> may also need to add card_busy() host op implementation for those
+>>>> drivers.
+>>>
+>>> This is true, and I did actually make an RFC for the sdhci driver
+>>> ("[RFC] mmc: sdhci: Let core handle UHS switch failure":
+>>> https://patchwork.kernel.org/patch/1517211/). Daniel Drake tried this
+>>> code for a problem related to the 1.8V switch (his board could
+>>> actually not perform the switch to 1.8V even though this capability
+>>> was announced), and I think this pointed out two areas for further
+>>> investigation before a proper patch for the sdhci driver can be
+>>> created:
+>>>
+>>> 1) the sdhci driver may not gate the clock when setting ios.clock = 0
+>>> and calling mmc_set_ios
+>>> 2) mmc_power_off may not cut power to the card
+>>>
+>>> maybe 2) was only for Daniel's board, I'm not sure, but this needs to
+>>> be investigated further anyway. Since I don't have any sdhci hardware
+>>> with UHS support, this must either be done by some other kind soul or
+>>> it will have to wait until I get the hardware.
+>>>
+>>> sdhci is the only driver I'm aware of that's got (mainlined) support
+>>> for start_signal_voltage_switch, are you thinking of any other driver?
+>>
+>> You may look at only in tree drivers who have implemented
+>> start_singnal_voltage_switch() ops. Our msm_sdcc* driver has also
+>> implemented it but it's not in tree driver so i may
+>> need to take care of that later once we are synced to kernel version which
+>> will have your patch series.
+>
+> Ok, good.
+>
+>> Yes, SDHCi seeems to be only one in tree driver implemented the
+>> start_singnal_voltage_switch() ops. So you might be good fixing the same.
+>
+> It seems the UHS support in the SDHCI driver is a complex issue,
+> judging from Daniel's experience described above, so I think the best
+> way forward is to get these patches in and then take care of the SDHCI
+> driver (perhaps based on my previous RFC), unless any of the SDHCI
+> guys thinks differently? Naturally, I will be happy to assist in
+> fixing the SDHCI driver.
+>
 
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
----
- drivers/mmc/host/sdhci.c |  188 +++++++++++++++++++---------------------------
- 1 files changed, 77 insertions(+), 111 deletions(-)
+Johan,
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 6f0bfc0..d19b2aa 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1608,141 +1608,95 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
--static int sdhci_do_3_3v_signal_voltage_switch(struct sdhci_host *host,
--						u16 ctrl)
-+static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
-+						struct mmc_ios *ios)
- {
-+	u16 ctrl;
- 	int ret;
- 
--	/* Set 1.8V Signal Enable in the Host Control2 register to 0 */
--	ctrl &= ~SDHCI_CTRL_VDD_180;
--	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
--
--	if (host->vqmmc) {
--		ret = regulator_set_voltage(host->vqmmc, 2700000, 3600000);
--		if (ret) {
--			pr_warning("%s: Switching to 3.3V signalling voltage "
--				   " failed\n", mmc_hostname(host->mmc));
--			return -EIO;
--		}
--	}
--	/* Wait for 5ms */
--	usleep_range(5000, 5500);
--
--	/* 3.3V regulator output should be stable within 5 ms */
--	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
--	if (!(ctrl & SDHCI_CTRL_VDD_180))
-+	/*
-+	 * Signal Voltage Switching is only applicable for Host Controllers
-+	 * v3.00 and above.
-+	 */
-+	if (host->version < SDHCI_SPEC_300)
- 		return 0;
- 
--	pr_warning("%s: 3.3V regulator output did not became stable\n",
--		   mmc_hostname(host->mmc));
--
--	return -EIO;
--}
-+	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 
--static int sdhci_do_1_8v_signal_voltage_switch(struct sdhci_host *host,
--						u16 ctrl)
--{
--	u8 pwr;
--	u16 clk;
--	u32 present_state;
--	int ret;
-+	switch (ios->signal_voltage) {
- 
--	/* Stop SDCLK */
--	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
--	clk &= ~SDHCI_CLOCK_CARD_EN;
--	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+	case MMC_SIGNAL_VOLTAGE_330:
-+		/* Set 1.8V Signal Enable in the Host Control2 register to 0 */
-+		ctrl &= ~SDHCI_CTRL_VDD_180;
-+		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
- 
--	/* Check whether DAT[3:0] is 0000 */
--	present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
--	if (!((present_state & SDHCI_DATA_LVL_MASK) >>
--	       SDHCI_DATA_LVL_SHIFT)) {
--		/*
--		 * Enable 1.8V Signal Enable in the Host Control2
--		 * register
--		 */
--		if (host->vqmmc)
--			ret = regulator_set_voltage(host->vqmmc,
--				1700000, 1950000);
--		else
--			ret = 0;
-+		if (host->vqmmc) {
-+			ret = regulator_set_voltage(host->vqmmc, 2700000, 3600000);
-+			if (ret) {
-+				pr_warning("%s: Switching to 3.3V signalling voltage "
-+						" failed\n", mmc_hostname(host->mmc));
-+				return -EIO;
-+			}
-+		}
-+		/* Wait for 5ms */
-+		usleep_range(5000, 5500);
- 
--		if (!ret) {
--			ctrl |= SDHCI_CTRL_VDD_180;
--			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-+		/* 3.3V regulator output should be stable within 5 ms */
-+		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+		if (!(ctrl & SDHCI_CTRL_VDD_180))
-+			return 0;
- 
--			/* Wait for 5ms */
--			usleep_range(5000, 5500);
-+		pr_warning("%s: 3.3V regulator output did not became stable\n",
-+				mmc_hostname(host->mmc));
- 
--			ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
--			if (ctrl & SDHCI_CTRL_VDD_180) {
--				/* Provide SDCLK again and wait for 1ms */
--				clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
--				clk |= SDHCI_CLOCK_CARD_EN;
--				sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
--				usleep_range(1000, 1500);
-+		return -EAGAIN;
- 
--				/*
--				 * If DAT[3:0] level is 1111b, then the card
--				 * was successfully switched to 1.8V signaling.
--				 */
--				present_state = sdhci_readl(host,
--							SDHCI_PRESENT_STATE);
--				if ((present_state & SDHCI_DATA_LVL_MASK) ==
--				     SDHCI_DATA_LVL_MASK)
--					return 0;
-+	case MMC_SIGNAL_VOLTAGE_180:
-+		if (host->vqmmc) {
-+			ret = regulator_set_voltage(host->vqmmc,
-+					1700000, 1950000);
-+			if (ret) {
-+				pr_warning("%s: Switching to 1.8V signalling voltage "
-+						" failed\n", mmc_hostname(host->mmc));
-+				return -EIO;
- 			}
- 		}
--	}
- 
--	/*
--	 * If we are here, that means the switch to 1.8V signaling
--	 * failed. We power cycle the card, and retry initialization
--	 * sequence by setting S18R to 0.
--	 */
--	pwr = sdhci_readb(host, SDHCI_POWER_CONTROL);
--	pwr &= ~SDHCI_POWER_ON;
--	sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
--	if (host->vmmc)
--		regulator_disable(host->vmmc);
-+		/*
-+		 * Enable 1.8V Signal Enable in the Host Control2
-+		 * register
-+		 */
-+		ctrl |= SDHCI_CTRL_VDD_180;
-+		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
- 
--	/* Wait for 1ms as per the spec */
--	usleep_range(1000, 1500);
--	pwr |= SDHCI_POWER_ON;
--	sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
--	if (host->vmmc)
--		regulator_enable(host->vmmc);
-+		/* Wait for 5ms */
-+		usleep_range(5000, 5500);
- 
--	pr_warning("%s: Switching to 1.8V signalling voltage failed, "
--		   "retrying with S18R set to 0\n", mmc_hostname(host->mmc));
-+		/* 1.8V regulator output should be stable within 5 ms */
-+		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+		if (ctrl & SDHCI_CTRL_VDD_180)
-+			return 0;
- 
--	return -EAGAIN;
--}
-+		pr_warning("%s: 1.8V regulator output did not became stable\n",
-+				mmc_hostname(host->mmc));
- 
--static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
--						struct mmc_ios *ios)
--{
--	u16 ctrl;
-+		return -EAGAIN;
- 
--	/*
--	 * Signal Voltage Switching is only applicable for Host Controllers
--	 * v3.00 and above.
--	 */
--	if (host->version < SDHCI_SPEC_300)
-+	case MMC_SIGNAL_VOLTAGE_120:
-+		if (host->vqmmc) {
-+			ret = regulator_set_voltage(host->vqmmc, 2700000, 3600000);
-+			if (ret) {
-+				pr_warning("%s: Switching to 1.2V signalling voltage "
-+						" failed\n", mmc_hostname(host->mmc));
-+				return -EIO;
-+			}
-+		}
- 		return 0;
- 
--	/*
--	 * We first check whether the request is to set signalling voltage
--	 * to 3.3V. If so, we change the voltage to 3.3V and return quickly.
--	 */
--	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
--	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)
--		return sdhci_do_3_3v_signal_voltage_switch(host, ctrl);
--	else if (!(ctrl & SDHCI_CTRL_VDD_180) &&
--			(ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180))
--		return sdhci_do_1_8v_signal_voltage_switch(host, ctrl);
--	else
-+	default:
- 		/* No signal voltage switch required */
- 		return 0;
-+	}
- }
- 
- static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
-@@ -1759,6 +1713,17 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
- 	return err;
- }
- 
-+static int sdhci_card_busy(struct mmc_host *mmc)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	u32 present_state;
-+
-+	/* Check whether DAT[3:0] is 0000 */
-+	present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
-+
-+	return !(present_state & SDHCI_DATA_LVL_MASK);
-+}
-+
- static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct sdhci_host *host;
-@@ -2029,6 +1994,7 @@ static const struct mmc_host_ops sdhci_ops = {
- 	.execute_tuning			= sdhci_execute_tuning,
- 	.enable_preset_value		= sdhci_enable_preset_value,
- 	.card_event			= sdhci_card_event,
-+	.card_busy	= sdhci_card_busy,
- };
- 
- /*****************************************************************************\
--- 
-1.7.0.4
+Just sent a patchset for sdhci based on your patch. Please help to review.
+Tested with both UHS and non-UHS sd card on sdhci-pxav3 platform.
 
+Thanks
+Kevin
