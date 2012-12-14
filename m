@@ -1,102 +1,111 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: add support for use_hold_reg
-Date: Fri, 14 Dec 2012 08:33:06 +0900
-Message-ID: <50CA65B2.9040709@samsung.com>
-References: <1355428991-4602-1-git-send-email-dinguyen@altera.com>
+From: Zhang Haijun-B42677 <B42677@freescale.com>
+Subject: RE: [mmc:mmc-next 45/63] of_iommu.c:(.text+0x114dbc): undefined
+ reference to `__aeabi_uldivmod'
+Date: Fri, 14 Dec 2012 02:52:16 +0000
+Message-ID: <99E897753B6F7048BD8CCDB4661D02E1183CA5@039-SN2MPN1-022.039d.mgd.msft.net>
+References: <50b2a62c.slEE/d1mNq4kUCUf%fengguang.wu@intel.com>
+ <87sj7x9r89.fsf@octavius.laptop.org>
+ <99E897753B6F7048BD8CCDB4661D02E117694E@039-SN2MPN1-022.039d.mgd.msft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:62590 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755579Ab2LMXdW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Dec 2012 18:33:22 -0500
-Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout4.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MEZ001OBTFKVF60@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 14 Dec 2012 08:33:20 +0900 (KST)
-Received: from [10.90.51.55] by mmp2.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0MEZ00681TFJP310@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 14 Dec 2012 08:33:20 +0900 (KST)
-In-reply-to: <1355428991-4602-1-git-send-email-dinguyen@altera.com>
+Received: from co1ehsobe003.messaging.microsoft.com ([216.32.180.186]:40043
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755825Ab2LNCwT convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 13 Dec 2012 21:52:19 -0500
+In-Reply-To: <99E897753B6F7048BD8CCDB4661D02E117694E@039-SN2MPN1-022.039d.mgd.msft.net>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com
-Cc: cjb@laptop.org, dinh.linux@gmail.com, linux-mmc@vger.kernel.org, tgih.jun@samsung.com, thomas.abraham@linaro.org, kyungmin.park@samsung.com, james.hogan@imgtec.com
+To: Chris Ball <cjb@laptop.org>, kbuild test robot <fengguang.wu@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Huang Changming-R66093 <r66093@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
 
-Hi Dinh,
+Hi, chris
 
-According to  DesignWare Spec, we need to check which bus-mode use.
-You can refer to "https://patchwork.kernel.org/patch/1379521/".
-I know that hold_reg didn't use always, although hold_reg is set.
+Two extra patches had been sent to fix these err.
+These patches had been Acked-by Anton.
+Could you please help review these patches again? Expect your comments.
+Thanks in advance.
 
-Best Regards,
-Jaehoon Chung
+1)	Subject: [PATCH] Powerpc eSDHC: Use u64 to calculate the timeout value to avoid overflow
+2)	Subject: [PATCH 2/2 v3] mmc:core: Add limit to data and erase timeout value calculation
+3)	Subject: [PATCH 1/2 v5] Powerpc/eSDHC: Calculate the applicable mmc erase timeout value
+Extra:
+4)	Subject: [PATCH 1/2 V2] mmc:block : Convert the cmd_timeou_ms to u64 to avoid overflow
+5)	Subject: [PATCH 2/2 V2] mmc:host: Use u64 to calculate the timeout value to avoid overflow
 
-On 12/14/2012 05:03 AM, dinguyen@altera.com wrote:
-> From: Dinh Nguyen <dinguyen@altera.com>
+
+Regards
+Haijun.
+
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Zhang Haijun-B42677
+> Sent: Monday, November 26, 2012 6:03 PM
+> To: Chris Ball; kbuild test robot
+> Cc: linux-mmc@vger.kernel.org; Huang Changming-R66093
+> Subject: RE: [mmc:mmc-next 45/63] of_iommu.c:(.text+0x114dbc): undefined
+> reference to `__aeabi_uldivmod'
 > 
-> Add code to read value of the use_hold_reg in the cmd register so that
-> the cmdflags can be correct.
+> Hi Chris
 > 
-> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-> ---
->  drivers/mmc/host/dw_mmc.c  |    6 ++++++
->  drivers/mmc/host/dw_mmc.h  |    1 +
->  include/linux/mmc/dw_mmc.h |    3 +++
->  3 files changed, 10 insertions(+)
+> I see patches modified the public C file and Powerpc Host C file. But it
+> also used by other host C file.
+> So need to replace all the u64 division by macro div_u64 to avoid this
+> error.
+> Two new patches had send and reviewed by Anton.
+> I think they can fix the `__aeabi_uldivmod' error.
+> All the patches work fine on my branch.
 > 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 323c502..490490b 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -265,6 +265,9 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
->  	if (drv_data && drv_data->prepare_command)
->  		drv_data->prepare_command(slot->host, &cmdr);
->  
-> +	if (slot->host->use_hold_reg)
-> +		cmdr |= SDMMC_CMD_USE_HOLD_REG;
-> +
->  	return cmdr;
->  }
->  
-> @@ -2183,6 +2186,9 @@ int dw_mci_probe(struct dw_mci *host)
->  		host->data_shift = 2;
->  	}
->  
-> +	/* Get the USE_HOLD_REG */
-> +	host->use_hold_reg = mci_readl(host, CMD) & SDMMC_CMD_USE_HOLD_REG;
-> +
->  	/* Reset all blocks */
->  	if (!mci_wait_reset(host->dev, host))
->  		return -ENODEV;
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 53b8fd9..6172900 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -111,6 +111,7 @@
->  #define SDMMC_INT_ERROR			0xbfc2
->  /* Command register defines */
->  #define SDMMC_CMD_START			BIT(31)
-> +#define SDMMC_CMD_USE_HOLD_REG		BIT(29)
->  #define SDMMC_CMD_CCS_EXP		BIT(23)
->  #define SDMMC_CMD_CEATA_RD		BIT(22)
->  #define SDMMC_CMD_UPD_CLK		BIT(21)
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index 34be4f4..36cab8a 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -187,6 +187,9 @@ struct dw_mci {
->  	struct regulator	*vmmc;	/* Power regulator */
->  	unsigned long		irq_flags; /* IRQ flags */
->  	int			irq;
-> +
-> +	/* Set to one for SDR12 and SDR25 */
-> +	unsigned int use_hold_reg;
->  };
->  
->  /* DMA ops for Internal/External DMAC interface */
+> Regards
+> Haijun.
 > 
+> 
+> > -----Original Message-----
+> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > owner@vger.kernel.org] On Behalf Of Chris Ball
+> > Sent: Monday, November 26, 2012 7:51 AM
+> > To: kbuild test robot
+> > Cc: Zhang Haijun-B42677; linux-mmc@vger.kernel.org; Huang Changming-
+> > R66093
+> > Subject: Re: [mmc:mmc-next 45/63] of_iommu.c:(.text+0x114dbc):
+> > undefined reference to `__aeabi_uldivmod'
+> >
+> > Hi,
+> >
+> > On Sun, Nov 25 2012, kbuild test robot wrote:
+> > > tree:   git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
+> mmc-
+> > next
+> > > head:   b1dc46e6cd5f314f52a9864cc7ba1b7624b54bd7
+> > > commit: d29254e21ddddee37b3c8525817398d96d6403f3 [45/63] mmc: core:
+> > > Use u64 to calculate the timeout value to avoid overflow
+> > > config: make ARCH=arm omap2plus_defconfig
+> > >
+> > > All error/warnings:
+> > >
+> > > drivers/built-in.o: In function `mmc_omap_start_request':
+> > > of_iommu.c:(.text+0x114dbc): undefined reference to
+> `__aeabi_uldivmod'
+> >
+> > I've removed Haijun's three patches from mmc-next while they're
+> > reworked to fix this.  Thanks!
+> >
+> > - Chris.
+> > --
+> > Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> > One Laptop Per Child
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
+
 
