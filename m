@@ -1,109 +1,136 @@
-From: Johan Rudholm <jrudholm@gmail.com>
-Subject: Re: [PATCH 3/3] mmc: core: Fixup signal voltage switch
-Date: Fri, 14 Dec 2012 11:41:34 +0100
-Message-ID: <CA+20K0BtApW9e+AFVqm4HMqvq=tCn1N2Ejc2LgK8h1AgYkJ-ng@mail.gmail.com>
-References: <1354897176-15307-1-git-send-email-johan.rudholm@stericsson.com>
-	<1354897176-15307-4-git-send-email-johan.rudholm@stericsson.com>
-	<50C2D989.5060901@codeaurora.org>
-	<CA+20K0CQjvK1O9Lwci86xLom0G1aHQcKemz1zXdqz5YKFQiRpg@mail.gmail.com>
-	<50C6D858.4020509@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Kevin Liu <kliu5@marvell.com>
+Subject: [PATCH 1/3] mmc: core: enhance the code for signal voltage setting
+Date: Fri, 14 Dec 2012 18:53:56 +0800
+Message-ID: <1355482438-16836-2-git-send-email-kliu5@marvell.com>
+References: <1355482438-16836-1-git-send-email-kliu5@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f53.google.com ([209.85.216.53]:52639 "EHLO
-	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751439Ab2LNKlf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 05:41:35 -0500
-Received: by mail-qa0-f53.google.com with SMTP id a19so546654qad.19
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Dec 2012 02:41:34 -0800 (PST)
-In-Reply-To: <50C6D858.4020509@codeaurora.org>
+Received: from na3sys009aog118.obsmtp.com ([74.125.149.244]:49583 "EHLO
+	na3sys009aog118.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753461Ab2LNKvT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 05:51:19 -0500
+In-Reply-To: <1355482438-16836-1-git-send-email-kliu5@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: Johan Rudholm <johan.rudholm@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Kevin Liu <keyuan.liu@gmail.com>, Philip Rakity <prakity@marvell.com>, Daniel Drake <dsd@laptop.org>, Aaron <leafy.myeh@allwinnertech.com>
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, johan.rudholm@stericsson.com
+Cc: per.forlin@stericsson.com, ulf.hansson@linaro.org, fredrik.soderstedt@stericsson.com, dsd@laptop.org, leafy.myeh@allwinnertech.com, subhashj@codeaurora.org, prakity@nvidia.com, zhangfei.gao@gmail.com, haojian.zhuang@gmail.com, cxie4@marvell.com, keyuan.liu@gmail.com, Kevin Liu <kliu5@marvell.com>
 
-Hi Subhash,
+1. if host does NOT implement signal voltage setting function,
+should return error.
+2. add the check for data signal before voltage change according
+to the spec. If host does NOT detect a low signal level, the host
+should abort the voltage switch sequence. (phisical layer spec 4.2.4.2(4))
+3. if voltage change failed then no need to restore the clock
+before cycle power the card.
+4. call mmc_power_cycle here since it's a part of voltage switch.
+besides -EAGAIN, any other error returned should also cycle power the card.
 
-2012/12/11 Subhash Jadavani <subhashj@codeaurora.org>:
-> On 12/10/2012 1:51 PM, Johan Rudholm wrote:
->>
->> 2012/12/8 Subhash Jadavani <subhashj@codeaurora.org>:
->>>
->>> On 12/7/2012 9:49 PM, Johan Rudholm wrote:
->>>>
->>>> When switching SD and SDIO cards from 3.3V to 1.8V signal levels, the
->>>> clock should be gated for 5 ms during the step. After enabling the
->>>> clock, the host should wait for at least 1 ms before checking for
->>>> failure. Failure by the card to switch is indicated by dat[0:3] being
->>>> pulled low. The host should check for this condition and power-cycle
->>>> the card if failure is indicated.
->>>>
->>>> Add a retry mechanism for the SDIO case.
->>>>
->>>> If the voltage switch fails repeatedly, give up and continue the
->>>> initialization using the original voltage.
->>>>
->>>> This patch places a couple of requirements on the host driver:
->>>>
->>>>    1) mmc_set_ios with ios.clock = 0 must gate the clock
->>>>    2) mmc_power_off must actually cut the power to the card
->>>>
->>>> if these requirements are not fulfilled, the 1.8V signal voltage switch
->>>> may not be successful.
->>
->> <snip>
->>
->>>>                  err = host->ops->start_signal_voltage_switch(host,
->>>> &host->ios);
->>>
->>>
->>> Shouldn't you fix all the existing host drivers who have already
->>> implemented
->>> start_signal_voltage_switch host ops? If you don't change them as part of
->>> this patch then
->>> i afraid UHS functionality would be broken on those platforms. Also, it's
->>> not just changing the start_signal_voltage_switch hot op implementation,
->>> you
->>> may also need to add card_busy() host op implementation for those
->>> drivers.
->>
->> This is true, and I did actually make an RFC for the sdhci driver
->> ("[RFC] mmc: sdhci: Let core handle UHS switch failure":
->> https://patchwork.kernel.org/patch/1517211/). Daniel Drake tried this
->> code for a problem related to the 1.8V switch (his board could
->> actually not perform the switch to 1.8V even though this capability
->> was announced), and I think this pointed out two areas for further
->> investigation before a proper patch for the sdhci driver can be
->> created:
->>
->> 1) the sdhci driver may not gate the clock when setting ios.clock = 0
->> and calling mmc_set_ios
->> 2) mmc_power_off may not cut power to the card
->>
->> maybe 2) was only for Daniel's board, I'm not sure, but this needs to
->> be investigated further anyway. Since I don't have any sdhci hardware
->> with UHS support, this must either be done by some other kind soul or
->> it will have to wait until I get the hardware.
->>
->> sdhci is the only driver I'm aware of that's got (mainlined) support
->> for start_signal_voltage_switch, are you thinking of any other driver?
->
-> You may look at only in tree drivers who have implemented
-> start_singnal_voltage_switch() ops. Our msm_sdcc* driver has also
-> implemented it but it's not in tree driver so i may
-> need to take care of that later once we are synced to kernel version which
-> will have your patch series.
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
+---
+ drivers/mmc/core/core.c |   71 ++++++++++++++++++++++++++++------------------
+ 1 files changed, 43 insertions(+), 28 deletions(-)
 
-Ok, good.
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index d1aa8ab..da93186 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1226,6 +1226,9 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
+ 
+ 	BUG_ON(!host);
+ 
++	if (!host->ops->start_signal_voltage_switch)
++		return -EPERM;
++
+ 	/*
+ 	 * Send CMD11 only if the request is to switch the card to
+ 	 * 1.8V signalling.
+@@ -1245,47 +1248,59 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
+ 
+ 	host->ios.signal_voltage = signal_voltage;
+ 
+-	if (host->ops->start_signal_voltage_switch) {
+-		u32 clock;
++	u32 clock;
++
++	mmc_host_clk_hold(host);
++
++	if (cmd11) {
++		if (!host->ops->card_busy)
++			pr_warning("%s: cannot verify signal voltage switch\n",
++					mmc_hostname(host));
+ 
+-		mmc_host_clk_hold(host);
+ 		/*
+ 		 * During a signal voltage level switch, the clock must be gated
+ 		 * for a certain period of time according to the SD spec
+ 		 */
+-		if (cmd11) {
+-			clock = host->ios.clock;
+-			host->ios.clock = 0;
+-			mmc_set_ios(host);
+-		}
++		clock = host->ios.clock;
++		host->ios.clock = 0;
++		mmc_set_ios(host);
+ 
+-		err = host->ops->start_signal_voltage_switch(host, &host->ios);
++		if (host->ops->card_busy && !host->ops->card_busy(host)) {
++			err = -EAGAIN;
++		} else {
+ 
+-		if (err && cmd11) {
+-			host->ios.clock = clock;
+-			mmc_set_ios(host);
+-		} else if (cmd11) {
+-			/* Keep clock gated for at least 5 ms */
+-			mmc_delay(5);
+-			host->ios.clock = clock;
+-			mmc_set_ios(host);
++			err = host->ops->start_signal_voltage_switch(host, &host->ios);
+ 
+-			/* Wait for at least 1 ms according to spec */
+-			mmc_delay(1);
++			if (!err) {
++				/* Keep clock gated for at least 5 ms */
++				mmc_delay(5);
++				host->ios.clock = clock;
++				mmc_set_ios(host);
+ 
+-			/*
+-			 * Failure to switch is indicated by the card holding
+-			 * dat[0:3] low
+-			 */
+-			if (!host->ops->card_busy)
+-				pr_warning("%s: cannot verify signal voltage switch\n",
++				/* Wait for at least 1 ms according to spec */
++				mmc_delay(1);
++
++				/*
++				 * Failure to switch is indicated by the card holding
++				 * dat[0:3] low
++				 */
++				if (host->ops->card_busy && host->ops->card_busy(host))
++					err = -EAGAIN;
++			}
++		}
++		if (err) {
++			/* Power cycle card */
++			pr_debug("%s: Signal voltage switch failed, "
++					"power cycling card \n",
+ 					mmc_hostname(host));
+-			else if (host->ops->card_busy(host))
+-				err = -EAGAIN;
++			mmc_power_cycle(host);
+ 		}
+-		mmc_host_clk_release(host);
++	} else {
++		err = host->ops->start_signal_voltage_switch(host, &host->ios);
+ 	}
+ 
++	mmc_host_clk_release(host);
++
+ 	return err;
+ }
+ 
+-- 
+1.7.0.4
 
-> Yes, SDHCi seeems to be only one in tree driver implemented the
-> start_singnal_voltage_switch() ops. So you might be good fixing the same.
-
-It seems the UHS support in the SDHCI driver is a complex issue,
-judging from Daniel's experience described above, so I think the best
-way forward is to get these patches in and then take care of the SDHCI
-driver (perhaps based on my previous RFC), unless any of the SDHCI
-guys thinks differently? Naturally, I will be happy to assist in
-fixing the SDHCI driver.
-
-Kind regards, Johan
