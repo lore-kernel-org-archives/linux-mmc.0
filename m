@@ -1,113 +1,63 @@
-From: Dinh Nguyen <dinguyen@altera.com>
-Subject: Re: [PATCH] mmc: dw_mmc: add support for use_hold_reg
-Date: Fri, 14 Dec 2012 10:12:03 -0600
-Message-ID: <1355501523.24619.4.camel@dinh-ubuntu>
-References: <1355428991-4602-1-git-send-email-dinguyen@altera.com>
-	 <50CA65B2.9040709@samsung.com>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH V2 2/2] mmc: mmci: Move ios_handler functionality into
+ the driver
+Date: Fri, 14 Dec 2012 16:33:29 +0000
+Message-ID: <20121214163329.GS27617@gmail.com>
+References: <1355495429-12510-1-git-send-email-ulf.hansson@stericsson.com>
+ <1355495429-12510-3-git-send-email-ulf.hansson@stericsson.com>
+ <20121214151002.GK14363@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:29896
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756417Ab2LNQMW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 11:12:22 -0500
-In-Reply-To: <50CA65B2.9040709@samsung.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:61415 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756224Ab2LNQde (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 11:33:34 -0500
+Received: by mail-bk0-f46.google.com with SMTP id q16so1854687bkw.19
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Dec 2012 08:33:33 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <20121214151002.GK14363@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: cjb@laptop.org, dinh.linux@gmail.com, linux-mmc@vger.kernel.org, tgih.jun@samsung.com, thomas.abraham@linaro.org, kyungmin.park@samsung.com, james.hogan@imgtec.com
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On Fri, 2012-12-14 at 08:33 +0900, Jaehoon Chung wrote:
-> Hi Dinh,
-> 
-> According to  DesignWare Spec, we need to check which bus-mode use.
-> You can refer to "https://patchwork.kernel.org/patch/1379521/".
-> I know that hold_reg didn't use always, although hold_reg is set.
+On Fri, 14 Dec 2012, Russell King - ARM Linux wrote:
 
-Hi Jaehoon,
+> On Fri, Dec 14, 2012 at 03:30:29PM +0100, Ulf Hansson wrote:
+> > From: Lee Jones <lee.jones@linaro.org>
+> >=20
+> > There are currently two instances of the ios_handler being used.
+> > Both of which mearly toy with some regulator settings. Now there
+> > is a GPIO regulator API, we can use that instead, and lessen the
+> > per platform burden. By doing this, we also become more Device
+> > Tree compatible.
+>=20
+> Err, why is this needed?  What's wrong with using the 'vmmc' for this=
+?
 
-Thanks for the info. So then my question is what is the correct way to
-add support for use_hold_reg?
+It's a different regulator. The core knows about 'vmmc', which is the
+primary one, then there is a regulator called 'vqmmc' which is for I/O
+voltage. Until now this was done in a very platform specific way.
+Normally by doing gpio_set's. Now there is a regulator API which can
+deal with GPIO controlled regulators and there is provision for it in
+MMC core also, so it's time to move it to the driver.
 
-Our implementation of the IP is using the use_hold_reg in its default
-state. The driver taken as is did not work.
+> From what I read in the mmc core, vmmc handling via mmc_regulator_set=
+_ocr()
+> can cope with GPIO-based regulators, and if you have a single GPIO si=
+gnal
+> then you have a single supply (it's either on or off).  So what's wro=
+ng
+> with using the existing regulator hooks for this which are already th=
+ere?
 
-Should we be adding a similar file dw_mmc-exynos.c to add this?
+In our case it's not a 'fixed' regulator (i.e. on/off). The new GPIO
+regulator API can also control voltage selection using GPIOs too.
 
-Thanks,
-
-Dinh
-> 
-> Best Regards,
-> Jaehoon Chung
-> 
-> On 12/14/2012 05:03 AM, dinguyen@altera.com wrote:
-> > From: Dinh Nguyen <dinguyen@altera.com>
-> > 
-> > Add code to read value of the use_hold_reg in the cmd register so that
-> > the cmdflags can be correct.
-> > 
-> > Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-> > ---
-> >  drivers/mmc/host/dw_mmc.c  |    6 ++++++
-> >  drivers/mmc/host/dw_mmc.h  |    1 +
-> >  include/linux/mmc/dw_mmc.h |    3 +++
-> >  3 files changed, 10 insertions(+)
-> > 
-> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> > index 323c502..490490b 100644
-> > --- a/drivers/mmc/host/dw_mmc.c
-> > +++ b/drivers/mmc/host/dw_mmc.c
-> > @@ -265,6 +265,9 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
-> >  	if (drv_data && drv_data->prepare_command)
-> >  		drv_data->prepare_command(slot->host, &cmdr);
-> >  
-> > +	if (slot->host->use_hold_reg)
-> > +		cmdr |= SDMMC_CMD_USE_HOLD_REG;
-> > +
-> >  	return cmdr;
-> >  }
-> >  
-> > @@ -2183,6 +2186,9 @@ int dw_mci_probe(struct dw_mci *host)
-> >  		host->data_shift = 2;
-> >  	}
-> >  
-> > +	/* Get the USE_HOLD_REG */
-> > +	host->use_hold_reg = mci_readl(host, CMD) & SDMMC_CMD_USE_HOLD_REG;
-> > +
-> >  	/* Reset all blocks */
-> >  	if (!mci_wait_reset(host->dev, host))
-> >  		return -ENODEV;
-> > diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> > index 53b8fd9..6172900 100644
-> > --- a/drivers/mmc/host/dw_mmc.h
-> > +++ b/drivers/mmc/host/dw_mmc.h
-> > @@ -111,6 +111,7 @@
-> >  #define SDMMC_INT_ERROR			0xbfc2
-> >  /* Command register defines */
-> >  #define SDMMC_CMD_START			BIT(31)
-> > +#define SDMMC_CMD_USE_HOLD_REG		BIT(29)
-> >  #define SDMMC_CMD_CCS_EXP		BIT(23)
-> >  #define SDMMC_CMD_CEATA_RD		BIT(22)
-> >  #define SDMMC_CMD_UPD_CLK		BIT(21)
-> > diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> > index 34be4f4..36cab8a 100644
-> > --- a/include/linux/mmc/dw_mmc.h
-> > +++ b/include/linux/mmc/dw_mmc.h
-> > @@ -187,6 +187,9 @@ struct dw_mci {
-> >  	struct regulator	*vmmc;	/* Power regulator */
-> >  	unsigned long		irq_flags; /* IRQ flags */
-> >  	int			irq;
-> > +
-> > +	/* Set to one for SDR12 and SDR25 */
-> > +	unsigned int use_hold_reg;
-> >  };
-> >  
-> >  /* DMA ops for Internal/External DMAC interface */
-> > 
-> 
-> 
-
-
-
+--=20
+Lee Jones
+Linaro ST-Ericsson Landing Team Lead
+Linaro.org =E2=94=82 Open source software for ARM SoCs
+=46ollow Linaro: Facebook | Twitter | Blog
