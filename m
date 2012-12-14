@@ -1,83 +1,113 @@
-From: Pawel Moll <pawel.moll@arm.com>
-Subject: [PATCH] mmc: mmci: Add new VE MMCI variant
-Date: Fri, 14 Dec 2012 15:38:46 +0000
-Message-ID: <1355499526-13790-1-git-send-email-pawel.moll@arm.com>
-Content-Type: text/plain; charset=WINDOWS-1252
-Content-Transfer-Encoding: quoted-printable
+From: Dinh Nguyen <dinguyen@altera.com>
+Subject: Re: [PATCH] mmc: dw_mmc: add support for use_hold_reg
+Date: Fri, 14 Dec 2012 10:12:03 -0600
+Message-ID: <1355501523.24619.4.camel@dinh-ubuntu>
+References: <1355428991-4602-1-git-send-email-dinguyen@altera.com>
+	 <50CA65B2.9040709@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from service87.mimecast.com ([91.220.42.44]:43378 "EHLO
-	service87.mimecast.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756217Ab2LNPjJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 10:39:09 -0500
+Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:29896
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756417Ab2LNQMW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 11:12:22 -0500
+In-Reply-To: <50CA65B2.9040709@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Russell King <rmk+kernel@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, Pawel Moll <pawel.moll@arm.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: cjb@laptop.org, dinh.linux@gmail.com, linux-mmc@vger.kernel.org, tgih.jun@samsung.com, thomas.abraham@linaro.org, kyungmin.park@samsung.com, james.hogan@imgtec.com
 
-The Versatile Express IOFPGA as shipped on VECD 5.0 (bitfiles v108/208
-and v116/216) contains a modified version of the PL180 MMCI, with
-PeriphID Configuration value changed to 0x2.
+On Fri, 2012-12-14 at 08:33 +0900, Jaehoon Chung wrote:
+> Hi Dinh,
+> 
+> According to  DesignWare Spec, we need to check which bus-mode use.
+> You can refer to "https://patchwork.kernel.org/patch/1379521/".
+> I know that hold_reg didn't use always, although hold_reg is set.
 
-This version adds an optional "hardware flow control" feature. When
-enabled MMC card clock will be automatically disabled when FIFO is
-about to over/underflow and re-enabled once the host retrieved some
-data. This makes the controller immune to over/underrun errors caused
-by big interrupt handling latencies.
+Hi Jaehoon,
 
-This patch adds relevant device variant in the driver.
+Thanks for the info. So then my question is what is the correct way to
+add support for use_hold_reg?
 
-Signed-off-by: Pawel Moll <pawel.moll@arm.com>
----
- drivers/mmc/host/mmci.c |   13 +++++++++++++
- drivers/mmc/host/mmci.h |    2 ++
- 2 files changed, 15 insertions(+)
+Our implementation of the IP is using the use_hold_reg in its default
+state. The driver taken as is did not work.
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index edc3e9b..b2b550f 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -86,6 +86,14 @@ static struct variant_data variant_arm_extended_fifo =3D=
- {
- =09.pwrreg_powerup=09=09=3D MCI_PWR_UP,
- };
-=20
-+static struct variant_data variant_arm_extended_fifo_hwfc =3D {
-+=09.fifosize=09=09=3D 128 * 4,
-+=09.fifohalfsize=09=09=3D 64 * 4,
-+=09.clkreg_enable=09=09=3D MCI_ARM_HWFCEN,
-+=09.datalength_bits=09=3D 16,
-+=09.pwrreg_powerup=09=09=3D MCI_PWR_UP,
-+};
-+
- static struct variant_data variant_u300 =3D {
- =09.fifosize=09=09=3D 16 * 4,
- =09.fifohalfsize=09=09=3D 8 * 4,
-@@ -1628,6 +1636,11 @@ static struct amba_id mmci_ids[] =3D {
- =09=09.data=09=3D &variant_arm_extended_fifo,
- =09},
- =09{
-+=09=09.id=09=3D 0x02041180,
-+=09=09.mask=09=3D 0xff0fffff,
-+=09=09.data=09=3D &variant_arm_extended_fifo_hwfc,
-+=09},
-+=09{
- =09=09.id=09=3D 0x00041181,
- =09=09.mask=09=3D 0x000fffff,
- =09=09.data=09=3D &variant_arm,
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index d437ccf..00d6d0c 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -28,6 +28,8 @@
- #define MCI_ST_UX500_NEG_EDGE=09(1 << 13)
- #define MCI_ST_UX500_HWFCEN=09(1 << 14)
- #define MCI_ST_UX500_CLK_INV=09(1 << 15)
-+/* Modified PL180 on Versatile Express platform */
-+#define MCI_ARM_HWFCEN=09=09(1 << 12)
-=20
- #define MMCIARGUMENT=09=090x008
- #define MMCICOMMAND=09=090x00c
---=20
-1.7.10.4
+Should we be adding a similar file dw_mmc-exynos.c to add this?
+
+Thanks,
+
+Dinh
+> 
+> Best Regards,
+> Jaehoon Chung
+> 
+> On 12/14/2012 05:03 AM, dinguyen@altera.com wrote:
+> > From: Dinh Nguyen <dinguyen@altera.com>
+> > 
+> > Add code to read value of the use_hold_reg in the cmd register so that
+> > the cmdflags can be correct.
+> > 
+> > Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+> > ---
+> >  drivers/mmc/host/dw_mmc.c  |    6 ++++++
+> >  drivers/mmc/host/dw_mmc.h  |    1 +
+> >  include/linux/mmc/dw_mmc.h |    3 +++
+> >  3 files changed, 10 insertions(+)
+> > 
+> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> > index 323c502..490490b 100644
+> > --- a/drivers/mmc/host/dw_mmc.c
+> > +++ b/drivers/mmc/host/dw_mmc.c
+> > @@ -265,6 +265,9 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+> >  	if (drv_data && drv_data->prepare_command)
+> >  		drv_data->prepare_command(slot->host, &cmdr);
+> >  
+> > +	if (slot->host->use_hold_reg)
+> > +		cmdr |= SDMMC_CMD_USE_HOLD_REG;
+> > +
+> >  	return cmdr;
+> >  }
+> >  
+> > @@ -2183,6 +2186,9 @@ int dw_mci_probe(struct dw_mci *host)
+> >  		host->data_shift = 2;
+> >  	}
+> >  
+> > +	/* Get the USE_HOLD_REG */
+> > +	host->use_hold_reg = mci_readl(host, CMD) & SDMMC_CMD_USE_HOLD_REG;
+> > +
+> >  	/* Reset all blocks */
+> >  	if (!mci_wait_reset(host->dev, host))
+> >  		return -ENODEV;
+> > diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> > index 53b8fd9..6172900 100644
+> > --- a/drivers/mmc/host/dw_mmc.h
+> > +++ b/drivers/mmc/host/dw_mmc.h
+> > @@ -111,6 +111,7 @@
+> >  #define SDMMC_INT_ERROR			0xbfc2
+> >  /* Command register defines */
+> >  #define SDMMC_CMD_START			BIT(31)
+> > +#define SDMMC_CMD_USE_HOLD_REG		BIT(29)
+> >  #define SDMMC_CMD_CCS_EXP		BIT(23)
+> >  #define SDMMC_CMD_CEATA_RD		BIT(22)
+> >  #define SDMMC_CMD_UPD_CLK		BIT(21)
+> > diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> > index 34be4f4..36cab8a 100644
+> > --- a/include/linux/mmc/dw_mmc.h
+> > +++ b/include/linux/mmc/dw_mmc.h
+> > @@ -187,6 +187,9 @@ struct dw_mci {
+> >  	struct regulator	*vmmc;	/* Power regulator */
+> >  	unsigned long		irq_flags; /* IRQ flags */
+> >  	int			irq;
+> > +
+> > +	/* Set to one for SDR12 and SDR25 */
+> > +	unsigned int use_hold_reg;
+> >  };
+> >  
+> >  /* DMA ops for Internal/External DMAC interface */
+> > 
+> 
+> 
+
 
 
