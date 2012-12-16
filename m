@@ -1,89 +1,131 @@
-From: Neeraj Jakhar <neeraj@fusiontoad.com>
-Subject: Regarding SD card
-Date: Sat, 15 Dec 2012 03:56:16 +0530
-Message-ID: <CAPv8OKS061mNcpL1y_x7U9D+BDv8fjFYP5CmOsH+RMDWZGrXBA@mail.gmail.com>
+From: NeilBrown <neilb@suse.de>
+Subject: Problem with "mmc: core: Do not rescan non-removable devices"
+Date: Sun, 16 Dec 2012 16:36:35 +1100
+Message-ID: <20121216163635.47537729@notabene.brown>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=PGP-SHA1;
+ boundary="Sig_/NxTZHU/Jp/RzaUaM+thXbUC"; protocol="application/pgp-signature"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f174.google.com ([209.85.220.174]:32941 "EHLO
-	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755621Ab2LNW0R (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Dec 2012 17:26:17 -0500
-Received: by mail-vc0-f174.google.com with SMTP id d16so4795787vcd.19
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Dec 2012 14:26:16 -0800 (PST)
+Received: from cantor2.suse.de ([195.135.220.15]:38043 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750745Ab2LPFhA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 16 Dec 2012 00:37:00 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Johan Rudholm <johan.rudholm@stericsson.com>, Chris Ball <cjb@laptop.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
 
-Hi,
+--Sig_/NxTZHU/Jp/RzaUaM+thXbUC
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
 
-I have with me a bunch of "raw" Micro SD Cards (which I got
-from a friend of my friend). Their capacity as reported by
-Linux/Windows is around 30 MB. Further, most of the fields in
-their CID and CSD register are empty. For example,  the
-following values are set, Manufacturer ID: 0x00 ;
-OEM/Application ID: 0x2020 (or "  "); Product name:
-0x4e2f412020 (or "N/A  "). The CSD structure version is set
-to 1 (which means SDSC card).
 
-I am told that these Micro SD cards are actually SDHC cards
-(anything between 4 GB - 32 GB). They are in pre-release state
-and a process called "upgrade" will make them realize their
-actual capacity, as noted in the previous statement instead of
-its current 30 MB. From what I have gathered from the
-documentation I need to modify C_SIZE, C_SIZE_MULT,
-READ_BL_LEN (from SD card specifications) to change
-the size of SD card.
+hi,
+ the commit below causes my wifi to disappear on suspend and never
+ reappear.
+ Unfortunately the commentary says what the patch does but not why, so I
+ cannot tell if simply reverting it is correct, or if something more subtle
+ in needed.
 
-However, before trying to modify these values, I tried the
-following command
+ My wifi chip is a "libertas" driven "Marvell" chip.  It is permanently
+ attached to port 1 on an OMAP3 'hsmmc' interface.  So MMC_CAP_NONREMOVABLE
+ seem appropriate and is set.
 
-dd if=/dev/zero of=/dev/mmcblk0
+ It is normally inactive and when the suspend code notices this it doesn't
+ bother trying to suspend through the driver but just removes the core:
+			/*
+			 * We simply "remove" the card in this case.
+			 * It will be redetected on resume.  (Calling
+			 * bus_ops->remove() with a claimed host can
+			 * deadlock.)
+			 */
+ (in mmc_suspend_host).  Only it isn't redetected on resume because
+ rescan_entered is set.
 
-I expected that the whole disk will be written with zeros, and I
-can always use fdisk and mkfs to recreate the file system.
+ I guess we could clear rescan_entered at this point.  Would that make sens=
+e?
+ It seems to work.
 
-However, I got a big surprise. When I open drive in fdisk and
-create partitions and save the partition table to the disk, nothing
-gets saved to the SD card. The device can't be formatted on windows
-either. Moreover, I created image of MBR, of another such raw
-SD card using the command,
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 06c42cf..65b8935 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2433,6 +2433,7 @@ int mmc_suspend_host(struct mmc_host *host)
+ 			mmc_claim_host(host);
+ 			mmc_detach_bus(host);
+ 			mmc_power_off(host);
++			host->rescan_entered =3D 0;
+ 			mmc_release_host(host);
+ 			host->pm_flags =3D 0;
+ 			err =3D 0;
 
-dd if=/dev/mmcblk0 of=mbr bs=512 count=1
 
-and wrote it to the erring SD card using the command,
-
-dd if=mbr of=/dev/mmcblk0 bs=512 count=1
-
-At this point I expected that at least partition table should be
-restored. But all this was to no avail. Moreover, a similar
-effort with a disk image of entire SD card (instead of just the
-initial 512 bytes) yielded no better results. From a look at the
-contents it would appear that no matter what I write to this SD
-card, its contents remain the same, and at the same time their
-is no error that is reported by the dd command. In the dmesg
-logs I can see the following output:
-
-[13534.411447] mmc0: new SD card at address 0002
-[13534.411709] mmcblk0: mmc0:0002 N/A   30.0 MiB
-[13534.413899]  mmcblk0: unknown partition table
-[13543.088097] mmcblk0: error -110 sending stop command, original cmd
-response 0x900, card status 0x580900
-[13543.088152] mmcblk0: error -110 transferring data, sector 0, nr 8,
-cmd response 0x900, card status 0x0
-[13543.088252] end_request: I/O error, dev mmcblk0, sector 1
-[13543.088257] Buffer I/O error on device mmcblk0, logical block 0
-[13543.088259] lost page write due to I/O error on mmcblk0
+Thanks,
+NeilBrown
 
 
 
-Can somebody help me understand two things:
+=46rom 3339d1e33185798a45dbdb5ea6c0bec1c27ca5fd Mon Sep 17 00:00:00 2001
+From: Johan Rudholm <johan.rudholm@stericsson.com>
+Date: Thu, 23 Aug 2012 13:40:55 +0200
+Subject: [PATCH] mmc: core: Do not rescan non-removable devices
 
-1) Why is dd not able to write to the SD card?
-2) Is there such a thing as "upgrade" process during
-manufacture of cards? If yes, how can I achieve the same
-in Linux? Please forgive me if this question does not belong
-to this mailing list.
+If MMC_CAP_NONREMOVABLE is set, only issue a detect job on init.
 
-Thanks for a patient read.
--N
+Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
+Signed-off-by: Chris Ball <cjb@laptop.org>
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 835c9f0..af2c4d2 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2053,6 +2053,11 @@ void mmc_rescan(struct work_struct *work)
+ 	if (host->rescan_disable)
+ 		return;
+=20
++	/* If there is a non-removable card registered, only scan once */
++	if ((host->caps & MMC_CAP_NONREMOVABLE) && host->rescan_entered)
++		return;
++	host->rescan_entered =3D 1;
++
+ 	mmc_bus_get(host);
+=20
+ 	/*
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index f578a71..d5d9bd4 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -300,6 +300,7 @@ struct mmc_host {
+ #endif
+=20
+ 	int			rescan_disable;	/* disable card detection */
++	int			rescan_entered;	/* used with nonremovable devices */
+=20
+ 	struct mmc_card		*card;		/* device attached to this host */
+=20
+
+--Sig_/NxTZHU/Jp/RzaUaM+thXbUC
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Disposition: attachment; filename=signature.asc
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+
+iQIVAwUBUM1d4znsnt1WYoG5AQI/Sg//QR/pj1w4Nj9ZGuSUSV1vMNYDXkvVzFfO
+i0C9yjEB/NMXO/4en9yY4sKYpCfVZ636QGAe/maq3eW/B7rJG1cKsxxM6xB3f4hn
+vN3q9D/smehiQArwbDhaojWTM9+di+7G4DYBrzsmnD+aBgPhbXy1OivJAslEdN0r
+dZ+8RIEGf+quMUlDf8kWW0qjFDliZ9si7qSgaGaYl4XcHbQTURM3zoxvM70YWDyS
+7mUODT2DgOKlKdJhKOQdtYvuac7NRlmtwyRMYEXAQimqPzrO2klC20bGmEZ0HTPe
+/ibz9MVege7U0Lu29MSwXIuporDrYiSs45AGSXJyLN6HpEtPi9YgXwuhFYYRe0E3
+OwNkM3bSnTGUjFiZnyQFmVGHaQ11zmm6AsTLUJUQkvJ8iWdfqhSqEFQrwI42YCMr
+b7BUyV+6pVexkIvmP6kFZ9DHpKqZTRg3Qh0py3Cv3eDcQQrPDtyd/rSFaFkZuQ2G
+9vzXZUSQcPwsSSXWtdVteW9E46qou9Tx2QITgbJxg8FMqtSlRKYy+EaQ007YesxT
+rJK4VIQ85Xm3BvVXAdPVssGfZmFGlJ0CzlvyYv3y6kT+Q2vmcud9KaKYAtpwoeMr
+GTyCX2u3sCfwbiNPpWv6H9wrA/QBuan/NB6XpTojZKuGUDjVDnJdGmJ5A0rmm5pb
+6DpoYrDML48=
+=xRh1
+-----END PGP SIGNATURE-----
+
+--Sig_/NxTZHU/Jp/RzaUaM+thXbUC--
