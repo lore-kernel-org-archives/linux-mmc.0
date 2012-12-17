@@ -1,56 +1,65 @@
 From: Kevin Liu <kliu5@marvell.com>
-Subject: [PATCH v10 10/12] mmc: sdhci: keep the saved clock var up to date
-Date: Mon, 17 Dec 2012 19:22:06 +0800
-Message-ID: <1355743328-17758-11-git-send-email-kliu5@marvell.com>
+Subject: [PATCH v10 11/12] mmc: sdhci: add notifier for regulator vqmmc
+Date: Mon, 17 Dec 2012 19:22:07 +0800
+Message-ID: <1355743328-17758-12-git-send-email-kliu5@marvell.com>
 References: <1355743328-17758-1-git-send-email-kliu5@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog137.obsmtp.com ([74.125.149.18]:58799 "EHLO
-	na3sys009aog137.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752321Ab2LQLW7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Dec 2012 06:22:59 -0500
+Received: from na3sys009aog122.obsmtp.com ([74.125.149.147]:54676 "EHLO
+	na3sys009aog122.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752275Ab2LQLXE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Dec 2012 06:23:04 -0500
 In-Reply-To: <1355743328-17758-1-git-send-email-kliu5@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, cjb@laptop.org, arindam.nath@amd.com, peppe.cavallaro@st.com, ulf.hansson@linaro.org, andriy.shevchenko@linux.intel.com, prakity@nvidia.com
-Cc: zhangfei.gao@gmail.com, haojian.zhuang@gmail.com, cxie4@marvell.com, keyuan.liu@gmail.com, Kevin Liu <kliu5@marvell.com>, Bin Wang <binw@marvell.com>
+Cc: zhangfei.gao@gmail.com, haojian.zhuang@gmail.com, cxie4@marvell.com, keyuan.liu@gmail.com, Kevin Liu <kliu5@marvell.com>, Philip Rakity <prakity@marvell.com>
 
-The clock rate set to the sdh controller may not exactly as requested
-by the mmc core, this patch make the clock rate saved in the mmc_ios
-and sdhci_host updated with the actual setting as in the controller. Thus
-"/sys/kernel/debug/mmcx/ios" and card detect prints can show the correct
-clock rate.
-Otherwise, mmc power class may be set to wrong value with wrong ios.clock
+Some soc/platform need specific handling for signal voltage
+switch. For example, mmp2/mmp3 need to set the AIB IO domain
+control register accordingly.
+Use regulator notifier to do this.
 
-Signed-off-by: Bin Wang <binw@marvell.com>
+Signed-off-by: Philip Rakity <prakity@marvell.com>
 Signed-off-by: Kevin Liu <kliu5@marvell.com>
 ---
- drivers/mmc/host/sdhci.c |    6 +++++-
- 1 files changed, 5 insertions(+), 1 deletions(-)
+ drivers/mmc/host/sdhci.c  |    4 ++++
+ include/linux/mmc/sdhci.h |    1 +
+ 2 files changed, 5 insertions(+), 0 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 6699497..7084a1c 100644
+index 7084a1c..4aa2fb8 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1239,7 +1239,10 @@ preset:
- 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+@@ -2923,6 +2923,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 			caps[1] &= ~(SDHCI_SUPPORT_SDR104 |
+ 					SDHCI_SUPPORT_SDR50 |
+ 					SDHCI_SUPPORT_DDR50);
++		if (host->nb_vqmmc)
++			regulator_register_notifier(host->vqmmc, host->nb_vqmmc);
+ 	}
  
- out:
--	host->clock = clock;
-+	if (real_div)
-+		host->clock = host->mmc->actual_clock;
-+	else
-+		host->clock = clock;
- }
+ 	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)
+@@ -3250,6 +3252,8 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 	}
  
- static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
-@@ -1422,6 +1425,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 		sdhci_enable_preset_value(host, false);
+ 	if (host->vqmmc) {
++		if (host->nb_vqmmc)
++			regulator_unregister_notifier(host->vqmmc, host->nb_vqmmc);
+ 		regulator_disable(host->vqmmc);
+ 		regulator_put(host->vqmmc);
+ 	}
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index b838ffc..dbb0a7e 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -103,6 +103,7 @@ struct sdhci_host {
  
- 	sdhci_set_clock(host, ios->clock);
-+	ios->clock = host->clock;
+ 	struct regulator *vmmc;		/* Power regulator (vmmc) */
+ 	struct regulator *vqmmc;	/* Signaling regulator (vccq) */
++	struct notifier_block	*nb_vqmmc;	/* Regulator notifier for vccq */
  
- 	if (ios->power_mode == MMC_POWER_OFF)
- 		vdd_bit = sdhci_set_power(host, -1);
+ 	/* Internal data */
+ 	struct mmc_host *mmc;	/* MMC structure */
 -- 
 1.7.0.4
 
