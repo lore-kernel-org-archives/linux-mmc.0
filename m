@@ -1,51 +1,149 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [RESEND PATCH v4] mmc: fix async request mechanism for sequential read scenarios
-Date: Tue, 18 Dec 2012 11:19:03 -0500
-Message-ID: <87mwxb72q0.fsf@octavius.laptop.org>
-References: <n@samsung.com>
-	<1355149430-17496-1-git-send-email-kdorfman@codeaurora.org>
-	<001c01cddc51$c9cc3f00$5d64bd00$%jun@samsung.com>
-	<50D09324.1000502@codeaurora.org>
+From: Jesper Juhl <jj@chaosbits.net>
+Subject: [PATCH][resend] MMC, vub300: Resolve mem leak in vub300_probe() and
+ simplify the code a bit
+Date: Tue, 18 Dec 2012 23:47:26 +0100 (CET)
+Message-ID: <alpine.LNX.2.00.1212182340280.14788@swampdragon.chaosbits.net>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:32974 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932093Ab2LRQTJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 18 Dec 2012 11:19:09 -0500
-In-Reply-To: <50D09324.1000502@codeaurora.org> (Konstantin Dorfman's message
-	of "Tue, 18 Dec 2012 18:00:36 +0200")
+Received: from swampdragon.chaosbits.net ([90.184.90.115]:45366 "EHLO
+	swampdragon.chaosbits.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751367Ab2LRWr2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Dec 2012 17:47:28 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Konstantin Dorfman <kdorfman@codeaurora.org>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Per Forlin <per.lkml@gmail.com>
+To: linux-kernel@vger.kernel.org
+Cc: linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Tony Olech <tony.olech@elandigitalsystems.com>, Greg Kroah-Hartman <greg@kroah.com>
 
-Hi,
+In drivers/mmc/host/vub300.c::vub300_probe() we need both
+'command_out_urb' and 'command_res_urb'. Currently we fail to free the
+former if allocating the latter fails. Fix that and simplify the code
+a bit at the same time by just doing both allocations and if either
+fails then free both - usb_free_urb() deals gracefully with NULL
+pointers, so this is safe.
 
-On Tue, Dec 18 2012, Konstantin Dorfman wrote:
->>>> @@ -1374,6 +1367,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
->>>>   		mmc_queue_bounce_post(mq_rq);
->>>>
->>>>   		switch (status) {
->>>> +		case MMC_BLK_NEW_REQUEST:
->>>> +			BUG(); /* should never get here */
->> Is there any case to reach here?
->> I didn't find it.
->> 
-> Correct. But since there is no "default:" in this switch, compiler
-> demands all values of the 'status' variable present. So, we need this
-> BUG() here or we need to introduce "default:".
+We also initialize 'retval' to '-ENOMEM' when we declare the variable,
+so there's no reason to re-set it to '-ENOMEM' before jumping to
+'error0:' when one of the initial usb_alloc_urb() calls fail().
 
-Please avoid using BUG() entirely (both here and elsewhere).  It crashes
-the entire MMC stack, which means it crashes the machine entirely if
-you're booted from eMMC/SD.  There is almost always something better
-that can be done than crashing the machine.
+Also rename the 'error[0145]:' labels to be just 'error0' and
+'error1'.
 
-default: and pr_err() sound fine here.
+Signed-off-by: Jesper Juhl <jj@chaosbits.net>
+---
+ drivers/mmc/host/vub300.c |   29 +++++++++++------------------
+ 1 files changed, 11 insertions(+), 18 deletions(-)
 
-Thanks,
+ This is a resend. I originally submitted this back in January: 
+ http://lkml.indiana.edu/hypermail/linux/kernel/1201.3/00305.html
+ but got no response.
 
-- Chris.
+ Note:
+ I have no real way to actually test this patch, so it is compile tested
+ only. Please review carefully before applying.
+ Also please keep me on Cc: when replying.
+
+diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+index cb9f361..3f59fe1 100644
+--- a/drivers/mmc/host/vub300.c
++++ b/drivers/mmc/host/vub300.c
+@@ -2116,23 +2116,18 @@ static int vub300_probe(struct usb_interface *interface,
+ 		 udev->descriptor.idVendor, udev->descriptor.idProduct,
+ 		 manufacturer, product, serial_number);
+ 	command_out_urb = usb_alloc_urb(0, GFP_KERNEL);
+-	if (!command_out_urb) {
+-		retval = -ENOMEM;
+-		dev_err(&udev->dev, "not enough memory for command_out_urb\n");
+-		goto error0;
+-	}
+ 	command_res_urb = usb_alloc_urb(0, GFP_KERNEL);
+-	if (!command_res_urb) {
++	if (!command_res_urb || !command_out_urb) {
+ 		retval = -ENOMEM;
+-		dev_err(&udev->dev, "not enough memory for command_res_urb\n");
+-		goto error1;
++		dev_err(&udev->dev, "not enough memory for command urbs\n");
++		goto error0;
+ 	}
+ 	/* this also allocates memory for our VUB300 mmc host device */
+ 	mmc = mmc_alloc_host(sizeof(struct vub300_mmc_host), &udev->dev);
+ 	if (!mmc) {
+ 		retval = -ENOMEM;
+ 		dev_err(&udev->dev, "not enough memory for the mmc_host\n");
+-		goto error4;
++		goto error0;
+ 	}
+ 	/* MMC core transfer sizes tunable parameters */
+ 	mmc->caps = 0;
+@@ -2285,7 +2280,7 @@ static int vub300_probe(struct usb_interface *interface,
+ 		dev_err(&vub300->udev->dev,
+ 		    "Could not find two sets of bulk-in/out endpoint pairs\n");
+ 		retval = -EINVAL;
+-		goto error5;
++		goto error1;
+ 	}
+ 	retval =
+ 		usb_control_msg(vub300->udev, usb_rcvctrlpipe(vub300->udev, 0),
+@@ -2294,14 +2289,14 @@ static int vub300_probe(struct usb_interface *interface,
+ 				0x0000, 0x0000, &vub300->hc_info,
+ 				sizeof(vub300->hc_info), HZ);
+ 	if (retval < 0)
+-		goto error5;
++		goto error1;
+ 	retval =
+ 		usb_control_msg(vub300->udev, usb_rcvctrlpipe(vub300->udev, 0),
+ 				SET_ROM_WAIT_STATES,
+ 				USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+ 				firmware_rom_wait_states, 0x0000, NULL, 0, HZ);
+ 	if (retval < 0)
+-		goto error5;
++		goto error1;
+ 	dev_info(&vub300->udev->dev,
+ 		 "operating_mode = %s %s %d MHz %s %d byte USB packets\n",
+ 		 (mmc->caps & MMC_CAP_SDIO_IRQ) ? "IRQs" : "POLL",
+@@ -2316,14 +2311,14 @@ static int vub300_probe(struct usb_interface *interface,
+ 				0x0000, 0x0000, &vub300->system_port_status,
+ 				sizeof(vub300->system_port_status), HZ);
+ 	if (retval < 0) {
+-		goto error4;
++		goto error0;
+ 	} else if (sizeof(vub300->system_port_status) == retval) {
+ 		vub300->card_present =
+ 			(0x0001 & vub300->system_port_status.port_flags) ? 1 : 0;
+ 		vub300->read_only =
+ 			(0x0010 & vub300->system_port_status.port_flags) ? 1 : 0;
+ 	} else {
+-		goto error4;
++		goto error0;
+ 	}
+ 	usb_set_intfdata(interface, vub300);
+ 	INIT_DELAYED_WORK(&vub300->pollwork, vub300_pollwork_thread);
+@@ -2351,17 +2346,15 @@ static int vub300_probe(struct usb_interface *interface,
+ 			 interface_to_InterfaceNumber(interface));
+ 	mmc_add_host(mmc);
+ 	return 0;
+-error5:
++error1:
+ 	mmc_free_host(mmc);
+ 	/*
+ 	 * and hence also frees vub300
+ 	 * which is contained at the end of struct mmc
+ 	 */
+-error4:
++error0:
+ 	usb_free_urb(command_res_urb);
+-error1:
+ 	usb_free_urb(command_out_urb);
+-error0:
+ 	usb_put_dev(udev);
+ 	return retval;
+ }
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.1
+
+
+-- 
+Jesper Juhl <jj@chaosbits.net>       http://www.chaosbits.net/
+Don't top-post http://www.catb.org/jargon/html/T/top-post.html
+Plain text mails only, please.
+
