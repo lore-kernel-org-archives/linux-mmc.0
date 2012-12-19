@@ -1,58 +1,58 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: 32kHz clock removal causes problems omap_hsmmc
-Date: Wed, 19 Dec 2012 10:09:09 +0000
-Message-ID: <20121219100909.GO4985@opensource.wolfsonmicro.com>
-References: <1352968293.10872.51.camel@cumari.coelho.fi>
- <20121218095450.GB27751@arwen.pp.htv.fi>
- <20121219094552.GN4985@opensource.wolfsonmicro.com>
- <50D19040.5090404@ti.com>
+From: Johan Rudholm <jrudholm@gmail.com>
+Subject: Re: [PATCH v2 3/3] mmc: core: Fixup signal voltage switch
+Date: Wed, 19 Dec 2012 11:03:35 +0100
+Message-ID: <CA+20K0BNWjytkL698LmbOSoA=iGaZF0msXyQF1MP82b5rkC4Bw@mail.gmail.com>
+References: <1355841538-6674-1-git-send-email-johan.rudholm@stericsson.com>
+	<1355841538-6674-4-git-send-email-johan.rudholm@stericsson.com>
+	<CADz5_gK4eudkHGws6QxE6rSHE3AUXBMRoGs7c5bq8HeNoPNj3w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="lRF4gxo9Z9M++D0O"
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <50D19040.5090404@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Cc: Felipe Balbi <balbi@ti.com>, Luciano Coelho <coelho@ti.com>, svenkatr@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, lrg@ti.com, linux-kernel@vger.kernel.org, Tony Lindgren <tony@atomide.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f50.google.com ([209.85.216.50]:34620 "EHLO
+	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751403Ab2LSKLy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Dec 2012 05:11:54 -0500
+Received: by mail-qa0-f50.google.com with SMTP id cr7so1353332qab.2
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Dec 2012 02:11:53 -0800 (PST)
+In-Reply-To: <CADz5_gK4eudkHGws6QxE6rSHE3AUXBMRoGs7c5bq8HeNoPNj3w@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: Johan Rudholm <johan.rudholm@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Philip Rakity <prakity@nvidia.com>, Daniel Drake <dsd@laptop.org>, Aaron <leafy.myeh@allwinnertech.com>, Subhash Jadavani <subhashj@codeaurora.org>, Kevin Liu <kliu5@marvell.com>
 
+Hi Kevin,
 
---lRF4gxo9Z9M++D0O
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+2012/12/18 Kevin Liu <keyuan.liu@gmail.com>:
+> 2012/12/18 Johan Rudholm <johan.rudholm@stericsson.com>:
+<...>
+>> +               host->ios.signal_voltage = signal_voltage;
+>>                 err = host->ops->start_signal_voltage_switch(host, &host->ios);
+>> -               mmc_host_clk_release(host);
+>> +               if (err) {
+>> +                       host->ios.clock = clock;
+>> +                       mmc_set_ios(host);
+>
+> Since will power cycle and init card again so no need to set clock here?
 
-On Wed, Dec 19, 2012 at 11:00:32AM +0100, Peter Ujfalusi wrote:
+This is true! We don't need to re-set the clock here.
 
-> I don't know the state of the common clock framework for OMAPs. Is it already
-> up in 3.7? Or going for 3.8? 3.9? 3.10?...
-> We need CCF to resolve this. I can cook up the clock driver for the 32k clock
-> from twl, but in order to use it we need CCF on OMAP.
+>> +       mmc_host_clk_release(host);
+>
+> mmc_host_clk_hold and mmc_host_clk_release seems not in pairs?
 
-Well, we at least ought to make sure it doesn't appear in the regulator
-DT bindings even if it's handled via some OMAP magic - that was the key
-point here.
+Also true, thanks.
 
---lRF4gxo9Z9M++D0O
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+>> +
+>>         return err;
+>>  }
+>>
+>
+> I still prefer to update host->ios.signal_voltage after voltage switch succeed.
+> And current code use host->ios as parameter while only the voltage
+> value will be used in start_signal_voltage_switch.
+> how do you think?
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
+I believe Ulf had some arguments against this, I don't remember
+exactly what they were. Maybe Ulf can elaborate a bit?
 
-iQIcBAEBAgAGBQJQ0ZIzAAoJELSic+t+oim9f24P/iF5uVDPLt/inTJDhwV5LpLS
-6cc1AClrpDAp48BM/YQ9UlPJKm4+iN5Q5Udy2oAMzsdqFt9+cpGabMQcfwlD5y9k
-NAVcaOa7I46wwAj6q/lN/fvri8VA84N06Ud7NCYksnxr3mWhztpnJMtGnRvNlBO5
-39Tyrs1fONMt8w+qgMOykHb04FcEaCIgKafp97IDEgt31etn365NBFtHxar7qzwR
-JThzrIXV4mRH5htHHj0W/bOXbqyN8nSR2GZogRc5Hl0BK+GIBKKD/IpY92E3sr7M
-S90mA3hIVKHlRaNek7w0YP5NisFPm4DHbjuItmeVN5UleNgyZMANpHhgQca/06LA
-E9KYsJcMPt8z6vQQ0a3iaUyMGbayAU9i7nUD/wiig6Q4mAwWudqVXbaAwgv9FyKs
-+bd016ExH+p5eUBPmi0wsnShC7LjHHB3LXYKuGcbocjSTCmO7QPyfi7fSb4kFHmc
-yUl0yH9ed6Q1lX0cfFZzLueW0nBXOOSsen5g85lSrJJVIvrn7CqLAms5D6acAtHW
-eSdZ3SQR7hsEHiElK+0ThXbeVrSiWJbaeiy7GWhByP1Vl+N+E0h7E1ppKIbciFQL
-P/DOFgrU9ka9wZ8FTZk8ndSHfkh7kri5phc5s/ckBSBXaWHrk3i4PTmSMo6XO6qq
-MFYkD3xor8103n01JSDK
-=Cpss
------END PGP SIGNATURE-----
-
---lRF4gxo9Z9M++D0O--
+Kind regards, Johan
