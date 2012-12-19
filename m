@@ -1,46 +1,75 @@
-From: Peter Ujfalusi <peter.ujfalusi@ti.com>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
 Subject: Re: 32kHz clock removal causes problems omap_hsmmc
-Date: Wed, 19 Dec 2012 11:18:11 +0100
-Message-ID: <50D19463.5010605@ti.com>
-References: <1352968293.10872.51.camel@cumari.coelho.fi> <20121218095450.GB27751@arwen.pp.htv.fi> <20121219094552.GN4985@opensource.wolfsonmicro.com> <50D19040.5090404@ti.com> <20121219100909.GO4985@opensource.wolfsonmicro.com>
+Date: Wed, 19 Dec 2012 10:28:35 +0000
+Message-ID: <20121219102835.GP4985@opensource.wolfsonmicro.com>
+References: <1352968293.10872.51.camel@cumari.coelho.fi>
+ <20121218095450.GB27751@arwen.pp.htv.fi>
+ <20121219094552.GN4985@opensource.wolfsonmicro.com>
+ <1355911317.5273.10.camel@cumari.coelho.fi>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:49163 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750810Ab2LSKSS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 19 Dec 2012 05:18:18 -0500
-In-Reply-To: <20121219100909.GO4985@opensource.wolfsonmicro.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="9v2bTOXBzuB5Piju"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1355911317.5273.10.camel@cumari.coelho.fi>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Luciano Coelho <coelho@ti.com>
+Cc: Felipe Balbi <balbi@ti.com>, svenkatr@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, lrg@ti.com, linux-kernel@vger.kernel.org, Peter Ujfalusi <peter.ujfalusi@ti.com>, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Felipe Balbi <balbi@ti.com>, Luciano Coelho <coelho@ti.com>, svenkatr@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, lrg@ti.com, linux-kernel@vger.kernel.org, Tony Lindgren <tony@atomide.com>
 
-On 12/19/2012 11:09 AM, Mark Brown wrote:
-> On Wed, Dec 19, 2012 at 11:00:32AM +0100, Peter Ujfalusi wrote:
->=20
->> I don't know the state of the common clock framework for OMAPs. Is i=
-t already
->> up in 3.7? Or going for 3.8? 3.9? 3.10?...
->> We need CCF to resolve this. I can cook up the clock driver for the =
-32k clock
->> from twl, but in order to use it we need CCF on OMAP.
->=20
-> Well, we at least ought to make sure it doesn't appear in the regulat=
-or
-> DT bindings even if it's handled via some OMAP magic - that was the k=
-ey
-> point here.
 
-Sure. It must be a clock driver. I already have similar driver (for McP=
-DM fclk
-clock) for twl6040.
-Let me check linux-next, if CCF is there for OMAP I can send the 32k cl=
-ock
-driver soon (after writing it and testing it). It is going to be for 3.=
-9 but
-we can roll it with us I think locally to resolv issues.
+--9v2bTOXBzuB5Piju
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
---=20
-P=E9ter
+On Wed, Dec 19, 2012 at 12:01:57PM +0200, Luciano Coelho wrote:
+
+> I think one of the reasons not many people use the mainline with TWL is
+> exactly because something seems to break on every new kernel release.
+> I'm one of those who care and report things when I see them.
+
+Well, it's a recursive thing - nobody works on mainline, nobody reviews
+mainline code and therefore you shouldn't be surprised if there's
+issues.
+
+> I think saying that it is not important because only one person reported
+> it is not a good excuse.  I would at least have liked seeing an answer
+> saying, "this can't be fixed because of this and that" or "can you try
+> to fix it by doing this or that".
+
+That's not what I'm saying.  What I'm saying is that it's clearly not
+the case that OMAP is completely broken here or anything, it appears to
+be one particular system which it appears vanishingly few people cared
+about in mainline even before all the stuff with TI recently.
+
+Looking at your report the reason I didn't reply myself is most likely
+to be a combination of my expectation that someone from TI would look at
+OMAP problems (at the time there were hundreds of people working on
+OMAP) and the lack of detail in your mail - the bisection report was a
+bit unclear as you said that you'd reverted the patch "plus a couple of
+associated patches" without saying what exactly you'd backed out and
+there was no analysis of the problem to engage with.
+
+--9v2bTOXBzuB5Piju
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJQ0Za1AAoJELSic+t+oim9WjIP/RkUuex/HoNV5Tj6cpq64pGw
+OjcLNkPUQ5etIr9wBHmk0egEc6eCBQWG4c3Mq0VgZs5Iyy1sHGZlAvmmlkOZO/O9
+Q6UkZBVO5eUImT/vXHoZp1skJxipFnL+9rrhYOAWlr1aK51FsMSjifbL44RZ50gT
++vchkrmqoIFLfaxX4G8toeKnIkVCEIK1v0ZJ5K0iu6bMxq8HbrgDejord8MXgLTP
+Yp8jlGYbSn3PhqBo/FRhzrKMCZc1CMR5cLaQ/27PSojOrepMcjbl6uNP9NRC+3PS
+IuH7yRysCjLSGYrwT2n1fgtj9HiRgK8AcyR+5IiYSu2puBHgyv2nbcaGCq1hv19H
+GX8Hjfcg0wwa25CcWLQd2JAVd90Cz08F4th0VMDWxmttzV1GZrFVaJktaa0h3Rj0
++0BO0PMCKqX0mCkshMB8KqWawUGmPZru4qaxN++BO/KUSZreDOgI865IWw4KhJtc
+avcpenu6EXnNxol2b3x55dHMfTs2COht2g6T+zbnm9/l3vvKlQKoteABWU5UCIJw
+dwLwW4d4jydecWxEC5/q3S34c/SJ0KLJta9sfY4lQIpXOCKQVETxqjzWg6VL0Mu8
+FW3gbZI8IR1dX46i2j+dA8Un8ZLGN1mZ4gQBJlT7nmaYmHCcUXw0sAkr7zw7sK7P
+sIZJcv3zX1ALIPWixVi2
+=AdQt
+-----END PGP SIGNATURE-----
+
+--9v2bTOXBzuB5Piju--
