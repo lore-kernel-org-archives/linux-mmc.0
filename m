@@ -1,52 +1,64 @@
-From: Peter Ujfalusi <peter.ujfalusi@ti.com>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
 Subject: Re: 32kHz clock removal causes problems omap_hsmmc
-Date: Wed, 19 Dec 2012 12:00:34 +0100
-Message-ID: <50D19E52.9030003@ti.com>
-References: <1352968293.10872.51.camel@cumari.coelho.fi>  <20121218095450.GB27751@arwen.pp.htv.fi>  <20121219094552.GN4985@opensource.wolfsonmicro.com>  <50D19040.5090404@ti.com>  <20121219100909.GO4985@opensource.wolfsonmicro.com>  <50D19463.5010605@ti.com>  <20121219103206.GQ4985@opensource.wolfsonmicro.com> <1355913954.5273.21.camel@cumari.coelho.fi> <50D19D54.2000307@ti.com>
+Date: Wed, 19 Dec 2012 11:02:38 +0000
+Message-ID: <20121219110238.GR4985@opensource.wolfsonmicro.com>
+References: <1352968293.10872.51.camel@cumari.coelho.fi>
+ <20121218095450.GB27751@arwen.pp.htv.fi>
+ <20121219094552.GN4985@opensource.wolfsonmicro.com>
+ <50D19040.5090404@ti.com>
+ <20121219100909.GO4985@opensource.wolfsonmicro.com>
+ <50D19463.5010605@ti.com>
+ <20121219103206.GQ4985@opensource.wolfsonmicro.com>
+ <1355913954.5273.21.camel@cumari.coelho.fi>
+ <50D19D54.2000307@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:52979 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750922Ab2LSLAk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 19 Dec 2012 06:00:40 -0500
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="Eu9PQ+LfZADlAtIa"
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
 In-Reply-To: <50D19D54.2000307@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-omap-owner@vger.kernel.org
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: Luciano Coelho <coelho@ti.com>, Felipe Balbi <balbi@ti.com>, svenkatr@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, lrg@ti.com, linux-kernel@vger.kernel.org, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Luciano Coelho <coelho@ti.com>
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Felipe Balbi <balbi@ti.com>, svenkatr@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, lrg@ti.com, linux-kernel@vger.kernel.org, Tony Lindgren <tony@atomide.com>
 
-On 12/19/2012 11:56 AM, Peter Ujfalusi wrote:
-> BTW: have you happened to ubdate u-boot recently? There is a nice eas=
-ter egg
-> added there:
-> f3f98bb ARM: OMAP4/5: Do not configure non essential pads, clocks, dp=
-lls.
->=20
-> Which means that _essential_ clocks and pads are no longer configured=
-=2E
 
-Meanwhile you can try to hack the u-boot to enable the 32k from there. =
-It is
-going to stay up since we do not have code to control it in the kernel =
-anymore.
+--Eu9PQ+LfZADlAtIa
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Also do something like this at the same time to get things working:
-diff --git a/include/configs/omap4_common.h b/include/configs/omap4_com=
-mon.h
-index cbc9bdb..b0ff1ec 100644
---- a/include/configs/omap4_common.h
-+++ b/include/configs/omap4_common.h
-@@ -271,4 +271,8 @@
+On Wed, Dec 19, 2012 at 11:56:20AM +0100, Peter Ujfalusi wrote:
+> On 12/19/2012 11:45 AM, Luciano Coelho wrote:
 
- #define CONFIG_SYS_THUMB_BUILD
+> > 0e8e5c34 "regulator: twl: Remove references to 32kHz clock from DT bindings"
+> > e76ab829 "regulator: twl: Remove references to the twl4030 regulator"
+> > 029dd3ce "regulator: twl: Remove another unused variable warning"
 
-+/* Configure all pins and clocks */
-+#define CONFIG_SYS_ENABLE_PADS_ALL
-+#define CONFIG_SYS_CLOCKS_ENABLE_ALL
-+
- #endif /* __CONFIG_OMAP4_COMMON_H */
+> Yeah. 32k clock is not provided by twl.
 
---=20
-P=C3=A9ter
+If these changes do anything to the platform I'd expect them to be
+leaving the clock enabled instead of disabling it...
+
+--Eu9PQ+LfZADlAtIa
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJQ0Z67AAoJELSic+t+oim9nGIP/0oQthRcZh2KwkYuYG+10FYl
+rlKAIZcpZAH/Eat+eJXM/gmfQC7Z3UvbxRH/o5I3GPiKn1Dk1UgcURA+3D4vzi+P
+FRFba8/my/4uPZcd7JOM/17NJbOD5I3TA0VB20/Yr+psa6JJZLmToYmUsibLpu2D
+14r0NInaNg023GCCSoESg3vl9ZILdFsR8wpqKnVKuAo0Qt3h3xNOkKJSmzxk8tzN
+rOda1ZuN3apCBhGw3RN8hJG50Skvr6IGkkkihB8ACNfnx+odLgArDFaa73fSQ9Yn
++x+CyzSyoEcGC7zgPHdgK5SxAQBSfc75hTxaZ7lh/pot9TGFmSQyVivcGZ6u7u+Q
+DTYEYCVIoaZVYRNLAS+aLyLRCq72FiQdrB8TKOyucnFy0W2/K3E6zICJAvnbt163
+ru7uz+3uu3l6ZVIxFzZTfyfbmvpabQHCNtOyyXtgielpGvXfmRJ3LsL+HxUhIvVr
+/Ap7hMNCweqZmjbaq6wsQKpXbDFQnFKY4zzwwKTfS3vqwaR82cvggvCB+stElGH5
+H/R2CR7wu+UOdAeqP/pV4CNgworm0kxLAAIwKmrDB7Vx5hKi/AuoS1NkRTb0PdWm
+p+9Zu6jbeGXFYDq8LE3ocoS2/Wm8P2CCZCFMRDuOSbJU5Z8rGXKBHHravAirQ/XU
+0hNjmBNfPyXddCvTS+dZ
+=SW/c
+-----END PGP SIGNATURE-----
+
+--Eu9PQ+LfZADlAtIa--
