@@ -1,149 +1,59 @@
-From: Jesper Juhl <jj@chaosbits.net>
-Subject: [PATCH][resend] MMC, vub300: Resolve mem leak in vub300_probe() and
- simplify the code a bit
-Date: Tue, 18 Dec 2012 23:47:26 +0100 (CET)
-Message-ID: <alpine.LNX.2.00.1212182340280.14788@swampdragon.chaosbits.net>
+From: Chuansheng Liu <chuansheng.liu@intel.com>
+Subject: [PATCH] mmc: sdio: Removing the unnecessary runtime_get/put in
+ sdio_bus_remove()
+Date: Wed, 19 Dec 2012 22:51:17 +0800
+Message-ID: <1355928677.1839.9.camel@cliu38-desktop-build>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from swampdragon.chaosbits.net ([90.184.90.115]:45366 "EHLO
-	swampdragon.chaosbits.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751367Ab2LRWr2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Dec 2012 17:47:28 -0500
+Received: from mga02.intel.com ([134.134.136.20]:32573 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751124Ab2LSFpA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 19 Dec 2012 00:45:00 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Tony Olech <tony.olech@elandigitalsystems.com>, Greg Kroah-Hartman <greg@kroah.com>
+To: cjb@laptop.org, ohad@wizery.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, chuansheng.liu@intel.com
 
-In drivers/mmc/host/vub300.c::vub300_probe() we need both
-'command_out_urb' and 'command_res_urb'. Currently we fail to free the
-former if allocating the latter fails. Fix that and simplify the code
-a bit at the same time by just doing both allocations and if either
-fails then free both - usb_free_urb() deals gracefully with NULL
-pointers, so this is safe.
 
-We also initialize 'retval' to '-ENOMEM' when we declare the variable,
-so there's no reason to re-set it to '-ENOMEM' before jumping to
-'error0:' when one of the initial usb_alloc_urb() calls fail().
+The runtime_get_sync() is called during sdio_bus_probe(), then the device
+will be kept in active runtime state, so not neccessary to call
+runtime_get_sync/put_noidle() again in sdio_bus_remove().
 
-Also rename the 'error[0145]:' labels to be just 'error0' and
-'error1'.
-
-Signed-off-by: Jesper Juhl <jj@chaosbits.net>
+Signed-off-by: liu chuansheng <chuansheng.liu@intel.com>
 ---
- drivers/mmc/host/vub300.c |   29 +++++++++++------------------
- 1 files changed, 11 insertions(+), 18 deletions(-)
+ drivers/mmc/core/sdio_bus.c |    8 --------
+ 1 files changed, 0 insertions(+), 8 deletions(-)
 
- This is a resend. I originally submitted this back in January: 
- http://lkml.indiana.edu/hypermail/linux/kernel/1201.3/00305.html
- but got no response.
-
- Note:
- I have no real way to actually test this patch, so it is compile tested
- only. Please review carefully before applying.
- Also please keep me on Cc: when replying.
-
-diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-index cb9f361..3f59fe1 100644
---- a/drivers/mmc/host/vub300.c
-+++ b/drivers/mmc/host/vub300.c
-@@ -2116,23 +2116,18 @@ static int vub300_probe(struct usb_interface *interface,
- 		 udev->descriptor.idVendor, udev->descriptor.idProduct,
- 		 manufacturer, product, serial_number);
- 	command_out_urb = usb_alloc_urb(0, GFP_KERNEL);
--	if (!command_out_urb) {
--		retval = -ENOMEM;
--		dev_err(&udev->dev, "not enough memory for command_out_urb\n");
--		goto error0;
--	}
- 	command_res_urb = usb_alloc_urb(0, GFP_KERNEL);
--	if (!command_res_urb) {
-+	if (!command_res_urb || !command_out_urb) {
- 		retval = -ENOMEM;
--		dev_err(&udev->dev, "not enough memory for command_res_urb\n");
--		goto error1;
-+		dev_err(&udev->dev, "not enough memory for command urbs\n");
-+		goto error0;
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index 5e57048..b576b70 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -167,10 +167,6 @@ static int sdio_bus_remove(struct device *dev)
+ 	struct sdio_func *func = dev_to_sdio_func(dev);
+ 	int ret = 0;
+ 
+-	/* Make sure card is powered before invoking ->remove() */
+-	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
+-		pm_runtime_get_sync(dev);
+-
+ 	drv->remove(func);
+ 
+ 	if (func->irq_handler) {
+@@ -181,10 +177,6 @@ static int sdio_bus_remove(struct device *dev)
+ 		sdio_release_host(func);
  	}
- 	/* this also allocates memory for our VUB300 mmc host device */
- 	mmc = mmc_alloc_host(sizeof(struct vub300_mmc_host), &udev->dev);
- 	if (!mmc) {
- 		retval = -ENOMEM;
- 		dev_err(&udev->dev, "not enough memory for the mmc_host\n");
--		goto error4;
-+		goto error0;
- 	}
- 	/* MMC core transfer sizes tunable parameters */
- 	mmc->caps = 0;
-@@ -2285,7 +2280,7 @@ static int vub300_probe(struct usb_interface *interface,
- 		dev_err(&vub300->udev->dev,
- 		    "Could not find two sets of bulk-in/out endpoint pairs\n");
- 		retval = -EINVAL;
--		goto error5;
-+		goto error1;
- 	}
- 	retval =
- 		usb_control_msg(vub300->udev, usb_rcvctrlpipe(vub300->udev, 0),
-@@ -2294,14 +2289,14 @@ static int vub300_probe(struct usb_interface *interface,
- 				0x0000, 0x0000, &vub300->hc_info,
- 				sizeof(vub300->hc_info), HZ);
- 	if (retval < 0)
--		goto error5;
-+		goto error1;
- 	retval =
- 		usb_control_msg(vub300->udev, usb_rcvctrlpipe(vub300->udev, 0),
- 				SET_ROM_WAIT_STATES,
- 				USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
- 				firmware_rom_wait_states, 0x0000, NULL, 0, HZ);
- 	if (retval < 0)
--		goto error5;
-+		goto error1;
- 	dev_info(&vub300->udev->dev,
- 		 "operating_mode = %s %s %d MHz %s %d byte USB packets\n",
- 		 (mmc->caps & MMC_CAP_SDIO_IRQ) ? "IRQs" : "POLL",
-@@ -2316,14 +2311,14 @@ static int vub300_probe(struct usb_interface *interface,
- 				0x0000, 0x0000, &vub300->system_port_status,
- 				sizeof(vub300->system_port_status), HZ);
- 	if (retval < 0) {
--		goto error4;
-+		goto error0;
- 	} else if (sizeof(vub300->system_port_status) == retval) {
- 		vub300->card_present =
- 			(0x0001 & vub300->system_port_status.port_flags) ? 1 : 0;
- 		vub300->read_only =
- 			(0x0010 & vub300->system_port_status.port_flags) ? 1 : 0;
- 	} else {
--		goto error4;
-+		goto error0;
- 	}
- 	usb_set_intfdata(interface, vub300);
- 	INIT_DELAYED_WORK(&vub300->pollwork, vub300_pollwork_thread);
-@@ -2351,17 +2346,15 @@ static int vub300_probe(struct usb_interface *interface,
- 			 interface_to_InterfaceNumber(interface));
- 	mmc_add_host(mmc);
- 	return 0;
--error5:
-+error1:
- 	mmc_free_host(mmc);
- 	/*
- 	 * and hence also frees vub300
- 	 * which is contained at the end of struct mmc
- 	 */
--error4:
-+error0:
- 	usb_free_urb(command_res_urb);
--error1:
- 	usb_free_urb(command_out_urb);
--error0:
- 	usb_put_dev(udev);
- 	return retval;
- }
+ 
+-	/* First, undo the increment made directly above */
+-	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
+-		pm_runtime_put_noidle(dev);
+-
+ 	/* Then undo the runtime PM settings in sdio_bus_probe() */
+ 	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
+ 		pm_runtime_put_sync(dev);
 -- 
-1.7.1
+1.7.0.4
 
 
--- 
-Jesper Juhl <jj@chaosbits.net>       http://www.chaosbits.net/
-Don't top-post http://www.catb.org/jargon/html/T/top-post.html
-Plain text mails only, please.
 
