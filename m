@@ -1,81 +1,85 @@
-From: Konstantin Dorfman <kdorfman@codeaurora.org>
-Subject: Re: [PATCH] mmc: queue: exclude asynchronous transfer for special
- request
-Date: Thu, 20 Dec 2012 16:52:47 +0200
-Message-ID: <50D3263F.6050407@codeaurora.org>
-References: <003c01cdde9c$95883ad0$c098b070$%jun@samsung.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [PATCH] mmc:core:if detect mmc card remove,don't wait for req done
+Date: Thu, 20 Dec 2012 07:49:18 -0800
+Message-ID: <CA+55aFxbE9G+2NdA_8s1vyjrkNE5mBdYZ5Cy9tYr4AJOdvdivg@mail.gmail.com>
+References: <034FBC2C8CCA484FBA5BA5FC707AC8303AD02F0D1E@EXMB02.eu.tieto.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:11490 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751133Ab2LTOwv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Dec 2012 09:52:51 -0500
-In-Reply-To: <003c01cdde9c$95883ad0$c098b070$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/mixed; boundary=047d7bfcf91ab3634104d14aada3
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <034FBC2C8CCA484FBA5BA5FC707AC8303AD02F0D1E@EXMB02.eu.tieto.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: zhenpeng.qian@tieto.com, Chris Ball <cjb@laptop.org>
+Cc: Greg KH <gregkh@suse.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Driver Project <devel@linuxdriverproject.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Per Forlin' <per.forlin@linaro.org>
 
-Hello Jeon,
+--047d7bfcf91ab3634104d14aada3
+Content-Type: text/plain; charset=ISO-8859-1
 
+Hi,
 
-On 12/20/2012 12:27 PM, Seungwon Jeon wrote:
-> Unlike normal r/w request, special requests(discard, flush)
-> is finished with a one-time issue_fn. Request change to
-> mqrq_prev makes unnecessary call.
+On Thu, Dec 20, 2012 at 1:32 AM,  <zhenpeng.qian@tieto.com> wrote:
 >
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> ---
->   drivers/mmc/card/queue.c |    8 ++++++++
->   1 files changed, 8 insertions(+), 0 deletions(-)
+>         I find a bug about mmc/core/core.c, and send you a patch which I fix
+> this bug.
 >
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index fadf52e..a71db7a 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -58,6 +58,7 @@ static int mmc_queue_thread(void *d)
->   	do {
->   		struct request *req = NULL;
->   		struct mmc_queue_req *tmp;
-> +		unsigned int cmd_flags = 0;
+>         In fact, the bug is a low probability of occurrence.
 >
->   		spin_lock_irq(q->queue_lock);
->   		set_current_state(TASK_INTERRUPTIBLE);
-> @@ -67,12 +68,19 @@ static int mmc_queue_thread(void *d)
->
->   		if (req || mq->mqrq_prev->req) {
->   			set_current_state(TASK_RUNNING);
-> +			cmd_flags = req ? req->cmd_flags : 0;
->   			mq->issue_fn(mq, req);
->
->   			/*
->   			 * Current request becomes previous request
->   			 * and vice versa.
-> +			 * In case of special requests, current request
-> +			 * has been finished. Do not remain it to previous
-> +			 * request.
->   			 */
-> +			if (cmd_flags & REQ_DISCARD || cmd_flags & REQ_FLUSH)
-> +				mq->mqrq_cur->req = NULL;
-> +
->   			mq->mqrq_prev->brq.mrq.data = NULL;
->   			mq->mqrq_prev->req = NULL;
->   			tmp = mq->mqrq_prev;
->
-It is better to define control mask, REQ_CONTROL_MASK, which will
-include all control/special requests.
+>         Hope you help me to analyze it and discuss with me.
 
-Then, when additional request will be added, there will be no need to
-change here, only update the mask.
+I've added the proper people - Chris Ball and linux-mmc - to the
+participants list.
 
-Another option - to clean mq->mqrq_cur->req immediately after executing
-a special request in mmc_blk_issue_rq().
+I also wanted to check with you: the commit message implies that this
+can cause an IO timeout and then a call to
+msmsdcc_start_command_deferred() with a NULL cmd->mrq. Which I assume
+results in a NULL pointer dereference and Oops, but that wasn't
+spelled out.
 
+Chris, please give it a look, and perhaps edit the commit message a bit.
 
--- 
-Konstantin Dorfman,
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center,
-Inc. is a member of Code Aurora Forum,
-hosted by The Linux Foundation
+                     Linus
+
+--047d7bfcf91ab3634104d14aada3
+Content-Type: application/octet-stream; name="0001-mmc-core.patch"
+Content-Disposition: attachment; filename="0001-mmc-core.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_hay2ajo01
+
+RnJvbSAwYWNiNjhkNWI3ZDA3OThlZmMzOTMyYjQwNTc3NjhkMGQ3MmRiZDBmIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBaaGVucGVuZyBRaWFuIDx6aGVucGVuZy5xaWFuQHRpZXRvLmNv
+bT4KRGF0ZTogVGh1LCAyMCBEZWMgMjAxMiAxNjoyMDoxMiArMDgwMApTdWJqZWN0OiBbUEFUQ0hd
+IG1tYzpjb3JlOmlmIGRldGVjdCBtbWMgY2FyZCByZW1vdmUsZG9uJ3Qgd2FpdCBmb3IgcmVxIGRv
+bmUKCmZ1bmN0aW9uIG1tY193YWl0X2Zvcl9yZXEgY2FsbCBfX21tY19zdGFydF9yZXEsaWYgZGV0
+ZWN0IG1tYyBjYXJkIHJlbW92ZQosaXQgd2lsbCByZXR1cm4gLUVOT01FRElVTSBhbmQgZG9uJ3Qg
+d2FpdCBmb3IgcmVxIGRvbmUuICBJbiB0aGlzIHdheSxpdApjYW4gcmVkdWNlIGlvX3NjaGVkdWxl
+IG9uY2UuCgpBbmQgaWYgaW9fc2NoZWR1bGUgdGltZW91dCBhbmQgY2hlY2sgbW1jX2NhcmRfcmVt
+b3ZlIGZhaWwsaXQgd2lsbCBjYWxsCmhvc3QtPm9wcy0+cmVxdWVzdCwoc29tZXRpbWVzIGl0IG1h
+eSBvY2N1ciBieSBpbnNtb2QgYW5kIHJtbW9kIGZhc3QpLCBpdAp3aWxsIGNhbGwgbXNtc2RjY19z
+dGFydF9jb21tYW5kX2RlZmVycmVkIGZpbmFsbHkgLCBhbmQgY21kLT5tcnEgaXMgTlVMTCwKaXQg
+aXMgaW5pdCBpbiBtbWNfc3RhcnRfcmVxdWVzdC4gCgoxMCBbPGMwNmU4NDU4Pl0gKF9fZGFidF9z
+dmMpIGZyb20gWzxjMDRjOGMyYz5dCjExIFs8YzA0YzhhNDQ+XSAobXNtc2RjY19zdGFydF9jb21t
+YW5kX2RlZmVycmVkKSBmcm9tIFs8YzA0YzhjMmM+XQoxMiBbPGMwNGM4YzJjPl0gKG1zbXNkY2Nf
+c3RhcnRfY29tbWFuZCkgZnJvbSBbPGMwNGQxNDI4Pl0KMTMgWzxjMDRkMTQyOD5dIChtc21zZGNj
+X3JlcXVlc3QpIGZyb20gWzxjMDRiN2M4MD5dCjE0IFs8YzA0YjdjODA+XSAobW1jX3dhaXRfZm9y
+X3JlcV9kb25lKSBmcm9tIFs8YzA0Yjg2MzA+XQoxNSBbPGMwNGI4NjMwPl0gKG1tY193YWl0X2Zv
+cl9jbWQpIGZyb20gWzxjMDRjNDk4MD5dCjE2IFs8YzA0YzQ5ODA+XSAoZ2V0X2NhcmRfc3RhdHVz
+KSBmcm9tIFs8YzA0YzUzMzg+XQoxNyBbPGMwNGM1MzM4Pl0gKG1tY19ibGtfZXJyX2NoZWNrKSBm
+cm9tIFs8YzA0YjhhNzg+XQoxOCBbPGMwNGI4YTc4Pl0gKG1tY19zdGFydF9yZXEpIGZyb20gWzxj
+MDRjNjAyMD5dCjE5IFs8YzA0YzYwMjA+XSAobW1jX2Jsa19pc3N1ZV9yd19ycSkgZnJvbSBbPGMw
+NGM2YTFjPl0KMjAgWzxjMDRjNmExYz5dIChtbWNfYmxrX2lzc3VlX3JxKSBmcm9tIFs8YzA0YzZj
+N2M+XQoyMSBbPGMwNGM2YzdjPl0gKG1tY19xdWV1ZV90aHJlYWQpIGZyb20gWzxjMDA5MWQ1ND5d
+CjIyIFs8YzAwOTFkNTQ+XSAoa3RocmVhZCkgZnJvbSBbPGMwMDBmMDI4Pl0KClNpZ25lZC1vZmYt
+Ynk6IFFpYW4gemhlbnBlbmcgPHpoZW5wZW5nLnFpYW5AdGlldG8uY29tPgotLS0KIGRyaXZlcnMv
+bW1jL2NvcmUvY29yZS5jIHwgNyArKysrKy0tCiAxIGZpbGUgY2hhbmdlZCwgNSBpbnNlcnRpb25z
+KCspLCAyIGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5j
+IGIvZHJpdmVycy9tbWMvY29yZS9jb3JlLmMKaW5kZXggYWFlZDc2OC4uZmFjMDE4YyAxMDA2NDQK
+LS0tIGEvZHJpdmVycy9tbWMvY29yZS9jb3JlLmMKKysrIGIvZHJpdmVycy9tbWMvY29yZS9jb3Jl
+LmMKQEAgLTQ3MCw4ICs0NzAsMTEgQEAgRVhQT1JUX1NZTUJPTChtbWNfc3RhcnRfcmVxKTsKICAq
+Lwogdm9pZCBtbWNfd2FpdF9mb3JfcmVxKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCwgc3RydWN0IG1t
+Y19yZXF1ZXN0ICptcnEpCiB7Ci0JX19tbWNfc3RhcnRfcmVxKGhvc3QsIG1ycSk7Ci0JbW1jX3dh
+aXRfZm9yX3JlcV9kb25lKGhvc3QsIG1ycSk7CisJaW50IGVycjsKKwllcnI9X19tbWNfc3RhcnRf
+cmVxKGhvc3QsIG1ycSk7CisJLyogaWYgZGV0ZWN0IG1tYyBjYXJkIHJlbW92ZSxkb24ndCB3YWl0
+IGZvciByZXEgZG9uZSovCisJaWYgKCFlcnIpCisJCW1tY193YWl0X2Zvcl9yZXFfZG9uZShob3N0
+LCBtcnEpOwogfQogRVhQT1JUX1NZTUJPTChtbWNfd2FpdF9mb3JfcmVxKTsKIAotLSAKMS43LjEx
+LjMKCg==
+--047d7bfcf91ab3634104d14aada3--
