@@ -1,149 +1,177 @@
 From: Kevin Liu <kliu5@marvell.com>
-Subject: [PATCH 1/2] mmc: sdhci: add pm runtime protection
-Date: Thu, 20 Dec 2012 19:11:26 +0800
-Message-ID: <1356001887-31793-1-git-send-email-kliu5@marvell.com>
+Subject: [PATCH 2/2] mmc: sdhci-pxav3: add pm runtime support
+Date: Thu, 20 Dec 2012 19:11:27 +0800
+Message-ID: <1356001887-31793-2-git-send-email-kliu5@marvell.com>
+References: <1356001887-31793-1-git-send-email-kliu5@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog118.obsmtp.com ([74.125.149.244]:33844 "EHLO
-	na3sys009aog118.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751775Ab2LTLMf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Dec 2012 06:12:35 -0500
+Received: from na3sys009aog117.obsmtp.com ([74.125.149.242]:45691 "EHLO
+	na3sys009aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752110Ab2LTLMh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Dec 2012 06:12:37 -0500
+In-Reply-To: <1356001887-31793-1-git-send-email-kliu5@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 Cc: Philip Rakity <prakity@nvidia.com>, Aaron Lu <aaron.lu@amd.com>, Shawn Guo <shawn.guo@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Adrian Hunter <adrian.hunter@intel.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Alexander Stein <alexander.stein@systec-electronic.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Al Cooper <acooper@gmail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>Cha
 
-Added pm runtime protection for suspend/resume and add/remove functions.
-When these functions called, pm runtime may have suspended.
-
 Signed-off-by: Jialing Fu <jlfu@marvell.com>
 Signed-off-by: Kevin Liu <kliu5@marvell.com>
 ---
- drivers/mmc/host/sdhci.c |   22 ++++++++++++++++++----
- 1 files changed, 18 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-pxav3.c |   89 ++++++++++++++++++++++++++++++++++++++-
+ 1 files changed, 86 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 6f0bfc0..ec7da59 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2460,6 +2460,7 @@ int sdhci_suspend_host(struct sdhci_host *host)
- {
- 	int ret;
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index fad0966..ba3a524 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -32,10 +32,15 @@
+ #include <linux/of.h>
+ #include <linux/of_device.h>
+ #include <linux/of_gpio.h>
++#include <linux/pm.h>
++#include <linux/pm_runtime.h>
++#include <plat/pm.h>
  
-+	sdhci_runtime_pm_get(host);
- 	if (host->ops->platform_suspend)
- 		host->ops->platform_suspend(host);
+ #include "sdhci.h"
+ #include "sdhci-pltfm.h"
  
-@@ -2480,12 +2481,13 @@ int sdhci_suspend_host(struct sdhci_host *host)
- 		}
- 
- 		sdhci_enable_card_detection(host);
++#define PXAV3_RPM_DELAY_MS     50
++
+ #define SD_CLOCK_BURST_SIZE_SETUP		0x10A
+ #define SDCLK_SEL	0x100
+ #define SDCLK_DELAY_SHIFT	9
+@@ -253,8 +258,9 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 		goto err_clk_get;
+ 	}
+ 	pltfm_host->clk = clk;
++#ifndef CONFIG_PM_RUNTIME
+ 	clk_prepare_enable(clk);
 -
-+		sdhci_runtime_pm_put(host);
- 		return ret;
++#endif
+ 	host->quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
+ 		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
+ 		| SDHCI_QUIRK_32BIT_ADMA_SIZE
+@@ -303,9 +309,17 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 
+ 	sdhci_get_of_property(pdev);
+ 
++	pm_runtime_enable(&pdev->dev);
++	pm_runtime_set_autosuspend_delay(&pdev->dev,
++			PXAV3_RPM_DELAY_MS);
++	pm_runtime_use_autosuspend(&pdev->dev);
++	pm_suspend_ignore_children(&pdev->dev, 1);
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "failed to add host\n");
++		pm_runtime_forbid(&pdev->dev);
++		pm_runtime_get_noresume(&pdev->dev);
+ 		goto err_add_host;
  	}
  
- 	free_irq(host->irq, host);
- 
-+	sdhci_runtime_pm_put(host);
- 	return ret;
- }
- 
-@@ -2495,6 +2497,7 @@ int sdhci_resume_host(struct sdhci_host *host)
- {
- 	int ret;
- 
-+	sdhci_runtime_pm_get(host);
- 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
- 		if (host->ops->enable_dma)
- 			host->ops->enable_dma(host);
-@@ -2502,8 +2505,10 @@ int sdhci_resume_host(struct sdhci_host *host)
- 
- 	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
- 			  mmc_hostname(host->mmc), host);
--	if (ret)
-+	if (ret) {
-+		sdhci_runtime_pm_put(host);
- 		return ret;
-+	}
- 
- 	if ((host->mmc->pm_flags & MMC_PM_KEEP_POWER) &&
- 	    (host->quirks2 & SDHCI_QUIRK2_HOST_OFF_CARD_ON)) {
-@@ -2527,6 +2532,7 @@ int sdhci_resume_host(struct sdhci_host *host)
- 	if (host->flags & SDHCI_USING_RETUNING_TIMER)
- 		host->flags |= SDHCI_NEEDS_RETUNING;
- 
-+	sdhci_runtime_pm_put(host);
- 	return ret;
- }
- 
-@@ -2664,6 +2670,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (host == NULL)
- 		return -EINVAL;
- 
-+	sdhci_runtime_pm_get(host);
- 	mmc = host->mmc;
- 
- 	if (debug_quirks)
-@@ -2766,6 +2773,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 		if (!host->ops->get_max_clock) {
- 			pr_err("%s: Hardware doesn't specify base clock "
- 			       "frequency.\n", mmc_hostname(mmc));
-+			sdhci_runtime_pm_put(host);
- 			return -ENODEV;
- 		}
- 		host->max_clk = host->ops->get_max_clock(host);
-@@ -2812,6 +2820,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
- 			pr_err("%s: Hardware doesn't specify timeout clock "
- 			       "frequency.\n", mmc_hostname(mmc));
-+			sdhci_runtime_pm_put(host);
- 			return -ENODEV;
- 		}
- 	}
-@@ -3015,6 +3024,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (mmc->ocr_avail == 0) {
- 		pr_err("%s: Hardware doesn't report any "
- 			"support voltages.\n", mmc_hostname(mmc));
-+		sdhci_runtime_pm_put(host);
- 		return -ENODEV;
- 	}
- 
-@@ -3133,7 +3143,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 		(host->flags & SDHCI_USE_SDMA) ? "DMA" : "PIO");
- 
- 	sdhci_enable_card_detection(host);
--
-+	sdhci_runtime_pm_put(host);
+@@ -314,7 +328,9 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
  	return 0;
  
- #ifdef SDHCI_USE_LEDS_CLASS
-@@ -3144,7 +3154,7 @@ reset:
- untasklet:
- 	tasklet_kill(&host->card_tasklet);
- 	tasklet_kill(&host->finish_tasklet);
+ err_add_host:
++#ifndef CONFIG_PM_RUNTIME
+ 	clk_disable_unprepare(clk);
++#endif
+ 	clk_put(clk);
+ 	mmc_gpio_free_cd(host->mmc);
+ err_cd_req:
+@@ -332,8 +348,10 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
+ 	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
+ 
+ 	sdhci_remove_host(host, 1);
 -
-+	sdhci_runtime_pm_put(host);
- 	return ret;
++	pm_runtime_disable(&pdev->dev);
++#ifndef CONFIG_PM_RUNTIME
+ 	clk_disable_unprepare(pltfm_host->clk);
++#endif
+ 	clk_put(pltfm_host->clk);
+ 
+ 	if (gpio_is_valid(pdata->ext_cd_gpio))
+@@ -347,6 +365,71 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
+ 	return 0;
  }
  
-@@ -3154,6 +3164,8 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- {
- 	unsigned long flags;
- 
-+	sdhci_runtime_pm_get(host);
++#ifdef CONFIG_PM_SLEEP
++static int sdhci_pxav3_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
 +
- 	if (dead) {
- 		spin_lock_irqsave(&host->lock, flags);
- 
-@@ -3203,6 +3215,8 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 
- 	host->adma_desc = NULL;
- 	host->align_buffer = NULL;
++	return sdhci_suspend_host(host);
++}
 +
-+	sdhci_runtime_pm_put(host);
- }
- 
- EXPORT_SYMBOL_GPL(sdhci_remove_host);
++static int sdhci_pxav3_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++
++	return sdhci_resume_host(host);
++}
++#endif
++
++#ifdef CONFIG_PM_RUNTIME
++static int sdhci_pxav3_runtime_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	unsigned long flags;
++
++	if (pltfm_host->clk) {
++		spin_lock_irqsave(&host->lock, flags);
++		host->runtime_suspended = true;
++		spin_unlock_irqrestore(&host->lock, flags);
++
++		clk_disable_unprepare(pltfm_host->clk);
++	}
++
++	return 0;
++}
++
++static int sdhci_pxav3_runtime_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	unsigned long flags;
++
++	if (pltfm_host->clk) {
++		clk_prepare_enable(pltfm_host->clk);
++
++		spin_lock_irqsave(&host->lock, flags);
++		host->runtime_suspended = false;
++		spin_unlock_irqrestore(&host->lock, flags);
++	}
++
++	return 0;
++}
++#endif
++
++#ifdef CONFIG_PM
++static const struct dev_pm_ops sdhci_pxav3_pmops = {
++	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pxav3_suspend, sdhci_pxav3_resume)
++	SET_RUNTIME_PM_OPS(sdhci_pxav3_runtime_suspend,
++		sdhci_pxav3_runtime_resume, NULL)
++};
++
++#define SDHCI_PXAV3_PMOPS (&sdhci_pxav3_pmops)
++
++#else
++#define SDHCI_PXAV3_PMOPS NULL
++#endif
++
+ static struct platform_driver sdhci_pxav3_driver = {
+ 	.driver		= {
+ 		.name	= "sdhci-pxav3",
+@@ -354,7 +437,7 @@ static struct platform_driver sdhci_pxav3_driver = {
+ 		.of_match_table = sdhci_pxav3_of_match,
+ #endif
+ 		.owner	= THIS_MODULE,
+-		.pm	= SDHCI_PLTFM_PMOPS,
++		.pm	= SDHCI_PXAV3_PMOPS,
+ 	},
+ 	.probe		= sdhci_pxav3_probe,
+ 	.remove		= sdhci_pxav3_remove,
 -- 
 1.7.0.4
 
