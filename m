@@ -1,66 +1,85 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH 7/7] MFD:rtsx: Fix checkpatch warning
-Date: Mon, 24 Dec 2012 17:10:25 +0100
-Message-ID: <20121224161025.GF6702@liondog.tnic>
-References: <cover.1356319097.git.wei_wang@realsil.com.cn>
- <fd3b65dc90ea95d4e904885fe8eefff295450f2a.1356319097.git.wei_wang@realsil.com.cn>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 18/25] TMIO MMC: don't use [delayed_]work_pending()
+Date: Mon, 24 Dec 2012 23:31:05 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1212242314420.31888@axis700.grange>
+References: <1356141435-17340-1-git-send-email-tj@kernel.org>
+ <1356141435-17340-19-git-send-email-tj@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.skyhub.de ([78.46.96.112]:49932 "EHLO mail.skyhub.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752597Ab2LXQK3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 24 Dec 2012 11:10:29 -0500
-Content-Disposition: inline
-In-Reply-To: <fd3b65dc90ea95d4e904885fe8eefff295450f2a.1356319097.git.wei_wang@realsil.com.cn>
+Received: from moutng.kundenserver.de ([212.227.17.8]:55952 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753341Ab2LXWb2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Dec 2012 17:31:28 -0500
+In-Reply-To: <1356141435-17340-19-git-send-email-tj@kernel.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: wei_wang@realsil.com.cn
-Cc: cjb@laptop.org, sameo@linux.intel.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com
+To: Tejun Heo <tj@kernel.org>
+Cc: linux-kernel@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
 
-On Mon, Dec 24, 2012 at 02:03:56PM +0800, wei_wang@realsil.com.cn wrote:
-> From: Wei WANG <wei_wang@realsil.com.cn>
+Hi Tejun
+
+On Fri, 21 Dec 2012, Tejun Heo wrote:
+
+> There's no need to test whether a (delayed) work item in pending
+> before queueing, flushing or cancelling it.  Most uses are unnecessary
+> and quite a few of them are buggy.
 > 
-> WARNING: Avoid CamelCase: <min_N>
-> +	u8 N, min_N, max_N, clk_divider;
+> Remove unnecessary pending tests from tmio mmc.  Only compile tested.
+
+Thanks for the patch. It looks good to me. What happens below is upon mmc 
+card detection IRQs, of which there are typically several due to pin 
+debouncing, a delayed work is scheduled to verify a possibly new card 
+state (plugged in or removed). So, the code below checks, that after the 
+first of those interrupts the work is already scheduled and doesn't 
+schedule it again. IIUC, this is indeed unneeded, since 
+queue_delayed_work_on() only has any effect if the work isn't queued yet. 
+Ah, there's a nitpick - you can remove one pair of parenthesis;-) 
+Otherwise, I guess, this is an
+
+Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+
+and Chris can take it (preferably, after the correction) via his queue. If 
+you give me a bit more time I can also test this, but it really looks 
+pretty obvious. Maybe Chris will prefer you to take this via your queue - 
+that's up to you two to decide.
+
+Thanks
+Guennadi
+
 > 
-> WARNING: Avoid CamelCase: <max_N>
-> +	u8 N, min_N, max_N, clk_divider;
-> 
-> Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
+> Signed-off-by: Tejun Heo <tj@kernel.org>
+> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> Cc: Ian Molton <ian@mnementh.co.uk>
+> Cc: linux-mmc@vger.kernel.org
 > ---
->  drivers/mfd/rtsx_pcr.c |   26 +++++++++++++-------------
->  1 file changed, 13 insertions(+), 13 deletions(-)
+> Please let me know how this patch should be routed.  I can take it
+> through the workqueue tree if necessary.
 > 
-> diff --git a/drivers/mfd/rtsx_pcr.c b/drivers/mfd/rtsx_pcr.c
-> index cc28f17..f843c73 100644
-> --- a/drivers/mfd/rtsx_pcr.c
-> +++ b/drivers/mfd/rtsx_pcr.c
-> @@ -590,7 +590,7 @@ int rtsx_pci_switch_clock(struct rtsx_pcr *pcr, unsigned int card_clock,
->  		u8 ssc_depth, bool initial_mode, bool double_clk, bool vpclk)
->  {
->  	int err, clk;
-> -	u8 N, min_N, max_N, clk_divider;
-> +	u8 n, min_n, max_n, clk_divider;
->  	u8 mcu_cnt, div, max_div;
->  	u8 depth[] = {
->  		[RTSX_SSC_DEPTH_4M] = SSC_DEPTH_4M,
-> @@ -615,8 +615,8 @@ int rtsx_pci_switch_clock(struct rtsx_pcr *pcr, unsigned int card_clock,
->  	card_clock /= 1000000;
->  	dev_dbg(&(pcr->pci->dev), "Switch card clock to %dMHz\n", card_clock);
->  
-> -	min_N = 80;
-> -	max_N = 208;
-> +	min_n = 80;
-> +	max_n = 208;
+> Thanks.
+> 
+>  drivers/mmc/host/tmio_mmc_pio.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index 50bf495..f4f18b3 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -573,8 +573,7 @@ static bool __tmio_mmc_card_detect_irq(struct tmio_mmc_host *host,
+>  		tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_CARD_INSERT |
+>  			TMIO_STAT_CARD_REMOVE);
+>  		if ((((ireg & TMIO_STAT_CARD_REMOVE) && mmc->card) ||
+> -		     ((ireg & TMIO_STAT_CARD_INSERT) && !mmc->card)) &&
+> -		    !work_pending(&mmc->detect.work))
+> +		     ((ireg & TMIO_STAT_CARD_INSERT) && !mmc->card)))
+>  			mmc_detect_change(host->mmc, msecs_to_jiffies(100));
+>  		return true;
+>  	}
+> -- 
+> 1.8.0.2
+> 
 
-Naked magic values? Maybe macro defines with descriptive names instead?
-
-Thanks.
-
--- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
