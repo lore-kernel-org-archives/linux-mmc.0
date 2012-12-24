@@ -1,56 +1,53 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH 3/7] MFD:rtsx: Declare that the DMA address limitation is
- 32bit explicitly
-Date: Mon, 24 Dec 2012 14:08:01 +0100
-Message-ID: <20121224130801.GC6702@liondog.tnic>
-References: <cover.1356319097.git.wei_wang@realsil.com.cn>
- <af58804b4774b109fbd6022ce7cc8081990b3625.1356319097.git.wei_wang@realsil.com.cn>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+From: Maya Erez <merez@codeaurora.org>
+Subject: [PATCH v4 0/2] Add support for periodic BKOPS
+Date: Mon, 24 Dec 2012 15:51:06 +0200
+Message-ID: <1356357068-31807-1-git-send-email-merez@codeaurora.org>
+References: <n>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.skyhub.de ([78.46.96.112]:34536 "EHLO mail.skyhub.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752125Ab2LXNIH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 24 Dec 2012 08:08:07 -0500
-Content-Disposition: inline
-In-Reply-To: <af58804b4774b109fbd6022ce7cc8081990b3625.1356319097.git.wei_wang@realsil.com.cn>
+Received: from 212.199.104.198.static.012.net.il ([212.199.104.198]:5016 "EHLO
+	lx-merez.qi.qualcomm.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752552Ab2LXNvS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Dec 2012 08:51:18 -0500
+In-Reply-To: <n>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: wei_wang@realsil.com.cn
-Cc: cjb@laptop.org, sameo@linux.intel.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>
 
-On Mon, Dec 24, 2012 at 02:03:30PM +0800, wei_wang@realsil.com.cn wrote:
-> From: Wei WANG <wei_wang@realsil.com.cn>
-> 
-> Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
-> ---
->  drivers/mfd/rtsx_pcr.c |    4 ++++
->  1 file changed, 4 insertions(+)
-> 
-> diff --git a/drivers/mfd/rtsx_pcr.c b/drivers/mfd/rtsx_pcr.c
-> index fa2c2bc..2ee6be5 100644
-> --- a/drivers/mfd/rtsx_pcr.c
-> +++ b/drivers/mfd/rtsx_pcr.c
-> @@ -1084,6 +1084,10 @@ static int __devinit rtsx_pci_probe(struct pci_dev *pcidev,
->  	pci_set_master(pcidev);
->  	synchronize_irq(pcr->irq);
->  
-> +	ret = pci_set_dma_mask(pcidev, DMA_BIT_MASK(32));
-> +	if (ret < 0)
-> +		goto disable_irq;
+This patch is based on the periodic BKOPS implementation in version 8 of "support BKOPS feature for eMMC" patch.
+The patch was modified to answer the following issues:
+- Since mmc_start_bkops is called from two contexts now, mmc_claim_host was moved to the beginning of the function
+- Also, the check of doing_bkops should be protected when determing if an HPI is needed due to the same reason.
 
-This piece is deep down in rtsx_pci_probe() and if it fails, the _probe
-function has do to all the error unwinding on the error path. Why not
-push it up before the pci_enable_device(pcidev) call so in case it
-fails, you can save yourself all the needless unwinding?
+Changes in v4:
+    - Separate the polling for BKOPS completion to a different patch
+    - add a flag to indicate if polling for card completion is required
 
-Oh, and ditto here, commit message is missing.
+Changes in v3:
+    - Move the call to stop_bkops to block.c. 
+      This allows us to remove the mmc_claim_host from inside the function and doesn't cause additional degradation 
+      due to un-neccessary calim host operation
 
-Thanks.
+Changes in v2:
+    - Check the number of written / discarded sectors as the trigger for checking the BKOPS need.
+    - Code review fixes
+
+Maya Erez (2):
+  mmc: core: Add support for idle time BKOPS
+  mmc: allow the host controller to poll for BKOPS completion
+
+ drivers/mmc/card/block.c |    8 ++-
+ drivers/mmc/card/queue.c |    2 +
+ drivers/mmc/core/core.c  |  189 +++++++++++++++++++++++++++++++++++++++++++---
+ drivers/mmc/core/mmc.c   |   22 ++++++
+ include/linux/mmc/card.h |   31 ++++++++
+ include/linux/mmc/core.h |    3 +
+ include/linux/mmc/host.h |    1 +
+ 7 files changed, 245 insertions(+), 11 deletions(-)
 
 -- 
-Regards/Gruss,
-    Boris.
+1.7.3.3
+-- 
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
+of Code Aurora Forum, hosted by The Linux Foundation
 
-Sent from a fat crate under my desk. Formatting is fine.
---
