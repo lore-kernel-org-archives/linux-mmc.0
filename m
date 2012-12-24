@@ -1,41 +1,51 @@
-From: Kevin Liu <kliu5@marvell.com>
-Subject: [PATCH v2 3/3] mmc: sdhci-pxav3: add wake up support
-Date: Mon, 24 Dec 2012 17:46:41 +0800
-Message-ID: <1356342401-26973-1-git-send-email-kliu5@marvell.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH 2/7] MFD:rtsx: Remove redundant code
+Date: Mon, 24 Dec 2012 11:11:34 +0100
+Message-ID: <20121224101134.GB6702@liondog.tnic>
+References: <cover.1356319097.git.wei_wang@realsil.com.cn>
+ <19e2c741f89b80b9d1640ff00902b1cc3f76a171.1356319097.git.wei_wang@realsil.com.cn>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog112.obsmtp.com ([74.125.149.207]:38359 "EHLO
-	na3sys009aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752999Ab2LXJs0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Dec 2012 04:48:26 -0500
+Received: from mail.skyhub.de ([78.46.96.112]:55174 "EHLO mail.skyhub.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752841Ab2LXKLg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 24 Dec 2012 05:11:36 -0500
+Content-Disposition: inline
+In-Reply-To: <19e2c741f89b80b9d1640ff00902b1cc3f76a171.1356319097.git.wei_wang@realsil.com.cn>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Philip Rakity <prakity@nvidia.com>, Aaron Lu <aaron.lu@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Adrian Hunter <adrian.hunter@intel.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Alexander Stein <alexander.stein@systec-electronic.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, key
+To: wei_wang@realsil.com.cn
+Cc: cjb@laptop.org, sameo@linux.intel.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com
 
-Signed-off-by: Jialing Fu <jlfu@marvell.com>
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
----
- drivers/mmc/host/sdhci-pxav3.c |    7 +++++++
- 1 files changed, 7 insertions(+), 0 deletions(-)
+On Mon, Dec 24, 2012 at 02:03:24PM +0800, wei_wang@realsil.com.cn wrote:
+> From: Wei WANG <wei_wang@realsil.com.cn>
+> 
+> Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
+> ---
+>  drivers/mfd/rtsx_pcr.c |    1 -
+>  1 file changed, 1 deletion(-)
+> 
+> diff --git a/drivers/mfd/rtsx_pcr.c b/drivers/mfd/rtsx_pcr.c
+> index 3a44efa..fa2c2bc 100644
+> --- a/drivers/mfd/rtsx_pcr.c
+> +++ b/drivers/mfd/rtsx_pcr.c
+> @@ -325,7 +325,6 @@ static void rtsx_pci_add_sg_tbl(struct rtsx_pcr *pcr,
+>  	val = ((u64)addr << 32) | ((u64)len << 12) | option;
+>  
+>  	put_unaligned_le64(val, ptr);
+> -	ptr++;
+>  	pcr->sgi++;
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index b4aca81..ff06aff 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -325,6 +325,13 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 
- 	platform_set_drvdata(pdev, host);
- 
-+	if (pdata->pm_caps & MMC_PM_KEEP_POWER) {
-+		device_init_wakeup(&pdev->dev, 1);
-+		host->mmc->pm_flags |= MMC_PM_WAKE_SDIO_IRQ;
-+	} else {
-+		device_init_wakeup(&pdev->dev, 0);
-+	}
-+
- 	pm_runtime_put_autosuspend(&pdev->dev);
- 
- 	return 0;
+Hmm, one has to look at the whole function to understand that the ptr++
+statement is actually useless. A sentence or two as a the commit message
+wouldn't hurt, IMHO.
+
+Thanks.
+
 -- 
-1.7.0.4
+Regards/Gruss,
+    Boris.
 
+Sent from a fat crate under my desk. Formatting is fine.
+--
