@@ -1,36 +1,43 @@
 From: <wei_wang@realsil.com.cn>
-Subject: [PATCH v2 0/8] rtsx patchset for MFD and MMC tree
-Date: Tue, 25 Dec 2012 10:42:53 +0800
-Message-ID: <cover.1356403281.git.wei_wang@realsil.com.cn>
+Subject: [PATCH v2 1/8] MFD:rtsx: Fix typo in comment
+Date: Tue, 25 Dec 2012 10:42:58 +0800
+Message-ID: <96e414124cedf14c9783acbf6579f6ce357da2d1.1356403281.git.wei_wang@realsil.com.cn>
+References: <cover.1356403281.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from rtits2.realtek.com ([60.250.210.242]:34950 "EHLO
+	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753385Ab2LYCng (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Dec 2012 21:43:36 -0500
+In-Reply-To: <cover.1356403281.git.wei_wang@realsil.com.cn>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org, sameo@linux.intel.com
 Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com, bp@alien8.de, Wei WANG <wei_wang@realsil.com.cn>
-List-Id: linux-mmc@vger.kernel.org
 
 From: Wei WANG <wei_wang@realsil.com.cn>
 
-Wei WANG (8):
-  MFD:rtsx: Fix typo in comment
-  MFD:rtsx: Remove redundant code
-  MFD:rtsx: Declare that the DMA address limitation is 32bit explicitly
-  MFD:rtsx: Add callback function switch_output_voltage
-  MMC:rtsx: Using callback function to switch output voltage
-  MFD:rtsx: Add callback function conv_clk_and_div_n
-  MFD:rtsx: Fix checkpatch warning
-  MFD:rtsx: Use macro defines to replace some variables
+Fix a misspelling word in comment
 
- drivers/mfd/rtl8411.c             |   29 ++++++++++++++++++++++++
- drivers/mfd/rts5209.c             |   21 +++++++++++++++++
- drivers/mfd/rts5229.c             |   21 +++++++++++++++++
- drivers/mfd/rtsx_pcr.c            |   45 +++++++++++++++++++++++++------------
- drivers/mfd/rtsx_pcr.h            |    3 +++
- drivers/mmc/host/rtsx_pci_sdmmc.c |   30 +++++--------------------
- include/linux/mfd/rtsx_common.h   |    3 +++
- include/linux/mfd/rtsx_pci.h      |   27 +++++++++++++++++-----
- 8 files changed, 135 insertions(+), 44 deletions(-)
+Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
+---
+ include/linux/mfd/rtsx_pci.h |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx_pci.h
+index 060b721..bebe9f9 100644
+--- a/include/linux/mfd/rtsx_pci.h
++++ b/include/linux/mfd/rtsx_pci.h
+@@ -452,7 +452,7 @@
+ #define	SD_RSP_TYPE_R6			0x01
+ #define	SD_RSP_TYPE_R7			0x01
+ 
+-/* SD_CONFIURE3 */
++/* SD_CONFIGURE3 */
+ #define	SD_RSP_80CLK_TIMEOUT_EN		0x01
+ 
+ /* Card Transfer Reset Register */
 -- 
 1.7.9.5
+
