@@ -1,87 +1,93 @@
 From: <wei_wang@realsil.com.cn>
-Subject: [PATCH v2 5/8] MMC:rtsx: Using callback function to switch output voltage
-Date: Tue, 25 Dec 2012 10:43:22 +0800
-Message-ID: <3112fe2febb6164357f5d808668dd8571cf59683.1356403281.git.wei_wang@realsil.com.cn>
+Subject: [PATCH v2 8/8] MFD:rtsx: Use macro defines to replace some variables
+Date: Tue, 25 Dec 2012 10:43:40 +0800
+Message-ID: <9df15689e28b011b5401b09d0a9282d95171dab5.1356403281.git.wei_wang@realsil.com.cn>
 References: <cover.1356403281.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from rtits2.realtek.com ([60.250.210.242]:35012 "EHLO
+	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753633Ab2LYCoO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Dec 2012 21:44:14 -0500
 In-Reply-To: <cover.1356403281.git.wei_wang@realsil.com.cn>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org, sameo@linux.intel.com
 Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com, bp@alien8.de, Wei WANG <wei_wang@realsil.com.cn>
-List-Id: linux-mmc@vger.kernel.org
 
 From: Wei WANG <wei_wang@realsil.com.cn>
 
-Different card reader has different method to switch output voltage, so
-we have to use the callback function provided by MFD driver to switch
-output pad voltage.
+In function rtsx_pci_switch_clock, some variables, such as min_n, max_n,
+and max_div, are not necessary. And those assigned values look very
+obscure for others. It's more proper to use macro definitions here to
+replace these variables.
 
 Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
 ---
- drivers/mmc/host/rtsx_pci_sdmmc.c |   30 +++++-------------------------
- 1 file changed, 5 insertions(+), 25 deletions(-)
+ drivers/mfd/rtsx_pcr.c |   13 ++++---------
+ drivers/mfd/rtsx_pcr.h |    3 +++
+ 2 files changed, 7 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 571915d..f74b5ad 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -1060,26 +1060,6 @@ static int sd_wait_voltage_stable_2(struct realtek_pci_sdmmc *host)
- 	return 0;
- }
- 
--static int sd_change_bank_voltage(struct realtek_pci_sdmmc *host, u8 voltage)
--{
--	struct rtsx_pcr *pcr = host->pcr;
--	int err;
--
--	if (voltage == SD_IO_3V3) {
--		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4FC0 | 0x24);
--		if (err < 0)
--			return err;
--	} else if (voltage == SD_IO_1V8) {
--		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4C40 | 0x24);
--		if (err < 0)
--			return err;
--	} else {
--		return -EINVAL;
--	}
--
--	return 0;
--}
--
- static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+diff --git a/drivers/mfd/rtsx_pcr.c b/drivers/mfd/rtsx_pcr.c
+index 7632e7f..431a74c 100644
+--- a/drivers/mfd/rtsx_pcr.c
++++ b/drivers/mfd/rtsx_pcr.c
+@@ -590,8 +590,7 @@ int rtsx_pci_switch_clock(struct rtsx_pcr *pcr, unsigned int card_clock,
+ 		u8 ssc_depth, bool initial_mode, bool double_clk, bool vpclk)
  {
- 	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
-@@ -1098,11 +1078,11 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
- 	rtsx_pci_start_run(pcr);
+ 	int err, clk;
+-	u8 n, min_n, max_n, clk_divider;
+-	u8 mcu_cnt, div, max_div;
++	u8 n, clk_divider, mcu_cnt, div;
+ 	u8 depth[] = {
+ 		[RTSX_SSC_DEPTH_4M] = SSC_DEPTH_4M,
+ 		[RTSX_SSC_DEPTH_2M] = SSC_DEPTH_2M,
+@@ -615,10 +614,6 @@ int rtsx_pci_switch_clock(struct rtsx_pcr *pcr, unsigned int card_clock,
+ 	card_clock /= 1000000;
+ 	dev_dbg(&(pcr->pci->dev), "Switch card clock to %dMHz\n", card_clock);
  
- 	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)
--		voltage = SD_IO_3V3;
-+		voltage = OUTPUT_3V3;
+-	min_n = 80;
+-	max_n = 208;
+-	max_div = CLK_DIV_8;
+-
+ 	clk = card_clock;
+ 	if (!initial_mode && double_clk)
+ 		clk = card_clock * 2;
+@@ -633,16 +628,16 @@ int rtsx_pci_switch_clock(struct rtsx_pcr *pcr, unsigned int card_clock,
+ 		n = (u8)pcr->ops->conv_clk_and_div_n(clk, CLK_TO_DIV_N);
  	else
--		voltage = SD_IO_1V8;
-+		voltage = OUTPUT_1V8;
+ 		n = (u8)(clk - 2);
+-	if ((clk <= 2) || (n > max_n))
++	if ((clk <= 2) || (n > MAX_DIV_N_PCR))
+ 		return -EINVAL;
  
--	if (voltage == SD_IO_1V8) {
-+	if (voltage == OUTPUT_1V8) {
- 		err = rtsx_pci_write_register(pcr,
- 				SD30_DRIVE_SEL, 0x07, DRIVER_TYPE_B);
- 		if (err < 0)
-@@ -1113,11 +1093,11 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
- 			goto out;
- 	}
+ 	mcu_cnt = (u8)(125/clk + 3);
+ 	if (mcu_cnt > 15)
+ 		mcu_cnt = 15;
  
--	err = sd_change_bank_voltage(host, voltage);
-+	err = rtsx_pci_switch_output_voltage(pcr, voltage);
- 	if (err < 0)
- 		goto out;
+-	/* Make sure that the SSC clock div_n is equal or greater than min_n */
++	/* Make sure that the SSC clock div_n is not less than MIN_DIV_N_PCR */
+ 	div = CLK_DIV_1;
+-	while ((n < min_n) && (div < max_div)) {
++	while ((n < MIN_DIV_N_PCR) && (div < CLK_DIV_8)) {
+ 		if (pcr->ops->conv_clk_and_div_n) {
+ 			int dbl_clk = pcr->ops->conv_clk_and_div_n(n,
+ 					DIV_N_TO_CLK) * 2;
+diff --git a/drivers/mfd/rtsx_pcr.h b/drivers/mfd/rtsx_pcr.h
+index 12462c1..33c210b 100644
+--- a/drivers/mfd/rtsx_pcr.h
++++ b/drivers/mfd/rtsx_pcr.h
+@@ -25,6 +25,9 @@
  
--	if (voltage == SD_IO_1V8) {
-+	if (voltage == OUTPUT_1V8) {
- 		err = sd_wait_voltage_stable_2(host);
- 		if (err < 0)
- 			goto out;
+ #include <linux/mfd/rtsx_pci.h>
+ 
++#define MIN_DIV_N_PCR		80
++#define MAX_DIV_N_PCR		208
++
+ void rts5209_init_params(struct rtsx_pcr *pcr);
+ void rts5229_init_params(struct rtsx_pcr *pcr);
+ void rtl8411_init_params(struct rtsx_pcr *pcr);
 -- 
 1.7.9.5
+
