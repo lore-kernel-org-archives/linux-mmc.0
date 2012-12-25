@@ -1,85 +1,36 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 18/25] TMIO MMC: don't use [delayed_]work_pending()
-Date: Mon, 24 Dec 2012 23:31:05 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1212242314420.31888@axis700.grange>
-References: <1356141435-17340-1-git-send-email-tj@kernel.org>
- <1356141435-17340-19-git-send-email-tj@kernel.org>
+From: <wei_wang@realsil.com.cn>
+Subject: [PATCH v2 0/8] rtsx patchset for MFD and MMC tree
+Date: Tue, 25 Dec 2012 10:42:53 +0800
+Message-ID: <cover.1356403281.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:55952 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753341Ab2LXWb2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Dec 2012 17:31:28 -0500
-In-Reply-To: <1356141435-17340-19-git-send-email-tj@kernel.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: cjb@laptop.org, sameo@linux.intel.com
+Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com, bp@alien8.de, Wei WANG <wei_wang@realsil.com.cn>
 List-Id: linux-mmc@vger.kernel.org
-To: Tejun Heo <tj@kernel.org>
-Cc: linux-kernel@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
 
-Hi Tejun
+From: Wei WANG <wei_wang@realsil.com.cn>
 
-On Fri, 21 Dec 2012, Tejun Heo wrote:
+Wei WANG (8):
+  MFD:rtsx: Fix typo in comment
+  MFD:rtsx: Remove redundant code
+  MFD:rtsx: Declare that the DMA address limitation is 32bit explicitly
+  MFD:rtsx: Add callback function switch_output_voltage
+  MMC:rtsx: Using callback function to switch output voltage
+  MFD:rtsx: Add callback function conv_clk_and_div_n
+  MFD:rtsx: Fix checkpatch warning
+  MFD:rtsx: Use macro defines to replace some variables
 
-> There's no need to test whether a (delayed) work item in pending
-> before queueing, flushing or cancelling it.  Most uses are unnecessary
-> and quite a few of them are buggy.
-> 
-> Remove unnecessary pending tests from tmio mmc.  Only compile tested.
+ drivers/mfd/rtl8411.c             |   29 ++++++++++++++++++++++++
+ drivers/mfd/rts5209.c             |   21 +++++++++++++++++
+ drivers/mfd/rts5229.c             |   21 +++++++++++++++++
+ drivers/mfd/rtsx_pcr.c            |   45 +++++++++++++++++++++++++------------
+ drivers/mfd/rtsx_pcr.h            |    3 +++
+ drivers/mmc/host/rtsx_pci_sdmmc.c |   30 +++++--------------------
+ include/linux/mfd/rtsx_common.h   |    3 +++
+ include/linux/mfd/rtsx_pci.h      |   27 +++++++++++++++++-----
+ 8 files changed, 135 insertions(+), 44 deletions(-)
 
-Thanks for the patch. It looks good to me. What happens below is upon mmc 
-card detection IRQs, of which there are typically several due to pin 
-debouncing, a delayed work is scheduled to verify a possibly new card 
-state (plugged in or removed). So, the code below checks, that after the 
-first of those interrupts the work is already scheduled and doesn't 
-schedule it again. IIUC, this is indeed unneeded, since 
-queue_delayed_work_on() only has any effect if the work isn't queued yet. 
-Ah, there's a nitpick - you can remove one pair of parenthesis;-) 
-Otherwise, I guess, this is an
-
-Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-
-and Chris can take it (preferably, after the correction) via his queue. If 
-you give me a bit more time I can also test this, but it really looks 
-pretty obvious. Maybe Chris will prefer you to take this via your queue - 
-that's up to you two to decide.
-
-Thanks
-Guennadi
-
-> 
-> Signed-off-by: Tejun Heo <tj@kernel.org>
-> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> Cc: Ian Molton <ian@mnementh.co.uk>
-> Cc: linux-mmc@vger.kernel.org
-> ---
-> Please let me know how this patch should be routed.  I can take it
-> through the workqueue tree if necessary.
-> 
-> Thanks.
-> 
->  drivers/mmc/host/tmio_mmc_pio.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> index 50bf495..f4f18b3 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -573,8 +573,7 @@ static bool __tmio_mmc_card_detect_irq(struct tmio_mmc_host *host,
->  		tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_CARD_INSERT |
->  			TMIO_STAT_CARD_REMOVE);
->  		if ((((ireg & TMIO_STAT_CARD_REMOVE) && mmc->card) ||
-> -		     ((ireg & TMIO_STAT_CARD_INSERT) && !mmc->card)) &&
-> -		    !work_pending(&mmc->detect.work))
-> +		     ((ireg & TMIO_STAT_CARD_INSERT) && !mmc->card)))
->  			mmc_detect_change(host->mmc, msecs_to_jiffies(100));
->  		return true;
->  	}
-> -- 
-> 1.8.0.2
-> 
-
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+-- 
+1.7.9.5
