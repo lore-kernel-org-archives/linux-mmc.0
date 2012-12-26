@@ -1,106 +1,85 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 2/3] mmc: esdhc i.MX: Fix version register read
-Date: Tue, 25 Dec 2012 21:00:53 +0800
-Message-ID: <20121225130050.GD14088@S2101-09.ap.freescale.net>
-References: <1348471345-30785-1-git-send-email-s.hauer@pengutronix.de>
- <1348471345-30785-3-git-send-email-s.hauer@pengutronix.de>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH v2] mmc: queue: exclude asynchronous transfer for special
+ request
+Date: Wed, 26 Dec 2012 10:40:17 +0900
+Message-ID: <000701cde309$f5ed8fd0$e1c8af70$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe005.messaging.microsoft.com ([213.199.154.143]:5869
-	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752266Ab2LYNA4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Dec 2012 08:00:56 -0500
-Content-Disposition: inline
-In-Reply-To: <1348471345-30785-3-git-send-email-s.hauer@pengutronix.de>
+Received: from mailout2.samsung.com ([203.254.224.25]:45897 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752639Ab2LZBkU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Dec 2012 20:40:20 -0500
+Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MFM00KR17ANDXE0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 26 Dec 2012 10:40:18 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0MFM00KRV7B6IBG0@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 26 Dec 2012 10:40:18 +0900 (KST)
+References: 
+In-reply-to: 
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Eric =?iso-8859-1?Q?B=E9nard?= <eric@eukrea.com>, kernel@pengutronix.de
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Per Forlin' <per.forlin@linaro.org>, 'Konstantin Dorfman' <kdorfman@codeaurora.org>
 
-Hi Sascha,
+Unlike normal r/w request, special requests(discard, flush)
+is finished with a one-time issue_fn. Request change to
+mqrq_prev makes unnecessary call.
 
-On Mon, Sep 24, 2012 at 09:22:24AM +0200, Sascha Hauer wrote:
-> The i.MX ESDHC controller version register is a mess:
-> 
-> - i.MX25 has a v1 controller which identifies itself as v2
-> - i.MX6Q has a v3 controller which identifies itself as v4
-> - i.MX35,51,53 have v2 controllers which identify themselves correctly
-
-When looking at these a second time, I start doubting the statement
-about i.MX25.  Since i.MX25 is actually a newer SoC than i.MX35, it
-sounds unreasonable that i.MX35 runs a v2 controller while i.MX25 runs
-a v1.
-
-The confirmation from designer tells that i.MX25 runs a v2 controller
-too.  This also matches the statement of "SD Host Controller Standard
-Specification Version 2.0" listed in IMX25RM 23.1.1 Features chapter.
-You probably got the impression that i.MX25 has a v1 controller by
-reading the HOSTVER_SVN bit description.  While it says 0x00 - SD Host
-Specification Version 1.0, the register value is actually 0x01. 
-
-So the esdhc host version register indeed encodes the correct value
-for all i.MX SoCs except imx6q.  Thus, I prefer to replace the patch
-with the one below.
-
-Also I'm working on a big series to make esdhc driver more feature
-complete for imx6q, including 8bit support, so I would like to pick
-up your work from here.
-
-Shawn
-
----8<------
-
-[PATCH] mmc: sdhci-esdhc-imx: fix host version read
-
-When commit 95a2482 (mmc: sdhci-esdhc-imx: add basic imx6q usdhc
-support) works around host version issue on imx6q, it gets the
-register address fixup "reg ^= 2" lost for imx25/35/51/53 esdhc.
-Thus, the controller version on these SoCs is wrongly identified
-as v1 while it's actually v2.
-
-Add the address fixup back and take a different approach to correct
-imx6q host version, so that the host version read gets back to work
-for all SoCs.
-
-Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-Cc: <stable@vger.kernel.org>
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c |   19 +++++++++++--------
- 1 file changed, 11 insertions(+), 8 deletions(-)
+ drivers/mmc/card/queue.c |   10 ++++++++++
+ 1 files changed, 10 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index e07df81..b503113 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -237,15 +237,18 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index fadf52e..c7e8716 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -24,6 +24,8 @@
  
- static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
- {
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+ #define MMC_QUEUE_SUSPENDED	(1 << 0)
+ 
++#define MMC_REQ_SPECIAL_MASK	(REQ_DISCARD | REQ_FLUSH)
 +
- 	if (unlikely(reg == SDHCI_HOST_VERSION)) {
--		u16 val = readw(host->ioaddr + (reg ^ 2));
--		/*
--		 * uSDHC supports SDHCI v3.0, but it's encoded as value
--		 * 0x3 in host controller version register, which violates
--		 * SDHCI_SPEC_300 definition.  Work it around here.
--		 */
--		if ((val & SDHCI_SPEC_VER_MASK) == 3)
--			return --val;
-+		reg ^= 2;
-+		if (is_imx6q_usdhc(imx_data)) {
-+			/*
-+			 * The usdhc register returns a wrong host version.
-+			 * Correct it here.
-+			 */
-+			return SDHCI_SPEC_300;
-+		}
- 	}
+ /*
+  * Prepare a MMC request. This just filters out odd stuff.
+  */
+@@ -58,6 +60,7 @@ static int mmc_queue_thread(void *d)
+ 	do {
+ 		struct request *req = NULL;
+ 		struct mmc_queue_req *tmp;
++		unsigned int cmd_flags = 0;
  
- 	return readw(host->ioaddr + reg);
+ 		spin_lock_irq(q->queue_lock);
+ 		set_current_state(TASK_INTERRUPTIBLE);
+@@ -67,12 +70,19 @@ static int mmc_queue_thread(void *d)
+ 
+ 		if (req || mq->mqrq_prev->req) {
+ 			set_current_state(TASK_RUNNING);
++			cmd_flags = req ? req->cmd_flags : 0;
+ 			mq->issue_fn(mq, req);
+ 
+ 			/*
+ 			 * Current request becomes previous request
+ 			 * and vice versa.
++			 * In case of special requests, current request
++			 * has been finished. Do not remain it to previous
++			 * request.
+ 			 */
++			if (cmd_flags & MMC_REQ_SPECIAL_MASK)
++				mq->mqrq_cur->req = NULL;
++
+ 			mq->mqrq_prev->brq.mrq.data = NULL;
+ 			mq->mqrq_prev->req = NULL;
+ 			tmp = mq->mqrq_prev;
 -- 
-1.7.9.5
+1.7.0.4
 
 
