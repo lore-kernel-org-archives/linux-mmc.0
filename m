@@ -1,38 +1,92 @@
 From: <wei_wang@realsil.com.cn>
-Subject: [PATCH v3 2/8] MFD:rtsx: Remove redundant code
-Date: Fri, 28 Dec 2012 10:41:23 +0800
-Message-ID: <08bda2184701413431444c0e58219ace09c5d97b.1356662293.git.wei_wang@realsil.com.cn>
+Subject: [PATCH v3 5/8] MMC:rtsx: Using callback function to switch output voltage
+Date: Fri, 28 Dec 2012 10:41:40 +0800
+Message-ID: <e476d1ca39d478b533510581077f8f365227fa1a.1356662294.git.wei_wang@realsil.com.cn>
 References: <cover.1356662293.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from rtits2.realtek.com ([60.250.210.242]:47871 "EHLO
+	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753046Ab2L1CmM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Dec 2012 21:42:12 -0500
 In-Reply-To: <cover.1356662293.git.wei_wang@realsil.com.cn>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org, sameo@linux.intel.com
 Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com, bp@alien8.de, Wei WANG <wei_wang@realsil.com.cn>
-List-Id: linux-mmc@vger.kernel.org
 
 From: Wei WANG <wei_wang@realsil.com.cn>
 
-In function rtsx_pci_add_sg_tbl, the statement "ptr++" is useless.
+Different card reader has different method to switch output voltage, so
+we have to use the callback function provided by MFD driver to switch
+output pad voltage.
 
 Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
-Acked-by: Borislav Petkov <bp@alien8.de>
 ---
- drivers/mfd/rtsx_pcr.c |    1 -
- 1 file changed, 1 deletion(-)
+ drivers/mmc/host/rtsx_pci_sdmmc.c |   30 +++++-------------------------
+ 1 file changed, 5 insertions(+), 25 deletions(-)
 
-diff --git a/drivers/mfd/rtsx_pcr.c b/drivers/mfd/rtsx_pcr.c
-index 3a44efa..fa2c2bc 100644
---- a/drivers/mfd/rtsx_pcr.c
-+++ b/drivers/mfd/rtsx_pcr.c
-@@ -325,7 +325,6 @@ static void rtsx_pci_add_sg_tbl(struct rtsx_pcr *pcr,
- 	val = ((u64)addr << 32) | ((u64)len << 12) | option;
- 
- 	put_unaligned_le64(val, ptr);
--	ptr++;
- 	pcr->sgi++;
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index 571915d..f74b5ad 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -1060,26 +1060,6 @@ static int sd_wait_voltage_stable_2(struct realtek_pci_sdmmc *host)
+ 	return 0;
  }
  
+-static int sd_change_bank_voltage(struct realtek_pci_sdmmc *host, u8 voltage)
+-{
+-	struct rtsx_pcr *pcr = host->pcr;
+-	int err;
+-
+-	if (voltage == SD_IO_3V3) {
+-		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4FC0 | 0x24);
+-		if (err < 0)
+-			return err;
+-	} else if (voltage == SD_IO_1V8) {
+-		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4C40 | 0x24);
+-		if (err < 0)
+-			return err;
+-	} else {
+-		return -EINVAL;
+-	}
+-
+-	return 0;
+-}
+-
+ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
+@@ -1098,11 +1078,11 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	rtsx_pci_start_run(pcr);
+ 
+ 	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)
+-		voltage = SD_IO_3V3;
++		voltage = OUTPUT_3V3;
+ 	else
+-		voltage = SD_IO_1V8;
++		voltage = OUTPUT_1V8;
+ 
+-	if (voltage == SD_IO_1V8) {
++	if (voltage == OUTPUT_1V8) {
+ 		err = rtsx_pci_write_register(pcr,
+ 				SD30_DRIVE_SEL, 0x07, DRIVER_TYPE_B);
+ 		if (err < 0)
+@@ -1113,11 +1093,11 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			goto out;
+ 	}
+ 
+-	err = sd_change_bank_voltage(host, voltage);
++	err = rtsx_pci_switch_output_voltage(pcr, voltage);
+ 	if (err < 0)
+ 		goto out;
+ 
+-	if (voltage == SD_IO_1V8) {
++	if (voltage == OUTPUT_1V8) {
+ 		err = sd_wait_voltage_stable_2(host);
+ 		if (err < 0)
+ 			goto out;
 -- 
 1.7.9.5
+
