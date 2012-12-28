@@ -1,81 +1,41 @@
-From: Konstantin Dorfman <kdorfman@codeaurora.org>
-Subject: Re: [PATCH v2] mmc: queue: exclude asynchronous transfer for special
- request
-Date: Thu, 27 Dec 2012 15:21:16 +0200
-Message-ID: <50DC4B4C.8090805@codeaurora.org>
-References: <000701cde309$f5ed8fd0$e1c8af70$%jun@samsung.com>
+From: <wei_wang@realsil.com.cn>
+Subject: [PATCH v3 0/8] rtsx patchset for MFD and MMC tree
+Date: Fri, 28 Dec 2012 10:41:07 +0800
+Message-ID: <cover.1356662293.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:36733 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752216Ab2L0NVU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Dec 2012 08:21:20 -0500
-In-Reply-To: <000701cde309$f5ed8fd0$e1c8af70$%jun@samsung.com>
+Received: from rtits2.realtek.com ([60.250.210.242]:47837 "EHLO
+	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753046Ab2L1Clw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Dec 2012 21:41:52 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Per Forlin' <per.forlin@linaro.org>
+To: cjb@laptop.org, sameo@linux.intel.com
+Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com, bp@alien8.de, Wei WANG <wei_wang@realsil.com.cn>
 
-Reviewed-by: Konstantin Dorfman <kdorfman@codeaurora.org>
+From: Wei WANG <wei_wang@realsil.com.cn>
 
-On 12/26/2012 03:40 AM, Seungwon Jeon wrote:
-> Unlike normal r/w request, special requests(discard, flush)
-> is finished with a one-time issue_fn. Request change to
-> mqrq_prev makes unnecessary call.
->
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> ---
->   drivers/mmc/card/queue.c |   10 ++++++++++
->   1 files changed, 10 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index fadf52e..c7e8716 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -24,6 +24,8 @@
->
->   #define MMC_QUEUE_SUSPENDED	(1 << 0)
->
-> +#define MMC_REQ_SPECIAL_MASK	(REQ_DISCARD | REQ_FLUSH)
-> +
->   /*
->    * Prepare a MMC request. This just filters out odd stuff.
->    */
-> @@ -58,6 +60,7 @@ static int mmc_queue_thread(void *d)
->   	do {
->   		struct request *req = NULL;
->   		struct mmc_queue_req *tmp;
-> +		unsigned int cmd_flags = 0;
->
->   		spin_lock_irq(q->queue_lock);
->   		set_current_state(TASK_INTERRUPTIBLE);
-> @@ -67,12 +70,19 @@ static int mmc_queue_thread(void *d)
->
->   		if (req || mq->mqrq_prev->req) {
->   			set_current_state(TASK_RUNNING);
-> +			cmd_flags = req ? req->cmd_flags : 0;
->   			mq->issue_fn(mq, req);
->
->   			/*
->   			 * Current request becomes previous request
->   			 * and vice versa.
-> +			 * In case of special requests, current request
-> +			 * has been finished. Do not remain it to previous
-> +			 * request.
->   			 */
-> +			if (cmd_flags & MMC_REQ_SPECIAL_MASK)
-> +				mq->mqrq_cur->req = NULL;
-> +
->   			mq->mqrq_prev->brq.mrq.data = NULL;
->   			mq->mqrq_prev->req = NULL;
->   			tmp = mq->mqrq_prev;
->
+Wei WANG (8):
+  MFD:rtsx: Fix typo in comment
+  MFD:rtsx: Remove redundant code
+  MFD:rtsx: Declare that the DMA address limitation is 32bit explicitly
+  MFD:rtsx: Add callback function switch_output_voltage
+  MMC:rtsx: Using callback function to switch output voltage
+  MFD:rtsx: Add callback function conv_clk_and_div_n
+  MFD:rtsx: Fix checkpatch warning
+  MFD:rtsx: Use macro defines to replace some variables
 
+ drivers/mfd/rtl8411.c             |   29 ++++++++++++++++++++++++
+ drivers/mfd/rts5209.c             |   21 +++++++++++++++++
+ drivers/mfd/rts5229.c             |   21 +++++++++++++++++
+ drivers/mfd/rtsx_pcr.c            |   45 +++++++++++++++++++++++++------------
+ drivers/mfd/rtsx_pcr.h            |    3 +++
+ drivers/mmc/host/rtsx_pci_sdmmc.c |   30 +++++--------------------
+ include/linux/mfd/rtsx_common.h   |    3 +++
+ include/linux/mfd/rtsx_pci.h      |   27 +++++++++++++++++-----
+ 8 files changed, 135 insertions(+), 44 deletions(-)
 
 -- 
-Konstantin Dorfman,
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center,
-Inc. is a member of Code Aurora Forum,
-hosted by The Linux Foundation
+1.7.9.5
+
