@@ -1,7 +1,7 @@
 From: <wei_wang@realsil.com.cn>
-Subject: [PATCH v3 3/8] MFD:rtsx: Declare that the DMA address limitation is 32bit explicitly
-Date: Fri, 28 Dec 2012 10:41:28 +0800
-Message-ID: <cd92be49bee917165009311d62e10a5f60a85a48.1356662293.git.wei_wang@realsil.com.cn>
+Subject: [PATCH v3 8/8] MFD:rtsx: Use macro defines to replace some variables
+Date: Fri, 28 Dec 2012 10:41:59 +0800
+Message-ID: <9cccfb9f3fd881584909069d2a63075adf2c3ce2.1356662294.git.wei_wang@realsil.com.cn>
 References: <cover.1356662293.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,27 +14,76 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Wei WANG <wei_wang@realsil.com.cn>
 
-Realtek PCIe card reader only supports 32bit DMA
+In function rtsx_pci_switch_clock, some variables, such as min_n, max_n,
+and max_div, are not necessary. And those assigned values look very
+obscure for others. It's more proper to use macro definitions here to
+replace these variables.
 
 Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
+Acked-by: Borislav Petkov <bp@alien8.de>
 ---
- drivers/mfd/rtsx_pcr.c |    4 ++++
- 1 file changed, 4 insertions(+)
+ drivers/mfd/rtsx_pcr.c |   13 ++++---------
+ drivers/mfd/rtsx_pcr.h |    3 +++
+ 2 files changed, 7 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/mfd/rtsx_pcr.c b/drivers/mfd/rtsx_pcr.c
-index fa2c2bc..1dc64bb 100644
+index 7632e7f..431a74c 100644
 --- a/drivers/mfd/rtsx_pcr.c
 +++ b/drivers/mfd/rtsx_pcr.c
-@@ -1010,6 +1010,10 @@ static int __devinit rtsx_pci_probe(struct pci_dev *pcidev,
- 		pci_name(pcidev), (int)pcidev->vendor, (int)pcidev->device,
- 		(int)pcidev->revision);
+@@ -590,8 +590,7 @@ int rtsx_pci_switch_clock(struct rtsx_pcr *pcr, unsigned int card_clock,
+ 		u8 ssc_depth, bool initial_mode, bool double_clk, bool vpclk)
+ {
+ 	int err, clk;
+-	u8 n, min_n, max_n, clk_divider;
+-	u8 mcu_cnt, div, max_div;
++	u8 n, clk_divider, mcu_cnt, div;
+ 	u8 depth[] = {
+ 		[RTSX_SSC_DEPTH_4M] = SSC_DEPTH_4M,
+ 		[RTSX_SSC_DEPTH_2M] = SSC_DEPTH_2M,
+@@ -615,10 +614,6 @@ int rtsx_pci_switch_clock(struct rtsx_pcr *pcr, unsigned int card_clock,
+ 	card_clock /= 1000000;
+ 	dev_dbg(&(pcr->pci->dev), "Switch card clock to %dMHz\n", card_clock);
  
-+	ret = pci_set_dma_mask(pcidev, DMA_BIT_MASK(32));
-+	if (ret < 0)
-+		return ret;
+-	min_n = 80;
+-	max_n = 208;
+-	max_div = CLK_DIV_8;
+-
+ 	clk = card_clock;
+ 	if (!initial_mode && double_clk)
+ 		clk = card_clock * 2;
+@@ -633,16 +628,16 @@ int rtsx_pci_switch_clock(struct rtsx_pcr *pcr, unsigned int card_clock,
+ 		n = (u8)pcr->ops->conv_clk_and_div_n(clk, CLK_TO_DIV_N);
+ 	else
+ 		n = (u8)(clk - 2);
+-	if ((clk <= 2) || (n > max_n))
++	if ((clk <= 2) || (n > MAX_DIV_N_PCR))
+ 		return -EINVAL;
+ 
+ 	mcu_cnt = (u8)(125/clk + 3);
+ 	if (mcu_cnt > 15)
+ 		mcu_cnt = 15;
+ 
+-	/* Make sure that the SSC clock div_n is equal or greater than min_n */
++	/* Make sure that the SSC clock div_n is not less than MIN_DIV_N_PCR */
+ 	div = CLK_DIV_1;
+-	while ((n < min_n) && (div < max_div)) {
++	while ((n < MIN_DIV_N_PCR) && (div < CLK_DIV_8)) {
+ 		if (pcr->ops->conv_clk_and_div_n) {
+ 			int dbl_clk = pcr->ops->conv_clk_and_div_n(n,
+ 					DIV_N_TO_CLK) * 2;
+diff --git a/drivers/mfd/rtsx_pcr.h b/drivers/mfd/rtsx_pcr.h
+index 12462c1..33c210b 100644
+--- a/drivers/mfd/rtsx_pcr.h
++++ b/drivers/mfd/rtsx_pcr.h
+@@ -25,6 +25,9 @@
+ 
+ #include <linux/mfd/rtsx_pci.h>
+ 
++#define MIN_DIV_N_PCR		80
++#define MAX_DIV_N_PCR		208
 +
- 	ret = pci_enable_device(pcidev);
- 	if (ret)
- 		return ret;
+ void rts5209_init_params(struct rtsx_pcr *pcr);
+ void rts5229_init_params(struct rtsx_pcr *pcr);
+ void rtl8411_init_params(struct rtsx_pcr *pcr);
 -- 
 1.7.9.5
