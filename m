@@ -1,41 +1,38 @@
 From: <wei_wang@realsil.com.cn>
-Subject: [PATCH v3 0/8] rtsx patchset for MFD and MMC tree
-Date: Fri, 28 Dec 2012 10:41:07 +0800
-Message-ID: <cover.1356662293.git.wei_wang@realsil.com.cn>
+Subject: [PATCH v3 2/8] MFD:rtsx: Remove redundant code
+Date: Fri, 28 Dec 2012 10:41:23 +0800
+Message-ID: <08bda2184701413431444c0e58219ace09c5d97b.1356662293.git.wei_wang@realsil.com.cn>
+References: <cover.1356662293.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rtits2.realtek.com ([60.250.210.242]:47837 "EHLO
-	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753046Ab2L1Clw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Dec 2012 21:41:52 -0500
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <cover.1356662293.git.wei_wang@realsil.com.cn>
+Sender: linux-kernel-owner@vger.kernel.org
 To: cjb@laptop.org, sameo@linux.intel.com
 Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com, bp@alien8.de, Wei WANG <wei_wang@realsil.com.cn>
+List-Id: linux-mmc@vger.kernel.org
 
 From: Wei WANG <wei_wang@realsil.com.cn>
 
-Wei WANG (8):
-  MFD:rtsx: Fix typo in comment
-  MFD:rtsx: Remove redundant code
-  MFD:rtsx: Declare that the DMA address limitation is 32bit explicitly
-  MFD:rtsx: Add callback function switch_output_voltage
-  MMC:rtsx: Using callback function to switch output voltage
-  MFD:rtsx: Add callback function conv_clk_and_div_n
-  MFD:rtsx: Fix checkpatch warning
-  MFD:rtsx: Use macro defines to replace some variables
+In function rtsx_pci_add_sg_tbl, the statement "ptr++" is useless.
 
- drivers/mfd/rtl8411.c             |   29 ++++++++++++++++++++++++
- drivers/mfd/rts5209.c             |   21 +++++++++++++++++
- drivers/mfd/rts5229.c             |   21 +++++++++++++++++
- drivers/mfd/rtsx_pcr.c            |   45 +++++++++++++++++++++++++------------
- drivers/mfd/rtsx_pcr.h            |    3 +++
- drivers/mmc/host/rtsx_pci_sdmmc.c |   30 +++++--------------------
- include/linux/mfd/rtsx_common.h   |    3 +++
- include/linux/mfd/rtsx_pci.h      |   27 +++++++++++++++++-----
- 8 files changed, 135 insertions(+), 44 deletions(-)
+Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
+Acked-by: Borislav Petkov <bp@alien8.de>
+---
+ drivers/mfd/rtsx_pcr.c |    1 -
+ 1 file changed, 1 deletion(-)
 
+diff --git a/drivers/mfd/rtsx_pcr.c b/drivers/mfd/rtsx_pcr.c
+index 3a44efa..fa2c2bc 100644
+--- a/drivers/mfd/rtsx_pcr.c
++++ b/drivers/mfd/rtsx_pcr.c
+@@ -325,7 +325,6 @@ static void rtsx_pci_add_sg_tbl(struct rtsx_pcr *pcr,
+ 	val = ((u64)addr << 32) | ((u64)len << 12) | option;
+ 
+ 	put_unaligned_le64(val, ptr);
+-	ptr++;
+ 	pcr->sgi++;
+ }
+ 
 -- 
 1.7.9.5
-
