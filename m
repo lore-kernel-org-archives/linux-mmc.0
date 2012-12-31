@@ -1,22 +1,24 @@
-From: Dongjin Kim <tobetter@gmail.com>
+From: Thomas Abraham <thomas.abraham@linaro.org>
 Subject: Re: [PATCH] mmc: host: dw_mmc-exynos: Add support for pinctrl
-Date: Mon, 31 Dec 2012 11:59:54 +0900
-Message-ID: <CADoNuNdiWc-vta=014qZyqQnKyT4JfS9vkoS9LwgJOg8eKBrLw@mail.gmail.com>
+Date: Sun, 30 Dec 2012 21:57:36 -0800
+Message-ID: <CAJuYYwSGvbUFVYt5P-pD5s=htTqLBmSmiEYt_kEJae-knnMkCA@mail.gmail.com>
 References: <1356109906-1622-1-git-send-email-tobetter@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ia0-f173.google.com ([209.85.210.173]:64837 "EHLO
+	mail-ia0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750844Ab2LaF5g (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Dec 2012 00:57:36 -0500
+Received: by mail-ia0-f173.google.com with SMTP id w21so10359061iac.32
+        for <linux-mmc@vger.kernel.org>; Sun, 30 Dec 2012 21:57:36 -0800 (PST)
 In-Reply-To: <1356109906-1622-1-git-send-email-tobetter@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Dongjin Kim <tobetter@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Thomas Abraham <thomas.abraham@linaro.org>, Will Newton <will.newton@imgtec.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dongjin Kim <tobetter@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Will Newton <will.newton@imgtec.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi,
-
-Does anyone have advice on this patch?
-
-On Sat, Dec 22, 2012 at 2:11 AM, Dongjin Kim <tobetter@gmail.com> wrote:
+On 21 December 2012 09:11, Dongjin Kim <tobetter@gmail.com> wrote:
 > This patch adds support for pin configuration using pinctrl subsystem to
 > dw_mmc-exynos driver. The property 'wp-gpios' can be specified for write
 > protect but 'samsung,cd-pinmux-gpio' and gpios used for clock, command and
@@ -28,12 +30,10 @@ On Sat, Dec 22, 2012 at 2:11 AM, Dongjin Kim <tobetter@gmail.com> wrote:
 >
 > Signed-off-by: Dongjin Kim <tobetter@gmail.com>
 > ---
->  drivers/mmc/host/dw_mmc-exynos.c |   44
-> ++++++++++++++++++++++++--------------
+>  drivers/mmc/host/dw_mmc-exynos.c |   44 ++++++++++++++++++++++++--------------
 >  1 file changed, 28 insertions(+), 16 deletions(-)
 >
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c
-> b/drivers/mmc/host/dw_mmc-exynos.c
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
 > index 4d50da6..d1c9963 100644
 > --- a/drivers/mmc/host/dw_mmc-exynos.c
 > +++ b/drivers/mmc/host/dw_mmc-exynos.c
@@ -61,11 +61,16 @@ On Sat, Dec 22, 2012 at 2:11 AM, Dongjin Kim <tobetter@gmail.com> wrote:
 > +       if (IS_ERR(priv->pctrl))
 > +               dev_dbg(host->dev, "no pinctrl node\n");
 > +
+
+This could have been handled in dw_mci_exynos_setup_bus function. And
+we also need to check if this patch gets merged.
+https://patchwork.kernel.org/patch/1870231/. If it gets merged, this
+change can be avoided.
+
 >         host->priv = priv;
 >         return 0;
 >  }
-> @@ -149,32 +155,19 @@ static int dw_mci_exynos_parse_dt(struct dw_mci
-> *host)
+> @@ -149,32 +155,19 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
 >                 return ret;
 >
 >         priv->ddr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
@@ -92,8 +97,7 @@ On Sat, Dec 22, 2012 at 2:11 AM, Dongjin Kim <tobetter@gmail.com> wrote:
 > -
 > -               ret = devm_gpio_request(host->dev, gpio, "dw-mci-bus");
 > -               if (ret) {
-> -                       dev_err(host->dev, "gpio [%d] request failed\n",
-> gpio);
+> -                       dev_err(host->dev, "gpio [%d] request failed\n", gpio);
 > -                       return -EBUSY;
 > -               }
 > -       }
@@ -101,8 +105,7 @@ On Sat, Dec 22, 2012 at 2:11 AM, Dongjin Kim <tobetter@gmail.com> wrote:
 >         gpio = of_get_named_gpio(slot_np, "wp-gpios", 0);
 >         if (gpio_is_valid(gpio)) {
 >                 if (devm_gpio_request(host->dev, gpio, "dw-mci-wp"))
-> @@ -185,9 +178,12 @@ static int dw_mci_exynos_setup_bus(struct dw_mci
-> *host,
+> @@ -185,9 +178,12 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
 >                 host->pdata->quirks |= DW_MCI_QUIRK_NO_WRITE_PROTECT;
 >         }
 >
@@ -113,11 +116,13 @@ On Sat, Dec 22, 2012 at 2:11 AM, Dongjin Kim <tobetter@gmail.com> wrote:
 > +       if (host->pdata->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
 > +               goto setup_bus;
 > +
+
+Why do the entire bus setup if card detection is broken?
+
 >         gpio = of_get_named_gpio(slot_np, "samsung,cd-pinmux-gpio", 0);
 >         if (gpio_is_valid(gpio)) {
 >                 if (devm_gpio_request(host->dev, gpio, "dw-mci-cd"))
-> @@ -196,6 +192,22 @@ static int dw_mci_exynos_setup_bus(struct dw_mci
-> *host,
+> @@ -196,6 +192,22 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
 >                 dev_info(host->dev, "cd gpio not available");
 >         }
 >
@@ -132,11 +137,17 @@ On Sat, Dec 22, 2012 at 2:11 AM, Dongjin Kim <tobetter@gmail.com> wrote:
 > +
 > +               ret = devm_gpio_request(host->dev, gpio, "dw-mci-bus");
 > +               if (ret) {
-> +                       dev_err(host->dev, "gpio [%d] request failed\n",
-> gpio);
+> +                       dev_err(host->dev, "gpio [%d] request failed\n", gpio);
 > +                       return -EBUSY;
 > +               }
 > +       }
+
+This change should not have been there. If the mmc bus setup is being
+done using pinctrl framework, this change can be avoided.
+
+Thanks,
+Thomas.
+
 > +
 >         return 0;
 >  }
