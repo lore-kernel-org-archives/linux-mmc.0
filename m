@@ -1,157 +1,47 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: Re: [PATCH] mmc: host: dw_mmc-exynos: Add support for pinctrl
-Date: Sun, 30 Dec 2012 21:57:36 -0800
-Message-ID: <CAJuYYwSGvbUFVYt5P-pD5s=htTqLBmSmiEYt_kEJae-knnMkCA@mail.gmail.com>
-References: <1356109906-1622-1-git-send-email-tobetter@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Tony Prisk <linux@prisktech.co.nz>
+Subject: [PATCH] mmc: vt8500: Remove __devexit attribute on .remove
+Date: Tue,  1 Jan 2013 21:08:03 +1300
+Message-ID: <1357027683-26992-1-git-send-email-linux@prisktech.co.nz>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ia0-f173.google.com ([209.85.210.173]:64837 "EHLO
-	mail-ia0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750844Ab2LaF5g (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Dec 2012 00:57:36 -0500
-Received: by mail-ia0-f173.google.com with SMTP id w21so10359061iac.32
-        for <linux-mmc@vger.kernel.org>; Sun, 30 Dec 2012 21:57:36 -0800 (PST)
-In-Reply-To: <1356109906-1622-1-git-send-email-tobetter@gmail.com>
+Received: from server.prisktech.co.nz ([115.188.14.127]:64140 "EHLO
+	server.prisktech.co.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752024Ab3AAIII (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Jan 2013 03:08:08 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dongjin Kim <tobetter@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Will Newton <will.newton@imgtec.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Tony Prisk <linux@prisktech.co.nz>
 
-On 21 December 2012 09:11, Dongjin Kim <tobetter@gmail.com> wrote:
-> This patch adds support for pin configuration using pinctrl subsystem to
-> dw_mmc-exynos driver. The property 'wp-gpios' can be specified for write
-> protect but 'samsung,cd-pinmux-gpio' and gpios used for clock, command and
-> data lines will be ignored.
->
-> -. 'pinctrl-0' should specify pin control groups (clock, comand and data
->     lines) used for this controller.
-> -. 'pinctrl-names' should contain only one value, 'default'.
->
-> Signed-off-by: Dongjin Kim <tobetter@gmail.com>
-> ---
->  drivers/mmc/host/dw_mmc-exynos.c |   44 ++++++++++++++++++++++++--------------
->  1 file changed, 28 insertions(+), 16 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index 4d50da6..d1c9963 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -16,6 +16,7 @@
->  #include <linux/mmc/dw_mmc.h>
->  #include <linux/of.h>
->  #include <linux/of_gpio.h>
-> +#include <linux/pinctrl/consumer.h>
->
->  #include "dw_mmc.h"
->  #include "dw_mmc-pltfm.h"
-> @@ -49,6 +50,7 @@ struct dw_mci_exynos_priv_data {
->         u8                              ciu_div;
->         u32                             sdr_timing;
->         u32                             ddr_timing;
-> +       struct pinctrl                  *pctrl;
->  };
->
->  static struct dw_mci_exynos_compatible {
-> @@ -84,6 +86,10 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
->                         priv->ctrl_type = exynos_compat[idx].ctrl_type;
->         }
->
-> +       priv->pctrl = devm_pinctrl_get_select_default(host->dev);
-> +       if (IS_ERR(priv->pctrl))
-> +               dev_dbg(host->dev, "no pinctrl node\n");
-> +
+With the changes to HOTPLUG merged for 3.8, this attribute is
+no longer required and results in a warning at compile time.
 
-This could have been handled in dw_mci_exynos_setup_bus function. And
-we also need to check if this patch gets merged.
-https://patchwork.kernel.org/patch/1870231/. If it gets merged, this
-change can be avoided.
+Signed-off-by: Tony Prisk <linux@prisktech.co.nz>
+---
+ drivers/mmc/host/wmt-sdmmc.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
->         host->priv = priv;
->         return 0;
->  }
-> @@ -149,32 +155,19 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
->                 return ret;
->
->         priv->ddr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
-> +
->         return 0;
->  }
->
->  static int dw_mci_exynos_setup_bus(struct dw_mci *host,
->                                 struct device_node *slot_np, u8 bus_width)
->  {
-> +       struct dw_mci_exynos_priv_data *priv = host->priv;
->         int idx, gpio, ret;
->
->         if (!slot_np)
->                 return -EINVAL;
->
-> -       /* cmd + clock + bus-width pins */
-> -       for (idx = 0; idx < NUM_PINS(bus_width); idx++) {
-> -               gpio = of_get_gpio(slot_np, idx);
-> -               if (!gpio_is_valid(gpio)) {
-> -                       dev_err(host->dev, "invalid gpio: %d\n", gpio);
-> -                       return -EINVAL;
-> -               }
-> -
-> -               ret = devm_gpio_request(host->dev, gpio, "dw-mci-bus");
-> -               if (ret) {
-> -                       dev_err(host->dev, "gpio [%d] request failed\n", gpio);
-> -                       return -EBUSY;
-> -               }
-> -       }
-> -
->         gpio = of_get_named_gpio(slot_np, "wp-gpios", 0);
->         if (gpio_is_valid(gpio)) {
->                 if (devm_gpio_request(host->dev, gpio, "dw-mci-wp"))
-> @@ -185,9 +178,12 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
->                 host->pdata->quirks |= DW_MCI_QUIRK_NO_WRITE_PROTECT;
->         }
->
-> -       if (host->pdata->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
-> +       if (!IS_ERR(priv->pctrl))
->                 return 0;
->
-> +       if (host->pdata->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
-> +               goto setup_bus;
-> +
+diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+index 5ba4605..3a7ce57 100644
+--- a/drivers/mmc/host/wmt-sdmmc.c
++++ b/drivers/mmc/host/wmt-sdmmc.c
+@@ -892,7 +892,7 @@ fail1:
+ 	return ret;
+ }
+ 
+-static int __devexit wmt_mci_remove(struct platform_device *pdev)
++static int wmt_mci_remove(struct platform_device *pdev)
+ {
+ 	struct mmc_host *mmc;
+ 	struct wmt_mci_priv *priv;
+@@ -1012,7 +1012,7 @@ static const struct dev_pm_ops wmt_mci_pm = {
+ 
+ static struct platform_driver wmt_mci_driver = {
+ 	.probe = wmt_mci_probe,
+-	.remove = __exit_p(wmt_mci_remove),
++	.remove = wmt_mci_remove,
+ 	.driver = {
+ 		.name = DRIVER_NAME,
+ 		.owner = THIS_MODULE,
+-- 
+1.7.9.5
 
-Why do the entire bus setup if card detection is broken?
-
->         gpio = of_get_named_gpio(slot_np, "samsung,cd-pinmux-gpio", 0);
->         if (gpio_is_valid(gpio)) {
->                 if (devm_gpio_request(host->dev, gpio, "dw-mci-cd"))
-> @@ -196,6 +192,22 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
->                 dev_info(host->dev, "cd gpio not available");
->         }
->
-> + setup_bus:
-> +       /* cmd + clock + bus-width pins */
-> +       for (idx = 0; idx < NUM_PINS(bus_width); idx++) {
-> +               gpio = of_get_gpio(slot_np, idx);
-> +               if (!gpio_is_valid(gpio)) {
-> +                       dev_err(host->dev, "invalid gpio: %d\n", gpio);
-> +                       return -EINVAL;
-> +               }
-> +
-> +               ret = devm_gpio_request(host->dev, gpio, "dw-mci-bus");
-> +               if (ret) {
-> +                       dev_err(host->dev, "gpio [%d] request failed\n", gpio);
-> +                       return -EBUSY;
-> +               }
-> +       }
-
-This change should not have been there. If the mmc bus setup is being
-done using pinctrl framework, this change can be avoided.
-
-Thanks,
-Thomas.
-
-> +
->         return 0;
->  }
->
-> --
-> 1.7.9.5
->
