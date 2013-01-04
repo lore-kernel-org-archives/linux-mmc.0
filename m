@@ -1,65 +1,37 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: omap_hsmmc: SDIO IRQ on AM335x family
-Date: Thu, 3 Jan 2013 11:48:51 -0800
-Message-ID: <20130103194851.GH25633@atomide.com>
-References: <20121130111847.GA24674@blumentopf>
- <20121130174022.GM5312@atomide.com>
- <50B9019F.2020109@gmail.com>
- <20121220220444.GA350@blumentopf>
+From: wwang <wei_wang@realsil.com.cn>
+Subject: Re: [PATCH v3 3/8] MFD:rtsx: Declare that the DMA address
+ limitationis32bit explicitly
+Date: Fri, 4 Jan 2013 10:46:22 +0800
+Message-ID: <50E6427E.1050809@realsil.com.cn>
+References: <cover.1356662293.git.wei_wang@realsil.com.cn>
+ <cd92be49bee917165009311d62e10a5f60a85a48.1356662293.git.wei_wang@realsil.com.cn>
+ <20130103122559.GF7247@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20121220220444.GA350@blumentopf>
-Sender: linux-omap-owner@vger.kernel.org
-To: Andreas Fenkart <andreas.fenkart@streamunlimited.com>
-Cc: Daniel Mack <zonque@gmail.com>, Chris Ball <cjb@laptop.org>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, santosh.shilimkar@ti.com
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20130103122559.GF7247@mwanda>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/devel>,
+ <mailto:devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/devel/>
+List-Post: <mailto:devel@linuxdriverproject.org>
+List-Help: <mailto:devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/devel>,
+ <mailto:devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: devel-bounces@linuxdriverproject.org
+Sender: "devel" <devel-bounces@linuxdriverproject.org>
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: "sameo@linux.intel.com" <sameo@linux.intel.com>, "oakad@yahoo.com" <oakad@yahoo.com>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "bp@alien8.de" <bp@alien8.de>, "cjb@laptop.org" <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
 
-* Andreas Fenkart <andreas.fenkart@streamunlimited.com> [121220 14:07]:
-> Hi,
-> 
-> On Fri, Nov 30, 2012 at 07:57:35PM +0100, Daniel Mack wrote:
-> > 
-> > On 30.11.2012 18:40, Tony Lindgren wrote:
-> > > * Andreas Fenkart <andreas.fenkart@streamunlimited.com> [121130 03:21]:
-> > >>
-> > >> The alternative was to configure dat1 line as a GPIO, while
-> > >> waiting for an IRQ. Then configuring it back as dat1 when the
-> > >> SDIO card is signalling an IRQ. Or the host starts a transfer. I
-> > >> guess this will perform poorly, hence not considering it really.
-> > > 
-> > > This might work for SDIO cards. It should be disabled for data
-> > > cards naturally to avoid potential data corruption.
-> I don't understand your concern here, could you explain
-> 
-> > > The way to implement this is set named states in the .dts file
-> > > for the pins using pinctrl-single.c, then have the MMC driver
-> > > request states "default" "active" and "idle" during the probe,
-> > > then toggle between active and idle during the runtime.
-> > > 
-> > > As far as I remember the GPIO functionality does not need to
-> > > be enabled, just muxing the pin to GPIO mode for the wake-up
-> > > is enough.
-> > 
-> > Wouldn't that be racy, given that an interrupt which occurs at beween
-> > the point in time when the driver decides to wait for IRQs again until
-> > the mux has finished switching over, could potentially be lost?
-> 
-> The IRQ is level triggered, so can't be lost. I implemented it as
-> suggested and surprisingly performance is pretty good. Actually not
-> worse than keeping the fclk enabled all times.
-> 
-> module: 88W8787 / mwifiex
-> tx bitrate: 150.0 MBit/s MCS 7 40Mhz short GI
-> 
->                    |   tcp tx         |  signal  | cpu idle
-> ---------------------------------------------------------------
-> keep fclk enabled  |   50.3 Mbits/sec | -23 dBm  | 15 %
-> suspend/resume     |   49.7 Mbits/sec | -22 dBM  | 13 %
-> 
-> patch follows
-
-Hey that's cool :) Will take a look at the patch.
-
-Tony
+09ogMjAxM8TqMDHUwjAzyNUgMjA6MjUsIERhbiBDYXJwZW50ZXIg0LS1wDoKPiBPbiBGcmksIERl
+YyAyOCwgMjAxMiBhdCAxMDo0MToyOEFNICswODAwLCB3ZWlfd2FuZ0ByZWFsc2lsLmNvbS5jbiB3
+cm90ZToKPj4gRnJvbTogV2VpIFdBTkcgPHdlaV93YW5nQHJlYWxzaWwuY29tLmNuPgo+Pgo+PiBS
+ZWFsdGVrIFBDSWUgY2FyZCByZWFkZXIgb25seSBzdXBwb3J0cyAzMmJpdCBETUEKPj4KPiBJcyB0
+aGlzIGEgYnVnZml4PyAgSWYgc28gd2hhdCBkb2VzIHRoZSBidWcgbG9vayBsaWtlPwo+Cj4gcmVn
+YXJkcywKPiBkYW4gY2FycGVudGVyCj4KSGkgRGFuOgoKTm8sIHRoaXMgaXMgbm90IGEgYnVnZml4
+LiBJbiBkZWZhdWx0LCB0aGUga2VybmVsIHdpbGwgYWxsb2NhdGUgMzJiaXQKYWRkcmVzcyBmb3Ig
+RE1BLiBUaGlzIGRlY2xhcmF0aW9uIGNhbiBpbXByb3ZlIHRoZSByZWFkYWJpbGl0eS4KCkJSLAp3
+ZWkgd2FuZwpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpk
+ZXZlbCBtYWlsaW5nIGxpc3QKZGV2ZWxAbGludXhkcml2ZXJwcm9qZWN0Lm9yZwpodHRwOi8vZHJp
+dmVyZGV2LmxpbnV4ZHJpdmVycHJvamVjdC5vcmcvbWFpbG1hbi9saXN0aW5mby9kZXZlbAo=
