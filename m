@@ -1,54 +1,73 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [PATCH v3 3/8] MFD:rtsx: Declare that the DMA address
- limitationis32bit explicitly
-Date: Fri, 4 Jan 2013 08:50:31 +0300
-Message-ID: <20130104055031.GQ7247@mwanda>
-References: <cover.1356662293.git.wei_wang@realsil.com.cn>
- <cd92be49bee917165009311d62e10a5f60a85a48.1356662293.git.wei_wang@realsil.com.cn>
- <20130103122559.GF7247@mwanda>
- <50E6427E.1050809@realsil.com.cn>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Kevin Liu <kliu5@marvell.com>
+Subject: [PATCH] mmc: sdhci: disable interrupt before free_irq
+Date: Sat,  5 Jan 2013 17:18:28 +0800
+Message-ID: <1357377508-12043-1-git-send-email-kliu5@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:31992 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750942Ab3ADFvH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Jan 2013 00:51:07 -0500
-Content-Disposition: inline
-In-Reply-To: <50E6427E.1050809@realsil.com.cn>
+Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:57889 "EHLO
+	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754833Ab3AEJTz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Jan 2013 04:19:55 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: wwang <wei_wang@realsil.com.cn>
-Cc: "sameo@linux.intel.com" <sameo@linux.intel.com>, "oakad@yahoo.com" <oakad@yahoo.com>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "bp@alien8.de" <bp@alien8.de>, "cjb@laptop.org" <cjb@laptop.org>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Philip Rakity <prakity@nvidia.com>, Aaron Lu <aaron.lu@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Adrian Hunter <adrian.hunter@intel.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Alexander Stein <alexander.stein@systec-electronic.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, key
 
-On Fri, Jan 04, 2013 at 10:46:22AM +0800, wwang wrote:
-> =E4=BA=8E 2013=E5=B9=B401=E6=9C=8803=E6=97=A5 20:25, Dan Carpenter =E5=
-=86=99=E9=81=93:
-> > On Fri, Dec 28, 2012 at 10:41:28AM +0800, wei_wang@realsil.com.cn w=
-rote:
-> >> From: Wei WANG <wei_wang@realsil.com.cn>
-> >>
-> >> Realtek PCIe card reader only supports 32bit DMA
-> >>
-> > Is this a bugfix?  If so what does the bug look like?
-> >
-> > regards,
-> > dan carpenter
-> >
-> Hi Dan:
->=20
-> No, this is not a bugfix. In default, the kernel will allocate 32bit
-> address for DMA. This declaration can improve the readability.
->=20
+Current code missed disabling interrupts before free irq which is shared.
 
-Ah ok.  Really none of the things I mentioned were stuff that
-prevented the patch from being merged or couldn't be fixed in follow
-on patches.
+Notice below comments for function free_irq (kernel/irq/manage.c):
+On a shared IRQ the caller must ensure the interrupt is disabled
+on the card it drives before calling this function.
 
-The thing is that the commit message should always say why a patch
-is needed.
+Original code has below issue during suspend/resume when multiple SD hosts
+share the same IRQ:
+1. Assume there are two hosts (host1 for emmc while host2 for sd) share
+the same mmc irq.
+2. When system suspend, host2 will be suspended before host1.
+So the sequence is below:
+	step1: irq handler for host2 removed ->
+	step2: irq handler for host1 removed and irq disabled ->
+	... system suspended ...
+	... system resumed ...
+	step3: irq enabled and the irq handler for host1 restored ->
+	step4: irq handler for host2 restored
+3. So there is the buggy time slot that the irq is enabled but the irq handler
+for host2 is removed. Then host2 interrupt can be triggered but can't be handled
+at that moment.
 
-regards,
-dan carpenter
+Signed-off-by: Jialing Fu <jlfu@marvell.com>
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
+---
+ drivers/mmc/host/sdhci.c |    3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 6f0bfc0..089182e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2484,6 +2484,7 @@ int sdhci_suspend_host(struct sdhci_host *host)
+ 		return ret;
+ 	}
+ 
++	sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
+ 	free_irq(host->irq, host);
+ 
+ 	return ret;
+@@ -3139,6 +3140,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ #ifdef SDHCI_USE_LEDS_CLASS
+ reset:
+ 	sdhci_reset(host, SDHCI_RESET_ALL);
++	sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
+ 	free_irq(host->irq, host);
+ #endif
+ untasklet:
+@@ -3181,6 +3183,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 	if (!dead)
+ 		sdhci_reset(host, SDHCI_RESET_ALL);
+ 
++	sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
+ 	free_irq(host->irq, host);
+ 
+ 	del_timer_sync(&host->timer);
+-- 
+1.7.9.5
 
