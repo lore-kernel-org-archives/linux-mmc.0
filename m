@@ -1,73 +1,172 @@
 From: Kevin Liu <kliu5@marvell.com>
-Subject: [PATCH] mmc: sdhci: disable interrupt before free_irq
-Date: Sat,  5 Jan 2013 17:18:28 +0800
-Message-ID: <1357377508-12043-1-git-send-email-kliu5@marvell.com>
+Subject: [PATCH v2] mmc: sdhci-pxav3: add pm runtime support
+Date: Sat,  5 Jan 2013 17:20:26 +0800
+Message-ID: <1357377626-3203-1-git-send-email-kliu5@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:57889 "EHLO
-	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754833Ab3AEJTz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Jan 2013 04:19:55 -0500
+Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:52452 "EHLO
+	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755152Ab3AEJVY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Jan 2013 04:21:24 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 Cc: Philip Rakity <prakity@nvidia.com>, Aaron Lu <aaron.lu@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Adrian Hunter <adrian.hunter@intel.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Alexander Stein <alexander.stein@systec-electronic.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, key
 
-Current code missed disabling interrupts before free irq which is shared.
-
-Notice below comments for function free_irq (kernel/irq/manage.c):
-On a shared IRQ the caller must ensure the interrupt is disabled
-on the card it drives before calling this function.
-
-Original code has below issue during suspend/resume when multiple SD hosts
-share the same IRQ:
-1. Assume there are two hosts (host1 for emmc while host2 for sd) share
-the same mmc irq.
-2. When system suspend, host2 will be suspended before host1.
-So the sequence is below:
-	step1: irq handler for host2 removed ->
-	step2: irq handler for host1 removed and irq disabled ->
-	... system suspended ...
-	... system resumed ...
-	step3: irq enabled and the irq handler for host1 restored ->
-	step4: irq handler for host2 restored
-3. So there is the buggy time slot that the irq is enabled but the irq handler
-for host2 is removed. Then host2 interrupt can be triggered but can't be handled
-at that moment.
-
 Signed-off-by: Jialing Fu <jlfu@marvell.com>
 Signed-off-by: Kevin Liu <kliu5@marvell.com>
 ---
- drivers/mmc/host/sdhci.c |    3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/host/sdhci-pxav3.c |   97 +++++++++++++++++++++++++++++++++++++++-
+ 1 files changed, 96 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 6f0bfc0..089182e 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2484,6 +2484,7 @@ int sdhci_suspend_host(struct sdhci_host *host)
- 		return ret;
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index fad0966..b4aca81 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -32,10 +32,14 @@
+ #include <linux/of.h>
+ #include <linux/of_device.h>
+ #include <linux/of_gpio.h>
++#include <linux/pm.h>
++#include <linux/pm_runtime.h>
+ 
+ #include "sdhci.h"
+ #include "sdhci-pltfm.h"
+ 
++#define PXAV3_RPM_DELAY_MS     50
++
+ #define SD_CLOCK_BURST_SIZE_SETUP		0x10A
+ #define SDCLK_SEL	0x100
+ #define SDCLK_DELAY_SHIFT	9
+@@ -303,14 +307,26 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 
+ 	sdhci_get_of_property(pdev);
+ 
++	pm_runtime_set_active(&pdev->dev);
++	pm_runtime_enable(&pdev->dev);
++	pm_runtime_set_autosuspend_delay(&pdev->dev,
++			PXAV3_RPM_DELAY_MS);
++	pm_runtime_use_autosuspend(&pdev->dev);
++	pm_suspend_ignore_children(&pdev->dev, 1);
++	pm_runtime_get_noresume(&pdev->dev);
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "failed to add host\n");
++		pm_runtime_forbid(&pdev->dev);
++		pm_runtime_disable(&pdev->dev);
+ 		goto err_add_host;
  	}
  
-+	sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
- 	free_irq(host->irq, host);
+ 	platform_set_drvdata(pdev, host);
  
- 	return ret;
-@@ -3139,6 +3140,7 @@ int sdhci_add_host(struct sdhci_host *host)
- #ifdef SDHCI_USE_LEDS_CLASS
- reset:
- 	sdhci_reset(host, SDHCI_RESET_ALL);
-+	sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
- 	free_irq(host->irq, host);
++	pm_runtime_put_autosuspend(&pdev->dev);
++
+ 	return 0;
+ 
+ err_add_host:
+@@ -331,7 +347,9 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
+ 	struct sdhci_pxa *pxa = pltfm_host->priv;
+ 	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
+ 
++	pm_runtime_get_sync(&pdev->dev);
+ 	sdhci_remove_host(host, 1);
++	pm_runtime_disable(&pdev->dev);
+ 
+ 	clk_disable_unprepare(pltfm_host->clk);
+ 	clk_put(pltfm_host->clk);
+@@ -347,6 +365,83 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_PM_SLEEP
++static int sdhci_pxav3_suspend(struct device *dev)
++{
++	int ret;
++	struct sdhci_host *host = dev_get_drvdata(dev);
++
++	pm_runtime_get_sync(dev);
++	ret = sdhci_suspend_host(host);
++	pm_runtime_mark_last_busy(dev);
++	pm_runtime_put_autosuspend(dev);
++
++	return ret;
++}
++
++static int sdhci_pxav3_resume(struct device *dev)
++{
++	int ret;
++	struct sdhci_host *host = dev_get_drvdata(dev);
++
++	pm_runtime_get_sync(dev);
++	ret = sdhci_resume_host(host);
++	pm_runtime_mark_last_busy(dev);
++	pm_runtime_put_autosuspend(dev);
++
++	return ret;
++}
++#endif
++
++#ifdef CONFIG_PM_RUNTIME
++static int sdhci_pxav3_runtime_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	unsigned long flags;
++
++	if (pltfm_host->clk) {
++		spin_lock_irqsave(&host->lock, flags);
++		host->runtime_suspended = true;
++		spin_unlock_irqrestore(&host->lock, flags);
++
++		clk_disable_unprepare(pltfm_host->clk);
++	}
++
++	return 0;
++}
++
++static int sdhci_pxav3_runtime_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	unsigned long flags;
++
++	if (pltfm_host->clk) {
++		clk_prepare_enable(pltfm_host->clk);
++
++		spin_lock_irqsave(&host->lock, flags);
++		host->runtime_suspended = false;
++		spin_unlock_irqrestore(&host->lock, flags);
++	}
++
++	return 0;
++}
++#endif
++
++#ifdef CONFIG_PM
++static const struct dev_pm_ops sdhci_pxav3_pmops = {
++	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pxav3_suspend, sdhci_pxav3_resume)
++	SET_RUNTIME_PM_OPS(sdhci_pxav3_runtime_suspend,
++		sdhci_pxav3_runtime_resume, NULL)
++};
++
++#define SDHCI_PXAV3_PMOPS (&sdhci_pxav3_pmops)
++
++#else
++#define SDHCI_PXAV3_PMOPS NULL
++#endif
++
+ static struct platform_driver sdhci_pxav3_driver = {
+ 	.driver		= {
+ 		.name	= "sdhci-pxav3",
+@@ -354,7 +449,7 @@ static struct platform_driver sdhci_pxav3_driver = {
+ 		.of_match_table = sdhci_pxav3_of_match,
  #endif
- untasklet:
-@@ -3181,6 +3183,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 	if (!dead)
- 		sdhci_reset(host, SDHCI_RESET_ALL);
- 
-+	sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
- 	free_irq(host->irq, host);
- 
- 	del_timer_sync(&host->timer);
+ 		.owner	= THIS_MODULE,
+-		.pm	= SDHCI_PLTFM_PMOPS,
++		.pm	= SDHCI_PXAV3_PMOPS,
+ 	},
+ 	.probe		= sdhci_pxav3_probe,
+ 	.remove		= sdhci_pxav3_remove,
 -- 
-1.7.9.5
+1.7.0.4
 
