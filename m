@@ -1,43 +1,41 @@
-From: Kevin Liu <kliu5@marvell.com>
-Subject: [PATCH v2 2/2] mmc: sdhci-pxav3: add wake up support
-Date: Sat,  5 Jan 2013 17:21:34 +0800
-Message-ID: <1357377694-2167-2-git-send-email-kliu5@marvell.com>
-References: <1357377694-2167-1-git-send-email-kliu5@marvell.com>
+From: Rainer Kaluscha <rainer.kaluscha@web.de>
+Subject: SD card reader stopped working in kernel 3.6: =?utf-8?b?Q09ORklHX1JFR1VMQVRPUg==?= troubles (solved)
+Date: Sat, 5 Jan 2013 16:19:57 +0000 (UTC)
+Message-ID: <loom.20130105T170733-403@post.gmane.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog133.obsmtp.com ([74.125.149.82]:51547 "EHLO
-	na3sys009aog133.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755152Ab3AEJX3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Jan 2013 04:23:29 -0500
-In-Reply-To: <1357377694-2167-1-git-send-email-kliu5@marvell.com>
+Received: from plane.gmane.org ([80.91.229.3]:53082 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755796Ab3AEQYt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 5 Jan 2013 11:24:49 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1TrWYR-0006VE-KA
+	for linux-mmc@vger.kernel.org; Sat, 05 Jan 2013 17:25:03 +0100
+Received: from HSI-KBW-095-208-079-040.hsi5.kabel-badenwuerttemberg.de ([95.208.79.40])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Sat, 05 Jan 2013 17:25:03 +0100
+Received: from rainer.kaluscha by HSI-KBW-095-208-079-040.hsi5.kabel-badenwuerttemberg.de with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Sat, 05 Jan 2013 17:25:03 +0100
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Philip Rakity <prakity@nvidia.com>, Aaron Lu <aaron.lu@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Adrian Hunter <adrian.hunter@intel.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Alexander Stein <alexander.stein@systec-electronic.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, key
+To: linux-mmc@vger.kernel.org
 
-Signed-off-by: Jialing Fu <jlfu@marvell.com>
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
----
- drivers/mmc/host/sdhci-pxav3.c |    7 +++++++
- 1 files changed, 7 insertions(+), 0 deletions(-)
+My SD card reader which worked fine with kernel 3.5 stopped working with kernel
+3.6 and 3.7. It is a "SD Host controller: Ricoh Co Ltd R5C822
+SD/SDIO/MMC/MS/MSPro Host Adapter (rev 22)", PCI-ID 0e:06.1 
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index b4aca81..ff06aff 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -325,6 +325,13 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 
- 	platform_set_drvdata(pdev, host);
- 
-+	if (pdata->pm_caps & MMC_PM_KEEP_POWER) {
-+		device_init_wakeup(&pdev->dev, 1);
-+		host->mmc->pm_flags |= MMC_PM_WAKE_SDIO_IRQ;
-+	} else {
-+		device_init_wakeup(&pdev->dev, 0);
-+	}
-+
- 	pm_runtime_put_autosuspend(&pdev->dev);
- 
- 	return 0;
--- 
-1.7.0.4
+I finally noticed messages like "mmc0: Hardware doesn't report any support
+voltages." so I tried disabling CONFIG_REGULATOR in kernel config which solved
+the issue.
+
+Maybe this is also of interest to others. Feel free to contact me if you need
+more details.
+
+
+
 
