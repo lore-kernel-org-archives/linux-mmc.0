@@ -1,154 +1,46 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: [PATCH 1/2] mmc: sdio: defer sdio irq handling when host suspended
-Date: Tue, 8 Jan 2013 01:01:20 +0800
-Message-ID: <CADz5_g+VPe3oh321NpcBmCLuPt-opB_s05J5Sn35gsSCJ-kFBA@mail.gmail.com>
-References: <1355919130-28702-1-git-send-email-kliu5@marvell.com>
-	<1355919130-28702-2-git-send-email-kliu5@marvell.com>
-	<CAPDyKFomOU=ArpZ__uSqLz1OxbmEYOx12-dA8H7CgcRDiqXkPA@mail.gmail.com>
-	<CADz5_gKVxwa6OdFFeJdXYsx46OjWN8JgH9HPsxKtKUcxH8aoDw@mail.gmail.com>
-	<CAPDyKFqtkpuQK+De+XYQtLQj1AW6o72Eua-KPwArS+JUNRGpvQ@mail.gmail.com>
-	<CADz5_g+GXbdGMwgmWWYjz=DayjP0LroAVowNw==JOSUUKPs9KQ@mail.gmail.com>
-	<CAPDyKFqnwk9e20-OQZ7ARyGGmAUoOqXtW4KBQFVqgnE=xrTc-Q@mail.gmail.com>
-	<CADz5_gKWJkms=0ybf9ZaJ7t+h7DgTkEtAzJQQfujs5ZKb6SYLg@mail.gmail.com>
-	<CAPDyKFrdu74sL=kC+RLDd4egaHKFLuUmmSthUo708by6WuDbpg@mail.gmail.com>
+From: Marek Vasut <marex@denx.de>
+Subject: Re: [PATCH] mmc: mxs-mmc: Add MODULE_ALIAS()
+Date: Mon, 7 Jan 2013 23:43:19 +0100
+Message-ID: <201301072343.19898.marex@denx.de>
+References: <1357598512-24189-1-git-send-email-festevam@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: Text/Plain;
+  charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f181.google.com ([74.125.82.181]:46574 "EHLO
-	mail-we0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754223Ab3AGRBV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Jan 2013 12:01:21 -0500
-Received: by mail-we0-f181.google.com with SMTP id t11so10166931wey.12
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Jan 2013 09:01:20 -0800 (PST)
-In-Reply-To: <CAPDyKFrdu74sL=kC+RLDd4egaHKFLuUmmSthUo708by6WuDbpg@mail.gmail.com>
+Received: from mail-out.m-online.net ([212.18.0.9]:49496 "EHLO
+	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753662Ab3AGWnX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Jan 2013 17:43:23 -0500
+In-Reply-To: <1357598512-24189-1-git-send-email-festevam@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Kevin Liu <kliu5@marvell.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Philip Rakity <prakity@nvidia.com>, Aaron Lu <aaron.lu@amd.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Adrian Hunter <adrian.hunter@intel.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Alexander Stein <alexander.stein@systec-electronic.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Al Cooper <acooper@gmail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>
+To: Fabio Estevam <festevam@gmail.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
 
-2013/1/8 Ulf Hansson <ulf.hansson@linaro.org>:
-> On 7 January 2013 17:04, Kevin Liu <keyuan.liu@gmail.com> wrote:
->> 2013/1/7 Ulf Hansson <ulf.hansson@linaro.org>:
->>> On 7 January 2013 12:16, Kevin Liu <keyuan.liu@gmail.com> wrote:
->>>> 2013/1/7 Ulf Hansson <ulf.hansson@linaro.org>:
->>>>> On 21 December 2012 13:59, Kevin Liu <keyuan.liu@gmail.com> wrote:
->>>>>> 2012/12/21 Ulf Hansson <ulf.hansson@linaro.org>:
->>>>>>> On 19 December 2012 13:12, Kevin Liu <kliu5@marvell.com> wrote:
->>>>>>>> If sdio host can wakeup system, its interrupt will _NOT_ be disabled
->>>>>>>> during suspending. So when card interrupt happens, the sdio irq thread
->>>>>>>> will be woken up.
->>>>>>>
->>>>>>> Is that really needed to handle the irq?
->>>>>>>
->>>>>>> I think you should instead wait on the system resume to be handled
->>>>>>> properly. In the mmc_sdio_resume, sdio_irq thread is woken up to find
->>>>>>> out if there is an irq to handle.
->>>>>>>
->>>>>>> ....
->>>>>>> if (!err && host->sdio_irqs)
->>>>>>>   wake_up_process(host->sdio_irq_thread);
->>>>>>> ....
->>>>>>>
->>>>>>> Would that not solve your issue?
->>>>>>>
->>>>>>
->>>>>> With current code, if irq keeps on during suspend/resume, when
->>>>>> interrupt happen, sdio_irq_thread will be woken up and handle the
->>>>>> interrupt immediately while sdio host has suspended. It won't wait.
->>>>>
->>>>> That is because the sdio host, when in a suspended state, does a
->>>>> mmc_signal_sdio_irq call. Is that really what the host should do in
->>>>> this state?
->>>>>
->>>>
->>>> Yes, the host should do this because we want the sdio to wakeup host
->>>> after system suspended.
->>>> So we must keep interrupt enabled after suspended.
->>>
->>> I see that you need to keep the irqs enabled. But that does not mean
->>> you need to call the mmc_signal_sdio_irq, when the host is in
->>> suspended. You should only need to keep the irqs enabled to wake up
->>> the system from suspend, that is enough, the rest could be handled
->>> through the normal resume sequence. Don't you think?
->>>
->>
->> mmc_signal_sdio_irq is called by sdhci_irq if card interrupt occur.
->> So if the irqs enabled, then mmc_signal_sdio_irq will be called when
->> card int from sdio occur even after host suspended and before resumed.
->>
->
-> Yes, but is that really correct? Should the host really do
-> mmc_signal_sdio_irq when the host is suspended? To me it feel like a
-> more proper way of dealing with this is to let the normal resume
-> sequence eventually handle it instead?
->
+Dear Fabio Estevam,
 
-Yes, it seems more reasonable...
-Just skip the wake_up if suspended...I will update the patch. Thanks!
+> From: Fabio Estevam <fabio.estevam@freescale.com>
+> 
+> Add an entry for MODULE_ALIAS().
+> 
+> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
 
->>>>
->>>>>>
->>>>>> Just as you said, this patch just let sdio_irq_thread wait untill sdio
->>>>>> host resume back to handle the interrupt.
->>>>>>
->>>>>>>> Claim the host  to avoid sdio irq thread handling the pending interrupt
->>>>>>>> while sdio host suspended. The pending interrupt will be handled after
->>>>>>>> the host released in resume when sdio host has been resumed.
->>>>>>>>
->>>>>>>> Signed-off-by: Jialing Fu <jlfu@marvell.com>
->>>>>>>> Signed-off-by: Kevin Liu <kliu5@marvell.com>
->>>>>>>> ---
->>>>>>>>  drivers/mmc/core/sdio.c |   20 ++++++++++++++++++--
->>>>>>>>  1 files changed, 18 insertions(+), 2 deletions(-)
->>>>>>>>
->>>>>>>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
->>>>>>>> index 2273ce6..81140b9 100644
->>>>>>>> --- a/drivers/mmc/core/sdio.c
->>>>>>>> +++ b/drivers/mmc/core/sdio.c
->>>>>>>> @@ -11,6 +11,7 @@
->>>>>>>>
->>>>>>>>  #include <linux/err.h>
->>>>>>>>  #include <linux/pm_runtime.h>
->>>>>>>> +#include <linux/pm_wakeup.h>
->>>>>>>>
->>>>>>>>  #include <linux/mmc/host.h>
->>>>>>>>  #include <linux/mmc/card.h>
->>>>>>>> @@ -923,6 +924,17 @@ static int mmc_sdio_suspend(struct mmc_host *host)
->>>>>>>>                 mmc_release_host(host);
->>>>>>>>         }
->>>>>>>>
->>>>>>>> +       /*
->>>>>>>> +       * If sdio host can wakeup system, its interrupt will _NOT_ be disabled
->>>>>>>> +       * during suspending. So the card interrupt may occur after host has
->>>>>>>> +       * suspended. Claim the host here to avoid sdio irq thread handling the
->>>>>>>> +       * pending interrupt while sdio host suspended. The pending interrupt
->>>>>>>> +       * will be handled after the host released in resume when sdio host has
->>>>>>>> +       * been resumed.
->>>>>>>> +       */
->>>>>>>> +       if (!err && device_may_wakeup(mmc_dev(host)))
->>>>>>>> +               mmc_claim_host(host);
->>>>>>>> +
->>>>>>>>         return err;
->>>>>>>>  }
->>>>>>>>
->>>>>>>> @@ -933,8 +945,12 @@ static int mmc_sdio_resume(struct mmc_host *host)
->>>>>>>>         BUG_ON(!host);
->>>>>>>>         BUG_ON(!host->card);
->>>>>>>>
->>>>>>>> -       /* Basic card reinitialization. */
->>>>>>>> -       mmc_claim_host(host);
->>>>>>>> +       /*
->>>>>>>> +       * Basic card reinitialization.
->>>>>>>> +       * if sdio host can wakeup system, the host has been claimed in suspend.
->>>>>>>> +       */
->>>>>>>> +       if (!device_may_wakeup(mmc_dev(host)))
->>>>>>>> +               mmc_claim_host(host);
->>>>>>>>
->>>>>>>>         /* No need to reinitialize powered-resumed nonremovable cards */
->>>>>>>>         if (mmc_card_is_removable(host) || !mmc_card_keep_power(host))
->>>>>>>> --
->>>>>>>> 1.7.0.4
->>>>>>>>
->>>>>>>
->>>>>>> Kind regards
->>>>>>> Ulf Hansson
+Acked-by: Marek Vasut <marex@denx.de>
+
+> ---
+>  drivers/mmc/host/mxs-mmc.c |    1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index 206fe49..b9a9ca0 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -804,3 +804,4 @@ module_platform_driver(mxs_mmc_driver);
+>  MODULE_DESCRIPTION("FREESCALE MXS MMC peripheral");
+>  MODULE_AUTHOR("Freescale Semiconductor");
+>  MODULE_LICENSE("GPL");
+> +MODULE_ALIAS("platform:" DRIVER_NAME);
+
+Best regards,
+Marek Vasut
