@@ -1,168 +1,140 @@
-From: Johan Rudholm <johan.rudholm@stericsson.com>
-Subject: [PATCH v4 3/4] mmc: core: Break out start_signal_voltage_switch
-Date: Mon, 7 Jan 2013 16:10:27 +0100
-Message-ID: <1357571428-19466-4-git-send-email-johan.rudholm@stericsson.com>
-References: <1357571428-19466-1-git-send-email-johan.rudholm@stericsson.com>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: [PATCH 1/2] mmc: sdio: defer sdio irq handling when host suspended
+Date: Tue, 8 Jan 2013 00:04:46 +0800
+Message-ID: <CADz5_gKWJkms=0ybf9ZaJ7t+h7DgTkEtAzJQQfujs5ZKb6SYLg@mail.gmail.com>
+References: <1355919130-28702-1-git-send-email-kliu5@marvell.com>
+	<1355919130-28702-2-git-send-email-kliu5@marvell.com>
+	<CAPDyKFomOU=ArpZ__uSqLz1OxbmEYOx12-dA8H7CgcRDiqXkPA@mail.gmail.com>
+	<CADz5_gKVxwa6OdFFeJdXYsx46OjWN8JgH9HPsxKtKUcxH8aoDw@mail.gmail.com>
+	<CAPDyKFqtkpuQK+De+XYQtLQj1AW6o72Eua-KPwArS+JUNRGpvQ@mail.gmail.com>
+	<CADz5_g+GXbdGMwgmWWYjz=DayjP0LroAVowNw==JOSUUKPs9KQ@mail.gmail.com>
+	<CAPDyKFqnwk9e20-OQZ7ARyGGmAUoOqXtW4KBQFVqgnE=xrTc-Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:53211 "EHLO
-	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752009Ab3AGPMS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Jan 2013 10:12:18 -0500
-In-Reply-To: <1357571428-19466-1-git-send-email-johan.rudholm@stericsson.com>
+Received: from mail-we0-f169.google.com ([74.125.82.169]:57608 "EHLO
+	mail-we0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753754Ab3AGQEr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Jan 2013 11:04:47 -0500
+Received: by mail-we0-f169.google.com with SMTP id t49so10651052wey.28
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Jan 2013 08:04:46 -0800 (PST)
+In-Reply-To: <CAPDyKFqnwk9e20-OQZ7ARyGGmAUoOqXtW4KBQFVqgnE=xrTc-Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Kevin Liu <keyuan.liu@gmail.com>, Philip Rakity <prakity@nvidia.com>, Daniel Drake <dsd@laptop.org>, Aaron <leafy.myeh@allwinnertech.com>, Subhash Jadavani <subhashj@codeaurora.org>, Johan Rudholm <johan.rudholm@stericsson.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Kevin Liu <kliu5@marvell.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Philip Rakity <prakity@nvidia.com>, Aaron Lu <aaron.lu@amd.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Adrian Hunter <adrian.hunter@intel.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Alexander Stein <alexander.stein@systec-electronic.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Al Cooper <acooper@gmail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>
 
-Allow callers to access the start_signal_voltage_switch host_ops
-member without going through any cmd11 logic. This is mostly a
-preparation for the following signal voltage switch patch.
+2013/1/7 Ulf Hansson <ulf.hansson@linaro.org>:
+> On 7 January 2013 12:16, Kevin Liu <keyuan.liu@gmail.com> wrote:
+>> 2013/1/7 Ulf Hansson <ulf.hansson@linaro.org>:
+>>> On 21 December 2012 13:59, Kevin Liu <keyuan.liu@gmail.com> wrote:
+>>>> 2012/12/21 Ulf Hansson <ulf.hansson@linaro.org>:
+>>>>> On 19 December 2012 13:12, Kevin Liu <kliu5@marvell.com> wrote:
+>>>>>> If sdio host can wakeup system, its interrupt will _NOT_ be disabled
+>>>>>> during suspending. So when card interrupt happens, the sdio irq thread
+>>>>>> will be woken up.
+>>>>>
+>>>>> Is that really needed to handle the irq?
+>>>>>
+>>>>> I think you should instead wait on the system resume to be handled
+>>>>> properly. In the mmc_sdio_resume, sdio_irq thread is woken up to find
+>>>>> out if there is an irq to handle.
+>>>>>
+>>>>> ....
+>>>>> if (!err && host->sdio_irqs)
+>>>>>   wake_up_process(host->sdio_irq_thread);
+>>>>> ....
+>>>>>
+>>>>> Would that not solve your issue?
+>>>>>
+>>>>
+>>>> With current code, if irq keeps on during suspend/resume, when
+>>>> interrupt happen, sdio_irq_thread will be woken up and handle the
+>>>> interrupt immediately while sdio host has suspended. It won't wait.
+>>>
+>>> That is because the sdio host, when in a suspended state, does a
+>>> mmc_signal_sdio_irq call. Is that really what the host should do in
+>>> this state?
+>>>
+>>
+>> Yes, the host should do this because we want the sdio to wakeup host
+>> after system suspended.
+>> So we must keep interrupt enabled after suspended.
+>
+> I see that you need to keep the irqs enabled. But that does not mean
+> you need to call the mmc_signal_sdio_irq, when the host is in
+> suspended. You should only need to keep the irqs enabled to wake up
+> the system from suspend, that is enough, the rest could be handled
+> through the normal resume sequence. Don't you think?
+>
 
-Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
----
- drivers/mmc/core/core.c |   31 +++++++++++++++++++------------
- drivers/mmc/core/core.h |    4 ++--
- drivers/mmc/core/mmc.c  |    8 ++++----
- drivers/mmc/core/sd.c   |    2 +-
- drivers/mmc/core/sdio.c |    3 +--
- 5 files changed, 27 insertions(+), 21 deletions(-)
+mmc_signal_sdio_irq is called by sdhci_irq if card interrupt occur.
+So if the irqs enabled, then mmc_signal_sdio_irq will be called when
+card int from sdio occur even after host suspended and before resumed.
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 285f064..90f8e11 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1219,7 +1219,22 @@ u32 mmc_select_voltage(struct mmc_host *host, u32 ocr)
- 	return ocr;
- }
- 
--int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11)
-+int __mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
-+{
-+	int err = 0;
-+
-+	host->ios.signal_voltage = signal_voltage;
-+	if (host->ops->start_signal_voltage_switch) {
-+		mmc_host_clk_hold(host);
-+		err = host->ops->start_signal_voltage_switch(host, &host->ios);
-+		mmc_host_clk_release(host);
-+	}
-+
-+	return err;
-+
-+}
-+
-+int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
- {
- 	struct mmc_command cmd = {0};
- 	int err = 0;
-@@ -1230,7 +1245,7 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
- 	 * Send CMD11 only if the request is to switch the card to
- 	 * 1.8V signalling.
- 	 */
--	if ((signal_voltage != MMC_SIGNAL_VOLTAGE_330) && cmd11) {
-+	if (signal_voltage != MMC_SIGNAL_VOLTAGE_330) {
- 		cmd.opcode = SD_SWITCH_VOLTAGE;
- 		cmd.arg = 0;
- 		cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-@@ -1243,15 +1258,7 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
- 			return -EIO;
- 	}
- 
--	host->ios.signal_voltage = signal_voltage;
--
--	if (host->ops->start_signal_voltage_switch) {
--		mmc_host_clk_hold(host);
--		err = host->ops->start_signal_voltage_switch(host, &host->ios);
--		mmc_host_clk_release(host);
--	}
--
--	return err;
-+	return __mmc_set_signal_voltage(host, signal_voltage);
- }
- 
- /*
-@@ -1314,7 +1321,7 @@ static void mmc_power_up(struct mmc_host *host)
- 	mmc_set_ios(host);
- 
- 	/* Set signal voltage to 3.3V */
--	mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, false);
-+	__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
- 
- 	/*
- 	 * This delay should be sufficient to allow the power supply
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 4a90067..f2439d5 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -40,8 +40,8 @@ void mmc_set_ungated(struct mmc_host *host);
- void mmc_set_bus_mode(struct mmc_host *host, unsigned int mode);
- void mmc_set_bus_width(struct mmc_host *host, unsigned int width);
- u32 mmc_select_voltage(struct mmc_host *host, u32 ocr);
--int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage,
--			   bool cmd11);
-+int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage);
-+int __mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage);
- void mmc_set_timing(struct mmc_host *host, unsigned int timing);
- void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
- void mmc_power_off(struct mmc_host *host);
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index e6e3911..bd86771 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -769,11 +769,11 @@ static int mmc_select_hs200(struct mmc_card *card)
- 
- 	if (card->ext_csd.card_type & EXT_CSD_CARD_TYPE_SDR_1_2V &&
- 			host->caps2 & MMC_CAP2_HS200_1_2V_SDR)
--		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120, 0);
-+		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
- 
- 	if (err && card->ext_csd.card_type & EXT_CSD_CARD_TYPE_SDR_1_8V &&
- 			host->caps2 & MMC_CAP2_HS200_1_8V_SDR)
--		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180, 0);
-+		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
- 
- 	/* If fails try again during next card power cycle */
- 	if (err)
-@@ -1221,8 +1221,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 			 * WARNING: eMMC rules are NOT the same as SD DDR
- 			 */
- 			if (ddr == MMC_1_2V_DDR_MODE) {
--				err = mmc_set_signal_voltage(host,
--					MMC_SIGNAL_VOLTAGE_120, 0);
-+				err = __mmc_set_signal_voltage(host,
-+					MMC_SIGNAL_VOLTAGE_120);
- 				if (err)
- 					goto err;
- 			}
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 74972c2..0cc1b26 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -759,7 +759,7 @@ try_again:
- 	 */
- 	if (!mmc_host_is_spi(host) && rocr &&
- 	   ((*rocr & 0x41000000) == 0x41000000)) {
--		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180, true);
-+		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
- 		if (err) {
- 			ocr &= ~SD_OCR_S18R;
- 			goto try_again;
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 2273ce6..0c84e0f 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -650,8 +650,7 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
- 			(MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
- 			 MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
- 			 MMC_CAP_UHS_DDR50))) {
--		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180,
--				true);
-+		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
- 		if (err) {
- 			ocr &= ~R4_18V_PRESENT;
- 			host->ocr &= ~R4_18V_PRESENT;
--- 
-1.7.10
-
+>>
+>>>>
+>>>> Just as you said, this patch just let sdio_irq_thread wait untill sdio
+>>>> host resume back to handle the interrupt.
+>>>>
+>>>>>> Claim the host  to avoid sdio irq thread handling the pending interrupt
+>>>>>> while sdio host suspended. The pending interrupt will be handled after
+>>>>>> the host released in resume when sdio host has been resumed.
+>>>>>>
+>>>>>> Signed-off-by: Jialing Fu <jlfu@marvell.com>
+>>>>>> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+>>>>>> ---
+>>>>>>  drivers/mmc/core/sdio.c |   20 ++++++++++++++++++--
+>>>>>>  1 files changed, 18 insertions(+), 2 deletions(-)
+>>>>>>
+>>>>>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+>>>>>> index 2273ce6..81140b9 100644
+>>>>>> --- a/drivers/mmc/core/sdio.c
+>>>>>> +++ b/drivers/mmc/core/sdio.c
+>>>>>> @@ -11,6 +11,7 @@
+>>>>>>
+>>>>>>  #include <linux/err.h>
+>>>>>>  #include <linux/pm_runtime.h>
+>>>>>> +#include <linux/pm_wakeup.h>
+>>>>>>
+>>>>>>  #include <linux/mmc/host.h>
+>>>>>>  #include <linux/mmc/card.h>
+>>>>>> @@ -923,6 +924,17 @@ static int mmc_sdio_suspend(struct mmc_host *host)
+>>>>>>                 mmc_release_host(host);
+>>>>>>         }
+>>>>>>
+>>>>>> +       /*
+>>>>>> +       * If sdio host can wakeup system, its interrupt will _NOT_ be disabled
+>>>>>> +       * during suspending. So the card interrupt may occur after host has
+>>>>>> +       * suspended. Claim the host here to avoid sdio irq thread handling the
+>>>>>> +       * pending interrupt while sdio host suspended. The pending interrupt
+>>>>>> +       * will be handled after the host released in resume when sdio host has
+>>>>>> +       * been resumed.
+>>>>>> +       */
+>>>>>> +       if (!err && device_may_wakeup(mmc_dev(host)))
+>>>>>> +               mmc_claim_host(host);
+>>>>>> +
+>>>>>>         return err;
+>>>>>>  }
+>>>>>>
+>>>>>> @@ -933,8 +945,12 @@ static int mmc_sdio_resume(struct mmc_host *host)
+>>>>>>         BUG_ON(!host);
+>>>>>>         BUG_ON(!host->card);
+>>>>>>
+>>>>>> -       /* Basic card reinitialization. */
+>>>>>> -       mmc_claim_host(host);
+>>>>>> +       /*
+>>>>>> +       * Basic card reinitialization.
+>>>>>> +       * if sdio host can wakeup system, the host has been claimed in suspend.
+>>>>>> +       */
+>>>>>> +       if (!device_may_wakeup(mmc_dev(host)))
+>>>>>> +               mmc_claim_host(host);
+>>>>>>
+>>>>>>         /* No need to reinitialize powered-resumed nonremovable cards */
+>>>>>>         if (mmc_card_is_removable(host) || !mmc_card_keep_power(host))
+>>>>>> --
+>>>>>> 1.7.0.4
+>>>>>>
+>>>>>
+>>>>> Kind regards
+>>>>> Ulf Hansson
