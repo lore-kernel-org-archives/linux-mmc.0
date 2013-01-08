@@ -1,59 +1,62 @@
-From: Marek Vasut <marex@denx.de>
-Subject: Re: [PATCH] mmc: mxs-mmc: Fix warning due to incorrect type
-Date: Tue, 8 Jan 2013 07:57:29 +0100
-Message-ID: <201301080757.29584.marex@denx.de>
-References: <1357605755-8872-1-git-send-email-festevam@gmail.com>
+From: Konstantin Dorfman <kdorfman@codeaurora.org>
+Subject: Re: [PATCH] mmc: correct the EXCEPTION_EVENTS_STATUS vaule comment
+Date: Tue, 08 Jan 2013 10:22:55 +0200
+Message-ID: <50EBD75F.7050805@codeaurora.org>
+References: <1A230AD7863570458C6CF2BE7CD6618B102BE5CB@SHSMSX102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-out.m-online.net ([212.18.0.9]:54408 "EHLO
-	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751241Ab3AHG5c (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Jan 2013 01:57:32 -0500
-In-Reply-To: <1357605755-8872-1-git-send-email-festevam@gmail.com>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:9034 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754398Ab3AHIXA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Jan 2013 03:23:00 -0500
+In-Reply-To: <1A230AD7863570458C6CF2BE7CD6618B102BE5CB@SHSMSX102.ccr.corp.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
+To: "Zhang, YiX X" <yix.x.zhang@intel.com>
+Cc: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Dear Fabio Estevam,
 
-> From: Fabio Estevam <fabio.estevam@freescale.com>
-> 
-> Fixes the following warning when building with W=1 option:
-> 
-> drivers/mmc/host/mxs-mmc.c: In function 'mxs_mmc_adtc':
-> drivers/mmc/host/mxs-mmc.c:401:2: warning: comparison between signed and
-> unsigned integer expressions [-Wsign-compare]
-> 
-> The warning happens because 'i' is used in 'for_each_sg(sgl, sg, sg_len,
-> i)' and should be made unsigned.
-> 
-> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+May be it is worth to change all this struct comments to be:
 
-Nice
+u8	raw_exception_status;	/* EXT_CSD_EXP_EVENTS_STATUS */
 
-Acked-by: Marek Vasut <marex@denx.de>
+This will reference actual offset value from "include/linux/mmc/mmc.h"
 
+Thanks,
+
+On 01/08/2013 08:07 AM, Zhang, YiX X wrote:
+>  From aaea3405944d844f53679b295d4082584f33d9a3 Mon Sep 17 00:00:00 2001
+> From: ZhangYi <yix.x.zhang@intel.com>
+> Date: Tue, 8 Jan 2013 13:50:09 +0800
+> Subject: [PATCH] mmc: correct the EXCEPTION_EVENTS_STATUS vaule comment
+>
+> The right value is 54 according to eMMC 4.5 specification.
+>
+> Signed-off-by: ZhangYi <yix.x.zhang@intel.com>
 > ---
->  drivers/mmc/host/mxs-mmc.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index 206fe49..eb33cb1 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -354,7 +354,7 @@ static void mxs_mmc_adtc(struct mxs_mmc_host *host)
->  	struct dma_async_tx_descriptor *desc;
->  	struct scatterlist *sgl = data->sg, *sg;
->  	unsigned int sg_len = data->sg_len;
-> -	int i;
-> +	unsigned int i;
-> 
->  	unsigned short dma_data_dir, timeout;
->  	enum dma_transfer_direction slave_dirn;
+>   include/linux/mmc/card.h |    2 +-
+>   1 files changed, 1 insertions(+), 1 deletions(-)
+>
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 5c69315..ffde1d3 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -83,7 +83,7 @@ struct mmc_ext_csd {
+>   	unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
+>   	unsigned int		boot_ro_lock;		/* ro lock support */
+>   	bool			boot_ro_lockable;
+> -	u8			raw_exception_status;	/* 53 */
+> +	u8			raw_exception_status;	/* 54 */
+>   	u8			raw_partition_support;	/* 160 */
+>   	u8			raw_rpmb_size_mult;	/* 168 */
+>   	u8			raw_erased_mem_count;	/* 181 */
+>
 
-Best regards,
-Marek Vasut
+
+-- 
+Konstantin Dorfman,
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center,
+Inc. is a member of Code Aurora Forum,
+hosted by The Linux Foundation
