@@ -1,81 +1,68 @@
-From: Andy Walls <awalls@md.metrocast.net>
-Subject: Re: [PATCH 5/5] kfifo: log based kfifo API
-Date: Tue, 08 Jan 2013 16:10:07 -0500
-Message-ID: <f1be90be-ad99-4dff-8332-804383adc5c8@email.android.com>
-References: <1357657073-27352-1-git-send-email-yuanhan.liu@linux.intel.com> <1357657073-27352-6-git-send-email-yuanhan.liu@linux.intel.com> <20130108181645.GA7972@core.coreip.homeip.net>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/1] mmc: mmci: Use devm_regulator_get API
+Date: Tue, 8 Jan 2013 22:19:19 +0100
+Message-ID: <CAPDyKFoCdeOUpmmyQ20fLyy_eLDHgRDBnUJKa_yt6Ew4rQtO-Q@mail.gmail.com>
+References: <1357638169-23321-1-git-send-email-sachin.kamat@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20130108181645.GA7972@core.coreip.homeip.net>
-Sender: owner-linux-mm@kvack.org
-To: Dmitry Torokhov <dmitry.torokhov@gmail.com>, Yuanhan Liu <yuanhan.liu@linux.intel.com>
-Cc: linux-kernel@vger.kernel.org, Stefani Seibold <stefani@seibold.net>, Andrew Morton <akpm@linux-foundation.org>, linux-omap@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, platform-driver-x86@vger.kernel.org, linux-input@vger.kernel.org, linux-iio@vger.kernel.org, linux-rdma@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, linux-pci@vger.kernel.org, open-iscsi@googlegroups.com, linux-scsi@vger.kernel.org, devel@driverdev.osuosl.org, linux-serial@vger.kernel.org, linux-usb@vger.kernel.org, linux-mm@kvack.org, dccp@vger.kernel.org, linux-sctp@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f169.google.com ([209.85.217.169]:48634 "EHLO
+	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751031Ab3AHVTU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Jan 2013 16:19:20 -0500
+Received: by mail-lb0-f169.google.com with SMTP id gk1so732256lbb.28
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Jan 2013 13:19:19 -0800 (PST)
+In-Reply-To: <1357638169-23321-1-git-send-email-sachin.kamat@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sachin Kamat <sachin.kamat@linaro.org>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, patches@linaro.org
 
-Dmitry Torokhov <dmitry.torokhov@gmail.com> wrote:
-
->Hi Yuanhan,
+On 8 January 2013 10:42, Sachin Kamat <sachin.kamat@linaro.org> wrote:
+> devm_regulator_get is device managed and saves some cleanup
+> and exit code.
 >
->On Tue, Jan 08, 2013 at 10:57:53PM +0800, Yuanhan Liu wrote:
->> The current kfifo API take the kfifo size as input, while it rounds
->>  _down_ the size to power of 2 at __kfifo_alloc. This may introduce
->> potential issue.
->>=20
->> Take the code at drivers/hid/hid-logitech-dj.c as example:
->>=20
->> 	if (kfifo_alloc(&djrcv_dev->notif_fifo,
->>                        DJ_MAX_NUMBER_NOTIFICATIONS * sizeof(struct
->dj_report),
->>                        GFP_KERNEL)) {
->>=20
->> Where, DJ_MAX_NUMBER_NOTIFICATIONS is 8, and sizeo of(struct
->dj_report)
->> is 15.
->>=20
->> Which means it wants to allocate a kfifo buffer which can store 8
->> dj_report entries at once. The expected kfifo buffer size would be
->> 8 * 15 =3D 120 then. While, in the end, __kfifo_alloc will turn the
->> size to rounddown_power_of_2(120) =3D  64, and then allocate a buf
->> with 64 bytes, which I don't think this is the original author want.
->>=20
->> With the new log API, we can do like following:
->>=20
->> 	int kfifo_size_order =3D order_base_2(DJ_MAX_NUMBER_NOTIFICATIONS *
->> 					    sizeof(struct dj_report));
->>=20
->> 	if (kfifo_alloc(&djrcv_dev->notif_fifo, kfifo_size_order,
->GFP_KERNEL)) {
->>=20
->> This make sure we will allocate enough kfifo buffer for holding
->> DJ_MAX_NUMBER_NOTIFICATIONS dj_report entries.
+> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+> ---
+> Compile tested against linux-next tree (20130108).
+> ---
+>  drivers/mmc/host/mmci.c |    3 +--
+>  1 files changed, 1 insertions(+), 2 deletions(-)
 >
->Why don't you simply change __kfifo_alloc to round the allocation up
->instead of down?
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 1507723..3ef9b1f 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -1386,7 +1386,7 @@ static int mmci_probe(struct amba_device *dev,
 >
->Thanks.
+>  #ifdef CONFIG_REGULATOR
+>         /* If we're using the regulator framework, try to fetch a regulator */
+> -       host->vcc = regulator_get(&dev->dev, "vmmc");
+> +       host->vcc = devm_regulator_get(&dev->dev, "vmmc");
+
+This is not needed. Host drivers shall instead use
+mmc_regulator_get_supply API, which is already doing
+devm_regulator_get. A patch for mmci to use mmc_regulator_get_supply
+API has already been merged through Russell King's ARM tree.
+
+>         if (IS_ERR(host->vcc))
+>                 host->vcc = NULL;
+>         else {
+> @@ -1587,7 +1587,6 @@ static int mmci_remove(struct amba_device *dev)
 >
->--=20
->Dmitry
->--
->To unsubscribe from this list: send the line "unsubscribe linux-media"
->in
->the body of a message to majordomo@vger.kernel.org
->More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>                 if (host->vcc)
+>                         mmc_regulator_set_ocr(mmc, host->vcc, 0);
+> -               regulator_put(host->vcc);
+>
+>                 mmc_free_host(mmc);
+>
+> --
+> 1.7.4.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Hi Dmitry,
-
-I agree.   I don't see the benefit in pushing up the change to a kfifo in=
-ternal decision/problem to many different places in the kernel.
-
-Regards,
-Andy
-
-=20
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=3Dmailto:"dont@kvack.org"> email@kvack.org </a>
+Kind regards
+Ulf Hansson
