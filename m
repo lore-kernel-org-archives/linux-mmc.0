@@ -1,87 +1,131 @@
-From: Johan Rudholm <jrudholm@gmail.com>
-Subject: Re: [PATCH v4 3/4] mmc: core: Break out start_signal_voltage_switch
-Date: Tue, 8 Jan 2013 11:23:01 +0100
-Message-ID: <CA+20K0Aj73irSXibLzMB4bDcFuox7jCBCpgr7fR-kd4=umCgSw@mail.gmail.com>
-References: <1357571428-19466-1-git-send-email-johan.rudholm@stericsson.com>
-	<1357571428-19466-4-git-send-email-johan.rudholm@stericsson.com>
-	<CAPDyKFp9D0c8vOqzEDdwU9XWdBg1-FYe3KNb52_Y=Bu4Q7OrPg@mail.gmail.com>
-	<CADz5_gLvU7ZPwTqiD3MJXoAKhCC05O2rdejstiUjpr-hvzOFWA@mail.gmail.com>
-	<CAPDyKFp2Xx5VokaZHDJgjoKKozkQ_DYRm69d_c4Qd8umhNZ9hw@mail.gmail.com>
+From: Qiang Gao <gaoqiangscut@gmail.com>
+Subject: [PATCH] fix multiple mark_page_accessed called when sequentially
+ writing a file with blocksize less than PAGE_SIZE ,which might pollute the LRU.
+Date: Tue, 8 Jan 2013 21:35:11 +0800
+Message-ID: <CAKWKT+bYwVXxi_pAG7S+htF9NYNtNxLN=Td+aqaynuHmD00DbA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f169.google.com ([209.85.216.169]:47414 "EHLO
-	mail-qc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751084Ab3AHKXD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Jan 2013 05:23:03 -0500
-Received: by mail-qc0-f169.google.com with SMTP id t2so308002qcq.28
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Jan 2013 02:23:01 -0800 (PST)
-In-Reply-To: <CAPDyKFp2Xx5VokaZHDJgjoKKozkQ_DYRm69d_c4Qd8umhNZ9hw@mail.gmail.com>
+Received: from mail-vb0-f47.google.com ([209.85.212.47]:60861 "EHLO
+	mail-vb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754754Ab3AHNfM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Jan 2013 08:35:12 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Kevin Liu <keyuan.liu@gmail.com>, Johan Rudholm <johan.rudholm@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Philip Rakity <prakity@nvidia.com>, Daniel Drake <dsd@laptop.org>, Aaron <leafy.myeh@allwinnertech.com>, Subhash Jadavani <subhashj@codeaurora.org>
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi Kevin and Ulf,
+sequential write to a file with blocksize less than PAGE_SIZE  will call
+mark_page_accessed multiple times,
 
-2013/1/8 Ulf Hansson <ulf.hansson@linaro.org>:
-> On 8 January 2013 01:56, Kevin Liu <keyuan.liu@gmail.com> wrote:
->> 2013/1/8 Ulf Hansson <ulf.hansson@linaro.org>:
->>> On 7 January 2013 16:10, Johan Rudholm <johan.rudholm@stericsson.com> wrote:
->>>> Allow callers to access the start_signal_voltage_switch host_ops
->>>> member without going through any cmd11 logic. This is mostly a
->>>> preparation for the following signal voltage switch patch.
->>>>
->>>> Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
->>>> ---
->>>>  drivers/mmc/core/core.c |   31 +++++++++++++++++++------------
->>>>  drivers/mmc/core/core.h |    4 ++--
->>>>  drivers/mmc/core/mmc.c  |    8 ++++----
->>>>  drivers/mmc/core/sd.c   |    2 +-
->>>>  drivers/mmc/core/sdio.c |    3 +--
->>>>  5 files changed, 27 insertions(+), 21 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>>> index 285f064..90f8e11 100644
->>>> --- a/drivers/mmc/core/core.c
->>>> +++ b/drivers/mmc/core/core.c
->>>> @@ -1219,7 +1219,22 @@ u32 mmc_select_voltage(struct mmc_host *host, u32 ocr)
->>>>         return ocr;
->>>>  }
->>>>
->>>> -int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11)
->>>> +int __mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
->>>> +{
->>>> +       int err = 0;
->>>> +
->>>> +       host->ios.signal_voltage = signal_voltage;
->>>> +       if (host->ops->start_signal_voltage_switch) {
->>>> +               mmc_host_clk_hold(host);
->>>> +               err = host->ops->start_signal_voltage_switch(host, &host->ios);
->>>
->>> Would it not make sense to restore the host->ios.signal_voltage value
->>> if this goes wrong?
->>>
->>
->> Why need to transfer ios to the voltage switch function which only
->> need the voltage value.
->> Why not just transfer the voltage value to the voltage switch
->> function? If return ok then set host->ios.signal_voltage =
->> signal_voltage otherwise do nothing.
->> I did this in my previous patch.
->
-> I like the idea!
->
-> Although, if the "host->ops->start_signal_voltage_switch" function
-> pointer is missing, we should fall back to set the new voltage value
-> anyway I think.
+	if (!pagevec_space(pvec))
+ 		__pagevec_lru_add(pvec, lru);
+it seems this trick fix this problem,but not quite thoroughly. there's a chance
+that when another page was added to the pvec before the 14th page was
+secondly mark_page_accesseded, then the 14th page was still active.
 
-How about we keep the definition of start_signal_voltage_switch for
-now and maybe send it as a separate patch later? This change is not
-really functionally related to this patch series.
 
-I agree that reseting the value of ios.signal_voltage to the original
-value on failure is good, as Kevin initially suggested. I'll take care
-of this in the next version!
 
-Kind regards, Johan
+diff --git a/fs/open.c b/fs/open.c
+index 9b33c0c..a418419 100644
+--- a/fs/open.c
++++ b/fs/open.c
+@@ -674,6 +674,13 @@ int open_check_o_direct(struct file *f)
+ 	return 0;
+ }
+
++
++static void
++file_w_state_init(struct file_w_state *wstat)
++{
++	wstat->prev_w_pos=-1;
++}
++
+ static int do_dentry_open(struct file *f,
+ 			  int (*open)(struct inode *, struct file *),
+ 			  const struct cred *cred)
+@@ -730,6 +737,7 @@ static int do_dentry_open(struct file *f,
+ 	f->f_flags &= ~(O_CREAT | O_EXCL | O_NOCTTY | O_TRUNC);
+
+ 	file_ra_state_init(&f->f_ra, f->f_mapping->host->i_mapping);
++	file_w_state_init(&f->f_wstat);
+
+ 	return 0;
+
+diff --git a/include/linux/fs.h b/include/linux/fs.h
+index 7617ee0..b90d3ff 100644
+--- a/include/linux/fs.h
++++ b/include/linux/fs.h
+@@ -746,6 +746,10 @@ struct file_ra_state {
+ 	loff_t prev_pos;		/* Cache last read() position */
+ };
+
++struct file_w_state {
++	loff_t prev_w_pos;
++};
++
+ /*
+  * Check if @index falls in the readahead windows.
+  */
+@@ -787,6 +791,7 @@ struct file {
+ 	struct fown_struct	f_owner;
+ 	const struct cred	*f_cred;
+ 	struct file_ra_state	f_ra;
++	struct file_w_state		f_wstat;
+
+ 	u64			f_version;
+ #ifdef CONFIG_SECURITY
+diff --git a/mm/filemap.c b/mm/filemap.c
+index 83efee7..ea144a9 100644
+--- a/mm/filemap.c
++++ b/mm/filemap.c
+@@ -2287,6 +2287,9 @@ static ssize_t generic_perform_write(struct file *file,
+ 	long status = 0;
+ 	ssize_t written = 0;
+ 	unsigned int flags = 0;
++	unsigned long prev_pos=file->f_wstat.prev_w_pos;
++	unsigned long prev_off=(prev_pos & (PAGE_CACHE_SIZE -1));
++	pgoff_t prev_index=(prev_pos >> PAGE_CACHE_SHIFT);
+
+ 	/*
+ 	 * Copies from kernel address space cannot fail (NFSD is a big user).
+@@ -2296,12 +2299,14 @@ static ssize_t generic_perform_write(struct file *file,
+
+ 	do {
+ 		struct page *page;
++		pgoff_t index;
+ 		unsigned long offset;	/* Offset into pagecache page */
+ 		unsigned long bytes;	/* Bytes to write to page */
+ 		size_t copied;		/* Bytes copied from user */
+ 		void *fsdata;
+
+ 		offset = (pos & (PAGE_CACHE_SIZE - 1));
++		index = pos >> PAGE_CACHE_SHIFT;
+ 		bytes = min_t(unsigned long, PAGE_CACHE_SIZE - offset,
+ 						iov_iter_count(i));
+
+@@ -2334,7 +2339,8 @@ again:
+ 		pagefault_enable();
+ 		flush_dcache_page(page);
+
+-		mark_page_accessed(page);
++		if (index != prev_index || offset != prev_off)
++			mark_page_accessed(page);
+ 		status = a_ops->write_end(file, mapping, pos, bytes, copied,
+ 						page, fsdata);
+ 		if (unlikely(status < 0))
+@@ -2359,6 +2365,8 @@ again:
+ 		}
+ 		pos += copied;
+ 		written += copied;
++		prev_index = index;
++		prev_off = offset;
+
+ 		balance_dirty_pages_ratelimited(mapping);
+ 		if (fatal_signal_pending(current)) {
+@@ -2367,6 +2375,7 @@ again:
+ 		}
+ 	} while (iov_iter_count(i));
+
++	file->f_wstat.prev_w_pos=pos;
+ 	return written ? written : status;
+ }
