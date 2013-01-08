@@ -1,226 +1,75 @@
-From: <wei_wang@realsil.com.cn>
-Subject: [PATCH v4 4/8] MFD:rtsx: Add callback function switch_output_voltage
-Date: Tue, 8 Jan 2013 17:57:25 +0800
-Message-ID: <f0d54487029a239b246313259c26d7c984cb4642.1357638064.git.wei_wang@realsil.com.cn>
-References: <cover.1357638064.git.wei_wang@realsil.com.cn>
+From: "Zhang, YiX X" <yix.x.zhang@intel.com>
+Subject: RE: [PATCH] mmc: correct the EXCEPTION_EVENTS_STATUS vaule comment
+Date: Tue, 8 Jan 2013 10:14:51 +0000
+Message-ID: <1A230AD7863570458C6CF2BE7CD6618B102BE9D0@SHSMSX102.ccr.corp.intel.com>
+References: <1A230AD7863570458C6CF2BE7CD6618B102BE5CB@SHSMSX102.ccr.corp.intel.com>
+ <50EBD75F.7050805@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devel-bounces@linuxdriverproject.org>
-In-Reply-To: <cover.1357638064.git.wei_wang@realsil.com.cn>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/devel>,
- <mailto:devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/devel/>
-List-Post: <mailto:devel@linuxdriverproject.org>
-List-Help: <mailto:devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/devel>,
- <mailto:devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: devel-bounces@linuxdriverproject.org
-Sender: "devel" <devel-bounces@linuxdriverproject.org>
-To: cjb@laptop.org, sameo@linux.intel.com
-Cc: arnd@arndb.de, oakad@yahoo.com, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Wei WANG <wei_wang@realsil.com.cn>, bp@alien8.de, devel@linuxdriverproject.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <50EBD75F.7050805@codeaurora.org>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Konstantin Dorfman <kdorfman@codeaurora.org>
+Cc: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Wei WANG <wei_wang@realsil.com.cn>
+yes, you are right, I will change them later, thanks.
 
-Different card reader has different method to switch output voltage,
-add this callback to let the card reader implement its individual switch
-function.
+Regards
+Zhang,Yi.
 
-Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
----
- drivers/mfd/rtl8411.c        |   16 ++++++++++++++++
- drivers/mfd/rts5209.c        |   20 ++++++++++++++++++++
- drivers/mfd/rts5229.c        |   20 ++++++++++++++++++++
- drivers/mfd/rtsx_pcr.c       |    9 +++++++++
- include/linux/mfd/rtsx_pci.h |   24 ++++++++++++++++++++----
- 5 files changed, 85 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mfd/rtl8411.c b/drivers/mfd/rtl8411.c
-index 89f046c..5058ba8 100644
---- a/drivers/mfd/rtl8411.c
-+++ b/drivers/mfd/rtl8411.c
-@@ -112,6 +112,21 @@ static int rtl8411_card_power_off(struct rtsx_pcr *pcr, int card)
- 			BPP_LDO_POWB, BPP_LDO_SUSPEND);
- }
- 
-+static int rtl8411_switch_output_voltage(struct rtsx_pcr *pcr, u8 voltage)
-+{
-+	u8 mask, val;
-+
-+	mask = (BPP_REG_TUNED18 << BPP_TUNED18_SHIFT_8411) | BPP_PAD_MASK;
-+	if (voltage == OUTPUT_3V3)
-+		val = (BPP_ASIC_3V3 << BPP_TUNED18_SHIFT_8411) | BPP_PAD_3V3;
-+	else if (voltage == OUTPUT_1V8)
-+		val = (BPP_ASIC_1V8 << BPP_TUNED18_SHIFT_8411) | BPP_PAD_1V8;
-+	else
-+		return -EINVAL;
-+
-+	return rtsx_pci_write_register(pcr, LDO_CTL, mask, val);
-+}
-+
- static unsigned int rtl8411_cd_deglitch(struct rtsx_pcr *pcr)
- {
- 	unsigned int card_exist;
-@@ -172,6 +187,7 @@ static const struct pcr_ops rtl8411_pcr_ops = {
- 	.disable_auto_blink = rtl8411_disable_auto_blink,
- 	.card_power_on = rtl8411_card_power_on,
- 	.card_power_off = rtl8411_card_power_off,
-+	.switch_output_voltage = rtl8411_switch_output_voltage,
- 	.cd_deglitch = rtl8411_cd_deglitch,
- };
- 
-diff --git a/drivers/mfd/rts5209.c b/drivers/mfd/rts5209.c
-index 283a4f1..ba74de8 100644
---- a/drivers/mfd/rts5209.c
-+++ b/drivers/mfd/rts5209.c
-@@ -144,6 +144,25 @@ static int rts5209_card_power_off(struct rtsx_pcr *pcr, int card)
- 	return rtsx_pci_send_cmd(pcr, 100);
- }
- 
-+static int rts5209_switch_output_voltage(struct rtsx_pcr *pcr, u8 voltage)
-+{
-+	int err;
-+
-+	if (voltage == OUTPUT_3V3) {
-+		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4FC0 | 0x24);
-+		if (err < 0)
-+			return err;
-+	} else if (voltage == OUTPUT_1V8) {
-+		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4C40 | 0x24);
-+		if (err < 0)
-+			return err;
-+	} else {
-+		return -EINVAL;
-+	}
-+
-+	return 0;
-+}
-+
- static const struct pcr_ops rts5209_pcr_ops = {
- 	.extra_init_hw = rts5209_extra_init_hw,
- 	.optimize_phy = rts5209_optimize_phy,
-@@ -153,6 +172,7 @@ static const struct pcr_ops rts5209_pcr_ops = {
- 	.disable_auto_blink = rts5209_disable_auto_blink,
- 	.card_power_on = rts5209_card_power_on,
- 	.card_power_off = rts5209_card_power_off,
-+	.switch_output_voltage = rts5209_switch_output_voltage,
- 	.cd_deglitch = NULL,
- };
- 
-diff --git a/drivers/mfd/rts5229.c b/drivers/mfd/rts5229.c
-index b9dbab2..ec1747a 100644
---- a/drivers/mfd/rts5229.c
-+++ b/drivers/mfd/rts5229.c
-@@ -114,6 +114,25 @@ static int rts5229_card_power_off(struct rtsx_pcr *pcr, int card)
- 	return rtsx_pci_send_cmd(pcr, 100);
- }
- 
-+static int rts5229_switch_output_voltage(struct rtsx_pcr *pcr, u8 voltage)
-+{
-+	int err;
-+
-+	if (voltage == OUTPUT_3V3) {
-+		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4FC0 | 0x24);
-+		if (err < 0)
-+			return err;
-+	} else if (voltage == OUTPUT_1V8) {
-+		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4C40 | 0x24);
-+		if (err < 0)
-+			return err;
-+	} else {
-+		return -EINVAL;
-+	}
-+
-+	return 0;
-+}
-+
- static const struct pcr_ops rts5229_pcr_ops = {
- 	.extra_init_hw = rts5229_extra_init_hw,
- 	.optimize_phy = rts5229_optimize_phy,
-@@ -123,6 +142,7 @@ static const struct pcr_ops rts5229_pcr_ops = {
- 	.disable_auto_blink = rts5229_disable_auto_blink,
- 	.card_power_on = rts5229_card_power_on,
- 	.card_power_off = rts5229_card_power_off,
-+	.switch_output_voltage = rts5229_switch_output_voltage,
- 	.cd_deglitch = NULL,
- };
- 
-diff --git a/drivers/mfd/rtsx_pcr.c b/drivers/mfd/rtsx_pcr.c
-index 1dc64bb..99e12b8 100644
---- a/drivers/mfd/rtsx_pcr.c
-+++ b/drivers/mfd/rtsx_pcr.c
-@@ -702,6 +702,15 @@ int rtsx_pci_card_power_off(struct rtsx_pcr *pcr, int card)
- }
- EXPORT_SYMBOL_GPL(rtsx_pci_card_power_off);
- 
-+int rtsx_pci_switch_output_voltage(struct rtsx_pcr *pcr, u8 voltage)
-+{
-+	if (pcr->ops->switch_output_voltage)
-+		return pcr->ops->switch_output_voltage(pcr, voltage);
-+
-+	return 0;
-+}
-+EXPORT_SYMBOL_GPL(rtsx_pci_switch_output_voltage);
-+
- unsigned int rtsx_pci_card_exist(struct rtsx_pcr *pcr)
- {
- 	unsigned int val;
-diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx_pci.h
-index bebe9f9..2e3e2e0 100644
---- a/include/linux/mfd/rtsx_pci.h
-+++ b/include/linux/mfd/rtsx_pci.h
-@@ -158,10 +158,9 @@
- #define SG_TRANS_DATA		(0x02 << 4)
- #define SG_LINK_DESC		(0x03 << 4)
- 
--/* SD bank voltage */
--#define SD_IO_3V3		0
--#define SD_IO_1V8		1
--
-+/* Output voltage */
-+#define OUTPUT_3V3		0
-+#define OUTPUT_1V8		1
- 
- /* Card Clock Enable Register */
- #define SD_CLK_EN			0x04
-@@ -201,6 +200,20 @@
- #define CHANGE_CLK			0x01
- 
- /* LDO_CTL */
-+#define BPP_ASIC_1V7			0x00
-+#define BPP_ASIC_1V8			0x01
-+#define BPP_ASIC_1V9			0x02
-+#define BPP_ASIC_2V0			0x03
-+#define BPP_ASIC_2V7			0x04
-+#define BPP_ASIC_2V8			0x05
-+#define BPP_ASIC_3V2			0x06
-+#define BPP_ASIC_3V3			0x07
-+#define BPP_REG_TUNED18			0x07
-+#define BPP_TUNED18_SHIFT_8402		5
-+#define BPP_TUNED18_SHIFT_8411		4
-+#define BPP_PAD_MASK			0x04
-+#define BPP_PAD_3V3			0x04
-+#define BPP_PAD_1V8			0x00
- #define BPP_LDO_POWB			0x03
- #define BPP_LDO_ON			0x00
- #define BPP_LDO_SUSPEND			0x02
-@@ -688,6 +701,8 @@ struct pcr_ops {
- 	int		(*disable_auto_blink)(struct rtsx_pcr *pcr);
- 	int		(*card_power_on)(struct rtsx_pcr *pcr, int card);
- 	int		(*card_power_off)(struct rtsx_pcr *pcr, int card);
-+	int		(*switch_output_voltage)(struct rtsx_pcr *pcr,
-+						u8 voltage);
- 	unsigned int	(*cd_deglitch)(struct rtsx_pcr *pcr);
- };
- 
-@@ -783,6 +798,7 @@ int rtsx_pci_switch_clock(struct rtsx_pcr *pcr, unsigned int card_clock,
- 		u8 ssc_depth, bool initial_mode, bool double_clk, bool vpclk);
- int rtsx_pci_card_power_on(struct rtsx_pcr *pcr, int card);
- int rtsx_pci_card_power_off(struct rtsx_pcr *pcr, int card);
-+int rtsx_pci_switch_output_voltage(struct rtsx_pcr *pcr, u8 voltage);
- unsigned int rtsx_pci_card_exist(struct rtsx_pcr *pcr);
- void rtsx_pci_complete_unfinished_transfer(struct rtsx_pcr *pcr);
- 
--- 
-1.7.9.5
+-----Original Message-----
+From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Konstantin Dorfman
+Sent: Tuesday, January 08, 2013 4:23 PM
+To: Zhang, YiX X
+Cc: cjb@laptop.org; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: correct the EXCEPTION_EVENTS_STATUS vaule comment
+
+
+May be it is worth to change all this struct comments to be:
+
+u8	raw_exception_status;	/* EXT_CSD_EXP_EVENTS_STATUS */
+
+This will reference actual offset value from "include/linux/mmc/mmc.h"
+
+Thanks,
+
+On 01/08/2013 08:07 AM, Zhang, YiX X wrote:
+>  From aaea3405944d844f53679b295d4082584f33d9a3 Mon Sep 17 00:00:00 
+> 2001
+> From: ZhangYi <yix.x.zhang@intel.com>
+> Date: Tue, 8 Jan 2013 13:50:09 +0800
+> Subject: [PATCH] mmc: correct the EXCEPTION_EVENTS_STATUS vaule 
+> comment
+>
+> The right value is 54 according to eMMC 4.5 specification.
+>
+> Signed-off-by: ZhangYi <yix.x.zhang@intel.com>
+> ---
+>   include/linux/mmc/card.h |    2 +-
+>   1 files changed, 1 insertions(+), 1 deletions(-)
+>
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h index 
+> 5c69315..ffde1d3 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -83,7 +83,7 @@ struct mmc_ext_csd {
+>   	unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
+>   	unsigned int		boot_ro_lock;		/* ro lock support */
+>   	bool			boot_ro_lockable;
+> -	u8			raw_exception_status;	/* 53 */
+> +	u8			raw_exception_status;	/* 54 */
+>   	u8			raw_partition_support;	/* 160 */
+>   	u8			raw_rpmb_size_mult;	/* 168 */
+>   	u8			raw_erased_mem_count;	/* 181 */
+>
+
+
+--
+Konstantin Dorfman,
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, hosted by The Linux Foundation
+--
+To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
