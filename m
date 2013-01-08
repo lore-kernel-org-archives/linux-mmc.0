@@ -1,131 +1,175 @@
-From: Qiang Gao <gaoqiangscut@gmail.com>
-Subject: [PATCH] fix multiple mark_page_accessed called when sequentially
- writing a file with blocksize less than PAGE_SIZE ,which might pollute the LRU.
-Date: Tue, 8 Jan 2013 21:35:11 +0800
-Message-ID: <CAKWKT+bYwVXxi_pAG7S+htF9NYNtNxLN=Td+aqaynuHmD00DbA@mail.gmail.com>
+From: Johan Rudholm <johan.rudholm@stericsson.com>
+Subject: [PATCH v5 3/4] mmc: core: Break out start_signal_voltage_switch
+Date: Tue, 8 Jan 2013 15:06:01 +0100
+Message-ID: <1357653962-10887-4-git-send-email-johan.rudholm@stericsson.com>
+References: <1357653962-10887-1-git-send-email-johan.rudholm@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f47.google.com ([209.85.212.47]:60861 "EHLO
-	mail-vb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754754Ab3AHNfM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Jan 2013 08:35:12 -0500
+Received: from eu1sys200aog101.obsmtp.com ([207.126.144.111]:33921 "EHLO
+	eu1sys200aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756264Ab3AHOGo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Jan 2013 09:06:44 -0500
+In-Reply-To: <1357653962-10887-1-git-send-email-johan.rudholm@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Kevin Liu <keyuan.liu@gmail.com>, Philip Rakity <prakity@nvidia.com>, Daniel Drake <dsd@laptop.org>, Aaron <leafy.myeh@allwinnertech.com>, Subhash Jadavani <subhashj@codeaurora.org>, Johan Rudholm <johan.rudholm@stericsson.com>
 
-sequential write to a file with blocksize less than PAGE_SIZE  will call
-mark_page_accessed multiple times,
+Allow callers to access the start_signal_voltage_switch host_ops
+member without going through any cmd11 logic. This is mostly a
+preparation for the following signal voltage switch patch.
 
-	if (!pagevec_space(pvec))
- 		__pagevec_lru_add(pvec, lru);
-it seems this trick fix this problem,but not quite thoroughly. there's a chance
-that when another page was added to the pvec before the 14th page was
-secondly mark_page_accesseded, then the 14th page was still active.
+Also, reset ios.signal_voltage to its original value if
+start_signal_voltage_switch fails.
 
+Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
+---
+ drivers/mmc/core/core.c |   35 +++++++++++++++++++++++------------
+ drivers/mmc/core/core.h |    4 ++--
+ drivers/mmc/core/mmc.c  |    8 ++++----
+ drivers/mmc/core/sd.c   |    2 +-
+ drivers/mmc/core/sdio.c |    3 +--
+ 5 files changed, 31 insertions(+), 21 deletions(-)
 
-
-diff --git a/fs/open.c b/fs/open.c
-index 9b33c0c..a418419 100644
---- a/fs/open.c
-+++ b/fs/open.c
-@@ -674,6 +674,13 @@ int open_check_o_direct(struct file *f)
- 	return 0;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 285f064..03db641 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1219,7 +1219,26 @@ u32 mmc_select_voltage(struct mmc_host *host, u32 ocr)
+ 	return ocr;
  }
-
-+
-+static void
-+file_w_state_init(struct file_w_state *wstat)
+ 
+-int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11)
++int __mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
 +{
-+	wstat->prev_w_pos=-1;
++	int err = 0;
++	int old_signal_voltage = host->ios.signal_voltage;
++
++	host->ios.signal_voltage = signal_voltage;
++	if (host->ops->start_signal_voltage_switch) {
++		mmc_host_clk_hold(host);
++		err = host->ops->start_signal_voltage_switch(host, &host->ios);
++		mmc_host_clk_release(host);
++	}
++
++	if (err)
++		host->ios.signal_voltage = old_signal_voltage;
++
++	return err;
++
 +}
 +
- static int do_dentry_open(struct file *f,
- 			  int (*open)(struct inode *, struct file *),
- 			  const struct cred *cred)
-@@ -730,6 +737,7 @@ static int do_dentry_open(struct file *f,
- 	f->f_flags &= ~(O_CREAT | O_EXCL | O_NOCTTY | O_TRUNC);
-
- 	file_ra_state_init(&f->f_ra, f->f_mapping->host->i_mapping);
-+	file_w_state_init(&f->f_wstat);
-
- 	return 0;
-
-diff --git a/include/linux/fs.h b/include/linux/fs.h
-index 7617ee0..b90d3ff 100644
---- a/include/linux/fs.h
-+++ b/include/linux/fs.h
-@@ -746,6 +746,10 @@ struct file_ra_state {
- 	loff_t prev_pos;		/* Cache last read() position */
- };
-
-+struct file_w_state {
-+	loff_t prev_w_pos;
-+};
-+
- /*
-  * Check if @index falls in the readahead windows.
-  */
-@@ -787,6 +791,7 @@ struct file {
- 	struct fown_struct	f_owner;
- 	const struct cred	*f_cred;
- 	struct file_ra_state	f_ra;
-+	struct file_w_state		f_wstat;
-
- 	u64			f_version;
- #ifdef CONFIG_SECURITY
-diff --git a/mm/filemap.c b/mm/filemap.c
-index 83efee7..ea144a9 100644
---- a/mm/filemap.c
-+++ b/mm/filemap.c
-@@ -2287,6 +2287,9 @@ static ssize_t generic_perform_write(struct file *file,
- 	long status = 0;
- 	ssize_t written = 0;
- 	unsigned int flags = 0;
-+	unsigned long prev_pos=file->f_wstat.prev_w_pos;
-+	unsigned long prev_off=(prev_pos & (PAGE_CACHE_SIZE -1));
-+	pgoff_t prev_index=(prev_pos >> PAGE_CACHE_SHIFT);
-
- 	/*
- 	 * Copies from kernel address space cannot fail (NFSD is a big user).
-@@ -2296,12 +2299,14 @@ static ssize_t generic_perform_write(struct file *file,
-
- 	do {
- 		struct page *page;
-+		pgoff_t index;
- 		unsigned long offset;	/* Offset into pagecache page */
- 		unsigned long bytes;	/* Bytes to write to page */
- 		size_t copied;		/* Bytes copied from user */
- 		void *fsdata;
-
- 		offset = (pos & (PAGE_CACHE_SIZE - 1));
-+		index = pos >> PAGE_CACHE_SHIFT;
- 		bytes = min_t(unsigned long, PAGE_CACHE_SIZE - offset,
- 						iov_iter_count(i));
-
-@@ -2334,7 +2339,8 @@ again:
- 		pagefault_enable();
- 		flush_dcache_page(page);
-
--		mark_page_accessed(page);
-+		if (index != prev_index || offset != prev_off)
-+			mark_page_accessed(page);
- 		status = a_ops->write_end(file, mapping, pos, bytes, copied,
- 						page, fsdata);
- 		if (unlikely(status < 0))
-@@ -2359,6 +2365,8 @@ again:
- 		}
- 		pos += copied;
- 		written += copied;
-+		prev_index = index;
-+		prev_off = offset;
-
- 		balance_dirty_pages_ratelimited(mapping);
- 		if (fatal_signal_pending(current)) {
-@@ -2367,6 +2375,7 @@ again:
- 		}
- 	} while (iov_iter_count(i));
-
-+	file->f_wstat.prev_w_pos=pos;
- 	return written ? written : status;
++int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
+ {
+ 	struct mmc_command cmd = {0};
+ 	int err = 0;
+@@ -1230,7 +1249,7 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
+ 	 * Send CMD11 only if the request is to switch the card to
+ 	 * 1.8V signalling.
+ 	 */
+-	if ((signal_voltage != MMC_SIGNAL_VOLTAGE_330) && cmd11) {
++	if (signal_voltage != MMC_SIGNAL_VOLTAGE_330) {
+ 		cmd.opcode = SD_SWITCH_VOLTAGE;
+ 		cmd.arg = 0;
+ 		cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
+@@ -1243,15 +1262,7 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
+ 			return -EIO;
+ 	}
+ 
+-	host->ios.signal_voltage = signal_voltage;
+-
+-	if (host->ops->start_signal_voltage_switch) {
+-		mmc_host_clk_hold(host);
+-		err = host->ops->start_signal_voltage_switch(host, &host->ios);
+-		mmc_host_clk_release(host);
+-	}
+-
+-	return err;
++	return __mmc_set_signal_voltage(host, signal_voltage);
  }
+ 
+ /*
+@@ -1314,7 +1325,7 @@ static void mmc_power_up(struct mmc_host *host)
+ 	mmc_set_ios(host);
+ 
+ 	/* Set signal voltage to 3.3V */
+-	mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, false);
++	__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
+ 
+ 	/*
+ 	 * This delay should be sufficient to allow the power supply
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 4a90067..f2439d5 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -40,8 +40,8 @@ void mmc_set_ungated(struct mmc_host *host);
+ void mmc_set_bus_mode(struct mmc_host *host, unsigned int mode);
+ void mmc_set_bus_width(struct mmc_host *host, unsigned int width);
+ u32 mmc_select_voltage(struct mmc_host *host, u32 ocr);
+-int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage,
+-			   bool cmd11);
++int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage);
++int __mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage);
+ void mmc_set_timing(struct mmc_host *host, unsigned int timing);
+ void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
+ void mmc_power_off(struct mmc_host *host);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index e6e3911..bd86771 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -769,11 +769,11 @@ static int mmc_select_hs200(struct mmc_card *card)
+ 
+ 	if (card->ext_csd.card_type & EXT_CSD_CARD_TYPE_SDR_1_2V &&
+ 			host->caps2 & MMC_CAP2_HS200_1_2V_SDR)
+-		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120, 0);
++		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
+ 
+ 	if (err && card->ext_csd.card_type & EXT_CSD_CARD_TYPE_SDR_1_8V &&
+ 			host->caps2 & MMC_CAP2_HS200_1_8V_SDR)
+-		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180, 0);
++		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
+ 
+ 	/* If fails try again during next card power cycle */
+ 	if (err)
+@@ -1221,8 +1221,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 			 * WARNING: eMMC rules are NOT the same as SD DDR
+ 			 */
+ 			if (ddr == MMC_1_2V_DDR_MODE) {
+-				err = mmc_set_signal_voltage(host,
+-					MMC_SIGNAL_VOLTAGE_120, 0);
++				err = __mmc_set_signal_voltage(host,
++					MMC_SIGNAL_VOLTAGE_120);
+ 				if (err)
+ 					goto err;
+ 			}
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 74972c2..0cc1b26 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -759,7 +759,7 @@ try_again:
+ 	 */
+ 	if (!mmc_host_is_spi(host) && rocr &&
+ 	   ((*rocr & 0x41000000) == 0x41000000)) {
+-		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180, true);
++		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
+ 		if (err) {
+ 			ocr &= ~SD_OCR_S18R;
+ 			goto try_again;
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 2273ce6..0c84e0f 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -650,8 +650,7 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 			(MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
+ 			 MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
+ 			 MMC_CAP_UHS_DDR50))) {
+-		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180,
+-				true);
++		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
+ 		if (err) {
+ 			ocr &= ~R4_18V_PRESENT;
+ 			host->ocr &= ~R4_18V_PRESENT;
+-- 
+1.7.10
+
