@@ -1,266 +1,50 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 4/4] mmc: core: Fixup signal voltage switch
-Date: Tue, 8 Jan 2013 10:45:33 +0100
-Message-ID: <CAPDyKFqpOiemJSmuYQtN50FhfC4Cx=M-8cL0pmu0norOt7VTiw@mail.gmail.com>
-References: <1357571428-19466-1-git-send-email-johan.rudholm@stericsson.com>
-	<1357571428-19466-5-git-send-email-johan.rudholm@stericsson.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Sachin Kamat <sachin.kamat@linaro.org>
+Subject: [PATCH 1/1] mmc: mmci: Use devm_regulator_get API
+Date: Tue,  8 Jan 2013 15:12:49 +0530
+Message-ID: <1357638169-23321-1-git-send-email-sachin.kamat@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f43.google.com ([209.85.215.43]:64264 "EHLO
-	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755166Ab3AHJpe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Jan 2013 04:45:34 -0500
-Received: by mail-la0-f43.google.com with SMTP id eg20so213895lab.16
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Jan 2013 01:45:33 -0800 (PST)
-In-Reply-To: <1357571428-19466-5-git-send-email-johan.rudholm@stericsson.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:36534 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754532Ab3AHJvB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Jan 2013 04:51:01 -0500
+Received: by mail-pb0-f46.google.com with SMTP id wy7so145830pbc.5
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Jan 2013 01:51:00 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <johan.rudholm@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Kevin Liu <keyuan.liu@gmail.com>, Philip Rakity <prakity@nvidia.com>, Daniel Drake <dsd@laptop.org>, Aaron <leafy.myeh@allwinnertech.com>, Subhash Jadavani <subhashj@codeaurora.org>, Kevin Liu <kliu5@marvell.com>
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, sachin.kamat@linaro.org, patches@linaro.org
 
-On 7 January 2013 16:10, Johan Rudholm <johan.rudholm@stericsson.com> wrote:
-> When switching SD and SDIO cards from 3.3V to 1.8V signal levels, the
-> clock should be gated for 5 ms during the step. After enabling the
-> clock, the host should wait for at least 1 ms before checking for
-> failure. Failure by the card to switch is indicated by dat[0:3] being
-> pulled low. The host should check for this condition and power-cycle
-> the card if failure is indicated.
->
-> Add a retry mechanism for the SDIO case.
->
-> If the voltage switch fails repeatedly, give up and continue the
-> initialization using the original voltage.
->
-> This patch places a couple of requirements on the host driver:
->
->  1) mmc_set_ios with ios.clock = 0 must gate the clock
->  2) mmc_power_off must actually cut the power to the card
->  3) The card_busy host_ops member must be implemented
->
-> if these requirements are not fulfilled, the 1.8V signal voltage switch
-> will still be attempted but may not be successful.
->
-> Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
-> Signed-off-by: Kevin Liu <kliu5@marvell.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/core/core.c |   83 +++++++++++++++++++++++++++++++++++++++++------
->  drivers/mmc/core/sd.c   |   21 +++++++++---
->  drivers/mmc/core/sdio.c |   20 ++++++++++--
->  3 files changed, 107 insertions(+), 17 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 90f8e11..0894a2f 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1238,6 +1238,7 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
->  {
->         struct mmc_command cmd = {0};
->         int err = 0;
-> +       u32 clock;
->
->         BUG_ON(!host);
->
-> @@ -1245,20 +1246,82 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
->          * Send CMD11 only if the request is to switch the card to
->          * 1.8V signalling.
->          */
-> -       if (signal_voltage != MMC_SIGNAL_VOLTAGE_330) {
-> -               cmd.opcode = SD_SWITCH_VOLTAGE;
-> -               cmd.arg = 0;
-> -               cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-> +       if (signal_voltage == MMC_SIGNAL_VOLTAGE_330)
-> +               return __mmc_set_signal_voltage(host, signal_voltage);
->
-> -               err = mmc_wait_for_cmd(host, &cmd, 0);
-> -               if (err)
-> -                       return err;
-> +       /*
-> +        * If we cannot switch voltages, return failure so the caller
-> +        * can continue without UHS mode
-> +        */
-> +       if (!host->ops->start_signal_voltage_switch)
-> +               return -EPERM;
-> +       if (!host->ops->card_busy)
-> +               pr_warning("%s: cannot verify signal voltage switch\n",
-> +                               mmc_hostname(host));
-> +
-> +       cmd.opcode = SD_SWITCH_VOLTAGE;
-> +       cmd.arg = 0;
-> +       cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-> +
-> +       err = mmc_wait_for_cmd(host, &cmd, 0);
-> +       if (err)
-> +               return err;
->
-> -               if (!mmc_host_is_spi(host) && (cmd.resp[0] & R1_ERROR))
-> -                       return -EIO;
-> +       if (!mmc_host_is_spi(host) && (cmd.resp[0] & R1_ERROR))
-> +               return -EIO;
-> +
-> +       mmc_host_clk_hold(host);
-> +       /*
-> +        * The card should drive cmd and dat[0:3] low immediately
-> +        * after the response of cmd11, but wait 1 ms to be sure
-> +        */
-> +       mmc_delay(1);
-> +       if (host->ops->card_busy && !host->ops->card_busy(host)) {
-> +               err = -EAGAIN;
-> +               goto power_cycle;
->         }
-> +       /*
-> +        * During a signal voltage level switch, the clock must be gated
-> +        * for 5 ms according to the SD spec
-> +        */
-> +       clock = host->ios.clock;
-> +       host->ios.clock = 0;
-> +       mmc_set_ios(host);
->
-> -       return __mmc_set_signal_voltage(host, signal_voltage);
-> +       if (__mmc_set_signal_voltage(host, signal_voltage)) {
-> +               /*
-> +                * Voltages may not have been switched, but we've already
-> +                * sent CMD11, so a power cycle is required anyway
-> +                */
-> +               err = -EAGAIN;
-> +               goto power_cycle;
-> +       }
-> +
-> +       /* Keep clock gated for at least 5 ms */
-> +       mmc_delay(5);
-> +       host->ios.clock = clock;
-> +       mmc_set_ios(host);
-> +
-> +       /* Wait for at least 1 ms according to spec */
-> +       mmc_delay(1);
-> +
-> +       /*
-> +        * Failure to switch is indicated by the card holding
-> +        * dat[0:3] low
-> +        */
-> +       if (host->ops->card_busy && host->ops->card_busy(host))
-> +               err = -EAGAIN;
-> +
-> +power_cycle:
-> +       if (err) {
-> +               pr_debug("%s: Signal voltage switch failed, "
-> +                       "power cycling card\n", mmc_hostname(host));
-> +               mmc_power_cycle(host);
-> +       }
-> +
-> +       mmc_host_clk_release(host);
-> +
-> +       return err;
->  }
->
->  /*
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 0cc1b26..f5729b0 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -713,6 +713,14 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
->  {
->         int err;
->         u32 max_current;
-> +       int retries = 10;
-> +
-> +try_again:
-> +       if (!retries) {
-> +               ocr &= ~SD_OCR_S18R;
-> +               pr_warning("%s: Skipping voltage switch\n",
-> +                       mmc_hostname(host));
-> +       }
->
->         /*
->          * Since we're changing the OCR value, we seem to
-> @@ -734,9 +742,10 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
->
->         /*
->          * If the host supports one of UHS-I modes, request the card
-> -        * to switch to 1.8V signaling level.
-> +        * to switch to 1.8V signaling level. If the card has failed
-> +        * repeatedly to switch however, skip this.
->          */
-> -       if (host->caps & (MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
-> +       if (retries && host->caps & (MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
->             MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_DDR50))
->                 ocr |= SD_OCR_S18R;
->
-> @@ -748,7 +757,6 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
->         if (max_current > 150)
->                 ocr |= SD_OCR_XPC;
->
-> -try_again:
->         err = mmc_send_app_op_cond(host, ocr, rocr);
->         if (err)
->                 return err;
-> @@ -760,8 +768,11 @@ try_again:
->         if (!mmc_host_is_spi(host) && rocr &&
->            ((*rocr & 0x41000000) == 0x41000000)) {
->                 err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
-> -               if (err) {
-> -                       ocr &= ~SD_OCR_S18R;
-> +               if (err == -EAGAIN) {
-> +                       retries--;
-> +                       goto try_again;
-> +               } else if (err) {
-> +                       retries = 0;
->                         goto try_again;
->                 }
->         }
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index 0c84e0f..494569b 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -583,10 +583,19 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
->  {
->         struct mmc_card *card;
->         int err;
-> +       int retries = 10;
->
->         BUG_ON(!host);
->         WARN_ON(!host->claimed);
->
-> +try_again:
-> +       if (!retries) {
-> +               pr_warning("%s: Skipping voltage switch\n",
-> +                               mmc_hostname(host));
-> +               ocr &= ~R4_18V_PRESENT;
-> +               host->ocr &= ~R4_18V_PRESENT;
-> +       }
-> +
->         /*
->          * Inform the card of the voltage
->          */
-> @@ -645,13 +654,20 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
->          * systems that claim 1.8v signalling in fact do not support
->          * it.
->          */
-> -       if ((ocr & R4_18V_PRESENT) &&
-> +       if (!powered_resume && (ocr & R4_18V_PRESENT) &&
->                 (host->caps &
->                         (MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
->                          MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
->                          MMC_CAP_UHS_DDR50))) {
->                 err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
-> -               if (err) {
-> +               if (err == -EAGAIN) {
-> +                       sdio_reset(host);
-> +                       mmc_go_idle(host);
-> +                       mmc_send_if_cond(host, host->ocr_avail);
-> +                       mmc_remove_card(card);
-> +                       retries--;
-> +                       goto try_again;
-> +               } else if (err) {
->                         ocr &= ~R4_18V_PRESENT;
->                         host->ocr &= ~R4_18V_PRESENT;
->                 }
-> --
-> 1.7.10
->
+devm_regulator_get is device managed and saves some cleanup
+and exit code.
 
-This looks good Johan, nice work!
+Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+---
+Compile tested against linux-next tree (20130108).
+---
+ drivers/mmc/host/mmci.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
 
-Kind regards
-Ulf Hansson
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 1507723..3ef9b1f 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1386,7 +1386,7 @@ static int mmci_probe(struct amba_device *dev,
+ 
+ #ifdef CONFIG_REGULATOR
+ 	/* If we're using the regulator framework, try to fetch a regulator */
+-	host->vcc = regulator_get(&dev->dev, "vmmc");
++	host->vcc = devm_regulator_get(&dev->dev, "vmmc");
+ 	if (IS_ERR(host->vcc))
+ 		host->vcc = NULL;
+ 	else {
+@@ -1587,7 +1587,6 @@ static int mmci_remove(struct amba_device *dev)
+ 
+ 		if (host->vcc)
+ 			mmc_regulator_set_ocr(mmc, host->vcc, 0);
+-		regulator_put(host->vcc);
+ 
+ 		mmc_free_host(mmc);
+ 
+-- 
+1.7.4.1
+
