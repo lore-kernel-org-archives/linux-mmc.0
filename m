@@ -1,104 +1,41 @@
-From: Kevin Liu <kliu5@marvell.com>
-Subject: [PATCH v3 1/2] mmc: sdhci: update timeout clock setting if SDCLK is used
-Date: Tue,  8 Jan 2013 10:16:58 +0800
-Message-ID: <1357611419-4179-1-git-send-email-kliu5@marvell.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog128.obsmtp.com ([74.125.149.141]:43961 "EHLO
-	na3sys009aog128.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750785Ab3AHCSx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Jan 2013 21:18:53 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: "Zhang, YiX X" <yix.x.zhang@intel.com>
+Subject: [PATCH] mmc: correct the EXCEPTION_EVENTS_STATUS vaule comment
+Date: Tue, 8 Jan 2013 06:07:39 +0000
+Message-ID: <1A230AD7863570458C6CF2BE7CD6618B102BE5CB@SHSMSX102.ccr.corp.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: "cjb@laptop.org" <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Philip Rakity <prakity@nvidia.com>, Aaron Lu <aaron.lu@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Alexander Stein <alexander.stein@systec-electronic.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>Kevin
 
-1. If SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK is selected, getting timeout
-through register or callback function is useless. So skip current
-redundant code.
-2. If SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK is selected, host uses
-SDCLK instead of TMCLK for data timeouts. So host->timeout_clk
-and mmc->max_discard_to should be updated accordingly when SDCLK
-changed.
-3. If callback function get_timeout_clock is used, the timeout
-clock will be returned directly and no need to multiply by
-the timeout clock unit read from register.
+>From aaea3405944d844f53679b295d4082584f33d9a3 Mon Sep 17 00:00:00 2001
+From: ZhangYi <yix.x.zhang@intel.com>
+Date: Tue, 8 Jan 2013 13:50:09 +0800
+Subject: [PATCH] mmc: correct the EXCEPTION_EVENTS_STATUS vaule comment
 
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
+The right value is 54 according to eMMC 4.5 specification.
+
+Signed-off-by: ZhangYi <yix.x.zhang@intel.com>
 ---
- drivers/mmc/host/sdhci.c |   43 +++++++++++++++++++++++++++----------------
- 1 file changed, 27 insertions(+), 16 deletions(-)
+ include/linux/mmc/card.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 04af0fd..38a6cf3 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1082,6 +1082,12 @@ static void sdhci_finish_command(struct sdhci_host *host)
- 	}
- }
- 
-+static inline void sdhci_set_max_discard_to(struct sdhci_host *host)
-+{
-+	if (host->timeout_clk)
-+		host->mmc->max_discard_to = (1 << 27) / host->timeout_clk;
-+}
-+
- static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	int div = 0; /* Initialized for compiler warning */
-@@ -1094,6 +1100,12 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 
- 	host->mmc->actual_clock = 0;
- 
-+	if ((host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK) && clock) {
-+		/* The lowest allowed timeout clock frequency is 1Khz */
-+		host->timeout_clk = (clock + 999) / 1000;
-+		sdhci_set_max_discard_to(host);
-+	}
-+
- 	if (host->ops->set_clock) {
- 		host->ops->set_clock(host, clock);
- 		if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
-@@ -2828,25 +2840,24 @@ int sdhci_add_host(struct sdhci_host *host)
- 	} else
- 		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
- 
--	host->timeout_clk =
--		(caps[0] & SDHCI_TIMEOUT_CLK_MASK) >> SDHCI_TIMEOUT_CLK_SHIFT;
--	if (host->timeout_clk == 0) {
--		if (host->ops->get_timeout_clock) {
--			host->timeout_clk = host->ops->get_timeout_clock(host);
--		} else if (!(host->quirks &
--				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
--			pr_err("%s: Hardware doesn't specify timeout clock "
--			       "frequency.\n", mmc_hostname(mmc));
--			return -ENODEV;
-+	if (!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
-+		host->timeout_clk = (caps[0] & SDHCI_TIMEOUT_CLK_MASK) >>
-+					SDHCI_TIMEOUT_CLK_SHIFT;
-+		if (host->timeout_clk == 0) {
-+			if (host->ops->get_timeout_clock) {
-+				host->timeout_clk =
-+					host->ops->get_timeout_clock(host);
-+			} else {
-+				pr_err("%s: Hardware doesn't specify timeout "
-+					"clock frequency.\n", mmc_hostname(mmc));
-+				return -ENODEV;
-+			}
-+		} else if (caps[0] & SDHCI_TIMEOUT_CLK_UNIT) {
-+			host->timeout_clk *= 1000;
- 		}
-+		sdhci_set_max_discard_to(host);
- 	}
--	if (caps[0] & SDHCI_TIMEOUT_CLK_UNIT)
--		host->timeout_clk *= 1000;
--
--	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
--		host->timeout_clk = mmc->f_max / 1000;
- 
--	mmc->max_discard_to = (1 << 27) / host->timeout_clk;
- 
- 	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
- 
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 5c69315..ffde1d3 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -83,7 +83,7 @@ struct mmc_ext_csd {
+ 	unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
+ 	unsigned int		boot_ro_lock;		/* ro lock support */
+ 	bool			boot_ro_lockable;
+-	u8			raw_exception_status;	/* 53 */
++	u8			raw_exception_status;	/* 54 */
+ 	u8			raw_partition_support;	/* 160 */
+ 	u8			raw_rpmb_size_mult;	/* 168 */
+ 	u8			raw_erased_mem_count;	/* 181 */
 -- 
-1.7.9.5
-
+1.7.0.4
