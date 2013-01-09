@@ -1,101 +1,73 @@
-From: Jingoo Han <jg1.han@samsung.com>
-Subject: [PATCH] mmc: sdhci-s3c: Use devm_clk_get()
-Date: Wed, 09 Jan 2013 11:11:43 +0900
-Message-ID: <004101cdee0e$ab8dc440$02a94cc0$%han@samsung.com>
+From: Yuanhan Liu <yuanhan.liu@linux.intel.com>
+Subject: Re: [PATCH 5/5] kfifo: log based kfifo API
+Date: Wed, 9 Jan 2013 10:42:26 +0800
+Message-ID: <20130109024226.GD304@yliu-dev.sh.intel.com>
+References: <1357657073-27352-1-git-send-email-yuanhan.liu@linux.intel.com>
+ <1357657073-27352-6-git-send-email-yuanhan.liu@linux.intel.com>
+ <20130108181645.GA7972@core.coreip.homeip.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:21607 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756144Ab3AICLq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Jan 2013 21:11:46 -0500
-Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MGC005GS6370ZA0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 09 Jan 2013 11:11:44 +0900 (KST)
-Received: from DOJG1HAN02 ([12.23.120.99])
- by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0MGC007AV63JN440@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 09 Jan 2013 11:11:44 +0900 (KST)
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20130108181645.GA7972@core.coreip.homeip.net>
+Sender: owner-linux-mm@kvack.org
+To: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+Cc: linux-kernel@vger.kernel.org, Stefani Seibold <stefani@seibold.net>, Andrew Morton <akpm@linux-foundation.org>, linux-omap@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, platform-driver-x86@vger.kernel.org, linux-input@vger.kernel.org, linux-iio@vger.kernel.org, linux-rdma@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, libertas-dev@lists.infradead.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, linux-pci@vger.kernel.org, open-iscsi@googlegroups.com, linux-scsi@vger.kernel.org, devel@driverdev.osuosl.org, linux-serial@vger.kernel.org, linux-usb@vger.kernel.org, linux-mm@kvack.org, dccp@vger.kernel.org, linux-sctp@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, 'Ben Dooks' <ben-linux@fluff.org>, 'Jingoo Han' <jg1.han@samsung.com>
 
-The devm_ functions allocate memory that is released when a driver
-detaches. This patch uses devm_clk_get() for these functions.
-These make the code smaller and a bit simpler.
+On Tue, Jan 08, 2013 at 10:16:46AM -0800, Dmitry Torokhov wrote:
+> Hi Yuanhan,
+> 
+> On Tue, Jan 08, 2013 at 10:57:53PM +0800, Yuanhan Liu wrote:
+> > The current kfifo API take the kfifo size as input, while it rounds
+> >  _down_ the size to power of 2 at __kfifo_alloc. This may introduce
+> > potential issue.
+> > 
+> > Take the code at drivers/hid/hid-logitech-dj.c as example:
+> > 
+> > 	if (kfifo_alloc(&djrcv_dev->notif_fifo,
+> >                        DJ_MAX_NUMBER_NOTIFICATIONS * sizeof(struct dj_report),
+> >                        GFP_KERNEL)) {
+> > 
+> > Where, DJ_MAX_NUMBER_NOTIFICATIONS is 8, and sizeo of(struct dj_report)
+> > is 15.
+> > 
+> > Which means it wants to allocate a kfifo buffer which can store 8
+> > dj_report entries at once. The expected kfifo buffer size would be
+> > 8 * 15 = 120 then. While, in the end, __kfifo_alloc will turn the
+> > size to rounddown_power_of_2(120) =  64, and then allocate a buf
+> > with 64 bytes, which I don't think this is the original author want.
+> > 
+> > With the new log API, we can do like following:
+> > 
+> > 	int kfifo_size_order = order_base_2(DJ_MAX_NUMBER_NOTIFICATIONS *
+> > 					    sizeof(struct dj_report));
+> > 
+> > 	if (kfifo_alloc(&djrcv_dev->notif_fifo, kfifo_size_order, GFP_KERNEL)) {
+> > 
+> > This make sure we will allocate enough kfifo buffer for holding
+> > DJ_MAX_NUMBER_NOTIFICATIONS dj_report entries.
+> 
+> Why don't you simply change __kfifo_alloc to round the allocation up
+> instead of down?
 
-Signed-off-by: Jingoo Han <jg1.han@samsung.com>
----
- drivers/mmc/host/sdhci-s3c.c |   17 ++---------------
- 1 files changed, 2 insertions(+), 15 deletions(-)
+Hi Dmitry,
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 82a8de1..5aaef5b 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -608,7 +608,7 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
- 
- 	platform_set_drvdata(pdev, host);
- 
--	sc->clk_io = clk_get(dev, "hsmmc");
-+	sc->clk_io = devm_clk_get(dev, "hsmmc");
- 	if (IS_ERR(sc->clk_io)) {
- 		dev_err(dev, "failed to get io clock\n");
- 		ret = PTR_ERR(sc->clk_io);
-@@ -623,7 +623,7 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
- 		char name[14];
- 
- 		snprintf(name, 14, "mmc_busclk.%d", ptr);
--		clk = clk_get(dev, name);
-+		clk = devm_clk_get(dev, name);
- 		if (IS_ERR(clk))
- 			continue;
- 
-@@ -765,15 +765,9 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
- #ifndef CONFIG_PM_RUNTIME
- 	clk_disable_unprepare(sc->clk_bus[sc->cur_clk]);
- #endif
--	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
--		if (sc->clk_bus[ptr]) {
--			clk_put(sc->clk_bus[ptr]);
--		}
--	}
- 
-  err_no_busclks:
- 	clk_disable_unprepare(sc->clk_io);
--	clk_put(sc->clk_io);
- 
-  err_pdata_io_clk:
- 	sdhci_free_host(host);
-@@ -786,7 +780,6 @@ static int sdhci_s3c_remove(struct platform_device *pdev)
- 	struct sdhci_host *host =  platform_get_drvdata(pdev);
- 	struct sdhci_s3c *sc = sdhci_priv(host);
- 	struct s3c_sdhci_platdata *pdata = sc->pdata;
--	int ptr;
- 
- 	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
- 		pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
-@@ -806,13 +799,7 @@ static int sdhci_s3c_remove(struct platform_device *pdev)
- #ifndef CONFIG_PM_RUNTIME
- 	clk_disable_unprepare(sc->clk_bus[sc->cur_clk]);
- #endif
--	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
--		if (sc->clk_bus[ptr]) {
--			clk_put(sc->clk_bus[ptr]);
--		}
--	}
- 	clk_disable_unprepare(sc->clk_io);
--	clk_put(sc->clk_io);
- 
- 	sdhci_free_host(host);
- 	platform_set_drvdata(pdev, NULL);
--- 
-1.7.2.5
+Yes, it would be neat and that was my first reaction as well. I then
+sent out a patch, but it was NACKed by Stefani(the original kfifo
+author). Here is the link:
 
+    https://lkml.org/lkml/2012/10/26/144
 
+Then Stefani proposed to change the API to take log of size as input to
+root fix this kind of issues. And here it is.
+
+Thanks.
+
+	--yliu
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
