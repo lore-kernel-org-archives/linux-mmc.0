@@ -1,154 +1,83 @@
-From: Matt Porter <mporter@ti.com>
-Subject: Re: [RFC PATCH v3 04/16] ARM: edma: add DT and runtime PM support
- for AM33XX
-Date: Thu, 10 Jan 2013 14:18:03 -0500
-Message-ID: <20130110191803.GN14660@beef>
+From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+Subject: Re: [RFC PATCH v3 08/16] ARM: dts: add AM33XX EDMA support
+Date: Thu, 10 Jan 2013 14:27:40 -0500
+Message-ID: <20130110192740.GO14660@beef>
 References: <1350566815-409-1-git-send-email-mporter@ti.com>
- <1350566815-409-5-git-send-email-mporter@ti.com>
- <508D110B.8010908@ti.com>
+	<1350566815-409-9-git-send-email-mporter@ti.com>
+	<508D1414.2000506@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <508D110B.8010908@ti.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Sekhar Nori <nsekhar@ti.com>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, Benoit Cousson <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Chris Ball <cjb@laptop.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+In-Reply-To: <508D1414.2000506-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, Oct 28, 2012 at 04:33:39PM +0530, Sekhar Nori wrote:
+On Sun, Oct 28, 2012 at 04:46:36PM +0530, Sekhar Nori wrote:
 > On 10/18/2012 6:56 PM, Matt Porter wrote:
-> > Adds support for parsing the TI EDMA DT data into the required
-> > EDMA private API platform data.
+> > Adds AM33XX EDMA support to the am33xx.dtsi as documented in
+> > Documentation/devicetree/bindings/dma/ti-edma.txt
 > > 
-> > Calls runtime PM API only in the DT case in order to unidle the
-> > associated hwmods on AM33XX.
-> 
-> Runtime PM is supported on DaVinci now, so if that was the reason for
-> this choice, then it doesn't need to be that way.
-
-Thanks, fixed this for v4.
-
-> > 
-> > Signed-off-by: Matt Porter <mporter@ti.com>
+> > Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 > > ---
-> >  arch/arm/common/edma.c                      |  255 +++++++++++++++++++++++++--
-> >  arch/arm/mach-davinci/board-da830-evm.c     |    4 +-
-> >  arch/arm/mach-davinci/board-da850-evm.c     |    8 +-
-> >  arch/arm/mach-davinci/board-dm646x-evm.c    |    4 +-
-> >  arch/arm/mach-davinci/board-omapl138-hawk.c |    8 +-
-> >  arch/arm/mach-davinci/devices-da8xx.c       |    8 +-
-> >  arch/arm/mach-davinci/devices-tnetv107x.c   |    4 +-
-> >  arch/arm/mach-davinci/dm355.c               |    4 +-
-> >  arch/arm/mach-davinci/dm365.c               |    4 +-
-> >  arch/arm/mach-davinci/dm644x.c              |    4 +-
-> >  arch/arm/mach-davinci/dm646x.c              |    4 +-
-> >  include/linux/platform_data/edma.h          |    8 +-
-> >  12 files changed, 272 insertions(+), 43 deletions(-)
+> >  arch/arm/boot/dts/am33xx.dtsi |   31 +++++++++++++++++++++++++++++++
+> >  1 file changed, 31 insertions(+)
 > > 
-> > diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
-> > index a3d189d..6d2a590 100644
-> > --- a/arch/arm/common/edma.c
-> > +++ b/arch/arm/common/edma.c
-> > @@ -24,6 +24,13 @@
-> >  #include <linux/platform_device.h>
-> >  #include <linux/io.h>
-> >  #include <linux/slab.h>
-> > +#include <linux/edma.h>
-> > +#include <linux/err.h>
-> > +#include <linux/of_address.h>
-> > +#include <linux/of_device.h>
-> > +#include <linux/of_dma.h>
-> > +#include <linux/of_irq.h>
-> > +#include <linux/pm_runtime.h>
+> > diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+> > index bb31bff..ab9c78f 100644
+> > --- a/arch/arm/boot/dts/am33xx.dtsi
+> > +++ b/arch/arm/boot/dts/am33xx.dtsi
+> > @@ -62,6 +62,37 @@
+> >  			reg = <0x48200000 0x1000>;
+> >  		};
 > >  
-> >  #include <linux/platform_data/edma.h>
-> >  
-> > @@ -1366,31 +1373,237 @@ void edma_clear_event(unsigned channel)
-> >  EXPORT_SYMBOL(edma_clear_event);
-> >  
-> >  /*-----------------------------------------------------------------------*/
-> > +static int edma_of_read_u32_to_s8_array(const struct device_node *np,
-> > +					 const char *propname, s8 *out_values,
-> > +					 size_t sz)
-> > +{
-> > +	struct property *prop = of_find_property(np, propname, NULL);
-> > +	const __be32 *val;
-> > +
-> > +	if (!prop)
-> > +		return -EINVAL;
-> > +	if (!prop->value)
-> > +		return -ENODATA;
-> > +	if ((sz * sizeof(u32)) > prop->length)
-> > +		return -EOVERFLOW;
-> > +
-> > +	val = prop->value;
-> > +
-> > +	while (sz--)
-> > +		*out_values++ = (s8)(be32_to_cpup(val++) & 0xff);
-> > +
-> > +	/* Terminate it */
-> > +	*out_values++ = -1;
-> > +	*out_values++ = -1;
-> > +
-> > +	return 0;
-> > +}
-> > +
-> > +static int edma_of_read_u32_to_s16_array(const struct device_node *np,
-> > +					 const char *propname, s16 *out_values,
-> > +					 size_t sz)
-> > +{
-> > +	struct property *prop = of_find_property(np, propname, NULL);
-> > +	const __be32 *val;
-> > +
-> > +	if (!prop)
-> > +		return -EINVAL;
-> > +	if (!prop->value)
-> > +		return -ENODATA;
-> > +	if ((sz * sizeof(u32)) > prop->length)
-> > +		return -EOVERFLOW;
-> > +
-> > +	val = prop->value;
-> > +
-> > +	while (sz--)
-> > +		*out_values++ = (s16)(be32_to_cpup(val++) & 0xffff);
-> > +
-> > +	/* Terminate it */
-> > +	*out_values++ = -1;
-> > +	*out_values++ = -1;
-> > +
-> > +	return 0;
-> > +}
+> > +		edma: edma@49000000 {
+> > +			compatible = "ti,edma3";
+> > +			ti,hwmods = "tpcc", "tptc0", "tptc1", "tptc2";
+> > +			reg =	<0x49000000 0x10000>,
+> > +				<0x44e10f90 0x10>;
+> > +			interrupt-parent = <&intc>;
+> > +			interrupts = <12 13 14>;
+> > +			#dma-cells = <1>;
+> > +			dma-channels = <64>;
+> > +			ti,edma-regions = <4>;
+> > +			ti,edma-slots = <256>;
+> > +			ti,edma-reserved-channels = <0  2
+> > +						     14 2
+> > +						     26 6
+> > +						     48 4
+> > +						     56 8>;
+> > +			ti,edma-reserved-slots = <0  2
+> > +						  14 2
+> > +						  26 6
+> > +						  48 4
+> > +						  56 8
+> > +						  64 127>;
 > 
-> I think these helper functions will have some general use beyond EDMA
-> and can be kept in drivers/of/base.c. Grant/Rob need to agree though.
+> No need to reserve any channels or slots on AM335x, I think. This is
+> used on DaVinci devices to share channels with DSP. I am not sure the
+> cortex-M3 or PRU on the AM335x need to (or even can) have EDMA access.
 
-I expect these to go away before too long as I expect to rewrite all of
-these data structures when the private edma api code is folded into
-drivers/dma/edma.c. When that happens, I would like to use some data
-structures that lend themselves to the DT property value. Given that,
-let's wait until there is another user to move these helpers to
-drivers/of/.
-
-> > diff --git a/arch/arm/mach-davinci/board-da830-evm.c b/arch/arm/mach-davinci/board-da830-evm.c
-> > index 95b5e10..ffcbec1 100644
-> > --- a/arch/arm/mach-davinci/board-da830-evm.c
-> > +++ b/arch/arm/mach-davinci/board-da830-evm.c
-> > @@ -512,7 +512,7 @@ static struct davinci_i2c_platform_data da830_evm_i2c_0_pdata = {
-> >   * example: Timer, GPIO, UART events etc) on da830/omap-l137 EVM, hence
-> >   * they are being reserved for codecs on the DSP side.
-> >   */
-> > -static const s16 da830_dma_rsv_chans[][2] = {
-> > +static s16 da830_dma_rsv_chans[][2] = {
-> 
-> I wonder why you had to remove const here and in other places. You seem
-> to be allocating new memory for DT case anyway. Its also not a good idea
-> to modify the passed platform data.
-
-Good catch. Although I was never modifying pdata itself, at one point
-the DT parsing code was modifying pointers that were const and I removed
-the const. I've since fixed that issue since we'd like them to be const
-as you point out. As a result, I've removed all these changes from v4 so
-all those files aren't touched.
+I agree. I'm dropping this from the .dtsi in v4 as it is board/application
+specific. The PRU, at least, can use the EDMA and I've seen examples as
+such, but we can't hardcode this. The feature is there and documented in
+the binding if somebody needs to reserve channels in their .dts.
 
 -Matt
+
+------------------------------------------------------------------------------
+Master Visual Studio, SharePoint, SQL, ASP.NET, C# 2012, HTML5, CSS,
+MVC, Windows 8 Apps, JavaScript and much more. Keep your skills current
+with LearnDevNow - 3,200 step-by-step video tutorials by Microsoft
+MVPs and experts. ON SALE this month only -- learn more at:
+http://p.sf.net/sfu/learnmore_122712
