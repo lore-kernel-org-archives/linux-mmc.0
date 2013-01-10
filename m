@@ -1,54 +1,65 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [REPOST PATCH v3 3/4] mmc: dw_mmc: exynos: Remove code for wp-gpios
-Date: Thu, 10 Jan 2013 10:24:28 -0800
-Message-ID: <1357842269-15062-3-git-send-email-dianders@chromium.org>
-References: <1354251857-21587-1-git-send-email-dianders@chromium.org>
- <1357842269-15062-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1357842269-15062-1-git-send-email-dianders@chromium.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-samsung-soc@vger.kernel.org, Thomas Abraham <thomas.abraham@linaro.org>, Kukjin Kim <kgene.kim@samsung.com>, Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>, Will Newton <will.newton@imgtec.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>
+From: Matt Porter <mporter@ti.com>
+Subject: [PATCH v2 0/3] dmaengine: add per channel capabilities api
+Date: Thu, 10 Jan 2013 14:07:03 -0500
+Message-ID: <1357844826-30746-1-git-send-email-mporter@ti.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Vinod Koul <vinod.koul@intel.com>
+Cc: Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The exynos code claimed the write protect with devm_gpio_request() but
-never did anything with it.  That meant that anyone using a write
-protect GPIO would effectively be write protected all the time.
+Changes since v1:
+	- Use the existing dma_transaction_type enums instead of
+	  adding the mostly duplicated dmaengine_apis enums
 
-The handling for wp-gpios belongs in the main dw_mmc driver and has
-been moved there.
+This series adds a new dmaengine api, dma_get_channels_caps(), which
+may be used by a driver to get channel-specific capabilities. This is
+based on a starting point suggested by Vinod Koul, but only implements
+the minimal sets of channel capabilities to fulfill the needs of the
+EDMA DMA Engine driver at this time.
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
----
-Changes in v3:
-- Totally removed wp-gpios handling from exynos code.
+Specifically, this implementation supports reporting of a set of
+transfer type operations, maximum number of SG segments, and the
+maximum size of an SG segment that a channel can support.
 
-Changes in v2: None
+The call is implemented as follows:
 
- drivers/mmc/host/dw_mmc-exynos.c |   10 ----------
- 1 files changed, 0 insertions(+), 10 deletions(-)
+	struct dmaengine_chan_caps
+	*dma_get_channel_caps(struct dma_chan *chan,
+			      enum dma_transfer_direction dir);
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 4d50da6..72fd0f2 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -175,16 +175,6 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
- 		}
- 	}
- 
--	gpio = of_get_named_gpio(slot_np, "wp-gpios", 0);
--	if (gpio_is_valid(gpio)) {
--		if (devm_gpio_request(host->dev, gpio, "dw-mci-wp"))
--			dev_info(host->dev, "gpio [%d] request failed\n",
--						gpio);
--	} else {
--		dev_info(host->dev, "wp gpio not available");
--		host->pdata->quirks |= DW_MCI_QUIRK_NO_WRITE_PROTECT;
--	}
--
- 	if (host->pdata->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
- 		return 0;
- 
+The dma transfer direction parameter may appear a bit out of place
+but it is necessary since the direction field in struct
+dma_slave_config was deprecated. In some cases, EDMA for one, it
+is necessary for the dmaengine driver to have the burst and address
+width slave configuration parameters available in order to compute
+the maximum segment size that can be handle. Due to this requirement,
+the calling order of this api is as follows:
+
+1. Allocate a DMA slave channel
+1a. [Optionally] Get channel capabilities
+2. Set slave and controller specific parameters
+3. Get a descriptor for transaction
+4. Submit the transaction
+5. Issue pending requests and wait for callback notification
+
+Along with the API implementation, this series implements the
+backend device_channel_caps() in the EDMA DMA Engine driver and
+converts the davinci_mmc driver to use dma_get_channel_caps() to
+replace hardcoded limits.
+
+This is tested on the AM1808-EVM.
+
+Matt Porter (3):
+  dmaengine: add dma_get_channel_caps()
+  dma: edma: add device_channel_caps() support
+  mmc: davinci: get SG segment limits with dma_get_channel_caps()
+
+ drivers/dma/edma.c                        |   27 ++++++++++++
+ drivers/mmc/host/davinci_mmc.c            |   66 +++++++++--------------------
+ include/linux/dmaengine.h                 |   40 +++++++++++++++++
+ include/linux/platform_data/mmc-davinci.h |    3 --
+ 4 files changed, 88 insertions(+), 48 deletions(-)
+
 -- 
-1.7.7.3
+1.7.9.5
