@@ -1,76 +1,89 @@
-From: Nishanth Menon <nm-l0cyMroinI0@public.gmane.org>
-Subject: Re: [RFC PATCH v3 16/16] ARM: dts: add AM33XX SPI support
-Date: Thu, 10 Jan 2013 13:46:53 -0600
-Message-ID: <20130110194653.GA32519@kahuna>
-References: <1350566815-409-1-git-send-email-mporter@ti.com>
- <1350566815-409-17-git-send-email-mporter@ti.com>
- <508D1791.1040806@ti.com> <20130110193547.GQ14660@beef>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20130110193547.GQ14660@beef>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+From: Maya Erez <merez@codeaurora.org>
+Subject: [PATCH v5 0/3] Add support for periodic BKOPS
+Date: Thu, 10 Jan 2013 22:15:18 +0200
+Message-ID: <1357848921-9596-1-git-send-email-merez@codeaurora.org>
+References: <n>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <n>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 14:35-20130110, Matt Porter wrote:
-> On Sun, Oct 28, 2012 at 05:01:29PM +0530, Sekhar Nori wrote:
-> > On 10/18/2012 6:56 PM, Matt Porter wrote:
-> > > Adds AM33XX SPI support for am335x-bone and am335x-evm.
-> > > 
-> > > Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-> > > ---
-> > >  arch/arm/boot/dts/am335x-bone.dts |   17 +++++++++++++++
-> > >  arch/arm/boot/dts/am335x-evm.dts  |    9 ++++++++
-> > >  arch/arm/boot/dts/am33xx.dtsi     |   43 +++++++++++++++++++++++++++++++++++++
-> > >  3 files changed, 69 insertions(+)
-> > > 
-> > > diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
-> > > index 5510979..23edfd8 100644
-> > > --- a/arch/arm/boot/dts/am335x-bone.dts
-> > > +++ b/arch/arm/boot/dts/am335x-bone.dts
-> > > @@ -18,6 +18,17 @@
-> > >  		reg = <0x80000000 0x10000000>; /* 256 MB */
-> > >  	};
-> > >  
-> > > +	am3358_pinmux: pinmux@44e10800 {
-> > > +		spi1_pins: pinmux_spi1_pins {
-> > > +			pinctrl-single,pins = <
-> > > +				0x190 0x13	/* mcasp0_aclkx.spi1_sclk, OUTPUT_PULLUP | MODE3 */
-> > > +				0x194 0x33	/* mcasp0_fsx.spi1_d0, INPUT_PULLUP | MODE3 */
-> > > +				0x198 0x13	/* mcasp0_axr0.spi1_d1, OUTPUT_PULLUP | MODE3 */
-minor comment:
-doing as a 0x33 is better for both d1, d0 as D0,D1 can be switched between SDI and SDO
-as needed with ti,pindir-d0-out-d1-in
-> > > +				0x19c 0x13	/* mcasp0_ahclkr.spi1_cs0, OUTPUT_PULLUP | MODE3 */
-> > > +			>;
-> > 
-> > Is there a single pinmux setting that provides SPI functionality on the
-> > bone headers? Or this is specific to a cape you tested with?
-> 
-> No, there are two usable settings for spi1 and one setting for spi0.
-> I'm dropping this from the series since it's specific to how I wired up
-> the homebrew cape I use for spi testing on the Bone. I publish the
-> branch where all these extra "test-specific" patches (that aren't intended
-> to be merged) are at in the cover letter.  Anybody that needs context of
-> how/what worked and was tested can grab them there.
-Possibly dumb question:
-Cant we have pre-usable spi configurations?  Like spi1_configuration1_pins,
-spi2_configuration1_pins, spi0_configuration1_pins? If documented with
-P9 pin names in the bone dts, it saves a bit of effort in looking up
-pad offset when dealing with capes.
+Devices have various maintenance operations need to perform internally.
+In order to reduce latencies during time critical operations like read
+and write, it is better to execute maintenance operations in other
+times - when the host is not being serviced. Such operations are called
+Background operations (BKOPS).
+The device notifies the status of the BKOPS need by updating BKOPS_STATUS
+(EXT_CSD byte [246]).
+
+According to the standard a host that supports BKOPS shall check the
+status periodically and start background operations as needed, so that
+the device has enough time for its maintenance operations.
+
+This patch adds support for this periodic check of the BKOPS status.
+Since foreground operations are of higher priority than background
+operations the host will check the need for BKOPS when it is idle,
+and in case of an incoming request the BKOPS operation will be
+interrupted.
+
+When the mmcqd thread is idle, a delayed work is created to check the
+need for BKOPS. The time to start the delayed work can be set by the host
+controller. If this time is not set, a default time is used.
+If the card raised an exception with need for urgent BKOPS (level 2/3)
+a flag will be set to indicate MMC to start the BKOPS activity when it
+becomes idle.
+
+Since running the BKOPS too often can impact the eMMC endurance, the card
+need for BKOPS is not checked every time MMC is idle (despite of cases of
+exception raised). In order to estimate when is the best time to check
+for BKOPS need the host will take into account the card capacity and
+percentages of changed sectors in the card. A future enhancement can be to
+check the card need for BKOPS only in case of random activity.
+
+This patch is based on the periodic BKOPS implementation in version 8 of "support BKOPS feature for eMMC" patch.
+The patch was modified to answer the following issues:
+- Since mmc_start_bkops is called from two contexts now, mmc_claim_host was moved to the beginning of the function
+- Also, the check of doing_bkops should be protected when determing if an HPI is needed due to the same reason.
+
+Changes in v5:
+    - Do not allow BKOPS operation in all levels to be blocking
+    - Change the periodic check for BKOPS need to be based on percentage of changed sector
+    - Add BKOPS statistics
+
+Changes in v4:
+    - Separate the polling for BKOPS completion to a different patch
+    - add a flag to indicate if polling for card completion is required
+
+Changes in v3:
+    - Move the call to stop_bkops to block.c. 
+      This allows us to remove the mmc_claim_host from inside the function and doesn't cause additional degradation 
+      due to un-neccessary calim host operation
+
+Changes in v2:
+    - Check the number of written / discarded sectors as the trigger for checking the BKOPS need.
+    - Code review fixes
+
+Maya Erez (3):
+  mmc: core: Add support for idle time BKOPS
+  mmc: allow the host controller to poll for BKOPS completion
+  mmc: core: Add MMC BKOPS statistics and debugfs ability to print them
+
+ Documentation/mmc/mmc-dev-attrs.txt |    9 +
+ drivers/mmc/card/block.c            |   96 ++++++++++++-
+ drivers/mmc/card/queue.c            |    2 +
+ drivers/mmc/core/bus.c              |    2 +
+ drivers/mmc/core/core.c             |  286 +++++++++++++++++++++++++++++++----
+ drivers/mmc/core/debugfs.c          |  114 ++++++++++++++
+ drivers/mmc/core/mmc.c              |   20 +++
+ include/linux/mmc/card.h            |   64 ++++++++-
+ include/linux/mmc/core.h            |    5 +
+ include/linux/mmc/host.h            |    2 +-
+ 10 files changed, 563 insertions(+), 37 deletions(-)
+
 -- 
-Regards,
-Nishanth Menon
+1.7.3.3
+-- 
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
+of Code Aurora Forum, hosted by The Linux Foundation
