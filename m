@@ -1,159 +1,154 @@
 From: Matt Porter <mporter@ti.com>
-Subject: [PATCH v2 3/3] mmc: davinci: get SG segment limits with dma_get_channel_caps()
-Date: Thu, 10 Jan 2013 14:07:06 -0500
-Message-ID: <1357844826-30746-4-git-send-email-mporter@ti.com>
-References: <1357844826-30746-1-git-send-email-mporter@ti.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1357844826-30746-1-git-send-email-mporter@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Vinod Koul <vinod.koul@intel.com>
-Cc: Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
+Subject: Re: [RFC PATCH v3 04/16] ARM: edma: add DT and runtime PM support
+ for AM33XX
+Date: Thu, 10 Jan 2013 14:18:03 -0500
+Message-ID: <20130110191803.GN14660@beef>
+References: <1350566815-409-1-git-send-email-mporter@ti.com>
+ <1350566815-409-5-git-send-email-mporter@ti.com>
+ <508D110B.8010908@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <508D110B.8010908@ti.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Sekhar Nori <nsekhar@ti.com>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, Benoit Cousson <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Chris Ball <cjb@laptop.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Replace the hardcoded values used to set max_segs/max_seg_size with
-a dma_get_channel_caps() query to the dmaengine driver.
+On Sun, Oct 28, 2012 at 04:33:39PM +0530, Sekhar Nori wrote:
+> On 10/18/2012 6:56 PM, Matt Porter wrote:
+> > Adds support for parsing the TI EDMA DT data into the required
+> > EDMA private API platform data.
+> > 
+> > Calls runtime PM API only in the DT case in order to unidle the
+> > associated hwmods on AM33XX.
+> 
+> Runtime PM is supported on DaVinci now, so if that was the reason for
+> this choice, then it doesn't need to be that way.
 
-Signed-off-by: Matt Porter <mporter@ti.com>
----
- drivers/mmc/host/davinci_mmc.c            |   66 +++++++++--------------------
- include/linux/platform_data/mmc-davinci.h |    3 --
- 2 files changed, 21 insertions(+), 48 deletions(-)
+Thanks, fixed this for v4.
 
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index 2063677..17e186d 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -144,18 +144,6 @@
- /* MMCSD Init clock in Hz in opendrain mode */
- #define MMCSD_INIT_CLOCK		200000
- 
--/*
-- * One scatterlist dma "segment" is at most MAX_CCNT rw_threshold units,
-- * and we handle up to MAX_NR_SG segments.  MMC_BLOCK_BOUNCE kicks in only
-- * for drivers with max_segs == 1, making the segments bigger (64KB)
-- * than the page or two that's otherwise typical. nr_sg (passed from
-- * platform data) == 16 gives at least the same throughput boost, using
-- * EDMA transfer linkage instead of spending CPU time copying pages.
-- */
--#define MAX_CCNT	((1 << 16) - 1)
--
--#define MAX_NR_SG	16
--
- static unsigned rw_threshold = 32;
- module_param(rw_threshold, uint, S_IRUGO);
- MODULE_PARM_DESC(rw_threshold,
-@@ -216,8 +204,6 @@ struct mmc_davinci_host {
- 	u8 version;
- 	/* for ns in one cycle calculation */
- 	unsigned ns_in_one_cycle;
--	/* Number of sg segments */
--	u8 nr_sg;
- #ifdef CONFIG_CPU_FREQ
- 	struct notifier_block	freq_transition;
- #endif
-@@ -421,16 +407,7 @@ static int mmc_davinci_send_dma_request(struct mmc_davinci_host *host,
- 	int ret = 0;
- 
- 	if (host->data_dir == DAVINCI_MMC_DATADIR_WRITE) {
--		struct dma_slave_config dma_tx_conf = {
--			.direction = DMA_MEM_TO_DEV,
--			.dst_addr = host->mem_res->start + DAVINCI_MMCDXR,
--			.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
--			.dst_maxburst =
--				rw_threshold / DMA_SLAVE_BUSWIDTH_4_BYTES,
--		};
- 		chan = host->dma_tx;
--		dmaengine_slave_config(host->dma_tx, &dma_tx_conf);
--
- 		desc = dmaengine_prep_slave_sg(host->dma_tx,
- 				data->sg,
- 				host->sg_len,
-@@ -443,16 +420,7 @@ static int mmc_davinci_send_dma_request(struct mmc_davinci_host *host,
- 			goto out;
- 		}
- 	} else {
--		struct dma_slave_config dma_rx_conf = {
--			.direction = DMA_DEV_TO_MEM,
--			.src_addr = host->mem_res->start + DAVINCI_MMCDRR,
--			.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
--			.src_maxburst =
--				rw_threshold / DMA_SLAVE_BUSWIDTH_4_BYTES,
--		};
- 		chan = host->dma_rx;
--		dmaengine_slave_config(host->dma_rx, &dma_rx_conf);
--
- 		desc = dmaengine_prep_slave_sg(host->dma_rx,
- 				data->sg,
- 				host->sg_len,
-@@ -1165,6 +1133,7 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
- 	struct resource *r, *mem = NULL;
- 	int ret = 0, irq = 0;
- 	size_t mem_size;
-+	struct dmaengine_chan_caps *dma_chan_caps;
- 
- 	/* REVISIT:  when we're fully converted, fail if pdata is NULL */
- 
-@@ -1214,12 +1183,6 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
- 
- 	init_mmcsd_host(host);
- 
--	if (pdata->nr_sg)
--		host->nr_sg = pdata->nr_sg - 1;
--
--	if (host->nr_sg > MAX_NR_SG || !host->nr_sg)
--		host->nr_sg = MAX_NR_SG;
--
- 	host->use_dma = use_dma;
- 	host->mmc_irq = irq;
- 	host->sdio_irq = platform_get_irq(pdev, 1);
-@@ -1248,14 +1211,27 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
- 		mmc->caps |= pdata->caps;
- 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
- 
--	/* With no iommu coalescing pages, each phys_seg is a hw_seg.
--	 * Each hw_seg uses one EDMA parameter RAM slot, always one
--	 * channel and then usually some linked slots.
--	 */
--	mmc->max_segs		= MAX_NR_SG;
-+	{
-+		struct dma_slave_config dma_txrx_conf = {
-+			.src_addr = host->mem_res->start + DAVINCI_MMCDRR,
-+			.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
-+			.src_maxburst =
-+				rw_threshold / DMA_SLAVE_BUSWIDTH_4_BYTES,
-+			.dst_addr = host->mem_res->start + DAVINCI_MMCDXR,
-+			.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
-+			.dst_maxburst =
-+				rw_threshold / DMA_SLAVE_BUSWIDTH_4_BYTES,
-+		};
-+		dmaengine_slave_config(host->dma_tx, &dma_txrx_conf);
-+		dmaengine_slave_config(host->dma_rx, &dma_txrx_conf);
-+	}
- 
--	/* EDMA limit per hw segment (one or two MBytes) */
--	mmc->max_seg_size	= MAX_CCNT * rw_threshold;
-+	/* Just check one channel for the DMA SG limits */
-+	dma_chan_caps = dma_get_channel_caps(host->dma_tx, DMA_MEM_TO_DEV);
-+	if (dma_chan_caps) {
-+		mmc->max_segs = dma_chan_caps->seg_nr;
-+		mmc->max_seg_size = dma_chan_caps->seg_len;
-+	}
- 
- 	/* MMC/SD controller limits for multiblock requests */
- 	mmc->max_blk_size	= 4095;  /* BLEN is 12 bits */
-diff --git a/include/linux/platform_data/mmc-davinci.h b/include/linux/platform_data/mmc-davinci.h
-index 5ba6b22..6910209 100644
---- a/include/linux/platform_data/mmc-davinci.h
-+++ b/include/linux/platform_data/mmc-davinci.h
-@@ -25,9 +25,6 @@ struct davinci_mmc_config {
- 
- 	/* Version of the MMC/SD controller */
- 	u8	version;
--
--	/* Number of sg segments */
--	u8	nr_sg;
- };
- void davinci_setup_mmc(int module, struct davinci_mmc_config *config);
- 
--- 
-1.7.9.5
+> > 
+> > Signed-off-by: Matt Porter <mporter@ti.com>
+> > ---
+> >  arch/arm/common/edma.c                      |  255 +++++++++++++++++++++++++--
+> >  arch/arm/mach-davinci/board-da830-evm.c     |    4 +-
+> >  arch/arm/mach-davinci/board-da850-evm.c     |    8 +-
+> >  arch/arm/mach-davinci/board-dm646x-evm.c    |    4 +-
+> >  arch/arm/mach-davinci/board-omapl138-hawk.c |    8 +-
+> >  arch/arm/mach-davinci/devices-da8xx.c       |    8 +-
+> >  arch/arm/mach-davinci/devices-tnetv107x.c   |    4 +-
+> >  arch/arm/mach-davinci/dm355.c               |    4 +-
+> >  arch/arm/mach-davinci/dm365.c               |    4 +-
+> >  arch/arm/mach-davinci/dm644x.c              |    4 +-
+> >  arch/arm/mach-davinci/dm646x.c              |    4 +-
+> >  include/linux/platform_data/edma.h          |    8 +-
+> >  12 files changed, 272 insertions(+), 43 deletions(-)
+> > 
+> > diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+> > index a3d189d..6d2a590 100644
+> > --- a/arch/arm/common/edma.c
+> > +++ b/arch/arm/common/edma.c
+> > @@ -24,6 +24,13 @@
+> >  #include <linux/platform_device.h>
+> >  #include <linux/io.h>
+> >  #include <linux/slab.h>
+> > +#include <linux/edma.h>
+> > +#include <linux/err.h>
+> > +#include <linux/of_address.h>
+> > +#include <linux/of_device.h>
+> > +#include <linux/of_dma.h>
+> > +#include <linux/of_irq.h>
+> > +#include <linux/pm_runtime.h>
+> >  
+> >  #include <linux/platform_data/edma.h>
+> >  
+> > @@ -1366,31 +1373,237 @@ void edma_clear_event(unsigned channel)
+> >  EXPORT_SYMBOL(edma_clear_event);
+> >  
+> >  /*-----------------------------------------------------------------------*/
+> > +static int edma_of_read_u32_to_s8_array(const struct device_node *np,
+> > +					 const char *propname, s8 *out_values,
+> > +					 size_t sz)
+> > +{
+> > +	struct property *prop = of_find_property(np, propname, NULL);
+> > +	const __be32 *val;
+> > +
+> > +	if (!prop)
+> > +		return -EINVAL;
+> > +	if (!prop->value)
+> > +		return -ENODATA;
+> > +	if ((sz * sizeof(u32)) > prop->length)
+> > +		return -EOVERFLOW;
+> > +
+> > +	val = prop->value;
+> > +
+> > +	while (sz--)
+> > +		*out_values++ = (s8)(be32_to_cpup(val++) & 0xff);
+> > +
+> > +	/* Terminate it */
+> > +	*out_values++ = -1;
+> > +	*out_values++ = -1;
+> > +
+> > +	return 0;
+> > +}
+> > +
+> > +static int edma_of_read_u32_to_s16_array(const struct device_node *np,
+> > +					 const char *propname, s16 *out_values,
+> > +					 size_t sz)
+> > +{
+> > +	struct property *prop = of_find_property(np, propname, NULL);
+> > +	const __be32 *val;
+> > +
+> > +	if (!prop)
+> > +		return -EINVAL;
+> > +	if (!prop->value)
+> > +		return -ENODATA;
+> > +	if ((sz * sizeof(u32)) > prop->length)
+> > +		return -EOVERFLOW;
+> > +
+> > +	val = prop->value;
+> > +
+> > +	while (sz--)
+> > +		*out_values++ = (s16)(be32_to_cpup(val++) & 0xffff);
+> > +
+> > +	/* Terminate it */
+> > +	*out_values++ = -1;
+> > +	*out_values++ = -1;
+> > +
+> > +	return 0;
+> > +}
+> 
+> I think these helper functions will have some general use beyond EDMA
+> and can be kept in drivers/of/base.c. Grant/Rob need to agree though.
+
+I expect these to go away before too long as I expect to rewrite all of
+these data structures when the private edma api code is folded into
+drivers/dma/edma.c. When that happens, I would like to use some data
+structures that lend themselves to the DT property value. Given that,
+let's wait until there is another user to move these helpers to
+drivers/of/.
+
+> > diff --git a/arch/arm/mach-davinci/board-da830-evm.c b/arch/arm/mach-davinci/board-da830-evm.c
+> > index 95b5e10..ffcbec1 100644
+> > --- a/arch/arm/mach-davinci/board-da830-evm.c
+> > +++ b/arch/arm/mach-davinci/board-da830-evm.c
+> > @@ -512,7 +512,7 @@ static struct davinci_i2c_platform_data da830_evm_i2c_0_pdata = {
+> >   * example: Timer, GPIO, UART events etc) on da830/omap-l137 EVM, hence
+> >   * they are being reserved for codecs on the DSP side.
+> >   */
+> > -static const s16 da830_dma_rsv_chans[][2] = {
+> > +static s16 da830_dma_rsv_chans[][2] = {
+> 
+> I wonder why you had to remove const here and in other places. You seem
+> to be allocating new memory for DT case anyway. Its also not a good idea
+> to modify the passed platform data.
+
+Good catch. Although I was never modifying pdata itself, at one point
+the DT parsing code was modifying pointers that were const and I removed
+the const. I've since fixed that issue since we'd like them to be const
+as you point out. As a result, I've removed all these changes from v4 so
+all those files aren't touched.
+
+-Matt
