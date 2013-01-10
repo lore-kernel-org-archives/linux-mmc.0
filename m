@@ -1,74 +1,105 @@
-From: Matt Porter <mporter@ti.com>
-Subject: Re: [RFC PATCH 1/3] dmaengine: add dma_get_channel_caps()
-Date: Wed, 9 Jan 2013 20:59:56 -0500
-Message-ID: <20130110015956.GA12220@beef>
-References: <1350615088-14562-1-git-send-email-mporter@ti.com>
- <1350615088-14562-2-git-send-email-mporter@ti.com>
- <CACxGe6sUrXPc2wtLfOy8_LvRMM+e=9=sSDNLkeszfe=JX_ipbw@mail.gmail.com>
- <1351048407.5263.10.camel@vkoul-udesk3>
+From: Jingoo Han <jg1.han@samsung.com>
+Subject: [PATCH v2] mmc: sdhci-s3c: Use devm_clk_get()
+Date: Thu, 10 Jan 2013 11:05:58 +0900
+Message-ID: <007601cdeed7$082d53a0$1887fae0$%han@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f175.google.com ([209.85.216.175]:57431 "EHLO
-	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932555Ab3AJBzX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jan 2013 20:55:23 -0500
-Content-Disposition: inline
-In-Reply-To: <1351048407.5263.10.camel@vkoul-udesk3>
+Received: from mailout4.samsung.com ([203.254.224.34]:28372 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758024Ab3AJCGA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jan 2013 21:06:00 -0500
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MGE00D940HCTOI0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 10 Jan 2013 11:05:59 +0900 (KST)
+Received: from DOJG1HAN02 ([12.23.120.99])
+ by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0MGE0069A0HYXN10@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 10 Jan 2013 11:05:58 +0900 (KST)
+References: 
+In-reply-to: 
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vinod Koul <vkoul@infradead.org>
-Cc: Grant Likely <grant.likely@secretlab.ca>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, vinod.koul@intel.com, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>
+To: 'Chris Ball' <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, 'Ben Dooks' <ben-linux@fluff.org>, 'Jingoo Han' <jg1.han@samsung.com>
 
-On Wed, Oct 24, 2012 at 08:43:27AM +0530, Vinod Koul wrote:
-> On Tue, 2012-10-23 at 23:49 +0100, Grant Likely wrote:
-> > > +enum dmaengine_apis {
-> > > +       DMAENGINE_MEMCPY        = 0x0001,
-> > > +       DMAENGINE_XOR           = 0x0002,
-> > > +       DMAENGINE_XOR_VAL       = 0x0004,
-> > > +       DMAENGINE_PQ            = 0x0008,
-> > > +       DMAENGINE_PQ_VAL        = 0x0010,
-> > > +       DMAENGINE_MEMSET        = 0x0020,
-> > > +       DMAENGINE_SLAVE         = 0x0040,
-> > > +       DMAENGINE_CYCLIC        = 0x0080,
-> > > +       DMAENGINE_INTERLEAVED   = 0x0100,
-> > > +       DMAENGINE_SG            = 0x0200,
-> > > +};
-> > 
-> > Actually, one more comment. Why the new enum? Why can't the
-> > dma_transaction_type enum be used directly along with dma_cap_mask_t? 
-> Some of the capabilities above are not there in dma_caps_t like DMA_SG.
-> Also DMA_INTERRUPT and DMA_PRIVATE would not make much sense here.
-> 
-> BUT would help to keep things simpler if have one definition which
-> includes all.
+Use devm_clk_get() rather than clk_get() to make cleanup paths
+more simple.
 
-All good points. I think we can best eliminate this redundant set of 
-enums by using dma_cap_mask_t and noting in a comment as follows:
+Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+---
+Changes since v1:
+- modified the commit message
 
-diff --git a/include/linux/dmaengine.h b/include/linux/dmaengine.h
-index 0181887..9add5ca 100644
---- a/include/linux/dmaengine.h
-+++ b/include/linux/dmaengine.h
-@@ -391,14 +391,15 @@ enum dmaengine_apis {
-  * a) APIs/ops supported
-  * b) channel physical capabilities
-  *
-- * @ops: or'ed api capability
-+ * @cap_mask: api/ops capability (DMA_INTERRUPT and DMA_PRIVATE
-+ *	       are invalid api/ops and will never be set)
-  * @seg_nr: maximum number of SG segments supported on a SG/SLAVE
-  *	    channel (0 for no maximum or not a SG/SLAVE channel)
-  * @seg_len: maximum length of SG segments supported on a SG/SLAVE
-  *	     channel (0 for no maximum or not a SG/SLAVE channel)
-  */
- struct dmaengine_chan_caps {
--	enum dmaengine_apis ops;
-+	dma_cap_mask_t cap_mask;
- 	int seg_nr;
- 	int seg_len;
- };
+ drivers/mmc/host/sdhci-s3c.c |   17 ++---------------
+ 1 files changed, 2 insertions(+), 15 deletions(-)
 
-If that sounds good I'll send an updated series with this change.
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 82a8de1..5aaef5b 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -608,7 +608,7 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+ 
+ 	platform_set_drvdata(pdev, host);
+ 
+-	sc->clk_io = clk_get(dev, "hsmmc");
++	sc->clk_io = devm_clk_get(dev, "hsmmc");
+ 	if (IS_ERR(sc->clk_io)) {
+ 		dev_err(dev, "failed to get io clock\n");
+ 		ret = PTR_ERR(sc->clk_io);
+@@ -623,7 +623,7 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+ 		char name[14];
+ 
+ 		snprintf(name, 14, "mmc_busclk.%d", ptr);
+-		clk = clk_get(dev, name);
++		clk = devm_clk_get(dev, name);
+ 		if (IS_ERR(clk))
+ 			continue;
+ 
+@@ -765,15 +765,9 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+ #ifndef CONFIG_PM_RUNTIME
+ 	clk_disable_unprepare(sc->clk_bus[sc->cur_clk]);
+ #endif
+-	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+-		if (sc->clk_bus[ptr]) {
+-			clk_put(sc->clk_bus[ptr]);
+-		}
+-	}
+ 
+  err_no_busclks:
+ 	clk_disable_unprepare(sc->clk_io);
+-	clk_put(sc->clk_io);
+ 
+  err_pdata_io_clk:
+ 	sdhci_free_host(host);
+@@ -786,7 +780,6 @@ static int sdhci_s3c_remove(struct platform_device *pdev)
+ 	struct sdhci_host *host =  platform_get_drvdata(pdev);
+ 	struct sdhci_s3c *sc = sdhci_priv(host);
+ 	struct s3c_sdhci_platdata *pdata = sc->pdata;
+-	int ptr;
+ 
+ 	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
+ 		pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
+@@ -806,13 +799,7 @@ static int sdhci_s3c_remove(struct platform_device *pdev)
+ #ifndef CONFIG_PM_RUNTIME
+ 	clk_disable_unprepare(sc->clk_bus[sc->cur_clk]);
+ #endif
+-	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+-		if (sc->clk_bus[ptr]) {
+-			clk_put(sc->clk_bus[ptr]);
+-		}
+-	}
+ 	clk_disable_unprepare(sc->clk_io);
+-	clk_put(sc->clk_io);
+ 
+ 	sdhci_free_host(host);
+ 	platform_set_drvdata(pdev, NULL);
+-- 
+1.7.2.5
 
--Matt
+
