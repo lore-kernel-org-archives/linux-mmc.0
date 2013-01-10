@@ -1,120 +1,174 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [REPOST PATCH v3 4/4] mmc: dw_mmc: Handle wp-gpios from device tree
-Date: Thu, 10 Jan 2013 10:24:29 -0800
-Message-ID: <1357842269-15062-4-git-send-email-dianders@chromium.org>
+From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: [REPOST PATCH v3 1/4] mmc: dw_mmc: Add "disable-wp" device tree
+ property
+Date: Thu, 10 Jan 2013 10:24:26 -0800
+Message-ID: <1357842269-15062-1-git-send-email-dianders@chromium.org>
 References: <1354251857-21587-1-git-send-email-dianders@chromium.org>
- <1357842269-15062-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1357842269-15062-1-git-send-email-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-samsung-soc@vger.kernel.org, Thomas Abraham <thomas.abraham@linaro.org>, Kukjin Kim <kgene.kim@samsung.com>, Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>, Will Newton <will.newton@imgtec.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Kyungmin Park <kyungmin.park@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <1354251857-21587-1-git-send-email-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Kukjin Kim <kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Will Newton <will.newton-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>, Kyungmin Park <kyungmin.park-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Abhilash Kesavan <a.kesavan-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On some SoCs (like exynos5250) you need to use an external GPIO for
-write protect.  Add support for wp-gpios to the core dw_mmc driver
-since it could be useful across multiple SoCs.
+The "disable-wp" property is used to specify that a given SD card slot
+doesn't have a concept of write protect.  This eliminates the need for
+special case code for SD slots that should never be write protected
+(like a micro SD slot or a dev board).
 
-With this change I am able to make use of the write protect for the
-external SD slot on exynos5250-snow.
+The dw_mmc driver is special in needing to specify "disable-wp"
+because the lack of a "wp-gpios" property means to use the special
+purpose write protect line.  On some other mmc devices the lack of
+"wp-gpios" means that write protect should be disabled.
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+Signed-off-by: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Acked-by: Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 ---
-Changes in v3: None
-Changes in v2:
-- Fixed return type from u32 to int
-- Return -EINVAL instead of -1
+Changes in v3:
+- New for this version of the patch series.  Chose "disable-wp" rather
+  than the discussed "broken-internal-wp" since it mapped more cleanly
+  to an existing quirk (and the only reason to specify that the
+  internal wp is broken is if you're disabling the write protect
+  anyway).
+- Reposted series 3 with Seungwon's ack, since it hasn't been picked
+  up by anyone.
 
- drivers/mmc/host/dw_mmc.c |   34 ++++++++++++++++++++++++++++++++++
- 1 files changed, 34 insertions(+), 0 deletions(-)
+ .../devicetree/bindings/mmc/synopsis-dw-mshc.txt   |   12 +++++-
+ drivers/mmc/host/dw_mmc.c                          |   36 +++++++++++++++++++-
+ include/linux/mmc/dw_mmc.h                         |    4 ++
+ 3 files changed, 49 insertions(+), 3 deletions(-)
 
+diff --git a/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
+index 06cd32d08..726fd21 100644
+--- a/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
+@@ -26,8 +26,16 @@ Required Properties:
+ 	* bus-width: as documented in mmc core bindings.
+ 
+ 	* wp-gpios: specifies the write protect gpio line. The format of the
+-	  gpio specifier depends on the gpio controller. If the write-protect
+-	  line is not available, this property is optional.
++	  gpio specifier depends on the gpio controller. If a GPIO is not used
++	  for write-protect, this property is optional.
++
++	* disable-wp: If the wp-gpios property isn't present then (by default)
++	  we'd assume that the write protect is hooked up directly to the
++	  controller's special purpose write protect line (accessible via
++	  the WRTPRT register).  However, it's possible that we simply don't
++	  want write protect.  In that case specify 'disable-wp'.
++	  NOTE: This property is not required for slots known to always
++	  connect to eMMC or SDIO cards.
+ 
+ Optional properties:
+ 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index bc0b030..e7e22ad 100644
+index 323c502..bc0b030 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -34,6 +34,7 @@
- #include <linux/regulator/consumer.h>
- #include <linux/workqueue.h>
- #include <linux/of.h>
-+#include <linux/of_gpio.h>
- 
- #include "dw_mmc.h"
- 
-@@ -75,6 +76,7 @@ struct idmac_desc {
+@@ -74,6 +74,7 @@ struct idmac_desc {
+  * struct dw_mci_slot - MMC slot state
   * @mmc: The mmc_host representing this slot.
   * @host: The MMC controller this slot is using.
-  * @quirks: Slot-level quirks (DW_MCI_SLOT_QUIRK_XXX)
-+ * @wp_gpio: If gpio_is_valid() we'll use this to read write protect.
++ * @quirks: Slot-level quirks (DW_MCI_SLOT_QUIRK_XXX)
   * @ctype: Card type for this slot.
   * @mrq: mmc_request currently being processed or waiting to be
   *	processed, or NULL when the slot is idle.
-@@ -90,6 +92,7 @@ struct dw_mci_slot {
+@@ -88,6 +89,8 @@ struct dw_mci_slot {
+ 	struct mmc_host		*mmc;
  	struct dw_mci		*host;
  
- 	int			quirks;
-+	int			wp_gpio;
- 
++	int			quirks;
++
  	u32			ctype;
  
-@@ -833,6 +836,8 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
+ 	struct mmc_request	*mrq;
+@@ -825,7 +828,8 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
+ 	struct dw_mci_board *brd = slot->host->pdata;
+ 
+ 	/* Use platform get_ro function, else try on board write protect */
+-	if (brd->quirks & DW_MCI_QUIRK_NO_WRITE_PROTECT)
++	if ((brd->quirks & DW_MCI_QUIRK_NO_WRITE_PROTECT) ||
++	    (slot->quirks & DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT))
  		read_only = 0;
  	else if (brd->get_ro)
  		read_only = brd->get_ro(slot->id);
-+	else if (gpio_is_valid(slot->wp_gpio))
-+		read_only = gpio_get_value(slot->wp_gpio);
- 	else
- 		read_only =
- 			mci_readl(slot->host, WRTPRT) & (1 << slot->id) ? 1 : 0;
-@@ -1827,6 +1832,29 @@ static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
- 			       " as 1\n");
- 	return bus_wd;
- }
-+
-+/* find the write protect gpio for a given slot; or -1 if none specified */
-+static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
-+{
-+	struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
-+	int gpio;
-+
-+	if (!np)
-+		return -EINVAL;
-+
-+	gpio = of_get_named_gpio(np, "wp-gpios", 0);
-+
-+	/* Having a missing entry is valid; return silently */
-+	if (!gpio_is_valid(gpio))
-+		return -EINVAL;
-+
-+	if (devm_gpio_request(dev, gpio, "dw-mci-wp")) {
-+		dev_warn(dev, "gpio [%d] request failed\n", gpio);
-+		return -EINVAL;
-+	}
-+
-+	return gpio;
-+}
- #else /* CONFIG_OF */
- static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
- {
-@@ -1840,6 +1868,10 @@ static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
- {
+@@ -1785,6 +1789,30 @@ static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
  	return NULL;
  }
-+static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
-+{
-+	return -EINVAL;
-+}
- #endif /* CONFIG_OF */
  
- static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
-@@ -1957,6 +1989,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	else
- 		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
- 
-+	slot->wp_gpio = dw_mci_of_get_wp_gpio(host->dev, slot->id);
++static struct dw_mci_of_slot_quirks {
++	char *quirk;
++	int id;
++} of_slot_quirks[] = {
++	{
++		.quirk	= "disable-wp",
++		.id	= DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT,
++	},
++};
 +
- 	mmc_add_host(mmc);
++static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
++{
++	struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
++	int quirks = 0;
++	int idx;
++
++	/* get quirks */
++	for (idx = 0; idx < ARRAY_SIZE(of_slot_quirks); idx++)
++		if (of_get_property(np, of_slot_quirks[idx].quirk, NULL))
++			quirks |= of_slot_quirks[idx].id;
++
++	return quirks;
++}
++
+ /* find out bus-width for a given slot */
+ static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
+ {
+@@ -1800,6 +1828,10 @@ static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
+ 	return bus_wd;
+ }
+ #else /* CONFIG_OF */
++static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
++{
++	return 0;
++}
+ static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
+ {
+ 	return 1;
+@@ -1828,6 +1860,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	slot->host = host;
+ 	host->slot[id] = slot;
  
- #if defined(CONFIG_DEBUG_FS)
++	slot->quirks = dw_mci_of_get_slot_quirks(host->dev, slot->id);
++
+ 	mmc->ops = &dw_mci_ops;
+ 	mmc->f_min = DIV_ROUND_UP(host->bus_hz, 510);
+ 	mmc->f_max = host->bus_hz;
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 34be4f4..24dc3a8 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -212,6 +212,10 @@ struct dw_mci_dma_ops {
+ /* Write Protect detection not available */
+ #define DW_MCI_QUIRK_NO_WRITE_PROTECT		BIT(4)
+ 
++/* Slot level quirks */
++/* This slot has no write protect */
++#define DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT	BIT(0)
++
+ struct dma_pdata;
+ 
+ struct block_settings {
 -- 
 1.7.7.3
