@@ -1,58 +1,38 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Enable SDIO IRQ using a GPIO in idle
- mode.
-Date: Thu, 10 Jan 2013 12:22:04 -0800
-Message-ID: <20130110202203.GD14149@atomide.com>
-References: <20121220220444.GA350@blumentopf>
- <1356041532-919-1-git-send-email-andreas.fenkart@streamunlimited.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1356041532-919-1-git-send-email-andreas.fenkart@streamunlimited.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Andreas Fenkart <andreas.fenkart@streamunlimited.com>
-Cc: cjb@laptop.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, santosh.shilimkar@ti.com, zonque@gmail.com
+From: Andrew Lunn <andrew@lunn.ch>
+Subject: [PATCH] mmc: mvsdio: Replace IS_ERR_NULL() is with IS_ERR()
+Date: Thu, 10 Jan 2013 21:29:15 +0100
+Message-ID: <1357849755-8168-1-git-send-email-andrew@lunn.ch>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from londo.lunn.ch ([80.238.139.98]:43253 "EHLO londo.lunn.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755309Ab3AJU3d (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 10 Jan 2013 15:29:33 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jason Cooper <jason@lakedaemon.net>
+Cc: linux ARM <linux-arm-kernel@lists.infradead.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, cjb@laptop.org, linux-mmc@vger.kernel.org, Andrew Lunn <andrew@lunn.ch>
 
-* Andreas Fenkart <andreas.fenkart@streamunlimited.com> [121220 14:15]:
-> Without functional clock the omap_hsmmc module can't forward
-> SDIO IRQs to the system. This patch reconfigures dat1 line
-> as a gpio while the fclk is off. And uses SDIO IRQ detection of
-> the module, while fclk is present.
+A NULL is a valid clk cookie, so we should not be tested with
+IS_ERR_NULL(). Replace it with IS_ERR().
 
-Looks pretty good to me, however I could not figure out what
-to apply this on for testing. It fails to apply at least against
-current linux next, can you please update against that?
- 
-> +static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
-> +{
-> +	struct omap_hsmmc_host *host = mmc_priv(mmc);
-> +	u32 irq_mask;
-> +	unsigned long flags;
-> +
-> +	spin_lock_irqsave(&host->irq_lock, flags);
-> +
-> +	host->sdio_irq_en = (enable != 0) ? true : false;
-> +
-> +	if (host->active_pinmux) {
-> +		irq_mask = OMAP_HSMMC_READ(host->base, ISE);
-> +		if (enable)
-> +			irq_mask |= CIRQ_ENABLE;
-> +		else
-> +			irq_mask &= ~CIRQ_ENABLE;
-> +		OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
-> +
-> +		if (!host->req_in_progress)
-> +			OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
-> +
-> +#if 0
-> +		OMAP_HSMMC_READ(host->base, IE); /* flush posted write */
-> +#endif
+Signed-off-by: Andrew Lunn <andrew@lunn.ch>
+---
+ drivers/mmc/host/mvsdio.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Maybe just replace #if 0 with just a comment in case it turns out to be
-needed for some cases?
+diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+index de4c20b..d0050fa 100644
+--- a/drivers/mmc/host/mvsdio.c
++++ b/drivers/mmc/host/mvsdio.c
+@@ -839,7 +839,7 @@ out:
+ 	if (r)
+ 		release_resource(r);
+ 	if (mmc)
+-		if (!IS_ERR_OR_NULL(host->clk)) {
++		if (!IS_ERR(host->clk)) {
+ 			clk_disable_unprepare(host->clk);
+ 			clk_put(host->clk);
+ 		}
+-- 
+1.7.10.4
 
-Regards,
-
-Tony
