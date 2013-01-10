@@ -1,196 +1,125 @@
-From: Kevin Liu <kliu5@marvell.com>
-Subject: [PATCH v2] mmc: sdio: defer card int handling when the function suspended
-Date: Thu, 10 Jan 2013 17:29:30 +0800
-Message-ID: <1357810170-24981-1-git-send-email-kliu5@marvell.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: Patch 'usb: convert drivers/usb/* to use
+	module_platform_driver_probe()' applied to my tree
+Date: Thu, 10 Jan 2013 13:23:48 +0000
+Message-ID: <20130110132348.GD19944@n2100.arm.linux.org.uk>
+References: <1357820529@ti.com> <CAHkwnC-vaeZ53chLcgLW3H8_MR-yG9uNoPQ+qg4ddjzVT-8qUQ@mail.gmail.com> <20130110130600.GX28920@arwen.pp.htv.fi>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog127.obsmtp.com ([74.125.149.107]:33920 "EHLO
-	na3sys009aog127.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751751Ab3AJJbA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jan 2013 04:31:00 -0500
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:43833 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752571Ab3AJNYB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jan 2013 08:24:01 -0500
+Content-Disposition: inline
+In-Reply-To: <20130110130600.GX28920@arwen.pp.htv.fi>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Nicolas Pitre <nico@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Aaron Lu <aaron.lu@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Alexander Stein <alexander.stein@systec-electronic.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>Kevin
+To: Felipe Balbi <balbi@ti.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Cc: Fabio Porcedda <fabio.porcedda@gmail.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, eric.y.miao@gmail.com, haojian.zhuang@gmail.com
 
-The sdio card interrupt happened after the function suspended should be
-regarded as wakeup event. The interrupt should not be handled until the
-function resume back.
-If sdio host can wakeup system, interrupts will _NOT_ be disabled
-and sdio card interrupt may happen during whole suspend/resume process.
-Defer the interrupt handling will make system resume back.
+On Thu, Jan 10, 2013 at 03:06:00PM +0200, Felipe Balbi wrote:
+> we just need to make sure that Greg merges my pull request after
+> driver-core. Another possibility is that I drop this patch from my tree
+> and Greg takes the entire series through driver-core.
 
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
-Signed-off-by: Jialing Fu <jlfu@marvell.com>
----
- drivers/mmc/core/sdio.c       |   21 +++++++++++++++++++--
- drivers/mmc/core/sdio_irq.c   |   16 ++++++++++++----
- include/linux/mmc/host.h      |    1 +
- include/linux/mmc/sdio_func.h |    6 ++++++
- 4 files changed, 38 insertions(+), 6 deletions(-)
+What would also be good is if someone also reviews the probe cleanup
+and remove paths too.  I just grepped for platform_driver_probe() in
+drivers/mmc - which hit three drivers.  Of those three drivers, all
+_three_ had bugs there.  It took me about two seconds of looking to
+find all these, and I wasn't even looking for this.
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 2273ce6..bd0e589 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -896,8 +896,10 @@ static int mmc_sdio_suspend(struct mmc_host *host)
- {
- 	int i, err = 0;
- 
-+	atomic_set(&host->sdio_suspend_abort, 0);
- 	for (i = 0; i < host->card->sdio_funcs; i++) {
- 		struct sdio_func *func = host->card->sdio_func[i];
-+
- 		if (func && sdio_func_present(func) && func->dev.driver) {
- 			const struct dev_pm_ops *pmops = func->dev.driver->pm;
- 			if (!pmops || !pmops->suspend || !pmops->resume) {
-@@ -905,18 +907,26 @@ static int mmc_sdio_suspend(struct mmc_host *host)
- 				err = -ENOSYS;
- 			} else
- 				err = pmops->suspend(&func->dev);
-+
- 			if (err)
- 				break;
-+			else
-+				func->func_status = FUNC_SUSPENDED;
- 		}
- 	}
-+
- 	while (err && --i >= 0) {
- 		struct sdio_func *func = host->card->sdio_func[i];
- 		if (func && sdio_func_present(func) && func->dev.driver) {
- 			const struct dev_pm_ops *pmops = func->dev.driver->pm;
- 			pmops->resume(&func->dev);
-+			func->func_status = FUNC_RESUMED;
- 		}
- 	}
- 
-+	if (err && atomic_cmpxchg(&host->sdio_suspend_abort, 1, 0))
-+		wake_up_process(host->sdio_irq_thread);
-+
- 	if (!err && mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
- 		mmc_claim_host(host);
- 		sdio_disable_wide(host->card);
-@@ -928,7 +938,7 @@ static int mmc_sdio_suspend(struct mmc_host *host)
- 
- static int mmc_sdio_resume(struct mmc_host *host)
- {
--	int i, err = 0;
-+	int i, err = 0, need_wake = 0;
- 
- 	BUG_ON(!host);
- 	BUG_ON(!host->card);
-@@ -950,7 +960,8 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 	}
- 
- 	if (!err && host->sdio_irqs)
--		wake_up_process(host->sdio_irq_thread);
-+		need_wake = 1;
-+
- 	mmc_release_host(host);
- 
- 	/*
-@@ -966,11 +977,17 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 	for (i = 0; !err && i < host->card->sdio_funcs; i++) {
- 		struct sdio_func *func = host->card->sdio_func[i];
- 		if (func && sdio_func_present(func) && func->dev.driver) {
-+
- 			const struct dev_pm_ops *pmops = func->dev.driver->pm;
- 			err = pmops->resume(&func->dev);
-+			func->func_status = FUNC_RESUMED;
- 		}
- 	}
- 
-+	atomic_set(&host->sdio_suspend_abort, 0);
-+	if (need_wake)
-+		wake_up_process(host->sdio_irq_thread);
-+
- 	return err;
- }
- 
-diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-index 3d8ceb4..390f08c 100644
---- a/drivers/mmc/core/sdio_irq.c
-+++ b/drivers/mmc/core/sdio_irq.c
-@@ -42,7 +42,10 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
- 	 */
- 	func = card->sdio_single_irq;
- 	if (func && host->sdio_irq_pending) {
--		func->irq_handler(func);
-+		if (func->func_status == FUNC_SUSPENDED)
-+			atomic_set(&host->sdio_suspend_abort, 1);
-+		else
-+			func->irq_handler(func);
- 		return 1;
- 	}
- 
-@@ -63,7 +66,10 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
- 					mmc_card_id(card));
- 				ret = -EINVAL;
- 			} else if (func->irq_handler) {
--				func->irq_handler(func);
-+				if (func->func_status == FUNC_SUSPENDED)
-+					atomic_set(&host->sdio_suspend_abort, 1);
-+				else
-+					func->irq_handler(func);
- 				count++;
- 			} else {
- 				pr_warning("%s: pending IRQ with no handler\n",
-@@ -119,7 +125,8 @@ static int sdio_irq_thread(void *_host)
- 		if (ret)
- 			break;
- 		ret = process_sdio_pending_irqs(host);
--		host->sdio_irq_pending = false;
-+		if (!atomic_read(&host->sdio_suspend_abort))
-+			host->sdio_irq_pending = false;
- 		mmc_release_host(host);
- 
- 		/*
-@@ -149,7 +156,8 @@ static int sdio_irq_thread(void *_host)
- 		}
- 
- 		set_current_state(TASK_INTERRUPTIBLE);
--		if (host->caps & MMC_CAP_SDIO_IRQ) {
-+		if ((host->caps & MMC_CAP_SDIO_IRQ) &&
-+			!atomic_read(&host->sdio_suspend_abort)) {
- 			mmc_host_clk_hold(host);
- 			host->ops->enable_sdio_irq(host, 1);
- 			mmc_host_clk_release(host);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 61a10c1..b98364d 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -316,6 +316,7 @@ struct mmc_host {
- 	struct task_struct	*sdio_irq_thread;
- 	bool			sdio_irq_pending;
- 	atomic_t		sdio_irq_thread_abort;
-+	atomic_t		sdio_suspend_abort;
- 
- 	mmc_pm_flag_t		pm_flags;	/* requested pm features */
- 
-diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
-index 50f0bc9..59f4c23 100644
---- a/include/linux/mmc/sdio_func.h
-+++ b/include/linux/mmc/sdio_func.h
-@@ -32,6 +32,11 @@ struct sdio_func_tuple {
- 	unsigned char data[0];
- };
- 
-+enum sdio_func_status {
-+	FUNC_RESUMED = 0,	/* default value */
-+	FUNC_SUSPENDED,
-+};
-+
- /*
-  * SDIO function devices
-  */
-@@ -59,6 +64,7 @@ struct sdio_func {
- 	const char		**info;		/* info strings */
- 
- 	struct sdio_func_tuple *tuples;
-+	enum sdio_func_status	func_status;	/* SDIO function driver state */
- };
- 
- #define sdio_func_present(f)	((f)->state & SDIO_STATE_PRESENT)
--- 
-1.7.9.5
+First off, mvsdio.c.  C _is_ _not_ PYTHON!
 
+        if (r)
+                release_resource(r);
+        if (mmc)
+                if (!IS_ERR_OR_NULL(host->clk)) {
+                        clk_disable_unprepare(host->clk);
+                        clk_put(host->clk);
+                }
+                mmc_free_host(mmc);
+
+        return ret;
+
+and yes, this path can be reached with mmc = NULL.
+
+Secondly:
+                if (host->gpio_card_detect) {
+                        free_irq(gpio_to_irq(host->gpio_card_detect), host);
+                        gpio_free(host->gpio_card_detect);
+                }
+                if (host->gpio_write_protect)
+                        gpio_free(host->gpio_write_protect);
+
+GPIO 0 is a valid GPIO.  Luckily, we won't probe GPIO 0 at probe time,
+but this is still buggy.
+
+Thirdly:
+
+probe():
+        r = request_mem_region(r->start, SZ_1K, DRIVER_NAME);
+        if (!r)
+                return -EBUSY;
+        host->res = r;
+...
+        if (r)
+                release_resource(r);
+...
+release():
+                release_resource(host->res);
+
+This is not how we free resources allocated by request_mem_region().
+
+Next up, atmel-mci.c:
+
+        if (pdata->slot[0].bus_width) {
+                ret = atmci_init_slot(host, &pdata->slot[0],
+                                0, ATMCI_SDCSEL_SLOT_A, ATMCI_SDIOIRQA);
+...
+        if (pdata->slot[1].bus_width) {
+                ret = atmci_init_slot(host, &pdata->slot[1],
+                                1, ATMCI_SDCSEL_SLOT_B, ATMCI_SDIOIRQB);
+...
+        if (!host->caps.has_rwproof) {
+                host->buffer = dma_alloc_coherent(&pdev->dev, host->buf_size,
+                                                  &host->buf_phys_addr,
+                                                  GFP_KERNEL);
+                if (!host->buffer) {
+                        ret = -ENOMEM;
+                        dev_err(&pdev->dev, "buffer allocation failed\n");
+                        goto err_init_slot;
+                }
+        }
+...
+err_init_slot:
+        if (host->dma.chan)
+                dma_release_channel(host->dma.chan);
+        free_irq(irq, host);
+err_request_irq:
+        iounmap(host->regs);
+err_ioremap:
+        clk_put(host->mck);
+err_clk_get:
+        kfree(host);
+        return ret;
+
+Great, so on DMA buffer failure (allocated _after_ we publish the interfaces
+to the rest of the system - which is in itself buggy) we don't remove these
+interfaces, but we free all the resources and memory beneath them.
+
+Finally, davinci_mmc.c:
+
+probe():
+        mem = request_mem_region(r->start, mem_size, pdev->name);
+...
+        host->mem_res = mem;
+...
+        if (mem)
+                release_resource(mem);
+...
+release():
+                release_resource(host->mem_res);
+
+Again, this is not how we free resources allocated by request_mem_region()
+and leads to memory leaks.
