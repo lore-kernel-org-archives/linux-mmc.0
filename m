@@ -1,52 +1,36 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [REPOST PATCH v3 1/4] mmc: dw_mmc: Add "disable-wp" device tree property
-Date: Thu, 10 Jan 2013 15:57:31 -0800
-Message-ID: <CAD=FV=UkbSF9qXvV2eSh=OhD726sp7oT4qxQAb+7dr3WQQnubA@mail.gmail.com>
-References: <1354251857-21587-1-git-send-email-dianders@chromium.org>
-	<1357842269-15062-1-git-send-email-dianders@chromium.org>
-	<20130110230121.GA20584@quad.lixom.net>
-	<CAD=FV=W_++TL0+5iu=HUchGQ47q4AWxNi5sy37ysM=EMb+NFmA@mail.gmail.com>
+From: Jason Cooper <jason@lakedaemon.net>
+Subject: Re: [PATCH] mmc: mvsdio: Replace IS_ERR_NULL() is with IS_ERR()
+Date: Thu, 10 Jan 2013 15:49:31 -0500
+Message-ID: <20130110204931.GP5075@titan.lakedaemon.net>
+References: <1357849755-8168-1-git-send-email-andrew@lunn.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=W_++TL0+5iu=HUchGQ47q4AWxNi5sy37ysM=EMb+NFmA@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Olof Johansson <olof@lixom.net>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Thomas Abraham <thomas.abraham@linaro.org>, Kukjin Kim <kgene.kim@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Will Newton <will.newton@imgtec.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Rob Landley <rob@landley.net>, Abhilash Kesavan <a.kesavan@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mho-04-ewr.mailhop.org ([204.13.248.74]:52331 "EHLO
+	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750827Ab3AKAYw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jan 2013 19:24:52 -0500
+Content-Disposition: inline
+In-Reply-To: <1357849755-8168-1-git-send-email-andrew@lunn.ch>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrew Lunn <andrew@lunn.ch>
+Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, cjb@laptop.org, linux-mmc@vger.kernel.org, linux ARM <linux-arm-kernel@lists.infradead.org>
 
-Hi,
+On Thu, Jan 10, 2013 at 09:29:15PM +0100, Andrew Lunn wrote:
+> A NULL is a valid clk cookie, so we should not be tested with
+> IS_ERR_NULL(). Replace it with IS_ERR().
+> 
+> Signed-off-by: Andrew Lunn <andrew@lunn.ch>
+> ---
+>  drivers/mmc/host/mvsdio.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 
-A followup as I did more investigation here...
+The subject and commit entry should be IS_ERR_OR_NULL, but other than
+that:
 
-On Thu, Jan 10, 2013 at 3:23 PM, Doug Anderson <dianders@chromium.org> wrote:
-> Olof,
->
-> Thanks for your comments.
->
-> On Thu, Jan 10, 2013 at 3:01 PM, Olof Johansson <olof@lixom.net> wrote:
->>
->> The previous code used the controller-common quirk field to set a
->> per-controller DW_MCI_QUIRK_NO_WRITE_PROTECT. Is there really need to
->> do this per-slot? And if so, please explain in the commit message why
->> there is need for a brand new quirk for the same functionality.
->
-> I'm happy to move back to using a per-controller quirk here--it
-> simplifies the code quite a bit since it can use all of the
-> preexisting quirks code.  I originally coded it up as per-slot since
-> generally each slot needs its own write-protect line.  Without ever
-> seeing any hardware using multiple slots per controller I can't say
-> how common this would be, so it may be overkill to handle that
-> situation.
+Acked-by: Jason Cooper <jason@lakedaemon.net>
 
-Actually, it looks like the per-controller
-DW_MCI_QUIRK_NO_WRITE_PROTECT was added at the same time as the code
-using it was added to 'drivers/mmc/host/dw_mmc-exynos.c'.  Since this
-patch series removes the code from dw_mmc-exynos.c I can also remove
-the controller-level quirk.
+thx,
 
-...I'll plan to spin a new rev tomorrow that leaves the 'no write
-protect' quirk at the slot level but removes the old controller-level
-quirk.  :)
-
--Doug
+Jason.
