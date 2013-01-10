@@ -1,126 +1,47 @@
-From: Matt Porter <mporter@ti.com>
-Subject: Re: [RFC PATCH v3 05/16] ARM: edma: add AM33XX crossbar event support
-Date: Thu, 10 Jan 2013 17:54:34 -0500
-Message-ID: <20130110225434.GT14660@beef>
-References: <1350566815-409-1-git-send-email-mporter@ti.com>
- <1350566815-409-6-git-send-email-mporter@ti.com>
- <508D12DC.8010400@ti.com>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [REPOST PATCH v3 1/4] mmc: dw_mmc: Add "disable-wp" device tree
+ property
+Date: Thu, 10 Jan 2013 15:01:21 -0800
+Message-ID: <20130110230121.GA20584@quad.lixom.net>
+References: <1354251857-21587-1-git-send-email-dianders@chromium.org>
+ <1357842269-15062-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f175.google.com ([209.85.220.175]:59927 "EHLO
-	mail-vc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753168Ab3AJWuA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jan 2013 17:50:00 -0500
+Received: from mail-pb0-f47.google.com ([209.85.160.47]:60116 "EHLO
+	mail-pb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753998Ab3AJXBX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jan 2013 18:01:23 -0500
+Received: by mail-pb0-f47.google.com with SMTP id un1so571551pbc.34
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Jan 2013 15:01:22 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <508D12DC.8010400@ti.com>
+In-Reply-To: <1357842269-15062-1-git-send-email-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sekhar Nori <nsekhar@ti.com>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, Benoit Cousson <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Chris Ball <cjb@laptop.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+To: Doug Anderson <dianders@chromium.org>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Thomas Abraham <thomas.abraham@linaro.org>, Kukjin Kim <kgene.kim@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Will Newton <will.newton@imgtec.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-kernel@vger.kernel.org, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Rob Landley <rob@landley.net>, Abhilash Kesavan <a.kesavan@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org
 
-On Sun, Oct 28, 2012 at 04:41:24PM +0530, Sekhar Nori wrote:
-> On 10/18/2012 6:56 PM, Matt Porter wrote:
-> > Adds support for the per-EDMA channel event mux. This is required
-> > for any peripherals using DMA crossbar mapped events.
-> > 
-> > Signed-off-by: Matt Porter <mporter@ti.com>
-> > ---
-> >  arch/arm/common/edma.c             |   63 +++++++++++++++++++++++++++++++++++-
-> >  include/linux/platform_data/edma.h |    1 +
-> >  2 files changed, 63 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
-> > index 6d2a590..b761b7a 100644
-> > --- a/arch/arm/common/edma.c
-> > +++ b/arch/arm/common/edma.c
-> > @@ -1425,6 +1425,53 @@ static int edma_of_read_u32_to_s16_array(const struct device_node *np,
-> >  	return 0;
-> >  }
-> >  
-> > +static int edma_xbar_event_map(struct device *dev,
-> > +			       struct device_node *node,
-> > +			       struct edma_soc_info *pdata, int len)
-> > +{
-> > +	int ret = 0;
-> > +	int i;
-> > +	struct resource res;
-> > +	void *xbar;
-> > +	s16 (*xbar_chans)[2];
-> > +	u32 shift, offset, mux;
-> > +
-> > +	xbar_chans = devm_kzalloc(dev,
-> > +				  len/sizeof(s16) + 2*sizeof(s16),
-> > +				  GFP_KERNEL);
-> > +	if (!xbar_chans)
-> > +		return -ENOMEM;
-> > +
-> > +	ret = of_address_to_resource(node, 1, &res);
-> > +	if (IS_ERR_VALUE(ret))
-> > +		return -EIO;
-> > +
-> > +	xbar = devm_ioremap(dev, res.start, resource_size(&res));
-> > +	if (!xbar)
-> > +		return -EIO;
+On Thu, Jan 10, 2013 at 10:24:26AM -0800, Doug Anderson wrote:
+> The "disable-wp" property is used to specify that a given SD card slot
+> doesn't have a concept of write protect.  This eliminates the need for
+> special case code for SD slots that should never be write protected
+> (like a micro SD slot or a dev board).
 > 
-> -ENOMEM is more appropiate for ioremap failures.
+> The dw_mmc driver is special in needing to specify "disable-wp"
+> because the lack of a "wp-gpios" property means to use the special
+> purpose write protect line.  On some other mmc devices the lack of
+> "wp-gpios" means that write protect should be disabled.
 
-Fixed in v4.
+Hi,
 
-> 
-> > +
-> > +	ret = edma_of_read_u32_to_s16_array(node,
-> > +					    "ti,edma-xbar-event-map",
-> > +					    (s16 *)xbar_chans,
-> > +					    len/sizeof(u32));
-> > +	if (IS_ERR_VALUE(ret))
-> > +		return -EIO;
-> > +
-> > +	for (i = 0; xbar_chans[i][0] != -1; i++) {
-> > +		shift = (xbar_chans[i][1] % 4) * 8;
-> > +		offset = xbar_chans[i][1] >> 2;
-> > +		offset <<= 2;
-> > +		mux = __raw_readl((void *)((u32)xbar + offset));
-> 
-> Dont use __raw* variants of io accessors. There will be ordering issues
-> on ARMv7.
+The previous code used the controller-common quirk field to set a
+per-controller DW_MCI_QUIRK_NO_WRITE_PROTECT. Is there really need to
+do this per-slot? And if so, please explain in the commit message why
+there is need for a brand new quirk for the same functionality.
 
-Fixed in v4.
+It's even uncertain if there are any systems out there that uses the
+multi-slot functionality of this driver to date, most seem to map one
+slot per controller in the first place...
 
-> 
-> > +		mux &= (~(0xff << shift));
-> > +		mux |= (xbar_chans[i][0] << shift);
-> 
-> Unnecessary parens above.
 
-Fixed in v4.
-
-> 
-> > +		__raw_writel(mux, (void *)((u32)xbar + offset));
-> > +	}
-> > +
-> > +	pdata->xbar_chans = xbar_chans;
-> > +
-> > +	return 0;
-> > +}
-> > +
-> >  static int edma_of_parse_dt(struct device *dev,
-> >  			    struct device_node *node,
-> >  			    struct edma_soc_info *pdata)
-> > @@ -1453,7 +1500,6 @@ static int edma_of_parse_dt(struct device *dev,
-> >  	pdata->n_slot = value;
-> >  
-> >  	pdata->n_cc = 1;
-> > -	/* This is unused */
-> 
-> The comment should have not been part of 4/16?
-
-Correct. I moved the change to the correct patch in v4.
-
-> 
-> Thanks,
-> Sekhar
-> _______________________________________________
-> Davinci-linux-open-source mailing list
-> Davinci-linux-open-source@linux.davincidsp.com
-> http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source
+-Olof
