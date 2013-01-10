@@ -1,62 +1,126 @@
-From: Nishanth Menon <nm-l0cyMroinI0@public.gmane.org>
-Subject: Re: [RFC PATCH v3 16/16] ARM: dts: add AM33XX SPI support
-Date: Thu, 10 Jan 2013 14:49:11 -0600
-Message-ID: <20130110204911.GA7586@kahuna>
+From: Matt Porter <mporter@ti.com>
+Subject: Re: [RFC PATCH v3 05/16] ARM: edma: add AM33XX crossbar event support
+Date: Thu, 10 Jan 2013 17:54:34 -0500
+Message-ID: <20130110225434.GT14660@beef>
 References: <1350566815-409-1-git-send-email-mporter@ti.com>
- <1350566815-409-17-git-send-email-mporter@ti.com>
- <508D1791.1040806@ti.com> <20130110193547.GQ14660@beef>
- <20130110194653.GA32519@kahuna> <20130110204959.GS14660@beef>
+ <1350566815-409-6-git-send-email-mporter@ti.com>
+ <508D12DC.8010400@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f175.google.com ([209.85.220.175]:59927 "EHLO
+	mail-vc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753168Ab3AJWuA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jan 2013 17:50:00 -0500
 Content-Disposition: inline
-In-Reply-To: <20130110204959.GS14660@beef>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <508D12DC.8010400@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sekhar Nori <nsekhar@ti.com>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, Benoit Cousson <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Chris Ball <cjb@laptop.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 
-On 15:49-20130110, Matt Porter wrote:
-> On Thu, Jan 10, 2013 at 01:46:53PM -0600, Nishanth Menon wrote:
-> > On 14:35-20130110, Matt Porter wrote:
-> > > On Sun, Oct 28, 2012 at 05:01:29PM +0530, Sekhar Nori wrote:
-> > > > On 10/18/2012 6:56 PM, Matt Porter wrote:
-[...]
+On Sun, Oct 28, 2012 at 04:41:24PM +0530, Sekhar Nori wrote:
+> On 10/18/2012 6:56 PM, Matt Porter wrote:
+> > Adds support for the per-EDMA channel event mux. This is required
+> > for any peripherals using DMA crossbar mapped events.
+> > 
+> > Signed-off-by: Matt Porter <mporter@ti.com>
+> > ---
+> >  arch/arm/common/edma.c             |   63 +++++++++++++++++++++++++++++++++++-
+> >  include/linux/platform_data/edma.h |    1 +
+> >  2 files changed, 63 insertions(+), 1 deletion(-)
+> > 
+> > diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+> > index 6d2a590..b761b7a 100644
+> > --- a/arch/arm/common/edma.c
+> > +++ b/arch/arm/common/edma.c
+> > @@ -1425,6 +1425,53 @@ static int edma_of_read_u32_to_s16_array(const struct device_node *np,
+> >  	return 0;
+> >  }
+> >  
+> > +static int edma_xbar_event_map(struct device *dev,
+> > +			       struct device_node *node,
+> > +			       struct edma_soc_info *pdata, int len)
+> > +{
+> > +	int ret = 0;
+> > +	int i;
+> > +	struct resource res;
+> > +	void *xbar;
+> > +	s16 (*xbar_chans)[2];
+> > +	u32 shift, offset, mux;
+> > +
+> > +	xbar_chans = devm_kzalloc(dev,
+> > +				  len/sizeof(s16) + 2*sizeof(s16),
+> > +				  GFP_KERNEL);
+> > +	if (!xbar_chans)
+> > +		return -ENOMEM;
+> > +
+> > +	ret = of_address_to_resource(node, 1, &res);
+> > +	if (IS_ERR_VALUE(ret))
+> > +		return -EIO;
+> > +
+> > +	xbar = devm_ioremap(dev, res.start, resource_size(&res));
+> > +	if (!xbar)
+> > +		return -EIO;
 > 
-> > > > > +				0x19c 0x13	/* mcasp0_ahclkr.spi1_cs0, OUTPUT_PULLUP | MODE3 */
-> > > > > +			>;
-> > > > 
-> > > > Is there a single pinmux setting that provides SPI functionality on the
-> > > > bone headers? Or this is specific to a cape you tested with?
-> > > 
-> > > No, there are two usable settings for spi1 and one setting for spi0.
-> > > I'm dropping this from the series since it's specific to how I wired up
-> > > the homebrew cape I use for spi testing on the Bone. I publish the
-> > > branch where all these extra "test-specific" patches (that aren't intended
-> > > to be merged) are at in the cover letter.  Anybody that needs context of
-> > > how/what worked and was tested can grab them there.
-> > Possibly dumb question:
-> > Cant we have pre-usable spi configurations?  Like spi1_configuration1_pins,
-> > spi2_configuration1_pins, spi0_configuration1_pins? If documented with
-> > P9 pin names in the bone dts, it saves a bit of effort in looking up
-> > pad offset when dealing with capes.
-> 
-> Yes, let's introduce these things separately. I plan to reintroduce
-> patches to fix the incorrect 1-based numbering on many of the AM33xx as
-> previous ones were dropped...and I think this makes sense on top of
-> that.
-sounds good to me.
+> -ENOMEM is more appropiate for ioremap failures.
 
--- 
-Regards,
-Nishanth Menon
+Fixed in v4.
+
+> 
+> > +
+> > +	ret = edma_of_read_u32_to_s16_array(node,
+> > +					    "ti,edma-xbar-event-map",
+> > +					    (s16 *)xbar_chans,
+> > +					    len/sizeof(u32));
+> > +	if (IS_ERR_VALUE(ret))
+> > +		return -EIO;
+> > +
+> > +	for (i = 0; xbar_chans[i][0] != -1; i++) {
+> > +		shift = (xbar_chans[i][1] % 4) * 8;
+> > +		offset = xbar_chans[i][1] >> 2;
+> > +		offset <<= 2;
+> > +		mux = __raw_readl((void *)((u32)xbar + offset));
+> 
+> Dont use __raw* variants of io accessors. There will be ordering issues
+> on ARMv7.
+
+Fixed in v4.
+
+> 
+> > +		mux &= (~(0xff << shift));
+> > +		mux |= (xbar_chans[i][0] << shift);
+> 
+> Unnecessary parens above.
+
+Fixed in v4.
+
+> 
+> > +		__raw_writel(mux, (void *)((u32)xbar + offset));
+> > +	}
+> > +
+> > +	pdata->xbar_chans = xbar_chans;
+> > +
+> > +	return 0;
+> > +}
+> > +
+> >  static int edma_of_parse_dt(struct device *dev,
+> >  			    struct device_node *node,
+> >  			    struct edma_soc_info *pdata)
+> > @@ -1453,7 +1500,6 @@ static int edma_of_parse_dt(struct device *dev,
+> >  	pdata->n_slot = value;
+> >  
+> >  	pdata->n_cc = 1;
+> > -	/* This is unused */
+> 
+> The comment should have not been part of 4/16?
+
+Correct. I moved the change to the correct patch in v4.
+
+> 
+> Thanks,
+> Sekhar
+> _______________________________________________
+> Davinci-linux-open-source mailing list
+> Davinci-linux-open-source@linux.davincidsp.com
+> http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source
