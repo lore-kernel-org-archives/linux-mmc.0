@@ -1,7 +1,8 @@
 From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v4 11/14] ARM: dts: add AM33XX MMC support
-Date: Fri, 11 Jan 2013 00:48:47 -0500
-Message-ID: <1357883330-5364-12-git-send-email-mporter@ti.com>
+Subject: [PATCH v4 12/14] spi: omap2-mcspi: convert to
+	dma_request_slave_channel_compat()
+Date: Fri, 11 Jan 2013 00:48:48 -0500
+Message-ID: <1357883330-5364-13-git-send-email-mporter@ti.com>
 References: <1357883330-5364-1-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -20,119 +21,119 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Adds AM33XX MMC support for am335x-bone, am335x-evm, and
-am335x-evmsk..
+Convert dmaengine channel requests to use
+dma_request_slave_channel_compat(). This supports the DT case of
+platforms requiring channel selection from either the OMAP DMA or
+the EDMA engine. AM33xx only boots from DT and is the only user
+implementing EDMA so in the !DT case we can default to the OMAP DMA
+filter.
 
 Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 ---
- arch/arm/boot/dts/am335x-bone.dts  |    7 +++++++
- arch/arm/boot/dts/am335x-evm.dts   |    7 +++++++
- arch/arm/boot/dts/am335x-evmsk.dts |    7 +++++++
- arch/arm/boot/dts/am33xx.dtsi      |   28 ++++++++++++++++++++++++++++
- 4 files changed, 49 insertions(+)
+ drivers/spi/spi-omap2-mcspi.c |   65 ++++++++++++++++++++++++++++-------------
+ 1 file changed, 45 insertions(+), 20 deletions(-)
 
-diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
-index 11b240c..a154ce0 100644
---- a/arch/arm/boot/dts/am335x-bone.dts
-+++ b/arch/arm/boot/dts/am335x-bone.dts
-@@ -120,6 +120,8 @@
- 		};
+diff --git a/drivers/spi/spi-omap2-mcspi.c b/drivers/spi/spi-omap2-mcspi.c
+index b610f52..2c02c02 100644
+--- a/drivers/spi/spi-omap2-mcspi.c
++++ b/drivers/spi/spi-omap2-mcspi.c
+@@ -102,6 +102,9 @@ struct omap2_mcspi_dma {
  
- 		ldo3_reg: regulator@5 {
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <3300000>;
- 			regulator-always-on;
- 		};
- 
-@@ -136,3 +138,8 @@
- &cpsw_emac1 {
- 	phy_id = <&davinci_mdio>, <1>;
+ 	struct completion dma_tx_completion;
+ 	struct completion dma_rx_completion;
++
++	char dma_rx_ch_name[14];
++	char dma_tx_ch_name[14];
  };
-+
-+&mmc1 {
-+	status = "okay";
-+	vmmc-supply = <&ldo3_reg>;
-+};
-diff --git a/arch/arm/boot/dts/am335x-evm.dts b/arch/arm/boot/dts/am335x-evm.dts
-index d649644..2907da6 100644
---- a/arch/arm/boot/dts/am335x-evm.dts
-+++ b/arch/arm/boot/dts/am335x-evm.dts
-@@ -232,6 +232,8 @@
- 		};
  
- 		vmmc_reg: regulator@12 {
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <3300000>;
- 			regulator-always-on;
- 		};
- 	};
-@@ -244,3 +246,8 @@
- &cpsw_emac1 {
- 	phy_id = <&davinci_mdio>, <1>;
- };
+ /* use PIO for small transfers, avoiding DMA setup/teardown overhead and
+@@ -822,14 +825,23 @@ static int omap2_mcspi_request_dma(struct spi_device *spi)
+ 	dma_cap_zero(mask);
+ 	dma_cap_set(DMA_SLAVE, mask);
+ 	sig = mcspi_dma->dma_rx_sync_dev;
+-	mcspi_dma->dma_rx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
 +
-+&mmc1 {
-+	status = "okay";
-+	vmmc-supply = <&vmmc_reg>;
-+};
-diff --git a/arch/arm/boot/dts/am335x-evmsk.dts b/arch/arm/boot/dts/am335x-evmsk.dts
-index f5a6162..f050c46 100644
---- a/arch/arm/boot/dts/am335x-evmsk.dts
-+++ b/arch/arm/boot/dts/am335x-evmsk.dts
-@@ -244,7 +244,14 @@
- 		};
++	mcspi_dma->dma_rx =
++		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
++						 &sig, &master->dev,
++						 mcspi_dma->dma_rx_ch_name);
++
+ 	if (!mcspi_dma->dma_rx) {
+ 		dev_err(&spi->dev, "no RX DMA engine channel for McSPI\n");
+ 		return -EAGAIN;
+ 	}
  
- 		vmmc_reg: regulator@12 {
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <3300000>;
- 			regulator-always-on;
- 		};
- 	};
- };
+ 	sig = mcspi_dma->dma_tx_sync_dev;
+-	mcspi_dma->dma_tx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
++	mcspi_dma->dma_tx =
++		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
++						 &sig, &master->dev,
++						 mcspi_dma->dma_tx_ch_name);
 +
-+&mmc1 {
-+	status = "okay";
-+	vmmc-supply = <&vmmc_reg>;
-+};
-diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
-index e711ffb..278b75d 100644
---- a/arch/arm/boot/dts/am33xx.dtsi
-+++ b/arch/arm/boot/dts/am33xx.dtsi
-@@ -235,6 +235,34 @@
- 			status = "disabled";
- 		};
+ 	if (!mcspi_dma->dma_tx) {
+ 		dev_err(&spi->dev, "no TX DMA engine channel for McSPI\n");
+ 		dma_release_channel(mcspi_dma->dma_rx);
+@@ -1223,29 +1235,42 @@ static int omap2_mcspi_probe(struct platform_device *pdev)
+ 		goto free_master;
  
-+		mmc1: mmc@48060000 {
-+			compatible = "ti,omap3-hsmmc";
-+			ti,hwmods = "mmc1";
-+			ti,dual-volt;
-+			ti,needs-special-reset;
-+			dmas = <&edma 24
-+				&edma 25>;
-+			dma-names = "tx", "rx";
-+			status = "disabled";
-+		};
-+
-+		mmc2: mmc@481d8000 {
-+			compatible = "ti,omap3-hsmmc";
-+			ti,hwmods = "mmc2";
-+			ti,needs-special-reset;
-+			dmas = <&edma 2
-+				&edma 3>;
-+			dma-names = "tx", "rx";
-+			status = "disabled";
-+		};
-+
-+		mmc3: mmc@47810000 {
-+			compatible = "ti,omap3-hsmmc";
-+			ti,hwmods = "mmc3";
-+			ti,needs-special-reset;
-+			status = "disabled";
-+		};
-+
- 		wdt2: wdt@44e35000 {
- 			compatible = "ti,omap3-wdt";
- 			ti,hwmods = "wd_timer2";
+ 	for (i = 0; i < master->num_chipselect; i++) {
+-		char dma_ch_name[14];
++		char *dma_rx_ch_name = mcspi->dma_channels[i].dma_rx_ch_name;
++		char *dma_tx_ch_name = mcspi->dma_channels[i].dma_tx_ch_name;
+ 		struct resource *dma_res;
+ 
+-		sprintf(dma_ch_name, "rx%d", i);
+-		dma_res = platform_get_resource_byname(pdev, IORESOURCE_DMA,
+-							dma_ch_name);
+-		if (!dma_res) {
+-			dev_dbg(&pdev->dev, "cannot get DMA RX channel\n");
+-			status = -ENODEV;
+-			break;
+-		}
++		sprintf(dma_rx_ch_name, "rx%d", i);
++		if (!pdev->dev.of_node) {
++			dma_res =
++				platform_get_resource_byname(pdev,
++							     IORESOURCE_DMA,
++							     dma_rx_ch_name);
++			if (!dma_res) {
++				dev_dbg(&pdev->dev,
++					"cannot get DMA RX channel\n");
++				status = -ENODEV;
++				break;
++			}
+ 
+-		mcspi->dma_channels[i].dma_rx_sync_dev = dma_res->start;
+-		sprintf(dma_ch_name, "tx%d", i);
+-		dma_res = platform_get_resource_byname(pdev, IORESOURCE_DMA,
+-							dma_ch_name);
+-		if (!dma_res) {
+-			dev_dbg(&pdev->dev, "cannot get DMA TX channel\n");
+-			status = -ENODEV;
+-			break;
++			mcspi->dma_channels[i].dma_rx_sync_dev =
++				dma_res->start;
+ 		}
++		sprintf(dma_tx_ch_name, "tx%d", i);
++		if (!pdev->dev.of_node) {
++			dma_res =
++				platform_get_resource_byname(pdev,
++							     IORESOURCE_DMA,
++							     dma_tx_ch_name);
++			if (!dma_res) {
++				dev_dbg(&pdev->dev,
++					"cannot get DMA TX channel\n");
++				status = -ENODEV;
++				break;
++			}
+ 
+-		mcspi->dma_channels[i].dma_tx_sync_dev = dma_res->start;
++			mcspi->dma_channels[i].dma_tx_sync_dev =
++				dma_res->start;
++		}
+ 	}
+ 
+ 	if (status < 0)
 -- 
 1.7.9.5
 
