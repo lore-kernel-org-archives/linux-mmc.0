@@ -1,65 +1,111 @@
-From: Andrew Lunn <andrew@lunn.ch>
-Subject: [PATCH v2] mmc: mvsdio: Replace IS_ERR_OR_NULL() with IS_ERR()
-Date: Fri, 11 Jan 2013 08:27:52 +0100
-Message-ID: <1357889273-11553-1-git-send-email-andrew@lunn.ch>
-References: <20130111004323.GA12257@schnuecks.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from londo.lunn.ch ([80.238.139.98]:44475 "EHLO londo.lunn.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753570Ab3AKH2K (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 11 Jan 2013 02:28:10 -0500
-In-Reply-To: <20130111004323.GA12257@schnuecks.de>
-Sender: linux-mmc-owner@vger.kernel.org
+From: "Hebbar, Gururaja" <gururaja.hebbar-l0cyMroinI0@public.gmane.org>
+Subject: RE: [PATCH v4 05/14] dmaengine: edma: Add TI EDMA device tree binding
+Date: Fri, 11 Jan 2013 07:54:05 +0000
+Message-ID: <1BAFE6F6C881BF42822005164F1491C33EB3EBBD@DBDE01.ent.ti.com>
+References: <1357883330-5364-1-git-send-email-mporter@ti.com>
+ <1357883330-5364-6-git-send-email-mporter@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <1357883330-5364-6-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: "Porter, Matt" <mporter-l0cyMroinI0@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Nori,
+ Sekhar" <nsekhar-l0cyMroinI0@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jason Cooper <jason@lakedaemon.net>
-Cc: linux ARM <linux-arm-kernel@lists.infradead.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, cjb@laptop.org, linux-mmc@vger.kernel.org, gmbnomis@gmail.com, Andrew Lunn <andrew@lunn.ch>
 
-A NULL is a valid clk cookie, so we should not be tested with
-IS_ERR_OR_NULL(). Replace it with IS_ERR().
+On Fri, Jan 11, 2013 at 11:18:41, Porter, Matt wrote:
+> The binding definition is based on the generic DMA controller
+> binding.
+> 
+> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+> ---
+>  Documentation/devicetree/bindings/dma/ti-edma.txt |   51 +++++++++++++++++++++
+>  1 file changed, 51 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/dma/ti-edma.txt
+> 
+> diff --git a/Documentation/devicetree/bindings/dma/ti-edma.txt b/Documentation/devicetree/bindings/dma/ti-edma.txt
+> new file mode 100644
+> index 0000000..3344345
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/dma/ti-edma.txt
+> @@ -0,0 +1,51 @@
+> +TI EDMA
+> +
+> +Required properties:
+> +- compatible : "ti,edma3"
+> +- ti,hwmods: Name of the hwmods associated to the EDMA
+> +- ti,edma-regions: Number of regions
+> +- ti,edma-slots: Number of slots
+> +- ti,edma-queue-tc-map: List of transfer control to queue mappings
+> +- ti,edma-queue-priority-map: List of queue priority mappings
+> +- ti,edma-default-queue: Default queue value
+> +
+> +Optional properties:
+> +- ti,edma-reserved-channels: List of reserved channel regions
+> +- ti,edma-reserved-slots: List of reserved slot regions
+> +- ti,edma-xbar-event-map: Crossbar event to channel map
+> +
+> +Example:
+> +
+> +edma: edma@49000000 {
+> +	#address-cells = <1>;
+> +	#size-cells = <0>;
 
-Signed-off-by: Andrew Lunn <andrew@lunn.ch>
----
+address-cells & size-cells are only required when current node is a parent 
+node & it has sibling/child nodes (that too if the child node uses "reg" 
+property).
 
-This patch depends on Thomas Petazzoni DT patches for mvsdio, which changed
-the order of resource allocation etc.
+> +	reg = <0x49000000 0x10000>;
+> +	interrupt-parent = <&intc>;
+> +	interrupts = <12 13 14>;
+> +	compatible = "ti,edma3";
+> +	ti,hwmods = "tpcc", "tptc0", "tptc1", "tptc2";
+> +	#dma-cells = <1>;
+> +	dma-channels = <64>;
+> +	ti,edma-regions = <4>;
+> +	ti,edma-slots = <256>;
+> +	ti,edma-reserved-channels = <0  2
+> +				     14 2
+> +				     26 6
+> +				     48 4
+> +				     56 8>;
+> +	ti,edma-reserved-slots = <0  2
+> +				  14 2
+> +				  26 6
+> +				  48 4
+> +				  56 8
+> +				  64 127>;
+> +	ti,edma-queue-tc-map = <0 0
+> +				1 1
+> +				2 2>;
+> +	ti,edma-queue-priority-map = <0 0
+> +				      1 1
+> +				      2 2>;
+> +	ti,edma-default-queue = <0>;
+> +	ti,edma-xbar-event-map = <1 12
+> +				  2 13>;
+> +};
+> -- 
+> 1.7.9.5
+> 
+> _______________________________________________
+> Davinci-linux-open-source mailing list
+> Davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+> http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source
+> 
 
-Simon
 
-You are correct about the indentation. As suggested, i moved the
-disable_unprepare() inside if (host).
-
-It should no longer be possible to have imbalanced clk operations:
-
-If mmc_alloc_host() fails, it goes to out. host is NULL, no clk calls.
-All other goto out occur after the clk_get() and when host is !NULL. clk
-calls are then made when !IS_ERR(host->clk), keeping this balanced.
-
- drivers/mmc/host/mvsdio.c |    8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index feb16bd..196f085 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -818,14 +818,14 @@ out:
- 		mmc_gpio_free_ro(mmc);
- 		if (host->base)
- 			iounmap(host->base);
-+		if (!IS_ERR(host->clk)) {
-+			clk_disable_unprepare(host->clk);
-+			clk_put(host->clk);
-+		}
- 	}
- 	if (r)
- 		release_resource(r);
- 	if (mmc)
--		if (!IS_ERR_OR_NULL(host->clk)) {
--			clk_disable_unprepare(host->clk);
--			clk_put(host->clk);
--		}
- 		mmc_free_host(mmc);
- 
- 	return ret;
--- 
-1.7.10.4
-
+Regards, 
+Gururaja
