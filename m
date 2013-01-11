@@ -1,64 +1,49 @@
-From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v4,03/14] ARM: edma: add AM33XX support to the private
-	EDMA API
-Date: Fri, 11 Jan 2013 13:21:46 -0500
-Message-ID: <20130111182146.GZ14660@beef>
-References: <1357883330-5364-4-git-send-email-mporter@ti.com>
-	<9fda86bbbec3444393fd5a2dc5135a5e@DFLE73.ent.ti.com>
+From: Matt Porter <mporter@ti.com>
+Subject: Re: [PATCH v4 00/14] DMA Engine support for AM33XX
+Date: Fri, 11 Jan 2013 13:33:49 -0500
+Message-ID: <20130111183349.GA14660@beef>
+References: <1357883330-5364-1-git-send-email-mporter@ti.com>
+ <201301111140.41584.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f178.google.com ([209.85.216.178]:36447 "EHLO
+	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753533Ab3AKS3M (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Jan 2013 13:29:12 -0500
 Content-Disposition: inline
-In-Reply-To: <9fda86bbbec3444393fd5a2dc5135a5e-jplQ/0hSbXKIQmiDNMet8wC/G2K4zDHf@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: Lars Poeschel <poeschel-Xtl8qvBWbHwb1SvskN2V4Q@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "Cousson,
-	Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, "Nori,
-	Sekhar" <nsekhar-l0cyMroinI0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <201301111140.41584.arnd@arndb.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Dan Williams <djbw@fb.com>, Rob Herring <rob.herring@calxeda.com>
 
-On Fri, Jan 11, 2013 at 06:14:27PM +0000, Lars Poeschel wrote:
-> Hi Matt,
+On Fri, Jan 11, 2013 at 11:40:41AM +0000, Arnd Bergmann wrote:
+> On Friday 11 January 2013, Matt Porter wrote:
+> > The approach taken is similar to how OMAP DMA is being converted to
+> > DMA Engine support. With the functional EDMA private API already
+> > existing in mach-davinci/dma.c, we first move that to an ARM common
+> > area so it can be shared. Adding DT and runtime PM support to the
+> > private EDMA API implementation allows it to run on AM33xx. AM33xx
+> > only boots using DT so we leverage Jon's generic DT DMA helpers to
+> > register EDMA DMAC with the of_dma framework and then add support
+> > for calling the dma_request_slave_channel() API to both the mmc
+> > and spi drivers.
 > 
-> On Friday 11 January 2013 at 06:48:39, Matt Porter wrote:
-> 
-> > diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
-> > index a3d189d..1951d63 100644
-> > --- a/arch/arm/common/edma.c
-> > +++ b/arch/arm/common/edma.c
-> > @@ -24,6 +24,13 @@
-> >  #include <linux/platform_device.h>
-> >  #include <linux/io.h>
-> >  #include <linux/slab.h>
-> > +#include <linux/edma.h>
-> > +#include <linux/err.h>
-> > +#include <linux/of_address.h>
-> > +#include <linux/of_device.h>
-> > +#include <linux/of_dma.h>
-> > +#include <linux/of_irq.h>
-> > +#include <linux/pm_runtime.h>
-> 
-> You add the include linux/of_dma.h here, but maybe you missed to add the file 
-> itself. It is not in Linus v3.8-rc3 tree, not in the patches yours depend on 
-> listed and not in your patchset.
+> I think this looks very good. What I wonder is whether we should
+> make the non-DT parts of the dmaengine driver compile-time
+> conditional on CONFIG_ATAGS though, so the slave drivers don't
+> have a link-time dependency on the dmaengine driver's 
+> omap_dma_filter_fn symbol when building without ATAGS support.
 
-of_dma.h comes in with the dependencies listed in the cover letter.
-Particularly, Vinod's dt_dmaengine branch in slave-dma.git contains Jon
-Hunter's OF DMA helpers series.
+We have tightly coupled the link-time dependency for
+omap_dma_filter_fn by going down the path of using
+dma_request_slave_channel_compat() as Tony suggested to avoid extra
+ifdefry.
+
+That dependency will go away naturally if all the "legacy" OMAP platforms
+were required to only boot from DT...just as a newly added SoCs are.
+
+Are you suggesting unwinding the _compat() approach?
 
 -Matt
-
-------------------------------------------------------------------------------
-Master HTML5, CSS3, ASP.NET, MVC, AJAX, Knockout.js, Web API and
-much more. Get web development skills now with LearnDevNow -
-350+ hours of step-by-step video tutorials by Microsoft MVPs and experts.
-SALE $99.99 this month only -- learn more at:
-http://p.sf.net/sfu/learnmore_122812
