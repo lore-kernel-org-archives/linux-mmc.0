@@ -1,428 +1,896 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 1/2] mmc: core: Add support for idle time BKOPS
-Date: Fri, 11 Jan 2013 13:51:41 +0100
-Message-ID: <CAPDyKFo4LVUSLY9=L3qG9caZuhrmie8WdD0vcyQi88L=HAbXjg@mail.gmail.com>
-References: <1356357068-31807-2-git-send-email-merez@codeaurora.org>
-	<CAPDyKFpB0FLgQEBuDuHV3JR7tcc2AWeKe8kj5_hTudCbkTZEXQ@mail.gmail.com>
-	<3e4b6ce20e828e730dd0c0e291eb82d0.squirrel@www.codeaurora.org>
+From: Matt Porter <mporter@ti.com>
+Subject: Re: [PATCH v4 01/14] ARM: davinci: move private EDMA API to
+ arm/common
+Date: Fri, 11 Jan 2013 09:27:21 -0500
+Message-ID: <20130111142721.GW14660@beef>
+References: <1357883330-5364-1-git-send-email-mporter@ti.com>
+ <1357883330-5364-2-git-send-email-mporter@ti.com>
+ <1BAFE6F6C881BF42822005164F1491C33EB3EAB6@DBDE01.ent.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f43.google.com ([209.85.215.43]:45976 "EHLO
-	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753757Ab3AKMvn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Jan 2013 07:51:43 -0500
-Received: by mail-la0-f43.google.com with SMTP id eg20so1709214lab.2
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Jan 2013 04:51:41 -0800 (PST)
-In-Reply-To: <3e4b6ce20e828e730dd0c0e291eb82d0.squirrel@www.codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1BAFE6F6C881BF42822005164F1491C33EB3EAB6@DBDE01.ent.ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>, "Cousson, Benoit" <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Vinod Koul <vinod.koul@intel.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Tony Lindgren <tony@atomide.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: merez@codeaurora.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
 
-On 10 January 2013 10:22,  <merez@codeaurora.org> wrote:
-> Hi Ulf,
->
-> See below.
->
-> Thanks,
-> Maya
->> Hi Maya,
->>
->> On 24 December 2012 14:51, Maya Erez <merez@codeaurora.org> wrote:
->>> Devices have various maintenance operations need to perform internally.
->>> In order to reduce latencies during time critical operations like read
->>> and write, it is better to execute maintenance operations in other
->>> times - when the host is not being serviced. Such operations are called
->>> Background operations (BKOPS).
->>> The device notifies the status of the BKOPS need by updating
->>> BKOPS_STATUS
->>> (EXT_CSD byte [246]).
->>>
->>> According to the standard a host that supports BKOPS shall check the
->>> status periodically and start background operations as needed, so that
->>> the device has enough time for its maintenance operations.
->>>
->>> This patch adds support for this periodic check of the BKOPS status.
->>> Since foreground operations are of higher priority than background
->>> operations the host will check the need for BKOPS when it is idle,
->>> and in case of an incoming request the BKOPS operation will be
->>> interrupted.
->>>
->>> When the mmcqd thread is idle, a delayed work is created to check the
->>> need for BKOPS. The time to start the delayed work can be set by the
->>> host
->>> controller. If this time is not set, a default time is used.
->>
->> I believe I have asked this question before; Have you considered to
->> use runtime PM autosuspend feature instead of adding a delayed work to
->> handle idle BKOPS?
->> Similar how sdio is doing mmc_power_save|restore, but for sd/mmc we
->> handle the BKOPS instead. My feeling is that it could simplify this
->> patch quite significantly.
->>
->> It would be interesting to hear about your view of this idea.
->
-> Sorry for not responding to this idea earlier.
-> As I am not familiar enough with runtime suspend it's hard for me to
-> specify if this can work or not. Can you please point me to the function
-> which handles the autosuspend that you think could be a good candidate for
-> doing the BKOPS check.
-> Lately we encountered many issues regarding BKOPS and had to change the
-> implementation. I will upload a new patch soon (still with the delayed
-> work usage) and we can continue the discussion on the new patch.
->
+On Fri, Jan 11, 2013 at 06:15:06AM +0000, Hebbar, Gururaja wrote:
+> On Fri, Jan 11, 2013 at 11:18:37, Porter, Matt wrote:
+> > Move mach-davinci/dma.c to common/edma.c so it can be used
+> > by OMAP (specifically AM33xx) as well. This just moves the
+> > private EDMA API and enables it to build on OMAP.
+> > 
+> > Signed-off-by: Matt Porter <mporter@ti.com>
+> > ---
+> >  arch/arm/Kconfig                               |    1 +
+> >  arch/arm/common/Kconfig                        |    3 +
+> >  arch/arm/common/Makefile                       |    1 +
+> >  arch/arm/{mach-davinci/dma.c => common/edma.c} |    2 +-
+> >  arch/arm/mach-davinci/Makefile                 |    2 +-
+> >  arch/arm/mach-davinci/board-tnetv107x-evm.c    |    2 +-
+> >  arch/arm/mach-davinci/davinci.h                |    2 +-
+> >  arch/arm/mach-davinci/devices-tnetv107x.c      |    2 +-
+> >  arch/arm/mach-davinci/devices.c                |    7 +-
+> >  arch/arm/mach-davinci/dm355.c                  |    2 +-
+> >  arch/arm/mach-davinci/dm365.c                  |    2 +-
+> >  arch/arm/mach-davinci/dm644x.c                 |    2 +-
+> >  arch/arm/mach-davinci/dm646x.c                 |    2 +-
+> >  arch/arm/mach-davinci/include/mach/da8xx.h     |    2 +-
+> >  arch/arm/mach-davinci/include/mach/edma.h      |  267 ------------------------
+> >  arch/arm/plat-omap/Kconfig                     |    1 +
+> >  drivers/dma/edma.c                             |    2 +-
+> >  drivers/mmc/host/davinci_mmc.c                 |    1 +
+> >  include/linux/mfd/davinci_voicecodec.h         |    3 +-
+> >  include/linux/platform_data/edma.h             |  182 ++++++++++++++++
+> 
+> Headers file are just moved here. So "git mv file1 flie2; and the git 
+> format-patch -C" on commit should just generate few lines of patch.
 
-I will take the liberty to put together a kind of a skeleton patch for
-how we could make use of runtime PM for this kind of features that is
-supposed to be executed in the background. You can then base your
-patches on top of that, I think that could be a way forward.
+Ok, good catch.
 
-In the meanwhile I will continue to follow up on your Idle BKOPS patches.
-
->>
->>> If the card raised an exception, the need for urgent BKOPS (level 2/3)
->>> will be checked immediately and if needed, the BKOPS will be performed
->>> without waiting for the next idle time.
->>>
->>> Signed-off-by: Maya Erez <merez@codeaurora.org>
->>>
->>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->>> index 21056b9..64bbf75 100644
->>> --- a/drivers/mmc/card/block.c
->>> +++ b/drivers/mmc/card/block.c
->>> @@ -1473,9 +1473,15 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
->>> struct request *req)
->>>         struct mmc_blk_data *md = mq->data;
->>>         struct mmc_card *card = md->queue.card;
->>>
->>> -       if (req && !mq->mqrq_prev->req)
->>> +       if (req && !mq->mqrq_prev->req) {
->>>                 /* claim host only for the first request */
->>>                 mmc_claim_host(card->host);
->>> +               if (card->ext_csd.bkops_en &&
->>> +                   card->bkops_info.started_delayed_bkops) {
->>> +                       card->bkops_info.started_delayed_bkops = false;
->>> +                       mmc_stop_bkops(card);
->>> +               }
->>> +       }
->>>
->>>         ret = mmc_blk_part_switch(card, md);
->>>         if (ret) {
->>> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
->>> index fadf52e..9d0c96a 100644
->>> --- a/drivers/mmc/card/queue.c
->>> +++ b/drivers/mmc/card/queue.c
->>> @@ -51,6 +51,7 @@ static int mmc_queue_thread(void *d)
->>>  {
->>>         struct mmc_queue *mq = d;
->>>         struct request_queue *q = mq->queue;
->>> +       struct mmc_card *card = mq->card;
->>>
->>>         current->flags |= PF_MEMALLOC;
->>>
->>> @@ -83,6 +84,7 @@ static int mmc_queue_thread(void *d)
->>>                                 set_current_state(TASK_RUNNING);
->>>                                 break;
->>>                         }
->>> +                       mmc_start_delayed_bkops(card);
->>>                         up(&mq->thread_sem);
->>>                         schedule();
->>>                         down(&mq->thread_sem);
->>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>> index aaed768..36cef94 100644
->>> --- a/drivers/mmc/core/core.c
->>> +++ b/drivers/mmc/core/core.c
->>> @@ -256,6 +256,33 @@ mmc_start_request(struct mmc_host *host, struct
->>> mmc_request *mrq)
->>>  }
->>>
->>>  /**
->>> + * mmc_start_delayed_bkops() - Start a delayed work to check for
->>> + *      the need of non urgent BKOPS
->>> + *
->>> + * @card: MMC card to start BKOPS on
->>> + */
->>> +void mmc_start_delayed_bkops(struct mmc_card *card)
->>> +{
->>> +       if (!card || !card->ext_csd.bkops_en ||
->>> mmc_card_doing_bkops(card))
->>> +               return;
->>> +
->>> +       pr_debug("%s: %s: queueing delayed_bkops_work\n",
->>> +                mmc_hostname(card->host), __func__);
->>> +
->>> +       /*
->>> +        * cancel_delayed_bkops_work will prevent a race condition
->>> between
->>> +        * fetching a request by the mmcqd and the delayed work, in case
->>> +        * it was removed from the queue work but not started yet
->>> +        */
->>> +       card->bkops_info.cancel_delayed_work = false;
->>> +       card->bkops_info.started_delayed_bkops = true;
->>> +       queue_delayed_work(system_nrt_wq, &card->bkops_info.dw,
->>> +                          msecs_to_jiffies(
->>> +                                  card->bkops_info.delay_ms));
->>> +}
->>> +EXPORT_SYMBOL(mmc_start_delayed_bkops);
->>> +
->>> +/**
->>>   *     mmc_start_bkops - start BKOPS for supported cards
->>>   *     @card: MMC card to start BKOPS
->>>   *     @form_exception: A flag to indicate if this function was
->>> @@ -272,25 +299,47 @@ void mmc_start_bkops(struct mmc_card *card, bool
->>> from_exception)
->>>         bool use_busy_signal;
->>>
->>>         BUG_ON(!card);
->>> -
->>> -       if (!card->ext_csd.bkops_en || mmc_card_doing_bkops(card))
->>> +       if (!card->ext_csd.bkops_en)
->>>                 return;
->>>
->>> +       mmc_claim_host(card->host);
->>> +
->>> +       if ((card->bkops_info.cancel_delayed_work) && !from_exception) {
->>> +               pr_debug("%s: %s: cancel_delayed_work was set, exit\n",
->>> +                        mmc_hostname(card->host), __func__);
->>> +               card->bkops_info.cancel_delayed_work = false;
->>> +               goto out;
->>> +       }
->>> +
->>> +       if (mmc_card_doing_bkops(card)) {
->>> +               pr_debug("%s: %s: already doing bkops, exit\n",
->>> +                        mmc_hostname(card->host), __func__);
->>> +               goto out;
->>> +       }
->>> +
->>>         err = mmc_read_bkops_status(card);
->>>         if (err) {
->>>                 pr_err("%s: Failed to read bkops status: %d\n",
->>>                        mmc_hostname(card->host), err);
->>> -               return;
->>> +               goto out;
->>>         }
->>>
->>>         if (!card->ext_csd.raw_bkops_status)
->>> -               return;
->>> +               goto out;
->>> +
->>> +       pr_info("%s: %s: card->ext_csd.raw_bkops_status = 0x%x\n",
->>> +               mmc_hostname(card->host), __func__,
->>> +               card->ext_csd.raw_bkops_status);
->>>
->>> +       /*
->>> +        * If the function was called due to exception but there is no
->>> need
->>> +        * for urgent BKOPS, BKOPs will be performed by the delayed
->>> BKOPs
->>> +        * work, before going to suspend
->>> +        */
->>>         if (card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2 &&
->>>             from_exception)
->>> -               return;
->>> +               goto out;
->>>
->>> -       mmc_claim_host(card->host);
->>>         if (card->ext_csd.raw_bkops_status >= EXT_CSD_BKOPS_LEVEL_2) {
->>>                 timeout = MMC_BKOPS_MAX_TIMEOUT;
->>>                 use_busy_signal = true;
->>> @@ -319,6 +368,27 @@ out:
->>>  }
->>>  EXPORT_SYMBOL(mmc_start_bkops);
->>>
->>> +/**
->>> + * mmc_start_idle_time_bkops() - check if a non urgent BKOPS is
->>> + * needed
->>> + * @work:      The idle time BKOPS work
->>> + */
->>> +void mmc_start_idle_time_bkops(struct work_struct *work)
->>> +{
->>> +       struct mmc_card *card = container_of(work, struct mmc_card,
->>> +                       bkops_info.dw.work);
->>> +
->>> +       /*
->>> +        * Prevent a race condition between mmc_stop_bkops and the
->>> delayed
->>> +        * BKOPS work in case the delayed work is executed on another
->>> CPU
->>> +        */
->>> +       if (card->bkops_info.cancel_delayed_work)
->>> +               return;
->>> +
->>> +       mmc_start_bkops(card, false);
->>> +}
->>> +EXPORT_SYMBOL(mmc_start_idle_time_bkops);
->>> +
->>>  static void mmc_wait_done(struct mmc_request *mrq)
->>>  {
->>>         complete(&mrq->completion);
->>> @@ -585,6 +655,17 @@ int mmc_stop_bkops(struct mmc_card *card)
->>>         int err = 0;
->>>
->>>         BUG_ON(!card);
->>> +
->>> +       /*
->>> +        * Notify the delayed work to be cancelled, in case it was
->>> already
->>> +        * removed from the queue, but was not started yet
->>> +        */
->>> +       card->bkops_info.cancel_delayed_work = true;
->>> +       if (delayed_work_pending(&card->bkops_info.dw))
->>> +               cancel_delayed_work_sync(&card->bkops_info.dw);
->>> +       if (!mmc_card_doing_bkops(card))
->>> +               goto out;
->>> +
->>>         err = mmc_interrupt_hpi(card);
->>>
->>>         /*
->>> @@ -596,6 +677,7 @@ int mmc_stop_bkops(struct mmc_card *card)
->>>                 err = 0;
->>>         }
->>>
->>> +out:
->>>         return err;
->>>  }
->>>  EXPORT_SYMBOL(mmc_stop_bkops);
->>> @@ -2536,15 +2618,15 @@ int mmc_pm_notify(struct notifier_block
->>> *notify_block,
->>>         switch (mode) {
->>>         case PM_HIBERNATION_PREPARE:
->>>         case PM_SUSPEND_PREPARE:
->>> -               if (host->card && mmc_card_mmc(host->card) &&
->>> -                   mmc_card_doing_bkops(host->card)) {
->>> +               if (host->card && mmc_card_mmc(host->card)) {
->>> +                       mmc_claim_host(host);
->>>                         err = mmc_stop_bkops(host->card);
->>> +                       mmc_release_host(host);
->>>                         if (err) {
->>>                                 pr_err("%s: didn't stop bkops\n",
->>>                                         mmc_hostname(host));
->>>                                 return err;
->>>                         }
->>> -                       mmc_card_clr_doing_bkops(host->card);
->>>                 }
->>>
->>>                 spin_lock_irqsave(&host->lock, flags);
->>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>> index e6e3911..f68624a 100644
->>> --- a/drivers/mmc/core/mmc.c
->>> +++ b/drivers/mmc/core/mmc.c
->>> @@ -1275,6 +1275,26 @@ static int mmc_init_card(struct mmc_host *host,
->>> u32 ocr,
->>>                 }
->>>         }
->>>
->>> +       if (!oldcard) {
->>> +               if (card->ext_csd.bkops_en) {
->>> +                       INIT_DELAYED_WORK(&card->bkops_info.dw,
->>> +                                         mmc_start_idle_time_bkops);
->>> +
->>> +                       /*
->>> +                        * Calculate the time to start the BKOPs
->>> checking.
->>> +                        * The host controller can set this time in
->>> order to
->>> +                        * prevent a race condition before starting
->>> BKOPs
->>> +                        * and going into suspend.
->>> +                        * If the host controller didn't set this time,
->>> +                        * a default value is used.
->>> +                        */
->>> +                       card->bkops_info.delay_ms =
->>> MMC_IDLE_BKOPS_TIME_MS;
->>> +                       if (card->bkops_info.host_delay_ms)
->>> +                               card->bkops_info.delay_ms =
->>> +                                       card->bkops_info.host_delay_ms;
->>> +               }
->>> +       }
->>> +
->>>         if (!oldcard)
->>>                 host->card = card;
->>>
->>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
->>> index 5c69315..ca4cf19 100644
->>> --- a/include/linux/mmc/card.h
->>> +++ b/include/linux/mmc/card.h
->>> @@ -210,6 +210,30 @@ struct mmc_part {
->>>  #define MMC_BLK_DATA_AREA_RPMB (1<<3)
->>>  };
->>>
->>> +/**
->>> + * struct mmc_bkops_info - BKOPS data
->>> + * @dw:        Idle time bkops delayed work
->>> + * @host_delay_ms:     The host controller time to start bkops
->>> + * @delay_ms:  The time to start the BKOPS
->>> + *        delayed work once MMC thread is idle
->>> + * @cancel_delayed_work: A flag to indicate if the delayed work
->>> + *        should be cancelled
->>> + * @started_delayed_bkops:  A flag to indicate if the delayed
->>> + *        work was scheduled
->>> + */
->>> +struct mmc_bkops_info {
->>> +       struct delayed_work     dw;
->>> +       unsigned int            host_delay_ms;
->>> +       unsigned int            delay_ms;
->>> +/*
->>> + * A default time for checking the need for non urgent BKOPS once mmcqd
->>> + * is idle.
->>> + */
->>> +#define MMC_IDLE_BKOPS_TIME_MS 2000
->>> +       bool                    cancel_delayed_work;
->>> +       bool                    started_delayed_bkops;
->>> +};
->>> +
->>>  /*
->>>   * MMC device
->>>   */
->>> @@ -278,6 +302,8 @@ struct mmc_card {
->>>         struct dentry           *debugfs_root;
->>>         struct mmc_part part[MMC_NUM_PHY_PARTITION]; /* physical
->>> partitions */
->>>         unsigned int    nr_parts;
->>> +
->>> +       struct mmc_bkops_info   bkops_info;
->>>  };
->>>
->>>  /*
->>> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
->>> index 5bf7c22..c6426c6 100644
->>> --- a/include/linux/mmc/core.h
->>> +++ b/include/linux/mmc/core.h
->>> @@ -145,6 +145,8 @@ extern int mmc_app_cmd(struct mmc_host *, struct
->>> mmc_card *);
->>>  extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
->>>         struct mmc_command *, int);
->>>  extern void mmc_start_bkops(struct mmc_card *card, bool
->>> from_exception);
->>> +extern void mmc_start_delayed_bkops(struct mmc_card *card);
->>> +extern void mmc_start_idle_time_bkops(struct work_struct *work);
->>>  extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int,
->>> bool);
->>>  extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
->>>
->>> --
->>> 1.7.3.3
->>> --
->>> QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a
->>> member
->>> of Code Aurora Forum, hosted by The Linux Foundation
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-kernel"
->>> in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> Please read the FAQ at  http://www.tux.org/lkml/
->>
->> Kind regards
->> Ulf Hansson
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
->
-
-Kind regards
-Ulf Hansson
+> 
+> >  include/linux/platform_data/spi-davinci.h      |    2 +-
+> >  sound/soc/davinci/davinci-evm.c                |    1 +
+> >  sound/soc/davinci/davinci-pcm.c                |    1 +
+> >  sound/soc/davinci/davinci-pcm.h                |    2 +-
+> >  sound/soc/davinci/davinci-sffsdr.c             |    6 +-
+> >  25 files changed, 212 insertions(+), 288 deletions(-)
+> >  rename arch/arm/{mach-davinci/dma.c => common/edma.c} (99%)
+> >  delete mode 100644 arch/arm/mach-davinci/include/mach/edma.h
+> >  create mode 100644 include/linux/platform_data/edma.h
+> > 
+> > diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+> > index 67874b8..7637d31 100644
+> > --- a/arch/arm/Kconfig
+> > +++ b/arch/arm/Kconfig
+> > @@ -932,6 +932,7 @@ config ARCH_DAVINCI
+> >  	select GENERIC_IRQ_CHIP
+> >  	select HAVE_IDE
+> >  	select NEED_MACH_GPIO_H
+> > +	select TI_PRIV_EDMA
+> >  	select USE_OF
+> >  	select ZONE_DMA
+> >  	help
+> > diff --git a/arch/arm/common/Kconfig b/arch/arm/common/Kconfig
+> > index 45ceeb0..9e32d0d 100644
+> > --- a/arch/arm/common/Kconfig
+> > +++ b/arch/arm/common/Kconfig
+> > @@ -40,3 +40,6 @@ config SHARP_PARAM
+> >  
+> >  config SHARP_SCOOP
+> >  	bool
+> > +
+> > +config TI_PRIV_EDMA
+> > +	bool
+> > diff --git a/arch/arm/common/Makefile b/arch/arm/common/Makefile
+> > index e8a4e58..d09a39b 100644
+> > --- a/arch/arm/common/Makefile
+> > +++ b/arch/arm/common/Makefile
+> > @@ -13,3 +13,4 @@ obj-$(CONFIG_SHARP_PARAM)	+= sharpsl_param.o
+> >  obj-$(CONFIG_SHARP_SCOOP)	+= scoop.o
+> >  obj-$(CONFIG_PCI_HOST_ITE8152)  += it8152.o
+> >  obj-$(CONFIG_ARM_TIMER_SP804)	+= timer-sp.o
+> > +obj-$(CONFIG_TI_PRIV_EDMA)	+= edma.o
+> > diff --git a/arch/arm/mach-davinci/dma.c b/arch/arm/common/edma.c
+> > similarity index 99%
+> > rename from arch/arm/mach-davinci/dma.c
+> > rename to arch/arm/common/edma.c
+> > index a685e97..4411087 100644
+> > --- a/arch/arm/mach-davinci/dma.c
+> > +++ b/arch/arm/common/edma.c
+> > @@ -25,7 +25,7 @@
+> >  #include <linux/io.h>
+> >  #include <linux/slab.h>
+> >  
+> > -#include <mach/edma.h>
+> > +#include <linux/platform_data/edma.h>
+> >  
+> >  /* Offsets matching "struct edmacc_param" */
+> >  #define PARM_OPT		0x00
+> > diff --git a/arch/arm/mach-davinci/Makefile b/arch/arm/mach-davinci/Makefile
+> > index fb5c1aa..493a36b 100644
+> > --- a/arch/arm/mach-davinci/Makefile
+> > +++ b/arch/arm/mach-davinci/Makefile
+> > @@ -5,7 +5,7 @@
+> >  
+> >  # Common objects
+> >  obj-y 			:= time.o clock.o serial.o psc.o \
+> > -			   dma.o usb.o common.o sram.o aemif.o
+> > +			   usb.o common.o sram.o aemif.o
+> >  
+> >  obj-$(CONFIG_DAVINCI_MUX)		+= mux.o
+> >  
+> > diff --git a/arch/arm/mach-davinci/board-tnetv107x-evm.c b/arch/arm/mach-davinci/board-tnetv107x-evm.c
+> > index be30997..86f55ba 100644
+> > --- a/arch/arm/mach-davinci/board-tnetv107x-evm.c
+> > +++ b/arch/arm/mach-davinci/board-tnetv107x-evm.c
+> > @@ -26,12 +26,12 @@
+> >  #include <linux/input.h>
+> >  #include <linux/input/matrix_keypad.h>
+> >  #include <linux/spi/spi.h>
+> > +#include <linux/platform_data/edma.h>
+> >  
+> >  #include <asm/mach/arch.h>
+> >  #include <asm/mach-types.h>
+> >  
+> >  #include <mach/irqs.h>
+> > -#include <mach/edma.h>
+> >  #include <mach/mux.h>
+> >  #include <mach/cp_intc.h>
+> >  #include <mach/tnetv107x.h>
+> > diff --git a/arch/arm/mach-davinci/davinci.h b/arch/arm/mach-davinci/davinci.h
+> > index 12d544b..d26a6bc 100644
+> > --- a/arch/arm/mach-davinci/davinci.h
+> > +++ b/arch/arm/mach-davinci/davinci.h
+> > @@ -23,9 +23,9 @@
+> >  #include <linux/platform_device.h>
+> >  #include <linux/spi/spi.h>
+> >  #include <linux/platform_data/davinci_asp.h>
+> > +#include <linux/platform_data/edma.h>
+> >  #include <linux/platform_data/keyscan-davinci.h>
+> >  #include <mach/hardware.h>
+> > -#include <mach/edma.h>
+> >  
+> >  #include <media/davinci/vpfe_capture.h>
+> >  #include <media/davinci/vpif_types.h>
+> > diff --git a/arch/arm/mach-davinci/devices-tnetv107x.c b/arch/arm/mach-davinci/devices-tnetv107x.c
+> > index 773ab07..ba37760 100644
+> > --- a/arch/arm/mach-davinci/devices-tnetv107x.c
+> > +++ b/arch/arm/mach-davinci/devices-tnetv107x.c
+> > @@ -18,10 +18,10 @@
+> >  #include <linux/dma-mapping.h>
+> >  #include <linux/clk.h>
+> >  #include <linux/slab.h>
+> > +#include <linux/platform_data/edma.h>
+> >  
+> >  #include <mach/common.h>
+> >  #include <mach/irqs.h>
+> > -#include <mach/edma.h>
+> >  #include <mach/tnetv107x.h>
+> >  
+> >  #include "clock.h"
+> > diff --git a/arch/arm/mach-davinci/devices.c b/arch/arm/mach-davinci/devices.c
+> > index 4c48a36..3bdf9f7 100644
+> > --- a/arch/arm/mach-davinci/devices.c
+> > +++ b/arch/arm/mach-davinci/devices.c
+> > @@ -19,9 +19,10 @@
+> >  #include <mach/irqs.h>
+> >  #include <mach/cputype.h>
+> >  #include <mach/mux.h>
+> > -#include <mach/edma.h>
+> >  #include <linux/platform_data/mmc-davinci.h>
+> >  #include <mach/time.h>
+> > +#include <linux/platform_data/edma.h>
+> > +
+> >  
+> >  #include "davinci.h"
+> >  #include "clock.h"
+> > @@ -141,10 +142,10 @@ static struct resource mmcsd0_resources[] = {
+> >  	},
+> >  	/* DMA channels: RX, then TX */
+> >  	{
+> > -		.start = EDMA_CTLR_CHAN(0, DAVINCI_DMA_MMCRXEVT),
+> > +		.start = EDMA_CTLR_CHAN(0, 26),	/* MMCRXEVT */
+> >  		.flags = IORESOURCE_DMA,
+> >  	}, {
+> > -		.start = EDMA_CTLR_CHAN(0, DAVINCI_DMA_MMCTXEVT),
+> > +		.start = EDMA_CTLR_CHAN(0, 27),	/* MMCTXEVT */
+> >  		.flags = IORESOURCE_DMA,
+> >  	},
+> >  };
+> > diff --git a/arch/arm/mach-davinci/dm355.c b/arch/arm/mach-davinci/dm355.c
+> > index b49c3b7..53998d8 100644
+> > --- a/arch/arm/mach-davinci/dm355.c
+> > +++ b/arch/arm/mach-davinci/dm355.c
+> > @@ -19,7 +19,6 @@
+> >  #include <asm/mach/map.h>
+> >  
+> >  #include <mach/cputype.h>
+> > -#include <mach/edma.h>
+> >  #include <mach/psc.h>
+> >  #include <mach/mux.h>
+> >  #include <mach/irqs.h>
+> > @@ -28,6 +27,7 @@
+> >  #include <mach/common.h>
+> >  #include <linux/platform_data/spi-davinci.h>
+> >  #include <mach/gpio-davinci.h>
+> > +#include <linux/platform_data/edma.h>
+> >  
+> >  #include "davinci.h"
+> >  #include "clock.h"
+> > diff --git a/arch/arm/mach-davinci/dm365.c b/arch/arm/mach-davinci/dm365.c
+> > index 6c39805..9b41d33 100644
+> > --- a/arch/arm/mach-davinci/dm365.c
+> > +++ b/arch/arm/mach-davinci/dm365.c
+> > @@ -18,11 +18,11 @@
+> >  #include <linux/platform_device.h>
+> >  #include <linux/dma-mapping.h>
+> >  #include <linux/spi/spi.h>
+> > +#include <linux/platform_data/edma.h>
+> >  
+> >  #include <asm/mach/map.h>
+> >  
+> >  #include <mach/cputype.h>
+> > -#include <mach/edma.h>
+> >  #include <mach/psc.h>
+> >  #include <mach/mux.h>
+> >  #include <mach/irqs.h>
+> > diff --git a/arch/arm/mach-davinci/dm644x.c b/arch/arm/mach-davinci/dm644x.c
+> > index 11c79a3..a08910e 100644
+> > --- a/arch/arm/mach-davinci/dm644x.c
+> > +++ b/arch/arm/mach-davinci/dm644x.c
+> > @@ -12,11 +12,11 @@
+> >  #include <linux/clk.h>
+> >  #include <linux/serial_8250.h>
+> >  #include <linux/platform_device.h>
+> > +#include <linux/platform_data/edma.h>
+> >  
+> >  #include <asm/mach/map.h>
+> >  
+> >  #include <mach/cputype.h>
+> > -#include <mach/edma.h>
+> >  #include <mach/irqs.h>
+> >  #include <mach/psc.h>
+> >  #include <mach/mux.h>
+> > diff --git a/arch/arm/mach-davinci/dm646x.c b/arch/arm/mach-davinci/dm646x.c
+> > index ac7b431..6d52a32 100644
+> > --- a/arch/arm/mach-davinci/dm646x.c
+> > +++ b/arch/arm/mach-davinci/dm646x.c
+> > @@ -13,11 +13,11 @@
+> >  #include <linux/clk.h>
+> >  #include <linux/serial_8250.h>
+> >  #include <linux/platform_device.h>
+> > +#include <linux/platform_data/edma.h>
+> >  
+> >  #include <asm/mach/map.h>
+> >  
+> >  #include <mach/cputype.h>
+> > -#include <mach/edma.h>
+> >  #include <mach/irqs.h>
+> >  #include <mach/psc.h>
+> >  #include <mach/mux.h>
+> > diff --git a/arch/arm/mach-davinci/include/mach/da8xx.h b/arch/arm/mach-davinci/include/mach/da8xx.h
+> > index 700d311..9d77f9b 100644
+> > --- a/arch/arm/mach-davinci/include/mach/da8xx.h
+> > +++ b/arch/arm/mach-davinci/include/mach/da8xx.h
+> > @@ -20,8 +20,8 @@
+> >  #include <linux/videodev2.h>
+> >  
+> >  #include <mach/serial.h>
+> > -#include <mach/edma.h>
+> >  #include <mach/pm.h>
+> > +#include <linux/platform_data/edma.h>
+> >  #include <linux/platform_data/i2c-davinci.h>
+> >  #include <linux/platform_data/mmc-davinci.h>
+> >  #include <linux/platform_data/usb-davinci.h>
+> > diff --git a/arch/arm/mach-davinci/include/mach/edma.h b/arch/arm/mach-davinci/include/mach/edma.h
+> > deleted file mode 100644
+> > index 7e84c90..0000000
+> > --- a/arch/arm/mach-davinci/include/mach/edma.h
+> > +++ /dev/null
+> > @@ -1,267 +0,0 @@
+> > -/*
+> > - *  TI DAVINCI dma definitions
+> > - *
+> > - *  Copyright (C) 2006-2009 Texas Instruments.
+> > - *
+> > - *  This program is free software; you can redistribute  it and/or modify it
+> > - *  under  the terms of  the GNU General  Public License as published by the
+> > - *  Free Software Foundation;  either version 2 of the  License, or (at your
+> > - *  option) any later version.
+> > - *
+> > - *  THIS  SOFTWARE  IS PROVIDED   ``AS  IS'' AND   ANY  EXPRESS OR IMPLIED
+> > - *  WARRANTIES,   INCLUDING, BUT NOT  LIMITED  TO, THE IMPLIED WARRANTIES OF
+> > - *  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN
+> > - *  NO  EVENT  SHALL   THE AUTHOR  BE    LIABLE FOR ANY   DIRECT, INDIRECT,
+> > - *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+> > - *  NOT LIMITED   TO, PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS OF
+> > - *  USE, DATA,  OR PROFITS; OR  BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+> > - *  ANY THEORY OF LIABILITY, WHETHER IN  CONTRACT, STRICT LIABILITY, OR TORT
+> > - *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+> > - *  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+> > - *
+> > - *  You should have received a copy of the  GNU General Public License along
+> > - *  with this program; if not, write  to the Free Software Foundation, Inc.,
+> > - *  675 Mass Ave, Cambridge, MA 02139, USA.
+> > - *
+> > - */
+> > -
+> > -/*
+> > - * This EDMA3 programming framework exposes two basic kinds of resource:
+> > - *
+> > - *  Channel	Triggers transfers, usually from a hardware event but
+> > - *		also manually or by "chaining" from DMA completions.
+> > - *		Each channel is coupled to a Parameter RAM (PaRAM) slot.
+> > - *
+> > - *  Slot	Each PaRAM slot holds a DMA transfer descriptor (PaRAM
+> > - *		"set"), source and destination addresses, a link to a
+> > - *		next PaRAM slot (if any), options for the transfer, and
+> > - *		instructions for updating those addresses.  There are
+> > - *		more than twice as many slots as event channels.
+> > - *
+> > - * Each PaRAM set describes a sequence of transfers, either for one large
+> > - * buffer or for several discontiguous smaller buffers.  An EDMA transfer
+> > - * is driven only from a channel, which performs the transfers specified
+> > - * in its PaRAM slot until there are no more transfers.  When that last
+> > - * transfer completes, the "link" field may be used to reload the channel's
+> > - * PaRAM slot with a new transfer descriptor.
+> > - *
+> > - * The EDMA Channel Controller (CC) maps requests from channels into physical
+> > - * Transfer Controller (TC) requests when the channel triggers (by hardware
+> > - * or software events, or by chaining).  The two physical DMA channels provided
+> > - * by the TCs are thus shared by many logical channels.
+> > - *
+> > - * DaVinci hardware also has a "QDMA" mechanism which is not currently
+> > - * supported through this interface.  (DSP firmware uses it though.)
+> > - */
+> > -
+> > -#ifndef EDMA_H_
+> > -#define EDMA_H_
+> > -
+> > -/* PaRAM slots are laid out like this */
+> > -struct edmacc_param {
+> > -	unsigned int opt;
+> > -	unsigned int src;
+> > -	unsigned int a_b_cnt;
+> > -	unsigned int dst;
+> > -	unsigned int src_dst_bidx;
+> > -	unsigned int link_bcntrld;
+> > -	unsigned int src_dst_cidx;
+> > -	unsigned int ccnt;
+> > -};
+> > -
+> > -#define CCINT0_INTERRUPT     16
+> > -#define CCERRINT_INTERRUPT   17
+> > -#define TCERRINT0_INTERRUPT   18
+> > -#define TCERRINT1_INTERRUPT   19
+> > -
+> > -/* fields in edmacc_param.opt */
+> > -#define SAM		BIT(0)
+> > -#define DAM		BIT(1)
+> > -#define SYNCDIM		BIT(2)
+> > -#define STATIC		BIT(3)
+> > -#define EDMA_FWID	(0x07 << 8)
+> > -#define TCCMODE		BIT(11)
+> > -#define EDMA_TCC(t)	((t) << 12)
+> > -#define TCINTEN		BIT(20)
+> > -#define ITCINTEN	BIT(21)
+> > -#define TCCHEN		BIT(22)
+> > -#define ITCCHEN		BIT(23)
+> > -
+> > -#define TRWORD (0x7<<2)
+> > -#define PAENTRY (0x1ff<<5)
+> > -
+> > -/* Drivers should avoid using these symbolic names for dm644x
+> > - * channels, and use platform_device IORESOURCE_DMA resources
+> > - * instead.  (Other DaVinci chips have different peripherals
+> > - * and thus have different DMA channel mappings.)
+> > - */
+> > -#define DAVINCI_DMA_MCBSP_TX              2
+> > -#define DAVINCI_DMA_MCBSP_RX              3
+> > -#define DAVINCI_DMA_VPSS_HIST             4
+> > -#define DAVINCI_DMA_VPSS_H3A              5
+> > -#define DAVINCI_DMA_VPSS_PRVU             6
+> > -#define DAVINCI_DMA_VPSS_RSZ              7
+> > -#define DAVINCI_DMA_IMCOP_IMXINT          8
+> > -#define DAVINCI_DMA_IMCOP_VLCDINT         9
+> > -#define DAVINCI_DMA_IMCO_PASQINT         10
+> > -#define DAVINCI_DMA_IMCOP_DSQINT         11
+> > -#define DAVINCI_DMA_SPI_SPIX             16
+> > -#define DAVINCI_DMA_SPI_SPIR             17
+> > -#define DAVINCI_DMA_UART0_URXEVT0        18
+> > -#define DAVINCI_DMA_UART0_UTXEVT0        19
+> > -#define DAVINCI_DMA_UART1_URXEVT1        20
+> > -#define DAVINCI_DMA_UART1_UTXEVT1        21
+> > -#define DAVINCI_DMA_UART2_URXEVT2        22
+> > -#define DAVINCI_DMA_UART2_UTXEVT2        23
+> > -#define DAVINCI_DMA_MEMSTK_MSEVT         24
+> > -#define DAVINCI_DMA_MMCRXEVT             26
+> > -#define DAVINCI_DMA_MMCTXEVT             27
+> > -#define DAVINCI_DMA_I2C_ICREVT           28
+> > -#define DAVINCI_DMA_I2C_ICXEVT           29
+> > -#define DAVINCI_DMA_GPIO_GPINT0          32
+> > -#define DAVINCI_DMA_GPIO_GPINT1          33
+> > -#define DAVINCI_DMA_GPIO_GPINT2          34
+> > -#define DAVINCI_DMA_GPIO_GPINT3          35
+> > -#define DAVINCI_DMA_GPIO_GPINT4          36
+> > -#define DAVINCI_DMA_GPIO_GPINT5          37
+> > -#define DAVINCI_DMA_GPIO_GPINT6          38
+> > -#define DAVINCI_DMA_GPIO_GPINT7          39
+> > -#define DAVINCI_DMA_GPIO_GPBNKINT0       40
+> > -#define DAVINCI_DMA_GPIO_GPBNKINT1       41
+> > -#define DAVINCI_DMA_GPIO_GPBNKINT2       42
+> > -#define DAVINCI_DMA_GPIO_GPBNKINT3       43
+> > -#define DAVINCI_DMA_GPIO_GPBNKINT4       44
+> > -#define DAVINCI_DMA_TIMER0_TINT0         48
+> > -#define DAVINCI_DMA_TIMER1_TINT1         49
+> > -#define DAVINCI_DMA_TIMER2_TINT2         50
+> > -#define DAVINCI_DMA_TIMER3_TINT3         51
+> > -#define DAVINCI_DMA_PWM0                 52
+> > -#define DAVINCI_DMA_PWM1                 53
+> > -#define DAVINCI_DMA_PWM2                 54
+> > -
+> > -/* DA830 specific EDMA3 information */
+> > -#define EDMA_DA830_NUM_DMACH		32
+> > -#define EDMA_DA830_NUM_TCC		32
+> > -#define EDMA_DA830_NUM_PARAMENTRY	128
+> > -#define EDMA_DA830_NUM_EVQUE		2
+> > -#define EDMA_DA830_NUM_TC		2
+> > -#define EDMA_DA830_CHMAP_EXIST		0
+> > -#define EDMA_DA830_NUM_REGIONS		4
+> > -#define DA830_DMACH2EVENT_MAP0		0x000FC03Fu
+> > -#define DA830_DMACH2EVENT_MAP1		0x00000000u
+> > -#define DA830_EDMA_ARM_OWN		0x30FFCCFFu
+> > -
+> > -/*ch_status paramater of callback function possible values*/
+> > -#define DMA_COMPLETE 1
+> > -#define DMA_CC_ERROR 2
+> > -#define DMA_TC1_ERROR 3
+> > -#define DMA_TC2_ERROR 4
+> > -
+> > -enum address_mode {
+> > -	INCR = 0,
+> > -	FIFO = 1
+> > -};
+> > -
+> > -enum fifo_width {
+> > -	W8BIT = 0,
+> > -	W16BIT = 1,
+> > -	W32BIT = 2,
+> > -	W64BIT = 3,
+> > -	W128BIT = 4,
+> > -	W256BIT = 5
+> > -};
+> > -
+> > -enum dma_event_q {
+> > -	EVENTQ_0 = 0,
+> > -	EVENTQ_1 = 1,
+> > -	EVENTQ_2 = 2,
+> > -	EVENTQ_3 = 3,
+> > -	EVENTQ_DEFAULT = -1
+> > -};
+> > -
+> > -enum sync_dimension {
+> > -	ASYNC = 0,
+> > -	ABSYNC = 1
+> > -};
+> > -
+> > -#define EDMA_CTLR_CHAN(ctlr, chan)	(((ctlr) << 16) | (chan))
+> > -#define EDMA_CTLR(i)			((i) >> 16)
+> > -#define EDMA_CHAN_SLOT(i)		((i) & 0xffff)
+> > -
+> > -#define EDMA_CHANNEL_ANY		-1	/* for edma_alloc_channel() */
+> > -#define EDMA_SLOT_ANY			-1	/* for edma_alloc_slot() */
+> > -#define EDMA_CONT_PARAMS_ANY		 1001
+> > -#define EDMA_CONT_PARAMS_FIXED_EXACT	 1002
+> > -#define EDMA_CONT_PARAMS_FIXED_NOT_EXACT 1003
+> > -
+> > -#define EDMA_MAX_CC               2
+> > -
+> > -/* alloc/free DMA channels and their dedicated parameter RAM slots */
+> > -int edma_alloc_channel(int channel,
+> > -	void (*callback)(unsigned channel, u16 ch_status, void *data),
+> > -	void *data, enum dma_event_q);
+> > -void edma_free_channel(unsigned channel);
+> > -
+> > -/* alloc/free parameter RAM slots */
+> > -int edma_alloc_slot(unsigned ctlr, int slot);
+> > -void edma_free_slot(unsigned slot);
+> > -
+> > -/* alloc/free a set of contiguous parameter RAM slots */
+> > -int edma_alloc_cont_slots(unsigned ctlr, unsigned int id, int slot, int count);
+> > -int edma_free_cont_slots(unsigned slot, int count);
+> > -
+> > -/* calls that operate on part of a parameter RAM slot */
+> > -void edma_set_src(unsigned slot, dma_addr_t src_port,
+> > -				enum address_mode mode, enum fifo_width);
+> > -void edma_set_dest(unsigned slot, dma_addr_t dest_port,
+> > -				 enum address_mode mode, enum fifo_width);
+> > -void edma_get_position(unsigned slot, dma_addr_t *src, dma_addr_t *dst);
+> > -void edma_set_src_index(unsigned slot, s16 src_bidx, s16 src_cidx);
+> > -void edma_set_dest_index(unsigned slot, s16 dest_bidx, s16 dest_cidx);
+> > -void edma_set_transfer_params(unsigned slot, u16 acnt, u16 bcnt, u16 ccnt,
+> > -		u16 bcnt_rld, enum sync_dimension sync_mode);
+> > -void edma_link(unsigned from, unsigned to);
+> > -void edma_unlink(unsigned from);
+> > -
+> > -/* calls that operate on an entire parameter RAM slot */
+> > -void edma_write_slot(unsigned slot, const struct edmacc_param *params);
+> > -void edma_read_slot(unsigned slot, struct edmacc_param *params);
+> > -
+> > -/* channel control operations */
+> > -int edma_start(unsigned channel);
+> > -void edma_stop(unsigned channel);
+> > -void edma_clean_channel(unsigned channel);
+> > -void edma_clear_event(unsigned channel);
+> > -void edma_pause(unsigned channel);
+> > -void edma_resume(unsigned channel);
+> > -
+> > -struct edma_rsv_info {
+> > -
+> > -	const s16	(*rsv_chans)[2];
+> > -	const s16	(*rsv_slots)[2];
+> > -};
+> > -
+> > -/* platform_data for EDMA driver */
+> > -struct edma_soc_info {
+> > -
+> > -	/* how many dma resources of each type */
+> > -	unsigned	n_channel;
+> > -	unsigned	n_region;
+> > -	unsigned	n_slot;
+> > -	unsigned	n_tc;
+> > -	unsigned	n_cc;
+> > -	/*
+> > -	 * Default queue is expected to be a low-priority queue.
+> > -	 * This way, long transfers on the default queue started
+> > -	 * by the codec engine will not cause audio defects.
+> > -	 */
+> > -	enum dma_event_q	default_queue;
+> > -
+> > -	/* Resource reservation for other cores */
+> > -	struct edma_rsv_info	*rsv;
+> > -
+> > -	const s8	(*queue_tc_mapping)[2];
+> > -	const s8	(*queue_priority_mapping)[2];
+> > -};
+> > -
+> > -#endif
+> > diff --git a/arch/arm/plat-omap/Kconfig b/arch/arm/plat-omap/Kconfig
+> > index 665870d..0b81d6c 100644
+> > --- a/arch/arm/plat-omap/Kconfig
+> > +++ b/arch/arm/plat-omap/Kconfig
+> > @@ -29,6 +29,7 @@ config ARCH_OMAP2PLUS
+> >  	select PINCTRL
+> >  	select PROC_DEVICETREE if PROC_FS
+> >  	select SPARSE_IRQ
+> > +	select TI_PRIV_EDMA
+> >  	select USE_OF
+> >  	help
+> >  	  "Systems based on OMAP2, OMAP3, OMAP4 or OMAP5"
+> > diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
+> > index 023c8f2..e57cce3 100644
+> > --- a/drivers/dma/edma.c
+> > +++ b/drivers/dma/edma.c
+> > @@ -24,7 +24,7 @@
+> >  #include <linux/slab.h>
+> >  #include <linux/spinlock.h>
+> >  
+> > -#include <mach/edma.h>
+> > +#include <linux/platform_data/edma.h>
+> >  
+> >  #include "dmaengine.h"
+> >  #include "virt-dma.h"
+> > diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+> > index 17e186d..d1efacc 100644
+> > --- a/drivers/mmc/host/davinci_mmc.c
+> > +++ b/drivers/mmc/host/davinci_mmc.c
+> > @@ -35,6 +35,7 @@
+> >  #include <linux/edma.h>
+> >  #include <linux/mmc/mmc.h>
+> >  
+> > +#include <linux/platform_data/edma.h>
+> >  #include <linux/platform_data/mmc-davinci.h>
+> >  
+> >  /*
+> > diff --git a/include/linux/mfd/davinci_voicecodec.h b/include/linux/mfd/davinci_voicecodec.h
+> > index 0ab6132..7dd6524 100644
+> > --- a/include/linux/mfd/davinci_voicecodec.h
+> > +++ b/include/linux/mfd/davinci_voicecodec.h
+> > @@ -26,8 +26,7 @@
+> >  #include <linux/kernel.h>
+> >  #include <linux/platform_device.h>
+> >  #include <linux/mfd/core.h>
+> > -
+> > -#include <mach/edma.h>
+> > +#include <linux/platform_data/edma.h>
+> >  
+> >  /*
+> >   * Register values.
+> > diff --git a/include/linux/platform_data/edma.h b/include/linux/platform_data/edma.h
+> > new file mode 100644
+> > index 0000000..2344ea2
+> > --- /dev/null
+> > +++ b/include/linux/platform_data/edma.h
+> > @@ -0,0 +1,182 @@
+> > +/*
+> > + *  TI EDMA definitions
+> > + *
+> > + *  Copyright (C) 2006-2013 Texas Instruments.
+> > + *
+> > + *  This program is free software; you can redistribute  it and/or modify it
+> > + *  under  the terms of  the GNU General  Public License as published by the
+> > + *  Free Software Foundation;  either version 2 of the  License, or (at your
+> > + *  option) any later version.
+> > + */
+> > +
+> > +/*
+> > + * This EDMA3 programming framework exposes two basic kinds of resource:
+> > + *
+> > + *  Channel	Triggers transfers, usually from a hardware event but
+> > + *		also manually or by "chaining" from DMA completions.
+> > + *		Each channel is coupled to a Parameter RAM (PaRAM) slot.
+> > + *
+> > + *  Slot	Each PaRAM slot holds a DMA transfer descriptor (PaRAM
+> > + *		"set"), source and destination addresses, a link to a
+> > + *		next PaRAM slot (if any), options for the transfer, and
+> > + *		instructions for updating those addresses.  There are
+> > + *		more than twice as many slots as event channels.
+> > + *
+> > + * Each PaRAM set describes a sequence of transfers, either for one large
+> > + * buffer or for several discontiguous smaller buffers.  An EDMA transfer
+> > + * is driven only from a channel, which performs the transfers specified
+> > + * in its PaRAM slot until there are no more transfers.  When that last
+> > + * transfer completes, the "link" field may be used to reload the channel's
+> > + * PaRAM slot with a new transfer descriptor.
+> > + *
+> > + * The EDMA Channel Controller (CC) maps requests from channels into physical
+> > + * Transfer Controller (TC) requests when the channel triggers (by hardware
+> > + * or software events, or by chaining).  The two physical DMA channels provided
+> > + * by the TCs are thus shared by many logical channels.
+> > + *
+> > + * DaVinci hardware also has a "QDMA" mechanism which is not currently
+> > + * supported through this interface.  (DSP firmware uses it though.)
+> > + */
+> > +
+> > +#ifndef EDMA_H_
+> > +#define EDMA_H_
+> > +
+> > +/* PaRAM slots are laid out like this */
+> > +struct edmacc_param {
+> > +	unsigned int opt;
+> > +	unsigned int src;
+> > +	unsigned int a_b_cnt;
+> > +	unsigned int dst;
+> > +	unsigned int src_dst_bidx;
+> > +	unsigned int link_bcntrld;
+> > +	unsigned int src_dst_cidx;
+> > +	unsigned int ccnt;
+> > +};
+> > +
+> > +/* fields in edmacc_param.opt */
+> > +#define SAM		BIT(0)
+> > +#define DAM		BIT(1)
+> > +#define SYNCDIM		BIT(2)
+> > +#define STATIC		BIT(3)
+> > +#define EDMA_FWID	(0x07 << 8)
+> > +#define TCCMODE		BIT(11)
+> > +#define EDMA_TCC(t)	((t) << 12)
+> > +#define TCINTEN		BIT(20)
+> > +#define ITCINTEN	BIT(21)
+> > +#define TCCHEN		BIT(22)
+> > +#define ITCCHEN		BIT(23)
+> > +
+> > +/*ch_status paramater of callback function possible values*/
+> > +#define DMA_COMPLETE 1
+> > +#define DMA_CC_ERROR 2
+> > +#define DMA_TC1_ERROR 3
+> > +#define DMA_TC2_ERROR 4
+> > +
+> > +enum address_mode {
+> > +	INCR = 0,
+> > +	FIFO = 1
+> > +};
+> > +
+> > +enum fifo_width {
+> > +	W8BIT = 0,
+> > +	W16BIT = 1,
+> > +	W32BIT = 2,
+> > +	W64BIT = 3,
+> > +	W128BIT = 4,
+> > +	W256BIT = 5
+> > +};
+> > +
+> > +enum dma_event_q {
+> > +	EVENTQ_0 = 0,
+> > +	EVENTQ_1 = 1,
+> > +	EVENTQ_2 = 2,
+> > +	EVENTQ_3 = 3,
+> > +	EVENTQ_DEFAULT = -1
+> > +};
+> > +
+> > +enum sync_dimension {
+> > +	ASYNC = 0,
+> > +	ABSYNC = 1
+> > +};
+> > +
+> > +#define EDMA_CTLR_CHAN(ctlr, chan)	(((ctlr) << 16) | (chan))
+> > +#define EDMA_CTLR(i)			((i) >> 16)
+> > +#define EDMA_CHAN_SLOT(i)		((i) & 0xffff)
+> > +
+> > +#define EDMA_CHANNEL_ANY		-1	/* for edma_alloc_channel() */
+> > +#define EDMA_SLOT_ANY			-1	/* for edma_alloc_slot() */
+> > +#define EDMA_CONT_PARAMS_ANY		 1001
+> > +#define EDMA_CONT_PARAMS_FIXED_EXACT	 1002
+> > +#define EDMA_CONT_PARAMS_FIXED_NOT_EXACT 1003
+> > +
+> > +#define EDMA_MAX_CC               2
+> > +
+> > +/* alloc/free DMA channels and their dedicated parameter RAM slots */
+> > +int edma_alloc_channel(int channel,
+> > +	void (*callback)(unsigned channel, u16 ch_status, void *data),
+> > +	void *data, enum dma_event_q);
+> > +void edma_free_channel(unsigned channel);
+> > +
+> > +/* alloc/free parameter RAM slots */
+> > +int edma_alloc_slot(unsigned ctlr, int slot);
+> > +void edma_free_slot(unsigned slot);
+> > +
+> > +/* alloc/free a set of contiguous parameter RAM slots */
+> > +int edma_alloc_cont_slots(unsigned ctlr, unsigned int id, int slot, int count);
+> > +int edma_free_cont_slots(unsigned slot, int count);
+> > +
+> > +/* calls that operate on part of a parameter RAM slot */
+> > +void edma_set_src(unsigned slot, dma_addr_t src_port,
+> > +				enum address_mode mode, enum fifo_width);
+> > +void edma_set_dest(unsigned slot, dma_addr_t dest_port,
+> > +				 enum address_mode mode, enum fifo_width);
+> > +void edma_get_position(unsigned slot, dma_addr_t *src, dma_addr_t *dst);
+> > +void edma_set_src_index(unsigned slot, s16 src_bidx, s16 src_cidx);
+> > +void edma_set_dest_index(unsigned slot, s16 dest_bidx, s16 dest_cidx);
+> > +void edma_set_transfer_params(unsigned slot, u16 acnt, u16 bcnt, u16 ccnt,
+> > +		u16 bcnt_rld, enum sync_dimension sync_mode);
+> > +void edma_link(unsigned from, unsigned to);
+> > +void edma_unlink(unsigned from);
+> > +
+> > +/* calls that operate on an entire parameter RAM slot */
+> > +void edma_write_slot(unsigned slot, const struct edmacc_param *params);
+> > +void edma_read_slot(unsigned slot, struct edmacc_param *params);
+> > +
+> > +/* channel control operations */
+> > +int edma_start(unsigned channel);
+> > +void edma_stop(unsigned channel);
+> > +void edma_clean_channel(unsigned channel);
+> > +void edma_clear_event(unsigned channel);
+> > +void edma_pause(unsigned channel);
+> > +void edma_resume(unsigned channel);
+> > +
+> > +struct edma_rsv_info {
+> > +
+> > +	const s16	(*rsv_chans)[2];
+> > +	const s16	(*rsv_slots)[2];
+> > +};
+> > +
+> > +/* platform_data for EDMA driver */
+> > +struct edma_soc_info {
+> > +
+> > +	/* how many dma resources of each type */
+> > +	unsigned	n_channel;
+> > +	unsigned	n_region;
+> > +	unsigned	n_slot;
+> > +	unsigned	n_tc;
+> > +	unsigned	n_cc;
+> > +	/*
+> > +	 * Default queue is expected to be a low-priority queue.
+> > +	 * This way, long transfers on the default queue started
+> > +	 * by the codec engine will not cause audio defects.
+> > +	 */
+> > +	enum dma_event_q	default_queue;
+> > +
+> > +	/* Resource reservation for other cores */
+> > +	struct edma_rsv_info	*rsv;
+> > +
+> > +	const s8	(*queue_tc_mapping)[2];
+> > +	const s8	(*queue_priority_mapping)[2];
+> > +};
+> > +
+> > +#endif
+> > diff --git a/include/linux/platform_data/spi-davinci.h b/include/linux/platform_data/spi-davinci.h
+> > index 7af305b..8dc2fa47 100644
+> > --- a/include/linux/platform_data/spi-davinci.h
+> > +++ b/include/linux/platform_data/spi-davinci.h
+> > @@ -19,7 +19,7 @@
+> >  #ifndef __ARCH_ARM_DAVINCI_SPI_H
+> >  #define __ARCH_ARM_DAVINCI_SPI_H
+> >  
+> > -#include <mach/edma.h>
+> > +#include <linux/platform_data/edma.h>
+> >  
+> >  #define SPI_INTERN_CS	0xFF
+> >  
+> > diff --git a/sound/soc/davinci/davinci-evm.c b/sound/soc/davinci/davinci-evm.c
+> > index d55e647..591f547 100644
+> > --- a/sound/soc/davinci/davinci-evm.c
+> > +++ b/sound/soc/davinci/davinci-evm.c
+> > @@ -14,6 +14,7 @@
+> >  #include <linux/timer.h>
+> >  #include <linux/interrupt.h>
+> >  #include <linux/platform_device.h>
+> > +#include <linux/platform_data/edma.h>
+> >  #include <linux/i2c.h>
+> >  #include <sound/core.h>
+> >  #include <sound/pcm.h>
+> > diff --git a/sound/soc/davinci/davinci-pcm.c b/sound/soc/davinci/davinci-pcm.c
+> > index afab81f..9bdd71b 100644
+> > --- a/sound/soc/davinci/davinci-pcm.c
+> > +++ b/sound/soc/davinci/davinci-pcm.c
+> > @@ -17,6 +17,7 @@
+> >  #include <linux/dma-mapping.h>
+> >  #include <linux/kernel.h>
+> >  #include <linux/genalloc.h>
+> > +#include <linux/platform_data/edma.h>
+> >  
+> >  #include <sound/core.h>
+> >  #include <sound/pcm.h>
+> > diff --git a/sound/soc/davinci/davinci-pcm.h b/sound/soc/davinci/davinci-pcm.h
+> > index b6ef703..fbb710c 100644
+> > --- a/sound/soc/davinci/davinci-pcm.h
+> > +++ b/sound/soc/davinci/davinci-pcm.h
+> > @@ -14,7 +14,7 @@
+> >  
+> >  #include <linux/genalloc.h>
+> >  #include <linux/platform_data/davinci_asp.h>
+> > -#include <mach/edma.h>
+> > +#include <linux/platform_data/edma.h>
+> >  
+> >  struct davinci_pcm_dma_params {
+> >  	int channel;			/* sync dma channel ID */
+> > diff --git a/sound/soc/davinci/davinci-sffsdr.c b/sound/soc/davinci/davinci-sffsdr.c
+> > index 5be65aa..074fc5d 100644
+> > --- a/sound/soc/davinci/davinci-sffsdr.c
+> > +++ b/sound/soc/davinci/davinci-sffsdr.c
+> > @@ -17,6 +17,7 @@
+> >  #include <linux/timer.h>
+> >  #include <linux/interrupt.h>
+> >  #include <linux/platform_device.h>
+> > +#include <linux/platform_data/edma.h>
+> >  #include <linux/gpio.h>
+> >  #include <sound/core.h>
+> >  #include <sound/pcm.h>
+> > @@ -28,7 +29,6 @@
+> >  #include <asm/plat-sffsdr/sffsdr-fpga.h>
+> >  #endif
+> >  
+> > -#include <mach/edma.h>
+> >  
+> >  #include "../codecs/pcm3008.h"
+> >  #include "davinci-pcm.h"
+> > @@ -123,8 +123,8 @@ static struct resource sffsdr_snd_resources[] = {
+> >  };
+> >  
+> >  static struct evm_snd_platform_data sffsdr_snd_data = {
+> > -	.tx_dma_ch	= DAVINCI_DMA_MCBSP_TX,
+> > -	.rx_dma_ch	= DAVINCI_DMA_MCBSP_RX,
+> > +	.tx_dma_ch	= 2,	/* MCBSP_TX */
+> > +	.rx_dma_ch	= 3,	/* MCBSP_RX */
+> >  };
+> >  
+> >  static struct platform_device *sffsdr_snd_device;
+> > -- 
+> > 1.7.9.5
+> > 
+> > _______________________________________________
+> > Davinci-linux-open-source mailing list
+> > Davinci-linux-open-source@linux.davincidsp.com
+> > http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source
+> > 
+> 
+> 
+> Regards, 
+> Gururaja
+> _______________________________________________
+> Davinci-linux-open-source mailing list
+> Davinci-linux-open-source@linux.davincidsp.com
+> http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source
