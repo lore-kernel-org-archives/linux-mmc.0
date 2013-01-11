@@ -1,83 +1,49 @@
-From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v4 13/14] spi: omap2-mcspi: add generic DMA request support to
-	the DT binding
-Date: Fri, 11 Jan 2013 00:48:49 -0500
-Message-ID: <1357883330-5364-14-git-send-email-mporter@ti.com>
+From: Matt Porter <mporter@ti.com>
+Subject: [PATCH v4 14/14] ARM: dts: add AM33XX SPI DMA support
+Date: Fri, 11 Jan 2013 00:48:50 -0500
+Message-ID: <1357883330-5364-15-git-send-email-mporter@ti.com>
 References: <1357883330-5364-1-git-send-email-mporter@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <1357883330-5364-1-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1357883330-5364-1-git-send-email-mporter@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>
+Cc: Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Arnd Bergmann <arnd@arndb.de>, Dan Williams <djbw@fb.com>, Rob Herring <rob.herring@calxeda.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The binding definition is based on the generic DMA request binding.
+Adds DMA resources to the AM33XX SPI nodes.
 
-Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+Signed-off-by: Matt Porter <mporter@ti.com>
 ---
- Documentation/devicetree/bindings/spi/omap-spi.txt |   28 +++++++++++++++++++-
- 1 file changed, 27 insertions(+), 1 deletion(-)
+ arch/arm/boot/dts/am33xx.dtsi |   10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/spi/omap-spi.txt b/Documentation/devicetree/bindings/spi/omap-spi.txt
-index 938809c..3bd8eed 100644
---- a/Documentation/devicetree/bindings/spi/omap-spi.txt
-+++ b/Documentation/devicetree/bindings/spi/omap-spi.txt
-@@ -10,7 +10,18 @@ Required properties:
- 			  input. The default is D0 as input and
- 			  D1 as output.
+diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+index 278b75d..8fd3648 100644
+--- a/arch/arm/boot/dts/am33xx.dtsi
++++ b/arch/arm/boot/dts/am33xx.dtsi
+@@ -356,6 +356,11 @@
+ 			interrupt = <65>;
+ 			ti,spi-num-cs = <2>;
+ 			ti,hwmods = "spi0";
++			dmas = <&edma 16
++				&edma 17
++				&edma 18
++				&edma 19>;
++			dma-names = "tx0", "rx0", "tx1", "rx1";
+ 			status = "disabled";
+ 		};
  
--Example:
-+Optional properties:
-+- dmas: List of DMA controller phandle and DMA request ordered
-+	pairs. One tx and one rx pair is required for each chip
-+	select.
-+- dma-names: List of DMA request names. These strings correspond
-+	1:1 with the ordered pairs in dmas. The string naming is
-+	to be "rxN" and "txN" for RX and TX requests,
-+	respectively, where N equals the chip select number.
-+
-+Examples:
-+
-+[hwmod populated DMA resources]
+@@ -367,6 +372,11 @@
+ 			interrupt = <125>;
+ 			ti,spi-num-cs = <2>;
+ 			ti,hwmods = "spi1";
++			dmas = <&edma 42
++				&edma 43
++				&edma 44
++				&edma 45>;
++			dma-names = "tx0", "rx0", "tx1", "rx1";
+ 			status = "disabled";
+ 		};
  
- mcspi1: mcspi@1 {
-     #address-cells = <1>;
-@@ -20,3 +31,18 @@ mcspi1: mcspi@1 {
-     ti,spi-num-cs = <4>;
- };
- 
-+[generic DMA request binding]
-+
-+mcspi1: mcspi@1 {
-+    #address-cells = <1>;
-+    #size-cells = <0>;
-+    compatible = "ti,omap4-mcspi";
-+    ti,hwmods = "mcspi1";
-+    ti,spi-num-cs = <2>;
-+    dmas = <&edma 42
-+	    &edma 43
-+	    &edma 44
-+	    &edma 45>;
-+    dma-names = "tx0", "rx0", "tx1", "rx1";
-+};
-+
 -- 
 1.7.9.5
-
-
-------------------------------------------------------------------------------
-Master HTML5, CSS3, ASP.NET, MVC, AJAX, Knockout.js, Web API and
-much more. Get web development skills now with LearnDevNow -
-350+ hours of step-by-step video tutorials by Microsoft MVPs and experts.
-SALE $99.99 this month only -- learn more at:
-http://p.sf.net/sfu/learnmore_122812
