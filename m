@@ -1,34 +1,97 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH] mmc: mvsdio: Replace IS_ERR_NULL() is with IS_ERR()
-Date: Fri, 11 Jan 2013 11:11:28 +0000
-Message-ID: <20130111111128.GE30875@n2100.arm.linux.org.uk>
-References: <1357849755-8168-1-git-send-email-andrew@lunn.ch> <20130111110210.GC30875@n2100.arm.linux.org.uk> <20130111120909.2cee1b8e@skate>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v5 0/3] Add support for periodic BKOPS
+Date: Fri, 11 Jan 2013 20:33:19 +0900
+Message-ID: <50EFF87F.6030006@samsung.com>
+References: <n@samsung.com>
+ <1357848921-9596-1-git-send-email-merez@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:44636 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753556Ab3AKLLh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Jan 2013 06:11:37 -0500
-Content-Disposition: inline
-In-Reply-To: <20130111120909.2cee1b8e@skate>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-reply-to: <1357848921-9596-1-git-send-email-merez@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Maya Erez <merez@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Cc: Andrew Lunn <andrew@lunn.ch>, Jason Cooper <jason@lakedaemon.net>, cjb@laptop.org, linux-mmc@vger.kernel.org, linux ARM <linux-arm-kernel@lists.infradead.org>
 
-On Fri, Jan 11, 2013 at 12:09:09PM +0100, Thomas Petazzoni wrote:
-> Dear Russell King - ARM Linux,
-> 
-> On Fri, 11 Jan 2013 11:02:10 +0000, Russell King - ARM Linux wrote:
-> 
-> > What remains?  The assumption that GPIO0 means "no GPIO" rather than
-> > testing with gpio_valid() and the IRQ stuff.
-> 
-> Patches that I have written have been merged by Jason Cooper and while
-> adding the DT binding for this driver, it also converts it to use the
-> MMC GPIO helpers from drivers/mmc/core/slot-gpio.c, which makes this
-> whole GPIO initialization/cleanup a lot simpler.
+Hi Maya,
 
-Please also fix the whole raft of other crap in this driver too, as
-I've highlighted previously and in these patches.
+I didn't see about "[PATCH v5 1/3]mmc: core: Add support for idle time BKOPS" at mailing.
+Could you check the patch set?
+
+Best Regards,
+Jaehoon Chung
+
+On 01/11/2013 05:15 AM, Maya Erez wrote:
+> Devices have various maintenance operations need to perform internally.
+> In order to reduce latencies during time critical operations like read
+> and write, it is better to execute maintenance operations in other
+> times - when the host is not being serviced. Such operations are called
+> Background operations (BKOPS).
+> The device notifies the status of the BKOPS need by updating BKOPS_STATUS
+> (EXT_CSD byte [246]).
+> 
+> According to the standard a host that supports BKOPS shall check the
+> status periodically and start background operations as needed, so that
+> the device has enough time for its maintenance operations.
+> 
+> This patch adds support for this periodic check of the BKOPS status.
+> Since foreground operations are of higher priority than background
+> operations the host will check the need for BKOPS when it is idle,
+> and in case of an incoming request the BKOPS operation will be
+> interrupted.
+> 
+> When the mmcqd thread is idle, a delayed work is created to check the
+> need for BKOPS. The time to start the delayed work can be set by the host
+> controller. If this time is not set, a default time is used.
+> If the card raised an exception with need for urgent BKOPS (level 2/3)
+> a flag will be set to indicate MMC to start the BKOPS activity when it
+> becomes idle.
+> 
+> Since running the BKOPS too often can impact the eMMC endurance, the card
+> need for BKOPS is not checked every time MMC is idle (despite of cases of
+> exception raised). In order to estimate when is the best time to check
+> for BKOPS need the host will take into account the card capacity and
+> percentages of changed sectors in the card. A future enhancement can be to
+> check the card need for BKOPS only in case of random activity.
+> 
+> This patch is based on the periodic BKOPS implementation in version 8 of "support BKOPS feature for eMMC" patch.
+> The patch was modified to answer the following issues:
+> - Since mmc_start_bkops is called from two contexts now, mmc_claim_host was moved to the beginning of the function
+> - Also, the check of doing_bkops should be protected when determing if an HPI is needed due to the same reason.
+> 
+> Changes in v5:
+>     - Do not allow BKOPS operation in all levels to be blocking
+>     - Change the periodic check for BKOPS need to be based on percentage of changed sector
+>     - Add BKOPS statistics
+> 
+> Changes in v4:
+>     - Separate the polling for BKOPS completion to a different patch
+>     - add a flag to indicate if polling for card completion is required
+> 
+> Changes in v3:
+>     - Move the call to stop_bkops to block.c. 
+>       This allows us to remove the mmc_claim_host from inside the function and doesn't cause additional degradation 
+>       due to un-neccessary calim host operation
+> 
+> Changes in v2:
+>     - Check the number of written / discarded sectors as the trigger for checking the BKOPS need.
+>     - Code review fixes
+> 
+> Maya Erez (3):
+>   mmc: core: Add support for idle time BKOPS
+>   mmc: allow the host controller to poll for BKOPS completion
+>   mmc: core: Add MMC BKOPS statistics and debugfs ability to print them
+> 
+>  Documentation/mmc/mmc-dev-attrs.txt |    9 +
+>  drivers/mmc/card/block.c            |   96 ++++++++++++-
+>  drivers/mmc/card/queue.c            |    2 +
+>  drivers/mmc/core/bus.c              |    2 +
+>  drivers/mmc/core/core.c             |  286 +++++++++++++++++++++++++++++++----
+>  drivers/mmc/core/debugfs.c          |  114 ++++++++++++++
+>  drivers/mmc/core/mmc.c              |   20 +++
+>  include/linux/mmc/card.h            |   64 ++++++++-
+>  include/linux/mmc/core.h            |    5 +
+>  include/linux/mmc/host.h            |    2 +-
+>  10 files changed, 563 insertions(+), 37 deletions(-)
+> 
