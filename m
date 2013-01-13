@@ -1,48 +1,43 @@
-From: Asutosh Das <asutoshd@codeaurora.org>
-Subject: Re: Query regarding ADMA descriptor allocation
-Date: Sun, 13 Jan 2013 17:50:31 +0530
-Message-ID: <50F2A68F.4000206@codeaurora.org>
-References: <50F0061F.6070509@codeaurora.org>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH V3] mmc: mmci: Fixup and cleanup code for DMA handling
+Date: Sun, 13 Jan 2013 19:24:29 +0000
+Message-ID: <20130113192428.GU23505@n2100.arm.linux.org.uk>
+References: <1357570707-28207-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:42481 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754651Ab3AMMUi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Jan 2013 07:20:38 -0500
-In-Reply-To: <50F0061F.6070509@codeaurora.org>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:45699 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755295Ab3AMTYg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Jan 2013 14:24:36 -0500
+Content-Disposition: inline
+In-Reply-To: <1357570707-28207-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: drzeus@drzeus.cx, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Per Forlin <per.forlin@stericsson.com>
 
-Hi
-Can you please let me know if my understanding in the below question is 
-correct ?
+On Mon, Jan 07, 2013 at 03:58:27PM +0100, Ulf Hansson wrote:
+> @@ -374,19 +415,12 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+>  	 * contiguous buffers.  On TX, we'll get a FIFO underrun error.
+>  	 */
+>  	if (status & MCI_RXDATAAVLBLMASK) {
+> -		dmaengine_terminate_all(chan);
+> -		if (!data->error)
+> -			data->error = -EIO;
+> -	}
+> -
+> -	if (data->flags & MMC_DATA_WRITE) {
+> -		dir = DMA_TO_DEVICE;
+> -	} else {
+> -		dir = DMA_FROM_DEVICE;
+> +		data->error = -EIO;
+> +		mmci_dma_data_error(host);
 
-Thanks
-Asutosh
+Please explain the change of behaviour here.  Before your change, we _only_
+set data->error if the error is not set.  Here, we overwrite the error code
+no matter what.  What is the reasoning for that change?
 
-On 1/11/2013 6:01 PM, Asutosh Das wrote:
-> Hi
-> In sdhci_add_host function, the number of adma descriptors allocated 
-> are 128 and each descriptor consumes 8 bytes and 1 4byte is added in 
-> the end like,
-> kmalloc((128 * 2 + 1) * 4, GFP_KERNEL);
->
-> In sdhci_adma_table_pre function, each node in sg-list is iterated and 
-> in case of a misaligned node, a descriptor is consumed, which means 
-> for a single sg-node 2 descriptors were consumed. Let's say in a 
-> situation, where there are multiple unaligned addresses in multiple sg 
-> nodes and the sg-list length is 128, wouldn't this use up all the 128 
-> descriptors long before the entire sg-list is traversed ?
->
->
->
->
-
-
--- 
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
-
+The reason the code is like it _was_ is so that any bytes remaining in the
+FIFO are _only_ reported as an error if there wasn't a preceding error.
+That is the behaviour I desired when I wrote this code.
