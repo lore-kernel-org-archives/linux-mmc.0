@@ -1,68 +1,45 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [Q] MMC GPIO polarity flag usage
-Date: Mon, 14 Jan 2013 10:56:14 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1301140954470.29911@axis700.grange>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH v4 5/5] mmc: dw_mmc: Remove DW_MCI_QUIRK_NO_WRITE_PROTECT
+Date: Mon, 14 Jan 2013 10:47:02 +0000
+Message-ID: <CAFbHwiTafLhK-uJKjUX4_yLC+27OOUnC2JxYM9-3rHZkPx7s5Q@mail.gmail.com>
+References: <1357842269-15062-1-git-send-email-dianders@chromium.org>
+	<1357923834-31641-1-git-send-email-dianders@chromium.org>
+	<1357923834-31641-5-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:63233 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751236Ab3ANJ4T (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Jan 2013 04:56:19 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1357923834-31641-5-git-send-email-dianders@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Thomas Abraham <thomas.abraham@linaro.org>, Kukjin Kim <kgene.kim@samsung.com>, Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>, Will Newton <will.newton@imgtec.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-kernel@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Grant Likely <grant.likely@secretlab.ca>, Linus Walleij <linus.walleij@linaro.org>
 
-Hi all
+On Fri, Jan 11, 2013 at 5:03 PM, Doug Anderson <dianders@chromium.org> wrote:
+> The original quirk was added in the change 'mmc: dw_mmc: add quirk to
+> indicate missing write protect line'.  The original quirk was added at
+> a controller level even though each slot has its own write protect (so
+> the quirk should be at the slot level).  A recent change (mmc: dw_mmc:
+> Add "disable-wp" device tree property) added a slot-level quirk and
+> support for the quirk directly to dw_mmc.
+>
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> ---
+> Changes in v4:
+> - New for this version; addresses comments from Olof Johansson about
+>   the fact that we shouldn't have both a slot and controller level
+>   quirk for the same thing.
+>
+>  drivers/mmc/host/dw_mmc.c  |    8 +-------
+>  include/linux/mmc/dw_mmc.h |    7 -------
+>  2 files changed, 1 insertions(+), 14 deletions(-)
 
-I'm confused by the ways to specify GPIO polarity in general and for MMC 
-card-detect and write-protect pins specifically.
+Hi Doug,
 
-IIUC, the flags variable as returned by a call to 
-of_get_named_gpio_flags(..., &flags) should be platform-independent, if a 
-specific gpio driver choses to define their gpio cells in a non-standard 
-way, not according to "*-gpios = <&gpio gpio_number flags>" they shall be 
-providing an .of_xlate() method to convert whatever their GPIO information 
-to standard data. So far the GPIO subsystem defines only one flag 
-OF_GPIO_ACTIVE_LOW. Any other use of the above flags is invalid.
+These changes look ok to me. I don't know if patch 4 made it to the
+list, I only got a copy via the cc and the only archive I can find of
+linux-mmc (gmane) seems to be missing a lot of messages besides this
+one.
 
-The first confusing thing about those flags is, that they are defined as 
-an enum, and not as a bit-field. This seems to suggest, that one only 
-should be comparing flags to specific enum values, and not checking set 
-bits, like e.g. drivers/usb/host/ohci-at91.c and drivers/hwmon/gpio-fan.c 
-are doing. Logically, this should indeed be a bit-field, in which case 
-of_get_named_gpio_flags()'s prototype should be changed, as well as the 
-definition of OF_GPIO_ACTIVE_LOW.
+So for the dw_mmc parts:
 
-Secondly, drivers/pinctrl/pinctrl-nomadik.c seems to be doing a wrong 
-thing - they are defining extended incompatible flags' bits in 
-Documentation/devicetree/bindings/gpio/gpio-nmk.txt and not providing an 
-.of_xlate() method.
-
-All drivers quoted above are just examples, that I stumbled ver, while 
-trying to figure out what's the right way to use flags and how others do 
-that. There are most likely more of them in the tree.
-
-Thirdly, Documentation/devicetree/bindings/mmc/mmc.txt defines the use of 
-gpio-bindings:
-
-  - cd-gpios: Specify GPIOs for card detection, see gpio binding
-- wp-gpios: Specify GPIOs for write protection, see gpio binding
-
-but additionally defines two boolean properties:
-
-- cd-inverted: when present, polarity on the cd gpio line is inverted
-- wp-inverted: when present, polarity on the wp gpio line is inverted
-
-which should be redundant and instead GPIO flags should be used?
-
-Are my above conclusions correct and what should we do to improve the 
-situation?
-
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Acked-by: Will Newton <will.newton@imgtec.com>
