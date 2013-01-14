@@ -1,38 +1,44 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: FW: [PATCH v1 0/3] SDIO fixes
-Date: Mon, 14 Jan 2013 14:07:25 -0500
-Message-ID: <87txqjtwgi.fsf@laptop.org>
-References: <1354620980-23764-1-git-send-email-subhashj@codeaurora.org>
-	<50C7271D.2080704@codeaurora.org>
-	<86988B169C1CD04598F5B80198CCE50E738D93@aphydexd01b>
-	<50C729FB.1090107@codeaurora.org>
+Subject: Re: [PATCH v2 0/3] Use devm_* managed functions to ease slot-gpio users
+Date: Mon, 14 Jan 2013 14:10:17 -0500
+Message-ID: <87pq17twbq.fsf@laptop.org>
+References: <1355236340-21304-1-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <50C729FB.1090107@codeaurora.org> (Subhash Jadavani's message of
-	"Tue, 11 Dec 2012 18:11:31 +0530")
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-msm@vger.kernel.org, johan.rudholm@stericsson.com, ulf.hansson@linaro.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:53528 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756856Ab3ANTKd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Jan 2013 14:10:33 -0500
+In-Reply-To: <1355236340-21304-1-git-send-email-shawn.guo@linaro.org> (Shawn
+	Guo's message of "Tue, 11 Dec 2012 22:32:17 +0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-arm-kernel@lists.infradead.org
 
-Hi Subhash,
+Hi Shawn,
 
-On Tue, Dec 11 2012, Subhash Jadavani wrote:
-> This patch-series is having 1 fix for SDIO resume and 2 fixes related to SDIO3.0 card detection
+On Tue, Dec 11 2012, Shawn Guo wrote:
+> Changes since v1:
+>  * Add kernel doc for mmc_gpio_request/free_ro/cd() to document the
+>    use cases.
+>  * Add a patch to remove unncessary mmc_gpio_free_cd() call from
+>    existing slot-gpio users.
 >
-> Subhash Jadavani (2):
->     mmc: sdio: fix resume failure
->     mmc: sdio: print correct UHS mode during card detection
+> Shawn Guo (3):
+>   mmc: slot-gpio: use devm_* managed functions to ease users
+>   mmc: remove unncessary mmc_gpio_free_cd() call from slot-gpio users
+>   mmc: sdhci-esdhc-imx: use slot-gpio helpers for CD and WP
 >
-> Sujit Reddy Thumma (1):
->     mmc: sdio: Fix SDIO 3.0 UHS-I initialization sequence
->
->    drivers/mmc/core/sdio.c  |   33 ++++++++++++++++++++-------------
->    include/linux/mmc/host.h |    8 ++++++++
->    2 files changed, 28 insertions(+), 13 deletions(-)
+>  drivers/mmc/core/slot-gpio.c       |   57 ++++++++++++++++++++++++++++++++----
+>  drivers/mmc/host/sdhci-esdhc-imx.c |   56 ++++++++++-------------------------
+>  drivers/mmc/host/sdhci-pxav3.c     |    5 ----
+>  drivers/mmc/host/sh_mmcif.c        |    6 ----
+>  drivers/mmc/host/tmio_mmc_pio.c    |    8 -----
+>  5 files changed, 67 insertions(+), 65 deletions(-)
 
-Thanks, pushed all three patches to mmc-next.
+Thanks for doing this, all merged to mmc-next for 3.9.
 
 - Chris.
 -- 
