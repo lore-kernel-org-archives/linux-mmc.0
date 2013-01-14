@@ -1,131 +1,39 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH v2 2/3] mmc: remove unncessary mmc_gpio_free_cd() call
- from slot-gpio users
-Date: Mon, 14 Jan 2013 16:47:57 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1301141647300.1303@axis700.grange>
-References: <1355236340-21304-1-git-send-email-shawn.guo@linaro.org>
- <1355236340-21304-3-git-send-email-shawn.guo@linaro.org>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v4 5/5] mmc: dw_mmc: Remove DW_MCI_QUIRK_NO_WRITE_PROTECT
+Date: Mon, 14 Jan 2013 08:09:56 -0800
+Message-ID: <CAD=FV=XEfydu-0oD-Vc_uwqt6qRU9Fs9ROgta3FugSEmPp7nFA@mail.gmail.com>
+References: <1357842269-15062-1-git-send-email-dianders@chromium.org>
+	<1357923834-31641-1-git-send-email-dianders@chromium.org>
+	<1357923834-31641-5-git-send-email-dianders@chromium.org>
+	<CAFbHwiTafLhK-uJKjUX4_yLC+27OOUnC2JxYM9-3rHZkPx7s5Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:61936 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756979Ab3ANPsF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Jan 2013 10:48:05 -0500
-In-Reply-To: <1355236340-21304-3-git-send-email-shawn.guo@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CAFbHwiTafLhK-uJKjUX4_yLC+27OOUnC2JxYM9-3rHZkPx7s5Q@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Will Newton <will.newton@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Thomas Abraham <thomas.abraham@linaro.org>, Kukjin Kim <kgene.kim@samsung.com>, Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>, Will Newton <will.newton@imgtec.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 
-On Tue, 11 Dec 2012, Shawn Guo wrote:
+Will,
 
-> Since slot-gpio uses devm_* managed functions in mmc_gpio_request_cd()
-> now, we can remove those mmc_gpio_free_cd() call from host drivers'
-> .probe() error path and .remove().
-> 
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+On Mon, Jan 14, 2013 at 2:47 AM, Will Newton <will.newton@gmail.com> wrote:
+> These changes look ok to me. I don't know if patch 4 made it to the
+> list, I only got a copy via the cc and the only archive I can find of
+> linux-mmc (gmane) seems to be missing a lot of messages besides this
+> one.
 
-(for mmcif and tmio)
+It seems to have made it onto patchwork, in any case.  Here's the link:
+    https://patchwork.kernel.org/patch/1966771/
 
-Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+The whole bundle of all 5 patches at v4 is here:
+    http://patchwork.kernel.org/bundle/dianders/mmc_wp/
 
-Thanks
-Guennadi
 
-> ---
->  drivers/mmc/host/sdhci-pxav3.c  |    5 -----
->  drivers/mmc/host/sh_mmcif.c     |    6 ------
->  drivers/mmc/host/tmio_mmc_pio.c |    8 --------
->  3 files changed, 19 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-> index fad0966..b7ee776 100644
-> --- a/drivers/mmc/host/sdhci-pxav3.c
-> +++ b/drivers/mmc/host/sdhci-pxav3.c
-> @@ -316,7 +316,6 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->  err_add_host:
->  	clk_disable_unprepare(clk);
->  	clk_put(clk);
-> -	mmc_gpio_free_cd(host->mmc);
->  err_cd_req:
->  err_clk_get:
->  	sdhci_pltfm_free(pdev);
-> @@ -329,16 +328,12 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
->  	struct sdhci_host *host = platform_get_drvdata(pdev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_pxa *pxa = pltfm_host->priv;
-> -	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
->  
->  	sdhci_remove_host(host, 1);
->  
->  	clk_disable_unprepare(pltfm_host->clk);
->  	clk_put(pltfm_host->clk);
->  
-> -	if (gpio_is_valid(pdata->ext_cd_gpio))
-> -		mmc_gpio_free_cd(host->mmc);
-> -
->  	sdhci_pltfm_free(pdev);
->  	kfree(pxa);
->  
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 9b8efac..2f229e0 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -1410,8 +1410,6 @@ static int sh_mmcif_probe(struct platform_device *pdev)
->  	return ret;
->  
->  emmcaddh:
-> -	if (pd && pd->use_cd_gpio)
-> -		mmc_gpio_free_cd(mmc);
->  erqcd:
->  	free_irq(irq[1], host);
->  ereqirq1:
-> @@ -1433,7 +1431,6 @@ ealloch:
->  static int sh_mmcif_remove(struct platform_device *pdev)
->  {
->  	struct sh_mmcif_host *host = platform_get_drvdata(pdev);
-> -	struct sh_mmcif_plat_data *pd = pdev->dev.platform_data;
->  	int irq[2];
->  
->  	host->dying = true;
-> @@ -1442,9 +1439,6 @@ static int sh_mmcif_remove(struct platform_device *pdev)
->  
->  	dev_pm_qos_hide_latency_limit(&pdev->dev);
->  
-> -	if (pd && pd->use_cd_gpio)
-> -		mmc_gpio_free_cd(host->mmc);
-> -
->  	mmc_remove_host(host->mmc);
->  	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
->  
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> index 50bf495..0f992e9 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -1060,16 +1060,8 @@ EXPORT_SYMBOL(tmio_mmc_host_probe);
->  void tmio_mmc_host_remove(struct tmio_mmc_host *host)
->  {
->  	struct platform_device *pdev = host->pdev;
-> -	struct tmio_mmc_data *pdata = host->pdata;
->  	struct mmc_host *mmc = host->mmc;
->  
-> -	if (pdata->flags & TMIO_MMC_USE_GPIO_CD)
-> -		/*
-> -		 * This means we can miss a card-eject, but this is anyway
-> -		 * possible, because of delayed processing of hotplug events.
-> -		 */
-> -		mmc_gpio_free_cd(mmc);
-> -
->  	if (!host->native_hotplug)
->  		pm_runtime_get_sync(&pdev->dev);
->  
-> -- 
-> 1.7.9.5
-> 
-> 
+> So for the dw_mmc parts:
+>
+> Acked-by: Will Newton <will.newton@imgtec.com>
 
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Thank you for your review and your ack.  :)
+
+-Doug
