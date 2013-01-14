@@ -1,55 +1,39 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 00/14] mmc: sh-mmcif: 3.8 fixes and improvements
-Date: Mon, 14 Jan 2013 14:14:37 -0500
-Message-ID: <87libvtw4i.fsf@laptop.org>
-References: <1355323098-18061-1-git-send-email-g.liakhovetski@gmx.de>
+Subject: Re: [PATCH/RFC] mmc: sh-mmcif: simplify IRQ processing
+Date: Mon, 14 Jan 2013 14:17:44 -0500
+Message-ID: <87hamjtvzb.fsf@laptop.org>
+References: <Pine.LNX.4.64.1212121540250.10522@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1355323098-18061-1-git-send-email-g.liakhovetski@gmx.de>
-	(Guennadi Liakhovetski's message of "Wed, 12 Dec 2012 15:38:04 +0100")
-Sender: linux-sh-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:57757 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757410Ab3ANTR6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Jan 2013 14:17:58 -0500
+In-Reply-To: <Pine.LNX.4.64.1212121540250.10522@axis700.grange> (Guennadi
+	Liakhovetski's message of "Wed, 12 Dec 2012 15:45:14 +0100 (CET)")
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
-List-Id: linux-mmc@vger.kernel.org
 
 Hi Guennadi,
 
 On Wed, Dec 12 2012, Guennadi Liakhovetski wrote:
-> This patch series fixes several bugs in the sh_mmcif.c driver, that showed 
-> up on SMP with DMA (patches 10, 13), adds new features (3, 4) and adds 
-> multiple further improvements and minor fixes. Even though these bugs 
-> currently exist in the mainline, this patch series is not considered to 
-> be suitable for @stable. Patches are rather experimental and it is better 
-> to test them over a complete development cycle. They also are easier 
-> implemented on top of preparatory cosmetic patches.
+> The classical way to process IRQs is read out the status, ack all triggered
+> IRQs, possibly mask them, then process them. Follow this simple procesure
+> instead of the current complex custom algorithm.
 >
-> Guennadi Liakhovetski (6):
->   mmc: sh-mmcif: fix missing and consolidate IO completion timeouts
->   mmc: sh-mmcif: (cosmetic) simplify boolean return blocks
->   mmc: sh-mmcif: fix a race, causing an Oops on SMP
->   mmc: sh-mmcif: reset error code for any opcode
->   mmc: sh-mmcif: reset DMA completion immediately before starting DMA
->   mmc: sh-mmcif: fix I/O errors
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
 >
-> Shinya Kuribayashi (1):
->   mmc: sh_mmcif: add support for bundled MMCIF IRQs
+> Hi Chris
 >
-> Teppei Kamijou (7):
->   mmc: sh_mmcif: force to fail CMD52 immediately
->   mmc: sh_mmcif: ensure run-time suspend call is processed before
->     suspend
->   mmc: sh_mmcif: Add support for eMMC Dual Data Rate
->   mmc: sh_mmcif: Use msecs_to_jiffies() for host->timeout
->   mmc: sh_mmcif: Avoid unnecessary mmc_delay() at mmc_card_sleepawake()
->   mmc: sh-mmcif: Terminate DMA transactions when detecting timeout or
->     error
->   mmc: sh-mmcif: report all errors
->
->  drivers/mmc/host/sh_mmcif.c |  215 +++++++++++++++++++++++++++++--------------
->  1 files changed, 145 insertions(+), 70 deletions(-)
+> Attention: this patch is __NOT__ for 3.8, please, let it simmer in -next 
+> until 3.9. It modifies the driver's interrupt handling significantly, so, 
+> we want to have it tested over a longer period.
 
-All 14 merged to mmc-next for 3.9, thanks.
+Sorry for the delay, this is in mmc-next now.
 
 - Chris.
 -- 
