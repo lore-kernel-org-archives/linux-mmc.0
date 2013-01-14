@@ -1,17 +1,17 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci: disable interrupt before free_irq
-Date: Mon, 14 Jan 2013 14:41:13 -0500
-Message-ID: <87sj63sgbq.fsf@laptop.org>
-References: <1357377508-12043-1-git-send-email-kliu5@marvell.com>
+Subject: Re: [PATCH v2 1/2] mmc: sdhci: add wake up support
+Date: Mon, 14 Jan 2013 14:43:13 -0500
+Message-ID: <87obgrsg8e.fsf@laptop.org>
+References: <1357377694-2167-1-git-send-email-kliu5@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:34591 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:34616 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756500Ab3ANTlp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Jan 2013 14:41:45 -0500
-In-Reply-To: <1357377508-12043-1-git-send-email-kliu5@marvell.com> (Kevin
-	Liu's message of "Sat, 5 Jan 2013 17:18:28 +0800")
+	id S1756500Ab3ANTnj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Jan 2013 14:43:39 -0500
+In-Reply-To: <1357377694-2167-1-git-send-email-kliu5@marvell.com> (Kevin Liu's
+	message of "Sat, 5 Jan 2013 17:21:33 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Kevin Liu <kliu5@marvell.com>
@@ -20,27 +20,8 @@ Cc: linux-mmc@vger.kernel.org, Philip Rakity <prakity@nvidia.com>, Aaron Lu <aar
 Hi,
 
 On Sat, Jan 05 2013, Kevin Liu wrote:
-> Current code missed disabling interrupts before free irq which is shared.
->
-> Notice below comments for function free_irq (kernel/irq/manage.c):
-> On a shared IRQ the caller must ensure the interrupt is disabled
-> on the card it drives before calling this function.
->
-> Original code has below issue during suspend/resume when multiple SD hosts
-> share the same IRQ:
-> 1. Assume there are two hosts (host1 for emmc while host2 for sd) share
-> the same mmc irq.
-> 2. When system suspend, host2 will be suspended before host1.
-> So the sequence is below:
-> 	step1: irq handler for host2 removed ->
-> 	step2: irq handler for host1 removed and irq disabled ->
-> 	... system suspended ...
-> 	... system resumed ...
-> 	step3: irq enabled and the irq handler for host1 restored ->
-> 	step4: irq handler for host2 restored
-> 3. So there is the buggy time slot that the irq is enabled but the irq handler
-> for host2 is removed. Then host2 interrupt can be triggered but can't be handled
-> at that moment.
+> Not to disable SD Host IRQ during suspend if it is wake up source.
+> Enable wakeup event during suspend.
 >
 > Signed-off-by: Jialing Fu <jlfu@marvell.com>
 > Signed-off-by: Kevin Liu <kliu5@marvell.com>
