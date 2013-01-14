@@ -1,39 +1,36 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH/RFC] mmc: sh-mmcif: simplify IRQ processing
-Date: Mon, 14 Jan 2013 14:17:44 -0500
-Message-ID: <87hamjtvzb.fsf@laptop.org>
-References: <Pine.LNX.4.64.1212121540250.10522@axis700.grange>
+Subject: Re: [PATCH v2] mmc: queue: exclude asynchronous transfer for special request
+Date: Mon, 14 Jan 2013 14:26:15 -0500
+Message-ID: <87d2x7tvl4.fsf@laptop.org>
+References: <000701cde309$f5ed8fd0$e1c8af70$%jun@samsung.com>
+	<50DC4B4C.8090805@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57757 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:38386 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757410Ab3ANTR6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Jan 2013 14:17:58 -0500
-In-Reply-To: <Pine.LNX.4.64.1212121540250.10522@axis700.grange> (Guennadi
-	Liakhovetski's message of "Wed, 12 Dec 2012 15:45:14 +0100 (CET)")
+	id S1756960Ab3ANT0a (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Jan 2013 14:26:30 -0500
+In-Reply-To: <50DC4B4C.8090805@codeaurora.org> (Konstantin Dorfman's message
+	of "Thu, 27 Dec 2012 15:21:16 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+To: Konstantin Dorfman <kdorfman@codeaurora.org>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, 'Per Forlin' <per.forlin@linaro.org>
 
-Hi Guennadi,
+Hi,
 
-On Wed, Dec 12 2012, Guennadi Liakhovetski wrote:
-> The classical way to process IRQs is read out the status, ack all triggered
-> IRQs, possibly mask them, then process them. Follow this simple procesure
-> instead of the current complex custom algorithm.
+On Thu, Dec 27 2012, Konstantin Dorfman wrote:
+> Reviewed-by: Konstantin Dorfman <kdorfman@codeaurora.org>
 >
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> ---
->
-> Hi Chris
->
-> Attention: this patch is __NOT__ for 3.8, please, let it simmer in -next 
-> until 3.9. It modifies the driver's interrupt handling significantly, so, 
-> we want to have it tested over a longer period.
+> On 12/26/2012 03:40 AM, Seungwon Jeon wrote:
+>> Unlike normal r/w request, special requests(discard, flush)
+>> is finished with a one-time issue_fn. Request change to
+>> mqrq_prev makes unnecessary call.
+>>
+>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 
-Sorry for the delay, this is in mmc-next now.
+Thanks, pushed to mmc-next for 3.9.
 
 - Chris.
 -- 
