@@ -1,76 +1,68 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [RFC PATCH] MAINTAINERS: Add an orphaned entry for the dw_mmc
- driver.
-Date: Mon, 14 Jan 2013 17:46:15 +0900
-Message-ID: <001301cdf233$9cf2bca0$d6d835e0$%jun@samsung.com>
-References: <CAFbHwiRX19Zm=O2dNZrbTDGZxnXDOx0zJ3pvTkfC1q8m5DBFug@mail.gmail.com>
- <87wqvjmxt6.fsf@laptop.org>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [Q] MMC GPIO polarity flag usage
+Date: Mon, 14 Jan 2013 10:56:14 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1301140954470.29911@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:32154 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752333Ab3ANIqR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Jan 2013 03:46:17 -0500
-Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout2.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MGL00ECIXOWK3G0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 14 Jan 2013 17:46:15 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0MGL00MRTXP3M020@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 14 Jan 2013 17:46:15 +0900 (KST)
-In-reply-to: <87wqvjmxt6.fsf@laptop.org>
-Content-language: ko
+Received: from moutng.kundenserver.de ([212.227.126.187]:63233 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751236Ab3ANJ4T (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Jan 2013 04:56:19 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@gmail.com>
-Cc: linux-mmc@vger.kernel.org, 'Thomas Abraham' <thomas.abraham@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'James Hogan' <james.hogan@imgtec.com>
+To: linux-mmc@vger.kernel.org
+Cc: Grant Likely <grant.likely@secretlab.ca>, Linus Walleij <linus.walleij@linaro.org>
 
-On Saturday, January 12, 2013, Chris Ball wrote:
-> Hi,
-> 
-> On Fri, Jan 11 2013, Will Newton wrote:
-> > I submitted this driver but will shortly no longer have access
-> > to hardware that uses it. The driver is quite widely used so
-> > there may be someone out there that feels strongly enough to
-> > step up and maintain it.
-> > ---
-> >  MAINTAINERS |    6 ++++++
-> >  1 files changed, 6 insertions(+), 0 deletions(-)
-> >
-> > diff --git a/MAINTAINERS b/MAINTAINERS
-> > index f940e81..88329bc 100644
-> > --- a/MAINTAINERS
-> > +++ b/MAINTAINERS
-> > @@ -6558,6 +6558,12 @@ F:	include/linux/dw_dmac.h
-> >  F:	drivers/dma/dw_dmac_regs.h
-> >  F:	drivers/dma/dw_dmac.c
-> >
-> > +SYNOPSYS DESIGNWARE MMC/SD/SDIO DRIVER
-> > +L:	linux-mmc@vger.kernel.org
-> > +S:	Orphaned
-> > +F:	include/linux/mmc/dw_mmc.h
-> > +F:	drivers/mmc/host/dw_mmc*
-> > +
-> >  TIMEKEEPING, NTP
-> >  M:	John Stultz <johnstul@us.ibm.com>
-> >  M:	Thomas Gleixner <tglx@linutronix.de>
-> 
-> Thanks for your work on the driver, Will!  I'm CC'ing some recent
-> committers so they can volunteer to take over if they're interested.
-Will, Thank you for your efforts.
-It's interesting to me. I am ready to volunteer to maintain 'dw_mmc*' driver.
-I would appreciate it if you let me know what you think.
+Hi all
 
-Thanks,
-Seungwon Jeon.
-> 
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
+I'm confused by the ways to specify GPIO polarity in general and for MMC 
+card-detect and write-protect pins specifically.
 
+IIUC, the flags variable as returned by a call to 
+of_get_named_gpio_flags(..., &flags) should be platform-independent, if a 
+specific gpio driver choses to define their gpio cells in a non-standard 
+way, not according to "*-gpios = <&gpio gpio_number flags>" they shall be 
+providing an .of_xlate() method to convert whatever their GPIO information 
+to standard data. So far the GPIO subsystem defines only one flag 
+OF_GPIO_ACTIVE_LOW. Any other use of the above flags is invalid.
+
+The first confusing thing about those flags is, that they are defined as 
+an enum, and not as a bit-field. This seems to suggest, that one only 
+should be comparing flags to specific enum values, and not checking set 
+bits, like e.g. drivers/usb/host/ohci-at91.c and drivers/hwmon/gpio-fan.c 
+are doing. Logically, this should indeed be a bit-field, in which case 
+of_get_named_gpio_flags()'s prototype should be changed, as well as the 
+definition of OF_GPIO_ACTIVE_LOW.
+
+Secondly, drivers/pinctrl/pinctrl-nomadik.c seems to be doing a wrong 
+thing - they are defining extended incompatible flags' bits in 
+Documentation/devicetree/bindings/gpio/gpio-nmk.txt and not providing an 
+.of_xlate() method.
+
+All drivers quoted above are just examples, that I stumbled ver, while 
+trying to figure out what's the right way to use flags and how others do 
+that. There are most likely more of them in the tree.
+
+Thirdly, Documentation/devicetree/bindings/mmc/mmc.txt defines the use of 
+gpio-bindings:
+
+  - cd-gpios: Specify GPIOs for card detection, see gpio binding
+- wp-gpios: Specify GPIOs for write protection, see gpio binding
+
+but additionally defines two boolean properties:
+
+- cd-inverted: when present, polarity on the cd gpio line is inverted
+- wp-inverted: when present, polarity on the wp gpio line is inverted
+
+which should be redundant and instead GPIO flags should be used?
+
+Are my above conclusions correct and what should we do to improve the 
+situation?
+
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
