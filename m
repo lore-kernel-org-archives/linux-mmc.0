@@ -1,125 +1,76 @@
-From: "Maya Erez" <merez@codeaurora.org>
-Subject: RE: [PATCH] mmc: core: disable the cache before suspend only after stopping BKOPS
-Date: Sun, 13 Jan 2013 23:47:21 +0200
-Message-ID: <002701cdf1d7$99dd1d00$cd975700$@codeaurora.org>
-References: <n> <1357936936-25977-1-git-send-email-merez@codeaurora.org> <50F10B86.6020905@codeaurora.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [RFC PATCH] MAINTAINERS: Add an orphaned entry for the dw_mmc
+ driver.
+Date: Mon, 14 Jan 2013 17:46:15 +0900
+Message-ID: <001301cdf233$9cf2bca0$d6d835e0$%jun@samsung.com>
+References: <CAFbHwiRX19Zm=O2dNZrbTDGZxnXDOx0zJ3pvTkfC1q8m5DBFug@mail.gmail.com>
+ <87wqvjmxt6.fsf@laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:2542 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755592Ab3AMVrh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Jan 2013 16:47:37 -0500
-In-Reply-To: <50F10B86.6020905@codeaurora.org>
-Content-Language: en-us
+Received: from mailout2.samsung.com ([203.254.224.25]:32154 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752333Ab3ANIqR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Jan 2013 03:46:17 -0500
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MGL00ECIXOWK3G0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 14 Jan 2013 17:46:15 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0MGL00MRTXP3M020@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 14 Jan 2013 17:46:15 +0900 (KST)
+In-reply-to: <87wqvjmxt6.fsf@laptop.org>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Subhash Jadavani' <subhashj@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 'open list' <linux-kernel@vger.kernel.org>
+To: 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@gmail.com>
+Cc: linux-mmc@vger.kernel.org, 'Thomas Abraham' <thomas.abraham@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'James Hogan' <james.hogan@imgtec.com>
 
------Original Message-----
-From: Subhash Jadavani [mailto:subhashj@codeaurora.org] 
-Sent: Saturday, January 12, 2013 9:07 AM
-To: Maya Erez
-Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org; open list
-Subject: Re: [PATCH] mmc: core: disable the cache before suspend only after
-stopping BKOPS
+On Saturday, January 12, 2013, Chris Ball wrote:
+> Hi,
+> 
+> On Fri, Jan 11 2013, Will Newton wrote:
+> > I submitted this driver but will shortly no longer have access
+> > to hardware that uses it. The driver is quite widely used so
+> > there may be someone out there that feels strongly enough to
+> > step up and maintain it.
+> > ---
+> >  MAINTAINERS |    6 ++++++
+> >  1 files changed, 6 insertions(+), 0 deletions(-)
+> >
+> > diff --git a/MAINTAINERS b/MAINTAINERS
+> > index f940e81..88329bc 100644
+> > --- a/MAINTAINERS
+> > +++ b/MAINTAINERS
+> > @@ -6558,6 +6558,12 @@ F:	include/linux/dw_dmac.h
+> >  F:	drivers/dma/dw_dmac_regs.h
+> >  F:	drivers/dma/dw_dmac.c
+> >
+> > +SYNOPSYS DESIGNWARE MMC/SD/SDIO DRIVER
+> > +L:	linux-mmc@vger.kernel.org
+> > +S:	Orphaned
+> > +F:	include/linux/mmc/dw_mmc.h
+> > +F:	drivers/mmc/host/dw_mmc*
+> > +
+> >  TIMEKEEPING, NTP
+> >  M:	John Stultz <johnstul@us.ibm.com>
+> >  M:	Thomas Gleixner <tglx@linutronix.de>
+> 
+> Thanks for your work on the driver, Will!  I'm CC'ing some recent
+> committers so they can volunteer to take over if they're interested.
+Will, Thank you for your efforts.
+It's interesting to me. I am ready to volunteer to maintain 'dw_mmc*' driver.
+I would appreciate it if you let me know what you think.
 
-On 1/12/2013 2:12 AM, Maya Erez wrote:
-> mmc_cache_ctrl was called in runtime suspend before MMC interrupted 
-> BKOPS in case it is still running on the card. This caused the cache 
-> disable to timeout.
-I guess even if the idle time bkops polling is not implemented, this patch
-is good to have. cache control is the eMMC feature and in that sense, it
-should have been part of MMC's bus resume (mmc_resume) rather than generic
-mmc_suspend_host().
-
-Patch as such is fine and if you agree, you may want to remove the
-mentioning of bkops as part of commit text and may just want to mention
-above reason as the main motivation for this patch.
-
-Agreed, I will change the commit text in the next uploaded version.
-
-> Therefore, mmc_cache_ctrl has to move to mmc_suspend where we are sure 
-> that the card can go into suspend and there is no pending activity.
->
-> Signed-off-by: Maya Erez <merez@codeaurora.org>
-> ---
->   drivers/mmc/core/core.c |    7 +------
->   drivers/mmc/core/mmc.c  |    8 +++++++-
->   2 files changed, 8 insertions(+), 7 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index 
-> aaed768..b438bb2 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2388,6 +2388,7 @@ EXPORT_SYMBOL(mmc_flush_cache);
->    * Turn the cache ON/OFF.
->    * Turning the cache OFF shall trigger flushing of the data
->    * to the non-volatile storage.
-> + * This function should be called with host claimed
->    */
->   int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
->   {
-> @@ -2399,7 +2400,6 @@ int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
->   			mmc_card_is_removable(host))
->   		return err;
->   
-> -	mmc_claim_host(host);
->   	if (card && mmc_card_mmc(card) &&
->   			(card->ext_csd.cache_size > 0)) {
->   		enable = !!enable;
-> @@ -2417,7 +2417,6 @@ int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
->   				card->ext_csd.cache_ctrl = enable;
->   		}
->   	}
-> -	mmc_release_host(host);
->   
->   	return err;
->   }
-> @@ -2436,10 +2435,6 @@ int mmc_suspend_host(struct mmc_host *host)
->   	cancel_delayed_work(&host->detect);
->   	mmc_flush_scheduled_work();
->   
-> -	err = mmc_cache_ctrl(host, 0);
-> -	if (err)
-> -		goto out;
-> -
->   	mmc_bus_get(host);
->   	if (host->bus_ops && !host->bus_dead) {
->   		if (host->bus_ops->suspend) {
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index 
-> e6e3911..dc17d40 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1379,6 +1379,11 @@ static int mmc_suspend(struct mmc_host *host)
->   	BUG_ON(!host->card);
->   
->   	mmc_claim_host(host);
-> +
-> +	err = mmc_cache_ctrl(host, 0);
-> +	if (err)
-> +		goto out;
-> +
->   	if (mmc_can_poweroff_notify(host->card))
->   		err = mmc_poweroff_notify(host->card,
-EXT_CSD_POWER_OFF_SHORT);
->   	else if (mmc_card_can_sleep(host))
-> @@ -1386,8 +1391,9 @@ static int mmc_suspend(struct mmc_host *host)
->   	else if (!mmc_host_is_spi(host))
->   		err = mmc_deselect_cards(host);
->   	host->card->state &= ~(MMC_STATE_HIGHSPEED |
-MMC_STATE_HIGHSPEED_200);
-> -	mmc_release_host(host);
->   
-> +out:
-> +	mmc_release_host(host);
->   	return err;
->   }
->   
---
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
-of Code Aurora Forum, hosted by The Linux Foundation
+Thanks,
+Seungwon Jeon.
+> 
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
 
