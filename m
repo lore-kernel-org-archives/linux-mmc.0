@@ -1,73 +1,62 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [RFC PATCH] MAINTAINERS: Add an orphaned entry for the dw_mmc
- driver.
-Date: Tue, 15 Jan 2013 11:07:46 +0900
-Message-ID: <50F4B9F2.3090104@samsung.com>
-References: <CAFbHwiRX19Zm=O2dNZrbTDGZxnXDOx0zJ3pvTkfC1q8m5DBFug@mail.gmail.com>
- <87wqvjmxt6.fsf@laptop.org>
+From: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
+Subject: Re: [PATCH v4 1/5] mmc: dw_mmc: Add "disable-wp" device tree property
+Date: Mon, 14 Jan 2013 22:20:04 -0800
+Message-ID: <20130115062004.GA19801@quad.lixom.net>
+References: <1357842269-15062-1-git-send-email-dianders@chromium.org>
+ <1357923834-31641-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [203.254.224.24] ([203.254.224.24]:46304 "EHLO
-	mailout1.samsung.com" rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org
-	with ESMTP id S1757234Ab3AOCI6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Jan 2013 21:08:58 -0500
-Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MGN003A49X60X60@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 15 Jan 2013 11:08:27 +0900 (KST)
-Received: from [10.90.51.55] by mmp1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0MGN003SJ9Y2UE00@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 15 Jan 2013 11:08:27 +0900 (KST)
-In-reply-to: <87wqvjmxt6.fsf@laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1357923834-31641-1-git-send-email-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Will Newton <will.newton-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>, Kyungmin Park <kyungmin.park-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Kukjin Kim <kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Abhilash Kesavan <a.kesavan-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Will Newton <will.newton@gmail.com>, linux-mmc@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, James Hogan <james.hogan@imgtec.com>
 
-Hi All,
-
-I have interesting to maintain "dw_mmc" driver.
-
-Best Regards,
-Jaehoon Chung
-
-On 01/12/2013 02:31 AM, Chris Ball wrote:
-> Hi,
+On Fri, Jan 11, 2013 at 09:03:50AM -0800, Doug Anderson wrote:
+> The "disable-wp" property is used to specify that a given SD card slot
+> doesn't have a concept of write protect.  This eliminates the need for
+> special case code for SD slots that should never be write protected
+> (like a micro SD slot or a dev board).
 > 
-> On Fri, Jan 11 2013, Will Newton wrote:
->> I submitted this driver but will shortly no longer have access
->> to hardware that uses it. The driver is quite widely used so
->> there may be someone out there that feels strongly enough to
->> step up and maintain it.
->> ---
->>  MAINTAINERS |    6 ++++++
->>  1 files changed, 6 insertions(+), 0 deletions(-)
->>
->> diff --git a/MAINTAINERS b/MAINTAINERS
->> index f940e81..88329bc 100644
->> --- a/MAINTAINERS
->> +++ b/MAINTAINERS
->> @@ -6558,6 +6558,12 @@ F:	include/linux/dw_dmac.h
->>  F:	drivers/dma/dw_dmac_regs.h
->>  F:	drivers/dma/dw_dmac.c
->>
->> +SYNOPSYS DESIGNWARE MMC/SD/SDIO DRIVER
->> +L:	linux-mmc@vger.kernel.org
->> +S:	Orphaned
->> +F:	include/linux/mmc/dw_mmc.h
->> +F:	drivers/mmc/host/dw_mmc*
->> +
->>  TIMEKEEPING, NTP
->>  M:	John Stultz <johnstul@us.ibm.com>
->>  M:	Thomas Gleixner <tglx@linutronix.de>
+> The dw_mmc driver is special in needing to specify "disable-wp"
+> because the lack of a "wp-gpios" property means to use the special
+> purpose write protect line.  On some other mmc devices the lack of
+> "wp-gpios" means that write protect should be disabled.
 > 
-> Thanks for your work on the driver, Will!  I'm CC'ing some recent
-> committers so they can volunteer to take over if they're interested.
-> 
-> - Chris.
-> 
+> Signed-off-by: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> Acked-by: Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 
+Acked-by: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
+
+Nit below.
+
+> @@ -825,7 +828,13 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
+>  	struct dw_mci_board *brd = slot->host->pdata;
+>  
+>  	/* Use platform get_ro function, else try on board write protect */
+> -	if (brd->quirks & DW_MCI_QUIRK_NO_WRITE_PROTECT)
+> +
+> +	/*
+> +	 * NOTE: DW_MCI_QUIRK_NO_WRITE_PROTECT will be removed in a future
+> +	 * patch in the series once reference to it is removed.
+> +	 */
+> +	if ((brd->quirks & DW_MCI_QUIRK_NO_WRITE_PROTECT) ||
+> +	    (slot->quirks & DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT))
+
+Given that it never worked properly, you could have nuked it first and avoid
+the extra churn. Still, not a strong enough reason to respin the series, IMHO.
+
+
+-Olof
