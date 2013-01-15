@@ -1,74 +1,67 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: remove ESDHC_CD_GPIO handling from IO accessory
-Date: Tue, 15 Jan 2013 10:22:41 -0500
-Message-ID: <87a9sapj26.fsf@laptop.org>
-References: <1358263194-3298-1-git-send-email-shawn.guo@linaro.org>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: fix host version read
+Date: Tue, 15 Jan 2013 23:30:27 +0800
+Message-ID: <1358263827-3379-1-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41857 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754086Ab3AOPXB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 15 Jan 2013 10:23:01 -0500
-In-Reply-To: <1358263194-3298-1-git-send-email-shawn.guo@linaro.org> (Shawn
-	Guo's message of "Tue, 15 Jan 2013 23:19:54 +0800")
+Received: from co1ehsobe005.messaging.microsoft.com ([216.32.180.188]:6034
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755118Ab3AOPaE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Jan 2013 10:30:04 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Shawn Guo <shawn.guo@linaro.org>, stable@vger.kernel.org
 
-Hi Shawn,
+When commit 95a2482 (mmc: sdhci-esdhc-imx: add basic imx6q usdhc
+support) works around host version issue on imx6q, it gets the
+register address fixup "reg ^= 2" lost for imx25/35/51/53 esdhc.
+Thus, the controller version on these SoCs is wrongly identified
+as v1 while it's actually v2.
 
-On Tue, Jan 15 2013, Shawn Guo wrote:
-> With commit 9444e07 (mmc: remove unncessary mmc_gpio_free_cd() call from
-> slot-gpio users) in place, those ESDHC_CD_GPIO handling in IO accessory
-> becomes unnecessary.  Remove them.
->
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c |   17 -----------------
->  1 file changed, 17 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index dd7fcc1..ae68bc9 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -150,16 +150,6 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
->  
->  	u32 val = readl(host->ioaddr + reg);
->  
-> -	if (unlikely(reg == SDHCI_PRESENT_STATE)) {
-> -		/*
-> -		 * After SDHCI core gets improved to never query
-> -		 * SDHCI_CARD_PRESENT state in GPIO case, we can
-> -		 * remove this check.
-> -		 */
-> -		if (boarddata->cd_type == ESDHC_CD_GPIO)
-> -			val &= ~SDHCI_CARD_PRESENT;
-> -	}
-> -
->  	if (unlikely(reg == SDHCI_CAPABILITIES)) {
->  		/* In FSL esdhc IC module, only bit20 is used to indicate the
->  		 * ADMA2 capability of esdhc, but this bit is messed up on
-> @@ -192,13 +182,6 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
->  	u32 data;
->  
->  	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)) {
-> -		if (boarddata->cd_type == ESDHC_CD_GPIO)
-> -			/*
-> -			 * These interrupts won't work with a custom
-> -			 * card_detect gpio (only applied to mx25/35)
-> -			 */
-> -			val &= ~(SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT);
-> -
->  		if (val & SDHCI_INT_CARD_INT) {
->  			/*
->  			 * Clear and then set D3CD bit to avoid missing the
+Add the address fixup back and take a different approach to correct
+imx6q host version, so that the host version read gets back to work
+for all SoCs.
 
-Yay for removing ugly code!  Thanks for doing this; pushed to mmc-next
-for 3.9.
+Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+Cc: <stable@vger.kernel.org>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |   19 +++++++++++--------
+ 1 file changed, 11 insertions(+), 8 deletions(-)
 
-- Chris.
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index e07df81..b503113 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -237,15 +237,18 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
+ 
+ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+ {
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_imx_data *imx_data = pltfm_host->priv;
++
+ 	if (unlikely(reg == SDHCI_HOST_VERSION)) {
+-		u16 val = readw(host->ioaddr + (reg ^ 2));
+-		/*
+-		 * uSDHC supports SDHCI v3.0, but it's encoded as value
+-		 * 0x3 in host controller version register, which violates
+-		 * SDHCI_SPEC_300 definition.  Work it around here.
+-		 */
+-		if ((val & SDHCI_SPEC_VER_MASK) == 3)
+-			return --val;
++		reg ^= 2;
++		if (is_imx6q_usdhc(imx_data)) {
++			/*
++			 * The usdhc register returns a wrong host version.
++			 * Correct it here.
++			 */
++			return SDHCI_SPEC_300;
++		}
+ 	}
+ 
+ 	return readw(host->ioaddr + reg);
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.9.5
+
+
