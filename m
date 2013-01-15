@@ -1,143 +1,73 @@
-From: Zhang Haijun-B42677 <B42677@freescale.com>
-Subject: RE: [mmc:mmc-next 45/63] of_iommu.c:(.text+0x114dbc): undefined
- reference to `__aeabi_uldivmod'
-Date: Tue, 15 Jan 2013 02:03:38 +0000
-Message-ID: <99E897753B6F7048BD8CCDB4661D02E11A9C88@039-SN2MPN1-022.039d.mgd.msft.net>
-References: <50b2a62c.slEE/d1mNq4kUCUf%fengguang.wu@intel.com>
- <87sj7x9r89.fsf@octavius.laptop.org>
- <99E897753B6F7048BD8CCDB4661D02E117694E@039-SN2MPN1-022.039d.mgd.msft.net>
- <99E897753B6F7048BD8CCDB4661D02E1183CA5@039-SN2MPN1-022.039d.mgd.msft.net>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RFC PATCH] MAINTAINERS: Add an orphaned entry for the dw_mmc
+ driver.
+Date: Tue, 15 Jan 2013 11:07:46 +0900
+Message-ID: <50F4B9F2.3090104@samsung.com>
+References: <CAFbHwiRX19Zm=O2dNZrbTDGZxnXDOx0zJ3pvTkfC1q8m5DBFug@mail.gmail.com>
+ <87wqvjmxt6.fsf@laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [216.32.181.185] ([216.32.181.185]:16596 "EHLO
-	ch1outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1756736Ab3AOCGA convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Jan 2013 21:06:00 -0500
-In-Reply-To: <99E897753B6F7048BD8CCDB4661D02E1183CA5@039-SN2MPN1-022.039d.mgd.msft.net>
-Content-Language: en-US
+Received: from [203.254.224.24] ([203.254.224.24]:46304 "EHLO
+	mailout1.samsung.com" rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org
+	with ESMTP id S1757234Ab3AOCI6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Jan 2013 21:08:58 -0500
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MGN003A49X60X60@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 15 Jan 2013 11:08:27 +0900 (KST)
+Received: from [10.90.51.55] by mmp1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0MGN003SJ9Y2UE00@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 15 Jan 2013 11:08:27 +0900 (KST)
+In-reply-to: <87wqvjmxt6.fsf@laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, kbuild test robot <fengguang.wu@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Huang Changming-R66093 <r66093@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>, Zhang Haijun-B42677 <B42677@freescale.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Will Newton <will.newton@gmail.com>, linux-mmc@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, James Hogan <james.hogan@imgtec.com>
 
-Hi, chris
+Hi All,
 
+I have interesting to maintain "dw_mmc" driver.
 
-Could you please help review these patches again? Expect your comments.
-Thanks in advance.
+Best Regards,
+Jaehoon Chung
 
-
-Regards
-Haijun.
-
-
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Zhang Haijun-B42677
-> Sent: Friday, December 14, 2012 10:52 AM
-> To: Chris Ball; kbuild test robot
-> Cc: linux-mmc@vger.kernel.org; Huang Changming-R66093; Anton Vorontsov
-> Subject: RE: [mmc:mmc-next 45/63] of_iommu.c:(.text+0x114dbc): undefined
-> reference to `__aeabi_uldivmod'
+On 01/12/2013 02:31 AM, Chris Ball wrote:
+> Hi,
 > 
-> Hi, chris
+> On Fri, Jan 11 2013, Will Newton wrote:
+>> I submitted this driver but will shortly no longer have access
+>> to hardware that uses it. The driver is quite widely used so
+>> there may be someone out there that feels strongly enough to
+>> step up and maintain it.
+>> ---
+>>  MAINTAINERS |    6 ++++++
+>>  1 files changed, 6 insertions(+), 0 deletions(-)
+>>
+>> diff --git a/MAINTAINERS b/MAINTAINERS
+>> index f940e81..88329bc 100644
+>> --- a/MAINTAINERS
+>> +++ b/MAINTAINERS
+>> @@ -6558,6 +6558,12 @@ F:	include/linux/dw_dmac.h
+>>  F:	drivers/dma/dw_dmac_regs.h
+>>  F:	drivers/dma/dw_dmac.c
+>>
+>> +SYNOPSYS DESIGNWARE MMC/SD/SDIO DRIVER
+>> +L:	linux-mmc@vger.kernel.org
+>> +S:	Orphaned
+>> +F:	include/linux/mmc/dw_mmc.h
+>> +F:	drivers/mmc/host/dw_mmc*
+>> +
+>>  TIMEKEEPING, NTP
+>>  M:	John Stultz <johnstul@us.ibm.com>
+>>  M:	Thomas Gleixner <tglx@linutronix.de>
 > 
-> Two extra patches had been sent to fix these err.
-> These patches had been Acked-by Anton.
-> Could you please help review these patches again? Expect your comments.
-> Thanks in advance.
+> Thanks for your work on the driver, Will!  I'm CC'ing some recent
+> committers so they can volunteer to take over if they're interested.
 > 
-> 1)	Subject: [PATCH] Powerpc eSDHC: Use u64 to calculate the timeout
-> value to avoid overflow
-> 2)	Subject: [PATCH 2/2 v3] mmc:core: Add limit to data and erase
-> timeout value calculation
-> 3)	Subject: [PATCH 1/2 v5] Powerpc/eSDHC: Calculate the applicable mmc
-> erase timeout value
-> Extra:
-> 4)	Subject: [PATCH 1/2 V2] mmc:block : Convert the cmd_timeou_ms to
-> u64 to avoid overflow
-> 5)	Subject: [PATCH 2/2 V2] mmc:host: Use u64 to calculate the timeout
-> value to avoid overflow
+> - Chris.
 > 
-> 
-> Regards
-> Haijun.
-> 
-> > -----Original Message-----
-> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > owner@vger.kernel.org] On Behalf Of Zhang Haijun-B42677
-> > Sent: Monday, November 26, 2012 6:03 PM
-> > To: Chris Ball; kbuild test robot
-> > Cc: linux-mmc@vger.kernel.org; Huang Changming-R66093
-> > Subject: RE: [mmc:mmc-next 45/63] of_iommu.c:(.text+0x114dbc):
-> > undefined reference to `__aeabi_uldivmod'
-> >
-> > Hi Chris
-> >
-> > I see patches modified the public C file and Powerpc Host C file. But
-> > it also used by other host C file.
-> > So need to replace all the u64 division by macro div_u64 to avoid this
-> > error.
-> > Two new patches had send and reviewed by Anton.
-> > I think they can fix the `__aeabi_uldivmod' error.
-> > All the patches work fine on my branch.
-> >
-> > Regards
-> > Haijun.
-> >
-> >
-> > > -----Original Message-----
-> > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > > owner@vger.kernel.org] On Behalf Of Chris Ball
-> > > Sent: Monday, November 26, 2012 7:51 AM
-> > > To: kbuild test robot
-> > > Cc: Zhang Haijun-B42677; linux-mmc@vger.kernel.org; Huang Changming-
-> > > R66093
-> > > Subject: Re: [mmc:mmc-next 45/63] of_iommu.c:(.text+0x114dbc):
-> > > undefined reference to `__aeabi_uldivmod'
-> > >
-> > > Hi,
-> > >
-> > > On Sun, Nov 25 2012, kbuild test robot wrote:
-> > > > tree:   git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
-> > mmc-
-> > > next
-> > > > head:   b1dc46e6cd5f314f52a9864cc7ba1b7624b54bd7
-> > > > commit: d29254e21ddddee37b3c8525817398d96d6403f3 [45/63] mmc: core:
-> > > > Use u64 to calculate the timeout value to avoid overflow
-> > > > config: make ARCH=arm omap2plus_defconfig
-> > > >
-> > > > All error/warnings:
-> > > >
-> > > > drivers/built-in.o: In function `mmc_omap_start_request':
-> > > > of_iommu.c:(.text+0x114dbc): undefined reference to
-> > `__aeabi_uldivmod'
-> > >
-> > > I've removed Haijun's three patches from mmc-next while they're
-> > > reworked to fix this.  Thanks!
-> > >
-> > > - Chris.
-> > > --
-> > > Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> > > One Laptop Per Child
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> > > in the body of a message to majordomo@vger.kernel.org More majordomo
-> > > info at http://vger.kernel.org/majordomo-info.html
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> > in the body of a message to majordomo@vger.kernel.org More majordomo
-> > info at http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
-
 
