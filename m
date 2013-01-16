@@ -1,57 +1,135 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 01/11] mmc: sdhi, tmio: only check flags in tmio-mmc driver proper
-Date: Wed, 16 Jan 2013 17:54:36 +0100
-Message-ID: <1358355286-26029-2-git-send-email-g.liakhovetski@gmx.de>
-References: <1358355286-26029-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:58573 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757963Ab3APQyu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jan 2013 11:54:50 -0500
-In-Reply-To: <1358355286-26029-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: disable the cache before suspend only after
+ stopping BKOPS
+Date: Wed, 16 Jan 2013 22:37:31 +0100
+Message-ID: <CAPDyKFrjFhBMHqn+CYB5LPwiWmAOWmiL2pm5Kww5u9jUrQ4p3w@mail.gmail.com>
+References: <1357936936-25977-1-git-send-email-merez@codeaurora.org>
+	<50F10B86.6020905@codeaurora.org>
+	<002701cdf1d7$99dd1d00$cd975700$@codeaurora.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <002701cdf1d7$99dd1d00$cd975700$@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Maya Erez <merez@codeaurora.org>
+Cc: Subhash Jadavani <subhashj@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 
-tmio-mmc platform flags can be set by various means, including caller
-drivers and device-tree bindings, therefore it is better to only check
-them in the tmio-mmc driver proper, not in caller drivers themselves.
+On 13 January 2013 22:47, Maya Erez <merez@codeaurora.org> wrote:
+> -----Original Message-----
+> From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
+> Sent: Saturday, January 12, 2013 9:07 AM
+> To: Maya Erez
+> Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org; open list
+> Subject: Re: [PATCH] mmc: core: disable the cache before suspend only after
+> stopping BKOPS
+>
+> On 1/12/2013 2:12 AM, Maya Erez wrote:
+>> mmc_cache_ctrl was called in runtime suspend before MMC interrupted
+>> BKOPS in case it is still running on the card. This caused the cache
+>> disable to timeout.
+> I guess even if the idle time bkops polling is not implemented, this patch
+> is good to have. cache control is the eMMC feature and in that sense, it
+> should have been part of MMC's bus resume (mmc_resume) rather than generic
+> mmc_suspend_host().
+>
+> Patch as such is fine and if you agree, you may want to remove the
+> mentioning of bkops as part of commit text and may just want to mention
+> above reason as the main motivation for this patch.
+>
+> Agreed, I will change the commit text in the next uploaded version.
+>
+>> Therefore, mmc_cache_ctrl has to move to mmc_suspend where we are sure
+>> that the card can go into suspend and there is no pending activity.
+>>
+>> Signed-off-by: Maya Erez <merez@codeaurora.org>
+>> ---
+>>   drivers/mmc/core/core.c |    7 +------
+>>   drivers/mmc/core/mmc.c  |    8 +++++++-
+>>   2 files changed, 8 insertions(+), 7 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
+>> aaed768..b438bb2 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -2388,6 +2388,7 @@ EXPORT_SYMBOL(mmc_flush_cache);
+>>    * Turn the cache ON/OFF.
+>>    * Turning the cache OFF shall trigger flushing of the data
+>>    * to the non-volatile storage.
+>> + * This function should be called with host claimed
+>>    */
+>>   int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
+>>   {
+>> @@ -2399,7 +2400,6 @@ int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
+>>                       mmc_card_is_removable(host))
+>>               return err;
+>>
+>> -     mmc_claim_host(host);
+>>       if (card && mmc_card_mmc(card) &&
+>>                       (card->ext_csd.cache_size > 0)) {
+>>               enable = !!enable;
+>> @@ -2417,7 +2417,6 @@ int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
+>>                               card->ext_csd.cache_ctrl = enable;
+>>               }
+>>       }
+>> -     mmc_release_host(host);
+>>
+>>       return err;
+>>   }
+>> @@ -2436,10 +2435,6 @@ int mmc_suspend_host(struct mmc_host *host)
+>>       cancel_delayed_work(&host->detect);
+>>       mmc_flush_scheduled_work();
+>>
+>> -     err = mmc_cache_ctrl(host, 0);
+>> -     if (err)
+>> -             goto out;
+>> -
+>>       mmc_bus_get(host);
+>>       if (host->bus_ops && !host->bus_dead) {
+>>               if (host->bus_ops->suspend) {
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
+>> e6e3911..dc17d40 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1379,6 +1379,11 @@ static int mmc_suspend(struct mmc_host *host)
+>>       BUG_ON(!host->card);
+>>
+>>       mmc_claim_host(host);
+>> +
+>> +     err = mmc_cache_ctrl(host, 0);
+>> +     if (err)
+>> +             goto out;
+>> +
+>>       if (mmc_can_poweroff_notify(host->card))
+>>               err = mmc_poweroff_notify(host->card,
+> EXT_CSD_POWER_OFF_SHORT);
+>>       else if (mmc_card_can_sleep(host))
+>> @@ -1386,8 +1391,9 @@ static int mmc_suspend(struct mmc_host *host)
+>>       else if (!mmc_host_is_spi(host))
+>>               err = mmc_deselect_cards(host);
+>>       host->card->state &= ~(MMC_STATE_HIGHSPEED |
+> MMC_STATE_HIGHSPEED_200);
+>> -     mmc_release_host(host);
+>>
+>> +out:
+>> +     mmc_release_host(host);
+>>       return err;
+>>   }
+>>
+> --
+> QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
+> of Code Aurora Forum, hosted by The Linux Foundation
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
- drivers/mmc/host/sh_mobile_sdhi.c |    3 +--
- drivers/mmc/host/tmio_mmc_pio.c   |    3 +++
- 2 files changed, 4 insertions(+), 2 deletions(-)
+I agree that some update to the commit msg is wanted; since this fixup
+is not related to runtime suspend as such.
+Anyway, you have my ack!
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 524a7f7..fa71b01 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -155,8 +155,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
- 	if (p) {
- 		mmc_data->flags = p->tmio_flags;
--		if (mmc_data->flags & TMIO_MMC_HAS_IDLE_WAIT)
--			mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
-+		mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
- 		mmc_data->ocr_mask = p->tmio_ocr_mask;
- 		mmc_data->capabilities |= p->tmio_caps;
- 		mmc_data->capabilities2 |= p->tmio_caps2;
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 0f992e9..b25adb4 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -928,6 +928,9 @@ int tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 	int ret;
- 	u32 irq_mask = TMIO_MASK_CMD;
- 
-+	if (!(pdata->flags & TMIO_MMC_HAS_IDLE_WAIT))
-+		pdata->write16_hook = NULL;
-+
- 	res_ctl = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (!res_ctl)
- 		return -EINVAL;
--- 
-1.7.2.5
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
+Kind regards
+Ulf Hansson
