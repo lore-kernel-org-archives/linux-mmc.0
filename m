@@ -1,86 +1,65 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V3] mmc: mmci: Fixup and cleanup code for DMA handling
-Date: Wed, 16 Jan 2013 12:01:51 +0100
-Message-ID: <CAPDyKFqGxy_KgRE0fKPU1KpdWxHz1j7A2RnfNYrq-zkRq5cXHg@mail.gmail.com>
-References: <1357570707-28207-1-git-send-email-ulf.hansson@stericsson.com>
-	<20130113192428.GU23505@n2100.arm.linux.org.uk>
-	<CAPDyKFrV8h+2ebfT6AK-ACfr716CE-f7+HGuh_+rOjbVnGOdfw@mail.gmail.com>
-	<20130116104947.GQ23505@n2100.arm.linux.org.uk>
+From: Subhash Jadavani <subhashj@codeaurora.org>
+Subject: Re: [PATCH v2 1/1] block: blk-merge: don't merge the pages with non-contiguous
+ descriptors
+Date: Wed, 16 Jan 2013 18:09:14 +0530
+Message-ID: <50F69F72.4030807@codeaurora.org>
+References: <1358265681-25671-1-git-send-email-subhashj@codeaurora.org>  <1358266794.10591.8.camel@dabdike.int.hansenpartnership.com>  <50F64AC1.3040304@codeaurora.org> <1358332355.2384.11.camel@dabdike.int.hansenpartnership.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f169.google.com ([209.85.217.169]:36419 "EHLO
-	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756369Ab3APLBx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jan 2013 06:01:53 -0500
-Received: by mail-lb0-f169.google.com with SMTP id gk1so941147lbb.14
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Jan 2013 03:01:51 -0800 (PST)
-In-Reply-To: <20130116104947.GQ23505@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1358332355.2384.11.camel@dabdike.int.hansenpartnership.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: James Bottomley <James.Bottomley@HansenPartnership.com>
+Cc: linux-kernel@vger.kernel.org, linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, martin.petersen@oracle.com, asias@redhat.com, tj@kernel.org, linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, Per Forlin <per.forlin@stericsson.com>
 
-On 16 January 2013 11:49, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> On Wed, Jan 16, 2013 at 11:23:57AM +0100, Ulf Hansson wrote:
->> On 13 January 2013 20:24, Russell King - ARM Linux
->> <linux@arm.linux.org.uk> wrote:
->> > On Mon, Jan 07, 2013 at 03:58:27PM +0100, Ulf Hansson wrote:
->> >> @@ -374,19 +415,12 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
->> >>        * contiguous buffers.  On TX, we'll get a FIFO underrun error.
->> >>        */
->> >>       if (status & MCI_RXDATAAVLBLMASK) {
->> >> -             dmaengine_terminate_all(chan);
->> >> -             if (!data->error)
->> >> -                     data->error = -EIO;
->> >> -     }
->> >> -
->> >> -     if (data->flags & MMC_DATA_WRITE) {
->> >> -             dir = DMA_TO_DEVICE;
->> >> -     } else {
->> >> -             dir = DMA_FROM_DEVICE;
->> >> +             data->error = -EIO;
->> >> +             mmci_dma_data_error(host);
->> >
->> > Please explain the change of behaviour here.  Before your change, we _only_
->> > set data->error if the error is not set.  Here, we overwrite the error code
->> > no matter what.  What is the reasoning for that change?
->> >
->> > The reason the code is like it _was_ is so that any bytes remaining in the
->> > FIFO are _only_ reported as an error if there wasn't a preceding error.
->> > That is the behaviour I desired when I wrote this code.
->>
->> Since we need to do dmaengine_terminate_all(chan), that will mean
->> another request could potentially already be prepared and thus it
->> could also be terminated.
->>
->> Then by always reporting an error the async request handling in the
->> mmc protocol layer, can do proper error handling and clean up the
->> previously prepared request.
+On 1/16/2013 4:02 PM, James Bottomley wrote:
+> On Wed, 2013-01-16 at 12:07 +0530, Subhash Jadavani wrote:
 >
-> Sigh, I don't think you understand what this code is doing at all then.
+>> Now consider this call stack from MMC block driver (this is on the ARmv7
+>> based board):
+>>       [   98.918174] [<c001b50c>] (v7_dma_inv_range+0x30/0x48) from
+>> [<c0017b8c>] (dma_cache_maint_page+0x1c4/0x24c)
+>>       [   98.927819] [<c0017b8c>] (dma_cache_maint_page+0x1c4/0x24c) from
+>> [<c0017c28>] (___dma_page_cpu_to_dev+0x14/0x1c)
+>>       [   98.937982] [<c0017c28>] (___dma_page_cpu_to_dev+0x14/0x1c) from
+>> [<c0017ff8>] (dma_map_sg+0x3c/0x114)
+> OK, so this is showing that ARM itself is making the assumption that the
+> pages are contiguous in the page offset map.
 >
-> We will _always_ report _an_ error as the code originally stands if we
-> encounter MCI_RXDATAAVLBLMASK being set.  The error that we report will
-> be the _correct_ one - either the one which preceeds this condition
-> occuring _or_ an IO error because not all data was read from the FIFO
-> by the DMA engine.
+> Fix this by doing the increment via the pfn, which will do the right
+> thing whatever the memory model.
 >
-> If the DMA engine fails to read all the data from the FIFO, _and_ there
-> was a preceeding error, we should _not_ overwrite the preceeding error.
-> This is exactly what the original code does.
->
-> Your version _always_ overwrites the previous error.  This could result
-> in FIFO/CRC errors always being reported as an IO error rather than
-> their proper error codes, and therefore _breaking_ error handling.
+> Signed-off-by: James Bottomley <JBottomley@Parallels.com>
 
-Sorry, Russell I was talking junk. :-) Please ignore my last respond.
+Thanks James. Yes, it make sense to fix the ARM code itself if it is the 
+only one giving this trouble.
+I have tried your change below and it also fixes this issue (without 
+having my blk-merge patch). I will forward your change to Russel King to 
+see what he thinks about it.
 
-It shall be safe to keep the original behavior. The important thing is
-that an error code get set, so the async request handling can clean up
-a prepared request, which was already handled.
-I will fixup the patch and send a v4, thanks a lot spotting this.
-
-Kind regards
-Ulf Hansson
+Regards,
+Subhash
+>
+> ---
+>
+> diff --git a/arch/arm/mm/dma-mapping.c b/arch/arm/mm/dma-mapping.c
+> index 6b2fb87..ab88c5b 100644
+> --- a/arch/arm/mm/dma-mapping.c
+> +++ b/arch/arm/mm/dma-mapping.c
+> @@ -809,7 +809,7 @@ static void dma_cache_maint_page(struct page *page, unsigned long offset,
+>   			op(vaddr, len, dir);
+>   		}
+>   		offset = 0;
+> -		page++;
+> +		page = pfn_to_page(page_to_pfn(page) + 1);
+>   		left -= len;
+>   	} while (left);
+>   }
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-scsi" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
