@@ -1,117 +1,53 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 0/4] mmc: core: Signal voltage switch procedure for UHS mode
-Date: Wed, 16 Jan 2013 09:16:40 +0100
-Message-ID: <CAPDyKFpgjFf4UCQE8LY29+TYoXwuYsbZzJoY7o2-BFFpuOhCzQ@mail.gmail.com>
-References: <1357653962-10887-1-git-send-email-johan.rudholm@stericsson.com>
-	<CAPDyKFpTb2QeSxxQLX9smSdx9_4XqvennLV1v22hfeo-aSXa+w@mail.gmail.com>
-	<CA+20K0BE2e5codiJf4a8yjyRvxgGd74nRVp_gT_sONdnM3evdQ@mail.gmail.com>
+From: wwang <wei_wang@realsil.com.cn>
+Subject: Re: [PATCH v4 0/8] rtsx patchset for MFD and MMC tree
+Date: Wed, 16 Jan 2013 17:02:37 +0800
+Message-ID: <50F66CAD.6090003@realsil.com.cn>
+References: <cover.1357638064.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f54.google.com ([209.85.215.54]:50390 "EHLO
-	mail-la0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757708Ab3APIQm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jan 2013 03:16:42 -0500
-Received: by mail-la0-f54.google.com with SMTP id gw10so254264lab.41
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Jan 2013 00:16:40 -0800 (PST)
-In-Reply-To: <CA+20K0BE2e5codiJf4a8yjyRvxgGd74nRVp_gT_sONdnM3evdQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <devel-bounces@linuxdriverproject.org>
+In-Reply-To: <cover.1357638064.git.wei_wang@realsil.com.cn>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/devel>,
+ <mailto:devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/devel/>
+List-Post: <mailto:devel@linuxdriverproject.org>
+List-Help: <mailto:devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/devel>,
+ <mailto:devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: devel-bounces@linuxdriverproject.org
+Sender: "devel" <devel-bounces@linuxdriverproject.org>
+To: =?GB2312?B?zfXsvw==?= <wei_wang@realsil.com.cn>
+Cc: "oakad@yahoo.com" <oakad@yahoo.com>, "sameo@linux.intel.com" <sameo@linux.intel.com>, "arnd@arndb.de" <arnd@arndb.de>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "bp@alien8.de" <bp@alien8.de>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "cjb@laptop.org" <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Johan Rudholm <johan.rudholm@stericsson.com>, linux-mmc@vger.kernel.org, Johan Rudholm <jrudholm@gmail.com>, Per Forlin <per.forlin@stericsson.com>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Kevin Liu <keyuan.liu@gmail.com>, Philip Rakity <prakity@nvidia.com>, Daniel Drake <dsd@laptop.org>, Aaron <leafy.myeh@allwinnertech.com>, Subhash Jadavani <subhashj@codeaurora.org>, Wei WANG <wei_wang@realsil.com.cn>
 
-On 9 January 2013 11:35, Johan Rudholm <jrudholm@gmail.com> wrote:
-> Hi,
->
-> 2013/1/8 Ulf Hansson <ulf.hansson@linaro.org>:
->> On 8 January 2013 15:05, Johan Rudholm <johan.rudholm@stericsson.com> wrote:
->>> This patch series attempts to make the 1.8V signal voltage switch
->>> required for UHS mode work according to the SD specification.
->>>
->>> These patches have been tested with a couple of UHS SD cards, one of
->>> which sometimes requires up to five power cycles before it accepts the
->>> signal voltage switch. The patches have also been tested with various
->>> other SD cards, as well as one SDIO WLAN chip (cw1200) to check
->>> for regressions. The patches have also been tested with
->>> CONFIG_MMC_CLKGATE.
->>>
->>> As usual, I'd be very grateful if someone could help me test this patch
->>> with an UHS SDIO card and perhaps also a combo card (which does seem to
->>> be rare these days?)?
->>>
->>> This patch series is based on previous RFC/patch:
->>>
->>> [RFC/PATCH v2] mmc: core: Fixup signal voltage switch
->>>
->>> and more recently on Kevin Liu's patches:
->>>
->>> [PATCH v2 1/3] mmc: core: enhance the code for signal voltage setting
->>> [PATCH v2 2/3] mmc: core: cycle power the card in voltage switch rather than mmc_sd_get_cid
->>>
->>> Changelog:
->>>         v4 -> v5
->>>         - Reset signal_voltage in struct ios if switch fails
->>>         v3 -> v4
->>>         - Added "mmc: core: Break out start_signal_voltage_switch",
->>>           which divides up mmc_set_signal_voltage to avoid a recursive
->>>           call from mmc_power_up. This removed the third argument
->>>           (cmd11) of the function
->>>         - Minor bug fixes
->>>         v2 -> v3
->>>         - Minor bug fixes
->>>         v1 -> v2
->>>         - Move mmc_power_cycle to the mmc_set_signal_voltage function
->>>         - Check card_busy before switching voltages
->>>         - Return -EPERM if signal voltage switch with cmd11 is
->>>           requested, but no start_signal_voltage_switch is defined.
->>>         - If we're switching back to 3.3 V, just do the switch without
->>>           checking card_busy etc
->>>         v2 -> This patch series
->>>         - Removed the extra argument to the card_busy host_ops function
->>>         - Added mmc_power_cycle
->>>         - Some clarifying comments
->>>         v1 -> v2
->>>         - Removed reset of signal voltage in mmc_sd_get_cid, since
->>>           "mmc: core: reset signal voltage on power up"
->>>         previous two patches -> v1:
->>>         - Keep calls to mmc_host_clk_hold / mmc_host_clk_release
->>>         - Add retry-loop / power cycle in sdio.c
->>>         - Fall back to 3.3 V if the switch repeatedly fails
->>>         - Add an extra argument to the card_busy host_ops function,
->>>           which can be used to signal polling use of the function
->>>
->>> Johan Rudholm (4):
->>>   mmc: core: Add mmc_power_cycle
->>>   mmc: core: Add card_busy to host_ops
->>>   mmc: core: Break out start_signal_voltage_switch
->>>   mmc: core: Fixup signal voltage switch
->>>
->>>  drivers/mmc/core/core.c  |  114 +++++++++++++++++++++++++++++++++++++++-------
->>>  drivers/mmc/core/core.h  |    5 +-
->>>  drivers/mmc/core/mmc.c   |    8 ++--
->>>  drivers/mmc/core/sd.c    |   23 +++++++---
->>>  drivers/mmc/core/sdio.c  |   23 ++++++++--
->>>  include/linux/mmc/host.h |    3 ++
->>>  6 files changed, 144 insertions(+), 32 deletions(-)
->>>
->>> --
->>> 1.7.10
->>>
->>
->> For those patches in this patchset that does not already have my signoff-by;
->>
->> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
->
-> Also, since Wei very kindly agreed to test the patch set with the rtsx driver:
->
-> Tested-by: Wei WANG <wei_wang@realsil.com.cn>
->
-> Kind regards, Johan
-
-Hi Chris,
-
-Do you see any issues merging this for 3.9? We have been through
-several review rounds and I think this patchset is mature now.
-
-Kind regards
-Ulf Hansson
+09ogMjAxM8TqMDHUwjA4yNUgMTc6NTcsIM317L8g0LS1wDoKPiBGcm9tOiBXZWkgV0FORyA8d2Vp
+X3dhbmdAcmVhbHNpbC5jb20uY24+Cj4KPiB2MjoKPiAxLiBBZGQgY29tbWl0IG1lc3NhZ2UgZm9y
+IHBhdGNoIDIKPiAyLiBNb3ZlIHBjaV9zZXRfZG1hX21hc2sgYmVmb3JlIHRoZSBwY2lfZW5hYmxl
+X2RldmljZShwY2lkZXYpIGNhbGwKPgo+IHYzOgo+IDEuIEFkZCBjb21taXQgbWVzc2FnZSBmb3Ig
+cGF0Y2ggMwo+IDIuIEFkZCBwYXRjaCA4OiBVc2UgbWFjcm8gZGVmaW5lcyB0byByZXBsYWNlIHNv
+bWUgdmFyaWFibGVzCj4KPiB2NDoKPiAxLiBEZXNjcmliZSB3aHkgcGF0Y2ggMyBpcyBuZWVkZWQK
+PiAyLiBNb2RpZnkgYSBjb21tZW50IGNoYXJhY3RlciBpbiBwYXRjaCA3Cj4KPiBXZWkgV0FORyAo
+OCk6Cj4gICBNRkQ6cnRzeDogRml4IHR5cG8gaW4gY29tbWVudAo+ICAgTUZEOnJ0c3g6IFJlbW92
+ZSByZWR1bmRhbnQgY29kZQo+ICAgTUZEOnJ0c3g6IERlY2xhcmUgdGhhdCB0aGUgRE1BIGFkZHJl
+c3MgbGltaXRhdGlvbiBpcyAzMmJpdCBleHBsaWNpdGx5Cj4gICBNRkQ6cnRzeDogQWRkIGNhbGxi
+YWNrIGZ1bmN0aW9uIHN3aXRjaF9vdXRwdXRfdm9sdGFnZQo+ICAgTU1DOnJ0c3g6IFVzaW5nIGNh
+bGxiYWNrIGZ1bmN0aW9uIHRvIHN3aXRjaCBvdXRwdXQgdm9sdGFnZQo+ICAgTUZEOnJ0c3g6IEFk
+ZCBjYWxsYmFjayBmdW5jdGlvbiBjb252X2Nsa19hbmRfZGl2X24KPiAgIE1GRDpydHN4OiBGaXgg
+Y2hlY2twYXRjaCB3YXJuaW5nCj4gICBNRkQ6cnRzeDogVXNlIG1hY3JvIGRlZmluZXMgdG8gcmVw
+bGFjZSBzb21lIHZhcmlhYmxlcwo+Cj4gIGRyaXZlcnMvbWZkL3J0bDg0MTEuYyAgICAgICAgICAg
+ICB8ICAgMjkgKysrKysrKysrKysrKysrKysrKysrKysrCj4gIGRyaXZlcnMvbWZkL3J0czUyMDku
+YyAgICAgICAgICAgICB8ICAgMjEgKysrKysrKysrKysrKysrKysKPiAgZHJpdmVycy9tZmQvcnRz
+NTIyOS5jICAgICAgICAgICAgIHwgICAyMSArKysrKysrKysrKysrKysrKwo+ICBkcml2ZXJzL21m
+ZC9ydHN4X3Bjci5jICAgICAgICAgICAgfCAgIDQ1ICsrKysrKysrKysrKysrKysrKysrKysrKyst
+LS0tLS0tLS0tLS0KPiAgZHJpdmVycy9tZmQvcnRzeF9wY3IuaCAgICAgICAgICAgIHwgICAgMyAr
+KysKPiAgZHJpdmVycy9tbWMvaG9zdC9ydHN4X3BjaV9zZG1tYy5jIHwgICAzMCArKysrKy0tLS0t
+LS0tLS0tLS0tLS0tLS0tCj4gIGluY2x1ZGUvbGludXgvbWZkL3J0c3hfY29tbW9uLmggICB8ICAg
+IDMgKysrCj4gIGluY2x1ZGUvbGludXgvbWZkL3J0c3hfcGNpLmggICAgICB8ICAgMjcgKysrKysr
+KysrKysrKysrKystLS0tLQo+ICA4IGZpbGVzIGNoYW5nZWQsIDEzNSBpbnNlcnRpb25zKCspLCA0
+NCBkZWxldGlvbnMoLSkKPgpIaSBDaHJpcyBhbmQgU2FtdWVsOgoKVGhpcyBwYXRjaHNldCBpcyB0
+cnlpbmcgdG8gZml4IHNvbWUgYnVncyBhbmQgc29tZSBjb2Rpbmcgc3R5bGUgaXNzdWVzLgpXb3Vs
+ZCB5b3UgcGxlYXNlIGhlbHAgdG8gbWVyZ2UgaXQgdG8gdjMuOCBrZXJuZWw/CgpCUiwKV2VpIFdB
+TkcKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KZGV2ZWwg
+bWFpbGluZyBsaXN0CmRldmVsQGxpbnV4ZHJpdmVycHJvamVjdC5vcmcKaHR0cDovL2RyaXZlcmRl
+di5saW51eGRyaXZlcnByb2plY3Qub3JnL21haWxtYW4vbGlzdGluZm8vZGV2ZWwK
