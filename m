@@ -1,43 +1,52 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH] mmc: fix DT binding documentation SDHCI left-over
-Date: Wed, 16 Jan 2013 17:20:41 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1301161719310.19928@axis700.grange>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Subject: [PATCH 02/11] mmc: deprecate redundant cd-inverted and wp-inverted DT properties
+Date: Wed, 16 Jan 2013 17:54:37 +0100
+Message-ID: <1358355286-26029-3-git-send-email-g.liakhovetski@gmx.de>
+References: <1358355286-26029-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:64160 "EHLO
+Received: from moutng.kundenserver.de ([212.227.126.187]:62317 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754888Ab3APQUo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jan 2013 11:20:44 -0500
-Received: from localhost (localhost [127.0.0.1])
-	by axis700.grange (Postfix) with ESMTP id 19D2840B98
-	for <linux-mmc@vger.kernel.org>; Wed, 16 Jan 2013 17:20:42 +0100 (CET)
+	with ESMTP id S1757947Ab3APQyu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jan 2013 11:54:50 -0500
+In-Reply-To: <1358355286-26029-1-git-send-email-g.liakhovetski@gmx.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 
-The file Documentation/devicetree/bindings/mmc/mmc.txt is common for all
-MMC host drivers. Use a generic MMC host reference instead of an SDHCI
-left-over.
+GPIO DT bindings have a standard way to specify GPIO polarity - the
+OF_GPIO_ACTIVE_LOW flag. Use that instead of custom cd-inverted and
+wp-inverted properties.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- Documentation/devicetree/bindings/mmc/mmc.txt |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ Documentation/devicetree/bindings/mmc/mmc.txt |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
 
 diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index a591c67..34f28ed 100644
+index 34f28ed..e180892 100644
 --- a/Documentation/devicetree/bindings/mmc/mmc.txt
 +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -10,7 +10,7 @@ Required properties:
- - bus-width: Number of data lines, can be <1>, <4>, or <8>
+@@ -19,11 +19,19 @@ Only one of the properties in this section should be supplied:
+ Optional properties:
+ - wp-gpios: Specify GPIOs for write protection, see gpio binding
+ - cd-inverted: when present, polarity on the cd gpio line is inverted
++  (deprecated)
+ - wp-inverted: when present, polarity on the wp gpio line is inverted
++  (deprecated)
+ - max-frequency: maximum operating clock frequency
+ - no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
+   this system, even if the controller claims it is.
  
- Card detection:
--If no property below is supplied, standard SDHCI card detect is used.
-+If no property below is supplied, host native card detect is used.
- Only one of the properties in this section should be supplied:
-   - broken-cd: There is no card detection available; polling must be used.
-   - cd-gpios: Specify GPIOs for card detection, see gpio binding
++cd-inverted and wp-inverted properties are deprecated ans shouldn't be used,
++instead pleaseuse the OF_GPIO_ACTIVE_LOW flag in respective GPIO bindings. Note,
++that the default (as defined by the SDHCI standard) CD and WP polarity is
++active-low, so, OF_GPIO_ACTIVE_LOW should normally be set, and only be left
++clear, if the polarity is inverted.
++
+ Optional SDIO properties:
+ - keep-power-in-suspend: Preserves card power during a suspend/resume cycle
+ - enable-sdio-wakeup: Enables wake up of host system on SDIO IRQ assertion
 -- 
 1.7.2.5
 
