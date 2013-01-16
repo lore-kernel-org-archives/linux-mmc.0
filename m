@@ -1,53 +1,126 @@
-From: wwang <wei_wang@realsil.com.cn>
-Subject: Re: [PATCH v4 0/8] rtsx patchset for MFD and MMC tree
-Date: Wed, 16 Jan 2013 17:02:37 +0800
-Message-ID: <50F66CAD.6090003@realsil.com.cn>
-References: <cover.1357638064.git.wei_wang@realsil.com.cn>
+From: James Bottomley <James.Bottomley@HansenPartnership.com>
+Subject: Re: [PATCH v2 1/1] block: blk-merge: don't merge the pages with
+ non-contiguous descriptors
+Date: Wed, 16 Jan 2013 09:25:34 +0000
+Message-ID: <1358328334.2384.3.camel@dabdike.int.hansenpartnership.com>
+References: <1358265681-25671-1-git-send-email-subhashj@codeaurora.org>
+	 <1358266794.10591.8.camel@dabdike.int.hansenpartnership.com>
+	 <50F64AC1.3040304@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <devel-bounces@linuxdriverproject.org>
-In-Reply-To: <cover.1357638064.git.wei_wang@realsil.com.cn>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/devel>,
- <mailto:devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/devel/>
-List-Post: <mailto:devel@linuxdriverproject.org>
-List-Help: <mailto:devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/devel>,
- <mailto:devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: devel-bounces@linuxdriverproject.org
-Sender: "devel" <devel-bounces@linuxdriverproject.org>
-To: =?GB2312?B?zfXsvw==?= <wei_wang@realsil.com.cn>
-Cc: "oakad@yahoo.com" <oakad@yahoo.com>, "sameo@linux.intel.com" <sameo@linux.intel.com>, "arnd@arndb.de" <arnd@arndb.de>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "bp@alien8.de" <bp@alien8.de>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "cjb@laptop.org" <cjb@laptop.org>
+Content-Type: text/plain; charset="ISO-8859-15"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <50F64AC1.3040304@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Subhash Jadavani <subhashj@codeaurora.org>
+Cc: linux-kernel@vger.kernel.org, linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, martin.petersen@oracle.com, asias@redhat.com, tj@kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-09ogMjAxM8TqMDHUwjA4yNUgMTc6NTcsIM317L8g0LS1wDoKPiBGcm9tOiBXZWkgV0FORyA8d2Vp
-X3dhbmdAcmVhbHNpbC5jb20uY24+Cj4KPiB2MjoKPiAxLiBBZGQgY29tbWl0IG1lc3NhZ2UgZm9y
-IHBhdGNoIDIKPiAyLiBNb3ZlIHBjaV9zZXRfZG1hX21hc2sgYmVmb3JlIHRoZSBwY2lfZW5hYmxl
-X2RldmljZShwY2lkZXYpIGNhbGwKPgo+IHYzOgo+IDEuIEFkZCBjb21taXQgbWVzc2FnZSBmb3Ig
-cGF0Y2ggMwo+IDIuIEFkZCBwYXRjaCA4OiBVc2UgbWFjcm8gZGVmaW5lcyB0byByZXBsYWNlIHNv
-bWUgdmFyaWFibGVzCj4KPiB2NDoKPiAxLiBEZXNjcmliZSB3aHkgcGF0Y2ggMyBpcyBuZWVkZWQK
-PiAyLiBNb2RpZnkgYSBjb21tZW50IGNoYXJhY3RlciBpbiBwYXRjaCA3Cj4KPiBXZWkgV0FORyAo
-OCk6Cj4gICBNRkQ6cnRzeDogRml4IHR5cG8gaW4gY29tbWVudAo+ICAgTUZEOnJ0c3g6IFJlbW92
-ZSByZWR1bmRhbnQgY29kZQo+ICAgTUZEOnJ0c3g6IERlY2xhcmUgdGhhdCB0aGUgRE1BIGFkZHJl
-c3MgbGltaXRhdGlvbiBpcyAzMmJpdCBleHBsaWNpdGx5Cj4gICBNRkQ6cnRzeDogQWRkIGNhbGxi
-YWNrIGZ1bmN0aW9uIHN3aXRjaF9vdXRwdXRfdm9sdGFnZQo+ICAgTU1DOnJ0c3g6IFVzaW5nIGNh
-bGxiYWNrIGZ1bmN0aW9uIHRvIHN3aXRjaCBvdXRwdXQgdm9sdGFnZQo+ICAgTUZEOnJ0c3g6IEFk
-ZCBjYWxsYmFjayBmdW5jdGlvbiBjb252X2Nsa19hbmRfZGl2X24KPiAgIE1GRDpydHN4OiBGaXgg
-Y2hlY2twYXRjaCB3YXJuaW5nCj4gICBNRkQ6cnRzeDogVXNlIG1hY3JvIGRlZmluZXMgdG8gcmVw
-bGFjZSBzb21lIHZhcmlhYmxlcwo+Cj4gIGRyaXZlcnMvbWZkL3J0bDg0MTEuYyAgICAgICAgICAg
-ICB8ICAgMjkgKysrKysrKysrKysrKysrKysrKysrKysrCj4gIGRyaXZlcnMvbWZkL3J0czUyMDku
-YyAgICAgICAgICAgICB8ICAgMjEgKysrKysrKysrKysrKysrKysKPiAgZHJpdmVycy9tZmQvcnRz
-NTIyOS5jICAgICAgICAgICAgIHwgICAyMSArKysrKysrKysrKysrKysrKwo+ICBkcml2ZXJzL21m
-ZC9ydHN4X3Bjci5jICAgICAgICAgICAgfCAgIDQ1ICsrKysrKysrKysrKysrKysrKysrKysrKyst
-LS0tLS0tLS0tLS0KPiAgZHJpdmVycy9tZmQvcnRzeF9wY3IuaCAgICAgICAgICAgIHwgICAgMyAr
-KysKPiAgZHJpdmVycy9tbWMvaG9zdC9ydHN4X3BjaV9zZG1tYy5jIHwgICAzMCArKysrKy0tLS0t
-LS0tLS0tLS0tLS0tLS0tCj4gIGluY2x1ZGUvbGludXgvbWZkL3J0c3hfY29tbW9uLmggICB8ICAg
-IDMgKysrCj4gIGluY2x1ZGUvbGludXgvbWZkL3J0c3hfcGNpLmggICAgICB8ICAgMjcgKysrKysr
-KysrKysrKysrKystLS0tLQo+ICA4IGZpbGVzIGNoYW5nZWQsIDEzNSBpbnNlcnRpb25zKCspLCA0
-NCBkZWxldGlvbnMoLSkKPgpIaSBDaHJpcyBhbmQgU2FtdWVsOgoKVGhpcyBwYXRjaHNldCBpcyB0
-cnlpbmcgdG8gZml4IHNvbWUgYnVncyBhbmQgc29tZSBjb2Rpbmcgc3R5bGUgaXNzdWVzLgpXb3Vs
-ZCB5b3UgcGxlYXNlIGhlbHAgdG8gbWVyZ2UgaXQgdG8gdjMuOCBrZXJuZWw/CgpCUiwKV2VpIFdB
-TkcKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KZGV2ZWwg
-bWFpbGluZyBsaXN0CmRldmVsQGxpbnV4ZHJpdmVycHJvamVjdC5vcmcKaHR0cDovL2RyaXZlcmRl
-di5saW51eGRyaXZlcnByb2plY3Qub3JnL21haWxtYW4vbGlzdGluZm8vZGV2ZWwK
+On Wed, 2013-01-16 at 12:07 +0530, Subhash Jadavani wrote:
+> On 1/15/2013 9:49 PM, James Bottomley wrote:
+> > On Tue, 2013-01-15 at 21:31 +0530, Subhash Jadavani wrote:
+> >> blk_rq_map_sg() function merges the physically contiguous pages to use same
+> >> scatter-gather node without checking if their page descriptors are
+> >> contiguous or not.
+> >>
+> >> Now when dma_map_sg() is called on the scatter gather list, it would
+> >> take the base page pointer from each node (one by one) and iterates
+> >> through all of the pages in same sg node by keep incrementing the base
+> >> page pointer with the assumption that physically contiguous pages will
+> >> have their page descriptor address contiguous which may not be true
+> >> if SPARSEMEM config is enabled. So here we may end referring to invalid
+> >> page descriptor.
+> >>
+> >> Following table shows the example of physically contiguous pages but
+> >> their page descriptor addresses non-contiguous.
+> >> -------------------------------------------
+> >> | Page Descriptor    |   Physical Address |
+> >> ------------------------------------------
+> >> | 0xc1e43fdc         |   0xdffff000       |
+> >> | 0xc2052000         |   0xe0000000       |
+> >> -------------------------------------------
+> >>
+> >> With this patch, relevant blk-merge functions will also check if the
+> >> physically contiguous pages are having page descriptors address contiguous
+> >> or not? If not then, these pages are separated to be in different
+> >> scatter-gather nodes.
+> > How does this manifest as a bug?
+> >
+> > The discontinuity is in struct page arrays, which hardware doesn't care
+> > about.  All we need is to get from struct page to the physical address
+> > for programming the hardware, for which we use the sg_phys() inline
+> > function.
+> >
+> > Even given we have a two page physical contiguity at 0xdffff000 in your
+> > example, the sg list entry contains a length of 8192 and a page_link of
+> > 0xc1e43fdc, which we transform to the correct physical address and
+> > length.
+> Thanks James for looking at this patch.
+> 
+> Let's assume this scenario.
+> PAGE_SIZE = 4096 (4K),
+> 2 page descriptors (as mentioned commit text) whose own addresses are 
+> discontingous but they point to physically contiguous memory space, 
+> sizeof(struct page) is 36 bytes.
+> Only one SG node created in Scatter Gather list (by blk_rq_map_sg) with 
+> this node's page_link=0xc1e43fdc, length=8192, offset=0
+> 
+> Now consider this call stack from MMC block driver (this is on the ARmv7 
+> based board):
+>      [   98.918174] [<c001b50c>] (v7_dma_inv_range+0x30/0x48) from 
+> [<c0017b8c>] (dma_cache_maint_page+0x1c4/0x24c)
+>      [   98.927819] [<c0017b8c>] (dma_cache_maint_page+0x1c4/0x24c) from 
+> [<c0017c28>] (___dma_page_cpu_to_dev+0x14/0x1c)
+>      [   98.937982] [<c0017c28>] (___dma_page_cpu_to_dev+0x14/0x1c) from 
+> [<c0017ff8>] (dma_map_sg+0x3c/0x114)
+>      [   98.947169] [<c0017ff8>] (dma_map_sg+0x3c/0x114) from 
+> [<c0532c40>] (msmsdcc_prep_xfer+0x50/0x10c)
+>      [   98.956020] [<c0532c40>] (msmsdcc_prep_xfer+0x50/0x10c) from 
+> [<c0539664>] (msmsdcc_pre_req+0x78/0x98)
+>      [   98.965237] [<c0539664>] (msmsdcc_pre_req+0x78/0x98) from 
+> [<c0521d98>] (mmc_start_req+0x4c/0x1c4)
+>      [   98.974088] [<c0521d98>] (mmc_start_req+0x4c/0x1c4) from 
+> [<c052faa0>] (mmc_blk_issue_rw_rq+0x3a0/0x84c)
+>      [   98.983457] [<c052faa0>] (mmc_blk_issue_rw_rq+0x3a0/0x84c) from 
+> [<c05304b4>] (mmc_blk_issue_rq+0x568/0x5c4)
+>      [   98.993193] [<c05304b4>] (mmc_blk_issue_rq+0x568/0x5c4) from 
+> [<c0530718>] (mmc_queue_thread+0xb4/0x120)
+>      [   99.002563] [<c0530718>] (mmc_queue_thread+0xb4/0x120) from 
+> [<c0096400>] (kthread+0x80/0x8c)
+>      [   99.010987] [<c0096400>] (kthread+0x80/0x8c) from [<c000f028>] 
+> (kernel_thread_exit+0x0/0x8)
+> 
+> dma_cache_maint_page() function iterates through each page in single sg 
+> node, maps it to virtual space and then call the cache maintainance 
+> operation on that page.
+> 
+> With above scenario, first page descriptor would be 0xc1e43fdc, which 
+> would be mapped virtual address by either kmap() (if it's higmem page) 
+> or by page_address() (if it's low mem page).
+> 
+> Now as the size of the sg node is 8192 bytes, dma_cache_maint_page() 
+> function increments the page pointer (pointed by page_link of sg node) 
+> to get to the next descriptor. page++ would yield page descriptor 
+> address = 0xc1e44000 (0xc1e43fdc + sizeof (struct page)). 0xc1e44000 is 
+> not pointing any real page descriptor so when calls 
+> page_address(0xc1e44000) to get virtual address of the page, it returns 
+> invalid virtual address. Now when we try to dereference that invalid 
+> virtual address in cache maintainance functions, it would result into 
+> "Unable to handle kernel paging request at virtual address xxxxxxxx" 
+> error and kernel crashes.
+
+Well, that means the fault is in the iterator, doesn't it?  It's
+assuming two pages which are physically contiguous have adjacent entries
+in the page arrays.  If you want to fix that fault, fix it in the
+iterators ... probably they should use the correct page to pfn
+transforms which will move across the discontiguous arrays.
+
+More simply, though, if the MMC drivers want to iterate through all the
+pages in the array, then surely you don't want any physical merging
+anyway, so your quick fix is to turn off clustering:
+
+		q->limits.cluster = 0;
+
+in the mmc layer?
+
+James
