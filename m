@@ -1,119 +1,117 @@
-From: Subhash Jadavani <subhashj@codeaurora.org>
-Subject: Re: [PATCH v2 1/1] block: blk-merge: don't merge the pages with non-contiguous
- descriptors
-Date: Wed, 16 Jan 2013 12:07:53 +0530
-Message-ID: <50F64AC1.3040304@codeaurora.org>
-References: <1358265681-25671-1-git-send-email-subhashj@codeaurora.org> <1358266794.10591.8.camel@dabdike.int.hansenpartnership.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v5 0/4] mmc: core: Signal voltage switch procedure for UHS mode
+Date: Wed, 16 Jan 2013 09:16:40 +0100
+Message-ID: <CAPDyKFpgjFf4UCQE8LY29+TYoXwuYsbZzJoY7o2-BFFpuOhCzQ@mail.gmail.com>
+References: <1357653962-10887-1-git-send-email-johan.rudholm@stericsson.com>
+	<CAPDyKFpTb2QeSxxQLX9smSdx9_4XqvennLV1v22hfeo-aSXa+w@mail.gmail.com>
+	<CA+20K0BE2e5codiJf4a8yjyRvxgGd74nRVp_gT_sONdnM3evdQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-scsi-owner@vger.kernel.org>
-In-Reply-To: <1358266794.10591.8.camel@dabdike.int.hansenpartnership.com>
-Sender: linux-scsi-owner@vger.kernel.org
-To: James Bottomley <James.Bottomley@HansenPartnership.com>
-Cc: linux-kernel@vger.kernel.org, linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, martin.petersen@oracle.com, asias@redhat.com, tj@kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-la0-f54.google.com ([209.85.215.54]:50390 "EHLO
+	mail-la0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757708Ab3APIQm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jan 2013 03:16:42 -0500
+Received: by mail-la0-f54.google.com with SMTP id gw10so254264lab.41
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Jan 2013 00:16:40 -0800 (PST)
+In-Reply-To: <CA+20K0BE2e5codiJf4a8yjyRvxgGd74nRVp_gT_sONdnM3evdQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Johan Rudholm <johan.rudholm@stericsson.com>, linux-mmc@vger.kernel.org, Johan Rudholm <jrudholm@gmail.com>, Per Forlin <per.forlin@stericsson.com>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Kevin Liu <keyuan.liu@gmail.com>, Philip Rakity <prakity@nvidia.com>, Daniel Drake <dsd@laptop.org>, Aaron <leafy.myeh@allwinnertech.com>, Subhash Jadavani <subhashj@codeaurora.org>, Wei WANG <wei_wang@realsil.com.cn>
 
-On 1/15/2013 9:49 PM, James Bottomley wrote:
-> On Tue, 2013-01-15 at 21:31 +0530, Subhash Jadavani wrote:
->> blk_rq_map_sg() function merges the physically contiguous pages to use same
->> scatter-gather node without checking if their page descriptors are
->> contiguous or not.
+On 9 January 2013 11:35, Johan Rudholm <jrudholm@gmail.com> wrote:
+> Hi,
+>
+> 2013/1/8 Ulf Hansson <ulf.hansson@linaro.org>:
+>> On 8 January 2013 15:05, Johan Rudholm <johan.rudholm@stericsson.com> wrote:
+>>> This patch series attempts to make the 1.8V signal voltage switch
+>>> required for UHS mode work according to the SD specification.
+>>>
+>>> These patches have been tested with a couple of UHS SD cards, one of
+>>> which sometimes requires up to five power cycles before it accepts the
+>>> signal voltage switch. The patches have also been tested with various
+>>> other SD cards, as well as one SDIO WLAN chip (cw1200) to check
+>>> for regressions. The patches have also been tested with
+>>> CONFIG_MMC_CLKGATE.
+>>>
+>>> As usual, I'd be very grateful if someone could help me test this patch
+>>> with an UHS SDIO card and perhaps also a combo card (which does seem to
+>>> be rare these days?)?
+>>>
+>>> This patch series is based on previous RFC/patch:
+>>>
+>>> [RFC/PATCH v2] mmc: core: Fixup signal voltage switch
+>>>
+>>> and more recently on Kevin Liu's patches:
+>>>
+>>> [PATCH v2 1/3] mmc: core: enhance the code for signal voltage setting
+>>> [PATCH v2 2/3] mmc: core: cycle power the card in voltage switch rather than mmc_sd_get_cid
+>>>
+>>> Changelog:
+>>>         v4 -> v5
+>>>         - Reset signal_voltage in struct ios if switch fails
+>>>         v3 -> v4
+>>>         - Added "mmc: core: Break out start_signal_voltage_switch",
+>>>           which divides up mmc_set_signal_voltage to avoid a recursive
+>>>           call from mmc_power_up. This removed the third argument
+>>>           (cmd11) of the function
+>>>         - Minor bug fixes
+>>>         v2 -> v3
+>>>         - Minor bug fixes
+>>>         v1 -> v2
+>>>         - Move mmc_power_cycle to the mmc_set_signal_voltage function
+>>>         - Check card_busy before switching voltages
+>>>         - Return -EPERM if signal voltage switch with cmd11 is
+>>>           requested, but no start_signal_voltage_switch is defined.
+>>>         - If we're switching back to 3.3 V, just do the switch without
+>>>           checking card_busy etc
+>>>         v2 -> This patch series
+>>>         - Removed the extra argument to the card_busy host_ops function
+>>>         - Added mmc_power_cycle
+>>>         - Some clarifying comments
+>>>         v1 -> v2
+>>>         - Removed reset of signal voltage in mmc_sd_get_cid, since
+>>>           "mmc: core: reset signal voltage on power up"
+>>>         previous two patches -> v1:
+>>>         - Keep calls to mmc_host_clk_hold / mmc_host_clk_release
+>>>         - Add retry-loop / power cycle in sdio.c
+>>>         - Fall back to 3.3 V if the switch repeatedly fails
+>>>         - Add an extra argument to the card_busy host_ops function,
+>>>           which can be used to signal polling use of the function
+>>>
+>>> Johan Rudholm (4):
+>>>   mmc: core: Add mmc_power_cycle
+>>>   mmc: core: Add card_busy to host_ops
+>>>   mmc: core: Break out start_signal_voltage_switch
+>>>   mmc: core: Fixup signal voltage switch
+>>>
+>>>  drivers/mmc/core/core.c  |  114 +++++++++++++++++++++++++++++++++++++++-------
+>>>  drivers/mmc/core/core.h  |    5 +-
+>>>  drivers/mmc/core/mmc.c   |    8 ++--
+>>>  drivers/mmc/core/sd.c    |   23 +++++++---
+>>>  drivers/mmc/core/sdio.c  |   23 ++++++++--
+>>>  include/linux/mmc/host.h |    3 ++
+>>>  6 files changed, 144 insertions(+), 32 deletions(-)
+>>>
+>>> --
+>>> 1.7.10
+>>>
 >>
->> Now when dma_map_sg() is called on the scatter gather list, it would
->> take the base page pointer from each node (one by one) and iterates
->> through all of the pages in same sg node by keep incrementing the base
->> page pointer with the assumption that physically contiguous pages will
->> have their page descriptor address contiguous which may not be true
->> if SPARSEMEM config is enabled. So here we may end referring to invalid
->> page descriptor.
+>> For those patches in this patchset that does not already have my signoff-by;
 >>
->> Following table shows the example of physically contiguous pages but
->> their page descriptor addresses non-contiguous.
->> -------------------------------------------
->> | Page Descriptor    |   Physical Address |
->> ------------------------------------------
->> | 0xc1e43fdc         |   0xdffff000       |
->> | 0xc2052000         |   0xe0000000       |
->> -------------------------------------------
->>
->> With this patch, relevant blk-merge functions will also check if the
->> physically contiguous pages are having page descriptors address contiguous
->> or not? If not then, these pages are separated to be in different
->> scatter-gather nodes.
-> How does this manifest as a bug?
+>> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 >
-> The discontinuity is in struct page arrays, which hardware doesn't care
-> about.  All we need is to get from struct page to the physical address
-> for programming the hardware, for which we use the sg_phys() inline
-> function.
+> Also, since Wei very kindly agreed to test the patch set with the rtsx driver:
 >
-> Even given we have a two page physical contiguity at 0xdffff000 in your
-> example, the sg list entry contains a length of 8192 and a page_link of
-> 0xc1e43fdc, which we transform to the correct physical address and
-> length.
-Thanks James for looking at this patch.
-
-Let's assume this scenario.
-PAGE_SIZE = 4096 (4K),
-2 page descriptors (as mentioned commit text) whose own addresses are 
-discontingous but they point to physically contiguous memory space, 
-sizeof(struct page) is 36 bytes.
-Only one SG node created in Scatter Gather list (by blk_rq_map_sg) with 
-this node's page_link=0xc1e43fdc, length=8192, offset=0
-
-Now consider this call stack from MMC block driver (this is on the ARmv7 
-based board):
-     [   98.918174] [<c001b50c>] (v7_dma_inv_range+0x30/0x48) from 
-[<c0017b8c>] (dma_cache_maint_page+0x1c4/0x24c)
-     [   98.927819] [<c0017b8c>] (dma_cache_maint_page+0x1c4/0x24c) from 
-[<c0017c28>] (___dma_page_cpu_to_dev+0x14/0x1c)
-     [   98.937982] [<c0017c28>] (___dma_page_cpu_to_dev+0x14/0x1c) from 
-[<c0017ff8>] (dma_map_sg+0x3c/0x114)
-     [   98.947169] [<c0017ff8>] (dma_map_sg+0x3c/0x114) from 
-[<c0532c40>] (msmsdcc_prep_xfer+0x50/0x10c)
-     [   98.956020] [<c0532c40>] (msmsdcc_prep_xfer+0x50/0x10c) from 
-[<c0539664>] (msmsdcc_pre_req+0x78/0x98)
-     [   98.965237] [<c0539664>] (msmsdcc_pre_req+0x78/0x98) from 
-[<c0521d98>] (mmc_start_req+0x4c/0x1c4)
-     [   98.974088] [<c0521d98>] (mmc_start_req+0x4c/0x1c4) from 
-[<c052faa0>] (mmc_blk_issue_rw_rq+0x3a0/0x84c)
-     [   98.983457] [<c052faa0>] (mmc_blk_issue_rw_rq+0x3a0/0x84c) from 
-[<c05304b4>] (mmc_blk_issue_rq+0x568/0x5c4)
-     [   98.993193] [<c05304b4>] (mmc_blk_issue_rq+0x568/0x5c4) from 
-[<c0530718>] (mmc_queue_thread+0xb4/0x120)
-     [   99.002563] [<c0530718>] (mmc_queue_thread+0xb4/0x120) from 
-[<c0096400>] (kthread+0x80/0x8c)
-     [   99.010987] [<c0096400>] (kthread+0x80/0x8c) from [<c000f028>] 
-(kernel_thread_exit+0x0/0x8)
-
-dma_cache_maint_page() function iterates through each page in single sg 
-node, maps it to virtual space and then call the cache maintainance 
-operation on that page.
-
-With above scenario, first page descriptor would be 0xc1e43fdc, which 
-would be mapped virtual address by either kmap() (if it's higmem page) 
-or by page_address() (if it's low mem page).
-
-Now as the size of the sg node is 8192 bytes, dma_cache_maint_page() 
-function increments the page pointer (pointed by page_link of sg node) 
-to get to the next descriptor. page++ would yield page descriptor 
-address = 0xc1e44000 (0xc1e43fdc + sizeof (struct page)). 0xc1e44000 is 
-not pointing any real page descriptor so when calls 
-page_address(0xc1e44000) to get virtual address of the page, it returns 
-invalid virtual address. Now when we try to dereference that invalid 
-virtual address in cache maintainance functions, it would result into 
-"Unable to handle kernel paging request at virtual address xxxxxxxx" 
-error and kernel crashes.
-
-Regards,
-Subhash
+> Tested-by: Wei WANG <wei_wang@realsil.com.cn>
 >
-> James
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Kind regards, Johan
 
+Hi Chris,
+
+Do you see any issues merging this for 3.9? We have been through
+several review rounds and I think this patchset is mature now.
+
+Kind regards
+Ulf Hansson
