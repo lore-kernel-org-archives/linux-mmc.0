@@ -1,57 +1,167 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 00/11] mmc: core and driver DT and related development
-Date: Wed, 16 Jan 2013 17:54:35 +0100
-Message-ID: <1358355286-26029-1-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 09/11] mmc: sh_mobile_sdhi: use managed resource allocations
+Date: Wed, 16 Jan 2013 17:54:44 +0100
+Message-ID: <1358355286-26029-10-git-send-email-g.liakhovetski@gmx.de>
+References: <1358355286-26029-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1358355286-26029-1-git-send-email-g.liakhovetski@gmx.de>
 Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch series addresses the following topics:
+Use managed allocations to get memory, clock and interrupts . This
+significantly simplifies clean up paths.
 
-1. DT: add a generic DT binding parsing function. It retrieves MMC DT 
-properties, currently documented in 
-Documentation/devicetree/bindings/mmc/mmc.txt, sets respective host flags, 
-initialises GPIO slot functions, verifies presence of the compulsory 
-bus-width property.
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
+ drivers/mmc/host/sh_mobile_sdhi.c |   57 +++++++++----------------------------
+ 1 files changed, 14 insertions(+), 43 deletions(-)
 
-2. DT: deprecate cd-inverted and wp-inverted DT properties, GPIO standard 
-"flags" cell should be used.
-
-3. DT-related sh_mobile_sdhi / tmio_mmc and sh_mmcif driver extensions.
-
-Guennadi Liakhovetski (11):
-  mmc: sdhi, tmio: only check flags in tmio-mmc driver proper
-  mmc: deprecate redundant cd-inverted and wp-inverted DT properties
-  mmc: provide a standard MMC device-tree binding parser centrally
-  mmc: (cosmetic) remove "extern" from function declarations
-  mmc: sh-mmcif: use mmc_of_parse() to parse standard MMC DT bindings
-  mmc: tmio-mmc: define device-tree bindings
-  mmc: tmio-mmc: parse device-tree bindings
-  mmc: sh_mobile_sdhi: remove unused .pdata field
-  mmc: sh_mobile_sdhi: use managed resource allocations
-  mmc: tmio: remove unused and deprecated symbols
-  mmc: tmio: add support for the VccQ regulator
-
- Documentation/devicetree/bindings/mmc/mmc.txt      |    8 ++
- Documentation/devicetree/bindings/mmc/tmio_mmc.txt |   19 +++++
- drivers/mmc/core/host.c                            |   82 ++++++++++++++++++++
- drivers/mmc/host/sh_mmcif.c                        |    3 +-
- drivers/mmc/host/sh_mobile_sdhi.c                  |   64 ++++------------
- drivers/mmc/host/tmio_mmc_pio.c                    |   67 ++++++++++++++--
- include/linux/mfd/tmio.h                           |   18 ----
- include/linux/mmc/host.h                           |   23 +++---
- include/linux/mmc/sh_mobile_sdhi.h                 |    2 -
- 9 files changed, 196 insertions(+), 90 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index f8f6fc7..eeb66f2 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -126,7 +126,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	int irq, ret, i = 0;
+ 	bool multiplexed_isr = true;
+ 
+-	priv = kzalloc(sizeof(struct sh_mobile_sdhi), GFP_KERNEL);
++	priv = devm_kzalloc(&pdev->dev, sizeof(struct sh_mobile_sdhi), GFP_KERNEL);
+ 	if (priv == NULL) {
+ 		dev_err(&pdev->dev, "kzalloc failed\n");
+ 		return -ENOMEM;
+@@ -138,11 +138,11 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		if (p->init) {
+ 			ret = p->init(pdev, &sdhi_ops);
+ 			if (ret)
+-				goto einit;
++				return ret;
+ 		}
+ 	}
+ 
+-	priv->clk = clk_get(&pdev->dev, NULL);
++	priv->clk = devm_clk_get(&pdev->dev, NULL);
+ 	if (IS_ERR(priv->clk)) {
+ 		ret = PTR_ERR(priv->clk);
+ 		dev_err(&pdev->dev, "cannot get clock: %d\n", ret);
+@@ -197,33 +197,33 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_CARD_DETECT);
+ 	if (irq >= 0) {
+ 		multiplexed_isr = false;
+-		ret = request_irq(irq, tmio_mmc_card_detect_irq, 0,
++		ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_card_detect_irq, 0,
+ 				  dev_name(&pdev->dev), host);
+ 		if (ret)
+-			goto eirq_card_detect;
++			goto eirq;
+ 	}
+ 
+ 	irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_SDIO);
+ 	if (irq >= 0) {
+ 		multiplexed_isr = false;
+-		ret = request_irq(irq, tmio_mmc_sdio_irq, 0,
++		ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_sdio_irq, 0,
+ 				  dev_name(&pdev->dev), host);
+ 		if (ret)
+-			goto eirq_sdio;
++			goto eirq;
+ 	}
+ 
+ 	irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_SDCARD);
+ 	if (irq >= 0) {
+ 		multiplexed_isr = false;
+-		ret = request_irq(irq, tmio_mmc_sdcard_irq, 0,
++		ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_sdcard_irq, 0,
+ 				  dev_name(&pdev->dev), host);
+ 		if (ret)
+-			goto eirq_sdcard;
++			goto eirq;
+ 	} else if (!multiplexed_isr) {
+ 		dev_err(&pdev->dev,
+ 			"Principal SD-card IRQ is missing among named interrupts\n");
+ 		ret = irq;
+-		goto eirq_sdcard;
++		goto eirq;
+ 	}
+ 
+ 	if (multiplexed_isr) {
+@@ -232,15 +232,15 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 			if (irq < 0)
+ 				break;
+ 			i++;
+-			ret = request_irq(irq, tmio_mmc_irq, 0,
++			ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_irq, 0,
+ 					  dev_name(&pdev->dev), host);
+ 			if (ret)
+-				goto eirq_multiplexed;
++				goto eirq;
+ 		}
+ 
+ 		/* There must be at least one IRQ source */
+ 		if (!i)
+-			goto eirq_multiplexed;
++			goto eirq;
+ 	}
+ 
+ 	dev_info(&pdev->dev, "%s base at 0x%08lx clock rate %u MHz\n",
+@@ -250,28 +250,12 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 
+ 	return ret;
+ 
+-eirq_multiplexed:
+-	while (i--) {
+-		irq = platform_get_irq(pdev, i);
+-		free_irq(irq, host);
+-	}
+-eirq_sdcard:
+-	irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_SDIO);
+-	if (irq >= 0)
+-		free_irq(irq, host);
+-eirq_sdio:
+-	irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_CARD_DETECT);
+-	if (irq >= 0)
+-		free_irq(irq, host);
+-eirq_card_detect:
++eirq:
+ 	tmio_mmc_host_remove(host);
+ eprobe:
+-	clk_put(priv->clk);
+ eclkget:
+ 	if (p && p->cleanup)
+ 		p->cleanup(pdev);
+-einit:
+-	kfree(priv);
+ 	return ret;
+ }
+ 
+@@ -279,26 +263,13 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
+ {
+ 	struct mmc_host *mmc = platform_get_drvdata(pdev);
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
+-	struct sh_mobile_sdhi *priv = container_of(host->pdata, struct sh_mobile_sdhi, mmc_data);
+ 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
+-	int i = 0, irq;
+ 
+ 	tmio_mmc_host_remove(host);
+ 
+-	while (1) {
+-		irq = platform_get_irq(pdev, i++);
+-		if (irq < 0)
+-			break;
+-		free_irq(irq, host);
+-	}
+-
+-	clk_put(priv->clk);
+-
+ 	if (p && p->cleanup)
+ 		p->cleanup(pdev);
+ 
+-	kfree(priv);
+-
+ 	return 0;
+ }
+ 
 -- 
 1.7.2.5
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
