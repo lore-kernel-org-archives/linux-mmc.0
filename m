@@ -1,13 +1,13 @@
 From: Andrew Lunn <andrew@lunn.ch>
-Subject: [PATCH 2/5] mmc: mvsdio: use slot-gpio infrastructure for write protect gpio
-Date: Wed, 16 Jan 2013 14:13:57 +0100
-Message-ID: <1358342040-7130-3-git-send-email-andrew@lunn.ch>
+Subject: [PATCH 4/5] mmc: mvsdio: implement a Device Tree binding
+Date: Wed, 16 Jan 2013 14:13:59 +0100
+Message-ID: <1358342040-7130-5-git-send-email-andrew@lunn.ch>
 References: <1358342040-7130-1-git-send-email-andrew@lunn.ch>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from londo.lunn.ch ([80.238.139.98]:49301 "EHLO londo.lunn.ch"
+Received: from londo.lunn.ch ([80.238.139.98]:49293 "EHLO londo.lunn.ch"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754142Ab3APNOv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 16 Jan 2013 08:14:51 -0500
+	id S1752108Ab3APNOo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 16 Jan 2013 08:14:44 -0500
 In-Reply-To: <1358342040-7130-1-git-send-email-andrew@lunn.ch>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -16,12 +16,17 @@ Cc: linux ARM <linux-arm-kernel@lists.infradead.org>, linux-mmc@vger.kernel.org,
 
 From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-The MMC core subsystem provides in drivers/mmc/core/slot-gpio.c a nice
-set of helper functions to simplify the management of the write
-protect GPIO in MMC host drivers. This patch migrates the mvsdio
-driver to using those helpers, which will make the ->probe() code
-simpler, and therefore ease the process of adding a Device Tree
-binding for this driver.
+This patch adds a simple Device Tree binding for the mvsdio driver, as
+well as the necessary documentation for it. Compatibility with non-DT
+platforms is preserved, by keeping the platform_data based
+initialization.
+
+We introduce a small difference between non-DT and DT platforms: DT
+platforms are required to provide a clocks = <...> property, which the
+driver uses to get the frequency of the clock that goes to the SDIO
+IP. The behaviour on non-DT platforms is kept unchanged: a clock
+reference is not mandatory, but the clock frequency must be passed in
+the "clock" field of the mvsdio_platform_data structure.
 
 Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 Signed-off-by: Andrew Lunn <andrew@lunn.ch>
@@ -29,92 +34,161 @@ Tested-by: Stefan Peter <s.peter@mpl.ch>
 Tested-by: Florian Fainelli <florian@openwrt.org>
 Signed-off-by: Jason Cooper <jason@lakedaemon.net>
 ---
- drivers/mmc/host/mvsdio.c |   30 +++++-------------------------
- 1 file changed, 5 insertions(+), 25 deletions(-)
+ .../devicetree/bindings/mmc/orion-sdio.txt         |   17 ++++++
+ drivers/mmc/host/mvsdio.c                          |   62 +++++++++++++++-----
+ 2 files changed, 64 insertions(+), 15 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/orion-sdio.txt
 
+diff --git a/Documentation/devicetree/bindings/mmc/orion-sdio.txt b/Documentation/devicetree/bindings/mmc/orion-sdio.txt
+new file mode 100644
+index 0000000..84f0ebd
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/orion-sdio.txt
+@@ -0,0 +1,17 @@
++* Marvell orion-sdio controller
++
++This file documents differences between the core properties in mmc.txt
++and the properties used by the orion-sdio driver.
++
++- compatible: Should be "marvell,orion-sdio"
++- clocks: reference to the clock of the SDIO interface
++
++Example:
++
++	mvsdio@d00d4000 {
++		compatible = "marvell,orion-sdio";
++		reg = <0xd00d4000 0x200>;
++		interrupts = <54>;
++		clocks = <&gateclk 17>;
++		status = "disabled";
++	};
 diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index f8dd361..c6dc8fd 100644
+index 704b7a3..5ea0b96 100644
 --- a/drivers/mmc/host/mvsdio.c
 +++ b/drivers/mmc/host/mvsdio.c
-@@ -22,6 +22,7 @@
+@@ -21,6 +21,8 @@
+ #include <linux/irq.h>
  #include <linux/clk.h>
  #include <linux/gpio.h>
++#include <linux/of_gpio.h>
++#include <linux/of_irq.h>
  #include <linux/mmc/host.h>
-+#include <linux/mmc/slot-gpio.h>
+ #include <linux/mmc/slot-gpio.h>
  
- #include <asm/sizes.h>
- #include <asm/unaligned.h>
-@@ -52,7 +53,6 @@ struct mvsd_host {
- 	struct device *dev;
- 	struct clk *clk;
- 	int gpio_card_detect;
--	int gpio_write_protect;
- };
+@@ -681,17 +683,17 @@ mv_conf_mbus_windows(struct mvsd_host *host,
  
- #define mvsd_write(offs, val)	writel(val, iobase + (offs))
-@@ -564,20 +564,6 @@ static void mvsd_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
--static int mvsd_get_ro(struct mmc_host *mmc)
--{
--	struct mvsd_host *host = mmc_priv(mmc);
--
--	if (host->gpio_write_protect)
--		return gpio_get_value(host->gpio_write_protect);
--
--	/*
--	 * Board doesn't support read only detection; let the mmc core
--	 * decide what to do.
--	 */
--	return -ENOSYS;
--}
--
- static void mvsd_power_up(struct mvsd_host *host)
+ static int __init mvsd_probe(struct platform_device *pdev)
  {
- 	void __iomem *iobase = host->base;
-@@ -674,7 +660,7 @@ static void mvsd_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
++	struct device_node *np = pdev->dev.of_node;
+ 	struct mmc_host *mmc = NULL;
+ 	struct mvsd_host *host = NULL;
+-	const struct mvsdio_platform_data *mvsd_data;
+ 	const struct mbus_dram_target_info *dram;
+ 	struct resource *r;
+ 	int ret, irq;
++	int gpio_card_detect, gpio_write_protect;
  
- static const struct mmc_host_ops mvsd_ops = {
- 	.request		= mvsd_request,
--	.get_ro			= mvsd_get_ro,
-+	.get_ro			= mmc_gpio_get_ro,
- 	.set_ios		= mvsd_set_ios,
- 	.enable_sdio_irq	= mvsd_enable_sdio_irq,
- };
-@@ -793,15 +779,7 @@ static int __init mvsd_probe(struct platform_device *pdev)
- 	if (!host->gpio_card_detect)
+ 	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	irq = platform_get_irq(pdev, 0);
+-	mvsd_data = pdev->dev.platform_data;
+-	if (!r || irq < 0 || !mvsd_data)
++	if (!r || irq < 0)
+ 		return -ENXIO;
+ 
+ 	mmc = mmc_alloc_host(sizeof(struct mvsd_host), &pdev->dev);
+@@ -703,8 +705,37 @@ static int __init mvsd_probe(struct platform_device *pdev)
+ 	host = mmc_priv(mmc);
+ 	host->mmc = mmc;
+ 	host->dev = &pdev->dev;
+-	host->base_clock = mvsd_data->clock / 2;
+-	host->clk = ERR_PTR(-EINVAL);
++
++	/* Some non-DT platforms do not pass a clock, and the clock
++	   frequency is passed through platform_data. On DT platforms,
++	   a clock must always be passed, even if there is no gatable
++	   clock associated to the SDIO interface (it can simply be a
++	   fixed rate clock). */
++	host->clk = devm_clk_get(&pdev->dev, NULL);
++	if (!IS_ERR(host->clk))
++		clk_prepare_enable(host->clk);
++
++	if (np) {
++		if (IS_ERR(host->clk)) {
++			dev_err(&pdev->dev, "DT platforms must have a clock associated\n");
++			ret = -EINVAL;
++			goto out;
++		}
++
++		host->base_clock = clk_get_rate(host->clk) / 2;
++		gpio_card_detect = of_get_named_gpio(np, "cd-gpios", 0);
++		gpio_write_protect = of_get_named_gpio(np, "wp-gpios", 0);
++	} else {
++		const struct mvsdio_platform_data *mvsd_data;
++		mvsd_data = pdev->dev.platform_data;
++		if (!mvsd_data) {
++			ret = -ENXIO;
++			goto out;
++		}
++		host->base_clock = mvsd_data->clock / 2;
++		gpio_card_detect = mvsd_data->gpio_card_detect;
++		gpio_write_protect = mvsd_data->gpio_write_protect;
++	}
+ 
+ 	mmc->ops = &mvsd_ops;
+ 
+@@ -743,20 +774,14 @@ static int __init mvsd_probe(struct platform_device *pdev)
+ 		goto out;
+ 	}
+ 
+-	/* Not all platforms can gate the clock, so it is not
+-	   an error if the clock does not exists. */
+-	host->clk = devm_clk_get(&pdev->dev, NULL);
+-	if (!IS_ERR(host->clk))
+-		clk_prepare_enable(host->clk);
+-
+-	if (gpio_is_valid(mvsd_data->gpio_card_detect)) {
+-		ret = mmc_gpio_request_cd(mmc, mvsd_data->gpio_card_detect);
++	if (gpio_is_valid(gpio_card_detect)) {
++		ret = mmc_gpio_request_cd(mmc, gpio_card_detect);
+ 		if (ret)
+ 			goto out;
+ 	} else
  		mmc->caps |= MMC_CAP_NEEDS_POLL;
  
--	if (mvsd_data->gpio_write_protect) {
--		ret = devm_gpio_request_one(&pdev->dev,
--					    mvsd_data->gpio_write_protect,
--					    GPIOF_IN, DRIVER_NAME " wp");
--		if (ret == 0) {
--			host->gpio_write_protect =
--				mvsd_data->gpio_write_protect;
--		}
--	}
-+	mmc_gpio_request_ro(mmc, mvsd_data->gpio_write_protect);
+-	mmc_gpio_request_ro(mmc, mvsd_data->gpio_write_protect);
++	mmc_gpio_request_ro(mmc, gpio_write_protect);
  
  	setup_timer(&host->timer, mvsd_timeout_timer, (unsigned long)host);
  	platform_set_drvdata(pdev, mmc);
-@@ -820,6 +798,7 @@ static int __init mvsd_probe(struct platform_device *pdev)
+@@ -768,7 +793,7 @@ static int __init mvsd_probe(struct platform_device *pdev)
+ 			   mmc_hostname(mmc), DRIVER_NAME);
+ 	if (!(mmc->caps & MMC_CAP_NEEDS_POLL))
+ 		printk("using GPIO %d for card detection\n",
+-		       mvsd_data->gpio_card_detect);
++		       gpio_card_detect);
+ 	else
+ 		printk("lacking card detect (fall back to polling)\n");
+ 	return 0;
+@@ -832,12 +857,19 @@ static int mvsd_resume(struct platform_device *dev)
+ #define mvsd_resume	NULL
+ #endif
  
- out:
- 	if (mmc) {
-+		mmc_gpio_free_ro(mmc);
- 		if (!IS_ERR(host->clk))
- 			clk_disable_unprepare(host->clk);
- 		mmc_free_host(mmc);
-@@ -834,6 +813,7 @@ static int __exit mvsd_remove(struct platform_device *pdev)
++static const struct of_device_id mvsdio_dt_ids[] = {
++	{ .compatible = "marvell,orion-sdio" },
++	{ /* sentinel */ }
++};
++MODULE_DEVICE_TABLE(of, mvsdio_dt_ids);
++
+ static struct platform_driver mvsd_driver = {
+ 	.remove		= __exit_p(mvsd_remove),
+ 	.suspend	= mvsd_suspend,
+ 	.resume		= mvsd_resume,
+ 	.driver		= {
+ 		.name	= DRIVER_NAME,
++		.of_match_table = mvsdio_dt_ids,
+ 	},
+ };
  
- 	struct mvsd_host *host = mmc_priv(mmc);
- 
-+	mmc_gpio_free_ro(mmc);
- 	mmc_remove_host(mmc);
- 	del_timer_sync(&host->timer);
- 	mvsd_power_down(host);
 -- 
 1.7.10.4
 
