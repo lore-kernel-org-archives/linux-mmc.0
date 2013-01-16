@@ -1,52 +1,59 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 02/11] mmc: deprecate redundant cd-inverted and wp-inverted DT properties
-Date: Wed, 16 Jan 2013 17:54:37 +0100
-Message-ID: <1358355286-26029-3-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 10/11] mmc: tmio: remove unused and deprecated symbols
+Date: Wed, 16 Jan 2013 17:54:45 +0100
+Message-ID: <1358355286-26029-11-git-send-email-g.liakhovetski@gmx.de>
 References: <1358355286-26029-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:62317 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757947Ab3APQyu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jan 2013 11:54:50 -0500
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1358355286-26029-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
 
-GPIO DT bindings have a standard way to specify GPIO polarity - the
-OF_GPIO_ACTIVE_LOW flag. Use that instead of custom cd-inverted and
-wp-inverted properties.
+The tmio_mmc_cd_wakeup() inline function has been deprecated since 3.4 and
+is unused since 3.4 too. Remove them.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- Documentation/devicetree/bindings/mmc/mmc.txt |    8 ++++++++
- 1 files changed, 8 insertions(+), 0 deletions(-)
+ include/linux/mfd/tmio.h |   18 ------------------
+ 1 files changed, 0 insertions(+), 18 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index 34f28ed..e180892 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -19,11 +19,19 @@ Only one of the properties in this section should be supplied:
- Optional properties:
- - wp-gpios: Specify GPIOs for write protection, see gpio binding
- - cd-inverted: when present, polarity on the cd gpio line is inverted
-+  (deprecated)
- - wp-inverted: when present, polarity on the wp gpio line is inverted
-+  (deprecated)
- - max-frequency: maximum operating clock frequency
- - no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
-   this system, even if the controller claims it is.
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index d83af39..99bf3e66 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -65,12 +65,6 @@
+  */
+ #define TMIO_MMC_SDIO_IRQ		(1 << 2)
+ /*
+- * Some platforms can detect card insertion events with controller powered
+- * down, using a GPIO IRQ, in which case they have to fill in cd_irq, cd_gpio,
+- * and cd_flags fields of struct tmio_mmc_data.
+- */
+-#define TMIO_MMC_HAS_COLD_CD		(1 << 3)
+-/*
+  * Some controllers require waiting for the SD bus to become
+  * idle before writing to some registers.
+  */
+@@ -117,18 +111,6 @@ struct tmio_mmc_data {
+ };
  
-+cd-inverted and wp-inverted properties are deprecated ans shouldn't be used,
-+instead pleaseuse the OF_GPIO_ACTIVE_LOW flag in respective GPIO bindings. Note,
-+that the default (as defined by the SDHCI standard) CD and WP polarity is
-+active-low, so, OF_GPIO_ACTIVE_LOW should normally be set, and only be left
-+clear, if the polarity is inverted.
-+
- Optional SDIO properties:
- - keep-power-in-suspend: Preserves card power during a suspend/resume cycle
- - enable-sdio-wakeup: Enables wake up of host system on SDIO IRQ assertion
+ /*
+- * This function is deprecated and will be removed soon. Please, convert your
+- * platform to use drivers/mmc/core/cd-gpio.c
+- */
+-#include <linux/mmc/host.h>
+-static inline void tmio_mmc_cd_wakeup(struct tmio_mmc_data *pdata)
+-{
+-	if (pdata)
+-		mmc_detect_change(dev_get_drvdata(pdata->dev),
+-				  msecs_to_jiffies(100));
+-}
+-
+-/*
+  * data for the NAND controller
+  */
+ struct tmio_nand_data {
 -- 
 1.7.2.5
 
