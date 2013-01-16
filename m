@@ -1,52 +1,57 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH/RFC 06/11] mmc: tmio-mmc: define device-tree bindings
-Date: Wed, 16 Jan 2013 17:54:41 +0100
-Message-ID: <1358355286-26029-7-git-send-email-g.liakhovetski@gmx.de>
-References: <1358355286-26029-1-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 00/11] mmc: core and driver DT and related development
+Date: Wed, 16 Jan 2013 17:54:35 +0100
+Message-ID: <1358355286-26029-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1358355286-26029-1-git-send-email-g.liakhovetski@gmx.de>
 Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Define device-tree bindings for the tmio-mmc driver to be able to specify
-parameters, currently provided in platform data.
+This patch series addresses the following topics:
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
+1. DT: add a generic DT binding parsing function. It retrieves MMC DT 
+properties, currently documented in 
+Documentation/devicetree/bindings/mmc/mmc.txt, sets respective host flags, 
+initialises GPIO slot functions, verifies presence of the compulsory 
+bus-width property.
 
-Please, comment on this one, since it is defining an ABI to be kept forever;-)
+2. DT: deprecate cd-inverted and wp-inverted DT properties, GPIO standard 
+"flags" cell should be used.
 
- Documentation/devicetree/bindings/mmc/tmio_mmc.txt |   19 +++++++++++++++++++
- 1 files changed, 19 insertions(+), 0 deletions(-)
+3. DT-related sh_mobile_sdhi / tmio_mmc and sh_mmcif driver extensions.
+
+Guennadi Liakhovetski (11):
+  mmc: sdhi, tmio: only check flags in tmio-mmc driver proper
+  mmc: deprecate redundant cd-inverted and wp-inverted DT properties
+  mmc: provide a standard MMC device-tree binding parser centrally
+  mmc: (cosmetic) remove "extern" from function declarations
+  mmc: sh-mmcif: use mmc_of_parse() to parse standard MMC DT bindings
+  mmc: tmio-mmc: define device-tree bindings
+  mmc: tmio-mmc: parse device-tree bindings
+  mmc: sh_mobile_sdhi: remove unused .pdata field
+  mmc: sh_mobile_sdhi: use managed resource allocations
+  mmc: tmio: remove unused and deprecated symbols
+  mmc: tmio: add support for the VccQ regulator
+
+ Documentation/devicetree/bindings/mmc/mmc.txt      |    8 ++
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt |   19 +++++
+ drivers/mmc/core/host.c                            |   82 ++++++++++++++++++++
+ drivers/mmc/host/sh_mmcif.c                        |    3 +-
+ drivers/mmc/host/sh_mobile_sdhi.c                  |   64 ++++------------
+ drivers/mmc/host/tmio_mmc_pio.c                    |   67 ++++++++++++++--
+ include/linux/mfd/tmio.h                           |   18 ----
+ include/linux/mmc/host.h                           |   23 +++---
+ include/linux/mmc/sh_mobile_sdhi.h                 |    2 -
+ 9 files changed, 196 insertions(+), 90 deletions(-)
  create mode 100644 Documentation/devicetree/bindings/mmc/tmio_mmc.txt
 
-diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-new file mode 100644
-index 0000000..dd8decd
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-@@ -0,0 +1,19 @@
-+* Toshiba Mobile IO SD/MMC controller
-+
-+The tmio-mmc driver doesn't probe its devices actively, instead its binding to
-+devices is managed by either MFD drivers or by the sh_mobile_sdhi platform
-+driver. Those drivers supply the tmio-mmc driver with platform data, that either
-+describe hardware capabilities, known to them, or are obtained by them from
-+their own platform data or from their DT information. In the latter case all
-+compulsory and any optional properties, common to all SD/MMC drivers, as
-+described in mmc.txt, should or can be used. Additionally the following optional
-+bindings can be used. They set either respective TMIO_MMC_* flags or MMC_CAP_*
-+capabilities.
-+
-+Optional properties:
-+- toshiba,mmc-wrprotect-disable	: set TMIO_MMC_WRPROTECT_DISABLE flag
-+- toshiba,mmc-blksz-2bytes	: set TMIO_MMC_BLKSZ_2BYTES
-+- toshiba,mmc-cap-sdio-irq	: SDIO IRQ signalling should be used, if
-+	supported by the hardware, i.e. set MMC_CAP_SDIO_IRQ if
-+	TMIO_MMC_SDIO_IRQ is also set
-+- toshiba,mmc-has-idle-wait	: set TMIO_MMC_HAS_IDLE_WAIT
 -- 
 1.7.2.5
 
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
