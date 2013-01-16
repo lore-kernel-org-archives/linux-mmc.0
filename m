@@ -1,42 +1,75 @@
-From: Venkatraman S <svenkatr@gmail.com>
-Subject: [PATCH] mmc: omap_hsmmc: MAINTAINERS: change omap_hsmmc maintenance to orphan
-Date: Wed, 16 Jan 2013 19:00:26 +0530
-Message-ID: <1358343026-17198-1-git-send-email-svenkatr@gmail.com>
+From: yix.x.zhang@gmail.com
+Subject: [PATCH v2] mmc: correct one comment error of structure mmc_ext_csd
+Date: Wed, 16 Jan 2013 22:53:34 +0800
+Message-ID: <50f6bf2a.e2ee440a.7c4d.ffff97b8@mx.google.com>
+References: <50EBD75F.7050805@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-da0-f50.google.com ([209.85.210.50]:51801 "EHLO
-	mail-da0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757663Ab3APNav (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jan 2013 08:30:51 -0500
+Received: from mail-pb0-f47.google.com ([209.85.160.47]:47473 "EHLO
+	mail-pb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751944Ab3APOyf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jan 2013 09:54:35 -0500
+In-Reply-To: <50EBD75F.7050805@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Venkatraman S <svenkatr@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "Zhang, Yi" <yix.x.zhang@gmail.com>
 
-The specified email id is no longer in service.
-Update the OMAP HSMMC entry from the MAINTAINERS file as I will
-no longer be able to maintain this driver.
+From: "Zhang, Yi" <yix.x.zhang@gmail.com>
 
-Signed-off-by: Venkatraman S <svenkatr@gmail.com>
+The right value for field raw_exception_status is 54(not 53) according
+to eMMC 4.5 specification. Also for more readable, replace all number
+values with macro symboles.
+
+Signed-off-by: Zhang, Yi <yix.x.zhang@gmail.com>
 ---
- MAINTAINERS |    4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ include/linux/mmc/card.h |   34 +++++++++++++++++-----------------
+ 1 file changed, 17 insertions(+), 17 deletions(-)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index cd5b31f..95778e1 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -5499,10 +5499,8 @@ S:	Maintained
- F:	drivers/mmc/host/omap.c
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 5c69315..d270392 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -83,23 +83,23 @@ struct mmc_ext_csd {
+ 	unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
+ 	unsigned int		boot_ro_lock;		/* ro lock support */
+ 	bool			boot_ro_lockable;
+-	u8			raw_exception_status;	/* 53 */
+-	u8			raw_partition_support;	/* 160 */
+-	u8			raw_rpmb_size_mult;	/* 168 */
+-	u8			raw_erased_mem_count;	/* 181 */
+-	u8			raw_ext_csd_structure;	/* 194 */
+-	u8			raw_card_type;		/* 196 */
+-	u8			out_of_int_time;	/* 198 */
+-	u8			raw_s_a_timeout;		/* 217 */
+-	u8			raw_hc_erase_gap_size;	/* 221 */
+-	u8			raw_erase_timeout_mult;	/* 223 */
+-	u8			raw_hc_erase_grp_size;	/* 224 */
+-	u8			raw_sec_trim_mult;	/* 229 */
+-	u8			raw_sec_erase_mult;	/* 230 */
+-	u8			raw_sec_feature_support;/* 231 */
+-	u8			raw_trim_mult;		/* 232 */
+-	u8			raw_bkops_status;	/* 246 */
+-	u8			raw_sectors[4];		/* 212 - 4 bytes */
++	u8			raw_exception_status;	/* EXT_CSD_EXP_EVENTS_STATUS */
++	u8			raw_partition_support;	/* EXT_CSD_PARTITION_SUPPORT */
++	u8			raw_rpmb_size_mult;	/* EXT_CSD_RPMB_MULT */
++	u8			raw_erased_mem_count;	/* EXT_CSD_ERASED_MEM_CONT */
++	u8			raw_ext_csd_structure;	/* EXT_CSD_STRUCTURE */
++	u8			raw_card_type;		/* EXT_CSD_CARD_TYPE */
++	u8			out_of_int_time;	/* EXT_CSD_OUT_OF_INTERRUPT_TIME */
++	u8			raw_s_a_timeout;	/* EXT_CSD_S_A_TIMEOUT */
++	u8			raw_hc_erase_gap_size;	/* EXT_CSD_HC_WP_GRP_SIZE */
++	u8			raw_erase_timeout_mult;	/* EXT_CSD_ERASE_TIMEOUT_MULT */
++	u8			raw_hc_erase_grp_size;	/* EXT_CSD_HC_ERASE_GRP_SIZE */
++	u8			raw_sec_trim_mult;	/* EXT_CSD_SEC_TRIM_MULT */
++	u8			raw_sec_erase_mult;	/* EXT_CSD_SEC_ERASE_MULT */
++	u8			raw_sec_feature_support;/* EXT_CSD_SEC_FEATURE_SUPPORT */
++	u8			raw_trim_mult;		/* EXT_CSD_TRIM_MULT */
++	u8			raw_bkops_status;	/* EXT_CSD_BKOPS_STATUS */
++	u8			raw_sectors[4];		/* EXT_CSD_SEC_CNT - 4 bytes */
  
- OMAP HS MMC SUPPORT
--M:	Venkatraman S <svenkatr@ti.com>
--L:	linux-mmc@vger.kernel.org
- L:	linux-omap@vger.kernel.org
--S:	Maintained
-+S:	Orphan
- F:	drivers/mmc/host/omap_hsmmc.c
- 
- OMAP RANDOM NUMBER GENERATOR SUPPORT
+ 	unsigned int            feature_support;
+ #define MMC_DISCARD_FEATURE	BIT(0)                  /* CMD38 feature */
 -- 
 1.7.10.4
 
