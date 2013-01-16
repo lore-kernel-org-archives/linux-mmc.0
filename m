@@ -1,65 +1,39 @@
-From: Subhash Jadavani <subhashj@codeaurora.org>
-Subject: Re: [PATCH v2 1/1] block: blk-merge: don't merge the pages with non-contiguous
- descriptors
-Date: Wed, 16 Jan 2013 18:09:14 +0530
-Message-ID: <50F69F72.4030807@codeaurora.org>
-References: <1358265681-25671-1-git-send-email-subhashj@codeaurora.org>  <1358266794.10591.8.camel@dabdike.int.hansenpartnership.com>  <50F64AC1.3040304@codeaurora.org> <1358332355.2384.11.camel@dabdike.int.hansenpartnership.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1358332355.2384.11.camel@dabdike.int.hansenpartnership.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: James Bottomley <James.Bottomley@HansenPartnership.com>
-Cc: linux-kernel@vger.kernel.org, linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, martin.petersen@oracle.com, asias@redhat.com, tj@kernel.org, linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>
+From: Andrew Lunn <andrew@lunn.ch>
+Subject: [PATCH 0/5] mmc: mvsdio: use devm_ API to simplify/correct error paths.
+Date: Wed, 16 Jan 2013 14:13:55 +0100
+Message-ID: <1358342040-7130-1-git-send-email-andrew@lunn.ch>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from londo.lunn.ch ([80.238.139.98]:49275 "EHLO londo.lunn.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752108Ab3APNO2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 16 Jan 2013 08:14:28 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jason Cooper <jason@lakedaemon.net>
+Cc: linux ARM <linux-arm-kernel@lists.infradead.org>, linux-mmc@vger.kernel.org, linux@arm.linux.org.uk, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Andrew Lunn <andrew@lunn.ch>
 
-On 1/16/2013 4:02 PM, James Bottomley wrote:
-> On Wed, 2013-01-16 at 12:07 +0530, Subhash Jadavani wrote:
->
->> Now consider this call stack from MMC block driver (this is on the ARmv7
->> based board):
->>       [   98.918174] [<c001b50c>] (v7_dma_inv_range+0x30/0x48) from
->> [<c0017b8c>] (dma_cache_maint_page+0x1c4/0x24c)
->>       [   98.927819] [<c0017b8c>] (dma_cache_maint_page+0x1c4/0x24c) from
->> [<c0017c28>] (___dma_page_cpu_to_dev+0x14/0x1c)
->>       [   98.937982] [<c0017c28>] (___dma_page_cpu_to_dev+0x14/0x1c) from
->> [<c0017ff8>] (dma_map_sg+0x3c/0x114)
-> OK, so this is showing that ARM itself is making the assumption that the
-> pages are contiguous in the page offset map.
->
-> Fix this by doing the increment via the pfn, which will do the right
-> thing whatever the memory model.
->
-> Signed-off-by: James Bottomley <JBottomley@Parallels.com>
+Russell King pointed out a number of issues with the probe code in the
+mvsdio driver and supplied a patch. This patchset uses a modified
+version, converting resource allocations to devm API calls, and fixes
+the error paths. The patches that then follow are from Thomas
+Petazzoni making other cleanups and adding device tree. These patches
+needed some changes after the swap to devm. The patches here replace
+the earlier submitted patches with the same Subject.
 
-Thanks James. Yes, it make sense to fix the ARM code itself if it is the 
-only one giving this trouble.
-I have tried your change below and it also fixes this issue (without 
-having my blk-merge patch). I will forward your change to Russel King to 
-see what he thinks about it.
+Andrew Lunn (1):
+  mmc: mvsdio: use devm_ API to simplify/correct error paths.
 
-Regards,
-Subhash
->
-> ---
->
-> diff --git a/arch/arm/mm/dma-mapping.c b/arch/arm/mm/dma-mapping.c
-> index 6b2fb87..ab88c5b 100644
-> --- a/arch/arm/mm/dma-mapping.c
-> +++ b/arch/arm/mm/dma-mapping.c
-> @@ -809,7 +809,7 @@ static void dma_cache_maint_page(struct page *page, unsigned long offset,
->   			op(vaddr, len, dir);
->   		}
->   		offset = 0;
-> -		page++;
-> +		page = pfn_to_page(page_to_pfn(page) + 1);
->   		left -= len;
->   	} while (left);
->   }
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-scsi" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thomas Petazzoni (4):
+  mmc: mvsdio: use slot-gpio infrastructure for write protect gpio
+  mmc: mvsdio: use slot-gpio for card detect gpio
+  mmc: mvsdio: implement a Device Tree binding
+  mmc: mvsdio: add pinctrl integration
+
+ .../devicetree/bindings/mmc/orion-sdio.txt         |   17 ++
+ drivers/mmc/host/mvsdio.c                          |  187 ++++++++------------
+ 2 files changed, 93 insertions(+), 111 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/orion-sdio.txt
+
+-- 
+1.7.10.4
+
