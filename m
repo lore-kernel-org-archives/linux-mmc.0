@@ -1,31 +1,61 @@
 From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Remove unused variables
-Date: Thu, 17 Jan 2013 00:31:44 -0200
-Message-ID: <CAOMZO5D__bQ_N+=c5XcgphegJe-kYMO8PF1R1bo0J3uMixrrtQ@mail.gmail.com>
-References: <1358383916-23614-1-git-send-email-festevam@gmail.com>
-	<20130117022546.GG26179@S2101-09.ap.freescale.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH v2] mmc: sdhci-esdhc-imx: Remove unused variables
+Date: Thu, 17 Jan 2013 00:32:52 -0200
+Message-ID: <1358389972-24399-1-git-send-email-festevam@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f177.google.com ([209.85.220.177]:61305 "EHLO
-	mail-vc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755928Ab3AQCbp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jan 2013 21:31:45 -0500
-Received: by mail-vc0-f177.google.com with SMTP id fo14so1773558vcb.8
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Jan 2013 18:31:45 -0800 (PST)
-In-Reply-To: <20130117022546.GG26179@S2101-09.ap.freescale.net>
+Received: from mail-yh0-f48.google.com ([209.85.213.48]:37029 "EHLO
+	mail-yh0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757518Ab3AQCjr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jan 2013 21:39:47 -0500
+Received: by mail-yh0-f48.google.com with SMTP id q46so345592yhf.35
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Jan 2013 18:39:47 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
+To: cjb@laptop.org
+Cc: shawn.guo@linaro.org, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
 
-On Thu, Jan 17, 2013 at 12:25 AM, Shawn Guo <shawn.guo@linaro.org> wrote:
-> On Wed, Jan 16, 2013 at 10:51:56PM -0200, Fabio Estevam wrote:
->> From: Fabio Estevam <fabio.estevam@freescale.com>
->>
->> commit 842afc02cf (mmc: sdhci-esdhc-imx: do not reference platform data after
->> probe) introduced the following build warnings:
->>
-> My bad.  The warnings are introduced by my commit 78b2b04 (mmc:
+From: Fabio Estevam <fabio.estevam@freescale.com>
 
-I guess you meant 3f175a6e5 instead. Will fix it in v2.
+commit 3f175a6e5 (mmc: sdhci-esdhc-imx: remove ESDHC_CD_GPIO handling from IO 
+accessory) introduced the following build warnings:
+
+drivers/mmc/host/sdhci-esdhc-imx.c:149:30: warning: unused variable 'boarddata' [-Wunused-variable]
+drivers/mmc/host/sdhci-esdhc-imx.c:181:30: warning: unused variable 'boarddata' [-Wunused-variable]
+
+Remove the unused variables.
+
+Acked-by: Shawn Guo <shawn.guo@linaro.org>
+Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+---
+Changes since v1:
+- Fix offending commit id
+
+ drivers/mmc/host/sdhci-esdhc-imx.c |    5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index ae68bc9..509be3a 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -144,10 +144,6 @@ static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, i
+ 
+ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+ {
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+-	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+-
+ 	u32 val = readl(host->ioaddr + reg);
+ 
+ 	if (unlikely(reg == SDHCI_CAPABILITIES)) {
+@@ -178,7 +174,6 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+-	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+ 	u32 data;
+ 
+ 	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)) {
+-- 
+1.7.9.5
+
