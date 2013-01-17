@@ -1,44 +1,52 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH v2 1/1] block: blk-merge: don't merge the pages with
-	non-contiguous descriptors
-Date: Thu, 17 Jan 2013 11:40:37 +0000
-Message-ID: <20130117114037.GA23505@n2100.arm.linux.org.uk>
-References: <1358266794.10591.8.camel@dabdike.int.hansenpartnership.com> <50F64AC1.3040304@codeaurora.org> <1358332355.2384.11.camel@dabdike.int.hansenpartnership.com> <20130116231857.GU2668@htj.dyndns.org> <1358413880.2394.7.camel@dabdike.int.hansenpartnership.com> <20130117103742.GX23505@n2100.arm.linux.org.uk> <20130117104741.GY23505@n2100.arm.linux.org.uk> <1358420507.2394.19.camel@dabdike.int.hansenpartnership.com> <20130117110438.GZ23505@n2100.arm.linux.org.uk> <1358421561.2394.27.camel@dabdike.int.hansenpartnership.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH] MAINTAINERS: mmc: add maintainer entry for dw_mmc driver
+Date: Thu, 17 Jan 2013 21:33:23 +0900
+Message-ID: <000c01cdf4ae$d77888a0$866999e0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-scsi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1358421561.2394.27.camel@dabdike.int.hansenpartnership.com>
-Sender: linux-scsi-owner@vger.kernel.org
-To: James Bottomley <James.Bottomley@HansenPartnership.com>
-Cc: martin.petersen@oracle.com, linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Subhash Jadavani <subhashj@codeaurora.org>, Tejun Heo <tj@kernel.org>, asias@redhat.com, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:30770 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750834Ab3AQMdZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jan 2013 07:33:25 -0500
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'open list' <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, jh80.chung@samsung.com, 'Will Newton' <will.newton@gmail.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Thomas Abraham' <thomas.abraham@linaro.org>
 
-On Thu, Jan 17, 2013 at 11:19:21AM +0000, James Bottomley wrote:
-> On Thu, 2013-01-17 at 11:04 +0000, Russell King - ARM Linux wrote:
-> > On Thu, Jan 17, 2013 at 11:01:47AM +0000, James Bottomley wrote:
-> > > On Thu, 2013-01-17 at 10:47 +0000, Russell King - ARM Linux wrote:
-> > > > Also, couldn't the addition of the scatterlist offset to the page also
-> > > > be buggy too?
-> > > 
-> > > No, fortunately, offset must be within the first page from the point of
-> > > view of block generated sg lists.  As long as nothing within arm
-> > > violates this, it should be a safe assumption ... although the code
-> > > seems to assume otherwise.
-> > 
-> > Are you absolutely sure about that?  I believe I have seen cases where
-> > that has been violated in the past, though it was many years ago.
-> 
-> >From the point of view of the block layer, absolutely: the scatterlist
-> is generated from an array of bio_vecs.  Each bio_vec is a page, offset
-> and length element and obeys the rule that offset must be within the
-> page and offset + length cannot stray over the page.
+Add maintainer entry for the Synopsys DW host driver which
+is used in various SOC including EXYNOS series.
+As Will Newton will no longer be able to take care of dw_mmc*,
+I and Jaehoon Chung are willing to maintain it.
 
-Well, I found it when working on the mmc stuff initially, long before
-it got complex.  The scatterlists were unmodified from the block layer,
-and I'm positive I saw occasions where the offset in the scatter lists
-were larger than PAGE_SIZE.
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ MAINTAINERS |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
 
-> >From the point of view of other arm stuff, I don't know.
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 943a607..2b7beac 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -6777,6 +6777,14 @@ F:	include/linux/dw_dmac.h
+ F:	drivers/dma/dw_dmac_regs.h
+ F:	drivers/dma/dw_dmac.c
+ 
++SYNOPSYS DESIGNWARE MMC/SD/SDIO DRIVER
++M:	Seungwon Jeon <tgih.jun@samsung.com>
++M:	Jaehoon Chung <jh80.chung@samsung.com>
++L:	linux-mmc@vger.kernel.org
++S:	Maintained
++F:	include/linux/mmc/dw_mmc.h
++F:	drivers/mmc/host/dw_mmc*
++
+ TIMEKEEPING, NTP
+ M:	John Stultz <johnstul@us.ibm.com>
+ M:	Thomas Gleixner <tglx@linutronix.de>
+-- 
+1.7.0.4
 
-I'm not talking about anything ARM specific here.
+
