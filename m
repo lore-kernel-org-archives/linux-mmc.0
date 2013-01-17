@@ -1,39 +1,134 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 2/2] gpio: devm_gpio_* support should not depend on GPIOLIB
-Date: Thu, 17 Jan 2013 14:31:06 +0100
-Message-ID: <CACRpkdZ+L6GN_1_wSkckZY553jsG3wTEdwM27dp+cyCAjH5tpA@mail.gmail.com>
-References: <1358239056-703-1-git-send-email-shawn.guo@linaro.org>
-	<1358239056-703-3-git-send-email-shawn.guo@linaro.org>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: [PATCH 1/2 RESEND] gpio: fix warning of 'struct gpio_chip' declaration
+Date: Thu, 17 Jan 2013 22:03:22 +0800
+Message-ID: <1358431402-29701-1-git-send-email-shawn.guo@linaro.org>
+References: <1358239056-703-2-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f173.google.com ([209.85.223.173]:39035 "EHLO
-	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753867Ab3AQNbH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jan 2013 08:31:07 -0500
-Received: by mail-ie0-f173.google.com with SMTP id e13so4717742iej.4
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Jan 2013 05:31:07 -0800 (PST)
-In-Reply-To: <1358239056-703-3-git-send-email-shawn.guo@linaro.org>
+Received: from va3ehsobe010.messaging.microsoft.com ([216.32.180.30]:50626
+	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753077Ab3AQODG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jan 2013 09:03:06 -0500
+In-Reply-To: <1358239056-703-2-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Grant Likely <grant.likely@secretlab.ca>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Grant Likely <grant.likely@secretlab.ca>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Shawn Guo <shawn.guo@linaro.org>
 
-On Tue, Jan 15, 2013 at 9:37 AM, Shawn Guo <shawn.guo@linaro.org> wrote:
+The struct gpio_chip is only defined inside #ifdef CONFIG_GPIOLIB,
+but it's referenced by gpiochip_add_pin_range() and
+gpiochip_remove_pin_ranges() which are outside #ifdef CONFIG_GPIOLIB.
+Thus, we see the following warning when building blackfin image, where
+GPIOLIB is not required.
 
-> Some architectures (e.g. blackfin) provide gpio API without requiring
-> GPIOLIB support (ARCH_WANT_OPTIONAL_GPIOLIB).  devm_gpio_* functions
-> should also work for these architectures, since they do not really
-> depend on GPIOLIB.
->
-> Add a new option GPIO_DEVRES (enabled by default) to control the build
-> of devres.c, and move devm_gpio_* function declarations out from #ifdef
-> CONFIG_GPIOLIB in include/asm-generic/gpio.h, so that they can be
-> available to client drivers without unnecessary dependency on GPIOLIB.
->
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+  CC      arch/blackfin/kernel/bfin_gpio.o
+  CC      init/version.o
+In file included from arch/blackfin/include/asm/gpio.h:321,
+                 from arch/blackfin/kernel/bfin_gpio.c:15:
+include/asm-generic/gpio.h:298: warning: 'struct gpio_chip' declared inside parameter list
+include/asm-generic/gpio.h:298: warning: its scope is only this definition or declaration, which is probably not what you want
+include/asm-generic/gpio.h:304: warning: 'struct gpio_chip' declared inside parameter list
 
-Fair enough, but I need the first patch in an applicable for first...
+Move pinctrl trunk into #ifdef CONFIG_GPIOLIB to fix the warning,
+since it appears that pinctrl gpio range support depends on GPIOLIB.
 
-Yours,
-Linus Walleij
+Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+---
+ include/asm-generic/gpio.h |   74 ++++++++++++++++++++++----------------------
+ 1 file changed, 37 insertions(+), 37 deletions(-)
+
+diff --git a/include/asm-generic/gpio.h b/include/asm-generic/gpio.h
+index 20ca766..2341014 100644
+--- a/include/asm-generic/gpio.h
++++ b/include/asm-generic/gpio.h
+@@ -212,6 +212,43 @@ extern void gpio_unexport(unsigned gpio);
+ 
+ #endif	/* CONFIG_GPIO_SYSFS */
+ 
++#ifdef CONFIG_PINCTRL
++
++/**
++ * struct gpio_pin_range - pin range controlled by a gpio chip
++ * @head: list for maintaining set of pin ranges, used internally
++ * @pctldev: pinctrl device which handles corresponding pins
++ * @range: actual range of pins controlled by a gpio controller
++ */
++
++struct gpio_pin_range {
++	struct list_head node;
++	struct pinctrl_dev *pctldev;
++	struct pinctrl_gpio_range range;
++};
++
++int gpiochip_add_pin_range(struct gpio_chip *chip, const char *pinctl_name,
++			   unsigned int gpio_offset, unsigned int pin_offset,
++			   unsigned int npins);
++void gpiochip_remove_pin_ranges(struct gpio_chip *chip);
++
++#else
++
++static inline int
++gpiochip_add_pin_range(struct gpio_chip *chip, const char *pinctl_name,
++		       unsigned int gpio_offset, unsigned int pin_offset,
++		       unsigned int npins)
++{
++	return 0;
++}
++
++static inline void
++gpiochip_remove_pin_ranges(struct gpio_chip *chip)
++{
++}
++
++#endif /* CONFIG_PINCTRL */
++
+ #else	/* !CONFIG_GPIOLIB */
+ 
+ static inline bool gpio_is_valid(int number)
+@@ -270,41 +307,4 @@ static inline void gpio_unexport(unsigned gpio)
+ }
+ #endif	/* CONFIG_GPIO_SYSFS */
+ 
+-#ifdef CONFIG_PINCTRL
+-
+-/**
+- * struct gpio_pin_range - pin range controlled by a gpio chip
+- * @head: list for maintaining set of pin ranges, used internally
+- * @pctldev: pinctrl device which handles corresponding pins
+- * @range: actual range of pins controlled by a gpio controller
+- */
+-
+-struct gpio_pin_range {
+-	struct list_head node;
+-	struct pinctrl_dev *pctldev;
+-	struct pinctrl_gpio_range range;
+-};
+-
+-int gpiochip_add_pin_range(struct gpio_chip *chip, const char *pinctl_name,
+-			   unsigned int gpio_offset, unsigned int pin_offset,
+-			   unsigned int npins);
+-void gpiochip_remove_pin_ranges(struct gpio_chip *chip);
+-
+-#else
+-
+-static inline int
+-gpiochip_add_pin_range(struct gpio_chip *chip, const char *pinctl_name,
+-		       unsigned int gpio_offset, unsigned int pin_offset,
+-		       unsigned int npins)
+-{
+-	return 0;
+-}
+-
+-static inline void
+-gpiochip_remove_pin_ranges(struct gpio_chip *chip)
+-{
+-}
+-
+-#endif /* CONFIG_PINCTRL */
+-
+ #endif /* _ASM_GENERIC_GPIO_H */
+-- 
+1.7.9.5
+
+
