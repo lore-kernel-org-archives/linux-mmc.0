@@ -1,41 +1,57 @@
-From: Tejun Heo <tj@kernel.org>
-Subject: Re: [PATCH v2 1/1] block: blk-merge: don't merge the pages with
- non-contiguous descriptors
-Date: Wed, 16 Jan 2013 15:18:57 -0800
-Message-ID: <20130116231857.GU2668@htj.dyndns.org>
-References: <1358265681-25671-1-git-send-email-subhashj@codeaurora.org>
- <1358266794.10591.8.camel@dabdike.int.hansenpartnership.com>
- <50F64AC1.3040304@codeaurora.org>
- <1358332355.2384.11.camel@dabdike.int.hansenpartnership.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Fabio Estevam <festevam@gmail.com>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: Remove unused variables
+Date: Wed, 16 Jan 2013 22:51:56 -0200
+Message-ID: <1358383916-23614-1-git-send-email-festevam@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f43.google.com ([209.85.160.43]:51370 "EHLO
-	mail-pb0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755727Ab3APXTE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jan 2013 18:19:04 -0500
-Content-Disposition: inline
-In-Reply-To: <1358332355.2384.11.camel@dabdike.int.hansenpartnership.com>
+Received: from mail-yh0-f42.google.com ([209.85.213.42]:65497 "EHLO
+	mail-yh0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756161Ab3AQAwH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jan 2013 19:52:07 -0500
+Received: by mail-yh0-f42.google.com with SMTP id f35so340348yha.29
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Jan 2013 16:52:07 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: James Bottomley <James.Bottomley@HansenPartnership.com>
-Cc: Subhash Jadavani <subhashj@codeaurora.org>, linux-kernel@vger.kernel.org, linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, martin.petersen@oracle.com, asias@redhat.com, linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>
+To: cjb@laptop.org
+Cc: shawn.guo@linaro.org, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
 
-On Wed, Jan 16, 2013 at 10:32:35AM +0000, James Bottomley wrote:
-> diff --git a/arch/arm/mm/dma-mapping.c b/arch/arm/mm/dma-mapping.c
-> index 6b2fb87..ab88c5b 100644
-> --- a/arch/arm/mm/dma-mapping.c
-> +++ b/arch/arm/mm/dma-mapping.c
-> @@ -809,7 +809,7 @@ static void dma_cache_maint_page(struct page *page, unsigned long offset,
->  			op(vaddr, len, dir);
->  		}
->  		offset = 0;
-> -		page++;
-> +		page = pfn_to_page(page_to_pfn(page) + 1);
+From: Fabio Estevam <fabio.estevam@freescale.com>
 
-Probably page = nth_page(page, 1) is the better form.
+commit 842afc02cf (mmc: sdhci-esdhc-imx: do not reference platform data after 
+probe) introduced the following build warnings:
 
-Thanks.
+drivers/mmc/host/sdhci-esdhc-imx.c:149:30: warning: unused variable 'boarddata' [-Wunused-variable]
+drivers/mmc/host/sdhci-esdhc-imx.c:181:30: warning: unused variable 'boarddata' [-Wunused-variable]
 
+Remove the unused variables.
+
+Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |    5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index ae68bc9..509be3a 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -144,10 +144,6 @@ static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, i
+ 
+ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+ {
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+-	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+-
+ 	u32 val = readl(host->ioaddr + reg);
+ 
+ 	if (unlikely(reg == SDHCI_CAPABILITIES)) {
+@@ -178,7 +174,6 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+-	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+ 	u32 data;
+ 
+ 	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)) {
 -- 
-tejun
+1.7.9.5
+
