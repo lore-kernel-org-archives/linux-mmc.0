@@ -1,89 +1,39 @@
-From: Maya Erez <merez@codeaurora.org>
-Subject: [PATCH v1] mmc: core: move the cache disabling operation to mmc_suspend
-Date: Sun, 20 Jan 2013 13:29:16 +0200
-Message-ID: <1358681368-13044-1-git-send-email-merez@codeaurora.org>
-References: <n>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <n>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
+From: Vinod Koul <vinod.koul@intel.com>
+Subject: Re: [PATCH v2 0/3] dmaengine: add per channel capabilities api
+Date: Sun, 20 Jan 2013 04:37:34 -0800
+Message-ID: <20130120123734.GC23398@intel.com>
+References: <1357844826-30746-1-git-send-email-mporter@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:4321 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750920Ab3ATNC1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 20 Jan 2013 08:02:27 -0500
+Content-Disposition: inline
+In-Reply-To: <1357844826-30746-1-git-send-email-mporter@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Matt Porter <mporter@ti.com>
+Cc: Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 
-Cache control is an eMMC feature and in therefore should be
-part of MMC's bus resume operations, performed in mmc_suspend,
-rather than in the generic mmc_suspend_host().
+On Thu, Jan 10, 2013 at 02:07:03PM -0500, Matt Porter wrote:
+> The call is implemented as follows:
+> 
+> 	struct dmaengine_chan_caps
+> 	*dma_get_channel_caps(struct dma_chan *chan,
+> 			      enum dma_transfer_direction dir);
+> 
+> The dma transfer direction parameter may appear a bit out of place
+> but it is necessary since the direction field in struct
+> dma_slave_config was deprecated. In some cases, EDMA for one, it
+> is necessary for the dmaengine driver to have the burst and address
+> width slave configuration parameters available in order to compute
+> the maximum segment size that can be handle. Due to this requirement,
+> the calling order of this api is as follows:
+Well you are passing direction as argument so even in EDMA it doesn't seem to
+help you as you seem to need burst and width!. So why do you even need the
+direction to compute the capablities
 
-Signed-off-by: Maya Erez <merez@codeaurora.org>
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index aaed768..b438bb2 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2388,6 +2388,7 @@ EXPORT_SYMBOL(mmc_flush_cache);
-  * Turn the cache ON/OFF.
-  * Turning the cache OFF shall trigger flushing of the data
-  * to the non-volatile storage.
-+ * This function should be called with host claimed
-  */
- int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
- {
-@@ -2399,7 +2400,6 @@ int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
- 			mmc_card_is_removable(host))
- 		return err;
- 
--	mmc_claim_host(host);
- 	if (card && mmc_card_mmc(card) &&
- 			(card->ext_csd.cache_size > 0)) {
- 		enable = !!enable;
-@@ -2417,7 +2417,6 @@ int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
- 				card->ext_csd.cache_ctrl = enable;
- 		}
- 	}
--	mmc_release_host(host);
- 
- 	return err;
- }
-@@ -2436,10 +2435,6 @@ int mmc_suspend_host(struct mmc_host *host)
- 	cancel_delayed_work(&host->detect);
- 	mmc_flush_scheduled_work();
- 
--	err = mmc_cache_ctrl(host, 0);
--	if (err)
--		goto out;
--
- 	mmc_bus_get(host);
- 	if (host->bus_ops && !host->bus_dead) {
- 		if (host->bus_ops->suspend) {
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index e6e3911..dc17d40 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1379,6 +1379,11 @@ static int mmc_suspend(struct mmc_host *host)
- 	BUG_ON(!host->card);
- 
- 	mmc_claim_host(host);
-+
-+	err = mmc_cache_ctrl(host, 0);
-+	if (err)
-+		goto out;
-+
- 	if (mmc_can_poweroff_notify(host->card))
- 		err = mmc_poweroff_notify(host->card, EXT_CSD_POWER_OFF_SHORT);
- 	else if (mmc_card_can_sleep(host))
-@@ -1386,8 +1391,9 @@ static int mmc_suspend(struct mmc_host *host)
- 	else if (!mmc_host_is_spi(host))
- 		err = mmc_deselect_cards(host);
- 	host->card->state &= ~(MMC_STATE_HIGHSPEED | MMC_STATE_HIGHSPEED_200);
--	mmc_release_host(host);
- 
-+out:
-+	mmc_release_host(host);
- 	return err;
- }
- 
--- 
-1.7.3.3
--- 
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
-of Code Aurora Forum, hosted by The Linux Foundation
+--
+~Vinod
