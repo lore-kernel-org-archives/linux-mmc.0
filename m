@@ -1,98 +1,73 @@
-From: Matt Porter <mporter@ti.com>
-Subject: Re: [PATCH v2 2/3] dma: edma: add device_channel_caps() support
-Date: Sun, 20 Jan 2013 11:51:08 -0500
-Message-ID: <20130120165108.GE21407@beef>
+From: Vinod Koul <vinod.koul@intel.com>
+Subject: Re: [PATCH v2 0/3] dmaengine: add per channel capabilities api
+Date: Sun, 20 Jan 2013 19:15:23 -0800
+Message-ID: <20130121031523.GA21551@intel.com>
 References: <1357844826-30746-1-git-send-email-mporter@ti.com>
- <1357844826-30746-3-git-send-email-mporter@ti.com>
- <7bca07cce8884261b9828946dff5a076@DFLE72.ent.ti.com>
+ <abcd725c6216491da2b1054e5e11ad82@DFLE72.ent.ti.com>
+ <20130120163735.GC21407@beef>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f179.google.com ([209.85.216.179]:61169 "EHLO
-	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752351Ab3ATQp6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Jan 2013 11:45:58 -0500
+Received: from mga09.intel.com ([134.134.136.24]:22522 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752629Ab3AUDkN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 20 Jan 2013 22:40:13 -0500
 Content-Disposition: inline
-In-Reply-To: <7bca07cce8884261b9828946dff5a076@DFLE72.ent.ti.com>
+In-Reply-To: <20130120163735.GC21407@beef>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vinod Koul <vinod.koul@intel.com>
+To: Matt Porter <mporter@ti.com>
 Cc: Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 
-On Sun, Jan 20, 2013 at 01:03:21PM +0000, Vinod Koul wrote:
-> On Thu, Jan 10, 2013 at 02:07:05PM -0500, Matt Porter wrote:
-> > Implement device_channel_caps().
-> > 
-> > EDMA has a finite set of PaRAM slots available for linking
-> > a multi-segment SG transfer. In order to prevent any one
-> > channel from consuming all PaRAM slots to fulfill a large SG
-> > transfer, the driver reports a static per-channel max number
-> > of SG segments it will handle.
-> > 
-> > The maximum size of SG segment is limited by the slave config
-> > maxburst and addr_width for the channel in question. These values
-> > are used from the current channel config to calculate and return
-> > the max segment length cap.
-> > 
-> > Signed-off-by: Matt Porter <mporter@ti.com>
-> > ---
-> >  drivers/dma/edma.c |   27 +++++++++++++++++++++++++++
-> >  1 file changed, 27 insertions(+)
-> > 
-> > diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
-> > index 82c8672..fc4b9db 100644
-> > --- a/drivers/dma/edma.c
-> > +++ b/drivers/dma/edma.c
-> > @@ -70,6 +70,7 @@ struct edma_chan {
-> >  	bool				alloced;
-> >  	int				slot[EDMA_MAX_SLOTS];
-> >  	struct dma_slave_config		cfg;
-> > +	struct dmaengine_chan_caps	caps;
-> >  };
-> >  
-> >  struct edma_cc {
-> > @@ -462,6 +463,28 @@ static void edma_issue_pending(struct dma_chan *chan)
-> >  	spin_unlock_irqrestore(&echan->vchan.lock, flags);
-> >  }
-> >  
-> > +static struct dmaengine_chan_caps
-> > +*edma_get_channel_caps(struct dma_chan *chan, enum dma_transfer_direction dir)
-> > +{
-> > +	struct edma_chan *echan;
-> > +	enum dma_slave_buswidth width = 0;
-> > +	u32 burst = 0;
-> > +
-> > +	if (chan) {
-> I think this check is redundant.
+On Sun, Jan 20, 2013 at 11:37:35AM -0500, Matt Porter wrote:
+> On Sun, Jan 20, 2013 at 12:37:34PM +0000, Vinod Koul wrote:
+> > On Thu, Jan 10, 2013 at 02:07:03PM -0500, Matt Porter wrote:
+> > > The call is implemented as follows:
+> > > 
+> > > 	struct dmaengine_chan_caps
+> > > 	*dma_get_channel_caps(struct dma_chan *chan,
+> > > 			      enum dma_transfer_direction dir);
+> > > 
+> > > The dma transfer direction parameter may appear a bit out of place
+> > > but it is necessary since the direction field in struct
+> > > dma_slave_config was deprecated. In some cases, EDMA for one, it
+> > > is necessary for the dmaengine driver to have the burst and address
+> > > width slave configuration parameters available in order to compute
+> > > the maximum segment size that can be handle. Due to this requirement,
+> > > the calling order of this api is as follows:
+> > Well you are passing direction as argument so even in EDMA it doesn't seem to
+> > help you as you seem to need burst and width!. So why do you even need the
+> > direction to compute the capablities
+> 
+> Yes, I need burst and width, but they are dependent on direction (dst vs
+> src, as stored in the slave channel config). Ok, so I think I know where
+> this is leading...the problem is probably that I made an implicit
+> dependency on burst and width here. The expectation in this
+And also due to wrong documentation. This is what you have put up the flow as:
+Due to this requirement,
+the calling order of this api is as follows:
 
-Yes, will remove.
+1. Allocate a DMA slave channel
+1a. [Optionally] Get channel capabilities
+2. Set slave and controller specific parameters
+3. Get a descriptor for transaction
+4. Submit the transaction
+5. Issue pending requests and wait for callback notification
 
-> > +		echan = to_edma_chan(chan);
-> > +		if (dir == DMA_MEM_TO_DEV) {
-> > +			width = echan->cfg.dst_addr_width;
-> > +			burst = echan->cfg.dst_maxburst;
-> Per you API example burst and width is not set yet, so this doesn't make sense
+Now when we query capablities, slave parameters _are_not_set_.
+So seems like you have thought something and written something else!
 
-The explanation in the cover letter mentions that dmaengine_slave_config() is
-required to be called prior to dmaengine_get_channel_caps(). If we
-switch to the alternative API, then that would go away including the
-dependency on direction.
+Which brings me to the point on what are we trying to query:
+a) API capability, dont need slave parameters for that
+b) Sg segment length and numbers: Well these are capabilities, so it tells
+you what is the maximum I can do. IMO it doesn't make sense to tie it down to
+burst, width etc. For that configuration you are checking maximum. What this
+needs to return is what is the maximum length it supports and maximum number of
+sg list the h/w can use. Also if you return your burst and width capablity, then
+any client can easily find out what is the length byte value it can hold.
 
-> > +		} else if (dir == DMA_DEV_TO_MEM) {
-> > +			width = echan->cfg.src_addr_width;
-> > +			burst = echan->cfg.src_maxburst;
-> > +		}
-> > +		echan->caps.seg_len = (SZ_64K - 1) * width * burst;
-> Also the defination of API is max, above computation doesn't make sense to me!
+If you feel this computaion if client specific, though looking at doesnt make me
+think so, you can add a callback for this computaion given the parameters.
 
-Ok, so in this case, the slave driver has informed the dmaengine driver
-that the max burst for the channel is foo. That's in units of
-addr_width. On the EDMA DMAC, we program burst transfers by setting ACNT
-to our per-transfer width (FIFO width in the slave SG case we are
-covering here) then BCNT gets the maxburst setting. We then have a CCNT
-field for EDMA that has a limit of SZ_64K-1 transfers. Thus, if a slave
-driver tells us the maxburst for the channel is foo and our width is
-bar, the maximum size of an SG segment in that configuration is:
-(SZ_64K - 1) * bar * foo. 
-
--Matt
+--
+~Vinod
