@@ -1,95 +1,90 @@
-From: Thierry Reding <thierry.reding@avionic-design.de>
-Subject: [PATCH 18/33] mmc: Convert to devm_ioremap_resource()
-Date: Mon, 21 Jan 2013 11:09:11 +0100
-Message-ID: <1358762966-20791-19-git-send-email-thierry.reding@avionic-design.de>
-References: <1358762966-20791-1-git-send-email-thierry.reding@avionic-design.de>
+From: Kyoungil Kim <ki0351.kim@samsung.com>
+Subject: [PATCH] mmc: dw_mmc: read all data in FIFO after Data transfer over
+ interrupt in pio mode
+Date: Mon, 21 Jan 2013 19:19:00 +0900
+Message-ID: <001701cdf7c0$bb3c5fd0$31b51f70$%kim@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:53309 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752986Ab3AUKJp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jan 2013 05:09:45 -0500
-In-Reply-To: <1358762966-20791-1-git-send-email-thierry.reding@avionic-design.de>
+Received: from mailout2.samsung.com ([203.254.224.25]:32650 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752946Ab3AUKTD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jan 2013 05:19:03 -0500
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MGZ00LJ10NHAJ20@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 21 Jan 2013 19:19:01 +0900 (KST)
+Received: from DOKI0351KIM04 ([12.23.119.96])
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0MGZ006FJ0NO2660@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 21 Jan 2013 19:19:01 +0900 (KST)
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, Ben Dooks <ben-linux@fluff.org>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Kyoungil Kim' <ki0351.kim@samsung.com>, 'Seungwon Jeon' <tgih.jun@samsung.com>
 
-Convert all uses of devm_request_and_ioremap() to the newly introduced
-devm_ioremap_resource() which provides more consistent error handling.
+In dwc manual, the below contents are described.
+"During end of packet, interrupt is not generated if threshold
+programming is larger than any remaining data. It is responsibility
+of host to read remaining bytes on seeing Data Transfer Done
+interrupt"
+We also have seen the data cannot be read fully
+when "sg_miter->length" is less than FIFO size.
 
-devm_ioremap_resource() provides its own error messages so all explicit
-error messages can be removed from the failure code paths.
-
-Signed-off-by: Thierry Reding <thierry.reding@avionic-design.de>
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Ben Dooks <ben-linux@fluff.org>
-Cc: linux-mmc@vger.kernel.org
+Signed-off-by: Kyoungil Kim <ki0351.kim@samsung.com>
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
- drivers/mmc/host/dw_mmc-pltfm.c | 7 ++++---
- drivers/mmc/host/mxs-mmc.c      | 6 +++---
- drivers/mmc/host/sdhci-s3c.c    | 7 +++----
- 3 files changed, 10 insertions(+), 10 deletions(-)
+ drivers/mmc/host/dw_mmc.c |   11 +++++++----
+ 1 files changed, 7 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-index 5e1fb1d..41c27b7 100644
---- a/drivers/mmc/host/dw_mmc-pltfm.c
-+++ b/drivers/mmc/host/dw_mmc-pltfm.c
-@@ -10,6 +10,7 @@
-  * (at your option) any later version.
-  */
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 323c502..afcc0f4 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1430,7 +1430,7 @@ static void dw_mci_pull_data(struct dw_mci *host, void *buf, int cnt)
+ 	host->pull_data(host, buf, cnt);
+ }
  
-+#include <linux/err.h>
- #include <linux/interrupt.h>
- #include <linux/module.h>
- #include <linux/io.h>
-@@ -46,9 +47,9 @@ int dw_mci_pltfm_register(struct platform_device *pdev,
- 	host->dev = &pdev->dev;
- 	host->irq_flags = 0;
- 	host->pdata = pdev->dev.platform_data;
--	host->regs = devm_request_and_ioremap(&pdev->dev, regs);
--	if (!host->regs)
--		return -ENOMEM;
-+	host->regs = devm_ioremap_resource(&pdev->dev, regs);
-+	if (IS_ERR(host->regs))
-+		return PTR_ERR(host->regs);
+-static void dw_mci_read_data_pio(struct dw_mci *host)
++static void dw_mci_read_data_pio(struct dw_mci *host, u8 int_data_over)
+ {
+ 	struct sg_mapping_iter *sg_miter = &host->sg_miter;
+ 	void *buf;
+@@ -1465,7 +1465,10 @@ static void dw_mci_read_data_pio(struct dw_mci *host)
+ 		sg_miter->consumed = offset;
+ 		status = mci_readl(host, MINTSTS);
+ 		mci_writel(host, RINTSTS, SDMMC_INT_RXDR);
+-	} while (status & SDMMC_INT_RXDR); /*if the RXDR is ready read again*/
++	/* if the RXDR is ready read again */
++	} while ((status & SDMMC_INT_RXDR) ||
++			(int_data_over &&
++			 SDMMC_GET_FCNT(mci_readl(host, STATUS))));
+ 	data->bytes_xfered += nbytes;
  
- 	if (drv_data && drv_data->init) {
- 		ret = drv_data->init(host);
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 206fe49..5b66555 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -614,9 +614,9 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 	host = mmc_priv(mmc);
- 	ssp = &host->ssp;
- 	ssp->dev = &pdev->dev;
--	ssp->base = devm_request_and_ioremap(&pdev->dev, iores);
--	if (!ssp->base) {
--		ret = -EADDRNOTAVAIL;
-+	ssp->base = devm_ioremap_resource(&pdev->dev, iores);
-+	if (IS_ERR(ssp->base)) {
-+		ret = PTR_ERR(ssp->base);
- 		goto out_mmc_free;
- 	}
+ 	if (!remain) {
+@@ -1597,7 +1600,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 			smp_wmb();
+ 			if (host->dir_status == DW_MCI_RECV_STATUS) {
+ 				if (host->sg != NULL)
+-					dw_mci_read_data_pio(host);
++					dw_mci_read_data_pio(host, 1);
+ 			}
+ 			set_bit(EVENT_DATA_COMPLETE, &host->pending_events);
+ 			tasklet_schedule(&host->tasklet);
+@@ -1606,7 +1609,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 		if (pending & SDMMC_INT_RXDR) {
+ 			mci_writel(host, RINTSTS, SDMMC_INT_RXDR);
+ 			if (host->dir_status == DW_MCI_RECV_STATUS && host->sg)
+-				dw_mci_read_data_pio(host);
++				dw_mci_read_data_pio(host, 0);
+ 		}
  
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 82a8de1..a0c6214 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -651,10 +651,9 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
- #endif
- 
- 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	host->ioaddr = devm_request_and_ioremap(&pdev->dev, res);
--	if (!host->ioaddr) {
--		dev_err(dev, "failed to map registers\n");
--		ret = -ENXIO;
-+	host->ioaddr = devm_ioremap_resource(&pdev->dev, res);
-+	if (IS_ERR(host->ioaddr)) {
-+		ret = PTR_ERR(host->ioaddr);
- 		goto err_req_regs;
- 	}
- 
+ 		if (pending & SDMMC_INT_TXDR) {
 -- 
-1.8.1.1
+1.7.4.1
+
 
