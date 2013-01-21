@@ -1,45 +1,379 @@
-From: Matt Porter <mporter@ti.com>
-Subject: Re: [PATCH v2 2/3] dma: edma: add device_channel_caps() support
-Date: Mon, 21 Jan 2013 13:29:21 -0500
-Message-ID: <20130121182921.GF10020@beef>
-References: <1357844826-30746-1-git-send-email-mporter@ti.com>
- <1357844826-30746-3-git-send-email-mporter@ti.com>
- <7bca07cce8884261b9828946dff5a076@DFLE72.ent.ti.com>
- <20130120165108.GE21407@beef>
- <bfaa71fba6ed468cbfd2d79604729b77@DFLE72.ent.ti.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH] mmc: mmci: Fixup and cleanup code for DMA handling
+Date: Mon, 21 Jan 2013 21:15:26 +0100
+Message-ID: <1358799327-23431-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f176.google.com ([209.85.216.176]:33103 "EHLO
-	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752782Ab3AUS3X (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jan 2013 13:29:23 -0500
-Content-Disposition: inline
-In-Reply-To: <bfaa71fba6ed468cbfd2d79604729b77@DFLE72.ent.ti.com>
+Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:37246 "EHLO
+	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756532Ab3AUUQF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jan 2013 15:16:05 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vinod Koul <vinod.koul@intel.com>
-Cc: Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Per Forlin <per.forlin@stericsson.com>
 
-On Mon, Jan 21, 2013 at 03:16:32AM +0000, Vinod Koul wrote:
-> On Sun, Jan 20, 2013 at 11:51:08AM -0500, Matt Porter wrote:
-> > The explanation in the cover letter mentions that dmaengine_slave_config() is
-> > required to be called prior to dmaengine_get_channel_caps(). If we
-> > switch to the alternative API, then that would go away including the
-> > dependency on direction.
-> Nope you got that wrong!
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-:) Yes, dropped the ball there, should have been for the api to make
-sense as implemented:
+The cookie is now used to indicate if dma_unmap_sg shall be
+done in post_request. At DMA errors, the DMA job is immediately
+not only terminated but also unmapped. To indicate that this
+has been done the cookie is reset to zero. post_request will
+thus only do dma_umap_sg for requests which has a cookie not set
+to zero.
 
-1. Allocate a DMA slave channel
-2. Set slave and controller specific parameters
-2a. [Optionally] Get channel capabilities
-3. Get a descriptor for transaction
-4. Submit the transaction
-5. Issue pending requests and wait for callback notification
+Some corresponding duplicated code could then be removed and
+moreover some corrections at DMA errors for terminating the same
+DMA job twice has also been fixed.
 
-FWIW, the implementation example in the davinci mmc client driver shows
-proper use as in the correct documentation above.
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Per Forlin <per.forlin@stericsson.com>
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
+---
+This patch has been tested both on a u8500 board and an ARM-RealView
+PB1176 board.
 
--Matt
+Changes in v4:
+	Keep behavior were error code was not overwritten in dma_finalize.
+        Rebased on top of Linux 3.8-rc4.
+
+Changes in v3:
+        Add ack from Linus Walleij.
+        Rebased on top of Linux 3.8-rc2
+
+Changes in v2:
+        Rebased patch on top of Linux 3.7
+
+---
+ drivers/mmc/host/mmci.c |  187 ++++++++++++++++++++++++++---------------------
+ 1 file changed, 105 insertions(+), 82 deletions(-)
+
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 1507723..f910a37 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -134,6 +134,24 @@ static struct variant_data variant_ux500v2 = {
+ };
+ 
+ /*
++ * Validate mmc prerequisites
++ */
++static int mmci_validate_data(struct mmci_host *host,
++			      struct mmc_data *data)
++{
++	if (!data)
++		return 0;
++
++	if (!is_power_of_2(data->blksz)) {
++		dev_err(mmc_dev(host->mmc),
++			"unsupported block size (%d bytes)\n", data->blksz);
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++/*
+  * This must be called with host->lock held
+  */
+ static void mmci_write_clkreg(struct mmci_host *host, u32 clk)
+@@ -352,10 +370,33 @@ static inline void mmci_dma_release(struct mmci_host *host)
+ 	host->dma_rx_channel = host->dma_tx_channel = NULL;
+ }
+ 
++static void mmci_dma_data_error(struct mmci_host *host)
++{
++	dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
++	dmaengine_terminate_all(host->dma_current);
++	host->dma_current = NULL;
++	host->dma_desc_current = NULL;
++	host->data->host_cookie = 0;
++}
++
+ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+ {
+-	struct dma_chan *chan = host->dma_current;
++	struct dma_chan *chan;
+ 	enum dma_data_direction dir;
++
++	if (data->flags & MMC_DATA_READ) {
++		dir = DMA_FROM_DEVICE;
++		chan = host->dma_rx_channel;
++	} else {
++		dir = DMA_TO_DEVICE;
++		chan = host->dma_tx_channel;
++	}
++
++	dma_unmap_sg(chan->device->dev, data->sg, data->sg_len, dir);
++}
++
++static void mmci_dma_finalize(struct mmci_host *host, struct mmc_data *data)
++{
+ 	u32 status;
+ 	int i;
+ 
+@@ -374,19 +415,13 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+ 	 * contiguous buffers.  On TX, we'll get a FIFO underrun error.
+ 	 */
+ 	if (status & MCI_RXDATAAVLBLMASK) {
+-		dmaengine_terminate_all(chan);
++		mmci_dma_data_error(host);
+ 		if (!data->error)
+ 			data->error = -EIO;
+ 	}
+ 
+-	if (data->flags & MMC_DATA_WRITE) {
+-		dir = DMA_TO_DEVICE;
+-	} else {
+-		dir = DMA_FROM_DEVICE;
+-	}
+-
+ 	if (!data->host_cookie)
+-		dma_unmap_sg(chan->device->dev, data->sg, data->sg_len, dir);
++		mmci_dma_unmap(host, data);
+ 
+ 	/*
+ 	 * Use of DMA with scatter-gather is impossible.
+@@ -396,16 +431,15 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+ 		dev_err(mmc_dev(host->mmc), "buggy DMA detected. Taking evasive action.\n");
+ 		mmci_dma_release(host);
+ 	}
+-}
+ 
+-static void mmci_dma_data_error(struct mmci_host *host)
+-{
+-	dev_err(mmc_dev(host->mmc), "error during DMA transfer!\n");
+-	dmaengine_terminate_all(host->dma_current);
++	host->dma_current = NULL;
++	host->dma_desc_current = NULL;
+ }
+ 
+-static int mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
+-			      struct mmci_host_next *next)
++/* prepares DMA channel and DMA descriptor, returns non-zero on failure */
++static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
++				struct dma_chan **dma_chan,
++				struct dma_async_tx_descriptor **dma_desc)
+ {
+ 	struct variant_data *variant = host->variant;
+ 	struct dma_slave_config conf = {
+@@ -423,16 +457,6 @@ static int mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 	enum dma_data_direction buffer_dirn;
+ 	int nr_sg;
+ 
+-	/* Check if next job is already prepared */
+-	if (data->host_cookie && !next &&
+-	    host->dma_current && host->dma_desc_current)
+-		return 0;
+-
+-	if (!next) {
+-		host->dma_current = NULL;
+-		host->dma_desc_current = NULL;
+-	}
+-
+ 	if (data->flags & MMC_DATA_READ) {
+ 		conf.direction = DMA_DEV_TO_MEM;
+ 		buffer_dirn = DMA_FROM_DEVICE;
+@@ -462,29 +486,41 @@ static int mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 	if (!desc)
+ 		goto unmap_exit;
+ 
+-	if (next) {
+-		next->dma_chan = chan;
+-		next->dma_desc = desc;
+-	} else {
+-		host->dma_current = chan;
+-		host->dma_desc_current = desc;
+-	}
++	*dma_chan = chan;
++	*dma_desc = desc;
+ 
+ 	return 0;
+ 
+  unmap_exit:
+-	if (!next)
+-		dmaengine_terminate_all(chan);
+ 	dma_unmap_sg(device->dev, data->sg, data->sg_len, buffer_dirn);
+ 	return -ENOMEM;
+ }
+ 
++static inline int mmci_dma_prep_data(struct mmci_host *host,
++				     struct mmc_data *data)
++{
++	/* Check if next job is already prepared. */
++	if (host->dma_current && host->dma_desc_current)
++		return 0;
++
++	/* No job were prepared thus do it now. */
++	return __mmci_dma_prep_data(host, data, &host->dma_current,
++				    &host->dma_desc_current);
++}
++
++static inline int mmci_dma_prep_next(struct mmci_host *host,
++				     struct mmc_data *data)
++{
++	struct mmci_host_next *nd = &host->next_data;
++	return __mmci_dma_prep_data(host, data, &nd->dma_chan, &nd->dma_desc);
++}
++
+ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+ {
+ 	int ret;
+ 	struct mmc_data *data = host->data;
+ 
+-	ret = mmci_dma_prep_data(host, host->data, NULL);
++	ret = mmci_dma_prep_data(host, host->data);
+ 	if (ret)
+ 		return ret;
+ 
+@@ -514,19 +550,11 @@ static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
+ {
+ 	struct mmci_host_next *next = &host->next_data;
+ 
+-	if (data->host_cookie && data->host_cookie != next->cookie) {
+-		pr_warning("[%s] invalid cookie: data->host_cookie %d"
+-		       " host->next_data.cookie %d\n",
+-		       __func__, data->host_cookie, host->next_data.cookie);
+-		data->host_cookie = 0;
+-	}
+-
+-	if (!data->host_cookie)
+-		return;
++	WARN_ON(data->host_cookie && data->host_cookie != next->cookie);
++	WARN_ON(!data->host_cookie && (next->dma_desc || next->dma_chan));
+ 
+ 	host->dma_desc_current = next->dma_desc;
+ 	host->dma_current = next->dma_chan;
+-
+ 	next->dma_desc = NULL;
+ 	next->dma_chan = NULL;
+ }
+@@ -541,19 +569,13 @@ static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq,
+ 	if (!data)
+ 		return;
+ 
+-	if (data->host_cookie) {
+-		data->host_cookie = 0;
++	BUG_ON(data->host_cookie);
++
++	if (mmci_validate_data(host, data))
+ 		return;
+-	}
+ 
+-	/* if config for dma */
+-	if (((data->flags & MMC_DATA_WRITE) && host->dma_tx_channel) ||
+-	    ((data->flags & MMC_DATA_READ) && host->dma_rx_channel)) {
+-		if (mmci_dma_prep_data(host, data, nd))
+-			data->host_cookie = 0;
+-		else
+-			data->host_cookie = ++nd->cookie < 0 ? 1 : nd->cookie;
+-	}
++	if (!mmci_dma_prep_next(host, data))
++		data->host_cookie = ++nd->cookie < 0 ? 1 : nd->cookie;
+ }
+ 
+ static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
+@@ -561,29 +583,23 @@ static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
+ {
+ 	struct mmci_host *host = mmc_priv(mmc);
+ 	struct mmc_data *data = mrq->data;
+-	struct dma_chan *chan;
+-	enum dma_data_direction dir;
+ 
+-	if (!data)
++	if (!data || !data->host_cookie)
+ 		return;
+ 
+-	if (data->flags & MMC_DATA_READ) {
+-		dir = DMA_FROM_DEVICE;
+-		chan = host->dma_rx_channel;
+-	} else {
+-		dir = DMA_TO_DEVICE;
+-		chan = host->dma_tx_channel;
+-	}
++	mmci_dma_unmap(host, data);
+ 
++	if (err) {
++		struct mmci_host_next *next = &host->next_data;
++		struct dma_chan *chan;
++		if (data->flags & MMC_DATA_READ)
++			chan = host->dma_rx_channel;
++		else
++			chan = host->dma_tx_channel;
++		dmaengine_terminate_all(chan);
+ 
+-	/* if config for dma */
+-	if (chan) {
+-		if (err)
+-			dmaengine_terminate_all(chan);
+-		if (data->host_cookie)
+-			dma_unmap_sg(mmc_dev(host->mmc), data->sg,
+-				     data->sg_len, dir);
+-		mrq->data->host_cookie = 0;
++		next->dma_desc = NULL;
++		next->dma_chan = NULL;
+ 	}
+ }
+ 
+@@ -604,6 +620,11 @@ static inline void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
+ {
+ }
+ 
++static inline void mmci_dma_finalize(struct mmci_host *host,
++				     struct mmc_data *data)
++{
++}
++
+ static inline void mmci_dma_data_error(struct mmci_host *host)
+ {
+ }
+@@ -751,8 +772,10 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 		u32 remain, success;
+ 
+ 		/* Terminate the DMA transfer */
+-		if (dma_inprogress(host))
++		if (dma_inprogress(host)) {
+ 			mmci_dma_data_error(host);
++			mmci_dma_unmap(host, data);
++		}
+ 
+ 		/*
+ 		 * Calculate how far we are into the transfer.  Note that
+@@ -791,7 +814,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 
+ 	if (status & MCI_DATAEND || data->error) {
+ 		if (dma_inprogress(host))
+-			mmci_dma_unmap(host, data);
++			mmci_dma_finalize(host, data);
+ 		mmci_stop_data(host);
+ 
+ 		if (!data->error)
+@@ -828,8 +851,10 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 	if (!cmd->data || cmd->error) {
+ 		if (host->data) {
+ 			/* Terminate the DMA transfer */
+-			if (dma_inprogress(host))
++			if (dma_inprogress(host)) {
+ 				mmci_dma_data_error(host);
++				mmci_dma_unmap(host, host->data);
++			}
+ 			mmci_stop_data(host);
+ 		}
+ 		mmci_request_end(host, cmd->mrq);
+@@ -1055,10 +1080,8 @@ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 
+ 	WARN_ON(host->mrq != NULL);
+ 
+-	if (mrq->data && !is_power_of_2(mrq->data->blksz)) {
+-		dev_err(mmc_dev(mmc), "unsupported block size (%d bytes)\n",
+-			mrq->data->blksz);
+-		mrq->cmd->error = -EINVAL;
++	mrq->cmd->error = mmci_validate_data(host, mrq->data);
++	if (mrq->cmd->error) {
+ 		mmc_request_done(mmc, mrq);
+ 		return;
+ 	}
+-- 
+1.7.10
+
