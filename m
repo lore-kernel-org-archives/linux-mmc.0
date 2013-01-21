@@ -1,90 +1,161 @@
-From: Kyoungil Kim <ki0351.kim@samsung.com>
-Subject: [PATCH] mmc: dw_mmc: read all data in FIFO after Data transfer over
- interrupt in pio mode
-Date: Mon, 21 Jan 2013 19:19:00 +0900
-Message-ID: <001701cdf7c0$bb3c5fd0$31b51f70$%kim@samsung.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: [PATCH 4/6] mmc: sdhci: rename platform_8bit_width to platform_bus_width
+Date: Mon, 21 Jan 2013 19:02:27 +0800
+Message-ID: <1358766149-9534-5-git-send-email-shawn.guo@linaro.org>
+References: <1358766149-9534-1-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:32650 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752946Ab3AUKTD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jan 2013 05:19:03 -0500
-Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout2.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MGZ00LJ10NHAJ20@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 21 Jan 2013 19:19:01 +0900 (KST)
-Received: from DOKI0351KIM04 ([12.23.119.96])
- by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0MGZ006FJ0NO2660@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 21 Jan 2013 19:19:01 +0900 (KST)
-Content-language: ko
+Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:37867
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752002Ab3AUKeM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jan 2013 05:34:12 -0500
+In-Reply-To: <1358766149-9534-1-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Kyoungil Kim' <ki0351.kim@samsung.com>, 'Seungwon Jeon' <tgih.jun@samsung.com>
+Cc: Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>
 
-In dwc manual, the below contents are described.
-"During end of packet, interrupt is not generated if threshold
-programming is larger than any remaining data. It is responsibility
-of host to read remaining bytes on seeing Data Transfer Done
-interrupt"
-We also have seen the data cannot be read fully
-when "sg_miter->length" is less than FIFO size.
+From: Sascha Hauer <s.hauer@pengutronix.de>
 
-Signed-off-by: Kyoungil Kim <ki0351.kim@samsung.com>
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+The 8bit in the function name is misleading. When set, it will be
+used to set the bus width, regardless of whether 8bit or another
+bus width is requested, so change the function name to
+platform_bus_width.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
 ---
- drivers/mmc/host/dw_mmc.c |   11 +++++++----
- 1 files changed, 7 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-pci.c   |    4 ++--
+ drivers/mmc/host/sdhci-pxav2.c |    2 +-
+ drivers/mmc/host/sdhci-s3c.c   |    8 ++++----
+ drivers/mmc/host/sdhci-tegra.c |    4 ++--
+ drivers/mmc/host/sdhci.c       |    8 ++++----
+ drivers/mmc/host/sdhci.h       |    2 +-
+ 6 files changed, 14 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 323c502..afcc0f4 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1430,7 +1430,7 @@ static void dw_mci_pull_data(struct dw_mci *host, void *buf, int cnt)
- 	host->pull_data(host, buf, cnt);
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index c7dd0cb..c7ccf30 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -935,7 +935,7 @@ static int sdhci_pci_enable_dma(struct sdhci_host *host)
+ 	return 0;
  }
  
--static void dw_mci_read_data_pio(struct dw_mci *host)
-+static void dw_mci_read_data_pio(struct dw_mci *host, u8 int_data_over)
+-static int sdhci_pci_8bit_width(struct sdhci_host *host, int width)
++static int sdhci_pci_bus_width(struct sdhci_host *host, int width)
  {
- 	struct sg_mapping_iter *sg_miter = &host->sg_miter;
- 	void *buf;
-@@ -1465,7 +1465,10 @@ static void dw_mci_read_data_pio(struct dw_mci *host)
- 		sg_miter->consumed = offset;
- 		status = mci_readl(host, MINTSTS);
- 		mci_writel(host, RINTSTS, SDMMC_INT_RXDR);
--	} while (status & SDMMC_INT_RXDR); /*if the RXDR is ready read again*/
-+	/* if the RXDR is ready read again */
-+	} while ((status & SDMMC_INT_RXDR) ||
-+			(int_data_over &&
-+			 SDMMC_GET_FCNT(mci_readl(host, STATUS))));
- 	data->bytes_xfered += nbytes;
+ 	u8 ctrl;
  
- 	if (!remain) {
-@@ -1597,7 +1600,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 			smp_wmb();
- 			if (host->dir_status == DW_MCI_RECV_STATUS) {
- 				if (host->sg != NULL)
--					dw_mci_read_data_pio(host);
-+					dw_mci_read_data_pio(host, 1);
- 			}
- 			set_bit(EVENT_DATA_COMPLETE, &host->pending_events);
- 			tasklet_schedule(&host->tasklet);
-@@ -1606,7 +1609,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 		if (pending & SDMMC_INT_RXDR) {
- 			mci_writel(host, RINTSTS, SDMMC_INT_RXDR);
- 			if (host->dir_status == DW_MCI_RECV_STATUS && host->sg)
--				dw_mci_read_data_pio(host);
-+				dw_mci_read_data_pio(host, 0);
- 		}
+@@ -977,7 +977,7 @@ static void sdhci_pci_hw_reset(struct sdhci_host *host)
  
- 		if (pending & SDMMC_INT_TXDR) {
+ static struct sdhci_ops sdhci_pci_ops = {
+ 	.enable_dma	= sdhci_pci_enable_dma,
+-	.platform_8bit_width	= sdhci_pci_8bit_width,
++	.platform_bus_width	= sdhci_pci_bus_width,
+ 	.hw_reset		= sdhci_pci_hw_reset,
+ };
+ 
+diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+index ac854aa..7e57565 100644
+--- a/drivers/mmc/host/sdhci-pxav2.c
++++ b/drivers/mmc/host/sdhci-pxav2.c
+@@ -121,7 +121,7 @@ static u32 pxav2_get_max_clock(struct sdhci_host *host)
+ static struct sdhci_ops pxav2_sdhci_ops = {
+ 	.get_max_clock = pxav2_get_max_clock,
+ 	.platform_reset_exit = pxav2_set_private_registers,
+-	.platform_8bit_width = pxav2_mmc_set_width,
++	.platform_bus_width = pxav2_mmc_set_width,
+ };
+ 
+ #ifdef CONFIG_OF
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 82a8de1..b16dae0 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -332,14 +332,14 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
+ }
+ 
+ /**
+- * sdhci_s3c_platform_8bit_width - support 8bit buswidth
++ * sdhci_s3c_platform_bus_width - support 8bit buswidth
+  * @host: The SDHCI host being queried
+  * @width: MMC_BUS_WIDTH_ macro for the bus width being requested
+  *
+  * We have 8-bit width support but is not a v3 controller.
+- * So we add platform_8bit_width() and support 8bit width.
++ * So we add platform_bus_width() and support 8bit width.
+  */
+-static int sdhci_s3c_platform_8bit_width(struct sdhci_host *host, int width)
++static int sdhci_s3c_platform_bus_width(struct sdhci_host *host, int width)
+ {
+ 	u8 ctrl;
+ 
+@@ -369,7 +369,7 @@ static struct sdhci_ops sdhci_s3c_ops = {
+ 	.get_max_clock		= sdhci_s3c_get_max_clk,
+ 	.set_clock		= sdhci_s3c_set_clock,
+ 	.get_min_clock		= sdhci_s3c_get_min_clock,
+-	.platform_8bit_width	= sdhci_s3c_platform_8bit_width,
++	.platform_bus_width	= sdhci_s3c_platform_bus_width,
+ };
+ 
+ static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 3695b2e..5a600a5 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -143,7 +143,7 @@ static void tegra_sdhci_reset_exit(struct sdhci_host *host, u8 mask)
+ 	}
+ }
+ 
+-static int tegra_sdhci_8bit(struct sdhci_host *host, int bus_width)
++static int tegra_sdhci_buswidth(struct sdhci_host *host, int bus_width)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_tegra *tegra_host = pltfm_host->priv;
+@@ -170,7 +170,7 @@ static struct sdhci_ops tegra_sdhci_ops = {
+ 	.read_l     = tegra_sdhci_readl,
+ 	.read_w     = tegra_sdhci_readw,
+ 	.write_l    = tegra_sdhci_writel,
+-	.platform_8bit_width = tegra_sdhci_8bit,
++	.platform_bus_width = tegra_sdhci_buswidth,
+ 	.platform_reset_exit = tegra_sdhci_reset_exit,
+ };
+ 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 336ab06..3bb9b88 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1395,11 +1395,11 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 	/*
+ 	 * If your platform has 8-bit width support but is not a v3 controller,
+ 	 * or if it requires special setup code, you should implement that in
+-	 * platform_8bit_width().
++	 * platform_bus_width().
+ 	 */
+-	if (host->ops->platform_8bit_width)
+-		host->ops->platform_8bit_width(host, ios->bus_width);
+-	else {
++	if (host->ops->platform_bus_width) {
++		host->ops->platform_bus_width(host, ios->bus_width);
++	} else {
+ 		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+ 		if (ios->bus_width == MMC_BUS_WIDTH_8) {
+ 			ctrl &= ~SDHCI_CTRL_4BITBUS;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index a6d69b7..c8d11b9 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -269,7 +269,7 @@ struct sdhci_ops {
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
+-	int		(*platform_8bit_width)(struct sdhci_host *host,
++	int		(*platform_bus_width)(struct sdhci_host *host,
+ 					       int width);
+ 	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
+ 					     u8 power_mode);
 -- 
-1.7.4.1
+1.7.9.5
 
 
