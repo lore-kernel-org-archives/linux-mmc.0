@@ -1,35 +1,70 @@
-From: Alan Cox <alan@linux.intel.com>
-Subject: Re: [PATCH] goldfish: emulated MMC device
-Date: Tue, 22 Jan 2013 22:47:01 +0000
-Message-ID: <20130122224701.5785e345@bob.linux.org.uk>
-References: <20130121234339.19859.80987.stgit@bob.linux.org.uk>
-	<CAGxe1ZGu4mQRPy=17-G2pBqVOTgwHs4pAsJZ8Bb2V+HNiiq2JA@mail.gmail.com>
+From: Samuel Ortiz <sameo@linux.intel.com>
+Subject: Re: [PATCH v4 0/8] rtsx patchset for MFD and MMC tree
+Date: Tue, 22 Jan 2013 23:42:32 +0100
+Message-ID: <20130122224232.GC5151@sortiz-mobl>
+References: <cover.1357638064.git.wei_wang@realsil.com.cn>
+ <50F66CAD.6090003@realsil.com.cn>
+ <20130122033115.GY7409@sortiz-mobl>
+ <50FE09DD.6070102@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:34378 "EHLO mga01.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:65086 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751855Ab3AVW0g (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 22 Jan 2013 17:26:36 -0500
-In-Reply-To: <CAGxe1ZGu4mQRPy=17-G2pBqVOTgwHs4pAsJZ8Bb2V+HNiiq2JA@mail.gmail.com>
+	id S1753097Ab3AVWnE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 22 Jan 2013 17:43:04 -0500
+Content-Disposition: inline
+In-Reply-To: <50FE09DD.6070102@realsil.com.cn>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: linux-mmc@vger.kernel.org
+To: wwang <wei_wang@realsil.com.cn>
+Cc: "cjb@laptop.org" <cjb@laptop.org>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "arnd@arndb.de" <arnd@arndb.de>, "oakad@yahoo.com" <oakad@yahoo.com>, "bp@alien8.de" <bp@alien8.de>
 
-> does it support dt? i cannot see and table entry here? I think Nall ew
-> drivers added should be dt compatible.
-> there should be a of table entry here
+On Tue, Jan 22, 2013 at 11:39:09AM +0800, wwang wrote:
+> >>>Wei WANG (8):
+> >>>   MFD:rtsx: Fix typo in comment
+> >>>   MFD:rtsx: Remove redundant code
+> >>>   MFD:rtsx: Declare that the DMA address limitation is 32bit explicitly
+> >>>   MFD:rtsx: Add callback function switch_output_voltage
+> >>>   MMC:rtsx: Using callback function to switch output voltage
+> >>>   MFD:rtsx: Add callback function conv_clk_and_div_n
+> >>>   MFD:rtsx: Fix checkpatch warning
+> >>>   MFD:rtsx: Use macro defines to replace some variables
+> >>>
+> >>>  drivers/mfd/rtl8411.c             |   29 ++++++++++++++++++++++++
+> >>>  drivers/mfd/rts5209.c             |   21 +++++++++++++++++
+> >>>  drivers/mfd/rts5229.c             |   21 +++++++++++++++++
+> >>>  drivers/mfd/rtsx_pcr.c            |   45 +++++++++++++++++++++++++------------
+> >>>  drivers/mfd/rtsx_pcr.h            |    3 +++
+> >>>  drivers/mmc/host/rtsx_pci_sdmmc.c |   30 +++++--------------------
+> >>>  include/linux/mfd/rtsx_common.h   |    3 +++
+> >>>  include/linux/mfd/rtsx_pci.h      |   27 +++++++++++++++++-----
+> >>>  8 files changed, 135 insertions(+), 44 deletions(-)
+> >>>
+> >>Hi Chris and Samuel:
+> >>
+> >>This patchset is trying to fix some bugs and some coding style issues.
+> >>Would you please help to merge it to v3.8 kernel?
+> >I'll only take bug fixes for 3.8, even minor ones, and I don't see real bug
+> >fixes here. Am I missing something ?
+> >
+> >Cheers,
+> >Samuel.
+> >
+> Hi Samuel:
+> 
+> The commits below are all bug fix ( fix rtl8411 specifically)
+> 
+>   MFD:rtsx: Add callback function switch_output_voltage
+>   MMC:rtsx: Using callback function to switch output voltage
+>   MFD:rtsx: Add callback function conv_clk_and_div_n
+Would you mind building a separate patchset for those 3, against e.g. a
+vanilla 3.8-rc4 kernel ? Otherwise they won't apply cleanly against my
+for-linus tree.
 
-The Goldfish virtual platform doesn't use devicetree, it does its own
-magic. That's out of my control. If you care then open discussions with
-google about future versions of the Android Virtual Device.
+Cheers,
+Samuel.
 
-Basically it has an IPC based discussion with the emulator which tells
-it directly what devices to create.
-
-Goldfish is an established platform used for most Android development
-work nowdays so we don't get to re-decide how it works just support it.
-
-Alan
+-- 
+Intel Open Source Technology Centre
+http://oss.intel.com/
