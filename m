@@ -1,59 +1,66 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH 1/2] mmc: core: fix permanent sleep of mmcqd during card removal
-Date: Tue, 22 Jan 2013 19:48:03 +0900
-Message-ID: <001d01cdf88d$f4214270$dc63c750$%jun@samsung.com>
-References: <n@samsung.com>
- <1356513966-24945-1-git-send-email-kdorfman@codeaurora.org>
+Subject: [PATCH 2/2] mmc: block: don't start new request when the card is
+ removed
+Date: Tue, 22 Jan 2013 19:48:07 +0900
+Message-ID: <001e01cdf88d$f666ecb0$e334c610$%jun@samsung.com>
+References: <004801cdad17$498d9140$dca8b3c0$%jun@samsung.com>
+ <201210191010.48776.heiko@sntech.de> <87liepq8qo.fsf@octavius.laptop.org>
+ <201210292337.35620.heiko@sntech.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:41999 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750899Ab3AVKsJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Jan 2013 05:48:09 -0500
-Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
- by mailout1.samsung.com
+Received: from mailout4.samsung.com ([203.254.224.34]:10276 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751449Ab3AVKsX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Jan 2013 05:48:23 -0500
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout4.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MH00061MWNPB7Z0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 22 Jan 2013 19:48:04 +0900 (KST)
+ 17 2011)) with ESMTP id <0MH000G2UWO3JLQ0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 22 Jan 2013 19:48:22 +0900 (KST)
 Received: from DOTGIHJUN01 ([12.23.118.161])
  by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0MH0004GEWO3O640@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 22 Jan 2013 19:48:03 +0900 (KST)
+ with ESMTPA id <0MH0005F1WO7AR10@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 22 Jan 2013 19:48:07 +0900 (KST)
 In-reply-to: 
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Konstantin Dorfman' <kdorfman@codeaurora.org>
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Sujit Reddy Thumma' <sthumma@codeaurora.org>, 'Adrian Hunter' <adrian.hunter@intel.com>
 
-This patch is derived from 'mmc: fix async request mechanism ...'.
-According as async transfer, a request is handled with twice mmc_start_req.
-When the card is removed, the request is actually not issued in the first
-mmc_start_req [__mmc_start_data_req]. And then mmc_wait_for_data_req_done
-will come in the next mmc_start_req. But there is no event for completions.
-wake_up_interruptible is needed in __mmc_start_data_req for the case of
-removed card.
+Current request can be started newly while handling the error.
+But if the card is removed, it's unnecessary to restart a request.
+This makes the extra error handling.
 
 Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
- drivers/mmc/core/core.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+ drivers/mmc/card/block.c |   10 ++++++++--
+ 1 files changed, 8 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 8b3a122..997b257 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -350,6 +350,7 @@ static int __mmc_start_data_req(struct mmc_host *host, struct mmc_request *mrq)
- 	mrq->host = host;
- 	if (mmc_card_removed(host->card)) {
- 		mrq->cmd->error = -ENOMEDIUM;
-+		mmc_wait_data_done(mrq);
- 		return -ENOMEDIUM;
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index f79b468..1170afe 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1456,8 +1456,14 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 
+  start_new_req:
+ 	if (rqc) {
+-		mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
+-		mmc_start_req(card->host, &mq->mqrq_cur->mmc_active, NULL);
++		if (mmc_card_removed(card)) {
++			rqc->cmd_flags |= REQ_QUIET;
++			blk_end_request_all(rqc, -EIO);
++		} else {
++			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
++			mmc_start_req(card->host,
++				      &mq->mqrq_cur->mmc_active, NULL);
++		}
  	}
- 	mmc_start_request(host, mrq);
+ 
+ 	return 0;
 -- 
 1.7.0.4
 
