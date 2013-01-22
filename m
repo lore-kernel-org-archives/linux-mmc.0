@@ -1,52 +1,60 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH V2 2/2] mmc: mmci: Move ios_handler functionality into
-	the driver
-Date: Tue, 22 Jan 2013 10:37:23 +0000
-Message-ID: <20130122103723.GI23505@n2100.arm.linux.org.uk>
-References: <1355495429-12510-1-git-send-email-ulf.hansson@stericsson.com> <1355495429-12510-3-git-send-email-ulf.hansson@stericsson.com> <20130122090000.GH6857@gmail.com> <CACRpkdatTagYaMqvpe-a8zj_kO3Twjn1r4SqPty8DosNmcxJcQ@mail.gmail.com> <20130122100607.GH23505@n2100.arm.linux.org.uk> <20130122102010.GL6857@gmail.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH 1/2] mmc: core: fix permanent sleep of mmcqd during card removal
+Date: Tue, 22 Jan 2013 19:48:03 +0900
+Message-ID: <001d01cdf88d$f4214270$dc63c750$%jun@samsung.com>
+References: <n@samsung.com>
+ <1356513966-24945-1-git-send-email-kdorfman@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:52238 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753236Ab3AVKhh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Jan 2013 05:37:37 -0500
-Content-Disposition: inline
-In-Reply-To: <20130122102010.GL6857@gmail.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:41999 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750899Ab3AVKsJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Jan 2013 05:48:09 -0500
+Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MH00061MWNPB7Z0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 22 Jan 2013 19:48:04 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0MH0004GEWO3O640@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 22 Jan 2013 19:48:03 +0900 (KST)
+In-reply-to: 
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lee Jones <lee.jones@linaro.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Konstantin Dorfman' <kdorfman@codeaurora.org>
 
-On Tue, Jan 22, 2013 at 10:20:10AM +0000, Lee Jones wrote:
-> On Tue, 22 Jan 2013, Russell King - ARM Linux wrote:
-> 
-> > On Tue, Jan 22, 2013 at 10:53:42AM +0100, Linus Walleij wrote:
-> > > On Tue, Jan 22, 2013 at 10:00 AM, Lee Jones <lee.jones@linaro.org> wrote:
-> > > 
-> > > >> From: Lee Jones <lee.jones@linaro.org>
-> > > >>
-> > > >> There are currently two instances of the ios_handler being used.
-> > > >> Both of which mearly toy with some regulator settings. Now there
-> > > >> is a GPIO regulator API, we can use that instead, and lessen the
-> > > >> per platform burden. By doing this, we also become more Device
-> > > >> Tree compatible.
-> > > >
-> > > > Russell,
-> > > >
-> > > > Why is this patch in your tree with Ulf as the Author?
-> > > 
-> > > This is because of the way Russell's patch tracker works, it sets
-> > > Author: to the name of the person using the patch tracker and
-> > > discards the From: field in the beginning of the patch which
-> > > git am will conversely respect.
-> > 
-> > Actually, the reverse.  It does now respect the From: line, but the
-> > From: line will be ignored for all notifications about the patch
-> > because the patch system was never built to parse the actual comments
-> > when sending out the email notifications.
-> 
-> So what do I have to do to reaffirm myself as the author?
+This patch is derived from 'mmc: fix async request mechanism ...'.
+According as async transfer, a request is handled with twice mmc_start_req.
+When the card is removed, the request is actually not issued in the first
+mmc_start_req [__mmc_start_data_req]. And then mmc_wait_for_data_req_done
+will come in the next mmc_start_req. But there is no event for completions.
+wake_up_interruptible is needed in __mmc_start_data_req for the case of
+removed card.
 
-I'd need to recommit the patch with the right information, which isn't
-that easy to do.
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+---
+ drivers/mmc/core/core.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 8b3a122..997b257 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -350,6 +350,7 @@ static int __mmc_start_data_req(struct mmc_host *host, struct mmc_request *mrq)
+ 	mrq->host = host;
+ 	if (mmc_card_removed(host->card)) {
+ 		mrq->cmd->error = -ENOMEDIUM;
++		mmc_wait_data_done(mrq);
+ 		return -ENOMEDIUM;
+ 	}
+ 	mmc_start_request(host, mrq);
+-- 
+1.7.0.4
+
+
