@@ -1,261 +1,131 @@
-From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v5 00/14] DMA Engine support for AM33XX
-Date: Wed, 23 Jan 2013 15:49:18 -0500
-Message-ID: <20130123204917.GA5256@beef>
-References: <1358281974-8411-1-git-send-email-mporter@ti.com>
-	<50FFC48B.80902@ti.com>
+From: Matt Porter <mporter@ti.com>
+Subject: Re: [RFC PATCH v3 02/16] ARM: davinci: move private EDMA API to
+ arm/common
+Date: Wed, 23 Jan 2013 16:00:10 -0500
+Message-ID: <20130123210010.GB5256@beef>
+References: <1350566815-409-1-git-send-email-mporter@ti.com>
+ <1350566815-409-3-git-send-email-mporter@ti.com>
+ <508CEA05.8060200@ti.com>
+ <20130110235157.GU14660@beef>
+ <d631bf39a8b8474bae448d089497fe0e@DLEE74.ent.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ie0-f182.google.com ([209.85.223.182]:59365 "EHLO
+	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751490Ab3AWVAI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Jan 2013 16:00:08 -0500
 Content-Disposition: inline
-In-Reply-To: <50FFC48B.80902-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <d631bf39a8b8474bae448d089497fe0e@DLEE74.ent.ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Nori, Sekhar" <nsekhar@ti.com>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, "Cousson, Benoit" <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Chris Ball <cjb@laptop.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 
-On Wed, Jan 23, 2013 at 04:37:55PM +0530, Santosh Shilimkar wrote:
+On Tue, Jan 22, 2013 at 03:40:06PM +0000, Sekhar Nori wrote:
 > Matt,
 > 
-> On Wednesday 16 January 2013 02:02 AM, Matt Porter wrote:
+> Sorry about the late reply. I noticed this mail only after I started to
+> look at v5 of your series :(
+
+Any time is fine! :)
+ 
+> On 1/11/2013 5:21 AM, Matt Porter wrote:
+> > On Sun, Oct 28, 2012 at 01:47:09PM +0530, Sekhar Nori wrote:
+> >> On 10/18/2012 6:56 PM, Matt Porter wrote:
+> >>> Move mach-davinci/dma.c to common/edma.c so it can be used
+> >>> by OMAP (specifically AM33xx) as well. This just moves the
+> >>> private EDMA API but does not support OMAP.
+> >>>
+> >>> Signed-off-by: Matt Porter <mporter@ti.com>
+> >>> ---
+> >>
+> >>> diff --git a/arch/arm/mach-davinci/devices.c b/arch/arm/mach-davinci/devices.c
+> >>> index 4c48a36..f45d591 100644
+> >>> --- a/arch/arm/mach-davinci/devices.c
+> >>> +++ b/arch/arm/mach-davinci/devices.c
+> >>> @@ -19,9 +19,10 @@
+> >>>  #include <mach/irqs.h>
+> >>>  #include <mach/cputype.h>
+> >>>  #include <mach/mux.h>
+> >>> -#include <mach/edma.h>
+> >>>  #include <linux/platform_data/mmc-davinci.h>
+> >>>  #include <mach/time.h>
+> >>> +#include <linux/platform_data/edma.h>
+> >>
+> >> Can you please introduce a patch to clean this mixture of linux/ and
+> >> mach/ includes?
+> > 
+> > Yeah, are you ok with a follow on series to clean all these files? I
+> > don't want to make this series longer with something not dma related
+> > that's purely cleanup from the great header reorg of 2012.
 > 
-> [..]
-> 
-> >This series adds DMA Engine support for AM33xx, which uses
-> >an EDMA DMAC. The EDMA DMAC has been previously supported by only
-> >a private API implementation (much like the situation with OMAP
-> >DMA) found on the DaVinci family of SoCs.
-> >
-> >The series applies on top of 3.8-rc3 and the following patches:
-> >
-> >	- TPS65910 REGMAP_IRQ build fix:
-> >	  https://patchwork.kernel.org/patch/1857701/
-> >	- dmaengine DT support from Vinod's dmaengine_dt branch in
-> >	  git://git.infradead.org/users/vkoul/slave-dma.git since
-> >	  027478851791df751176398be02a3b1c5f6aa824
-> >	- edma dmaengine driver fix:
-> >	  https://patchwork.kernel.org/patch/1961521/
-> >	- dmaengine dma_get_channel_caps v2:
-> >	  https://patchwork.kernel.org/patch/1961601/
-> >	- dmaengine edma driver channel caps support v2:
-> >	  https://patchwork.kernel.org/patch/1961591/
-> >
-> >The approach taken is similar to how OMAP DMA is being converted to
-> >DMA Engine support. With the functional EDMA private API already
-> >existing in mach-davinci/dma.c, we first move that to an ARM common
-> >area so it can be shared. Adding DT and runtime PM support to the
-> >private EDMA API implementation allows it to run on AM33xx. AM33xx
-> >*only* boots using DT so we leverage Jon's generic DT DMA helpers to
-> >register EDMA DMAC with the of_dma framework and then add support
-> >for calling the dma_request_slave_channel() API to both the mmc
-> >and spi drivers.
-> >
-> >With this series both BeagleBone and the AM335x EVM have working
-> >MMC and SPI support.
-> >
-> >This is tested on BeagleBone with a SPI framebuffer driver and MMC
-> >rootfs. A trivial gpio DMA event misc driver was used to test the
-> >crossbar DMA event support. It is also tested on the AM335x EVM
-> >with the onboard SPI flash and MMC rootfs. The branch at
-> >https://github.com/ohporter/linux/tree/edma-dmaengine-am33xx-v4
-> >has the complete series, dependencies, and some test
-> >drivers/defconfigs.
-> >
-> >Regression testing was done on AM180x-EVM (which also makes use
-> >of the EDMA dmaengine driver and the EDMA private API) using SD,
-> >SPI flash, and the onboard audio supported by the ASoC Davinci
-> >driver. Regression testing was also done on a BeagleBoard xM
-> >booting from the legacy board file using MMC rootfs.
-> >
-> >Matt Porter (14):
-> >   ARM: davinci: move private EDMA API to arm/common
-> >   ARM: edma: remove unused transfer controller handlers
-> >   ARM: edma: add AM33XX support to the private EDMA API
-> >   dmaengine: edma: enable build for AM33XX
-> >   dmaengine: edma: Add TI EDMA device tree binding
-> >   ARM: dts: add AM33XX EDMA support
-> >   dmaengine: add dma_request_slave_channel_compat()
-> >   mmc: omap_hsmmc: convert to dma_request_slave_channel_compat()
-> >   mmc: omap_hsmmc: set max_segs based on dma engine limitations
-> >   mmc: omap_hsmmc: add generic DMA request support to the DT binding
-> >   ARM: dts: add AM33XX MMC support
-> >   spi: omap2-mcspi: convert to dma_request_slave_channel_compat()
-> >   spi: omap2-mcspi: add generic DMA request support to the DT binding
-> >   ARM: dts: add AM33XX SPI DMA support
-> >
-> While going through the series and testing it out, I observed an issue
-> with MMC driver. You need patch in the end of the email to avoid the
-> issue. Same is attached in case mailer damages it. Can you please
-> add it with your series if you agree ?
+> Okay. I agree doing this sort of change now will cause merge issues.
 
-Yes, by inspection this makes sense. As you noticed, we've been relying
-on the fact that DMA resources still don't come from DT, we only use our
-DT data in conjunction with the DMA OF helpers to do channel filtering.
-I was figuring we would address that separately later, but I see how
-even omap4 has this issue with DMA resources named with "tx1", for
-example. A good followup once this series is taken will be to only
-use hwmod resources on a !populated-dt platform like we do for other
-resources now. Baby steps. :)
-
-Thanks for the catch, I'll add this in with your tested line as well for
-the series. 
-
--Matt
+Ok.
 
 > 
-> Overall the series looks good to my eyes.
-> Acked-tested-by: Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>
+> > 
+> >>> +
+> >>>  
+> >>>  #include "davinci.h"
+> >>>  #include "clock.h"
+> >>> @@ -141,10 +142,10 @@ static struct resource mmcsd0_resources[] = {
+> >>>  	},
+> >>>  	/* DMA channels: RX, then TX */
+> >>>  	{
+> >>> -		.start = EDMA_CTLR_CHAN(0, DAVINCI_DMA_MMCRXEVT),
+> >>> +		.start = EDMA_CTLR_CHAN(0, 26),
+> >>
+> >> Instead of just replacing the event #defines with plain numbers, can you
+> >> introduce a mach-davinci local edma.h which can then be included in the
+> >> davinci platform files which refer to edma channel numbers?
+> > 
+> > Ok, so when I removed the old edma.h it was full of unused defines and
+> > we are left with just this one. If I introduced something like that it
+> > would be used in just one place here. and only for these two values.
+> > How about we just add a comment?
 > 
-> Regards,
-> Santosh
-> 
-> From 2dcc90b7a4b2dcdb52ddd052ca7f3e88a78e83e4 Mon Sep 17 00:00:00 2001
-> From: Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>
-> Date: Wed, 23 Jan 2013 16:04:32 +0530
-> Subject: [PATCH] mmc: omap_hsmmc: Skip platform_get_resource_byname() for dt
->  case
-> 
-> MMC driver probe will abort for DT case because of failed
-> platform_get_resource_byname() lookup. Fix it by skipping resource
-> byname lookup for device tree build.
-> 
-> Issue is hidden because hwmod popullates the IO resources which
-> helps to succeed platform_get_resource_byname() and probe.
-> 
-> Signed-off-by: Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>
-> ---
->  drivers/mmc/host/omap_hsmmc.c |   28 +++++++++++++++-------------
->  1 file changed, 15 insertions(+), 13 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index f74bd69..d4655e7 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1897,21 +1897,23 @@ static int omap_hsmmc_probe(struct
-> platform_device *pdev)
-> 
->  	omap_hsmmc_conf_bus_power(host);
-> 
-> -	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
-> -	if (!res) {
-> -		dev_err(mmc_dev(host->mmc), "cannot get DMA TX channel\n");
-> -		ret = -ENXIO;
-> -		goto err_irq;
-> -	}
-> -	tx_req = res->start;
-> +	if (!pdev->dev.of_node) {
-> +		res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
-> +		if (!res) {
-> +			dev_err(mmc_dev(host->mmc), "cannot get DMA TX channel\n");
-> +			ret = -ENXIO;
-> +			goto err_irq;
-> +		}
-> +		tx_req = res->start;
-> 
-> -	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
-> -	if (!res) {
-> -		dev_err(mmc_dev(host->mmc), "cannot get DMA RX channel\n");
-> -		ret = -ENXIO;
-> -		goto err_irq;
-> +		res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
-> +		if (!res) {
-> +			dev_err(mmc_dev(host->mmc), "cannot get DMA RX channel\n");
-> +			ret = -ENXIO;
-> +			goto err_irq;
-> +		}
-> +		rx_req = res->start;
->  	}
-> -	rx_req = res->start;
-> 
->  	dma_cap_zero(mask);
->  	dma_cap_set(DMA_SLAVE, mask);
-> -- 
-> 1.7.9.5
-> 
-> 
-> 
-> 
+> I prefer adding a local #define in this file. This will keep it
+> consistent with what is done in arch/arm/mach-davinci/dm365.c for
+> example. Same for the change in sound/soc/davinci/davinci-sffsdr.c
 
-> >From 2dcc90b7a4b2dcdb52ddd052ca7f3e88a78e83e4 Mon Sep 17 00:00:00 2001
-> From: Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>
-> Date: Wed, 23 Jan 2013 16:04:32 +0530
-> Subject: [PATCH] mmc: omap_hsmmc: Skip platform_get_resource_byname() for dt
->  case
-> 
-> MMC driver probe will abort for DT case because of failed
-> platform_get_resource_byname() lookup. Fix it by skipping resource
-> byname lookup for device tree build.
-> 
-> Issue is hidden because hwmod popullates the IO resources which
-> helps to succeed platform_get_resource_byname() and probe.
-> 
-> Signed-off-by: Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>
-> ---
->  drivers/mmc/host/omap_hsmmc.c |   28 +++++++++++++++-------------
->  1 file changed, 15 insertions(+), 13 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index f74bd69..d4655e7 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1897,21 +1897,23 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->  
->  	omap_hsmmc_conf_bus_power(host);
->  
-> -	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
-> -	if (!res) {
-> -		dev_err(mmc_dev(host->mmc), "cannot get DMA TX channel\n");
-> -		ret = -ENXIO;
-> -		goto err_irq;
-> -	}
-> -	tx_req = res->start;
-> +	if (!pdev->dev.of_node) {
-> +		res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
-> +		if (!res) {
-> +			dev_err(mmc_dev(host->mmc), "cannot get DMA TX channel\n");
-> +			ret = -ENXIO;
-> +			goto err_irq;
-> +		}
-> +		tx_req = res->start;
->  
-> -	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
-> -	if (!res) {
-> -		dev_err(mmc_dev(host->mmc), "cannot get DMA RX channel\n");
-> -		ret = -ENXIO;
-> -		goto err_irq;
-> +		res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
-> +		if (!res) {
-> +			dev_err(mmc_dev(host->mmc), "cannot get DMA RX channel\n");
-> +			ret = -ENXIO;
-> +			goto err_irq;
-> +		}
-> +		rx_req = res->start;
->  	}
-> -	rx_req = res->start;
->  
->  	dma_cap_zero(mask);
->  	dma_cap_set(DMA_SLAVE, mask);
-> -- 
-> 1.7.9.5
-> 
+Ok, will do.
 
-> _______________________________________________
-> Davinci-linux-open-source mailing list
-> Davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-> http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source
+> > 
+> >>
+> >>> diff --git a/arch/arm/plat-omap/Kconfig b/arch/arm/plat-omap/Kconfig
+> >>> index 7cd56ed..153fab8 100644
+> >>> --- a/arch/arm/plat-omap/Kconfig
+> >>> +++ b/arch/arm/plat-omap/Kconfig
+> >>> @@ -28,6 +28,7 @@ config ARCH_OMAP2PLUS
+> >>>  	select OMAP_DM_TIMER
+> >>>  	select PROC_DEVICETREE if PROC_FS
+> >>>  	select SPARSE_IRQ
+> >>> +	select TI_PRIV_EDMA
+> >>
+> >> This hunk does not seem to belong to subject of this patch.
+> > 
+> > Let me reword the subject/description. The idea of this logical
+> > chunk was to put everything in place to make it build on OMAP,
+> > with the expectation that the build fails without the next patch
+> > in the series.
+> 
+> But this will break bisect. With just this patch applied, omap build
+> breaks. Looks like it will be more logical to merge this hunk with 3/14
+> since that's when you really start using the private DMA support on OMAP
+> platforms.
 
+Ahh, yes,. thanks for pointing that out. I will address it and add your
+ack. Thanks.
 
-------------------------------------------------------------------------------
-Master Visual Studio, SharePoint, SQL, ASP.NET, C# 2012, HTML5, CSS,
-MVC, Windows 8 Apps, JavaScript and much more. Keep your skills current
-with LearnDevNow - 3,200 step-by-step video tutorials by Microsoft
-MVPs and experts. ON SALE this month only -- learn more at:
-http://p.sf.net/sfu/learnnow-d2d
+> This issue is a must fix IMO.
+ 
+Ok.
+
+> I am ok with the patch otherwise. With these changes done, you can add:
+> 
+> Acked-by: Sekhar Nori <nsekhar@ti.com>
+> 
+> Thanks,
+> Sekhar
