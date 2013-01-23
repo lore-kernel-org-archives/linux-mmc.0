@@ -1,35 +1,63 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH V2 2/2] mmc: mmci: Move ios_handler functionality into
-	the driver
-Date: Wed, 23 Jan 2013 10:17:48 +0000
-Message-ID: <20130123101748.GO23505@n2100.arm.linux.org.uk>
-References: <1355495429-12510-1-git-send-email-ulf.hansson@stericsson.com> <1355495429-12510-3-git-send-email-ulf.hansson@stericsson.com> <20130122090000.GH6857@gmail.com> <CACRpkdatTagYaMqvpe-a8zj_kO3Twjn1r4SqPty8DosNmcxJcQ@mail.gmail.com> <20130122100607.GH23505@n2100.arm.linux.org.uk> <20130122102010.GL6857@gmail.com> <20130122103723.GI23505@n2100.arm.linux.org.uk> <20130122105608.GP6857@gmail.com> <20130123101349.GH15873@gmail.com>
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v5 00/14] DMA Engine support for AM33XX
+Date: Wed, 23 Jan 2013 16:19:18 +0530
+Message-ID: <50FFC02E.5090703@ti.com>
+References: <1358281974-8411-1-git-send-email-mporter@ti.com>
+	<50FEB6B2.5020303@ti.com>
+	<20130123022133.GA5727@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:53156 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754386Ab3AWKR7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Jan 2013 05:17:59 -0500
-Content-Disposition: inline
-In-Reply-To: <20130123101349.GH15873@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+In-Reply-To: <20130123022133.GA5727-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>
+Cc: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Grant, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Rob, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Lee Jones <lee.jones@linaro.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-On Wed, Jan 23, 2013 at 10:13:49AM +0000, Lee Jones wrote:
-> On Tue, 22 Jan 2013, Lee Jones wrote:
-> > Are you saying that you won't do it? :)
-> > 
-> > Is there anything I can do to make the process easier?
+Hi Mark,
+
+On 1/23/2013 7:51 AM, Mark Brown wrote:
+> On Tue, Jan 22, 2013 at 09:26:34PM +0530, Sekhar Nori wrote:
+>> On 1/16/2013 2:02 AM, Matt Porter wrote:
 > 
-> Thinking about this a little more. Is it easier to remove it from your
-> tree altogether? Only I have a small "ARM: ux500: " patch-set which
-> directly relies on this patch. I could take it in via ARM-SoC without
-> any fear of ordering issues.
+>>> This series adds DMA Engine support for AM33xx, which uses
+>>> an EDMA DMAC. The EDMA DMAC has been previously supported by only
+>>> a private API implementation (much like the situation with OMAP
+>>> DMA) found on the DaVinci family of SoCs.
+> 
+>> Will you take this series through the OMAP tree? Only 1/14 touches
+>> mach-davinci and I am mostly okay with it except some changes I just
+>> requested Matt to make in another thread.
+> 
+> Is this series somewhere near actually getting merged then? It seemed
+> like there was lots of stuff going on.
 
-Thankfully, the patch doesn't conflict with any of the others I have, so
-we can do that (and it's actually easier to do that.)
+I don't think there is a lot of churn on this now. 5 of the patches have
+already been acked by Tony. I had a look at the first two patches (from
+davinci perspective) and they mostly look good to me.
 
-Done.
+That said, I was not intending to suggest the entire series was ready
+for merging. Since the series touches multiple areas of the kernel, I
+wanted to make sure we have one person shepherding the series towards
+mainline.
+
+Patch 1/14 has some changes in sound/ can you please take a look and ack
+them?
+
+Thanks,
+Sekhar
+
+------------------------------------------------------------------------------
+Master Visual Studio, SharePoint, SQL, ASP.NET, C# 2012, HTML5, CSS,
+MVC, Windows 8 Apps, JavaScript and much more. Keep your skills current
+with LearnDevNow - 3,200 step-by-step video tutorials by Microsoft
+MVPs and experts. ON SALE this month only -- learn more at:
+http://p.sf.net/sfu/learnnow-d2d
