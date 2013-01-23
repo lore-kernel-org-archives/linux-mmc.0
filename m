@@ -1,60 +1,190 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH v5 00/14] DMA Engine support for AM33XX
-Date: Wed, 23 Jan 2013 10:21:42 +0800
-Message-ID: <20130123022133.GA5727@opensource.wolfsonmicro.com>
-References: <1358281974-8411-1-git-send-email-mporter@ti.com>
- <50FEB6B2.5020303@ti.com>
+From: Dongjin Kim <tobetter@gmail.com>
+Subject: Re: [PATCH] mmc: host: dw_mmc-exynos: Add support for pinctrl
+Date: Wed, 23 Jan 2013 15:08:01 +0900
+Message-ID: <CADoNuNdHEBHa8dEb_7SgjOLBhYuCCJ4R8=7udbDHKXQs45oSWA@mail.gmail.com>
+References: <1356109906-1622-1-git-send-email-tobetter@gmail.com>
+	<CAJuYYwSGvbUFVYt5P-pD5s=htTqLBmSmiEYt_kEJae-knnMkCA@mail.gmail.com>
+	<CADoNuNd5zqnXDJNe6TYmC70tqK19iKXGCntnm4vtHvKKZEb2kQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="tThc/1wpZn/ma/RB"
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <50FEB6B2.5020303@ti.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Sekhar Nori <nsekhar@ti.com>
-Cc: Matt Porter <mporter@ti.com>, Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Arnd Bergmann <arnd@arndb.de>, Dan Williams <djbw@fb.com>, Rob Herring <rob.herring@calxeda.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wg0-f45.google.com ([74.125.82.45]:38926 "EHLO
+	mail-wg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752372Ab3AWGIC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Jan 2013 01:08:02 -0500
+In-Reply-To: <CADoNuNd5zqnXDJNe6TYmC70tqK19iKXGCntnm4vtHvKKZEb2kQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Thomas Abraham <thomas.abraham@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Will Newton <will.newton@imgtec.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
+Hi Thomas,
 
---tThc/1wpZn/ma/RB
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+I have a question regarding the bus setup when I use the patch
+https://patchwork.kernel.org/patch/1870231. It configures buses as
+defined in "pinctrl-0 = ...".
 
-On Tue, Jan 22, 2013 at 09:26:34PM +0530, Sekhar Nori wrote:
-> On 1/16/2013 2:02 AM, Matt Porter wrote:
+But in the function dw_mci_exynos_setup_bus(), it tries again to
+configure gpios and probing is failed because there is no "gpios =
+<...>" property. So I guess bus setup has to be ignored when the gpios
+are configured with pinctrl.
 
-> > This series adds DMA Engine support for AM33xx, which uses
-> > an EDMA DMAC. The EDMA DMAC has been previously supported by only
-> > a private API implementation (much like the situation with OMAP
-> > DMA) found on the DaVinci family of SoCs.
+What's your advice?
 
-> Will you take this series through the OMAP tree? Only 1/14 touches
-> mach-davinci and I am mostly okay with it except some changes I just
-> requested Matt to make in another thread.
+Thank you in advance.
+Dongjin.
 
-Is this series somewhere near actually getting merged then? It seemed
-like there was lots of stuff going on.
-
---tThc/1wpZn/ma/RB
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJQ/0enAAoJELSic+t+oim9ffsQAI5Ur3zy+yOwyevsnZw8bB12
-7bBbRS8xk9pMMDyncxZ/7KU/B7IXSjWbTHS+4un1gPpIVEA6I3J25inPDFJIkh6I
-0vpuGOf3CWpKtKb8vYFG3e6j4ibk+fz2ZBzq7gx3snPEyb/nOTwuutGrU41TAGhF
-YC63hsoC4olgKL3eZgaqa1T0jQixK/aRFWQ8GVvy8MLDgoGZiCMS5rwtc+d/qJzv
-r0+woqcmx0UCEHMaSk+WBBJ1ncRBxSCOIvGXY7J9x+rcQxbizmnOlRsOHbBKfTI3
-o5np5K7wPR0nyQSVR0YLKjlQnM2PP1X4VRXFvKoqyTKGEr7TlXhU87yiv0O3K0Eu
-anRUphgIIcuCBy8DcpxMO3QHkVHgsiMDKippR3a///bxyYy+VRO6FZCa/GJx9X7j
-z2GHXEX7oioB0HfLPEiBFBuOKXFlGwp9SIoebF7it4fnKjrmW8qoTMtZaltDE9eu
-FVah1IGDQKlgI9XSqOK+OqD4muz/Lb/e6MdpLDOAtk86AfrfS2iHbq138SSA3DgN
-IjBlPjRuDKJucPYitiYHvfmxNtzsmbOsMnA86OfnBxuSOUZMaHUyQGe37q3hJXUJ
-BbSrrGN2gP6KdutaSooB/ua5XR4A6TDBX7nA3Zi4wmGfyA4Pl7e857eqtJSL6QP4
-atfb6xpp6+wpPEWlFGlE
-=FwkO
------END PGP SIGNATURE-----
-
---tThc/1wpZn/ma/RB--
+On Fri, Jan 4, 2013 at 3:33 AM, Dongjin Kim <tobetter@gmail.com> wrote:
+> Hi Thomas,
+>
+> Thank you for your reviewing, and
+> https://patchwork.kernel.org/patch/1870231 works. So this change is
+> needless.
+>
+> I had tested with below changes on my hardware.
+>
+> [1] https://patchwork.kernel.org/patch/1904431
+> [2] https://patchwork.kernel.org/patch/1920661
+>
+> Best regards,
+> Dongjin.
+>
+> On Mon, Dec 31, 2012 at 2:57 PM, Thomas Abraham
+> <thomas.abraham@linaro.org> wrote:
+>> On 21 December 2012 09:11, Dongjin Kim <tobetter@gmail.com> wrote:
+>>> This patch adds support for pin configuration using pinctrl subsystem to
+>>> dw_mmc-exynos driver. The property 'wp-gpios' can be specified for write
+>>> protect but 'samsung,cd-pinmux-gpio' and gpios used for clock, command and
+>>> data lines will be ignored.
+>>>
+>>> -. 'pinctrl-0' should specify pin control groups (clock, comand and data
+>>>     lines) used for this controller.
+>>> -. 'pinctrl-names' should contain only one value, 'default'.
+>>>
+>>> Signed-off-by: Dongjin Kim <tobetter@gmail.com>
+>>> ---
+>>>  drivers/mmc/host/dw_mmc-exynos.c |   44 ++++++++++++++++++++++++--------------
+>>>  1 file changed, 28 insertions(+), 16 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+>>> index 4d50da6..d1c9963 100644
+>>> --- a/drivers/mmc/host/dw_mmc-exynos.c
+>>> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+>>> @@ -16,6 +16,7 @@
+>>>  #include <linux/mmc/dw_mmc.h>
+>>>  #include <linux/of.h>
+>>>  #include <linux/of_gpio.h>
+>>> +#include <linux/pinctrl/consumer.h>
+>>>
+>>>  #include "dw_mmc.h"
+>>>  #include "dw_mmc-pltfm.h"
+>>> @@ -49,6 +50,7 @@ struct dw_mci_exynos_priv_data {
+>>>         u8                              ciu_div;
+>>>         u32                             sdr_timing;
+>>>         u32                             ddr_timing;
+>>> +       struct pinctrl                  *pctrl;
+>>>  };
+>>>
+>>>  static struct dw_mci_exynos_compatible {
+>>> @@ -84,6 +86,10 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
+>>>                         priv->ctrl_type = exynos_compat[idx].ctrl_type;
+>>>         }
+>>>
+>>> +       priv->pctrl = devm_pinctrl_get_select_default(host->dev);
+>>> +       if (IS_ERR(priv->pctrl))
+>>> +               dev_dbg(host->dev, "no pinctrl node\n");
+>>> +
+>>
+>> This could have been handled in dw_mci_exynos_setup_bus function. And
+>> we also need to check if this patch gets merged.
+>> https://patchwork.kernel.org/patch/1870231/. If it gets merged, this
+>> change can be avoided.
+>>
+>>>         host->priv = priv;
+>>>         return 0;
+>>>  }
+>>> @@ -149,32 +155,19 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+>>>                 return ret;
+>>>
+>>>         priv->ddr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
+>>> +
+>>>         return 0;
+>>>  }
+>>>
+>>>  static int dw_mci_exynos_setup_bus(struct dw_mci *host,
+>>>                                 struct device_node *slot_np, u8 bus_width)
+>>>  {
+>>> +       struct dw_mci_exynos_priv_data *priv = host->priv;
+>>>         int idx, gpio, ret;
+>>>
+>>>         if (!slot_np)
+>>>                 return -EINVAL;
+>>>
+>>> -       /* cmd + clock + bus-width pins */
+>>> -       for (idx = 0; idx < NUM_PINS(bus_width); idx++) {
+>>> -               gpio = of_get_gpio(slot_np, idx);
+>>> -               if (!gpio_is_valid(gpio)) {
+>>> -                       dev_err(host->dev, "invalid gpio: %d\n", gpio);
+>>> -                       return -EINVAL;
+>>> -               }
+>>> -
+>>> -               ret = devm_gpio_request(host->dev, gpio, "dw-mci-bus");
+>>> -               if (ret) {
+>>> -                       dev_err(host->dev, "gpio [%d] request failed\n", gpio);
+>>> -                       return -EBUSY;
+>>> -               }
+>>> -       }
+>>> -
+>>>         gpio = of_get_named_gpio(slot_np, "wp-gpios", 0);
+>>>         if (gpio_is_valid(gpio)) {
+>>>                 if (devm_gpio_request(host->dev, gpio, "dw-mci-wp"))
+>>> @@ -185,9 +178,12 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
+>>>                 host->pdata->quirks |= DW_MCI_QUIRK_NO_WRITE_PROTECT;
+>>>         }
+>>>
+>>> -       if (host->pdata->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+>>> +       if (!IS_ERR(priv->pctrl))
+>>>                 return 0;
+>>>
+>>> +       if (host->pdata->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+>>> +               goto setup_bus;
+>>> +
+>>
+>> Why do the entire bus setup if card detection is broken?
+>>
+>>>         gpio = of_get_named_gpio(slot_np, "samsung,cd-pinmux-gpio", 0);
+>>>         if (gpio_is_valid(gpio)) {
+>>>                 if (devm_gpio_request(host->dev, gpio, "dw-mci-cd"))
+>>> @@ -196,6 +192,22 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
+>>>                 dev_info(host->dev, "cd gpio not available");
+>>>         }
+>>>
+>>> + setup_bus:
+>>> +       /* cmd + clock + bus-width pins */
+>>> +       for (idx = 0; idx < NUM_PINS(bus_width); idx++) {
+>>> +               gpio = of_get_gpio(slot_np, idx);
+>>> +               if (!gpio_is_valid(gpio)) {
+>>> +                       dev_err(host->dev, "invalid gpio: %d\n", gpio);
+>>> +                       return -EINVAL;
+>>> +               }
+>>> +
+>>> +               ret = devm_gpio_request(host->dev, gpio, "dw-mci-bus");
+>>> +               if (ret) {
+>>> +                       dev_err(host->dev, "gpio [%d] request failed\n", gpio);
+>>> +                       return -EBUSY;
+>>> +               }
+>>> +       }
+>>
+>> This change should not have been there. If the mmc bus setup is being
+>> done using pinctrl framework, this change can be avoided.
+>>
+>> Thanks,
+>> Thomas.
+>>
+>>> +
+>>>         return 0;
+>>>  }
+>>>
+>>> --
+>>> 1.7.9.5
+>>>
