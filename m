@@ -1,7 +1,7 @@
 From: <wei_wang@realsil.com.cn>
-Subject: [PATCH 1/3] MFD:rtsx: Add callback function switch_output_voltage
-Date: Wed, 23 Jan 2013 09:51:04 +0800
-Message-ID: <4c45c78f2e66710bf54fd4bbcd5bdb2f0fee2028.1358905022.git.wei_wang@realsil.com.cn>
+Subject: [PATCH 2/3] MMC:rtsx: Using callback function to switch output voltage
+Date: Wed, 23 Jan 2013 09:51:05 +0800
+Message-ID: <7294264f89d04dcad3e1c0654d998419450b9022.1358905022.git.wei_wang@realsil.com.cn>
 References: <cover.1358905022.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,204 +14,74 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Wei WANG <wei_wang@realsil.com.cn>
 
-Different card reader has different method to switch output voltage,
-add this callback to let the card reader implement its individual switch
-function.
+Different card reader has different method to switch output voltage, so
+we have to use the callback function provided by MFD driver to switch
+output pad voltage.
 
 Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
 ---
- drivers/mfd/rtl8411.c        |   16 ++++++++++++++++
- drivers/mfd/rts5209.c        |   20 ++++++++++++++++++++
- drivers/mfd/rts5229.c        |   20 ++++++++++++++++++++
- drivers/mfd/rtsx_pcr.c       |    9 +++++++++
- include/linux/mfd/rtsx_pci.h |   24 ++++++++++++++++++++----
- 5 files changed, 85 insertions(+), 4 deletions(-)
+ drivers/mmc/host/rtsx_pci_sdmmc.c |   30 +++++-------------------------
+ 1 file changed, 5 insertions(+), 25 deletions(-)
 
-diff --git a/drivers/mfd/rtl8411.c b/drivers/mfd/rtl8411.c
-index 89f046c..5058ba8 100644
---- a/drivers/mfd/rtl8411.c
-+++ b/drivers/mfd/rtl8411.c
-@@ -112,6 +112,21 @@ static int rtl8411_card_power_off(struct rtsx_pcr *pcr, int card)
- 			BPP_LDO_POWB, BPP_LDO_SUSPEND);
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index 571915d..f74b5ad 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -1060,26 +1060,6 @@ static int sd_wait_voltage_stable_2(struct realtek_pci_sdmmc *host)
+ 	return 0;
  }
  
-+static int rtl8411_switch_output_voltage(struct rtsx_pcr *pcr, u8 voltage)
-+{
-+	u8 mask, val;
-+
-+	mask = (BPP_REG_TUNED18 << BPP_TUNED18_SHIFT_8411) | BPP_PAD_MASK;
-+	if (voltage == OUTPUT_3V3)
-+		val = (BPP_ASIC_3V3 << BPP_TUNED18_SHIFT_8411) | BPP_PAD_3V3;
-+	else if (voltage == OUTPUT_1V8)
-+		val = (BPP_ASIC_1V8 << BPP_TUNED18_SHIFT_8411) | BPP_PAD_1V8;
-+	else
-+		return -EINVAL;
-+
-+	return rtsx_pci_write_register(pcr, LDO_CTL, mask, val);
-+}
-+
- static unsigned int rtl8411_cd_deglitch(struct rtsx_pcr *pcr)
- {
- 	unsigned int card_exist;
-@@ -172,6 +187,7 @@ static const struct pcr_ops rtl8411_pcr_ops = {
- 	.disable_auto_blink = rtl8411_disable_auto_blink,
- 	.card_power_on = rtl8411_card_power_on,
- 	.card_power_off = rtl8411_card_power_off,
-+	.switch_output_voltage = rtl8411_switch_output_voltage,
- 	.cd_deglitch = rtl8411_cd_deglitch,
- };
- 
-diff --git a/drivers/mfd/rts5209.c b/drivers/mfd/rts5209.c
-index 283a4f1..ba74de8 100644
---- a/drivers/mfd/rts5209.c
-+++ b/drivers/mfd/rts5209.c
-@@ -144,6 +144,25 @@ static int rts5209_card_power_off(struct rtsx_pcr *pcr, int card)
- 	return rtsx_pci_send_cmd(pcr, 100);
- }
- 
-+static int rts5209_switch_output_voltage(struct rtsx_pcr *pcr, u8 voltage)
-+{
-+	int err;
-+
-+	if (voltage == OUTPUT_3V3) {
-+		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4FC0 | 0x24);
-+		if (err < 0)
-+			return err;
-+	} else if (voltage == OUTPUT_1V8) {
-+		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4C40 | 0x24);
-+		if (err < 0)
-+			return err;
-+	} else {
-+		return -EINVAL;
-+	}
-+
-+	return 0;
-+}
-+
- static const struct pcr_ops rts5209_pcr_ops = {
- 	.extra_init_hw = rts5209_extra_init_hw,
- 	.optimize_phy = rts5209_optimize_phy,
-@@ -153,6 +172,7 @@ static const struct pcr_ops rts5209_pcr_ops = {
- 	.disable_auto_blink = rts5209_disable_auto_blink,
- 	.card_power_on = rts5209_card_power_on,
- 	.card_power_off = rts5209_card_power_off,
-+	.switch_output_voltage = rts5209_switch_output_voltage,
- 	.cd_deglitch = NULL,
- };
- 
-diff --git a/drivers/mfd/rts5229.c b/drivers/mfd/rts5229.c
-index b9dbab2..ec1747a 100644
---- a/drivers/mfd/rts5229.c
-+++ b/drivers/mfd/rts5229.c
-@@ -114,6 +114,25 @@ static int rts5229_card_power_off(struct rtsx_pcr *pcr, int card)
- 	return rtsx_pci_send_cmd(pcr, 100);
- }
- 
-+static int rts5229_switch_output_voltage(struct rtsx_pcr *pcr, u8 voltage)
-+{
-+	int err;
-+
-+	if (voltage == OUTPUT_3V3) {
-+		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4FC0 | 0x24);
-+		if (err < 0)
-+			return err;
-+	} else if (voltage == OUTPUT_1V8) {
-+		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4C40 | 0x24);
-+		if (err < 0)
-+			return err;
-+	} else {
-+		return -EINVAL;
-+	}
-+
-+	return 0;
-+}
-+
- static const struct pcr_ops rts5229_pcr_ops = {
- 	.extra_init_hw = rts5229_extra_init_hw,
- 	.optimize_phy = rts5229_optimize_phy,
-@@ -123,6 +142,7 @@ static const struct pcr_ops rts5229_pcr_ops = {
- 	.disable_auto_blink = rts5229_disable_auto_blink,
- 	.card_power_on = rts5229_card_power_on,
- 	.card_power_off = rts5229_card_power_off,
-+	.switch_output_voltage = rts5229_switch_output_voltage,
- 	.cd_deglitch = NULL,
- };
- 
-diff --git a/drivers/mfd/rtsx_pcr.c b/drivers/mfd/rtsx_pcr.c
-index 7a7b0bd..f4e02d0 100644
---- a/drivers/mfd/rtsx_pcr.c
-+++ b/drivers/mfd/rtsx_pcr.c
-@@ -703,6 +703,15 @@ int rtsx_pci_card_power_off(struct rtsx_pcr *pcr, int card)
- }
- EXPORT_SYMBOL_GPL(rtsx_pci_card_power_off);
- 
-+int rtsx_pci_switch_output_voltage(struct rtsx_pcr *pcr, u8 voltage)
-+{
-+	if (pcr->ops->switch_output_voltage)
-+		return pcr->ops->switch_output_voltage(pcr, voltage);
-+
-+	return 0;
-+}
-+EXPORT_SYMBOL_GPL(rtsx_pci_switch_output_voltage);
-+
- unsigned int rtsx_pci_card_exist(struct rtsx_pcr *pcr)
- {
- 	unsigned int val;
-diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx_pci.h
-index 060b721..271b6e5 100644
---- a/include/linux/mfd/rtsx_pci.h
-+++ b/include/linux/mfd/rtsx_pci.h
-@@ -158,10 +158,9 @@
- #define SG_TRANS_DATA		(0x02 << 4)
- #define SG_LINK_DESC		(0x03 << 4)
- 
--/* SD bank voltage */
--#define SD_IO_3V3		0
--#define SD_IO_1V8		1
+-static int sd_change_bank_voltage(struct realtek_pci_sdmmc *host, u8 voltage)
+-{
+-	struct rtsx_pcr *pcr = host->pcr;
+-	int err;
 -
-+/* Output voltage */
-+#define OUTPUT_3V3		0
-+#define OUTPUT_1V8		1
+-	if (voltage == SD_IO_3V3) {
+-		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4FC0 | 0x24);
+-		if (err < 0)
+-			return err;
+-	} else if (voltage == SD_IO_1V8) {
+-		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4C40 | 0x24);
+-		if (err < 0)
+-			return err;
+-	} else {
+-		return -EINVAL;
+-	}
+-
+-	return 0;
+-}
+-
+ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
+@@ -1098,11 +1078,11 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	rtsx_pci_start_run(pcr);
  
- /* Card Clock Enable Register */
- #define SD_CLK_EN			0x04
-@@ -201,6 +200,20 @@
- #define CHANGE_CLK			0x01
+ 	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)
+-		voltage = SD_IO_3V3;
++		voltage = OUTPUT_3V3;
+ 	else
+-		voltage = SD_IO_1V8;
++		voltage = OUTPUT_1V8;
  
- /* LDO_CTL */
-+#define BPP_ASIC_1V7			0x00
-+#define BPP_ASIC_1V8			0x01
-+#define BPP_ASIC_1V9			0x02
-+#define BPP_ASIC_2V0			0x03
-+#define BPP_ASIC_2V7			0x04
-+#define BPP_ASIC_2V8			0x05
-+#define BPP_ASIC_3V2			0x06
-+#define BPP_ASIC_3V3			0x07
-+#define BPP_REG_TUNED18			0x07
-+#define BPP_TUNED18_SHIFT_8402		5
-+#define BPP_TUNED18_SHIFT_8411		4
-+#define BPP_PAD_MASK			0x04
-+#define BPP_PAD_3V3			0x04
-+#define BPP_PAD_1V8			0x00
- #define BPP_LDO_POWB			0x03
- #define BPP_LDO_ON			0x00
- #define BPP_LDO_SUSPEND			0x02
-@@ -688,6 +701,8 @@ struct pcr_ops {
- 	int		(*disable_auto_blink)(struct rtsx_pcr *pcr);
- 	int		(*card_power_on)(struct rtsx_pcr *pcr, int card);
- 	int		(*card_power_off)(struct rtsx_pcr *pcr, int card);
-+	int		(*switch_output_voltage)(struct rtsx_pcr *pcr,
-+						u8 voltage);
- 	unsigned int	(*cd_deglitch)(struct rtsx_pcr *pcr);
- };
+-	if (voltage == SD_IO_1V8) {
++	if (voltage == OUTPUT_1V8) {
+ 		err = rtsx_pci_write_register(pcr,
+ 				SD30_DRIVE_SEL, 0x07, DRIVER_TYPE_B);
+ 		if (err < 0)
+@@ -1113,11 +1093,11 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			goto out;
+ 	}
  
-@@ -783,6 +798,7 @@ int rtsx_pci_switch_clock(struct rtsx_pcr *pcr, unsigned int card_clock,
- 		u8 ssc_depth, bool initial_mode, bool double_clk, bool vpclk);
- int rtsx_pci_card_power_on(struct rtsx_pcr *pcr, int card);
- int rtsx_pci_card_power_off(struct rtsx_pcr *pcr, int card);
-+int rtsx_pci_switch_output_voltage(struct rtsx_pcr *pcr, u8 voltage);
- unsigned int rtsx_pci_card_exist(struct rtsx_pcr *pcr);
- void rtsx_pci_complete_unfinished_transfer(struct rtsx_pcr *pcr);
+-	err = sd_change_bank_voltage(host, voltage);
++	err = rtsx_pci_switch_output_voltage(pcr, voltage);
+ 	if (err < 0)
+ 		goto out;
  
+-	if (voltage == SD_IO_1V8) {
++	if (voltage == OUTPUT_1V8) {
+ 		err = sd_wait_voltage_stable_2(host);
+ 		if (err < 0)
+ 			goto out;
 -- 
 1.7.9.5
