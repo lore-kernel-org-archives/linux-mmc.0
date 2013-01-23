@@ -1,37 +1,71 @@
-From: Samuel Ortiz <sameo@linux.intel.com>
-Subject: Re: [PATCH v4 0/8] rtsx patchset for MFD and MMC tree
-Date: Wed, 23 Jan 2013 16:37:50 +0100
-Message-ID: <20130123153750.GF5151@sortiz-mobl>
-References: <cover.1357638064.git.wei_wang@realsil.com.cn>
- <50F66CAD.6090003@realsil.com.cn>
- <20130122033115.GY7409@sortiz-mobl>
- <50FE09DD.6070102@realsil.com.cn>
- <20130122224232.GC5151@sortiz-mobl>
- <50FF3BAD.4010009@realsil.com.cn>
- <50FF3D9F.6070503@realsil.com.cn>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <50FF3D9F.6070503@realsil.com.cn>
-Sender: linux-kernel-owner@vger.kernel.org
-To: wwang <wei_wang@realsil.com.cn>
-Cc: pclinux <pclinux@realsil.com.cn>, "cjb@laptop.org" <cjb@laptop.org>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "arnd@arndb.de" <arnd@arndb.de>, "oakad@yahoo.com" <oakad@yahoo.com>, "bp@alien8.de" <bp@alien8.de>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH v2 08/11] mmc: sh_mobile_sdhi: remove unused .pdata field
+Date: Wed, 23 Jan 2013 16:32:35 +0100
+Message-ID: <1358955158-1510-9-git-send-email-g.liakhovetski@gmx.de>
+References: <1358955158-1510-1-git-send-email-g.liakhovetski@gmx.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.126.171]:57746 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755551Ab3AWPkS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Jan 2013 10:40:18 -0500
+In-Reply-To: <1358955158-1510-1-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Hi Wei,
+The struct sh_mobile_sdhi_info::pdata field was only used for platform-
+based card detection and isn't used anymore since the migration to GPIO-
+based MMC slot functions. Remove it.
 
-On Wed, Jan 23, 2013 at 09:32:15AM +0800, wwang wrote:
-> Hi Samuel:
-> 
-> Sorry, pclinux is also me. I always mess the two mail accounts up.
-> I would like to repeat my question. Does it mean that the other commits
-> only can be submitted to 3.9-rc?
-Yes, that's how I prefer to handle it.
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
+ drivers/mmc/host/sh_mobile_sdhi.c  |    4 ----
+ include/linux/mmc/sh_mobile_sdhi.h |    2 --
+ 2 files changed, 0 insertions(+), 6 deletions(-)
 
-Cheers,
-Samuel.
-
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index e0ca0ab..17d5778 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -135,7 +135,6 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	mmc_data = &priv->mmc_data;
+ 
+ 	if (p) {
+-		p->pdata = mmc_data;
+ 		if (p->init) {
+ 			ret = p->init(pdev, &sdhi_ops);
+ 			if (ret)
+@@ -284,9 +283,6 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
+ 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
+ 	int i = 0, irq;
+ 
+-	if (p)
+-		p->pdata = NULL;
+-
+ 	tmio_mmc_host_remove(host);
+ 
+ 	while (1) {
+diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
+index b65679f..b76bcf0 100644
+--- a/include/linux/mmc/sh_mobile_sdhi.h
++++ b/include/linux/mmc/sh_mobile_sdhi.h
+@@ -4,7 +4,6 @@
+ #include <linux/types.h>
+ 
+ struct platform_device;
+-struct tmio_mmc_data;
+ 
+ #define SH_MOBILE_SDHI_IRQ_CARD_DETECT	"card_detect"
+ #define SH_MOBILE_SDHI_IRQ_SDCARD	"sdcard"
+@@ -26,7 +25,6 @@ struct sh_mobile_sdhi_info {
+ 	unsigned long tmio_caps2;
+ 	u32 tmio_ocr_mask;	/* available MMC voltages */
+ 	unsigned int cd_gpio;
+-	struct tmio_mmc_data *pdata;
+ 	void (*set_pwr)(struct platform_device *pdev, int state);
+ 	int (*get_cd)(struct platform_device *pdev);
+ 
 -- 
-Intel Open Source Technology Centre
-http://oss.intel.com/
+1.7.2.5
+
