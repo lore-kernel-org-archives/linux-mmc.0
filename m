@@ -1,57 +1,74 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH/RFC v2 06/11] mmc: tmio-mmc: define device-tree bindings
-Date: Wed, 23 Jan 2013 16:32:33 +0100
-Message-ID: <1358955158-1510-7-git-send-email-g.liakhovetski@gmx.de>
-References: <1358955158-1510-1-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH/RFC] mmc: add DT bindings for more MMC capability flags
+Date: Wed, 23 Jan 2013 17:45:11 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1301231743190.26301@axis700.grange>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:63997 "EHLO
+Received: from moutng.kundenserver.de ([212.227.126.171]:58535 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755551Ab3AWPkU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Jan 2013 10:40:20 -0500
-In-Reply-To: <1358955158-1510-1-git-send-email-g.liakhovetski@gmx.de>
+	with ESMTP id S1752976Ab3AWQpO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Jan 2013 11:45:14 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Chris Ball <cjb@laptop.org>, devicetree-discuss@lists.ozlabs.org, Magnus Damm <magnus.damm@gmail.com>
 
-Define device-tree bindings for the tmio-mmc driver to be able to specify
-parameters, currently provided in platform data.
+Many MMC capability flags are platform-dependent and are traditionally set
+in platform data. With DT often each such capability requires a special
+binding. Add bindings for MMC_CAP_SD_HIGHSPEED, MMC_CAP_MMC_HIGHSPEED and
+MMC_CAP_POWER_OFF_CARD capabilities. Also add code to DT parser to look
+up "keep-power-in-suspend" and "enable-sdio-wakeup" bindings and set
+MMC_PM_KEEP_POWER and MMC_PM_WAKE_SDIO_IRQ respectively, if found.
 
-Cc: Magnus Damm <magnus.damm@gmail.com>
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
 
-Please, comment on this one, since it is defining an ABI
+Attention: contains new DT bindings, please, comment!
 
- Documentation/devicetree/bindings/mmc/tmio_mmc.txt |   19 +++++++++++++++++++
- 1 files changed, 19 insertions(+), 0 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+ Documentation/devicetree/bindings/mmc/mmc.txt |    5 ++++-
+ drivers/mmc/core/host.c                       |   11 +++++++++++
+ 2 files changed, 15 insertions(+), 1 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-new file mode 100644
-index 0000000..dd8decd
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-@@ -0,0 +1,19 @@
-+* Toshiba Mobile IO SD/MMC controller
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index e180892..92ec534c 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -25,8 +25,11 @@ Optional properties:
+ - max-frequency: maximum operating clock frequency
+ - no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
+   this system, even if the controller claims it is.
++- cap-sd-highspeed: SD high-speed timing is supported
++- cap-mmc-highspeed: MMC high-speed timing is supported
++- cap-power-off-card: powering off the card is safe
+ 
+-cd-inverted and wp-inverted properties are deprecated ans shouldn't be used,
++cd-inverted and wp-inverted properties are deprecated and shouldn't be used,
+ instead pleaseuse the OF_GPIO_ACTIVE_LOW flag in respective GPIO bindings. Note,
+ that the default (as defined by the SDHCI standard) CD and WP polarity is
+ active-low, so, OF_GPIO_ACTIVE_LOW should normally be set, and only be left
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index e4c1cbd..f3ea268 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -372,6 +372,17 @@ void mmc_of_parse(struct mmc_host *host)
+ 			dev_err(host->parent,
+ 				"Failed to request WP GPIO: %d!\n", ret);
+ 	}
 +
-+The tmio-mmc driver doesn't probe its devices actively, instead its binding to
-+devices is managed by either MFD drivers or by the sh_mobile_sdhi platform
-+driver. Those drivers supply the tmio-mmc driver with platform data, that either
-+describe hardware capabilities, known to them, or are obtained by them from
-+their own platform data or from their DT information. In the latter case all
-+compulsory and any optional properties, common to all SD/MMC drivers, as
-+described in mmc.txt, should or can be used. Additionally the following optional
-+bindings can be used. They set either respective TMIO_MMC_* flags or MMC_CAP_*
-+capabilities.
-+
-+Optional properties:
-+- toshiba,mmc-wrprotect-disable	: set TMIO_MMC_WRPROTECT_DISABLE flag
-+- toshiba,mmc-blksz-2bytes	: set TMIO_MMC_BLKSZ_2BYTES
-+- toshiba,mmc-cap-sdio-irq	: SDIO IRQ signalling should be used, if
-+	supported by the hardware, i.e. set MMC_CAP_SDIO_IRQ if
-+	TMIO_MMC_SDIO_IRQ is also set
-+- toshiba,mmc-has-idle-wait	: set TMIO_MMC_HAS_IDLE_WAIT
++	if (of_find_property(np, "cap-sd-highspeed", &len))
++		host->caps |= MMC_CAP_SD_HIGHSPEED;
++	if (of_find_property(np, "cap-mmc-highspeed", &len))
++		host->caps |= MMC_CAP_MMC_HIGHSPEED;
++	if (of_find_property(np, "cap-power-off-card", &len))
++		host->caps |= MMC_CAP_POWER_OFF_CARD;
++	if (of_find_property(np, "keep-power-in-suspend", &len))
++		host->pm_caps |= MMC_PM_KEEP_POWER;
++	if (of_find_property(np, "enable-sdio-wakeup", &len))
++		host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+ }
+ 
+ EXPORT_SYMBOL(mmc_of_parse);
 -- 
 1.7.2.5
 
