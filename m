@@ -1,50 +1,33 @@
-From: Jason Cooper <jason@lakedaemon.net>
-Subject: Re: [PATCH 0/5] mmc: mvsdio: use devm_ API to simplify/correct
- error paths.
-Date: Tue, 22 Jan 2013 20:44:48 -0500
-Message-ID: <20130123014447.GE1758@titan.lakedaemon.net>
-References: <1358342040-7130-1-git-send-email-andrew@lunn.ch>
+From: <wei_wang@realsil.com.cn>
+Subject: [PATCH 0/3] Fix two bugs in rtl8411
+Date: Wed, 23 Jan 2013 09:51:03 +0800
+Message-ID: <cover.1358905022.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:61600 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752729Ab3AWBoz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Jan 2013 20:44:55 -0500
-Content-Disposition: inline
-In-Reply-To: <1358342040-7130-1-git-send-email-andrew@lunn.ch>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: cjb@laptop.org, sameo@linux.intel.com
+Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com, bp@alien8.de, Wei WANG <wei_wang@realsil.com.cn>
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Lunn <andrew@lunn.ch>
-Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux@arm.linux.org.uk, linux-mmc@vger.kernel.org, linux ARM <linux-arm-kernel@lists.infradead.org>
 
-On Wed, Jan 16, 2013 at 02:13:55PM +0100, Andrew Lunn wrote:
-> Russell King pointed out a number of issues with the probe code in the
-> mvsdio driver and supplied a patch. This patchset uses a modified
-> version, converting resource allocations to devm API calls, and fixes
-> the error paths. The patches that then follow are from Thomas
-> Petazzoni making other cleanups and adding device tree. These patches
-> needed some changes after the swap to devm. The patches here replace
-> the earlier submitted patches with the same Subject.
-> 
-> Andrew Lunn (1):
->   mmc: mvsdio: use devm_ API to simplify/correct error paths.
+From: Wei WANG <wei_wang@realsil.com.cn>
 
-Applied to mvebu/fixes.
+1. The method to switch output voltage is different in rtl8411
+2. Fix the formula to calculate N from SD clock if clock divider is more than 1
 
-> Thomas Petazzoni (4):
->   mmc: mvsdio: use slot-gpio infrastructure for write protect gpio
->   mmc: mvsdio: use slot-gpio for card detect gpio
->   mmc: mvsdio: implement a Device Tree binding
->   mmc: mvsdio: add pinctrl integration
+Wei WANG (3):
+  MFD:rtsx: Add callback function switch_output_voltage
+  MMC:rtsx: Using callback function to switch output voltage
+  MFD:rtsx: Add callback function conv_clk_and_div_n
 
-Re-applied to mvebu/drivers
+ drivers/mfd/rtl8411.c             |   29 +++++++++++++++++++++++++++++
+ drivers/mfd/rts5209.c             |   21 +++++++++++++++++++++
+ drivers/mfd/rts5229.c             |   21 +++++++++++++++++++++
+ drivers/mfd/rtsx_pcr.c            |   23 +++++++++++++++++++++--
+ drivers/mmc/host/rtsx_pci_sdmmc.c |   30 +++++-------------------------
+ include/linux/mfd/rtsx_common.h   |    3 +++
+ include/linux/mfd/rtsx_pci.h      |   25 +++++++++++++++++++++----
+ 7 files changed, 121 insertions(+), 31 deletions(-)
 
->  .../devicetree/bindings/mmc/orion-sdio.txt         |   17 ++
->  drivers/mmc/host/mvsdio.c                          |  187 ++++++++------------
->  2 files changed, 93 insertions(+), 111 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/orion-sdio.txt
-
-thx,
-
-Jason.
+-- 
+1.7.9.5
