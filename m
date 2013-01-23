@@ -1,87 +1,60 @@
-From: <wei_wang@realsil.com.cn>
-Subject: [PATCH 2/3] MMC:rtsx: Using callback function to switch output voltage
-Date: Wed, 23 Jan 2013 09:51:05 +0800
-Message-ID: <7294264f89d04dcad3e1c0654d998419450b9022.1358905022.git.wei_wang@realsil.com.cn>
-References: <cover.1358905022.git.wei_wang@realsil.com.cn>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH v5 00/14] DMA Engine support for AM33XX
+Date: Wed, 23 Jan 2013 10:21:42 +0800
+Message-ID: <20130123022133.GA5727@opensource.wolfsonmicro.com>
+References: <1358281974-8411-1-git-send-email-mporter@ti.com>
+ <50FEB6B2.5020303@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1358905022.git.wei_wang@realsil.com.cn>
-Sender: linux-kernel-owner@vger.kernel.org
-To: cjb@laptop.org, sameo@linux.intel.com
-Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, arnd@arndb.de, oakad@yahoo.com, bp@alien8.de, Wei WANG <wei_wang@realsil.com.cn>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="tThc/1wpZn/ma/RB"
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <50FEB6B2.5020303@ti.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Sekhar Nori <nsekhar@ti.com>
+Cc: Matt Porter <mporter@ti.com>, Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Arnd Bergmann <arnd@arndb.de>, Dan Williams <djbw@fb.com>, Rob Herring <rob.herring@calxeda.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Wei WANG <wei_wang@realsil.com.cn>
 
-Different card reader has different method to switch output voltage, so
-we have to use the callback function provided by MFD driver to switch
-output pad voltage.
+--tThc/1wpZn/ma/RB
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
----
- drivers/mmc/host/rtsx_pci_sdmmc.c |   30 +++++-------------------------
- 1 file changed, 5 insertions(+), 25 deletions(-)
+On Tue, Jan 22, 2013 at 09:26:34PM +0530, Sekhar Nori wrote:
+> On 1/16/2013 2:02 AM, Matt Porter wrote:
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 571915d..f74b5ad 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -1060,26 +1060,6 @@ static int sd_wait_voltage_stable_2(struct realtek_pci_sdmmc *host)
- 	return 0;
- }
- 
--static int sd_change_bank_voltage(struct realtek_pci_sdmmc *host, u8 voltage)
--{
--	struct rtsx_pcr *pcr = host->pcr;
--	int err;
--
--	if (voltage == SD_IO_3V3) {
--		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4FC0 | 0x24);
--		if (err < 0)
--			return err;
--	} else if (voltage == SD_IO_1V8) {
--		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4C40 | 0x24);
--		if (err < 0)
--			return err;
--	} else {
--		return -EINVAL;
--	}
--
--	return 0;
--}
--
- static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
-@@ -1098,11 +1078,11 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
- 	rtsx_pci_start_run(pcr);
- 
- 	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)
--		voltage = SD_IO_3V3;
-+		voltage = OUTPUT_3V3;
- 	else
--		voltage = SD_IO_1V8;
-+		voltage = OUTPUT_1V8;
- 
--	if (voltage == SD_IO_1V8) {
-+	if (voltage == OUTPUT_1V8) {
- 		err = rtsx_pci_write_register(pcr,
- 				SD30_DRIVE_SEL, 0x07, DRIVER_TYPE_B);
- 		if (err < 0)
-@@ -1113,11 +1093,11 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
- 			goto out;
- 	}
- 
--	err = sd_change_bank_voltage(host, voltage);
-+	err = rtsx_pci_switch_output_voltage(pcr, voltage);
- 	if (err < 0)
- 		goto out;
- 
--	if (voltage == SD_IO_1V8) {
-+	if (voltage == OUTPUT_1V8) {
- 		err = sd_wait_voltage_stable_2(host);
- 		if (err < 0)
- 			goto out;
--- 
-1.7.9.5
+> > This series adds DMA Engine support for AM33xx, which uses
+> > an EDMA DMAC. The EDMA DMAC has been previously supported by only
+> > a private API implementation (much like the situation with OMAP
+> > DMA) found on the DaVinci family of SoCs.
+
+> Will you take this series through the OMAP tree? Only 1/14 touches
+> mach-davinci and I am mostly okay with it except some changes I just
+> requested Matt to make in another thread.
+
+Is this series somewhere near actually getting merged then? It seemed
+like there was lots of stuff going on.
+
+--tThc/1wpZn/ma/RB
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJQ/0enAAoJELSic+t+oim9ffsQAI5Ur3zy+yOwyevsnZw8bB12
+7bBbRS8xk9pMMDyncxZ/7KU/B7IXSjWbTHS+4un1gPpIVEA6I3J25inPDFJIkh6I
+0vpuGOf3CWpKtKb8vYFG3e6j4ibk+fz2ZBzq7gx3snPEyb/nOTwuutGrU41TAGhF
+YC63hsoC4olgKL3eZgaqa1T0jQixK/aRFWQ8GVvy8MLDgoGZiCMS5rwtc+d/qJzv
+r0+woqcmx0UCEHMaSk+WBBJ1ncRBxSCOIvGXY7J9x+rcQxbizmnOlRsOHbBKfTI3
+o5np5K7wPR0nyQSVR0YLKjlQnM2PP1X4VRXFvKoqyTKGEr7TlXhU87yiv0O3K0Eu
+anRUphgIIcuCBy8DcpxMO3QHkVHgsiMDKippR3a///bxyYy+VRO6FZCa/GJx9X7j
+z2GHXEX7oioB0HfLPEiBFBuOKXFlGwp9SIoebF7it4fnKjrmW8qoTMtZaltDE9eu
+FVah1IGDQKlgI9XSqOK+OqD4muz/Lb/e6MdpLDOAtk86AfrfS2iHbq138SSA3DgN
+IjBlPjRuDKJucPYitiYHvfmxNtzsmbOsMnA86OfnBxuSOUZMaHUyQGe37q3hJXUJ
+BbSrrGN2gP6KdutaSooB/ua5XR4A6TDBX7nA3Zi4wmGfyA4Pl7e857eqtJSL6QP4
+atfb6xpp6+wpPEWlFGlE
+=FwkO
+-----END PGP SIGNATURE-----
+
+--tThc/1wpZn/ma/RB--
