@@ -1,44 +1,83 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH/RFC v2 06/11] mmc: tmio-mmc: define device-tree bindings
-Date: Thu, 24 Jan 2013 11:03:07 -0500
-Message-ID: <87k3r2h8lg.fsf@laptop.org>
-References: <1358955158-1510-1-git-send-email-g.liakhovetski@gmx.de>
-	<1358955158-1510-7-git-send-email-g.liakhovetski@gmx.de>
-	<Pine.LNX.4.64.1301241630160.7826@axis700.grange>
-	<87pq0uh9ob.fsf@laptop.org>
-	<Pine.LNX.4.64.1301241649560.7826@axis700.grange>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: mmci: Add new VE MMCI variant
+Date: Thu, 24 Jan 2013 18:12:52 +0100
+Message-ID: <CACRpkdbG=Ad27EPdWz4hGg5D84FjS=b1M6BpPdLu9-nnMpADSA@mail.gmail.com>
+References: <1355499526-13790-1-git-send-email-pawel.moll@arm.com>
+	<CAPDyKFpOd3abjoYyrOeV=i+VRwUqisMwJe8_33j0G7zcd5r6Eg@mail.gmail.com>
+	<1359030968.26878.46.camel@hornet>
+	<CAPDyKFpc3GZd0Zr4TcGBX_cobJLXFJzr+LAO5Z6TEJu2_26ekA@mail.gmail.com>
+	<20130124125907.GV23505@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36205 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752732Ab3AXQD3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 24 Jan 2013 11:03:29 -0500
-In-Reply-To: <Pine.LNX.4.64.1301241649560.7826@axis700.grange> (Guennadi
-	Liakhovetski's message of "Thu, 24 Jan 2013 16:58:34 +0100 (CET)")
+Received: from mail-ia0-f182.google.com ([209.85.210.182]:51396 "EHLO
+	mail-ia0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752142Ab3AXRMx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Jan 2013 12:12:53 -0500
+Received: by mail-ia0-f182.google.com with SMTP id w33so5078550iag.41
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Jan 2013 09:12:52 -0800 (PST)
+In-Reply-To: <20130124125907.GV23505@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-Hi,
+On Thu, Jan 24, 2013 at 1:59 PM, Russell King - ARM Linux
+<linux@arm.linux.org.uk> wrote:
 
-On Thu, Jan 24 2013, Guennadi Liakhovetski wrote:
-> I tried to keep this binding similar to others, that I proposed in "mmc: 
-> add DT bindings for more MMC capability flags." Actually, the above is 
-> indeed wrong, I would call it "cap-sdio-irq." And in that patch I tried to 
-> keep binding names resembling as closely as possible respective MMC_CAP_* 
-> flags. I think, it would have been better if "enable-sdio-wakeup" and 
-> "keep-power-in-suspend" were also named, following the same rule, but it's 
-> too late now. Anyway, I'm not too concerned about the names. We can use 
-> "enable-sdio-irq" too if you like.
+> The clock can be masked independently too via the clock enable bit in
+> the clock register.
+>
+> However, it's interesting to note: experiments that Linus did with having
+> the primecell automatically masking the clock to the card did not prove
+> worthwhile (see the comment in the code).  We seem to be heading towards
+> doing this in software and people suggesting it is worthwhile...  Why is
+> this?
+>
+> If the hardware can gate the clock and it doesn't produce the power
+> savings we expect, how does then gating the clock via software then
+> become worthwhile?  It doesn't make sense.
 
-I see.  Okay, let's go with your proposed cap-* for each MMC_CAP_*, and
-the pm_caps can stay as they are.
+We're talking about this I guess:
+http://marc.info/?l=linux-arm-kernel&m=123790711306850&w=4
 
-Thanks!
+In these experiments I actually gated not only the
+enable bit (bit 8) to the MCI clock, but also the pclk to
+the PrimeCell itself as well. This was due to the U300
+clock framework doing that behind the scenes on
+clk_disable(host->clk);
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+And the reason the clock framework was doing that
+was that the U300 had the block clock and the card
+clock wired to the same clock tap ...
+The equivalent patch today would also call
+amba_pclk_disable() when the card was inactive.
+
+Thus we also got rid of all the switching leaks in the PL180
+logic. (Containing two big state machines for example.)
+
+It was an interesting comparison to just enable PwrSave
+(bit 9) instead, and disable the other clock logic.
+
+It turned out that this saving was significantly bigger when
+gating the entire PrimeCell than the savings for just gating
+the clock out to the card itself with bit 9.
+
+But at this time I didn't have a card in the slot, so as to
+eliminate the power consumed in the card (assuming
+this would drown the overall current consumption).
+
+So I have second thoughts about this. The experiment
+was not testing the PwrSave bit with a card inserted, this
+is the wrong thing to do. To determine if that bit is a good
+thing to turn on, it needs to be tested with a card in the
+slot.
+
+The only really useful information is that the switching
+logic inside the PL180 synthesized IP-core consumes
+circa 200uA, so it could be useful to gate it at times.
+
+Anyone wants to re-do the measurements?
+
+Yours,
+Linus Walleij
