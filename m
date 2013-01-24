@@ -1,57 +1,62 @@
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v5 00/14] DMA Engine support for AM33XX
-Date: Thu, 24 Jan 2013 10:44:13 +0530
-Message-ID: <5100C325.6020102@ti.com>
-References: <1358281974-8411-1-git-send-email-mporter@ti.com>
- <50FEB6B2.5020303@ti.com> <20130123022133.GA5727@opensource.wolfsonmicro.com>
- <20130123213736.GC5256@beef>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH] mmc: tmio: add barriers to IO operations
+Date: Thu, 24 Jan 2013 12:20:19 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1301241219290.5625@axis700.grange>
+References: <Pine.LNX.4.64.1301231745130.26301@axis700.grange>
+ <20130124111018.GC5724@linux-sh.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <20130123213736.GC5256@beef>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.126.187]:58866 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754309Ab3AXLUW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Jan 2013 06:20:22 -0500
+In-Reply-To: <20130124111018.GC5724@linux-sh.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Paul Mundt <lethal@linux-sh.org>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>
 
-Matt,
+On Thu, 24 Jan 2013, Paul Mundt wrote:
 
-On 1/24/2013 3:07 AM, Matt Porter wrote:
-> On Wed, Jan 23, 2013 at 10:21:42AM +0800, Mark Brown wrote:
->> On Tue, Jan 22, 2013 at 09:26:34PM +0530, Sekhar Nori wrote:
->>> On 1/16/2013 2:02 AM, Matt Porter wrote:
->>
->>>> This series adds DMA Engine support for AM33xx, which uses
->>>> an EDMA DMAC. The EDMA DMAC has been previously supported by only
->>>> a private API implementation (much like the situation with OMAP
->>>> DMA) found on the DaVinci family of SoCs.
->>
->>> Will you take this series through the OMAP tree? Only 1/14 touches
->>> mach-davinci and I am mostly okay with it except some changes I just
->>> requested Matt to make in another thread.
->>
->> Is this series somewhere near actually getting merged then? It seemed
->> like there was lots of stuff going on.
-> 
-> The issues raised by Sekhar and Santosh were reasonably minor and will
-> be addressed. My major concern is that the dependency on some api to
-> fetch dmaengine driver SG limitations is not resolved. That's being
-> discussed in https://lkml.org/lkml/2013/1/10/432
+> On Wed, Jan 23, 2013 at 05:46:18PM +0100, Guennadi Liakhovetski wrote:
+> > Without barriers SDIO operations fail with runtime PM enabled.
+> > 
+> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> > ---
+> >  drivers/mmc/host/tmio_mmc.h |   14 ++++++++------
+> >  1 files changed, 8 insertions(+), 6 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> > index d857f5c..ad1a1c6 100644
+> > --- a/drivers/mmc/host/tmio_mmc.h
+> > +++ b/drivers/mmc/host/tmio_mmc.h
+> > @@ -159,19 +159,20 @@ int tmio_mmc_host_runtime_resume(struct device *dev);
+> >  
+> >  static inline u16 sd_ctrl_read16(struct tmio_mmc_host *host, int addr)
+> >  {
+> > -	return readw(host->ctl + (addr << host->bus_shift));
+> > +	return ioread16(host->ctl + (addr << host->bus_shift));
+> >  }
+> >  
+> >  static inline void sd_ctrl_read16_rep(struct tmio_mmc_host *host, int addr,
+> >  		u16 *buf, int count)
+> >  {
+> > +	wmb();
+> >  	readsw(host->ctl + (addr << host->bus_shift), buf, count);
+> >  }
+> >  
+> Some reason to not use ioread16_rep() and friends?
 
-It might be worth posting the patches which don't have dependencies and
-are ready for acceptance as a separate series. That way at least some of
-these patches have a good chance of getting into v3.9 if not the entire
-series.
+Aren't they "raw," i.e. without barriers:
 
-Thanks,
-Sekhar
+#define ioread16_rep(p,d,c)	__raw_readsw(p,d,c)
+
+?
+
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
