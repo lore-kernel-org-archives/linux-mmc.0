@@ -1,35 +1,66 @@
-From: Barak Wasserstrom <wbarak@gmail.com>
-Subject: device tree support for MMC host OCR mask
-Date: Thu, 24 Jan 2013 19:46:05 +0200
-Message-ID: <CD273FDE.3764A%wbarak@gmail.com>
-References: <S1751919Ab3AXRe0/20130124173426Z+264@vger.kernel.org>
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
+From: Dongjin Kim <tobetter@gmail.com>
+Subject: [PATCH v2] mmc: dw_mmc: Add MSHC compatible for Exynos4412
+Date: Fri, 25 Jan 2013 03:20:33 +0900
+Message-ID: <1359051650-16822-1-git-send-email-tobetter@gmail.com>
+References: <1358954692-5625-1-git-send-email-tobetter@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f50.google.com ([74.125.83.50]:49950 "EHLO
-	mail-ee0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752380Ab3AXRqO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Jan 2013 12:46:14 -0500
-Received: by mail-ee0-f50.google.com with SMTP id e51so4900292eek.9
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Jan 2013 09:46:13 -0800 (PST)
-In-Reply-To: <S1751919Ab3AXRe0/20130124173426Z+264@vger.kernel.org>
+Received: from mail-pa0-f52.google.com ([209.85.220.52]:65212 "EHLO
+	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751919Ab3AXSVP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Jan 2013 13:21:15 -0500
+In-Reply-To: <1358954692-5625-1-git-send-email-tobetter@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+Cc: Dongjin Kim <tobetter@gmail.com>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Thomas Abraham <thomas.abraham@linaro.org>, Will Newton <will.newton@imgtec.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi,
-Is there a standard support for providing the MMC host OCR mask in the
-device tree structure?
-I'm using ARM PrimeCell PL180/181 Multimedia Card Interface driver.
-In 'mmci_dt_populate_generic_pdata' I cannot see any evidence for parsing
-oct mask.
-I wonder if I can just add to the function:
- of_property_read_u32(np, "ocr-mask", &pdata->ocr_mask);
+This patch adds the compatible string for MSHC controller of Exynos4412, and
+share the controller specific properties with Exynos5250 since they have same
+features. Its driver data name is changed to exynos5_drv_data not to use SoC
+specific name.
 
+Signed-off-by: Dongjin Kim <tobetter@gmail.com>
+---
+ drivers/mmc/host/dw_mmc-exynos.c |   12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
 
-Regards,
-Barak
-
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index 4d50da6..8238a00 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -199,8 +199,8 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
+ 	return 0;
+ }
+ 
+-/* Exynos5250 controller specific capabilities */
+-static unsigned long exynos5250_dwmmc_caps[4] = {
++/* Exynos4412/Exynos5250 controller specific capabilities */
++static unsigned long exynos5_dwmmc_caps[4] = {
+ 	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
+ 		MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
+ 	MMC_CAP_CMD23,
+@@ -208,8 +208,8 @@ static unsigned long exynos5250_dwmmc_caps[4] = {
+ 	MMC_CAP_CMD23,
+ };
+ 
+-static const struct dw_mci_drv_data exynos5250_drv_data = {
+-	.caps			= exynos5250_dwmmc_caps,
++static const struct dw_mci_drv_data exynos5_drv_data = {
++	.caps			= exynos5_dwmmc_caps,
+ 	.init			= dw_mci_exynos_priv_init,
+ 	.setup_clock		= dw_mci_exynos_setup_clock,
+ 	.prepare_command	= dw_mci_exynos_prepare_command,
+@@ -219,8 +219,10 @@ static const struct dw_mci_drv_data exynos5250_drv_data = {
+ };
+ 
+ static const struct of_device_id dw_mci_exynos_match[] = {
++	{ .compatible = "samsung,exynos4412-dw-mshc",
++			.data = &exynos5_drv_data, },
+ 	{ .compatible = "samsung,exynos5250-dw-mshc",
+-			.data = &exynos5250_drv_data, },
++			.data = &exynos5_drv_data, },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, dw_mci_exynos_match);
+-- 
+1.7.10.4
 
