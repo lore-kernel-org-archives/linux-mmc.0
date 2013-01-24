@@ -1,68 +1,56 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] mmc: tmio: add barriers to IO operations
-Date: Thu, 24 Jan 2013 12:52:29 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1301241248530.7826@axis700.grange>
-References: <Pine.LNX.4.64.1301231745130.26301@axis700.grange>
- <20130124111018.GC5724@linux-sh.org> <Pine.LNX.4.64.1301241219290.5625@axis700.grange>
- <20130124114205.GD5724@linux-sh.org>
+From: Pawel Moll <pawel.moll@arm.com>
+Subject: Re: [PATCH] mmc: mmci: Add new VE MMCI variant
+Date: Thu, 24 Jan 2013 12:36:08 +0000
+Message-ID: <1359030968.26878.46.camel@hornet>
+References: <1355499526-13790-1-git-send-email-pawel.moll@arm.com>
+	 <CAPDyKFpOd3abjoYyrOeV=i+VRwUqisMwJe8_33j0G7zcd5r6Eg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20130124114205.GD5724@linux-sh.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: Paul Mundt <lethal@linux-sh.org>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from service87.mimecast.com ([91.220.42.44]:44506 "EHLO
+	service87.mimecast.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753272Ab3AXMgM convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Jan 2013 07:36:12 -0500
+In-Reply-To: <CAPDyKFpOd3abjoYyrOeV=i+VRwUqisMwJe8_33j0G7zcd5r6Eg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On Thu, 24 Jan 2013, Paul Mundt wrote:
+Hello Ulf,
 
-> On Thu, Jan 24, 2013 at 12:20:19PM +0100, Guennadi Liakhovetski wrote:
-> > On Thu, 24 Jan 2013, Paul Mundt wrote:
-> > 
-> > > On Wed, Jan 23, 2013 at 05:46:18PM +0100, Guennadi Liakhovetski wrote:
-> > > > Without barriers SDIO operations fail with runtime PM enabled.
-> > > > 
-> > > > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > > > ---
-> > > >  drivers/mmc/host/tmio_mmc.h |   14 ++++++++------
-> > > >  1 files changed, 8 insertions(+), 6 deletions(-)
-> > > > 
-> > > > diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-> > > > index d857f5c..ad1a1c6 100644
-> > > > --- a/drivers/mmc/host/tmio_mmc.h
-> > > > +++ b/drivers/mmc/host/tmio_mmc.h
-> > > > @@ -159,19 +159,20 @@ int tmio_mmc_host_runtime_resume(struct device *dev);
-> > > >  
-> > > >  static inline u16 sd_ctrl_read16(struct tmio_mmc_host *host, int addr)
-> > > >  {
-> > > > -	return readw(host->ctl + (addr << host->bus_shift));
-> > > > +	return ioread16(host->ctl + (addr << host->bus_shift));
-> > > >  }
-> > > >  
-> > > >  static inline void sd_ctrl_read16_rep(struct tmio_mmc_host *host, int addr,
-> > > >  		u16 *buf, int count)
-> > > >  {
-> > > > +	wmb();
-> > > >  	readsw(host->ctl + (addr << host->bus_shift), buf, count);
-> > > >  }
-> > > >  
-> > > Some reason to not use ioread16_rep() and friends?
-> > 
-> > Aren't they "raw," i.e. without barriers:
-> > 
-> > #define ioread16_rep(p,d,c)	__raw_readsw(p,d,c)
+On Fri, 2012-12-21 at 11:05 +0000, Ulf Hansson wrote:
+> On 14 December 2012 16:38, Pawel Moll <pawel.moll@arm.com> wrote:
+> > The Versatile Express IOFPGA as shipped on VECD 5.0 (bitfiles v108/208
+> > and v116/216) contains a modified version of the PL180 MMCI, with
+> > PeriphID Configuration value changed to 0x2.
+> >
+> > This version adds an optional "hardware flow control" feature. When
+> > enabled MMC card clock will be automatically disabled when FIFO is
+> > about to over/underflow and re-enabled once the host retrieved some
+> > data. This makes the controller immune to over/underrun errors caused
+> > by big interrupt handling latencies.
+> >
+> > This patch adds relevant device variant in the driver.
+> >
+> > Signed-off-by: Pawel Moll <pawel.moll@arm.com>
+
+> So enabling this in the variant will also effect how the clock is
+> being set/gated when the clock freq is 0.
 > 
-> I wasn't talking about the barrier semantics, I meant for consistency, as
-> you are converting to the ioread/write API for everything else.
+> Please have a look at "mmc: mmci: Gate the clock when freq is 0", a
+> patch I sent out as of 12 dec.
+> That patch is using the power register to gate the clock. Will that
+> work with this new version of the PL180 as well? If not, that patch
+> must be reworked.
 
-Ok, I see. But the reason to replace readw() / writew() ops with io* was 
-to add barriers, whereas this change wouldn't actually do any good. So, 
-yeah, we could do that for consistency, but otherwise it wouldn't bring 
-any more benefits and explicit barriers would have to be kept anyway.
+I'm not quite sure what you meant here, but I see that v2 of your patch
+does whatever it is supposed to do to ST variants only, so I guess your
+objections don't apply any more?
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Cheers!
+
+Pawel
+
+
