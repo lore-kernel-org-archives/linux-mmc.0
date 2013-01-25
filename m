@@ -1,91 +1,46 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: mmci: Add new VE MMCI variant
-Date: Fri, 25 Jan 2013 10:35:54 +0100
-Message-ID: <CACRpkdbgmJW4X6vzuDjPM+cHgcPSMW0Y2jCKwmYk9-t0RtOv8w@mail.gmail.com>
-References: <1355499526-13790-1-git-send-email-pawel.moll@arm.com>
-	<CAPDyKFpOd3abjoYyrOeV=i+VRwUqisMwJe8_33j0G7zcd5r6Eg@mail.gmail.com>
-	<1359030968.26878.46.camel@hornet>
-	<CAPDyKFpc3GZd0Zr4TcGBX_cobJLXFJzr+LAO5Z6TEJu2_26ekA@mail.gmail.com>
-	<20130124125907.GV23505@n2100.arm.linux.org.uk>
-	<CACRpkdbG=Ad27EPdWz4hGg5D84FjS=b1M6BpPdLu9-nnMpADSA@mail.gmail.com>
-	<CAPDyKFq-8ZHgvNUL7fpZMdQsjaDEYog4qe0pTPZ_e0Ldv4dNZQ@mail.gmail.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCH] mmc: core: expose RPMB partition only for CMD23 capable host
+Date: Fri, 25 Jan 2013 17:00:30 +0530
+Message-ID: <1359113430-10951-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ia0-f178.google.com ([209.85.210.178]:62654 "EHLO
-	mail-ia0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753179Ab3AYJfz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Jan 2013 04:35:55 -0500
-Received: by mail-ia0-f178.google.com with SMTP id y26so283632iab.9
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Jan 2013 01:35:55 -0800 (PST)
-In-Reply-To: <CAPDyKFq-8ZHgvNUL7fpZMdQsjaDEYog4qe0pTPZ_e0Ldv4dNZQ@mail.gmail.com>
+Received: from comal.ext.ti.com ([198.47.26.152]:45346 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755872Ab3AYLal (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 25 Jan 2013 06:30:41 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Pawel Moll <pawel.moll@arm.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@stericsson.com>
+To: linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: loic.pallardy-ext@stericsson.com, peter.ujfalusi@ti.com, Balaji T K <balajitk@ti.com>
 
-On Thu, Jan 24, 2013 at 9:11 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 24 January 2013 18:12, Linus Walleij <linus.walleij@linaro.org> wrote:
+SET_BLOCK_COUNT CMD23 is needed for all access to RPMB partition.
+If block count is not set by CMD23, all subsequent read/write commands
+fail as per eMMC specification. So, If the host does not support CMD23,
+do not expose RPMB partition.
 
->> We're talking about this I guess:
->> http://marc.info/?l=linux-arm-kernel&m=123790711306850&w=4
->>
->> In these experiments I actually gated not only the
->> enable bit (bit 8) to the MCI clock, but also the pclk to
->> the PrimeCell itself as well. This was due to the U300
->> clock framework doing that behind the scenes on
->> clk_disable(host->clk);
->>
->> And the reason the clock framework was doing that
->> was that the U300 had the block clock and the card
->> clock wired to the same clock tap ...
->> The equivalent patch today would also call
->> amba_pclk_disable() when the card was inactive.
->>
->> Thus we also got rid of all the switching leaks in the PL180
->> logic. (Containing two big state machines for example.)
->>
->> It was an interesting comparison to just enable PwrSave
->> (bit 9) instead, and disable the other clock logic.
->>
->> It turned out that this saving was significantly bigger when
->> gating the entire PrimeCell than the savings for just gating
->> the clock out to the card itself with bit 9.
->>
->> But at this time I didn't have a card in the slot, so as to
->> eliminate the power consumed in the card (assuming
->> this would drown the overall current consumption).
->>
->> So I have second thoughts about this. The experiment
->> was not testing the PwrSave bit with a card inserted, this
->> is the wrong thing to do. To determine if that bit is a good
->> thing to turn on, it needs to be tested with a card in the
->> slot.
->>
->> The only really useful information is that the switching
->> logic inside the PL180 synthesized IP-core consumes
->> circa 200uA, so it could be useful to gate it at times.
->
-> So in the runtime_pm callbacks, it you don't just want to do normal
-> clk gating/ungating with the clock API, which is done right now. You
-> also would like to actually gate the clock internally by using
-> clock/power register. Does that make sense?
+Accessing RPMB partition can cause hang / huge delay
+for host which do not support CMD23.
 
-Well in the currently merged patches it will only cut of
-MCLK through the clock API right?
+Signed-off-by: Balaji T K <balajitk@ti.com>
+Reported-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
+---
+ drivers/mmc/core/mmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Maybe it makes sense to also call amba_pclk_disable()
-in these hooks so as to propagate up and gate off the
-silicon pclk?
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index e6e3911..089e8ea 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -496,7 +496,7 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		 * RPMB regions are defined in multiples of 128K.
+ 		 */
+ 		card->ext_csd.raw_rpmb_size_mult = ext_csd[EXT_CSD_RPMB_MULT];
+-		if (ext_csd[EXT_CSD_RPMB_MULT]) {
++		if (ext_csd[EXT_CSD_RPMB_MULT] && mmc_host_cmd23(card->host)) {
+ 			mmc_part_add(card, ext_csd[EXT_CSD_RPMB_MULT] << 17,
+ 				EXT_CSD_PART_CONFIG_ACC_RPMB,
+ 				"rpmb", 0, false,
+-- 
+1.7.5.4
 
-In the ST case, with SDIO support and all, this can not be
-done on SDIO devices though, as that thing needs to
-react to IRQs, and thus the logic must always be clocked.
-But for blocks connected to cards/eMMCs where the device
-is essentially passive, it seems like the right thing to do.
-
-(Actually in a finer technology the power savings could of
-course be greater than 200uA for doing this.)
-
-Yours,
-Linus Walleij
