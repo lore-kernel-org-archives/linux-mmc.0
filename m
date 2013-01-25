@@ -1,31 +1,52 @@
 From: Dirk Behme <dirk.behme@de.bosch.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci-esdhc-imx: remove D3CD check from SDHCI_HOST_CONTROL
- write
-Date: Fri, 25 Jan 2013 07:46:09 +0100
-Message-ID: <51022A31.4060908@de.bosch.com>
-References: <1358264213-3611-1-git-send-email-shawn.guo@linaro.org>
+Subject: Re: [PATCH 0/6] sdhci-esdhc-imx: 8bit mmc support
+Date: Fri, 25 Jan 2013 07:47:23 +0100
+Message-ID: <51022A7B.4040901@de.bosch.com>
+References: <1358766149-9534-1-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from imta22.fe.bosch.de ([139.15.243.26]:56117 "EHLO
+Received: from imta22.fe.bosch.de ([139.15.243.26]:56195 "EHLO
 	imta22.fe.bosch.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751185Ab3AYGzs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Jan 2013 01:55:48 -0500
+	with ESMTP id S1751185Ab3AYHAt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Jan 2013 02:00:49 -0500
 Received: from smtp6-v.fe.bosch.de (imta24.fe.bosch.de [139.15.243.27])
-	by imta22.fe.bosch.de (Postfix) with ESMTP id 6479E8405FD
-	for <linux-mmc@vger.kernel.org>; Fri, 25 Jan 2013 07:49:57 +0100 (CET)
-In-Reply-To: <1358264213-3611-1-git-send-email-shawn.guo@linaro.org>
+	by imta22.fe.bosch.de (Postfix) with ESMTP id 26EFA8405A0
+	for <linux-mmc@vger.kernel.org>; Fri, 25 Jan 2013 07:51:11 +0100 (CET)
+In-Reply-To: <1358766149-9534-1-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Shawn Guo <shawn.guo@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <cjb@laptop.org>
 
-On 15.01.2013 16:36, Shawn Guo wrote:
-> SDHCI_CTRL_D3CD is not a standard SDHCI_HOST_CONTROL, so there is no
-> need to check it in SDHCI_HOST_CONTROL write at all.  Remove it.
+On 21.01.2013 12:02, Shawn Guo wrote:
+> The series makes Auto CMD23 work for imx6q usdhc and then adds 8bit
+> mmc support.
 > 
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+> Sascha Hauer (2):
+>   mmc: sdhci: rename platform_8bit_width to platform_bus_width
+>   mmc: sdhci-esdhc-imx: support 8bit mode
+> 
+> Shawn Guo (4):
+>   mmc: sdhci-esdhc-imx: separate transfer mode from command write for
+>     usdhc
+>   mmc: sdhci-esdhc-imx: manually reset MIX_CTRL for usdhc
+>   mmc: sdhci-esdhc-imx: Auto CMD23 support for usdhc
+>   mmc: dt: bus-width can be an optional property
+> 
+>  Documentation/devicetree/bindings/mmc/mmc.txt |    5 +-
+>  drivers/mmc/host/sdhci-esdhc-imx.c            |   98 +++++++++++++++++++++----
+>  drivers/mmc/host/sdhci-pci.c                  |    4 +-
+>  drivers/mmc/host/sdhci-pxav2.c                |    2 +-
+>  drivers/mmc/host/sdhci-s3c.c                  |    8 +-
+>  drivers/mmc/host/sdhci-tegra.c                |    4 +-
+>  drivers/mmc/host/sdhci.c                      |    8 +-
+>  drivers/mmc/host/sdhci.h                      |    2 +-
+>  include/linux/platform_data/mmc-esdhc-imx.h   |    1 +
+>  9 files changed, 101 insertions(+), 31 deletions(-)
+
+Whole series:
 
 Tested-by: Dirk Behme <dirk.behme@de.bosch.com>
 
@@ -34,25 +55,3 @@ Tested on i.MX6.
 Thanks
 
 Dirk
-
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c |    6 ++----
->  1 file changed, 2 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index ac6f971..322eabf 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -297,10 +297,8 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
->  		 */
->  		return;
->  	case SDHCI_HOST_CONTROL:
-> -		/* FSL messed up here, so we can just keep those three */
-> -		new_val = val & (SDHCI_CTRL_LED | \
-> -				SDHCI_CTRL_4BITBUS | \
-> -				SDHCI_CTRL_D3CD);
-> +		/* FSL messed up here, so we need to manually compose it. */
-> +		new_val = val & (SDHCI_CTRL_LED | SDHCI_CTRL_4BITBUS);
->  		/* ensure the endianness */
->  		new_val |= ESDHC_HOST_CONTROL_LE;
->  		/* bits 8&9 are reserved on mx25 */
