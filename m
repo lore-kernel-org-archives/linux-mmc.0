@@ -1,45 +1,75 @@
-From: Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v5 00/14] DMA Engine support for AM33XX
-Date: Fri, 25 Jan 2013 12:32:28 +0530
-Message-ID: <51022E04.6040204@ti.com>
-References: <1358281974-8411-1-git-send-email-mporter@ti.com>
- <50FFC48B.80902@ti.com> <20130123204917.GA5256@beef>
- <8ea1d227d84648f68e670c56f27c481e@DFLE72.ent.ti.com>
- <20130124204943.GE5256@beef>
+From: Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>
+Subject: Re: [PATCH v2 03/11] mmc: provide a standard MMC device-tree binding
+ parser centrally
+Date: Fri, 25 Jan 2013 08:55:54 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1301250848560.17518@axis700.grange>
+References: <1359095537.25175.32.camel@jlo-ubuntu-64.nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <20130124204943.GE5256@beef>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1359095537.25175.32.camel-yx3yKKdKkHfc7b1ADBJPm0n48jw8i0AO@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Joseph Lo <josephl-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Friday 25 January 2013 02:19 AM, Matt Porter wrote:
-> On Thu, Jan 24, 2013 at 05:12:05AM +0000, Shilimkar, Santosh wrote:
->> On Thursday 24 January 2013 02:19 AM, Matt Porter wrote:
->>> On Wed, Jan 23, 2013 at 04:37:55PM +0530, Santosh Shilimkar wrote:
->>>> Matt,
->>>>
->>>> On Wednesday 16 January 2013 02:02 AM, Matt Porter wrote:
->>>>
+Hi Joseph
 
-[...]
->
->>> Thanks for the catch, I'll add this in with your tested line as well for
->>> the series.
->
-> BTW, since I'm dropping mmc support from this series, I'll move your
-> patch into a separate series with only the mmc pieces.
->
-Fine by me
+On Fri, 25 Jan 2013, Joseph Lo wrote:
+
+> Hi Guennadi,
+> 
+> > MMC defines a number of standard DT bindings. Having each driver parse
+> > them individually adds code redundancy and is error prone. Provide a
+> > standard function to unify the parsing. After all drivers are
+> converted
+> > to using it instead of their own parsers, this function can be
+> integrated
+> > into mmc_alloc_host().
+> >
+> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>
+> 
+> I saw you introducing the "mmc_of_parse" API here. It looks pretty
+> similar to the "sdhci_get_of_property" that under
+> "drivers/mmc/host/sdhci-pltfm.c".
+
+Yes, several drivers have their own functions to parse MMC DT bindings, 
+whereas, I think, a common helper function can be used to parse generic 
+MMC bindings.
+
+> Does this function can be enhanced in
+> "sdhci_get_of_property" or replaced it?
+
+The goal is to make all MMC host drivers, running on DT-enabled systems, 
+use the new mmc_of_parse() function and, additionally, their own parser 
+for any their host-specific properties. As I wrote in the patch commit 
+message, if we get all drivers converted to use it, it can be later 
+integrated into mmc_alloc_host().
+
+> Or its use for different DT
+> property bindings, one is for mmc (you introduced here), the other is
+> for sdhci. Just curious, how do I determine which one should I use in
+> the sdhci/mmc host driver?
+
+The best would be to (1) convert SDHCI core to use mmc_of_parse(), (2) 
+have all SDHCI implementations use that feature either implicitly, having 
+SDHCI core call it automatically during its initialisation, or explicitly, 
+during their own probing.
+
+> And after this one "[PATCH/RFC] mmc: add DT bindings for more MMC
+> capability flags", some of the properties parsing were overlap and some
+> were not. If the host driver uses the standard property but it was being
+> separated to these two different of_parse function, I need to call both
+> of them. Sorry, I am not sure the sdhci and mmc do have different
+> specific properties and should separate to two different functions.
+
+As I said, SDHCI (and other host drivers) should be converted to use 
+mmc_of_parse() in addition to their own vendor-specific DT property 
+parsing.
+
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
