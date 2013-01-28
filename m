@@ -1,51 +1,110 @@
-From: Vinod Koul <vinod.koul@intel.com>
-Subject: Re: [PATCH v2 0/3] dmaengine: add per channel capabilities api
-Date: Mon, 28 Jan 2013 02:06:03 -0800
-Message-ID: <20130128100603.GP26562@intel.com>
-References: <1357844826-30746-1-git-send-email-mporter@ti.com>
- <abcd725c6216491da2b1054e5e11ad82@DFLE72.ent.ti.com>
- <20130120163735.GC21407@beef>
- <c4113bae604945b586e9613814be737a@DLEE74.ent.ti.com>
- <20130121181922.GD10020@beef>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Kevin Liu <kliu5@marvell.com>
+Subject: [PATCH v2] mmc: sdio: add wakeup event for suspend/resume
+Date: Mon, 28 Jan 2013 21:01:13 +0800
+Message-ID: <1359378073-3554-1-git-send-email-kliu5@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:21583 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751773Ab3A1KbK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 28 Jan 2013 05:31:10 -0500
-Content-Disposition: inline
-In-Reply-To: <20130121181922.GD10020@beef>
+Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:50203 "EHLO
+	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751407Ab3A1NA7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Jan 2013 08:00:59 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Porter <mporter@ti.com>
-Cc: Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Nicolas Pitre <nico@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Aaron Lu <aaron.lu@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Alexander Stein <alexander.stein@systec-electronic.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin
 
-On Mon, Jan 21, 2013 at 01:19:23PM -0500, Matt Porter wrote:
-> > b) Sg segment length and numbers: Well these are capabilities, so it tells
-> > you what is the maximum I can do. IMO it doesn't make sense to tie it down to
-> > burst, width etc. For that configuration you are checking maximum. What this
-> > needs to return is what is the maximum length it supports and maximum number of
-> > sg list the h/w can use. Also if you return your burst and width capablity, then
-> > any client can easily find out what is the length byte value it can hold.
->  
-> Ok, so I could report the max burst size to the client, but on EDMA it's
-> going to be SZ_64K-1, as that's the hw limit. Max addr width would also
-> be the same or capped at the maximum enum the current API support of 8
-> bytes.
-Yes IMO you should report the h/w limit and let client deduce what can be done
-with that h/w limit given the other parameters (burst, length etc...)
-> 
-> This information is not useful to the client in my case. Only the client
-> knows its FIFO size, and thus the actual burst size it needs to request
-> as that is a value specific to the IP the client driver controls. So it
-> knows actual burst size and the width of that fifo transfer, because we
-> already support telling the dmaengine driver this info in the current
-> API.
-Your current API way is not very generic. We need to make sure it useful on
-other systems too. That is why it would make sense to query the DMA H/W
-capablities and then use it with above properties to get various parameters used
-for initiating a transfer, that way you dont need to set slave parameters
+If sdio can wakeup host, the card interrupts received after suspend
+while before resume back should be regard as wakeup event. So set
+a wakeup event at that point. All sdio functions should set the
+wakeup event individually according to its suspending status.
 
---
-~Vinod
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
+---
+ drivers/mmc/core/sdio.c       |    4 ++++
+ drivers/mmc/core/sdio_irq.c   |   10 ++++++++++
+ include/linux/mmc/sdio_func.h |    6 ++++++
+ 3 files changed, 20 insertions(+)
+
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 3a64933..06675cb 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -904,6 +904,8 @@ static int mmc_sdio_suspend(struct mmc_host *host)
+ 				err = pmops->suspend(&func->dev);
+ 			if (err)
+ 				break;
++			else
++				func->func_status = FUNC_SUSPENDED;
+ 		}
+ 	}
+ 	while (err && --i >= 0) {
+@@ -911,6 +913,7 @@ static int mmc_sdio_suspend(struct mmc_host *host)
+ 		if (func && sdio_func_present(func) && func->dev.driver) {
+ 			const struct dev_pm_ops *pmops = func->dev.driver->pm;
+ 			pmops->resume(&func->dev);
++			func->func_status = FUNC_RESUMED;
+ 		}
+ 	}
+ 
+@@ -967,6 +970,7 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 		if (func && sdio_func_present(func) && func->dev.driver) {
+ 			const struct dev_pm_ops *pmops = func->dev.driver->pm;
+ 			err = pmops->resume(&func->dev);
++			func->func_status = FUNC_RESUMED;
+ 		}
+ 	}
+ 
+diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+index 3d8ceb4..b1f3a3b 100644
+--- a/drivers/mmc/core/sdio_irq.c
++++ b/drivers/mmc/core/sdio_irq.c
+@@ -42,6 +42,11 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
+ 	 */
+ 	func = card->sdio_single_irq;
+ 	if (func && host->sdio_irq_pending) {
++		if (mmc_card_keep_power(host) &&
++			mmc_card_wake_sdio_irq(host) &&
++			(func->func_status == FUNC_SUSPENDED)) {
++			pm_wakeup_event(mmc_dev(host), 0);
++		}
+ 		func->irq_handler(func);
+ 		return 1;
+ 	}
+@@ -63,6 +68,11 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
+ 					mmc_card_id(card));
+ 				ret = -EINVAL;
+ 			} else if (func->irq_handler) {
++				if (mmc_card_keep_power(host) &&
++					mmc_card_wake_sdio_irq(host) &&
++					(func->func_status == FUNC_SUSPENDED)) {
++					pm_wakeup_event(mmc_dev(host), 0);
++				}
+ 				func->irq_handler(func);
+ 				count++;
+ 			} else {
+diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
+index 50f0bc9..59f4c23 100644
+--- a/include/linux/mmc/sdio_func.h
++++ b/include/linux/mmc/sdio_func.h
+@@ -32,6 +32,11 @@ struct sdio_func_tuple {
+ 	unsigned char data[0];
+ };
+ 
++enum sdio_func_status {
++	FUNC_RESUMED = 0,	/* default value */
++	FUNC_SUSPENDED,
++};
++
+ /*
+  * SDIO function devices
+  */
+@@ -59,6 +64,7 @@ struct sdio_func {
+ 	const char		**info;		/* info strings */
+ 
+ 	struct sdio_func_tuple *tuples;
++	enum sdio_func_status	func_status;	/* SDIO function driver state */
+ };
+ 
+ #define sdio_func_present(f)	((f)->state & SDIO_STATE_PRESENT)
+-- 
+1.7.9.5
+
