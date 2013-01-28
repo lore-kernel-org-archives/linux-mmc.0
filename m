@@ -1,31 +1,29 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v1] mmc: core: move the cache disabling operation to mmc_suspend
-Date: Mon, 28 Jan 2013 16:45:45 -0500
-Message-ID: <87k3qx6kxi.fsf@laptop.org>
-References: <1358681368-13044-1-git-send-email-merez@codeaurora.org>
+Subject: Re: [PATCH 0/6] sdhci-esdhc-imx: 8bit mmc support
+Date: Mon, 28 Jan 2013 16:50:08 -0500
+Message-ID: <87fw1l6kq7.fsf@laptop.org>
+References: <1358766149-9534-1-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1358681368-13044-1-git-send-email-merez@codeaurora.org> (Maya
-	Erez's message of "Sun, 20 Jan 2013 13:29:16 +0200")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Maya Erez <merez@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:59471 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753085Ab3A1Vu5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 28 Jan 2013 16:50:57 -0500
+In-Reply-To: <1358766149-9534-1-git-send-email-shawn.guo@linaro.org> (Shawn
+	Guo's message of "Mon, 21 Jan 2013 19:02:23 +0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Sascha Hauer <s.hauer@pengutronix.de>
 
-Hi,
+Hi Shawn,
 
-On Sun, Jan 20 2013, Maya Erez wrote:
-> Cache control is an eMMC feature and in therefore should be
-> part of MMC's bus resume operations, performed in mmc_suspend,
-> rather than in the generic mmc_suspend_host().
->
-> Signed-off-by: Maya Erez <merez@codeaurora.org>
+On Mon, Jan 21 2013, Shawn Guo wrote:
+> The series makes Auto CMD23 work for imx6q usdhc and then adds 8bit
+> mmc support.
 
-Thanks, pushed to mmc-next for 3.9.
-
-(Please ignore the mail I just sent asking you to repost this patch --
-I was confused by the v1 and change in Subject line.)
+Thanks, the whole set is pushed to mmc-next for 3.9.
 
 - Chris.
 -- 
