@@ -1,35 +1,50 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: fix host version read
-Date: Mon, 28 Jan 2013 16:27:29 -0500
-Message-ID: <877gmx80ce.fsf@laptop.org>
-References: <1358263827-3379-1-git-send-email-shawn.guo@linaro.org>
+Subject: Re: [PATCH] mmc: omap_hsmmc: MAINTAINERS: change omap_hsmmc maintenance to orphan
+Date: Mon, 28 Jan 2013 16:33:43 -0500
+Message-ID: <8738xl8020.fsf@laptop.org>
+References: <1358343026-17198-1-git-send-email-svenkatr@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1358263827-3379-1-git-send-email-shawn.guo@linaro.org> (Shawn
-	Guo's message of "Tue, 15 Jan 2013 23:30:27 +0800")
-Sender: stable-owner@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Sascha Hauer <s.hauer@pengutronix.de>, stable@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1358343026-17198-1-git-send-email-svenkatr@gmail.com>
+	(Venkatraman S.'s message of "Wed, 16 Jan 2013 19:00:26 +0530")
+Sender: linux-omap-owner@vger.kernel.org
+To: Venkatraman S <svenkatr@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Shawn,
+Hi,
 
-On Tue, Jan 15 2013, Shawn Guo wrote:
-> When commit 95a2482 (mmc: sdhci-esdhc-imx: add basic imx6q usdhc
-> support) works around host version issue on imx6q, it gets the
-> register address fixup "reg ^= 2" lost for imx25/35/51/53 esdhc.
-> Thus, the controller version on these SoCs is wrongly identified
-> as v1 while it's actually v2.
+On Wed, Jan 16 2013, Venkatraman S wrote:
+> The specified email id is no longer in service.
+> Update the OMAP HSMMC entry from the MAINTAINERS file as I will
+> no longer be able to maintain this driver.
 >
-> Add the address fixup back and take a different approach to correct
-> imx6q host version, so that the host version read gets back to work
-> for all SoCs.
+> Signed-off-by: Venkatraman S <svenkatr@gmail.com>
+> ---
+>  MAINTAINERS |    4 +---
+>  1 file changed, 1 insertion(+), 3 deletions(-)
 >
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> Cc: <stable@vger.kernel.org>
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index cd5b31f..95778e1 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -5499,10 +5499,8 @@ S:	Maintained
+>  F:	drivers/mmc/host/omap.c
+>  
+>  OMAP HS MMC SUPPORT
+> -M:	Venkatraman S <svenkatr@ti.com>
+> -L:	linux-mmc@vger.kernel.org
+>  L:	linux-omap@vger.kernel.org
+> -S:	Maintained
+> +S:	Orphan
+>  F:	drivers/mmc/host/omap_hsmmc.c
+>  
+>  OMAP RANDOM NUMBER GENERATOR SUPPORT
 
-Thanks, pushed to mmc-next for 3.9.
+Thanks for your work on omap_hsmmc, Venkat!
+
+Is anyone else interested in taking up maintenance of omap_hsmmc?
 
 - Chris.
 -- 
