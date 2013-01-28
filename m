@@ -1,37 +1,39 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2] mmc: sdhci-esdhc-imx: Remove unused variables
-Date: Mon, 28 Jan 2013 16:40:06 -0500
-Message-ID: <87sj5l6l6x.fsf@laptop.org>
-References: <1358389972-24399-1-git-send-email-festevam@gmail.com>
+Subject: Re: [PATCH] MAINTAINERS: mmc: add maintainer entry for dw_mmc driver
+Date: Mon, 28 Jan 2013 16:42:12 -0500
+Message-ID: <87obg96l3f.fsf@laptop.org>
+References: <000c01cdf4ae$d77888a0$866999e0$%jun@samsung.com>
+	<CAFbHwiSZf2haZZ+ohs7EY+Ex3t9cwyJoJmBVfD=HLj0WmskDxQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:58600 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:56700 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754308Ab3A1Vkk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 28 Jan 2013 16:40:40 -0500
-In-Reply-To: <1358389972-24399-1-git-send-email-festevam@gmail.com> (Fabio
-	Estevam's message of "Thu, 17 Jan 2013 00:32:52 -0200")
+	id S1754009Ab3A1Vmp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 28 Jan 2013 16:42:45 -0500
+In-Reply-To: <CAFbHwiSZf2haZZ+ohs7EY+Ex3t9cwyJoJmBVfD=HLj0WmskDxQ@mail.gmail.com>
+	(Will Newton's message of "Thu, 17 Jan 2013 12:40:53 +0000")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>
-Cc: shawn.guo@linaro.org, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
+To: Will Newton <will.newton@gmail.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, open list <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Will Newton <will.newton@imgtec.com>, jh80.chung@samsung.com, James Hogan <james.hogan@imgtec.com>, Thomas Abraham <thomas.abraham@linaro.org>
 
 Hi,
 
-On Wed, Jan 16 2013, Fabio Estevam wrote:
-> From: Fabio Estevam <fabio.estevam@freescale.com>
+On Thu, Jan 17 2013, Will Newton wrote:
+> On Thu, Jan 17, 2013 at 12:33 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> Add maintainer entry for the Synopsys DW host driver which
+>> is used in various SOC including EXYNOS series.
+>> As Will Newton will no longer be able to take care of dw_mmc*,
+>> I and Jaehoon Chung are willing to maintain it.
+>>
+>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> ---
+>>  MAINTAINERS |    8 ++++++++
+>>  1 files changed, 8 insertions(+), 0 deletions(-)
 >
-> commit 3f175a6e5 (mmc: sdhci-esdhc-imx: remove ESDHC_CD_GPIO handling from IO 
-> accessory) introduced the following build warnings:
->
-> drivers/mmc/host/sdhci-esdhc-imx.c:149:30: warning: unused variable 'boarddata' [-Wunused-variable]
-> drivers/mmc/host/sdhci-esdhc-imx.c:181:30: warning: unused variable 'boarddata' [-Wunused-variable]
->
-> Remove the unused variables.
->
-> Acked-by: Shawn Guo <shawn.guo@linaro.org>
-> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+> Acked-by: Will Newton <will.newton@imgtec.com>
 
 Thanks, pushed to mmc-next for 3.9.
 
