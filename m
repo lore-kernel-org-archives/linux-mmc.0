@@ -1,36 +1,34 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: correct the EXCEPTION_EVENTS_STATUS vaule comment
-Date: Mon, 28 Jan 2013 15:56:09 -0500
-Message-ID: <87sj5l81sm.fsf@laptop.org>
-References: <1A230AD7863570458C6CF2BE7CD6618B102BE5CB@SHSMSX102.ccr.corp.intel.com>
-	<50EBD75F.7050805@codeaurora.org>
+Subject: Re: [PATCH v1 1/1] mmc: host: add SDHCI platform driver for msm chipsets
+Date: Mon, 28 Jan 2013 16:05:13 -0500
+Message-ID: <87obg981di.fsf@laptop.org>
+References: <1357712243-486-1-git-send-email-asutoshd@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41829 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753531Ab3A1U4r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 28 Jan 2013 15:56:47 -0500
-In-Reply-To: <50EBD75F.7050805@codeaurora.org> (Konstantin Dorfman's message
-	of "Tue, 08 Jan 2013 10:22:55 +0200")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1357712243-486-1-git-send-email-asutoshd@codeaurora.org>
+	(Asutosh Das's message of "Wed, 9 Jan 2013 11:47:23 +0530")
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Asutosh Das <asutoshd@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Venkat Gopalakrishnan <venkatg@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Konstantin Dorfman <kdorfman@codeaurora.org>
-Cc: "Zhang, YiX X" <yix.x.zhang@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi,
+Hi Asutosh,
 
-On Tue, Jan 08 2013, Konstantin Dorfman wrote:
-> May be it is worth to change all this struct comments to be:
+On Wed, Jan 09 2013, Asutosh Das wrote:
+> This platform driver adds the support of Secure Digital Host
+> Controller Interface compliant controller in MSM chipsets.
 >
-> u8	raw_exception_status;	/* EXT_CSD_EXP_EVENTS_STATUS */
->
-> This will reference actual offset value from "include/linux/mmc/mmc.h"
+> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
 
-I think I prefer having the literal numbers accessible, even though it
-duplicates data, so I've taken Zhang's original patch for now.
+Please resubmit (or just let me know) this patch once the SoC that
+contains this IP has mainline support queued for merging.
 
-Thanks,
+Also, please switch to using the standard MMC DT bindings where possible
+instead of the qcom,-prefixed ones.
+
+Thanks!
 
 - Chris.
 -- 
