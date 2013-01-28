@@ -1,80 +1,51 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: fix to refer NULL pointer
-Date: Mon, 28 Jan 2013 11:14:08 +0900
-Message-ID: <5105DEF0.5000507@samsung.com>
-References: <1359177589-13868-1-git-send-email-jy0922.shim@samsung.com>
- <Pine.LNX.4.64.1301270906270.5137@axis700.grange>
+From: Vinod Koul <vinod.koul@intel.com>
+Subject: Re: [PATCH v2 0/3] dmaengine: add per channel capabilities api
+Date: Mon, 28 Jan 2013 02:06:03 -0800
+Message-ID: <20130128100603.GP26562@intel.com>
+References: <1357844826-30746-1-git-send-email-mporter@ti.com>
+ <abcd725c6216491da2b1054e5e11ad82@DFLE72.ent.ti.com>
+ <20130120163735.GC21407@beef>
+ <c4113bae604945b586e9613814be737a@DLEE74.ent.ti.com>
+ <20130121181922.GD10020@beef>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:43619 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751247Ab3A1COa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 27 Jan 2013 21:14:30 -0500
-In-reply-to: <Pine.LNX.4.64.1301270906270.5137@axis700.grange>
+Received: from mga03.intel.com ([143.182.124.21]:21583 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751773Ab3A1KbK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 28 Jan 2013 05:31:10 -0500
+Content-Disposition: inline
+In-Reply-To: <20130121181922.GD10020@beef>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Joonyoung Shim <jy0922.shim@samsung.com>, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Matt Porter <mporter@ti.com>
+Cc: Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 
-On 01/27/2013 05:10 PM, Guennadi Liakhovetski wrote:
-> On Sat, 26 Jan 2013, Joonyoung Shim wrote:
+On Mon, Jan 21, 2013 at 01:19:23PM -0500, Matt Porter wrote:
+> > b) Sg segment length and numbers: Well these are capabilities, so it tells
+> > you what is the maximum I can do. IMO it doesn't make sense to tie it down to
+> > burst, width etc. For that configuration you are checking maximum. What this
+> > needs to return is what is the maximum length it supports and maximum number of
+> > sg list the h/w can use. Also if you return your burst and width capablity, then
+> > any client can easily find out what is the length byte value it can hold.
+>  
+> Ok, so I could report the max burst size to the client, but on EDMA it's
+> going to be SZ_64K-1, as that's the hw limit. Max addr width would also
+> be the same or capped at the maximum enum the current API support of 8
+> bytes.
+Yes IMO you should report the h/w limit and let client deduce what can be done
+with that h/w limit given the other parameters (burst, length etc...)
 > 
->> Check whether host->sdio_irq_thread is NULL before wake_up_process() is
->> called about host->sdio_irq_thread.
-> 
-> Actually, mmc_signal_sdio_irq() shouldn't be called if SDIO IRQ isn't 
-> used...
-Right, But I think that need to check whether the host->sdio_irq_thread is assigned or not.
+> This information is not useful to the client in my case. Only the client
+> knows its FIFO size, and thus the actual burst size it needs to request
+> as that is a value specific to the IP the client driver controls. So it
+> knows actual burst size and the width of that fifo transfer, because we
+> already support telling the dmaengine driver this info in the current
+> API.
+Your current API way is not very generic. We need to make sure it useful on
+other systems too. That is why it would make sense to query the DMA H/W
+capablities and then use it with above properties to get various parameters used
+for initiating a transfer, that way you dont need to set slave parameters
 
-Best Regards,
-Jaehoon Chung
-> 
-> Thanks
-> Guennadi
-> 
->>
->> Signed-off-by: Joonyoung Shim <jy0922.shim@samsung.com>
->> ---
->> Currently the kernel panic to refer NULL pointer about
->> host->sdio_irq_thread are occuring at the trats board using Samsung
->> SDHCI driver.
->>
->>  include/linux/mmc/host.h |    3 ++-
->>  1 file changed, 2 insertions(+), 1 deletion(-)
->>
->> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->> index 61a10c1..2950fea 100644
->> --- a/include/linux/mmc/host.h
->> +++ b/include/linux/mmc/host.h
->> @@ -372,7 +372,8 @@ static inline void mmc_signal_sdio_irq(struct mmc_host *host)
->>  {
->>  	host->ops->enable_sdio_irq(host, 0);
->>  	host->sdio_irq_pending = true;
->> -	wake_up_process(host->sdio_irq_thread);
->> +	if (host->sdio_irq_thread)
->> +		wake_up_process(host->sdio_irq_thread);
->>  }
->>  
->>  #ifdef CONFIG_REGULATOR
->> -- 
->> 1.7.9.5
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-> 
-> ---
-> Guennadi Liakhovetski, Ph.D.
-> Freelance Open-Source Software Developer
-> http://www.open-technology.de/
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
-> 
-
+--
+~Vinod
