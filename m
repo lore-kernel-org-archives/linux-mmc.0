@@ -1,254 +1,206 @@
-From: Johan Rudholm <johan.rudholm@stericsson.com>
-Subject: [PATCH v6 5/5] mmc: core: Fixup signal voltage switch
-Date: Mon, 28 Jan 2013 15:08:28 +0100
-Message-ID: <1359382108-958-6-git-send-email-johan.rudholm@stericsson.com>
-References: <1359382108-958-1-git-send-email-johan.rudholm@stericsson.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Lars-Peter Clausen <lars@metafoo.de>
+Subject: [PATCH] mmc: sdhci-pltfm: Add a common clk API based implementation of get_timeout_clock
+Date: Mon, 28 Jan 2013 19:27:12 +0100
+Message-ID: <1359397632-31646-1-git-send-email-lars@metafoo.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:53166 "EHLO
-	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756957Ab3A1OJe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Jan 2013 09:09:34 -0500
-In-Reply-To: <1359382108-958-1-git-send-email-johan.rudholm@stericsson.com>
+Received: from smtp-out-081.synserver.de ([212.40.185.81]:1067 "EHLO
+	smtp-out-081.synserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751270Ab3A1SdA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Jan 2013 13:33:00 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Kevin Liu <keyuan.liu@gmail.com>, Philip Rakity <prakity@nvidia.com>, Daniel Drake <dsd@laptop.org>, Aaron <leafy.myeh@allwinnertech.com>, Subhash Jadavani <subhashj@codeaurora.org>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Wei WANG <wei_wang@realsil.com.cn>, Johan Rudholm <johan.rudholm@stericsson.com>, Kevin Liu <kliu5@marvell.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Stephen Warren <swarren@wwwdotorg.org>, Shawn Guo <shawn.guo@linaro.org>, Zhangfei Gao <zhangfei.gao@marvell.com>, Kevin Liu <kliu5@marvell.com>, linux-mmc@vger.kernel.org, Lars-Peter Clausen <lars@metafoo.de>
 
-When switching SD and SDIO cards from 3.3V to 1.8V signal levels, the
-clock should be gated for 5 ms during the step. After enabling the
-clock, the host should wait for at least 1 ms before checking for
-failure. Failure by the card to switch is indicated by dat[0:3] being
-pulled low. The host should check for this condition and power-cycle
-the card if failure is indicated.
+Quite a few drivers have a implementation of the get_timeout_clock callback
+which simply returns the result of clk_get_rate on devices clock. This patch
+adds a common implementation of this to the sdhci-pltfm module and replaces all
+custom implementations with the common one.
 
-Add a retry mechanism for the SDIO case.
-
-If the voltage switch fails repeatedly, give up and continue the
-initialization using the original voltage.
-
-This patch places a couple of requirements on the host driver:
-
- 1) mmc_set_ios with ios.clock = 0 must gate the clock
- 2) mmc_power_off must actually cut the power to the card
- 3) The card_busy host_ops member must be implemented
-
-if these requirements are not fulfilled, the 1.8V signal voltage switch
-will still be attempted but may not be successful.
-
-Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Tested-by: Wei WANG <wei_wang@realsil.com.cn>
+Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
 ---
- drivers/mmc/core/core.c |   83 +++++++++++++++++++++++++++++++++++++++++------
- drivers/mmc/core/sd.c   |   21 +++++++++---
- drivers/mmc/core/sdio.c |   20 ++++++++++--
- 3 files changed, 107 insertions(+), 17 deletions(-)
+I've only runtime tested this patch on a platform which is not yet upstream. For
+the drivers which are modified in this patch I've only done compile time
+testing. But I think all changes, but maybe the bcm2835 one, are straight
+forward.
+---
+ drivers/mmc/host/sdhci-bcm2835.c   | 27 +++++----------------------
+ drivers/mmc/host/sdhci-esdhc-imx.c |  9 +--------
+ drivers/mmc/host/sdhci-pltfm.c     |  8 ++++++++
+ drivers/mmc/host/sdhci-pltfm.h     |  2 ++
+ drivers/mmc/host/sdhci-pxav2.c     |  9 +--------
+ drivers/mmc/host/sdhci-pxav3.c     |  9 +--------
+ 6 files changed, 18 insertions(+), 46 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 3823351..2aee757 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1340,6 +1340,7 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
- {
- 	struct mmc_command cmd = {0};
- 	int err = 0;
-+	u32 clock;
+diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
+index 453825f..1e97b89 100644
+--- a/drivers/mmc/host/sdhci-bcm2835.c
++++ b/drivers/mmc/host/sdhci-bcm2835.c
+@@ -51,7 +51,6 @@
+ #define BCM2835_SDHCI_WRITE_DELAY	(((2 * 1000000) / MIN_FREQ) + 1)
  
- 	BUG_ON(!host);
+ struct bcm2835_sdhci {
+-	struct clk *clk;
+ 	u32 shadow;
+ };
  
-@@ -1347,20 +1348,82 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
- 	 * Send CMD11 only if the request is to switch the card to
- 	 * 1.8V signalling.
- 	 */
--	if (signal_voltage != MMC_SIGNAL_VOLTAGE_330) {
--		cmd.opcode = SD_SWITCH_VOLTAGE;
--		cmd.arg = 0;
--		cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-+	if (signal_voltage == MMC_SIGNAL_VOLTAGE_330)
-+		return __mmc_set_signal_voltage(host, signal_voltage);
- 
--		err = mmc_wait_for_cmd(host, &cmd, 0);
--		if (err)
--			return err;
-+	/*
-+	 * If we cannot switch voltages, return failure so the caller
-+	 * can continue without UHS mode
-+	 */
-+	if (!host->ops->start_signal_voltage_switch)
-+		return -EPERM;
-+	if (!host->ops->card_busy)
-+		pr_warning("%s: cannot verify signal voltage switch\n",
-+				mmc_hostname(host));
-+
-+	cmd.opcode = SD_SWITCH_VOLTAGE;
-+	cmd.arg = 0;
-+	cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-+
-+	err = mmc_wait_for_cmd(host, &cmd, 0);
-+	if (err)
-+		return err;
- 
--		if (!mmc_host_is_spi(host) && (cmd.resp[0] & R1_ERROR))
--			return -EIO;
-+	if (!mmc_host_is_spi(host) && (cmd.resp[0] & R1_ERROR))
-+		return -EIO;
-+
-+	mmc_host_clk_hold(host);
-+	/*
-+	 * The card should drive cmd and dat[0:3] low immediately
-+	 * after the response of cmd11, but wait 1 ms to be sure
-+	 */
-+	mmc_delay(1);
-+	if (host->ops->card_busy && !host->ops->card_busy(host)) {
-+		err = -EAGAIN;
-+		goto power_cycle;
- 	}
-+	/*
-+	 * During a signal voltage level switch, the clock must be gated
-+	 * for 5 ms according to the SD spec
-+	 */
-+	clock = host->ios.clock;
-+	host->ios.clock = 0;
-+	mmc_set_ios(host);
- 
--	return __mmc_set_signal_voltage(host, signal_voltage);
-+	if (__mmc_set_signal_voltage(host, signal_voltage)) {
-+		/*
-+		 * Voltages may not have been switched, but we've already
-+		 * sent CMD11, so a power cycle is required anyway
-+		 */
-+		err = -EAGAIN;
-+		goto power_cycle;
-+	}
-+
-+	/* Keep clock gated for at least 5 ms */
-+	mmc_delay(5);
-+	host->ios.clock = clock;
-+	mmc_set_ios(host);
-+
-+	/* Wait for at least 1 ms according to spec */
-+	mmc_delay(1);
-+
-+	/*
-+	 * Failure to switch is indicated by the card holding
-+	 * dat[0:3] low
-+	 */
-+	if (host->ops->card_busy && host->ops->card_busy(host))
-+		err = -EAGAIN;
-+
-+power_cycle:
-+	if (err) {
-+		pr_debug("%s: Signal voltage switch failed, "
-+			"power cycling card\n", mmc_hostname(host));
-+		mmc_power_cycle(host);
-+	}
-+
-+	mmc_host_clk_release(host);
-+
-+	return err;
+@@ -120,27 +119,11 @@ static u8 bcm2835_sdhci_readb(struct sdhci_host *host, int reg)
+ 	return byte;
  }
  
- /*
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 9a59fcd..03134b1 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -712,6 +712,14 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
+-static unsigned int bcm2835_sdhci_get_max_clock(struct sdhci_host *host)
+-{
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct bcm2835_sdhci *bcm2835_host = pltfm_host->priv;
+-
+-	return clk_get_rate(bcm2835_host->clk);
+-}
+-
+ unsigned int bcm2835_sdhci_get_min_clock(struct sdhci_host *host)
  {
- 	int err;
- 	u32 max_current;
-+	int retries = 10;
-+
-+try_again:
-+	if (!retries) {
-+		ocr &= ~SD_OCR_S18R;
-+		pr_warning("%s: Skipping voltage switch\n",
-+			mmc_hostname(host));
-+	}
+ 	return MIN_FREQ;
+ }
  
- 	/*
- 	 * Since we're changing the OCR value, we seem to
-@@ -733,9 +741,10 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
+-unsigned int bcm2835_sdhci_get_timeout_clock(struct sdhci_host *host)
+-{
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct bcm2835_sdhci *bcm2835_host = pltfm_host->priv;
+-
+-	return clk_get_rate(bcm2835_host->clk);
+-}
+-
+ static struct sdhci_ops bcm2835_sdhci_ops = {
+ 	.write_l = bcm2835_sdhci_writel,
+ 	.write_w = bcm2835_sdhci_writew,
+@@ -148,9 +131,9 @@ static struct sdhci_ops bcm2835_sdhci_ops = {
+ 	.read_l = bcm2835_sdhci_readl,
+ 	.read_w = bcm2835_sdhci_readw,
+ 	.read_b = bcm2835_sdhci_readb,
+-	.get_max_clock = bcm2835_sdhci_get_max_clock,
++	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.get_min_clock = bcm2835_sdhci_get_min_clock,
+-	.get_timeout_clock = bcm2835_sdhci_get_timeout_clock,
++	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+ };
  
- 	/*
- 	 * If the host supports one of UHS-I modes, request the card
--	 * to switch to 1.8V signaling level.
-+	 * to switch to 1.8V signaling level. If the card has failed
-+	 * repeatedly to switch however, skip this.
- 	 */
--	if (mmc_host_uhs(host))
-+	if (retries && mmc_host_uhs(host))
- 		ocr |= SD_OCR_S18R;
+ static struct sdhci_pltfm_data bcm2835_sdhci_pdata = {
+@@ -180,9 +163,9 @@ static int bcm2835_sdhci_probe(struct platform_device *pdev)
+ 	pltfm_host = sdhci_priv(host);
+ 	pltfm_host->priv = bcm2835_host;
  
- 	/*
-@@ -746,7 +755,6 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
- 	if (max_current > 150)
- 		ocr |= SD_OCR_XPC;
- 
--try_again:
- 	err = mmc_send_app_op_cond(host, ocr, rocr);
- 	if (err)
- 		return err;
-@@ -758,8 +766,11 @@ try_again:
- 	if (!mmc_host_is_spi(host) && rocr &&
- 	   ((*rocr & 0x41000000) == 0x41000000)) {
- 		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
--		if (err) {
--			ocr &= ~SD_OCR_S18R;
-+		if (err == -EAGAIN) {
-+			retries--;
-+			goto try_again;
-+		} else if (err) {
-+			retries = 0;
- 			goto try_again;
- 		}
+-	bcm2835_host->clk = devm_clk_get(&pdev->dev, NULL);
+-	if (IS_ERR(bcm2835_host->clk)) {
+-		ret = PTR_ERR(bcm2835_host->clk);
++	pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
++	if (IS_ERR(pltfm_host->clk)) {
++		ret = PTR_ERR(pltfm_host->clk);
+ 		goto err;
  	}
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 1a726ae..aa0719a 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -584,10 +584,19 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index ae68bc9..4757b04 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -323,13 +323,6 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
+ 		esdhc_clrset_le(host, 0x7, 0x7, ESDHC_SYSTEM_CONTROL);
+ }
+ 
+-static unsigned int esdhc_pltfm_get_max_clock(struct sdhci_host *host)
+-{
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-
+-	return clk_get_rate(pltfm_host->clk);
+-}
+-
+ static unsigned int esdhc_pltfm_get_min_clock(struct sdhci_host *host)
  {
- 	struct mmc_card *card;
- 	int err;
-+	int retries = 10;
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -363,7 +356,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
+ 	.write_w = esdhc_writew_le,
+ 	.write_b = esdhc_writeb_le,
+ 	.set_clock = esdhc_set_clock,
+-	.get_max_clock = esdhc_pltfm_get_max_clock,
++	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.get_min_clock = esdhc_pltfm_get_min_clock,
+ 	.get_ro = esdhc_pltfm_get_ro,
+ };
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index d4283ef..3145a78 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -36,6 +36,14 @@
+ #endif
+ #include "sdhci-pltfm.h"
  
- 	BUG_ON(!host);
- 	WARN_ON(!host->claimed);
- 
-+try_again:
-+	if (!retries) {
-+		pr_warning("%s: Skipping voltage switch\n",
-+				mmc_hostname(host));
-+		ocr &= ~R4_18V_PRESENT;
-+		host->ocr &= ~R4_18V_PRESENT;
-+	}
++unsigned int sdhci_pltfm_clk_get_max_clock(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 +
- 	/*
- 	 * Inform the card of the voltage
- 	 */
-@@ -646,9 +655,16 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
- 	 * systems that claim 1.8v signalling in fact do not support
- 	 * it.
- 	 */
--	if ((ocr & R4_18V_PRESENT) && mmc_host_uhs(host)) {
-+	if (!powered_resume && (ocr & R4_18V_PRESENT) && mmc_host_uhs(host)) {
- 		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
--		if (err) {
-+		if (err == -EAGAIN) {
-+			sdio_reset(host);
-+			mmc_go_idle(host);
-+			mmc_send_if_cond(host, host->ocr_avail);
-+			mmc_remove_card(card);
-+			retries--;
-+			goto try_again;
-+		} else if (err) {
- 			ocr &= ~R4_18V_PRESENT;
- 			host->ocr &= ~R4_18V_PRESENT;
- 		}
++	return clk_get_rate(pltfm_host->clk);
++}
++EXPORT_SYMBOL_GPL(sdhci_pltfm_clk_get_max_clock);
++
+ static struct sdhci_ops sdhci_pltfm_ops = {
+ };
+ 
+diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+index 37e0e18..153b6c5 100644
+--- a/drivers/mmc/host/sdhci-pltfm.h
++++ b/drivers/mmc/host/sdhci-pltfm.h
+@@ -98,6 +98,8 @@ extern int sdhci_pltfm_register(struct platform_device *pdev,
+ 				struct sdhci_pltfm_data *pdata);
+ extern int sdhci_pltfm_unregister(struct platform_device *pdev);
+ 
++extern unsigned int sdhci_pltfm_clk_get_max_clock(struct sdhci_host *host);
++
+ #ifdef CONFIG_PM
+ extern const struct dev_pm_ops sdhci_pltfm_pmops;
+ #define SDHCI_PLTFM_PMOPS (&sdhci_pltfm_pmops)
+diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+index ac854aa..c151a25 100644
+--- a/drivers/mmc/host/sdhci-pxav2.c
++++ b/drivers/mmc/host/sdhci-pxav2.c
+@@ -111,15 +111,8 @@ static int pxav2_mmc_set_width(struct sdhci_host *host, int width)
+ 	return 0;
+ }
+ 
+-static u32 pxav2_get_max_clock(struct sdhci_host *host)
+-{
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-
+-	return clk_get_rate(pltfm_host->clk);
+-}
+-
+ static struct sdhci_ops pxav2_sdhci_ops = {
+-	.get_max_clock = pxav2_get_max_clock,
++	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.platform_reset_exit = pxav2_set_private_registers,
+ 	.platform_8bit_width = pxav2_mmc_set_width,
+ };
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index 3d20c10..f09877f 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -163,18 +163,11 @@ static int pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+ 	return 0;
+ }
+ 
+-static u32 pxav3_get_max_clock(struct sdhci_host *host)
+-{
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-
+-	return clk_get_rate(pltfm_host->clk);
+-}
+-
+ static struct sdhci_ops pxav3_sdhci_ops = {
+ 	.platform_reset_exit = pxav3_set_private_registers,
+ 	.set_uhs_signaling = pxav3_set_uhs_signaling,
+ 	.platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
+-	.get_max_clock = pxav3_get_max_clock,
++	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+ };
+ 
+ #ifdef CONFIG_OF
 -- 
-1.7.10
+1.8.0
 
