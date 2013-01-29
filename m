@@ -1,119 +1,47 @@
-From: Kevin Liu <kliu5@marvell.com>
-Subject: [PATCH v4] mmc: sdio: add wakeup event for suspend/resume
-Date: Tue, 29 Jan 2013 09:15:41 +0800
-Message-ID: <1359422142-9686-1-git-send-email-kliu5@marvell.com>
+From: Asutosh Das <asutoshd@codeaurora.org>
+Subject: Re: [PATCH v1 1/1] mmc: host: add SDHCI platform driver for msm chipsets
+Date: Tue, 29 Jan 2013 09:30:01 +0530
+Message-ID: <51074941.9030603@codeaurora.org>
+References: <1357712243-486-1-git-send-email-asutoshd@codeaurora.org> <87obg981di.fsf@laptop.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog133.obsmtp.com ([74.125.149.82]:58698 "EHLO
-	na3sys009aog133.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751695Ab3A2BOn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Jan 2013 20:14:43 -0500
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:28606 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753640Ab3A2EAO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Jan 2013 23:00:14 -0500
+In-Reply-To: <87obg981di.fsf@laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Nicolas Pitre <nico@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Aaron Lu <aaron.lu@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Alexander Stein <alexander.stein@systec-electronic.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>, Kevin Liu <kl>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Venkat Gopalakrishnan <venkatg@codeaurora.org>
 
-If sdio can wakeup host, the card interrupts received after suspend
-while before resume back should be regard as wakeup event. So set
-a wakeup event at that point. All sdio functions should set the
-wakeup event individually according to its suspending status.
+On 1/29/2013 2:35 AM, Chris Ball wrote:
+> Hi Asutosh,
+>
+> On Wed, Jan 09 2013, Asutosh Das wrote:
+>> This platform driver adds the support of Secure Digital Host
+>> Controller Interface compliant controller in MSM chipsets.
+>>
+>> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+>> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+> Please resubmit (or just let me know) this patch once the SoC that
+> contains this IP has mainline support queued for merging.
+>
+> Also, please switch to using the standard MMC DT bindings where possible
+> instead of the qcom,-prefixed ones.
+>
+> Thanks!
+>
+> - Chris.
+Hi Chris
+sure will do.
 
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
----
- drivers/mmc/core/sdio.c       |    4 ++++
- drivers/mmc/core/sdio_irq.c   |   12 ++++++++++++
- include/linux/mmc/sdio_func.h |    6 ++++++
- 3 files changed, 22 insertions(+)
+Thanks
+Asutosh
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 3a64933..06675cb 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -904,6 +904,8 @@ static int mmc_sdio_suspend(struct mmc_host *host)
- 				err = pmops->suspend(&func->dev);
- 			if (err)
- 				break;
-+			else
-+				func->func_status = FUNC_SUSPENDED;
- 		}
- 	}
- 	while (err && --i >= 0) {
-@@ -911,6 +913,7 @@ static int mmc_sdio_suspend(struct mmc_host *host)
- 		if (func && sdio_func_present(func) && func->dev.driver) {
- 			const struct dev_pm_ops *pmops = func->dev.driver->pm;
- 			pmops->resume(&func->dev);
-+			func->func_status = FUNC_RESUMED;
- 		}
- 	}
- 
-@@ -967,6 +970,7 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 		if (func && sdio_func_present(func) && func->dev.driver) {
- 			const struct dev_pm_ops *pmops = func->dev.driver->pm;
- 			err = pmops->resume(&func->dev);
-+			func->func_status = FUNC_RESUMED;
- 		}
- 	}
- 
-diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-index 3d8ceb4..3bae8aa 100644
---- a/drivers/mmc/core/sdio_irq.c
-+++ b/drivers/mmc/core/sdio_irq.c
-@@ -28,6 +28,14 @@
- 
- #include "sdio_ops.h"
- 
-+static inline bool sdio_irq_wakeup(struct sdio_func *func)
-+{
-+	struct mmc_host *host = func->card->host;
-+
-+	return mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)
-+		&& func->func_status == FUNC_SUSPENDED;
-+}
-+
- static int process_sdio_pending_irqs(struct mmc_host *host)
- {
- 	struct mmc_card *card = host->card;
-@@ -42,6 +50,8 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
- 	 */
- 	func = card->sdio_single_irq;
- 	if (func && host->sdio_irq_pending) {
-+		if (sdio_irq_wakeup(func))
-+			pm_wakeup_event(mmc_dev(host), 0);
- 		func->irq_handler(func);
- 		return 1;
- 	}
-@@ -63,6 +73,8 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
- 					mmc_card_id(card));
- 				ret = -EINVAL;
- 			} else if (func->irq_handler) {
-+				if (sdio_irq_wakeup(func))
-+					pm_wakeup_event(mmc_dev(host), 0);
- 				func->irq_handler(func);
- 				count++;
- 			} else {
-diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
-index 50f0bc9..59f4c23 100644
---- a/include/linux/mmc/sdio_func.h
-+++ b/include/linux/mmc/sdio_func.h
-@@ -32,6 +32,11 @@ struct sdio_func_tuple {
- 	unsigned char data[0];
- };
- 
-+enum sdio_func_status {
-+	FUNC_RESUMED = 0,	/* default value */
-+	FUNC_SUSPENDED,
-+};
-+
- /*
-  * SDIO function devices
-  */
-@@ -59,6 +64,7 @@ struct sdio_func {
- 	const char		**info;		/* info strings */
- 
- 	struct sdio_func_tuple *tuples;
-+	enum sdio_func_status	func_status;	/* SDIO function driver state */
- };
- 
- #define sdio_func_present(f)	((f)->state & SDIO_STATE_PRESENT)
 -- 
-1.7.9.5
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
 
