@@ -1,37 +1,52 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-pltfm: Add a common clk API based
- implementation of get_timeout_clock
-Date: Tue, 29 Jan 2013 13:51:13 +0800
-Message-ID: <20130129055112.GB21504@S2101-09.ap.freescale.net>
-References: <1359397632-31646-1-git-send-email-lars@metafoo.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+From: Kevin Liu <kliu5@marvell.com>
+Subject: [PATCH 0/5] mmc: sdhci: several bug fixes
+Date: Tue, 29 Jan 2013 16:21:04 +0800
+Message-ID: <1359447669-20089-1-git-send-email-kliu5@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:16891
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753319Ab3A2FvI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Jan 2013 00:51:08 -0500
-Content-Disposition: inline
-In-Reply-To: <1359397632-31646-1-git-send-email-lars@metafoo.de>
+Received: from na3sys009aog112.obsmtp.com ([74.125.149.207]:46073 "EHLO
+	na3sys009aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753190Ab3A2IUL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Jan 2013 03:20:11 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lars-Peter Clausen <lars@metafoo.de>
-Cc: Chris Ball <cjb@laptop.org>, Stephen Warren <swarren@wwwdotorg.org>, Zhangfei Gao <zhangfei.gao@marvell.com>, Kevin Liu <kliu5@marvell.com>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Nicolas Pitre <nico@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Aaron Lu <aaron.lu@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Alexander Stein <alexander.stein@systec-electronic.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>
 
-On Mon, Jan 28, 2013 at 07:27:12PM +0100, Lars-Peter Clausen wrote:
-> Quite a few drivers have a implementation of the get_timeout_clock callback
-> which simply returns the result of clk_get_rate on devices clock. This patch
-> adds a common implementation of this to the sdhci-pltfm module and replaces all
-> custom implementations with the common one.
-> 
-> Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
-> ---
-> I've only runtime tested this patch on a platform which is not yet upstream. For
-> the drivers which are modified in this patch I've only done compile time
-> testing. But I think all changes, but maybe the bcm2835 one, are straight
-> forward.
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c |  9 +--------
 
-Acked-by: Shawn Guo <shawn.guo@linaro.org>
+This patchset aim to fix several sdhci bugs.
+All the patches have been verified on sdhci-pxav3 platforms.
+This patchset based on previous patch:
+[PATCH v10 00/12] mmc: sdhci: fixes and enhancements
+
+Introduction for the patches:
+
+[PATCH 1/5] mmc: sdhci: fix transfer mode setting bug for cmds w/o
+Without this patch, timeout error will occur during emmc suspend/resume
+if it support sleep/awake.
+
+[PATCH 2/5] mmc: sdhci: add function to get retunig timer count
+Current code didn't follow the host spec and missed this case.
+
+[PATCH 3/5] mmc: sdhci: correct voltage support caps when regulator
+Current code have logic mistake although not leading to error.
+
+[PATCH 4/5] mmc: sdhci: fix the bug that emmc DDR mode can't work by
+[PATCH 5/5] mmc: sdhci: remove set_uhs_signaling function
+Current default code in sdhci.c can't work for emmc DDR mode since
+1.8v signal bit is not set. Only sdhci-pxav3.c add a callback function
+set_uhs_signaling to workaround this. But this operation should be added
+to sdhci.c by default as SD host spec require it clearly. Then the callback
+function can be removed.
+
+Kevin Liu (5):
+ [PATCH 1/5] mmc: sdhci: fix transfer mode setting bug for cmds w/o
+ [PATCH 2/5] mmc: sdhci: add function to get retunig timer count
+ [PATCH 3/5] mmc: sdhci: correct voltage support caps when regulator
+ [PATCH 4/5] mmc: sdhci: fix the bug that emmc DDR mode can't work by
+ [PATCH 5/5] mmc: sdhci: remove set_uhs_signaling function
+
+ drivers/mmc/host/sdhci-pxav3.c |   39 --------------------
+ drivers/mmc/host/sdhci.c       |   77 ++++++++++++++++++++++++----------------
+ drivers/mmc/host/sdhci.h       |    2 +-
+ 3 files changed, 48 insertions(+), 70 deletions(-)
 
