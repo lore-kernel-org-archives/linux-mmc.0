@@ -1,62 +1,62 @@
-From: Lars-Peter Clausen <lars@metafoo.de>
-Subject: Re: [PATCH] mmc: sdhci-pltfm: Add a common clk API based implementation
- of get_timeout_clock
-Date: Tue, 29 Jan 2013 10:22:35 +0100
-Message-ID: <510794DB.3050606@metafoo.de>
-References: <1359397632-31646-1-git-send-email-lars@metafoo.de> <51076205.6040704@wwwdotorg.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Kevin Liu <kliu5@marvell.com>
+Subject: [PATCH v2 2/5] mmc: sdhci: add function to get retunig timer count
+Date: Tue, 29 Jan 2013 17:41:45 +0800
+Message-ID: <1359452505-27599-1-git-send-email-kliu5@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp-out-081.synserver.de ([212.40.185.81]:1225 "EHLO
-	smtp-out-081.synserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755365Ab3A2JVd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Jan 2013 04:21:33 -0500
-In-Reply-To: <51076205.6040704@wwwdotorg.org>
+Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:53757 "EHLO
+	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751210Ab3A2Jkk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Jan 2013 04:40:40 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, Kevin Liu <kliu5@marvell.com>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Nicolas Pitre <nico@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Alexander Stein <alexander.stein@systec-electronic.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>, Kevin Liu <kliu5@marvell.com>
 
-On 01/29/2013 06:45 AM, Stephen Warren wrote:
-> On 01/28/2013 11:27 AM, Lars-Peter Clausen wrote:
->> Quite a few drivers have a implementation of the get_timeout_clock callback
->> which simply returns the result of clk_get_rate on devices clock. This patch
->> adds a common implementation of this to the sdhci-pltfm module and replaces all
->> custom implementations with the common one.
->>
->> Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
->> ---
->> I've only runtime tested this patch on a platform which is not yet upstream. For
->> the drivers which are modified in this patch I've only done compile time
->> testing. But I think all changes, but maybe the bcm2835 one, are straight
->> forward.
-> 
-> It seems to work fine for bcm2835. So,
-> 
-> Tested-by: Stephen Warren <swarren@wwwdotorg.org>
-> 
->> @@ -148,9 +131,9 @@ static struct sdhci_ops bcm2835_sdhci_ops = {
->>  	.read_l = bcm2835_sdhci_readl,
->>  	.read_w = bcm2835_sdhci_readw,
->>  	.read_b = bcm2835_sdhci_readb,
->> -	.get_max_clock = bcm2835_sdhci_get_max_clock,
->> +	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
->>  	.get_min_clock = bcm2835_sdhci_get_min_clock,
->> -	.get_timeout_clock = bcm2835_sdhci_get_timeout_clock,
->> +	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
->>  };
-> 
-> Rather than requiring .get_max_clock and .get_timeout_clock to be set by
-> each driver, perhaps the SDHCI core can call
-> sdhci_pltfm_clk_get_max_clock() if the function pointer is NULL?
+According to SD host spec (Capabilities Register, offset 0x40<43:40>),
+if timer count for retuning return 0xF, it means get information from
+other source. If driver didn't provide the function in case timer count
+return 0xF, just disable retuning.
 
-Yea, this part of the bcm2835 driver confused me a bit. So there is the
-SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK quirk which causes the sdhci core to use
-the max clock as a basis to calculate the timeout clock. But it divides it
-by 1000. I don't know the bcm2835 sdhci controller hardware, but is it
-possible that the current timeout clock value is too large by a factor of
-1000? This wouldn't cause problems with normal transfers, but may increase
-the timeout delay for failed transfers.
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
+Reviewed-by: Aaron Lu <aaron.lu@intel.com>
+---
+ drivers/mmc/host/sdhci.c |   10 ++++++++++
+ drivers/mmc/host/sdhci.h |    1 +
+ 2 files changed, 11 insertions(+)
 
-- Lars
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 8a14927..46753a3 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2945,6 +2945,16 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	/* Initial value for re-tuning timer count */
+ 	host->tuning_count = (caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
+ 			      SDHCI_RETUNING_TIMER_COUNT_SHIFT;
++	if (host->tuning_count == 0xF) {
++		if (host->ops->get_tuning_count) {
++			host->tuning_count =
++				host->ops->get_tuning_count(host) & 0xF;
++		} else {
++			pr_err("%s: Hardware doesn't specify tuning count.\n",
++				mmc_hostname(mmc));
++			host->tuning_count = 0;
++		}
++	}
+ 
+ 	/*
+ 	 * In case Re-tuning Timer is not disabled, the actual value of
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index c8d11b9..4a65dbe 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -282,6 +282,7 @@ struct sdhci_ops {
+ 	void	(*platform_resume)(struct sdhci_host *host);
+ 	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
+ 	void	(*platform_init)(struct sdhci_host *host);
++	unsigned int    (*get_tuning_count)(struct sdhci_host *host);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+-- 
+1.7.9.5
+
