@@ -1,32 +1,49 @@
-From: "Bruce Ford (bford)" <bford@micron.com>
-Subject: MMC Driver Throughput
-Date: Wed, 30 Jan 2013 18:35:30 +0000
-Message-ID: <DB9374B0B2CB664D9425A1916C7DE85A36804AA8@NTXBOIMBX06.micron.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Thierry Reding <thierry.reding@avionic-design.de>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: Remove unused variables
+Date: Wed, 30 Jan 2013 21:11:21 +0100
+Message-ID: <1359576681-14797-1-git-send-email-thierry.reding@avionic-design.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from masquerade.micron.com ([137.201.242.130]:16908 "EHLO
-	masquerade.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755307Ab3A3Sfc convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Jan 2013 13:35:32 -0500
-Received: from mail.micron.com (ntxboicas01.micron.com [137.201.84.60])
-	by masquerade.micron.com (8.13.6/8.13.6) with ESMTP id r0UIZUDi019823
-	for <linux-mmc@vger.kernel.org>; Wed, 30 Jan 2013 11:35:30 -0700
-Content-Language: en-US
+Received: from moutng.kundenserver.de ([212.227.126.186]:50903 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752703Ab3A3ULZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Jan 2013 15:11:25 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Question:
+Commit 3f175a6 (mmc: sdhci-esdhc-imx: remove ESDHC_CD_GPIO handling from
+IO accessory) removed all the code that was using these variables, so it
+is safe to drop them.
 
-Has any testing been done to determine the maximum data throughput to/from 
-a MMC device; assuming the MMC device takes zero time to complete tasks?
+Signed-off-by: Thierry Reding <thierry.reding@avionic-design.de>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 5 -----
+ 1 file changed, 5 deletions(-)
 
-Put another way - at what level of IOPS does the kernel/driver become the 
-bottleneck, instead of the storage device?
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index ae68bc9..509be3a 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -144,10 +144,6 @@ static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, i
+ 
+ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+ {
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+-	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+-
+ 	u32 val = readl(host->ioaddr + reg);
+ 
+ 	if (unlikely(reg == SDHCI_CAPABILITIES)) {
+@@ -178,7 +174,6 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+-	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+ 	u32 data;
+ 
+ 	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)) {
+-- 
+1.8.1.2
 
-Sorry if the question is slightly off forum topic - but it is MMC driver related.  
-Worth a shot.
-
-Thx --Bruce
