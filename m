@@ -1,86 +1,39 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH v2 02/11] mmc: deprecate redundant cd-inverted and
- wp-inverted DT properties
-Date: Wed, 30 Jan 2013 18:03:35 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1301301743470.3113@axis700.grange>
-References: <1358955158-1510-1-git-send-email-g.liakhovetski@gmx.de>
- <Pine.LNX.4.64.1301301656370.3113@axis700.grange>
- <Pine.LNX.4.64.1301301709400.3113@axis700.grange> <201301301629.45511.arnd@arndb.de>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <201301301629.45511.arnd@arndb.de>
-Sender: linux-sh-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+From: Roland Stigge <stigge@antcom.de>
+Subject: [PATCH] mmc: mmc_spi: Fix return value evaluation of irq_of_parse_and_map()
+Date: Wed, 30 Jan 2013 18:05:08 +0100
+Message-ID: <1359565508-13362-1-git-send-email-stigge@antcom.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.work-microwave.de ([62.245.205.51]:46872 "EHLO
+	work-microwave.de" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754298Ab3A3RFb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Jan 2013 12:05:31 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org, plagnioj@jcrosoft.com, grant.likely@secretlab.ca, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Roland Stigge <stigge@antcom.de>
 
-On Wed, 30 Jan 2013, Arnd Bergmann wrote:
+When irq_of_parse_and_map() returns an error, it does as zero. But in
+mmc_spi_get_pdata(), the error return case is compared against NO_IRQ. This
+might work where NO_IRQ is zero (defaults to zero when undefined, as on MIPS)
+but not where NO_IRQ is sth. different, e.g. on ARM, where it is -1.
 
-> On Wednesday 30 January 2013, Guennadi Liakhovetski wrote:
-> > > This means, that a multi-platform driver like, e.g. SDHCI cannot use the 
-> > > gpio "flags" cell and has to fall-back to always use "*-inverted" 
-> > > properties. Same holds for any other multi-arch driver, using GPIOs. So, 
-> > > we're stuck with this?
-> 
-> But the SDHCI driver itself would not interpret the flags anyway, would it?
+This patch changes to comparison with 0 which is the error return value of
+irq_of_parse_and_map(). 
 
-Currently each driver, including SDHCI, does it on its own, the goal is to 
-do this centrally. And yes, in our specific MMC case, if we want to 
-support GPIO controllers with 1 cell, no mmc DT node, using GPIOs for WP 
-or CD should be using the inversion flag - even where possible.
+Tested on ARM that mmc_spi is working now.
 
-> From the code, I understand that of_get_named_gpio() would return a gpio
-> line with the polarity already inverted if it's specified that way,
+Signed-off-by: Roland Stigge <stigge@antcom.de>
 
-Sorry, don't understand. of_get_named_gpio() just returns a GPIO number, 
-not GPIO level. It doesn't even actually request the GPIO for the specific 
-user. Or do you mean, that gpio_chip::of_xlate() should request the chip 
-to invert the GPIO from now on?
-
-> and
-> the SDHCI_QUIRK_INVERTED_WRITE_PROTECT flag can be used to invert it
-> independent of it.
-
-Right, not sure about that flag. Isn't it used for SDHCI-native WP?
-
-> So you could actually express the same thing by either
-> putting the inversion into the gpio specifier or into the *-inverted
-> properties.
-> 
-> If you actually provide both, that would have the same meaning as not
-> inverting.
-
-Hm, that'd be a weird way to configure the pin, perhaps.
-
-> > BTW, just verified in the current "next": all platforms, using cd-inverted 
-> > or wp-inverted in the mainline
-> > 
-> > arch/arm/boot/dts/ccu9540.dts
-> > arch/arm/boot/dts/ea3250.dts
-> > arch/arm/boot/dts/phy3250.dts
-> > arch/arm/boot/dts/snowball.dts
-> > arch/arm/boot/dts/u9540.dts
-> > 
-> > use GPIO controllers with 2 or 3 cells.
-> 
-> What about those that don't use a GPIO line at all but instead use a
-> built-in write-protect and card-detect registers of the SDHCI controller?
-
-The mmc.txt document specifies cd-inverted and wp-inverted _explicitly_ 
-for use with GPIOs. If we want to use them with built-in CD and WP pins, 
-we have to modify those definitions too.
-
-Thanks
-Guennadi
-
-> The Freescale ESDHC on powerpc mpc83xx seems to do that, and require 
-> the wp-inverted flag.
-> 
-> 	Arnd
-> 
-
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
+index 1534b58..d720b5e 100644
+--- a/drivers/mmc/host/of_mmc_spi.c
++++ b/drivers/mmc/host/of_mmc_spi.c
+@@ -146,7 +146,7 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
+ 		oms->pdata.get_ro = of_mmc_spi_get_ro;
+ 
+ 	oms->detect_irq = irq_of_parse_and_map(np, 0);
+-	if (oms->detect_irq != NO_IRQ) {
++	if (oms->detect_irq != 0) {
+ 		oms->pdata.init = of_mmc_spi_init;
+ 		oms->pdata.exit = of_mmc_spi_exit;
+ 	} else {
