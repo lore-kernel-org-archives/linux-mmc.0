@@ -1,39 +1,32 @@
-From: Roland Stigge <stigge@antcom.de>
-Subject: [PATCH] mmc: mmc_spi: Fix return value evaluation of irq_of_parse_and_map()
-Date: Wed, 30 Jan 2013 18:05:08 +0100
-Message-ID: <1359565508-13362-1-git-send-email-stigge@antcom.de>
+From: "Bruce Ford (bford)" <bford@micron.com>
+Subject: MMC Driver Throughput
+Date: Wed, 30 Jan 2013 18:35:30 +0000
+Message-ID: <DB9374B0B2CB664D9425A1916C7DE85A36804AA8@NTXBOIMBX06.micron.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.work-microwave.de ([62.245.205.51]:46872 "EHLO
-	work-microwave.de" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754298Ab3A3RFb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Jan 2013 12:05:31 -0500
+Received: from masquerade.micron.com ([137.201.242.130]:16908 "EHLO
+	masquerade.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755307Ab3A3Sfc convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Jan 2013 13:35:32 -0500
+Received: from mail.micron.com (ntxboicas01.micron.com [137.201.84.60])
+	by masquerade.micron.com (8.13.6/8.13.6) with ESMTP id r0UIZUDi019823
+	for <linux-mmc@vger.kernel.org>; Wed, 30 Jan 2013 11:35:30 -0700
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, plagnioj@jcrosoft.com, grant.likely@secretlab.ca, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Roland Stigge <stigge@antcom.de>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-When irq_of_parse_and_map() returns an error, it does as zero. But in
-mmc_spi_get_pdata(), the error return case is compared against NO_IRQ. This
-might work where NO_IRQ is zero (defaults to zero when undefined, as on MIPS)
-but not where NO_IRQ is sth. different, e.g. on ARM, where it is -1.
+Question:
 
-This patch changes to comparison with 0 which is the error return value of
-irq_of_parse_and_map(). 
+Has any testing been done to determine the maximum data throughput to/from 
+a MMC device; assuming the MMC device takes zero time to complete tasks?
 
-Tested on ARM that mmc_spi is working now.
+Put another way - at what level of IOPS does the kernel/driver become the 
+bottleneck, instead of the storage device?
 
-Signed-off-by: Roland Stigge <stigge@antcom.de>
+Sorry if the question is slightly off forum topic - but it is MMC driver related.  
+Worth a shot.
 
-diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-index 1534b58..d720b5e 100644
---- a/drivers/mmc/host/of_mmc_spi.c
-+++ b/drivers/mmc/host/of_mmc_spi.c
-@@ -146,7 +146,7 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
- 		oms->pdata.get_ro = of_mmc_spi_get_ro;
- 
- 	oms->detect_irq = irq_of_parse_and_map(np, 0);
--	if (oms->detect_irq != NO_IRQ) {
-+	if (oms->detect_irq != 0) {
- 		oms->pdata.init = of_mmc_spi_init;
- 		oms->pdata.exit = of_mmc_spi_exit;
- 	} else {
+Thx --Bruce
