@@ -1,7 +1,7 @@
 From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v6 04/10] dmaengine: edma: enable build for AM33XX
-Date: Wed, 30 Jan 2013 02:00:23 -0500
-Message-ID: <1359529229-22207-5-git-send-email-mporter@ti.com>
+Subject: [PATCH v6 06/10] ARM: dts: add AM33XX EDMA support
+Date: Wed, 30 Jan 2013 02:00:25 -0500
+Message-ID: <1359529229-22207-7-git-send-email-mporter@ti.com>
 References: <1359529229-22207-1-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -20,26 +20,45 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Enable TI EDMA option on OMAP.
+Adds AM33XX EDMA support to the am33xx.dtsi as documented in
+Documentation/devicetree/bindings/dma/ti-edma.txt
 
 Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 ---
- drivers/dma/Kconfig |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/arm/boot/dts/am33xx.dtsi |   20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
 
-diff --git a/drivers/dma/Kconfig b/drivers/dma/Kconfig
-index 0b408bb..239020b 100644
---- a/drivers/dma/Kconfig
-+++ b/drivers/dma/Kconfig
-@@ -220,7 +220,7 @@ config SIRF_DMA
+diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+index c2f14e8..e711ffb 100644
+--- a/arch/arm/boot/dts/am33xx.dtsi
++++ b/arch/arm/boot/dts/am33xx.dtsi
+@@ -87,6 +87,26 @@
+ 			reg = <0x48200000 0x1000>;
+ 		};
  
- config TI_EDMA
- 	tristate "TI EDMA support"
--	depends on ARCH_DAVINCI
-+	depends on ARCH_DAVINCI || ARCH_OMAP
- 	select DMA_ENGINE
- 	select DMA_VIRTUAL_CHANNELS
- 	default n
++		edma: edma@49000000 {
++			compatible = "ti,edma3";
++			ti,hwmods = "tpcc", "tptc0", "tptc1", "tptc2";
++			reg =	<0x49000000 0x10000>,
++				<0x44e10f90 0x10>;
++			interrupt-parent = <&intc>;
++			interrupts = <12 13 14>;
++			#dma-cells = <1>;
++			dma-channels = <64>;
++			ti,edma-regions = <4>;
++			ti,edma-slots = <256>;
++			ti,edma-queue-tc-map = <0 0
++						1 1
++						2 2>;
++			ti,edma-queue-priority-map = <0 0
++						      1 1
++						      2 2>;
++			ti,edma-default-queue = <0>;
++		};
++
+ 		gpio1: gpio@44e07000 {
+ 			compatible = "ti,omap4-gpio";
+ 			ti,hwmods = "gpio1";
 -- 
 1.7.9.5
 
