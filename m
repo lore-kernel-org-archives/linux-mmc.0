@@ -1,36 +1,54 @@
-From: Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>
-Subject: Re: [PATCH v6 08/10] spi: omap2-mcspi: convert to
- dma_request_slave_channel_compat()
-Date: Wed, 30 Jan 2013 18:35:34 +0800
-Message-ID: <20130130103530.GA6229@opensource.wolfsonmicro.com>
-References: <1359529229-22207-1-git-send-email-mporter@ti.com>
- <1359529229-22207-9-git-send-email-mporter@ti.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH/RFC v2 06/11] mmc: tmio-mmc: define device-tree bindings
+Date: Wed, 30 Jan 2013 15:07:03 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1301301453110.3113@axis700.grange>
+References: <1358955158-1510-1-git-send-email-g.liakhovetski@gmx.de>
+ <1358955158-1510-7-git-send-email-g.liakhovetski@gmx.de>
+ <Pine.LNX.4.64.1301241630160.7826@axis700.grange> <87pq0uh9ob.fsf@laptop.org>
+ <Pine.LNX.4.64.1301241649560.7826@axis700.grange> <87k3r2h8lg.fsf@laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1359529229-22207-9-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <87k3r2h8lg.fsf@laptop.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jan 30, 2013 at 02:00:27AM -0500, Matt Porter wrote:
-> Convert dmaengine channel requests to use
-> dma_request_slave_channel_compat(). This supports the DT case of
-> platforms requiring channel selection from either the OMAP DMA or
-> the EDMA engine. AM33xx only boots from DT and is the only user
-> implementing EDMA so in the !DT case we can default to the OMAP DMA
-> filter.
+Hi Chris
 
-Acked-by: Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>
+On Thu, 24 Jan 2013, Chris Ball wrote:
+
+> Hi,
+> 
+> On Thu, Jan 24 2013, Guennadi Liakhovetski wrote:
+> > I tried to keep this binding similar to others, that I proposed in "mmc: 
+> > add DT bindings for more MMC capability flags." Actually, the above is 
+> > indeed wrong, I would call it "cap-sdio-irq." And in that patch I tried to 
+> > keep binding names resembling as closely as possible respective MMC_CAP_* 
+> > flags. I think, it would have been better if "enable-sdio-wakeup" and 
+> > "keep-power-in-suspend" were also named, following the same rule, but it's 
+> > too late now. Anyway, I'm not too concerned about the names. We can use 
+> > "enable-sdio-irq" too if you like.
+> 
+> I see.  Okay, let's go with your proposed cap-* for each MMC_CAP_*, and
+> the pm_caps can stay as they are.
+
+Thanks, let's do that. But in fact, in a recent discussion it has been 
+pointed out to me, that this property
+
++- toshiba,mmc-cap-sdio-irq	: SDIO IRQ signalling should be used, if
++	supported by the hardware, i.e. set MMC_CAP_SDIO_IRQ if
++	TMIO_MMC_SDIO_IRQ is also set
+
+should be common for all MMC drivers: it should be possible to decide per 
+SD interface, whether SDIO IRQ signalling should be enabled. What do you 
+think? Shall we add a global "cap-sdio-irq" DT property instead of a 
+toshiba-specific one?
+
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
