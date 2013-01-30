@@ -1,86 +1,51 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: MAINTAINERS: change omap_hsmmc maintenance
- to orphan
-Date: Wed, 30 Jan 2013 22:22:11 +0530
-Message-ID: <51094FBB.7050503@ti.com>
-References: <1358343026-17198-1-git-send-email-svenkatr@gmail.com> <8738xl8020.fsf@laptop.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: omap_hsmmc: MAINTAINERS: change omap_hsmmc maintenance to orphan
+Date: Wed, 30 Jan 2013 11:57:57 -0500
+Message-ID: <878v7asj56.fsf@octavius.laptop.org>
+References: <1358343026-17198-1-git-send-email-svenkatr@gmail.com>
+	<8738xl8020.fsf@laptop.org> <51094FBB.7050503@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:50562 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753737Ab3A3QwT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 30 Jan 2013 11:52:19 -0500
-In-Reply-To: <8738xl8020.fsf@laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
+Content-Type: text/plain
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <51094FBB.7050503@ti.com> (Balaji T. K.'s message of "Wed, 30 Jan
+	2013 22:22:11 +0530")
+Sender: linux-omap-owner@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>
 Cc: Venkatraman S <svenkatr@gmail.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Felipe Balbi <balbi@ti.com>
+List-Id: linux-mmc@vger.kernel.org
 
-On Tuesday 29 January 2013 03:03 AM, Chris Ball wrote:
-> Hi,
+Hi Balaji,
+
+On Wed, Jan 30 2013, Balaji T K wrote:
+> I am interested in maintaining omap_hsmmc,
+> Please add me as Maintainer and Thanks Venkat for his support
 >
-> On Wed, Jan 16 2013, Venkatraman S wrote:
->> The specified email id is no longer in service.
->> Update the OMAP HSMMC entry from the MAINTAINERS file as I will
->> no longer be able to maintain this driver.
->>
->> Signed-off-by: Venkatraman S <svenkatr@gmail.com>
->> ---
->>   MAINTAINERS |    4 +---
->>   1 file changed, 1 insertion(+), 3 deletions(-)
->>
->> diff --git a/MAINTAINERS b/MAINTAINERS
->> index cd5b31f..95778e1 100644
->> --- a/MAINTAINERS
->> +++ b/MAINTAINERS
->> @@ -5499,10 +5499,8 @@ S:	Maintained
->>   F:	drivers/mmc/host/omap.c
->>
->>   OMAP HS MMC SUPPORT
->> -M:	Venkatraman S <svenkatr@ti.com>
->> -L:	linux-mmc@vger.kernel.org
->>   L:	linux-omap@vger.kernel.org
->> -S:	Maintained
->> +S:	Orphan
->>   F:	drivers/mmc/host/omap_hsmmc.c
->>
->>   OMAP RANDOM NUMBER GENERATOR SUPPORT
+> From: Balaji T K <balajitk@ti.com>
+> Subject: [PATCH] mmc: omap_hsmmc: MAINTAINERS: update
 >
-> Thanks for your work on omap_hsmmc, Venkat!
+> Update Maintainer email for omap_hsmmc,
+> as Venkatraman will no longer be able to maintain omap_hsmmc driver.
 >
-> Is anyone else interested in taking up maintenance of omap_hsmmc?
+> Signed-off-by: Venkatraman S <svenkatr@gmail.com>
 
-Hi Chris,
-I am interested in maintaining omap_hsmmc,
-Please add me as Maintainer and Thanks Venkat for his support
+Did Venkat offer his signoff on this patch privately?  (In general,
+you shouldn't add someone else's Signed-off-by to your patches.)
 
-From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH] mmc: omap_hsmmc: MAINTAINERS: update
-
-Update Maintainer email for omap_hsmmc,
-as Venkatraman will no longer be able to maintain omap_hsmmc driver.
-
-Signed-off-by: Venkatraman S <svenkatr@gmail.com>
-Signed-off-by: Balaji T K <balajitk@ti.com>
----
-  MAINTAINERS |    2 +-
-  1 file changed, 1 insertion(+), 1 deletion(-)
-
-Index: linux2/MAINTAINERS
-===================================================================
---- linux2.orig/MAINTAINERS	2013-01-30 22:12:51.449322930 +0530
-+++ linux2/MAINTAINERS	2013-01-30 22:21:22.412224531 +0530
-@@ -5454,7 +5454,7 @@ S:	Maintained
-  F:	drivers/mmc/host/omap.c
-
-  OMAP HS MMC SUPPORT
--M:	Venkatraman S <svenkatr@ti.com>
-+M:	Balaji T K <balajitk@ti.com>
-  L:	linux-mmc@vger.kernel.org
-  L:	linux-omap@vger.kernel.org
-  S:	Maintained
+> Signed-off-by: Balaji T K <balajitk@ti.com>
+> ---
+>  MAINTAINERS |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> - Chris.
->
+> Index: linux2/MAINTAINERS
+> ===================================================================
+> --- linux2.orig/MAINTAINERS	2013-01-30 22:12:51.449322930 +0530
+> +++ linux2/MAINTAINERS	2013-01-30 22:21:22.412224531 +0530
+
+Could you send a "git diff"-generated patch instead?
+
+Thanks!
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
