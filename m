@@ -1,59 +1,43 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH/RFC v2 06/11] mmc: tmio-mmc: define device-tree bindings
-Date: Wed, 30 Jan 2013 09:09:44 -0500
-Message-ID: <87r4l269uf.fsf@octavius.laptop.org>
-References: <1358955158-1510-1-git-send-email-g.liakhovetski@gmx.de>
-	<1358955158-1510-7-git-send-email-g.liakhovetski@gmx.de>
-	<Pine.LNX.4.64.1301241630160.7826@axis700.grange>
-	<87pq0uh9ob.fsf@laptop.org>
-	<Pine.LNX.4.64.1301241649560.7826@axis700.grange>
-	<87k3r2h8lg.fsf@laptop.org>
-	<Pine.LNX.4.64.1301301453110.3113@axis700.grange>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v2 02/11] mmc: deprecate redundant cd-inverted and wp-inverted DT properties
+Date: Wed, 30 Jan 2013 15:47:24 +0000
+Message-ID: <201301301547.24961.arnd@arndb.de>
+References: <1358955158-1510-1-git-send-email-g.liakhovetski@gmx.de> <1358955158-1510-3-git-send-email-g.liakhovetski@gmx.de> <874ni16j6j.fsf@laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56676 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752126Ab3A3OJt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 30 Jan 2013 09:09:49 -0500
-In-Reply-To: <Pine.LNX.4.64.1301301453110.3113@axis700.grange> (Guennadi
-	Liakhovetski's message of "Wed, 30 Jan 2013 15:07:03 +0100 (CET)")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <874ni16j6j.fsf@laptop.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 
-Hi,
+On Monday 28 January 2013, Chris Ball wrote:
+> On Wed, Jan 23 2013, Guennadi Liakhovetski wrote:
+> > +cd-inverted and wp-inverted properties are deprecated ans shouldn't be used,
+> > +instead pleaseuse the OF_GPIO_ACTIVE_LOW flag in respective GPIO bindings. Note,
+> > +that the default (as defined by the SDHCI standard) CD and WP polarity is
+> > +active-low, so, OF_GPIO_ACTIVE_LOW should normally be set, and only be left
+> > +clear, if the polarity is inverted.
+> 
+> Please use this text for your next version, fixing typos and a newline:
+> 
+> cd-inverted and wp-inverted properties are deprecated and shouldn't be used,
+> instead please use the OF_GPIO_ACTIVE_LOW flag in respective GPIO bindings.
+> Note that the default (as defined by the SDHCI standard) CD and WP polarity
+> is active-low, so OF_GPIO_ACTIVE_LOW should normally be set, and only be
+> left clear if the polarity is inverted.
 
-On Wed, Jan 30 2013, Guennadi Liakhovetski wrote:
->> On Thu, Jan 24 2013, Guennadi Liakhovetski wrote:
->> > I tried to keep this binding similar to others, that I proposed in "mmc: 
->> > add DT bindings for more MMC capability flags." Actually, the above is 
->> > indeed wrong, I would call it "cap-sdio-irq." And in that patch I tried to 
->> > keep binding names resembling as closely as possible respective MMC_CAP_* 
->> > flags. I think, it would have been better if "enable-sdio-wakeup" and 
->> > "keep-power-in-suspend" were also named, following the same rule, but it's 
->> > too late now. Anyway, I'm not too concerned about the names. We can use 
->> > "enable-sdio-irq" too if you like.
->> 
->> I see.  Okay, let's go with your proposed cap-* for each MMC_CAP_*, and
->> the pm_caps can stay as they are.
->
-> Thanks, let's do that. But in fact, in a recent discussion it has been 
-> pointed out to me, that this property
->
-> +- toshiba,mmc-cap-sdio-irq	: SDIO IRQ signalling should be used, if
-> +	supported by the hardware, i.e. set MMC_CAP_SDIO_IRQ if
-> +	TMIO_MMC_SDIO_IRQ is also set
->
-> should be common for all MMC drivers: it should be possible to decide per 
-> SD interface, whether SDIO IRQ signalling should be enabled. What do you 
-> think? Shall we add a global "cap-sdio-irq" DT property instead of a 
-> toshiba-specific one?
+Hmm, I wonder if this is possible in general. A lot of the GPIO bindings
+allow passing flags, but I think that some of them do not, for historic
+reasons. If we want to deprecate the behavior in eMMC, we should also
+ensure that all gpio drivers are extended to support gpio specifiers
+with flags. It should be possible to extend all drivers in a compatible
+way, but someone has to do that.
 
-Yes, please.
+When we introduced the MMC binding, the situation was already like this,
+and it seemed easier to leave the {wp,cd}-inverted properties as optional.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+	Arnd
