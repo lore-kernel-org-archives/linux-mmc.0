@@ -1,66 +1,244 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/2] mmc: core: fix permanent sleep of mmcqd during card
- removal
-Date: Thu, 31 Jan 2013 20:05:35 +0900
-Message-ID: <510A4FFF.4070100@samsung.com>
-References: <n@samsung.com>
- <1356513966-24945-1-git-send-email-kdorfman@codeaurora.org>
- <001d01cdf88d$f4214270$dc63c750$%jun@samsung.com>
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [PATCH 2/3] mmc: davinci_mmc: add DT support
+Date: Thu, 31 Jan 2013 11:23:03 +0000
+Message-ID: <20130131112303.GA7235@e106331-lin.cambridge.arm.com>
+References: <1359628387-14437-1-git-send-email-prakash.pm@ti.com>
+ <1359628387-14437-3-git-send-email-prakash.pm@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=EUC-KR
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:30696 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751282Ab3AaLGE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Jan 2013 06:06:04 -0500
-Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout3.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MHH0067YLHQ5FL0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 31 Jan 2013 20:06:02 +0900 (KST)
-Received: from [10.90.51.55] by mmp2.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0MHH00EUGLI19S70@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 31 Jan 2013 20:06:02 +0900 (KST)
-In-reply-to: <001d01cdf88d$f4214270$dc63c750$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=WINDOWS-1252
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1359628387-14437-3-git-send-email-prakash.pm@ti.com>
+Content-Language: en-US
+Content-Disposition: inline
+Sender: linux-doc-owner@vger.kernel.org
+To: "Manjunathappa, Prakash" <prakash.pm@ti.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "mporter@ti.com" <mporter@ti.com>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "nsekhar@ti.com" <nsekhar@ti.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "hs@denx.de" <hs@denx.de>, "ido@wizery.com" <ido@wizery.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Konstantin Dorfman' <kdorfman@codeaurora.org>
 
-Great..
+Hello,
 
-I also found this problem and sent the similar patch at mailing.
-But i think this patch is more generic.
+I have a few comments on the devicetree binding and the way it's parsed.
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-On 01/22/2013 07:48 PM, Seungwon Jeon wrote:
-> This patch is derived from 'mmc: fix async request mechanism ...'.
-> According as async transfer, a request is handled with twice mmc_start_req.
-> When the card is removed, the request is actually not issued in the first
-> mmc_start_req [__mmc_start_data_req]. And then mmc_wait_for_data_req_done
-> will come in the next mmc_start_req. But there is no event for completions.
-> wake_up_interruptible is needed in __mmc_start_data_req for the case of
-> removed card.
+On Thu, Jan 31, 2013 at 10:33:06AM +0000, Manjunathappa, Prakash wrote:
+> Adds device tree support for davinci_mmc. Also add
+> binding documentation.
+> Tested with non-dma PIO mode and without GPIO
+> card_detect/write_protect option because of
+> dependencies on EDMA and GPIO modules DT support.
 > 
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> Signed-off-by: Manjunathappa, Prakash <prakash.pm@ti.com>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linux-arm-kernel@lists.infradead.org
+> Cc: linux-kernel@vger.kernel.org
+> Cc: davinci-linux-open-source@linux.davincidsp.com
+> Cc: devicetree-discuss@lists.ozlabs.org
+> Cc: cjb@laptop.org
+> Cc: Sekhar Nori <nsekhar@ti.com>
+> Cc: mporter@ti.com
 > ---
->  drivers/mmc/core/core.c |    1 +
->  1 files changed, 1 insertions(+), 0 deletions(-)
+>  .../devicetree/bindings/mmc/davinci_mmc.txt        |   23 +++++++
+>  drivers/mmc/host/davinci_mmc.c                     |   69 +++++++++++++++++++-
+>  2 files changed, 91 insertions(+), 1 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/davinci_mmc.txt
 > 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 8b3a122..997b257 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -350,6 +350,7 @@ static int __mmc_start_data_req(struct mmc_host *host, struct mmc_request *mrq)
->  	mrq->host = host;
->  	if (mmc_card_removed(host->card)) {
->  		mrq->cmd->error = -ENOMEDIUM;
-> +		mmc_wait_data_done(mrq);
->  		return -ENOMEDIUM;
->  	}
->  	mmc_start_request(host, mrq);
-> 
+> diff --git a/Documentation/devicetree/bindings/mmc/davinci_mmc.txt b/Documentation/devicetree/bindings/mmc/davinci_mmc.txt
+> new file mode 100644
+> index 0000000..144bee6
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/davinci_mmc.txt
+> @@ -0,0 +1,23 @@
+> +* TI Highspeed MMC host controller for DaVinci
+> +
+> +The Highspeed MMC Host Controller on TI DaVinci family
+> +provides an interface for MMC, SD and SDIO types of memory cards.
+> +
+> +This file documents differences between the core properties described
+> +by mmc.txt and the properties used by the davinci_mmc driver.
+> +
+> +Required properties:
+> +- compatible:
+> + Should be "ti,davinci_mmc", for davinci controllers
+
+"ti,davinci-mmc" (with '-' rather than '_') would be preferable.
+
+> +
+> +Optional properties:
+> +- bus-width: Number of data lines, can be <1>, <4>, or <8>, default <1>
+> +- max-frequency: maximum operating clock frequency.
+
+You said you only described differences from mmc.txt, but this is listed in
+mmc.txt.
+
+> +- caps: Check for Host capabilities in <linux/mmc/host.h>
+
+Is this a set of binary flags? Also, is this Linux-specific?
+
+I really don't think this should be in the devicetree binding. Why do you need
+this?
+
+> +- version: version of controller.
+
+This should be encoded as part of the compatible string.
+
+> +Example:
+> +	mmc1: mmc@0x4809c000 {
+> +		compatible = "ti,omap4-hsmmc";
+> +		reg = <0x4809c000 0x400>;
+> +		bus-width = <4>;
+> +	};
+
+It would be nice if the example referred to this binding rather than another.
+
+> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+> index 382b79d..ce6730d 100644
+> --- a/drivers/mmc/host/davinci_mmc.c
+> +++ b/drivers/mmc/host/davinci_mmc.c
+> @@ -34,6 +34,7 @@
+>  #include <linux/dma-mapping.h>
+>  #include <linux/edma.h>
+>  #include <linux/mmc/mmc.h>
+> +#include <linux/of.h>
+>  
+>  #include <linux/platform_data/mmc-davinci.h>
+>  
+> @@ -1156,16 +1157,75 @@ static void __init init_mmcsd_host(struct mmc_davinci_host *host)
+>  
+>  	mmc_davinci_reset_ctrl(host, 0);
+>  }
+> +#ifdef CONFIG_OF
+> +static struct davinci_mmc_config
+> +	*mmc_of_get_pdata(struct platform_device *pdev)
+> +{
+> +	struct device_node *np;
+> +	struct davinci_mmc_config *pdata = NULL;
+> +	u32 data;
+> +	int ret;
+> +
+> +	pdata = pdev->dev.platform_data;
+> +	if (!pdata) {
+> +		pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
+> +		if (!pdata) {
+> +			dev_err(&pdev->dev, "Failed to allocate memory for struct davinci_mmc_config\n");
+> +			goto nodata;
+> +		}
+> +	}
+
+Why do you need to conditionally allocate this? This only seems to be called
+once.
+
+> +
+> +	np = pdev->dev.of_node;
+> +	if (!np)
+> +		goto nodata;
+
+Why not just return immediately here? You do nothing special at nodata.
+
+> +
+> +	ret = of_property_read_u32(np, "bus-width", &data);
+> +	if (ret)
+> +		dev_info(&pdev->dev, "wires not specified, defaulting to 4 bit mode\n");
+> +	pdata->wires = data;
+
+That dev_info doesn't seem to match up with what the next line is doing (data
+might not have been initialised). Also, unless I've misunderstood, it doesn't
+match up with the default of 1 mentioned in the binding doc.
+
+> +
+> +	ret = of_property_read_u32(np, "max-frequency", &data);
+> +	if (ret)
+> +		dev_info(&pdev->dev, "max-frequency not specified, defaulting to 25MHz\n");
+> +	pdata->max_freq = data;
+
+Again, the dev_info doesn't match up with the line below it. I notice
+the default's not one specified in the binding. Is this frequency chosen
+from the hardware docs, or is it an arbitrary choice. If not arbitrary,
+it might be worth specifying in the binding.
+
+
+> +
+> +	ret = of_property_read_u32(np, "caps", &data);
+> +	if (ret)
+> +		dev_info(&pdev->dev, "card capability not specified\n");
+> +	pdata->caps = data;
+
+Again, you may be using garbage data.
+
+> +
+> +	ret = of_property_read_u32(np, "version", &data);
+> +	if (ret)
+> +		dev_err(&pdev->dev, "version not specified\n");
+> +	pdata->version = data;
+
+And again, though I'd prefer to see this property go entirely.
+
+> +
+> +nodata:
+> +	return pdata;
+> +}
+> +
+> +#else
+> +static struct davinci_mmc_config
+> +	*mmc_of_get_pdata(struct platform_device *pdev)
+> +{
+> +	return pdev->dev.platform_data;
+> +}
+> +#endif
+
+This is poorly named if it's required for !CONFIG_OF.
+
+Why not change this to something like mmc_parse_pdata, returning an
+error code. For !CONFIG_OF, it can simply return 0, which should be less
+surprising for anyone else reading this code.
+
+>  
+>  static int __init davinci_mmcsd_probe(struct platform_device *pdev)
+>  {
+> -	struct davinci_mmc_config *pdata = pdev->dev.platform_data;
+> +	struct davinci_mmc_config *pdata = NULL;
+>  	struct mmc_davinci_host *host = NULL;
+>  	struct mmc_host *mmc = NULL;
+>  	struct resource *r, *mem = NULL;
+>  	int ret = 0, irq = 0;
+>  	size_t mem_size;
+>  
+> +	pdata = mmc_of_get_pdata(pdev);
+> +	if (pdata == NULL) {
+> +		dev_err(&pdev->dev, "Can not get platform data\n");
+> +		return -ENOENT;
+> +	}
+> +
+>  	/* REVISIT:  when we're fully converted, fail if pdata is NULL */
+>  
+>  	ret = -ENODEV;
+> @@ -1403,11 +1463,18 @@ static const struct dev_pm_ops davinci_mmcsd_pm = {
+>  #define davinci_mmcsd_pm_ops NULL
+>  #endif
+>  
+> +static const struct of_device_id davinci_mmc_of_match[] = {
+> +	{.compatible = "ti,davinci_mmc", },
+> +	{},
+> +};
+> +MODULE_DEVICE_TABLE(of, davinci_mmc_of_match);
+
+For supporting multiple versions, you could either use some auxdata
+here, or check each one in davince_mmcsd_probe.
+
+> +
+>  static struct platform_driver davinci_mmcsd_driver = {
+>  	.driver		= {
+>  		.name	= "davinci_mmc",
+>  		.owner	= THIS_MODULE,
+>  		.pm	= davinci_mmcsd_pm_ops,
+> +		.of_match_table = of_match_ptr(davinci_mmc_of_match),
+>  	},
+>  	.remove		= __exit_p(davinci_mmcsd_remove),
+>  };
+
+Where does davinci_mmcsd_probe get called from, and how is the
+of_match_table used? Should it not be set as .probe on the driver?
+
+Thanks,
+Mark.
+
 
