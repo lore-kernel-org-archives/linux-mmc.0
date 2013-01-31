@@ -1,183 +1,129 @@
-From: "Manjunathappa, Prakash" <prakash.pm-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH 2/3] mmc: davinci_mmc: add DT support
-Date: Thu, 31 Jan 2013 16:03:06 +0530
-Message-ID: <1359628387-14437-3-git-send-email-prakash.pm@ti.com>
-References: <1359628387-14437-1-git-send-email-prakash.pm@ti.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH] mmc: core: fix the aysync mechanism when card removed
+Date: Thu, 31 Jan 2013 19:48:43 +0900
+Message-ID: <001f01cdffa0$8a01b3b0$9e051b10$%jun@samsung.com>
+References: <50FE838C.5010709@samsung.com> <510A2E69.6000608@codeaurora.org>
+ <510A3D69.5080309@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <1359628387-14437-1-git-send-email-prakash.pm-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: mporter-l0cyMroinI0@public.gmane.org, davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org, rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org, hs-ynQEQJNshbs@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:18723 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751886Ab3AaKsq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Jan 2013 05:48:46 -0500
+Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MHH00KZIKP3PF80@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 31 Jan 2013 19:48:44 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0MHH00E0ZKP7NX00@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 31 Jan 2013 19:48:43 +0900 (KST)
+In-reply-to: <510A3D69.5080309@samsung.com>
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Subhash Jadavani' <subhashj@codeaurora.org>
+Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, 'Konstantin Dorfman' <kdorfman@codeaurora.org>, 'Kyungmin Park' <kyungmin.park@samsung.com>, 'Per FORLIN' <per.forlin@stericsson.com>, 'Maya Erez' <merez@codeaurora.org>
 
-Adds device tree support for davinci_mmc. Also add
-binding documentation.
-Tested with non-dma PIO mode and without GPIO
-card_detect/write_protect option because of
-dependencies on EDMA and GPIO modules DT support.
+On Thursday, January 31, 2013, Jaehoon Chung wrote:
+> On 01/31/2013 05:42 PM, Subhash Jadavani wrote:
+> > On 1/22/2013 5:48 PM, Jaehoon Chung wrote:
+> >> When card removed, then didn't complete the previously data.
+> >> (It didn't wakeup any interrupt.)
+> >> If card is removed, then we can assume to complete the previously data.
+> >> And wakeup the interrupt for wait_event of data.
+> >>
+> >> This problem is produced when sd-card is removed.(Sd-card is running some operation)
+> >>
+> >> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> >> Signed-off-by: Kyungmin Park <Kyungmin.park@samsung.com>
+> >> ---
+> >>   drivers/mmc/core/core.c |   31 ++++++++++++++++++++-----------
+> >>   1 files changed, 20 insertions(+), 11 deletions(-)
+> >>
+> >> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> >> index 8b3a122..bc1d627 100644
+> >> --- a/drivers/mmc/core/core.c
+> >> +++ b/drivers/mmc/core/core.c
+> >> @@ -515,17 +515,26 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+> >>           mmc_pre_req(host, areq->mrq, !host->areq);
+> >>         if (host->areq) {
+> >> -            err = mmc_wait_for_data_req_done(host, host->areq->mrq,
+> >> -                    areq);
+> >> -            if (err == MMC_BLK_NEW_REQUEST) {
+> >> -                if (error)
+> >> -                    *error = err;
+> >> -                /*
+> >> -                 * The previous request was not completed,
+> >> -                 * nothing to return
+> >> -                 */
+> >> -                return NULL;
+> >> -            }
+> >> +        err = mmc_wait_for_data_req_done(host, host->areq->mrq,
+> >> +                areq);
+> >> +        if (err == MMC_BLK_NEW_REQUEST) {
+> >> +            if (error)
+> >> +                *error = err;
+> >> +            /*
+> >> +             * The previous request was not completed,
+> >> +             * nothing to return
+> >> +             */
+> >> +            return NULL;
+> >> +        } else if (err == MMC_BLK_NOMEDIUM && areq) {
+> >> +            struct mmc_context_info *ctnx = &host->context_info;
+> >> +            /*
+> >> +             * If crad is removed,
+> >> +             * then we didn't wait for data completed.
+> >> +             * Assume that data-recieve done.
+> >> +             */
+> >> +            ctnx->is_done_rcv = true;
+> >> +            wake_up_interruptible(&ctnx->wait);
+> >
+> > Can you please explain more on what exactly we are trying to do here (may be you can list down the
+> call flow)? I am not sure if i understood this correctly. But why would you need to wakeup the thread
+> here? We are here because thread is already woken up. mmc_wait_for_data_req_done() would return only
+> if either the new request is received or the currently running request on controller is completed.
+> This problem is produced when card is removed and running some operation.
+> If card is removed, mmc_wait_for_data_req_done() is returned error, right?
+> But if there was async request and running async operation, then maybe run mmc_start_request() with
+> areq.
+> controller is waiting "_for_req_data_done_" for areq.
+> 
+> If request is host->areq.process is running at this time.
+> But if request is areq(prepared request), then mmc_wait_for_data_req_done should be pending.
+> and system is dead-lock.
+I also found this problem with sdcard.
+I think it can be solved easily. Did you see the following patch?
+[PATCH 1/2] mmc: core: fix permanent sleep of mmcqd during card removal
+We may just get the hint from __mmc_start_req function.
 
-Signed-off-by: Manjunathappa, Prakash <prakash.pm-l0cyMroinI0@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-Cc: devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Cc: cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org
-Cc: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Cc: mporter-l0cyMroinI0@public.gmane.org
----
- .../devicetree/bindings/mmc/davinci_mmc.txt        |   23 +++++++
- drivers/mmc/host/davinci_mmc.c                     |   69 +++++++++++++++++++-
- 2 files changed, 91 insertions(+), 1 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/davinci_mmc.txt
+Thanks,
+Seungwon Jeon
+> 
+> Best Regards,
+> Jaehoon Chung
+> 
+> >
+> > Regards,
+> > Subhash
+> >
+> >> +        }
+> >>           /*
+> >>            * Check BKOPS urgency for each R1 response
+> >>            */
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-diff --git a/Documentation/devicetree/bindings/mmc/davinci_mmc.txt b/Documentation/devicetree/bindings/mmc/davinci_mmc.txt
-new file mode 100644
-index 0000000..144bee6
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/davinci_mmc.txt
-@@ -0,0 +1,23 @@
-+* TI Highspeed MMC host controller for DaVinci
-+
-+The Highspeed MMC Host Controller on TI DaVinci family
-+provides an interface for MMC, SD and SDIO types of memory cards.
-+
-+This file documents differences between the core properties described
-+by mmc.txt and the properties used by the davinci_mmc driver.
-+
-+Required properties:
-+- compatible:
-+ Should be "ti,davinci_mmc", for davinci controllers
-+
-+Optional properties:
-+- bus-width: Number of data lines, can be <1>, <4>, or <8>, default <1>
-+- max-frequency: maximum operating clock frequency.
-+- caps: Check for Host capabilities in <linux/mmc/host.h>
-+- version: version of controller.
-+Example:
-+	mmc1: mmc@0x4809c000 {
-+		compatible = "ti,omap4-hsmmc";
-+		reg = <0x4809c000 0x400>;
-+		bus-width = <4>;
-+	};
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index 382b79d..ce6730d 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -34,6 +34,7 @@
- #include <linux/dma-mapping.h>
- #include <linux/edma.h>
- #include <linux/mmc/mmc.h>
-+#include <linux/of.h>
- 
- #include <linux/platform_data/mmc-davinci.h>
- 
-@@ -1156,16 +1157,75 @@ static void __init init_mmcsd_host(struct mmc_davinci_host *host)
- 
- 	mmc_davinci_reset_ctrl(host, 0);
- }
-+#ifdef CONFIG_OF
-+static struct davinci_mmc_config
-+	*mmc_of_get_pdata(struct platform_device *pdev)
-+{
-+	struct device_node *np;
-+	struct davinci_mmc_config *pdata = NULL;
-+	u32 data;
-+	int ret;
-+
-+	pdata = pdev->dev.platform_data;
-+	if (!pdata) {
-+		pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
-+		if (!pdata) {
-+			dev_err(&pdev->dev, "Failed to allocate memory for struct davinci_mmc_config\n");
-+			goto nodata;
-+		}
-+	}
-+
-+	np = pdev->dev.of_node;
-+	if (!np)
-+		goto nodata;
-+
-+	ret = of_property_read_u32(np, "bus-width", &data);
-+	if (ret)
-+		dev_info(&pdev->dev, "wires not specified, defaulting to 4 bit mode\n");
-+	pdata->wires = data;
-+
-+	ret = of_property_read_u32(np, "max-frequency", &data);
-+	if (ret)
-+		dev_info(&pdev->dev, "max-frequency not specified, defaulting to 25MHz\n");
-+	pdata->max_freq = data;
-+
-+	ret = of_property_read_u32(np, "caps", &data);
-+	if (ret)
-+		dev_info(&pdev->dev, "card capability not specified\n");
-+	pdata->caps = data;
-+
-+	ret = of_property_read_u32(np, "version", &data);
-+	if (ret)
-+		dev_err(&pdev->dev, "version not specified\n");
-+	pdata->version = data;
-+
-+nodata:
-+	return pdata;
-+}
-+
-+#else
-+static struct davinci_mmc_config
-+	*mmc_of_get_pdata(struct platform_device *pdev)
-+{
-+	return pdev->dev.platform_data;
-+}
-+#endif
- 
- static int __init davinci_mmcsd_probe(struct platform_device *pdev)
- {
--	struct davinci_mmc_config *pdata = pdev->dev.platform_data;
-+	struct davinci_mmc_config *pdata = NULL;
- 	struct mmc_davinci_host *host = NULL;
- 	struct mmc_host *mmc = NULL;
- 	struct resource *r, *mem = NULL;
- 	int ret = 0, irq = 0;
- 	size_t mem_size;
- 
-+	pdata = mmc_of_get_pdata(pdev);
-+	if (pdata == NULL) {
-+		dev_err(&pdev->dev, "Can not get platform data\n");
-+		return -ENOENT;
-+	}
-+
- 	/* REVISIT:  when we're fully converted, fail if pdata is NULL */
- 
- 	ret = -ENODEV;
-@@ -1403,11 +1463,18 @@ static const struct dev_pm_ops davinci_mmcsd_pm = {
- #define davinci_mmcsd_pm_ops NULL
- #endif
- 
-+static const struct of_device_id davinci_mmc_of_match[] = {
-+	{.compatible = "ti,davinci_mmc", },
-+	{},
-+};
-+MODULE_DEVICE_TABLE(of, davinci_mmc_of_match);
-+
- static struct platform_driver davinci_mmcsd_driver = {
- 	.driver		= {
- 		.name	= "davinci_mmc",
- 		.owner	= THIS_MODULE,
- 		.pm	= davinci_mmcsd_pm_ops,
-+		.of_match_table = of_match_ptr(davinci_mmc_of_match),
- 	},
- 	.remove		= __exit_p(davinci_mmcsd_remove),
- };
--- 
-1.7.4.1
