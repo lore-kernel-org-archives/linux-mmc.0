@@ -1,123 +1,70 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH v2 02/11] mmc: deprecate redundant cd-inverted and
- wp-inverted DT properties
-Date: Thu, 31 Jan 2013 07:47:46 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1301310727590.14639@axis700.grange>
-References: <1358955158-1510-1-git-send-email-g.liakhovetski@gmx.de>
- <201301301629.45511.arnd@arndb.de> <Pine.LNX.4.64.1301301743470.3113@axis700.grange>
- <201301310009.34426.arnd@arndb.de>
+From: Subhash Jadavani <subhashj@codeaurora.org>
+Subject: Re: [PATCH 1/2] mmc: core: fix permanent sleep of mmcqd during card
+ removal
+Date: Thu, 31 Jan 2013 12:23:35 +0530
+Message-ID: <510A14EF.5010103@codeaurora.org>
+References: <n@samsung.com> <1356513966-24945-1-git-send-email-kdorfman@codeaurora.org> <001201cdfeb3$3e628ee0$bb27aca0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <201301310009.34426.arnd@arndb.de>
-Sender: linux-sh-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+Content-Type: text/plain; charset=EUC-KR
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:59890 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751045Ab3AaGxi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Jan 2013 01:53:38 -0500
+In-Reply-To: <001201cdfeb3$3e628ee0$bb27aca0$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Konstantin Dorfman' <kdorfman@codeaurora.org>, 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On Thu, 31 Jan 2013, Arnd Bergmann wrote:
+Looks good to me.
+Reviewed-by: Subhash Jadavani <subhashj@codeaurora.org>
 
-> On Wednesday 30 January 2013, Guennadi Liakhovetski wrote:
-> > On Wed, 30 Jan 2013, Arnd Bergmann wrote:
-> > 
-> > > On Wednesday 30 January 2013, Guennadi Liakhovetski wrote:
-> > > > > This means, that a multi-platform driver like, e.g. SDHCI cannot use the 
-> > > > > gpio "flags" cell and has to fall-back to always use "*-inverted" 
-> > > > > properties. Same holds for any other multi-arch driver, using GPIOs. So, 
-> > > > > we're stuck with this?
-> > > 
-> > > But the SDHCI driver itself would not interpret the flags anyway, would it?
-> > 
-> > Currently each driver, including SDHCI, does it on its own, the goal is to 
-> > do this centrally. And yes, in our specific MMC case, if we want to 
-> > support GPIO controllers with 1 cell, no mmc DT node, using GPIOs for WP 
-> > or CD should be using the inversion flag - even where possible.
-> > 
-> > > From the code, I understand that of_get_named_gpio() would return a gpio
-> > > line with the polarity already inverted if it's specified that way,
-> > 
-> > Sorry, don't understand. of_get_named_gpio() just returns a GPIO number, 
-> > not GPIO level. It doesn't even actually request the GPIO for the specific 
-> > user. Or do you mean, that gpio_chip::of_xlate() should request the chip 
-> > to invert the GPIO from now on?
-> 
-> I'm not saying that it should, I just thought that it did that already,
-> but I may be wrong with that. Where does the polarity of a gpio
-> line normally get set?
 
-Well, don't think we had a generic way to handle this until now. Each 
-driver handles GPIOs in its own way. The GPIO API only provides functions 
-to reserve GPIOs, specify their direction (out / in) and set or get level 
-respectively. Besides you could set some flags like GPIOF_OPEN_DRAIN etc. 
-After a driver, say, reads low level of a GPIO it has to decide itself 
-whether it's the "on" or the "off" level, for which many drivers often use 
-their own means to specify GPIO's "polarity."
+On 1/30/2013 12:00 PM, Seungwon Jeon wrote:
+> Hi Konstantin.
+>
+> Could you check this patch with [2/2]?
+> [PATCH 2/2] mmc: block: don't start new request when the card is removed
+>
+> mmcqd is often sleeping with acquiring the claim(mmc_claim_host) when a card is removed.
+> As a result, mmc_rescan can be blocked for the insertion of a card newly. It's a dead lock.
+>
+> Thanks,
+> Seungwon Jeon
+>
+> On Tuesday, January 22, 2013, Seungwon Jeon wrote:
+>> This patch is derived from 'mmc: fix async request mechanism ...'.
+>> According as async transfer, a request is handled with twice mmc_start_req.
+>> When the card is removed, the request is actually not issued in the first
+>> mmc_start_req [__mmc_start_data_req]. And then mmc_wait_for_data_req_done
+>> will come in the next mmc_start_req. But there is no event for completions.
+>> wake_up_interruptible is needed in __mmc_start_data_req for the case of
+>> removed card.
+>>
+>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>> ---
+>>  drivers/mmc/core/core.c |    1 +
+>>  1 files changed, 1 insertions(+), 0 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 8b3a122..997b257 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -350,6 +350,7 @@ static int __mmc_start_data_req(struct mmc_host *host, struct mmc_request *mrq)
+>>  	mrq->host = host;
+>>  	if (mmc_card_removed(host->card)) {
+>>  		mrq->cmd->error = -ENOMEDIUM;
+>> +		mmc_wait_data_done(mrq);
+>>  		return -ENOMEDIUM;
+>>  	}
+>>  	mmc_start_request(host, mrq);
+>> --
+>> 1.7.0.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-> > > and
-> > > the SDHCI_QUIRK_INVERTED_WRITE_PROTECT flag can be used to invert it
-> > > independent of it.
-> > 
-> > Right, not sure about that flag. Isn't it used for SDHCI-native WP?
-> 
-> It's used in the sdhci_check_ro() function, independent of whether
-> the bit comes from the GPIO or from the SDHCI_PRESENT_STATE
-> register.
-
-Right, but the MMC core already has a generic MMC_CAP2_RO_ACTIVE_HIGH 
-flag, so, this flag is redundant. Perhaps, the SDHCI OF glue will have to 
-set that flag if the MMC core reports MMC_CAP2_RO_ACTIVE_HIGH.
-
-> It gets set based on the presence of the wp-inverted or the
-> older sdhci,wp-inverted property, which both get interpreted
-> in the same way.
-
-Right, which is already a mess...
-
-> > > So you could actually express the same thing by either
-> > > putting the inversion into the gpio specifier or into the *-inverted
-> > > properties.
-> > > 
-> > > If you actually provide both, that would have the same meaning as not
-> > > inverting.
-> > 
-> > Hm, that'd be a weird way to configure the pin, perhaps.
-> 
-> Yes, it's silly and I don't see a reason why you'd do that, but I think
-> it should still be considered valid.
-
-We can do that, sure, but I'm not sure we really have to apply both to end 
-up with a non-inverted pin, or just interpret it as resundant information 
-and invert once.
-
-> > > > BTW, just verified in the current "next": all platforms, using cd-inverted 
-> > > > or wp-inverted in the mainline
-> > > > 
-> > > > arch/arm/boot/dts/ccu9540.dts
-> > > > arch/arm/boot/dts/ea3250.dts
-> > > > arch/arm/boot/dts/phy3250.dts
-> > > > arch/arm/boot/dts/snowball.dts
-> > > > arch/arm/boot/dts/u9540.dts
-> > > > 
-> > > > use GPIO controllers with 2 or 3 cells.
-> > > 
-> > > What about those that don't use a GPIO line at all but instead use a
-> > > built-in write-protect and card-detect registers of the SDHCI controller?
-> > 
-> > The mmc.txt document specifies cd-inverted and wp-inverted _explicitly_ 
-> > for use with GPIOs. If we want to use them with built-in CD and WP pins, 
-> > we have to modify those definitions too.
-> 
-> Yes, that makes sense. The way that the specific esdhc binding is written
-> does not refer to gpio and could be interpreted the way that it is used
-> in the driver (for both gpio and internal wp), but it's certainly a
-> good idea to clarify it in the common binding.
-
-Ok, as soon as we agree on handling of the double inversion, I'll prepare 
-and post an updated patch series.
-
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
