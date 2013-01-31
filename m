@@ -1,354 +1,123 @@
-From: Kevin Liu <kliu5@marvell.com>
-Subject: [PATCH v2 5/7] mmc: sdhci: enhance preset value function
-Date: Thu, 31 Jan 2013 11:31:37 +0800
-Message-ID: <1359603097-25325-1-git-send-email-kliu5@marvell.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog132.obsmtp.com ([74.125.149.250]:56388 "EHLO
-	na3sys009aog132.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752908Ab3AaDar (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Jan 2013 22:30:47 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH v2 02/11] mmc: deprecate redundant cd-inverted and
+ wp-inverted DT properties
+Date: Thu, 31 Jan 2013 07:47:46 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1301310727590.14639@axis700.grange>
+References: <1358955158-1510-1-git-send-email-g.liakhovetski@gmx.de>
+ <201301301629.45511.arnd@arndb.de> <Pine.LNX.4.64.1301301743470.3113@axis700.grange>
+ <201301310009.34426.arnd@arndb.de>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <201301310009.34426.arnd@arndb.de>
+Sender: linux-sh-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alexander Stein <alexander.stein@systec-electronic.com>
-Cc: Nicolas Pitre <nico@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>, Kevin Liu <kliu5@marvell.com>
 
-commit 4d55c5a1 added preset value support and enable it by default
-during sd card init.
+On Thu, 31 Jan 2013, Arnd Bergmann wrote:
 
-below are the enhancements introduced by this patch:
-1. In current code, preset value is enabled after setting clock finished,
-which means the clock is manually set by driver firstly and
-then suddenly switched to preset value at this point. So the
-first setting is useless and unnecessary. What's more, the first
-clock setting may differ from the preset one.
-The better way is enable preset value just after switch to UHS mode
-so the preset value can take effect immediately. So move preset
-value enable from mmc_sd_init_card to sdhci_set_ios which will
-be called during set timing.
+> On Wednesday 30 January 2013, Guennadi Liakhovetski wrote:
+> > On Wed, 30 Jan 2013, Arnd Bergmann wrote:
+> > 
+> > > On Wednesday 30 January 2013, Guennadi Liakhovetski wrote:
+> > > > > This means, that a multi-platform driver like, e.g. SDHCI cannot use the 
+> > > > > gpio "flags" cell and has to fall-back to always use "*-inverted" 
+> > > > > properties. Same holds for any other multi-arch driver, using GPIOs. So, 
+> > > > > we're stuck with this?
+> > > 
+> > > But the SDHCI driver itself would not interpret the flags anyway, would it?
+> > 
+> > Currently each driver, including SDHCI, does it on its own, the goal is to 
+> > do this centrally. And yes, in our specific MMC case, if we want to 
+> > support GPIO controllers with 1 cell, no mmc DT node, using GPIOs for WP 
+> > or CD should be using the inversion flag - even where possible.
+> > 
+> > > From the code, I understand that of_get_named_gpio() would return a gpio
+> > > line with the polarity already inverted if it's specified that way,
+> > 
+> > Sorry, don't understand. of_get_named_gpio() just returns a GPIO number, 
+> > not GPIO level. It doesn't even actually request the GPIO for the specific 
+> > user. Or do you mean, that gpio_chip::of_xlate() should request the chip 
+> > to invert the GPIO from now on?
+> 
+> I'm not saying that it should, I just thought that it did that already,
+> but I may be wrong with that. Where does the polarity of a gpio
+> line normally get set?
 
-2. In current code, preset value is disabled at the begining of mmc_attach_sd.
-It's too late since low freq (400khz) should be set in mmc_power_up.
-So move preset value disable to sdhci_set_ios which will be
-called during power up.
+Well, don't think we had a generic way to handle this until now. Each 
+driver handles GPIOs in its own way. The GPIO API only provides functions 
+to reserve GPIOs, specify their direction (out / in) and set or get level 
+respectively. Besides you could set some flags like GPIOF_OPEN_DRAIN etc. 
+After a driver, say, reads low level of a GPIO it has to decide itself 
+whether it's the "on" or the "off" level, for which many drivers often use 
+their own means to specify GPIO's "polarity."
 
-3. host->clock and ios->drv_type should also be updated according to the
-preset value if it's enabled. Current code missed this.
+> > > and
+> > > the SDHCI_QUIRK_INVERTED_WRITE_PROTECT flag can be used to invert it
+> > > independent of it.
+> > 
+> > Right, not sure about that flag. Isn't it used for SDHCI-native WP?
+> 
+> It's used in the sdhci_check_ro() function, independent of whether
+> the bit comes from the GPIO or from the SDHCI_PRESENT_STATE
+> register.
 
-4. This patch also introduce a quirk to disable preset value in case
-preset value don't work.
+Right, but the MMC core already has a generic MMC_CAP2_RO_ACTIVE_HIGH 
+flag, so, this flag is redundant. Perhaps, the SDHCI OF glue will have to 
+set that flag if the MMC core reports MMC_CAP2_RO_ACTIVE_HIGH.
 
-This patch has been verified on sdhci-pxav3 platform with
-both preset enabled and disabled.
+> It gets set based on the presence of the wp-inverted or the
+> older sdhci,wp-inverted property, which both get interpreted
+> in the same way.
 
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
-Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+Right, which is already a mess...
+
+> > > So you could actually express the same thing by either
+> > > putting the inversion into the gpio specifier or into the *-inverted
+> > > properties.
+> > > 
+> > > If you actually provide both, that would have the same meaning as not
+> > > inverting.
+> > 
+> > Hm, that'd be a weird way to configure the pin, perhaps.
+> 
+> Yes, it's silly and I don't see a reason why you'd do that, but I think
+> it should still be considered valid.
+
+We can do that, sure, but I'm not sure we really have to apply both to end 
+up with a non-inverted pin, or just interpret it as resundant information 
+and invert once.
+
+> > > > BTW, just verified in the current "next": all platforms, using cd-inverted 
+> > > > or wp-inverted in the mainline
+> > > > 
+> > > > arch/arm/boot/dts/ccu9540.dts
+> > > > arch/arm/boot/dts/ea3250.dts
+> > > > arch/arm/boot/dts/phy3250.dts
+> > > > arch/arm/boot/dts/snowball.dts
+> > > > arch/arm/boot/dts/u9540.dts
+> > > > 
+> > > > use GPIO controllers with 2 or 3 cells.
+> > > 
+> > > What about those that don't use a GPIO line at all but instead use a
+> > > built-in write-protect and card-detect registers of the SDHCI controller?
+> > 
+> > The mmc.txt document specifies cd-inverted and wp-inverted _explicitly_ 
+> > for use with GPIOs. If we want to use them with built-in CD and WP pins, 
+> > we have to modify those definitions too.
+> 
+> Yes, that makes sense. The way that the specific esdhc binding is written
+> does not refer to gpio and could be interpreted the way that it is used
+> in the driver (for both gpio and internal wp), but it's certainly a
+> good idea to clarify it in the common binding.
+
+Ok, as soon as we agree on handling of the double inversion, I'll prepare 
+and post an updated patch series.
+
+Thanks
+Guennadi
 ---
- drivers/mmc/core/sd.c     |   17 ------
- drivers/mmc/host/sdhci.c  |  129 +++++++++++++++++++++++++++++++--------------
- drivers/mmc/host/sdhci.h  |   12 +++++
- include/linux/mmc/host.h  |    1 -
- include/linux/mmc/sdhci.h |    1 +
- 5 files changed, 102 insertions(+), 58 deletions(-)
-
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 74972c2..3dafb54 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -960,16 +960,6 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 
- 		/* Card is an ultra-high-speed card */
- 		mmc_card_set_uhs(card);
--
--		/*
--		 * Since initialization is now complete, enable preset
--		 * value registers for UHS-I cards.
--		 */
--		if (host->ops->enable_preset_value) {
--			mmc_host_clk_hold(card->host);
--			host->ops->enable_preset_value(host, true);
--			mmc_host_clk_release(card->host);
--		}
- 	} else {
- 		/*
- 		 * Attempt to change to high-speed (if supported)
-@@ -1148,13 +1138,6 @@ int mmc_attach_sd(struct mmc_host *host)
- 	BUG_ON(!host);
- 	WARN_ON(!host->claimed);
- 
--	/* Disable preset value enable if already set since last time */
--	if (host->ops->enable_preset_value) {
--		mmc_host_clk_hold(host);
--		host->ops->enable_preset_value(host, false);
--		mmc_host_clk_release(host);
--	}
--
- 	err = mmc_send_app_op_cond(host, 0, &ocr);
- 	if (err)
- 		return err;
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 631106d..f8bfc2f 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -53,6 +53,7 @@ static void sdhci_send_command(struct sdhci_host *, struct mmc_command *);
- static void sdhci_finish_command(struct sdhci_host *);
- static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
- static void sdhci_tuning_timer(unsigned long data);
-+static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
- 
- #ifdef CONFIG_PM_RUNTIME
- static int sdhci_runtime_pm_get(struct sdhci_host *host);
-@@ -1082,6 +1083,37 @@ static void sdhci_finish_command(struct sdhci_host *host)
- 	}
- }
- 
-+static u16 sdhci_get_preset_value(struct sdhci_host *host)
-+{
-+	u16 ctrl, preset = 0;
-+
-+	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+
-+	switch (ctrl & SDHCI_CTRL_UHS_MASK) {
-+	case SDHCI_CTRL_UHS_SDR12:
-+		preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR12);
-+		break;
-+	case SDHCI_CTRL_UHS_SDR25:
-+		preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR25);
-+		break;
-+	case SDHCI_CTRL_UHS_SDR50:
-+		preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR50);
-+		break;
-+	case SDHCI_CTRL_UHS_SDR104:
-+		preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR104);
-+		break;
-+	case SDHCI_CTRL_UHS_DDR50:
-+		preset = sdhci_readw(host, SDHCI_PRESET_FOR_DDR50);
-+		break;
-+	default:
-+		pr_warn("%s: Invalid UHS-I mode selected\n",
-+			mmc_hostname(host->mmc));
-+		preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR12);
-+		break;
-+	}
-+	return preset;
-+}
-+
- static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	int div = 0; /* Initialized for compiler warning */
-@@ -1106,35 +1138,43 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 		goto out;
- 
- 	if (host->version >= SDHCI_SPEC_300) {
-+		if (sdhci_readw(host, SDHCI_HOST_CONTROL2) &
-+			SDHCI_CTRL_PRESET_VAL_ENABLE) {
-+			u16 pre_val;
-+
-+			clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+			pre_val = sdhci_get_preset_value(host);
-+			div = (pre_val & SDHCI_PRESET_SDCLK_FREQ_MASK)
-+				>> SDHCI_PRESET_SDCLK_FREQ_SHIFT;
-+			if (host->clk_mul &&
-+				(pre_val & SDHCI_PRESET_CLKGEN_SEL_MASK)) {
-+				clk = SDHCI_PROG_CLOCK_MODE;
-+				real_div = div + 1;
-+				clk_mul = host->clk_mul;
-+			} else {
-+				real_div = max_t(int, 1, div << 1);
-+			}
-+			goto clock_set;
-+		}
-+
- 		/*
- 		 * Check if the Host Controller supports Programmable Clock
- 		 * Mode.
- 		 */
- 		if (host->clk_mul) {
--			u16 ctrl;
--
-+			for (div = 1; div <= 1024; div++) {
-+				if ((host->max_clk * host->clk_mul / div)
-+					<= clock)
-+					break;
-+			}
- 			/*
--			 * We need to figure out whether the Host Driver needs
--			 * to select Programmable Clock Mode, or the value can
--			 * be set automatically by the Host Controller based on
--			 * the Preset Value registers.
-+			 * Set Programmable Clock Mode in the Clock
-+			 * Control register.
- 			 */
--			ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
--			if (!(ctrl & SDHCI_CTRL_PRESET_VAL_ENABLE)) {
--				for (div = 1; div <= 1024; div++) {
--					if (((host->max_clk * host->clk_mul) /
--					      div) <= clock)
--						break;
--				}
--				/*
--				 * Set Programmable Clock Mode in the Clock
--				 * Control register.
--				 */
--				clk = SDHCI_PROG_CLOCK_MODE;
--				real_div = div;
--				clk_mul = host->clk_mul;
--				div--;
--			}
-+			clk = SDHCI_PROG_CLOCK_MODE;
-+			real_div = div;
-+			clk_mul = host->clk_mul;
-+			div--;
- 		} else {
- 			/* Version 3.00 divisors must be a multiple of 2. */
- 			if (host->max_clk <= clock)
-@@ -1159,6 +1199,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 		div >>= 1;
- 	}
- 
-+clock_set:
- 	if (real_div)
- 		host->mmc->actual_clock = (host->max_clk * clk_mul) / real_div;
- 
-@@ -1376,6 +1417,10 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 		sdhci_reinit(host);
- 	}
- 
-+	if (host->version >= SDHCI_SPEC_300 &&
-+		(ios->power_mode == MMC_POWER_UP))
-+		sdhci_enable_preset_value(host, false);
-+
- 	sdhci_set_clock(host, ios->clock);
- 
- 	if (ios->power_mode == MMC_POWER_OFF)
-@@ -1487,6 +1532,20 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 			sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
- 		}
- 
-+		if (!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN) &&
-+				((ios->timing == MMC_TIMING_UHS_SDR12) ||
-+				 (ios->timing == MMC_TIMING_UHS_SDR25) ||
-+				 (ios->timing == MMC_TIMING_UHS_SDR50) ||
-+				 (ios->timing == MMC_TIMING_UHS_SDR104) ||
-+				 (ios->timing == MMC_TIMING_UHS_DDR50))) {
-+			u16 preset;
-+
-+			sdhci_enable_preset_value(host, true);
-+			preset = sdhci_get_preset_value(host);
-+			ios->drv_type = (preset & SDHCI_PRESET_DRV_MASK)
-+				>> SDHCI_PRESET_DRV_SHIFT;
-+		}
-+
- 		/* Re-enable SD Clock */
- 		sdhci_update_clock(host);
- 	} else
-@@ -1953,17 +2012,15 @@ out:
- 	return err;
- }
- 
--static void sdhci_do_enable_preset_value(struct sdhci_host *host, bool enable)
-+
-+static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
- {
- 	u16 ctrl;
--	unsigned long flags;
- 
- 	/* Host Controller v3.00 defines preset value registers */
- 	if (host->version < SDHCI_SPEC_300)
- 		return;
- 
--	spin_lock_irqsave(&host->lock, flags);
--
- 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 
- 	/*
-@@ -1979,17 +2036,6 @@ static void sdhci_do_enable_preset_value(struct sdhci_host *host, bool enable)
- 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
- 		host->flags &= ~SDHCI_PV_ENABLED;
- 	}
--
--	spin_unlock_irqrestore(&host->lock, flags);
--}
--
--static void sdhci_enable_preset_value(struct mmc_host *mmc, bool enable)
--{
--	struct sdhci_host *host = mmc_priv(mmc);
--
--	sdhci_runtime_pm_get(host);
--	sdhci_do_enable_preset_value(host, enable);
--	sdhci_runtime_pm_put(host);
- }
- 
- static void sdhci_card_event(struct mmc_host *mmc)
-@@ -2025,7 +2071,6 @@ static const struct mmc_host_ops sdhci_ops = {
- 	.enable_sdio_irq = sdhci_enable_sdio_irq,
- 	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
- 	.execute_tuning			= sdhci_execute_tuning,
--	.enable_preset_value		= sdhci_enable_preset_value,
- 	.card_event			= sdhci_card_event,
- };
- 
-@@ -2620,8 +2665,12 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
- 	sdhci_do_set_ios(host, &host->mmc->ios);
- 
- 	sdhci_do_start_signal_voltage_switch(host, &host->mmc->ios);
--	if (host_flags & SDHCI_PV_ENABLED)
--		sdhci_do_enable_preset_value(host, true);
-+	if ((host_flags & SDHCI_PV_ENABLED) &&
-+		!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN)) {
-+		spin_lock_irqsave(&host->lock, flags);
-+		sdhci_enable_preset_value(host, true);
-+		spin_unlock_irqrestore(&host->lock, flags);
-+	}
- 
- 	/* Set the re-tuning expiration flag */
- 	if (host->flags & SDHCI_USING_RETUNING_TIMER)
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c8d11b9..379e09d 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -229,6 +229,18 @@
- 
- /* 60-FB reserved */
- 
-+#define SDHCI_PRESET_FOR_SDR12 0x66
-+#define SDHCI_PRESET_FOR_SDR25 0x68
-+#define SDHCI_PRESET_FOR_SDR50 0x6A
-+#define SDHCI_PRESET_FOR_SDR104        0x6C
-+#define SDHCI_PRESET_FOR_DDR50 0x6E
-+#define SDHCI_PRESET_DRV_MASK  0xC000
-+#define SDHCI_PRESET_DRV_SHIFT  14
-+#define SDHCI_PRESET_CLKGEN_SEL_MASK   0x400
-+#define SDHCI_PRESET_CLKGEN_SEL_SHIFT	10
-+#define SDHCI_PRESET_SDCLK_FREQ_MASK   0x3FF
-+#define SDHCI_PRESET_SDCLK_FREQ_SHIFT	0
-+
- #define SDHCI_SLOT_INT_STATUS	0xFC
- 
- #define SDHCI_HOST_VERSION	0xFE
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 523d570..f39ddfa 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -133,7 +133,6 @@ struct mmc_host_ops {
- 
- 	/* The tuning command opcode value is different for SD and eMMC cards */
- 	int	(*execute_tuning)(struct mmc_host *host, u32 opcode);
--	void	(*enable_preset_value)(struct mmc_host *host, bool enable);
- 	int	(*select_drive_strength)(unsigned int max_dtr, int host_drv, int card_drv);
- 	void	(*hw_reset)(struct mmc_host *host);
- 	void	(*card_event)(struct mmc_host *host);
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 4bbc330..b838ffc 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -94,6 +94,7 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_HOST_NO_CMD23			(1<<1)
- /* The system physically doesn't support 1.8v, even if the host does */
- #define SDHCI_QUIRK2_NO_1_8_V				(1<<2)
-+#define SDHCI_QUIRK2_PRESET_VALUE_BROKEN		(1<<3)
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
--- 
-1.7.9.5
-
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
