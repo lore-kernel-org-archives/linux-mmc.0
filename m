@@ -1,70 +1,64 @@
-From: Subhash Jadavani <subhashj@codeaurora.org>
-Subject: Re: [PATCH 1/2] mmc: core: fix permanent sleep of mmcqd during card
- removal
-Date: Thu, 31 Jan 2013 12:23:35 +0530
-Message-ID: <510A14EF.5010103@codeaurora.org>
-References: <n@samsung.com> <1356513966-24945-1-git-send-email-kdorfman@codeaurora.org> <001201cdfeb3$3e628ee0$bb27aca0$%jun@samsung.com>
+From: Thierry Reding <thierry.reding@avionic-design.de>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Remove unused variables
+Date: Thu, 31 Jan 2013 08:00:53 +0100
+Message-ID: <20130131070052.GA31996@avionic-0098.mockup.avionic-design.de>
+References: <1359576681-14797-1-git-send-email-thierry.reding@avionic-design.de>
+ <20130131003118.GC2765@S2101-09.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=EUC-KR
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="2fHTh5uZTiUOsy+g"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:59890 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751045Ab3AaGxi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Jan 2013 01:53:38 -0500
-In-Reply-To: <001201cdfeb3$3e628ee0$bb27aca0$%jun@samsung.com>
+Received: from moutng.kundenserver.de ([212.227.126.171]:55749 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751562Ab3AaHA6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Jan 2013 02:00:58 -0500
+Content-Disposition: inline
+In-Reply-To: <20130131003118.GC2765@S2101-09.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Konstantin Dorfman' <kdorfman@codeaurora.org>, 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org
-
-Looks good to me.
-Reviewed-by: Subhash Jadavani <subhashj@codeaurora.org>
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
 
-On 1/30/2013 12:00 PM, Seungwon Jeon wrote:
-> Hi Konstantin.
->
-> Could you check this patch with [2/2]?
-> [PATCH 2/2] mmc: block: don't start new request when the card is removed
->
-> mmcqd is often sleeping with acquiring the claim(mmc_claim_host) when a card is removed.
-> As a result, mmc_rescan can be blocked for the insertion of a card newly. It's a dead lock.
->
-> Thanks,
-> Seungwon Jeon
->
-> On Tuesday, January 22, 2013, Seungwon Jeon wrote:
->> This patch is derived from 'mmc: fix async request mechanism ...'.
->> According as async transfer, a request is handled with twice mmc_start_req.
->> When the card is removed, the request is actually not issued in the first
->> mmc_start_req [__mmc_start_data_req]. And then mmc_wait_for_data_req_done
->> will come in the next mmc_start_req. But there is no event for completions.
->> wake_up_interruptible is needed in __mmc_start_data_req for the case of
->> removed card.
->>
->> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->> ---
->>  drivers/mmc/core/core.c |    1 +
->>  1 files changed, 1 insertions(+), 0 deletions(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index 8b3a122..997b257 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -350,6 +350,7 @@ static int __mmc_start_data_req(struct mmc_host *host, struct mmc_request *mrq)
->>  	mrq->host = host;
->>  	if (mmc_card_removed(host->card)) {
->>  		mrq->cmd->error = -ENOMEDIUM;
->> +		mmc_wait_data_done(mrq);
->>  		return -ENOMEDIUM;
->>  	}
->>  	mmc_start_request(host, mrq);
->> --
->> 1.7.0.4
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--2fHTh5uZTiUOsy+g
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
+On Thu, Jan 31, 2013 at 08:31:20AM +0800, Shawn Guo wrote:
+> On Wed, Jan 30, 2013 at 09:11:21PM +0100, Thierry Reding wrote:
+> > Commit 3f175a6 (mmc: sdhci-esdhc-imx: remove ESDHC_CD_GPIO handling from
+> > IO accessory) removed all the code that was using these variables, so it
+> > is safe to drop them.
+> >=20
+> > Signed-off-by: Thierry Reding <thierry.reding@avionic-design.de>
+>=20
+> Thanks for the fixing, Thierry.  But Chris has already queued a fix [1]
+> from Fabio.
+
+Okay, great!
+
+Thierry
+
+--2fHTh5uZTiUOsy+g
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+
+iQIcBAEBAgAGBQJRChakAAoJEN0jrNd/PrOhJVcP/iRLLWTBvjx8oYRKO0g0kdT0
+RcBbvEO4vJfSQk6zbt/1989U3+zqYj7iMhZIDTOKS/ObMVkWpR/TbKLt2DgRMGo1
+AhEMCTAVdXgtORjR6+xG+rmvcAtG2xFR4xJS0gUu2KHD+Jsdsa+cYbR35jX0Wcea
+CyhlUIxxliSKaodukFJyCXp1XvJZoJoJd6Cz6cpMMlH6TvxrgWwlH1aLX1m9TDoL
+9D7rd/opLfcnKA09rx5KBH8lscT2ViJfXJKG2n2Tmf5bWtnesQ4THURaH57EwOOL
+gvwYxY2JbjP2m97kOoRmAuj5p4jP+0eCyIU3S+KXa1OZwxGkDbqDkRPmhSxm7plo
+cDkpeelKHianVoFYWGivc+LXOSI22Soq8leoeq4+cuGYAXWmiLq0kA2qtyfLzBCY
+Caon2qU+PsNCipwrckA5XCgvzsLFcckXdcO5DGkJqeF46Z5jHsbHD4dquoAU+r1I
+GZFXZUlRAF9C93X2i8XxqU3wwIiKjWwHzwCxaFisYbd/A+6mAqY4KV6/FPTdPL82
+rUyDZ5r2k6D//H74ZC/PpM/zJeFPQVgmMMkqhF/3ZPK71ly2DbW02EHOA3R48G0L
+if4bCqHFl7LytzitbZiLN4JWBRENm+BJvCkva5Ag/hOyxuI3J8yXFgFZPOWSRlGp
+SFFw0+emMxKs6IWl1LqX
+=EGEG
+-----END PGP SIGNATURE-----
+
+--2fHTh5uZTiUOsy+g--
