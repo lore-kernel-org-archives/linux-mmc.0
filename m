@@ -1,7 +1,7 @@
 From: "Manjunathappa, Prakash" <prakash.pm@ti.com>
-Subject: [PATCH 3/3] ARM: davinci: da850: add mmc DT entries
-Date: Thu, 31 Jan 2013 16:03:07 +0530
-Message-ID: <1359628387-14437-4-git-send-email-prakash.pm@ti.com>
+Subject: [PATCH 1/3] ARM: davinci: da850: override mmc DT node device name
+Date: Thu, 31 Jan 2013 16:03:05 +0530
+Message-ID: <1359628387-14437-2-git-send-email-prakash.pm@ti.com>
 References: <1359628387-14437-1-git-send-email-prakash.pm@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,9 +12,9 @@ To: linux-mmc@vger.kernel.org
 Cc: grant.likely@secretlab.ca, rob.herring@calxeda.com, rob@landley.net, linux@arm.linux.org.uk, nsekhar@ti.com, hs@denx.de, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, davinci-linux-open-source@linux.davincidsp.com, mporter@ti.com, ido@wizery.com, gregkh@linuxfoundation.org, "Manjunathappa, Prakash" <prakash.pm@ti.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add DT entry for MMC. Also add entry for pinmux information.
-Tested on da850-evm without card detect and EDMA support as
-DT support for GPIO and EDMA are yet come.
+Populate OF_DEV_AUXDATA with desired device name expected by
+davinci_mmc driver. Without this clk_get of davinci_mmc DT driver
+fails.
 
 Signed-off-by: Manjunathappa, Prakash <prakash.pm@ti.com>
 Cc: linux-mmc@vger.kernel.org
@@ -25,67 +25,30 @@ Cc: devicetree-discuss@lists.ozlabs.org
 Cc: cjb@laptop.org
 Cc: Sekhar Nori <nsekhar@ti.com>
 ---
- arch/arm/boot/dts/da850-evm.dts |   13 +++++++++++++
- arch/arm/boot/dts/da850.dtsi    |   15 +++++++++++++++
- 2 files changed, 28 insertions(+), 0 deletions(-)
+ arch/arm/mach-davinci/da8xx-dt.c |    8 +++++++-
+ 1 files changed, 7 insertions(+), 1 deletions(-)
 
-diff --git a/arch/arm/boot/dts/da850-evm.dts b/arch/arm/boot/dts/da850-evm.dts
-index fa04152..51c87e7 100644
---- a/arch/arm/boot/dts/da850-evm.dts
-+++ b/arch/arm/boot/dts/da850-evm.dts
-@@ -30,6 +30,19 @@
- 		rtc0: rtc@1c23000 {
- 			status = "okay";
- 		};
-+		mmc0: mmc@1c40000 {
-+			status = "okay";
-+			bus-width = <4>;
-+			max-frequency = <50000000>;
-+			/*
-+			 * BIT(1) MMC_CAP_MMC_HIGHSPEED
-+			 * BIT(2) MMC_CAP_SD_HIGHSPEED
-+			 */
-+			caps = <6>;
-+			version = <1>;
-+			pinctrl-names = "default";
-+			pinctrl-0 = <&mmc0_pins>;
-+		};
- 	};
- 	nand_cs3@62000000 {
- 		status = "okay";
-diff --git a/arch/arm/boot/dts/da850.dtsi b/arch/arm/boot/dts/da850.dtsi
-index 099c81e..5978a83 100644
---- a/arch/arm/boot/dts/da850.dtsi
-+++ b/arch/arm/boot/dts/da850.dtsi
-@@ -56,6 +56,15 @@
- 					0x30 0x01100000  0x0ff00000
- 				>;
- 			};
-+			mmc0_pins: pinmux_mmc_pins {
-+				pinctrl-single,bits = <
-+					/* MMCSD0_DAT[3] MMCSD0_DAT[2]
-+					 * MMCSD0_DAT[1] MMCSD0_DAT[0]
-+					 * MMCSD0_CMD    MMCSD0_CLK
-+					 */
-+					0x28 0x00222222  0x00ffffff
-+				>;
-+			};
- 		};
- 		serial0: serial@1c42000 {
- 			compatible = "ns16550a";
-@@ -88,6 +97,12 @@
- 				      19>;
- 			status = "disabled";
- 		};
-+		mmc0: mmc@1c40000 {
-+			compatible = "ti,davinci_mmc";
-+			reg = <0x40000 0x1000>;
-+			interrupts = <16>;
-+			status = "disabled";
-+		};
- 	};
- 	nand_cs3@62000000 {
- 		compatible = "ti,davinci-nand";
+diff --git a/arch/arm/mach-davinci/da8xx-dt.c b/arch/arm/mach-davinci/da8xx-dt.c
+index 37c27af..c623db0 100644
+--- a/arch/arm/mach-davinci/da8xx-dt.c
++++ b/arch/arm/mach-davinci/da8xx-dt.c
+@@ -39,9 +39,15 @@ static void __init da8xx_init_irq(void)
+ 
+ #ifdef CONFIG_ARCH_DAVINCI_DA850
+ 
++static const struct of_dev_auxdata da8xx_auxdata[] __initconst = {
++	OF_DEV_AUXDATA("ti,davinci_mmc", 0x01c40000, "davinci_mmc.0", NULL),
++	{},
++};
++
+ static void __init da850_init_machine(void)
+ {
+-	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
++	of_platform_populate(NULL, of_default_bus_match_table, da8xx_auxdata,
++			NULL);
+ 
+ 	da8xx_uart_clk_enable();
+ }
 -- 
 1.7.4.1
 
