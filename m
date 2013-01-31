@@ -1,64 +1,88 @@
-From: Thierry Reding <thierry.reding@avionic-design.de>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Remove unused variables
-Date: Thu, 31 Jan 2013 08:00:53 +0100
-Message-ID: <20130131070052.GA31996@avionic-0098.mockup.avionic-design.de>
-References: <1359576681-14797-1-git-send-email-thierry.reding@avionic-design.de>
- <20130131003118.GC2765@S2101-09.ap.freescale.net>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: core: fix the aysync mechanism when card removed
+Date: Thu, 31 Jan 2013 16:06:18 +0900
+Message-ID: <510A17EA.8060005@samsung.com>
+References: <50FE838C.5010709@samsung.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="2fHTh5uZTiUOsy+g"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:55749 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751562Ab3AaHA6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Jan 2013 02:00:58 -0500
-Content-Disposition: inline
-In-Reply-To: <20130131003118.GC2765@S2101-09.ap.freescale.net>
+Received: from mailout1.samsung.com ([203.254.224.24]:18952 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751007Ab3AaHGq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Jan 2013 02:06:46 -0500
+Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MHH008HFACIGWR0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 31 Jan 2013 16:06:45 +0900 (KST)
+Received: from [10.90.51.55] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0MHH001VWAF8IHO0@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 31 Jan 2013 16:06:44 +0900 (KST)
+In-reply-to: <50FE838C.5010709@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Kyungmin Park <kyungmin.park@samsung.com>, Per FORLIN <per.forlin@stericsson.com>, Maya Erez <merez@codeaurora.org>
 
+Have any other opinion?
 
---2fHTh5uZTiUOsy+g
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On 01/22/2013 09:18 PM, Jaehoon Chung wrote:
+> When card removed, then didn't complete the previously data.
+> (It didn't wakeup any interrupt.)
+> If card is removed, then we can assume to complete the previously data.
+> And wakeup the interrupt for wait_event of data.
+> 
+> This problem is produced when sd-card is removed.(Sd-card is running some operation)
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <Kyungmin.park@samsung.com>
+> ---
+>  drivers/mmc/core/core.c |   31 ++++++++++++++++++++-----------
+>  1 files changed, 20 insertions(+), 11 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 8b3a122..bc1d627 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -515,17 +515,26 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+>  		mmc_pre_req(host, areq->mrq, !host->areq);
+>  
+>  	if (host->areq) {
+> -			err = mmc_wait_for_data_req_done(host, host->areq->mrq,
+> -					areq);
+> -			if (err == MMC_BLK_NEW_REQUEST) {
+> -				if (error)
+> -					*error = err;
+> -				/*
+> -				 * The previous request was not completed,
+> -				 * nothing to return
+> -				 */
+> -				return NULL;
+> -			}
+> +		err = mmc_wait_for_data_req_done(host, host->areq->mrq,
+> +				areq);
+> +		if (err == MMC_BLK_NEW_REQUEST) {
+> +			if (error)
+> +				*error = err;
+> +			/*
+> +			 * The previous request was not completed,
+> +			 * nothing to return
+> +			 */
+> +			return NULL;
+> +		} else if (err == MMC_BLK_NOMEDIUM && areq) {
+> +			struct mmc_context_info *ctnx = &host->context_info;
+> +			/*
+> +			 * If crad is removed,
+> +			 * then we didn't wait for data completed.
+> +			 * Assume that data-recieve done.
+> +			 */
+> +			ctnx->is_done_rcv = true;
+> +			wake_up_interruptible(&ctnx->wait);
+> +		}
+>  		/*
+>  		 * Check BKOPS urgency for each R1 response
+>  		 */
+> 
 
-On Thu, Jan 31, 2013 at 08:31:20AM +0800, Shawn Guo wrote:
-> On Wed, Jan 30, 2013 at 09:11:21PM +0100, Thierry Reding wrote:
-> > Commit 3f175a6 (mmc: sdhci-esdhc-imx: remove ESDHC_CD_GPIO handling from
-> > IO accessory) removed all the code that was using these variables, so it
-> > is safe to drop them.
-> >=20
-> > Signed-off-by: Thierry Reding <thierry.reding@avionic-design.de>
->=20
-> Thanks for the fixing, Thierry.  But Chris has already queued a fix [1]
-> from Fabio.
-
-Okay, great!
-
-Thierry
-
---2fHTh5uZTiUOsy+g
-Content-Type: application/pgp-signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-
-iQIcBAEBAgAGBQJRChakAAoJEN0jrNd/PrOhJVcP/iRLLWTBvjx8oYRKO0g0kdT0
-RcBbvEO4vJfSQk6zbt/1989U3+zqYj7iMhZIDTOKS/ObMVkWpR/TbKLt2DgRMGo1
-AhEMCTAVdXgtORjR6+xG+rmvcAtG2xFR4xJS0gUu2KHD+Jsdsa+cYbR35jX0Wcea
-CyhlUIxxliSKaodukFJyCXp1XvJZoJoJd6Cz6cpMMlH6TvxrgWwlH1aLX1m9TDoL
-9D7rd/opLfcnKA09rx5KBH8lscT2ViJfXJKG2n2Tmf5bWtnesQ4THURaH57EwOOL
-gvwYxY2JbjP2m97kOoRmAuj5p4jP+0eCyIU3S+KXa1OZwxGkDbqDkRPmhSxm7plo
-cDkpeelKHianVoFYWGivc+LXOSI22Soq8leoeq4+cuGYAXWmiLq0kA2qtyfLzBCY
-Caon2qU+PsNCipwrckA5XCgvzsLFcckXdcO5DGkJqeF46Z5jHsbHD4dquoAU+r1I
-GZFXZUlRAF9C93X2i8XxqU3wwIiKjWwHzwCxaFisYbd/A+6mAqY4KV6/FPTdPL82
-rUyDZ5r2k6D//H74ZC/PpM/zJeFPQVgmMMkqhF/3ZPK71ly2DbW02EHOA3R48G0L
-if4bCqHFl7LytzitbZiLN4JWBRENm+BJvCkva5Ag/hOyxuI3J8yXFgFZPOWSRlGp
-SFFw0+emMxKs6IWl1LqX
-=EGEG
------END PGP SIGNATURE-----
-
---2fHTh5uZTiUOsy+g--
