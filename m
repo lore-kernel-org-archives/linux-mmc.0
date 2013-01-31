@@ -1,59 +1,77 @@
 From: Matt Porter <mporter@ti.com>
-Subject: Re: [PATCH v6 03/10] ARM: edma: add AM33XX support to the private
- EDMA API
-Date: Thu, 31 Jan 2013 16:42:41 -0500
-Message-ID: <20130131214241.GJ2244@beef>
-References: <1359529229-22207-1-git-send-email-mporter@ti.com>
- <201301300932.58732.arnd@arndb.de>
- <20130131183255.GI2244@beef>
- <6932828d68394f71ba6df8e6bf608635@DFLE72.ent.ti.com>
+Subject: Re: [PATCH v2 0/3] dmaengine: add per channel capabilities api
+Date: Thu, 31 Jan 2013 17:25:59 -0500
+Message-ID: <20130131222559.GK2244@beef>
+References: <1357844826-30746-1-git-send-email-mporter@ti.com>
+ <abcd725c6216491da2b1054e5e11ad82@DFLE72.ent.ti.com>
+ <20130120163735.GC21407@beef>
+ <c4113bae604945b586e9613814be737a@DLEE74.ent.ti.com>
+ <20130121181922.GD10020@beef>
+ <f97c0fe89e4643069c177f549a2e5628@DLEE74.ent.ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <6932828d68394f71ba6df8e6bf608635@DFLE72.ent.ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, "Cousson, Benoit" <b-cousson@ti.com>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Padma Venkat <padma.kvr@gmail.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Chris Ball <cjb@laptop.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+In-Reply-To: <f97c0fe89e4643069c177f549a2e5628@DLEE74.ent.ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Vinod Koul <vinod.koul@intel.com>
+Cc: Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jan 31, 2013 at 08:58:39PM +0000, Arnd Bergmann wrote:
-> On Thursday 31 January 2013, Matt Porter wrote:
-> > On Wed, Jan 30, 2013 at 09:32:58AM +0000, Arnd Bergmann wrote:
-> > > On Wednesday 30 January 2013, Matt Porter wrote:
-> > > > +               dma_cap_set(DMA_SLAVE, edma_filter_info.dma_cap);
-> > > > +               of_dma_controller_register(dev->of_node,
-> > > > +                                          of_dma_simple_xlate,
-> > > > +                                          &edma_filter_info);
-> > > > +       }
-> > > 
-> > > How do you actually deal with the problem mentioned by Padma, that
-> > > the filter function does not know which edma instance it is looking
-> > > at? If you assume that there can only be a single edma instance in
-> > > the system, that is probably a limitation that should be documented
-> > > somewhere, and ideally the probe() function should check for that.
-> > 
-> > I make an assumption of one edma instance in the system in the case of
-> > DT being populated. This is always true right now as the only SoC with
-> > two EDMA controllers in existence is Davinci DA850. Until recently,
-> > Davinci had no DT support. Given the steady work being done today on DT
-> > support for DA850, it'll probably be something needed in 3.10.
-> > 
-> > I will add a comment and check in probe() to capture this assumption
-> > and then plan to update separately to support DA850 booting from DT.
-> 
-> Ok, sounds good. Hopefully by then we will already have a nicer
-> way to write an xlate function that does not rely on a filter
-> function.
+On Mon, Jan 28, 2013 at 10:06:03AM +0000, Vinod Koul wrote:
+> On Mon, Jan 21, 2013 at 01:19:23PM -0500, Matt Porter wrote:
+> > > b) Sg segment length and numbers: Well these are capabilities, so it tells
+> > > you what is the maximum I can do. IMO it doesn't make sense to tie it down to
+> > > burst, width etc. For that configuration you are checking maximum. What this
+> > > needs to return is what is the maximum length it supports and maximum number of
+> > > sg list the h/w can use. Also if you return your burst and width capablity, then
+> > > any client can easily find out what is the length byte value it can hold.
+> >  
+> > Ok, so I could report the max burst size to the client, but on EDMA it's
+> > going to be SZ_64K-1, as that's the hw limit. Max addr width would also
+> > be the same or capped at the maximum enum the current API support of 8
+> > bytes.
+> Yes IMO you should report the h/w limit and let client deduce what can be done
+> with that h/w limit given the other parameters (burst, length etc...)
 
-Yes, it would be nice to avoid what Padma had to do. I should have
-mentioned also that the second EDMA on DA850 has no DMA events of
-immediate use on it anyway. All the in-kernel users use events on the
-first controller, except for the second MMC instance. That's only used
-for a wl12xx module on the EVM and that driver has no DT support so it
-doesn't matter yet in the DT case. Because of this, DA850 can actually
-add EDMA DT support immediately (on top of this series) and add DMA
-support to the DT support already posted for the Davinci SPI and MMC
-client drivers.
+Hrm, in a driver that runs on two different DMACs, we don't know which
+one we are running on in order to determine if the information returned
+is relevant to do a calculation. If omap_hsmmc.c is running on SDMA the
+absolute max_seg_len may be fixed. On EDMA, that max values can be
+returned but is invalid for purposes of computing the actual length of
+sg segments that can be absorbed by the driver.
+
+The client driver does know the burst and length, and could compute this
+in an EDMA specific way, but we're talking now about in the client
+driver is:
+
+if (i_am_edma)
+	max_seg_len = (SZ_64K-1) * max_burst * addr_width;
+else /* sdma */
+	max_seg_len = MY_FIXED_VALUE_FROM_CHANNEL_CAPS;
+
+There's no way to deduce what to do in the client driver without having
+the knowledge of being on an EDMA DMAC or not. The only thing to do with
+fixed h/w caps is to report back a safe value. That would be SZ_64K-1
+but would be very inefficient when the slave config is set for a large
+FIFO and 32-bit address width and the actual size that can be
+transferred if much larger.
+
+> > 
+> > This information is not useful to the client in my case. Only the client
+> > knows its FIFO size, and thus the actual burst size it needs to request
+> > as that is a value specific to the IP the client driver controls. So it
+> > knows actual burst size and the width of that fifo transfer, because we
+> > already support telling the dmaengine driver this info in the current
+> > API.
+> Your current API way is not very generic. We need to make sure it useful on
+> other systems too. That is why it would make sense to query the DMA H/W
+> capablities and then use it with above properties to get various parameters used
+> for initiating a transfer, that way you dont need to set slave parameters
+ 
+Ok, you want something then that takes max_burst and addr_width as
+arguments and returns max_seg_len. Easy enough. That's the minimum
+information the driver needs to report the value and will avoid having
+to set the slave config first.
 
 -Matt
