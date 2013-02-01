@@ -1,167 +1,64 @@
-From: Antigen_EXODUS@vger.kernel.org
-Subject: Antigen forwarded attachment
-Date: 31 Jan 2013 18:36:59 -0500
-Message-ID: <EXODUSZS2TRqf69aZbL0000019c@exodus.vtti.vt.edu>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH/RFC v2 06/11] mmc: tmio-mmc: define device-tree bindings
+Date: Fri, 1 Feb 2013 13:23:51 +0900
+Message-ID: <20130201042350.GA6898@verge.net.au>
+References: <1358955158-1510-1-git-send-email-g.liakhovetski@gmx.de>
+ <1358955158-1510-7-git-send-email-g.liakhovetski@gmx.de>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;  boundary="ANTIGEN-31066-13101-16673-10734-10425-27959"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exodus.vtti.vt.edu ([128.173.192.104]:7394 "EHLO
-	exodus.vtti.vt.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751570Ab3AaXwd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Jan 2013 18:52:33 -0500
+Received: from kirsty.vergenet.net ([202.4.237.240]:51772 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751582Ab3BAEXy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Jan 2013 23:23:54 -0500
+Content-Disposition: inline
+In-Reply-To: <1358955158-1510-7-git-send-email-g.liakhovetski@gmx.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: prakash.pm@ti.com
-Cc: mporter@ti.com, davinci-linux-open-source@linux.davincidsp.com, hs@denx.de, linux@arm.linux.org.uk, linux-doc@vger.kernel.org, gregkh@linuxfoundation.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>
 
---ANTIGEN-31066-13101-16673-10734-10425-27959
-Content-Type: text/plain;
- charset="utf-7"
-Content-Transfer-Encoding: quoted-printable
+On Wed, Jan 23, 2013 at 04:32:33PM +0100, Guennadi Liakhovetski wrote:
+> Define device-tree bindings for the tmio-mmc driver to be able to specify
+> parameters, currently provided in platform data.
+> 
+> Cc: Magnus Damm <magnus.damm@gmail.com>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
+> 
+> Please, comment on this one, since it is defining an ABI
+> 
+>  Documentation/devicetree/bindings/mmc/tmio_mmc.txt |   19 +++++++++++++++++++
+>  1 files changed, 19 insertions(+), 0 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> new file mode 100644
+> index 0000000..dd8decd
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> @@ -0,0 +1,19 @@
+> +* Toshiba Mobile IO SD/MMC controller
+> +
+> +The tmio-mmc driver doesn't probe its devices actively, instead its binding to
+> +devices is managed by either MFD drivers or by the sh_mobile_sdhi platform
+> +driver. Those drivers supply the tmio-mmc driver with platform data, that either
+> +describe hardware capabilities, known to them, or are obtained by them from
+> +their own platform data or from their DT information. In the latter case all
+> +compulsory and any optional properties, common to all SD/MMC drivers, as
+> +described in mmc.txt, should or can be used. Additionally the following optional
+> +bindings can be used. They set either respective TMIO_MMC_* flags or MMC_CAP_*
+> +capabilities.
+> +
+> +Optional properties:
+> +- toshiba,mmc-wrprotect-disable	: set TMIO_MMC_WRPROTECT_DISABLE flag
+> +- toshiba,mmc-blksz-2bytes	: set TMIO_MMC_BLKSZ_2BYTES
+> +- toshiba,mmc-cap-sdio-irq	: SDIO IRQ signalling should be used, if
+> +	supported by the hardware, i.e. set MMC_CAP_SDIO_IRQ if
+> +	TMIO_MMC_SDIO_IRQ is also set
+> +- toshiba,mmc-has-idle-wait	: set TMIO_MMC_HAS_IDLE_WAIT
 
-
-The body from the message +ACI-Re: +AFs-PATCH 2/3+AF0- mmc: davinci+AF8-mmc: add DT support+ACI-, originally sent to you by davinci-linux-open-source-bounces+AEA-linux.davincidsp.com (davinci-linux-open-source-bounces+AEA-linux.davincidsp.com), has been forwarded to you from the Antigen Quarantine area.
-This message body may have been re-scanned by Antigen and handled according to the appropriate scan job's settings.
-
-
-
-
-<<Body of Message>>
-
---ANTIGEN-31066-13101-16673-10734-10425-27959
-Content-Type: application/octet-stream;
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment;
-	filename="Body of Message"
-
-SGVsbG8sDQoNCkkgaGF2ZSBhIGZldyBjb21tZW50cyBvbiB0aGUgZGV2aWNldHJlZSBiaW5kaW5n
-IGFuZCB0aGUgd2F5IGl0J3MgcGFyc2VkLg0KDQpPbiBUaHUsIEphbiAzMSwgMjAxMyBhdCAxMDoz
-MzowNkFNICswMDAwLCBNYW5qdW5hdGhhcHBhLCBQcmFrYXNoIHdyb3RlOg0KPiBBZGRzIGRldmlj
-ZSB0cmVlIHN1cHBvcnQgZm9yIGRhdmluY2lfbW1jLiBBbHNvIGFkZA0KPiBiaW5kaW5nIGRvY3Vt
-ZW50YXRpb24uDQo+IFRlc3RlZCB3aXRoIG5vbi1kbWEgUElPIG1vZGUgYW5kIHdpdGhvdXQgR1BJ
-Tw0KPiBjYXJkX2RldGVjdC93cml0ZV9wcm90ZWN0IG9wdGlvbiBiZWNhdXNlIG9mDQo+IGRlcGVu
-ZGVuY2llcyBvbiBFRE1BIGFuZCBHUElPIG1vZHVsZXMgRFQgc3VwcG9ydC4NCj4gDQo+IFNpZ25l
-ZC1vZmYtYnk6IE1hbmp1bmF0aGFwcGEsIFByYWthc2ggPHByYWthc2gucG1AdGkuY29tPg0KPiBD
-YzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZw0KPiBDYzogbGludXgtYXJtLWtlcm5lbEBsaXN0
-cy5pbmZyYWRlYWQub3JnDQo+IENjOiBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnDQo+IENj
-OiBkYXZpbmNpLWxpbnV4LW9wZW4tc291cmNlQGxpbnV4LmRhdmluY2lkc3AuY29tDQo+IENjOiBk
-ZXZpY2V0cmVlLWRpc2N1c3NAbGlzdHMub3psYWJzLm9yZw0KPiBDYzogY2piQGxhcHRvcC5vcmcN
-Cj4gQ2M6IFNla2hhciBOb3JpIDxuc2VraGFyQHRpLmNvbT4NCj4gQ2M6IG1wb3J0ZXJAdGkuY29t
-DQo+IC0tLQ0KPiAgLi4uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL2RhdmluY2lfbW1jLnR4dCAg
-ICAgICAgfCAgIDIzICsrKysrKysNCj4gIGRyaXZlcnMvbW1jL2hvc3QvZGF2aW5jaV9tbWMuYyAg
-ICAgICAgICAgICAgICAgICAgIHwgICA2OSArKysrKysrKysrKysrKysrKysrLQ0KPiAgMiBmaWxl
-cyBjaGFuZ2VkLCA5MSBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9ucygtKQ0KPiAgY3JlYXRlIG1v
-ZGUgMTAwNjQ0IERvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvZGF2aW5jaV9t
-bWMudHh0DQo+IA0KPiBkaWZmIC0tZ2l0IGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRp
-bmdzL21tYy9kYXZpbmNpX21tYy50eHQgYi9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGlu
-Z3MvbW1jL2RhdmluY2lfbW1jLnR4dA0KPiBuZXcgZmlsZSBtb2RlIDEwMDY0NA0KPiBpbmRleCAw
-MDAwMDAwLi4xNDRiZWU2DQo+IC0tLSAvZGV2L251bGwNCj4gKysrIGIvRG9jdW1lbnRhdGlvbi9k
-ZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9kYXZpbmNpX21tYy50eHQNCj4gQEAgLTAsMCArMSwyMyBA
-QA0KPiArKiBUSSBIaWdoc3BlZWQgTU1DIGhvc3QgY29udHJvbGxlciBmb3IgRGFWaW5jaQ0KPiAr
-DQo+ICtUaGUgSGlnaHNwZWVkIE1NQyBIb3N0IENvbnRyb2xsZXIgb24gVEkgRGFWaW5jaSBmYW1p
-bHkNCj4gK3Byb3ZpZGVzIGFuIGludGVyZmFjZSBmb3IgTU1DLCBTRCBhbmQgU0RJTyB0eXBlcyBv
-ZiBtZW1vcnkgY2FyZHMuDQo+ICsNCj4gK1RoaXMgZmlsZSBkb2N1bWVudHMgZGlmZmVyZW5jZXMg
-YmV0d2VlbiB0aGUgY29yZSBwcm9wZXJ0aWVzIGRlc2NyaWJlZA0KPiArYnkgbW1jLnR4dCBhbmQg
-dGhlIHByb3BlcnRpZXMgdXNlZCBieSB0aGUgZGF2aW5jaV9tbWMgZHJpdmVyLg0KPiArDQo+ICtS
-ZXF1aXJlZCBwcm9wZXJ0aWVzOg0KPiArLSBjb21wYXRpYmxlOg0KPiArIFNob3VsZCBiZSAidGks
-ZGF2aW5jaV9tbWMiLCBmb3IgZGF2aW5jaSBjb250cm9sbGVycw0KDQoidGksZGF2aW5jaS1tbWMi
-ICh3aXRoICctJyByYXRoZXIgdGhhbiAnXycpIHdvdWxkIGJlIHByZWZlcmFibGUuDQoNCj4gKw0K
-PiArT3B0aW9uYWwgcHJvcGVydGllczoNCj4gKy0gYnVzLXdpZHRoOiBOdW1iZXIgb2YgZGF0YSBs
-aW5lcywgY2FuIGJlIDwxPiwgPDQ+LCBvciA8OD4sIGRlZmF1bHQgPDE+DQo+ICstIG1heC1mcmVx
-dWVuY3k6IG1heGltdW0gb3BlcmF0aW5nIGNsb2NrIGZyZXF1ZW5jeS4NCg0KWW91IHNhaWQgeW91
-IG9ubHkgZGVzY3JpYmVkIGRpZmZlcmVuY2VzIGZyb20gbW1jLnR4dCwgYnV0IHRoaXMgaXMgbGlz
-dGVkIGluDQptbWMudHh0Lg0KDQo+ICstIGNhcHM6IENoZWNrIGZvciBIb3N0IGNhcGFiaWxpdGll
-cyBpbiA8bGludXgvbW1jL2hvc3QuaD4NCg0KSXMgdGhpcyBhIHNldCBvZiBiaW5hcnkgZmxhZ3M/
-IEFsc28sIGlzIHRoaXMgTGludXgtc3BlY2lmaWM/DQoNCkkgcmVhbGx5IGRvbid0IHRoaW5rIHRo
-aXMgc2hvdWxkIGJlIGluIHRoZSBkZXZpY2V0cmVlIGJpbmRpbmcuIFdoeSBkbyB5b3UgbmVlZA0K
-dGhpcz8NCg0KPiArLSB2ZXJzaW9uOiB2ZXJzaW9uIG9mIGNvbnRyb2xsZXIuDQoNClRoaXMgc2hv
-dWxkIGJlIGVuY29kZWQgYXMgcGFydCBvZiB0aGUgY29tcGF0aWJsZSBzdHJpbmcuDQoNCj4gK0V4
-YW1wbGU6DQo+ICsJbW1jMTogbW1jQDB4NDgwOWMwMDAgew0KPiArCQljb21wYXRpYmxlID0gInRp
-LG9tYXA0LWhzbW1jIjsNCj4gKwkJcmVnID0gPDB4NDgwOWMwMDAgMHg0MDA+Ow0KPiArCQlidXMt
-d2lkdGggPSA8ND47DQo+ICsJfTsNCg0KSXQgd291bGQgYmUgbmljZSBpZiB0aGUgZXhhbXBsZSBy
-ZWZlcnJlZCB0byB0aGlzIGJpbmRpbmcgcmF0aGVyIHRoYW4gYW5vdGhlci4NCg0KPiBkaWZmIC0t
-Z2l0IGEvZHJpdmVycy9tbWMvaG9zdC9kYXZpbmNpX21tYy5jIGIvZHJpdmVycy9tbWMvaG9zdC9k
-YXZpbmNpX21tYy5jDQo+IGluZGV4IDM4MmI3OWQuLmNlNjczMGQgMTAwNjQ0DQo+IC0tLSBhL2Ry
-aXZlcnMvbW1jL2hvc3QvZGF2aW5jaV9tbWMuYw0KPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L2Rh
-dmluY2lfbW1jLmMNCj4gQEAgLTM0LDYgKzM0LDcgQEANCj4gICNpbmNsdWRlIDxsaW51eC9kbWEt
-bWFwcGluZy5oPg0KPiAgI2luY2x1ZGUgPGxpbnV4L2VkbWEuaD4NCj4gICNpbmNsdWRlIDxsaW51
-eC9tbWMvbW1jLmg+DQo+ICsjaW5jbHVkZSA8bGludXgvb2YuaD4NCj4gIA0KPiAgI2luY2x1ZGUg
-PGxpbnV4L3BsYXRmb3JtX2RhdGEvbW1jLWRhdmluY2kuaD4NCj4gIA0KPiBAQCAtMTE1NiwxNiAr
-MTE1Nyw3NSBAQCBzdGF0aWMgdm9pZCBfX2luaXQgaW5pdF9tbWNzZF9ob3N0KHN0cnVjdCBtbWNf
-ZGF2aW5jaV9ob3N0ICpob3N0KQ0KPiAgDQo+ICAJbW1jX2RhdmluY2lfcmVzZXRfY3RybChob3N0
-LCAwKTsNCj4gIH0NCj4gKyNpZmRlZiBDT05GSUdfT0YNCj4gK3N0YXRpYyBzdHJ1Y3QgZGF2aW5j
-aV9tbWNfY29uZmlnDQo+ICsJKm1tY19vZl9nZXRfcGRhdGEoc3RydWN0IHBsYXRmb3JtX2Rldmlj
-ZSAqcGRldikNCj4gK3sNCj4gKwlzdHJ1Y3QgZGV2aWNlX25vZGUgKm5wOw0KPiArCXN0cnVjdCBk
-YXZpbmNpX21tY19jb25maWcgKnBkYXRhID0gTlVMTDsNCj4gKwl1MzIgZGF0YTsNCj4gKwlpbnQg
-cmV0Ow0KPiArDQo+ICsJcGRhdGEgPSBwZGV2LT5kZXYucGxhdGZvcm1fZGF0YTsNCj4gKwlpZiAo
-IXBkYXRhKSB7DQo+ICsJCXBkYXRhID0gZGV2bV9remFsbG9jKCZwZGV2LT5kZXYsIHNpemVvZigq
-cGRhdGEpLCBHRlBfS0VSTkVMKTsNCj4gKwkJaWYgKCFwZGF0YSkgew0KPiArCQkJZGV2X2Vycigm
-cGRldi0+ZGV2LCAiRmFpbGVkIHRvIGFsbG9jYXRlIG1lbW9yeSBmb3Igc3RydWN0IGRhdmluY2lf
-bW1jX2NvbmZpZ1xuIik7DQo+ICsJCQlnb3RvIG5vZGF0YTsNCj4gKwkJfQ0KPiArCX0NCg0KV2h5
-IGRvIHlvdSBuZWVkIHRvIGNvbmRpdGlvbmFsbHkgYWxsb2NhdGUgdGhpcz8gVGhpcyBvbmx5IHNl
-ZW1zIHRvIGJlIGNhbGxlZA0Kb25jZS4NCg0KPiArDQo+ICsJbnAgPSBwZGV2LT5kZXYub2Zfbm9k
-ZTsNCj4gKwlpZiAoIW5wKQ0KPiArCQlnb3RvIG5vZGF0YTsNCg0KV2h5IG5vdCBqdXN0IHJldHVy
-biBpbW1lZGlhdGVseSBoZXJlPyBZb3UgZG8gbm90aGluZyBzcGVjaWFsIGF0IG5vZGF0YS4NCg0K
-PiArDQo+ICsJcmV0ID0gb2ZfcHJvcGVydHlfcmVhZF91MzIobnAsICJidXMtd2lkdGgiLCAmZGF0
-YSk7DQo+ICsJaWYgKHJldCkNCj4gKwkJZGV2X2luZm8oJnBkZXYtPmRldiwgIndpcmVzIG5vdCBz
-cGVjaWZpZWQsIGRlZmF1bHRpbmcgdG8gNCBiaXQgbW9kZVxuIik7DQo+ICsJcGRhdGEtPndpcmVz
-ID0gZGF0YTsNCg0KVGhhdCBkZXZfaW5mbyBkb2Vzbid0IHNlZW0gdG8gbWF0Y2ggdXAgd2l0aCB3
-aGF0IHRoZSBuZXh0IGxpbmUgaXMgZG9pbmcgKGRhdGENCm1pZ2h0IG5vdCBoYXZlIGJlZW4gaW5p
-dGlhbGlzZWQpLiBBbHNvLCB1bmxlc3MgSSd2ZSBtaXN1bmRlcnN0b29kLCBpdCBkb2Vzbid0DQpt
-YXRjaCB1cCB3aXRoIHRoZSBkZWZhdWx0IG9mIDEgbWVudGlvbmVkIGluIHRoZSBiaW5kaW5nIGRv
-Yy4NCg0KPiArDQo+ICsJcmV0ID0gb2ZfcHJvcGVydHlfcmVhZF91MzIobnAsICJtYXgtZnJlcXVl
-bmN5IiwgJmRhdGEpOw0KPiArCWlmIChyZXQpDQo+ICsJCWRldl9pbmZvKCZwZGV2LT5kZXYsICJt
-YXgtZnJlcXVlbmN5IG5vdCBzcGVjaWZpZWQsIGRlZmF1bHRpbmcgdG8gMjVNSHpcbiIpOw0KPiAr
-CXBkYXRhLT5tYXhfZnJlcSA9IGRhdGE7DQoNCkFnYWluLCB0aGUgZGV2X2luZm8gZG9lc24ndCBt
-YXRjaCB1cCB3aXRoIHRoZSBsaW5lIGJlbG93IGl0LiBJIG5vdGljZQ0KdGhlIGRlZmF1bHQncyBu
-b3Qgb25lIHNwZWNpZmllZCBpbiB0aGUgYmluZGluZy4gSXMgdGhpcyBmcmVxdWVuY3kgY2hvc2Vu
-DQpmcm9tIHRoZSBoYXJkd2FyZSBkb2NzLCBvciBpcyBpdCBhbiBhcmJpdHJhcnkgY2hvaWNlLiBJ
-ZiBub3QgYXJiaXRyYXJ5LA0KaXQgbWlnaHQgYmUgd29ydGggc3BlY2lmeWluZyBpbiB0aGUgYmlu
-ZGluZy4NCg0KDQo+ICsNCj4gKwlyZXQgPSBvZl9wcm9wZXJ0eV9yZWFkX3UzMihucCwgImNhcHMi
-LCAmZGF0YSk7DQo+ICsJaWYgKHJldCkNCj4gKwkJZGV2X2luZm8oJnBkZXYtPmRldiwgImNhcmQg
-Y2FwYWJpbGl0eSBub3Qgc3BlY2lmaWVkXG4iKTsNCj4gKwlwZGF0YS0+Y2FwcyA9IGRhdGE7DQoN
-CkFnYWluLCB5b3UgbWF5IGJlIHVzaW5nIGdhcmJhZ2UgZGF0YS4NCg0KPiArDQo+ICsJcmV0ID0g
-b2ZfcHJvcGVydHlfcmVhZF91MzIobnAsICJ2ZXJzaW9uIiwgJmRhdGEpOw0KPiArCWlmIChyZXQp
-DQo+ICsJCWRldl9lcnIoJnBkZXYtPmRldiwgInZlcnNpb24gbm90IHNwZWNpZmllZFxuIik7DQo+
-ICsJcGRhdGEtPnZlcnNpb24gPSBkYXRhOw0KDQpBbmQgYWdhaW4sIHRob3VnaCBJJ2QgcHJlZmVy
-IHRvIHNlZSB0aGlzIHByb3BlcnR5IGdvIGVudGlyZWx5Lg0KDQo+ICsNCj4gK25vZGF0YToNCj4g
-KwlyZXR1cm4gcGRhdGE7DQo+ICt9DQo+ICsNCj4gKyNlbHNlDQo+ICtzdGF0aWMgc3RydWN0IGRh
-dmluY2lfbW1jX2NvbmZpZw0KPiArCSptbWNfb2ZfZ2V0X3BkYXRhKHN0cnVjdCBwbGF0Zm9ybV9k
-ZXZpY2UgKnBkZXYpDQo+ICt7DQo+ICsJcmV0dXJuIHBkZXYtPmRldi5wbGF0Zm9ybV9kYXRhOw0K
-PiArfQ0KPiArI2VuZGlmDQoNClRoaXMgaXMgcG9vcmx5IG5hbWVkIGlmIGl0J3MgcmVxdWlyZWQg
-Zm9yICFDT05GSUdfT0YuDQoNCldoeSBub3QgY2hhbmdlIHRoaXMgdG8gc29tZXRoaW5nIGxpa2Ug
-bW1jX3BhcnNlX3BkYXRhLCByZXR1cm5pbmcgYW4NCmVycm9yIGNvZGUuIEZvciAhQ09ORklHX09G
-LCBpdCBjYW4gc2ltcGx5IHJldHVybiAwLCB3aGljaCBzaG91bGQgYmUgbGVzcw0Kc3VycHJpc2lu
-ZyBmb3IgYW55b25lIGVsc2UgcmVhZGluZyB0aGlzIGNvZGUuDQoNCj4gIA0KPiAgc3RhdGljIGlu
-dCBfX2luaXQgZGF2aW5jaV9tbWNzZF9wcm9iZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2
-KQ0KPiAgew0KPiAtCXN0cnVjdCBkYXZpbmNpX21tY19jb25maWcgKnBkYXRhID0gcGRldi0+ZGV2
-LnBsYXRmb3JtX2RhdGE7DQo+ICsJc3RydWN0IGRhdmluY2lfbW1jX2NvbmZpZyAqcGRhdGEgPSBO
-VUxMOw0KPiAgCXN0cnVjdCBtbWNfZGF2aW5jaV9ob3N0ICpob3N0ID0gTlVMTDsNCj4gIAlzdHJ1
-Y3QgbW1jX2hvc3QgKm1tYyA9IE5VTEw7DQo+ICAJc3RydWN0IHJlc291cmNlICpyLCAqbWVtID0g
-TlVMTDsNCj4gIAlpbnQgcmV0ID0gMCwgaXJxID0gMDsNCj4gIAlzaXplX3QgbWVtX3NpemU7DQo+
-ICANCj4gKwlwZGF0YSA9IG1tY19vZl9nZXRfcGRhdGEocGRldik7DQo+ICsJaWYgKHBkYXRhID09
-IE5VTEwpIHsNCj4gKwkJZGV2X2VycigmcGRldi0+ZGV2LCAiQ2FuIG5vdCBnZXQgcGxhdGZvcm0g
-ZGF0YVxuIik7DQo+ICsJCXJldHVybiAtRU5PRU5UOw0KPiArCX0NCj4gKw0KPiAgCS8qIFJFVklT
-SVQ6ICB3aGVuIHdlJ3JlIGZ1bGx5IGNvbnZlcnRlZCwgZmFpbCBpZiBwZGF0YSBpcyBOVUxMICov
-DQo+ICANCj4gIAlyZXQgPSAtRU5PREVWOw0KPiBAQCAtMTQwMywxMSArMTQ2MywxOCBAQCBzdGF0
-aWMgY29uc3Qgc3RydWN0IGRldl9wbV9vcHMgZGF2aW5jaV9tbWNzZF9wbSA9IHsNCj4gICNkZWZp
-bmUgZGF2aW5jaV9tbWNzZF9wbV9vcHMgTlVMTA0KPiAgI2VuZGlmDQo+ICANCj4gK3N0YXRpYyBj
-b25zdCBzdHJ1Y3Qgb2ZfZGV2aWNlX2lkIGRhdmluY2lfbW1jX29mX21hdGNoW10gPSB7DQo+ICsJ
-ey5jb21wYXRpYmxlID0gInRpLGRhdmluY2lfbW1jIiwgfSwNCj4gKwl7fSwNCj4gK307DQo+ICtN
-T0RVTEVfREVWSUNFX1RBQkxFKG9mLCBkYXZpbmNpX21tY19vZl9tYXRjaCk7DQoNCkZvciBzdXBw
-b3J0aW5nIG11bHRpcGxlIHZlcnNpb25zLCB5b3UgY291bGQgZWl0aGVyIHVzZSBzb21lIGF1eGRh
-dGENCmhlcmUsIG9yIGNoZWNrIGVhY2ggb25lIGluIGRhdmluY2VfbW1jc2RfcHJvYmUuDQoNCj4g
-Kw0KPiAgc3RhdGljIHN0cnVjdCBwbGF0Zm9ybV9kcml2ZXIgZGF2aW5jaV9tbWNzZF9kcml2ZXIg
-PSB7DQo+ICAJLmRyaXZlcgkJPSB7DQo+ICAJCS5uYW1lCT0gImRhdmluY2lfbW1jIiwNCj4gIAkJ
-Lm93bmVyCT0gVEhJU19NT0RVTEUsDQo+ICAJCS5wbQk9IGRhdmluY2lfbW1jc2RfcG1fb3BzLA0K
-PiArCQkub2ZfbWF0Y2hfdGFibGUgPSBvZl9tYXRjaF9wdHIoZGF2aW5jaV9tbWNfb2ZfbWF0Y2gp
-LA0KPiAgCX0sDQo+ICAJLnJlbW92ZQkJPSBfX2V4aXRfcChkYXZpbmNpX21tY3NkX3JlbW92ZSks
-DQo+ICB9Ow0KDQpXaGVyZSBkb2VzIGRhdmluY2lfbW1jc2RfcHJvYmUgZ2V0IGNhbGxlZCBmcm9t
-LCBhbmQgaG93IGlzIHRoZQ0Kb2ZfbWF0Y2hfdGFibGUgdXNlZD8gU2hvdWxkIGl0IG5vdCBiZSBz
-ZXQgYXMgLnByb2JlIG9uIHRoZSBkcml2ZXI/DQoNClRoYW5rcywNCk1hcmsuDQoNCg0KX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCkRhdmluY2ktbGludXgt
-b3Blbi1zb3VyY2UgbWFpbGluZyBsaXN0DQpEYXZpbmNpLWxpbnV4LW9wZW4tc291cmNlQGxpbnV4
-LmRhdmluY2lkc3AuY29tDQpodHRwOi8vbGludXguZGF2aW5jaWRzcC5jb20vbWFpbG1hbi9saXN0
-aW5mby9kYXZpbmNpLWxpbnV4LW9wZW4tc291cmNlDQo=
-
---ANTIGEN-31066-13101-16673-10734-10425-27959--
+FWIW, TMIO_MMC_HAS_IDLE_WAIT appears to be required for SDHI0 to
+function on the Marzen board. As I have been doing some work on
+bring up the Marzen board using DT I am very happy to see these new
+bindings.
