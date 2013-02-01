@@ -1,95 +1,61 @@
-From: =?utf-8?B?Ik3DpW5zc29uLCBCasO2cm4i?= <Bjorn.Mansson@sonymobile.com>
-Subject: [PATCH] mmc: Adding ftrace event logging to the mmc layer
-Date: Fri, 1 Feb 2013 14:05:55 +0100
-Message-ID: <9A742367D258D34A9753780E2AE6B8BD75DB1FCFEA@SELDMBX04.corpusers.net>
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+Subject: Re: [PATCH 2/3] mmc: use regulator_can_change_voltage() instead of
+ regulator_count_voltages() hacks
+Date: Fri, 01 Feb 2013 15:39:45 +0100
+Message-ID: <510BD3B1.3040601@samsung.com>
+References: <1354629663-29091-1-git-send-email-m.szyprowski@samsung.com>
+ <1354629663-29091-3-git-send-email-m.szyprowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from seldrel01.sonyericsson.com ([212.209.106.2]:9853 "EHLO
-	seldrel01.sonyericsson.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757505Ab3BANLL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Feb 2013 08:11:11 -0500
-Content-Language: en-US
+Received: from mailout3.w1.samsung.com ([210.118.77.13]:26376 "EHLO
+	mailout3.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756059Ab3BAOjt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Feb 2013 09:39:49 -0500
+In-reply-to: <1354629663-29091-3-git-send-email-m.szyprowski@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>
+To: Marek Szyprowski <m.szyprowski@samsung.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>, Kevin Liu <keyuan.liu@gmail.com>
 
-RnJvbTogQmpvcm4gTWFuc3NvbiA8Ympvcm4ubWFuc3NvbkBzb255bW9iaWxlLmNvbT4NCg0KQWRk
-aW5nIGZ0cmFjZSB0byB0aGUgbW1jIGxheWVyIGZhY2lsaXRhdGVzIGRlYnVnZ2luZywNCm1ha2lu
-ZyBpdCBlYXNpZXIgdG8gZGVidWcgY29tbWFuZCBzZXF1ZW5jZXMgd2l0aG91dA0KcmVidWlsZGlu
-ZyB0aGUga2VybmVsLg0KTW9yZSBsb2dnaW5nIGNvdWxkIGJlIGFkZGVkLCBidXQgdGhpcyBpcyB3
-aGF0IGhhdmUNCmZvdW5kIHVzZSBmb3IuDQpJdCBpcyBhbHNvIHBvc3NpYmxlIHRvIHBhcnNlIHRo
-ZSBmdHJhY2Ugb3V0cHV0IGludG8NClZDRCBmb3JtYXQgYW5kIHZpc3VhbGl6ZSBpdCBpbiBHVEtX
-YXZlLg0KDQpQYXRjaCBpcyBmb3IgdGhlIDMuNy41IEtlcm5lbC4NCg0KDQpTaWduZWQtb2ZmLWJ5
-OiBCam9ybiBNYW5zc29uIDxiam9ybi5tYW5zc29uQHNvbnltb2JpbGUuY29tPg0KIi0tLSINCg0K
-ZGlmZiAtdXByTiAtWCBsaW51eC0zLjcuNS12YW5pbGxhL0RvY3VtZW50YXRpb24vZG9udGRpZmYg
-bGludXgtMy43LjUtdmFuaWxsYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYyBsaW51eC0zLjcuNS1w
-YXRjaGVkL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jDQotLS0gbGludXgtMy43LjUtdmFuaWxsYS9k
-cml2ZXJzL21tYy9jb3JlL2NvcmUuYwkyMDEzLTAxLTI4IDA1OjUwOjU1LjAwMDAwMDAwMCArMDEw
-MA0KKysrIGxpbnV4LTMuNy41LXBhdGNoZWQvZHJpdmVycy9tbWMvY29yZS9jb3JlLmMJMjAxMy0w
-Mi0wMSAxMjowMzoyNi42OTE5ODc0OTUgKzAxMDANCkBAIC00Miw2ICs0Miw5IEBADQogI2luY2x1
-ZGUgInNkX29wcy5oIg0KICNpbmNsdWRlICJzZGlvX29wcy5oIg0KIA0KKyNkZWZpbmUgQ1JFQVRF
-X1RSQUNFX1BPSU5UUw0KKyNpbmNsdWRlIDx0cmFjZS9ldmVudHMvbW1jLmg+DQorDQogLyoNCiAg
-KiBCYWNrZ3JvdW5kIG9wZXJhdGlvbnMgY2FuIHRha2UgYSBsb25nIHRpbWUsIGRlcGVuZGluZyBv
-biB0aGUgaG91c2VrZWVwaW5nDQogICogb3BlcmF0aW9ucyB0aGUgY2FyZCBoYXMgdG8gcGVyZm9y
-bS4NCkBAIC0xNjUsNiArMTY4LDEwIEBAIHZvaWQgbW1jX3JlcXVlc3RfZG9uZShzdHJ1Y3QgbW1j
-X2hvc3QgKmgNCiAJCQljbWQtPnJlc3BbMF0sIGNtZC0+cmVzcFsxXSwNCiAJCQljbWQtPnJlc3Bb
-Ml0sIGNtZC0+cmVzcFszXSk7DQogDQorCQl0cmFjZV9tbWNfcmVxX2RvbmUoIG1tY19ob3N0bmFt
-ZShob3N0KSwgY21kLT5vcGNvZGUsIGVyciwNCisJCQljbWQtPnJlc3BbMF0sIGNtZC0+cmVzcFsx
-XSwNCisJCQljbWQtPnJlc3BbMl0sIGNtZC0+cmVzcFszXSk7DQorDQogCQlpZiAobXJxLT5kYXRh
-KSB7DQogCQkJcHJfZGVidWcoIiVzOiAgICAgJWQgYnl0ZXMgdHJhbnNmZXJyZWQ6ICVkXG4iLA0K
-IAkJCQltbWNfaG9zdG5hbWUoaG9zdCksDQpAQCAtMjAyLDYgKzIwOSw5IEBAIG1tY19zdGFydF9y
-ZXF1ZXN0KHN0cnVjdCBtbWNfaG9zdCAqaG9zdCwNCiAJCQkgbXJxLT5zYmMtPmFyZywgbXJxLT5z
-YmMtPmZsYWdzKTsNCiAJfQ0KIA0KKwl0cmFjZV9tbWNfc3RhcnRfcmVxKCBtbWNfaG9zdG5hbWUo
-aG9zdCksIG1ycS0+Y21kLT5vcGNvZGUsDQorCQkJCW1ycS0+Y21kLT5hcmcsIG1ycS0+Y21kLT5m
-bGFncyk7DQorDQogCXByX2RlYnVnKCIlczogc3RhcnRpbmcgQ01EJXUgYXJnICUwOHggZmxhZ3Mg
-JTA4eFxuIiwNCiAJCSBtbWNfaG9zdG5hbWUoaG9zdCksIG1ycS0+Y21kLT5vcGNvZGUsDQogCQkg
-bXJxLT5jbWQtPmFyZywgbXJxLT5jbWQtPmZsYWdzKTsNCmRpZmYgLXVwck4gLVggbGludXgtMy43
-LjUtdmFuaWxsYS9Eb2N1bWVudGF0aW9uL2RvbnRkaWZmIGxpbnV4LTMuNy41LXZhbmlsbGEvaW5j
-bHVkZS90cmFjZS9ldmVudHMvbW1jLmggbGludXgtMy43LjUtcGF0Y2hlZC9pbmNsdWRlL3RyYWNl
-L2V2ZW50cy9tbWMuaA0KLS0tIGxpbnV4LTMuNy41LXZhbmlsbGEvaW5jbHVkZS90cmFjZS9ldmVu
-dHMvbW1jLmgJMTk3MC0wMS0wMSAwMTowMDowMC4wMDAwMDAwMDAgKzAxMDANCisrKyBsaW51eC0z
-LjcuNS1wYXRjaGVkL2luY2x1ZGUvdHJhY2UvZXZlbnRzL21tYy5oCTIwMTMtMDEtMzEgMDk6Mzg6
-MzIuMDAyODUxMDAwICswMTAwDQpAQCAtMCwwICsxLDg2IEBADQorI3VuZGVmIFRSQUNFX1NZU1RF
-TQ0KKyNkZWZpbmUgVFJBQ0VfU1lTVEVNIG1tYw0KKw0KKyNpZiAhZGVmaW5lZChfVFJBQ0VfTU1D
-X0gpIHx8IGRlZmluZWQoVFJBQ0VfSEVBREVSX01VTFRJX1JFQUQpDQorI2RlZmluZSBfVFJBQ0Vf
-TU1DX0gNCisNCisjaW5jbHVkZSA8bGludXgvdHJhY2Vwb2ludC5oPg0KKw0KK0RFQ0xBUkVfRVZF
-TlRfQ0xBU1Moc3RhcnRfcmVxLA0KKwlUUF9QUk9UTyhjb25zdCBjaGFyICogaG9zdCwgdW5zaWdu
-ZWQgaW50IGNtZCwNCisJICAgICAgICAgdW5zaWduZWQgaW50IGFyZywgdW5zaWduZWQgaW50IGZs
-YWdzKSwNCisJVFBfQVJHUyhob3N0LCBjbWQsIGFyZywgZmxhZ3MpLA0KKw0KKwlUUF9TVFJVQ1Rf
-X2VudHJ5KA0KKwkgICAgX19zdHJpbmcoaG9zdCwgaG9zdCkNCisJICAgIF9fZmllbGQodW5zaWdu
-ZWQgaW50LCBjbWQgICApDQorCSAgICBfX2ZpZWxkKHVuc2lnbmVkIGludCwgYXJnICkNCisJICAg
-IF9fZmllbGQodW5zaWduZWQgaW50LCBmbGFncyApDQorCSAgICksDQorDQorCVRQX2Zhc3RfYXNz
-aWduKA0KKwkgICAgX19hc3NpZ25fc3RyKGhvc3QsIGhvc3QpOw0KKwkgICAgX19lbnRyeS0+Y21k
-ID0gY21kOw0KKwkgICAgX19lbnRyeS0+YXJnID0gYXJnOw0KKwkgICAgX19lbnRyeS0+ZmxhZ3Mg
-PSBmbGFnczsNCisJKSwNCisNCisJVFBfcHJpbnRrKCJob3N0PSVzIENNRCV1IGFyZz0lMDh4IGZs
-YWdzPSUwOHgiLA0KKwkgICAgICAgX19nZXRfc3RyKGhvc3QpLCBfX2VudHJ5LT5jbWQsDQorCSAg
-ICAgIF9fZW50cnktPmFyZywgX19lbnRyeS0+ZmxhZ3MgKQ0KKyk7DQorDQorREVGSU5FX0VWRU5U
-KHN0YXJ0X3JlcSwgbW1jX3N0YXJ0X3JlcSwNCisJVFBfUFJPVE8oY29uc3QgY2hhciAqaG9zdCwg
-dW5zaWduZWQgaW50IGNtZCwNCisJICAgICB1bnNpZ25lZCBpbnQgYXJnLCB1bnNpZ25lZCBpbnQg
-ZmxhZ3MpLA0KKwlUUF9BUkdTKGhvc3QsIGNtZCwgYXJnLCBmbGFncykNCispOw0KKw0KKw0KK0RF
-Q0xBUkVfRVZFTlRfQ0xBU1MocmVxX2RvbmUsDQorCVRQX1BST1RPKGNvbnN0IGNoYXIgKmhvc3Qs
-IHVuc2lnbmVkIGludCBjbWQsDQorCQlpbnQgZXJyLCB1bnNpZ25lZCBpbnQgcmVzcDEsIA0KKwkJ
-dW5zaWduZWQgaW50IHJlc3AyLCB1bnNpZ25lZCBpbnQgcmVzcDMsDQorCQl1bnNpZ25lZCBpbnQg
-cmVzcDQpLA0KKwlUUF9BUkdTKGhvc3QsIGNtZCwgZXJyLCByZXNwMSwgcmVzcDIsIHJlc3AzLCBy
-ZXNwNCksDQorDQorCVRQX1NUUlVDVF9fZW50cnkoDQorCSAgICBfX3N0cmluZyhob3N0LCBob3N0
-KQ0KKwkgICAgX19maWVsZCh1bnNpZ25lZCBpbnQsIGNtZCAgICkNCisJICAgIF9fZmllbGQoICAg
-ICAgICAgaW50LCBlcnIgKQ0KKwkgICAgX19maWVsZCh1bnNpZ25lZCBpbnQsIHJlc3AxICkNCisJ
-ICAgIF9fZmllbGQodW5zaWduZWQgaW50LCByZXNwMiApDQorCSAgICBfX2ZpZWxkKHVuc2lnbmVk
-IGludCwgcmVzcDMgKQ0KKwkgICAgX19maWVsZCh1bnNpZ25lZCBpbnQsIHJlc3A0ICkNCisJICAg
-KSwNCisNCisJVFBfZmFzdF9hc3NpZ24oDQorCSAgICBfX2Fzc2lnbl9zdHIoaG9zdCwgaG9zdCk7
-DQorCSAgICBfX2VudHJ5LT5jbWQgPSBjbWQ7DQorCSAgICBfX2VudHJ5LT5lcnIgPSBlcnI7DQor
-CSAgICBfX2VudHJ5LT5yZXNwMSA9IHJlc3AxOw0KKwkgICAgX19lbnRyeS0+cmVzcDIgPSByZXNw
-MjsNCisJICAgIF9fZW50cnktPnJlc3AzID0gcmVzcDM7DQorCSAgICBfX2VudHJ5LT5yZXNwNCA9
-IHJlc3A0Ow0KKwkpLA0KKw0KKwlUUF9wcmludGsoImhvc3Q9JXMgQ01EJXUgZXJyPSUwOHggcmVz
-cDE9JTA4eCByZXNwMj0lMDh4IHJlc3AzPSUwOHggcmVzcDQ9JTA4eCIsDQorCQlfX2dldF9zdHIo
-aG9zdCksIF9fZW50cnktPmNtZCwNCisJCV9fZW50cnktPmVyciwgX19lbnRyeS0+cmVzcDEsIA0K
-KwkJX19lbnRyeS0+cmVzcDIsIF9fZW50cnktPnJlc3AzLA0KKwkJX19lbnRyeS0+cmVzcDQgKQ0K
-Kyk7DQorDQorREVGSU5FX0VWRU5UKHJlcV9kb25lLCBtbWNfcmVxX2RvbmUsDQorCVRQX1BST1RP
-KGNvbnN0IGNoYXIgKmhvc3QsIHVuc2lnbmVkIGludCBjbWQsDQorCQlpbnQgZXJyLCB1bnNpZ25l
-ZCBpbnQgcmVzcDEsIA0KKwkJdW5zaWduZWQgaW50IHJlc3AyLCB1bnNpZ25lZCBpbnQgcmVzcDMs
-DQorCQl1bnNpZ25lZCBpbnQgcmVzcDQpLA0KKwlUUF9BUkdTKGhvc3QsIGNtZCwgZXJyLCByZXNw
-MSwgcmVzcDIsIHJlc3AzLCByZXNwNCkNCispOw0KKw0KKw0KKyNlbmRpZiAvKiBfVFJBQ0VfTU1D
-X0ggKi8NCisNCisvKiBUaGlzIHBhcnQgbXVzdCBiZSBvdXRzaWRlIHByb3RlY3Rpb24gKi8NCisj
-aW5jbHVkZSA8dHJhY2UvZGVmaW5lX3RyYWNlLmg+DQoNCg==
+Hello,
+
+On 12/4/2012 3:01 PM, Marek Szyprowski wrote:
+> mmc_regulator_set_ocr() depends on the ability of regulator to change the
+> voltage value. When regulator cannot change its voltage output, some code is
+> skipped to avoid reporting false errors on some boards, which use MMC hosts
+> with fixed regulators (example: Samsung Goni and UniversalC210 boards).
+>
+> This patch replaces a hacky workaround based on regulator_count_voltages()
+> value with the correct call to recently introduced
+> regulator_can_change_voltage() function in regulators core.
+>
+> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+
+Any chance to get this patch scheduled for v3.9?
+
+> ---
+>   drivers/mmc/core/core.c |    2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index aaed768..f5a0493 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1137,7 +1137,7 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
+>   		 */
+>   		voltage = regulator_get_voltage(supply);
+>   
+> -		if (regulator_count_voltages(supply) == 1)
+> +		if (!regulator_can_change_voltage(supply))
+>   			min_uV = max_uV = voltage;
+>   
+>   		if (voltage < 0)
+
+Best regards
+-- 
+Marek Szyprowski
+Samsung Poland R&D Center
+
+
