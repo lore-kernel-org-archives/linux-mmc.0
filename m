@@ -1,69 +1,95 @@
-From: Matt Porter <mporter@ti.com>
-Subject: Re: [PATCH v6 03/10] ARM: edma: add AM33XX support to the private
- EDMA API
-Date: Fri, 1 Feb 2013 06:57:39 -0500
-Message-ID: <20130201115738.GL2244@beef>
-References: <1359529229-22207-1-git-send-email-mporter@ti.com>
- <201301300932.58732.arnd@arndb.de>
- <20130131183255.GI2244@beef>
- <6932828d68394f71ba6df8e6bf608635@DFLE72.ent.ti.com>
- <20130131214241.GJ2244@beef>
- <1359698501.14894.74.camel@cumari.coelho.fi>
+From: =?utf-8?B?Ik3DpW5zc29uLCBCasO2cm4i?= <Bjorn.Mansson@sonymobile.com>
+Subject: [PATCH] mmc: Adding ftrace event logging to the mmc layer
+Date: Fri, 1 Feb 2013 14:05:55 +0100
+Message-ID: <9A742367D258D34A9753780E2AE6B8BD75DB1FCFEA@SELDMBX04.corpusers.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1359698501.14894.74.camel@cumari.coelho.fi>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Luciano Coelho <coelho@ti.com>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>, "Cousson, Benoit" <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Padma Venkat <padma.kvr@gmail.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@li>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from seldrel01.sonyericsson.com ([212.209.106.2]:9853 "EHLO
+	seldrel01.sonyericsson.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757505Ab3BANLL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Feb 2013 08:11:11 -0500
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>
 
-On Fri, Feb 01, 2013 at 08:01:41AM +0200, Luciano Coelho wrote:
-> On Thu, 2013-01-31 at 16:42 -0500, Matt Porter wrote:
-> > On Thu, Jan 31, 2013 at 08:58:39PM +0000, Arnd Bergmann wrote:
-> > > On Thursday 31 January 2013, Matt Porter wrote:
-> > > > On Wed, Jan 30, 2013 at 09:32:58AM +0000, Arnd Bergmann wrote:
-> > > > > On Wednesday 30 January 2013, Matt Porter wrote:
-> > > > > > +               dma_cap_set(DMA_SLAVE, edma_filter_info.dma_cap);
-> > > > > > +               of_dma_controller_register(dev->of_node,
-> > > > > > +                                          of_dma_simple_xlate,
-> > > > > > +                                          &edma_filter_info);
-> > > > > > +       }
-> > > > > 
-> > > > > How do you actually deal with the problem mentioned by Padma, that
-> > > > > the filter function does not know which edma instance it is looking
-> > > > > at? If you assume that there can only be a single edma instance in
-> > > > > the system, that is probably a limitation that should be documented
-> > > > > somewhere, and ideally the probe() function should check for that.
-> > > > 
-> > > > I make an assumption of one edma instance in the system in the case of
-> > > > DT being populated. This is always true right now as the only SoC with
-> > > > two EDMA controllers in existence is Davinci DA850. Until recently,
-> > > > Davinci had no DT support. Given the steady work being done today on DT
-> > > > support for DA850, it'll probably be something needed in 3.10.
-> > > > 
-> > > > I will add a comment and check in probe() to capture this assumption
-> > > > and then plan to update separately to support DA850 booting from DT.
-> > > 
-> > > Ok, sounds good. Hopefully by then we will already have a nicer
-> > > way to write an xlate function that does not rely on a filter
-> > > function.
-> > 
-> > Yes, it would be nice to avoid what Padma had to do. I should have
-> > mentioned also that the second EDMA on DA850 has no DMA events of
-> > immediate use on it anyway. All the in-kernel users use events on the
-> > first controller, except for the second MMC instance. That's only used
-> > for a wl12xx module on the EVM and that driver has no DT support so it
-> > doesn't matter yet in the DT case. Because of this, DA850 can actually
-> > add EDMA DT support immediately (on top of this series) and add DMA
-> > support to the DT support already posted for the Davinci SPI and MMC
-> > client drivers.
-> 
-> I haven't followed this whole discussion in details, but please notice
-> that I'm aiming to get DT support for the WiLink modules (wlcore,
-> wl12xx...) for 3.10. ;)
-
-Great, looks like we'll all be synced then. ;)
-
--Matt
+RnJvbTogQmpvcm4gTWFuc3NvbiA8Ympvcm4ubWFuc3NvbkBzb255bW9iaWxlLmNvbT4NCg0KQWRk
+aW5nIGZ0cmFjZSB0byB0aGUgbW1jIGxheWVyIGZhY2lsaXRhdGVzIGRlYnVnZ2luZywNCm1ha2lu
+ZyBpdCBlYXNpZXIgdG8gZGVidWcgY29tbWFuZCBzZXF1ZW5jZXMgd2l0aG91dA0KcmVidWlsZGlu
+ZyB0aGUga2VybmVsLg0KTW9yZSBsb2dnaW5nIGNvdWxkIGJlIGFkZGVkLCBidXQgdGhpcyBpcyB3
+aGF0IGhhdmUNCmZvdW5kIHVzZSBmb3IuDQpJdCBpcyBhbHNvIHBvc3NpYmxlIHRvIHBhcnNlIHRo
+ZSBmdHJhY2Ugb3V0cHV0IGludG8NClZDRCBmb3JtYXQgYW5kIHZpc3VhbGl6ZSBpdCBpbiBHVEtX
+YXZlLg0KDQpQYXRjaCBpcyBmb3IgdGhlIDMuNy41IEtlcm5lbC4NCg0KDQpTaWduZWQtb2ZmLWJ5
+OiBCam9ybiBNYW5zc29uIDxiam9ybi5tYW5zc29uQHNvbnltb2JpbGUuY29tPg0KIi0tLSINCg0K
+ZGlmZiAtdXByTiAtWCBsaW51eC0zLjcuNS12YW5pbGxhL0RvY3VtZW50YXRpb24vZG9udGRpZmYg
+bGludXgtMy43LjUtdmFuaWxsYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYyBsaW51eC0zLjcuNS1w
+YXRjaGVkL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jDQotLS0gbGludXgtMy43LjUtdmFuaWxsYS9k
+cml2ZXJzL21tYy9jb3JlL2NvcmUuYwkyMDEzLTAxLTI4IDA1OjUwOjU1LjAwMDAwMDAwMCArMDEw
+MA0KKysrIGxpbnV4LTMuNy41LXBhdGNoZWQvZHJpdmVycy9tbWMvY29yZS9jb3JlLmMJMjAxMy0w
+Mi0wMSAxMjowMzoyNi42OTE5ODc0OTUgKzAxMDANCkBAIC00Miw2ICs0Miw5IEBADQogI2luY2x1
+ZGUgInNkX29wcy5oIg0KICNpbmNsdWRlICJzZGlvX29wcy5oIg0KIA0KKyNkZWZpbmUgQ1JFQVRF
+X1RSQUNFX1BPSU5UUw0KKyNpbmNsdWRlIDx0cmFjZS9ldmVudHMvbW1jLmg+DQorDQogLyoNCiAg
+KiBCYWNrZ3JvdW5kIG9wZXJhdGlvbnMgY2FuIHRha2UgYSBsb25nIHRpbWUsIGRlcGVuZGluZyBv
+biB0aGUgaG91c2VrZWVwaW5nDQogICogb3BlcmF0aW9ucyB0aGUgY2FyZCBoYXMgdG8gcGVyZm9y
+bS4NCkBAIC0xNjUsNiArMTY4LDEwIEBAIHZvaWQgbW1jX3JlcXVlc3RfZG9uZShzdHJ1Y3QgbW1j
+X2hvc3QgKmgNCiAJCQljbWQtPnJlc3BbMF0sIGNtZC0+cmVzcFsxXSwNCiAJCQljbWQtPnJlc3Bb
+Ml0sIGNtZC0+cmVzcFszXSk7DQogDQorCQl0cmFjZV9tbWNfcmVxX2RvbmUoIG1tY19ob3N0bmFt
+ZShob3N0KSwgY21kLT5vcGNvZGUsIGVyciwNCisJCQljbWQtPnJlc3BbMF0sIGNtZC0+cmVzcFsx
+XSwNCisJCQljbWQtPnJlc3BbMl0sIGNtZC0+cmVzcFszXSk7DQorDQogCQlpZiAobXJxLT5kYXRh
+KSB7DQogCQkJcHJfZGVidWcoIiVzOiAgICAgJWQgYnl0ZXMgdHJhbnNmZXJyZWQ6ICVkXG4iLA0K
+IAkJCQltbWNfaG9zdG5hbWUoaG9zdCksDQpAQCAtMjAyLDYgKzIwOSw5IEBAIG1tY19zdGFydF9y
+ZXF1ZXN0KHN0cnVjdCBtbWNfaG9zdCAqaG9zdCwNCiAJCQkgbXJxLT5zYmMtPmFyZywgbXJxLT5z
+YmMtPmZsYWdzKTsNCiAJfQ0KIA0KKwl0cmFjZV9tbWNfc3RhcnRfcmVxKCBtbWNfaG9zdG5hbWUo
+aG9zdCksIG1ycS0+Y21kLT5vcGNvZGUsDQorCQkJCW1ycS0+Y21kLT5hcmcsIG1ycS0+Y21kLT5m
+bGFncyk7DQorDQogCXByX2RlYnVnKCIlczogc3RhcnRpbmcgQ01EJXUgYXJnICUwOHggZmxhZ3Mg
+JTA4eFxuIiwNCiAJCSBtbWNfaG9zdG5hbWUoaG9zdCksIG1ycS0+Y21kLT5vcGNvZGUsDQogCQkg
+bXJxLT5jbWQtPmFyZywgbXJxLT5jbWQtPmZsYWdzKTsNCmRpZmYgLXVwck4gLVggbGludXgtMy43
+LjUtdmFuaWxsYS9Eb2N1bWVudGF0aW9uL2RvbnRkaWZmIGxpbnV4LTMuNy41LXZhbmlsbGEvaW5j
+bHVkZS90cmFjZS9ldmVudHMvbW1jLmggbGludXgtMy43LjUtcGF0Y2hlZC9pbmNsdWRlL3RyYWNl
+L2V2ZW50cy9tbWMuaA0KLS0tIGxpbnV4LTMuNy41LXZhbmlsbGEvaW5jbHVkZS90cmFjZS9ldmVu
+dHMvbW1jLmgJMTk3MC0wMS0wMSAwMTowMDowMC4wMDAwMDAwMDAgKzAxMDANCisrKyBsaW51eC0z
+LjcuNS1wYXRjaGVkL2luY2x1ZGUvdHJhY2UvZXZlbnRzL21tYy5oCTIwMTMtMDEtMzEgMDk6Mzg6
+MzIuMDAyODUxMDAwICswMTAwDQpAQCAtMCwwICsxLDg2IEBADQorI3VuZGVmIFRSQUNFX1NZU1RF
+TQ0KKyNkZWZpbmUgVFJBQ0VfU1lTVEVNIG1tYw0KKw0KKyNpZiAhZGVmaW5lZChfVFJBQ0VfTU1D
+X0gpIHx8IGRlZmluZWQoVFJBQ0VfSEVBREVSX01VTFRJX1JFQUQpDQorI2RlZmluZSBfVFJBQ0Vf
+TU1DX0gNCisNCisjaW5jbHVkZSA8bGludXgvdHJhY2Vwb2ludC5oPg0KKw0KK0RFQ0xBUkVfRVZF
+TlRfQ0xBU1Moc3RhcnRfcmVxLA0KKwlUUF9QUk9UTyhjb25zdCBjaGFyICogaG9zdCwgdW5zaWdu
+ZWQgaW50IGNtZCwNCisJICAgICAgICAgdW5zaWduZWQgaW50IGFyZywgdW5zaWduZWQgaW50IGZs
+YWdzKSwNCisJVFBfQVJHUyhob3N0LCBjbWQsIGFyZywgZmxhZ3MpLA0KKw0KKwlUUF9TVFJVQ1Rf
+X2VudHJ5KA0KKwkgICAgX19zdHJpbmcoaG9zdCwgaG9zdCkNCisJICAgIF9fZmllbGQodW5zaWdu
+ZWQgaW50LCBjbWQgICApDQorCSAgICBfX2ZpZWxkKHVuc2lnbmVkIGludCwgYXJnICkNCisJICAg
+IF9fZmllbGQodW5zaWduZWQgaW50LCBmbGFncyApDQorCSAgICksDQorDQorCVRQX2Zhc3RfYXNz
+aWduKA0KKwkgICAgX19hc3NpZ25fc3RyKGhvc3QsIGhvc3QpOw0KKwkgICAgX19lbnRyeS0+Y21k
+ID0gY21kOw0KKwkgICAgX19lbnRyeS0+YXJnID0gYXJnOw0KKwkgICAgX19lbnRyeS0+ZmxhZ3Mg
+PSBmbGFnczsNCisJKSwNCisNCisJVFBfcHJpbnRrKCJob3N0PSVzIENNRCV1IGFyZz0lMDh4IGZs
+YWdzPSUwOHgiLA0KKwkgICAgICAgX19nZXRfc3RyKGhvc3QpLCBfX2VudHJ5LT5jbWQsDQorCSAg
+ICAgIF9fZW50cnktPmFyZywgX19lbnRyeS0+ZmxhZ3MgKQ0KKyk7DQorDQorREVGSU5FX0VWRU5U
+KHN0YXJ0X3JlcSwgbW1jX3N0YXJ0X3JlcSwNCisJVFBfUFJPVE8oY29uc3QgY2hhciAqaG9zdCwg
+dW5zaWduZWQgaW50IGNtZCwNCisJICAgICB1bnNpZ25lZCBpbnQgYXJnLCB1bnNpZ25lZCBpbnQg
+ZmxhZ3MpLA0KKwlUUF9BUkdTKGhvc3QsIGNtZCwgYXJnLCBmbGFncykNCispOw0KKw0KKw0KK0RF
+Q0xBUkVfRVZFTlRfQ0xBU1MocmVxX2RvbmUsDQorCVRQX1BST1RPKGNvbnN0IGNoYXIgKmhvc3Qs
+IHVuc2lnbmVkIGludCBjbWQsDQorCQlpbnQgZXJyLCB1bnNpZ25lZCBpbnQgcmVzcDEsIA0KKwkJ
+dW5zaWduZWQgaW50IHJlc3AyLCB1bnNpZ25lZCBpbnQgcmVzcDMsDQorCQl1bnNpZ25lZCBpbnQg
+cmVzcDQpLA0KKwlUUF9BUkdTKGhvc3QsIGNtZCwgZXJyLCByZXNwMSwgcmVzcDIsIHJlc3AzLCBy
+ZXNwNCksDQorDQorCVRQX1NUUlVDVF9fZW50cnkoDQorCSAgICBfX3N0cmluZyhob3N0LCBob3N0
+KQ0KKwkgICAgX19maWVsZCh1bnNpZ25lZCBpbnQsIGNtZCAgICkNCisJICAgIF9fZmllbGQoICAg
+ICAgICAgaW50LCBlcnIgKQ0KKwkgICAgX19maWVsZCh1bnNpZ25lZCBpbnQsIHJlc3AxICkNCisJ
+ICAgIF9fZmllbGQodW5zaWduZWQgaW50LCByZXNwMiApDQorCSAgICBfX2ZpZWxkKHVuc2lnbmVk
+IGludCwgcmVzcDMgKQ0KKwkgICAgX19maWVsZCh1bnNpZ25lZCBpbnQsIHJlc3A0ICkNCisJICAg
+KSwNCisNCisJVFBfZmFzdF9hc3NpZ24oDQorCSAgICBfX2Fzc2lnbl9zdHIoaG9zdCwgaG9zdCk7
+DQorCSAgICBfX2VudHJ5LT5jbWQgPSBjbWQ7DQorCSAgICBfX2VudHJ5LT5lcnIgPSBlcnI7DQor
+CSAgICBfX2VudHJ5LT5yZXNwMSA9IHJlc3AxOw0KKwkgICAgX19lbnRyeS0+cmVzcDIgPSByZXNw
+MjsNCisJICAgIF9fZW50cnktPnJlc3AzID0gcmVzcDM7DQorCSAgICBfX2VudHJ5LT5yZXNwNCA9
+IHJlc3A0Ow0KKwkpLA0KKw0KKwlUUF9wcmludGsoImhvc3Q9JXMgQ01EJXUgZXJyPSUwOHggcmVz
+cDE9JTA4eCByZXNwMj0lMDh4IHJlc3AzPSUwOHggcmVzcDQ9JTA4eCIsDQorCQlfX2dldF9zdHIo
+aG9zdCksIF9fZW50cnktPmNtZCwNCisJCV9fZW50cnktPmVyciwgX19lbnRyeS0+cmVzcDEsIA0K
+KwkJX19lbnRyeS0+cmVzcDIsIF9fZW50cnktPnJlc3AzLA0KKwkJX19lbnRyeS0+cmVzcDQgKQ0K
+Kyk7DQorDQorREVGSU5FX0VWRU5UKHJlcV9kb25lLCBtbWNfcmVxX2RvbmUsDQorCVRQX1BST1RP
+KGNvbnN0IGNoYXIgKmhvc3QsIHVuc2lnbmVkIGludCBjbWQsDQorCQlpbnQgZXJyLCB1bnNpZ25l
+ZCBpbnQgcmVzcDEsIA0KKwkJdW5zaWduZWQgaW50IHJlc3AyLCB1bnNpZ25lZCBpbnQgcmVzcDMs
+DQorCQl1bnNpZ25lZCBpbnQgcmVzcDQpLA0KKwlUUF9BUkdTKGhvc3QsIGNtZCwgZXJyLCByZXNw
+MSwgcmVzcDIsIHJlc3AzLCByZXNwNCkNCispOw0KKw0KKw0KKyNlbmRpZiAvKiBfVFJBQ0VfTU1D
+X0ggKi8NCisNCisvKiBUaGlzIHBhcnQgbXVzdCBiZSBvdXRzaWRlIHByb3RlY3Rpb24gKi8NCisj
+aW5jbHVkZSA8dHJhY2UvZGVmaW5lX3RyYWNlLmg+DQoNCg==
