@@ -1,164 +1,212 @@
-From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v7 00/10] DMA Engine support for AM33XX
-Date: Fri,  1 Feb 2013 13:22:45 -0500
-Message-ID: <1359742975-10421-1-git-send-email-mporter@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+From: Matt Porter <mporter@ti.com>
+Subject: [PATCH v7 03/10] ARM: edma: add AM33XX support to the private EDMA API
+Date: Fri,  1 Feb 2013 13:22:48 -0500
+Message-ID: <1359742975-10421-4-git-send-email-mporter@ti.com>
+References: <1359742975-10421-1-git-send-email-mporter@ti.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1359742975-10421-1-git-send-email-mporter@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>
+Cc: Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Arnd Bergmann <arnd@arndb.de>, Dan Williams <djbw@fb.com>, Rob Herring <rob.herring@calxeda.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Changes since v6:
-	- Converted edma_of_read_*() to wrappers around of_property_read_*()
-	- Fixed wording on the omap-spi generic DMA properties
-	- Added comment/check to clarify that the driver only supports
-	  a single EDMA instance when booting from DT
+Adds support for parsing the TI EDMA DT data into the
+required EDMA private API platform data. Enables runtime
+PM support to initialize the EDMA hwmod. Adds AM33XX EDMA
+crossbar event mux support. Enables build on OMAP.
 
-Changes since v5:
-	- Dropped mmc portion and moved it to a separate series
-	- Incorporate corrected version of dma_request_slave_channel_compat()
-	- Fix #defines and enablement of TI_PRIV_EDMA option
+Signed-off-by: Matt Porter <mporter@ti.com>
+Acked-by: Sekhar Nori <nsekhar@ti.com>
+---
+ arch/arm/common/edma.c             |   96 ++++++++++++++++++++++++++++++++----
+ arch/arm/plat-omap/Kconfig         |    1 +
+ include/linux/platform_data/edma.h |    1 +
+ 3 files changed, 89 insertions(+), 9 deletions(-)
 
-Changes since v4:
-	- Fixed debug section mismatch in private edma api [01/14]
-	- Respun format-patch to catch the platform_data/edma.h rename [01/14]
-	- Removed address/size-cells from the EDMA binding [05/14]
-
-Changes since v3:
-	- Rebased on 3.8-rc3
-	- No longer an RFC
-	- Fixed bugs in DT/pdata parsing reported by Vaibhav Bedia
-	- Restored all the Davinci pdata to const
-	- Removed max_segs hack in favor of using dma_get_channel_caps()
-	- Fixed extra parens, __raw_* accessors and, ioremap error checks
-	  in xbar handling
-	- Removed excess license info in platform_data/edma.h
-	- Removed unneeded reserved channels data for AM33xx
-	- Removed test-specific pinmuxing from dts files
-	- Adjusted mmc1 node to be disabled by default in the dtsi
-
-Changes since v2:
-	- Rebased on 3.7-rc1
-	- Fixed bug in DT/pdata parsing first found by Gururaja
-	  that turned out to be masked by some toolchains
-	- Dropped unused mach-omap2/devices.c hsmmc patch
-	- Added AM33XX crossbar DMA event mux support
-	- Added am335x-evm support
-
-Changes since v1:
-	- Rebased on top of mainline from 12250d8
-	- Dropped the feature removal schedule patch
-	- Implemented dma_request_slave_channel_compat() and
-	  converted the mmc and spi drivers to use it
-	- Dropped unneeded #address-cells and #size-cells from
-	  EDMA DT support
-	- Moved private EDMA header to linux/platform_data/ and
-	  removed some unneeded definitions
-	- Fixed parsing of optional properties
-
-This series adds DMA Engine support for AM33xx, which uses
-an EDMA DMAC. The EDMA DMAC has been previously supported by only
-a private API implementation (much like the situation with OMAP
-DMA) found on the DaVinci family of SoCs.
-
-The series applies on top of 3.8-rc5 and the following patches:
-
-	- dmaengine DT support and edma dmaengine driver fix from 
-	  the git://git.infradead.org/users/vkoul/slave-dma.git next
-	  branch
-
-The approach taken is similar to how OMAP DMA is being converted to
-DMA Engine support. With the functional EDMA private API already
-existing in mach-davinci/dma.c, we first move that to an ARM common
-area so it can be shared. Adding DT and runtime PM support to the
-private EDMA API implementation allows it to run on AM33xx. AM33xx
-*only* boots using DT so we leverage Jon's generic DT DMA helpers to
-register EDMA DMAC with the of_dma framework and then add support
-for calling the dma_request_slave_channel() API to both the mmc
-and spi drivers.
-
-With this series both BeagleBone and the AM335x EVM have working
-SPI DMA support (and MMC support with the separate MMC series).
-
-This is tested on BeagleBone with a SPI framebuffer driver and MMC
-rootfs. A trivial gpio DMA event misc driver was used to test the
-crossbar DMA event support. It is also tested on the AM335x EVM
-with the onboard SPI flash and MMC rootfs. The branch at
-https://github.com/ohporter/linux/tree/edma-dmaengine-am33xx-v7
-has the complete series, dependencies, and some test
-drivers/defconfigs. Note that MMC can only be tested with a
-separate MMC dmaengine/DT series applied.
-
-Regression testing was done on AM180x-EVM (which also makes use
-of the EDMA dmaengine driver and the EDMA private API) using SD,
-SPI flash, and the onboard audio supported by the ASoC Davinci
-driver. Regression testing was also done on a BeagleBoard xM
-booting from the legacy board file using MMC rootfs.
-
-
-Matt Porter (10):
-  ARM: davinci: move private EDMA API to arm/common
-  ARM: edma: remove unused transfer controller handlers
-  ARM: edma: add AM33XX support to the private EDMA API
-  dmaengine: edma: enable build for AM33XX
-  dmaengine: edma: Add TI EDMA device tree binding
-  ARM: dts: add AM33XX EDMA support
-  dmaengine: add dma_request_slave_channel_compat()
-  spi: omap2-mcspi: convert to dma_request_slave_channel_compat()
-  spi: omap2-mcspi: add generic DMA request support to the DT binding
-  ARM: dts: add AM33XX SPI DMA support
-
- Documentation/devicetree/bindings/dma/ti-edma.txt  |   49 +++
- Documentation/devicetree/bindings/spi/omap-spi.txt |   27 +-
- arch/arm/Kconfig                                   |    1 +
- arch/arm/boot/dts/am33xx.dtsi                      |   30 ++
- arch/arm/common/Kconfig                            |    3 +
- arch/arm/common/Makefile                           |    1 +
- arch/arm/{mach-davinci/dma.c => common/edma.c}     |  342 +++++++++++++++++---
- arch/arm/mach-davinci/Makefile                     |    2 +-
- arch/arm/mach-davinci/board-tnetv107x-evm.c        |    2 +-
- arch/arm/mach-davinci/davinci.h                    |    2 +-
- arch/arm/mach-davinci/devices-tnetv107x.c          |    2 +-
- arch/arm/mach-davinci/devices.c                    |    6 +-
- arch/arm/mach-davinci/dm355.c                      |    2 +-
- arch/arm/mach-davinci/dm365.c                      |    2 +-
- arch/arm/mach-davinci/dm644x.c                     |    2 +-
- arch/arm/mach-davinci/dm646x.c                     |    2 +-
- arch/arm/mach-davinci/include/mach/da8xx.h         |    2 +-
- arch/arm/plat-omap/Kconfig                         |    1 +
- drivers/dma/Kconfig                                |    2 +-
- drivers/dma/edma.c                                 |    2 +-
- drivers/mmc/host/davinci_mmc.c                     |    1 +
- drivers/spi/spi-omap2-mcspi.c                      |   65 ++--
- include/linux/dmaengine.h                          |   16 +
- include/linux/mfd/davinci_voicecodec.h             |    3 +-
- .../mach => include/linux/platform_data}/edma.h    |   90 +-----
- include/linux/platform_data/spi-davinci.h          |    2 +-
- sound/soc/davinci/davinci-evm.c                    |    1 +
- sound/soc/davinci/davinci-pcm.c                    |    1 +
- sound/soc/davinci/davinci-pcm.h                    |    2 +-
- sound/soc/davinci/davinci-sffsdr.c                 |    7 +-
- 30 files changed, 496 insertions(+), 174 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/dma/ti-edma.txt
- rename arch/arm/{mach-davinci/dma.c => common/edma.c} (86%)
- rename {arch/arm/mach-davinci/include/mach => include/linux/platform_data}/edma.h (59%)
-
+diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+index 3440d16..bd2416a 100644
+--- a/arch/arm/common/edma.c
++++ b/arch/arm/common/edma.c
+@@ -24,6 +24,13 @@
+ #include <linux/platform_device.h>
+ #include <linux/io.h>
+ #include <linux/slab.h>
++#include <linux/edma.h>
++#include <linux/err.h>
++#include <linux/of_address.h>
++#include <linux/of_device.h>
++#include <linux/of_dma.h>
++#include <linux/of_irq.h>
++#include <linux/pm_runtime.h>
+ 
+ #include <linux/platform_data/edma.h>
+ 
+@@ -723,6 +730,9 @@ EXPORT_SYMBOL(edma_free_channel);
+  */
+ int edma_alloc_slot(unsigned ctlr, int slot)
+ {
++	if (!edma_cc[ctlr])
++		return -EINVAL;
++
+ 	if (slot >= 0)
+ 		slot = EDMA_CHAN_SLOT(slot);
+ 
+@@ -1575,27 +1585,69 @@ static struct of_dma_filter_info edma_filter_info = {
+ static int edma_probe(struct platform_device *pdev)
+ {
+ 	struct edma_soc_info	**info = pdev->dev.platform_data;
++	struct edma_soc_info	*ninfo[EDMA_MAX_CC] = {NULL, NULL};
++	struct edma_soc_info	tmpinfo;
+ 	const s8		(*queue_priority_mapping)[2];
+ 	const s8		(*queue_tc_mapping)[2];
+ 	int			i, j, off, ln, found = 0;
+ 	int			status = -1;
+ 	const s16		(*rsv_chans)[2];
+ 	const s16		(*rsv_slots)[2];
++	const s16		(*xbar_chans)[2];
+ 	int			irq[EDMA_MAX_CC] = {0, 0};
+ 	int			err_irq[EDMA_MAX_CC] = {0, 0};
+-	struct resource		*r[EDMA_MAX_CC] = {NULL};
++	struct resource		*r[EDMA_MAX_CC] = {NULL, NULL};
++	struct resource		res[EDMA_MAX_CC];
+ 	resource_size_t		len[EDMA_MAX_CC];
+ 	char			res_name[10];
+ 	char			irq_name[10];
++	struct device_node	*node = pdev->dev.of_node;
++	struct device		*dev = &pdev->dev;
++	int			ret;
++
++	if (node) {
++		/* Check if this is a second instance registered */
++		if (arch_num_cc) {
++			dev_err(dev, "only one EDMA instance is supported via DT\n");
++			return -ENODEV;
++		}
++		info = ninfo;
++		edma_of_parse_dt(dev, node, &tmpinfo);
++		info[0] = &tmpinfo;
++
++		dma_cap_set(DMA_SLAVE, edma_filter_info.dma_cap);
++		of_dma_controller_register(dev->of_node,
++					   of_dma_simple_xlate,
++					   &edma_filter_info);
++	}
+ 
+ 	if (!info)
+ 		return -ENODEV;
+ 
++	pm_runtime_enable(dev);
++	ret = pm_runtime_get_sync(dev);
++	if (IS_ERR_VALUE(ret)) {
++		dev_err(dev, "pm_runtime_get_sync() failed\n");
++		return ret;
++	}
++
+ 	for (j = 0; j < EDMA_MAX_CC; j++) {
+-		sprintf(res_name, "edma_cc%d", j);
+-		r[j] = platform_get_resource_byname(pdev, IORESOURCE_MEM,
++		if (!info[j]) {
++			if (!found)
++				return -ENODEV;
++			break;
++		}
++		if (node) {
++			ret = of_address_to_resource(node, j, &res[j]);
++			if (!IS_ERR_VALUE(ret))
++				r[j] = &res[j];
++		} else {
++			sprintf(res_name, "edma_cc%d", j);
++			r[j] = platform_get_resource_byname(pdev,
++						IORESOURCE_MEM,
+ 						res_name);
+-		if (!r[j] || !info[j]) {
++		}
++		if (!r[j]) {
+ 			if (found)
+ 				break;
+ 			else
+@@ -1670,8 +1722,22 @@ static int edma_probe(struct platform_device *pdev)
+ 			}
+ 		}
+ 
+-		sprintf(irq_name, "edma%d", j);
+-		irq[j] = platform_get_irq_byname(pdev, irq_name);
++		/* Clear the xbar mapped channels in unused list */
++		xbar_chans = info[j]->xbar_chans;
++		if (xbar_chans) {
++			for (i = 0; xbar_chans[i][1] != -1; i++) {
++				off = xbar_chans[i][1];
++				clear_bits(off, 1,
++					edma_cc[j]->edma_unused);
++			}
++		}
++
++		if (node)
++			irq[j] = irq_of_parse_and_map(node, 0);
++		else {
++			sprintf(irq_name, "edma%d", j);
++			irq[j] = platform_get_irq_byname(pdev, irq_name);
++		}
+ 		edma_cc[j]->irq_res_start = irq[j];
+ 		status = request_irq(irq[j], dma_irq_handler, 0, "edma",
+ 					&pdev->dev);
+@@ -1681,8 +1747,12 @@ static int edma_probe(struct platform_device *pdev)
+ 			goto fail;
+ 		}
+ 
+-		sprintf(irq_name, "edma%d_err", j);
+-		err_irq[j] = platform_get_irq_byname(pdev, irq_name);
++		if (node)
++			err_irq[j] = irq_of_parse_and_map(node, 2);
++		else {
++			sprintf(irq_name, "edma%d_err", j);
++			err_irq[j] = platform_get_irq_byname(pdev, irq_name);
++		}
+ 		edma_cc[j]->irq_res_end = err_irq[j];
+ 		status = request_irq(err_irq[j], dma_ccerr_handler, 0,
+ 					"edma_error", &pdev->dev);
+@@ -1743,9 +1813,17 @@ fail1:
+ 	return status;
+ }
+ 
++static const struct of_device_id edma_of_ids[] = {
++	{ .compatible = "ti,edma3", },
++	{}
++};
+ 
+ static struct platform_driver edma_driver = {
+-	.driver.name	= "edma",
++	.driver = {
++		.name	= "edma",
++		.of_match_table = edma_of_ids,
++	},
++	.probe = edma_probe,
+ };
+ 
+ static int __init edma_init(void)
+diff --git a/arch/arm/plat-omap/Kconfig b/arch/arm/plat-omap/Kconfig
+index 665870d..0b81d6c 100644
+--- a/arch/arm/plat-omap/Kconfig
++++ b/arch/arm/plat-omap/Kconfig
+@@ -29,6 +29,7 @@ config ARCH_OMAP2PLUS
+ 	select PINCTRL
+ 	select PROC_DEVICETREE if PROC_FS
+ 	select SPARSE_IRQ
++	select TI_PRIV_EDMA
+ 	select USE_OF
+ 	help
+ 	  "Systems based on OMAP2, OMAP3, OMAP4 or OMAP5"
+diff --git a/include/linux/platform_data/edma.h b/include/linux/platform_data/edma.h
+index 2344ea2..ffc1fb2 100644
+--- a/include/linux/platform_data/edma.h
++++ b/include/linux/platform_data/edma.h
+@@ -177,6 +177,7 @@ struct edma_soc_info {
+ 
+ 	const s8	(*queue_tc_mapping)[2];
+ 	const s8	(*queue_priority_mapping)[2];
++	const s16	(*xbar_chans)[2];
+ };
+ 
+ #endif
 -- 
 1.7.9.5
-
-
-------------------------------------------------------------------------------
-Everyone hates slow websites. So do we.
-Make your web apps faster with AppDynamics
-Download AppDynamics Lite for free today:
-http://p.sf.net/sfu/appdyn_d2d_jan
