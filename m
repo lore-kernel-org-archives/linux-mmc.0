@@ -1,53 +1,110 @@
-From: Sergei Shtylyov <sshtylyov@mvista.com>
+From: Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org>
 Subject: Re: [PATCH v7 01/10] ARM: davinci: move private EDMA API to arm/common
-Date: Fri, 01 Feb 2013 23:49:11 +0300
-Message-ID: <510C2A47.1090607@mvista.com>
-References: <1359742975-10421-1-git-send-email-mporter@ti.com> <1359742975-10421-2-git-send-email-mporter@ti.com> <5022f635a527470dbd0be932063e9cd2@DFLE72.ent.ti.com> <20130201184915.GP2244@beef> <510C1D0E.6030401@mvista.com> <20130201185820.GE29898@arwen.pp.htv.fi>
+Date: Fri, 1 Feb 2013 22:56:00 +0200
+Message-ID: <20130201205600.GA31762@arwen.pp.htv.fi>
+References: <1359742975-10421-1-git-send-email-mporter@ti.com>
+ <1359742975-10421-2-git-send-email-mporter@ti.com>
+ <5022f635a527470dbd0be932063e9cd2@DFLE72.ent.ti.com>
+ <20130201184915.GP2244@beef> <510C1D0E.6030401@mvista.com>
+ <20130201185820.GE29898@arwen.pp.htv.fi>
+ <510C2A47.1090607@mvista.com>
+Reply-To: balbi-l0cyMroinI0@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <20130201185820.GE29898@arwen.pp.htv.fi>
-Sender: linux-doc-owner@vger.kernel.org
-To: balbi@ti.com
-Cc: Matt Porter <mporter@ti.com>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>, "Cousson, Benoit" <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.in>
+Content-Type: multipart/mixed; boundary="===============7764280878580205488=="
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <510C2A47.1090607-Igf4POYTYCDQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Sergei Shtylyov <sshtylyov-Igf4POYTYCDQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, balbi-l0cyMroinI0@public.gmane.org, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hello.
+--===============7764280878580205488==
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="2oS5YaxWCcQjTEyO"
+Content-Disposition: inline
 
-On 02/01/2013 09:58 PM, Felipe Balbi wrote:
+--2oS5YaxWCcQjTEyO
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
->>>>> Move mach-davinci/dma.c to common/edma.c so it can be used
->>>>> by OMAP (specifically AM33xx) as well.
+hi,
 
->>>> I think this should rather go to drivers/dma/?
+On Fri, Feb 01, 2013 at 11:49:11PM +0300, Sergei Shtylyov wrote:
+> > good point, do you wanna send some patches ?
+>=20
+>    I have already sent them countless times and even stuck CPPI 4.1 suppo=
+rt (in
+> arch/arm/common/cppi41.c) in Russell's patch system. TI requested to remo=
+ve the
+> patch. :-(
 
->>> No, this is the private EDMA API. It's the analogous thing to
->>> the private OMAP dma API that is in plat-omap/dma.c. The actual
->>> dmaengine driver is in drivers/dma/edma.c as a wrapper around
->>> this...same way OMAP DMA engine conversion is being done.
+sticking into arch/arm/common/ wasn't a nice move. But then again, so
+wasn't asking for the patch to be removed :-s
 
->>   Keeps me wondering why we couldn't have the same with CPPI 4.1 when I proposed
->> that, instead of waiting indefinitely for TI to convert it to drivers/dma/
->> directly. We could have working MUSB DMA on OMAP-L1x/Sitara all this time... Sigh.
+> > I guess to make the MUSB side simpler we would need musb-dma-engine glue
+> > to map dmaengine to the private MUSB API. Then we would have some
+> > starting point to also move inventra (and anybody else) to dmaengine
+> > API.
+>=20
+>    Why? Inventra is a dedicated device's private DMA controller, why make
+> universal DMA driver for it?
 
-> good point, do you wanna send some patches ?
+because it doesn't make sense to support multiple DMA APIs. We can check
+=66rom MUSB's registers if it was configured with Inventra DMA support and
+based on that we can register MUSB's own DMA Engine to dmaengine API.
 
-   I have already sent them countless times and even stuck CPPI 4.1 support (in
-arch/arm/common/cppi41.c) in Russell's patch system. TI requested to remove the
-patch. :-(
+> > Once that's done, we drop MUSB's private API.
+>=20
+>    Don't think it's a good idea.
 
-> I guess to make the MUSB side simpler we would need musb-dma-engine glue
-> to map dmaengine to the private MUSB API. Then we would have some
-> starting point to also move inventra (and anybody else) to dmaengine
-> API.
+see above.
 
-   Why? Inventra is a dedicated device's private DMA controller, why make
-universal DMA driver for it?
+--=20
+balbi
 
-> Once that's done, we drop MUSB's private API.
+--2oS5YaxWCcQjTEyO
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
-   Don't think it's a good idea.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
 
-WBR, Sergei
+iQIcBAEBAgAGBQJRDCvfAAoJEIaOsuA1yqREUjQP/RqhK6sXFPDiZQokepbVHvh1
+/QY/xwmvqJ5sC+OJn99FrQ0Lp+4awceYRrx3d/aLbZ2ato58jLpdXNMOSyYiJR5R
+gE4nNYafHmv070vFnkt87M9VsEZY7hERUh0UjNoqcREKYLSJ5Te0CkN2Dfewx4Ub
+dX3UQKVxjjCsxcNEg2+Ssyw1+oMTbjkSjkAwQbet8ZFsZSqXXoJ5xuRh1Ik2VD0M
+Xuc+MAAWbzilgcyM7C9Yxw5cvlan7ei6hsPgAq2kNai7WK2lm47h+enwW41q/nbs
+iXIhXM7qFHpwsByG3K3Rpkmtsg75SM8ymyNohdxb5odwh4Evzw2Z/ed6Vu+t0JK6
+vK1/mSOP7QtQCNFcO0gOvLT3NCavEf372bTLiKNWvSb1KecC4BB84tJ+oGrGxCKS
+BnhVKCKtq5PqGBoBxv29JVaTgNh0djr804bLYssB9RNvnigYh8ZD6CCLr8aDT8P5
+fyZWjXY74K8N8sfTHBYASUIhC7IVeDDFApt/0UKt8+OLPwJ9aLxXHhx+xBG96Im9
+d0Jx31hInwZ+2l7ZZr8CE/1Oy79qtAX2ANJOjSSuR8SGah+ipW40Er2nYbN0+0hx
+QiDPcezowX/2yVF7HNQjiYfAoq3pwiESXlPfN3/BnAwIsP5p/HGT9nRun2yiQJL1
+U0qONWBg4L7gNQUFhURD
+=dgm9
+-----END PGP SIGNATURE-----
 
+--2oS5YaxWCcQjTEyO--
+
+--===============7764280878580205488==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+devicetree-discuss mailing list
+devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+https://lists.ozlabs.org/listinfo/devicetree-discuss
+
+--===============7764280878580205488==--
