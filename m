@@ -1,18 +1,18 @@
 From: Sergei Shtylyov <sshtylyov@mvista.com>
 Subject: Re: [PATCH v7 01/10] ARM: davinci: move private EDMA API to arm/common
-Date: Sat, 02 Feb 2013 04:07:59 +0400
-Message-ID: <510C58DF.3010103@mvista.com>
+Date: Sat, 02 Feb 2013 04:13:57 +0400
+Message-ID: <510C5A45.5050802@mvista.com>
 References: <1359742975-10421-1-git-send-email-mporter@ti.com> <1359742975-10421-2-git-send-email-mporter@ti.com> <5022f635a527470dbd0be932063e9cd2@DFLE72.ent.ti.com> <20130201184915.GP2244@beef> <510C1D0E.6030401@mvista.com> <20130201185820.GE29898@arwen.pp.htv.fi> <510C2A47.1090607@mvista.com> <20130201205600.GA31762@arwen.pp.htv.fi> <20130201213003.GW2637@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f181.google.com ([209.85.217.181]:47352 "EHLO
-	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755713Ab3BBAIU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Feb 2013 19:08:20 -0500
-Received: by mail-lb0-f181.google.com with SMTP id gm6so4989214lbb.26
-        for <linux-mmc@vger.kernel.org>; Fri, 01 Feb 2013 16:08:18 -0800 (PST)
+Received: from mail-lb0-f180.google.com ([209.85.217.180]:59058 "EHLO
+	mail-lb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756243Ab3BBAOS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Feb 2013 19:14:18 -0500
+Received: by mail-lb0-f180.google.com with SMTP id q12so5031297lbc.39
+        for <linux-mmc@vger.kernel.org>; Fri, 01 Feb 2013 16:14:16 -0800 (PST)
 In-Reply-To: <20130201213003.GW2637@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -35,10 +35,6 @@ On 02-02-2013 1:30, Russell King - ARM Linux wrote:
 
 > Err, patches don't get removed, they get moved to 'discarded'.
 
-    Any chance to bring it back to life? :-)
-    Although... drivers/usb/musb/cppi41.c would need to be somewhat reworked 
-for at least AM35x and I don't have time. But that may change, of course.
-
 >>>> I guess to make the MUSB side simpler we would need musb-dma-engine glue
 >>>> to map dmaengine to the private MUSB API. Then we would have some
 >>>> starting point to also move inventra (and anybody else) to dmaengine
@@ -60,16 +56,9 @@ for at least AM35x and I don't have time. But that may change, of course.
 > 2. It would not live in arch/arm.
 > 3. It would be placed nearby the USB driver it's associated with.
 
-> (1) because we don't use APIs just for the hell of it - think.  Do we
-> use the DMA engine API for PCI bus mastering ethernet controllers?  No.
-> Do we use it for PCI bus mastering SCSI controllers?  No.  Because the
-> DMA is integral to the rest of the device.
-
-> The DMA engine API only makes sense if the DMA engine is a shared
-> system resource.
-
-    Thanks for such extensive wording in the support of my point. :-)
+    Note that all this doesn't apply to CPPI 4.1 controller (as contrasted to 
+CPPI 3.0 support in MUSB aand EMAC drivers) -- it's shared by design. Just the 
+implementations that are in tree have it as MUSB's sub-block, serving only MUSB.
 
 WBR, Sergei
-
 
