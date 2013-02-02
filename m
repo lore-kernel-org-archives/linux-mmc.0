@@ -1,307 +1,68 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: [PATCH] mmc: s3cmci: moved mach/regs-sdi.h into s3cmci device driver
-Date: Fri, 01 Feb 2013 16:45:17 -0800
-Message-ID: <1359765917-11219-1-git-send-email-kgene.kim@samsung.com>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Kukjin Kim <kgene.kim@samsung.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH v7 01/10] ARM: davinci: move private EDMA API to
+	arm/common
+Date: Sat, 2 Feb 2013 00:44:55 +0000
+Message-ID: <20130202004455.GX2637@n2100.arm.linux.org.uk>
+References: <1359742975-10421-1-git-send-email-mporter@ti.com> <1359742975-10421-2-git-send-email-mporter@ti.com> <5022f635a527470dbd0be932063e9cd2@DFLE72.ent.ti.com> <20130201184915.GP2244@beef> <510C1D0E.6030401@mvista.com> <20130201185820.GE29898@arwen.pp.htv.fi> <510C2A47.1090607@mvista.com> <20130201205600.GA31762@arwen.pp.htv.fi> <20130201213003.GW2637@n2100.arm.linux.org.uk> <510C58DF.3010103@mvista.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <510C58DF.3010103@mvista.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Sergei Shtylyov <sshtylyov@mvista.com>
+Cc: Felipe Balbi <balbi@ti.com>, Matt Porter <mporter@ti.com>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Chris Ball <cjb@laptop.org>, "Cousson, Benoit" <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Since mach/regs-sdi.h is used only for s3cmci.c, so this moves the
-header file into the driver file, drivers/mmc/host/s3cmci.c file.
+On Sat, Feb 02, 2013 at 04:07:59AM +0400, Sergei Shtylyov wrote:
+> Hello.
+>
+> On 02-02-2013 1:30, Russell King - ARM Linux wrote:
+>
+>>> On Fri, Feb 01, 2013 at 11:49:11PM +0300, Sergei Shtylyov wrote:
+>>>>> good point, do you wanna send some patches ?
+>
+>>>>     I have already sent them countless times and even stuck CPPI 4.1 support (in
+>>>> arch/arm/common/cppi41.c) in Russell's patch system. TI requested to remove the
+>>>> patch. :-(
+>
+>>> sticking into arch/arm/common/ wasn't a nice move. But then again, so
+>>> wasn't asking for the patch to be removed :-s
+>
+>> Err, patches don't get removed, they get moved to 'discarded'.
+>
+>    Any chance to bring it back to life? :-)
+>    Although... drivers/usb/musb/cppi41.c would need to be somewhat 
+> reworked for at least AM35x and I don't have time. But that may change, 
+> of course.
 
-Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
----
- arch/arm/mach-s3c24xx/dma-s3c2410.c           |    1 -
- arch/arm/mach-s3c24xx/dma-s3c2412.c           |    1 -
- arch/arm/mach-s3c24xx/dma-s3c2440.c           |    1 -
- arch/arm/mach-s3c24xx/dma-s3c2443.c           |    1 -
- arch/arm/mach-s3c24xx/include/mach/regs-sdi.h |  127 -------------------------
- drivers/mmc/host/s3cmci.c                     |   83 +++++++++++++++-
- 6 files changed, 81 insertions(+), 133 deletions(-)
- delete mode 100644 arch/arm/mach-s3c24xx/include/mach/regs-sdi.h
+Right, I've just looked back at the various meeting minutes from December
+2010 when the CPPI stuff was discussed.  Yes, I archive these things and
+all email discussions for referencing in cases like this.
 
-diff --git a/arch/arm/mach-s3c24xx/dma-s3c2410.c b/arch/arm/mach-s3c24xx/dma-s3c2410.c
-index 4803338..6eb5be9 100644
---- a/arch/arm/mach-s3c24xx/dma-s3c2410.c
-+++ b/arch/arm/mach-s3c24xx/dma-s3c2410.c
-@@ -29,7 +29,6 @@
- #include <plat/regs-dma.h>
- #include <mach/regs-mem.h>
- #include <mach/regs-lcd.h>
--#include <mach/regs-sdi.h>
- #include <plat/regs-iis.h>
- #include <plat/regs-spi.h>
- 
-diff --git a/arch/arm/mach-s3c24xx/dma-s3c2412.c b/arch/arm/mach-s3c24xx/dma-s3c2412.c
-index 38472ac..f239d09 100644
---- a/arch/arm/mach-s3c24xx/dma-s3c2412.c
-+++ b/arch/arm/mach-s3c24xx/dma-s3c2412.c
-@@ -29,7 +29,6 @@
- #include <plat/regs-dma.h>
- #include <mach/regs-mem.h>
- #include <mach/regs-lcd.h>
--#include <mach/regs-sdi.h>
- #include <plat/regs-iis.h>
- #include <plat/regs-spi.h>
- 
-diff --git a/arch/arm/mach-s3c24xx/dma-s3c2440.c b/arch/arm/mach-s3c24xx/dma-s3c2440.c
-index 5f0a0c8..ca98189 100644
---- a/arch/arm/mach-s3c24xx/dma-s3c2440.c
-+++ b/arch/arm/mach-s3c24xx/dma-s3c2440.c
-@@ -29,7 +29,6 @@
- #include <plat/regs-dma.h>
- #include <mach/regs-mem.h>
- #include <mach/regs-lcd.h>
--#include <mach/regs-sdi.h>
- #include <plat/regs-iis.h>
- #include <plat/regs-spi.h>
- 
-diff --git a/arch/arm/mach-s3c24xx/dma-s3c2443.c b/arch/arm/mach-s3c24xx/dma-s3c2443.c
-index 2d94228..d3448f6 100644
---- a/arch/arm/mach-s3c24xx/dma-s3c2443.c
-+++ b/arch/arm/mach-s3c24xx/dma-s3c2443.c
-@@ -29,7 +29,6 @@
- #include <plat/regs-dma.h>
- #include <mach/regs-mem.h>
- #include <mach/regs-lcd.h>
--#include <mach/regs-sdi.h>
- #include <plat/regs-iis.h>
- #include <plat/regs-spi.h>
- 
-diff --git a/arch/arm/mach-s3c24xx/include/mach/regs-sdi.h b/arch/arm/mach-s3c24xx/include/mach/regs-sdi.h
-deleted file mode 100644
-index cbf2d88..0000000
---- a/arch/arm/mach-s3c24xx/include/mach/regs-sdi.h
-+++ /dev/null
-@@ -1,127 +0,0 @@
--/* arch/arm/mach-s3c2410/include/mach/regs-sdi.h
-- *
-- * Copyright (c) 2004 Simtec Electronics <linux@simtec.co.uk>
-- *		      http://www.simtec.co.uk/products/SWLINUX/
-- *
-- * This program is free software; you can redistribute it and/or modify
-- * it under the terms of the GNU General Public License version 2 as
-- * published by the Free Software Foundation.
-- *
-- * S3C2410 MMC/SDIO register definitions
--*/
--
--#ifndef __ASM_ARM_REGS_SDI
--#define __ASM_ARM_REGS_SDI "regs-sdi.h"
--
--#define S3C2410_SDICON                (0x00)
--#define S3C2410_SDIPRE                (0x04)
--#define S3C2410_SDICMDARG             (0x08)
--#define S3C2410_SDICMDCON             (0x0C)
--#define S3C2410_SDICMDSTAT            (0x10)
--#define S3C2410_SDIRSP0               (0x14)
--#define S3C2410_SDIRSP1               (0x18)
--#define S3C2410_SDIRSP2               (0x1C)
--#define S3C2410_SDIRSP3               (0x20)
--#define S3C2410_SDITIMER              (0x24)
--#define S3C2410_SDIBSIZE              (0x28)
--#define S3C2410_SDIDCON               (0x2C)
--#define S3C2410_SDIDCNT               (0x30)
--#define S3C2410_SDIDSTA               (0x34)
--#define S3C2410_SDIFSTA               (0x38)
--
--#define S3C2410_SDIDATA               (0x3C)
--#define S3C2410_SDIIMSK               (0x40)
--
--#define S3C2440_SDIDATA               (0x40)
--#define S3C2440_SDIIMSK               (0x3C)
--
--#define S3C2440_SDICON_SDRESET        (1<<8)
--#define S3C2440_SDICON_MMCCLOCK       (1<<5)
--#define S3C2410_SDICON_BYTEORDER      (1<<4)
--#define S3C2410_SDICON_SDIOIRQ        (1<<3)
--#define S3C2410_SDICON_RWAITEN        (1<<2)
--#define S3C2410_SDICON_FIFORESET      (1<<1)
--#define S3C2410_SDICON_CLOCKTYPE      (1<<0)
--
--#define S3C2410_SDICMDCON_ABORT       (1<<12)
--#define S3C2410_SDICMDCON_WITHDATA    (1<<11)
--#define S3C2410_SDICMDCON_LONGRSP     (1<<10)
--#define S3C2410_SDICMDCON_WAITRSP     (1<<9)
--#define S3C2410_SDICMDCON_CMDSTART    (1<<8)
--#define S3C2410_SDICMDCON_SENDERHOST  (1<<6)
--#define S3C2410_SDICMDCON_INDEX       (0x3f)
--
--#define S3C2410_SDICMDSTAT_CRCFAIL    (1<<12)
--#define S3C2410_SDICMDSTAT_CMDSENT    (1<<11)
--#define S3C2410_SDICMDSTAT_CMDTIMEOUT (1<<10)
--#define S3C2410_SDICMDSTAT_RSPFIN     (1<<9)
--#define S3C2410_SDICMDSTAT_XFERING    (1<<8)
--#define S3C2410_SDICMDSTAT_INDEX      (0xff)
--
--#define S3C2440_SDIDCON_DS_BYTE       (0<<22)
--#define S3C2440_SDIDCON_DS_HALFWORD   (1<<22)
--#define S3C2440_SDIDCON_DS_WORD       (2<<22)
--#define S3C2410_SDIDCON_IRQPERIOD     (1<<21)
--#define S3C2410_SDIDCON_TXAFTERRESP   (1<<20)
--#define S3C2410_SDIDCON_RXAFTERCMD    (1<<19)
--#define S3C2410_SDIDCON_BUSYAFTERCMD  (1<<18)
--#define S3C2410_SDIDCON_BLOCKMODE     (1<<17)
--#define S3C2410_SDIDCON_WIDEBUS       (1<<16)
--#define S3C2410_SDIDCON_DMAEN         (1<<15)
--#define S3C2410_SDIDCON_STOP          (1<<14)
--#define S3C2440_SDIDCON_DATSTART      (1<<14)
--#define S3C2410_SDIDCON_DATMODE	      (3<<12)
--#define S3C2410_SDIDCON_BLKNUM        (0x7ff)
--
--/* constants for S3C2410_SDIDCON_DATMODE */
--#define S3C2410_SDIDCON_XFER_READY    (0<<12)
--#define S3C2410_SDIDCON_XFER_CHKSTART (1<<12)
--#define S3C2410_SDIDCON_XFER_RXSTART  (2<<12)
--#define S3C2410_SDIDCON_XFER_TXSTART  (3<<12)
--
--#define S3C2410_SDIDCON_BLKNUM_MASK   (0xFFF)
--#define S3C2410_SDIDCNT_BLKNUM_SHIFT  (12)
--
--#define S3C2410_SDIDSTA_RDYWAITREQ    (1<<10)
--#define S3C2410_SDIDSTA_SDIOIRQDETECT (1<<9)
--#define S3C2410_SDIDSTA_FIFOFAIL      (1<<8)	/* reserved on 2440 */
--#define S3C2410_SDIDSTA_CRCFAIL       (1<<7)
--#define S3C2410_SDIDSTA_RXCRCFAIL     (1<<6)
--#define S3C2410_SDIDSTA_DATATIMEOUT   (1<<5)
--#define S3C2410_SDIDSTA_XFERFINISH    (1<<4)
--#define S3C2410_SDIDSTA_BUSYFINISH    (1<<3)
--#define S3C2410_SDIDSTA_SBITERR       (1<<2)	/* reserved on 2410a/2440 */
--#define S3C2410_SDIDSTA_TXDATAON      (1<<1)
--#define S3C2410_SDIDSTA_RXDATAON      (1<<0)
--
--#define S3C2440_SDIFSTA_FIFORESET      (1<<16)
--#define S3C2440_SDIFSTA_FIFOFAIL       (3<<14)  /* 3 is correct (2 bits) */
--#define S3C2410_SDIFSTA_TFDET          (1<<13)
--#define S3C2410_SDIFSTA_RFDET          (1<<12)
--#define S3C2410_SDIFSTA_TFHALF         (1<<11)
--#define S3C2410_SDIFSTA_TFEMPTY        (1<<10)
--#define S3C2410_SDIFSTA_RFLAST         (1<<9)
--#define S3C2410_SDIFSTA_RFFULL         (1<<8)
--#define S3C2410_SDIFSTA_RFHALF         (1<<7)
--#define S3C2410_SDIFSTA_COUNTMASK      (0x7f)
--
--#define S3C2410_SDIIMSK_RESPONSECRC    (1<<17)
--#define S3C2410_SDIIMSK_CMDSENT        (1<<16)
--#define S3C2410_SDIIMSK_CMDTIMEOUT     (1<<15)
--#define S3C2410_SDIIMSK_RESPONSEND     (1<<14)
--#define S3C2410_SDIIMSK_READWAIT       (1<<13)
--#define S3C2410_SDIIMSK_SDIOIRQ        (1<<12)
--#define S3C2410_SDIIMSK_FIFOFAIL       (1<<11)
--#define S3C2410_SDIIMSK_CRCSTATUS      (1<<10)
--#define S3C2410_SDIIMSK_DATACRC        (1<<9)
--#define S3C2410_SDIIMSK_DATATIMEOUT    (1<<8)
--#define S3C2410_SDIIMSK_DATAFINISH     (1<<7)
--#define S3C2410_SDIIMSK_BUSYFINISH     (1<<6)
--#define S3C2410_SDIIMSK_SBITERR        (1<<5)	/* reserved 2440/2410a */
--#define S3C2410_SDIIMSK_TXFIFOHALF     (1<<4)
--#define S3C2410_SDIIMSK_TXFIFOEMPTY    (1<<3)
--#define S3C2410_SDIIMSK_RXFIFOLAST     (1<<2)
--#define S3C2410_SDIIMSK_RXFIFOFULL     (1<<1)
--#define S3C2410_SDIIMSK_RXFIFOHALF     (1<<0)
--
--#endif /* __ASM_ARM_REGS_SDI */
-diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-index 63fb265..8d6794c 100644
---- a/drivers/mmc/host/s3cmci.c
-+++ b/drivers/mmc/host/s3cmci.c
-@@ -25,14 +25,93 @@
- 
- #include <mach/dma.h>
- 
--#include <mach/regs-sdi.h>
--
- #include <linux/platform_data/mmc-s3cmci.h>
- 
- #include "s3cmci.h"
- 
- #define DRIVER_NAME "s3c-mci"
- 
-+#define S3C2410_SDICON			(0x00)
-+#define S3C2410_SDIPRE			(0x04)
-+#define S3C2410_SDICMDARG		(0x08)
-+#define S3C2410_SDICMDCON		(0x0C)
-+#define S3C2410_SDICMDSTAT		(0x10)
-+#define S3C2410_SDIRSP0			(0x14)
-+#define S3C2410_SDIRSP1			(0x18)
-+#define S3C2410_SDIRSP2			(0x1C)
-+#define S3C2410_SDIRSP3			(0x20)
-+#define S3C2410_SDITIMER		(0x24)
-+#define S3C2410_SDIBSIZE		(0x28)
-+#define S3C2410_SDIDCON			(0x2C)
-+#define S3C2410_SDIDCNT			(0x30)
-+#define S3C2410_SDIDSTA			(0x34)
-+#define S3C2410_SDIFSTA			(0x38)
-+
-+#define S3C2410_SDIDATA			(0x3C)
-+#define S3C2410_SDIIMSK			(0x40)
-+
-+#define S3C2440_SDIDATA			(0x40)
-+#define S3C2440_SDIIMSK			(0x3C)
-+
-+#define S3C2440_SDICON_SDRESET		(1 << 8)
-+#define S3C2410_SDICON_SDIOIRQ		(1 << 3)
-+#define S3C2410_SDICON_FIFORESET	(1 << 1)
-+#define S3C2410_SDICON_CLOCKTYPE	(1 << 0)
-+
-+#define S3C2410_SDICMDCON_LONGRSP	(1 << 10)
-+#define S3C2410_SDICMDCON_WAITRSP	(1 << 9)
-+#define S3C2410_SDICMDCON_CMDSTART	(1 << 8)
-+#define S3C2410_SDICMDCON_SENDERHOST	(1 << 6)
-+#define S3C2410_SDICMDCON_INDEX		(0x3f)
-+
-+#define S3C2410_SDICMDSTAT_CRCFAIL	(1 << 12)
-+#define S3C2410_SDICMDSTAT_CMDSENT	(1 << 11)
-+#define S3C2410_SDICMDSTAT_CMDTIMEOUT	(1 << 10)
-+#define S3C2410_SDICMDSTAT_RSPFIN	(1 << 9)
-+
-+#define S3C2440_SDIDCON_DS_WORD		(2 << 22)
-+#define S3C2410_SDIDCON_TXAFTERRESP	(1 << 20)
-+#define S3C2410_SDIDCON_RXAFTERCMD	(1 << 19)
-+#define S3C2410_SDIDCON_BLOCKMODE	(1 << 17)
-+#define S3C2410_SDIDCON_WIDEBUS		(1 << 16)
-+#define S3C2410_SDIDCON_DMAEN		(1 << 15)
-+#define S3C2410_SDIDCON_STOP		(1 << 14)
-+#define S3C2440_SDIDCON_DATSTART	(1 << 14)
-+
-+#define S3C2410_SDIDCON_XFER_RXSTART	(2 << 12)
-+#define S3C2410_SDIDCON_XFER_TXSTART	(3 << 12)
-+
-+#define S3C2410_SDIDCON_BLKNUM_MASK	(0xFFF)
-+
-+#define S3C2410_SDIDSTA_SDIOIRQDETECT	(1 << 9)
-+#define S3C2410_SDIDSTA_FIFOFAIL	(1 << 8)
-+#define S3C2410_SDIDSTA_CRCFAIL		(1 << 7)
-+#define S3C2410_SDIDSTA_RXCRCFAIL	(1 << 6)
-+#define S3C2410_SDIDSTA_DATATIMEOUT	(1 << 5)
-+#define S3C2410_SDIDSTA_XFERFINISH	(1 << 4)
-+#define S3C2410_SDIDSTA_TXDATAON	(1 << 1)
-+#define S3C2410_SDIDSTA_RXDATAON	(1 << 0)
-+
-+#define S3C2440_SDIFSTA_FIFORESET	(1 << 16)
-+#define S3C2440_SDIFSTA_FIFOFAIL	(3 << 14)
-+#define S3C2410_SDIFSTA_TFDET		(1 << 13)
-+#define S3C2410_SDIFSTA_RFDET		(1 << 12)
-+#define S3C2410_SDIFSTA_COUNTMASK	(0x7f)
-+
-+#define S3C2410_SDIIMSK_RESPONSECRC	(1 << 17)
-+#define S3C2410_SDIIMSK_CMDSENT		(1 << 16)
-+#define S3C2410_SDIIMSK_CMDTIMEOUT	(1 << 15)
-+#define S3C2410_SDIIMSK_RESPONSEND	(1 << 14)
-+#define S3C2410_SDIIMSK_SDIOIRQ		(1 << 12)
-+#define S3C2410_SDIIMSK_FIFOFAIL	(1 << 11)
-+#define S3C2410_SDIIMSK_CRCSTATUS	(1 << 10)
-+#define S3C2410_SDIIMSK_DATACRC		(1 << 9)
-+#define S3C2410_SDIIMSK_DATATIMEOUT	(1 << 8)
-+#define S3C2410_SDIIMSK_DATAFINISH	(1 << 7)
-+#define S3C2410_SDIIMSK_TXFIFOHALF	(1 << 4)
-+#define S3C2410_SDIIMSK_RXFIFOLAST	(1 << 2)
-+#define S3C2410_SDIIMSK_RXFIFOHALF	(1 << 0)
-+
- enum dbg_channels {
- 	dbg_err   = (1 << 0),
- 	dbg_debug = (1 << 1),
--- 
-1.7.10.4
+Unfortunately, they do not contain any useful information other than the
+topic having been brought up.  At that point, the CPPI stuff was in
+mach-davinci, and I had suggested moving it into drivers/dma.
+
+The result of that was to say that it doesn't fit the DMA engine APIs.
+So someone came up with the idea of putting it in arch/arm/common - which
+I frankly ignored by email (how long have we been saying "no drivers in
+arch/arm" ?)
+
+Now, it would've been discussed in that meeting, but unfortunately no
+record exists of that.  What does follow that meeting is a discussion
+trail.  From what I can see there, but it looks to me like the decision
+was taken to move it to the DMA engine API, and work on sorting out MUSB
+was going to commence.
+
+The last email in that says "I'll get to that soon"... and that is also
+the final email I have on this topic.  I guess if nothing has happened...
+Shrug, that's someone elses problem.
+
+Anyway, the answer for putting it in arch/arm/common hasn't changed,
+and really, where we are now, post Linus having a moan about the size
+of arch/arm, that answer is even more concrete in the negative.  It's
+54K of code which should not be under arch/arm at all.
+
+Anyway, if you need to look at the patch, it's 6305/1.  Typing into the
+summary search box 'cppi' found it in one go.
