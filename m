@@ -1,89 +1,59 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v7 01/10] ARM: davinci: move private EDMA API to
- arm/common
-Date: Sat, 2 Feb 2013 13:02:51 -0800
-Message-ID: <20130202210251.GE577@atomide.com>
-References: <1359742975-10421-1-git-send-email-mporter@ti.com>
- <1359742975-10421-2-git-send-email-mporter@ti.com>
- <5022f635a527470dbd0be932063e9cd2@DFLE72.ent.ti.com>
- <20130201184915.GP2244@beef>
- <2077c13e12314dc3adc8e5b653855da0@DFLE72.ent.ti.com>
- <20130201185959.GQ2244@beef>
- <e9be6668da8b4372a04687847daa1d8c@DFLE72.ent.ti.com>
- <20130202180747.GS2244@beef>
- <20130202181643.GD577@atomide.com>
- <20130202194853.GT2244@beef>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-04-ewr.mailhop.org ([204.13.248.74]:31480 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751095Ab3BBVC7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Feb 2013 16:02:59 -0500
-Content-Disposition: inline
-In-Reply-To: <20130202194853.GT2244@beef>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Tejun Heo <tj@kernel.org>
+Subject: [PATCH 36/62] mmc: convert to idr_alloc()
+Date: Sat,  2 Feb 2013 17:20:37 -0800
+Message-ID: <1359854463-2538-37-git-send-email-tj@kernel.org>
+References: <1359854463-2538-1-git-send-email-tj@kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1359854463-2538-1-git-send-email-tj@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: akpm@linux-foundation.org
+Cc: linux-kernel@vger.kernel.org, rusty@rustcorp.com.au, bfields@fieldses.org, skinsbursky@parallels.com, ebiederm@xmission.com, jmorris@namei.org, axboe@kernel.dk, Tejun Heo <tj@kernel.org>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Porter <mporter@ti.com>
-Cc: Sergei Shtylyov <sshtylyov@mvista.com>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, "Cousson, Benoit" <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Vinod Koul <vinod.koul@intel.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Chris Ball <cjb@laptop.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 
-* Matt Porter <mporter@ti.com> [130202 11:51]:
-> On Sat, Feb 02, 2013 at 10:16:43AM -0800, Tony Lindgren wrote:
-> > * Matt Porter <mporter@ti.com> [130202 10:10]:
-> > > If it doesn't work, work with Vinod to fix the api. It's expected,
-> > > I'm working on dmaengine API changes right now to deal with a
-> > > limitation of EDMA that needs to be abstracted.
-> > 
-> > Regarding the DMA API limitations, I'm only aware of lack of capability
-> > to configure autoincrement at the device end. And that keeps us from
-> > converting all GPMC related devices using omap SDMA to use the DMA API.
-> > 
-> > Are there other limitations currently known with the DMA API?
-> 
-> Yes, I called one out when this was first posted as an RFC and was
-> working it in parallel with this support. This one blocks AM33XX support
-> in mmc and is the reason I split all of the mmc support out of the base
-> edma dmaengine for am33xx series. Independent of the blockage, whatever
-> we finally settle on to address this API need will also cleanup the use
-> of magic values in the davinci mmc driver (that's part of the second
-> thread below).
-> 
-> RFC posting:
-> https://patchwork.kernel.org/patch/1583531/
-> Posting with initial attempt at a caps api:
-> http://www.spinics.net/lists/linux-mmc/msg18351.html
+Convert to the much saner new idr interface.
 
-OK thanks for the links, good to hear at least some work is happening
-on it.
+Only compile tested.
 
-> Also, I haven't fully vetted the situation with cyclic transfers and
-> EDMA, however, I'm pretty sure that we'll need some API changes there.
-> The reason is that some Davinci platforms have no FIFO on their McASP
-> implementation (that was a new feature added on DA8xx and also AM33xx).
-> As such they have audio support implemented using ping-pong buffering
-> via an SRAM buffer. There's been a number of patches ahead of all this
-> that myself and others have worked upstream to get the SRAM stuff to be
-> Davinci-independent (genalloc). But, at the end of all of this, there's
-> no notion in a cyclic transfer of doing synchronized ping-pong buffering
-> using two chain channels. This is how it is implemented (and documented
-> in EDMA docs going back to the DSPs this IP first showed up on) using
-> the private API. I'll be looking at this soon, but, I'm more interested
-> in 1) getting the base support in 2) then the mmc stuff blocking DT
-> populated platforms using omap_hsmmc (split out and posted) 3) v3 of the
-> caps api w/ vinod's concerns address (working it not)
-> 
-> Normally, I'm not going to bring up the cyclic transfer issue until I
-> have some code to show or reference for discussion...but it's worth
-> being aware. But, in any case, I'm confident that will gate having the
-> mcasp driver that am33xx also uses converted to dmaengine.  Except for
-> the gpmc limitation you menationed, that's the last in kernel user of
-> the privat edma api needed to be converted such that we can kill off
-> arch/arm/common/edma.c once it's taken in.
+Signed-off-by: Tejun Heo <tj@kernel.org>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
+---
+This patch depends on an earlier idr changes and I think it would be
+best to route these together through -mm.  Please holler if there's
+any objection.  Thanks.
 
-And then there's the case of device-to-device DMA that we're not
-currently doing luckily. And I don't think I've even seen that being
-used so we probably don't need to worry about that one right now.
+ drivers/mmc/core/host.c | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
-Regards,
-
-Tony
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index ee2e16b..1117de7 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -306,19 +306,20 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 	int err;
+ 	struct mmc_host *host;
+ 
+-	if (!idr_pre_get(&mmc_host_idr, GFP_KERNEL))
+-		return NULL;
+-
+ 	host = kzalloc(sizeof(struct mmc_host) + extra, GFP_KERNEL);
+ 	if (!host)
+ 		return NULL;
+ 
+ 	/* scanning will be enabled when we're ready */
+ 	host->rescan_disable = 1;
++	idr_preload(GFP_KERNEL);
+ 	spin_lock(&mmc_host_lock);
+-	err = idr_get_new(&mmc_host_idr, host, &host->index);
++	err = idr_alloc(&mmc_host_idr, host, 0, 0, GFP_NOWAIT);
++	if (err >= 0)
++		host->index = err;
+ 	spin_unlock(&mmc_host_lock);
+-	if (err)
++	idr_preload_end();
++	if (err < 0)
+ 		goto free;
+ 
+ 	dev_set_name(&host->class_dev, "mmc%d", host->index);
+-- 
+1.8.1
