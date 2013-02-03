@@ -1,32 +1,25 @@
-From: Sylwester Nawrocki <sylvester.nawrocki@gmail.com>
-Subject: Re: [PATCH] mmc: s3cmci: moved mach/regs-sdi.h into s3cmci device
- driver
-Date: Sun, 03 Feb 2013 19:56:49 +0100
-Message-ID: <510EB2F1.4010603@gmail.com>
-References: <1359765917-11219-1-git-send-email-kgene.kim@samsung.com>
+From: "Song Chen" <info@song.com>
+Subject: Great Proposal!!
+Date: Mon, 04 Feb 2013 03:39:38 +0700
+Message-ID: <20130203203817.2267E5C00D4__36070.5521809452$1359924841$gmane$org@unevm-pmta14.une.net.co>
+Reply-To: mrsongchen12@yahoo.cn
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1359765917-11219-1-git-send-email-kgene.kim@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Kukjin Kim <kgene.kim@samsung.com>
-Cc: linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.une.net.co ([200.13.249.231]:46439 "EHLO
+	une-avas-int03.une.net.co" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753550Ab3BCUxH convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 3 Feb 2013 15:53:07 -0500
+Content-Description: Mail message body
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Recipients <info@song.com>
 
-Hi,
+Hello,
 
-On 02/02/2013 01:45 AM, Kukjin Kim wrote:
-> Since mach/regs-sdi.h is used only for s3cmci.c, so this moves the
-> header file into the driver file, drivers/mmc/host/s3cmci.c file.
->
-> Signed-off-by: Kukjin Kim<kgene.kim@samsung.com>
+Proposal of ($12.8mUSD)for you, reply for details.I await to hear from you on my private email (mrsongchen12@yahoo.cn)
 
-FIW, I have tested this patch on mini2440 board:
-
-Tested-by: Sylwester Nawrocki <sylvester.nawrocki@gmail.com>
-
---
-
-Thanks,
-Sylwester
+Regards
+Song.
