@@ -1,212 +1,70 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH 2/3] mmc: davinci_mmc: add DT support
-Date: Mon, 4 Feb 2013 14:06:16 +0000
-Message-ID: <20130204140616.GB28464@e106331-lin.cambridge.arm.com>
-References: <1359628387-14437-1-git-send-email-prakash.pm@ti.com>
- <1359628387-14437-3-git-send-email-prakash.pm@ti.com>
- <20130131112303.GA7235@e106331-lin.cambridge.arm.com>
- <A73F36158E33644199EB82C5EC81C7BC3EA46049@DBDE01.ent.ti.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH v7 01/10] ARM: davinci: move private EDMA API to arm/common
+Date: Mon, 04 Feb 2013 15:27:09 +0100
+Message-ID: <7655522.SvRnLo3eyU@wuerfel>
+References: <1359742975-10421-1-git-send-email-mporter@ti.com>
+ <20130201213003.GW2637@n2100.arm.linux.org.uk> <510C58DF.3010103@mvista.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=WINDOWS-1252
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <A73F36158E33644199EB82C5EC81C7BC3EA46049@DBDE01.ent.ti.com>
-Content-Disposition: inline
-Sender: linux-doc-owner@vger.kernel.org
-To: "Manjunathappa, Prakash" <prakash.pm@ti.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Porter, Matt" <mporter@ti.com>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "Nori, Sekhar" <nsekhar@ti.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "hs@denx.de" <hs@denx.de>, "ido@wizery.com" <ido@wizery.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <510C58DF.3010103-Igf4POYTYCDQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Sergei Shtylyov <sshtylyov-Igf4POYTYCDQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+On Saturday 02 February 2013 04:07:59 Sergei Shtylyov wrote:
+> On 02-02-2013 1:30, Russell King - ARM Linux wrote:
 
-On Mon, Feb 04, 2013 at 01:28:14PM +0000, Manjunathappa, Prakash wrote:
-> Hi Mark,
+> >> because it doesn't make sense to support multiple DMA APIs. We can check
+> >> from MUSB's registers if it was configured with Inventra DMA support and
+> >> based on that we can register MUSB's own DMA Engine to dmaengine API.
 > 
-> On Thu, Jan 31, 2013 at 16:53:03, Mark Rutland wrote:
-> > Hello,
-> >
-> > I have a few comments on the devicetree binding and the way it's parsed.
-> >
+> > Hang on.  This is one of the DMA implementations which is closely
+> > coupled with the USB and only the USB?  If it is...
 > 
-> Thanks for review.
+> > I thought this had been discussed _extensively_ before.  I thought the
+> > resolution on it was:
+> > 1. It would not use the DMA engine API.
+> > 2. It would not live in arch/arm.
+> > 3. It would be placed nearby the USB driver it's associated with.
 > 
-> > On Thu, Jan 31, 2013 at 10:33:06AM +0000, Manjunathappa, Prakash wrote:
-
-[...]
-
-> > > +- caps: Check for Host capabilities in <linux/mmc/host.h>
-> >
-> > Is this a set of binary flags? Also, is this Linux-specific?
-> >
-> > I really don't think this should be in the devicetree binding. Why do you need
-> > this?
-> >
+> > (1) because we don't use APIs just for the hell of it - think.  Do we
+> > use the DMA engine API for PCI bus mastering ethernet controllers?  No.
+> > Do we use it for PCI bus mastering SCSI controllers?  No.  Because the
+> > DMA is integral to the rest of the device.
 > 
-> I was using this to specify the below controller capabilities:
-> MMC_CAP_MMC_HIGHSPEED and MMC_CAP_SD_HIGHSPEED,
-> Found from discussion[1] that this can be derived from max-frequency,
-> That is above capabilities are supported when max-frequency >= 50MHz.
+> > The DMA engine API only makes sense if the DMA engine is a shared
+> > system resource.
 > 
-> [1] https://lkml.org/lkml/2012/10/15/231
+>     Thanks for such extensive wording in the support of my point. 
 
-Great!
+Actually there is another problem with the musb driver, which is that
+you can only have one DMA controller configured at build time, and
+that currently prevents us from building a kernel that supports both
+the Inventra and TUSB variants together. With multiplatform coming
+up for both ux500 and omap2, we will also have to make a decision
+about ux500 vs omap being supported in DMA mode.
 
-[...]
+I can see two ways out of this: either we extend the musb driver to
+have run-time registration of the DMA controller, which duplicates
+infrastructure that already exists in the dmaengine API, or we
+make the dmaengine back-end for musb the default and require all
+platforms to use that if they want to coexist with other platforms
+and also use DMA support in musb.
 
-> > > @@ -1156,16 +1157,75 @@ static void __init init_mmcsd_host(struct mmc_davinci_host *host)
-> > >
-> > >     mmc_davinci_reset_ctrl(host, 0);
-> > >  }
-> > > +#ifdef CONFIG_OF
-> > > +static struct davinci_mmc_config
-> > > +   *mmc_of_get_pdata(struct platform_device *pdev)
-> > > +{
-> > > +   struct device_node *np;
-> > > +   struct davinci_mmc_config *pdata = NULL;
-> > > +   u32 data;
-> > > +   int ret;
-> > > +
-> > > +   pdata = pdev->dev.platform_data;
-> > > +   if (!pdata) {
-> > > +           pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
-> > > +           if (!pdata) {
-> > > +                   dev_err(&pdev->dev, "Failed to allocate memory for struct davinci_mmc_config\n");
-> > > +                   goto nodata;
-> > > +           }
-> > > +   }
-> >
-> > Why do you need to conditionally allocate this? This only seems to be called
-> > once.
-> >
-> 
-> This is common function for DT and non-DT kernel(will be removing #ifdef CONFIG_OF),
-> So above check is necessary for to allocate pdata for DT kernel.
+Note that the ux500_dma code in musb already uses dmaengine. It could
+probably be extended to support any platform that has a dmaengine
+driver for the DMA controller used in MUSB.
 
-Ah. Am I right in thinking if you moved the check for pdev->dev.of_node above
-the pdata allocation, it wouldn't have to be done conditionally?
-
-> 
-> > > +
-> > > +   np = pdev->dev.of_node;
-> > > +   if (!np)
-> > > +           goto nodata;
-> >
-> > Why not just return immediately here? You do nothing special at nodata.
-> >
-> 
-> Following convention to not have more than 1 return from function and have
-> Common exit point. May not be necessary now since we have devm_* calls now.
-> Can I still prefer to keep this goto?
-
-It just looks a little odd to me. I have no strong feelings here.
-
-[...]
-
-> > > +
-> > > +   ret = of_property_read_u32(np, "version", &data);
-> > > +   if (ret)
-> > > +           dev_err(&pdev->dev, "version not specified\n");
-> > > +   pdata->version = data;
-> >
-> > And again, though I'd prefer to see this property go entirely.
-> >
-> 
-> Yes this is going to go away.
-
-Great!
-
-> 
-> > > +
-> > > +nodata:
-> > > +   return pdata;
-> > > +}
-> > > +
-> > > +#else
-> > > +static struct davinci_mmc_config
-> > > +   *mmc_of_get_pdata(struct platform_device *pdev)
-> > > +{
-> > > +   return pdev->dev.platform_data;
-> > > +}
-> > > +#endif
-> >
-> > This is poorly named if it's required for !CONFIG_OF.
-> >
-> > Why not change this to something like mmc_parse_pdata, returning an
-> > error code. For !CONFIG_OF, it can simply return 0, which should be less
-> > surprising for anyone else reading this code.
-> >
-> 
-> I will remove #ifdef CONFIG_OF conditional compilation and consideration
-> your suggestion to name function as mmc_parse_pdata.
-
-Sounds good.
-
-> 
-> > >
-> > >  static int __init davinci_mmcsd_probe(struct platform_device *pdev)
-> > >  {
-> > > -   struct davinci_mmc_config *pdata = pdev->dev.platform_data;
-> > > +   struct davinci_mmc_config *pdata = NULL;
-> > >     struct mmc_davinci_host *host = NULL;
-> > >     struct mmc_host *mmc = NULL;
-> > >     struct resource *r, *mem = NULL;
-> > >     int ret = 0, irq = 0;
-> > >     size_t mem_size;
-> > >
-> > > +   pdata = mmc_of_get_pdata(pdev);
-> > > +   if (pdata == NULL) {
-> > > +           dev_err(&pdev->dev, "Can not get platform data\n");
-> > > +           return -ENOENT;
-> > > +   }
-> > > +
-> > >     /* REVISIT:  when we're fully converted, fail if pdata is NULL */
-> > >
-> > >     ret = -ENODEV;
-> > > @@ -1403,11 +1463,18 @@ static const struct dev_pm_ops davinci_mmcsd_pm = {
-> > >  #define davinci_mmcsd_pm_ops NULL
-> > >  #endif
-> > >
-> > > +static const struct of_device_id davinci_mmc_of_match[] = {
-> > > +   {.compatible = "ti,davinci_mmc", },
-> > > +   {},
-> > > +};
-> > > +MODULE_DEVICE_TABLE(of, davinci_mmc_of_match);
-> >
-> > For supporting multiple versions, you could either use some auxdata
-> > here, or check each one in davince_mmcsd_probe.
-> >
-> 
-> I will consider keeping auxdata via compatible field.
-> 
-> > > +
-> > >  static struct platform_driver davinci_mmcsd_driver = {
-> > >     .driver         = {
-> > >             .name   = "davinci_mmc",
-> > >             .owner  = THIS_MODULE,
-> > >             .pm     = davinci_mmcsd_pm_ops,
-> > > +           .of_match_table = of_match_ptr(davinci_mmc_of_match),
-> > >     },
-> > >     .remove         = __exit_p(davinci_mmcsd_remove),
-> > >  };
-> >
-> > Where does davinci_mmcsd_probe get called from, and how is the
-> > of_match_table used? Should it not be set as .probe on the driver?
-> >
-> 
-> Driver probe is registered in module_init.
-
-Ah, I'd missed the module_init when scanning through the code.
-
-I couldn't figure out how davinci_mmcsd_probe got called for elements matched
-by the match table. I see platform_driver_probe temporarily sets the .probe on
-the driver, so that makes sense now.
-
-> And are you suggesting me to use module_platform_driver? If yes can it not
-> be taken separately as it is unrelated to DT support I am adding.
-
-No, I'd just managed to miss that which got called via module_init. It should
-be fine as-is.
-
-Thanks,
-Mark.
-
+	Arnd
