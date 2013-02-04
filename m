@@ -1,39 +1,43 @@
 From: Roger Tseng <rogerable@realtek.com>
-Subject: [PATCH 0/3] rtsx: patchset for supporting new model RTS5227
-Date: Mon, 4 Feb 2013 15:45:56 +0800
-Message-ID: <1359963959-2305-1-git-send-email-rogerable@realtek.com>
+Subject: [PATCH 1/3] MMC: rtsx: remove driving adjustment
+Date: Mon, 4 Feb 2013 15:45:57 +0800
+Message-ID: <1359963959-2305-2-git-send-email-rogerable@realtek.com>
+References: <1359963959-2305-1-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rtits2.realtek.com ([60.250.210.242]:49892 "EHLO
-	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751825Ab3BDHsv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Feb 2013 02:48:51 -0500
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1359963959-2305-1-git-send-email-rogerable@realtek.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: cjb@laptop.org, sameo@linux.intel.com
 Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, wei_wang@realsil.com.cn, Roger Tseng <rogerable@realtek.com>
+List-Id: linux-mmc@vger.kernel.org
 
-The patchset makes necessary changes in mfd and mmc tree for supporting RTS5227
-card reader.
+Several new models of readers use different way to select driving
+capability(a necessary adjustment along with voltage change). Removing this
+from device-independent rtsx_pci_sdmmc module. It will be implemented in
+device-depend calls encapsulated by rtsx_pci_switch_output_voltage().
 
-Roger Tseng (3):
-  MMC: rtsx: remove driving adjustment
-  mfd: rtsx: implement driving adjustment to device-dependent callbacks
-  mfd: rtsx: support RTS5227
+Signed-off-by: Roger Tseng <rogerable@realtek.com>
+Reviewed-by: Wei WANG <wei_wang@realsil.com.cn>
+---
+ drivers/mmc/host/rtsx_pci_sdmmc.c | 5 -----
+ 1 file changed, 5 deletions(-)
 
- drivers/mfd/Makefile              |   2 +-
- drivers/mfd/rtl8411.c             |  16 ++-
- drivers/mfd/rts5209.c             |   8 ++
- drivers/mfd/rts5227.c             | 234 ++++++++++++++++++++++++++++++++++++++
- drivers/mfd/rts5229.c             |   8 ++
- drivers/mfd/rtsx_pcr.c            |   5 +
- drivers/mfd/rtsx_pcr.h            |   1 +
- drivers/mmc/host/rtsx_pci_sdmmc.c |   5 -
- include/linux/mfd/rtsx_pci.h      |   5 +
- 9 files changed, 275 insertions(+), 9 deletions(-)
- create mode 100644 drivers/mfd/rts5227.c
-
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index f74b5ad..f93f100 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -1083,11 +1083,6 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		voltage = OUTPUT_1V8;
+ 
+ 	if (voltage == OUTPUT_1V8) {
+-		err = rtsx_pci_write_register(pcr,
+-				SD30_DRIVE_SEL, 0x07, DRIVER_TYPE_B);
+-		if (err < 0)
+-			goto out;
+-
+ 		err = sd_wait_voltage_stable_1(host);
+ 		if (err < 0)
+ 			goto out;
 -- 
 1.7.12.1
-
