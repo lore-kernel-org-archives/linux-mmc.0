@@ -1,77 +1,49 @@
-From: Linus Walleij <linus.walleij@linaro.org>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
 Subject: Re: [PATCH v7 01/10] ARM: davinci: move private EDMA API to arm/common
-Date: Mon, 4 Feb 2013 22:11:46 +0100
-Message-ID: <CACRpkdbPyZt8=pLhz-5qcaSSAk6VBn61dPTNp6teU9HksBwN2w@mail.gmail.com>
+Date: Mon, 4 Feb 2013 21:47:38 +0000
+Message-ID: <201302042147.38407.arnd@arndb.de>
 References: <510C2A47.1090607@mvista.com>
-	<20130201205600.GA31762@arwen.pp.htv.fi>
-	<20130201213003.GW2637@n2100.arm.linux.org.uk>
-	<20130204154153.GA18237@arwen.pp.htv.fi>
-	<510FF1A6.403@mvista.com>
-	<20130204164712.GB4269@arwen.pp.htv.fi>
-	<510FF5C9.3030600@mvista.com>
-	<20130204170216.GC4269@arwen.pp.htv.fi>
-	<51100A72.6030909@ti.com>
-	<CACRpkdZihnp3_Df==QRWxQupgi7W_YXZxc-MxkusVH6J+Vx56A@mail.gmail.com>
 	<20130204203358.GX4720@opensource.wolfsonmicro.com>
+	<CACRpkdbPyZt8=pLhz-5qcaSSAk6VBn61dPTNp6teU9HksBwN2w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f177.google.com ([209.85.223.177]:36112 "EHLO
-	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754948Ab3BDVLr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Feb 2013 16:11:47 -0500
-Received: by mail-ie0-f177.google.com with SMTP id 16so6408124iea.36
-        for <linux-mmc@vger.kernel.org>; Mon, 04 Feb 2013 13:11:46 -0800 (PST)
-In-Reply-To: <20130204203358.GX4720@opensource.wolfsonmicro.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+In-Reply-To: <CACRpkdbPyZt8=pLhz-5qcaSSAk6VBn61dPTNp6teU9HksBwN2w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Sergei Shtylyov <sshtylyov-Igf4POYTYCDQT0dZR+AlfA@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Nair,
+	Sandeep" <sandeep_n-l0cyMroinI0@public.gmane.org>, Cyril Chemparathy <cyril-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Matt Porter <mporter-l0cyMroinI0@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, "Cousson,
+	Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, balbi-l0cyMroinI0@public.gmane.org, Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>Linux
 List-Id: linux-mmc@vger.kernel.org
-To: Cyril Chemparathy <cyril@ti.com>
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, balbi@ti.com, Sergei Shtylyov <sshtylyov@mvista.com>, Linux Documentation List <linux-doc@vger.kernel.org>, Lindgren <tony@atomide.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, "Nair, Sandeep" <sandeep_n@ti.com>, Chris Ball <cjb@laptop.org>, Matt Porter <mporter@ti.com>, Arnd Bergmann <arnd@arndb.de>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Rob Herring <rob.herring@calxeda.com>, Linux OMAP List <linux-omap@vger.kernel.org>, ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, "Cousson, Benoit" <b-cousson@ti.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Landley <rob@landley.net>, Dan Williams <djbw@fb.com>Linux
 
-On Mon, Feb 4, 2013 at 9:33 PM, Mark Brown
-<broonie@opensource.wolfsonmicro.com> wrote:
-> On Mon, Feb 04, 2013 at 09:29:46PM +0100, Linus Walleij wrote:
->> On Mon, Feb 4, 2013 at 8:22 PM, Cyril Chemparathy <cyril@ti.com> wrote:
->
->> > Based on our experience with fitting multiple subsystems on top of this
->> > DMA-Engine driver, I must say that the DMA-Engine interface has proven
->> > to be a less than ideal fit for the network driver use case.
->
->> > The first problem is that the DMA-Engine interface expects to "push"
->> > completed traffic up into the upper layer as a part of its callback.
->> > This doesn't fit cleanly with NAPI, which expects to "pull" completed
->> > traffic from below in the NAPI poll.  We've somehow kludged together a
->> > solution around this, but it isn't very elegant.
->
->> I cannot understand the actual technical problem from the above
->> paragraphs though. dmaengine doesn't have a concept of pushing
->> nor polling, it basically copies streams of words from A to B, where
->> A/B can be a device or a buffer, nothing else.
->
->> The thing you're looking for sounds more like an adapter on top
->> of dmaengine, which can surely be constructed, some
->> drivers/dma/dmaengine-napi.c or whatever.
->
-> Broadly speaking what NAPI wants is to never get any callbacks from the
-> hardware (or DMAs).  It wants to wake up periodically, take a look at
-> what packets have been read by the hardware and process them.  The goal
-> is to have the DMAs sitting and running without disturbing the processor
-> at all after the first packet has been handled.
+On Monday 04 February 2013, Linus Walleij wrote:
+> So I think the above concerns are moot. The callback we can
+> set on cookies is entirely optional, and it's even implemented by
+> each DMA engine, and some may not even support it but require
+> polling, and then it won't even be implemented by the driver.
 
-OK we should definately be able to encompass that in dmaengine
-quite easily.
+Just to ensure that everybody is talking about the same thing here:
+Is it just the callback that is optional, or also the interrupt
+coming from the hardware? With NAPI, you want to avoid both, since
+getting an interrupt for every packet adds noticeable overhead,
+but you still want to be able to tell the hardware that you
+are fed up with polling and would like to get an interrupt again
+when the next data arrives (ideally, after either a little time
+has passed after the next packet, or a specific number of packets
+has arrived).
 
-So I think the above concerns are moot. The callback we can
-set on cookies is entirely optional, and it's even implemented by
-each DMA engine, and some may not even support it but *require*
-polling, and then it won't even be implemented by the driver.
+	Arnd
 
-Which probably stems from the original design of the dmaengine
-API, which was for TCP networking acceleration, mainly.
-
-Cyril, just stack up the cookies and take a sweep over them to see
-which ones are baked when the NAPI poll comes in -> problem
-solved.
-
-Yours,
-Linus Walleij
+------------------------------------------------------------------------------
+Everyone hates slow websites. So do we.
+Make your web apps faster with AppDynamics
+Download AppDynamics Lite for free today:
+http://p.sf.net/sfu/appdyn_d2d_jan
