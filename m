@@ -1,303 +1,212 @@
-From: "Manjunathappa, Prakash" <prakash.pm@ti.com>
-Subject: RE: [PATCH 2/3] mmc: davinci_mmc: add DT support
-Date: Mon, 4 Feb 2013 13:28:14 +0000
-Message-ID: <A73F36158E33644199EB82C5EC81C7BC3EA46049@DBDE01.ent.ti.com>
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [PATCH 2/3] mmc: davinci_mmc: add DT support
+Date: Mon, 4 Feb 2013 14:06:16 +0000
+Message-ID: <20130204140616.GB28464@e106331-lin.cambridge.arm.com>
 References: <1359628387-14437-1-git-send-email-prakash.pm@ti.com>
  <1359628387-14437-3-git-send-email-prakash.pm@ti.com>
  <20130131112303.GA7235@e106331-lin.cambridge.arm.com>
+ <A73F36158E33644199EB82C5EC81C7BC3EA46049@DBDE01.ent.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=WINDOWS-1252
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <20130131112303.GA7235@e106331-lin.cambridge.arm.com>
-Content-Language: en-US
+In-Reply-To: <A73F36158E33644199EB82C5EC81C7BC3EA46049@DBDE01.ent.ti.com>
+Content-Disposition: inline
 Sender: linux-doc-owner@vger.kernel.org
-To: Mark Rutland <mark.rutland@arm.com>
+To: "Manjunathappa, Prakash" <prakash.pm@ti.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Porter, Matt" <mporter@ti.com>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "Nori, Sekhar" <nsekhar@ti.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "hs@denx.de" <hs@denx.de>, "ido@wizery.com" <ido@wizery.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Mark,
+Hi,
 
-On Thu, Jan 31, 2013 at 16:53:03, Mark Rutland wrote:
-> Hello,
+On Mon, Feb 04, 2013 at 01:28:14PM +0000, Manjunathappa, Prakash wrote:
+> Hi Mark,
 > 
-> I have a few comments on the devicetree binding and the way it's parsed.
+> On Thu, Jan 31, 2013 at 16:53:03, Mark Rutland wrote:
+> > Hello,
+> >
+> > I have a few comments on the devicetree binding and the way it's parsed.
+> >
 > 
+> Thanks for review.
+> 
+> > On Thu, Jan 31, 2013 at 10:33:06AM +0000, Manjunathappa, Prakash wrote:
 
-Thanks for review.
+[...]
 
-> On Thu, Jan 31, 2013 at 10:33:06AM +0000, Manjunathappa, Prakash wrote:
-> > Adds device tree support for davinci_mmc. Also add
-> > binding documentation.
-> > Tested with non-dma PIO mode and without GPIO
-> > card_detect/write_protect option because of
-> > dependencies on EDMA and GPIO modules DT support.
-> > 
-> > Signed-off-by: Manjunathappa, Prakash <prakash.pm@ti.com>
-> > Cc: linux-mmc@vger.kernel.org
-> > Cc: linux-arm-kernel@lists.infradead.org
-> > Cc: linux-kernel@vger.kernel.org
-> > Cc: davinci-linux-open-source@linux.davincidsp.com
-> > Cc: devicetree-discuss@lists.ozlabs.org
-> > Cc: cjb@laptop.org
-> > Cc: Sekhar Nori <nsekhar@ti.com>
-> > Cc: mporter@ti.com
-> > ---
-> >  .../devicetree/bindings/mmc/davinci_mmc.txt        |   23 +++++++
-> >  drivers/mmc/host/davinci_mmc.c                     |   69 +++++++++++++++++++-
-> >  2 files changed, 91 insertions(+), 1 deletions(-)
-> >  create mode 100644 Documentation/devicetree/bindings/mmc/davinci_mmc.txt
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/davinci_mmc.txt b/Documentation/devicetree/bindings/mmc/davinci_mmc.txt
-> > new file mode 100644
-> > index 0000000..144bee6
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/mmc/davinci_mmc.txt
-> > @@ -0,0 +1,23 @@
-> > +* TI Highspeed MMC host controller for DaVinci
-> > +
-> > +The Highspeed MMC Host Controller on TI DaVinci family
-> > +provides an interface for MMC, SD and SDIO types of memory cards.
-> > +
-> > +This file documents differences between the core properties described
-> > +by mmc.txt and the properties used by the davinci_mmc driver.
-> > +
-> > +Required properties:
-> > +- compatible:
-> > + Should be "ti,davinci_mmc", for davinci controllers
+> > > +- caps: Check for Host capabilities in <linux/mmc/host.h>
+> >
+> > Is this a set of binary flags? Also, is this Linux-specific?
+> >
+> > I really don't think this should be in the devicetree binding. Why do you need
+> > this?
+> >
 > 
-> "ti,davinci-mmc" (with '-' rather than '_') would be preferable.
+> I was using this to specify the below controller capabilities:
+> MMC_CAP_MMC_HIGHSPEED and MMC_CAP_SD_HIGHSPEED,
+> Found from discussion[1] that this can be derived from max-frequency,
+> That is above capabilities are supported when max-frequency >= 50MHz.
 > 
+> [1] https://lkml.org/lkml/2012/10/15/231
 
-I agree, will correct it.
+Great!
 
-> > +
-> > +Optional properties:
-> > +- bus-width: Number of data lines, can be <1>, <4>, or <8>, default <1>
-> > +- max-frequency: maximum operating clock frequency.
-> 
-> You said you only described differences from mmc.txt, but this is listed in
-> mmc.txt.
-> 
+[...]
 
-Agreed, I will remove it from here.
-
-> > +- caps: Check for Host capabilities in <linux/mmc/host.h>
+> > > @@ -1156,16 +1157,75 @@ static void __init init_mmcsd_host(struct mmc_davinci_host *host)
+> > >
+> > >     mmc_davinci_reset_ctrl(host, 0);
+> > >  }
+> > > +#ifdef CONFIG_OF
+> > > +static struct davinci_mmc_config
+> > > +   *mmc_of_get_pdata(struct platform_device *pdev)
+> > > +{
+> > > +   struct device_node *np;
+> > > +   struct davinci_mmc_config *pdata = NULL;
+> > > +   u32 data;
+> > > +   int ret;
+> > > +
+> > > +   pdata = pdev->dev.platform_data;
+> > > +   if (!pdata) {
+> > > +           pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
+> > > +           if (!pdata) {
+> > > +                   dev_err(&pdev->dev, "Failed to allocate memory for struct davinci_mmc_config\n");
+> > > +                   goto nodata;
+> > > +           }
+> > > +   }
+> >
+> > Why do you need to conditionally allocate this? This only seems to be called
+> > once.
+> >
 > 
-> Is this a set of binary flags? Also, is this Linux-specific?
-> 
-> I really don't think this should be in the devicetree binding. Why do you need
-> this?
-> 
+> This is common function for DT and non-DT kernel(will be removing #ifdef CONFIG_OF),
+> So above check is necessary for to allocate pdata for DT kernel.
 
-I was using this to specify the below controller capabilities:
-MMC_CAP_MMC_HIGHSPEED and MMC_CAP_SD_HIGHSPEED,
-Found from discussion[1] that this can be derived from max-frequency,
-That is above capabilities are supported when max-frequency >= 50MHz.
-
-[1] https://lkml.org/lkml/2012/10/15/231
-
-> > +- version: version of controller.
-> 
-> This should be encoded as part of the compatible string.
-> 
-
-Agreed will make change accordingly to accommodate version info in compatible string.
-
-> > +Example:
-> > +	mmc1: mmc@0x4809c000 {
-> > +		compatible = "ti,omap4-hsmmc";
-> > +		reg = <0x4809c000 0x400>;
-> > +		bus-width = <4>;
-> > +	};
-> 
-> It would be nice if the example referred to this binding rather than another.
-> 
-
-Agreed, I will change.
-
-> > diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-> > index 382b79d..ce6730d 100644
-> > --- a/drivers/mmc/host/davinci_mmc.c
-> > +++ b/drivers/mmc/host/davinci_mmc.c
-> > @@ -34,6 +34,7 @@
-> >  #include <linux/dma-mapping.h>
-> >  #include <linux/edma.h>
-> >  #include <linux/mmc/mmc.h>
-> > +#include <linux/of.h>
-> >  
-> >  #include <linux/platform_data/mmc-davinci.h>
-> >  
-> > @@ -1156,16 +1157,75 @@ static void __init init_mmcsd_host(struct mmc_davinci_host *host)
-> >  
-> >  	mmc_davinci_reset_ctrl(host, 0);
-> >  }
-> > +#ifdef CONFIG_OF
-> > +static struct davinci_mmc_config
-> > +	*mmc_of_get_pdata(struct platform_device *pdev)
-> > +{
-> > +	struct device_node *np;
-> > +	struct davinci_mmc_config *pdata = NULL;
-> > +	u32 data;
-> > +	int ret;
-> > +
-> > +	pdata = pdev->dev.platform_data;
-> > +	if (!pdata) {
-> > +		pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
-> > +		if (!pdata) {
-> > +			dev_err(&pdev->dev, "Failed to allocate memory for struct davinci_mmc_config\n");
-> > +			goto nodata;
-> > +		}
-> > +	}
-> 
-> Why do you need to conditionally allocate this? This only seems to be called
-> once.
-> 
-
-This is common function for DT and non-DT kernel(will be removing #ifdef CONFIG_OF),
-So above check is necessary for to allocate pdata for DT kernel.
-
-> > +
-> > +	np = pdev->dev.of_node;
-> > +	if (!np)
-> > +		goto nodata;
-> 
-> Why not just return immediately here? You do nothing special at nodata.
-> 
-
-Following convention to not have more than 1 return from function and have
-Common exit point. May not be necessary now since we have devm_* calls now.
-Can I still prefer to keep this goto?
-
-> > +
-> > +	ret = of_property_read_u32(np, "bus-width", &data);
-> > +	if (ret)
-> > +		dev_info(&pdev->dev, "wires not specified, defaulting to 4 bit mode\n");
-> > +	pdata->wires = data;
-> 
-> That dev_info doesn't seem to match up with what the next line is doing (data
-> might not have been initialised). Also, unless I've misunderstood, it doesn't
-> match up with the default of 1 mentioned in the binding doc.
-> 
-
-Yes with missing bus-width property module comes in 1 bit mode, I will correct it.
-
-> > +
-> > +	ret = of_property_read_u32(np, "max-frequency", &data);
-> > +	if (ret)
-> > +		dev_info(&pdev->dev, "max-frequency not specified, defaulting to 25MHz\n");
-> > +	pdata->max_freq = data;
-> 
-> Again, the dev_info doesn't match up with the line below it. I notice
-> the default's not one specified in the binding. Is this frequency chosen
-> from the hardware docs, or is it an arbitrary choice. If not arbitrary,
-> it might be worth specifying in the binding.
-> 
-
-Agreed, I will make the changes for the default values.
+Ah. Am I right in thinking if you moved the check for pdev->dev.of_node above
+the pdata allocation, it wouldn't have to be done conditionally?
 
 > 
-> > +
-> > +	ret = of_property_read_u32(np, "caps", &data);
-> > +	if (ret)
-> > +		dev_info(&pdev->dev, "card capability not specified\n");
-> > +	pdata->caps = data;
+> > > +
+> > > +   np = pdev->dev.of_node;
+> > > +   if (!np)
+> > > +           goto nodata;
+> >
+> > Why not just return immediately here? You do nothing special at nodata.
+> >
 > 
-> Again, you may be using garbage data.
-> 
+> Following convention to not have more than 1 return from function and have
+> Common exit point. May not be necessary now since we have devm_* calls now.
+> Can I still prefer to keep this goto?
 
-Ok I will correct it.
+It just looks a little odd to me. I have no strong feelings here.
 
-> > +
-> > +	ret = of_property_read_u32(np, "version", &data);
-> > +	if (ret)
-> > +		dev_err(&pdev->dev, "version not specified\n");
-> > +	pdata->version = data;
-> 
-> And again, though I'd prefer to see this property go entirely.
-> 
+[...]
 
-Yes this is going to go away.
-
-> > +
-> > +nodata:
-> > +	return pdata;
-> > +}
-> > +
-> > +#else
-> > +static struct davinci_mmc_config
-> > +	*mmc_of_get_pdata(struct platform_device *pdev)
-> > +{
-> > +	return pdev->dev.platform_data;
-> > +}
-> > +#endif
+> > > +
+> > > +   ret = of_property_read_u32(np, "version", &data);
+> > > +   if (ret)
+> > > +           dev_err(&pdev->dev, "version not specified\n");
+> > > +   pdata->version = data;
+> >
+> > And again, though I'd prefer to see this property go entirely.
+> >
 > 
-> This is poorly named if it's required for !CONFIG_OF.
-> 
-> Why not change this to something like mmc_parse_pdata, returning an
-> error code. For !CONFIG_OF, it can simply return 0, which should be less
-> surprising for anyone else reading this code.
-> 
+> Yes this is going to go away.
 
-I will remove #ifdef CONFIG_OF conditional compilation and consideration
-your suggestion to name function as mmc_parse_pdata.
+Great!
 
-> >  
-> >  static int __init davinci_mmcsd_probe(struct platform_device *pdev)
-> >  {
-> > -	struct davinci_mmc_config *pdata = pdev->dev.platform_data;
-> > +	struct davinci_mmc_config *pdata = NULL;
-> >  	struct mmc_davinci_host *host = NULL;
-> >  	struct mmc_host *mmc = NULL;
-> >  	struct resource *r, *mem = NULL;
-> >  	int ret = 0, irq = 0;
-> >  	size_t mem_size;
-> >  
-> > +	pdata = mmc_of_get_pdata(pdev);
-> > +	if (pdata == NULL) {
-> > +		dev_err(&pdev->dev, "Can not get platform data\n");
-> > +		return -ENOENT;
-> > +	}
-> > +
-> >  	/* REVISIT:  when we're fully converted, fail if pdata is NULL */
-> >  
-> >  	ret = -ENODEV;
-> > @@ -1403,11 +1463,18 @@ static const struct dev_pm_ops davinci_mmcsd_pm = {
-> >  #define davinci_mmcsd_pm_ops NULL
-> >  #endif
-> >  
-> > +static const struct of_device_id davinci_mmc_of_match[] = {
-> > +	{.compatible = "ti,davinci_mmc", },
-> > +	{},
-> > +};
-> > +MODULE_DEVICE_TABLE(of, davinci_mmc_of_match);
 > 
-> For supporting multiple versions, you could either use some auxdata
-> here, or check each one in davince_mmcsd_probe.
+> > > +
+> > > +nodata:
+> > > +   return pdata;
+> > > +}
+> > > +
+> > > +#else
+> > > +static struct davinci_mmc_config
+> > > +   *mmc_of_get_pdata(struct platform_device *pdev)
+> > > +{
+> > > +   return pdev->dev.platform_data;
+> > > +}
+> > > +#endif
+> >
+> > This is poorly named if it's required for !CONFIG_OF.
+> >
+> > Why not change this to something like mmc_parse_pdata, returning an
+> > error code. For !CONFIG_OF, it can simply return 0, which should be less
+> > surprising for anyone else reading this code.
+> >
 > 
+> I will remove #ifdef CONFIG_OF conditional compilation and consideration
+> your suggestion to name function as mmc_parse_pdata.
 
-I will consider keeping auxdata via compatible field.
+Sounds good.
 
-> > +
-> >  static struct platform_driver davinci_mmcsd_driver = {
-> >  	.driver		= {
-> >  		.name	= "davinci_mmc",
-> >  		.owner	= THIS_MODULE,
-> >  		.pm	= davinci_mmcsd_pm_ops,
-> > +		.of_match_table = of_match_ptr(davinci_mmc_of_match),
-> >  	},
-> >  	.remove		= __exit_p(davinci_mmcsd_remove),
-> >  };
 > 
-> Where does davinci_mmcsd_probe get called from, and how is the
-> of_match_table used? Should it not be set as .probe on the driver?
+> > >
+> > >  static int __init davinci_mmcsd_probe(struct platform_device *pdev)
+> > >  {
+> > > -   struct davinci_mmc_config *pdata = pdev->dev.platform_data;
+> > > +   struct davinci_mmc_config *pdata = NULL;
+> > >     struct mmc_davinci_host *host = NULL;
+> > >     struct mmc_host *mmc = NULL;
+> > >     struct resource *r, *mem = NULL;
+> > >     int ret = 0, irq = 0;
+> > >     size_t mem_size;
+> > >
+> > > +   pdata = mmc_of_get_pdata(pdev);
+> > > +   if (pdata == NULL) {
+> > > +           dev_err(&pdev->dev, "Can not get platform data\n");
+> > > +           return -ENOENT;
+> > > +   }
+> > > +
+> > >     /* REVISIT:  when we're fully converted, fail if pdata is NULL */
+> > >
+> > >     ret = -ENODEV;
+> > > @@ -1403,11 +1463,18 @@ static const struct dev_pm_ops davinci_mmcsd_pm = {
+> > >  #define davinci_mmcsd_pm_ops NULL
+> > >  #endif
+> > >
+> > > +static const struct of_device_id davinci_mmc_of_match[] = {
+> > > +   {.compatible = "ti,davinci_mmc", },
+> > > +   {},
+> > > +};
+> > > +MODULE_DEVICE_TABLE(of, davinci_mmc_of_match);
+> >
+> > For supporting multiple versions, you could either use some auxdata
+> > here, or check each one in davince_mmcsd_probe.
+> >
 > 
+> I will consider keeping auxdata via compatible field.
+> 
+> > > +
+> > >  static struct platform_driver davinci_mmcsd_driver = {
+> > >     .driver         = {
+> > >             .name   = "davinci_mmc",
+> > >             .owner  = THIS_MODULE,
+> > >             .pm     = davinci_mmcsd_pm_ops,
+> > > +           .of_match_table = of_match_ptr(davinci_mmc_of_match),
+> > >     },
+> > >     .remove         = __exit_p(davinci_mmcsd_remove),
+> > >  };
+> >
+> > Where does davinci_mmcsd_probe get called from, and how is the
+> > of_match_table used? Should it not be set as .probe on the driver?
+> >
+> 
+> Driver probe is registered in module_init.
 
-Driver probe is registered in module_init. 
-And are you suggesting me to use module_platform_driver? If yes can it not
-be taken separately as it is unrelated to DT support I am adding.
+Ah, I'd missed the module_init when scanning through the code.
 
-of_match_table is used by device tree. (will point to NULL for !CONFIG_OF)
+I couldn't figure out how davinci_mmcsd_probe got called for elements matched
+by the match table. I see platform_driver_probe temporarily sets the .probe on
+the driver, so that makes sense now.
+
+> And are you suggesting me to use module_platform_driver? If yes can it not
+> be taken separately as it is unrelated to DT support I am adding.
+
+No, I'd just managed to miss that which got called via module_init. It should
+be fine as-is.
 
 Thanks,
-Prakash
+Mark.
+
