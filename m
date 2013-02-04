@@ -1,49 +1,100 @@
 From: Matt Porter <mporter@ti.com>
-Subject: [PATCH v3 0/3] dmaengine: add slave sg transfer capabilities api
-Date: Mon,  4 Feb 2013 14:47:01 -0500
-Message-ID: <1360007224-21735-1-git-send-email-mporter@ti.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ia0-f177.google.com ([209.85.210.177]:45832 "EHLO
-	mail-ia0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753576Ab3BDTqY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Feb 2013 14:46:24 -0500
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH v3 1/3] dmaengine: add dma_get_slave_sg_caps()
+Date: Mon,  4 Feb 2013 14:47:02 -0500
+Message-ID: <1360007224-21735-2-git-send-email-mporter@ti.com>
+References: <1360007224-21735-1-git-send-email-mporter@ti.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1360007224-21735-1-git-send-email-mporter@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Vinod Koul <vinod.koul@intel.com>
 Cc: Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
-Changes since v2:
-	- Change to a separate slave sg specific api. Drop the
-	  generic per-channel capabilities api that is not used.
+Add a dmaengine API to retrieve slave SG transfer capabilities.
 
-Changes since v1:
-	- Use the existing dma_transaction_type enums instead of
-	  adding the mostly duplicated dmaengine_apis enums
+The API is optionally implemented by dmaengine drivers and when
+unimplemented will return a NULL pointer. A client driver using
+this API provides the required dma channel, address width, and
+burst size of the transfer. dma_get_slave_sg_caps() returns an
+SG caps structure with the maximum number and size of SG segments
+that the given channel can handle.
 
-This series adds a new dmaengine api, dma_get_slave_sg_caps(), which
-may be used by a client driver to get slave SG transfer capabilities
-for a particular channel. At this time, these include the max number
-of segments and max length of a segment that a channel can handle for
-a SG transfer.
+Signed-off-by: Matt Porter <mporter@ti.com>
+---
+ include/linux/dmaengine.h |   40 ++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 40 insertions(+)
 
-Along with the API implementation, this series implements the backend
-device_slave_sg_caps() in the EDMA DMA Engine driver and converts the
-davinci_mmc driver to use dma_get_slave_sg_caps() to replace hardcoded
-limits.
-
-This is tested on the AM1808-EVM.
-
-Matt Porter (3):
-  dmaengine: add dma_get_slave_sg_caps()
-  dma: edma: add device_slave_sg_caps() support
-  mmc: davinci: get SG segment limits with dma_get_slave_sg_caps()
-
- drivers/dma/edma.c                        |   17 ++++++++++++
- drivers/mmc/host/davinci_mmc.c            |   37 ++++++++------------------
- include/linux/dmaengine.h                 |   40 +++++++++++++++++++++++++++++
- include/linux/platform_data/mmc-davinci.h |    3 ---
- 4 files changed, 67 insertions(+), 30 deletions(-)
-
+diff --git a/include/linux/dmaengine.h b/include/linux/dmaengine.h
+index d3201e4..5b5b220 100644
+--- a/include/linux/dmaengine.h
++++ b/include/linux/dmaengine.h
+@@ -371,6 +371,19 @@ struct dma_slave_config {
+ 	unsigned int slave_id;
+ };
+ 
++/* struct dma_slave_sg_caps - expose SG transfer capability of a
++ * channel.
++ *
++ * @max_seg_nr: maximum number of SG segments supported on a SG/SLAVE
++ *	    channel (0 for no maximum or not a SG/SLAVE channel)
++ * @max_seg_len: maximum length of SG segments supported on a SG/SLAVE
++ *	     channel (0 for no maximum or not a SG/SLAVE channel)
++ */
++struct dma_slave_sg_caps {
++	u32 max_seg_nr;
++	u32 max_seg_len;
++};
++
+ static inline const char *dma_chan_name(struct dma_chan *chan)
+ {
+ 	return dev_name(&chan->dev->device);
+@@ -534,6 +547,7 @@ struct dma_tx_state {
+  *	struct with auxiliary transfer status information, otherwise the call
+  *	will just return a simple status code
+  * @device_issue_pending: push pending transactions to hardware
++ * @device_slave_sg_caps: return the slave SG capabilities
+  */
+ struct dma_device {
+ 
+@@ -602,6 +616,9 @@ struct dma_device {
+ 					    dma_cookie_t cookie,
+ 					    struct dma_tx_state *txstate);
+ 	void (*device_issue_pending)(struct dma_chan *chan);
++	struct dma_slave_sg_caps *(*device_slave_sg_caps)(
++		struct dma_chan *chan, enum dma_slave_buswidth addr_width,
++		u32 maxburst);
+ };
+ 
+ static inline int dmaengine_device_control(struct dma_chan *chan,
+@@ -969,6 +986,29 @@ dma_set_tx_state(struct dma_tx_state *st, dma_cookie_t last, dma_cookie_t used,
+ 	}
+ }
+ 
++/**
++ * dma_get_slave_sg_caps - get DMAC SG transfer capabilities
++ * @chan: target DMA channel
++ * @addr_width: address width of the DMA transfer
++ * @maxburst: maximum DMA transfer burst size
++ *
++ * Get SG transfer capabilities for a specified channel. If the dmaengine
++ * driver does not implement SG transfer capabilities then NULL is
++ * returned.
++ */
++static inline struct dma_slave_sg_caps
++*dma_get_slave_sg_caps(struct dma_chan *chan,
++		       enum dma_slave_buswidth addr_width,
++		       u32 maxburst)
++{
++	if (chan->device->device_slave_sg_caps)
++		return chan->device->device_slave_sg_caps(chan,
++							  addr_width,
++							  maxburst);
++
++	return NULL;
++}
++
+ enum dma_status dma_sync_wait(struct dma_chan *chan, dma_cookie_t cookie);
+ #ifdef CONFIG_DMA_ENGINE
+ enum dma_status dma_wait_for_async_tx(struct dma_async_tx_descriptor *tx);
 -- 
 1.7.9.5
-
