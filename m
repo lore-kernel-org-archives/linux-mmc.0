@@ -1,48 +1,62 @@
-From: Samuel Ortiz <sameo@linux.intel.com>
-Subject: Re: [PATCH 3/3] mfd: rtsx: support RTS5227
-Date: Mon, 4 Feb 2013 12:57:04 +0100
-Message-ID: <20130204115704.GE8476@sortiz-mobl>
-References: <1359963959-2305-1-git-send-email-rogerable@realtek.com>
- <1359963959-2305-4-git-send-email-rogerable@realtek.com>
+From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
+Subject: Control drive strength in software
+Date: Mon, 4 Feb 2013 14:08:28 +0100
+Message-ID: <510FB2CC.20201@parrot.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <devel-bounces@linuxdriverproject.org>
-Content-Disposition: inline
-In-Reply-To: <1359963959-2305-4-git-send-email-rogerable@realtek.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/devel>,
- <mailto:devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/devel/>
-List-Post: <mailto:devel@linuxdriverproject.org>
-List-Help: <mailto:devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/devel>,
- <mailto:devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: devel-bounces@linuxdriverproject.org
-Sender: "devel" <devel-bounces@linuxdriverproject.org>
-To: Roger Tseng <rogerable@realtek.com>
-Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, devel@linuxdriverproject.org, cjb@laptop.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from co202.xi-lite.net ([149.6.83.202]:48646 "EHLO co202.xi-lite.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754277Ab3BDNK4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 4 Feb 2013 08:10:56 -0500
+Received: from ONYX.xi-lite.lan (unknown [193.34.35.244])
+	by co202.xi-lite.net (Postfix) with ESMTPS id 50982260359
+	for <linux-mmc@vger.kernel.org>; Mon,  4 Feb 2013 14:26:12 +0100 (CET)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Roger,
+Hi,
 
-On Mon, Feb 04, 2013 at 03:45:59PM +0800, Roger Tseng wrote:
-> Support new model RTS5227.
-> 
-> Signed-off-by: Roger Tseng <rogerable@realtek.com>
-> Reviewed-by: Wei WANG <wei_wang@realsil.com.cn>
-> ---
->  drivers/mfd/Makefile         |   2 +-
->  drivers/mfd/rts5227.c        | 234 +++++++++++++++++++++++++++++++++++++++++++
->  drivers/mfd/rtsx_pcr.c       |   5 +
->  drivers/mfd/rtsx_pcr.h       |   1 +
->  include/linux/mfd/rtsx_pci.h |   5 +
->  5 files changed, 246 insertions(+), 1 deletion(-)
->  create mode 100644 drivers/mfd/rts5227.c
-Applied as well, thanks.
+I'm working on a SDHCI driver for linux kernel 3.4.
 
-Cheers,
-Samuel.
+  The IP that I have to control does not control the Driver Strength. 
+Driver Type B is always selected. On the other hand, I can control the 
+drive strength of the pads in software.
 
--- 
-Intel Open Source Technology Centre
-http://oss.intel.com/
+I would like to use the interface select_drive_strength of the 
+mmc_host_ops. Is it a good idea?
+
+If so, I have an other issue.
+
+This function doesn't have an mmc_host as parameter. It is an issue for 
+me since the drive strength parameters can be board specific.
+A solution would be to add this parameter:
+
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 5674504..cb6d117 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -134,7 +134,7 @@ struct mmc_host_ops {
+         /* The tuning command opcode value is different for SD and eMMC 
+cards */
+         int     (*execute_tuning)(struct mmc_host *host, u32 opcode);
+         void    (*enable_preset_value)(struct mmc_host *host, bool enable);
+-       int     (*select_drive_strength)(unsigned int max_dtr, int 
+host_drv, int card_drv);
++       int     (*select_drive_strength)(struct mmc_host *host, unsigned 
+int max_dtr, int host_drv, int card_drv);
+         void    (*hw_reset)(struct mmc_host *host);
+  };
+
+Is this solution a good idea?
+
+Also, the drive strength configuration might be different according to 
+the mode (not only UHS). So, I would like to control the drive strength 
+for the default speed and the high speed. Would it be relevant to add 
+this a call to this function in mmc_sd_switch_hs or in mmc_sd_init_card?
+
+Thanks,
+
+Jeremie Samuel
