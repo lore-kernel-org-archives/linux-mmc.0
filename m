@@ -1,62 +1,50 @@
-From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Subject: Control drive strength in software
-Date: Mon, 4 Feb 2013 14:08:28 +0100
-Message-ID: <510FB2CC.20201@parrot.com>
+From: "Manjunathappa, Prakash" <prakash.pm@ti.com>
+Subject: RE: [PATCH] mmc: davinci: allow driver to work without DMA resource
+Date: Mon, 4 Feb 2013 13:27:56 +0000
+Message-ID: <A73F36158E33644199EB82C5EC81C7BC3EA46036@DBDE01.ent.ti.com>
+References: <1359620433-3546-1-git-send-email-prakash.pm@ti.com>
+ <510B6740.7050808@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co202.xi-lite.net ([149.6.83.202]:48646 "EHLO co202.xi-lite.net"
+Received: from comal.ext.ti.com ([198.47.26.152]:40281 "EHLO comal.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754277Ab3BDNK4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 4 Feb 2013 08:10:56 -0500
-Received: from ONYX.xi-lite.lan (unknown [193.34.35.244])
-	by co202.xi-lite.net (Postfix) with ESMTPS id 50982260359
-	for <linux-mmc@vger.kernel.org>; Mon,  4 Feb 2013 14:26:12 +0100 (CET)
+	id S1754039Ab3BDN2H (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 4 Feb 2013 08:28:07 -0500
+In-Reply-To: <510B6740.7050808@ti.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: "Nori, Sekhar" <nsekhar@ti.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Porter, Matt" <mporter@ti.com>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "cjb@laptop.org" <cjb@laptop.org>
 
-Hi,
-
-I'm working on a SDHCI driver for linux kernel 3.4.
-
-  The IP that I have to control does not control the Driver Strength. 
-Driver Type B is always selected. On the other hand, I can control the 
-drive strength of the pads in software.
-
-I would like to use the interface select_drive_strength of the 
-mmc_host_ops. Is it a good idea?
-
-If so, I have an other issue.
-
-This function doesn't have an mmc_host as parameter. It is an issue for 
-me since the drive strength parameters can be board specific.
-A solution would be to add this parameter:
-
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 5674504..cb6d117 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -134,7 +134,7 @@ struct mmc_host_ops {
-         /* The tuning command opcode value is different for SD and eMMC 
-cards */
-         int     (*execute_tuning)(struct mmc_host *host, u32 opcode);
-         void    (*enable_preset_value)(struct mmc_host *host, bool enable);
--       int     (*select_drive_strength)(unsigned int max_dtr, int 
-host_drv, int card_drv);
-+       int     (*select_drive_strength)(struct mmc_host *host, unsigned 
-int max_dtr, int host_drv, int card_drv);
-         void    (*hw_reset)(struct mmc_host *host);
-  };
-
-Is this solution a good idea?
-
-Also, the drive strength configuration might be different according to 
-the mode (not only UHS). So, I would like to control the drive strength 
-for the default speed and the high speed. Would it be relevant to add 
-this a call to this function in mmc_sd_switch_hs or in mmc_sd_init_card?
-
-Thanks,
-
-Jeremie Samuel
+SGkgU2VraGFyLA0KDQpPbiBGcmksIEZlYiAwMSwgMjAxMyBhdCAxMjoyNzowNCwgTm9yaSwgU2Vr
+aGFyIHdyb3RlOg0KPiBPbiAxLzMxLzIwMTMgMTo1MCBQTSwgTWFuanVuYXRoYXBwYSwgUHJha2Fz
+aCB3cm90ZToNCj4gPiBEbyBub3QgcmV0dXJuIHByb2JlIGZhaWx1cmUgd2l0aCBtaXNzaW5nIERN
+QSByZXNvdXJjZXMsDQo+ID4gYWxsb3cgZHJpdmVyIHRvIHdvcmsgaW4gUElPIG1vZGUuDQo+ID4g
+VGVzdGVkIG9uIGRhODUwLWV2bS4NCj4gDQo+IEl0IHdpbGwgYmUgbmljZSB0byBtZW50aW9uIHdo
+YXQgZXhhY3RseSB3YXMgdGVzdGVkLiByb290ZnMgbW91bnQ/IGZpbGUNCj4gY3JlYXRlL2RlbGV0
+aW9uPyBtb3VudC91bm1vdW50Pw0KPiANCg0KQWdyZWVkLCB3aWxsIGFkZCB0ZXN0aW5nIGluZm9y
+bWF0aW9uLg0KDQo+ID4gU2lnbmVkLW9mZi1ieTogTWFuanVuYXRoYXBwYSwgUHJha2FzaCA8cHJh
+a2FzaC5wbUB0aS5jb20+DQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3QvZGF2aW5jaV9t
+bWMuYyB8ICAgMTAgKysrKysrLS0tLQ0KPiA+ICAxIGZpbGVzIGNoYW5nZWQsIDYgaW5zZXJ0aW9u
+cygrKSwgNCBkZWxldGlvbnMoLSkNCj4gPiANCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMv
+aG9zdC9kYXZpbmNpX21tYy5jIGIvZHJpdmVycy9tbWMvaG9zdC9kYXZpbmNpX21tYy5jDQo+ID4g
+aW5kZXggMjA2MzY3Ny4uMzgyYjc5ZCAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0
+L2RhdmluY2lfbW1jLmMNCj4gPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L2RhdmluY2lfbW1jLmMN
+Cj4gPiBAQCAtMTE5MCwxMyArMTE5MCwxNSBAQCBzdGF0aWMgaW50IF9faW5pdCBkYXZpbmNpX21t
+Y3NkX3Byb2JlKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYpDQo+ID4gIA0KPiA+ICAJciA9
+IHBsYXRmb3JtX2dldF9yZXNvdXJjZShwZGV2LCBJT1JFU09VUkNFX0RNQSwgMCk7DQo+ID4gIAlp
+ZiAoIXIpDQo+ID4gLQkJZ290byBvdXQ7DQo+ID4gLQlob3N0LT5yeGRtYSA9IHItPnN0YXJ0Ow0K
+PiA+ICsJCWRldl93YXJuKCZwZGV2LT5kZXYsICJETUEgcmVzb3VyY2Ugbm90IHNwZWNpZmllZFxu
+Iik7DQo+IA0KPiBXaHkgbm90IGJlIHNwZWNpZmljIGFuZCBjYWxsIGl0ICJSWCBETUEiIGluc3Rl
+YWQuIEFueW9uZSB3aG8gZ2V0cyB0aGlzDQo+IGVycm9yIHdpbGwgaGF2ZSB0byBkbyB0aGF0IGFu
+eXdheSBzaW5jZSB5b3UgaGF2ZSBub3cgZ290IHR3byBpZGVudGljYWwNCj4gZXJyb3IgbWVzc2Fn
+ZXMuDQo+IA0KDQpBZ3JlZSwgSSB3aWxsIHNwZWNpZnkuDQoNCj4gPiArCWVsc2UNCj4gPiArCQlo
+b3N0LT5yeGRtYSA9IHItPnN0YXJ0Ow0KPiA+ICANCj4gPiAgCXIgPSBwbGF0Zm9ybV9nZXRfcmVz
+b3VyY2UocGRldiwgSU9SRVNPVVJDRV9ETUEsIDEpOw0KPiA+ICAJaWYgKCFyKQ0KPiA+IC0JCWdv
+dG8gb3V0Ow0KPiA+IC0JaG9zdC0+dHhkbWEgPSByLT5zdGFydDsNCj4gPiArCQlkZXZfd2Fybigm
+cGRldi0+ZGV2LCAiRE1BIHJlc291cmNlIG5vdCBzcGVjaWZpZWRcbiIpOw0KPiANCj4gIlRYIERN
+QSIgaGVyZS4NCj4gDQoNCkFncmVlIHRvIGZpeCBoZXJlIGFsc28uDQoNClRoYW5rcywNClByYWth
+c2gNCg0KPiBUaGFua3MsDQo+IFNla2hhcg0KPiANCg0K
