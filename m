@@ -1,80 +1,49 @@
-From: Konstantin Dorfman <kdorfman@codeaurora.org>
-Subject: Re: [PATCH 1/2] mmc: core: fix permanent sleep of mmcqd during card
- removal
-Date: Mon, 04 Feb 2013 21:27:02 +0200
-Message-ID: <51100B86.5070901@codeaurora.org>
-References: <n@samsung.com> <1356513966-24945-1-git-send-email-kdorfman@codeaurora.org> <001201cdfeb3$3e628ee0$bb27aca0$%jun@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=EUC-KR
-Content-Transfer-Encoding: 7bit
+From: Matt Porter <mporter@ti.com>
+Subject: [PATCH v3 0/3] dmaengine: add slave sg transfer capabilities api
+Date: Mon,  4 Feb 2013 14:47:01 -0500
+Message-ID: <1360007224-21735-1-git-send-email-mporter@ti.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:13785 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754967Ab3BDT1F (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Feb 2013 14:27:05 -0500
-In-Reply-To: <001201cdfeb3$3e628ee0$bb27aca0$%jun@samsung.com>
+Received: from mail-ia0-f177.google.com ([209.85.210.177]:45832 "EHLO
+	mail-ia0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753576Ab3BDTqY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Feb 2013 14:46:24 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Vinod Koul <vinod.koul@intel.com>
+Cc: Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 
-Hello Jeon,
+Changes since v2:
+	- Change to a separate slave sg specific api. Drop the
+	  generic per-channel capabilities api that is not used.
 
-I'm working on this and will post results.
+Changes since v1:
+	- Use the existing dma_transaction_type enums instead of
+	  adding the mostly duplicated dmaengine_apis enums
 
-Thanks,
+This series adds a new dmaengine api, dma_get_slave_sg_caps(), which
+may be used by a client driver to get slave SG transfer capabilities
+for a particular channel. At this time, these include the max number
+of segments and max length of a segment that a channel can handle for
+a SG transfer.
 
-On 01/30/2013 08:30 AM, Seungwon Jeon wrote:
-> Hi Konstantin.
-> 
-> Could you check this patch with [2/2]?
-> [PATCH 2/2] mmc: block: don't start new request when the card is removed
-> 
-> mmcqd is often sleeping with acquiring the claim(mmc_claim_host) when a card is removed.
-> As a result, mmc_rescan can be blocked for the insertion of a card newly. It's a dead lock.
-> 
-> Thanks,
-> Seungwon Jeon
-> 
-> On Tuesday, January 22, 2013, Seungwon Jeon wrote:
->> This patch is derived from 'mmc: fix async request mechanism ...'.
->> According as async transfer, a request is handled with twice mmc_start_req.
->> When the card is removed, the request is actually not issued in the first
->> mmc_start_req [__mmc_start_data_req]. And then mmc_wait_for_data_req_done
->> will come in the next mmc_start_req. But there is no event for completions.
->> wake_up_interruptible is needed in __mmc_start_data_req for the case of
->> removed card.
->>
->> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->> ---
->>   drivers/mmc/core/core.c |    1 +
->>   1 files changed, 1 insertions(+), 0 deletions(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index 8b3a122..997b257 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -350,6 +350,7 @@ static int __mmc_start_data_req(struct mmc_host *host, struct mmc_request *mrq)
->>   	mrq->host = host;
->>   	if (mmc_card_removed(host->card)) {
->>   		mrq->cmd->error = -ENOMEDIUM;
->> +		mmc_wait_data_done(mrq);
->>   		return -ENOMEDIUM;
->>   	}
->>   	mmc_start_request(host, mrq);
->> --
->> 1.7.0.4
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Along with the API implementation, this series implements the backend
+device_slave_sg_caps() in the EDMA DMA Engine driver and converts the
+davinci_mmc driver to use dma_get_slave_sg_caps() to replace hardcoded
+limits.
 
+This is tested on the AM1808-EVM.
+
+Matt Porter (3):
+  dmaengine: add dma_get_slave_sg_caps()
+  dma: edma: add device_slave_sg_caps() support
+  mmc: davinci: get SG segment limits with dma_get_slave_sg_caps()
+
+ drivers/dma/edma.c                        |   17 ++++++++++++
+ drivers/mmc/host/davinci_mmc.c            |   37 ++++++++------------------
+ include/linux/dmaengine.h                 |   40 +++++++++++++++++++++++++++++
+ include/linux/platform_data/mmc-davinci.h |    3 ---
+ 4 files changed, 67 insertions(+), 30 deletions(-)
 
 -- 
-Konstantin Dorfman,
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center,
-Inc. is a member of Code Aurora Forum,
-hosted by The Linux Foundation
+1.7.9.5
+
