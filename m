@@ -1,56 +1,52 @@
-From: "Manjunathappa, Prakash" <prakash.pm@ti.com>
-Subject: [PATCH v2] mmc: davinci: allow driver to work without DMA resource
-Date: Tue, 5 Feb 2013 17:52:24 +0530
-Message-ID: <1360066944-14265-1-git-send-email-prakash.pm@ti.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH v7 01/10] ARM: davinci: move private EDMA API to
+	arm/common
+Date: Tue, 5 Feb 2013 12:38:28 +0000
+Message-ID: <20130205123828.GB17852@n2100.arm.linux.org.uk>
+References: <510C2A47.1090607@mvista.com> <20130204203358.GX4720@opensource.wolfsonmicro.com> <CACRpkdbPyZt8=pLhz-5qcaSSAk6VBn61dPTNp6teU9HksBwN2w@mail.gmail.com> <201302042147.38407.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:36985 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754966Ab3BEMVb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Feb 2013 07:21:31 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <201302042147.38407.arnd@arndb.de>
+Sender: linux-doc-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Cyril Chemparathy <cyril@ti.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, balbi@ti.com, Sergei Shtylyov <sshtylyov@mvista.com>, Linux Documentation List <linux-doc@vger.kernel.org>, Lindgren <tony@atomide.com>, Vinod Koul <vinod.koul@intel.com>, "Nair, Sandeep" <sandeep_n@ti.com>, Chris Ball <cjb@laptop.org>, Matt Porter <mporter@ti.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Rob Herring <rob.herring@calxeda.com>, Linux OMAP List <linux-omap@vger.kernel.org>, ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, "Cousson, Benoit" <b-cousson@ti.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Landley <rob@landley.net>, Dan Williams <djbw@fb.com>Linux
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, davinci-linux-open-source@linux.davincidsp.com, mporter@ti.com, ido@wizery.com, gregkh@linuxfoundation.org, "Manjunathappa, Prakash" <prakash.pm@ti.com>
 
-Do not return probe failure with missing DMA resources,
-allow driver to work in PIO mode.
-Tested on da850-evm by mounting partition followed by
-file creation and deletion.
+On Mon, Feb 04, 2013 at 09:47:38PM +0000, Arnd Bergmann wrote:
+> On Monday 04 February 2013, Linus Walleij wrote:
+> > So I think the above concerns are moot. The callback we can
+> > set on cookies is entirely optional, and it's even implemented by
+> > each DMA engine, and some may not even support it but require
+> > polling, and then it won't even be implemented by the driver.
+> 
+> Just to ensure that everybody is talking about the same thing here:
+> Is it just the callback that is optional, or also the interrupt
+> coming from the hardware?
 
-Signed-off-by: Manjunathappa, Prakash <prakash.pm@ti.com>
----
-Since v1:
-Specified missing DMA resource(RX/TX).
+If everyone implements stuff correctly, both.  The callback most certainly
+is optional as things stand.  The interrupt - that depends on the DMA
+engine.
 
- drivers/mmc/host/davinci_mmc.c |   10 ++++++----
- 1 files changed, 6 insertions(+), 4 deletions(-)
+Some DMA engines you can't avoid it because you need to reprogram the
+hardware with the next+1 transfer upon completion of an existing transfer.
+Others may allow you to chain transfers in hardware.  That's all up to
+how the DMA engine driver is implemented and how the hardware behaves.
 
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index 2063677..27123f8 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -1190,13 +1190,15 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
- 
- 	r = platform_get_resource(pdev, IORESOURCE_DMA, 0);
- 	if (!r)
--		goto out;
--	host->rxdma = r->start;
-+		dev_warn(&pdev->dev, "RX DMA resource not specified\n");
-+	else
-+		host->rxdma = r->start;
- 
- 	r = platform_get_resource(pdev, IORESOURCE_DMA, 1);
- 	if (!r)
--		goto out;
--	host->txdma = r->start;
-+		dev_warn(&pdev->dev, "TX DMA resource not specified\n");
-+	else
-+		host->txdma = r->start;
- 
- 	host->mem_res = mem;
- 	host->base = ioremap(mem->start, mem_size);
--- 
-1.7.4.1
+Now, there's another problem here: that is, people abuse the API.  People
+don't pass DMA_CTRL_ACK | DMA_PREP_INTERRUPT into their operations by
+default.  People like typing '0'.
 
+The intention of the "DMA_PREP_INTERRUPT" is significant here: it means
+"ask the hardware to send an interrupt upon completion of this transfer".
+
+Because soo many people like to type '0' instead in their DMA engine
+clients, it means that this flag is utterly useless today - you have to
+ignore it.  So there's _no_ way for client drivers to actually tell the
+a DMA engine driver which _doesn't_ need to signal interrupts at the end
+of every transfer not to do so.
+
+So yes, the DMA engine API supports it.  Whether the _implementations_
+themselves do is very much hit and miss (and in reality is much more
+miss than hit.)
