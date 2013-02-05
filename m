@@ -1,67 +1,71 @@
-From: Linus Walleij <linus.walleij@linaro.org>
+From: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Subject: Re: [PATCH v7 01/10] ARM: davinci: move private EDMA API to arm/common
-Date: Tue, 5 Feb 2013 19:29:53 +0100
-Message-ID: <CACRpkdbeoMO1rjPiWDAuVL0uYwMGF+9-vCxqoMiMd1uAgZm=RQ@mail.gmail.com>
-References: <20130201213003.GW2637@n2100.arm.linux.org.uk>
-	<20130204154153.GA18237@arwen.pp.htv.fi>
-	<510FF1A6.403@mvista.com>
-	<20130204164712.GB4269@arwen.pp.htv.fi>
+Date: Tue, 5 Feb 2013 19:33:42 +0100
+Message-ID: <CACRpkdbruBRH8TJb8kkopYEZrpX+h73HT=1VDa=tOWPKg-sGJw@mail.gmail.com>
+References: <510FF1A6.403@mvista.com> <20130204164712.GB4269@arwen.pp.htv.fi>
 	<510FF5C9.3030600@mvista.com>
-	<20130204170216.GC4269@arwen.pp.htv.fi>
-	<51100A72.6030909@ti.com>
+	<20130204170216.GC4269@arwen.pp.htv.fi> <51100A72.6030909@ti.com>
 	<CACRpkdZihnp3_Df==QRWxQupgi7W_YXZxc-MxkusVH6J+Vx56A@mail.gmail.com>
-	<5110369B.9060901@ti.com>
-	<CACRpkda8xBB35CwuBH76xXcC341TeRs1ZuwzDD0LtuXc4ifQTw@mail.gmail.com>
-	<20130205164705.GG4720@opensource.wolfsonmicro.com>
+	<20130204203358.GX4720@opensource.wolfsonmicro.com>
+	<CACRpkdbPyZt8=pLhz-5qcaSSAk6VBn61dPTNp6teU9HksBwN2w@mail.gmail.com>
+	<51102E25.8040107@ti.com>
+	<CACRpkdaUQ60W8Vmg3MpvP5uV+3jD3y4+9V2et4Ni+z-7k=aFTg@mail.gmail.com>
+	<20130205171451.GE17852@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <20130205164705.GG4720@opensource.wolfsonmicro.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Cyril Chemparathy <cyril@ti.com>, balbi@ti.com, Sergei Shtylyov <sshtylyov@mvista.com>, Linux Documentation List <linux-doc@vger.kernel.org>, Lindgren <tony@atomide.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, "Nair, Sandeep" <sandeep_n@ti.com>, Chris Ball <cjb@laptop.org>, Matt Porter <mporter@ti.com>, Arnd Bergmann <arnd@arndb.de>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Rob Herring <rob.herring@calxeda.com>, Linux OMAP List <linux-omap@vger.kernel.org>, ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, "Cousson, Benoit" <b-cousson@ti.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Landley <rob@landley.net>, Dan Williams <djbw@fb.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+In-Reply-To: <20130205171451.GE17852-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+Cc: Sergei Shtylyov <sshtylyov-Igf4POYTYCDQT0dZR+AlfA@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Nair, Sandeep" <sandeep_n-l0cyMroinI0@public.gmane.org>, Cyril Chemparathy <cyril-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Matt Porter <mporter-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, "Cousson,
+	Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, balbi-l0cyMroinI0@public.gmane.org, Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-d>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Feb 5, 2013 at 5:47 PM, Mark Brown
-<broonie@opensource.wolfsonmicro.com> wrote:
-> On Tue, Feb 05, 2013 at 05:21:48PM +0100, Linus Walleij wrote:
+On Tue, Feb 5, 2013 at 6:14 PM, Russell King - ARM Linux
+<linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org> wrote:
+> On Tue, Feb 05, 2013 at 04:30:45PM +0100, Linus Walleij wrote:
+
+>> So put them on a wait list? Surely you will have a list of pending
+>> cookies and pick from the front of the queue if there isn't a hole on
+>> queue position 0.
 >
->> For IRQ mode, use the completion callback to push each cookie
->> to NAPI, and thus let the IRQ drive the traffic.
+> Not quite.  The key is the cookie system DMA engine employs to indicate
+> when a cookie is complete.
 >
-> The whole purpose of NAPI is to avoid taking interrupts for completion
-> of transfers.  Anything that generates interrupts when NAPI is in
-> polling mode is defeating the point.
+> Cookies between the "issued sequence" and "completed sequence" are defined
+> to be in progress, everything else is defined to be completed.
+>
+> This means that if "completed sequence" is 1, and "issued sequence" is 5,
+> then cookies with values 2, 3, 4, 5 are in progress.  You can't mark
+> sequence 4 as being complete until 2 and 3 have completed.
 
-So what I was trying to get across is that when you're in polling
-mode you do not set DMA_PREP_INTERRUPT on your transfers,
-just throw the obtained struct dma_async_tx_descriptor on some
-list and then when polling use dma_async_is_tx_complete()
-on the channel and the cookie inside the descriptor.
+Yes that is true. DMA transfers on a certain channel are defined
+as progressing linearly per-cookie. I wonder if that is a problem
+in this case though (actually it seems the reverse, this helps
+in Cyril's case.)
 
-I was trying to describe that you can move from
-IRQ mode to polling mode and back again by selectively
-choosing to set/not set the DMA_PREP_INTERRUPT flag.
+> If we need out-of-order completion, then that's a problem for the DMA
+> engine API, because you'd need to radically change the way "completion"
+> is marked.
 
-If polling is all you want you never set it.
-
-Then there is the fact that the transfer needs to have
-been flagged complete and it is indeed something that needs
-to be set in some bytes somewhere. By something. But it
-doesn't have to be an interrupt from the DMA controller.
-
-In such cases we use dma_async_is_tx_complete() with
-channel and cookies as parameter. This will call down into the
-driver chan->device->device_tx_status() and there we can
-actually poll the hardware to see if the transfer happens to
-be complete, and if it is flag it complete.
-
-Which is likely what we want.
-
-No interrupts, only function calls as far as I can see.
-
-(I bet Russell will poke a hole in my reasoning, but it's worth
-a try.)
+True. I wonder if this usecase is ever going to be applicable
+however. It could maybe be useful in some instances of
+memcpy() I could dream up, whereas for device transfers it
+seems unlikely to me.
 
 Yours,
 Linus Walleij
+
+------------------------------------------------------------------------------
+Free Next-Gen Firewall Hardware Offer
+Buy your Sophos next-gen firewall before the end March 2013 
+and get the hardware for free! Learn more.
+http://p.sf.net/sfu/sophos-d2d-feb
