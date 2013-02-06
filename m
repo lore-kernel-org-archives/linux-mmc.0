@@ -1,59 +1,53 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH v3 01/13] mmc: sdhi, tmio: only check flags in tmio-mmc driver proper
-Date: Wed,  6 Feb 2013 20:46:48 +0100
-Message-ID: <1360180020-18555-2-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH v3 05/13] mmc: sh-mmcif: use mmc_of_parse() to parse standard MMC DT bindings
+Date: Wed,  6 Feb 2013 20:46:52 +0100
+Message-ID: <1360180020-18555-6-git-send-email-g.liakhovetski@gmx.de>
 References: <1360180020-18555-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:60545 "EHLO
+Received: from moutng.kundenserver.de ([212.227.17.10]:52133 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757346Ab3BFTrN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Feb 2013 14:47:13 -0500
+	with ESMTP id S1757346Ab3BFTrG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Feb 2013 14:47:06 -0500
 In-Reply-To: <1360180020-18555-1-git-send-email-g.liakhovetski@gmx.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Arnd Bergmann <arnd@arndb.de>
 
-tmio-mmc platform flags can be set by various means, including caller
-drivers and device-tree bindings, therefore it is better to only check
-them in the tmio-mmc driver proper, not in caller drivers themselves.
+Use mmc_of_parse() to get interface capability flags and used GPIOs from
+device-tree bindings.
 
+Cc: Arnd Bergmann <arnd@arndb.de>
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c |    3 +--
- drivers/mmc/host/tmio_mmc_pio.c   |    3 +++
- 2 files changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 524a7f7..e0ca0ab 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -153,10 +153,9 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	mmc_data->clk_enable = sh_mobile_sdhi_clk_enable;
- 	mmc_data->clk_disable = sh_mobile_sdhi_clk_disable;
- 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
-+	mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
- 	if (p) {
- 		mmc_data->flags = p->tmio_flags;
--		if (mmc_data->flags & TMIO_MMC_HAS_IDLE_WAIT)
--			mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
- 		mmc_data->ocr_mask = p->tmio_ocr_mask;
- 		mmc_data->capabilities |= p->tmio_caps;
- 		mmc_data->capabilities2 |= p->tmio_caps2;
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 0f992e9..b25adb4 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -928,6 +928,9 @@ int tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 	int ret;
- 	u32 irq_mask = TMIO_MASK_CMD;
+v3: updated on top of "mmc: sh_mmcif: Avoid unnecessary mmc_delay() at
+    mmc_card_sleepawake()"
+
+ drivers/mmc/host/sh_mmcif.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 7d05852..adb4f68 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -1331,6 +1331,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 		ret = -ENOMEM;
+ 		goto ealloch;
+ 	}
++	mmc_of_parse(mmc);
+ 	host		= mmc_priv(mmc);
+ 	host->mmc	= mmc;
+ 	host->addr	= reg;
+@@ -1343,7 +1344,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 	mmc->ops = &sh_mmcif_ops;
+ 	sh_mmcif_init_ocr(host);
  
-+	if (!(pdata->flags & TMIO_MMC_HAS_IDLE_WAIT))
-+		pdata->write16_hook = NULL;
-+
- 	res_ctl = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (!res_ctl)
- 		return -EINVAL;
+-	mmc->caps = MMC_CAP_MMC_HIGHSPEED | MMC_CAP_WAIT_WHILE_BUSY;
++	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_WAIT_WHILE_BUSY;
+ 	if (pd && pd->caps)
+ 		mmc->caps |= pd->caps;
+ 	mmc->max_segs = 32;
 -- 
 1.7.2.5
 
