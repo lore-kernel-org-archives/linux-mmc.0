@@ -1,43 +1,101 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v2] mmc: omap_hsmmc: MAINTAINERS: update
-Date: Wed, 6 Feb 2013 20:04:43 +0530
-Message-ID: <1360161283-28956-1-git-send-email-balajitk@ti.com>
-References: <510FCEA2.8010507@ti.com>
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [PATCH/RFC] mmc: add DT bindings for more MMC capability flags
+Date: Wed, 6 Feb 2013 15:15:49 +0000
+Message-ID: <20130206151549.GA11609@e106331-lin.cambridge.arm.com>
+References: <Pine.LNX.4.64.1301231743190.26301@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=WINDOWS-1252
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:37178 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755202Ab3BFOfA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Feb 2013 09:35:00 -0500
-In-Reply-To: <510FCEA2.8010507@ti.com>
+Received: from service87.mimecast.com ([91.220.42.44]:55342 "EHLO
+	service87.mimecast.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754955Ab3BFPP4 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Feb 2013 10:15:56 -0500
+In-Reply-To: <Pine.LNX.4.64.1301231743190.26301@axis700.grange>
+Content-Language: en-US
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: linux-omap@vger.kernel.org, balbi@ti.com, Balaji T K <balajitk@ti.com>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Arnd Bergmann <arnd@arndb.de>
 
-Update Maintainer email for omap_hsmmc,
-as Venkatraman will no longer be able to maintain omap_hsmmc driver.
+Hi,
 
-Signed-off-by: Balaji T K <balajitk@ti.com>
-Acked-by: Venkatraman S <svenkatr@gmail.com>
----
- MAINTAINERS |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+On Wed, Jan 23, 2013 at 04:45:11PM +0000, Guennadi Liakhovetski wrote:
+> Many MMC capability flags are platform-dependent and are traditionally set
+> in platform data. With DT often each such capability requires a special
+> binding. Add bindings for MMC_CAP_SD_HIGHSPEED, MMC_CAP_MMC_HIGHSPEED and
+> MMC_CAP_POWER_OFF_CARD capabilities. Also add code to DT parser to look
+> up "keep-power-in-suspend" and "enable-sdio-wakeup" bindings and set
+> MMC_PM_KEEP_POWER and MMC_PM_WAKE_SDIO_IRQ respectively, if found.
+> 
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 92e726c..f319237 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -5498,7 +5498,7 @@ S:	Maintained
- F:	drivers/mmc/host/omap.c
- 
- OMAP HS MMC SUPPORT
--M:	Venkatraman S <svenkatr@ti.com>
-+M:	Balaji T K <balajitk@ti.com>
- L:	linux-mmc@vger.kernel.org
- L:	linux-omap@vger.kernel.org
- S:	Maintained
--- 
-1.7.5.4
+I've Cc'd Arnd, who had some related comments a while back:
+
+https://lkml.org/lkml/2012/10/15/231
+
+MMC_CAP_POWER_OFF_CARD sounds like something that can be selected in the driver
+by checking the compatible string or probing the hardware revision, and not
+something that should be taken directly from the dts where it could be
+completely invalid for the hardware.
+
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
+> 
+> Attention: contains new DT bindings, please, comment!
+> 
+>  Documentation/devicetree/bindings/mmc/mmc.txt |    5 ++++-
+>  drivers/mmc/core/host.c                       |   11 +++++++++++
+>  2 files changed, 15 insertions(+), 1 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> index e180892..92ec534c 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> @@ -25,8 +25,11 @@ Optional properties:
+>  - max-frequency: maximum operating clock frequency
+>  - no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
+>    this system, even if the controller claims it is.
+> +- cap-sd-highspeed: SD high-speed timing is supported
+> +- cap-mmc-highspeed: MMC high-speed timing is supported
+> +- cap-power-off-card: powering off the card is safe
+>  
+> -cd-inverted and wp-inverted properties are deprecated ans shouldn't be used,
+> +cd-inverted and wp-inverted properties are deprecated and shouldn't be used,
+>  instead pleaseuse the OF_GPIO_ACTIVE_LOW flag in respective GPIO bindings. Note,
+>  that the default (as defined by the SDHCI standard) CD and WP polarity is
+>  active-low, so, OF_GPIO_ACTIVE_LOW should normally be set, and only be left
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index e4c1cbd..f3ea268 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -372,6 +372,17 @@ void mmc_of_parse(struct mmc_host *host)
+>  			dev_err(host->parent,
+>  				"Failed to request WP GPIO: %d!\n", ret);
+>  	}
+> +
+> +	if (of_find_property(np, "cap-sd-highspeed", &len))
+> +		host->caps |= MMC_CAP_SD_HIGHSPEED;
+> +	if (of_find_property(np, "cap-mmc-highspeed", &len))
+> +		host->caps |= MMC_CAP_MMC_HIGHSPEED;
+> +	if (of_find_property(np, "cap-power-off-card", &len))
+> +		host->caps |= MMC_CAP_POWER_OFF_CARD;
+> +	if (of_find_property(np, "keep-power-in-suspend", &len))
+> +		host->pm_caps |= MMC_PM_KEEP_POWER;
+> +	if (of_find_property(np, "enable-sdio-wakeup", &len))
+> +		host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+>  }
+>  
+>  EXPORT_SYMBOL(mmc_of_parse);
+> -- 
+> 1.7.2.5
+> 
+> _______________________________________________
+> devicetree-discuss mailing list
+> devicetree-discuss@lists.ozlabs.org
+> https://lists.ozlabs.org/listinfo/devicetree-discuss
+> 
+
+Thanks,
+Mark.
 
