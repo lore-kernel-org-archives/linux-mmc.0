@@ -1,59 +1,59 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH v3 10/13] mmc: tmio: remove unused and deprecated symbols
-Date: Wed,  6 Feb 2013 20:46:57 +0100
-Message-ID: <1360180020-18555-11-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH v3 01/13] mmc: sdhi, tmio: only check flags in tmio-mmc driver proper
+Date: Wed,  6 Feb 2013 20:46:48 +0100
+Message-ID: <1360180020-18555-2-git-send-email-g.liakhovetski@gmx.de>
 References: <1360180020-18555-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.9]:60545 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757346Ab3BFTrN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Feb 2013 14:47:13 -0500
 In-Reply-To: <1360180020-18555-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-sh-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-List-Id: linux-mmc@vger.kernel.org
 
-The tmio_mmc_cd_wakeup() inline function has been deprecated since 3.4 and
-is unused since 3.4 too. Remove them.
+tmio-mmc platform flags can be set by various means, including caller
+drivers and device-tree bindings, therefore it is better to only check
+them in the tmio-mmc driver proper, not in caller drivers themselves.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- include/linux/mfd/tmio.h |   18 ------------------
- 1 files changed, 0 insertions(+), 18 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c |    3 +--
+ drivers/mmc/host/tmio_mmc_pio.c   |    3 +++
+ 2 files changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-index d83af39..99bf3e66 100644
---- a/include/linux/mfd/tmio.h
-+++ b/include/linux/mfd/tmio.h
-@@ -65,12 +65,6 @@
-  */
- #define TMIO_MMC_SDIO_IRQ		(1 << 2)
- /*
-- * Some platforms can detect card insertion events with controller powered
-- * down, using a GPIO IRQ, in which case they have to fill in cd_irq, cd_gpio,
-- * and cd_flags fields of struct tmio_mmc_data.
-- */
--#define TMIO_MMC_HAS_COLD_CD		(1 << 3)
--/*
-  * Some controllers require waiting for the SD bus to become
-  * idle before writing to some registers.
-  */
-@@ -117,18 +111,6 @@ struct tmio_mmc_data {
- };
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 524a7f7..e0ca0ab 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -153,10 +153,9 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	mmc_data->clk_enable = sh_mobile_sdhi_clk_enable;
+ 	mmc_data->clk_disable = sh_mobile_sdhi_clk_disable;
+ 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
++	mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
+ 	if (p) {
+ 		mmc_data->flags = p->tmio_flags;
+-		if (mmc_data->flags & TMIO_MMC_HAS_IDLE_WAIT)
+-			mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
+ 		mmc_data->ocr_mask = p->tmio_ocr_mask;
+ 		mmc_data->capabilities |= p->tmio_caps;
+ 		mmc_data->capabilities2 |= p->tmio_caps2;
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 0f992e9..b25adb4 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -928,6 +928,9 @@ int tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 	int ret;
+ 	u32 irq_mask = TMIO_MASK_CMD;
  
- /*
-- * This function is deprecated and will be removed soon. Please, convert your
-- * platform to use drivers/mmc/core/cd-gpio.c
-- */
--#include <linux/mmc/host.h>
--static inline void tmio_mmc_cd_wakeup(struct tmio_mmc_data *pdata)
--{
--	if (pdata)
--		mmc_detect_change(dev_get_drvdata(pdata->dev),
--				  msecs_to_jiffies(100));
--}
--
--/*
-  * data for the NAND controller
-  */
- struct tmio_nand_data {
++	if (!(pdata->flags & TMIO_MMC_HAS_IDLE_WAIT))
++		pdata->write16_hook = NULL;
++
+ 	res_ctl = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	if (!res_ctl)
+ 		return -EINVAL;
 -- 
 1.7.2.5
 
