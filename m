@@ -1,48 +1,65 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH/RFC] mmc: add DT bindings for more MMC capability flags
-Date: Wed, 6 Feb 2013 18:32:24 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1302061817120.13474@axis700.grange>
-References: <Pine.LNX.4.64.1301231743190.26301@axis700.grange>
- <20130206151549.GA11609@e106331-lin.cambridge.arm.com>
- <Pine.LNX.4.64.1302061720390.13474@axis700.grange> <1923973.xHEn0Jh3IU@wuerfel>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:61672 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751884Ab3BFRcb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Feb 2013 12:32:31 -0500
-In-Reply-To: <1923973.xHEn0Jh3IU@wuerfel>
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: [PATCH v3 04/13] mmc: (cosmetic) remove "extern" from function declarations
+Date: Wed,  6 Feb 2013 20:46:51 +0100
+Message-ID: <1360180020-18555-5-git-send-email-g.liakhovetski@gmx.de>
+References: <1360180020-18555-1-git-send-email-g.liakhovetski@gmx.de>
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1360180020-18555-1-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Mark Rutland <mark.rutland@arm.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
 
-On Thu, 7 Feb 2013, Arnd Bergmann wrote:
+The "extern" keyword isn't required in function declarations, remove it.
 
-> On Wednesday 06 February 2013 17:25:42 Guennadi Liakhovetski wrote:
-> > 
-> > Thank for pointing me out at that thread. However, I don't think 
-> > MMC_CAP_POWER_OFF_CARD has anything to do with compatibility or hardware 
-> > revisions. At least I haven't yet come across any sd/mmc hosts, that also 
-> > supply card power. You could "derive" this flag from the presence of a 
-> > regulator, capable of changing its status (switching on / off), but even 
-> > then you're not guaranteed, that you actually can (and want to) power the 
-> > card off at run-time - the regulator can be shared etc. So, an explicit 
-> > flag is needed.
-> 
-> It sounds like something that should be handled in a controller specific
-> way I think. E.g. on SDHCI, there seems to always be a method to power
-> down the card using the SDHCI_POWER_CONTROL register, even without
-> any external regulators.
-
-If I understand correctly, that register only controls card bus power. 
-Further sdhci.c uses regulators (host->vmmc) to power up and down the 
-card.
-
-Thanks
-Guennadi
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+ include/linux/mmc/host.h |   22 +++++++++++-----------
+ 1 files changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 13c0c8d..356ae0a 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -341,10 +341,10 @@ struct mmc_host {
+ 	unsigned long		private[0] ____cacheline_aligned;
+ };
+ 
+-extern struct mmc_host *mmc_alloc_host(int extra, struct device *);
+-extern int mmc_add_host(struct mmc_host *);
+-extern void mmc_remove_host(struct mmc_host *);
+-extern void mmc_free_host(struct mmc_host *);
++struct mmc_host *mmc_alloc_host(int extra, struct device *);
++int mmc_add_host(struct mmc_host *);
++void mmc_remove_host(struct mmc_host *);
++void mmc_free_host(struct mmc_host *);
+ void mmc_of_parse(struct mmc_host *host);
+ 
+ static inline void *mmc_priv(struct mmc_host *host)
+@@ -358,16 +358,16 @@ static inline void *mmc_priv(struct mmc_host *host)
+ #define mmc_classdev(x)	(&(x)->class_dev)
+ #define mmc_hostname(x)	(dev_name(&(x)->class_dev))
+ 
+-extern int mmc_suspend_host(struct mmc_host *);
+-extern int mmc_resume_host(struct mmc_host *);
++int mmc_suspend_host(struct mmc_host *);
++int mmc_resume_host(struct mmc_host *);
+ 
+-extern int mmc_power_save_host(struct mmc_host *host);
+-extern int mmc_power_restore_host(struct mmc_host *host);
++int mmc_power_save_host(struct mmc_host *host);
++int mmc_power_restore_host(struct mmc_host *host);
+ 
+-extern void mmc_detect_change(struct mmc_host *, unsigned long delay);
+-extern void mmc_request_done(struct mmc_host *, struct mmc_request *);
++void mmc_detect_change(struct mmc_host *, unsigned long delay);
++void mmc_request_done(struct mmc_host *, struct mmc_request *);
+ 
+-extern int mmc_cache_ctrl(struct mmc_host *, u8);
++int mmc_cache_ctrl(struct mmc_host *, u8);
+ 
+ static inline void mmc_signal_sdio_irq(struct mmc_host *host)
+ {
+-- 
+1.7.2.5
+
