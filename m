@@ -1,105 +1,118 @@
-From: Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v7 01/10] ARM: davinci: move private EDMA API to arm/common
-Date: Wed, 6 Feb 2013 09:45:08 +0200
-Message-ID: <20130206074508.GB22064@arwen.pp.htv.fi>
-References: <1359742975-10421-1-git-send-email-mporter@ti.com>
- <20130204154153.GA18237@arwen.pp.htv.fi>
- <20130205182848.GJ25185@atomide.com>
- <201302052226.30754.arnd@arndb.de>
-Reply-To: balbi-l0cyMroinI0@public.gmane.org
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH v9 0/2] mmc: support packed command feature of eMMC4.5
+Date: Wed, 06 Feb 2013 17:00:23 +0900
+Message-ID: <003001ce0440$04844b40$0d8ce1c0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============8912946262857323859=="
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <201302052226.30754.arnd-r2nGTMty4D4@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Sergei Shtylyov <sshtylyov-Igf4POYTYCDQT0dZR+AlfA@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Id: linux-mmc@vger.kernel.org
-
---===============8912946262857323859==
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="wq9mPyueHGvFACwf"
-Content-Disposition: inline
-
---wq9mPyueHGvFACwf
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, Feb 05, 2013 at 10:26:30PM +0000, Arnd Bergmann wrote:
-> On Tuesday 05 February 2013, Tony Lindgren wrote:
-> > * Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org> [130204 07:46]:
-> > >=20
-> > > Current DMA abstraction is quite poor, for example there's no way to
-> > > compile support for multiple DMA engines. Code also makes certain, IMO
-> > > unnecessary, assumptions about the underlying DMA engine (abstraction=
- is
-> > > poor, as said above but it we could follow MUSB's programming guide w=
-hen
-> > > it comes to programming DMA transfers).
-> > >=20
-> > > Considering all of the above, it's far better to use DMA engine and g=
-et
-> > > rid of all the mess.
-> >=20
-> > How about just disable MUSB DMA support if ARCH_MULTIPLATFORM for now?
-> > That way MUSB can be fixed up first to support ARCH_MULTIPLATFORM
-> > using PIO while sorting out the DMA related issues.
->=20
-> Sounds ok to me. Someone still needs to do the work to make the non-DMA
-> variants of MUSB coexist in one kernel, but as we discussed erlier, that
-> should be much simpler.
-
-Yeah, I'm cooking some patches to at least make it buildable. Dropping
-unnecessary dependencies and marking da8xx and davinci as depending on
-BROKEN seems to be the easiest way; those two glues hasn't seen a real
-patch since 2010 or so.
-
---=20
-balbi
-
---wq9mPyueHGvFACwf
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJREgoEAAoJEIaOsuA1yqRE1usP/R//BpO3v7devKDdQBLwvF8l
-phPe3rz8ETV1nVYLYYrbmBtfDf5DBMD0D0FcehZyPDXcXUeQnlijhTRXVFpyH0Zy
-SIE5djOk1Tn16H06zw0igs5BOo9ErOLL3lBu5wg3fkXehdd81pmGBJKAooEkj2jw
-GSJlsvId2MST7VOuzA0ZX+4hwE0GWSD9H4L0qPiShZXT4fPtLB0KdYWINYe5ydsU
-h1Doapg3ur93Hvaz1otV+a219TMBa3zmtORPnKDeTMKgZmuAPIKJBX2fCY1CmYuh
-c6C5F6xKS6iYsqO+TsDXFM9r2gN0qUG2Y/2nhTsRDP5wNZVqVTQcLlUeSjPPCrI6
-TCp6uQyBjvyMWY8U+sBO0Rvq181PQytCujeH5rcwT5V4Y1Yq0dp+2466jk3STesY
-9Md48ZZYIboKmjkXcN0gE1Ypge79Cdofrxt/fFvPrAro8jw+mSb7GA2nMD8Jts/D
-eKsd6r53u6dBRcrYhTXroWuHKv+lyEffxbmSWmSk3SBM0+LIgEgCyhLycwYq1MyG
-Y12kgteqKgMJlGJbpWmYDJ1szi7KUIrMRwUviRWIKt8NebZrvEcAPyxWy521uKYe
-1gTYGDyw05BP0VlWff8JRAWF027uUBac1tacfpnCg9LtAA0HSTK6gZ2Gb7EYGG81
-NyGEb7Y2apxrUalPd+aF
-=J3m8
------END PGP SIGNATURE-----
-
---wq9mPyueHGvFACwf--
-
---===============8912946262857323859==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:50327 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751539Ab3BFIAj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Feb 2013 03:00:39 -0500
+Received: from epcpsbgm2.samsung.com (epcpsbgm2 [203.254.230.27])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0MHS00B7YGW5GRP0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 06 Feb 2013 17:00:24 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0MHS001L4GWN0S90@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 06 Feb 2013 17:00:24 +0900 (KST)
+References: 
+In-reply-to: 
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Maya Erez' <merez@codeaurora.org>, 'Subhash Jadavani' <subhashj@codeaurora.org>, "'S, Venkatraman'" <svenkatr@ti.com>, 'Saugata Das' <saugata.das@linaro.org>, 'Namjae Jeon' <linkinjeon@gmail.com>, 'Arnd Bergmann' <arnd.bergmann@linaro.org>
 
-_______________________________________________
-devicetree-discuss mailing list
-devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-https://lists.ozlabs.org/listinfo/devicetree-discuss
+This patch-set adds support of packed command feature for eMMC4.5 devices.
+Specially, packed write is introduced.
 
---===============8912946262857323859==--
+Seeing the NAND flash, write is expensive operation including the block management internally.
+Because write data cannot be overwritten on the NAND cell, additional operation is needed.
+Overhead of the management can be reduced with once large write size rather than several data of small size.
+That is when writing large amounts of data, eMMC gives a significant speed advantage.
+Packed write can help it by gathering the data. Actually we got the performance gain.
+For experiments, three eMMCs of different type from two vendor are used.
+
+Additionally, there is a interesting result for packed read.
+Packed read has been excluded from whole patch-set with a performance regression conclusively.
+I found the reason for this regression. As we know, asynchronous transfer improves the performance
+over than 20% for the read.  And I found that packed read actually gives performance gain of 2% 
+only if asynchronous transfer is disabled. This shows that asynchronous transfer is more effective 
+than packed read although packed read is a bit useful.
+
+When several requests is packed for read, asynchronous transfer doesn't occur. That is packed read replaces
+asynchronous transfer. Choice of packed read equals to the abandonment of asynchronous transfer.
+This also means the abandonment of performance advantage. As a result, asynchronous transfer is currently
+best choice regarding the read.
+
+Changes in v9:
+	- Rebase with the latest mmc.
+	- Rework including reconstitution of data struct, on the whole.
+	* Extend the number of blocks for packed header considering large sector (according to the eMMC 4.51)
+	* Use flag of mmc_blk_data to identify permission of packed command.
+	* Check the max commands strictly conforming to mandatory minimum values of spec.
+	Note: These patch-set is dependant in the following patch.
+	[PATCH 2/2] mmc: block: don't start new request when the card is removed
+	
+Changes in v8:
+	- Ensure the alignment of sector size for native 4KB sector
+	  in command packing(from Subhash Jadavani)
+	- Exclude packed read in this phase due to performance issue.
+
+Changes in v7:
+	- Break the endless execution in some error handling(from Maya Erez).
+	- Change the condition for enabling packed command(from Subhash Jadavani).
+	- Spilt the error related routine from mmc_blk_issue_rw_rq.
+
+Changes in v6:
+	- Split the patch for packed read.
+	- Remove the unnecessary code. 
+
+Changes in v5:
+	- Revert "Add a variable member in mmc_host for minimum number of packed entries".
+	- Fix the partial packed command from failure index.
+	- Clean an unnecessary parameter of mmc_blk_packed_hdr_wrq_prep 
+	- Clean warning of checkpatch.
+
+Changes in v4:
+	- Add Data-tag as CMD23 argument for packed header.
+	- Separate the capability of MMC_CAP2_PACKED_CMD into read and write.
+	- Remove unncessary initial value.
+
+Changes in v3:
+	- Add a variable member in mmc_host for minimum number of packed entries.
+	  This value can be overridden by host.
+	- Fix a handling of error sequence.
+
+Changes in v2:
+	- Fix the packed read sequence and error handling.
+	- Apply checking the exception status for all cases with
+	  the comments from Maya Erez and Sahitya Tummala.
+	- Fix preparing the packed list with the comment from Maya Erez and Venkatraman.
+
+Seungwon Jeon (2):
+      mmc: add packed command feature of eMMC4.5
+      mmc: support packed write command for eMMC4.5 device
+	
+drivers/mmc/card/block.c   |  454 ++++++++++++++++++++++++++++++++++++++++++--
+drivers/mmc/card/queue.c   |   96 +++++++++-
+drivers/mmc/card/queue.h   |   22 ++
+drivers/mmc/core/mmc.c     |   28 +++
+drivers/mmc/core/mmc_ops.c |    1 +
+include/linux/mmc/card.h   |    8 +
+include/linux/mmc/core.h   |    4 +
+include/linux/mmc/host.h   |    9 +
+include/linux/mmc/mmc.h    |   15 ++-
+9 files changed, 618 insertions(+), 19 deletions(-)
+
+Thanks,
+Seungwon Jeon
+--
+1.7.2.3
+
+
