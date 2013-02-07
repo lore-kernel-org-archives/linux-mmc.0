@@ -1,49 +1,32 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v3 06/13] mmc: tmio-mmc: define device-tree bindings
-Date: Thu, 7 Feb 2013 08:27:29 +0000
-Message-ID: <201302070827.29355.arnd@arndb.de>
-References: <1360180020-18555-1-git-send-email-g.liakhovetski@gmx.de> <201302062224.20549.arnd@arndb.de> <20130207005957.GB9775@verge.net.au>
+From: Paul Mundt <lethal@linux-sh.org>
+Subject: Re: [PATCH v3 13/13] mmc: tmio: add barriers to IO operations
+Date: Thu, 7 Feb 2013 18:51:42 +0900
+Message-ID: <20130207095141.GD13371@linux-sh.org>
+References: <1360180020-18555-1-git-send-email-g.liakhovetski@gmx.de>
+ <1360180020-18555-14-git-send-email-g.liakhovetski@gmx.de>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20130207005957.GB9775@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from linux-sh.org ([111.68.239.195]:44930 "EHLO linux-sh.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755436Ab3BGJwA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 7 Feb 2013 04:52:00 -0500
+Content-Disposition: inline
+In-Reply-To: <1360180020-18555-14-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>
 
-On Thursday 07 February 2013, Simon Horman wrote:
-> > Please write the binding in a way that does not refer to a specific
-> > implementation in Linux: The binding should describe the hardware
-> > independent of details in the driver. In particular, I think you
-> > should not refer to the TMIO_MMC_BLKSZ_2BYTES etc macros but describe
-> > in text what the flags are about.
-> > 
-> > Regarding the toshiba,mmc-wrprotect-disable property, would it be
-> > enough to just check the presence of the wp-gpios property?
-> > 
-> > TMIO_MMC_BLKSZ_2BYTES seems to be set unconditionally in
-> > sh_mobile_sdhi_probe and nowhere else, so I'd assume we don't
-> > actually need to provide this here, but can keep that knowledge
-> > implicit based on whether we're talking to sh_mobile_sdhi
-> > or another tmio_mmc variant.
-> > 
-> > For the other last one, is that actually board specific, or just
-> > a feature of a given chip? If we can tell by the SoC, then I'd
-> > suggest using separate "compatible" properties instead, and
-> > put a bitmask of features into the .data field of the of match
-> > table. For all I can tell, SH7372 does not set it, while SH73A0,
-> > R8A7740 and R8A7779 always do.
+On Wed, Feb 06, 2013 at 08:47:00PM +0100, Guennadi Liakhovetski wrote:
+> Without barriers SDIO operations fail with runtime PM enabled.
 > 
-> My understanding is that TMIO_MMC_HAS_IDLE_WAIT can be set based
-> on the SoC in use.
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> Cc: Paul Mundt <lethal@linux-sh.org>
+> ---
+> 
+> v3: use iowrite16_rep() and ioread16_rep() for consistency.
+> 
+Looks better to me!
 
-Ok, thanks for the confirmation. Just to be clear: Either way (compatible
-or separate property) works fine and can be used here. I tend to prefer
-basing these things on the "compatible" string in order to keep
-specific knowledge of the device internals out of the device tree
-binding though.
-
-	Arnd
+Reviewed-by: Paul Mundt <lethal@linux-sh.org>
