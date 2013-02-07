@@ -1,38 +1,59 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: exynos: Add pinctrl support
-Date: Thu, 7 Feb 2013 16:30:27 +0100
-Message-ID: <CACRpkdbJJq3+BkHwzM_osDxdY5ZuVyTuYDjejaqNRRETMf7a6w@mail.gmail.com>
-References: <1360238236-17694-1-git-send-email-sachin.kamat@linaro.org>
-	<1360238236-17694-2-git-send-email-sachin.kamat@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Dongjin Kim <tobetter@gmail.com>
+Subject: [PATCH] mmc: dw_mmc: No bus setup if default pinctrl is used
+Date: Fri,  8 Feb 2013 03:17:58 +0900
+Message-ID: <1360261079-24361-1-git-send-email-tobetter@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ia0-f178.google.com ([209.85.210.178]:46216 "EHLO
-	mail-ia0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757124Ab3BGPae (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Feb 2013 10:30:34 -0500
-Received: by mail-ia0-f178.google.com with SMTP id y26so3114499iab.9
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Feb 2013 07:30:34 -0800 (PST)
-In-Reply-To: <1360238236-17694-2-git-send-email-sachin.kamat@linaro.org>
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:48452 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758789Ab3BGSSO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Feb 2013 13:18:14 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sachin Kamat <sachin.kamat@linaro.org>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, tgih.jun@samsung.com, jh80.chung@samsung.com, patches@linaro.org, Thomas Abraham <thomas.abraham@linaro.org>
+Cc: Dongjin Kim <tobetter@gmail.com>, Thomas Abraham <thomas.ab@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Thu, Feb 7, 2013 at 12:57 PM, Sachin Kamat <sachin.kamat@linaro.org> wrote:
+Legacy gpio based bus setup is failed when the bus pins are listed with the
+property 'pinctrl-0' and 'pinctrl-names', instead of 'gpios'. The default
+pinctrls are handled by device core before probe, no need to configure the
+pins again in a device driver.
 
-> Added support for pin configuration using pinctrl subsystem.
->
-> Cc: Thomas Abraham <thomas.abraham@linaro.org>
-> Cc: Linus Walleij <linus.walleij@linaro.org>
-> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+[    1.190000] Synopsys Designware Multimedia Card Interface Driver
+[    1.195000] dwmmc_exynos 12550000.mshc: Using PIO mode.
+[    1.200000] dwmmc_exynos 12550000.mshc: DW MMC controller at irq 109, 32 bit host data width, 128 deep fifo
+[    1.210000] dwmmc_exynos 12550000.mshc: invalid gpio: -2
+[    1.215000] dwmmc_exynos: probe of 12550000.mshc failed with error -22
 
-NACK.
+Cc: Thomas Abraham <thomas.ab@samsung.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>
+Signed-off-by: Dongjin Kim <tobetter@gmail.com>
+---
+ drivers/mmc/host/dw_mmc-exynos.c |    9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
 
-In the v3.9 merge window we will merge this patch:
-http://marc.info/?l=linux-kernel&m=135887740715083&w=2
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index aafd485..f568c32 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -156,12 +156,19 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
+ 				struct device_node *slot_np, u8 bus_width)
+ {
+ 	int idx, gpio, ret;
++	int nr_pins = NUM_PINS(bus_width);
+ 
+ 	if (!slot_np)
+ 		return -EINVAL;
+ 
++#if defined(CONFIG_PINCTRL)
++	/* Default pinctrl is used */
++	if (!IS_ERR(host->dev->pins->default_state))
++		nr_pins = 0;
++#endif
++
+ 	/* cmd + clock + bus-width pins */
+-	for (idx = 0; idx < NUM_PINS(bus_width); idx++) {
++	for (idx = 0; idx < nr_pins; idx++) {
+ 		gpio = of_get_gpio(slot_np, idx);
+ 		if (!gpio_is_valid(gpio)) {
+ 			dev_err(host->dev, "invalid gpio: %d\n", gpio);
+-- 
+1.7.10.4
 
-That should do the trick. Just define your tables properly.
-
-Yours,
-Linus Walleij
