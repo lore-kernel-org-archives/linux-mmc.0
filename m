@@ -1,91 +1,49 @@
-From: "Manjunathappa, Prakash" <prakash.pm@ti.com>
-Subject: [PATCH v2 3/3] ARM: davinci: da850: add mmc DT entries
-Date: Thu, 7 Feb 2013 13:27:05 +0530
-Message-ID: <1360223825-23929-4-git-send-email-prakash.pm@ti.com>
-References: <1360223825-23929-1-git-send-email-prakash.pm@ti.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v3 06/13] mmc: tmio-mmc: define device-tree bindings
+Date: Thu, 7 Feb 2013 08:27:29 +0000
+Message-ID: <201302070827.29355.arnd@arndb.de>
+References: <1360180020-18555-1-git-send-email-g.liakhovetski@gmx.de> <201302062224.20549.arnd@arndb.de> <20130207005957.GB9775@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1360223825-23929-1-git-send-email-prakash.pm@ti.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: grant.likely@secretlab.ca, rob.herring@calxeda.com, rob@landley.net, linux@arm.linux.org.uk, nsekhar@ti.com, hs@denx.de, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, davinci-linux-open-source@linux.davincidsp.com, "Manjunathappa, Prakash" <prakash.pm@ti.com>, linux-kernel@vger.kernel.org
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <20130207005957.GB9775@verge.net.au>
+Sender: linux-sh-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add DT entry for MMC. Also add entry for pinmux information.
-Tested on da850-evm without card detect and EDMA support as
-DT support for GPIO and EDMA are yet come.
+On Thursday 07 February 2013, Simon Horman wrote:
+> > Please write the binding in a way that does not refer to a specific
+> > implementation in Linux: The binding should describe the hardware
+> > independent of details in the driver. In particular, I think you
+> > should not refer to the TMIO_MMC_BLKSZ_2BYTES etc macros but describe
+> > in text what the flags are about.
+> > 
+> > Regarding the toshiba,mmc-wrprotect-disable property, would it be
+> > enough to just check the presence of the wp-gpios property?
+> > 
+> > TMIO_MMC_BLKSZ_2BYTES seems to be set unconditionally in
+> > sh_mobile_sdhi_probe and nowhere else, so I'd assume we don't
+> > actually need to provide this here, but can keep that knowledge
+> > implicit based on whether we're talking to sh_mobile_sdhi
+> > or another tmio_mmc variant.
+> > 
+> > For the other last one, is that actually board specific, or just
+> > a feature of a given chip? If we can tell by the SoC, then I'd
+> > suggest using separate "compatible" properties instead, and
+> > put a bitmask of features into the .data field of the of match
+> > table. For all I can tell, SH7372 does not set it, while SH73A0,
+> > R8A7740 and R8A7779 always do.
+> 
+> My understanding is that TMIO_MMC_HAS_IDLE_WAIT can be set based
+> on the SoC in use.
 
-Signed-off-by: Manjunathappa, Prakash <prakash.pm@ti.com>
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
-Cc: linux-kernel@vger.kernel.org
-Cc: davinci-linux-open-source@linux.davincidsp.com
-Cc: devicetree-discuss@lists.ozlabs.org
-Cc: cjb@laptop.org
-Cc: Sekhar Nori <nsekhar@ti.com>
----
-Since v1:
-Removed bitfields for specifying the device capabilty and accomodate
-controller revision in compatible field.
+Ok, thanks for the confirmation. Just to be clear: Either way (compatible
+or separate property) works fine and can be used here. I tend to prefer
+basing these things on the "compatible" string in order to keep
+specific knowledge of the device internals out of the device tree
+binding though.
 
- arch/arm/boot/dts/da850-evm.dts |    9 +++++++++
- arch/arm/boot/dts/da850.dtsi    |   15 +++++++++++++++
- 2 files changed, 24 insertions(+), 0 deletions(-)
-
-diff --git a/arch/arm/boot/dts/da850-evm.dts b/arch/arm/boot/dts/da850-evm.dts
-index fa04152..78a6fb7 100644
---- a/arch/arm/boot/dts/da850-evm.dts
-+++ b/arch/arm/boot/dts/da850-evm.dts
-@@ -30,6 +30,15 @@
- 		rtc0: rtc@1c23000 {
- 			status = "okay";
- 		};
-+		mmc0: mmc@1c40000 {
-+			max-frequency = <50000000>;
-+			mmc-cap-sd-highspeed;
-+			mmc-cap-mmc-highspeed;
-+			bus-width = <4>;
-+			status = "okay";
-+			pinctrl-names = "default";
-+			pinctrl-0 = <&mmc0_pins>;
-+		};
- 	};
- 	nand_cs3@62000000 {
- 		status = "okay";
-diff --git a/arch/arm/boot/dts/da850.dtsi b/arch/arm/boot/dts/da850.dtsi
-index 099c81e..3ef9c22 100644
---- a/arch/arm/boot/dts/da850.dtsi
-+++ b/arch/arm/boot/dts/da850.dtsi
-@@ -56,6 +56,15 @@
- 					0x30 0x01100000  0x0ff00000
- 				>;
- 			};
-+			mmc0_pins: pinmux_mmc_pins {
-+				pinctrl-single,bits = <
-+					/* MMCSD0_DAT[3] MMCSD0_DAT[2]
-+					 * MMCSD0_DAT[1] MMCSD0_DAT[0]
-+					 * MMCSD0_CMD    MMCSD0_CLK
-+					 */
-+					0x28 0x00222222  0x00ffffff
-+				>;
-+			};
- 		};
- 		serial0: serial@1c42000 {
- 			compatible = "ns16550a";
-@@ -88,6 +97,12 @@
- 				      19>;
- 			status = "disabled";
- 		};
-+		mmc0: mmc@1c40000 {
-+			compatible = "ti,davinci-mmc-da830";
-+			reg = <0x40000 0x1000>;
-+			interrupts = <16>;
-+			status = "disabled";
-+		};
- 	};
- 	nand_cs3@62000000 {
- 		compatible = "ti,davinci-nand";
--- 
-1.7.4.1
-
+	Arnd
