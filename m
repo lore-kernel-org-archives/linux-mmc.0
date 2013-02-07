@@ -1,58 +1,45 @@
 From: "Manjunathappa, Prakash" <prakash.pm@ti.com>
-Subject: [PATCH v2 1/3] ARM: davinci: da850: override mmc DT node device name
-Date: Thu, 7 Feb 2013 13:27:03 +0530
-Message-ID: <1360223825-23929-2-git-send-email-prakash.pm@ti.com>
-References: <1360223825-23929-1-git-send-email-prakash.pm@ti.com>
+Subject: [PATCH v2 0/3] Add DT support for davinci_mmc driver
+Date: Thu, 7 Feb 2013 13:27:02 +0530
+Message-ID: <1360223825-23929-1-git-send-email-prakash.pm@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1360223825-23929-1-git-send-email-prakash.pm@ti.com>
 Sender: linux-doc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: grant.likely@secretlab.ca, rob.herring@calxeda.com, rob@landley.net, linux@arm.linux.org.uk, nsekhar@ti.com, hs@denx.de, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, davinci-linux-open-source@linux.davincidsp.com, "Manjunathappa, Prakash" <prakash.pm@ti.com>, linux-kernel@vger.kernel.org
+Cc: grant.likely@secretlab.ca, rob.herring@calxeda.com, rob@landley.net, linux@arm.linux.org.uk, nsekhar@ti.com, hs@denx.de, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, davinci-linux-open-source@linux.davincidsp.com, "Manjunathappa, Prakash" <prakash.pm@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Populate OF_DEV_AUXDATA with desired device name expected by
-davinci_mmc driver. Without this clk_get of davinci_mmc DT driver
-fails.
+Patch set adds DT support for davinci_mmc driver and is
+verified on da850-evm without card_detect/write_protect and
+EDMA support.
 
-Signed-off-by: Manjunathappa, Prakash <prakash.pm@ti.com>
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
-Cc: linux-kernel@vger.kernel.org
-Cc: davinci-linux-open-source@linux.davincidsp.com
-Cc: devicetree-discuss@lists.ozlabs.org
-Cc: cjb@laptop.org
-Cc: Sekhar Nori <nsekhar@ti.com>
----
+This patch depends on below patches under review:
+1) Patch "drivers/pinctrl: grab default handles from device core"
+	http://www.gossamer-threads.com/lists/linux/kernel/1664015?page=last
+2) Patch "mmc: davinci: allow driver to work without DMA resource"
+	http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg18771.html
+
+Applies on top of v3.9/dt branch of linux_davinci tree:
+git://gitorious.org/linux-davinci/linux-davinci.git
+
 Since v1:
-Compatible string modified to accomodate version information.
+Modified the DT parse function to take default values, updated DT binding
+documentation accordingly.
 
- arch/arm/mach-davinci/da8xx-dt.c |    9 ++++++++-
- 1 files changed, 8 insertions(+), 1 deletions(-)
+Manjunathappa, Prakash (3):
+  ARM: davinci: da850: override mmc DT node device name
+  mmc: davinci_mmc: add DT support
+  ARM: davinci: da850: add mmc DT entries
 
-diff --git a/arch/arm/mach-davinci/da8xx-dt.c b/arch/arm/mach-davinci/da8xx-dt.c
-index 37c27af..3362ca4 100644
---- a/arch/arm/mach-davinci/da8xx-dt.c
-+++ b/arch/arm/mach-davinci/da8xx-dt.c
-@@ -39,9 +39,16 @@ static void __init da8xx_init_irq(void)
- 
- #ifdef CONFIG_ARCH_DAVINCI_DA850
- 
-+static const struct of_dev_auxdata da8xx_auxdata[] __initconst = {
-+	OF_DEV_AUXDATA("ti,davinci-mmc-da830", 0x01c40000, "davinci_mmc.0",
-+			NULL),
-+	{},
-+};
-+
- static void __init da850_init_machine(void)
- {
--	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
-+	of_platform_populate(NULL, of_default_bus_match_table, da8xx_auxdata,
-+			NULL);
- 
- 	da8xx_uart_clk_enable();
- }
+ .../devicetree/bindings/mmc/davinci_mmc.txt        |   30 ++++++++
+ arch/arm/boot/dts/da850-evm.dts                    |    9 +++
+ arch/arm/boot/dts/da850.dtsi                       |   15 ++++
+ arch/arm/mach-davinci/da8xx-dt.c                   |    9 ++-
+ drivers/mmc/host/davinci_mmc.c                     |   70 +++++++++++++++++++-
+ 5 files changed, 131 insertions(+), 2 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/davinci_mmc.txt
+
 -- 
 1.7.4.1
 
