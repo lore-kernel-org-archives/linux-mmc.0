@@ -1,89 +1,186 @@
-From: Dongjin Kim <tobetter@gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: No bus setup if default pinctrl is used
-Date: Fri, 8 Feb 2013 04:49:48 +0900
-Message-ID: <CADoNuNeEeuOEJswpSnGuVoRYb_te3KJDKsVhStJzEbfsfzLBtA@mail.gmail.com>
-References: <1360261079-24361-1-git-send-email-tobetter@gmail.com>
-	<CACRpkdb7gFAr=-WbeMv98t6wcM+T2yJ+BqhLxiSY=Oq=9fnLYQ@mail.gmail.com>
+From: "Manjunathappa, Prakash" <prakash.pm@ti.com>
+Subject: RE: [PATCH v2 2/3] mmc: davinci_mmc: add DT support
+Date: Fri, 8 Feb 2013 06:25:09 +0000
+Message-ID: <A73F36158E33644199EB82C5EC81C7BC3EA465FE@DBDE01.ent.ti.com>
+References: <1360223825-23929-1-git-send-email-prakash.pm@ti.com>
+ <1360223825-23929-3-git-send-email-prakash.pm@ti.com>
+ <20130207104656.GE16987@e106331-lin.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f42.google.com ([209.85.215.42]:44588 "EHLO
-	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1422653Ab3BGTtv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Feb 2013 14:49:51 -0500
-In-Reply-To: <CACRpkdb7gFAr=-WbeMv98t6wcM+T2yJ+BqhLxiSY=Oq=9fnLYQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <20130207104656.GE16987@e106331-lin.cambridge.arm.com>
+Content-Language: en-US
+Sender: linux-doc-owner@vger.kernel.org
+To: Mark Rutland <mark.rutland@arm.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Porter, Matt" <mporter@ti.com>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "Nori, Sekhar" <nsekhar@ti.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "hs@denx.de" <hs@denx.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Thomas Abraham <thomas.ab@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Linus,
+Hi Mark,
 
-Thank you for reviewing.
+On Thu, Feb 07, 2013 at 16:16:56, Mark Rutland wrote:
+> Hello,
+> 
+> I have a couple of comments on the dt bindings and the way it's parsed.
+> 
 
-Initially I also considered to use IS_ENABLED(CONFIG_PINCTRL) and
-ignore for-block according to its status. But it would make a certain
-board failed if gpios is used for pin configuration rather than
-default-pinctrl even if CONFIG_PINCTRL is enabled. Also considered to
-add a function on pinctrl.c to return if default-pinctrl is used, and
-drop down the for-block according to its status. It could replace the
-long and complicaed line, IS_ERR(host->dev->pins->default_state), to
-simple one as well. :)
+Thanks for your review comments.
 
-The best is obviously to enable CONFIG_PINCTRL and remove the
-for-block, it makes the code more simple. I like to have a comment
-from Thomas if have to support both cases, gpios and default-pinctrl.
+> On Thu, Feb 07, 2013 at 07:57:04AM +0000, Manjunathappa, Prakash wrote:
+> > Adds device tree support for davinci_mmc. Also add binding documentation.
+> > Tested in non-dma PIO mode and without GPIO card_detect/write_protect
+> > option because of dependencies on EDMA and GPIO module DT support.
+> > 
+> > Signed-off-by: Manjunathappa, Prakash <prakash.pm@ti.com>
+> > Cc: linux-mmc@vger.kernel.org
+> > Cc: linux-arm-kernel@lists.infradead.org
+> > Cc: linux-kernel@vger.kernel.org
+> > Cc: davinci-linux-open-source@linux.davincidsp.com
+> > Cc: devicetree-discuss@lists.ozlabs.org
+> > Cc: cjb@laptop.org
+> > Cc: Sekhar Nori <nsekhar@ti.com>
+> > Cc: mporter@ti.com
+> > ---
+> > Since v1:
+> > Modified DT parse function to take default values and accomodate controller
+> > version in compatible field.
+> > 
+> >  .../devicetree/bindings/mmc/davinci_mmc.txt        |   30 ++++++++
+> >  drivers/mmc/host/davinci_mmc.c                     |   70 +++++++++++++++++++-
+> >  2 files changed, 99 insertions(+), 1 deletions(-)
+> >  create mode 100644 Documentation/devicetree/bindings/mmc/davinci_mmc.txt
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/davinci_mmc.txt b/Documentation/devicetree/bindings/mmc/davinci_mmc.txt
+> > new file mode 100644
+> > index 0000000..6717ab1
+> > --- /dev/null
+> > +++ b/Documentation/devicetree/bindings/mmc/davinci_mmc.txt
+> > @@ -0,0 +1,30 @@
+> > +* TI Highspeed MMC host controller for DaVinci
+> > +
+> > +The Highspeed MMC Host Controller on TI DaVinci family
+> > +provides an interface for MMC, SD and SDIO types of memory cards.
+> > +
+> > +This file documents the properties used by the davinci_mmc driver.
+> > +
+> > +Required properties:
+> > +- compatible:
+> > + Should be "ti,davinci-mmc-da830": for da830, da850, dm365
+> > + Should be "ti,davinci-mmc-dm355": for dm355, dm644x
+> > +
+> > +Optional properties:
+> > +- bus-width: Number of data lines, can be <4>, or <8>, default <1>
+> > +- max-frequency: Maximum operating clock frequency, default 25MHz.
+> > +- mmc-cap-mmc-highspeed: Indicates support for MMC in high speed mode
+> > +- mmc-cap-sd-highspeed: Indicates support for SD in high speed mode
+> 
+> I thought the last two were derivable from max-frequency?
+> 
 
-Best regards,
-Dongjin.
+Yes, but I see below comment that it doesnot support MMC/SD.
+arch/arm/mach-davinci/devices.c: davinci_setup_mmc
+	   "
+         * FIXME dm6441 (no MMC/SD), dm357 (one), and dm335 (two) are
+         * not handled right here ...
+         */"
+I was wondering how do we support such platforms, so I thought it is necessary
+to have these. But I see that on da850-evm even on skipping above flags EVM is able
+to detect card, does it mean there is no way to specify "no SD/MMC" capability?
+I will remove these and decide highspeed capability based on max-frequency.
 
-On Fri, Feb 8, 2013 at 4:03 AM, Linus Walleij <linus.walleij@linaro.org> wrote:
-> On Thu, Feb 7, 2013 at 7:17 PM, Dongjin Kim <tobetter@gmail.com> wrote:
->
->> Legacy gpio based bus setup is failed when the bus pins are listed with the
->> property 'pinctrl-0' and 'pinctrl-names', instead of 'gpios'. The default
->> pinctrls are handled by device core before probe, no need to configure the
->> pins again in a device driver.
->
-> Aha.
->
->>  {
->>         int idx, gpio, ret;
->> +       int nr_pins = NUM_PINS(bus_width);
->>
->>         if (!slot_np)
->>                 return -EINVAL;
->>
->> +#if defined(CONFIG_PINCTRL)
->> +       /* Default pinctrl is used */
->> +       if (!IS_ERR(host->dev->pins->default_state))
->> +               nr_pins = 0;
->> +#endif
->
-> Use:
->
-> if (IS_ENABLED(CONFIG_PINCTRL))
->    nr_pins = 0;
->
-> Without ifdefs. Grep kernel for examples.
-> Read <linux/kconfig.h> for explanations.
->
-> Put a comment above this to explain exactly why
-> you do this.
->
->> +
->>         /* cmd + clock + bus-width pins */
->> -       for (idx = 0; idx < NUM_PINS(bus_width); idx++) {
->> +       for (idx = 0; idx < nr_pins; idx++) {
->>                 gpio = of_get_gpio(slot_np, idx);
->>                 if (!gpio_is_valid(gpio)) {
->>                         dev_err(host->dev, "invalid gpio: %d\n", gpio);
->
-> This looks kludgy, is it so that the driver falls back to GPIO
-> if it cannot use pinctrl? Can't it just depend on CONFIG_PINCTRL
-> in Kconfig or do you absolutely have to support both cases?
->
-> I was under the impression that the Exynos requires pinctrl.
->
-> Yours,
-> Linus Walleij
+> https://lkml.org/lkml/2012/10/15/231
+> 
+> [...]
+> 
+> > +static struct davinci_mmc_config
+> > +	*mmc_parse_pdata(struct platform_device *pdev)
+> >  {
+> > +	struct device_node *np;
+> >  	struct davinci_mmc_config *pdata = pdev->dev.platform_data;
+> > +	const struct of_device_id *match =
+> > +		of_match_device(of_match_ptr(davinci_mmc_dt_ids), &pdev->dev);
+> > +	u32 data;
+> > +
+> > +	np = pdev->dev.of_node;
+> > +	if (!np)
+> > +		return pdata;
+> > +
+> > +	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
+> > +	if (!pdata) {
+> > +		dev_err(&pdev->dev, "Failed to allocate memory for struct davinci_mmc_config\n");
+> > +		goto nodata;
+> > +	}
+> > +
+> > +	if (match->data)
+> > +		pdata->version = (u8)((int)match->data);
+> > +
+> > +	of_property_read_u32(np, "max-frequency", &pdata->max_freq);
+> > +	if (!pdata->max_freq)
+> > +		dev_info(&pdev->dev, "'max-frequency' property not specified, defaulting to 25MHz\n");
+> > +
+> > +	if (of_get_property(np, "mmc-cap-mmc-highspeed", NULL))
+> > +		pdata->caps |= MMC_CAP_MMC_HIGHSPEED;
+> > +	if (of_get_property(np, "mmc-cap-sd-highspeed", NULL))
+> > +		pdata->caps |= MMC_CAP_SD_HIGHSPEED;
+> 
+> If these aren't derivable from max-frequency, you could use
+> of_property_read_bool to make this clearer.
+> 
+
+Correct, I will decide these based on max-frequency.
+
+> > +
+> > +	of_property_read_u32(np, "bus-width", &data);
+> > +	switch (data) {
+> > +	case 0:
+> 
+> Judging by the binding doc, should this be 1 rather than 0?
+> 
+
+By default driver comes up in 4 bit mode when bus-width is not specified.
+Bus-width is set to 1 bit for invalid bus-widths. Below are the cases
+when bus-width 0 or 4, bus-width is set to 4bit mode
+When bus-width is 8, bus-width is set to 8 bit mode
+
+I thought that if somebody specifies bus-width as 2, 3, 5, 6, 7..., then
+it should be defaulted to 1 bit mode, so I specified it as 1 bit in binding doc.
+But I feel that a person who is editing dts file will not make such a mistake.
+I will change binding document to default as 4 bit mode.
+
+> > +	case 4:
+> > +	case 8:
+> > +		pdata->wires = data;
+> > +		break;
+> > +	default:
+> > +		pdata->wires = 1;
+> > +		dev_info(&pdev->dev, "Unsupported buswidth, defaulting to 1 bit\n");
+> > +	}
+> > +nodata:
+> > +	return pdata;
+> > +}
+> > +
+> > +static int __init davinci_mmcsd_probe(struct platform_device *pdev)
+> > +{
+> > +	struct davinci_mmc_config *pdata = NULL;
+> >  	struct mmc_davinci_host *host = NULL;
+> >  	struct mmc_host *mmc = NULL;
+> >  	struct resource *r, *mem = NULL;
+> >  	int ret = 0, irq = 0;
+> >  	size_t mem_size;
+> >  
+> > +	pdata = mmc_parse_pdata(pdev);
+> > +	if (pdata == NULL) {
+> > +		dev_err(&pdev->dev, "Can not get platform data\n");
+> > +		return -ENOENT;
+> > +	}
+> > +
+> >  	/* REVISIT:  when we're fully converted, fail if pdata is NULL */
+> 
+> This comment can presumably disappear judging by the lines above?
+> 
+
+Agreed. I will remove it.
+
+Thanks,
+Prakash
+
