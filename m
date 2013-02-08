@@ -1,198 +1,133 @@
-From: <wei_wang@realsil.com.cn>
-Subject: [PATCH] mfd:rtsx: Fix issue that booting OS with SD card inserted
-Date: Fri, 8 Feb 2013 15:24:27 +0800
-Message-ID: <1360308268-6911-1-git-send-email-wei_wang@realsil.com.cn>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v6 0/5] mmc: core: Signal voltage switch procedure for UHS mode
+Date: Fri, 8 Feb 2013 09:58:23 +0100
+Message-ID: <CAPDyKFoLvbQRmaMVX0-DddR_T0tNz389kQVJSuaKSHkE-5mS6g@mail.gmail.com>
+References: <25B60CDC2F704E4E9D88FFD52780CB4C08B059D33F@SC-VEXCH1.marvell.com>
+	<CADz5_gL=WJHRCKqft_5nPf3RKCmh1P_aEpzgAUEPkCY7PioscA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rtits2.realtek.com ([60.250.210.242]:45264 "EHLO
-	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752562Ab3BHHYw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Feb 2013 02:24:52 -0500
+Received: from mail-lb0-f173.google.com ([209.85.217.173]:36115 "EHLO
+	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1946134Ab3BHI6Z (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Feb 2013 03:58:25 -0500
+Received: by mail-lb0-f173.google.com with SMTP id gf7so2825210lbb.18
+        for <linux-mmc@vger.kernel.org>; Fri, 08 Feb 2013 00:58:23 -0800 (PST)
+In-Reply-To: <CADz5_gL=WJHRCKqft_5nPf3RKCmh1P_aEpzgAUEPkCY7PioscA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, sameo@linux.intel.com
-Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, adam.lee@canonical.com, rogerable@realtek.com, Wei WANG <wei_wang@realsil.com.cn>
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Per Forlin <per.forlin@stericsson.com>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Philip Rakity <prakity@nvidia.com>, Daniel Drake <dsd@laptop.org>, Aaron <leafy.myeh@allwinnertech.com>, Subhash Jadavani <subhashj@codeaurora.org>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Wei WANG <wei_wang@realsil.com.cn>
 
-From: Wei WANG <wei_wang@realsil.com.cn>
+On 29 January 2013 05:32, Kevin Liu <keyuan.liu@gmail.com> wrote:
+>> -----Original Message-----
+>> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Johan Rudholm
+>> Sent: Monday, January 28, 2013 10:08 PM
+>> To: linux-mmc@vger.kernel.org; Chris Ball
+>> Cc: Per Forlin; Ulf Hansson; Fredrik Soderstedt; Kevin Liu; Philip Rakity; Daniel Drake; Aaron; Subhash Jadavani; Sujit Reddy Thumma; Wei WANG; Johan Rudholm
+>> Subject: [PATCH v6 0/5] mmc: core: Signal voltage switch procedure for UHS mode
+>>
+>> This patch series attempts to make the 1.8V signal voltage switch
+>> required for UHS mode work according to the SD specification.
+>>
+>> These patches have been tested with a couple of UHS SD cards, one of
+>> which sometimes requires up to five power cycles before it accepts the
+>> signal voltage switch. The patches have also been tested with various
+>> other SD cards, as well as one SDIO WLAN chip (cw1200) to check
+>> for regressions. The patches have also been tested with
+>> CONFIG_MMC_CLKGATE.
+>>
+>> As usual, I'd be very grateful if someone could help me test this patch
+>> with an UHS SDIO card and perhaps also a combo card (which does seem to
+>> be rare these days?)?
+>>
+>> This patch series is based on previous RFC/patch:
+>>
+>> [RFC/PATCH v2] mmc: core: Fixup signal voltage switch
+>>
+>> and more recently on Kevin Liu's patches:
+>>
+>> [PATCH v2 1/3] mmc: core: enhance the code for signal voltage setting
+>> [PATCH v2 2/3] mmc: core: cycle power the card in voltage switch rather than mmc_sd_get_cid
+>>
+>> Changelog:
+>>         v5 -> v6
+>>         - Rebase
+>>         - Adapt sd.c to use mmc_host_uhs introduced by
+>>           "mmc: sdio: Fix SDIO 3.0 UHS-I initialization sequence"
+>>         v4 -> v5
+>>         - Reset signal_voltage in struct ios if switch fails
+>>         v3 -> v4
+>>         - Added "mmc: core: Break out start_signal_voltage_switch",
+>>           which divides up mmc_set_signal_voltage to avoid a recursive
+>>           call from mmc_power_up. This removed the third argument
+>>           (cmd11) of the function
+>>         - Minor bug fixes
+>>         v2 -> v3
+>>         - Minor bug fixes
+>>         v1 -> v2
+>>         - Move mmc_power_cycle to the mmc_set_signal_voltage function
+>>         - Check card_busy before switching voltages
+>>         - Return -EPERM if signal voltage switch with cmd11 is
+>>           requested, but no start_signal_voltage_switch is defined.
+>>         - If we're switching back to 3.3 V, just do the switch without
+>>           checking card_busy etc
+>>         v2 -> This patch series
+>>         - Removed the extra argument to the card_busy host_ops function
+>>         - Added mmc_power_cycle
+>>         - Some clarifying comments
+>>         v1 -> v2
+>>         - Removed reset of signal voltage in mmc_sd_get_cid, since
+>>           "mmc: core: reset signal voltage on power up"
+>>         previous two patches -> v1:
+>>         - Keep calls to mmc_host_clk_hold / mmc_host_clk_release
+>>         - Add retry-loop / power cycle in sdio.c
+>>         - Fall back to 3.3 V if the switch repeatedly fails
+>>         - Add an extra argument to the card_busy host_ops function,
+>>           which can be used to signal polling use of the function
+>>
+>> Johan Rudholm (5):
+>>   mmc: sd: Simplify by using mmc_host_uhs
+>>   mmc: core: Add mmc_power_cycle
+>>   mmc: core: Add card_busy to host_ops
+>>   mmc: core: Break out start_signal_voltage_switch
+>>   mmc: core: Fixup signal voltage switch
+>>
+>>  drivers/mmc/core/core.c  |  114 +++++++++++++++++++++++++++++++++++++++-------
+>>  drivers/mmc/core/core.h  |    5 +-
+>>  drivers/mmc/core/mmc.c   |    8 ++--
+>>  drivers/mmc/core/sd.c    |   27 +++++++----
+>>  drivers/mmc/core/sdio.c  |   23 ++++++++--
+>>  include/linux/mmc/host.h |    3 ++
+>>  6 files changed, 145 insertions(+), 35 deletions(-)
+>>
+>>
+>
+> Tested-by: Kevin Liu <kliu5@marvell.com>
+>
+> Tested with both high speed and UHS sd cards.
+> Tested with emmc chip.
+> Tested with sdio card (non UHS).
+>
+> Tested all the patchset together with below patch (update sdhci.c
+> accordingly) on sdhci-pxav3 platforms.
+>
+> From fc6069b79203f64e7efa8dd0bb295bebcd22f710 Mon Sep 17 00:00:00 2001
+> From: Kevin Liu <kliu5@marvell.com>
+> Date: Fri, 14 Dec 2012 16:44:10 +0800
+> Subject: [PATCH v3 3/3] mmc: sdhci: update signal voltage switch code
+>
+> The protocal related code is moved to core stack. So update the host
+> driver accordingly.
 
-Realtek card reader supports both SD and MS card. According to the
-settings of rtsx MFD driver, SD host will be probed before MS host.
-If we boot/reboot Linux with SD card inserted, the resetting flow of SD
-card will succeed, and the following resetting flow of MS is sure to fail.
-Then MS upper-level driver will ask rtsx driver to turn power off. This
-request leads to the result that the following SD commands fail and SD card
-can't be accessed again.
+I think one patch in this set have not got my ack yet, so to be clear,
+for the hole series:
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-In this commit, Realtek's SD and MS host driver will check whether the card
-that upper driver requesting is the one existing in the slot. If not, Realtek's
-host driver will refuse the operation to make sure the exlusive accessing
-at the same time.
+Chris, unless you see some issues with this patch set, could this be
+merged for 3.9? I have some mmci patches that I would like to upstream
+that relies on these fixes, and since those goes though Russell's tree
+I will always one kernel version behind.
 
-Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
----
- drivers/memstick/host/rtsx_pci_ms.c |    7 +++++++
- drivers/mfd/rtsx_pcr.c              |   30 ++++++++++++++++++++++++++++++
- drivers/mmc/host/rtsx_pci_sdmmc.c   |   18 ++++++++++++++++++
- include/linux/mfd/rtsx_pci.h        |    2 ++
- 4 files changed, 57 insertions(+)
-
-diff --git a/drivers/memstick/host/rtsx_pci_ms.c b/drivers/memstick/host/rtsx_pci_ms.c
-index f5ddb82..64a779c 100644
---- a/drivers/memstick/host/rtsx_pci_ms.c
-+++ b/drivers/memstick/host/rtsx_pci_ms.c
-@@ -426,6 +426,9 @@ static void rtsx_pci_ms_request(struct memstick_host *msh)
- 
- 	dev_dbg(ms_dev(host), "--> %s\n", __func__);
- 
-+	if (rtsx_pci_card_exclusive_check(host->pcr, RTSX_MS_CARD))
-+		return;
-+
- 	schedule_work(&host->handle_req);
- }
- 
-@@ -441,6 +444,10 @@ static int rtsx_pci_ms_set_param(struct memstick_host *msh,
- 	dev_dbg(ms_dev(host), "%s: param = %d, value = %d\n",
- 			__func__, param, value);
- 
-+	err = rtsx_pci_card_exclusive_check(host->pcr, RTSX_MS_CARD);
-+	if (err)
-+		return err;
-+
- 	switch (param) {
- 	case MEMSTICK_POWER:
- 		if (value == MEMSTICK_POWER_ON)
-diff --git a/drivers/mfd/rtsx_pcr.c b/drivers/mfd/rtsx_pcr.c
-index 822237e..481a98a 100644
---- a/drivers/mfd/rtsx_pcr.c
-+++ b/drivers/mfd/rtsx_pcr.c
-@@ -708,6 +708,25 @@ int rtsx_pci_card_power_off(struct rtsx_pcr *pcr, int card)
- }
- EXPORT_SYMBOL_GPL(rtsx_pci_card_power_off);
- 
-+int rtsx_pci_card_exclusive_check(struct rtsx_pcr *pcr, int card)
-+{
-+	unsigned int cd_mask[] = {
-+		[RTSX_SD_CARD] = SD_EXIST,
-+		[RTSX_MS_CARD] = MS_EXIST
-+	};
-+
-+	if (!pcr->ms_pmos) {
-+		/* When using single PMOS, accessing card is not permitted
-+		 * if the existing card is not the designated one.
-+		 */
-+		if (pcr->card_exist & (~cd_mask[card]))
-+			return -EIO;
-+	}
-+
-+	return 0;
-+}
-+EXPORT_SYMBOL_GPL(rtsx_pci_card_exclusive_check);
-+
- int rtsx_pci_switch_output_voltage(struct rtsx_pcr *pcr, u8 voltage)
- {
- 	if (pcr->ops->switch_output_voltage)
-@@ -784,6 +803,9 @@ static void rtsx_pci_card_detect(struct work_struct *work)
- 			card_inserted = pcr->ops->cd_deglitch(pcr);
- 
- 		card_detect = card_inserted | card_removed;
-+
-+		pcr->card_exist |= card_inserted;
-+		pcr->card_exist &= ~card_removed;
- 	}
- 
- 	mutex_unlock(&pcr->pcr_mutex);
-@@ -976,6 +998,14 @@ static int rtsx_pci_init_hw(struct rtsx_pcr *pcr)
- 			return err;
- 	}
- 
-+	/* No CD interrupt if probing driver with card inserted.
-+	 * So we need to initialize pcr->card_exist here.
-+	 */
-+	if (pcr->ops->cd_deglitch)
-+		pcr->card_exist = pcr->ops->cd_deglitch(pcr);
-+	else
-+		pcr->card_exist = rtsx_pci_readl(pcr, RTSX_BIPR) & CARD_EXIST;
-+
- 	return 0;
- }
- 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index f93f100..f981f7d 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -678,12 +678,19 @@ static void sdmmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	struct mmc_command *cmd = mrq->cmd;
- 	struct mmc_data *data = mrq->data;
- 	unsigned int data_size = 0;
-+	int err;
- 
- 	if (host->eject) {
- 		cmd->error = -ENOMEDIUM;
- 		goto finish;
- 	}
- 
-+	err = rtsx_pci_card_exclusive_check(host->pcr, RTSX_SD_CARD);
-+	if (err) {
-+		cmd->error = err;
-+		goto finish;
-+	}
-+
- 	mutex_lock(&pcr->pcr_mutex);
- 
- 	rtsx_pci_start_run(pcr);
-@@ -901,6 +908,9 @@ static void sdmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	if (host->eject)
- 		return;
- 
-+	if (rtsx_pci_card_exclusive_check(host->pcr, RTSX_SD_CARD))
-+		return;
-+
- 	mutex_lock(&pcr->pcr_mutex);
- 
- 	rtsx_pci_start_run(pcr);
-@@ -1073,6 +1083,10 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
- 	if (host->eject)
- 		return -ENOMEDIUM;
- 
-+	err = rtsx_pci_card_exclusive_check(host->pcr, RTSX_SD_CARD);
-+	if (err)
-+		return err;
-+
- 	mutex_lock(&pcr->pcr_mutex);
- 
- 	rtsx_pci_start_run(pcr);
-@@ -1117,6 +1131,10 @@ static int sdmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	if (host->eject)
- 		return -ENOMEDIUM;
- 
-+	err = rtsx_pci_card_exclusive_check(host->pcr, RTSX_SD_CARD);
-+	if (err)
-+		return err;
-+
- 	mutex_lock(&pcr->pcr_mutex);
- 
- 	rtsx_pci_start_run(pcr);
-diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx_pci.h
-index 5d9b81e..26ea7f1 100644
---- a/include/linux/mfd/rtsx_pci.h
-+++ b/include/linux/mfd/rtsx_pci.h
-@@ -740,6 +740,7 @@ struct rtsx_pcr {
- 
- 	unsigned int			card_inserted;
- 	unsigned int			card_removed;
-+	unsigned int			card_exist;
- 
- 	struct delayed_work		carddet_work;
- 	struct delayed_work		idle_work;
-@@ -804,6 +805,7 @@ int rtsx_pci_switch_clock(struct rtsx_pcr *pcr, unsigned int card_clock,
- 		u8 ssc_depth, bool initial_mode, bool double_clk, bool vpclk);
- int rtsx_pci_card_power_on(struct rtsx_pcr *pcr, int card);
- int rtsx_pci_card_power_off(struct rtsx_pcr *pcr, int card);
-+int rtsx_pci_card_exclusive_check(struct rtsx_pcr *pcr, int card);
- int rtsx_pci_switch_output_voltage(struct rtsx_pcr *pcr, u8 voltage);
- unsigned int rtsx_pci_card_exist(struct rtsx_pcr *pcr);
- void rtsx_pci_complete_unfinished_transfer(struct rtsx_pcr *pcr);
--- 
-1.7.9.5
-
+Kind regards
+Ulf Hansson
