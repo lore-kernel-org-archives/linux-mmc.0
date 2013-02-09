@@ -1,69 +1,60 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [PATCH 6/6] mmc: dt: bus-width can be an optional property
-Date: Fri, 08 Feb 2013 23:02:58 +0000
-Message-ID: <20130208230259.05F933E2C27@localhost>
-References: <1358766149-9534-1-git-send-email-shawn.guo@linaro.org> <1358766149-9534-7-git-send-email-shawn.guo@linaro.org>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: [PATCH REPOST] mmc: bcm2835: set SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
+Date: Fri,  8 Feb 2013 20:56:27 -0700
+Message-ID: <1360382187-26296-1-git-send-email-swarren@wwwdotorg.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f54.google.com ([74.125.82.54]:51381 "EHLO
-	mail-wg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1947094Ab3BHXDD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Feb 2013 18:03:03 -0500
-Received: by mail-wg0-f54.google.com with SMTP id fm10so3255876wgb.33
-        for <linux-mmc@vger.kernel.org>; Fri, 08 Feb 2013 15:03:02 -0800 (PST)
-In-Reply-To: <1358766149-9534-7-git-send-email-shawn.guo@linaro.org>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:37022 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760623Ab3BID4f (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Feb 2013 22:56:35 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <cjb@laptop.org>, devicetree-discuss@lists.ozlabs.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Stephen Warren <swarren@wwwdotorg.org>
 
-On Mon, 21 Jan 2013 19:02:29 +0800, Shawn Guo <shawn.guo@linaro.org> wrote:
-> None of mmc drivers implements bus-width as a required device tree
-> property.  Instead, some drivers like atmel-mci, dw_mmc, sdhci-s3c
-> implement it as an optional one, and will force bus width to be 1
-> when the property is absent.  Let's change the common binding to
-> reflect what the drivers are usually doing.
-> 
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> Cc: devicetree-discuss@lists.ozlabs.org
+SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK does basically the same as
+implementing struct sdhci_ops .get_timeout_clock, so simply set that
+quirk and remove the custom code to simplify the driver.
 
-Acked-by: Grant Likely <grant.likely@secretlab.ca>
+Reported-by: Lars-Peter Clausen <lars@metafoo.de>
+Signed-off-by: Stephen Warren <swarren@wwwdotorg.org>
+---
+ drivers/mmc/host/sdhci-bcm2835.c |   12 ++----------
+ 1 file changed, 2 insertions(+), 10 deletions(-)
 
-> ---
->  Documentation/devicetree/bindings/mmc/mmc.txt |    5 ++---
->  1 file changed, 2 insertions(+), 3 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-> index a591c67..cef217d 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-> @@ -6,9 +6,6 @@ Interpreted by the OF core:
->  - reg: Registers location and length.
->  - interrupts: Interrupts used by the MMC controller.
->  
-> -Required properties:
-> -- bus-width: Number of data lines, can be <1>, <4>, or <8>
-> -
->  Card detection:
->  If no property below is supplied, standard SDHCI card detect is used.
->  Only one of the properties in this section should be supplied:
-> @@ -17,6 +14,8 @@ Only one of the properties in this section should be supplied:
->    - non-removable: non-removable slot (like eMMC); assume always present.
->  
->  Optional properties:
-> +- bus-width: Number of data lines, can be <1>, <4>, or <8>.  The default
-> +  will be <1> if the property is absent.
->  - wp-gpios: Specify GPIOs for write protection, see gpio binding
->  - cd-inverted: when present, polarity on the cd gpio line is inverted
->  - wp-inverted: when present, polarity on the wp gpio line is inverted
-> -- 
-> 1.7.9.5
-> 
-> 
-> _______________________________________________
-> devicetree-discuss mailing list
-> devicetree-discuss@lists.ozlabs.org
-> https://lists.ozlabs.org/listinfo/devicetree-discuss
-
+diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
+index 453825f..21fc735 100644
+--- a/drivers/mmc/host/sdhci-bcm2835.c
++++ b/drivers/mmc/host/sdhci-bcm2835.c
+@@ -133,14 +133,6 @@ unsigned int bcm2835_sdhci_get_min_clock(struct sdhci_host *host)
+ 	return MIN_FREQ;
+ }
+ 
+-unsigned int bcm2835_sdhci_get_timeout_clock(struct sdhci_host *host)
+-{
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct bcm2835_sdhci *bcm2835_host = pltfm_host->priv;
+-
+-	return clk_get_rate(bcm2835_host->clk);
+-}
+-
+ static struct sdhci_ops bcm2835_sdhci_ops = {
+ 	.write_l = bcm2835_sdhci_writel,
+ 	.write_w = bcm2835_sdhci_writew,
+@@ -150,11 +142,11 @@ static struct sdhci_ops bcm2835_sdhci_ops = {
+ 	.read_b = bcm2835_sdhci_readb,
+ 	.get_max_clock = bcm2835_sdhci_get_max_clock,
+ 	.get_min_clock = bcm2835_sdhci_get_min_clock,
+-	.get_timeout_clock = bcm2835_sdhci_get_timeout_clock,
+ };
+ 
+ static struct sdhci_pltfm_data bcm2835_sdhci_pdata = {
+-	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
++	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
++			SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
+ 	.ops = &bcm2835_sdhci_ops,
+ };
+ 
 -- 
-Grant Likely, B.Sc, P.Eng.
-Secret Lab Technologies, Ltd.
+1.7.10.4
+
