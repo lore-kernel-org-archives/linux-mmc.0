@@ -1,46 +1,52 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: mmc_spi: Fix return value evaluation of irq_of_parse_and_map()
-Date: Mon, 11 Feb 2013 11:49:11 -0500
-Message-ID: <878v6ussmw.fsf@octavius.laptop.org>
-References: <1359565508-13362-1-git-send-email-stigge@antcom.de>
+Subject: Re: [PATCH 1/2] mmc: core: fix permanent sleep of mmcqd during card removal
+Date: Mon, 11 Feb 2013 12:00:27 -0500
+Message-ID: <87zjzardjo.fsf@octavius.laptop.org>
+References: <n@samsung.com>
+	<1356513966-24945-1-git-send-email-kdorfman@codeaurora.org>
+	<001d01cdf88d$f4214270$dc63c750$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1359565508-13362-1-git-send-email-stigge@antcom.de> (Roland
-	Stigge's message of "Wed, 30 Jan 2013 18:05:08 +0100")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Roland Stigge <stigge@antcom.de>
-Cc: plagnioj@jcrosoft.com, grant.likely@secretlab.ca, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:39087 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758094Ab3BKRAc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Feb 2013 12:00:32 -0500
+In-Reply-To: <001d01cdf88d$f4214270$dc63c750$%jun@samsung.com> (Seungwon
+	Jeon's message of "Tue, 22 Jan 2013 19:48:03 +0900")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, 'Konstantin Dorfman' <kdorfman@codeaurora.org>
 
 Hi,
 
-On Wed, Jan 30 2013, Roland Stigge wrote:
-> When irq_of_parse_and_map() returns an error, it does as zero. But in
-> mmc_spi_get_pdata(), the error return case is compared against NO_IRQ. This
-> might work where NO_IRQ is zero (defaults to zero when undefined, as on MIPS)
-> but not where NO_IRQ is sth. different, e.g. on ARM, where it is -1.
+On Tue, Jan 22 2013, Seungwon Jeon wrote:
+> This patch is derived from 'mmc: fix async request mechanism ...'.
+> According as async transfer, a request is handled with twice mmc_start_req.
+> When the card is removed, the request is actually not issued in the first
+> mmc_start_req [__mmc_start_data_req]. And then mmc_wait_for_data_req_done
+> will come in the next mmc_start_req. But there is no event for completions.
+> wake_up_interruptible is needed in __mmc_start_data_req for the case of
+> removed card.
 >
-> This patch changes to comparison with 0 which is the error return value of
-> irq_of_parse_and_map(). 
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+>  drivers/mmc/core/core.c |    1 +
+>  1 files changed, 1 insertions(+), 0 deletions(-)
 >
-> Tested on ARM that mmc_spi is working now.
->
-> Signed-off-by: Roland Stigge <stigge@antcom.de>
->
-> diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-> index 1534b58..d720b5e 100644
-> --- a/drivers/mmc/host/of_mmc_spi.c
-> +++ b/drivers/mmc/host/of_mmc_spi.c
-> @@ -146,7 +146,7 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
->  		oms->pdata.get_ro = of_mmc_spi_get_ro;
->  
->  	oms->detect_irq = irq_of_parse_and_map(np, 0);
-> -	if (oms->detect_irq != NO_IRQ) {
-> +	if (oms->detect_irq != 0) {
->  		oms->pdata.init = of_mmc_spi_init;
->  		oms->pdata.exit = of_mmc_spi_exit;
->  	} else {
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 8b3a122..997b257 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -350,6 +350,7 @@ static int __mmc_start_data_req(struct mmc_host *host, struct mmc_request *mrq)
+>  	mrq->host = host;
+>  	if (mmc_card_removed(host->card)) {
+>  		mrq->cmd->error = -ENOMEDIUM;
+> +		mmc_wait_data_done(mrq);
+>  		return -ENOMEDIUM;
+>  	}
+>  	mmc_start_request(host, mrq);
 
 Thanks, pushed to mmc-next for 3.9.
 
