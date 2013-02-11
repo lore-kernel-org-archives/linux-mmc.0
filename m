@@ -1,55 +1,50 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH REPOST] mmc: bcm2835: set SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
-Date: Mon, 11 Feb 2013 11:36:24 -0500
-Message-ID: <87k3qest87.fsf@octavius.laptop.org>
-References: <1360382187-26296-1-git-send-email-swarren@wwwdotorg.org>
+Subject: Re: [PATCH v2] mmc: omap_hsmmc: MAINTAINERS: update
+Date: Mon, 11 Feb 2013 11:44:26 -0500
+Message-ID: <87fw12ssut.fsf@octavius.laptop.org>
+References: <510FCEA2.8010507@ti.com>
+	<1360161283-28956-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36050 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:48002 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757854Ab3BKQg2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 11 Feb 2013 11:36:28 -0500
-In-Reply-To: <1360382187-26296-1-git-send-email-swarren@wwwdotorg.org>
-	(Stephen Warren's message of "Fri, 8 Feb 2013 20:56:27 -0700")
+	id S1757594Ab3BKQob (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Feb 2013 11:44:31 -0500
+In-Reply-To: <1360161283-28956-1-git-send-email-balajitk@ti.com> (Balaji
+	T. K.'s message of "Wed, 6 Feb 2013 20:04:43 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org
+To: Balaji T K <balajitk@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, balbi@ti.com
 
-Hi Stephen,
+Hi,
 
-On Fri, Feb 08 2013, Stephen Warren wrote:
-> SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK does basically the same as
-> implementing struct sdhci_ops .get_timeout_clock, so simply set that
-> quirk and remove the custom code to simplify the driver.
+On Wed, Feb 06 2013, Balaji T K wrote:
+> Update Maintainer email for omap_hsmmc,
+> as Venkatraman will no longer be able to maintain omap_hsmmc driver.
 >
-> Reported-by: Lars-Peter Clausen <lars@metafoo.de>
-> Signed-off-by: Stephen Warren <swarren@wwwdotorg.org>
+> Signed-off-by: Balaji T K <balajitk@ti.com>
+> Acked-by: Venkatraman S <svenkatr@gmail.com>
+> ---
+>  MAINTAINERS |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+>
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index 92e726c..f319237 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -5498,7 +5498,7 @@ S:	Maintained
+>  F:	drivers/mmc/host/omap.c
+>  
+>  OMAP HS MMC SUPPORT
+> -M:	Venkatraman S <svenkatr@ti.com>
+> +M:	Balaji T K <balajitk@ti.com>
+>  L:	linux-mmc@vger.kernel.org
+>  L:	linux-omap@vger.kernel.org
+>  S:	Maintained
 
-This conflicts with Lars-Peter's larger patch, which I just merged --
-I could merge the changes from both, which reduces your patch to this:
-
-diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
-index 1e97b89..8ffea05 100644
---- a/drivers/mmc/host/sdhci-bcm2835.c
-+++ b/drivers/mmc/host/sdhci-bcm2835.c
-@@ -133,11 +133,11 @@ static struct sdhci_ops bcm2835_sdhci_ops = {
- 	.read_b = bcm2835_sdhci_readb,
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
- 	.get_min_clock = bcm2835_sdhci_get_min_clock,
--	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
- };
- 
- static struct sdhci_pltfm_data bcm2835_sdhci_pdata = {
--	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
-+	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
-+		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
- 	.ops = &bcm2835_sdhci_ops,
- };
-
-
-Thanks,
+Thanks, pushed to mmc-next for 3.9.
 
 - Chris.
 -- 
