@@ -1,48 +1,46 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2] mmc: omap_hsmmc: MAINTAINERS: update
-Date: Mon, 11 Feb 2013 11:44:26 -0500
-Message-ID: <87fw12ssut.fsf@octavius.laptop.org>
-References: <510FCEA2.8010507@ti.com>
-	<1360161283-28956-1-git-send-email-balajitk@ti.com>
+Subject: Re: [PATCH] mmc: mmc_spi: Fix return value evaluation of irq_of_parse_and_map()
+Date: Mon, 11 Feb 2013 11:49:11 -0500
+Message-ID: <878v6ussmw.fsf@octavius.laptop.org>
+References: <1359565508-13362-1-git-send-email-stigge@antcom.de>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:48002 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757594Ab3BKQob (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 11 Feb 2013 11:44:31 -0500
-In-Reply-To: <1360161283-28956-1-git-send-email-balajitk@ti.com> (Balaji
-	T. K.'s message of "Wed, 6 Feb 2013 20:04:43 +0530")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1359565508-13362-1-git-send-email-stigge@antcom.de> (Roland
+	Stigge's message of "Wed, 30 Jan 2013 18:05:08 +0100")
+Sender: linux-kernel-owner@vger.kernel.org
+To: Roland Stigge <stigge@antcom.de>
+Cc: plagnioj@jcrosoft.com, grant.likely@secretlab.ca, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, balbi@ti.com
 
 Hi,
 
-On Wed, Feb 06 2013, Balaji T K wrote:
-> Update Maintainer email for omap_hsmmc,
-> as Venkatraman will no longer be able to maintain omap_hsmmc driver.
+On Wed, Jan 30 2013, Roland Stigge wrote:
+> When irq_of_parse_and_map() returns an error, it does as zero. But in
+> mmc_spi_get_pdata(), the error return case is compared against NO_IRQ. This
+> might work where NO_IRQ is zero (defaults to zero when undefined, as on MIPS)
+> but not where NO_IRQ is sth. different, e.g. on ARM, where it is -1.
 >
-> Signed-off-by: Balaji T K <balajitk@ti.com>
-> Acked-by: Venkatraman S <svenkatr@gmail.com>
-> ---
->  MAINTAINERS |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
+> This patch changes to comparison with 0 which is the error return value of
+> irq_of_parse_and_map(). 
 >
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 92e726c..f319237 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -5498,7 +5498,7 @@ S:	Maintained
->  F:	drivers/mmc/host/omap.c
+> Tested on ARM that mmc_spi is working now.
+>
+> Signed-off-by: Roland Stigge <stigge@antcom.de>
+>
+> diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
+> index 1534b58..d720b5e 100644
+> --- a/drivers/mmc/host/of_mmc_spi.c
+> +++ b/drivers/mmc/host/of_mmc_spi.c
+> @@ -146,7 +146,7 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
+>  		oms->pdata.get_ro = of_mmc_spi_get_ro;
 >  
->  OMAP HS MMC SUPPORT
-> -M:	Venkatraman S <svenkatr@ti.com>
-> +M:	Balaji T K <balajitk@ti.com>
->  L:	linux-mmc@vger.kernel.org
->  L:	linux-omap@vger.kernel.org
->  S:	Maintained
+>  	oms->detect_irq = irq_of_parse_and_map(np, 0);
+> -	if (oms->detect_irq != NO_IRQ) {
+> +	if (oms->detect_irq != 0) {
+>  		oms->pdata.init = of_mmc_spi_init;
+>  		oms->pdata.exit = of_mmc_spi_exit;
+>  	} else {
 
 Thanks, pushed to mmc-next for 3.9.
 
