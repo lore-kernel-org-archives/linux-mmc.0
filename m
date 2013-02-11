@@ -1,55 +1,56 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/3] MMC: rtsx: remove driving adjustment
-Date: Mon, 11 Feb 2013 12:53:13 -0500
-Message-ID: <87txpipwja.fsf@octavius.laptop.org>
-References: <1359963959-2305-1-git-send-email-rogerable@realtek.com>
-	<1359963959-2305-2-git-send-email-rogerable@realtek.com>
+Subject: Re: Control drive strength in software
+Date: Mon, 11 Feb 2013 12:55:54 -0500
+Message-ID: <87pq06pwet.fsf@octavius.laptop.org>
+References: <510FB2CC.20201@parrot.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:37661 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:37675 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758520Ab3BKRxZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 11 Feb 2013 12:53:25 -0500
-In-Reply-To: <1359963959-2305-2-git-send-email-rogerable@realtek.com> (Roger
-	Tseng's message of "Mon, 4 Feb 2013 15:45:57 +0800")
+	id S1758378Ab3BKRz7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Feb 2013 12:55:59 -0500
+In-Reply-To: <510FB2CC.20201@parrot.com> (Jeremie Samuel's message of "Mon, 4
+	Feb 2013 14:08:28 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Roger Tseng <rogerable@realtek.com>
-Cc: sameo@linux.intel.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, wei_wang@realsil.com.cn
+To: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi,
+Hi Jeremie,
 
-On Mon, Feb 04 2013, Roger Tseng wrote:
-> Several new models of readers use different way to select driving
-> capability(a necessary adjustment along with voltage change). Removing this
-> from device-independent rtsx_pci_sdmmc module. It will be implemented in
-> device-depend calls encapsulated by rtsx_pci_switch_output_voltage().
+On Mon, Feb 04 2013, Jeremie Samuel wrote:
+> This function doesn't have an mmc_host as parameter. It is an issue
+> for me since the drive strength parameters can be board specific.
+> A solution would be to add this parameter:
 >
-> Signed-off-by: Roger Tseng <rogerable@realtek.com>
-> Reviewed-by: Wei WANG <wei_wang@realsil.com.cn>
-> ---
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 5 -----
->  1 file changed, 5 deletions(-)
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 5674504..cb6d117 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -134,7 +134,7 @@ struct mmc_host_ops {
+>         /* The tuning command opcode value is different for SD and
+> eMMC cards */
+>         int     (*execute_tuning)(struct mmc_host *host, u32 opcode);
+>         void    (*enable_preset_value)(struct mmc_host *host, bool enable);
+> -       int     (*select_drive_strength)(unsigned int max_dtr, int
+> host_drv, int card_drv);
+> +       int     (*select_drive_strength)(struct mmc_host *host,
+> unsigned int max_dtr, int host_drv, int card_drv);
+>         void    (*hw_reset)(struct mmc_host *host);
+>  };
 >
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index f74b5ad..f93f100 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -1083,11 +1083,6 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
->  		voltage = OUTPUT_1V8;
->  
->  	if (voltage == OUTPUT_1V8) {
-> -		err = rtsx_pci_write_register(pcr,
-> -				SD30_DRIVE_SEL, 0x07, DRIVER_TYPE_B);
-> -		if (err < 0)
-> -			goto out;
-> -
->  		err = sd_wait_voltage_stable_1(host);
->  		if (err < 0)
->  			goto out;
+> Is this solution a good idea?
 
-Thanks, I've pushed 1/3 to mmc-next for 3.9 now.
+Yes, sounds good.  Want to send a formal patch?
+
+> Also, the drive strength configuration might be different according to
+> the mode (not only UHS). So, I would like to control the drive
+> strength for the default speed and the high speed. Would it be
+> relevant to add this a call to this function in mmc_sd_switch_hs or in
+> mmc_sd_init_card?
+
+Yes, that sounds sensible too.
 
 - Chris.
 -- 
