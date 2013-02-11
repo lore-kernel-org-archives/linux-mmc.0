@@ -1,48 +1,43 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH REPOST] mmc: bcm2835: set SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
-Date: Mon, 11 Feb 2013 13:20:53 -0500
-Message-ID: <87halipv96.fsf@octavius.laptop.org>
-References: <1360382187-26296-1-git-send-email-swarren@wwwdotorg.org>
-	<87k3qest87.fsf@octavius.laptop.org> <51193273.6000901@wwwdotorg.org>
+From: Johan Rudholm <jrudholm@gmail.com>
+Subject: Re: [PATCH v6 0/5] mmc: core: Signal voltage switch procedure for UHS mode
+Date: Mon, 11 Feb 2013 20:09:31 +0100
+Message-ID: <CA+20K0DQYO3hODLRb-ibqdfmxUZP1u_mjtbT04JzK2uMk4r9bw@mail.gmail.com>
+References: <1359382108-958-1-git-send-email-johan.rudholm@stericsson.com>
+	<87y5eustxu.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:60433 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758746Ab3BKSU5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 11 Feb 2013 13:20:57 -0500
-In-Reply-To: <51193273.6000901@wwwdotorg.org> (Stephen Warren's message of
-	"Mon, 11 Feb 2013 11:03:31 -0700")
+Received: from mail-qc0-f172.google.com ([209.85.216.172]:42396 "EHLO
+	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758472Ab3BKTJe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Feb 2013 14:09:34 -0500
+Received: by mail-qc0-f172.google.com with SMTP id b25so2363793qca.3
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Feb 2013 11:09:32 -0800 (PST)
+In-Reply-To: <87y5eustxu.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Johan Rudholm <johan.rudholm@stericsson.com>, linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Kevin Liu <keyuan.liu@gmail.com>, Philip Rakity <prakity@nvidia.com>, Daniel Drake <dsd@laptop.org>, Aaron <leafy.myeh@allwinnertech.com>, Subhash Jadavani <subhashj@codeaurora.org>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Wei WANG <wei_wang@realsil.com.cn>
 
-Hi,
+Hi Chris,
 
-On Mon, Feb 11 2013, Stephen Warren wrote:
-> On 02/11/2013 09:36 AM, Chris Ball wrote:
->> Hi Stephen,
->> 
->> On Fri, Feb 08 2013, Stephen Warren wrote:
->>> SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK does basically the same as
->>> implementing struct sdhci_ops .get_timeout_clock, so simply set that
->>> quirk and remove the custom code to simplify the driver.
->>>
->>> Reported-by: Lars-Peter Clausen <lars@metafoo.de>
->>> Signed-off-by: Stephen Warren <swarren@wwwdotorg.org>
->> 
->> This conflicts with Lars-Peter's larger patch, which I just merged --
->> I could merge the changes from both, which reduces your patch to this:
+2013/2/11 Chris Ball <cjb@laptop.org>:
+> Hi Johan,
 >
-> Yes, that updated patch looks fine to me.
+> On Mon, Jan 28 2013, Johan Rudholm wrote:
+>> This patch series attempts to make the 1.8V signal voltage switch
+>> required for UHS mode work according to the SD specification.
 >
-> I thought Lars-Peter was going to update his series on top of this
-> cleanup, but either way is fine.
+> Thanks, pushed to mmc-next for 3.9.
 
-Thanks, pushed the updated patch to mmc-next for 3.9.
+Cool! Just so we won't forget and break something, have you considered
+taking in the following patch too?
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+>From fc6069b79203f64e7efa8dd0bb295bebcd22f710 Mon Sep 17 00:00:00 2001
+From: Kevin Liu <kliu5@marvell.com>
+Date: Fri, 14 Dec 2012 16:44:10 +0800
+Subject: [PATCH v3 3/3] mmc: sdhci: update signal voltage switch code
+
+otherwise I think that SDHCI may break. Kevin, please correct me if I'm wrong?
+
+Kind regards, Johan
