@@ -1,31 +1,55 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 0/3] omap_hsmmc DT DMA Client support
-Date: Mon, 11 Feb 2013 12:34:15 -0500
-Message-ID: <87y5eupxew.fsf@octavius.laptop.org>
-References: <1359752479-29427-1-git-send-email-mporter@ti.com>
+Subject: Re: [PATCH 1/3] MMC: rtsx: remove driving adjustment
+Date: Mon, 11 Feb 2013 12:53:13 -0500
+Message-ID: <87txpipwja.fsf@octavius.laptop.org>
+References: <1359963959-2305-1-git-send-email-rogerable@realtek.com>
+	<1359963959-2305-2-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1359752479-29427-1-git-send-email-mporter@ti.com> (Matt Porter's
-	message of "Fri, 1 Feb 2013 16:01:16 -0500")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Porter <mporter@ti.com>
-Cc: Venkatraman S <svenkatr@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Dan Williams <djbw@fb.com>, Jon Hunter <jon-hunter@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:37661 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758520Ab3BKRxZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Feb 2013 12:53:25 -0500
+In-Reply-To: <1359963959-2305-2-git-send-email-rogerable@realtek.com> (Roger
+	Tseng's message of "Mon, 4 Feb 2013 15:45:57 +0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Roger Tseng <rogerable@realtek.com>
+Cc: sameo@linux.intel.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, wei_wang@realsil.com.cn
 
-Hi Matt,
+Hi,
 
-On Fri, Feb 01 2013, Matt Porter wrote:
-> This series adds DT DMA Engine Client support to the omap_hsmmc.
-> It leverages the generic DMA OF helpers in -next and the
-> dma_request_slave_channel_compat() wrapper introduced in the
-> AM33XX DMA Engine series to support DMA in omap_hsmmc on platforms
-> booting via DT. These platforms include omap2/3/4/5 and am33xx.
+On Mon, Feb 04 2013, Roger Tseng wrote:
+> Several new models of readers use different way to select driving
+> capability(a necessary adjustment along with voltage change). Removing this
+> from device-independent rtsx_pci_sdmmc module. It will be implemented in
+> device-depend calls encapsulated by rtsx_pci_switch_output_voltage().
 >
-> These patches were split out from the v5 version of the AM33XX DMA
-> series and split from the EDMA-specific omap_hsmmc changes.
+> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+> Reviewed-by: Wei WANG <wei_wang@realsil.com.cn>
+> ---
+>  drivers/mmc/host/rtsx_pci_sdmmc.c | 5 -----
+>  1 file changed, 5 deletions(-)
+>
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index f74b5ad..f93f100 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -1083,11 +1083,6 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+>  		voltage = OUTPUT_1V8;
+>  
+>  	if (voltage == OUTPUT_1V8) {
+> -		err = rtsx_pci_write_register(pcr,
+> -				SD30_DRIVE_SEL, 0x07, DRIVER_TYPE_B);
+> -		if (err < 0)
+> -			goto out;
+> -
+>  		err = sd_wait_voltage_stable_1(host);
+>  		if (err < 0)
+>  			goto out;
 
-Thanks, pushed to mmc-next for 3.9.
+Thanks, I've pushed 1/3 to mmc-next for 3.9 now.
 
 - Chris.
 -- 
