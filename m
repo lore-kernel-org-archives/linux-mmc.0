@@ -1,38 +1,31 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 3/3] mmc: sdhci: check voltage range only on regulators aware of voltage value
-Date: Mon, 11 Feb 2013 12:27:11 -0500
-Message-ID: <87bobqrcb4.fsf@octavius.laptop.org>
-References: <1354629663-29091-1-git-send-email-m.szyprowski@samsung.com>
-	<1354629663-29091-4-git-send-email-m.szyprowski@samsung.com>
-	<510BD3D7.1090302@samsung.com>
+Subject: Re: [PATCH 0/3] omap_hsmmc DT DMA Client support
+Date: Mon, 11 Feb 2013 12:34:15 -0500
+Message-ID: <87y5eupxew.fsf@octavius.laptop.org>
+References: <1359752479-29427-1-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <510BD3D7.1090302@samsung.com> (Marek Szyprowski's message of
-	"Fri, 01 Feb 2013 15:40:23 +0100")
+In-Reply-To: <1359752479-29427-1-git-send-email-mporter@ti.com> (Matt Porter's
+	message of "Fri, 1 Feb 2013 16:01:16 -0500")
 Sender: linux-kernel-owner@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@ti.com>, Kevin Liu <keyuan.liu@gmail.com>
+To: Matt Porter <mporter@ti.com>
+Cc: Venkatraman S <svenkatr@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Dan Williams <djbw@fb.com>, Jon Hunter <jon-hunter@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Marek,
+Hi Matt,
 
-On Fri, Feb 01 2013, Marek Szyprowski wrote:
-> On 12/4/2012 3:01 PM, Marek Szyprowski wrote:
->> Some regulators don't report any voltage values, so checking supported
->> voltage range results in disabling all SDHCI_CAN_VDD_* flags and
->> registration failure. This patch finally provides a correct fix for the
->> registration of SDHCI driver with all possible voltage regulators:
->> dummy, fixed and regulated without using regulator_count_voltages()
->> hacks.
->>
->> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+On Fri, Feb 01 2013, Matt Porter wrote:
+> This series adds DT DMA Engine Client support to the omap_hsmmc.
+> It leverages the generic DMA OF helpers in -next and the
+> dma_request_slave_channel_compat() wrapper introduced in the
+> AM33XX DMA Engine series to support DMA in omap_hsmmc on platforms
+> booting via DT. These platforms include omap2/3/4/5 and am33xx.
 >
-> Any chance to get this patch scheduled for v3.9?
+> These patches were split out from the v5 version of the AM33XX DMA
+> series and split from the EDMA-specific omap_hsmmc changes.
 
-This one doesn't apply -- please could you rebase/resend?
-
-Thanks,
+Thanks, pushed to mmc-next for 3.9.
 
 - Chris.
 -- 
