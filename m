@@ -1,103 +1,59 @@
-From: Jingoo Han <jg1.han@samsung.com>
-Subject: [PATCH v2 RESEND] mmc: sdhci-s3c: Use devm_clk_get()
-Date: Tue, 12 Feb 2013 12:24:39 +0900
-Message-ID: <01c101ce08d0$7d8808d0$78981a70$%han@samsung.com>
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v2 1/3] ARM: davinci: da850: override mmc DT node device
+ name
+Date: Tue, 12 Feb 2013 11:16:21 +0530
+Message-ID: <5119D72D.3010605@ti.com>
+References: <1360223825-23929-1-git-send-email-prakash.pm@ti.com>
+ <1360223825-23929-2-git-send-email-prakash.pm@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:22516 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752170Ab3BLDYl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Feb 2013 22:24:41 -0500
-Received: from epcpsbgm1.samsung.com (epcpsbgm1 [203.254.230.26])
- by mailout4.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0MI300LPD84TK4B0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 12 Feb 2013 12:24:39 +0900 (KST)
-Received: from DOJG1HAN02 ([12.23.120.99])
- by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0MI300AE38530F20@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 12 Feb 2013 12:24:39 +0900 (KST)
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <1360223825-23929-2-git-send-email-prakash.pm-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: "Manjunathappa, Prakash" <prakash.pm-l0cyMroinI0@public.gmane.org>
+Cc: davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, hs-ynQEQJNshbs@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, 'Ben Dooks' <ben-linux@fluff.org>, 'Jingoo Han' <jg1.han@samsung.com>
 
-Use devm_clk_get() rather than clk_get() to make cleanup paths
-more simple.
+On 2/7/2013 1:27 PM, Manjunathappa, Prakash wrote:
+> Populate OF_DEV_AUXDATA with desired device name expected by
+> davinci_mmc driver. Without this clk_get of davinci_mmc DT driver
+> fails.
 
-Signed-off-by: Jingoo Han <jg1.han@samsung.com>
----
-Changes since v1:
-- modified the commit message
+But there is no mmc DT support for DaVinci at this time. This patch
+should come after the driver DT support and .dts addition patches.
 
- drivers/mmc/host/sdhci-s3c.c |   17 ++---------------
- 1 files changed, 2 insertions(+), 15 deletions(-)
+> diff --git a/arch/arm/mach-davinci/da8xx-dt.c b/arch/arm/mach-davinci/da8xx-dt.c
+> index 37c27af..3362ca4 100644
+> --- a/arch/arm/mach-davinci/da8xx-dt.c
+> +++ b/arch/arm/mach-davinci/da8xx-dt.c
+> @@ -39,9 +39,16 @@ static void __init da8xx_init_irq(void)
+>  
+>  #ifdef CONFIG_ARCH_DAVINCI_DA850
+>  
+> +static const struct of_dev_auxdata da8xx_auxdata[] __initconst = {
+> +	OF_DEV_AUXDATA("ti,davinci-mmc-da830", 0x01c40000, "davinci_mmc.0",
+> +			NULL),
+> +	{},
+> +};
+> +
+>  static void __init da850_init_machine(void)
+>  {
+> -	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
+> +	of_platform_populate(NULL, of_default_bus_match_table, da8xx_auxdata,
+> +			NULL);
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 82a8de1..5aaef5b 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -608,7 +608,7 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
- 
- 	platform_set_drvdata(pdev, host);
- 
--	sc->clk_io = clk_get(dev, "hsmmc");
-+	sc->clk_io = devm_clk_get(dev, "hsmmc");
- 	if (IS_ERR(sc->clk_io)) {
- 		dev_err(dev, "failed to get io clock\n");
- 		ret = PTR_ERR(sc->clk_io);
-@@ -623,7 +623,7 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
- 		char name[14];
- 
- 		snprintf(name, 14, "mmc_busclk.%d", ptr);
--		clk = clk_get(dev, name);
-+		clk = devm_clk_get(dev, name);
- 		if (IS_ERR(clk))
- 			continue;
- 
-@@ -765,15 +765,9 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
- #ifndef CONFIG_PM_RUNTIME
- 	clk_disable_unprepare(sc->clk_bus[sc->cur_clk]);
- #endif
--	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
--		if (sc->clk_bus[ptr]) {
--			clk_put(sc->clk_bus[ptr]);
--		}
--	}
- 
-  err_no_busclks:
- 	clk_disable_unprepare(sc->clk_io);
--	clk_put(sc->clk_io);
- 
-  err_pdata_io_clk:
- 	sdhci_free_host(host);
-@@ -786,7 +780,6 @@ static int sdhci_s3c_remove(struct platform_device *pdev)
- 	struct sdhci_host *host =  platform_get_drvdata(pdev);
- 	struct sdhci_s3c *sc = sdhci_priv(host);
- 	struct s3c_sdhci_platdata *pdata = sc->pdata;
--	int ptr;
- 
- 	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
- 		pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
-@@ -806,13 +799,7 @@ static int sdhci_s3c_remove(struct platform_device *pdev)
- #ifndef CONFIG_PM_RUNTIME
- 	clk_disable_unprepare(sc->clk_bus[sc->cur_clk]);
- #endif
--	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
--		if (sc->clk_bus[ptr]) {
--			clk_put(sc->clk_bus[ptr]);
--		}
--	}
- 	clk_disable_unprepare(sc->clk_io);
--	clk_put(sc->clk_io);
- 
- 	sdhci_free_host(host);
- 	platform_set_drvdata(pdev, NULL);
--- 
-1.7.2.5
+This needs to be rebased on by v3.9/dt-2 branch. There are conflicts
+with the code already present.
 
-
+Thanks,
+Sekhar
