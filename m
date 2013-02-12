@@ -1,68 +1,122 @@
 From: Vinod Koul <vinod.koul@intel.com>
-Subject: Re: [PATCH v7 07/10] dmaengine: add
- dma_request_slave_channel_compat()
-Date: Tue, 12 Feb 2013 08:38:38 -0800
-Message-ID: <20130212163838.GR3789@intel.com>
-References: <1359742975-10421-1-git-send-email-mporter@ti.com>
- <1359742975-10421-8-git-send-email-mporter@ti.com>
+Subject: Re: [PATCH v3 1/3] dmaengine: add dma_get_slave_sg_caps()
+Date: Tue, 12 Feb 2013 09:08:44 -0800
+Message-ID: <20130212170844.GS3789@intel.com>
+References: <1360007224-21735-1-git-send-email-mporter@ti.com>
+ <1360007224-21735-2-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:28879 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933329Ab3BLRdZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 12 Feb 2013 12:33:25 -0500
 Content-Disposition: inline
-In-Reply-To: <1359742975-10421-8-git-send-email-mporter@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Porter <mporter@ti.com>
-Cc: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Arnd Bergmann <arnd@arndb.de>, Dan Williams <djbw@fb.com>, Rob Herring <rob.herring@calxeda.com>
+In-Reply-To: <1360007224-21735-2-git-send-email-mporter@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Matt Porter <mporter@ti.com>
+Cc: Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 
-On Fri, Feb 01, 2013 at 01:22:52PM -0500, Matt Porter wrote:
-> Adds a dma_request_slave_channel_compat() wrapper which accepts
-> both the arguments from dma_request_channel() and
-> dma_request_slave_channel(). Based on whether the driver is
-> instantiated via DT, the appropriate channel request call will be
-> made.
+On Mon, Feb 04, 2013 at 02:47:02PM -0500, Matt Porter wrote:
+> Add a dmaengine API to retrieve slave SG transfer capabilities.
 > 
-> This allows for a much cleaner migration of drivers to the
-> dmaengine DT API as platforms continue to be mixed between those
-> that boot using DT and those that do not.
+> The API is optionally implemented by dmaengine drivers and when
+> unimplemented will return a NULL pointer. A client driver using
+> this API provides the required dma channel, address width, and
+> burst size of the transfer. dma_get_slave_sg_caps() returns an
+> SG caps structure with the maximum number and size of SG segments
+> that the given channel can handle.
+Okay this sounds much better :-)
+
+few points though:
+- you added API for caps, but is actually calculating for given configuration
+  the max allowed range. IMHO that is not caps, perhaps renaming to get_max_sg
+  /some_better_name would be more apt.
+- Still I like the idea of caps, but it should give H/W support capablity. If
+  you want to add that, pls develop on same line...
+
+--
+~Vinod
+
 > 
-> Suggested-by: Tony Lindgren <tony@atomide.com>
 > Signed-off-by: Matt Porter <mporter@ti.com>
-> Acked-by: Tony Lindgren <tony@atomide.com>
-> Acked-by: Arnd Bergmann <arnd@arndb.de>
-Acked-by: Vinod Koul <vinod.koul@intel.com>
-
 > ---
->  include/linux/dmaengine.h |   16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
+>  include/linux/dmaengine.h |   40 ++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 40 insertions(+)
 > 
 > diff --git a/include/linux/dmaengine.h b/include/linux/dmaengine.h
-> index bfcdecb..17d8ffd 100644
+> index d3201e4..5b5b220 100644
 > --- a/include/linux/dmaengine.h
 > +++ b/include/linux/dmaengine.h
-> @@ -1001,6 +1001,22 @@ void dma_run_dependencies(struct dma_async_tx_descriptor *tx);
->  struct dma_chan *dma_find_channel(enum dma_transaction_type tx_type);
->  struct dma_chan *net_dma_find_channel(void);
->  #define dma_request_channel(mask, x, y) __dma_request_channel(&(mask), x, y)
-> +#define dma_request_slave_channel_compat(mask, x, y, dev, name) \
-> +	__dma_request_slave_channel_compat(&(mask), x, y, dev, name)
+> @@ -371,6 +371,19 @@ struct dma_slave_config {
+>  	unsigned int slave_id;
+>  };
+>  
+> +/* struct dma_slave_sg_caps - expose SG transfer capability of a
+> + * channel.
+> + *
+> + * @max_seg_nr: maximum number of SG segments supported on a SG/SLAVE
+> + *	    channel (0 for no maximum or not a SG/SLAVE channel)
+> + * @max_seg_len: maximum length of SG segments supported on a SG/SLAVE
+> + *	     channel (0 for no maximum or not a SG/SLAVE channel)
+> + */
+> +struct dma_slave_sg_caps {
+> +	u32 max_seg_nr;
+> +	u32 max_seg_len;
+> +};
 > +
-> +static inline struct dma_chan
-> +*__dma_request_slave_channel_compat(dma_cap_mask_t *mask, dma_filter_fn fn,
-> +				  void *fn_param, struct device *dev,
-> +				  char *name)
+>  static inline const char *dma_chan_name(struct dma_chan *chan)
+>  {
+>  	return dev_name(&chan->dev->device);
+> @@ -534,6 +547,7 @@ struct dma_tx_state {
+>   *	struct with auxiliary transfer status information, otherwise the call
+>   *	will just return a simple status code
+>   * @device_issue_pending: push pending transactions to hardware
+> + * @device_slave_sg_caps: return the slave SG capabilities
+>   */
+>  struct dma_device {
+>  
+> @@ -602,6 +616,9 @@ struct dma_device {
+>  					    dma_cookie_t cookie,
+>  					    struct dma_tx_state *txstate);
+>  	void (*device_issue_pending)(struct dma_chan *chan);
+> +	struct dma_slave_sg_caps *(*device_slave_sg_caps)(
+> +		struct dma_chan *chan, enum dma_slave_buswidth addr_width,
+> +		u32 maxburst);
+>  };
+>  
+>  static inline int dmaengine_device_control(struct dma_chan *chan,
+> @@ -969,6 +986,29 @@ dma_set_tx_state(struct dma_tx_state *st, dma_cookie_t last, dma_cookie_t used,
+>  	}
+>  }
+>  
+> +/**
+> + * dma_get_slave_sg_caps - get DMAC SG transfer capabilities
+> + * @chan: target DMA channel
+> + * @addr_width: address width of the DMA transfer
+> + * @maxburst: maximum DMA transfer burst size
+> + *
+> + * Get SG transfer capabilities for a specified channel. If the dmaengine
+> + * driver does not implement SG transfer capabilities then NULL is
+> + * returned.
+> + */
+> +static inline struct dma_slave_sg_caps
+> +*dma_get_slave_sg_caps(struct dma_chan *chan,
+> +		       enum dma_slave_buswidth addr_width,
+> +		       u32 maxburst)
 > +{
-> +	struct dma_chan *chan;
+> +	if (chan->device->device_slave_sg_caps)
+> +		return chan->device->device_slave_sg_caps(chan,
+> +							  addr_width,
+> +							  maxburst);
 > +
-> +	chan = dma_request_slave_channel(dev, name);
-> +	if (chan)
-> +		return chan;
-> +
-> +	return __dma_request_channel(mask, fn, fn_param);
+> +	return NULL;
 > +}
->  
->  /* --- Helper iov-locking functions --- */
->  
+> +
+>  enum dma_status dma_sync_wait(struct dma_chan *chan, dma_cookie_t cookie);
+>  #ifdef CONFIG_DMA_ENGINE
+>  enum dma_status dma_wait_for_async_tx(struct dma_async_tx_descriptor *tx);
 > -- 
 > 1.7.9.5
 > 
