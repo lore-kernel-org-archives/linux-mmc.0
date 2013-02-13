@@ -1,62 +1,98 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH 3/3 RESEND] mmc: sdhci: check voltage range only on
- regulators aware of voltage value
-Date: Wed, 13 Feb 2013 11:35:25 +0000
-Message-ID: <20130213113525.GB5062@opensource.wolfsonmicro.com>
-References: <87bobqrcb4.fsf@octavius.laptop.org>
- <1360656096-1671-1-git-send-email-m.szyprowski@samsung.com>
- <Pine.LNX.4.64.1302122309470.14434@axis700.grange>
- <511B41B8.3060506@samsung.com>
- <Pine.LNX.4.64.1302130844530.18535@axis700.grange>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH v3 06/13] mmc: tmio-mmc: define device-tree bindings
+Date: Wed, 13 Feb 2013 16:59:42 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1302131632280.18535@axis700.grange>
+References: <1360180020-18555-1-git-send-email-g.liakhovetski@gmx.de>
+ <1360180020-18555-7-git-send-email-g.liakhovetski@gmx.de>
+ <201302062224.20549.arnd@arndb.de> <20130207005957.GB9775@verge.net.au>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="xgyAXRrhYN0wYx8y"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:53918 "EHLO
-	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933818Ab3BMLf2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Feb 2013 06:35:28 -0500
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1302130844530.18535@axis700.grange>
+Received: from moutng.kundenserver.de ([212.227.17.9]:64021 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934166Ab3BMP7y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Feb 2013 10:59:54 -0500
+In-Reply-To: <20130207005957.GB9775@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Marek Szyprowski <m.szyprowski@samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>, Kevin Liu <keyuan.liu@gmail.com>
+To: Simon Horman <horms@verge.net.au>
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 
+On Thu, 7 Feb 2013, Simon Horman wrote:
 
---xgyAXRrhYN0wYx8y
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+> On Wed, Feb 06, 2013 at 10:24:20PM +0000, Arnd Bergmann wrote:
+> > On Wednesday 06 February 2013, Guennadi Liakhovetski wrote:
+> > > +* Toshiba Mobile IO SD/MMC controller
+> > > +
+> > > +The tmio-mmc driver doesn't probe its devices actively, instead its binding to
+> > > +devices is managed by either MFD drivers or by the sh_mobile_sdhi platform
+> > > +driver. Those drivers supply the tmio-mmc driver with platform data, that either
+> > > +describe hardware capabilities, known to them, or are obtained by them from
+> > > +their own platform data or from their DT information. In the latter case all
+> > > +compulsory and any optional properties, common to all SD/MMC drivers, as
+> > > +described in mmc.txt, should or can be used. Additionally the following optional
+> > > +bindings can be used. They set respective TMIO_MMC_* flags.
+> > > +
+> > > +Optional properties:
+> > > +- toshiba,mmc-wrprotect-disable        : set TMIO_MMC_WRPROTECT_DISABLE flag
+> > > +- toshiba,mmc-blksz-2bytes     : set TMIO_MMC_BLKSZ_2BYTES
+> > > +- toshiba,mmc-has-idle-wait    : set TMIO_MMC_HAS_IDLE_WAIT
+> > 
+> > Please write the binding in a way that does not refer to a specific
+> > implementation in Linux: The binding should describe the hardware
+> > independent of details in the driver. In particular, I think you
+> > should not refer to the TMIO_MMC_BLKSZ_2BYTES etc macros but describe
+> > in text what the flags are about.
+> > 
+> > Regarding the toshiba,mmc-wrprotect-disable property, would it be
+> > enough to just check the presence of the wp-gpios property?
+> > 
+> > TMIO_MMC_BLKSZ_2BYTES seems to be set unconditionally in
+> > sh_mobile_sdhi_probe and nowhere else, so I'd assume we don't
+> > actually need to provide this here, but can keep that knowledge
+> > implicit based on whether we're talking to sh_mobile_sdhi
+> > or another tmio_mmc variant.
 
-On Wed, Feb 13, 2013 at 08:45:56AM +0100, Guennadi Liakhovetski wrote:
-> On Wed, 13 Feb 2013, Marek Szyprowski wrote:
+Can do that, yes.
 
-> > BTW, mmc_regulator_get_ocrmask() won't work with continuous range regulators.
+> > For the other last one, is that actually board specific, or just
+> > a feature of a given chip? If we can tell by the SoC, then I'd
+> > suggest using separate "compatible" properties instead, and
+> > put a bitmask of features into the .data field of the of match
+> > table. For all I can tell, SH7372 does not set it, while SH73A0,
+> > R8A7740 and R8A7779 always do.
+> 
+> My understanding is that TMIO_MMC_HAS_IDLE_WAIT can be set based
+> on the SoC in use.
 
-> This seems like a problem, that has to be fixed...
+So far TMIO_MMC_HAS_IDLE_WAIT is set on
 
-Indeed, what's the issue?
+board-kzm9g.c (sh73a0 / AG5)
+board-ag5evm.c (sh73a0 / AG5)
+board-armadillo800eva.c (r8a7740 / A1)
+board-kota2.c (sh73a0 / AG5)
+board-marzen.c (r8a7779 / H1)
 
---xgyAXRrhYN0wYx8y
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+and isn't set on
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
+board-ap4evb.c (sh7372 / ap4)
+board-bonito.c (r8a7740 / a1, SDHI isn't used)
+board-mackerel.c (sh7372 / ap4)
 
-iQIcBAEBAgAGBQJRG3p2AAoJELSic+t+oim90HUP/3JVw/VgCaEP0EOPS2JeLDZu
-mYKG9DA5W3t7kVCScEZiDl3OepF3Q5NAyAwXxbE7dXZqzHD+PVJQV4T262IwMMIC
-5/leGCmU932LKBUSlmOsXaasiJdaMKBEsr81z/sfo/a99wnhSX776JcmwmF9t1F2
-BKHIoUJk/OH5S8gBS9tFQOTNIsom0LVElco5TbQt5bqFM89+MXb3ksGS3Cz08nqh
-S+ZuDXv84gaw2cRFbUJgAEVG8Acn5zc+nJNJ1yCjglnlO5m44AZ/sNTgmZBdjUZ8
-JwNxwpCPGV7Y9ALELOK75ScMZkFh4Wsl0CLGecxC6h2UfIKFFhpw3xX5xszAC/TM
-srKTX3EmdJ1SLbb+nh+RrOzyiYscVlSaZqiqu96wbUOSmAtH3ytQFXEmP84aEtf4
-hvx/LMjBPpiXsQvwOHAL8WTUgVkrdyaqcDrmAYhmfq4E04nV2w+cnMzKrZK0h5wO
-gURVxq/f5QcWPaX0fZJzhi9f0m5+lOt7/qCfKd/+iYR5XL/B8TZgzr6MyvW2+5y1
-HTYEUE+AUdqMo1ZDqUu5CmM9y5GhfI/oPYUMflFfz8oGl00yqqs0y735tYL5vTOt
-EpTT9KG75/DppaSWYjliFPTrWNHjHz50Vdp71cAEWcsJprY+PWE6TzizB3T0HD8D
-AW3JqqGQee6cSTSc1laL
-=K1Hr
------END PGP SIGNATURE-----
+So, shall we use a compatible property for this and drop this property? We 
+can add later at any time, if needed, which is better, than defining 
+something redundant. OTOH I seem to remember, that using SoC-version from 
+the "compatible" property was considered by someone inappropriate. Magnus, 
+what do you think?
 
---xgyAXRrhYN0wYx8y--
+So, if we drop TMIO_MMC_BLKSZ_2BYTES and TMIO_MMC_HAS_IDLE_WAIT, we only 
+keep toshiba,mmc-wrprotect-disable to set TMIO_MMC_WRPROTECT_DISABLE? And 
+that one is definitely needed, because that even differs between SDHI 
+instances on one SoC.
+
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
