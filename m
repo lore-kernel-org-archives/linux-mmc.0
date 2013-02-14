@@ -1,172 +1,200 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+From: Magnus Damm <magnus.damm@gmail.com>
 Subject: Re: [PATCH v3 06/13] mmc: tmio-mmc: define device-tree bindings
-Date: Thu, 14 Feb 2013 09:28:06 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1302140909340.29693@axis700.grange>
+Date: Thu, 14 Feb 2013 18:12:43 +0900
+Message-ID: <CANqRtoQCRahB1BUKFr+o+5gKysgw3FC_MC2AUvtODSz76XmGkA@mail.gmail.com>
 References: <1360180020-18555-1-git-send-email-g.liakhovetski@gmx.de>
- <1360180020-18555-7-git-send-email-g.liakhovetski@gmx.de>
- <201302062224.20549.arnd@arndb.de> <20130207005957.GB9775@verge.net.au>
- <Pine.LNX.4.64.1302131632280.18535@axis700.grange>
- <CANqRtoS_3wbNxVoPy48r=OFbnG=a7f6TDwc9XWcajkdANqsd8g@mail.gmail.com>
- <20130214015920.GK15879@verge.net.au> <CANqRtoTnF16T8dSNohPZLTSyLthS0xCJ6kUaMO6D1aEXmZmRtA@mail.gmail.com>
+	<1360180020-18555-7-git-send-email-g.liakhovetski@gmx.de>
+	<201302062224.20549.arnd@arndb.de>
+	<20130207005957.GB9775@verge.net.au>
+	<Pine.LNX.4.64.1302131632280.18535@axis700.grange>
+	<CANqRtoS_3wbNxVoPy48r=OFbnG=a7f6TDwc9XWcajkdANqsd8g@mail.gmail.com>
+	<20130214015920.GK15879@verge.net.au>
+	<CANqRtoTnF16T8dSNohPZLTSyLthS0xCJ6kUaMO6D1aEXmZmRtA@mail.gmail.com>
+	<Pine.LNX.4.64.1302140909340.29693@axis700.grange>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:62861 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756160Ab3BNI2J (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Feb 2013 03:28:09 -0500
-In-Reply-To: <CANqRtoTnF16T8dSNohPZLTSyLthS0xCJ6kUaMO6D1aEXmZmRtA@mail.gmail.com>
+Received: from mail-la0-f50.google.com ([209.85.215.50]:49238 "EHLO
+	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756496Ab3BNJMr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Feb 2013 04:12:47 -0500
+In-Reply-To: <Pine.LNX.4.64.1302140909340.29693@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Magnus Damm <magnus.damm@gmail.com>
-Cc: Simon Horman <horms@verge.net.au>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Simon Horman <horms@verge.net.au>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, SH-Linux <linux-sh@vger.kernel.org>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>
 
-On Thu, 14 Feb 2013, Magnus Damm wrote:
+Hi Guennadi,
 
-> On Thu, Feb 14, 2013 at 10:59 AM, Simon Horman <horms@verge.net.au> wrote:
-> > On Thu, Feb 14, 2013 at 10:42:21AM +0900, Magnus Damm wrote:
-> >> On Thu, Feb 14, 2013 at 12:59 AM, Guennadi Liakhovetski
-> >> <g.liakhovetski@gmx.de> wrote:
-> >> > On Thu, 7 Feb 2013, Simon Horman wrote:
-> >> >
-> >> >> On Wed, Feb 06, 2013 at 10:24:20PM +0000, Arnd Bergmann wrote:
-> >> >> > On Wednesday 06 February 2013, Guennadi Liakhovetski wrote:
-> >> >> > > +* Toshiba Mobile IO SD/MMC controller
-> >> >> > > +
-> >> >> > > +The tmio-mmc driver doesn't probe its devices actively, instead its binding to
-> >> >> > > +devices is managed by either MFD drivers or by the sh_mobile_sdhi platform
-> >> >> > > +driver. Those drivers supply the tmio-mmc driver with platform data, that either
-> >> >> > > +describe hardware capabilities, known to them, or are obtained by them from
-> >> >> > > +their own platform data or from their DT information. In the latter case all
-> >> >> > > +compulsory and any optional properties, common to all SD/MMC drivers, as
-> >> >> > > +described in mmc.txt, should or can be used. Additionally the following optional
-> >> >> > > +bindings can be used. They set respective TMIO_MMC_* flags.
-> >> >> > > +
-> >> >> > > +Optional properties:
-> >> >> > > +- toshiba,mmc-wrprotect-disable        : set TMIO_MMC_WRPROTECT_DISABLE flag
-> >> >> > > +- toshiba,mmc-blksz-2bytes     : set TMIO_MMC_BLKSZ_2BYTES
-> >> >> > > +- toshiba,mmc-has-idle-wait    : set TMIO_MMC_HAS_IDLE_WAIT
-> >> >> >
-> >> >> > Please write the binding in a way that does not refer to a specific
-> >> >> > implementation in Linux: The binding should describe the hardware
-> >> >> > independent of details in the driver. In particular, I think you
-> >> >> > should not refer to the TMIO_MMC_BLKSZ_2BYTES etc macros but describe
-> >> >> > in text what the flags are about.
-> >> >> >
-> >> >> > Regarding the toshiba,mmc-wrprotect-disable property, would it be
-> >> >> > enough to just check the presence of the wp-gpios property?
+[Added Laurent to CC]
 
-No, normally WP would be implemented, using the native dedicated SDHI WP 
-pin. So, toshiba,mmc-wrprotect-disable is used when no such pin is 
-available on this interface, or it's not routed to the socket and no GPIO 
-is used for that either. So, this flag is the only way to know, whether a 
-WP pin is used, if no wp-gpios is used.
+On Thu, Feb 14, 2013 at 5:28 PM, Guennadi Liakhovetski
+<g.liakhovetski@gmx.de> wrote:
+> On Thu, 14 Feb 2013, Magnus Damm wrote:
+>
+>> On Thu, Feb 14, 2013 at 10:59 AM, Simon Horman <horms@verge.net.au> wrote:
+>> > On Thu, Feb 14, 2013 at 10:42:21AM +0900, Magnus Damm wrote:
+>> >> On Thu, Feb 14, 2013 at 12:59 AM, Guennadi Liakhovetski
+>> >> <g.liakhovetski@gmx.de> wrote:
+>> >> > On Thu, 7 Feb 2013, Simon Horman wrote:
+>> >> >
+>> >> >> On Wed, Feb 06, 2013 at 10:24:20PM +0000, Arnd Bergmann wrote:
+>> >> >> > On Wednesday 06 February 2013, Guennadi Liakhovetski wrote:
+>> >> >> > > +* Toshiba Mobile IO SD/MMC controller
+>> >> >> > > +
+>> >> >> > > +The tmio-mmc driver doesn't probe its devices actively, instead its binding to
+>> >> >> > > +devices is managed by either MFD drivers or by the sh_mobile_sdhi platform
+>> >> >> > > +driver. Those drivers supply the tmio-mmc driver with platform data, that either
+>> >> >> > > +describe hardware capabilities, known to them, or are obtained by them from
+>> >> >> > > +their own platform data or from their DT information. In the latter case all
+>> >> >> > > +compulsory and any optional properties, common to all SD/MMC drivers, as
+>> >> >> > > +described in mmc.txt, should or can be used. Additionally the following optional
+>> >> >> > > +bindings can be used. They set respective TMIO_MMC_* flags.
+>> >> >> > > +
+>> >> >> > > +Optional properties:
+>> >> >> > > +- toshiba,mmc-wrprotect-disable        : set TMIO_MMC_WRPROTECT_DISABLE flag
+>> >> >> > > +- toshiba,mmc-blksz-2bytes     : set TMIO_MMC_BLKSZ_2BYTES
+>> >> >> > > +- toshiba,mmc-has-idle-wait    : set TMIO_MMC_HAS_IDLE_WAIT
+>> >> >> >
+>> >> >> > Please write the binding in a way that does not refer to a specific
+>> >> >> > implementation in Linux: The binding should describe the hardware
+>> >> >> > independent of details in the driver. In particular, I think you
+>> >> >> > should not refer to the TMIO_MMC_BLKSZ_2BYTES etc macros but describe
+>> >> >> > in text what the flags are about.
+>> >> >> >
+>> >> >> > Regarding the toshiba,mmc-wrprotect-disable property, would it be
+>> >> >> > enough to just check the presence of the wp-gpios property?
+>
+> No, normally WP would be implemented, using the native dedicated SDHI WP
+> pin. So, toshiba,mmc-wrprotect-disable is used when no such pin is
+> available on this interface, or it's not routed to the socket and no GPIO
+> is used for that either. So, this flag is the only way to know, whether a
+> WP pin is used, if no wp-gpios is used.
 
-> >> >> > TMIO_MMC_BLKSZ_2BYTES seems to be set unconditionally in
-> >> >> > sh_mobile_sdhi_probe and nowhere else, so I'd assume we don't
-> >> >> > actually need to provide this here, but can keep that knowledge
-> >> >> > implicit based on whether we're talking to sh_mobile_sdhi
-> >> >> > or another tmio_mmc variant.
-> >> >
-> >> > Can do that, yes.
-> >> >
-> >> >> > For the other last one, is that actually board specific, or just
-> >> >> > a feature of a given chip? If we can tell by the SoC, then I'd
-> >> >> > suggest using separate "compatible" properties instead, and
-> >> >> > put a bitmask of features into the .data field of the of match
-> >> >> > table. For all I can tell, SH7372 does not set it, while SH73A0,
-> >> >> > R8A7740 and R8A7779 always do.
-> >> >>
-> >> >> My understanding is that TMIO_MMC_HAS_IDLE_WAIT can be set based
-> >> >> on the SoC in use.
-> >> >
-> >> > So far TMIO_MMC_HAS_IDLE_WAIT is set on
-> >> >
-> >> > board-kzm9g.c (sh73a0 / AG5)
-> >> > board-ag5evm.c (sh73a0 / AG5)
-> >> > board-armadillo800eva.c (r8a7740 / A1)
-> >> > board-kota2.c (sh73a0 / AG5)
-> >> > board-marzen.c (r8a7779 / H1)
-> >> >
-> >> > and isn't set on
-> >> >
-> >> > board-ap4evb.c (sh7372 / ap4)
-> >> > board-bonito.c (r8a7740 / a1, SDHI isn't used)
-> >> > board-mackerel.c (sh7372 / ap4)
-> >> >
-> >> > So, shall we use a compatible property for this and drop this property? We
-> >> > can add later at any time, if needed, which is better, than defining
-> >> > something redundant. OTOH I seem to remember, that using SoC-version from
-> >> > the "compatible" property was considered by someone inappropriate. Magnus,
-> >> > what do you think?
-> >>
-> >> I prefer you to use a hardware-block version compatible suffix instead
-> >> of SoC suffix.
-> >>
-> >> This since we have more SoCs than actual hardware block
-> >> configurations. Using the list above, how many configurations would we
-> >> have?
-> >>
-> >> Actually, forcing the drivers to be updated for each new SoC sounds
-> >> like a pretty terrible idea. Wouldn't that be against one of the
-> >> merits of using DT? Also, don't you have enough interesting work piled
-> >> up already? =)
-> >>
-> >> Basically, I can't see any point in adding an extra unnecessary need
-> >> for updating the drivers when there is no real functional change.
-> >
-> > My understanding is that the discussion is about the details of
-> > bindings that are required for SDHI to function when brought
-> > up using DT on a variety of boards. Not exciting new work.
-> >
-> > In particular how to set TMIO_MMC_HAS_IDLE_WAIT via DT.
-> 
-> No, not exciting new work. More describing certain versions of the
-> SDHI hardware. This is a SDHI-specific configuration which may end up
-> being used on a certain SoC. There are also some board specific
-> details that need to be taken into consideration. I believe it is
-> important to understand the difference between hardware-block
-> configuration (SDHI in this particular case), SoC and board.
-> 
-> So the way I see it we have 3 ways to deal with it:
-> 
-> 1) Use the "toshiba,mmc-has-idle-wait" property proposed by Guennadi
-> or
-> 2) Use a SoC suffix in the compatible string and deal with
-> TMIO_MMC_HAS_IDLE_WAIT in the driver
-> or
-> 3) Use a SDHI-specific version suffix in the compatible string and
-> deal with TMIO_MMC_HAS_IDLE_WAIT in the driver
-> 
-> I am fine with 1) or 3) but I don't want to go down the route of 2)
-> because it will just lead to more pointless driver changes than are
-> actually needed. And the TMIO_MMC_HAS_IDLE_WAIT flag is not
-> SoC-specific so using a SoC suffix seems incorrect to me.
+Can't we request this information via PINCTRL somehow? I feel that I
+may have asked this before, so correct me if I am going in circles.
 
-My take on this is the following: having N optionally available on 
-different IP-versions features, I'd rather have N DT properties, than up 
-to 2^N abstract vX versions. Yes, I realise, that in practice we'll never 
-have 2^N, rather just a bit more than N, still, my main problem with those 
-versions, is that they are purely abstracted. I'd be happy if that was a 
-real hardware revision string, that you could look up in a datasheet. But 
-if you have to look in some text file... That just seems much less 
-user-friendly to me, than selecting single properties. Just imagine, what 
-would you prefer, either specifying
+If we have a native SDHI WP pin and it is used on our board then this
+information is known with the board configuration already. And that
+pin function needs to be select. Same thing if we happen to have a
+GPIO pin for WP, then that need to be selected as well. And if we have
+neither SDHI WP nor GPIO WP then we don't have to bother with the WP
+signal at all.
 
-	feature-A;
-	feature-B;
+>> >> >> > TMIO_MMC_BLKSZ_2BYTES seems to be set unconditionally in
+>> >> >> > sh_mobile_sdhi_probe and nowhere else, so I'd assume we don't
+>> >> >> > actually need to provide this here, but can keep that knowledge
+>> >> >> > implicit based on whether we're talking to sh_mobile_sdhi
+>> >> >> > or another tmio_mmc variant.
+>> >> >
+>> >> > Can do that, yes.
+>> >> >
+>> >> >> > For the other last one, is that actually board specific, or just
+>> >> >> > a feature of a given chip? If we can tell by the SoC, then I'd
+>> >> >> > suggest using separate "compatible" properties instead, and
+>> >> >> > put a bitmask of features into the .data field of the of match
+>> >> >> > table. For all I can tell, SH7372 does not set it, while SH73A0,
+>> >> >> > R8A7740 and R8A7779 always do.
+>> >> >>
+>> >> >> My understanding is that TMIO_MMC_HAS_IDLE_WAIT can be set based
+>> >> >> on the SoC in use.
+>> >> >
+>> >> > So far TMIO_MMC_HAS_IDLE_WAIT is set on
+>> >> >
+>> >> > board-kzm9g.c (sh73a0 / AG5)
+>> >> > board-ag5evm.c (sh73a0 / AG5)
+>> >> > board-armadillo800eva.c (r8a7740 / A1)
+>> >> > board-kota2.c (sh73a0 / AG5)
+>> >> > board-marzen.c (r8a7779 / H1)
+>> >> >
+>> >> > and isn't set on
+>> >> >
+>> >> > board-ap4evb.c (sh7372 / ap4)
+>> >> > board-bonito.c (r8a7740 / a1, SDHI isn't used)
+>> >> > board-mackerel.c (sh7372 / ap4)
+>> >> >
+>> >> > So, shall we use a compatible property for this and drop this property? We
+>> >> > can add later at any time, if needed, which is better, than defining
+>> >> > something redundant. OTOH I seem to remember, that using SoC-version from
+>> >> > the "compatible" property was considered by someone inappropriate. Magnus,
+>> >> > what do you think?
+>> >>
+>> >> I prefer you to use a hardware-block version compatible suffix instead
+>> >> of SoC suffix.
+>> >>
+>> >> This since we have more SoCs than actual hardware block
+>> >> configurations. Using the list above, how many configurations would we
+>> >> have?
+>> >>
+>> >> Actually, forcing the drivers to be updated for each new SoC sounds
+>> >> like a pretty terrible idea. Wouldn't that be against one of the
+>> >> merits of using DT? Also, don't you have enough interesting work piled
+>> >> up already? =)
+>> >>
+>> >> Basically, I can't see any point in adding an extra unnecessary need
+>> >> for updating the drivers when there is no real functional change.
+>> >
+>> > My understanding is that the discussion is about the details of
+>> > bindings that are required for SDHI to function when brought
+>> > up using DT on a variety of boards. Not exciting new work.
+>> >
+>> > In particular how to set TMIO_MMC_HAS_IDLE_WAIT via DT.
+>>
+>> No, not exciting new work. More describing certain versions of the
+>> SDHI hardware. This is a SDHI-specific configuration which may end up
+>> being used on a certain SoC. There are also some board specific
+>> details that need to be taken into consideration. I believe it is
+>> important to understand the difference between hardware-block
+>> configuration (SDHI in this particular case), SoC and board.
+>>
+>> So the way I see it we have 3 ways to deal with it:
+>>
+>> 1) Use the "toshiba,mmc-has-idle-wait" property proposed by Guennadi
+>> or
+>> 2) Use a SoC suffix in the compatible string and deal with
+>> TMIO_MMC_HAS_IDLE_WAIT in the driver
+>> or
+>> 3) Use a SDHI-specific version suffix in the compatible string and
+>> deal with TMIO_MMC_HAS_IDLE_WAIT in the driver
+>>
+>> I am fine with 1) or 3) but I don't want to go down the route of 2)
+>> because it will just lead to more pointless driver changes than are
+>> actually needed. And the TMIO_MMC_HAS_IDLE_WAIT flag is not
+>> SoC-specific so using a SoC suffix seems incorrect to me.
+>
+> My take on this is the following: having N optionally available on
+> different IP-versions features, I'd rather have N DT properties, than up
+> to 2^N abstract vX versions. Yes, I realise, that in practice we'll never
+> have 2^N, rather just a bit more than N, still, my main problem with those
+> versions, is that they are purely abstracted. I'd be happy if that was a
+> real hardware revision string, that you could look up in a datasheet. But
+> if you have to look in some text file... That just seems much less
+> user-friendly to me, than selecting single properties. Just imagine, what
+> would you prefer, either specifying
+>
+>         feature-A;
+>         feature-B;
+>
+> in your .dts or going through a list of
+>
+> v1: has no features
+> v2: feature A only
+> v3: feature B only
+> v4: features A and B
+> ...
 
-in your .dts or going through a list of
+In this particular case based on the information above:
 
-v1: has no features
-v2: feature A only
-v3: feature B only
-v4: features A and B
-...
+toshiba,mmc-blksz-2bytes
+toshiba,mmc-has-idle-wait
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+or my guess:
+
+renesas,shmobile-sdhi-v1: TMIO_MMC_BLKSZ_2BYTES
+renesas,shmobile-sdhi-v2: TMIO_MMC_BLKSZ_2BYTES + TMIO_MMC_HAS_IDLE_WAIT
+
+I think the WP and CD pins should be handled differently if possible.
+
+Thanks,
+
+/ magnus
