@@ -1,103 +1,72 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 3/3 RESEND] mmc: sdhci: check voltage range only on
- regulators aware of voltage value
-Date: Thu, 14 Feb 2013 12:08:57 +0100
-Message-ID: <CAPDyKFpEUO+tJs+2esDkOT9eZuwgj6qScSrMEoG1G3mct-J6sw@mail.gmail.com>
-References: <87bobqrcb4.fsf@octavius.laptop.org>
-	<1360656096-1671-1-git-send-email-m.szyprowski@samsung.com>
-	<Pine.LNX.4.64.1302122309470.14434@axis700.grange>
-	<511B41B8.3060506@samsung.com>
-	<Pine.LNX.4.64.1302130844530.18535@axis700.grange>
-	<20130213113525.GB5062@opensource.wolfsonmicro.com>
-	<511C9AD7.6000904@samsung.com>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: [PATCH] mmc: core: Fix start_signal_voltage_switch argument type
+Date: Thu, 14 Feb 2013 09:57:42 -0200
+Message-ID: <CAOMZO5DKNmqiYs7wHSB5MktgxwczTrhn3fQA0Frkm=bNbUYUdw@mail.gmail.com>
+References: <1360808084-9128-1-git-send-email-festevam@gmail.com>
+	<CAPDyKFpKTA=Sqsyz_nB+kvBzdbRckVCCNDUGRaWdYVYxcoqk4w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f172.google.com ([209.85.217.172]:36034 "EHLO
-	mail-lb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933839Ab3BNLI7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Feb 2013 06:08:59 -0500
-Received: by mail-lb0-f172.google.com with SMTP id n8so1723598lbj.17
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Feb 2013 03:08:57 -0800 (PST)
-In-Reply-To: <511C9AD7.6000904@samsung.com>
+Received: from mail-vc0-f170.google.com ([209.85.220.170]:37412 "EHLO
+	mail-vc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934253Ab3BNL5n (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Feb 2013 06:57:43 -0500
+Received: by mail-vc0-f170.google.com with SMTP id p16so1419047vcq.1
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Feb 2013 03:57:42 -0800 (PST)
+In-Reply-To: <CAPDyKFpKTA=Sqsyz_nB+kvBzdbRckVCCNDUGRaWdYVYxcoqk4w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>, Kevin Liu <keyuan.liu@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: cjb@laptop.org, kliu5@marvell.com, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
 
-On 14 February 2013 09:05, Marek Szyprowski <m.szyprowski@samsung.com> wrote:
->
-> On 2/13/2013 12:35 PM, Mark Brown wrote:
->>
->> On Wed, Feb 13, 2013 at 08:45:56AM +0100, Guennadi Liakhovetski wrote:
->> > On Wed, 13 Feb 2013, Marek Szyprowski wrote:
->>
->> > > BTW, mmc_regulator_get_ocrmask() won't work with continuous range
->> > > regulators.
->>
->> > This seems like a problem, that has to be fixed...
->>
->> Indeed, what's the issue?
->
->
-> There are probably 2 issues:
->
-> 1. mmc_regulator_get_ocrmask() works only with regulators which support
-> regulator_count_voltages() and regulator_list_voltage(). Recently support
-> for
-> continuous regulators have been merged. Such regulators doesn't provide
-> regulator_list_voltage() method, but are able to change/set voltage to the
-> given value. I agree that they are not very common, so right now we can
-> probably ignore them until the first board, which uses them arrives.
->
-> 2. The second issue might be related to the testing of precise voltage
-> values
-> in the ocr mask, not the whole allowed ranges. Such issues in sdhci.c driver
-> has been recently fixed by commit cec2e216f72c6b5ccdadb60aadbe99821d744503
-> ("mmc: sdhci: Use regulator min/max voltage range according to spec"), but I
-> don't know MMC core code to judge if ocr mask is used for exact voltage
-> checking or only for checking the voltage ranges. However someone with good
-> mmc subsystem knowledge should check it.
->
+Hi Ulf,
 
-Not 100% sure what your problem relates too here, but I am aware of an
-issue for how the mmc protocol layer are handling ocr_masks. Let me
-try to describe it here:
+On Thu, Feb 14, 2013 at 8:33 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-1. During "card init" mmc_power_up will be called for telling the host
-driver to provide power to the card. The level of voltage will be set
-to "ocr_avail" which means the highest supported voltage by the host.
-2. At the protocol layer the card init sequence tries to negotiate to
-lowest possible ocr value from what the card and the host together
-supports. Once done, the ocr mask value will be cached into the host
-struct.
-3. The host will informed about the new ocr mask from the protocol
-layer with mmc_select_voltage and it somewhere here the problems
-starts. No host are actually changing the voltage level at this state
-(MMC_POWER_ON) which is correct since it would likely mean violation
-of the spec. At the same time the protocol layer still believes the
-host has switched to operate at the new voltage level.
-4. So the host and the protocol layer are out of sync with regards to
-the ocr mask, which is why the cached ocr_mask in the host struct is
-reset when doing mmc_power_off. Otherwise the suspend/resume sequence
-would have been broken.
+> No. Fixup shall be done in SDHCI instead. Otherwise other host drivers
+> will break instead.
 
-I have been looking into a solution for the above problem, but has not
-yet been able to finalize the task.
+Do you mean like this?
 
-Hope this did not become more fussy now. :-)
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1675,7 +1675,7 @@ static void sdhci_enable_sdio_irq(struct
+mmc_host *mmc, int enable)
+ }
 
->
-> Best regards
-> --
-> Marek Szyprowski
-> Samsung Poland R&D Center
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+-                                               int signal_voltage)
++                                               struct mmc_ios *ios)
+ {
+        u16 ctrl;
+        int ret;
+@@ -1689,7 +1689,7 @@ static int
+sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
 
-Kind regards
-Ulf Hansson
+        ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+
+-       switch (signal_voltage) {
++       switch (ios->signal_voltage) {
+        case MMC_SIGNAL_VOLTAGE_330:
+                /* Set 1.8V Signal Enable in the Host Control2 register to 0 */
+                ctrl &= ~SDHCI_CTRL_VDD_180;
+@@ -1762,7 +1762,7 @@ static int
+sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+ }
+
+ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+-       int signal_voltage)
++       struct mmc_ios *ios)
+ {
+        struct sdhci_host *host = mmc_priv(mmc);
+        int err;
+@@ -1770,7 +1770,7 @@ static int
+sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+        if (host->version < SDHCI_SPEC_300)
+                return 0;
+        sdhci_runtime_pm_get(host);
+-       err = sdhci_do_start_signal_voltage_switch(host, signal_voltage);
++       err = sdhci_do_start_signal_voltage_switch(host, ios);
+        sdhci_runtime_pm_put(host);
+        return err;
+ }
