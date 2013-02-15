@@ -1,126 +1,171 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH v4 11/13] mmc: tmio: add support for the VccQ regulator
-Date: Fri, 15 Feb 2013 16:14:00 +0100
-Message-ID: <1360941242-18153-12-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH v4 09/13] mmc: sh_mobile_sdhi: use managed resource allocations
+Date: Fri, 15 Feb 2013 16:13:58 +0100
+Message-ID: <1360941242-18153-10-git-send-email-g.liakhovetski@gmx.de>
 References: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.8]:58149 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756331Ab3BOPOT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Feb 2013 10:14:19 -0500
 In-Reply-To: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-sh-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Arnd Bergmann <arnd@arndb.de>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-List-Id: linux-mmc@vger.kernel.org
 
-Some SD/MMC interfaces use 2 power regulators: one to power the card itself
-(Vcc) and another one to pull signal lines up (VccQ). In case of eMMC and
-UHS SD cards the regulators also have to be configured to supply different
-voltages. The preferred order of turning supply power on and off is to
-turn Vcc first on and last off.
+Use managed allocations to get memory, clock and interrupts . This
+significantly simplifies clean up paths.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/tmio_mmc_pio.c |   56 ++++++++++++++++++++++++++++++++-------
- 1 files changed, 46 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c |   57 +++++++++----------------------------
+ 1 files changed, 14 insertions(+), 43 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index e5b3fcf..f508ecb 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -43,6 +43,7 @@
- #include <linux/platform_device.h>
- #include <linux/pm_qos.h>
- #include <linux/pm_runtime.h>
-+#include <linux/regulator/consumer.h>
- #include <linux/scatterlist.h>
- #include <linux/spinlock.h>
- #include <linux/workqueue.h>
-@@ -155,6 +156,7 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host, int new_clock)
- 		host->set_clk_div(host->pdev, (clk>>22) & 1);
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 175ab97..fe90853 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -147,7 +147,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	int irq, ret, i = 0;
+ 	bool multiplexed_isr = true;
  
- 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clk & 0x1ff);
-+	msleep(10);
- }
+-	priv = kzalloc(sizeof(struct sh_mobile_sdhi), GFP_KERNEL);
++	priv = devm_kzalloc(&pdev->dev, sizeof(struct sh_mobile_sdhi), GFP_KERNEL);
+ 	if (priv == NULL) {
+ 		dev_err(&pdev->dev, "kzalloc failed\n");
+ 		return -ENOMEM;
+@@ -159,11 +159,11 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		if (p->init) {
+ 			ret = p->init(pdev, &sdhi_ops);
+ 			if (ret)
+-				goto einit;
++				return ret;
+ 		}
+ 	}
  
- static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
-@@ -768,16 +770,48 @@ static int tmio_mmc_clk_update(struct mmc_host *mmc)
+-	priv->clk = clk_get(&pdev->dev, NULL);
++	priv->clk = devm_clk_get(&pdev->dev, NULL);
+ 	if (IS_ERR(priv->clk)) {
+ 		ret = PTR_ERR(priv->clk);
+ 		dev_err(&pdev->dev, "cannot get clock: %d\n", ret);
+@@ -223,33 +223,33 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_CARD_DETECT);
+ 	if (irq >= 0) {
+ 		multiplexed_isr = false;
+-		ret = request_irq(irq, tmio_mmc_card_detect_irq, 0,
++		ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_card_detect_irq, 0,
+ 				  dev_name(&pdev->dev), host);
+ 		if (ret)
+-			goto eirq_card_detect;
++			goto eirq;
+ 	}
+ 
+ 	irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_SDIO);
+ 	if (irq >= 0) {
+ 		multiplexed_isr = false;
+-		ret = request_irq(irq, tmio_mmc_sdio_irq, 0,
++		ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_sdio_irq, 0,
+ 				  dev_name(&pdev->dev), host);
+ 		if (ret)
+-			goto eirq_sdio;
++			goto eirq;
+ 	}
+ 
+ 	irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_SDCARD);
+ 	if (irq >= 0) {
+ 		multiplexed_isr = false;
+-		ret = request_irq(irq, tmio_mmc_sdcard_irq, 0,
++		ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_sdcard_irq, 0,
+ 				  dev_name(&pdev->dev), host);
+ 		if (ret)
+-			goto eirq_sdcard;
++			goto eirq;
+ 	} else if (!multiplexed_isr) {
+ 		dev_err(&pdev->dev,
+ 			"Principal SD-card IRQ is missing among named interrupts\n");
+ 		ret = irq;
+-		goto eirq_sdcard;
++		goto eirq;
+ 	}
+ 
+ 	if (multiplexed_isr) {
+@@ -258,15 +258,15 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 			if (irq < 0)
+ 				break;
+ 			i++;
+-			ret = request_irq(irq, tmio_mmc_irq, 0,
++			ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_irq, 0,
+ 					  dev_name(&pdev->dev), host);
+ 			if (ret)
+-				goto eirq_multiplexed;
++				goto eirq;
+ 		}
+ 
+ 		/* There must be at least one IRQ source */
+ 		if (!i)
+-			goto eirq_multiplexed;
++			goto eirq;
+ 	}
+ 
+ 	dev_info(&pdev->dev, "%s base at 0x%08lx clock rate %u MHz\n",
+@@ -276,28 +276,12 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 
+ 	return ret;
+ 
+-eirq_multiplexed:
+-	while (i--) {
+-		irq = platform_get_irq(pdev, i);
+-		free_irq(irq, host);
+-	}
+-eirq_sdcard:
+-	irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_SDIO);
+-	if (irq >= 0)
+-		free_irq(irq, host);
+-eirq_sdio:
+-	irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_CARD_DETECT);
+-	if (irq >= 0)
+-		free_irq(irq, host);
+-eirq_card_detect:
++eirq:
+ 	tmio_mmc_host_remove(host);
+ eprobe:
+-	clk_put(priv->clk);
+ eclkget:
+ 	if (p && p->cleanup)
+ 		p->cleanup(pdev);
+-einit:
+-	kfree(priv);
  	return ret;
  }
  
--static void tmio_mmc_set_power(struct tmio_mmc_host *host, struct mmc_ios *ios)
-+static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned short vdd)
+@@ -305,26 +289,13 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
  {
- 	struct mmc_host *mmc = host->mmc;
-+	int ret = 0;
-+
-+	/* .set_ios() is returning void, so, no chance to report an error */
+ 	struct mmc_host *mmc = platform_get_drvdata(pdev);
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
+-	struct sh_mobile_sdhi *priv = container_of(host->pdata, struct sh_mobile_sdhi, mmc_data);
+ 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
+-	int i = 0, irq;
  
- 	if (host->set_pwr)
--		host->set_pwr(host->pdev, ios->power_mode != MMC_POWER_OFF);
-+		host->set_pwr(host->pdev, 1);
-+
-+	if (!IS_ERR(mmc->supply.vmmc)) {
-+		ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
-+		/*
-+		 * Attention: empiric value. With a b43 WiFi SDIO card this
-+		 * delay proved necessary for reliable card-insertion probing.
-+		 * 100us were not enough. Is this the same 140us delay, as in
-+		 * tmio_mmc_set_ios()?
-+		 */
-+		udelay(200);
-+	}
-+	/*
-+	 * It seems, VccQ should be switched on after Vcc, this is also what the
-+	 * omap_hsmmc.c driver does.
-+	 */
-+	if (!IS_ERR(mmc->supply.vqmmc) && !ret) {
-+		regulator_enable(mmc->supply.vqmmc);
-+		udelay(200);
-+	}
-+}
-+
-+static void tmio_mmc_power_off(struct tmio_mmc_host *host)
-+{
-+	struct mmc_host *mmc = host->mmc;
-+
-+	if (!IS_ERR(mmc->supply.vqmmc))
-+		regulator_disable(mmc->supply.vqmmc);
-+
- 	if (!IS_ERR(mmc->supply.vmmc))
--		/* Errors ignored... */
--		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
--				      ios->power_mode ? ios->vdd : 0);
-+		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-+
-+	if (host->set_pwr)
-+		host->set_pwr(host->pdev, 0);
+ 	tmio_mmc_host_remove(host);
+ 
+-	while (1) {
+-		irq = platform_get_irq(pdev, i++);
+-		if (irq < 0)
+-			break;
+-		free_irq(irq, host);
+-	}
+-
+-	clk_put(priv->clk);
+-
+ 	if (p && p->cleanup)
+ 		p->cleanup(pdev);
+ 
+-	kfree(priv);
+-
+ 	return 0;
  }
  
- /* Set MMC clock / power.
-@@ -828,18 +862,20 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		if (!host->power) {
- 			tmio_mmc_clk_update(mmc);
- 			pm_runtime_get_sync(dev);
--			host->power = true;
- 		}
- 		tmio_mmc_set_clock(host, ios->clock);
--		/* power up SD bus */
--		tmio_mmc_set_power(host, ios);
-+		if (!host->power) {
-+			/* power up SD card and the bus */
-+			tmio_mmc_power_on(host, ios->vdd);
-+			host->power = true;
-+		}
- 		/* start bus clock */
- 		tmio_mmc_clk_start(host);
- 	} else if (ios->power_mode != MMC_POWER_UP) {
--		if (ios->power_mode == MMC_POWER_OFF)
--			tmio_mmc_set_power(host, ios);
- 		if (host->power) {
- 			struct tmio_mmc_data *pdata = host->pdata;
-+			if (ios->power_mode == MMC_POWER_OFF)
-+				tmio_mmc_power_off(host);
- 			tmio_mmc_clk_stop(host);
- 			host->power = false;
- 			pm_runtime_put(dev);
 -- 
 1.7.2.5
 
