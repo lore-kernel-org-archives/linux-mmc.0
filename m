@@ -1,7 +1,7 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH v4 12/13] mmc: add DT bindings for more MMC capability flags
-Date: Fri, 15 Feb 2013 16:14:01 +0100
-Message-ID: <1360941242-18153-13-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH v4 13/13] mmc: tmio: add barriers to IO operations
+Date: Fri, 15 Feb 2013 16:14:02 +0100
+Message-ID: <1360941242-18153-14-git-send-email-g.liakhovetski@gmx.de>
 References: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
@@ -10,59 +10,68 @@ To: linux-mmc@vger.kernel.org
 Cc: devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Arnd Bergmann <arnd@arndb.de>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Many MMC capability flags are platform-dependent and are traditionally set
-in platform data. With DT often each such capability requires a special
-binding. Add bindings for MMC_CAP_SD_HIGHSPEED, MMC_CAP_MMC_HIGHSPEED,
-MMC_CAP_POWER_OFF_CARD and MMC_CAP_SDIO_IRQ capabilities. Also add code to
-DT parser to look up "keep-power-in-suspend" and "enable-sdio-wakeup"
-bindings and set MMC_PM_KEEP_POWER and MMC_PM_WAKE_SDIO_IRQ respectively,
-if found.
+Without barriers SDIO operations fail with runtime PM enabled.
 
+Reviewed-by: Paul Mundt <lethal@linux-sh.org>
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- Documentation/devicetree/bindings/mmc/mmc.txt |    4 ++++
- drivers/mmc/core/host.c                       |   13 +++++++++++++
- 2 files changed, 17 insertions(+), 0 deletions(-)
+ drivers/mmc/host/tmio_mmc.h |   18 ++++++++++--------
+ 1 files changed, 10 insertions(+), 8 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index 24c8552..d9ab51f 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -25,6 +25,10 @@ Optional properties:
- - max-frequency: maximum operating clock frequency
- - no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
-   this system, even if the controller claims it is.
-+- cap-sd-highspeed: SD high-speed timing is supported
-+- cap-mmc-highspeed: MMC high-speed timing is supported
-+- cap-power-off-card: powering off the card is safe
-+- cap-sdio-irq: enable SDIO IRQ signalling on this interface
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index d857f5c..a10ebd0 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -159,19 +159,20 @@ int tmio_mmc_host_runtime_resume(struct device *dev);
  
- *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
- polarity properties, we have to fix the meaning of the "normal" and "inverted"
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index daa2ed1..1365466 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -398,6 +398,19 @@ void mmc_of_parse(struct mmc_host *host)
- 	}
- 	if (explicit_inv_wp ^ gpio_inv_wp)
- 		host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
-+
-+	if (of_find_property(np, "cap-sd-highspeed", &len))
-+		host->caps |= MMC_CAP_SD_HIGHSPEED;
-+	if (of_find_property(np, "cap-mmc-highspeed", &len))
-+		host->caps |= MMC_CAP_MMC_HIGHSPEED;
-+	if (of_find_property(np, "cap-power-off-card", &len))
-+		host->caps |= MMC_CAP_POWER_OFF_CARD;
-+	if (of_find_property(np, "cap-sdio-irq", &len))
-+		host->caps |= MMC_CAP_SDIO_IRQ;
-+	if (of_find_property(np, "keep-power-in-suspend", &len))
-+		host->pm_caps |= MMC_PM_KEEP_POWER;
-+	if (of_find_property(np, "enable-sdio-wakeup", &len))
-+		host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+ static inline u16 sd_ctrl_read16(struct tmio_mmc_host *host, int addr)
+ {
+-	return readw(host->ctl + (addr << host->bus_shift));
++	return ioread16(host->ctl + (addr << host->bus_shift));
  }
  
- EXPORT_SYMBOL(mmc_of_parse);
+ static inline void sd_ctrl_read16_rep(struct tmio_mmc_host *host, int addr,
+ 		u16 *buf, int count)
+ {
+-	readsw(host->ctl + (addr << host->bus_shift), buf, count);
++	wmb();
++	ioread16_rep(host->ctl + (addr << host->bus_shift), buf, count);
+ }
+ 
+ static inline u32 sd_ctrl_read32(struct tmio_mmc_host *host, int addr)
+ {
+-	return readw(host->ctl + (addr << host->bus_shift)) |
+-	       readw(host->ctl + ((addr + 2) << host->bus_shift)) << 16;
++	return ioread16(host->ctl + (addr << host->bus_shift)) |
++	       ioread16(host->ctl + ((addr + 2) << host->bus_shift)) << 16;
+ }
+ 
+ static inline void sd_ctrl_write16(struct tmio_mmc_host *host, int addr, u16 val)
+@@ -181,19 +182,20 @@ static inline void sd_ctrl_write16(struct tmio_mmc_host *host, int addr, u16 val
+ 	 */
+ 	if (host->pdata->write16_hook && host->pdata->write16_hook(host, addr))
+ 		return;
+-	writew(val, host->ctl + (addr << host->bus_shift));
++	iowrite16(val, host->ctl + (addr << host->bus_shift));
+ }
+ 
+ static inline void sd_ctrl_write16_rep(struct tmio_mmc_host *host, int addr,
+ 		u16 *buf, int count)
+ {
+-	writesw(host->ctl + (addr << host->bus_shift), buf, count);
++	iowrite16_rep(host->ctl + (addr << host->bus_shift), buf, count);
++	wmb();
+ }
+ 
+ static inline void sd_ctrl_write32(struct tmio_mmc_host *host, int addr, u32 val)
+ {
+-	writew(val, host->ctl + (addr << host->bus_shift));
+-	writew(val >> 16, host->ctl + ((addr + 2) << host->bus_shift));
++	iowrite16(val, host->ctl + (addr << host->bus_shift));
++	iowrite16(val >> 16, host->ctl + ((addr + 2) << host->bus_shift));
+ }
+ 
+ 
 -- 
 1.7.2.5
 
