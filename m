@@ -1,51 +1,55 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: dw-mmc: return the result of mmc_add_host()
-Date: Fri, 15 Feb 2013 23:45:45 +0900
-Message-ID: <511E4A19.6020000@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:47070 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755419Ab3BOOpp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Feb 2013 09:45:45 -0500
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MI9008NSNO7VEM0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 15 Feb 2013 23:45:43 +0900 (KST)
-Received: from [10.90.51.55] by mmp1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0MI900ANSNO76Y70@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 15 Feb 2013 23:45:43 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH v4 06/13] mmc: tmio-mmc: define device-tree bindings
+Date: Fri, 15 Feb 2013 16:13:55 +0100
+Message-ID: <1360941242-18153-7-git-send-email-g.liakhovetski@gmx.de>
+References: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>
+Cc: devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Arnd Bergmann <arnd@arndb.de>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+List-Id: linux-mmc@vger.kernel.org
 
-check the result of mmc_add_host() and return the value.
+Define device-tree bindings for the tmio-mmc driver to be able to specify
+parameters, currently provided in platform data.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/dw_mmc.c |    4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 60063cc..e481d90 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1990,7 +1990,9 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 
- 	slot->wp_gpio = dw_mci_of_get_wp_gpio(host->dev, slot->id);
- 
--	mmc_add_host(mmc);
-+	ret = mmc_add_host(mmc);
-+	if (ret)
-+		goto err_setup_bus;
- 
- #if defined(CONFIG_DEBUG_FS)
- 	dw_mci_init_debugfs(slot);
+v4: remove the "toshiba,mmc-blksz-2bytes" property, it can be set directly 
+by the sh_mobile_sdhi driver, use compatible string parsing instead of
+the "toshiba,mmc-has-idle-wait" property.
+
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt |   20 ++++++++++++++++++++
+ 1 files changed, 20 insertions(+), 0 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+
+diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+new file mode 100644
+index 0000000..df204e1
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+@@ -0,0 +1,20 @@
++* Toshiba Mobile IO SD/MMC controller
++
++The tmio-mmc driver doesn't probe its devices actively, instead its binding to
++devices is managed by either MFD drivers or by the sh_mobile_sdhi platform
++driver. Those drivers supply the tmio-mmc driver with platform data, that either
++describe hardware capabilities, known to them, or are obtained by them from
++their own platform data or from their DT information. In the latter case all
++compulsory and any optional properties, common to all SD/MMC drivers, as
++described in mmc.txt, can be used. Additionally the following tmio_mmc-specific
++optional bindings can be used.
++
++Optional properties:
++- toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
++
++When used with Renesas SDHI hardware, the following compatibility strings
++configure various model-specific properties:
++
++"renesas,sh7372-sdhi":	(default) compatible with SH7372
++"renesas,r8a7740-sdhi":	compatible with R8A7740: certain MMC/SD commands have to
++			wait for the interface to become idle.
 -- 
-1.7.9.5
+1.7.2.5
+
