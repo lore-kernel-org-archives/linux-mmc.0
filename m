@@ -1,123 +1,136 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 RESEND] mmc: sdhci-s3c: Use devm_clk_get()
-Date: Fri, 15 Feb 2013 20:59:49 +0900
-Message-ID: <511E2335.3070804@samsung.com>
-References: <01c101ce08d0$7d8808d0$78981a70$%han@samsung.com>
- <CAPDyKFqN8=Bs96uhV_+da_==_5Rw2tEvE62fAiVCAf3cm46g9g@mail.gmail.com>
+Subject: [PATCH] mmc: core: remove the duplicate  variable at ext_csd structure
+Date: Fri, 15 Feb 2013 22:11:20 +0900
+Message-ID: <511E33F8.6090109@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:39902 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751495Ab3BOL7t (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Feb 2013 06:59:49 -0500
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout4.samsung.com ([203.254.224.34]:26115 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S936007Ab3BONLU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Feb 2013 08:11:20 -0500
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MI9005JRFZNYQ30@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 15 Feb 2013 20:59:47 +0900 (KST)
-Received: from [10.90.51.55] by mmp2.samsung.com
+ with ESMTP id <0MI9006N6JAMN910@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 15 Feb 2013 22:11:18 +0900 (KST)
+Received: from [10.90.51.55] by mmp1.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0MI900KWUFZN6Z70@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 15 Feb 2013 20:59:47 +0900 (KST)
-In-reply-to: <CAPDyKFqN8=Bs96uhV_+da_==_5Rw2tEvE62fAiVCAf3cm46g9g@mail.gmail.com>
+ 17 2011)) with ESMTPA id <0MI9007A8JAU4Y70@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 15 Feb 2013 22:11:18 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jingoo Han <jg1.han@samsung.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Ben Dooks <ben-linux@fluff.org>
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-It looks good to me.
+Some ext_csd's variable have been defined the unnecessarily.
+sec_erase_mult/sec_trim_mult/sec_feature_support would not be changed.
+Then we can use the just "_raw_" variable.
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/core/core.c  |   14 +++++++-------
+ drivers/mmc/core/mmc.c   |    6 ------
+ include/linux/mmc/card.h |    3 ---
+ 3 files changed, 7 insertions(+), 16 deletions(-)
 
-On 02/14/2013 08:58 PM, Ulf Hansson wrote:
-> On 12 February 2013 04:24, Jingoo Han <jg1.han@samsung.com> wrote:
->> Use devm_clk_get() rather than clk_get() to make cleanup paths
->> more simple.
->>
->> Signed-off-by: Jingoo Han <jg1.han@samsung.com>
->> ---
->> Changes since v1:
->> - modified the commit message
->>
->>  drivers/mmc/host/sdhci-s3c.c |   17 ++---------------
->>  1 files changed, 2 insertions(+), 15 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
->> index 82a8de1..5aaef5b 100644
->> --- a/drivers/mmc/host/sdhci-s3c.c
->> +++ b/drivers/mmc/host/sdhci-s3c.c
->> @@ -608,7 +608,7 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
->>
->>         platform_set_drvdata(pdev, host);
->>
->> -       sc->clk_io = clk_get(dev, "hsmmc");
->> +       sc->clk_io = devm_clk_get(dev, "hsmmc");
->>         if (IS_ERR(sc->clk_io)) {
->>                 dev_err(dev, "failed to get io clock\n");
->>                 ret = PTR_ERR(sc->clk_io);
->> @@ -623,7 +623,7 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
->>                 char name[14];
->>
->>                 snprintf(name, 14, "mmc_busclk.%d", ptr);
->> -               clk = clk_get(dev, name);
->> +               clk = devm_clk_get(dev, name);
->>                 if (IS_ERR(clk))
->>                         continue;
->>
->> @@ -765,15 +765,9 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
->>  #ifndef CONFIG_PM_RUNTIME
->>         clk_disable_unprepare(sc->clk_bus[sc->cur_clk]);
->>  #endif
->> -       for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
->> -               if (sc->clk_bus[ptr]) {
->> -                       clk_put(sc->clk_bus[ptr]);
->> -               }
->> -       }
->>
->>   err_no_busclks:
->>         clk_disable_unprepare(sc->clk_io);
->> -       clk_put(sc->clk_io);
->>
->>   err_pdata_io_clk:
->>         sdhci_free_host(host);
->> @@ -786,7 +780,6 @@ static int sdhci_s3c_remove(struct platform_device *pdev)
->>         struct sdhci_host *host =  platform_get_drvdata(pdev);
->>         struct sdhci_s3c *sc = sdhci_priv(host);
->>         struct s3c_sdhci_platdata *pdata = sc->pdata;
->> -       int ptr;
->>
->>         if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
->>                 pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
->> @@ -806,13 +799,7 @@ static int sdhci_s3c_remove(struct platform_device *pdev)
->>  #ifndef CONFIG_PM_RUNTIME
->>         clk_disable_unprepare(sc->clk_bus[sc->cur_clk]);
->>  #endif
->> -       for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
->> -               if (sc->clk_bus[ptr]) {
->> -                       clk_put(sc->clk_bus[ptr]);
->> -               }
->> -       }
->>         clk_disable_unprepare(sc->clk_io);
->> -       clk_put(sc->clk_io);
->>
->>         sdhci_free_host(host);
->>         platform_set_drvdata(pdev, NULL);
->> --
->> 1.7.2.5
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 08a3cf2..5385689 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1757,9 +1757,9 @@ static unsigned int mmc_mmc_erase_timeout(struct mmc_card *card,
+ 	/* Multiplier for secure operations */
+ 	if (arg & MMC_SECURE_ARGS) {
+ 		if (arg == MMC_SECURE_ERASE_ARG)
+-			erase_timeout *= card->ext_csd.sec_erase_mult;
++			erase_timeout *= card->ext_csd.raw_sec_erase_mult;
+ 		else
+-			erase_timeout *= card->ext_csd.sec_trim_mult;
++			erase_timeout *= card->ext_csd.raw_sec_trim_mult;
+ 	}
+ 
+ 	erase_timeout *= qty;
+@@ -1948,11 +1948,11 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ 		return -EOPNOTSUPP;
+ 
+ 	if ((arg & MMC_SECURE_ARGS) &&
+-	    !(card->ext_csd.sec_feature_support & EXT_CSD_SEC_ER_EN))
++	    !(card->ext_csd.raw_sec_feature_support & EXT_CSD_SEC_ER_EN))
+ 		return -EOPNOTSUPP;
+ 
+ 	if ((arg & MMC_TRIM_ARGS) &&
+-	    !(card->ext_csd.sec_feature_support & EXT_CSD_SEC_GB_CL_EN))
++	    !(card->ext_csd.raw_sec_feature_support & EXT_CSD_SEC_GB_CL_EN))
+ 		return -EOPNOTSUPP;
+ 
+ 	if (arg == MMC_SECURE_ERASE_ARG) {
+@@ -2001,7 +2001,7 @@ EXPORT_SYMBOL(mmc_can_erase);
+ 
+ int mmc_can_trim(struct mmc_card *card)
+ {
+-	if (card->ext_csd.sec_feature_support & EXT_CSD_SEC_GB_CL_EN)
++	if (card->ext_csd.raw_sec_feature_support & EXT_CSD_SEC_GB_CL_EN)
+ 		return 1;
+ 	return 0;
+ }
+@@ -2023,7 +2023,7 @@ int mmc_can_sanitize(struct mmc_card *card)
+ {
+ 	if (!mmc_can_trim(card) && !mmc_can_erase(card))
+ 		return 0;
+-	if (card->ext_csd.sec_feature_support & EXT_CSD_SEC_SANITIZE)
++	if (card->ext_csd.raw_sec_feature_support & EXT_CSD_SEC_SANITIZE)
+ 		return 1;
+ 	return 0;
+ }
+@@ -2031,7 +2031,7 @@ EXPORT_SYMBOL(mmc_can_sanitize);
+ 
+ int mmc_can_secure_erase_trim(struct mmc_card *card)
+ {
+-	if (card->ext_csd.sec_feature_support & EXT_CSD_SEC_ER_EN)
++	if (card->ext_csd.raw_sec_feature_support & EXT_CSD_SEC_ER_EN)
+ 		return 1;
+ 	return 0;
+ }
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index c8f3d6e..0c66c0c 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -444,12 +444,6 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 					MMC_BLK_DATA_AREA_GP);
+ 			}
+ 		}
+-		card->ext_csd.sec_trim_mult =
+-			ext_csd[EXT_CSD_SEC_TRIM_MULT];
+-		card->ext_csd.sec_erase_mult =
+-			ext_csd[EXT_CSD_SEC_ERASE_MULT];
+-		card->ext_csd.sec_feature_support =
+-			ext_csd[EXT_CSD_SEC_FEATURE_SUPPORT];
+ 		card->ext_csd.trim_timeout = 300 *
+ 			ext_csd[EXT_CSD_TRIM_MULT];
+ 
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 61b2c30..f481983 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -47,7 +47,6 @@ struct mmc_csd {
+ struct mmc_ext_csd {
+ 	u8			rev;
+ 	u8			erase_group_def;
+-	u8			sec_feature_support;
+ 	u8			rel_sectors;
+ 	u8			rel_param;
+ 	u8			part_config;
+@@ -70,8 +69,6 @@ struct mmc_ext_csd {
+ 	unsigned int		card_type;
+ 	unsigned int		hc_erase_size;		/* In sectors */
+ 	unsigned int		hc_erase_timeout;	/* In milliseconds */
+-	unsigned int		sec_trim_mult;	/* Secure trim multiplier  */
+-	unsigned int		sec_erase_mult;	/* Secure erase multiplier */
+ 	unsigned int		trim_timeout;		/* In milliseconds */
+ 	bool			enhanced_area_en;	/* enable bit */
+ 	unsigned long long	enhanced_area_offset;	/* Units: Byte */
+-- 
+1.7.9.5
