@@ -1,67 +1,69 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH v4 08/13] mmc: sh_mobile_sdhi: remove unused .pdata field
-Date: Fri, 15 Feb 2013 16:13:57 +0100
-Message-ID: <1360941242-18153-9-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH v4 04/13] mmc: (cosmetic) remove "extern" from function declarations
+Date: Fri, 15 Feb 2013 16:13:53 +0100
+Message-ID: <1360941242-18153-5-git-send-email-g.liakhovetski@gmx.de>
 References: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.8]:54833 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755718Ab3BOPOO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Feb 2013 10:14:14 -0500
 In-Reply-To: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-sh-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Arnd Bergmann <arnd@arndb.de>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-List-Id: linux-mmc@vger.kernel.org
 
-The struct sh_mobile_sdhi_info::pdata field was only used for platform-
-based card detection and isn't used anymore since the migration to GPIO-
-based MMC slot functions. Remove it.
+The "extern" keyword isn't required in function declarations, remove it.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c  |    4 ----
- include/linux/mmc/sh_mobile_sdhi.h |    2 --
- 2 files changed, 0 insertions(+), 6 deletions(-)
+ include/linux/mmc/host.h |   22 +++++++++++-----------
+ 1 files changed, 11 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 06e1bc9..175ab97 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -156,7 +156,6 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	mmc_data = &priv->mmc_data;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 13c0c8d..356ae0a 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -341,10 +341,10 @@ struct mmc_host {
+ 	unsigned long		private[0] ____cacheline_aligned;
+ };
  
- 	if (p) {
--		p->pdata = mmc_data;
- 		if (p->init) {
- 			ret = p->init(pdev, &sdhi_ops);
- 			if (ret)
-@@ -310,9 +309,6 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
- 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
- 	int i = 0, irq;
+-extern struct mmc_host *mmc_alloc_host(int extra, struct device *);
+-extern int mmc_add_host(struct mmc_host *);
+-extern void mmc_remove_host(struct mmc_host *);
+-extern void mmc_free_host(struct mmc_host *);
++struct mmc_host *mmc_alloc_host(int extra, struct device *);
++int mmc_add_host(struct mmc_host *);
++void mmc_remove_host(struct mmc_host *);
++void mmc_free_host(struct mmc_host *);
+ void mmc_of_parse(struct mmc_host *host);
  
--	if (p)
--		p->pdata = NULL;
--
- 	tmio_mmc_host_remove(host);
+ static inline void *mmc_priv(struct mmc_host *host)
+@@ -358,16 +358,16 @@ static inline void *mmc_priv(struct mmc_host *host)
+ #define mmc_classdev(x)	(&(x)->class_dev)
+ #define mmc_hostname(x)	(dev_name(&(x)->class_dev))
  
- 	while (1) {
-diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
-index b65679f..b76bcf0 100644
---- a/include/linux/mmc/sh_mobile_sdhi.h
-+++ b/include/linux/mmc/sh_mobile_sdhi.h
-@@ -4,7 +4,6 @@
- #include <linux/types.h>
+-extern int mmc_suspend_host(struct mmc_host *);
+-extern int mmc_resume_host(struct mmc_host *);
++int mmc_suspend_host(struct mmc_host *);
++int mmc_resume_host(struct mmc_host *);
  
- struct platform_device;
--struct tmio_mmc_data;
+-extern int mmc_power_save_host(struct mmc_host *host);
+-extern int mmc_power_restore_host(struct mmc_host *host);
++int mmc_power_save_host(struct mmc_host *host);
++int mmc_power_restore_host(struct mmc_host *host);
  
- #define SH_MOBILE_SDHI_IRQ_CARD_DETECT	"card_detect"
- #define SH_MOBILE_SDHI_IRQ_SDCARD	"sdcard"
-@@ -26,7 +25,6 @@ struct sh_mobile_sdhi_info {
- 	unsigned long tmio_caps2;
- 	u32 tmio_ocr_mask;	/* available MMC voltages */
- 	unsigned int cd_gpio;
--	struct tmio_mmc_data *pdata;
- 	void (*set_pwr)(struct platform_device *pdev, int state);
- 	int (*get_cd)(struct platform_device *pdev);
+-extern void mmc_detect_change(struct mmc_host *, unsigned long delay);
+-extern void mmc_request_done(struct mmc_host *, struct mmc_request *);
++void mmc_detect_change(struct mmc_host *, unsigned long delay);
++void mmc_request_done(struct mmc_host *, struct mmc_request *);
  
+-extern int mmc_cache_ctrl(struct mmc_host *, u8);
++int mmc_cache_ctrl(struct mmc_host *, u8);
+ 
+ static inline void mmc_signal_sdio_irq(struct mmc_host *host)
+ {
 -- 
 1.7.2.5
 
