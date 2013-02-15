@@ -1,55 +1,59 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH v4 06/13] mmc: tmio-mmc: define device-tree bindings
-Date: Fri, 15 Feb 2013 16:13:55 +0100
-Message-ID: <1360941242-18153-7-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH v4 01/13] mmc: sdhi, tmio: only check flags in tmio-mmc driver proper
+Date: Fri, 15 Feb 2013 16:13:50 +0100
+Message-ID: <1360941242-18153-2-git-send-email-g.liakhovetski@gmx.de>
 References: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.10]:58700 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755600Ab3BOPON (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Feb 2013 10:14:13 -0500
 In-Reply-To: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-sh-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Arnd Bergmann <arnd@arndb.de>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-List-Id: linux-mmc@vger.kernel.org
 
-Define device-tree bindings for the tmio-mmc driver to be able to specify
-parameters, currently provided in platform data.
+tmio-mmc platform flags can be set by various means, including caller
+drivers and device-tree bindings, therefore it is better to only check
+them in the tmio-mmc driver proper, not in caller drivers themselves.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
+ drivers/mmc/host/sh_mobile_sdhi.c |    3 +--
+ drivers/mmc/host/tmio_mmc_pio.c   |    3 +++
+ 2 files changed, 4 insertions(+), 2 deletions(-)
 
-v4: remove the "toshiba,mmc-blksz-2bytes" property, it can be set directly 
-by the sh_mobile_sdhi driver, use compatible string parsing instead of
-the "toshiba,mmc-has-idle-wait" property.
-
- Documentation/devicetree/bindings/mmc/tmio_mmc.txt |   20 ++++++++++++++++++++
- 1 files changed, 20 insertions(+), 0 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-
-diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-new file mode 100644
-index 0000000..df204e1
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-@@ -0,0 +1,20 @@
-+* Toshiba Mobile IO SD/MMC controller
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 524a7f7..e0ca0ab 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -153,10 +153,9 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	mmc_data->clk_enable = sh_mobile_sdhi_clk_enable;
+ 	mmc_data->clk_disable = sh_mobile_sdhi_clk_disable;
+ 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
++	mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
+ 	if (p) {
+ 		mmc_data->flags = p->tmio_flags;
+-		if (mmc_data->flags & TMIO_MMC_HAS_IDLE_WAIT)
+-			mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
+ 		mmc_data->ocr_mask = p->tmio_ocr_mask;
+ 		mmc_data->capabilities |= p->tmio_caps;
+ 		mmc_data->capabilities2 |= p->tmio_caps2;
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 0f992e9..b25adb4 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -928,6 +928,9 @@ int tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 	int ret;
+ 	u32 irq_mask = TMIO_MASK_CMD;
+ 
++	if (!(pdata->flags & TMIO_MMC_HAS_IDLE_WAIT))
++		pdata->write16_hook = NULL;
 +
-+The tmio-mmc driver doesn't probe its devices actively, instead its binding to
-+devices is managed by either MFD drivers or by the sh_mobile_sdhi platform
-+driver. Those drivers supply the tmio-mmc driver with platform data, that either
-+describe hardware capabilities, known to them, or are obtained by them from
-+their own platform data or from their DT information. In the latter case all
-+compulsory and any optional properties, common to all SD/MMC drivers, as
-+described in mmc.txt, can be used. Additionally the following tmio_mmc-specific
-+optional bindings can be used.
-+
-+Optional properties:
-+- toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
-+
-+When used with Renesas SDHI hardware, the following compatibility strings
-+configure various model-specific properties:
-+
-+"renesas,sh7372-sdhi":	(default) compatible with SH7372
-+"renesas,r8a7740-sdhi":	compatible with R8A7740: certain MMC/SD commands have to
-+			wait for the interface to become idle.
+ 	res_ctl = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	if (!res_ctl)
+ 		return -EINVAL;
 -- 
 1.7.2.5
 
