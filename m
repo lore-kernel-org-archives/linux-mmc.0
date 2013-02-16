@@ -1,139 +1,190 @@
-From: Kevin Liu <kliu5@marvell.com>
-Subject: [PATCH] mmc: sdhci-pxav3: add a quirk to disable pm_runtime if needed
-Date: Sat, 16 Feb 2013 13:12:27 +0800
-Message-ID: <1360991547-20448-1-git-send-email-kliu5@marvell.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog122.obsmtp.com ([74.125.149.147]:54719 "EHLO
-	na3sys009aog122.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750741Ab3BPFNU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Feb 2013 00:13:20 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v4 03/13] mmc: provide a standard MMC device-tree binding
+ parser centrally
+Date: Sat, 16 Feb 2013 15:05:26 +0900
+Message-ID: <20130216060526.GA20785@verge.net.au>
+References: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
+ <1360941242-18153-4-git-send-email-g.liakhovetski@gmx.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1360941242-18153-4-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Markus Pargmann <mpa@pengutronix.de>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alexander Stein <alexander.stein@systec-electronic.com>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>
-Cc: Nicolas Pitre <nico@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>, Kevin Liu <kliu5@marvell.com>
 
-For some sdio cards, clock need to alwasys on during working.
-So pm_runtime need to be disabled for this case.
+On Fri, Feb 15, 2013 at 04:13:52PM +0100, Guennadi Liakhovetski wrote:
+> MMC defines a number of standard DT bindings. Having each driver parse
+> them individually adds code redundancy and is error prone. Provide a
+> standard function to unify the parsing. After all drivers are converted
+> to using it instead of their own parsers, this function can be integrated
+> into mmc_alloc_host().
+> 
+> Cc: Markus Pargmann <mpa@pengutronix.de>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
+> 
+> v4: make the bus-width property optional to match a recent change to 
+> mmc.txt, use of_property_read_bool() to obtain a boolean value of a DT 
+> property, add comments.
+> 
+>  drivers/mmc/core/host.c  |  108 ++++++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/mmc/host.h |    1 +
+>  2 files changed, 109 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index ee2e16b..daa2ed1 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -15,6 +15,8 @@
+>  #include <linux/device.h>
+>  #include <linux/err.h>
+>  #include <linux/idr.h>
+> +#include <linux/of.h>
+> +#include <linux/of_gpio.h>
+>  #include <linux/pagemap.h>
+>  #include <linux/export.h>
+>  #include <linux/leds.h>
+> @@ -23,6 +25,7 @@
+>  
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/card.h>
+> +#include <linux/mmc/slot-gpio.h>
+>  
+>  #include "core.h"
+>  #include "host.h"
+> @@ -295,6 +298,111 @@ static inline void mmc_host_clk_sysfs_init(struct mmc_host *host)
+>  #endif
+>  
+>  /**
+> + *	mmc_of_parse() - parse host's device-tree node
+> + *	@host: host, whose node should be parsed.
+> + *
+> + * To keep the rest of the MMC subsystem unaware of the fact, whether DT has
+> + * been used to to instantiate and configure this host instance or not, we
+> + * parse the properties and set respective generic mmc-host flags and
+> + * parameters.
+> + */
+> +void mmc_of_parse(struct mmc_host *host)
+> +{
+> +	struct device_node *np;
+> +	u32 bus_width;
+> +	bool explicit_inv_wp, gpio_inv_wp = false;
+> +	enum of_gpio_flags flags;
+> +	int len, ret, gpio;
+> +
+> +	if (!host->parent || !host->parent->of_node)
+> +		return;
+> +
+> +	np = host->parent->of_node;
+> +
+> +	/* "bus-width" is translated to MMC_CAP_*_BIT_DATA flags */
+> +	if (of_property_read_u32_array(np, "bus-width", &bus_width, 1) < 0)
+> +		dev_dbg(host->parent,
+> +			"\"bus-width\" property is missing, assuming 1 bit.\n");
+> +
+> +	switch (bus_width) {
 
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
----
- drivers/mmc/host/sdhci-pxav3.c |   58 ++++++++++++++++++++++++++--------------
- include/linux/mmc/sdhci.h      |    1 +
- 2 files changed, 39 insertions(+), 20 deletions(-)
+kbuild tells me that gcc thinks that bus_width is used without being
+initialised here. Assuming that of_property_read_u32_array always
+initialises bus_width if it returns zero then perhaps it would be worth
+considering using uninitialized_var().
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index a0cdbc5..24fc327 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -300,18 +300,23 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 
- 	sdhci_get_of_property(pdev);
- 
--	pm_runtime_set_active(&pdev->dev);
--	pm_runtime_enable(&pdev->dev);
--	pm_runtime_set_autosuspend_delay(&pdev->dev, PXAV3_RPM_DELAY_MS);
--	pm_runtime_use_autosuspend(&pdev->dev);
--	pm_suspend_ignore_children(&pdev->dev, 1);
--	pm_runtime_get_noresume(&pdev->dev);
-+	if (!(host->quirks2 & SDHCI_QUIRK2_PM_RUNTIME_BROKEN)) {
-+		pm_runtime_set_active(&pdev->dev);
-+		pm_runtime_enable(&pdev->dev);
-+		pm_runtime_set_autosuspend_delay(&pdev->dev,
-+			PXAV3_RPM_DELAY_MS);
-+		pm_runtime_use_autosuspend(&pdev->dev);
-+		pm_suspend_ignore_children(&pdev->dev, 1);
-+		pm_runtime_get_noresume(&pdev->dev);
-+	}
- 
- 	ret = sdhci_add_host(host);
- 	if (ret) {
- 		dev_err(&pdev->dev, "failed to add host\n");
--		pm_runtime_forbid(&pdev->dev);
--		pm_runtime_disable(&pdev->dev);
-+		if (!(host->quirks2 & SDHCI_QUIRK2_PM_RUNTIME_BROKEN)) {
-+			pm_runtime_forbid(&pdev->dev);
-+			pm_runtime_disable(&pdev->dev);
-+		}
- 		goto err_add_host;
- 	}
- 
-@@ -324,7 +329,8 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 		device_init_wakeup(&pdev->dev, 0);
- 	}
- 
--	pm_runtime_put_autosuspend(&pdev->dev);
-+	if (!(host->quirks2 & SDHCI_QUIRK2_PM_RUNTIME_BROKEN))
-+		pm_runtime_put_autosuspend(&pdev->dev);
- 
- 	return 0;
- 
-@@ -344,9 +350,13 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_pxa *pxa = pltfm_host->priv;
- 
--	pm_runtime_get_sync(&pdev->dev);
--	sdhci_remove_host(host, 1);
--	pm_runtime_disable(&pdev->dev);
-+	if (!(host->quirks2 & SDHCI_QUIRK2_PM_RUNTIME_BROKEN)) {
-+		pm_runtime_get_sync(&pdev->dev);
-+		sdhci_remove_host(host, 1);
-+		pm_runtime_disable(&pdev->dev);
-+	} else {
-+		sdhci_remove_host(host, 1);
-+	}
- 
- 	clk_disable_unprepare(pltfm_host->clk);
- 	clk_put(pltfm_host->clk);
-@@ -365,10 +375,14 @@ static int sdhci_pxav3_suspend(struct device *dev)
- 	int ret;
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 
--	pm_runtime_get_sync(dev);
--	ret = sdhci_suspend_host(host);
--	pm_runtime_mark_last_busy(dev);
--	pm_runtime_put_autosuspend(dev);
-+	if (!(host->quirks2 & SDHCI_QUIRK2_PM_RUNTIME_BROKEN)) {
-+		pm_runtime_get_sync(dev);
-+		ret = sdhci_suspend_host(host);
-+		pm_runtime_mark_last_busy(dev);
-+		pm_runtime_put_autosuspend(dev);
-+	} else {
-+		ret = sdhci_suspend_host(host);
-+	}
- 
- 	return ret;
- }
-@@ -378,10 +392,14 @@ static int sdhci_pxav3_resume(struct device *dev)
- 	int ret;
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 
--	pm_runtime_get_sync(dev);
--	ret = sdhci_resume_host(host);
--	pm_runtime_mark_last_busy(dev);
--	pm_runtime_put_autosuspend(dev);
-+	if (!(host->quirks2 & SDHCI_QUIRK2_PM_RUNTIME_BROKEN)) {
-+		pm_runtime_get_sync(dev);
-+		ret = sdhci_resume_host(host);
-+		pm_runtime_mark_last_busy(dev);
-+		pm_runtime_put_autosuspend(dev);
-+	} else {
-+		ret = sdhci_resume_host(host);
-+	}
- 
- 	return ret;
- }
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index b838ffc..3fd6c8c 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -95,6 +95,7 @@ struct sdhci_host {
- /* The system physically doesn't support 1.8v, even if the host does */
- #define SDHCI_QUIRK2_NO_1_8_V				(1<<2)
- #define SDHCI_QUIRK2_PRESET_VALUE_BROKEN		(1<<3)
-+#define SDHCI_QUIRK2_PM_RUNTIME_BROKEN			(1<<4)
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
--- 
-1.7.9.5
-
+> +	case 8:
+> +		host->caps |= MMC_CAP_8_BIT_DATA;
+> +		/* Hosts, capable of 8-bit transfers can also do 4 bits */
+> +	case 4:
+> +		host->caps |= MMC_CAP_4_BIT_DATA;
+> +		break;
+> +	case 1:
+> +		break;
+> +	default:
+> +		dev_err(host->parent,
+> +			"Invalid \"bus-width\" value %ud!\n", bus_width);
+> +	}
+> +
+> +	/* f_max is obtained from the optional "max-frequency" property */
+> +	of_property_read_u32_array(np, "max-frequency", &host->f_max, 1);
+> +
+> +	/*
+> +	 * Configure CD and WP pins. They are both by default active low to
+> +	 * match the SDHCI spec. If GPIOs are provided for CD and / or WP, the
+> +	 * mmc-gpio helpers are used to attach, configure and use them. If
+> +	 * polarity inversion is specified in DT, one of MMC_CAP2_CD_ACTIVE_HIGH
+> +	 * and MMC_CAP2_RO_ACTIVE_HIGH capability-2 flags is set. If the
+> +	 * "broken-cd" property is provided, the MMC_CAP_NEEDS_POLL capability
+> +	 * is set. If the "non-removable" property is found, the
+> +	 * MMC_CAP_NONREMOVABLE capability is set and no card-detection
+> +	 * configuration is performed.
+> +	 */
+> +
+> +	/* Parse Card Detection */
+> +	if (of_find_property(np, "non-removable", &len)) {
+> +		host->caps |= MMC_CAP_NONREMOVABLE;
+> +	} else {
+> +		bool explicit_inv_cd, gpio_inv_cd = false;
+> +
+> +		explicit_inv_cd = of_property_read_bool(np, "cd-inverted");
+> +
+> +		if (of_find_property(np, "broken-cd", &len))
+> +			host->caps |= MMC_CAP_NEEDS_POLL;
+> +
+> +		gpio = of_get_named_gpio_flags(np, "cd-gpios", 0, &flags);
+> +		if (gpio_is_valid(gpio)) {
+> +			if (!(flags & OF_GPIO_ACTIVE_LOW))
+> +				gpio_inv_cd = true;
+> +
+> +			ret = mmc_gpio_request_cd(host, gpio);
+> +			if (ret < 0)
+> +				dev_err(host->parent,
+> +					"Failed to request CD GPIO #%d: %d!\n",
+> +					gpio, ret);
+> +			else
+> +				dev_info(host->parent, "Got CD GPIO #%d.\n",
+> +					 gpio);
+> +		}
+> +
+> +		if (explicit_inv_cd ^ gpio_inv_cd)
+> +			host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
+> +	}
+> +
+> +	/* Parse Write Protection */
+> +	explicit_inv_wp = of_property_read_bool(np, "wp-inverted");
+> +
+> +	gpio = of_get_named_gpio_flags(np, "wp-gpios", 0, &flags);
+> +	if (gpio_is_valid(gpio)) {
+> +		if (!(flags & OF_GPIO_ACTIVE_LOW))
+> +			gpio_inv_wp = true;
+> +
+> +		ret = mmc_gpio_request_ro(host, gpio);
+> +		if (ret < 0)
+> +			dev_err(host->parent,
+> +				"Failed to request WP GPIO: %d!\n", ret);
+> +	}
+> +	if (explicit_inv_wp ^ gpio_inv_wp)
+> +		host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+> +}
+> +
+> +EXPORT_SYMBOL(mmc_of_parse);
+> +
+> +/**
+>   *	mmc_alloc_host - initialise the per-host structure.
+>   *	@extra: sizeof private data structure
+>   *	@dev: pointer to host device model structure
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 61a10c1..13c0c8d 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -345,6 +345,7 @@ extern struct mmc_host *mmc_alloc_host(int extra, struct device *);
+>  extern int mmc_add_host(struct mmc_host *);
+>  extern void mmc_remove_host(struct mmc_host *);
+>  extern void mmc_free_host(struct mmc_host *);
+> +void mmc_of_parse(struct mmc_host *host);
+>  
+>  static inline void *mmc_priv(struct mmc_host *host)
+>  {
+> -- 
+> 1.7.2.5
+> 
