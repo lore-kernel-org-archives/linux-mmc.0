@@ -1,42 +1,56 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: exynos: Add compatibility for exynos4412 SoC
-Date: Mon, 18 Feb 2013 14:39:06 +0530
-Message-ID: <CAK9yfHxNfB9+3BuWKFiQX-57iWH5N4siVHFnpd2J7Tx-GTqSBQ@mail.gmail.com>
-References: <1360238236-17694-1-git-send-email-sachin.kamat@linaro.org>
-	<CAK9yfHynG-avvyNaiXpDcKmDoDYY+6jg4knL6n6aM87bfq0K_w@mail.gmail.com>
-	<CAGOxZ52iXBzv9capeJoe0-_GXEABOmuTOUzSWXX2vV174n7C3g@mail.gmail.com>
-	<511DC675.4050004@samsung.com>
-	<CAK9yfHy2MJNOSB73rzBFbUSUu0Sd-j=7rsre1Pkdz8FmFj7K2g@mail.gmail.com>
-	<CADoNuNfnU4THePNN7iuZprsL7NdP-iXQc9bzf==fXHAixqLABg@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 1/2] mmc: dw_mmc: Make dw_mci_exynos_probe static
+Date: Mon, 18 Feb 2013 18:41:34 +0900
+Message-ID: <5121F74E.5050903@samsung.com>
+References: <1361177589-23953-1-git-send-email-sachin.kamat@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f176.google.com ([209.85.214.176]:33517 "EHLO
-	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751885Ab3BRJJH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Feb 2013 04:09:07 -0500
-Received: by mail-ob0-f176.google.com with SMTP id v19so5358341obq.21
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Feb 2013 01:09:06 -0800 (PST)
-In-Reply-To: <CADoNuNfnU4THePNN7iuZprsL7NdP-iXQc9bzf==fXHAixqLABg@mail.gmail.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:13864 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752146Ab3BRJlq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Feb 2013 04:41:46 -0500
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MIE009B7TL5TKD0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 18 Feb 2013 18:41:29 +0900 (KST)
+Received: from [10.90.51.55] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0MIE00G92TL5BV20@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 18 Feb 2013 18:41:29 +0900 (KST)
+In-reply-to: <1361177589-23953-1-git-send-email-sachin.kamat@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dongjin Kim <tobetter@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Alim Akhtar <alim.akhtar@gmail.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, tgih.jun@samsung.com, patches@linaro.org, Thomas Abraham <thomas.abraham@linaro.org>
+To: Sachin Kamat <sachin.kamat@linaro.org>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, jh80.chung@samsung.com, patches@linaro.org, tgih.jun@samsung.com
 
-Hi Dongjin,
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
+On 02/18/2013 05:53 PM, Sachin Kamat wrote:
+> Silences the following sparse warning:
+> drivers/mmc/host/dw_mmc-exynos.c:218:5: warning:
+> symbol 'dw_mci_exynos_probe' was not declared. Should it be static?
+> 
+> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+> ---
+>  drivers/mmc/host/dw_mmc-exynos.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 72fd0f2..5a09c77 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -215,7 +215,7 @@ static const struct of_device_id dw_mci_exynos_match[] = {
+>  };
+>  MODULE_DEVICE_TABLE(of, dw_mci_exynos_match);
+>  
+> -int dw_mci_exynos_probe(struct platform_device *pdev)
+> +static int dw_mci_exynos_probe(struct platform_device *pdev)
+>  {
+>  	const struct dw_mci_drv_data *drv_data;
+>  	const struct of_device_id *match;
+> 
 
-On 18 February 2013 14:34, Dongjin Kim <tobetter@gmail.com> wrote:
-> Hello Sachin,
->
-> I have one more patch which use '&exynos_drv_data' for its drv_data,
-> but not submitted yet.
-> I will send it soon anyway, anything else do you like to point out on
-> the patch? :)
-
-Please verify if the capabilities of Exynos 4412 and 5 are same? Other
-comments are already provided by Jaehoon and Alim.
-
--- 
-With warm regards,
-Sachin
