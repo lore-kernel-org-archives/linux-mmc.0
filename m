@@ -1,69 +1,61 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 1/2] mmc: dw-mmc: check the host->bus_hz before calling
-Date: Mon, 18 Feb 2013 19:12:03 +0900
-Message-ID: <5121FE73.5010206@samsung.com>
+From: Daniel Mack <zonque@gmail.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: Enable SDIO IRQ using a GPIO in idle
+ mode.
+Date: Mon, 18 Feb 2013 11:26:38 +0100
+Message-ID: <512201DE.1070001@gmail.com>
+References: <20121220220444.GA350@blumentopf> <1356041532-919-1-git-send-email-andreas.fenkart@streamunlimited.com> <20130110202203.GD14149@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:18921 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754751Ab3BRKMA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Feb 2013 05:12:00 -0500
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MIE00DRCUYU7101@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 18 Feb 2013 19:11:58 +0900 (KST)
-Received: from [10.90.51.55] by mmp2.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0MIE00FJQUZYFIE0@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 18 Feb 2013 19:11:58 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20130110202203.GD14149@atomide.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: Andreas Fenkart <andreas.fenkart@streamunlimited.com>, cjb@laptop.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, santosh.shilimkar@ti.com
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Check whether host->bus_hz is zero or not. before calling drv_data->setup_clock.
+On 10.01.2013 21:22, Tony Lindgren wrote:
+> * Andreas Fenkart <andreas.fenkart@streamunlimited.com> [121220 14:15]:
+>> Without functional clock the omap_hsmmc module can't forward
+>> SDIO IRQs to the system. This patch reconfigures dat1 line
+>> as a gpio while the fclk is off. And uses SDIO IRQ detection of
+>> the module, while fclk is present.
+> 
+> Looks pretty good to me, however I could not figure out what
+> to apply this on for testing. It fails to apply at least against
+> current linux next, can you please update against that?
+>  
+>> +static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
+>> +{
+>> +	struct omap_hsmmc_host *host = mmc_priv(mmc);
+>> +	u32 irq_mask;
+>> +	unsigned long flags;
+>> +
+>> +	spin_lock_irqsave(&host->irq_lock, flags);
+>> +
+>> +	host->sdio_irq_en = (enable != 0) ? true : false;
+>> +
+>> +	if (host->active_pinmux) {
+>> +		irq_mask = OMAP_HSMMC_READ(host->base, ISE);
+>> +		if (enable)
+>> +			irq_mask |= CIRQ_ENABLE;
+>> +		else
+>> +			irq_mask &= ~CIRQ_ENABLE;
+>> +		OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
+>> +
+>> +		if (!host->req_in_progress)
+>> +			OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
+>> +
+>> +#if 0
+>> +		OMAP_HSMMC_READ(host->base, IE); /* flush posted write */
+>> +#endif
+> 
+> Maybe just replace #if 0 with just a comment in case it turns out to be
+> needed for some cases?
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |   14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+Is there any update on this series? Andreas, did you do more tests?
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 60063cc..c59078c 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2203,6 +2203,13 @@ int dw_mci_probe(struct dw_mci *host)
- 	else
- 		host->bus_hz = clk_get_rate(host->ciu_clk);
- 
-+	if (!host->bus_hz) {
-+		dev_err(host->dev,
-+			"Platform data must supply bus speed\n");
-+		ret = -ENODEV;
-+		goto err_clk_ciu;
-+	}
-+
- 	if (drv_data && drv_data->setup_clock) {
- 		ret = drv_data->setup_clock(host);
- 		if (ret) {
-@@ -2212,13 +2219,6 @@ int dw_mci_probe(struct dw_mci *host)
- 		}
- 	}
- 
--	if (!host->bus_hz) {
--		dev_err(host->dev,
--			"Platform data must supply bus speed\n");
--		ret = -ENODEV;
--		goto err_clk_ciu;
--	}
--
- 	host->quirks = host->pdata->quirks;
- 
- 	spin_lock_init(&host->lock);
--- 
-1.7.9.5
+
+Thanks and best regards,
+Daniel
+
