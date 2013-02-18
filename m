@@ -1,42 +1,54 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: [PATCH 2/2] mmc: dw_mmc: exynos: Remove unnecessary use of of_match_ptr()
-Date: Mon, 18 Feb 2013 14:23:09 +0530
-Message-ID: <1361177589-23953-2-git-send-email-sachin.kamat@linaro.org>
-References: <1361177589-23953-1-git-send-email-sachin.kamat@linaro.org>
+From: Dongjin Kim <tobetter@gmail.com>
+Subject: Re: [PATCH 1/2] mmc: dw_mmc: exynos: Add compatibility for exynos4412 SoC
+Date: Mon, 18 Feb 2013 18:04:44 +0900
+Message-ID: <CADoNuNfnU4THePNN7iuZprsL7NdP-iXQc9bzf==fXHAixqLABg@mail.gmail.com>
+References: <1360238236-17694-1-git-send-email-sachin.kamat@linaro.org>
+	<CAK9yfHynG-avvyNaiXpDcKmDoDYY+6jg4knL6n6aM87bfq0K_w@mail.gmail.com>
+	<CAGOxZ52iXBzv9capeJoe0-_GXEABOmuTOUzSWXX2vV174n7C3g@mail.gmail.com>
+	<511DC675.4050004@samsung.com>
+	<CAK9yfHy2MJNOSB73rzBFbUSUu0Sd-j=7rsre1Pkdz8FmFj7K2g@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-da0-f43.google.com ([209.85.210.43]:54031 "EHLO
-	mail-da0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751690Ab3BRJDH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Feb 2013 04:03:07 -0500
-Received: by mail-da0-f43.google.com with SMTP id u36so2423454dak.16
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Feb 2013 01:03:07 -0800 (PST)
-In-Reply-To: <1361177589-23953-1-git-send-email-sachin.kamat@linaro.org>
+Received: from mail-ob0-f175.google.com ([209.85.214.175]:43069 "EHLO
+	mail-ob0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751870Ab3BRJEp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Feb 2013 04:04:45 -0500
+Received: by mail-ob0-f175.google.com with SMTP id uz6so5307105obc.20
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Feb 2013 01:04:44 -0800 (PST)
+In-Reply-To: <CAK9yfHy2MJNOSB73rzBFbUSUu0Sd-j=7rsre1Pkdz8FmFj7K2g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, jh80.chung@samsung.com, sachin.kamat@linaro.org, patches@linaro.org, tgih.jun@samsung.com
+To: Sachin Kamat <sachin.kamat@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Alim Akhtar <alim.akhtar@gmail.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, tgih.jun@samsung.com, patches@linaro.org, Thomas Abraham <thomas.abraham@linaro.org>
 
-'dw_mci_exynos_match' is always compiled in. Hence of_match_ptr
-is not required.
+Hello Sachin,
 
-Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
----
- drivers/mmc/host/dw_mmc-exynos.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+I have one more patch which use '&exynos_drv_data' for its drv_data,
+but not submitted yet.
+I will send it soon anyway, anything else do you like to point out on
+the patch? :)
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 5a09c77..517a603 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -230,7 +230,7 @@ static struct platform_driver dw_mci_exynos_pltfm_driver = {
- 	.remove		= __exit_p(dw_mci_pltfm_remove),
- 	.driver		= {
- 		.name		= "dwmmc_exynos",
--		.of_match_table	= of_match_ptr(dw_mci_exynos_match),
-+		.of_match_table	= dw_mci_exynos_match,
- 		.pm		= &dw_mci_pltfm_pmops,
- 	},
- };
--- 
-1.7.4.1
+Regards,
+Dongjin.
 
+On Mon, Feb 18, 2013 at 5:46 PM, Sachin Kamat <sachin.kamat@linaro.org> wrote:
+>>>> On 07/02/2013, Sachin Kamat <sachin.kamat@linaro.org> wrote:
+>>>>> Added compatibility string for Exynos4412 SoC.
+>>>>>
+>> If using same drv_data, i would prefer to use "&exynos_drv_data" instead of &exynos5250_drv_data.
+>>
+>> This patch could be separated into two patches. like this "compatibility for exynos4412 SOC" and "rename the drv_data"
+>
+> Came across this patch from Dongjin Kim [1] who has already attempetd
+> the above suggestion. Hence dropping my patch.
+>
+> Dongjin,
+> Are you still working on this patch [1] as this has not yet been
+> accepted or merged?
+>
+> [1] http://lkml.indiana.edu/hypermail/linux/kernel/1301.3/00450.html
+>
+> --
+> With warm regards,
+> Sachin
