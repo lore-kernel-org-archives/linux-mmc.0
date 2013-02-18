@@ -1,70 +1,30 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v4 13/13] mmc: tmio: add barriers to IO operations
-Date: Mon, 18 Feb 2013 15:05:57 +0000
-Message-ID: <201302181505.58118.arnd@arndb.de>
-References: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de> <1360941242-18153-14-git-send-email-g.liakhovetski@gmx.de>
+From: Fabio Estevam <fabio.estevam@freescale.com>
+Subject: Re: FW: [PATCH v2] mmc: host: sdhci: Fix parameter of sdhci_do_start_signal_voltage_switch()
+Date: Mon, 18 Feb 2013 12:50:00 -0300
+Message-ID: <51224DA8.7020907@freescale.com>
+References: <25B60CDC2F704E4E9D88FFD52780CB4C0BDE525A28@SC-VEXCH1.marvell.com> <CADz5_gLDcVNdG+hisNDinKXmjJsNn=bnqdL47C_t4BpDfDDZsg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1360941242-18153-14-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Russell King - ARM Linux <linux@arm.linux.org.uk>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:54781
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753849Ab3BRPcr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Feb 2013 10:32:47 -0500
+In-Reply-To: <CADz5_gLDcVNdG+hisNDinKXmjJsNn=bnqdL47C_t4BpDfDDZsg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Fabio Estevam <festevam@gmail.com>
 
-On Friday 15 February 2013, Guennadi Liakhovetski wrote:
-> Without barriers SDIO operations fail with runtime PM enabled.
+Kevin Liu wrote:
 
-I don't understand how the changeset comment relates to the patch.
+> Thanks a lot for finding this and quick fix!
+> My original purpose is to change the argument type from ios to
+> signal_voltage. But the code change for mmc core was not integrated
+> into Johan's final patchset ([PATCH v6 5/5] mmc: core: Fixup signal
+> voltage switch).
+> So I still prefer your first version. I submit below patch for this just now:
 
-> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-> index d857f5c..a10ebd0 100644
-> --- a/drivers/mmc/host/tmio_mmc.h
-> +++ b/drivers/mmc/host/tmio_mmc.h
-> @@ -159,19 +159,20 @@ int tmio_mmc_host_runtime_resume(struct device *dev);
->  
->  static inline u16 sd_ctrl_read16(struct tmio_mmc_host *host, int addr)
->  {
-> -	return readw(host->ctl + (addr << host->bus_shift));
-> +	return ioread16(host->ctl + (addr << host->bus_shift));
->  }
->  
+Chris has already applied my patch, so if you need to make further changes, just send incremental patches on top of it.
 
-As far as I know, all architectures are required to have the same barrier
-semantics on readw and ioread16. The only difference between the two is
-that ioread16 must be able top operate on an __iomem token returned by
-ioport_map() or pci_iomap, which readw does not have to, but does on ARM.
-
->  static inline void sd_ctrl_read16_rep(struct tmio_mmc_host *host, int addr,
->  		u16 *buf, int count)
->  {
-> -	readsw(host->ctl + (addr << host->bus_shift), buf, count);
-> +	wmb();
-> +	ioread16_rep(host->ctl + (addr << host->bus_shift), buf, count);
->  }
-
-Same thing here: both readsw and ioread16_rep are supposed to do the same
-thing, and I would assume that they should also include that barrier.
-For some reason I don't understand, they do not have the barrier on
-ARM at the moment, but I cannot say whether that is intentional or not.
-
-Maybe Russell can comment on this.
-
-Also, should the barrier not be /after/ the MMIO read, rather than before it?
-Typically the barrier should ensure that any read from memory after an
-MMIO read reflects the memory contents after any DMA is complete that
-the MMIO read has already claimed to be done.
-
->  static inline void sd_ctrl_write16_rep(struct tmio_mmc_host *host, int addr,
->  		u16 *buf, int count)
->  {
-> -	writesw(host->ctl + (addr << host->bus_shift), buf, count);
-> +	iowrite16_rep(host->ctl + (addr << host->bus_shift), buf, count);
-> +	wmb();
->  }
-
-Similarly here: why do you have the wmb after the iowrite rather than before it?
-
-	Arnd
