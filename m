@@ -1,42 +1,107 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: exynos: Add compatibility for exynos4412 SoC
-Date: Mon, 18 Feb 2013 14:16:03 +0530
-Message-ID: <CAK9yfHy2MJNOSB73rzBFbUSUu0Sd-j=7rsre1Pkdz8FmFj7K2g@mail.gmail.com>
-References: <1360238236-17694-1-git-send-email-sachin.kamat@linaro.org>
-	<CAK9yfHynG-avvyNaiXpDcKmDoDYY+6jg4knL6n6aM87bfq0K_w@mail.gmail.com>
-	<CAGOxZ52iXBzv9capeJoe0-_GXEABOmuTOUzSWXX2vV174n7C3g@mail.gmail.com>
-	<511DC675.4050004@samsung.com>
+From: Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>
+Subject: Re: [PATCH v4 12/13] mmc: add DT bindings for more MMC capability
+ flags
+Date: Mon, 18 Feb 2013 09:52:43 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1302180950310.4526@axis700.grange>
+References: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
+ <1360941242-18153-13-git-send-email-g.liakhovetski@gmx.de>
+ <51201D32.20006@cogentembedded.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f169.google.com ([209.85.214.169]:48247 "EHLO
-	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751885Ab3BRIqG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Feb 2013 03:46:06 -0500
-Received: by mail-ob0-f169.google.com with SMTP id ta14so5333605obb.28
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Feb 2013 00:46:04 -0800 (PST)
-In-Reply-To: <511DC675.4050004@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <51201D32.20006-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Sergei Shtylyov <sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
+Cc: linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Alim Akhtar <alim.akhtar@gmail.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, tgih.jun@samsung.com, patches@linaro.org, Thomas Abraham <thomas.abraham@linaro.org>, Dongjin Kim <tobetter@gmail.com>
 
->>> On 07/02/2013, Sachin Kamat <sachin.kamat@linaro.org> wrote:
->>>> Added compatibility string for Exynos4412 SoC.
->>>>
-> If using same drv_data, i would prefer to use "&exynos_drv_data" instead of &exynos5250_drv_data.
->
-> This patch could be separated into two patches. like this "compatibility for exynos4412 SOC" and "rename the drv_data"
+Hi Sergei
 
-Came across this patch from Dongjin Kim [1] who has already attempetd
-the above suggestion. Hence dropping my patch.
+On Sun, 17 Feb 2013, Sergei Shtylyov wrote:
 
-Dongjin,
-Are you still working on this patch [1] as this has not yet been
-accepted or merged?
+> Hello.
+> 
+> On 02/15/2013 06:14 PM, Guennadi Liakhovetski wrote:
+> 
+> > Many MMC capability flags are platform-dependent and are traditionally set
+> > in platform data. With DT often each such capability requires a special
+> > binding. Add bindings for MMC_CAP_SD_HIGHSPEED, MMC_CAP_MMC_HIGHSPEED,
+> > MMC_CAP_POWER_OFF_CARD and MMC_CAP_SDIO_IRQ capabilities. Also add code to
+> > DT parser to look up "keep-power-in-suspend" and "enable-sdio-wakeup"
+> > bindings and set MMC_PM_KEEP_POWER and MMC_PM_WAKE_SDIO_IRQ respectively,
+> > if found.
+> > 
+> > Signed-off-by: Guennadi Liakhovetski<g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>
+> > ---
+> >   Documentation/devicetree/bindings/mmc/mmc.txt |    4 ++++
+> >   drivers/mmc/core/host.c                       |   13 +++++++++++++
+> >   2 files changed, 17 insertions(+), 0 deletions(-)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt
+> > b/Documentation/devicetree/bindings/mmc/mmc.txt
+> > index 24c8552..d9ab51f 100644
+> > --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> > +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> > @@ -25,6 +25,10 @@ Optional properties:
+> >   - max-frequency: maximum operating clock frequency
+> >   - no-1-8-v: when present, denotes that 1.8v card voltage is not supported
+> > on
+> >     this system, even if the controller claims it is.
+> > +- cap-sd-highspeed: SD high-speed timing is supported
+> > +- cap-mmc-highspeed: MMC high-speed timing is supported
+> > +- cap-power-off-card: powering off the card is safe
+> > +- cap-sdio-irq: enable SDIO IRQ signalling on this interface
+> > 
+> >   *NOTE* on CD and WP polarity. To use common for all SD/MMC host
+> > controllers line
+> >   polarity properties, we have to fix the meaning of the "normal" and
+> > "inverted"
+> > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> > index daa2ed1..1365466 100644
+> > --- a/drivers/mmc/core/host.c
+> > +++ b/drivers/mmc/core/host.c
+> > @@ -398,6 +398,19 @@ void mmc_of_parse(struct mmc_host *host)
+> >   	}
+> >   	if (explicit_inv_wp ^ gpio_inv_wp)
+> >   		host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+> > +
+> > +	if (of_find_property(np, "cap-sd-highspeed",&len))
+> > +		host->caps |= MMC_CAP_SD_HIGHSPEED;
+> > +	if (of_find_property(np, "cap-mmc-highspeed",&len))
+> > +		host->caps |= MMC_CAP_MMC_HIGHSPEED;
+> > +	if (of_find_property(np, "cap-power-off-card",&len))
+> > +		host->caps |= MMC_CAP_POWER_OFF_CARD;
+> > +	if (of_find_property(np, "cap-sdio-irq",&len))
+> > +		host->caps |= MMC_CAP_SDIO_IRQ;
+> > +	if (of_find_property(np, "keep-power-in-suspend",&len))
+> > +		host->pm_caps |= MMC_PM_KEEP_POWER;
+> > +	if (of_find_property(np, "enable-sdio-wakeup",&len))
+> > +		host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+> >    
+> 
+>    Why are you not using of_property_read_bool() instead?
 
-[1] http://lkml.indiana.edu/hypermail/linux/kernel/1301.3/00450.html
+Because it's the same. Where I need a boolean return value I so use 
+of_property_read_bool(), e.g.
 
--- 
-With warm regards,
-Sachin
+	explicit_inv_cd = of_property_read_bool(np, "cd-inverted");
+
+But where I just need to check, whether a property is present, using 
+of_find_property() isn't any worse, IMHO.
+
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
