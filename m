@@ -1,103 +1,73 @@
-From: Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>
-Subject: Re: [PATCH v4 12/13] mmc: add DT bindings for more MMC capability
- flags
-Date: Mon, 18 Feb 2013 09:52:43 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1302180950310.4526@axis700.grange>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH v5 03/13] mmc: provide a standard MMC device-tree binding
+ parser centrally
+Date: Mon, 18 Feb 2013 09:54:06 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1302180953140.4526@axis700.grange>
 References: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
- <1360941242-18153-13-git-send-email-g.liakhovetski@gmx.de>
- <51201D32.20006@cogentembedded.com>
+ <1360941242-18153-4-git-send-email-g.liakhovetski@gmx.de>
+ <Pine.LNX.4.64.1302161613450.20044@axis700.grange> <20130216165825.GF1906@pengutronix.de>
+ <20130217075216.GA3871@verge.net.au> <20130217075805.GB3871@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <51201D32.20006-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Sergei Shtylyov <sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
-Cc: linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.9]:65194 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756705Ab3BRIy0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Feb 2013 03:54:26 -0500
+In-Reply-To: <20130217075805.GB3871@verge.net.au>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Magnus Damm <magnus.damm@gmail.com>, Markus Pargmann <mpa@pengutronix.de>
 
-Hi Sergei
+On Sun, 17 Feb 2013, Simon Horman wrote:
 
-On Sun, 17 Feb 2013, Sergei Shtylyov wrote:
-
-> Hello.
-> 
-> On 02/15/2013 06:14 PM, Guennadi Liakhovetski wrote:
-> 
-> > Many MMC capability flags are platform-dependent and are traditionally set
-> > in platform data. With DT often each such capability requires a special
-> > binding. Add bindings for MMC_CAP_SD_HIGHSPEED, MMC_CAP_MMC_HIGHSPEED,
-> > MMC_CAP_POWER_OFF_CARD and MMC_CAP_SDIO_IRQ capabilities. Also add code to
-> > DT parser to look up "keep-power-in-suspend" and "enable-sdio-wakeup"
-> > bindings and set MMC_PM_KEEP_POWER and MMC_PM_WAKE_SDIO_IRQ respectively,
-> > if found.
+> On Sun, Feb 17, 2013 at 04:52:16PM +0900, Simon Horman wrote:
+> > On Sat, Feb 16, 2013 at 05:58:25PM +0100, Sascha Hauer wrote:
+> > > Hi Guennadi,
+> > > 
+> > > On Sat, Feb 16, 2013 at 04:21:16PM +0100, Guennadi Liakhovetski wrote:
+> > > > MMC defines a number of standard DT bindings. Having each driver parse
+> > > > them individually adds code redundancy and is error prone. Provide a
+> > > > standard function to unify the parsing. After all drivers are converted
+> > > > to using it instead of their own parsers, this function can be integrated
+> > > > into mmc_alloc_host().
+> > > > 
+> > > > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> > > > ---
+> > > > 
+> > > > v5:
+> > > > 
+> > > > 1. fix an uninitialised variable warning. Note, I don't actually know, 
+> > > > whether this will fix the error, reported by the kbuild test robot. None 
+> > > > of my compilers reports an error there, at most, I've got a warning with 
+> > > > one of them, and, surprisingly, it is gone after this change. 
+> > > > Surprisingly, because I only add the bus_width initialisation in the error 
+> > > > case - exactly as it actually has to be done. In the success case it is 
+> > > > assigned set by the function. But the compiler cannot know that!
+> > > 
+> > > Maybe the build robot builds with devicetree disabled? In this case
+> > > of_property_read_u32_array expands to a static inline function and the
+> > > compiler indeed knows that &bus_width is unitialized. It also knows that
+> > > this function always returns an error, so what you did below should
+> > > silence the compiler.
 > > 
-> > Signed-off-by: Guennadi Liakhovetski<g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>
-> > ---
-> >   Documentation/devicetree/bindings/mmc/mmc.txt |    4 ++++
-> >   drivers/mmc/core/host.c                       |   13 +++++++++++++
-> >   2 files changed, 17 insertions(+), 0 deletions(-)
+> > It seems so. The configuration that flagged the error was atngw100_defconfig.
 > > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt
-> > b/Documentation/devicetree/bindings/mmc/mmc.txt
-> > index 24c8552..d9ab51f 100644
-> > --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> > +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-> > @@ -25,6 +25,10 @@ Optional properties:
-> >   - max-frequency: maximum operating clock frequency
-> >   - no-1-8-v: when present, denotes that 1.8v card voltage is not supported
-> > on
-> >     this system, even if the controller claims it is.
-> > +- cap-sd-highspeed: SD high-speed timing is supported
-> > +- cap-mmc-highspeed: MMC high-speed timing is supported
-> > +- cap-power-off-card: powering off the card is safe
-> > +- cap-sdio-irq: enable SDIO IRQ signalling on this interface
-> > 
-> >   *NOTE* on CD and WP polarity. To use common for all SD/MMC host
-> > controllers line
-> >   polarity properties, we have to fix the meaning of the "normal" and
-> > "inverted"
-> > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> > index daa2ed1..1365466 100644
-> > --- a/drivers/mmc/core/host.c
-> > +++ b/drivers/mmc/core/host.c
-> > @@ -398,6 +398,19 @@ void mmc_of_parse(struct mmc_host *host)
-> >   	}
-> >   	if (explicit_inv_wp ^ gpio_inv_wp)
-> >   		host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
-> > +
-> > +	if (of_find_property(np, "cap-sd-highspeed",&len))
-> > +		host->caps |= MMC_CAP_SD_HIGHSPEED;
-> > +	if (of_find_property(np, "cap-mmc-highspeed",&len))
-> > +		host->caps |= MMC_CAP_MMC_HIGHSPEED;
-> > +	if (of_find_property(np, "cap-power-off-card",&len))
-> > +		host->caps |= MMC_CAP_POWER_OFF_CARD;
-> > +	if (of_find_property(np, "cap-sdio-irq",&len))
-> > +		host->caps |= MMC_CAP_SDIO_IRQ;
-> > +	if (of_find_property(np, "keep-power-in-suspend",&len))
-> > +		host->pm_caps |= MMC_PM_KEEP_POWER;
-> > +	if (of_find_property(np, "enable-sdio-wakeup",&len))
-> > +		host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
-> >    
+> > ARCH=avr32 make atngw100_defconfig
+> > grep USE_OF .config
+> > [nothing]
 > 
->    Why are you not using of_property_read_bool() instead?
+> In that vein I managed to reproduce the warning using ap4evb_defconfig
+> and then enabled MMC. I have also verified that v5 does not produce
+> the same warning.
+> 
+> I chose this as I don't have a avr32 cross-compile environment
+> but I do have one for ARM and I know that ap4evb doesn't use DT.
+> 
+> I will update topic/mmc with v5.
 
-Because it's the same. Where I need a boolean return value I so use 
-of_property_read_bool(), e.g.
-
-	explicit_inv_cd = of_property_read_bool(np, "cd-inverted");
-
-But where I just need to check, whether a property is present, using 
-of_find_property() isn't any worse, IMHO.
+Very good, thanks! So, this way I think, v5 should be ok.
 
 Thanks
 Guennadi
