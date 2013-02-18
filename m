@@ -1,72 +1,89 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 1/2] mmc: dw_mmc: Make dw_mci_exynos_probe static
-Date: Mon, 18 Feb 2013 19:51:50 +0900
-Message-ID: <001501ce0dc5$f470bab0$dd523010$%jun@samsung.com>
-References: <1361177589-23953-1-git-send-email-sachin.kamat@linaro.org>
- <5121F74E.5050903@samsung.com>
+From: Andreas Fenkart <andreas.fenkart@streamunlimited.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: Enable SDIO IRQ using a GPIO in idle
+ mode.
+Date: Mon, 18 Feb 2013 13:42:27 +0100
+Message-ID: <20130218124227.GA24607@blumentopf>
+References: <20121220220444.GA350@blumentopf>
+ <1356041532-919-1-git-send-email-andreas.fenkart@streamunlimited.com>
+ <20130110202203.GD14149@atomide.com>
+ <512201DE.1070001@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:60836 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751086Ab3BRKvv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Feb 2013 05:51:51 -0500
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MIE00IUGWTWOLF0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 18 Feb 2013 19:51:50 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0MIE0019PWUEUJ70@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 18 Feb 2013 19:51:50 +0900 (KST)
-In-reply-to: <5121F74E.5050903@samsung.com>
-Content-language: ko
+Received: from mout.gmx.net ([212.227.17.21]:53458 "EHLO mout.gmx.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753223Ab3BRMmi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 18 Feb 2013 07:42:38 -0500
+Received: from mailout-de.gmx.net ([10.1.76.31]) by mrigmx.server.lan
+ (mrigmx001) with ESMTP (Nemesis) id 0MJ0Rb-1U9txM0A7l-002YyN for
+ <linux-mmc@vger.kernel.org>; Mon, 18 Feb 2013 13:42:37 +0100
+Content-Disposition: inline
+In-Reply-To: <512201DE.1070001@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Sachin Kamat' <sachin.kamat@linaro.org>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, patches@linaro.org
+To: Daniel Mack <zonque@gmail.com>
+Cc: Tony Lindgren <tony@atomide.com>, Andreas Fenkart <andreas.fenkart@streamunlimited.com>, cjb@laptop.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, santosh.shilimkar@ti.com
 
-Hi Sachin,
+Hi,
 
-You're right.
-'dw_mci_exynos_probe' is only used here.
-
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
-
-On Monday, February 18, 2013, Jaehoon Chung wrote:
-> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+On Mon, Feb 18, 2013 at 11:26:38AM +0100, Daniel Mack wrote:
+> On 10.01.2013 21:22, Tony Lindgren wrote:
+> > * Andreas Fenkart <andreas.fenkart@streamunlimited.com> [121220 14:15]:
+> >> Without functional clock the omap_hsmmc module can't forward
+> >> SDIO IRQs to the system. This patch reconfigures dat1 line
+> >> as a gpio while the fclk is off. And uses SDIO IRQ detection of
+> >> the module, while fclk is present.
+> > 
+> > Looks pretty good to me, however I could not figure out what
+> > to apply this on for testing. It fails to apply at least against
+> > current linux next, can you please update against that?
+> >  
+> >> +static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
+> >> +{
+> >> +	struct omap_hsmmc_host *host = mmc_priv(mmc);
+> >> +	u32 irq_mask;
+> >> +	unsigned long flags;
+> >> +
+> >> +	spin_lock_irqsave(&host->irq_lock, flags);
+> >> +
+> >> +	host->sdio_irq_en = (enable != 0) ? true : false;
+> >> +
+> >> +	if (host->active_pinmux) {
+> >> +		irq_mask = OMAP_HSMMC_READ(host->base, ISE);
+> >> +		if (enable)
+> >> +			irq_mask |= CIRQ_ENABLE;
+> >> +		else
+> >> +			irq_mask &= ~CIRQ_ENABLE;
+> >> +		OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
+> >> +
+> >> +		if (!host->req_in_progress)
+> >> +			OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
+> >> +
+> >> +#if 0
+> >> +		OMAP_HSMMC_READ(host->base, IE); /* flush posted write */
+> >> +#endif
+> > 
+> > Maybe just replace #if 0 with just a comment in case it turns out to be
+> > needed for some cases?
 > 
-> On 02/18/2013 05:53 PM, Sachin Kamat wrote:
-> > Silences the following sparse warning:
-> > drivers/mmc/host/dw_mmc-exynos.c:218:5: warning:
-> > symbol 'dw_mci_exynos_probe' was not declared. Should it be static?
-> >
-> > Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
-> > ---
-> >  drivers/mmc/host/dw_mmc-exynos.c |    2 +-
-> >  1 files changed, 1 insertions(+), 1 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> > index 72fd0f2..5a09c77 100644
-> > --- a/drivers/mmc/host/dw_mmc-exynos.c
-> > +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> > @@ -215,7 +215,7 @@ static const struct of_device_id dw_mci_exynos_match[] = {
-> >  };
-> >  MODULE_DEVICE_TABLE(of, dw_mci_exynos_match);
-> >
-> > -int dw_mci_exynos_probe(struct platform_device *pdev)
-> > +static int dw_mci_exynos_probe(struct platform_device *pdev)
-> >  {
-> >  	const struct dw_mci_drv_data *drv_data;
-> >  	const struct of_device_id *match;
-> >
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Is there any update on this series? Andreas, did you do more tests?
+
+Thanks for all the feedback so far. Yes I did more testing. After
+reducing the autosuspend delay, I found two more bugs.
+
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -138,7 +138,7 @@ static void apply_clk_hack(void)
+ #define SOFTRESET              (1 << 1)
+ #define RESETDONE              (1 << 0)
+
+-#define MMC_AUTOSUSPEND_DELAY  100
++#define MMC_AUTOSUSPEND_DELAY  1
+ #define MMC_TIMEOUT_MS         20
+
+One is already fixed[1], the other I'm still working on.
+Hope to progress this week, then need to redo the testing.
+Plan is to resubmit latest next week.
+
+Andi
 
