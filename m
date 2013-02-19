@@ -1,31 +1,35 @@
-From: Tejun Heo <tj@kernel.org>
-Subject: Re: [PATCH v9 0/2] *** adding and exposing SANITIZE capability to
- the user space via a unique IOCTL ***
-Date: Tue, 19 Feb 2013 08:17:20 -0800
-Message-ID: <20130219161720.GK17414@htj.dyndns.org>
-References: <1361290252-6004-1-git-send-email-ygardi@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-da0-f49.google.com ([209.85.210.49]:46929 "EHLO
-	mail-da0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754764Ab3BSQRZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Feb 2013 11:17:25 -0500
-Content-Disposition: inline
-In-Reply-To: <1361290252-6004-1-git-send-email-ygardi@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Yaniv Gardi <ygardi@codeaurora.org>
+Subject: [PATCH v9 0/2] *** adding and exposing SANITIZE capability to the user space via a unique IOCTL ***
+Date: Tue, 19 Feb 2013 18:22:15 +0200
+Message-ID: <1361290937-7427-1-git-send-email-ygardi@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, vgoyal@redhat.com, tj@kernel.org, linux-kernel@vger.kernel.org, jaxboe@fusionio.com, akpm@linux-foundation.org
+Cc: linux-arm-msm@vger.kernel.org, Yaniv Gardi <ygardi@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Yaniv Gardi <ygardi@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, vgoyal@redhat.com, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 
-On Tue, Feb 19, 2013 at 06:10:50PM +0200, Yaniv Gardi wrote:
-> *** adding and exposing SANITIZE capability to the user space via a unique IOCTL ***
+*** adding and exposing SANITIZE capability to the user space via a unique IOCTL ***
 
-If this is something eMMC specific and not expected to have in-kernel
-consumer, unlike DISCARD which filesystems use, why not just use
-SG_IO?
+Yaniv Gardi (2):
+  block: ioctl support for sanitize in eMMC 4.5
+  mmc: card: Adding support for sanitize in eMMC 4.5
 
-Thanks.
+ block/blk-core.c          |    8 +++++
+ block/blk-lib.c           |   51 ++++++++++++++++++++++++++++++
+ block/blk-merge.c         |    4 ++
+ block/elevator.c          |    6 +++-
+ block/ioctl.c             |    9 +++++
+ drivers/mmc/card/block.c  |   75 +++++++++++++++++++++++++++++++-------------
+ drivers/mmc/card/queue.c  |   10 +++++-
+ include/linux/blk_types.h |    7 +++-
+ include/linux/blkdev.h    |    6 +++
+ include/linux/mmc/host.h  |    1 +
+ include/uapi/linux/fs.h   |    1 +
+ kernel/trace/blktrace.c   |    2 +
+ 12 files changed, 154 insertions(+), 26 deletions(-)
 
 -- 
-tejun
+1.7.6
+-- 
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum
