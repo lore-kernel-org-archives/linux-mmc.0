@@ -1,39 +1,57 @@
-From: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] mmc: tegra: assume CONFIG_OF, remove platform data
-Date: Tue, 19 Feb 2013 14:22:53 -0500
-Message-ID: <87ppzwglbm.fsf@octavius.laptop.org>
-References: <1360966039-24071-1-git-send-email-swarren@wwwdotorg.org>
-	<5123CFB9.7020209@wwwdotorg.org>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH v4 00/13] mmc: core and driver DT and related development
+Date: Tue, 19 Feb 2013 22:57:05 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1302192253140.22058@axis700.grange>
+References: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
+ <87k3q5ahl8.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <5123CFB9.7020209-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> (Stephen Warren's message of
-	"Tue, 19 Feb 2013 12:17:13 -0700")
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.10]:60533 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933545Ab3BSV5V (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Feb 2013 16:57:21 -0500
+In-Reply-To: <87k3q5ahl8.fsf@octavius.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Arnd Bergmann <arnd@arndb.de>
 
-Hi Stephen,
+Hi Chris
 
-On Tue, Feb 19 2013, Stephen Warren wrote:
->> Tegra only supports, and always enables, device tree. Remove all ifdefs
->> and runtime checks for DT support from the driver. Platform data is
->> therefore no longer required. Rework the driver to parse the device tree
->> directly into struct sdhci_tegra.
->
-> Chris,
->
-> If you can take this for 3.9, everything is simple. I understand it's
-> very late for that.
+On Mon, 18 Feb 2013, Chris Ball wrote:
 
-I'll take it for 3.9 (perhaps straight after -rc1), since this is a more
-of a cleanup than a new feature.  I've pushed it to mmc-next now so that
-testing can happen in the meantime.
+> Hi Guennadi,
+> 
+> On Fri, Feb 15 2013, Guennadi Liakhovetski wrote:
+> > This is v4 of a patch-series, extending mmc subsystem device-tree usage 
+> > and adding more advanced DT capabilities to sh_mmcif and sh_mobile_sdhi / 
+> > tmio_mmc drivers. Changes since v3 are described in respective patches. 
+> > Thanks to all who commented on v3.
+> >
+> > Guennadi Liakhovetski (13):
+> >   mmc: sdhi, tmio: only check flags in tmio-mmc driver proper
+> >   mmc: detailed definition of CD and WP MMC line polarities in DT
+> >   mmc: provide a standard MMC device-tree binding parser centrally
+> >   mmc: (cosmetic) remove "extern" from function declarations
+> >   mmc: sh-mmcif: use mmc_of_parse() to parse standard MMC DT bindings
+> >   mmc: tmio-mmc: define device-tree bindings
+> >   mmc: tmio-mmc: parse device-tree bindings
+> >   mmc: sh_mobile_sdhi: remove unused .pdata field
+> >   mmc: sh_mobile_sdhi: use managed resource allocations
+> >   mmc: tmio: remove unused and deprecated symbols
+> >   mmc: tmio: add support for the VccQ regulator
+> >   mmc: add DT bindings for more MMC capability flags
+> >   mmc: tmio: add barriers to IO operations
+> 
+> Thanks!  Pushed to mmc-next, will think about merging for 3.9.
 
-Thanks,
+Thanks! Please, push all of them (taking into account v5 of #03/13), but 
+hold back on #13, it'll need some more work.
 
-- Chris.
--- 
-Chris Ball   <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>   <http://printf.net/>
-One Laptop Per Child
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
