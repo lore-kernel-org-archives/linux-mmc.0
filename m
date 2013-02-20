@@ -1,49 +1,52 @@
-From: Rhyland Klein <rklein@nvidia.com>
-Subject: [PATCH 2/4] ARM: tegra: add SDHCI support for Dalmore
-Date: Wed, 20 Feb 2013 13:35:15 -0500
-Message-ID: <1361385317-6020-3-git-send-email-rklein@nvidia.com>
+From: Rhyland Klein <rklein-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 4/4] mmc: host: sdhci-tegra: add basic support for Tegra114
+Date: Wed, 20 Feb 2013 13:35:17 -0500
+Message-ID: <1361385317-6020-5-git-send-email-rklein@nvidia.com>
 References: <1361385317-6020-1-git-send-email-rklein@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate04.nvidia.com ([216.228.121.35]:1900 "EHLO
-	hqemgate04.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758457Ab3BTSew (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Feb 2013 13:34:52 -0500
-In-Reply-To: <1361385317-6020-1-git-send-email-rklein@nvidia.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1361385317-6020-1-git-send-email-rklein-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Pritesh Raithatha <praithatha-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Rhyland Klein <rklein-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>, Chris Ball <cjb@laptop.org>, linux-tegra@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Pritesh Raithatha <praithatha@nvidia.com>, Rhyland Klein <rklein@nvidia.com>
 
-Based on changes by: Pritesh Raithatha <praithatha@nvidia.com>
-Signed-off-by: Rhyland Klein <rklein@nvidia.com>
+The mmc controller on Tegra114 platforms is basically compatible with
+the settings used for Tegra30. However there is a difference where we
+don't need the extra ENABLE_SDHCI_SPEC_300 quirk as Tegra114 hardware
+advertises v3.0 support already.
+
+Signed-off-by: Rhyland Klein <rklein-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 ---
- arch/arm/boot/dts/tegra114-dalmore.dts |   11 +++++++++++
- 1 file changed, 11 insertions(+)
+ drivers/mmc/host/sdhci-tegra.c |   14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-diff --git a/arch/arm/boot/dts/tegra114-dalmore.dts b/arch/arm/boot/dts/tegra114-dalmore.dts
-index a30aca6..7be8bd2 100644
---- a/arch/arm/boot/dts/tegra114-dalmore.dts
-+++ b/arch/arm/boot/dts/tegra114-dalmore.dts
-@@ -15,6 +15,17 @@
- 		clock-frequency = <408000000>;
- 	};
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 5e126bf..931d9d7 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -201,7 +201,21 @@ static struct sdhci_tegra_soc_data soc_data_tegra30 = {
+ 	.nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300,
+ };
  
-+	sdhci@78000400 {
-+		cd-gpios = <&gpio 170 1>; /* gpio PV2 */
-+		bus-width = <4>;
-+		status = "okay";
-+	};
++static struct sdhci_pltfm_data sdhci_tegra114_pdata = {
++	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
++		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
++		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
++		  SDHCI_QUIRK_NO_HISPD_BIT |
++		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
++	.ops  = &tegra_sdhci_ops,
++};
 +
-+	sdhci@78000600 {
-+		bus-width = <8>;
-+		status = "okay";
-+	};
++static struct sdhci_tegra_soc_data soc_data_tegra114 = {
++	.pdata = &sdhci_tegra114_pdata,
++};
 +
- 	pmc {
- 		nvidia,invert-interrupt;
- 	};
+ static const struct of_device_id sdhci_tegra_dt_match[] = {
++	{ .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
+ 	{ .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
+ 	{ .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
+ 	{}
 -- 
 1.7.9.5
-
