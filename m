@@ -1,35 +1,39 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v4 00/13] mmc: core and driver DT and related development
-Date: Tue, 19 Feb 2013 17:00:26 -0500
-Message-ID: <87k3q4ge11.fsf@octavius.laptop.org>
-References: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
-	<87k3q5ahl8.fsf@octavius.laptop.org>
-	<Pine.LNX.4.64.1302192253140.22058@axis700.grange>
+From: Joseph Lo <josephl-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 0/2] mmc: tegra: use mmc_of_parse to get support of standard MMC DT binding
+Date: Wed, 20 Feb 2013 15:05:00 +0800
+Message-ID: <1361343902-15223-1-git-send-email-josephl@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:45121 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933545Ab3BSWAo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 19 Feb 2013 17:00:44 -0500
-In-Reply-To: <Pine.LNX.4.64.1302192253140.22058@axis700.grange> (Guennadi
-	Liakhovetski's message of "Tue, 19 Feb 2013 22:57:05 +0100 (CET)")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Cc: linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Joseph Lo <josephl-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Arnd Bergmann <arnd@arndb.de>
 
-Hi,
+The 2nd patch of this series depends on two patches below.
 
-On Tue, Feb 19 2013, Guennadi Liakhovetski wrote:
->> Thanks!  Pushed to mmc-next, will think about merging for 3.9.
->
-> Thanks! Please, push all of them (taking into account v5 of #03/13), but 
-> hold back on #13, it'll need some more work.
+"mmc: provide a standard MMC device-tree binding parser centrally"
+(available on next-20130219)
+mmc: tegra: assume CONFIG_OF, remove platform data
+(https://patchwork.kernel.org/patch/2150351/)
 
-Okay, I've dropped #13 from mmc-next.
+Verified on Seaboard and Cardhu.
 
-- Chris.
+Joseph Lo (2):
+  ARM: dts: tegra: fix the activate polarity of cd-gpio in mmc host
+  mmc: tegra: use mmc_of_parse to get the support of standard MMC DT
+    bindings
+
+ arch/arm/boot/dts/tegra20-harmony.dts   |  4 +-
+ arch/arm/boot/dts/tegra20-paz00.dts     |  2 +-
+ arch/arm/boot/dts/tegra20-seaboard.dts  |  2 +-
+ arch/arm/boot/dts/tegra20-trimslice.dts |  2 +-
+ arch/arm/boot/dts/tegra20-ventana.dts   |  2 +-
+ arch/arm/boot/dts/tegra20-whistler.dts  |  1 +
+ arch/arm/boot/dts/tegra30-beaver.dts    |  2 +-
+ arch/arm/boot/dts/tegra30-cardhu.dtsi   |  2 +-
+ drivers/mmc/host/sdhci-tegra.c          | 85 +++------------------------------
+ 9 files changed, 16 insertions(+), 86 deletions(-)
+
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.8.1.1
