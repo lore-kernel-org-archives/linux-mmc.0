@@ -1,52 +1,67 @@
-From: Rhyland Klein <rklein-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 4/4] mmc: host: sdhci-tegra: add basic support for Tegra114
-Date: Wed, 20 Feb 2013 13:35:17 -0500
-Message-ID: <1361385317-6020-5-git-send-email-rklein@nvidia.com>
-References: <1361385317-6020-1-git-send-email-rklein@nvidia.com>
+From: Imre Deak <imre.deak@intel.com>
+Subject: Re: dw_mmc build broken in next-20130220 (was Re: [PATCH v3 2/2]
+ lib/scatterlist: use page iterator in the mapping iterator)
+Date: Wed, 20 Feb 2013 20:41:57 +0200
+Message-ID: <1361385717.18593.12.camel@ideak-mobl>
+References: <CAAG0J99wUgcOt09_XxuK+ennnuj7OzxcJndYYGXbAqpj59E7PQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1361385317-6020-1-git-send-email-rklein-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Pritesh Raithatha <praithatha-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Rhyland Klein <rklein-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:62396 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756008Ab3BTSmD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 20 Feb 2013 13:42:03 -0500
+In-Reply-To: <CAAG0J99wUgcOt09_XxuK+ennnuj7OzxcJndYYGXbAqpj59E7PQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: James Hogan <james.hogan@imgtec.com>
+Cc: linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Tejun Heo <tj@kernel.org>, Daniel Vetter <daniel.vetter@ffwll.ch>, linaro-mm-sig@lists.linaro.org, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-next@vger.kernel.org
 
-The mmc controller on Tegra114 platforms is basically compatible with
-the settings used for Tegra30. However there is a difference where we
-don't need the extra ENABLE_SDHCI_SPEC_300 quirk as Tegra114 hardware
-advertises v3.0 support already.
+On Wed, 2013-02-20 at 16:42 +0000, James Hogan wrote:
+> On 13 February 2013 15:10, Imre Deak <imre.deak@intel.com> wrote:
+> > For better code reuse use the newly added page iterator to iterate
+> > through the pages. The offset, length within the page is still
+> > calculated by the mapping iterator as well as the actual mapping.
+> > Idea from Tejun Heo <tj@kernel.org>.
+> >
+> > Signed-off-by: Imre Deak <imre.deak@intel.com>
+> > ---
+> >  include/linux/scatterlist.h |    6 +++---
+> >  lib/scatterlist.c           |   46 ++++++++++++++++++++-----------------------
+> >  2 files changed, 24 insertions(+), 28 deletions(-)
+> >
+> > diff --git a/include/linux/scatterlist.h b/include/linux/scatterlist.h
+> > index 788a853..a6cd692 100644
+> > --- a/include/linux/scatterlist.h
+> > +++ b/include/linux/scatterlist.h
+> > @@ -295,9 +295,9 @@ struct sg_mapping_iter {
+> >         size_t                  consumed;       /* number of consumed bytes */
+> >
+> >         /* these are internal states, keep away */
+> > -       struct scatterlist      *__sg;          /* current entry */
+> > -       unsigned int            __nents;        /* nr of remaining entries */
+> > -       unsigned int            __offset;       /* offset within sg */
+> > +       unsigned int            __offset;       /* offset within page */
+> > +       struct sg_page_iter     __piter;        /* page iterator */
+> > +       unsigned int            __remaining;    /* remaining bytes on page */
+> >         unsigned int            __flags;
+> >  };
+> 
+> Hi,
+> 
+> FYI, in next-20130220 this appears to break the build of the dw_mmc driver:
+> drivers/mmc/host/dw_mmc.c In function 'dw_mci_read_data_pio':
+> drivers/mmc/host/dw_mmc.c +1457 : error: 'struct sg_mapping_iter' has
+> no member named '__sg'
+> drivers/mmc/host/dw_mmc.c In function 'dw_mci_write_data_pio':
+> drivers/mmc/host/dw_mmc.c +1512 : error: 'struct sg_mapping_iter' has
+> no member named '__sg'
 
-Signed-off-by: Rhyland Klein <rklein-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
----
- drivers/mmc/host/sdhci-tegra.c |   14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+My fault, I haven't noticed this user of the field. It could be fixed by
+using __piter.sg instead of __sg. I will follow up with v4 of this patch
+including this change.
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 5e126bf..931d9d7 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -201,7 +201,21 @@ static struct sdhci_tegra_soc_data soc_data_tegra30 = {
- 	.nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300,
- };
- 
-+static struct sdhci_pltfm_data sdhci_tegra114_pdata = {
-+	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
-+		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-+		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
-+		  SDHCI_QUIRK_NO_HISPD_BIT |
-+		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
-+	.ops  = &tegra_sdhci_ops,
-+};
-+
-+static struct sdhci_tegra_soc_data soc_data_tegra114 = {
-+	.pdata = &sdhci_tegra114_pdata,
-+};
-+
- static const struct of_device_id sdhci_tegra_dt_match[] = {
-+	{ .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
- 	{ .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
- 	{ .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
- 	{}
--- 
-1.7.9.5
+--Imre
+
+
