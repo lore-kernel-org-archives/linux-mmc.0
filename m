@@ -1,88 +1,153 @@
-From: Kevin Liu <kliu5@marvell.com>
-Subject: [PATCH v2] mmc: core: enhance card remove detection for gpio detect
-Date: Thu, 21 Feb 2013 16:36:22 +0800
-Message-ID: <1361435782-18963-1-git-send-email-kliu5@marvell.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v3] mmc: dw_mmc: Add MSHC compatible for Exynos4412
+Date: Thu, 21 Feb 2013 19:53:22 +0900
+Message-ID: <003401ce1021$ab1b6eb0$01524c10$%jun@samsung.com>
+References: <1361210793-5710-1-git-send-email-tobetter@gmail.com>
+ <000501ce0e8a$91ef7c30$b5ce7490$%jun@samsung.com>
+ <CADoNuNc2cjOU-PjWgwtB2wo9USMABGdwP=udCBHBYO9jgiLnvw@mail.gmail.com>
+ <CAGOxZ51YtUL1yOJERLZG7uWgfQ=j88HmYue1oWiuah6Gdr32Eg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog127.obsmtp.com ([74.125.149.107]:50918 "EHLO
-	na3sys009aog127.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752994Ab3BUIjC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Feb 2013 03:39:02 -0500
+Received: from mailout2.samsung.com ([203.254.224.25]:38734 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751974Ab3BUKxZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Feb 2013 05:53:25 -0500
+In-reply-to: <CAGOxZ51YtUL1yOJERLZG7uWgfQ=j88HmYue1oWiuah6Gdr32Eg@mail.gmail.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alexander Stein <alexander.stein@systec-electronic.com>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>
-Cc: Anton Vorontsov <cbouatmailru@gmail.com>, Stephen Warren <swarren@wwwdotorg.org>, Lars-Peter Clausen <lars@metafoo.de>, Mike Rapoport <mike@compulab.co.il>, Nicolas Pitre <nico@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gma>
+To: 'Alim Akhtar' <alim.akhtar@gmail.com>, 'Dongjin Kim' <tobetter@gmail.com>
+Cc: "'unlisted-recipients:'"@samsung.com, "'no To-header on input'"@samsung.com, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Sachin Kamat' <sachin.kamat@linaro.org>, 'Chris Ball' <cjb@laptop.org>, 'Arnd Bergmann' <arnd@arndb.de>, 'Thomas Abraham' <thomas.abraham@linaro.org>, 'Will Newton' <will.newton@imgtec.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Current code detect card removal only by judging the result of
-sending cmd13 to card, which is not safe for card with external
-gpio detection. The communication status between host and card
-may out of sync with the external gpio status if remove the card
-slowly or hands shake during the process. The reason is the async
-between card detect and pin contact in slot/card hardware.
+On Wednesday, February 20, 2013, Alim Akhtar wrote:
+> Hi,
+> 
+> On Tue, Feb 19, 2013 at 6:04 PM, Dongjin Kim <tobetter@gmail.com> wrote:
+> > Hello Seungwon,
+> >
+> > Thank you for reviewing and I understand what you mean.
+> >
+> > I agree that Exynos5250 and Exynos4412 are not same, no idea how much
+> > they are different because no Exynos5250 spec on my hand. But at least
+> > I assumed that the capabilities below are supported by Exynos4412 in
+> > terms of its datasheet and it does work on my end as expected. :) Also
+> > I assumed it will be separated if one of both become different to add
+> > more capabilities.
+> >
+> >         MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
+> >                MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
+> >
+> > Maybe my understanding or approach is wrong since I do not have the
+> > information of Exynos5250.
+> > And suggestion do you have?
+At least, these capabilities can be shared because of common feature, not fully same.
+Dongjin, could you modify the commit message and comments of code?
 
-The sequence is below when the issue occur (remove the card slowly):
-1. gpio level changed and card detect interrupt triggered.
-2. mmc_rescan is launched.
-3. the card pin is still contacted with the slot because of slow
-removal. So _mmc_detect_card_removed and mmc_rescan think card is
-still present.
-4. then card is really removed but the gpio level won't change
-and detect work won't be scheduled and the card removal event
-will be missed by system.
+Let me introduce the functional feature of Exynos5250 and capability extension.
+I guess I'll send soon.
 
-For a card with external gpio detection, this patch add the
-gpio detection into consideration when detect card removal.
-If the gpio status and cmd13 result are out of sync then schedule
-another detect work 200ms later.
+Thanks,
+Seungwon Jeon
 
-This patch won't impact to cards not using gpio detection.
-
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
----
- drivers/mmc/core/core.c |   17 ++++++++++++++++-
- 1 file changed, 16 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index b8c3d41..4f438f5 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -32,6 +32,7 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/sd.h>
-+#include <linux/mmc/slot-gpio.h>
- 
- #include "core.h"
- #include "bus.h"
-@@ -2281,7 +2282,7 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
- 
- int _mmc_detect_card_removed(struct mmc_host *host)
- {
--	int ret;
-+	int ret, gpio_cd;
- 
- 	if ((host->caps & MMC_CAP_NONREMOVABLE) || !host->bus_ops->alive)
- 		return 0;
-@@ -2290,6 +2291,20 @@ int _mmc_detect_card_removed(struct mmc_host *host)
- 		return 1;
- 
- 	ret = host->bus_ops->alive(host);
-+	/*
-+	 * If card use gpio detection then the gpio status and alive check
-+	 * may out of sync because of the async between card detect and
-+	 * pin contact in slot hardware. So schedule a detect work 200ms
-+	 * later in this case.
-+	 */
-+	gpio_cd = mmc_gpio_get_cd(host);
-+	if (gpio_cd >= 0) {
-+		if (!ret ^ gpio_cd) {
-+			mmc_detect_change(host, msecs_to_jiffies(200));
-+			pr_warn("%s: card insert/remove too slowly\n",
-+					mmc_hostname(host));
-+		}
-+	}
- 	if (ret) {
- 		mmc_card_set_removed(host->card);
- 		pr_debug("%s: card remove detected\n", mmc_hostname(host));
--- 
-1.7.9.5
+> 
+> Recently Guennadi Liakhovetski has done some work to centralize the
+> mmc capabilities. See [1] and [2].
+> Those patches are pushed to Chris's mmc-next tree.
+> Is  it possible to extend [1] and [2] and add more capabilities (at
+> least all known one) and let these caps being passed from DT instead?
+> 
+> Second thought is, let the common minimum caps as a part of .caps
+> field in dw_mmc-exynos.c itself and pass the extra/advance controller
+> caps from DT and parse them via dw_mci_parse_dt() in dw_mmc.c itself.
+> 
+> [1] https://patchwork.kernel.org/patch/1991851/
+> [2] https://patchwork.kernel.org/patch/2106531/
+> 
+> > Regards,
+> > Dongjin.
+> >
+> > On Tue, Feb 19, 2013 at 7:19 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> >> On Tuesday, February 19, 2013, Dongjin Kim wrote:
+> >>> This patch adds the compatible string for MSHC controller of Exynos4412, and
+> >>> share the controller specific properties with Exynos5250 since they have same
+> >>> features. Its driver data name is changed to exynos_drv_data instead SoC
+> >>> specific name.
+> >>
+> >> It's not actually same.
+> >> Exynos4412 doesn't have forward compatibilities for Exynos5250.
+> >> I agree that functionality of exynos_drv_data is common.
+> >> These functions have been implemented for existing Exynos*.
+> >> But in case of caps, it can't applied completely.
+> >> I'm concerning about this.
+> >>
+> >> Thanks,
+> >> Seungwon Jeon
+> >>>
+> >>> Cc: Jaehoon Chung <jh80.chung@samsung.com>
+> >>> Cc: Sachin Kamat <sachin.kamat@linaro.org>
+> >>> Signed-off-by: Dongjin Kim <tobetter@gmail.com>
+> >>> ---
+> >>>  drivers/mmc/host/dw_mmc-exynos.c |   12 +++++++-----
+> >>>  1 file changed, 7 insertions(+), 5 deletions(-)
+> >>>
+> >>> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> >>> index 4d50da6..38cd03c 100644
+> >>> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> >>> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> >>> @@ -199,8 +199,8 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
+> >>>       return 0;
+> >>>  }
+> >>>
+> >>> -/* Exynos5250 controller specific capabilities */
+> >>> -static unsigned long exynos5250_dwmmc_caps[4] = {
+> >>> +/* Exynos4412/Exynos5250 controller specific capabilities */
+> >>> +static unsigned long exynos_dwmmc_caps[4] = {
+> >>>       MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
+> >>>               MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
+> >>>       MMC_CAP_CMD23,
+> >>> @@ -208,8 +208,8 @@ static unsigned long exynos5250_dwmmc_caps[4] = {
+> >>>       MMC_CAP_CMD23,
+> >>>  };
+> >>>
+> >>> -static const struct dw_mci_drv_data exynos5250_drv_data = {
+> >>> -     .caps                   = exynos5250_dwmmc_caps,
+> >>> +static const struct dw_mci_drv_data exynos_drv_data = {
+> >>> +     .caps                   = exynos_dwmmc_caps,
+> >>>       .init                   = dw_mci_exynos_priv_init,
+> >>>       .setup_clock            = dw_mci_exynos_setup_clock,
+> >>>       .prepare_command        = dw_mci_exynos_prepare_command,
+> >>> @@ -219,8 +219,10 @@ static const struct dw_mci_drv_data exynos5250_drv_data = {
+> >>>  };
+> >>>
+> >>>  static const struct of_device_id dw_mci_exynos_match[] = {
+> >>> +     { .compatible = "samsung,exynos4412-dw-mshc",
+> >>> +                     .data = &exynos_drv_data, },
+> >>>       { .compatible = "samsung,exynos5250-dw-mshc",
+> >>> -                     .data = &exynos5250_drv_data, },
+> >>> +                     .data = &exynos_drv_data, },
+> >>>       {},
+> >>>  };
+> >>>  MODULE_DEVICE_TABLE(of, dw_mci_exynos_match);
+> >>> --
+> >>> 1.7.10.4
+> >>>
+> >>> --
+> >>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> >>> the body of a message to majordomo@vger.kernel.org
+> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> --
+> Regards,
+> Alim
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
