@@ -1,40 +1,55 @@
-From: Anatolij Gustschin <agust@denx.de>
-Subject: Re: [PATCH v2] mmc: mxcmmc: fix bug that may block a data transfer
- forever.
-Date: Thu, 21 Feb 2013 13:57:55 +0100
-Message-ID: <20130221135755.44440261@crub>
-References: <1347014617-16238-1-git-send-email-javier.martin@vista-silicon.com>
-	<20130219151414.2aa318d7@crub>
-	<CACKLOr0vTr=8F7Ly_bQCL5FLWhn8hqmsLaUeGfDUMM7OaEqWOg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-out.m-online.net ([212.18.0.9]:57127 "EHLO
-	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752471Ab3BUM57 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Feb 2013 07:57:59 -0500
-In-Reply-To: <CACKLOr0vTr=8F7Ly_bQCL5FLWhn8hqmsLaUeGfDUMM7OaEqWOg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Phil Edworthy <phil.edworthy@renesas.com>
+Subject: [PATCH] mc: sh-mmcif: handle MMC_WRITE_MULTIPLE_BLOCK completion IRQ
+ again
+Date: Thu, 21 Feb 2013 15:31:18 +0000
+Message-ID: <1361460678-9429-1-git-send-email-phil.edworthy@renesas.com>
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Magnus <magnus.damm@gmail.com>, Simon <horms@verge.net.au>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Phil Edworthy <phil.edworthy@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
-To: javier Martin <javier.martin@vista-silicon.com>
-Cc: linux-mmc@vger.kernel.org, viresh.linux@gmail.com, g.liakhovetski@gmx.de, vinod.koul@linux.intel.com, s.hauer@pengutronix.de, cjb@laptop.org, fabio.estevam@freescale.com, gcembed@gmail.com
 
-Hi,
+Upon completion of a MMC_WRITE_MULTIPLE_BLOCK command MMCIF issues an IRQ
+with the BUFREN or BUFWEN bits set and often with one or several of CMD12
+bits set.
 
-On Thu, 21 Feb 2013 13:32:08 +0100
-javier Martin <javier.martin@vista-silicon.com> wrote:
-...
-> It was tested executing a loop with bonnie++ for a week.
-> I didn't notice the race condition. Have you had real issues or just
-> found  it by analysing the code?
+If those interrupts are not acknowledged, an additional interrupt can be
+produced and will be delivered later, possibly when the transaction has
+already been completed. To prevent this from happening, CMD12 completion
+interrupt sources have to be cleared too upon reception of a BUFREN or
+BUFWEN IRQ.
 
-I've had real issues, but my setup is different. I'm using this mxcmmc
-driver with extensions on mpc5121e (with different DMA controller/driver).
-It is quite difficult to reproduce the issue on my test system. I've also
-an i.mx31 based pcm037 board but the SD-Card slot is broken on it, so I
-can not test the driver on i.mx31.
+This is similar to commit 7a7eb328; this change adds the same handling for
+BUFREN and BUFWEN interrupts.
 
-Thanks,
+Signed-off-by: Phil Edworthy <phil.edworthy@renesas.com>
+---
+Tested on Renesas Hurricane board with r8a7779 device, eMMC with DMA.
 
-Anatolij
+ drivers/mmc/host/sh_mmcif.c |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 9a4c151..59fa44e 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -1199,10 +1199,14 @@ static irqreturn_t sh_mmcif_intr(int irq, void *dev_id)
+ 		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~INT_CRSPE);
+ 		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MCRSPE);
+ 	} else if (state & INT_BUFREN) {
+-		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~INT_BUFREN);
++		sh_mmcif_writel(host->addr, MMCIF_CE_INT,
++			~(INT_CMD12DRE | INT_CMD12RBE |
++			  INT_CMD12CRE | INT_BUFREN));
+ 		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
+ 	} else if (state & INT_BUFWEN) {
+-		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~INT_BUFWEN);
++		sh_mmcif_writel(host->addr, MMCIF_CE_INT,
++			~(INT_CMD12DRE | INT_CMD12RBE |
++			  INT_CMD12CRE | INT_BUFWEN));
+ 		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
+ 	} else if (state & INT_CMD12DRE) {
+ 		sh_mmcif_writel(host->addr, MMCIF_CE_INT,
+-- 
+1.7.5.4
+
