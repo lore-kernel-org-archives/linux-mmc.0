@@ -1,60 +1,58 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: OMAP4 bust: MMC causes hung tasks
-Date: Wed, 20 Feb 2013 23:43:49 +0000
-Message-ID: <20130220234349.GA17852@n2100.arm.linux.org.uk>
-References: <20130220170003.GW17833@n2100.arm.linux.org.uk> <87txp6gb3s.fsf@octavius.laptop.org>
+From: Joseph Lo <josephl-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 2/2] mmc: tegra: use mmc_of_parse to get the support of
+ standard MMC DT bindings
+Date: Thu, 21 Feb 2013 10:23:45 +0800
+Message-ID: <1361413425.5678.8.camel@jlo-ubuntu-64.nvidia.com>
+References: <1361343902-15223-1-git-send-email-josephl@nvidia.com>
+	 <1361343902-15223-3-git-send-email-josephl@nvidia.com>
+	 <512502D7.4090605@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <87txp6gb3s.fsf@octavius.laptop.org>
-Sender: linux-omap-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <512502D7.4090605-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Feb 20, 2013 at 12:15:51PM -0500, Chris Ball wrote:
-> Hi,
+On Thu, 2013-02-21 at 01:07 +0800, Stephen Warren wrote:
+> On 02/20/2013 12:05 AM, Joseph Lo wrote:
+> > Updating the sdhci-tegra driver to use mmc_of_parse to support standard
+> > MMC DT bindings. Then we can remove the redundant code that already support
 > 
-> On Wed, Feb 20 2013, Russell King - ARM Linux wrote:
-> > MMC looks sick - not sure what's going on with it though.  mmc0 I believe
-> > is the onboard eMMC, mmc1 is the external SD card with the rootfs.  Any
-> > ideas?
+> >  static unsigned int tegra_sdhci_get_ro(struct sdhci_host *host)
+> >  {
+> > -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > -	struct sdhci_tegra *tegra_host = pltfm_host->priv;
+> > -
+> > -	if (!gpio_is_valid(tegra_host->wp_gpio))
+> > -		return -1;
+> > -
+> > -	return gpio_get_value(tegra_host->wp_gpio);
+> > +	return mmc_gpio_get_ro(host->mmc);
+> >  }
 > 
-> Is this with 3.8 final, or mmc-next?
+> It'd be nice if there was a standard version of this function that could
+> be plugged directly into struct sdhci_ops, so that each individual
+> driver doesn't have to re-invent this wrapper.
+> 
+> > @@ -220,15 +203,12 @@ static void sdhci_tegra_parse_dt(struct device *dev,
+> >  					struct sdhci_tegra *tegra_host)
+> >  {
+> ...
+> > +	struct sdhci_host *host;
+> ...
+> > +	host = platform_get_drvdata(to_platform_device(dev));
+> > +	mmc_of_parse(host->mmc);
+> >  }
+> 
+> It might be simpler to change the function prototype to simply pass in
+> the host object too.
 
-You chopped off the version line printed by the kernel which gave you
-some of that information.  It's v3.8-rc7 based, no external trees
-pulled in.
+It's a interface problem that I can't fix now. If sdhci core is going to
+integrate mmc_of_parse into sdhci_get_of_property and mmc_gpio_get_ro
+into somethere sdhci_do_get_ro, then we can refine later.
 
-> > [    1.253265] mmc0: new high speed MMC card at address 0001
-> > [    1.260650] mmcblk0: mmc0:0001 SEM08G 7.39 GiB
-> > [    1.265594] mmcblk0boot0: mmc0:0001 SEM08G partition 1 1.00 MiB
-> > [    1.272003] mmcblk0boot1: mmc0:0001 SEM08G partition 2 1.00 MiB
-> > [    1.278411] mmcblk0rpmb: mmc0:0001 SEM08G partition 3 128 KiB
-> > [    1.289947]  mmcblk0: unknown partition table
-> > [    1.297851]  mmcblk0boot1: unknown partition table
-> > [    1.304321]  mmcblk0boot0: unknown partition table
-> > [    1.471282] twl6040 1-004b: timeout waiting for READYINT
-> > ...
-> > [    1.603820] mmc1: host does not support reading read-only switch. assuming wr
-> > ite-enable.
-> > [    1.614105] mmc1: new high speed SD card at address 0002
-> > [    1.620086] mmcblk1: mmc1:0002 00000 971 MiB
-> > [    1.626129]  mmcblk1: p1 p2
-> > ...
-> > [    4.698455] VFS: Mounted root (ext3 filesystem) on device 179:34.
-> > ...
-> > [ 10.123077] mmcblk0rpmb: timed out sending r/w cmd command, card
-> > status 0x400900
-> 
-> Ah, I think you need this patch from mmc-next:
-> 
-> 30bedc8b4c99b0da585a8e983d6346773cb50794
-> mmc: core: expose RPMB partition only for CMD23 capable hosts
-> 
-> It's already got a stable@ tag on it.  I'll be sending mmc-next to Linus
-> shortly and will make sure it gets into 3.8-stable; sorry it didn't make
-> it into 3.8-final.
-
-Yup, that's missing.  Thanks Chris.
+Thanks,
+Joseph
