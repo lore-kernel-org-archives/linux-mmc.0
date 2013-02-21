@@ -1,95 +1,69 @@
-From: Joseph Lo <josephl-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 2/2] mmc: tegra: use mmc_of_parse to get the support of
- standard MMC DT bindings
-Date: Thu, 21 Feb 2013 16:15:11 +0800
-Message-ID: <1361434511.5678.102.camel@jlo-ubuntu-64.nvidia.com>
+From: Thierry Reding <thierry.reding-RM9K5IK7kjKj5M59NBduVrNAH6kLmebB@public.gmane.org>
+Subject: Re: [PATCH 1/2] ARM: dts: tegra: fix the activate polarity of
+ cd-gpio in mmc host
+Date: Thu, 21 Feb 2013 09:18:09 +0100
+Message-ID: <20130221081809.GB7718@avionic-0098.mockup.avionic-design.de>
 References: <1361343902-15223-1-git-send-email-josephl@nvidia.com>
-	 <1361343902-15223-3-git-send-email-josephl@nvidia.com>
-	 <512502D7.4090605@wwwdotorg.org>
-	 <1361413425.5678.8.camel@jlo-ubuntu-64.nvidia.com>
-	 <5125A075.5000000@wwwdotorg.org>
-	 <1361427997.5678.59.camel@jlo-ubuntu-64.nvidia.com>
-	 <20130221080306.GA7718@avionic-0098.mockup.avionic-design.de>
+ <1361343902-15223-2-git-send-email-josephl@nvidia.com>
+ <512500EB.1070802@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="A6N2fC+uXW/VQSAv"
 Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130221080306.GA7718-RM9K5IK7kjIQXX3q8xo1gnVAuStQJXxyR5q1nwbD4aMs9pC9oP6+/A@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <512500EB.1070802-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
 Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Thierry Reding <thierry.reding-RM9K5IK7kjKj5M59NBduVrNAH6kLmebB@public.gmane.org>
-Cc: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Cc: Joseph Lo <josephl-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 2013-02-21 at 16:03 +0800, Thierry Reding wrote:
-> * PGP Signed by an unknown key
-> 
-> On Thu, Feb 21, 2013 at 02:26:37PM +0800, Joseph Lo wrote:
-> > On Thu, 2013-02-21 at 12:20 +0800, Stephen Warren wrote:
-> > > On 02/20/2013 07:23 PM, Joseph Lo wrote:
-> > > > On Thu, 2013-02-21 at 01:07 +0800, Stephen Warren wrote:
-> > > >> On 02/20/2013 12:05 AM, Joseph Lo wrote:
-> > > >>> Updating the sdhci-tegra driver to use mmc_of_parse to support standard
-> > > >>> MMC DT bindings. Then we can remove the redundant code that already support
-> > > 
-> > > >>> @@ -220,15 +203,12 @@ static void sdhci_tegra_parse_dt(struct device *dev,
-> > > >>>  					struct sdhci_tegra *tegra_host)
-> > > >>>  {
-> > > >> ...
-> > > >>> +	struct sdhci_host *host;
-> > > >> ...
-> > > >>> +	host = platform_get_drvdata(to_platform_device(dev));
-> > > >>> +	mmc_of_parse(host->mmc);
-> > > >>>  }
-> > > >>
-> > > >> It might be simpler to change the function prototype to simply pass in
-> > > >> the host object too.
-> > > > 
-> > > > It's a interface problem that I can't fix now. If sdhci core is going to
-> > > > integrate mmc_of_parse into sdhci_get_of_property and mmc_gpio_get_ro
-> > > > into somethere sdhci_do_get_ro, then we can refine later.
-> > > 
-> > > I meant to change the prototype of sdhci_tegra_parse_dt(). It would be
-> > > simple to change that function in this patch.
-> > 
-> > Hmm. It might not too much different. Which version you prefer?
-> > 
-> > 1. Original version
-> > 
-> > 2.
-> >  static void sdhci_tegra_parse_dt(struct device *dev,
-> > -                                       struct sdhci_tegra *tegra_host)
-> > +                                       struct sdhci_host *host)
-> >  {
-> >         struct device_node *np = dev->of_node;
-> > -       struct sdhci_host *host;
-> > +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +       struct sdhci_tegra *tegra_host = pltfm_host->priv;
-> >  
-> >         tegra_host->power_gpio = of_get_named_gpio(np, "power-gpios",0);
-> > -
-> > -       host = platform_get_drvdata(to_platform_device(dev));
-> >         mmc_of_parse(host->mmc);
-> >  }
-> >  
-> > @@ -240,7 +239,7 @@ static int sdhci_tegra_probe(struct platform_device
-> > *pdev)
-> >         tegra_host->soc_data = soc_data;
-> >         pltfm_host->priv = tegra_host;
-> >  
-> > -       sdhci_tegra_parse_dt(&pdev->dev, tegra_host);
-> > +       sdhci_tegra_parse_dt(&pdev->dev, host);
-> >  
-> 
-> I personally prefer this second version. It keeps with the tradition to
-> pass a struct device into the *_parse_dt() and also provides easy access
-> to the sdhci_host.
-> 
-> And on a side-note:
-> 
-> 	host = platform_get_drvdata(to_platform_device(dev));
-> 
-> can be more simply written as:
-> 
-> 	host = dev_get_drvdata(dev);
-> 
-Indeed, it's simpler and works. Thanks for sharing. :)
+
+--A6N2fC+uXW/VQSAv
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Wed, Feb 20, 2013 at 09:59:23AM -0700, Stephen Warren wrote:
+> On 02/20/2013 12:05 AM, Joseph Lo wrote:
+> > The GPIO pin of SD slot card detection should active low.
+>=20
+> Thierry, Lucas, can you please check if the same change should be made
+> to all the Avionic Design and Toradex boards? I assume MMC CD should be
+> active low on all of them. Once you've confirmed this, Joseph can respin
+> this first patch, and perhaps we can get it into 3.9/stable as a
+> bug-fix. Thanks.
+
+The card-detect GPIO is certainly low-active on Tamonten. I'm not quite
+sure why things worked before, but I guess it was due to the MMC core
+assuming the CD GPIO to be low-active unless otherwise specified and the
+Tegra DT code didn't pass the GPIO flags to the core.
+
+Anyway, I've verified that on Tamonten the same change doesn't break
+anything, card detect still works as expected with this patch series
+applied, so if Joseph could carry the Tamonten change as part of this
+patch it'd be great.
+
+Thierry
+
+--A6N2fC+uXW/VQSAv
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+
+iQIcBAEBAgAGBQJRJdhBAAoJEN0jrNd/PrOhUY8P/jGjaFnQvFHAgEwyoQVldtae
+5zRPtoqKbSTkoRdiBbhDBf3ahZetY8MHeewHWmjHfPCsOc79+WDkxGE95ZXH7sML
+UDsucTb4xm1jE1yjYR5YYHYSGaPl/oDwCUIvmtNtS2eS2DWV5nO07+O8D2luJHvf
+vlfZaDO8SpPf2+LoYIyBwN1TtNgn9WwlHLPIE0gH/16lL7kE4ee1F5cg2ZLCzUmS
+SHaRBdex4o/aTpqAyIXqLKi7fnt2CoIo9mvYWMLI6XWZ45g+97hqEd4QJZ11eCIk
+hMfr+hm5W86aFyc7G/nI5gTr0Rcii4tMYWpeG+0kX84m258B9StHSIFImAz61zNU
+MoofnKFIzsJv6KrB/LmBLUvkLbeT5DBAAwQwJU5zWzcCDgyVvdjVzlQQIh/CMPon
+6z35yls1CiUfjUBGPFk5kyyGEIFGLNamOidh92DXpKHg4FvS3jkD5EJwgpeh/9fx
+98133Jtu86s2jlYyeQ+NHEOO0RUYoi7cpV4nWgozLR1D1gKJmB03b7pJpydhQK+C
+c5XUSv+XDUATaYuP5sMy0DJj2UxgWOs46DWdNc2WyilskvCQsXi7UVU0eAvzdiBx
+sLLGOrwGfDpqFCS6geZa19AYuXj1o69JLWU6NEODkIFNV371UR6IoH+u19G2PsyO
++097Mq5jj5YCXVpgNJ7h
+=HYG1
+-----END PGP SIGNATURE-----
+
+--A6N2fC+uXW/VQSAv--
