@@ -1,75 +1,80 @@
-From: phil.edworthy@renesas.com
-Subject: Re: [PATCH] mc: sh-mmcif: handle MMC_WRITE_MULTIPLE_BLOCK completion
- IRQ again
-Date: Thu, 21 Feb 2013 15:52:28 +0000
-Message-ID: <OF4941B37B.055A51A7-ON80257B19.005706E5-80257B19.00573382@eu.necel.com>
-References: <1361460678-9429-1-git-send-email-phil.edworthy@renesas.com>
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: Re: [PATCH 2/2] mmc: tegra: use mmc_of_parse to get the support of
+ standard MMC DT bindings
+Date: Thu, 21 Feb 2013 11:50:30 -0700
+Message-ID: <51266C76.5000902@wwwdotorg.org>
+References: <1361343902-15223-1-git-send-email-josephl@nvidia.com>  <1361343902-15223-3-git-send-email-josephl@nvidia.com>  <512502D7.4090605@wwwdotorg.org>  <1361413425.5678.8.camel@jlo-ubuntu-64.nvidia.com>  <5125A075.5000000@wwwdotorg.org> <1361427997.5678.59.camel@jlo-ubuntu-64.nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-reply-to: <1361460678-9429-1-git-send-email-phil.edworthy@renesas.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Simon <horms@verge.net.au>, linux-sh@vger.kernel.org, Magnus <magnus.damm@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1361427997.5678.59.camel-yx3yKKdKkHfc7b1ADBJPm0n48jw8i0AO@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Joseph Lo <josephl-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+On 02/20/2013 11:26 PM, Joseph Lo wrote:
+> On Thu, 2013-02-21 at 12:20 +0800, Stephen Warren wrote:
+>> On 02/20/2013 07:23 PM, Joseph Lo wrote:
+>>> On Thu, 2013-02-21 at 01:07 +0800, Stephen Warren wrote:
+>>>> On 02/20/2013 12:05 AM, Joseph Lo wrote:
+>>>>> Updating the sdhci-tegra driver to use mmc_of_parse to support standard
+>>>>> MMC DT bindings. Then we can remove the redundant code that already support
+>>
+>>>>> @@ -220,15 +203,12 @@ static void sdhci_tegra_parse_dt(struct device *dev,
+>>>>>  					struct sdhci_tegra *tegra_host)
+>>>>>  {
+>>>> ...
+>>>>> +	struct sdhci_host *host;
+>>>> ...
+>>>>> +	host = platform_get_drvdata(to_platform_device(dev));
+>>>>> +	mmc_of_parse(host->mmc);
+>>>>>  }
+>>>>
+>>>> It might be simpler to change the function prototype to simply pass in
+>>>> the host object too.
+>>>
+>>> It's a interface problem that I can't fix now. If sdhci core is going to
+>>> integrate mmc_of_parse into sdhci_get_of_property and mmc_gpio_get_ro
+>>> into somethere sdhci_do_get_ro, then we can refine later.
+>>
+>> I meant to change the prototype of sdhci_tegra_parse_dt(). It would be
+>> simple to change that function in this patch.
+> 
+> Hmm. It might not too much different. Which version you prefer?
+> 
+> 1. Original version
+> 
+> 2.
 
-I've been told that this should be fixed in next, so please ignore this 
-patch.
+sdhci_tegra_probe() already has all the values you need; I was thinking
+of just passing in all of the values that this function needs, rather
+than deriving anything within the function.
 
-Thanks
-Phil
+>  static void sdhci_tegra_parse_dt(struct device *dev,
+> -                                       struct sdhci_tegra *tegra_host)
+> +                                       struct sdhci_host *host)
+>  {
+>         struct device_node *np = dev->of_node;
+> -       struct sdhci_host *host;
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_tegra *tegra_host = pltfm_host->priv;
+>  
+>         tegra_host->power_gpio = of_get_named_gpio(np, "power-gpios",0);
+> -
+> -       host = platform_get_drvdata(to_platform_device(dev));
+>         mmc_of_parse(host->mmc);
+>  }
+>  
+> @@ -240,7 +239,7 @@ static int sdhci_tegra_probe(struct platform_device
+> *pdev)
+>         tegra_host->soc_data = soc_data;
+>         pltfm_host->priv = tegra_host;
+>  
+> -       sdhci_tegra_parse_dt(&pdev->dev, tegra_host);
+> +       sdhci_tegra_parse_dt(&pdev->dev, host);
 
-> Subject: [PATCH] mc: sh-mmcif: handle MMC_WRITE_MULTIPLE_BLOCK 
-> completion IRQ again
-> 
-> Upon completion of a MMC_WRITE_MULTIPLE_BLOCK command MMCIF issues an 
-IRQ
-> with the BUFREN or BUFWEN bits set and often with one or several of 
-CMD12
-> bits set.
-> 
-> If those interrupts are not acknowledged, an additional interrupt can be
-> produced and will be delivered later, possibly when the transaction has
-> already been completed. To prevent this from happening, CMD12 completion
-> interrupt sources have to be cleared too upon reception of a BUFREN or
-> BUFWEN IRQ.
-> 
-> This is similar to commit 7a7eb328; this change adds the same handling 
-for
-> BUFREN and BUFWEN interrupts.
-> 
-> Signed-off-by: Phil Edworthy <phil.edworthy@renesas.com>
-> ---
-> Tested on Renesas Hurricane board with r8a7779 device, eMMC with DMA.
-> 
->  drivers/mmc/host/sh_mmcif.c |    8 ++++++--
->  1 files changed, 6 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 9a4c151..59fa44e 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -1199,10 +1199,14 @@ static irqreturn_t sh_mmcif_intr(int irq, 
-> void *dev_id)
->        sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~INT_CRSPE);
->        sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MCRSPE);
->     } else if (state & INT_BUFREN) {
-> -      sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~INT_BUFREN);
-> +      sh_mmcif_writel(host->addr, MMCIF_CE_INT,
-> +         ~(INT_CMD12DRE | INT_CMD12RBE |
-> +           INT_CMD12CRE | INT_BUFREN));
->        sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
->     } else if (state & INT_BUFWEN) {
-> -      sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~INT_BUFWEN);
-> +      sh_mmcif_writel(host->addr, MMCIF_CE_INT,
-> +         ~(INT_CMD12DRE | INT_CMD12RBE |
-> +           INT_CMD12CRE | INT_BUFWEN));
->        sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
->     } else if (state & INT_CMD12DRE) {
->        sh_mmcif_writel(host->addr, MMCIF_CE_INT,
-> -- 
-> 1.7.5.4
-> 
-
+That seems fairly direct though. Is "dev" available inside host,
+platfm_host or tegra_host? You could obtain it from there if you wanted
+to reduce the number of parameters passed to the function.
