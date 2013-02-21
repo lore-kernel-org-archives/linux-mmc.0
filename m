@@ -1,153 +1,64 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v3] mmc: dw_mmc: Add MSHC compatible for Exynos4412
-Date: Thu, 21 Feb 2013 19:53:22 +0900
-Message-ID: <003401ce1021$ab1b6eb0$01524c10$%jun@samsung.com>
-References: <1361210793-5710-1-git-send-email-tobetter@gmail.com>
- <000501ce0e8a$91ef7c30$b5ce7490$%jun@samsung.com>
- <CADoNuNc2cjOU-PjWgwtB2wo9USMABGdwP=udCBHBYO9jgiLnvw@mail.gmail.com>
- <CAGOxZ51YtUL1yOJERLZG7uWgfQ=j88HmYue1oWiuah6Gdr32Eg@mail.gmail.com>
+From: javier Martin <javier.martin@vista-silicon.com>
+Subject: Re: [PATCH v2] mmc: mxcmmc: fix bug that may block a data transfer forever.
+Date: Thu, 21 Feb 2013 13:32:08 +0100
+Message-ID: <CACKLOr0vTr=8F7Ly_bQCL5FLWhn8hqmsLaUeGfDUMM7OaEqWOg@mail.gmail.com>
+References: <1347014617-16238-1-git-send-email-javier.martin@vista-silicon.com>
+	<20130219151414.2aa318d7@crub>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:38734 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751974Ab3BUKxZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Feb 2013 05:53:25 -0500
-In-reply-to: <CAGOxZ51YtUL1yOJERLZG7uWgfQ=j88HmYue1oWiuah6Gdr32Eg@mail.gmail.com>
-Content-language: ko
+Received: from mail-we0-f181.google.com ([74.125.82.181]:43089 "EHLO
+	mail-we0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752079Ab3BUMcK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Feb 2013 07:32:10 -0500
+Received: by mail-we0-f181.google.com with SMTP id t44so7561274wey.40
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Feb 2013 04:32:08 -0800 (PST)
+In-Reply-To: <20130219151414.2aa318d7@crub>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Alim Akhtar' <alim.akhtar@gmail.com>, 'Dongjin Kim' <tobetter@gmail.com>
-Cc: "'unlisted-recipients:'"@samsung.com, "'no To-header on input'"@samsung.com, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Sachin Kamat' <sachin.kamat@linaro.org>, 'Chris Ball' <cjb@laptop.org>, 'Arnd Bergmann' <arnd@arndb.de>, 'Thomas Abraham' <thomas.abraham@linaro.org>, 'Will Newton' <will.newton@imgtec.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Anatolij Gustschin <agust@denx.de>
+Cc: linux-mmc@vger.kernel.org, viresh.linux@gmail.com, g.liakhovetski@gmx.de, vinod.koul@linux.intel.com, s.hauer@pengutronix.de, cjb@laptop.org, fabio.estevam@freescale.com, gcembed@gmail.com
 
-On Wednesday, February 20, 2013, Alim Akhtar wrote:
-> Hi,
-> 
-> On Tue, Feb 19, 2013 at 6:04 PM, Dongjin Kim <tobetter@gmail.com> wrote:
-> > Hello Seungwon,
-> >
-> > Thank you for reviewing and I understand what you mean.
-> >
-> > I agree that Exynos5250 and Exynos4412 are not same, no idea how much
-> > they are different because no Exynos5250 spec on my hand. But at least
-> > I assumed that the capabilities below are supported by Exynos4412 in
-> > terms of its datasheet and it does work on my end as expected. :) Also
-> > I assumed it will be separated if one of both become different to add
-> > more capabilities.
-> >
-> >         MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
-> >                MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
-> >
-> > Maybe my understanding or approach is wrong since I do not have the
-> > information of Exynos5250.
-> > And suggestion do you have?
-At least, these capabilities can be shared because of common feature, not fully same.
-Dongjin, could you modify the commit message and comments of code?
+Hi,
 
-Let me introduce the functional feature of Exynos5250 and capability extension.
-I guess I'll send soon.
+On 19 February 2013 15:14, Anatolij Gustschin <agust@denx.de> wrote:
+> On Fri,  7 Sep 2012 12:43:37 +0200
+> Javier Martin <javier.martin@vista-silicon.com> wrote:
+> ...
+>> +static void mxcmci_dma_callback(void *data)
+>> +{
+>> +     struct mxcmci_host *host = data;
+>> +     u32 stat;
+>> +
+>> +     del_timer(&host->watchdog);
+>> +
+>> +     stat = readl(host->base + MMC_REG_STATUS);
+>> +     writel(stat & ~STATUS_DATA_TRANS_DONE, host->base + MMC_REG_STATUS);
+>> +
+>> +     dev_dbg(mmc_dev(host->mmc), "%s: 0x%08x\n", __func__, stat);
+>> +
+>> +     if (stat & STATUS_READ_OP_DONE)
+>> +             writel(STATUS_READ_OP_DONE, host->base + MMC_REG_STATUS);
+>> +
+>> +     mxcmci_data_done(host, stat);
+>
+> this change introduces a race condition for host->req (and maybe
+> for host->data) accesses. The callback is running in soft-irq context and can
+> be interrupted by the mxcmci_irq() interrupt which can finish the request and
+> set host->req to NULL. Then mxcmci_data_done() crashes with a null pointer
+> dereference. How extensively was it tested?
 
-Thanks,
-Seungwon Jeon
+It was tested executing a loop with bonnie++ for a week.
+I didn't notice the race condition. Have you had real issues or just
+found  it by analysing the code?
 
-> 
-> Recently Guennadi Liakhovetski has done some work to centralize the
-> mmc capabilities. See [1] and [2].
-> Those patches are pushed to Chris's mmc-next tree.
-> Is  it possible to extend [1] and [2] and add more capabilities (at
-> least all known one) and let these caps being passed from DT instead?
-> 
-> Second thought is, let the common minimum caps as a part of .caps
-> field in dw_mmc-exynos.c itself and pass the extra/advance controller
-> caps from DT and parse them via dw_mci_parse_dt() in dw_mmc.c itself.
-> 
-> [1] https://patchwork.kernel.org/patch/1991851/
-> [2] https://patchwork.kernel.org/patch/2106531/
-> 
-> > Regards,
-> > Dongjin.
-> >
-> > On Tue, Feb 19, 2013 at 7:19 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> >> On Tuesday, February 19, 2013, Dongjin Kim wrote:
-> >>> This patch adds the compatible string for MSHC controller of Exynos4412, and
-> >>> share the controller specific properties with Exynos5250 since they have same
-> >>> features. Its driver data name is changed to exynos_drv_data instead SoC
-> >>> specific name.
-> >>
-> >> It's not actually same.
-> >> Exynos4412 doesn't have forward compatibilities for Exynos5250.
-> >> I agree that functionality of exynos_drv_data is common.
-> >> These functions have been implemented for existing Exynos*.
-> >> But in case of caps, it can't applied completely.
-> >> I'm concerning about this.
-> >>
-> >> Thanks,
-> >> Seungwon Jeon
-> >>>
-> >>> Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> >>> Cc: Sachin Kamat <sachin.kamat@linaro.org>
-> >>> Signed-off-by: Dongjin Kim <tobetter@gmail.com>
-> >>> ---
-> >>>  drivers/mmc/host/dw_mmc-exynos.c |   12 +++++++-----
-> >>>  1 file changed, 7 insertions(+), 5 deletions(-)
-> >>>
-> >>> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> >>> index 4d50da6..38cd03c 100644
-> >>> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> >>> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> >>> @@ -199,8 +199,8 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
-> >>>       return 0;
-> >>>  }
-> >>>
-> >>> -/* Exynos5250 controller specific capabilities */
-> >>> -static unsigned long exynos5250_dwmmc_caps[4] = {
-> >>> +/* Exynos4412/Exynos5250 controller specific capabilities */
-> >>> +static unsigned long exynos_dwmmc_caps[4] = {
-> >>>       MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
-> >>>               MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
-> >>>       MMC_CAP_CMD23,
-> >>> @@ -208,8 +208,8 @@ static unsigned long exynos5250_dwmmc_caps[4] = {
-> >>>       MMC_CAP_CMD23,
-> >>>  };
-> >>>
-> >>> -static const struct dw_mci_drv_data exynos5250_drv_data = {
-> >>> -     .caps                   = exynos5250_dwmmc_caps,
-> >>> +static const struct dw_mci_drv_data exynos_drv_data = {
-> >>> +     .caps                   = exynos_dwmmc_caps,
-> >>>       .init                   = dw_mci_exynos_priv_init,
-> >>>       .setup_clock            = dw_mci_exynos_setup_clock,
-> >>>       .prepare_command        = dw_mci_exynos_prepare_command,
-> >>> @@ -219,8 +219,10 @@ static const struct dw_mci_drv_data exynos5250_drv_data = {
-> >>>  };
-> >>>
-> >>>  static const struct of_device_id dw_mci_exynos_match[] = {
-> >>> +     { .compatible = "samsung,exynos4412-dw-mshc",
-> >>> +                     .data = &exynos_drv_data, },
-> >>>       { .compatible = "samsung,exynos5250-dw-mshc",
-> >>> -                     .data = &exynos5250_drv_data, },
-> >>> +                     .data = &exynos_drv_data, },
-> >>>       {},
-> >>>  };
-> >>>  MODULE_DEVICE_TABLE(of, dw_mci_exynos_match);
-> >>> --
-> >>> 1.7.10.4
-> >>>
-> >>> --
-> >>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> >>> the body of a message to majordomo@vger.kernel.org
-> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> Regards,
-> Alim
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Regards.
 
+-- 
+Javier Martin
+Vista Silicon S.L.
+CDTUC - FASE C - Oficina S-345
+Avda de los Castros s/n
+39005- Santander. Cantabria. Spain
++34 942 25 32 60
+www.vista-silicon.com
