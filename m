@@ -1,40 +1,71 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: fixed a wrong UHS_REG 16 bit clear
-Date: Fri, 22 Feb 2013 20:16:53 +0900
-Message-ID: <001101ce10ee$1df30610$59d91230$%jun@samsung.com>
-References: <1361496450-12647-1-git-send-email-hyeonsu.kim@samsung.com>
+From: "Manjunathappa, Prakash" <prakash.pm@ti.com>
+Subject: RE: [PATCH v2] mmc: davinci: allow driver to work without DMA
+ resource
+Date: Fri, 22 Feb 2013 13:03:38 +0000
+Message-ID: <A73F36158E33644199EB82C5EC81C7BC3EA47D52@DBDE01.ent.ti.com>
+References: <1360066944-14265-1-git-send-email-prakash.pm@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:43062 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755609Ab3BVLQy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Feb 2013 06:16:54 -0500
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MIM00IEFCNWOVG0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 22 Feb 2013 20:16:53 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0MIM00HBUCO56O10@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 22 Feb 2013 20:16:53 +0900 (KST)
-In-reply-to: <1361496450-12647-1-git-send-email-hyeonsu.kim@samsung.com>
-Content-language: ko
+Received: from comal.ext.ti.com ([198.47.26.152]:58473 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757099Ab3BVNDt convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Feb 2013 08:03:49 -0500
+In-Reply-To: <1360066944-14265-1-git-send-email-prakash.pm@ti.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Hyeonsu Kim' <hyeonsu.kim@samsung.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com
-Cc: kyungmin.park@samsung.com, jh80.chung@samsung.com
+To: "Manjunathappa, Prakash" <prakash.pm@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "cjb@laptop.org" <cjb@laptop.org>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "Porter, Matt" <mporter@ti.com>, "ido@wizery.com" <ido@wizery.com>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>
 
-On Friday, February 22, 2013, Hyeonsu Kim wrote:
-> In the legacy code, driver clear not only UHS_REG 16 bit also 0-15bit.
-> If we use UHS-1 mode spec card like SDR50, SDR104. UHS_REG 0-15 should be set by
-> 1 according to slot id. In this case, legacy code can make problem.
+Hi Chris,
+
+As there are no comments, Could you please accept this patch?
+
+Thanks,
+Prakash
+
+On Tue, Feb 05, 2013 at 17:52:24, Manjunathappa, Prakash wrote:
+> Do not return probe failure with missing DMA resources,
+> allow driver to work in PIO mode.
+> Tested on da850-evm by mounting partition followed by
+> file creation and deletion.
 > 
-> Signed-off-by: Hyeonsu Kim <hyeonsu.kim@samsung.com>
-
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+> Signed-off-by: Manjunathappa, Prakash <prakash.pm@ti.com>
+> ---
+> Since v1:
+> Specified missing DMA resource(RX/TX).
+> 
+>  drivers/mmc/host/davinci_mmc.c |   10 ++++++----
+>  1 files changed, 6 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+> index 2063677..27123f8 100644
+> --- a/drivers/mmc/host/davinci_mmc.c
+> +++ b/drivers/mmc/host/davinci_mmc.c
+> @@ -1190,13 +1190,15 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
+>  
+>  	r = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+>  	if (!r)
+> -		goto out;
+> -	host->rxdma = r->start;
+> +		dev_warn(&pdev->dev, "RX DMA resource not specified\n");
+> +	else
+> +		host->rxdma = r->start;
+>  
+>  	r = platform_get_resource(pdev, IORESOURCE_DMA, 1);
+>  	if (!r)
+> -		goto out;
+> -	host->txdma = r->start;
+> +		dev_warn(&pdev->dev, "TX DMA resource not specified\n");
+> +	else
+> +		host->txdma = r->start;
+>  
+>  	host->mem_res = mem;
+>  	host->base = ioremap(mem->start, mem_size);
+> -- 
+> 1.7.4.1
+> 
+> 
 
