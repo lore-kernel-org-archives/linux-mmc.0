@@ -1,68 +1,29 @@
-From: Dongjin Kim <tobetter@gmail.com>
-Subject: [PATCH v4] mmc: dw_mmc: Add MSHC compatible for Exynos4412
-Date: Sat, 23 Feb 2013 00:17:45 +0900
-Message-ID: <1361546283-7479-1-git-send-email-tobetter@gmail.com>
-References: <1361210793-5710-1-git-send-email-tobetter@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f52.google.com ([209.85.220.52]:33613 "EHLO
-	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756743Ab3BVPSi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Feb 2013 10:18:38 -0500
-In-Reply-To: <1361210793-5710-1-git-send-email-tobetter@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: Re: [PATCH V2 0/2] mmc: tegra: use mmc_of_parse to get support of
+ standard MMC DT binding
+Date: Fri, 22 Feb 2013 11:16:18 -0700
+Message-ID: <5127B5F2.40304@wwwdotorg.org>
+References: <1361503420-16473-1-git-send-email-josephl@nvidia.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1361503420-16473-1-git-send-email-josephl-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Joseph Lo <josephl-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-Cc: Dongjin Kim <tobetter@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sachin Kamat <sachin.kamat@linaro.org>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Thomas Abraham <thomas.abraham@linaro.org>, Will Newton <will.newton@imgtec.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-This patch adds the compatible string for MSHC controller of Exynos4412.
-And exynos5250_dwmmc_caps is renamed to exynos_dwmmc_caps, since it has the
-capablities of common feature supported by Exynos4 and Exynos5.
+On 02/21/2013 08:23 PM, Joseph Lo wrote:
+> The 2nd patch of this series depends on two patches below.
+> 
+> "mmc: provide a standard MMC device-tree binding parser centrally"
+> (available on next-20130219)
+> mmc: tegra: assume CONFIG_OF, remove platform data
+> (available on next-20130220)
 
-Cc: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Sachin Kamat <sachin.kamat@linaro.org>
-Signed-off-by: Dongjin Kim <tobetter@gmail.com>
----
- drivers/mmc/host/dw_mmc-exynos.c |   12 +++++++-----
- 1 file changed, 7 insertions(+), 5 deletions(-)
+I think this version looks good. I'll apply it for 3.10 when I can.
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 4d50da6..dd8f58c 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -199,8 +199,8 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
- 	return 0;
- }
- 
--/* Exynos5250 controller specific capabilities */
--static unsigned long exynos5250_dwmmc_caps[4] = {
-+/* Common capabilities of Exynos4/Exynos5 SoC */
-+static unsigned long exynos_dwmmc_caps[4] = {
- 	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
- 		MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
- 	MMC_CAP_CMD23,
-@@ -208,8 +208,8 @@ static unsigned long exynos5250_dwmmc_caps[4] = {
- 	MMC_CAP_CMD23,
- };
- 
--static const struct dw_mci_drv_data exynos5250_drv_data = {
--	.caps			= exynos5250_dwmmc_caps,
-+static const struct dw_mci_drv_data exynos_drv_data = {
-+	.caps			= exynos_dwmmc_caps,
- 	.init			= dw_mci_exynos_priv_init,
- 	.setup_clock		= dw_mci_exynos_setup_clock,
- 	.prepare_command	= dw_mci_exynos_prepare_command,
-@@ -219,8 +219,10 @@ static const struct dw_mci_drv_data exynos5250_drv_data = {
- };
- 
- static const struct of_device_id dw_mci_exynos_match[] = {
-+	{ .compatible = "samsung,exynos4412-dw-mshc",
-+			.data = &exynos_drv_data, },
- 	{ .compatible = "samsung,exynos5250-dw-mshc",
--			.data = &exynos5250_drv_data, },
-+			.data = &exynos_drv_data, },
- 	{},
- };
- MODULE_DEVICE_TABLE(of, dw_mci_exynos_match);
--- 
-1.7.10.4
-
+Chris, once you can merge patches for 3.10, can you create a topic
+branch that contains "mmc: provide a standard MMC device-tree binding
+parser centrally" so I can merge it into the Tegra tree? Thanks.
