@@ -1,53 +1,163 @@
-From: Hyeonsu Kim <hyeonsu.kim@samsung.com>
-Subject: [PATCH] mmc: dw_mmc: fixed a wrong UHS_REG 16 bit clear
-Date: Fri, 22 Feb 2013 10:27:30 +0900
-Message-ID: <1361496450-12647-1-git-send-email-hyeonsu.kim@samsung.com>
+From: Dongjin Kim <tobetter@gmail.com>
+Subject: Re: [PATCH v3] mmc: dw_mmc: Add MSHC compatible for Exynos4412
+Date: Fri, 22 Feb 2013 10:39:49 +0900
+Message-ID: <CADoNuNfDuz+njsn+7isNKf-Ud_nNEKFYYf7Xio3=94hVU6KGVA@mail.gmail.com>
+References: <1361210793-5710-1-git-send-email-tobetter@gmail.com>
+	<000501ce0e8a$91ef7c30$b5ce7490$%jun@samsung.com>
+	<CADoNuNc2cjOU-PjWgwtB2wo9USMABGdwP=udCBHBYO9jgiLnvw@mail.gmail.com>
+	<CAGOxZ51YtUL1yOJERLZG7uWgfQ=j88HmYue1oWiuah6Gdr32Eg@mail.gmail.com>
+	<003401ce1021$ab1b6eb0$01524c10$%jun@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:25260 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753149Ab3BVB1i (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Feb 2013 20:27:38 -0500
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MIL00M35LCPFP60@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 22 Feb 2013 10:27:37 +0900 (KST)
-Received: from localhost.localdomain ([165.213.71.253])
- by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0MIL003F9LDYW690@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 22 Feb 2013 10:27:36 +0900 (KST)
+Received: from mail-ob0-f170.google.com ([209.85.214.170]:37632 "EHLO
+	mail-ob0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753834Ab3BVBju (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Feb 2013 20:39:50 -0500
+In-Reply-To: <003401ce1021$ab1b6eb0$01524c10$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com
-Cc: kyungmin.park@samsung.com, jh80.chung@samsung.com, tgih.jun@samsung.com, Hyeonsu Kim <hyeonsu.kim@samsung.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Alim Akhtar <alim.akhtar@gmail.com>, "'unlisted-recipients:'"@samsung.com, "'no To-header on input'"@samsung.com, Jaehoon Chung <jh80.chung@samsung.com>, Sachin Kamat <sachin.kamat@linaro.org>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Thomas Abraham <thomas.abraham@linaro.org>, Will Newton <will.newton@imgtec.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-In the legacy code, driver clear not only UHS_REG 16 bit also 0-15bit.
-If we use UHS-1 mode spec card like SDR50, SDR104. UHS_REG 0-15 should be set by
-1 according to slot id. In this case, legacy code can make problem.
+Hello Seungwon,
 
-Signed-off-by: Hyeonsu Kim <hyeonsu.kim@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
+OK, I will change the commit message. And I also think Alim's idea is
+good but need more detail about functional features of Synopsis' IP.
+Similar situation would be happened to Exynos4210 which is not
+supported by dw_mmc-exynos.c yet.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 323c502..390c15c 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -789,9 +789,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 	/* DDR mode set */
- 	if (ios->timing == MMC_TIMING_UHS_DDR50)
--		regs |= (0x1 << slot->id) << 16;
-+		regs |= ((0x1 << slot->id) << 16);
- 	else
--		regs &= ~(0x1 << slot->id) << 16;
-+		regs &= ~((0x1 << slot->id) << 16);
- 
- 	mci_writel(slot->host, UHS_REG, regs);
- 
--- 
-1.7.5.4
+Regards,
+Dongjin.
 
+On Thu, Feb 21, 2013 at 7:53 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> On Wednesday, February 20, 2013, Alim Akhtar wrote:
+>> Hi,
+>>
+>> On Tue, Feb 19, 2013 at 6:04 PM, Dongjin Kim <tobetter@gmail.com> wrote:
+>> > Hello Seungwon,
+>> >
+>> > Thank you for reviewing and I understand what you mean.
+>> >
+>> > I agree that Exynos5250 and Exynos4412 are not same, no idea how much
+>> > they are different because no Exynos5250 spec on my hand. But at least
+>> > I assumed that the capabilities below are supported by Exynos4412 in
+>> > terms of its datasheet and it does work on my end as expected. :) Also
+>> > I assumed it will be separated if one of both become different to add
+>> > more capabilities.
+>> >
+>> >         MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
+>> >                MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
+>> >
+>> > Maybe my understanding or approach is wrong since I do not have the
+>> > information of Exynos5250.
+>> > And suggestion do you have?
+> At least, these capabilities can be shared because of common feature, not fully same.
+> Dongjin, could you modify the commit message and comments of code?
+>
+> Let me introduce the functional feature of Exynos5250 and capability extension.
+> I guess I'll send soon.
+>
+> Thanks,
+> Seungwon Jeon
+>
+>>
+>> Recently Guennadi Liakhovetski has done some work to centralize the
+>> mmc capabilities. See [1] and [2].
+>> Those patches are pushed to Chris's mmc-next tree.
+>> Is  it possible to extend [1] and [2] and add more capabilities (at
+>> least all known one) and let these caps being passed from DT instead?
+>>
+>> Second thought is, let the common minimum caps as a part of .caps
+>> field in dw_mmc-exynos.c itself and pass the extra/advance controller
+>> caps from DT and parse them via dw_mci_parse_dt() in dw_mmc.c itself.
+>>
+>> [1] https://patchwork.kernel.org/patch/1991851/
+>> [2] https://patchwork.kernel.org/patch/2106531/
+>>
+>> > Regards,
+>> > Dongjin.
+>> >
+>> > On Tue, Feb 19, 2013 at 7:19 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> >> On Tuesday, February 19, 2013, Dongjin Kim wrote:
+>> >>> This patch adds the compatible string for MSHC controller of Exynos4412, and
+>> >>> share the controller specific properties with Exynos5250 since they have same
+>> >>> features. Its driver data name is changed to exynos_drv_data instead SoC
+>> >>> specific name.
+>> >>
+>> >> It's not actually same.
+>> >> Exynos4412 doesn't have forward compatibilities for Exynos5250.
+>> >> I agree that functionality of exynos_drv_data is common.
+>> >> These functions have been implemented for existing Exynos*.
+>> >> But in case of caps, it can't applied completely.
+>> >> I'm concerning about this.
+>> >>
+>> >> Thanks,
+>> >> Seungwon Jeon
+>> >>>
+>> >>> Cc: Jaehoon Chung <jh80.chung@samsung.com>
+>> >>> Cc: Sachin Kamat <sachin.kamat@linaro.org>
+>> >>> Signed-off-by: Dongjin Kim <tobetter@gmail.com>
+>> >>> ---
+>> >>>  drivers/mmc/host/dw_mmc-exynos.c |   12 +++++++-----
+>> >>>  1 file changed, 7 insertions(+), 5 deletions(-)
+>> >>>
+>> >>> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+>> >>> index 4d50da6..38cd03c 100644
+>> >>> --- a/drivers/mmc/host/dw_mmc-exynos.c
+>> >>> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+>> >>> @@ -199,8 +199,8 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
+>> >>>       return 0;
+>> >>>  }
+>> >>>
+>> >>> -/* Exynos5250 controller specific capabilities */
+>> >>> -static unsigned long exynos5250_dwmmc_caps[4] = {
+>> >>> +/* Exynos4412/Exynos5250 controller specific capabilities */
+>> >>> +static unsigned long exynos_dwmmc_caps[4] = {
+>> >>>       MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
+>> >>>               MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
+>> >>>       MMC_CAP_CMD23,
+>> >>> @@ -208,8 +208,8 @@ static unsigned long exynos5250_dwmmc_caps[4] = {
+>> >>>       MMC_CAP_CMD23,
+>> >>>  };
+>> >>>
+>> >>> -static const struct dw_mci_drv_data exynos5250_drv_data = {
+>> >>> -     .caps                   = exynos5250_dwmmc_caps,
+>> >>> +static const struct dw_mci_drv_data exynos_drv_data = {
+>> >>> +     .caps                   = exynos_dwmmc_caps,
+>> >>>       .init                   = dw_mci_exynos_priv_init,
+>> >>>       .setup_clock            = dw_mci_exynos_setup_clock,
+>> >>>       .prepare_command        = dw_mci_exynos_prepare_command,
+>> >>> @@ -219,8 +219,10 @@ static const struct dw_mci_drv_data exynos5250_drv_data = {
+>> >>>  };
+>> >>>
+>> >>>  static const struct of_device_id dw_mci_exynos_match[] = {
+>> >>> +     { .compatible = "samsung,exynos4412-dw-mshc",
+>> >>> +                     .data = &exynos_drv_data, },
+>> >>>       { .compatible = "samsung,exynos5250-dw-mshc",
+>> >>> -                     .data = &exynos5250_drv_data, },
+>> >>> +                     .data = &exynos_drv_data, },
+>> >>>       {},
+>> >>>  };
+>> >>>  MODULE_DEVICE_TABLE(of, dw_mci_exynos_match);
+>> >>> --
+>> >>> 1.7.10.4
+>> >>>
+>> >>> --
+>> >>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> >>> the body of a message to majordomo@vger.kernel.org
+>> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >>
+>> > --
+>> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> > the body of a message to majordomo@vger.kernel.org
+>> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>> --
+>> Regards,
+>> Alim
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
