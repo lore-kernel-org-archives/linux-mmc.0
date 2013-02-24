@@ -1,42 +1,52 @@
-From: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH V2 0/2] mmc: tegra: use mmc_of_parse to get support of standard MMC DT binding
-Date: Sun, 24 Feb 2013 15:08:44 -0500
-Message-ID: <87mwutbhkj.fsf@octavius.laptop.org>
-References: <1361503420-16473-1-git-send-email-josephl@nvidia.com>
-	<5127B5F2.40304@wwwdotorg.org>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <5127B5F2.40304-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> (Stephen Warren's message of "Fri,
-	22 Feb 2013 11:16:18 -0700")
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Cc: Joseph Lo <josephl-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Syam Sidhardhan <syamsidhardh@gmail.com>
+Subject: [PATCH] mmc: omap_hsmmc: Remove redundant check
+Date: Mon, 25 Feb 2013 04:22:19 +0530
+Message-ID: <1361746339-28836-1-git-send-email-s.syam@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:36408 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756368Ab3BXWwc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Feb 2013 17:52:32 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: syamsidhardh@gmail.com, balajitk@ti.com, cjb@laptop.org
 
-Hi Stephen,
+Remove redundant check for (host == NULL)
 
-On Fri, Feb 22 2013, Stephen Warren wrote:
-> On 02/21/2013 08:23 PM, Joseph Lo wrote:
->> The 2nd patch of this series depends on two patches below.
->> 
->> "mmc: provide a standard MMC device-tree binding parser centrally"
->> (available on next-20130219)
->> mmc: tegra: assume CONFIG_OF, remove platform data
->> (available on next-20130220)
->
-> I think this version looks good. I'll apply it for 3.10 when I can.
->
-> Chris, once you can merge patches for 3.10, can you create a topic
-> branch that contains "mmc: provide a standard MMC device-tree binding
-> parser centrally" so I can merge it into the Tegra tree? Thanks.
+Signed-off-by: Syam Sidhardhan <s.syam@samsung.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |   10 ++--------
+ 1 file changed, 2 insertions(+), 8 deletions(-)
 
-I just sent "mmc: provide a standard MMC device-tree binding parser
-centrally" for 3.9, so you're all set.
-
-Thanks,
-
-- Chris.
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index bc58078..5d690e6 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2100,10 +2100,7 @@ static int omap_hsmmc_suspend(struct device *dev)
+ 	int ret = 0;
+ 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
+ 
+-	if (!host)
+-		return 0;
+-
+-	if (host && host->suspended)
++	if (!host || host->suspended)
+ 		return 0;
+ 
+ 	pm_runtime_get_sync(host->dev);
+@@ -2134,10 +2131,7 @@ static int omap_hsmmc_resume(struct device *dev)
+ 	int ret = 0;
+ 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
+ 
+-	if (!host)
+-		return 0;
+-
+-	if (host && !host->suspended)
++	if (!(host && host->suspended))
+ 		return 0;
+ 
+ 	pm_runtime_get_sync(host->dev);
 -- 
-Chris Ball   <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.9.5
+
