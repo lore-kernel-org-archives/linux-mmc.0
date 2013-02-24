@@ -1,175 +1,262 @@
-From: Yaniv Gardi <ygardi@codeaurora.org>
-Subject: [PATCH v1] mmc: card: Adding support for sanitize in eMMC 4.5
-Date: Sun, 24 Feb 2013 13:38:44 +0200
-Message-ID: <1361705927-10524-1-git-send-email-ygardi@codeaurora.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: [GIT PULL] MMC updates for 3.9-rc1
+Date: Sun, 24 Feb 2013 15:04:22 -0500
+Message-ID: <87r4k5bhrt.fsf@octavius.laptop.org>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, vgoyal@redhat.com, tj@kernel.org, linux-kernel@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, Yaniv Gardi <ygardi@codeaurora.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-The sanitize support is added as a user-app ioctl call, and
-was removed from the block-device request, since its purpose is
-to be invoked not via File-System but by a user.
-This feature deletes the unmap memory region of the eMMC card,
-by writing to a specific register in the EXT_CSD.
-unmap region is the memory region that was previously deleted
-(by erase, trim or discard operation).
-In order to avoid timeout when sanitizing large-scale cards,
-the timeout for sanitize operation is 240 seconds.
+Hi Linus,
 
-Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
+Please pull from:
 
----
- drivers/mmc/card/block.c |   68 +++++++++++++++++++++++++++++++--------------
- drivers/mmc/card/queue.c |    2 +-
- include/linux/mmc/host.h |    1 +
- 3 files changed, 49 insertions(+), 22 deletions(-)
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-updates-for-3.9-rc1
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 21056b9..21bb8b4 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -58,6 +58,8 @@ MODULE_ALIAS("mmc:block");
- #define INAND_CMD38_ARG_SECTRIM1 0x81
- #define INAND_CMD38_ARG_SECTRIM2 0x88
- #define MMC_BLK_TIMEOUT_MS  (10 * 60 * 1000)        /* 10 minute timeout */
-+#define MMC_SANITIZE_REQ_TIMEOUT 240000
-+#define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
- 
- static DEFINE_MUTEX(block_mutex);
- 
-@@ -394,6 +396,35 @@ static int ioctl_rpmb_card_status_poll(struct mmc_card *card, u32 *status,
- 	return err;
- }
- 
-+static int ioctl_do_sanitize(struct mmc_card *card)
-+{
-+	int err;
-+
-+	if (!(mmc_can_sanitize(card) &&
-+	      (card->host->caps2 & MMC_CAP2_SANITIZE))) {
-+			pr_warn("%s: %s - SANITIZE is not supported\n",
-+				mmc_hostname(card->host), __func__);
-+			err = -EOPNOTSUPP;
-+			goto out;
-+	}
-+
-+	pr_debug("%s: %s - SANITIZE IN PROGRESS...\n",
-+		mmc_hostname(card->host), __func__);
-+
-+	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+					EXT_CSD_SANITIZE_START, 1,
-+					MMC_SANITIZE_REQ_TIMEOUT);
-+
-+	if (err)
-+		pr_err("%s: %s - EXT_CSD_SANITIZE_START failed. err=%d\n",
-+		       mmc_hostname(card->host), __func__, err);
-+
-+	pr_debug("%s: %s - SANITIZE COMPLETED\n", mmc_hostname(card->host),
-+					     __func__);
-+out:
-+	return err;
-+}
-+
- static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 	struct mmc_ioc_cmd __user *ic_ptr)
- {
-@@ -496,6 +527,16 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 			goto cmd_rel_host;
- 	}
- 
-+	if (MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_SANITIZE_START) {
-+		err = ioctl_do_sanitize(card);
-+
-+		if (err)
-+			pr_err("%s: ioctl_do_sanitize() failed. err = %d",
-+			       __func__, err);
-+
-+		goto cmd_rel_host;
-+	}
-+
- 	mmc_wait_for_req(card->host, &mrq);
- 
- 	if (cmd.error) {
-@@ -925,10 +966,10 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
- {
- 	struct mmc_blk_data *md = mq->data;
- 	struct mmc_card *card = md->queue.card;
--	unsigned int from, nr, arg, trim_arg, erase_arg;
-+	unsigned int from, nr, arg;
- 	int err = 0, type = MMC_BLK_SECDISCARD;
- 
--	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
-+	if (!(mmc_can_secure_erase_trim(card))) {
- 		err = -EOPNOTSUPP;
- 		goto out;
- 	}
-@@ -936,23 +977,11 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
- 	from = blk_rq_pos(req);
- 	nr = blk_rq_sectors(req);
- 
--	/* The sanitize operation is supported at v4.5 only */
--	if (mmc_can_sanitize(card)) {
--		erase_arg = MMC_ERASE_ARG;
--		trim_arg = MMC_TRIM_ARG;
--	} else {
--		erase_arg = MMC_SECURE_ERASE_ARG;
--		trim_arg = MMC_SECURE_TRIM1_ARG;
--	}
-+	if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
-+		arg = MMC_SECURE_TRIM1_ARG;
-+	else
-+		arg = MMC_SECURE_ERASE_ARG;
- 
--	if (mmc_erase_group_aligned(card, from, nr))
--		arg = erase_arg;
--	else if (mmc_can_trim(card))
--		arg = trim_arg;
--	else {
--		err = -EINVAL;
--		goto out;
--	}
- retry:
- 	if (card->quirks & MMC_QUIRK_INAND_CMD38) {
- 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-@@ -988,9 +1017,6 @@ retry:
- 			goto out;
- 	}
- 
--	if (mmc_can_sanitize(card))
--		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--				 EXT_CSD_SANITIZE_START, 1, 0);
- out_retry:
- 	if (err && !mmc_blk_reset(md, card->host, type))
- 		goto retry;
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index fadf52e..483f0e8 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -148,7 +148,7 @@ static void mmc_queue_setup_discard(struct request_queue *q,
- 	/* granularity must not be greater than max. discard */
- 	if (card->pref_erase > max_discard)
- 		q->limits.discard_granularity = 0;
--	if (mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))
-+	if (mmc_can_secure_erase_trim(card))
- 		queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
- }
- 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 61a10c1..045e9f7 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -258,6 +258,7 @@ struct mmc_host {
- #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
- #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
- #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
-+#define MMC_CAP2_SANITIZE	(1 << 12)		/* Support Sanitize */
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 
+to receive the MMC merge for 3.9.  There are currently no conflicts,
+and these patches have been tested in linux-next.  Thanks.
+
+
+The following changes since commit 7810cc1e7721220f1ed2a23ca95113d6434f6dcd:
+
+  digsig: Fix memory leakage in digsig_verify_rsa() (2013-02-01 15:59:33 +1100)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-updates-for-3.9-rc1
+
+for you to fetch changes up to 0e786102949d7461859c6ce9f39c2c8d28e42db3:
+
+  mmc: tegra: assume CONFIG_OF, remove platform data (2013-02-24 14:37:26 -0500)
+
+----------------------------------------------------------------
+MMC highlights for 3.9:
+
+Core:
+ - Support for packed commands in eMMC 4.5.  (This requires a host
+   capability to be turned on.  It increases write throughput by 20%+,
+   but may also increase average write latency; more testing needed.)
+ - Add DT bindings for capability flags.
+ - Add mmc_of_parse() for shared DT parsing between drivers.
+
+Drivers:
+ - android-goldfish: New MMC driver for the Android Goldfish emulator.
+ - mvsdio: Add DT bindings, pinctrl, use slot-gpio for card detection.
+ - omap_hsmmc: Fix boot hangs with RPMB partitions.
+ - sdhci-bcm2835: New driver for controller used by Raspberry Pi.
+ - sdhci-esdhc-imx: Add 8-bit data, auto CMD23 support, use slot-gpio.
+ - sh_mmcif: Add support for eMMC DDR, bundled MMCIF IRQs.
+ - tmio_mmc: Add DT bindings, support for vccq regulator.
+
+----------------------------------------------------------------
+Andy Shevchenko (1):
+      mmc: sdhci: introduce sdhci_update_clock helper to re-enable clock
+
+Balaji T K (2):
+      mmc: core: expose RPMB partition only for CMD23 capable hosts
+      mmc: MAINTAINERS update for omap_hsmmc
+
+Doug Anderson (5):
+      mmc: dw_mmc: Add "disable-wp" device tree property
+      ARM: dts: Add disable-wp for sd card slot on smdk5250
+      mmc: dw_mmc: exynos: Remove code for wp-gpios
+      mmc: dw_mmc: Handle wp-gpios from device tree
+      mmc: dw_mmc: Remove DW_MCI_QUIRK_NO_WRITE_PROTECT
+
+Fabio Estevam (4):
+      mmc: mxs-mmc: Add MODULE_ALIAS()
+      mmc: mxs-mmc: Fix warning due to incorrect type
+      mmc: sdhci-esdhc-imx: Remove unused variables
+      mmc: sdhci: Fix parameter of sdhci_do_start_signal_voltage_switch()
+
+Guennadi Liakhovetski (20):
+      mmc: sh_mmcif: fix missing and consolidate IO completion timeouts
+      mmc: sh_mmcif: (cosmetic) simplify boolean return blocks
+      mmc: sh_mmcif: fix a race, causing an Oops on SMP
+      mmc: sh_mmcif: reset error code for any opcode
+      mmc: sh_mmcif: reset DMA completion immediately before starting DMA
+      mmc: sh_mmcif: fix I/O errors
+      mmc: sh_mmcif: simplify IRQ processing
+      mmc: fix DT binding documentation SDHCI left-over
+      mmc: sdhi, tmio: only check flags in tmio-mmc driver proper
+      mmc: detailed definition of CD and WP MMC line polarities in DT
+      mmc: provide a standard MMC device-tree binding parser centrally
+      mmc: (cosmetic) remove "extern" from function declarations
+      mmc: sh_mmcif: use mmc_of_parse() to parse standard MMC DT bindings
+      mmc: tmio-mmc: define device-tree bindings
+      mmc: tmio-mmc: parse device-tree bindings
+      mmc: sh_mobile_sdhi: remove unused .pdata field
+      mmc: sh_mobile_sdhi: use managed resource allocations
+      mmc: tmio: remove unused and deprecated symbols
+      mmc: tmio: add support for the VccQ regulator
+      mmc: add DT bindings for more MMC capability flags
+
+Jaehoon Chung (1):
+      mmc: core: fix indentation
+
+Johan Rudholm (5):
+      mmc: sd: Simplify by using mmc_host_uhs
+      mmc: core: Add mmc_power_cycle
+      mmc: core: Add card_busy to host_ops
+      mmc: core: Break out start_signal_voltage_switch
+      mmc: core: Fixup signal voltage switch
+
+Kevin Liu (6):
+      mmc: sdhci: disable interrupt before free_irq
+      mmc: sdhci: add IRQ wake up support
+      mmc: sdhci-pxav3: add IRQ wake up support
+      mmc: sdhci: update signal voltage switch code
+      mmc: sdhci: enhance preset value function
+      mmc: sdhci-pxav3: add pm runtime support
+
+Konstantin Dorfman (1):
+      mmc: fix async request mechanism for sequential read scenarios
+
+Lars-Peter Clausen (1):
+      mmc: sdhci-pltfm: Add a common clk API implementation of get_timeout_clock
+
+Marek Szyprowski (2):
+      mmc: use regulator_can_change_voltage() instead of regulator_count_voltages
+      mmc: sdhci: check voltage range only on regulators aware of voltage value
+
+Maya Erez (1):
+      mmc: core: move the cache disabling operation to mmc_suspend
+
+Mike Lockwood (1):
+      mmc: goldfish: emulated MMC device
+
+Roger Tseng (1):
+      mmc: rtsx: remove driving adjustment
+
+Roland Stigge (1):
+      mmc: mmc_spi: Fix return value evaluation of irq_of_parse_and_map()
+
+Sascha Hauer (2):
+      mmc: sdhci: rename platform_8bit_width to platform_bus_width
+      mmc: sdhci-esdhc-imx: support 8bit mode
+
+Seungwon Jeon (6):
+      mmc: queue: exclude asynchronous transfer for special request
+      MAINTAINERS: mmc: add maintainer entry for dw_mmc driver
+      mmc: core: fix permanent sleep of mmcqd during card removal
+      mmc: block: don't start new request when the card is removed
+      mmc: add packed command feature of eMMC4.5
+      mmc: support packed write command for eMMC4.5 devices
+
+Shawn Guo (12):
+      mmc: sdhci: query card presence from cd-gpio before asking SDHCI
+      mmc: slot-gpio: use devm_* managed functions to ease users
+      mmc: remove unncessary mmc_gpio_free_cd() call from slot-gpio users
+      mmc: sdhci-esdhc-imx: use slot-gpio helpers for CD and WP
+      mmc: sdhci-esdhc-imx: remove ESDHC_CD_GPIO handling from IO accessory
+      mmc: sdhci-esdhc-imx: fix host version read
+      mmc: sdhci-esdhc-imx: remove D3CD check from SDHCI_HOST_CONTROL write
+      mmc: sdhci-esdhc-imx: name esdhc specific definitions with ESDHC_ prefix
+      mmc: sdhci-esdhc-imx: separate transfer mode from command write for usdhc
+      mmc: sdhci-esdhc-imx: manually reset MIX_CTRL for usdhc
+      mmc: sdhci-esdhc-imx: Auto CMD23 support for usdhc
+      mmc: dt: bus-width can be an optional property
+
+Shinya Kuribayashi (1):
+      mmc: sh_mmcif: add support for bundled MMCIF IRQs
+
+Stephen Warren (3):
+      mmc: add BCM2835 driver
+      mmc: bcm2835: set SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
+      mmc: tegra: assume CONFIG_OF, remove platform data
+
+Subhash Jadavani (2):
+      mmc: sdio: fix resume failure due to lack of CMD52 reset
+      mmc: sdio: print correct UHS mode during card detection
+
+Sujit Reddy Thumma (1):
+      mmc: sdio: Fix SDIO 3.0 UHS-I initialization sequence
+
+Teppei Kamijou (7):
+      mmc: sh_mmcif: force to fail CMD52 immediately
+      mmc: sh_mmcif: ensure run-time suspend call is processed before suspend
+      mmc: sh_mmcif: Add support for eMMC Dual Data Rate
+      mmc: sh_mmcif: Use msecs_to_jiffies() for host->timeout
+      mmc: sh_mmcif: Avoid unnecessary mmc_delay() at mmc_card_sleepawake()
+      mmc: sh_mmcif: Terminate DMA transactions when detecting timeout or error
+      mmc: sh_mmcif: report all errors
+
+Thomas Petazzoni (4):
+      mmc: mvsdio: use slot-gpio infrastructure for write protect gpio
+      mmc: mvsdio: use slot-gpio for card detect gpio
+      mmc: mvsdio: implement a Device Tree binding
+      mmc: mvsdio: add pinctrl integration
+
+Tony Prisk (1):
+      mmc: vt8500: Remove erroneous __exitp in wmt_mci_driver
+
+Zhang, YiX X (1):
+      mmc: correct the EXCEPTION_EVENTS_STATUS value in comment
+
+ .../devicetree/bindings/mmc/brcm,bcm2835-sdhci.txt |  18 +
+ Documentation/devicetree/bindings/mmc/mmc.txt      |  34 +-
+ .../devicetree/bindings/mmc/orion-sdio.txt         |  17 +
+ .../devicetree/bindings/mmc/synopsis-dw-mshc.txt   |  12 +-
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt |  20 +
+ MAINTAINERS                                        |  10 +-
+ arch/arm/boot/dts/exynos5250-smdk5250.dts          |   1 +
+ drivers/mmc/card/block.c                           | 491 +++++++++++++++++-
+ drivers/mmc/card/queue.c                           | 128 ++++-
+ drivers/mmc/card/queue.h                           |  25 +
+ drivers/mmc/core/bus.c                             |   1 +
+ drivers/mmc/core/core.c                            | 246 ++++++++-
+ drivers/mmc/core/core.h                            |   6 +-
+ drivers/mmc/core/host.c                            | 123 +++++
+ drivers/mmc/core/mmc.c                             |  46 +-
+ drivers/mmc/core/mmc_ops.c                         |   1 +
+ drivers/mmc/core/sd.c                              |  44 +-
+ drivers/mmc/core/sdio.c                            |  54 +-
+ drivers/mmc/core/slot-gpio.c                       |  57 ++-
+ drivers/mmc/host/Kconfig                           |  18 +
+ drivers/mmc/host/Makefile                          |   2 +
+ drivers/mmc/host/android-goldfish.c                | 570 +++++++++++++++++++++
+ drivers/mmc/host/dw_mmc-exynos.c                   |  10 -
+ drivers/mmc/host/dw_mmc.c                          |  69 ++-
+ drivers/mmc/host/mvsdio.c                          | 131 +++--
+ drivers/mmc/host/mxs-mmc.c                         |   3 +-
+ drivers/mmc/host/of_mmc_spi.c                      |   2 +-
+ drivers/mmc/host/rtsx_pci_sdmmc.c                  |   5 -
+ drivers/mmc/host/sdhci-bcm2835.c                   | 210 ++++++++
+ drivers/mmc/host/sdhci-esdhc-imx.c                 | 230 +++++----
+ drivers/mmc/host/sdhci-pci.c                       |   4 +-
+ drivers/mmc/host/sdhci-pltfm.c                     |   8 +
+ drivers/mmc/host/sdhci-pltfm.h                     |   2 +
+ drivers/mmc/host/sdhci-pxav2.c                     |  11 +-
+ drivers/mmc/host/sdhci-pxav3.c                     | 117 ++++-
+ drivers/mmc/host/sdhci-s3c.c                       |   8 +-
+ drivers/mmc/host/sdhci-tegra.c                     | 123 ++---
+ drivers/mmc/host/sdhci.c                           | 448 ++++++++--------
+ drivers/mmc/host/sdhci.h                           |  14 +-
+ drivers/mmc/host/sh_mmcif.c                        | 281 +++++-----
+ drivers/mmc/host/sh_mobile_sdhi.c                  |  96 ++--
+ drivers/mmc/host/tmio_mmc_pio.c                    |  87 +++-
+ drivers/mmc/host/wmt-sdmmc.c                       |   2 +-
+ include/linux/mfd/tmio.h                           |  18 -
+ include/linux/mmc/card.h                           |  22 +-
+ include/linux/mmc/core.h                           |   7 +-
+ include/linux/mmc/dw_mmc.h                         |   6 +-
+ include/linux/mmc/host.h                           |  61 ++-
+ include/linux/mmc/mmc.h                            |  15 +-
+ include/linux/mmc/sdhci.h                          |   1 +
+ include/linux/mmc/sh_mobile_sdhi.h                 |   2 -
+ include/linux/platform_data/mmc-esdhc-imx.h        |   1 +
+ include/linux/platform_data/mmc-sdhci-tegra.h      |  28 -
+ 53 files changed, 3064 insertions(+), 882 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhci.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/orion-sdio.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+ create mode 100644 drivers/mmc/host/android-goldfish.c
+ create mode 100644 drivers/mmc/host/sdhci-bcm2835.c
+ delete mode 100644 include/linux/platform_data/mmc-sdhci-tegra.h
+
 -- 
-1.7.6
--- 
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
