@@ -1,52 +1,61 @@
-From: Syam Sidhardhan <syamsidhardh@gmail.com>
-Subject: [PATCH] mmc: omap_hsmmc: Remove redundant check
-Date: Mon, 25 Feb 2013 04:22:19 +0530
-Message-ID: <1361746339-28836-1-git-send-email-s.syam@samsung.com>
+From: Sachin Kamat <sachin.kamat@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: exynos: Add pinctrl support
+Date: Mon, 25 Feb 2013 10:09:15 +0530
+Message-ID: <CAK9yfHzXZ0Xjg02FGALAvbzm0P+Oo-XuSNciYj+cAOvOuOUL8w@mail.gmail.com>
+References: <1360238236-17694-1-git-send-email-sachin.kamat@linaro.org>
+	<1360238236-17694-2-git-send-email-sachin.kamat@linaro.org>
+	<CACRpkdbJJq3+BkHwzM_osDxdY5ZuVyTuYDjejaqNRRETMf7a6w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:36408 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756368Ab3BXWwc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Feb 2013 17:52:32 -0500
+Received: from mail-oa0-f42.google.com ([209.85.219.42]:54293 "EHLO
+	mail-oa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759505Ab3BYEjP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Feb 2013 23:39:15 -0500
+Received: by mail-oa0-f42.google.com with SMTP id i18so2521402oag.15
+        for <linux-mmc@vger.kernel.org>; Sun, 24 Feb 2013 20:39:15 -0800 (PST)
+In-Reply-To: <CACRpkdbJJq3+BkHwzM_osDxdY5ZuVyTuYDjejaqNRRETMf7a6w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: syamsidhardh@gmail.com, balajitk@ti.com, cjb@laptop.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, tgih.jun@samsung.com, jh80.chung@samsung.com
 
-Remove redundant check for (host == NULL)
+On 7 February 2013 21:00, Linus Walleij <linus.walleij@linaro.org> wrote:
+> On Thu, Feb 7, 2013 at 12:57 PM, Sachin Kamat <sachin.kamat@linaro.org> wrote:
+>
+>> Added support for pin configuration using pinctrl subsystem.
+>>
+>
+> NACK.
+>
+> In the v3.9 merge window we will merge this patch:
+> http://marc.info/?l=linux-kernel&m=135887740715083&w=2
+>
+> That should do the trick. Just define your tables properly.
+>
 
-Signed-off-by: Syam Sidhardhan <s.syam@samsung.com>
----
- drivers/mmc/host/omap_hsmmc.c |   10 ++--------
- 1 file changed, 2 insertions(+), 8 deletions(-)
+Just a small clarification needed in this regard.
+On systems that do not use pinctrl and need to configure the gpios, we
+used to check the return value of devm_pinctrl_get_select_default()
+for error and then parse the dt file for gpios and configure them if
+needed. Now your latest patch "drivers/pinctrl: grab default handles
+from device core" suggests not to use boilerplate code as it will
+handle pinctrl configuration based on dt entries for it. So in the
+case like dw_mmc (in my patch above), please suggest best way to avoid
+parsing gpios from dt file in case where we have pinctrl defined.
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index bc58078..5d690e6 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -2100,10 +2100,7 @@ static int omap_hsmmc_suspend(struct device *dev)
- 	int ret = 0;
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
- 
--	if (!host)
--		return 0;
--
--	if (host && host->suspended)
-+	if (!host || host->suspended)
- 		return 0;
- 
- 	pm_runtime_get_sync(host->dev);
-@@ -2134,10 +2131,7 @@ static int omap_hsmmc_resume(struct device *dev)
- 	int ret = 0;
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
- 
--	if (!host)
--		return 0;
--
--	if (host && !host->suspended)
-+	if (!(host && host->suspended))
- 		return 0;
- 
- 	pm_runtime_get_sync(host->dev);
+The following 3 lines (with +) wouldn't be required according to the
+patch and hence 'for' loop would get executed (which I want to avoid
+as the system supports pinctrl in this case).
+
++       pctrl = devm_pinctrl_get_select_default(host->dev);
++       if (!IS_ERR(pctrl))
++               return 0;
++
+        /* cmd + clock + bus-width pins */
+        for (idx = 0; idx < NUM_PINS(bus_width); idx++) {
+                gpio = of_get_gpio(slot_np, idx);
+
 -- 
-1.7.9.5
-
+With warm regards,
+Sachin
