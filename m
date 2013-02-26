@@ -1,201 +1,108 @@
-From: Markus Pargmann <mpa@pengutronix.de>
-Subject: [PATCH] mmc: mxcmmc: DT support
-Date: Mon, 25 Feb 2013 19:28:05 +0100
-Message-ID: <1361816885-3033-1-git-send-email-mpa@pengutronix.de>
+From: Kevin Liu <kliu5@marvell.com>
+Subject: [PATCH 1/2 v4] mmc: core: enhance card removal judgement for slow removal
+Date: Tue, 26 Feb 2013 17:48:04 +0800
+Message-ID: <1361872084-13370-1-git-send-email-kliu5@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:34555 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751347Ab3BYS2c (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Feb 2013 13:28:32 -0500
+Received: from na3sys009aog117.obsmtp.com ([74.125.149.242]:47795 "EHLO
+	na3sys009aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932568Ab3BZJsI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Feb 2013 04:48:08 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: rob.herring@calxeda.com, rob@landley.net, s.hauer@pengutronix.de, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, Markus Pargmann <mpa@pengutronix.de>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alexander Stein <alexander.stein@systec-electronic.com>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: Stephen Warren <swarren@wwwdotorg.org>, Lars-Peter Clausen <lars@metafoo.de>, Mike Rapoport <mike@compulab.co.il>, Nicolas Pitre <nico@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>, Kevin Liu <kliu5@marvell.com>
 
-Adding devicetree support for imx21-mmc and imx31-mmc. Based on generic
-gpio helper functions by Guennadi and generic DMA devicetree bindings.
+Function _mmc_detect_card_removed will be called to know whether
+the card is still present when host->bus_ops->detect is called.
+In current code, the return value of this function generally only
+depend on the result of sending cmd13 to card, which may not safe
+for card with detection support like slot gpio detection.
+Because the communication status between host and card may out of
+sync with the detect status if remove the card slowly or hands shake
+during the process. The direct reason is the async between card
+detect switch and card/slot pad contaction in hardware, which is
+defined by spec.
 
-Signed-off-by: Markus Pargmann <mpa@pengutronix.de>
+The spec define card insert/remove sequence as below (both standard size
+SD card and MicroSD card have the same sequence):
+"Part 1 Standard Size SD Card Mechanical Addendum Ver4.00 Final,
+Appendix C: Card Detection Switch" (Take normally open type as example)
+a)SD card insertion sequence:
+  The card detection switch should be turned on after all SD card
+  contact pads are connected to the host connector contact pads.
+b)SD removal sequence:
+  The card detection switch should be turned off when the SD card
+  is just going to be removed and before any SD card contact pad is
+  disconnected from the host connector contact pad.
+
+Below is the sequence when this issue occur (Take slot gpio detection
+as example and remove the card slowly during the process):
+1. gpio level changed and card detect interrupt triggered.
+2. mmc_rescan was launched.
+3. the card pads were still contacted with the slot pads because of slow
+   removal. So _mmc_detect_card_removed and mmc_rescan think card was
+   still present (cmd13 succeed).
+4. card pads were discontacted from the card slot pads.
+So the card was actually removed finally but the card removal event
+has been missed by system.
+The interval length between step 1 and step 4 depends on the
+card removal speed. If it's longer than the detect work schedule
+delay which is 200ms, this issue will likely happen.
+
+This patch add the card detect status check in function
+_mmc_detect_card_removed if host->ops->get_cd existed.
+If the card detect status and cmd13 result are out of sync then schedule
+another detect work 200ms later.
+
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
 ---
- .../devicetree/bindings/mmc/fsl-imx-mmc.txt        | 24 +++++++
- drivers/mmc/host/mxcmmc.c                          | 80 +++++++++++++++++-----
- 2 files changed, 86 insertions(+), 18 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
+ drivers/mmc/core/core.c |   19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
-new file mode 100644
-index 0000000..a5ab662
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
-@@ -0,0 +1,24 @@
-+* Freescale Secure Digital Host Controller for i.MX1/2 series
-+
-+This file documents differences to the properties defined in mmc.txt.
-+
-+Required properties:
-+- compatible : Should be "fsl,<chip>-mmc", chip can be imx21 or imx31
-+
-+Optional properties:
-+- dmas: One DMA phandle with arguments as defined by the devicetree bindings
-+	of the used DMA controller.
-+- dma-names: Has to be "rx-tx".
-+
-+Example:
-+
-+sdhci1: sdhci@10014000 {
-+	compatible = "fsl,imx27-mmc", "fsl,imx21-mmc";
-+	reg = <0x10014000 0x1000>;
-+	interrupts = <11>;
-+	dmas = <&dma 7>;
-+	dma-names = "rx-tx";
-+	bus-width = <4>;
-+	cd-gpios = <&gpio3 29>;
-+	status = "okay";
-+};
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index a72936e..626698b 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -34,6 +34,10 @@
- #include <linux/regulator/consumer.h>
- #include <linux/dmaengine.h>
- #include <linux/types.h>
-+#include <linux/of.h>
-+#include <linux/of_device.h>
-+#include <linux/of_dma.h>
-+#include <linux/of_gpio.h>
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index b8c3d41..ad927ad 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -32,6 +32,7 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/sd.h>
++#include <linux/mmc/slot-gpio.h>
  
- #include <asm/dma.h>
- #include <asm/irq.h>
-@@ -173,6 +177,19 @@ static struct platform_device_id mxcmci_devtype[] = {
- };
- MODULE_DEVICE_TABLE(platform, mxcmci_devtype);
- 
-+static const struct of_device_id mxcmci_of_match[] = {
-+	{
-+		.compatible = "fsl,imx21-mmc",
-+		.data = &mxcmci_devtype[IMX21_MMC],
-+	}, {
-+		.compatible = "fsl,imx31-mmc",
-+		.data = &mxcmci_devtype[IMX31_MMC],
-+	}, {
-+		/* sentinel */
-+	}
-+};
-+MODULE_DEVICE_TABLE(of, mxcmci_of_match);
-+
- static inline int is_imx31_mmc(struct mxcmci_host *host)
+ #include "core.h"
+ #include "bus.h"
+@@ -2282,6 +2283,7 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+ int _mmc_detect_card_removed(struct mmc_host *host)
  {
- 	return host->devtype == IMX31_MMC;
-@@ -935,10 +952,15 @@ static int mxcmci_probe(struct platform_device *pdev)
- 	struct mxcmci_host *host = NULL;
- 	struct resource *iores, *r;
- 	int ret = 0, irq;
-+	bool dat3_card_detect = false;
- 	dma_cap_mask_t mask;
-+	const struct of_device_id *of_id;
-+	struct imxmmc_platform_data *pdata = pdev->dev.platform_data;
+ 	int ret;
++	int detected;
  
- 	pr_info("i.MX SDHC driver\n");
+ 	if ((host->caps & MMC_CAP_NONREMOVABLE) || !host->bus_ops->alive)
+ 		return 0;
+@@ -2290,6 +2292,23 @@ int _mmc_detect_card_removed(struct mmc_host *host)
+ 		return 1;
  
-+	of_id = of_match_device(mxcmci_of_match, &pdev->dev);
-+
- 	iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	irq = platform_get_irq(pdev, 0);
- 	if (!iores || irq < 0)
-@@ -954,8 +976,14 @@ static int mxcmci_probe(struct platform_device *pdev)
- 		goto out_release_mem;
- 	}
- 
-+	mmc_of_parse(mmc);
- 	mmc->ops = &mxcmci_ops;
--	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;
-+
-+	/* For devicetree parsing, the bus width is read from devicetree */
-+	if (pdata)
-+		mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;
-+	else
-+		mmc->caps |= MMC_CAP_SDIO_IRQ;
- 
- 	/* MMC core transfer sizes tunable parameters */
- 	mmc->max_segs = 64;
-@@ -971,14 +999,25 @@ static int mxcmci_probe(struct platform_device *pdev)
- 		goto out_free;
- 	}
- 
-+	if (of_id) {
-+		struct platform_device_id *id_entry = of_id->data;
-+		host->devtype = id_entry->driver_data;
-+	} else {
-+		host->devtype = pdev->id_entry->driver_data;
-+	}
- 	host->mmc = mmc;
--	host->pdata = pdev->dev.platform_data;
--	host->devtype = pdev->id_entry->driver_data;
-+	host->pdata = pdata;
- 	spin_lock_init(&host->lock);
- 
-+	if (pdata)
-+		dat3_card_detect = pdata->dat3_card_detect;
-+	else if (!(mmc->caps & MMC_CAP_NONREMOVABLE)
-+			&& !of_property_read_bool(pdev->dev.of_node, "cd-gpios"))
-+		dat3_card_detect = true;
-+
- 	mxcmci_init_ocr(host);
- 
--	if (host->pdata && host->pdata->dat3_card_detect)
-+	if (dat3_card_detect)
- 		host->default_irq_mask =
- 			INT_CARD_INSERTION_EN | INT_CARD_REMOVAL_EN;
- 	else
-@@ -1020,21 +1059,25 @@ static int mxcmci_probe(struct platform_device *pdev)
- 
- 	writel(host->default_irq_mask, host->base + MMC_REG_INT_CNTR);
- 
--	r = platform_get_resource(pdev, IORESOURCE_DMA, 0);
--	if (r) {
--		host->dmareq = r->start;
--		host->dma_data.peripheral_type = IMX_DMATYPE_SDHC;
--		host->dma_data.priority = DMA_PRIO_LOW;
--		host->dma_data.dma_request = host->dmareq;
--		dma_cap_zero(mask);
--		dma_cap_set(DMA_SLAVE, mask);
--		host->dma = dma_request_channel(mask, filter, host);
--		if (host->dma)
--			mmc->max_seg_size = dma_get_max_seg_size(
--					host->dma->device->dev);
-+	if (!host->pdata) {
-+		host->dma = of_dma_request_slave_channel(pdev->dev.of_node,
-+				"rx-tx");
-+	} else {
-+		r = platform_get_resource(pdev, IORESOURCE_DMA, 0);
-+		if (r) {
-+			host->dmareq = r->start;
-+			host->dma_data.peripheral_type = IMX_DMATYPE_SDHC;
-+			host->dma_data.priority = DMA_PRIO_LOW;
-+			host->dma_data.dma_request = host->dmareq;
-+			dma_cap_zero(mask);
-+			dma_cap_set(DMA_SLAVE, mask);
-+			host->dma = dma_request_channel(mask, filter, host);
+ 	ret = host->bus_ops->alive(host);
++	/*
++	 * Card detect status and alive check may out of sync because of
++	 * the async between card detect switch and card/slot pad contaction
++	 * in hardware.(refer to "SD Card Mechanical Addendum, Appendix C:
++	 * Card Detection Switch") So reschedule a detect work 200ms later
++	 * for this case.
++	 */
++	if (host->ops->get_cd &&
++		!(host->caps & MMC_CAP_NEEDS_POLL)) {
++		detected = host->ops->get_cd(host);
++		if (!IS_ERR_VALUE(detected) && (!ret ^ !!detected)) {
++			mmc_detect_change(host, msecs_to_jiffies(200));
++			pr_warn("%s: card insert/remove too slowly\n",
++					mmc_hostname(host));
 +		}
- 	}
--
--	if (!host->dma)
-+	if (host->dma)
-+		mmc->max_seg_size = dma_get_max_seg_size(
-+				host->dma->device->dev);
-+	else
- 		dev_info(mmc_dev(host->mmc), "dma not available. Using PIO\n");
- 
- 	INIT_WORK(&host->datawork, mxcmci_datawork);
-@@ -1153,6 +1196,7 @@ static struct platform_driver mxcmci_driver = {
- #ifdef CONFIG_PM
- 		.pm	= &mxcmci_pm_ops,
- #endif
-+		.of_match_table	= mxcmci_of_match,
- 	}
- };
- 
++	}
++
+ 	if (ret) {
+ 		mmc_card_set_removed(host->card);
+ 		pr_debug("%s: card remove detected\n", mmc_hostname(host));
 -- 
-1.8.1.2
+1.7.9.5
 
