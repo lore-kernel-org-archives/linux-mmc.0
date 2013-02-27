@@ -1,50 +1,67 @@
-From: Rob Herring <robherring2@gmail.com>
-Subject: Re: [PATCH v4 5/5] ARM: davinci: da850: override mmc DT node device
- name
-Date: Wed, 27 Feb 2013 08:04:09 -0600
-Message-ID: <512E1259.5020903@gmail.com>
-References: <1360909322-1858-1-git-send-email-prakash.pm@ti.com> <1360909322-1858-6-git-send-email-prakash.pm@ti.com>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: [Question] What does SDHCI_QUIRK_BROKEN_CARD_DETECTION stands for?
+Date: Wed, 27 Feb 2013 22:33:15 +0800
+Message-ID: <CADz5_gKvGqSFsTiMVMG2jcsXmfESydGfTSzN=sG-WAGkpP6DYw@mail.gmail.com>
+References: <CADz5_gKreSB9BvTgBBcjjOOEDMRc2q1s-9VNHfb_+x+9gdADLw@mail.gmail.com>
+	<87r4k17toq.fsf@octavius.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1360909322-1858-6-git-send-email-prakash.pm@ti.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: "Manjunathappa, Prakash" <prakash.pm@ti.com>
-Cc: linux-mmc@vger.kernel.org, grant.likely@secretlab.ca, rob@landley.net, linux@arm.linux.org.uk, nsekhar@ti.com, hs@denx.de, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, davinci-linux-open-source@linux.davincidsp.com, linux-kernel@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oa0-f49.google.com ([209.85.219.49]:35161 "EHLO
+	mail-oa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760154Ab3B0OdQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Feb 2013 09:33:16 -0500
+Received: by mail-oa0-f49.google.com with SMTP id j6so1220548oag.22
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Feb 2013 06:33:15 -0800 (PST)
+In-Reply-To: <87r4k17toq.fsf@octavius.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-On 02/15/2013 12:22 AM, Manjunathappa, Prakash wrote:
-> Populate OF_DEV_AUXDATA with desired device name expected by
-> davinci_mmc driver. Without this clk_get of davinci_mmc DT driver
-> fails.
-> 
-> Signed-off-by: Manjunathappa, Prakash <prakash.pm@ti.com>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linux-arm-kernel@lists.infradead.org
-> Cc: linux-kernel@vger.kernel.org
-> Cc: davinci-linux-open-source@linux.davincidsp.com
-> Cc: devicetree-discuss@lists.ozlabs.org
-> Cc: cjb@laptop.org
-> Cc: Sekhar Nori <nsekhar@ti.com>
-> ---
-> Since v2:
-> Rebased on top of v3.9/dt-2 branch of linux_davinci and reordered this patch.
-> 
->  arch/arm/mach-davinci/da8xx-dt.c |    2 ++
->  1 files changed, 2 insertions(+), 0 deletions(-)
-> 
-> diff --git a/arch/arm/mach-davinci/da8xx-dt.c b/arch/arm/mach-davinci/da8xx-dt.c
-> index 5404e92..2b740a9 100644
-> --- a/arch/arm/mach-davinci/da8xx-dt.c
-> +++ b/arch/arm/mach-davinci/da8xx-dt.c
-> @@ -40,6 +40,8 @@ static void __init da8xx_init_irq(void)
->  struct of_dev_auxdata da850_auxdata_lookup[] __initdata = {
->  	OF_DEV_AUXDATA("ti,davinci-i2c", 0x01c22000, "i2c_davinci.1", NULL),
->  	OF_DEV_AUXDATA("ti,davinci-wdt", 0x01c21000, "watchdog", NULL),
-> +	OF_DEV_AUXDATA("ti,davinci-mmc-da830", 0x01c40000, "davinci-mmc-da830.0",
-> +			NULL),
+2013/2/27 Chris Ball <cjb@laptop.org>:
+> Hi,
+>
+> The CC: list seems excessively long here.
+>
+> On Wed, Feb 27 2013, Kevin Liu wrote:
+>> Who can help to answer below question?
+>> Which statement is true if quirk SDHCI_QUIRK_BROKEN_CARD_DETECTION is selected?
+>> 1. The host controller Present State Register[18] (offset 0x24) can
+>> reflect card status (present or not) but can't trigger interrupt when
+>> card insert/remove.
+>> 2. The host controller Present State Register[18] can't reflect card
+>> status at all and can't trigger card insert/remove interrupt either.
+>> But have other way out of host controller to detect card like slot
+>> gpio.
+>> 3. The host controller Present State Register[18] can't reflect card
+>> status at all, can't trigger card insert/remove interrupt, and don't
+>> have the other ways to detect card like slot gpio. So have to use
+>> polling to know card present status.
+>
+> (3)
+>
+> The best documentation for this is probably the DT bindings file:
+>
+> Card detection:
+> If no property below is supplied, host native card detect is used.
+> Only one of the properties in this section should be supplied:
+>   - broken-cd: There is no card detection available; polling must be used.
+>   - cd-gpios: Specify GPIOs for card detection, see gpio binding
+>   - non-removable: non-removable slot (like eMMC); assume always present.
+>
+> (SDHCI_QUIRK_BROKEN_CARD_DETECTION maps to broken-cd)
+>
+Chris,
 
-If you only need clock lookup, just add a clkdev entry with the new name.
+Thanks for quick answer!
+Then if broken-cd/SDHCI_QUIRK_BROKEN_CARD_DETECTION is selected, can I
+use host controller Present State Register[18] (offset 0x24) to know
+card status (present or not)?
 
-Rob
+Kevin
+
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
