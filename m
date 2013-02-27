@@ -1,136 +1,107 @@
-From: Zhang Haijun-B42677 <B42677@freescale.com>
-Subject: RE: [PATCH RESEND v4 1/2] mmc: sdhci: update timeout clock setting
- if SDCLK is used
-Date: Wed, 27 Feb 2013 07:35:23 +0000
-Message-ID: <99E897753B6F7048BD8CCDB4661D02E1209B3A@039-SN2MPN1-022.039d.mgd.msft.net>
-References: <1359113698-14014-1-git-send-email-kliu5@marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Kevin Liu <kliu5@marvell.com>
+Subject: [PATCH v5 1/2] mmc: core: enhance card removal judgement for slow removal
+Date: Wed, 27 Feb 2013 16:10:07 +0800
+Message-ID: <1361952607-24898-1-git-send-email-kliu5@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe010.messaging.microsoft.com ([216.32.180.30]:38974
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752348Ab3B0Hfn convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 27 Feb 2013 02:35:43 -0500
-In-Reply-To: <1359113698-14014-1-git-send-email-kliu5@marvell.com>
-Content-Language: en-US
+Received: from na3sys009aog131.obsmtp.com ([74.125.149.247]:47707 "EHLO
+	na3sys009aog131.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752433Ab3B0ILZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Feb 2013 03:11:25 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Liu <kliu5@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Nicolas Pitre <nico@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Aaron Lu <aaron.lu@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Huang Changming-R66093 <r66093@freescale.com>, Alexander Stein <alexander.stein@systec-electronic.com>, Girish K S <girish.shivananjappa@linaro.org>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alexander Stein <alexander.stein@systec-electronic.com>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: Stephen Warren <swarren@wwwdotorg.org>, Lars-Peter Clausen <lars@metafoo.de>, Mike Rapoport <mike@compulab.co.il>, Nicolas Pitre <nico@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Daniel Drake <dsd@laptop.org>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Viresh Kumar <viresh.kumar@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Thomas Abraham <thomas.abraham@linaro.org>, Chander Kashyap <chander.kashyap@linaro.com>, Sebastian Hesselbarth <sebastian.hesselbarth@googlemail.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>, Kevin Liu <kliu5@marvell.com>
 
-Is there any feedback about this patch?
-We also need this patch.
+Function _mmc_detect_card_removed will be called to know whether
+the card is still present when host->bus_ops->detect is called.
+In current code, the return value of this function generally only
+depend on the result of sending cmd13 to card, which may not safe
+for card with detection support like slot gpio detection.
+Because the communication status between host and card may out of
+sync with the detect status if remove the card slowly or hands shake
+during the process. The direct reason is the async between card
+detect switch and card/slot pad contaction in hardware, which is
+defined by spec.
 
+The spec define card insert/remove sequence as below (both standard size
+SD card and MicroSD card have the same sequence):
+"Part 1 Standard Size SD Card Mechanical Addendum Ver4.00 Final,
+Appendix C: Card Detection Switch" (Take normally open type as example)
+a)SD card insertion sequence:
+  The card detection switch should be turned on after all SD card
+  contact pads are connected to the host connector contact pads.
+b)SD removal sequence:
+  The card detection switch should be turned off when the SD card
+  is just going to be removed and before any SD card contact pad is
+  disconnected from the host connector contact pad.
 
-Regards
-Haijun.
+Below is the sequence when this issue occur (Take slot gpio detection
+as example and remove the card slowly during the process):
+1. gpio level changed and card detect interrupt triggered.
+2. mmc_rescan was launched.
+3. the card pads were still contacted with the slot pads because of slow
+   removal. So _mmc_detect_card_removed and mmc_rescan think card was
+   still present (cmd13 succeed).
+4. card pads were discontacted from the card slot pads.
+So the card was actually removed finally but the card removal event
+has been missed by system.
+The interval length between step 1 and step 4 depends on the
+card removal speed. If it's longer than the detect work schedule
+delay which is 200ms, this issue will likely happen.
 
+This patch add the card detect status check in function
+_mmc_detect_card_removed if host->ops->get_cd existed.
+If the card detect status and cmd13 result are out of sync then schedule
+another detect work 200ms later.
 
-> -----Original Message-----
-> From: Kevin Liu [mailto:kliu5@marvell.com]
-> Sent: Friday, January 25, 2013 7:35 PM
-> To: linux-mmc@vger.kernel.org; Chris Ball; Andy Shevchenko; Ulf Hansson
-> Cc: Nicolas Pitre; Adrian Hunter; Philip Rakity; Aaron Lu; Shawn Guo;
-> Johan Rudholm; Daniel Drake; Guennadi Liakhovetski; Huang Changming-
-> R66093; Alexander Stein; Girish K S; Zhang Haijun-B42677; Viresh Kumar;
-> Heiko Stuebner; Thomas Abraham; Chander Kashyap; Jaehoon Chung; Sebastian
-> Hesselbarth; Zhangfei Gao; Haojian Zhuang; Chao Xie; Kevin Liu; Kevin Liu
-> Subject: [PATCH RESEND v4 1/2] mmc: sdhci: update timeout clock setting
-> if SDCLK is used
-> 
-> 1. If SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK is selected, getting timeout
-> through register or callback function is useless. So skip current
-> redundant code.
-> 2. If SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK is selected, host uses SDCLK
-> instead of TMCLK for data timeouts. So host->timeout_clk and mmc-
-> >max_discard_to should be updated accordingly when SDCLK changed.
-> 3. If callback function get_timeout_clock is used, the timeout clock will
-> be returned directly and no need to multiply by the timeout clock unit
-> read from register.
-> 
-> Signed-off-by: Kevin Liu <kliu5@marvell.com>
-> Acked-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> ---
->  drivers/mmc/host/sdhci.c |   43 +++++++++++++++++++++++++++-------------
-> ---
->  1 file changed, 27 insertions(+), 16 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
-> 04af0fd..c31c30e 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1082,6 +1082,11 @@ static void sdhci_finish_command(struct sdhci_host
-> *host)
->  	}
->  }
-> 
-> +static inline void sdhci_set_max_discard_to(struct sdhci_host *host) {
-> +	host->mmc->max_discard_to = (1 << 27) / host->timeout_clk; }
-> +
->  static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
-> {
->  	int div = 0; /* Initialized for compiler warning */ @@ -1094,6
-> +1099,12 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned
-> int clock)
-> 
->  	host->mmc->actual_clock = 0;
-> 
-> +	if ((host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK) && clock)
-> {
-> +		/* The lowest permitted timeout clock frequency is 1Khz */
-> +		host->timeout_clk = DIV_ROUND_UP(clock, 1000);
-> +		sdhci_set_max_discard_to(host);
-> +	}
-> +
->  	if (host->ops->set_clock) {
->  		host->ops->set_clock(host, clock);
->  		if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) @@ -2828,25
-> +2839,25 @@ int sdhci_add_host(struct sdhci_host *host)
->  	} else
->  		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
-> 
-> -	host->timeout_clk =
-> -		(caps[0] & SDHCI_TIMEOUT_CLK_MASK) >> SDHCI_TIMEOUT_CLK_SHIFT;
-> -	if (host->timeout_clk == 0) {
-> -		if (host->ops->get_timeout_clock) {
-> -			host->timeout_clk = host->ops->get_timeout_clock(host);
-> -		} else if (!(host->quirks &
-> -				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
-> -			pr_err("%s: Hardware doesn't specify timeout clock "
-> -			       "frequency.\n", mmc_hostname(mmc));
-> -			return -ENODEV;
-> +	if (!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
-> +		host->timeout_clk = (caps[0] & SDHCI_TIMEOUT_CLK_MASK) >>
-> +					SDHCI_TIMEOUT_CLK_SHIFT;
-> +		if (host->timeout_clk == 0) {
-> +			if (host->ops->get_timeout_clock) {
-> +				host->timeout_clk =
-> +					host->ops->get_timeout_clock(host);
-> +			}
-> +			if (host->timeout_clk == 0) {
-> +				pr_err("%s: Hardware doesn't specify timeout "
-> +					"clock frequency.\n", mmc_hostname(mmc));
-> +				return -ENODEV;
-> +			}
-> +		} else if (caps[0] & SDHCI_TIMEOUT_CLK_UNIT) {
-> +			host->timeout_clk *= 1000;
->  		}
-> +		sdhci_set_max_discard_to(host);
->  	}
-> -	if (caps[0] & SDHCI_TIMEOUT_CLK_UNIT)
-> -		host->timeout_clk *= 1000;
-> -
-> -	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
-> -		host->timeout_clk = mmc->f_max / 1000;
-> 
-> -	mmc->max_discard_to = (1 << 27) / host->timeout_clk;
-> 
->  	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
-> 
-> --
-> 1.7.9.5
-> 
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
+---
+ drivers/mmc/core/core.c |   18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index b8c3d41..538c8d9 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -32,6 +32,7 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/sd.h>
++#include <linux/mmc/slot-gpio.h>
+ 
+ #include "core.h"
+ #include "bus.h"
+@@ -2282,6 +2283,7 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+ int _mmc_detect_card_removed(struct mmc_host *host)
+ {
+ 	int ret;
++	int detected;
+ 
+ 	if ((host->caps & MMC_CAP_NONREMOVABLE) || !host->bus_ops->alive)
+ 		return 0;
+@@ -2290,6 +2292,22 @@ int _mmc_detect_card_removed(struct mmc_host *host)
+ 		return 1;
+ 
+ 	ret = host->bus_ops->alive(host);
++	/*
++	 * Card detect status and alive check may out of sync because of
++	 * the async between card detect switch and card/slot pad contaction
++	 * in hardware.(refer to "SD Card Mechanical Addendum, Appendix C:
++	 * Card Detection Switch") So reschedule a detect work 200ms later
++	 * for this case.
++	 */
++	if (host->ops->get_cd) {
++		detected = host->ops->get_cd(host);
++		if (!IS_ERR_VALUE(detected) && (!ret ^ !!detected)) {
++			mmc_detect_change(host, msecs_to_jiffies(200));
++			pr_warn("%s: card insert/remove too slowly\n",
++					mmc_hostname(host));
++		}
++	}
++
+ 	if (ret) {
+ 		mmc_card_set_removed(host->card);
+ 		pr_debug("%s: card remove detected\n", mmc_hostname(host));
+-- 
+1.7.9.5
 
