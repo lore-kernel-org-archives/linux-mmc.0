@@ -1,51 +1,57 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 04/12] mmc: mxs-mmc: move to use generic DMA helper
-Date: Thu, 28 Feb 2013 10:50:21 +0000
-Message-ID: <201302281050.21522.arnd@arndb.de>
-References: <1361978748-25281-1-git-send-email-shawn.guo@linaro.org> <201302272054.18829.arnd@arndb.de> <20130228082831.GG26106@S2101-09.ap.freescale.net>
+From: Sekhar Nori <nsekhar@ti.com>
+Subject: Re: [PATCH v4 5/5] ARM: davinci: da850: override mmc DT node device
+ name
+Date: Thu, 28 Feb 2013 16:21:28 +0530
+Message-ID: <512F36B0.9040907@ti.com>
+References: <1360909322-1858-1-git-send-email-prakash.pm@ti.com> <1360909322-1858-6-git-send-email-prakash.pm@ti.com> <512E1259.5020903@gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:61859 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750899Ab3B1KuZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Feb 2013 05:50:25 -0500
-In-Reply-To: <20130228082831.GG26106@S2101-09.ap.freescale.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <512E1259.5020903@gmail.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Rob Herring <robherring2@gmail.com>
+Cc: "Manjunathappa, Prakash" <prakash.pm@ti.com>, linux-mmc@vger.kernel.org, grant.likely@secretlab.ca, rob@landley.net, linux@arm.linux.org.uk, hs@denx.de, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, davinci-linux-open-source@linux.davincidsp.com, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-arm-kernel@lists.infradead.org, Vinod Koul <vinod.koul@intel.com>, Marek Vasut <marek.vasut@gmail.com>, Fabio Estevam <fabio.estevam@freescale.com>, Huang Shijie <b32955@freescale.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On Thursday 28 February 2013, Shawn Guo wrote:
-> On Wed, Feb 27, 2013 at 08:54:18PM +0000, Arnd Bergmann wrote:
-> > On Wednesday 27 February 2013, Shawn Guo wrote:
-> >
-> > I wonder if we should leave support for old device trees files around,
-> > at least for a while. Your patch removes a lot of unnecessary code if
-> > we decide not to worry about backwards compatibility here, but I could
-> > imagine that we see a few surprises here.
-> > 
-> I'm less concerned by that at this point.  Though platform mxs has been
-> fully converted to device tree, device tree is still quite new for the
-> platform.  The incompatible device tree should be acceptable,
-> considering we have noticed that when adding the temporary DMA binding
-> for client devices.
-> 
-> /*
->  * TODO: This is a temporary solution and should be changed
->  * to use generic DMA binding later when the helper get in.
->  */
-> 
-> Unless we have these TODO remarks leave in the tree forever, we will
-> break old device tree sooner or later anyway.  And I would have it
-> happen sooner than later.
-> 
-> And I would start thinking about maintaining the device tree
-> compatibility for mxs after generic DMA binding adoption.
+Hi Rob,
 
-Right. It's your decision anyway, and removing the code as early
-as possible has some advantages as well.
+On 2/27/2013 7:34 PM, Rob Herring wrote:
+> On 02/15/2013 12:22 AM, Manjunathappa, Prakash wrote:
+>> Populate OF_DEV_AUXDATA with desired device name expected by
+>> davinci_mmc driver. Without this clk_get of davinci_mmc DT driver
+>> fails.
+>>
+>> Signed-off-by: Manjunathappa, Prakash <prakash.pm@ti.com>
+>> Cc: linux-mmc@vger.kernel.org
+>> Cc: linux-arm-kernel@lists.infradead.org
+>> Cc: linux-kernel@vger.kernel.org
+>> Cc: davinci-linux-open-source@linux.davincidsp.com
+>> Cc: devicetree-discuss@lists.ozlabs.org
+>> Cc: cjb@laptop.org
+>> Cc: Sekhar Nori <nsekhar@ti.com>
+>> ---
+>> Since v2:
+>> Rebased on top of v3.9/dt-2 branch of linux_davinci and reordered this patch.
+>>
+>>  arch/arm/mach-davinci/da8xx-dt.c |    2 ++
+>>  1 files changed, 2 insertions(+), 0 deletions(-)
+>>
+>> diff --git a/arch/arm/mach-davinci/da8xx-dt.c b/arch/arm/mach-davinci/da8xx-dt.c
+>> index 5404e92..2b740a9 100644
+>> --- a/arch/arm/mach-davinci/da8xx-dt.c
+>> +++ b/arch/arm/mach-davinci/da8xx-dt.c
+>> @@ -40,6 +40,8 @@ static void __init da8xx_init_irq(void)
+>>  struct of_dev_auxdata da850_auxdata_lookup[] __initdata = {
+>>  	OF_DEV_AUXDATA("ti,davinci-i2c", 0x01c22000, "i2c_davinci.1", NULL),
+>>  	OF_DEV_AUXDATA("ti,davinci-wdt", 0x01c21000, "watchdog", NULL),
+>> +	OF_DEV_AUXDATA("ti,davinci-mmc-da830", 0x01c40000, "davinci-mmc-da830.0",
+>> +			NULL),
+> 
+> If you only need clock lookup, just add a clkdev entry with the new name.
 
-	Arnd
+That would work, but wouldn't it be better to keep this here so it can
+all be dropped once clocks are converted to DT?
+
+Thanks,
+Sekhar
