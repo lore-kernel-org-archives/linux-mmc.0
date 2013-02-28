@@ -1,88 +1,75 @@
-From: Kevin Liu <kliu5@marvell.com>
-Subject: [PATCH v7 1/2] mmc: core: enhance card removal judgement for slow removal
-Date: Thu, 28 Feb 2013 15:29:29 +0800
-Message-ID: <1362036569-14364-1-git-send-email-kliu5@marvell.com>
+From: Li Fei <fei.li@intel.com>
+Subject: [PATCH 2/5] mmc: core: call pm_runtime_put_sync in
+ pm_runtime_get_sync failed case
+Date: Thu, 28 Feb 2013 15:44:15 +0800
+Message-ID: <1362037455.6212.8.camel@fli24-HP-Compaq-8100-Elite-CMT-PC>
+References: <1362037031.6212.3.camel@fli24-HP-Compaq-8100-Elite-CMT-PC>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog124.obsmtp.com ([74.125.149.151]:32940 "EHLO
-	na3sys009aog124.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751417Ab3B1H3m (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Feb 2013 02:29:42 -0500
+Received: from mga09.intel.com ([134.134.136.24]:7716 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751315Ab3B1Hps (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 28 Feb 2013 02:45:48 -0500
+In-Reply-To: <1362037031.6212.3.camel@fli24-HP-Compaq-8100-Elite-CMT-PC>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>
-Cc: Stephen Warren <swarren@wwwdotorg.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>, Kevin Liu <kliu5@marvell.com>
+To: cjb@laptop.org, ulf.hansson@linaro.org, johan.rudholm@stericsson.com, subhashj@codeaurora.org, prakity@marvell.com, rafael.j.wysocki@intel.com, thierry.reding@avionic-design.de, sachin.kamat@linaro.org
+Cc: linux-mmc@vger.kernel.org, rjw@sisk.pl, linux-kernel@vger.kernel.org, chuansheng.liu@intel.com, fei.li@intel.com
 
-Function _mmc_detect_card_removed will be called to know whether
-the card is still present when host->bus_ops->detect is called.
-In current code, the return value of this function generally only
-depend on the result of sending cmd13 to card, which may not safe
-for card with detection support like slot gpio detection.
-Because the communication status between host and card may out of
-sync with the detect status if remove the card slowly or hands shake
-during the process. The direct reason is the async between card
-detect switch and card/slot pad contaction in hardware, which is
-defined by spec.
 
-The spec define card insert/remove sequence as below (both standard size
-SD card and MicroSD card have the same sequence):
-"Part 1 Standard Size SD Card Mechanical Addendum Ver4.00 Final,
-Appendix C: Card Detection Switch" (Take normally open type as example)
-a)SD card insertion sequence:
-  The card detection switch should be turned on after all SD card
-  contact pads are connected to the host connector contact pads.
-b)SD removal sequence:
-  The card detection switch should be turned off when the SD card
-  is just going to be removed and before any SD card contact pad is
-  disconnected from the host connector contact pad.
+Even in failed case of pm_runtime_get_sync, the usage_count
+is incremented. In order to keep the usage_count with correct
+value and runtime power management to behave correctly, call
+pm_runtime_put(_sync) in such case.
 
-Below is the sequence when this issue occur (Take slot gpio detection
-as example and remove the card slowly during the process):
-1. gpio level changed and card detect interrupt triggered.
-2. mmc_rescan was launched.
-3. the card pads were still contacted with the slot pads because of slow
-   removal. So _mmc_detect_card_removed and mmc_rescan think card was
-   still present (cmd13 succeed).
-4. card pads were discontacted from the card slot pads.
-So the card was actually removed finally but the card removal event
-has been missed by system.
-The interval length between step 1 and step 4 depends on the
-card removal speed. If it's longer than the detect work schedule
-delay which is 200ms, this issue will likely happen.
-
-This patch add the card detect status check in function
-_mmc_detect_card_removed if cmd13 check succeed and host->ops->get_cd
-provided. If get_cd detect no card present then schedule another detect
-work 200ms later.
-
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
+Signed-off-by Liu Chuansheng <chuansheng.liu@intel.com>
+Signed-off-by: Li Fei <fei.li@intel.com>
 ---
- drivers/mmc/core/core.c |   13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ drivers/mmc/core/sdio.c     |    3 +--
+ drivers/mmc/core/sdio_bus.c |    4 +++-
+ 2 files changed, 4 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index b8c3d41..d9ac96c 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2290,6 +2290,19 @@ int _mmc_detect_card_removed(struct mmc_host *host)
- 		return 1;
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index aa0719a..45ab6f32 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -874,6 +874,7 @@ static void mmc_sdio_detect(struct mmc_host *host)
  
- 	ret = host->bus_ops->alive(host);
-+	/*
-+	 * Card detect status and alive check may out of sync if card is
-+	 * removed slowly when card detect switch changed while card/slot
-+	 * pads still contacted in hardware.(refer to "SD Card Mechanical
-+	 * Addendum, Appendix C: Card Detection Switch") So reschedule a
-+	 * detect work 200ms later for this case.
-+	 */
-+	if (!ret && host->ops->get_cd && !host->ops->get_cd(host)) {
-+		mmc_detect_change(host, msecs_to_jiffies(200));
-+		pr_debug("%s: card remove too slowly\n",
-+				mmc_hostname(host));
-+	}
-+
- 	if (ret) {
- 		mmc_card_set_removed(host->card);
- 		pr_debug("%s: card remove detected\n", mmc_hostname(host));
+ 	mmc_release_host(host);
+ 
++out:
+ 	/*
+ 	 * Tell PM core it's OK to power off the card now.
+ 	 *
+@@ -887,8 +888,6 @@ static void mmc_sdio_detect(struct mmc_host *host)
+ 	 */
+ 	if (host->caps & MMC_CAP_POWER_OFF_CARD)
+ 		pm_runtime_put_sync(&host->card->dev);
+-
+-out:
+ 	if (err) {
+ 		mmc_sdio_remove(host);
+ 
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index 5e57048..d572b31 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -136,8 +136,10 @@ static int sdio_bus_probe(struct device *dev)
+ 	 */
+ 	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD) {
+ 		ret = pm_runtime_get_sync(dev);
+-		if (ret < 0)
++		if (ret < 0) {
++			pm_runtime_put_sync(dev);
+ 			goto out;
++		}
+ 	}
+ 
+ 	/* Set the default block size so the driver is sure it's something
 -- 
-1.7.9.5
+1.7.4.1
+
+
 
