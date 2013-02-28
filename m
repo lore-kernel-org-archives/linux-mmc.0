@@ -1,58 +1,88 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: Re: question for mmc_test
-Date: Thu, 28 Feb 2013 09:21:20 +0200
-Message-ID: <1362036080.28241.86.camel@smile>
-References: <25B60CDC2F704E4E9D88FFD52780CB4C0BDE9843EA@SC-VEXCH1.marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+From: Kevin Liu <kliu5@marvell.com>
+Subject: [PATCH v7 1/2] mmc: core: enhance card removal judgement for slow removal
+Date: Thu, 28 Feb 2013 15:29:29 +0800
+Message-ID: <1362036569-14364-1-git-send-email-kliu5@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:43552 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751398Ab3B1HVg convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Feb 2013 02:21:36 -0500
-In-Reply-To: <25B60CDC2F704E4E9D88FFD52780CB4C0BDE9843EA@SC-VEXCH1.marvell.com>
+Received: from na3sys009aog124.obsmtp.com ([74.125.149.151]:32940 "EHLO
+	na3sys009aog124.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751417Ab3B1H3m (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Feb 2013 02:29:42 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Liu <kliu5@marvell.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>
+Cc: Stephen Warren <swarren@wwwdotorg.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>, Kevin Liu <kliu5@marvell.com>
 
-On Wed, 2013-02-27 at 22:15 -0800, Kevin Liu wrote: 
-> Andy,
+Function _mmc_detect_card_removed will be called to know whether
+the card is still present when host->bus_ops->detect is called.
+In current code, the return value of this function generally only
+depend on the result of sending cmd13 to card, which may not safe
+for card with detection support like slot gpio detection.
+Because the communication status between host and card may out of
+sync with the detect status if remove the card slowly or hands shake
+during the process. The direct reason is the async between card
+detect switch and card/slot pad contaction in hardware, which is
+defined by spec.
 
-Added linux-mmc@ ML.
+The spec define card insert/remove sequence as below (both standard size
+SD card and MicroSD card have the same sequence):
+"Part 1 Standard Size SD Card Mechanical Addendum Ver4.00 Final,
+Appendix C: Card Detection Switch" (Take normally open type as example)
+a)SD card insertion sequence:
+  The card detection switch should be turned on after all SD card
+  contact pads are connected to the host connector contact pads.
+b)SD removal sequence:
+  The card detection switch should be turned off when the SD card
+  is just going to be removed and before any SD card contact pad is
+  disconnected from the host connector contact pad.
 
-> I never used mmc_test.c and I have several questions for it.
-> 1. I have 3 sdh controllers (sd, emmc, sdio) in system, then which host does mmc_test test?
-> 2. I found mmc_test always bind to sdio, so fail to add the debugfs. 
-> mmc_test_probe was not launched for sd and emmc, why?
+Below is the sequence when this issue occur (Take slot gpio detection
+as example and remove the card slowly during the process):
+1. gpio level changed and card detect interrupt triggered.
+2. mmc_rescan was launched.
+3. the card pads were still contacted with the slot pads because of slow
+   removal. So _mmc_detect_card_removed and mmc_rescan think card was
+   still present (cmd13 succeed).
+4. card pads were discontacted from the card slot pads.
+So the card was actually removed finally but the card removal event
+has been missed by system.
+The interval length between step 1 and step 4 depends on the
+card removal speed. If it's longer than the detect work schedule
+delay which is 200ms, this issue will likely happen.
 
-It binds to the card. It seems you have sdio attached when module is
-initialized.
+This patch add the card detect status check in function
+_mmc_detect_card_removed if cmd13 check succeed and host->ops->get_cd
+provided. If get_cd detect no card present then schedule another detect
+work 200ms later.
 
-> 3. Currently, I just build mmc_test in the kernel and didn't change anything.
-> In git log, I found below comments written by you.
->     Example of usage:
->       # mount -t debugfs none /sys/kernel/debug
->       # modprobe mmc_test
->         [  581.395843] mmc_test mmc0:0001: Card claimed for testing.
->       # echo 25 > /sys/kernel/debug/mmc0/mmc0\:0001/test
->         [  604.568542] mmc0: Starting tests of card mmc0:0001...
->         [  604.582733] mmc0: Test case 25. Best-case read performance into scattered pages...
->         [  604.923553] mmc0: Transfer of 8192 sectors (4096 KiB) took 0.124664314 seconds (33644 kB/s, 32856 KiB/s)
->         [  604.933227] mmc0: Result: OK
->         [  604.936248] mmc0: Tests completed.
->       # cat /sys/kernel/debug/mmc0/mmc0\:0001/test
-> 
-> I can also make mmc_test build-in kernel, right? Do I miss anything?
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
+---
+ drivers/mmc/core/core.c |   13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-Yes, you missed something.
-You have to attach the card you would like to test, then go to the sysfs
-and do unbind-bind cycle manually by echoing proper card ID.
-
-I could ask Adrian if we could provide piece of documentation he wrote
-few years ago at Nokia.
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index b8c3d41..d9ac96c 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2290,6 +2290,19 @@ int _mmc_detect_card_removed(struct mmc_host *host)
+ 		return 1;
+ 
+ 	ret = host->bus_ops->alive(host);
++	/*
++	 * Card detect status and alive check may out of sync if card is
++	 * removed slowly when card detect switch changed while card/slot
++	 * pads still contacted in hardware.(refer to "SD Card Mechanical
++	 * Addendum, Appendix C: Card Detection Switch") So reschedule a
++	 * detect work 200ms later for this case.
++	 */
++	if (!ret && host->ops->get_cd && !host->ops->get_cd(host)) {
++		mmc_detect_change(host, msecs_to_jiffies(200));
++		pr_debug("%s: card remove too slowly\n",
++				mmc_hostname(host));
++	}
++
+ 	if (ret) {
+ 		mmc_card_set_removed(host->card);
+ 		pr_debug("%s: card remove detected\n", mmc_hostname(host));
 -- 
-Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Intel Finland Oy
+1.7.9.5
+
