@@ -1,66 +1,102 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 04/12] mmc: mxs-mmc: move to use generic DMA helper
-Date: Thu, 28 Feb 2013 16:28:33 +0800
-Message-ID: <20130228082831.GG26106@S2101-09.ap.freescale.net>
-References: <1361978748-25281-1-git-send-email-shawn.guo@linaro.org>
- <1361978748-25281-5-git-send-email-shawn.guo@linaro.org>
- <201302272054.18829.arnd@arndb.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v7 1/2] mmc: core: enhance card removal judgement for slow removal
+Date: Thu, 28 Feb 2013 09:46:55 +0100
+Message-ID: <CAPDyKFq5-4=tnzA5hUOeqru1cO6J-t3N0Nrj8_HiUXbzTbgRgw@mail.gmail.com>
+References: <1362036569-14364-1-git-send-email-kliu5@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe002.messaging.microsoft.com ([213.199.154.140]:10119
-	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752028Ab3B1I2e (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Feb 2013 03:28:34 -0500
-Content-Disposition: inline
-In-Reply-To: <201302272054.18829.arnd@arndb.de>
+Received: from mail-la0-f43.google.com ([209.85.215.43]:53144 "EHLO
+	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753217Ab3B1Iq5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Feb 2013 03:46:57 -0500
+Received: by mail-la0-f43.google.com with SMTP id ek20so1506039lab.16
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Feb 2013 00:46:55 -0800 (PST)
+In-Reply-To: <1362036569-14364-1-git-send-email-kliu5@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-arm-kernel@lists.infradead.org, Vinod Koul <vinod.koul@intel.com>, Marek Vasut <marek.vasut@gmail.com>, Fabio Estevam <fabio.estevam@freescale.com>, Huang Shijie <b32955@freescale.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Kevin Liu <kliu5@marvell.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Aaron Lu <aaron.lu@intel.com>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>, Stephen Warren <swarren@wwwdotorg.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>
 
-On Wed, Feb 27, 2013 at 08:54:18PM +0000, Arnd Bergmann wrote:
-> On Wednesday 27 February 2013, Shawn Guo wrote:
-> >  Required properties:
-> >  - compatible: Should be "fsl,<chip>-mmc".  The supported chips include
-> >    imx23 and imx28.
-> > -- interrupts: Should contain ERROR and DMA interrupts
-> > -- fsl,ssp-dma-channel: APBH DMA channel for the SSP
-> > +- interrupts: Should contain ERROR interrupt number
-> > +- dmas: DMA specifier, consisting of a phandle to DMA controller node
-> > +  and SSP DMA channel ID.
-> > +  Refer to dma.txt and fsl-mxs-dma.txt for details.
-> 
-> I wonder if we should leave support for old device trees files around,
-> at least for a while. Your patch removes a lot of unnecessary code if
-> we decide not to worry about backwards compatibility here, but I could
-> imagine that we see a few surprises here.
-> 
-I'm less concerned by that at this point.  Though platform mxs has been
-fully converted to device tree, device tree is still quite new for the
-platform.  The incompatible device tree should be acceptable,
-considering we have noticed that when adding the temporary DMA binding
-for client devices.
+On 28 February 2013 08:29, Kevin Liu <kliu5@marvell.com> wrote:
+> Function _mmc_detect_card_removed will be called to know whether
+> the card is still present when host->bus_ops->detect is called.
+> In current code, the return value of this function generally only
+> depend on the result of sending cmd13 to card, which may not safe
+> for card with detection support like slot gpio detection.
+> Because the communication status between host and card may out of
+> sync with the detect status if remove the card slowly or hands shake
+> during the process. The direct reason is the async between card
+> detect switch and card/slot pad contaction in hardware, which is
+> defined by spec.
+>
+> The spec define card insert/remove sequence as below (both standard size
+> SD card and MicroSD card have the same sequence):
+> "Part 1 Standard Size SD Card Mechanical Addendum Ver4.00 Final,
+> Appendix C: Card Detection Switch" (Take normally open type as example)
+> a)SD card insertion sequence:
+>   The card detection switch should be turned on after all SD card
+>   contact pads are connected to the host connector contact pads.
+> b)SD removal sequence:
+>   The card detection switch should be turned off when the SD card
+>   is just going to be removed and before any SD card contact pad is
+>   disconnected from the host connector contact pad.
+>
+> Below is the sequence when this issue occur (Take slot gpio detection
+> as example and remove the card slowly during the process):
+> 1. gpio level changed and card detect interrupt triggered.
+> 2. mmc_rescan was launched.
+> 3. the card pads were still contacted with the slot pads because of slow
+>    removal. So _mmc_detect_card_removed and mmc_rescan think card was
+>    still present (cmd13 succeed).
+> 4. card pads were discontacted from the card slot pads.
+> So the card was actually removed finally but the card removal event
+> has been missed by system.
+> The interval length between step 1 and step 4 depends on the
+> card removal speed. If it's longer than the detect work schedule
+> delay which is 200ms, this issue will likely happen.
+>
+> This patch add the card detect status check in function
+> _mmc_detect_card_removed if cmd13 check succeed and host->ops->get_cd
+> provided. If get_cd detect no card present then schedule another detect
+> work 200ms later.
+>
+> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+> ---
+>  drivers/mmc/core/core.c |   13 +++++++++++++
+>  1 file changed, 13 insertions(+)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index b8c3d41..d9ac96c 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2290,6 +2290,19 @@ int _mmc_detect_card_removed(struct mmc_host *host)
+>                 return 1;
+>
+>         ret = host->bus_ops->alive(host);
+> +       /*
+> +        * Card detect status and alive check may out of sync if card is
+> +        * removed slowly when card detect switch changed while card/slot
+> +        * pads still contacted in hardware.(refer to "SD Card Mechanical
+> +        * Addendum, Appendix C: Card Detection Switch") So reschedule a
+> +        * detect work 200ms later for this case.
+> +        */
+> +       if (!ret && host->ops->get_cd && !host->ops->get_cd(host)) {
+> +               mmc_detect_change(host, msecs_to_jiffies(200));
+> +               pr_debug("%s: card remove too slowly\n",
+> +                               mmc_hostname(host));
+> +       }
+> +
+>         if (ret) {
+>                 mmc_card_set_removed(host->card);
+>                 pr_debug("%s: card remove detected\n", mmc_hostname(host));
+> --
+> 1.7.9.5
+>
 
-/*
- * TODO: This is a temporary solution and should be changed
- * to use generic DMA binding later when the helper get in.
- */
+Great work Kevin and thanks for convincing me around this patch! :-)
 
-Unless we have these TODO remarks leave in the tree forever, we will
-break old device tree sooner or later anyway.  And I would have it
-happen sooner than later.
+I also intend to remove the MMC_CAP2_DETECT_ON_ERR code, I don't see a
+need for it anymore.
 
-And I would start thinking about maintaining the device tree
-compatibility for mxs after generic DMA binding adoption.
-
-> > +- dma-names: Must be "ssp".
-> 
-> I would prefer calling this "data" rather than "ssp". The name only
-> has local significance in the ssp device, so calling the channel
-> "ssp" seems wrong.
-> 
-Ok, will rename it per the use of the channel in the controller.
-
-Shawn
-
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
