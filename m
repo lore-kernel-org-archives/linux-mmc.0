@@ -1,16 +1,14 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 3/3] mmc: block: Enable runtime pm for mmc blkdevice
-Date: Fri, 1 Mar 2013 13:47:15 +0100
-Message-ID: <1362142035-8403-4-git-send-email-ulf.hansson@stericsson.com>
-References: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH 0/3] mmc: Use runtime pm for blkdevice
+Date: Fri, 1 Mar 2013 13:47:12 +0100
+Message-ID: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog115.obsmtp.com ([207.126.144.139]:49036 "EHLO
-	eu1sys200aog115.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750778Ab3CAMsG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Mar 2013 07:48:06 -0500
-In-Reply-To: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from eu1sys200aog113.obsmtp.com ([207.126.144.135]:42575 "EHLO
+	eu1sys200aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750799Ab3CAMsH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Mar 2013 07:48:07 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
@@ -18,142 +16,31 @@ Cc: Johan Rudholm <johan.rudholm@stericsson.com>, Ulf Hansson <ulf.hansson@linar
 
 From: Ulf Hansson <ulf.hansson@linaro.org>
 
-Once the mmc blkdevice is being probed, runtime pm will be enabled.
-By using runtime autosuspend, the power save operations can be done
-when request inactivity occurs for a certain time. Right now the
-selected timeout value is set to 3 s.
+SDIO has been using runtime pm for a while to handle runtime power save
+operations. This patchset is enabling the option to make the sd/mmc
+blockdevices to use runtime pm as well.
 
-Moreover, when the blk device is being suspended, we make sure the device
-will be runtime resumed. The reason for doing this is that we what the
-host suspend sequence to be unaware of any runtime power save operations,
-so it can just handle the suspend as the device is fully powerered from a
-runtime perspective.
+The runtime pm implementation for the block device will make use of
+autosuspend to defer power save operation to after request inactivty for
+a certain time.
 
-This patch is preparing to make it possible to move BKOPS handling into
-the runtime callbacks for the mmc bus_ops. Thus IDLE BKOPS can be
-accomplished.
+To actually perform some power save operations the corresponding bus ops
+for mmc and sd shall be implemented. Typically it could make sense to do
+BKOPS for eMMC in here.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
+Ulf Hansson (3):
+  mmc: core: Remove power_restore bus_ops for mmc and sd
+  mmc: core: Add bus_ops for runtime pm callbacks
+  mmc: block: Enable runtime pm for mmc blkdevice
+
  drivers/mmc/card/block.c |   28 ++++++++++++++++++++++++++--
- 1 file changed, 26 insertions(+), 2 deletions(-)
+ drivers/mmc/core/bus.c   |   14 ++++++++++++--
+ drivers/mmc/core/core.h  |    2 ++
+ drivers/mmc/core/mmc.c   |   14 --------------
+ drivers/mmc/core/sd.c    |   14 --------------
+ drivers/mmc/core/sdio.c  |   20 ++++++++++++++++++++
+ 6 files changed, 60 insertions(+), 32 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 5bab73b..89d1c39 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -34,6 +34,7 @@
- #include <linux/delay.h>
- #include <linux/capability.h>
- #include <linux/compat.h>
-+#include <linux/pm_runtime.h>
- 
- #include <linux/mmc/ioctl.h>
- #include <linux/mmc/card.h>
-@@ -222,6 +223,7 @@ static ssize_t power_ro_lock_store(struct device *dev,
- 	md = mmc_blk_get(dev_to_disk(dev));
- 	card = md->queue.card;
- 
-+	pm_runtime_get_sync(&card->dev);
- 	mmc_claim_host(card->host);
- 
- 	ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BOOT_WP,
-@@ -234,6 +236,8 @@ static ssize_t power_ro_lock_store(struct device *dev,
- 		card->ext_csd.boot_ro_lock |= EXT_CSD_BOOT_WP_B_PWR_WP_EN;
- 
- 	mmc_release_host(card->host);
-+	pm_runtime_mark_last_busy(&card->dev);
-+	pm_runtime_put_autosuspend(&card->dev);
- 
- 	if (!ret) {
- 		pr_info("%s: Locking boot partition ro until next power on\n",
-@@ -492,6 +496,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 
- 	mrq.cmd = &cmd;
- 
-+	pm_runtime_get_sync(&card->dev);
- 	mmc_claim_host(card->host);
- 
- 	err = mmc_blk_part_switch(card, md);
-@@ -560,6 +565,8 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 
- cmd_rel_host:
- 	mmc_release_host(card->host);
-+	pm_runtime_mark_last_busy(&card->dev);
-+	pm_runtime_put_autosuspend(&card->dev);
- 
- cmd_done:
- 	mmc_blk_put(md);
-@@ -1894,9 +1901,11 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	struct mmc_host *host = card->host;
- 	unsigned long flags;
- 
--	if (req && !mq->mqrq_prev->req)
-+	if (req && !mq->mqrq_prev->req) {
-+		pm_runtime_get_sync(&card->dev);
- 		/* claim host only for the first request */
- 		mmc_claim_host(card->host);
-+	}
- 
- 	ret = mmc_blk_part_switch(card, md);
- 	if (ret) {
-@@ -1932,9 +1941,13 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	}
- 
- out:
--	if (!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST))
-+	if (!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) {
- 		/* release host only when there are no more requests */
- 		mmc_release_host(card->host);
-+		pm_runtime_mark_last_busy(&card->dev);
-+		pm_runtime_put_autosuspend(&card->dev);
-+	}
-+
- 	return ret;
- }
- 
-@@ -2331,6 +2344,12 @@ static int mmc_blk_probe(struct mmc_card *card)
- 		if (mmc_add_disk(part_md))
- 			goto out;
- 	}
-+
-+	pm_runtime_set_active(&card->dev);
-+	pm_runtime_set_autosuspend_delay(&card->dev, 3000);
-+	pm_runtime_use_autosuspend(&card->dev);
-+	pm_runtime_enable(&card->dev);
-+
- 	return 0;
- 
-  out:
-@@ -2344,9 +2363,12 @@ static void mmc_blk_remove(struct mmc_card *card)
- 	struct mmc_blk_data *md = mmc_get_drvdata(card);
- 
- 	mmc_blk_remove_parts(card, md);
-+	pm_runtime_get_sync(&card->dev);
- 	mmc_claim_host(card->host);
- 	mmc_blk_part_switch(card, md);
- 	mmc_release_host(card->host);
-+	pm_runtime_disable(&card->dev);
-+	pm_runtime_put_noidle(&card->dev);
- 	mmc_blk_remove_req(md);
- 	mmc_set_drvdata(card, NULL);
- }
-@@ -2358,6 +2380,7 @@ static int mmc_blk_suspend(struct mmc_card *card)
- 	struct mmc_blk_data *md = mmc_get_drvdata(card);
- 
- 	if (md) {
-+		pm_runtime_get_sync(&card->dev);
- 		mmc_queue_suspend(&md->queue);
- 		list_for_each_entry(part_md, &md->part, part) {
- 			mmc_queue_suspend(&part_md->queue);
-@@ -2381,6 +2404,7 @@ static int mmc_blk_resume(struct mmc_card *card)
- 		list_for_each_entry(part_md, &md->part, part) {
- 			mmc_queue_resume(&part_md->queue);
- 		}
-+		pm_runtime_put(&card->dev);
- 	}
- 	return 0;
- }
 -- 
 1.7.10
 
