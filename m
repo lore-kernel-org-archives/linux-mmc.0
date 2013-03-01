@@ -1,121 +1,114 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 2/3] mmc: core: Add bus_ops for runtime pm callbacks
-Date: Fri, 1 Mar 2013 13:47:14 +0100
-Message-ID: <1362142035-8403-3-git-send-email-ulf.hansson@stericsson.com>
-References: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhci: update check code for cd-broken or
+ nonremovable card
+Date: Fri, 1 Mar 2013 23:23:03 +0800
+Message-ID: <CADz5_gLteMpVcw28WUoX1B_W0hNpzqGiV+UuzJFo_+9ptRmXVA@mail.gmail.com>
+References: <1362130829-4677-1-git-send-email-kliu5@marvell.com>
+	<1DB98640-1C4C-457F-B555-3E5152B95AC6@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog108.obsmtp.com ([207.126.144.125]:33136 "EHLO
-	eu1sys200aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750884Ab3CANKA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Mar 2013 08:10:00 -0500
-In-Reply-To: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from mail-oa0-f48.google.com ([209.85.219.48]:60036 "EHLO
+	mail-oa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750696Ab3CAPXE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Mar 2013 10:23:04 -0500
+Received: by mail-oa0-f48.google.com with SMTP id j1so5820999oag.21
+        for <linux-mmc@vger.kernel.org>; Fri, 01 Mar 2013 07:23:03 -0800 (PST)
+In-Reply-To: <1DB98640-1C4C-457F-B555-3E5152B95AC6@nvidia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Johan Rudholm <johan.rudholm@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Philip Rakity <prakity@nvidia.com>
+Cc: Kevin Liu <kliu5@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>, Stephen Warren <swarren@wwwdotorg.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+2013/3/1 Philip Rakity <prakity@nvidia.com>:
+>
+> On Mar 1, 2013, at 9:40 AM, Kevin Liu <kliu5@marvell.com> wrote:
+>
+>> in function sdhci_request:
+>> 1. If quirk SDHCI_QUIRK_BROKEN_CARD_DETECTION is selected, there is no
+>> card detection available and polling must be used. Gpio detect must
+>> _not_ be supported under this case.
+>> Change the sequence to check SDHCI_QUIRK_BROKEN_CARD_DETECTION first,
+>> which make code more clear.
+>> 2. nonremovable card should be also assumed always present.
+>>
+>> in function sdhci_enable_irq_wakeups:
+>> 1. nonremovable card should be also assumed no insert/remove wakeup
+>> needed like some sdio cards which is nonremovable and can wakeup host
+>> only by card int.
+>>
+>> Signed-off-by: Kevin Liu <kliu5@marvell.com>
+>> ---
+>> drivers/mmc/host/sdhci.c |   30 ++++++++++++++++--------------
+>> 1 file changed, 16 insertions(+), 14 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index c94fd6c..e4ada0d 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -1337,19 +1337,20 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>
+>>       host->mrq = mrq;
+>>
+>> -     /*
+>> -      * Firstly check card presence from cd-gpio.  The return could
+>> -      * be one of the following possibilities:
+>> -      *     negative: cd-gpio is not available
+>> -      *     zero: cd-gpio is used, and card is removed
+>> -      *     one: cd-gpio is used, and card is present
+>> -      */
+>> -     present = mmc_gpio_get_cd(host->mmc);
+>> -     if (present < 0) {
+>> -             /* If polling, assume that the card is always present. */
+>> -             if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+>> -                     present = 1;
+>> -             else
+>> +     /* If polling/nonremovable, assume that the card is always present. */
+>> +     if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
+>> +                     (host->mmc->caps & MMC_CAP_NONREMOVABLE)) {
+>> +             present = 1;
+>> +     } else {
+>> +             /*
+>> +              * Firstly check card presence from cd-gpio.  The return could
+>> +              * be one of the following possibilities:
+>> +              *     negative: cd-gpio is not available
+>> +              *     zero: cd-gpio is used, and card is removed
+>> +              *     one: cd-gpio is used, and card is present
+>> +              */
+>> +             present = mmc_gpio_get_cd(host->mmc);
+>> +             if (IS_ERR_VALUE(present))
+>>                       present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+>>                                       SDHCI_CARD_PRESENT;
+>
+> Hi Kevin
+>
+> does it make sense to move this logic to a more generic function (static inline ?)
+> int sdhci_card_present ()
+>
+> and encapsulate all the logic there for gpio cd, present state (card is there) etc.
+>
+> Philip
+>
 
-SDIO is the only protocol that uses runtime pm for the card device
-right now. To provide the option for sd and mmc to use runtime pm as
-well the bus_ops callback are extended with two new functions. One for
-runtime_suspend and one for runtime_resume.
+Philip,
 
-This patch will also implement the callbacks for SDIO to make sure
-existing functionallity is maintained.
+Good idea...Will call the function "sdhci_do_get_cd" introdunced in my
+previous patch. Thanks!
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/bus.c  |   14 ++++++++++++--
- drivers/mmc/core/core.h |    2 ++
- drivers/mmc/core/sdio.c |   20 ++++++++++++++++++++
- 3 files changed, 34 insertions(+), 2 deletions(-)
+Kevin
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index e219c97..d9e8c2b 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -151,15 +151,25 @@ static int mmc_bus_resume(struct device *dev)
- static int mmc_runtime_suspend(struct device *dev)
- {
- 	struct mmc_card *card = mmc_dev_to_card(dev);
-+	struct mmc_host *host = card->host;
-+	int ret = 0;
-+
-+	if (host->bus_ops->runtime_suspend)
-+		ret = host->bus_ops->runtime_suspend(host);
- 
--	return mmc_power_save_host(card->host);
-+	return ret;
- }
- 
- static int mmc_runtime_resume(struct device *dev)
- {
- 	struct mmc_card *card = mmc_dev_to_card(dev);
-+	struct mmc_host *host = card->host;
-+	int ret = 0;
-+
-+	if (host->bus_ops->runtime_resume)
-+		ret = host->bus_ops->runtime_resume(host);
- 
--	return mmc_power_restore_host(card->host);
-+	return ret;
- }
- 
- static int mmc_runtime_idle(struct device *dev)
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index b9f18a2..9445519 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -22,6 +22,8 @@ struct mmc_bus_ops {
- 	void (*detect)(struct mmc_host *);
- 	int (*suspend)(struct mmc_host *);
- 	int (*resume)(struct mmc_host *);
-+	int (*runtime_suspend)(struct mmc_host *);
-+	int (*runtime_resume)(struct mmc_host *);
- 	int (*power_save)(struct mmc_host *);
- 	int (*power_restore)(struct mmc_host *);
- 	int (*alive)(struct mmc_host *);
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index aa0719a..0e6e8c1 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -988,6 +988,24 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 	return err;
- }
- 
-+static int mmc_sdio_runtime_suspend(struct mmc_host *host)
-+{
-+	/*
-+	 * Once sdio clients has entirely switched to runtime pm we wrap
-+	 * the call to power_save here.
-+	 */
-+	return mmc_power_save_host(host);
-+}
-+
-+static int mmc_sdio_runtime_resume(struct mmc_host *host)
-+{
-+	/*
-+	 * Once sdio clients has entirely switched to runtime pm we wrap
-+	 * the call to power_restore here.
-+	 */
-+	return mmc_power_restore_host(host);
-+}
-+
- static int mmc_sdio_power_restore(struct mmc_host *host)
- {
- 	int ret;
-@@ -1054,6 +1072,8 @@ static const struct mmc_bus_ops mmc_sdio_ops = {
- 	.detect = mmc_sdio_detect,
- 	.suspend = mmc_sdio_suspend,
- 	.resume = mmc_sdio_resume,
-+	.runtime_suspend = mmc_sdio_runtime_suspend,
-+	.runtime_resume = mmc_sdio_runtime_resume,
- 	.power_restore = mmc_sdio_power_restore,
- 	.alive = mmc_sdio_alive,
- };
--- 
-1.7.10
-
+>>       }
+>> @@ -2504,7 +2505,8 @@ void sdhci_enable_irq_wakeups(struct sdhci_host *host)
+>>       val = sdhci_readb(host, SDHCI_WAKE_UP_CONTROL);
+>>       val |= mask ;
+>>       /* Avoid fake wake up */
+>> -     if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+>> +     if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
+>> +                     (host->mmc->caps & MMC_CAP_NONREMOVABLE))
+>>               val &= ~(SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE);
+>>       sdhci_writeb(host, val, SDHCI_WAKE_UP_CONTROL);
+>> }
+>> --
+>> 1.7.9.5
+>>
+>
