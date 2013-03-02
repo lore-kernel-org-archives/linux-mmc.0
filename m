@@ -1,114 +1,75 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci: update check code for cd-broken or
- nonremovable card
-Date: Fri, 1 Mar 2013 23:23:03 +0800
-Message-ID: <CADz5_gLteMpVcw28WUoX1B_W0hNpzqGiV+UuzJFo_+9ptRmXVA@mail.gmail.com>
-References: <1362130829-4677-1-git-send-email-kliu5@marvell.com>
-	<1DB98640-1C4C-457F-B555-3E5152B95AC6@nvidia.com>
+From: "Maya Erez" <merez@codeaurora.org>
+Subject: RE: [PATCH 0/3] mmc: Use runtime pm for blkdevice
+Date: Sat, 2 Mar 2013 22:00:56 +0200
+Message-ID: <003101ce1780$a928d000$fb7a7000$@codeaurora.org>
+References: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f48.google.com ([209.85.219.48]:60036 "EHLO
-	mail-oa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750696Ab3CAPXE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Mar 2013 10:23:04 -0500
-Received: by mail-oa0-f48.google.com with SMTP id j1so5820999oag.21
-        for <linux-mmc@vger.kernel.org>; Fri, 01 Mar 2013 07:23:03 -0800 (PST)
-In-Reply-To: <1DB98640-1C4C-457F-B555-3E5152B95AC6@nvidia.com>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:28189 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752677Ab3CBUBB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Mar 2013 15:01:01 -0500
+In-Reply-To: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com>
+Content-Language: en-us
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@nvidia.com>
-Cc: Kevin Liu <kliu5@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>, Stephen Warren <swarren@wwwdotorg.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>
+To: 'Ulf Hansson' <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>
+Cc: 'Johan Rudholm' <johan.rudholm@stericsson.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>
 
-2013/3/1 Philip Rakity <prakity@nvidia.com>:
->
-> On Mar 1, 2013, at 9:40 AM, Kevin Liu <kliu5@marvell.com> wrote:
->
->> in function sdhci_request:
->> 1. If quirk SDHCI_QUIRK_BROKEN_CARD_DETECTION is selected, there is no
->> card detection available and polling must be used. Gpio detect must
->> _not_ be supported under this case.
->> Change the sequence to check SDHCI_QUIRK_BROKEN_CARD_DETECTION first,
->> which make code more clear.
->> 2. nonremovable card should be also assumed always present.
->>
->> in function sdhci_enable_irq_wakeups:
->> 1. nonremovable card should be also assumed no insert/remove wakeup
->> needed like some sdio cards which is nonremovable and can wakeup host
->> only by card int.
->>
->> Signed-off-by: Kevin Liu <kliu5@marvell.com>
->> ---
->> drivers/mmc/host/sdhci.c |   30 ++++++++++++++++--------------
->> 1 file changed, 16 insertions(+), 14 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index c94fd6c..e4ada0d 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1337,19 +1337,20 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>
->>       host->mrq = mrq;
->>
->> -     /*
->> -      * Firstly check card presence from cd-gpio.  The return could
->> -      * be one of the following possibilities:
->> -      *     negative: cd-gpio is not available
->> -      *     zero: cd-gpio is used, and card is removed
->> -      *     one: cd-gpio is used, and card is present
->> -      */
->> -     present = mmc_gpio_get_cd(host->mmc);
->> -     if (present < 0) {
->> -             /* If polling, assume that the card is always present. */
->> -             if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
->> -                     present = 1;
->> -             else
->> +     /* If polling/nonremovable, assume that the card is always present. */
->> +     if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
->> +                     (host->mmc->caps & MMC_CAP_NONREMOVABLE)) {
->> +             present = 1;
->> +     } else {
->> +             /*
->> +              * Firstly check card presence from cd-gpio.  The return could
->> +              * be one of the following possibilities:
->> +              *     negative: cd-gpio is not available
->> +              *     zero: cd-gpio is used, and card is removed
->> +              *     one: cd-gpio is used, and card is present
->> +              */
->> +             present = mmc_gpio_get_cd(host->mmc);
->> +             if (IS_ERR_VALUE(present))
->>                       present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
->>                                       SDHCI_CARD_PRESENT;
->
-> Hi Kevin
->
-> does it make sense to move this logic to a more generic function (static inline ?)
-> int sdhci_card_present ()
->
-> and encapsulate all the logic there for gpio cd, present state (card is there) etc.
->
-> Philip
->
+Thanks Ulf.
+I will go over the new patch and will develop the periodic BKOPS on top of
+it.
 
-Philip,
+Thanks,
+Maya
 
-Good idea...Will call the function "sdhci_do_get_cd" introdunced in my
-previous patch. Thanks!
+-----Original Message-----
+From: linux-mmc-owner@vger.kernel.org
+[mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Ulf Hansson
+Sent: Friday, March 01, 2013 2:47 PM
+To: linux-mmc@vger.kernel.org; Chris Ball
+Cc: Johan Rudholm; Ulf Hansson
+Subject: [PATCH 0/3] mmc: Use runtime pm for blkdevice
 
-Kevin
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
->>       }
->> @@ -2504,7 +2505,8 @@ void sdhci_enable_irq_wakeups(struct sdhci_host *host)
->>       val = sdhci_readb(host, SDHCI_WAKE_UP_CONTROL);
->>       val |= mask ;
->>       /* Avoid fake wake up */
->> -     if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
->> +     if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
->> +                     (host->mmc->caps & MMC_CAP_NONREMOVABLE))
->>               val &= ~(SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE);
->>       sdhci_writeb(host, val, SDHCI_WAKE_UP_CONTROL);
->> }
->> --
->> 1.7.9.5
->>
->
+SDIO has been using runtime pm for a while to handle runtime power save
+operations. This patchset is enabling the option to make the sd/mmc
+blockdevices to use runtime pm as well.
+
+The runtime pm implementation for the block device will make use of
+autosuspend to defer power save operation to after request inactivty for a
+certain time.
+
+To actually perform some power save operations the corresponding bus ops for
+mmc and sd shall be implemented. Typically it could make sense to do BKOPS
+for eMMC in here.
+
+Ulf Hansson (3):
+  mmc: core: Remove power_restore bus_ops for mmc and sd
+  mmc: core: Add bus_ops for runtime pm callbacks
+  mmc: block: Enable runtime pm for mmc blkdevice
+
+ drivers/mmc/card/block.c |   28 ++++++++++++++++++++++++++--
+ drivers/mmc/core/bus.c   |   14 ++++++++++++--
+ drivers/mmc/core/core.h  |    2 ++
+ drivers/mmc/core/mmc.c   |   14 --------------
+ drivers/mmc/core/sd.c    |   14 --------------
+ drivers/mmc/core/sdio.c  |   20 ++++++++++++++++++++
+ 6 files changed, 60 insertions(+), 32 deletions(-)
+
+--
+1.7.10
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the
+body of a message to majordomo@vger.kernel.org More majordomo info at
+http://vger.kernel.org/majordomo-info.html
+
+Maya Erez
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
+of Code Aurora Forum, hosted by The Linux Foundation
+
