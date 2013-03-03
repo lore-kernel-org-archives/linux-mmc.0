@@ -1,75 +1,65 @@
-From: "Maya Erez" <merez@codeaurora.org>
-Subject: RE: [PATCH 0/3] mmc: Use runtime pm for blkdevice
-Date: Sat, 2 Mar 2013 22:00:56 +0200
-Message-ID: <003101ce1780$a928d000$fb7a7000$@codeaurora.org>
-References: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com>
+From: Daniel Palmer <daniel@0x0f.com>
+Subject: atmel-mci: issues after upgrading to linux 3.8
+Date: Sun, 3 Mar 2013 20:59:00 +0900
+Message-ID: <CAFr9PX=h0gzBaJF0nMAbHO_UBx1VA79jiu2VTYaUQ1Q6VJipAA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:28189 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752677Ab3CBUBB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Mar 2013 15:01:01 -0500
-In-Reply-To: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com>
-Content-Language: en-us
+Received: from mail-pb0-f44.google.com ([209.85.160.44]:59384 "EHLO
+	mail-pb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752825Ab3CCL7B (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Mar 2013 06:59:01 -0500
+Received: by mail-pb0-f44.google.com with SMTP id wz12so2553251pbc.31
+        for <linux-mmc@vger.kernel.org>; Sun, 03 Mar 2013 03:59:00 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Ulf Hansson' <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>
-Cc: 'Johan Rudholm' <johan.rudholm@stericsson.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>
+To: linux-mmc@vger.kernel.org
 
-Thanks Ulf.
-I will go over the new patch and will develop the periodic BKOPS on top of
-it.
+Hi all,
 
-Thanks,
-Maya
+Hopefully this is the right place for this. Maybe it should go to a
+list more related to the at91 stuff. Please tell me if that is the
+case.
+I'm not subscribed so please CC me.
 
------Original Message-----
-From: linux-mmc-owner@vger.kernel.org
-[mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Ulf Hansson
-Sent: Friday, March 01, 2013 2:47 PM
-To: linux-mmc@vger.kernel.org; Chris Ball
-Cc: Johan Rudholm; Ulf Hansson
-Subject: [PATCH 0/3] mmc: Use runtime pm for blkdevice
+I have an Atmel sam9g45 based machine that has been running 3.4.0-rc4
+for a long time without any major issues.
+I decided to try out 3.8 this weekend and now have some issues using a
+SD card via the atmel-mci driver.
+It seems whenever something does a lot of transfers that the card stops working;
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+root@ein:~# hdparm -Tt /dev/mmcblk0
 
-SDIO has been using runtime pm for a while to handle runtime power save
-operations. This patchset is enabling the option to make the sd/mmc
-blockdevices to use runtime pm as well.
+/dev/mmcblk0:
+ Timing cached reads:   106 MB in  2.00 seconds =  52.94 MB/sec
+ Timing buffered disk reads: [ 1422.480000] mmcblk0: error -115
+sending stop command, original cmd response 0x900, card status 0xb00
+[ 1422.480000] mmcblk0: error -110 transferring data, sector 54784, nr
+256, cmd response 0x900, card status 0xb00
+[ 1422.480000] mmcblk0: retrying using single block read
+[ 1424.490000] mmcblk0: error -110 transferring data, sector 54784, nr
+256, cmd response 0x900, card status 0x0
+[ 1424.500000] end_request: I/O error, dev mmcblk0, sector 54784
+[ 1426.890000] mmcblk0: error -110 transferring data, sector 54785, nr
+255, cmd response 0x900, card status 0x0
+[ 1426.900000] end_request: I/O error, dev mmcblk0, sector 54785
 
-The runtime pm implementation for the block device will make use of
-autosuspend to defer power save operation to after request inactivty for a
-certain time.
+I'm not sure what is triggering the issue. Sometimes the machine will
+boot into Debian and run for a while without issue and sometimes it
+will start playing up just after init starts. One thing I have noticed
+is that if I can actually manage to warm reboot the machine and boot
+back into the working 3.4.0-rc4 kernel the same issue starts happening
+there too.
 
-To actually perform some power save operations the corresponding bus ops for
-mmc and sd shall be implemented. Typically it could make sense to do BKOPS
-for eMMC in here.
+I thought it could be because of the SD failing so I tried another
+card I had around and I bought a new card today. There didn't seem to
+be any change with either card. I'm not familiar with the mmc
+subsystem at all so I don't know where to start on debugging this. I
+have the mmc debugging option turned on and can see lots of output
+about the states the driver is going through but I couldn't see
+anything that suggested why it is failing. Any pointers on how to
+approach fixing this would be appreciated.
 
-Ulf Hansson (3):
-  mmc: core: Remove power_restore bus_ops for mmc and sd
-  mmc: core: Add bus_ops for runtime pm callbacks
-  mmc: block: Enable runtime pm for mmc blkdevice
+Cheers,
 
- drivers/mmc/card/block.c |   28 ++++++++++++++++++++++++++--
- drivers/mmc/core/bus.c   |   14 ++++++++++++--
- drivers/mmc/core/core.h  |    2 ++
- drivers/mmc/core/mmc.c   |   14 --------------
- drivers/mmc/core/sd.c    |   14 --------------
- drivers/mmc/core/sdio.c  |   20 ++++++++++++++++++++
- 6 files changed, 60 insertions(+), 32 deletions(-)
-
---
-1.7.10
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the
-body of a message to majordomo@vger.kernel.org More majordomo info at
-http://vger.kernel.org/majordomo-info.html
-
-Maya Erez
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
-of Code Aurora Forum, hosted by The Linux Foundation
-
+Daniel
