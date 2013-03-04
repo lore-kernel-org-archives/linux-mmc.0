@@ -1,190 +1,164 @@
-From: Asutosh Das <asutoshd@codeaurora.org>
-Subject: Re: [PATCH 3/3] mmc: block: Enable runtime pm for mmc blkdevice
-Date: Mon, 04 Mar 2013 19:18:13 +0530
-Message-ID: <5134A61D.9040001@codeaurora.org>
-References: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com> <1362142035-8403-4-git-send-email-ulf.hansson@stericsson.com>
+From: Matt Porter <mporter@ti.com>
+Subject: Re: [PATCH v7 01/10] ARM: davinci: move private EDMA API to
+ arm/common
+Date: Mon, 4 Mar 2013 17:05:35 -0500
+Message-ID: <20130304220535.GF6209@beef>
+References: <1359742975-10421-1-git-send-email-mporter@ti.com>
+ <1359742975-10421-2-git-send-email-mporter@ti.com>
+ <511673E1.7000908@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:16915 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756501Ab3CDNsT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Mar 2013 08:48:19 -0500
-In-Reply-To: <1362142035-8403-4-git-send-email-ulf.hansson@stericsson.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <511673E1.7000908@ti.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Sekhar Nori <nsekhar@ti.com>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, Benoit Cousson <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Vinod Koul <vinod.koul@intel.com>, Rob Landley <rob@landley.net>, Dan Williams <djbw@fb.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Chris Ball <cjb@laptop.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On 3/1/2013 6:17 PM, Ulf Hansson wrote:
-> From: Ulf Hansson <ulf.hansson@linaro.org>
->
-> Once the mmc blkdevice is being probed, runtime pm will be enabled.
-> By using runtime autosuspend, the power save operations can be done
-> when request inactivity occurs for a certain time. Right now the
-> selected timeout value is set to 3 s.
->
-> Moreover, when the blk device is being suspended, we make sure the device
-> will be runtime resumed. The reason for doing this is that we what the
-> host suspend sequence to be unaware of any runtime power save operations,
-> so it can just handle the suspend as the device is fully powerered from a
-> runtime perspective.
->
-> This patch is preparing to make it possible to move BKOPS handling into
-> the runtime callbacks for the mmc bus_ops. Thus IDLE BKOPS can be
-> accomplished.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->   drivers/mmc/card/block.c |   28 ++++++++++++++++++++++++++--
->   1 file changed, 26 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 5bab73b..89d1c39 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -34,6 +34,7 @@
->   #include <linux/delay.h>
->   #include <linux/capability.h>
->   #include <linux/compat.h>
-> +#include <linux/pm_runtime.h>
->   
->   #include <linux/mmc/ioctl.h>
->   #include <linux/mmc/card.h>
-> @@ -222,6 +223,7 @@ static ssize_t power_ro_lock_store(struct device *dev,
->   	md = mmc_blk_get(dev_to_disk(dev));
->   	card = md->queue.card;
->   
-> +	pm_runtime_get_sync(&card->dev);
->   	mmc_claim_host(card->host);
->   
->   	ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BOOT_WP,
-> @@ -234,6 +236,8 @@ static ssize_t power_ro_lock_store(struct device *dev,
->   		card->ext_csd.boot_ro_lock |= EXT_CSD_BOOT_WP_B_PWR_WP_EN;
->   
->   	mmc_release_host(card->host);
-> +	pm_runtime_mark_last_busy(&card->dev);
-> +	pm_runtime_put_autosuspend(&card->dev);
->   
->   	if (!ret) {
->   		pr_info("%s: Locking boot partition ro until next power on\n",
-> @@ -492,6 +496,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
->   
->   	mrq.cmd = &cmd;
->   
-> +	pm_runtime_get_sync(&card->dev);
->   	mmc_claim_host(card->host);
->   
->   	err = mmc_blk_part_switch(card, md);
-> @@ -560,6 +565,8 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
->   
->   cmd_rel_host:
->   	mmc_release_host(card->host);
-> +	pm_runtime_mark_last_busy(&card->dev);
-> +	pm_runtime_put_autosuspend(&card->dev);
->   
->   cmd_done:
->   	mmc_blk_put(md);
-> @@ -1894,9 +1901,11 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
->   	struct mmc_host *host = card->host;
->   	unsigned long flags;
->   
-> -	if (req && !mq->mqrq_prev->req)
-> +	if (req && !mq->mqrq_prev->req) {
-> +		pm_runtime_get_sync(&card->dev);
->   		/* claim host only for the first request */
->   		mmc_claim_host(card->host);
-> +	}
->   
->   	ret = mmc_blk_part_switch(card, md);
->   	if (ret) {
-> @@ -1932,9 +1941,13 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
->   	}
->   
->   out:
-> -	if (!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST))
-> +	if (!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) {
->   		/* release host only when there are no more requests */
->   		mmc_release_host(card->host);
-> +		pm_runtime_mark_last_busy(&card->dev);
-> +		pm_runtime_put_autosuspend(&card->dev);
-> +	}
-> +
->   	return ret;
->   }
->   
-> @@ -2331,6 +2344,12 @@ static int mmc_blk_probe(struct mmc_card *card)
->   		if (mmc_add_disk(part_md))
->   			goto out;
->   	}
-> +
-> +	pm_runtime_set_active(&card->dev);
-> +	pm_runtime_set_autosuspend_delay(&card->dev, 3000);
-> +	pm_runtime_use_autosuspend(&card->dev);
-> +	pm_runtime_enable(&card->dev);
-> +
->   	return 0;
->   
->    out:
-> @@ -2344,9 +2363,12 @@ static void mmc_blk_remove(struct mmc_card *card)
->   	struct mmc_blk_data *md = mmc_get_drvdata(card);
->   
->   	mmc_blk_remove_parts(card, md);
-> +	pm_runtime_get_sync(&card->dev);
->   	mmc_claim_host(card->host);
->   	mmc_blk_part_switch(card, md);
->   	mmc_release_host(card->host);
-> +	pm_runtime_disable(&card->dev);
-> +	pm_runtime_put_noidle(&card->dev);
->   	mmc_blk_remove_req(md);
->   	mmc_set_drvdata(card, NULL);
->   }
-> @@ -2358,6 +2380,7 @@ static int mmc_blk_suspend(struct mmc_card *card)
->   	struct mmc_blk_data *md = mmc_get_drvdata(card);
->   
->   	if (md) {
-> +		pm_runtime_get_sync(&card->dev);
->   		mmc_queue_suspend(&md->queue);
->   		list_for_each_entry(part_md, &md->part, part) {
->   			mmc_queue_suspend(&part_md->queue);
-> @@ -2381,6 +2404,7 @@ static int mmc_blk_resume(struct mmc_card *card)
->   		list_for_each_entry(part_md, &md->part, part) {
->   			mmc_queue_resume(&part_md->queue);
->   		}
-> +		pm_runtime_put(&card->dev);
->   	}
->   	return 0;
->   }
-Hi Ulf
-Currently, I am implementing a patch that facilitates each device to 
-manage is runtime pm on its own.
-I am using the parent-child relationship that is already established in 
-the mmc stack for this implementation. In this case,
-mmc_card is a child of mmc_host which is in turn is the child of 
-platform-device.
-The following contexts exist which would have to invoke get_sync and 
-put_sync on the mmc_card device:
-1. mmcqd
-2. bkops
-3. mmc_rescan
+On Sat, Feb 09, 2013 at 09:35:53PM +0530, Sekhar Nori wrote:
+> Hi Matt,
+> 
+> This version introduces build/bisect issues.
 
-The get_sync on card device would resume all the 3 devices starting from 
-the platform-device and the put-sync would suspend all the 3 devices 
-starting from the card-device.
-pm_auto_suspend/pm_schedule_suspend may be used to trigger the suspend 
-from the above contexts.
-I believe this would simplify the runtime pm functionality.
+Ok, see later comment which addresses this...
 
-I can put up the patch for review in a couple of days.
+> On 2/1/2013 11:52 PM, Matt Porter wrote:
+> > Move mach-davinci/dma.c to common/edma.c so it can be used
+> > by OMAP (specifically AM33xx) as well.
+> > 
+> > Signed-off-by: Matt Porter <mporter@ti.com>
+> > Acked-by: Sekhar Nori <nsekhar@ti.com>
+> 
+> > diff --git a/arch/arm/mach-davinci/dma.c b/arch/arm/common/edma.c
+> 
+> > @@ -25,7 +25,7 @@
+> >  #include <linux/io.h>
+> >  #include <linux/slab.h>
+> >  
+> > -#include <mach/edma.h>
+> > +#include <linux/platform_data/edma.h>
+> 
+> >  /*-----------------------------------------------------------------------*/
+> > +static int edma_of_read_u32_to_s8_array(const struct device_node *np,
+> > +					 const char *propname, s8 *out_values,
+> > +					 size_t sz)
+> > +{
+> > +	int ret;
+> > +
+> > +	ret = of_property_read_u8_array(np, propname, out_values, sz);
+> 
+> This needs <linux/of.h> to be included in this file.
+> 
+> > +static int edma_xbar_event_map(struct device *dev,
+> > +			       struct device_node *node,
+> > +			       struct edma_soc_info *pdata, int len)
+> > +{
+> > +	int ret = 0;
+> > +	int i;
+> > +	struct resource res;
+> > +	void *xbar;
+> > +	const s16 (*xbar_chans)[2];
+> > +	u32 shift, offset, mux;
+> > +
+> > +	xbar_chans = devm_kzalloc(dev,
+> > +				  len/sizeof(s16) + 2*sizeof(s16),
+> > +				  GFP_KERNEL);
+> > +	if (!xbar_chans)
+> > +		return -ENOMEM;
+> > +
+> > +	ret = of_address_to_resource(node, 1, &res);
+> 
+> of_address_to_resource() needs <linux/of_address.h>
+> 
+> > +	if (IS_ERR_VALUE(ret))
+> 
+> This needs <linux/err.h>
+> 
+> > +		return -EIO;
+> > +
+> > +	xbar = devm_ioremap(dev, res.start, resource_size(&res));
+> > +	if (!xbar)
+> > +		return -ENOMEM;
+> > +
+> > +	ret = edma_of_read_u32_to_s16_array(node,
+> > +					    "ti,edma-xbar-event-map",
+> > +					    (s16 *)xbar_chans,
+> > +					    len/sizeof(u32));
+> > +	if (IS_ERR_VALUE(ret))
+> > +		return -EIO;
+> > +
+> > +	for (i = 0; xbar_chans[i][0] != -1; i++) {
+> > +		shift = (xbar_chans[i][1] % 4) * 8;
+> > +		offset = xbar_chans[i][1] >> 2;
+> > +		offset <<= 2;
+> > +		mux = readl((void *)((u32)xbar + offset));
+> > +		mux &= ~(0xff << shift);
+> > +		mux |= xbar_chans[i][0] << shift;
+> > +		writel(mux, (void *)((u32)xbar + offset));
+> > +	}
+> > +
+> > +	pdata->xbar_chans = xbar_chans;
+> 
+> There is no member xbar_chans ATM. It seems to be introduced in 03/10.
+> 
+> > +
+> > +static struct of_dma_filter_info edma_filter_info = {
+> 
+> of_dma_filter_info needs <linux/of_dma.h>.
+> 
+> > +	.filter_fn = edma_filter_fn,
+> 
+> edma_filter_fn needs <linux/edma.h>
+> 
+> BTW, I am not sure if you really intended to introduce EDMA DT support
+> in this patch. I thought 1/10 was supposed to just move EDMA private API
+> to a common place. If you really want to introduce DT support as well,
+> that should be noted in the description. I think it is better done in a
+> later patch.
 
-Please let me know your opinion about this approach.
+This was a complete fubared rebase for this patch. As you noticed, I
+got hunks from 3/10 in there and the bisect test didn't run so it was
+missed. I've got this fixed up for v8 which address all these comments
+that stem from that issue.
 
---
-Thanks
-Asutosh
+> > diff --git a/sound/soc/davinci/davinci-sffsdr.c b/sound/soc/davinci/davinci-sffsdr.c
+> 
+> > @@ -17,6 +17,7 @@
+> >  #include <linux/timer.h>
+> >  #include <linux/interrupt.h>
+> >  #include <linux/platform_device.h>
+> > +#include <linux/platform_data/edma.h>
+> >  #include <linux/gpio.h>
+> >  #include <sound/core.h>
+> >  #include <sound/pcm.h>
+> > @@ -28,12 +29,14 @@
+> >  #include <asm/plat-sffsdr/sffsdr-fpga.h>
+> >  #endif
+> >  
+> > -#include <mach/edma.h>
+> >  
+> >  #include "../codecs/pcm3008.h"
+> >  #include "davinci-pcm.h"
+> >  #include "davinci-i2s.h"
+> >  
+> > +#define DAVINCI_DMA_MCBSP_TX	2
+> > +#define DAVINCI_DMA_MCBSP_RX	3
+> > +
+> >  /*
+> >   * CLKX and CLKR are the inputs for the Sample Rate Generator.
+> >   * FSX and FSR are outputs, driven by the sample Rate Generator.
+> > @@ -124,7 +127,7 @@ static struct resource sffsdr_snd_resources[] = {
+> >  
+> >  static struct evm_snd_platform_data sffsdr_snd_data = {
+> >  	.tx_dma_ch	= DAVINCI_DMA_MCBSP_TX,
+> > -	.rx_dma_ch	= DAVINCI_DMA_MCBSP_RX,
+> 
+> > +	.rx_dma_ch	= DAVINCI_DMA_MCBAP_RX,
+> 
+> Typo here. Should be DAVINCI_DMA_MCBSP_RX. Unfortunately
+> davinci-sffsdr.c seems to be broken already.
 
--- 
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+Ok, fixed..definitely shouldn't break it more.
 
+-Matt
