@@ -1,48 +1,42 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: Make dw_mci_exynos_probe static
-Date: Mon, 4 Mar 2013 10:06:19 +0530
-Message-ID: <CAK9yfHxwsXHg74_m3qS-ukZuCAnD8Fe9Qy7mH-etHsW7ZFa1GA@mail.gmail.com>
-References: <1361177589-23953-1-git-send-email-sachin.kamat@linaro.org>
-	<5121F74E.5050903@samsung.com>
-	<001501ce0dc5$f470bab0$dd523010$%jun@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f45.google.com ([209.85.219.45]:63430 "EHLO
-	mail-oa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755042Ab3CDEgU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Mar 2013 23:36:20 -0500
-Received: by mail-oa0-f45.google.com with SMTP id o6so8380635oag.4
-        for <linux-mmc@vger.kernel.org>; Sun, 03 Mar 2013 20:36:20 -0800 (PST)
-In-Reply-To: <001501ce0dc5$f470bab0$dd523010$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Akinobu Mita <akinobu.mita@gmail.com>
+Subject: [PATCH -v3 10/23] mmc: rename random32() to prandom_u32()
+Date: Mon,  4 Mar 2013 21:58:18 +0900
+Message-ID: <1362401911-14074-11-git-send-email-akinobu.mita@gmail.com>
+References: <1362401911-14074-1-git-send-email-akinobu.mita@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1362401911-14074-1-git-send-email-akinobu.mita@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, akpm@linux-foundation.org
+Cc: Akinobu Mita <akinobu.mita@gmail.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, patches@linaro.org
 
-Hi Chris,
+Use more preferable function name which implies using a pseudo-random
+number generator.
 
-On 18 February 2013 16:21, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> Hi Sachin,
->
-> You're right.
-> 'dw_mci_exynos_probe' is only used here.
->
-> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
->
-> On Monday, February 18, 2013, Jaehoon Chung wrote:
->> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
->>
->> On 02/18/2013 05:53 PM, Sachin Kamat wrote:
->> > Silences the following sparse warning:
->> > drivers/mmc/host/dw_mmc-exynos.c:218:5: warning:
->> > symbol 'dw_mci_exynos_probe' was not declared. Should it be static?
->> >
->> > Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+Signed-off-by: Akinobu Mita <akinobu.mita@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
+---
 
-Can you please review this series?
+No change from v2
 
+ drivers/mmc/core/core.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 08a3cf2..9290bb5 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -120,8 +120,8 @@ static void mmc_should_fail_request(struct mmc_host *host,
+ 	    !should_fail(&host->fail_mmc_request, data->blksz * data->blocks))
+ 		return;
+ 
+-	data->error = data_errors[random32() % ARRAY_SIZE(data_errors)];
+-	data->bytes_xfered = (random32() % (data->bytes_xfered >> 9)) << 9;
++	data->error = data_errors[prandom_u32() % ARRAY_SIZE(data_errors)];
++	data->bytes_xfered = (prandom_u32() % (data->bytes_xfered >> 9)) << 9;
+ }
+ 
+ #else /* CONFIG_FAIL_MMC_REQUEST */
 -- 
-With warm regards,
-Sachin
+1.8.1.2
