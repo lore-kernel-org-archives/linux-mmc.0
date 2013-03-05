@@ -1,81 +1,40 @@
-From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v8 8/9] spi: omap2-mcspi: add generic DMA request support to
-	the DT binding
-Date: Tue,  5 Mar 2013 15:53:14 -0500
-Message-ID: <1362516795-6346-9-git-send-email-mporter@ti.com>
-References: <1362516795-6346-1-git-send-email-mporter@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <1362516795-6346-1-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+From: Matt Porter <mporter@ti.com>
+Subject: [PATCH v2 0/3] omap_hsmmc DT DMA Client support
+Date: Tue,  5 Mar 2013 16:13:21 -0500
+Message-ID: <1362518004-7083-1-git-send-email-mporter@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ie0-f171.google.com ([209.85.223.171]:65115 "EHLO
+	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756428Ab3CEVM7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Mar 2013 16:12:59 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>
+Cc: Vinod Koul <vinod.koul@intel.com>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Dan Williams <djbw@fb.com>, Jon Hunter <jon-hunter@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>
 
-The binding definition is based on the generic DMA request binding
+Changes since v1:
+	- rebase to 3.9-rc1, previous dependencies upstream
 
-Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
----
- Documentation/devicetree/bindings/spi/omap-spi.txt |   27 +++++++++++++++++++-
- 1 file changed, 26 insertions(+), 1 deletion(-)
+This series adds DT DMA Engine Client support to the omap_hsmmc.
+It leverages the generic DMA OF helpers in -next and the
+dma_request_slave_channel_compat() wrapper introduced in the
+AM33XX DMA Engine series to support DMA in omap_hsmmc on platforms
+booting via DT. These platforms include omap2/3/4/5 and am33xx.
 
-diff --git a/Documentation/devicetree/bindings/spi/omap-spi.txt b/Documentation/devicetree/bindings/spi/omap-spi.txt
-index 938809c..4c85c4c 100644
---- a/Documentation/devicetree/bindings/spi/omap-spi.txt
-+++ b/Documentation/devicetree/bindings/spi/omap-spi.txt
-@@ -10,7 +10,18 @@ Required properties:
- 			  input. The default is D0 as input and
- 			  D1 as output.
- 
--Example:
-+Optional properties:
-+- dmas: List of DMA specifiers with the controller specific format
-+	as described in the generic DMA client binding. A tx and rx
-+	specifier is required for each chip select.
-+- dma-names: List of DMA request names. These strings correspond
-+	1:1 with the DMA specifiers listed in dmas. The string naming
-+	is to be "rxN" and "txN" for RX and TX requests,
-+	respectively, where N equals the chip select number.
-+
-+Examples:
-+
-+[hwmod populated DMA resources]
- 
- mcspi1: mcspi@1 {
-     #address-cells = <1>;
-@@ -20,3 +31,17 @@ mcspi1: mcspi@1 {
-     ti,spi-num-cs = <4>;
- };
- 
-+[generic DMA request binding]
-+
-+mcspi1: mcspi@1 {
-+    #address-cells = <1>;
-+    #size-cells = <0>;
-+    compatible = "ti,omap4-mcspi";
-+    ti,hwmods = "mcspi1";
-+    ti,spi-num-cs = <2>;
-+    dmas = <&edma 42
-+	    &edma 43
-+	    &edma 44
-+	    &edma 45>;
-+    dma-names = "tx0", "rx0", "tx1", "rx1";
-+};
+These patches were split out from the v5 version of the AM33XX DMA
+series and split from the EDMA-specific omap_hsmmc changes.
+
+Matt Porter (2):
+  mmc: omap_hsmmc: convert to dma_request_slave_channel_compat()
+  mmc: omap_hsmmc: add generic DMA request support to the DT binding
+
+Santosh Shilimkar (1):
+  mmc: omap_hsmmc: Skip platform_get_resource_byname() for dt case
+
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   26 +++++++++++++-
+ drivers/mmc/host/omap_hsmmc.c                      |   38 ++++++++++++--------
+ 2 files changed, 48 insertions(+), 16 deletions(-)
+
 -- 
 1.7.9.5
 
-
-------------------------------------------------------------------------------
-Everyone hates slow websites. So do we.
-Make your web apps faster with AppDynamics
-Download AppDynamics Lite for free today:
-http://p.sf.net/sfu/appdyn_d2d_feb
