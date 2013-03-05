@@ -1,66 +1,35 @@
-From: Matt Porter <mporter@ti.com>
-Subject: [PATCH v2 3/3] mmc: omap_hsmmc: add generic DMA request support to the DT binding
-Date: Tue,  5 Mar 2013 16:13:24 -0500
-Message-ID: <1362518004-7083-4-git-send-email-mporter@ti.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v2 0/3] omap_hsmmc DT DMA Client support
+Date: Tue, 5 Mar 2013 21:26:01 +0000
+Message-ID: <201303052126.01572.arnd@arndb.de>
 References: <1362518004-7083-1-git-send-email-mporter@ti.com>
-Return-path: <linux-omap-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1362518004-7083-1-git-send-email-mporter@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>
-Cc: Vinod Koul <vinod.koul@intel.com>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Dan Williams <djbw@fb.com>, Jon Hunter <jon-hunter@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Porter <mporter@ti.com>
+Cc: Balaji T K <balajitk@ti.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Dan Williams <djbw@fb.com>, Jon Hunter <jon-hunter@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The binding definition is based on the generic DMA request binding.
+On Tuesday 05 March 2013, Matt Porter wrote:
+> Changes since v1:
+>         - rebase to 3.9-rc1, previous dependencies upstream
+> 
+> This series adds DT DMA Engine Client support to the omap_hsmmc.
+> It leverages the generic DMA OF helpers in -next and the
+> dma_request_slave_channel_compat() wrapper introduced in the
+> AM33XX DMA Engine series to support DMA in omap_hsmmc on platforms
+> booting via DT. These platforms include omap2/3/4/5 and am33xx.
+> 
+> These patches were split out from the v5 version of the AM33XX DMA
+> series and split from the EDMA-specific omap_hsmmc changes.
+> 
 
-Signed-off-by: Matt Porter <mporter@ti.com>
-Acked-by: Tony Lindgren <tony@atomide.com>
----
- .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   26 +++++++++++++++++++-
- 1 file changed, 25 insertions(+), 1 deletion(-)
+The description seems stale, but the patches all look good to me.
 
-diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-index ed271fc..8c8908a 100644
---- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-@@ -20,8 +20,29 @@ ti,dual-volt: boolean, supports dual voltage cards
- ti,non-removable: non-removable slot (like eMMC)
- ti,needs-special-reset: Requires a special softreset sequence
- ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
-+dmas: List of DMA specifiers with the controller specific format
-+as described in the generic DMA client binding. A tx and rx
-+specifier is required.
-+dma-names: List of DMA request names. These strings correspond
-+1:1 with the DMA specifiers listed in dmas. The string naming is
-+to be "rx" and "tx" for RX and TX DMA requests, respectively.
-+
-+Examples:
-+
-+[hwmod populated DMA resources]
-+
-+	mmc1: mmc@0x4809c000 {
-+		compatible = "ti,omap4-hsmmc";
-+		reg = <0x4809c000 0x400>;
-+		ti,hwmods = "mmc1";
-+		ti,dual-volt;
-+		bus-width = <4>;
-+		vmmc-supply = <&vmmc>; /* phandle to regulator node */
-+		ti,non-removable;
-+	};
-+
-+[generic DMA request binding]
- 
--Example:
- 	mmc1: mmc@0x4809c000 {
- 		compatible = "ti,omap4-hsmmc";
- 		reg = <0x4809c000 0x400>;
-@@ -30,4 +51,7 @@ Example:
- 		bus-width = <4>;
- 		vmmc-supply = <&vmmc>; /* phandle to regulator node */
- 		ti,non-removable;
-+		dmas = <&edma 24
-+			&edma 25>;
-+		dma-names = "tx", "rx";
- 	};
--- 
-1.7.9.5
+I guess they can now get merged in any order.
 
+Acked-by: Arnd Bergmann <arnd@arndb.de>
