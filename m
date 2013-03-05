@@ -1,107 +1,65 @@
-From: Aaron Lu <aaron.lu@intel.com>
-Subject: [PATCH] mmc: sdio: bind acpi with sdio function device
-Date: Tue,  5 Mar 2013 11:24:52 +0800
-Message-ID: <1362453892-13304-1-git-send-email-aaron.lu@intel.com>
-Return-path: <linux-pm-owner@vger.kernel.org>
-Sender: linux-pm-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, linux-mmc@vger.kernel.org, linux-acpi@vger.kernel.org, linux-pm@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>, Aaron Lu <aaron.lu@intel.com>
+From: Jingoo Han <jg1.han@samsung.com>
+Subject: [PATCH 1/2] mmc: davinci_mmc: use module_platform_driver_probe()
+Date: Tue, 05 Mar 2013 12:53:23 +0900
+Message-ID: <005801ce1954$fc029ce0$f407d6a0$%han@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:46863 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932566Ab3CEDxl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Mar 2013 22:53:41 -0500
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MJ60034C5GHOQH0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 05 Mar 2013 12:53:23 +0900 (KST)
+Received: from DOJG1HAN02 ([12.23.120.99])
+ by mmp1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTPA id <0MJ600F1V5GZ8R30@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 05 Mar 2013 12:53:23 +0900 (KST)
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Chris Ball' <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, 'Jingoo Han' <jg1.han@samsung.com>
 
-ACPI spec 5 defined the _ADR encoding for sdio bus as:
-High word - slot number (0 based)
-Low word  - function number
+This patch uses module_platform_driver_probe() macro which makes
+the code smaller and simpler.
 
-This patch adds support for binding sdio function device with acpi node,
-and if successful, involve acpi into its power management.
-
-Signed-off-by: Aaron Lu <aaron.lu@intel.com>
-Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Jingoo Han <jg1.han@samsung.com>
 ---
- drivers/mmc/core/sdio_bus.c  | 20 +++++++++++++++++++-
- drivers/mmc/host/sdhci-pci.c |  1 +
- include/linux/mmc/host.h     |  2 ++
- 3 files changed, 22 insertions(+), 1 deletion(-)
+ drivers/mmc/host/davinci_mmc.c |   13 +------------
+ 1 files changed, 1 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 5e57048..8d6bb18 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -16,6 +16,7 @@
- #include <linux/export.h>
- #include <linux/slab.h>
- #include <linux/pm_runtime.h>
-+#include <linux/acpi.h>
- 
- #include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
-@@ -299,6 +300,19 @@ struct sdio_func *sdio_alloc_func(struct mmc_card *card)
- 	return func;
- }
- 
-+#ifdef CONFIG_ACPI
-+static void sdio_acpi_set_handle(struct sdio_func *func)
-+{
-+	struct mmc_host *host = func->card->host;
-+	u64 addr = (host->slotno << 16) | func->num;
-+
-+	ACPI_HANDLE_SET(&func->dev,
-+			acpi_get_child(ACPI_HANDLE(host->parent), addr));
-+}
-+#else
-+static inline void sdio_acpi_set_handle(struct sdio_func *func) {}
-+#endif
-+
- /*
-  * Register a new SDIO function with the driver model.
-  */
-@@ -308,9 +322,12 @@ int sdio_add_func(struct sdio_func *func)
- 
- 	dev_set_name(&func->dev, "%s:%d", mmc_card_id(func->card), func->num);
- 
-+	sdio_acpi_set_handle(func);
- 	ret = device_add(&func->dev);
--	if (ret == 0)
-+	if (ret == 0) {
- 		sdio_func_set_present(func);
-+		acpi_dev_pm_attach(&func->dev, false);
-+	}
- 
- 	return ret;
- }
-@@ -326,6 +343,7 @@ void sdio_remove_func(struct sdio_func *func)
- 	if (!sdio_func_present(func))
- 		return;
- 
-+	acpi_dev_pm_detach(&func->dev, false);
- 	device_del(&func->dev);
- 	put_device(&func->dev);
- }
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index c7ccf30..3dee22d 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -1279,6 +1279,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
- 	}
- 
- 	host->mmc->pm_caps = MMC_PM_KEEP_POWER | MMC_PM_WAKE_SDIO_IRQ;
-+	host->mmc->slotno = slotno;
- 
- 	ret = sdhci_add_host(host);
- 	if (ret)
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index d6f20cc..17d7148 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -361,6 +361,8 @@ struct mmc_host {
- 
- 	unsigned int		actual_clock;	/* Actual HC clock rate */
- 
-+	unsigned int		slotno;	/* used for sdio acpi binding */
-+
- 	unsigned long		private[0] ____cacheline_aligned;
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index 2063677..7635e48 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -1410,18 +1410,7 @@ static struct platform_driver davinci_mmcsd_driver = {
+ 	.remove		= __exit_p(davinci_mmcsd_remove),
  };
  
+-static int __init davinci_mmcsd_init(void)
+-{
+-	return platform_driver_probe(&davinci_mmcsd_driver,
+-				     davinci_mmcsd_probe);
+-}
+-module_init(davinci_mmcsd_init);
+-
+-static void __exit davinci_mmcsd_exit(void)
+-{
+-	platform_driver_unregister(&davinci_mmcsd_driver);
+-}
+-module_exit(davinci_mmcsd_exit);
++module_platform_driver_probe(davinci_mmcsd_driver, davinci_mmcsd_probe);
+ 
+ MODULE_AUTHOR("Texas Instruments India");
+ MODULE_LICENSE("GPL");
 -- 
-1.8.1.2
+1.7.2.5
+
 
