@@ -1,35 +1,34 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v2 0/3] omap_hsmmc DT DMA Client support
-Date: Tue, 5 Mar 2013 21:26:01 +0000
-Message-ID: <201303052126.01572.arnd@arndb.de>
-References: <1362518004-7083-1-git-send-email-mporter@ti.com>
-Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1362518004-7083-1-git-send-email-mporter@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Porter <mporter@ti.com>
-Cc: Balaji T K <balajitk@ti.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Dan Williams <djbw@fb.com>, Jon Hunter <jon-hunter@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>
+From: Kevin Liu <kliu5@marvell.com>
+Subject: [PATCH 0/3] mmc: core/sdhci: enhance card detect code
+Date: Wed,  6 Mar 2013 11:28:59 +0800
+Message-ID: <1362540542-28995-1-git-send-email-kliu5@marvell.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:34479 "EHLO
+	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751215Ab3CFD2W (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Mar 2013 22:28:22 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>
+Cc: Stephen Warren <swarren@wwwdotorg.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>
 
-On Tuesday 05 March 2013, Matt Porter wrote:
-> Changes since v1:
->         - rebase to 3.9-rc1, previous dependencies upstream
-> 
-> This series adds DT DMA Engine Client support to the omap_hsmmc.
-> It leverages the generic DMA OF helpers in -next and the
-> dma_request_slave_channel_compat() wrapper introduced in the
-> AM33XX DMA Engine series to support DMA in omap_hsmmc on platforms
-> booting via DT. These platforms include omap2/3/4/5 and am33xx.
-> 
-> These patches were split out from the v5 version of the AM33XX DMA
-> series and split from the EDMA-specific omap_hsmmc changes.
-> 
 
-The description seems stale, but the patches all look good to me.
+Patch 1 enhanced card removal judgement code to resolve the missing
+removal event issue when card is removed slowly.
+Patch 2 added callback function get_cd accordingly in sdhci.c.
+Patch 3 update some card detect related code in sdhci.c and used
+patch 2.
 
-I guess they can now get merged in any order.
+patch 1 and 2 are same as previous version except adding 
+Reviewed-by/Acked-by/Tested-by.
+patch 3 is added to this patchset in this version.
 
-Acked-by: Arnd Bergmann <arnd@arndb.de>
+Kevin Liu (3)
+ [PATCH v8 1/3] mmc: core: enhance card removal judgement for slow
+ [PATCH v4 2/3] mmc: sdhci: add function get_cd
+ [PATCH v3 3/3] mmc: sdhci: update check code for cd-broken or
+
+ drivers/mmc/core/core.c  |   13 ++++++++++++
+ drivers/mmc/host/sdhci.c |   51 ++++++++++++++++++++++++++++++----------------
+ 2 files changed, 47 insertions(+), 17 deletions(-)
+
