@@ -1,51 +1,83 @@
-From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v2 0/3] omap_hsmmc DT DMA Client support
-Date: Wed, 6 Mar 2013 08:37:17 -0500
-Message-ID: <20130306133717.GJ6209@beef>
-References: <1362518004-7083-1-git-send-email-mporter@ti.com>
- <201303052126.01572.arnd@arndb.de>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH v2 2/3] mmc: omap_hsmmc: Skip platform_get_resource_byname()
+ for dt case
+Date: Wed, 6 Mar 2013 19:12:29 +0530
+Message-ID: <513747C5.6080507@ti.com>
+References: <1362518004-7083-1-git-send-email-mporter@ti.com> <1362518004-7083-3-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <201303052126.01572.arnd-r2nGTMty4D4@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1362518004-7083-3-git-send-email-mporter@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Porter <mporter@ti.com>, Chris Ball <cjb@laptop.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Jon Hunter <jon-hunter@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>
+Cc: Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Dan Williams <djbw@fb.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Mar 05, 2013 at 09:26:01PM +0000, Arnd Bergmann wrote:
-> On Tuesday 05 March 2013, Matt Porter wrote:
-> > Changes since v1:
-> >         - rebase to 3.9-rc1, previous dependencies upstream
-> > 
-> > This series adds DT DMA Engine Client support to the omap_hsmmc.
-> > It leverages the generic DMA OF helpers in -next and the
-> > dma_request_slave_channel_compat() wrapper introduced in the
-> > AM33XX DMA Engine series to support DMA in omap_hsmmc on platforms
-> > booting via DT. These platforms include omap2/3/4/5 and am33xx.
-> > 
-> > These patches were split out from the v5 version of the AM33XX DMA
-> > series and split from the EDMA-specific omap_hsmmc changes.
-> > 
-> 
-> The description seems stale, but the patches all look good to me.
-> 
-> I guess they can now get merged in any order.
-> 
-> Acked-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+On Wednesday 06 March 2013 02:43 AM, Matt Porter wrote:
+> From: Santosh Shilimkar <santosh.shilimkar@ti.com>
+>
+> MMC driver probe will abort for DT case because of failed
+> platform_get_resource_byname() lookup. Fix it by skipping resource
+> byname lookup for device tree build.
+>
+> Issue is hidden because hwmod popullates the IO resources which
+> helps to succeed platform_get_resource_byname() and probe.
+>
 
-Yes, missed updating that to indicating that those are now in
-3.9-rc1.
+Hi Matt,
+Could you please drop this patch from the current series,
+since this patch causes regression on omap3,4 platform
+which are not yet dma dt adapted.
+It is best to send this patch along with Jon Hunter dma dt series,
+which adds dt dma support and mmc dma data. DMA dt series is needed
+any way before hwmod cleanup can happen.
 
--Matt
+
+> Signed-off-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
+> ---
+>   drivers/mmc/host/omap_hsmmc.c |   28 +++++++++++++++-------------
+>   1 file changed, 15 insertions(+), 13 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index e79b12d..8ae1225 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1896,21 +1896,23 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>
+>   	omap_hsmmc_conf_bus_power(host);
+>
+> -	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
+> -	if (!res) {
+> -		dev_err(mmc_dev(host->mmc), "cannot get DMA TX channel\n");
+> -		ret = -ENXIO;
+> -		goto err_irq;
+> -	}
+> -	tx_req = res->start;
+> +	if (!pdev->dev.of_node) {
+> +		res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
+> +		if (!res) {
+> +			dev_err(mmc_dev(host->mmc), "cannot get DMA TX channel\n");
+> +			ret = -ENXIO;
+> +			goto err_irq;
+> +		}
+> +		tx_req = res->start;
+>
+> -	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
+> -	if (!res) {
+> -		dev_err(mmc_dev(host->mmc), "cannot get DMA RX channel\n");
+> -		ret = -ENXIO;
+> -		goto err_irq;
+> +		res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
+> +		if (!res) {
+> +			dev_err(mmc_dev(host->mmc), "cannot get DMA RX channel\n");
+> +			ret = -ENXIO;
+> +			goto err_irq;
+> +		}
+> +		rx_req = res->start;
+>   	}
+> -	rx_req = res->start;
+>
+>   	dma_cap_zero(mask);
+>   	dma_cap_set(DMA_SLAVE, mask);
+>
