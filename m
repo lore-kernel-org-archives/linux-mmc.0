@@ -1,70 +1,39 @@
-From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v8 6/9] ARM: dts: add AM33XX EDMA support
-Date: Wed, 6 Mar 2013 09:01:30 -0500
-Message-ID: <20130306140130.GL6209@beef>
-References: <1362516795-6346-1-git-send-email-mporter@ti.com>
-	<1362516795-6346-7-git-send-email-mporter@ti.com>
-	<a02b3a2e7dff42b0814bb6fa603068ba@DFLE73.ent.ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <a02b3a2e7dff42b0814bb6fa603068ba-jplQ/0hSbXKIQmiDNMet8wC/G2K4zDHf@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: "Kumar, Anil" <anilkumar.v-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "Cousson,
-	Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, "Nori,
-	Sekhar" <nsekhar-l0cyMroinI0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+From: Matt Porter <mporter@ti.com>
+Subject: [PATCH v3 0/2] omap_hsmmc DT DMA Client support
+Date: Wed,  6 Mar 2013 09:12:06 -0500
+Message-ID: <1362579128-5312-1-git-send-email-mporter@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ie0-f169.google.com ([209.85.223.169]:32857 "EHLO
+	mail-ie0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757408Ab3CFOLm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Mar 2013 09:11:42 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>
+Cc: Vinod Koul <vinod.koul@intel.com>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Dan Williams <djbw@fb.com>, Jon Hunter <jon-hunter@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>
 
-On Wed, Mar 06, 2013 at 04:19:58AM +0000, Kumar, Anil wrote:
-> Hi,
-> 
-> On Wed, Mar 06, 2013 at 02:23:12, Porter, Matt wrote:
-> > Adds AM33XX EDMA support to the am33xx.dtsi as documented in
-> > Documentation/devicetree/bindings/dma/ti-edma.txt
-> > 
-> > Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-> > ---
-> >  arch/arm/boot/dts/am33xx.dtsi |   20 ++++++++++++++++++++
-> >  1 file changed, 20 insertions(+)
-> > 
-> > diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
-> > index 0957645..aaf44122 100644
-> > --- a/arch/arm/boot/dts/am33xx.dtsi
-> > +++ b/arch/arm/boot/dts/am33xx.dtsi
-> > @@ -87,6 +87,26 @@
-> >  			reg = <0x48200000 0x1000>;
-> >  		};
-> >  
-> > +		edma: edma@49000000 {
-> > +			compatible = "ti,edma3";
-> > +			ti,hwmods = "tpcc", "tptc0", "tptc1", "tptc2";
-> > +			reg =	<0x49000000 0x10000>,
-> > +				<0x44e10f90 0x10>;
-> > +			interrupt-parent = <&intc>;
-> 
-> Is it really need of "interrupt-parent = <&intc>" here ?
-> as this property is already with root node.  
-> I am taking reference of 3.9-rc1
+Changes since v2:
+	- dropped skip platform_get_resource_byname() patch
+Changes since v1:
+	- rebase to 3.9-rc1, previous dependencies upstream
 
-You're correct. It's inherited from the parent node so I'll drop it out.
-I also noted that the cpsw node has this wrong so I'll send a patch to
-address that separately.
+This series adds DT DMA Engine Client support to the omap_hsmmc.
+It leverages the generic DMA OF helpers and the
+dma_request_slave_channel_compat() wrapper to support DMA in
+omap_hsmmc on platforms booting via DT. These platforms include
+omap2/3/4/5 and am33xx.
 
--Matt
+These patches were split out from the v5 version of the AM33XX DMA
+series and split from the EDMA-specific omap_hsmmc changes.
 
-------------------------------------------------------------------------------
-Symantec Endpoint Protection 12 positioned as A LEADER in The Forrester  
-Wave(TM): Endpoint Security, Q1 2013 and "remains a good choice" in the  
-endpoint security space. For insight on selecting the right partner to 
-tackle endpoint security challenges, access the full report. 
-http://p.sf.net/sfu/symantec-dev2dev
+Matt Porter (2):
+  mmc: omap_hsmmc: convert to dma_request_slave_channel_compat()
+  mmc: omap_hsmmc: add generic DMA request support to the DT binding
+
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   26 +++++++++++++++++++-
+ drivers/mmc/host/omap_hsmmc.c                      |   10 ++++++--
+ 2 files changed, 33 insertions(+), 3 deletions(-)
+
+-- 
+1.7.9.5
+
