@@ -1,107 +1,76 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci: update check code for cd-broken or
- nonremovable card
-Date: Wed, 6 Mar 2013 12:13:20 +0800
-Message-ID: <CADz5_gJ1MSFJK=4gspEBQKGPiPUBV0yC5G4WZa5h-kLeZN0Qjg@mail.gmail.com>
-References: <1362130829-4677-1-git-send-email-kliu5@marvell.com>
-	<1DB98640-1C4C-457F-B555-3E5152B95AC6@nvidia.com>
-	<CADz5_gLteMpVcw28WUoX1B_W0hNpzqGiV+UuzJFo_+9ptRmXVA@mail.gmail.com>
+From: "Kumar, Anil" <anilkumar.v@ti.com>
+Subject: RE: [PATCH v8 6/9] ARM: dts: add AM33XX EDMA support
+Date: Wed, 6 Mar 2013 04:19:58 +0000
+Message-ID: <F3DBB1B3EF102E4994C89758CFCA32412CD652@DBDE01.ent.ti.com>
+References: <1362516795-6346-1-git-send-email-mporter@ti.com>
+ <1362516795-6346-7-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f171.google.com ([209.85.214.171]:48779 "EHLO
-	mail-ob0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751217Ab3CFENV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Mar 2013 23:13:21 -0500
-Received: by mail-ob0-f171.google.com with SMTP id x4so3230550obh.2
-        for <linux-mmc@vger.kernel.org>; Tue, 05 Mar 2013 20:13:21 -0800 (PST)
-In-Reply-To: <CADz5_gLteMpVcw28WUoX1B_W0hNpzqGiV+UuzJFo_+9ptRmXVA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1362516795-6346-7-git-send-email-mporter@ti.com>
+Content-Language: en-US
+Sender: linux-doc-owner@vger.kernel.org
+To: "Porter, Matt" <mporter@ti.com>, Tony Lindgren <tony@atomide.com>, "Nori, Sekhar" <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Mark Brown <broonie@opensource.wolfsonmicro.com>, "Cousson, Benoit" <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Rob Landley <rob@landley.net>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@nvidia.com>
-Cc: Kevin Liu <kliu5@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>, Stephen Warren <swarren@wwwdotorg.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>
 
-2013/3/1 Kevin Liu <keyuan.liu@gmail.com>:
-> 2013/3/1 Philip Rakity <prakity@nvidia.com>:
->>
->> On Mar 1, 2013, at 9:40 AM, Kevin Liu <kliu5@marvell.com> wrote:
->>
->>> in function sdhci_request:
->>> 1. If quirk SDHCI_QUIRK_BROKEN_CARD_DETECTION is selected, there is no
->>> card detection available and polling must be used. Gpio detect must
->>> _not_ be supported under this case.
->>> Change the sequence to check SDHCI_QUIRK_BROKEN_CARD_DETECTION first,
->>> which make code more clear.
->>> 2. nonremovable card should be also assumed always present.
->>>
->>> in function sdhci_enable_irq_wakeups:
->>> 1. nonremovable card should be also assumed no insert/remove wakeup
->>> needed like some sdio cards which is nonremovable and can wakeup host
->>> only by card int.
->>>
->>> Signed-off-by: Kevin Liu <kliu5@marvell.com>
->>> ---
->>> drivers/mmc/host/sdhci.c |   30 ++++++++++++++++--------------
->>> 1 file changed, 16 insertions(+), 14 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index c94fd6c..e4ada0d 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -1337,19 +1337,20 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>>
->>>       host->mrq = mrq;
->>>
->>> -     /*
->>> -      * Firstly check card presence from cd-gpio.  The return could
->>> -      * be one of the following possibilities:
->>> -      *     negative: cd-gpio is not available
->>> -      *     zero: cd-gpio is used, and card is removed
->>> -      *     one: cd-gpio is used, and card is present
->>> -      */
->>> -     present = mmc_gpio_get_cd(host->mmc);
->>> -     if (present < 0) {
->>> -             /* If polling, assume that the card is always present. */
->>> -             if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
->>> -                     present = 1;
->>> -             else
->>> +     /* If polling/nonremovable, assume that the card is always present. */
->>> +     if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
->>> +                     (host->mmc->caps & MMC_CAP_NONREMOVABLE)) {
->>> +             present = 1;
->>> +     } else {
->>> +             /*
->>> +              * Firstly check card presence from cd-gpio.  The return could
->>> +              * be one of the following possibilities:
->>> +              *     negative: cd-gpio is not available
->>> +              *     zero: cd-gpio is used, and card is removed
->>> +              *     one: cd-gpio is used, and card is present
->>> +              */
->>> +             present = mmc_gpio_get_cd(host->mmc);
->>> +             if (IS_ERR_VALUE(present))
->>>                       present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
->>>                                       SDHCI_CARD_PRESENT;
->>
->> Hi Kevin
->>
->> does it make sense to move this logic to a more generic function (static inline ?)
->> int sdhci_card_present ()
->>
->> and encapsulate all the logic there for gpio cd, present state (card is there) etc.
->>
->> Philip
->>
->
-> Philip,
->
-> Good idea...Will call the function "sdhci_do_get_cd" introdunced in my
-> previous patch. Thanks!
->
+Hi,
 
-This patch has been updated and added to below patchset.
-[PATCH 0/3] mmc: core/sdhci: enhance card detect code ([PATCH v3 3/3]
-mmc: sdhci: update check code for cd-broken or)
-So it can be ignored.
+On Wed, Mar 06, 2013 at 02:23:12, Porter, Matt wrote:
+> Adds AM33XX EDMA support to the am33xx.dtsi as documented in
+> Documentation/devicetree/bindings/dma/ti-edma.txt
+> 
+> Signed-off-by: Matt Porter <mporter@ti.com>
+> ---
+>  arch/arm/boot/dts/am33xx.dtsi |   20 ++++++++++++++++++++
+>  1 file changed, 20 insertions(+)
+> 
+> diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+> index 0957645..aaf44122 100644
+> --- a/arch/arm/boot/dts/am33xx.dtsi
+> +++ b/arch/arm/boot/dts/am33xx.dtsi
+> @@ -87,6 +87,26 @@
+>  			reg = <0x48200000 0x1000>;
+>  		};
+>  
+> +		edma: edma@49000000 {
+> +			compatible = "ti,edma3";
+> +			ti,hwmods = "tpcc", "tptc0", "tptc1", "tptc2";
+> +			reg =	<0x49000000 0x10000>,
+> +				<0x44e10f90 0x10>;
+> +			interrupt-parent = <&intc>;
 
-Thanks
-Kevin
+Is it really need of "interrupt-parent = <&intc>" here ?
+as this property is already with root node.  
+I am taking reference of 3.9-rc1
+
+Thanks,
+Anil
+
+> +			interrupts = <12 13 14>;
+> +			#dma-cells = <1>;
+> +			dma-channels = <64>;
+> +			ti,edma-regions = <4>;
+> +			ti,edma-slots = <256>;
+> +			ti,edma-queue-tc-map = <0 0
+> +						1 1
+> +						2 2>;
+> +			ti,edma-queue-priority-map = <0 0
+> +						      1 1
+> +						      2 2>;
+> +			ti,edma-default-queue = <0>;
+> +		};
+> +
+>  		gpio1: gpio@44e07000 {
+>  			compatible = "ti,omap4-gpio";
+>  			ti,hwmods = "gpio1";
+> -- 
+> 1.7.9.5
+> 
+> _______________________________________________
+> Davinci-linux-open-source mailing list
+> Davinci-linux-open-source@linux.davincidsp.com
+> http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source
+> 
+
