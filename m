@@ -1,100 +1,174 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dwmmc: let device core setup the default pin
- configuration
-Date: Thu, 07 Mar 2013 20:02:10 +0900
-Message-ID: <000e01ce1b23$375166d0$a5f43470$%jun@samsung.com>
-References: <1362571461-14570-1-git-send-email-thomas.abraham@linaro.org>
+From: Matt Porter <mporter@ti.com>
+Subject: Re: [PATCH 2/2] ARM: dts: add AM33XX MMC support
+Date: Thu, 7 Mar 2013 09:12:35 -0500
+Message-ID: <20130307141235.GQ6209@beef>
+References: <1362629799-22485-1-git-send-email-mporter@ti.com>
+ <1362629799-22485-3-git-send-email-mporter@ti.com>
+ <41fde401c8e646689123d7c6d3a2dffc@DLEE71.ent.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1362571461-14570-1-git-send-email-thomas.abraham@linaro.org>
-Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Thomas Abraham' <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, linux-arm-kernel@lists.infradead.org, t.figa@samsung.com, heiko@sntech.de, linus.walleij@linaro.org, patches@linaro.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ia0-f175.google.com ([209.85.210.175]:34555 "EHLO
+	mail-ia0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932149Ab3CGOMD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Mar 2013 09:12:03 -0500
+Content-Disposition: inline
+In-Reply-To: <41fde401c8e646689123d7c6d3a2dffc@DLEE71.ent.ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Hiremath, Vaibhav" <hvaibhav@ti.com>
+Cc: "Krishnamoorthy, Balaji T" <balajitk@ti.com>, Chris Ball <cjb@laptop.org>, "Cousson, Benoit" <b-cousson@ti.com>, Tony Lindgren <tony@atomide.com>, Russell King <linux@arm.linux.org.uk>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 
-Hi Thomas,
+On Thu, Mar 07, 2013 at 05:29:24AM +0000, Vaibhav Hiremath wrote:
+> > -----Original Message-----
+> > From: linux-omap-owner@vger.kernel.org [mailto:linux-omap-
+> > owner@vger.kernel.org] On Behalf Of Porter, Matt
+> > Sent: Thursday, March 07, 2013 9:47 AM
+> > To: Krishnamoorthy, Balaji T; Chris Ball; Cousson, Benoit; Tony
+> > Lindgren; Russell King
+> > Cc: Devicetree Discuss; Linux ARM Kernel List; Linux OMAP List; Linux
+> > Kernel Mailing List; Linux MMC List
+> > Subject: [PATCH 2/2] ARM: dts: add AM33XX MMC support
+> > 
+> > Adds AM33XX MMC support for am335x-bone, am335x-evm, and
+> > am335x-evmsk.
+> > 
+> > Signed-off-by: Matt Porter <mporter@ti.com>
+> > Acked-by: Tony Lindgren <tony@atomide.com>
+> > ---
+> >  arch/arm/boot/dts/am335x-bone.dts  |    7 +++++++
+> >  arch/arm/boot/dts/am335x-evm.dts   |    7 +++++++
+> >  arch/arm/boot/dts/am335x-evmsk.dts |    7 +++++++
+> >  arch/arm/boot/dts/am33xx.dtsi      |   28 ++++++++++++++++++++++++++++
+> >  4 files changed, 49 insertions(+)
+> > 
+> > diff --git a/arch/arm/boot/dts/am335x-bone.dts
+> > b/arch/arm/boot/dts/am335x-bone.dts
+> > index 11b240c..a154ce0 100644
+> > --- a/arch/arm/boot/dts/am335x-bone.dts
+> > +++ b/arch/arm/boot/dts/am335x-bone.dts
+> > @@ -120,6 +120,8 @@
+> >  		};
+> > 
+> >  		ldo3_reg: regulator@5 {
+> > +			regulator-min-microvolt = <1800000>;
+> > +			regulator-max-microvolt = <3300000>;
+> >  			regulator-always-on;
+> >  		};
+> > 
+> > @@ -136,3 +138,8 @@
+> >  &cpsw_emac1 {
+> >  	phy_id = <&davinci_mdio>, <1>;
+> >  };
+> > +
+> > +&mmc1 {
+> > +	status = "okay";
+> > +	vmmc-supply = <&ldo3_reg>;
+> > +};
+> > diff --git a/arch/arm/boot/dts/am335x-evm.dts
+> > b/arch/arm/boot/dts/am335x-evm.dts
+> > index d649644..2907da6 100644
+> > --- a/arch/arm/boot/dts/am335x-evm.dts
+> > +++ b/arch/arm/boot/dts/am335x-evm.dts
+> > @@ -232,6 +232,8 @@
+> >  		};
+> > 
+> >  		vmmc_reg: regulator@12 {
+> > +			regulator-min-microvolt = <1800000>;
+> > +			regulator-max-microvolt = <3300000>;
+> >  			regulator-always-on;
+> >  		};
+> >  	};
+> > @@ -244,3 +246,8 @@
+> >  &cpsw_emac1 {
+> >  	phy_id = <&davinci_mdio>, <1>;
+> >  };
+> > +
+> > +&mmc1 {
+> > +	status = "okay";
+> > +	vmmc-supply = <&vmmc_reg>;
+> > +};
+> > diff --git a/arch/arm/boot/dts/am335x-evmsk.dts
+> > b/arch/arm/boot/dts/am335x-evmsk.dts
+> > index f5a6162..f050c46 100644
+> > --- a/arch/arm/boot/dts/am335x-evmsk.dts
+> > +++ b/arch/arm/boot/dts/am335x-evmsk.dts
+> > @@ -244,7 +244,14 @@
+> >  		};
+> > 
+> >  		vmmc_reg: regulator@12 {
+> > +			regulator-min-microvolt = <1800000>;
+> > +			regulator-max-microvolt = <3300000>;
+> >  			regulator-always-on;
+> >  		};
+> >  	};
+> >  };
+> > +
+> > +&mmc1 {
+> > +	status = "okay";
+> > +	vmmc-supply = <&vmmc_reg>;
+> > +};
+> > diff --git a/arch/arm/boot/dts/am33xx.dtsi
+> > b/arch/arm/boot/dts/am33xx.dtsi
+> > index c3c781a..e029eea 100644
+> > --- a/arch/arm/boot/dts/am33xx.dtsi
+> > +++ b/arch/arm/boot/dts/am33xx.dtsi
+> > @@ -234,6 +234,34 @@
+> >  			status = "disabled";
+> >  		};
+> > 
+> > +		mmc1: mmc@48060000 {
+> > +			compatible = "ti,omap3-hsmmc";
+> > +			ti,hwmods = "mmc1";
+> > +			ti,dual-volt;
+> > +			ti,needs-special-reset;
+> > +			dmas = <&edma 24
+> > +				&edma 25>;
+> > +			dma-names = "tx", "rx";
+> > +			status = "disabled";
+> > +		};
+> > +
+> > +		mmc2: mmc@481d8000 {
+> > +			compatible = "ti,omap3-hsmmc";
+> > +			ti,hwmods = "mmc2";
+> > +			ti,needs-special-reset;
+> > +			dmas = <&edma 2
+> > +				&edma 3>;
+> > +			dma-names = "tx", "rx";
+> > +			status = "disabled";
+> > +		};
+> > +
+> > +		mmc3: mmc@47810000 {
+> > +			compatible = "ti,omap3-hsmmc";
+> > +			ti,hwmods = "mmc3";
+> > +			ti,needs-special-reset;
+> > +			status = "disabled";
+> > +		};
+> Any specific reason why you did not add edma entry here as well?
 
-On Wednesday, March 06, 2013, Thomas Abraham wrote:
-> With device core now able to setup the default pin configuration,
-> the pin configuration code based on the deprecated Samsung specific
-> gpio bindings is removed.
+Yes, I've answered this one before and I think this illustrates a need
+for a comment in the .dtsi. mmc3 edma event are on the crossbar and so
+the event that will be mapped is system-specific. Since Luca is still
+working on DT support for WiLink, there's no way to show an example of
+how this is used upstream as that's the only in-kernel user.
 
-'setup_bus' callback is still useful in dw_mci_drv_data?
-Considering the purpose, it would be good to remove.
-And, could you change commit prefix for consistency?
-dwmmc -> dw_mmc
+I have a test driver I've cited in the postings that shows how the
+crossbar is configured via the board .dts. It doesn't belong in the
+.dtsi, however, in this case. When WiLink DT support is ready we can
+have an entry in the am335x-evmsk.dts that shows this case.
 
-Thanks,
-Seungwon Jeon
-> 
-> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
-> ---
->  drivers/mmc/host/dw_mmc-exynos.c |   38 --------------------------------------
->  1 files changed, 0 insertions(+), 38 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index 72fd0f2..467d043 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -152,43 +152,6 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
->  	return 0;
->  }
-> 
-> -static int dw_mci_exynos_setup_bus(struct dw_mci *host,
-> -				struct device_node *slot_np, u8 bus_width)
-> -{
-> -	int idx, gpio, ret;
-> -
-> -	if (!slot_np)
-> -		return -EINVAL;
-> -
-> -	/* cmd + clock + bus-width pins */
-> -	for (idx = 0; idx < NUM_PINS(bus_width); idx++) {
-> -		gpio = of_get_gpio(slot_np, idx);
-> -		if (!gpio_is_valid(gpio)) {
-> -			dev_err(host->dev, "invalid gpio: %d\n", gpio);
-> -			return -EINVAL;
-> -		}
-> -
-> -		ret = devm_gpio_request(host->dev, gpio, "dw-mci-bus");
-> -		if (ret) {
-> -			dev_err(host->dev, "gpio [%d] request failed\n", gpio);
-> -			return -EBUSY;
-> -		}
-> -	}
-> -
-> -	if (host->pdata->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
-> -		return 0;
-> -
-> -	gpio = of_get_named_gpio(slot_np, "samsung,cd-pinmux-gpio", 0);
-> -	if (gpio_is_valid(gpio)) {
-> -		if (devm_gpio_request(host->dev, gpio, "dw-mci-cd"))
-> -			dev_err(host->dev, "gpio [%d] request failed\n", gpio);
-> -	} else {
-> -		dev_info(host->dev, "cd gpio not available");
-> -	}
-> -
-> -	return 0;
-> -}
-> -
->  /* Exynos5250 controller specific capabilities */
->  static unsigned long exynos5250_dwmmc_caps[4] = {
->  	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
-> @@ -205,7 +168,6 @@ static const struct dw_mci_drv_data exynos5250_drv_data = {
->  	.prepare_command	= dw_mci_exynos_prepare_command,
->  	.set_ios		= dw_mci_exynos_set_ios,
->  	.parse_dt		= dw_mci_exynos_parse_dt,
-> -	.setup_bus		= dw_mci_exynos_setup_bus,
->  };
-> 
->  static const struct of_device_id dw_mci_exynos_match[] = {
-> --
-> 1.6.6.rc2
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Also, I wonder why "interrupt" property is not coming here, I understand
+> That hwmod is filling the gap here; but I would still recommend you to complete
+> The DT node, as we only support DT boot.
+
+Yeah, I only added needed properties so as to not confuse people as to
+where the interrupt resources are coming from. If you feel strongly
+about this I don't have a problem with adding unused data in the dts.
+I suppose this will help clear things to have a switch away from using
+the hwmod data.
+
+> I will test the whole patch series today and update you.
+
+Thanks.
+
+-Matt
