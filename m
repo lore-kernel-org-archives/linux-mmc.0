@@ -1,76 +1,34 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [PATCH v9 3/9] ARM: edma: add AM33XX support to the private EDMA API
-Date: Thu, 7 Mar 2013 08:42:18 +0200
-Message-ID: <CAHp75Ve40sM-d9Gr3k6mgOOTkM_G+cYSPcftqqsuAi-MzEb9dg@mail.gmail.com>
-References: <1362586540-10393-1-git-send-email-mporter@ti.com>
-	<1362586540-10393-4-git-send-email-mporter@ti.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-s3c: let device core setup the default pin configuration
+Date: Thu, 7 Mar 2013 09:09:58 +0100
+Message-ID: <CACRpkdY-RVAXxc2TqDcczhCLGDC8d401ucuCCDzRb+Ha9apr8g@mail.gmail.com>
+References: <1362569776-13932-1-git-send-email-thomas.abraham@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1362586540-10393-4-git-send-email-mporter@ti.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Matt Porter <mporter@ti.com>
-Cc: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Rob Landley <rob@landley.net>, Andrew Morton <akpm@linux-foundation.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Arnd Bergmann <arnd@arndb.de>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ia0-f173.google.com ([209.85.210.173]:55183 "EHLO
+	mail-ia0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753879Ab3CGIJ6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Mar 2013 03:09:58 -0500
+Received: by mail-ia0-f173.google.com with SMTP id h37so173552iak.4
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Mar 2013 00:09:58 -0800 (PST)
+In-Reply-To: <1362569776-13932-1-git-send-email-thomas.abraham@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Thomas Abraham <thomas.abraham@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, t.figa@samsung.com, ben-linux@fluff.org, jh80.chung@samsung.com, tgih.jun@samsung.com, girish.shivananjappa@linaro.org, patches@linaro.org
 
-On Wed, Mar 6, 2013 at 6:15 PM, Matt Porter <mporter@ti.com> wrote:
-> Adds support for parsing the TI EDMA DT data into the
-> required EDMA private API platform data. Enables runtime
-> PM support to initialize the EDMA hwmod. Adds AM33XX EDMA
-> crossbar event mux support. Enables build on OMAP.
+On Wed, Mar 6, 2013 at 12:36 PM, Thomas Abraham
+<thomas.abraham@linaro.org> wrote:
 
-> --- a/arch/arm/common/edma.c
-> +++ b/arch/arm/common/edma.c
+> With device core now able to setup the default pin configuration,
+> the call to devm_pinctrl_get_select_default can be removed. And
+> the pin configuration code based on the deprecated Samsung specific
+> gpio bindings is also removed.
+>
+> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
 
-> +static int edma_xbar_event_map(struct device *dev,
-> +                              struct device_node *node,
-> +                              struct edma_soc_info *pdata, int len)
-> +{
-> +       int ret = 0;
-> +       int i;
-> +       struct resource res;
-> +       void *xbar;
-> +       const s16 (*xbar_chans)[2];
-> +       u32 shift, offset, mux;
-> +
-> +       xbar_chans = devm_kzalloc(dev,
-> +                                 len/sizeof(s16) + 2*sizeof(s16),
-> +                                 GFP_KERNEL);
-> +       if (!xbar_chans)
-> +               return -ENOMEM;
-> +
-> +       ret = of_address_to_resource(node, 1, &res);
-> +       if (ret)
-> +               return -EIO;
-> +
-> +       xbar = devm_ioremap(dev, res.start, resource_size(&res));
-> +       if (!xbar)
-> +               return -ENOMEM;
-> +
-> +       ret = edma_of_read_u32_to_s16_array(node,
-> +                                           "ti,edma-xbar-event-map",
-> +                                           (s16 *)xbar_chans,
-> +                                           len/sizeof(u32));
-> +       if (ret)
-> +               return -EIO;
-> +
-> +       for (i = 0; xbar_chans[i][0] != -1; i++) {
-> +               shift = (xbar_chans[i][1] % 4) * 8;
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
-Looks like shift = (xbar_chans[i][1] & 0x03) << 3;
-
-> +               offset = xbar_chans[i][1] >> 2;
-> +               offset <<= 2;
-
-Is it offset = xbar_chans[i][1] & 0xfffc; ?
-
-> +               mux = readl((void *)((u32)xbar + offset));
-> +               mux &= ~(0xff << shift);
-> +               mux |= xbar_chans[i][0] << shift;
-> +               writel(mux, (void *)((u32)xbar + offset));
-> +       }
-
-
--- 
-With Best Regards,
-Andy Shevchenko
+Yours,
+Linus Walleij
