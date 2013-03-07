@@ -1,89 +1,105 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: FW: [PATCH 0/3] mmc: Use runtime pm for blkdevice
-Date: Thu, 7 Mar 2013 11:41:22 +0800
-Message-ID: <CAPDyKFoHXMkDhmGHQJ88FvT1kv888y8QYBpz0uXMm8Yyk7ZheQ@mail.gmail.com>
-References: <ED64882F200EF5419CDAC2E6B5C4B3A2097FC4412E@SC-VEXCH1.marvell.com>
-	<25B60CDC2F704E4E9D88FFD52780CB4C0BDE9E0DE9@SC-VEXCH1.marvell.com>
-	<CADz5_gLDMUYNEz32z+BANYdDid5ANPx5t48m=1bgTDjV52FK3A@mail.gmail.com>
+From: Jingoo Han <jg1.han@samsung.com>
+Subject: [PATCH v3] mmc: sdhci-s3c: Use devm_clk_get()
+Date: Thu, 07 Mar 2013 13:11:29 +0900
+Message-ID: <000101ce1ae9$d84cd860$88e68920$%han@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f42.google.com ([209.85.215.42]:54524 "EHLO
-	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754489Ab3CGDlX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Mar 2013 22:41:23 -0500
-Received: by mail-la0-f42.google.com with SMTP id fe20so8246507lab.15
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Mar 2013 19:41:22 -0800 (PST)
-In-Reply-To: <CADz5_gLDMUYNEz32z+BANYdDid5ANPx5t48m=1bgTDjV52FK3A@mail.gmail.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:46281 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754553Ab3CGELb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Mar 2013 23:11:31 -0500
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MJ9002LLVM1OJO0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 07 Mar 2013 13:11:30 +0900 (KST)
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Liu <keyuan.liu@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>
+To: 'Chris Ball' <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Jingoo Han' <jg1.han@samsung.com>
 
-On 7 March 2013 01:12, Kevin Liu <keyuan.liu@gmail.com> wrote:
->> From: Ulf Hansson <ulf.hansson@stericsson.com<mailto:ulf.hansson@stericsson.com>>
->> Date: Fri, Mar 1, 2013 at 8:47 PM
->> Subject: [PATCH 0/3] mmc: Use runtime pm for blkdevice
->> To: linux-mmc@vger.kernel.org<mailto:linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org<mailto:cjb@laptop.org>>
->> Cc: Johan Rudholm <johan.rudholm@stericsson.com<mailto:johan.rudholm@stericsson.com>>, Ulf Hansson <ulf.hansson@linaro.org<mailto:ulf.hansson@linaro.org>>
->>
->>
->> From: Ulf Hansson <ulf.hansson@linaro.org<mailto:ulf.hansson@linaro.org>>
->>
->> SDIO has been using runtime pm for a while to handle runtime power save
->> operations. This patchset is enabling the option to make the sd/mmc
->> blockdevices to use runtime pm as well.
->>
->> The runtime pm implementation for the block device will make use of
->> autosuspend to defer power save operation to after request inactivty for
->> a certain time.
->>
->> To actually perform some power save operations the corresponding bus ops
->> for mmc and sd shall be implemented. Typically it could make sense to do
->> BKOPS for eMMC in here.
->>
->> Ulf Hansson (3):
->>   mmc: core: Remove power_restore bus_ops for mmc and sd
->>   mmc: core: Add bus_ops for runtime pm callbacks
->>   mmc: block: Enable runtime pm for mmc blkdevice
->>
-> Ulf,
->
-> sdhci.c has added pm_runtime which also protect between request and
-> task finish. And some sdhci.c based host drivers has provided
-> pm_runtime_suspend/resume functions like sdhci-pxav3.c. From the
-> powersave viewpoint, I think adding pm_runtime in driver level is
-> better than doing that on bus level since the control granularity is
-> even smaller. And adding pm_runtime in both block.c and sdhci.c will
-> call pm_runtime twice. How do you think?
->
-> Thanks
-> Kevin
+Use devm_clk_get() rather than clk_get() to make cleanup paths
+more simple.
 
-Hi Kevin,
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+---
+Changes since v2:
+- added Ulf Hansson's Reviewed-by
+- added Jaehoon Chung's Acked-by
 
-Thanks for your response!
+Changes since v1:
+- modified the commit message
 
-It seems like we need some more clarification around this area.
-Runtime pm for a host device driver shall ultimately be responsible
-for taking care of runtime power management of the host device - only.
-It should not handle runtime power management of a block device, which
-in principle means BKOPS shall be handled in the blkdevice. At least
-this is my view.
+ drivers/mmc/host/sdhci-s3c.c |   17 ++---------------
+ 1 files changed, 2 insertions(+), 15 deletions(-)
 
-So, why is this? I will try to elaborate on the runtime pm support in
-host drivers here.
-The host device driver controls a MMC/SD/SDIO IP. This IP could very
-well reside (for some SoC) in what you call a power domain. In
-principle, once the IP needs to be used, a host driver has done a
-pm_runtime_get of it's device. This will mean a reference to the power
-domain has been fetched. Once the IP is not needed any more,
-pm_runtime_put is done and the reference to the power domain is
-released. Once no reference to the power domain exist the power domain
-can enter lower sleep states, which is preferred to happen as soon as
-possible and as long as possible - of course.
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 7363efe..128b650 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -608,7 +608,7 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+ 
+ 	platform_set_drvdata(pdev, host);
+ 
+-	sc->clk_io = clk_get(dev, "hsmmc");
++	sc->clk_io = devm_clk_get(dev, "hsmmc");
+ 	if (IS_ERR(sc->clk_io)) {
+ 		dev_err(dev, "failed to get io clock\n");
+ 		ret = PTR_ERR(sc->clk_io);
+@@ -623,7 +623,7 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+ 		char name[14];
+ 
+ 		snprintf(name, 14, "mmc_busclk.%d", ptr);
+-		clk = clk_get(dev, name);
++		clk = devm_clk_get(dev, name);
+ 		if (IS_ERR(clk))
+ 			continue;
+ 
+@@ -764,15 +764,9 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+ #ifndef CONFIG_PM_RUNTIME
+ 	clk_disable_unprepare(sc->clk_bus[sc->cur_clk]);
+ #endif
+-	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+-		if (sc->clk_bus[ptr]) {
+-			clk_put(sc->clk_bus[ptr]);
+-		}
+-	}
+ 
+  err_no_busclks:
+ 	clk_disable_unprepare(sc->clk_io);
+-	clk_put(sc->clk_io);
+ 
+  err_pdata_io_clk:
+ 	sdhci_free_host(host);
+@@ -785,7 +779,6 @@ static int sdhci_s3c_remove(struct platform_device *pdev)
+ 	struct sdhci_host *host =  platform_get_drvdata(pdev);
+ 	struct sdhci_s3c *sc = sdhci_priv(host);
+ 	struct s3c_sdhci_platdata *pdata = sc->pdata;
+-	int ptr;
+ 
+ 	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
+ 		pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
+@@ -805,13 +798,7 @@ static int sdhci_s3c_remove(struct platform_device *pdev)
+ #ifndef CONFIG_PM_RUNTIME
+ 	clk_disable_unprepare(sc->clk_bus[sc->cur_clk]);
+ #endif
+-	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+-		if (sc->clk_bus[ptr]) {
+-			clk_put(sc->clk_bus[ptr]);
+-		}
+-	}
+ 	clk_disable_unprepare(sc->clk_io);
+-	clk_put(sc->clk_io);
+ 
+ 	sdhci_free_host(host);
+ 	platform_set_drvdata(pdev, NULL);
+-- 
+1.7.2.5
 
-Hope this gives a better understanding. :-)
 
-Kind regards
-Ulf Hansson
