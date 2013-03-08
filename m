@@ -1,190 +1,121 @@
-From: Matt Porter <mporter@ti.com>
-Subject: Re: [PATCH 2/2] ARM: dts: add AM33XX MMC support
-Date: Thu, 7 Mar 2013 11:02:36 -0500
-Message-ID: <20130307160236.GV6209@beef>
-References: <1362629799-22485-1-git-send-email-mporter@ti.com>
- <1362629799-22485-3-git-send-email-mporter@ti.com>
- <41fde401c8e646689123d7c6d3a2dffc@DLEE71.ent.ti.com>
- <20130307141235.GQ6209@beef>
- <79CD15C6BA57404B839C016229A409A83EC20C57@DBDE01.ent.ti.com>
- <20130307144656.GR6209@beef>
- <79CD15C6BA57404B839C016229A409A83EC20CCA@DBDE01.ent.ti.com>
- <20130307150408.GU6209@beef>
- <79CD15C6BA57404B839C016229A409A83EC20D27@DBDE01.ent.ti.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 0/3] mmc: Use runtime pm for blkdevice
+Date: Fri, 8 Mar 2013 11:14:18 +0800
+Message-ID: <CAPDyKFoPxQLg+U6=rp+wTnTyfLDbwMd5orX=-Kw2Qp7nhpuSsg@mail.gmail.com>
+References: <ED64882F200EF5419CDAC2E6B5C4B3A2097FC4412E@SC-VEXCH1.marvell.com>
+	<25B60CDC2F704E4E9D88FFD52780CB4C0BDE9E0DE9@SC-VEXCH1.marvell.com>
+	<CADz5_gLDMUYNEz32z+BANYdDid5ANPx5t48m=1bgTDjV52FK3A@mail.gmail.com>
+	<CAPDyKFoHXMkDhmGHQJ88FvT1kv888y8QYBpz0uXMm8Yyk7ZheQ@mail.gmail.com>
+	<CADz5_gKqDvgP-uOpjsPk6zPo0XC9YdM0nTwCDUucO+dhRYwj_g@mail.gmail.com>
+	<CADz5_gLiwusyVHehA6G0BkTgxfs31T=FALmQRv1GPaxH_Xe-mA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f179.google.com ([209.85.223.179]:57335 "EHLO
-	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751029Ab3CGQCE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Mar 2013 11:02:04 -0500
-Content-Disposition: inline
-In-Reply-To: <79CD15C6BA57404B839C016229A409A83EC20D27@DBDE01.ent.ti.com>
+Received: from mail-la0-f48.google.com ([209.85.215.48]:56855 "EHLO
+	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933174Ab3CHDOU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Mar 2013 22:14:20 -0500
+Received: by mail-la0-f48.google.com with SMTP id fq13so1217863lab.7
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Mar 2013 19:14:18 -0800 (PST)
+In-Reply-To: <CADz5_gLiwusyVHehA6G0BkTgxfs31T=FALmQRv1GPaxH_Xe-mA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Hiremath, Vaibhav" <hvaibhav@ti.com>
-Cc: Linux OMAP List <linux-omap@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, "Krishnamoorthy, Balaji T" <balajitk@ti.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+To: Kevin Liu <keyuan.liu@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>
 
-On Thu, Mar 07, 2013 at 03:50:01PM +0000, Vaibhav Hiremath wrote:
-> 
-> > -----Original Message-----
-> > From: Matt Porter [mailto:ohiomdp@gmail.com] On Behalf Of Porter, Matt
-> > Sent: Thursday, March 07, 2013 8:34 PM
-> > To: Hiremath, Vaibhav
-> > Cc: Chris Ball; Russell King; Krishnamoorthy, Balaji T; Devicetree
-> > Discuss; Linux MMC List; Linux Kernel Mailing List; Linux OMAP List;
-> > Linux ARM Kernel List
-> > Subject: Re: [PATCH 2/2] ARM: dts: add AM33XX MMC support
-> > 
-> > On Thu, Mar 07, 2013 at 02:59:42PM +0000, Vaibhav Hiremath wrote:
-> > >
-> > > > -----Original Message-----
-> > > > From: Hiremath, Vaibhav
-> > > > Sent: Thursday, March 07, 2013 8:24 PM
-> > > > To: Porter, Matt
-> > > > Cc: Linux OMAP List; Russell King; Krishnamoorthy, Balaji T;
-> > Devicetree
-> > > > Discuss; Linux MMC List; Linux Kernel Mailing List; Chris Ball;
-> > Linux
-> > > > ARM Kernel List
-> > > > Subject: RE: [PATCH 2/2] ARM: dts: add AM33XX MMC support
-> > > >
-> > > > > -----Original Message-----
-> > > > > From: Matt Porter [mailto:ohiomdp@gmail.com] On Behalf Of Porter,
-> > > > Matt
-> > > > > Sent: Thursday, March 07, 2013 8:17 PM
-> > > > > To: Hiremath, Vaibhav
-> > > > > Cc: Linux OMAP List; Russell King; Krishnamoorthy, Balaji T;
-> > > > Devicetree
-> > > > > Discuss; Linux MMC List; Linux Kernel Mailing List; Chris Ball;
-> > Linux
-> > > > > ARM Kernel List
-> > > > > Subject: Re: [PATCH 2/2] ARM: dts: add AM33XX MMC support
-> > > > >
-> > > > > On Thu, Mar 07, 2013 at 02:39:55PM +0000, Vaibhav Hiremath wrote:
-> > > > > >
-> > > > > > > -----Original Message-----
-> > > > > > > From: Matt Porter [mailto:ohiomdp@gmail.com] On Behalf Of
-> > Porter,
-> > > > > Matt
-> > > > > > > Sent: Thursday, March 07, 2013 7:43 PM
-> > > > > > > To: Hiremath, Vaibhav
-> > > > > > > Cc: Krishnamoorthy, Balaji T; Chris Ball; Cousson, Benoit;
-> > Tony
-> > > > > > > Lindgren; Russell King; Devicetree Discuss; Linux ARM Kernel
-> > > > List;
-> > > > > > > Linux OMAP List; Linux Kernel Mailing List; Linux MMC List
-> > > > > > > Subject: Re: [PATCH 2/2] ARM: dts: add AM33XX MMC support
-> > > > > > >
-> > > > > > > On Thu, Mar 07, 2013 at 05:29:24AM +0000, Vaibhav Hiremath
-> > wrote:
-> > > > > > > > > -----Original Message-----
-> > > > > > > > > From: linux-omap-owner@vger.kernel.org [mailto:linux-
-> > omap-
-> > > > > > > > > owner@vger.kernel.org] On Behalf Of Porter, Matt
-> > > > > > > > > Sent: Thursday, March 07, 2013 9:47 AM
-> > > > > > > > > To: Krishnamoorthy, Balaji T; Chris Ball; Cousson,
-> > Benoit;
-> > > > Tony
-> > > > > > > > > Lindgren; Russell King
-> > > > > > > > > Cc: Devicetree Discuss; Linux ARM Kernel List; Linux OMAP
-> > > > List;
-> > > > > > > Linux
-> > > > > > > > > Kernel Mailing List; Linux MMC List
-> > > > > > > > > Subject: [PATCH 2/2] ARM: dts: add AM33XX MMC support
-> > > > > > > > >
-> > > <snip>
-> > > >
-> > > > I believe you meant "CONFIG_TI_EDMA" right?
-> > > >
-> > > > Yes, I just enabled it and the result is still same.
-> > > >
-> > > >
-> > > >
-> > > > [root@arago /]# dmesg | grep -ir mmc
-> > > > [    0.506844] vmmc: 1800 <--> 3300 mV at 3300 mV
-> > > > [    0.506970] vmmc: supplied by vbat
-> > > > [root@arago /]#
-> > > > [root@arago /]#
-> > > > [root@arago /]# dmesg | grep -ir dma
-> > > > [    0.217063] DMA: preallocated 256 KiB pool for atomic coherent
-> > > > allocations
-> > > > [    0.236321] platform 49000000.edma: alias fck already exists
-> > > > [    0.236360] platform 49000000.edma: alias fck already exists
-> > > > [    0.236381] platform 49000000.edma: alias fck already exists
-> > > > [    0.370705] edma-dma-engine edma-dma-engine.0: TI EDMA DMA
-> > engine
-> > > > driver
-> > > > [    0.445156] omap-dma-engine omap-dma-engine: OMAP DMA engine
-> > driver
-> > > > [root@arago /]#
-> > > > [root@arago /]#
-> > > >
-> > > >
-> > > I have applied below patches from your recent post
-> > >
-> > >
-> > > [2/2] ARM: dts: add AM33XX MMC support
-> > > [1/2] mmc: omap_hsmmc: set max_segs based on dma engine limits
-> > > [v4,3/3] mmc: davinci: get SG segment limits with
-> > dma_get_slave_sg_limits()
-> > > [v4,2/3] dma: edma: add device_slave_sg_limits() support
-> > > [v4,1/3] dmaengine: add dma_get_slave_sg_limits()
-> > > [v9,9/9] ARM: dts: add AM33XX SPI DMA support
-> > > [v9,8/9] spi: omap2-mcspi: add generic DMA request support to the DT
-> > binding
-> > > [v9,7/9] spi: omap2-mcspi: convert to
-> > dma_request_slave_channel_compat()
-> > > [v9,6/9] ARM: dts: add AM33XX EDMA support
-> > > [v9,5/9] dmaengine: edma: Add TI EDMA device tree binding
-> > > [v9,4/9] dmaengine: edma: enable build for AM33XX
-> > > [v9,3/9] ARM: edma: add AM33XX support to the private EDMA API
-> > > [v9,2/9] ARM: edma: remove unused transfer controller handlers
-> > > [v9,1/9] ARM: davinci: move private EDMA API to arm/common
-> > > [v3,2/2] mmc: omap_hsmmc: add generic DMA request support to the DT
-> > binding
-> > > [v3,1/2] mmc: omap_hsmmc: convert to
-> > dma_request_slave_channel_compat()
-> > >
-> > >
-> > >
-> > > Am I missing anything here?
-> > 
-> > Yes, you missed the
-> > http://www.spinics.net/lists/arm-kernel/msg227886.html dependency
-> > mentioned first in the cover letter.
-> > 
-> 
-> Matt, I manually edited the file with above patch and result is still the same.
-> Can you point me to branch where you have tested MMC code?
+On 7 March 2013 22:14, Kevin Liu <keyuan.liu@gmail.com> wrote:
+> 2013/3/7 Kevin Liu <keyuan.liu@gmail.com>:
+>> 2013/3/7 Ulf Hansson <ulf.hansson@linaro.org>:
+>>> On 7 March 2013 01:12, Kevin Liu <keyuan.liu@gmail.com> wrote:
+>>>>> From: Ulf Hansson <ulf.hansson@stericsson.com<mailto:ulf.hansson@stericsson.com>>
+>>>>> Date: Fri, Mar 1, 2013 at 8:47 PM
+>>>>> Subject: [PATCH 0/3] mmc: Use runtime pm for blkdevice
+>>>>> To: linux-mmc@vger.kernel.org<mailto:linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org<mailto:cjb@laptop.org>>
+>>>>> Cc: Johan Rudholm <johan.rudholm@stericsson.com<mailto:johan.rudholm@stericsson.com>>, Ulf Hansson <ulf.hansson@linaro.org<mailto:ulf.hansson@linaro.org>>
+>>>>>
+>>>>>
+>>>>> From: Ulf Hansson <ulf.hansson@linaro.org<mailto:ulf.hansson@linaro.org>>
+>>>>>
+>>>>> SDIO has been using runtime pm for a while to handle runtime power save
+>>>>> operations. This patchset is enabling the option to make the sd/mmc
+>>>>> blockdevices to use runtime pm as well.
+>>>>>
+>>>>> The runtime pm implementation for the block device will make use of
+>>>>> autosuspend to defer power save operation to after request inactivty for
+>>>>> a certain time.
+>>>>>
+>>>>> To actually perform some power save operations the corresponding bus ops
+>>>>> for mmc and sd shall be implemented. Typically it could make sense to do
+>>>>> BKOPS for eMMC in here.
+>>>>>
+>>>>> Ulf Hansson (3):
+>>>>>   mmc: core: Remove power_restore bus_ops for mmc and sd
+>>>>>   mmc: core: Add bus_ops for runtime pm callbacks
+>>>>>   mmc: block: Enable runtime pm for mmc blkdevice
+>>>>>
+>>>> Ulf,
+>>>>
+>>>> sdhci.c has added pm_runtime which also protect between request and
+>>>> task finish. And some sdhci.c based host drivers has provided
+>>>> pm_runtime_suspend/resume functions like sdhci-pxav3.c. From the
+>>>> powersave viewpoint, I think adding pm_runtime in driver level is
+>>>> better than doing that on bus level since the control granularity is
+>>>> even smaller. And adding pm_runtime in both block.c and sdhci.c will
+>>>> call pm_runtime twice. How do you think?
+>>>>
+>>>> Thanks
+>>>> Kevin
+>>>
+>>> Hi Kevin,
+>>>
+>>> Thanks for your response!
+>>>
+>>> It seems like we need some more clarification around this area.
+>>> Runtime pm for a host device driver shall ultimately be responsible
+>>> for taking care of runtime power management of the host device - only.
+>>> It should not handle runtime power management of a block device, which
+>>> in principle means BKOPS shall be handled in the blkdevice. At least
+>>> this is my view.
+>>>
+>>> So, why is this? I will try to elaborate on the runtime pm support in
+>>> host drivers here.
+>>> The host device driver controls a MMC/SD/SDIO IP. This IP could very
+>>> well reside (for some SoC) in what you call a power domain. In
+>>> principle, once the IP needs to be used, a host driver has done a
+>>> pm_runtime_get of it's device. This will mean a reference to the power
+>>> domain has been fetched. Once the IP is not needed any more,
+>>> pm_runtime_put is done and the reference to the power domain is
+>>> released. Once no reference to the power domain exist the power domain
+>>> can enter lower sleep states, which is preferred to happen as soon as
+>>> possible and as long as possible - of course.
+>>>
+>>> Hope this gives a better understanding. :-)
+>>>
+>> Ulf,
+>>
+>> Thanks for the explanations!
+>> Then do you mean to start bkops when blkdev pm_runtime auto suspended
+>> while stop bkops when blkdev pm_runtime resumed?
+>> My only concern is that we have implemented pm_runtime for host device
+>> and its pm_runtime functions will turn on/off bus clock when host dev
+>> runtime resume/suspend. Let's see below sequence when an issue request
+>> come:
+>> 1. blkdev pm_runtime resumed in mmc_blk_issue_rq.
+>> 2. blkdev issue request
+>> 3. host dev pm_runtime resumed in host->ops->request.
+>> 4. host finished the transfer and host dev pm_runtime suspended.
+>> 5. 3s later, blkdev pm_runtime suspended.
+>> The bus clock will be turn off in step 4 by host dev
+>> pm_runtime_suspend function. Then how can bkops run in step 5?
+>>
+> My question is host dev will stop bus clock by pm_runtime_suspend once
+> the request transfer is finished. But bkops on emmc chip should still
+> need the bus clock after bkops started. How to handle this?
 
-git://github.com/ohporter/linux.git edma-dmaengine-am33xx-mmc-v1
+According the eMMC spec I can't see any requirement that the bus clock
+needs to be on while a BKOPS is running. Moreover it is clearly stated
+it is allowed to gate the bus clock for a device which indicates busy.
+So, I can't see that this is needed.
 
-omap2plus_defconfig + CONFIG_TI_EDMA
-
-I just doublechecked MMC rootfs on bone and evmsk as it's the standard
-smoke test. My EVM is intermittent now so trying to coax it to power up
-to reverify.
-
--Matt
-
-> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
-> index 8c3b1fa..e68ac38 100644
-> --- a/arch/arm/common/edma.c
-> +++ b/arch/arm/common/edma.c
-> @@ -730,6 +730,9 @@ EXPORT_SYMBOL(edma_free_channel);
->   */
->  int edma_alloc_slot(unsigned ctlr, int slot)
->  {
-> +       if (!edma_cc[ctlr])
-> +               return -EINVAL;
-> +
->         if (slot >= 0)
->                 slot = EDMA_CHAN_SLOT(slot);
-> 
-> Thanks,
-> Vaibhav
-> _______________________________________________
-> devicetree-discuss mailing list
-> devicetree-discuss@lists.ozlabs.org
-> https://lists.ozlabs.org/listinfo/devicetree-discuss
+Kind regards
+Ulf Hansson
