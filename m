@@ -1,63 +1,54 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pltfm: Fix timeout on t4240's sdhci controller
-Date: Fri, 8 Mar 2013 23:17:02 +0800
-Message-ID: <CADz5_gKDP2S9RnH0n6A3M4o3vuxNeRObVgMnAPGdSFFjJa9gHg@mail.gmail.com>
-References: <25B60CDC2F704E4E9D88FFD52780CB4C0BDEB04DCF@SC-VEXCH1.marvell.com>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: Re: [PATCH v2 1/2] mmc: sdhci-pltfm: add calling mmc_of_parse in
+ sdhci_pltfm_register
+Date: Fri, 08 Mar 2013 13:17:30 -0700
+Message-ID: <513A475A.7040803@wwwdotorg.org>
+References: <1362755263-6832-1-git-send-email-kliu5@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f182.google.com ([74.125.82.182]:57605 "EHLO
-	mail-we0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932256Ab3CHPRF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Mar 2013 10:17:05 -0500
-Received: by mail-we0-f182.google.com with SMTP id t57so1198355wey.13
-        for <linux-mmc@vger.kernel.org>; Fri, 08 Mar 2013 07:17:03 -0800 (PST)
-In-Reply-To: <25B60CDC2F704E4E9D88FFD52780CB4C0BDEB04DCF@SC-VEXCH1.marvell.com>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:44858 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756799Ab3CHURh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Mar 2013 15:17:37 -0500
+In-Reply-To: <1362755263-6832-1-git-send-email-kliu5@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chunhe Lan <Chunhe.Lan@freescale.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>
+To: Kevin Liu <kliu5@marvell.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Chunhe Lan <Chunhe.Lan@freescale.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>
 
-Hi,
+On 03/08/2013 08:07 AM, Kevin Liu wrote:
+> commit 6c56e7a0 provide a function mmc_of_parse for standard MMC
+> device-tree binding parser centrally. So just call it with
+> sdhci_get_of_property together in sdhci_pltfm_register.
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chunhe Lan
-> Sent: Friday, March 08, 2013 4:14 PM
-> To: linux-mmc@vger.kernel.org
-> Cc: cjb@laptop.org; Chunhe Lan
-> Subject: [PATCH] mmc: sdhci-pltfm: Fix timeout on t4240's sdhci controller
->
-> This patch fixes timeout problems on t4240's sdhci controller:
->
->         mmc0: Too large timeout requested for CMD25!
->         mmc0: Too large timeout requested for CMD25!
->         mmc0: Too large timeout requested for CMD25!
->
-> Signed-off-by: Chunhe Lan <Chunhe.Lan@freescale.com>
-> Cc: Chris Ball <cjb@laptop.org>
-> ---
->  drivers/mmc/host/sdhci-pltfm.c |    1 +
->  1 files changed, 1 insertions(+), 0 deletions(-)
->
 > diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index 3145a78..9db7b12 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -94,6 +94,7 @@ void sdhci_get_of_property(struct platform_device *pdev)
->
->                 if (of_device_is_compatible(np, "fsl,p2020-esdhc") ||
->                     of_device_is_compatible(np, "fsl,p1010-esdhc") ||
-> +                   of_device_is_compatible(np, "fsl,t4240-esdhc") ||
->                     of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
->                         host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
->
 
-I think it's better to parse host specific property in host's driver
-rather than the shared sdhci-pltfm.c.
-Otherwise, sdhci_get_of_property will become bigger and bigger.
-How do you think?
-I have submitted below patch aim to do this:
-[PATCH 2/2] mmc: sdhci-pltfm: add function in sdhci_ops to parse dt property
+> @@ -212,6 +213,7 @@ int sdhci_pltfm_register(struct platform_device *pdev,
+>  	if (IS_ERR(host))
+>  		return PTR_ERR(host);
+>  
+> +	mmc_of_parse(host->mmc);
 
-Thanks
-Kevin
+A few drivers already call mmc_of_parse() themselves. This change will
+make that call happen twice. Mostly this won't be an issue, but there
+are a couple gpio_request() calls in there, the error-handling for which
+in mmc_of_parse() will spew error messages if attempted twice. I also
+have a patch in the Tegra tree that adds a call to mmc_of_parse() into
+the Tegra driver, and that relies on fixing some bugs in the device
+tree; the CD GPIO polarity was previously specified incorrectly in the DT...
+
+I guess to resolve this, what I could do is as follows:
+
+a) Create a topic branch in the Tegra tree that contains just the DT
+fixes that mmc_of_parse() relies on for Tegra.
+
+b) Have Chris merge that into the MMC tree.
+
+c) Then, it's safe to move the Tegra driver patch out of the Tegra tree
+into the MMC tree, so this issue can be addressed there. Equally, if the
+merge in (b) above happens before this current patch is applied, this
+current patch won't cause any breakage on Tegra.
+
+Chris, do you want to do this?
