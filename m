@@ -1,80 +1,44 @@
-From: <wei_wang@realsil.com.cn>
-Subject: [PATCH] mmc/host:rtsx: Don't execute power up sequence repeatedly
-Date: Fri, 8 Mar 2013 15:05:57 +0800
-Message-ID: <1362726357-7629-1-git-send-email-wei_wang@realsil.com.cn>
+From: Chunhe Lan <Chunhe.Lan@freescale.com>
+Subject: [PATCH] mmc: sdhci-pltfm: Fix timeout on t4240's sdhci controller
+Date: Fri, 8 Mar 2013 16:14:10 +0800
+Message-ID: <1362730450-24254-1-git-send-email-Chunhe.Lan@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rtits2.realtek.com ([60.250.210.242]:35463 "EHLO
-	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753223Ab3CHHGS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Mar 2013 02:06:18 -0500
+Received: from mail-db8lp0186.outbound.messaging.microsoft.com ([213.199.154.186]:15455
+	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753451Ab3CHI0M (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Mar 2013 03:26:12 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, sameo@linux.intel.com
-Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, rogerable@realtek.com, Wei WANG <wei_wang@realsil.com.cn>
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, Chunhe Lan <Chunhe.Lan@freescale.com>
 
-From: Wei WANG <wei_wang@realsil.com.cn>
+This patch fixes timeout problems on t4240's sdhci controller:
 
-For some Realtek's card reader, power up sequence can only be executed
-when power has been turned off fully.
-So rtsx host should not start power up sequence again when set_ios been
-called if the power has been turned on.
+	mmc0: Too large timeout requested for CMD25!
+	mmc0: Too large timeout requested for CMD25!
+	mmc0: Too large timeout requested for CMD25!
 
-Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
+Signed-off-by: Chunhe Lan <Chunhe.Lan@freescale.com>
+Cc: Chris Ball <cjb@laptop.org>
 ---
- drivers/mmc/host/rtsx_pci_sdmmc.c |   10 ++++++++++
- 1 file changed, 10 insertions(+)
+ drivers/mmc/host/sdhci-pltfm.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index f981f7d..ad13f42 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -57,6 +57,9 @@ struct realtek_pci_sdmmc {
- 	bool			eject;
- 	bool			initial_mode;
- 	bool			ddr_mode;
-+	int			power_state;
-+#define SDMMC_POWER_ON		1
-+#define SDMMC_POWER_OFF		0
- };
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index 3145a78..9db7b12 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -94,6 +94,7 @@ void sdhci_get_of_property(struct platform_device *pdev)
  
- static inline struct device *sdmmc_dev(struct realtek_pci_sdmmc *host)
-@@ -765,6 +768,9 @@ static int sd_power_on(struct realtek_pci_sdmmc *host)
- 	struct rtsx_pcr *pcr = host->pcr;
- 	int err;
+ 		if (of_device_is_compatible(np, "fsl,p2020-esdhc") ||
+ 		    of_device_is_compatible(np, "fsl,p1010-esdhc") ||
++		    of_device_is_compatible(np, "fsl,t4240-esdhc") ||
+ 		    of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
+ 			host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
  
-+	if (host->power_state == SDMMC_POWER_ON)
-+		return 0;
-+
- 	rtsx_pci_init_cmd(pcr);
- 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_SELECT, 0x07, SD_MOD_SEL);
- 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_SHARE_MODE,
-@@ -787,6 +793,7 @@ static int sd_power_on(struct realtek_pci_sdmmc *host)
- 	if (err < 0)
- 		return err;
- 
-+	host->power_state = SDMMC_POWER_ON;
- 	return 0;
- }
- 
-@@ -795,6 +802,8 @@ static int sd_power_off(struct realtek_pci_sdmmc *host)
- 	struct rtsx_pcr *pcr = host->pcr;
- 	int err;
- 
-+	host->power_state = SDMMC_POWER_OFF;
-+
- 	rtsx_pci_init_cmd(pcr);
- 
- 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_CLK_EN, SD_CLK_EN, 0);
-@@ -1260,6 +1269,7 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
- 	host->pcr = pcr;
- 	host->mmc = mmc;
- 	host->pdev = pdev;
-+	host->power_state = SDMMC_POWER_OFF;
- 	platform_set_drvdata(pdev, host);
- 	pcr->slots[RTSX_SD_CARD].p_dev = pdev;
- 	pcr->slots[RTSX_SD_CARD].card_event = rtsx_pci_sdmmc_card_event;
 -- 
-1.7.9.5
+1.7.6.5
+
 
