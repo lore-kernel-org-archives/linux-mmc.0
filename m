@@ -1,94 +1,80 @@
-From: Kevin Liu <kliu5@marvell.com>
-Subject: [PATCH] mmc: sdhci-pxav3: enhance device tree parser code
-Date: Fri,  8 Mar 2013 12:53:53 +0800
-Message-ID: <1362718433-3052-1-git-send-email-kliu5@marvell.com>
+From: <wei_wang@realsil.com.cn>
+Subject: [PATCH] mmc/host:rtsx: Don't execute power up sequence repeatedly
+Date: Fri, 8 Mar 2013 15:05:57 +0800
+Message-ID: <1362726357-7629-1-git-send-email-wei_wang@realsil.com.cn>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:47245 "EHLO
-	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1759557Ab3CHExB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Mar 2013 23:53:01 -0500
+Received: from rtits2.realtek.com ([60.250.210.242]:35463 "EHLO
+	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753223Ab3CHHGS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Mar 2013 02:06:18 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>
-Cc: Stephen Warren <swarren@wwwdotorg.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>, Kevin Liu <kliu5@marvell.com>
+To: cjb@laptop.org, sameo@linux.intel.com
+Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, rogerable@realtek.com, Wei WANG <wei_wang@realsil.com.cn>
 
-1. seperate device tree parsing from platform data handling which
-can make further work easy when platform data can be removed.
-2. add calling mmc_of_parse which can parse more of property and
-pxav3_get_mmc_pdata can be shrinked a lot.
+From: Wei WANG <wei_wang@realsil.com.cn>
 
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
+For some Realtek's card reader, power up sequence can only be executed
+when power has been turned off fully.
+So rtsx host should not start power up sequence again when set_ios been
+called if the power has been turned on.
+
+Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
 ---
- drivers/mmc/host/sdhci-pxav3.c |   24 +++++-------------------
- 1 file changed, 5 insertions(+), 19 deletions(-)
+ drivers/mmc/host/rtsx_pci_sdmmc.c |   10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index da3952d..d83343d 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -195,29 +195,16 @@ static struct sdhci_pxa_platdata *pxav3_get_mmc_pdata(struct device *dev)
- {
- 	struct sdhci_pxa_platdata *pdata;
- 	struct device_node *np = dev->of_node;
--	u32 bus_width;
- 	u32 clk_delay_cycles;
--	enum of_gpio_flags gpio_flags;
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index f981f7d..ad13f42 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -57,6 +57,9 @@ struct realtek_pci_sdmmc {
+ 	bool			eject;
+ 	bool			initial_mode;
+ 	bool			ddr_mode;
++	int			power_state;
++#define SDMMC_POWER_ON		1
++#define SDMMC_POWER_OFF		0
+ };
  
- 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
- 	if (!pdata)
- 		return NULL;
+ static inline struct device *sdmmc_dev(struct realtek_pci_sdmmc *host)
+@@ -765,6 +768,9 @@ static int sd_power_on(struct realtek_pci_sdmmc *host)
+ 	struct rtsx_pcr *pcr = host->pcr;
+ 	int err;
  
--	if (of_find_property(np, "non-removable", NULL))
--		pdata->flags |= PXA_FLAG_CARD_PERMANENT;
--
--	of_property_read_u32(np, "bus-width", &bus_width);
--	if (bus_width == 8)
--		pdata->flags |= PXA_FLAG_SD_8_BIT_CAPABLE_SLOT;
--
- 	of_property_read_u32(np, "mrvl,clk-delay-cycles", &clk_delay_cycles);
- 	if (clk_delay_cycles > 0)
- 		pdata->clk_delay_cycles = clk_delay_cycles;
++	if (host->power_state == SDMMC_POWER_ON)
++		return 0;
++
+ 	rtsx_pci_init_cmd(pcr);
+ 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_SELECT, 0x07, SD_MOD_SEL);
+ 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_SHARE_MODE,
+@@ -787,6 +793,7 @@ static int sd_power_on(struct realtek_pci_sdmmc *host)
+ 	if (err < 0)
+ 		return err;
  
--	pdata->ext_cd_gpio = of_get_named_gpio_flags(np, "cd-gpios", 0, &gpio_flags);
--	if (gpio_flags != OF_GPIO_ACTIVE_LOW)
--		pdata->host_caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
--
- 	return pdata;
++	host->power_state = SDMMC_POWER_ON;
+ 	return 0;
  }
- #else
-@@ -264,10 +251,11 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 	host->mmc->caps |= MMC_CAP_1_8V_DDR;
  
- 	match = of_match_device(of_match_ptr(sdhci_pxav3_of_match), &pdev->dev);
--	if (match)
-+	if (match) {
-+		mmc_of_parse(host->mmc);
-+		sdhci_get_of_property(pdev);
- 		pdata = pxav3_get_mmc_pdata(dev);
--
--	if (pdata) {
-+	} else if (pdata) {
- 		/* on-chip device */
- 		if (pdata->flags & PXA_FLAG_CARD_PERMANENT)
- 			host->mmc->caps |= MMC_CAP_NONREMOVABLE;
-@@ -297,8 +285,6 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 		}
- 	}
+@@ -795,6 +802,8 @@ static int sd_power_off(struct realtek_pci_sdmmc *host)
+ 	struct rtsx_pcr *pcr = host->pcr;
+ 	int err;
  
--	sdhci_get_of_property(pdev);
--
- 	pm_runtime_set_active(&pdev->dev);
- 	pm_runtime_enable(&pdev->dev);
- 	pm_runtime_set_autosuspend_delay(&pdev->dev, PXAV3_RPM_DELAY_MS);
-@@ -316,7 +302,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
++	host->power_state = SDMMC_POWER_OFF;
++
+ 	rtsx_pci_init_cmd(pcr);
  
+ 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_CLK_EN, SD_CLK_EN, 0);
+@@ -1260,6 +1269,7 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
+ 	host->pcr = pcr;
+ 	host->mmc = mmc;
+ 	host->pdev = pdev;
++	host->power_state = SDMMC_POWER_OFF;
  	platform_set_drvdata(pdev, host);
- 
--	if (pdata->pm_caps & MMC_PM_KEEP_POWER) {
-+	if (host->mmc->pm_caps & MMC_PM_KEEP_POWER) {
- 		device_init_wakeup(&pdev->dev, 1);
- 		host->mmc->pm_flags |= MMC_PM_WAKE_SDIO_IRQ;
- 	} else {
+ 	pcr->slots[RTSX_SD_CARD].p_dev = pdev;
+ 	pcr->slots[RTSX_SD_CARD].card_event = rtsx_pci_sdmmc_card_event;
 -- 
 1.7.9.5
 
