@@ -1,35 +1,44 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: [PATCH] mmc: sdhci-pltfm: add calling mmc_of_parse in sdhci_pltfm_register
-Date: Mon, 11 Mar 2013 09:53:28 -0600
-Message-ID: <513DFDF8.5090604@wwwdotorg.org>
-References: <1362718371-5074-1-git-send-email-kliu5@marvell.com> <513A479C.9010709@wwwdotorg.org> <CADz5_gJXb85MPcrXer-13rJB7VYG=fuf28NpPVBif9tHUmAG-g@mail.gmail.com>
+From: Lars-Peter Clausen <lars@metafoo.de>
+Subject: Re: [PATCH v4 1/3] dmaengine: add dma_get_slave_sg_limits()
+Date: Mon, 11 Mar 2013 17:57:48 +0100
+Message-ID: <513E0D0C.1080203@metafoo.de>
+References: <1362599767-11292-1-git-send-email-mporter@ti.com> <1362599767-11292-2-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:33459 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753423Ab3CKPxd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Mar 2013 11:53:33 -0400
-In-Reply-To: <CADz5_gJXb85MPcrXer-13rJB7VYG=fuf28NpPVBif9tHUmAG-g@mail.gmail.com>
+Received: from smtp-out-222.synserver.de ([212.40.185.222]:1069 "EHLO
+	smtp-out-222.synserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751612Ab3CKQz7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Mar 2013 12:55:59 -0400
+In-Reply-To: <1362599767-11292-2-git-send-email-mporter@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Liu <keyuan.liu@gmail.com>
-Cc: Kevin Liu <kliu5@marvell.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>
+To: Matt Porter <mporter@ti.com>
+Cc: Vinod Koul <vinod.koul@intel.com>, Chris Ball <cjb@laptop.org>, Dan Williams <djbw@fb.com>, Sekhar Nori <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 
-On 03/08/2013 09:27 PM, Kevin Liu wrote:
-> 2013/3/9 Stephen Warren <swarren@wwwdotorg.org>:
->> On 03/07/2013 09:52 PM, Kevin Liu wrote:
->>> commit 6c56e7a0 provide a function mmc_of_parse for standard MMC
->>> device-tree binding parser centrally. So just call it with
->>> sdhci_get_of_property together in sdhci_pltfm_register.
->>
->> BTW, this patch seems to do two unrelated things; firstly it changes the
->> indentation level throughout sdhci_get_of_property(), and secondly makes
->> the change described in the commit description.
-> 
-> That's true. I originally want to do the first thing incidentally :-)
-> So do you want to split this patch into two?
+[...]
+>   *	struct with auxiliary transfer status information, otherwise the call
+>   *	will just return a simple status code
+>   * @device_issue_pending: push pending transactions to hardware
+> + * @device_slave_sg_limits: return the slave SG capabilities
+>   */
+>  struct dma_device {
+>  
+> @@ -602,6 +615,9 @@ struct dma_device {
+>  					    dma_cookie_t cookie,
+>  					    struct dma_tx_state *txstate);
+>  	void (*device_issue_pending)(struct dma_chan *chan);
+> +	struct dma_slave_sg_limits *(*device_slave_sg_limits)(
+> +		struct dma_chan *chan, enum dma_slave_buswidth addr_width,
+> +		u32 maxburst);
 
-It's Chris's call, but I think it'd be more usual to make this two
-separate patches.
+In my opinion it is better to pass in a pointer to a dma_slave_sg_limits
+struct and let the driver fill it. Instead of passing back a pointer to an
+internal structure. It is kind of problematic because you never really know
+when the user is done using the struct and you don't know when it is safe to
+free or reuse it. E.g. in your implementation for the edma driver if the
+function is called with different parameters for the same channel, the
+previous result will also be overwritten.
+
+- Lars
