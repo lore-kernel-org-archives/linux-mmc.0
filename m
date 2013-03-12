@@ -1,110 +1,106 @@
-From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v9 5/9] dmaengine: edma: Add TI EDMA device tree binding
-Date: Tue, 12 Mar 2013 12:23:10 -0400
-Message-ID: <20130312162310.GZ6209@beef>
-References: <1362586540-10393-1-git-send-email-mporter@ti.com>
-	<1362586540-10393-6-git-send-email-mporter@ti.com>
-	<1ced8cac7b9b41f596f0385e1f4f1f40@DFLE72.ent.ti.com>
+From: James Hogan <james.hogan@imgtec.com>
+Subject: Re: [PATCH] mmc: dw_mmc: setpower on MMC_POWER_{UP,OFF}
+Date: Tue, 12 Mar 2013 16:31:32 +0000
+Message-ID: <513F5864.6090006@imgtec.com>
+References: <1363085012-9220-1-git-send-email-james.hogan@imgtec.com> <513F10D9.9060402@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1ced8cac7b9b41f596f0385e1f4f1f40-S6owGmh5AOyIQmiDNMet8wC/G2K4zDHf@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: "Nori, Sekhar" <nsekhar-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "Cousson,
-	Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from multi.imgtec.com ([194.200.65.239]:37561 "EHLO multi.imgtec.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932206Ab3CLQcd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 12 Mar 2013 12:32:33 -0400
+In-Reply-To: <513F10D9.9060402@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <cjb@laptop.org>
 
-On Tue, Mar 12, 2013 at 06:53:03AM +0000, Sekhar Nori wrote:
-> On 3/6/2013 9:45 PM, Matt Porter wrote:
-> > The binding definition is based on the generic DMA controller
-> > binding.
-> > 
-> > Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+On 12/03/13 11:26, Jaehoon Chung wrote:
+> Looks good to me.
 > 
-> Okay the bindings the documented after they are used leading to some
-> confusion. This patch should be moved up the series. As I noted in my
-> other e-mail, some of these bindings are not really hardware description
-> and need to be re-looked.
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Sure, I'll reorder it.
+Thanks Jaehoon
 
--Matt
+Cheers
+James
 
-> > ---
-> >  Documentation/devicetree/bindings/dma/ti-edma.txt |   49 +++++++++++++++++++++
-> >  1 file changed, 49 insertions(+)
-> >  create mode 100644 Documentation/devicetree/bindings/dma/ti-edma.txt
-> > 
-> > diff --git a/Documentation/devicetree/bindings/dma/ti-edma.txt b/Documentation/devicetree/bindings/dma/ti-edma.txt
-> > new file mode 100644
-> > index 0000000..075a60e3
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/dma/ti-edma.txt
-> > @@ -0,0 +1,49 @@
-> > +TI EDMA
-> > +
-> > +Required properties:
-> > +- compatible : "ti,edma3"
-> > +- ti,hwmods: Name of the hwmods associated to the EDMA
-> > +- ti,edma-regions: Number of regions
-> > +- ti,edma-slots: Number of slots
-> > +- ti,edma-queue-tc-map: List of transfer control to queue mappings
-> > +- ti,edma-queue-priority-map: List of queue priority mappings
-> > +- ti,edma-default-queue: Default queue value
-> > +
-> > +Optional properties:
-> > +- ti,edma-reserved-channels: List of reserved channel regions
-> > +- ti,edma-reserved-slots: List of reserved slot regions
-> > +- ti,edma-xbar-event-map: Crossbar event to channel map
-> > +
-> > +Example:
-> > +
-> > +edma: edma@49000000 {
-> > +	reg = <0x49000000 0x10000>;
-> > +	interrupt-parent = <&intc>;
-> > +	interrupts = <12 13 14>;
-> > +	compatible = "ti,edma3";
-> > +	ti,hwmods = "tpcc", "tptc0", "tptc1", "tptc2";
-> > +	#dma-cells = <1>;
-> > +	dma-channels = <64>;
-> > +	ti,edma-regions = <4>;
-> > +	ti,edma-slots = <256>;
-> > +	ti,edma-reserved-channels = <0  2
-> > +				     14 2
-> > +				     26 6
-> > +				     48 4
-> > +				     56 8>;
-> > +	ti,edma-reserved-slots = <0  2
-> > +				  14 2
-> > +				  26 6
-> > +				  48 4
-> > +				  56 8
-> > +				  64 127>;
-> > +	ti,edma-queue-tc-map = <0 0
-> > +				1 1
-> > +				2 2>;
-> > +	ti,edma-queue-priority-map = <0 0
-> > +				      1 1
-> > +				      2 2>;
-> > +	ti,edma-default-queue = <0>;
-> > +	ti,edma-xbar-event-map = <1 12
-> > +				  2 13>;
-> > +};
-> > 
+> 
+> Best Regards,
+> Jaehoon Chung
+> 
+> On 03/12/2013 07:43 PM, James Hogan wrote:
+>> Call the setpower platform callback in response to set_ios with
+>> ios->power_mode == MMC_POWER_UP or MMC_POWER_OFF, instead of from the
+>> card detect work function.
+>>
+>> This appears to fix a problem I have where a card stuck in a funny state
+>> doesn't get properly cleared by the power being turned off, presumably
+>> due to lack of power sequencing. This resulted in the following log
+>> messages after boot:
+>>
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 200000Hz, actual 199680HZ div = 250)
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 195765Hz, actual 195764HZ div = 255)
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 400000Hz, actual 399360HZ div = 125)
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
+>>
+>> Signed-off-by: James Hogan <james.hogan@imgtec.com>
+>> Cc: Seungwon Jeon <tgih.jun@samsung.com>
+>> Cc: Jaehoon Chung <jh80.chung@samsung.com>
+>> Cc: Chris Ball <cjb@laptop.org>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c | 16 ++++++++--------
+>>  1 file changed, 8 insertions(+), 8 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 60063cc..1a42c7c 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -818,6 +818,14 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>  	switch (ios->power_mode) {
+>>  	case MMC_POWER_UP:
+>>  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+>> +		/* Power up slot */
+>> +		if (slot->host->pdata->setpower)
+>> +			slot->host->pdata->setpower(slot->id, mmc->ocr_avail);
+>> +		break;
+>> +	case MMC_POWER_OFF:
+>> +		/* Power down slot */
+>> +		if (slot->host->pdata->setpower)
+>> +			slot->host->pdata->setpower(slot->id, 0);
+>>  		break;
+>>  	default:
+>>  		break;
+>> @@ -1674,10 +1682,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
+>>  			dev_dbg(&slot->mmc->class_dev, "card %s\n",
+>>  				present ? "inserted" : "removed");
+>>  
+>> -			/* Power up slot (before spin_lock, may sleep) */
+>> -			if (present != 0 && host->pdata->setpower)
+>> -				host->pdata->setpower(slot->id, mmc->ocr_avail);
+>> -
+>>  			spin_lock_bh(&host->lock);
+>>  
+>>  			/* Card change detected */
+>> @@ -1760,10 +1764,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
+>>  
+>>  			spin_unlock_bh(&host->lock);
+>>  
+>> -			/* Power down slot (after spin_unlock, may sleep) */
+>> -			if (present == 0 && host->pdata->setpower)
+>> -				host->pdata->setpower(slot->id, 0);
+>> -
+>>  			present = dw_mci_get_cd(mmc);
+>>  		}
+>>  
+>>
+> 
 
-------------------------------------------------------------------------------
-Symantec Endpoint Protection 12 positioned as A LEADER in The Forrester  
-Wave(TM): Endpoint Security, Q1 2013 and "remains a good choice" in the  
-endpoint security space. For insight on selecting the right partner to 
-tackle endpoint security challenges, access the full report. 
-http://p.sf.net/sfu/symantec-dev2dev
