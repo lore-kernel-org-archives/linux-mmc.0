@@ -1,42 +1,77 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: FW: Regulator API ignored return values
-Date: Tue, 12 Mar 2013 14:03:09 +0000
-Message-ID: <201303121403.09315.arnd@arndb.de>
-References: <25B60CDC2F704E4E9D88FFD52780CB4C0BDEB0547F@SC-VEXCH1.marvell.com> <CADz5_g+KfxL43BKKsgZZ3Xg4sZWE4-ZaFpFhphKrfj9yK59-XA@mail.gmail.com>
+From: "Manjunathappa, Prakash" <prakash.pm@ti.com>
+Subject: [PATCH v5 0/4] Add DT support for davinci_mmc driver
+Date: Tue, 12 Mar 2013 19:43:53 +0530
+Message-ID: <1363097637-11371-1-git-send-email-prakash.pm@ti.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:54622 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754468Ab3CLODd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Mar 2013 10:03:33 -0400
-In-Reply-To: <CADz5_g+KfxL43BKKsgZZ3Xg4sZWE4-ZaFpFhphKrfj9yK59-XA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: grant.likely@secretlab.ca, rob.herring@calxeda.com, rob@landley.net, linux@arm.linux.org.uk, nsekhar@ti.com, hs@denx.de, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, davinci-linux-open-source@linux.davincidsp.com, "Manjunathappa, Prakash" <prakash.pm@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Liu <keyuan.liu@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-kernel@vger.kernel.org List" <linux-kernel@vger.kernel.org>, Stephen Warren <swarren@wwwdotorg.org>, linux-arm-kernel@lists.infradead.org, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linus Walleij <linus.walleij@linaro.org>, Axel Lin <axel.lin@ingics.com>, Jingoo Han <jg1.han@samsung.com>, Felipe Balbi <balbi@ti.com>, Dmitry Torokhov <dtor@mail.ru>, linux-mmc@vger.kernel.org
 
-On Tuesday 12 March 2013, Kevin Liu wrote:
-> > -               regulator_enable(host->vqmmc);
-> > +               ret = regulator_enable(host->vqmmc);
-> >                 if (!regulator_is_supported_voltage(host->vqmmc, 1700000,
-> >                         1950000))
-> >                         caps[1] &= ~(SDHCI_SUPPORT_SDR104 |
-> >                                         SDHCI_SUPPORT_SDR50 |
-> >                                         SDHCI_SUPPORT_DDR50);
-> > +               if (ret) {
-> > +                       pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
-> > +                               mmc_hostname(mmc), ret);
-> 
-> Need add regulator_put here since regulator_get has succeed?
+Patch set adds DT support for davinci_mmc driver and is
+verified on da850-evm without card_detect/write_protect and
+EDMA support. Also takecare to derive controller IP version from
+platform_device_id table, remove version specification in pdata.
 
-Hmm, we still don't actually bail out if the error is encountered, so
-the reference count is balanced with the current patch, but I maybe
-a failed regulator_enable() should actually be a fatal error?
+Applies on top of below patch under community review:
+"Enable SPI flash support on da850-evm DT kernel"
+http://www.spinics.net/lists/arm-kernel/msg229328.html
 
-If we do that, using devm_regulator_get() would be a nice way to
-track the reference counts.
+Depends on patch waiting for acceptance:
+Patch "mmc: davinci: allow driver to work without DMA resource"
+http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg18771.html
 
-	Arnd
+Since v4:
+Minor nit, check on return value for failure of max-frequency property
+parsing.
+Merged patch "ARM: davinci: mmc: derive version information from device name"
+with patch 1/4.
+
+Since v3:
+Added support to derive IP version information from platform_device_id table.
+
+Since v2:
+Modified the default value for bus-width and skipping the property specifications
+for highspeed card capabilties for now. Re-ordered patch 2 and 3.
+
+Since v1:
+Modified the DT parse function to take default values, updated DT binding
+documentation accordingly.
+
+Manjunathappa, Prakash (4):
+  ARM: davinci: mmc: derive version information from device name
+  mmc: davinci_mmc: add DT support
+  ARM: davinci: da850: add mmc DT entries
+  ARM: davinci: da850: override mmc DT node device name
+
+ .../devicetree/bindings/mmc/davinci_mmc.txt        |   25 ++++++
+ arch/arm/boot/dts/da850-evm.dts                    |    7 ++
+ arch/arm/boot/dts/da850.dtsi                       |   15 ++++
+ arch/arm/mach-davinci/board-da830-evm.c            |    1 -
+ arch/arm/mach-davinci/board-da850-evm.c            |    2 -
+ arch/arm/mach-davinci/board-dm355-evm.c            |    1 -
+ arch/arm/mach-davinci/board-dm365-evm.c            |    1 -
+ arch/arm/mach-davinci/board-dm644x-evm.c           |    1 -
+ arch/arm/mach-davinci/board-neuros-osd2.c          |    1 -
+ arch/arm/mach-davinci/board-omapl138-hawk.c        |    1 -
+ arch/arm/mach-davinci/board-tnetv107x-evm.c        |    1 -
+ arch/arm/mach-davinci/da830.c                      |    2 +-
+ arch/arm/mach-davinci/da850.c                      |    4 +-
+ arch/arm/mach-davinci/da8xx-dt.c                   |    2 +
+ arch/arm/mach-davinci/devices-da8xx.c              |    4 +-
+ arch/arm/mach-davinci/devices-tnetv107x.c          |    4 +-
+ arch/arm/mach-davinci/devices.c                    |    6 +-
+ arch/arm/mach-davinci/dm355.c                      |    4 +-
+ arch/arm/mach-davinci/dm365.c                      |    4 +-
+ arch/arm/mach-davinci/dm644x.c                     |    2 +-
+ arch/arm/mach-davinci/tnetv107x.c                  |    4 +-
+ drivers/mmc/host/davinci_mmc.c                     |   82 +++++++++++++++++++-
+ include/linux/platform_data/mmc-davinci.h          |    3 -
+ 23 files changed, 146 insertions(+), 31 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/davinci_mmc.txt
+
+-- 
+1.7.4.1
+
