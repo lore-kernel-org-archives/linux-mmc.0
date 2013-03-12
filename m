@@ -1,84 +1,38 @@
 From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: FW: Regulator API ignored return values
-Date: Tue, 12 Mar 2013 12:15:14 +0800
-Message-ID: <CADz5_g+KfxL43BKKsgZZ3Xg4sZWE4-ZaFpFhphKrfj9yK59-XA@mail.gmail.com>
-References: <25B60CDC2F704E4E9D88FFD52780CB4C0BDEB0547F@SC-VEXCH1.marvell.com>
+Subject: [PATCH 0/4] mmc: sdhci-pltfm: DT related enhancements
+Date: Tue, 12 Mar 2013 12:25:57 +0800
+Message-ID: <CADz5_gKjN8P_Qq4fVQHxVD1tH-mRLELBrPiq6sifNy-mxn8FtQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f180.google.com ([209.85.214.180]:55211 "EHLO
-	mail-ob0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750997Ab3CLEPP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Mar 2013 00:15:15 -0400
-In-Reply-To: <25B60CDC2F704E4E9D88FFD52780CB4C0BDEB0547F@SC-VEXCH1.marvell.com>
+Received: from mail-ob0-f181.google.com ([209.85.214.181]:65437 "EHLO
+	mail-ob0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750997Ab3CLEZ5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Mar 2013 00:25:57 -0400
+Received: by mail-ob0-f181.google.com with SMTP id ni5so4074813obc.26
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Mar 2013 21:25:57 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, "linux-kernel@vger.kernel.org List" <linux-kernel@vger.kernel.org>, Stephen Warren <swarren@wwwdotorg.org>, linux-arm-kernel@lists.infradead.org, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linus Walleij <linus.walleij@linaro.org>, Axel Lin <axel.lin@ingics.com>, Jingoo Han <jg1.han@samsung.com>, Felipe Balbi <balbi@ti.com>, Dmitry Torokhov <dtor@mail.ru>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Chunhe Lan <Chunhe.Lan@freescale.com>, Stephen Warren <swarren@wwwdotorg.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chris Ball
-> Sent: Tuesday, March 12, 2013 5:56 AM
-> To: Arnd Bergmann
-> Cc: linux-kernel@vger.kernel.org; Stephen Warren; linux-arm-kernel@lists.infradead.org; Mark Brown; Linus Walleij; Axel Lin; Jingoo Han; Felipe Balbi; Dmitry Torokhov; linux-mmc@vger.kernel.org
-> Subject: Re: Regulator API ignored return values
->
-> Hi,
->
-> On Mon, Mar 11 2013, Arnd Bergmann wrote:
->> ==> build/dove_defconfig/faillog <==
->> /git/arm-soc/drivers/mmc/host/sdhci.c: In function 'sdhci_add_host':
->> /git/arm-soc/drivers/mmc/host/sdhci.c:2910:19: warning: ignoring
->> return value of 'regulator_enable', declared with attribute
->> warn_unused_result [-Wunused-result]
->
-> Thanks, this looks like the right fix to me:
->
->
-> Subject: [PATCH] mmc: sdhci: Don't ignore regulator_enable() return value
->
-> Fixes:
-> /git/arm-soc/drivers/mmc/host/sdhci.c: In function 'sdhci_add_host':
-> /git/arm-soc/drivers/mmc/host/sdhci.c:2910:19: warning: ignoring
-> return value of 'regulator_enable', declared with attribute
-> warn_unused_result [-Wunused-result]
->
-> Reported-by: Arnd Bergmann <arnd@arndb.de>
-> Signed-off-by: Chris Ball <cjb@laptop.org>
-> ---
->  drivers/mmc/host/sdhci.c | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 51bbba4..fbf0b93 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2907,12 +2907,17 @@ int sdhci_add_host(struct sdhci_host *host)
->                         host->vqmmc = NULL;
->                 }
->         } else {
-> -               regulator_enable(host->vqmmc);
-> +               ret = regulator_enable(host->vqmmc);
->                 if (!regulator_is_supported_voltage(host->vqmmc, 1700000,
->                         1950000))
->                         caps[1] &= ~(SDHCI_SUPPORT_SDR104 |
->                                         SDHCI_SUPPORT_SDR50 |
->                                         SDHCI_SUPPORT_DDR50);
-> +               if (ret) {
-> +                       pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
-> +                               mmc_hostname(mmc), ret);
+This patchset aim to enhance DT related code in sdhci-pltfm.c by below patches:
+[PATCH v3 1/4] mmc: sdhci-pltfm: add calling mmc_of_parse in
+sdhci_pltfm_register
+[PATCH 2/4] mmc: sdhci-pltfm: avoid indentation in sdhci_get_of_property
+[PATCH v2 3/4] mmc: sdhci-pltfm: add function in sdhci_ops to parse dt property
+[PATCH 4/4] mmc: sdhci-pltfm: remove host specific dt property parse code
 
-Need add regulator_put here since regulator_get has succeed?
+Changelog:
+Split code for different purposes into different patches.
 
-> +                       host->vqmmc = NULL;
-> +               }
->         }
->
->         if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Kevin Liu (4):
+ mmc: sdhci-pltfm: add calling mmc_of_parse in sdhci_pltfm_register
+ mmc: sdhci-pltfm: avoid indentation in sdhci_get_of_property
+ mmc: sdhci-pltfm: add function in sdhci_ops to parse dt property
+ mmc: sdhci-pltfm: remove host specific dt property parse code
+
+ drivers/mmc/host/sdhci-of-esdhc.c |   19 ++++++++++++++
+ drivers/mmc/host/sdhci-pltfm.c    |   51 +++++++++++++++++--------------------
+ drivers/mmc/host/sdhci.h          |    1 +
+ 3 files changed, 44 insertions(+), 27 deletions(-)
