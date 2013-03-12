@@ -1,106 +1,38 @@
-From: James Hogan <james.hogan@imgtec.com>
-Subject: Re: [PATCH] mmc: dw_mmc: setpower on MMC_POWER_{UP,OFF}
-Date: Tue, 12 Mar 2013 16:31:32 +0000
-Message-ID: <513F5864.6090006@imgtec.com>
-References: <1363085012-9220-1-git-send-email-james.hogan@imgtec.com> <513F10D9.9060402@samsung.com>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: Re: [PATCH 1/3] mmc: sdhci_pltfm: Constify sdhci_pltfm_data
+Date: Tue, 12 Mar 2013 12:15:59 -0600
+Message-ID: <513F70DF.2000708@wwwdotorg.org>
+References: <1363085580-3690-1-git-send-email-lars@metafoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from multi.imgtec.com ([194.200.65.239]:37561 "EHLO multi.imgtec.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932206Ab3CLQcd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 12 Mar 2013 12:32:33 -0400
-In-Reply-To: <513F10D9.9060402@samsung.com>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:41768 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933238Ab3CLSQF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Mar 2013 14:16:05 -0400
+In-Reply-To: <1363085580-3690-1-git-send-email-lars@metafoo.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <cjb@laptop.org>
+To: Lars-Peter Clausen <lars@metafoo.de>
+Cc: Chris Ball <cjb@laptop.org>, Anton Vorontsov <avorontsov@ru.mvista.com>, Viresh Kumar <viresh.linux@gmail.com>, Mike Rapoport <mike@compulab.co.il>, Shawn Guo <shawn.guo@linaro.org>, Albert Herranz <albert_herranz@yahoo.es>, Kevin Liu <kliu5@marvell.com>, linux-mmc@vger.kernel.org
 
-On 12/03/13 11:26, Jaehoon Chung wrote:
-> Looks good to me.
+On 03/12/2013 04:52 AM, Lars-Peter Clausen wrote:
+> The sdhci_pltfm_data struct is never modified within the sdhci_pltfm module. So
+> make the pdata parameter to sdhci_pltfm_init and sdhci_pltfm_register const.
+> This allows drivers to declare their sdhci_pltfm_data struct as const.
 > 
-> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+> This patch also makes the sdhci_pltfm_data declarations const where possible.
 
-Thanks Jaehoon
+> No changes since the last submission, just rebased onto of the latest mmc-next
 
-Cheers
-James
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
 
-> 
-> Best Regards,
-> Jaehoon Chung
-> 
-> On 03/12/2013 07:43 PM, James Hogan wrote:
->> Call the setpower platform callback in response to set_ios with
->> ios->power_mode == MMC_POWER_UP or MMC_POWER_OFF, instead of from the
->> card detect work function.
->>
->> This appears to fix a problem I have where a card stuck in a funny state
->> doesn't get properly cleared by the power being turned off, presumably
->> due to lack of power sequencing. This resulted in the following log
->> messages after boot:
->>
->> mmc0: error -110 whilst initialising SD card
->> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
->> mmc0: error -110 whilst initialising SD card
->> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 200000Hz, actual 199680HZ div = 250)
->> mmc0: error -110 whilst initialising SD card
->> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 195765Hz, actual 195764HZ div = 255)
->> mmc0: error -110 whilst initialising SD card
->> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 400000Hz, actual 399360HZ div = 125)
->> mmc0: error -110 whilst initialising SD card
->> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
->>
->> Signed-off-by: James Hogan <james.hogan@imgtec.com>
->> Cc: Seungwon Jeon <tgih.jun@samsung.com>
->> Cc: Jaehoon Chung <jh80.chung@samsung.com>
->> Cc: Chris Ball <cjb@laptop.org>
->> ---
->>  drivers/mmc/host/dw_mmc.c | 16 ++++++++--------
->>  1 file changed, 8 insertions(+), 8 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 60063cc..1a42c7c 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -818,6 +818,14 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>  	switch (ios->power_mode) {
->>  	case MMC_POWER_UP:
->>  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
->> +		/* Power up slot */
->> +		if (slot->host->pdata->setpower)
->> +			slot->host->pdata->setpower(slot->id, mmc->ocr_avail);
->> +		break;
->> +	case MMC_POWER_OFF:
->> +		/* Power down slot */
->> +		if (slot->host->pdata->setpower)
->> +			slot->host->pdata->setpower(slot->id, 0);
->>  		break;
->>  	default:
->>  		break;
->> @@ -1674,10 +1682,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
->>  			dev_dbg(&slot->mmc->class_dev, "card %s\n",
->>  				present ? "inserted" : "removed");
->>  
->> -			/* Power up slot (before spin_lock, may sleep) */
->> -			if (present != 0 && host->pdata->setpower)
->> -				host->pdata->setpower(slot->id, mmc->ocr_avail);
->> -
->>  			spin_lock_bh(&host->lock);
->>  
->>  			/* Card change detected */
->> @@ -1760,10 +1764,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
->>  
->>  			spin_unlock_bh(&host->lock);
->>  
->> -			/* Power down slot (after spin_unlock, may sleep) */
->> -			if (present == 0 && host->pdata->setpower)
->> -				host->pdata->setpower(slot->id, 0);
->> -
->>  			present = dw_mci_get_cd(mmc);
->>  		}
->>  
->>
-> 
+> -static struct sdhci_pltfm_data sdhci_tegra20_pdata = {
+> +static const struct sdhci_pltfm_data sdhci_tegra20_pdata = {
 
+> -static struct sdhci_pltfm_data sdhci_tegra30_pdata = {
+> +static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
+
+Commit 5ebf255 "mmc: sdhci-tegra: add basic support for Tegra114"
+recently added sdhci_tegra114_pdata, which would need the same treatment.
