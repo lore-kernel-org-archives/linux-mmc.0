@@ -1,71 +1,47 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: Regulator API ignored return values
-Date: Mon, 11 Mar 2013 17:55:39 -0400
-Message-ID: <87a9q9iotg.fsf@octavius.laptop.org>
-References: <201303112043.53334.arnd@arndb.de>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pltfm: add calling mmc_of_parse in sdhci_pltfm_register
+Date: Tue, 12 Mar 2013 10:03:19 +0800
+Message-ID: <CADz5_g+u6wkvTgto1WOz+oo7jSdTqTJWrWqZ0sk5W1=Cq2ok2w@mail.gmail.com>
+References: <1362718371-5074-1-git-send-email-kliu5@marvell.com>
+	<513A479C.9010709@wwwdotorg.org>
+	<CADz5_gJXb85MPcrXer-13rJB7VYG=fuf28NpPVBif9tHUmAG-g@mail.gmail.com>
+	<513DFDF8.5090604@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:39618 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754519Ab3CKVz5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 11 Mar 2013 17:55:57 -0400
-In-Reply-To: <201303112043.53334.arnd@arndb.de> (Arnd Bergmann's message of
-	"Mon, 11 Mar 2013 20:43:53 +0000")
+Received: from mail-ob0-f170.google.com ([209.85.214.170]:40864 "EHLO
+	mail-ob0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753549Ab3CLCDU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Mar 2013 22:03:20 -0400
+Received: by mail-ob0-f170.google.com with SMTP id wc20so4080083obb.29
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Mar 2013 19:03:20 -0700 (PDT)
+In-Reply-To: <513DFDF8.5090604@wwwdotorg.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-kernel@vger.kernel.org, Stephen Warren <swarren@wwwdotorg.org>, linux-arm-kernel@lists.infradead.org, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linus Walleij <linus.walleij@linaro.org>, Axel Lin <axel.lin@ingics.com>, Jingoo Han <jg1.han@samsung.com>, Felipe Balbi <balbi@ti.com>, Dmitry Torokhov <dtor@mail.ru>, linux-mmc@vger.kernel.org
+To: Stephen Warren <swarren@wwwdotorg.org>
+Cc: Kevin Liu <kliu5@marvell.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>
 
-Hi,
+2013/3/11 Stephen Warren <swarren@wwwdotorg.org>:
+> On 03/08/2013 09:27 PM, Kevin Liu wrote:
+>> 2013/3/9 Stephen Warren <swarren@wwwdotorg.org>:
+>>> On 03/07/2013 09:52 PM, Kevin Liu wrote:
+>>>> commit 6c56e7a0 provide a function mmc_of_parse for standard MMC
+>>>> device-tree binding parser centrally. So just call it with
+>>>> sdhci_get_of_property together in sdhci_pltfm_register.
+>>>
+>>> BTW, this patch seems to do two unrelated things; firstly it changes the
+>>> indentation level throughout sdhci_get_of_property(), and secondly makes
+>>> the change described in the commit description.
+>>
+>> That's true. I originally want to do the first thing incidentally :-)
+>> So do you want to split this patch into two?
+>
+> It's Chris's call, but I think it'd be more usual to make this two
+> separate patches.
 
-On Mon, Mar 11 2013, Arnd Bergmann wrote:
-> ==> build/dove_defconfig/faillog <==
-> /git/arm-soc/drivers/mmc/host/sdhci.c: In function 'sdhci_add_host':
-> /git/arm-soc/drivers/mmc/host/sdhci.c:2910:19: warning: ignoring
-> return value of 'regulator_enable', declared with attribute
-> warn_unused_result [-Wunused-result]
+Thanks for review!
+I have splited it into different patches as below:
+[PATCH v3 1/4] mmc: sdhci-pltfm: add calling mmc_of_parse in
+[PATCH 2/4] mmc: sdhci-pltfm: avoid indentation in
 
-Thanks, this looks like the right fix to me:
-
-
-Subject: [PATCH] mmc: sdhci: Don't ignore regulator_enable() return value
-
-Fixes:
-/git/arm-soc/drivers/mmc/host/sdhci.c: In function 'sdhci_add_host':
-/git/arm-soc/drivers/mmc/host/sdhci.c:2910:19: warning: ignoring
-return value of 'regulator_enable', declared with attribute
-warn_unused_result [-Wunused-result]
-
-Reported-by: Arnd Bergmann <arnd@arndb.de>
-Signed-off-by: Chris Ball <cjb@laptop.org>
----
- drivers/mmc/host/sdhci.c | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 51bbba4..fbf0b93 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2907,12 +2907,17 @@ int sdhci_add_host(struct sdhci_host *host)
- 			host->vqmmc = NULL;
- 		}
- 	} else {
--		regulator_enable(host->vqmmc);
-+		ret = regulator_enable(host->vqmmc);
- 		if (!regulator_is_supported_voltage(host->vqmmc, 1700000,
- 			1950000))
- 			caps[1] &= ~(SDHCI_SUPPORT_SDR104 |
- 					SDHCI_SUPPORT_SDR50 |
- 					SDHCI_SUPPORT_DDR50);
-+		if (ret) {
-+			pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
-+				mmc_hostname(mmc), ret);
-+			host->vqmmc = NULL;
-+		}
- 	}
- 
- 	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Kevin
