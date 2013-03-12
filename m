@@ -1,148 +1,93 @@
-From: Markos Chandras <markos.chandras@imgtec.com>
-Subject: [PATCH 3/3] dw_mmc: Handle unaligned data submission correctly
-Date: Tue, 12 Mar 2013 10:53:13 +0000
-Message-ID: <1363085593-22214-3-git-send-email-markos.chandras@imgtec.com>
-References: <1363085593-22214-1-git-send-email-markos.chandras@imgtec.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: setpower on MMC_POWER_{UP,OFF}
+Date: Tue, 12 Mar 2013 20:26:17 +0900
+Message-ID: <513F10D9.9060402@samsung.com>
+References: <1363085012-9220-1-git-send-email-james.hogan@imgtec.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from multi.imgtec.com ([194.200.65.239]:44029 "EHLO multi.imgtec.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752623Ab3CLK6o (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 12 Mar 2013 06:58:44 -0400
-In-Reply-To: <1363085593-22214-1-git-send-email-markos.chandras@imgtec.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <1363085012-9220-1-git-send-email-james.hogan@imgtec.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: James Hogan <james.hogan@imgtec.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Markos Chandras <markos.chandras@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>
 
-Commit f9c2a0dc42a6938ff2a80e55ca2bbd1d5581c72e
-"mmc: dw_mmc: Fix PIO mode with support of highmem" introduced
-a regression since v3.2 making the mmc_test hang on test #13
-with a "Data starvation by host timeout" interrupt.
+Looks good to me.
 
-This is because, sg_mapping_iter is used to iterate through the
-data which spans on multiple pages. The problem is detected on
-unaligned data submission where the code previously checked for
-!(sg_next(host->sg)) which is true because we only have a single
-scatter/gather list which then expands to multiple pages.
-Therefore, the driver incorrectly assumed that this was the last
-list item and submitted unaligned data to the mmc device. This
-overflowed the FIFO on the device before all the data were written
-to it. The code was fixed to only submit unaligned data when we are
-handling the last sg_miter item by checking whether we reached
-the desired data length or not.
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-The patch was tested against mmc_test and all the tests passed.
+Best Regards,
+Jaehoon Chung
 
-Signed-off-by: Markos Chandras <markos.chandras@imgtec.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>
----
-The patch is based on Chris Ball's mmc-next branch
-
- drivers/mmc/host/dw_mmc.c |   33 ++++++++++++++++++++++++---------
- 1 files changed, 24 insertions(+), 9 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 4e7a5c8..d3f68d4 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1191,12 +1191,15 @@ static void dw_mci_pull_final_bytes(struct dw_mci *host, void *buf, int cnt)
- 
- static void dw_mci_push_data16(struct dw_mci *host, void *buf, int cnt)
- {
-+	struct mmc_data *data = host->data;
-+	int init_cnt = cnt;
-+
- 	/* try and push anything in the part_buf */
- 	if (unlikely(host->part_buf_count)) {
- 		int len = dw_mci_push_part_bytes(host, buf, cnt);
- 		buf += len;
- 		cnt -= len;
--		if (!sg_next(host->sg) || host->part_buf_count == 2) {
-+		if (host->part_buf_count == 2) {
- 			mci_writew(host, DATA(host->data_offset),
- 					host->part_buf16);
- 			host->part_buf_count = 0;
-@@ -1229,9 +1232,11 @@ static void dw_mci_push_data16(struct dw_mci *host, void *buf, int cnt)
- 	/* put anything remaining in the part_buf */
- 	if (cnt) {
- 		dw_mci_set_part_bytes(host, buf, cnt);
--		if (!sg_next(host->sg))
-+		 /* Push data if we have reached the expected data length */
-+		if ((data->bytes_xfered + init_cnt) ==
-+		    (data->blksz * data->blocks))
- 			mci_writew(host, DATA(host->data_offset),
--					host->part_buf16);
-+				   host->part_buf16);
- 	}
- }
- 
-@@ -1269,12 +1274,15 @@ static void dw_mci_pull_data16(struct dw_mci *host, void *buf, int cnt)
- 
- static void dw_mci_push_data32(struct dw_mci *host, void *buf, int cnt)
- {
-+	struct mmc_data *data = host->data;
-+	int init_cnt = cnt;
-+
- 	/* try and push anything in the part_buf */
- 	if (unlikely(host->part_buf_count)) {
- 		int len = dw_mci_push_part_bytes(host, buf, cnt);
- 		buf += len;
- 		cnt -= len;
--		if (!sg_next(host->sg) || host->part_buf_count == 4) {
-+		if (host->part_buf_count == 4) {
- 			mci_writel(host, DATA(host->data_offset),
- 					host->part_buf32);
- 			host->part_buf_count = 0;
-@@ -1307,9 +1315,11 @@ static void dw_mci_push_data32(struct dw_mci *host, void *buf, int cnt)
- 	/* put anything remaining in the part_buf */
- 	if (cnt) {
- 		dw_mci_set_part_bytes(host, buf, cnt);
--		if (!sg_next(host->sg))
-+		 /* Push data if we have reached the expected data length */
-+		if ((data->bytes_xfered + init_cnt) ==
-+		    (data->blksz * data->blocks))
- 			mci_writel(host, DATA(host->data_offset),
--						host->part_buf32);
-+				   host->part_buf32);
- 	}
- }
- 
-@@ -1347,12 +1357,15 @@ static void dw_mci_pull_data32(struct dw_mci *host, void *buf, int cnt)
- 
- static void dw_mci_push_data64(struct dw_mci *host, void *buf, int cnt)
- {
-+	struct mmc_data *data = host->data;
-+	int init_cnt = cnt;
-+
- 	/* try and push anything in the part_buf */
- 	if (unlikely(host->part_buf_count)) {
- 		int len = dw_mci_push_part_bytes(host, buf, cnt);
- 		buf += len;
- 		cnt -= len;
--		if (!sg_next(host->sg) || host->part_buf_count == 8) {
-+		if (host->part_buf_count == 8) {
- 			mci_writew(host, DATA(host->data_offset),
- 					host->part_buf);
- 			host->part_buf_count = 0;
-@@ -1385,9 +1398,11 @@ static void dw_mci_push_data64(struct dw_mci *host, void *buf, int cnt)
- 	/* put anything remaining in the part_buf */
- 	if (cnt) {
- 		dw_mci_set_part_bytes(host, buf, cnt);
--		if (!sg_next(host->sg))
-+		/* Push data if we have reached the expected data length */
-+		if ((data->bytes_xfered + init_cnt) ==
-+		    (data->blksz * data->blocks))
- 			mci_writeq(host, DATA(host->data_offset),
--					host->part_buf);
-+				   host->part_buf);
- 	}
- }
- 
--- 
-1.7.1
-
-
+On 03/12/2013 07:43 PM, James Hogan wrote:
+> Call the setpower platform callback in response to set_ios with
+> ios->power_mode == MMC_POWER_UP or MMC_POWER_OFF, instead of from the
+> card detect work function.
+> 
+> This appears to fix a problem I have where a card stuck in a funny state
+> doesn't get properly cleared by the power being turned off, presumably
+> due to lack of power sequencing. This resulted in the following log
+> messages after boot:
+> 
+> mmc0: error -110 whilst initialising SD card
+> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
+> mmc0: error -110 whilst initialising SD card
+> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 200000Hz, actual 199680HZ div = 250)
+> mmc0: error -110 whilst initialising SD card
+> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 195765Hz, actual 195764HZ div = 255)
+> mmc0: error -110 whilst initialising SD card
+> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 400000Hz, actual 399360HZ div = 125)
+> mmc0: error -110 whilst initialising SD card
+> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
+> 
+> Signed-off-by: James Hogan <james.hogan@imgtec.com>
+> Cc: Seungwon Jeon <tgih.jun@samsung.com>
+> Cc: Jaehoon Chung <jh80.chung@samsung.com>
+> Cc: Chris Ball <cjb@laptop.org>
+> ---
+>  drivers/mmc/host/dw_mmc.c | 16 ++++++++--------
+>  1 file changed, 8 insertions(+), 8 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 60063cc..1a42c7c 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -818,6 +818,14 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	switch (ios->power_mode) {
+>  	case MMC_POWER_UP:
+>  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+> +		/* Power up slot */
+> +		if (slot->host->pdata->setpower)
+> +			slot->host->pdata->setpower(slot->id, mmc->ocr_avail);
+> +		break;
+> +	case MMC_POWER_OFF:
+> +		/* Power down slot */
+> +		if (slot->host->pdata->setpower)
+> +			slot->host->pdata->setpower(slot->id, 0);
+>  		break;
+>  	default:
+>  		break;
+> @@ -1674,10 +1682,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
+>  			dev_dbg(&slot->mmc->class_dev, "card %s\n",
+>  				present ? "inserted" : "removed");
+>  
+> -			/* Power up slot (before spin_lock, may sleep) */
+> -			if (present != 0 && host->pdata->setpower)
+> -				host->pdata->setpower(slot->id, mmc->ocr_avail);
+> -
+>  			spin_lock_bh(&host->lock);
+>  
+>  			/* Card change detected */
+> @@ -1760,10 +1764,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
+>  
+>  			spin_unlock_bh(&host->lock);
+>  
+> -			/* Power down slot (after spin_unlock, may sleep) */
+> -			if (present == 0 && host->pdata->setpower)
+> -				host->pdata->setpower(slot->id, 0);
+> -
+>  			present = dw_mci_get_cd(mmc);
+>  		}
+>  
+> 
