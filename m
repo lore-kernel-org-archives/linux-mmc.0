@@ -1,23 +1,21 @@
 From: Markos Chandras <markos.chandras@imgtec.com>
-Subject: [PATCH 1/3] dw_mmc: Don't loop when handling an interrupt
-Date: Tue, 12 Mar 2013 10:53:11 +0000
-Message-ID: <1363085593-22214-1-git-send-email-markos.chandras@imgtec.com>
+Subject: [PATCH 2/3] dw_mmc: Avoid adding the number of transmitted bytes twice
+Date: Tue, 12 Mar 2013 10:53:12 +0000
+Message-ID: <1363085593-22214-2-git-send-email-markos.chandras@imgtec.com>
+References: <1363085593-22214-1-git-send-email-markos.chandras@imgtec.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from multi.imgtec.com ([194.200.65.239]:43982 "EHLO multi.imgtec.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753933Ab3CLKzG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 12 Mar 2013 06:55:06 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1363085593-22214-1-git-send-email-markos.chandras@imgtec.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, Markos Chandras <markos.chandras@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>
+List-Id: linux-mmc@vger.kernel.org
 
-There is no reason to loop when handling an interrupt. The "if" clauses
-will handle all of them sequentially. This also eliminates the extra loop
-we used to take with no pending interrupts and we ended up breaking out
-of the while loop.
+Previously, it was possible to add either 0 bytes or add nbytes
+twice if we broke out of the outer loop and then carry on to the
+"done" label. This is now fixed by adding the transferred bytes
+right after the pull/pop operation
 
 Signed-off-by: Markos Chandras <markos.chandras@imgtec.com>
 Cc: Seungwon Jeon <tgih.jun@samsung.com>
@@ -26,48 +24,82 @@ Cc: Chris Ball <cjb@laptop.org>
 ---
 The patch is based on Chris Ball's mmc-next branch
 
- drivers/mmc/host/dw_mmc.c |   11 ++++-------
- 1 files changed, 4 insertions(+), 7 deletions(-)
+ drivers/mmc/host/dw_mmc.c |   12 ++++--------
+ 1 files changed, 4 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 60063cc..78c7251 100644
+index 78c7251..4e7a5c8 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -1563,11 +1563,11 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- {
- 	struct dw_mci *host = dev_id;
- 	u32 pending;
--	unsigned int pass_count = 0;
- 	int i;
+@@ -1446,7 +1446,7 @@ static void dw_mci_read_data_pio(struct dw_mci *host)
+ 	struct mmc_data	*data = host->data;
+ 	int shift = host->data_shift;
+ 	u32 status;
+-	unsigned int nbytes = 0, len;
++	unsigned int len;
+ 	unsigned int remain, fcnt;
  
--	do {
--		pending = mci_readl(host, MINTSTS); /* read-only mask reg */
-+	pending = mci_readl(host, MINTSTS); /* read-only mask reg */
-+
-+	if (pending) {
+ 	do {
+@@ -1465,8 +1465,8 @@ static void dw_mci_read_data_pio(struct dw_mci *host)
+ 			if (!len)
+ 				break;
+ 			dw_mci_pull_data(host, (void *)(buf + offset), len);
++			data->bytes_xfered += len;
+ 			offset += len;
+-			nbytes += len;
+ 			remain -= len;
+ 		} while (remain);
  
- 		/*
- 		 * DTO fix - version 2.10a and below, and only if internal DMA
-@@ -1579,9 +1579,6 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 				pending |= SDMMC_INT_DATA_OVER;
- 		}
+@@ -1474,7 +1474,6 @@ static void dw_mci_read_data_pio(struct dw_mci *host)
+ 		status = mci_readl(host, MINTSTS);
+ 		mci_writel(host, RINTSTS, SDMMC_INT_RXDR);
+ 	} while (status & SDMMC_INT_RXDR); /*if the RXDR is ready read again*/
+-	data->bytes_xfered += nbytes;
  
--		if (!pending)
--			break;
--
- 		if (pending & DW_MCI_CMD_ERROR_FLAGS) {
- 			mci_writel(host, RINTSTS, DW_MCI_CMD_ERROR_FLAGS);
- 			host->cmd_status = pending;
-@@ -1642,7 +1639,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 			}
- 		}
+ 	if (!remain) {
+ 		if (!sg_miter_next(sg_miter))
+@@ -1485,7 +1484,6 @@ static void dw_mci_read_data_pio(struct dw_mci *host)
+ 	return;
  
--	} while (pass_count++ < 5);
-+	}
+ done:
+-	data->bytes_xfered += nbytes;
+ 	sg_miter_stop(sg_miter);
+ 	host->sg = NULL;
+ 	smp_wmb();
+@@ -1500,7 +1498,7 @@ static void dw_mci_write_data_pio(struct dw_mci *host)
+ 	struct mmc_data	*data = host->data;
+ 	int shift = host->data_shift;
+ 	u32 status;
+-	unsigned int nbytes = 0, len;
++	unsigned int len;
+ 	unsigned int fifo_depth = host->fifo_depth;
+ 	unsigned int remain, fcnt;
  
- #ifdef CONFIG_MMC_DW_IDMAC
- 	/* Handle DMA interrupts */
+@@ -1521,8 +1519,8 @@ static void dw_mci_write_data_pio(struct dw_mci *host)
+ 			if (!len)
+ 				break;
+ 			host->push_data(host, (void *)(buf + offset), len);
++			data->bytes_xfered += len;
+ 			offset += len;
+-			nbytes += len;
+ 			remain -= len;
+ 		} while (remain);
+ 
+@@ -1530,7 +1528,6 @@ static void dw_mci_write_data_pio(struct dw_mci *host)
+ 		status = mci_readl(host, MINTSTS);
+ 		mci_writel(host, RINTSTS, SDMMC_INT_TXDR);
+ 	} while (status & SDMMC_INT_TXDR); /* if TXDR write again */
+-	data->bytes_xfered += nbytes;
+ 
+ 	if (!remain) {
+ 		if (!sg_miter_next(sg_miter))
+@@ -1541,7 +1538,6 @@ static void dw_mci_write_data_pio(struct dw_mci *host)
+ 	return;
+ 
+ done:
+-	data->bytes_xfered += nbytes;
+ 	sg_miter_stop(sg_miter);
+ 	host->sg = NULL;
+ 	smp_wmb();
 -- 
 1.7.1
-
-
