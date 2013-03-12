@@ -1,42 +1,38 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: FW: Regulator API ignored return values
-Date: Tue, 12 Mar 2013 10:30:55 -0400
-Message-ID: <87y5dsheqo.fsf@octavius.laptop.org>
-References: <25B60CDC2F704E4E9D88FFD52780CB4C0BDEB0547F@SC-VEXCH1.marvell.com>
-	<CADz5_g+KfxL43BKKsgZZ3Xg4sZWE4-ZaFpFhphKrfj9yK59-XA@mail.gmail.com>
-	<201303121403.09315.arnd@arndb.de>
+From: Sachin Kamat <sachin.kamat@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: dw_mmc: Make dw_mci_exynos_probe static
+Date: Tue, 12 Mar 2013 20:22:11 +0530
+Message-ID: <CAK9yfHwT5scTmgRF7dwGf2syyHj=N4ipMfFgcOs=W6Rd1eUU+g@mail.gmail.com>
+References: <1361177589-23953-1-git-send-email-sachin.kamat@linaro.org>
+	<8738w0ixc8.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:37096 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754061Ab3CLObQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 12 Mar 2013 10:31:16 -0400
-In-Reply-To: <201303121403.09315.arnd@arndb.de> (Arnd Bergmann's message of
-	"Tue, 12 Mar 2013 14:03:09 +0000")
+Received: from mail-oa0-f42.google.com ([209.85.219.42]:33757 "EHLO
+	mail-oa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932086Ab3CLOwM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Mar 2013 10:52:12 -0400
+Received: by mail-oa0-f42.google.com with SMTP id i18so5873126oag.15
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Mar 2013 07:52:11 -0700 (PDT)
+In-Reply-To: <8738w0ixc8.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Kevin Liu <keyuan.liu@gmail.com>, "linux-kernel@vger.kernel.org List" <linux-kernel@vger.kernel.org>, Stephen Warren <swarren@wwwdotorg.org>, linux-arm-kernel@lists.infradead.org, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linus Walleij <linus.walleij@linaro.org>, Axel Lin <axel.lin@ingics.com>, Jingoo Han <jg1.han@samsung.com>, Felipe Balbi <balbi@ti.com>, Dmitry Torokhov <dtor@mail.ru>, linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-Hi,
-
-On Tue, Mar 12 2013, Arnd Bergmann wrote:
->> Need add regulator_put here since regulator_get has succeed?
+>> -int dw_mci_exynos_probe(struct platform_device *pdev)
+>> +static int dw_mci_exynos_probe(struct platform_device *pdev)
+>>  {
+>>       const struct dw_mci_drv_data *drv_data;
+>>       const struct of_device_id *match;
 >
-> Hmm, we still don't actually bail out if the error is encountered, so
-> the reference count is balanced with the current patch, but I maybe
-> a failed regulator_enable() should actually be a fatal error?
+> Thanks, pushed to mmc-next for 3.10.
 
-The reason I didn't make it a fatal error is that this is just vqmmc
-(responsible for moving from 3.3V to 1.8V for UHS modes), not the
-main vmmc regulator.  We can just disable those UHS modes from the
-capabilities on the host if vqmmc is missing, or failed to enable,
-or doesn't support those voltages, and that's what the code does now.
+Thanks Chris.
 
-Thanks,
+There is also another patch in this series [1] that needs your attention.
+[1] https://patchwork.kernel.org/patch/2156621/
 
-- Chris.
+
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+With warm regards,
+Sachin
