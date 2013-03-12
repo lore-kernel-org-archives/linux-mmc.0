@@ -1,48 +1,89 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: Make dw_mci_exynos_probe static
-Date: Tue, 12 Mar 2013 14:52:54 +0530
-Message-ID: <CAK9yfHx=MpF2nCk+5B_uf=A92gM3GoniPeUm578xpVwB_Nz5mw@mail.gmail.com>
-References: <1361177589-23953-1-git-send-email-sachin.kamat@linaro.org>
-	<5121F74E.5050903@samsung.com>
-	<001501ce0dc5$f470bab0$dd523010$%jun@samsung.com>
-	<CAK9yfHxwsXHg74_m3qS-ukZuCAnD8Fe9Qy7mH-etHsW7ZFa1GA@mail.gmail.com>
+From: James Hogan <james.hogan@imgtec.com>
+Subject: [PATCH] mmc: dw_mmc: setpower on MMC_POWER_{UP,OFF}
+Date: Tue, 12 Mar 2013 10:43:32 +0000
+Message-ID: <1363085012-9220-1-git-send-email-james.hogan@imgtec.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f49.google.com ([209.85.219.49]:50264 "EHLO
-	mail-oa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754756Ab3CLJWz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Mar 2013 05:22:55 -0400
-Received: by mail-oa0-f49.google.com with SMTP id j6so5565146oag.36
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Mar 2013 02:22:54 -0700 (PDT)
-In-Reply-To: <CAK9yfHxwsXHg74_m3qS-ukZuCAnD8Fe9Qy7mH-etHsW7ZFa1GA@mail.gmail.com>
+Received: from multi.imgtec.com ([194.200.65.239]:42786 "EHLO multi.imgtec.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751825Ab3CLKn4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 12 Mar 2013 06:43:56 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, James Hogan <james.hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>
 
-On 4 March 2013 10:06, Sachin Kamat <sachin.kamat@linaro.org> wrote:
-> Hi Chris,
->
-> On 18 February 2013 16:21, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> Hi Sachin,
->>
->> You're right.
->> 'dw_mci_exynos_probe' is only used here.
->>
->> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
->>
->> On Monday, February 18, 2013, Jaehoon Chung wrote:
->>> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
->>>
->>> On 02/18/2013 05:53 PM, Sachin Kamat wrote:
->>> > Silences the following sparse warning:
->>> > drivers/mmc/host/dw_mmc-exynos.c:218:5: warning:
->>> > symbol 'dw_mci_exynos_probe' was not declared. Should it be static?
->>> >
->>> > Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
->
-> Can you please review this series?
->
+Call the setpower platform callback in response to set_ios with
+ios->power_mode == MMC_POWER_UP or MMC_POWER_OFF, instead of from the
+card detect work function.
 
-ping Chris.
+This appears to fix a problem I have where a card stuck in a funny state
+doesn't get properly cleared by the power being turned off, presumably
+due to lack of power sequencing. This resulted in the following log
+messages after boot:
+
+mmc0: error -110 whilst initialising SD card
+mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
+mmc0: error -110 whilst initialising SD card
+mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 200000Hz, actual 199680HZ div = 250)
+mmc0: error -110 whilst initialising SD card
+mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 195765Hz, actual 195764HZ div = 255)
+mmc0: error -110 whilst initialising SD card
+mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 400000Hz, actual 399360HZ div = 125)
+mmc0: error -110 whilst initialising SD card
+mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
+
+Signed-off-by: James Hogan <james.hogan@imgtec.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>
+---
+ drivers/mmc/host/dw_mmc.c | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 60063cc..1a42c7c 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -818,6 +818,14 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_UP:
+ 		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
++		/* Power up slot */
++		if (slot->host->pdata->setpower)
++			slot->host->pdata->setpower(slot->id, mmc->ocr_avail);
++		break;
++	case MMC_POWER_OFF:
++		/* Power down slot */
++		if (slot->host->pdata->setpower)
++			slot->host->pdata->setpower(slot->id, 0);
+ 		break;
+ 	default:
+ 		break;
+@@ -1674,10 +1682,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
+ 			dev_dbg(&slot->mmc->class_dev, "card %s\n",
+ 				present ? "inserted" : "removed");
+ 
+-			/* Power up slot (before spin_lock, may sleep) */
+-			if (present != 0 && host->pdata->setpower)
+-				host->pdata->setpower(slot->id, mmc->ocr_avail);
+-
+ 			spin_lock_bh(&host->lock);
+ 
+ 			/* Card change detected */
+@@ -1760,10 +1764,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
+ 
+ 			spin_unlock_bh(&host->lock);
+ 
+-			/* Power down slot (after spin_unlock, may sleep) */
+-			if (present == 0 && host->pdata->setpower)
+-				host->pdata->setpower(slot->id, 0);
+-
+ 			present = dw_mci_get_cd(mmc);
+ 		}
+ 
+-- 
+1.8.1.2
+
+
