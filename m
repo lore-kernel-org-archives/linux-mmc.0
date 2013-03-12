@@ -1,38 +1,38 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: [PATCH 1/3] mmc: sdhci_pltfm: Constify sdhci_pltfm_data
-Date: Tue, 12 Mar 2013 12:15:59 -0600
-Message-ID: <513F70DF.2000708@wwwdotorg.org>
-References: <1363085580-3690-1-git-send-email-lars@metafoo.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Silviu-Mihai Popescu <silviupopescu1990@gmail.com>
+Subject: [PATCH] mmc: host: use resource_size()
+Date: Tue, 12 Mar 2013 20:21:26 +0200
+Message-ID: <1363112486-2543-1-git-send-email-silviupopescu1990@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:41768 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933238Ab3CLSQF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Mar 2013 14:16:05 -0400
-In-Reply-To: <1363085580-3690-1-git-send-email-lars@metafoo.de>
+Received: from mail-we0-f177.google.com ([74.125.82.177]:63395 "EHLO
+	mail-we0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932456Ab3CLSVd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Mar 2013 14:21:33 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lars-Peter Clausen <lars@metafoo.de>
-Cc: Chris Ball <cjb@laptop.org>, Anton Vorontsov <avorontsov@ru.mvista.com>, Viresh Kumar <viresh.linux@gmail.com>, Mike Rapoport <mike@compulab.co.il>, Shawn Guo <shawn.guo@linaro.org>, Albert Herranz <albert_herranz@yahoo.es>, Kevin Liu <kliu5@marvell.com>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, yunhong.jiang@intel.com, sheng@linux.intel.com, mikechan@google.com, xiaohui.xin@intel.com, jun.nakajima@intel.com, linux-kernel@vger.kernel.org, Silviu-Mihai Popescu <silviupopescu1990@gmail.com>
 
-On 03/12/2013 04:52 AM, Lars-Peter Clausen wrote:
-> The sdhci_pltfm_data struct is never modified within the sdhci_pltfm module. So
-> make the pdata parameter to sdhci_pltfm_init and sdhci_pltfm_register const.
-> This allows drivers to declare their sdhci_pltfm_data struct as const.
-> 
-> This patch also makes the sdhci_pltfm_data declarations const where possible.
+Use resource_size() instead of explicit calculation. This was found via
+make coccicheck.
 
-> No changes since the last submission, just rebased onto of the latest mmc-next
+Signed-off-by: Silviu-Mihai Popescu <silviupopescu1990@gmail.com>
+---
+ drivers/mmc/host/android-goldfish.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+diff --git a/drivers/mmc/host/android-goldfish.c b/drivers/mmc/host/android-goldfish.c
+index ef3aef0..7780c14 100644
+--- a/drivers/mmc/host/android-goldfish.c
++++ b/drivers/mmc/host/android-goldfish.c
+@@ -476,7 +476,7 @@ static int goldfish_mmc_probe(struct platform_device *pdev)
+ 	host->mmc = mmc;
+ 
+ 	pr_err("mmc: Mapping %lX to %lX\n", (long)res->start, (long)res->end);
+-	host->reg_base = ioremap(res->start, res->end - res->start + 1);
++	host->reg_base = ioremap(res->start, resource_size(res));
+ 	if (host->reg_base == NULL) {
+ 		ret = -ENOMEM;
+ 		goto ioremap_failed;
+-- 
+1.7.9.5
 
-> -static struct sdhci_pltfm_data sdhci_tegra20_pdata = {
-> +static const struct sdhci_pltfm_data sdhci_tegra20_pdata = {
-
-> -static struct sdhci_pltfm_data sdhci_tegra30_pdata = {
-> +static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
-
-Commit 5ebf255 "mmc: sdhci-tegra: add basic support for Tegra114"
-recently added sdhci_tegra114_pdata, which would need the same treatment.
