@@ -1,53 +1,84 @@
-From: Tony Prisk <linux@prisktech.co.nz>
-Subject: Re: [PATCH -next] mmc: wmt-sdmmc: remove unused variable in
- wmt_complete_data_request()
-Date: Tue, 12 Mar 2013 17:03:48 +1300
-Message-ID: <1363061028.23051.1.camel@gitbox>
-References: <CAPgLHd-7nVD3=83wpNtw1cBmkr+xs5iD7tuxZM+PdxWPLtwZsQ@mail.gmail.com>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: FW: Regulator API ignored return values
+Date: Tue, 12 Mar 2013 12:15:14 +0800
+Message-ID: <CADz5_g+KfxL43BKKsgZZ3Xg4sZWE4-ZaFpFhphKrfj9yK59-XA@mail.gmail.com>
+References: <25B60CDC2F704E4E9D88FFD52780CB4C0BDEB0547F@SC-VEXCH1.marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from server.prisktech.co.nz ([115.188.14.127]:59731 "EHLO
-	server.prisktech.co.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752342Ab3CLEDh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Mar 2013 00:03:37 -0400
-In-Reply-To: <CAPgLHd-7nVD3=83wpNtw1cBmkr+xs5iD7tuxZM+PdxWPLtwZsQ@mail.gmail.com>
+Received: from mail-ob0-f180.google.com ([209.85.214.180]:55211 "EHLO
+	mail-ob0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750997Ab3CLEPP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Mar 2013 00:15:15 -0400
+In-Reply-To: <25B60CDC2F704E4E9D88FFD52780CB4C0BDEB0547F@SC-VEXCH1.marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wei Yongjun <weiyj.lk@gmail.com>
-Cc: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, yongjun_wei@trendmicro.com.cn, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, "linux-kernel@vger.kernel.org List" <linux-kernel@vger.kernel.org>, Stephen Warren <swarren@wwwdotorg.org>, linux-arm-kernel@lists.infradead.org, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linus Walleij <linus.walleij@linaro.org>, Axel Lin <axel.lin@ingics.com>, Jingoo Han <jg1.han@samsung.com>, Felipe Balbi <balbi@ti.com>, Dmitry Torokhov <dtor@mail.ru>, linux-mmc@vger.kernel.org
 
-On Mon, 2013-03-11 at 22:36 +0800, Wei Yongjun wrote:
-> From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
-> 
-> The variable 'mmc' is initialized but never used
-> otherwise, so remove the unused variable.
-> 
-> Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chris Ball
+> Sent: Tuesday, March 12, 2013 5:56 AM
+> To: Arnd Bergmann
+> Cc: linux-kernel@vger.kernel.org; Stephen Warren; linux-arm-kernel@lists.infradead.org; Mark Brown; Linus Walleij; Axel Lin; Jingoo Han; Felipe Balbi; Dmitry Torokhov; linux-mmc@vger.kernel.org
+> Subject: Re: Regulator API ignored return values
+>
+> Hi,
+>
+> On Mon, Mar 11 2013, Arnd Bergmann wrote:
+>> ==> build/dove_defconfig/faillog <==
+>> /git/arm-soc/drivers/mmc/host/sdhci.c: In function 'sdhci_add_host':
+>> /git/arm-soc/drivers/mmc/host/sdhci.c:2910:19: warning: ignoring
+>> return value of 'regulator_enable', declared with attribute
+>> warn_unused_result [-Wunused-result]
+>
+> Thanks, this looks like the right fix to me:
+>
+>
+> Subject: [PATCH] mmc: sdhci: Don't ignore regulator_enable() return value
+>
+> Fixes:
+> /git/arm-soc/drivers/mmc/host/sdhci.c: In function 'sdhci_add_host':
+> /git/arm-soc/drivers/mmc/host/sdhci.c:2910:19: warning: ignoring
+> return value of 'regulator_enable', declared with attribute
+> warn_unused_result [-Wunused-result]
+>
+> Reported-by: Arnd Bergmann <arnd@arndb.de>
+> Signed-off-by: Chris Ball <cjb@laptop.org>
 > ---
->  drivers/mmc/host/wmt-sdmmc.c | 2 --
->  1 file changed, 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-> index 154f0e8..41d5802 100644
-> --- a/drivers/mmc/host/wmt-sdmmc.c
-> +++ b/drivers/mmc/host/wmt-sdmmc.c
-> @@ -348,13 +348,11 @@ static void wmt_complete_data_request(struct wmt_mci_priv *priv)
->  
->  static irqreturn_t wmt_mci_dma_isr(int irq_num, void *data)
->  {
-> -	struct mmc_host *mmc;
->  	struct wmt_mci_priv *priv;
->  
->  	int status;
->  
->  	priv = (struct wmt_mci_priv *)data;
-> -	mmc = priv->mmc;
->  
->  	status = readl(priv->sdmmc_base + SDDMA_CCR) & 0x0F;
->  
-> 
+>  drivers/mmc/host/sdhci.c | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 51bbba4..fbf0b93 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2907,12 +2907,17 @@ int sdhci_add_host(struct sdhci_host *host)
+>                         host->vqmmc = NULL;
+>                 }
+>         } else {
+> -               regulator_enable(host->vqmmc);
+> +               ret = regulator_enable(host->vqmmc);
+>                 if (!regulator_is_supported_voltage(host->vqmmc, 1700000,
+>                         1950000))
+>                         caps[1] &= ~(SDHCI_SUPPORT_SDR104 |
+>                                         SDHCI_SUPPORT_SDR50 |
+>                                         SDHCI_SUPPORT_DDR50);
+> +               if (ret) {
+> +                       pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
+> +                               mmc_hostname(mmc), ret);
 
-Acked-by: Tony Prisk <linux@prisktech.co.nz>
+Need add regulator_put here since regulator_get has succeed?
 
+> +                       host->vqmmc = NULL;
+> +               }
+>         }
+>
+>         if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
