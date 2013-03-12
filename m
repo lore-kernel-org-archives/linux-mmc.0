@@ -1,47 +1,53 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pltfm: add calling mmc_of_parse in sdhci_pltfm_register
-Date: Tue, 12 Mar 2013 10:03:19 +0800
-Message-ID: <CADz5_g+u6wkvTgto1WOz+oo7jSdTqTJWrWqZ0sk5W1=Cq2ok2w@mail.gmail.com>
-References: <1362718371-5074-1-git-send-email-kliu5@marvell.com>
-	<513A479C.9010709@wwwdotorg.org>
-	<CADz5_gJXb85MPcrXer-13rJB7VYG=fuf28NpPVBif9tHUmAG-g@mail.gmail.com>
-	<513DFDF8.5090604@wwwdotorg.org>
+From: Tony Prisk <linux@prisktech.co.nz>
+Subject: Re: [PATCH -next] mmc: wmt-sdmmc: remove unused variable in
+ wmt_complete_data_request()
+Date: Tue, 12 Mar 2013 17:03:48 +1300
+Message-ID: <1363061028.23051.1.camel@gitbox>
+References: <CAPgLHd-7nVD3=83wpNtw1cBmkr+xs5iD7tuxZM+PdxWPLtwZsQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f170.google.com ([209.85.214.170]:40864 "EHLO
-	mail-ob0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753549Ab3CLCDU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Mar 2013 22:03:20 -0400
-Received: by mail-ob0-f170.google.com with SMTP id wc20so4080083obb.29
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Mar 2013 19:03:20 -0700 (PDT)
-In-Reply-To: <513DFDF8.5090604@wwwdotorg.org>
+Received: from server.prisktech.co.nz ([115.188.14.127]:59731 "EHLO
+	server.prisktech.co.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752342Ab3CLEDh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Mar 2013 00:03:37 -0400
+In-Reply-To: <CAPgLHd-7nVD3=83wpNtw1cBmkr+xs5iD7tuxZM+PdxWPLtwZsQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Kevin Liu <kliu5@marvell.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>
+To: Wei Yongjun <weiyj.lk@gmail.com>
+Cc: cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, yongjun_wei@trendmicro.com.cn, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
 
-2013/3/11 Stephen Warren <swarren@wwwdotorg.org>:
-> On 03/08/2013 09:27 PM, Kevin Liu wrote:
->> 2013/3/9 Stephen Warren <swarren@wwwdotorg.org>:
->>> On 03/07/2013 09:52 PM, Kevin Liu wrote:
->>>> commit 6c56e7a0 provide a function mmc_of_parse for standard MMC
->>>> device-tree binding parser centrally. So just call it with
->>>> sdhci_get_of_property together in sdhci_pltfm_register.
->>>
->>> BTW, this patch seems to do two unrelated things; firstly it changes the
->>> indentation level throughout sdhci_get_of_property(), and secondly makes
->>> the change described in the commit description.
->>
->> That's true. I originally want to do the first thing incidentally :-)
->> So do you want to split this patch into two?
->
-> It's Chris's call, but I think it'd be more usual to make this two
-> separate patches.
+On Mon, 2013-03-11 at 22:36 +0800, Wei Yongjun wrote:
+> From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+> 
+> The variable 'mmc' is initialized but never used
+> otherwise, so remove the unused variable.
+> 
+> Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+> ---
+>  drivers/mmc/host/wmt-sdmmc.c | 2 --
+>  1 file changed, 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+> index 154f0e8..41d5802 100644
+> --- a/drivers/mmc/host/wmt-sdmmc.c
+> +++ b/drivers/mmc/host/wmt-sdmmc.c
+> @@ -348,13 +348,11 @@ static void wmt_complete_data_request(struct wmt_mci_priv *priv)
+>  
+>  static irqreturn_t wmt_mci_dma_isr(int irq_num, void *data)
+>  {
+> -	struct mmc_host *mmc;
+>  	struct wmt_mci_priv *priv;
+>  
+>  	int status;
+>  
+>  	priv = (struct wmt_mci_priv *)data;
+> -	mmc = priv->mmc;
+>  
+>  	status = readl(priv->sdmmc_base + SDDMA_CCR) & 0x0F;
+>  
+> 
 
-Thanks for review!
-I have splited it into different patches as below:
-[PATCH v3 1/4] mmc: sdhci-pltfm: add calling mmc_of_parse in
-[PATCH 2/4] mmc: sdhci-pltfm: avoid indentation in
+Acked-by: Tony Prisk <linux@prisktech.co.nz>
 
-Kevin
