@@ -1,48 +1,71 @@
-From: Markos Chandras <Markos.Chandras@imgtec.com>
-Subject: Re: [PATCH 1/3] dw_mmc: Don't loop when handling an interrupt
-Date: Wed, 13 Mar 2013 14:27:52 +0000
-Message-ID: <51408CE8.70406@imgtec.com>
-References: <1363085593-22214-1-git-send-email-markos.chandras@imgtec.com> <002501ce1ff6$38e3c470$aaab4d50$%jun@samsung.com> <87a9q7fk9l.fsf@octavius.laptop.org>
+From: James Hogan <james.hogan@imgtec.com>
+Subject: Re: [PATCH] mmc: dw_mmc: setpower on MMC_POWER_{UP,OFF}
+Date: Wed, 13 Mar 2013 14:37:17 +0000
+Message-ID: <51408F1D.8010600@imgtec.com>
+References: <1363085012-9220-1-git-send-email-james.hogan@imgtec.com> <002301ce1ff5$e42f8090$ac8e81b0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset="EUC-KR"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from multi.imgtec.com ([194.200.65.239]:23762 "EHLO multi.imgtec.com"
+Received: from multi.imgtec.com ([194.200.65.239]:25019 "EHLO multi.imgtec.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932101Ab3CMO16 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 13 Mar 2013 10:27:58 -0400
-In-Reply-To: <87a9q7fk9l.fsf@octavius.laptop.org>
+	id S1751901Ab3CMOhg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 13 Mar 2013 10:37:36 -0400
+In-Reply-To: <002301ce1ff5$e42f8090$ac8e81b0$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 'Jaehoon Chung' <jh80.chung@samsung.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>
 
-On 03/13/2013 02:26 PM, Chris Ball wrote:
-> Hi,
->
-> On Wed, Mar 13 2013, Seungwon Jeon wrote:
->> On Tuesday, March 12, 2013, Markos Chandras wrote:
->>> There is no reason to loop when handling an interrupt. The "if" clauses
->>> will handle all of them sequentially. This also eliminates the extra loop
->>> we used to take with no pending interrupts and we ended up breaking out
->>> of the while loop.
->>>
->>> Signed-off-by: Markos Chandras <markos.chandras@imgtec.com>
->>> Cc: Seungwon Jeon <tgih.jun@samsung.com>
+On 13/03/13 14:20, Seungwon Jeon wrote:
+> Hi James,
+> 
+> On Tuesday, March 12, 2013, James Hogan wrote:
+>> Call the setpower platform callback in response to set_ios with
+>> ios->power_mode == MMC_POWER_UP or MMC_POWER_OFF, instead of from the
+>> card detect work function.
 >>
->> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+>> This appears to fix a problem I have where a card stuck in a funny state
+>> doesn't get properly cleared by the power being turned off, presumably
+>> due to lack of power sequencing. This resulted in the following log
+>> messages after boot:
 >>
->> You can add my ack to other patches.
->> However, could you change the subject prefix to 'mmc: dw_mmc' and resend?
->
-> It's okay, I'll take care of that when applying this time.  Thanks!
->
-> - Chris.
->
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 200000Hz, actual 199680HZ div = 250)
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 195765Hz, actual 195764HZ div = 255)
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 400000Hz, actual 399360HZ div = 125)
+>> mmc0: error -110 whilst initialising SD card
+>> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
+>>
+>> Signed-off-by: James Hogan <james.hogan@imgtec.com>
+>> Cc: Seungwon Jeon <tgih.jun@samsung.com>
+> 
+> This patch is reasonable.
+> I just want to know though.
+> I guess this problem is happened when card is inserted as soon as card is removed.
+> If not, could you explain your situation more?
 
-Hi Chris,
+Hi,
 
-Ok thank you
+It initially started happening after the patch by Yuvaraj CD ("mmc:
+dw_mmc: enable controller interrupt before calling mmc_start_host").
+Basically after hard resetting the board the card would be in a dodgy
+state, and I'd get these elusive errors after boot (see the above patch
+thread for details). It was specifically the position of the prink that
+it was sensitive to (I have a JTAG console turned on which adds big
+latencies to prinks, so it's clearly some kind of race). Unplugging the
+card cleared the problem, as did cutting the power to the card for a
+sufficient amount of time. While trying to debug the messages I saw
+these power callbacks and thought I'd try them as they seem like a much
+better place to control the card power, and seem to match other host
+drivers too, and it fixed the problem, I presume due to the intentional
+delays around those calls. It is of course possible that the race is
+just hiding again, but I think the patch is an improvement regardless.
 
-Markos
+Cheers
+James
 
