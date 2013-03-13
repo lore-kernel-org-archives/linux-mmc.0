@@ -1,108 +1,87 @@
-From: Johan Hovold <jhovold@gmail.com>
-Subject: [PATCH] ARM: at91/avr32/atmel-mci: fix DMA-channel leak on module unload
-Date: Wed, 13 Mar 2013 17:11:59 +0100
-Message-ID: <1363191119-4948-1-git-send-email-jhovold@gmail.com>
+From: Johan Rudholm <jrudholm@gmail.com>
+Subject: Trouble suspending with "mmc: queue: exclude asynchronous transfer
+ for special request"
+Date: Wed, 13 Mar 2013 17:40:18 +0100
+Message-ID: <CA+20K0Bzbg3m0TvgRgk8Fsuqdc1keqyGuY6y1-M8mp7chPR2+A@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f51.google.com ([209.85.215.51]:46958 "EHLO
-	mail-la0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932658Ab3CMQNU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Mar 2013 12:13:20 -0400
+Received: from mail-qc0-f175.google.com ([209.85.216.175]:60240 "EHLO
+	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755591Ab3CMQkS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Mar 2013 12:40:18 -0400
+Received: by mail-qc0-f175.google.com with SMTP id j3so551738qcs.20
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Mar 2013 09:40:18 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Ludovic Desroches <ludovic.desroches@atmel.com>
-Cc: Haavard Skinnemoen <hskinnemoen@gmail.com>, Hans-Christian Egtvedt <egtvedt@samfundet.no>, Nicolas Ferre <nicolas.ferre@atmel.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Johan Hovold <jhovold@gmail.com>, stable <stable@vger.kernel.org>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Konstantin Dorfman <kdorfman@codeaurora.org>, Chris Ball <cjb@laptop.org>
 
-Fix regression introduced by commit 796211b7953 ("mmc: atmel-mci: add
-pdc support and runtime capabilities detection") which removed the need
-for CONFIG_MMC_ATMELMCI_DMA but kept the Kconfig-entry as well as the
-compile guards around dma_release_channel() in remove(). Consequently,
-DMA is always enabled (if supported), but the DMA-channel is not
-released on module unload unless the DMA-config option is selected.
+Hi Seungwon,
 
-Remove the no longer used CONFIG_MMC_ATMELMCI_DMA option completely.
+we've just backported mmc-related patches from 3.9rc1 to our internal
+tree, and I'm seeing an issue with:
 
-Cc: stable <stable@vger.kernel.org>
-Signed-off-by: Johan Hovold <jhovold@gmail.com>
----
- arch/arm/configs/at91sam9g45_defconfig |  1 -
- arch/avr32/configs/favr-32_defconfig   |  1 -
- arch/avr32/configs/merisc_defconfig    |  1 -
- drivers/mmc/host/Kconfig               | 10 ----------
- drivers/mmc/host/atmel-mci.c           |  2 --
- 5 files changed, 15 deletions(-)
+369d321 mmc: queue: exclude asynchronous transfer for special request
 
-diff --git a/arch/arm/configs/at91sam9g45_defconfig b/arch/arm/configs/at91sam9g45_defconfig
-index 606d48f..8aab786 100644
---- a/arch/arm/configs/at91sam9g45_defconfig
-+++ b/arch/arm/configs/at91sam9g45_defconfig
-@@ -173,7 +173,6 @@ CONFIG_MMC=y
- # CONFIG_MMC_BLOCK_BOUNCE is not set
- CONFIG_SDIO_UART=m
- CONFIG_MMC_ATMELMCI=y
--CONFIG_MMC_ATMELMCI_DMA=y
- CONFIG_LEDS_ATMEL_PWM=y
- CONFIG_LEDS_GPIO=y
- CONFIG_LEDS_TRIGGER_TIMER=y
-diff --git a/arch/avr32/configs/favr-32_defconfig b/arch/avr32/configs/favr-32_defconfig
-index 0421498..9791820 100644
---- a/arch/avr32/configs/favr-32_defconfig
-+++ b/arch/avr32/configs/favr-32_defconfig
-@@ -122,7 +122,6 @@ CONFIG_USB_G_SERIAL=m
- CONFIG_USB_CDC_COMPOSITE=m
- CONFIG_MMC=y
- CONFIG_MMC_ATMELMCI=y
--CONFIG_MMC_ATMELMCI_DMA=y
- CONFIG_NEW_LEDS=y
- CONFIG_LEDS_CLASS=y
- CONFIG_LEDS_ATMEL_PWM=m
-diff --git a/arch/avr32/configs/merisc_defconfig b/arch/avr32/configs/merisc_defconfig
-index 3befab9..65de443 100644
---- a/arch/avr32/configs/merisc_defconfig
-+++ b/arch/avr32/configs/merisc_defconfig
-@@ -102,7 +102,6 @@ CONFIG_FRAMEBUFFER_CONSOLE=y
- CONFIG_LOGO=y
- CONFIG_MMC=y
- CONFIG_MMC_ATMELMCI=y
--CONFIG_MMC_ATMELMCI_DMA=y
- CONFIG_NEW_LEDS=y
- CONFIG_LEDS_CLASS=y
- CONFIG_LEDS_ATMEL_PWM=y
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 8d13c65..009dabd 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -292,16 +292,6 @@ config MMC_ATMELMCI
- 
- 	  If unsure, say N.
- 
--config MMC_ATMELMCI_DMA
--	bool "Atmel MCI DMA support"
--	depends on MMC_ATMELMCI && (AVR32 || ARCH_AT91SAM9G45) && DMA_ENGINE
--	help
--	  Say Y here to have the Atmel MCI driver use a DMA engine to
--	  do data transfers and thus increase the throughput and
--	  reduce the CPU utilization.
--
--	  If unsure, say N.
--
- config MMC_MSM
- 	tristate "Qualcomm SDCC Controller Support"
- 	depends on MMC && ARCH_MSM
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 722af1d..10f8b73 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -2487,10 +2487,8 @@ static int __exit atmci_remove(struct platform_device *pdev)
- 	atmci_readl(host, ATMCI_SR);
- 	clk_disable(host->mck);
- 
--#ifdef CONFIG_MMC_ATMELMCI_DMA
- 	if (host->dma.chan)
- 		dma_release_channel(host->dma.chan);
--#endif
- 
- 	free_irq(platform_get_irq(pdev, 0), host);
- 	iounmap(host->regs);
--- 
-1.8.1.5
+When the device is going into suspend, it seems that mmcqd still has
+claimed the host and so the 20s DPM device timeout happens, and we get
+a kernel BUG:
 
+[   42.049865] PM: Syncing filesystems ... done.
+[   42.058044] Freezing user space processes ... (elapsed 0.03 seconds) done.
+[   42.098937] Freezing remaining freezable tasks ... (elapsed 0.01
+seconds) done.
+[   42.118988] Suspending console(s) (use no_console_suspend to debug)
+[   42.129455] alarmtimer alarmtimer: Next rtc wakeup 2000.01.04 - 19:48:10
+[   42.155517] regulator regulator.24: VEXTSUPPLY3-disable (bank, reg,
+mask, value): 0x04, 0x08, 0x30, 0x00
+[   54.185241] **** DPM device timeout: sdi2 (mmci-pl18x)
+[   54.185241] dpm suspend stack:
+[   54.185302] [<c071276c>] (__schedule+0x310/0x624) from [<c0712bd0>]
+(schedule+0x40/0x80)
+[   54.185302] [<c0712bd0>] (schedule+0x40/0x80) from [<c0488774>]
+(__mmc_claim_host+0xa4/0x1a8)
+[   54.185333] [<c0488774>] (__mmc_claim_host+0xa4/0x1a8) from
+[<c048dd68>] (mmc_suspend+0x34/0x134)
+[   54.185363] [<c048dd68>] (mmc_suspend+0x34/0x134) from [<c048b688>]
+(mmc_suspend_host.part.20+0x98/0x1b0)
+[   54.185363] [<c048b688>] (mmc_suspend_host.part.20+0x98/0x1b0) from
+[<c048b7fc>] (mmc_suspend_host+0x5c/0x70)
+[   54.185394] [<c048b7fc>] (mmc_suspend_host+0x5c/0x70) from
+[<c049cce8>] (mmci_suspend+0x28/0x64)
+[   54.185424] [<c049cce8>] (mmci_suspend+0x28/0x64) from [<c0315d54>]
+(amba_pm_suspend+0x3c/0x68)
+[   54.185455] [<c0315d54>] (amba_pm_suspend+0x3c/0x68) from
+[<c0022b2c>] (ux500_pd_amba_pm_suspend+0x3c/0x50)
+[   54.185455] [<c0022b2c>] (ux500_pd_amba_pm_suspend+0x3c/0x50) from
+[<c0374a8c>] (dpm_run_callback+0x54/0x8c)
+[   54.185485] [<c0374a8c>] (dpm_run_callback+0x54/0x8c) from
+[<c0375c54>] (__device_suspend+0x174/0x3f0)
+[   54.185516] [<c0375c54>] (__device_suspend+0x174/0x3f0) from
+[<c03768a4>] (dpm_suspend+0x60/0x21c)
+[   54.185516] [<c03768a4>] (dpm_suspend+0x60/0x21c) from [<c0376bd4>]
+(dpm_suspend_start+0x68/0x70)
+[   54.185546] [<c0376bd4>] (dpm_suspend_start+0x68/0x70) from
+[<c007d424>] (suspend_devices_and_enter+0x70/0x20c)
+[   54.185546] [<c007d424>] (suspend_devices_and_enter+0x70/0x20c)
+from [<c007d66c>] (enter_state+0xac/0x184)
+[   54.185577] [<c007d66c>] (enter_state+0xac/0x184) from [<c007d768>]
+(pm_suspend+0x24/0x80)
+[   54.185607] [<c007d768>] (pm_suspend+0x24/0x80) from [<c007e774>]
+(suspend.part.2+0x44/0x174)
+[   54.185607] [<c007e774>] (suspend.part.2+0x44/0x174) from
+[<c007ea04>] (suspend+0x44/0x50)
+[   54.185638] [<c007ea04>] (suspend+0x44/0x50) from [<c0058280>]
+(process_one_work+0x138/0x4b0)
+[   54.185638] [<c0058280>] (process_one_work+0x138/0x4b0) from
+[<c0058748>] (worker_thread+0x150/0x37c)
+[   54.185668] [<c0058748>] (worker_thread+0x150/0x37c) from
+[<c005d768>] (kthread+0x98/0xa4)
+[   54.185699] [<c005d768>] (kthread+0x98/0xa4) from [<c00106a8>]
+(kernel_thread_exit+0x0/0x8)
+
+Do you have any idea what causes this? Please disregard the
+amba-stuff, this is our power domain.
+
+Kind regards, Johan
