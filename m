@@ -1,25 +1,49 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v4] mmc: dw_mmc: Add MSHC compatible for Exynos4412
-Date: Wed, 13 Mar 2013 23:17:30 +0900
-Message-ID: <002101ce1ff5$7f713fe0$7e53bfa0$%jun@samsung.com>
-References: <1361210793-5710-1-git-send-email-tobetter@gmail.com>
- <1361546283-7479-1-git-send-email-tobetter@gmail.com>
+Subject: RE: [PATCH] mmc: dw_mmc: setpower on MMC_POWER_{UP,OFF}
+Date: Wed, 13 Mar 2013 23:20:19 +0900
+Message-ID: <002301ce1ff5$e42f8090$ac8e81b0$%jun@samsung.com>
+References: <1363085012-9220-1-git-send-email-james.hogan@imgtec.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ks_c_5601-1987
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <1361546283-7479-1-git-send-email-tobetter@gmail.com>
+In-reply-to: <1363085012-9220-1-git-send-email-james.hogan@imgtec.com>
 Content-language: ko
 Sender: linux-kernel-owner@vger.kernel.org
-To: 'Dongjin Kim' <tobetter@gmail.com>
-Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Sachin Kamat' <sachin.kamat@linaro.org>, 'Chris Ball' <cjb@laptop.org>, 'Arnd Bergmann' <arnd@arndb.de>, 'Thomas Abraham' <thomas.abraham@linaro.org>, 'Will Newton' <will.newton@imgtec.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: 'James Hogan' <james.hogan@imgtec.com>, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Saturday, February 23, 2013, Dongjin Kim wrote:
-> This patch adds the compatible string for MSHC controller of Exynos4412.
-> And exynos5250_dwmmc_caps is renamed to exynos_dwmmc_caps, since it has the
-> capablities of common feature supported by Exynos4 and Exynos5.
+Hi James,
+
+On Tuesday, March 12, 2013, James Hogan wrote:
+> Call the setpower platform callback in response to set_ios with
+> ios->power_mode == MMC_POWER_UP or MMC_POWER_OFF, instead of from the
+> card detect work function.
 > 
+> This appears to fix a problem I have where a card stuck in a funny state
+> doesn't get properly cleared by the power being turned off, presumably
+> due to lack of power sequencing. This resulted in the following log
+> messages after boot:
+> 
+> mmc0: error -110 whilst initialising SD card
+> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
+> mmc0: error -110 whilst initialising SD card
+> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 200000Hz, actual 199680HZ div = 250)
+> mmc0: error -110 whilst initialising SD card
+> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 195765Hz, actual 195764HZ div = 255)
+> mmc0: error -110 whilst initialising SD card
+> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 400000Hz, actual 399360HZ div = 125)
+> mmc0: error -110 whilst initialising SD card
+> mmc_host mmc0: Bus speed (slot 0) = 99840000Hz (slot req 300000Hz, actual 298922HZ div = 167)
+> 
+> Signed-off-by: James Hogan <james.hogan@imgtec.com>
 > Cc: Seungwon Jeon <tgih.jun@samsung.com>
 
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+This patch is reasonable.
+I just want to know though.
+I guess this problem is happened when card is inserted as soon as card is removed.
+If not, could you explain your situation more?
+
+Thanks,
+Seungwon Jeon
