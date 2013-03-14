@@ -1,56 +1,54 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: block: fix the host's claim-release in special request
-Date: Thu, 14 Mar 2013 15:49:27 +0100
-Message-ID: <CAPDyKFo2dkEp4n3gcwKbJ0NB+G_zAiKwPLxsBaZXJFvqQ1JFiQ@mail.gmail.com>
-References: <001101ce207b$91e60440$b5b20cc0$%jun@samsung.com>
-	<CA+20K0DxMmq67gWR4igtdOMdO+h19JqbEMH1=Wsp1v9cKPKkZQ@mail.gmail.com>
+From: Anatolij Gustschin <agust@denx.de>
+Subject: Re: [PATCH] mmc: mxcmmc: DT support
+Date: Thu, 14 Mar 2013 16:50:48 +0100
+Message-ID: <20130314165048.08416241@crub>
+References: <1361816885-3033-1-git-send-email-mpa@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f173.google.com ([209.85.217.173]:42170 "EHLO
-	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756655Ab3CNOt3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Mar 2013 10:49:29 -0400
-Received: by mail-lb0-f173.google.com with SMTP id gf7so1926208lbb.4
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Mar 2013 07:49:27 -0700 (PDT)
-In-Reply-To: <CA+20K0DxMmq67gWR4igtdOMdO+h19JqbEMH1=Wsp1v9cKPKkZQ@mail.gmail.com>
+Received: from mail-out.m-online.net ([212.18.0.9]:56846 "EHLO
+	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932460Ab3CNPuv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Mar 2013 11:50:51 -0400
+In-Reply-To: <1361816885-3033-1-git-send-email-mpa@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <jrudholm@gmail.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Konstantin Dorfman <kdorfman@codeaurora.org>
+To: Markus Pargmann <mpa@pengutronix.de>
+Cc: cjb@laptop.org, rob.herring@calxeda.com, rob@landley.net, s.hauer@pengutronix.de, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de
 
-On 14 March 2013 12:56, Johan Rudholm <jrudholm@gmail.com> wrote:
-> Hi Seungwon,
->
-> 2013/3/14 Seungwon Jeon <tgih.jun@samsung.com>:
->> For normal request mmc_blk_issue_rq is called twice with asynchronous
->> transfer(cur and prev). Host's claim and release can be done in each
->> mmc_blk_issue_rq. However, Special request is currently excluded in
->> asynchronous transfer. After special request is finished, if there is
->> no new request, mmc_release_host won't be called in mmc_blk_issue_rq.
->> The problem is founded during mmc_suspend.
->>
->> [<c0541124>] (__schedule+0x0/0x78c) from [<c05419e8>] (schedule+0x38/0x78)
->> [<c05419b0>] (schedule+0x0/0x78) from [<c03a843c>] (__mmc_claim_host+0xac/0x1b4)
->> [<c03a8390>] (__mmc_claim_host+0x0/0x1b4) from [<c03ac98c>] (mmc_suspend+0x28/0x9c)
->> [<c03ac964>] (mmc_suspend+0x0/0x9c) from [<c03aad24>] (mmc_suspend_host+0xb4/0x194)
->> ...
->>
->> Reported-by: Johan Rudholm <jrudholm@gmail.com>
->> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->
-> Thank you for the quick response and fix! This fixes the problem. So
-> please include my
->
-> Tested-by: Johan Rudholm <johan.rudholm@stericsson.com>
->
-> Kind regards, Johan
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Mon, 25 Feb 2013 19:28:05 +0100
+Markus Pargmann <mpa@pengutronix.de> wrote:
 
-Chris, could you send this for the 3.9 rc, since it is a bugfix?
+> Adding devicetree support for imx21-mmc and imx31-mmc. Based on generic
+> gpio helper functions by Guennadi and generic DMA devicetree bindings.
+> 
+> Signed-off-by: Markus Pargmann <mpa@pengutronix.de>
+> ---
+>  .../devicetree/bindings/mmc/fsl-imx-mmc.txt        | 24 +++++++
+>  drivers/mmc/host/mxcmmc.c                          | 80 +++++++++++++++++-----
+>  2 files changed, 86 insertions(+), 18 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
+> new file mode 100644
+> index 0000000..a5ab662
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
+> @@ -0,0 +1,24 @@
+> +* Freescale Secure Digital Host Controller for i.MX1/2 series
 
-Kind regards
-Ulf Hansson
+shouldn't it be "... for i.MX2/3 series"?
+
+...
+> +	if (!host->pdata) {
+> +		host->dma = of_dma_request_slave_channel(pdev->dev.of_node,
+> +				"rx-tx");
+
+please use dma_request_slave_channel(&pdev->dev, "rx-tx")
+here. of_dma_request_slave_channel() is not exported for
+modules, building the driver as a module will fail.
+
+Thanks,
+
+Anatolij
