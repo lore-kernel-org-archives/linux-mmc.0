@@ -1,12 +1,14 @@
 From: Sergey Yanovich <ynvich@gmail.com>
-Subject: [PATCH] wait while adding MMC host to ensure root mounts
-Date: Thu, 14 Mar 2013 05:06:23 +0400
-Message-ID: <1363223183-3772-1-git-send-email-ynvich@gmail.com>
+Subject: [PATCH v2] wait while adding MMC host to ensure root mounts
+Date: Thu, 14 Mar 2013 05:23:13 +0400
+Message-ID: <1363224194-7366-1-git-send-email-ynvich@gmail.com>
+References: <1363223183-3772-1-git-send-email-ynvich@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:33810 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755649Ab3CNBGj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Mar 2013 21:06:39 -0400
+Received: from mail-we0-f169.google.com ([74.125.82.169]:49446 "EHLO
+	mail-we0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755679Ab3CNBXX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Mar 2013 21:23:23 -0400
+In-Reply-To: <1363223183-3772-1-git-send-email-ynvich@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
@@ -33,40 +35,17 @@ Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
 
 Signed-off-by: Sergey Yanovich <ynvich@gmail.com>
 ---
- drivers/base/dd.c       |    1 -
- drivers/mmc/core/core.c |    4 +++-
- 2 files changed, 3 insertions(+), 2 deletions(-)
+changes for v2:
+- removed exporting as symbol is in the same file
 
-diff --git a/drivers/base/dd.c b/drivers/base/dd.c
-index 218f1e6..61d3e1b 100644
---- a/drivers/base/dd.c
-+++ b/drivers/base/dd.c
-@@ -345,7 +345,6 @@ int driver_probe_done(void)
- void wait_for_device_probe(void)
- {
- 	/* wait for the known devices to complete their probing */
--
- 	wait_event(probe_waitqueue, atomic_read(&probe_count) == 0);
- 	async_synchronize_full();
- }
+ drivers/mmc/core/core.c |    1 +
+ 1 file changed, 1 insertion(+)
+
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index aaed768..9790323 100644
+index aaed768..7196888 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -91,10 +91,11 @@ static int mmc_schedule_delayed_work(struct delayed_work *work,
- /*
-  * Internal function. Flush all scheduled work from the MMC work queue.
-  */
--static void mmc_flush_scheduled_work(void)
-+void mmc_flush_scheduled_work(void)
- {
- 	flush_workqueue(workqueue);
- }
-+EXPORT_SYMBOL(mmc_flush_scheduled_work);
- 
- #ifdef CONFIG_FAIL_MMC_REQUEST
- 
-@@ -2225,6 +2226,7 @@ void mmc_start_host(struct mmc_host *host)
+@@ -2225,6 +2225,7 @@ void mmc_start_host(struct mmc_host *host)
  	host->rescan_disable = 0;
  	mmc_power_up(host);
  	mmc_detect_change(host, 0);
