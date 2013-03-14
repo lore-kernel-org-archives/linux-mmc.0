@@ -1,64 +1,55 @@
-From: Markus Pargmann <mpa@pengutronix.de>
-Subject: Re: [PATCH] mmc: mxcmmc: DT support
-Date: Thu, 14 Mar 2013 17:35:13 +0100
-Message-ID: <20130314163513.GF32452@pengutronix.de>
-References: <1361816885-3033-1-git-send-email-mpa@pengutronix.de>
- <20130314165048.08416241@crub>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+From: Anatolij Gustschin <agust@denx.de>
+Subject: [PATCH 2/5] mmc: mxcmmc: use slot-gpio API for write-protect detection
+Date: Thu, 14 Mar 2013 17:40:50 +0100
+Message-ID: <1363279254-22351-3-git-send-email-agust@denx.de>
+References: <1363279254-22351-1-git-send-email-agust@denx.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:53879 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932274Ab3CNQf0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Mar 2013 12:35:26 -0400
-Content-Disposition: inline
-In-Reply-To: <20130314165048.08416241@crub>
+Received: from mail-out.m-online.net ([212.18.0.9]:57776 "EHLO
+	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933724Ab3CNQlE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Mar 2013 12:41:04 -0400
+In-Reply-To: <1363279254-22351-1-git-send-email-agust@denx.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anatolij Gustschin <agust@denx.de>
-Cc: cjb@laptop.org, rob.herring@calxeda.com, rob@landley.net, s.hauer@pengutronix.de, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Markus Pargmann <mpa@pengutronix.de>, devicetree-discuss@lists.ozlabs.org, Anatolij Gustschin <agust@denx.de>
 
-On Thu, Mar 14, 2013 at 04:50:48PM +0100, Anatolij Gustschin wrote:
-> On Mon, 25 Feb 2013 19:28:05 +0100
-> Markus Pargmann <mpa@pengutronix.de> wrote:
-> 
-> > Adding devicetree support for imx21-mmc and imx31-mmc. Based on generic
-> > gpio helper functions by Guennadi and generic DMA devicetree bindings.
-> > 
-> > Signed-off-by: Markus Pargmann <mpa@pengutronix.de>
-> > ---
-> >  .../devicetree/bindings/mmc/fsl-imx-mmc.txt        | 24 +++++++
-> >  drivers/mmc/host/mxcmmc.c                          | 80 +++++++++++++++++-----
-> >  2 files changed, 86 insertions(+), 18 deletions(-)
-> >  create mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
-> > new file mode 100644
-> > index 0000000..a5ab662
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
-> > @@ -0,0 +1,24 @@
-> > +* Freescale Secure Digital Host Controller for i.MX1/2 series
-> 
-> shouldn't it be "... for i.MX2/3 series"?
-> 
-> ...
-> > +	if (!host->pdata) {
-> > +		host->dma = of_dma_request_slave_channel(pdev->dev.of_node,
-> > +				"rx-tx");
-> 
-> please use dma_request_slave_channel(&pdev->dev, "rx-tx")
-> here. of_dma_request_slave_channel() is not exported for
-> modules, building the driver as a module will fail.
+slot-gpio API suppors read-only detection when "wp-gpios"
+property is present in the device tree mmc node. Use this
+API for write-protect detection.
 
-Thank you, I changed both in version 2.
+Signed-off-by: Anatolij Gustschin <agust@denx.de>
+---
+ drivers/mmc/host/mxcmmc.c |    8 +++++---
+ 1 files changed, 5 insertions(+), 3 deletions(-)
 
-Regards,
-
-Markus
-
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index 562f4e6..dc25802 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -38,6 +38,7 @@
+ #include <linux/of_device.h>
+ #include <linux/of_dma.h>
+ #include <linux/of_gpio.h>
++#include <linux/mmc/slot-gpio.h>
+ 
+ #include <asm/dma.h>
+ #include <asm/irq.h>
+@@ -943,10 +944,11 @@ static int mxcmci_get_ro(struct mmc_host *mmc)
+ 	if (host->pdata && host->pdata->get_ro)
+ 		return !!host->pdata->get_ro(mmc_dev(mmc));
+ 	/*
+-	 * Board doesn't support read only detection; let the mmc core
+-	 * decide what to do.
++	 * If board doesn't support read only detection (no mmc_gpio
++	 * context or gpio is invalid), then let the mmc core decide
++	 * what to do.
+ 	 */
+-	return -ENOSYS;
++	return mmc_gpio_get_ro(mmc);
+ }
+ 
+ static void mxcmci_enable_sdio_irq(struct mmc_host *mmc, int enable)
 -- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+1.7.5.4
+
