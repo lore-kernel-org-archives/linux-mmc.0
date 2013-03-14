@@ -1,68 +1,33 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 1/5] mmc: mxcmmc: add mpc512x SDHC support
-Date: Thu, 14 Mar 2013 17:50:08 +0100
-Message-ID: <1589714.JH7YyAvXz1@wuerfel>
-References: <1363279254-22351-1-git-send-email-agust@denx.de> <1363279254-22351-2-git-send-email-agust@denx.de>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v8 1/3] mmc: core: enhance card removal judgement for slow removal
+Date: Thu, 14 Mar 2013 18:02:48 +0100
+Message-ID: <CACRpkdY+ieMLQvgNx3E9EAT8Xk+fFcbsPDDijUhOoiAsYMgEQQ@mail.gmail.com>
+References: <1362540542-28995-1-git-send-email-kliu5@marvell.com>
+	<1362540542-28995-2-git-send-email-kliu5@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:63943 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932320Ab3CNQuP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Mar 2013 12:50:15 -0400
-In-Reply-To: <1363279254-22351-2-git-send-email-agust@denx.de>
+Received: from mail-ia0-f173.google.com ([209.85.210.173]:35837 "EHLO
+	mail-ia0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754796Ab3CNRCs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Mar 2013 13:02:48 -0400
+Received: by mail-ia0-f173.google.com with SMTP id h37so2300425iak.32
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Mar 2013 10:02:48 -0700 (PDT)
+In-Reply-To: <1362540542-28995-2-git-send-email-kliu5@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anatolij Gustschin <agust@denx.de>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Markus Pargmann <mpa@pengutronix.de>, devicetree-discuss@lists.ozlabs.org
+To: Kevin Liu <kliu5@marvell.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, Aaron Lu <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wei WANG <wei_wang@realsil.com.cn>, Fabio Estevam <fabio.estevam@freescale.com>, Stephen Warren <swarren@wwwdotorg.org>, Adrian Hunter <adrian.hunter@intel.com>, Philip Rakity <prakity@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhangfei Gao <zhangfei.gao@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chao Xie <cxie4@marvell.com>, Kevin Liu <keyuan.liu@gmail.com>
 
-On Thursday 14 March 2013 17:40:49 Anatolij Gustschin wrote:
+On Wed, Mar 6, 2013 at 4:29 AM, Kevin Liu <kliu5@marvell.com> wrote:
 
-> +
-> +struct mxcmci_reg_ops mxcmci_reg_ops = {
-> +	.read_l = mpcmci_readl,
-> +	.write_l = mpcmci_writel,
-> +	.read_w = mpcmci_readw,
-> +	.write_w = mpcmci_writew,
-> +};
-> +#else
-> +struct mxcmci_reg_ops mxcmci_reg_ops;
-> +#endif
+> This patch add the card detect status check in function
+> _mmc_detect_card_removed if cmd13 check succeed and host->ops->get_cd
+> provided. If get_cd detect no card present then schedule another detect
+> work 200ms later.
 
-Should the struct be static?
+Tested-by: Linus Walleij <linus.walleij@linaro.org>
+(On the Nomadik)
 
-> +static inline u32 mxcmci_readl(struct mxcmci_host *host, int reg)
-> +{
-> +	if (host->reg_ops->read_l)
-> +		return host->reg_ops->read_l(host, reg);
-> +	else
-> +		return readl(host->base + reg);
-> +}
-
-This seems a bit strange. I would suggest you either use the ops structure
-all the time and provide an imx variant, or you make it completely
-compile-time selected.
-
-> @@ -1026,24 +1115,33 @@ static int mxcmci_probe(struct platform_device *pdev)
->  	host->res = r;
->  	host->irq = irq;
->  
-> -	host->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
-> -	if (IS_ERR(host->clk_ipg)) {
-> -		ret = PTR_ERR(host->clk_ipg);
-> -		goto out_iounmap;
-> -	}
-> +	if (!is_mpc512x_mmc(host)) {
-> +		host->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
-> +		if (IS_ERR(host->clk_ipg)) {
-> +			ret = PTR_ERR(host->clk_ipg);
-> +			goto out_iounmap;
-> +		}
-
-Does mpc512x have no clock management? I think it should still
-work without modifications if CONFIG_HAVE_CLK is disabled.
-In that case, devm_clk_get() will return NULL and we don't
-error out here.
-
-	Arnd
+Yours,
+Linus Walleij
