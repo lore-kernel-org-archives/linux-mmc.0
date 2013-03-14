@@ -1,37 +1,114 @@
-From: "Manjunathappa, Prakash" <prakash.pm@ti.com>
-Subject: RE: [PATCH v5 0/4] Add DT support for davinci_mmc driver
-Date: Thu, 14 Mar 2013 13:52:19 +0000
-Message-ID: <A73F36158E33644199EB82C5EC81C7BC3EA48F4D@DBDE01.ent.ti.com>
-References: <1363097637-11371-1-git-send-email-prakash.pm@ti.com>
- <5141BAA1.1070906@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Lucas Stach <l.stach@pengutronix.de>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: fix multiblock reads on i.MX53
+Date: Thu, 14 Mar 2013 15:43:45 +0100
+Message-ID: <1363272225-1304-1-git-send-email-l.stach@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:44530 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755858Ab3CNNwo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 14 Mar 2013 09:52:44 -0400
-In-Reply-To: <5141BAA1.1070906@ti.com>
-Content-Language: en-US
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:36499 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751089Ab3CNOoL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Mar 2013 10:44:11 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Nori, Sekhar" <nsekhar@ti.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "rob@landley.net" <rob@landley.net>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "hs@denx.de" <hs@denx.de>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "cjb@laptop.org" <cjb@laptop.org>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>
+To: linux-mmc@vger.kernel.org
+Cc: Shawn Guo <shawn.guo@linaro.org>, Chris Ball <cjb@laptop.org>, Lucas Stach <l.stach@pengutronix.de>
 
-T24gVGh1LCBNYXIgMTQsIDIwMTMgYXQgMTc6MjU6MTMsIE5vcmksIFNla2hhciB3cm90ZToNCj4g
-T24gMy8xMi8yMDEzIDc6NDMgUE0sIE1hbmp1bmF0aGFwcGEsIFByYWthc2ggd3JvdGU6DQo+ID4g
-UGF0Y2ggc2V0IGFkZHMgRFQgc3VwcG9ydCBmb3IgZGF2aW5jaV9tbWMgZHJpdmVyIGFuZCBpcw0K
-PiA+IHZlcmlmaWVkIG9uIGRhODUwLWV2bSB3aXRob3V0IGNhcmRfZGV0ZWN0L3dyaXRlX3Byb3Rl
-Y3QgYW5kDQo+ID4gRURNQSBzdXBwb3J0LiBBbHNvIHRha2VjYXJlIHRvIGRlcml2ZSBjb250cm9s
-bGVyIElQIHZlcnNpb24gZnJvbQ0KPiA+IHBsYXRmb3JtX2RldmljZV9pZCB0YWJsZSwgcmVtb3Zl
-IHZlcnNpb24gc3BlY2lmaWNhdGlvbiBpbiBwZGF0YS4NCj4gPiANCj4gPiBBcHBsaWVzIG9uIHRv
-cCBvZiBiZWxvdyBwYXRjaCB1bmRlciBjb21tdW5pdHkgcmV2aWV3Og0KPiA+ICJFbmFibGUgU1BJ
-IGZsYXNoIHN1cHBvcnQgb24gZGE4NTAtZXZtIERUIGtlcm5lbCINCj4gPiBodHRwOi8vd3d3LnNw
-aW5pY3MubmV0L2xpc3RzL2FybS1rZXJuZWwvbXNnMjI5MzI4Lmh0bWwNCj4gPiANCj4gPiBEZXBl
-bmRzIG9uIHBhdGNoIHdhaXRpbmcgZm9yIGFjY2VwdGFuY2U6DQo+ID4gUGF0Y2ggIm1tYzogZGF2
-aW5jaTogYWxsb3cgZHJpdmVyIHRvIHdvcmsgd2l0aG91dCBETUEgcmVzb3VyY2UiDQo+ID4gaHR0
-cDovL3d3dy5tYWlsLWFyY2hpdmUuY29tL2xpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmcvbXNnMTg3
-NzEuaHRtbA0KPiANCj4gU2luY2UgdGhpcyBwYXRjaCBkaWQgbm90IGdldCBwaWNrZWQgZm9yIHYz
-LjksIGl0IG1heSBiZSB3b3J0aHdoaWxlDQo+IHJlYmFzaW5nIGl0IGFuZCBhZGRpbmcgdG8gdGhp
-cyBzZXJpZXMuDQo+IA0KDQpXaWxsIGRvIHRoYXQuDQoNClRoYW5rcywNClByYWthc2ggDQoNCg==
+The eSDHC controller on the i.MX53 needs an additional, non spec
+compliant CMD12 after a multiblock read with a predefined number of
+blocks. Otherwise the internal state machine won't go back to the
+idle state.
+
+This commit effectively reverts ebe31e44 (mmc: sdhci-esdhc-imx:
+fix for mmc cards on i.MX5), which fixed part of the problem by
+making multiblock reads work, however this fix was not sufficient
+when multi- and singleblock reads got intermixed.
+
+This implements the recommended workaround by manually sending a
+CMD12 with the RSPTYP bits cleared.
+
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |   38 +++++++++++++++++++++++++++++++++---
+ 1 file changed, 35 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 78ac002..bd3830d 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -85,6 +85,14 @@ struct pltfm_imx_data {
+ 	struct clk *clk_ipg;
+ 	struct clk *clk_ahb;
+ 	struct clk *clk_per;
++	/*
++	 * controller multiblock status:
++	 * 0: no multiblock command pending
++	 * 1: exact multiblock command in process
++	 * 2: multiblock command finished by CMD12, waiting for response INT
++	 */
++	unsigned char multiblock_status;
++
+ };
+ 
+ static struct platform_device_id imx_esdhc_devtype[] = {
+@@ -154,6 +162,8 @@ static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, i
+ 
+ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+ {
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+ 	u32 val = readl(host->ioaddr + reg);
+ 
+ 	if (unlikely(reg == SDHCI_CAPABILITIES)) {
+@@ -175,6 +185,18 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+ 			val &= ~ESDHC_INT_VENDOR_SPEC_DMA_ERR;
+ 			val |= SDHCI_INT_ADMA_ERROR;
+ 		}
++
++		/*
++		 * mask off the interrupt we get in response to the manually
++		 * sent CMD12
++		 */
++		if ((imx_data->multiblock_status == 2) &&
++		    ((val & SDHCI_INT_RESPONSE) == SDHCI_INT_RESPONSE)) {
++			val &= ~SDHCI_INT_RESPONSE;
++			writel(SDHCI_INT_RESPONSE, host->ioaddr +
++						   SDHCI_INT_STATUS);
++			imx_data->multiblock_status = 0;
++		}
+ 	}
+ 
+ 	return val;
+@@ -211,6 +233,14 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
+ 			v = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+ 			v &= ~ESDHC_VENDOR_SPEC_SDIO_QUIRK;
+ 			writel(v, host->ioaddr + ESDHC_VENDOR_SPEC);
++
++			if (imx_data->multiblock_status == 1) {
++				/* send a manual CMD12 with RESPTYP=none */
++				data = MMC_STOP_TRANSMISSION << 24 |
++				       SDHCI_CMD_ABORTCMD << 16;
++				writel(data, host->ioaddr + SDHCI_TRANSFER_MODE);
++				imx_data->multiblock_status = 2;
++			}
+ 	}
+ 
+ 	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)) {
+@@ -277,11 +307,13 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ 		}
+ 		return;
+ 	case SDHCI_COMMAND:
+-		if ((host->cmd->opcode == MMC_STOP_TRANSMISSION ||
+-		     host->cmd->opcode == MMC_SET_BLOCK_COUNT) &&
+-	            (imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT))
++		if (host->cmd->opcode == MMC_STOP_TRANSMISSION)
+ 			val |= SDHCI_CMD_ABORTCMD;
+ 
++		if ((host->cmd->opcode == MMC_SET_BLOCK_COUNT) &&
++		    (imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT))
++			imx_data->multiblock_status = 1;
++
+ 		if (is_imx6q_usdhc(imx_data))
+ 			writel(val << 16,
+ 			       host->ioaddr + SDHCI_TRANSFER_MODE);
+-- 
+1.7.10.4
+
