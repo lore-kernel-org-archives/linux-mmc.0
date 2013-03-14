@@ -1,34 +1,45 @@
-From: Sekhar Nori <nsekhar@ti.com>
-Subject: Re: [PATCH v5 0/4] Add DT support for davinci_mmc driver
-Date: Thu, 14 Mar 2013 17:25:13 +0530
-Message-ID: <5141BAA1.1070906@ti.com>
-References: <1363097637-11371-1-git-send-email-prakash.pm@ti.com>
+From: Johan Rudholm <jrudholm@gmail.com>
+Subject: Re: [PATCH] mmc: block: fix the host's claim-release in special request
+Date: Thu, 14 Mar 2013 12:56:15 +0100
+Message-ID: <CA+20K0DxMmq67gWR4igtdOMdO+h19JqbEMH1=Wsp1v9cKPKkZQ@mail.gmail.com>
+References: <001101ce207b$91e60440$b5b20cc0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1363097637-11371-1-git-send-email-prakash.pm@ti.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: "Manjunathappa, Prakash" <prakash.pm@ti.com>
-Cc: linux-mmc@vger.kernel.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, rob@landley.net, linux@arm.linux.org.uk, hs@denx.de, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, davinci-linux-open-source@linux.davincidsp.com
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:39250 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756768Ab3CNL4Q (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Mar 2013 07:56:16 -0400
+Received: by mail-qa0-f46.google.com with SMTP id o13so2791927qaj.12
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Mar 2013 04:56:16 -0700 (PDT)
+In-Reply-To: <001101ce207b$91e60440$b5b20cc0$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Konstantin Dorfman <kdorfman@codeaurora.org>
 
-On 3/12/2013 7:43 PM, Manjunathappa, Prakash wrote:
-> Patch set adds DT support for davinci_mmc driver and is
-> verified on da850-evm without card_detect/write_protect and
-> EDMA support. Also takecare to derive controller IP version from
-> platform_device_id table, remove version specification in pdata.
-> 
-> Applies on top of below patch under community review:
-> "Enable SPI flash support on da850-evm DT kernel"
-> http://www.spinics.net/lists/arm-kernel/msg229328.html
-> 
-> Depends on patch waiting for acceptance:
-> Patch "mmc: davinci: allow driver to work without DMA resource"
-> http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg18771.html
+Hi Seungwon,
 
-Since this patch did not get picked for v3.9, it may be worthwhile
-rebasing it and adding to this series.
+2013/3/14 Seungwon Jeon <tgih.jun@samsung.com>:
+> For normal request mmc_blk_issue_rq is called twice with asynchronous
+> transfer(cur and prev). Host's claim and release can be done in each
+> mmc_blk_issue_rq. However, Special request is currently excluded in
+> asynchronous transfer. After special request is finished, if there is
+> no new request, mmc_release_host won't be called in mmc_blk_issue_rq.
+> The problem is founded during mmc_suspend.
+>
+> [<c0541124>] (__schedule+0x0/0x78c) from [<c05419e8>] (schedule+0x38/0x78)
+> [<c05419b0>] (schedule+0x0/0x78) from [<c03a843c>] (__mmc_claim_host+0xac/0x1b4)
+> [<c03a8390>] (__mmc_claim_host+0x0/0x1b4) from [<c03ac98c>] (mmc_suspend+0x28/0x9c)
+> [<c03ac964>] (mmc_suspend+0x0/0x9c) from [<c03aad24>] (mmc_suspend_host+0xb4/0x194)
+> ...
+>
+> Reported-by: Johan Rudholm <jrudholm@gmail.com>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 
-Thanks,
-Sekhar
+Thank you for the quick response and fix! This fixes the problem. So
+please include my
+
+Tested-by: Johan Rudholm <johan.rudholm@stericsson.com>
+
+Kind regards, Johan
