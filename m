@@ -1,45 +1,60 @@
-From: Anatolij Gustschin <agust@denx.de>
-Subject: Re: [PATCH 4/5] mmc: mxcmmc: enable DMA support on mpc512x
-Date: Thu, 14 Mar 2013 22:18:16 +0100
-Message-ID: <20130314221816.1e4c93c1@crub>
-References: <1363279254-22351-1-git-send-email-agust@denx.de>
-	<1363279254-22351-6-git-send-email-agust@denx.de>
-	<20130314201139.GS1906@pengutronix.de>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 1/5] mmc: mxcmmc: add mpc512x SDHC support
+Date: Thu, 14 Mar 2013 22:52:57 +0000
+Message-ID: <201303142252.57951.arnd@arndb.de>
+References: <1363279254-22351-1-git-send-email-agust@denx.de> <1589714.JH7YyAvXz1@wuerfel> <20130314191332.44ca64c9@crub>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-out.m-online.net ([212.18.0.10]:46626 "EHLO
-	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752969Ab3CNVSS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Mar 2013 17:18:18 -0400
-In-Reply-To: <20130314201139.GS1906@pengutronix.de>
+Received: from moutng.kundenserver.de ([212.227.17.9]:50785 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753093Ab3CNWxE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Mar 2013 18:53:04 -0400
+In-Reply-To: <20130314191332.44ca64c9@crub>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Markus Pargmann <mpa@pengutronix.de>, devicetree-discuss@lists.ozlabs.org
+To: Anatolij Gustschin <agust@denx.de>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Markus Pargmann <mpa@pengutronix.de>, devicetree-discuss@lists.ozlabs.org
 
-On Thu, 14 Mar 2013 21:11:39 +0100
-Sascha Hauer <s.hauer@pengutronix.de> wrote:
-
-> On Thu, Mar 14, 2013 at 05:40:53PM +0100, Anatolij Gustschin wrote:
-> > Add SDHC DMA channel description to the mpc512x device
-> > tree to enable slave channel requesting in the mxcmmc
-> > driver.
-> > 
-> > mpc512x DMA engine doesn't support endianness conversion
-> > when reading/writing data from peripheral's FIFO, so we
-> > have to swap data buffers before each DMA write and after
-> > each DMA read transfer manually.
-> > 
-> > Since chained SDHC DMA transfers are not supported on
-> > mpc512x, limit 'max_segs' tunable parameter to one and
-> > initialise it to 64 only when running on i.MX platforms.
+On Thursday 14 March 2013, Anatolij Gustschin wrote:
+> I wanted to avoid additional levels of indirection and function calls
+> on i.MX. If something like
 > 
-> They are also not supported on the older i.MX platforms. Shouldn't this
-> be handled in the DMA driver?
+> static inline u32 mxcmci_readl(struct mxcmci_host *host, int reg)
+> {
+> #if IS_ENABLED(CONFIG_PPC_MPC512x)
+>         return in_be32(host->base + reg);
+> #else
+>         return readl(host->base + reg); 
+> #endif
+> }
+> 
+> is acceptable, I'll use it.
 
-This could be handled in the DMA driver, but up to now nobody
-cared to extend the DMA driver so.
+I think that's ok. A single #ifdef around the four functions might be
+nicer though. You could also use ioread32_be on powerpc and write it
+like
 
-Anatolij
+static inline u32 mxcmci_readl(struct mxcmci_host *host, int reg)
+{
+	if (IS_ENABLED(CONFIG_PPC_MPC512x))
+		return ioread32_be(host->base + reg);
+	else
+		return readl(host->base + reg); 
+}
+
+> > Does mpc512x have no clock management? I think it should still
+> > work without modifications if CONFIG_HAVE_CLK is disabled.
+> > In that case, devm_clk_get() will return NULL and we don't
+> > error out here.
+> 
+> It does have some clock management (a platform clock driver) and
+> the platform selects CONFIG_HAVE_CLK. But we do not have "ipg"
+> and "per" clocks on that platform, but "sdhc_clk" instead.
+
+As Sascha said, they should really use the same name, although it's
+possible that neither sdhc_clk nor ipg is a good name here.
+
+	Arnd
