@@ -1,39 +1,48 @@
 From: Anatolij Gustschin <agust@denx.de>
-Subject: Re: [PATCH 3/5] mmc: mxcmmc: constify mxcmci_devtype and fix build
- warning
-Date: Thu, 14 Mar 2013 19:15:03 +0100
-Message-ID: <20130314191503.7e0e4903@crub>
-References: <1363279254-22351-1-git-send-email-agust@denx.de>
-	<1363279254-22351-5-git-send-email-agust@denx.de>
+Subject: Re: [PATCH v2] mmc: mxcmmc: fix bug that may block a data transfer
+ forever.
+Date: Thu, 14 Mar 2013 20:58:57 +0100
+Message-ID: <20130314205857.7b0ad091@crub>
+References: <1347014617-16238-1-git-send-email-javier.martin@vista-silicon.com>
+	<20130219151414.2aa318d7@crub>
+	<5126421D.7010204@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-out.m-online.net ([212.18.0.9]:52276 "EHLO
+Received: from mail-out.m-online.net ([212.18.0.10]:36942 "EHLO
 	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932979Ab3CNSPB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Mar 2013 14:15:01 -0400
-In-Reply-To: <1363279254-22351-5-git-send-email-agust@denx.de>
+	with ESMTP id S1751106Ab3CNT67 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Mar 2013 15:58:59 -0400
+In-Reply-To: <5126421D.7010204@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anatolij Gustschin <agust@denx.de>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Markus Pargmann <mpa@pengutronix.de>, devicetree-discuss@lists.ozlabs.org
+To: Fabio Estevam <fabio.estevam@freescale.com>
+Cc: Javier Martin <javier.martin@vista-silicon.com>, linux-mmc@vger.kernel.org, viresh.linux@gmail.com, g.liakhovetski@gmx.de, vinod.koul@linux.intel.com, s.hauer@pengutronix.de, cjb@laptop.org, gcembed@gmail.com, festevam@gmail.com
 
-On Thu, 14 Mar 2013 17:40:52 +0100
-Anatolij Gustschin <agust@denx.de> wrote:
+Hi Fabio,
 
-> Fix:
-> drivers/mmc/host/mxcmmc.c: In function 'mxcmci_probe':
-> drivers/mmc/host/mxcmmc.c:1137:41: warning: initialization discards
-> 'const' qualifier from pointer target type [enabled by default]
+On Thu, 21 Feb 2013 12:49:49 -0300
+Fabio Estevam <fabio.estevam@freescale.com> wrote:
+
+> Hi Anatolij,
 > 
-> Signed-off-by: Anatolij Gustschin <agust@denx.de>
-> ---
->  drivers/mmc/host/mxcmmc.c |    4 ++--
->  1 files changed, 2 insertions(+), 2 deletions(-)
+> Anatolij Gustschin wrote:
+> 
+> > this change introduces a race condition for host->req (and maybe
+> > for host->data) accesses. The callback is running in soft-irq context and can
+> > be interrupted by the mxcmci_irq() interrupt which can finish the request and
+> > set host->req to NULL. Then mxcmci_data_done() crashes with a null pointer
+> > dereference. How extensively was it tested?
+> 
+> Does the patch below help?
 
-that one has been sent by accident, please ignore it.
+Sorry for long delay. No, it doesn't help. With this patch applied
+the task copying data to the sd-card hangs forever. I used following
+patch to fix observed crashes:
 
-Sorry for that.
+ http://thread.gmane.org/gmane.linux.kernel.mmc/19658/focus=19662
+
+Thanks anyway!
 
 Anatolij
