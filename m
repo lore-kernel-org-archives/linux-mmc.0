@@ -1,48 +1,117 @@
-From: Anatolij Gustschin <agust@denx.de>
-Subject: Re: [PATCH v2] mmc: mxcmmc: fix bug that may block a data transfer
- forever.
-Date: Thu, 14 Mar 2013 20:58:57 +0100
-Message-ID: <20130314205857.7b0ad091@crub>
-References: <1347014617-16238-1-git-send-email-javier.martin@vista-silicon.com>
-	<20130219151414.2aa318d7@crub>
-	<5126421D.7010204@freescale.com>
+From: Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+Subject: Re: [PATCH 1/5] mmc: mxcmmc: add mpc512x SDHC support
+Date: Thu, 14 Mar 2013 21:05:56 +0100
+Message-ID: <20130314200556.GR1906@pengutronix.de>
+References: <1363279254-22351-1-git-send-email-agust@denx.de>
+ <1363279254-22351-2-git-send-email-agust@denx.de>
+ <1589714.JH7YyAvXz1@wuerfel> <20130314191332.44ca64c9@crub>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-out.m-online.net ([212.18.0.10]:36942 "EHLO
-	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751106Ab3CNT67 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Mar 2013 15:58:59 -0400
-In-Reply-To: <5126421D.7010204@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20130314191332.44ca64c9@crub>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Anatolij Gustschin <agust-ynQEQJNshbs@public.gmane.org>
+Cc: devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <fabio.estevam@freescale.com>
-Cc: Javier Martin <javier.martin@vista-silicon.com>, linux-mmc@vger.kernel.org, viresh.linux@gmail.com, g.liakhovetski@gmx.de, vinod.koul@linux.intel.com, s.hauer@pengutronix.de, cjb@laptop.org, gcembed@gmail.com, festevam@gmail.com
 
-Hi Fabio,
-
-On Thu, 21 Feb 2013 12:49:49 -0300
-Fabio Estevam <fabio.estevam@freescale.com> wrote:
-
-> Hi Anatolij,
+On Thu, Mar 14, 2013 at 07:13:32PM +0100, Anatolij Gustschin wrote:
+> On Thu, 14 Mar 2013 17:50:08 +0100
+> Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
 > 
-> Anatolij Gustschin wrote:
+> > On Thursday 14 March 2013 17:40:49 Anatolij Gustschin wrote:
+> > 
+> > > +
+> > > +struct mxcmci_reg_ops mxcmci_reg_ops = {
+> > > +	.read_l = mpcmci_readl,
+> > > +	.write_l = mpcmci_writel,
+> > > +	.read_w = mpcmci_readw,
+> > > +	.write_w = mpcmci_writew,
+> > > +};
+> > > +#else
+> > > +struct mxcmci_reg_ops mxcmci_reg_ops;
+> > > +#endif
+> > 
+> > Should the struct be static?
 > 
-> > this change introduces a race condition for host->req (and maybe
-> > for host->data) accesses. The callback is running in soft-irq context and can
-> > be interrupted by the mxcmci_irq() interrupt which can finish the request and
-> > set host->req to NULL. Then mxcmci_data_done() crashes with a null pointer
-> > dereference. How extensively was it tested?
+> yes, it should.
 > 
-> Does the patch below help?
+> > > +static inline u32 mxcmci_readl(struct mxcmci_host *host, int reg)
+> > > +{
+> > > +	if (host->reg_ops->read_l)
+> > > +		return host->reg_ops->read_l(host, reg);
+> > > +	else
+> > > +		return readl(host->base + reg);
+> > > +}
+> > 
+> > This seems a bit strange. I would suggest you either use the ops structure
+> > all the time and provide an imx variant, or you make it completely
+> > compile-time selected.
+> 
+> I wanted to avoid additional levels of indirection and function calls
+> on i.MX. If something like
+> 
+> static inline u32 mxcmci_readl(struct mxcmci_host *host, int reg)
+> {
+> #if IS_ENABLED(CONFIG_PPC_MPC512x)
+> 	return in_be32(host->base + reg);
+> #else
+> 	return readl(host->base + reg); 
+> #endif
 
-Sorry for long delay. No, it doesn't help. With this patch applied
-the task copying data to the sd-card hangs forever. I used following
-patch to fix observed crashes:
+I really wish we would have native endianess accessors...
 
- http://thread.gmane.org/gmane.linux.kernel.mmc/19658/focus=19662
+> 
+> is acceptable, I'll use it.
 
-Thanks anyway!
+Looks better to me.
 
-Anatolij
+> > > @@ -1026,24 +1115,33 @@ static int mxcmci_probe(struct platform_device *pdev)
+> > >  	host->res = r;
+> > >  	host->irq = irq;
+> > >  
+> > > -	host->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
+> > > -	if (IS_ERR(host->clk_ipg)) {
+> > > -		ret = PTR_ERR(host->clk_ipg);
+> > > -		goto out_iounmap;
+> > > -	}
+> > > +	if (!is_mpc512x_mmc(host)) {
+> > > +		host->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
+> > > +		if (IS_ERR(host->clk_ipg)) {
+> > > +			ret = PTR_ERR(host->clk_ipg);
+> > > +			goto out_iounmap;
+> > > +		}
+> > 
+> > Does mpc512x have no clock management? I think it should still
+> > work without modifications if CONFIG_HAVE_CLK is disabled.
+> > In that case, devm_clk_get() will return NULL and we don't
+> > error out here.
+> 
+> It does have some clock management (a platform clock driver) and
+> the platform selects CONFIG_HAVE_CLK. But we do not have "ipg"
+> and "per" clocks on that platform, but "sdhc_clk" instead.
+
+The clocks should be modelled after the input clocks the MMC controller
+has, not after the clocks the SoC provides control for. So if you cannot
+software control a clock then you should provide a dummy clock for it.
+
+That said, 'ipg' is not a very good name for a mpc SoC,
+something like 'bus' would probably be better.
+
+Sascha
+
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
