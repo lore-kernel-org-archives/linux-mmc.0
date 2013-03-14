@@ -1,58 +1,96 @@
-From: Sergey Yanovich <ynvich@gmail.com>
-Subject: [PATCH v2] wait while adding MMC host to ensure root mounts
-Date: Thu, 14 Mar 2013 05:23:13 +0400
-Message-ID: <1363224194-7366-1-git-send-email-ynvich@gmail.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: Re: [PATCH] wait while adding MMC host to ensure root mounts
+Date: Wed, 13 Mar 2013 19:47:19 -0700
+Message-ID: <20130314024719.GA9342@kroah.com>
 References: <1363223183-3772-1-git-send-email-ynvich@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f169.google.com ([74.125.82.169]:49446 "EHLO
-	mail-we0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755679Ab3CNBXX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Mar 2013 21:23:23 -0400
+Received: from mail-ia0-f182.google.com ([209.85.210.182]:37490 "EHLO
+	mail-ia0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755677Ab3CNCqX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Mar 2013 22:46:23 -0400
+Received: by mail-ia0-f182.google.com with SMTP id b35so1614498iac.41
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Mar 2013 19:46:23 -0700 (PDT)
+Content-Disposition: inline
 In-Reply-To: <1363223183-3772-1-git-send-email-ynvich@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Sergey Yanovich <ynvich@gmail.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <linkinjeon@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Sergey Yanovich <ynvich@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <linkinjeon@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-MMC hosts are added asynchronously. We need to wait until detect returns to
-avoid failed root filesystem mounts.
----8<---
-VFS: Cannot open root device "mmcblk0p1" or unknown-block(0,0): error -6
-Please append a correct "root=" boot option; here are the available partitions:
-mmc0: host does not support reading read-only switch. assuming write-enable.
-1f00             256 mtdblock0  (driver?)
-1f01             256 mtdblock1  (driver?)
-1f02            2560 mtdblock2 mmc0: new SDHC card at address b368
- (driver?)
-1f03           29696 mtdblock3  (driver?)
-1f04           16384 mtdblock4 mmcblk0: mmc0:b368 USD   3.72 GiB
- (driver?)
- mmcblk0: p1
-b300         3910656 mmcblk0  driver: mmcblk
-  b301         3906560 mmcblk0p1 00000000-01
-Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
----8<---
+On Thu, Mar 14, 2013 at 05:06:23AM +0400, Sergey Yanovich wrote:
+> MMC hosts are added asynchronously. We need to wait until detect returns to
+> avoid failed root filesystem mounts.
+> ---8<---
+> VFS: Cannot open root device "mmcblk0p1" or unknown-block(0,0): error -6
+> Please append a correct "root=" boot option; here are the available partitions:
+> mmc0: host does not support reading read-only switch. assuming write-enable.
+> 1f00             256 mtdblock0  (driver?)
+> 1f01             256 mtdblock1  (driver?)
+> 1f02            2560 mtdblock2 mmc0: new SDHC card at address b368
+>  (driver?)
+> 1f03           29696 mtdblock3  (driver?)
+> 1f04           16384 mtdblock4 mmcblk0: mmc0:b368 USD   3.72 GiB
+>  (driver?)
+>  mmcblk0: p1
+> b300         3910656 mmcblk0  driver: mmcblk
+>   b301         3906560 mmcblk0p1 00000000-01
+> Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
+> ---8<---
+> 
+> Signed-off-by: Sergey Yanovich <ynvich@gmail.com>
+> ---
+>  drivers/base/dd.c       |    1 -
+>  drivers/mmc/core/core.c |    4 +++-
+>  2 files changed, 3 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/base/dd.c b/drivers/base/dd.c
+> index 218f1e6..61d3e1b 100644
+> --- a/drivers/base/dd.c
+> +++ b/drivers/base/dd.c
+> @@ -345,7 +345,6 @@ int driver_probe_done(void)
+>  void wait_for_device_probe(void)
+>  {
+>  	/* wait for the known devices to complete their probing */
+> -
+>  	wait_event(probe_waitqueue, atomic_read(&probe_count) == 0);
+>  	async_synchronize_full();
+>  }
 
-Signed-off-by: Sergey Yanovich <ynvich@gmail.com>
----
-changes for v2:
-- removed exporting as symbol is in the same file
+You didn't need to change this file, please don't.
 
- drivers/mmc/core/core.c |    1 +
- 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index aaed768..7196888 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2225,6 +2225,7 @@ void mmc_start_host(struct mmc_host *host)
- 	host->rescan_disable = 0;
- 	mmc_power_up(host);
- 	mmc_detect_change(host, 0);
-+	mmc_flush_scheduled_work();
- }
- 
- void mmc_stop_host(struct mmc_host *host)
--- 
-1.7.10.4
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index aaed768..9790323 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -91,10 +91,11 @@ static int mmc_schedule_delayed_work(struct delayed_work *work,
+>  /*
+>   * Internal function. Flush all scheduled work from the MMC work queue.
+>   */
+> -static void mmc_flush_scheduled_work(void)
+> +void mmc_flush_scheduled_work(void)
+>  {
+>  	flush_workqueue(workqueue);
+>  }
+> +EXPORT_SYMBOL(mmc_flush_scheduled_work);
 
+EXPORT_SYMBOL_GPL()?
+
+Wait, why are you exporting it at all?
+
+>  #ifdef CONFIG_FAIL_MMC_REQUEST
+>  
+> @@ -2225,6 +2226,7 @@ void mmc_start_host(struct mmc_host *host)
+>  	host->rescan_disable = 0;
+>  	mmc_power_up(host);
+>  	mmc_detect_change(host, 0);
+> +	mmc_flush_scheduled_work();
+
+If this is the only fix, then you don't need to change it from being
+static or need to export it.
+
+Please be more careful when making kernel patches.
+
+greg k-h
