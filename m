@@ -1,164 +1,129 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/3] mmc: Use runtime pm for blkdevice
-Date: Fri, 15 Mar 2013 09:50:53 +0100
-Message-ID: <CAPDyKFr0UT1aPxhg69hicC6xBHoMPwfNVP688gjoJQMZrPspzw@mail.gmail.com>
-References: <ED64882F200EF5419CDAC2E6B5C4B3A2097FC4412E@SC-VEXCH1.marvell.com>
-	<25B60CDC2F704E4E9D88FFD52780CB4C0BDE9E0DE9@SC-VEXCH1.marvell.com>
-	<CADz5_gLDMUYNEz32z+BANYdDid5ANPx5t48m=1bgTDjV52FK3A@mail.gmail.com>
-	<CAPDyKFoHXMkDhmGHQJ88FvT1kv888y8QYBpz0uXMm8Yyk7ZheQ@mail.gmail.com>
-	<CADz5_gKqDvgP-uOpjsPk6zPo0XC9YdM0nTwCDUucO+dhRYwj_g@mail.gmail.com>
-	<CADz5_gLiwusyVHehA6G0BkTgxfs31T=FALmQRv1GPaxH_Xe-mA@mail.gmail.com>
-	<CAPDyKFoPxQLg+U6=rp+wTnTyfLDbwMd5orX=-Kw2Qp7nhpuSsg@mail.gmail.com>
-	<5142A105.3090505@codeaurora.org>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH] ARM: at91/avr32/atmel-mci: fix DMA-channel leak on
+ module unload
+Date: Fri, 15 Mar 2013 11:56:06 +0100
+Message-ID: <46568.1708221838$1363345027@news.gmane.org>
+References: <1363191119-4948-1-git-send-email-jhovold@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f173.google.com ([209.85.217.173]:49120 "EHLO
-	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753223Ab3COIuz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Mar 2013 04:50:55 -0400
-Received: by mail-lb0-f173.google.com with SMTP id gf7so2565296lbb.4
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Mar 2013 01:50:53 -0700 (PDT)
-In-Reply-To: <5142A105.3090505@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <1363191119-4948-1-git-send-email-jhovold@gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Johan Hovold <jhovold@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>, linux-kernel@vger.kernel.org, stable <stable@vger.kernel.org>, Haavard Skinnemoen <hskinnemoen@gmail.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Hans-Christian Egtvedt <egtvedt@samfundet.no>
 List-Id: linux-mmc@vger.kernel.org
-To: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Cc: Kevin Liu <keyuan.liu@gmail.com>, Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>
 
-On 15 March 2013 05:18, Sujit Reddy Thumma <sthumma@codeaurora.org> wrote:
-> On 3/8/2013 8:44 AM, Ulf Hansson wrote:
->>
->> On 7 March 2013 22:14, Kevin Liu <keyuan.liu@gmail.com> wrote:
->>>
->>> 2013/3/7 Kevin Liu <keyuan.liu@gmail.com>:
->>>>
->>>> 2013/3/7 Ulf Hansson <ulf.hansson@linaro.org>:
->>>>>
->>>>> On 7 March 2013 01:12, Kevin Liu <keyuan.liu@gmail.com> wrote:
->>>>>>>
->>>>>>> From: Ulf Hansson
->>>>>>> <ulf.hansson@stericsson.com<mailto:ulf.hansson@stericsson.com>>
->>>>>>> Date: Fri, Mar 1, 2013 at 8:47 PM
->>>>>>> Subject: [PATCH 0/3] mmc: Use runtime pm for blkdevice
->>>>>>> To: linux-mmc@vger.kernel.org<mailto:linux-mmc@vger.kernel.org>,
->>>>>>> Chris Ball <cjb@laptop.org<mailto:cjb@laptop.org>>
->>>>>>> Cc: Johan Rudholm
->>>>>>> <johan.rudholm@stericsson.com<mailto:johan.rudholm@stericsson.com>>, Ulf
->>>>>>> Hansson <ulf.hansson@linaro.org<mailto:ulf.hansson@linaro.org>>
->>>>>>>
->>>>>>>
->>>>>>> From: Ulf Hansson
->>>>>>> <ulf.hansson@linaro.org<mailto:ulf.hansson@linaro.org>>
->>>>>>>
->>>>>>> SDIO has been using runtime pm for a while to handle runtime power
->>>>>>> save
->>>>>>> operations. This patchset is enabling the option to make the sd/mmc
->>>>>>> blockdevices to use runtime pm as well.
->>>>>>>
->>>>>>> The runtime pm implementation for the block device will make use of
->>>>>>> autosuspend to defer power save operation to after request inactivty
->>>>>>> for
->>>>>>> a certain time.
->>>>>>>
->>>>>>> To actually perform some power save operations the corresponding bus
->>>>>>> ops
->>>>>>> for mmc and sd shall be implemented. Typically it could make sense to
->>>>>>> do
->>>>>>> BKOPS for eMMC in here.
->>>>>>>
->>>>>>> Ulf Hansson (3):
->>>>>>>    mmc: core: Remove power_restore bus_ops for mmc and sd
->>>>>>>    mmc: core: Add bus_ops for runtime pm callbacks
->>>>>>>    mmc: block: Enable runtime pm for mmc blkdevice
->>>>>>>
->>>>>> Ulf,
->>>>>>
->>>>>> sdhci.c has added pm_runtime which also protect between request and
->>>>>> task finish. And some sdhci.c based host drivers has provided
->>>>>> pm_runtime_suspend/resume functions like sdhci-pxav3.c. From the
->>>>>> powersave viewpoint, I think adding pm_runtime in driver level is
->>>>>> better than doing that on bus level since the control granularity is
->>>>>> even smaller. And adding pm_runtime in both block.c and sdhci.c will
->>>>>> call pm_runtime twice. How do you think?
->>>>>>
->>>>>> Thanks
->>>>>> Kevin
->>>>>
->>>>>
->>>>> Hi Kevin,
->>>>>
->>>>> Thanks for your response!
->>>>>
->>>>> It seems like we need some more clarification around this area.
->>>>> Runtime pm for a host device driver shall ultimately be responsible
->>>>> for taking care of runtime power management of the host device - only.
->>>>> It should not handle runtime power management of a block device, which
->>>>> in principle means BKOPS shall be handled in the blkdevice. At least
->>>>> this is my view.
->>>>>
->>>>> So, why is this? I will try to elaborate on the runtime pm support in
->>>>> host drivers here.
->>>>> The host device driver controls a MMC/SD/SDIO IP. This IP could very
->>>>> well reside (for some SoC) in what you call a power domain. In
->>>>> principle, once the IP needs to be used, a host driver has done a
->>>>> pm_runtime_get of it's device. This will mean a reference to the power
->>>>> domain has been fetched. Once the IP is not needed any more,
->>>>> pm_runtime_put is done and the reference to the power domain is
->>>>> released. Once no reference to the power domain exist the power domain
->>>>> can enter lower sleep states, which is preferred to happen as soon as
->>>>> possible and as long as possible - of course.
->>>>>
->>>>> Hope this gives a better understanding. :-)
->>>>>
->>>> Ulf,
->>>>
->>>> Thanks for the explanations!
->>>> Then do you mean to start bkops when blkdev pm_runtime auto suspended
->>>> while stop bkops when blkdev pm_runtime resumed?
->>>> My only concern is that we have implemented pm_runtime for host device
->>>> and its pm_runtime functions will turn on/off bus clock when host dev
->>>> runtime resume/suspend. Let's see below sequence when an issue request
->>>> come:
->>>> 1. blkdev pm_runtime resumed in mmc_blk_issue_rq.
->>>> 2. blkdev issue request
->>>> 3. host dev pm_runtime resumed in host->ops->request.
->>>> 4. host finished the transfer and host dev pm_runtime suspended.
->>>> 5. 3s later, blkdev pm_runtime suspended.
->>>> The bus clock will be turn off in step 4 by host dev
->>>> pm_runtime_suspend function. Then how can bkops run in step 5?
->>>>
->>> My question is host dev will stop bus clock by pm_runtime_suspend once
->>> the request transfer is finished. But bkops on emmc chip should still
->>> need the bus clock after bkops started. How to handle this?
->>
->>
->> According the eMMC spec I can't see any requirement that the bus clock
->> needs to be on while a BKOPS is running. Moreover it is clearly stated
->> it is allowed to gate the bus clock for a device which indicates busy.
->> So, I can't see that this is needed.
->>
->
-> What if host is aggressive and wants to keep eMMC in sleep-mode and turn off
-> VCC regulator during runtime power management? I believe that eMMC card
-> needs VCC supply as well in addition to VCCQ to carry out BKOPS. Do you
-> think that the block device also needs to take a reference for VCC regulator
-> while BKOPS is started in runtime suspend of block device?
+On Wed, Mar 13, 2013 at 05:11:59PM +0100, Johan Hovold wrote:
+> Fix regression introduced by commit 796211b7953 ("mmc: atmel-mci: add
+> pdc support and runtime capabilities detection") which removed the need
+> for CONFIG_MMC_ATMELMCI_DMA but kept the Kconfig-entry as well as the
+> compile guards around dma_release_channel() in remove(). Consequently,
+> DMA is always enabled (if supported), but the DMA-channel is not
+> released on module unload unless the DMA-config option is selected.
+> 
+> Remove the no longer used CONFIG_MMC_ATMELMCI_DMA option completely.
+> 
+> Cc: stable <stable@vger.kernel.org>
+> Signed-off-by: Johan Hovold <jhovold@gmail.com>
 
-What you are thinking of would be exactly the same scenario as doing
-"mmc_suspend_host" from a host runtime suspend callback, which have
-been discussed here earlier. Right now, no up-streamed host driver is
-doing this and I would guess it would never happen either. Anyway,
-still worth to consider somehow.
+Hi Johan,
 
-Please have a look at below thread to find the answers to your questions:
-http://thread.gmane.org/gmane.linux.kernel.mmc/19444/focus=19443
+Good point so
 
+Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 
->
->
-> --
-> Regards,
-> Sujit
+Thanks
 
-Kind regards
-Ulf Hansson
+> ---
+>  arch/arm/configs/at91sam9g45_defconfig |  1 -
+>  arch/avr32/configs/favr-32_defconfig   |  1 -
+>  arch/avr32/configs/merisc_defconfig    |  1 -
+>  drivers/mmc/host/Kconfig               | 10 ----------
+>  drivers/mmc/host/atmel-mci.c           |  2 --
+>  5 files changed, 15 deletions(-)
+> 
+> diff --git a/arch/arm/configs/at91sam9g45_defconfig b/arch/arm/configs/at91sam9g45_defconfig
+> index 606d48f..8aab786 100644
+> --- a/arch/arm/configs/at91sam9g45_defconfig
+> +++ b/arch/arm/configs/at91sam9g45_defconfig
+> @@ -173,7 +173,6 @@ CONFIG_MMC=y
+>  # CONFIG_MMC_BLOCK_BOUNCE is not set
+>  CONFIG_SDIO_UART=m
+>  CONFIG_MMC_ATMELMCI=y
+> -CONFIG_MMC_ATMELMCI_DMA=y
+>  CONFIG_LEDS_ATMEL_PWM=y
+>  CONFIG_LEDS_GPIO=y
+>  CONFIG_LEDS_TRIGGER_TIMER=y
+> diff --git a/arch/avr32/configs/favr-32_defconfig b/arch/avr32/configs/favr-32_defconfig
+> index 0421498..9791820 100644
+> --- a/arch/avr32/configs/favr-32_defconfig
+> +++ b/arch/avr32/configs/favr-32_defconfig
+> @@ -122,7 +122,6 @@ CONFIG_USB_G_SERIAL=m
+>  CONFIG_USB_CDC_COMPOSITE=m
+>  CONFIG_MMC=y
+>  CONFIG_MMC_ATMELMCI=y
+> -CONFIG_MMC_ATMELMCI_DMA=y
+>  CONFIG_NEW_LEDS=y
+>  CONFIG_LEDS_CLASS=y
+>  CONFIG_LEDS_ATMEL_PWM=m
+> diff --git a/arch/avr32/configs/merisc_defconfig b/arch/avr32/configs/merisc_defconfig
+> index 3befab9..65de443 100644
+> --- a/arch/avr32/configs/merisc_defconfig
+> +++ b/arch/avr32/configs/merisc_defconfig
+> @@ -102,7 +102,6 @@ CONFIG_FRAMEBUFFER_CONSOLE=y
+>  CONFIG_LOGO=y
+>  CONFIG_MMC=y
+>  CONFIG_MMC_ATMELMCI=y
+> -CONFIG_MMC_ATMELMCI_DMA=y
+>  CONFIG_NEW_LEDS=y
+>  CONFIG_LEDS_CLASS=y
+>  CONFIG_LEDS_ATMEL_PWM=y
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 8d13c65..009dabd 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -292,16 +292,6 @@ config MMC_ATMELMCI
+>  
+>  	  If unsure, say N.
+>  
+> -config MMC_ATMELMCI_DMA
+> -	bool "Atmel MCI DMA support"
+> -	depends on MMC_ATMELMCI && (AVR32 || ARCH_AT91SAM9G45) && DMA_ENGINE
+> -	help
+> -	  Say Y here to have the Atmel MCI driver use a DMA engine to
+> -	  do data transfers and thus increase the throughput and
+> -	  reduce the CPU utilization.
+> -
+> -	  If unsure, say N.
+> -
+>  config MMC_MSM
+>  	tristate "Qualcomm SDCC Controller Support"
+>  	depends on MMC && ARCH_MSM
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index 722af1d..10f8b73 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -2487,10 +2487,8 @@ static int __exit atmci_remove(struct platform_device *pdev)
+>  	atmci_readl(host, ATMCI_SR);
+>  	clk_disable(host->mck);
+>  
+> -#ifdef CONFIG_MMC_ATMELMCI_DMA
+>  	if (host->dma.chan)
+>  		dma_release_channel(host->dma.chan);
+> -#endif
+>  
+>  	free_irq(platform_get_irq(pdev, 0), host);
+>  	iounmap(host->regs);
+> -- 
+> 1.8.1.5
+> 
