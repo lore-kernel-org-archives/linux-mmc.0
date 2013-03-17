@@ -1,46 +1,51 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH] RFC: mmc: dw_mmc: Don't clear errors we aren't handling
-Date: Fri, 15 Mar 2013 14:30:47 -0700
-Message-ID: <1363383047-15285-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Will Newton <will.newton@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Bing Zhao <bzhao@marvell.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ashok Nagarajan <asnagarajan@chromium.org>, Paul Stewart <pstew@chromium.org>, Olof Johansson <olof@lixom.net>, Doug Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Chris Ball <cjb@laptop.org>
+Subject: When bus width detection procedure takes place, kernel cannot lock on correct bus width
+Date: Sun, 17 Mar 2013 08:07:20 -0400
+Message-ID: <87ip4qdybr.fsf@octavius.laptop.org>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:50888 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755911Ab3CQMH3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 17 Mar 2013 08:07:29 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: elad.yi@gmail.com
+Cc: linux-mmc@vger.kernel.org, Philip Rakity <prakity@nvidia.com>
 
-Although there are no known cases of this being a problem (and it may
-be technically impossible for the hardware to report more errors once
-already in the error state), it seems unwise for us to be clearing
-error interrupts that we didn't actually read.
+Hi Elad, I'm forwarding your bug report to the linux-mmc@ list.
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
- drivers/mmc/host/dw_mmc.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+- Chris.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 9834221..84ae704 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1583,7 +1583,8 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 			break;
- 
- 		if (pending & DW_MCI_CMD_ERROR_FLAGS) {
--			mci_writel(host, RINTSTS, DW_MCI_CMD_ERROR_FLAGS);
-+			mci_writel(host, RINTSTS,
-+				   pending & DW_MCI_CMD_ERROR_FLAGS);
- 			host->cmd_status = pending;
- 			smp_wmb();
- 			set_bit(EVENT_CMD_COMPLETE, &host->pending_events);
-@@ -1591,7 +1592,8 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 
- 		if (pending & DW_MCI_DATA_ERROR_FLAGS) {
- 			/* if there is an error report DATA_ERROR */
--			mci_writel(host, RINTSTS, DW_MCI_DATA_ERROR_FLAGS);
-+			mci_writel(host, RINTSTS,
-+				   pending & DW_MCI_DATA_ERROR_FLAGS);
- 			host->data_status = pending;
- 			smp_wmb();
- 			set_bit(EVENT_DATA_ERROR, &host->pending_events);
+
+I've been working on a bringup of an new board in Harmonic Inc.
+This board uses Sandisk iNand eMMC flash.
+I've noticed that the mmc driver keeps detecting 1 bit width although HW
+supports 4 bit, looked into it, and found the problem. In line 571 at mmc.c:
+There is:
+    /* only compare read only fields */
+    err = !((card->ext_csd.raw_partition_support ==
+            bw_ext_csd[EXT_CSD_PARTITION_SUPPORT]) &&
+        (card->ext_csd.raw_erased_mem_count ==
+            bw_ext_csd[EXT_CSD_ERASED_MEM_CONT]) &&
+        (card->ext_csd.rev ==
+            bw_ext_csd[EXT_CSD_REV]) &&
+        (card->ext_csd.raw_ext_csd_structure ==
+                ...
+
+The problem is that raw_partition_support is not the same when setting width of
+4 bits instead of 1 bit, and shouldn't be compared at all although it is read
+only.
+this should be changed to:
+    /* only compare read only fields */
+    err = !((card->ext_csd.raw_erased_mem_count ==
+            bw_ext_csd[EXT_CSD_ERASED_MEM_CONT]) &&
+        (card->ext_csd.rev ==
+            bw_ext_csd[EXT_CSD_REV]) &&
+        (card->ext_csd.raw_ext_csd_structure ==
+                ...
+
 -- 
-1.8.1.3
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
