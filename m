@@ -1,11 +1,13 @@
 From: Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>
-Subject: [PATCH 0/4] Add SD support for PXA168 & gplugD
-Date: Sun, 17 Mar 2013 13:16:46 -0500
-Message-ID: <1363544206-3671-1-git-send-email-tanmay.upadhyay@einfochips.com>
+Subject: [PATCH 1/4] mmc: sdhci-pxa: Trivial fix in Kconfig
+Date: Sun, 17 Mar 2013 13:18:01 -0500
+Message-ID: <1363544281-3716-1-git-send-email-tanmay.upadhyay@einfochips.com>
+References: <1363544206-3671-1-git-send-email-tanmay.upadhyay@einfochips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1363544206-3671-1-git-send-email-tanmay.upadhyay@einfochips.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -15,30 +17,41 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: zhangfei.gao@marvell.com, dwang4@marvell.com, njun@marvell.com, wuqm@marvell.com, prakity@marvell.com, eric.y.miao@gmail.com, haojian.zhuang@gmail.com
+To: zhangfei.gao@marvell.com, dwang4@marvell.com, njun@marvell.com, wuqm@marvell.com, prakity@marvell.com
 Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch series adds support for on-chip SD controller on PXA168
+Select MMC_SDHCI_PXAV3 by default if CPU is MMP2
+Select MMC_SDHCI_PXAV2 by default if CPU is PXA910
 
-Tanmay Upadhyay (4):
-  mmc: sdhci-pxa: Trivial fix in Kconfig
-  ARM: pxa168: Add SDHCI support
-  mmc: sdhci-pxa: Add SDHCI driver for PXA16x
-  ARM: pxa168/gplugd: Add support for SD port 1
+Signed-off-by: Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>
+Reviewed-by: Philip Rakity <prakity@marvell.com>
+---
+ drivers/mmc/host/Kconfig |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
- arch/arm/mach-mmp/Kconfig               |    1 -
- arch/arm/mach-mmp/clock-pxa168.c        |   47 +++++++++++++++++++++++++++++++
- arch/arm/mach-mmp/gplugd.c              |    6 ++++
- arch/arm/mach-mmp/include/mach/pxa168.h |   20 +++++++++++++
- arch/arm/mach-mmp/pxa168.c              |    4 +++
- drivers/mmc/host/Kconfig                |   11 ++++----
- drivers/mmc/host/sdhci-pxav2.c          |   30 +++++++++++++++++++-
- drivers/mmc/host/sdhci.c                |    3 ++
- drivers/mmc/host/sdhci.h                |    1 +
- include/linux/platform_data/pxa_sdhci.h |    2 ++
- 10 files changed, 118 insertions(+), 7 deletions(-)
-
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 8d13c65..e5faed8 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -198,7 +198,7 @@ config MMC_SDHCI_PXAV3
+ 	depends on CLKDEV_LOOKUP
+ 	select MMC_SDHCI
+ 	select MMC_SDHCI_PLTFM
+-	default CPU_MMP2
++	default y if CPU_MMP2
+ 	help
+ 	  This selects the Marvell(R) PXAV3 SD Host Controller.
+ 	  If you have a MMP2 platform with SD Host Controller
+@@ -211,7 +211,7 @@ config MMC_SDHCI_PXAV2
+ 	depends on CLKDEV_LOOKUP
+ 	select MMC_SDHCI
+ 	select MMC_SDHCI_PLTFM
+-	default CPU_PXA910
++	default y if CPU_PXA910
+ 	help
+ 	  This selects the Marvell(R) PXAV2 SD Host Controller.
+ 	  If you have a PXA9XX platform with SD Host Controller
 -- 
 1.7.9.5
 
