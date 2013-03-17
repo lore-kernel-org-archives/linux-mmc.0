@@ -1,51 +1,29 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: When bus width detection procedure takes place, kernel cannot lock on correct bus width
-Date: Sun, 17 Mar 2013 08:07:20 -0400
-Message-ID: <87ip4qdybr.fsf@octavius.laptop.org>
+From: Jonas Jensen <jonas.jensen@gmail.com>
+Subject: Re: [PATCH] ARM: mach-moxart: platform port for MOXA ART SoC
+Date: Sun, 17 Mar 2013 16:32:30 +0100
+Message-ID: <CACmBeS3aXs9vhc5ZYPbz5bjsYsSa6EzM12H4uPv706x0zU_5iw@mail.gmail.com>
+References: <CACmBeS1NLFUYHBOVL28aCCzRrgXYGPZF9t3qj6AdcgaMkrPGoQ@mail.gmail.com>
+	<CACmBeS05cyT8N9nZeqbJUPMSGeZYLWjL0Tu1GSZ-ms+Hjc0UoQ@mail.gmail.com>
+	<5140C6B2.7040702@gmail.com>
+	<201303151125.53999.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:50888 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755911Ab3CQMH3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 17 Mar 2013 08:07:29 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <201303151125.53999.arnd@arndb.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Arnd Bergmann <arnd@arndb.de>, Daniel Mack <zonque@gmail.com>, linux@arm.linux.org.uk, linux-mmc@vger.kernel.org, jirislaby@gmail.com, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: elad.yi@gmail.com
-Cc: linux-mmc@vger.kernel.org, Philip Rakity <prakity@nvidia.com>
 
-Hi Elad, I'm forwarding your bug report to the linux-mmc@ list.
+Thank you for the feedback.
 
-- Chris.
+Some of the changes are sure to be a challenge for me, but I want to
+move this forward, and having a list helps.
 
+3.2.40 is as far as it'll go right now, nothing prints to UART
+starting with 3.3.8 (last tested, it's somewhere around there).
 
-I've been working on a bringup of an new board in Harmonic Inc.
-This board uses Sandisk iNand eMMC flash.
-I've noticed that the mmc driver keeps detecting 1 bit width although HW
-supports 4 bit, looked into it, and found the problem. In line 571 at mmc.c:
-There is:
-    /* only compare read only fields */
-    err = !((card->ext_csd.raw_partition_support ==
-            bw_ext_csd[EXT_CSD_PARTITION_SUPPORT]) &&
-        (card->ext_csd.raw_erased_mem_count ==
-            bw_ext_csd[EXT_CSD_ERASED_MEM_CONT]) &&
-        (card->ext_csd.rev ==
-            bw_ext_csd[EXT_CSD_REV]) &&
-        (card->ext_csd.raw_ext_csd_structure ==
-                ...
+I have been advised to enable early_printk (by landley on freenode IRC #edev).
 
-The problem is that raw_partition_support is not the same when setting width of
-4 bits instead of 1 bit, and shouldn't be compared at all although it is read
-only.
-this should be changed to:
-    /* only compare read only fields */
-    err = !((card->ext_csd.raw_erased_mem_count ==
-            bw_ext_csd[EXT_CSD_ERASED_MEM_CONT]) &&
-        (card->ext_csd.rev ==
-            bw_ext_csd[EXT_CSD_REV]) &&
-        (card->ext_csd.raw_ext_csd_structure ==
-                ...
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Best regards,
+Jonas
