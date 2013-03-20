@@ -1,113 +1,63 @@
-From: <Chang-Ming.Huang@freescale.com>
-Subject: [PATCH 2/3 v7] SDHCI: add sdhci_get_cd callback to detect the card
-Date: Wed, 20 Mar 2013 13:41:34 +0800
-Message-ID: <1363758095-32378-2-git-send-email-Chang-Ming.Huang@freescale.com>
-References: <1363758095-32378-1-git-send-email-Chang-Ming.Huang@freescale.com>
+From: Axel Lin <axel.lin@ingics.com>
+Subject: [PATCH] mmc: sdhci-{pxav2,pxav3}: Use of_match_ptr() macro
+Date: Wed, 20 Mar 2013 15:48:30 +0800
+Message-ID: <1363765710.3758.0.camel@phoenix>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db8lp0188.outbound.messaging.microsoft.com ([213.199.154.188]:28780
-	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752935Ab3CTGbh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Mar 2013 02:31:37 -0400
-In-Reply-To: <1363758095-32378-1-git-send-email-Chang-Ming.Huang@freescale.com>
+Received: from mail-pb0-f45.google.com ([209.85.160.45]:62301 "EHLO
+	mail-pb0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751586Ab3CTHsn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Mar 2013 03:48:43 -0400
+Received: by mail-pb0-f45.google.com with SMTP id ro8so1142774pbb.4
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Mar 2013 00:48:42 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Chris Ball <cjb@laptop.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: Zhangfei Gao <zhangfei.gao@marvell.com>, Kevin Liu <kliu5@marvell.com>, Philip Rakity <prakity@marvell.com>, linux-mmc@vger.kernel.org
 
-From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+This eliminates having an #ifdef returning NULL for the case
+when OF is disabled.
 
-Add callback function sdhci_get_cd to detect the card.
-And one new callback added to implement the card detect in sdhci struncture.
-If special platform has the card detect callback, it will return the card
-state, the value zero is for absent cardi and one is for present card.
-If the controller don't support card detect, sdhci_get_cd will return -ENOSYS.
-
-Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-Reviewed-by: Anton Vorontsov <cbouatmailru@gmail.com>
-CC: Chris Ball <cjb@laptop.org>
+Signed-off-by: Axel Lin <axel.lin@ingics.com>
 ---
-changes for v2:
-	- when controller don't support get_cd, return -ENOSYS
-	- add new callback for sdhci to detect the card
-	- add the CC
-changes for v3:
-	- use pin_lock only when get_cd defined
-changes for v4:
-	- enalbe the controller clock in platform, instead of core
-changes for v5:
-	- remove the copyright
-changes for v6:
-	- fix the incorrect style and add the reviewed-by.
-changes for v7:
-	- upgrade to latest kernel
+ drivers/mmc/host/sdhci-pxav2.c |    4 +---
+ drivers/mmc/host/sdhci-pxav3.c |    4 +---
+ 2 files changed, 2 insertions(+), 6 deletions(-)
 
- drivers/mmc/host/sdhci.c |   22 ++++++++++++++++++++++
- drivers/mmc/host/sdhci.h |    2 ++
- 2 files changed, 24 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 51bbba4..d7f82b4 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1642,6 +1642,27 @@ static int sdhci_get_ro(struct mmc_host *mmc)
- 	return ret;
- }
- 
-+/*
-+ * Return values for the sdhci_get_cd callback:
-+ * 0: for a absent card
-+ * 1: for a present card
-+ * -ENOSYS: when not supported (equal to NULL callback)
-+ */
-+static int sdhci_get_cd(struct mmc_host *mmc)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	unsigned long flags;
-+	int present = -ENOSYS;
-+
-+	if (host->ops->get_cd) {
-+		spin_lock_irqsave(&host->lock, flags);
-+		present = host->ops->get_cd(host);
-+		spin_unlock_irqrestore(&host->lock, flags);
-+	}
-+
-+	return present;
-+}
-+
- static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
- {
- 	if (host->flags & SDHCI_DEVICE_DEAD)
-@@ -2039,6 +2060,7 @@ static const struct mmc_host_ops sdhci_ops = {
- 	.request	= sdhci_request,
- 	.set_ios	= sdhci_set_ios,
- 	.get_ro		= sdhci_get_ro,
-+	.get_cd		= sdhci_get_cd,
- 	.hw_reset	= sdhci_hw_reset,
- 	.enable_sdio_irq = sdhci_enable_sdio_irq,
- 	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 379e09d..6f523c3 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -69,6 +69,7 @@
- #define  SDHCI_SPACE_AVAILABLE	0x00000400
- #define  SDHCI_DATA_AVAILABLE	0x00000800
- #define  SDHCI_CARD_PRESENT	0x00010000
-+#define  SDHCI_CARD_CDPL	0x00040000
- #define  SDHCI_WRITE_PROTECT	0x00080000
- #define  SDHCI_DATA_LVL_MASK	0x00F00000
- #define   SDHCI_DATA_LVL_SHIFT	20
-@@ -277,6 +278,7 @@ struct sdhci_ops {
- 
- 	void	(*set_clock)(struct sdhci_host *host, unsigned int clock);
- 
-+	int		(*get_cd)(struct sdhci_host *host);
- 	int		(*enable_dma)(struct sdhci_host *host);
- 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+index eeb7d43..d57c047 100644
+--- a/drivers/mmc/host/sdhci-pxav2.c
++++ b/drivers/mmc/host/sdhci-pxav2.c
+@@ -262,9 +262,7 @@ static struct platform_driver sdhci_pxav2_driver = {
+ 	.driver		= {
+ 		.name	= "sdhci-pxav2",
+ 		.owner	= THIS_MODULE,
+-#ifdef CONFIG_OF
+-		.of_match_table = sdhci_pxav2_of_match,
+-#endif
++		.of_match_table = of_match_ptr(sdhci_pxav2_of_match),
+ 		.pm	= SDHCI_PLTFM_PMOPS,
+ 	},
+ 	.probe		= sdhci_pxav2_probe,
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index a0cdbc5..bbadfbd 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -439,9 +439,7 @@ static const struct dev_pm_ops sdhci_pxav3_pmops = {
+ static struct platform_driver sdhci_pxav3_driver = {
+ 	.driver		= {
+ 		.name	= "sdhci-pxav3",
+-#ifdef CONFIG_OF
+-		.of_match_table = sdhci_pxav3_of_match,
+-#endif
++		.of_match_table = of_match_ptr(sdhci_pxav3_of_match),
+ 		.owner	= THIS_MODULE,
+ 		.pm	= SDHCI_PXAV3_PMOPS,
+ 	},
 -- 
 1.7.9.5
+
 
 
