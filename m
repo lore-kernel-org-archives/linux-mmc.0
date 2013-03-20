@@ -1,119 +1,91 @@
-From: Aaron Lu <aaron.lu@intel.com>
-Subject: Re: [PATCH] mmc: sdio: bind acpi with sdio function device
-Date: Wed, 20 Mar 2013 14:00:45 +0800
-Message-ID: <5149508D.8040507@intel.com>
-References: <1362453892-13304-1-git-send-email-aaron.lu@intel.com>
+From: <Chang-Ming.Huang@freescale.com>
+Subject: [PATCH 1/3i v6] MMC/SD: Add callback function to detect card
+Date: Wed, 20 Mar 2013 13:41:33 +0800
+Message-ID: <1363758095-32378-1-git-send-email-Chang-Ming.Huang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <1362453892-13304-1-git-send-email-aaron.lu@intel.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, linux-mmc@vger.kernel.org, linux-acpi@vger.kernel.org, linux-pm@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from db3ehsobe002.messaging.microsoft.com ([213.199.154.140]:51352
+	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750810Ab3CTGQc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Mar 2013 02:16:32 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Chris Ball <cjb@laptop.org>
 
-Hi Chris,
+From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-Any comments on this patch?
+In order to check whether the card has been removed, the function
+mmc_send_status() will send command CMD13 to card and ask the card
+to send its status register to sdhc driver, which will generate
+many interrupts repeatedly and make the system performance bad.
+>From the performance test on Freescale's board (such as Iozone for SD),
+the performance will degrade about 4~6%.
 
-Thanks,
-Aaron
+There is one another way to get this information,
+which is to read the register PRSSTAT and check the bit CDPL or CINS.
+If the card is present, these two bit will set to one.
+Therefore, add callback function get_cd() to check whether
+the card has been inserted/removed when the driver supports this feature.
+If the card is present, 0 will return, if the card is absent, 1 will return.
+If the controller will not support this feature, -ENOSYS will return.
 
-On 03/05/2013 11:24 AM, Aaron Lu wrote:
-> ACPI spec 5 defined the _ADR encoding for sdio bus as:
-> High word - slot number (0 based)
-> Low word  - function number
-> 
-> This patch adds support for binding sdio function device with acpi node,
-> and if successful, involve acpi into its power management.
-> 
-> Signed-off-by: Aaron Lu <aaron.lu@intel.com>
-> Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
->  drivers/mmc/core/sdio_bus.c  | 20 +++++++++++++++++++-
->  drivers/mmc/host/sdhci-pci.c |  1 +
->  include/linux/mmc/host.h     |  2 ++
->  3 files changed, 22 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-> index 5e57048..8d6bb18 100644
-> --- a/drivers/mmc/core/sdio_bus.c
-> +++ b/drivers/mmc/core/sdio_bus.c
-> @@ -16,6 +16,7 @@
->  #include <linux/export.h>
->  #include <linux/slab.h>
->  #include <linux/pm_runtime.h>
-> +#include <linux/acpi.h>
->  
->  #include <linux/mmc/card.h>
->  #include <linux/mmc/host.h>
-> @@ -299,6 +300,19 @@ struct sdio_func *sdio_alloc_func(struct mmc_card *card)
->  	return func;
->  }
->  
-> +#ifdef CONFIG_ACPI
-> +static void sdio_acpi_set_handle(struct sdio_func *func)
-> +{
-> +	struct mmc_host *host = func->card->host;
-> +	u64 addr = (host->slotno << 16) | func->num;
-> +
-> +	ACPI_HANDLE_SET(&func->dev,
-> +			acpi_get_child(ACPI_HANDLE(host->parent), addr));
-> +}
-> +#else
-> +static inline void sdio_acpi_set_handle(struct sdio_func *func) {}
-> +#endif
-> +
->  /*
->   * Register a new SDIO function with the driver model.
->   */
-> @@ -308,9 +322,12 @@ int sdio_add_func(struct sdio_func *func)
->  
->  	dev_set_name(&func->dev, "%s:%d", mmc_card_id(func->card), func->num);
->  
-> +	sdio_acpi_set_handle(func);
->  	ret = device_add(&func->dev);
-> -	if (ret == 0)
-> +	if (ret == 0) {
->  		sdio_func_set_present(func);
-> +		acpi_dev_pm_attach(&func->dev, false);
-> +	}
->  
->  	return ret;
->  }
-> @@ -326,6 +343,7 @@ void sdio_remove_func(struct sdio_func *func)
->  	if (!sdio_func_present(func))
->  		return;
->  
-> +	acpi_dev_pm_detach(&func->dev, false);
->  	device_del(&func->dev);
->  	put_device(&func->dev);
->  }
-> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-> index c7ccf30..3dee22d 100644
-> --- a/drivers/mmc/host/sdhci-pci.c
-> +++ b/drivers/mmc/host/sdhci-pci.c
-> @@ -1279,6 +1279,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
->  	}
->  
->  	host->mmc->pm_caps = MMC_PM_KEEP_POWER | MMC_PM_WAKE_SDIO_IRQ;
-> +	host->mmc->slotno = slotno;
->  
->  	ret = sdhci_add_host(host);
->  	if (ret)
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index d6f20cc..17d7148 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -361,6 +361,8 @@ struct mmc_host {
->  
->  	unsigned int		actual_clock;	/* Actual HC clock rate */
->  
-> +	unsigned int		slotno;	/* used for sdio acpi binding */
-> +
->  	unsigned long		private[0] ____cacheline_aligned;
->  };
->  
-> 
+Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+Reviewed-by: Johan Rudholm <johan.rudholm@stericsson.com>
+Reviewed-by: Anton Vorontsov <cbouatmailru@gmail.com>
+CC: Chris Ball <cjb@laptop.org>
+---
+changes for v2:
+	- when controller don't support get_cd, return -ENOSYS
+	- add the CC
+changes for v3:
+	- enalbe the controller clock in platform, instead of core
+changes for v4:
+	- move the detect code to core.c according to the new structure
+changes for v5:
+	- reviewed by Anton and Johan, add the reviewed-by.
+changes for v6:
+	- add more comment.
+
+ drivers/mmc/core/core.c |   16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 08a3cf2..e225deb 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2280,7 +2280,7 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+ 
+ int _mmc_detect_card_removed(struct mmc_host *host)
+ {
+-	int ret;
++	int ret = -ENOSYS;
+ 
+ 	if ((host->caps & MMC_CAP_NONREMOVABLE) || !host->bus_ops->alive)
+ 		return 0;
+@@ -2288,7 +2288,19 @@ int _mmc_detect_card_removed(struct mmc_host *host)
+ 	if (!host->card || mmc_card_removed(host->card))
+ 		return 1;
+ 
+-	ret = host->bus_ops->alive(host);
++	/* First, try host-controller's card detect callback */
++	if (host->ops->get_cd) {
++		ret = host->ops->get_cd(host);
++		/*
++		 * The return value from get_cd: 1 for present, 0 for absent,
++		 * we need to convert it to: 1 for absent, 0 for present.
++		 */
++		if (ret >= 0)
++			ret = !ret;
++	}
++	/* If failed, back to the bus_ops alive() callback */
++	if (ret < 0)
++		ret = host->bus_ops->alive(host);
+ 	if (ret) {
+ 		mmc_card_set_removed(host->card);
+ 		pr_debug("%s: card remove detected\n", mmc_hostname(host));
+-- 
+1.7.9.5
+
 
