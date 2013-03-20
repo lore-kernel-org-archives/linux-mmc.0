@@ -1,97 +1,84 @@
-From: <ludovic.desroches@atmel.com>
-Subject: [PATCH] mmc: atmel-mci: pio hang on block errors
-Date: Wed, 20 Mar 2013 10:32:26 +0100
-Message-ID: <1363771946-8931-1-git-send-email-ludovic.desroches@atmel.com>
+From: "Manjunathappa, Prakash" <prakash.pm@ti.com>
+Subject: [PATCH v6 0/5] Add DT support for davinci_mmc driver
+Date: Wed, 20 Mar 2013 17:14:07 +0530
+Message-ID: <1363779852-24083-1-git-send-email-prakash.pm@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:50375 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934136Ab3CTJch (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Mar 2013 05:32:37 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: davinci-linux-open-source@linux.davincidsp.com, linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, nsekhar@ti.com, grant.likely@secretlab.ca, rob.herring@calxeda.com, rob@landley.net, linux@arm.linux.org.uk, hs@denx.de, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, "Manjunathappa, Prakash" <prakash.pm@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: nicolas.ferre@atmel.com, terry@beam.ltd.uk, ludovic.desroches@atmel.com
 
-From: Terry Barnaby <terry@beam.ltd.uk>
+Patch set adds DT support for davinci_mmc driver and is
+verified on da850-evm without card_detect/write_protect and
+EDMA support. Also takecare to derive controller IP version from
+platform_device_id table, remove version specification in pdata.
 
-The driver is doing, by default, multi-block reads. When a block error occurs
-card/block.c instigates a single block read: "mmcblk0: retrying using single
-block read".
-It leaves the sg chain intact and just changes the length attribute for the
-first sg entry and the overall sg_len parameter. When atmci_read_data_pio is
-called to read the single block of data it ignores the sg_len and expects to
-read more than 512 bytes as it sees there are multiple items in the sg list. No
-more data comes as the controller has only been commanded to get one block.
+Applies on top of below patch series under community review:
+"Enable SPI flash support on da850-evm DT kernel"
+http://www.spinics.net/lists/arm-kernel/msg231546.html
 
-Signed-off-by: Terry Barnaby <terry@beam.ltd.uk>
-Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-Cc: stable <stable@vger.kernel.org> # 3.2+
----
- drivers/mmc/host/atmel-mci.c | 14 ++++++++++----
- 1 file changed, 10 insertions(+), 4 deletions(-)
+This series is reviewed and tested by Sekhar Nori, with and
+without DT on da850 EVM.
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 0932024..d98e68e 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -163,6 +163,7 @@ struct atmel_mci {
- 	void __iomem		*regs;
- 
- 	struct scatterlist	*sg;
-+	unsigned int		sg_len;
- 	unsigned int		pio_offset;
- 
- 	struct atmel_mci_slot	*cur_slot;
-@@ -751,6 +752,7 @@ static u32 atmci_prepare_data(struct atmel_mci *host, struct mmc_data *data)
- 	data->error = -EINPROGRESS;
- 
- 	host->sg = data->sg;
-+	host->sg_len = data->sg_len;
- 	host->data = data;
- 	host->data_chan = NULL;
- 
-@@ -1573,7 +1575,8 @@ static void atmci_read_data_pio(struct atmel_mci *host)
- 			if (offset == sg->length) {
- 				flush_dcache_page(sg_page(sg));
- 				host->sg = sg = sg_next(sg);
--				if (!sg)
-+				host->sg_len--;
-+				if (!sg || !host->sg_len)
- 					goto done;
- 
- 				offset = 0;
-@@ -1586,7 +1589,8 @@ static void atmci_read_data_pio(struct atmel_mci *host)
- 
- 			flush_dcache_page(sg_page(sg));
- 			host->sg = sg = sg_next(sg);
--			if (!sg)
-+			host->sg_len--;
-+			if (!sg || !host->sg_len)
- 				goto done;
- 
- 			offset = 4 - remaining;
-@@ -1640,7 +1644,8 @@ static void atmci_write_data_pio(struct atmel_mci *host)
- 			nbytes += 4;
- 			if (offset == sg->length) {
- 				host->sg = sg = sg_next(sg);
--				if (!sg)
-+				host->sg_len--;
-+				if (!sg || !host->sg_len)
- 					goto done;
- 
- 				offset = 0;
-@@ -1654,7 +1659,8 @@ static void atmci_write_data_pio(struct atmel_mci *host)
- 			nbytes += remaining;
- 
- 			host->sg = sg = sg_next(sg);
--			if (!sg) {
-+			host->sg_len--;
-+			if (!sg || !host->sg_len) {
- 				atmci_writel(host, ATMCI_TDR, value);
- 				goto done;
- 			}
+Since v5:
+Add below patch to this series.
+"mmc: davinci: allow driver to work without DMA resource"
+Choose smaller device name, da830-mmc instead of davinci-mmc-da830
+and dm6441-mmc instead of davinci-mmc-dm355.
+
+Since v4:
+Minor nit, check on return value for failure of max-frequency property
+parsing.
+Merged patch "ARM: davinci: mmc: derive version information from device name"
+with patch 1/4.
+
+Since v3:
+Added support to derive IP version information from platform_device_id table.
+
+Since v2:
+Modified the default value for bus-width and skipping the property specifications
+for highspeed card capabilties for now. Re-ordered patch 2 and 3.
+
+Since v1:
+Modified the DT parse function to take default values, updated DT binding
+documentation accordingly.
+
+
+Manjunathappa, Prakash (5):
+  mmc: davinci: allow driver to work without DMA resource
+  ARM: davinci: mmc: derive version information from device name
+  mmc: davinci_mmc: add DT support
+  ARM: davinci: da850: add mmc DT entries
+  ARM: davinci: da850: override mmc DT node device name
+
+ .../devicetree/bindings/mmc/davinci_mmc.txt        |   25 ++++++
+ arch/arm/boot/dts/da850-evm.dts                    |    7 ++
+ arch/arm/boot/dts/da850.dtsi                       |   15 +++
+ arch/arm/mach-davinci/board-da830-evm.c            |    1 -
+ arch/arm/mach-davinci/board-da850-evm.c            |    2 -
+ arch/arm/mach-davinci/board-dm355-evm.c            |    1 -
+ arch/arm/mach-davinci/board-dm365-evm.c            |    1 -
+ arch/arm/mach-davinci/board-dm644x-evm.c           |    1 -
+ arch/arm/mach-davinci/board-neuros-osd2.c          |    1 -
+ arch/arm/mach-davinci/board-omapl138-hawk.c        |    1 -
+ arch/arm/mach-davinci/board-tnetv107x-evm.c        |    1 -
+ arch/arm/mach-davinci/da830.c                      |    2 +-
+ arch/arm/mach-davinci/da850.c                      |    4 +-
+ arch/arm/mach-davinci/da8xx-dt.c                   |    1 +
+ arch/arm/mach-davinci/devices-da8xx.c              |    4 +-
+ arch/arm/mach-davinci/devices-tnetv107x.c          |    4 +-
+ arch/arm/mach-davinci/devices.c                    |    6 +-
+ arch/arm/mach-davinci/dm355.c                      |    4 +-
+ arch/arm/mach-davinci/dm365.c                      |    4 +-
+ arch/arm/mach-davinci/dm644x.c                     |    2 +-
+ arch/arm/mach-davinci/tnetv107x.c                  |    4 +-
+ drivers/mmc/host/davinci_mmc.c                     |   92 ++++++++++++++++++--
+ include/linux/platform_data/mmc-davinci.h          |    3 -
+ 23 files changed, 151 insertions(+), 35 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/davinci_mmc.txt
+
 -- 
-1.7.11.3
+1.7.4.1
 
