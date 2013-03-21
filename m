@@ -1,96 +1,41 @@
-From: Subhash Jadavani <subhashj@codeaurora.org>
-Subject: Re: [PATCH] Add method for triggering Sanitize command
-Date: Fri, 22 Mar 2013 23:04:28 +0530
-Message-ID: <514C9624.7020704@codeaurora.org>
-References: <1363780682-28440-1-git-send-email-ygardi@codeaurora.org> <514C2E10.4090108@codeaurora.org> <87obebl5oi.fsf@octavius.laptop.org>
+From: "WERNER ERICH ZELLER" <e639@humv.es>
+Subject: ACHTUNG FRIEND!
+Date: Fri, 22 Mar 2013 00:57:10 +0100 (CET)
+Message-ID: <55112.82.128.17.98.1363910230.squirrel__20036.0899827958$1363975581$gmane$org@correo.humv.es>
+Reply-To: wernererichzeller@yahoo.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <87obebl5oi.fsf@octavius.laptop.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Yaniv Gardi <ygardi@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from agero.humv.es ([193.146.74.20]:58141 "EHLO agero.humv.es"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1422633Ab3CVSFL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Mar 2013 14:05:11 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 3/22/2013 10:42 PM, Chris Ball wrote:
-> Hi,
->
-> On Fri, Mar 22 2013, Subhash Jadavani wrote:
->> On 3/20/2013 5:28 PM, Yaniv Gardi wrote:
->>> This patch adds a method to trigger Sanitize command to MMC.
->>> The Sanitize command is used for deleting the unmapped memory region
->>> of the MMC device.
->>>
->>> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
->>>
->>> diff --git a/mmc.c b/mmc.c
->>> index a2de863..174d9a4 100644
->>> --- a/mmc.c
->>> +++ b/mmc.c
->>> @@ -90,6 +90,11 @@ static struct Command commands[] = {
->>>    		"Permanently disable the eMMC H/W Reset feature on <device>.\nNOTE!  This is a one-time programmable (unreversible) change.",
->>>    	  NULL
->>>    	},
->>> +	{ do_sanitize, -1,
->>> +	  "sanitize", "<device>\n"
->>> +		"Send Sanitize command to the <device>.\nThis will delete the unmapped memory region of the device",
->>> +	  NULL
->>> +	},
->>>    	{ 0, 0, 0, 0 }
->>>    };
->>>    diff --git a/mmc.h b/mmc.h
->>> index c863751..5173d34 100644
->>> --- a/mmc.h
->>> +++ b/mmc.h
->>> @@ -38,6 +38,7 @@
->>>    #define EXT_CSD_PART_CONFIG		179
->>>    #define EXT_CSD_BOOT_WP			173
->>>    #define EXT_CSD_WR_REL_PARAM		166
->>> +#define EXT_CSD_SANITIZE_START		165
->>>    #define EXT_CSD_BKOPS_EN		163	/* R/W */
->>>    #define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
->>>    #define EXT_CSD_NATIVE_SECTOR_SIZE	63 /* R */
->>> diff --git a/mmc_cmds.c b/mmc_cmds.c
->>> index b407f65..5473a20 100644
->>> --- a/mmc_cmds.c
->>> +++ b/mmc_cmds.c
->>> @@ -767,3 +767,31 @@ int do_read_extcsd(int nargs, char **argv)
->>>    out_free:
->>>    	return ret;
->>>    }
->>> +
->>> +int do_sanitize(int nargs, char **argv)
->>> +{
->>> +	int fd, ret;
->>> +	char *device;
->>> +
->>> +	CHECK(nargs != 2, "Usage: mmc sanitize </path/to/mmcblkX>\n",
->>> +			exit(1));
->>> +
->>> +	device = argv[1];
->>> +
->>> +	fd = open(device, O_RDWR);
->>> +	if (fd < 0) {
->>> +		perror("open");
->>> +		exit(1);
->>> +	}
->>> +
->>> +	ret = write_extcsd_value(fd, EXT_CSD_SANITIZE_START, 1);
->>> +	if (ret) {
->>> +		fprintf(stderr, "Could not write 0x%02x to EXT_CSD[%d] in %s\n",
->>> +			1, EXT_CSD_SANITIZE_START, device);
->>> +		exit(1);
->>> +	}
->>> +
->> don't we need to close the opened blkdev file here? or is it done
->> somewhere else?
-> Linux closes open file descriptors on process exit, no?
-ok then it looks good to me.
 
-Acked-by: Subhash Jadavani <subhashj@codeaurora.org>
 
-Thanks,
-Subhash
->
-> - Chris.
+
+--=20
+Eure Eminenz, das ist das dritte Mal, dass ich schreibe Ihnen bin, ich
+bete nur du es dieses Mal! Ich bin Barrister Werner Erich Zeller des
+Vereinigten K=F6nigreichs und ich schreibe auf Ihre 100% aufrichtiges
+Interesse und Partnerschaft bei der Wiederherstellung der H=F6he von =80=
+ 15
+Mio. (EURO) Privatbank, die fr=FCher zu einem sp=E4ten Kunde von mir, d=
+ie,
+ohne einem bestimmten Nest weitergegeben geh=F6rten zu suchen Angeh=F6r=
+igen
+und Empf=E4nger. Wie f=FCr die Rechtm=E4=DFigkeit und Echtheit, lassen =
+Sie das zu
+mir, ich werde es als Rechtsanwalt rechtlich 100% Griff! Wir stehen bei=
+de
+zu 50% des =80 15 Mio. (EURO) jeweils als Partner profitieren. Schicken=
+ Sie
+mir eine private E-Mail f=FCr die Details: wernererichzeller@yahoo.com =
+und
+Telefon: +447024090820
+
+Bitte zur=FCck zu mir sofort!
+Werner Erich Zeller (Attorney)
