@@ -1,98 +1,99 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH] mmc: core: Decrease the card detect frequency in polling mode
-Date: Fri, 22 Mar 2013 10:30:19 +0100
-Message-ID: <1363944619-19829-1-git-send-email-ulf.hansson@stericsson.com>
+From: Subhash Jadavani <subhashj@codeaurora.org>
+Subject: Re: [PATCH] Add method for triggering Sanitize command
+Date: Fri, 22 Mar 2013 15:40:24 +0530
+Message-ID: <514C2E10.4090108@codeaurora.org>
+References: <1363780682-28440-1-git-send-email-ygardi@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:39336 "EHLO
-	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932102Ab3CVJah (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Mar 2013 05:30:37 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1363780682-28440-1-git-send-email-ygardi@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Yaniv Gardi <ygardi@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+On 3/20/2013 5:28 PM, Yaniv Gardi wrote:
+> This patch adds a method to trigger Sanitize command to MMC.
+> The Sanitize command is used for deleting the unmapped memory region
+> of the MMC device.
+>
+> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
+>
+> diff --git a/mmc.c b/mmc.c
+> index a2de863..174d9a4 100644
+> --- a/mmc.c
+> +++ b/mmc.c
+> @@ -90,6 +90,11 @@ static struct Command commands[] = {
+>   		"Permanently disable the eMMC H/W Reset feature on <device>.\nNOTE!  This is a one-time programmable (unreversible) change.",
+>   	  NULL
+>   	},
+> +	{ do_sanitize, -1,
+> +	  "sanitize", "<device>\n"
+> +		"Send Sanitize command to the <device>.\nThis will delete the unmapped memory region of the device",
+> +	  NULL
+> +	},
+>   	{ 0, 0, 0, 0 }
+>   };
+>   
+> diff --git a/mmc.h b/mmc.h
+> index c863751..5173d34 100644
+> --- a/mmc.h
+> +++ b/mmc.h
+> @@ -38,6 +38,7 @@
+>   #define EXT_CSD_PART_CONFIG		179
+>   #define EXT_CSD_BOOT_WP			173
+>   #define EXT_CSD_WR_REL_PARAM		166
+> +#define EXT_CSD_SANITIZE_START		165
+>   #define EXT_CSD_BKOPS_EN		163	/* R/W */
+>   #define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
+>   #define EXT_CSD_NATIVE_SECTOR_SIZE	63 /* R */
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index b407f65..5473a20 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -767,3 +767,31 @@ int do_read_extcsd(int nargs, char **argv)
+>   out_free:
+>   	return ret;
+>   }
+> +
+> +int do_sanitize(int nargs, char **argv)
+> +{
+> +	int fd, ret;
+> +	char *device;
+> +
+> +	CHECK(nargs != 2, "Usage: mmc sanitize </path/to/mmcblkX>\n",
+> +			exit(1));
+> +
+> +	device = argv[1];
+> +
+> +	fd = open(device, O_RDWR);
+> +	if (fd < 0) {
+> +		perror("open");
+> +		exit(1);
+> +	}
+> +
+> +	ret = write_extcsd_value(fd, EXT_CSD_SANITIZE_START, 1);
+> +	if (ret) {
+> +		fprintf(stderr, "Could not write 0x%02x to EXT_CSD[%d] in %s\n",
+> +			1, EXT_CSD_SANITIZE_START, device);
+> +		exit(1);
+> +	}
+> +
 
-Previously the MMC_CAP2_DETECT_ON_ERR was invented for detecting
-slow card removal. In was never a realy good solution and a proper
-fix shall use gpio debouncing instead. We remove this cap in this
-patch.
+don't we need to close the opened blkdev file here? or is it done 
+somewhere else?
 
-Although when running in polling card detect mode, the code can be
-re-used to detect card removals. Thus we are able to decrease the
-frequency of issued detect works from the mmc_rescan function.
-
-When no card is inserted the polling timeout is 1 HZ. When card is
-inserted and detected the polling timeout is increased to 30 s.
-
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/core.c  |   10 ++++++----
- include/linux/mmc/host.h |    1 -
- 2 files changed, 6 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 08a3cf2..3a83cdc 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2312,14 +2312,13 @@ int mmc_detect_card_removed(struct mmc_host *host)
- 	 * The card will be considered unchanged unless we have been asked to
- 	 * detect a change or host requires polling to provide card detection.
- 	 */
--	if (!host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL) &&
--	    !(host->caps2 & MMC_CAP2_DETECT_ON_ERR))
-+	if (!host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
- 		return ret;
- 
- 	host->detect_change = 0;
- 	if (!ret) {
- 		ret = _mmc_detect_card_removed(host);
--		if (ret && (host->caps2 & MMC_CAP2_DETECT_ON_ERR)) {
-+		if (ret && (host->caps & MMC_CAP_NEEDS_POLL)) {
- 			/*
- 			 * Schedule a detect work as soon as possible to let a
- 			 * rescan handle the card removal.
-@@ -2338,6 +2337,7 @@ void mmc_rescan(struct work_struct *work)
- 	struct mmc_host *host =
- 		container_of(work, struct mmc_host, detect.work);
- 	int i;
-+	unsigned int polltimeout_s = 1;
- 
- 	if (host->rescan_disable)
- 		return;
-@@ -2368,6 +2368,8 @@ void mmc_rescan(struct work_struct *work)
- 
- 	/* if there still is a card present, stop here */
- 	if (host->bus_ops != NULL) {
-+		/* set the poll timeout to 30 s when card is inserted */
-+		polltimeout_s = 30;
- 		mmc_bus_put(host);
- 		goto out;
- 	}
-@@ -2396,7 +2398,7 @@ void mmc_rescan(struct work_struct *work)
- 
-  out:
- 	if (host->caps & MMC_CAP_NEEDS_POLL)
--		mmc_schedule_delayed_work(&host->detect, HZ);
-+		mmc_schedule_delayed_work(&host->detect, polltimeout_s * HZ);
- }
- 
- void mmc_start_host(struct mmc_host *host)
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index d6f20cc..a018e2d 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -272,7 +272,6 @@ struct mmc_host {
- #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
- 				 MMC_CAP2_HS200_1_2V_SDR)
- #define MMC_CAP2_BROKEN_VOLTAGE	(1 << 7)	/* Use the broken voltage */
--#define MMC_CAP2_DETECT_ON_ERR	(1 << 8)	/* On I/O err check card removal */
- #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
- #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
- #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
--- 
-1.7.10
-
+> +	return ret;
+> +
+> +}
+> +
+> diff --git a/mmc_cmds.h b/mmc_cmds.h
+> index e52d622..ec22eee 100644
+> --- a/mmc_cmds.h
+> +++ b/mmc_cmds.h
+> @@ -24,3 +24,4 @@ int do_write_boot_en(int nargs, char **argv);
+>   int do_write_bkops_en(int nargs, char **argv);
+>   int do_hwreset_en(int nargs, char **argv);
+>   int do_hwreset_dis(int nargs, char **argv);
+> +int do_sanitize(int nargs, char **argv);
