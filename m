@@ -1,36 +1,48 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc/host:rtsx: Don't execute power up sequence repeatedly
-Date: Fri, 22 Mar 2013 12:36:26 -0400
-Message-ID: <87txo3o0hh.fsf@octavius.laptop.org>
-References: <1362726357-7629-1-git-send-email-wei_wang@realsil.com.cn>
+Subject: Re: [PATCH] mmc: sdhci-pltfm: Fix timeout on t4240's sdhci controller
+Date: Fri, 22 Mar 2013 12:37:12 -0400
+Message-ID: <87ppyro0g7.fsf@octavius.laptop.org>
+References: <1362730450-24254-1-git-send-email-Chunhe.Lan@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:39075 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:39086 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1161003Ab3CVQgf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Mar 2013 12:36:35 -0400
-In-Reply-To: <1362726357-7629-1-git-send-email-wei_wang@realsil.com.cn> (wei
-	wang's message of "Fri, 8 Mar 2013 15:05:57 +0800")
+	id S1422631Ab3CVQhP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Mar 2013 12:37:15 -0400
+In-Reply-To: <1362730450-24254-1-git-send-email-Chunhe.Lan@freescale.com>
+	(Chunhe Lan's message of "Fri, 8 Mar 2013 16:14:10 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: wei_wang@realsil.com.cn
-Cc: sameo@linux.intel.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, rogerable@realtek.com
+To: Chunhe Lan <Chunhe.Lan@freescale.com>
+Cc: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Fri, Mar 08 2013, wei_wang@realsil.com.cn wrote:
-> From: Wei WANG <wei_wang@realsil.com.cn>
+On Fri, Mar 08 2013, Chunhe Lan wrote:
+> This patch fixes timeout problems on t4240's sdhci controller:
 >
-> For some Realtek's card reader, power up sequence can only be executed
-> when power has been turned off fully.
-> So rtsx host should not start power up sequence again when set_ios been
-> called if the power has been turned on.
+> 	mmc0: Too large timeout requested for CMD25!
+> 	mmc0: Too large timeout requested for CMD25!
+> 	mmc0: Too large timeout requested for CMD25!
 >
-> Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
+> Signed-off-by: Chunhe Lan <Chunhe.Lan@freescale.com>
+> Cc: Chris Ball <cjb@laptop.org>
 > ---
->  drivers/mmc/host/rtsx_pci_sdmmc.c |   10 ++++++++++
->  1 file changed, 10 insertions(+)
+>  drivers/mmc/host/sdhci-pltfm.c |    1 +
+>  1 files changed, 1 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+> index 3145a78..9db7b12 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -94,6 +94,7 @@ void sdhci_get_of_property(struct platform_device *pdev)
+>  
+>  		if (of_device_is_compatible(np, "fsl,p2020-esdhc") ||
+>  		    of_device_is_compatible(np, "fsl,p1010-esdhc") ||
+> +		    of_device_is_compatible(np, "fsl,t4240-esdhc") ||
+>  		    of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
+>  			host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
 
 Thanks, pushed to mmc-next for 3.10.
 
