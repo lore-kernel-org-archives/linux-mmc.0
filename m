@@ -1,30 +1,57 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdio: bind acpi with sdio function device
-Date: Fri, 22 Mar 2013 12:27:11 -0400
-Message-ID: <87boabpfhc.fsf@octavius.laptop.org>
-References: <1362453892-13304-1-git-send-email-aaron.lu@intel.com>
+Subject: Re: [PATCH 1/2] mmc: davinci_mmc: use module_platform_driver_probe()
+Date: Fri, 22 Mar 2013 12:30:56 -0400
+Message-ID: <877gkzpfb3.fsf@octavius.laptop.org>
+References: <005801ce1954$fc029ce0$f407d6a0$%han@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <1362453892-13304-1-git-send-email-aaron.lu@intel.com> (Aaron
-	Lu's message of "Tue, 5 Mar 2013 11:24:52 +0800")
-Sender: linux-pm-owner@vger.kernel.org
-To: Aaron Lu <aaron.lu@intel.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, linux-mmc@vger.kernel.org, linux-acpi@vger.kernel.org, linux-pm@vger.kernel.org, Aaron Lu <aaron.lwe@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:43757 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1160995Ab3CVQbA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Mar 2013 12:31:00 -0400
+In-Reply-To: <005801ce1954$fc029ce0$f407d6a0$%han@samsung.com> (Jingoo Han's
+	message of "Tue, 05 Mar 2013 12:53:23 +0900")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jingoo Han <jg1.han@samsung.com>
+Cc: linux-mmc@vger.kernel.org
 
-Hi Aaron,
+Hi,
 
-On Mon, Mar 04 2013, Aaron Lu wrote:
-> ACPI spec 5 defined the _ADR encoding for sdio bus as:
-> High word - slot number (0 based)
-> Low word  - function number
+On Mon, Mar 04 2013, Jingoo Han wrote:
+> This patch uses module_platform_driver_probe() macro which makes
+> the code smaller and simpler.
 >
-> This patch adds support for binding sdio function device with acpi node,
-> and if successful, involve acpi into its power management.
+> Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+> ---
+>  drivers/mmc/host/davinci_mmc.c |   13 +------------
+>  1 files changed, 1 insertions(+), 12 deletions(-)
 >
-> Signed-off-by: Aaron Lu <aaron.lu@intel.com>
-> Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
+> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+> index 2063677..7635e48 100644
+> --- a/drivers/mmc/host/davinci_mmc.c
+> +++ b/drivers/mmc/host/davinci_mmc.c
+> @@ -1410,18 +1410,7 @@ static struct platform_driver davinci_mmcsd_driver = {
+>  	.remove		= __exit_p(davinci_mmcsd_remove),
+>  };
+>  
+> -static int __init davinci_mmcsd_init(void)
+> -{
+> -	return platform_driver_probe(&davinci_mmcsd_driver,
+> -				     davinci_mmcsd_probe);
+> -}
+> -module_init(davinci_mmcsd_init);
+> -
+> -static void __exit davinci_mmcsd_exit(void)
+> -{
+> -	platform_driver_unregister(&davinci_mmcsd_driver);
+> -}
+> -module_exit(davinci_mmcsd_exit);
+> +module_platform_driver_probe(davinci_mmcsd_driver, davinci_mmcsd_probe);
+>  
+>  MODULE_AUTHOR("Texas Instruments India");
+>  MODULE_LICENSE("GPL");
 
 Thanks, pushed to mmc-next for 3.10.
 
