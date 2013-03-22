@@ -1,37 +1,38 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: mvsdio: use dev_*() API instead of pr_*() API
-Date: Fri, 22 Mar 2013 13:13:15 -0400
-Message-ID: <87k3ozl5n8.fsf@octavius.laptop.org>
-References: <1363792181-26512-1-git-send-email-thomas.petazzoni@free-electrons.com>
+Subject: Re: [PATCH] sdhci: sirf: add mmc host sdhci-pltfm based driver for SiRF SoCs
+Date: Fri, 22 Mar 2013 13:14:51 -0400
+Message-ID: <87fvznl5kk.fsf@octavius.laptop.org>
+References: <1363854439-6859-1-git-send-email-Barry.Song@csr.com>
+	<1605490.1WxfNfZQTh@wuerfel>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:47769 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:47787 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1422636Ab3CVRNY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Mar 2013 13:13:24 -0400
-In-Reply-To: <1363792181-26512-1-git-send-email-thomas.petazzoni@free-electrons.com>
-	(Thomas Petazzoni's message of "Wed, 20 Mar 2013 16:09:41 +0100")
+	id S1422636Ab3CVRO6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Mar 2013 13:14:58 -0400
+In-Reply-To: <1605490.1WxfNfZQTh@wuerfel> (Arnd Bergmann's message of "Thu, 21
+	Mar 2013 11:13:34 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Cc: linux-mmc@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Maen Suleiman <maen@marvell.com>, Lior Amsalem <alior@marvell.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Ralph Droms <rdroms.ietf@gmail.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Barry Song <Barry.Song@csr.com>, linux-mmc@vger.kernel.org, workgroup.linux@csr.com, linux-arm-kernel@lists.infradead.org, Barry Song <Baohua.Song@csr.com>, Bin Shi <Bin.Shi@csr.com>
 
 Hi,
 
-On Wed, Mar 20 2013, Thomas Petazzoni wrote:
-> The mvsdio driver was already using some dev_*() functions to print
-> some messages, but still using pr_*() functions for some others. This
-> patch converts all messages to use dev_*() functions.
+On Thu, Mar 21 2013, Arnd Bergmann wrote:
+> On Thursday 21 March 2013 16:27:19 Barry Song wrote:
+>> From: Barry Song <Baohua.Song@csr.com>
+>> 
+>> this patch adds the new driver for CSR SiRF SoCs:
+>> SiRFprimaII: unicore ARM Cortex-A9
+>> SiRFatlas6: unicore ARM Cortex-A9
+>> SiRFmarco: dual core ARM Cortex-A9 SMP
+>> 
+>> Signed-off-by: Barry Song <Baohua.Song@csr.com>
+>> Signed-off-by: Bin Shi <Bin.Shi@csr.com>
 >
-> Many of the pr_*() function calls were printing the output of
-> mmc_hostname() to preprend the message with an identifier for the
-> device. Since the dev_*() functions do that automatically, this patch
-> also gets rid of those string prefixes.
->
-> Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-> ---
-> This is for 3.10.
+> Acked-by: Arnd Bergmann <arnd@arndb.de>
 
 Thanks, pushed to mmc-next for 3.10.
 
