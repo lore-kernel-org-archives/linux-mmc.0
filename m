@@ -1,71 +1,140 @@
-From: Philip Rakity <prakity@nvidia.com>
-Subject: Re: When bus width detection procedure takes place, kernel cannot
- lock on correct bus width
-Date: Fri, 22 Mar 2013 19:56:10 +0100
-Message-ID: <C0EB07A4-F566-4865-BF4C-D9668C527203@nvidia.com>
-References: <87ip4qdybr.fsf@octavius.laptop.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Ralph Droms <rdroms@gmail.com>
+Subject: Re: [PATCH for 3.10 v2] mmc: mvsdio: use dev_*() API instead of pr_*() API
+Date: Fri, 22 Mar 2013 16:44:53 -0400
+Message-ID: <314D078E-96FA-4118-9640-CF37883137A0@gmail.com>
+References: <1363959441-30744-1-git-send-email-thomas.petazzoni@free-electrons.com>
+Mime-Version: 1.0 (Mac OS X Mail 6.3 \(1503\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate03.nvidia.com ([216.228.121.140]:17585 "EHLO
-	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754781Ab3CVS4L convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Mar 2013 14:56:11 -0400
-In-Reply-To: <87ip4qdybr.fsf@octavius.laptop.org>
-Content-Language: en-US
+Received: from mail-vc0-f181.google.com ([209.85.220.181]:35889 "EHLO
+	mail-vc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1422937Ab3CVUo6 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Mar 2013 16:44:58 -0400
+Received: by mail-vc0-f181.google.com with SMTP id hv10so3411993vcb.40
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Mar 2013 13:44:57 -0700 (PDT)
+In-Reply-To: <1363959441-30744-1-git-send-email-thomas.petazzoni@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "elad.yi@gmail.com" <elad.yi@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Cc: Lior Amsalem <alior@marvell.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Andrew Lunn <andrew@lunn.ch>, Jason Cooper <jason@lakedaemon.net>, Gregory Clement <gregory.clement@free-electrons.com>, Maen Suleiman <maen@marvell.com>, linux-arm-kernel@lists.infradead.org
 
+I've successfully compiled and tested this patch on my SheevaPlug platform.
 
-Elad,
+- Ralph Droms
 
-Please supply the name of the spec which shows that this field is dependent on bit width.
+On Mar 22, 2013, at 9:37 AM, Thomas Petazzoni <thomas.petazzoni@free-electrons.com> wrote:
 
-I checked my sd / emmc specs and do not see this.
+The mvsdio driver was already using some dev_*() functions to print
+some messages, but still using pr_*() functions for some others. This
+patch converts all messages to use dev_*() functions.
 
-regards,
+Many of the pr_*() function calls were printing the output of
+mmc_hostname() to preprend the message with an identifier for the
+device. Since the dev_*() functions do that automatically, this patch
+also gets rid of those string prefixes.
 
-Philip
+Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Tested-by: Ralph Droms <rdroms@gmail.com>
 
+---
+This is for 3.10.
 
-On Mar 17, 2013, at 5:07 AM, Chris Ball <cjb@laptop.org> wrote:
+Changes between v1 and v2:
 
-> Hi Elad, I'm forwarding your bug report to the linux-mmc@ list.
-> 
-> - Chris.
-> 
-> 
-> I've been working on a bringup of an new board in Harmonic Inc.
-> This board uses Sandisk iNand eMMC flash.
-> I've noticed that the mmc driver keeps detecting 1 bit width although HW
-> supports 4 bit, looked into it, and found the problem. In line 571 at mmc.c:
-> There is:
->    /* only compare read only fields */
->    err = !((card->ext_csd.raw_partition_support ==
->            bw_ext_csd[EXT_CSD_PARTITION_SUPPORT]) &&
->        (card->ext_csd.raw_erased_mem_count ==
->            bw_ext_csd[EXT_CSD_ERASED_MEM_CONT]) &&
->        (card->ext_csd.rev ==
->            bw_ext_csd[EXT_CSD_REV]) &&
->        (card->ext_csd.raw_ext_csd_structure ==
->                ...
-> 
-> The problem is that raw_partition_support is not the same when setting width of
-> 4 bits instead of 1 bit, and shouldn't be compared at all although it is read
-> only.
-> this should be changed to:
->    /* only compare read only fields */
->    err = !((card->ext_csd.raw_erased_mem_count ==
->            bw_ext_csd[EXT_CSD_ERASED_MEM_CONT]) &&
->        (card->ext_csd.rev ==
->            bw_ext_csd[EXT_CSD_REV]) &&
->        (card->ext_csd.raw_ext_csd_structure ==
->                ...
-> 
-> -- 
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
+* Fix incorrect format string. A "%s" was left, even though the
+  mmc_hostname() argument was removed due to the conversion to the
+  dev_*() API.
+---
+drivers/mmc/host/mvsdio.c |   37 +++++++++++++++----------------------
+1 file changed, 15 insertions(+), 22 deletions(-)
+
+diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+index 145cdaf..f6e5e25 100644
+--- a/drivers/mmc/host/mvsdio.c
++++ b/drivers/mmc/host/mvsdio.c
+@@ -119,10 +119,8 @@ static int mvsd_setup_data(struct mvsd_host *host, struct mmc_data *data)
+		host->pio_size = data->blocks * data->blksz;
+		host->pio_ptr = sg_virt(data->sg);
+		if (!nodma)
+-			pr_debug("%s: fallback to PIO for data "
+-					  "at 0x%p size %d\n",
+-					  mmc_hostname(host->mmc),
+-					  host->pio_ptr, host->pio_size);
++			dev_dbg(host->dev, "fallback to PIO for data at 0x%p size %d\n",
++				host->pio_ptr, host->pio_size);
+		return 1;
+	} else {
+		dma_addr_t phys_addr;
+@@ -473,8 +471,8 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
+		if (mrq->data)
+			err_status = mvsd_finish_data(host, mrq->data, err_status);
+		if (err_status) {
+-			pr_err("%s: unhandled error status %#04x\n",
+-					mmc_hostname(host->mmc), err_status);
++			dev_err(host->dev, "unhandled error status %#04x\n",
++				err_status);
+			cmd->error = -ENOMSG;
+		}
+
+@@ -491,9 +489,8 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
+	if (irq_handled)
+		return IRQ_HANDLED;
+
+-	pr_err("%s: unhandled interrupt status=0x%04x en=0x%04x "
+-			"pio=%d\n", mmc_hostname(host->mmc), intr_status,
+-			host->intr_en, host->pio_size);
++	dev_err(host->dev, "unhandled interrupt status=0x%04x en=0x%04x pio=%d\n",
++		intr_status, host->intr_en, host->pio_size);
+	return IRQ_NONE;
+}
+
+@@ -507,13 +504,11 @@ static void mvsd_timeout_timer(unsigned long data)
+	spin_lock_irqsave(&host->lock, flags);
+	mrq = host->mrq;
+	if (mrq) {
+-		pr_err("%s: Timeout waiting for hardware interrupt.\n",
+-				mmc_hostname(host->mmc));
+-		pr_err("%s: hw_state=0x%04x, intr_status=0x%04x "
+-				"intr_en=0x%04x\n", mmc_hostname(host->mmc),
+-				mvsd_read(MVSD_HW_STATE),
+-				mvsd_read(MVSD_NOR_INTR_STATUS),
+-				mvsd_read(MVSD_NOR_INTR_EN));
++		dev_err(host->dev, "Timeout waiting for hardware interrupt.\n");
++		dev_err(host->dev, "hw_state=0x%04x, intr_status=0x%04x intr_en=0x%04x\n",
++			mvsd_read(MVSD_HW_STATE),
++			mvsd_read(MVSD_NOR_INTR_STATUS),
++			mvsd_read(MVSD_NOR_INTR_EN));
+
+		host->mrq = NULL;
+
+@@ -778,7 +773,7 @@ static int __init mvsd_probe(struct platform_device *pdev)
+
+	ret = devm_request_irq(&pdev->dev, irq, mvsd_irq, 0, DRIVER_NAME, host);
+	if (ret) {
+-		pr_err("%s: cannot assign irq %d\n", DRIVER_NAME, irq);
++		dev_err(&pdev->dev, "cannot assign irq %d\n", irq);
+		goto out;
+	}
+
+@@ -797,13 +792,11 @@ static int __init mvsd_probe(struct platform_device *pdev)
+	if (ret)
+		goto out;
+
+-	pr_notice("%s: %s driver initialized, ",
+-			   mmc_hostname(mmc), DRIVER_NAME);
+	if (!(mmc->caps & MMC_CAP_NEEDS_POLL))
+-		printk("using GPIO %d for card detection\n",
+-		       gpio_card_detect);
++		dev_notice(&pdev->dev, "using GPIO %d for card detection\n",
++			   gpio_card_detect);
+	else
+-		printk("lacking card detect (fall back to polling)\n");
++		dev_notice(&pdev->dev, "lacking card detect (fall back to polling)\n");
+	return 0;
+
+out:
+-- 
+1.7.9.5
+
 
