@@ -1,97 +1,98 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/3i v6] MMC/SD: Add callback function to detect card
-Date: Fri, 22 Mar 2013 09:38:07 +0100
-Message-ID: <CAPDyKFqNcT_BFPDh1bST9S+jnOWp6tm34mSEAxHHpQ7uC_K+8A@mail.gmail.com>
-References: <25B60CDC2F704E4E9D88FFD52780CB4C0BDEC869A3@SC-VEXCH1.marvell.com>
-	<CADz5_gJe8xJH6FD7xwxssmWSZ2w4tvKAnYAexzTtVSyW0ovweQ@mail.gmail.com>
-	<110EED8CC96DFC488B7E717A2027A27C33B2BF@039-SN1MPN1-003.039d.mgd.msft.net>
-	<CADz5_gLJvVmJa_5zAZAD-7cfbneySgH8GmwfDfj+-eT3Y80QQA@mail.gmail.com>
-	<110EED8CC96DFC488B7E717A2027A27C33B361@039-SN1MPN1-003.039d.mgd.msft.net>
-	<CADz5_g+_JTafM4rLL0Qa8yOSCnoGn9R+nJ6JdqKrR7Td82BDzA@mail.gmail.com>
-	<110EED8CC96DFC488B7E717A2027A27C33B46A@039-SN1MPN1-003.039d.mgd.msft.net>
-	<CAPDyKFrHvg6inGahDwz0dsqBbrzJF4p0oW1PEVxSLEq0Mq-s=A@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH] mmc: core: Decrease the card detect frequency in polling mode
+Date: Fri, 22 Mar 2013 10:30:19 +0100
+Message-ID: <1363944619-19829-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f48.google.com ([209.85.212.48]:45968 "EHLO
-	mail-vb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933577Ab3CVIiJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Mar 2013 04:38:09 -0400
-Received: by mail-vb0-f48.google.com with SMTP id fc21so2443173vbb.7
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Mar 2013 01:38:08 -0700 (PDT)
-In-Reply-To: <CAPDyKFrHvg6inGahDwz0dsqBbrzJF4p0oW1PEVxSLEq0Mq-s=A@mail.gmail.com>
+Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:39336 "EHLO
+	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932102Ab3CVJah (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Mar 2013 05:30:37 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Changming-R66093 <r66093@freescale.com>
-Cc: Kevin Liu <keyuan.liu@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-On 22 March 2013 09:35, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 22 March 2013 08:42, Huang Changming-R66093 <r66093@freescale.com> wrote:
->>
->> <r66093@freescale.com>:
->>> >> >> Jerry,
->>> >> >>
->>> >> >> Function _mmc_detect_card_removed should only be called when card
->>> >> >> insert/removal or i/o error occur unless POLLING is used(called
->>> >> >> once per second). So it should _not_ impact performance much.
->>> >> > [jerry]
->>> >> > No, your understanding is wrong.
->>> >> > Function "_mmc_detect_card_removed " is called to check if our card
->>> >> > has
->>> >> been removed when driver run the function "mmc_rescan" every time.
->>> >> >
->>> >>
->>> >> But when will mmc_rescan be called?
->>> >> Besides boot up, only when card status change it will be called.
->>> >> So usually it should _not_ be called frequently.
->>> > [jerry]
->>> > For poll mode, how to know card status changed?
->>> > The answer is "mmc_rescan".
->>> > maybe you could read the last two lines of this function ago.
->>> >
->>>
->>> I mentioned this in my first response "unless POLLING is used(called once
->>> per second)". I was a bit confused firstly.
->>> I think slot-gpio is a better solution, with which you don't need the
->>> every second polling.
->> [jerry]
->> Not all Soc has GPIO to do this. our controller has the pin to detect the card status, need the external hardware to support it.
->> But due to some reasons, some boards don't do this work, so need the poll mode for all boards.
->>
->>> >> >> POLLING is poor for performance, why not change to slot-gpio if
->>> >> >> host is broken for card detect.
->>> >> > [jerry]
->>> >> > Some our boards can't support interrupt mode to detect card
->>> >> insert/removable, so we unify the poll mode.
->>> >> >
->>> >>
->>> >> Not support gpio interrupt?
->>> >> I think you only don't support sdh host interrupt.
->>> >
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org More majordomo info at
->>> http://vger.kernel.org/majordomo-info.html
->>
->>
->
-> A suggestion; the poll time out is 1s today. We could make some more
-> intelligent update to the timeout value so we decrease the number of
-> timeouts to happen. In other words minimize the number of mmc_rescan
-> to be executed.
->
-> 1. When no card is inserted, use 1 s.
-> 2. When card is inserted, switch to 30 s timeout. The card removal
-> will be detected anyway when a blk err occurs, due to that
-> mmc_detect_card_removed will be called from the block layer at error
-> handling path.
->
-> Any thoughts?
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-Well, one more thing is needed. MMC_CAP2_DETECT_ON_ERR shall be
-removed and replaced with MMC_CAP_NEEDS_POLL in the
-mmc_detect_card_removed function.
+Previously the MMC_CAP2_DETECT_ON_ERR was invented for detecting
+slow card removal. In was never a realy good solution and a proper
+fix shall use gpio debouncing instead. We remove this cap in this
+patch.
 
->
-> Kind regards
-> Ulf Hansson
+Although when running in polling card detect mode, the code can be
+re-used to detect card removals. Thus we are able to decrease the
+frequency of issued detect works from the mmc_rescan function.
+
+When no card is inserted the polling timeout is 1 HZ. When card is
+inserted and detected the polling timeout is increased to 30 s.
+
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/core.c  |   10 ++++++----
+ include/linux/mmc/host.h |    1 -
+ 2 files changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 08a3cf2..3a83cdc 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2312,14 +2312,13 @@ int mmc_detect_card_removed(struct mmc_host *host)
+ 	 * The card will be considered unchanged unless we have been asked to
+ 	 * detect a change or host requires polling to provide card detection.
+ 	 */
+-	if (!host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL) &&
+-	    !(host->caps2 & MMC_CAP2_DETECT_ON_ERR))
++	if (!host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
+ 		return ret;
+ 
+ 	host->detect_change = 0;
+ 	if (!ret) {
+ 		ret = _mmc_detect_card_removed(host);
+-		if (ret && (host->caps2 & MMC_CAP2_DETECT_ON_ERR)) {
++		if (ret && (host->caps & MMC_CAP_NEEDS_POLL)) {
+ 			/*
+ 			 * Schedule a detect work as soon as possible to let a
+ 			 * rescan handle the card removal.
+@@ -2338,6 +2337,7 @@ void mmc_rescan(struct work_struct *work)
+ 	struct mmc_host *host =
+ 		container_of(work, struct mmc_host, detect.work);
+ 	int i;
++	unsigned int polltimeout_s = 1;
+ 
+ 	if (host->rescan_disable)
+ 		return;
+@@ -2368,6 +2368,8 @@ void mmc_rescan(struct work_struct *work)
+ 
+ 	/* if there still is a card present, stop here */
+ 	if (host->bus_ops != NULL) {
++		/* set the poll timeout to 30 s when card is inserted */
++		polltimeout_s = 30;
+ 		mmc_bus_put(host);
+ 		goto out;
+ 	}
+@@ -2396,7 +2398,7 @@ void mmc_rescan(struct work_struct *work)
+ 
+  out:
+ 	if (host->caps & MMC_CAP_NEEDS_POLL)
+-		mmc_schedule_delayed_work(&host->detect, HZ);
++		mmc_schedule_delayed_work(&host->detect, polltimeout_s * HZ);
+ }
+ 
+ void mmc_start_host(struct mmc_host *host)
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index d6f20cc..a018e2d 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -272,7 +272,6 @@ struct mmc_host {
+ #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
+ 				 MMC_CAP2_HS200_1_2V_SDR)
+ #define MMC_CAP2_BROKEN_VOLTAGE	(1 << 7)	/* Use the broken voltage */
+-#define MMC_CAP2_DETECT_ON_ERR	(1 << 8)	/* On I/O err check card removal */
+ #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
+ #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
+ #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
+-- 
+1.7.10
+
