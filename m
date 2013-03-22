@@ -1,46 +1,35 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3] mmc: dw_mmc: read all data in FIFO after Data transfer over interrupt in pio mode
-Date: Fri, 22 Mar 2013 12:01:21 -0400
-Message-ID: <871ub7qv8u.fsf@octavius.laptop.org>
-References: <000401cdf874$97e25620$c7a70260$%kim@samsung.com>
-	<001401ce0dc5$ea3b0d20$beb12760$%jun@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: fixed a wrong UHS_REG 16 bit clear
+Date: Fri, 22 Mar 2013 12:04:36 -0400
+Message-ID: <87wqszpgiz.fsf@octavius.laptop.org>
+References: <1361496450-12647-1-git-send-email-hyeonsu.kim@samsung.com>
+	<001101ce10ee$1df30610$59d91230$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43064 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:34300 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933488Ab3CVQB0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Mar 2013 12:01:26 -0400
-In-Reply-To: <001401ce0dc5$ea3b0d20$beb12760$%jun@samsung.com> (Seungwon
-	Jeon's message of "Mon, 18 Feb 2013 19:51:32 +0900")
+	id S933516Ab3CVQEn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Mar 2013 12:04:43 -0400
+In-Reply-To: <001101ce10ee$1df30610$59d91230$%jun@samsung.com> (Seungwon
+	Jeon's message of "Fri, 22 Feb 2013 20:16:53 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Kyoungil Kim' <ki0351.kim@samsung.com>, linux-mmc@vger.kernel.org, 'Jaehoon Chung' <jh80.chung@samsung.com>
+Cc: 'Hyeonsu Kim' <hyeonsu.kim@samsung.com>, linux-mmc@vger.kernel.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, kyungmin.park@samsung.com, jh80.chung@samsung.com
 
 Hi,
 
-On Mon, Feb 18 2013, Seungwon Jeon wrote:
-> Hi Chris,
->
-> Could you merge this patch in your tree.
-> We've verified.
->
-> Thanks,
-> Seungwon Jeon
->
-> On Tuesday, January 22, 2013, Kyoungil Kim wrote:
->> In dwc manual, the below contents are described.
->> "During end of packet, interrupt is not generated if threshold
->> programming is larger than any remaining data. It is responsibility
->> of host to read remaining bytes on seeing Data Transfer Done
->> interrupt"
->> We also have seen the data cannot be read fully
->> when "sg_miter->length" is less than FIFO size.
+On Fri, Feb 22 2013, Seungwon Jeon wrote:
+> On Friday, February 22, 2013, Hyeonsu Kim wrote:
+>> In the legacy code, driver clear not only UHS_REG 16 bit also 0-15bit.
+>> If we use UHS-1 mode spec card like SDR50, SDR104. UHS_REG 0-15
+>> should be set by
+>> 1 according to slot id. In this case, legacy code can make problem.
 >> 
->> Signed-off-by: Kyoungil Kim <ki0351.kim@samsung.com>
->> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Hyeonsu Kim <hyeonsu.kim@samsung.com>
+>
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
 Thanks, pushed to mmc-next for 3.10.
 
