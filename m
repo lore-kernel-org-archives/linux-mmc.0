@@ -1,58 +1,33 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/2] mmc: mvsdio: use module_platform_driver_probe()
-Date: Fri, 22 Mar 2013 12:31:11 -0400
-Message-ID: <8738vnpfao.fsf@octavius.laptop.org>
-References: <005801ce1954$fc029ce0$f407d6a0$%han@samsung.com>
-	<005901ce1955$15a43280$40ec9780$%han@samsung.com>
+Subject: Re: [PATCH] mmc: sdhci-s3c: let device core setup the default pin configuration
+Date: Fri, 22 Mar 2013 12:33:33 -0400
+Message-ID: <87y5dfo0ma.fsf@octavius.laptop.org>
+References: <1362569776-13932-1-git-send-email-thomas.abraham@linaro.org>
+	<CACRpkdY-RVAXxc2TqDcczhCLGDC8d401ucuCCDzRb+Ha9apr8g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43764 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1160995Ab3CVQbO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Mar 2013 12:31:14 -0400
-In-Reply-To: <005901ce1955$15a43280$40ec9780$%han@samsung.com> (Jingoo Han's
-	message of "Tue, 05 Mar 2013 12:54:06 +0900")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdY-RVAXxc2TqDcczhCLGDC8d401ucuCCDzRb+Ha9apr8g@mail.gmail.com>
+	(Linus Walleij's message of "Thu, 7 Mar 2013 09:09:58 +0100")
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Thomas Abraham <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, t.figa@samsung.com, ben-linux@fluff.org, jh80.chung@samsung.com, tgih.jun@samsung.com, girish.shivananjappa@linaro.org, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jingoo Han <jg1.han@samsung.com>
-Cc: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Mon, Mar 04 2013, Jingoo Han wrote:
-> This patch uses module_platform_driver_probe() macro which makes
-> the code smaller and simpler.
+On Thu, Mar 07 2013, Linus Walleij wrote:
+> On Wed, Mar 6, 2013 at 12:36 PM, Thomas Abraham
+> <thomas.abraham@linaro.org> wrote:
 >
-> Signed-off-by: Jingoo Han <jg1.han@samsung.com>
-> ---
->  drivers/mmc/host/mvsdio.c |   13 +------------
->  1 files changed, 1 insertions(+), 12 deletions(-)
+>> With device core now able to setup the default pin configuration,
+>> the call to devm_pinctrl_get_select_default can be removed. And
+>> the pin configuration code based on the deprecated Samsung specific
+>> gpio bindings is also removed.
+>>
+>> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
 >
-> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-> index 145cdaf..2b7d5b7 100644
-> --- a/drivers/mmc/host/mvsdio.c
-> +++ b/drivers/mmc/host/mvsdio.c
-> @@ -881,18 +881,7 @@ static struct platform_driver mvsd_driver = {
->  	},
->  };
->  
-> -static int __init mvsd_init(void)
-> -{
-> -	return platform_driver_probe(&mvsd_driver, mvsd_probe);
-> -}
-> -
-> -static void __exit mvsd_exit(void)
-> -{
-> -	platform_driver_unregister(&mvsd_driver);
-> -}
-> -
-> -module_init(mvsd_init);
-> -module_exit(mvsd_exit);
-> +module_platform_driver_probe(mvsd_driver, mvsd_probe);
->  
->  /* maximum card clock frequency (default 50MHz) */
->  module_param(maxfreq, int, 0);
+> Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
 Thanks, pushed to mmc-next for 3.10.
 
