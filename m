@@ -1,35 +1,38 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: dw_mmc: fixed a wrong UHS_REG 16 bit clear
-Date: Fri, 22 Mar 2013 12:04:36 -0400
-Message-ID: <87wqszpgiz.fsf@octavius.laptop.org>
-References: <1361496450-12647-1-git-send-email-hyeonsu.kim@samsung.com>
-	<001101ce10ee$1df30610$59d91230$%jun@samsung.com>
+Subject: Re: [PATCH v2] mmc: davinci: allow driver to work without DMA resource
+Date: Fri, 22 Mar 2013 12:05:45 -0400
+Message-ID: <87sj3npgh2.fsf@octavius.laptop.org>
+References: <1360066944-14265-1-git-send-email-prakash.pm@ti.com>
+	<512F38CD.1070805@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:34300 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:34317 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933516Ab3CVQEn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Mar 2013 12:04:43 -0400
-In-Reply-To: <001101ce10ee$1df30610$59d91230$%jun@samsung.com> (Seungwon
-	Jeon's message of "Fri, 22 Feb 2013 20:16:53 +0900")
+	id S1754489Ab3CVQFu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Mar 2013 12:05:50 -0400
+In-Reply-To: <512F38CD.1070805@ti.com> (Sekhar Nori's message of "Thu, 28 Feb
+	2013 16:30:29 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Hyeonsu Kim' <hyeonsu.kim@samsung.com>, linux-mmc@vger.kernel.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, kyungmin.park@samsung.com, jh80.chung@samsung.com
+To: Sekhar Nori <nsekhar@ti.com>
+Cc: "Manjunathappa, Prakash" <prakash.pm@ti.com>, linux-mmc@vger.kernel.org, mporter@ti.com, davinci-linux-open-source@linux.davincidsp.com, gregkh@linuxfoundation.org
 
 Hi,
 
-On Fri, Feb 22 2013, Seungwon Jeon wrote:
-> On Friday, February 22, 2013, Hyeonsu Kim wrote:
->> In the legacy code, driver clear not only UHS_REG 16 bit also 0-15bit.
->> If we use UHS-1 mode spec card like SDR50, SDR104. UHS_REG 0-15
->> should be set by
->> 1 according to slot id. In this case, legacy code can make problem.
+On Thu, Feb 28 2013, Sekhar Nori wrote:
+> On 2/5/2013 5:52 PM, Manjunathappa, Prakash wrote:
+>> Do not return probe failure with missing DMA resources,
+>> allow driver to work in PIO mode.
+>> Tested on da850-evm by mounting partition followed by
+>> file creation and deletion.
 >> 
->> Signed-off-by: Hyeonsu Kim <hyeonsu.kim@samsung.com>
+>> Signed-off-by: Manjunathappa, Prakash <prakash.pm@ti.com>
 >
-> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+> I verified this along with your other patches enabling use of MMC with
+> DT boot.
+>
+> Tested-by: Sekhar Nori <nsekhar@ti.com>
 
 Thanks, pushed to mmc-next for 3.10.
 
