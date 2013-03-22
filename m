@@ -1,32 +1,32 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 RESEND] mmc: sdhci-s3c: Use devm_clk_get()
-Date: Fri, 22 Mar 2013 11:53:17 -0400
-Message-ID: <87a9pvqvma.fsf@octavius.laptop.org>
-References: <01c101ce08d0$7d8808d0$78981a70$%han@samsung.com>
+Subject: Re: [PATCH] mmc: dw-mmc: return the result of mmc_add_host()
+Date: Fri, 22 Mar 2013 11:56:18 -0400
+Message-ID: <87620jqvh9.fsf@octavius.laptop.org>
+References: <511E4A19.6020000@samsung.com>
+	<000301ce0e8a$81e2e750$85a8b5f0$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:46791 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:46809 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933516Ab3CVPxV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Mar 2013 11:53:21 -0400
-In-Reply-To: <01c101ce08d0$7d8808d0$78981a70$%han@samsung.com> (Jingoo Han's
-	message of "Tue, 12 Feb 2013 12:24:39 +0900")
+	id S933488Ab3CVP4V (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Mar 2013 11:56:21 -0400
+In-Reply-To: <000301ce0e8a$81e2e750$85a8b5f0$%jun@samsung.com> (Seungwon
+	Jeon's message of "Tue, 19 Feb 2013 19:18:48 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jingoo Han <jg1.han@samsung.com>
-Cc: linux-mmc@vger.kernel.org, 'Ben Dooks' <ben-linux@fluff.org>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
 
 Hi,
 
-On Mon, Feb 11 2013, Jingoo Han wrote:
-> Use devm_clk_get() rather than clk_get() to make cleanup paths
-> more simple.
+On Tue, Feb 19 2013, Seungwon Jeon wrote:
+> On Friday, February 15, 2013, Jaehoon Chung wrote:
+>> check the result of mmc_add_host() and return the value.
+>> 
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 >
-> Signed-off-by: Jingoo Han <jg1.han@samsung.com>
-> ---
-> Changes since v1:
-> - modified the commit message
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
 Thanks, pushed to mmc-next for 3.10.
 
