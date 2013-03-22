@@ -1,249 +1,193 @@
-From: merez@codeaurora.org
-Subject: RE: [PATCH v1] mmc: card: Adding support for sanitize in eMMC 4.5
-Date: Thu, 21 Mar 2013 12:49:46 -0700
-Message-ID: <024eaaf711ee8e1438484a3bf8436cc9.squirrel@www.codeaurora.org>
-References: <1361705927-10524-1-git-send-email-ygardi@codeaurora.org>
-    <26E7A31274623843B0E8CF86148BFE32B02F5779@NTXAVZMBX04.azit.micron.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 1/3i v6] MMC/SD: Add callback function to detect card
+Date: Fri, 22 Mar 2013 14:44:13 +0900
+Message-ID: <514BEFAD.50606@samsung.com>
+References: <1363758095-32378-1-git-send-email-Chang-Ming.Huang@freescale.com>
+ <CAPDyKFqV4M7YzfOAvOMX5vjbw7pf1XA8tbPK+cVNVERWhox6eg@mail.gmail.com>
+ <110EED8CC96DFC488B7E717A2027A27C3342D9@039-SN1MPN1-003.039d.mgd.msft.net>
+ <CAPDyKFqM709s_er_mc0Gu+uh5+2GMf4sE62p_UNNwqFv9EwK7A@mail.gmail.com>
+ <110EED8CC96DFC488B7E717A2027A27C335A1E@039-SN1MPN1-003.039d.mgd.msft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <26E7A31274623843B0E8CF86148BFE32B02F5779@NTXAVZMBX04.azit.micron.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: "Luca Porzio (lporzio)" <lporzio@micron.com>
-Cc: Yaniv Gardi <ygardi@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "vgoyal@redhat.com" <vgoyal@redhat.com>, "tj@kernel.org" <tj@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:29832 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753989Ab3CVFoJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Mar 2013 01:44:09 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MK100LSZRXJ3U60@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 22 Mar 2013 14:44:07 +0900 (KST)
+In-reply-to: <110EED8CC96DFC488B7E717A2027A27C335A1E@039-SN1MPN1-003.039d.mgd.msft.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Huang Changming-R66093 <r66093@freescale.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
 
-Hi Luca,
+Hi,
 
-Having a timeout that takes into consideration the card size would be
-artificial as we cannot have the ability to create a function for its
-calculation that will fit all the card vendors.
+As my understanding, You means that controller is sending CMD13 to detect the card at every time.
+Right?
+If card is nonremovable (eMMC), need not to send the CMD13 to card detect and actually didn't send the command.
+Then how do you implement the code in get_cd?
 
-I suggest keeping it as a constant value for simplicity, as 4 minutes
-cover all the card sizes.
+Actually, i didn't see the any performance degrade with sdhci-s3c.c
 
-Thanks,
-Maya
-> Hi Yaniv,
->
+Best Regards,
+Jaehoon Chung
+
+On 03/21/2013 12:28 PM, Huang Changming-R66093 wrote:
+> In the current codes, SDHCI use the CMD13 to detect the card status. So there are many interrupt for this command, regardless of the card is absent or present.
+> When the card is removed, these interrupts are still generated, which will cause the performance degrade (such as Iozone for SATA I/O pressure test).
+> 
+> And in the current SD/MMC stack, there is one callback "get_cd" which is used on some platforms.
+> So I introduce it to SDHCI, if the driver support this callback, we first use it, instead of CMD13.
+> 
+> Best Regards
+> Jerry Huang
+> 
+> 
 >> -----Original Message-----
->> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
->> owner@vger.kernel.org] On Behalf Of Yaniv Gardi
->> Sent: Sunday, February 24, 2013 12:39 PM
->> To: linux-mmc@vger.kernel.org; vgoyal@redhat.com; tj@kernel.org; linux-
->> kernel@vger.kernel.org
->> Cc: linux-arm-msm@vger.kernel.org; Yaniv Gardi
->> Subject: [PATCH v1] mmc: card: Adding support for sanitize in eMMC 4.5
+>> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+>> Sent: Wednesday, March 20, 2013 5:29 PM
+>> To: Huang Changming-R66093
+>> Cc: linux-mmc@vger.kernel.org; Chris Ball
+>> Subject: Re: [PATCH 1/3i v6] MMC/SD: Add callback function to detect card
 >>
->> The sanitize support is added as a user-app ioctl call, and
->> was removed from the block-device request, since its purpose is
->> to be invoked not via File-System but by a user.
->> This feature deletes the unmap memory region of the eMMC card,
->> by writing to a specific register in the EXT_CSD.
->> unmap region is the memory region that was previously deleted
->> (by erase, trim or discard operation).
->> In order to avoid timeout when sanitizing large-scale cards,
->> the timeout for sanitize operation is 240 seconds.
+>> On 20 March 2013 10:04, Huang Changming-R66093 <r66093@freescale.com>
+>> wrote:
+>>> They have different function, Kevin's patch is for slowly removed, it
+>> can't resolve the performance issue.
 >>
->> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
+>> Actually I am not sure what your patch is trying to solve. Kevin's patch
+>> makes sense.
 >>
->> ---
->>  drivers/mmc/card/block.c |   68
->> +++++++++++++++++++++++++++++++-----------
->> ---
->>  drivers/mmc/card/queue.c |    2 +-
->>  include/linux/mmc/host.h |    1 +
->>  3 files changed, 49 insertions(+), 22 deletions(-)
+>> Can you elaborate a bit on what performance issues that needs to be
+>> considered during card removal?
 >>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> index 21056b9..21bb8b4 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -58,6 +58,8 @@ MODULE_ALIAS("mmc:block");
->>  #define INAND_CMD38_ARG_SECTRIM1 0x81
->>  #define INAND_CMD38_ARG_SECTRIM2 0x88
->>  #define MMC_BLK_TIMEOUT_MS  (10 * 60 * 1000)        /* 10 minute
->> timeout
->> */
->> +#define MMC_SANITIZE_REQ_TIMEOUT 240000
->
-> Though I would agree that 4 minutes is a reasonable sanitize time,
-> the sanitize command may also depend on card size.
-> As such I am not sure whether it can be regarded as a constant or
-> needs to be proportional to card size.
->
->> +#define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
->>
->>  static DEFINE_MUTEX(block_mutex);
->>
->> @@ -394,6 +396,35 @@ static int ioctl_rpmb_card_status_poll(struct
->> mmc_card
->> *card, u32 *status,
->>  	return err;
->>  }
->>
->> +static int ioctl_do_sanitize(struct mmc_card *card)
->> +{
->> +	int err;
->> +
->> +	if (!(mmc_can_sanitize(card) &&
->> +	      (card->host->caps2 & MMC_CAP2_SANITIZE))) {
->> +			pr_warn("%s: %s - SANITIZE is not supported\n",
->> +				mmc_hostname(card->host), __func__);
->> +			err = -EOPNOTSUPP;
->> +			goto out;
->> +	}
->> +
->> +	pr_debug("%s: %s - SANITIZE IN PROGRESS...\n",
->> +		mmc_hostname(card->host), __func__);
->> +
->> +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> +					EXT_CSD_SANITIZE_START, 1,
->> +					MMC_SANITIZE_REQ_TIMEOUT);
->> +
->> +	if (err)
->> +		pr_err("%s: %s - EXT_CSD_SANITIZE_START failed. err=%d\n",
->> +		       mmc_hostname(card->host), __func__, err);
->> +
->
-> In case of Sanitize timeout, the eMMC might go in an unclear state.
-> May I suggest to:
-> - issue an HPI before leaving thus bring the eMMC back into safe status
-> - report the 'sanitize not complete error' and let the user decide on
->   Whether he wants to re-issue (i.e. continue) the sanitize or just let
->   it go.
->
-> Thanks,
->    Luca
->
->> +	pr_debug("%s: %s - SANITIZE COMPLETED\n", mmc_hostname(card->host),
->> +					     __func__);
->> +out:
->> +	return err;
->> +}
->> +
->>  static int mmc_blk_ioctl_cmd(struct block_device *bdev,
->>  	struct mmc_ioc_cmd __user *ic_ptr)
->>  {
->> @@ -496,6 +527,16 @@ static int mmc_blk_ioctl_cmd(struct block_device
->> *bdev,
->>  			goto cmd_rel_host;
->>  	}
->>
->> +	if (MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_SANITIZE_START) {
->> +		err = ioctl_do_sanitize(card);
->> +
->> +		if (err)
->> +			pr_err("%s: ioctl_do_sanitize() failed. err = %d",
->> +			       __func__, err);
->> +
->> +		goto cmd_rel_host;
->> +	}
->> +
->>  	mmc_wait_for_req(card->host, &mrq);
->>
->>  	if (cmd.error) {
->> @@ -925,10 +966,10 @@ static int mmc_blk_issue_secdiscard_rq(struct
->> mmc_queue *mq,
->>  {
->>  	struct mmc_blk_data *md = mq->data;
->>  	struct mmc_card *card = md->queue.card;
->> -	unsigned int from, nr, arg, trim_arg, erase_arg;
->> +	unsigned int from, nr, arg;
->>  	int err = 0, type = MMC_BLK_SECDISCARD;
->>
->> -	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
->> +	if (!(mmc_can_secure_erase_trim(card))) {
->>  		err = -EOPNOTSUPP;
->>  		goto out;
->>  	}
->> @@ -936,23 +977,11 @@ static int mmc_blk_issue_secdiscard_rq(struct
->> mmc_queue *mq,
->>  	from = blk_rq_pos(req);
->>  	nr = blk_rq_sectors(req);
->>
->> -	/* The sanitize operation is supported at v4.5 only */
->> -	if (mmc_can_sanitize(card)) {
->> -		erase_arg = MMC_ERASE_ARG;
->> -		trim_arg = MMC_TRIM_ARG;
->> -	} else {
->> -		erase_arg = MMC_SECURE_ERASE_ARG;
->> -		trim_arg = MMC_SECURE_TRIM1_ARG;
->> -	}
->> +	if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
->> +		arg = MMC_SECURE_TRIM1_ARG;
->> +	else
->> +		arg = MMC_SECURE_ERASE_ARG;
->>
->> -	if (mmc_erase_group_aligned(card, from, nr))
->> -		arg = erase_arg;
->> -	else if (mmc_can_trim(card))
->> -		arg = trim_arg;
->> -	else {
->> -		err = -EINVAL;
->> -		goto out;
->> -	}
->>  retry:
->>  	if (card->quirks & MMC_QUIRK_INAND_CMD38) {
->>  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> @@ -988,9 +1017,6 @@ retry:
->>  			goto out;
->>  	}
->>
->> -	if (mmc_can_sanitize(card))
->> -		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> -				 EXT_CSD_SANITIZE_START, 1, 0);
->>  out_retry:
->>  	if (err && !mmc_blk_reset(md, card->host, type))
->>  		goto retry;
->> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
->> index fadf52e..483f0e8 100644
->> --- a/drivers/mmc/card/queue.c
->> +++ b/drivers/mmc/card/queue.c
->> @@ -148,7 +148,7 @@ static void mmc_queue_setup_discard(struct
->> request_queue *q,
->>  	/* granularity must not be greater than max. discard */
->>  	if (card->pref_erase > max_discard)
->>  		q->limits.discard_granularity = 0;
->> -	if (mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))
->> +	if (mmc_can_secure_erase_trim(card))
->>  		queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
->>  }
->>
->> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->> index 61a10c1..045e9f7 100644
->> --- a/include/linux/mmc/host.h
->> +++ b/include/linux/mmc/host.h
->> @@ -258,6 +258,7 @@ struct mmc_host {
->>  #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
->>  #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active
->> high */
->>  #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal
->> active
->> high */
->> +#define MMC_CAP2_SANITIZE	(1 << 12)		/* Support Sanitize */
->>
->>  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
->>
->> --
->> 1.7.6
->> --
->> Sent by a consultant of the Qualcomm Innovation Center, Inc.
->> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
->> Forum
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> First, we should use get_cd to get the card status, if it is not
+>> supported, then use the alive to send CMD13.
+>>> For the driver that supports get_cd, the system performance can upgrade.
+>>> Maybe Kevin can base on this patch.
+>>>
+>>> Best Regards
+>>> Jerry Huang
+>>>
+>>>
+>>>> -----Original Message-----
+>>>> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+>>>> Sent: Wednesday, March 20, 2013 4:43 PM
+>>>> To: Huang Changming-R66093
+>>>> Cc: linux-mmc@vger.kernel.org; Chris Ball
+>>>> Subject: Re: [PATCH 1/3i v6] MMC/SD: Add callback function to detect
+>>>> card
+>>>>
+>>>> On 20 March 2013 06:41,  <Chang-Ming.Huang@freescale.com> wrote:
+>>>>> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+>>>>>
+>>>>> In order to check whether the card has been removed, the function
+>>>>> mmc_send_status() will send command CMD13 to card and ask the card
+>>>>> to send its status register to sdhc driver, which will generate
+>>>>> many interrupts repeatedly and make the system performance bad.
+>>>>> From the performance test on Freescale's board (such as Iozone for
+>>>>> SD), the performance will degrade about 4~6%.
+>>>>>
+>>>>> There is one another way to get this information, which is to read
+>>>>> the register PRSSTAT and check the bit CDPL or CINS.
+>>>>> If the card is present, these two bit will set to one.
+>>>>> Therefore, add callback function get_cd() to check whether the card
+>>>>> has been inserted/removed when the driver supports this feature.
+>>>>> If the card is present, 0 will return, if the card is absent, 1
+>>>>> will
+>>>> return.
+>>>>> If the controller will not support this feature, -ENOSYS will return.
+>>>>>
+>>>>> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+>>>>> Reviewed-by: Johan Rudholm <johan.rudholm@stericsson.com>
+>>>>> Reviewed-by: Anton Vorontsov <cbouatmailru@gmail.com>
+>>>>> CC: Chris Ball <cjb@laptop.org>
+>>>>> ---
+>>>>> changes for v2:
+>>>>>         - when controller don't support get_cd, return -ENOSYS
+>>>>>         - add the CC
+>>>>> changes for v3:
+>>>>>         - enalbe the controller clock in platform, instead of core
+>>>>> changes for v4:
+>>>>>         - move the detect code to core.c according to the new
+>>>>> structure changes for v5:
+>>>>>         - reviewed by Anton and Johan, add the reviewed-by.
+>>>>> changes for v6:
+>>>>>         - add more comment.
+>>>>>
+>>>>>  drivers/mmc/core/core.c |   16 ++++++++++++++--
+>>>>>  1 file changed, 14 insertions(+), 2 deletions(-)
+>>>>>
+>>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>>>> index 08a3cf2..e225deb 100644
+>>>>> --- a/drivers/mmc/core/core.c
+>>>>> +++ b/drivers/mmc/core/core.c
+>>>>> @@ -2280,7 +2280,7 @@ static int mmc_rescan_try_freq(struct
+>>>>> mmc_host *host, unsigned freq)
+>>>>>
+>>>>>  int _mmc_detect_card_removed(struct mmc_host *host)  {
+>>>>> -       int ret;
+>>>>> +       int ret = -ENOSYS;
+>>>>>
+>>>>>         if ((host->caps & MMC_CAP_NONREMOVABLE) || !host->bus_ops-
+>>>>> alive)
+>>>>>                 return 0;
+>>>>> @@ -2288,7 +2288,19 @@ int _mmc_detect_card_removed(struct mmc_host
+>>>> *host)
+>>>>>         if (!host->card || mmc_card_removed(host->card))
+>>>>>                 return 1;
+>>>>>
+>>>>> -       ret = host->bus_ops->alive(host);
+>>>>> +       /* First, try host-controller's card detect callback */
+>>>>> +       if (host->ops->get_cd) {
+>>>>> +               ret = host->ops->get_cd(host);
+>>>>> +               /*
+>>>>> +                * The return value from get_cd: 1 for present, 0
+>>>>> + for
+>>>> absent,
+>>>>> +                * we need to convert it to: 1 for absent, 0 for
+>>>> present.
+>>>>> +                */
+>>>>> +               if (ret >= 0)
+>>>>> +                       ret = !ret;
+>>>>> +       }
+>>>>> +       /* If failed, back to the bus_ops alive() callback */
+>>>>> +       if (ret < 0)
+>>>>> +               ret = host->bus_ops->alive(host);
+>>>>>         if (ret) {
+>>>>>                 mmc_card_set_removed(host->card);
+>>>>>                 pr_debug("%s: card remove detected\n",
+>>>> mmc_hostname(host));
+>>>>
+>>>> I guess this already has been fixed by Kevin's patch below.
+>>>>
+>>>> http://article.gmane.org/gmane.linux.kernel.mmc/19481
+>>>>
+>>>>> --
+>>>>> 1.7.9.5
+>>>>>
+>>>>>
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe
+>>>>> linux-mmc" in the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>> Kind regards
+>>>> Ulf Hansson
+>>>
+>>>
+> 
+> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+> 
 
-
--- 
-Maya Erez
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
-of Code Aurora Forum, hosted by The Linux Foundation
