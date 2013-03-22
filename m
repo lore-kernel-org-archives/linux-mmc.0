@@ -1,67 +1,55 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2] wait while adding MMC host to ensure root mounts
-Date: Fri, 22 Mar 2013 13:03:13 -0400
-Message-ID: <87620jmkoe.fsf@octavius.laptop.org>
-References: <1363223183-3772-1-git-send-email-ynvich@gmail.com>
-	<1363224194-7366-1-git-send-email-ynvich@gmail.com>
+Subject: Re: [PATCH] mmc: block: fix the host's claim-release in special request
+Date: Fri, 22 Mar 2013 13:05:16 -0400
+Message-ID: <871ub7mkkz.fsf@octavius.laptop.org>
+References: <001101ce207b$91e60440$b5b20cc0$%jun@samsung.com>
+	<CA+20K0DxMmq67gWR4igtdOMdO+h19JqbEMH1=Wsp1v9cKPKkZQ@mail.gmail.com>
+	<CAPDyKFo2dkEp4n3gcwKbJ0NB+G_zAiKwPLxsBaZXJFvqQ1JFiQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43792 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:34044 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1161066Ab3CVRDS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Mar 2013 13:03:18 -0400
-In-Reply-To: <1363224194-7366-1-git-send-email-ynvich@gmail.com> (Sergey
-	Yanovich's message of "Thu, 14 Mar 2013 05:23:13 +0400")
+	id S1161016Ab3CVRFU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Mar 2013 13:05:20 -0400
+In-Reply-To: <CAPDyKFo2dkEp4n3gcwKbJ0NB+G_zAiKwPLxsBaZXJFvqQ1JFiQ@mail.gmail.com>
+	(Ulf Hansson's message of "Thu, 14 Mar 2013 15:49:27 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sergey Yanovich <ynvich@gmail.com>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <linkinjeon@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Johan Rudholm <jrudholm@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Konstantin Dorfman <kdorfman@codeaurora.org>
 
-Hi Sergey,
+Hi,
 
-On Wed, Mar 13 2013, Sergey Yanovich wrote:
-> MMC hosts are added asynchronously. We need to wait until detect returns to
-> avoid failed root filesystem mounts.
-> ---8<---
-> VFS: Cannot open root device "mmcblk0p1" or unknown-block(0,0): error -6
-> Please append a correct "root=" boot option; here are the available partitions:
-> mmc0: host does not support reading read-only switch. assuming write-enable.
-> 1f00             256 mtdblock0  (driver?)
-> 1f01             256 mtdblock1  (driver?)
-> 1f02            2560 mtdblock2 mmc0: new SDHC card at address b368
->  (driver?)
-> 1f03           29696 mtdblock3  (driver?)
-> 1f04           16384 mtdblock4 mmcblk0: mmc0:b368 USD   3.72 GiB
->  (driver?)
->  mmcblk0: p1
-> b300         3910656 mmcblk0  driver: mmcblk
->   b301         3906560 mmcblk0p1 00000000-01
-> Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
-> ---8<---
+On Thu, Mar 14 2013, Ulf Hansson wrote:
+>> 2013/3/14 Seungwon Jeon <tgih.jun@samsung.com>:
+>>> For normal request mmc_blk_issue_rq is called twice with asynchronous
+>>> transfer(cur and prev). Host's claim and release can be done in each
+>>> mmc_blk_issue_rq. However, Special request is currently excluded in
+>>> asynchronous transfer. After special request is finished, if there is
+>>> no new request, mmc_release_host won't be called in mmc_blk_issue_rq.
+>>> The problem is founded during mmc_suspend.
+>>>
+>>> [<c0541124>] (__schedule+0x0/0x78c) from [<c05419e8>] (schedule+0x38/0x78)
+>>> [<c05419b0>] (schedule+0x0/0x78) from [<c03a843c>]
+>>> (__mmc_claim_host+0xac/0x1b4)
+>>> [<c03a8390>] (__mmc_claim_host+0x0/0x1b4) from [<c03ac98c>]
+>>> (mmc_suspend+0x28/0x9c)
+>>> [<c03ac964>] (mmc_suspend+0x0/0x9c) from [<c03aad24>]
+>>> (mmc_suspend_host+0xb4/0x194)
+>>> ...
+>>>
+>>> Reported-by: Johan Rudholm <jrudholm@gmail.com>
+>>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>>
+>> Thank you for the quick response and fix! This fixes the problem. So
+>> please include my
+>>
+>> Tested-by: Johan Rudholm <johan.rudholm@stericsson.com>
 >
-> Signed-off-by: Sergey Yanovich <ynvich@gmail.com>
-> ---
-> changes for v2:
-> - removed exporting as symbol is in the same file
->
->  drivers/mmc/core/core.c |    1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index aaed768..7196888 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2225,6 +2225,7 @@ void mmc_start_host(struct mmc_host *host)
->  	host->rescan_disable = 0;
->  	mmc_power_up(host);
->  	mmc_detect_change(host, 0);
-> +	mmc_flush_scheduled_work();
->  }
->  
->  void mmc_stop_host(struct mmc_host *host)
+> Chris, could you send this for the 3.9 rc, since it is a bugfix?
 
-Thanks, this looks okay to me, I've pushed it to mmc-next for 3.10.
+Thanks, pushed to mmc-next for 3.9-rc.
 
 - Chris.
 -- 
