@@ -1,34 +1,57 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: FW: Regulator API ignored return values
-Date: Fri, 22 Mar 2013 17:06:27 +0000
-Message-ID: <201303221706.27733.arnd@arndb.de>
-References: <25B60CDC2F704E4E9D88FFD52780CB4C0BDEB0547F@SC-VEXCH1.marvell.com> <87y5dsheqo.fsf@octavius.laptop.org> <87d2uro09v.fsf@octavius.laptop.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: When bus width detection procedure takes place, kernel cannot lock on correct bus width
+Date: Fri, 22 Mar 2013 13:06:45 -0400
+Message-ID: <87wqszl5y2.fsf@octavius.laptop.org>
+References: <87ip4qdybr.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:54919 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161016Ab3CVRGj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Mar 2013 13:06:39 -0400
-In-Reply-To: <87d2uro09v.fsf@octavius.laptop.org>
+Received: from void.printf.net ([89.145.121.20]:34060 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1161016Ab3CVRGu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Mar 2013 13:06:50 -0400
+In-Reply-To: <87ip4qdybr.fsf@octavius.laptop.org> (Chris Ball's message of
+	"Sun, 17 Mar 2013 08:07:20 -0400")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Kevin Liu <keyuan.liu@gmail.com>, linux-kernel@vger.kernel.org, Stephen Warren <swarren@wwwdotorg.org>, linux-arm-kernel@lists.infradead.org, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linus Walleij <linus.walleij@linaro.org>, Axel Lin <axel.lin@ingics.com>, Jingoo Han <jg1.han@samsung.com>, Felipe Balbi <balbi@ti.com>, Dmitry Torokhov <dtor@mail.ru>, linux-mmc@vger.kernel.org
+To: elad.yi@gmail.com
+Cc: linux-mmc@vger.kernel.org, Philip Rakity <prakity@nvidia.com>
 
-On Friday 22 March 2013, Chris Ball wrote:
-> >
-> > The reason I didn't make it a fatal error is that this is just vqmmc
-> > (responsible for moving from 3.3V to 1.8V for UHS modes), not the
-> > main vmmc regulator.  We can just disable those UHS modes from the
-> > capabilities on the host if vqmmc is missing, or failed to enable,
-> > or doesn't support those voltages, and that's what the code does now.
-> 
-> I've pushed this patch to mmc-next for 3.10 now, let me know if you
-> disagree.
+Hi,
 
-No, it's fine. Sorry for not replying earlier.
+On Sun, Mar 17 2013, Chris Ball wrote:
+> I've been working on a bringup of an new board in Harmonic Inc.
+> This board uses Sandisk iNand eMMC flash.
+> I've noticed that the mmc driver keeps detecting 1 bit width although HW
+> supports 4 bit, looked into it, and found the problem. In line 571 at mmc.c:
+> There is:
+>     /* only compare read only fields */
+>     err = !((card->ext_csd.raw_partition_support ==
+>             bw_ext_csd[EXT_CSD_PARTITION_SUPPORT]) &&
+>         (card->ext_csd.raw_erased_mem_count ==
+>             bw_ext_csd[EXT_CSD_ERASED_MEM_CONT]) &&
+>         (card->ext_csd.rev ==
+>             bw_ext_csd[EXT_CSD_REV]) &&
+>         (card->ext_csd.raw_ext_csd_structure ==
+>                 ...
+>
+> The problem is that raw_partition_support is not the same when setting width of
+> 4 bits instead of 1 bit, and shouldn't be compared at all although it is read
+> only.
+> this should be changed to:
+>     /* only compare read only fields */
+>     err = !((card->ext_csd.raw_erased_mem_count ==
+>             bw_ext_csd[EXT_CSD_ERASED_MEM_CONT]) &&
+>         (card->ext_csd.rev ==
+>             bw_ext_csd[EXT_CSD_REV]) &&
+>         (card->ext_csd.raw_ext_csd_structure ==
+>                 ...
 
-	Arnd
+Philip, what do you think?
+
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
