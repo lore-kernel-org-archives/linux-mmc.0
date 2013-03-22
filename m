@@ -1,82 +1,124 @@
 From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Subject: [PATCH for 3.9 v3] mmc: mvsdio: fix non-DT probing of GPIOs
-Date: Fri, 22 Mar 2013 14:30:23 +0100
-Message-ID: <1363959023-25661-1-git-send-email-thomas.petazzoni@free-electrons.com>
+Subject: [PATCH for 3.10 v2] mmc: mvsdio: use dev_*() API instead of pr_*() API
+Date: Fri, 22 Mar 2013 14:37:21 +0100
+Message-ID: <1363959441-30744-1-git-send-email-thomas.petazzoni@free-electrons.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.free-electrons.com ([94.23.35.102]:59183 "EHLO
+Received: from mail.free-electrons.com ([94.23.35.102]:59229 "EHLO
 	mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753650Ab3CVNao (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Mar 2013 09:30:44 -0400
+	with ESMTP id S1754411Ab3CVNhe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Mar 2013 09:37:34 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
-Cc: Lior Amsalem <alior@marvell.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Andrew Lunn <andrew@lunn.ch>, Jason Cooper <jason@lakedaemon.net>, Gregory Clement <gregory.clement@free-electrons.com>, Maen Suleiman <maen@marvell.com>, Ralph Droms <rdroms@gmail.com>, linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>
+Cc: Lior Amsalem <alior@marvell.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Andrew Lunn <andrew@lunn.ch>, Jason Cooper <jason@lakedaemon.net>, Gregory Clement <gregory.clement@free-electrons.com>, Maen Suleiman <maen@marvell.com>, Ralph Droms <rdroms@gmail.com>, linux-arm-kernel@lists.infradead.org
 
-Ralph Droms <rdroms@gmail.com> reported that 3.9-rc was breaking the
-SDIO interface on his Sheevaplug platform, and that the recent changes
-to the mvsdio driver are responsible for this breakage. Precisely, the
-regression has been introduced by 07728b77c03d (mmc: mvsdio: use
-slot-gpio for card detect gpio).
+The mvsdio driver was already using some dev_*() functions to print
+some messages, but still using pr_*() functions for some others. This
+patch converts all messages to use dev_*() functions.
 
-After investigation, is turns out that the Sheevaplug does not have
-any "card detect" GPIO, and the Sheevaplug has not been converted to
-the Device Tree. Therefore, the Sheevaplug board code does not define
-a value for the .gpio_card_detect field of the mvsdio_platform_data
-structure, which means that its value is 0. Unfortunately,
-gpio_is_valid() considers 0 as a valid GPIO, and therefore calls
-mmc_gpio_request_cd(), which fails and makes the entire probing of the
-driver fail.
+Many of the pr_*() function calls were printing the output of
+mmc_hostname() to preprend the message with an identifier for the
+device. Since the dev_*() functions do that automatically, this patch
+also gets rid of those string prefixes.
 
-In fact, in the previous mvsdio code, before the Device Tree binding
-was introduced, 0 was not considered as a valid GPIO. Therefore, this
-fix revert back to this behavior in the non-DT case, by setting the
-gpio_card_detect and gpio_write_protect local variables to -EINVAL
-when the corresponding fields of the mvsdio_platform_data structure
-are set to zero (i.e, left undefined). Of course, it prevents to use
-GPIO 0 as a card detect or write protect GPIO, but it was a defiency
-of the previous non-DT code, and the fix moving forward is to convert
-platforms to the Device Tree.
-
-The problem has been reproduced successfully on the Kirkwood-based
-Marvell DB-88F6281-BP Development Board (that doesn't use the Device
-Tree) and the fix has proven to work properly, after of course
-removing the gpio_card_detect field of the mvsdio_platform_data
-instance for this board.
-
-Reported-by: Ralph Droms <rdroms@gmail.com>
-Tested-by: Ralph Droms <rdroms@gmail.com>
 Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 ---
-This patch should be applied on 3.9-rcX.
-
-Changes between v2 and v3:
- * Add a reference to the commit introducing the regression. Suggested
-   by Russell King.
- * Fix the e-mail address from Ralph Droms, and add his Tested-by.
- * No code change.
+This is for 3.10.
 
 Changes between v1 and v2:
- * Send the patch to the MMC maintainer instead of the Marvell
-   maintainers.
+
+ * Fix incorrect format string. A "%s" was left, even though the
+   mmc_hostname() argument was removed due to the conversion to the
+   dev_*() API.
 ---
- drivers/mmc/host/mvsdio.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/mvsdio.c |   37 +++++++++++++++----------------------
+ 1 file changed, 15 insertions(+), 22 deletions(-)
 
 diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index 145cdaf..1e4d567 100644
+index 145cdaf..f6e5e25 100644
 --- a/drivers/mmc/host/mvsdio.c
 +++ b/drivers/mmc/host/mvsdio.c
-@@ -741,8 +741,8 @@ static int __init mvsd_probe(struct platform_device *pdev)
- 			goto out;
+@@ -119,10 +119,8 @@ static int mvsd_setup_data(struct mvsd_host *host, struct mmc_data *data)
+ 		host->pio_size = data->blocks * data->blksz;
+ 		host->pio_ptr = sg_virt(data->sg);
+ 		if (!nodma)
+-			pr_debug("%s: fallback to PIO for data "
+-					  "at 0x%p size %d\n",
+-					  mmc_hostname(host->mmc),
+-					  host->pio_ptr, host->pio_size);
++			dev_dbg(host->dev, "fallback to PIO for data at 0x%p size %d\n",
++				host->pio_ptr, host->pio_size);
+ 		return 1;
+ 	} else {
+ 		dma_addr_t phys_addr;
+@@ -473,8 +471,8 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
+ 		if (mrq->data)
+ 			err_status = mvsd_finish_data(host, mrq->data, err_status);
+ 		if (err_status) {
+-			pr_err("%s: unhandled error status %#04x\n",
+-					mmc_hostname(host->mmc), err_status);
++			dev_err(host->dev, "unhandled error status %#04x\n",
++				err_status);
+ 			cmd->error = -ENOMSG;
  		}
- 		host->base_clock = mvsd_data->clock / 2;
--		gpio_card_detect = mvsd_data->gpio_card_detect;
--		gpio_write_protect = mvsd_data->gpio_write_protect;
-+		gpio_card_detect = mvsd_data->gpio_card_detect ? : -EINVAL;
-+		gpio_write_protect = mvsd_data->gpio_write_protect ? : -EINVAL;
+ 
+@@ -491,9 +489,8 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
+ 	if (irq_handled)
+ 		return IRQ_HANDLED;
+ 
+-	pr_err("%s: unhandled interrupt status=0x%04x en=0x%04x "
+-			"pio=%d\n", mmc_hostname(host->mmc), intr_status,
+-			host->intr_en, host->pio_size);
++	dev_err(host->dev, "unhandled interrupt status=0x%04x en=0x%04x pio=%d\n",
++		intr_status, host->intr_en, host->pio_size);
+ 	return IRQ_NONE;
+ }
+ 
+@@ -507,13 +504,11 @@ static void mvsd_timeout_timer(unsigned long data)
+ 	spin_lock_irqsave(&host->lock, flags);
+ 	mrq = host->mrq;
+ 	if (mrq) {
+-		pr_err("%s: Timeout waiting for hardware interrupt.\n",
+-				mmc_hostname(host->mmc));
+-		pr_err("%s: hw_state=0x%04x, intr_status=0x%04x "
+-				"intr_en=0x%04x\n", mmc_hostname(host->mmc),
+-				mvsd_read(MVSD_HW_STATE),
+-				mvsd_read(MVSD_NOR_INTR_STATUS),
+-				mvsd_read(MVSD_NOR_INTR_EN));
++		dev_err(host->dev, "Timeout waiting for hardware interrupt.\n");
++		dev_err(host->dev, "hw_state=0x%04x, intr_status=0x%04x intr_en=0x%04x\n",
++			mvsd_read(MVSD_HW_STATE),
++			mvsd_read(MVSD_NOR_INTR_STATUS),
++			mvsd_read(MVSD_NOR_INTR_EN));
+ 
+ 		host->mrq = NULL;
+ 
+@@ -778,7 +773,7 @@ static int __init mvsd_probe(struct platform_device *pdev)
+ 
+ 	ret = devm_request_irq(&pdev->dev, irq, mvsd_irq, 0, DRIVER_NAME, host);
+ 	if (ret) {
+-		pr_err("%s: cannot assign irq %d\n", DRIVER_NAME, irq);
++		dev_err(&pdev->dev, "cannot assign irq %d\n", irq);
+ 		goto out;
  	}
  
- 	mmc->ops = &mvsd_ops;
+@@ -797,13 +792,11 @@ static int __init mvsd_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto out;
+ 
+-	pr_notice("%s: %s driver initialized, ",
+-			   mmc_hostname(mmc), DRIVER_NAME);
+ 	if (!(mmc->caps & MMC_CAP_NEEDS_POLL))
+-		printk("using GPIO %d for card detection\n",
+-		       gpio_card_detect);
++		dev_notice(&pdev->dev, "using GPIO %d for card detection\n",
++			   gpio_card_detect);
+ 	else
+-		printk("lacking card detect (fall back to polling)\n");
++		dev_notice(&pdev->dev, "lacking card detect (fall back to polling)\n");
+ 	return 0;
+ 
+ out:
 -- 
 1.7.9.5
 
