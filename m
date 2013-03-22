@@ -1,51 +1,96 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V3 5/7] mmc: queue work on any cpu
-Date: Fri, 22 Mar 2013 13:30:32 -0400
-Message-ID: <87r4j7jq9z.fsf@octavius.laptop.org>
-References: <cover.1363617402.git.viresh.kumar@linaro.org>
-	<08070dbf56439c84b8c25837c2049ff8e8eafd6e.1363617402.git.viresh.kumar@linaro.org>
-	<87vc8jjqhc.fsf@octavius.laptop.org>
-	<CAKohpomqkYeMgvTpjrUjGs3md=vzguW5Ae6Snf4hzsqtQxNDOw@mail.gmail.com>
+From: Subhash Jadavani <subhashj@codeaurora.org>
+Subject: Re: [PATCH] Add method for triggering Sanitize command
+Date: Fri, 22 Mar 2013 23:04:28 +0530
+Message-ID: <514C9624.7020704@codeaurora.org>
+References: <1363780682-28440-1-git-send-email-ygardi@codeaurora.org> <514C2E10.4090108@codeaurora.org> <87obebl5oi.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKohpomqkYeMgvTpjrUjGs3md=vzguW5Ae6Snf4hzsqtQxNDOw@mail.gmail.com>
-	(Viresh Kumar's message of "Fri, 22 Mar 2013 22:57:49 +0530")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Viresh Kumar <viresh.kumar@linaro.org>
-Cc: pjt@google.com, paul.mckenney@linaro.org, tglx@linutronix.de, tj@kernel.org, suresh.b.siddha@intel.com, venki@google.com, mingo@redhat.com, peterz@infradead.org, rostedt@goodmis.org, linaro-kernel@lists.linaro.org, robin.randhawa@arm.com, Steve.Bannister@arm.com, Liviu.Dudau@arm.com, charles.garcia-tobin@arm.com, Arvind.Chauhan@arm.com, linux-rt-users@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <87obebl5oi.fsf@octavius.laptop.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Yaniv Gardi <ygardi@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
-
-On Fri, Mar 22 2013, Viresh Kumar wrote:
-> On 22 March 2013 22:56, Chris Ball <cjb@laptop.org> wrote:
->> On Mon, Mar 18 2013, Viresh Kumar wrote:
->>
->> /home/cjb/git/mmc/drivers/mmc/core/core.c: In function
->> =E2=80=98mmc_schedule_delayed_work=E2=80=99:
->> /home/cjb/git/mmc/drivers/mmc/core/core.c:88:2: error: implicit
->> declaration of function =E2=80=98queue_delayed_work_on_any_cpu=E2=80=
-=99
->> [-Werror=3Dimplicit-function-declaration]
->>
->> I've dropped this patch for now.  This function doesn't seem to be
->> defined in linux-next either.
+On 3/22/2013 10:42 PM, Chris Ball wrote:
+> Hi,
 >
-> Hi chris,
+> On Fri, Mar 22 2013, Subhash Jadavani wrote:
+>> On 3/20/2013 5:28 PM, Yaniv Gardi wrote:
+>>> This patch adds a method to trigger Sanitize command to MMC.
+>>> The Sanitize command is used for deleting the unmapped memory region
+>>> of the MMC device.
+>>>
+>>> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
+>>>
+>>> diff --git a/mmc.c b/mmc.c
+>>> index a2de863..174d9a4 100644
+>>> --- a/mmc.c
+>>> +++ b/mmc.c
+>>> @@ -90,6 +90,11 @@ static struct Command commands[] = {
+>>>    		"Permanently disable the eMMC H/W Reset feature on <device>.\nNOTE!  This is a one-time programmable (unreversible) change.",
+>>>    	  NULL
+>>>    	},
+>>> +	{ do_sanitize, -1,
+>>> +	  "sanitize", "<device>\n"
+>>> +		"Send Sanitize command to the <device>.\nThis will delete the unmapped memory region of the device",
+>>> +	  NULL
+>>> +	},
+>>>    	{ 0, 0, 0, 0 }
+>>>    };
+>>>    diff --git a/mmc.h b/mmc.h
+>>> index c863751..5173d34 100644
+>>> --- a/mmc.h
+>>> +++ b/mmc.h
+>>> @@ -38,6 +38,7 @@
+>>>    #define EXT_CSD_PART_CONFIG		179
+>>>    #define EXT_CSD_BOOT_WP			173
+>>>    #define EXT_CSD_WR_REL_PARAM		166
+>>> +#define EXT_CSD_SANITIZE_START		165
+>>>    #define EXT_CSD_BKOPS_EN		163	/* R/W */
+>>>    #define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
+>>>    #define EXT_CSD_NATIVE_SECTOR_SIZE	63 /* R */
+>>> diff --git a/mmc_cmds.c b/mmc_cmds.c
+>>> index b407f65..5473a20 100644
+>>> --- a/mmc_cmds.c
+>>> +++ b/mmc_cmds.c
+>>> @@ -767,3 +767,31 @@ int do_read_extcsd(int nargs, char **argv)
+>>>    out_free:
+>>>    	return ret;
+>>>    }
+>>> +
+>>> +int do_sanitize(int nargs, char **argv)
+>>> +{
+>>> +	int fd, ret;
+>>> +	char *device;
+>>> +
+>>> +	CHECK(nargs != 2, "Usage: mmc sanitize </path/to/mmcblkX>\n",
+>>> +			exit(1));
+>>> +
+>>> +	device = argv[1];
+>>> +
+>>> +	fd = open(device, O_RDWR);
+>>> +	if (fd < 0) {
+>>> +		perror("open");
+>>> +		exit(1);
+>>> +	}
+>>> +
+>>> +	ret = write_extcsd_value(fd, EXT_CSD_SANITIZE_START, 1);
+>>> +	if (ret) {
+>>> +		fprintf(stderr, "Could not write 0x%02x to EXT_CSD[%d] in %s\n",
+>>> +			1, EXT_CSD_SANITIZE_START, device);
+>>> +		exit(1);
+>>> +	}
+>>> +
+>> don't we need to close the opened blkdev file here? or is it done
+>> somewhere else?
+> Linux closes open file descriptors on process exit, no?
+ok then it looks good to me.
+
+Acked-by: Subhash Jadavani <subhashj@codeaurora.org>
+
+Thanks,
+Subhash
 >
-> This patch was part of a bigger patchset which also adds this API. I
-> don't want you to
-> apply this one but just Ack here. Probably Tejun or some scheduler
-> maintainer will
-> apply it later (if they like all patches).
-
-Thanks, makes sense.  For [5/7]:
-
-Acked-by: Chris Ball <cjb@laptop.org>
-
-- Chris.
---=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> - Chris.
