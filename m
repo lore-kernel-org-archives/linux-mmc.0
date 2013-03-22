@@ -1,33 +1,36 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci-s3c: let device core setup the default pin configuration
-Date: Fri, 22 Mar 2013 12:33:33 -0400
-Message-ID: <87y5dfo0ma.fsf@octavius.laptop.org>
-References: <1362569776-13932-1-git-send-email-thomas.abraham@linaro.org>
-	<CACRpkdY-RVAXxc2TqDcczhCLGDC8d401ucuCCDzRb+Ha9apr8g@mail.gmail.com>
+Subject: Re: [PATCH] mmc/host:rtsx: Don't execute power up sequence repeatedly
+Date: Fri, 22 Mar 2013 12:36:26 -0400
+Message-ID: <87txo3o0hh.fsf@octavius.laptop.org>
+References: <1362726357-7629-1-git-send-email-wei_wang@realsil.com.cn>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdY-RVAXxc2TqDcczhCLGDC8d401ucuCCDzRb+Ha9apr8g@mail.gmail.com>
-	(Linus Walleij's message of "Thu, 7 Mar 2013 09:09:58 +0100")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Thomas Abraham <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, t.figa@samsung.com, ben-linux@fluff.org, jh80.chung@samsung.com, tgih.jun@samsung.com, girish.shivananjappa@linaro.org, patches@linaro.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:39075 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1161003Ab3CVQgf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Mar 2013 12:36:35 -0400
+In-Reply-To: <1362726357-7629-1-git-send-email-wei_wang@realsil.com.cn> (wei
+	wang's message of "Fri, 8 Mar 2013 15:05:57 +0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: wei_wang@realsil.com.cn
+Cc: sameo@linux.intel.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, rogerable@realtek.com
 
 Hi,
 
-On Thu, Mar 07 2013, Linus Walleij wrote:
-> On Wed, Mar 6, 2013 at 12:36 PM, Thomas Abraham
-> <thomas.abraham@linaro.org> wrote:
+On Fri, Mar 08 2013, wei_wang@realsil.com.cn wrote:
+> From: Wei WANG <wei_wang@realsil.com.cn>
 >
->> With device core now able to setup the default pin configuration,
->> the call to devm_pinctrl_get_select_default can be removed. And
->> the pin configuration code based on the deprecated Samsung specific
->> gpio bindings is also removed.
->>
->> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+> For some Realtek's card reader, power up sequence can only be executed
+> when power has been turned off fully.
+> So rtsx host should not start power up sequence again when set_ios been
+> called if the power has been turned on.
 >
-> Acked-by: Linus Walleij <linus.walleij@linaro.org>
+> Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
+> ---
+>  drivers/mmc/host/rtsx_pci_sdmmc.c |   10 ++++++++++
+>  1 file changed, 10 insertions(+)
 
 Thanks, pushed to mmc-next for 3.10.
 
