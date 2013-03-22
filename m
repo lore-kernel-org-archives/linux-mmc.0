@@ -1,55 +1,67 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: When bus width detection procedure takes place, kernel cannot lock on correct bus width
-Date: Fri, 22 Mar 2013 13:06:45 -0400
-Message-ID: <87wqszl5y2.fsf@octavius.laptop.org>
-References: <87ip4qdybr.fsf@octavius.laptop.org>
+Subject: Re: [PATCH V3 5/7] mmc: queue work on any cpu
+Date: Fri, 22 Mar 2013 13:09:13 -0400
+Message-ID: <87sj3nl5ty.fsf@octavius.laptop.org>
+References: <cover.1363617402.git.viresh.kumar@linaro.org>
+	<08070dbf56439c84b8c25837c2049ff8e8eafd6e.1363617402.git.viresh.kumar@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:34060 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:46903 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1161016Ab3CVRGu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Mar 2013 13:06:50 -0400
-In-Reply-To: <87ip4qdybr.fsf@octavius.laptop.org> (Chris Ball's message of
-	"Sun, 17 Mar 2013 08:07:20 -0400")
+	id S1161035Ab3CVRJY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Mar 2013 13:09:24 -0400
+In-Reply-To: <08070dbf56439c84b8c25837c2049ff8e8eafd6e.1363617402.git.viresh.kumar@linaro.org>
+	(Viresh Kumar's message of "Mon, 18 Mar 2013 20:53:27 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: elad.yi@gmail.com
-Cc: linux-mmc@vger.kernel.org, Philip Rakity <prakity@nvidia.com>
+To: Viresh Kumar <viresh.kumar@linaro.org>
+Cc: pjt@google.com, paul.mckenney@linaro.org, tglx@linutronix.de, tj@kernel.org, suresh.b.siddha@intel.com, venki@google.com, mingo@redhat.com, peterz@infradead.org, rostedt@goodmis.org, linaro-kernel@lists.linaro.org, robin.randhawa@arm.com, Steve.Bannister@arm.com, Liviu.Dudau@arm.com, charles.garcia-tobin@arm.com, Arvind.Chauhan@arm.com, linux-rt-users@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
 Hi,
 
-On Sun, Mar 17 2013, Chris Ball wrote:
-> I've been working on a bringup of an new board in Harmonic Inc.
-> This board uses Sandisk iNand eMMC flash.
-> I've noticed that the mmc driver keeps detecting 1 bit width although HW
-> supports 4 bit, looked into it, and found the problem. In line 571 at mmc.c:
-> There is:
->     /* only compare read only fields */
->     err = !((card->ext_csd.raw_partition_support ==
->             bw_ext_csd[EXT_CSD_PARTITION_SUPPORT]) &&
->         (card->ext_csd.raw_erased_mem_count ==
->             bw_ext_csd[EXT_CSD_ERASED_MEM_CONT]) &&
->         (card->ext_csd.rev ==
->             bw_ext_csd[EXT_CSD_REV]) &&
->         (card->ext_csd.raw_ext_csd_structure ==
->                 ...
+On Mon, Mar 18 2013, Viresh Kumar wrote:
+> mmc uses workqueues for running mmc_rescan(). There is no real dependency of
+> scheduling these on the cpu which scheduled them.
 >
-> The problem is that raw_partition_support is not the same when setting width of
-> 4 bits instead of 1 bit, and shouldn't be compared at all although it is read
-> only.
-> this should be changed to:
->     /* only compare read only fields */
->     err = !((card->ext_csd.raw_erased_mem_count ==
->             bw_ext_csd[EXT_CSD_ERASED_MEM_CONT]) &&
->         (card->ext_csd.rev ==
->             bw_ext_csd[EXT_CSD_REV]) &&
->         (card->ext_csd.raw_ext_csd_structure ==
->                 ...
+> On a idle system, it is observed that and idle cpu wakes up many times just to
+> service this work. It would be better if we can schedule it on a cpu which isn't
+> idle to save on power.
+>
+> By idle cpu (from scheduler's perspective) we mean:
+> - Current task is idle task
+> - nr_running == 0
+> - wake_list is empty
+>
+> This patch replaces the queue_delayed_work() with
+> queue_delayed_work_on_any_cpu() siblings.
+>
+> This routine would look for the closest (via scheduling domains) non-idle cpu
+> (non-idle from schedulers perspective). If the current cpu is not idle or all
+> cpus are idle, work will be scheduled on local cpu.
+>
+> Cc: Chris Ball <cjb@laptop.org>
+> Cc: linux-mmc@vger.kernel.org
+> Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+> ---
+>  drivers/mmc/core/core.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 9290bb5..adf331a 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -85,7 +85,7 @@ MODULE_PARM_DESC(
+>  static int mmc_schedule_delayed_work(struct delayed_work *work,
+>  				     unsigned long delay)
+>  {
+> -	return queue_delayed_work(workqueue, work, delay);
+> +	return queue_delayed_work_on_any_cpu(workqueue, work, delay);
+>  }
+>  
+>  /*
 
-Philip, what do you think?
-
-Thanks,
+Thanks, pushed to mmc-next for 3.10.
 
 - Chris.
 -- 
