@@ -1,99 +1,57 @@
-From: Subhash Jadavani <subhashj@codeaurora.org>
-Subject: Re: [PATCH] Add method for triggering Sanitize command
-Date: Fri, 22 Mar 2013 15:40:24 +0530
-Message-ID: <514C2E10.4090108@codeaurora.org>
-References: <1363780682-28440-1-git-send-email-ygardi@codeaurora.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: Subject: [PATCH] mmc: dw_mmc: fix fifo access for 64-bit
+Date: Fri, 22 Mar 2013 19:30:20 +0900
+Message-ID: <000d01ce26e8$411079b0$c3316d10$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1363780682-28440-1-git-send-email-ygardi@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Yaniv Gardi <ygardi@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:65110 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751679Ab3CVKaW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Mar 2013 06:30:22 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MK2001F256IIFJ0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 22 Mar 2013 19:30:20 +0900 (KST)
+References: 
+In-reply-to: 
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
 
-On 3/20/2013 5:28 PM, Yaniv Gardi wrote:
-> This patch adds a method to trigger Sanitize command to MMC.
-> The Sanitize command is used for deleting the unmapped memory region
-> of the MMC device.
->
-> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
->
-> diff --git a/mmc.c b/mmc.c
-> index a2de863..174d9a4 100644
-> --- a/mmc.c
-> +++ b/mmc.c
-> @@ -90,6 +90,11 @@ static struct Command commands[] = {
->   		"Permanently disable the eMMC H/W Reset feature on <device>.\nNOTE!  This is a one-time programmable (unreversible) change.",
->   	  NULL
->   	},
-> +	{ do_sanitize, -1,
-> +	  "sanitize", "<device>\n"
-> +		"Send Sanitize command to the <device>.\nThis will delete the unmapped memory region of the device",
-> +	  NULL
-> +	},
->   	{ 0, 0, 0, 0 }
->   };
->   
-> diff --git a/mmc.h b/mmc.h
-> index c863751..5173d34 100644
-> --- a/mmc.h
-> +++ b/mmc.h
-> @@ -38,6 +38,7 @@
->   #define EXT_CSD_PART_CONFIG		179
->   #define EXT_CSD_BOOT_WP			173
->   #define EXT_CSD_WR_REL_PARAM		166
-> +#define EXT_CSD_SANITIZE_START		165
->   #define EXT_CSD_BKOPS_EN		163	/* R/W */
->   #define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
->   #define EXT_CSD_NATIVE_SECTOR_SIZE	63 /* R */
-> diff --git a/mmc_cmds.c b/mmc_cmds.c
-> index b407f65..5473a20 100644
-> --- a/mmc_cmds.c
-> +++ b/mmc_cmds.c
-> @@ -767,3 +767,31 @@ int do_read_extcsd(int nargs, char **argv)
->   out_free:
->   	return ret;
->   }
-> +
-> +int do_sanitize(int nargs, char **argv)
-> +{
-> +	int fd, ret;
-> +	char *device;
-> +
-> +	CHECK(nargs != 2, "Usage: mmc sanitize </path/to/mmcblkX>\n",
-> +			exit(1));
-> +
-> +	device = argv[1];
-> +
-> +	fd = open(device, O_RDWR);
-> +	if (fd < 0) {
-> +		perror("open");
-> +		exit(1);
-> +	}
-> +
-> +	ret = write_extcsd_value(fd, EXT_CSD_SANITIZE_START, 1);
-> +	if (ret) {
-> +		fprintf(stderr, "Could not write 0x%02x to EXT_CSD[%d] in %s\n",
-> +			1, EXT_CSD_SANITIZE_START, device);
-> +		exit(1);
-> +	}
-> +
+Subject: [PATCH] mmc: dw_mmc: fix fifo access for 64-bit
 
-don't we need to close the opened blkdev file here? or is it done 
-somewhere else?
+mci_writew causes a failure of fifo access for 64-bit.
+mci_writeq is correct.
 
-> +	return ret;
-> +
-> +}
-> +
-> diff --git a/mmc_cmds.h b/mmc_cmds.h
-> index e52d622..ec22eee 100644
-> --- a/mmc_cmds.h
-> +++ b/mmc_cmds.h
-> @@ -24,3 +24,4 @@ int do_write_boot_en(int nargs, char **argv);
->   int do_write_bkops_en(int nargs, char **argv);
->   int do_hwreset_en(int nargs, char **argv);
->   int do_hwreset_dis(int nargs, char **argv);
-> +int do_sanitize(int nargs, char **argv);
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+---
+This patch depends on [PATCH 3/3] dw_mmc: Handle unaligned data submission correctly.
+
+ drivers/mmc/host/dw_mmc.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index aab5473..0d8fb78 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1373,8 +1373,9 @@ static void dw_mci_push_data64(struct dw_mci *host, void *buf, int cnt)
+ 		int len = dw_mci_push_part_bytes(host, buf, cnt);
+ 		buf += len;
+ 		cnt -= len;
++
+ 		if (host->part_buf_count == 8) {
+-			mci_writew(host, DATA(host->data_offset),
++			mci_writeq(host, DATA(host->data_offset),
+ 					host->part_buf);
+ 			host->part_buf_count = 0;
+ 		}
+-- 
+1.7.0.4
+
+
