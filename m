@@ -1,42 +1,38 @@
 From: Jens Axboe <axboe@kernel.dk>
-Subject: Re: [PATCH v5 1/3] block: Add support for reinsert a dispatched req
-Date: Mon, 25 Mar 2013 06:34:10 -0600
-Message-ID: <20130325123410.GG22327@kernel.dk>
-References: <1364202150-8776-1-git-send-email-tlinder@codeaurora.org>
+Subject: Re: [PATCH v5 2/3] block: Add API for urgent request handling
+Date: Mon, 25 Mar 2013 06:40:07 -0600
+Message-ID: <20130325124007.GH22327@kernel.dk>
+References: <1364202178-8936-1-git-send-email-tlinder@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 173-166-109-252-newengland.hfc.comcastbusiness.net ([173.166.109.252]:57567
-	"EHLO bombadil.infradead.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757010Ab3CYMeP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Mar 2013 08:34:15 -0400
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1364202150-8776-1-git-send-email-tlinder@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+In-Reply-To: <1364202178-8936-1-git-send-email-tlinder@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: Tanya Brokhman <tlinder@codeaurora.org>
 Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Alex.Lemberg@sandisk.com, open list <linux-kernel@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
 On Mon, Mar 25 2013, Tanya Brokhman wrote:
-> From: Tatyana Brokhman <tlinder@codeaurora.org>
+> This patch add support in block & elevator layers for handling
+> urgent requests. The decision if a request is urgent or not is taken
+> by the scheduler. Request is marked as urgent in cmd_flags (by the
+> scheduler) with a new flag - REQ_URGENT.
+> Urgent request notification is passed to the underlying
+> block device driver (eMMC for example). Block device driver may decide to
+> interrupt the currently running low priority request to serve the new
+> urgent request. By doing so READ latency is greatly reduced in read&write
+> collision scenarios.
 > 
-> Add support for reinserting a dispatched request back to the
-> scheduler's internal data structures.
-> This capability is used by the device driver when it chooses to
-> interrupt the current request transmission and execute another (more
-> urgent) pending request. For example: interrupting long write in order
-> to handle pending read. The device driver re-inserts the
-> remaining write request back to the scheduler, to be rescheduled
-> for transmission later on.
-> 
-> Add API for verifying whether the current scheduler
-> supports reinserting requests mechanism. If reinsert mechanism isn't
-> supported by the scheduler, this code path will never be activated.
+> Note that if the current scheduler doesn't implement the urgent request
+> mechanism, this code path is never activated.
 
-This is practically the exact same operation as a requeue. So why this
-duplication? I also don't quite understand why an IO scheduler would
-have to opt-in for this, seems like a pretty basic operation.
+I really don't like this out-of-band mechanism. Lets say there is an
+urgent request, the IO scheduler would put that at the head of the
+queue. So the first time the driver fetches a request, it'll see this
+urgent request. A driver that has support for this, would check the head
+of queue everytime its request_fn was invoked. There's no need to add a
+elevator_is_urgent_fn() and ->notified_urgent.
 
 -- 
 Jens Axboe
-
