@@ -1,140 +1,344 @@
-From: Ralph Droms <rdroms@gmail.com>
-Subject: Re: [PATCH for 3.10 v2] mmc: mvsdio: use dev_*() API instead of pr_*() API
-Date: Fri, 22 Mar 2013 16:44:53 -0400
-Message-ID: <314D078E-96FA-4118-9640-CF37883137A0@gmail.com>
-References: <1363959441-30744-1-git-send-email-thomas.petazzoni@free-electrons.com>
-Mime-Version: 1.0 (Mac OS X Mail 6.3 \(1503\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: <wei_wang@realsil.com.cn>
+Subject: [PATCH] mfd:rtsx: Support RTS5249
+Date: Mon, 25 Mar 2013 10:13:56 +0800
+Message-ID: <1364177636-4294-1-git-send-email-wei_wang@realsil.com.cn>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f181.google.com ([209.85.220.181]:35889 "EHLO
-	mail-vc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1422937Ab3CVUo6 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Mar 2013 16:44:58 -0400
-Received: by mail-vc0-f181.google.com with SMTP id hv10so3411993vcb.40
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Mar 2013 13:44:57 -0700 (PDT)
-In-Reply-To: <1363959441-30744-1-git-send-email-thomas.petazzoni@free-electrons.com>
+Received: from rtits2.realtek.com ([60.250.210.242]:44624 "EHLO
+	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755019Ab3CYCOQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Mar 2013 22:14:16 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
-Cc: Lior Amsalem <alior@marvell.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Andrew Lunn <andrew@lunn.ch>, Jason Cooper <jason@lakedaemon.net>, Gregory Clement <gregory.clement@free-electrons.com>, Maen Suleiman <maen@marvell.com>, linux-arm-kernel@lists.infradead.org
+To: cjb@laptop.org, sameo@linux.intel.com
+Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, rogerable@realtek.com, Wei WANG <wei_wang@realsil.com.cn>
 
-I've successfully compiled and tested this patch on my SheevaPlug platform.
+From: Wei WANG <wei_wang@realsil.com.cn>
 
-- Ralph Droms
+Support new model: RTS5249
 
-On Mar 22, 2013, at 9:37 AM, Thomas Petazzoni <thomas.petazzoni@free-electrons.com> wrote:
-
-The mvsdio driver was already using some dev_*() functions to print
-some messages, but still using pr_*() functions for some others. This
-patch converts all messages to use dev_*() functions.
-
-Many of the pr_*() function calls were printing the output of
-mmc_hostname() to preprend the message with an identifier for the
-device. Since the dev_*() functions do that automatically, this patch
-also gets rid of those string prefixes.
-
-Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Tested-by: Ralph Droms <rdroms@gmail.com>
-
+Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
 ---
-This is for 3.10.
+ drivers/mfd/Makefile         |    2 +-
+ drivers/mfd/rts5249.c        |  245 ++++++++++++++++++++++++++++++++++++++++++
+ drivers/mfd/rtsx_pcr.c       |    5 +
+ drivers/mfd/rtsx_pcr.h       |    1 +
+ include/linux/mfd/rtsx_pci.h |    2 +
+ 5 files changed, 254 insertions(+), 1 deletion(-)
+ create mode 100644 drivers/mfd/rts5249.c
 
-Changes between v1 and v2:
-
-* Fix incorrect format string. A "%s" was left, even though the
-  mmc_hostname() argument was removed due to the conversion to the
-  dev_*() API.
----
-drivers/mmc/host/mvsdio.c |   37 +++++++++++++++----------------------
-1 file changed, 15 insertions(+), 22 deletions(-)
-
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index 145cdaf..f6e5e25 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -119,10 +119,8 @@ static int mvsd_setup_data(struct mvsd_host *host, struct mmc_data *data)
-		host->pio_size = data->blocks * data->blksz;
-		host->pio_ptr = sg_virt(data->sg);
-		if (!nodma)
--			pr_debug("%s: fallback to PIO for data "
--					  "at 0x%p size %d\n",
--					  mmc_hostname(host->mmc),
--					  host->pio_ptr, host->pio_size);
-+			dev_dbg(host->dev, "fallback to PIO for data at 0x%p size %d\n",
-+				host->pio_ptr, host->pio_size);
-		return 1;
-	} else {
-		dma_addr_t phys_addr;
-@@ -473,8 +471,8 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
-		if (mrq->data)
-			err_status = mvsd_finish_data(host, mrq->data, err_status);
-		if (err_status) {
--			pr_err("%s: unhandled error status %#04x\n",
--					mmc_hostname(host->mmc), err_status);
-+			dev_err(host->dev, "unhandled error status %#04x\n",
-+				err_status);
-			cmd->error = -ENOMSG;
-		}
-
-@@ -491,9 +489,8 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
-	if (irq_handled)
-		return IRQ_HANDLED;
-
--	pr_err("%s: unhandled interrupt status=0x%04x en=0x%04x "
--			"pio=%d\n", mmc_hostname(host->mmc), intr_status,
--			host->intr_en, host->pio_size);
-+	dev_err(host->dev, "unhandled interrupt status=0x%04x en=0x%04x pio=%d\n",
-+		intr_status, host->intr_en, host->pio_size);
-	return IRQ_NONE;
-}
-
-@@ -507,13 +504,11 @@ static void mvsd_timeout_timer(unsigned long data)
-	spin_lock_irqsave(&host->lock, flags);
-	mrq = host->mrq;
-	if (mrq) {
--		pr_err("%s: Timeout waiting for hardware interrupt.\n",
--				mmc_hostname(host->mmc));
--		pr_err("%s: hw_state=0x%04x, intr_status=0x%04x "
--				"intr_en=0x%04x\n", mmc_hostname(host->mmc),
--				mvsd_read(MVSD_HW_STATE),
--				mvsd_read(MVSD_NOR_INTR_STATUS),
--				mvsd_read(MVSD_NOR_INTR_EN));
-+		dev_err(host->dev, "Timeout waiting for hardware interrupt.\n");
-+		dev_err(host->dev, "hw_state=0x%04x, intr_status=0x%04x intr_en=0x%04x\n",
-+			mvsd_read(MVSD_HW_STATE),
-+			mvsd_read(MVSD_NOR_INTR_STATUS),
-+			mvsd_read(MVSD_NOR_INTR_EN));
-
-		host->mrq = NULL;
-
-@@ -778,7 +773,7 @@ static int __init mvsd_probe(struct platform_device *pdev)
-
-	ret = devm_request_irq(&pdev->dev, irq, mvsd_irq, 0, DRIVER_NAME, host);
-	if (ret) {
--		pr_err("%s: cannot assign irq %d\n", DRIVER_NAME, irq);
-+		dev_err(&pdev->dev, "cannot assign irq %d\n", irq);
-		goto out;
-	}
-
-@@ -797,13 +792,11 @@ static int __init mvsd_probe(struct platform_device *pdev)
-	if (ret)
-		goto out;
-
--	pr_notice("%s: %s driver initialized, ",
--			   mmc_hostname(mmc), DRIVER_NAME);
-	if (!(mmc->caps & MMC_CAP_NEEDS_POLL))
--		printk("using GPIO %d for card detection\n",
--		       gpio_card_detect);
-+		dev_notice(&pdev->dev, "using GPIO %d for card detection\n",
-+			   gpio_card_detect);
-	else
--		printk("lacking card detect (fall back to polling)\n");
-+		dev_notice(&pdev->dev, "lacking card detect (fall back to polling)\n");
-	return 0;
-
-out:
+diff --git a/drivers/mfd/Makefile b/drivers/mfd/Makefile
+index b90409c..f61ac02 100644
+--- a/drivers/mfd/Makefile
++++ b/drivers/mfd/Makefile
+@@ -9,7 +9,7 @@ obj-$(CONFIG_MFD_88PM805)	+= 88pm805.o 88pm80x.o
+ obj-$(CONFIG_MFD_SM501)		+= sm501.o
+ obj-$(CONFIG_MFD_ASIC3)		+= asic3.o tmio_core.o
+ 
+-rtsx_pci-objs			:= rtsx_pcr.o rts5209.o rts5229.o rtl8411.o rts5227.o
++rtsx_pci-objs			:= rtsx_pcr.o rts5209.o rts5229.o rtl8411.o rts5227.o rts5249.o
+ obj-$(CONFIG_MFD_RTSX_PCI)	+= rtsx_pci.o
+ 
+ obj-$(CONFIG_HTC_EGPIO)		+= htc-egpio.o
+diff --git a/drivers/mfd/rts5249.c b/drivers/mfd/rts5249.c
+new file mode 100644
+index 0000000..24a1861
+--- /dev/null
++++ b/drivers/mfd/rts5249.c
+@@ -0,0 +1,245 @@
++/* Driver for Realtek PCI-Express card reader
++ *
++ * Copyright(c) 2009 Realtek Semiconductor Corp. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License as published by the
++ * Free Software Foundation; either version 2, or (at your option) any
++ * later version.
++ *
++ * This program is distributed in the hope that it will be useful, but
++ * WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program; if not, see <http://www.gnu.org/licenses/>.
++ *
++ * Author:
++ *   Wei WANG <wei_wang@realsil.com.cn>
++ *   No. 450, Shenhu Road, Suzhou Industry Park, Suzhou, China
++ */
++
++#include <linux/module.h>
++#include <linux/delay.h>
++#include <linux/mfd/rtsx_pci.h>
++
++#include "rtsx_pcr.h"
++
++static u8 rts5249_get_ic_version(struct rtsx_pcr *pcr)
++{
++	u8 val;
++
++	rtsx_pci_read_register(pcr, DUMMY_REG_RESET_0, &val);
++	return val & 0x0F;
++}
++
++static int rts5249_extra_init_hw(struct rtsx_pcr *pcr)
++{
++	rtsx_pci_init_cmd(pcr);
++
++	/* Configure GPIO as output */
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, GPIO_CTL, 0x02, 0x02);
++	/* Switch LDO3318 source from DV33 to card_3v3 */
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, LDO_PWR_SEL, 0x03, 0x00);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, LDO_PWR_SEL, 0x03, 0x01);
++	/* LED shine disabled, set initial shine cycle period */
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, OLT_LED_CTL, 0x0F, 0x02);
++	/* Configure force_clock_req
++	 * Maybe We should define 0xFF03 as some name
++	 */
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, 0xFF03, 0x08, 0x08);
++	/* Correct driving */
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD,
++			SD30_CLK_DRIVE_SEL, 0xFF, 0x99);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD,
++			SD30_CMD_DRIVE_SEL, 0xFF, 0x99);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD,
++			SD30_DAT_DRIVE_SEL, 0xFF, 0x92);
++
++	return rtsx_pci_send_cmd(pcr, 100);
++}
++
++static int rts5249_optimize_phy(struct rtsx_pcr *pcr)
++{
++	int err;
++
++	err = rtsx_pci_write_phy_register(pcr, 0x19, 0xFE46);
++	if (err < 0)
++		return err;
++
++	mdelay(1);
++
++	return rtsx_pci_write_phy_register(pcr, 0x0A, 0x05C0);
++}
++
++static int rts5249_turn_on_led(struct rtsx_pcr *pcr)
++{
++	return rtsx_pci_write_register(pcr, GPIO_CTL, 0x02, 0x02);
++}
++
++static int rts5249_turn_off_led(struct rtsx_pcr *pcr)
++{
++	return rtsx_pci_write_register(pcr, GPIO_CTL, 0x02, 0x00);
++}
++
++static int rts5249_enable_auto_blink(struct rtsx_pcr *pcr)
++{
++	return rtsx_pci_write_register(pcr, OLT_LED_CTL, 0x08, 0x08);
++}
++
++static int rts5249_disable_auto_blink(struct rtsx_pcr *pcr)
++{
++	return rtsx_pci_write_register(pcr, OLT_LED_CTL, 0x08, 0x00);
++}
++
++static int rts5249_card_power_on(struct rtsx_pcr *pcr, int card)
++{
++	int err;
++
++	rtsx_pci_init_cmd(pcr);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_PWR_CTL,
++			SD_POWER_MASK, SD_VCC_PARTIAL_POWER_ON);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, PWR_GATE_CTRL,
++			LDO3318_PWR_MASK, 0x02);
++	err = rtsx_pci_send_cmd(pcr, 100);
++	if (err < 0)
++		return err;
++
++	msleep(5);
++
++	rtsx_pci_init_cmd(pcr);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_PWR_CTL,
++			SD_POWER_MASK, SD_VCC_POWER_ON);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, PWR_GATE_CTRL,
++			LDO3318_PWR_MASK, 0x06);
++	err = rtsx_pci_send_cmd(pcr, 100);
++	if (err < 0)
++		return err;
++
++	return 0;
++}
++
++static int rts5249_card_power_off(struct rtsx_pcr *pcr, int card)
++{
++	rtsx_pci_init_cmd(pcr);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_PWR_CTL,
++			SD_POWER_MASK, SD_POWER_OFF);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, PWR_GATE_CTRL,
++			LDO3318_PWR_MASK, 0x00);
++	return rtsx_pci_send_cmd(pcr, 100);
++}
++
++static int rts5249_switch_output_voltage(struct rtsx_pcr *pcr, u8 voltage)
++{
++	int err;
++	u8 clk_drive, cmd_drive, dat_drive;
++
++	if (voltage == OUTPUT_3V3) {
++		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4FC0 | 0x24);
++		if (err < 0)
++			return err;
++		clk_drive = 0x99;
++		cmd_drive = 0x99;
++		dat_drive = 0x92;
++	} else if (voltage == OUTPUT_1V8) {
++		err = rtsx_pci_write_phy_register(pcr, 0x11, 0x3C02);
++		if (err < 0)
++			return err;
++		err = rtsx_pci_write_phy_register(pcr, 0x08, 0x4C40 | 0x24);
++		if (err < 0)
++			return err;
++		clk_drive = 0xb3;
++		cmd_drive = 0xb3;
++		dat_drive = 0xb3;
++	} else {
++		return -EINVAL;
++	}
++
++	/* set pad drive */
++	rtsx_pci_init_cmd(pcr);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD30_CLK_DRIVE_SEL,
++			0xFF, clk_drive);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD30_CMD_DRIVE_SEL,
++			0xFF, cmd_drive);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD30_DAT_DRIVE_SEL,
++			0xFF, dat_drive);
++	return rtsx_pci_send_cmd(pcr, 100);
++}
++
++static const struct pcr_ops rts5249_pcr_ops = {
++	.extra_init_hw = rts5249_extra_init_hw,
++	.optimize_phy = rts5249_optimize_phy,
++	.turn_on_led = rts5249_turn_on_led,
++	.turn_off_led = rts5249_turn_off_led,
++	.enable_auto_blink = rts5249_enable_auto_blink,
++	.disable_auto_blink = rts5249_disable_auto_blink,
++	.card_power_on = rts5249_card_power_on,
++	.card_power_off = rts5249_card_power_off,
++	.switch_output_voltage = rts5249_switch_output_voltage,
++};
++
++/* SD Pull Control Enable:
++ *     SD_DAT[3:0] ==> pull up
++ *     SD_CD       ==> pull up
++ *     SD_WP       ==> pull up
++ *     SD_CMD      ==> pull up
++ *     SD_CLK      ==> pull down
++ */
++static const u32 rts5249_sd_pull_ctl_enable_tbl[] = {
++	RTSX_REG_PAIR(CARD_PULL_CTL1, 0x66),
++	RTSX_REG_PAIR(CARD_PULL_CTL2, 0xAA),
++	RTSX_REG_PAIR(CARD_PULL_CTL3, 0xE9),
++	RTSX_REG_PAIR(CARD_PULL_CTL4, 0xAA),
++	0,
++};
++
++/* SD Pull Control Disable:
++ *     SD_DAT[3:0] ==> pull down
++ *     SD_CD       ==> pull up
++ *     SD_WP       ==> pull down
++ *     SD_CMD      ==> pull down
++ *     SD_CLK      ==> pull down
++ */
++static const u32 rts5249_sd_pull_ctl_disable_tbl[] = {
++	RTSX_REG_PAIR(CARD_PULL_CTL1, 0x66),
++	RTSX_REG_PAIR(CARD_PULL_CTL2, 0x55),
++	RTSX_REG_PAIR(CARD_PULL_CTL3, 0xD5),
++	RTSX_REG_PAIR(CARD_PULL_CTL4, 0x55),
++	0,
++};
++
++/* MS Pull Control Enable:
++ *     MS CD       ==> pull up
++ *     others      ==> pull down
++ */
++static const u32 rts5249_ms_pull_ctl_enable_tbl[] = {
++	RTSX_REG_PAIR(CARD_PULL_CTL4, 0x55),
++	RTSX_REG_PAIR(CARD_PULL_CTL5, 0x55),
++	RTSX_REG_PAIR(CARD_PULL_CTL6, 0x15),
++	0,
++};
++
++/* MS Pull Control Disable:
++ *     MS CD       ==> pull up
++ *     others      ==> pull down
++ */
++static const u32 rts5249_ms_pull_ctl_disable_tbl[] = {
++	RTSX_REG_PAIR(CARD_PULL_CTL4, 0x55),
++	RTSX_REG_PAIR(CARD_PULL_CTL5, 0x55),
++	RTSX_REG_PAIR(CARD_PULL_CTL6, 0x15),
++	0,
++};
++
++void rts5249_init_params(struct rtsx_pcr *pcr)
++{
++	pcr->extra_caps = EXTRA_CAPS_SD_SDR50 | EXTRA_CAPS_SD_SDR104;
++	pcr->num_slots = 2;
++	pcr->ops = &rts5249_pcr_ops;
++
++	pcr->ic_version = rts5249_get_ic_version(pcr);
++	pcr->sd_pull_ctl_enable_tbl = rts5249_sd_pull_ctl_enable_tbl;
++	pcr->sd_pull_ctl_disable_tbl = rts5249_sd_pull_ctl_disable_tbl;
++	pcr->ms_pull_ctl_enable_tbl = rts5249_ms_pull_ctl_enable_tbl;
++	pcr->ms_pull_ctl_disable_tbl = rts5249_ms_pull_ctl_disable_tbl;
++}
+diff --git a/drivers/mfd/rtsx_pcr.c b/drivers/mfd/rtsx_pcr.c
+index 2f12cc1..62b0e12 100644
+--- a/drivers/mfd/rtsx_pcr.c
++++ b/drivers/mfd/rtsx_pcr.c
+@@ -56,6 +56,7 @@ static DEFINE_PCI_DEVICE_TABLE(rtsx_pci_ids) = {
+ 	{ PCI_DEVICE(0x10EC, 0x5229), PCI_CLASS_OTHERS << 16, 0xFF0000 },
+ 	{ PCI_DEVICE(0x10EC, 0x5289), PCI_CLASS_OTHERS << 16, 0xFF0000 },
+ 	{ PCI_DEVICE(0x10EC, 0x5227), PCI_CLASS_OTHERS << 16, 0xFF0000 },
++	{ PCI_DEVICE(0x10EC, 0x5249), PCI_CLASS_OTHERS << 16, 0xFF0000 },
+ 	{ 0, }
+ };
+ 
+@@ -1033,6 +1034,10 @@ static int rtsx_pci_init_chip(struct rtsx_pcr *pcr)
+ 	case 0x5227:
+ 		rts5227_init_params(pcr);
+ 		break;
++
++	case 0x5249:
++		rts5249_init_params(pcr);
++		break;
+ 	}
+ 
+ 	dev_dbg(&(pcr->pci->dev), "PID: 0x%04x, IC version: 0x%02x\n",
+diff --git a/drivers/mfd/rtsx_pcr.h b/drivers/mfd/rtsx_pcr.h
+index 2b3ab8a..55fcfc2 100644
+--- a/drivers/mfd/rtsx_pcr.h
++++ b/drivers/mfd/rtsx_pcr.h
+@@ -32,5 +32,6 @@ void rts5209_init_params(struct rtsx_pcr *pcr);
+ void rts5229_init_params(struct rtsx_pcr *pcr);
+ void rtl8411_init_params(struct rtsx_pcr *pcr);
+ void rts5227_init_params(struct rtsx_pcr *pcr);
++void rts5249_init_params(struct rtsx_pcr *pcr);
+ 
+ #endif
+diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx_pci.h
+index 26ea7f1..ffb880b 100644
+--- a/include/linux/mfd/rtsx_pci.h
++++ b/include/linux/mfd/rtsx_pci.h
+@@ -500,6 +500,8 @@
+ #define BPP_POWER_15_PERCENT_ON		0x08
+ #define BPP_POWER_ON			0x00
+ #define BPP_POWER_MASK			0x0F
++#define SD_VCC_PARTIAL_POWER_ON		0x02
++#define SD_VCC_POWER_ON			0x00
+ 
+ /* PWR_GATE_CTRL */
+ #define PWR_GATE_EN			0x01
 -- 
 1.7.9.5
-
 
