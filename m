@@ -1,207 +1,32 @@
-From: Markus Pargmann <mpa@pengutronix.de>
-Subject: [PATCH v2] mmc: mxcmmc: DT support
-Date: Mon, 25 Mar 2013 16:34:19 +0100
-Message-ID: <1364225659-29677-1-git-send-email-mpa@pengutronix.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:57852 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757511Ab3CYPgj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Mar 2013 11:36:39 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Doug Anderson <dianders@google.com>
+Subject: Re: [PATCH] mmc: dwmmc: let device core setup the default pin configuration
+Date: Mon, 25 Mar 2013 09:56:25 -0700
+Message-ID: <CAD=FV=Uy1dQMAxgh_ncxfsQVMDp4Da3inLTvgbJFhyhFLjVWrg@mail.gmail.com>
+References: <1362571461-14570-1-git-send-email-thomas.abraham@linaro.org>
+	<CAD=FV=W8E=0C8_QZ3d44caq6EOvBpTkX0Ng86niQuN4B-cnHiw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=W8E=0C8_QZ3d44caq6EOvBpTkX0Ng86niQuN4B-cnHiw@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Thomas Abraham <thomas.abraham@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>, Girish Shivananjappa <girish.shivananjappa@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Tomasz Figa <t.figa@samsung.com>, =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>, Linus Walleij <linus.walleij@linaro.org>, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: rob.herring@calxeda.com, rob@landley.net, kernel@pengutronix.de, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, Markus Pargmann <mpa@pengutronix.de>, Anatolij Gustschin <agust@denx.de>
 
-Adding devicetree support for imx21-mmc and imx31-mmc. Based on generic
-gpio helper functions by Guennadi and generic DMA devicetree bindings.
+Thomas,
 
-Signed-off-by: Markus Pargmann <mpa@pengutronix.de>
-Cc: Anatolij Gustschin <agust@denx.de>
----
+On Mon, Mar 11, 2013 at 10:53 AM, Doug Anderson <dianders@google.com> wrote:
+> It would be good to address Seungwon Jeon's comments (change prefix to
+> dw_mmc and remove setup_bus), but in general this looks good to me,
+> so...
 
-Notes:
-    Changes in v2:
-    - Documentation fix
-    - Use dma_request_slave_channel instead of of_*
+Are you planning on doing this?  I noticed that Chris pulled your
+sdhci-s3c change in recently but apparently skipped this one since it
+had outstanding comments.  Can you address comments and re-send?  This
+is blocking pinmux dts stuff from landing (I think) and that blocks a
+lot of other things from landing.
 
- .../devicetree/bindings/mmc/fsl-imx-mmc.txt        | 24 +++++++
- drivers/mmc/host/mxcmmc.c                          | 79 +++++++++++++++++-----
- 2 files changed, 85 insertions(+), 18 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
+The comments are pretty trivial, so I could always fix them and
+re-send myself, but it would be better if you could do it...  :)
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
-new file mode 100644
-index 0000000..db44235
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
-@@ -0,0 +1,24 @@
-+* Freescale Secure Digital Host Controller for i.MX2/3 series
-+
-+This file documents differences to the properties defined in mmc.txt.
-+
-+Required properties:
-+- compatible : Should be "fsl,<chip>-mmc", chip can be imx21 or imx31
-+
-+Optional properties:
-+- dmas: One DMA phandle with arguments as defined by the devicetree bindings
-+	of the used DMA controller.
-+- dma-names: Has to be "rx-tx".
-+
-+Example:
-+
-+sdhci1: sdhci@10014000 {
-+	compatible = "fsl,imx27-mmc", "fsl,imx21-mmc";
-+	reg = <0x10014000 0x1000>;
-+	interrupts = <11>;
-+	dmas = <&dma 7>;
-+	dma-names = "rx-tx";
-+	bus-width = <4>;
-+	cd-gpios = <&gpio3 29>;
-+	status = "okay";
-+};
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index a72936e..f477b4f 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -34,6 +34,10 @@
- #include <linux/regulator/consumer.h>
- #include <linux/dmaengine.h>
- #include <linux/types.h>
-+#include <linux/of.h>
-+#include <linux/of_device.h>
-+#include <linux/of_dma.h>
-+#include <linux/of_gpio.h>
- 
- #include <asm/dma.h>
- #include <asm/irq.h>
-@@ -173,6 +177,19 @@ static struct platform_device_id mxcmci_devtype[] = {
- };
- MODULE_DEVICE_TABLE(platform, mxcmci_devtype);
- 
-+static const struct of_device_id mxcmci_of_match[] = {
-+	{
-+		.compatible = "fsl,imx21-mmc",
-+		.data = &mxcmci_devtype[IMX21_MMC],
-+	}, {
-+		.compatible = "fsl,imx31-mmc",
-+		.data = &mxcmci_devtype[IMX31_MMC],
-+	}, {
-+		/* sentinel */
-+	}
-+};
-+MODULE_DEVICE_TABLE(of, mxcmci_of_match);
-+
- static inline int is_imx31_mmc(struct mxcmci_host *host)
- {
- 	return host->devtype == IMX31_MMC;
-@@ -935,10 +952,15 @@ static int mxcmci_probe(struct platform_device *pdev)
- 	struct mxcmci_host *host = NULL;
- 	struct resource *iores, *r;
- 	int ret = 0, irq;
-+	bool dat3_card_detect = false;
- 	dma_cap_mask_t mask;
-+	const struct of_device_id *of_id;
-+	struct imxmmc_platform_data *pdata = pdev->dev.platform_data;
- 
- 	pr_info("i.MX SDHC driver\n");
- 
-+	of_id = of_match_device(mxcmci_of_match, &pdev->dev);
-+
- 	iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	irq = platform_get_irq(pdev, 0);
- 	if (!iores || irq < 0)
-@@ -954,8 +976,14 @@ static int mxcmci_probe(struct platform_device *pdev)
- 		goto out_release_mem;
- 	}
- 
-+	mmc_of_parse(mmc);
- 	mmc->ops = &mxcmci_ops;
--	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;
-+
-+	/* For devicetree parsing, the bus width is read from devicetree */
-+	if (pdata)
-+		mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;
-+	else
-+		mmc->caps |= MMC_CAP_SDIO_IRQ;
- 
- 	/* MMC core transfer sizes tunable parameters */
- 	mmc->max_segs = 64;
-@@ -971,14 +999,25 @@ static int mxcmci_probe(struct platform_device *pdev)
- 		goto out_free;
- 	}
- 
-+	if (of_id) {
-+		const struct platform_device_id *id_entry = of_id->data;
-+		host->devtype = id_entry->driver_data;
-+	} else {
-+		host->devtype = pdev->id_entry->driver_data;
-+	}
- 	host->mmc = mmc;
--	host->pdata = pdev->dev.platform_data;
--	host->devtype = pdev->id_entry->driver_data;
-+	host->pdata = pdata;
- 	spin_lock_init(&host->lock);
- 
-+	if (pdata)
-+		dat3_card_detect = pdata->dat3_card_detect;
-+	else if (!(mmc->caps & MMC_CAP_NONREMOVABLE)
-+			&& !of_property_read_bool(pdev->dev.of_node, "cd-gpios"))
-+		dat3_card_detect = true;
-+
- 	mxcmci_init_ocr(host);
- 
--	if (host->pdata && host->pdata->dat3_card_detect)
-+	if (dat3_card_detect)
- 		host->default_irq_mask =
- 			INT_CARD_INSERTION_EN | INT_CARD_REMOVAL_EN;
- 	else
-@@ -1020,21 +1059,24 @@ static int mxcmci_probe(struct platform_device *pdev)
- 
- 	writel(host->default_irq_mask, host->base + MMC_REG_INT_CNTR);
- 
--	r = platform_get_resource(pdev, IORESOURCE_DMA, 0);
--	if (r) {
--		host->dmareq = r->start;
--		host->dma_data.peripheral_type = IMX_DMATYPE_SDHC;
--		host->dma_data.priority = DMA_PRIO_LOW;
--		host->dma_data.dma_request = host->dmareq;
--		dma_cap_zero(mask);
--		dma_cap_set(DMA_SLAVE, mask);
--		host->dma = dma_request_channel(mask, filter, host);
--		if (host->dma)
--			mmc->max_seg_size = dma_get_max_seg_size(
--					host->dma->device->dev);
-+	if (!host->pdata) {
-+		host->dma = dma_request_slave_channel(pdev->dev, "rx-tx");
-+	} else {
-+		r = platform_get_resource(pdev, IORESOURCE_DMA, 0);
-+		if (r) {
-+			host->dmareq = r->start;
-+			host->dma_data.peripheral_type = IMX_DMATYPE_SDHC;
-+			host->dma_data.priority = DMA_PRIO_LOW;
-+			host->dma_data.dma_request = host->dmareq;
-+			dma_cap_zero(mask);
-+			dma_cap_set(DMA_SLAVE, mask);
-+			host->dma = dma_request_channel(mask, filter, host);
-+		}
- 	}
--
--	if (!host->dma)
-+	if (host->dma)
-+		mmc->max_seg_size = dma_get_max_seg_size(
-+				host->dma->device->dev);
-+	else
- 		dev_info(mmc_dev(host->mmc), "dma not available. Using PIO\n");
- 
- 	INIT_WORK(&host->datawork, mxcmci_datawork);
-@@ -1153,6 +1195,7 @@ static struct platform_driver mxcmci_driver = {
- #ifdef CONFIG_PM
- 		.pm	= &mxcmci_pm_ops,
- #endif
-+		.of_match_table	= mxcmci_of_match,
- 	}
- };
- 
--- 
-1.8.1.5
-
+-Doug
