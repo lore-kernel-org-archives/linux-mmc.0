@@ -1,150 +1,207 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: [PATCH 1/3i v6] MMC/SD: Add callback function to detect card
-Date: Mon, 25 Mar 2013 23:27:14 +0800
-Message-ID: <CADz5_gKGtO_WTGu3gU05LxGzweUTYFssGPabWiepXa0k_f_RZw@mail.gmail.com>
-References: <25B60CDC2F704E4E9D88FFD52780CB4C0BDEC869A3@SC-VEXCH1.marvell.com>
-	<CADz5_gJe8xJH6FD7xwxssmWSZ2w4tvKAnYAexzTtVSyW0ovweQ@mail.gmail.com>
-	<110EED8CC96DFC488B7E717A2027A27C33B2BF@039-SN1MPN1-003.039d.mgd.msft.net>
-	<CADz5_gLJvVmJa_5zAZAD-7cfbneySgH8GmwfDfj+-eT3Y80QQA@mail.gmail.com>
-	<110EED8CC96DFC488B7E717A2027A27C33B361@039-SN1MPN1-003.039d.mgd.msft.net>
-	<CADz5_g+_JTafM4rLL0Qa8yOSCnoGn9R+nJ6JdqKrR7Td82BDzA@mail.gmail.com>
-	<110EED8CC96DFC488B7E717A2027A27C33B46A@039-SN1MPN1-003.039d.mgd.msft.net>
-	<CAPDyKFrHvg6inGahDwz0dsqBbrzJF4p0oW1PEVxSLEq0Mq-s=A@mail.gmail.com>
-	<CADz5_gJiV4R0tkmcX-_oY-m64_ETtcGW5bg8euq_rDHGLuFa=Q@mail.gmail.com>
-	<CAPDyKFpa7KWQPZWP-4Gz4sV6YN4jbs1F9tKc0KXSgUkTz0yCew@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Markus Pargmann <mpa@pengutronix.de>
+Subject: [PATCH v2] mmc: mxcmmc: DT support
+Date: Mon, 25 Mar 2013 16:34:19 +0100
+Message-ID: <1364225659-29677-1-git-send-email-mpa@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f54.google.com ([209.85.219.54]:53394 "EHLO
-	mail-oa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757354Ab3CYP1Q (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Mar 2013 11:27:16 -0400
-Received: by mail-oa0-f54.google.com with SMTP id n12so6500785oag.41
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Mar 2013 08:27:15 -0700 (PDT)
-In-Reply-To: <CAPDyKFpa7KWQPZWP-4Gz4sV6YN4jbs1F9tKc0KXSgUkTz0yCew@mail.gmail.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:57852 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757511Ab3CYPgj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Mar 2013 11:36:39 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Huang Changming-R66093 <r66093@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+To: cjb@laptop.org
+Cc: rob.herring@calxeda.com, rob@landley.net, kernel@pengutronix.de, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, Markus Pargmann <mpa@pengutronix.de>, Anatolij Gustschin <agust@denx.de>
 
-2013/3/25 Ulf Hansson <ulf.hansson@linaro.org>:
-> On 22 March 2013 16:27, Kevin Liu <keyuan.liu@gmail.com> wrote:
->> 2013/3/22 Ulf Hansson <ulf.hansson@linaro.org>:
->>> On 22 March 2013 08:42, Huang Changming-R66093 <r66093@freescale.com> wrote:
->>>>
->>>> <r66093@freescale.com>:
->>>>> >> >> Jerry,
->>>>> >> >>
->>>>> >> >> Function _mmc_detect_card_removed should only be called when card
->>>>> >> >> insert/removal or i/o error occur unless POLLING is used(called
->>>>> >> >> once per second). So it should _not_ impact performance much.
->>>>> >> > [jerry]
->>>>> >> > No, your understanding is wrong.
->>>>> >> > Function "_mmc_detect_card_removed " is called to check if our card
->>>>> >> > has
->>>>> >> been removed when driver run the function "mmc_rescan" every time.
->>>>> >> >
->>>>> >>
->>>>> >> But when will mmc_rescan be called?
->>>>> >> Besides boot up, only when card status change it will be called.
->>>>> >> So usually it should _not_ be called frequently.
->>>>> > [jerry]
->>>>> > For poll mode, how to know card status changed?
->>>>> > The answer is "mmc_rescan".
->>>>> > maybe you could read the last two lines of this function ago.
->>>>> >
->>>>>
->>>>> I mentioned this in my first response "unless POLLING is used(called once
->>>>> per second)". I was a bit confused firstly.
->>>>> I think slot-gpio is a better solution, with which you don't need the
->>>>> every second polling.
->>>> [jerry]
->>>> Not all Soc has GPIO to do this. our controller has the pin to detect the card status, need the external hardware to support it.
->>>> But due to some reasons, some boards don't do this work, so need the poll mode for all boards.
->>>>
->>>>> >> >> POLLING is poor for performance, why not change to slot-gpio if
->>>>> >> >> host is broken for card detect.
->>>>> >> > [jerry]
->>>>> >> > Some our boards can't support interrupt mode to detect card
->>>>> >> insert/removable, so we unify the poll mode.
->>>>> >> >
->>>>> >>
->>>>> >> Not support gpio interrupt?
->>>>> >> I think you only don't support sdh host interrupt.
->>>>> >
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>>> the body of a message to majordomo@vger.kernel.org More majordomo info at
->>>>> http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>>
->>> A suggestion; the poll time out is 1s today. We could make some more
->>> intelligent update to the timeout value so we decrease the number of
->>> timeouts to happen. In other words minimize the number of mmc_rescan
->>> to be executed.
->>>
->>> 1. When no card is inserted, use 1 s.
->>> 2. When card is inserted, switch to 30 s timeout. The card removal
->>> will be detected anyway when a blk err occurs, due to that
->>> mmc_detect_card_removed will be called from the block layer at error
->>> handling path.
->>>
->>
->> Ulf,
->>
->> Sounds good! But I have one concern:
->> If the card is removed when there is no i/o access. Then the
->> mmc_rescan won't run until 30 seconds later (just imagine the worst
->> case). If within 30 seconds, the card is inserted again or another
->> different card is inserted, then issue may occur.
->
-> True!
->
-> Do you think a timeout of say 10 s could be more more acceptable?
->
+Adding devicetree support for imx21-mmc and imx31-mmc. Based on generic
+gpio helper functions by Guennadi and generic DMA devicetree bindings.
 
-I prefer below solution.
+Signed-off-by: Markus Pargmann <mpa@pengutronix.de>
+Cc: Anatolij Gustschin <agust@denx.de>
+---
 
->>
->> Then I have a suggestion as below:
->> 1. keep current code as 1 second in mmc_rescan for polling.
->> 2. When an i/o request come, we can cancel current delay work and
->> reschedule the delay detect work after 1 second from that point.
->> 3. If next i/o request come within 1 second, we can reschedule the
->> detect work after 1 second from that point again.
->
-> Well, I actually thought of such a solution as well, but I kind of
-> dropped it because it felt a bit messy. Although, I guess you are
-> right, that is probably the most proper way of doing it.
->
-> Giving it some more thoughts, I guess we should utilize the runtime pm
-> callbacks for the sd card bus_ops somehow. I pushed a skeleton
-> patchset for this a while ago. If it gets merged of course.
->
-> 1.mmc_rescan could check the runtime status, if active, skip the rescan.
-> 2. Or, make the runtime supend callback schedule a rescan work.
->
+Notes:
+    Changes in v2:
+    - Documentation fix
+    - Use dma_request_slave_channel instead of of_*
 
-Good idea!
-Agree with either of above two. Maybe the second is better. Cancel the
-rescan work in runtime resume callback while schedule the rescan in
-runtime suspend.
-I think above should can handle normal cases.
-To handle the special case that card is removed during i/o operations,
-can remove  MMC_CAP2_DETECT_ON_ERR and use MMC_CAP_NEEDS_POLL in
-mmc_detect_card_removed when error occur as your patch did.
+ .../devicetree/bindings/mmc/fsl-imx-mmc.txt        | 24 +++++++
+ drivers/mmc/host/mxcmmc.c                          | 79 +++++++++++++++++-----
+ 2 files changed, 85 insertions(+), 18 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
 
->>
->> So during continuous i/o operations, there will be no mmc_rescan execution.
->> Once i/o operation stopped, the mmc_rescan will be called every 1 second.
->> This way can solve above issue.
->> How do you think?
->>
->> Thanks
->> Kevin
->>
->>> Any thoughts?
->>>
->>> Kind regards
->>> Ulf Hansson
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
+new file mode 100644
+index 0000000..db44235
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-mmc.txt
+@@ -0,0 +1,24 @@
++* Freescale Secure Digital Host Controller for i.MX2/3 series
++
++This file documents differences to the properties defined in mmc.txt.
++
++Required properties:
++- compatible : Should be "fsl,<chip>-mmc", chip can be imx21 or imx31
++
++Optional properties:
++- dmas: One DMA phandle with arguments as defined by the devicetree bindings
++	of the used DMA controller.
++- dma-names: Has to be "rx-tx".
++
++Example:
++
++sdhci1: sdhci@10014000 {
++	compatible = "fsl,imx27-mmc", "fsl,imx21-mmc";
++	reg = <0x10014000 0x1000>;
++	interrupts = <11>;
++	dmas = <&dma 7>;
++	dma-names = "rx-tx";
++	bus-width = <4>;
++	cd-gpios = <&gpio3 29>;
++	status = "okay";
++};
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index a72936e..f477b4f 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -34,6 +34,10 @@
+ #include <linux/regulator/consumer.h>
+ #include <linux/dmaengine.h>
+ #include <linux/types.h>
++#include <linux/of.h>
++#include <linux/of_device.h>
++#include <linux/of_dma.h>
++#include <linux/of_gpio.h>
+ 
+ #include <asm/dma.h>
+ #include <asm/irq.h>
+@@ -173,6 +177,19 @@ static struct platform_device_id mxcmci_devtype[] = {
+ };
+ MODULE_DEVICE_TABLE(platform, mxcmci_devtype);
+ 
++static const struct of_device_id mxcmci_of_match[] = {
++	{
++		.compatible = "fsl,imx21-mmc",
++		.data = &mxcmci_devtype[IMX21_MMC],
++	}, {
++		.compatible = "fsl,imx31-mmc",
++		.data = &mxcmci_devtype[IMX31_MMC],
++	}, {
++		/* sentinel */
++	}
++};
++MODULE_DEVICE_TABLE(of, mxcmci_of_match);
++
+ static inline int is_imx31_mmc(struct mxcmci_host *host)
+ {
+ 	return host->devtype == IMX31_MMC;
+@@ -935,10 +952,15 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 	struct mxcmci_host *host = NULL;
+ 	struct resource *iores, *r;
+ 	int ret = 0, irq;
++	bool dat3_card_detect = false;
+ 	dma_cap_mask_t mask;
++	const struct of_device_id *of_id;
++	struct imxmmc_platform_data *pdata = pdev->dev.platform_data;
+ 
+ 	pr_info("i.MX SDHC driver\n");
+ 
++	of_id = of_match_device(mxcmci_of_match, &pdev->dev);
++
+ 	iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	irq = platform_get_irq(pdev, 0);
+ 	if (!iores || irq < 0)
+@@ -954,8 +976,14 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 		goto out_release_mem;
+ 	}
+ 
++	mmc_of_parse(mmc);
+ 	mmc->ops = &mxcmci_ops;
+-	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;
++
++	/* For devicetree parsing, the bus width is read from devicetree */
++	if (pdata)
++		mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;
++	else
++		mmc->caps |= MMC_CAP_SDIO_IRQ;
+ 
+ 	/* MMC core transfer sizes tunable parameters */
+ 	mmc->max_segs = 64;
+@@ -971,14 +999,25 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 		goto out_free;
+ 	}
+ 
++	if (of_id) {
++		const struct platform_device_id *id_entry = of_id->data;
++		host->devtype = id_entry->driver_data;
++	} else {
++		host->devtype = pdev->id_entry->driver_data;
++	}
+ 	host->mmc = mmc;
+-	host->pdata = pdev->dev.platform_data;
+-	host->devtype = pdev->id_entry->driver_data;
++	host->pdata = pdata;
+ 	spin_lock_init(&host->lock);
+ 
++	if (pdata)
++		dat3_card_detect = pdata->dat3_card_detect;
++	else if (!(mmc->caps & MMC_CAP_NONREMOVABLE)
++			&& !of_property_read_bool(pdev->dev.of_node, "cd-gpios"))
++		dat3_card_detect = true;
++
+ 	mxcmci_init_ocr(host);
+ 
+-	if (host->pdata && host->pdata->dat3_card_detect)
++	if (dat3_card_detect)
+ 		host->default_irq_mask =
+ 			INT_CARD_INSERTION_EN | INT_CARD_REMOVAL_EN;
+ 	else
+@@ -1020,21 +1059,24 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 
+ 	writel(host->default_irq_mask, host->base + MMC_REG_INT_CNTR);
+ 
+-	r = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+-	if (r) {
+-		host->dmareq = r->start;
+-		host->dma_data.peripheral_type = IMX_DMATYPE_SDHC;
+-		host->dma_data.priority = DMA_PRIO_LOW;
+-		host->dma_data.dma_request = host->dmareq;
+-		dma_cap_zero(mask);
+-		dma_cap_set(DMA_SLAVE, mask);
+-		host->dma = dma_request_channel(mask, filter, host);
+-		if (host->dma)
+-			mmc->max_seg_size = dma_get_max_seg_size(
+-					host->dma->device->dev);
++	if (!host->pdata) {
++		host->dma = dma_request_slave_channel(pdev->dev, "rx-tx");
++	} else {
++		r = platform_get_resource(pdev, IORESOURCE_DMA, 0);
++		if (r) {
++			host->dmareq = r->start;
++			host->dma_data.peripheral_type = IMX_DMATYPE_SDHC;
++			host->dma_data.priority = DMA_PRIO_LOW;
++			host->dma_data.dma_request = host->dmareq;
++			dma_cap_zero(mask);
++			dma_cap_set(DMA_SLAVE, mask);
++			host->dma = dma_request_channel(mask, filter, host);
++		}
+ 	}
+-
+-	if (!host->dma)
++	if (host->dma)
++		mmc->max_seg_size = dma_get_max_seg_size(
++				host->dma->device->dev);
++	else
+ 		dev_info(mmc_dev(host->mmc), "dma not available. Using PIO\n");
+ 
+ 	INIT_WORK(&host->datawork, mxcmci_datawork);
+@@ -1153,6 +1195,7 @@ static struct platform_driver mxcmci_driver = {
+ #ifdef CONFIG_PM
+ 		.pm	= &mxcmci_pm_ops,
+ #endif
++		.of_match_table	= mxcmci_of_match,
+ 	}
+ };
+ 
+-- 
+1.8.1.5
+
