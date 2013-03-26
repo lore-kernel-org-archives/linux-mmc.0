@@ -1,55 +1,90 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: dw-mmc: control the power-enable register
-Date: Tue, 26 Mar 2013 21:36:14 +0900
-Message-ID: <5151963E.2020101@samsung.com>
+From: Philip Rakity <prakity@nvidia.com>
+Subject: Re: When bus width detection procedure takes place, kernel cannot
+ lock on correct bus width
+Date: Tue, 26 Mar 2013 16:54:34 +0100
+Message-ID: <BF08E033-377F-4356-92B7-356BCEA5F4E4@nvidia.com>
+References: <87ip4qdybr.fsf@octavius.laptop.org>
+ <C0EB07A4-F566-4865-BF4C-D9668C527203@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:27793 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759255Ab3CZMgO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Mar 2013 08:36:14 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MK9007GKPODTH00@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 26 Mar 2013 21:36:13 +0900 (KST)
+Received: from hqemgate03.nvidia.com ([216.228.121.140]:1750 "EHLO
+	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964809Ab3CZPyv convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Mar 2013 11:54:51 -0400
+In-Reply-To: <C0EB07A4-F566-4865-BF4C-D9668C527203@nvidia.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: 'Chris Ball' <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@gmail.com>, James Hogan <james.hogan@imgtec.com>
+To: "elad.yi@gmail.com" <elad.yi@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
 
-When card is power-on/off, need to control the power-enable register.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |    6 ++++++
- 1 file changed, 6 insertions(+)
+Elad,
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index a443820..a32aab5 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -821,11 +821,17 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		/* Power up slot */
- 		if (slot->host->pdata->setpower)
- 			slot->host->pdata->setpower(slot->id, mmc->ocr_avail);
-+		regs = mci_readl(slot->host, PWREN);
-+		regs |= (1 << slot->id);
-+		mci_writel(slot->host, PWREN, regs);
- 		break;
- 	case MMC_POWER_OFF:
- 		/* Power down slot */
- 		if (slot->host->pdata->setpower)
- 			slot->host->pdata->setpower(slot->id, 0);
-+		regs = mci_readl(slot->host, PWREN);
-+		regs &= ~(1 << slot->id);
-+		mci_writel(slot->host, PWREN, regs);
- 		break;
- 	default:
- 		break;
--- 
-1.7.9.5
+I would like to discuss this problem with someone at sandisk.  Could you let me know what part you are using.
+
+Also, since you have managed to track down the problem this far perhaps you can print out the fields values in 1, 4, and 8 bit modes and let me know what is present.
+
+regards,
+
+Philip
+
+On Mar 22, 2013, at 6:56 PM, Philip Rakity <prakity@nvidia.com> wrote:
+
+> 
+> Elad,
+> 
+> Please supply the name of the spec which shows that this field is dependent on bit width.
+> 
+> I checked my sd / emmc specs and do not see this.
+> 
+> regards,
+> 
+> Philip
+> 
+> 
+> On Mar 17, 2013, at 5:07 AM, Chris Ball <cjb@laptop.org> wrote:
+> 
+>> Hi Elad, I'm forwarding your bug report to the linux-mmc@ list.
+>> 
+>> - Chris.
+>> 
+>> 
+>> I've been working on a bringup of an new board in Harmonic Inc.
+>> This board uses Sandisk iNand eMMC flash.
+>> I've noticed that the mmc driver keeps detecting 1 bit width although HW
+>> supports 4 bit, looked into it, and found the problem. In line 571 at mmc.c:
+>> There is:
+>>   /* only compare read only fields */
+>>   err = !((card->ext_csd.raw_partition_support ==
+>>           bw_ext_csd[EXT_CSD_PARTITION_SUPPORT]) &&
+>>       (card->ext_csd.raw_erased_mem_count ==
+>>           bw_ext_csd[EXT_CSD_ERASED_MEM_CONT]) &&
+>>       (card->ext_csd.rev ==
+>>           bw_ext_csd[EXT_CSD_REV]) &&
+>>       (card->ext_csd.raw_ext_csd_structure ==
+>>               ...
+>> 
+>> The problem is that raw_partition_support is not the same when setting width of
+>> 4 bits instead of 1 bit, and shouldn't be compared at all although it is read
+>> only.
+>> this should be changed to:
+>>   /* only compare read only fields */
+>>   err = !((card->ext_csd.raw_erased_mem_count ==
+>>           bw_ext_csd[EXT_CSD_ERASED_MEM_CONT]) &&
+>>       (card->ext_csd.rev ==
+>>           bw_ext_csd[EXT_CSD_REV]) &&
+>>       (card->ext_csd.raw_ext_csd_structure ==
+>>               ...
+>> 
+>> -- 
+>> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+>> One Laptop Per Child
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
