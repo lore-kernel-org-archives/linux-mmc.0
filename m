@@ -1,42 +1,58 @@
-From: =?UTF-8?B?0KHQtdGA0LPQtdC5INCv0L3QvtCy0LjRhw==?= <ynvich@gmail.com>
-Subject: Re: [PATCH v2] wait while adding MMC host to ensure root mounts
-Date: Wed, 27 Mar 2013 16:28:31 +0400
-Message-ID: <CAL0eWdGjPKUUcm6mStAHgHKHLABmPw7nMwDhR8D5rbvg+DPzfQ@mail.gmail.com>
-References: <1363223183-3772-1-git-send-email-ynvich@gmail.com>
-	<1363224194-7366-1-git-send-email-ynvich@gmail.com>
-	<87620jmkoe.fsf@octavius.laptop.org>
-	<CAPDyKFp27MUOjhydLXf92vN3cua=XcX4oTJnMGfOJPpBhtwM8Q@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 0/3] mmc: Use runtime pm for blkdevice
+Date: Wed, 27 Mar 2013 09:31:45 -0400
+Message-ID: <87d2ulezpa.fsf@octavius.laptop.org>
+References: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f177.google.com ([209.85.128.177]:48815 "EHLO
-	mail-ve0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752315Ab3C0M2c (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Mar 2013 08:28:32 -0400
-In-Reply-To: <CAPDyKFp27MUOjhydLXf92vN3cua=XcX4oTJnMGfOJPpBhtwM8Q@mail.gmail.com>
+Received: from void.printf.net ([89.145.121.20]:58858 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750798Ab3C0Nb6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 27 Mar 2013 09:31:58 -0400
+In-Reply-To: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com>
+	(Ulf Hansson's message of "Fri, 1 Mar 2013 13:47:12 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <linkinjeon@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Johan Rudholm <johan.rudholm@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Maya Erez <merez@codeaurora.org>, Kevin Liu <kliu5@marvell.com>, Seungwon Jeon <tgih.jun@samsung.com>, jh80.chung@samsung.com
 
-Hi Ulf,
+Hi Maya, Kevin, Seungwon, Jaehoon,
 
-On 27 March 2013 15:13, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> Moreover, this patch will have bad impact on booting the kernel, since
-> every host device that has scheduled a detect work from it's probe
-> function will also wait for it to finish. Even if it is the boot
-> device of not. If this is needed, I would prefer that a host cap is
-> used.
+On Fri, Mar 01 2013, Ulf Hansson wrote:
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+>
+> SDIO has been using runtime pm for a while to handle runtime power save
+> operations. This patchset is enabling the option to make the sd/mmc
+> blockdevices to use runtime pm as well.
+>
+> The runtime pm implementation for the block device will make use of
+> autosuspend to defer power save operation to after request inactivty for
+> a certain time.
+>
+> To actually perform some power save operations the corresponding bus ops
+> for mmc and sd shall be implemented. Typically it could make sense to do
+> BKOPS for eMMC in here.
+>
+> Ulf Hansson (3):
+>   mmc: core: Remove power_restore bus_ops for mmc and sd
+>   mmc: core: Add bus_ops for runtime pm callbacks
+>   mmc: block: Enable runtime pm for mmc blkdevice
+>
+>  drivers/mmc/card/block.c |   28 ++++++++++++++++++++++++++--
+>  drivers/mmc/core/bus.c   |   14 ++++++++++++--
+>  drivers/mmc/core/core.h  |    2 ++
+>  drivers/mmc/core/mmc.c   |   14 --------------
+>  drivers/mmc/core/sd.c    |   14 --------------
+>  drivers/mmc/core/sdio.c  |   20 ++++++++++++++++++++
+>  6 files changed, 60 insertions(+), 32 deletions(-)
 
-Do you have any profiling data supporting bad impact on boot?
+This looks good to me, but I'd like to make sure the design works for
+you before we decide to merge it.  Any concerns?
 
-It should be it in the range of dozens us, if any. Without the patch,
-approx. 30% of boots succeeded with CONFIG_PREEMT and aprox. 95%
-without CONFIG_PREEMT. mmc_rescan is just a few instructions, if there
-is no card present. On boot and with a card present, it might only
-sleep in the host implementation.
+Thanks,
 
-Anyway, something had to be done about mmc boot. rootdelay will not
-report error if the card is absent or its partition table is damaged.
-rootdelay is a workaround by definition, so it may occasionally fail
-if it is too small. Big rootdealy has a clear bad impact on boot time.
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
