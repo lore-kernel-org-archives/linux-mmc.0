@@ -1,63 +1,75 @@
-From: tlinder@codeaurora.org
-Subject: Re: [PATCH v5 1/3] block: Add support for reinsert a dispatched req
-Date: Wed, 27 Mar 2013 12:09:41 -0700
-Message-ID: <d6658b60b7e09376cfcf692dc54ac922.squirrel@www.codeaurora.org>
-References: <1364202150-8776-1-git-send-email-tlinder@codeaurora.org>
-    <20130325123410.GG22327@kernel.dk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <20130325123410.GG22327@kernel.dk>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Jens Axboe <axboe@kernel.dk>
-Cc: Tanya Brokhman <tlinder@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, alex.lemberg@sandisk.com, open list <linux-kernel@vger.kernel.org>
+From: Grant Grundler <grundler@chromium.org>
+Subject: [PATCH V2] mmc: dw_mmc: rewrite CLKDIV computation
+Date: Wed, 27 Mar 2013 13:38:52 -0700
+Message-ID: <1364416732-23722-1-git-send-email-grundler@chromium.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pb0-f52.google.com ([209.85.160.52]:52293 "EHLO
+	mail-pb0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751978Ab3C0UjL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Mar 2013 16:39:11 -0400
+Received: by mail-pb0-f52.google.com with SMTP id ma3so5464435pbc.39
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Mar 2013 13:39:10 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Doug Anderson <dianders@chromium.org>, Will Newton <will.newton@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Bing Zhao <bzhao@marvell.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ashok Nagarajan <asnagarajan@chromium.org>, Olof Johansson <olof@lixom.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Grant Grundler <grundler@chromium.org>
 
-Hi Jens
+When backporting Commit e419990b5e8 ("mmc: dw_mmc: correct the
+calculation for CLKDIV") to 3.4 kernel and debugging
+a FW issue, I found the code unreadable.  This rewrite simplifies
+the computation and explains each step.
 
->> Add support for reinserting a dispatched request back to the
->> scheduler's internal data structures.
->> This capability is used by the device driver when it chooses to
->> interrupt the current request transmission and execute another (more
->> urgent) pending request. For example: interrupting long write in order
->> to handle pending read. The device driver re-inserts the
->> remaining write request back to the scheduler, to be rescheduled
->> for transmission later on.
->>
->> Add API for verifying whether the current scheduler
->> supports reinserting requests mechanism. If reinsert mechanism isn't
->> supported by the scheduler, this code path will never be activated.
->
-> This is practically the exact same operation as a requeue.
+Signed-off-by: Grant Grundler <grundler@chromium.org>
+---
+V2: rewrote commit msg per feedback
 
-Not exactly. When you requeue request X it will be the next one to be
-dispatched and handled by the device driver. When you reinsert a request,
-you reinset it back to the I/O scheduler and not to the dispatch queue.
-That means that this reinserted request will be rescheduled and its
-possible that it wont be the next one to be dispatched since there might
-be more urgent requests pending.
-For example: an urgent request notification was sent to the device driver
-that is currently transmitting a long packed WRITE command. The urgent
-request pending to be served is a READ request. The device driver decides
-to stop the packed WRITE request and handle the urgent READ. This is the
-difference between requeue and reinsert:
- - if we requeue the stopped packed WRITE, it will be immediately fetched
-and transmitted again and the READ will be left pending till the packed
-WRITE completes. In this case there was no point in stopping the packed
-WRITE
-- if we reinsert the stopped packed WRITE the next request to be
-dispatched will be the urgent READ request (since READ is given priority
-over WRITE) and this will reduce the READ latency greatly.
+Tested on Samsung Series 3 Chromebook (exynos 5250 chipset) using
+ChromeOS 3.4 kernel (not 3.9-rc3 which this patch is based against).
 
-> So why this
-> duplication? I also don't quite understand why an IO scheduler would
-> have to opt-in for this, seems like a pretty basic operation.
+I've posted the test_dw_mmc.c source to confirm this patch generates
+the same correct values.
 
-I hope the above example addressed this as well. Please let me know if
-this is not the case.
+The CLKDIV issue I was trying to resolve in ChromeOS 3.4 kernel:
+    http://crbug.com/221828
 
-Thanks
-Tanya Brokhman
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
-of Code Aurora Forum, hosted by The Linux Foundation
+ drivers/mmc/host/dw_mmc.c | 22 +++++++++++++++-------
+ 1 file changed, 15 insertions(+), 7 deletions(-)
+
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 9834221..6fdf55b 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -631,14 +631,22 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+ 
+ 	if (slot->clock != host->current_speed || force_clkinit) {
+ 		div = host->bus_hz / slot->clock;
+-		if (host->bus_hz % slot->clock && host->bus_hz > slot->clock)
+-			/*
+-			 * move the + 1 after the divide to prevent
+-			 * over-clocking the card.
++		if (host->bus_hz > slot->clock) {
++			/* don't overclock due to integer math losses */
++			if ((div * slot->clock) < host->bus_hz)
++				div++;
++
++			/* don't overclock due to resolution of HW */
++			if (div & 1)
++				div++;
++
++			/* See 6.2.3 CLKDIV in "Mobile Storage Host Databook"
++			 * Look for dwc_mobile_storage_db.pdf from Synopsys.
++			 * CLKDIV value 0 means divisor 1, val 1 -> 2, ...
+ 			 */
+-			div += 1;
+-
+-		div = (host->bus_hz != slot->clock) ? DIV_ROUND_UP(div, 2) : 0;
++			div /= 2;
++		} else
++			div = 0;        /* use bus_hz */
+ 
+ 		dev_info(&slot->mmc->class_dev,
+ 			 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ"
+-- 
+1.8.1.3
+
