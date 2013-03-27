@@ -1,39 +1,80 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v6 3/5] mmc: davinci_mmc: add DT support
-Date: Wed, 27 Mar 2013 10:43:51 +0000
-Message-ID: <201303271043.51265.arnd@arndb.de>
-References: <1363779852-24083-1-git-send-email-prakash.pm@ti.com> <201303201326.09265.arnd@arndb.de> <A73F36158E33644199EB82C5EC81C7BC3EA4A96A@DBDE01.ent.ti.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] wait while adding MMC host to ensure root mounts
+Date: Wed, 27 Mar 2013 12:13:12 +0100
+Message-ID: <CAPDyKFp27MUOjhydLXf92vN3cua=XcX4oTJnMGfOJPpBhtwM8Q@mail.gmail.com>
+References: <1363223183-3772-1-git-send-email-ynvich@gmail.com>
+	<1363224194-7366-1-git-send-email-ynvich@gmail.com>
+	<87620jmkoe.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <A73F36158E33644199EB82C5EC81C7BC3EA4A96A@DBDE01.ent.ti.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: "Manjunathappa, Prakash" <prakash.pm@ti.com>
-Cc: "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "Nori, Sekhar" <nsekhar@ti.com>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "rob@landley.net" <rob@landley.net>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "hs@denx.de" <hs@denx.de>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "Porter, Matt" <mporter@ti.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <87620jmkoe.fsf@octavius.laptop.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Sergey Yanovich <ynvich@gmail.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <linkinjeon@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wednesday 27 March 2013, Manjunathappa, Prakash wrote:
-> On Wed, Mar 20, 2013 at 18:56:09, Arnd Bergmann wrote:
-> > On Wednesday 20 March 2013, Manjunathappa, Prakash wrote:
-> > > Adds device tree support for davinci_mmc. Also add binding documentation.
-> > > As of now in non-dma PIO mode and without GPIO card_detect/write_protect
-> > > option because of dependencies on EDMA and GPIO module DT support.
-> > 
-> > Shouldn't the binding at least specify the names for the DMA channels?
-> > It's fine if the driver works without those, but I think there is no
-> > strict dependency here: If dma_request_slave_channel does not find
-> > a channel, the driver can just continue in PIO mode, and as soon
-> > as the EDMA driver is merged, it will work with DMA.
-> 
-> In that case, don't I have to add support for it in driver also using
-> dma_request_slave_channel_compat? As we do not have edma support yet on
-> da850, I will not be able to test it.
+On 22 March 2013 18:03, Chris Ball <cjb@laptop.org> wrote:
+> Hi Sergey,
+>
+> On Wed, Mar 13 2013, Sergey Yanovich wrote:
+>> MMC hosts are added asynchronously. We need to wait until detect returns to
+>> avoid failed root filesystem mounts.
+>> ---8<---
+>> VFS: Cannot open root device "mmcblk0p1" or unknown-block(0,0): error -6
+>> Please append a correct "root=" boot option; here are the available partitions:
+>> mmc0: host does not support reading read-only switch. assuming write-enable.
+>> 1f00             256 mtdblock0  (driver?)
+>> 1f01             256 mtdblock1  (driver?)
+>> 1f02            2560 mtdblock2 mmc0: new SDHC card at address b368
+>>  (driver?)
+>> 1f03           29696 mtdblock3  (driver?)
+>> 1f04           16384 mtdblock4 mmcblk0: mmc0:b368 USD   3.72 GiB
+>>  (driver?)
+>>  mmcblk0: p1
+>> b300         3910656 mmcblk0  driver: mmcblk
+>>   b301         3906560 mmcblk0p1 00000000-01
+>> Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
+>> ---8<---
+>>
+>> Signed-off-by: Sergey Yanovich <ynvich@gmail.com>
+>> ---
+>> changes for v2:
+>> - removed exporting as symbol is in the same file
+>>
+>>  drivers/mmc/core/core.c |    1 +
+>>  1 file changed, 1 insertion(+)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index aaed768..7196888 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -2225,6 +2225,7 @@ void mmc_start_host(struct mmc_host *host)
+>>       host->rescan_disable = 0;
+>>       mmc_power_up(host);
+>>       mmc_detect_change(host, 0);
+>> +     mmc_flush_scheduled_work();
+>>  }
+>>
+>>  void mmc_stop_host(struct mmc_host *host)
+>
+> Thanks, this looks okay to me, I've pushed it to mmc-next for 3.10.
+>
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
 
-The code is independent of the binding in this case. If you already know
-that the hardware supports DMA channels and you will add support in the
-code later, I would recommend writing up the binding the way it should
-be used.
+Hi Chris,
 
-	Arnd
+I noticed you merged this. I thought the idea was to use the rootwait
+or rootdelay?
+
+Moreover, this patch will have bad impact on booting the kernel, since
+every host device that has scheduled a detect work from it's probe
+function will also wait for it to finish. Even if it is the boot
+device of not. If this is needed, I would prefer that a host cap is
+used.
+
+Kind regards
+Ulf Hansson
