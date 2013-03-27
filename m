@@ -1,30 +1,54 @@
-From: James Hogan <james.hogan@imgtec.com>
-Subject: Re: [PATCH] mmc: dw-mmc: control the power-enable register
-Date: Wed, 27 Mar 2013 14:47:01 +0000
-Message-ID: <51530665.1040103@imgtec.com>
-References: <5151963E.2020101@samsung.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: rewrite CLKDIV computation
+Date: Wed, 27 Mar 2013 08:07:32 -0700
+Message-ID: <CAD=FV=WRJhr1+OS5Be2Vz6J=Rgk3UQAzwjY3FuNSjvMbeR3uUg@mail.gmail.com>
+References: <1364338202-10311-1-git-send-email-grundler@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from multi.imgtec.com ([194.200.65.239]:40206 "EHLO multi.imgtec.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753440Ab3C0Os1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 27 Mar 2013 10:48:27 -0400
-In-Reply-To: <5151963E.2020101@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1364338202-10311-1-git-send-email-grundler@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Grant Grundler <grundler@chromium.org>
+Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Bing Zhao <bzhao@marvell.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ashok Nagarajan <asnagarajan@chromium.org>, Olof Johansson <olof@lixom.net>, linux-mmc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@gmail.com>
 
-On 26/03/13 12:36, Jaehoon Chung wrote:
-> When card is power-on/off, need to control the power-enable register.
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+Grant,
 
-Reviewed-by: James Hogan <james.hogan@imgtec.com>
+Thanks for posting!  See below...
 
-Cheers
-James
+On Tue, Mar 26, 2013 at 3:50 PM, Grant Grundler <grundler@chromium.org> wrote:
+> Last year Seungwon Jeon (Samsung) fixed a bug in CLKDIV computation.
+> But when debugging a related issue (http://crbug.com/221828) I found
+> the code unreadable.  This rewrite simplifies the computation and
+> explains each step.
 
+The fact that you mention a bug here is confusing.  I think this patch
+has nothing to do with fixing that bug and is just a readability
+patch.  Is that correct?  Please add to the description if so and
+maybe remove unrelated comment about the bug.
+
+
+> +                       /* don't overclock due to resolution of HW */
+> +                       if (div & 1)
+> +                               div++;
+> +
+> +                       /* See 6.2.3 CLKDIV in "Mobile Storage Host Databook"
+> +                        * Look for dwc_mobile_storage_db.pdf from Synopsys.
+> +                        * CLKDIV value 0 means divisor 1, val 1 -> 2, ...
+
+You are quoting exynos5250 docs here.  This driver is used for more
+than just exynos and so this could be confusing to users on other
+platforms.
+
+
+>                          */
+> -                       div += 1;
+> -
+> -               div = (host->bus_hz != slot->clock) ? DIV_ROUND_UP(div, 2) : 0;
+> +                       div /= 2;
+
+It does look like you're re-implementing DIV_ROUND_UP.  Maybe replace
+your "if" test and division with just a DIV_ROUND_UP?
+
+
+-Doug
