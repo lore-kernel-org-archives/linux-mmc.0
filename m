@@ -1,39 +1,30 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 0/3] mmc: Use runtime pm for blkdevice
-Date: Wed, 27 Mar 2013 13:40:06 +0000
-Message-ID: <201303271340.06521.arnd@arndb.de>
-References: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com>
+From: James Hogan <james.hogan@imgtec.com>
+Subject: Re: [PATCH] mmc: dw-mmc: control the power-enable register
+Date: Wed, 27 Mar 2013 14:47:01 +0000
+Message-ID: <51530665.1040103@imgtec.com>
+References: <5151963E.2020101@samsung.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:63714 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752016Ab3C0NkQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Mar 2013 09:40:16 -0400
-In-Reply-To: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from multi.imgtec.com ([194.200.65.239]:40206 "EHLO multi.imgtec.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753440Ab3C0Os1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 27 Mar 2013 10:48:27 -0400
+In-Reply-To: <5151963E.2020101@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@gmail.com>
 
-On Friday 01 March 2013, Ulf Hansson wrote:
+On 26/03/13 12:36, Jaehoon Chung wrote:
+> When card is power-on/off, need to control the power-enable register.
 > 
-> From: Ulf Hansson <ulf.hansson@linaro.org>
-> 
-> SDIO has been using runtime pm for a while to handle runtime power save
-> operations. This patchset is enabling the option to make the sd/mmc
-> blockdevices to use runtime pm as well.
-> 
-> The runtime pm implementation for the block device will make use of
-> autosuspend to defer power save operation to after request inactivty for
-> a certain time.
-> 
-> To actually perform some power save operations the corresponding bus ops
-> for mmc and sd shall be implemented. Typically it could make sense to do
-> BKOPS for eMMC in here.
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 
-As per IRC discussion:
+Reviewed-by: James Hogan <james.hogan@imgtec.com>
 
-Acked-by: Arnd Bergmann <arnd@arndb.de>
+Cheers
+James
+
