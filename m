@@ -1,55 +1,114 @@
-From: "Manjunathappa, Prakash" <prakash.pm-l0cyMroinI0@public.gmane.org>
-Subject: RE: [PATCH v6 3/5] mmc: davinci_mmc: add DT support
-Date: Wed, 27 Mar 2013 17:46:12 +0000
-Message-ID: <A73F36158E33644199EB82C5EC81C7BC3EA4A9FC@DBDE01.ent.ti.com>
-References: <1363779852-24083-1-git-send-email-prakash.pm@ti.com>
-	<201303201326.09265.arnd@arndb.de>
-	<A73F36158E33644199EB82C5EC81C7BC3EA4A96A@DBDE01.ent.ti.com>
-	<201303271043.51265.arnd@arndb.de>
+From: Grant Grundler <grundler@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: rewrite CLKDIV computation
+Date: Wed, 27 Mar 2013 10:51:51 -0700
+Message-ID: <CANEJEGsLqAdZqLV+c59nT97ErdAOSRWTPJpYye7m64_i7ga0rg@mail.gmail.com>
+References: <1364338202-10311-1-git-send-email-grundler@chromium.org>
+	<000b01ce2ae6$249bfb90$6dd3f2b0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <201303271043.51265.arnd-r2nGTMty4D4@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: "Porter, Matt" <mporter-l0cyMroinI0@public.gmane.org>, "davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org" <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, "hs-ynQEQJNshbs@public.gmane.org" <hs-ynQEQJNshbs@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org" <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, "grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org" <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, "rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org" <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, "cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org" <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oa0-f53.google.com ([209.85.219.53]:34503 "EHLO
+	mail-oa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753477Ab3C0Rvw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Mar 2013 13:51:52 -0400
+Received: by mail-oa0-f53.google.com with SMTP id m17so7559819oag.40
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Mar 2013 10:51:51 -0700 (PDT)
+In-Reply-To: <000b01ce2ae6$249bfb90$6dd3f2b0$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>, Doug Anderson <dianders@chromium.org>, Will Newton <will.newton@gmail.com>, Bing Zhao <bzhao@marvell.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ashok Nagarajan <asnagarajan@chromium.org>, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 
-On Wed, Mar 27, 2013 at 16:13:51, Arnd Bergmann wrote:
-> On Wednesday 27 March 2013, Manjunathappa, Prakash wrote:
-> > On Wed, Mar 20, 2013 at 18:56:09, Arnd Bergmann wrote:
-> > > On Wednesday 20 March 2013, Manjunathappa, Prakash wrote:
-> > > > Adds device tree support for davinci_mmc. Also add binding documentation.
-> > > > As of now in non-dma PIO mode and without GPIO card_detect/write_protect
-> > > > option because of dependencies on EDMA and GPIO module DT support.
-> > > 
-> > > Shouldn't the binding at least specify the names for the DMA channels?
-> > > It's fine if the driver works without those, but I think there is no
-> > > strict dependency here: If dma_request_slave_channel does not find
-> > > a channel, the driver can just continue in PIO mode, and as soon
-> > > as the EDMA driver is merged, it will work with DMA.
-> > 
-> > In that case, don't I have to add support for it in driver also using
-> > dma_request_slave_channel_compat? As we do not have edma support yet on
-> > da850, I will not be able to test it.
-> 
-> The code is independent of the binding in this case. If you already know
-> that the hardware supports DMA channels and you will add support in the
-> code later, I would recommend writing up the binding the way it should
-> be used.
-> 
+On Wed, Mar 27, 2013 at 5:25 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> On Wednesday, March 27, 2013, Grant Grundler wrote:
+>> Last year Seungwon Jeon (Samsung) fixed a bug in CLKDIV computation.
+> For easily identifying, it would be good to point the commit id and subject.
 
-Ok I will add support for DMA bindings with a note saying "not tested dma capability via DT". 
+commit id will be different for different git trees and branches - not
+as useful as one might think.
 
-Thanks,
-Prakash
+I will include the following and update the patch:
+   Author: Seungwon Jeon <tgih.jun@samsung.com>
+   Date:   Tue May 22 13:01:21 2012 +0900
+   mmc: dw_mmc: correct the calculation for CLKDIV
+
+
+>> But when debugging a related issue (http://crbug.com/221828) I found
+>
+> It is not easy to catch up issue in your site. What problem is bothering you?
+> Could you describe the problem and conditions you have found?
+
+The bug is not relevant to this patch - it's a "related bug". I
+mentioned the bug only to explain my motivation for looking at this
+code. I will move the bug reference out of the commit message.
+
+To summarize, I was trying to backport "mmc: dw_mmc: correct the
+calculation for CLKDIV" patch to 3.4 kernel to support faster eMMC
+parts since the original computation in 3.4 kernel was returning wrong
+CLKDIV value. But then ran into other problems specific to one
+firmware combination breaking the eMMC clock settings.
+
+cheers,
+grant
+
+>
+> Thanks,
+> Seungwon Jeon
+>
+>> the code unreadable.  This rewrite simplifies the computation and
+>> explains each step.
+>>
+>> Signed-off-by: Grant Grundler <grundler@chromium.org>
+>> ---
+>> Tested on Samsung Series 3 Chromebook (exynos 5250 chipset) using
+>> ChromeOS 3.4 kernel (not 3.9-rc3 which this patch is based against).
+>>
+>> I've written a test program to confirm this patch generates the
+>> same correct values and will share that separately.
+>>
+>>  drivers/mmc/host/dw_mmc.c | 22 +++++++++++++++-------
+>>  1 file changed, 15 insertions(+), 7 deletions(-)
+>>
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 9834221..6fdf55b 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -631,14 +631,22 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>>
+>>       if (slot->clock != host->current_speed || force_clkinit) {
+>>               div = host->bus_hz / slot->clock;
+>> -             if (host->bus_hz % slot->clock && host->bus_hz > slot->clock)
+>> -                     /*
+>> -                      * move the + 1 after the divide to prevent
+>> -                      * over-clocking the card.
+>> +             if (host->bus_hz > slot->clock) {
+>> +                     /* don't overclock due to integer math losses */
+>> +                     if ((div * slot->clock) < host->bus_hz)
+>> +                             div++;
+>> +
+>> +                     /* don't overclock due to resolution of HW */
+>> +                     if (div & 1)
+>> +                             div++;
+>> +
+>> +                     /* See 6.2.3 CLKDIV in "Mobile Storage Host Databook"
+>> +                      * Look for dwc_mobile_storage_db.pdf from Synopsys.
+>> +                      * CLKDIV value 0 means divisor 1, val 1 -> 2, ...
+>>                        */
+>> -                     div += 1;
+>> -
+>> -             div = (host->bus_hz != slot->clock) ? DIV_ROUND_UP(div, 2) : 0;
+>> +                     div /= 2;
+>> +             } else
+>> +                     div = 0;        /* use bus_hz */
+>>
+>>               dev_info(&slot->mmc->class_dev,
+>>                        "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ"
+>> --
+>> 1.8.1.3
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
