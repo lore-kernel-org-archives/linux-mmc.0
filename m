@@ -1,87 +1,42 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: rewrite CLKDIV computation
-Date: Wed, 27 Mar 2013 21:25:18 +0900
-Message-ID: <000b01ce2ae6$249bfb90$6dd3f2b0$%jun@samsung.com>
-References: <1364338202-10311-1-git-send-email-grundler@chromium.org>
+From: =?UTF-8?B?0KHQtdGA0LPQtdC5INCv0L3QvtCy0LjRhw==?= <ynvich@gmail.com>
+Subject: Re: [PATCH v2] wait while adding MMC host to ensure root mounts
+Date: Wed, 27 Mar 2013 16:28:31 +0400
+Message-ID: <CAL0eWdGjPKUUcm6mStAHgHKHLABmPw7nMwDhR8D5rbvg+DPzfQ@mail.gmail.com>
+References: <1363223183-3772-1-git-send-email-ynvich@gmail.com>
+	<1363224194-7366-1-git-send-email-ynvich@gmail.com>
+	<87620jmkoe.fsf@octavius.laptop.org>
+	<CAPDyKFp27MUOjhydLXf92vN3cua=XcX4oTJnMGfOJPpBhtwM8Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:39647 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751035Ab3C0MZV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Mar 2013 08:25:21 -0400
-In-reply-to: <1364338202-10311-1-git-send-email-grundler@chromium.org>
-Content-language: ko
+Received: from mail-ve0-f177.google.com ([209.85.128.177]:48815 "EHLO
+	mail-ve0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752315Ab3C0M2c (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Mar 2013 08:28:32 -0400
+In-Reply-To: <CAPDyKFp27MUOjhydLXf92vN3cua=XcX4oTJnMGfOJPpBhtwM8Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Grant Grundler' <grundler@chromium.org>, 'Chris Ball' <cjb@laptop.org>
-Cc: 'Doug Anderson' <dianders@chromium.org>, 'Will Newton' <will.newton@gmail.com>, 'Bing Zhao' <bzhao@marvell.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Ashok Nagarajan' <asnagarajan@chromium.org>, 'Olof Johansson' <olof@lixom.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <linkinjeon@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Wednesday, March 27, 2013, Grant Grundler wrote:
-> Last year Seungwon Jeon (Samsung) fixed a bug in CLKDIV computation.
-For easily identifying, it would be good to point the commit id and subject.
-> But when debugging a related issue (http://crbug.com/221828) I found
-It is not easy to catch up issue in your site. What problem is bothering you?
-Could you describe the problem and conditions you have found?
+Hi Ulf,
 
-Thanks,
-Seungwon Jeon
+On 27 March 2013 15:13, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> Moreover, this patch will have bad impact on booting the kernel, since
+> every host device that has scheduled a detect work from it's probe
+> function will also wait for it to finish. Even if it is the boot
+> device of not. If this is needed, I would prefer that a host cap is
+> used.
 
-> the code unreadable.  This rewrite simplifies the computation and
-> explains each step.
-> 
-> Signed-off-by: Grant Grundler <grundler@chromium.org>
-> ---
-> Tested on Samsung Series 3 Chromebook (exynos 5250 chipset) using
-> ChromeOS 3.4 kernel (not 3.9-rc3 which this patch is based against).
-> 
-> I've written a test program to confirm this patch generates the
-> same correct values and will share that separately.
-> 
->  drivers/mmc/host/dw_mmc.c | 22 +++++++++++++++-------
->  1 file changed, 15 insertions(+), 7 deletions(-)
-> 
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 9834221..6fdf55b 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -631,14 +631,22 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
-> 
->  	if (slot->clock != host->current_speed || force_clkinit) {
->  		div = host->bus_hz / slot->clock;
-> -		if (host->bus_hz % slot->clock && host->bus_hz > slot->clock)
-> -			/*
-> -			 * move the + 1 after the divide to prevent
-> -			 * over-clocking the card.
-> +		if (host->bus_hz > slot->clock) {
-> +			/* don't overclock due to integer math losses */
-> +			if ((div * slot->clock) < host->bus_hz)
-> +				div++;
-> +
-> +			/* don't overclock due to resolution of HW */
-> +			if (div & 1)
-> +				div++;
-> +
-> +			/* See 6.2.3 CLKDIV in "Mobile Storage Host Databook"
-> +			 * Look for dwc_mobile_storage_db.pdf from Synopsys.
-> +			 * CLKDIV value 0 means divisor 1, val 1 -> 2, ...
->  			 */
-> -			div += 1;
-> -
-> -		div = (host->bus_hz != slot->clock) ? DIV_ROUND_UP(div, 2) : 0;
-> +			div /= 2;
-> +		} else
-> +			div = 0;        /* use bus_hz */
-> 
->  		dev_info(&slot->mmc->class_dev,
->  			 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ"
-> --
-> 1.8.1.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Do you have any profiling data supporting bad impact on boot?
 
+It should be it in the range of dozens us, if any. Without the patch,
+approx. 30% of boots succeeded with CONFIG_PREEMT and aprox. 95%
+without CONFIG_PREEMT. mmc_rescan is just a few instructions, if there
+is no card present. On boot and with a card present, it might only
+sleep in the host implementation.
+
+Anyway, something had to be done about mmc boot. rootdelay will not
+report error if the card is absent or its partition table is damaged.
+rootdelay is a workaround by definition, so it may occasionally fail
+if it is too small. Big rootdealy has a clear bad impact on boot time.
