@@ -1,54 +1,70 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: dw_mmc: rewrite CLKDIV computation
-Date: Wed, 27 Mar 2013 08:07:32 -0700
-Message-ID: <CAD=FV=WRJhr1+OS5Be2Vz6J=Rgk3UQAzwjY3FuNSjvMbeR3uUg@mail.gmail.com>
-References: <1364338202-10311-1-git-send-email-grundler@chromium.org>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH] mmc: core: Re-use code for MMC_CAP2_DETECT_ON_ERR in polling mode
+Date: Wed, 27 Mar 2013 17:11:40 +0100
+Message-ID: <1364400700-13161-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1364338202-10311-1-git-send-email-grundler@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Grant Grundler <grundler@chromium.org>
-Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Bing Zhao <bzhao@marvell.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ashok Nagarajan <asnagarajan@chromium.org>, Olof Johansson <olof@lixom.net>, linux-mmc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog110.obsmtp.com ([207.126.144.129]:49590 "EHLO
+	eu1sys200aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752039Ab3C0Qlh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Mar 2013 12:41:37 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-Grant,
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-Thanks for posting!  See below...
+Previously the MMC_CAP2_DETECT_ON_ERR was invented for detecting
+slow card removal. In was never a realy good solution and a proper
+fix has been merged using gpio debouncing instead. We remove this
+cap in this patch.
 
-On Tue, Mar 26, 2013 at 3:50 PM, Grant Grundler <grundler@chromium.org> wrote:
-> Last year Seungwon Jeon (Samsung) fixed a bug in CLKDIV computation.
-> But when debugging a related issue (http://crbug.com/221828) I found
-> the code unreadable.  This rewrite simplifies the computation and
-> explains each step.
+Although when using polling card detect mode, the code invented for
+MMC_CAP2_DETECT_ON_ERR is re-used to complete card removal in an
+earlier phase. There are no need waiting for the polling timeout to
+elapse in this case.
 
-The fact that you mention a bug here is confusing.  I think this patch
-has nothing to do with fixing that bug and is just a readability
-patch.  Is that correct?  Please add to the description if so and
-maybe remove unrelated comment about the bug.
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/core.c  |    5 ++---
+ include/linux/mmc/host.h |    1 -
+ 2 files changed, 2 insertions(+), 4 deletions(-)
 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index ad7decc..59ae194 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2325,14 +2325,13 @@ int mmc_detect_card_removed(struct mmc_host *host)
+ 	 * The card will be considered unchanged unless we have been asked to
+ 	 * detect a change or host requires polling to provide card detection.
+ 	 */
+-	if (!host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL) &&
+-	    !(host->caps2 & MMC_CAP2_DETECT_ON_ERR))
++	if (!host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
+ 		return ret;
+ 
+ 	host->detect_change = 0;
+ 	if (!ret) {
+ 		ret = _mmc_detect_card_removed(host);
+-		if (ret && (host->caps2 & MMC_CAP2_DETECT_ON_ERR)) {
++		if (ret && (host->caps & MMC_CAP_NEEDS_POLL)) {
+ 			/*
+ 			 * Schedule a detect work as soon as possible to let a
+ 			 * rescan handle the card removal.
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 17d7148..301892a 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -272,7 +272,6 @@ struct mmc_host {
+ #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
+ 				 MMC_CAP2_HS200_1_2V_SDR)
+ #define MMC_CAP2_BROKEN_VOLTAGE	(1 << 7)	/* Use the broken voltage */
+-#define MMC_CAP2_DETECT_ON_ERR	(1 << 8)	/* On I/O err check card removal */
+ #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
+ #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
+ #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
+-- 
+1.7.10
 
-> +                       /* don't overclock due to resolution of HW */
-> +                       if (div & 1)
-> +                               div++;
-> +
-> +                       /* See 6.2.3 CLKDIV in "Mobile Storage Host Databook"
-> +                        * Look for dwc_mobile_storage_db.pdf from Synopsys.
-> +                        * CLKDIV value 0 means divisor 1, val 1 -> 2, ...
-
-You are quoting exynos5250 docs here.  This driver is used for more
-than just exynos and so this could be confusing to users on other
-platforms.
-
-
->                          */
-> -                       div += 1;
-> -
-> -               div = (host->bus_hz != slot->clock) ? DIV_ROUND_UP(div, 2) : 0;
-> +                       div /= 2;
-
-It does look like you're re-implementing DIV_ROUND_UP.  Maybe replace
-your "if" test and division with just a DIV_ROUND_UP?
-
-
--Doug
