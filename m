@@ -1,46 +1,62 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v7 0/5] Add DT support for davinci_mmc driver
-Date: Thu, 28 Mar 2013 15:28:37 +0000
-Message-ID: <201303281528.37228.arnd@arndb.de>
-References: <1364476211-14322-1-git-send-email-prakash.pm@ti.com>
+From: Jens Axboe <axboe@kernel.dk>
+Subject: Re: [PATCH v5 1/3] block: Add support for reinsert a dispatched req
+Date: Thu, 28 Mar 2013 12:49:22 -0600
+Message-ID: <20130328184922.GE19488@kernel.dk>
+References: <1364202150-8776-1-git-send-email-tlinder@codeaurora.org>
+ <20130325123410.GG22327@kernel.dk>
+ <d6658b60b7e09376cfcf692dc54ac922.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:57372 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755204Ab3C1P2r (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Mar 2013 11:28:47 -0400
-In-Reply-To: <1364476211-14322-1-git-send-email-prakash.pm@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <d6658b60b7e09376cfcf692dc54ac922.squirrel@www.codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: tlinder@codeaurora.org
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, alex.lemberg@sandisk.com, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: "Manjunathappa, Prakash" <prakash.pm@ti.com>
-Cc: davinci-linux-open-source@linux.davincidsp.com, linux-mmc@vger.kernel.org, cjb@laptop.org, nsekhar@ti.com, grant.likely@secretlab.ca, rob.herring@calxeda.com, rob@landley.net, linux@arm.linux.org.uk, hs@denx.de, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, mark.rutland@arm.com
 
-On Thursday 28 March 2013, Manjunathappa, Prakash wrote:
+On Wed, Mar 27 2013, tlinder@codeaurora.org wrote:
+> Hi Jens
 > 
-> Patch set adds DT support for davinci_mmc driver and is
-> verified on da850-evm without card_detect/write_protect and
-> EDMA support. Also takecare to derive controller IP version from
-> platform_device_id table, remove version specification in pdata.
+> >> Add support for reinserting a dispatched request back to the
+> >> scheduler's internal data structures.
+> >> This capability is used by the device driver when it chooses to
+> >> interrupt the current request transmission and execute another (more
+> >> urgent) pending request. For example: interrupting long write in order
+> >> to handle pending read. The device driver re-inserts the
+> >> remaining write request back to the scheduler, to be rescheduled
+> >> for transmission later on.
+> >>
+> >> Add API for verifying whether the current scheduler
+> >> supports reinserting requests mechanism. If reinsert mechanism isn't
+> >> supported by the scheduler, this code path will never be activated.
+> >
+> > This is practically the exact same operation as a requeue.
 > 
-> Applies on top of below patch series under community review:
-> "Enable SPI flash support on da850-evm DT kernel"
-> http://www.spinics.net/lists/arm-kernel/msg231546.html
-> 
-> This series is reviewed and tested by Sekhar Nori, with and
-> without DT on da850 EVM.
+> Not exactly. When you requeue request X it will be the next one to be
+> dispatched and handled by the device driver. When you reinsert a request,
+> you reinset it back to the I/O scheduler and not to the dispatch queue.
+> That means that this reinserted request will be rescheduled and its
+> possible that it wont be the next one to be dispatched since there might
+> be more urgent requests pending.
+> For example: an urgent request notification was sent to the device driver
+> that is currently transmitting a long packed WRITE command. The urgent
+> request pending to be served is a READ request. The device driver decides
+> to stop the packed WRITE request and handle the urgent READ. This is the
+> difference between requeue and reinsert:
+>  - if we requeue the stopped packed WRITE, it will be immediately fetched
+> and transmitted again and the READ will be left pending till the packed
+> WRITE completes. In this case there was no point in stopping the packed
+> WRITE
+> - if we reinsert the stopped packed WRITE the next request to be
+> dispatched will be the urgent READ request (since READ is given priority
+> over WRITE) and this will reduce the READ latency greatly.
 
-Very nice!
+I said practically the same, not exactly the same! In any case, the
+point is that you could reuse the exact same infrastructure for this,
+instead of literally duplicating everything. Have some helper that does
+the grunt of the work, pass in whether or not you want the existing
+requeue event, or a reinsert event.
 
-Acked-by: Arnd Bergmann <arnd@arndb.de>
-
-> Since v6:
-> Add DMA handling capability, but not tested.
-
-What I was asking for was actually just adding the description to the
-binding documentation, not also to the code, but the code does look
-correct to me, so this is fine, too.
-
-	Arnd
+-- 
+Jens Axboe
