@@ -1,75 +1,68 @@
-From: Grant Grundler <grundler@chromium.org>
-Subject: [PATCH V2] mmc: dw_mmc: rewrite CLKDIV computation
-Date: Wed, 27 Mar 2013 13:38:52 -0700
-Message-ID: <1364416732-23722-1-git-send-email-grundler@chromium.org>
+From: Kevin Liu <keyuan.liu@gmail.com>
+Subject: Re: [PATCH 0/3] mmc: Use runtime pm for blkdevice
+Date: Thu, 28 Mar 2013 09:43:22 +0800
+Message-ID: <CADz5_g+TB9rg0_dwgzsOe7UL2F9gYuO17A=5iAca5N1jPkPj2g@mail.gmail.com>
+References: <25B60CDC2F704E4E9D88FFD52780CB4C0BDED3BFE1@SC-VEXCH1.marvell.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f52.google.com ([209.85.160.52]:52293 "EHLO
-	mail-pb0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751978Ab3C0UjL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Mar 2013 16:39:11 -0400
-Received: by mail-pb0-f52.google.com with SMTP id ma3so5464435pbc.39
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Mar 2013 13:39:10 -0700 (PDT)
+Received: from mail-oa0-f52.google.com ([209.85.219.52]:58615 "EHLO
+	mail-oa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755164Ab3C1BnX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Mar 2013 21:43:23 -0400
+Received: by mail-oa0-f52.google.com with SMTP id k14so9604760oag.11
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Mar 2013 18:43:22 -0700 (PDT)
+In-Reply-To: <25B60CDC2F704E4E9D88FFD52780CB4C0BDED3BFE1@SC-VEXCH1.marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: Doug Anderson <dianders@chromium.org>, Will Newton <will.newton@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Bing Zhao <bzhao@marvell.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ashok Nagarajan <asnagarajan@chromium.org>, Olof Johansson <olof@lixom.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Grant Grundler <grundler@chromium.org>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Johan Rudholm <johan.rudholm@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Maya Erez <merez@codeaurora.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kevin Liu <kliu5@marvell.com>
 
-When backporting Commit e419990b5e8 ("mmc: dw_mmc: correct the
-calculation for CLKDIV") to 3.4 kernel and debugging
-a FW issue, I found the code unreadable.  This rewrite simplifies
-the computation and explains each step.
+> -----Original Message-----
+> From: Chris Ball [mailto:cjb@laptop.org]
+> Sent: Wednesday, March 27, 2013 9:32 PM
+> To: Ulf Hansson
+> Cc: linux-mmc@vger.kernel.org; Johan Rudholm; Ulf Hansson; Maya Erez; Kevin Liu; Seungwon Jeon; jh80.chung@samsung.com
+> Subject: Re: [PATCH 0/3] mmc: Use runtime pm for blkdevice
+>
+> Hi Maya, Kevin, Seungwon, Jaehoon,
+>
+> On Fri, Mar 01 2013, Ulf Hansson wrote:
+>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>
+>> SDIO has been using runtime pm for a while to handle runtime power save
+>> operations. This patchset is enabling the option to make the sd/mmc
+>> blockdevices to use runtime pm as well.
+>>
+>> The runtime pm implementation for the block device will make use of
+>> autosuspend to defer power save operation to after request inactivty for
+>> a certain time.
+>>
+>> To actually perform some power save operations the corresponding bus ops
+>> for mmc and sd shall be implemented. Typically it could make sense to do
+>> BKOPS for eMMC in here.
+>>
+>> Ulf Hansson (3):
+>>   mmc: core: Remove power_restore bus_ops for mmc and sd
+>>   mmc: core: Add bus_ops for runtime pm callbacks
+>>   mmc: block: Enable runtime pm for mmc blkdevice
+>>
+>>  drivers/mmc/card/block.c |   28 ++++++++++++++++++++++++++--
+>>  drivers/mmc/core/bus.c   |   14 ++++++++++++--
+>>  drivers/mmc/core/core.h  |    2 ++
+>>  drivers/mmc/core/mmc.c   |   14 --------------
+>>  drivers/mmc/core/sd.c    |   14 --------------
+>>  drivers/mmc/core/sdio.c  |   20 ++++++++++++++++++++
+>>  6 files changed, 60 insertions(+), 32 deletions(-)
+>
+> This looks good to me, but I'd like to make sure the design works for
+> you before we decide to merge it.  Any concerns?
+>
 
-Signed-off-by: Grant Grundler <grundler@chromium.org>
----
-V2: rewrote commit msg per feedback
+Chris,
 
-Tested on Samsung Series 3 Chromebook (exynos 5250 chipset) using
-ChromeOS 3.4 kernel (not 3.9-rc3 which this patch is based against).
+This patchset is ok for me.
+We can discuss/review how sd/mmc runtime callback function implemented later.
 
-I've posted the test_dw_mmc.c source to confirm this patch generates
-the same correct values.
-
-The CLKDIV issue I was trying to resolve in ChromeOS 3.4 kernel:
-    http://crbug.com/221828
-
- drivers/mmc/host/dw_mmc.c | 22 +++++++++++++++-------
- 1 file changed, 15 insertions(+), 7 deletions(-)
-
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 9834221..6fdf55b 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -631,14 +631,22 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
- 
- 	if (slot->clock != host->current_speed || force_clkinit) {
- 		div = host->bus_hz / slot->clock;
--		if (host->bus_hz % slot->clock && host->bus_hz > slot->clock)
--			/*
--			 * move the + 1 after the divide to prevent
--			 * over-clocking the card.
-+		if (host->bus_hz > slot->clock) {
-+			/* don't overclock due to integer math losses */
-+			if ((div * slot->clock) < host->bus_hz)
-+				div++;
-+
-+			/* don't overclock due to resolution of HW */
-+			if (div & 1)
-+				div++;
-+
-+			/* See 6.2.3 CLKDIV in "Mobile Storage Host Databook"
-+			 * Look for dwc_mobile_storage_db.pdf from Synopsys.
-+			 * CLKDIV value 0 means divisor 1, val 1 -> 2, ...
- 			 */
--			div += 1;
--
--		div = (host->bus_hz != slot->clock) ? DIV_ROUND_UP(div, 2) : 0;
-+			div /= 2;
-+		} else
-+			div = 0;        /* use bus_hz */
- 
- 		dev_info(&slot->mmc->class_dev,
- 			 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ"
--- 
-1.8.1.3
-
+Thanks
+Kevin
