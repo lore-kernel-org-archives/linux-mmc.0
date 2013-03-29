@@ -1,37 +1,64 @@
-From: Viresh Kumar <viresh.kumar@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci-spear: add CONFIG_PM_SLEEP to
- suspend/resume functions
-Date: Fri, 29 Mar 2013 12:48:40 +0530
-Message-ID: <CAOh2x=me7M+pMKQ4O+1BXubfjy4Gq1Pz4EG7-d9nwHoF-vgdzw@mail.gmail.com>
-References: <003301ce2c4b$d2864fb0$7792ef10$%han@samsung.com>
-	<003401ce2c4c$26048490$720d8db0$%han@samsung.com>
+From: Phillip Williams <p.williams@americanmediadistributioninc.com>
+Subject: Offer to Attend Events for AMD
+Date: Fri, 29 Mar 2013 12:52:22 -0400
+Message-ID: <de1759d2d1853c6b3af8fe30f0b44072@www.americanmediadistributioninc.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f171.google.com ([209.85.128.171]:36373 "EHLO
-	mail-ve0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751247Ab3C2HSl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Mar 2013 03:18:41 -0400
-Received: by mail-ve0-f171.google.com with SMTP id b10so300361vea.16
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Mar 2013 00:18:41 -0700 (PDT)
-In-Reply-To: <003401ce2c4c$26048490$720d8db0$%han@samsung.com>
+Received: from [204.12.61.126] ([204.12.61.126]:51022 "EHLO
+	s1051440.instanturl.net" rhost-flags-FAIL-FAIL-OK-OK)
+	by vger.kernel.org with ESMTP id S1755963Ab3C2RBH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Mar 2013 13:01:07 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jingoo Han <jg1.han@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-On Fri, Mar 29, 2013 at 12:38 PM, Jingoo Han <jg1.han@samsung.com> wrote:
-> Add CONFIG_PM_SLEEP to suspend/resume functions to fix the following
-> build warning when CONFIG_PM_SLEEP is not selected. This is because
-> sleep PM callbacks defined by SIMPLE_DEV_PM_OPS are only used when
-> the CONFIG_PM_SLEEP is enabled.
->
-> drivers/mmc/host/sdhci-spear.c:295:12: warning: 'sdhci_suspend' defined but not used [-Wunused-function]
-> drivers/mmc/host/sdhci-spear.c:308:12: warning: 'sdhci_resume' defined but not used [-Wunused-function]
->
-> Signed-off-by: Jingoo Han <jg1.han@samsung.com>
-> ---
->  drivers/mmc/host/sdhci-spear.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
+I would like to know if you would have any interest in covering some
+events for us in your area?
 
-Acked-by: Viresh Kumar <viresh.kumar@linaro.org>
+There would be NO COST at all for admission, and it would not be
+necessary for you to be an experienced reporter.
+
+We are looking for members of the public to cover events such as Music
+Concerts, Sporting Events, Restaurant Openings, Movies, Gallery
+Openings, Shows, and others.
+
+Since AMD has different pools relevant to experience (beginners up to
+experienced working reporters) should you not be familiar with our
+company, please take a moment to look into American Media Distribution
+with any source you deem trusted.
+
+Here is a link to the AMD BBB page for your convenience.
+
+http://www.bbb.org/new-jersey/business-reviews/news-service/american-media-distribution-in-howell-nj-90096055
+
+There is compensation for the events you would attend and again, there
+is no cost for admission to any of the events, and no obligation is
+required. 
+
+We will be accepting only a few people from your area so let us know
+if you are interested in obtaining any further information. 
+
+Phil Williams
+AMD Event Coverage Coordinator
+American Media Distribution(.com) or americanmediadist.com
+4057 US Hwy 9 North Howell NJ 07731
+888.319.6336 x714(by appointment only please)
+
+-This e-mail and any accompanying attachments are confidential. This
+information is intended solely for the use of the individual to whom
+it is addressed. Any review, disclosure, copying, distribution, or use
+of this e-mail communication by others is strictly prohibited. THERE
+WILL BE NO FOLLOWING EMAILS SENT - If you are not the intended
+recipient, please notify us immediately by returning this message to
+the sender and delete all copies. Thank you for your cooperation.
+-MacAfee Virus Checked - Virus Free-
+
+-- no more reporter/event updates reply w NO MORE in subject
+
+
+
+--
+
+
