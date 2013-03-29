@@ -1,96 +1,76 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH 0/3] mmc: Use runtime pm for blkdevice
-Date: Thu, 28 Mar 2013 14:05:40 -0700
-Message-ID: <d3e7755a3509464281def783c5685a7f.squirrel@www.codeaurora.org>
-References: <25B60CDC2F704E4E9D88FFD52780CB4C0BDED3BFE1@SC-VEXCH1.marvell.com>
-    <CADz5_g+TB9rg0_dwgzsOe7UL2F9gYuO17A=5iAca5N1jPkPj2g@mail.gmail.com>
+From: Jingoo Han <jg1.han@samsung.com>
+Subject: [PATCH 1/2] mmc: atmel-mci: add CONFIG_PM_SLEEP to suspend/resume
+ functions
+Date: Fri, 29 Mar 2013 16:05:40 +0900
+Message-ID: <003301ce2c4b$d2864fb0$7792ef10$%han@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:45892 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751453Ab3C1VFk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Mar 2013 17:05:40 -0400
-In-Reply-To: <CADz5_g+TB9rg0_dwgzsOe7UL2F9gYuO17A=5iAca5N1jPkPj2g@mail.gmail.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:45278 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754615Ab3C2HFm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Mar 2013 03:05:42 -0400
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MKE000JMUD0D3O0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 29 Mar 2013 16:05:41 +0900 (KST)
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Liu <keyuan.liu@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Johan Rudholm <johan.rudholm@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Maya Erez <merez@codeaurora.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kevin Liu <kliu5@marvell.com>
+To: 'Chris Ball' <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, 'Ludovic Desroches' <ludovic.desroches@atmel.com>, 'Jingoo Han' <jg1.han@samsung.com>
 
-Hi Chris,
+Add CONFIG_PM_SLEEP to suspend/resume functions to fix the following
+build warning when CONFIG_PM_SLEEP is not selected. This is because
+sleep PM callbacks defined by SIMPLE_DEV_PM_OPS are only used when
+the CONFIG_PM_SLEEP is enabled.
 
-Sorry for the late response.
-I am currently on vacation and would get back to work next week.
-We would like to have an internal discussion to make sure there are no
-additional concerns with this patch.
-Can you please wait with this patch approval until the end of next week?
+drivers/mmc/host/atmel-mci.c:2526:12: warning: 'atmci_suspend' defined but not used [-Wunused-function]
+drivers/mmc/host/atmel-mci.c:2556:12: warning: 'atmci_resume' defined but not used [-Wunused-function]
 
-Thanks,
-Maya
+Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+---
+ drivers/mmc/host/atmel-mci.c |   10 ++++------
+ 1 files changed, 4 insertions(+), 6 deletions(-)
 
->> -----Original Message-----
->> From: Chris Ball [mailto:cjb@laptop.org]
->> Sent: Wednesday, March 27, 2013 9:32 PM
->> To: Ulf Hansson
->> Cc: linux-mmc@vger.kernel.org; Johan Rudholm; Ulf Hansson; Maya Erez;
->> Kevin Liu; Seungwon Jeon; jh80.chung@samsung.com
->> Subject: Re: [PATCH 0/3] mmc: Use runtime pm for blkdevice
->>
->> Hi Maya, Kevin, Seungwon, Jaehoon,
->>
->> On Fri, Mar 01 2013, Ulf Hansson wrote:
->>> From: Ulf Hansson <ulf.hansson@linaro.org>
->>>
->>> SDIO has been using runtime pm for a while to handle runtime power save
->>> operations. This patchset is enabling the option to make the sd/mmc
->>> blockdevices to use runtime pm as well.
->>>
->>> The runtime pm implementation for the block device will make use of
->>> autosuspend to defer power save operation to after request inactivty
->>> for
->>> a certain time.
->>>
->>> To actually perform some power save operations the corresponding bus
->>> ops
->>> for mmc and sd shall be implemented. Typically it could make sense to
->>> do
->>> BKOPS for eMMC in here.
->>>
->>> Ulf Hansson (3):
->>>   mmc: core: Remove power_restore bus_ops for mmc and sd
->>>   mmc: core: Add bus_ops for runtime pm callbacks
->>>   mmc: block: Enable runtime pm for mmc blkdevice
->>>
->>>  drivers/mmc/card/block.c |   28 ++++++++++++++++++++++++++--
->>>  drivers/mmc/core/bus.c   |   14 ++++++++++++--
->>>  drivers/mmc/core/core.h  |    2 ++
->>>  drivers/mmc/core/mmc.c   |   14 --------------
->>>  drivers/mmc/core/sd.c    |   14 --------------
->>>  drivers/mmc/core/sdio.c  |   20 ++++++++++++++++++++
->>>  6 files changed, 60 insertions(+), 32 deletions(-)
->>
->> This looks good to me, but I'd like to make sure the design works for
->> you before we decide to merge it.  Any concerns?
->>
->
-> Chris,
->
-> This patchset is ok for me.
-> We can discuss/review how sd/mmc runtime callback function implemented
-> later.
->
-> Thanks
-> Kevin
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
-
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 10f8b73..172f874 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -2499,7 +2499,7 @@ static int __exit atmci_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
+-#ifdef CONFIG_PM
++#ifdef CONFIG_PM_SLEEP
+ static int atmci_suspend(struct device *dev)
+ {
+ 	struct atmel_mci *host = dev_get_drvdata(dev);
+@@ -2554,17 +2554,15 @@ static int atmci_resume(struct device *dev)
+ 
+ 	return ret;
+ }
+-static SIMPLE_DEV_PM_OPS(atmci_pm, atmci_suspend, atmci_resume);
+-#define ATMCI_PM_OPS	(&atmci_pm)
+-#else
+-#define ATMCI_PM_OPS	NULL
+ #endif
+ 
++static SIMPLE_DEV_PM_OPS(atmci_pm, atmci_suspend, atmci_resume);
++
+ static struct platform_driver atmci_driver = {
+ 	.remove		= __exit_p(atmci_remove),
+ 	.driver		= {
+ 		.name		= "atmel_mci",
+-		.pm		= ATMCI_PM_OPS,
++		.pm		= &atmci_pm,
+ 		.of_match_table	= of_match_ptr(atmci_dt_ids),
+ 	},
+ };
 -- 
-Maya Erez
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
-of Code Aurora Forum, hosted by The Linux Foundation
+1.7.2.5
+
 
