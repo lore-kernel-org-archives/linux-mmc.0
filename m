@@ -1,38 +1,160 @@
-From: Doug Anderson <dianders@google.com>
-Subject: Re: [PATCH] mmc: dwmmc: let device core setup the default pin configuration
-Date: Mon, 1 Apr 2013 11:42:31 -0700
-Message-ID: <CAD=FV=Vxh9+qpAmoLuALCOZJCLTfga0WdCf=P+heOmbkDY=Aww@mail.gmail.com>
-References: <1362571461-14570-1-git-send-email-thomas.abraham@linaro.org>
-	<CAD=FV=W8E=0C8_QZ3d44caq6EOvBpTkX0Ng86niQuN4B-cnHiw@mail.gmail.com>
-	<CAD=FV=Uy1dQMAxgh_ncxfsQVMDp4Da3inLTvgbJFhyhFLjVWrg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: [PATCH v2] mmc: dwmmc: let device core setup the default pin
+ configuration
+Date: Tue, 02 Apr 2013 11:39:59 +0530
+Message-ID: <1364882999-31670-1-git-send-email-thomas.abraham@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f48.google.com ([209.85.215.48]:46123 "EHLO
-	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758094Ab3DASmd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Apr 2013 14:42:33 -0400
-Received: by mail-la0-f48.google.com with SMTP id fq13so2360485lab.21
-        for <linux-mmc@vger.kernel.org>; Mon, 01 Apr 2013 11:42:32 -0700 (PDT)
-In-Reply-To: <CAD=FV=Uy1dQMAxgh_ncxfsQVMDp4Da3inLTvgbJFhyhFLjVWrg@mail.gmail.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:40378 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760070Ab3DBFun (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Apr 2013 01:50:43 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Thomas Abraham <thomas.abraham@linaro.org>, Olof Johansson <olofj@chromium.org>, Kukjin Kim <kgene.kim@samsung.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, Girish Shivananjappa <girish.shivananjappa@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Tomasz Figa <t.figa@samsung.com>, =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>, Linus Walleij <linus.walleij@linaro.org>, patches@linaro.org
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, linux-arm-kernel@lists.infradead.org, t.figa@samsung.com, heiko@sntech.de, linus.walleij@linaro.org, patches@linaro.org, dianders@chromium.org
 
-Thomas,
+With device core now able to setup the default pin configuration,
+the pin configuration code based on the deprecated Samsung specific
+gpio bindings is removed.
 
-On Mon, Mar 25, 2013 at 9:56 AM, Doug Anderson <dianders@google.com> wrote:
-> Are you planning on doing this?  I noticed that Chris pulled your
-> sdhci-s3c change in recently but apparently skipped this one since it
-> had outstanding comments.  Can you address comments and re-send?  This
-> is blocking pinmux dts stuff from landing (I think) and that blocks a
-> lot of other things from landing.
->
-> The comments are pretty trivial, so I could always fix them and
-> re-send myself, but it would be better if you could do it...  :)
+Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
+Reviewed-by: Doug Anderson <dianders@chromium.org>
+Tested-by: Doug Anderson <dianders@chromium.org>
+---
 
-I didn't hear anything last week and it's getting pretty late in the
-process.  I'll post something tomorrow if I don't hear from you...
+Hi Doug, Seungwon,
 
--Doug
+I apologize for the delaying in following up on the review comment.
+The setup_bus callback support has been removed in this patch. I did
+intend to retain the support for setup_bus callback in the previous
+version of this patch since any new platform that might use this
+driver and need such a callback would have this callback ready for
+use. But it seems removing the setup_bus callback is preferred, so
+I am fine with it.
+
+Thomas.
+
+ drivers/mmc/host/dw_mmc-exynos.c |   38 --------------------------------------
+ drivers/mmc/host/dw_mmc.c        |   14 +-------------
+ drivers/mmc/host/dw_mmc.h        |    3 ---
+ 3 files changed, 1 insertions(+), 54 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index 72fd0f2..467d043 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -152,43 +152,6 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+ 	return 0;
+ }
+ 
+-static int dw_mci_exynos_setup_bus(struct dw_mci *host,
+-				struct device_node *slot_np, u8 bus_width)
+-{
+-	int idx, gpio, ret;
+-
+-	if (!slot_np)
+-		return -EINVAL;
+-
+-	/* cmd + clock + bus-width pins */
+-	for (idx = 0; idx < NUM_PINS(bus_width); idx++) {
+-		gpio = of_get_gpio(slot_np, idx);
+-		if (!gpio_is_valid(gpio)) {
+-			dev_err(host->dev, "invalid gpio: %d\n", gpio);
+-			return -EINVAL;
+-		}
+-
+-		ret = devm_gpio_request(host->dev, gpio, "dw-mci-bus");
+-		if (ret) {
+-			dev_err(host->dev, "gpio [%d] request failed\n", gpio);
+-			return -EBUSY;
+-		}
+-	}
+-
+-	if (host->pdata->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+-		return 0;
+-
+-	gpio = of_get_named_gpio(slot_np, "samsung,cd-pinmux-gpio", 0);
+-	if (gpio_is_valid(gpio)) {
+-		if (devm_gpio_request(host->dev, gpio, "dw-mci-cd"))
+-			dev_err(host->dev, "gpio [%d] request failed\n", gpio);
+-	} else {
+-		dev_info(host->dev, "cd gpio not available");
+-	}
+-
+-	return 0;
+-}
+-
+ /* Exynos5250 controller specific capabilities */
+ static unsigned long exynos5250_dwmmc_caps[4] = {
+ 	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
+@@ -205,7 +168,6 @@ static const struct dw_mci_drv_data exynos5250_drv_data = {
+ 	.prepare_command	= dw_mci_exynos_prepare_command,
+ 	.set_ios		= dw_mci_exynos_set_ios,
+ 	.parse_dt		= dw_mci_exynos_parse_dt,
+-	.setup_bus		= dw_mci_exynos_setup_bus,
+ };
+ 
+ static const struct of_device_id dw_mci_exynos_match[] = {
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 9834221..adb1b7d 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1878,7 +1878,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	struct mmc_host *mmc;
+ 	struct dw_mci_slot *slot;
+ 	const struct dw_mci_drv_data *drv_data = host->drv_data;
+-	int ctrl_id, ret;
++	int ctrl_id;
+ 	u8 bus_width;
+ 
+ 	mmc = mmc_alloc_host(sizeof(struct dw_mci_slot), host->dev);
+@@ -1935,14 +1935,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	else
+ 		bus_width = 1;
+ 
+-	if (drv_data && drv_data->setup_bus) {
+-		struct device_node *slot_np;
+-		slot_np = dw_mci_of_find_slot_node(host->dev, slot->id);
+-		ret = drv_data->setup_bus(host, slot_np, bus_width);
+-		if (ret)
+-			goto err_setup_bus;
+-	}
+-
+ 	switch (bus_width) {
+ 	case 8:
+ 		mmc->caps |= MMC_CAP_8_BIT_DATA;
+@@ -2006,10 +1998,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	queue_work(host->card_workqueue, &host->card_work);
+ 
+ 	return 0;
+-
+-err_setup_bus:
+-	mmc_free_host(mmc);
+-	return -EINVAL;
+ }
+ 
+ static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 53b8fd9..0b74189 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -190,7 +190,6 @@ extern int dw_mci_resume(struct dw_mci *host);
+  * @prepare_command: handle CMD register extensions.
+  * @set_ios: handle bus specific extensions.
+  * @parse_dt: parse implementation specific device tree properties.
+- * @setup_bus: initialize io-interface
+  *
+  * Provide controller implementation specific extensions. The usage of this
+  * data structure is fully optional and usage of each member in this structure
+@@ -203,7 +202,5 @@ struct dw_mci_drv_data {
+ 	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
+ 	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
+ 	int		(*parse_dt)(struct dw_mci *host);
+-	int		(*setup_bus)(struct dw_mci *host,
+-				struct device_node *slot_np, u8 bus_width);
+ };
+ #endif /* _DW_MMC_H_ */
+-- 
+1.6.6.rc2
+
