@@ -1,41 +1,31 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v2] mmc: dwmmc: let device core setup the default pin configuration
-Date: Tue, 2 Apr 2013 08:37:35 -0700
-Message-ID: <CAD=FV=Xck5XW3LPmvkMfP=dfmnDH+kG4VYkRetW+SJ-bAz7SqQ@mail.gmail.com>
-References: <1364882999-31670-1-git-send-email-thomas.abraham@linaro.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v7 0/5] Add DT support for davinci_mmc driver
+Date: Tue, 02 Apr 2013 12:01:18 -0400
+Message-ID: <87wqskx6pd.fsf@octavius.laptop.org>
+References: <1364476211-14322-1-git-send-email-prakash.pm@ti.com>
+	<515AAB88.3030406@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1364882999-31670-1-git-send-email-thomas.abraham@linaro.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Thomas Abraham <thomas.abraham@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>, Girish Shivananjappa <girish.shivananjappa@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Tomasz Figa <t.figa@samsung.com>, =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>, Linus Walleij <linus.walleij@linaro.org>, patches@linaro.org
+Content-Type: text/plain
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <515AAB88.3030406@ti.com> (Sekhar Nori's message of "Tue, 2 Apr
+	2013 15:27:28 +0530")
+Sender: linux-doc-owner@vger.kernel.org
+To: Sekhar Nori <nsekhar@ti.com>
+Cc: "Manjunathappa, Prakash" <prakash.pm@ti.com>, davinci-linux-open-source@linux.davincidsp.com, linux-mmc@vger.kernel.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, rob@landley.net, linux@arm.linux.org.uk, hs@denx.de, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, mark.rutland@arm.com, arnd@arndb.de
 List-Id: linux-mmc@vger.kernel.org
 
-Thomas,
+Hi,
 
-On Mon, Apr 1, 2013 at 11:09 PM, Thomas Abraham
-<thomas.abraham@linaro.org> wrote:
-> With device core now able to setup the default pin configuration,
-> the pin configuration code based on the deprecated Samsung specific
-> gpio bindings is removed.
->
-> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
-> Acked-by: Linus Walleij <linus.walleij@linaro.org>
-> Reviewed-by: Doug Anderson <dianders@chromium.org>
-> Tested-by: Doug Anderson <dianders@chromium.org>
+On Tue, Apr 02 2013, Sekhar Nori wrote:
+> I would like to take this series through DaVinci tree to manage the
+> dependencies with mach-davinci. I need your ack on the driver part and
+> the DT binding. Can you please provide your ack?
 
-You missed Seungwon's other feedback.  Please change the title from
-"mmc: dwmmc: let device core setup the default pin configuration" to
-"mmc: dw_mmc: let device core setup the default pin configuration".
-He requested that the tag have the underscore in it for consistency.
+Acked-by: Chris Ball <cjb@laptop.org>
 
-If you're resending, it also seems like it might be nice to rebase this atop:
+Thanks,
 
-0f6e73d mmc: dw_mmc: Add MSHC compatible for Exynos4412
-
-...just to avoid the simple merge conflict when applying?
-
-Otherwise everything here looks great...
-
--Doug
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
