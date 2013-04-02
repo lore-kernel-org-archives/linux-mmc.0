@@ -1,57 +1,55 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
+From: Sergey Yanovich <ynvich@gmail.com>
 Subject: Re: [PATCH v2] wait while adding MMC host to ensure root mounts
-Date: Tue, 02 Apr 2013 16:36:30 +0300
-Message-ID: <515ADEDE.3050707@intel.com>
-References: <1363223183-3772-1-git-send-email-ynvich@gmail.com> <1363224194-7366-1-git-send-email-ynvich@gmail.com> <87620jmkoe.fsf@octavius.laptop.org> <CAPDyKFp27MUOjhydLXf92vN3cua=XcX4oTJnMGfOJPpBhtwM8Q@mail.gmail.com> <87ppylf429.fsf@octavius.laptop.org>
+Date: Tue, 02 Apr 2013 18:24:49 +0400
+Message-ID: <1364912689.3399.7.camel@host5.opentask.org>
+References: <1363223183-3772-1-git-send-email-ynvich@gmail.com>
+	 <1363224194-7366-1-git-send-email-ynvich@gmail.com>
+	 <87620jmkoe.fsf@octavius.laptop.org>
+	 <CAPDyKFp27MUOjhydLXf92vN3cua=XcX4oTJnMGfOJPpBhtwM8Q@mail.gmail.com>
+	 <87ppylf429.fsf@octavius.laptop.org> <515ADEDE.3050707@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:25082 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1761289Ab3DBNbP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 2 Apr 2013 09:31:15 -0400
-In-Reply-To: <87ppylf429.fsf@octavius.laptop.org>
+Received: from mail-bk0-f49.google.com ([209.85.214.49]:42117 "EHLO
+	mail-bk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760885Ab3DBOYy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Apr 2013 10:24:54 -0400
+In-Reply-To: <515ADEDE.3050707@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Sergey Yanovich <ynvich@gmail.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <linkinjeon@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <linkinjeon@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On 27/03/13 13:57, Chris Ball wrote:
-> Hi,
+On Tue, 2013-04-02 at 16:36 +0300, Adrian Hunter wrote:
+> On my system it is significant:
 > 
-> On Wed, Mar 27 2013, Ulf Hansson wrote:
->> I noticed you merged this. I thought the idea was to use the rootwait
->> or rootdelay?
+> Before the patch:
 > 
-> That's necessary before the patch, but it would be better if we didn't
-> have to pass rootwait, all else being equal.
+> [    1.625623] VFS: Mounted root (ext4 filesystem) readonly on device 179:2.
 > 
->> Moreover, this patch will have bad impact on booting the kernel, since
->> every host device that has scheduled a detect work from it's probe
->> function will also wait for it to finish. Even if it is the boot
->> device of not. If this is needed, I would prefer that a host cap is
->> used.
+> After the patch:
 > 
-> I see, you're worried about a performance regression where every boot
-> takes longer than it used to while MMC quiesces.  That's fair.  Do you
-> think you could tell me how much delay this adds to a boot for you, so
-> that we can consider whether the usability improvement is worth it?
+> [    1.935851] VFS: Mounted root (ext4 filesystem) readonly on device 179:2.
 > 
-> If the delay's significant, I agree with you and will revert this patch.
+> That is an addition of 310 ms which is 19% performance degradation.
 
-On my system it is significant:
+Are you sure the delay is caused by mmc?
 
-Before the patch:
+On my intel laptop (userspace is Debian/unstable):
+[    1.542339] EXT4-fs (sda2): mounted filesystem with ordered data mode. Opts: (null)
+...
+[    2.735851] mmc0: new high speed SD card at address e624
+[    2.742289] mmcblk0: mmc0:e624 SU02G 1.84 GiB 
+[    2.752317]  mmcblk0: p1
 
-[    1.625623] VFS: Mounted root (ext4 filesystem) readonly on device 179:2.
+> Please revert the patch.
 
-After the patch:
+Chris, could provide a pointer on how to improve the patch?
 
-[    1.935851] VFS: Mounted root (ext4 filesystem) readonly on device 179:2.
+Maybe introduce mmc_is_hosting_root() and do something like:
 
-That is an addition of 310 ms which is 19% performance degradation.
-
-Please revert the patch.
-
+-	mmc_flush_scheduled_work();
++	if (mmc_is_hosting_root())
++		mmc_flush_scheduled_work();
 
