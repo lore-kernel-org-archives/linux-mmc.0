@@ -1,160 +1,112 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: [PATCH v2] mmc: dwmmc: let device core setup the default pin
- configuration
-Date: Tue, 02 Apr 2013 11:39:59 +0530
-Message-ID: <1364882999-31670-1-git-send-email-thomas.abraham@linaro.org>
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: Re: [PATCH v2 4/5] mmc: mxcmmc: enable DMA support on mpc512x
+Date: Tue, 2 Apr 2013 08:56:54 +0200
+Message-ID: <20130402065654.GC1906@pengutronix.de>
+References: <1364768585-5177-1-git-send-email-agust@denx.de>
+ <1364768585-5177-5-git-send-email-agust@denx.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:40378 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760070Ab3DBFun (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Apr 2013 01:50:43 -0400
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:44417 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760889Ab3DBG45 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Apr 2013 02:56:57 -0400
+Content-Disposition: inline
+In-Reply-To: <1364768585-5177-5-git-send-email-agust@denx.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, linux-arm-kernel@lists.infradead.org, t.figa@samsung.com, heiko@sntech.de, linus.walleij@linaro.org, patches@linaro.org, dianders@chromium.org
+To: Anatolij Gustschin <agust@denx.de>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Markus Pargmann <mpa@pengutronix.de>, devicetree-discuss@lists.ozlabs.org
 
-With device core now able to setup the default pin configuration,
-the pin configuration code based on the deprecated Samsung specific
-gpio bindings is removed.
+On Mon, Apr 01, 2013 at 12:23:04AM +0200, Anatolij Gustschin wrote:
+> Add SDHC DMA channel description to the mpc512x device
+> tree to enable slave channel requesting in the mxcmmc
+> driver.
+> 
+> mpc512x DMA engine doesn't support endianness conversion
+> when reading/writing data from peripheral's FIFO, so we
+> have to swap data buffers before each DMA write and after
+> each DMA read transfer manually.
+> 
+> Since chained SDHC DMA transfers are not supported on
+> mpc512x, limit 'max_segs' tunable parameter to one and
+> initialise it to 64 only when running on i.MX platforms.
+> 
+> Signed-off-by: Anatolij Gustschin <agust@denx.de>
+> ---
+> v2:
+>  - only rebased
+> 
+>  arch/powerpc/boot/dts/mpc5121.dtsi |    2 ++
+>  drivers/mmc/host/mxcmmc.c          |   35 +++++++++++++++++++++++++++++++++--
+>  2 files changed, 35 insertions(+), 2 deletions(-)
+> 
+> diff --git a/arch/powerpc/boot/dts/mpc5121.dtsi b/arch/powerpc/boot/dts/mpc5121.dtsi
+> index d1fe070..712b15a 100644
+> --- a/arch/powerpc/boot/dts/mpc5121.dtsi
+> +++ b/arch/powerpc/boot/dts/mpc5121.dtsi
+> @@ -152,6 +152,8 @@
+>  			compatible = "fsl,mpc5121-sdhc";
+>  			reg = <0x1500 0x100>;
+>  			interrupts = <8 0x8>;
+> +			dmas = <&dma0 30>;
+> +			dma-names = "rx-tx";
+>  		};
+>  
+>  		i2c@1700 {
+> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+> index dbacbde..2861e0d 100644
+> --- a/drivers/mmc/host/mxcmmc.c
+> +++ b/drivers/mmc/host/mxcmmc.c
+> @@ -301,6 +301,29 @@ static void mxcmci_softreset(struct mxcmci_host *host)
+>  }
+>  static int mxcmci_setup_dma(struct mmc_host *mmc);
+>  
+> +#if IS_ENABLED(CONFIG_PPC_MPC512x)
+> +static inline void buffer_swap32(u32 *buf, int len)
+> +{
+> +	int i;
+> +
+> +	for (i = 0; i < ((len + 3) / 4); i++) {
+> +		st_le32(buf, *buf);
+> +		buf++;
+> +	}
+> +}
+> +
+> +static void mxcmci_fixup_buffers(struct mmc_data *data)
+> +{
+> +	struct scatterlist *sg;
+> +	int i;
+> +
+> +	for_each_sg(data->sg, sg, data->sg_len, i)
+> +		buffer_swap32(sg_virt(sg), sg->length);
+> +}
+> +#else
+> +static inline void mxcmci_fixup_buffers(struct mmc_data *data) {}
+> +#endif
+> +
+>  static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
+>  {
+>  	unsigned int nob = data->blocks;
+> @@ -336,6 +359,8 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
+>  	} else {
+>  		host->dma_dir = DMA_TO_DEVICE;
+>  		slave_dirn = DMA_MEM_TO_DEV;
+> +
+> +		mxcmci_fixup_buffers(data);
 
-Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
-Reviewed-by: Doug Anderson <dianders@chromium.org>
-Tested-by: Doug Anderson <dianders@chromium.org>
----
+For the register accesses it's fine the way you did in this version, but
+here I think a
 
-Hi Doug, Seungwon,
+	if (is_mpc512x_mmc())
+		swap_buffer()
 
-I apologize for the delaying in following up on the review comment.
-The setup_bus callback support has been removed in this patch. I did
-intend to retain the support for setup_bus callback in the previous
-version of this patch since any new platform that might use this
-driver and need such a callback would have this callback ready for
-use. But it seems removing the setup_bus callback is preferred, so
-I am fine with it.
+would look better.
 
-Thomas.
+Sascha
 
- drivers/mmc/host/dw_mmc-exynos.c |   38 --------------------------------------
- drivers/mmc/host/dw_mmc.c        |   14 +-------------
- drivers/mmc/host/dw_mmc.h        |    3 ---
- 3 files changed, 1 insertions(+), 54 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 72fd0f2..467d043 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -152,43 +152,6 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
- 	return 0;
- }
- 
--static int dw_mci_exynos_setup_bus(struct dw_mci *host,
--				struct device_node *slot_np, u8 bus_width)
--{
--	int idx, gpio, ret;
--
--	if (!slot_np)
--		return -EINVAL;
--
--	/* cmd + clock + bus-width pins */
--	for (idx = 0; idx < NUM_PINS(bus_width); idx++) {
--		gpio = of_get_gpio(slot_np, idx);
--		if (!gpio_is_valid(gpio)) {
--			dev_err(host->dev, "invalid gpio: %d\n", gpio);
--			return -EINVAL;
--		}
--
--		ret = devm_gpio_request(host->dev, gpio, "dw-mci-bus");
--		if (ret) {
--			dev_err(host->dev, "gpio [%d] request failed\n", gpio);
--			return -EBUSY;
--		}
--	}
--
--	if (host->pdata->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
--		return 0;
--
--	gpio = of_get_named_gpio(slot_np, "samsung,cd-pinmux-gpio", 0);
--	if (gpio_is_valid(gpio)) {
--		if (devm_gpio_request(host->dev, gpio, "dw-mci-cd"))
--			dev_err(host->dev, "gpio [%d] request failed\n", gpio);
--	} else {
--		dev_info(host->dev, "cd gpio not available");
--	}
--
--	return 0;
--}
--
- /* Exynos5250 controller specific capabilities */
- static unsigned long exynos5250_dwmmc_caps[4] = {
- 	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
-@@ -205,7 +168,6 @@ static const struct dw_mci_drv_data exynos5250_drv_data = {
- 	.prepare_command	= dw_mci_exynos_prepare_command,
- 	.set_ios		= dw_mci_exynos_set_ios,
- 	.parse_dt		= dw_mci_exynos_parse_dt,
--	.setup_bus		= dw_mci_exynos_setup_bus,
- };
- 
- static const struct of_device_id dw_mci_exynos_match[] = {
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 9834221..adb1b7d 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1878,7 +1878,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	struct mmc_host *mmc;
- 	struct dw_mci_slot *slot;
- 	const struct dw_mci_drv_data *drv_data = host->drv_data;
--	int ctrl_id, ret;
-+	int ctrl_id;
- 	u8 bus_width;
- 
- 	mmc = mmc_alloc_host(sizeof(struct dw_mci_slot), host->dev);
-@@ -1935,14 +1935,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	else
- 		bus_width = 1;
- 
--	if (drv_data && drv_data->setup_bus) {
--		struct device_node *slot_np;
--		slot_np = dw_mci_of_find_slot_node(host->dev, slot->id);
--		ret = drv_data->setup_bus(host, slot_np, bus_width);
--		if (ret)
--			goto err_setup_bus;
--	}
--
- 	switch (bus_width) {
- 	case 8:
- 		mmc->caps |= MMC_CAP_8_BIT_DATA;
-@@ -2006,10 +1998,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	queue_work(host->card_workqueue, &host->card_work);
- 
- 	return 0;
--
--err_setup_bus:
--	mmc_free_host(mmc);
--	return -EINVAL;
- }
- 
- static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 53b8fd9..0b74189 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -190,7 +190,6 @@ extern int dw_mci_resume(struct dw_mci *host);
-  * @prepare_command: handle CMD register extensions.
-  * @set_ios: handle bus specific extensions.
-  * @parse_dt: parse implementation specific device tree properties.
-- * @setup_bus: initialize io-interface
-  *
-  * Provide controller implementation specific extensions. The usage of this
-  * data structure is fully optional and usage of each member in this structure
-@@ -203,7 +202,5 @@ struct dw_mci_drv_data {
- 	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
- 	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
- 	int		(*parse_dt)(struct dw_mci *host);
--	int		(*setup_bus)(struct dw_mci *host,
--				struct device_node *slot_np, u8 bus_width);
- };
- #endif /* _DW_MMC_H_ */
 -- 
-1.6.6.rc2
-
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
