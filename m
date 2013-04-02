@@ -1,55 +1,41 @@
-From: Sergey Yanovich <ynvich@gmail.com>
-Subject: Re: [PATCH v2] wait while adding MMC host to ensure root mounts
-Date: Tue, 02 Apr 2013 18:24:49 +0400
-Message-ID: <1364912689.3399.7.camel@host5.opentask.org>
-References: <1363223183-3772-1-git-send-email-ynvich@gmail.com>
-	 <1363224194-7366-1-git-send-email-ynvich@gmail.com>
-	 <87620jmkoe.fsf@octavius.laptop.org>
-	 <CAPDyKFp27MUOjhydLXf92vN3cua=XcX4oTJnMGfOJPpBhtwM8Q@mail.gmail.com>
-	 <87ppylf429.fsf@octavius.laptop.org> <515ADEDE.3050707@intel.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v2] mmc: dwmmc: let device core setup the default pin configuration
+Date: Tue, 2 Apr 2013 08:37:35 -0700
+Message-ID: <CAD=FV=Xck5XW3LPmvkMfP=dfmnDH+kG4VYkRetW+SJ-bAz7SqQ@mail.gmail.com>
+References: <1364882999-31670-1-git-send-email-thomas.abraham@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f49.google.com ([209.85.214.49]:42117 "EHLO
-	mail-bk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760885Ab3DBOYy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Apr 2013 10:24:54 -0400
-In-Reply-To: <515ADEDE.3050707@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1364882999-31670-1-git-send-email-thomas.abraham@linaro.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Thomas Abraham <thomas.abraham@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>, Girish Shivananjappa <girish.shivananjappa@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Tomasz Figa <t.figa@samsung.com>, =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>, Linus Walleij <linus.walleij@linaro.org>, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <linkinjeon@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Tue, 2013-04-02 at 16:36 +0300, Adrian Hunter wrote:
-> On my system it is significant:
-> 
-> Before the patch:
-> 
-> [    1.625623] VFS: Mounted root (ext4 filesystem) readonly on device 179:2.
-> 
-> After the patch:
-> 
-> [    1.935851] VFS: Mounted root (ext4 filesystem) readonly on device 179:2.
-> 
-> That is an addition of 310 ms which is 19% performance degradation.
+Thomas,
 
-Are you sure the delay is caused by mmc?
+On Mon, Apr 1, 2013 at 11:09 PM, Thomas Abraham
+<thomas.abraham@linaro.org> wrote:
+> With device core now able to setup the default pin configuration,
+> the pin configuration code based on the deprecated Samsung specific
+> gpio bindings is removed.
+>
+> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+> Acked-by: Linus Walleij <linus.walleij@linaro.org>
+> Reviewed-by: Doug Anderson <dianders@chromium.org>
+> Tested-by: Doug Anderson <dianders@chromium.org>
 
-On my intel laptop (userspace is Debian/unstable):
-[    1.542339] EXT4-fs (sda2): mounted filesystem with ordered data mode. Opts: (null)
-...
-[    2.735851] mmc0: new high speed SD card at address e624
-[    2.742289] mmcblk0: mmc0:e624 SU02G 1.84 GiB 
-[    2.752317]  mmcblk0: p1
+You missed Seungwon's other feedback.  Please change the title from
+"mmc: dwmmc: let device core setup the default pin configuration" to
+"mmc: dw_mmc: let device core setup the default pin configuration".
+He requested that the tag have the underscore in it for consistency.
 
-> Please revert the patch.
+If you're resending, it also seems like it might be nice to rebase this atop:
 
-Chris, could provide a pointer on how to improve the patch?
+0f6e73d mmc: dw_mmc: Add MSHC compatible for Exynos4412
 
-Maybe introduce mmc_is_hosting_root() and do something like:
+...just to avoid the simple merge conflict when applying?
 
--	mmc_flush_scheduled_work();
-+	if (mmc_is_hosting_root())
-+		mmc_flush_scheduled_work();
+Otherwise everything here looks great...
 
+-Doug
