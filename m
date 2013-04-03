@@ -1,38 +1,60 @@
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v7 0/5] Add DT support for davinci_mmc driver
-Date: Wed, 3 Apr 2013 09:47:10 +0530
-Message-ID: <515BAD46.8060904@ti.com>
-References: <1364476211-14322-1-git-send-email-prakash.pm@ti.com>
-	<515AAB88.3030406@ti.com> <87wqskx6pd.fsf@octavius.laptop.org>
+From: Marc Kleine-Budde <mkl@pengutronix.de>
+Subject: Re: [PATCH 0/2] mmc: mxs-mmc: add cd-inverted and non-removeable
+Date: Wed, 03 Apr 2013 09:56:41 +0200
+Message-ID: <515BE0B9.4010209@pengutronix.de>
+References: <1364223751-28253-1-git-send-email-mkl@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <87wqskx6pd.fsf-DGHOrqG7t0YzNDMTQreKSUB+6BGkLq7r@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org, rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org, hs-ynQEQJNshbs@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="----enig2RCWWELMTGKQJBFFRLAQN"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:40098 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757629Ab3DCH4v (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Apr 2013 03:56:51 -0400
+In-Reply-To: <1364223751-28253-1-git-send-email-mkl@pengutronix.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: kernel@pengutronix.de, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 
-On 4/2/2013 9:31 PM, Chris Ball wrote:
-> Hi,
-> 
-> On Tue, Apr 02 2013, Sekhar Nori wrote:
->> I would like to take this series through DaVinci tree to manage the
->> dependencies with mach-davinci. I need your ack on the driver part and
->> the DT binding. Can you please provide your ack?
-> 
-> Acked-by: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+------enig2RCWWELMTGKQJBFFRLAQN
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: quoted-printable
 
-Thanks Chris. I added your Ack to 2/5 and 3/5 which had driver changes.
+On 03/25/2013 04:02 PM, Marc Kleine-Budde wrote:
+> Hello,
+>=20
+> this patch add support for the cd-inverted and non-removeable property =
+(as
+> defined in devicetree/bindings/mmc/mmc.txt) to the mxs-mmc driver. Test=
+ed on a
+> custom imx28 board.
+>=20
+> This series applies to Chris Ball's cjb/mmc-next branch.
 
-Regards,
-Sekhar
+ping
+
+--=20
+Pengutronix e.K.                  | Marc Kleine-Budde           |
+Industrial Linux Solutions        | Phone: +49-231-2826-924     |
+Vertretung West/Dortmund          | Fax:   +49-5121-206917-5555 |
+Amtsgericht Hildesheim, HRA 2686  | http://www.pengutronix.de   |
+
+
+------enig2RCWWELMTGKQJBFFRLAQN
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlFb4LwACgkQjTAFq1RaXHOA+ACgieZ/CLy6N4iOx0a4ehJi6hDI
+uMIAn0/B+thWoPBGVC9W1/QGvdfj88jH
+=MmEy
+-----END PGP SIGNATURE-----
+
+------enig2RCWWELMTGKQJBFFRLAQN--
