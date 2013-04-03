@@ -1,96 +1,144 @@
-From: Tanya Brokhman <tlinder@codeaurora.org>
-Subject: Re: [PATCH v5 2/3] block: Add API for urgent request handling
-Date: Wed, 03 Apr 2013 13:40:46 +0300
-Message-ID: <515C072E.3010801@codeaurora.org>
-References: <1364202178-8936-1-git-send-email-tlinder@codeaurora.org> <20130325124007.GH22327@kernel.dk>
+From: Maya Erez <merez@codeaurora.org>
+Subject: Re: [PATCH 0/3] mmc: Use runtime pm for blkdevice
+Date: Wed, 03 Apr 2013 13:51:18 +0300
+Message-ID: <515C09A6.9010002@codeaurora.org>
+References: <25B60CDC2F704E4E9D88FFD52780CB4C0BDED3BFE1@SC-VEXCH1.marvell.com> <CADz5_g+TB9rg0_dwgzsOe7UL2F9gYuO17A=5iAca5N1jPkPj2g@mail.gmail.com> <d3e7755a3509464281def783c5685a7f.squirrel@www.codeaurora.org> <CAPDyKFpsTWCoTWSNOaJVfr-3hXzf4x_qNYujo1trhbim4Tnxdg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
+Content-Type: text/plain; charset=UTF-8;
 	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <20130325124007.GH22327@kernel.dk>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Jens Axboe <axboe@kernel.dk>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Alex.Lemberg@sandisk.com, open list <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:14451 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761664Ab3DCKvW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Apr 2013 06:51:22 -0400
+In-Reply-To: <CAPDyKFpsTWCoTWSNOaJVfr-3hXzf4x_qNYujo1trhbim4Tnxdg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Kevin Liu <keyuan.liu@gmail.com>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Johan Rudholm <johan.rudholm@stericsson.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kevin Liu <kliu5@marvell.com>
 
-On 3/25/2013 2:40 PM, Jens Axboe wrote:
-> On Mon, Mar 25 2013, Tanya Brokhman wrote:
->> This patch add support in block & elevator layers for handling
->> urgent requests. The decision if a request is urgent or not is taken
->> by the scheduler. Request is marked as urgent in cmd_flags (by the
->> scheduler) with a new flag - REQ_URGENT.
->> Urgent request notification is passed to the underlying
->> block device driver (eMMC for example). Block device driver may deci=
-de to
->> interrupt the currently running low priority request to serve the ne=
-w
->> urgent request. By doing so READ latency is greatly reduced in read&=
-write
->> collision scenarios.
+=D7=91=D7=AA=D7=90=D7=A8=D7=99=D7=9A 4/2/2013 1:45 PM, =D7=A6=D7=99=D7=98=
+=D7=95=D7=98 Ulf Hansson:
+> On 28 March 2013 22:05,  <merez@codeaurora.org> wrote:
+>> Hi Chris,
 >>
->> Note that if the current scheduler doesn't implement the urgent requ=
-est
->> mechanism, this code path is never activated.
-> I really don't like this out-of-band mechanism. Lets say there is an
-> urgent request, the IO scheduler would put that at the head of the
-> queue. So the first time the driver fetches a request, it'll see this
-> urgent request. A driver that has support for this, would check the h=
-ead
-> of queue everytime its request_fn was invoked. There's no need to add=
- a
-> elevator_is_urgent_fn() and ->notified_urgent.
+>> Sorry for the late response.
+>> I am currently on vacation and would get back to work next week.
+>> We would like to have an internal discussion to make sure there are =
+no
+>> additional concerns with this patch.
+>> Can you please wait with this patch approval until the end of next w=
+eek?
+> Hi Maya,
 >
-Hi Jens,
+> Hope you have had a good vacation. I was thinking of the BKOPS patche=
+s
+> I assume you are working on. If you need some assistance to "rebase"
+> you work on top of this patchset, just ping me.
+>
+> Kind regards
+> Ulf Hansson
+>
+>> Thanks,
+>> Maya
+>>
+>>>> -----Original Message-----
+>>>> From: Chris Ball [mailto:cjb@laptop.org]
+>>>> Sent: Wednesday, March 27, 2013 9:32 PM
+>>>> To: Ulf Hansson
+>>>> Cc: linux-mmc@vger.kernel.org; Johan Rudholm; Ulf Hansson; Maya Er=
+ez;
+>>>> Kevin Liu; Seungwon Jeon; jh80.chung@samsung.com
+>>>> Subject: Re: [PATCH 0/3] mmc: Use runtime pm for blkdevice
+>>>>
+>>>> Hi Maya, Kevin, Seungwon, Jaehoon,
+>>>>
+>>>> On Fri, Mar 01 2013, Ulf Hansson wrote:
+>>>>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>>>>
+>>>>> SDIO has been using runtime pm for a while to handle runtime powe=
+r save
+>>>>> operations. This patchset is enabling the option to make the sd/m=
+mc
+>>>>> blockdevices to use runtime pm as well.
+>>>>>
+>>>>> The runtime pm implementation for the block device will make use =
+of
+>>>>> autosuspend to defer power save operation to after request inacti=
+vty
+>>>>> for
+>>>>> a certain time.
+>>>>>
+>>>>> To actually perform some power save operations the corresponding =
+bus
+>>>>> ops
+>>>>> for mmc and sd shall be implemented. Typically it could make sens=
+e to
+>>>>> do
+>>>>> BKOPS for eMMC in here.
+>>>>>
+>>>>> Ulf Hansson (3):
+>>>>>    mmc: core: Remove power_restore bus_ops for mmc and sd
+>>>>>    mmc: core: Add bus_ops for runtime pm callbacks
+>>>>>    mmc: block: Enable runtime pm for mmc blkdevice
+>>>>>
+>>>>>   drivers/mmc/card/block.c |   28 ++++++++++++++++++++++++++--
+>>>>>   drivers/mmc/core/bus.c   |   14 ++++++++++++--
+>>>>>   drivers/mmc/core/core.h  |    2 ++
+>>>>>   drivers/mmc/core/mmc.c   |   14 --------------
+>>>>>   drivers/mmc/core/sd.c    |   14 --------------
+>>>>>   drivers/mmc/core/sdio.c  |   20 ++++++++++++++++++++
+>>>>>   6 files changed, 60 insertions(+), 32 deletions(-)
+>>>> This looks good to me, but I'd like to make sure the design works =
+for
+>>>> you before we decide to merge it.  Any concerns?
+>>>>
+>>> Chris,
+>>>
+>>> This patchset is ok for me.
+>>> We can discuss/review how sd/mmc runtime callback function implemen=
+ted
+>>> later.
+>>>
+>>> Thanks
+>>> Kevin
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc=
+" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+>> --
+>> Maya Erez
+>> QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a =
+member
+>> of Code Aurora Forum, hosted by The Linux Foundation
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Thank you for your inputs. We implemented the URGENT request=20
-notification in block layer with elevator_is_urgent_fn() and=20
-->notified_urgent due to the following:
+Hi Ulf,
 
-1. In the future the URGENT request mechanism may be of use to other=20
-block device drivers besides mmc (such as sdcc for example). Having thi=
-s=20
-mechanism in the block layer spares all of the block devices=20
-re-implementing it.
+Thanks for your offer.
 
-2. Using the existing API (->request_fn() and not urgent_request->fn())=
-=20
-won=92t work as intended for URGENT requests in case the block device=20
-already handles 2 requests. In such a case, when a device driver will=20
-peek the dispatch queue to check if an URGENT request is pending or not=
-,=20
-a new request will be dispatched. If an URGENT requests is inserted to=20
-the scheduler after that, the block device will not be aware of its=20
-existence, which will result in high latency for this URGENT request.=20
-=46or example:
+The current plan is to start the BKOPS in the runtime suspend API=20
+(triggerred 3 secs after idle time) although it may be less efficient=20
+than the current approach which starts the BKOPS after 200ms from idle =
+time.
+I will try to send the BKOPS patch next week.
 
-The device driver is currently handling requests regular_A and regular_=
-B=20
-when a new regular request ( regular_C ) arrives and ->request_fn() is=20
-called by the block layer. The device driver =94peeks=94 the dispatch q=
-ueue=20
-in order to find out if there is an URGENT request pending. The I/O=20
-scheduler will insert regular_C into the dispatch queue, the device=20
-driver will see that there is no URGNET request pending and continue it=
-s=20
-work. Regular_C will remain pending on the dispatch queue. Now another=20
-request arrives: URGENT_D and ->request_fn() is called again. But this=20
-time when the device driver =93peeks=94 the dispatch queue to find if a=
-n=20
-URGENT request is pending it will look at regular_C and URGENT_D will=20
-remain in the scheduler data base till regular_A and regular_B requests=
-=20
-are completed and regular_C is sent to the card.
+Chris - we are OK with this patch, you can continue with its merge.
 
-The ->notified_urgent is needed because we don=92t want to notify the=20
-device driver of an URGENT request if there is already an URGENT reques=
-t=20
-in flight. This is because we don=92t want URGENT requests to be interr=
-upted.
+Thanks,
+Maya
 
 --=20
-
+Maya Erez
 QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a mem=
-ber
+ber of Code Aurora Forum, hosted by The Linux Foundation
 
-of Code Aurora Forum, hosted by The Linux Foundation
