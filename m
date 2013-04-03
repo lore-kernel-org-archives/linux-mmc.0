@@ -1,65 +1,38 @@
-From: Sergey Yanovich <ynvich@gmail.com>
-Subject: Re: [PATCH v2] wait while adding MMC host to ensure root mounts
-Date: Tue, 02 Apr 2013 22:56:38 +0400
-Message-ID: <1364928998.3399.34.camel@host5.opentask.org>
-References: <1363223183-3772-1-git-send-email-ynvich@gmail.com>
-	 <1363224194-7366-1-git-send-email-ynvich@gmail.com>
-	 <87620jmkoe.fsf@octavius.laptop.org>
-	 <CAPDyKFp27MUOjhydLXf92vN3cua=XcX4oTJnMGfOJPpBhtwM8Q@mail.gmail.com>
-	 <CAL0eWdGjPKUUcm6mStAHgHKHLABmPw7nMwDhR8D5rbvg+DPzfQ@mail.gmail.com>
-	 <CAPDyKFroki00+SCLjUXYN_=+qcVZwZ2H4NJacH+d8p3dFXoLPg@mail.gmail.com>
-	 <1364898904.2556.26.camel@host5.opentask.org>
-	 <CAPDyKFpOf7G_f=J=6sDdH1NQXow5uq1+rkACGGSvpEQ-LWsm4g@mail.gmail.com>
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v7 0/5] Add DT support for davinci_mmc driver
+Date: Wed, 3 Apr 2013 09:47:10 +0530
+Message-ID: <515BAD46.8060904@ti.com>
+References: <1364476211-14322-1-git-send-email-prakash.pm@ti.com>
+	<515AAB88.3030406@ti.com> <87wqskx6pd.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f43.google.com ([209.85.214.43]:33165 "EHLO
-	mail-bk0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754155Ab3DBS4n (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Apr 2013 14:56:43 -0400
-In-Reply-To: <CAPDyKFpOf7G_f=J=6sDdH1NQXow5uq1+rkACGGSvpEQ-LWsm4g@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <87wqskx6pd.fsf-DGHOrqG7t0YzNDMTQreKSUB+6BGkLq7r@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org, rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org, hs-ynQEQJNshbs@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <linkinjeon@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Tue, 2013-04-02 at 19:45 +0200, Ulf Hansson wrote:
-> On 2 April 2013 12:35, Sergey Yanovich <ynvich@gmail.com> wrote:
-> > If the system is booted using initrd and root is not on an mmc card,
-> > then mmc modules can be omitted from initrd. The probing will happen
-> > only after root is mounted.
+On 4/2/2013 9:31 PM, Chris Ball wrote:
+> Hi,
 > 
-> This will not solve the problem when having one device intended for
-> rootfs and some other for something else. Of course, as long as the
-> devices uses the same mmc module. Once inserted, all devices will be
-> probed.
-
-I agree that is this special case there will be boot time regression.
-However, this case is not guaranteed to boot without the patch or some
-workaround.
-
-> > If root is on an mmc, kernel needs to wait for the mmc probe.
-> >
+> On Tue, Apr 02 2013, Sekhar Nori wrote:
+>> I would like to take this series through DaVinci tree to manage the
+>> dependencies with mach-davinci. I need your ack on the driver part and
+>> the DT binding. Can you please provide your ack?
 > 
-> True, although your patch is preventing the parallelism and instead
-> doing things in synchronized manner.
+> Acked-by: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
 
-mount_root() assumes it has waited for "known devices to complete their
-probing" [init/do_mounts.c:545]. The patch has brought mmc into
-compliance with the assumption.
+Thanks Chris. I added your Ack to 2/5 and 3/5 which had driver changes.
 
-If several devices can be probed in parallel, the bus should do it, but
-not the driver.
-
-> I think we must discuss alternative solutions instead.
-> 
-> Like an "mmc detect flush" mechanism or a "new card device notification" event.
-
-There are 2 events to trigger root mount:
-1. all known devices complete their probing
-2. 1 is true and root_wait is specified and root device is found
-
-So I see the only fast alternative to my patch: if root is on an mmc
-card, set root_wait to 'true'.
-
+Regards,
+Sekhar
