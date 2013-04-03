@@ -1,133 +1,54 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH 1/3] mmc: core: Remove power_restore bus_ops for mmc and
- sd
-Date: Wed, 3 Apr 2013 04:08:17 -0700
-Message-ID: <ba85e7a1b1327f114ac1936a798d5a5f.squirrel@www.codeaurora.org>
-References: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com>
-    <1362142035-8403-2-git-send-email-ulf.hansson@stericsson.com>
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v9 0/9] DMA Engine support for AM33XX
+Date: Wed, 3 Apr 2013 17:15:54 +0530
+Message-ID: <515C1672.4060000@ti.com>
+References: <1362586540-10393-1-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:10106 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757409Ab3DCLIS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Apr 2013 07:08:18 -0400
-In-Reply-To: <1362142035-8403-2-git-send-email-ulf.hansson@stericsson.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <1362586540-10393-1-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Acked-by: Maya Erez <merez@codeaurora.org>
+Hi Matt,
 
-> From: Ulf Hansson <ulf.hansson@linaro.org>
->
-> The mmc_power_restore|save_host API is only used by SDIO func drivers.
-> SDIO
-> func drivers are also moving towards use of runtime pm to accomplish the
-> the same operation and since this API is not used for mmc and sd it makes
-> sense to remove the corresponding bus_ops.
->
-> Moreover, at least for eMMC the mmc bus_ops is broken, since no
-> consideration
-> is taken for mmc sleep and mmc power off notify.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/core/mmc.c |   14 --------------
->  drivers/mmc/core/sd.c  |   14 --------------
->  2 files changed, 28 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index c8f3d6e..edc6bc4 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1445,18 +1445,6 @@ static int mmc_resume(struct mmc_host *host)
->  	return err;
->  }
->
-> -static int mmc_power_restore(struct mmc_host *host)
-> -{
-> -	int ret;
-> -
-> -	host->card->state &= ~(MMC_STATE_HIGHSPEED | MMC_STATE_HIGHSPEED_200);
-> -	mmc_claim_host(host);
-> -	ret = mmc_init_card(host, host->ocr, host->card);
-> -	mmc_release_host(host);
-> -
-> -	return ret;
-> -}
-> -
->  static int mmc_sleep(struct mmc_host *host)
->  {
->  	struct mmc_card *card = host->card;
-> @@ -1494,7 +1482,6 @@ static const struct mmc_bus_ops mmc_ops = {
->  	.detect = mmc_detect,
->  	.suspend = NULL,
->  	.resume = NULL,
-> -	.power_restore = mmc_power_restore,
->  	.alive = mmc_alive,
->  };
->
-> @@ -1505,7 +1492,6 @@ static const struct mmc_bus_ops mmc_ops_unsafe = {
->  	.detect = mmc_detect,
->  	.suspend = mmc_suspend,
->  	.resume = mmc_resume,
-> -	.power_restore = mmc_power_restore,
->  	.alive = mmc_alive,
->  };
->
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 9e645e1..b71d906 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -1095,24 +1095,11 @@ static int mmc_sd_resume(struct mmc_host *host)
->  	return err;
->  }
->
-> -static int mmc_sd_power_restore(struct mmc_host *host)
-> -{
-> -	int ret;
-> -
-> -	host->card->state &= ~MMC_STATE_HIGHSPEED;
-> -	mmc_claim_host(host);
-> -	ret = mmc_sd_init_card(host, host->ocr, host->card);
-> -	mmc_release_host(host);
-> -
-> -	return ret;
-> -}
-> -
->  static const struct mmc_bus_ops mmc_sd_ops = {
->  	.remove = mmc_sd_remove,
->  	.detect = mmc_sd_detect,
->  	.suspend = NULL,
->  	.resume = NULL,
-> -	.power_restore = mmc_sd_power_restore,
->  	.alive = mmc_sd_alive,
->  };
->
-> @@ -1121,7 +1108,6 @@ static const struct mmc_bus_ops mmc_sd_ops_unsafe =
-> {
->  	.detect = mmc_sd_detect,
->  	.suspend = mmc_sd_suspend,
->  	.resume = mmc_sd_resume,
-> -	.power_restore = mmc_sd_power_restore,
->  	.alive = mmc_sd_alive,
->  };
->
-> --
-> 1.7.10
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+On 3/6/2013 9:45 PM, Matt Porter wrote:
 
+> This series adds DMA Engine support for AM33xx, which uses
+> an EDMA DMAC. The EDMA DMAC has been previously supported by only
+> a private API implementation (much like the situation with OMAP
+> DMA) found on the DaVinci family of SoCs.
 
--- 
-Maya Erez
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
-of Code Aurora Forum, hosted by The Linux Foundation
+> Matt Porter (9):
+>   ARM: davinci: move private EDMA API to arm/common
+>   ARM: edma: remove unused transfer controller handlers
 
+If you are going to be late in re-spinning the entire series in time for
+v3.10, then I suggest I queue the first two patches through davinci tree
+for v3.10 and then you can work on rest of patches for next (v3.11)
+merge window.
+
+Let me know what you think.
+
+>   ARM: edma: add AM33XX support to the private EDMA API
+>   dmaengine: edma: enable build for AM33XX
+>   dmaengine: edma: Add TI EDMA device tree binding
+>   ARM: dts: add AM33XX EDMA support
+>   spi: omap2-mcspi: convert to dma_request_slave_channel_compat()
+>   spi: omap2-mcspi: add generic DMA request support to the DT binding
+>   ARM: dts: add AM33XX SPI DMA support
+
+Thanks,
+Sekhar
