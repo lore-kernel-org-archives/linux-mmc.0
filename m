@@ -1,64 +1,82 @@
-From: Marc Kleine-Budde <mkl@pengutronix.de>
-Subject: Re: [PATCH 2/2] mmc: mxs-mmc: add non-removeable property
-Date: Thu, 04 Apr 2013 16:25:42 +0200
-Message-ID: <515D8D66.2040402@pengutronix.de>
-References: <1364223751-28253-1-git-send-email-mkl@pengutronix.de> <1364223751-28253-3-git-send-email-mkl@pengutronix.de> <87r4iqpey3.fsf@octavius.laptop.org>
+From: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
+Subject: mmc: core: negotiate ocr during resume
+Date: Thu, 4 Apr 2013 14:35:27 +0000 (UTC)
+Message-ID: <loom.20130404T163258-423@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="----enig2UVDCXFUNAABORXOPTLLM"
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:43049 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761625Ab3DDOZ7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Apr 2013 10:25:59 -0400
-In-Reply-To: <87r4iqpey3.fsf@octavius.laptop.org>
+Received: from plane.gmane.org ([80.91.229.3]:42215 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1761952Ab3DDOfx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 4 Apr 2013 10:35:53 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1UNlGx-0005yN-Jj
+	for linux-mmc@vger.kernel.org; Thu, 04 Apr 2013 16:36:15 +0200
+Received: from 202.122.18.226 ([202.122.18.226])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Apr 2013 16:36:15 +0200
+Received: from prasanna.navaratna by 202.122.18.226 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Apr 2013 16:36:15 +0200
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org, Shawn Guo <shawn.guo@linaro.org>
+To: linux-mmc@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
-------enig2UVDCXFUNAABORXOPTLLM
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: quoted-printable
+>From f43005e05f1e9d93705ec6b3ab98cfa5215c1896 Mon Sep 17 00:00:00 2001
+From: Prasanna NAVARATNA <prasanna.navaratna@broadcom.com>
+Date: Thu, 4 Apr 2013 19:55:19 +0530
+Subject: [PATCH] mmc: core: negotiate ocr during resume
 
-On 04/04/2013 04:07 PM, Chris Ball wrote:
-> Hi,
->=20
-> On Mon, Mar 25 2013, Marc Kleine-Budde wrote:
->> +	host->non_removeable =3D of_property_read_bool(np, "non-removable");=
+Save the card ocr into struct mmc_card when read from sd card and
+negotiate ocr mask during mmc_sd_init_card with host->ocr & card->ocr.
+---
+ drivers/mmc/core/sd.c    |    7 +++++++
+ include/linux/mmc/card.h |    1 +
+ 2 files changed, 8 insertions(+), 0 deletions(-)
 
->> +	if (host->non_removeable)
->> +		mmc->caps |=3D MMC_CAP_NONREMOVABLE;
->=20
-> The correct spelling is "non_removable", as used in the DT property.
->=20
-> Thanks,
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 9e645e1..8ee27e8 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -910,6 +910,10 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 
+ocr,
+ 	BUG_ON(!host);
+ 	WARN_ON(!host->claimed);
+ 
++	/* Negotiate OCR with oldcard->ocr */
++	if (oldcard)
++		ocr &= oldcard->ocr;
++
+ 	err = mmc_sd_get_cid(host, ocr, cid, &rocr);
+ 	if (err)
+ 		return err;
+@@ -1185,6 +1189,9 @@ int mmc_attach_sd(struct mmc_host *host)
+ 		ocr &= ~MMC_VDD_165_195;
+ 	}
+ 
++	/* Save the card OCR */
++	host->card->ocr = ocr;
++
+ 	host->ocr = mmc_select_voltage(host, ocr);
+ 
+ 	/*
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index f31725b..1bbec2f 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -273,6 +273,7 @@ struct mmc_card {
+ 	u32			raw_cid[4];	/* raw card CID */
+ 	u32			raw_csd[4];	/* raw card CSD */
+ 	u32			raw_scr[2];	/* raw card SCR */
++	u32			ocr;		/* card OCR */
+ 	struct mmc_cid		cid;		/* card identification */
+ 	struct mmc_csd		csd;		/* card specific */
+ 	struct mmc_ext_csd	ext_csd;	/* mmc v4 extended card 
+specific */
+-- 
+1.7.6
 
-Will fix.
 
-Marc
-
---=20
-Pengutronix e.K.                  | Marc Kleine-Budde           |
-Industrial Linux Solutions        | Phone: +49-231-2826-924     |
-Vertretung West/Dortmund          | Fax:   +49-5121-206917-5555 |
-Amtsgericht Hildesheim, HRA 2686  | http://www.pengutronix.de   |
-
-
-------enig2UVDCXFUNAABORXOPTLLM
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlFdjXAACgkQjTAFq1RaXHPQKwCfTEhnW4BzuDb8WDsSa8EkUf5y
-OQ0An0Z8ROUCxJE/pG/qSdI/o41rXVHb
-=Xy1Y
------END PGP SIGNATURE-----
-
-------enig2UVDCXFUNAABORXOPTLLM--
