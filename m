@@ -1,38 +1,46 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: dw-mmc: control the power-enable register
-Date: Thu, 04 Apr 2013 10:09:35 -0400
-Message-ID: <87k3oipeu8.fsf@octavius.laptop.org>
-References: <5151963E.2020101@samsung.com> <51530665.1040103@imgtec.com>
-	<004301ce30f7$dc00d320$94027960$%jun@samsung.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-spear: add CONFIG_PM_SLEEP to suspend/resume functions
+Date: Thu, 04 Apr 2013 10:14:15 -0400
+Message-ID: <87fvz6pemg.fsf@octavius.laptop.org>
+References: <003301ce2c4b$d2864fb0$7792ef10$%han@samsung.com>
+	<003401ce2c4c$26048490$720d8db0$%han@samsung.com>
+	<CAOh2x=me7M+pMKQ4O+1BXubfjy4Gq1Pz4EG7-d9nwHoF-vgdzw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35240 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:41837 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1761256Ab3DDOJk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 4 Apr 2013 10:09:40 -0400
-In-Reply-To: <004301ce30f7$dc00d320$94027960$%jun@samsung.com> (Seungwon
-	Jeon's message of "Thu, 04 Apr 2013 14:47:14 +0900")
+	id S1761529Ab3DDOOU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 4 Apr 2013 10:14:20 -0400
+In-Reply-To: <CAOh2x=me7M+pMKQ4O+1BXubfjy4Gq1Pz4EG7-d9nwHoF-vgdzw@mail.gmail.com>
+	(Viresh Kumar's message of "Fri, 29 Mar 2013 12:48:40 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'James Hogan' <james.hogan@imgtec.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, 'Kyungmin Park' <kyungmin.park@samsung.com>, 'Will Newton' <will.newton@gmail.com>
+To: Viresh Kumar <viresh.kumar@linaro.org>
+Cc: Jingoo Han <jg1.han@samsung.com>, linux-mmc@vger.kernel.org
 
 Hi,
 
-On Thu, Apr 04 2013, Seungwon Jeon wrote:
-> On Wednesday, March 27, 2013, James Hogan wrote:
->> On 26/03/13 12:36, Jaehoon Chung wrote:
->> > When card is power-on/off, need to control the power-enable register.
->> >
->> > Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> > Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->> 
->> Reviewed-by: James Hogan <james.hogan@imgtec.com>
-> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+On Fri, Mar 29 2013, Viresh Kumar wrote:
+> On Fri, Mar 29, 2013 at 12:38 PM, Jingoo Han <jg1.han@samsung.com> wrote:
+>> Add CONFIG_PM_SLEEP to suspend/resume functions to fix the following
+>> build warning when CONFIG_PM_SLEEP is not selected. This is because
+>> sleep PM callbacks defined by SIMPLE_DEV_PM_OPS are only used when
+>> the CONFIG_PM_SLEEP is enabled.
+>>
+>> drivers/mmc/host/sdhci-spear.c:295:12: warning: 'sdhci_suspend'
+>> defined but not used [-Wunused-function]
+>> drivers/mmc/host/sdhci-spear.c:308:12: warning: 'sdhci_resume'
+>> defined but not used [-Wunused-function]
+>>
+>> Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+>> ---
+>>  drivers/mmc/host/sdhci-spear.c |    2 +-
+>>  1 files changed, 1 insertions(+), 1 deletions(-)
+>
+> Acked-by: Viresh Kumar <viresh.kumar@linaro.org>
 
-Thanks, pushed to mmc-next for 3.10 after changing "dw-mmc" to
-"dw_mmc" in the commit subject line.
+Thanks, pushed to mmc-next for 3.10.
 
 - Chris.
 -- 
