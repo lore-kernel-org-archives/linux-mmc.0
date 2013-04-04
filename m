@@ -1,37 +1,33 @@
-From: Sergey Yanovich <ynvich@gmail.com>
-Subject: Re: [PATCH v2] wait while adding MMC host to ensure root mounts
-Date: Thu, 04 Apr 2013 16:32:47 +0400
-Message-ID: <1365078767.9806.34.camel@host5.omatika.ru>
-References: <1363223183-3772-1-git-send-email-ynvich@gmail.com>
-	   <1363224194-7366-1-git-send-email-ynvich@gmail.com>
-	   <87620jmkoe.fsf@octavius.laptop.org>
-	   <CAPDyKFp27MUOjhydLXf92vN3cua=XcX4oTJnMGfOJPpBhtwM8Q@mail.gmail.com>
-	   <87ppylf429.fsf@octavius.laptop.org> <515ADEDE.3050707@intel.com>
-	  <1364912689.3399.7.camel@host5.opentask.org> <515D1F4E.1080306@intel.com>
-	 <1365073152.9806.26.camel@host5.omatika.ru> <515D6568.7000702@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <515D6568.7000702@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <linkinjeon@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH 0/2] sdhci-acpi initialization performance regression
+Date: Thu,  4 Apr 2013 16:41:04 +0300
+Message-ID: <1365082866-28404-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:48115 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1760316Ab3DDNgD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 4 Apr 2013 09:36:03 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Namjae Jeon <linkinjeon@gmail.com>, Sergey Yanovich <ynvich@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-On Thu, 2013-04-04 at 14:35 +0300, Adrian Hunter wrote:
-> On 04/04/13 13:59, Sergey Yanovich wrote:
-> > On Thu, 2013-04-04 at 09:35 +0300, Adrian Hunter wrote:
-> >> No,  I am booting from eMMC.
-> > 
-> > Well, in this case you should be aware, that your system is not
-> > concurrency-safe without the patch. It may or may not boot each time
-> > depending on the large number of factors.
-> 
-> Not true.  You know nothing of my boot time characteristics.
+Hi
 
-Well, I assumed you use linux kernel recent enough to include the patch
-in question. This assumption may well be wrong.
+When I submitted the sdhci-acpi driver, it's initialization performance
+was satisfactory.  Now it is not.  Here are 2 fixes to restore that
+regression.
 
-Could you please elaborate how you avoid a situation which brought up
-this patch ("all probes finish and mmc card is not ready")?
+Adrian Hunter (2):
+      Revert "mmc: core: wait while adding MMC host to ensure root mounts successfully"
+      mmc: core: fix performance regression initializing MMC host controllers
+
+ drivers/mmc/core/core.c       | 4 ++--
+ drivers/mmc/host/sdhci-acpi.c | 2 ++
+ include/linux/mmc/host.h      | 1 +
+ 3 files changed, 5 insertions(+), 2 deletions(-)
+
+
+Regards
+Adrian
+
