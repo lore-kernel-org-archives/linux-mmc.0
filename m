@@ -1,50 +1,34 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 1/2] mmc: dw_mmc: Check return value of regulator_enable
-Date: Thu, 04 Apr 2013 10:18:52 -0400
-Message-ID: <87bo9upeer.fsf@octavius.laptop.org>
-References: <1365054911-19928-1-git-send-email-sachin.kamat@linaro.org>
-	<004701ce30fb$353ce1b0$9fb6a510$%jun@samsung.com>
+Subject: Re: [PATCH v1] mmc: card: Adding support for sanitize in eMMC 4.5
+Date: Thu, 04 Apr 2013 10:20:54 -0400
+Message-ID: <877gkipebd.fsf@octavius.laptop.org>
+References: <1361705927-10524-1-git-send-email-ygardi@codeaurora.org>
+	<26E7A31274623843B0E8CF86148BFE32B02F5779@NTXAVZMBX04.azit.micron.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:33086 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1761161Ab3DDOS5 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Apr 2013 10:18:57 -0400
-In-Reply-To: <004701ce30fb$353ce1b0$9fb6a510$%jun@samsung.com> (Seungwon
-	Jeon's message of "Thu, 04 Apr 2013 15:11:12 +0900")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <26E7A31274623843B0E8CF86148BFE32B02F5779@NTXAVZMBX04.azit.micron.com>
+	(Luca Porzio's message of "Mon, 11 Mar 2013 18:36:55 +0000")
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Luca Porzio (lporzio)" <lporzio@micron.com>
+Cc: Yaniv Gardi <ygardi@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "vgoyal@redhat.com" <vgoyal@redhat.com>, "tj@kernel.org" <tj@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Sachin Kamat' <sachin.kamat@linaro.org>, linux-mmc@vger.kernel.org, patches@linaro.org
 
-Hi,
+Hi Yaniv, Maya,
 
-On Thu, Apr 04 2013, Seungwon Jeon wrote:
-> On Thursday, April 04, 2013, Sachin Kamat wrote:
->> regulator_enable() is declared with __must_check attribute.
->> Hence check the return value to ensure that the regulator is enabled=
-=2E
->> Fixes the following warning:
->> drivers/mmc/host/dw_mmc.c:2461:19: warning:
->> ignoring return value of =E2=80=98regulator_enable=E2=80=99, declare=
-d with attribute
->> warn_unused_result [-Wunused-result]
->> drivers/mmc/host/dw_mmc.c: In function =E2=80=98dw_mci_init_slot=E2=80=
-=99:
->> drivers/mmc/host/dw_mmc.c:1994:19: warning:
->> ignoring return value of =E2=80=98regulator_enable=E2=80=99, declare=
-d with attribute
->> warn_unused_result [-Wunused-result]
->>=20
->> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
->> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+On Mon, Mar 11 2013, Luca Porzio (lporzio) wrote:
+> In case of Sanitize timeout, the eMMC might go in an unclear state.
+> May I suggest to:
+> - issue an HPI before leaving thus bring the eMMC back into safe status
+> - report the 'sanitize not complete error' and let the user decide on 
+>   Whether he wants to re-issue (i.e. continue) the sanitize or just let 
+>   it go.
 
-Thanks, both patches pushed to mmc-next for 3.10.
+Can you respond to this review feedback from Luca, please?
+
+Thanks,
 
 - Chris.
---=20
+-- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
