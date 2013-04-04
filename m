@@ -1,69 +1,56 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2] wait while adding MMC host to ensure root mounts
-Date: Thu, 04 Apr 2013 14:35:04 +0300
-Message-ID: <515D6568.7000702@intel.com>
-References: <1363223183-3772-1-git-send-email-ynvich@gmail.com>   <1363224194-7366-1-git-send-email-ynvich@gmail.com>   <87620jmkoe.fsf@octavius.laptop.org>   <CAPDyKFp27MUOjhydLXf92vN3cua=XcX4oTJnMGfOJPpBhtwM8Q@mail.gmail.com>   <87ppylf429.fsf@octavius.laptop.org> <515ADEDE.3050707@intel.com>  <1364912689.3399.7.camel@host5.opentask.org> <515D1F4E.1080306@intel.com> <1365073152.9806.26.camel@host5.omatika.ru>
+Subject: Re: [PATCH 1/3] mmc: core: Remove power_restore bus_ops for mmc and
+ sd
+Date: Thu, 04 Apr 2013 14:44:17 +0300
+Message-ID: <515D6791.4010803@intel.com>
+References: <1362142035-8403-1-git-send-email-ulf.hansson@stericsson.com> <1362142035-8403-2-git-send-email-ulf.hansson@stericsson.com> <515D3DCC.8000505@intel.com> <CAPDyKFr983eazpW=ky2knujur+RND4m0nL=n1pZmUyzxVSe3uA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:21497 "EHLO mga14.intel.com"
+Received: from mga03.intel.com ([143.182.124.21]:61249 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758322Ab3DDL3v (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 4 Apr 2013 07:29:51 -0400
-In-Reply-To: <1365073152.9806.26.camel@host5.omatika.ru>
+	id S1759112Ab3DDLi6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 4 Apr 2013 07:38:58 -0400
+In-Reply-To: <CAPDyKFr983eazpW=ky2knujur+RND4m0nL=n1pZmUyzxVSe3uA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sergey Yanovich <ynvich@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Walleij <linus.walleij@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Namjae Jeon <linkinjeon@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>
 
-On 04/04/13 13:59, Sergey Yanovich wrote:
-> On Thu, 2013-04-04 at 09:35 +0300, Adrian Hunter wrote:
->> No,  I am booting from eMMC.
-> 
-> Well, in this case you should be aware, that your system is not
-> concurrency-safe without the patch. It may or may not boot each time
-> depending on the large number of factors.
-
-Not true.  You know nothing of my boot time characteristics.
-
-> 
->>> Maybe introduce mmc_is_hosting_root() and do something like:
+On 04/04/13 12:55, Ulf Hansson wrote:
+> On 4 April 2013 10:46, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 01/03/13 14:47, Ulf Hansson wrote:
+>>> From: Ulf Hansson <ulf.hansson@linaro.org>
 >>>
->>> -	mmc_flush_scheduled_work();
->>> +	if (mmc_is_hosting_root())
->>> +		mmc_flush_scheduled_work();
+>>> The mmc_power_restore|save_host API is only used by SDIO func drivers. SDIO
 >>
->> No, I am booting from eMMC.  Perhaps a host capability:
->>
->> 	if (host->caps2 & MMC_CAP2_ROOTWAIT)
->> 		mmc_flush_scheduled_work();
->>
+>> NAK - it is also used by eMMC hardware reset i.e. mmc_do_hw_reset()
 > 
-> Neither my variant, nor yours will help to handle the increased boot
-> time.
-
-Not true.  I would not set MMC_CAP2_ROOTWAIT.
-
-> The root cause is that probing several devices is done sequentially and
-> mmc was reporting end of its probing before it was actually happening.
-
-Not true.  The probe of the MMC Host Controller finishes when the host
-controller is initialized.
-
-> My patch makes mmc report end of probing on-time. The correct way to fix
-> the additional delay, my patch introduces, is to rewrite the probing to
-> be parallel instead of sequential. I understand that it is much easier
-> just to revert the patch.
+> True for eMMC, but for SD card the bus_ops can go away. Thanks for
+> spotting this Adrian!
 > 
-> If the patch is reverted, something like this somewhere in
-> 'init/do_mounts.c' could conditionally activate 'root_wait':
+> Although, I see some serious problems with the mmc_do_hw_reset
+> function - it could cause eMMC data corruption.
 > 
-> 	if (mmc_is_hosting_root())
-> 		root_wait = 1;
+> Issuing hw reset and doing re-initialization by using the mmc
+> bus_ops->power_restore will mean no consideration is taken to "cache
+> ctrl", "bkops" and "power off notify". I think it must.
 > 
-> IMHO this is wrong and my patch is right, but better this than broken
-> mmc boot.
+> So the more proper way instead of calling power_restore, should be to
+> use bus_ops->suspend and bus_ops->resume callbacks from the
+> mmc_do_hw_reset function. Additionally if bus_ops->suspend is done
+> successfully, we should be able to skip the actual hw reset and just
+> do bus_ops->resume.
+> 
+> Do you have any thoughts on this?
 
-No.  Your patch is not right for my platform.
+Certainly the bootloader should leave the eMMC is a safe state including:
+flushing the cache or turning it off (why did it turn on?), stopping
+background operations (why did it start them?), disabling power-off
+notification CMD0? (again why it it enable it?)
+
+Note that according to spec. CMD0 anyway clears the cache so you have lost
+your data anyway.
+
 
