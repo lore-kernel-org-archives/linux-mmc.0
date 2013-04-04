@@ -1,82 +1,63 @@
 From: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
-Subject: mmc: core: negotiate ocr during resume
-Date: Thu, 4 Apr 2013 14:35:27 +0000 (UTC)
-Message-ID: <loom.20130404T163258-423@post.gmane.org>
+Subject: Re: [PATCH] mmc: core: restore ocr and operation voltage in resume
+Date: Thu, 4 Apr 2013 14:43:23 +0000 (UTC)
+Message-ID: <loom.20130404T164129-208@post.gmane.org>
+References: <1361352662-12263-1-git-send-email-kliu5@marvell.com> <loom.20130404T113956-355@post.gmane.org> <CAPDyKFrmH85XdqogaztEsbdaSwuXGJrQihocTkckdZ48A5-=zQ@mail.gmail.com> <loom.20130404T123942-185@post.gmane.org> <CAPDyKFrmo3s=sHn-jx-=bDjH81SDyWUfVGvnnRz6KTpzjO9zwA@mail.gmail.com> <loom.20130404T141613-473@post.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:42215 "EHLO plane.gmane.org"
+Received: from plane.gmane.org ([80.91.229.3]:49291 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1761952Ab3DDOfx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 4 Apr 2013 10:35:53 -0400
+	id S1761898Ab3DDOnj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 4 Apr 2013 10:43:39 -0400
 Received: from list by plane.gmane.org with local (Exim 4.69)
 	(envelope-from <glkm-linux-mmc@m.gmane.org>)
-	id 1UNlGx-0005yN-Jj
-	for linux-mmc@vger.kernel.org; Thu, 04 Apr 2013 16:36:15 +0200
+	id 1UNlOU-0004kQ-Ca
+	for linux-mmc@vger.kernel.org; Thu, 04 Apr 2013 16:44:02 +0200
 Received: from 202.122.18.226 ([202.122.18.226])
         by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Apr 2013 16:36:15 +0200
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Apr 2013 16:44:02 +0200
 Received: from prasanna.navaratna by 202.122.18.226 with local (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Apr 2013 16:36:15 +0200
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Apr 2013 16:44:02 +0200
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 
->From f43005e05f1e9d93705ec6b3ab98cfa5215c1896 Mon Sep 17 00:00:00 2001
-From: Prasanna NAVARATNA <prasanna.navaratna@broadcom.com>
-Date: Thu, 4 Apr 2013 19:55:19 +0530
-Subject: [PATCH] mmc: core: negotiate ocr during resume
+Prasanna NAVARATNA <prasanna.navaratna <at> gmail.com> writes:
 
-Save the card ocr into struct mmc_card when read from sd card and
-negotiate ocr mask during mmc_sd_init_card with host->ocr & card->ocr.
----
- drivers/mmc/core/sd.c    |    7 +++++++
- include/linux/mmc/card.h |    1 +
- 2 files changed, 8 insertions(+), 0 deletions(-)
+> 
+> So you agree the ocr mask must not be reset during suspend.
+> 
+> The patch over here exactly addresses the problem which you stated :-
+> "mmc core should tell the host driver to use the properly negotiated ocr 
+> mask to set the voltage level, both at initialization and at resume"
+> 
+> The patch saves the ocr which is properly negotiated during initialization 
+> time and then restores it back during resume.
+> 
+> Will you please elaborate, what is wrong with this patch? Or are you 
+trying 
+> to tell, this is not the proper way to do the same?
+> 
+> Thanks & Regards,
+> Prasanna NAVARATNA
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo <at> vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 9e645e1..8ee27e8 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -910,6 +910,10 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 
-ocr,
- 	BUG_ON(!host);
- 	WARN_ON(!host->claimed);
- 
-+	/* Negotiate OCR with oldcard->ocr */
-+	if (oldcard)
-+		ocr &= oldcard->ocr;
-+
- 	err = mmc_sd_get_cid(host, ocr, cid, &rocr);
- 	if (err)
- 		return err;
-@@ -1185,6 +1189,9 @@ int mmc_attach_sd(struct mmc_host *host)
- 		ocr &= ~MMC_VDD_165_195;
- 	}
- 
-+	/* Save the card OCR */
-+	host->card->ocr = ocr;
-+
- 	host->ocr = mmc_select_voltage(host, ocr);
- 
- 	/*
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index f31725b..1bbec2f 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -273,6 +273,7 @@ struct mmc_card {
- 	u32			raw_cid[4];	/* raw card CID */
- 	u32			raw_csd[4];	/* raw card CSD */
- 	u32			raw_scr[2];	/* raw card SCR */
-+	u32			ocr;		/* card OCR */
- 	struct mmc_cid		cid;		/* card identification */
- 	struct mmc_csd		csd;		/* card specific */
- 	struct mmc_ext_csd	ext_csd;	/* mmc v4 extended card 
-specific */
--- 
-1.7.6
+Hello,
+
+I have suggested another patch which does the same thing in better way.
+Please refer to the new post "mmc: core: negotiate ocr during resume"
+
+Regards,
+Prasanna NAVARATNA
 
 
