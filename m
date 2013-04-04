@@ -1,48 +1,50 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci-spear: add CONFIG_PM_SLEEP to suspend/resume functions
-Date: Thu, 04 Apr 2013 10:14:15 -0400
-Message-ID: <87fvz6pemg.fsf@octavius.laptop.org>
-References: <003301ce2c4b$d2864fb0$7792ef10$%han@samsung.com>
-	<003401ce2c4c$26048490$720d8db0$%han@samsung.com>
-	<CAOh2x=me7M+pMKQ4O+1BXubfjy4Gq1Pz4EG7-d9nwHoF-vgdzw@mail.gmail.com>
+Subject: Re: [PATCH v2 1/2] mmc: dw_mmc: Check return value of regulator_enable
+Date: Thu, 04 Apr 2013 10:18:52 -0400
+Message-ID: <87bo9upeer.fsf@octavius.laptop.org>
+References: <1365054911-19928-1-git-send-email-sachin.kamat@linaro.org>
+	<004701ce30fb$353ce1b0$9fb6a510$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41837 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:33086 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1761529Ab3DDOOU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 4 Apr 2013 10:14:20 -0400
-In-Reply-To: <CAOh2x=me7M+pMKQ4O+1BXubfjy4Gq1Pz4EG7-d9nwHoF-vgdzw@mail.gmail.com>
-	(Viresh Kumar's message of "Fri, 29 Mar 2013 12:48:40 +0530")
+	id S1761161Ab3DDOS5 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Apr 2013 10:18:57 -0400
+In-Reply-To: <004701ce30fb$353ce1b0$9fb6a510$%jun@samsung.com> (Seungwon
+	Jeon's message of "Thu, 04 Apr 2013 15:11:12 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Viresh Kumar <viresh.kumar@linaro.org>
-Cc: Jingoo Han <jg1.han@samsung.com>, linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Sachin Kamat' <sachin.kamat@linaro.org>, linux-mmc@vger.kernel.org, patches@linaro.org
 
 Hi,
 
-On Fri, Mar 29 2013, Viresh Kumar wrote:
-> On Fri, Mar 29, 2013 at 12:38 PM, Jingoo Han <jg1.han@samsung.com> wrote:
->> Add CONFIG_PM_SLEEP to suspend/resume functions to fix the following
->> build warning when CONFIG_PM_SLEEP is not selected. This is because
->> sleep PM callbacks defined by SIMPLE_DEV_PM_OPS are only used when
->> the CONFIG_PM_SLEEP is enabled.
->>
->> drivers/mmc/host/sdhci-spear.c:295:12: warning: 'sdhci_suspend'
->> defined but not used [-Wunused-function]
->> drivers/mmc/host/sdhci-spear.c:308:12: warning: 'sdhci_resume'
->> defined but not used [-Wunused-function]
->>
->> Signed-off-by: Jingoo Han <jg1.han@samsung.com>
->> ---
->>  drivers/mmc/host/sdhci-spear.c |    2 +-
->>  1 files changed, 1 insertions(+), 1 deletions(-)
->
-> Acked-by: Viresh Kumar <viresh.kumar@linaro.org>
+On Thu, Apr 04 2013, Seungwon Jeon wrote:
+> On Thursday, April 04, 2013, Sachin Kamat wrote:
+>> regulator_enable() is declared with __must_check attribute.
+>> Hence check the return value to ensure that the regulator is enabled=
+=2E
+>> Fixes the following warning:
+>> drivers/mmc/host/dw_mmc.c:2461:19: warning:
+>> ignoring return value of =E2=80=98regulator_enable=E2=80=99, declare=
+d with attribute
+>> warn_unused_result [-Wunused-result]
+>> drivers/mmc/host/dw_mmc.c: In function =E2=80=98dw_mci_init_slot=E2=80=
+=99:
+>> drivers/mmc/host/dw_mmc.c:1994:19: warning:
+>> ignoring return value of =E2=80=98regulator_enable=E2=80=99, declare=
+d with attribute
+>> warn_unused_result [-Wunused-result]
+>>=20
+>> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+>> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
-Thanks, pushed to mmc-next for 3.10.
+Thanks, both patches pushed to mmc-next for 3.10.
 
 - Chris.
--- 
+--=20
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
