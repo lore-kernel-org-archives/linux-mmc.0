@@ -1,54 +1,49 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw-mmc: control the power-enable register
-Date: Fri, 05 Apr 2013 12:27:21 +0900
-Message-ID: <515E4499.2070309@samsung.com>
-References: <5151963E.2020101@samsung.com> <51530665.1040103@imgtec.com>
- <004301ce30f7$dc00d320$94027960$%jun@samsung.com>
- <87k3oipeu8.fsf@octavius.laptop.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
+Subject: [PATCH] mmc: mxs-mmc: Add support for non-removable cards
+Date: Fri,  5 Apr 2013 01:18:38 -0300
+Message-ID: <1365135518-31549-1-git-send-email-aletes.xgr@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:36068 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932130Ab3DED1N (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Apr 2013 23:27:13 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MKR00I2PIX7ZYA0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 05 Apr 2013 12:27:11 +0900 (KST)
-In-reply-to: <87k3oipeu8.fsf@octavius.laptop.org>
+Received: from mail-gh0-f179.google.com ([209.85.160.179]:51581 "EHLO
+	mail-gh0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753488Ab3DEESV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Apr 2013 00:18:21 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, 'James Hogan' <james.hogan@imgtec.com>, linux-mmc@vger.kernel.org, 'Kyungmin Park' <kyungmin.park@samsung.com>, 'Will Newton' <will.newton@gmail.com>
+To: cjb@laptop.org, shawn.guo@linaro.org, marex@denx.de, fabio.estevam@freescale.com, otavio@ossystems.com.br, broonie@opensource.wolfsonmicro.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
 
-Thanks Chris..
+Some boards and card slots doesn't have card detect feature available.
+In that case allow to mark the cards as non-removable, via devicetree.
 
-I will send the patch as "dw_mmc" in future.
+Signed-off-by: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
+---
+ drivers/mmc/host/mxs-mmc.c |    6 ++++++
+ 1 file changed, 6 insertions(+)
 
-Best Regards,
-Jaehoon Chung
-
-On 04/04/2013 11:09 PM, Chris Ball wrote:
-> Hi,
-> 
-> On Thu, Apr 04 2013, Seungwon Jeon wrote:
->> On Wednesday, March 27, 2013, James Hogan wrote:
->>> On 26/03/13 12:36, Jaehoon Chung wrote:
->>>> When card is power-on/off, need to control the power-enable register.
->>>>
->>>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->>>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->>>
->>> Reviewed-by: James Hogan <james.hogan@imgtec.com>
->> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
-> 
-> Thanks, pushed to mmc-next for 3.10 after changing "dw-mmc" to
-> "dw_mmc" in the commit subject line.
-> 
-> - Chris.
-> 
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index 4efe302..7d2cd74 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -95,6 +95,9 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+ 	struct mxs_mmc_host *host = mmc_priv(mmc);
+ 	struct mxs_ssp *ssp = &host->ssp;
+ 
++	if (mmc->caps & MMC_CAP_NONREMOVABLE)
++		return 1;
++
+ 	return !(readl(ssp->base + HW_SSP_STATUS(ssp)) &
+ 		 BM_SSP_STATUS_CARD_DETECT);
+ }
+@@ -691,6 +694,9 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+ 	if (flags & OF_GPIO_ACTIVE_LOW)
+ 		host->wp_inverted = 1;
+ 
++	if (of_find_property(np, "non-removable", NULL))
++		mmc->caps |= MMC_CAP_NONREMOVABLE;
++
+ 	mmc->f_min = 400000;
+ 	mmc->f_max = 288000000;
+ 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+-- 
+1.7.10
 
