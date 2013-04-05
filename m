@@ -1,29 +1,69 @@
 From: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
-Subject: [PATCH] mmc: core: proper ocr negotiation during resume
-Date: Fri, 5 Apr 2013 11:10:17 +0000 (UTC)
-Message-ID: <loom.20130405T130554-311@post.gmane.org>
+Subject: Re: core: negotiate ocr during resume
+Date: Fri, 5 Apr 2013 10:49:58 +0000 (UTC)
+Message-ID: <loom.20130405T124720-793@post.gmane.org>
+References: <CADz5_gKbDh6Q6H=CJf8ZeH_t9gQ4J_L+wtJghVDo7tep2N4qYg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:51458 "EHLO plane.gmane.org"
+Received: from plane.gmane.org ([80.91.229.3]:54739 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1765499Ab3DFTIt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 6 Apr 2013 15:08:49 -0400
+	id S1765928Ab3DFTOi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 6 Apr 2013 15:14:38 -0400
 Received: from list by plane.gmane.org with local (Exim 4.69)
 	(envelope-from <glkm-linux-mmc@m.gmane.org>)
-	id 1UOYQQ-0004aF-6i
-	for linux-mmc@vger.kernel.org; Sat, 06 Apr 2013 21:05:18 +0200
+	id 1UOYVM-0001Yq-3I
+	for linux-mmc@vger.kernel.org; Sat, 06 Apr 2013 21:10:24 +0200
 Received: from 202.122.18.226 ([202.122.18.226])
         by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Sat, 06 Apr 2013 21:05:18 +0200
+        for <linux-mmc@vger.kernel.org>; Sat, 06 Apr 2013 21:10:24 +0200
 Received: from prasanna.navaratna by 202.122.18.226 with local (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Sat, 06 Apr 2013 21:05:18 +0200
+        for <linux-mmc@vger.kernel.org>; Sat, 06 Apr 2013 21:10:24 +0200
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
+
+Kevin Liu <keyuan.liu <at> gmail.com> writes:
+
+Please find my updated patch and comments under _PNN_ below :-
+
+> I think there are several issues here:
+> 1. with this patch the vmmc voltage should still be 3.3v after resume
+> back since the vmmc voltage is updated in set_ios which depend on
+> mmc_select_voltage. But mmc_select_voltage didn't notice your ocr
+> update.
+_PNN_: Yes, good point. I agree. Accordingly updated the patch.
+
+> 2. you didn't handle the special case that the card is changed to a
+> new card during suspended. So the ocr may be different here.
+_PNN_ : This case doesn't holds good because even when new card is inserted 
+druing suspend, cd interrupt is generated and mmc_detect_change will be 
+called and mmc_rescan will be scheduled to begin initialization from the 
+begining, where ocr is freshly read from new card (mmc_attach_***) and my 
+patch will take care to update new ocr in card->ocr.
+Although consider an hypothetical situtaion where within the debounce time 
+of cd, suppose resume gets called, it may fail. But fair enough after 200ms, 
+fresh initialization will begin and card re-inits. So no need to take 
+special consideration here. Don't you agree?
+
+> 3. mmc.c and sdio.c should also be updated besides sd.c.
+> 
+_PNN_ : Thanks for pointing this out. Patch updated.
+
+> I have another old version of this patch attached below for your 
+reference.
+_PNN_ : I do agree with your patch, but i would suggest to consider my below 
+patch rather than yours for following reasons:
+ a. Very simple & less code changes.
+ b. Similar to rca, cid, csa, better to have "ocr" structure member in 
+"struct mmc_card" which is card specific.
+ c. mmc_select_voltage is localised in core.c rather than moving it accross 
+sd.c sdio.c and mmc.c
+ d. ocr field might be helpful in future too. So better to have it rather 
+than "ocr_bak" in struct mmc_host.
 
 >From ad70dbd00db355d1e8ca08e7ad12e73cb41df960 Mon Sep 17 00:00:00 2001
 From: Prasanna NAVARATNA <prasanna.navaratna@broadcom.com>
@@ -113,15 +153,12 @@ specific */
 -- 
 1.7.6
 
-Note :- 
-1. mmc_select_voltage(host, host->card->ocr);
+
+Note : mmc_select_voltage(host, host->card->ocr);
 Here host->card->ocr is directly dereferenced because during resume, we will 
 always have host->card !
 
-2. Similar to rca, cid, csa, better to have "ocr" structure member in 
-"struct mmc_card" which is card specific and hopefully ocr field might be 
-helpful in future too.
-
 Regards,
-Prasanna NAVARATNA
+Prasanna
+
 
