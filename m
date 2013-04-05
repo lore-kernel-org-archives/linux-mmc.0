@@ -1,168 +1,97 @@
-From: Kevin Liu <keyuan.liu@gmail.com>
-Subject: Re: [PATCH 1/3i v6] MMC/SD: Add callback function to detect card
-Date: Fri, 5 Apr 2013 17:11:05 +0800
-Message-ID: <CADz5_g+LkB2nnpORbT83aLq45+KZEBPY1WXbXqdsrocdMg5iAg@mail.gmail.com>
-References: <25B60CDC2F704E4E9D88FFD52780CB4C0BDEC869A3@SC-VEXCH1.marvell.com>
-	<CADz5_gJe8xJH6FD7xwxssmWSZ2w4tvKAnYAexzTtVSyW0ovweQ@mail.gmail.com>
-	<110EED8CC96DFC488B7E717A2027A27C33B2BF@039-SN1MPN1-003.039d.mgd.msft.net>
-	<CADz5_gLJvVmJa_5zAZAD-7cfbneySgH8GmwfDfj+-eT3Y80QQA@mail.gmail.com>
-	<110EED8CC96DFC488B7E717A2027A27C33B361@039-SN1MPN1-003.039d.mgd.msft.net>
-	<CADz5_g+_JTafM4rLL0Qa8yOSCnoGn9R+nJ6JdqKrR7Td82BDzA@mail.gmail.com>
-	<110EED8CC96DFC488B7E717A2027A27C33B46A@039-SN1MPN1-003.039d.mgd.msft.net>
-	<CAPDyKFrHvg6inGahDwz0dsqBbrzJF4p0oW1PEVxSLEq0Mq-s=A@mail.gmail.com>
-	<CADz5_gJiV4R0tkmcX-_oY-m64_ETtcGW5bg8euq_rDHGLuFa=Q@mail.gmail.com>
-	<CAPDyKFpa7KWQPZWP-4Gz4sV6YN4jbs1F9tKc0KXSgUkTz0yCew@mail.gmail.com>
-	<CADz5_gKGtO_WTGu3gU05LxGzweUTYFssGPabWiepXa0k_f_RZw@mail.gmail.com>
-	<CAPDyKFocX5eDHGhercMfOvUsCTpzaByLHRqakUp-xe_7ZF_RXg@mail.gmail.com>
+From: Marc Kleine-Budde <mkl@pengutronix.de>
+Subject: Re: mmc: mxs-mmc: add non-removeable property
+Date: Fri, 05 Apr 2013 14:14:06 +0200
+Message-ID: <515EC00E.5060009@pengutronix.de>
+References: <CAAAP30HvkQNTS1+7QddAV4CZVo=g3vaJGjJNNFu3CCbGDHTqsQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f173.google.com ([209.85.214.173]:36378 "EHLO
-	mail-ob0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751278Ab3DEJLG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Apr 2013 05:11:06 -0400
-Received: by mail-ob0-f173.google.com with SMTP id wn14so2521798obc.32
-        for <linux-mmc@vger.kernel.org>; Fri, 05 Apr 2013 02:11:05 -0700 (PDT)
-In-Reply-To: <CAPDyKFocX5eDHGhercMfOvUsCTpzaByLHRqakUp-xe_7ZF_RXg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============8576662197906746493=="
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAAAP30HvkQNTS1+7QddAV4CZVo=g3vaJGjJNNFu3CCbGDHTqsQ@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Huang Changming-R66093 <r66093@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
 
-2013/4/5 Ulf Hansson <ulf.hansson@linaro.org>:
-> On 25 March 2013 16:27, Kevin Liu <keyuan.liu@gmail.com> wrote:
->> 2013/3/25 Ulf Hansson <ulf.hansson@linaro.org>:
->>> On 22 March 2013 16:27, Kevin Liu <keyuan.liu@gmail.com> wrote:
->>>> 2013/3/22 Ulf Hansson <ulf.hansson@linaro.org>:
->>>>> On 22 March 2013 08:42, Huang Changming-R66093 <r66093@freescale.com> wrote:
->>>>>>
->>>>>> <r66093@freescale.com>:
->>>>>>> >> >> Jerry,
->>>>>>> >> >>
->>>>>>> >> >> Function _mmc_detect_card_removed should only be called when card
->>>>>>> >> >> insert/removal or i/o error occur unless POLLING is used(called
->>>>>>> >> >> once per second). So it should _not_ impact performance much.
->>>>>>> >> > [jerry]
->>>>>>> >> > No, your understanding is wrong.
->>>>>>> >> > Function "_mmc_detect_card_removed " is called to check if our card
->>>>>>> >> > has
->>>>>>> >> been removed when driver run the function "mmc_rescan" every time.
->>>>>>> >> >
->>>>>>> >>
->>>>>>> >> But when will mmc_rescan be called?
->>>>>>> >> Besides boot up, only when card status change it will be called.
->>>>>>> >> So usually it should _not_ be called frequently.
->>>>>>> > [jerry]
->>>>>>> > For poll mode, how to know card status changed?
->>>>>>> > The answer is "mmc_rescan".
->>>>>>> > maybe you could read the last two lines of this function ago.
->>>>>>> >
->>>>>>>
->>>>>>> I mentioned this in my first response "unless POLLING is used(called once
->>>>>>> per second)". I was a bit confused firstly.
->>>>>>> I think slot-gpio is a better solution, with which you don't need the
->>>>>>> every second polling.
->>>>>> [jerry]
->>>>>> Not all Soc has GPIO to do this. our controller has the pin to detect the card status, need the external hardware to support it.
->>>>>> But due to some reasons, some boards don't do this work, so need the poll mode for all boards.
->>>>>>
->>>>>>> >> >> POLLING is poor for performance, why not change to slot-gpio if
->>>>>>> >> >> host is broken for card detect.
->>>>>>> >> > [jerry]
->>>>>>> >> > Some our boards can't support interrupt mode to detect card
->>>>>>> >> insert/removable, so we unify the poll mode.
->>>>>>> >> >
->>>>>>> >>
->>>>>>> >> Not support gpio interrupt?
->>>>>>> >> I think you only don't support sdh host interrupt.
->>>>>>> >
->>>>>>> --
->>>>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>>>>> the body of a message to majordomo@vger.kernel.org More majordomo info at
->>>>>>> http://vger.kernel.org/majordomo-info.html
->>>>>>
->>>>>>
->>>>>
->>>>> A suggestion; the poll time out is 1s today. We could make some more
->>>>> intelligent update to the timeout value so we decrease the number of
->>>>> timeouts to happen. In other words minimize the number of mmc_rescan
->>>>> to be executed.
->>>>>
->>>>> 1. When no card is inserted, use 1 s.
->>>>> 2. When card is inserted, switch to 30 s timeout. The card removal
->>>>> will be detected anyway when a blk err occurs, due to that
->>>>> mmc_detect_card_removed will be called from the block layer at error
->>>>> handling path.
->>>>>
->>>>
->>>> Ulf,
->>>>
->>>> Sounds good! But I have one concern:
->>>> If the card is removed when there is no i/o access. Then the
->>>> mmc_rescan won't run until 30 seconds later (just imagine the worst
->>>> case). If within 30 seconds, the card is inserted again or another
->>>> different card is inserted, then issue may occur.
->>>
->>> True!
->>>
->>> Do you think a timeout of say 10 s could be more more acceptable?
->>>
->>
->> I prefer below solution.
->>
->>>>
->>>> Then I have a suggestion as below:
->>>> 1. keep current code as 1 second in mmc_rescan for polling.
->>>> 2. When an i/o request come, we can cancel current delay work and
->>>> reschedule the delay detect work after 1 second from that point.
->>>> 3. If next i/o request come within 1 second, we can reschedule the
->>>> detect work after 1 second from that point again.
->>>
->>> Well, I actually thought of such a solution as well, but I kind of
->>> dropped it because it felt a bit messy. Although, I guess you are
->>> right, that is probably the most proper way of doing it.
->>>
->>> Giving it some more thoughts, I guess we should utilize the runtime pm
->>> callbacks for the sd card bus_ops somehow. I pushed a skeleton
->>> patchset for this a while ago. If it gets merged of course.
->>>
->>> 1.mmc_rescan could check the runtime status, if active, skip the rescan.
->>> 2. Or, make the runtime supend callback schedule a rescan work.
->>>
->>
->> Good idea!
->> Agree with either of above two. Maybe the second is better. Cancel the
->> rescan work in runtime resume callback while schedule the rescan in
->> runtime suspend.
->> I think above should can handle normal cases.
->> To handle the special case that card is removed during i/o operations,
->> can remove  MMC_CAP2_DETECT_ON_ERR and use MMC_CAP_NEEDS_POLL in
->> mmc_detect_card_removed when error occur as your patch did.
->>
->>>>
->>>> So during continuous i/o operations, there will be no mmc_rescan execution.
->>>> Once i/o operation stopped, the mmc_rescan will be called every 1 second.
->>>> This way can solve above issue.
->>>> How do you think?
->>>>
->>>> Thanks
->>>> Kevin
->>>>
->>>>> Any thoughts?
->>>>>
->>>>> Kind regards
->>>>> Ulf Hansson
->
-> Hi Kevin,
->
-> For reference, I have sent a patch which removes the
-> MMC_CAP2_DETECT_ON_ERR and instead use MMC_CAP_NEEDS_POLL for the same
-> code. I will send another patch for the second part, if the runtime PM
-> patchset gets merged.
->
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--===============8576662197906746493==
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="----enig2DFPMFRDEQNIJOSNAGSHL"
 
-Ulf,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+------enig2DFPMFRDEQNIJOSNAGSHL
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: quoted-printable
 
-I noticed that patch and added my review. Thanks for the reminder.
+On 04/05/2013 02:01 PM, Alexandre Pereira da Silva wrote:
+> I just sent a patch to fix the same thing to the list, without seeing
+> yours first.
+>=20
+> But in the discussion, I learned that I should be checking for
+> broken-cd instead of non-removable.
 
-Kevin
+I'm not subscribed to linux-mmc and on
+http://news.gmane.org/gmane.linux.kernel.mmc I just see Marek's
+Reviewed-by. Can you point me to the discussion?
+
+In fact my board has an eMMC, which is soldered to the board and the
+card detect is not connected...the documentation says:
+
+>   - broken-cd: There is no card detection available; polling must be us=
+ed.
+>   - non-removable: non-removable slot (like eMMC); assume always presen=
+t.
+
+I see no point in using polling if the card is in deed always present.
+
+> Would you like for me to send a separate patch for broken-cd or do you
+> prefer to check on yours when you resubmit?
+
+If your card detect is not connected and the card is removable, you
+should use broken-cd and base you patch on mine.
+
+Marc
+--=20
+Pengutronix e.K.                  | Marc Kleine-Budde           |
+Industrial Linux Solutions        | Phone: +49-231-2826-924     |
+Vertretung West/Dortmund          | Fax:   +49-5121-206917-5555 |
+Amtsgericht Hildesheim, HRA 2686  | http://www.pengutronix.de   |
+
+
+------enig2DFPMFRDEQNIJOSNAGSHL
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlFewBIACgkQjTAFq1RaXHPfyQCbBWECKJ51GfRNkA0DTs26F8Ym
+eakAoIWbIQ84WgPwQLApfEDQPkC3Pyf0
+=gsXK
+-----END PGP SIGNATURE-----
+
+------enig2DFPMFRDEQNIJOSNAGSHL--
+
+
+--===============8576662197906746493==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+linux-arm-kernel mailing list
+linux-arm-kernel@lists.infradead.org
+http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
+--===============8576662197906746493==--
