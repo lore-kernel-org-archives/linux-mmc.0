@@ -1,90 +1,74 @@
-From: Marc Kleine-Budde <mkl@pengutronix.de>
-Subject: Re: mmc: mxs-mmc: add non-removeable property
-Date: Fri, 05 Apr 2013 14:49:22 +0200
-Message-ID: <515EC852.8080404@pengutronix.de>
-References: <CAAAP30HvkQNTS1+7QddAV4CZVo=g3vaJGjJNNFu3CCbGDHTqsQ@mail.gmail.com>
- <515EC00E.5060009@pengutronix.de>
- <CAAAP30GCRsS4JhAy0yP5su3mVm-NNTxtVS0cddxWGVwS3C6gNw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: restore ocr and operation voltage in resume
+Date: Fri, 5 Apr 2013 11:39:26 +0200
+Message-ID: <CAPDyKFpiDOQjpXaZHVQbBj7NAezR=0bmwAmADZ73N6nmSMsF2A@mail.gmail.com>
+References: <1361352662-12263-1-git-send-email-kliu5@marvell.com>
+	<loom.20130404T113956-355@post.gmane.org>
+	<CAPDyKFrmH85XdqogaztEsbdaSwuXGJrQihocTkckdZ48A5-=zQ@mail.gmail.com>
+	<loom.20130404T123942-185@post.gmane.org>
+	<CAPDyKFrmo3s=sHn-jx-=bDjH81SDyWUfVGvnnRz6KTpzjO9zwA@mail.gmail.com>
+	<loom.20130404T141613-473@post.gmane.org>
+	<loom.20130404T164129-208@post.gmane.org>
+	<CAPDyKFp8LEd7qb+afJbvUZFSNuDVL3SXshnEH5cuhSgH8L+drA@mail.gmail.com>
+	<loom.20130405T080017-884@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============5251219450435972301=="
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAAAP30GCRsS4JhAy0yP5su3mVm-NNTxtVS0cddxWGVwS3C6gNw@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:57447 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751130Ab3DEJj1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Apr 2013 05:39:27 -0400
+Received: by mail-vb0-f46.google.com with SMTP id 11so1970381vbe.5
+        for <linux-mmc@vger.kernel.org>; Fri, 05 Apr 2013 02:39:26 -0700 (PDT)
+In-Reply-To: <loom.20130405T080017-884@post.gmane.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
+Cc: linux-mmc@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---===============5251219450435972301==
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="----enig2OKRKIVSAERMMBGNKMMVD"
+On 5 April 2013 08:07, Prasanna NAVARATNA <prasanna.navaratna@gmail.com> wrote:
+> Ulf Hansson <ulf.hansson <at> linaro.org> writes:
+>
+>> "host->ocr" is intended for keeping the negotiated ocr mask. Another
+>> variable is not needed.
+>>
+>> A proper patch would in principle remove the workaround, which means
+>> the reset of the "host->ocr" in mmc_power_off is not done any more.
+>>
+>> Exactly what you need to make this work, is as stated before a bit
+>> more complicated.
+>
+> Hello Ulf,
+>
+> The work around is introduced by yourself :-
+> "At power off, reset OCR mask to be the highest possible voltage
+> supported for the current mmc host.
+>
+> This solves the re-initialization during the power up sequence.
+> The voltage may have been decreased due to the card accepts a lower
+> voltage than the voltage used during the initialization sequence.
+> We need to reset the voltage to by the host highest possible value
+> since according to _specification_ the initialization must always be
+> done at high voltage"
+>
+> So do you think, solution to current issue is to revert this patch? This
+> will not violate the spec as you are mentioning above?
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
-------enig2OKRKIVSAERMMBGNKMMVD
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: quoted-printable
+The solution is not to revert, but to make a proper patch which solves
+the initialization issues and the suspend/resume issues.
 
-On 04/05/2013 02:31 PM, Alexandre Pereira da Silva wrote:
-> On Fri, Apr 5, 2013 at 9:14 AM, Marc Kleine-Budde <mkl@pengutronix.de>
-> wrote:
->> I'm not subscribed to linux-mmc and on
->> http://news.gmane.org/gmane.linux.kernel.mmc I just see Marek's
->> Reviewed-by. Can you point me to the discussion?
->=20
-> http://marc.info/?l=3Dlinux-kernel&m=3D136515344220293&w=3D2
+If you just revert the patch you will break suspend/resume sequence
+for a many SoC I believe.
 
-tnx
-
->> If your card detect is not connected and the card is removable, you
->> should use broken-cd and base you patch on mine.
->=20
-> Ok, I will do that.
-
-I've just posted an updated series.
-
-Marc
---=20
-Pengutronix e.K.                  | Marc Kleine-Budde           |
-Industrial Linux Solutions        | Phone: +49-231-2826-924     |
-Vertretung West/Dortmund          | Fax:   +49-5121-206917-5555 |
-Amtsgericht Hildesheim, HRA 2686  | http://www.pengutronix.de   |
-
-
-------enig2OKRKIVSAERMMBGNKMMVD
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlFeyFoACgkQjTAFq1RaXHO1DgCfXMB6fjpQXriihE0C5dm7Cdim
-bNEAnRBKD99+BUyXB6Tk3Z+aoWW6JONH
-=u/QF
------END PGP SIGNATURE-----
-
-------enig2OKRKIVSAERMMBGNKMMVD--
-
-
---===============5251219450435972301==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============5251219450435972301==--
+> If you agree, i'll push a new patch by reverting this. Else consider another
+> way in my new post "mmc: core: negotiate ocr during resume"
+> This patch will follow the spec and will also negotiate ocr during
+> mmc_resume_host.
+>
+> Thanks,
+> Prasanna NAVARATNA
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
