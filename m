@@ -1,27 +1,27 @@
 From: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
 Subject: Re: core: negotiate ocr during resume
-Date: Fri, 5 Apr 2013 10:37:31 +0000 (UTC)
-Message-ID: <loom.20130405T123659-817@post.gmane.org>
+Date: Fri, 5 Apr 2013 09:44:07 +0000 (UTC)
+Message-ID: <loom.20130405T114335-471@post.gmane.org>
 References: <CADz5_gKbDh6Q6H=CJf8ZeH_t9gQ4J_L+wtJghVDo7tep2N4qYg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:52619 "EHLO plane.gmane.org"
+Received: from plane.gmane.org ([80.91.229.3]:52649 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1765499Ab3DFTLe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 6 Apr 2013 15:11:34 -0400
+	id S1765499Ab3DFTKf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 6 Apr 2013 15:10:35 -0400
 Received: from list by plane.gmane.org with local (Exim 4.69)
 	(envelope-from <glkm-linux-mmc@m.gmane.org>)
-	id 1UOYLf-0000SU-TQ
-	for linux-mmc@vger.kernel.org; Sat, 06 Apr 2013 21:00:24 +0200
+	id 1UOYGK-00043b-IL
+	for linux-mmc@vger.kernel.org; Sat, 06 Apr 2013 20:54:54 +0200
 Received: from 202.122.18.226 ([202.122.18.226])
         by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Sat, 06 Apr 2013 21:00:23 +0200
+        for <linux-mmc@vger.kernel.org>; Sat, 06 Apr 2013 20:54:52 +0200
 Received: from prasanna.navaratna by 202.122.18.226 with local (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Sat, 06 Apr 2013 21:00:23 +0200
+        for <linux-mmc@vger.kernel.org>; Sat, 06 Apr 2013 20:54:52 +0200
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
@@ -156,5 +156,4 @@ always have host->card !
 
 Regards,
 Prasanna
-
 
