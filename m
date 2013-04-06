@@ -1,37 +1,34 @@
-From: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
-Subject: [PATCH] mmc: mxs-mmc: Add broken-cd devicetree property
-Date: Sat,  6 Apr 2013 10:43:48 -0300
-Message-ID: <1365255828-6416-1-git-send-email-aletes.xgr@gmail.com>
+From: Marek Vasut <marex@denx.de>
+Subject: Re: [PATCH] mmc: mxs-mmc: Add broken-cd devicetree property
+Date: Sat, 6 Apr 2013 17:06:54 +0200
+Message-ID: <201304061706.54320.marex@denx.de>
+References: <1365255828-6416-1-git-send-email-aletes.xgr@gmail.com> <51602A0B.6020405@pengutronix.de> <CAAAP30Gmc+aR1AY2Grd_M5LyXUO9szMxoLLA62ROq7=Hzz3ZEQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: Text/Plain;
+  charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: 1365166070-9370-3-git-send-email-mkl@pengutronix.de
+In-Reply-To: <CAAAP30Gmc+aR1AY2Grd_M5LyXUO9szMxoLLA62ROq7=Hzz3ZEQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: cjb@laptop.org, shawn.guo@linaro.org, marex@denx.de, fabio.estevam@freescale.com, otavio@ossystems.com.br, broonie@opensource.wolfsonmicro.com, mkl@pengutronix.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
+To: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
+Cc: Marc Kleine-Budde <mkl@pengutronix.de>, Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, fabio.estevam@freescale.com, Otavio Salvador <otavio@ossystems.com.br>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-In case of broken card detect support, assume the card is non-removable
+Dear Alexandre Pereira da Silva,
 
-Signed-off-by: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
----
+> On Sat, Apr 6, 2013 at 10:58 AM, Marc Kleine-Budde <mkl@pengutronix.de> wrote:
+> > According to the documentation broken card detect is something different
+> > 
+> > than non-removable:
+> > >   - broken-cd: There is no card detection available; polling must be
+> > >   used. - non-removable: non-removable slot (like eMMC); assume always
+> > >   present.
+> > 
+> > But mxs-mmc set MMC_CAP_NEEDS_POLL unconditionally.
+> 
+> I will work on a better way to fix this.
 
-This patch depends on Marc Kleine-Budde series adding support for non-removable.
+NEEDS_POLL looks nice and seems to fit this case.
 
- drivers/mmc/host/mxs-mmc.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index c231881..8418928 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -689,7 +689,8 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 		mmc->caps |= MMC_CAP_4_BIT_DATA;
- 	else if (bus_width == 8)
- 		mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
--	host->non_removable = of_property_read_bool(np, "non-removable");
-+	host->non_removable = of_property_read_bool(np, "non-removable") |
-+		of_property_read_bool(np, "broken-cd");
- 	if (host->non_removable)
- 		mmc->caps |= MMC_CAP_NONREMOVABLE;
- 	host->wp_gpio = of_get_named_gpio_flags(np, "wp-gpios", 0, &flags);
--- 
-1.7.10
+Best regards,
+Marek Vasut
