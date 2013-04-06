@@ -1,29 +1,61 @@
-From: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
+From: Marc Kleine-Budde <mkl@pengutronix.de>
 Subject: Re: [PATCH] mmc: mxs-mmc: Add broken-cd devicetree property
-Date: Sat, 6 Apr 2013 11:19:32 -0300
-Message-ID: <CAAAP30Gmc+aR1AY2Grd_M5LyXUO9szMxoLLA62ROq7=Hzz3ZEQ@mail.gmail.com>
+Date: Sat, 06 Apr 2013 15:58:35 +0200
+Message-ID: <51602A0B.6020405@pengutronix.de>
 References: <1365255828-6416-1-git-send-email-aletes.xgr@gmail.com>
-	<51602A0B.6020405@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f170.google.com ([209.85.214.170]:48943 "EHLO
-	mail-ob0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1422983Ab3DFOTd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 6 Apr 2013 10:19:33 -0400
-In-Reply-To: <51602A0B.6020405@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="----enig2HCNMDXQBCIVHPJXULAEX"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1365255828-6416-1-git-send-email-aletes.xgr@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
+Cc: cjb@laptop.org, shawn.guo@linaro.org, marex@denx.de, fabio.estevam@freescale.com, otavio@ossystems.com.br, broonie@opensource.wolfsonmicro.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Marc Kleine-Budde <mkl@pengutronix.de>
-Cc: Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, =?UTF-8?B?TWFyZWsgVmHFoXV0?= <marex@denx.de>, fabio.estevam@freescale.com, Otavio Salvador <otavio@ossystems.com.br>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
 
-On Sat, Apr 6, 2013 at 10:58 AM, Marc Kleine-Budde <mkl@pengutronix.de> wrote:
-> According to the documentation broken card detect is something different
-> than non-removable:
->
-> >   - broken-cd: There is no card detection available; polling must be used.
-> >   - non-removable: non-removable slot (like eMMC); assume always present.
->
-> But mxs-mmc set MMC_CAP_NEEDS_POLL unconditionally.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+------enig2HCNMDXQBCIVHPJXULAEX
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: quoted-printable
 
-I will work on a better way to fix this.
+On 04/06/2013 03:43 PM, Alexandre Pereira da Silva wrote:
+> In case of broken card detect support, assume the card is non-removable=
+
+
+According to the documentation broken card detect is something different
+than non-removable:
+
+>   - broken-cd: There is no card detection available; polling must be us=
+ed.
+>   - non-removable: non-removable slot (like eMMC); assume always presen=
+t.
+
+But mxs-mmc set MMC_CAP_NEEDS_POLL unconditionally.
+
+http://lxr.free-electrons.com/source/drivers/mmc/host/mxs-mmc.c#L682
+
+Marc
+
+--=20
+Pengutronix e.K.                  | Marc Kleine-Budde           |
+Industrial Linux Solutions        | Phone: +49-231-2826-924     |
+Vertretung West/Dortmund          | Fax:   +49-5121-206917-5555 |
+Amtsgericht Hildesheim, HRA 2686  | http://www.pengutronix.de   |
+
+
+------enig2HCNMDXQBCIVHPJXULAEX
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlFgKg4ACgkQjTAFq1RaXHPIaACfd7jUqxvocgaC4UhYsGtVmKiI
+gf8AnR/GKb2mebHmiyDLAw+DK26FJCzh
+=KrLK
+-----END PGP SIGNATURE-----
+
+------enig2HCNMDXQBCIVHPJXULAEX--
