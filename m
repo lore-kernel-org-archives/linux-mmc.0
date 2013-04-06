@@ -1,12 +1,11 @@
-From: Marc Kleine-Budde <mkl@pengutronix.de>
-Subject: Re: mmc: mxs-mmc: add non-removeable property
-Date: Fri, 05 Apr 2013 14:14:06 +0200
-Message-ID: <515EC00E.5060009@pengutronix.de>
-References: <CAAAP30HvkQNTS1+7QddAV4CZVo=g3vaJGjJNNFu3CCbGDHTqsQ@mail.gmail.com>
+From: Alexander Shiyan <shc_work@mail.ru>
+Subject: [PATCH] mmc: mxcmmc: Fix bug when card is present during boot
+Date: Sat,  6 Apr 2013 10:13:31 +0400
+Message-ID: <1365228811-10928-1-git-send-email-shc_work@mail.ru>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============8576662197906746493=="
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAAAP30HvkQNTS1+7QddAV4CZVo=g3vaJGjJNNFu3CCbGDHTqsQ@mail.gmail.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -16,82 +15,86 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+To: linux-mmc@vger.kernel.org
+Cc: Alexander Shiyan <shc_work@mail.ru>, Arnd Bergmann <arnd@arndb.de>, Sascha Hauer <s.hauer@pengutronix.de>, Javier Martin <javier.martin@vista-silicon.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---===============8576662197906746493==
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="----enig2DFPMFRDEQNIJOSNAGSHL"
+This patch fixes bug when card is present during boot.
+Bug was introduced due commit "mmc: mxcmmc: fix bug that may block a
+data transfer forever". When a card is present "mxcmci_setup_data"
+function is executed, but the timer is not initialized.
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
-------enig2DFPMFRDEQNIJOSNAGSHL
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: quoted-printable
+...
+i.MX SDHC driver
+mmc0: SD Status: Invalid Allocation Unit size.
+mmc0: new SD card at address b368
+mmcblk0: mmc0:b368 SDC   1.91 GiB
+------------[ cut here ]------------
+kernel BUG at kernel/timer.c:729!
+Internal error: Oops - BUG: 0 [#1] PREEMPT ARM
+CPU: 0    Not tainted  (3.9.0-rc5-next-20130404 #2)
+PC is at mod_timer+0x168/0x198
+LR is at mxcmci_request+0x21c/0x328
+pc : [<c0026d28>]    lr : [<c0261928>]    psr: 60000013
+sp : c7933df0  ip : 00001000  fp : 00000001
+r10: c0012edc  r9 : c7920400  r8 : c014f92c
+r7 : c7920600  r6 : ffff8f8f  r5 : ffff8f8f  r4 : c79206a4
+r3 : 00000000  r2 : 00000000  r1 : ffff8f8f  r0 : c79206a4
+Flags: nZCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment kernel
+Control: 0005317f  Table: a0004000  DAC: 00000017
+Process mmcqd/0 (pid: 450, stack limit = 0xc79321b8)
+Stack: (0xc7933df0 to 0xc7934000)
+3de0:                                     c78260f8 00000000 00000001 c78dcce0
+3e00: c78dcc2c 00000200 c7920600 c014f92c c0012edc c0261928 00000003 00000000
+3e20: 00000000 c7874210 c78dc800 00000002 c790f720 c78dcc2c c7920400 00000001
+3e40: c78dcd20 00000001 c7933ee4 00000000 c78dcc2c c02504f0 00000000 c7920400
+3e60: 00000000 c0251588 c7a60138 c7920000 c78dcc2c c78dcc04 c78dcc00 00000000
+3e80: 00000000 c025de34 c78dcc04 c7a60138 c78dcc28 c78dcc04 c7920000 c7a60138
+3ea0: c7920400 c78dcc00 c78dcc2c c025ed3c c7933f44 00000000 c78dcc00 00000000
+3ec0: 00000000 c0037af0 00000000 c7932000 40000013 c0250d50 c7933f6c 00000000
+3ee0: c78cb6c0 c003f6b8 00100100 c7920000 c7a60138 c78dcc04 c78dcc00 120d0000
+3f00: c7920400 c78dcc00 c78dcc0c c025f918 c7847d34 00000001 c7847d40 00000000
+3f20: c7933f54 c78dcc04 c7a60138 c7932000 00000000 120d0000 c7996b80 00000001
+3f40: c78dcc0c c0260410 00000000 c7847d2c 00000000 c78dcc04 c0260358 00000000
+3f60: 00000000 00000000 00000000 c0037094 00000000 00000000 2d656761 c78dcc04
+3f80: 00000000 c7933f84 c7933f84 00000000 c7933f90 c7933f90 c7933fac c7847d2c
+3fa0: c0036ff0 00000000 00000000 c000e210 00000000 00000000 00000000 00000000
+3fc0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+3fe0: 00000000 00000000 00000000 00000000 00000013 00000000 7ffff1e5 ef7b8ff9
+[<c0026d28>] (mod_timer+0x168/0x198) from [<c0261928>] (mxcmci_request+0x21c/0x328)
+[<c0261928>] (mxcmci_request+0x21c/0x328) from [<c02504f0>] (mmc_start_request+0xc4/0xe8)
+[<c02504f0>] (mmc_start_request+0xc4/0xe8) from [<c0251588>] (mmc_start_req+0x2d0/0x380)
+[<c0251588>] (mmc_start_req+0x2d0/0x380) from [<c025ed3c>] (mmc_blk_issue_rw_rq+0xb4/0xaf0)
+[<c025ed3c>] (mmc_blk_issue_rw_rq+0xb4/0xaf0) from [<c025f918>] (mmc_blk_issue_rq+0x1a0/0x4ec)
+[<c025f918>] (mmc_blk_issue_rq+0x1a0/0x4ec) from [<c0260410>] (mmc_queue_thread+0xb8/0x150)
+[<c0260410>] (mmc_queue_thread+0xb8/0x150) from [<c0037094>] (kthread+0xa4/0xb0)
+[<c0037094>] (kthread+0xa4/0xb0) from [<c000e210>] (ret_from_fork+0x14/0x24)
+Code: e0065015 eaffffb3 e3a0a001 eaffffea (e7f001f2)
+---[ end trace 29f2f8ea54d9d99e ]---
 
-On 04/05/2013 02:01 PM, Alexandre Pereira da Silva wrote:
-> I just sent a patch to fix the same thing to the list, without seeing
-> yours first.
->=20
-> But in the discussion, I learned that I should be checking for
-> broken-cd instead of non-removable.
+Signed-off-by: Alexander Shiyan <shc_work@mail.ru>
+---
+ drivers/mmc/host/mxcmmc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-I'm not subscribed to linux-mmc and on
-http://news.gmane.org/gmane.linux.kernel.mmc I just see Marek's
-Reviewed-by. Can you point me to the discussion?
-
-In fact my board has an eMMC, which is soldered to the board and the
-card detect is not connected...the documentation says:
-
->   - broken-cd: There is no card detection available; polling must be us=
-ed.
->   - non-removable: non-removable slot (like eMMC); assume always presen=
-t.
-
-I see no point in using polling if the card is in deed always present.
-
-> Would you like for me to send a separate patch for broken-cd or do you
-> prefer to check on yours when you resubmit?
-
-If your card detect is not connected and the card is removable, you
-should use broken-cd and base you patch on mine.
-
-Marc
---=20
-Pengutronix e.K.                  | Marc Kleine-Budde           |
-Industrial Linux Solutions        | Phone: +49-231-2826-924     |
-Vertretung West/Dortmund          | Fax:   +49-5121-206917-5555 |
-Amtsgericht Hildesheim, HRA 2686  | http://www.pengutronix.de   |
-
-
-------enig2DFPMFRDEQNIJOSNAGSHL
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlFewBIACgkQjTAFq1RaXHPfyQCbBWECKJ51GfRNkA0DTs26F8Ym
-eakAoIWbIQ84WgPwQLApfEDQPkC3Pyf0
-=gsXK
------END PGP SIGNATURE-----
-
-------enig2DFPMFRDEQNIJOSNAGSHL--
-
-
---===============8576662197906746493==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============8576662197906746493==--
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index a72936e..28e527e 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -1052,12 +1052,12 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 			goto out_free_irq;
+ 	}
+ 
+-	mmc_add_host(mmc);
+-
+ 	init_timer(&host->watchdog);
+ 	host->watchdog.function = &mxcmci_watchdog;
+ 	host->watchdog.data = (unsigned long)mmc;
+ 
++	mmc_add_host(mmc);
++
+ 	return 0;
+ 
+ out_free_irq:
+-- 
+1.8.1.5
