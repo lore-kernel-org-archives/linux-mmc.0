@@ -1,41 +1,52 @@
 From: Haijun Zhang <haijun.zhang@freescale.com>
-Subject: [PATCH] mmc:host eSDHC:  Remove duplicate code of enable_dma
-Date: Sun, 7 Apr 2013 15:30:17 +0800
-Message-ID: <1365319817-27237-1-git-send-email-haijun.zhang@freescale.com>
+Subject: [PATCH] mmc:block Add Fixup of BROKEN CMD23 for SANDISK card
+Date: Sun, 7 Apr 2013 15:36:32 +0800
+Message-ID: <1365320192-27620-1-git-send-email-haijun.zhang@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe005.messaging.microsoft.com ([216.32.180.31]:26126
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1161571Ab3DGIFz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Apr 2013 04:05:55 -0400
+Received: from mail-db8lp0189.outbound.messaging.microsoft.com ([213.199.154.189]:9431
+	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932916Ab3DGIMI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Apr 2013 04:12:08 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Haijun Zhang <haijun.zhang@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: Haijun Zhang <haijun.zhang@freescale.com>, Haijun Zhang <Haijun.Zhang@freescale.com>, Anton Vorontsov <cbouatmailru@gmail.com>
 
-Remove duplicate code "enable_dma()" in platform_resume.
-Enable_dma was invoked already in sdhci_resume_host
-before ops->platform_resume was executed
+Some sandisk card can't support CMD23, cmd timeout will generate.
+SO add FIX-UP for two type of these Sandisk cards.
+"SDMB-32" and "SDM032"
 
-Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+Error log:
+mmcblk0: timed out sending SET_BLOCK_COUNT command, card status 0x400900
+mmcblk0: timed out sending SET_BLOCK_COUNT command, card status 0x400900
+mmcblk0: timed out sending SET_BLOCK_COUNT command, card status 0x400900
+end_request: I/O error, dev mmcblk0, sector 0
+Buffer I/O error on device mmcblk0, logical block 0
+mmcblk0: timed out sending SET_BLOCK_COUNT command, card status 0x400900
+
+Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
 CC: Anton Vorontsov <cbouatmailru@gmail.com>
 ---
- drivers/mmc/host/sdhci-of-esdhc.c |    1 -
- 1 files changed, 0 insertions(+), 1 deletions(-)
+ drivers/mmc/card/block.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 5e68adc..da3fb7b 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -212,7 +212,6 @@ static void esdhc_of_suspend(struct sdhci_host *host)
- 
- static void esdhc_of_resume(struct sdhci_host *host)
- {
--	esdhc_of_enable_dma(host);
- 	sdhci_be32bs_writel(host, esdhc_proctl, SDHCI_HOST_CONTROL);
- }
- #endif
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index e12a03c..fb378e0 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2264,6 +2264,10 @@ static const struct mmc_fixup blk_fixups[] =
+ 	 *
+ 	 * N.B. This doesn't affect SD cards.
+ 	 */
++	MMC_FIXUP("SDMB-32", CID_MANFID_SANDISK, CID_OEMID_ANY, add_quirk_mmc,
++		MMC_QUIRK_BLK_NO_CMD23),
++	MMC_FIXUP("SDM032", CID_MANFID_SANDISK, CID_OEMID_ANY, add_quirk_mmc,
++		MMC_QUIRK_BLK_NO_CMD23),
+ 	MMC_FIXUP("MMC08G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_mmc,
+ 		  MMC_QUIRK_BLK_NO_CMD23),
+ 	MMC_FIXUP("MMC16G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_mmc,
 -- 
 1.7.0.4
 
