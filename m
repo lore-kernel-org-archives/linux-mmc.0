@@ -1,111 +1,99 @@
-From: =?utf-8?B?Ik3DpW5zc29uLCBCasO2cm4i?= <Bjorn.Mansson@sonymobile.com>
-Subject: [PATCH] mmc: Adding (more) ftrace event logging to the mmc layer
-Date: Mon, 8 Apr 2013 10:09:14 +0200
-Message-ID: <9A742367D258D34A9753780E2AE6B8BDBDD51E46FD@SELDMBX04.corpusers.net>
-References: <CADz5_g+V-th0Vpyo72sOOCKUBsZbT2VQCkAXrVFfJBEDbDfF_w@mail.gmail.com>
- <loom.20130408T082911-988@post.gmane.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V3 2/2] mmc: core: fix performance regression initializing
+ MMC host controllers
+Date: Mon, 8 Apr 2013 11:41:09 +0200
+Message-ID: <CAPDyKFqMjZ_b+YapO60z=3eaKQ4ggdK-7CHfiqWg=d+WVFa94Q@mail.gmail.com>
+References: <1365082866-28404-1-git-send-email-adrian.hunter@intel.com>
+	<1365082866-28404-3-git-send-email-adrian.hunter@intel.com>
+	<CAPDyKFry9CUmguXw0u4Vxa6YXixF-vVzGrvT_MorFjg=1wS+pA@mail.gmail.com>
+	<515E7CB2.9020602@intel.com>
+	<CAPDyKFp2gKuJNY-X5obsDZVvj1V=JN2rnyfkpNKB=HZQd+_pJg@mail.gmail.com>
+	<515ED220.5050105@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from seldrel01.sonyericsson.com ([212.209.106.2]:8539 "EHLO
-	seldrel01.sonyericsson.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933171Ab3DHIJR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Apr 2013 04:09:17 -0400
-In-Reply-To: <loom.20130408T082911-988@post.gmane.org>
-Content-Language: en-US
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:43421 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934848Ab3DHJlK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Apr 2013 05:41:10 -0400
+Received: by mail-vc0-f174.google.com with SMTP id kw10so2443798vcb.19
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Apr 2013 02:41:09 -0700 (PDT)
+In-Reply-To: <515ED220.5050105@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>
-Cc: "'cjb@laptop.org'" <cjb@laptop.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Namjae Jeon <linkinjeon@gmail.com>, Sergey Yanovich <ynvich@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>
 
-RnJvbTogQmpvcm4gTWFuc3NvbiA8Ympvcm4ubWFuc3NvbkBzb255bW9iaWxlLmNvbT4NCg0KQWRk
-aW5nIGZ0cmFjZSB0byB0aGUgbW1jIGxheWVyIGZhY2lsaXRhdGVzIGRlYnVnZ2luZywgbWFraW5n
-IGl0IGVhc2llciB0byBkZWJ1ZyBjb21tZW5kIHNlcXVlbmNlcyB3aXRob3V0IHJlYnVpbGRpbmcg
-dGhlIGtlcm5lbC4NCkl0IGlzIGFsc28gcG9zc2libGUgdG8gcGFyc2UgdGhlIGZ0cmFjZSBvdXRw
-dXQgaW50byBWQ0QgZm9ybWF0IGFuZCB2aXN1YWxpemUgaXQgaW4gR1RLV2F2ZS4NCg0KUGF0Y2gg
-aXMgZm9yIHRoZSAzLjcuNSBLZXJuZWwuDQoNCg0KU2lnbmVkLW9mZi1ieTogQmpvcm4gTWFuc3Nv
-biA8Ympvcm4ubWFuc3NvbkBzb255bW9iaWxlLmNvbT4NCkFja2VkLWJ5OiANCiItLS0iDQoNCmRp
-ZmYgLXVwck4gLVggbGludXgtMy43LjUtdmFuaWxsYS9Eb2N1bWVudGF0aW9uL2RvbnRkaWZmIGxp
-bnV4LTMuNy41LXZhbmlsbGEvZHJpdmVycy9tbWMvY29yZS9jb3JlLmMgbGludXgtMy43LjUtcGF0
-Y2hlZC9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYw0KLS0tIGxpbnV4LTMuNy41LXZhbmlsbGEvZHJp
-dmVycy9tbWMvY29yZS9jb3JlLmMJMjAxMy0wMS0yOCAwNTo1MDo1NS4wMDAwMDAwMDAgKzAxMDAN
-CisrKyBsaW51eC0zLjcuNS1wYXRjaGVkL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jCTIwMTMtMDQt
-MDUgMTE6NTQ6MjkuMzA2MjczODA4ICswMjAwDQpAQCAtNDIsNiArNDIsOSBAQA0KICNpbmNsdWRl
-ICJzZF9vcHMuaCINCiAjaW5jbHVkZSAic2Rpb19vcHMuaCINCiANCisjZGVmaW5lIENSRUFURV9U
-UkFDRV9QT0lOVFMNCisjaW5jbHVkZSA8dHJhY2UvZXZlbnRzL21tYy5oPg0KKw0KIC8qDQogICog
-QmFja2dyb3VuZCBvcGVyYXRpb25zIGNhbiB0YWtlIGEgbG9uZyB0aW1lLCBkZXBlbmRpbmcgb24g
-dGhlIGhvdXNla2VlcGluZw0KICAqIG9wZXJhdGlvbnMgdGhlIGNhcmQgaGFzIHRvIHBlcmZvcm0u
-DQpAQCAtMTY1LDYgKzE2OCwxMCBAQCB2b2lkIG1tY19yZXF1ZXN0X2RvbmUoc3RydWN0IG1tY19o
-b3N0ICpoDQogCQkJY21kLT5yZXNwWzBdLCBjbWQtPnJlc3BbMV0sDQogCQkJY21kLT5yZXNwWzJd
-LCBjbWQtPnJlc3BbM10pOw0KIA0KKwkJdHJhY2VfbW1jX3JlcV9kb25lKCBtbWNfaG9zdG5hbWUo
-aG9zdCksIGNtZC0+b3Bjb2RlLCBlcnIsDQorCQkJY21kLT5yZXNwWzBdLCBjbWQtPnJlc3BbMV0s
-DQorCQkJY21kLT5yZXNwWzJdLCBjbWQtPnJlc3BbM10pOw0KKw0KIAkJaWYgKG1ycS0+ZGF0YSkg
-ew0KIAkJCXByX2RlYnVnKCIlczogICAgICVkIGJ5dGVzIHRyYW5zZmVycmVkOiAlZFxuIiwNCiAJ
-CQkJbW1jX2hvc3RuYW1lKGhvc3QpLA0KQEAgLTE5NSw2ICsyMDIsOCBAQCBtbWNfc3RhcnRfcmVx
-dWVzdChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QsDQogCXVuc2lnbmVkIGludCBpLCBzejsNCiAJc3Ry
-dWN0IHNjYXR0ZXJsaXN0ICpzZzsNCiAjZW5kaWYNCisJdW5zaWduZWQgaW50IGJsa3N6ID0gMDsN
-CisJdW5zaWduZWQgaW50IGJsb2NrcyA9IDA7DQogDQogCWlmIChtcnEtPnNiYykgew0KIAkJcHJf
-ZGVidWcoIjwlczogc3RhcnRpbmcgQ01EJXUgYXJnICUwOHggZmxhZ3MgJTA4eD5cbiIsDQpAQCAt
-MjEzLDggKzIyMiwxMyBAQCBtbWNfc3RhcnRfcmVxdWVzdChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3Qs
-DQogCQkJbXJxLT5kYXRhLT5ibG9ja3MsIG1ycS0+ZGF0YS0+ZmxhZ3MsDQogCQkJbXJxLT5kYXRh
-LT50aW1lb3V0X25zIC8gMTAwMDAwMCwNCiAJCQltcnEtPmRhdGEtPnRpbWVvdXRfY2xrcyk7DQor
-CQlibGtzeiA9IG1ycS0+ZGF0YS0+Ymxrc3o7DQorCQlibG9ja3MgPSBtcnEtPmRhdGEtPmJsb2Nr
-czsNCiAJfQ0KIA0KKwl0cmFjZV9tbWNfc3RhcnRfcmVxKCBtbWNfaG9zdG5hbWUoaG9zdCksIG1y
-cS0+Y21kLT5vcGNvZGUsDQorCQkJICAgICBtcnEtPmNtZC0+YXJnLCBtcnEtPmNtZC0+ZmxhZ3Ms
-IGJsa3N6LCBibG9ja3MpOw0KKw0KIAlpZiAobXJxLT5zdG9wKSB7DQogCQlwcl9kZWJ1ZygiJXM6
-ICAgICBDTUQldSBhcmcgJTA4eCBmbGFncyAlMDh4XG4iLA0KIAkJCSBtbWNfaG9zdG5hbWUoaG9z
-dCksIG1ycS0+c3RvcC0+b3Bjb2RlLA0KZGlmZiAtdXByTiAtWCBsaW51eC0zLjcuNS12YW5pbGxh
-L0RvY3VtZW50YXRpb24vZG9udGRpZmYgbGludXgtMy43LjUtdmFuaWxsYS9pbmNsdWRlL3RyYWNl
-L2V2ZW50cy9tbWMuaCBsaW51eC0zLjcuNS1wYXRjaGVkL2luY2x1ZGUvdHJhY2UvZXZlbnRzL21t
-Yy5oDQotLS0gbGludXgtMy43LjUtdmFuaWxsYS9pbmNsdWRlL3RyYWNlL2V2ZW50cy9tbWMuaAkx
-OTcwLTAxLTAxIDAxOjAwOjAwLjAwMDAwMDAwMCArMDEwMA0KKysrIGxpbnV4LTMuNy41LXBhdGNo
-ZWQvaW5jbHVkZS90cmFjZS9ldmVudHMvbW1jLmgJMjAxMy0wNC0wNSAwOTo1MTozMS43NzY2MDgw
-MTMgKzAyMDANCkBAIC0wLDAgKzEsOTMgQEANCisjdW5kZWYgVFJBQ0VfU1lTVEVNDQorI2RlZmlu
-ZSBUUkFDRV9TWVNURU0gbW1jDQorDQorI2lmICFkZWZpbmVkKF9UUkFDRV9NTUNfSCkgfHwgZGVm
-aW5lZChUUkFDRV9IRUFERVJfTVVMVElfUkVBRCkNCisjZGVmaW5lIF9UUkFDRV9NTUNfSA0KKw0K
-KyNpbmNsdWRlIDxsaW51eC90cmFjZXBvaW50Lmg+DQorDQorREVDTEFSRV9FVkVOVF9DTEFTUyhz
-dGFydF9yZXEsDQorCVRQX1BST1RPKGNvbnN0IGNoYXIgKiBob3N0LCB1bnNpZ25lZCBpbnQgY21k
-LA0KKwkgICAgICAgICB1bnNpZ25lZCBpbnQgYXJnLCB1bnNpZ25lZCBpbnQgZmxhZ3MsDQorCQkg
-dW5zaWduZWQgaW50IGJsa3N6LCB1bnNpZ25lZCBpbnQgYmxvY2tzKSwNCisJVFBfQVJHUyhob3N0
-LCBjbWQsIGFyZywgZmxhZ3MsIGJsa3N6LCBibG9ja3MpLA0KKw0KKwlUUF9TVFJVQ1RfX2VudHJ5
-KA0KKwkgICAgX19zdHJpbmcoaG9zdCwgaG9zdCkNCisJICAgIF9fZmllbGQodW5zaWduZWQgaW50
-LCBjbWQgICApDQorCSAgICBfX2ZpZWxkKHVuc2lnbmVkIGludCwgYXJnICkNCisJICAgIF9fZmll
-bGQodW5zaWduZWQgaW50LCBmbGFncyApDQorCSAgICBfX2ZpZWxkKHVuc2lnbmVkIGludCwgYmxr
-c3ogKQ0KKwkgICAgX19maWVsZCh1bnNpZ25lZCBpbnQsIGJsb2NrcyApDQorCSAgICksDQorDQor
-CVRQX2Zhc3RfYXNzaWduKA0KKwkgICAgX19hc3NpZ25fc3RyKGhvc3QsIGhvc3QpOw0KKwkgICAg
-X19lbnRyeS0+Y21kID0gY21kOw0KKwkgICAgX19lbnRyeS0+YXJnID0gYXJnOw0KKwkgICAgX19l
-bnRyeS0+ZmxhZ3MgPSBmbGFnczsNCisJICAgIF9fZW50cnktPmJsa3N6ID0gYmxrc3o7DQorCSAg
-ICBfX2VudHJ5LT5ibG9ja3MgPSBibG9ja3M7DQorCSksDQorDQorCVRQX3ByaW50aygiaG9zdD0l
-cyBDTUQldSBhcmc9JTA4eCBmbGFncz0lMDh4IGJsa3N6PSUwOHggYmxvY2tzPSUwOHgiLA0KKwkg
-ICAgICBfX2dldF9zdHIoaG9zdCksIF9fZW50cnktPmNtZCwNCisJICAgICAgX19lbnRyeS0+YXJn
-LCBfX2VudHJ5LT5mbGFncywNCisJICAgICAgX19lbnRyeS0+Ymxrc3osIF9fZW50cnktPmJsb2Nr
-cykNCispOw0KKw0KK0RFRklORV9FVkVOVChzdGFydF9yZXEsIG1tY19zdGFydF9yZXEsDQorCVRQ
-X1BST1RPKGNvbnN0IGNoYXIgKmhvc3QsIHVuc2lnbmVkIGludCBjbWQsDQorCSAgICAgdW5zaWdu
-ZWQgaW50IGFyZywgdW5zaWduZWQgaW50IGZsYWdzLA0KKwkgICAgIHVuc2lnbmVkIGludCBibGtz
-eiwgdW5zaWduZWQgaW50IGJsb2NrcyksDQorCVRQX0FSR1MoaG9zdCwgY21kLCBhcmcsIGZsYWdz
-LCBibGtzeiwgYmxvY2tzKQ0KKyk7DQorDQorDQorREVDTEFSRV9FVkVOVF9DTEFTUyhyZXFfZG9u
-ZSwNCisJVFBfUFJPVE8oY29uc3QgY2hhciAqaG9zdCwgdW5zaWduZWQgaW50IGNtZCwNCisJCWlu
-dCBlcnIsIHVuc2lnbmVkIGludCByZXNwMSwgDQorCQl1bnNpZ25lZCBpbnQgcmVzcDIsIHVuc2ln
-bmVkIGludCByZXNwMywNCisJCXVuc2lnbmVkIGludCByZXNwNCksDQorCVRQX0FSR1MoaG9zdCwg
-Y21kLCBlcnIsIHJlc3AxLCByZXNwMiwgcmVzcDMsIHJlc3A0KSwNCisNCisJVFBfU1RSVUNUX19l
-bnRyeSgNCisJICAgIF9fc3RyaW5nKGhvc3QsIGhvc3QpDQorCSAgICBfX2ZpZWxkKHVuc2lnbmVk
-IGludCwgY21kICAgKQ0KKwkgICAgX19maWVsZCggICAgICAgICBpbnQsIGVyciApDQorCSAgICBf
-X2ZpZWxkKHVuc2lnbmVkIGludCwgcmVzcDEgKQ0KKwkgICAgX19maWVsZCh1bnNpZ25lZCBpbnQs
-IHJlc3AyICkNCisJICAgIF9fZmllbGQodW5zaWduZWQgaW50LCByZXNwMyApDQorCSAgICBfX2Zp
-ZWxkKHVuc2lnbmVkIGludCwgcmVzcDQgKQ0KKwkgICApLA0KKw0KKwlUUF9mYXN0X2Fzc2lnbigN
-CisJICAgIF9fYXNzaWduX3N0cihob3N0LCBob3N0KTsNCisJICAgIF9fZW50cnktPmNtZCA9IGNt
-ZDsNCisJICAgIF9fZW50cnktPmVyciA9IGVycjsNCisJICAgIF9fZW50cnktPnJlc3AxID0gcmVz
-cDE7DQorCSAgICBfX2VudHJ5LT5yZXNwMiA9IHJlc3AyOw0KKwkgICAgX19lbnRyeS0+cmVzcDMg
-PSByZXNwMzsNCisJICAgIF9fZW50cnktPnJlc3A0ID0gcmVzcDQ7DQorCSksDQorDQorCVRQX3By
-aW50aygiaG9zdD0lcyBDTUQldSBlcnI9JTA4eCByZXNwMT0lMDh4IHJlc3AyPSUwOHggcmVzcDM9
-JTA4eCByZXNwND0lMDh4IiwNCisJCV9fZ2V0X3N0cihob3N0KSwgX19lbnRyeS0+Y21kLA0KKwkJ
-X19lbnRyeS0+ZXJyLCBfX2VudHJ5LT5yZXNwMSwgDQorCQlfX2VudHJ5LT5yZXNwMiwgX19lbnRy
-eS0+cmVzcDMsDQorCQlfX2VudHJ5LT5yZXNwNCApDQorKTsNCisNCitERUZJTkVfRVZFTlQocmVx
-X2RvbmUsIG1tY19yZXFfZG9uZSwNCisJVFBfUFJPVE8oY29uc3QgY2hhciAqaG9zdCwgdW5zaWdu
-ZWQgaW50IGNtZCwNCisJCWludCBlcnIsIHVuc2lnbmVkIGludCByZXNwMSwgDQorCQl1bnNpZ25l
-ZCBpbnQgcmVzcDIsIHVuc2lnbmVkIGludCByZXNwMywNCisJCXVuc2lnbmVkIGludCByZXNwNCks
-DQorCVRQX0FSR1MoaG9zdCwgY21kLCBlcnIsIHJlc3AxLCByZXNwMiwgcmVzcDMsIHJlc3A0KQ0K
-Kyk7DQorDQorDQorI2VuZGlmIC8qIF9UUkFDRV9NTUNfSCAqLw0KKw0KKy8qIFRoaXMgcGFydCBt
-dXN0IGJlIG91dHNpZGUgcHJvdGVjdGlvbiAqLw0KKyNpbmNsdWRlIDx0cmFjZS9kZWZpbmVfdHJh
-Y2UuaD4NCg0KDQoNCg==
+On 5 April 2013 15:31, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Commit fa5501890d8974301042e0202d342a6cbe8609f4 introduced a boot time
+> performance regression by adding mmc_power_up() to mmc_start_host().
+> mmc_power_up() is not necessary to host controller initialization, it is
+> part of card initialization and is performed anyway asynchronously.
+> Please see the original commit for an explanation of the use of
+> mmc_power_up() in mmc_start_host().
+>
+> This patch allows a driver to leave the power up in asynchronous code
+> (as it was before).
+>
+> On my current target platform this reduces driver initialization from:
+>
+> [    1.313220] initcall sdhci_acpi_driver_init+0x0/0x12 returned 0 after 102008 usecs
+>
+> to this:
+>
+> [    1.217209] initcall sdhci_acpi_driver_init+0x0/0x12 returned 0 after 8331 usecs
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>  drivers/mmc/core/core.c       | 3 ++-
+>  drivers/mmc/host/sdhci-acpi.c | 2 ++
+>  include/linux/mmc/host.h      | 1 +
+>  3 files changed, 5 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 3bf1c46..c1893c9 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2416,7 +2416,8 @@ void mmc_start_host(struct mmc_host *host)
+>  {
+>         host->f_init = max(freqs[0], host->f_min);
+>         host->rescan_disable = 0;
+> -       mmc_power_up(host);
+> +       if (!(host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP))
+> +               mmc_power_up(host);
+>         mmc_detect_change(host, 0);
+>  }
+>
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 2592ddd..7bcf74b 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -195,6 +195,8 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>                 host->mmc->pm_caps  |= c->slot->pm_caps;
+>         }
+>
+> +       host->mmc->caps2 |= MMC_CAP2_NO_PRESCAN_POWERUP;
+> +
+>         err = sdhci_add_host(host);
+>         if (err)
+>                 goto err_free;
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 17d7148..8873e83 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -280,6 +280,7 @@ struct mmc_host {
+>  #define MMC_CAP2_PACKED_WR     (1 << 13)       /* Allow packed write */
+>  #define MMC_CAP2_PACKED_CMD    (MMC_CAP2_PACKED_RD | \
+>                                  MMC_CAP2_PACKED_WR)
+> +#define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)  /* Don't power up before scan */
+>
+>         mmc_pm_flag_t           pm_caps;        /* supported pm features */
+>
+> --
+> 1.7.11.7
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
