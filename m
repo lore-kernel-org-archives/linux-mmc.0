@@ -1,114 +1,39 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH] mmc: atmel-mci: pio hang on block errors
-Date: Mon, 8 Apr 2013 18:02:24 +0200
-Message-ID: <15090.1651396$1365448029@news.gmane.org>
-References: <1363771946-8931-1-git-send-email-ludovic.desroches@atmel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1363771946-8931-1-git-send-email-ludovic.desroches@atmel.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org
-Cc: terry@beam.ltd.uk, nicolas.ferre@atmel.com
+From: Anatolij Gustschin <agust@denx.de>
+Subject: [PATCH v3 0/5] mmc: mxcmmc: add mpc512x support
+Date: Mon,  8 Apr 2013 23:28:04 +0200
+Message-ID: <1365456489-13152-1-git-send-email-agust@denx.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-out.m-online.net ([212.18.0.9]:37942 "EHLO
+	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965009Ab3DHV20 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Apr 2013 17:28:26 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: devicetree-discuss@lists.ozlabs.org, Sascha Hauer <s.hauer@pengutronix.de>, Markus Pargmann <mpa@pengutronix.de>, Anatolij Gustschin <agust@denx.de>
 
-Hi Chris,
+The SDHC controller on mpc512x is compatible with i.MX31 SDHC
+controller, the existing MMC host driver can be used on
+mpc512x with some modifications, the patch series extends
+the existing driver. It is based on the following v3 mxcmmc DT
+support patch:
 
-Could you take this fix? If there are no objections of course.
+   https://patchwork.kernel.org/patch/2368631
 
-Regards
+Changes in v3 series are mentioned in each patch
 
-Ludovic
+Anatolij Gustschin (5):
+  mmc: mxcmmc: fix race conditions for host->req and host->data access
+  mmc: mxcmmc: add mpc512x SDHC support
+  mmc: mxcmmc: use slot-gpio API for write-protect detection
+  mmc: mxcmmc: constify mxcmci_devtype
+  mmc: mxcmmc: enable DMA support on mpc512x
 
-On Wed, Mar 20, 2013 at 10:32:26AM +0100, ludovic.desroches@atmel.com wrote:
-> From: Terry Barnaby <terry@beam.ltd.uk>
-> 
-> The driver is doing, by default, multi-block reads. When a block error occurs
-> card/block.c instigates a single block read: "mmcblk0: retrying using single
-> block read".
-> It leaves the sg chain intact and just changes the length attribute for the
-> first sg entry and the overall sg_len parameter. When atmci_read_data_pio is
-> called to read the single block of data it ignores the sg_len and expects to
-> read more than 512 bytes as it sees there are multiple items in the sg list. No
-> more data comes as the controller has only been commanded to get one block.
-> 
-> Signed-off-by: Terry Barnaby <terry@beam.ltd.uk>
-> Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> Cc: stable <stable@vger.kernel.org> # 3.2+
-> ---
->  drivers/mmc/host/atmel-mci.c | 14 ++++++++++----
->  1 file changed, 10 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index 0932024..d98e68e 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -163,6 +163,7 @@ struct atmel_mci {
->  	void __iomem		*regs;
->  
->  	struct scatterlist	*sg;
-> +	unsigned int		sg_len;
->  	unsigned int		pio_offset;
->  
->  	struct atmel_mci_slot	*cur_slot;
-> @@ -751,6 +752,7 @@ static u32 atmci_prepare_data(struct atmel_mci *host, struct mmc_data *data)
->  	data->error = -EINPROGRESS;
->  
->  	host->sg = data->sg;
-> +	host->sg_len = data->sg_len;
->  	host->data = data;
->  	host->data_chan = NULL;
->  
-> @@ -1573,7 +1575,8 @@ static void atmci_read_data_pio(struct atmel_mci *host)
->  			if (offset == sg->length) {
->  				flush_dcache_page(sg_page(sg));
->  				host->sg = sg = sg_next(sg);
-> -				if (!sg)
-> +				host->sg_len--;
-> +				if (!sg || !host->sg_len)
->  					goto done;
->  
->  				offset = 0;
-> @@ -1586,7 +1589,8 @@ static void atmci_read_data_pio(struct atmel_mci *host)
->  
->  			flush_dcache_page(sg_page(sg));
->  			host->sg = sg = sg_next(sg);
-> -			if (!sg)
-> +			host->sg_len--;
-> +			if (!sg || !host->sg_len)
->  				goto done;
->  
->  			offset = 4 - remaining;
-> @@ -1640,7 +1644,8 @@ static void atmci_write_data_pio(struct atmel_mci *host)
->  			nbytes += 4;
->  			if (offset == sg->length) {
->  				host->sg = sg = sg_next(sg);
-> -				if (!sg)
-> +				host->sg_len--;
-> +				if (!sg || !host->sg_len)
->  					goto done;
->  
->  				offset = 0;
-> @@ -1654,7 +1659,8 @@ static void atmci_write_data_pio(struct atmel_mci *host)
->  			nbytes += remaining;
->  
->  			host->sg = sg = sg_next(sg);
-> -			if (!sg) {
-> +			host->sg_len--;
-> +			if (!sg || !host->sg_len) {
->  				atmci_writel(host, ATMCI_TDR, value);
->  				goto done;
->  			}
-> -- 
-> 1.7.11.3
-> 
+ arch/powerpc/boot/dts/mpc5121.dtsi |    2 +
+ drivers/mmc/host/Kconfig           |   10 +-
+ drivers/mmc/host/mxcmmc.c          |  209 ++++++++++++++++++++++++++----------
+ 3 files changed, 159 insertions(+), 62 deletions(-)
+
+-- 
+1.7.5.4
+
