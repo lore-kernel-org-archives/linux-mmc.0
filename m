@@ -1,83 +1,111 @@
-From: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
-Subject: Re: core: negotiate ocr during resume
-Date: Mon, 8 Apr 2013 06:41:35 +0000 (UTC)
-Message-ID: <loom.20130408T082911-988@post.gmane.org>
+From: =?utf-8?B?Ik3DpW5zc29uLCBCasO2cm4i?= <Bjorn.Mansson@sonymobile.com>
+Subject: [PATCH] mmc: Adding (more) ftrace event logging to the mmc layer
+Date: Mon, 8 Apr 2013 10:09:14 +0200
+Message-ID: <9A742367D258D34A9753780E2AE6B8BDBDD51E46FD@SELDMBX04.corpusers.net>
 References: <CADz5_g+V-th0Vpyo72sOOCKUBsZbT2VQCkAXrVFfJBEDbDfF_w@mail.gmail.com>
+ <loom.20130408T082911-988@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:52079 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1762503Ab3DHHDE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 8 Apr 2013 03:03:04 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <glkm-linux-mmc@m.gmane.org>)
-	id 1UP644-0008W8-PD
-	for linux-mmc@vger.kernel.org; Mon, 08 Apr 2013 09:00:31 +0200
-Received: from 202.122.18.226 ([202.122.18.226])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Apr 2013 09:00:28 +0200
-Received: from prasanna.navaratna by 202.122.18.226 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Apr 2013 09:00:28 +0200
+Received: from seldrel01.sonyericsson.com ([212.209.106.2]:8539 "EHLO
+	seldrel01.sonyericsson.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S933171Ab3DHIJR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Apr 2013 04:09:17 -0400
+In-Reply-To: <loom.20130408T082911-988@post.gmane.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>
+Cc: "'cjb@laptop.org'" <cjb@laptop.org>
 
-
-Kevin : you didn't handle the special case that the card is changed to =
-a
-new card during suspended. So the ocr may be different here.
-
-PNN : This case doesn't holds good because even when new card is insert=
-ed
-during suspend, cd interrupt is generated and mmc_detect_change will be
-called and mmc_rescan will be scheduled to begin initialization from th=
-e
-beginning, where ocr is freshly read from new card (mmc_attach_***) and=
- my
-patch will take care to update new ocr in card->ocr.
-Although consider an hypothetical situation where within the debounce t=
-ime
-of cd, suppose resume gets called, it may fail. But fair enough after 2=
-00ms,
-fresh initialization will begin and card re-inits. So no need to take
-special consideration here. Don't you agree?
-
-Kevin : But if the card detect can't wakeup system then the cd interrup=
-t may
-be discarded if it occurred during system suspended. For example, if
-the card detect used slot-gpio and the slot power is off during system
-suspended or card used polling for card detect.
-So there must be a solution to verify whether a same card after system
-resumed. In fact, there have been such method in current code:
-
-in mmc_sd_init_card:
-        if (oldcard) {
-                if (memcmp(cid, oldcard->raw_cid, sizeof(cid)) !=3D 0)
-                        return -ENOENT;
-                card =3D oldcard;
-
-So in my patch, I moved mmc_select_voltage after this verification.
-Please consider this case.
-
-_PNN_ : I personally haven=E2=80=99t seen any system design where card =
-insertion or=20
-removal doesn't generate interrupt to resume the system (I may not have=
- seen=20
-enough variety of systems)
-But suppose assume, mmc_detect_change, for various reasons as you menti=
-oned=20
-above is not called during card insertion or removal.
-Then still =E2=80=9Coldcard=E2=80=9D pointer is valid but old card has =
-been replaced with=20
-new card. Your patch will still consider old ocr saved of old card. Rig=
-ht?
-I didn't understand, how does your patch works and takes care of this=20
-situation? Please elaborate.
-
-Thanks & Regards,
-Prasanna NAVARATNA
-
+RnJvbTogQmpvcm4gTWFuc3NvbiA8Ympvcm4ubWFuc3NvbkBzb255bW9iaWxlLmNvbT4NCg0KQWRk
+aW5nIGZ0cmFjZSB0byB0aGUgbW1jIGxheWVyIGZhY2lsaXRhdGVzIGRlYnVnZ2luZywgbWFraW5n
+IGl0IGVhc2llciB0byBkZWJ1ZyBjb21tZW5kIHNlcXVlbmNlcyB3aXRob3V0IHJlYnVpbGRpbmcg
+dGhlIGtlcm5lbC4NCkl0IGlzIGFsc28gcG9zc2libGUgdG8gcGFyc2UgdGhlIGZ0cmFjZSBvdXRw
+dXQgaW50byBWQ0QgZm9ybWF0IGFuZCB2aXN1YWxpemUgaXQgaW4gR1RLV2F2ZS4NCg0KUGF0Y2gg
+aXMgZm9yIHRoZSAzLjcuNSBLZXJuZWwuDQoNCg0KU2lnbmVkLW9mZi1ieTogQmpvcm4gTWFuc3Nv
+biA8Ympvcm4ubWFuc3NvbkBzb255bW9iaWxlLmNvbT4NCkFja2VkLWJ5OiANCiItLS0iDQoNCmRp
+ZmYgLXVwck4gLVggbGludXgtMy43LjUtdmFuaWxsYS9Eb2N1bWVudGF0aW9uL2RvbnRkaWZmIGxp
+bnV4LTMuNy41LXZhbmlsbGEvZHJpdmVycy9tbWMvY29yZS9jb3JlLmMgbGludXgtMy43LjUtcGF0
+Y2hlZC9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYw0KLS0tIGxpbnV4LTMuNy41LXZhbmlsbGEvZHJp
+dmVycy9tbWMvY29yZS9jb3JlLmMJMjAxMy0wMS0yOCAwNTo1MDo1NS4wMDAwMDAwMDAgKzAxMDAN
+CisrKyBsaW51eC0zLjcuNS1wYXRjaGVkL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jCTIwMTMtMDQt
+MDUgMTE6NTQ6MjkuMzA2MjczODA4ICswMjAwDQpAQCAtNDIsNiArNDIsOSBAQA0KICNpbmNsdWRl
+ICJzZF9vcHMuaCINCiAjaW5jbHVkZSAic2Rpb19vcHMuaCINCiANCisjZGVmaW5lIENSRUFURV9U
+UkFDRV9QT0lOVFMNCisjaW5jbHVkZSA8dHJhY2UvZXZlbnRzL21tYy5oPg0KKw0KIC8qDQogICog
+QmFja2dyb3VuZCBvcGVyYXRpb25zIGNhbiB0YWtlIGEgbG9uZyB0aW1lLCBkZXBlbmRpbmcgb24g
+dGhlIGhvdXNla2VlcGluZw0KICAqIG9wZXJhdGlvbnMgdGhlIGNhcmQgaGFzIHRvIHBlcmZvcm0u
+DQpAQCAtMTY1LDYgKzE2OCwxMCBAQCB2b2lkIG1tY19yZXF1ZXN0X2RvbmUoc3RydWN0IG1tY19o
+b3N0ICpoDQogCQkJY21kLT5yZXNwWzBdLCBjbWQtPnJlc3BbMV0sDQogCQkJY21kLT5yZXNwWzJd
+LCBjbWQtPnJlc3BbM10pOw0KIA0KKwkJdHJhY2VfbW1jX3JlcV9kb25lKCBtbWNfaG9zdG5hbWUo
+aG9zdCksIGNtZC0+b3Bjb2RlLCBlcnIsDQorCQkJY21kLT5yZXNwWzBdLCBjbWQtPnJlc3BbMV0s
+DQorCQkJY21kLT5yZXNwWzJdLCBjbWQtPnJlc3BbM10pOw0KKw0KIAkJaWYgKG1ycS0+ZGF0YSkg
+ew0KIAkJCXByX2RlYnVnKCIlczogICAgICVkIGJ5dGVzIHRyYW5zZmVycmVkOiAlZFxuIiwNCiAJ
+CQkJbW1jX2hvc3RuYW1lKGhvc3QpLA0KQEAgLTE5NSw2ICsyMDIsOCBAQCBtbWNfc3RhcnRfcmVx
+dWVzdChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QsDQogCXVuc2lnbmVkIGludCBpLCBzejsNCiAJc3Ry
+dWN0IHNjYXR0ZXJsaXN0ICpzZzsNCiAjZW5kaWYNCisJdW5zaWduZWQgaW50IGJsa3N6ID0gMDsN
+CisJdW5zaWduZWQgaW50IGJsb2NrcyA9IDA7DQogDQogCWlmIChtcnEtPnNiYykgew0KIAkJcHJf
+ZGVidWcoIjwlczogc3RhcnRpbmcgQ01EJXUgYXJnICUwOHggZmxhZ3MgJTA4eD5cbiIsDQpAQCAt
+MjEzLDggKzIyMiwxMyBAQCBtbWNfc3RhcnRfcmVxdWVzdChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3Qs
+DQogCQkJbXJxLT5kYXRhLT5ibG9ja3MsIG1ycS0+ZGF0YS0+ZmxhZ3MsDQogCQkJbXJxLT5kYXRh
+LT50aW1lb3V0X25zIC8gMTAwMDAwMCwNCiAJCQltcnEtPmRhdGEtPnRpbWVvdXRfY2xrcyk7DQor
+CQlibGtzeiA9IG1ycS0+ZGF0YS0+Ymxrc3o7DQorCQlibG9ja3MgPSBtcnEtPmRhdGEtPmJsb2Nr
+czsNCiAJfQ0KIA0KKwl0cmFjZV9tbWNfc3RhcnRfcmVxKCBtbWNfaG9zdG5hbWUoaG9zdCksIG1y
+cS0+Y21kLT5vcGNvZGUsDQorCQkJICAgICBtcnEtPmNtZC0+YXJnLCBtcnEtPmNtZC0+ZmxhZ3Ms
+IGJsa3N6LCBibG9ja3MpOw0KKw0KIAlpZiAobXJxLT5zdG9wKSB7DQogCQlwcl9kZWJ1ZygiJXM6
+ICAgICBDTUQldSBhcmcgJTA4eCBmbGFncyAlMDh4XG4iLA0KIAkJCSBtbWNfaG9zdG5hbWUoaG9z
+dCksIG1ycS0+c3RvcC0+b3Bjb2RlLA0KZGlmZiAtdXByTiAtWCBsaW51eC0zLjcuNS12YW5pbGxh
+L0RvY3VtZW50YXRpb24vZG9udGRpZmYgbGludXgtMy43LjUtdmFuaWxsYS9pbmNsdWRlL3RyYWNl
+L2V2ZW50cy9tbWMuaCBsaW51eC0zLjcuNS1wYXRjaGVkL2luY2x1ZGUvdHJhY2UvZXZlbnRzL21t
+Yy5oDQotLS0gbGludXgtMy43LjUtdmFuaWxsYS9pbmNsdWRlL3RyYWNlL2V2ZW50cy9tbWMuaAkx
+OTcwLTAxLTAxIDAxOjAwOjAwLjAwMDAwMDAwMCArMDEwMA0KKysrIGxpbnV4LTMuNy41LXBhdGNo
+ZWQvaW5jbHVkZS90cmFjZS9ldmVudHMvbW1jLmgJMjAxMy0wNC0wNSAwOTo1MTozMS43NzY2MDgw
+MTMgKzAyMDANCkBAIC0wLDAgKzEsOTMgQEANCisjdW5kZWYgVFJBQ0VfU1lTVEVNDQorI2RlZmlu
+ZSBUUkFDRV9TWVNURU0gbW1jDQorDQorI2lmICFkZWZpbmVkKF9UUkFDRV9NTUNfSCkgfHwgZGVm
+aW5lZChUUkFDRV9IRUFERVJfTVVMVElfUkVBRCkNCisjZGVmaW5lIF9UUkFDRV9NTUNfSA0KKw0K
+KyNpbmNsdWRlIDxsaW51eC90cmFjZXBvaW50Lmg+DQorDQorREVDTEFSRV9FVkVOVF9DTEFTUyhz
+dGFydF9yZXEsDQorCVRQX1BST1RPKGNvbnN0IGNoYXIgKiBob3N0LCB1bnNpZ25lZCBpbnQgY21k
+LA0KKwkgICAgICAgICB1bnNpZ25lZCBpbnQgYXJnLCB1bnNpZ25lZCBpbnQgZmxhZ3MsDQorCQkg
+dW5zaWduZWQgaW50IGJsa3N6LCB1bnNpZ25lZCBpbnQgYmxvY2tzKSwNCisJVFBfQVJHUyhob3N0
+LCBjbWQsIGFyZywgZmxhZ3MsIGJsa3N6LCBibG9ja3MpLA0KKw0KKwlUUF9TVFJVQ1RfX2VudHJ5
+KA0KKwkgICAgX19zdHJpbmcoaG9zdCwgaG9zdCkNCisJICAgIF9fZmllbGQodW5zaWduZWQgaW50
+LCBjbWQgICApDQorCSAgICBfX2ZpZWxkKHVuc2lnbmVkIGludCwgYXJnICkNCisJICAgIF9fZmll
+bGQodW5zaWduZWQgaW50LCBmbGFncyApDQorCSAgICBfX2ZpZWxkKHVuc2lnbmVkIGludCwgYmxr
+c3ogKQ0KKwkgICAgX19maWVsZCh1bnNpZ25lZCBpbnQsIGJsb2NrcyApDQorCSAgICksDQorDQor
+CVRQX2Zhc3RfYXNzaWduKA0KKwkgICAgX19hc3NpZ25fc3RyKGhvc3QsIGhvc3QpOw0KKwkgICAg
+X19lbnRyeS0+Y21kID0gY21kOw0KKwkgICAgX19lbnRyeS0+YXJnID0gYXJnOw0KKwkgICAgX19l
+bnRyeS0+ZmxhZ3MgPSBmbGFnczsNCisJICAgIF9fZW50cnktPmJsa3N6ID0gYmxrc3o7DQorCSAg
+ICBfX2VudHJ5LT5ibG9ja3MgPSBibG9ja3M7DQorCSksDQorDQorCVRQX3ByaW50aygiaG9zdD0l
+cyBDTUQldSBhcmc9JTA4eCBmbGFncz0lMDh4IGJsa3N6PSUwOHggYmxvY2tzPSUwOHgiLA0KKwkg
+ICAgICBfX2dldF9zdHIoaG9zdCksIF9fZW50cnktPmNtZCwNCisJICAgICAgX19lbnRyeS0+YXJn
+LCBfX2VudHJ5LT5mbGFncywNCisJICAgICAgX19lbnRyeS0+Ymxrc3osIF9fZW50cnktPmJsb2Nr
+cykNCispOw0KKw0KK0RFRklORV9FVkVOVChzdGFydF9yZXEsIG1tY19zdGFydF9yZXEsDQorCVRQ
+X1BST1RPKGNvbnN0IGNoYXIgKmhvc3QsIHVuc2lnbmVkIGludCBjbWQsDQorCSAgICAgdW5zaWdu
+ZWQgaW50IGFyZywgdW5zaWduZWQgaW50IGZsYWdzLA0KKwkgICAgIHVuc2lnbmVkIGludCBibGtz
+eiwgdW5zaWduZWQgaW50IGJsb2NrcyksDQorCVRQX0FSR1MoaG9zdCwgY21kLCBhcmcsIGZsYWdz
+LCBibGtzeiwgYmxvY2tzKQ0KKyk7DQorDQorDQorREVDTEFSRV9FVkVOVF9DTEFTUyhyZXFfZG9u
+ZSwNCisJVFBfUFJPVE8oY29uc3QgY2hhciAqaG9zdCwgdW5zaWduZWQgaW50IGNtZCwNCisJCWlu
+dCBlcnIsIHVuc2lnbmVkIGludCByZXNwMSwgDQorCQl1bnNpZ25lZCBpbnQgcmVzcDIsIHVuc2ln
+bmVkIGludCByZXNwMywNCisJCXVuc2lnbmVkIGludCByZXNwNCksDQorCVRQX0FSR1MoaG9zdCwg
+Y21kLCBlcnIsIHJlc3AxLCByZXNwMiwgcmVzcDMsIHJlc3A0KSwNCisNCisJVFBfU1RSVUNUX19l
+bnRyeSgNCisJICAgIF9fc3RyaW5nKGhvc3QsIGhvc3QpDQorCSAgICBfX2ZpZWxkKHVuc2lnbmVk
+IGludCwgY21kICAgKQ0KKwkgICAgX19maWVsZCggICAgICAgICBpbnQsIGVyciApDQorCSAgICBf
+X2ZpZWxkKHVuc2lnbmVkIGludCwgcmVzcDEgKQ0KKwkgICAgX19maWVsZCh1bnNpZ25lZCBpbnQs
+IHJlc3AyICkNCisJICAgIF9fZmllbGQodW5zaWduZWQgaW50LCByZXNwMyApDQorCSAgICBfX2Zp
+ZWxkKHVuc2lnbmVkIGludCwgcmVzcDQgKQ0KKwkgICApLA0KKw0KKwlUUF9mYXN0X2Fzc2lnbigN
+CisJICAgIF9fYXNzaWduX3N0cihob3N0LCBob3N0KTsNCisJICAgIF9fZW50cnktPmNtZCA9IGNt
+ZDsNCisJICAgIF9fZW50cnktPmVyciA9IGVycjsNCisJICAgIF9fZW50cnktPnJlc3AxID0gcmVz
+cDE7DQorCSAgICBfX2VudHJ5LT5yZXNwMiA9IHJlc3AyOw0KKwkgICAgX19lbnRyeS0+cmVzcDMg
+PSByZXNwMzsNCisJICAgIF9fZW50cnktPnJlc3A0ID0gcmVzcDQ7DQorCSksDQorDQorCVRQX3By
+aW50aygiaG9zdD0lcyBDTUQldSBlcnI9JTA4eCByZXNwMT0lMDh4IHJlc3AyPSUwOHggcmVzcDM9
+JTA4eCByZXNwND0lMDh4IiwNCisJCV9fZ2V0X3N0cihob3N0KSwgX19lbnRyeS0+Y21kLA0KKwkJ
+X19lbnRyeS0+ZXJyLCBfX2VudHJ5LT5yZXNwMSwgDQorCQlfX2VudHJ5LT5yZXNwMiwgX19lbnRy
+eS0+cmVzcDMsDQorCQlfX2VudHJ5LT5yZXNwNCApDQorKTsNCisNCitERUZJTkVfRVZFTlQocmVx
+X2RvbmUsIG1tY19yZXFfZG9uZSwNCisJVFBfUFJPVE8oY29uc3QgY2hhciAqaG9zdCwgdW5zaWdu
+ZWQgaW50IGNtZCwNCisJCWludCBlcnIsIHVuc2lnbmVkIGludCByZXNwMSwgDQorCQl1bnNpZ25l
+ZCBpbnQgcmVzcDIsIHVuc2lnbmVkIGludCByZXNwMywNCisJCXVuc2lnbmVkIGludCByZXNwNCks
+DQorCVRQX0FSR1MoaG9zdCwgY21kLCBlcnIsIHJlc3AxLCByZXNwMiwgcmVzcDMsIHJlc3A0KQ0K
+Kyk7DQorDQorDQorI2VuZGlmIC8qIF9UUkFDRV9NTUNfSCAqLw0KKw0KKy8qIFRoaXMgcGFydCBt
+dXN0IGJlIG91dHNpZGUgcHJvdGVjdGlvbiAqLw0KKyNpbmNsdWRlIDx0cmFjZS9kZWZpbmVfdHJh
+Y2UuaD4NCg0KDQoNCg==
