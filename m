@@ -1,33 +1,31 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH 2/5 V2] mmc: core: call pm_runtime_put_noidle in
- pm_runtime_get_sync failed case
-Date: Mon, 8 Apr 2013 15:48:52 +0300
-Message-ID: <CAK=WgbZUrVCeFhXjBGirJmYehy2MDnWYF8OVjyMTgfx5sK5_zQ@mail.gmail.com>
-References: <1362037031.6212.3.camel@fli24-HP-Compaq-8100-Elite-CMT-PC>
- <1362037455.6212.8.camel@fli24-HP-Compaq-8100-Elite-CMT-PC> <1365384999.31128.6.camel@fli24-HP-Compaq-8100-Elite-CMT-PC>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: atmel-mci: pio hang on block errors
+Date: Mon, 08 Apr 2013 12:07:58 -0400
+Message-ID: <87y5ctm2e9.fsf@octavius.laptop.org>
+References: <1363771946-8931-1-git-send-email-ludovic.desroches@atmel.com>
+	<20130408160224.GC6398@ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1365384999.31128.6.camel@fli24-HP-Compaq-8100-Elite-CMT-PC>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Li Fei <fei.li@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, "ulf.hansson" <ulf.hansson@linaro.org>, "johan.rudholm" <johan.rudholm@stericsson.com>, subhashj <subhashj@codeaurora.org>, "rafael.j.wysocki" <rafael.j.wysocki@intel.com>, "thierry.reding" <thierry.reding@avionic-design.de>, "sachin.kamat" <sachin.kamat@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Rafael J. Wysocki" <rjw@sisk.pl>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chuansheng Liu <chuansheng.liu@intel.com>, "Coelho, Luciano" <coelho@ti.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:60802 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1762742Ab3DHQII (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 8 Apr 2013 12:08:08 -0400
+In-Reply-To: <20130408160224.GC6398@ludovic.desroches@atmel.com> (Ludovic
+	Desroches's message of "Mon, 8 Apr 2013 18:02:24 +0200")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, nicolas.ferre@atmel.com, terry@beam.ltd.uk
 
-On Mon, Apr 8, 2013 at 4:36 AM, Li Fei <fei.li@intel.com> wrote:
-> Even in failed case of pm_runtime_get_sync, the usage_count
-> is incremented. In order to keep the usage_count with correct
-> value and runtime power management to behave correctly, call
-> pm_runtime_put_noidle in such case.
->
-> Signed-off-by Liu Chuansheng <chuansheng.liu@intel.com>
-> Signed-off-by: Li Fei <fei.li@intel.com>
+Hi,
 
-Acked-by: Ohad Ben-Cohen <ohad@wizery.com>
+On Mon, Apr 08 2013, Ludovic Desroches wrote:
+> Could you take this fix? If there are no objections of course.
 
-BTW, Li, could you please move to _noidle in those other places where
-your previous patch was already applied? I think we have at least the
-12xx driver (cc'ing Luca).
+Thanks for the reminder; pushed to mmc-next now.
 
-Thanks!
-Ohad.
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
