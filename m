@@ -1,115 +1,54 @@
-From: Marek Vasut <marex@denx.de>
-Subject: Re: [PATCH RFC] ARM: dts: mxs: leave card detect out of common mmc pins config
-Date: Tue, 9 Apr 2013 12:51:59 +0200
-Message-ID: <201304091251.59359.marex@denx.de>
-References: <1365415940-11609-1-git-send-email-hector.palacios@digi.com> <201304091015.43472.marex@denx.de> <5163D899.6000904@digi.com>
+From: Tejun Heo <tj@kernel.org>
+Subject: Re: FLUSH mechanism implementation in block layer
+Date: Tue, 9 Apr 2013 12:03:36 -0700
+Message-ID: <20130409190336.GG6186@mtj.dyndns.org>
+References: <51617172.10300@codeaurora.org>
+ <20130407163345.GC12038@htj.dyndns.org>
+ <51624547.6000500@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-out.m-online.net ([212.18.0.9]:57779 "EHLO
-	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1762521Ab3DIRTI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Apr 2013 13:19:08 -0400
-In-Reply-To: <5163D899.6000904@digi.com>
+Received: from mail-qc0-f173.google.com ([209.85.216.173]:49486 "EHLO
+	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759834Ab3DITDl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Apr 2013 15:03:41 -0400
+Received: by mail-qc0-f173.google.com with SMTP id b12so3173833qca.32
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Apr 2013 12:03:40 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <51624547.6000500@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hector Palacios <hector.palacios@digi.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "maxime.ripard@free-electrons.com" <maxime.ripard@free-electrons.com>, "fabio.estevam@freescale.com" <fabio.estevam@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Tanya Brokhman <tlinder@codeaurora.org>
+Cc: Jens Axboe <axboe@kernel.dk>, linux-mmc@vger.kernel.org, merez@codeaurora.org, kdorfman@codeaurora.org
 
-Hi Hector,
+Hey,
 
-> Dear Marek Vasut,
-> 
-> On 04/09/2013 10:15 AM, Marek Vasut wrote:
-> > Dear Hector Palacios,
-> > 
-> >> Dear Marek Vasut,
-> >> 
-> >> On 04/08/2013 06:28 PM, Marek Vasut wrote:
-> >>> Dear Shawn Guo,
-> >>> 
-> >>>> On Mon, Apr 08, 2013 at 03:58:05PM +0200, Hector Palacios wrote:
-> >>>>> On 04/08/2013 02:48 PM, Shawn Guo wrote:
-> >>>>>> On Mon, Apr 08, 2013 at 12:12:20PM +0200, Hector Palacios wrote:
-> >>>>>>> MicroSD card sockets don't usually have card detect line. This pin
-> >>>>>>> is actually not needed for the MMC to work and it is more of a
-> >>>>>>> platform design decission to have it.
-> >>>>>>> The card detect pin already has a configuration entry of its own:
-> >>>>>>> 'mmc0_cd_cfg' so we complete the iomux configuration here and let
-> >>>>>>> platforms to include it or not depending on whether the card detect
-> >>>>>>> line is routed to the SD socket.
-> >>>>>> 
-> >>>>>> Sounds sensible.
-> >>>>>> 
-> >>>>>>> Signed-off-by: Hector Palacios <hector.palacios@digi.com>
-> >>>>>>> ---
-> >>>>>>> 
-> >>>>>>> Hello,
-> >>>>>>> 
-> >>>>>>> All imx28 based platforms except 'bluegiga,apx4devkit' and
-> >>>>>>> 'schulercontrol,imx28-sps1', use 'mmc0_cd_cfg' in their mmc
-> >>>>>>> configuration so please check whether this patch would break these
-> >>>>>>> platforms.
-> >>>>>> 
-> >>>>>> I just tested the patch on imx28-evk and card-detection still works.
-> >>>>>> So patches applied, thanks.
-> >>>>> 
-> >>>>> The EVK and most platforms will work because they are using
-> >>>>> 'mmc0_cd_cfg' so actually this patch does not change anything on
-> >>>>> them.
-> >>>>> Platforms 'bluegiga,apx4devkit' and 'schulercontrol,imx28-sps1'
-> >>>>> however are not referencing 'mmc0_cd_cfg' so after applying this
-> >>>>> patch they will have unconfigured CD line and they may break.
-> >>>> 
-> >>>> Ah, yes.  I thought that any board that has CD support has to
-> >>>> reference 'mmc0_cd_cfg'.  That's not necessarily true.
-> >>>> 
-> >>>>> The driver will call get_cd() upon probing, which returns the status
-> >>>>> of the CD line. Please check these two platforms before applying.
-> >>>> 
-> >>>> Ok, let's wait for people owning the boards to confirm.
-> >>> 
-> >>> Maybe you want to use MMC_CAP_NEEDS_POLL as was noted by someone before
-> >>> on the olinuxino -- the slot is there, it's just the CD line that's
-> >>> missing.
-> >> 
-> >> I'm not sure of what you mean. The mxs-mmc.c driver already sets the
-> >> MMC_CAP_NEEDS_POLL flag by default in the probe() function. My platform
-> >> does not even route the CD line because the microSD socket does not have
-> >> it.
-> >> So what I have done is modify the driver to parse the property
-> >> 'non-removable' from the device tree in order to set the
-> > 
-> >> MMC_CAP_NONREMOVABLE flag:
-> > Yes, I get it. I have two remarks still:
-> > 1) The card is removable (you can pull it out from olinuxino's slot)
-> 
-> True, I misunderstood the use of 'non-removable'. So I guess I could use
-> 'broken-cd' property instead, right?
+On Mon, Apr 08, 2013 at 07:19:19AM +0300, Tanya Brokhman wrote:
+> completed after the FLUSH. But perhaps there is a correct way to
+> move the implementation of "ordering around the flush" to the block
+> layer? Not that it would work better, it just feels that logically -
+> block layer is the place to do it at.
+> What do you think?
 
-Yep, seems ok.
+It used to be implemented that way - REQ_BARRIER.  The problem was
+that filesystems wanted multiple dependency streams - ie. fdatasync()
+of a file doesn't need to drain all other IOs in progress.  We could
+do coloring of IOs - ie. give IOs which may need flushing later but
+belong to different dependency streams different colors and let block
+layer figure out partial drainining, which would work but at the same
+time be pretty nasty and complex.  The thing was that most filesystems
+were already drainings IOs and didn't need any ordering guarantee from
+block layer.  hch took care of the outliers which were depending on
+REQ_BARRIER ordering guarantees and we just stripped the ordering
+mechanism which immediately improved performance noticeably in certain
+workloads.
 
-> > 2) Why is the NEEDS_POLL set by default ?
-> 
-> Because the CD line cannot cause an interrupt in this controller.
+It was done that way mostly out of convenience at that time but now I
+think of it it's the correct thing to do.  It just is too much
+information to communicate downwards and the extra communication
+overhead doesn't really buy anything.
 
-Ok, understood.
+Thanks.
 
-NOTE: Here is an idea -- we can solve this the same way it's solved with the MXC 
-SDHCI, configure the CD pin(s) as GPIO(s) and then they'll be able to generate 
-interrupt. On the other hand, this shall definitelly be done in a separate 
-patch.
-
-> > 3) Does the NEEDS_POLL not solve the issue with missing CD line?
-> 
-> No. CD polling relies on the status register. The field CARD_DETECT in
-> HW_SSP_STATUS register directly reflects the state of the SSP_DETECT input
-> pin. If the pin is not connected it can have any value, so I guess we need
-> a custom flag on the driver:
-
-Understood!
-
-Best regards,
-Marek Vasut
+-- 
+tejun
