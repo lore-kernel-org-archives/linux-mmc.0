@@ -1,153 +1,116 @@
-From: Hector Palacios <hector.palacios@digi.com>
-Subject: Re: [PATCH RFC] ARM: dts: mxs: leave card detect out of common mmc
- pins config
-Date: Tue, 9 Apr 2013 11:00:09 +0200
-Message-ID: <5163D899.6000904@digi.com>
-References: <1365415940-11609-1-git-send-email-hector.palacios@digi.com> <201304081828.27127.marex@denx.de> <5163C0B4.60501@digi.com> <201304091015.43472.marex@denx.de>
+From: Samuel Ortiz <sameo@linux.intel.com>
+Subject: Re: [PATCH] mfd:rtsx: Support RTS5249
+Date: Tue, 9 Apr 2013 11:49:11 +0200
+Message-ID: <20130409094911.GN24058@zurbaran>
+References: <1364177636-4294-1-git-send-email-wei_wang@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <201304091015.43472.marex@denx.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Marek Vasut <marex@denx.de>
-Cc: Shawn Guo <shawn.guo@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "maxime.ripard@free-electrons.com" <maxime.ripard@free-electrons.com>, "fabio.estevam@freescale.com" <fabio.estevam@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:4947 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933110Ab3DIJth (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 9 Apr 2013 05:49:37 -0400
+Content-Disposition: inline
+In-Reply-To: <1364177636-4294-1-git-send-email-wei_wang@realsil.com.cn>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: wei_wang@realsil.com.cn
+Cc: cjb@laptop.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, rogerable@realtek.com
 
-Dear Marek Vasut,
+Hi Wei,
 
-On 04/09/2013 10:15 AM, Marek Vasut wrote:
-> Dear Hector Palacios,
->
->> Dear Marek Vasut,
->>
->> On 04/08/2013 06:28 PM, Marek Vasut wrote:
->>> Dear Shawn Guo,
->>>
->>>> On Mon, Apr 08, 2013 at 03:58:05PM +0200, Hector Palacios wrote:
->>>>> On 04/08/2013 02:48 PM, Shawn Guo wrote:
->>>>>> On Mon, Apr 08, 2013 at 12:12:20PM +0200, Hector Palacios wrote:
->>>>>>> MicroSD card sockets don't usually have card detect line. This =
-pin
->>>>>>> is actually not needed for the MMC to work and it is more of a
->>>>>>> platform design decission to have it.
->>>>>>> The card detect pin already has a configuration entry of its ow=
-n:
->>>>>>> 'mmc0_cd_cfg' so we complete the iomux configuration here and l=
-et
->>>>>>> platforms to include it or not depending on whether the card de=
-tect
->>>>>>> line is routed to the SD socket.
->>>>>>
->>>>>> Sounds sensible.
->>>>>>
->>>>>>> Signed-off-by: Hector Palacios <hector.palacios@digi.com>
->>>>>>> ---
->>>>>>>
->>>>>>> Hello,
->>>>>>>
->>>>>>> All imx28 based platforms except 'bluegiga,apx4devkit' and
->>>>>>> 'schulercontrol,imx28-sps1', use 'mmc0_cd_cfg' in their mmc
->>>>>>> configuration so please check whether this patch would break th=
-ese
->>>>>>> platforms.
->>>>>>
->>>>>> I just tested the patch on imx28-evk and card-detection still wo=
-rks.
->>>>>> So patches applied, thanks.
->>>>>
->>>>> The EVK and most platforms will work because they are using
->>>>> 'mmc0_cd_cfg' so actually this patch does not change anything on
->>>>> them.
->>>>> Platforms 'bluegiga,apx4devkit' and 'schulercontrol,imx28-sps1'
->>>>> however are not referencing 'mmc0_cd_cfg' so after applying this
->>>>> patch they will have unconfigured CD line and they may break.
->>>>
->>>> Ah, yes.  I thought that any board that has CD support has to refe=
-rence
->>>> 'mmc0_cd_cfg'.  That's not necessarily true.
->>>>
->>>>> The driver will call get_cd() upon probing, which returns the sta=
-tus of
->>>>> the CD line. Please check these two platforms before applying.
->>>>
->>>> Ok, let's wait for people owning the boards to confirm.
->>>
->>> Maybe you want to use MMC_CAP_NEEDS_POLL as was noted by someone be=
-fore
->>> on the olinuxino -- the slot is there, it's just the CD line that's
->>> missing.
->>
->> I'm not sure of what you mean. The mxs-mmc.c driver already sets the
->> MMC_CAP_NEEDS_POLL flag by default in the probe() function. My platf=
-orm
->> does not even route the CD line because the microSD socket does not =
-have
->> it.
->> So what I have done is modify the driver to parse the property
->> 'non-removable' from the device tree in order to set the
->> MMC_CAP_NONREMOVABLE flag:
->
-> Yes, I get it. I have two remarks still:
-> 1) The card is removable (you can pull it out from olinuxino's slot)
+On Mon, Mar 25, 2013 at 10:13:56AM +0800, wei_wang@realsil.com.cn wrote:
+> diff --git a/drivers/mfd/rts5249.c b/drivers/mfd/rts5249.c
+> new file mode 100644
+> index 0000000..24a1861
+> --- /dev/null
+> +++ b/drivers/mfd/rts5249.c
+> @@ -0,0 +1,245 @@
+> +/* Driver for Realtek PCI-Express card reader
+> + *
+> + * Copyright(c) 2009 Realtek Semiconductor Corp. All rights reserved.
+2009-2013 ?
 
-True, I misunderstood the use of 'non-removable'. So I guess I could us=
-e 'broken-cd'=20
-property instead, right?
 
-> 2) Why is the NEEDS_POLL set by default ?
+> + *
+> + * This program is free software; you can redistribute it and/or modify it
+> + * under the terms of the GNU General Public License as published by the
+> + * Free Software Foundation; either version 2, or (at your option) any
+> + * later version.
+> + *
+> + * This program is distributed in the hope that it will be useful, but
+> + * WITHOUT ANY WARRANTY; without even the implied warranty of
+> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+> + * General Public License for more details.
+> + *
+> + * You should have received a copy of the GNU General Public License along
+> + * with this program; if not, see <http://www.gnu.org/licenses/>.
+> + *
+> + * Author:
+> + *   Wei WANG <wei_wang@realsil.com.cn>
+> + *   No. 450, Shenhu Road, Suzhou Industry Park, Suzhou, China
+> + */
+> +
+> +#include <linux/module.h>
+> +#include <linux/delay.h>
+> +#include <linux/mfd/rtsx_pci.h>
+> +
+> +#include "rtsx_pcr.h"
+> +
+> +static u8 rts5249_get_ic_version(struct rtsx_pcr *pcr)
+> +{
+> +	u8 val;
+> +
+> +	rtsx_pci_read_register(pcr, DUMMY_REG_RESET_0, &val);
+> +	return val & 0x0F;
+> +}
+> +
+> +static int rts5249_extra_init_hw(struct rtsx_pcr *pcr)
+> +{
+> +	rtsx_pci_init_cmd(pcr);
+> +
+> +	/* Configure GPIO as output */
+> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, GPIO_CTL, 0x02, 0x02);
+> +	/* Switch LDO3318 source from DV33 to card_3v3 */
+> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, LDO_PWR_SEL, 0x03, 0x00);
+> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, LDO_PWR_SEL, 0x03, 0x01);
+> +	/* LED shine disabled, set initial shine cycle period */
+> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, OLT_LED_CTL, 0x0F, 0x02);
+> +	/* Configure force_clock_req
+> +	 * Maybe We should define 0xFF03 as some name
+> +	 */
+> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, 0xFF03, 0x08, 0x08);
+> +	/* Correct driving */
+> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD,
+> +			SD30_CLK_DRIVE_SEL, 0xFF, 0x99);
+> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD,
+> +			SD30_CMD_DRIVE_SEL, 0xFF, 0x99);
+> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD,
+> +			SD30_DAT_DRIVE_SEL, 0xFF, 0x92);
+> +
+> +	return rtsx_pci_send_cmd(pcr, 100);
+> +}
+> +
+> +static int rts5249_optimize_phy(struct rtsx_pcr *pcr)
+> +{
+> +	int err;
+> +
+> +	err = rtsx_pci_write_phy_register(pcr, 0x19, 0xFE46);
+There are a _lot_ of magic values in those drivers. Could we at least define
+register names in the header files ?
 
-Because the CD line cannot cause an interrupt in this controller.
 
-> 3) Does the NEEDS_POLL not solve the issue with missing CD line?
+> +	if (err < 0)
+> +		return err;
+> +
+> +	mdelay(1);
+I second Dan here: Why do you need to busy loop ? I understand delays may be
+needed, but why wouldn't an msleep be sufficient ? AFAICT, you're calling this
+one from the PCI probe routine, where you could sleep.
 
-No. CD polling relies on the status register. The field CARD_DETECT in =
-HW_SSP_STATUS=20
-register directly reflects the state of the SSP_DETECT input pin. If th=
-e pin is not=20
-connected it can have any value, so I guess we need a custom flag on th=
-e driver:
+Cheers,
+Samuel.
 
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 206fe49..ec0874b 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -72,6 +72,7 @@ struct mxs_mmc_host {
-         int                             sdio_irq_en;
-         int                             wp_gpio;
-         bool                            wp_inverted;
-+       bool                            cd_broken;
-  };
-
-  static int mxs_mmc_get_ro(struct mmc_host *mmc)
-@@ -95,6 +96,9 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
-         struct mxs_mmc_host *host =3D mmc_priv(mmc);
-         struct mxs_ssp *ssp =3D &host->ssp;
-
-+       if (host->cd_broken)
-+               return 1;
-+
-         return !(readl(ssp->base + HW_SSP_STATUS(ssp)) &
-                  BM_SSP_STATUS_CARD_DETECT);
-  }
-@@ -686,8 +690,11 @@ static int mxs_mmc_probe(struct platform_device *p=
-dev)
-                 mmc->caps |=3D MMC_CAP_4_BIT_DATA;
-         else if (bus_width =3D=3D 8)
-                 mmc->caps |=3D MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA=
-;
--       host->wp_gpio =3D of_get_named_gpio_flags(np, "wp-gpios", 0, &f=
-lags);
-
-+       if (of_find_property(np, "broken-cd", NULL))
-+               host->cd_broken =3D 1;
-+
-+       host->wp_gpio =3D of_get_named_gpio_flags(np, "wp-gpios", 0, &f=
-lags);
-         if (flags & OF_GPIO_ACTIVE_LOW)
-                 host->wp_inverted =3D 1;
-
-Thank you for your comments.
---=20
-H=E9ctor Palacios
+-- 
+Intel Open Source Technology Centre
+http://oss.intel.com/
