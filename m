@@ -1,102 +1,161 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] RFC: mmc: dw_mmc: Always go to STATE_DATA_BUSY from STATE_DATA_ERROR
-Date: Mon, 8 Apr 2013 16:09:39 -0700
-Message-ID: <CAD=FV=V+ZZ0MUtuWKUOgR9NPyAquUjFC6KtHvAP-4iHXAYpjqA@mail.gmail.com>
-References: <1363382956-14557-1-git-send-email-dianders@chromium.org>
-	<5146EAB0.1030705@samsung.com>
-	<CAD=FV=Ww-iK=-vg4jnJe6w4836-yQUoUyxNvCYsDQ5w0q-OMMQ@mail.gmail.com>
-	<515E88E3.5070507@samsung.com>
-	<003401ce3453$19d1e8c0$4d75ba40$%jun@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: [PATCH v4] mmc: dw_mmc: let device core setup the default pin
+ configuration
+Date: Tue, 09 Apr 2013 11:29:46 +0530
+Message-ID: <1365487186-4587-1-git-send-email-thomas.abraham@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f48.google.com ([209.85.215.48]:59140 "EHLO
-	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760209Ab3DHXJl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Apr 2013 19:09:41 -0400
-Received: by mail-la0-f48.google.com with SMTP id fq13so5911716lab.35
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Apr 2013 16:09:39 -0700 (PDT)
-In-Reply-To: <003401ce3453$19d1e8c0$4d75ba40$%jun@samsung.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:40980 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755053Ab3DIFlT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Apr 2013 01:41:19 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@gmail.com>, Bing Zhao <bzhao@marvell.com>, Ashok Nagarajan <asnagarajan@chromium.org>, Paul Stewart <pstew@chromium.org>, Olof Johansson <olof@lixom.net>, linux-mmc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, linux-arm-kernel@lists.infradead.org, t.figa@samsung.com, heiko@sntech.de, linus.walleij@linaro.org, dianders@chromium.org, patches@linaro.org
 
-Seungwon,
+With device core now able to setup the default pin configuration,
+the pin configuration code based on the deprecated Samsung specific
+gpio bindings is removed.
 
-On Mon, Apr 8, 2013 at 5:17 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> I guess Doug are debugging it with wifi, right?
+Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
+Reviewed-by: Doug Anderson <dianders@chromium.org>
+Tested-by: Doug Anderson <dianders@chromium.org>
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+---
+Changes since v3:
+- Rebased to the latest mmc-next branch, resolving the compilation
+  error with this patch due to changes in commit f2f942ce
+  "mmc: dw_mmc: Check return value of regulator_enable".
+  Thanks to Doug for pointing out this issue with the v3 patch.
 
-Yes, we're debugging it on the Samsung ARM Chromebook on a part that
-has an SDIO WiFi module by Marvell.  Bing Zhao (CCed) has a unit in
-hand that generates lots of CRC errors and has been testing patches
-I've sent him.
+ drivers/mmc/host/dw_mmc-exynos.c |   38 --------------------------------------
+ drivers/mmc/host/dw_mmc.c        |   14 +++-----------
+ drivers/mmc/host/dw_mmc.h        |    3 ---
+ 3 files changed, 3 insertions(+), 52 deletions(-)
 
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index c7f0976..f013e7e 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -152,43 +152,6 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+ 	return 0;
+ }
+ 
+-static int dw_mci_exynos_setup_bus(struct dw_mci *host,
+-				struct device_node *slot_np, u8 bus_width)
+-{
+-	int idx, gpio, ret;
+-
+-	if (!slot_np)
+-		return -EINVAL;
+-
+-	/* cmd + clock + bus-width pins */
+-	for (idx = 0; idx < NUM_PINS(bus_width); idx++) {
+-		gpio = of_get_gpio(slot_np, idx);
+-		if (!gpio_is_valid(gpio)) {
+-			dev_err(host->dev, "invalid gpio: %d\n", gpio);
+-			return -EINVAL;
+-		}
+-
+-		ret = devm_gpio_request(host->dev, gpio, "dw-mci-bus");
+-		if (ret) {
+-			dev_err(host->dev, "gpio [%d] request failed\n", gpio);
+-			return -EBUSY;
+-		}
+-	}
+-
+-	if (host->pdata->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+-		return 0;
+-
+-	gpio = of_get_named_gpio(slot_np, "samsung,cd-pinmux-gpio", 0);
+-	if (gpio_is_valid(gpio)) {
+-		if (devm_gpio_request(host->dev, gpio, "dw-mci-cd"))
+-			dev_err(host->dev, "gpio [%d] request failed\n", gpio);
+-	} else {
+-		dev_info(host->dev, "cd gpio not available");
+-	}
+-
+-	return 0;
+-}
+-
+ /* Common capabilities of Exynos4/Exynos5 SoC */
+ static unsigned long exynos_dwmmc_caps[4] = {
+ 	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
+@@ -205,7 +168,6 @@ static const struct dw_mci_drv_data exynos_drv_data = {
+ 	.prepare_command	= dw_mci_exynos_prepare_command,
+ 	.set_ios		= dw_mci_exynos_set_ios,
+ 	.parse_dt		= dw_mci_exynos_parse_dt,
+-	.setup_bus		= dw_mci_exynos_setup_bus,
+ };
+ 
+ static const struct of_device_id dw_mci_exynos_match[] = {
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 45d9216..5dcef43 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1952,14 +1952,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	else
+ 		bus_width = 1;
+ 
+-	if (drv_data && drv_data->setup_bus) {
+-		struct device_node *slot_np;
+-		slot_np = dw_mci_of_find_slot_node(host->dev, slot->id);
+-		ret = drv_data->setup_bus(host, slot_np, bus_width);
+-		if (ret)
+-			goto err_setup_bus;
+-	}
+-
+ 	switch (bus_width) {
+ 	case 8:
+ 		mmc->caps |= MMC_CAP_8_BIT_DATA;
+@@ -2002,7 +1994,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 		if (ret) {
+ 			dev_err(host->dev,
+ 				"failed to enable regulator: %d\n", ret);
+-			goto err_setup_bus;
++			return ret;
+ 		}
+ 	}
+ 
+@@ -2015,7 +2007,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 
+ 	ret = mmc_add_host(mmc);
+ 	if (ret)
+-		goto err_setup_bus;
++		goto err_add_host;
+ 
+ #if defined(CONFIG_DEBUG_FS)
+ 	dw_mci_init_debugfs(slot);
+@@ -2032,7 +2024,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 
+ 	return 0;
+ 
+-err_setup_bus:
++err_add_host:
+ 	mmc_free_host(mmc);
+ 	return -EINVAL;
+ }
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 53b8fd9..0b74189 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -190,7 +190,6 @@ extern int dw_mci_resume(struct dw_mci *host);
+  * @prepare_command: handle CMD register extensions.
+  * @set_ios: handle bus specific extensions.
+  * @parse_dt: parse implementation specific device tree properties.
+- * @setup_bus: initialize io-interface
+  *
+  * Provide controller implementation specific extensions. The usage of this
+  * data structure is fully optional and usage of each member in this structure
+@@ -203,7 +202,5 @@ struct dw_mci_drv_data {
+ 	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
+ 	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
+ 	int		(*parse_dt)(struct dw_mci *host);
+-	int		(*setup_bus)(struct dw_mci *host,
+-				struct device_node *slot_np, u8 bus_width);
+ };
+ #endif /* _DW_MMC_H_ */
+-- 
+1.6.6.rc2
 
-> The problem happens when dw_mci_stop_dma is called in the middle of data transfers.
-> If data error occurs in the end of block, EVENT_XFER_COMPLETE might be set. So, it's fine.
-> Actually, dw_mci_idmac_stop_dma stops the dma working, there is no further interrupt for dma completion.
-
-That sounds right to me.
-
-
-> There are two solutions we have applied.
-
-I'm a little confused.  Have you already applied one or both of the
-solutions you list below, or are you proposing them as alternates to
-the patch I submitted?
-
-> #1. deferring the call of dw_mci_stop_dma until EVENT_XFER_COMPLETE flag is set into pending_events.
-> In this case, dma transfer will be continued with error.
->
-> @@ -1062,7 +1062,6 @@ static void dw_mci_tasklet_func(unsigned long priv)
->                 case STATE_SENDING_DATA:
->                         if (test_and_clear_bit(EVENT_DATA_ERROR,
->                                                &host->pending_events)) {
-> -                               dw_mci_stop_dma(host);
->                                 if (data->stop)
->                                         send_stop_cmd(host, data);
->                                 state = STATE_DATA_ERROR;
-> @@ -1155,6 +1154,9 @@ static void dw_mci_tasklet_func(unsigned long priv)
->                                                 &host->pending_events))
->                                 break;
->
-> +                       dw_mci_stop_dma(host);
-> +                       set_bit(EVENT_XFER_COMPLETE, &host->completed_events);
-> +
->                         state = STATE_DATA_BUSY;
->                         break;
-
-I can't say that I'm quite familiar enough with the intricate details
-of the driver to know whether this is a good idea or guaranteed to
-work.  Do we really think that we'll still get the end of the transfer
-properly if we've seen an error already?  I worry that we won't.
-
-
-> #2. set EVENT_XFER_COMPLETE flag when dw_mci_stop_dma is called regardless using_dma.
->
-> @@ -299,10 +299,9 @@ static void dw_mci_stop_dma(struct dw_mci *host)
->         if (host->using_dma) {
->                 host->dma_ops->stop(host);
->                 host->dma_ops->cleanup(host);
-> -       } else {
-> -               /* Data transfer was stopped by the interrupt handler */
-> -               set_bit(EVENT_XFER_COMPLETE, &host->pending_events);
->         }
-> +
-> +       set_bit(EVENT_XFER_COMPLETE, &host->pending_events);
->  }
-
-This is fairly similar to my patch but goes further.  I believe my
-patch has this effect but only for the call to dw_mci_stop_dma() in
-STATE_SENDING_DATA in the tasklet.  Your affects all 3 calls to
-dw_mci_stop_dma().
-
-This seems reasonable but I don't have confidence in my understanding
-of this driver's state machine (especially with regards to the error
-conditions) that I can say which is better.  If you think that this is
-a more correct solution than mine then we can give it some testing.
-
-Thanks!
-
--Doug
