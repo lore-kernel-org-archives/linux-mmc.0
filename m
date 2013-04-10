@@ -1,145 +1,147 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] RFC: mmc: dw_mmc: Always go to STATE_DATA_BUSY from
- STATE_DATA_ERROR
-Date: Wed, 10 Apr 2013 17:51:52 +0900
-Message-ID: <51652828.10907@samsung.com>
-References: <1363382956-14557-1-git-send-email-dianders@chromium.org>
- <5146EAB0.1030705@samsung.com>
- <CAD=FV=Ww-iK=-vg4jnJe6w4836-yQUoUyxNvCYsDQ5w0q-OMMQ@mail.gmail.com>
- <515E88E3.5070507@samsung.com>
- <003401ce3453$19d1e8c0$4d75ba40$%jun@samsung.com>
- <CAD=FV=V+ZZ0MUtuWKUOgR9NPyAquUjFC6KtHvAP-4iHXAYpjqA@mail.gmail.com>
- <001601ce35b9$652c5870$2f850950$%jun@samsung.com>
+From: Hector Palacios <hector.palacios@digi.com>
+Subject: Re: [PATCH RFC] ARM: dts: mxs: leave card detect out of common mmc
+ pins config
+Date: Wed, 10 Apr 2013 10:56:30 +0200
+Message-ID: <5165293E.7060103@digi.com>
+References: <1365415940-11609-1-git-send-email-hector.palacios@digi.com> <201304091015.43472.marex@denx.de> <5163D899.6000904@digi.com> <201304091251.59359.marex@denx.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:62939 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S936532Ab3DJIvz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Apr 2013 04:51:55 -0400
-In-reply-to: <001601ce35b9$652c5870$2f850950$%jun@samsung.com>
+Received: from mail1.bemta8.messagelabs.com ([216.82.243.208]:14130 "EHLO
+	mail1.bemta8.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S935612Ab3DJI4s (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Apr 2013 04:56:48 -0400
+In-Reply-To: <201304091251.59359.marex@denx.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Doug Anderson' <dianders@chromium.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@gmail.com>, 'Bing Zhao' <bzhao@marvell.com>, 'Ashok Nagarajan' <asnagarajan@chromium.org>, 'Paul Stewart' <pstew@chromium.org>, 'Olof Johansson' <olof@lixom.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Marek Vasut <marex@denx.de>
+Cc: Shawn Guo <shawn.guo@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "maxime.ripard@free-electrons.com" <maxime.ripard@free-electrons.com>, "fabio.estevam@freescale.com" <fabio.estevam@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 04/10/2013 04:02 PM, Seungwon Jeon wrote:
-> On Tuesday, April 09, 2013, Doug Anderson wrote:
->> Seungwon,
+On 04/09/2013 12:51 PM, Marek Vasut wrote:
+> Hi Hector,
+>
+>> Dear Marek Vasut,
 >>
->> On Mon, Apr 8, 2013 at 5:17 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->>> I guess Doug are debugging it with wifi, right?
+>> On 04/09/2013 10:15 AM, Marek Vasut wrote:
+>>> Dear Hector Palacios,
+>>>
+>>>> Dear Marek Vasut,
+>>>>
+>>>> On 04/08/2013 06:28 PM, Marek Vasut wrote:
+>>>>> Dear Shawn Guo,
+>>>>>
+>>>>>> On Mon, Apr 08, 2013 at 03:58:05PM +0200, Hector Palacios wrote:
+>>>>>>> On 04/08/2013 02:48 PM, Shawn Guo wrote:
+>>>>>>>> On Mon, Apr 08, 2013 at 12:12:20PM +0200, Hector Palacios wrot=
+e:
+>>>>>>>>> MicroSD card sockets don't usually have card detect line. Thi=
+s pin
+>>>>>>>>> is actually not needed for the MMC to work and it is more of =
+a
+>>>>>>>>> platform design decission to have it.
+>>>>>>>>> The card detect pin already has a configuration entry of its =
+own:
+>>>>>>>>> 'mmc0_cd_cfg' so we complete the iomux configuration here and=
+ let
+>>>>>>>>> platforms to include it or not depending on whether the card =
+detect
+>>>>>>>>> line is routed to the SD socket.
+>>>>>>>>
+>>>>>>>> Sounds sensible.
+>>>>>>>>
+>>>>>>>>> Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+>>>>>>>>> ---
+>>>>>>>>>
+>>>>>>>>> Hello,
+>>>>>>>>>
+>>>>>>>>> All imx28 based platforms except 'bluegiga,apx4devkit' and
+>>>>>>>>> 'schulercontrol,imx28-sps1', use 'mmc0_cd_cfg' in their mmc
+>>>>>>>>> configuration so please check whether this patch would break =
+these
+>>>>>>>>> platforms.
+>>>>>>>>
+>>>>>>>> I just tested the patch on imx28-evk and card-detection still =
+works.
+>>>>>>>> So patches applied, thanks.
+>>>>>>>
+>>>>>>> The EVK and most platforms will work because they are using
+>>>>>>> 'mmc0_cd_cfg' so actually this patch does not change anything o=
+n
+>>>>>>> them.
+>>>>>>> Platforms 'bluegiga,apx4devkit' and 'schulercontrol,imx28-sps1'
+>>>>>>> however are not referencing 'mmc0_cd_cfg' so after applying thi=
+s
+>>>>>>> patch they will have unconfigured CD line and they may break.
+>>>>>>
+>>>>>> Ah, yes.  I thought that any board that has CD support has to
+>>>>>> reference 'mmc0_cd_cfg'.  That's not necessarily true.
+>>>>>>
+>>>>>>> The driver will call get_cd() upon probing, which returns the s=
+tatus
+>>>>>>> of the CD line. Please check these two platforms before applyin=
+g.
+>>>>>>
+>>>>>> Ok, let's wait for people owning the boards to confirm.
+>>>>>
+>>>>> Maybe you want to use MMC_CAP_NEEDS_POLL as was noted by someone =
+before
+>>>>> on the olinuxino -- the slot is there, it's just the CD line that=
+'s
+>>>>> missing.
+>>>>
+>>>> I'm not sure of what you mean. The mxs-mmc.c driver already sets t=
+he
+>>>> MMC_CAP_NEEDS_POLL flag by default in the probe() function. My pla=
+tform
+>>>> does not even route the CD line because the microSD socket does no=
+t have
+>>>> it.
+>>>> So what I have done is modify the driver to parse the property
+>>>> 'non-removable' from the device tree in order to set the
+>>>
+>>>> MMC_CAP_NONREMOVABLE flag:
+>>> Yes, I get it. I have two remarks still:
+>>> 1) The card is removable (you can pull it out from olinuxino's slot=
+)
 >>
->> Yes, we're debugging it on the Samsung ARM Chromebook on a part that
->> has an SDIO WiFi module by Marvell.  Bing Zhao (CCed) has a unit in
->> hand that generates lots of CRC errors and has been testing patches
->> I've sent him.
+>> True, I misunderstood the use of 'non-removable'. So I guess I could=
+ use
+>> 'broken-cd' property instead, right?
+>
+> Yep, seems ok.
+>
+>>> 2) Why is the NEEDS_POLL set by default ?
 >>
+>> Because the CD line cannot cause an interrupt in this controller.
+>
+> Ok, understood.
+>
+> NOTE: Here is an idea -- we can solve this the same way it's solved w=
+ith the MXC
+> SDHCI, configure the CD pin(s) as GPIO(s) and then they'll be able to=
+ generate
+> interrupt. On the other hand, this shall definitelly be done in a sep=
+arate
+> patch.
+>
+>>> 3) Does the NEEDS_POLL not solve the issue with missing CD line?
 >>
->>> The problem happens when dw_mci_stop_dma is called in the middle of data transfers.
->>> If data error occurs in the end of block, EVENT_XFER_COMPLETE might be set. So, it's fine.
->>> Actually, dw_mci_idmac_stop_dma stops the dma working, there is no further interrupt for dma
->> completion.
->>
->> That sounds right to me.
->>
->>
->>> There are two solutions we have applied.
->>
->> I'm a little confused.  Have you already applied one or both of the
->> solutions you list below, or are you proposing them as alternates to
->> the patch I submitted?
-> Yes, first one already has been applied.
-> I wanted to introduce our fix. Did you try to test with these fixes?
-Actually i have tested with Seungwon's fixes. It looks good.
+>> No. CD polling relies on the status register. The field CARD_DETECT =
+in
+>> HW_SSP_STATUS register directly reflects the state of the SSP_DETECT=
+ input
+>> pin. If the pin is not connected it can have any value, so I guess w=
+e need
+>> a custom flag on the driver:
 
-> 
->>
->>> #1. deferring the call of dw_mci_stop_dma until EVENT_XFER_COMPLETE flag is set into pending_events.
->>> In this case, dma transfer will be continued with error.
->>>
->>> @@ -1062,7 +1062,6 @@ static void dw_mci_tasklet_func(unsigned long priv)
->>>                 case STATE_SENDING_DATA:
->>>                         if (test_and_clear_bit(EVENT_DATA_ERROR,
->>>                                                &host->pending_events)) {
->>> -                               dw_mci_stop_dma(host);
->>>                                 if (data->stop)
->>>                                         send_stop_cmd(host, data);
->>>                                 state = STATE_DATA_ERROR;
->>> @@ -1155,6 +1154,9 @@ static void dw_mci_tasklet_func(unsigned long priv)
->>>                                                 &host->pending_events))
->>>                                 break;
->>>
->>> +                       dw_mci_stop_dma(host);
->>> +                       set_bit(EVENT_XFER_COMPLETE, &host->completed_events);
->>> +
->>>                         state = STATE_DATA_BUSY;
->>>                         break;
->>
->> I can't say that I'm quite familiar enough with the intricate details
->> of the driver to know whether this is a good idea or guaranteed to
->> work.  Do we really think that we'll still get the end of the transfer
->> properly if we've seen an error already?  I worry that we won't.
-> For example, let's pretend data CRC error occurs during data read.
-> Peer device doesn't know that error occurrence and data transmission still keeps going.
-> dma will run as long as host doesn't take the stop or see the end of descriptor.
->>
->>
->>> #2. set EVENT_XFER_COMPLETE flag when dw_mci_stop_dma is called regardless using_dma.
->>>
->>> @@ -299,10 +299,9 @@ static void dw_mci_stop_dma(struct dw_mci *host)
->>>         if (host->using_dma) {
->>>                 host->dma_ops->stop(host);
->>>                 host->dma_ops->cleanup(host);
->>> -       } else {
->>> -               /* Data transfer was stopped by the interrupt handler */
->>> -               set_bit(EVENT_XFER_COMPLETE, &host->pending_events);
->>>         }
->>> +
->>> +       set_bit(EVENT_XFER_COMPLETE, &host->pending_events);
->>>  }
->>
->> This is fairly similar to my patch but goes further.  I believe my
->> patch has this effect but only for the call to dw_mci_stop_dma() in
->> STATE_SENDING_DATA in the tasklet.  Your affects all 3 calls to
->> dw_mci_stop_dma().
-I think we can also use the second approach.
-but i think that it also needs to test with this.
->>
->> This seems reasonable but I don't have confidence in my understanding
->> of this driver's state machine (especially with regards to the error
->> conditions) that I can say which is better.  If you think that this is
->> a more correct solution than mine then we can give it some testing.
-> Yes. As a result, both patches prevent tasklet's hanging.
-> In that regard, two patches give the similar effect.
-> But I think your fix are just removing the test_bit to wait for EVENT_XFER_COMPLETE.
-> 'clear_bit(...) part which is added might be of no effect.
-> It doesn't make sense a bit.
-> 
-> <quotation>
->  		case STATE_DATA_ERROR:
-> -			if (!test_and_clear_bit(EVENT_XFER_COMPLETE,
-> -						&host->pending_events))
-> -				break;
-> -
-> +			clear_bit(EVENT_XFER_COMPLETE, &host->pending_events);
-> </quotation>
-> 
-> Thanks,
-> Seugwon Jeon
->>
->> Thanks!
->>
->> -Doug
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Patch available in this other thread (pending resubmission):
+http://comments.gmane.org/gmane.linux.kernel.mmc/19982
 
+With this, card detection works via polling even if you don't use the C=
+ard Detect line.
+
+Regards,
+--=20
+H=E9ctor Palacios
