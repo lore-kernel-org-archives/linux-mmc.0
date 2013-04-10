@@ -1,84 +1,41 @@
-From: Marc Kleine-Budde <mkl@pengutronix.de>
-Subject: Re: [PATCH v2 2/2] mmc: mxs-mmc: add non-removable property
-Date: Wed, 10 Apr 2013 11:16:15 +0200
-Message-ID: <51652DDF.8000100@pengutronix.de>
-References: <1365166070-9370-1-git-send-email-mkl@pengutronix.de> <1365166070-9370-3-git-send-email-mkl@pengutronix.de> <51643053.7030302@digi.com> <516431F9.8010302@digi.com> <51644302.6000109@pengutronix.de> <516520AA.8030300@digi.com>
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: Re: [PATCH v4] mmc: dw_mmc: let device core setup the default pin configuration
+Date: Wed, 10 Apr 2013 18:18:37 +0530
+Message-ID: <CAJuYYwQT=povqiutVHXkF5jxTAnjpwTMQ5G0Z6xKGnnM7qYADQ@mail.gmail.com>
+References: <1365487186-4587-1-git-send-email-thomas.abraham@linaro.org>
+	<CAD=FV=VJ-ykDNqYKQ=fqxeOD6bRNLW02VT4bjsRHRAuXLcCpQQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="----enig2EQSCXBSGRPTCXDAGAJSR"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <516520AA.8030300@digi.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Hector Palacios <hector.palacios@digi.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>, "aletes.xgr@gmail.com" <aletes.xgr@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Marek Vasut <marex@denx.de>, Shawn Guo <shawn.guo@linaro.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=VJ-ykDNqYKQ=fqxeOD6bRNLW02VT4bjsRHRAuXLcCpQQ@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene.kim@samsung.com>, Girish Shivananjappa <girish.shivananjappa@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Tomasz Figa <t.figa@samsung.com>, =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>, Linus Walleij <linus.walleij@linaro.org>, Patch Tracking <patches@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
-------enig2EQSCXBSGRPTCXDAGAJSR
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: quoted-printable
+On 10 April 2013 05:00, Doug Anderson <dianders@chromium.org> wrote:
+> Thomas,
+>
+> On Mon, Apr 8, 2013 at 10:59 PM, Thomas Abraham
+> <thomas.abraham@linaro.org> wrote:
+>> @@ -2002,7 +1994,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>                 if (ret) {
+>>                         dev_err(host->dev,
+>>                                 "failed to enable regulator: %d\n", ret);
+>> -                       goto err_setup_bus;
+>> +                       return ret;
+>
+> It seems like you'd need a "mmc_free_host(mmc);" in this case don't
+> you?  AKA: this should be a goto and not a return.
 
-On 04/10/2013 10:19 AM, Hector Palacios wrote:
-> On Tue 09 Apr 2013 06:34:10 PM CEST, Marc Kleine-Budde wrote:
->> On 04/09/2013 05:21 PM, Hector Palacios wrote:
->>> On 04/09/2013 05:14 PM, Hector Palacios wrote:
->>>> @@ -95,7 +97,8 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
->>>>           struct mxs_mmc_host *host =3D mmc_priv(mmc);
->>>>           struct mxs_ssp *ssp =3D &host->ssp;
->>>>
->>>> -       return !(readl(ssp->base + HW_SSP_STATUS(ssp)) &
->>>> +       return host->non_removable || host->broken_cd ||
->>>> +              !(readl(ssp->base + HW_SSP_STATUS(ssp)) &
->>>>                    BM_SSP_STATUS_CARD_DETECT);
->>>>    }
->>>
->>> Sorry, I missed your original XOR here, when merging my changes:
->>
->> Can you send an incremental patch against my 2/2 with your
->> Signed-off-by, I'll squash your patch into mine and repost the series.=
+Hi Doug,
 
->=20
-> Sure. Here it is:
->=20
-> From 18f6199947bc2681d2d63b307506019535018646 Mon Sep 17 00:00:00 2001
-> From: Hector Palacios <hector.palacios@digi.com>
-> Date: Wed, 10 Apr 2013 09:16:31 +0200
-> Subject: [PATCH] mmc: mxs-mmc: handle 'broken-cd' property
->=20
-> According to bindings documentation for mmc, the property 'broken-cd'
-> can be used to indicate card-detection is not available and polling
-> must be used instead. This patch retrieves this property
-> and sets a custom flag. On the get_cd() hook, it returns 1 if
-> the flag is set, to always assume the card is present.
->=20
-> Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+The call to regulator_enable() is prior to the call to mmc_add_host().
+Hence, call to mmc_fre_host is not required in this case. So the above
+change should be right.
 
-Thanks, your patch description is so good, I'll keep your patch as 3
-and repost the whole series.
+Thanks,
+Thomas.
 
-Marc
-
-P.S.:
---=20
-Pengutronix e.K.                  | Marc Kleine-Budde           |
-Industrial Linux Solutions        | Phone: +49-231-2826-924     |
-Vertretung West/Dortmund          | Fax:   +49-5121-206917-5555 |
-Amtsgericht Hildesheim, HRA 2686  | http://www.pengutronix.de   |
-
-
-------enig2EQSCXBSGRPTCXDAGAJSR
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iEYEARECAAYFAlFlLecACgkQjTAFq1RaXHP10ACaA2KGRg959+/WhqB72oOuOjXm
-SGsAn3xtU3Vo9ZYXimFgXiXFvDu3gnZY
-=orlO
------END PGP SIGNATURE-----
-
-------enig2EQSCXBSGRPTCXDAGAJSR--
+>
+> -Doug
