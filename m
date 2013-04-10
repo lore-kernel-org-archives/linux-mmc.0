@@ -1,29 +1,62 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v4] mmc: dw_mmc: let device core setup the default pin configuration
-Date: Tue, 9 Apr 2013 16:30:09 -0700
-Message-ID: <CAD=FV=VJ-ykDNqYKQ=fqxeOD6bRNLW02VT4bjsRHRAuXLcCpQQ@mail.gmail.com>
-References: <1365487186-4587-1-git-send-email-thomas.abraham@linaro.org>
+From: Tanya Brokhman <tlinder@codeaurora.org>
+Subject: Re: FLUSH mechanism implementation in block layer
+Date: Wed, 10 Apr 2013 09:13:01 +0300
+Message-ID: <516502ED.8040307@codeaurora.org>
+References: <51617172.10300@codeaurora.org> <20130407163345.GC12038@htj.dyndns.org> <51624547.6000500@codeaurora.org> <20130409190336.GG6186@mtj.dyndns.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1365487186-4587-1-git-send-email-thomas.abraham@linaro.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Thomas Abraham <thomas.abraham@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>, Girish Shivananjappa <girish.shivananjappa@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Tomasz Figa <t.figa@samsung.com>, =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>, Linus Walleij <linus.walleij@linaro.org>, patches@linaro.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:62263 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750781Ab3DJGNG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Apr 2013 02:13:06 -0400
+In-Reply-To: <20130409190336.GG6186@mtj.dyndns.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Tejun Heo <tj@kernel.org>
+Cc: Jens Axboe <axboe@kernel.dk>, linux-mmc@vger.kernel.org, merez@codeaurora.org, kdorfman@codeaurora.org
 
-Thomas,
+Hi Tejun
 
-On Mon, Apr 8, 2013 at 10:59 PM, Thomas Abraham
-<thomas.abraham@linaro.org> wrote:
-> @@ -2002,7 +1994,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->                 if (ret) {
->                         dev_err(host->dev,
->                                 "failed to enable regulator: %d\n", ret);
-> -                       goto err_setup_bus;
-> +                       return ret;
+Thank you for the detailed explanation!
 
-It seems like you'd need a "mmc_free_host(mmc);" in this case don't
-you?  AKA: this should be a goto and not a return.
+Best Regards
+Tanya Brokhman
+-- 
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a 
+member of Code Aurora Forum, hosted by The Linux Foundation
 
--Doug
+On 4/9/2013 10:03 PM, Tejun Heo wrote:
+> Hey,
+>
+> On Mon, Apr 08, 2013 at 07:19:19AM +0300, Tanya Brokhman wrote:
+>> completed after the FLUSH. But perhaps there is a correct way to
+>> move the implementation of "ordering around the flush" to the block
+>> layer? Not that it would work better, it just feels that logically -
+>> block layer is the place to do it at.
+>> What do you think?
+>
+> It used to be implemented that way - REQ_BARRIER.  The problem was
+> that filesystems wanted multiple dependency streams - ie. fdatasync()
+> of a file doesn't need to drain all other IOs in progress.  We could
+> do coloring of IOs - ie. give IOs which may need flushing later but
+> belong to different dependency streams different colors and let block
+> layer figure out partial drainining, which would work but at the same
+> time be pretty nasty and complex.  The thing was that most filesystems
+> were already drainings IOs and didn't need any ordering guarantee from
+> block layer.  hch took care of the outliers which were depending on
+> REQ_BARRIER ordering guarantees and we just stripped the ordering
+> mechanism which immediately improved performance noticeably in certain
+> workloads.
+>
+> It was done that way mostly out of convenience at that time but now I
+> think of it it's the correct thing to do.  It just is too much
+> information to communicate downwards and the extra communication
+> overhead doesn't really buy anything.
+>
+> Thanks.
+>
+
+
+
