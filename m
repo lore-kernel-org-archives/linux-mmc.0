@@ -1,134 +1,84 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] RFC: mmc: dw_mmc: Always go to STATE_DATA_BUSY from
- STATE_DATA_ERROR
-Date: Wed, 10 Apr 2013 16:02:41 +0900
-Message-ID: <001601ce35b9$652c5870$2f850950$%jun@samsung.com>
-References: <1363382956-14557-1-git-send-email-dianders@chromium.org>
- <5146EAB0.1030705@samsung.com>
- <CAD=FV=Ww-iK=-vg4jnJe6w4836-yQUoUyxNvCYsDQ5w0q-OMMQ@mail.gmail.com>
- <515E88E3.5070507@samsung.com>
- <003401ce3453$19d1e8c0$4d75ba40$%jun@samsung.com>
- <CAD=FV=V+ZZ0MUtuWKUOgR9NPyAquUjFC6KtHvAP-4iHXAYpjqA@mail.gmail.com>
+From: Hector Palacios <hector.palacios@digi.com>
+Subject: Re: [PATCH v2 2/2] mmc: mxs-mmc: add non-removable property
+Date: Wed, 10 Apr 2013 10:19:54 +0200
+Message-ID: <516520AA.8030300@digi.com>
+References: <1365166070-9370-1-git-send-email-mkl@pengutronix.de> <1365166070-9370-3-git-send-email-mkl@pengutronix.de> <51643053.7030302@digi.com> <516431F9.8010302@digi.com> <51644302.6000109@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:39735 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750729Ab3DJHCp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Apr 2013 03:02:45 -0400
-In-reply-to: <CAD=FV=V+ZZ0MUtuWKUOgR9NPyAquUjFC6KtHvAP-4iHXAYpjqA@mail.gmail.com>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <51644302.6000109@pengutronix.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Marc Kleine-Budde <mkl@pengutronix.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>, "aletes.xgr@gmail.com" <aletes.xgr@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Marek Vasut <marex@denx.de>, Shawn Guo <shawn.guo@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: 'Doug Anderson' <dianders@chromium.org>
-Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@gmail.com>, 'Bing Zhao' <bzhao@marvell.com>, 'Ashok Nagarajan' <asnagarajan@chromium.org>, 'Paul Stewart' <pstew@chromium.org>, 'Olof Johansson' <olof@lixom.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Tuesday, April 09, 2013, Doug Anderson wrote:
-> Seungwon,
-> 
-> On Mon, Apr 8, 2013 at 5:17 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> > I guess Doug are debugging it with wifi, right?
-> 
-> Yes, we're debugging it on the Samsung ARM Chromebook on a part that
-> has an SDIO WiFi module by Marvell.  Bing Zhao (CCed) has a unit in
-> hand that generates lots of CRC errors and has been testing patches
-> I've sent him.
-> 
-> 
-> > The problem happens when dw_mci_stop_dma is called in the middle of data transfers.
-> > If data error occurs in the end of block, EVENT_XFER_COMPLETE might be set. So, it's fine.
-> > Actually, dw_mci_idmac_stop_dma stops the dma working, there is no further interrupt for dma
-> completion.
-> 
-> That sounds right to me.
-> 
-> 
-> > There are two solutions we have applied.
-> 
-> I'm a little confused.  Have you already applied one or both of the
-> solutions you list below, or are you proposing them as alternates to
-> the patch I submitted?
-Yes, first one already has been applied.
-I wanted to introduce our fix. Did you try to test with these fixes?
+On Tue 09 Apr 2013 06:34:10 PM CEST, Marc Kleine-Budde wrote:
+> On 04/09/2013 05:21 PM, Hector Palacios wrote:
+>> On 04/09/2013 05:14 PM, Hector Palacios wrote:
+>>> @@ -95,7 +97,8 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+>>>           struct mxs_mmc_host *host = mmc_priv(mmc);
+>>>           struct mxs_ssp *ssp = &host->ssp;
+>>>
+>>> -       return !(readl(ssp->base + HW_SSP_STATUS(ssp)) &
+>>> +       return host->non_removable || host->broken_cd ||
+>>> +              !(readl(ssp->base + HW_SSP_STATUS(ssp)) &
+>>>                    BM_SSP_STATUS_CARD_DETECT);
+>>>    }
+>>
+>> Sorry, I missed your original XOR here, when merging my changes:
+>
+> Can you send an incremental patch against my 2/2 with your
+> Signed-off-by, I'll squash your patch into mine and repost the series.
 
-> 
-> > #1. deferring the call of dw_mci_stop_dma until EVENT_XFER_COMPLETE flag is set into pending_events.
-> > In this case, dma transfer will be continued with error.
-> >
-> > @@ -1062,7 +1062,6 @@ static void dw_mci_tasklet_func(unsigned long priv)
-> >                 case STATE_SENDING_DATA:
-> >                         if (test_and_clear_bit(EVENT_DATA_ERROR,
-> >                                                &host->pending_events)) {
-> > -                               dw_mci_stop_dma(host);
-> >                                 if (data->stop)
-> >                                         send_stop_cmd(host, data);
-> >                                 state = STATE_DATA_ERROR;
-> > @@ -1155,6 +1154,9 @@ static void dw_mci_tasklet_func(unsigned long priv)
-> >                                                 &host->pending_events))
-> >                                 break;
-> >
-> > +                       dw_mci_stop_dma(host);
-> > +                       set_bit(EVENT_XFER_COMPLETE, &host->completed_events);
-> > +
-> >                         state = STATE_DATA_BUSY;
-> >                         break;
-> 
-> I can't say that I'm quite familiar enough with the intricate details
-> of the driver to know whether this is a good idea or guaranteed to
-> work.  Do we really think that we'll still get the end of the transfer
-> properly if we've seen an error already?  I worry that we won't.
-For example, let's pretend data CRC error occurs during data read.
-Peer device doesn't know that error occurrence and data transmission still keeps going.
-dma will run as long as host doesn't take the stop or see the end of descriptor.
-> 
-> 
-> > #2. set EVENT_XFER_COMPLETE flag when dw_mci_stop_dma is called regardless using_dma.
-> >
-> > @@ -299,10 +299,9 @@ static void dw_mci_stop_dma(struct dw_mci *host)
-> >         if (host->using_dma) {
-> >                 host->dma_ops->stop(host);
-> >                 host->dma_ops->cleanup(host);
-> > -       } else {
-> > -               /* Data transfer was stopped by the interrupt handler */
-> > -               set_bit(EVENT_XFER_COMPLETE, &host->pending_events);
-> >         }
-> > +
-> > +       set_bit(EVENT_XFER_COMPLETE, &host->pending_events);
-> >  }
-> 
-> This is fairly similar to my patch but goes further.  I believe my
-> patch has this effect but only for the call to dw_mci_stop_dma() in
-> STATE_SENDING_DATA in the tasklet.  Your affects all 3 calls to
-> dw_mci_stop_dma().
-> 
-> This seems reasonable but I don't have confidence in my understanding
-> of this driver's state machine (especially with regards to the error
-> conditions) that I can say which is better.  If you think that this is
-> a more correct solution than mine then we can give it some testing.
-Yes. As a result, both patches prevent tasklet's hanging.
-In that regard, two patches give the similar effect.
-But I think your fix are just removing the test_bit to wait for EVENT_XFER_COMPLETE.
-'clear_bit(...) part which is added might be of no effect.
-It doesn't make sense a bit.
+Sure. Here it is:
 
-<quotation>
- 		case STATE_DATA_ERROR:
--			if (!test_and_clear_bit(EVENT_XFER_COMPLETE,
--						&host->pending_events))
--				break;
--
-+			clear_bit(EVENT_XFER_COMPLETE, &host->pending_events);
-</quotation>
+>From 18f6199947bc2681d2d63b307506019535018646 Mon Sep 17 00:00:00 2001
+From: Hector Palacios <hector.palacios@digi.com>
+Date: Wed, 10 Apr 2013 09:16:31 +0200
+Subject: [PATCH] mmc: mxs-mmc: handle 'broken-cd' property
 
-Thanks,
-Seugwon Jeon
-> 
-> Thanks!
-> 
-> -Doug
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+According to bindings documentation for mmc, the property 'broken-cd'
+can be used to indicate card-detection is not available and polling
+must be used instead. This patch retrieves this property
+and sets a custom flag. On the get_cd() hook, it returns 1 if
+the flag is set, to always assume the card is present.
 
+Signed-off-by: Hector Palacios <hector.palacios@digi.com>
+---
+ drivers/mmc/host/mxs-mmc.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index 75dee88..10c07a8 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -73,6 +73,7 @@ struct mxs_mmc_host {
+        int                             wp_gpio;
+        bool                            wp_inverted;
+        bool                            cd_inverted;
++       bool                            broken_cd;
+        bool                            non_removable;
+ };
+
+@@ -97,7 +98,7 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+        struct mxs_mmc_host *host = mmc_priv(mmc);
+        struct mxs_ssp *ssp = &host->ssp;
+
+-       return host->non_removable ||
++       return host->non_removable || host->broken_cd ||
+                !(readl(ssp->base + HW_SSP_STATUS(ssp)) &
+                  BM_SSP_STATUS_CARD_DETECT) ^ host->cd_inverted;
+ }
+@@ -689,6 +690,7 @@ static int mxs_mmc_probe(struct platform_device 
+*pdev)
+                mmc->caps |= MMC_CAP_4_BIT_DATA;
+        else if (bus_width == 8)
+                mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
++       host->broken_cd = of_property_read_bool(np, "broken-cd");
+        host->non_removable = of_property_read_bool(np, 
+"non-removable");
+        if (host->non_removable)
+                mmc->caps |= MMC_CAP_NONREMOVABLE;
+--
+1.8.2
