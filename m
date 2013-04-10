@@ -1,57 +1,84 @@
 From: Marc Kleine-Budde <mkl@pengutronix.de>
-Subject: [PATCH v3 1/3] mmc: mxs-mmc: add cd-inverted property
-Date: Wed, 10 Apr 2013 11:13:43 +0200
-Message-ID: <1365585225-11360-2-git-send-email-mkl@pengutronix.de>
-References: <1365585225-11360-1-git-send-email-mkl@pengutronix.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:59346 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S936027Ab3DJJOA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Apr 2013 05:14:00 -0400
-In-Reply-To: <1365585225-11360-1-git-send-email-mkl@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: Re: [PATCH v2 2/2] mmc: mxs-mmc: add non-removable property
+Date: Wed, 10 Apr 2013 11:16:15 +0200
+Message-ID: <51652DDF.8000100@pengutronix.de>
+References: <1365166070-9370-1-git-send-email-mkl@pengutronix.de> <1365166070-9370-3-git-send-email-mkl@pengutronix.de> <51643053.7030302@digi.com> <516431F9.8010302@digi.com> <51644302.6000109@pengutronix.de> <516520AA.8030300@digi.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="----enig2EQSCXBSGRPTCXDAGAJSR"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <516520AA.8030300@digi.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Hector Palacios <hector.palacios@digi.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>, "aletes.xgr@gmail.com" <aletes.xgr@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Marek Vasut <marex@denx.de>, Shawn Guo <shawn.guo@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: kernel@pengutronix.de, cjb@laptop.org, Marc Kleine-Budde <mkl@pengutronix.de>
 
-The card-detect GPIO is inverted on some boards. Handle such case.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+------enig2EQSCXBSGRPTCXDAGAJSR
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: quoted-printable
 
-Acked-by: Shawn Guo <shawn.guo@linaro.org>
-Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
----
- drivers/mmc/host/mxs-mmc.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+On 04/10/2013 10:19 AM, Hector Palacios wrote:
+> On Tue 09 Apr 2013 06:34:10 PM CEST, Marc Kleine-Budde wrote:
+>> On 04/09/2013 05:21 PM, Hector Palacios wrote:
+>>> On 04/09/2013 05:14 PM, Hector Palacios wrote:
+>>>> @@ -95,7 +97,8 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+>>>>           struct mxs_mmc_host *host =3D mmc_priv(mmc);
+>>>>           struct mxs_ssp *ssp =3D &host->ssp;
+>>>>
+>>>> -       return !(readl(ssp->base + HW_SSP_STATUS(ssp)) &
+>>>> +       return host->non_removable || host->broken_cd ||
+>>>> +              !(readl(ssp->base + HW_SSP_STATUS(ssp)) &
+>>>>                    BM_SSP_STATUS_CARD_DETECT);
+>>>>    }
+>>>
+>>> Sorry, I missed your original XOR here, when merging my changes:
+>>
+>> Can you send an incremental patch against my 2/2 with your
+>> Signed-off-by, I'll squash your patch into mine and repost the series.=
 
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 4efe302..0cdf1f6 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -72,6 +72,7 @@ struct mxs_mmc_host {
- 	int				sdio_irq_en;
- 	int				wp_gpio;
- 	bool				wp_inverted;
-+	bool				cd_inverted;
- };
- 
- static int mxs_mmc_get_ro(struct mmc_host *mmc)
-@@ -96,7 +97,7 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
- 	struct mxs_ssp *ssp = &host->ssp;
- 
- 	return !(readl(ssp->base + HW_SSP_STATUS(ssp)) &
--		 BM_SSP_STATUS_CARD_DETECT);
-+		 BM_SSP_STATUS_CARD_DETECT)) ^ host->cd_inverted;
- }
- 
- static void mxs_mmc_reset(struct mxs_mmc_host *host)
-@@ -691,6 +692,8 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 	if (flags & OF_GPIO_ACTIVE_LOW)
- 		host->wp_inverted = 1;
- 
-+	host->cd_inverted = of_property_read_bool(np, "cd-inverted");
-+
- 	mmc->f_min = 400000;
- 	mmc->f_max = 288000000;
- 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
--- 
-1.8.2.rc2
+>=20
+> Sure. Here it is:
+>=20
+> From 18f6199947bc2681d2d63b307506019535018646 Mon Sep 17 00:00:00 2001
+> From: Hector Palacios <hector.palacios@digi.com>
+> Date: Wed, 10 Apr 2013 09:16:31 +0200
+> Subject: [PATCH] mmc: mxs-mmc: handle 'broken-cd' property
+>=20
+> According to bindings documentation for mmc, the property 'broken-cd'
+> can be used to indicate card-detection is not available and polling
+> must be used instead. This patch retrieves this property
+> and sets a custom flag. On the get_cd() hook, it returns 1 if
+> the flag is set, to always assume the card is present.
+>=20
+> Signed-off-by: Hector Palacios <hector.palacios@digi.com>
 
+Thanks, your patch description is so good, I'll keep your patch as 3
+and repost the whole series.
+
+Marc
+
+P.S.:
+--=20
+Pengutronix e.K.                  | Marc Kleine-Budde           |
+Industrial Linux Solutions        | Phone: +49-231-2826-924     |
+Vertretung West/Dortmund          | Fax:   +49-5121-206917-5555 |
+Amtsgericht Hildesheim, HRA 2686  | http://www.pengutronix.de   |
+
+
+------enig2EQSCXBSGRPTCXDAGAJSR
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlFlLecACgkQjTAFq1RaXHP10ACaA2KGRg959+/WhqB72oOuOjXm
+SGsAn3xtU3Vo9ZYXimFgXiXFvDu3gnZY
+=orlO
+-----END PGP SIGNATURE-----
+
+------enig2EQSCXBSGRPTCXDAGAJSR--
