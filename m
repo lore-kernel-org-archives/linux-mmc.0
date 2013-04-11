@@ -1,53 +1,39 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v4] mmc: dw_mmc: let device core setup the default pin
- configuration
-Date: Thu, 11 Apr 2013 12:13:09 +0900
-Message-ID: <001101ce3662$7ecb9850$7c62c8f0$%jun@samsung.com>
-References: <1365487186-4587-1-git-send-email-thomas.abraham@linaro.org>
- <CAD=FV=VJ-ykDNqYKQ=fqxeOD6bRNLW02VT4bjsRHRAuXLcCpQQ@mail.gmail.com>
- <CAJuYYwQT=povqiutVHXkF5jxTAnjpwTMQ5G0Z6xKGnnM7qYADQ@mail.gmail.com>
- <CAD=FV=UddWM=yc5N9=jwbMDpZ7Bpg7o3Z714CnBSg=iHhmPxWw@mail.gmail.com>
- <CAD=FV=WyPbkYvq9udPzQtVnaXZR3jzXTPnBrrdxpUuX3CZT=Og@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <CAD=FV=WyPbkYvq9udPzQtVnaXZR3jzXTPnBrrdxpUuX3CZT=Og@mail.gmail.com>
-Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Doug Anderson' <dianders@chromium.org>, 'Thomas Abraham' <thomas.abraham@linaro.org>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'linux-samsung-soc' <linux-samsung-soc@vger.kernel.org>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'Girish Shivananjappa' <girish.shivananjappa@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-arm-kernel@lists.infradead.org, 'Tomasz Figa' <t.figa@samsung.com>, =?Windows-1252?Q?'Heiko_St=FCbner'?= <heiko@sntech.de>, 'Linus Walleij' <linus.walleij@linaro.org>, 'Patch Tracking' <patches@linaro.org>
+From: Yong Li <sdliyong@gmail.com>
+Subject: [PATCH 1/1] mmc: card: If the card does not support CMD23, disable the reliable write
+Date: Thu, 11 Apr 2013 14:31:12 +0800
+Message-ID: <1365661872-32300-1-git-send-email-sdliyong@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pb0-f44.google.com ([209.85.160.44]:38607 "EHLO
+	mail-pb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752350Ab3DKGbz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Apr 2013 02:31:55 -0400
+Received: by mail-pb0-f44.google.com with SMTP id wz12so692156pbc.17
+        for <linux-mmc@vger.kernel.org>; Wed, 10 Apr 2013 23:31:55 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Namjae Jeon <linkinjeon@gmail.com>
+Cc: Yong Li <sdliyong@gmail.com>
 
-On Wednesday, April 10, 2013, Doug Anderson wrote:
-> Thomas,
-> 
-> On Wed, Apr 10, 2013 at 6:56 AM, Doug Anderson <dianders@chromium.org> wrote:
-> > On Wed, Apr 10, 2013 at 5:48 AM, Thomas Abraham
-> > <thomas.abraham@linaro.org> wrote:
-> >> The call to regulator_enable() is prior to the call to mmc_add_host().
-> >> Hence, call to mmc_fre_host is not required in this case. So the above
-> >> change should be right.
-> >
-> > Are you sure that mmc_free_host() is the opposite of mmc_add_host()
-> > and not mmc_alloc_host()?
-> >
-> > I'll double-check myself in a few hours when I'm in front of a computer.
-> 
-> OK, I double checked and I'm still convinced that the free is needed
-> because we've already called mmc_alloc_host().  Current code always
-> makes sure to free when it returns an error and that seems right to
-> me.
-mmc_alloc_host corresponds to mmc_free_host. And mmc_add_host matches
-with mmc_remove_host. Let's focus on mmc_alloc_host.
-mmc_alloc_host is called prior to regulator_enable.
-So, if regulator_enable is failed, call of mmc_free_host makes sense.
 
-Thanks,
-Seungwon Jeon
-> 
-> -Doug
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Signed-off-by: Yong Li <sdliyong@gmail.com>
+---
+ drivers/mmc/card/block.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 21056b9..8039a87 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1175,7 +1175,8 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ 	bool do_rel_wr = ((req->cmd_flags & REQ_FUA) ||
+ 			  (req->cmd_flags & REQ_META)) &&
+ 		(rq_data_dir(req) == WRITE) &&
+-		(md->flags & MMC_BLK_REL_WR);
++		(md->flags & MMC_BLK_REL_WR) &&
++		!(card->quirks & MMC_QUIRK_BLK_NO_CMD23);
+ 
+ 	memset(brq, 0, sizeof(struct mmc_blk_request));
+ 	brq->mrq.cmd = &brq->cmd;
+-- 
+1.7.10.4
+
