@@ -1,133 +1,104 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: [PATCH v5] mmc: dw_mmc: let device core setup the default pin
- configuration
-Date: Thu, 11 Apr 2013 17:54:07 +0530
-Message-ID: <1365683047-8829-1-git-send-email-thomas.abraham@linaro.org>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, girish.shivananjappa@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, linux-arm-kernel@lists.infradead.org, t.figa@samsung.com, heiko@sntech.de, linus.walleij@linaro.org, dianders@chromium.org, patches@linaro.org
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V2 2/2] mmc: block: Enable runtime pm for mmc blkdevice
+Date: Thu, 11 Apr 2013 15:28:02 +0300
+Message-ID: <5166AC52.6090807@intel.com>
+References: <1365421497-4661-1-git-send-email-ulf.hansson@stericsson.com> <516674FC.60704@intel.com> <CAPDyKFq93uPy5tR+GnDf0PKGVooxMytFn46JMe8AVfavbFm3DA@mail.gmail.com> <51668955.7010204@intel.com> <CAPDyKFqf3Ruw8fBzNOiBRN2y8ONxa=W7=MAB-4+5q6c2og=yWQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([143.182.124.37]:63526 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933891Ab3DKMXj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 11 Apr 2013 08:23:39 -0400
+In-Reply-To: <CAPDyKFqf3Ruw8fBzNOiBRN2y8ONxa=W7=MAB-4+5q6c2og=yWQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-With device core now able to setup the default pin configuration,
-the pin configuration code based on the deprecated Samsung specific
-gpio bindings is removed.
+On 11/04/13 13:14, Ulf Hansson wrote:
+> On 11 April 2013 11:58, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 11/04/13 12:40, Ulf Hansson wrote:
+>>> On 11 April 2013 10:31, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>> On 08/04/13 14:44, Ulf Hansson wrote:
+>>>>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>>>>
+>>>>> Once the mmc blkdevice is being probed, runtime pm will be enabled.
+>>>>> By using runtime autosuspend, the power save operations can be done
+>>>>> when request inactivity occurs for a certain time. Right now the
+>>>>> selected timeout value is set to 3 s.
+>>>>>
+>>>>> Moreover, when the blk device is being suspended, we make sure the device
+>>>>> will be runtime resumed. The reason for doing this is that we want the
+>>>>> host suspend sequence to be unaware of any runtime power save operations,
+>>>>> so it can just handle the suspend as the device is fully powered from a
+>>>>> runtime perspective.
+>>>>>
+>>>>> This patch is preparing to make it possible to move BKOPS handling into
+>>>>> the runtime callbacks for the mmc bus_ops. Thus IDLE BKOPS can be
+>>>>> accomplished.
+>>>>>
+>>>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>>>> Acked-by: Maya Erez <merez@codeaurora.org>
+>>>>> Acked-by: Arnd Bergmann <arnd@arndb.de>
+>>>>> Acked-by: Kevin Liu <kliu5@marvell.com>
+>>>>> ---
+>>>>>  drivers/mmc/card/block.c |   28 ++++++++++++++++++++++++++--
+>>>>>  1 file changed, 26 insertions(+), 2 deletions(-)
+>>>>>
+>>>>
+>>>> There are debugfs uses of the card also (e.g.mmc_dbg_card_status_get)
+>>>> that will need get/put added.
+>>>
+>>> In the end it all depends on what kind of operations you decide to do
+>>> in the runtime_supend|resume callbacks.
+>>> Since the callbacks is not yet implemented for sd and mmc, this is not
+>>> required as of now.
+>>>
+>>> Nevertheless a most valid point that needs to be considered, while
+>>> implementing the callbacks. Thanks for pointing this out.
+>>>
+>>>>
+>>>> There might be others.  Please check.
+>>>
+>>> mmc_rescan needs to be considered at card removal and at resume. But,
+>>> again this does not need to be handled as of now.
+>>
+>> I disagree.  If you are adding runtime PM for SD/MMC cards, it must not be
+>> possible to access the card without going through runtime PM first.  That
+>> includes *all* code paths. We should not leave holes for others to fall in.
+>>
+> 
+> This patchset shall not be considered as full blown common solution
+> for runtime pm for mmc/sd/sdio. It is an initial step that we can
+> start build upon.
 
-Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
-Reviewed-by: Doug Anderson <dianders@chromium.org>
-Tested-by: Doug Anderson <dianders@chromium.org>
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
----
-Changes since v4:
-- Fixed the incorrecr return path after error in enabling vmmc regulator
-  as pointed out by Doug.
+That does not justify leaving holes.
 
-Changes since v3:
-- Rebased to the latest mmc-next branch, resolving the compilation
-  error with this patch due to changes in commit f2f942ce
-  "mmc: dw_mmc: Check return value of regulator_enable".
-  Thanks to Doug for pointing out this issue with the v3 patch.
+> I took the approach of only adding, pm_runtime_get|put from the mmc
+> block layer, thus it will also _not_ affect the SDIO pm_runtime
+> implementation, which is already being used today. Adding what you
+> propose will affect SDIO as well, I think it is better to handle this
+> in the next steps instead.
 
- drivers/mmc/host/dw_mmc-exynos.c |   38 --------------------------------------
- drivers/mmc/host/dw_mmc.c        |    8 --------
- drivers/mmc/host/dw_mmc.h        |    3 ---
- 3 files changed, 0 insertions(+), 49 deletions(-)
+I disagree.  SDIO is easily avoided by coding for card->type.
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index c7f0976..f013e7e 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -152,43 +152,6 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
- 	return 0;
- }
- 
--static int dw_mci_exynos_setup_bus(struct dw_mci *host,
--				struct device_node *slot_np, u8 bus_width)
--{
--	int idx, gpio, ret;
--
--	if (!slot_np)
--		return -EINVAL;
--
--	/* cmd + clock + bus-width pins */
--	for (idx = 0; idx < NUM_PINS(bus_width); idx++) {
--		gpio = of_get_gpio(slot_np, idx);
--		if (!gpio_is_valid(gpio)) {
--			dev_err(host->dev, "invalid gpio: %d\n", gpio);
--			return -EINVAL;
--		}
--
--		ret = devm_gpio_request(host->dev, gpio, "dw-mci-bus");
--		if (ret) {
--			dev_err(host->dev, "gpio [%d] request failed\n", gpio);
--			return -EBUSY;
--		}
--	}
--
--	if (host->pdata->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
--		return 0;
--
--	gpio = of_get_named_gpio(slot_np, "samsung,cd-pinmux-gpio", 0);
--	if (gpio_is_valid(gpio)) {
--		if (devm_gpio_request(host->dev, gpio, "dw-mci-cd"))
--			dev_err(host->dev, "gpio [%d] request failed\n", gpio);
--	} else {
--		dev_info(host->dev, "cd gpio not available");
--	}
--
--	return 0;
--}
--
- /* Common capabilities of Exynos4/Exynos5 SoC */
- static unsigned long exynos_dwmmc_caps[4] = {
- 	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
-@@ -205,7 +168,6 @@ static const struct dw_mci_drv_data exynos_drv_data = {
- 	.prepare_command	= dw_mci_exynos_prepare_command,
- 	.set_ios		= dw_mci_exynos_set_ios,
- 	.parse_dt		= dw_mci_exynos_parse_dt,
--	.setup_bus		= dw_mci_exynos_setup_bus,
- };
- 
- static const struct of_device_id dw_mci_exynos_match[] = {
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 45d9216..bc3a1bc 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1952,14 +1952,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	else
- 		bus_width = 1;
- 
--	if (drv_data && drv_data->setup_bus) {
--		struct device_node *slot_np;
--		slot_np = dw_mci_of_find_slot_node(host->dev, slot->id);
--		ret = drv_data->setup_bus(host, slot_np, bus_width);
--		if (ret)
--			goto err_setup_bus;
--	}
--
- 	switch (bus_width) {
- 	case 8:
- 		mmc->caps |= MMC_CAP_8_BIT_DATA;
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 53b8fd9..0b74189 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -190,7 +190,6 @@ extern int dw_mci_resume(struct dw_mci *host);
-  * @prepare_command: handle CMD register extensions.
-  * @set_ios: handle bus specific extensions.
-  * @parse_dt: parse implementation specific device tree properties.
-- * @setup_bus: initialize io-interface
-  *
-  * Provide controller implementation specific extensions. The usage of this
-  * data structure is fully optional and usage of each member in this structure
-@@ -203,7 +202,5 @@ struct dw_mci_drv_data {
- 	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
- 	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
- 	int		(*parse_dt)(struct dw_mci *host);
--	int		(*setup_bus)(struct dw_mci *host,
--				struct device_node *slot_np, u8 bus_width);
- };
- #endif /* _DW_MMC_H_ */
--- 
-1.6.6.rc2
+Fix debugfs handling.
+
+Don't enable runtime pm for removable cards.  Document why i.e. rescan of
+removable cards needs special handling depending on the power-saving
+strategy e.g. if the power is off there is a risk of confusing a new card
+with an old card.
+
+That covers two omissions that we know about.  Check for others -
+essentially check all mmc_claim_host() / __mmc_claim_host() /
+mmc_try_claim_host() calls.
+
+SD-Combo cards also look like a problem, so don't enable runtime pm for them
+either.
+
+Document what works (i.e. non-removable SD and MMC cards) and what doesn't
+(removable and SD-Combo cards) and why.
+
+
