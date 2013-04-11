@@ -1,199 +1,253 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH 00/30] ARM: exynos multiplatform support
-Date: Thu, 11 Apr 2013 02:04:42 +0200
-Message-ID: <1365638712-1028578-1-git-send-email-arnd@arndb.de>
-Return-path: <linux-pm-owner@vger.kernel.org>
-Sender: linux-pm-owner@vger.kernel.org
+Subject: [PATCH 09/30] mmc: sdhci-s3c: remove platform dependencies
+Date: Thu, 11 Apr 2013 02:04:51 +0200
+Message-ID: <1365638712-1028578-10-git-send-email-arnd@arndb.de>
+References: <1365638712-1028578-1-git-send-email-arnd@arndb.de>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1365638712-1028578-1-git-send-email-arnd@arndb.de>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org
-Cc: linux-kernel@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>, linux-samsung-soc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, stern@rowland.harvard.edu, a.zummo@towertech.it, ben-linux@fluff.org, cjb@laptop.org, dwmw2@infradead.org, grant.likely@secretlab.ca, gregkh@linuxfoundation.org, jg1.han@samsung.com, john.stultz@linaro.org, broonie@opensource.wolfsonmicro.com, mchehab@redhat.com, mturquette@linaro.org, padma.kvr@gmail.com, thierry.reding@avionic-design.de, tglx@linutronix.de, t.figa@samsung.com, wsa@the-dreams.de, rui.zhang@intel.com, alsa-devel@alsa-project.org, linux-fbdev@vger.kernel.org, linux-i2c@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pm@vger.kernel.org, linux-serial@vger.kernel.org, linux-usb@vger.kernel.org, rtc-linux@googlegroups.com, spi-devel-general@lists.sourceforge.net
+Cc: linux-kernel@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>, linux-samsung-soc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi everyone,
+plat/regs-sdhci.h is not used anywhere but in the sdhci-s3c
+driver, so it can become a local file there and all other
+inclusions removed.
 
-I have updated my series for multiplatform support of the ARM exynos
-platform, based on what is currently queued up in arm-soc.
+plat/sdhci.h is used only to define the platform devices,
+and with the exception of the platform_data structure not
+needed by the driver, so we can split out the platform_data
+definition instead and leave the rest to platform code.
 
-It would be really nice to still get this merged for 3.10. A lot of
-the patches are really trivial, but there are some complex ones
-as well.
-
-To all subsystem maintainers: feel free to directly apply the patches
-for your subsystem, there should be no dependencies between any of them,
-aside from the last patch requiring all of the earlier ones to be applied
-first. Getting an Ack is also fine so we can put the patches into arm-soc.
-
-	Arnd
-
-Arnd Bergmann (30):
-  ARM: exynos: introduce EXYNOS_ATAGS symbol
-  ARM: exynos: prepare for sparse IRQ
-  ARM: exynos: move debug-macro.S to include/debug/
-  ARM: samsung: move mfc device definition to s5p-dev-mfc.c
-  tty: serial/samsung: prepare for common clock API
-  tty: serial/samsung: make register definitions global
-  tty: serial/samsung: fix modular build
-  i2c: s3c2410: make header file local
-  mmc: sdhci-s3c: remove platform dependencies
-  usb: exynos: do not include plat/usb-phy.h
-  [media] exynos: remove unnecessary header inclusions
-  video/exynos: remove unnecessary header inclusions
-  video/s3c: move platform_data out of arch/arm
-  thermal/exynos: remove unnecessary header inclusions
-  mtd: onenand/samsung: make regs-onenand.h file local
-  rtc: s3c: make header file local
-  pwm: samsung: repair the worst MMIO abuses
-  ASoC: samsung: move plat/ headers to local directory
-  ASoC: samsung: use irq resource for idma
-  ASoC: samsung: convert to dmaengine API
-  ASoC: samsung/i2s: fix module_device_table
-  ASoC: samsung/idma: export idma_reg_addr_init
-  clk: exynos: prepare for multiplatform
-  clocksource: exynos_mct: remove platform header dependency
-  irqchip: exynos: pass max combiner number to combiner_init
-  irqchip: exynos: allocate combiner_data dynamically
-  irqchip: exynos: localize irq lookup for ATAGS
-  irqchip: exynos: pass irq_base from platform
-  spi: s3c64xx: move to generic dmaengine API
-  ARM: exynos: enable multiplatform support
-
- arch/arm/Kconfig                                   |  10 +-
- arch/arm/Kconfig.debug                             |   8 +
- arch/arm/configs/exynos4_defconfig                 |   2 +-
- .../mach/debug-macro.S => include/debug/exynos.S}  |  12 +-
- .../plat/debug-macro.S => include/debug/samsung.S} |   2 +-
- arch/arm/mach-exynos/Kconfig                       |  40 ++-
- arch/arm/mach-exynos/Makefile                      |   5 +-
- arch/arm/mach-exynos/common.c                      |  26 +-
- arch/arm/mach-exynos/common.h                      |   7 +-
- arch/arm/mach-exynos/dev-uart.c                    |   1 +
- arch/arm/mach-exynos/include/mach/irqs.h           |   5 +-
- arch/arm/mach-exynos/mach-armlex4210.c             |   2 +
- arch/arm/mach-exynos/mach-exynos4-dt.c             |   3 +
- arch/arm/mach-exynos/mach-exynos5-dt.c             |   2 +
- arch/arm/mach-exynos/mach-nuri.c                   |   2 +
- arch/arm/mach-exynos/mach-origen.c                 |   2 +
- arch/arm/mach-exynos/mach-smdk4x12.c               |   2 +
- arch/arm/mach-exynos/mach-smdkv310.c               |   3 +
- arch/arm/mach-exynos/setup-sdhci-gpio.c            |   2 +-
- arch/arm/mach-exynos/setup-usb-phy.c               |   8 +-
- arch/arm/mach-s3c24xx/clock-s3c2440.c              |   5 +
- arch/arm/mach-s3c24xx/common.c                     |   5 +
- arch/arm/mach-s3c24xx/dma-s3c2410.c                |   2 -
- arch/arm/mach-s3c24xx/dma-s3c2412.c                |   2 -
- arch/arm/mach-s3c24xx/dma-s3c2440.c                |   2 -
- arch/arm/mach-s3c24xx/dma-s3c2443.c                |   2 -
- arch/arm/mach-s3c24xx/include/mach/debug-macro.S   |   2 +-
- arch/arm/mach-s3c24xx/mach-rx1950.c                |   1 -
- arch/arm/mach-s3c64xx/include/mach/debug-macro.S   |   2 +-
- arch/arm/mach-s3c64xx/setup-usb-phy.c              |   4 +-
- arch/arm/mach-s5p64x0/include/mach/debug-macro.S   |   2 +-
- arch/arm/mach-s5pc100/include/mach/debug-macro.S   |   2 +-
- arch/arm/mach-s5pc100/setup-sdhci-gpio.c           |   1 -
- arch/arm/mach-s5pv210/include/mach/debug-macro.S   |   2 +-
- arch/arm/mach-s5pv210/setup-sdhci-gpio.c           |   1 -
- arch/arm/mach-s5pv210/setup-usb-phy.c              |   4 +-
- arch/arm/plat-samsung/Kconfig                      |   7 +-
- arch/arm/plat-samsung/Makefile                     |   8 +-
- arch/arm/plat-samsung/devs.c                       |  62 ++---
- arch/arm/plat-samsung/include/plat/fb.h            |  50 +---
- arch/arm/plat-samsung/include/plat/pm.h            |   5 +
- arch/arm/plat-samsung/include/plat/regs-serial.h   | 282 +--------------------
- arch/arm/plat-samsung/include/plat/sdhci.h         |  56 +---
- arch/arm/plat-samsung/include/plat/usb-phy.h       |   5 +-
- arch/arm/plat-samsung/irq-vic-timer.c              |   1 +
- arch/arm/plat-samsung/pm.c                         |   1 +
- arch/arm/plat-samsung/s5p-dev-mfc.c                |  42 ++-
- arch/arm/plat-samsung/s5p-irq.c                    |   1 +
- drivers/clk/samsung/clk-exynos4.c                  |  93 +++----
- drivers/clk/samsung/clk-exynos5250.c               |   1 -
- drivers/clk/samsung/clk-exynos5440.c               |   1 -
- drivers/clk/samsung/clk.h                          |   2 -
- drivers/clocksource/exynos_mct.c                   |  21 +-
- drivers/gpio/Makefile                              |   2 +-
- drivers/i2c/busses/i2c-s3c2410.c                   |   3 +-
- .../regs-iic.h => drivers/i2c/busses/i2c-s3c2410.h |   0
- drivers/irqchip/exynos-combiner.c                  | 116 +++++----
- drivers/media/platform/exynos-gsc/gsc-regs.c       |   1 -
- drivers/media/platform/s5p-tv/sii9234_drv.c        |   3 -
- drivers/mmc/host/Kconfig                           |   2 +-
- .../mmc/host/sdhci-s3c-regs.h                      |   0
- drivers/mmc/host/sdhci-s3c.c                       |   5 +-
- drivers/mtd/onenand/samsung.c                      |   4 +-
- .../mtd/onenand/samsung.h                          |   2 -
- drivers/pwm/pwm-samsung.c                          |  60 +++--
- drivers/rtc/rtc-s3c.c                              |   3 +-
- .../plat/regs-rtc.h => drivers/rtc/rtc-s3c.h       |   3 +-
- drivers/spi/spi-s3c64xx.c                          | 185 ++++++++++----
- drivers/thermal/exynos_thermal.c                   |   2 -
- drivers/tty/serial/samsung.c                       |  17 +-
- drivers/tty/serial/samsung.h                       |   4 +-
- drivers/usb/host/ehci-s5p.c                        |   1 -
- drivers/usb/host/ohci-exynos.c                     |   1 -
- drivers/video/exynos/exynos_mipi_dsi.c             |   2 -
- drivers/video/exynos/exynos_mipi_dsi_common.c      |   2 -
- drivers/video/exynos/exynos_mipi_dsi_lowlevel.c    |   2 -
- drivers/video/s3c-fb.c                             |   3 +-
- include/linux/platform_data/mmc-sdhci-s3c.h        |  56 ++++
- include/linux/platform_data/spi-s3c64xx.h          |   3 +
- include/linux/platform_data/video_s3c.h            |  54 ++++
- include/linux/serial_s3c.h                         | 260 +++++++++++++++++++
- sound/soc/samsung/ac97.c                           |   2 +-
- sound/soc/samsung/dma.c                            | 219 ++++++++++++++++
- sound/soc/samsung/dma.h                            |  15 +-
- sound/soc/samsung/h1940_uda1380.c                  |   2 +-
- sound/soc/samsung/i2s.c                            |   4 +-
- sound/soc/samsung/idma.c                           |  11 +-
- sound/soc/samsung/neo1973_wm8753.c                 |   2 +-
- sound/soc/samsung/pcm.c                            |   1 -
- .../include/plat => sound/soc/samsung}/regs-ac97.h |   0
- .../include/plat => sound/soc/samsung}/regs-iis.h  |   0
- sound/soc/samsung/rx1950_uda1380.c                 |   2 +-
- sound/soc/samsung/s3c24xx-i2s.c                    |   2 +-
- sound/soc/samsung/s3c24xx_uda134x.c                |   2 +-
- sound/soc/samsung/spdif.c                          |   1 -
- 95 files changed, 1146 insertions(+), 734 deletions(-)
- rename arch/arm/{mach-exynos/include/mach/debug-macro.S => include/debug/exynos.S} (84%)
- rename arch/arm/{plat-samsung/include/plat/debug-macro.S => include/debug/samsung.S} (98%)
- rename arch/arm/plat-samsung/include/plat/regs-iic.h => drivers/i2c/busses/i2c-s3c2410.h (100%)
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>
+---
+ arch/arm/mach-exynos/setup-sdhci-gpio.c            |  2 +-
+ arch/arm/mach-s5pc100/setup-sdhci-gpio.c           |  1 -
+ arch/arm/mach-s5pv210/setup-sdhci-gpio.c           |  1 -
+ arch/arm/plat-samsung/include/plat/sdhci.h         | 56 +---------------------
+ drivers/mmc/host/Kconfig                           |  2 +-
+ .../mmc/host/sdhci-s3c-regs.h                      |  0
+ drivers/mmc/host/sdhci-s3c.c                       |  5 +-
+ include/linux/platform_data/mmc-sdhci-s3c.h        | 56 ++++++++++++++++++++++
+ 8 files changed, 61 insertions(+), 62 deletions(-)
  rename arch/arm/plat-samsung/include/plat/regs-sdhci.h => drivers/mmc/host/sdhci-s3c-regs.h (100%)
- rename arch/arm/plat-samsung/include/plat/regs-onenand.h => drivers/mtd/onenand/samsung.h (98%)
- rename arch/arm/plat-samsung/include/plat/regs-rtc.h => drivers/rtc/rtc-s3c.h (97%)
  create mode 100644 include/linux/platform_data/mmc-sdhci-s3c.h
- create mode 100644 include/linux/platform_data/video_s3c.h
- create mode 100644 include/linux/serial_s3c.h
- rename {arch/arm/plat-samsung/include/plat => sound/soc/samsung}/regs-ac97.h (100%)
- rename {arch/arm/plat-samsung/include/plat => sound/soc/samsung}/regs-iis.h (100%)
 
+diff --git a/arch/arm/mach-exynos/setup-sdhci-gpio.c b/arch/arm/mach-exynos/setup-sdhci-gpio.c
+index e8d08bf..d5b98c8 100644
+--- a/arch/arm/mach-exynos/setup-sdhci-gpio.c
++++ b/arch/arm/mach-exynos/setup-sdhci-gpio.c
+@@ -19,8 +19,8 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/card.h>
+ 
++#include <mach/gpio.h>
+ #include <plat/gpio-cfg.h>
+-#include <plat/regs-sdhci.h>
+ #include <plat/sdhci.h>
+ 
+ void exynos4_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
+diff --git a/arch/arm/mach-s5pc100/setup-sdhci-gpio.c b/arch/arm/mach-s5pc100/setup-sdhci-gpio.c
+index 03c02d0..6010c03 100644
+--- a/arch/arm/mach-s5pc100/setup-sdhci-gpio.c
++++ b/arch/arm/mach-s5pc100/setup-sdhci-gpio.c
+@@ -19,7 +19,6 @@
+ #include <linux/mmc/card.h>
+ 
+ #include <plat/gpio-cfg.h>
+-#include <plat/regs-sdhci.h>
+ #include <plat/sdhci.h>
+ 
+ void s5pc100_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
+diff --git a/arch/arm/mach-s5pv210/setup-sdhci-gpio.c b/arch/arm/mach-s5pv210/setup-sdhci-gpio.c
+index 3e3ac05..0512ada 100644
+--- a/arch/arm/mach-s5pv210/setup-sdhci-gpio.c
++++ b/arch/arm/mach-s5pv210/setup-sdhci-gpio.c
+@@ -20,7 +20,6 @@
+ #include <linux/mmc/card.h>
+ 
+ #include <plat/gpio-cfg.h>
+-#include <plat/regs-sdhci.h>
+ #include <plat/sdhci.h>
+ 
+ void s5pv210_setup_sdhci0_cfg_gpio(struct platform_device *dev, int width)
+diff --git a/arch/arm/plat-samsung/include/plat/sdhci.h b/arch/arm/plat-samsung/include/plat/sdhci.h
+index 5560586..ce1d0f7 100644
+--- a/arch/arm/plat-samsung/include/plat/sdhci.h
++++ b/arch/arm/plat-samsung/include/plat/sdhci.h
+@@ -18,62 +18,9 @@
+ #ifndef __PLAT_S3C_SDHCI_H
+ #define __PLAT_S3C_SDHCI_H __FILE__
+ 
++#include <linux/platform_data/mmc-sdhci-s3c.h>
+ #include <plat/devs.h>
+ 
+-struct platform_device;
+-struct mmc_host;
+-struct mmc_card;
+-struct mmc_ios;
+-
+-enum cd_types {
+-	S3C_SDHCI_CD_INTERNAL,	/* use mmc internal CD line */
+-	S3C_SDHCI_CD_EXTERNAL,	/* use external callback */
+-	S3C_SDHCI_CD_GPIO,	/* use external gpio pin for CD line */
+-	S3C_SDHCI_CD_NONE,	/* no CD line, use polling to detect card */
+-	S3C_SDHCI_CD_PERMANENT,	/* no CD line, card permanently wired to host */
+-};
+-
+-/**
+- * struct s3c_sdhci_platdata() - Platform device data for Samsung SDHCI
+- * @max_width: The maximum number of data bits supported.
+- * @host_caps: Standard MMC host capabilities bit field.
+- * @host_caps2: The second standard MMC host capabilities bit field.
+- * @cd_type: Type of Card Detection method (see cd_types enum above)
+- * @ext_cd_init: Initialize external card detect subsystem. Called on
+- *		 sdhci-s3c driver probe when cd_type == S3C_SDHCI_CD_EXTERNAL.
+- *		 notify_func argument is a callback to the sdhci-s3c driver
+- *		 that triggers the card detection event. Callback arguments:
+- *		 dev is pointer to platform device of the host controller,
+- *		 state is new state of the card (0 - removed, 1 - inserted).
+- * @ext_cd_cleanup: Cleanup external card detect subsystem. Called on
+- *		 sdhci-s3c driver remove when cd_type == S3C_SDHCI_CD_EXTERNAL.
+- *		 notify_func argument is the same callback as for ext_cd_init.
+- * @ext_cd_gpio: gpio pin used for external CD line, valid only if
+- *		 cd_type == S3C_SDHCI_CD_GPIO
+- * @ext_cd_gpio_invert: invert values for external CD gpio line
+- * @cfg_gpio: Configure the GPIO for a specific card bit-width
+- *
+- * Initialisation data specific to either the machine or the platform
+- * for the device driver to use or call-back when configuring gpio or
+- * card speed information.
+-*/
+-struct s3c_sdhci_platdata {
+-	unsigned int	max_width;
+-	unsigned int	host_caps;
+-	unsigned int	host_caps2;
+-	unsigned int	pm_caps;
+-	enum cd_types	cd_type;
+-
+-	int		ext_cd_gpio;
+-	bool		ext_cd_gpio_invert;
+-	int	(*ext_cd_init)(void (*notify_func)(struct platform_device *,
+-						   int state));
+-	int	(*ext_cd_cleanup)(void (*notify_func)(struct platform_device *,
+-						      int state));
+-
+-	void	(*cfg_gpio)(struct platform_device *dev, int width);
+-};
+-
+ /* s3c_sdhci_set_platdata() - common helper for setting SDHCI platform data
+  * @pd: The default platform data for this device.
+  * @set: Pointer to the platform data to fill in.
+@@ -378,5 +325,4 @@ static inline void s3c_sdhci_setname(int id, char *name)
+ 		break;
+ 	}
+ }
+-
+ #endif /* __PLAT_S3C_SDHCI_H */
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index d88219e..d054744 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -180,7 +180,7 @@ config MMC_SDHCI_TEGRA
+ 
+ config MMC_SDHCI_S3C
+ 	tristate "SDHCI support on Samsung S3C SoC"
+-	depends on MMC_SDHCI && PLAT_SAMSUNG
++	depends on MMC_SDHCI && PLAT_SAMSUNG_SINGLE
+ 	help
+ 	  This selects the Secure Digital Host Controller Interface (SDHCI)
+ 	  often referrered to as the HSMMC block in some of the Samsung S3C
+diff --git a/arch/arm/plat-samsung/include/plat/regs-sdhci.h b/drivers/mmc/host/sdhci-s3c-regs.h
+similarity index 100%
+rename from arch/arm/plat-samsung/include/plat/regs-sdhci.h
+rename to drivers/mmc/host/sdhci-s3c-regs.h
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 7363efe..e4f52b5 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -15,6 +15,7 @@
+ #include <linux/delay.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/platform_device.h>
++#include <linux/platform_data/mmc-sdhci-s3c.h>
+ #include <linux/slab.h>
+ #include <linux/clk.h>
+ #include <linux/io.h>
+@@ -28,9 +29,7 @@
+ 
+ #include <linux/mmc/host.h>
+ 
+-#include <plat/sdhci.h>
+-#include <plat/regs-sdhci.h>
+-
++#include "sdhci-s3c-regs.h"
+ #include "sdhci.h"
+ 
+ #define MAX_BUS_CLK	(4)
+diff --git a/include/linux/platform_data/mmc-sdhci-s3c.h b/include/linux/platform_data/mmc-sdhci-s3c.h
+new file mode 100644
+index 0000000..249f023
+--- /dev/null
++++ b/include/linux/platform_data/mmc-sdhci-s3c.h
+@@ -0,0 +1,56 @@
++#ifndef __PLATFORM_DATA_SDHCI_S3C_H
++#define __PLATFORM_DATA_SDHCI_S3C_H
++
++struct platform_device;
++
++enum cd_types {
++	S3C_SDHCI_CD_INTERNAL,	/* use mmc internal CD line */
++	S3C_SDHCI_CD_EXTERNAL,	/* use external callback */
++	S3C_SDHCI_CD_GPIO,	/* use external gpio pin for CD line */
++	S3C_SDHCI_CD_NONE,	/* no CD line, use polling to detect card */
++	S3C_SDHCI_CD_PERMANENT,	/* no CD line, card permanently wired to host */
++};
++
++/**
++ * struct s3c_sdhci_platdata() - Platform device data for Samsung SDHCI
++ * @max_width: The maximum number of data bits supported.
++ * @host_caps: Standard MMC host capabilities bit field.
++ * @host_caps2: The second standard MMC host capabilities bit field.
++ * @cd_type: Type of Card Detection method (see cd_types enum above)
++ * @ext_cd_init: Initialize external card detect subsystem. Called on
++ *		 sdhci-s3c driver probe when cd_type == S3C_SDHCI_CD_EXTERNAL.
++ *		 notify_func argument is a callback to the sdhci-s3c driver
++ *		 that triggers the card detection event. Callback arguments:
++ *		 dev is pointer to platform device of the host controller,
++ *		 state is new state of the card (0 - removed, 1 - inserted).
++ * @ext_cd_cleanup: Cleanup external card detect subsystem. Called on
++ *		 sdhci-s3c driver remove when cd_type == S3C_SDHCI_CD_EXTERNAL.
++ *		 notify_func argument is the same callback as for ext_cd_init.
++ * @ext_cd_gpio: gpio pin used for external CD line, valid only if
++ *		 cd_type == S3C_SDHCI_CD_GPIO
++ * @ext_cd_gpio_invert: invert values for external CD gpio line
++ * @cfg_gpio: Configure the GPIO for a specific card bit-width
++ *
++ * Initialisation data specific to either the machine or the platform
++ * for the device driver to use or call-back when configuring gpio or
++ * card speed information.
++*/
++struct s3c_sdhci_platdata {
++	unsigned int	max_width;
++	unsigned int	host_caps;
++	unsigned int	host_caps2;
++	unsigned int	pm_caps;
++	enum cd_types	cd_type;
++
++	int		ext_cd_gpio;
++	bool		ext_cd_gpio_invert;
++	int	(*ext_cd_init)(void (*notify_func)(struct platform_device *,
++						   int state));
++	int	(*ext_cd_cleanup)(void (*notify_func)(struct platform_device *,
++						      int state));
++
++	void	(*cfg_gpio)(struct platform_device *dev, int width);
++};
++
++
++#endif /* __PLATFORM_DATA_SDHCI_S3C_H */
 -- 
 1.8.1.2
-
-Cc: stern@rowland.harvard.edu
-Cc: a.zummo@towertech.it
-Cc: ben-linux@fluff.org
-Cc: cjb@laptop.org
-Cc: dwmw2@infradead.org
-Cc: grant.likely@secretlab.ca
-Cc: gregkh@linuxfoundation.org
-Cc: jg1.han@samsung.com
-Cc: john.stultz@linaro.org
-Cc: broonie@opensource.wolfsonmicro.com
-Cc: mchehab@redhat.com
-Cc: mturquette@linaro.org
-Cc: padma.kvr@gmail.com
-Cc: thierry.reding@avionic-design.de
-Cc: tglx@linutronix.de
-Cc: t.figa@samsung.com
-Cc: wsa@the-dreams.de
-Cc: rui.zhang@intel.com
-Cc: alsa-devel@alsa-project.org
-Cc: linux-fbdev@vger.kernel.org
-Cc: linux-i2c@vger.kernel.org
-Cc: linux-media@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-mtd@lists.infradead.org
-Cc: linux-pm@vger.kernel.org
-Cc: linux-serial@vger.kernel.org
-Cc: linux-usb@vger.kernel.org
-Cc: rtc-linux@googlegroups.com
-Cc: spi-devel-general@lists.sourceforge.net
-.
