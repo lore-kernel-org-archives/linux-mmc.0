@@ -1,50 +1,117 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3 0/5] mmc: mxcmmc: add mpc512x support
-Date: Fri, 12 Apr 2013 15:14:16 -0400
-Message-ID: <87bo9jblyv.fsf@octavius.laptop.org>
-References: <1365456489-13152-1-git-send-email-agust@denx.de>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Steve Magnani <smagnani@iscandar.digidescorp.com>
+Subject: [PATCH] mmc: debugfs: Add debugfs ability to read CID and CSD
+Date: Fri, 12 Apr 2013 14:46:53 -0500
+Message-ID: <1365796013-11399-1-git-send-email-smagnani@iscandar.digidescorp.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41889 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751504Ab3DLTOU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 12 Apr 2013 15:14:20 -0400
-In-Reply-To: <1365456489-13152-1-git-send-email-agust@denx.de> (Anatolij
-	Gustschin's message of "Mon, 8 Apr 2013 23:28:04 +0200")
+Received: from mail.digidescorp.com ([50.73.98.161]:18308 "EHLO
+	mail.digidescorp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752866Ab3DLT4l (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Apr 2013 15:56:41 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anatolij Gustschin <agust@denx.de>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Sascha Hauer <s.hauer@pengutronix.de>, Markus Pargmann <mpa@pengutronix.de>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "Steven J. Magnani" <steve@digidescorp.com>
 
-Hi,
+Adds 'cid' and 'csd' debugfs entries for SD/MMC devices that allow
+userland to obtain the values of the corresponding device registers.
 
-On Mon, Apr 08 2013, Anatolij Gustschin wrote:
-> The SDHC controller on mpc512x is compatible with i.MX31 SDHC
-> controller, the existing MMC host driver can be used on
-> mpc512x with some modifications, the patch series extends
-> the existing driver. It is based on the following v3 mxcmmc DT
-> support patch:
->
->    https://patchwork.kernel.org/patch/2368631
->
-> Changes in v3 series are mentioned in each patch
->
-> Anatolij Gustschin (5):
->   mmc: mxcmmc: fix race conditions for host->req and host->data access
->   mmc: mxcmmc: add mpc512x SDHC support
->   mmc: mxcmmc: use slot-gpio API for write-protect detection
->   mmc: mxcmmc: constify mxcmci_devtype
->   mmc: mxcmmc: enable DMA support on mpc512x
->
->  arch/powerpc/boot/dts/mpc5121.dtsi |    2 +
->  drivers/mmc/host/Kconfig           |   10 +-
->  drivers/mmc/host/mxcmmc.c          |  209 ++++++++++++++++++++++++++----------
->  3 files changed, 159 insertions(+), 62 deletions(-)
+Signed-off-by: Steven J. Magnani <steve@digidescorp.com>
+---
+--- a/drivers/mmc/core/debugfs.c	2013-04-12 07:39:22.532586948 -0500
++++ b/drivers/mmc/core/debugfs.c	2013-04-12 07:40:14.513331587 -0500
+@@ -321,7 +321,7 @@ static ssize_t mmc_ext_csd_read(struct f
+ 				       buf, EXT_CSD_STR_LEN);
+ }
+ 
+-static int mmc_ext_csd_release(struct inode *inode, struct file *file)
++static int mmc_dbg_buf_release(struct inode *inode, struct file *file)
+ {
+ 	kfree(file->private_data);
+ 	return 0;
+@@ -330,7 +330,65 @@ static int mmc_ext_csd_release(struct in
+ static const struct file_operations mmc_dbg_ext_csd_fops = {
+ 	.open		= mmc_ext_csd_open,
+ 	.read		= mmc_ext_csd_read,
+-	.release	= mmc_ext_csd_release,
++	.release	= mmc_dbg_buf_release,
++	.llseek		= default_llseek,
++};
++
++/* CSD and CID have the same length and so can be handled much the same */
++#define CXD_STR_LEN 33
++
++static int mmc_cxd_open(struct file *filp, u32 *raw_cxd)
++{
++	char *buf;
++	ssize_t n = 0;
++	int i;
++
++	buf = kmalloc(CXD_STR_LEN + 1, GFP_KERNEL);
++	if (!buf)
++		return -ENOMEM;
++
++	for (i = 0; i < 4; i++)
++		n += sprintf(buf + n, "%08x", raw_cxd[i]);
++	n += sprintf(buf + n, "\n");
++	BUG_ON(n != CXD_STR_LEN);
++
++	filp->private_data = buf;
++	return 0;
++}
++
++static ssize_t mmc_cxd_read(struct file *filp, char __user *ubuf,
++				size_t cnt, loff_t *ppos)
++{
++	char *buf = filp->private_data;
++
++	return simple_read_from_buffer(ubuf, cnt, ppos,
++				       buf, CXD_STR_LEN);
++}
++
++static int mmc_csd_open(struct inode *inode, struct file *filp)
++{
++	struct mmc_card *card = inode->i_private;
++	return mmc_cxd_open(filp, card->raw_csd);
++}
++
++static const struct file_operations mmc_dbg_csd_fops = {
++	.open		= mmc_csd_open,
++	.read		= mmc_cxd_read,
++	.release	= mmc_dbg_buf_release,
++	.llseek		= default_llseek,
++};
++
++
++static int mmc_cid_open(struct inode *inode, struct file *filp)
++{
++	struct mmc_card *card = inode->i_private;
++	return mmc_cxd_open(filp, card->raw_cid);
++}
++
++static const struct file_operations mmc_dbg_cid_fops = {
++	.open		= mmc_cid_open,
++	.read		= mmc_cxd_read,
++	.release	= mmc_dbg_buf_release,
+ 	.llseek		= default_llseek,
+ };
+ 
+@@ -356,10 +414,17 @@ void mmc_add_card_debugfs(struct mmc_car
+ 	if (!debugfs_create_x32("state", S_IRUSR, root, &card->state))
+ 		goto err;
+ 
+-	if (mmc_card_mmc(card) || mmc_card_sd(card))
++	if (mmc_card_mmc(card) || mmc_card_sd(card)) {
+ 		if (!debugfs_create_file("status", S_IRUSR, root, card,
+ 					&mmc_dbg_card_status_fops))
+ 			goto err;
++		if (!debugfs_create_file("csd", S_IRUSR, root, card,
++					&mmc_dbg_csd_fops))
++			goto err;
++		if (!debugfs_create_file("cid", S_IRUSR, root, card,
++					&mmc_dbg_cid_fops))
++			goto err;
++	}
+ 
+ 	if (mmc_card_mmc(card))
+ 		if (!debugfs_create_file("ext_csd", S_IRUSR, root, card,
 
-Thanks, all pushed to mmc-next for 3.10.
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
