@@ -1,41 +1,84 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH] mmc: dw_mmc: exynos: Turn SDIO interrupts on
-Date: Thu, 11 Apr 2013 09:38:58 -0700
-Message-ID: <1365698338-27503-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Thomas Abraham <thomas.abraham@linaro.org>, Bing Zhao <bzhao@marvell.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Sachin Kamat <sachin.kamat@linaro.org>, Olof Johansson <olof@lixom.net>, Doug Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Andreas Fenkart <andreas.fenkart@streamunlimited.com>
+Subject: [PATCH v2 0/3] omap_hsmmc: SDIO IRQ on AM335x family
+Date: Fri, 12 Apr 2013 14:38:24 +0200
+Message-ID: <1365770307-19859-1-git-send-email-andreas.fenkart@streamunlimited.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.gmx.net ([212.227.17.22]:51253 "EHLO mout.gmx.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753304Ab3DLMil (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 12 Apr 2013 08:38:41 -0400
+Received: from mailout-de.gmx.net ([10.1.76.1]) by mrigmx.server.lan
+ (mrigmx001) with ESMTP (Nemesis) id 0MSFoz-1TyyQl2qNP-00TQI4 for
+ <linux-mmc@vger.kernel.org>; Fri, 12 Apr 2013 14:38:40 +0200
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: tony@atomide.com
+Cc: cjb@laptop.org, arnd@arndb.de, svenkatr@ti.com, balajitk@ti.com, grant.likely@secretlab.ca, linux-mmc@vger.kernel.org, rob@landley.net, linux-omap@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, zonque@gmail.com, Andreas Fenkart <andreas.fenkart@streamunlimited.com>
 
-The mmc part in exynos supports SDIO interrupts and they work fine, so
-turn the capability on.  With this I see download speeds increase
-about 10x.  This is a port of a change present in the Chrome OS tree
-that can be found at <https://gerrit.chromium.org/gerrit/#/c/26729/>.
+This is a resend of an earlier patch
+http://comments.gmane.org/gmane.linux.ports.arm.omap/90381
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
- drivers/mmc/host/dw_mmc-exynos.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+It's rebased against Linux 3.9-rc6 / 31880c37c11e28cb8
+Main changes are two bug fixes. Also did lots of testing.
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index c7f0976..3a227be 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -192,10 +192,10 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
- /* Common capabilities of Exynos4/Exynos5 SoC */
- static unsigned long exynos_dwmmc_caps[4] = {
- 	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
--		MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
--	MMC_CAP_CMD23,
--	MMC_CAP_CMD23,
--	MMC_CAP_CMD23,
-+		MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
-+	MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
-+	MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
-+	MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
- };
- 
- static const struct dw_mci_drv_data exynos_drv_data = {
+Fixes are a race condition during suspend and the gpio
+irq being disabled unintendedly.
+
+The gpio irq is managed via the 'disable_depth' ref counter of
+the irq subsystem, driver simply call enable_irq/disable_irq when
+needed.
+
+                      sdio irq    sdio irq
+                      unmasked     masked
+   -----------------------------------------
+    runtime suspend  |    0     |   1
+    runtime default  |    1     |   2
+
+               irq disable depth
+
+
+only when sdio irq is enabled AND module is idle, the ref drops
+to zero and the gpio irq is effectively armed.
+
+problem was that omap_hsmmc_enable_sdio_irq(.. disable)
+was called when the irq was already disabled. This corrupted
+the ref count. Another issue was to ensure that the ref count
+starts with the right initial value (2).
+
+I did quite some duration testing. Test setup is two sdio wifi
+cards, running iperf as server/client. Test is running for 8+
+days now, still running.
+
+# cat /sys/kernel/debug/mmc0/regs                        
+[snip]
+pinmux config   sdio
+sdio irq        enabled
+pm suspends     19993594
+
+So there had been ~20 Mio sdio to gpio pinmux transitions.
+
+Without enabling the pinmux toggling in the dts file, there is no
+functional change. The driver will use polling as it does now.
+If you want to enable it, you also need to implement
+enable_irq/disable_irq for omap chips.
+
+https://patchwork.kernel.org/patch/1886421/
+http://permalink.gmane.org/gmane.linux.ports.arm.omap/97093
+
+
+/Andi
+
+
+Andreas Fenkart (3):
+  mmc: omap_hsmmc: Enable SDIO IRQ using a GPIO in idle mode.
+  mmc: omap_hsmmc: debugfs entries for GPIO mode.
+  mmc: omap_hsmmc: add PSTATE to debugfs regs_show.
+
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   42 +++
+ drivers/mmc/host/omap_hsmmc.c                      |  269 ++++++++++++++++++--
+ include/linux/platform_data/mmc-omap.h             |    4 +
+ 3 files changed, 294 insertions(+), 21 deletions(-)
+
 -- 
-1.8.1.3
+1.7.10.4
+
