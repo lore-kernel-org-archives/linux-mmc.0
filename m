@@ -1,35 +1,40 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: mxcmmc: Fix bug when card is present during boot
-Date: Fri, 12 Apr 2013 14:14:00 -0400
-Message-ID: <87bo9jfwgn.fsf@octavius.laptop.org>
-References: <1365228811-10928-1-git-send-email-shc_work@mail.ru>
-	<20130409073318.GF1906@pengutronix.de>
+Subject: Re: [PATCH 2/5 V2] mmc: core: call pm_runtime_put_noidle in pm_runtime_get_sync failed case
+Date: Fri, 12 Apr 2013 14:15:35 -0400
+Message-ID: <877gk7fwe0.fsf@octavius.laptop.org>
+References: <1362037031.6212.3.camel@fli24-HP-Compaq-8100-Elite-CMT-PC>
+	<1362037455.6212.8.camel@fli24-HP-Compaq-8100-Elite-CMT-PC>
+	<1365384999.31128.6.camel@fli24-HP-Compaq-8100-Elite-CMT-PC>
+	<CAK=WgbZUrVCeFhXjBGirJmYehy2MDnWYF8OVjyMTgfx5sK5_zQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35729 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:35751 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754294Ab3DLSOI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 12 Apr 2013 14:14:08 -0400
-In-Reply-To: <20130409073318.GF1906@pengutronix.de> (Sascha Hauer's message of
-	"Tue, 9 Apr 2013 09:33:18 +0200")
+	id S1752910Ab3DLSPo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 12 Apr 2013 14:15:44 -0400
+In-Reply-To: <CAK=WgbZUrVCeFhXjBGirJmYehy2MDnWYF8OVjyMTgfx5sK5_zQ@mail.gmail.com>
+	(Ohad Ben-Cohen's message of "Mon, 8 Apr 2013 15:48:52 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: Alexander Shiyan <shc_work@mail.ru>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Javier Martin <javier.martin@vista-silicon.com>, Arnd Bergmann <arnd@arndb.de>
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: Li Fei <fei.li@intel.com>, "ulf.hansson" <ulf.hansson@linaro.org>, "johan.rudholm" <johan.rudholm@stericsson.com>, subhashj <subhashj@codeaurora.org>, "rafael.j.wysocki" <rafael.j.wysocki@intel.com>, "thierry.reding" <thierry.reding@avionic-design.de>, "sachin.kamat" <sachin.kamat@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Rafael J. Wysocki" <rjw@sisk.pl>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chuansheng Liu <chuansheng.liu@intel.com>, "Coelho, Luciano" <coelho@ti.com>
 
 Hi,
 
-On Tue, Apr 09 2013, Sascha Hauer wrote:
-> On Sat, Apr 06, 2013 at 10:13:31AM +0400, Alexander Shiyan wrote:
->> This patch fixes bug when card is present during boot.
->> Bug was introduced due commit "mmc: mxcmmc: fix bug that may block a
->> data transfer forever". When a card is present "mxcmci_setup_data"
->> function is executed, but the timer is not initialized.
+On Mon, Apr 08 2013, Ohad Ben-Cohen wrote:
+> On Mon, Apr 8, 2013 at 4:36 AM, Li Fei <fei.li@intel.com> wrote:
+>> Even in failed case of pm_runtime_get_sync, the usage_count
+>> is incremented. In order to keep the usage_count with correct
+>> value and runtime power management to behave correctly, call
+>> pm_runtime_put_noidle in such case.
+>>
+>> Signed-off-by Liu Chuansheng <chuansheng.liu@intel.com>
+>> Signed-off-by: Li Fei <fei.li@intel.com>
 >
-> Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
+> Acked-by: Ohad Ben-Cohen <ohad@wizery.com>
 
-Thanks, pushed to mmc-next for 3.10.
+Thanks, pushed this patch to mmc-next for 3.10.
 
 - Chris.
 -- 
