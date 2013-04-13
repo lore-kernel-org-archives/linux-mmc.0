@@ -1,117 +1,36 @@
-From: Steve Magnani <smagnani@iscandar.digidescorp.com>
-Subject: [PATCH] mmc: debugfs: Add debugfs ability to read CID and CSD
-Date: Fri, 12 Apr 2013 14:46:53 -0500
-Message-ID: <1365796013-11399-1-git-send-email-smagnani@iscandar.digidescorp.com>
+From: "Steven J. Magnani" <steve@digidescorp.com>
+Subject: Re: [PATCH] mmc: debugfs: Add debugfs ability to read CID and CSD
+Date: Fri, 12 Apr 2013 20:54:03 -0500
+Message-ID: <1365818043.1691.23.camel@iscandar.digidescorp.com>
+References: <1365796013-11399-1-git-send-email-smagnani@iscandar.digidescorp.com>
+	 <CA+20K0DFA9r+fLhhbFnzx+t2wQ6+UH3DAWhoiF2W1g=ok8hyBQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.digidescorp.com ([50.73.98.161]:18308 "EHLO
+Received: from mail.digidescorp.com ([50.73.98.161]:4931 "EHLO
 	mail.digidescorp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752866Ab3DLT4l (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Apr 2013 15:56:41 -0400
+	with ESMTP id S1751998Ab3DMCBl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Apr 2013 22:01:41 -0400
+In-Reply-To: <CA+20K0DFA9r+fLhhbFnzx+t2wQ6+UH3DAWhoiF2W1g=ok8hyBQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "Steven J. Magnani" <steve@digidescorp.com>
+To: Johan Rudholm <jrudholm@gmail.com>
+Cc: Steve Magnani <smagnani@iscandar.digidescorp.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-kernel@vger.kernel.org
 
-Adds 'cid' and 'csd' debugfs entries for SD/MMC devices that allow
-userland to obtain the values of the corresponding device registers.
 
-Signed-off-by: Steven J. Magnani <steve@digidescorp.com>
----
---- a/drivers/mmc/core/debugfs.c	2013-04-12 07:39:22.532586948 -0500
-+++ b/drivers/mmc/core/debugfs.c	2013-04-12 07:40:14.513331587 -0500
-@@ -321,7 +321,7 @@ static ssize_t mmc_ext_csd_read(struct f
- 				       buf, EXT_CSD_STR_LEN);
- }
- 
--static int mmc_ext_csd_release(struct inode *inode, struct file *file)
-+static int mmc_dbg_buf_release(struct inode *inode, struct file *file)
- {
- 	kfree(file->private_data);
- 	return 0;
-@@ -330,7 +330,65 @@ static int mmc_ext_csd_release(struct in
- static const struct file_operations mmc_dbg_ext_csd_fops = {
- 	.open		= mmc_ext_csd_open,
- 	.read		= mmc_ext_csd_read,
--	.release	= mmc_ext_csd_release,
-+	.release	= mmc_dbg_buf_release,
-+	.llseek		= default_llseek,
-+};
-+
-+/* CSD and CID have the same length and so can be handled much the same */
-+#define CXD_STR_LEN 33
-+
-+static int mmc_cxd_open(struct file *filp, u32 *raw_cxd)
-+{
-+	char *buf;
-+	ssize_t n = 0;
-+	int i;
-+
-+	buf = kmalloc(CXD_STR_LEN + 1, GFP_KERNEL);
-+	if (!buf)
-+		return -ENOMEM;
-+
-+	for (i = 0; i < 4; i++)
-+		n += sprintf(buf + n, "%08x", raw_cxd[i]);
-+	n += sprintf(buf + n, "\n");
-+	BUG_ON(n != CXD_STR_LEN);
-+
-+	filp->private_data = buf;
-+	return 0;
-+}
-+
-+static ssize_t mmc_cxd_read(struct file *filp, char __user *ubuf,
-+				size_t cnt, loff_t *ppos)
-+{
-+	char *buf = filp->private_data;
-+
-+	return simple_read_from_buffer(ubuf, cnt, ppos,
-+				       buf, CXD_STR_LEN);
-+}
-+
-+static int mmc_csd_open(struct inode *inode, struct file *filp)
-+{
-+	struct mmc_card *card = inode->i_private;
-+	return mmc_cxd_open(filp, card->raw_csd);
-+}
-+
-+static const struct file_operations mmc_dbg_csd_fops = {
-+	.open		= mmc_csd_open,
-+	.read		= mmc_cxd_read,
-+	.release	= mmc_dbg_buf_release,
-+	.llseek		= default_llseek,
-+};
-+
-+
-+static int mmc_cid_open(struct inode *inode, struct file *filp)
-+{
-+	struct mmc_card *card = inode->i_private;
-+	return mmc_cxd_open(filp, card->raw_cid);
-+}
-+
-+static const struct file_operations mmc_dbg_cid_fops = {
-+	.open		= mmc_cid_open,
-+	.read		= mmc_cxd_read,
-+	.release	= mmc_dbg_buf_release,
- 	.llseek		= default_llseek,
- };
- 
-@@ -356,10 +414,17 @@ void mmc_add_card_debugfs(struct mmc_car
- 	if (!debugfs_create_x32("state", S_IRUSR, root, &card->state))
- 		goto err;
- 
--	if (mmc_card_mmc(card) || mmc_card_sd(card))
-+	if (mmc_card_mmc(card) || mmc_card_sd(card)) {
- 		if (!debugfs_create_file("status", S_IRUSR, root, card,
- 					&mmc_dbg_card_status_fops))
- 			goto err;
-+		if (!debugfs_create_file("csd", S_IRUSR, root, card,
-+					&mmc_dbg_csd_fops))
-+			goto err;
-+		if (!debugfs_create_file("cid", S_IRUSR, root, card,
-+					&mmc_dbg_cid_fops))
-+			goto err;
-+	}
- 
- 	if (mmc_card_mmc(card))
- 		if (!debugfs_create_file("ext_csd", S_IRUSR, root, card,
+On Sat, 2013-04-13 at 01:06 +0200, Johan Rudholm wrote: 
+> I believe these registers are already available as sysfs nodes? I
+> don't have access to the proper hardware right now, but I'm pretty
+> sure you'll find something if you do for instance "find /sys -name
+> csd".
+
+Ahh. Thanks for the tip; I hadn't thought to look there since I found
+the ext_csd under debugfs.
+------------------------------------------------------------------------
+Steven J. Magnani               "I claim this network for MARS!
+www.digidescorp.com              Earthling, return my space modulator!"
+
+#include <standard.disclaimer> 
+
 
