@@ -1,60 +1,55 @@
-From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
-Subject: Re: [PATCH 0/3] ARM: at91: move to generic DMA device tree bindings
-Date: Mon, 15 Apr 2013 14:38:34 +0200
-Message-ID: <20130415123834.GA15139@game.jcrosoft.org>
-References: <1366028217-5037-1-git-send-email-ludovic.desroches@atmel.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: exynos: Turn SDIO interrupts on
+Date: Mon, 15 Apr 2013 08:05:22 -0700
+Message-ID: <CAD=FV=XqmLRjQPwWCZfw0Nfu_uK16SOP=OgJcrbziWs4e__h7A@mail.gmail.com>
+References: <1365698338-27503-1-git-send-email-dianders@chromium.org>
+	<001701ce39d2$c0dbf8c0$4293ea40$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1366028217-5037-1-git-send-email-ludovic.desroches@atmel.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: ludovic.desroches@atmel.com
-Cc: nicolas.ferre@atmel.com, linux-mmc@vger.kernel.org, linux-i2c@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f176.google.com ([209.85.217.176]:41230 "EHLO
+	mail-lb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753156Ab3DOPFY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Apr 2013 11:05:24 -0400
+Received: by mail-lb0-f176.google.com with SMTP id y8so4543612lbh.7
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Apr 2013 08:05:23 -0700 (PDT)
+In-Reply-To: <001701ce39d2$c0dbf8c0$4293ea40$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>, Thomas Abraham <thomas.abraham@linaro.org>, Bing Zhao <bzhao@marvell.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sachin Kamat <sachin.kamat@linaro.org>, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 14:16 Mon 15 Apr     , ludovic.desroches@atmel.com wrote:
-> From: Ludovic Desroches <ludovic.desroches@atmel.com>
-> 
-> Hi,
-> 
-> This set of patches introduces DMA device tree bindings support for the atmel
-> DMA controller and first driver conversions.
-> 
-> I'll send an update of dts file in the next version if there is no major issue
-> with the bindings.
-looks fine
+Seungwon,
 
-Acked-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+On Mon, Apr 15, 2013 at 5:14 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> +             MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
+>> +     MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
+> This line for [1]
+>> +     MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
+>> +     MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
+> [1] is for mshc1. mshc1 is only used for SDIO.
+> As I know, The others are improper for SDIO.
 
-Best Regards,
-J.
-> 
-> Regards
-> 
-> 
-> Ludovic Desroches (3):
->   at_hdmac: move to generic DMA binding
->   i2c: at91: convert to dma_request_slave_channel_compat()
->   mci: at91: convert to dma_request_slave_channel_compat()
-> 
->  .../devicetree/bindings/dma/atmel-dma.txt          | 26 +++++-
->  arch/arm/boot/dts/sama5d3.dtsi                     |  4 +-
->  drivers/dma/at_hdmac.c                             | 93 ++++++++++++++++++++--
->  drivers/dma/at_hdmac_regs.h                        |  4 +
->  drivers/i2c/busses/i2c-at91.c                      | 49 ++++++------
->  drivers/mmc/host/atmel-mci.c                       | 25 +++---
->  6 files changed, 154 insertions(+), 47 deletions(-)
-> 
-> -- 
-> 1.7.11.3
-> 
+I'm nearly certain that all of the ports are OK for SDIO.  Specifically:
+
+* On the ARM Chromebook (exynos5250) we are using mmc3 (12230000) for
+the SDIO connection to WiFi.
+
+* I have plugged in an external WiFi module to the SD card slot on the
+ARM Chromebook and seen it work (including interrupts).  This is mmc2
+(12220000).
+
+* I have seen a board where mmc1 was wired up to WiFi and seen it work.
+
+
+It is possible that mmc0 wouldn't work for SDIO.  I've never tested it
+since mmc0 is intended for eMMC and every system I've worked with has
+eMMC on that port.  There is some evidence that mmc0 would work for
+SDIO, though: there is a muxing slot on GPC0[2] for SD_0_CARD_INT_n.
+That implies that mmc0 ought to also work for SDIO (and even could be
+configured for an external eSDIO interrupt, I guess).
+
+
+Thanks!
+
+-Doug
