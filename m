@@ -1,32 +1,43 @@
-From: James Fred Hall <jamesfred1010@gmail.com>
-Subject: Order Needed
-Date: Sun, 14 Apr 2013 19:38:05 +0100
-Message-ID: <CAOrwpefNcRgEDk7Z42v9q1zHcyMZk8caj1Za+a6HvvZd3SeMzA__29929.7342579395$1365964711$gmane$org@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 0/2] sdhci-acpi initialization performance regression
+Date: Mon, 15 Apr 2013 09:47:30 +0300
+Message-ID: <516BA282.2000500@intel.com>
+References: <1365082866-28404-1-git-send-email-adrian.hunter@intel.com> <87fvyvfwor.fsf@octavius.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f194.google.com ([209.85.212.194]:55457 "EHLO
-	mail-wi0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753597Ab3DNSiH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Apr 2013 14:38:07 -0400
-Received: by mail-wi0-f194.google.com with SMTP id hm11so332386wib.9
-        for <linux-mmc@vger.kernel.org>; Sun, 14 Apr 2013 11:38:06 -0700 (PDT)
+Received: from mga02.intel.com ([134.134.136.20]:19409 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750911Ab3DOGm6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 15 Apr 2013 02:42:58 -0400
+In-Reply-To: <87fvyvfwor.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Namjae Jeon <linkinjeon@gmail.com>, Sergey Yanovich <ynvich@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
-Dear Sir / Madam
+On 12/04/13 21:09, Chris Ball wrote:
+> Hi Adrian,
+> 
+> On Thu, Apr 04 2013, Adrian Hunter wrote:
+>> When I submitted the sdhci-acpi driver, it's initialization performance
+>> was satisfactory.  Now it is not.  Here are 2 fixes to restore that
+>> regression.
+>>
+>> Adrian Hunter (2):
+>>       Revert "mmc: core: wait while adding MMC host to ensure root mounts successfully"
+>>       mmc: core: fix performance regression initializing MMC host controllers
+>>
+>>  drivers/mmc/core/core.c       | 4 ++--
+>>  drivers/mmc/host/sdhci-acpi.c | 2 ++
+>>  include/linux/mmc/host.h      | 1 +
+>>  3 files changed, 5 insertions(+), 2 deletions(-)
+> 
+> Thanks, both pushed to mmc-next (using v4 of patch 2/2) for 3.10.
 
-Am Mr. Rick i got in contact with your company to see if you sell  (
-Swim Ladder ) , if you do i will like you to email me with the picked
-up price including tax and if you accept Master or Visa credit card as
-a form  of payment , but if you don't have this type kindly email me
-with the types  that you have or the one nearer to the one am
-requesting or you can direct  me to you website so i can see what you
-have for sale .
+Thanks you!
 
-Best Regards
-Mr. James Fred
-Fred And Sons Ltd
-# 891 Davis St
-San Francisco, CA 94111
-Phone Number : (814-580-2250)
+It looks like mmc-next and linux-next have the V1 version of patch 2/2.  Can
+you replace it with V4?
+
