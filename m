@@ -1,83 +1,60 @@
-From: <ludovic.desroches@atmel.com>
-Subject: [PATCH 3/3] mci: at91: convert to dma_request_slave_channel_compat()
-Date: Mon, 15 Apr 2013 14:16:57 +0200
-Message-ID: <1366028217-5037-4-git-send-email-ludovic.desroches@atmel.com>
+From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Subject: Re: [PATCH 0/3] ARM: at91: move to generic DMA device tree bindings
+Date: Mon, 15 Apr 2013 14:38:34 +0200
+Message-ID: <20130415123834.GA15139@game.jcrosoft.org>
 References: <1366028217-5037-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:53121 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932081Ab3DOMSH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Apr 2013 08:18:07 -0400
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
 In-Reply-To: <1366028217-5037-1-git-send-email-ludovic.desroches@atmel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: ludovic.desroches@atmel.com
+Cc: nicolas.ferre@atmel.com, linux-mmc@vger.kernel.org, linux-i2c@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-i2c@vger.kernel.org
-Cc: nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
+On 14:16 Mon 15 Apr     , ludovic.desroches@atmel.com wrote:
+> From: Ludovic Desroches <ludovic.desroches@atmel.com>
+> 
+> Hi,
+> 
+> This set of patches introduces DMA device tree bindings support for the atmel
+> DMA controller and first driver conversions.
+> 
+> I'll send an update of dts file in the next version if there is no major issue
+> with the bindings.
+looks fine
 
-Use generic DMA DT helper. Platforms booting with or without DT populated are
-both supported.
+Acked-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
----
- drivers/mmc/host/atmel-mci.c | 25 ++++++++++++-------------
- 1 file changed, 12 insertions(+), 13 deletions(-)
-
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 10f8b73..73d5d24 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -2224,10 +2224,15 @@ static void __exit atmci_cleanup_slot(struct atmel_mci_slot *slot,
- 	mmc_free_host(slot->mmc);
- }
- 
--static bool atmci_filter(struct dma_chan *chan, void *slave)
-+static bool atmci_filter(struct dma_chan *chan, void *pdata)
- {
--	struct mci_dma_data	*sl = slave;
-+	struct mci_platform_data *sl_pdata = pdata;
-+	struct mci_dma_data *sl;
- 
-+	if (!sl_pdata)
-+		return false;
-+
-+	sl = sl_pdata->dma_slave;
- 	if (sl && find_slave_dev(sl) == chan->device->dev) {
- 		chan->private = slave_data_ptr(sl);
- 		return true;
-@@ -2239,24 +2244,18 @@ static bool atmci_filter(struct dma_chan *chan, void *slave)
- static bool atmci_configure_dma(struct atmel_mci *host)
- {
- 	struct mci_platform_data	*pdata;
-+	dma_cap_mask_t mask;
- 
- 	if (host == NULL)
- 		return false;
- 
- 	pdata = host->pdev->dev.platform_data;
- 
--	if (!pdata)
--		return false;
-+	dma_cap_zero(mask);
-+	dma_cap_set(DMA_SLAVE, mask);
- 
--	if (pdata->dma_slave && find_slave_dev(pdata->dma_slave)) {
--		dma_cap_mask_t mask;
--
--		/* Try to grab a DMA channel */
--		dma_cap_zero(mask);
--		dma_cap_set(DMA_SLAVE, mask);
--		host->dma.chan =
--			dma_request_channel(mask, atmci_filter, pdata->dma_slave);
--	}
-+	host->dma.chan = dma_request_slave_channel_compat(mask, atmci_filter, pdata,
-+						   	  &host->pdev->dev, "rxtx");
- 	if (!host->dma.chan) {
- 		dev_warn(&host->pdev->dev, "no DMA channel available\n");
- 		return false;
--- 
-1.7.11.3
-
+Best Regards,
+J.
+> 
+> Regards
+> 
+> 
+> Ludovic Desroches (3):
+>   at_hdmac: move to generic DMA binding
+>   i2c: at91: convert to dma_request_slave_channel_compat()
+>   mci: at91: convert to dma_request_slave_channel_compat()
+> 
+>  .../devicetree/bindings/dma/atmel-dma.txt          | 26 +++++-
+>  arch/arm/boot/dts/sama5d3.dtsi                     |  4 +-
+>  drivers/dma/at_hdmac.c                             | 93 ++++++++++++++++++++--
+>  drivers/dma/at_hdmac_regs.h                        |  4 +
+>  drivers/i2c/busses/i2c-at91.c                      | 49 ++++++------
+>  drivers/mmc/host/atmel-mci.c                       | 25 +++---
+>  6 files changed, 154 insertions(+), 47 deletions(-)
+> 
+> -- 
+> 1.7.11.3
+> 
