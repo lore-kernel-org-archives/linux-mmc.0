@@ -1,43 +1,86 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 0/2] sdhci-acpi initialization performance regression
-Date: Mon, 15 Apr 2013 09:47:30 +0300
-Message-ID: <516BA282.2000500@intel.com>
-References: <1365082866-28404-1-git-send-email-adrian.hunter@intel.com> <87fvyvfwor.fsf@octavius.laptop.org>
+Subject: Re: [PATCH 2/8] mmc: fix max_discard_sectors
+Date: Mon, 15 Apr 2013 10:20:22 +0300
+Message-ID: <516BAA36.9030500@intel.com>
+References: <1365860309-21261-1-git-send-email-linkinjeon@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:19409 "EHLO mga02.intel.com"
+Received: from mga03.intel.com ([143.182.124.21]:48100 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750911Ab3DOGm6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 15 Apr 2013 02:42:58 -0400
-In-Reply-To: <87fvyvfwor.fsf@octavius.laptop.org>
+	id S932124Ab3DOHPx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 15 Apr 2013 03:15:53 -0400
+In-Reply-To: <1365860309-21261-1-git-send-email-linkinjeon@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Namjae Jeon <linkinjeon@gmail.com>, Sergey Yanovich <ynvich@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>
+To: Namjae Jeon <linkinjeon@gmail.com>
+Cc: dwmw2@infradead.org, axboe@kernel.dk, shli@kernel.org, Paul.Clements@steeleye.com, npiggin@kernel.dk, neilb@suse.de, cjb@laptop.org, linux-mtd@lists.infradead.org, nbd-general@lists.sourceforge.net, linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Namjae Jeon <namjae.jeon@samsung.com>, Vivek Trivedi <t.vivek@samsung.com>
 
-On 12/04/13 21:09, Chris Ball wrote:
-> Hi Adrian,
+On 13/04/13 16:38, Namjae Jeon wrote:
+> From: Namjae Jeon <namjae.jeon@samsung.com>
 > 
-> On Thu, Apr 04 2013, Adrian Hunter wrote:
->> When I submitted the sdhci-acpi driver, it's initialization performance
->> was satisfactory.  Now it is not.  Here are 2 fixes to restore that
->> regression.
->>
->> Adrian Hunter (2):
->>       Revert "mmc: core: wait while adding MMC host to ensure root mounts successfully"
->>       mmc: core: fix performance regression initializing MMC host controllers
->>
->>  drivers/mmc/core/core.c       | 4 ++--
->>  drivers/mmc/host/sdhci-acpi.c | 2 ++
->>  include/linux/mmc/host.h      | 1 +
->>  3 files changed, 5 insertions(+), 2 deletions(-)
+> https://lkml.org/lkml/2013/4/1/292
+> As per above discussion, there is possibility that request's __data_len
+> field may overflow when max_discard_sectors greater than UINT_MAX >> 9
 > 
-> Thanks, both pushed to mmc-next (using v4 of patch 2/2) for 3.10.
+> If multiple discard requests get merged, merged discard request's
+> size exceeds 4GB, there is possibility that merged discard request's
+> __data_len field may overflow.
+> 
+> This patch fixes this issue.
+> 
+> Reported-by: Max Filippov <jcmvbkbc@gmail.com>
+> Signed-off-by: Namjae Jeon <namjae.jeon@samsung.com>
+> Signed-off-by: Vivek Trivedi <t.vivek@samsung.com>
+> Tested-by: Max Filippov <jcmvbkbc@gmail.com>
+> ---
+>  drivers/mmc/card/queue.c |    2 +-
+>  drivers/mmc/core/core.c  |    4 ++--
+>  2 files changed, 3 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index 9447a0e..54726b7 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -166,7 +166,7 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+>  		return;
+>  
+>  	queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, q);
+> -	q->limits.max_discard_sectors = max_discard;
+> +	blk_queue_max_discard_sectors(q, max_discard);
+>  	if (card->erased_byte == 0 && !mmc_can_discard(card))
+>  		q->limits.discard_zeroes_data = 1;
+>  	q->limits.discard_granularity = card->pref_erase << 9;
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 7b435a3..6ee530c 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2058,7 +2058,7 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
+>  	if (card->erase_shift)
+>  		max_qty = UINT_MAX >> card->erase_shift;
+>  	else if (mmc_card_sd(card))
+> -		max_qty = UINT_MAX;
+> +		max_qty = UINT_MAX >> 9;
 
-Thanks you!
+No.  This function calculates max discard for the card not the block layer.
+ Apply the block layer limitation at the block layer interface e.g.
+in mmc_queue_setup_discard()
 
-It looks like mmc-next and linux-next have the V1 version of patch 2/2.  Can
-you replace it with V4?
+>  	else
+>  		max_qty = UINT_MAX / card->erase_size;
+>  
+> @@ -2100,7 +2100,7 @@ unsigned int mmc_calc_max_discard(struct mmc_card *card)
+>  	unsigned int max_discard, max_trim;
+>  
+>  	if (!host->max_discard_to)
+> -		return UINT_MAX;
+> +		return UINT_MAX >> 9;
+
+Ditto.
+
+>  
+>  	/*
+>  	 * Without erase_group_def set, MMC erase timeout depends on clock
+> 
 
