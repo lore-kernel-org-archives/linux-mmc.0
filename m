@@ -1,64 +1,45 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: exynos: Turn SDIO interrupts on
-Date: Mon, 15 Apr 2013 21:14:17 +0900
-Message-ID: <001701ce39d2$c0dbf8c0$4293ea40$%jun@samsung.com>
-References: <1365698338-27503-1-git-send-email-dianders@chromium.org>
+From: <ludovic.desroches@atmel.com>
+Subject: [PATCH 0/3] ARM: at91: move to generic DMA device tree bindings
+Date: Mon, 15 Apr 2013 14:16:54 +0200
+Message-ID: <1366028217-5037-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:21093 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753442Ab3DOMOU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Apr 2013 08:14:20 -0400
-In-reply-to: <1365698338-27503-1-git-send-email-dianders@chromium.org>
-Content-language: ko
+Received: from eusmtp01.atmel.com ([212.144.249.243]:53052 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753559Ab3DOMRr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Apr 2013 08:17:47 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Doug Anderson' <dianders@chromium.org>, 'Chris Ball' <cjb@laptop.org>
-Cc: 'Thomas Abraham' <thomas.abraham@linaro.org>, 'Bing Zhao' <bzhao@marvell.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Sachin Kamat' <sachin.kamat@linaro.org>, 'Olof Johansson' <olof@lixom.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-i2c@vger.kernel.org
+Cc: nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Friday, April 12, 2013, Doug Anderson wrote:
-> The mmc part in exynos supports SDIO interrupts and they work fine, so
-> turn the capability on.  With this I see download speeds increase
-> about 10x.  This is a port of a change present in the Chrome OS tree
-> that can be found at <https://gerrit.chromium.org/gerrit/#/c/26729/>.
-> 
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> ---
->  drivers/mmc/host/dw_mmc-exynos.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index c7f0976..3a227be 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -192,10 +192,10 @@ static int dw_mci_exynos_setup_bus(struct dw_mci *host,
->  /* Common capabilities of Exynos4/Exynos5 SoC */
->  static unsigned long exynos_dwmmc_caps[4] = {
->  	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
-> -		MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
-> -	MMC_CAP_CMD23,
-> -	MMC_CAP_CMD23,
-> -	MMC_CAP_CMD23,
-> +		MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
-> +	MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
-This line for [1]
-> +	MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
-> +	MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
-[1] is for mshc1. mshc1 is only used for SDIO.
-As I know, The others are improper for SDIO.
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Thanks,
-Seungwon Jeon
->  };
-> 
->  static const struct dw_mci_drv_data exynos_drv_data = {
-> --
-> 1.8.1.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hi,
+
+This set of patches introduces DMA device tree bindings support for the atmel
+DMA controller and first driver conversions.
+
+I'll send an update of dts file in the next version if there is no major issue
+with the bindings.
+
+Regards
+
+
+Ludovic Desroches (3):
+  at_hdmac: move to generic DMA binding
+  i2c: at91: convert to dma_request_slave_channel_compat()
+  mci: at91: convert to dma_request_slave_channel_compat()
+
+ .../devicetree/bindings/dma/atmel-dma.txt          | 26 +++++-
+ arch/arm/boot/dts/sama5d3.dtsi                     |  4 +-
+ drivers/dma/at_hdmac.c                             | 93 ++++++++++++++++++++--
+ drivers/dma/at_hdmac_regs.h                        |  4 +
+ drivers/i2c/busses/i2c-at91.c                      | 49 ++++++------
+ drivers/mmc/host/atmel-mci.c                       | 25 +++---
+ 6 files changed, 154 insertions(+), 47 deletions(-)
+
+-- 
+1.7.11.3
 
