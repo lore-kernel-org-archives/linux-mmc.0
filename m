@@ -1,55 +1,97 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: dw_mmc: exynos: Turn SDIO interrupts on
-Date: Mon, 15 Apr 2013 08:05:22 -0700
-Message-ID: <CAD=FV=XqmLRjQPwWCZfw0Nfu_uK16SOP=OgJcrbziWs4e__h7A@mail.gmail.com>
-References: <1365698338-27503-1-git-send-email-dianders@chromium.org>
-	<001701ce39d2$c0dbf8c0$4293ea40$%jun@samsung.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 0/2] sdhci-acpi initialization performance regression
+Date: Mon, 15 Apr 2013 11:42:31 -0400
+Message-ID: <87k3o3ajh4.fsf@octavius.laptop.org>
+References: <1365082866-28404-1-git-send-email-adrian.hunter@intel.com>
+	<87fvyvfwor.fsf@octavius.laptop.org> <516BA282.2000500@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f176.google.com ([209.85.217.176]:41230 "EHLO
-	mail-lb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753156Ab3DOPFY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Apr 2013 11:05:24 -0400
-Received: by mail-lb0-f176.google.com with SMTP id y8so4543612lbh.7
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Apr 2013 08:05:23 -0700 (PDT)
-In-Reply-To: <001701ce39d2$c0dbf8c0$4293ea40$%jun@samsung.com>
+Received: from void.printf.net ([89.145.121.20]:57570 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933039Ab3DOPmo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 15 Apr 2013 11:42:44 -0400
+In-Reply-To: <516BA282.2000500@intel.com> (Adrian Hunter's message of "Mon, 15
+	Apr 2013 09:47:30 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, Thomas Abraham <thomas.abraham@linaro.org>, Bing Zhao <bzhao@marvell.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sachin Kamat <sachin.kamat@linaro.org>, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Namjae Jeon <linkinjeon@gmail.com>, Sergey Yanovich <ynvich@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
-Seungwon,
+Hi,
 
-On Mon, Apr 15, 2013 at 5:14 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> +             MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
->> +     MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
-> This line for [1]
->> +     MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
->> +     MMC_CAP_CMD23 | MMC_CAP_SDIO_IRQ,
-> [1] is for mshc1. mshc1 is only used for SDIO.
-> As I know, The others are improper for SDIO.
+On Mon, Apr 15 2013, Adrian Hunter wrote:
+> On 12/04/13 21:09, Chris Ball wrote:
+>> Hi Adrian,
+>> 
+>> On Thu, Apr 04 2013, Adrian Hunter wrote:
+>>> When I submitted the sdhci-acpi driver, it's initialization performance
+>>> was satisfactory.  Now it is not.  Here are 2 fixes to restore that
+>>> regression.
+>>>
+>>> Adrian Hunter (2):
+>>>       Revert "mmc: core: wait while adding MMC host to ensure root mounts successfully"
+>>>       mmc: core: fix performance regression initializing MMC host controllers
+>>>
+>>>  drivers/mmc/core/core.c       | 4 ++--
+>>>  drivers/mmc/host/sdhci-acpi.c | 2 ++
+>>>  include/linux/mmc/host.h      | 1 +
+>>>  3 files changed, 5 insertions(+), 2 deletions(-)
+>> 
+>> Thanks, both pushed to mmc-next (using v4 of patch 2/2) for 3.10.
+>
+> Thanks you!
+>
+> It looks like mmc-next and linux-next have the V1 version of patch 2/2.  Can
+> you replace it with V4?
 
-I'm nearly certain that all of the ports are OK for SDIO.  Specifically:
-
-* On the ARM Chromebook (exynos5250) we are using mmc3 (12230000) for
-the SDIO connection to WiFi.
-
-* I have plugged in an external WiFi module to the SD card slot on the
-ARM Chromebook and seen it work (including interrupts).  This is mmc2
-(12220000).
-
-* I have seen a board where mmc1 was wired up to WiFi and seen it work.
+Ouch, I'm sorry about that; thank you for catching it.  I applied the
+incremental patch below to bring it up to v4 (to avoid rebasing a
+public tree):
 
 
-It is possible that mmc0 wouldn't work for SDIO.  I've never tested it
-since mmc0 is intended for eMMC and every system I've worked with has
-eMMC on that port.  There is some evidence that mmc0 would work for
-SDIO, though: there is a muxing slot on GPC0[2] for SD_0_CARD_INT_n.
-That implies that mmc0 ought to also work for SDIO (and even could be
-configured for an external eSDIO interrupt, I guess).
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH] mmc: core: fix init controller performance regression,
+ updated patch
 
+Add MMC_CAP2_NO_PRESCAN_POWERUP to sdhci-pci.c also, use mmc_power_off()
+for MMC_CAP2_NO_PRESCAN_POWERUP.
 
-Thanks!
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+[cjb: previously applied v1 of this patch instead of v4]
+Signed-off-by: Chris Ball <cjb@laptop.org>
+---
+ drivers/mmc/core/core.c      | 4 +++-
+ drivers/mmc/host/sdhci-pci.c | 1 +
+ 2 files changed, 4 insertions(+), 1 deletion(-)
 
--Doug
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index c1893c9..65f9ca7 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2416,7 +2416,9 @@ void mmc_start_host(struct mmc_host *host)
+ {
+ 	host->f_init = max(freqs[0], host->f_min);
+ 	host->rescan_disable = 0;
+-	if (!(host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP))
++	if (host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP)
++		mmc_power_off(host);
++	else
+ 		mmc_power_up(host);
+ 	mmc_detect_change(host, 0);
+ }
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index c1f0372..0012d3f 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -1280,6 +1280,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+ 
+ 	host->mmc->pm_caps = MMC_PM_KEEP_POWER | MMC_PM_WAKE_SDIO_IRQ;
+ 	host->mmc->slotno = slotno;
++	host->mmc->caps2 |= MMC_CAP2_NO_PRESCAN_POWERUP;
+ 
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
