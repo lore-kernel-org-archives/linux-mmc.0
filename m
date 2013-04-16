@@ -1,124 +1,116 @@
-From: <ludovic.desroches@atmel.com>
-Subject: [PATCH 4/6] ARM: at91: dts: add i2c dma support
-Date: Tue, 16 Apr 2013 15:03:08 +0200
-Message-ID: <1366117390-24686-5-git-send-email-ludovic.desroches@atmel.com>
+From: <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH 6/6] ARM: at91: dts: add MCI DMA support
+Date: Tue, 16 Apr 2013 15:03:10 +0200
+Message-ID: <1366117390-24686-7-git-send-email-ludovic.desroches@atmel.com>
 References: <1366117390-24686-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:40700 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932847Ab3DPNDl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Apr 2013 09:03:41 -0400
-In-Reply-To: <1366117390-24686-1-git-send-email-ludovic.desroches@atmel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1366117390-24686-1-git-send-email-ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: nicolas.ferre-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org, Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-i2c@vger.kernel.org
-Cc: nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
+From: Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
 
-Add DMA resources to i2c nodes.
+Add DMA resources to MCI nodes.
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+Signed-off-by: Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
 ---
- arch/arm/boot/dts/at91sam9n12.dtsi | 6 ++++++
- arch/arm/boot/dts/at91sam9x5.dtsi  | 9 +++++++++
- arch/arm/boot/dts/sama5d3.dtsi     | 9 +++++++++
- 3 files changed, 24 insertions(+)
+ arch/arm/boot/dts/at91sam9g45.dtsi | 4 ++++
+ arch/arm/boot/dts/at91sam9n12.dtsi | 2 ++
+ arch/arm/boot/dts/at91sam9x5.dtsi  | 4 ++++
+ arch/arm/boot/dts/sama5d3.dtsi     | 6 ++++++
+ 4 files changed, 16 insertions(+)
 
-diff --git a/arch/arm/boot/dts/at91sam9n12.dtsi b/arch/arm/boot/dts/at91sam9n12.dtsi
-index acc4526..f912124 100644
---- a/arch/arm/boot/dts/at91sam9n12.dtsi
-+++ b/arch/arm/boot/dts/at91sam9n12.dtsi
-@@ -361,6 +361,9 @@
- 				compatible = "atmel,at91sam9x5-i2c";
- 				reg = <0xf8010000 0x100>;
- 				interrupts = <9 4 6>;
-+				dmas = <&dma0 1 13>,
-+				       <&dma0 1 14>;
-+				dma-names = "tx", "rx";
+diff --git a/arch/arm/boot/dts/at91sam9g45.dtsi b/arch/arm/boot/dts/at91sam9g45.dtsi
+index 275e768..de2abc0 100644
+--- a/arch/arm/boot/dts/at91sam9g45.dtsi
++++ b/arch/arm/boot/dts/at91sam9g45.dtsi
+@@ -513,6 +513,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xfff80000 0x600>;
+ 				interrupts = <11 4 0>;
++				dmas = <&dma0 1 0>;
++				dma-names = "rxtx";
  				#address-cells = <1>;
  				#size-cells = <0>;
  				status = "disabled";
-@@ -370,6 +373,9 @@
- 				compatible = "atmel,at91sam9x5-i2c";
- 				reg = <0xf8014000 0x100>;
- 				interrupts = <10 4 6>;
-+				dmas = <&dma0 1 15>,
-+				       <&dma0 1 16>;
-+				dma-names = "tx", "rx";
+@@ -522,6 +524,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xfffd0000 0x600>;
+ 				interrupts = <29 4 0>;
++				dmas = <&dma0 1 13>;
++				dma-names = "rxtx";
+ 				#address-cells = <1>;
+ 				#size-cells = <0>;
+ 				status = "disabled";
+diff --git a/arch/arm/boot/dts/at91sam9n12.dtsi b/arch/arm/boot/dts/at91sam9n12.dtsi
+index f912124..0b61c41 100644
+--- a/arch/arm/boot/dts/at91sam9n12.dtsi
++++ b/arch/arm/boot/dts/at91sam9n12.dtsi
+@@ -89,6 +89,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xf0008000 0x600>;
+ 				interrupts = <12 4 0>;
++				dmas = <&dma0 1 0>
++				dma-names = "rxtx";
  				#address-cells = <1>;
  				#size-cells = <0>;
  				status = "disabled";
 diff --git a/arch/arm/boot/dts/at91sam9x5.dtsi b/arch/arm/boot/dts/at91sam9x5.dtsi
-index 8e83d87..16c9b81 100644
+index 16c9b81..5f42e7a 100644
 --- a/arch/arm/boot/dts/at91sam9x5.dtsi
 +++ b/arch/arm/boot/dts/at91sam9x5.dtsi
-@@ -519,6 +519,9 @@
- 				compatible = "atmel,at91sam9x5-i2c";
- 				reg = <0xf8010000 0x100>;
- 				interrupts = <9 4 6>;
-+				dmas = <&dma0 1 7>,
-+				       <&dma0 1 8>;
-+				dma-names = "tx", "rx";
- 				#address-cells = <1>;
- 				#size-cells = <0>;
- 				pinctrl-names = "default";
-@@ -530,6 +533,9 @@
- 				compatible = "atmel,at91sam9x5-i2c";
- 				reg = <0xf8014000 0x100>;
- 				interrupts = <10 4 6>;
-+				dmas = <&dma1 1 5>,
-+				       <&dma1 1 6>;
-+				dma-names = "tx", "rx";
- 				#address-cells = <1>;
- 				#size-cells = <0>;
- 				pinctrl-names = "default";
-@@ -541,6 +547,9 @@
- 				compatible = "atmel,at91sam9x5-i2c";
- 				reg = <0xf8018000 0x100>;
- 				interrupts = <11 4 6>;
-+				dmas = <&dma0 1 9>,
-+				       <&dma0 1 10>;
-+				dma-names = "tx", "rx";
- 				#address-cells = <1>;
- 				#size-cells = <0>;
- 				pinctrl-names = "default";
-diff --git a/arch/arm/boot/dts/sama5d3.dtsi b/arch/arm/boot/dts/sama5d3.dtsi
-index 95c00a3..8e87277 100644
---- a/arch/arm/boot/dts/sama5d3.dtsi
-+++ b/arch/arm/boot/dts/sama5d3.dtsi
-@@ -111,6 +111,9 @@
- 				compatible = "atmel,at91sam9x5-i2c";
- 				reg = <0xf0014000 0x4000>;
- 				interrupts = <18 4 6>;
-+				dmas = <&dma0 2 7>,
-+				       <&dma0 2 8>;
-+				dma-names = "tx", "rx";
- 				pinctrl-names = "default";
- 				pinctrl-0 = <&pinctrl_i2c0>;
- 				#address-cells = <1>;
-@@ -122,6 +125,9 @@
- 				compatible = "atmel,at91sam9x5-i2c";
- 				reg = <0xf0018000 0x4000>;
- 				interrupts = <19 4 6>;
-+				dmas = <&dma0 2 9>,
-+				       <&dma0 2 10>;
-+				dma-names = "tx", "rx";
- 				pinctrl-names = "default";
- 				pinctrl-0 = <&pinctrl_i2c1>;
- 				#address-cells = <1>;
-@@ -294,6 +300,9 @@
- 				compatible = "atmel,at91sam9x5-i2c";
- 				reg = <0xf801c000 0x4000>;
- 				interrupts = <20 4 6>;
-+				dmas = <&dma1 2 11>,
-+				       <&dma1 2 12>;
-+				dma-names = "tx", "rx";
+@@ -449,6 +449,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xf0008000 0x600>;
+ 				interrupts = <12 4 0>;
++				dmas = <&dma0 1 0>;
++				dma-names = "rxtx";
  				#address-cells = <1>;
  				#size-cells = <0>;
  				status = "disabled";
+@@ -458,6 +460,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xf000c000 0x600>;
+ 				interrupts = <26 4 0>;
++				dmas = <&dma1 1 0>;
++				dma-names = "rxtx";
+ 				#address-cells = <1>;
+ 				#size-cells = <0>;
+ 				status = "disabled";
+diff --git a/arch/arm/boot/dts/sama5d3.dtsi b/arch/arm/boot/dts/sama5d3.dtsi
+index 8e87277..2e643ea 100644
+--- a/arch/arm/boot/dts/sama5d3.dtsi
++++ b/arch/arm/boot/dts/sama5d3.dtsi
+@@ -60,6 +60,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xf0000000 0x600>;
+ 				interrupts = <21 4 0>;
++				dmas = <&dma0 2 0>;
++				dma-names = "rxtx";
+ 				pinctrl-names = "default";
+ 				pinctrl-0 = <&pinctrl_mmc0_clk_cmd_dat0 &pinctrl_mmc0_dat1_3 &pinctrl_mmc0_dat4_7>;
+ 				status = "disabled";
+@@ -173,6 +175,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xf8000000 0x600>;
+ 				interrupts = <22 4 0>;
++				dmas = <&dma1 2 0>;
++				dma-names = "rxtx";
+ 				pinctrl-names = "default";
+ 				pinctrl-0 = <&pinctrl_mmc1_clk_cmd_dat0 &pinctrl_mmc1_dat1_3>;
+ 				status = "disabled";
+@@ -184,6 +188,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xf8004000 0x600>;
+ 				interrupts = <23 4 0>;
++				dmas = <&dma1 2 1>;
++				dma-names = "rxtx";
+ 				pinctrl-names = "default";
+ 				pinctrl-0 = <&pinctrl_mmc2_clk_cmd_dat0 &pinctrl_mmc2_dat1_3>;
+ 				status = "disabled";
 -- 
 1.7.11.3
-
