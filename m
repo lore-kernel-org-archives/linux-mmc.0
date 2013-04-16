@@ -1,63 +1,191 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH V3 0/4] mmc: Use runtime pm for blkdevice
-Date: Tue, 16 Apr 2013 12:00:33 +0200
-Message-ID: <1366106437-18004-1-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH V3 4/4] mmc: core: Support aggressive power management for (e)MMC/SD
+Date: Tue, 16 Apr 2013 12:00:37 +0200
+Message-ID: <1366106437-18004-5-git-send-email-ulf.hansson@stericsson.com>
+References: <1366106437-18004-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog108.obsmtp.com ([207.126.144.125]:32828 "EHLO
-	eu1sys200aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S935175Ab3DPKAx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Apr 2013 06:00:53 -0400
+Received: from eu1sys200aog114.obsmtp.com ([207.126.144.137]:48177 "EHLO
+	eu1sys200aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S935458Ab3DPKBT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Apr 2013 06:01:19 -0400
+In-Reply-To: <1366106437-18004-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Maya Erez <merez@codeaurora.org>, Subhash Jadavani <subhashj@codeaurora.org>, Arnd Bergmann <arnd@arndb.de>, Kevin Liu <kliu5@marvell.com>, Adrian Hunter <adrian.hunter@intel.com>, Daniel Drake <dsd@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+Aggressive power management is suitable when saving power is
+essential. At request inactivity timeout, aka pm runtime
+autosuspend timeout, the card will be suspended.
 
-SDIO has been using runtime pm for a while to handle runtime power save
-operations. This patchset is enabling the option to make the sd/mmc
-blockdevices to use runtime pm as well.
+Once a new request arrives, the card will be re-initalized and
+thus the first request will suffer from a latency. This latency
+is card-specific, experiments has shown in general that SD-cards
+has quite poor initialization time, around 300ms-1100ms. eMMC is
+not surprisingly far better but still a couple of hundreds of ms
+has been observed.
 
-The runtime pm implementation for the block device will make use of
-autosuspend to defer power save operation to after request inactivty for
-a certain time.
+Except for the request latency, it is important to know that
+suspending the card will also prevent the card from executing
+internal house-keeping operations in idle mode. This could mean
+degradation in performance.
 
-Corresponding pm_runtime_get|put calls has been added at those places that
-do requires the card to be fully powered to communicate.
+To use this feature make sure the request inactivity timeout is
+chosen carefully. This has not been done as a part of this patch.
 
-Patch 4 can be considered as a proof of concept patch. It implements
-aggressive power management for (e)MMC/SD. This feature has also been
-discussed on the mmc mailing list previously.
+Enable this feature by using host cap MMC_CAP_AGGRESSIVE_PM and
+by setting CONFIG_MMC_UNSAFE_RESUME.
 
-Next step would be to implement the IDLE BKOPS on top of the runtime pm
-callbacks.
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Maya Erez <merez@codeaurora.org>
+Cc: Subhash Jadavani <subhashj@codeaurora.org>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Kevin Liu <kliu5@marvell.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Daniel Drake <dsd@laptop.org>
+Cc: Ohad Ben-Cohen <ohad@wizery.com>
+---
+ drivers/mmc/core/mmc.c   |   43 +++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/sd.c    |   42 ++++++++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/host.h |    2 +-
+ 3 files changed, 86 insertions(+), 1 deletion(-)
 
-Changes in v2:
-        - Removed the stated patch below from this patchset. It can be handled
-        separately. "mmc: core: Remove power_restore bus_ops for mmc and sd"
-        - Rebased patches on latest mmc-next.
-        - Added Acks.
-
-Ulf Hansson (4):
-  mmc: core: Stop bkops for eMMC only from mmc suspend
-  mmc: core: Add bus_ops for runtime pm callbacks
-  mmc: block: Enable runtime pm for mmc blkdevice
-  mmc: core: Support aggressive power management for (e)MMC/SD
-
- drivers/mmc/card/block.c   |   32 +++++++++++++++++++++-----
- drivers/mmc/core/bus.c     |   14 ++++++++++--
- drivers/mmc/core/core.c    |   47 +++++++++++++++++++++------------------
- drivers/mmc/core/core.h    |    3 +++
- drivers/mmc/core/debugfs.c |    8 +++----
- drivers/mmc/core/mmc.c     |   53 ++++++++++++++++++++++++++++++++++++++++++--
- drivers/mmc/core/sd.c      |   46 ++++++++++++++++++++++++++++++++++++--
- drivers/mmc/core/sdio.c    |   16 +++++++++++++
- include/linux/mmc/core.h   |    3 +++
- include/linux/mmc/host.h   |    2 +-
- 10 files changed, 185 insertions(+), 39 deletions(-)
-
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index bf19058..8dfbc84 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1454,6 +1454,47 @@ static int mmc_resume(struct mmc_host *host)
+ 	return err;
+ }
+ 
++
++/*
++ * Callback for runtime_suspend.
++ */
++static int mmc_runtime_suspend(struct mmc_host *host)
++{
++	int err;
++
++	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
++		return 0;
++
++	err = mmc_suspend(host);
++	if (err) {
++		pr_err("%s: error %d doing aggessive suspend\n",
++			mmc_hostname(host), err);
++		return err;
++	}
++
++	mmc_power_off(host);
++	return err;
++}
++
++/*
++ * Callback for runtime_resume.
++ */
++static int mmc_runtime_resume(struct mmc_host *host)
++{
++	int err;
++
++	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
++		return 0;
++
++	mmc_power_up(host);
++	err = mmc_resume(host);
++	if (err)
++		pr_err("%s: error %d doing aggessive resume\n",
++			mmc_hostname(host), err);
++
++	return err;
++}
++
+ static int mmc_power_restore(struct mmc_host *host)
+ {
+ 	int ret;
+@@ -1514,6 +1555,8 @@ static const struct mmc_bus_ops mmc_ops_unsafe = {
+ 	.detect = mmc_detect,
+ 	.suspend = mmc_suspend,
+ 	.resume = mmc_resume,
++	.runtime_suspend = mmc_runtime_suspend,
++	.runtime_resume = mmc_runtime_resume,
+ 	.power_restore = mmc_power_restore,
+ 	.alive = mmc_alive,
+ };
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 30387d6..e0458f9 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -1095,6 +1095,46 @@ static int mmc_sd_resume(struct mmc_host *host)
+ 	return err;
+ }
+ 
++/*
++ * Callback for runtime_suspend.
++ */
++static int mmc_sd_runtime_suspend(struct mmc_host *host)
++{
++	int err;
++
++	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
++		return 0;
++
++	err = mmc_sd_suspend(host);
++	if (err) {
++		pr_err("%s: error %d doing aggessive suspend\n",
++			mmc_hostname(host), err);
++		return err;
++	}
++
++	mmc_power_off(host);
++	return err;
++}
++
++/*
++ * Callback for runtime_resume.
++ */
++static int mmc_sd_runtime_resume(struct mmc_host *host)
++{
++	int err;
++
++	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
++		return 0;
++
++	mmc_power_up(host);
++	err = mmc_sd_resume(host);
++	if (err)
++		pr_err("%s: error %d doing aggessive resume\n",
++			mmc_hostname(host), err);
++
++	return err;
++}
++
+ static int mmc_sd_power_restore(struct mmc_host *host)
+ {
+ 	int ret;
+@@ -1119,6 +1159,8 @@ static const struct mmc_bus_ops mmc_sd_ops = {
+ static const struct mmc_bus_ops mmc_sd_ops_unsafe = {
+ 	.remove = mmc_sd_remove,
+ 	.detect = mmc_sd_detect,
++	.runtime_suspend = mmc_sd_runtime_suspend,
++	.runtime_resume = mmc_sd_runtime_resume,
+ 	.suspend = mmc_sd_suspend,
+ 	.resume = mmc_sd_resume,
+ 	.power_restore = mmc_sd_power_restore,
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 17d7148..cec6684 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -239,7 +239,7 @@ struct mmc_host {
+ #define MMC_CAP_SPI		(1 << 4)	/* Talks only SPI protocols */
+ #define MMC_CAP_NEEDS_POLL	(1 << 5)	/* Needs polling for card-detection */
+ #define MMC_CAP_8_BIT_DATA	(1 << 6)	/* Can the host do 8 bit transfers */
+-
++#define MMC_CAP_AGGRESSIVE_PM	(1 << 7)	/* Suspend (e)MMC/SD at idle  */
+ #define MMC_CAP_NONREMOVABLE	(1 << 8)	/* Nonremovable e.g. eMMC */
+ #define MMC_CAP_WAIT_WHILE_BUSY	(1 << 9)	/* Waits while card is busy */
+ #define MMC_CAP_ERASE		(1 << 10)	/* Allow erase/trim commands */
 -- 
 1.7.10
 
