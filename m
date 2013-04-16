@@ -1,15 +1,15 @@
 From: <ludovic.desroches@atmel.com>
-Subject: [PATCH 5/6] mci: at91: convert to dma_request_slave_channel_compat()
-Date: Tue, 16 Apr 2013 15:03:09 +0200
-Message-ID: <1366117390-24686-6-git-send-email-ludovic.desroches@atmel.com>
+Subject: [PATCH 4/6] ARM: at91: dts: add i2c dma support
+Date: Tue, 16 Apr 2013 15:03:08 +0200
+Message-ID: <1366117390-24686-5-git-send-email-ludovic.desroches@atmel.com>
 References: <1366117390-24686-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:40717 "EHLO
+Received: from eusmtp01.atmel.com ([212.144.249.243]:40700 "EHLO
 	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932847Ab3DPNDp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Apr 2013 09:03:45 -0400
+	with ESMTP id S932847Ab3DPNDl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Apr 2013 09:03:41 -0400
 In-Reply-To: <1366117390-24686-1-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -18,68 +18,107 @@ Cc: nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, Ludovic Desroches <ludovic.d
 
 From: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Use generic DMA DT helper. Platforms booting with or without DT populated are
-both supported.
+Add DMA resources to i2c nodes.
 
 Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-Acked-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
-Acked-by: Nicolas Ferre <nicolas.ferre@atmel.com>
 ---
- drivers/mmc/host/atmel-mci.c | 25 ++++++++++++-------------
- 1 file changed, 12 insertions(+), 13 deletions(-)
+ arch/arm/boot/dts/at91sam9n12.dtsi | 6 ++++++
+ arch/arm/boot/dts/at91sam9x5.dtsi  | 9 +++++++++
+ arch/arm/boot/dts/sama5d3.dtsi     | 9 +++++++++
+ 3 files changed, 24 insertions(+)
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 10f8b73..73d5d24 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -2224,10 +2224,15 @@ static void __exit atmci_cleanup_slot(struct atmel_mci_slot *slot,
- 	mmc_free_host(slot->mmc);
- }
- 
--static bool atmci_filter(struct dma_chan *chan, void *slave)
-+static bool atmci_filter(struct dma_chan *chan, void *pdata)
- {
--	struct mci_dma_data	*sl = slave;
-+	struct mci_platform_data *sl_pdata = pdata;
-+	struct mci_dma_data *sl;
- 
-+	if (!sl_pdata)
-+		return false;
-+
-+	sl = sl_pdata->dma_slave;
- 	if (sl && find_slave_dev(sl) == chan->device->dev) {
- 		chan->private = slave_data_ptr(sl);
- 		return true;
-@@ -2239,24 +2244,18 @@ static bool atmci_filter(struct dma_chan *chan, void *slave)
- static bool atmci_configure_dma(struct atmel_mci *host)
- {
- 	struct mci_platform_data	*pdata;
-+	dma_cap_mask_t mask;
- 
- 	if (host == NULL)
- 		return false;
- 
- 	pdata = host->pdev->dev.platform_data;
- 
--	if (!pdata)
--		return false;
-+	dma_cap_zero(mask);
-+	dma_cap_set(DMA_SLAVE, mask);
- 
--	if (pdata->dma_slave && find_slave_dev(pdata->dma_slave)) {
--		dma_cap_mask_t mask;
--
--		/* Try to grab a DMA channel */
--		dma_cap_zero(mask);
--		dma_cap_set(DMA_SLAVE, mask);
--		host->dma.chan =
--			dma_request_channel(mask, atmci_filter, pdata->dma_slave);
--	}
-+	host->dma.chan = dma_request_slave_channel_compat(mask, atmci_filter, pdata,
-+						   	  &host->pdev->dev, "rxtx");
- 	if (!host->dma.chan) {
- 		dev_warn(&host->pdev->dev, "no DMA channel available\n");
- 		return false;
+diff --git a/arch/arm/boot/dts/at91sam9n12.dtsi b/arch/arm/boot/dts/at91sam9n12.dtsi
+index acc4526..f912124 100644
+--- a/arch/arm/boot/dts/at91sam9n12.dtsi
++++ b/arch/arm/boot/dts/at91sam9n12.dtsi
+@@ -361,6 +361,9 @@
+ 				compatible = "atmel,at91sam9x5-i2c";
+ 				reg = <0xf8010000 0x100>;
+ 				interrupts = <9 4 6>;
++				dmas = <&dma0 1 13>,
++				       <&dma0 1 14>;
++				dma-names = "tx", "rx";
+ 				#address-cells = <1>;
+ 				#size-cells = <0>;
+ 				status = "disabled";
+@@ -370,6 +373,9 @@
+ 				compatible = "atmel,at91sam9x5-i2c";
+ 				reg = <0xf8014000 0x100>;
+ 				interrupts = <10 4 6>;
++				dmas = <&dma0 1 15>,
++				       <&dma0 1 16>;
++				dma-names = "tx", "rx";
+ 				#address-cells = <1>;
+ 				#size-cells = <0>;
+ 				status = "disabled";
+diff --git a/arch/arm/boot/dts/at91sam9x5.dtsi b/arch/arm/boot/dts/at91sam9x5.dtsi
+index 8e83d87..16c9b81 100644
+--- a/arch/arm/boot/dts/at91sam9x5.dtsi
++++ b/arch/arm/boot/dts/at91sam9x5.dtsi
+@@ -519,6 +519,9 @@
+ 				compatible = "atmel,at91sam9x5-i2c";
+ 				reg = <0xf8010000 0x100>;
+ 				interrupts = <9 4 6>;
++				dmas = <&dma0 1 7>,
++				       <&dma0 1 8>;
++				dma-names = "tx", "rx";
+ 				#address-cells = <1>;
+ 				#size-cells = <0>;
+ 				pinctrl-names = "default";
+@@ -530,6 +533,9 @@
+ 				compatible = "atmel,at91sam9x5-i2c";
+ 				reg = <0xf8014000 0x100>;
+ 				interrupts = <10 4 6>;
++				dmas = <&dma1 1 5>,
++				       <&dma1 1 6>;
++				dma-names = "tx", "rx";
+ 				#address-cells = <1>;
+ 				#size-cells = <0>;
+ 				pinctrl-names = "default";
+@@ -541,6 +547,9 @@
+ 				compatible = "atmel,at91sam9x5-i2c";
+ 				reg = <0xf8018000 0x100>;
+ 				interrupts = <11 4 6>;
++				dmas = <&dma0 1 9>,
++				       <&dma0 1 10>;
++				dma-names = "tx", "rx";
+ 				#address-cells = <1>;
+ 				#size-cells = <0>;
+ 				pinctrl-names = "default";
+diff --git a/arch/arm/boot/dts/sama5d3.dtsi b/arch/arm/boot/dts/sama5d3.dtsi
+index 95c00a3..8e87277 100644
+--- a/arch/arm/boot/dts/sama5d3.dtsi
++++ b/arch/arm/boot/dts/sama5d3.dtsi
+@@ -111,6 +111,9 @@
+ 				compatible = "atmel,at91sam9x5-i2c";
+ 				reg = <0xf0014000 0x4000>;
+ 				interrupts = <18 4 6>;
++				dmas = <&dma0 2 7>,
++				       <&dma0 2 8>;
++				dma-names = "tx", "rx";
+ 				pinctrl-names = "default";
+ 				pinctrl-0 = <&pinctrl_i2c0>;
+ 				#address-cells = <1>;
+@@ -122,6 +125,9 @@
+ 				compatible = "atmel,at91sam9x5-i2c";
+ 				reg = <0xf0018000 0x4000>;
+ 				interrupts = <19 4 6>;
++				dmas = <&dma0 2 9>,
++				       <&dma0 2 10>;
++				dma-names = "tx", "rx";
+ 				pinctrl-names = "default";
+ 				pinctrl-0 = <&pinctrl_i2c1>;
+ 				#address-cells = <1>;
+@@ -294,6 +300,9 @@
+ 				compatible = "atmel,at91sam9x5-i2c";
+ 				reg = <0xf801c000 0x4000>;
+ 				interrupts = <20 4 6>;
++				dmas = <&dma1 2 11>,
++				       <&dma1 2 12>;
++				dma-names = "tx", "rx";
+ 				#address-cells = <1>;
+ 				#size-cells = <0>;
+ 				status = "disabled";
 -- 
 1.7.11.3
 
