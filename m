@@ -1,191 +1,52 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [RESEND PATCH V3 4/4] mmc: core: Support aggressive power management for (e)MMC/SD
-Date: Tue, 16 Apr 2013 12:55:35 +0200
-Message-ID: <1366109735-18178-1-git-send-email-ulf.hansson@stericsson.com>
+From: <ludovic.desroches@atmel.com>
+Subject: [PATCH v2 0/6] ARM: at91: move to generic DMA device tree binding
+Date: Tue, 16 Apr 2013 15:03:04 +0200
+Message-ID: <1366117390-24686-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog111.obsmtp.com ([207.126.144.131]:59090 "EHLO
-	eu1sys200aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751619Ab3DPLZA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Apr 2013 07:25:00 -0400
+Received: from eusmtp01.atmel.com ([212.144.249.243]:40596 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932847Ab3DPNDR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Apr 2013 09:03:17 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maya Erez <merez@codeaurora.org>, Subhash Jadavani <subhashj@codeaurora.org>, Arnd Bergmann <arnd@arndb.de>, Kevin Liu <kliu5@marvell.com>, Adrian Hunter <adrian.hunter@intel.com>, Daniel Drake <dsd@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>
+To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-i2c@vger.kernel.org
+Cc: nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Aggressive power management is suitable when saving power is
-essential. At request inactivity timeout, aka pm runtime
-autosuspend timeout, the card will be suspended.
+Hi,
 
-Once a new request arrives, the card will be re-initalized and
-thus the first request will suffer from a latency. This latency
-is card-specific, experiments has shown in general that SD-cards
-has quite poor initialization time, around 300ms-1100ms. eMMC is
-not surprisingly far better but still a couple of hundreds of ms
-has been observed.
+This set of patches introduces DMA device tree bindings support for the atmel
+DMA controller and first driver conversions.
 
-Except for the request latency, it is important to know that
-suspending the card will also prevent the card from executing
-internal house-keeping operations in idle mode. This could mean
-degradation in performance.
+Patch 3/6 has already been taken by Wolfram.
 
-To use this feature make sure the request inactivity timeout is
-chosen carefully. This has not been done as a part of this patch.
+v2 changes:
+- update documentation about dma bindings according to Nicolas' comments
+- put dtsi changes in a separate patch
+- add dtb update for i2c and mci nodes
 
-Enable this feature by using host cap MMC_CAP_AGGRESSIVE_PM and
-by setting CONFIG_MMC_UNSAFE_RESUME.
+Ludovic Desroches (6):
+  at_hdmac: move to generic DMA binding
+  ARM: at91: dts: set #dma-cells to the correct value
+  i2c: at91: convert to dma_request_slave_channel_compat()
+  ARM: at91: dts: add i2c dma support
+  mci: at91: convert to dma_request_slave_channel_compat()
+  ARM: at91: dts: add MCI DMA support
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Maya Erez <merez@codeaurora.org>
-Cc: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: Arnd Bergmann <arnd@arndb.de>
-Cc: Kevin Liu <kliu5@marvell.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Daniel Drake <dsd@laptop.org>
-Cc: Ohad Ben-Cohen <ohad@wizery.com>
----
- drivers/mmc/core/mmc.c   |   43 +++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/sd.c    |   42 ++++++++++++++++++++++++++++++++++++++++++
- include/linux/mmc/host.h |    2 +-
- 3 files changed, 86 insertions(+), 1 deletion(-)
+ .../devicetree/bindings/dma/atmel-dma.txt          | 35 ++++++--
+ arch/arm/boot/dts/at91sam9g45.dtsi                 |  5 ++
+ arch/arm/boot/dts/at91sam9n12.dtsi                 |  9 +++
+ arch/arm/boot/dts/at91sam9x5.dtsi                  | 15 ++++
+ arch/arm/boot/dts/sama5d3.dtsi                     | 19 ++++-
+ drivers/dma/at_hdmac.c                             | 93 ++++++++++++++++++++--
+ drivers/dma/at_hdmac_regs.h                        |  4 +
+ drivers/i2c/busses/i2c-at91.c                      | 49 ++++++------
+ drivers/mmc/host/atmel-mci.c                       | 25 +++---
+ 9 files changed, 204 insertions(+), 50 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index bf19058..8dfbc84 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1454,6 +1454,47 @@ static int mmc_resume(struct mmc_host *host)
- 	return err;
- }
- 
-+
-+/*
-+ * Callback for runtime_suspend.
-+ */
-+static int mmc_runtime_suspend(struct mmc_host *host)
-+{
-+	int err;
-+
-+	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
-+		return 0;
-+
-+	err = mmc_suspend(host);
-+	if (err) {
-+		pr_err("%s: error %d doing aggessive suspend\n",
-+			mmc_hostname(host), err);
-+		return err;
-+	}
-+
-+	mmc_power_off(host);
-+	return err;
-+}
-+
-+/*
-+ * Callback for runtime_resume.
-+ */
-+static int mmc_runtime_resume(struct mmc_host *host)
-+{
-+	int err;
-+
-+	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
-+		return 0;
-+
-+	mmc_power_up(host);
-+	err = mmc_resume(host);
-+	if (err)
-+		pr_err("%s: error %d doing aggessive resume\n",
-+			mmc_hostname(host), err);
-+
-+	return err;
-+}
-+
- static int mmc_power_restore(struct mmc_host *host)
- {
- 	int ret;
-@@ -1514,6 +1555,8 @@ static const struct mmc_bus_ops mmc_ops_unsafe = {
- 	.detect = mmc_detect,
- 	.suspend = mmc_suspend,
- 	.resume = mmc_resume,
-+	.runtime_suspend = mmc_runtime_suspend,
-+	.runtime_resume = mmc_runtime_resume,
- 	.power_restore = mmc_power_restore,
- 	.alive = mmc_alive,
- };
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 30387d6..e0458f9 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1095,6 +1095,46 @@ static int mmc_sd_resume(struct mmc_host *host)
- 	return err;
- }
- 
-+/*
-+ * Callback for runtime_suspend.
-+ */
-+static int mmc_sd_runtime_suspend(struct mmc_host *host)
-+{
-+	int err;
-+
-+	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
-+		return 0;
-+
-+	err = mmc_sd_suspend(host);
-+	if (err) {
-+		pr_err("%s: error %d doing aggessive suspend\n",
-+			mmc_hostname(host), err);
-+		return err;
-+	}
-+
-+	mmc_power_off(host);
-+	return err;
-+}
-+
-+/*
-+ * Callback for runtime_resume.
-+ */
-+static int mmc_sd_runtime_resume(struct mmc_host *host)
-+{
-+	int err;
-+
-+	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
-+		return 0;
-+
-+	mmc_power_up(host);
-+	err = mmc_sd_resume(host);
-+	if (err)
-+		pr_err("%s: error %d doing aggessive resume\n",
-+			mmc_hostname(host), err);
-+
-+	return err;
-+}
-+
- static int mmc_sd_power_restore(struct mmc_host *host)
- {
- 	int ret;
-@@ -1119,6 +1159,8 @@ static const struct mmc_bus_ops mmc_sd_ops = {
- static const struct mmc_bus_ops mmc_sd_ops_unsafe = {
- 	.remove = mmc_sd_remove,
- 	.detect = mmc_sd_detect,
-+	.runtime_suspend = mmc_sd_runtime_suspend,
-+	.runtime_resume = mmc_sd_runtime_resume,
- 	.suspend = mmc_sd_suspend,
- 	.resume = mmc_sd_resume,
- 	.power_restore = mmc_sd_power_restore,
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 17d7148..cec6684 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -239,7 +239,7 @@ struct mmc_host {
- #define MMC_CAP_SPI		(1 << 4)	/* Talks only SPI protocols */
- #define MMC_CAP_NEEDS_POLL	(1 << 5)	/* Needs polling for card-detection */
- #define MMC_CAP_8_BIT_DATA	(1 << 6)	/* Can the host do 8 bit transfers */
--
-+#define MMC_CAP_AGGRESSIVE_PM	(1 << 7)	/* Suspend (e)MMC/SD at idle  */
- #define MMC_CAP_NONREMOVABLE	(1 << 8)	/* Nonremovable e.g. eMMC */
- #define MMC_CAP_WAIT_WHILE_BUSY	(1 << 9)	/* Waits while card is busy */
- #define MMC_CAP_ERASE		(1 << 10)	/* Allow erase/trim commands */
 -- 
-1.7.10
+1.7.11.3
 
