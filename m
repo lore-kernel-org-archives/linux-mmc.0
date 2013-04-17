@@ -1,32 +1,95 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: dw_mmc: exynos: Turn SDIO interrupts on
-Date: Tue, 16 Apr 2013 07:55:48 -0700
-Message-ID: <CAD=FV=U_n7sma6NMbQ=FySEV7nocubCmBSYEJ_R-q=dtuFLaFA@mail.gmail.com>
-References: <1365698338-27503-1-git-send-email-dianders@chromium.org>
-	<001701ce39d2$c0dbf8c0$4293ea40$%jun@samsung.com>
-	<CAD=FV=XqmLRjQPwWCZfw0Nfu_uK16SOP=OgJcrbziWs4e__h7A@mail.gmail.com>
-	<001601ce3a85$16087f00$42197d00$%jun@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 0/2] sdhci-acpi initialization performance regression
+Date: Wed, 17 Apr 2013 08:55:23 +0300
+Message-ID: <516E394B.6090507@intel.com>
+References: <1365082866-28404-1-git-send-email-adrian.hunter@intel.com> <87fvyvfwor.fsf@octavius.laptop.org> <516BA282.2000500@intel.com> <87k3o3ajh4.fsf@octavius.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <001601ce3a85$16087f00$42197d00$%jun@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, Thomas Abraham <thomas.abraham@linaro.org>, Bing Zhao <bzhao@marvell.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sachin Kamat <sachin.kamat@linaro.org>, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:39217 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757777Ab3DQFur (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 17 Apr 2013 01:50:47 -0400
+In-Reply-To: <87k3o3ajh4.fsf@octavius.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Namjae Jeon <linkinjeon@gmail.com>, Sergey Yanovich <ynvich@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
-Seungwon,
+On 15/04/13 18:42, Chris Ball wrote:
+> Hi,
+>
+> On Mon, Apr 15 2013, Adrian Hunter wrote:
+>> On 12/04/13 21:09, Chris Ball wrote:
+>>> Hi Adrian,
+>>>
+>>> On Thu, Apr 04 2013, Adrian Hunter wrote:
+>>>> When I submitted the sdhci-acpi driver, it's initialization performance
+>>>> was satisfactory.  Now it is not.  Here are 2 fixes to restore that
+>>>> regression.
+>>>>
+>>>> Adrian Hunter (2):
+>>>>       Revert "mmc: core: wait while adding MMC host to ensure root mounts successfully"
+>>>>       mmc: core: fix performance regression initializing MMC host controllers
+>>>>
+>>>>  drivers/mmc/core/core.c       | 4 ++--
+>>>>  drivers/mmc/host/sdhci-acpi.c | 2 ++
+>>>>  include/linux/mmc/host.h      | 1 +
+>>>>  3 files changed, 5 insertions(+), 2 deletions(-)
+>>> Thanks, both pushed to mmc-next (using v4 of patch 2/2) for 3.10.
+>> Thanks you!
+>>
+>> It looks like mmc-next and linux-next have the V1 version of patch 2/2.  Can
+>> you replace it with V4?
+> Ouch, I'm sorry about that; thank you for catching it.  I applied the
+> incremental patch below to bring it up to v4 (to avoid rebasing a
+> public tree):
 
-On Tue, Apr 16, 2013 at 2:30 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> If needed for specific channel, it can be got from dts as property.
-> if (of_find_property(np, "cap-sdio-irq", NULL))
->         pdata->caps |= MMC_CAP_SDIO_IRQ;
+That is fine with me.  Is it in any tree?
 
-Oh!  I missed that these new properties had gone in.  That is a much
-better way to do it.  Let's abandon this patch and I'll post up a
-device tree change that turns interrupts for the right ports on the
-exynos5250-snow and we can call it done.
+>
+>
+> From: Adrian Hunter <adrian.hunter@intel.com>
+> Subject: [PATCH] mmc: core: fix init controller performance regression,
+>  updated patch
+>
+> Add MMC_CAP2_NO_PRESCAN_POWERUP to sdhci-pci.c also, use mmc_power_off()
+> for MMC_CAP2_NO_PRESCAN_POWERUP.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> [cjb: previously applied v1 of this patch instead of v4]
+> Signed-off-by: Chris Ball <cjb@laptop.org>
+> ---
+>  drivers/mmc/core/core.c      | 4 +++-
+>  drivers/mmc/host/sdhci-pci.c | 1 +
+>  2 files changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index c1893c9..65f9ca7 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2416,7 +2416,9 @@ void mmc_start_host(struct mmc_host *host)
+>  {
+>  	host->f_init = max(freqs[0], host->f_min);
+>  	host->rescan_disable = 0;
+> -	if (!(host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP))
+> +	if (host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP)
+> +		mmc_power_off(host);
+> +	else
+>  		mmc_power_up(host);
+>  	mmc_detect_change(host, 0);
+>  }
+> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+> index c1f0372..0012d3f 100644
+> --- a/drivers/mmc/host/sdhci-pci.c
+> +++ b/drivers/mmc/host/sdhci-pci.c
+> @@ -1280,6 +1280,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+>  
+>  	host->mmc->pm_caps = MMC_PM_KEEP_POWER | MMC_PM_WAKE_SDIO_IRQ;
+>  	host->mmc->slotno = slotno;
+> +	host->mmc->caps2 |= MMC_CAP2_NO_PRESCAN_POWERUP;
+>  
+>  	ret = sdhci_add_host(host);
+>  	if (ret)
 
-Thanks for the review and for pointing me to the new properties!
-
--Doug
