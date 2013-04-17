@@ -1,75 +1,240 @@
-From: Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
-Subject: [PATCH] mmc: core: Only execute tuning for SDR50 and SDR104
-Date: Wed, 17 Apr 2013 13:50:53 +0200
-Message-ID: <1366199453-6135-1-git-send-email-fredrik.soderstedt@stericsson.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: card: Adding support for sanitize in eMMC 4.5
+Date: Wed, 17 Apr 2013 13:55:46 +0200
+Message-ID: <CAPDyKFr90S_O4cW4y=sGC-oRnc58yXJEd89xKoXt5Orp5_mdpA@mail.gmail.com>
+References: <1366198740-9651-1-git-send-email-merez@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog103.obsmtp.com ([207.126.144.115]:60738 "EHLO
-	eu1sys200aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S966071Ab3DQLvW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Apr 2013 07:51:22 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1366198740-9651-1-git-send-email-merez@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Maya Erez <merez@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Yaniv Gardi <ygardi@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@stericsson.com>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
 
-Only execute tuning for sd and sdio devices that are using
-SDR50 or SDR104.
+On 17 April 2013 13:38, Maya Erez <merez@codeaurora.org> wrote:
+> The sanitize support is added as a user-app ioctl call, and
+> was removed from the block-device request, since its purpose is
+> to be invoked not via File-System but by a user.
+> This feature deletes the unmap memory region of the eMMC card,
+> by writing to a specific register in the EXT_CSD.
+> unmap region is the memory region that was previously deleted
+> (by erase, trim or discard operation).
+> In order to avoid timeout when sanitizing large-scale cards,
+> the timeout for sanitize operation is 240 seconds.
+>
+> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
+> Signed-off-by: Maya Erez <merez@codeaurora.org>
+> ---
+>  drivers/mmc/card/block.c |   68 +++++++++++++++++++++++++++++++--------------
+>  drivers/mmc/card/queue.c |    2 +-
+>  drivers/mmc/core/core.c  |   21 ++++++++++++++
+>  include/linux/mmc/core.h |    2 +
+>  include/linux/mmc/host.h |    1 +
+>  5 files changed, 72 insertions(+), 22 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index e12a03c..1f043ee 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -58,6 +58,8 @@ MODULE_ALIAS("mmc:block");
+>  #define INAND_CMD38_ARG_SECTRIM1 0x81
+>  #define INAND_CMD38_ARG_SECTRIM2 0x88
+>  #define MMC_BLK_TIMEOUT_MS  (10 * 60 * 1000)        /* 10 minute timeout */
+> +#define MMC_SANITIZE_REQ_TIMEOUT 240000
+> +#define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
+>
+>  #define mmc_req_rel_wr(req)    (((req->cmd_flags & REQ_FUA) || \
+>                                   (req->cmd_flags & REQ_META)) && \
+> @@ -409,6 +411,35 @@ static int ioctl_rpmb_card_status_poll(struct mmc_card *card, u32 *status,
+>         return err;
+>  }
+>
+> +static int ioctl_do_sanitize(struct mmc_card *card)
+> +{
+> +       int err;
+> +
+> +       if (!(mmc_can_sanitize(card) &&
+> +             (card->host->caps2 & MMC_CAP2_SANITIZE))) {
+> +                       pr_warn("%s: %s - SANITIZE is not supported\n",
+> +                               mmc_hostname(card->host), __func__);
+> +                       err = -EOPNOTSUPP;
+> +                       goto out;
+> +       }
+> +
+> +       pr_debug("%s: %s - SANITIZE IN PROGRESS...\n",
+> +               mmc_hostname(card->host), __func__);
+> +
+> +       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +                                       EXT_CSD_SANITIZE_START, 1,
+> +                                       MMC_SANITIZE_REQ_TIMEOUT);
+> +
+> +       if (err)
+> +               pr_err("%s: %s - EXT_CSD_SANITIZE_START failed. err=%d\n",
+> +                      mmc_hostname(card->host), __func__, err);
+> +
+> +       pr_debug("%s: %s - SANITIZE COMPLETED\n", mmc_hostname(card->host),
+> +                                            __func__);
+> +out:
+> +       return err;
+> +}
+> +
+>  static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+>         struct mmc_ioc_cmd __user *ic_ptr)
+>  {
+> @@ -511,6 +542,16 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+>                         goto cmd_rel_host;
+>         }
+>
+> +       if (MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_SANITIZE_START) {
+> +               err = ioctl_do_sanitize(card);
+> +
+> +               if (err)
+> +                       pr_err("%s: ioctl_do_sanitize() failed. err = %d",
+> +                              __func__, err);
+> +
+> +               goto cmd_rel_host;
+> +       }
+> +
+>         mmc_wait_for_req(card->host, &mrq);
+>
+>         if (cmd.error) {
+> @@ -940,10 +981,10 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
+>  {
+>         struct mmc_blk_data *md = mq->data;
+>         struct mmc_card *card = md->queue.card;
+> -       unsigned int from, nr, arg, trim_arg, erase_arg;
+> +       unsigned int from, nr, arg;
+>         int err = 0, type = MMC_BLK_SECDISCARD;
+>
+> -       if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
+> +       if (!(mmc_can_secure_erase_trim(card))) {
+>                 err = -EOPNOTSUPP;
+>                 goto out;
+>         }
+> @@ -951,23 +992,11 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
+>         from = blk_rq_pos(req);
+>         nr = blk_rq_sectors(req);
+>
+> -       /* The sanitize operation is supported at v4.5 only */
+> -       if (mmc_can_sanitize(card)) {
+> -               erase_arg = MMC_ERASE_ARG;
+> -               trim_arg = MMC_TRIM_ARG;
+> -       } else {
+> -               erase_arg = MMC_SECURE_ERASE_ARG;
+> -               trim_arg = MMC_SECURE_TRIM1_ARG;
+> -       }
+> +       if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
+> +               arg = MMC_SECURE_TRIM1_ARG;
+> +       else
+> +               arg = MMC_SECURE_ERASE_ARG;
+>
+> -       if (mmc_erase_group_aligned(card, from, nr))
+> -               arg = erase_arg;
+> -       else if (mmc_can_trim(card))
+> -               arg = trim_arg;
+> -       else {
+> -               err = -EINVAL;
+> -               goto out;
+> -       }
+>  retry:
+>         if (card->quirks & MMC_QUIRK_INAND_CMD38) {
+>                 err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> @@ -1003,9 +1032,6 @@ retry:
+>                         goto out;
+>         }
+>
+> -       if (mmc_can_sanitize(card))
+> -               err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> -                                EXT_CSD_SANITIZE_START, 1, 0);
+>  out_retry:
+>         if (err && !mmc_blk_reset(md, card->host, type))
+>                 goto retry;
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index 9447a0e..fa9632e 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -173,7 +173,7 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+>         /* granularity must not be greater than max. discard */
+>         if (card->pref_erase > max_discard)
+>                 q->limits.discard_granularity = 0;
+> -       if (mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))
+> +       if (mmc_can_secure_erase_trim(card))
+>                 queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
+>  }
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 37c5dad..dea9381 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -402,6 +402,27 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
+>                         context_info->is_done_rcv = false;
+>                         context_info->is_new_req = false;
+>                         cmd = mrq->cmd;
+> +
+> +                       /*
+> +                        * If host has timed out waiting for the sanitize
+> +                        * to complete, card might be still in programming state
+> +                        * so let's try to bring the card out of programming
+> +                        * state.
+> +                        */
+> +                       if (cmd->sanitize_busy && cmd->error == -ETIMEDOUT) {
+> +                               if (!mmc_interrupt_hpi(host->card)) {
+> +                                       pr_warning("%s: %s: Interrupted "
+> +                                                  "sanitize\n",
+> +                                                  mmc_hostname(host),
+> +                                                  __func__);
+> +                                       cmd->error = 0;
+> +                                       break;
+> +                               } else {
+> +                                       pr_err("%s: %s: Failed to interrupt "
+> +                                              "sanitize\n",
+> +                                              mmc_hostname(host), __func__);
+> +                               }
+> +                       }
+>                         if (!cmd->error || !cmd->retries ||
+>                             mmc_card_removed(host->card)) {
+>                                 err = host->areq->err_check(host->card,
+> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> index 39613b9..bd06ff5 100644
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -96,6 +96,8 @@ struct mmc_command {
+>   */
+>
+>         unsigned int            cmd_timeout_ms; /* in milliseconds */
+> +       /* Set this flag only for blocking sanitize request */
+> +       bool                    sanitize_busy;
+>
+>         struct mmc_data         *data;          /* data segment associated with cmd */
+>         struct mmc_request      *mrq;           /* associated request */
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index e326ae2..00c10be 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -281,6 +281,7 @@ struct mmc_host {
+>  #define MMC_CAP2_PACKED_CMD    (MMC_CAP2_PACKED_RD | \
+>                                  MMC_CAP2_PACKED_WR)
+>  #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)  /* Don't power up before scan */
+> +#define MMC_CAP2_SANITIZE      (1 << 15)               /* Support Sanitize */
 
-Make sure clock is hold during tuning for sdio devices.
+Is there a specific reason to why a cap is needed? Would it be okay to
+use this feature just if the card supports it?
 
-Signed-off-by: Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
----
- drivers/mmc/core/sd.c   |  9 +++++++--
- drivers/mmc/core/sdio.c | 12 ++++++++++--
- 2 files changed, 17 insertions(+), 4 deletions(-)
+>
+>         mmc_pm_flag_t           pm_caps;        /* supported pm features */
+>
+> --
+> 1.7.3.3
+> --
+> QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
+> of Code Aurora Forum, hosted by The Linux Foundation
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 9e645e1..8373d22 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -646,8 +646,13 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
- 	if (err)
- 		goto out;
- 
--	/* SPI mode doesn't define CMD19 */
--	if (!mmc_host_is_spi(card->host) && card->host->ops->execute_tuning) {
-+	/*
-+	 * SPI mode doesn't define CMD19 and tuning is only valid for SDR50 and
-+	 * SDR104 mode SD-cards. Note that tuning is mandatory for SDR104.
-+	 */
-+	if (!mmc_host_is_spi(card->host) && card->host->ops->execute_tuning &&
-+			(card->sd_bus_speed == UHS_SDR50_BUS_SPEED ||
-+			 card->sd_bus_speed == UHS_SDR104_BUS_SPEED)) {
- 		mmc_host_clk_hold(card->host);
- 		err = card->host->ops->execute_tuning(card->host,
- 						      MMC_SEND_TUNING_BLOCK);
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 6889a82..444668c 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -563,10 +563,18 @@ static int mmc_sdio_init_uhs_card(struct mmc_card *card)
- 	if (err)
- 		goto out;
- 
--	/* Initialize and start re-tuning timer */
--	if (!mmc_host_is_spi(card->host) && card->host->ops->execute_tuning)
-+	/*
-+	 * SPI mode doesn't define CMD19 and tuning is only valid for SDR50 and
-+	 * SDR104 mode SD-cards. Note that tuning is mandatory for SDR104.
-+	 */
-+	if (!mmc_host_is_spi(card->host) && card->host->ops->execute_tuning &&
-+			((card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR50) ||
-+			 (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR104))) {
-+		mmc_host_clk_hold(card->host);
- 		err = card->host->ops->execute_tuning(card->host,
- 						      MMC_SEND_TUNING_BLOCK);
-+		mmc_host_clk_release(card->host);
-+	}
- 
- out:
- 
--- 
-1.8.2.1
-
+Kind regards
+Ulf Hansson
