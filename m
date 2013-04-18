@@ -1,289 +1,280 @@
-From: merez@codeaurora.org
-Subject: RE: [PATCH v2] mmc: card: Adding support for sanitize in eMMC 4.5
-Date: Thu, 18 Apr 2013 03:28:29 -0700
-Message-ID: <28567cad1071b0f2fde716fa0892acf6.squirrel@www.codeaurora.org>
-References: <n> <1366198740-9651-1-git-send-email-merez@codeaurora.org>
-    <26E7A31274623843B0E8CF86148BFE32B030559E@NTXAVZMBX04.azit.micron.com>
+From: Nicolas Ferre <nicolas.ferre-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 1/6] at_hdmac: move to generic DMA binding
+Date: Thu, 18 Apr 2013 12:59:42 +0200
+Message-ID: <516FD21E.7070807@atmel.com>
+References: <1366117390-24686-1-git-send-email-ludovic.desroches@atmel.com> <1366117390-24686-2-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <26E7A31274623843B0E8CF86148BFE32B030559E@NTXAVZMBX04.azit.micron.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Luca Porzio (lporzio)" <lporzio@micron.com>
-Cc: Maya Erez <merez@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Yaniv Gardi <ygardi@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1366117390-24686-2-git-send-email-ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, "Koul, Vinod" <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Luca,
+On 04/16/2013 03:03 PM, ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org :
+> From: Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+> 
+> Update at_hdmac driver to support generic DMA device tree binding. Devices
+> can still request channel with dma_request_channel() then it doesn't break
+> DMA for non DT boards.
+> 
+> Signed-off-by: Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+> Acked-by: Nicolas Ferre <nicolas.ferre-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+> Acked-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org>
 
-See below (2 comments).
+I plan to make this whole series go forward for 3.10 because of the
+sensitive nature of DMA bindings and the expectations of everybody on
+this topic ;-)
 
-Thanks,
-Maya
-> Hi Maya,
->
->> -----Original Message-----
->> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
->> owner@vger.kernel.org] On Behalf Of Maya Erez
->> Sent: Wednesday, April 17, 2013 1:39 PM
->> To: linux-mmc@vger.kernel.org
->> Cc: linux-arm-msm@vger.kernel.org; Maya Erez; Yaniv Gardi; open list
->> Subject: [PATCH v2] mmc: card: Adding support for sanitize in eMMC 4.5
->>
->> The sanitize support is added as a user-app ioctl call, and
->> was removed from the block-device request, since its purpose is
->> to be invoked not via File-System but by a user.
->> This feature deletes the unmap memory region of the eMMC card,
->> by writing to a specific register in the EXT_CSD.
->> unmap region is the memory region that was previously deleted
->> (by erase, trim or discard operation).
->> In order to avoid timeout when sanitizing large-scale cards,
->> the timeout for sanitize operation is 240 seconds.
->>
->> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
->> Signed-off-by: Maya Erez <merez@codeaurora.org>
->> ---
->>  drivers/mmc/card/block.c |   68
->> +++++++++++++++++++++++++++++++-----------
->> ---
->>  drivers/mmc/card/queue.c |    2 +-
->>  drivers/mmc/core/core.c  |   21 ++++++++++++++
->>  include/linux/mmc/core.h |    2 +
->>  include/linux/mmc/host.h |    1 +
->>  5 files changed, 72 insertions(+), 22 deletions(-)
->>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> index e12a03c..1f043ee 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -58,6 +58,8 @@ MODULE_ALIAS("mmc:block");
->>  #define INAND_CMD38_ARG_SECTRIM1 0x81
->>  #define INAND_CMD38_ARG_SECTRIM2 0x88
->>  #define MMC_BLK_TIMEOUT_MS  (10 * 60 * 1000)        /* 10 minute
->> timeout
->> */
->> +#define MMC_SANITIZE_REQ_TIMEOUT 240000
->> +#define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
->>
->>  #define mmc_req_rel_wr(req)	(((req->cmd_flags & REQ_FUA) || \
->>  				  (req->cmd_flags & REQ_META)) && \
->> @@ -409,6 +411,35 @@ static int ioctl_rpmb_card_status_poll(struct
->> mmc_card
->> *card, u32 *status,
->>  	return err;
->>  }
->>
->> +static int ioctl_do_sanitize(struct mmc_card *card)
->> +{
->> +	int err;
->> +
->> +	if (!(mmc_can_sanitize(card) &&
->> +	      (card->host->caps2 & MMC_CAP2_SANITIZE))) {
->> +			pr_warn("%s: %s - SANITIZE is not supported\n",
->> +				mmc_hostname(card->host), __func__);
->> +			err = -EOPNOTSUPP;
->> +			goto out;
->> +	}
->> +
->> +	pr_debug("%s: %s - SANITIZE IN PROGRESS...\n",
->> +		mmc_hostname(card->host), __func__);
->> +
->> +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> +					EXT_CSD_SANITIZE_START, 1,
->> +					MMC_SANITIZE_REQ_TIMEOUT);
->> +
->> +	if (err)
->
-> Shouldn't you set the sanitize_busy flag here in case of timeout error?
-> Otherwise the patch looks good to me
->
-> Thanks,
->    Luca
+Arnd,
+Do you feel like giving your "Acked-by" to this patch? I think that you
+were pretty in line with Ludovic's RFC, so it may be interesting to have
+your support on this...
 
-This is done in __mmc_switch.
-I sent an uncomplete patch by mistake. Good catch!
+Vinod,
+This series touches several sub-systems, I plan to split it so everyone
+can take its corresponding code. Does it seem sensible to send you this
+patch alone, extracted from this series, when it is ready?
 
->
->> +		pr_err("%s: %s - EXT_CSD_SANITIZE_START failed. err=%d\n",
->> +		       mmc_hostname(card->host), __func__, err);
->> +
->> +	pr_debug("%s: %s - SANITIZE COMPLETED\n", mmc_hostname(card->host),
->> +					     __func__);
->> +out:
->> +	return err;
->> +}
->> +
->>  static int mmc_blk_ioctl_cmd(struct block_device *bdev,
->>  	struct mmc_ioc_cmd __user *ic_ptr)
->>  {
->> @@ -511,6 +542,16 @@ static int mmc_blk_ioctl_cmd(struct block_device
->> *bdev,
->>  			goto cmd_rel_host;
->>  	}
->>
->> +	if (MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_SANITIZE_START) {
->> +		err = ioctl_do_sanitize(card);
->> +
->> +		if (err)
->> +			pr_err("%s: ioctl_do_sanitize() failed. err = %d",
->> +			       __func__, err);
->> +
->> +		goto cmd_rel_host;
->> +	}
->> +
->>  	mmc_wait_for_req(card->host, &mrq);
->>
->>  	if (cmd.error) {
->> @@ -940,10 +981,10 @@ static int mmc_blk_issue_secdiscard_rq(struct
->> mmc_queue *mq,
->>  {
->>  	struct mmc_blk_data *md = mq->data;
->>  	struct mmc_card *card = md->queue.card;
->> -	unsigned int from, nr, arg, trim_arg, erase_arg;
->> +	unsigned int from, nr, arg;
->>  	int err = 0, type = MMC_BLK_SECDISCARD;
->>
->> -	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
->> +	if (!(mmc_can_secure_erase_trim(card))) {
->>  		err = -EOPNOTSUPP;
->>  		goto out;
->>  	}
->> @@ -951,23 +992,11 @@ static int mmc_blk_issue_secdiscard_rq(struct
->> mmc_queue *mq,
->>  	from = blk_rq_pos(req);
->>  	nr = blk_rq_sectors(req);
->>
->> -	/* The sanitize operation is supported at v4.5 only */
->> -	if (mmc_can_sanitize(card)) {
->> -		erase_arg = MMC_ERASE_ARG;
->> -		trim_arg = MMC_TRIM_ARG;
->> -	} else {
->> -		erase_arg = MMC_SECURE_ERASE_ARG;
->> -		trim_arg = MMC_SECURE_TRIM1_ARG;
->> -	}
->> +	if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
->> +		arg = MMC_SECURE_TRIM1_ARG;
->> +	else
->> +		arg = MMC_SECURE_ERASE_ARG;
->>
->> -	if (mmc_erase_group_aligned(card, from, nr))
->> -		arg = erase_arg;
->> -	else if (mmc_can_trim(card))
->> -		arg = trim_arg;
->> -	else {
->> -		err = -EINVAL;
->> -		goto out;
->> -	}
->>  retry:
->>  	if (card->quirks & MMC_QUIRK_INAND_CMD38) {
->>  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> @@ -1003,9 +1032,6 @@ retry:
->>  			goto out;
->>  	}
->>
->> -	if (mmc_can_sanitize(card))
->> -		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> -				 EXT_CSD_SANITIZE_START, 1, 0);
->>  out_retry:
->>  	if (err && !mmc_blk_reset(md, card->host, type))
->>  		goto retry;
->> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
->> index 9447a0e..fa9632e 100644
->> --- a/drivers/mmc/card/queue.c
->> +++ b/drivers/mmc/card/queue.c
->> @@ -173,7 +173,7 @@ static void mmc_queue_setup_discard(struct
->> request_queue *q,
->>  	/* granularity must not be greater than max. discard */
->>  	if (card->pref_erase > max_discard)
->>  		q->limits.discard_granularity = 0;
->> -	if (mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))
->> +	if (mmc_can_secure_erase_trim(card))
->>  		queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
->>  }
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index 37c5dad..dea9381 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -402,6 +402,27 @@ static int mmc_wait_for_data_req_done(struct
->> mmc_host
->> *host,
->>  			context_info->is_done_rcv = false;
->>  			context_info->is_new_req = false;
->>  			cmd = mrq->cmd;
->> +
->> +			/*
->> +			 * If host has timed out waiting for the sanitize
->> +			 * to complete, card might be still in programming state
->> +			 * so let's try to bring the card out of programming
->> +			 * state.
->> +			 */
->> +			if (cmd->sanitize_busy && cmd->error == -ETIMEDOUT) {
->> +				if (!mmc_interrupt_hpi(host->card)) {
->> +					pr_warning("%s: %s: Interrupted "
->> +						   "sanitize\n",
->> +						   mmc_hostname(host),
->> +						   __func__);
->> +					cmd->error = 0;
->> +					break;
->> +				} else {
->> +					pr_err("%s: %s: Failed to interrupt "
->> +					       "sanitize\n",
->> +					       mmc_hostname(host), __func__);
->> +				}
->> +			}
-This should be moved to mmc_wait_for_req_done. Sorry for the mistake.
-Will send a new patch with the fix.
+Thanks, best regards.
 
->>  			if (!cmd->error || !cmd->retries ||
->>  			    mmc_card_removed(host->card)) {
->>  				err = host->areq->err_check(host->card,
->> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
->> index 39613b9..bd06ff5 100644
->> --- a/include/linux/mmc/core.h
->> +++ b/include/linux/mmc/core.h
->> @@ -96,6 +96,8 @@ struct mmc_command {
->>   */
->>
->>  	unsigned int		cmd_timeout_ms;	/* in milliseconds */
->> +	/* Set this flag only for blocking sanitize request */
->> +	bool			sanitize_busy;
->>
->>  	struct mmc_data		*data;		/* data segment associated
->> with cmd */
->>  	struct mmc_request	*mrq;		/* associated request */
->> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->> index e326ae2..00c10be 100644
->> --- a/include/linux/mmc/host.h
->> +++ b/include/linux/mmc/host.h
->> @@ -281,6 +281,7 @@ struct mmc_host {
->>  #define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
->>  				 MMC_CAP2_PACKED_WR)
->>  #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before
->> scan */
->> +#define MMC_CAP2_SANITIZE	(1 << 15)		/* Support Sanitize */
->>
->>  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
->>
->> --
->> 1.7.3.3
->> --
->> QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a
->> member
->> of Code Aurora Forum, hosted by The Linux Foundation
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+
+> ---
+>  .../devicetree/bindings/dma/atmel-dma.txt          | 35 ++++++--
+>  drivers/dma/at_hdmac.c                             | 93 ++++++++++++++++++++--
+>  drivers/dma/at_hdmac_regs.h                        |  4 +
+>  3 files changed, 121 insertions(+), 11 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/dma/atmel-dma.txt b/Documentation/devicetree/bindings/dma/atmel-dma.txt
+> index 3c046ee..c80e8a3 100644
+> --- a/Documentation/devicetree/bindings/dma/atmel-dma.txt
+> +++ b/Documentation/devicetree/bindings/dma/atmel-dma.txt
+> @@ -1,14 +1,39 @@
+>  * Atmel Direct Memory Access Controller (DMA)
+>  
+>  Required properties:
+> -- compatible: Should be "atmel,<chip>-dma"
+> -- reg: Should contain DMA registers location and length
+> -- interrupts: Should contain DMA interrupt
+> +- compatible: Should be "atmel,<chip>-dma".
+> +- reg: Should contain DMA registers location and length.
+> +- interrupts: Should contain DMA interrupt.
+> +- #dma-cells: Must be <2>, used to represent the number of integer cells in
+> +the dmas property of client devices.
+>  
+> -Examples:
+> +Example:
+>  
+> -dma@ffffec00 {
+> +dma0: dma@ffffec00 {
+>  	compatible = "atmel,at91sam9g45-dma";
+>  	reg = <0xffffec00 0x200>;
+>  	interrupts = <21>;
+> +	#dma-cells = <2>;
+> +};
+> +
+> +DMA clients connected to the Atmel DMA controller must use the format
+> +described in the dma.txt file, using a three-cell specifier for each channel:
+> +a phandle plus two interger cells.
+> +The three cells in order are:
+> +
+> +1. A phandle pointing to the DMA controller.
+> +2. The memory interface (16 most significant bits), the peripheral interface
+> +(16 less significant bits).
+> +3. The peripheral identifier for the hardware handshaking interface. The
+> +identifier can be different for tx and rx.
+> +
+> +Example:
+> +
+> +i2c0@i2c@f8010000 {
+> +	compatible = "atmel,at91sam9x5-i2c";
+> +	reg = <0xf8010000 0x100>;
+> +	interrupts = <9 4 6>;
+> +	dmas = <&dma0 1 7>,
+> +	       <&dma0 1 8>;
+> +	dma-names = "tx", "rx";
+>  };
+> diff --git a/drivers/dma/at_hdmac.c b/drivers/dma/at_hdmac.c
+> index de4e930..2a63dbe 100644
+> --- a/drivers/dma/at_hdmac.c
+> +++ b/drivers/dma/at_hdmac.c
+> @@ -24,6 +24,7 @@
+>  #include <linux/slab.h>
+>  #include <linux/of.h>
+>  #include <linux/of_device.h>
+> +#include <linux/of_dma.h>
+>  
+>  #include "at_hdmac_regs.h"
+>  #include "dmaengine.h"
+> @@ -677,7 +678,7 @@ atc_prep_slave_sg(struct dma_chan *chan, struct scatterlist *sgl,
+>  		ctrlb |=  ATC_DST_ADDR_MODE_FIXED
+>  			| ATC_SRC_ADDR_MODE_INCR
+>  			| ATC_FC_MEM2PER
+> -			| ATC_SIF(AT_DMA_MEM_IF) | ATC_DIF(AT_DMA_PER_IF);
+> +			| ATC_SIF(atchan->mem_if) | ATC_DIF(atchan->per_if);
+>  		reg = sconfig->dst_addr;
+>  		for_each_sg(sgl, sg, sg_len, i) {
+>  			struct at_desc	*desc;
+> @@ -716,7 +717,7 @@ atc_prep_slave_sg(struct dma_chan *chan, struct scatterlist *sgl,
+>  		ctrlb |=  ATC_DST_ADDR_MODE_INCR
+>  			| ATC_SRC_ADDR_MODE_FIXED
+>  			| ATC_FC_PER2MEM
+> -			| ATC_SIF(AT_DMA_PER_IF) | ATC_DIF(AT_DMA_MEM_IF);
+> +			| ATC_SIF(atchan->per_if) | ATC_DIF(atchan->mem_if);
+>  
+>  		reg = sconfig->src_addr;
+>  		for_each_sg(sgl, sg, sg_len, i) {
+> @@ -822,8 +823,8 @@ atc_dma_cyclic_fill_desc(struct dma_chan *chan, struct at_desc *desc,
+>  		desc->lli.ctrlb = ATC_DST_ADDR_MODE_FIXED
+>  				| ATC_SRC_ADDR_MODE_INCR
+>  				| ATC_FC_MEM2PER
+> -				| ATC_SIF(AT_DMA_MEM_IF)
+> -				| ATC_DIF(AT_DMA_PER_IF);
+> +				| ATC_SIF(atchan->mem_if)
+> +				| ATC_DIF(atchan->per_if);
+>  		break;
+>  
+>  	case DMA_DEV_TO_MEM:
+> @@ -833,8 +834,8 @@ atc_dma_cyclic_fill_desc(struct dma_chan *chan, struct at_desc *desc,
+>  		desc->lli.ctrlb = ATC_DST_ADDR_MODE_INCR
+>  				| ATC_SRC_ADDR_MODE_FIXED
+>  				| ATC_FC_PER2MEM
+> -				| ATC_SIF(AT_DMA_PER_IF)
+> -				| ATC_DIF(AT_DMA_MEM_IF);
+> +				| ATC_SIF(atchan->per_if)
+> +				| ATC_DIF(atchan->mem_if);
+>  		break;
+>  
+>  	default:
+> @@ -1190,6 +1191,67 @@ static void atc_free_chan_resources(struct dma_chan *chan)
+>  	dev_vdbg(chan2dev(chan), "free_chan_resources: done\n");
+>  }
+>  
+> +static bool at_dma_filter(struct dma_chan *chan, void *slave)
+> +{
+> +	struct at_dma_slave *atslave = slave;
+> +
+> +	if (atslave->dma_dev == chan->device->dev) {
+> +		chan->private = atslave;
+> +		return true;
+> +	} else {
+> +		return false;
+> +	}
+> +}
+> +
+> +#ifdef CONFIG_OF
+> +static struct dma_chan *at_dma_xlate(struct of_phandle_args *dma_spec,
+> +				     struct of_dma *of_dma)
+> +{
+> +	struct dma_chan *chan;
+> +	struct at_dma_chan *atchan;
+> +	struct at_dma_slave *atslave;
+> +	dma_cap_mask_t mask;
+> +	unsigned int per_id;
+> +	struct platform_device *dmac_pdev;
+> +
+> +	if (dma_spec->args_count != 2)
+> +		return NULL;
+> +
+> +	dmac_pdev = of_find_device_by_node(dma_spec->np);
+> +
+> +	dma_cap_zero(mask);
+> +	dma_cap_set(DMA_SLAVE, mask);
+> +
+> +	atslave = devm_kzalloc(&dmac_pdev->dev, sizeof(*atslave), GFP_KERNEL);
+> +	if (!atslave)
+> +		return NULL;
+> +	/*
+> +	 * We can fill both SRC_PER and DST_PER, one of these fields will be
+> +	 * ignored depending on DMA transfer direction.
+> +	 */
+> +	per_id = dma_spec->args[1];
+> +	atslave->cfg = ATC_FIFOCFG_HALFFIFO | ATC_DST_H2SEL_HW
+> +		      | ATC_SRC_H2SEL_HW | ATC_DST_PER(per_id)
+> +		      | ATC_SRC_PER(per_id);
+> +	atslave->dma_dev = &dmac_pdev->dev;
+> +
+> +	chan = dma_request_channel(mask, at_dma_filter, atslave);
+> +	if (!chan)
+> +		return NULL;
+> +
+> +	atchan = to_at_dma_chan(chan);
+> +	atchan->per_if = dma_spec->args[0] & 0xff;
+> +	atchan->mem_if = (dma_spec->args[0] >> 16) & 0xff;
+> +
+> +	return chan;
+> +}
+> +#else
+> +static struct dma_chan *at_dma_xlate(struct of_phandle_args *dma_spec,
+> +				     struct of_dma *of_dma)
+> +{
+> +	return NULL;
+> +}
+> +#endif
+>  
+>  /*--  Module Management  -----------------------------------------------*/
+>  
+> @@ -1344,6 +1406,8 @@ static int __init at_dma_probe(struct platform_device *pdev)
+>  	for (i = 0; i < plat_dat->nr_channels; i++) {
+>  		struct at_dma_chan	*atchan = &atdma->chan[i];
+>  
+> +		atchan->mem_if = AT_DMA_MEM_IF;
+> +		atchan->per_if = AT_DMA_PER_IF;
+>  		atchan->chan_common.device = &atdma->dma_common;
+>  		dma_cookie_init(&atchan->chan_common);
+>  		list_add_tail(&atchan->chan_common.device_node,
+> @@ -1390,8 +1454,25 @@ static int __init at_dma_probe(struct platform_device *pdev)
+>  
+>  	dma_async_device_register(&atdma->dma_common);
+>  
+> +	/*
+> +	 * Do not return an error if the dmac node is not present in order to
+> +	 * not break the existing way of requesting channel with
+> +	 * dma_request_channel().
+> +	 */
+> +	if (pdev->dev.of_node) {
+> +		err = of_dma_controller_register(pdev->dev.of_node,
+> +						 at_dma_xlate, atdma);
+> +		if (err) {
+> +			dev_err(&pdev->dev, "could not register of_dma_controller\n");
+> +			goto err_of_dma_controller_register;
+> +		}
+> +	}
+> +
+>  	return 0;
+>  
+> +err_of_dma_controller_register:
+> +	dma_async_device_unregister(&atdma->dma_common);
+> +	dma_pool_destroy(atdma->dma_desc_pool);
+>  err_pool_create:
+>  	platform_set_drvdata(pdev, NULL);
+>  	free_irq(platform_get_irq(pdev, 0), atdma);
+> diff --git a/drivers/dma/at_hdmac_regs.h b/drivers/dma/at_hdmac_regs.h
+> index 0eb3c13..c604d26 100644
+> --- a/drivers/dma/at_hdmac_regs.h
+> +++ b/drivers/dma/at_hdmac_regs.h
+> @@ -220,6 +220,8 @@ enum atc_status {
+>   * @device: parent device
+>   * @ch_regs: memory mapped register base
+>   * @mask: channel index in a mask
+> + * @per_if: peripheral interface
+> + * @mem_if: memory interface
+>   * @status: transmit status information from irq/prep* functions
+>   *                to tasklet (use atomic operations)
+>   * @tasklet: bottom half to finish transaction work
+> @@ -238,6 +240,8 @@ struct at_dma_chan {
+>  	struct at_dma		*device;
+>  	void __iomem		*ch_regs;
+>  	u8			mask;
+> +	u8			per_if;
+> +	u8			mem_if;
+>  	unsigned long		status;
+>  	struct tasklet_struct	tasklet;
+>  	u32			save_cfg;
+> 
 
 
 -- 
-Maya Erez
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
-of Code Aurora Forum, hosted by The Linux Foundation
+Nicolas Ferre
