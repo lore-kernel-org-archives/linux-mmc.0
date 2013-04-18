@@ -1,83 +1,59 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] mmc: mmci: Allow MMCI to request channels with
- information acquired from DT
-Date: Wed, 17 Apr 2013 17:31:56 +0200
-Message-ID: <201304171731.56292.arnd@arndb.de>
-References: <1366205534-25079-1-git-send-email-lee.jones@linaro.org>
- <201304171550.56037.arnd@arndb.de> <20130417150437.GA3137@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20130417150437.GA3137@gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Lee Jones <lee.jones@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>, linus.walleij@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+From: Joonyoung Shim <jy0922.shim@samsung.com>
+Subject: [PATCH] mmc: dw_mmc: clear INSTS register when initialize
+Date: Thu, 18 Apr 2013 14:21:37 +0900
+Message-ID: <1366262497-22560-1-git-send-email-jy0922.shim@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:12218 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752459Ab3DRFVS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Apr 2013 01:21:18 -0400
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MLF00GU2QTGE3H0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 18 Apr 2013 14:21:16 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, will.newton@imgtec.com, jh80.chung@samsung.com
 
-On Wednesday 17 April 2013, Lee Jones wrote:
-> > This looks unnecessarily complex.
-> 
-> That thought did cross my mind.
-> 
-> > Why not just do dma_request_slave_channel_compat() unconditionally here?
-> 
-> So how about something like this instead, as it keeps the current
-> semantics, and only differs in the case of DT.
+If pending interrupt for IDMAC exists when probe, it will call interrupt
+handler unnecessarily.
 
-Yes, looks better.
+Signed-off-by: Joonyoung Shim <jy0922.shim@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c |    3 +++
+ 1 file changed, 3 insertions(+)
 
-> @@ -298,14 +298,16 @@ static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
->   * no custom DMA interfaces are supported.
->   */
->  #ifdef CONFIG_DMA_ENGINE
-> -static void mmci_dma_setup(struct mmci_host *host)
-> +static void mmci_dma_setup(struct amba_device *dev,
-> +			   struct mmci_host *host)
->  {
-> +	struct device_node *np = dev->dev.of_node;
->  	struct mmci_platform_data *plat = host->plat;
->  	const char *rxname, *txname;
->  	dma_cap_mask_t mask;
->  
-> -	if (!plat || !plat->dma_filter) {
-> -		dev_info(mmc_dev(host->mmc), "no DMA platform data\n");
-> +	if (!(plat && plat->dma_filter) && !np) {
-> +		dev_info(mmc_dev(host->mmc), "no DMA platform data or DT\n");
->  		return;
->  	}
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 323c502..b0057a2 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2192,6 +2192,7 @@ int dw_mci_probe(struct dw_mci *host)
+ 
+ 	/* Clear the interrupts for the host controller */
+ 	mci_writel(host, RINTSTS, 0xFFFFFFFF);
++	mci_writel(host, IDSTS, 0xFFFFFFFF);
+ 	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
+ 
+ 	/* Put in max timeout */
+@@ -2243,6 +2244,7 @@ int dw_mci_probe(struct dw_mci *host)
+ 	 * receive ready and error such as transmit, receive timeout, crc error
+ 	 */
+ 	mci_writel(host, RINTSTS, 0xFFFFFFFF);
++	mci_writel(host, IDSTS, 0xFFFFFFFF);
+ 	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+ 		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+ 		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
+@@ -2393,6 +2395,7 @@ int dw_mci_resume(struct dw_mci *host)
+ 	mci_writel(host, FIFOTH, host->fifoth_val);
+ 
+ 	mci_writel(host, RINTSTS, 0xFFFFFFFF);
++	mci_writel(host, IDSTS, 0xFFFFFFFF);
+ 	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+ 		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+ 		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
+-- 
+1.7.9.5
 
-I think you can further simplify this, given that in the DT case we always
-allocate a zeroed mmci_platform_data for host->plat, so !plat cannot happen
-when we get here.
-
-> @@ -321,19 +323,21 @@ static void mmci_dma_setup(struct mmci_host *host)
->  	 * attempt to use it bidirectionally, however if it is
->  	 * is specified but cannot be located, DMA will be disabled.
->  	 */
-> -	if (plat->dma_rx_param) {
-> -		host->dma_rx_channel = dma_request_channel(mask,
-> -							   plat->dma_filter,
-> -							   plat->dma_rx_param);
-> +	if ((plat && plat->dma_rx_param) || np) {
-> +		host->dma_rx_channel = dma_request_slave_channel_compat(mask,
-> +					(plat) ? plat->dma_filter : NULL,
-> +					(plat) ? plat->dma_rx_param : NULL,
-> +					&dev->dev, "rx");
->  		/* E.g if no DMA hardware is present */
->  		if (!host->dma_rx_channel)
->  			dev_err(mmc_dev(host->mmc), "no RX DMA channel\n");
-
-And based on that, you can unconditionally pass plat->dma_filter and
-plat->dma_rx_param here. In case of DT, they will be NULL, and they
-will not be used either.
-
-	Arnd
