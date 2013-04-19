@@ -1,7 +1,8 @@
 From: Neil Armstrong <narmstrong@neotion.com>
-Subject: [PATCH 1/3] Add BOOT_PARTITION_ENABLE definition to MMC EXT_CSD PART_CONFIG
-Date: Fri, 19 Apr 2013 14:41:31 +0200
-Message-ID: <51713B7B.3060402@neotion.com>
+Subject: [PATCH 0/3] Add boot_enable attribute to eMMC device for boot mode
+ operation selection
+Date: Fri, 19 Apr 2013 14:41:42 +0200
+Message-ID: <51713B86.2090001@neotion.com>
 Reply-To: narmstrong@neotion.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
@@ -12,24 +13,22 @@ To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Namjae Jeon <linkinjeon@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Subhash Jadavani <subhashj@codeaurora.org>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add bit mask for the BOOT_PARTITION_ENABLE values.
+Since eMMC 4.3 a special boot mode operation was introduced to retrieve
+data from the eMMC device with a very simple procedure. Since the Linux
+kernel exports these device boot partitions, it may be useful to select
+the boot partition from the user space.
 
-Signed-off-by: Neil Armstrong <narmstrong@neotion.com>
----
- include/linux/mmc/mmc.h |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+The patch has been tested on a Toshiba eMMC conforming with eMMC 4.5
+specifications.
 
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 50bcde3..eb5b361 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -347,6 +347,7 @@ struct _mmc_csd {
- #define EXT_CSD_PART_CONFIG_ACC_BOOT0    (0x1)
- #define EXT_CSD_PART_CONFIG_ACC_RPMB    (0x3)
- #define EXT_CSD_PART_CONFIG_ACC_GP0    (0x4)
-+#define EXT_CSD_PART_CONFIG_EN_MASK    (0x38)
- 
- #define EXT_CSD_PART_SUPPORT_PART_EN    (0x1)
- 
--- 
-1.7.0.4
+Neil Armstrong (3):
+  Add BOOT_PARTITION_ENABLE definition to MMC EXT_CSD PART_CONFIG
+  Add boot_enable sysfs attribute to select MMC boot operation
+    partition
+  Add Documentation for MMC boot_enable attribute
+
+ Documentation/mmc/mmc-dev-parts.txt |    6 +++
+ drivers/mmc/card/block.c            |   72
+++++++++++++++++++++++++++++++++++-
+ include/linux/mmc/mmc.h             |    1 +
+ 3 files changed, 78 insertions(+), 1 deletions(-)
