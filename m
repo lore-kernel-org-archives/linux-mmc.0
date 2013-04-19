@@ -1,7 +1,7 @@
 From: <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v3 2/6] ARM: at91: dts: set #dma-cells to the correct value
-Date: Fri, 19 Apr 2013 11:11:19 +0200
-Message-ID: <1366362683-14496-3-git-send-email-ludovic.desroches@atmel.com>
+Subject: [PATCH v3 3/6] i2c: at91: convert to dma_request_slave_channel_compat()
+Date: Fri, 19 Apr 2013 11:11:20 +0200
+Message-ID: <1366362683-14496-4-git-send-email-ludovic.desroches@atmel.com>
 References: <1366362683-14496-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,79 +14,94 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
 
-Moving to generic DMA DT binding involves to set #dma-cells to 2.
+Use generic DMA DT helper. Platforms booting with or without DT populated are
+both supported.
 
 Signed-off-by: Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+Acked-by: Nicolas Ferre <nicolas.ferre-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+Acked-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org>
 ---
- arch/arm/boot/dts/at91sam9g45.dtsi | 1 +
- arch/arm/boot/dts/at91sam9n12.dtsi | 1 +
- arch/arm/boot/dts/at91sam9x5.dtsi  | 2 ++
- arch/arm/boot/dts/sama5d3.dtsi     | 4 ++--
- 4 files changed, 6 insertions(+), 2 deletions(-)
+ drivers/i2c/busses/i2c-at91.c | 49 ++++++++++++++++++++++---------------------
+ 1 file changed, 25 insertions(+), 24 deletions(-)
 
-diff --git a/arch/arm/boot/dts/at91sam9g45.dtsi b/arch/arm/boot/dts/at91sam9g45.dtsi
-index 6b1d4ca..275e768 100644
---- a/arch/arm/boot/dts/at91sam9g45.dtsi
-+++ b/arch/arm/boot/dts/at91sam9g45.dtsi
-@@ -108,6 +108,7 @@
- 				compatible = "atmel,at91sam9g45-dma";
- 				reg = <0xffffec00 0x200>;
- 				interrupts = <21 4 0>;
-+				#dma-cells = <2>;
- 			};
+diff --git a/drivers/i2c/busses/i2c-at91.c b/drivers/i2c/busses/i2c-at91.c
+index 75195e3..7ffd544 100644
+--- a/drivers/i2c/busses/i2c-at91.c
++++ b/drivers/i2c/busses/i2c-at91.c
+@@ -607,11 +607,16 @@ MODULE_DEVICE_TABLE(of, atmel_twi_dt_ids);
+ #define atmel_twi_dt_ids NULL
+ #endif
  
- 			pinctrl@fffff200 {
-diff --git a/arch/arm/boot/dts/at91sam9n12.dtsi b/arch/arm/boot/dts/at91sam9n12.dtsi
-index 7750f98..acc4526 100644
---- a/arch/arm/boot/dts/at91sam9n12.dtsi
-+++ b/arch/arm/boot/dts/at91sam9n12.dtsi
-@@ -110,6 +110,7 @@
- 				compatible = "atmel,at91sam9g45-dma";
- 				reg = <0xffffec00 0x200>;
- 				interrupts = <20 4 0>;
-+				#dma-cells = <2>;
- 			};
+-static bool filter(struct dma_chan *chan, void *slave)
++static bool filter(struct dma_chan *chan, void *pdata)
+ {
+-	struct at_dma_slave *sl = slave;
++	struct at91_twi_pdata *sl_pdata = pdata;
++	struct at_dma_slave *sl;
  
- 			pinctrl@fffff400 {
-diff --git a/arch/arm/boot/dts/at91sam9x5.dtsi b/arch/arm/boot/dts/at91sam9x5.dtsi
-index 3870322..8e83d87 100644
---- a/arch/arm/boot/dts/at91sam9x5.dtsi
-+++ b/arch/arm/boot/dts/at91sam9x5.dtsi
-@@ -104,12 +104,14 @@
- 				compatible = "atmel,at91sam9g45-dma";
- 				reg = <0xffffec00 0x200>;
- 				interrupts = <20 4 0>;
-+				#dma-cells = <2>;
- 			};
+-	if (sl->dma_dev == chan->device->dev) {
++	if (!sl_pdata)
++		return false;
++
++	sl = &sl_pdata->dma_slave;
++	if (sl && (sl->dma_dev == chan->device->dev)) {
+ 		chan->private = sl;
+ 		return true;
+ 	} else {
+@@ -622,11 +627,10 @@ static bool filter(struct dma_chan *chan, void *slave)
+ static int at91_twi_configure_dma(struct at91_twi_dev *dev, u32 phy_addr)
+ {
+ 	int ret = 0;
+-	struct at_dma_slave *sdata;
++	struct at91_twi_pdata *pdata = dev->pdata;
+ 	struct dma_slave_config slave_config;
+ 	struct at91_twi_dma *dma = &dev->dma;
+-
+-	sdata = &dev->pdata->dma_slave;
++	dma_cap_mask_t mask;
  
- 			dma1: dma-controller@ffffee00 {
- 				compatible = "atmel,at91sam9g45-dma";
- 				reg = <0xffffee00 0x200>;
- 				interrupts = <21 4 0>;
-+				#dma-cells = <2>;
- 			};
+ 	memset(&slave_config, 0, sizeof(slave_config));
+ 	slave_config.src_addr = (dma_addr_t)phy_addr + AT91_TWI_RHR;
+@@ -637,25 +641,22 @@ static int at91_twi_configure_dma(struct at91_twi_dev *dev, u32 phy_addr)
+ 	slave_config.dst_maxburst = 1;
+ 	slave_config.device_fc = false;
  
- 			pinctrl@fffff400 {
-diff --git a/arch/arm/boot/dts/sama5d3.dtsi b/arch/arm/boot/dts/sama5d3.dtsi
-index 39b0458..95c00a3 100644
---- a/arch/arm/boot/dts/sama5d3.dtsi
-+++ b/arch/arm/boot/dts/sama5d3.dtsi
-@@ -348,14 +348,14 @@
- 				compatible = "atmel,at91sam9g45-dma";
- 				reg = <0xffffe600 0x200>;
- 				interrupts = <30 4 0>;
--				#dma-cells = <1>;
-+				#dma-cells = <2>;
- 			};
+-	if (sdata && sdata->dma_dev) {
+-		dma_cap_mask_t mask;
++	dma_cap_zero(mask);
++	dma_cap_set(DMA_SLAVE, mask);
  
- 			dma1: dma-controller@ffffe800 {
- 				compatible = "atmel,at91sam9g45-dma";
- 				reg = <0xffffe800 0x200>;
- 				interrupts = <31 4 0>;
--				#dma-cells = <1>;
-+				#dma-cells = <2>;
- 			};
+-		dma_cap_zero(mask);
+-		dma_cap_set(DMA_SLAVE, mask);
+-		dma->chan_tx = dma_request_channel(mask, filter, sdata);
+-		if (!dma->chan_tx) {
+-			dev_err(dev->dev, "no DMA channel available for tx\n");
+-			ret = -EBUSY;
+-			goto error;
+-		}
+-		dma->chan_rx = dma_request_channel(mask, filter, sdata);
+-		if (!dma->chan_rx) {
+-			dev_err(dev->dev, "no DMA channel available for rx\n");
+-			ret = -EBUSY;
+-			goto error;
+-		}
+-	} else {
+-		ret = -EINVAL;
++	dma->chan_tx = dma_request_slave_channel_compat(mask, filter, pdata,
++							dev->dev, "tx");
++	if (!dma->chan_tx) {
++		dev_err(dev->dev, "can't get a DMA channel for tx\n");
++		ret = -EBUSY;
++		goto error;
++	}
++
++	dma->chan_rx = dma_request_slave_channel_compat(mask, filter, pdata,
++							dev->dev, "rx");
++	if (!dma->chan_rx) {
++		dev_err(dev->dev, "can't get a DMA channel for rx\n");
++		ret = -EBUSY;
+ 		goto error;
+ 	}
  
- 			ramc0: ramc@ffffea00 {
 -- 
 1.7.11.3
