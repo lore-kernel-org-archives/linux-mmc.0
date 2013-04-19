@@ -1,26 +1,61 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [PATCH] mfd:rtsx: Support RTL8411B
-Date: Fri, 19 Apr 2013 18:02:44 +0300
-Message-ID: <20130419150244.GK6638@mwanda>
-References: <1366379562-23429-1-git-send-email-rogerable@realtek.com>
+From: Samuel Ortiz <sameo@linux.intel.com>
+Subject: Re: [PATCH v2] mfd:rtsx: Support RTS5249
+Date: Fri, 19 Apr 2013 18:30:17 +0200
+Message-ID: <20130419163017.GB11866@zurbaran>
+References: <cover.1365648007.git.wei_wang@realsil.com.cn>
+ <6b09b5138a549e49ea2d27bfee0e36c7aebb0a1b.1365648007.git.wei_wang@realsil.com.cn>
+ <20130418225022.GF8798@zurbaran>
+ <5170A2E9.1030704@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([143.182.124.37]:39393 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756979Ab3DSQal (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 19 Apr 2013 12:30:41 -0400
 Content-Disposition: inline
-In-Reply-To: <1366379562-23429-1-git-send-email-rogerable@realtek.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: rogerable@realtek.com
-Cc: cjb@laptop.org, sameo@linux.intel.com, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, devel@linuxdriverproject.org
+In-Reply-To: <5170A2E9.1030704@realsil.com.cn>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: wwang <wei_wang@realsil.com.cn>
+Cc: cjb@laptop.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, rogerable@realtek.com
 
-On Fri, Apr 19, 2013 at 09:52:42PM +0800, rogerable@realtek.com wrote:
-> From: Roger Tseng <rogerable@realtek.com>
-> 
-> Adding support of model RTL8411B. Since the model is similar to RTL8411,
-> differences are implemented in rtl8411.c.
-> 
+Hi Wei,
 
-What tree is this against?
+On Fri, Apr 19, 2013 at 09:50:33AM +0800, wwang wrote:
+> =E4=BA=8E 2013=E5=B9=B404=E6=9C=8819=E6=97=A5 06:50, Samuel Ortiz =E5=
+=86=99=E9=81=93:
+> >Hi Wei,
+> >
+> >On Thu, Apr 11, 2013 at 10:43:40AM +0800, wei_wang@realsil.com.cn wr=
+ote:
+> >>From: Wei WANG <wei_wang@realsil.com.cn>
+> >>
+> >>Support new model: RTS5249
+> >Could you please provide me with a more detailled changelog (What's =
+so
+> >different with this model that the current driver does not support ?=
+) before I
+> >apply it ?
+> >
+> >Cheers,
+> >Samuel.
+> >
+>=20
+> The difference is minor except that RTS5249 supports SD UHS-II interf=
+ace.
+>=20
+> In order to support SD UHS-II=EF=BC=8Cthe definitions of some interna=
+l
+> registers of RTS5249 have to be modified and are different from its
+> predecessors. So we need this patch to ensure RTS5249 can work, even
+> SD/MMC stack doesn't support UHS-II interface.
+Patch applied and pushed now, thanks.
 
-regards,
-dan carpenter
+Cheers,
+Samuel.
+
+--=20
+Intel Open Source Technology Centre
+http://oss.intel.com/
