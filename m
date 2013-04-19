@@ -1,36 +1,45 @@
-From: Samuel Ortiz <sameo@linux.intel.com>
-Subject: Re: [PATCH v2] mfd:rtsx: Support RTS5249
-Date: Fri, 19 Apr 2013 00:50:23 +0200
-Message-ID: <20130418225022.GF8798@zurbaran>
-References: <cover.1365648007.git.wei_wang@realsil.com.cn>
- <6b09b5138a549e49ea2d27bfee0e36c7aebb0a1b.1365648007.git.wei_wang@realsil.com.cn>
+From: Wei Yongjun <weiyj.lk@gmail.com>
+Subject: [PATCH -next] mmc: dw_mmc: fix error return code in dw_mci_probe()
+Date: Fri, 19 Apr 2013 09:25:45 +0800
+Message-ID: <CAPgLHd9RGHwoitQ0EusPepKK+AApKJ=ryRbm4S32o_vOonUgeQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:21679 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752858Ab3DRWup (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 18 Apr 2013 18:50:45 -0400
-Content-Disposition: inline
-In-Reply-To: <6b09b5138a549e49ea2d27bfee0e36c7aebb0a1b.1365648007.git.wei_wang@realsil.com.cn>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:64297 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S967266Ab3DSBZr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Apr 2013 21:25:47 -0400
+Received: by mail-bk0-f46.google.com with SMTP id je9so1539941bkc.19
+        for <linux-mmc@vger.kernel.org>; Thu, 18 Apr 2013 18:25:45 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: wei_wang@realsil.com.cn
-Cc: cjb@laptop.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, rogerable@realtek.com
+To: tgih.jun@samsung.com, jh80.chung@samsung.com, cjb@laptop.org, grant.likely@linaro.org, rob.herring@calxeda.com
+Cc: yongjun_wei@trendmicro.com.cn, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
 
-Hi Wei,
+From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
 
-On Thu, Apr 11, 2013 at 10:43:40AM +0800, wei_wang@realsil.com.cn wrote:
-> From: Wei WANG <wei_wang@realsil.com.cn>
-> 
-> Support new model: RTS5249
-Could you please provide me with a more detailled changelog (What's so
-different with this model that the current driver does not support ?) before I
-apply it ?
+Fix to return -ENOMEM in alloc workqueue error case instead
+of 0, as done elsewhere in this function.
 
-Cheers,
-Samuel.
+Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+---
+ drivers/mmc/host/dw_mmc.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
--- 
-Intel Open Source Technology Centre
-http://oss.intel.com/
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index bc3a1bc..0652690 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2321,8 +2321,10 @@ int dw_mci_probe(struct dw_mci *host)
+ 	tasklet_init(&host->tasklet, dw_mci_tasklet_func, (unsigned long)host);
+ 	host->card_workqueue = alloc_workqueue("dw-mci-card",
+ 			WQ_MEM_RECLAIM | WQ_NON_REENTRANT, 1);
+-	if (!host->card_workqueue)
++	if (!host->card_workqueue) {
++		ret = -ENOMEM;
+ 		goto err_dmaunmap;
++	}
+ 	INIT_WORK(&host->card_work, dw_mci_work_routine_card);
+ 	ret = devm_request_irq(host->dev, host->irq, dw_mci_interrupt,
+ 			       host->irq_flags, "dw-mci", host);
+
