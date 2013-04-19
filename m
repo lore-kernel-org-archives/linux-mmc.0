@@ -1,38 +1,87 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH v4] mmc: dw_mmc: let device core setup the default pin
-	configuration
-Date: Fri, 19 Apr 2013 11:11:31 +0100
-Message-ID: <20130419101131.GH14496@n2100.arm.linux.org.uk>
-References: <1365487186-4587-1-git-send-email-thomas.abraham@linaro.org> <CAD=FV=VJ-ykDNqYKQ=fqxeOD6bRNLW02VT4bjsRHRAuXLcCpQQ@mail.gmail.com> <CAJuYYwQT=povqiutVHXkF5jxTAnjpwTMQ5G0Z6xKGnnM7qYADQ@mail.gmail.com> <CAD=FV=UddWM=yc5N9=jwbMDpZ7Bpg7o3Z714CnBSg=iHhmPxWw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: Only execute tuning for SDR50 and SDR104
+Date: Fri, 19 Apr 2013 12:16:37 +0200
+Message-ID: <CAPDyKFp7N7FYUbHHcH_O6P-p5Ajd7ME+WZ4TCGqbGKKU=hpdEA@mail.gmail.com>
+References: <1366199453-6135-1-git-send-email-fredrik.soderstedt@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAD=FV=UddWM=yc5N9=jwbMDpZ7Bpg7o3Z714CnBSg=iHhmPxWw@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Thomas Abraham <thomas.abraham@linaro.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Heiko =?iso-8859-1?Q?St=FCbner?= <heiko@sntech.de>, Patch Tracking <patches@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Tomasz Figa <t.figa@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, Girish Shivananjappa <girish.shivananjappa@linaro.org>, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vb0-f49.google.com ([209.85.212.49]:36496 "EHLO
+	mail-vb0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756664Ab3DSKQi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Apr 2013 06:16:38 -0400
+Received: by mail-vb0-f49.google.com with SMTP id 11so3402336vbf.8
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Apr 2013 03:16:37 -0700 (PDT)
+In-Reply-To: <1366199453-6135-1-git-send-email-fredrik.soderstedt@stericsson.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-On Wed, Apr 10, 2013 at 06:56:48AM -0700, Doug Anderson wrote:
-> Thomas,
-> 
-> On Wed, Apr 10, 2013 at 5:48 AM, Thomas Abraham
-> <thomas.abraham@linaro.org> wrote:
-> > The call to regulator_enable() is prior to the call to mmc_add_host().
-> > Hence, call to mmc_fre_host is not required in this case. So the above
-> > change should be right.
-> 
-> Are you sure that mmc_free_host() is the opposite of mmc_add_host()
-> and not mmc_alloc_host()?
+On 17 April 2013 13:50, Fredrik Soderstedt
+<fredrik.soderstedt@stericsson.com> wrote:
+> Only execute tuning for sd and sdio devices that are using
+> SDR50 or SDR104.
+>
+> Make sure clock is hold during tuning for sdio devices.
+>
+> Signed-off-by: Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
+> ---
+>  drivers/mmc/core/sd.c   |  9 +++++++--
+>  drivers/mmc/core/sdio.c | 12 ++++++++++--
+>  2 files changed, 17 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 9e645e1..8373d22 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -646,8 +646,13 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
+>         if (err)
+>                 goto out;
+>
+> -       /* SPI mode doesn't define CMD19 */
+> -       if (!mmc_host_is_spi(card->host) && card->host->ops->execute_tuning) {
+> +       /*
+> +        * SPI mode doesn't define CMD19 and tuning is only valid for SDR50 and
+> +        * SDR104 mode SD-cards. Note that tuning is mandatory for SDR104.
+> +        */
+> +       if (!mmc_host_is_spi(card->host) && card->host->ops->execute_tuning &&
+> +                       (card->sd_bus_speed == UHS_SDR50_BUS_SPEED ||
+> +                        card->sd_bus_speed == UHS_SDR104_BUS_SPEED)) {
+>                 mmc_host_clk_hold(card->host);
+>                 err = card->host->ops->execute_tuning(card->host,
+>                                                       MMC_SEND_TUNING_BLOCK);
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index 6889a82..444668c 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -563,10 +563,18 @@ static int mmc_sdio_init_uhs_card(struct mmc_card *card)
+>         if (err)
+>                 goto out;
+>
+> -       /* Initialize and start re-tuning timer */
+> -       if (!mmc_host_is_spi(card->host) && card->host->ops->execute_tuning)
+> +       /*
+> +        * SPI mode doesn't define CMD19 and tuning is only valid for SDR50 and
+> +        * SDR104 mode SD-cards. Note that tuning is mandatory for SDR104.
+> +        */
+> +       if (!mmc_host_is_spi(card->host) && card->host->ops->execute_tuning &&
+> +                       ((card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR50) ||
+> +                        (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR104))) {
+> +               mmc_host_clk_hold(card->host);
+>                 err = card->host->ops->execute_tuning(card->host,
+>                                                       MMC_SEND_TUNING_BLOCK);
+> +               mmc_host_clk_release(card->host);
+> +       }
+>
+>  out:
+>
+> --
+> 1.8.2.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-mmc_free_host() undoes mmc_alloc_host().  mmc_remove_host() undoes
-mmc_add_host().
-
-alloc
-add
-remove
-free
-
-is pretty standard terminology, standard ordering.  If add fails, then
-free is the right thing to call to clean up after the alloc.
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
