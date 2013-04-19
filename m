@@ -1,7 +1,7 @@
 From: <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v3 5/6] mci: at91: convert to dma_request_slave_channel_compat()
-Date: Fri, 19 Apr 2013 11:11:22 +0200
-Message-ID: <1366362683-14496-6-git-send-email-ludovic.desroches@atmel.com>
+Subject: [PATCH v3 6/6] ARM: at91: dts: add MCI DMA support
+Date: Fri, 19 Apr 2013 11:11:23 +0200
+Message-ID: <1366362683-14496-7-git-send-email-ludovic.desroches@atmel.com>
 References: <1366362683-14496-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,67 +14,103 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
 
-Use generic DMA DT helper. Platforms booting with or without DT populated are
-both supported.
+Add DMA resources to MCI nodes.
 
 Signed-off-by: Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
-Acked-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org>
-Acked-by: Nicolas Ferre <nicolas.ferre-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
 ---
- drivers/mmc/host/atmel-mci.c | 25 ++++++++++++-------------
- 1 file changed, 12 insertions(+), 13 deletions(-)
+ arch/arm/boot/dts/at91sam9g45.dtsi | 4 ++++
+ arch/arm/boot/dts/at91sam9n12.dtsi | 2 ++
+ arch/arm/boot/dts/at91sam9x5.dtsi  | 4 ++++
+ arch/arm/boot/dts/sama5d3.dtsi     | 6 ++++++
+ 4 files changed, 16 insertions(+)
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 10f8b73..ffbd0d3 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -2224,10 +2224,15 @@ static void __exit atmci_cleanup_slot(struct atmel_mci_slot *slot,
- 	mmc_free_host(slot->mmc);
- }
- 
--static bool atmci_filter(struct dma_chan *chan, void *slave)
-+static bool atmci_filter(struct dma_chan *chan, void *pdata)
- {
--	struct mci_dma_data	*sl = slave;
-+	struct mci_platform_data *sl_pdata = pdata;
-+	struct mci_dma_data *sl;
- 
-+	if (!sl_pdata)
-+		return false;
-+
-+	sl = sl_pdata->dma_slave;
- 	if (sl && find_slave_dev(sl) == chan->device->dev) {
- 		chan->private = slave_data_ptr(sl);
- 		return true;
-@@ -2239,24 +2244,18 @@ static bool atmci_filter(struct dma_chan *chan, void *slave)
- static bool atmci_configure_dma(struct atmel_mci *host)
- {
- 	struct mci_platform_data	*pdata;
-+	dma_cap_mask_t mask;
- 
- 	if (host == NULL)
- 		return false;
- 
- 	pdata = host->pdev->dev.platform_data;
- 
--	if (!pdata)
--		return false;
-+	dma_cap_zero(mask);
-+	dma_cap_set(DMA_SLAVE, mask);
- 
--	if (pdata->dma_slave && find_slave_dev(pdata->dma_slave)) {
--		dma_cap_mask_t mask;
--
--		/* Try to grab a DMA channel */
--		dma_cap_zero(mask);
--		dma_cap_set(DMA_SLAVE, mask);
--		host->dma.chan =
--			dma_request_channel(mask, atmci_filter, pdata->dma_slave);
--	}
-+	host->dma.chan = dma_request_slave_channel_compat(mask, atmci_filter, pdata,
-+							  &host->pdev->dev, "rxtx");
- 	if (!host->dma.chan) {
- 		dev_warn(&host->pdev->dev, "no DMA channel available\n");
- 		return false;
+diff --git a/arch/arm/boot/dts/at91sam9g45.dtsi b/arch/arm/boot/dts/at91sam9g45.dtsi
+index 275e768..de2abc0 100644
+--- a/arch/arm/boot/dts/at91sam9g45.dtsi
++++ b/arch/arm/boot/dts/at91sam9g45.dtsi
+@@ -513,6 +513,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xfff80000 0x600>;
+ 				interrupts = <11 4 0>;
++				dmas = <&dma0 1 0>;
++				dma-names = "rxtx";
+ 				#address-cells = <1>;
+ 				#size-cells = <0>;
+ 				status = "disabled";
+@@ -522,6 +524,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xfffd0000 0x600>;
+ 				interrupts = <29 4 0>;
++				dmas = <&dma0 1 13>;
++				dma-names = "rxtx";
+ 				#address-cells = <1>;
+ 				#size-cells = <0>;
+ 				status = "disabled";
+diff --git a/arch/arm/boot/dts/at91sam9n12.dtsi b/arch/arm/boot/dts/at91sam9n12.dtsi
+index f912124..0b61c41 100644
+--- a/arch/arm/boot/dts/at91sam9n12.dtsi
++++ b/arch/arm/boot/dts/at91sam9n12.dtsi
+@@ -89,6 +89,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xf0008000 0x600>;
+ 				interrupts = <12 4 0>;
++				dmas = <&dma0 1 0>
++				dma-names = "rxtx";
+ 				#address-cells = <1>;
+ 				#size-cells = <0>;
+ 				status = "disabled";
+diff --git a/arch/arm/boot/dts/at91sam9x5.dtsi b/arch/arm/boot/dts/at91sam9x5.dtsi
+index 16c9b81..5f42e7a 100644
+--- a/arch/arm/boot/dts/at91sam9x5.dtsi
++++ b/arch/arm/boot/dts/at91sam9x5.dtsi
+@@ -449,6 +449,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xf0008000 0x600>;
+ 				interrupts = <12 4 0>;
++				dmas = <&dma0 1 0>;
++				dma-names = "rxtx";
+ 				#address-cells = <1>;
+ 				#size-cells = <0>;
+ 				status = "disabled";
+@@ -458,6 +460,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xf000c000 0x600>;
+ 				interrupts = <26 4 0>;
++				dmas = <&dma1 1 0>;
++				dma-names = "rxtx";
+ 				#address-cells = <1>;
+ 				#size-cells = <0>;
+ 				status = "disabled";
+diff --git a/arch/arm/boot/dts/sama5d3.dtsi b/arch/arm/boot/dts/sama5d3.dtsi
+index 8e87277..2e643ea 100644
+--- a/arch/arm/boot/dts/sama5d3.dtsi
++++ b/arch/arm/boot/dts/sama5d3.dtsi
+@@ -60,6 +60,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xf0000000 0x600>;
+ 				interrupts = <21 4 0>;
++				dmas = <&dma0 2 0>;
++				dma-names = "rxtx";
+ 				pinctrl-names = "default";
+ 				pinctrl-0 = <&pinctrl_mmc0_clk_cmd_dat0 &pinctrl_mmc0_dat1_3 &pinctrl_mmc0_dat4_7>;
+ 				status = "disabled";
+@@ -173,6 +175,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xf8000000 0x600>;
+ 				interrupts = <22 4 0>;
++				dmas = <&dma1 2 0>;
++				dma-names = "rxtx";
+ 				pinctrl-names = "default";
+ 				pinctrl-0 = <&pinctrl_mmc1_clk_cmd_dat0 &pinctrl_mmc1_dat1_3>;
+ 				status = "disabled";
+@@ -184,6 +188,8 @@
+ 				compatible = "atmel,hsmci";
+ 				reg = <0xf8004000 0x600>;
+ 				interrupts = <23 4 0>;
++				dmas = <&dma1 2 1>;
++				dma-names = "rxtx";
+ 				pinctrl-names = "default";
+ 				pinctrl-0 = <&pinctrl_mmc2_clk_cmd_dat0 &pinctrl_mmc2_dat1_3>;
+ 				status = "disabled";
 -- 
 1.7.11.3
