@@ -1,65 +1,41 @@
-From: Namjae Jeon <linkinjeon-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v2 9/9] bcache: use generic helper to set
-	max_discard_sectors
-Date: Sat, 20 Apr 2013 01:42:35 +0900
-Message-ID: <1366389755-19621-1-git-send-email-linkinjeon@gmail.com>
+From: Roger Tseng <rogerable@realtek.com>
+Subject: RE: [PATCH] mfd:rtsx: Support RTL8411B
+Date: Sat, 20 Apr 2013 12:59:17 +0800
+Message-ID: <1121E117AD4ECE49880A389A396215BB8718AE9050@rtitmbs7.realtek.com.tw>
+References: <1366379562-23429-1-git-send-email-rogerable@realtek.com>,
+ <20130419150244.GK6638@mwanda>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <nbd-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/nbd-general>,
-	<mailto:nbd-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=nbd-general>
-List-Post: <mailto:nbd-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:nbd-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/nbd-general>,
-	<mailto:nbd-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: nbd-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org, shli-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Paul.Clements-G8/ITkJZaeZWk0Htik3J/w@public.gmane.org, npiggin-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org, neilb-l3A5Bk7waGM@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, JBottomley-bzQdu9zFT3WakBO8gow8eQ@public.gmane.org
-Cc: nbd-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Namjae Jeon <linkinjeon-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Vivek Trivedi <t.vivek-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Namjae Jeon <namjae.jeon-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-raid-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jcmvbkbc-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20130419150244.GK6638@mwanda>
+Content-Language: en-US
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/devel>,
+ <mailto:devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/devel/>
+List-Post: <mailto:devel@linuxdriverproject.org>
+List-Help: <mailto:devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/devel>,
+ <mailto:devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: devel-bounces@linuxdriverproject.org
+Sender: "devel" <devel-bounces@linuxdriverproject.org>
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: "sameo@linux.intel.com" <sameo@linux.intel.com>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei_wang <wei_wang@realsil.com.cn>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "cjb@laptop.org" <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Namjae Jeon <namjae.jeon-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+>On Fri, Apr 19, 2013 at 09:52:42PM +0800, rogerable@realtek.com wrote:
+>> From: Roger Tseng <rogerable@realtek.com>
+>>
+>> Adding support of model RTL8411B. Since the model is similar to RTL8411,
+>> differences are implemented in rtl8411.c.
+>>
+>
+>What tree is this against?
+>
+>regards,
+>dan carpenter
 
-It is better to use blk_queue_max_discard_sectors helper
-function to set max_discard_sectors as it checks
-max_discard_sectors upper limit UINT_MAX >> 9
+It should be the mfd-next tree.
 
-similar issue was reported for mmc in below link
-https://lkml.org/lkml/2013/4/1/292
-
-If multiple discard requests get merged, merged discard request's
-size exceeds 4GB, there is possibility that merged discard request's
-__data_len field may overflow.
-
-This patch fixes this issue.
-
-Signed-off-by: Namjae Jeon <namjae.jeon-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Signed-off-by: Vivek Trivedi <t.vivek-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
----
- drivers/md/bcache/super.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/md/bcache/super.c b/drivers/md/bcache/super.c
-index f3bf310..d87ab31 100644
---- a/drivers/md/bcache/super.c
-+++ b/drivers/md/bcache/super.c
-@@ -746,7 +746,7 @@ static int bcache_device_init(struct bcache_device *d, unsigned block_size)
- 	q->limits.max_sectors		= UINT_MAX;
- 	q->limits.max_segment_size	= UINT_MAX;
- 	q->limits.max_segments		= BIO_MAX_PAGES;
--	q->limits.max_discard_sectors	= UINT_MAX;
-+	blk_queue_max_discard_sectors(q, UINT_MAX >> 9);
- 	q->limits.io_min		= block_size;
- 	q->limits.logical_block_size	= block_size;
- 	q->limits.physical_block_size	= block_size;
--- 
-1.7.9.5
-
-
-------------------------------------------------------------------------------
-Precog is a next-generation analytics platform capable of advanced
-analytics on semi-structured data. The platform includes APIs for building
-apps and a phenomenal toolset for data science. Developers can use
-our toolset for easy data analysis & visualization. Get a free account!
-http://www2.precog.com/precogplatform/slashdotnewsletter
+Best regards,
+Roger Tseng
