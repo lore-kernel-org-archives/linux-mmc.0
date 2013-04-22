@@ -1,115 +1,218 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH] MMC: tmio: fix unbalanced power-on calls with clock-gating
- enabled
-Date: Mon, 22 Apr 2013 16:14:40 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1304221611100.23906@axis700.grange>
+From: Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
+Subject: [PATCH] mmc: core: Fix select power class after resume
+Date: Mon, 22 Apr 2013 16:46:17 +0200
+Message-ID: <1366641977-31914-1-git-send-email-fredrik.soderstedt@stericsson.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog101.obsmtp.com ([207.126.144.111]:41430 "EHLO
+	eu1sys200aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754654Ab3DVOrS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Apr 2013 10:47:18 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>
 
-With MMC clock gating enabled the MMC core currently calls MMC host driver's
-.set_ios() method with .power_mode == MMC_POWER_ON and the clock value set
-either to 0 or to the target rate. The tmio MMC driver then wrongly
-translates the latter calls to card slot power-on requests, even when the
-slot already was on. This patch fixes the driver to avoid needlessly
-incrementing power-supplying regulator's use count.
+Use the saved values in card->ext_csd when selecting power class.
+By doing this the power class will be selected even if mmc_init_card
+is called with oldcard != NULL, which is the case after a suspend/resume.
 
-Reported-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+Today ext_csd is NULL if mmc_init_card is called with oldcard != NULL
+and power class will not be selected.
+
+According to the eMMC specification the POWER_CLASS value is reset after
+power failure, H/W reset assertion and any CMD0 reset.
+
+CC: Girish K S <girish.shivananjappa@linaro.org>
+Signed-off-by: Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
 ---
- drivers/mmc/host/tmio_mmc.h     |   20 ++++++++++++++++++--
- drivers/mmc/host/tmio_mmc_pio.c |   16 +++++++++-------
- 2 files changed, 27 insertions(+), 9 deletions(-)
+ drivers/mmc/core/mmc.c   | 74 ++++++++++++++++++++++++++++++++----------------
+ include/linux/mmc/card.h | 10 ++++++-
+ 2 files changed, 59 insertions(+), 25 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index d857f5c..3cc589a 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -40,6 +40,22 @@
- 
- struct tmio_mmc_data;
- 
-+/*
-+ * We differentiate between the following 3 power states:
-+ * 1. card slot powered off, controller stopped. This is used, when either there
-+ *    is no card in the slot, or the card really has to be powered down.
-+ * 2. card slot powered on, controller stopped. This is used, when a card is in
-+ *    the slot, but no activity is currently taking place. This is a power-
-+ *    saving mode with card-state preserved. This state can be entered, e.g.
-+ *    when MMC clock-gating is used.
-+ * 3. card slot powered on, controller running. This is the actual active state.
-+ */
-+enum tmio_mmc_power {
-+	TMIO_MMC_OFF_STOP,	/* card power off, controller stopped */
-+	TMIO_MMC_ON_STOP,	/* card power on, controller stopped */
-+	TMIO_MMC_ON_RUN,	/* card power on, controller running */
-+};
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 0cbd1ef..4d8ae26 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -461,6 +461,24 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		 */
+ 		card->ext_csd.boot_ro_lock = ext_csd[EXT_CSD_BOOT_WP];
+ 		card->ext_csd.boot_ro_lockable = true;
 +
- struct tmio_mmc_host {
- 	void __iomem *ctl;
- 	unsigned long bus_shift;
-@@ -48,8 +64,8 @@ struct tmio_mmc_host {
- 	struct mmc_data         *data;
- 	struct mmc_host         *mmc;
++		/* Save power class values */
++		card->ext_csd.raw_pwr_cl_52_195 =
++			ext_csd[EXT_CSD_PWR_CL_52_195];
++		card->ext_csd.raw_pwr_cl_26_195 =
++			ext_csd[EXT_CSD_PWR_CL_26_195];
++		card->ext_csd.raw_pwr_cl_52_360 =
++			ext_csd[EXT_CSD_PWR_CL_52_360];
++		card->ext_csd.raw_pwr_cl_26_360 =
++			ext_csd[EXT_CSD_PWR_CL_26_360];
++		card->ext_csd.raw_pwr_cl_200_195 =
++			ext_csd[EXT_CSD_PWR_CL_200_195];
++		card->ext_csd.raw_pwr_cl_200_360 =
++			ext_csd[EXT_CSD_PWR_CL_200_360];
++		card->ext_csd.raw_pwr_cl_ddr_52_195 =
++			ext_csd[EXT_CSD_PWR_CL_DDR_52_195];
++		card->ext_csd.raw_pwr_cl_ddr_52_360 =
++			ext_csd[EXT_CSD_PWR_CL_DDR_52_360];
+ 	}
  
--	/* Controller power state */
--	bool			power;
-+	/* Controller and card power state */
-+	enum tmio_mmc_power	power;
+ 	if (card->ext_csd.rev >= 5) {
+@@ -607,7 +625,23 @@ static int mmc_compare_ext_csds(struct mmc_card *card, unsigned bus_width)
+ 		(card->ext_csd.raw_sectors[2] ==
+ 			bw_ext_csd[EXT_CSD_SEC_CNT + 2]) &&
+ 		(card->ext_csd.raw_sectors[3] ==
+-			bw_ext_csd[EXT_CSD_SEC_CNT + 3]));
++			bw_ext_csd[EXT_CSD_SEC_CNT + 3]) &&
++		(card->ext_csd.raw_pwr_cl_52_195 ==
++			bw_ext_csd[EXT_CSD_PWR_CL_52_195]) &&
++		(card->ext_csd.raw_pwr_cl_26_195 ==
++			bw_ext_csd[EXT_CSD_PWR_CL_26_195]) &&
++		(card->ext_csd.raw_pwr_cl_52_360 ==
++			bw_ext_csd[EXT_CSD_PWR_CL_52_360]) &&
++		(card->ext_csd.raw_pwr_cl_26_360 ==
++			bw_ext_csd[EXT_CSD_PWR_CL_26_360]) &&
++		(card->ext_csd.raw_pwr_cl_200_195 ==
++			bw_ext_csd[EXT_CSD_PWR_CL_200_195]) &&
++		(card->ext_csd.raw_pwr_cl_200_360 ==
++			bw_ext_csd[EXT_CSD_PWR_CL_200_360]) &&
++		(card->ext_csd.raw_pwr_cl_ddr_52_195 ==
++			bw_ext_csd[EXT_CSD_PWR_CL_DDR_52_195]) &&
++		(card->ext_csd.raw_pwr_cl_ddr_52_360 ==
++			bw_ext_csd[EXT_CSD_PWR_CL_DDR_52_360]));
+ 	if (err)
+ 		err = -EINVAL;
  
- 	/* Callbacks for clock / power control */
- 	void (*set_pwr)(struct platform_device *host, int state);
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index f508ecb..d442eab 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -859,25 +859,27 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	 * is kept positive, so no suspending actually takes place.
- 	 */
- 	if (ios->power_mode == MMC_POWER_ON && ios->clock) {
--		if (!host->power) {
-+		if (host->power != TMIO_MMC_ON_RUN) {
- 			tmio_mmc_clk_update(mmc);
- 			pm_runtime_get_sync(dev);
+@@ -676,11 +710,10 @@ static struct device_type mmc_type = {
+  * mmc_switch command.
+  */
+ static int mmc_select_powerclass(struct mmc_card *card,
+-		unsigned int bus_width, u8 *ext_csd)
++		unsigned int bus_width)
+ {
+ 	int err = 0;
+-	unsigned int pwrclass_val;
+-	unsigned int index = 0;
++	unsigned int pwrclass_val = 0;
+ 	struct mmc_host *host;
+ 
+ 	BUG_ON(!card);
+@@ -688,9 +721,6 @@ static int mmc_select_powerclass(struct mmc_card *card,
+ 	host = card->host;
+ 	BUG_ON(!host);
+ 
+-	if (ext_csd == NULL)
+-		return 0;
+-
+ 	/* Power class selection is supported for versions >= 4.0 */
+ 	if (card->csd.mmca_vsn < CSD_SPEC_VER_4)
+ 		return 0;
+@@ -702,13 +732,13 @@ static int mmc_select_powerclass(struct mmc_card *card,
+ 	switch (1 << host->ios.vdd) {
+ 	case MMC_VDD_165_195:
+ 		if (host->ios.clock <= 26000000)
+-			index = EXT_CSD_PWR_CL_26_195;
++			pwrclass_val = card->ext_csd.raw_pwr_cl_26_195;
+ 		else if	(host->ios.clock <= 52000000)
+-			index = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
+-				EXT_CSD_PWR_CL_52_195 :
+-				EXT_CSD_PWR_CL_DDR_52_195;
++			pwrclass_val = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
++				card->ext_csd.raw_pwr_cl_52_195 :
++				card->ext_csd.raw_pwr_cl_ddr_52_195;
+ 		else if (host->ios.clock <= 200000000)
+-			index = EXT_CSD_PWR_CL_200_195;
++			pwrclass_val = card->ext_csd.raw_pwr_cl_200_195;
+ 		break;
+ 	case MMC_VDD_27_28:
+ 	case MMC_VDD_28_29:
+@@ -720,13 +750,13 @@ static int mmc_select_powerclass(struct mmc_card *card,
+ 	case MMC_VDD_34_35:
+ 	case MMC_VDD_35_36:
+ 		if (host->ios.clock <= 26000000)
+-			index = EXT_CSD_PWR_CL_26_360;
++			pwrclass_val = card->ext_csd.raw_pwr_cl_26_360;
+ 		else if	(host->ios.clock <= 52000000)
+-			index = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
+-				EXT_CSD_PWR_CL_52_360 :
+-				EXT_CSD_PWR_CL_DDR_52_360;
++			pwrclass_val = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
++				card->ext_csd.raw_pwr_cl_52_360 :
++				card->ext_csd.raw_pwr_cl_52_360;
+ 		else if (host->ios.clock <= 200000000)
+-			index = EXT_CSD_PWR_CL_200_360;
++			pwrclass_val = card->ext_csd.raw_pwr_cl_200_360;
+ 		break;
+ 	default:
+ 		pr_warning("%s: Voltage range not supported "
+@@ -734,8 +764,6 @@ static int mmc_select_powerclass(struct mmc_card *card,
+ 		return -EINVAL;
+ 	}
+ 
+-	pwrclass_val = ext_csd[index];
+-
+ 	if (bus_width & (EXT_CSD_BUS_WIDTH_8 | EXT_CSD_DDR_BUS_WIDTH_8))
+ 		pwrclass_val = (pwrclass_val & EXT_CSD_PWR_CL_8BIT_MASK) >>
+ 				EXT_CSD_PWR_CL_8BIT_SHIFT;
+@@ -1131,7 +1159,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 
+ 		ext_csd_bits = (bus_width == MMC_BUS_WIDTH_8) ?
+ 				EXT_CSD_BUS_WIDTH_8 : EXT_CSD_BUS_WIDTH_4;
+-		err = mmc_select_powerclass(card, ext_csd_bits, ext_csd);
++		err = mmc_select_powerclass(card, ext_csd_bits);
+ 		if (err)
+ 			pr_warning("%s: power class selection to bus width %d"
+ 				   " failed\n", mmc_hostname(card->host),
+@@ -1164,8 +1192,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 			bus_width = bus_widths[idx];
+ 			if (bus_width == MMC_BUS_WIDTH_1)
+ 				ddr = 0; /* no DDR for 1-bit width */
+-			err = mmc_select_powerclass(card, ext_csd_bits[idx][0],
+-						    ext_csd);
++			err = mmc_select_powerclass(card, ext_csd_bits[idx][0]);
+ 			if (err)
+ 				pr_warning("%s: power class selection to "
+ 					   "bus width %d failed\n",
+@@ -1195,8 +1222,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
  		}
- 		tmio_mmc_set_clock(host, ios->clock);
--		if (!host->power) {
-+		if (host->power == TMIO_MMC_OFF_STOP)
- 			/* power up SD card and the bus */
- 			tmio_mmc_power_on(host, ios->vdd);
--			host->power = true;
--		}
-+		host->power = TMIO_MMC_ON_RUN;
- 		/* start bus clock */
- 		tmio_mmc_clk_start(host);
- 	} else if (ios->power_mode != MMC_POWER_UP) {
- 		if (host->power) {
- 			struct tmio_mmc_data *pdata = host->pdata;
--			if (ios->power_mode == MMC_POWER_OFF)
-+			if (ios->power_mode == MMC_POWER_OFF) {
- 				tmio_mmc_power_off(host);
-+				host->power = TMIO_MMC_OFF_STOP;
-+			} else {
-+				host->power = TMIO_MMC_ON_STOP;
-+			}
- 			tmio_mmc_clk_stop(host);
--			host->power = false;
- 			pm_runtime_put(dev);
- 			if (pdata->clk_disable)
- 				pdata->clk_disable(host->pdev);
-@@ -1025,7 +1027,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 				  mmc->caps & MMC_CAP_NONREMOVABLE ||
- 				  mmc->slot.cd_irq >= 0);
  
--	_host->power = false;
-+	_host->power = TMIO_MMC_OFF_STOP;
- 	pm_runtime_enable(&pdev->dev);
- 	ret = pm_runtime_resume(&pdev->dev);
- 	if (ret < 0)
+ 		if (!err && ddr) {
+-			err = mmc_select_powerclass(card, ext_csd_bits[idx][1],
+-						    ext_csd);
++			err = mmc_select_powerclass(card, ext_csd_bits[idx][1]);
+ 			if (err)
+ 				pr_warning("%s: power class selection to "
+ 					   "bus width %d ddr %d failed\n",
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index f31725b..6a98f32 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -94,7 +94,11 @@ struct mmc_ext_csd {
+ 	u8			raw_ext_csd_structure;	/* 194 */
+ 	u8			raw_card_type;		/* 196 */
+ 	u8			out_of_int_time;	/* 198 */
+-	u8			raw_s_a_timeout;		/* 217 */
++	u8			raw_pwr_cl_52_195;	/* 200 */
++	u8			raw_pwr_cl_26_195;	/* 201 */
++	u8			raw_pwr_cl_52_360;	/* 202 */
++	u8			raw_pwr_cl_26_360;	/* 203 */
++	u8			raw_s_a_timeout;	/* 217 */
+ 	u8			raw_hc_erase_gap_size;	/* 221 */
+ 	u8			raw_erase_timeout_mult;	/* 223 */
+ 	u8			raw_hc_erase_grp_size;	/* 224 */
+@@ -102,6 +106,10 @@ struct mmc_ext_csd {
+ 	u8			raw_sec_erase_mult;	/* 230 */
+ 	u8			raw_sec_feature_support;/* 231 */
+ 	u8			raw_trim_mult;		/* 232 */
++	u8			raw_pwr_cl_200_195;	/* 236 */
++	u8			raw_pwr_cl_200_360;	/* 237 */
++	u8			raw_pwr_cl_ddr_52_195;	/* 238 */
++	u8			raw_pwr_cl_ddr_52_360;	/* 239 */
+ 	u8			raw_bkops_status;	/* 246 */
+ 	u8			raw_sectors[4];		/* 212 - 4 bytes */
+ 
 -- 
-1.7.2.5
+1.8.2.1
 
