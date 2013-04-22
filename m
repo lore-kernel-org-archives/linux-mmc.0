@@ -1,52 +1,53 @@
-From: Namjae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH 0/3] Add boot_enable attribute to eMMC device for boot
- mode operation selection
-Date: Mon, 22 Apr 2013 13:55:04 +0900
-Message-ID: <CAKYAXd_xa--1QpFCdz3Kj0mKF3cvtxFn-xL3QGWZyXPO4Y79ng@mail.gmail.com>
-References: <51713B86.2090001@neotion.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: sdhci-s3c: fix the wrong register value when clock is,
+ disabled
+Date: Mon, 22 Apr 2013 14:02:25 +0900
+Message-ID: <5174C461.9010603@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f173.google.com ([209.85.192.173]:41460 "EHLO
-	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751141Ab3DVEzG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Apr 2013 00:55:06 -0400
-In-Reply-To: <51713B86.2090001@neotion.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:48643 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751466Ab3DVFCQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Apr 2013 01:02:16 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MLN00JSS4NJR4O0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 22 Apr 2013 14:02:14 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: narmstrong@neotion.com
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Subhash Jadavani <subhashj@codeaurora.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nam-Jae Jeon <namjae.jeon@samsung.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: 'Chris Ball' <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Ben Dooks <ben-linux@fluff.org>
 
-2013/4/19, Neil Armstrong <narmstrong@neotion.com>:
-> Since eMMC 4.3 a special boot mode operation was introduced to retrieve
-> data from the eMMC device with a very simple procedure. Since the Linux
-> kernel exports these device boot partitions, it may be useful to select
-> the boot partition from the user space.
->
-> The patch has been tested on a Toshiba eMMC conforming with eMMC 4.5
-> specifications.
-Hi Neil.
-We can be enable boot partition using mmc-utils.
-See this address.
-https://git.kernel.org/cgit/linux/kernel/git/cjb/mmc-utils.git/commit/?id=7bd1320b2cb38f040ab5cf017d17e283496690bf
+When use the QUIRK_NONSTANDARD_CLOCK, then never set to 0 at clock
+control register.
+This patch is fixed this problem.
 
-So, I don't think this patch is useful.
-If you consider to be disable boot partition, you can try to update
-mmc-utils base on the address I shared.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |    5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-Thanks.
->
-> Neil Armstrong (3):
->   Add BOOT_PARTITION_ENABLE definition to MMC EXT_CSD PART_CONFIG
->   Add boot_enable sysfs attribute to select MMC boot operation
->     partition
->   Add Documentation for MMC boot_enable attribute
->
->  Documentation/mmc/mmc-dev-parts.txt |    6 +++
->  drivers/mmc/card/block.c            |   72
-> ++++++++++++++++++++++++++++++++++-
->  include/linux/mmc/mmc.h             |    1 +
->  3 files changed, 78 insertions(+), 1 deletions(-)
->
->
->
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 8cd966d..317bde2 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -298,8 +298,11 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	u16 clk = 0;
+ 
+ 	/* don't bother if the clock is going off */
+-	if (clock == 0)
++	if (clock == 0) {
++		sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
++		host->clock = clock;
+ 		return;
++	}
+ 
+ 	sdhci_s3c_set_clock(host, clock);
+ 
+-- 
+1.7.9.5
