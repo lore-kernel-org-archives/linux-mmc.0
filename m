@@ -1,65 +1,135 @@
-From: Jason Cooper <jason@lakedaemon.net>
-Subject: Re: [PATCH 1/3] mmc: mvsdio: Support inverted CD and WP GPIO lines
-Date: Mon, 22 Apr 2013 18:54:56 -0400
-Message-ID: <20130422225456.GK25724@titan.lakedaemon.net>
-References: <1366660500-26835-1-git-send-email-gmbnomis@gmail.com>
- <1366660500-26835-2-git-send-email-gmbnomis@gmail.com>
- <87wqrutjss.fsf@octavius.laptop.org>
- <20130422203723.GI29947@lunn.ch>
- <20130422210949.GJ25724@titan.lakedaemon.net>
- <20130422214543.GJ29947@lunn.ch>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH] MMC: tmio: fix unbalanced power-on calls with clock-gating enabled
+Date: Tue, 23 Apr 2013 01:24:04 +0200
+Message-ID: <3707076.C3cH4Fjh9W@avalon>
+References: <Pine.LNX.4.64.1304221611100.23906@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:31381 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751474Ab3DVWzG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Apr 2013 18:55:06 -0400
-Content-Disposition: inline
-In-Reply-To: <20130422214543.GJ29947@lunn.ch>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1304221611100.23906@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Lunn <andrew@lunn.ch>
-Cc: Chris Ball <cjb@laptop.org>, gmbnomis@gmail.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, thomas.petazzoni@free-electrons.com, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-On Mon, Apr 22, 2013 at 11:45:43PM +0200, Andrew Lunn wrote:
-> > > > The core function mmc_of_parse() (new in 3.9) will do all of this DT
-> > > > parsing for you, and will also take care of the driver's later calls
-> > > > to mmc_gpio_request_{cd,wp}().  Could you try using that function
-> > > > instead, please?
-> > > 
-> > > Hi Chris, Simon
-> > > 
-> > > I have a vague recollection that Thomas Petazzoni already did this
-> > > conversion. Take a look in linux-next, or maybe Jason can point you at
-> > > a branch.
-> > 
-> > Andrew,
-> > 
-> > Thomas did a board conversion here (slated for v3.11 in /pcie branch):
-> > 
-> >   cd2bde5 arm: kirkwood: convert db-88f6281 to the Device Tree
-> > 
-> > And Sebastian did some mvsdio WP and CD pin work here:
-> > 
-> >   0d0644eARM: Kirkwood: fix unused mvsdio gpio pins
-> > 
-> > Nothing else really jumps out though.  Where either of these what you
-> > were thinking of?
+Hi Guennadi,
+
+Thanks for the patch.
+
+On Monday 22 April 2013 16:14:40 Guennadi Liakhovetski wrote:
+> With MMC clock gating enabled the MMC core currently calls MMC host driver's
+> .set_ios() method with .power_mode == MMC_POWER_ON and the clock value set
+> either to 0 or to the target rate. The tmio MMC driver then wrongly
+> translates the latter calls to card slot power-on requests, even when the
+> slot already was on. This patch fixes the driver to avoid needlessly
+> incrementing power-supplying regulator's use count.
 > 
-> http://lists.infradead.org/pipermail/linux-arm-kernel/2012-December/138514.html
+> Reported-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+>
+> ---
+>  drivers/mmc/host/tmio_mmc.h     |   20 ++++++++++++++++++--
+>  drivers/mmc/host/tmio_mmc_pio.c |   16 +++++++++-------
+>  2 files changed, 27 insertions(+), 9 deletions(-)
 > 
-> and
+> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> index d857f5c..3cc589a 100644
+> --- a/drivers/mmc/host/tmio_mmc.h
+> +++ b/drivers/mmc/host/tmio_mmc.h
+> @@ -40,6 +40,22 @@
 > 
-> http://lists.infradead.org/pipermail/linux-arm-kernel/2012-December/138513.html
+>  struct tmio_mmc_data;
+> 
+> +/*
+> + * We differentiate between the following 3 power states:
+> + * 1. card slot powered off, controller stopped. This is used, when either
+> + *    there is no card in the slot, or the card really has to be powered
+> + *    down.
+> + * 2. card slot powered on, controller stopped. This is used, when a card
+> + *    is in the slot, but no activity is currently taking place. This is a
+> + *    power-saving mode with card-state preserved. This state can be
+> + *    entered, e.g. when MMC clock-gating is used.
+> + * 3. card slot powered on, controller running. This is the actual active
+> + *    state.
+> + */
+> +enum tmio_mmc_power {
+> +	TMIO_MMC_OFF_STOP,	/* card power off, controller stopped */
+> +	TMIO_MMC_ON_STOP,	/* card power on, controller stopped */
+> +	TMIO_MMC_ON_RUN,	/* card power on, controller running */
+> +};
+> +
+>  struct tmio_mmc_host {
+>  	void __iomem *ctl;
+>  	unsigned long bus_shift;
+> @@ -48,8 +64,8 @@ struct tmio_mmc_host {
+>  	struct mmc_data         *data;
+>  	struct mmc_host         *mmc;
+> 
+> -	/* Controller power state */
+> -	bool			power;
+> +	/* Controller and card power state */
+> +	enum tmio_mmc_power	power;
+> 
+>  	/* Callbacks for clock / power control */
+>  	void (*set_pwr)(struct platform_device *host, int state);
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c
+> b/drivers/mmc/host/tmio_mmc_pio.c index f508ecb..d442eab 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -859,25 +859,27 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc,
+> struct mmc_ios *ios) * is kept positive, so no suspending actually takes
+> place.
+>  	 */
+>  	if (ios->power_mode == MMC_POWER_ON && ios->clock) {
+> -		if (!host->power) {
+> +		if (host->power != TMIO_MMC_ON_RUN) {
+>  			tmio_mmc_clk_update(mmc);
+>  			pm_runtime_get_sync(dev);
+>  		}
+>  		tmio_mmc_set_clock(host, ios->clock);
+> -		if (!host->power) {
+> +		if (host->power == TMIO_MMC_OFF_STOP)
+>  			/* power up SD card and the bus */
+>  			tmio_mmc_power_on(host, ios->vdd);
+> -			host->power = true;
+> -		}
+> +		host->power = TMIO_MMC_ON_RUN;
+>  		/* start bus clock */
+>  		tmio_mmc_clk_start(host);
+>  	} else if (ios->power_mode != MMC_POWER_UP) {
+>  		if (host->power) {
 
-Ahh, they were with the original submission for mvsdio:
+Maybe host->power != TMIO_MMC_OFF_STOP ?
 
-  07728b7 mmc: mvsdio: use slot-gpio for card detect gpio
-  3724482 mmc: mvsdio: use slot-gpio infrastructure for write protect gpio
+Otherwise the patch looks good to me.
 
-I thought you were referring to a newer patch.
+Reviewed-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
 
-thx,
+>  			struct tmio_mmc_data *pdata = host->pdata;
+> -			if (ios->power_mode == MMC_POWER_OFF)
+> +			if (ios->power_mode == MMC_POWER_OFF) {
+>  				tmio_mmc_power_off(host);
+> +				host->power = TMIO_MMC_OFF_STOP;
+> +			} else {
+> +				host->power = TMIO_MMC_ON_STOP;
+> +			}
+>  			tmio_mmc_clk_stop(host);
+> -			host->power = false;
+>  			pm_runtime_put(dev);
+>  			if (pdata->clk_disable)
+>  				pdata->clk_disable(host->pdev);
+> @@ -1025,7 +1027,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host **host,
+>  				  mmc->caps & MMC_CAP_NONREMOVABLE ||
+>  				  mmc->slot.cd_irq >= 0);
+> 
+> -	_host->power = false;
+> +	_host->power = TMIO_MMC_OFF_STOP;
+>  	pm_runtime_enable(&pdev->dev);
+>  	ret = pm_runtime_resume(&pdev->dev);
+>  	if (ret < 0)
+-- 
+Regards,
 
-Jason.
+Laurent Pinchart
+
