@@ -1,64 +1,73 @@
-From: Neil Armstrong <narmstrong@neotion.com>
-Subject: Re: [PATCH 0/3] Add boot_enable attribute to eMMC device for boot
- mode operation selection
-Date: Mon, 22 Apr 2013 09:23:58 +0200
-Message-ID: <5174E58E.8090307@neotion.com>
-References: <51713B86.2090001@neotion.com> <CAKYAXd_xa--1QpFCdz3Kj0mKF3cvtxFn-xL3QGWZyXPO4Y79ng@mail.gmail.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH] mmc: tmio: postpone controller reset during resume
+Date: Mon, 22 Apr 2013 10:29:26 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1304221025300.23906@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.neotion.com ([91.121.222.125]:50799 "EHLO mail.neotion.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753929Ab3DVHYE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 22 Apr 2013 03:24:04 -0400
-In-Reply-To: <CAKYAXd_xa--1QpFCdz3Kj0mKF3cvtxFn-xL3QGWZyXPO4Y79ng@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-sh@vger.kernel.org
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Nguyen Viet Dung <nv-dung@jinso.co.jp>, hechtb@gmail.com, Horman Simon <simon@horms.net>, Damm Magnus <magnus.damm@gmail.com>, "^[$B0p5H$5$s^[(B" <jinso.inayoshi@gmail.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Namjae Jeon <linkinjeon@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Subhash Jadavani <subhashj@codeaurora.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nam-Jae Jeon <namjae.jeon@samsung.com>
 
-On 04/22/2013 06:55 AM, Namjae Jeon wrote:
-> 2013/4/19, Neil Armstrong <narmstrong@neotion.com>:
->> Since eMMC 4.3 a special boot mode operation was introduced to retrieve
->> data from the eMMC device with a very simple procedure. Since the Linux
->> kernel exports these device boot partitions, it may be useful to select
->> the boot partition from the user space.
->>
->> The patch has been tested on a Toshiba eMMC conforming with eMMC 4.5
->> specifications.
-> Hi Neil.
-> We can be enable boot partition using mmc-utils.
-> See this address.
-> https://git.kernel.org/cgit/linux/kernel/git/cjb/mmc-utils.git/commit/?id=7bd1320b2cb38f040ab5cf017d17e283496690bf
-> 
-> So, I don't think this patch is useful.
-> If you consider to be disable boot partition, you can try to update
-> mmc-utils base on the address I shared.
-> 
-> Thanks.
->>
->> Neil Armstrong (3):
->>   Add BOOT_PARTITION_ENABLE definition to MMC EXT_CSD PART_CONFIG
->>   Add boot_enable sysfs attribute to select MMC boot operation
->>     partition
->>   Add Documentation for MMC boot_enable attribute
->>
->>  Documentation/mmc/mmc-dev-parts.txt |    6 +++
->>  drivers/mmc/card/block.c            |   72
->> ++++++++++++++++++++++++++++++++++-
->>  include/linux/mmc/mmc.h             |    1 +
->>  3 files changed, 78 insertions(+), 1 deletions(-)
->>
->>
->>
-> 
+When resuming, the tmio_mmc_host_resume() function is run when the
+controller might still be powered down. Issuing a reset command to it at
+that time has no effect. This patch postpones resetting the controller
+until the first powering-up .set_ios() call.
 
-Hi,
-Thanks for the reply, I was not aware of the mmc-utils tools. I think
-the tool and the MMC_IOC_CMD interface should be documented in the kernel.
+Reported-by: Nguyen Viet Dung <nv-dung@jinso.co.jp>
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+---
 
-Please ignore my patch.
+There is some risk associated with this patch: it removes unconditional 
+(attempt of) controller reset from the tmio_mmc_host_resume() function. 
+AFAICS, this shouldn't have any negative effects. There _should_ always be 
+a powering-up .set_ios() call after a resume. However, if anyone sees any 
+(potential) problems with it, please, let me know.
 
-Regards,
-Neil
+ drivers/mmc/host/tmio_mmc.h     |    1 +
+ drivers/mmc/host/tmio_mmc_pio.c |    6 +++++-
+ 2 files changed, 6 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index d857f5c..759d8f4 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -85,6 +85,7 @@ struct tmio_mmc_host {
+ 	unsigned long		last_req_ts;
+ 	struct mutex		ios_lock;	/* protect set_ios() context */
+ 	bool			native_hotplug;
++	bool			resuming;
+ };
+ 
+ int tmio_mmc_host_probe(struct tmio_mmc_host **host,
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index f508ecb..435cc4d 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -862,6 +862,10 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		if (!host->power) {
+ 			tmio_mmc_clk_update(mmc);
+ 			pm_runtime_get_sync(dev);
++			if (host->resuming) {
++				tmio_mmc_reset(host);
++				host->resuming = false;
++			}
+ 		}
+ 		tmio_mmc_set_clock(host, ios->clock);
+ 		if (!host->power) {
+@@ -1154,10 +1158,10 @@ int tmio_mmc_host_resume(struct device *dev)
+ 	struct mmc_host *mmc = dev_get_drvdata(dev);
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
+ 
+-	tmio_mmc_reset(host);
+ 	tmio_mmc_enable_dma(host, true);
+ 
+ 	/* The MMC core will perform the complete set up */
++	host->resuming = true;
+ 	return mmc_resume_host(mmc);
+ }
+ EXPORT_SYMBOL(tmio_mmc_host_resume);
+-- 
+1.7.2.5
+
