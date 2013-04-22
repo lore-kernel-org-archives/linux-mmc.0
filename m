@@ -1,122 +1,52 @@
-From: Tomasz Figa <tomasz.figa@gmail.com>
-Subject: [PATCH] MAINTAINERS: Add linux-samsung-soc list to all related entries
-Date: Sun, 21 Apr 2013 21:20:50 +0200
-Message-ID: <1366572050-626-1-git-send-email-tomasz.figa@gmail.com>
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH 0/3] Add boot_enable attribute to eMMC device for boot
+ mode operation selection
+Date: Mon, 22 Apr 2013 13:55:04 +0900
+Message-ID: <CAKYAXd_xa--1QpFCdz3Kj0mKF3cvtxFn-xL3QGWZyXPO4Y79ng@mail.gmail.com>
+References: <51713B86.2090001@neotion.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f182.google.com ([74.125.82.182]:56905 "EHLO
-	mail-we0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754090Ab3DUTVI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 21 Apr 2013 15:21:08 -0400
+Received: from mail-pd0-f173.google.com ([209.85.192.173]:41460 "EHLO
+	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751141Ab3DVEzG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Apr 2013 00:55:06 -0400
+In-Reply-To: <51713B86.2090001@neotion.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: linux-samsung-soc@vger.kernel.org, linux-media@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org, linux-mmc@vger.kernel.org, kyungmin.park@samsung.com, k.debski@samsung.com, s.nawrocki@samsung.com, jtp.park@samsung.com, t.stanislaws@samsung.com, inki.dae@samsung.com, jy0922.shim@samsung.com, sw0312.kim@samsung.com, jg1.han@samsung.com, dh09.lee@samsung.com, sbkim73@samsung.com, linux@arm.linux.org.uk, Tomasz Figa <tomasz.figa@gmail.com>
+To: narmstrong@neotion.com
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Subhash Jadavani <subhashj@codeaurora.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nam-Jae Jeon <namjae.jeon@samsung.com>
 
-Several entries in MAINTAINERS file related to Samsung SoCs do not point
-to linux-samsung-soc mailing list, which is supposed to collect all
-Samsung SoC-related threads, to ease following of Samsung SoC-related
-work. This leads to a problem with people skipping this mailing list in
-their posts, even though they are related to Samsung SoCs.
+2013/4/19, Neil Armstrong <narmstrong@neotion.com>:
+> Since eMMC 4.3 a special boot mode operation was introduced to retrieve
+> data from the eMMC device with a very simple procedure. Since the Linux
+> kernel exports these device boot partitions, it may be useful to select
+> the boot partition from the user space.
+>
+> The patch has been tested on a Toshiba eMMC conforming with eMMC 4.5
+> specifications.
+Hi Neil.
+We can be enable boot partition using mmc-utils.
+See this address.
+https://git.kernel.org/cgit/linux/kernel/git/cjb/mmc-utils.git/commit/?id=7bd1320b2cb38f040ab5cf017d17e283496690bf
 
-This patch adds pointers to linux-samsung-soc mailing list to affected
-entries of MAINTAINERS file.
+So, I don't think this patch is useful.
+If you consider to be disable boot partition, you can try to update
+mmc-utils base on the address I shared.
 
-Signed-off-by: Tomasz Figa <tomasz.figa@gmail.com>
----
- MAINTAINERS | 11 +++++++++++
- 1 file changed, 11 insertions(+)
-
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 6c0d68b..07cb8da 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -1139,6 +1139,7 @@ F:	arch/arm/mach-exynos*/
- ARM/SAMSUNG MOBILE MACHINE SUPPORT
- M:	Kyungmin Park <kyungmin.park@samsung.com>
- L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
-+L:	linux-samsung-soc@vger.kernel.org (moderated for non-subscribers)
- S:	Maintained
- F:	arch/arm/mach-s5pv210/mach-aquila.c
- F:	arch/arm/mach-s5pv210/mach-goni.c
-@@ -1150,6 +1151,7 @@ M:	Kyungmin Park <kyungmin.park@samsung.com>
- M:	Kamil Debski <k.debski@samsung.com>
- L:	linux-arm-kernel@lists.infradead.org
- L:	linux-media@vger.kernel.org
-+L:	linux-samsung-soc@vger.kernel.org (moderated for non-subscribers)
- S:	Maintained
- F:	drivers/media/platform/s5p-g2d/
- 
-@@ -1158,6 +1160,7 @@ M:	Kyungmin Park <kyungmin.park@samsung.com>
- M:	Sylwester Nawrocki <s.nawrocki@samsung.com>
- L:	linux-arm-kernel@lists.infradead.org
- L:	linux-media@vger.kernel.org
-+L:	linux-samsung-soc@vger.kernel.org (moderated for non-subscribers)
- S:	Maintained
- F:	arch/arm/plat-samsung/include/plat/*fimc*
- F:	drivers/media/platform/s5p-fimc/
-@@ -1168,6 +1171,7 @@ M:	Kamil Debski <k.debski@samsung.com>
- M:	Jeongtae Park <jtp.park@samsung.com>
- L:	linux-arm-kernel@lists.infradead.org
- L:	linux-media@vger.kernel.org
-+L:	linux-samsung-soc@vger.kernel.org (moderated for non-subscribers)
- S:	Maintained
- F:	arch/arm/plat-samsung/s5p-dev-mfc.c
- F:	drivers/media/platform/s5p-mfc/
-@@ -1177,6 +1181,7 @@ M:	Kyungmin Park <kyungmin.park@samsung.com>
- M:	Tomasz Stanislawski <t.stanislaws@samsung.com>
- L:	linux-arm-kernel@lists.infradead.org
- L:	linux-media@vger.kernel.org
-+L:	linux-samsung-soc@vger.kernel.org (moderated for non-subscribers)
- S:	Maintained
- F:	drivers/media/platform/s5p-tv/
- 
-@@ -2679,6 +2684,7 @@ M:	Joonyoung Shim <jy0922.shim@samsung.com>
- M:	Seung-Woo Kim <sw0312.kim@samsung.com>
- M:	Kyungmin Park <kyungmin.park@samsung.com>
- L:	dri-devel@lists.freedesktop.org
-+L:	linux-samsung-soc@vger.kernel.org (moderated for non-subscribers)
- T:	git git://git.kernel.org/pub/scm/linux/kernel/git/daeinki/drm-exynos.git
- S:	Supported
- F:	drivers/gpu/drm/exynos
-@@ -3142,6 +3148,7 @@ F:	Documentation/extcon/
- EXYNOS DP DRIVER
- M:	Jingoo Han <jg1.han@samsung.com>
- L:	linux-fbdev@vger.kernel.org
-+L:	linux-samsung-soc@vger.kernel.org (moderated for non-subscribers)
- S:	Maintained
- F:	drivers/video/exynos/exynos_dp*
- F:	include/video/exynos_dp*
-@@ -3151,6 +3158,7 @@ M:	Inki Dae <inki.dae@samsung.com>
- M:	Donghwa Lee <dh09.lee@samsung.com>
- M:	Kyungmin Park <kyungmin.park@samsung.com>
- L:	linux-fbdev@vger.kernel.org
-+L:	linux-samsung-soc@vger.kernel.org (moderated for non-subscribers)
- S:	Maintained
- F:	drivers/video/exynos/exynos_mipi*
- F:	include/video/exynos_mipi*
-@@ -6892,12 +6900,14 @@ F:	drivers/platform/x86/samsung-laptop.c
- SAMSUNG AUDIO (ASoC) DRIVERS
- M:	Sangbeom Kim <sbkim73@samsung.com>
- L:	alsa-devel@alsa-project.org (moderated for non-subscribers)
-+L:	linux-samsung-soc@vger.kernel.org (moderated for non-subscribers)
- S:	Supported
- F:	sound/soc/samsung
- 
- SAMSUNG FRAMEBUFFER DRIVER
- M:	Jingoo Han <jg1.han@samsung.com>
- L:	linux-fbdev@vger.kernel.org
-+L:	linux-samsung-soc@vger.kernel.org (moderated for non-subscribers)
- S:	Maintained
- F:	drivers/video/s3c-fb.c
- 
-@@ -7087,6 +7097,7 @@ F:	drivers/mmc/host/sdhci-pltfm.[ch]
- SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) SAMSUNG DRIVER
- M:	Ben Dooks <ben-linux@fluff.org>
- L:	linux-mmc@vger.kernel.org
-+L:	linux-samsung-soc@vger.kernel.org (moderated for non-subscribers)
- S:	Maintained
- F:	drivers/mmc/host/sdhci-s3c.c
- 
--- 
-1.8.2.1
-
+Thanks.
+>
+> Neil Armstrong (3):
+>   Add BOOT_PARTITION_ENABLE definition to MMC EXT_CSD PART_CONFIG
+>   Add boot_enable sysfs attribute to select MMC boot operation
+>     partition
+>   Add Documentation for MMC boot_enable attribute
+>
+>  Documentation/mmc/mmc-dev-parts.txt |    6 +++
+>  drivers/mmc/card/block.c            |   72
+> ++++++++++++++++++++++++++++++++++-
+>  include/linux/mmc/mmc.h             |    1 +
+>  3 files changed, 78 insertions(+), 1 deletions(-)
+>
+>
+>
