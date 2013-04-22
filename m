@@ -1,244 +1,67 @@
-From: Simon Baatz <gmbnomis@gmail.com>
-Subject: [PATCH 2/3] ARM: Kirkwood: Add dts files for Sheevaplug and eSATA Sheevaplug
-Date: Mon, 22 Apr 2013 21:54:59 +0200
-Message-ID: <1366660500-26835-3-git-send-email-gmbnomis@gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 1/3] mmc: mvsdio: Support inverted CD and WP GPIO lines
+Date: Mon, 22 Apr 2013 16:03:15 -0400
+Message-ID: <87wqrutjss.fsf@octavius.laptop.org>
 References: <1366660500-26835-1-git-send-email-gmbnomis@gmail.com>
+	<1366660500-26835-2-git-send-email-gmbnomis@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f174.google.com ([209.85.212.174]:43002 "EHLO
-	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755213Ab3DVTzW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Apr 2013 15:55:22 -0400
-Received: by mail-wi0-f174.google.com with SMTP id m6so5097456wiv.7
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Apr 2013 12:55:21 -0700 (PDT)
-In-Reply-To: <1366660500-26835-1-git-send-email-gmbnomis@gmail.com>
+Received: from void.printf.net ([89.145.121.20]:49319 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754847Ab3DVUDa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 22 Apr 2013 16:03:30 -0400
+In-Reply-To: <1366660500-26835-2-git-send-email-gmbnomis@gmail.com> (Simon
+	Baatz's message of "Mon, 22 Apr 2013 21:54:58 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: jason@lakedaemon.net, andrew@lunn.ch, cjb@laptop.org, thomas.petazzoni@free-electrons.com
+To: Simon Baatz <gmbnomis@gmail.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, jason@lakedaemon.net, andrew@lunn.ch, thomas.petazzoni@free-electrons.com, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
+Hi Simon,
 
-Signed-off-by: Simon Baatz <gmbnomis@gmail.com>
----
- arch/arm/boot/dts/Makefile                        |    2 +
- arch/arm/boot/dts/kirkwood-sheevaplug-common.dtsi |   97 +++++++++++++++++++++
- arch/arm/boot/dts/kirkwood-sheevaplug-esata.dts   |   40 +++++++++
- arch/arm/boot/dts/kirkwood-sheevaplug.dts         |   43 +++++++++
- 4 files changed, 182 insertions(+)
- create mode 100644 arch/arm/boot/dts/kirkwood-sheevaplug-common.dtsi
- create mode 100644 arch/arm/boot/dts/kirkwood-sheevaplug-esata.dts
- create mode 100644 arch/arm/boot/dts/kirkwood-sheevaplug.dts
+On Mon, Apr 22 2013, Simon Baatz wrote:
+> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+> index 145cdaf..d444efd 100644
+> --- a/drivers/mmc/host/mvsdio.c
+> +++ b/drivers/mmc/host/mvsdio.c
+> @@ -691,6 +691,7 @@ static int __init mvsd_probe(struct platform_device *pdev)
+>  	struct resource *r;
+>  	int ret, irq;
+>  	int gpio_card_detect, gpio_write_protect;
+> +	enum of_gpio_flags gpio_flags;
+>  	struct pinctrl *pinctrl;
+>  
+>  	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> @@ -731,8 +732,17 @@ static int __init mvsd_probe(struct platform_device *pdev)
+>  		}
+>  
+>  		host->base_clock = clk_get_rate(host->clk) / 2;
+> -		gpio_card_detect = of_get_named_gpio(np, "cd-gpios", 0);
+> -		gpio_write_protect = of_get_named_gpio(np, "wp-gpios", 0);
+> +		gpio_card_detect = of_get_named_gpio_flags(np, "cd-gpios", 0,
+> +						     &gpio_flags);
+> +		if (gpio_is_valid(gpio_card_detect) &&
+> +		    !(gpio_flags & OF_GPIO_ACTIVE_LOW))
+> +			mmc->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
+> +
+> +		gpio_write_protect = of_get_named_gpio_flags(np, "wp-gpios", 0,
+> +						       &gpio_flags);
+> +		if (gpio_is_valid(gpio_write_protect) &&
+> +		    !(gpio_flags & OF_GPIO_ACTIVE_LOW))
+> +			mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+>  	} else {
+>  		const struct mvsdio_platform_data *mvsd_data;
+>  		mvsd_data = pdev->dev.platform_data;
 
-diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index 9c62558..c2f52db 100644
---- a/arch/arm/boot/dts/Makefile
-+++ b/arch/arm/boot/dts/Makefile
-@@ -70,6 +70,8 @@ dtb-$(CONFIG_ARCH_KIRKWOOD) += kirkwood-dns320.dtb \
- 	kirkwood-ns2max.dtb \
- 	kirkwood-ns2mini.dtb \
- 	kirkwood-nsa310.dtb \
-+	kirkwood-sheevaplug.dtb \
-+	kirkwood-sheevaplug-esata.dtb \
- 	kirkwood-topkick.dtb \
- 	kirkwood-ts219-6281.dtb \
- 	kirkwood-ts219-6282.dtb \
-diff --git a/arch/arm/boot/dts/kirkwood-sheevaplug-common.dtsi b/arch/arm/boot/dts/kirkwood-sheevaplug-common.dtsi
-new file mode 100644
-index 0000000..9d59475
---- /dev/null
-+++ b/arch/arm/boot/dts/kirkwood-sheevaplug-common.dtsi
-@@ -0,0 +1,97 @@
-+/*
-+ * kirkwood-sheevaplug-common.dts - Common parts for Sheevaplugs
-+ *
-+ * Copyright (C) 2013 Simon Baatz <gmbnomis@gmail.com>
-+ *
-+ * Licensed under GPLv2
-+ */
-+
-+/include/ "kirkwood.dtsi"
-+/include/ "kirkwood-6281.dtsi"
-+
-+/ {
-+	memory {
-+		device_type = "memory";
-+		reg = <0x00000000 0x20000000>;
-+	};
-+
-+	chosen {
-+		bootargs = "console=ttyS0,115200n8 earlyprintk";
-+	};
-+
-+	ocp@f1000000 {
-+		pinctrl: pinctrl@10000 {
-+
-+			pmx_usb_power_enable: pmx-usb-power-enable {
-+				marvell,pins = "mpp29";
-+				marvell,function = "gpio";
-+			};
-+			pmx_led_red: pmx-led-red {
-+				marvell,pins = "mpp46";
-+				marvell,function = "gpio";
-+			};
-+			pmx_led_blue: pmx-led-blue {
-+				marvell,pins = "mpp49";
-+				marvell,function = "gpio";
-+			};
-+			pmx_sdio_cd: pmx-sdio-cd {
-+				marvell,pins = "mpp44";
-+				marvell,function = "gpio";
-+			};
-+			pmx_sdio_wp: pmx-sdio-wp {
-+				marvell,pins = "mpp47";
-+				marvell,function = "gpio";
-+			};
-+		};
-+		serial@12000 {
-+			status = "okay";
-+		};
-+
-+		nand@3000000 {
-+			status = "okay";
-+
-+			partition@0 {
-+				label = "u-boot";
-+				reg = <0x0000000 0x100000>;
-+			};
-+
-+			partition@100000 {
-+				label = "uImage";
-+				reg = <0x0100000 0x400000>;
-+			};
-+
-+			partition@500000 {
-+				label = "root";
-+				reg = <0x0500000 0x1fb00000>;
-+			};
-+		};
-+	};
-+
-+	regulators {
-+		compatible = "simple-bus";
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+
-+		usb_power: regulator@1 {
-+			compatible = "regulator-fixed";
-+			reg = <1>;
-+			regulator-name = "USB Power";
-+			regulator-min-microvolt = <5000000>;
-+			regulator-max-microvolt = <5000000>;
-+			enable-active-high;
-+			regulator-always-on;
-+			regulator-boot-on;
-+			gpio = <&gpio0 29 0>;
-+		};
-+	};
-+
-+	gpio-leds {
-+		compatible = "gpio-leds";
-+
-+		health {
-+			label = "sheevaplug:blue:health";
-+			gpios = <&gpio1 17 1>;
-+			linux,default-trigger = "default-on";
-+		};
-+	};
-+};
-diff --git a/arch/arm/boot/dts/kirkwood-sheevaplug-esata.dts b/arch/arm/boot/dts/kirkwood-sheevaplug-esata.dts
-new file mode 100644
-index 0000000..1c6946a
---- /dev/null
-+++ b/arch/arm/boot/dts/kirkwood-sheevaplug-esata.dts
-@@ -0,0 +1,40 @@
-+/*
-+ * kirkwood-sheevaplug-esata.dts - Device tree file for eSATA Sheevaplug
-+ *
-+ * Copyright (C) 2013 Simon Baatz <gmbnomis@gmail.com>
-+ *
-+ * Licensed under GPLv2
-+ */
-+
-+/dts-v1/;
-+
-+/include/ "kirkwood-sheevaplug-common.dtsi"
-+
-+/ {
-+	model = "Globalscale Technologies eSATA SheevaPlug";
-+	compatible = "globalscale,sheevaplug-esata-rev13", "globalscale,sheevaplug-esata", "globalscale,sheevaplug", "marvell,kirkwood-88f6281", "marvell,kirkwood";
-+
-+	ocp@f1000000 {
-+		pinctrl: pinctrl@10000 {
-+
-+			pinctrl-0 = < &pmx_nand &pmx_uart0
-+				      &pmx_usb_power_enable
-+				      &pmx_led_blue>;
-+			pinctrl-names = "default";
-+
-+		};
-+
-+		sata@80000 {
-+			status = "okay";
-+			nr-ports = <2>;
-+		};
-+
-+		mvsdio@90000 {
-+			pinctrl-0 = <&pmx_sdio &pmx_sdio_cd &pmx_sdio_wp>;
-+			pinctrl-names = "default";
-+			status = "okay";
-+			cd-gpios = <&gpio1 12 1>;
-+			wp-gpios = <&gpio1 15 0>;
-+		};
-+	};
-+};
-diff --git a/arch/arm/boot/dts/kirkwood-sheevaplug.dts b/arch/arm/boot/dts/kirkwood-sheevaplug.dts
-new file mode 100644
-index 0000000..ca2ac1c
---- /dev/null
-+++ b/arch/arm/boot/dts/kirkwood-sheevaplug.dts
-@@ -0,0 +1,43 @@
-+/*
-+ * kirkwood-sheevaplug-esata.dts - Device tree file for Sheevaplug
-+ *
-+ * Copyright (C) 2013 Simon Baatz <gmbnomis@gmail.com>
-+ *
-+ * Licensed under GPLv2
-+ */
-+
-+/dts-v1/;
-+
-+/include/ "kirkwood-sheevaplug-common.dtsi"
-+
-+/ {
-+	model = "Globalscale Technologies SheevaPlug";
-+	compatible = "globalscale,sheevaplug", "marvell,kirkwood-88f6281", "marvell,kirkwood";
-+
-+	ocp@f1000000 {
-+		pinctrl: pinctrl@10000 {
-+
-+			pinctrl-0 = < &pmx_nand &pmx_uart0
-+				      &pmx_usb_power_enable
-+				      &pmx_led_red
-+				      &pmx_led_blue>;
-+			pinctrl-names = "default";
-+
-+		};
-+
-+		mvsdio@90000 {
-+			pinctrl-0 = <&pmx_sdio>;
-+			pinctrl-names = "default";
-+			status = "okay";
-+		};
-+	};
-+
-+	gpio-leds {
-+		compatible = "gpio-leds";
-+
-+		misc {
-+			label = "sheevaplug:red:misc";
-+			gpios = <&gpio1 14 1>;
-+		};
-+	};
-+};
+The core function mmc_of_parse() (new in 3.9) will do all of this DT
+parsing for you, and will also take care of the driver's later calls
+to mmc_gpio_request_{cd,wp}().  Could you try using that function
+instead, please?
+
+Thanks,
+
+- Chris.
 -- 
-1.7.9.5
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
