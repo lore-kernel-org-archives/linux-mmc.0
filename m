@@ -1,36 +1,89 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH -next] mmc: dw_mmc: fix error return code in dw_mci_probe()
-Date: Tue, 23 Apr 2013 18:59:21 +0900
-Message-ID: <002301ce4009$3a3099b0$ae91cd10$%jun@samsung.com>
-References: <CAPgLHd9RGHwoitQ0EusPepKK+AApKJ=ryRbm4S32o_vOonUgeQ@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: clear INSTS register when initialize
+Date: Tue, 23 Apr 2013 19:23:14 +0900
+Message-ID: <51766112.7070806@samsung.com>
+References: <1366262497-22560-1-git-send-email-jy0922.shim@samsung.com>
+ <002201ce4008$fe0e0210$fa2a0630$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
+Content-Type: text/plain; charset=EUC-KR
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:19380 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755418Ab3DWJ7X (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Apr 2013 05:59:23 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout2.samsung.com ([203.254.224.25]:51570 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752005Ab3DWKXE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Apr 2013 06:23:04 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MLP00N90D2X4NY0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 23 Apr 2013 18:59:22 +0900 (KST)
-In-reply-to: <CAPgLHd9RGHwoitQ0EusPepKK+AApKJ=ryRbm4S32o_vOonUgeQ@mail.gmail.com>
-Content-language: ko
+ with ESMTP id <0MLP0015UE5WPN21@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 23 Apr 2013 19:23:02 +0900 (KST)
+In-reply-to: <002201ce4008$fe0e0210$fa2a0630$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Wei Yongjun' <weiyj.lk@gmail.com>, jh80.chung@samsung.com, cjb@laptop.org, grant.likely@linaro.org, rob.herring@calxeda.com
-Cc: yongjun_wei@trendmicro.com.cn, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Joonyoung Shim' <jy0922.shim@samsung.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, will.newton@imgtec.com
 
-On Friday, April 19, 2013 , Wei Yongjun wrote:
-> From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+On 04/23/2013 06:57 PM, Seungwon Jeon wrote:
+> Hi,
 > 
-> Fix to return -ENOMEM in alloc workqueue error case instead
-> of 0, as done elsewhere in this function.
+> On Thursday, April 18, 2013, Joonyoung Shim wrote:
+>> If pending interrupt for IDMAC exists when probe, it will call interrupt
+>> handler unnecessarily.
+>>
+>> Signed-off-by: Joonyoung Shim <jy0922.shim@samsung.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c |    3 +++
+>>  1 file changed, 3 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 323c502..b0057a2 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -2192,6 +2192,7 @@ int dw_mci_probe(struct dw_mci *host)
+>>
+>>  	/* Clear the interrupts for the host controller */
+>>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+>> +	mci_writel(host, IDSTS, 0xFFFFFFFF);
+> 0x337 is correct for bits. Could you check the bit filed?
+I think that don't care which reset value used.
+"It is recommended that you write 0xffff_ffff to the Raw Interrupt register @0x044 and IDSTS @0x8C
+in order to clear any pending interrupts before setting the int_enable bit."
+This boot mode case is also used the 0xffff_ffff.
 > 
-> Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
-
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+>>  	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
+>>
+>>  	/* Put in max timeout */
+>> @@ -2243,6 +2244,7 @@ int dw_mci_probe(struct dw_mci *host)
+>>  	 * receive ready and error such as transmit, receive timeout, crc error
+>>  	 */
+>>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+>> +	mci_writel(host, IDSTS, 0xFFFFFFFF);
+> No need, it's already done above.
+> 
+>>  	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+>>  		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+>>  		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
+>> @@ -2393,6 +2395,7 @@ int dw_mci_resume(struct dw_mci *host)
+>>  	mci_writel(host, FIFOTH, host->fifoth_val);
+>>
+>>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+>> +	mci_writel(host, IDSTS, 0xFFFFFFFF);
+> Same, incorrect bits.
+> 
+> Thanks,
+> Seungwon Jeon
+> 
+>>  	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+>>  		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+>>  		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
+>> --
+>> 1.7.9.5
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
 
