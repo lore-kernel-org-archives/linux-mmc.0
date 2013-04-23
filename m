@@ -1,58 +1,37 @@
-From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Subject: Re: [PATCH 1/3] mmc: mvsdio: Support inverted CD and WP GPIO lines
-Date: Tue, 23 Apr 2013 03:48:58 +0200
-Message-ID: <20130423034858.28c7f99c@skate>
-References: <1366660500-26835-1-git-send-email-gmbnomis@gmail.com>
-	<1366660500-26835-2-git-send-email-gmbnomis@gmail.com>
-	<87wqrutjss.fsf@octavius.laptop.org>
-	<20130422203723.GI29947@lunn.ch>
-	<20130422210949.GJ25724@titan.lakedaemon.net>
-	<20130422214543.GJ29947@lunn.ch>
-	<87sj2iteue.fsf@octavius.laptop.org>
+From: Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v3 1/6] at_hdmac: move to generic DMA binding
+Date: Tue, 23 Apr 2013 09:14:07 +0530
+Message-ID: <20130423034407.GY24632@intel.com>
+References: <1366362683-14496-1-git-send-email-ludovic.desroches@atmel.com>
+ <1366362683-14496-2-git-send-email-ludovic.desroches@atmel.com>
+ <51750F68.4040701@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.free-electrons.com ([94.23.35.102]:48349 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754077Ab3DWBtJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Apr 2013 21:49:09 -0400
-In-Reply-To: <87sj2iteue.fsf@octavius.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <51750F68.4040701-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Nicolas Ferre <nicolas.ferre-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+Cc: ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org, Linux Kernel list <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Andrew Lunn <andrew@lunn.ch>, Jason Cooper <jason@lakedaemon.net>, gmbnomis@gmail.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Dear Chris Ball,
+On Mon, Apr 22, 2013 at 12:22:32PM +0200, Nicolas Ferre wrote:
+> On 04/19/2013 11:11 AM, ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org :
+> > From: Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
 
-On Mon, 22 Apr 2013 17:50:17 -0400, Chris Ball wrote:
+> > +#ifdef CONFIG_OF
+> > +static bool at_dma_filter(struct dma_chan *chan, void *slave)
+this is not defined for else case here. Also this could be CONFIG_DMA_OF...?
+> > +{
+> > +	struct at_dma_slave *atslave = slave;
+> > +
+> > +	if (atslave->dma_dev == chan->device->dev) {
+> > +		chan->private = atslave;
+> > +		return true;
+> > +	} else {
+> > +		return false;
+> > +	}
+> > +}
 
-> On Mon, Apr 22 2013, Andrew Lunn wrote:
-> >> Nothing else really jumps out though.  Where either of these what you
-> >> were thinking of?
-> >
-> > http://lists.infradead.org/pipermail/linux-arm-kernel/2012-December/138514.html
-> >
-> > and
-> >
-> > http://lists.infradead.org/pipermail/linux-arm-kernel/2012-December/138513.html
-> 
-> These patches move mvsdio to slot-gpio, which is a prerequisite for
-> using the shared mmc_of_parse(), but they don't go all the way to
-> using mmc_of_parse().
-> 
-> (Which makes sense; mmc_of_parse() was merged to mmc-next in February,
-> so it wasn't available for this patchset in December.)
-
-Correct. I used the slot-gpio infrastructure in mvsdio, but I wasn't
-aware of the new mmc_of_parse() thing, and I don't have any patch that
-converts mvsdio to use it for the moment.
-
-Best regards,
-
-Thomas
--- 
-Thomas Petazzoni, Free Electrons
-Kernel, drivers, real-time and embedded Linux
-development, consulting, training and support.
-http://free-electrons.com
+--
+~Vinod
