@@ -1,89 +1,57 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: clear INSTS register when initialize
-Date: Tue, 23 Apr 2013 19:23:14 +0900
-Message-ID: <51766112.7070806@samsung.com>
-References: <1366262497-22560-1-git-send-email-jy0922.shim@samsung.com>
- <002201ce4008$fe0e0210$fa2a0630$%jun@samsung.com>
+From: Johan Rudholm <jrudholm@gmail.com>
+Subject: Re: [PATCH] mmc: core: Fix select power class after resume
+Date: Tue, 23 Apr 2013 14:43:22 +0200
+Message-ID: <CA+20K0AQQ6PxSRwyL+TAP0B0i=zUpCm6=5y0k0wKNx9yonOsYA@mail.gmail.com>
+References: <1366641977-31914-1-git-send-email-fredrik.soderstedt@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=EUC-KR
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:51570 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752005Ab3DWKXE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Apr 2013 06:23:04 -0400
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MLP0015UE5WPN21@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 23 Apr 2013 19:23:02 +0900 (KST)
-In-reply-to: <002201ce4008$fe0e0210$fa2a0630$%jun@samsung.com>
+Received: from mail-qa0-f47.google.com ([209.85.216.47]:63436 "EHLO
+	mail-qa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755308Ab3DWMnX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Apr 2013 08:43:23 -0400
+Received: by mail-qa0-f47.google.com with SMTP id bn16so577015qab.6
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Apr 2013 05:43:22 -0700 (PDT)
+In-Reply-To: <1366641977-31914-1-git-send-email-fredrik.soderstedt@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Joonyoung Shim' <jy0922.shim@samsung.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, will.newton@imgtec.com
+To: Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Girish K S <girish.shivananjappa@linaro.org>
 
-On 04/23/2013 06:57 PM, Seungwon Jeon wrote:
-> Hi,
-> 
-> On Thursday, April 18, 2013, Joonyoung Shim wrote:
->> If pending interrupt for IDMAC exists when probe, it will call interrupt
->> handler unnecessarily.
->>
->> Signed-off-by: Joonyoung Shim <jy0922.shim@samsung.com>
->> ---
->>  drivers/mmc/host/dw_mmc.c |    3 +++
->>  1 file changed, 3 insertions(+)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 323c502..b0057a2 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -2192,6 +2192,7 @@ int dw_mci_probe(struct dw_mci *host)
->>
->>  	/* Clear the interrupts for the host controller */
->>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
->> +	mci_writel(host, IDSTS, 0xFFFFFFFF);
-> 0x337 is correct for bits. Could you check the bit filed?
-I think that don't care which reset value used.
-"It is recommended that you write 0xffff_ffff to the Raw Interrupt register @0x044 and IDSTS @0x8C
-in order to clear any pending interrupts before setting the int_enable bit."
-This boot mode case is also used the 0xffff_ffff.
-> 
->>  	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
->>
->>  	/* Put in max timeout */
->> @@ -2243,6 +2244,7 @@ int dw_mci_probe(struct dw_mci *host)
->>  	 * receive ready and error such as transmit, receive timeout, crc error
->>  	 */
->>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
->> +	mci_writel(host, IDSTS, 0xFFFFFFFF);
-> No need, it's already done above.
-> 
->>  	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
->>  		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
->>  		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
->> @@ -2393,6 +2395,7 @@ int dw_mci_resume(struct dw_mci *host)
->>  	mci_writel(host, FIFOTH, host->fifoth_val);
->>
->>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
->> +	mci_writel(host, IDSTS, 0xFFFFFFFF);
-> Same, incorrect bits.
-> 
-> Thanks,
-> Seungwon Jeon
-> 
->>  	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
->>  		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
->>  		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
->> --
->> 1.7.9.5
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+Hi,
 
+2013/4/22 Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>:
+> Use the saved values in card->ext_csd when selecting power class.
+> By doing this the power class will be selected even if mmc_init_card
+> is called with oldcard != NULL, which is the case after a suspend/resume.
+>
+> Today ext_csd is NULL if mmc_init_card is called with oldcard != NULL
+> and power class will not be selected.
+>
+> According to the eMMC specification the POWER_CLASS value is reset after
+> power failure, H/W reset assertion and any CMD0 reset.
+>
+> CC: Girish K S <girish.shivananjappa@linaro.org>
+> Signed-off-by: Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
+> ---
+
+<snip>
+
+
+> @@ -720,13 +750,13 @@ static int mmc_select_powerclass(struct mmc_card *card,
+>         case MMC_VDD_34_35:
+>         case MMC_VDD_35_36:
+>                 if (host->ios.clock <= 26000000)
+> -                       index = EXT_CSD_PWR_CL_26_360;
+> +                       pwrclass_val = card->ext_csd.raw_pwr_cl_26_360;
+>                 else if (host->ios.clock <= 52000000)
+> -                       index = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
+> -                               EXT_CSD_PWR_CL_52_360 :
+> -                               EXT_CSD_PWR_CL_DDR_52_360;
+> +                       pwrclass_val = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
+> +                               card->ext_csd.raw_pwr_cl_52_360 :
+> +                               card->ext_csd.raw_pwr_cl_52_360;
+
+I believe you should have "_ddr" here, right? Otherwise it looks good.
+
+Kind regards, Johan
