@@ -1,146 +1,82 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH v2] MMC: tmio: fix unbalanced power-on calls with clock-gating
- enabled
-Date: Tue, 23 Apr 2013 09:29:44 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1304230916270.1422@axis700.grange>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH] mmc: dw_mmc: clear INSTS register when initialize
+Date: Tue, 23 Apr 2013 18:57:40 +0900
+Message-ID: <002201ce4008$fe0e0210$fa2a0630$%jun@samsung.com>
+References: <1366262497-22560-1-git-send-email-jy0922.shim@samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:51153 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755730Ab3DWH3t (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Apr 2013 03:29:49 -0400
+Received: from mailout1.samsung.com ([203.254.224.24]:50674 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756084Ab3DWJ5n (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Apr 2013 05:57:43 -0400
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MLP00BYQD05WUZ0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 23 Apr 2013 18:57:41 +0900 (KST)
+In-reply-to: <1366262497-22560-1-git-send-email-jy0922.shim@samsung.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+To: 'Joonyoung Shim' <jy0922.shim@samsung.com>, linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, will.newton@imgtec.com, jh80.chung@samsung.com
 
-With MMC clock gating enabled the MMC core currently calls MMC host driver's
-.set_ios() method with .power_mode == MMC_POWER_ON and the clock value set
-either to 0 or to the target rate. The tmio MMC driver then wrongly
-translates the latter calls to card slot power-on requests, even when the
-slot already was on. This patch fixes the driver to avoid needlessly
-incrementing power-supplying regulator's use count.
+Hi,
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
----
+On Thursday, April 18, 2013, Joonyoung Shim wrote:
+> If pending interrupt for IDMAC exists when probe, it will call interrupt
+> handler unnecessarily.
+> 
+> Signed-off-by: Joonyoung Shim <jy0922.shim@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c |    3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 323c502..b0057a2 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2192,6 +2192,7 @@ int dw_mci_probe(struct dw_mci *host)
+> 
+>  	/* Clear the interrupts for the host controller */
+>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+> +	mci_writel(host, IDSTS, 0xFFFFFFFF);
+0x337 is correct for bits. Could you check the bit filed?
 
-v2: Also make runtime PM handling safer and more resistant to possible 
-MMC core changes. V1 worked fine too, but theoretically if the core 
-decided to issue a sequence like
+>  	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
+> 
+>  	/* Put in max timeout */
+> @@ -2243,6 +2244,7 @@ int dw_mci_probe(struct dw_mci *host)
+>  	 * receive ready and error such as transmit, receive timeout, crc error
+>  	 */
+>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+> +	mci_writel(host, IDSTS, 0xFFFFFFFF);
+No need, it's already done above.
 
-	.set_ios(ios->power_mode == MMC_POWER_ON, ios->clock != 0);
-	.set_ios(ios->power_mode == MMC_POWER_ON, ios->clock == 0);
-	.set_ios(ios->power_mode == MMC_POWER_OFF, ios->clock == 0);
+>  	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+>  		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+>  		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
+> @@ -2393,6 +2395,7 @@ int dw_mci_resume(struct dw_mci *host)
+>  	mci_writel(host, FIFOTH, host->fifoth_val);
+> 
+>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+> +	mci_writel(host, IDSTS, 0xFFFFFFFF);
+Same, incorrect bits.
 
-we would end up calling pm_runtime_put() twice in a row, which is wrong. 
-V2 only toggles the controller runtime PM status only when entering or 
-leaving the TMIO_MMC_ON_RUN state.
+Thanks,
+Seungwon Jeon
 
- drivers/mmc/host/tmio_mmc.h     |   20 ++++++++++++++++++--
- drivers/mmc/host/tmio_mmc_pio.c |   27 +++++++++++++++++----------
- 2 files changed, 35 insertions(+), 12 deletions(-)
-
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index d857f5c..3cc589a 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -40,6 +40,22 @@
- 
- struct tmio_mmc_data;
- 
-+/*
-+ * We differentiate between the following 3 power states:
-+ * 1. card slot powered off, controller stopped. This is used, when either there
-+ *    is no card in the slot, or the card really has to be powered down.
-+ * 2. card slot powered on, controller stopped. This is used, when a card is in
-+ *    the slot, but no activity is currently taking place. This is a power-
-+ *    saving mode with card-state preserved. This state can be entered, e.g.
-+ *    when MMC clock-gating is used.
-+ * 3. card slot powered on, controller running. This is the actual active state.
-+ */
-+enum tmio_mmc_power {
-+	TMIO_MMC_OFF_STOP,	/* card power off, controller stopped */
-+	TMIO_MMC_ON_STOP,	/* card power on, controller stopped */
-+	TMIO_MMC_ON_RUN,	/* card power on, controller running */
-+};
-+
- struct tmio_mmc_host {
- 	void __iomem *ctl;
- 	unsigned long bus_shift;
-@@ -48,8 +64,8 @@ struct tmio_mmc_host {
- 	struct mmc_data         *data;
- 	struct mmc_host         *mmc;
- 
--	/* Controller power state */
--	bool			power;
-+	/* Controller and card power state */
-+	enum tmio_mmc_power	power;
- 
- 	/* Callbacks for clock / power control */
- 	void (*set_pwr)(struct platform_device *host, int state);
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index f508ecb..1d5ef64 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -859,32 +859,39 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	 * is kept positive, so no suspending actually takes place.
- 	 */
- 	if (ios->power_mode == MMC_POWER_ON && ios->clock) {
--		if (!host->power) {
-+		if (host->power != TMIO_MMC_ON_RUN) {
- 			tmio_mmc_clk_update(mmc);
- 			pm_runtime_get_sync(dev);
- 		}
- 		tmio_mmc_set_clock(host, ios->clock);
--		if (!host->power) {
-+		if (host->power == TMIO_MMC_OFF_STOP)
- 			/* power up SD card and the bus */
- 			tmio_mmc_power_on(host, ios->vdd);
--			host->power = true;
--		}
-+		host->power = TMIO_MMC_ON_RUN;
- 		/* start bus clock */
- 		tmio_mmc_clk_start(host);
- 	} else if (ios->power_mode != MMC_POWER_UP) {
--		if (host->power) {
--			struct tmio_mmc_data *pdata = host->pdata;
--			if (ios->power_mode == MMC_POWER_OFF)
-+		struct tmio_mmc_data *pdata = host->pdata;
-+		unsigned int old_power = host->power;
-+
-+		if (old_power != TMIO_MMC_OFF_STOP) {
-+			if (ios->power_mode == MMC_POWER_OFF) {
- 				tmio_mmc_power_off(host);
-+				host->power = TMIO_MMC_OFF_STOP;
-+			} else {
-+				host->power = TMIO_MMC_ON_STOP;
-+			}
-+		}
-+
-+		if (old_power == TMIO_MMC_ON_RUN) {
- 			tmio_mmc_clk_stop(host);
--			host->power = false;
- 			pm_runtime_put(dev);
- 			if (pdata->clk_disable)
- 				pdata->clk_disable(host->pdev);
- 		}
- 	}
- 
--	if (host->power) {
-+	if (host->power != TMIO_MMC_OFF_STOP) {
- 		switch (ios->bus_width) {
- 		case MMC_BUS_WIDTH_1:
- 			sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x80e0);
-@@ -1025,7 +1032,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 				  mmc->caps & MMC_CAP_NONREMOVABLE ||
- 				  mmc->slot.cd_irq >= 0);
- 
--	_host->power = false;
-+	_host->power = TMIO_MMC_OFF_STOP;
- 	pm_runtime_enable(&pdev->dev);
- 	ret = pm_runtime_resume(&pdev->dev);
- 	if (ret < 0)
--- 
-1.7.2.5
+>  	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+>  		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+>  		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
+> --
+> 1.7.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
