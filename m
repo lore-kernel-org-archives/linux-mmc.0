@@ -1,56 +1,98 @@
-From: Simon Baatz <gmbnomis@gmail.com>
-Subject: Re: [PATCH 1/3] mmc: mvsdio: Support inverted CD and WP GPIO lines
-Date: Tue, 23 Apr 2013 23:22:25 +0200
-Message-ID: <20130423212224.GA29507@schnuecks.de>
-References: <1366660500-26835-1-git-send-email-gmbnomis@gmail.com>
- <1366660500-26835-2-git-send-email-gmbnomis@gmail.com>
- <87wqrutjss.fsf@octavius.laptop.org>
- <20130422203723.GI29947@lunn.ch>
- <20130422210949.GJ25724@titan.lakedaemon.net>
- <20130422214543.GJ29947@lunn.ch>
- <87sj2iteue.fsf@octavius.laptop.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH] mmc: dw_mmc: clear INSTS register when initialize
+Date: Wed, 24 Apr 2013 10:34:44 +0900
+Message-ID: <000601ce408b$e60a4e70$b21eeb50$%jun@samsung.com>
+References: <1366262497-22560-1-git-send-email-jy0922.shim@samsung.com>
+ <002201ce4008$fe0e0210$fa2a0630$%jun@samsung.com>
+ <51766112.7070806@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f42.google.com ([209.85.214.42]:61593 "EHLO
-	mail-bk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752652Ab3DWVW2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Apr 2013 17:22:28 -0400
-Received: by mail-bk0-f42.google.com with SMTP id jc3so470257bkc.15
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Apr 2013 14:22:27 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <87sj2iteue.fsf@octavius.laptop.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:20096 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755426Ab3DXBeq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Apr 2013 21:34:46 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MLQ00FAIKD936K0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 24 Apr 2013 10:34:44 +0900 (KST)
+In-reply-to: <51766112.7070806@samsung.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Andrew Lunn <andrew@lunn.ch>, Jason Cooper <jason@lakedaemon.net>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, thomas.petazzoni@free-electrons.com
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>
+Cc: 'Joonyoung Shim' <jy0922.shim@samsung.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, will.newton@imgtec.com
 
-Hi Chris, Guennadi,
-
-On Mon, Apr 22, 2013 at 05:50:17PM -0400, Chris Ball wrote:
-> Hi,
-> 
-> On Mon, Apr 22 2013, Andrew Lunn wrote:
-> >> Nothing else really jumps out though.  Where either of these what you
-> >> were thinking of?
+On Tuesday, April 23, 2013, Jaehoon Chung wrote:
+> On 04/23/2013 06:57 PM, Seungwon Jeon wrote:
+> > Hi,
 > >
-> > http://lists.infradead.org/pipermail/linux-arm-kernel/2012-December/138514.html
+> > On Thursday, April 18, 2013, Joonyoung Shim wrote:
+> >> If pending interrupt for IDMAC exists when probe, it will call interrupt
+> >> handler unnecessarily.
+> >>
+> >> Signed-off-by: Joonyoung Shim <jy0922.shim@samsung.com>
+> >> ---
+> >>  drivers/mmc/host/dw_mmc.c |    3 +++
+> >>  1 file changed, 3 insertions(+)
+> >>
+> >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> >> index 323c502..b0057a2 100644
+> >> --- a/drivers/mmc/host/dw_mmc.c
+> >> +++ b/drivers/mmc/host/dw_mmc.c
+> >> @@ -2192,6 +2192,7 @@ int dw_mci_probe(struct dw_mci *host)
+> >>
+> >>  	/* Clear the interrupts for the host controller */
+> >>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+> >> +	mci_writel(host, IDSTS, 0xFFFFFFFF);
+> > 0x337 is correct for bits. Could you check the bit filed?
+> I think that don't care which reset value used.
+> "It is recommended that you write 0xffff_ffff to the Raw Interrupt register @0x044 and IDSTS @0x8C
+> in order to clear any pending interrupts before setting the int_enable bit."
+> This boot mode case is also used the 0xffff_ffff.
+In case IDSTS all 32bit are not for interrupt status unlike RINTSTS.
+IDSTS[31:17] is reserved and IDSTS[16:0] also contains 'reserved' and 'read-only' field.
+Correct use would be needed.
+
+Thanks,
+Seungwon Jeon
 > >
-> > and
+> >>  	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
+> >>
+> >>  	/* Put in max timeout */
+> >> @@ -2243,6 +2244,7 @@ int dw_mci_probe(struct dw_mci *host)
+> >>  	 * receive ready and error such as transmit, receive timeout, crc error
+> >>  	 */
+> >>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+> >> +	mci_writel(host, IDSTS, 0xFFFFFFFF);
+> > No need, it's already done above.
 > >
-> > http://lists.infradead.org/pipermail/linux-arm-kernel/2012-December/138513.html
-> 
-> These patches move mvsdio to slot-gpio, which is a prerequisite for
-> using the shared mmc_of_parse(), but they don't go all the way to
-> using mmc_of_parse().
+> >>  	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+> >>  		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+> >>  		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
+> >> @@ -2393,6 +2395,7 @@ int dw_mci_resume(struct dw_mci *host)
+> >>  	mci_writel(host, FIFOTH, host->fifoth_val);
+> >>
+> >>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+> >> +	mci_writel(host, IDSTS, 0xFFFFFFFF);
+> > Same, incorrect bits.
+> >
+> > Thanks,
+> > Seungwon Jeon
+> >
+> >>  	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+> >>  		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+> >>  		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
+> >> --
+> >> 1.7.9.5
+> >>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> >
 
-That's nice functionality, I was not aware of that. I will convert this
-to mmc_of_parse() once I find some time.
-
-One question already: Why does mmc_of_parse() not return errors to
-the caller?  If, for example, a GPIO line was given for CD in the DT,
-but it could not be obtained, shouldn't the caller at least have the
-possibility to handle this as an error?  (mvsdio currently
-aborts the probe if it can't get the GPIO line).
-
-- Simon
