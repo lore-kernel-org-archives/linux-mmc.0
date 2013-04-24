@@ -1,99 +1,35 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: [PATCH] mmc: mmci: Allow MMCI to request channels with information acquired from DT
-Date: Wed, 24 Apr 2013 11:58:42 +0100
-Message-ID: <1366801122-13302-1-git-send-email-lee.jones@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f170.google.com ([74.125.82.170]:40240 "EHLO
-	mail-we0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932085Ab3DXK6v (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Apr 2013 06:58:51 -0400
-Received: by mail-we0-f170.google.com with SMTP id z2so1525911wey.15
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Apr 2013 03:58:50 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Yaniv Gardi <ygardi@codeaurora.org>
+Subject: [PATCH v1] mmc-utils: adding support for Android compilation
+Date: Wed, 24 Apr 2013 14:51:26 +0300
+Message-ID: <1366804286-16571-1-git-send-email-ygardi@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Yaniv Gardi <ygardi@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Cc: arnd@arndb.de, linus.walleij@stericsson.com, Lee Jones <lee.jones@linaro.org>, Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Currently, if DMA information isn't passed from platform data, then DMA
-will not be used. This patch allows DMA information obtained though Device
-Tree to be used as well.
-
-Cc: Russell King <linux@arm.linux.org.uk>
-Cc: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Lee Jones <lee.jones@linaro.org>
+Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
 ---
- drivers/mmc/host/mmci.c |   43 ++++++++++++++++++++++---------------------
- 1 file changed, 22 insertions(+), 21 deletions(-)
+ Android.mk |   11 +++++++++++
+ 1 files changed, 11 insertions(+), 0 deletions(-)
+ create mode 100644 Android.mk
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 372e921..ecd256b 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -304,10 +304,8 @@ static void mmci_dma_setup(struct mmci_host *host)
- 	const char *rxname, *txname;
- 	dma_cap_mask_t mask;
- 
--	if (!plat || !plat->dma_filter) {
--		dev_info(mmc_dev(host->mmc), "no DMA platform data\n");
--		return;
--	}
-+	host->dma_rx_channel = dma_request_slave_channel(dev, "rx");
-+	host->dma_tx_channel = dma_request_slave_channel(dev, "tx");
- 
- 	/* initialize pre request cookie */
- 	host->next_data.cookie = 1;
-@@ -316,30 +314,33 @@ static void mmci_dma_setup(struct mmci_host *host)
- 	dma_cap_zero(mask);
- 	dma_cap_set(DMA_SLAVE, mask);
- 
--	/*
--	 * If only an RX channel is specified, the driver will
--	 * attempt to use it bidirectionally, however if it is
--	 * is specified but cannot be located, DMA will be disabled.
--	 */
--	if (plat->dma_rx_param) {
--		host->dma_rx_channel = dma_request_channel(mask,
-+	if (plat && plat->dma_filter) {
-+		if (!host->dma_rx_channel && plat->dma_rx_param) {
-+			host->dma_rx_channel = dma_request_channel(mask,
- 							   plat->dma_filter,
- 							   plat->dma_rx_param);
--		/* E.g if no DMA hardware is present */
--		if (!host->dma_rx_channel)
--			dev_err(mmc_dev(host->mmc), "no RX DMA channel\n");
--	}
-+			/* E.g if no DMA hardware is present */
-+			if (!host->dma_rx_channel)
-+				dev_err(mmc_dev(host->mmc), "no RX DMA channel\n");
-+		}
- 
--	if (plat->dma_tx_param) {
--		host->dma_tx_channel = dma_request_channel(mask,
-+		if (!host->dma_tx_channel && plat->dma_tx_param) {
-+			host->dma_tx_channel = dma_request_channel(mask,
- 							   plat->dma_filter,
- 							   plat->dma_tx_param);
--		if (!host->dma_tx_channel)
--			dev_warn(mmc_dev(host->mmc), "no TX DMA channel\n");
--	} else {
--		host->dma_tx_channel = host->dma_rx_channel;
-+			if (!host->dma_tx_channel)
-+				dev_warn(mmc_dev(host->mmc), "no TX DMA channel\n");
-+		}
- 	}
- 
-+	/*
-+	 * If only an RX channel is specified, the driver will
-+	 * attempt to use it bidirectionally, however if it is
-+	 * is specified but cannot be located, DMA will be disabled.
-+	 */
-+	if (host->dma_rx_channel && !host->dma_tx_channel)
-+		host->dma_tx_channel = host->dma_rx_channel;
+diff --git a/Android.mk b/Android.mk
+new file mode 100644
+index 0000000..7c8cce4
+--- /dev/null
++++ b/Android.mk
+@@ -0,0 +1,11 @@
++LOCAL_PATH:= $(call my-dir)
 +
- 	if (host->dma_rx_channel)
- 		rxname = dma_chan_name(host->dma_rx_channel);
- 	else
++include $(CLEAR_VARS)
++LOCAL_MODULE_TAGS := optional
++LOCAL_SRC_FILES:= mmc.c mmc_cmds.c
++LOCAL_MODULE := mmc_utils
++LOCAL_SHARED_LIBRARIES := libcutils libc
++LOCAL_C_INCLUDES+= $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
++LOCAL_ADDITIONAL_DEPENDENCIES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
++LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/mmc-utils
++include $(BUILD_EXECUTABLE)
 -- 
-1.7.10.4
-
+1.7.6
