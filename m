@@ -1,62 +1,99 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH v2] mmc: tmio: reset the controller after power-up
-Date: Wed, 24 Apr 2013 11:59:19 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1304241143460.11670@axis700.grange>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-sh@vger.kernel.org
-Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Nguyen Viet Dung <nv-dung@jinso.co.jp>, hechtb@gmail.com, Horman Simon <simon@horms.net>, Damm Magnus <magnus.damm@gmail.com>, "^[$B0p5H$5$s^[(B" <jinso.inayoshi@gmail.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Nguyen Hong Ky <nh-ky@jinso.co.jp>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: [PATCH] mmc: mmci: Allow MMCI to request channels with information acquired from DT
+Date: Wed, 24 Apr 2013 11:58:42 +0100
+Message-ID: <1366801122-13302-1-git-send-email-lee.jones@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-we0-f170.google.com ([74.125.82.170]:40240 "EHLO
+	mail-we0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932085Ab3DXK6v (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Apr 2013 06:58:51 -0400
+Received: by mail-we0-f170.google.com with SMTP id z2so1525911wey.15
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Apr 2013 03:58:50 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc: arnd@arndb.de, linus.walleij@stericsson.com, Lee Jones <lee.jones@linaro.org>, Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-This fixes two reported problems:
-1. after a system resume the controller isn't functioning until a command
-   runs on a timeout and a controller reset is performed.
-2. if a card is ejected during a running write operation, its re-insertion
-   isn't detected.
+Currently, if DMA information isn't passed from platform data, then DMA
+will not be used. This patch allows DMA information obtained though Device
+Tree to be used as well.
 
-Reported-by: Nguyen Viet Dung <nv-dung@jinso.co.jp>
-Reported-by: Nguyen Hong Ky <nh-ky@jinso.co.jp>
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+Cc: Russell King <linux@arm.linux.org.uk>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
+Signed-off-by: Lee Jones <lee.jones@linaro.org>
 ---
+ drivers/mmc/host/mmci.c |   43 ++++++++++++++++++++++---------------------
+ 1 file changed, 22 insertions(+), 21 deletions(-)
 
-v2: this patch supersedes the earlier "mmc: tmio: postpone controller 
-reset during resume" in that it extends the number of cases, in which the 
-reset is applied. It turned out, it is needed not only after a resume, but 
-also for recovery after an interrupted write. It also now applies on top 
-of "[PATCH v2] MMC: tmio: fix unbalanced power-on calls with clock-gating 
-enabled" http://article.gmane.org/gmane.linux.kernel.mmc/20233. Reporters 
-are cordially invited to add their "Tested-by" tags ;-)
-
-Chris, both these patches are fixes. Not sure whether it's still a good 
-idea to push them for 3.9, maybe better get them into 3.10 and then to 
-stable?
-
- drivers/mmc/host/tmio_mmc_pio.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 1d5ef64..fcb9503 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -863,6 +863,8 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			tmio_mmc_clk_update(mmc);
- 			pm_runtime_get_sync(dev);
- 		}
-+		if (host->power == TMIO_MMC_OFF_STOP)
-+			tmio_mmc_reset(host);
- 		tmio_mmc_set_clock(host, ios->clock);
- 		if (host->power == TMIO_MMC_OFF_STOP)
- 			/* power up SD card and the bus */
-@@ -1161,7 +1163,6 @@ int tmio_mmc_host_resume(struct device *dev)
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 372e921..ecd256b 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -304,10 +304,8 @@ static void mmci_dma_setup(struct mmci_host *host)
+ 	const char *rxname, *txname;
+ 	dma_cap_mask_t mask;
  
--	tmio_mmc_reset(host);
- 	tmio_mmc_enable_dma(host, true);
+-	if (!plat || !plat->dma_filter) {
+-		dev_info(mmc_dev(host->mmc), "no DMA platform data\n");
+-		return;
+-	}
++	host->dma_rx_channel = dma_request_slave_channel(dev, "rx");
++	host->dma_tx_channel = dma_request_slave_channel(dev, "tx");
  
- 	/* The MMC core will perform the complete set up */
+ 	/* initialize pre request cookie */
+ 	host->next_data.cookie = 1;
+@@ -316,30 +314,33 @@ static void mmci_dma_setup(struct mmci_host *host)
+ 	dma_cap_zero(mask);
+ 	dma_cap_set(DMA_SLAVE, mask);
+ 
+-	/*
+-	 * If only an RX channel is specified, the driver will
+-	 * attempt to use it bidirectionally, however if it is
+-	 * is specified but cannot be located, DMA will be disabled.
+-	 */
+-	if (plat->dma_rx_param) {
+-		host->dma_rx_channel = dma_request_channel(mask,
++	if (plat && plat->dma_filter) {
++		if (!host->dma_rx_channel && plat->dma_rx_param) {
++			host->dma_rx_channel = dma_request_channel(mask,
+ 							   plat->dma_filter,
+ 							   plat->dma_rx_param);
+-		/* E.g if no DMA hardware is present */
+-		if (!host->dma_rx_channel)
+-			dev_err(mmc_dev(host->mmc), "no RX DMA channel\n");
+-	}
++			/* E.g if no DMA hardware is present */
++			if (!host->dma_rx_channel)
++				dev_err(mmc_dev(host->mmc), "no RX DMA channel\n");
++		}
+ 
+-	if (plat->dma_tx_param) {
+-		host->dma_tx_channel = dma_request_channel(mask,
++		if (!host->dma_tx_channel && plat->dma_tx_param) {
++			host->dma_tx_channel = dma_request_channel(mask,
+ 							   plat->dma_filter,
+ 							   plat->dma_tx_param);
+-		if (!host->dma_tx_channel)
+-			dev_warn(mmc_dev(host->mmc), "no TX DMA channel\n");
+-	} else {
+-		host->dma_tx_channel = host->dma_rx_channel;
++			if (!host->dma_tx_channel)
++				dev_warn(mmc_dev(host->mmc), "no TX DMA channel\n");
++		}
+ 	}
+ 
++	/*
++	 * If only an RX channel is specified, the driver will
++	 * attempt to use it bidirectionally, however if it is
++	 * is specified but cannot be located, DMA will be disabled.
++	 */
++	if (host->dma_rx_channel && !host->dma_tx_channel)
++		host->dma_tx_channel = host->dma_rx_channel;
++
+ 	if (host->dma_rx_channel)
+ 		rxname = dma_chan_name(host->dma_rx_channel);
+ 	else
 -- 
-1.7.2.5
+1.7.10.4
 
