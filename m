@@ -1,83 +1,31 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH v2] mmc: tmio: reset the controller after power-up
-Date: Thu, 25 Apr 2013 12:41:38 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1304251240360.21045@axis700.grange>
-References: <Pine.LNX.4.64.1304241143460.11670@axis700.grange>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 1/3] Add BOOT_PARTITION_ENABLE definition to MMC EXT_CSD PART_CONFIG
+Date: Thu, 25 Apr 2013 23:42:15 +0200
+Message-ID: <CACRpkdYsZgrGtog9-DDgW4PB7SaMgNjRKr=Uh3PKo+_AcoGeRg@mail.gmail.com>
+References: <51713B7B.3060402@neotion.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1304241143460.11670@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-sh@vger.kernel.org
-Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Nguyen Viet Dung <nv-dung@jinso.co.jp>, hechtb@gmail.com, Horman Simon <simon@horms.net>, Damm Magnus <magnus.damm@gmail.com>, "^[$B0p5H$5$s^[(B" <jinso.inayoshi@gmail.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Nguyen Hong Ky <nh-ky@jinso.co.jp>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ia0-f182.google.com ([209.85.210.182]:64984 "EHLO
+	mail-ia0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757640Ab3DYVmQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Apr 2013 17:42:16 -0400
+Received: by mail-ia0-f182.google.com with SMTP id w33so800500iag.13
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2013 14:42:15 -0700 (PDT)
+In-Reply-To: <51713B7B.3060402@neotion.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: narmstrong@neotion.com
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Namjae Jeon <linkinjeon@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Subhash Jadavani <subhashj@codeaurora.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Loic PALLARDY <loic.pallardy@st.com>
 
-Hi Chris
+On Fri, Apr 19, 2013 at 2:41 PM, Neil Armstrong <narmstrong@neotion.com> wrote:
 
-On Wed, 24 Apr 2013, Guennadi Liakhovetski wrote:
+> Add bit mask for the BOOT_PARTITION_ENABLE values.
+>
+> Signed-off-by: Neil Armstrong <narmstrong@neotion.com>
 
-> This fixes two reported problems:
-> 1. after a system resume the controller isn't functioning until a command
->    runs on a timeout and a controller reset is performed.
-> 2. if a card is ejected during a running write operation, its re-insertion
->    isn't detected.
-> 
-> Reported-by: Nguyen Viet Dung <nv-dung@jinso.co.jp>
-> Reported-by: Nguyen Hong Ky <nh-ky@jinso.co.jp>
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+Loic (CC) pushed these boot partition changes so make sure he gets
+to review them...
 
-Please, add the following tags, when applying:
-
-Tested-by: Nguyen Viet Dung <nv-dung@jinso.co.jp>
-Tested-by: Nguyen Hong Ky <nh-ky@jinso.co.jp>
-
-Thanks
-Guennadi
-
-> ---
-> 
-> v2: this patch supersedes the earlier "mmc: tmio: postpone controller 
-> reset during resume" in that it extends the number of cases, in which the 
-> reset is applied. It turned out, it is needed not only after a resume, but 
-> also for recovery after an interrupted write. It also now applies on top 
-> of "[PATCH v2] MMC: tmio: fix unbalanced power-on calls with clock-gating 
-> enabled" http://article.gmane.org/gmane.linux.kernel.mmc/20233. Reporters 
-> are cordially invited to add their "Tested-by" tags ;-)
-> 
-> Chris, both these patches are fixes. Not sure whether it's still a good 
-> idea to push them for 3.9, maybe better get them into 3.10 and then to 
-> stable?
-> 
->  drivers/mmc/host/tmio_mmc_pio.c |    3 ++-
->  1 files changed, 2 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> index 1d5ef64..fcb9503 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -863,6 +863,8 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  			tmio_mmc_clk_update(mmc);
->  			pm_runtime_get_sync(dev);
->  		}
-> +		if (host->power == TMIO_MMC_OFF_STOP)
-> +			tmio_mmc_reset(host);
->  		tmio_mmc_set_clock(host, ios->clock);
->  		if (host->power == TMIO_MMC_OFF_STOP)
->  			/* power up SD card and the bus */
-> @@ -1161,7 +1163,6 @@ int tmio_mmc_host_resume(struct device *dev)
->  	struct mmc_host *mmc = dev_get_drvdata(dev);
->  	struct tmio_mmc_host *host = mmc_priv(mmc);
->  
-> -	tmio_mmc_reset(host);
->  	tmio_mmc_enable_dma(host, true);
->  
->  	/* The MMC core will perform the complete set up */
-> -- 
-> 1.7.2.5
-> 
-> 
-
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Yours,
+Linus Walleij
