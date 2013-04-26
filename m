@@ -1,31 +1,81 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 1/3] Add BOOT_PARTITION_ENABLE definition to MMC EXT_CSD PART_CONFIG
-Date: Thu, 25 Apr 2013 23:42:15 +0200
-Message-ID: <CACRpkdYsZgrGtog9-DDgW4PB7SaMgNjRKr=Uh3PKo+_AcoGeRg@mail.gmail.com>
-References: <51713B7B.3060402@neotion.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: [PATCH] mmc: omap_hsmmc: Fix the DT pbias workaround for MMC
+ controllers 2 to 5
+Date: Thu, 25 Apr 2013 20:38:54 -0700
+Message-ID: <20130426033853.GK5184@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ia0-f182.google.com ([209.85.210.182]:64984 "EHLO
-	mail-ia0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757640Ab3DYVmQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Apr 2013 17:42:16 -0400
-Received: by mail-ia0-f182.google.com with SMTP id w33so800500iag.13
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Apr 2013 14:42:15 -0700 (PDT)
-In-Reply-To: <51713B7B.3060402@neotion.com>
+Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:22360 "EHLO
+	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758711Ab3DZDi5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Apr 2013 23:38:57 -0400
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: narmstrong@neotion.com
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Namjae Jeon <linkinjeon@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Subhash Jadavani <subhashj@codeaurora.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Loic PALLARDY <loic.pallardy@st.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, "Cousson, Benoit" <b-cousson@ti.com>, Rajendra Nayak <rnayak@ti.com>, Luciano Coelho <coelho@ti.com>
 
-On Fri, Apr 19, 2013 at 2:41 PM, Neil Armstrong <narmstrong@neotion.com> wrote:
+Otherwise SDIO cards won't necessarily work when booted with
+device tree as we will never power down the SDIO cards. This
+means the SDIO card reset does not happen which at least some
+WLAN controllers expect to happen with ifconfig wlan0 down.
 
-> Add bit mask for the BOOT_PARTITION_ENABLE values.
->
-> Signed-off-by: Neil Armstrong <narmstrong@neotion.com>
+The PBIAS voltage is only available for the first controller
+instance, so let's limit the PBIAS workaround to the first
+controller only.
 
-Loic (CC) pushed these boot partition changes so make sure he gets
-to review them...
+Signed-off-by: Tony Lindgren <tony@atomide.com>
 
-Yours,
-Linus Walleij
+---
+
+This fix would be good to get merged during the v3.10 -rc cycle.
+
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -161,6 +161,7 @@ struct omap_hsmmc_host {
+ 	 */
+ 	struct	regulator	*vcc;
+ 	struct	regulator	*vcc_aux;
++	int			pbias_disable;
+ 	void	__iomem		*base;
+ 	resource_size_t		mapbase;
+ 	spinlock_t		irq_lock; /* Prevent races with irq handler */
+@@ -255,11 +256,11 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+ 	if (!host->vcc)
+ 		return 0;
+ 	/*
+-	 * With DT, never turn OFF the regulator. This is because
++	 * With DT, never turn OFF the regulator for MMC1. This is because
+ 	 * the pbias cell programming support is still missing when
+ 	 * booting with Device tree
+ 	 */
+-	if (dev->of_node && !vdd)
++	if (host->pbias_disable && !vdd)
+ 		return 0;
+ 
+ 	if (mmc_slot(host).before_set_reg)
+@@ -1520,10 +1521,10 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			(ios->vdd == DUAL_VOLT_OCR_BIT) &&
+ 			/*
+ 			 * With pbias cell programming missing, this
+-			 * can't be allowed when booting with device
++			 * can't be allowed on MMC1 when booting with device
+ 			 * tree.
+ 			 */
+-			!host->dev->of_node) {
++			!host->pbias_disable) {
+ 				/*
+ 				 * The mmc_select_voltage fn of the core does
+ 				 * not seem to set the power_mode to
+@@ -1871,6 +1872,10 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 
+ 	omap_hsmmc_context_save(host);
+ 
++	/* This can be removed once we support PBIAS with DT */
++	if (host->dev->of_node && host->mapbase == 0x4809c000)
++		host->pbias_disable =1;
++
+ 	host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
+ 	/*
+ 	 * MMC can still work without debounce clock.
