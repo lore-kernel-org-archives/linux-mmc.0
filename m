@@ -1,81 +1,96 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: [PATCH] mmc: omap_hsmmc: Fix the DT pbias workaround for MMC
- controllers 2 to 5
-Date: Thu, 25 Apr 2013 20:38:54 -0700
-Message-ID: <20130426033853.GK5184@atomide.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH] mmc: dw_mmc: clear INSTS register when initialize
+Date: Fri, 26 Apr 2013 13:24:15 +0900
+Message-ID: <000a01ce4235$e9c49ec0$bd4ddc40$%jun@samsung.com>
+References: <1366262497-22560-1-git-send-email-jy0922.shim@samsung.com>
+ <002201ce4008$fe0e0210$fa2a0630$%jun@samsung.com>
+ <51766112.7070806@samsung.com>
+ <000601ce408b$e60a4e70$b21eeb50$%jun@samsung.com>
+ <51774C0F.9040104@samsung.com> <51787CBA.80607@samsung.com>
+ <5178E002.6010902@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:22360 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758711Ab3DZDi5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Apr 2013 23:38:57 -0400
-Content-Disposition: inline
+Received: from mailout3.samsung.com ([203.254.224.33]:45545 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751096Ab3DZEY0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Apr 2013 00:24:26 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MLU000KAHK73QM0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 26 Apr 2013 13:24:17 +0900 (KST)
+In-reply-to: <5178E002.6010902@samsung.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, "Cousson, Benoit" <b-cousson@ti.com>, Rajendra Nayak <rnayak@ti.com>, Luciano Coelho <coelho@ti.com>
+To: 'Joonyoung Shim' <jy0922.shim@samsung.com>
+Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, will.newton@gmail.com
 
-Otherwise SDIO cards won't necessarily work when booted with
-device tree as we will never power down the SDIO cards. This
-means the SDIO card reset does not happen which at least some
-WLAN controllers expect to happen with ifconfig wlan0 down.
+On Thursday, April 25, 2013, Joonyoung Shim wrote:
+> On 04/25/2013 09:45 AM, Jaehoon Chung wrote:
+> > On 04/24/2013 12:05 PM, Joonyoung Shim wrote:
+> >> On 04/24/2013 10:34 AM, Seungwon Jeon wrote:
+> >>> On Tuesday, April 23, 2013, Jaehoon Chung wrote:
+> >>>> On 04/23/2013 06:57 PM, Seungwon Jeon wrote:
+> >>>>> Hi,
+> >>>>>
+> >>>>> On Thursday, April 18, 2013, Joonyoung Shim wrote:
+> >>>>>> If pending interrupt for IDMAC exists when probe, it will call interrupt
+> >>>>>> handler unnecessarily.
+> >>>>>>
+> >>>>>> Signed-off-by: Joonyoung Shim <jy0922.shim@samsung.com>
+> >>>>>> ---
+> >>>>>>  drivers/mmc/host/dw_mmc.c |    3 +++
+> >>>>>>  1 file changed, 3 insertions(+)
+> >>>>>>
+> >>>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> >>>>>> index 323c502..b0057a2 100644
+> >>>>>> --- a/drivers/mmc/host/dw_mmc.c
+> >>>>>> +++ b/drivers/mmc/host/dw_mmc.c
+> >>>>>> @@ -2192,6 +2192,7 @@ int dw_mci_probe(struct dw_mci *host)
+> >>>>>>
+> >>>>>>  	/* Clear the interrupts for the host controller */
+> >>>>>>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+> >>>>>> +	mci_writel(host, IDSTS, 0xFFFFFFFF);
+> >>>>> 0x337 is correct for bits. Could you check the bit filed?
+> >> I feel it's better to use already existing defines than 0x337.
+> >>
+> >>>> I think that don't care which reset value used.
+> >>>> "It is recommended that you write 0xffff_ffff to the Raw Interrupt register @0x044 and IDSTS
+> @0x8C
+> >>>> in order to clear any pending interrupts before setting the int_enable bit."
+> >>>> This boot mode case is also used the 0xffff_ffff.
+> >> Jaehoon, can i get this sentence from which document?
+> > That comment is existed at "Synopsys DesignWare Cores mobile storage host databook".
+> > So we can use the 0xffff_ffff.
+> >
+> > Best Regards,
+> > Jaehoon Chung
+> >>> In case IDSTS all 32bit are not for interrupt status unlike RINTSTS.
+> >>> IDSTS[31:17] is reserved and IDSTS[16:0] also contains 'reserved' and 'read-only' field.
+> >>> Correct use would be needed.
+> 
+> I know, but as Jaehoon said, it recommands to write 0xFFFFFFFF "Synopsys
+> DesignWare Cores mobile storage host databook" document, so i also think
+> it's ok.
+> 
+> Nevertheless if you want to use strict bits set, i can modify it. What
+> is your idea?
+Jaehoon,
+Thank you for information. I also checked that description, 
+but I still feel it doesn't make sense a little bit.
+It seems that manual mentions both RINTSTS and IDSTS at a time while focusing the RINTSTS.
+In a general approach, it's expected to touch relevant fields.
 
-The PBIAS voltage is only available for the first controller
-instance, so let's limit the PBIAS workaround to the first
-controller only.
+Thanks,
+Seungwon Jeon
+> 
+> Thanks.
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Signed-off-by: Tony Lindgren <tony@atomide.com>
-
----
-
-This fix would be good to get merged during the v3.10 -rc cycle.
-
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -161,6 +161,7 @@ struct omap_hsmmc_host {
- 	 */
- 	struct	regulator	*vcc;
- 	struct	regulator	*vcc_aux;
-+	int			pbias_disable;
- 	void	__iomem		*base;
- 	resource_size_t		mapbase;
- 	spinlock_t		irq_lock; /* Prevent races with irq handler */
-@@ -255,11 +256,11 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 	if (!host->vcc)
- 		return 0;
- 	/*
--	 * With DT, never turn OFF the regulator. This is because
-+	 * With DT, never turn OFF the regulator for MMC1. This is because
- 	 * the pbias cell programming support is still missing when
- 	 * booting with Device tree
- 	 */
--	if (dev->of_node && !vdd)
-+	if (host->pbias_disable && !vdd)
- 		return 0;
- 
- 	if (mmc_slot(host).before_set_reg)
-@@ -1520,10 +1521,10 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			(ios->vdd == DUAL_VOLT_OCR_BIT) &&
- 			/*
- 			 * With pbias cell programming missing, this
--			 * can't be allowed when booting with device
-+			 * can't be allowed on MMC1 when booting with device
- 			 * tree.
- 			 */
--			!host->dev->of_node) {
-+			!host->pbias_disable) {
- 				/*
- 				 * The mmc_select_voltage fn of the core does
- 				 * not seem to set the power_mode to
-@@ -1871,6 +1872,10 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 
- 	omap_hsmmc_context_save(host);
- 
-+	/* This can be removed once we support PBIAS with DT */
-+	if (host->dev->of_node && host->mapbase == 0x4809c000)
-+		host->pbias_disable =1;
-+
- 	host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
- 	/*
- 	 * MMC can still work without debounce clock.
