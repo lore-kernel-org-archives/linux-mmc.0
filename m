@@ -1,43 +1,51 @@
-From: Namjae Jeon <linkinjeon@gmail.com>
-Subject: [PATCH] mmc: fix refcount leak in power_ro_lock_show
-Date: Sun, 28 Apr 2013 09:06:49 +0900
-Message-ID: <1367107609-2586-1-git-send-email-linkinjeon@gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2] mmc: dw_mmc: clear IDSTS register when initialize IDMAC
+Date: Mon, 29 Apr 2013 13:59:13 +0900
+Message-ID: <517DFE21.5030106@samsung.com>
+References: <1366958122-14869-1-git-send-email-jy0922.shim@samsung.com>
+ <001101ce4251$06a47b30$13ed7190$%jun@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=EUC-KR
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f181.google.com ([209.85.192.181]:58945 "EHLO
-	mail-pd0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752770Ab3D1AHD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 27 Apr 2013 20:07:03 -0400
+Received: from mailout4.samsung.com ([203.254.224.34]:14394 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750696Ab3D2E7E (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Apr 2013 00:59:04 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MM00096A3689LH0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 29 Apr 2013 13:58:56 +0900 (KST)
+In-reply-to: <001101ce4251$06a47b30$13ed7190$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Namjae Jeon <linkinjeon@gmail.com>, Namjae Jeon <namjae.jeon@samsung.com>, Vivek Trivedi <t.vivek@samsung.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Joonyoung Shim' <jy0922.shim@samsung.com>, linux-mmc@vger.kernel.org, jh80.chung@samsung.com, cjb@laptop.org, will.newton@gmail.com
 
-From: Namjae Jeon <namjae.jeon@samsung.com>
+Reviewed-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-when user does
-cat /sys/block/mmcblk0boot0/ro_lock_until_next_power_on
-
-power_ro_lock_show increments md->usage by calling mmc_blk_get
-but it forgets to call mmc_blk_put to restore md->usage
-
-Signed-off-by: Namjae Jeon <namjae.jeon@samsung.com>
-Signed-off-by: Vivek Trivedi <t.vivek@samsung.com>
----
- drivers/mmc/card/block.c |    1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index e12a03c..ae8e1de 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -201,6 +201,7 @@ static ssize_t power_ro_lock_show(struct device *dev,
- 		locked = 1;
- 
- 	ret = snprintf(buf, PAGE_SIZE, "%d\n", locked);
-+	mmc_blk_put(md);
- 
- 	return ret;
- }
--- 
-1.7.9.5
+On 04/26/2013 04:38 PM, Seungwon Jeon wrote:
+> On Friday, April 26, 2013, Joonyoung Shim wrote:
+>> If pending interrupt for IDMAC exists when initialize IDMAC, it will
+>> call interrupt handler unnecessarily.
+>>
+>> Signed-off-by: Joonyoung Shim <jy0922.shim@samsung.com>
+>> ---
+>> Changes from previous patch v1:
+>> - Change subject and contents of commit
+>> - Define IDMAC_INT_CLR macro to clear IDSTS register
+>> - It moved to clear IDSTS register in dw_mci_idmac_init()
+> 
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com> 
+> 
+> Thanks,
+> Seungwon Jeon
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
