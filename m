@@ -1,81 +1,57 @@
-From: Jingoo Han <jg1.han@samsung.com>
-Subject: [PATCH V2] mmc: atmel-mci: add CONFIG_PM_SLEEP to suspend/resume
- functions
-Date: Mon, 29 Apr 2013 17:56:16 +0900
-Message-ID: <000101ce44b7$68f391a0$3adab4e0$@samsung.com>
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: Re: [PATCH v3 1/6] at_hdmac: move to generic DMA binding
+Date: Mon, 29 Apr 2013 15:28:41 +0200
+Message-ID: <517E7589.5030205@atmel.com>
+References: <1366362683-14496-1-git-send-email-ludovic.desroches@atmel.com> <1366362683-14496-2-git-send-email-ludovic.desroches@atmel.com> <51750F68.4040701@atmel.com> <20130423034407.GY24632@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:16872 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750828Ab3D2I4T (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Apr 2013 04:56:19 -0400
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MM000K8AE5AHUT0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 29 Apr 2013 17:56:17 +0900 (KST)
-Content-language: ko
+Received: from eusmtp01.atmel.com ([212.144.249.243]:5482 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751700Ab3D2N2h (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Apr 2013 09:28:37 -0400
+In-Reply-To: <20130423034407.GY24632@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, 'Ludovic Desroches' <ludovic.desroches@atmel.com>, 'Jingoo Han' <jg1.han@samsung.com>
+To: Vinod Koul <vinod.koul@intel.com>
+Cc: ludovic.desroches@atmel.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-i2c@vger.kernel.org, plagnioj@jcrosoft.com, Linux Kernel list <linux-kernel@vger.kernel.org>
 
-Add CONFIG_PM_SLEEP to suspend/resume functions to fix the following
-build warning when CONFIG_PM_SLEEP is not selected. This is because
-sleep PM callbacks defined by SIMPLE_DEV_PM_OPS are only used when
-the CONFIG_PM_SLEEP is enabled.
+On 04/23/2013 05:44 AM, Vinod Koul :
+> On Mon, Apr 22, 2013 at 12:22:32PM +0200, Nicolas Ferre wrote:
+>> On 04/19/2013 11:11 AM, ludovic.desroches@atmel.com :
+>>> From: Ludovic Desroches <ludovic.desroches@atmel.com>
+> 
+>>> +#ifdef CONFIG_OF
+>>> +static bool at_dma_filter(struct dma_chan *chan, void *slave)
+> this is not defined for else case here. Also this could be CONFIG_DMA_OF...?
 
-drivers/mmc/host/atmel-mci.c:2509:12: warning: 'atmci_suspend' defined but not used [-Wunused-function]
-drivers/mmc/host/atmel-mci.c:2539:12: warning: 'atmci_resume' defined but not used [-Wunused-function]
+in fact, at_dma_filter() is only used in corresponding
+dma_request_channel() in at_dma_xlate() function just below and only in
+case of CONFIG_OF.
+As the at_dma_xlate() is an empty function in !CONFIG_OF case, the
+at_dma_filter() is not needed.
 
-Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-Signed-off-by: Jingoo Han <jg1.han@samsung.com>
----
-Changes since v1:
-- added Ludovic Desroches's Acked-by
-- re-based on the latest branch
+For the use of CONFIG_OF and not CONFIG_OF_DMA, it is simply because it
+it the directive that we currently use in drivers when we have to put
+the device tree condition around a piece of code. It is quite a common
+pattern I think.
+Moreover, it is what is used in dw_dmac.c and mv_xor.c...
 
- drivers/mmc/host/atmel-mci.c |   10 ++++------
- 1 files changed, 4 insertions(+), 6 deletions(-)
+>>> +{
+>>> +	struct at_dma_slave *atslave = slave;
+>>> +
+>>> +	if (atslave->dma_dev == chan->device->dev) {
+>>> +		chan->private = atslave;
+>>> +		return true;
+>>> +	} else {
+>>> +		return false;
+>>> +	}
+>>> +}
+> 
+> --
+> ~Vinod
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index e75774f..645fe9a 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -2505,7 +2505,7 @@ static int __exit atmci_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
--#ifdef CONFIG_PM
-+#ifdef CONFIG_PM_SLEEP
- static int atmci_suspend(struct device *dev)
- {
- 	struct atmel_mci *host = dev_get_drvdata(dev);
-@@ -2560,17 +2560,15 @@ static int atmci_resume(struct device *dev)
- 
- 	return ret;
- }
--static SIMPLE_DEV_PM_OPS(atmci_pm, atmci_suspend, atmci_resume);
--#define ATMCI_PM_OPS	(&atmci_pm)
--#else
--#define ATMCI_PM_OPS	NULL
- #endif
- 
-+static SIMPLE_DEV_PM_OPS(atmci_pm, atmci_suspend, atmci_resume);
-+
- static struct platform_driver atmci_driver = {
- 	.remove		= __exit_p(atmci_remove),
- 	.driver		= {
- 		.name		= "atmel_mci",
--		.pm		= ATMCI_PM_OPS,
-+		.pm		= &atmci_pm,
- 		.of_match_table	= of_match_ptr(atmci_dt_ids),
- 	},
- };
+Best regards,
 -- 
-1.7.2.5
-
-
+Nicolas Ferre
