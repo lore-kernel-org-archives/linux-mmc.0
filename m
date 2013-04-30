@@ -1,286 +1,254 @@
-From: Maya Erez <merez@codeaurora.org>
-Subject: [PATCH v6] mmc: block: Add write packing control
-Date: Mon, 29 Apr 2013 22:10:13 +0300
-Message-ID: <1367262811-18105-1-git-send-email-merez@codeaurora.org>
-References: <n>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <n>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, Maya Erez <merez@codeaurora.org>, Lee Susman <lsusman@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH v2] mmc: core: Fix select power class after resume
+Date: Tue, 30 Apr 2013 10:40:20 +0530
+Message-ID: <CAGxe1ZEaw-efL1icZyYOz8VZFeXW7m3c1dFDZ9NAXfSzAUEYgA@mail.gmail.com>
+References: <1366727227-29848-1-git-send-email-fredrik.soderstedt@stericsson.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bk0-f47.google.com ([209.85.214.47]:58955 "EHLO
+	mail-bk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751254Ab3D3FKX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Apr 2013 01:10:23 -0400
+Received: by mail-bk0-f47.google.com with SMTP id ji1so48592bkc.34
+        for <linux-mmc@vger.kernel.org>; Mon, 29 Apr 2013 22:10:21 -0700 (PDT)
+In-Reply-To: <1366727227-29848-1-git-send-email-fredrik.soderstedt@stericsson.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-The write packing control will ensure that read requests latency is
-not increased due to long write packed commands.
+Hi,
 
-The trigger for enabling the write packing is calculated by the relation
-between the number of potential packed write requests and the mean
-value of all previous potential values:
-If the current potential is greater than the mean potential then
-the heuristic is that the following workload will contain many write
-requests, therefore we lower the packed trigger. In the opposite case
-we want to increase the trigger in order to get less packing events.
-The trigger for disabling the write packing is fetching a read request.
+On 23 April 2013 19:57, Fredrik Soderstedt
+<fredrik.soderstedt@stericsson.com> wrote:
+>
+> Use the saved values in card->ext_csd when selecting power class.
+> By doing this the power class will be selected even if mmc_init_card
+> is called with oldcard != NULL, which is the case after a suspend/resume.
+>
+> Today ext_csd is NULL if mmc_init_card is called with oldcard != NULL
+> and power class will not be selected.
+>
+> According to the eMMC specification the POWER_CLASS value is reset after
+> power failure, H/W reset assertion and any CMD0 reset.
+>
+> CC: Girish K S <girish.shivananjappa@linaro.org>
+> Signed-off-by: Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
+> ---
+>
+> Changes since v1:
+> - Fix typo from card->ext_csd.raw_pwr_cl_52_360 to
+> card->ext_csd.raw_pwr_cl_ddr_52_360
+>
+>  drivers/mmc/core/mmc.c   | 74
+> ++++++++++++++++++++++++++++++++----------------
+>  include/linux/mmc/card.h | 10 ++++++-
+>  2 files changed, 59 insertions(+), 25 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 0cbd1ef..d6d957e 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -461,6 +461,24 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8
+> *ext_csd)
+>                  */
+>                 card->ext_csd.boot_ro_lock = ext_csd[EXT_CSD_BOOT_WP];
+>                 card->ext_csd.boot_ro_lockable = true;
+> +
+> +               /* Save power class values */
+> +               card->ext_csd.raw_pwr_cl_52_195 =
+> +                       ext_csd[EXT_CSD_PWR_CL_52_195];
+> +               card->ext_csd.raw_pwr_cl_26_195 =
+> +                       ext_csd[EXT_CSD_PWR_CL_26_195];
+> +               card->ext_csd.raw_pwr_cl_52_360 =
+> +                       ext_csd[EXT_CSD_PWR_CL_52_360];
+> +               card->ext_csd.raw_pwr_cl_26_360 =
+> +                       ext_csd[EXT_CSD_PWR_CL_26_360];
+> +               card->ext_csd.raw_pwr_cl_200_195 =
+> +                       ext_csd[EXT_CSD_PWR_CL_200_195];
+> +               card->ext_csd.raw_pwr_cl_200_360 =
+> +                       ext_csd[EXT_CSD_PWR_CL_200_360];
+> +               card->ext_csd.raw_pwr_cl_ddr_52_195 =
+> +                       ext_csd[EXT_CSD_PWR_CL_DDR_52_195];
+> +               card->ext_csd.raw_pwr_cl_ddr_52_360 =
+> +                       ext_csd[EXT_CSD_PWR_CL_DDR_52_360];
+>         }
+>
+>         if (card->ext_csd.rev >= 5) {
+> @@ -607,7 +625,23 @@ static int mmc_compare_ext_csds(struct mmc_card
+> *card, unsigned bus_width)
+>                 (card->ext_csd.raw_sectors[2] ==
+>                         bw_ext_csd[EXT_CSD_SEC_CNT + 2]) &&
+>                 (card->ext_csd.raw_sectors[3] ==
+> -                       bw_ext_csd[EXT_CSD_SEC_CNT + 3]));
+> +                       bw_ext_csd[EXT_CSD_SEC_CNT + 3]) &&
+> +               (card->ext_csd.raw_pwr_cl_52_195 ==
+> +                       bw_ext_csd[EXT_CSD_PWR_CL_52_195]) &&
+> +               (card->ext_csd.raw_pwr_cl_26_195 ==
+> +                       bw_ext_csd[EXT_CSD_PWR_CL_26_195]) &&
+> +               (card->ext_csd.raw_pwr_cl_52_360 ==
+> +                       bw_ext_csd[EXT_CSD_PWR_CL_52_360]) &&
+> +               (card->ext_csd.raw_pwr_cl_26_360 ==
+> +                       bw_ext_csd[EXT_CSD_PWR_CL_26_360]) &&
+> +               (card->ext_csd.raw_pwr_cl_200_195 ==
+> +                       bw_ext_csd[EXT_CSD_PWR_CL_200_195]) &&
+> +               (card->ext_csd.raw_pwr_cl_200_360 ==
+> +                       bw_ext_csd[EXT_CSD_PWR_CL_200_360]) &&
+> +               (card->ext_csd.raw_pwr_cl_ddr_52_195 ==
+> +                       bw_ext_csd[EXT_CSD_PWR_CL_DDR_52_195]) &&
+> +               (card->ext_csd.raw_pwr_cl_ddr_52_360 ==
+> +                       bw_ext_csd[EXT_CSD_PWR_CL_DDR_52_360]));
+>         if (err)
+>                 err = -EINVAL;
+>
+> @@ -676,11 +710,10 @@ static struct device_type mmc_type = {
+>   * mmc_switch command.
+>   */
+>  static int mmc_select_powerclass(struct mmc_card *card,
+> -               unsigned int bus_width, u8 *ext_csd)
+> +               unsigned int bus_width)
+>  {
+>         int err = 0;
+> -       unsigned int pwrclass_val;
+> -       unsigned int index = 0;
+> +       unsigned int pwrclass_val = 0;
+>         struct mmc_host *host;
+>
+>         BUG_ON(!card);
+> @@ -688,9 +721,6 @@ static int mmc_select_powerclass(struct mmc_card
+> *card,
+>         host = card->host;
+>         BUG_ON(!host);
+>
+> -       if (ext_csd == NULL)
+> -               return 0;
+> -
+>         /* Power class selection is supported for versions >= 4.0 */
+>         if (card->csd.mmca_vsn < CSD_SPEC_VER_4)
+>                 return 0;
+> @@ -702,13 +732,13 @@ static int mmc_select_powerclass(struct mmc_card
+> *card,
+>         switch (1 << host->ios.vdd) {
+>         case MMC_VDD_165_195:
+>                 if (host->ios.clock <= 26000000)
+> -                       index = EXT_CSD_PWR_CL_26_195;
+> +                       pwrclass_val = card->ext_csd.raw_pwr_cl_26_195;
+>                 else if (host->ios.clock <= 52000000)
+> -                       index = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
+> -                               EXT_CSD_PWR_CL_52_195 :
+> -                               EXT_CSD_PWR_CL_DDR_52_195;
+> +                       pwrclass_val = (bus_width <= EXT_CSD_BUS_WIDTH_8)
+> ?
+> +                               card->ext_csd.raw_pwr_cl_52_195 :
+> +                               card->ext_csd.raw_pwr_cl_ddr_52_195;
+>                 else if (host->ios.clock <= 200000000)
+> -                       index = EXT_CSD_PWR_CL_200_195;
+> +                       pwrclass_val = card->ext_csd.raw_pwr_cl_200_195;
+>                 break;
+>         case MMC_VDD_27_28:
+>         case MMC_VDD_28_29:
+> @@ -720,13 +750,13 @@ static int mmc_select_powerclass(struct mmc_card
+> *card,
+>         case MMC_VDD_34_35:
+>         case MMC_VDD_35_36:
+>                 if (host->ios.clock <= 26000000)
+> -                       index = EXT_CSD_PWR_CL_26_360;
+> +                       pwrclass_val = card->ext_csd.raw_pwr_cl_26_360;
+>                 else if (host->ios.clock <= 52000000)
+> -                       index = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
+> -                               EXT_CSD_PWR_CL_52_360 :
+> -                               EXT_CSD_PWR_CL_DDR_52_360;
+> +                       pwrclass_val = (bus_width <= EXT_CSD_BUS_WIDTH_8)
+> ?
+> +                               card->ext_csd.raw_pwr_cl_52_360 :
+> +                               card->ext_csd.raw_pwr_cl_ddr_52_360;
+>                 else if (host->ios.clock <= 200000000)
+> -                       index = EXT_CSD_PWR_CL_200_360;
+> +                       pwrclass_val = card->ext_csd.raw_pwr_cl_200_360;
+>                 break;
+>         default:
+>                 pr_warning("%s: Voltage range not supported "
+> @@ -734,8 +764,6 @@ static int mmc_select_powerclass(struct mmc_card
+> *card,
+>                 return -EINVAL;
+>         }
+>
+> -       pwrclass_val = ext_csd[index];
+> -
+>         if (bus_width & (EXT_CSD_BUS_WIDTH_8 | EXT_CSD_DDR_BUS_WIDTH_8))
+>                 pwrclass_val = (pwrclass_val & EXT_CSD_PWR_CL_8BIT_MASK)
+> >>
+>                                 EXT_CSD_PWR_CL_8BIT_SHIFT;
+> @@ -1131,7 +1159,7 @@ static int mmc_init_card(struct mmc_host *host, u32
+> ocr,
+>
+>                 ext_csd_bits = (bus_width == MMC_BUS_WIDTH_8) ?
+>                                 EXT_CSD_BUS_WIDTH_8 : EXT_CSD_BUS_WIDTH_4;
+> -               err = mmc_select_powerclass(card, ext_csd_bits, ext_csd);
+> +               err = mmc_select_powerclass(card, ext_csd_bits);
+>                 if (err)
+>                         pr_warning("%s: power class selection to bus width
+> %d"
+>                                    " failed\n", mmc_hostname(card->host),
+> @@ -1164,8 +1192,7 @@ static int mmc_init_card(struct mmc_host *host, u32
+> ocr,
+>                         bus_width = bus_widths[idx];
+>                         if (bus_width == MMC_BUS_WIDTH_1)
+>                                 ddr = 0; /* no DDR for 1-bit width */
+> -                       err = mmc_select_powerclass(card,
+> ext_csd_bits[idx][0],
+> -                                                   ext_csd);
+> +                       err = mmc_select_powerclass(card,
+> ext_csd_bits[idx][0]);
+>                         if (err)
+>                                 pr_warning("%s: power class selection to "
+>                                            "bus width %d failed\n",
+> @@ -1195,8 +1222,7 @@ static int mmc_init_card(struct mmc_host *host, u32
+> ocr,
+>                 }
+>
+>                 if (!err && ddr) {
+> -                       err = mmc_select_powerclass(card,
+> ext_csd_bits[idx][1],
+> -                                                   ext_csd);
+> +                       err = mmc_select_powerclass(card,
+> ext_csd_bits[idx][1]);
+>                         if (err)
+>                                 pr_warning("%s: power class selection to "
+>                                            "bus width %d ddr %d failed\n",
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index f31725b..6a98f32 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -94,7 +94,11 @@ struct mmc_ext_csd {
+>         u8                      raw_ext_csd_structure;  /* 194 */
+>         u8                      raw_card_type;          /* 196 */
+>         u8                      out_of_int_time;        /* 198 */
+> -       u8                      raw_s_a_timeout;                /* 217 */
+> +       u8                      raw_pwr_cl_52_195;      /* 200 */
+> +       u8                      raw_pwr_cl_26_195;      /* 201 */
+> +       u8                      raw_pwr_cl_52_360;      /* 202 */
+> +       u8                      raw_pwr_cl_26_360;      /* 203 */
+> +       u8                      raw_s_a_timeout;        /* 217 */
+>         u8                      raw_hc_erase_gap_size;  /* 221 */
+>         u8                      raw_erase_timeout_mult; /* 223 */
+>         u8                      raw_hc_erase_grp_size;  /* 224 */
+> @@ -102,6 +106,10 @@ struct mmc_ext_csd {
+>         u8                      raw_sec_erase_mult;     /* 230 */
+>         u8                      raw_sec_feature_support;/* 231 */
+>         u8                      raw_trim_mult;          /* 232 */
+> +       u8                      raw_pwr_cl_200_195;     /* 236 */
+> +       u8                      raw_pwr_cl_200_360;     /* 237 */
+> +       u8                      raw_pwr_cl_ddr_52_195;  /* 238 */
+> +       u8                      raw_pwr_cl_ddr_52_360;  /* 239 */
+>         u8                      raw_bkops_status;       /* 246 */
+>         u8                      raw_sectors[4];         /* 212 - 4 bytes
+> */
+>
+Looks good.
 
-Signed-off-by: Maya Erez <merez@codeaurora.org>
-Signed-off-by: Lee Susman <lsusman@codeaurora.org>
----
-Our experiments showed that the write packing can increase the worst case read latency.
-Since the read latency is critical for user experience we added a write packing control
-mechanism that disables the write packing in case of read requests.
-This will ensure that read requests latency is not increased due to long write packed commands.
-
-The trigger for enabling the write packing is managing to pack several write requests.
-The number of potential packed requests that will trigger the packing can be configured via sysfs.
-The trigger for disabling the write packing is a fetch of a read request.
-
-Changes in v6:
-    - Dynamic calculation of the trigger for enabling te write packing (instead of a hardcoded value)
-
-Changes in v5:
-    - Revert v4 changes
-    - fix the device attribute removal in case of failure of device_create_file
-
-Changes in v4:
-    - Move MMC specific attributes to mmc sub-directory
-
-Changes in v3:
-    - Fix the settings of num_of_potential_packed_wr_reqs
-
-Changes in v2:
-    - Move the attribute for setting the packing enabling trigger to the block device
-    - Add documentation of the new attribute
----
- drivers/mmc/card/block.c |  131 ++++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/card/queue.c |    8 +++
- drivers/mmc/card/queue.h |    3 +
- include/linux/mmc/host.h |    1 +
- 4 files changed, 143 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index e12a03c..e0ed0b4 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -64,6 +64,13 @@ MODULE_ALIAS("mmc:block");
- 				  (rq_data_dir(req) == WRITE))
- #define PACKED_CMD_VER	0x01
- #define PACKED_CMD_WR	0x02
-+#define PACKED_TRIGGER_MAX_ELEMENTS	5000
-+#define PCKD_TRGR_INIT_MEAN_POTEN	17
-+#define PCKD_TRGR_POTEN_LOWER_BOUND	5
-+#define PCKD_TRGR_URGENT_PENALTY	2
-+#define PCKD_TRGR_LOWER_BOUND		5
-+#define PCKD_TRGR_PRECISION_MULTIPLIER	100
-+
- 
- static DEFINE_MUTEX(block_mutex);
- 
-@@ -1405,6 +1412,122 @@ static inline u8 mmc_calc_packed_hdr_segs(struct request_queue *q,
- 	return nr_segs;
- }
- 
-+static int get_packed_trigger(int potential, struct mmc_card *card,
-+			      struct request *req, int curr_trigger)
-+{
-+	static int num_mean_elements = 1;
-+	static unsigned long mean_potential = PCKD_TRGR_INIT_MEAN_POTEN;
-+	unsigned int trigger = curr_trigger;
-+	unsigned int pckd_trgr_upper_bound = card->ext_csd.max_packed_writes;
-+
-+	/* scale down the upper bound to 75% */
-+	pckd_trgr_upper_bound = (pckd_trgr_upper_bound * 3) / 4;
-+
-+	/*
-+	 * since the most common calls for this function are with small
-+	 * potential write values and since we don't want these calls to affect
-+	 * the packed trigger, set a lower bound and ignore calls with
-+	 * potential lower than that bound
-+	 */
-+	if (potential <= PCKD_TRGR_POTEN_LOWER_BOUND)
-+		return trigger;
-+
-+	/*
-+	 * this is to prevent integer overflow in the following calculation:
-+	 * once every PACKED_TRIGGER_MAX_ELEMENTS reset the algorithm
-+	 */
-+	if (num_mean_elements > PACKED_TRIGGER_MAX_ELEMENTS) {
-+		num_mean_elements = 1;
-+		mean_potential = PCKD_TRGR_INIT_MEAN_POTEN;
-+	}
-+
-+	/*
-+	 * get next mean value based on previous mean value and current
-+	 * potential packed writes. Calculation is as follows:
-+	 * mean_pot[i+1] =
-+	 *	((mean_pot[i] * num_mean_elem) + potential)/(num_mean_elem + 1)
-+	 */
-+	mean_potential *= num_mean_elements;
-+	/*
-+	 * add num_mean_elements so that the division of two integers doesn't
-+	 * lower mean_potential too much
-+	 */
-+	if (potential > mean_potential)
-+		mean_potential += num_mean_elements;
-+	mean_potential += potential;
-+	/* this is for gaining more precision when dividing two integers */
-+	mean_potential *= PCKD_TRGR_PRECISION_MULTIPLIER;
-+	/* this completes the mean calculation */
-+	mean_potential /= ++num_mean_elements;
-+	mean_potential /= PCKD_TRGR_PRECISION_MULTIPLIER;
-+
-+	/*
-+	 * if current potential packed writes is greater than the mean potential
-+	 * then the heuristic is that the following workload will contain many
-+	 * write requests, therefore we lower the packed trigger. In the
-+	 * opposite case we want to increase the trigger in order to get less
-+	 * packing events.
-+	 */
-+	if (potential >= mean_potential)
-+		trigger = (trigger <= PCKD_TRGR_LOWER_BOUND) ?
-+				PCKD_TRGR_LOWER_BOUND : trigger - 1;
-+	else
-+		trigger = (trigger >= pckd_trgr_upper_bound) ?
-+				pckd_trgr_upper_bound : trigger + 1;
-+
-+	return trigger;
-+}
-+
-+static void mmc_blk_write_packing_control(struct mmc_queue *mq,
-+					  struct request *req)
-+{
-+	struct mmc_host *host = mq->card->host;
-+	int data_dir;
-+
-+	if (!(host->caps2 & MMC_CAP2_PACKED_WR))
-+		return;
-+
-+	/*
-+	 * In case the packing control is not supported by the host, it should
-+	 * not have an effect on the write packing. Therefore we have to enable
-+	 * the write packing
-+	 */
-+	if (!(host->caps2 & MMC_CAP2_PACKED_WR_CONTROL)) {
-+		mq->wr_packing_enabled = true;
-+		return;
-+	}
-+
-+	if (!req || (req && (req->cmd_flags & REQ_FLUSH))) {
-+		if (mq->num_of_potential_packed_wr_reqs >
-+				mq->num_wr_reqs_to_start_packing)
-+			mq->wr_packing_enabled = true;
-+		mq->num_wr_reqs_to_start_packing =
-+			get_packed_trigger(mq->num_of_potential_packed_wr_reqs,
-+					   mq->card, req,
-+					   mq->num_wr_reqs_to_start_packing);
-+		mq->num_of_potential_packed_wr_reqs = 0;
-+		return;
-+	}
-+
-+	data_dir = rq_data_dir(req);
-+
-+	if (data_dir == READ) {
-+		mq->num_of_potential_packed_wr_reqs = 0;
-+		mq->wr_packing_enabled = false;
-+		mq->num_wr_reqs_to_start_packing =
-+			get_packed_trigger(mq->num_of_potential_packed_wr_reqs,
-+					   mq->card, req,
-+					   mq->num_wr_reqs_to_start_packing);
-+		return;
-+	} else if (data_dir == WRITE) {
-+		mq->num_of_potential_packed_wr_reqs++;
-+	}
-+
-+	if (mq->num_of_potential_packed_wr_reqs >
-+			mq->num_wr_reqs_to_start_packing)
-+		mq->wr_packing_enabled = true;
-+}
-+
- static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
- {
- 	struct request_queue *q = mq->queue;
-@@ -1422,6 +1545,9 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
- 	if (!(md->flags & MMC_BLK_PACKED_CMD))
- 		goto no_packed;
- 
-+	if (!mq->wr_packing_enabled)
-+		goto no_packed;
-+
- 	if ((rq_data_dir(cur) == WRITE) &&
- 	    mmc_host_packed_wr(card->host))
- 		max_packed_rw = card->ext_csd.max_packed_writes;
-@@ -1490,6 +1616,8 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
- 		if (phys_segments > max_phys_segs)
- 			break;
- 
-+		if (rq_data_dir(next) == WRITE)
-+			mq->num_of_potential_packed_wr_reqs++;
- 		list_add_tail(&next->queuelist, &mqrq->packed->list);
- 		cur = next;
- 		reqs++;
-@@ -1908,6 +2036,9 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	}
- 
- 	mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
-+
-+	mmc_blk_write_packing_control(mq, req);
-+
- 	if (req && req->cmd_flags & REQ_DISCARD) {
- 		/* complete ongoing async transfer before issuing discard */
- 		if (card->host->areq)
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 9447a0e..b876d92 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -23,6 +23,13 @@
- #define MMC_QUEUE_BOUNCESZ	65536
- 
- /*
-+ * Based on benchmark tests the default num of requests to trigger the write
-+ * packing was determined, to keep the read latency as low as possible and
-+ * manage to keep the high write throughput.
-+ */
-+#define DEFAULT_NUM_REQS_TO_START_PACK 17
-+
-+/*
-  * Prepare a MMC request. This just filters out odd stuff.
-  */
- static int mmc_prep_request(struct request_queue *q, struct request *req)
-@@ -206,6 +213,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	mq->mqrq_cur = mqrq_cur;
- 	mq->mqrq_prev = mqrq_prev;
- 	mq->queue->queuedata = mq;
-+	mq->num_wr_reqs_to_start_packing = DEFAULT_NUM_REQS_TO_START_PACK;
- 
- 	blk_queue_prep_rq(mq->queue, mmc_prep_request);
- 	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index 5752d50..864d81d 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -57,6 +57,9 @@ struct mmc_queue {
- 	struct mmc_queue_req	mqrq[2];
- 	struct mmc_queue_req	*mqrq_cur;
- 	struct mmc_queue_req	*mqrq_prev;
-+	bool			wr_packing_enabled;
-+	int			num_of_potential_packed_wr_reqs;
-+	int			num_wr_reqs_to_start_packing;
- };
- 
- extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index e326ae2..b1e4ec9 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -281,6 +281,7 @@ struct mmc_host {
- #define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
- 				 MMC_CAP2_PACKED_WR)
- #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before scan */
-+#define MMC_CAP2_PACKED_WR_CONTROL (1 << 15) /* Allow write packing control */
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 
--- 
-1.7.3.3
--- 
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+Acked By: Girish K S <girish.shivananjappa@linaro.org>
+> --
+> 1.8.2.1
+>
