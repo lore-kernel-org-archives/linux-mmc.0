@@ -1,7 +1,7 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH 11/13] ARM: dts: omap4: Add omap control mmc data
-Date: Tue, 30 Apr 2013 19:33:51 +0530
-Message-ID: <1367330633-5941-12-git-send-email-balajitk@ti.com>
+Subject: [PATCH 13/13] ARM: dts: am3517: add omap_control_mmc
+Date: Tue, 30 Apr 2013 19:33:53 +0530
+Message-ID: <1367330633-5941-14-git-send-email-balajitk@ti.com>
 References: <1367330633-5941-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,43 +12,72 @@ To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@
 Cc: Balaji T K <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add omap-hsmmc-control data to omap4.
-Update with pbias register address for configuration of pbias dual volt
-i/o cells in mmc1 and control_mmc1 register address for i/o strength
-configuration
+Add omap-hsmmc-control data to am3517 board.
+Update with devconf1 register address, used for loopback clock configuration
+in mmc2.
 
 Signed-off-by: Balaji T K <balajitk@ti.com>
 ---
- arch/arm/boot/dts/omap4.dtsi |    9 +++++++++
- 1 files changed, 9 insertions(+), 0 deletions(-)
+ arch/arm/boot/dts/am3517-evm.dts        |   20 ++++++++++++++++++++
+ arch/arm/boot/dts/am3517_mt_ventoux.dts |   20 ++++++++++++++++++++
+ 2 files changed, 40 insertions(+), 0 deletions(-)
 
-diff --git a/arch/arm/boot/dts/omap4.dtsi b/arch/arm/boot/dts/omap4.dtsi
-index 739bb79..7f1d0c1 100644
---- a/arch/arm/boot/dts/omap4.dtsi
-+++ b/arch/arm/boot/dts/omap4.dtsi
-@@ -292,6 +292,14 @@
- 			ti,spi-num-cs = <1>;
- 		};
- 
-+		omap_control_mmc1: omap-hsmmc-control@4A100600 {
-+			compatible = "ti,omap-hsmmc-control";
-+			reg = <0x4A100600 0x4>,
-+			      <0x4A100628 0x4>;
-+			reg-names = "pbias", "mmc1";
-+			ctrl-type = <5>;
-+		};
+diff --git a/arch/arm/boot/dts/am3517-evm.dts b/arch/arm/boot/dts/am3517-evm.dts
+index 474f760..2775c51 100644
+--- a/arch/arm/boot/dts/am3517-evm.dts
++++ b/arch/arm/boot/dts/am3517-evm.dts
+@@ -30,3 +30,23 @@
+ &i2c3 {
+ 	clock-frequency = <400000>;
+ };
 +
- 		mmc1: mmc@4809c000 {
- 			compatible = "ti,omap4-hsmmc";
- 			reg = <0x4809c000 0x400>;
-@@ -299,6 +307,7 @@
- 			ti,hwmods = "mmc1";
- 			ti,dual-volt;
- 			ti,needs-special-reset;
-+			ctrl-module = <&omap_control_mmc1>;
++&omap_control_mmc1 {
++	compatible = "ti,omap-hsmmc-control";
++	ctrl-type = <0>;
++};
++
++omap_control_mmc2: omap-hsmmc-control@480022D8 {
++	compatible = "ti,omap-hsmmc-control";
++	reg = <0x480022D8 0x4>;
++	reg-names = "devconf1";
++	ctrl-type = <2>;
++};
++
++&mmc1 {
++	bus-width = <8>;
++};
++
++&mmc2 {
++	status = "disabled";
++};
+diff --git a/arch/arm/boot/dts/am3517_mt_ventoux.dts b/arch/arm/boot/dts/am3517_mt_ventoux.dts
+index 5eb26d7..2a15345 100644
+--- a/arch/arm/boot/dts/am3517_mt_ventoux.dts
++++ b/arch/arm/boot/dts/am3517_mt_ventoux.dts
+@@ -25,3 +25,23 @@
  		};
- 
- 		mmc2: mmc@480b4000 {
+ 	};
+ };
++
++&omap_control_mmc1 {
++	compatible = "ti,omap-hsmmc-control";
++	ctrl-type = <0>;
++};
++
++omap_control_mmc2: omap-hsmmc-control@480022D8 {
++	compatible = "ti,omap-hsmmc-control";
++	reg = <0x480022D8 0x4>;
++	reg-names = "devconf1";
++	ctrl-type = <2>;
++};
++
++&mmc1 {
++	bus-width = <8>;
++};
++
++&mmc2 {
++	status = "disabled";
++};
 -- 
 1.7.5.4
 
