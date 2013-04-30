@@ -1,33 +1,55 @@
-From: Vinod Koul <vinod.koul@intel.com>
-Subject: Re: [PATCH v3 1/6] at_hdmac: move to generic DMA binding
-Date: Tue, 30 Apr 2013 14:18:25 +0530
-Message-ID: <20130430084825.GA1960@intel.com>
-References: <1366362683-14496-1-git-send-email-ludovic.desroches@atmel.com>
- <1366362683-14496-2-git-send-email-ludovic.desroches@atmel.com>
- <51750F68.4040701@atmel.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: mmci: Allow MMCI to request channels with
+ information acquired from DT
+Date: Tue, 30 Apr 2013 15:01:56 +0200
+Message-ID: <CACRpkdY+WtjnJGhVOCk3OZW+Z1maO0ru+Fc2wPR7OzWe+RMuJg@mail.gmail.com>
+References: <1366801122-13302-1-git-send-email-lee.jones@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <51750F68.4040701@atmel.com>
+In-Reply-To: <1366801122-13302-1-git-send-email-lee.jones@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: ludovic.desroches@atmel.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-i2c@vger.kernel.org, plagnioj@jcrosoft.com, Linux Kernel list <linux-kernel@vger.kernel.org>
+To: Lee Jones <lee.jones@linaro.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Linus WALLEIJ <linus.walleij@stericsson.com>, Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Apr 22, 2013 at 12:22:32PM +0200, Nicolas Ferre wrote:
-> On 04/19/2013 11:11 AM, ludovic.desroches@atmel.com :
-> > From: Ludovic Desroches <ludovic.desroches@atmel.com>
-> > 
-> > Update at_hdmac driver to support generic DMA device tree binding. Devices
-> > can still request channel with dma_request_channel() then it doesn't break
-> > DMA for non DT boards.
-> > 
-> > Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> > Acked-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-> > Acked-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
-> > Acked-by: Arnd Bergmann <arnd@arndb.de>
-Applied now thanks
+On Wed, Apr 24, 2013 at 12:58 PM, Lee Jones <lee.jones@linaro.org> wrote:
 
---
-~Vinod
+> Currently, if DMA information isn't passed from platform data, then DMA
+> will not be used. This patch allows DMA information obtained though Device
+> Tree to be used as well.
+>
+> Cc: Russell King <linux@arm.linux.org.uk>
+> Cc: Chris Ball <cjb@laptop.org>
+> Cc: linux-mmc@vger.kernel.org
+> Signed-off-by: Lee Jones <lee.jones@linaro.org>
+(...)
+
+I tried to test this patch, but:
+  CC      drivers/mmc/host/mmci.o
+/drivers/mmc/host/mmci.c: In function 'mmci_dma_setup':
+/drivers/mmc/host/mmci.c:307:51: error: 'dev' undeclared (first use in
+this function)
+/drivers/mmc/host/mmci.c:307:51: note: each undeclared identifier is
+reported only once for each function it appears in
+make[5]: *** [drivers/mmc/host/mmci.o] Error 1
+make[4]: *** [drivers/mmc/host] Error 2
+make[3]: *** [drivers/mmc] Error 2
+
+Due to:
+
+> @@ -304,10 +304,8 @@ static void mmci_dma_setup(struct mmci_host *host)
+>         const char *rxname, *txname;
+>         dma_cap_mask_t mask;
+>
+> -       if (!plat || !plat->dma_filter) {
+> -               dev_info(mmc_dev(host->mmc), "no DMA platform data\n");
+> -               return;
+> -       }
+> +       host->dma_rx_channel = dma_request_slave_channel(dev, "rx");
+> +       host->dma_tx_channel = dma_request_slave_channel(dev, "tx");
+
+There is no "dev" here.
+
+Yours,
+Linus Walleij
