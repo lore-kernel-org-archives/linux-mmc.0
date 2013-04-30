@@ -1,140 +1,71 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH 03/13] mmc: omap_hsmmc: use needs_vmmc
-Date: Tue, 30 Apr 2013 19:33:43 +0530
-Message-ID: <1367330633-5941-4-git-send-email-balajitk@ti.com>
+Subject: [PATCH 08/13] Documentation: dt: mmc: omap hsmmc
+Date: Tue, 30 Apr 2013 19:33:48 +0530
+Message-ID: <1367330633-5941-9-git-send-email-balajitk@ti.com>
 References: <1367330633-5941-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bear.ext.ti.com ([192.94.94.41]:58090 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1760723Ab3D3OEH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 30 Apr 2013 10:04:07 -0400
 In-Reply-To: <1367330633-5941-1-git-send-email-balajitk@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, b-cousson@ti.com
 Cc: Balaji T K <balajitk@ti.com>
-List-Id: linux-mmc@vger.kernel.org
 
-Use needs_vmmc/needs_vmmc_aux to check whether
-regulator is mandatory and handle regulator errors
-like EPROBE_DEFER properly
+Update ti-omap-hsmmc devicetree documentation with omap-hsmmc-control binding
+information for MMC1/MMC2 in different OMAP SoCs.
 
 Signed-off-by: Balaji T K <balajitk@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   65 ++++++++++++++++++++++------------------
- 1 files changed, 36 insertions(+), 29 deletions(-)
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   34 ++++++++++++++++++++
+ 1 files changed, 34 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 7e122a9..4f7ca7a 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -183,6 +183,8 @@ struct omap_hsmmc_host {
- 	struct omap_hsmmc_next	next_data;
- 
- 	struct	omap_mmc_platform_data	*pdata;
-+	int needs_vmmc:1;
-+	int needs_vmmc_aux:1;
- };
- 
- static int omap_hsmmc_card_detect(struct device *dev, int slot)
-@@ -311,11 +313,13 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 	int ocr_value = 0;
- 
- 	reg = regulator_get(host->dev, "vmmc");
--	if (IS_ERR(reg)) {
--		dev_err(host->dev, "vmmc regulator missing\n");
-+	if (IS_ERR(reg) && host->needs_vmmc) {
-+		dev_err(host->dev, "unable to get vmmc regulator %ld\n",
-+			PTR_ERR(reg));
- 		return PTR_ERR(reg);
--	} else {
--		mmc_slot(host).set_power = omap_hsmmc_set_power;
-+	}
-+	mmc_slot(host).set_power = omap_hsmmc_set_power;
-+	if (!IS_ERR(reg)) {
- 		host->vcc = reg;
- 		ocr_value = mmc_regulator_get_ocrmask(reg);
- 		if (!mmc_slot(host).ocr_mask) {
-@@ -328,31 +332,33 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 				return -EINVAL;
- 			}
- 		}
-+	}
- 
--		/* Allow an aux regulator */
--		reg = regulator_get(host->dev, "vmmc_aux");
--		host->vcc_aux = IS_ERR(reg) ? NULL : reg;
--
--		/* For eMMC do not power off when not in sleep state */
--		if (mmc_slot(host).no_regulator_off_init)
--			return 0;
--		/*
--		* UGLY HACK:  workaround regulator framework bugs.
--		* When the bootloader leaves a supply active, it's
--		* initialized with zero usecount ... and we can't
--		* disable it without first enabling it.  Until the
--		* framework is fixed, we need a workaround like this
--		* (which is safe for MMC, but not in general).
--		*/
--		if (regulator_is_enabled(host->vcc) > 0 ||
--		    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
--			int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
-+	/* Allow an aux regulator */
-+	reg = regulator_get(host->dev, "vmmc_aux");
-+	host->vcc_aux = IS_ERR(reg) ? NULL : reg;
-+	if (IS_ERR(reg) && host->needs_vmmc_aux) {
-+		dev_err(host->dev, "unable to get vmmc_aux regulator %ld\n",
-+			PTR_ERR(reg));
-+		return PTR_ERR(reg);
-+	}
- 
--			mmc_slot(host).set_power(host->dev, host->slot_id,
--						 1, vdd);
--			mmc_slot(host).set_power(host->dev, host->slot_id,
--						 0, 0);
--		}
-+	/* For eMMC do not power off when not in sleep state */
-+	if (mmc_slot(host).no_regulator_off_init ||
-+	    (!host->needs_vmmc && !host->needs_vmmc_aux))
-+		return 0;
-+	/*
-+	 * To disable boot_on regulator, enable regulator
-+	 * to increase usecount and then disable it.
-+	 */
-+	if (regulator_is_enabled(host->vcc) > 0 ||
-+	    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
-+		int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
+diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+index ed271fc..f0468e8 100644
+--- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
++++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+@@ -31,3 +31,37 @@ Example:
+ 		vmmc-supply = <&vmmc>; /* phandle to regulator node */
+ 		ti,non-removable;
+ 	};
 +
-+		mmc_slot(host).set_power(host->dev, host->slot_id,
-+					 1, vdd);
-+		mmc_slot(host).set_power(host->dev, host->slot_id,
-+					 0, 0);
- 	}
- 
- 	return 0;
-@@ -1822,6 +1828,8 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	host->base	= ioremap(host->mapbase, SZ_4K);
- 	host->power_mode = MMC_POWER_OFF;
- 	host->next_data.cookie = 1;
-+	host->needs_vmmc = pdata->needs_vmmc;
-+	host->needs_vmmc_aux = pdata->needs_vmmc_aux;
- 
- 	platform_set_drvdata(pdev, host);
- 
-@@ -1949,7 +1957,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	if (omap_hsmmc_have_reg() && !mmc_slot(host).set_power) {
- 		ret = omap_hsmmc_reg_get(host);
- 		if (ret)
--			goto err_reg;
-+			goto err_irq_cd;
- 		host->use_reg = 1;
- 	}
- 
-@@ -2006,7 +2014,6 @@ err_slot_name:
- err_irq_cd:
- 	if (host->use_reg)
- 		omap_hsmmc_reg_put(host);
--err_reg:
- 	if (host->pdata->cleanup)
- 		host->pdata->cleanup(&pdev->dev);
- err_irq_cd_init:
++OMAP HSMMC CONTROL
++
++Required properties:
++- compatible: Should be "ti,omap-hsmmc-control"
++- reg : Address and length of the register set for the device. It contains
++ the address of "pbias" and/or "prog_io1" and/or "ctrl_mmc1" and/or "devconf1"
++ and/or "devconf0"
++- reg-names: The names of the register addresses corresponding to the registers
++ filled in "reg".
++- ti,ctrl-type: This is used to differentiate mmc1, mmc2 on different
++ omap SOCs like 2430, omap3, omap3630, omap4, omap5.
++ MMC1 pbias programming is same for omap2430 and omap3 but differs across
++ omap3,4,5.
++ Should be "0" for no control mmc module configuration
++ Should be "1" for MMC1 on OMAP2430 for MMC1 pbias, loopback
++  and speed mode configuration
++ Should be "2" for MMC2 on OMAP2430, OMAP3 for loopback clock configuration
++ Should be "3" for MMC1 on OMAP3430 for MMC1 pbias, loopback
++  and speed mode configuration
++ Should be "4" for MMC1 on OMAP3630 for MMC1 pbias, loopback
++  and speed mode configuration
++ Should be "5" for MMC1 on OMAP4 for MMC1 pbias configuration
++ Should be "6" for MMC2 on OMAP4 for loopback clock configuration
++ Should be "7" for MMC1 on OMAP5 for MMC1 pbias configuration
++
++Example:
++omap_control_mmc1: omap-hsmmc-control@4A100600 {
++	compatible = "ti,omap-hsmmc-control";
++	reg = <0x4A100600 0x4>,
++	      <0x4A100628 0x4>;
++	reg-names = "pbias", "mmc1";
++	ctrl-type = <5>;
++};
 -- 
 1.7.5.4
 
