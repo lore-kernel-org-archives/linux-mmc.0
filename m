@@ -1,79 +1,65 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH] mmc: mmci: Allow MMCI to request channels with
- information acquired from DT
-Date: Tue, 30 Apr 2013 14:12:15 +0100
-Message-ID: <20130430131215.GA25256@gmail.com>
-References: <1366801122-13302-1-git-send-email-lee.jones@linaro.org>
- <CACRpkdY+WtjnJGhVOCk3OZW+Z1maO0ru+Fc2wPR7OzWe+RMuJg@mail.gmail.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCH 02/13] mmc: omap_hsmmc: make vcc and vcc_aux independent
+Date: Tue, 30 Apr 2013 19:33:42 +0530
+Message-ID: <1367330633-5941-3-git-send-email-balajitk@ti.com>
+References: <1367330633-5941-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f53.google.com ([74.125.82.53]:47490 "EHLO
-	mail-wg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760334Ab3D3NMW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Apr 2013 09:12:22 -0400
-Received: by mail-wg0-f53.google.com with SMTP id z11so457236wgg.32
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Apr 2013 06:12:21 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CACRpkdY+WtjnJGhVOCk3OZW+Z1maO0ru+Fc2wPR7OzWe+RMuJg@mail.gmail.com>
+Received: from devils.ext.ti.com ([198.47.26.153]:54079 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760708Ab3D3OEG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Apr 2013 10:04:06 -0400
+In-Reply-To: <1367330633-5941-1-git-send-email-balajitk@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Linus WALLEIJ <linus.walleij@stericsson.com>, Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, b-cousson@ti.com
+Cc: Balaji T K <balajitk@ti.com>
 
-On Tue, 30 Apr 2013, Linus Walleij wrote:
+handle vcc and vcc_aux independently
 
-> On Wed, Apr 24, 2013 at 12:58 PM, Lee Jones <lee.jones@linaro.org> wr=
-ote:
->=20
-> > Currently, if DMA information isn't passed from platform data, then=
- DMA
-> > will not be used. This patch allows DMA information obtained though=
- Device
-> > Tree to be used as well.
-> >
-> > Cc: Russell King <linux@arm.linux.org.uk>
-> > Cc: Chris Ball <cjb@laptop.org>
-> > Cc: linux-mmc@vger.kernel.org
-> > Signed-off-by: Lee Jones <lee.jones@linaro.org>
-> (...)
->=20
-> I tried to test this patch, but:
->   CC      drivers/mmc/host/mmci.o
-> /drivers/mmc/host/mmci.c: In function 'mmci_dma_setup':
-> /drivers/mmc/host/mmci.c:307:51: error: 'dev' undeclared (first use i=
-n
-> this function)
-> /drivers/mmc/host/mmci.c:307:51: note: each undeclared identifier is
-> reported only once for each function it appears in
-> make[5]: *** [drivers/mmc/host/mmci.o] Error 1
-> make[4]: *** [drivers/mmc/host] Error 2
-> make[3]: *** [drivers/mmc] Error 2
->=20
-> Due to:
->=20
-> > @@ -304,10 +304,8 @@ static void mmci_dma_setup(struct mmci_host *h=
-ost)
-> >         const char *rxname, *txname;
-> >         dma_cap_mask_t mask;
-> >
-> > -       if (!plat || !plat->dma_filter) {
-> > -               dev_info(mmc_dev(host->mmc), "no DMA platform data\=
-n");
-> > -               return;
-> > -       }
-> > +       host->dma_rx_channel =3D dma_request_slave_channel(dev, "rx=
-");
-> > +       host->dma_tx_channel =3D dma_request_slave_channel(dev, "tx=
-");
->=20
-> There is no "dev" here.
+Signed-off-by: Balaji T K <balajitk@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |    9 +++++----
+ 1 files changed, 5 insertions(+), 4 deletions(-)
 
-You've missed v2 again dude.
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index bc58078..7e122a9 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -252,7 +252,7 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+ 	 * If we don't see a Vcc regulator, assume it's a fixed
+ 	 * voltage always-on regulator.
+ 	 */
+-	if (!host->vcc)
++	if (!host->vcc && !host->vcc_aux)
+ 		return 0;
+ 	/*
+ 	 * With DT, never turn OFF the regulator. This is because
+@@ -279,11 +279,12 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+ 	 * chips/cards need an interface voltage rail too.
+ 	 */
+ 	if (power_on) {
+-		ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
++		if (host->vcc)
++			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
+ 		/* Enable interface voltage rail, if needed */
+ 		if (ret == 0 && host->vcc_aux) {
+ 			ret = regulator_enable(host->vcc_aux);
+-			if (ret < 0)
++			if (ret < 0 && host->vcc)
+ 				ret = mmc_regulator_set_ocr(host->mmc,
+ 							host->vcc, 0);
+ 		}
+@@ -291,7 +292,7 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+ 		/* Shut down the rail */
+ 		if (host->vcc_aux)
+ 			ret = regulator_disable(host->vcc_aux);
+-		if (!ret) {
++		if (host->vcc) {
+ 			/* Then proceed to shut down the local regulator */
+ 			ret = mmc_regulator_set_ocr(host->mmc,
+ 						host->vcc, 0);
+-- 
+1.7.5.4
 
---=20
-Lee Jones
-Linaro ST-Ericsson Landing Team Lead
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
