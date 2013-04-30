@@ -1,254 +1,103 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH v2] mmc: core: Fix select power class after resume
-Date: Tue, 30 Apr 2013 10:40:20 +0530
-Message-ID: <CAGxe1ZEaw-efL1icZyYOz8VZFeXW7m3c1dFDZ9NAXfSzAUEYgA@mail.gmail.com>
-References: <1366727227-29848-1-git-send-email-fredrik.soderstedt@stericsson.com>
+From: Nicolas Ferre <nicolas.ferre-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v3 5/6] mci: at91: convert to dma_request_slave_channel_compat()
+Date: Tue, 30 Apr 2013 10:06:07 +0200
+Message-ID: <517F7B6F.4070907@atmel.com>
+References: <1366362683-14496-1-git-send-email-ludovic.desroches@atmel.com> <1366362683-14496-6-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f47.google.com ([209.85.214.47]:58955 "EHLO
-	mail-bk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751254Ab3D3FKX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Apr 2013 01:10:23 -0400
-Received: by mail-bk0-f47.google.com with SMTP id ji1so48592bkc.34
-        for <linux-mmc@vger.kernel.org>; Mon, 29 Apr 2013 22:10:21 -0700 (PDT)
-In-Reply-To: <1366727227-29848-1-git-send-email-fredrik.soderstedt@stericsson.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1366362683-14496-6-git-send-email-ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-Hi,
+On 04/19/2013 11:11 AM, ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org :
+> From: Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+> 
+> Use generic DMA DT helper. Platforms booting with or without DT populated are
+> both supported.
+> 
+> Signed-off-by: Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+> Acked-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org>
+> Acked-by: Nicolas Ferre <nicolas.ferre-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
 
-On 23 April 2013 19:57, Fredrik Soderstedt
-<fredrik.soderstedt@stericsson.com> wrote:
->
-> Use the saved values in card->ext_csd when selecting power class.
-> By doing this the power class will be selected even if mmc_init_card
-> is called with oldcard != NULL, which is the case after a suspend/resume.
->
-> Today ext_csd is NULL if mmc_init_card is called with oldcard != NULL
-> and power class will not be selected.
->
-> According to the eMMC specification the POWER_CLASS value is reset after
-> power failure, H/W reset assertion and any CMD0 reset.
->
-> CC: Girish K S <girish.shivananjappa@linaro.org>
-> Signed-off-by: Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
+Hi Chris,
+
+As you were not in copy of the patch, I send you a little reminder for
+it. It is part of a series by Ludovic and is adding the generic slave
+DMA request channel function, as we now have the support for DMA bindings.
+
+Here is the only patch of the series that should go through your tree.
+Other maintainers and ourselves have taken the other patches (no strong
+synchronization needed between them).
+
+Here is the Linux arm kernel patchwork reference:
+https://patchwork.kernel.org/patch/2463641/
+
+But for sure, Ludovic or myself can send it again to you if you need.
+
+Thanks, best regards,
+
 > ---
->
-> Changes since v1:
-> - Fix typo from card->ext_csd.raw_pwr_cl_52_360 to
-> card->ext_csd.raw_pwr_cl_ddr_52_360
->
->  drivers/mmc/core/mmc.c   | 74
-> ++++++++++++++++++++++++++++++++----------------
->  include/linux/mmc/card.h | 10 ++++++-
->  2 files changed, 59 insertions(+), 25 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 0cbd1ef..d6d957e 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -461,6 +461,24 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8
-> *ext_csd)
->                  */
->                 card->ext_csd.boot_ro_lock = ext_csd[EXT_CSD_BOOT_WP];
->                 card->ext_csd.boot_ro_lockable = true;
-> +
-> +               /* Save power class values */
-> +               card->ext_csd.raw_pwr_cl_52_195 =
-> +                       ext_csd[EXT_CSD_PWR_CL_52_195];
-> +               card->ext_csd.raw_pwr_cl_26_195 =
-> +                       ext_csd[EXT_CSD_PWR_CL_26_195];
-> +               card->ext_csd.raw_pwr_cl_52_360 =
-> +                       ext_csd[EXT_CSD_PWR_CL_52_360];
-> +               card->ext_csd.raw_pwr_cl_26_360 =
-> +                       ext_csd[EXT_CSD_PWR_CL_26_360];
-> +               card->ext_csd.raw_pwr_cl_200_195 =
-> +                       ext_csd[EXT_CSD_PWR_CL_200_195];
-> +               card->ext_csd.raw_pwr_cl_200_360 =
-> +                       ext_csd[EXT_CSD_PWR_CL_200_360];
-> +               card->ext_csd.raw_pwr_cl_ddr_52_195 =
-> +                       ext_csd[EXT_CSD_PWR_CL_DDR_52_195];
-> +               card->ext_csd.raw_pwr_cl_ddr_52_360 =
-> +                       ext_csd[EXT_CSD_PWR_CL_DDR_52_360];
->         }
->
->         if (card->ext_csd.rev >= 5) {
-> @@ -607,7 +625,23 @@ static int mmc_compare_ext_csds(struct mmc_card
-> *card, unsigned bus_width)
->                 (card->ext_csd.raw_sectors[2] ==
->                         bw_ext_csd[EXT_CSD_SEC_CNT + 2]) &&
->                 (card->ext_csd.raw_sectors[3] ==
-> -                       bw_ext_csd[EXT_CSD_SEC_CNT + 3]));
-> +                       bw_ext_csd[EXT_CSD_SEC_CNT + 3]) &&
-> +               (card->ext_csd.raw_pwr_cl_52_195 ==
-> +                       bw_ext_csd[EXT_CSD_PWR_CL_52_195]) &&
-> +               (card->ext_csd.raw_pwr_cl_26_195 ==
-> +                       bw_ext_csd[EXT_CSD_PWR_CL_26_195]) &&
-> +               (card->ext_csd.raw_pwr_cl_52_360 ==
-> +                       bw_ext_csd[EXT_CSD_PWR_CL_52_360]) &&
-> +               (card->ext_csd.raw_pwr_cl_26_360 ==
-> +                       bw_ext_csd[EXT_CSD_PWR_CL_26_360]) &&
-> +               (card->ext_csd.raw_pwr_cl_200_195 ==
-> +                       bw_ext_csd[EXT_CSD_PWR_CL_200_195]) &&
-> +               (card->ext_csd.raw_pwr_cl_200_360 ==
-> +                       bw_ext_csd[EXT_CSD_PWR_CL_200_360]) &&
-> +               (card->ext_csd.raw_pwr_cl_ddr_52_195 ==
-> +                       bw_ext_csd[EXT_CSD_PWR_CL_DDR_52_195]) &&
-> +               (card->ext_csd.raw_pwr_cl_ddr_52_360 ==
-> +                       bw_ext_csd[EXT_CSD_PWR_CL_DDR_52_360]));
->         if (err)
->                 err = -EINVAL;
->
-> @@ -676,11 +710,10 @@ static struct device_type mmc_type = {
->   * mmc_switch command.
->   */
->  static int mmc_select_powerclass(struct mmc_card *card,
-> -               unsigned int bus_width, u8 *ext_csd)
-> +               unsigned int bus_width)
+>  drivers/mmc/host/atmel-mci.c | 25 ++++++++++++-------------
+>  1 file changed, 12 insertions(+), 13 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index 10f8b73..ffbd0d3 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -2224,10 +2224,15 @@ static void __exit atmci_cleanup_slot(struct atmel_mci_slot *slot,
+>  	mmc_free_host(slot->mmc);
+>  }
+>  
+> -static bool atmci_filter(struct dma_chan *chan, void *slave)
+> +static bool atmci_filter(struct dma_chan *chan, void *pdata)
 >  {
->         int err = 0;
-> -       unsigned int pwrclass_val;
-> -       unsigned int index = 0;
-> +       unsigned int pwrclass_val = 0;
->         struct mmc_host *host;
->
->         BUG_ON(!card);
-> @@ -688,9 +721,6 @@ static int mmc_select_powerclass(struct mmc_card
-> *card,
->         host = card->host;
->         BUG_ON(!host);
->
-> -       if (ext_csd == NULL)
-> -               return 0;
+> -	struct mci_dma_data	*sl = slave;
+> +	struct mci_platform_data *sl_pdata = pdata;
+> +	struct mci_dma_data *sl;
+>  
+> +	if (!sl_pdata)
+> +		return false;
+> +
+> +	sl = sl_pdata->dma_slave;
+>  	if (sl && find_slave_dev(sl) == chan->device->dev) {
+>  		chan->private = slave_data_ptr(sl);
+>  		return true;
+> @@ -2239,24 +2244,18 @@ static bool atmci_filter(struct dma_chan *chan, void *slave)
+>  static bool atmci_configure_dma(struct atmel_mci *host)
+>  {
+>  	struct mci_platform_data	*pdata;
+> +	dma_cap_mask_t mask;
+>  
+>  	if (host == NULL)
+>  		return false;
+>  
+>  	pdata = host->pdev->dev.platform_data;
+>  
+> -	if (!pdata)
+> -		return false;
+> +	dma_cap_zero(mask);
+> +	dma_cap_set(DMA_SLAVE, mask);
+>  
+> -	if (pdata->dma_slave && find_slave_dev(pdata->dma_slave)) {
+> -		dma_cap_mask_t mask;
 > -
->         /* Power class selection is supported for versions >= 4.0 */
->         if (card->csd.mmca_vsn < CSD_SPEC_VER_4)
->                 return 0;
-> @@ -702,13 +732,13 @@ static int mmc_select_powerclass(struct mmc_card
-> *card,
->         switch (1 << host->ios.vdd) {
->         case MMC_VDD_165_195:
->                 if (host->ios.clock <= 26000000)
-> -                       index = EXT_CSD_PWR_CL_26_195;
-> +                       pwrclass_val = card->ext_csd.raw_pwr_cl_26_195;
->                 else if (host->ios.clock <= 52000000)
-> -                       index = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
-> -                               EXT_CSD_PWR_CL_52_195 :
-> -                               EXT_CSD_PWR_CL_DDR_52_195;
-> +                       pwrclass_val = (bus_width <= EXT_CSD_BUS_WIDTH_8)
-> ?
-> +                               card->ext_csd.raw_pwr_cl_52_195 :
-> +                               card->ext_csd.raw_pwr_cl_ddr_52_195;
->                 else if (host->ios.clock <= 200000000)
-> -                       index = EXT_CSD_PWR_CL_200_195;
-> +                       pwrclass_val = card->ext_csd.raw_pwr_cl_200_195;
->                 break;
->         case MMC_VDD_27_28:
->         case MMC_VDD_28_29:
-> @@ -720,13 +750,13 @@ static int mmc_select_powerclass(struct mmc_card
-> *card,
->         case MMC_VDD_34_35:
->         case MMC_VDD_35_36:
->                 if (host->ios.clock <= 26000000)
-> -                       index = EXT_CSD_PWR_CL_26_360;
-> +                       pwrclass_val = card->ext_csd.raw_pwr_cl_26_360;
->                 else if (host->ios.clock <= 52000000)
-> -                       index = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
-> -                               EXT_CSD_PWR_CL_52_360 :
-> -                               EXT_CSD_PWR_CL_DDR_52_360;
-> +                       pwrclass_val = (bus_width <= EXT_CSD_BUS_WIDTH_8)
-> ?
-> +                               card->ext_csd.raw_pwr_cl_52_360 :
-> +                               card->ext_csd.raw_pwr_cl_ddr_52_360;
->                 else if (host->ios.clock <= 200000000)
-> -                       index = EXT_CSD_PWR_CL_200_360;
-> +                       pwrclass_val = card->ext_csd.raw_pwr_cl_200_360;
->                 break;
->         default:
->                 pr_warning("%s: Voltage range not supported "
-> @@ -734,8 +764,6 @@ static int mmc_select_powerclass(struct mmc_card
-> *card,
->                 return -EINVAL;
->         }
->
-> -       pwrclass_val = ext_csd[index];
-> -
->         if (bus_width & (EXT_CSD_BUS_WIDTH_8 | EXT_CSD_DDR_BUS_WIDTH_8))
->                 pwrclass_val = (pwrclass_val & EXT_CSD_PWR_CL_8BIT_MASK)
-> >>
->                                 EXT_CSD_PWR_CL_8BIT_SHIFT;
-> @@ -1131,7 +1159,7 @@ static int mmc_init_card(struct mmc_host *host, u32
-> ocr,
->
->                 ext_csd_bits = (bus_width == MMC_BUS_WIDTH_8) ?
->                                 EXT_CSD_BUS_WIDTH_8 : EXT_CSD_BUS_WIDTH_4;
-> -               err = mmc_select_powerclass(card, ext_csd_bits, ext_csd);
-> +               err = mmc_select_powerclass(card, ext_csd_bits);
->                 if (err)
->                         pr_warning("%s: power class selection to bus width
-> %d"
->                                    " failed\n", mmc_hostname(card->host),
-> @@ -1164,8 +1192,7 @@ static int mmc_init_card(struct mmc_host *host, u32
-> ocr,
->                         bus_width = bus_widths[idx];
->                         if (bus_width == MMC_BUS_WIDTH_1)
->                                 ddr = 0; /* no DDR for 1-bit width */
-> -                       err = mmc_select_powerclass(card,
-> ext_csd_bits[idx][0],
-> -                                                   ext_csd);
-> +                       err = mmc_select_powerclass(card,
-> ext_csd_bits[idx][0]);
->                         if (err)
->                                 pr_warning("%s: power class selection to "
->                                            "bus width %d failed\n",
-> @@ -1195,8 +1222,7 @@ static int mmc_init_card(struct mmc_host *host, u32
-> ocr,
->                 }
->
->                 if (!err && ddr) {
-> -                       err = mmc_select_powerclass(card,
-> ext_csd_bits[idx][1],
-> -                                                   ext_csd);
-> +                       err = mmc_select_powerclass(card,
-> ext_csd_bits[idx][1]);
->                         if (err)
->                                 pr_warning("%s: power class selection to "
->                                            "bus width %d ddr %d failed\n",
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index f31725b..6a98f32 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -94,7 +94,11 @@ struct mmc_ext_csd {
->         u8                      raw_ext_csd_structure;  /* 194 */
->         u8                      raw_card_type;          /* 196 */
->         u8                      out_of_int_time;        /* 198 */
-> -       u8                      raw_s_a_timeout;                /* 217 */
-> +       u8                      raw_pwr_cl_52_195;      /* 200 */
-> +       u8                      raw_pwr_cl_26_195;      /* 201 */
-> +       u8                      raw_pwr_cl_52_360;      /* 202 */
-> +       u8                      raw_pwr_cl_26_360;      /* 203 */
-> +       u8                      raw_s_a_timeout;        /* 217 */
->         u8                      raw_hc_erase_gap_size;  /* 221 */
->         u8                      raw_erase_timeout_mult; /* 223 */
->         u8                      raw_hc_erase_grp_size;  /* 224 */
-> @@ -102,6 +106,10 @@ struct mmc_ext_csd {
->         u8                      raw_sec_erase_mult;     /* 230 */
->         u8                      raw_sec_feature_support;/* 231 */
->         u8                      raw_trim_mult;          /* 232 */
-> +       u8                      raw_pwr_cl_200_195;     /* 236 */
-> +       u8                      raw_pwr_cl_200_360;     /* 237 */
-> +       u8                      raw_pwr_cl_ddr_52_195;  /* 238 */
-> +       u8                      raw_pwr_cl_ddr_52_360;  /* 239 */
->         u8                      raw_bkops_status;       /* 246 */
->         u8                      raw_sectors[4];         /* 212 - 4 bytes
-> */
->
-Looks good.
+> -		/* Try to grab a DMA channel */
+> -		dma_cap_zero(mask);
+> -		dma_cap_set(DMA_SLAVE, mask);
+> -		host->dma.chan =
+> -			dma_request_channel(mask, atmci_filter, pdata->dma_slave);
+> -	}
+> +	host->dma.chan = dma_request_slave_channel_compat(mask, atmci_filter, pdata,
+> +							  &host->pdev->dev, "rxtx");
+>  	if (!host->dma.chan) {
+>  		dev_warn(&host->pdev->dev, "no DMA channel available\n");
+>  		return false;
+> 
 
-Acked By: Girish K S <girish.shivananjappa@linaro.org>
-> --
-> 1.8.2.1
->
+
+-- 
+Nicolas Ferre
