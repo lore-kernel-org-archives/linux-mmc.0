@@ -1,15 +1,15 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH V4 4/4] mmc: core: Support aggressive power management for (e)MMC/SD
-Date: Thu, 2 May 2013 14:02:39 +0200
-Message-ID: <1367496159-7090-5-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH V4 1/4] mmc: core: Stop bkops for eMMC only from mmc suspend
+Date: Thu, 2 May 2013 14:02:36 +0200
+Message-ID: <1367496159-7090-2-git-send-email-ulf.hansson@stericsson.com>
 References: <1367496159-7090-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog103.obsmtp.com ([207.126.144.115]:40618 "EHLO
-	eu1sys200aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755971Ab3EBMDJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 May 2013 08:03:09 -0400
+Received: from eu1sys200aog108.obsmtp.com ([207.126.144.125]:55701 "EHLO
+	eu1sys200aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756939Ab3EBMDL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 May 2013 08:03:11 -0400
 In-Reply-To: <1367496159-7090-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -18,27 +18,12 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maya Erez <merez@codeaurora.org>, Subh
 
 From: Ulf Hansson <ulf.hansson@linaro.org>
 
-Aggressive power management is suitable when saving power is
-essential. At request inactivity timeout, aka pm runtime
-autosuspend timeout, the card will be suspended.
+Move mmc suspend specific operations to be executed from the .suspend
+callback in the mmc bus_ops. This simplifies the mmc_suspend_host
+function which is supposed to handle nothing but common suspend tasks.
 
-Once a new request arrives, the card will be re-initalized and
-thus the first request will suffer from a latency. This latency
-is card-specific, experiments has shown in general that SD-cards
-has quite poor initialization time, around 300ms-1100ms. eMMC is
-not surprisingly far better but still a couple of hundreds of ms
-has been observed.
-
-Except for the request latency, it is important to know that
-suspending the card will also prevent the card from executing
-internal house-keeping operations in idle mode. This could mean
-degradation in performance.
-
-To use this feature make sure the request inactivity timeout is
-chosen carefully. This has not been done as a part of this patch.
-
-Enable this feature by using host cap MMC_CAP_AGGRESSIVE_PM and
-by setting CONFIG_MMC_UNSAFE_RESUME.
+Since eMMC can be considered non-removable there are no need to check
+for ongoing bkops at PM_SUSPEND_PREPARE notification so remove it.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Maya Erez <merez@codeaurora.org>
@@ -49,159 +34,81 @@ Cc: Adrian Hunter <adrian.hunter@intel.com>
 Cc: Daniel Drake <dsd@laptop.org>
 Cc: Ohad Ben-Cohen <ohad@wizery.com>
 ---
- drivers/mmc/core/mmc.c   |   50 ++++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/sd.c    |   49 +++++++++++++++++++++++++++++++++++++++++++++
- include/linux/mmc/host.h |    2 +-
- 3 files changed, 100 insertions(+), 1 deletion(-)
+ drivers/mmc/core/core.c |   22 +---------------------
+ drivers/mmc/core/mmc.c  |    6 ++++++
+ 2 files changed, 7 insertions(+), 21 deletions(-)
 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 65f9ca7..808db8b 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2633,14 +2633,8 @@ int mmc_suspend_host(struct mmc_host *host)
+ 
+ 	mmc_bus_get(host);
+ 	if (host->bus_ops && !host->bus_dead) {
+-		if (host->bus_ops->suspend) {
+-			if (mmc_card_doing_bkops(host->card)) {
+-				err = mmc_stop_bkops(host->card);
+-				if (err)
+-					goto out;
+-			}
++		if (host->bus_ops->suspend)
+ 			err = host->bus_ops->suspend(host);
+-		}
+ 
+ 		if (err == -ENOSYS || !host->bus_ops->resume) {
+ 			/*
+@@ -2664,10 +2658,8 @@ int mmc_suspend_host(struct mmc_host *host)
+ 	if (!err && !mmc_card_keep_power(host))
+ 		mmc_power_off(host);
+ 
+-out:
+ 	return err;
+ }
+-
+ EXPORT_SYMBOL(mmc_suspend_host);
+ 
+ /**
+@@ -2722,22 +2714,10 @@ int mmc_pm_notify(struct notifier_block *notify_block,
+ 	struct mmc_host *host = container_of(
+ 		notify_block, struct mmc_host, pm_notify);
+ 	unsigned long flags;
+-	int err = 0;
+ 
+ 	switch (mode) {
+ 	case PM_HIBERNATION_PREPARE:
+ 	case PM_SUSPEND_PREPARE:
+-		if (host->card && mmc_card_mmc(host->card) &&
+-		    mmc_card_doing_bkops(host->card)) {
+-			err = mmc_stop_bkops(host->card);
+-			if (err) {
+-				pr_err("%s: didn't stop bkops\n",
+-					mmc_hostname(host));
+-				return err;
+-			}
+-			mmc_card_clr_doing_bkops(host->card);
+-		}
+-
+ 		spin_lock_irqsave(&host->lock, flags);
+ 		host->rescan_disable = 1;
+ 		spin_unlock_irqrestore(&host->lock, flags);
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 903f381..506f4ee 100644
+index 0cbd1ef..a0469cf 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -1454,6 +1454,54 @@ static int mmc_resume(struct mmc_host *host)
- 	return err;
- }
+@@ -1411,6 +1411,12 @@ static int mmc_suspend(struct mmc_host *host)
  
-+
-+/*
-+ * Callback for runtime_suspend.
-+ */
-+static int mmc_runtime_suspend(struct mmc_host *host)
-+{
-+	int err;
-+
-+	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
-+		return 0;
-+
-+	mmc_claim_host(host);
-+
-+	err = mmc_suspend(host);
-+	if (err) {
-+		pr_err("%s: error %d doing aggessive suspend\n",
-+			mmc_hostname(host), err);
-+		goto out;
-+	}
-+	mmc_power_off(host);
-+
-+out:
-+	mmc_release_host(host);
-+	return err;
-+}
-+
-+/*
-+ * Callback for runtime_resume.
-+ */
-+static int mmc_runtime_resume(struct mmc_host *host)
-+{
-+	int err;
-+
-+	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
-+		return 0;
-+
-+	mmc_claim_host(host);
-+
-+	mmc_power_up(host);
-+	err = mmc_resume(host);
-+	if (err)
-+		pr_err("%s: error %d doing aggessive resume\n",
-+			mmc_hostname(host), err);
-+
-+	mmc_release_host(host);
-+	return 0;
-+}
-+
- static int mmc_power_restore(struct mmc_host *host)
- {
- 	int ret;
-@@ -1514,6 +1562,8 @@ static const struct mmc_bus_ops mmc_ops_unsafe = {
- 	.detect = mmc_detect,
- 	.suspend = mmc_suspend,
- 	.resume = mmc_resume,
-+	.runtime_suspend = mmc_runtime_suspend,
-+	.runtime_resume = mmc_runtime_resume,
- 	.power_restore = mmc_power_restore,
- 	.alive = mmc_alive,
- };
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 30387d6..c197fc7 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1095,6 +1095,53 @@ static int mmc_sd_resume(struct mmc_host *host)
- 	return err;
- }
+ 	mmc_claim_host(host);
  
-+/*
-+ * Callback for runtime_suspend.
-+ */
-+static int mmc_sd_runtime_suspend(struct mmc_host *host)
-+{
-+	int err;
-+
-+	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
-+		return 0;
-+
-+	mmc_claim_host(host);
-+
-+	err = mmc_sd_suspend(host);
-+	if (err) {
-+		pr_err("%s: error %d doing aggessive suspend\n",
-+			mmc_hostname(host), err);
-+		goto out;
++	if (mmc_card_doing_bkops(host->card)) {
++		err = mmc_stop_bkops(host->card);
++		if (err)
++			goto out;
 +	}
-+	mmc_power_off(host);
 +
-+out:
-+	mmc_release_host(host);
-+	return err;
-+}
-+
-+/*
-+ * Callback for runtime_resume.
-+ */
-+static int mmc_sd_runtime_resume(struct mmc_host *host)
-+{
-+	int err;
-+
-+	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
-+		return 0;
-+
-+	mmc_claim_host(host);
-+
-+	mmc_power_up(host);
-+	err = mmc_sd_resume(host);
-+	if (err)
-+		pr_err("%s: error %d doing aggessive resume\n",
-+			mmc_hostname(host), err);
-+
-+	mmc_release_host(host);
-+	return 0;
-+}
-+
- static int mmc_sd_power_restore(struct mmc_host *host)
- {
- 	int ret;
-@@ -1119,6 +1166,8 @@ static const struct mmc_bus_ops mmc_sd_ops = {
- static const struct mmc_bus_ops mmc_sd_ops_unsafe = {
- 	.remove = mmc_sd_remove,
- 	.detect = mmc_sd_detect,
-+	.runtime_suspend = mmc_sd_runtime_suspend,
-+	.runtime_resume = mmc_sd_runtime_resume,
- 	.suspend = mmc_sd_suspend,
- 	.resume = mmc_sd_resume,
- 	.power_restore = mmc_sd_power_restore,
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 8873e83..35f1f7f 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -239,7 +239,7 @@ struct mmc_host {
- #define MMC_CAP_SPI		(1 << 4)	/* Talks only SPI protocols */
- #define MMC_CAP_NEEDS_POLL	(1 << 5)	/* Needs polling for card-detection */
- #define MMC_CAP_8_BIT_DATA	(1 << 6)	/* Can the host do 8 bit transfers */
--
-+#define MMC_CAP_AGGRESSIVE_PM	(1 << 7)	/* Suspend (e)MMC/SD at idle  */
- #define MMC_CAP_NONREMOVABLE	(1 << 8)	/* Nonremovable e.g. eMMC */
- #define MMC_CAP_WAIT_WHILE_BUSY	(1 << 9)	/* Waits while card is busy */
- #define MMC_CAP_ERASE		(1 << 10)	/* Allow erase/trim commands */
+ 	err = mmc_cache_ctrl(host, 0);
+ 	if (err)
+ 		goto out;
 -- 
 1.7.10
 
