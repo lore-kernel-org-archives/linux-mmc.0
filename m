@@ -1,93 +1,307 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V4 0/4] mmc: Use runtime pm for blkdevice
-Date: Fri, 03 May 2013 16:10:44 +0300
-Message-ID: <5183B754.3060203@intel.com>
-References: <1367496159-7090-1-git-send-email-ulf.hansson@stericsson.com> <CAPDyKFoFXdvB1fQoYM4VH89zZThQxk7QJ9x_G7E+hzR+17s-Ug@mail.gmail.com>
+From: "Luca Porzio (lporzio)" <lporzio@micron.com>
+Subject: RE: [PATCH v4] mmc: card: Adding support for sanitize in eMMC 4.5
+Date: Fri, 3 May 2013 17:55:02 +0000
+Message-ID: <26E7A31274623843B0E8CF86148BFE32B030F2D2@NTXAVZMBX04.azit.micron.com>
+References: <n> <1367353620-2983-1-git-send-email-merez@codeaurora.org>
+ <20156afaa810d94e35d0b72456fc3c4a.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:50377 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1761934Ab3ECNFc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 3 May 2013 09:05:32 -0400
-In-Reply-To: <CAPDyKFoFXdvB1fQoYM4VH89zZThQxk7QJ9x_G7E+hzR+17s-Ug@mail.gmail.com>
+Received: from mailout.micron.com ([137.201.242.129]:35216 "EHLO
+	mailout.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751518Ab3ECSJI convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 May 2013 14:09:08 -0400
+In-Reply-To: <20156afaa810d94e35d0b72456fc3c4a.squirrel@www.codeaurora.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@stericsson.com>
+To: "merez@codeaurora.org" <merez@codeaurora.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Yaniv Gardi <ygardi@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
 
-On 03/05/13 14:11, Ulf Hansson wrote:
-> On 2 May 2013 14:02, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
->> From: Ulf Hansson <ulf.hansson@linaro.org>
->>
->> SDIO has been using runtime pm for a while to handle runtime power save
->> operations. This patchset is enabling the option to make the sd/mmc
->> blockdevices to use runtime pm as well.
->>
->> The runtime pm implementation for the block device will make use of
->> autosuspend to defer power save operation to after request inactivty for
->> a certain time.
->>
->> Corresponding pm_runtime_get|put calls has been added at those places that
->> do requires the card to be fully powered to communicate.
->>
->> Patch 4 can be considered as a proof of concept patch. It implements
->> aggressive power management for (e)MMC/SD. This feature has also been
->> discussed on the mmc mailing list previously.
->>
->> Next step would be to implement the IDLE BKOPS on top of the runtime pm
->> callbacks.
->>
->> Changes in v4:
->>         - Updated patch 4 according to review comments from Adrian.
->>
->> Changes in v3:
->>         - Make sure the card device is powered from a runtime perspective
->>         when needed. This is also the indirect reason to why the new patch 1
->>         has been added to this patchset.
->>         - Added a proof of concept patch, in patch 4.
->>         - Replace acks with cc, since quite some changes has been done.
->>
->> Changes in v2:
->>         - Removed the stated patch below from this patchset. It can be handled
->>         separately. "mmc: core: Remove power_restore bus_ops for mmc and sd"
->>         - Rebased patches on latest mmc-next.
->>         - Added Acks.
->>
->> Ulf Hansson (4):
->>   mmc: core: Stop bkops for eMMC only from mmc suspend
->>   mmc: core: Add bus_ops for runtime pm callbacks
->>   mmc: block: Enable runtime pm for mmc blkdevice
->>   mmc: core: Support aggressive power management for (e)MMC/SD
->>
->>  drivers/mmc/card/block.c   |   32 ++++++++++++++++++-----
->>  drivers/mmc/core/bus.c     |   14 +++++++++--
->>  drivers/mmc/core/core.c    |   47 ++++++++++++++++++----------------
->>  drivers/mmc/core/core.h    |    3 +++
->>  drivers/mmc/core/debugfs.c |    8 +++---
->>  drivers/mmc/core/mmc.c     |   60 ++++++++++++++++++++++++++++++++++++++++++--
->>  drivers/mmc/core/sd.c      |   53 ++++++++++++++++++++++++++++++++++++--
->>  drivers/mmc/core/sdio.c    |   16 ++++++++++++
->>  include/linux/mmc/core.h   |    3 +++
->>  include/linux/mmc/host.h   |    2 +-
->>  10 files changed, 199 insertions(+), 39 deletions(-)
->>
->> --
->> 1.7.10
->>
-> 
-> Thanks for reviewing this patchset Adrian. I suppose we have sorted
-> out all the issues now and I would like to advise Chris to merge it
-> from 3.10, unless you have any other opinions.
+Maya,
 
-It is OK by me
+This looks good to me.
 
-> 
-> Not sure if it is still possible for Chris to merge it for 3.10, but let's see.
-> 
-> Kind regards
-> Ulf Hansson
-> 
-> 
+Thanks,
+   Luca
 
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of merez@codeaurora.org
+> Sent: Wednesday, May 01, 2013 9:44 AM
+> To: Maya Erez
+> Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org; Maya
+> Erez; Yaniv Gardi; open list
+> Subject: Re: [PATCH v4] mmc: card: Adding support for sanitize in eMMC
+> 4.5
+> 
+> Hi,
+> 
+> Ulf / Luca - I would appreciate if you could review this new version
+> with
+> high priority.
+> If you don't have additional concerns I would like to try and push the
+> changes to kernel-3.10.
+> 
+> Thanks,
+> Maya
+> > The sanitize support is added as a user-app ioctl call, and
+> > was removed from the block-device request, since its purpose is
+> > to be invoked not via File-System but by a user.
+> > This feature deletes the unmap memory region of the eMMC card,
+> > by writing to a specific register in the EXT_CSD.
+> > unmap region is the memory region that was previously deleted
+> > (by erase, trim or discard operation).
+> > In order to avoid timeout when sanitizing large-scale cards,
+> > the timeout for sanitize operation is 240 seconds.
+> >
+> > Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
+> > Signed-off-by: Maya Erez <merez@codeaurora.org>
+> > ---
+> >  drivers/mmc/card/block.c   |   67
+> > ++++++++++++++++++++++++++++++--------------
+> >  drivers/mmc/card/queue.c   |    2 +-
+> >  drivers/mmc/core/core.c    |   22 ++++++++++++++
+> >  drivers/mmc/core/mmc_ops.c |    2 +
+> >  include/linux/mmc/core.h   |    2 +
+> >  5 files changed, 73 insertions(+), 22 deletions(-)
+> >
+> > diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> > index e12a03c..d3fbc21 100644
+> > --- a/drivers/mmc/card/block.c
+> > +++ b/drivers/mmc/card/block.c
+> > @@ -58,6 +58,8 @@ MODULE_ALIAS("mmc:block");
+> >  #define INAND_CMD38_ARG_SECTRIM1 0x81
+> >  #define INAND_CMD38_ARG_SECTRIM2 0x88
+> >  #define MMC_BLK_TIMEOUT_MS  (10 * 60 * 1000)        /* 10 minute
+> timeout
+> > */
+> > +#define MMC_SANITIZE_REQ_TIMEOUT 240000
+> > +#define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
+> >
+> >  #define mmc_req_rel_wr(req)	(((req->cmd_flags & REQ_FUA) || \
+> >  				  (req->cmd_flags & REQ_META)) && \
+> > @@ -409,6 +411,34 @@ static int ioctl_rpmb_card_status_poll(struct
+> > mmc_card *card, u32 *status,
+> >  	return err;
+> >  }
+> >
+> > +static int ioctl_do_sanitize(struct mmc_card *card)
+> > +{
+> > +	int err;
+> > +
+> > +	if (!mmc_can_sanitize(card)) {
+> > +		pr_warn("%s: %s - SANITIZE is not supported\n",
+> > +			mmc_hostname(card->host), __func__);
+> > +		err = -EOPNOTSUPP;
+> > +		goto out;
+> > +	}
+> > +
+> > +	pr_debug("%s: %s - SANITIZE IN PROGRESS...\n",
+> > +		mmc_hostname(card->host), __func__);
+> > +
+> > +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> > +					EXT_CSD_SANITIZE_START, 1,
+> > +					MMC_SANITIZE_REQ_TIMEOUT);
+> > +
+> > +	if (err)
+> > +		pr_err("%s: %s - EXT_CSD_SANITIZE_START failed. err=%d\n",
+> > +		       mmc_hostname(card->host), __func__, err);
+> > +
+> > +	pr_debug("%s: %s - SANITIZE COMPLETED\n", mmc_hostname(card-
+> >host),
+> > +					     __func__);
+> > +out:
+> > +	return err;
+> > +}
+> > +
+> >  static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+> >  	struct mmc_ioc_cmd __user *ic_ptr)
+> >  {
+> > @@ -511,6 +541,16 @@ static int mmc_blk_ioctl_cmd(struct block_device
+> > *bdev,
+> >  			goto cmd_rel_host;
+> >  	}
+> >
+> > +	if (MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) ==
+> EXT_CSD_SANITIZE_START) {
+> > +		err = ioctl_do_sanitize(card);
+> > +
+> > +		if (err)
+> > +			pr_err("%s: ioctl_do_sanitize() failed. err = %d",
+> > +			       __func__, err);
+> > +
+> > +		goto cmd_rel_host;
+> > +	}
+> > +
+> >  	mmc_wait_for_req(card->host, &mrq);
+> >
+> >  	if (cmd.error) {
+> > @@ -940,10 +980,10 @@ static int mmc_blk_issue_secdiscard_rq(struct
+> > mmc_queue *mq,
+> >  {
+> >  	struct mmc_blk_data *md = mq->data;
+> >  	struct mmc_card *card = md->queue.card;
+> > -	unsigned int from, nr, arg, trim_arg, erase_arg;
+> > +	unsigned int from, nr, arg;
+> >  	int err = 0, type = MMC_BLK_SECDISCARD;
+> >
+> > -	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card)))
+> {
+> > +	if (!(mmc_can_secure_erase_trim(card))) {
+> >  		err = -EOPNOTSUPP;
+> >  		goto out;
+> >  	}
+> > @@ -951,23 +991,11 @@ static int mmc_blk_issue_secdiscard_rq(struct
+> > mmc_queue *mq,
+> >  	from = blk_rq_pos(req);
+> >  	nr = blk_rq_sectors(req);
+> >
+> > -	/* The sanitize operation is supported at v4.5 only */
+> > -	if (mmc_can_sanitize(card)) {
+> > -		erase_arg = MMC_ERASE_ARG;
+> > -		trim_arg = MMC_TRIM_ARG;
+> > -	} else {
+> > -		erase_arg = MMC_SECURE_ERASE_ARG;
+> > -		trim_arg = MMC_SECURE_TRIM1_ARG;
+> > -	}
+> > +	if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from,
+> nr))
+> > +		arg = MMC_SECURE_TRIM1_ARG;
+> > +	else
+> > +		arg = MMC_SECURE_ERASE_ARG;
+> >
+> > -	if (mmc_erase_group_aligned(card, from, nr))
+> > -		arg = erase_arg;
+> > -	else if (mmc_can_trim(card))
+> > -		arg = trim_arg;
+> > -	else {
+> > -		err = -EINVAL;
+> > -		goto out;
+> > -	}
+> >  retry:
+> >  	if (card->quirks & MMC_QUIRK_INAND_CMD38) {
+> >  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> > @@ -1003,9 +1031,6 @@ retry:
+> >  			goto out;
+> >  	}
+> >
+> > -	if (mmc_can_sanitize(card))
+> > -		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> > -				 EXT_CSD_SANITIZE_START, 1, 0);
+> >  out_retry:
+> >  	if (err && !mmc_blk_reset(md, card->host, type))
+> >  		goto retry;
+> > diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> > index 9447a0e..fa9632e 100644
+> > --- a/drivers/mmc/card/queue.c
+> > +++ b/drivers/mmc/card/queue.c
+> > @@ -173,7 +173,7 @@ static void mmc_queue_setup_discard(struct
+> > request_queue *q,
+> >  	/* granularity must not be greater than max. discard */
+> >  	if (card->pref_erase > max_discard)
+> >  		q->limits.discard_granularity = 0;
+> > -	if (mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))
+> > +	if (mmc_can_secure_erase_trim(card))
+> >  		queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
+> >  }
+> >
+> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > index 37c5dad..c103962 100644
+> > --- a/drivers/mmc/core/core.c
+> > +++ b/drivers/mmc/core/core.c
+> > @@ -402,6 +402,7 @@ static int mmc_wait_for_data_req_done(struct
+> mmc_host
+> > *host,
+> >  			context_info->is_done_rcv = false;
+> >  			context_info->is_new_req = false;
+> >  			cmd = mrq->cmd;
+> > +
+> >  			if (!cmd->error || !cmd->retries ||
+> >  			    mmc_card_removed(host->card)) {
+> >  				err = host->areq->err_check(host->card,
+> > @@ -436,6 +437,27 @@ static void mmc_wait_for_req_done(struct
+> mmc_host
+> > *host,
+> >  		wait_for_completion(&mrq->completion);
+> >
+> >  		cmd = mrq->cmd;
+> > +
+> > +		/*
+> > +		 * If host has timed out waiting for the sanitize
+> > +		 * to complete, card might be still in programming state
+> > +		 * so let's try to bring the card out of programming
+> > +		 * state.
+> > +		 */
+> > +		if (cmd->sanitize_busy && cmd->error == -ETIMEDOUT) {
+> > +			if (!mmc_interrupt_hpi(host->card)) {
+> > +				pr_warning("%s: %s: Interrupted "
+> > +					   "sanitize\n",
+> > +					   mmc_hostname(host),
+> > +					   __func__);
+> > +				cmd->error = 0;
+> > +				break;
+> > +			} else {
+> > +				pr_err("%s: %s: Failed to interrupt "
+> > +				       "sanitize\n",
+> > +				       mmc_hostname(host), __func__);
+> > +			}
+> > +		}
+> >  		if (!cmd->error || !cmd->retries ||
+> >  		    mmc_card_removed(host->card))
+> >  			break;
+> > diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> > index 49f04bc..124af52 100644
+> > --- a/drivers/mmc/core/mmc_ops.c
+> > +++ b/drivers/mmc/core/mmc_ops.c
+> > @@ -431,6 +431,8 @@ int __mmc_switch(struct mmc_card *card, u8 set,
+> u8
+> > index, u8 value,
+> >
+> >
+> >  	cmd.cmd_timeout_ms = timeout_ms;
+> > +	if (index == EXT_CSD_SANITIZE_START)
+> > +		cmd.sanitize_busy = true;
+> >
+> >  	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
+> >  	if (err)
+> > diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> > index 39613b9..bd06ff5 100644
+> > --- a/include/linux/mmc/core.h
+> > +++ b/include/linux/mmc/core.h
+> > @@ -96,6 +96,8 @@ struct mmc_command {
+> >   */
+> >
+> >  	unsigned int		cmd_timeout_ms;	/* in milliseconds */
+> > +	/* Set this flag only for blocking sanitize request */
+> > +	bool			sanitize_busy;
+> >
+> >  	struct mmc_data		*data;		/* data segment
+> associated with cmd */
+> >  	struct mmc_request	*mrq;		/* associated request */
+> > --
+> > 1.7.3.3
+> > --
+> > QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a
+> member
+> > of Code Aurora Forum, hosted by The Linux Foundation
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> 
+> 
+> --
+> Maya Erez
+> QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a
+> member
+> of Code Aurora Forum, hosted by The Linux Foundation
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
