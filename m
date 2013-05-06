@@ -1,26 +1,26 @@
 From: Jingoo Han <jg1.han@samsung.com>
-Subject: [PATCH 08/22] mmc: mvsdio: remove unnecessary platform_set_drvdata()
-Date: Mon, 06 May 2013 15:19:23 +0900
-Message-ID: <005301ce4a21$a6d339c0$f479ad40$@samsung.com>
+Subject: [PATCH 09/22] mmc: mxcmmc: remove unnecessary platform_set_drvdata()
+Date: Mon, 06 May 2013 15:21:20 +0900
+Message-ID: <005401ce4a21$ecc1e7b0$c645b710$@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:54880 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750840Ab3EFGTY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 May 2013 02:19:24 -0400
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout1.samsung.com ([203.254.224.24]:53637 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752117Ab3EFGVj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 May 2013 02:21:39 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MMD00CGU5K6VQN0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 06 May 2013 15:19:23 +0900 (KST)
+ with ESMTP id <0MMD001U75JVVX30@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 06 May 2013 15:21:21 +0900 (KST)
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: 'Chris Ball' <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Jingoo Han <jg1.han@samsung.com>, 'Nicolas Pitre' <nico@fluxnic.net>, 'Thomas Petazzoni' <thomas.petazzoni@free-electrons.com>
+Cc: linux-mmc@vger.kernel.org, Jingoo Han <jg1.han@samsung.com>, 'Anatolij Gustschin' <agust@denx.de>, 'Markus Pargmann' <mpa@pengutronix.de>
 
 The driver core clears the driver data to NULL after device_release
 or on probe failure, since commit 0998d0631001288a5974afc0b2a5f568bcdecb4d
@@ -29,21 +29,22 @@ Thus, it is not needed to manually clear the device driver data to NULL.
 
 Signed-off-by: Jingoo Han <jg1.han@samsung.com>
 ---
- drivers/mmc/host/mvsdio.c |    1 -
- 1 files changed, 0 insertions(+), 1 deletions(-)
+ drivers/mmc/host/mxcmmc.c |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index 8960fc8..d08fe6a 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -827,7 +827,6 @@ static int __exit mvsd_remove(struct platform_device *pdev)
- 		clk_disable_unprepare(host->clk);
- 	mmc_free_host(mmc);
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index d503635..786448a 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -1219,8 +1219,6 @@ static int mxcmci_remove(struct platform_device *pdev)
+ 	struct mmc_host *mmc = platform_get_drvdata(pdev);
+ 	struct mxcmci_host *host = mmc_priv(mmc);
  
 -	platform_set_drvdata(pdev, NULL);
- 	return 0;
- }
+-
+ 	mmc_remove_host(mmc);
  
+ 	if (host->vcc)
 -- 
 1.7.2.5
 
