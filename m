@@ -1,51 +1,132 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 0/3] mmc: sdhci: support runtime PM for BYT SD cards
-Date: Mon,  6 May 2013 12:17:31 +0300
-Message-ID: <1367831854-31952-1-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 1/3] mmc: sdhci: add ability to stay runtime-resumed if the card is powered up
+Date: Mon,  6 May 2013 12:17:32 +0300
+Message-ID: <1367831854-31952-2-git-send-email-adrian.hunter@intel.com>
+References: <1367831854-31952-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:33871 "EHLO mga11.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:11508 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752364Ab3EFJMi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 6 May 2013 05:12:38 -0400
+	id S1752436Ab3EFJMk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 6 May 2013 05:12:40 -0400
+In-Reply-To: <1367831854-31952-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>
 
-Hi
+If card power is dependent on SD bus power then the host controller
+must not be runtime suspended while the card is powered up.  Add
+the ability to stay runtime-resumed in that case and enable it with a new
+quirk SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON.
 
-Here are 3 patches to support runtime PM for BYT SD cards
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci.c  | 35 ++++++++++++++++++++++++++++++++++-
+ include/linux/mmc/sdhci.h |  2 ++
+ 2 files changed, 36 insertions(+), 1 deletion(-)
 
-Please note that these patches are dependent upon 2 gpio patches
-that are in linux-next and linux-gpio but not the mmc tree.
-Those patches are:
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 2ea429c..c81c2a2 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -58,6 +58,8 @@ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
+ #ifdef CONFIG_PM_RUNTIME
+ static int sdhci_runtime_pm_get(struct sdhci_host *host);
+ static int sdhci_runtime_pm_put(struct sdhci_host *host);
++static void sdhci_runtime_pm_bus_on(struct sdhci_host *host);
++static void sdhci_runtime_pm_bus_off(struct sdhci_host *host);
+ #else
+ static inline int sdhci_runtime_pm_get(struct sdhci_host *host)
+ {
+@@ -67,6 +69,12 @@ static inline int sdhci_runtime_pm_put(struct sdhci_host *host)
+ {
+ 	return 0;
+ }
++static void sdhci_runtime_pm_bus_on(struct sdhci_host *host)
++{
++}
++static void sdhci_runtime_pm_bus_off(struct sdhci_host *host)
++{
++}
+ #endif
+ 
+ static void sdhci_dumpregs(struct sdhci_host *host)
+@@ -192,8 +200,12 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
+ 
+ 	sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
+ 
+-	if (mask & SDHCI_RESET_ALL)
++	if (mask & SDHCI_RESET_ALL) {
+ 		host->clock = 0;
++		/* Reset-all turns off SD Bus Power */
++		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
++			sdhci_runtime_pm_bus_off(host);
++	}
+ 
+ 	/* Wait max 100 ms */
+ 	timeout = 100;
+@@ -1268,6 +1280,8 @@ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
+ 
+ 	if (pwr == 0) {
+ 		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
++		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
++			sdhci_runtime_pm_bus_off(host);
+ 		return 0;
+ 	}
+ 
+@@ -1289,6 +1303,9 @@ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
+ 
+ 	sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+ 
++	if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
++		sdhci_runtime_pm_bus_on(host);
++
+ 	/*
+ 	 * Some controllers need an extra 10ms delay of 10ms before they
+ 	 * can apply clock after applying power
+@@ -2625,6 +2642,22 @@ static int sdhci_runtime_pm_put(struct sdhci_host *host)
+ 	return pm_runtime_put_autosuspend(host->mmc->parent);
+ }
+ 
++static void sdhci_runtime_pm_bus_on(struct sdhci_host *host)
++{
++	if (host->runtime_suspended || host->bus_on)
++		return;
++	host->bus_on = true;
++	pm_runtime_get_noresume(host->mmc->parent);
++}
++
++static void sdhci_runtime_pm_bus_off(struct sdhci_host *host)
++{
++	if (host->runtime_suspended || !host->bus_on)
++		return;
++	host->bus_on = false;
++	pm_runtime_put_noidle(host->mmc->parent);
++}
++
+ int sdhci_runtime_suspend_host(struct sdhci_host *host)
+ {
+ 	unsigned long flags;
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index b838ffc..ba35bdb 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -95,6 +95,7 @@ struct sdhci_host {
+ /* The system physically doesn't support 1.8v, even if the host does */
+ #define SDHCI_QUIRK2_NO_1_8_V				(1<<2)
+ #define SDHCI_QUIRK2_PRESET_VALUE_BROKEN		(1<<3)
++#define SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON		(1<<4)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
+@@ -139,6 +140,7 @@ struct sdhci_host {
+ 	u8 pwr;			/* Current voltage */
+ 
+ 	bool runtime_suspended;	/* Host is runtime suspended */
++	bool bus_on;		/* Bus power prevents runtime suspend */
+ 
+ 	struct mmc_request *mrq;	/* Current request */
+ 	struct mmc_command *cmd;	/* Current command */
+-- 
+1.7.11.7
 
-	author	Mika Westerberg <mika.westerberg@linux.intel.com>	2013-04-03 10:56:54 (GMT)
-	committer	Linus Walleij <linus.walleij@linaro.org>	2013-04-11 22:31:18 (GMT)
-	commit	12028d2d216220618f76284af5f8ed510b11da55 (patch)
-	gpiolib-acpi: introduce acpi_get_gpio_by_index() helper
-
-	author	Rafael J. Wysocki <rafael.j.wysocki@intel.com>	2013-04-09 13:57:25 (GMT)
-	committer	Linus Walleij <linus.walleij@linaro.org>	2013-04-10 21:41:17 (GMT)
-	commit	7fc7acb9a0b0ff3ffdf21818fe0735ebaf4fecb8 (patch)
-	gpio / ACPI: Handle ACPI events in accordance with the spec
-
-I think those patches are queued for 3.10.
-
-cc: Linus Walleij <linus.walleij@linaro.org>
-
-
-Adrian Hunter (3):
-      mmc: sdhci: add ability to stay runtime-resumed if the card is powered up
-      mmc: sdhci-acpi: support runtime PM for ACPI HID 80860F14 SD cards
-      mmc: sdhci-pci: support runtime PM for BYT SD cards
-
- drivers/mmc/host/sdhci-acpi.c | 64 ++++++++++++++++++++++++++++++++++++++++++-
- drivers/mmc/host/sdhci-pci.c  |  2 ++
- drivers/mmc/host/sdhci.c      | 35 ++++++++++++++++++++++-
- include/linux/mmc/sdhci.h     |  2 ++
- 4 files changed, 101 insertions(+), 2 deletions(-)
-
-
-Regards
-Adrian Hunter
