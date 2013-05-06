@@ -1,52 +1,51 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 10/22] mmc: mxs-mmc: remove unnecessary
- platform_set_drvdata()
-Date: Mon, 6 May 2013 16:49:00 +0800
-Message-ID: <20130506084858.GI1749@S2101-09.ap.freescale.net>
-References: <005501ce4a22$2377cb80$6a676280$@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH 0/3] mmc: sdhci: support runtime PM for BYT SD cards
+Date: Mon,  6 May 2013 12:17:31 +0300
+Message-ID: <1367831854-31952-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co9ehsobe004.messaging.microsoft.com ([207.46.163.27]:7160 "EHLO
-	co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752228Ab3EFIsv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 May 2013 04:48:51 -0400
-Content-Disposition: inline
-In-Reply-To: <005501ce4a22$2377cb80$6a676280$@samsung.com>
+Received: from mga11.intel.com ([192.55.52.93]:33871 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752364Ab3EFJMi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 6 May 2013 05:12:38 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jingoo Han <jg1.han@samsung.com>
-Cc: 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org, 'Marc Kleine-Budde' <mkl@pengutronix.de>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On Mon, May 06, 2013 at 03:22:51PM +0900, Jingoo Han wrote:
-> The driver core clears the driver data to NULL after device_release
-> or on probe failure, since commit 0998d0631001288a5974afc0b2a5f568bcdecb4d
-> (device-core: Ensure drvdata = NULL when no driver is bound).
-> Thus, it is not needed to manually clear the device driver data to NULL.
-> 
-> Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+Hi
 
-Acked-by: Shawn Guo <shawn.guo@linaro.org>
+Here are 3 patches to support runtime PM for BYT SD cards
 
-> ---
->  drivers/mmc/host/mxs-mmc.c |    2 --
->  1 files changed, 0 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index 4278a17..d38f0da 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -708,8 +708,6 @@ static int mxs_mmc_remove(struct platform_device *pdev)
->  
->  	mmc_remove_host(mmc);
->  
-> -	platform_set_drvdata(pdev, NULL);
-> -
->  	if (ssp->dmach)
->  		dma_release_channel(ssp->dmach);
->  
-> -- 
-> 1.7.2.5
-> 
-> 
+Please note that these patches are dependent upon 2 gpio patches
+that are in linux-next and linux-gpio but not the mmc tree.
+Those patches are:
 
+	author	Mika Westerberg <mika.westerberg@linux.intel.com>	2013-04-03 10:56:54 (GMT)
+	committer	Linus Walleij <linus.walleij@linaro.org>	2013-04-11 22:31:18 (GMT)
+	commit	12028d2d216220618f76284af5f8ed510b11da55 (patch)
+	gpiolib-acpi: introduce acpi_get_gpio_by_index() helper
+
+	author	Rafael J. Wysocki <rafael.j.wysocki@intel.com>	2013-04-09 13:57:25 (GMT)
+	committer	Linus Walleij <linus.walleij@linaro.org>	2013-04-10 21:41:17 (GMT)
+	commit	7fc7acb9a0b0ff3ffdf21818fe0735ebaf4fecb8 (patch)
+	gpio / ACPI: Handle ACPI events in accordance with the spec
+
+I think those patches are queued for 3.10.
+
+cc: Linus Walleij <linus.walleij@linaro.org>
+
+
+Adrian Hunter (3):
+      mmc: sdhci: add ability to stay runtime-resumed if the card is powered up
+      mmc: sdhci-acpi: support runtime PM for ACPI HID 80860F14 SD cards
+      mmc: sdhci-pci: support runtime PM for BYT SD cards
+
+ drivers/mmc/host/sdhci-acpi.c | 64 ++++++++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/sdhci-pci.c  |  2 ++
+ drivers/mmc/host/sdhci.c      | 35 ++++++++++++++++++++++-
+ include/linux/mmc/sdhci.h     |  2 ++
+ 4 files changed, 101 insertions(+), 2 deletions(-)
+
+
+Regards
+Adrian Hunter
