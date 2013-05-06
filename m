@@ -1,33 +1,52 @@
-From: Postmaster@vinalinescontainer.com
-Subject: MDaemon Notification -- Attachment Removed
-Date: Mon, 06 May 2013 10:36:07 +0700
-Message-ID: <MDAEMON0110201305061036.AA3607921@mail.vinalinescontainer.com>
-Reply-To: Postmaster@vinalinescontainer.com
+From: Jingoo Han <jg1.han@samsung.com>
+Subject: [PATCH 01/22] mmc: android-goldfish: remove unnecessary
+ platform_set_drvdata()
+Date: Mon, 06 May 2013 15:05:21 +0900
+Message-ID: <004b01ce4a1f$b0dbcec0$12936c40$@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.vinalinescontainer.com ([113.160.24.50]:3383 "EHLO
-	mail.vinalinescontainer.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752728Ab3EFDnV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 May 2013 23:43:21 -0400
-Received: from mail.vinalinescontainer.com by mail.vinalinescontainer.com (via RAW) (MDaemon PRO v11.0.0)
-	for <linux-mmc@vger.kernel.org>; Mon, 06 May 2013 10:36:07 +0700
+Received: from mailout3.samsung.com ([203.254.224.33]:52016 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752572Ab3EFGFX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 May 2013 02:05:23 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MMD00GFE4VHLFJ0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 06 May 2013 15:05:21 +0900 (KST)
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: 'Chris Ball' <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, 'Jingoo Han' <jg1.han@samsung.com>
 
--------------------------------------------------------------------
-MDaemon has detected restricted attachments within an email message
--------------------------------------------------------------------
+The driver core clears the driver data to NULL after device_release
+or on probe failure, since commit 0998d0631001288a5974afc0b2a5f568bcdecb4d
+(device-core: Ensure drvdata = NULL when no driver is bound).
+Thus, it is not needed to manually clear the device driver data to NULL.
 
->From      : fwd_vsx@vinalinescontainer.com
-To        : linux-mmc@vger.kernel.org
-Subject   : Returned mail: Data format error
-Message-ID: 
+Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+---
+ drivers/mmc/host/android-goldfish.c |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
 
----------------------
-Attachment(s) removed
----------------------
-letter.zip (letter.doc                                                                                                                                                                        .exe)
+diff --git a/drivers/mmc/host/android-goldfish.c b/drivers/mmc/host/android-goldfish.c
+index 7780c14..8b4e20a 100644
+--- a/drivers/mmc/host/android-goldfish.c
++++ b/drivers/mmc/host/android-goldfish.c
+@@ -546,8 +546,6 @@ static int goldfish_mmc_remove(struct platform_device *pdev)
+ {
+ 	struct goldfish_mmc_host *host = platform_get_drvdata(pdev);
+ 
+-	platform_set_drvdata(pdev, NULL);
+-
+ 	BUG_ON(host == NULL);
+ 
+ 	mmc_remove_host(host->mmc);
+-- 
+1.7.2.5
 
 
