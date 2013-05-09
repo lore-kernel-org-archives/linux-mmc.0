@@ -1,42 +1,41 @@
-From: "John P. Goldman" <gliceaga@mendoza-conicet.gob.ar>
-Subject: dringender Vorschlag
-Date: Wed, 8 May 2013 05:46:28 -0300 (ART)
-Message-ID: <351326728.69416.1368002788604.JavaMail.root__24647.3664803945$1368004118$gmane$org@correo.mendoza-conicet.gob.ar>
-Reply-To: "John P. Goldman" <johnp.goldman@yahoo.com>
+From: Wei Yongjun <weiyj.lk@gmail.com>
+Subject: [PATCH] mmc: omap_hsmmc: fix error return code in omap_hsmmc_probe()
+Date: Thu, 9 May 2013 10:06:20 +0800
+Message-ID: <CAPgLHd-Trv1W4+NC2m8=quDpyZ74kHZiY35ZV7f7_PnRZAP+4g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx2.mendoza-conicet.gob.ar ([200.69.149.90]:40948 "EHLO
-	mx2.mendoza-conicet.gob.ar" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751190Ab3EHJG6 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 8 May 2013 05:06:58 -0400
+Received: from mail-bk0-f42.google.com ([209.85.214.42]:65334 "EHLO
+	mail-bk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753353Ab3EICGW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 May 2013 22:06:22 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: balajitk@ti.com, cjb@laptop.org, grant.likely@linaro.org, rob.herring@calxeda.com
+Cc: yongjun_wei@trendmicro.com.cn, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
 
+From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
 
+Fix to return a negative error code in the init error handling
+case instead of 0, as done elsewhere in this function.
 
-Entschuldigungen f=C3=BCr kommen in Ihre Privatsph=C3=A4re! Ich bin Rec=
-htsanwalt
-Werner Erich Zeller; Ich habe einen meiner einflussreichen und
-wohlhabenden Kunden zum Tode; und er hatte eine sehr geheime und privat=
-e
-Investitionen von =E2=82=AC15,000,000.00 bei einer privaten Bank in Gro=
-=C3=9Fbritannien
-hier zu Lebzeiten. Diese Investition wurde ohne einen deklarierten
-n=C3=A4chsten Angeh=C3=B6rigen und beg=C3=BCnstigte. Jetzt brauche ich =
-Sie arbeiten mit
-mir als mein Partner zu erholen und zu je 50 % Aktienfonds. Alle Dokume=
-nte
-werden rechtlich beantragt und beschafft, und in 5 Werktage, wird diese
-Transaktion auftreten. Aber ich brauche einen ernsten, treuen und
-glaubw=C3=BCrdigen Partner.
+Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+---
+ drivers/mmc/host/omap_hsmmc.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Bitte senden Sie mir eine vertrauliche Antwort, wenn Sie denken, Sie
-vertraut werden k=C3=B6nnen und sind von den Qualit=C3=A4ten! Ich warte=
- auf Ihre
-schnelle Antwort.
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 6e44025..32d3659 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1948,7 +1948,8 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	if (pdata->init != NULL) {
+-		if (pdata->init(&pdev->dev) != 0) {
++		ret = pdata->init(&pdev->dev);
++		if (ret != 0) {
+ 			dev_err(mmc_dev(host->mmc),
+ 				"Unable to configure MMC IRQs\n");
+ 			goto err_irq_cd_init;
 
-Werner Erich Zeller (Rechtsanwalt)
-Rufen Sie + 44-702-409-0820 (Office)
