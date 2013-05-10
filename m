@@ -1,7 +1,7 @@
 From: "Christian Daudt" <csd@broadcom.com>
 Subject: Re: [PATCH] ARM: mmc: bcm281xx SDHCI driver
-Date: Fri, 10 May 2013 00:29:35 -0700
-Message-ID: <518CA1DF.5050008@broadcom.com>
+Date: Fri, 10 May 2013 00:23:12 -0700
+Message-ID: <518CA060.5090802@broadcom.com>
 References: <1368078942-31265-1-git-send-email-csd@broadcom.com>
  <20130509063503.GF3041@game.jcrosoft.org>
 Mime-Version: 1.0
