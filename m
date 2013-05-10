@@ -1,85 +1,79 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH 1/3] mmc: omap_hsmmc: Fix the DT pbias workaround for MMC controllers 2 to 5
-Date: Fri, 10 May 2013 17:42:33 +0530
-Message-ID: <1368187955-13069-2-git-send-email-balajitk@ti.com>
-References: <1368187955-13069-1-git-send-email-balajitk@ti.com>
+From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Subject: Re: [PATCH] ARM: mmc: bcm281xx SDHCI driver
+Date: Fri, 10 May 2013 16:37:01 +0200
+Message-ID: <20130510143701.GC22508@game.jcrosoft.org>
+References: <1368078942-31265-1-git-send-email-csd@broadcom.com>
+ <20130509063503.GF3041@game.jcrosoft.org>
+ <518CA1DF.5050008@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1368187955-13069-1-git-send-email-balajitk@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Balaji T K <balajitk@ti.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <518CA1DF.5050008@broadcom.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Christian Daudt <csd@broadcom.com>
+Cc: csd_b@daudt.org, Stephen Warren <swarren@nvidia.com>, Arnd Bergmann <arnd@arndb.de>, linux-doc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Wei WANG <wei_wang@realsil.com.cn>, Ludovic Desroches <ludovic.desroches@atmel.com>, "Mike A. Chan" <mikechan@google.com>, Rob Landley <rob@landley.net>, Olof Johansson <olof@lixom.net>, Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Tony Lindgren <tony@atomide.com>
+On 00:29 Fri 10 May     , Christian Daudt wrote:
+> Thanks for the feedback.
+> 
+> On 13-05-08 11:35 PM, Jean-Christophe PLAGNIOL-VILLARD wrote:
+> >On 22:55 Wed 08 May     , Christian Daudt wrote:
+> >>Add SDHCI driver for the Broadcom 281xx SoCs. Also
+> >>add bindings for it into bcm281xx dts files.
+> >>Still missing:
+> >>  - power managemement
+> >split the dts/dtsi in an other patch
+> ok.
+> >>Signed-off-by: Christian Daudt <csd@broadcom.com>
+> >>
+> >>diff --git a/arch/arm/configs/bcm_defconfig b/arch/arm/configs/bcm_defconfig
+> >>index e3bf2d6..65edf6d 100644
+> >>--- a/arch/arm/configs/bcm_defconfig
+> >>+++ b/arch/arm/configs/bcm_defconfig
+> >>@@ -78,6 +78,13 @@ CONFIG_BACKLIGHT_LCD_SUPPORT=y
+> >>  CONFIG_LCD_CLASS_DEVICE=y
+> >>  CONFIG_BACKLIGHT_CLASS_DEVICE=y
+> >>  # CONFIG_USB_SUPPORT is not set
+> >>+CONFIG_MMC=y
+> >>+CONFIG_MMC_UNSAFE_RESUME=y
+> >>+CONFIG_MMC_BLOCK_MINORS=32
+> >>+CONFIG_MMC_TEST=y
+> >>+CONFIG_MMC_SDHCI=y
+> >>+CONFIG_MMC_SDHCI_PLTFM=y
+> >>+CONFIG_MMC_SDHCI_BCM_KONA=y
+> >>  CONFIG_NEW_LEDS=y
+> >>  CONFIG_LEDS_CLASS=y
+> >>  CONFIG_LEDS_TRIGGERS=y
+> >>diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> >>index d88219e..e067c5a 100644
+> >>--- a/drivers/mmc/host/Kconfig
+> >>+++ b/drivers/mmc/host/Kconfig
+> >>@@ -238,6 +238,16 @@ config MMC_SDHCI_S3C_DMA
+> >>  	  YMMV.
+> >>+config MMC_SDHCI_BCM_KONA
+> >>+	tristate "SDHCI support on Broadcom KONA platform"
+> >>+	depends on ARCH_BCM && MMC_SDHCI_PLTFM
+> >select MMC_SDHCI_PLTFM
+> >will be better
+> Ok - changed it. Why is the select is better than the depends ?
 
-Otherwise SDIO cards won't necessarily work when booted with
-device tree as we will never power down the SDIO cards. This
-means the SDIO card reset does not happen which at least some
-WLAN controllers expect to happen with ifconfig wlan0 down.
+so you do not need to enable MMC_SDHCI_PLTFM
 
-The PBIAS voltage is only available for the first controller
-instance, so let's limit the PBIAS workaround to the first
-controller only.
+and you can drop one line in the savdefconfig
 
-Signed-off-by: Tony Lindgren <tony@atomide.com>
-Tested-by: Luciano Coelho <coelho@ti.com>
-Signed-off-by: Balaji T K <balajitk@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c |   13 +++++++++----
- 1 files changed, 9 insertions(+), 4 deletions(-)
+if tomorrow you need regulator select it so a old defconfig will continue to
+work
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 6e44025..29a63d2 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -161,6 +161,7 @@ struct omap_hsmmc_host {
- 	 */
- 	struct	regulator	*vcc;
- 	struct	regulator	*vcc_aux;
-+	int			pbias_disable;
- 	void	__iomem		*base;
- 	resource_size_t		mapbase;
- 	spinlock_t		irq_lock; /* Prevent races with irq handler */
-@@ -255,11 +256,11 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 	if (!host->vcc)
- 		return 0;
- 	/*
--	 * With DT, never turn OFF the regulator. This is because
-+	 * With DT, never turn OFF the regulator for MMC1. This is because
- 	 * the pbias cell programming support is still missing when
- 	 * booting with Device tree
- 	 */
--	if (dev->of_node && !vdd)
-+	if (host->pbias_disable && !vdd)
- 		return 0;
- 
- 	if (mmc_slot(host).before_set_reg)
-@@ -1520,10 +1521,10 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			(ios->vdd == DUAL_VOLT_OCR_BIT) &&
- 			/*
- 			 * With pbias cell programming missing, this
--			 * can't be allowed when booting with device
-+			 * can't be allowed on MMC1 when booting with device
- 			 * tree.
- 			 */
--			!host->dev->of_node) {
-+			!host->pbias_disable) {
- 				/*
- 				 * The mmc_select_voltage fn of the core does
- 				 * not seem to set the power_mode to
-@@ -1871,6 +1872,10 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 
- 	omap_hsmmc_context_save(host);
- 
-+	/* This can be removed once we support PBIAS with DT */
-+	if (host->dev->of_node && host->mapbase == 0x4809c000)
-+		host->pbias_disable = 1;
-+
- 	host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
- 	/*
- 	 * MMC can still work without debounce clock.
--- 
-1.7.5.4
-
+Best Regards,
+J.
