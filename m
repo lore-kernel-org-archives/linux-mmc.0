@@ -1,58 +1,34 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH 2/3] mmc: omap_hsmmc: convert to dma_request_slave_channel_compat
-Date: Fri, 10 May 2013 17:42:34 +0530
-Message-ID: <1368187955-13069-3-git-send-email-balajitk@ti.com>
-References: <1368187955-13069-1-git-send-email-balajitk@ti.com>
+Subject: [PATCH 0/3] mmc: omap_hsmmc: fixes for 3.10
+Date: Fri, 10 May 2013 17:42:32 +0530
+Message-ID: <1368187955-13069-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1368187955-13069-1-git-send-email-balajitk@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: linux-omap@vger.kernel.org, Matt Porter <mporter@ti.com>, Balaji T K <balajitk@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:34421 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751718Ab3EJMMs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 10 May 2013 08:12:48 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>
 
-From: Matt Porter <mporter@ti.com>
+Fix to make wlan/sdio work with dt and to use dma binding from dt
 
-Convert dmaengine channel requests to use
-dma_request_slave_channel_compat(). This supports platforms booting
-with or without DT populated.
+Matt Porter (1):
+  mmc: omap_hsmmc: convert to dma_request_slave_channel_compat
 
-Signed-off-by: Matt Porter <mporter@ti.com>
-Acked-by: Tony Lindgren <tony@atomide.com>
-Acked-by: Arnd Bergmann <arnd@arndb.de>
-Signed-off-by: Balaji T K <balajitk@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c |   10 ++++++++--
- 1 files changed, 8 insertions(+), 2 deletions(-)
+Santosh Shilimkar (1):
+  mmc: omap_hsmmc: Skip platform_get_resource_byname() for dt case
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 29a63d2..dc89aea 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1930,14 +1930,20 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	dma_cap_zero(mask);
- 	dma_cap_set(DMA_SLAVE, mask);
- 
--	host->rx_chan = dma_request_channel(mask, omap_dma_filter_fn, &rx_req);
-+	host->rx_chan =
-+		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
-+						 &rx_req, &pdev->dev, "rx");
-+
- 	if (!host->rx_chan) {
- 		dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
- 		ret = -ENXIO;
- 		goto err_irq;
- 	}
- 
--	host->tx_chan = dma_request_channel(mask, omap_dma_filter_fn, &tx_req);
-+	host->tx_chan =
-+		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
-+						 &tx_req, &pdev->dev, "tx");
-+
- 	if (!host->tx_chan) {
- 		dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel %u\n", tx_req);
- 		ret = -ENXIO;
+Tony Lindgren (1):
+  mmc: omap_hsmmc: Fix the DT pbias workaround for MMC controllers 2 to
+    5
+
+ drivers/mmc/host/omap_hsmmc.c |   51 +++++++++++++++++++++++++---------------
+ 1 files changed, 32 insertions(+), 19 deletions(-)
+
 -- 
 1.7.5.4
 
