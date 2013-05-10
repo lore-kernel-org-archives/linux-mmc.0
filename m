@@ -1,79 +1,113 @@
-From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
-Subject: Re: [PATCH] ARM: mmc: bcm281xx SDHCI driver
-Date: Fri, 10 May 2013 16:37:01 +0200
-Message-ID: <20130510143701.GC22508@game.jcrosoft.org>
-References: <1368078942-31265-1-git-send-email-csd@broadcom.com>
- <20130509063503.GF3041@game.jcrosoft.org>
- <518CA1DF.5050008@broadcom.com>
+From: "Christian Daudt" <csd@broadcom.com>
+Subject: [PATCH V2 2/2] ARM: mmc: bcm281xx SDHCI driver (dt mods)
+Date: Fri, 10 May 2013 08:48:03 -0700
+Message-ID: <1368200883-15668-2-git-send-email-csd@broadcom.com>
+References: <1368200883-15668-1-git-send-email-csd@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <518CA1DF.5050008@broadcom.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Christian Daudt <csd@broadcom.com>
-Cc: csd_b@daudt.org, Stephen Warren <swarren@nvidia.com>, Arnd Bergmann <arnd@arndb.de>, linux-doc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Wei WANG <wei_wang@realsil.com.cn>, Ludovic Desroches <ludovic.desroches@atmel.com>, "Mike A. Chan" <mikechan@google.com>, Rob Landley <rob@landley.net>, Olof Johansson <olof@lixom.net>, Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1368200883-15668-1-git-send-email-csd@broadcom.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Rob Landley <rob@landley.net>, Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, Stephen Warren <swarren@nvidia.com>, Olof Johansson <olof@lixom.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Wei WANG <wei_wang@realsil.com.cn>, Ludovic Desroches <ludovic.desroches@atmel.com>, Arnd Bergmann <arnd@arndb.de>, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc: csd_b@daudt.org, Christian Daudt <csd@broadcom.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 00:29 Fri 10 May     , Christian Daudt wrote:
-> Thanks for the feedback.
-> 
-> On 13-05-08 11:35 PM, Jean-Christophe PLAGNIOL-VILLARD wrote:
-> >On 22:55 Wed 08 May     , Christian Daudt wrote:
-> >>Add SDHCI driver for the Broadcom 281xx SoCs. Also
-> >>add bindings for it into bcm281xx dts files.
-> >>Still missing:
-> >>  - power managemement
-> >split the dts/dtsi in an other patch
-> ok.
-> >>Signed-off-by: Christian Daudt <csd@broadcom.com>
-> >>
-> >>diff --git a/arch/arm/configs/bcm_defconfig b/arch/arm/configs/bcm_defconfig
-> >>index e3bf2d6..65edf6d 100644
-> >>--- a/arch/arm/configs/bcm_defconfig
-> >>+++ b/arch/arm/configs/bcm_defconfig
-> >>@@ -78,6 +78,13 @@ CONFIG_BACKLIGHT_LCD_SUPPORT=y
-> >>  CONFIG_LCD_CLASS_DEVICE=y
-> >>  CONFIG_BACKLIGHT_CLASS_DEVICE=y
-> >>  # CONFIG_USB_SUPPORT is not set
-> >>+CONFIG_MMC=y
-> >>+CONFIG_MMC_UNSAFE_RESUME=y
-> >>+CONFIG_MMC_BLOCK_MINORS=32
-> >>+CONFIG_MMC_TEST=y
-> >>+CONFIG_MMC_SDHCI=y
-> >>+CONFIG_MMC_SDHCI_PLTFM=y
-> >>+CONFIG_MMC_SDHCI_BCM_KONA=y
-> >>  CONFIG_NEW_LEDS=y
-> >>  CONFIG_LEDS_CLASS=y
-> >>  CONFIG_LEDS_TRIGGERS=y
-> >>diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> >>index d88219e..e067c5a 100644
-> >>--- a/drivers/mmc/host/Kconfig
-> >>+++ b/drivers/mmc/host/Kconfig
-> >>@@ -238,6 +238,16 @@ config MMC_SDHCI_S3C_DMA
-> >>  	  YMMV.
-> >>+config MMC_SDHCI_BCM_KONA
-> >>+	tristate "SDHCI support on Broadcom KONA platform"
-> >>+	depends on ARCH_BCM && MMC_SDHCI_PLTFM
-> >select MMC_SDHCI_PLTFM
-> >will be better
-> Ok - changed it. Why is the select is better than the depends ?
+Add SDHCI driver for the Broadcom 281xx SoCs. Also
+add bindings for it into bcm281xx dts files.
 
-so you do not need to enable MMC_SDHCI_PLTFM
+Changes from V1:
+ - split original patch into 2, one for driver and this one for dt
 
-and you can drop one line in the savdefconfig
+Signed-off-by: Christian Daudt <csd@broadcom.com>
 
-if tomorrow you need regulator select it so a old defconfig will continue to
-work
+diff --git a/Documentation/devicetree/bindings/mmc/bcm,kona-sdhci.txt b/Documentation/devicetree/bindings/mmc/bcm,kona-sdhci.txt
+new file mode 100644
+index 0000000..ad1c4bd
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/bcm,kona-sdhci.txt
+@@ -0,0 +1,16 @@
++Broadcom BCM281xx SDHCI driver
++
++This file documents differences between the core properties in mmc.txt
++and the properties in the bcm281xx driver.
++
++Required properties:
++- compatible : Should be "bcm,kona-sdhci"
++
++Example:
++
++sdio2: sdio@0x3f1a0000 {
++	compatible = "bcm,kona-sdhci";
++	reg = <0x3f1a0000 0x10000>;
++	interrupts = <0x0 74 0x4>;
++};
++
+diff --git a/arch/arm/boot/dts/bcm11351-brt.dts b/arch/arm/boot/dts/bcm11351-brt.dts
+index 248067c..9ae3404 100644
+--- a/arch/arm/boot/dts/bcm11351-brt.dts
++++ b/arch/arm/boot/dts/bcm11351-brt.dts
+@@ -27,4 +27,21 @@
+ 		status = "okay";
+ 	};
+ 
++	sdio0: sdio@0x3f180000 {
++		max-frequency = <48000000>;
++		status = "okay";
++	};
++
++	sdio1: sdio@0x3f190000 {
++		non-removable;
++		max-frequency = <48000000>;
++		status = "okay";
++	};
++
++	sdio3: sdio@0x3f1b0000 {
++		max-frequency = <48000000>;
++		status = "okay";
++	};
++
++
+ };
+diff --git a/arch/arm/boot/dts/bcm11351.dtsi b/arch/arm/boot/dts/bcm11351.dtsi
+index ad13588..6606b41 100644
+--- a/arch/arm/boot/dts/bcm11351.dtsi
++++ b/arch/arm/boot/dts/bcm11351.dtsi
+@@ -47,4 +47,33 @@
+ 		    cache-unified;
+ 		    cache-level = <2>;
+ 	};
++
++	sdio0: sdio@0x3f180000 {
++		compatible = "bcm,kona-sdhci";
++		reg = <0x3f180000 0x10000>;
++		interrupts = <0x0 77 0x4>;
++		status = "disabled";
++	};
++
++	sdio1: sdio@0x3f190000 {
++		compatible = "bcm,kona-sdhci";
++		reg = <0x3f190000 0x10000>;
++		interrupts = <0x0 76 0x4>;
++		status = "disabled";
++	};
++
++	sdio2: sdio@0x3f1a0000 {
++		compatible = "bcm,kona-sdhci";
++		reg = <0x3f1a0000 0x10000>;
++		interrupts = <0x0 74 0x4>;
++		status = "disabled";
++	};
++
++	sdio3: sdio@0x3f1b0000 {
++		compatible = "bcm,kona-sdhci";
++		reg = <0x3f1b0000 0x10000>;
++		interrupts = <0x0 73 0x4>;
++		status = "disabled";
++	};
++
+ };
+-- 
+1.7.10.4
 
-Best Regards,
-J.
+
