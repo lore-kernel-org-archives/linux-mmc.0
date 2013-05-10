@@ -1,34 +1,73 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH 0/3] mmc: omap_hsmmc: fixes for 3.10
-Date: Fri, 10 May 2013 17:42:32 +0530
-Message-ID: <1368187955-13069-1-git-send-email-balajitk@ti.com>
+Subject: [PATCH 3/3] mmc: omap_hsmmc: Skip platform_get_resource_byname() for dt case
+Date: Fri, 10 May 2013 17:42:35 +0530
+Message-ID: <1368187955-13069-4-git-send-email-balajitk@ti.com>
+References: <1368187955-13069-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:34421 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751718Ab3EJMMs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 10 May 2013 08:12:48 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1368187955-13069-1-git-send-email-balajitk@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>
+Cc: linux-omap@vger.kernel.org, Santosh Shilimkar <santosh.shilimkar@ti.com>, Balaji T K <balajitk@ti.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Fix to make wlan/sdio work with dt and to use dma binding from dt
+From: Santosh Shilimkar <santosh.shilimkar@ti.com>
 
-Matt Porter (1):
-  mmc: omap_hsmmc: convert to dma_request_slave_channel_compat
+MMC driver probe will abort for DT case because of failed
+platform_get_resource_byname() lookup. Fix it by skipping resource
+lookup byname for device tree build.
 
-Santosh Shilimkar (1):
-  mmc: omap_hsmmc: Skip platform_get_resource_byname() for dt case
+Issue is hidden because hwmod populates the IO resources which
+helps to succeed platform_get_resource_byname() and probe.
 
-Tony Lindgren (1):
-  mmc: omap_hsmmc: Fix the DT pbias workaround for MMC controllers 2 to
-    5
+Signed-off-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
+Signed-off-by: Balaji T K <balajitk@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |   28 +++++++++++++++-------------
+ 1 files changed, 15 insertions(+), 13 deletions(-)
 
- drivers/mmc/host/omap_hsmmc.c |   51 +++++++++++++++++++++++++---------------
- 1 files changed, 32 insertions(+), 19 deletions(-)
-
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index dc89aea..eccedc7 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1911,21 +1911,23 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 
+ 	omap_hsmmc_conf_bus_power(host);
+ 
+-	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
+-	if (!res) {
+-		dev_err(mmc_dev(host->mmc), "cannot get DMA TX channel\n");
+-		ret = -ENXIO;
+-		goto err_irq;
+-	}
+-	tx_req = res->start;
++	if (!pdev->dev.of_node) {
++		res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
++		if (!res) {
++			dev_err(mmc_dev(host->mmc), "cannot get DMA TX channel\n");
++			ret = -ENXIO;
++			goto err_irq;
++		}
++		tx_req = res->start;
+ 
+-	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
+-	if (!res) {
+-		dev_err(mmc_dev(host->mmc), "cannot get DMA RX channel\n");
+-		ret = -ENXIO;
+-		goto err_irq;
++		res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
++		if (!res) {
++			dev_err(mmc_dev(host->mmc), "cannot get DMA RX channel\n");
++			ret = -ENXIO;
++			goto err_irq;
++		}
++		rx_req = res->start;
+ 	}
+-	rx_req = res->start;
+ 
+ 	dma_cap_zero(mask);
+ 	dma_cap_set(DMA_SLAVE, mask);
 -- 
 1.7.5.4
 
