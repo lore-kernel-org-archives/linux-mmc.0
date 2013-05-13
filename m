@@ -1,157 +1,244 @@
 From: Simon Baatz <gmbnomis@gmail.com>
-Subject: [PATCH V2 08/10] mmc: mvsdio: use standard MMC device-tree binding parser mmc_of_parse()
-Date: Mon, 13 May 2013 23:18:59 +0200
-Message-ID: <1368479941-10084-9-git-send-email-gmbnomis@gmail.com>
+Subject: [PATCH V2 09/10] ARM: Kirkwood: Add dts files for Sheevaplug and eSATA Sheevaplug
+Date: Mon, 13 May 2013 23:19:00 +0200
+Message-ID: <1368479941-10084-10-git-send-email-gmbnomis@gmail.com>
 References: <1368479941-10084-1-git-send-email-gmbnomis@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mo-p00-ob.rzone.de ([81.169.146.160]:39757 "EHLO
+Received: from mo-p00-ob.rzone.de ([81.169.146.160]:44576 "EHLO
 	mo-p00-ob.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753309Ab3EMVT6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 May 2013 17:19:58 -0400
+	with ESMTP id S1753309Ab3EMVUA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 May 2013 17:20:00 -0400
 In-Reply-To: <1368479941-10084-1-git-send-email-gmbnomis@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
 Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-Instead of parsing the DT binding on our own, use the standard parser
-mmc_of_parse(), introduced by commit 6c56e7a.
 
 Signed-off-by: Simon Baatz <gmbnomis@gmail.com>
 ---
- drivers/mmc/host/mvsdio.c |   73 +++++++++++++++++++++++++--------------------
- 1 file changed, 40 insertions(+), 33 deletions(-)
+ arch/arm/boot/dts/Makefile                        |    2 +
+ arch/arm/boot/dts/kirkwood-sheevaplug-common.dtsi |   97 +++++++++++++++++++++
+ arch/arm/boot/dts/kirkwood-sheevaplug-esata.dts   |   40 +++++++++
+ arch/arm/boot/dts/kirkwood-sheevaplug.dts         |   45 ++++++++++
+ 4 files changed, 184 insertions(+)
+ create mode 100644 arch/arm/boot/dts/kirkwood-sheevaplug-common.dtsi
+ create mode 100644 arch/arm/boot/dts/kirkwood-sheevaplug-esata.dts
+ create mode 100644 arch/arm/boot/dts/kirkwood-sheevaplug.dts
 
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index 8960fc8..edfc481 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -35,7 +35,7 @@
- 
- #define DRIVER_NAME	"mvsdio"
- 
--static int maxfreq = MVSD_CLOCKRATE_MAX;
-+static int maxfreq;
- static int nodma;
- 
- struct mvsd_host {
-@@ -685,7 +685,6 @@ static int __init mvsd_probe(struct platform_device *pdev)
- 	const struct mbus_dram_target_info *dram;
- 	struct resource *r;
- 	int ret, irq;
--	int gpio_card_detect, gpio_write_protect;
- 	struct pinctrl *pinctrl;
- 
- 	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-@@ -718,6 +717,20 @@ static int __init mvsd_probe(struct platform_device *pdev)
- 	if (!IS_ERR(host->clk))
- 		clk_prepare_enable(host->clk);
- 
-+	mmc->ops = &mvsd_ops;
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index b9f7121..e81a387 100644
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -84,6 +84,8 @@ dtb-$(CONFIG_ARCH_KIRKWOOD) += kirkwood-cloudbox.dtb \
+ 	kirkwood-ns2max.dtb \
+ 	kirkwood-ns2mini.dtb \
+ 	kirkwood-nsa310.dtb \
++	kirkwood-sheevaplug.dtb \
++	kirkwood-sheevaplug-esata.dtb \
+ 	kirkwood-topkick.dtb \
+ 	kirkwood-ts219-6281.dtb \
+ 	kirkwood-ts219-6282.dtb \
+diff --git a/arch/arm/boot/dts/kirkwood-sheevaplug-common.dtsi b/arch/arm/boot/dts/kirkwood-sheevaplug-common.dtsi
+new file mode 100644
+index 0000000..9d59475
+--- /dev/null
++++ b/arch/arm/boot/dts/kirkwood-sheevaplug-common.dtsi
+@@ -0,0 +1,97 @@
++/*
++ * kirkwood-sheevaplug-common.dts - Common parts for Sheevaplugs
++ *
++ * Copyright (C) 2013 Simon Baatz <gmbnomis@gmail.com>
++ *
++ * Licensed under GPLv2
++ */
 +
-+	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
++/include/ "kirkwood.dtsi"
++/include/ "kirkwood-6281.dtsi"
 +
-+	mmc->f_min = DIV_ROUND_UP(host->base_clock, MVSD_BASE_DIV_MAX);
-+	mmc->f_max = MVSD_CLOCKRATE_MAX;
++/ {
++	memory {
++		device_type = "memory";
++		reg = <0x00000000 0x20000000>;
++	};
 +
-+	mmc->max_blk_size = 2048;
-+	mmc->max_blk_count = 65535;
++	chosen {
++		bootargs = "console=ttyS0,115200n8 earlyprintk";
++	};
 +
-+	mmc->max_segs = 1;
-+	mmc->max_seg_size = mmc->max_blk_size * mmc->max_blk_count;
-+	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
++	ocp@f1000000 {
++		pinctrl: pinctrl@10000 {
 +
- 	if (np) {
- 		if (IS_ERR(host->clk)) {
- 			dev_err(&pdev->dev, "DT platforms must have a clock associated\n");
-@@ -726,35 +739,38 @@ static int __init mvsd_probe(struct platform_device *pdev)
- 		}
- 
- 		host->base_clock = clk_get_rate(host->clk) / 2;
--		gpio_card_detect = of_get_named_gpio(np, "cd-gpios", 0);
--		gpio_write_protect = of_get_named_gpio(np, "wp-gpios", 0);
-+		ret = mmc_of_parse(mmc);
-+		if (ret < 0)
-+			goto out;
- 	} else {
- 		const struct mvsdio_platform_data *mvsd_data;
++			pmx_usb_power_enable: pmx-usb-power-enable {
++				marvell,pins = "mpp29";
++				marvell,function = "gpio";
++			};
++			pmx_led_red: pmx-led-red {
++				marvell,pins = "mpp46";
++				marvell,function = "gpio";
++			};
++			pmx_led_blue: pmx-led-blue {
++				marvell,pins = "mpp49";
++				marvell,function = "gpio";
++			};
++			pmx_sdio_cd: pmx-sdio-cd {
++				marvell,pins = "mpp44";
++				marvell,function = "gpio";
++			};
++			pmx_sdio_wp: pmx-sdio-wp {
++				marvell,pins = "mpp47";
++				marvell,function = "gpio";
++			};
++		};
++		serial@12000 {
++			status = "okay";
++		};
 +
- 		mvsd_data = pdev->dev.platform_data;
- 		if (!mvsd_data) {
- 			ret = -ENXIO;
- 			goto out;
- 		}
-+		mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ |
-+			    MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
- 		host->base_clock = mvsd_data->clock / 2;
--		gpio_card_detect = mvsd_data->gpio_card_detect ? : -EINVAL;
--		gpio_write_protect = mvsd_data->gpio_write_protect ? : -EINVAL;
--	}
--
--	mmc->ops = &mvsd_ops;
--
--	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
--	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ |
--		    MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
--
--	mmc->f_min = DIV_ROUND_UP(host->base_clock, MVSD_BASE_DIV_MAX);
--	mmc->f_max = maxfreq;
-+		/* GPIO 0 regarded as invalid for backward compatibility */
-+		if (mvsd_data->gpio_card_detect &&
-+		    gpio_is_valid(mvsd_data->gpio_card_detect)) {
-+			ret = mmc_gpio_request_cd(mmc,
-+						  mvsd_data->gpio_card_detect);
-+			if (ret)
-+				goto out;
-+		} else {
-+			mmc->caps |= MMC_CAP_NEEDS_POLL;
-+		}
- 
--	mmc->max_blk_size = 2048;
--	mmc->max_blk_count = 65535;
-+		if (mvsd_data->gpio_write_protect &&
-+		    gpio_is_valid(mvsd_data->gpio_write_protect))
-+			mmc_gpio_request_ro(mmc, mvsd_data->gpio_write_protect);
-+	}
- 
--	mmc->max_segs = 1;
--	mmc->max_seg_size = mmc->max_blk_size * mmc->max_blk_count;
--	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
-+	if (maxfreq)
-+		mmc->f_max = maxfreq;
- 
- 	spin_lock_init(&host->lock);
- 
-@@ -777,15 +793,6 @@ static int __init mvsd_probe(struct platform_device *pdev)
- 		goto out;
- 	}
- 
--	if (gpio_is_valid(gpio_card_detect)) {
--		ret = mmc_gpio_request_cd(mmc, gpio_card_detect);
--		if (ret)
--			goto out;
--	} else
--		mmc->caps |= MMC_CAP_NEEDS_POLL;
--
--	mmc_gpio_request_ro(mmc, gpio_write_protect);
--
- 	setup_timer(&host->timer, mvsd_timeout_timer, (unsigned long)host);
- 	platform_set_drvdata(pdev, mmc);
- 	ret = mmc_add_host(mmc);
-@@ -793,10 +800,10 @@ static int __init mvsd_probe(struct platform_device *pdev)
- 		goto out;
- 
- 	if (!(mmc->caps & MMC_CAP_NEEDS_POLL))
--		dev_notice(&pdev->dev, "using GPIO %d for card detection\n",
--			   gpio_card_detect);
-+		dev_notice(&pdev->dev, "using GPIO for card detection\n");
- 	else
--		dev_notice(&pdev->dev, "lacking card detect (fall back to polling)\n");
-+		dev_notice(&pdev->dev,
-+			   "lacking card detect (fall back to polling)\n");
- 	return 0;
- 
- out:
++		nand@3000000 {
++			status = "okay";
++
++			partition@0 {
++				label = "u-boot";
++				reg = <0x0000000 0x100000>;
++			};
++
++			partition@100000 {
++				label = "uImage";
++				reg = <0x0100000 0x400000>;
++			};
++
++			partition@500000 {
++				label = "root";
++				reg = <0x0500000 0x1fb00000>;
++			};
++		};
++	};
++
++	regulators {
++		compatible = "simple-bus";
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		usb_power: regulator@1 {
++			compatible = "regulator-fixed";
++			reg = <1>;
++			regulator-name = "USB Power";
++			regulator-min-microvolt = <5000000>;
++			regulator-max-microvolt = <5000000>;
++			enable-active-high;
++			regulator-always-on;
++			regulator-boot-on;
++			gpio = <&gpio0 29 0>;
++		};
++	};
++
++	gpio-leds {
++		compatible = "gpio-leds";
++
++		health {
++			label = "sheevaplug:blue:health";
++			gpios = <&gpio1 17 1>;
++			linux,default-trigger = "default-on";
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/kirkwood-sheevaplug-esata.dts b/arch/arm/boot/dts/kirkwood-sheevaplug-esata.dts
+new file mode 100644
+index 0000000..1c6946a
+--- /dev/null
++++ b/arch/arm/boot/dts/kirkwood-sheevaplug-esata.dts
+@@ -0,0 +1,40 @@
++/*
++ * kirkwood-sheevaplug-esata.dts - Device tree file for eSATA Sheevaplug
++ *
++ * Copyright (C) 2013 Simon Baatz <gmbnomis@gmail.com>
++ *
++ * Licensed under GPLv2
++ */
++
++/dts-v1/;
++
++/include/ "kirkwood-sheevaplug-common.dtsi"
++
++/ {
++	model = "Globalscale Technologies eSATA SheevaPlug";
++	compatible = "globalscale,sheevaplug-esata-rev13", "globalscale,sheevaplug-esata", "globalscale,sheevaplug", "marvell,kirkwood-88f6281", "marvell,kirkwood";
++
++	ocp@f1000000 {
++		pinctrl: pinctrl@10000 {
++
++			pinctrl-0 = < &pmx_nand &pmx_uart0
++				      &pmx_usb_power_enable
++				      &pmx_led_blue>;
++			pinctrl-names = "default";
++
++		};
++
++		sata@80000 {
++			status = "okay";
++			nr-ports = <2>;
++		};
++
++		mvsdio@90000 {
++			pinctrl-0 = <&pmx_sdio &pmx_sdio_cd &pmx_sdio_wp>;
++			pinctrl-names = "default";
++			status = "okay";
++			cd-gpios = <&gpio1 12 1>;
++			wp-gpios = <&gpio1 15 0>;
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/kirkwood-sheevaplug.dts b/arch/arm/boot/dts/kirkwood-sheevaplug.dts
+new file mode 100644
+index 0000000..f7684066
+--- /dev/null
++++ b/arch/arm/boot/dts/kirkwood-sheevaplug.dts
+@@ -0,0 +1,45 @@
++/*
++ * kirkwood-sheevaplug-esata.dts - Device tree file for Sheevaplug
++ *
++ * Copyright (C) 2013 Simon Baatz <gmbnomis@gmail.com>
++ *
++ * Licensed under GPLv2
++ */
++
++/dts-v1/;
++
++/include/ "kirkwood-sheevaplug-common.dtsi"
++
++/ {
++	model = "Globalscale Technologies SheevaPlug";
++	compatible = "globalscale,sheevaplug", "marvell,kirkwood-88f6281", "marvell,kirkwood";
++
++	ocp@f1000000 {
++		pinctrl: pinctrl@10000 {
++
++			pinctrl-0 = < &pmx_nand &pmx_uart0
++				      &pmx_usb_power_enable
++				      &pmx_led_red
++				      &pmx_led_blue>;
++			pinctrl-names = "default";
++
++		};
++
++		mvsdio@90000 {
++			pinctrl-0 = <&pmx_sdio>;
++			pinctrl-names = "default";
++			status = "okay";
++			/* No CD or WP GPIOs */
++			broken-cd;
++		};
++	};
++
++	gpio-leds {
++		compatible = "gpio-leds";
++
++		misc {
++			label = "sheevaplug:red:misc";
++			gpios = <&gpio1 14 1>;
++		};
++	};
++};
 -- 
 1.7.9.5
 
