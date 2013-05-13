@@ -1,88 +1,61 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH] mmc: mmci: Support for CMD23
-Date: Mon, 13 May 2013 16:33:32 +0200
-Message-ID: <1368455612-20786-1-git-send-email-ulf.hansson@stericsson.com>
+From: Jason Cooper <jason@lakedaemon.net>
+Subject: Re: [PATCH 0/3] ARM: Kirkwood: Add DT support for (eSATA)
+ Sheevaplug
+Date: Mon, 13 May 2013 13:30:17 -0400
+Message-ID: <20130513173017.GV31290@titan.lakedaemon.net>
+References: <1366660500-26835-1-git-send-email-gmbnomis@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog111.obsmtp.com ([207.126.144.131]:59713 "EHLO
-	eu1sys200aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751205Ab3EMOeK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 May 2013 10:34:10 -0400
+Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:10774 "EHLO
+	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752149Ab3EMRam (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 May 2013 13:30:42 -0400
+Content-Disposition: inline
+In-Reply-To: <1366660500-26835-1-git-send-email-gmbnomis@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Simon Baatz <gmbnomis@gmail.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, thomas.petazzoni@free-electrons.com, andrew@lunn.ch, cjb@laptop.org
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+On Mon, Apr 22, 2013 at 09:54:57PM +0200, Simon Baatz wrote:
+> These patches add DT support for the Sheevaplugs by Globalscale
+> Technologies.  There exists two versions, one with an eSATA port and
+> one without.
+> 
+> Surprisingly, the conversion was not straight forward. In the eSATA
+> version (board revision 1.3), the CD and WP pins are connected to GPIO
+> lines, but I could not get this to work.  Apparently, I am not the only
+> one ([1]).  I found that the pins are reversed on my hardware and use
+> different active low/active high settings.
+> 
+> Thus, the first patch adds support for the GPIO active low/high flag in
+> DT to the mvsdio driver.
+> 
+> With that, everything except the Gigabit Ethernet can be described in
+> the DTS.  I have split the DTS and the board support files into two
+> patches.  This way, we can drop the last patch once we can describe
+> everything in the DTS or we can squash them together if we don't want
+> to wait.
+> 
+> I could only test on an eSATA Sheevaplug. I found patches with
+> different LEDs for the Sheevaplug.  Thus, I would highly appreciate if
+> someone with the hardware could give this a spin on a non-eSATA
+> version.  Some additional testing of the change detect and write
+> protect behaviour for sdio can't hurt either.  I hope that there aren't
+> board revisions with different CD/WP pins out there.
+> 
+> [1] http://lists.infradead.org/pipermail/linux-arm-kernel/2011-August/062567.html
+> 
+> Simon Baatz (3):
+>   mmc: mvsdio: Support inverted CD and WP GPIO lines
+>   ARM: Kirkwood: Add dts files for Sheevaplug and eSATA Sheevaplug
+>   ARM: Kirkwood: Add DT support for Sheevaplug and Sheevaplug eSATA
 
-Support added for transmission of CMD23 during multi block read or
-write. In order to activate this feature, MMC_CAP_CMD23 flag needs
-to be enabled in the capabilities field. Note that CMD23 support is
-mandatory to support features like reliable write, data tag, context
-ID, packed command.
+Simon,
 
-This patch is based upon a patch from Saugata Das.
+Were you able to find any time to work on this?
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
----
- drivers/mmc/host/mmci.c |   14 ++++++++++----
- 1 file changed, 10 insertions(+), 4 deletions(-)
+thx,
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index f4f3038..27f29bb 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -842,7 +842,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 			/* The error clause is handled above, success! */
- 			data->bytes_xfered = data->blksz * data->blocks;
- 
--		if (!data->stop) {
-+		if (!data->stop || host->mrq->sbc) {
- 			mmci_request_end(host, data->mrq);
- 		} else {
- 			mmci_start_command(host, data->stop, 0);
-@@ -855,6 +855,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	     unsigned int status)
- {
- 	void __iomem *base = host->base;
-+	bool sbc = (cmd == host->mrq->sbc);
- 
- 	host->cmd = NULL;
- 
-@@ -869,7 +870,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 		cmd->resp[3] = readl(base + MMCIRESPONSE3);
- 	}
- 
--	if (!cmd->data || cmd->error) {
-+	if ((!sbc && !cmd->data) || cmd->error) {
- 		if (host->data) {
- 			/* Terminate the DMA transfer */
- 			if (dma_inprogress(host)) {
-@@ -878,7 +879,9 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 			}
- 			mmci_stop_data(host);
- 		}
--		mmci_request_end(host, cmd->mrq);
-+		mmci_request_end(host, host->mrq);
-+	} else if (sbc) {
-+		mmci_start_command(host, host->mrq->cmd, 0);
- 	} else if (!(cmd->data->flags & MMC_DATA_READ)) {
- 		mmci_start_data(host, cmd->data);
- 	}
-@@ -1119,7 +1122,10 @@ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	if (mrq->data && mrq->data->flags & MMC_DATA_READ)
- 		mmci_start_data(host, mrq->data);
- 
--	mmci_start_command(host, mrq->cmd, 0);
-+	if (mrq->sbc)
-+		mmci_start_command(host, mrq->sbc, 0);
-+	else
-+		mmci_start_command(host, mrq->cmd, 0);
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
--- 
-1.7.10
-
+Jason.
