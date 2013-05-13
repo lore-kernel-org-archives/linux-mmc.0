@@ -1,47 +1,31 @@
-From: Lars-Peter Clausen <lars@metafoo.de>
-Subject: [PATCH] mmc: jz4740: Use clk_prepare_enable/clk_disable_unprepare
-Date: Sun, 12 May 2013 20:12:38 +0200
-Message-ID: <1368382358-4433-1-git-send-email-lars@metafoo.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp-out-237.synserver.de ([212.40.185.237]:1042 "EHLO
-	smtp-out-236.synserver.de" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1750808Ab3ELSQs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 12 May 2013 14:16:48 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Artem Bityutskiy <dedekind1@gmail.com>
+Subject: Re: [PATCH 3/8] mtd: use generic helper to set max_discard_sectors
+Date: Mon, 13 May 2013 10:08:02 +0300
+Message-ID: <1368428882.5360.3.camel@sauron.fi.intel.com>
+References: <1365860324-21295-1-git-send-email-linkinjeon@gmail.com>
+Reply-To: dedekind1@gmail.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1365860324-21295-1-git-send-email-linkinjeon@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Namjae Jeon <linkinjeon@gmail.com>
+Cc: dwmw2@infradead.org, axboe@kernel.dk, shli@kernel.org, Paul.Clements@steeleye.com, npiggin@kernel.dk, neilb@suse.de, cjb@laptop.org, adrian.hunter@intel.com, linux-mtd@lists.infradead.org, nbd-general@lists.sourceforge.net, linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Namjae Jeon <namjae.jeon@samsung.com>, Vivek Trivedi <t.vivek@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Lars-Peter Clausen <lars@metafoo.de>
 
-In preparation to switching the jz4740 clk driver to the common clk framework
-update the clk enable/disable calls to clk_prepare_enable/clk_disable_unprepare.
+On Sat, 2013-04-13 at 22:38 +0900, Namjae Jeon wrote:
+> From: Namjae Jeon <namjae.jeon@samsung.com>
+> 
+> It is better to use blk_queue_max_discard_sectors helper
+> function to set max_discard_sectors as it checks
+> max_discard_sectors upper limit UINT_MAX >> 9
+> 
+> similar issue was reported for mmc in below link
+> https://lkml.org/lkml/2013/4/1/292
 
-Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
----
- drivers/mmc/host/jz4740_mmc.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Pushed to l2-mtd.git, thanks!
 
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index 2391c6b..2bc147f 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -626,7 +626,7 @@ static void jz4740_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			gpio_set_value(host->pdata->gpio_power,
- 					!host->pdata->power_active_low);
- 		host->cmdat |= JZ_MMC_CMDAT_INIT;
--		clk_enable(host->clk);
-+		clk_prepare_enable(host->clk);
- 		break;
- 	case MMC_POWER_ON:
- 		break;
-@@ -634,7 +634,7 @@ static void jz4740_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		if (gpio_is_valid(host->pdata->gpio_power))
- 			gpio_set_value(host->pdata->gpio_power,
- 					host->pdata->power_active_low);
--		clk_disable(host->clk);
-+		clk_disable_unprepare(host->clk);
- 		break;
- 	}
- 
 -- 
-1.8.2.1
-
+Best Regards,
+Artem Bityutskiy
