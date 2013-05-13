@@ -1,44 +1,42 @@
-From: Namjae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH 3/8] mtd: use generic helper to set max_discard_sectors
-Date: Mon, 13 May 2013 16:10:51 +0900
-Message-ID: <CAKYAXd8-TfSxh=z0GHuN-y5Z1OvVh89WYEV1+zeHzm5LorP1SA@mail.gmail.com>
-References: <1365860324-21295-1-git-send-email-linkinjeon@gmail.com>
-	<1368428882.5360.3.camel@sauron.fi.intel.com>
+From: Ilan Smith <Ilan.Smith@sandisk.com>
+Subject: Packed commands amount limitation
+Date: Mon, 13 May 2013 08:09:05 +0000
+Message-ID: <4A8F1406B5725C4A80D5792137FCE51B268B5D71@MILMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f176.google.com ([209.85.214.176]:57910 "EHLO
-	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750866Ab3EMHKw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 May 2013 03:10:52 -0400
-In-Reply-To: <1368428882.5360.3.camel@sauron.fi.intel.com>
+Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:22280
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752996Ab3EMIJK convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 13 May 2013 04:09:10 -0400
+Received: from mail95-ch1 (localhost [127.0.0.1])	by mail95-ch1-R.bigfish.com
+ (Postfix) with ESMTP id EBDA148021B	for <linux-mmc@vger.kernel.org>; Mon, 13
+ May 2013 08:09:08 +0000 (UTC)
+Received: from CH1EHSMHS032.bigfish.com (snatpool2.int.messaging.microsoft.com
+ [10.43.68.230])	by mail95-ch1.bigfish.com (Postfix) with ESMTP id 0B5304E0062
+	for <linux-mmc@vger.kernel.org>; Mon, 13 May 2013 08:09:07 +0000 (UTC)
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dedekind1@gmail.com
-Cc: dwmw2@infradead.org, axboe@kernel.dk, shli@kernel.org, Paul.Clements@steeleye.com, npiggin@kernel.dk, neilb@suse.de, cjb@laptop.org, adrian.hunter@intel.com, linux-mtd@lists.infradead.org, nbd-general@lists.sourceforge.net, linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Namjae Jeon <namjae.jeon@samsung.com>, Vivek Trivedi <t.vivek@samsung.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Ilan Smith <Ilan.Smith@sandisk.com>
 
-2013/5/13, Artem Bityutskiy <dedekind1@gmail.com>:
-> On Sat, 2013-04-13 at 22:38 +0900, Namjae Jeon wrote:
->> From: Namjae Jeon <namjae.jeon@samsung.com>
->>
->> It is better to use blk_queue_max_discard_sectors helper
->> function to set max_discard_sectors as it checks
->> max_discard_sectors upper limit UINT_MAX >> 9
->>
->> similar issue was reported for mmc in below link
->> https://lkml.org/lkml/2013/4/1/292
->
-> Pushed to l2-mtd.git, thanks!
->
-Hi. Artem.
-Please revert this patch and ignore it.
-Because this issue was already fixed by the below patch.
-https://git.kernel.org/cgit/linux/kernel/git/next/linux-next.git/commit/?id=871dd9286e25330c8a581e5dacfa8b1dfe1dd641
+Hi,
 
-Sorry for interrupt.
-Thanks.
-> --
-> Best Regards,
-> Artem Bityutskiy
->
->
+In card/block.c:mmc_blk_prep_packed_list(), there is generic logic for determining the maximum number of blocks that can be sent in a single transaction:
+
+        max_blk_count = min(card->host->max_blk_count,
+                            card->host->max_req_size >> 9);
+
+This value is used to limit the total size of accumulated packed commands in a single transaction. Running on the Samsung Arndale platform (Exynos5), it evaluates to 256 (128K) or 512 (256K) depending on whether CONFIG_MMC_DW_IDMAC is set or not (respectively), while ext_csd[MAX_PACKED_WRITES]==ext_csd[MAX_PACKED_READS]=63, which is also the spec limit (JEDEC 4.51). This value results in very little packing activity, and if any occurs, it consists of very few requests (usually around 5) of relatively small sizes (probably random writes since sequential write requests within these size constraints would no doubt be merged to a single request). I would expect to see a limitation of 512K * 63 (or close to that), that is: a max_blk_count of ~64512.
+
+I suspect that much larger sizes can be transferred resulting in increased utilization of packed commands and significant enhancement of overall performance.
+
+I'd appreciate any insights on the matter.
+
+Thanks,
+ - Ilan
+
+
