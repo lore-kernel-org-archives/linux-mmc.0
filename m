@@ -1,130 +1,51 @@
-From: Simon Baatz <gmbnomis@gmail.com>
-Subject: [PATCH V2 10/10] ARM: Kirkwood: add DT support for Sheevaplug and Sheevaplug eSATA
-Date: Mon, 13 May 2013 23:19:01 +0200
-Message-ID: <1368479941-10084-11-git-send-email-gmbnomis@gmail.com>
+From: Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>
+Subject: Re: [PATCH V2 07/10] ARM: mvebu: Use standard MMC binding for all
+ users of mvsdio
+Date: Mon, 13 May 2013 19:09:18 -0400
+Message-ID: <20130513230918.GG31290@titan.lakedaemon.net>
 References: <1368479941-10084-1-git-send-email-gmbnomis@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mo-p00-ob.rzone.de ([81.169.146.161]:65114 "EHLO
-	mo-p00-ob.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753309Ab3EMVUC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 May 2013 17:20:02 -0400
-In-Reply-To: <1368479941-10084-1-git-send-email-gmbnomis@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+ <1368479941-10084-8-git-send-email-gmbnomis@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1368479941-10084-8-git-send-email-gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
-Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
+On Mon, May 13, 2013 at 11:18:58PM +0200, Simon Baatz wrote:
+> In order to prepare the switch to the standard MMC device tree parser
+> for mvsdio, adapt all current uses of mvsdio in the dts files to the
+> standard format.
+> 
+> Signed-off-by: Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> ---
+...
+> diff --git a/arch/arm/boot/dts/kirkwood-mplcec4.dts b/arch/arm/boot/dts/kirkwood-mplcec4.dts
+> index 7588241..bf3a58c 100644
+> --- a/arch/arm/boot/dts/kirkwood-mplcec4.dts
+> +++ b/arch/arm/boot/dts/kirkwood-mplcec4.dts
+> @@ -136,7 +136,7 @@
+>  			pinctrl-0 = <&pmx_sdio &pmx_sdio_cd>;
+>  			pinctrl-names = "default";
+>  			status = "okay";
+> -			cd-gpios = <&gpio1 15 0>;
+> +			cd-gpios = <&gpio1 15 1>;
 
-Signed-off-by: Simon Baatz <gmbnomis@gmail.com>
----
- arch/arm/mach-kirkwood/Kconfig            |    7 +++++++
- arch/arm/mach-kirkwood/Makefile           |    1 +
- arch/arm/mach-kirkwood/board-dt.c         |    4 ++++
- arch/arm/mach-kirkwood/board-sheevaplug.c |   27 +++++++++++++++++++++++++++
- arch/arm/mach-kirkwood/common.h           |    5 +++++
- 5 files changed, 44 insertions(+)
- create mode 100644 arch/arm/mach-kirkwood/board-sheevaplug.c
+Is this a bugfix that should be backported?
 
-diff --git a/arch/arm/mach-kirkwood/Kconfig b/arch/arm/mach-kirkwood/Kconfig
-index 7509a89..58518a2 100644
---- a/arch/arm/mach-kirkwood/Kconfig
-+++ b/arch/arm/mach-kirkwood/Kconfig
-@@ -296,6 +296,13 @@ config MACH_READYNAS_DT
- 	  Say 'Y' here if you want your kernel to support the
- 	  NETGEAR ReadyNAS Duo v2 using Fattened Device Tree.
- 
-+config MACH_SHEEVAPLUG_DT
-+	bool "Marvell (eSATA) SheevaPlug (Flattened Device Tree)"
-+	select ARCH_KIRKWOOD_DT
-+	help
-+	  Say 'Y' here if you want your kernel to support the
-+	  Marvell (eSATA) SheevaPlug (Flattened Device Tree).
-+
- config MACH_TOPKICK_DT
- 	bool "USI Topkick (Flattened Device Tree)"
- 	select ARCH_KIRKWOOD_DT
-diff --git a/arch/arm/mach-kirkwood/Makefile b/arch/arm/mach-kirkwood/Makefile
-index e1f3735..8846abf 100644
---- a/arch/arm/mach-kirkwood/Makefile
-+++ b/arch/arm/mach-kirkwood/Makefile
-@@ -40,5 +40,6 @@ obj-$(CONFIG_MACH_NETSPACE_V2_DT)	+= board-ns2.o
- obj-$(CONFIG_MACH_NSA310_DT)		+= board-nsa310.o
- obj-$(CONFIG_MACH_OPENBLOCKS_A6_DT)	+= board-openblocks_a6.o
- obj-$(CONFIG_MACH_READYNAS_DT)		+= board-readynas.o
-+obj-$(CONFIG_MACH_SHEEVAPLUG_DT)	+= board-sheevaplug.o
- obj-$(CONFIG_MACH_TOPKICK_DT)		+= board-usi_topkick.o
- obj-$(CONFIG_MACH_TS219_DT)		+= board-ts219.o tsx1x-common.o
-diff --git a/arch/arm/mach-kirkwood/board-dt.c b/arch/arm/mach-kirkwood/board-dt.c
-index e9647b8..a09dbac 100644
---- a/arch/arm/mach-kirkwood/board-dt.c
-+++ b/arch/arm/mach-kirkwood/board-dt.c
-@@ -112,6 +112,9 @@ static void __init kirkwood_dt_init(void)
- 	if (of_machine_is_compatible("globalscale,guruplug"))
- 		guruplug_dt_init();
- 
-+	if (of_machine_is_compatible("globalscale,sheevaplug"))
-+		sheevaplug_dt_init();
-+
- 	if (of_machine_is_compatible("dlink,dns-kirkwood"))
- 		dnskw_init();
- 
-@@ -165,6 +168,7 @@ static void __init kirkwood_dt_init(void)
- static const char * const kirkwood_dt_board_compat[] = {
- 	"globalscale,dreamplug",
- 	"globalscale,guruplug",
-+	"globalscale,sheevaplug",
- 	"dlink,dns-320",
- 	"dlink,dns-325",
- 	"iom,iconnect",
-diff --git a/arch/arm/mach-kirkwood/board-sheevaplug.c b/arch/arm/mach-kirkwood/board-sheevaplug.c
-new file mode 100644
-index 0000000..fa38937
---- /dev/null
-+++ b/arch/arm/mach-kirkwood/board-sheevaplug.c
-@@ -0,0 +1,27 @@
-+/*
-+ * arch/arm/mach-kirkwood/board-sheevaplug.c
-+ *
-+ * Marvell Sheevaplug Reference Board Init for drivers not converted to
-+ * flattened device tree yet.
-+ *
-+ * This file is licensed under the terms of the GNU General Public
-+ * License version 2.  This program is licensed "as is" without any
-+ * warranty of any kind, whether express or implied.
-+ */
-+
-+#include <linux/kernel.h>
-+#include <linux/init.h>
-+#include <linux/mv643xx_eth.h>
-+#include "common.h"
-+
-+static struct mv643xx_eth_platform_data sheevaplug_ge00_data = {
-+	.phy_addr	= MV643XX_ETH_PHY_ADDR(0),
-+};
-+
-+void __init sheevaplug_dt_init(void)
-+{
-+	/*
-+	 * Basic setup. Needs to be called early.
-+	 */
-+	kirkwood_ge00_init(&sheevaplug_ge00_data);
-+}
-diff --git a/arch/arm/mach-kirkwood/common.h b/arch/arm/mach-kirkwood/common.h
-index 21da3b1..974442e 100644
---- a/arch/arm/mach-kirkwood/common.h
-+++ b/arch/arm/mach-kirkwood/common.h
-@@ -65,6 +65,11 @@ void guruplug_dt_init(void);
- #else
- static inline void guruplug_dt_init(void) {};
- #endif
-+#ifdef CONFIG_MACH_SHEEVAPLUG_DT
-+void sheevaplug_dt_init(void);
-+#else
-+static inline void sheevaplug_dt_init(void) {};
-+#endif
- #ifdef CONFIG_MACH_TS219_DT
- void qnap_dt_ts219_init(void);
- #else
--- 
-1.7.9.5
+thx,
 
+Jason.
