@@ -1,148 +1,69 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 3/3] mmc: mmci: Save and restore register context
-Date: Mon, 13 May 2013 15:47:17 +0200
-Message-ID: <1368452837-31458-4-git-send-email-ulf.hansson@stericsson.com>
-References: <1368452837-31458-1-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH] mmc: mmci: Use devm_clk_get API
+Date: Mon, 13 May 2013 15:56:33 +0200
+Message-ID: <1368453393-1272-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog114.obsmtp.com ([207.126.144.137]:44898 "EHLO
-	eu1sys200aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752808Ab3EMNsS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 May 2013 09:48:18 -0400
-In-Reply-To: <1368452837-31458-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:34052 "EHLO
+	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750830Ab3EMN5w (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 May 2013 09:57:52 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Daniel Lezcano <daniel.lezcano@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Rickard Andersson <rickard.andersson@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
 From: Ulf Hansson <ulf.hansson@linaro.org>
 
-If a corresponding power domain exists for the device and it manages
-to cut the domain regulator while the device is runtime suspended,
-the IP loses it's registers context. We restore the context in the
-.runtime_resume callback from the existing register caches to adapt
-to this siutuation.
-
-We also want to make sure the registers are in a known state while
-restoring context in the case when the power domain did not drop the
-power, since there are restrictions for the order of writing to these
-registers. To handle this, we clear the registers in the
-.runtime_suspend callback.
+Converting to devm_clk_get simplifies error handling in probe
+and we can remove other corresponding calls to clk_put.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/mmci.c |   41 +++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 41 insertions(+)
+ drivers/mmc/host/mmci.c |    8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 7815816..790d744 100644
+index f4f3038..d57ce43 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -61,6 +61,7 @@ static unsigned int fmax = 515633;
-  * @pwrreg_powerup: power up value for MMCIPOWER register
-  * @signal_direction: input/out direction of bus signals can be indicated
-  * @pwrreg_clkgate: MMCIPOWER register must be used to gate the clock
-+ * @pwrreg_nopower: bits in MMCIPOWER don't controls ext. power supply
-  */
- struct variant_data {
- 	unsigned int		clkreg;
-@@ -74,6 +75,7 @@ struct variant_data {
- 	u32			pwrreg_powerup;
- 	bool			signal_direction;
- 	bool			pwrreg_clkgate;
-+	bool			pwrreg_nopower;
- };
+@@ -1362,16 +1362,15 @@ static int mmci_probe(struct amba_device *dev,
+ 	dev_dbg(mmc_dev(mmc), "designer ID = 0x%02x\n", host->hw_designer);
+ 	dev_dbg(mmc_dev(mmc), "revision = 0x%01x\n", host->hw_revision);
  
- static struct variant_data variant_arm = {
-@@ -107,6 +109,7 @@ static struct variant_data variant_u300 = {
- 	.pwrreg_powerup		= MCI_PWR_ON,
- 	.signal_direction	= true,
- 	.pwrreg_clkgate		= true,
-+	.pwrreg_nopower		= true,
- };
- 
- static struct variant_data variant_nomadik = {
-@@ -119,6 +122,7 @@ static struct variant_data variant_nomadik = {
- 	.pwrreg_powerup		= MCI_PWR_ON,
- 	.signal_direction	= true,
- 	.pwrreg_clkgate		= true,
-+	.pwrreg_nopower		= true,
- };
- 
- static struct variant_data variant_ux500 = {
-@@ -132,6 +136,7 @@ static struct variant_data variant_ux500 = {
- 	.pwrreg_powerup		= MCI_PWR_ON,
- 	.signal_direction	= true,
- 	.pwrreg_clkgate		= true,
-+	.pwrreg_nopower		= true,
- };
- 
- static struct variant_data variant_ux500v2 = {
-@@ -146,6 +151,7 @@ static struct variant_data variant_ux500v2 = {
- 	.pwrreg_powerup		= MCI_PWR_ON,
- 	.signal_direction	= true,
- 	.pwrreg_clkgate		= true,
-+	.pwrreg_nopower		= true,
- };
- 
- /*
-@@ -1695,6 +1701,39 @@ static int mmci_resume(struct device *dev)
- #endif
- 
- #ifdef CONFIG_PM_RUNTIME
-+static void mmci_save(struct mmci_host *host)
-+{
-+	unsigned long flags;
-+
-+	if (host->variant->pwrreg_nopower) {
-+		spin_lock_irqsave(&host->lock, flags);
-+
-+		writel(0, host->base + MMCIMASK0);
-+		writel(0, host->base + MMCIPOWER);
-+		writel(0, host->base + MMCICLOCK);
-+		mmci_reg_delay(host);
-+
-+		spin_unlock_irqrestore(&host->lock, flags);
-+	}
-+
-+}
-+
-+static void mmci_restore(struct mmci_host *host)
-+{
-+	unsigned long flags;
-+
-+	if (host->variant->pwrreg_nopower) {
-+		spin_lock_irqsave(&host->lock, flags);
-+
-+		writel(host->clk_reg, host->base + MMCICLOCK);
-+		writel(host->pwr_reg, host->base + MMCIPOWER);
-+		writel(MCI_IRQENABLE, host->base + MMCIMASK0);
-+		mmci_reg_delay(host);
-+
-+		spin_unlock_irqrestore(&host->lock, flags);
-+	}
-+}
-+
- static int mmci_runtime_suspend(struct device *dev)
- {
- 	struct amba_device *adev = to_amba_device(dev);
-@@ -1707,6 +1746,7 @@ static int mmci_runtime_suspend(struct device *dev)
- 		if (!IS_ERR(host->pins_sleep))
- 			pinctrl_select_state(host->pinctrl, host->pins_sleep);
- 
-+		mmci_save(host);
- 		clk_disable_unprepare(host->clk);
+-	host->clk = clk_get(&dev->dev, NULL);
++	host->clk = devm_clk_get(&dev->dev, NULL);
+ 	if (IS_ERR(host->clk)) {
+ 		ret = PTR_ERR(host->clk);
+-		host->clk = NULL;
+ 		goto host_free;
  	}
  
-@@ -1722,6 +1762,7 @@ static int mmci_runtime_resume(struct device *dev)
- 		struct mmci_host *host = mmc_priv(mmc);
+ 	ret = clk_prepare_enable(host->clk);
+ 	if (ret)
+-		goto clk_free;
++		goto host_free;
  
- 		clk_prepare_enable(host->clk);
-+		mmci_restore(host);
+ 	host->plat = plat;
+ 	host->variant = variant;
+@@ -1576,8 +1575,6 @@ static int mmci_probe(struct amba_device *dev,
+ 	iounmap(host->base);
+  clk_disable:
+ 	clk_disable_unprepare(host->clk);
+- clk_free:
+-	clk_put(host->clk);
+  host_free:
+ 	mmc_free_host(mmc);
+  rel_regions:
+@@ -1623,7 +1620,6 @@ static int mmci_remove(struct amba_device *dev)
  
- 		/* Optionally enable pins to be muxed in and configured */
- 		if (!IS_ERR(host->pins_default))
+ 		iounmap(host->base);
+ 		clk_disable_unprepare(host->clk);
+-		clk_put(host->clk);
+ 
+ 		mmc_free_host(mmc);
+ 
 -- 
 1.7.10
 
