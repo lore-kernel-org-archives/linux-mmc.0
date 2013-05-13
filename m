@@ -1,62 +1,75 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: Packed commands amount limitation
-Date: Mon, 13 May 2013 21:09:07 +0900
-Message-ID: <003c01ce4fd2$ab91ab20$02b50160$%jun@samsung.com>
-References: <4A8F1406B5725C4A80D5792137FCE51B268B5D71@MILMBXIP01.sdcorp.global.sandisk.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH 2/3] mmc: mmci: Adapt to register write restrictions
+Date: Mon, 13 May 2013 15:47:16 +0200
+Message-ID: <1368452837-31458-3-git-send-email-ulf.hansson@stericsson.com>
+References: <1368452837-31458-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:54743 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751148Ab3EMMJJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 May 2013 08:09:09 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MMQ00J66KESJ1H0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 13 May 2013 21:09:08 +0900 (KST)
-In-reply-to: <4A8F1406B5725C4A80D5792137FCE51B268B5D71@MILMBXIP01.sdcorp.global.sandisk.com>
-Content-language: ko
+Received: from eu1sys200aog115.obsmtp.com ([207.126.144.139]:49660 "EHLO
+	eu1sys200aog115.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752727Ab3EMNsR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 May 2013 09:48:17 -0400
+In-Reply-To: <1368452837-31458-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Ilan Smith' <Ilan.Smith@sandisk.com>, linux-mmc@vger.kernel.org
-Cc: 'Arnd Bergmann' <arnd@arndb.de>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>, 'Alex Lemberg' <Alex.Lemberg@sandisk.com>
+To: linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Daniel Lezcano <daniel.lezcano@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Rickard Andersson <rickard.andersson@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>, Johan Rudholm <jrudholm@gmail.com>
 
-On Monday, May 13, 2013, Ilan Smith wrote:
-> Hi,
-> 
-> In card/block.c:mmc_blk_prep_packed_list(), there is generic logic for determining the maximum number
-> of blocks that can be sent in a single transaction:
-> 
->         max_blk_count = min(card->host->max_blk_count,
->                             card->host->max_req_size >> 9);
-> 
-> This value is used to limit the total size of accumulated packed commands in a single transaction.
-> Running on the Samsung Arndale platform (Exynos5), it evaluates to 256 (128K) or 512 (256K) depending
-> on whether CONFIG_MMC_DW_IDMAC is set or not (respectively), while
-> ext_csd[MAX_PACKED_WRITES]==ext_csd[MAX_PACKED_READS]=63, which is also the spec limit (JEDEC 4.51).
-> This value results in very little packing activity, and if any occurs, it consists of very few
-> requests (usually around 5) of relatively small sizes (probably random writes since sequential write
-> requests within these size constraints would no doubt be merged to a single request). I would expect
-> to see a limitation of 512K * 63 (or close to that), that is: a max_blk_count of ~64512.
-> 
-> I suspect that much larger sizes can be transferred resulting in increased utilization of packed
-> commands and significant enhancement of overall performance.
-> 
-> I'd appreciate any insights on the matter.
-Host side should be configured to increase the maximum number of blocks.
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-Thanks,
-Seungwon Jeon
-> 
-> Thanks,
->  - Ilan
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+After a write to the MMCICLOCK register data cannot be written to this
+register for three feedback clock cycles. Writes to the MMCIPOWER
+register must be separated by three MCLK cycles. Previously no issues
+has been observered, but using higher ARM clock frequencies on STE-
+platforms has triggered this problem.
+
+The MMCICLOCK register is written to in .set_ios and for some data
+transmissions for SDIO. We do not need a delay at the data transmission
+path, because sending and receiving data will require more than three
+clock cycles. Then we use a simple logic to only delay in .set_ios and
+thus we don't affect throughput performance.
+
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Johan Rudholm <jrudholm@gmail.com>
+---
+ drivers/mmc/host/mmci.c |   16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 98b0c16..7815816 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -166,6 +166,21 @@ static int mmci_validate_data(struct mmci_host *host,
+ 	return 0;
+ }
+ 
++static void mmci_reg_delay(struct mmci_host *host)
++{
++	/*
++	 * According to the spec, at least three feedback clock cycles
++	 * of max 52 MHz must pass between two writes to the MMCICLOCK reg.
++	 * Three MCLK clock cycles must pass between two MMCIPOWER reg writes.
++	 * Worst delay time during card init is at 100 kHz => 30 us.
++	 * Worst delay time when up and running is at 25 MHz => 120 ns.
++	 */
++	if (host->cclk < 20000000)
++		udelay(30);
++	else
++		ndelay(120);
++}
++
+ /*
+  * This must be called with host->lock held
+  */
+@@ -1212,6 +1227,7 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	mmci_set_clkreg(host, ios->clock);
+ 	mmci_write_pwrreg(host, pwr);
++	mmci_reg_delay(host);
+ 
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+-- 
+1.7.10
 
