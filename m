@@ -1,61 +1,39 @@
-From: Jason Cooper <jason@lakedaemon.net>
-Subject: Re: [PATCH 0/3] ARM: Kirkwood: Add DT support for (eSATA)
- Sheevaplug
-Date: Mon, 13 May 2013 13:30:17 -0400
-Message-ID: <20130513173017.GV31290@titan.lakedaemon.net>
-References: <1366660500-26835-1-git-send-email-gmbnomis@gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 1/3] mmc: mmci: Use optional sleep pinctrl state
+Date: Mon, 13 May 2013 19:48:48 +0200
+Message-ID: <CACRpkdarH5FbegyN17n+--hoCgHqzEupUA0pjkXG3juCA9aW5w@mail.gmail.com>
+References: <1368452837-31458-1-git-send-email-ulf.hansson@stericsson.com>
+	<1368452837-31458-2-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:10774 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752149Ab3EMRam (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 May 2013 13:30:42 -0400
-Content-Disposition: inline
-In-Reply-To: <1366660500-26835-1-git-send-email-gmbnomis@gmail.com>
+Received: from mail-ie0-f181.google.com ([209.85.223.181]:42696 "EHLO
+	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751846Ab3EMRst (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 May 2013 13:48:49 -0400
+Received: by mail-ie0-f181.google.com with SMTP id x12so13035855ief.12
+        for <linux-mmc@vger.kernel.org>; Mon, 13 May 2013 10:48:48 -0700 (PDT)
+In-Reply-To: <1368452837-31458-2-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Simon Baatz <gmbnomis@gmail.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, thomas.petazzoni@free-electrons.com, andrew@lunn.ch, cjb@laptop.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Daniel Lezcano <daniel.lezcano@linaro.org>, Rickard Andersson <rickard.andersson@stericsson.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On Mon, Apr 22, 2013 at 09:54:57PM +0200, Simon Baatz wrote:
-> These patches add DT support for the Sheevaplugs by Globalscale
-> Technologies.  There exists two versions, one with an eSATA port and
-> one without.
-> 
-> Surprisingly, the conversion was not straight forward. In the eSATA
-> version (board revision 1.3), the CD and WP pins are connected to GPIO
-> lines, but I could not get this to work.  Apparently, I am not the only
-> one ([1]).  I found that the pins are reversed on my hardware and use
-> different active low/active high settings.
-> 
-> Thus, the first patch adds support for the GPIO active low/high flag in
-> DT to the mvsdio driver.
-> 
-> With that, everything except the Gigabit Ethernet can be described in
-> the DTS.  I have split the DTS and the board support files into two
-> patches.  This way, we can drop the last patch once we can describe
-> everything in the DTS or we can squash them together if we don't want
-> to wait.
-> 
-> I could only test on an eSATA Sheevaplug. I found patches with
-> different LEDs for the Sheevaplug.  Thus, I would highly appreciate if
-> someone with the hardware could give this a spin on a non-eSATA
-> version.  Some additional testing of the change detect and write
-> protect behaviour for sdio can't hurt either.  I hope that there aren't
-> board revisions with different CD/WP pins out there.
-> 
-> [1] http://lists.infradead.org/pipermail/linux-arm-kernel/2011-August/062567.html
-> 
-> Simon Baatz (3):
->   mmc: mvsdio: Support inverted CD and WP GPIO lines
->   ARM: Kirkwood: Add dts files for Sheevaplug and eSATA Sheevaplug
->   ARM: Kirkwood: Add DT support for Sheevaplug and Sheevaplug eSATA
+On Mon, May 13, 2013 at 3:47 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
 
-Simon,
+> By optionally putting the pins into sleep state in the .runtime_suspend
+> callback we can accomplish two things. One is to minimize current leakage
+> from pins and thus save power, second we can prevent the IP from driving
+> pins output in an uncontrolled manner, which may happen if the power domain
+> drops the domain regulator.
+>
+> When returning from idle, entering .runtime_resume callback, the pins
+> are restored to default state.
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Were you able to find any time to work on this?
+Looks straight-forward from a pinctrl point of view.
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-thx,
-
-Jason.
+Yours,
+Linus Walleij
