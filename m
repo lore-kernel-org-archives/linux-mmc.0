@@ -1,51 +1,64 @@
-From: Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>
-Subject: Re: [PATCH V2 07/10] ARM: mvebu: Use standard MMC binding for all
- users of mvsdio
-Date: Mon, 13 May 2013 19:09:18 -0400
-Message-ID: <20130513230918.GG31290@titan.lakedaemon.net>
-References: <1368479941-10084-1-git-send-email-gmbnomis@gmail.com>
- <1368479941-10084-8-git-send-email-gmbnomis@gmail.com>
+From: Jingoo Han <jg1.han@samsung.com>
+Subject: Re: [PATCH] drivers: mmc: host: use devm_ioremap_resource()
+Date: Tue, 14 May 2013 09:39:25 +0900
+Message-ID: <001601ce503b$7bfd1840$73f748c0$@samsung.com>
+References: <1368369860-32085-1-git-send-email-laurent.navet@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1368479941-10084-8-git-send-email-gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:65091 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752642Ab3ENAj1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 May 2013 20:39:27 -0400
+In-reply-to: <1368369860-32085-1-git-send-email-laurent.navet@gmail.com>
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Laurent Navet' <laurent.navet@gmail.com>, nico@fluxnic.net, cjb@laptop.org
+Cc: andrew@lunn.ch, thomas.petazzoni@free-electrons.com, jason@lakedaemon.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jingoo Han <jg1.han@samsung.com>, Sachin Kamat <sachin.kamat@linaro.org>
 
-On Mon, May 13, 2013 at 11:18:58PM +0200, Simon Baatz wrote:
-> In order to prepare the switch to the standard MMC device tree parser
-> for mvsdio, adapt all current uses of mvsdio in the dts files to the
-> standard format.
+Sunday, May 12, 2013 11:44 PM, Laurent Navet wrote:
 > 
-> Signed-off-by: Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> eplace a call to deprecated devm_request_and_ioremap by devm_ioremap_resource.
+
+CC'ed Sachin Kamat
+
+Fix the typo: eplace -> replace
+
+> 
+> Found with coccicheck and this semantic patch:
+>  scripts/coccinelle/api/devm_ioremap_resource.cocci
+> 
+> Signed-off-by: Laurent Navet <laurent.navet@gmail.com>
+
+It looks good.
+Reviewed-by: Jingoo Han <jg1.han@samsung.com>
+
+Best regards,
+Jingoo Han
+
 > ---
-...
-> diff --git a/arch/arm/boot/dts/kirkwood-mplcec4.dts b/arch/arm/boot/dts/kirkwood-mplcec4.dts
-> index 7588241..bf3a58c 100644
-> --- a/arch/arm/boot/dts/kirkwood-mplcec4.dts
-> +++ b/arch/arm/boot/dts/kirkwood-mplcec4.dts
-> @@ -136,7 +136,7 @@
->  			pinctrl-0 = <&pmx_sdio &pmx_sdio_cd>;
->  			pinctrl-names = "default";
->  			status = "okay";
-> -			cd-gpios = <&gpio1 15 0>;
-> +			cd-gpios = <&gpio1 15 1>;
+>  drivers/mmc/host/mvsdio.c |    6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+> index 8960fc8..a66ee4b 100644
+> --- a/drivers/mmc/host/mvsdio.c
+> +++ b/drivers/mmc/host/mvsdio.c
+> @@ -758,9 +758,9 @@ static int __init mvsd_probe(struct platform_device *pdev)
+> 
+>  	spin_lock_init(&host->lock);
+> 
+> -	host->base = devm_request_and_ioremap(&pdev->dev, r);
+> -	if (!host->base) {
+> -		ret = -ENOMEM;
+> +	host->base = devm_ioremap_resource(&pdev->dev, r);
+> +	if (IS_ERR(host->base)) {
+> +		ret = PTR_ERR(host->base);
+>  		goto out;
+>  	}
+> 
+> --
+> 1.7.10.4
 
-Is this a bugfix that should be backported?
-
-thx,
-
-Jason.
