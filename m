@@ -1,52 +1,59 @@
-From: Simon Baatz <gmbnomis@gmail.com>
-Subject: Re: [PATCH V2 07/10] ARM: mvebu: Use standard MMC binding for all
- users of mvsdio
-Date: Tue, 14 May 2013 07:37:06 +0200
-Message-ID: <20130514053706.GA29922@schnuecks.de>
-References: <1368479941-10084-1-git-send-email-gmbnomis@gmail.com>
- <1368479941-10084-8-git-send-email-gmbnomis@gmail.com>
- <20130513230918.GG31290@titan.lakedaemon.net>
+From: Barry Song <Baohua.Song@csr.com>
+Subject: [PATCH] mmc: sdhci-sirf: let device core setup the default pin
+ configuration
+Date: Tue, 14 May 2013 13:49:09 +0800
+Message-ID: <1368510549-7230-1-git-send-email-Baohua.Song@csr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ea0-f170.google.com ([209.85.215.170]:48690 "EHLO
-	mail-ea0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751263Ab3ENFhK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 May 2013 01:37:10 -0400
-Received: by mail-ea0-f170.google.com with SMTP id f15so59211eak.15
-        for <linux-mmc@vger.kernel.org>; Mon, 13 May 2013 22:37:08 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20130513230918.GG31290@titan.lakedaemon.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: cjb@laptop.org
+Cc: Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, workgroup.linux@csr.com, linux-arm-kernel@lists.infradead.org, Barry Song <Baohua.Song@csr.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Jason Cooper <jason@lakedaemon.net>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Andrew Lunn <andrew@lunn.ch>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-Hi Jason,
+With device core now able to setup the default pin configuration, the call
+to devm_pinctrl_get_select_default can be removed. And the pin configuration
+code based on the deprecated Samsung specific gpio bindings is also removed.
 
-On Mon, May 13, 2013 at 07:09:18PM -0400, Jason Cooper wrote:
-> On Mon, May 13, 2013 at 11:18:58PM +0200, Simon Baatz wrote:
-> > In order to prepare the switch to the standard MMC device tree parser
-> > for mvsdio, adapt all current uses of mvsdio in the dts files to the
-> > standard format.
-> > 
-> > Signed-off-by: Simon Baatz <gmbnomis@gmail.com>
-> > ---
-> ...
-> > diff --git a/arch/arm/boot/dts/kirkwood-mplcec4.dts b/arch/arm/boot/dts/kirkwood-mplcec4.dts
-> > index 7588241..bf3a58c 100644
-> > --- a/arch/arm/boot/dts/kirkwood-mplcec4.dts
-> > +++ b/arch/arm/boot/dts/kirkwood-mplcec4.dts
-> > @@ -136,7 +136,7 @@
-> >  			pinctrl-0 = <&pmx_sdio &pmx_sdio_cd>;
-> >  			pinctrl-names = "default";
-> >  			status = "okay";
-> > -			cd-gpios = <&gpio1 15 0>;
-> > +			cd-gpios = <&gpio1 15 1>;
-> 
-> Is this a bugfix that should be backported?
+CC: Linus Walleij <linus.walleij@linaro.org>
+Signed-off-by: Barry Song <Baohua.Song@csr.com>
+---
+ drivers/mmc/host/sdhci-sirf.c |    7 -------
+ 1 files changed, 0 insertions(+), 7 deletions(-)
 
-No, that should not be necessary. The old code implicitly used "1"
-here regardless of the actual flag value.
+diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
+index 09805af..04c81cf 100644
+--- a/drivers/mmc/host/sdhci-sirf.c
++++ b/drivers/mmc/host/sdhci-sirf.c
+@@ -46,15 +46,8 @@ static int sdhci_sirf_probe(struct platform_device *pdev)
+ 	struct sdhci_host *host;
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_sirf_priv *priv;
+-	struct pinctrl *pinctrl;
+ 	int ret;
+ 
+-	pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
+-	if (IS_ERR(pinctrl)) {
+-		dev_err(&pdev->dev, "unable to get pinmux");
+-		return PTR_ERR(pinctrl);
+-	}
+-
+ 	priv = devm_kzalloc(&pdev->dev, sizeof(struct sdhci_sirf_priv),
+ 		GFP_KERNEL);
+ 	if (!priv) {
+-- 
+1.7.4.1
 
-- Simon
+
+
+Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
+More information can be found at www.csr.com. Follow CSR on Twitter at http://twitter.com/CSR_PLC and read our blog at www.csr.com/blog
