@@ -1,118 +1,36 @@
-From: Gerhard Sittig <gsi@denx.de>
-Subject: [PATCH v1 1/1] mmc: mxcmmc: setup mpc512x related clocks
-Date: Tue, 14 May 2013 17:00:09 +0200
-Message-ID: <1368543609-11372-2-git-send-email-gsi@denx.de>
-References: <1368543609-11372-1-git-send-email-gsi@denx.de>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: core: Add a capability for disabling mmc cards
+Date: Tue, 14 May 2013 08:04:29 -0700
+Message-ID: <CAD=FV=VF2cVMR+2p5BTidOPKV0kAqJVGRxWYV4WRPu6qjkE+Vw@mail.gmail.com>
+References: <1368517100-22243-1-git-send-email-adam.lee@canonical.com>
+	<20130514075333.GA22435@adam-laptop>
+	<874ne5n6zv.fsf@octavius.laptop.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-out.m-online.net ([212.18.0.10]:39011 "EHLO
-	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752917Ab3ENPBR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 May 2013 11:01:17 -0400
-In-Reply-To: <1368543609-11372-1-git-send-email-gsi@denx.de>
+Received: from mail-la0-f52.google.com ([209.85.215.52]:65035 "EHLO
+	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757875Ab3ENPEa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 May 2013 11:04:30 -0400
+Received: by mail-la0-f52.google.com with SMTP id fo13so656879lab.11
+        for <linux-mmc@vger.kernel.org>; Tue, 14 May 2013 08:04:29 -0700 (PDT)
+In-Reply-To: <874ne5n6zv.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, Anatolij Gustschin <agust@denx.de>, Gerhard Sittig <gsi@denx.de>
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, nico@fluxnic.net, Alim Akhtar <alim.akhtar@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-the mxcmmc(4) driver is shared across the i.MX and MPC512x platforms,
-setup the 'sdhc_clk' instead of 'ipg' and 'per' in the mpc512x case
+Chris / Adam,
 
-this change re-uses the i.MX 'per' clock related variable for everything
-SDHC/MMC related, and makes the 'ipg' clock related variable access
-conditional -- this approach is less intrusive than adding an #ifdef and
-two sets of variables everywhere
+On Tue, May 14, 2013 at 4:19 AM, Chris Ball <cjb@laptop.org> wrote:
+> This has already been NACKed by Nicolas:
+>
+> https://patchwork.kernel.org/patch/1359121/
+>
+> (At least, I think it has -- your forward doesn't include the patch
+> itself.)
 
-viewing the change with 'git diff -w' better reflects its nature
+Yup, it got NAKed.  Unless something has changed I think that
+interested parties will need to carry this as a local patch.
 
-Signed-off-by: Gerhard Sittig <gsi@denx.de>
----
- drivers/mmc/host/mxcmmc.c |   41 +++++++++++++++++++++++++++--------------
- 1 file changed, 27 insertions(+), 14 deletions(-)
-
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index d503635..b9d21cc 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -1121,20 +1121,29 @@ static int mxcmci_probe(struct platform_device *pdev)
- 	host->res = r;
- 	host->irq = irq;
- 
--	host->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
--	if (IS_ERR(host->clk_ipg)) {
--		ret = PTR_ERR(host->clk_ipg);
--		goto out_iounmap;
--	}
-+	if (!is_mpc512x_mmc(host)) {
-+		host->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
-+		if (IS_ERR(host->clk_ipg)) {
-+			ret = PTR_ERR(host->clk_ipg);
-+			goto out_iounmap;
-+		}
- 
--	host->clk_per = devm_clk_get(&pdev->dev, "per");
--	if (IS_ERR(host->clk_per)) {
--		ret = PTR_ERR(host->clk_per);
--		goto out_iounmap;
-+		host->clk_per = devm_clk_get(&pdev->dev, "per");
-+		if (IS_ERR(host->clk_per)) {
-+			ret = PTR_ERR(host->clk_per);
-+			goto out_iounmap;
-+		}
-+	} else {
-+		host->clk_per = devm_clk_get(&pdev->dev, "sdhc_clk");
-+		if (IS_ERR(host->clk_per)) {
-+			ret = PTR_ERR(host->clk_per);
-+			goto out_iounmap;
-+		}
- 	}
- 
- 	clk_prepare_enable(host->clk_per);
--	clk_prepare_enable(host->clk_ipg);
-+	if (host->clk_ipg)
-+		clk_prepare_enable(host->clk_ipg);
- 
- 	mxcmci_softreset(host);
- 
-@@ -1204,7 +1213,8 @@ out_free_dma:
- 		dma_release_channel(host->dma);
- out_clk_put:
- 	clk_disable_unprepare(host->clk_per);
--	clk_disable_unprepare(host->clk_ipg);
-+	if (host->clk_ipg)
-+		clk_disable_unprepare(host->clk_ipg);
- out_iounmap:
- 	iounmap(host->base);
- out_free:
-@@ -1236,7 +1246,8 @@ static int mxcmci_remove(struct platform_device *pdev)
- 		dma_release_channel(host->dma);
- 
- 	clk_disable_unprepare(host->clk_per);
--	clk_disable_unprepare(host->clk_ipg);
-+	if (host->clk_ipg)
-+		clk_disable_unprepare(host->clk_ipg);
- 
- 	release_mem_region(host->res->start, resource_size(host->res));
- 
-@@ -1255,7 +1266,8 @@ static int mxcmci_suspend(struct device *dev)
- 	if (mmc)
- 		ret = mmc_suspend_host(mmc);
- 	clk_disable_unprepare(host->clk_per);
--	clk_disable_unprepare(host->clk_ipg);
-+	if (host->clk_ipg)
-+		clk_disable_unprepare(host->clk_ipg);
- 
- 	return ret;
- }
-@@ -1267,7 +1279,8 @@ static int mxcmci_resume(struct device *dev)
- 	int ret = 0;
- 
- 	clk_prepare_enable(host->clk_per);
--	clk_prepare_enable(host->clk_ipg);
-+	if (host->clk_ipg)
-+		clk_prepare_enable(host->clk_ipg);
- 	if (mmc)
- 		ret = mmc_resume_host(mmc);
- 
--- 
-1.7.10.4
-
+-Doug
