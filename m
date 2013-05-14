@@ -1,64 +1,52 @@
-From: Jingoo Han <jg1.han@samsung.com>
-Subject: Re: [PATCH] drivers: mmc: host: use devm_ioremap_resource()
-Date: Tue, 14 May 2013 09:39:25 +0900
-Message-ID: <001601ce503b$7bfd1840$73f748c0$@samsung.com>
-References: <1368369860-32085-1-git-send-email-laurent.navet@gmail.com>
+From: Simon Baatz <gmbnomis@gmail.com>
+Subject: Re: [PATCH V2 07/10] ARM: mvebu: Use standard MMC binding for all
+ users of mvsdio
+Date: Tue, 14 May 2013 07:37:06 +0200
+Message-ID: <20130514053706.GA29922@schnuecks.de>
+References: <1368479941-10084-1-git-send-email-gmbnomis@gmail.com>
+ <1368479941-10084-8-git-send-email-gmbnomis@gmail.com>
+ <20130513230918.GG31290@titan.lakedaemon.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:65091 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752642Ab3ENAj1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 May 2013 20:39:27 -0400
-In-reply-to: <1368369860-32085-1-git-send-email-laurent.navet@gmail.com>
-Content-language: ko
+Received: from mail-ea0-f170.google.com ([209.85.215.170]:48690 "EHLO
+	mail-ea0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751263Ab3ENFhK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 May 2013 01:37:10 -0400
+Received: by mail-ea0-f170.google.com with SMTP id f15so59211eak.15
+        for <linux-mmc@vger.kernel.org>; Mon, 13 May 2013 22:37:08 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <20130513230918.GG31290@titan.lakedaemon.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Laurent Navet' <laurent.navet@gmail.com>, nico@fluxnic.net, cjb@laptop.org
-Cc: andrew@lunn.ch, thomas.petazzoni@free-electrons.com, jason@lakedaemon.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jingoo Han <jg1.han@samsung.com>, Sachin Kamat <sachin.kamat@linaro.org>
+To: Jason Cooper <jason@lakedaemon.net>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Andrew Lunn <andrew@lunn.ch>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-Sunday, May 12, 2013 11:44 PM, Laurent Navet wrote:
+Hi Jason,
+
+On Mon, May 13, 2013 at 07:09:18PM -0400, Jason Cooper wrote:
+> On Mon, May 13, 2013 at 11:18:58PM +0200, Simon Baatz wrote:
+> > In order to prepare the switch to the standard MMC device tree parser
+> > for mvsdio, adapt all current uses of mvsdio in the dts files to the
+> > standard format.
+> > 
+> > Signed-off-by: Simon Baatz <gmbnomis@gmail.com>
+> > ---
+> ...
+> > diff --git a/arch/arm/boot/dts/kirkwood-mplcec4.dts b/arch/arm/boot/dts/kirkwood-mplcec4.dts
+> > index 7588241..bf3a58c 100644
+> > --- a/arch/arm/boot/dts/kirkwood-mplcec4.dts
+> > +++ b/arch/arm/boot/dts/kirkwood-mplcec4.dts
+> > @@ -136,7 +136,7 @@
+> >  			pinctrl-0 = <&pmx_sdio &pmx_sdio_cd>;
+> >  			pinctrl-names = "default";
+> >  			status = "okay";
+> > -			cd-gpios = <&gpio1 15 0>;
+> > +			cd-gpios = <&gpio1 15 1>;
 > 
-> eplace a call to deprecated devm_request_and_ioremap by devm_ioremap_resource.
+> Is this a bugfix that should be backported?
 
-CC'ed Sachin Kamat
+No, that should not be necessary. The old code implicitly used "1"
+here regardless of the actual flag value.
 
-Fix the typo: eplace -> replace
-
-> 
-> Found with coccicheck and this semantic patch:
->  scripts/coccinelle/api/devm_ioremap_resource.cocci
-> 
-> Signed-off-by: Laurent Navet <laurent.navet@gmail.com>
-
-It looks good.
-Reviewed-by: Jingoo Han <jg1.han@samsung.com>
-
-Best regards,
-Jingoo Han
-
-> ---
->  drivers/mmc/host/mvsdio.c |    6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-> index 8960fc8..a66ee4b 100644
-> --- a/drivers/mmc/host/mvsdio.c
-> +++ b/drivers/mmc/host/mvsdio.c
-> @@ -758,9 +758,9 @@ static int __init mvsd_probe(struct platform_device *pdev)
-> 
->  	spin_lock_init(&host->lock);
-> 
-> -	host->base = devm_request_and_ioremap(&pdev->dev, r);
-> -	if (!host->base) {
-> -		ret = -ENOMEM;
-> +	host->base = devm_ioremap_resource(&pdev->dev, r);
-> +	if (IS_ERR(host->base)) {
-> +		ret = PTR_ERR(host->base);
->  		goto out;
->  	}
-> 
-> --
-> 1.7.10.4
-
+- Simon
