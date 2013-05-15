@@ -1,84 +1,55 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 2/4] mmc: mmci: Support signal voltage switch for UHS cards
-Date: Wed, 15 May 2013 11:40:20 +0200
-Message-ID: <1368610823-14113-3-git-send-email-ulf.hansson@stericsson.com>
-References: <1368610823-14113-1-git-send-email-ulf.hansson@stericsson.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 5/5] mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA
+Date: Wed, 15 May 2013 15:25:49 +0200
+Message-ID: <201305151525.50005.arnd@arndb.de>
+References: <1368571955-6652-1-git-send-email-dinguyen@altera.com> <1368571955-6652-5-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog125.obsmtp.com ([207.126.144.159]:44957 "EHLO
-	eu1sys200aog125.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1758800Ab3EOJmE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 May 2013 05:42:04 -0400
-In-Reply-To: <1368610823-14113-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from moutng.kundenserver.de ([212.227.17.8]:54719 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758125Ab3EONZ4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 May 2013 09:25:56 -0400
+In-Reply-To: <1368571955-6652-5-git-send-email-dinguyen@altera.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+To: dinguyen@altera.com
+Cc: linux-arm-kernel@lists.infradead.org, dinh.linux@gmail.com, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Olof Johansson <olof@lixom.net>, Pavel Machek <pavel@denx.de>, linux-mmc@vger.kernel.org
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+On Wednesday 15 May 2013, dinguyen@altera.com wrote:
+> +
+> +#define SYSMGR_SDMMCGRP_CTRL_OFFSET		0x108
+> +#define DRV_CLK_PHASE_SHIFT_SEL_MASK	0x7
+> +#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel)		\
+> +	((((drvsel) << 0) & 0x7) | (((smplsel) << 3) & 0x38))
+> +
+> +extern void __iomem *sys_manager_base_addr;
 
-Add .start_signal_voltage_switch callback to be able to support UHS cards.
-The voltage switch requires the optional vqmmc regulator to exist since
-the actual voltage switch will be performed directly on it.
+This is not acceptable, you cannot just reference external symbols
+from one driver in another, without a proper interface.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/host/mmci.c |   34 ++++++++++++++++++++++++++++++++++
- 1 file changed, 34 insertions(+)
+Please explain what the functionality is that you need here, then
+we can help you find the proper interface. My guess is that you
+need either the functionality provided by drivers/reset/
+or drivers/mfd/syscon.c.
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 2983c15..8d4ceb8 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1253,6 +1253,39 @@ static int mmci_get_cd(struct mmc_host *mmc)
- 	return status;
- }
- 
-+static int mmci_sig_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	int ret = 0;
-+
-+	if (!IS_ERR(mmc->supply.vqmmc)) {
-+
-+		pm_runtime_get_sync(mmc_dev(mmc));
-+
-+		switch (ios->signal_voltage) {
-+		case MMC_SIGNAL_VOLTAGE_330:
-+			ret = regulator_set_voltage(mmc->supply.vqmmc,
-+						2700000, 3600000);
-+			break;
-+		case MMC_SIGNAL_VOLTAGE_180:
-+			ret = regulator_set_voltage(mmc->supply.vqmmc,
-+						1700000, 1950000);
-+			break;
-+		case MMC_SIGNAL_VOLTAGE_120:
-+			ret = regulator_set_voltage(mmc->supply.vqmmc,
-+						1100000, 1300000);
-+			break;
-+		}
-+
-+		if (ret)
-+			dev_warn(mmc_dev(mmc), "Voltage switch failed\n");
-+
-+		pm_runtime_mark_last_busy(mmc_dev(mmc));
-+		pm_runtime_put_autosuspend(mmc_dev(mmc));
-+	}
-+
-+	return ret;
-+}
-+
- static irqreturn_t mmci_cd_irq(int irq, void *dev_id)
- {
- 	struct mmci_host *host = dev_id;
-@@ -1269,6 +1302,7 @@ static const struct mmc_host_ops mmci_ops = {
- 	.set_ios	= mmci_set_ios,
- 	.get_ro		= mmci_get_ro,
- 	.get_cd		= mmci_get_cd,
-+	.start_signal_voltage_switch = mmci_sig_volt_switch,
- };
- 
- #ifdef CONFIG_OF
--- 
-1.7.10
+> +       if (of_property_read_u32(dev->of_node, "pwr-en", &pwr_en)) {
+> +               dev_info(dev, "couldn't determine pwr-en, assuming pwr-en = 0\n");
+> +               pwr_en = 0;
+> +       }
+> +
+> +       /* Set PWREN bit */
+> +       mci_writel(host, PWREN, pwr_en);
 
+If you add new properties, you have to document them in
+Documentations/devicetree/bindings/*.
+
+What is the requirement for this property? Is there no way to 
+automatically power the card on/off using the normal
+dw_mci_set_ios function?
+
+The rest of this patch looks ok to me.
+
+	Arnd
