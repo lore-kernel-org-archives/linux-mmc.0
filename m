@@ -1,55 +1,53 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 5/5] mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA
-Date: Wed, 15 May 2013 15:25:49 +0200
-Message-ID: <201305151525.50005.arnd@arndb.de>
-References: <1368571955-6652-1-git-send-email-dinguyen@altera.com> <1368571955-6652-5-git-send-email-dinguyen@altera.com>
+From: Johan Rudholm <jrudholm@gmail.com>
+Subject: Re: [PATCH 0/4] mmc: mmci: Add support for UHS cards
+Date: Wed, 15 May 2013 16:10:09 +0200
+Message-ID: <CA+20K0DP1xY1urAsxBFWcaN22AahJ3GVG2dxhACFArfwuZFDZw@mail.gmail.com>
+References: <1368610823-14113-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:54719 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758125Ab3EONZ4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 May 2013 09:25:56 -0400
-In-Reply-To: <1368571955-6652-5-git-send-email-dinguyen@altera.com>
+Received: from mail-qe0-f53.google.com ([209.85.128.53]:49606 "EHLO
+	mail-qe0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758992Ab3EOOKK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 May 2013 10:10:10 -0400
+Received: by mail-qe0-f53.google.com with SMTP id cz11so1247512qeb.40
+        for <linux-mmc@vger.kernel.org>; Wed, 15 May 2013 07:10:09 -0700 (PDT)
+In-Reply-To: <1368610823-14113-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com
-Cc: linux-arm-kernel@lists.infradead.org, dinh.linux@gmail.com, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Olof Johansson <olof@lixom.net>, Pavel Machek <pavel@denx.de>, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On Wednesday 15 May 2013, dinguyen@altera.com wrote:
-> +
-> +#define SYSMGR_SDMMCGRP_CTRL_OFFSET		0x108
-> +#define DRV_CLK_PHASE_SHIFT_SEL_MASK	0x7
-> +#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel)		\
-> +	((((drvsel) << 0) & 0x7) | (((smplsel) << 3) & 0x38))
-> +
-> +extern void __iomem *sys_manager_base_addr;
+Hi,
 
-This is not acceptable, you cannot just reference external symbols
-from one driver in another, without a proper interface.
+2013/5/15 Ulf Hansson <ulf.hansson@stericsson.com>:
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+>
+> UHS cards in mode SDR12|25 operates at 1.8V I/O voltage. This patchset
+> adds support to handle the corresponding voltage switch from the default
+> 2.7-3.6 I/O voltage to 1.8V.
+>
+> The first patch, "Fixup regulator handling for vqmmc" has recently been
+> sent as a separate patch, since it is a pure bugfix. Nevertheless this
+> patchset depends on this patch, thus I decided to fold it here as well.
+>
+> Host capabilities for SDR12 and SDR25 needs to be set to enable support,
+> but that will be handled outside this patchset.
+>
+> Ulf Hansson (4):
+>   mmc: mmci: Fixup regulator handling for vqmmc
+>   mmc: mmci: Support signal voltage switch for UHS cards
+>   mmc: mmci: Cache MMCIDATACTRL register
+>   mmc: mmci: Add card_busy function to improve UHS card support
+>
+>  drivers/mmc/host/mmci.c |   94 +++++++++++++++++++++++++++++++++++++++++++----
+>  drivers/mmc/host/mmci.h |    4 ++
+>  2 files changed, 90 insertions(+), 8 deletions(-)
 
-Please explain what the functionality is that you need here, then
-we can help you find the proper interface. My guess is that you
-need either the functionality provided by drivers/reset/
-or drivers/mfd/syscon.c.
+Looks good! Please add my
 
-> +       if (of_property_read_u32(dev->of_node, "pwr-en", &pwr_en)) {
-> +               dev_info(dev, "couldn't determine pwr-en, assuming pwr-en = 0\n");
-> +               pwr_en = 0;
-> +       }
-> +
-> +       /* Set PWREN bit */
-> +       mci_writel(host, PWREN, pwr_en);
+Reviewed-by: Johan Rudholm <jrudholm@gmail.com>
 
-If you add new properties, you have to document them in
-Documentations/devicetree/bindings/*.
+to this patch set.
 
-What is the requirement for this property? Is there no way to 
-automatically power the card on/off using the normal
-dw_mci_set_ios function?
-
-The rest of this patch looks ok to me.
-
-	Arnd
+Kind regards, Johan
