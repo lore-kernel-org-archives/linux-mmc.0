@@ -1,15 +1,15 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 4/4] mmc: mmci: Add card_busy function to improve UHS card support
-Date: Wed, 15 May 2013 11:40:22 +0200
-Message-ID: <1368610823-14113-5-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH 1/4] mmc: mmci: Fixup regulator handling for vqmmc
+Date: Wed, 15 May 2013 11:40:19 +0200
+Message-ID: <1368610823-14113-2-git-send-email-ulf.hansson@stericsson.com>
 References: <1368610823-14113-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog120.obsmtp.com ([207.126.144.149]:53186 "EHLO
-	eu1sys200aog120.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1758757Ab3EOJlZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 May 2013 05:41:25 -0400
+Received: from eu1sys200aog123.obsmtp.com ([207.126.144.155]:45410 "EHLO
+	eu1sys200aog123.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754581Ab3EOJlf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 May 2013 05:41:35 -0400
 In-Reply-To: <1368610823-14113-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -18,128 +18,64 @@ Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Linus Walleij <linus
 
 From: Ulf Hansson <ulf.hansson@linaro.org>
 
-To verify a signal voltage switch at initialization of UHS cards the
-.card_busy callback is used. For some of the ST-variants, card busy
-detection on the DAT0 pin is supported.
+We can not rely on regulator_is_enabled to decide whether to
+enable|disable the regulator. It would mean that the reference
+counter for it is not balanced properly.
 
-We extend the variant struct with a busy_detect flag to indicate
-support for it. A corresponding busy detect function, which polls the
-busy status bit, is then set to the .card_busy callback.
+Instead keep track of our internal state by using a new flag in
+the host struct, so we can take correct decisions.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/mmci.c |   33 ++++++++++++++++++++++++++++++++-
- drivers/mmc/host/mmci.h |    2 ++
- 2 files changed, 34 insertions(+), 1 deletion(-)
+ drivers/mmc/host/mmci.c |   10 ++++++----
+ drivers/mmc/host/mmci.h |    1 +
+ 2 files changed, 7 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 4530217..fa1a7d7 100644
+index f4f3038..2983c15 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -61,6 +61,7 @@ static unsigned int fmax = 515633;
-  * @pwrreg_powerup: power up value for MMCIPOWER register
-  * @signal_direction: input/out direction of bus signals can be indicated
-  * @pwrreg_clkgate: MMCIPOWER register must be used to gate the clock
-+ * @busy_detect: true if busy detection on dat0 is supported
-  */
- struct variant_data {
- 	unsigned int		clkreg;
-@@ -74,6 +75,7 @@ struct variant_data {
- 	u32			pwrreg_powerup;
- 	bool			signal_direction;
- 	bool			pwrreg_clkgate;
-+	bool			busy_detect;
- };
+@@ -1143,9 +1143,10 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		if (!IS_ERR(mmc->supply.vmmc))
+ 			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
  
- static struct variant_data variant_arm = {
-@@ -132,6 +134,7 @@ static struct variant_data variant_ux500 = {
- 	.pwrreg_powerup		= MCI_PWR_ON,
- 	.signal_direction	= true,
- 	.pwrreg_clkgate		= true,
-+	.busy_detect		= true,
- };
+-		if (!IS_ERR(mmc->supply.vqmmc) &&
+-		    regulator_is_enabled(mmc->supply.vqmmc))
++		if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled) {
+ 			regulator_disable(mmc->supply.vqmmc);
++			host->vqmmc_enabled = false;
++		}
  
- static struct variant_data variant_ux500v2 = {
-@@ -146,8 +149,28 @@ static struct variant_data variant_ux500v2 = {
- 	.pwrreg_powerup		= MCI_PWR_ON,
- 	.signal_direction	= true,
- 	.pwrreg_clkgate		= true,
-+	.busy_detect		= true,
- };
+ 		break;
+ 	case MMC_POWER_UP:
+@@ -1161,12 +1162,13 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  
-+static int mmci_card_busy(struct mmc_host *mmc)
-+{
-+	struct mmci_host *host = mmc_priv(mmc);
-+	unsigned long flags;
-+	int busy = 0;
-+
-+	pm_runtime_get_sync(mmc_dev(mmc));
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+	if (readl(host->base + MMCISTATUS) & MCI_ST_CARDBUSY)
-+		busy = 1;
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	pm_runtime_mark_last_busy(mmc_dev(mmc));
-+	pm_runtime_put_autosuspend(mmc_dev(mmc));
-+
-+	return busy;
-+}
-+
- /*
-  * Validate mmc prerequisites
-  */
-@@ -193,6 +216,9 @@ static void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
-  */
- static void mmci_write_datactrlreg(struct mmci_host *host, u32 datactrl)
- {
-+	/* Keep ST Micro busy mode if enabled */
-+	datactrl |= host->datactrl_reg & MCI_ST_DPSM_BUSYMODE;
-+
- 	if (host->datactrl_reg != datactrl) {
- 		host->datactrl_reg = datactrl;
- 		writel(datactrl, host->base + MMCIDATACTRL);
-@@ -1306,7 +1332,7 @@ static irqreturn_t mmci_cd_irq(int irq, void *dev_id)
- 	return IRQ_HANDLED;
- }
+ 		break;
+ 	case MMC_POWER_ON:
+-		if (!IS_ERR(mmc->supply.vqmmc) &&
+-		    !regulator_is_enabled(mmc->supply.vqmmc)) {
++		if (!IS_ERR(mmc->supply.vqmmc) && !host->vqmmc_enabled) {
+ 			ret = regulator_enable(mmc->supply.vqmmc);
+ 			if (ret < 0)
+ 				dev_err(mmc_dev(mmc),
+ 					"failed to enable vqmmc regulator\n");
++			else
++				host->vqmmc_enabled = true;
+ 		}
  
--static const struct mmc_host_ops mmci_ops = {
-+static struct mmc_host_ops mmci_ops = {
- 	.request	= mmci_request,
- 	.pre_req	= mmci_pre_request,
- 	.post_req	= mmci_post_request,
-@@ -1443,6 +1469,11 @@ static int mmci_probe(struct amba_device *dev,
- 		goto clk_disable;
- 	}
- 
-+	if (variant->busy_detect) {
-+		mmci_ops.card_busy = mmci_card_busy;
-+		mmci_write_datactrlreg(host, MCI_ST_DPSM_BUSYMODE);
-+	}
-+
- 	mmc->ops = &mmci_ops;
- 	/*
- 	 * The ARM and ST versions of the block have slightly different
+ 		pwr |= MCI_PWR_ON;
 diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 0b6cc54..69080fa 100644
+index 1f33ad5..1383c9c 100644
 --- a/drivers/mmc/host/mmci.h
 +++ b/drivers/mmc/host/mmci.h
-@@ -94,6 +94,7 @@
- /* Extended status bits for the ST Micro variants */
- #define MCI_ST_SDIOIT		(1 << 22)
- #define MCI_ST_CEATAEND		(1 << 23)
-+#define MCI_ST_CARDBUSY		(1 << 24)
+@@ -183,6 +183,7 @@ struct mmci_host {
+ 	unsigned int		cclk;
+ 	u32			pwr_reg;
+ 	u32			clk_reg;
++	bool			vqmmc_enabled;
+ 	struct mmci_platform_data *plat;
+ 	struct variant_data	*variant;
  
- #define MMCICLEAR		0x038
- #define MCI_CMDCRCFAILCLR	(1 << 0)
-@@ -110,6 +111,7 @@
- /* Extended status bits for the ST Micro variants */
- #define MCI_ST_SDIOITC		(1 << 22)
- #define MCI_ST_CEATAENDC	(1 << 23)
-+#define MCI_ST_BUSYENDC		(1 << 24)
- 
- #define MMCIMASK0		0x03c
- #define MCI_CMDCRCFAILMASK	(1 << 0)
 -- 
 1.7.10
 
