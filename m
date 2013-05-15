@@ -1,66 +1,82 @@
-From: Simon Baatz <gmbnomis@gmail.com>
-Subject: Re: [PATCH V2 00/10] mmc_of_parse() adaptations, DT support for
- Sheevaplugs
-Date: Wed, 15 May 2013 21:42:29 +0200
-Message-ID: <20130515194229.GA27459@schnuecks.de>
-References: <1368479941-10084-1-git-send-email-gmbnomis@gmail.com>
- <Pine.LNX.4.64.1305140819520.32151@axis700.grange>
- <20130514162652.GA13801@schnuecks.de>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc-utils: small fixes of output
+Date: Thu, 16 May 2013 07:17:11 +0900
+Message-ID: <51940967.8020309@samsung.com>
+References: <1368599284-28499-1-git-send-email-mario.schuknecht@dresearch-fe.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ea0-f181.google.com ([209.85.215.181]:61684 "EHLO
-	mail-ea0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932486Ab3EOTmd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 May 2013 15:42:33 -0400
-Received: by mail-ea0-f181.google.com with SMTP id a11so1247729eae.26
-        for <linux-mmc@vger.kernel.org>; Wed, 15 May 2013 12:42:31 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20130514162652.GA13801@schnuecks.de>
+Received: from mailout1.samsung.com ([203.254.224.24]:21328 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751103Ab3EOWRO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 May 2013 18:17:14 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MMV006AX1WILVJ0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 16 May 2013 07:17:13 +0900 (KST)
+In-reply-to: <1368599284-28499-1-git-send-email-mario.schuknecht@dresearch-fe.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Chris Ball <cjb@laptop.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org
 
-On Tue, May 14, 2013 at 06:26:52PM +0200, Simon Baatz wrote:
-> On Tue, May 14, 2013 at 08:37:47AM +0200, Guennadi Liakhovetski wrote:
-> > On Mon, 13 May 2013, Simon Baatz wrote:
-> > 
-> > > While adding DT support for the Sheevaplugs by Globalscale Technologies
-> > > (Kirkwood), it turned out that the DT binding of mvsdio lacked features to
-> > > properly support the hardware (active high/low of CD and WP pins could not
-> > > be described in DT).
-> > > 
-> > > This is standard functionality provided by the mmc_of_parse() helper
-> > > function.  However, mmc_of_parse() may allocate GPIO lines.  If the
-> > > allocation fails, it outputs an error, but does not return an error to its
-> > > caller.  Therefore, a proposal to handle errors in mmc_of_parse() is made.
-> > 
-> > Thanks for the patches. In principle I'm fine either way. It is a policy 
-> > decision IMHO. E.g. consider a situation. You have a DT with an SD-card 
-> > slot, where card-detection is performed by a GPIO. OTOH the same pin is 
-> > used on some other (optional) interface on the same board. If that other 
-> > competing interface is unused, the driver isn't loaded, you can use the 
-> > GPIO for card-detection. However, if that other interface is used, your 
-> > attempt to get the card-detect pin will fail, but you still can use the 
-> > interface in polling mode. No, I don't think this is a good example of 
-> > hardware design :) User experience would depend on driver probing order, 
-> > but in principle it is imaginable. So, with the current mmc_of_parse() 
-> > you're more tolerant. You get a warning in the log, but the interface 
-> > might still be usable. And if you're surprised why your write protection 
-> > status hasn't been properly detected - just look in the log.
+Looks good to me.
+
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+
+On 05/15/2013 03:28 PM, Mario Schuknecht wrote:
+> Improve "extcsd read" output of the registers.
+> Right-shift by 3 of EXT_CSD_BOOT_CFG_EN bits.
+> Expand the EXT_CSD_BOOT_CFG_ACC bit mask to 0x7.
+> Add case 3 RPMB partition.
 > 
-> Yes, there is value in both ways. As should be clear by now, I prefer
-> being more strict here :-).  But in the end, it is a policy decision
-> as you say.
+> Signed-off-by: Mario Schuknecht <mario.schuknecht@dresearch-fe.de>
+> ---
+>  mmc.h      |    2 +-
+>  mmc_cmds.c |    7 +++++--
+>  2 files changed, 6 insertions(+), 3 deletions(-)
+> 
+> diff --git a/mmc.h b/mmc.h
+> index c863751..a01c079 100644
+> --- a/mmc.h
+> +++ b/mmc.h
+> @@ -70,7 +70,7 @@
+>  #define EXT_CSD_BOOT_INFO_ALT		(1<<0)
+>  #define EXT_CSD_BOOT_CFG_ACK		(1<<6)
+>  #define EXT_CSD_BOOT_CFG_EN		(0x38)
+> -#define EXT_CSD_BOOT_CFG_ACC		(0x03)
+> +#define EXT_CSD_BOOT_CFG_ACC		(0x07)
+>  #define EXT_CSD_RST_N_EN_MASK		(0x03)
+>  #define EXT_CSD_HW_RESET_EN		(0x01)
+>  #define EXT_CSD_HW_RESET_DIS		(0x02)
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index b407f65..96a1cb5 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -613,7 +613,7 @@ int do_read_extcsd(int nargs, char **argv)
+>  		ext_csd[181]);
+>  	reg = ext_csd[EXT_CSD_BOOT_CFG];
+>  	printf("Boot configuration bytes [PARTITION_CONFIG: 0x%02x]\n", reg);
+> -	switch (reg & EXT_CSD_BOOT_CFG_EN) {
+> +	switch ((reg & EXT_CSD_BOOT_CFG_EN)>>3) {
+>  	case 0x0:
+>  		printf(" Not boot enable\n");
+>  		break;
+> @@ -637,8 +637,11 @@ int do_read_extcsd(int nargs, char **argv)
+>  	case 0x2:
+>  		printf(" R/W Boot Partition 2\n");
+>  		break;
+> +	case 0x3:
+> +		printf(" R/W Replay Protected Memory Block (RPMB)\n");
+> +		break;
+>  	default:
+> -		printf(" Access to General Purpuse partition %d\n",
+> +		printf(" Access to General Purpose partition %d\n",
+>  			(reg & EXT_CSD_BOOT_CFG_ACC) - 3);
+>  		break;
+>  	}
+> 
 
-I realized that I missed one use case: There are platforms on which a
-driver may load earlier than the GPIO driver.  In this case,
-EPROBE_DEFER can be used to retry the probe later.  Actually, mmci.c
-is an example of such a driver.
-
-Thus, when calling of_get_named_gpio_flags() in mmc_of_parse(), we
-need to check for EPROBE_DEFER and return that to the caller. I will
-update the patch accordingly.
-
-- Simon
