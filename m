@@ -1,16 +1,14 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 1/4] mmc: mmci: Fixup regulator handling for vqmmc
-Date: Wed, 15 May 2013 11:40:19 +0200
-Message-ID: <1368610823-14113-2-git-send-email-ulf.hansson@stericsson.com>
-References: <1368610823-14113-1-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH 0/4] mmc: mmci: Add support for UHS cards
+Date: Wed, 15 May 2013 11:40:18 +0200
+Message-ID: <1368610823-14113-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog123.obsmtp.com ([207.126.144.155]:45410 "EHLO
-	eu1sys200aog123.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754581Ab3EOJlf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 May 2013 05:41:35 -0400
-In-Reply-To: <1368610823-14113-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:37461 "EHLO
+	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1758803Ab3EOJl4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 May 2013 05:41:56 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>
@@ -18,64 +16,27 @@ Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Linus Walleij <linus
 
 From: Ulf Hansson <ulf.hansson@linaro.org>
 
-We can not rely on regulator_is_enabled to decide whether to
-enable|disable the regulator. It would mean that the reference
-counter for it is not balanced properly.
+UHS cards in mode SDR12|25 operates at 1.8V I/O voltage. This patchset
+adds support to handle the corresponding voltage switch from the default
+2.7-3.6 I/O voltage to 1.8V.
 
-Instead keep track of our internal state by using a new flag in
-the host struct, so we can take correct decisions.
+The first patch, "Fixup regulator handling for vqmmc" has recently been
+sent as a separate patch, since it is a pure bugfix. Nevertheless this
+patchset depends on this patch, thus I decided to fold it here as well.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/host/mmci.c |   10 ++++++----
- drivers/mmc/host/mmci.h |    1 +
- 2 files changed, 7 insertions(+), 4 deletions(-)
+Host capabilities for SDR12 and SDR25 needs to be set to enable support,
+but that will be handled outside this patchset.
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index f4f3038..2983c15 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1143,9 +1143,10 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		if (!IS_ERR(mmc->supply.vmmc))
- 			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
- 
--		if (!IS_ERR(mmc->supply.vqmmc) &&
--		    regulator_is_enabled(mmc->supply.vqmmc))
-+		if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled) {
- 			regulator_disable(mmc->supply.vqmmc);
-+			host->vqmmc_enabled = false;
-+		}
- 
- 		break;
- 	case MMC_POWER_UP:
-@@ -1161,12 +1162,13 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 		break;
- 	case MMC_POWER_ON:
--		if (!IS_ERR(mmc->supply.vqmmc) &&
--		    !regulator_is_enabled(mmc->supply.vqmmc)) {
-+		if (!IS_ERR(mmc->supply.vqmmc) && !host->vqmmc_enabled) {
- 			ret = regulator_enable(mmc->supply.vqmmc);
- 			if (ret < 0)
- 				dev_err(mmc_dev(mmc),
- 					"failed to enable vqmmc regulator\n");
-+			else
-+				host->vqmmc_enabled = true;
- 		}
- 
- 		pwr |= MCI_PWR_ON;
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 1f33ad5..1383c9c 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -183,6 +183,7 @@ struct mmci_host {
- 	unsigned int		cclk;
- 	u32			pwr_reg;
- 	u32			clk_reg;
-+	bool			vqmmc_enabled;
- 	struct mmci_platform_data *plat;
- 	struct variant_data	*variant;
- 
+Ulf Hansson (4):
+  mmc: mmci: Fixup regulator handling for vqmmc
+  mmc: mmci: Support signal voltage switch for UHS cards
+  mmc: mmci: Cache MMCIDATACTRL register
+  mmc: mmci: Add card_busy function to improve UHS card support
+
+ drivers/mmc/host/mmci.c |   94 +++++++++++++++++++++++++++++++++++++++++++----
+ drivers/mmc/host/mmci.h |    4 ++
+ 2 files changed, 90 insertions(+), 8 deletions(-)
+
 -- 
 1.7.10
 
