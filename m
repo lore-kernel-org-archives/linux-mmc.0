@@ -1,151 +1,150 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: mmc: core: proper ocr negotiation during resume
-Date: Thu, 16 May 2013 14:48:16 +0200
-Message-ID: <CAPDyKFr6q9d+3VvMfoHY2cDvma5yo==jXX5JB0yuZDtTUVFBZg@mail.gmail.com>
-References: <loom.20130516T070719-840@post.gmane.org>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 06/13] mmc: omap_hsmmc: add dt pbias and control mmc
+ support
+Date: Thu, 16 May 2013 09:16:51 -0700
+Message-ID: <20130516161650.GW5600@atomide.com>
+References: <1367330633-5941-1-git-send-email-balajitk@ti.com>
+ <1367330633-5941-7-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f175.google.com ([209.85.128.175]:60676 "EHLO
-	mail-ve0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753771Ab3EPMsR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 May 2013 08:48:17 -0400
-Received: by mail-ve0-f175.google.com with SMTP id cz11so2949998veb.20
-        for <linux-mmc@vger.kernel.org>; Thu, 16 May 2013 05:48:16 -0700 (PDT)
-In-Reply-To: <loom.20130516T070719-840@post.gmane.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1367330633-5941-7-git-send-email-balajitk@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, b-cousson@ti.com
 List-Id: linux-mmc@vger.kernel.org
-To: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
-Cc: linux-mmc@vger.kernel.org
 
-On 16 May 2013 07:14, Prasanna NAVARATNA <prasanna.navaratna@gmail.com> wrote:
-> Hello,
->
-> There seems some problem with ocr negotiation during resume. While going for
-> suspend, in mmc_power_off function, it resets ocr mask to be the highest
-> possible voltage supported for this mmc host. This value will be used at
-> next power up without actually negotiating with card's ocr by querying, as
-> done during initialization. This results in higher voltage during resume
-> compared to voltage used during initialization.
->
-> To fix this issue, i propose the following patch. Please review :-
->
-> From 305c151cb5b217ff7c622a769df120b14153c25a Mon Sep 17 00:00:00 2001
-> From: Prasanna NAVARATNA <prasanna.navaratna@broadcom.com>
-> Date: Thu, 4 Apr 2013 19:55:19 +0530
-> Subject: [PATCH] mmc: core: proper ocr negotiation during resume
->
-> Save the card ocr into struct mmc_card when read from card
-> during initialization of sd/mmc/sdio.
-> Druing mmc_resume_host, supply saved card's ocr to
-> mmc_select_voltage so as to negotiate voltage appropriately.
+Hi,
 
-We have already discussed this issue on the mailing list I believe.
-Your patch will not solve anything on it's own.
+* Balaji T K <balajitk@ti.com> [130430 07:09]:
+> Add omap_hsmmc_control to support pbias, high speed mode configuration for mmc1,
+> loopback clock configuration (when external transceiver is used) for mmc2
 
-> ---
->  drivers/mmc/core/core.c  |    1 +
->  drivers/mmc/core/mmc.c   |    3 +++
->  drivers/mmc/core/sd.c    |    3 +++
->  drivers/mmc/core/sdio.c  |    3 +++
->  include/linux/mmc/card.h |    1 +
->  5 files changed, 11 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index ad7decc..e61b5ab 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2680,6 +2680,7 @@ int mmc_resume_host(struct mmc_host *host)
->         if (host->bus_ops && !host->bus_dead) {
->                 if (!mmc_card_keep_power(host)) {
->                         mmc_power_up(host);
-> +                       host->ocr = host->card ? host->card->ocr : host->ocr;
->                         mmc_select_voltage(host, host->ocr);
+Thanks for working on this, few suggestions inlined below.
+ 
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -182,6 +182,7 @@ struct omap_hsmmc_host {
+>  	struct omap_hsmmc_next	next_data;
+>  
+>  	struct	omap_mmc_platform_data	*pdata;
+> +	struct omap_hsmmc_control	*ctrl_mmc;
+>  	int needs_vmmc:1;
+>  	int needs_vmmc_aux:1;
+>  };
+> @@ -265,6 +266,8 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+>  
+>  	if (mmc_slot(host).before_set_reg)
+>  		mmc_slot(host).before_set_reg(dev, slot, power_on, vdd);
+> +	if (host->ctrl_mmc && host->ctrl_mmc->before)
+> +		host->ctrl_mmc->before(host->ctrl_mmc->dev, power_on, vdd);
+>  
+>  	/*
+>  	 * Assume Vcc regulator is used only to power the card ... OMAP
+> @@ -302,6 +305,8 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+>  
+>  	if (mmc_slot(host).after_set_reg)
+>  		mmc_slot(host).after_set_reg(dev, slot, power_on, vdd);
+> +	if (host->ctrl_mmc && host->ctrl_mmc->after)
+> +		host->ctrl_mmc->after(host->ctrl_mmc->dev, power_on, vdd);
+>  
+>  	return ret;
+>  }
 
-mmc_select_voltage will manipulate the vdd/ocr, but at this point the
-card is already powered due to state is MMC_POWER_ON.
+These before and after functions should be first converted to just usual
+regulator_set_voltage() eventually. In the PBIAS case it's really a mux
+plus a comparator, but we can set it up as a regulator. And on some boards
+it can be an external regulator like we have the legacy callbacks for in
+mach-omap2/hsmmc.c.
 
->                         /*
->                          * Tell runtime PM core we just powered up the card,
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 0cbd1ef..9b4b3a5 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1566,6 +1566,9 @@ int mmc_attach_mmc(struct mmc_host *host)
->                 ocr &= ~0x7F;
->         }
->
-> +       /* Save the card OCR */
-> +       host->card->ocr = ocr;
+> +++ b/drivers/mmc/host/omap_hsmmc_control.c
+> @@ -0,0 +1,466 @@
+> +static void omap_control_mmc_writel(u32 reg, u32 *base2)
+> +{
+> +	if (base2)
+> +		__raw_writel(reg, base2);
+> +	return;
+> +}
 > +
->         host->ocr = mmc_select_voltage(host, ocr);
-
-dito
-
->
->         /*
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 9e645e1..965504b 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -1185,6 +1185,9 @@ int mmc_attach_sd(struct mmc_host *host)
->                 ocr &= ~MMC_VDD_165_195;
->         }
->
-> +       /* Save the card OCR */
-> +       host->card->ocr = ocr;
+> +static u32 omap_control_mmc_readl(u32 *base2)
+> +{
+> +	u32 pbias_reg = 0;
 > +
->         host->ocr = mmc_select_voltage(host, ocr);
-
-dito
-
->
->         /*
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index aa0719a..3f9e08d 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -1090,6 +1090,9 @@ int mmc_attach_sdio(struct mmc_host *host)
->                 ocr &= ~0x7F;
->         }
->
-> +       /* Save the card OCR */
-> +       host->card->ocr = ocr;
+> +	if (base2)
+> +		pbias_reg = __raw_readl(base2);
+> +	return pbias_reg;
+> +}
 > +
->         host->ocr = mmc_select_voltage(host, ocr);
+> +static void omap2430_mmc1_active_overwrite(u32 __iomem *devconf1, int vdd)
+> +{
+> +	u32 reg;
+> +
+> +	reg = omap_control_mmc_readl(devconf1);
+> +	if ((1 << vdd) >= MMC_VDD_30_31)
+> +		reg |= OMAP243X_MMC1_ACTIVE_OVERWRITE;
+> +	else
+> +		reg &= ~OMAP243X_MMC1_ACTIVE_OVERWRITE;
+> +	omap_control_mmc_writel(reg, devconf1);
+> +}
+> +/* pbias configuration for omap2430, omap3 */
+> +static void omap_hsmmc1_before_set_reg(struct device *dev,
+> +				  int power_on, int vdd)
+> +{
+> +	u32 reg;
+> +	struct omap_hsmmc_control *ctl_mmc = dev_get_drvdata(dev);
+> +
+> +	if (ctl_mmc->devconf1)
+> +		omap2430_mmc1_active_overwrite(ctl_mmc->devconf1, vdd);
+> +
+> +	reg = omap_control_mmc_readl(ctl_mmc->pbias);
+> +	reg &= ~OMAP2_PBIASLITEPWRDNZ0;
+> +	omap_control_mmc_writel(reg, ctl_mmc->pbias);
+> +}
+> +
+> +static void omap_hsmmc1_after_set_reg(struct device *dev,
+> +				 int power_on, int vdd)
+> +{
+> +	u32 reg;
+> +	struct omap_hsmmc_control *ctl_mmc = dev_get_drvdata(dev);
+> +
+> +	/* 100ms delay required for PBIAS configuration */
+> +	msleep(100);
+> +
+> +	if (power_on) {
+> +		reg = omap_control_mmc_readl(ctl_mmc->pbias);
+> +		reg |= OMAP2_PBIASLITEPWRDNZ0;
+> +		if ((1 << vdd) <= MMC_VDD_165_195)
+> +			reg &= ~OMAP2_PBIASLITEVMODE0;
+> +		else
+> +			reg |= OMAP2_PBIASLITEVMODE0;
+> +		omap_control_mmc_writel(reg, ctl_mmc->pbias);
+> +	} else {
+> +		reg = omap_control_mmc_readl(ctl_mmc->pbias);
+> +		reg |= (OMAP2_PBIASLITEPWRDNZ0 |
+> +			OMAP2_PBIASLITEVMODE0);
+> +		omap_control_mmc_writel(reg, ctl_mmc->pbias);
+> +	}
+> +}
+...
 
-dito
+This all we can simplify quite a bit by defining the PBIAS register
+as pinctrl-single,bits with two different named modes. One for
+1.8V and for 3.3V. This way the PBIAS register is abstracted for
+various omaps in the .dts file as the register is different.
 
->
->         /*
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index f31725b..1bbec2f 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -273,6 +273,7 @@ struct mmc_card {
->         u32                     raw_cid[4];     /* raw card CID */
->         u32                     raw_csd[4];     /* raw card CSD */
->         u32                     raw_scr[2];     /* raw card SCR */
-> +       u32                     ocr;            /* card OCR */
->         struct mmc_cid          cid;            /* card identification */
->         struct mmc_csd          csd;            /* card specific */
->         struct mmc_ext_csd      ext_csd;        /* mmc v4 extended card specific */
-> --
-> 1.7.6
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Then this file should just define a new regulator that requests the
+defined pinctrl named mode with pinctrl_select_state().
 
-Nack!
+Now the only thing missing AFAIK is getting the comparator value
+for checks with the generic pinconf framework. But you can already
+get the raw register value with pin_config_get() and add the
+checking to this driver until pinconf allows us to do that.
 
-This is not the proper way to solve this issue. We need a way to
-negotiate _AND_ use the correct ocr mask already at the first card
-initialization sequence, this is not done today. When that is solved,
-we don't need mmc_select_voltage as a part of the mmc_resume_host
-sequence I believe.
+BTW, the same can then be done for the USB transceivers if we
+figure out a way to properly deal with comparators with generic
+pinconf.
 
-Kind regards
-Ulf Hansson
+Regards,
+
+Tony
