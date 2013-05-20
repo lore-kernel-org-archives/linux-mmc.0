@@ -1,157 +1,65 @@
 From: Simon Baatz <gmbnomis@gmail.com>
-Subject: [PATCH V3 08/10] mmc: mvsdio: use standard MMC device-tree binding parser mmc_of_parse()
-Date: Tue, 21 May 2013 01:01:49 +0200
-Message-ID: <1369090911-1479-9-git-send-email-gmbnomis@gmail.com>
+Subject: [PATCH V3 06/10] mmc: tegra: handle mmc_of_parse() errors during probe
+Date: Tue, 21 May 2013 01:01:47 +0200
+Message-ID: <1369090911-1479-7-git-send-email-gmbnomis@gmail.com>
 References: <1369090911-1479-1-git-send-email-gmbnomis@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mo-p00-ob.rzone.de ([81.169.146.160]:46859 "EHLO
+Received: from mo-p00-ob.rzone.de ([81.169.146.162]:27896 "EHLO
 	mo-p00-ob.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757094Ab3ETXCk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 May 2013 19:02:40 -0400
+	with ESMTP id S1757094Ab3ETXCc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 May 2013 19:02:32 -0400
 In-Reply-To: <1369090911-1479-1-git-send-email-gmbnomis@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
 Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Instead of parsing the DT binding on our own, use the standard parser
-mmc_of_parse(), introduced by commit 6c56e7a.
-
 Signed-off-by: Simon Baatz <gmbnomis@gmail.com>
 ---
- drivers/mmc/host/mvsdio.c |   73 +++++++++++++++++++++++++--------------------
- 1 file changed, 40 insertions(+), 33 deletions(-)
+ drivers/mmc/host/sdhci-tegra.c |    9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index 8960fc8..edfc481 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -35,7 +35,7 @@
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index e0dba74..7eb62f8 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -205,7 +205,7 @@ static const struct of_device_id sdhci_tegra_dt_match[] = {
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_tegra_dt_match);
  
- #define DRIVER_NAME	"mvsdio"
+-static void sdhci_tegra_parse_dt(struct device *dev)
++static int sdhci_tegra_parse_dt(struct device *dev)
+ {
+ 	struct device_node *np = dev->of_node;
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+@@ -213,7 +213,7 @@ static void sdhci_tegra_parse_dt(struct device *dev)
+ 	struct sdhci_tegra *tegra_host = pltfm_host->priv;
  
--static int maxfreq = MVSD_CLOCKRATE_MAX;
-+static int maxfreq;
- static int nodma;
+ 	tegra_host->power_gpio = of_get_named_gpio(np, "power-gpios", 0);
+-	mmc_of_parse(host->mmc);
++	return mmc_of_parse(host->mmc);
+ }
  
- struct mvsd_host {
-@@ -685,7 +685,6 @@ static int __init mvsd_probe(struct platform_device *pdev)
- 	const struct mbus_dram_target_info *dram;
- 	struct resource *r;
- 	int ret, irq;
--	int gpio_card_detect, gpio_write_protect;
- 	struct pinctrl *pinctrl;
+ static int sdhci_tegra_probe(struct platform_device *pdev)
+@@ -245,7 +245,9 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+ 	tegra_host->soc_data = soc_data;
+ 	pltfm_host->priv = tegra_host;
  
- 	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-@@ -718,6 +717,20 @@ static int __init mvsd_probe(struct platform_device *pdev)
- 	if (!IS_ERR(host->clk))
- 		clk_prepare_enable(host->clk);
+-	sdhci_tegra_parse_dt(&pdev->dev);
++	rc = sdhci_tegra_parse_dt(&pdev->dev);
++	if (rc)
++		goto err_parse_dt;
  
-+	mmc->ops = &mvsd_ops;
-+
-+	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-+
-+	mmc->f_min = DIV_ROUND_UP(host->base_clock, MVSD_BASE_DIV_MAX);
-+	mmc->f_max = MVSD_CLOCKRATE_MAX;
-+
-+	mmc->max_blk_size = 2048;
-+	mmc->max_blk_count = 65535;
-+
-+	mmc->max_segs = 1;
-+	mmc->max_seg_size = mmc->max_blk_size * mmc->max_blk_count;
-+	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
-+
- 	if (np) {
- 		if (IS_ERR(host->clk)) {
- 			dev_err(&pdev->dev, "DT platforms must have a clock associated\n");
-@@ -726,35 +739,38 @@ static int __init mvsd_probe(struct platform_device *pdev)
- 		}
- 
- 		host->base_clock = clk_get_rate(host->clk) / 2;
--		gpio_card_detect = of_get_named_gpio(np, "cd-gpios", 0);
--		gpio_write_protect = of_get_named_gpio(np, "wp-gpios", 0);
-+		ret = mmc_of_parse(mmc);
-+		if (ret < 0)
-+			goto out;
- 	} else {
- 		const struct mvsdio_platform_data *mvsd_data;
-+
- 		mvsd_data = pdev->dev.platform_data;
- 		if (!mvsd_data) {
- 			ret = -ENXIO;
- 			goto out;
- 		}
-+		mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ |
-+			    MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
- 		host->base_clock = mvsd_data->clock / 2;
--		gpio_card_detect = mvsd_data->gpio_card_detect ? : -EINVAL;
--		gpio_write_protect = mvsd_data->gpio_write_protect ? : -EINVAL;
--	}
--
--	mmc->ops = &mvsd_ops;
--
--	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
--	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ |
--		    MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
--
--	mmc->f_min = DIV_ROUND_UP(host->base_clock, MVSD_BASE_DIV_MAX);
--	mmc->f_max = maxfreq;
-+		/* GPIO 0 regarded as invalid for backward compatibility */
-+		if (mvsd_data->gpio_card_detect &&
-+		    gpio_is_valid(mvsd_data->gpio_card_detect)) {
-+			ret = mmc_gpio_request_cd(mmc,
-+						  mvsd_data->gpio_card_detect);
-+			if (ret)
-+				goto out;
-+		} else {
-+			mmc->caps |= MMC_CAP_NEEDS_POLL;
-+		}
- 
--	mmc->max_blk_size = 2048;
--	mmc->max_blk_count = 65535;
-+		if (mvsd_data->gpio_write_protect &&
-+		    gpio_is_valid(mvsd_data->gpio_write_protect))
-+			mmc_gpio_request_ro(mmc, mvsd_data->gpio_write_protect);
-+	}
- 
--	mmc->max_segs = 1;
--	mmc->max_seg_size = mmc->max_blk_size * mmc->max_blk_count;
--	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
-+	if (maxfreq)
-+		mmc->f_max = maxfreq;
- 
- 	spin_lock_init(&host->lock);
- 
-@@ -777,15 +793,6 @@ static int __init mvsd_probe(struct platform_device *pdev)
- 		goto out;
- 	}
- 
--	if (gpio_is_valid(gpio_card_detect)) {
--		ret = mmc_gpio_request_cd(mmc, gpio_card_detect);
--		if (ret)
--			goto out;
--	} else
--		mmc->caps |= MMC_CAP_NEEDS_POLL;
--
--	mmc_gpio_request_ro(mmc, gpio_write_protect);
--
- 	setup_timer(&host->timer, mvsd_timeout_timer, (unsigned long)host);
- 	platform_set_drvdata(pdev, mmc);
- 	ret = mmc_add_host(mmc);
-@@ -793,10 +800,10 @@ static int __init mvsd_probe(struct platform_device *pdev)
- 		goto out;
- 
- 	if (!(mmc->caps & MMC_CAP_NEEDS_POLL))
--		dev_notice(&pdev->dev, "using GPIO %d for card detection\n",
--			   gpio_card_detect);
-+		dev_notice(&pdev->dev, "using GPIO for card detection\n");
- 	else
--		dev_notice(&pdev->dev, "lacking card detect (fall back to polling)\n");
-+		dev_notice(&pdev->dev,
-+			   "lacking card detect (fall back to polling)\n");
- 	return 0;
- 
- out:
+ 	if (gpio_is_valid(tegra_host->power_gpio)) {
+ 		rc = gpio_request(tegra_host->power_gpio, "sdhci_power");
+@@ -278,6 +280,7 @@ err_add_host:
+ err_clk_get:
+ 	if (gpio_is_valid(tegra_host->power_gpio))
+ 		gpio_free(tegra_host->power_gpio);
++err_parse_dt:
+ err_power_req:
+ err_alloc_tegra_host:
+ 	sdhci_pltfm_free(pdev);
 -- 
 1.7.9.5
 
