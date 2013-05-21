@@ -1,137 +1,153 @@
-From: Andrew Lunn <andrew@lunn.ch>
-Subject: Re: [PATCH V3 10/10] ARM: Kirkwood: add DT support for Sheevaplug
- and Sheevaplug eSATA
-Date: Tue, 21 May 2013 07:13:15 +0200
-Message-ID: <20130521051315.GK26249@lunn.ch>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V3 01/10] mmc: return mmc_of_parse() errors to caller
+Date: Tue, 21 May 2013 09:00:09 +0200
+Message-ID: <CAPDyKFoE-_Kpn_FBmrePEGF84jwSADC+=6ibBmA_ePVg7B4z9Q@mail.gmail.com>
 References: <1369090911-1479-1-git-send-email-gmbnomis@gmail.com>
- <1369090911-1479-11-git-send-email-gmbnomis@gmail.com>
+	<1369090911-1479-2-git-send-email-gmbnomis@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from londo.lunn.ch ([80.238.139.98]:35454 "EHLO londo.lunn.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752726Ab3EUFNq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 21 May 2013 01:13:46 -0400
-Content-Disposition: inline
-In-Reply-To: <1369090911-1479-11-git-send-email-gmbnomis@gmail.com>
+Received: from mail-vc0-f176.google.com ([209.85.220.176]:40394 "EHLO
+	mail-vc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754457Ab3EUHAL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 May 2013 03:00:11 -0400
+Received: by mail-vc0-f176.google.com with SMTP id ha11so163334vcb.21
+        for <linux-mmc@vger.kernel.org>; Tue, 21 May 2013 00:00:10 -0700 (PDT)
+In-Reply-To: <1369090911-1479-2-git-send-email-gmbnomis@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Simon Baatz <gmbnomis@gmail.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-On Tue, May 21, 2013 at 01:01:51AM +0200, Simon Baatz wrote:
+On 21 May 2013 01:01, Simon Baatz <gmbnomis@gmail.com> wrote:
+> In addition to just logging errors encountered during DT parsing or
+> allocating GPIO slots for CD/WP, mmc_of_parse() now returns with an error.
+>
+> In particular, this is needed if the GPIO allocation may return
+> EPROBE_DEFER.
+>
 > Signed-off-by: Simon Baatz <gmbnomis@gmail.com>
 > ---
->  arch/arm/mach-kirkwood/Kconfig            |    7 +++++++
->  arch/arm/mach-kirkwood/Makefile           |    1 +
->  arch/arm/mach-kirkwood/board-dt.c         |    4 ++++
->  arch/arm/mach-kirkwood/board-sheevaplug.c |   27 +++++++++++++++++++++++++++
->  arch/arm/mach-kirkwood/common.h           |    5 +++++
->  5 files changed, 44 insertions(+)
->  create mode 100644 arch/arm/mach-kirkwood/board-sheevaplug.c
-> 
-> diff --git a/arch/arm/mach-kirkwood/Kconfig b/arch/arm/mach-kirkwood/Kconfig
-> index 7509a89..58518a2 100644
-> --- a/arch/arm/mach-kirkwood/Kconfig
-> +++ b/arch/arm/mach-kirkwood/Kconfig
-> @@ -296,6 +296,13 @@ config MACH_READYNAS_DT
->  	  Say 'Y' here if you want your kernel to support the
->  	  NETGEAR ReadyNAS Duo v2 using Fattened Device Tree.
->  
-> +config MACH_SHEEVAPLUG_DT
-> +	bool "Marvell (eSATA) SheevaPlug (Flattened Device Tree)"
-> +	select ARCH_KIRKWOOD_DT
-> +	help
-> +	  Say 'Y' here if you want your kernel to support the
-> +	  Marvell (eSATA) SheevaPlug (Flattened Device Tree).
+>
+> changes in V3:
+> - Handle EPROBE_DEFER case
+>
+>  drivers/mmc/core/host.c  |   30 +++++++++++++++++++++++++-----
+>  include/linux/mmc/host.h |    2 +-
+>  2 files changed, 26 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 2a3593d..89f5849 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -306,7 +306,7 @@ static inline void mmc_host_clk_sysfs_init(struct mmc_host *host)
+>   * parse the properties and set respective generic mmc-host flags and
+>   * parameters.
+>   */
+> -void mmc_of_parse(struct mmc_host *host)
+> +int mmc_of_parse(struct mmc_host *host)
+>  {
+>         struct device_node *np;
+>         u32 bus_width;
+> @@ -315,7 +315,7 @@ void mmc_of_parse(struct mmc_host *host)
+>         int len, ret, gpio;
+>
+>         if (!host->parent || !host->parent->of_node)
+> -               return;
+> +               return 0;
+>
+>         np = host->parent->of_node;
+>
+> @@ -338,6 +338,7 @@ void mmc_of_parse(struct mmc_host *host)
+>         default:
+>                 dev_err(host->parent,
+>                         "Invalid \"bus-width\" value %ud!\n", bus_width);
+> +               return -EINVAL;
+>         }
+>
+>         /* f_max is obtained from the optional "max-frequency" property */
+> @@ -367,18 +368,22 @@ void mmc_of_parse(struct mmc_host *host)
+>                         host->caps |= MMC_CAP_NEEDS_POLL;
+>
+>                 gpio = of_get_named_gpio_flags(np, "cd-gpios", 0, &flags);
+> +               if (gpio == -EPROBE_DEFER)
+> +                       return gpio;
+>                 if (gpio_is_valid(gpio)) {
+>                         if (!(flags & OF_GPIO_ACTIVE_LOW))
+>                                 gpio_inv_cd = true;
+>
+>                         ret = mmc_gpio_request_cd(host, gpio);
+> -                       if (ret < 0)
+> +                       if (ret < 0) {
+>                                 dev_err(host->parent,
+>                                         "Failed to request CD GPIO #%d: %d!\n",
+>                                         gpio, ret);
+> -                       else
+> +                               return ret;
+> +                       } else {
+>                                 dev_info(host->parent, "Got CD GPIO #%d.\n",
+>                                          gpio);
+> +                       }
+>                 }
+>
+>                 if (explicit_inv_cd ^ gpio_inv_cd)
+> @@ -389,14 +394,23 @@ void mmc_of_parse(struct mmc_host *host)
+>         explicit_inv_wp = of_property_read_bool(np, "wp-inverted");
+>
+>         gpio = of_get_named_gpio_flags(np, "wp-gpios", 0, &flags);
+> +       if (gpio == -EPROBE_DEFER) {
+> +               ret = -EPROBE_DEFER;
+> +               goto out;
+> +       }
+>         if (gpio_is_valid(gpio)) {
+>                 if (!(flags & OF_GPIO_ACTIVE_LOW))
+>                         gpio_inv_wp = true;
+>
+>                 ret = mmc_gpio_request_ro(host, gpio);
+> -               if (ret < 0)
+> +               if (ret < 0) {
+>                         dev_err(host->parent,
+>                                 "Failed to request WP GPIO: %d!\n", ret);
+> +                       goto out;
+> +               } else {
+> +                               dev_info(host->parent, "Got WP GPIO #%d.\n",
+> +                                        gpio);
+> +               }
+>         }
+>         if (explicit_inv_wp ^ gpio_inv_wp)
+>                 host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+> @@ -413,6 +427,12 @@ void mmc_of_parse(struct mmc_host *host)
+>                 host->pm_caps |= MMC_PM_KEEP_POWER;
+>         if (of_find_property(np, "enable-sdio-wakeup", &len))
+>                 host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
 > +
->  config MACH_TOPKICK_DT
->  	bool "USI Topkick (Flattened Device Tree)"
->  	select ARCH_KIRKWOOD_DT
-> diff --git a/arch/arm/mach-kirkwood/Makefile b/arch/arm/mach-kirkwood/Makefile
-> index e1f3735..8846abf 100644
-> --- a/arch/arm/mach-kirkwood/Makefile
-> +++ b/arch/arm/mach-kirkwood/Makefile
-> @@ -40,5 +40,6 @@ obj-$(CONFIG_MACH_NETSPACE_V2_DT)	+= board-ns2.o
->  obj-$(CONFIG_MACH_NSA310_DT)		+= board-nsa310.o
->  obj-$(CONFIG_MACH_OPENBLOCKS_A6_DT)	+= board-openblocks_a6.o
->  obj-$(CONFIG_MACH_READYNAS_DT)		+= board-readynas.o
-> +obj-$(CONFIG_MACH_SHEEVAPLUG_DT)	+= board-sheevaplug.o
->  obj-$(CONFIG_MACH_TOPKICK_DT)		+= board-usi_topkick.o
->  obj-$(CONFIG_MACH_TS219_DT)		+= board-ts219.o tsx1x-common.o
-> diff --git a/arch/arm/mach-kirkwood/board-dt.c b/arch/arm/mach-kirkwood/board-dt.c
-> index e9647b8..a09dbac 100644
-> --- a/arch/arm/mach-kirkwood/board-dt.c
-> +++ b/arch/arm/mach-kirkwood/board-dt.c
-> @@ -112,6 +112,9 @@ static void __init kirkwood_dt_init(void)
->  	if (of_machine_is_compatible("globalscale,guruplug"))
->  		guruplug_dt_init();
->  
-> +	if (of_machine_is_compatible("globalscale,sheevaplug"))
-> +		sheevaplug_dt_init();
+> +       return 0;
 > +
->  	if (of_machine_is_compatible("dlink,dns-kirkwood"))
->  		dnskw_init();
->  
-> @@ -165,6 +168,7 @@ static void __init kirkwood_dt_init(void)
->  static const char * const kirkwood_dt_board_compat[] = {
->  	"globalscale,dreamplug",
->  	"globalscale,guruplug",
-> +	"globalscale,sheevaplug",
->  	"dlink,dns-320",
->  	"dlink,dns-325",
->  	"iom,iconnect",
-> diff --git a/arch/arm/mach-kirkwood/board-sheevaplug.c b/arch/arm/mach-kirkwood/board-sheevaplug.c
-> new file mode 100644
-> index 0000000..fa38937
-> --- /dev/null
-> +++ b/arch/arm/mach-kirkwood/board-sheevaplug.c
-> @@ -0,0 +1,27 @@
-> +/*
-> + * arch/arm/mach-kirkwood/board-sheevaplug.c
-> + *
-> + * Marvell Sheevaplug Reference Board Init for drivers not converted to
-> + * flattened device tree yet.
-> + *
-> + * This file is licensed under the terms of the GNU General Public
-> + * License version 2.  This program is licensed "as is" without any
-> + * warranty of any kind, whether express or implied.
-> + */
-> +
-> +#include <linux/kernel.h>
-> +#include <linux/init.h>
-> +#include <linux/mv643xx_eth.h>
-> +#include "common.h"
-> +
-> +static struct mv643xx_eth_platform_data sheevaplug_ge00_data = {
-> +	.phy_addr	= MV643XX_ETH_PHY_ADDR(0),
-> +};
-> +
-> +void __init sheevaplug_dt_init(void)
-> +{
-> +	/*
-> +	 * Basic setup. Needs to be called early.
-> +	 */
-> +	kirkwood_ge00_init(&sheevaplug_ge00_data);
-> +}
-> diff --git a/arch/arm/mach-kirkwood/common.h b/arch/arm/mach-kirkwood/common.h
-> index 21da3b1..974442e 100644
-> --- a/arch/arm/mach-kirkwood/common.h
-> +++ b/arch/arm/mach-kirkwood/common.h
-> @@ -65,6 +65,11 @@ void guruplug_dt_init(void);
->  #else
->  static inline void guruplug_dt_init(void) {};
->  #endif
-> +#ifdef CONFIG_MACH_SHEEVAPLUG_DT
-> +void sheevaplug_dt_init(void);
-> +#else
-> +static inline void sheevaplug_dt_init(void) {};
-> +#endif
->  #ifdef CONFIG_MACH_TS219_DT
->  void qnap_dt_ts219_init(void);
->  #else
-> -- 
+> +out:
+> +       mmc_gpio_free_cd(host);
+> +       return ret;
+>  }
+>
+>  EXPORT_SYMBOL(mmc_of_parse);
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index e326ae2..c8c4fbc 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -369,7 +369,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *);
+>  int mmc_add_host(struct mmc_host *);
+>  void mmc_remove_host(struct mmc_host *);
+>  void mmc_free_host(struct mmc_host *);
+> -void mmc_of_parse(struct mmc_host *host);
+> +int mmc_of_parse(struct mmc_host *host);
+>
+>  static inline void *mmc_priv(struct mmc_host *host)
+>  {
+> --
 > 1.7.9.5
-> 
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Acked-by: Andrew Lunn <andrew@lunn.ch>
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
