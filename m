@@ -1,61 +1,54 @@
-From: "Felipe F. Tonello" <eu@felipetonello.com>
-Subject: [PATCH 2/2] mmc: sdhci-s3c: Added set_power handler to platdata
-Date: Wed, 22 May 2013 10:47:12 -0700
-Message-ID: <1369244832-23868-3-git-send-email-eu@felipetonello.com>
-References: <1369244832-23868-1-git-send-email-eu@felipetonello.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1369244832-23868-1-git-send-email-eu@felipetonello.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ben-linux@fluff.org, cjb@laptop.org, arnd@arndb.de, linux-kernel@vger.kernel.org, "Felipe F. Tonello" <eu@felipetonello.com>
+From: Matt Porter <matt.porter@linaro.org>
+Subject: Re: [PATCH V2 2/2] ARM: mmc: bcm281xx SDHCI driver (dt mods)
+Date: Wed, 22 May 2013 14:01:14 -0400
+Message-ID: <20130522180114.GA8235@beef>
+References: <1368200883-15668-1-git-send-email-csd@broadcom.com>
+ <1368200883-15668-2-git-send-email-csd@broadcom.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1368200883-15668-2-git-send-email-csd@broadcom.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Christian Daudt <csd@broadcom.com>
+Cc: Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Rob Landley <rob@landley.net>, Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, Stephen Warren <swarren@nvidia.com>, Olof Johansson <olof@lixom.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Wei WANG <wei_wang@realsil.com.cn>, Ludovic Desroches <ludovic.desroches@atmel.com>, Arnd Bergmann <arnd@arndb.de>, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, csd_b@daudt.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: "Felipe F. Tonello" <eu@felipetonello.com>
+Hi Christian,
 
-This is useful to turn off peripherals that are related to the mmc host. One
-common case is when the wifi module is connected as an mmc card to the host.
+On Fri, May 10, 2013 at 08:48:03AM -0700, Christian Daudt wrote:
+> Add SDHCI driver for the Broadcom 281xx SoCs. Also
+> add bindings for it into bcm281xx dts files.
 
-Signed-off-by: Felipe F. Tonello <eu@felipetonello.com>
----
- drivers/mmc/host/sdhci-s3c.c                | 8 ++++++++
- include/linux/platform_data/mmc-sdhci-s3c.h | 1 +
- 2 files changed, 9 insertions(+)
+Since this is independent of the driver, the description should probably
+be updated to reflect that this is just the DT support for the bcm281xx
+(or kona) SDHCI hw.
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index c6f6246..f7e740c 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -360,11 +360,19 @@ static int sdhci_s3c_platform_bus_width(struct sdhci_host *host, int width)
- 	return 0;
- }
- 
-+static void sdhci_s3c_set_power(struct sdhci_host *host, bool power)
-+{
-+	struct sdhci_s3c *ourhost = to_s3c(host);
-+	if (ourhost->pdata->set_power)
-+		ourhost->pdata->set_power(power);
-+}
-+
- static struct sdhci_ops sdhci_s3c_ops = {
- 	.get_max_clock		= sdhci_s3c_get_max_clk,
- 	.set_clock		= sdhci_s3c_set_clock,
- 	.get_min_clock		= sdhci_s3c_get_min_clock,
- 	.platform_bus_width	= sdhci_s3c_platform_bus_width,
-+	.set_power		= sdhci_s3c_set_power,
- };
- 
- static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
-diff --git a/include/linux/platform_data/mmc-sdhci-s3c.h b/include/linux/platform_data/mmc-sdhci-s3c.h
-index 249f023..55be925 100644
---- a/include/linux/platform_data/mmc-sdhci-s3c.h
-+++ b/include/linux/platform_data/mmc-sdhci-s3c.h
-@@ -50,6 +50,7 @@ struct s3c_sdhci_platdata {
- 						      int state));
- 
- 	void	(*cfg_gpio)(struct platform_device *dev, int width);
-+	void	(*set_power)(bool power);
- };
- 
- 
--- 
-1.8.1.4
+> Changes from V1:
+>  - split original patch into 2, one for driver and this one for dt
+> 
+> Signed-off-by: Christian Daudt <csd@broadcom.com>
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/bcm,kona-sdhci.txt b/Documentation/devicetree/bindings/mmc/bcm,kona-sdhci.txt
+> new file mode 100644
+> index 0000000..ad1c4bd
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/bcm,kona-sdhci.txt
+> @@ -0,0 +1,16 @@
+> +Broadcom BCM281xx SDHCI driver
+
+s/driver//
+
+> +
+> +This file documents differences between the core properties in mmc.txt
+> +and the properties in the bcm281xx driver.
+
+The hardware binding should not mention the supporting driver. Borrowing
+from other examples, you'd want something more like:
+
+"
+This file documents differences between the core properties described
+by mmc.txt and the properties that represent the bcm281xx [kona?] SDHCI.
+"
+
+-Matt
