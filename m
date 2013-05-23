@@ -1,44 +1,57 @@
-From: Doug Anderson <dianders@google.com>
-Subject: Re: [PATCH] mmc: core: Update the ext-csd.rev check for eMMC5.1
-Date: Wed, 22 May 2013 17:08:25 -0700
-Message-ID: <CAD=FV=V_=vduQHRXKfqC7O6Oz6H++-rckAkULPtkT7URHRcVLQ@mail.gmail.com>
-References: <1369129124-31128-1-git-send-email-yuvaraj.cd@samsung.com>
-	<CAD=FV=UknLh3ud6aQ8mzK8H0mXDR+uVqeeyWF6zgyZTnBuq2bA@mail.gmail.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 1/2] mmc: sdhci: Added set_power sdhci_ops handler.
+Date: Thu, 23 May 2013 09:25:16 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1305230920430.23354@axis700.grange>
+References: <1369244832-23868-1-git-send-email-eu@felipetonello.com>
+ <1369244832-23868-2-git-send-email-eu@felipetonello.com>
+ <Pine.LNX.4.64.1305222230050.19558@axis700.grange> <2537252.KzShHU8h54@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f52.google.com ([209.85.215.52]:52148 "EHLO
-	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754052Ab3EWAI1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 May 2013 20:08:27 -0400
-Received: by mail-la0-f52.google.com with SMTP id fo13so2590416lab.39
-        for <linux-mmc@vger.kernel.org>; Wed, 22 May 2013 17:08:25 -0700 (PDT)
-In-Reply-To: <CAD=FV=UknLh3ud6aQ8mzK8H0mXDR+uVqeeyWF6zgyZTnBuq2bA@mail.gmail.com>
+Received: from moutng.kundenserver.de ([212.227.126.187]:60657 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757143Ab3EWHZj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 May 2013 03:25:39 -0400
+In-Reply-To: <2537252.KzShHU8h54@localhost.localdomain>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>
+To: Felipe Ferreri Tonello <eu@felipetonello.com>
+Cc: linux-mmc@vger.kernel.org, ben-linux@fluff.org, cjb@laptop.org, arnd@arndb.de, linux-kernel@vger.kernel.org
 
-Correction,
+On Wed, 22 May 2013, Felipe Ferreri Tonello wrote:
 
-On Wed, May 22, 2013 at 5:06 PM, Doug Anderson <dianders@google.com> wrote:
-> Yavaraj,
->
-> On Tue, May 21, 2013 at 2:38 AM, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
->> With the new eMMC5.1 spec,there is a new EXT_CSD register with
->> the revision number(EXT_CSD_REV) 7.This patch updates the check
->> for ext-csd.rev number as 7.
->>
->> Signed-off-by: Alim Akhtar <alim.akthar@samsung.com>
->> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
->> ---
->>  drivers/mmc/core/mmc.c |    2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> Looks reasonable.
->
-> Reviewed-by: Doug Anderson <dianders@chromium.org>
+> Hi Guennadi,
+> 
+> On Wednesday, May 22, 2013 10:30:40 PM Guennadi Liakhovetski wrote:
+> > On Wed, 22 May 2013, Felipe F. Tonello wrote:
+> > > From: "Felipe F. Tonello" <eu@felipetonello.com>
+> > > 
+> > > This is useful for power managment purposes if a sdhci child host wants to
+> > > turn off some other peripheral also.
+> > 
+> > Sorry, could you elaborate a bit? In what situations is it exactly useful?
+> > And why cannot the regulator API be used there?
+> 
+> Sorry about that.
+> 
+> One example that I can think of is when you have a wifi module connected as a 
+> mmc card via sdio. So you can register a callback function in your machine 
+> source code to turn on/off the wifi module based on the mmc host power.
 
-...with the caveat the Alim's email address be corrected.
+Ok, understand. Your second patch in this series adds such a callback in 
+your SDHCI host driver and there it just calls a platform callback. I 
+don't think this is a good idea. First, we want to go away from platform 
+callbacks, because they are incompatible with DT. Second, because the 
+proper solution IMHO would be for your platform to export a regulator, and 
+the SDHCI core driver already includes regulator support.
 
-Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+> I've seen this implementation in others mmc hosts, such as omap.
+
+Which, however, doesn't yet mean, it's a good idea :)
+
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
