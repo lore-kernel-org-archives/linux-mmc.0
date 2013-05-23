@@ -1,112 +1,36 @@
-From: Felipe Ferreri Tonello <eu@felipetonello.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci: Added set_power sdhci_ops handler.
-Date: Wed, 22 May 2013 14:22:45 -0700
-Message-ID: <2537252.KzShHU8h54@localhost.localdomain>
-References: <1369244832-23868-1-git-send-email-eu@felipetonello.com> <1369244832-23868-2-git-send-email-eu@felipetonello.com> <Pine.LNX.4.64.1305222230050.19558@axis700.grange>
+From: Doug Anderson <dianders@google.com>
+Subject: Re: [PATCH] mmc: core: Update the ext-csd.rev check for eMMC5.1
+Date: Wed, 22 May 2013 17:06:08 -0700
+Message-ID: <CAD=FV=UknLh3ud6aQ8mzK8H0mXDR+uVqeeyWF6zgyZTnBuq2bA@mail.gmail.com>
+References: <1369129124-31128-1-git-send-email-yuvaraj.cd@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f52.google.com ([209.85.219.52]:32859 "EHLO
-	mail-oa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755955Ab3EVVWw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 May 2013 17:22:52 -0400
-Received: by mail-oa0-f52.google.com with SMTP id h1so3348102oag.25
-        for <linux-mmc@vger.kernel.org>; Wed, 22 May 2013 14:22:51 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1305222230050.19558@axis700.grange>
+Received: from mail-lb0-f180.google.com ([209.85.217.180]:40796 "EHLO
+	mail-lb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754052Ab3EWAGK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 May 2013 20:06:10 -0400
+Received: by mail-lb0-f180.google.com with SMTP id r10so2720201lbi.39
+        for <linux-mmc@vger.kernel.org>; Wed, 22 May 2013 17:06:09 -0700 (PDT)
+In-Reply-To: <1369129124-31128-1-git-send-email-yuvaraj.cd@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, ben-linux@fluff.org, cjb@laptop.org, arnd@arndb.de, linux-kernel@vger.kernel.org
+To: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, Alim Akhtar <alim.akthar@samsung.com>
 
-Hi Guennadi,
+Yavaraj,
 
-On Wednesday, May 22, 2013 10:30:40 PM Guennadi Liakhovetski wrote:
-> On Wed, 22 May 2013, Felipe F. Tonello wrote:
-> > From: "Felipe F. Tonello" <eu@felipetonello.com>
-> > 
-> > This is useful for power managment purposes if a sdhci child host wants to
-> > turn off some other peripheral also.
-> 
-> Sorry, could you elaborate a bit? In what situations is it exactly useful?
-> And why cannot the regulator API be used there?
-
-Sorry about that.
-
-One example that I can think of is when you have a wifi module connected as a 
-mmc card via sdio. So you can register a callback function in your machine 
-source code to turn on/off the wifi module based on the mmc host power.
-
-I've seen this implementation in others mmc hosts, such as omap.
-
-Regards,
-
-Felipe
-
-> 
-> Thanks
-> Guennadi
-> 
-> > Signed-off-by: Felipe F. Tonello <eu@felipetonello.com>
-> > ---
-> > 
-> >  drivers/mmc/host/sdhci.c | 8 ++++++++
-> >  drivers/mmc/host/sdhci.h | 1 +
-> >  2 files changed, 9 insertions(+)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index 2ea429c..0a026c6 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -1244,6 +1244,10 @@ static int sdhci_set_power(struct sdhci_host *host,
-> > unsigned short power)> 
-> >  	u8 pwr = 0;
-> >  	
-> >  	if (power != (unsigned short)-1) {
-> > 
-> > +
-> > +		if (host->ops->set_power)
-> > +			host->ops->set_power(host, true);
-> > +
-> > 
-> >  		switch (1 << power) {
-> >  		
-> >  		case MMC_VDD_165_195:
-> >  			pwr = SDHCI_POWER_180;
-> > 
-> > @@ -1259,6 +1263,10 @@ static int sdhci_set_power(struct sdhci_host *host,
-> > unsigned short power)> 
-> >  		default:
-> >  			BUG();
-> >  		
-> >  		}
-> > 
-> > +	} else {
-> > +
-> > +		if (host->ops->set_power)
-> > +			host->ops->set_power(host, false);
-> > 
-> >  	}
-> >  	
-> >  	if (host->pwr == pwr)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> > index 379e09d..293d56d 100644
-> > --- a/drivers/mmc/host/sdhci.h
-> > +++ b/drivers/mmc/host/sdhci.h
-> > @@ -294,6 +294,7 @@ struct sdhci_ops {
-> > 
-> >  	void	(*platform_resume)(struct sdhci_host *host);
-> >  	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
-> >  	void	(*platform_init)(struct sdhci_host *host);
-> > 
-> > +	void	(*set_power)(struct sdhci_host *host, bool power);
-> > 
-> >  };
-> >  
-> >  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> 
+On Tue, May 21, 2013 at 2:38 AM, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
+> With the new eMMC5.1 spec,there is a new EXT_CSD register with
+> the revision number(EXT_CSD_REV) 7.This patch updates the check
+> for ext-csd.rev number as 7.
+>
+> Signed-off-by: Alim Akhtar <alim.akthar@samsung.com>
+> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 > ---
-> Guennadi Liakhovetski, Ph.D.
-> Freelance Open-Source Software Developer
-> http://www.open-technology.de/
+>  drivers/mmc/core/mmc.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+
+Looks reasonable.
+
+Reviewed-by: Doug Anderson <dianders@chromium.org>
