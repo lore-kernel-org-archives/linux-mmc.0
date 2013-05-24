@@ -1,28 +1,85 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCHv4 6/6] mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA
-Date: Fri, 24 May 2013 20:58:34 +0200
-Message-ID: <201305242058.34332.arnd@arndb.de>
-References: <1369410080-436-1-git-send-email-dinguyen@altera.com> <201305241912.53751.arnd@arndb.de> <1369418588.9717.0.camel@linux-builds1>
+From: Felipe Tonello <eu@felipetonello.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci: Added set_power sdhci_ops handler.
+Date: Fri, 24 May 2013 15:12:45 -0700
+Message-ID: <CAGrhNMydmS3K9R=h+tgxUyYQcT_4yz8hmcDnZS2VHXhA3Nm2+Q@mail.gmail.com>
+References: <1369244832-23868-1-git-send-email-eu@felipetonello.com>
+	<1369244832-23868-2-git-send-email-eu@felipetonello.com>
+	<Pine.LNX.4.64.1305222230050.19558@axis700.grange>
+	<2537252.KzShHU8h54@localhost.localdomain>
+	<Pine.LNX.4.64.1305230920430.23354@axis700.grange>
+	<519EE672.9060508@samsung.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:54729 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751579Ab3EXS6i (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 May 2013 14:58:38 -0400
-In-Reply-To: <1369418588.9717.0.camel@linux-builds1>
+Received: from mail-pd0-f173.google.com ([209.85.192.173]:54169 "EHLO
+	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756048Ab3EXWMq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 May 2013 18:12:46 -0400
+Received: by mail-pd0-f173.google.com with SMTP id v14so3397757pde.4
+        for <linux-mmc@vger.kernel.org>; Fri, 24 May 2013 15:12:46 -0700 (PDT)
+In-Reply-To: <519EE672.9060508@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dinh Nguyen <dinguyen@altera.com>
-Cc: linux-arm-kernel@lists.infradead.org, dinh.linux@gmail.com, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Olof Johansson <olof@lixom.net>, Pavel Machek <pavel@denx.de>, linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, ben-linux@fluff.org, cjb@laptop.org, arnd@arndb.de, linux-kernel@vger.kernel.org
 
-On Friday 24 May 2013, Dinh Nguyen wrote:
-> I apologize for that. Will make sure to include a [PATCH 0/6] message in
-> the future.
+Hi all,
 
-No worries, I actually saw now that my only other comment was also
-wrong, as you have the binding I was looking for in patch 5/6.
+On Thu, May 23, 2013 at 9:02 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> On 05/23/2013 04:25 PM, Guennadi Liakhovetski wrote:
+>> On Wed, 22 May 2013, Felipe Ferreri Tonello wrote:
+>>
+>>> Hi Guennadi,
+>>>
+>>> On Wednesday, May 22, 2013 10:30:40 PM Guennadi Liakhovetski wrote:
+>>>> On Wed, 22 May 2013, Felipe F. Tonello wrote:
+>>>>> From: "Felipe F. Tonello" <eu@felipetonello.com>
+>>>>>
+>>>>> This is useful for power managment purposes if a sdhci child host wants to
+>>>>> turn off some other peripheral also.
+>>>>
+>>>> Sorry, could you elaborate a bit? In what situations is it exactly useful?
+>>>> And why cannot the regulator API be used there?
+>>>
+>>> Sorry about that.
+>>>
+>>> One example that I can think of is when you have a wifi module connected as a
+>>> mmc card via sdio. So you can register a callback function in your machine
+>>> source code to turn on/off the wifi module based on the mmc host power.
+>>
+>> Ok, understand. Your second patch in this series adds such a callback in
+>> your SDHCI host driver and there it just calls a platform callback. I
+>> don't think this is a good idea. First, we want to go away from platform
+>> callbacks, because they are incompatible with DT. Second, because the
+>> proper solution IMHO would be for your platform to export a regulator, and
+>> the SDHCI core driver already includes regulator support.
+> We can use the regulator framework.
+> i think this callback function didn't need.
+>
 
-	Arnd
+Ok, thanks for the feed back. Just to get things clear, is this
+implementation using regulator framework already done?
+
+BR,
+
+Felipe
+
+> Best Regards,
+> Jaehoon Chung
+>>
+>>> I've seen this implementation in others mmc hosts, such as omap.
+>>
+>> Which, however, doesn't yet mean, it's a good idea :)
+>>
+>> Thanks
+>> Guennadi
+>> ---
+>> Guennadi Liakhovetski, Ph.D.
+>> Freelance Open-Source Software Developer
+>> http://www.open-technology.de/
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>
