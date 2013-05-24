@@ -1,133 +1,132 @@
 From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Subject: [PATCH 5/8] sdhci: Delay led blinking
-Date: Fri, 24 May 2013 18:00:39 +0200
-Message-ID: <1369411242-20515-6-git-send-email-jeremie.samuel.ext@parrot.com>
+Subject: [PATCH 8/8] sdhci: Use jiffies instead of a timeout counter
+Date: Fri, 24 May 2013 18:00:42 +0200
+Message-ID: <1369411242-20515-9-git-send-email-jeremie.samuel.ext@parrot.com>
 References: <1369411242-20515-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co202.xi-lite.net ([149.6.83.202]:35680 "EHLO co202.xi-lite.net"
+Received: from co202.xi-lite.net ([149.6.83.202]:35687 "EHLO co202.xi-lite.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755322Ab3EXQBe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 24 May 2013 12:01:34 -0400
+	id S1755337Ab3EXQBg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 24 May 2013 12:01:36 -0400
 In-Reply-To: <1369411242-20515-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: matthieu.castet@parrot.com, gregor.boirie@parrot.com, Jeremie Samuel <jeremie.samuel.ext@parrot.com>
+Cc: matthieu.castet@parrot.com, gregor.boirie@parrot.com, Jeremie Samuel <jeremie.samuel.ext@parrot.com>, Anton Vorontsov <avorontsov@mvista.com>
 
-The function sdhci_led_control is called in an atomic context by the
-led_trigger driver. So, it is necessary to delay the activation or
-deactivation of the led.
+Just a cosmetic change, should not affect functionality.
 
+Patch based on: http://thread.gmane.org/gmane.linux.kernel.mmc/2579.
+
+Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
 Signed-off-by: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
 ---
- drivers/mmc/host/sdhci.c  |   42 ++++++++++++++++++++++--------------------
- include/linux/mmc/sdhci.h |    1 +
- 2 files changed, 23 insertions(+), 20 deletions(-)
+ drivers/mmc/host/sdhci.c |   22 +++++++++-------------
+ 1 file changed, 9 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index f361fec..c2585dd 100644
+index 4a6b716..f121822 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -269,8 +269,14 @@ static void sdhci_activate_led(struct sdhci_host *host)
- 	u8 ctrl;
+@@ -198,17 +198,16 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
+ 		host->clock = 0;
  
- 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
--	ctrl |= SDHCI_CTRL_LED;
--	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+#ifdef SDHCI_USE_LEDS_CLASS
-+	if (host->brightness && !(ctrl & SDHCI_CTRL_LED)) {
-+#else
-+	if (!(ctrl & SDHCI_CTRL_LED)) {
-+#endif
-+		ctrl |= SDHCI_CTRL_LED;
-+		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+	}
- }
+ 	/* Wait max 100 ms */
+-	timeout = 100;
++	timeout = jiffies + msecs_to_jiffies(100);
  
- static void sdhci_deactivate_led(struct sdhci_host *host)
-@@ -278,8 +284,14 @@ static void sdhci_deactivate_led(struct sdhci_host *host)
- 	u8 ctrl;
+ 	/* hw clears the bit when it's done */
+ 	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
+-		if (timeout == 0) {
++		if (time_after(jiffies, timeout)) {
+ 			pr_err("%s: Reset 0x%x never completed.\n",
+ 				mmc_hostname(host->mmc), (int)mask);
+ 			sdhci_dumpregs(host);
+ 			return;
+ 		}
+-		timeout--;
+ 		msleep(1);
+ 	}
  
- 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
--	ctrl &= ~SDHCI_CTRL_LED;
--	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+#ifdef SDHCI_USE_LEDS_CLASS
-+	if (!host->brightness && (ctrl & SDHCI_CTRL_LED)) {
-+#else
-+	if (ctrl & SDHCI_CTRL_LED) {
-+#endif
-+		ctrl &= ~SDHCI_CTRL_LED;
-+		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+	}
- }
+@@ -984,7 +983,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 	WARN_ON(host->cmd);
  
- #ifdef SDHCI_USE_LEDS_CLASS
-@@ -287,19 +299,11 @@ static void sdhci_led_control(struct led_classdev *led,
- 	enum led_brightness brightness)
- {
- 	struct sdhci_host *host = container_of(led, struct sdhci_host, led);
--	unsigned long flags;
--
--	spin_lock_irqsave(&host->lock, flags);
+ 	/* Wait max 10 ms */
+-	timeout = 10;
++	timeout = jiffies + msecs_to_jiffies(10);
  
- 	if (host->runtime_suspended)
--		goto out;
-+		return;
+ 	mask = SDHCI_CMD_INHIBIT;
+ 	if ((cmd->data != NULL) || (cmd->flags & MMC_RSP_BUSY))
+@@ -996,7 +995,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 		mask &= ~SDHCI_DATA_INHIBIT;
  
--	if (brightness == LED_OFF)
--		sdhci_deactivate_led(host);
--	else
--		sdhci_activate_led(host);
--out:
--	spin_unlock_irqrestore(&host->lock, flags);
-+	host->brightness = brightness;
- }
- #endif
+ 	while (sdhci_readl(host, SDHCI_PRESENT_STATE) & mask) {
+-		if (timeout == 0) {
++		if (time_after(jiffies, timeout)) {
+ 			pr_err("%s: Controller never released "
+ 				"inhibit bit(s).\n", mmc_hostname(host->mmc));
+ 			sdhci_dumpregs(host);
+@@ -1004,7 +1003,6 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 			schedule_work(&host->finish_work);
+ 			return;
+ 		}
+-		timeout--;
+ 		mdelay(1);
+ 	}
  
-@@ -1321,9 +1325,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+@@ -1216,16 +1214,15 @@ clock_set:
+ 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
  
- 	WARN_ON(host->mrq != NULL);
+ 	/* Wait max 20 ms */
+-	timeout = 20;
++	timeout = jiffies + msecs_to_jiffies(20);
+ 	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+ 		& SDHCI_CLOCK_INT_STABLE)) {
+-		if (timeout == 0) {
++		if (time_after(jiffies, timeout)) {
+ 			pr_err("%s: Internal clock never "
+ 				"stabilised.\n", mmc_hostname(host->mmc));
+ 			sdhci_dumpregs(host);
+ 			return;
+ 		}
+-		timeout--;
+ 		msleep(1);
+ 	}
  
--#ifndef SDHCI_USE_LEDS_CLASS
- 	sdhci_activate_led(host);
--#endif
+@@ -1878,12 +1875,12 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	 * Issue CMD19 repeatedly till Execute Tuning is set to 0 or the number
+ 	 * of loops reaches 40 times or a timeout of 150ms occurs.
+ 	 */
+-	timeout = 150;
++	timeout = jiffies + msecs_to_jiffies(150);
+ 	do {
+ 		struct mmc_command cmd = {0};
+ 		struct mmc_request mrq = {NULL};
  
- 	/*
- 	 * Ensure we don't send the STOP for non-SET_BLOCK_COUNTED
-@@ -2145,15 +2147,15 @@ static void sdhci_finish_work(struct work_struct *wk)
- 	host->cmd = NULL;
- 	host->data = NULL;
+-		if (!tuning_loop_counter && !timeout)
++		if (!tuning_loop_counter && time_after(jiffies, timeout))
+ 			break;
  
--#ifndef SDHCI_USE_LEDS_CLASS
--	sdhci_deactivate_led(host);
--#endif
--
- 	mmiowb();
- 	spin_unlock_irqrestore(&host->lock, flags);
+ 		cmd.opcode = opcode;
+@@ -1954,7 +1951,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
  
- 	mmc_request_done(host->mmc, mrq);
- 	sdhci_runtime_pm_put(host);
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+	sdhci_deactivate_led(host);
-+	spin_unlock_irqrestore(&host->lock, flags);
- }
+ 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 		tuning_loop_counter--;
+-		timeout--;
+ 		msleep(1);
+ 	} while (ctrl & SDHCI_CTRL_EXEC_TUNING);
  
- static void sdhci_timeout_work(struct work_struct *wk)
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 152acb5..8002d17 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -112,6 +112,7 @@ struct sdhci_host {
- #if defined(CONFIG_LEDS_CLASS) || defined(CONFIG_LEDS_CLASS_MODULE)
- 	struct led_classdev led;	/* LED control */
- 	char led_name[32];
-+	enum led_brightness brightness;
- #endif
- 
- 	spinlock_t lock;	/* Mutex */
+@@ -1962,7 +1958,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	 * The Host Driver has exhausted the maximum number of loops allowed,
+ 	 * so use fixed sampling frequency.
+ 	 */
+-	if (!tuning_loop_counter || !timeout) {
++	if (!tuning_loop_counter || time_after(jiffies, timeout)) {
+ 		ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+ 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 	} else {
 -- 
 1.7.10.4
 
