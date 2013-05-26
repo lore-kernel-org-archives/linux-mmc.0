@@ -1,53 +1,42 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 01/22] mmc: android-goldfish: remove unnecessary platform_set_drvdata()
-Date: Sun, 26 May 2013 14:05:52 -0400
-Message-ID: <87y5b1k45b.fsf@octavius.laptop.org>
-References: <004b01ce4a1f$b0dbcec0$12936c40$@samsung.com>
+From: Pavel Machek <pavel@denx.de>
+Subject: Re: [PATCHv4 6/6] mmc: dw_mmc: Add support DW SD/MMC driver on
+ SOCFPGA
+Date: Sun, 26 May 2013 20:11:16 +0200
+Message-ID: <20130526181116.GA16409@amd.pavel.ucw.cz>
+References: <1369410080-436-1-git-send-email-dinguyen@altera.com>
+ <201305241912.53751.arnd@arndb.de>
+ <1369418588.9717.0.camel@linux-builds1>
+ <201305242058.34332.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:51271 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754674Ab3EZSF5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 26 May 2013 14:05:57 -0400
-In-Reply-To: <004b01ce4a1f$b0dbcec0$12936c40$@samsung.com> (Jingoo Han's
-	message of "Mon, 06 May 2013 15:05:21 +0900")
+Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:44744 "EHLO
+	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754737Ab3EZSLS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 May 2013 14:11:18 -0400
+Content-Disposition: inline
+In-Reply-To: <201305242058.34332.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jingoo Han <jg1.han@samsung.com>
-Cc: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Dinh Nguyen <dinguyen@altera.com>, linux-arm-kernel@lists.infradead.org, dinh.linux@gmail.com, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Olof Johansson <olof@lixom.net>, linux-mmc@vger.kernel.org
 
-Hi Jingoo,
+On Fri 2013-05-24 20:58:34, Arnd Bergmann wrote:
+> On Friday 24 May 2013, Dinh Nguyen wrote:
+> > I apologize for that. Will make sure to include a [PATCH 0/6] message in
+> > the future.
+> 
+> No worries, I actually saw now that my only other comment was also
+> wrong, as you have the binding I was looking for in patch 5/6.
 
-On Mon, May 06 2013, Jingoo Han wrote:
-> The driver core clears the driver data to NULL after device_release
-> or on probe failure, since commit 0998d0631001288a5974afc0b2a5f568bcdecb4d
-> (device-core: Ensure drvdata = NULL when no driver is bound).
-> Thus, it is not needed to manually clear the device driver data to NULL.
->
-> Signed-off-by: Jingoo Han <jg1.han@samsung.com>
-> ---
->  drivers/mmc/host/android-goldfish.c |    2 --
->  1 files changed, 0 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/android-goldfish.c b/drivers/mmc/host/android-goldfish.c
-> index 7780c14..8b4e20a 100644
-> --- a/drivers/mmc/host/android-goldfish.c
-> +++ b/drivers/mmc/host/android-goldfish.c
-> @@ -546,8 +546,6 @@ static int goldfish_mmc_remove(struct platform_device *pdev)
->  {
->  	struct goldfish_mmc_host *host = platform_get_drvdata(pdev);
->  
-> -	platform_set_drvdata(pdev, NULL);
-> -
->  	BUG_ON(host == NULL);
->  
->  	mmc_remove_host(host->mmc);
+Could you take the series through your tree?
 
-Thanks.  I squashed everything down into one patch, collated the ACKs
-and added them, and pushed it to mmc-next for 3.11.
+Patches 1,2,4,5/6 are mostly local to arch/arm, 3/6 is stuff Dinh is
+listed as a maintainer for, and 6/6 is fairly socfpga-specific,
+too. (I guess Dinh could add MAINTAINERs entry for that...).
 
-- Chris.
+Thanks,
+									Pavel
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
