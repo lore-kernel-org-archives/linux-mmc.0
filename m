@@ -1,39 +1,46 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3] mmc: card: Adding support for sanitize in eMMC 4.5
-Date: Sun, 26 May 2013 13:22:06 -0400
-Message-ID: <87ppwdr70h.fsf@octavius.laptop.org>
-References: <1366288936-26373-1-git-send-email-merez@codeaurora.org>
+Subject: Re: [PATCH v1] mmc-utils: adding support for Android compilation
+Date: Sun, 26 May 2013 13:22:51 -0400
+Message-ID: <87li71r6z8.fsf@octavius.laptop.org>
+References: <1366804286-16571-1-git-send-email-ygardi@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36335 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754608Ab3EZRWL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 26 May 2013 13:22:11 -0400
-In-Reply-To: <1366288936-26373-1-git-send-email-merez@codeaurora.org> (Maya
-	Erez's message of "Thu, 18 Apr 2013 15:41:55 +0300")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1366804286-16571-1-git-send-email-ygardi@codeaurora.org> (Yaniv
+	Gardi's message of "Wed, 24 Apr 2013 14:51:26 +0300")
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Yaniv Gardi <ygardi@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Maya Erez <merez@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Yaniv Gardi <ygardi@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
 
-Hi Maya,
+Hi,
 
-On Thu, Apr 18 2013, Maya Erez wrote:
-> The sanitize support is added as a user-app ioctl call, and
-> was removed from the block-device request, since its purpose is
-> to be invoked not via File-System but by a user.
-> This feature deletes the unmap memory region of the eMMC card,
-> by writing to a specific register in the EXT_CSD.
-> unmap region is the memory region that was previously deleted
-> (by erase, trim or discard operation).
-> In order to avoid timeout when sanitizing large-scale cards,
-> the timeout for sanitize operation is 240 seconds.
->
+On Wed, Apr 24 2013, Yaniv Gardi wrote:
 > Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
-> Signed-off-by: Maya Erez <merez@codeaurora.org>
+> ---
+>  Android.mk |   11 +++++++++++
+>  1 files changed, 11 insertions(+), 0 deletions(-)
+>  create mode 100644 Android.mk
+>
+> diff --git a/Android.mk b/Android.mk
+> new file mode 100644
+> index 0000000..7c8cce4
+> --- /dev/null
+> +++ b/Android.mk
+> @@ -0,0 +1,11 @@
+> +LOCAL_PATH:= $(call my-dir)
+> +
+> +include $(CLEAR_VARS)
+> +LOCAL_MODULE_TAGS := optional
+> +LOCAL_SRC_FILES:= mmc.c mmc_cmds.c
+> +LOCAL_MODULE := mmc_utils
+> +LOCAL_SHARED_LIBRARIES := libcutils libc
+> +LOCAL_C_INCLUDES+= $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
+> +LOCAL_ADDITIONAL_DEPENDENCIES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
+> +LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/mmc-utils
+> +include $(BUILD_EXECUTABLE)
 
-Thanks, pushed to mmc-next for 3.11.
+Thanks, pushed to mmc-utils.
 
 - Chris.
 -- 
