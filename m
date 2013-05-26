@@ -1,35 +1,44 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [PATCH V4 1/4] mmc: core: Stop bkops for eMMC only from mmc suspend
-Date: Sun, 26 May 2013 10:22:46 +0800
-Message-ID: <CAMj5BkiFcH2s42kB7DZ=tk36A6fzr8EwbxRNLMDhUdfKEPRFPw@mail.gmail.com>
-References: <1367496159-7090-1-git-send-email-ulf.hansson@stericsson.com>
-	<1367496159-7090-2-git-send-email-ulf.hansson@stericsson.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Subject: [PATCH 1/1] mmc: of_mmc_spi: fix card detect irq
+Date: Sun, 26 May 2013 14:28:57 +0200
+Message-ID: <1369571337-9300-1-git-send-email-plagnioj@jcrosoft.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f52.google.com ([74.125.83.52]:45403 "EHLO
-	mail-ee0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758816Ab3EZCWs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 25 May 2013 22:22:48 -0400
-Received: by mail-ee0-f52.google.com with SMTP id c13so3249967eek.11
-        for <linux-mmc@vger.kernel.org>; Sat, 25 May 2013 19:22:47 -0700 (PDT)
-In-Reply-To: <1367496159-7090-2-git-send-email-ulf.hansson@stericsson.com>
+Received: from 6.mo2.mail-out.ovh.net ([87.98.165.38]:44294 "EHLO
+	mo2.mail-out.ovh.net" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752120Ab3EZMdN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 May 2013 08:33:13 -0400
+Received: from mail421.ha.ovh.net (b7.ovh.net [213.186.33.57])
+	by mo2.mail-out.ovh.net (Postfix) with SMTP id 09E24DC1B88
+	for <linux-mmc@vger.kernel.org>; Sun, 26 May 2013 14:33:12 +0200 (CEST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Maya Erez <merez@codeaurora.org>, Subhash Jadavani <subhashj@codeaurora.org>, Arnd Bergmann <arnd@arndb.de>, Kevin Liu <kliu5@marvell.com>, Adrian Hunter <adrian.hunter@intel.com>, Daniel Drake <dsd@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>
+To: linux-arm-kernel@lists.infradead.org
+Cc: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, linux-mmc@vger.kernel.org
 
-On Thu, May 2, 2013 at 8:02 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
->
-> From: Ulf Hansson <ulf.hansson@linaro.org>
->
-> Move mmc suspend specific operations to be executed from the .suspend
-> callback in the mmc bus_ops. This simplifies the mmc_suspend_host
-> function which is supposed to handle nothing but common suspend tasks.
->
-> Since eMMC can be considered non-removable there are no need to check
-> for ongoing bkops at PM_SUSPEND_PREPARE notification so remove it.
+set missing irq type the IRQF_ONESHOT
 
+Signed-off-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Cc: stable <stable@vger.kernel.org> # 3.4+
+Cc: linux-mmc@vger.kernel.org
+---
+ drivers/mmc/host/of_mmc_spi.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Sorry, a bit confused about this desc.
-How about mmc card, which can be removable.
+diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
+index d720b5e..cfb2e61 100644
+--- a/drivers/mmc/host/of_mmc_spi.c
++++ b/drivers/mmc/host/of_mmc_spi.c
+@@ -74,8 +74,8 @@ static int of_mmc_spi_init(struct device *dev,
+ {
+ 	struct of_mmc_spi *oms = to_of_mmc_spi(dev);
+ 
+-	return request_threaded_irq(oms->detect_irq, NULL, irqhandler, 0,
+-				    dev_name(dev), mmc);
++	return request_threaded_irq(oms->detect_irq, NULL, irqhandler,
++		IRQF_ONESHOT, dev_name(dev), mmc);
+ }
+ 
+ static void of_mmc_spi_exit(struct device *dev, void *mmc)
+-- 
+1.7.10.4
+
