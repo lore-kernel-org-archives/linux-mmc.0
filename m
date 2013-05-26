@@ -1,85 +1,35 @@
-From: Felipe Tonello <eu@felipetonello.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci: Added set_power sdhci_ops handler.
-Date: Fri, 24 May 2013 15:12:45 -0700
-Message-ID: <CAGrhNMydmS3K9R=h+tgxUyYQcT_4yz8hmcDnZS2VHXhA3Nm2+Q@mail.gmail.com>
-References: <1369244832-23868-1-git-send-email-eu@felipetonello.com>
-	<1369244832-23868-2-git-send-email-eu@felipetonello.com>
-	<Pine.LNX.4.64.1305222230050.19558@axis700.grange>
-	<2537252.KzShHU8h54@localhost.localdomain>
-	<Pine.LNX.4.64.1305230920430.23354@axis700.grange>
-	<519EE672.9060508@samsung.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH V4 1/4] mmc: core: Stop bkops for eMMC only from mmc suspend
+Date: Sun, 26 May 2013 10:22:46 +0800
+Message-ID: <CAMj5BkiFcH2s42kB7DZ=tk36A6fzr8EwbxRNLMDhUdfKEPRFPw@mail.gmail.com>
+References: <1367496159-7090-1-git-send-email-ulf.hansson@stericsson.com>
+	<1367496159-7090-2-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f173.google.com ([209.85.192.173]:54169 "EHLO
-	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756048Ab3EXWMq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 May 2013 18:12:46 -0400
-Received: by mail-pd0-f173.google.com with SMTP id v14so3397757pde.4
-        for <linux-mmc@vger.kernel.org>; Fri, 24 May 2013 15:12:46 -0700 (PDT)
-In-Reply-To: <519EE672.9060508@samsung.com>
+Received: from mail-ee0-f52.google.com ([74.125.83.52]:45403 "EHLO
+	mail-ee0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758816Ab3EZCWs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 25 May 2013 22:22:48 -0400
+Received: by mail-ee0-f52.google.com with SMTP id c13so3249967eek.11
+        for <linux-mmc@vger.kernel.org>; Sat, 25 May 2013 19:22:47 -0700 (PDT)
+In-Reply-To: <1367496159-7090-2-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, ben-linux@fluff.org, cjb@laptop.org, arnd@arndb.de, linux-kernel@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Maya Erez <merez@codeaurora.org>, Subhash Jadavani <subhashj@codeaurora.org>, Arnd Bergmann <arnd@arndb.de>, Kevin Liu <kliu5@marvell.com>, Adrian Hunter <adrian.hunter@intel.com>, Daniel Drake <dsd@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>
 
-Hi all,
-
-On Thu, May 23, 2013 at 9:02 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> On 05/23/2013 04:25 PM, Guennadi Liakhovetski wrote:
->> On Wed, 22 May 2013, Felipe Ferreri Tonello wrote:
->>
->>> Hi Guennadi,
->>>
->>> On Wednesday, May 22, 2013 10:30:40 PM Guennadi Liakhovetski wrote:
->>>> On Wed, 22 May 2013, Felipe F. Tonello wrote:
->>>>> From: "Felipe F. Tonello" <eu@felipetonello.com>
->>>>>
->>>>> This is useful for power managment purposes if a sdhci child host wants to
->>>>> turn off some other peripheral also.
->>>>
->>>> Sorry, could you elaborate a bit? In what situations is it exactly useful?
->>>> And why cannot the regulator API be used there?
->>>
->>> Sorry about that.
->>>
->>> One example that I can think of is when you have a wifi module connected as a
->>> mmc card via sdio. So you can register a callback function in your machine
->>> source code to turn on/off the wifi module based on the mmc host power.
->>
->> Ok, understand. Your second patch in this series adds such a callback in
->> your SDHCI host driver and there it just calls a platform callback. I
->> don't think this is a good idea. First, we want to go away from platform
->> callbacks, because they are incompatible with DT. Second, because the
->> proper solution IMHO would be for your platform to export a regulator, and
->> the SDHCI core driver already includes regulator support.
-> We can use the regulator framework.
-> i think this callback function didn't need.
+On Thu, May 2, 2013 at 8:02 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
 >
-
-Ok, thanks for the feed back. Just to get things clear, is this
-implementation using regulator framework already done?
-
-BR,
-
-Felipe
-
-> Best Regards,
-> Jaehoon Chung
->>
->>> I've seen this implementation in others mmc hosts, such as omap.
->>
->> Which, however, doesn't yet mean, it's a good idea :)
->>
->> Thanks
->> Guennadi
->> ---
->> Guennadi Liakhovetski, Ph.D.
->> Freelance Open-Source Software Developer
->> http://www.open-technology.de/
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
+> From: Ulf Hansson <ulf.hansson@linaro.org>
 >
+> Move mmc suspend specific operations to be executed from the .suspend
+> callback in the mmc bus_ops. This simplifies the mmc_suspend_host
+> function which is supposed to handle nothing but common suspend tasks.
+>
+> Since eMMC can be considered non-removable there are no need to check
+> for ongoing bkops at PM_SUSPEND_PREPARE notification so remove it.
+
+
+Sorry, a bit confused about this desc.
+How about mmc card, which can be removable.
