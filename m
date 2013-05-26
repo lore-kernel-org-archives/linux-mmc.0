@@ -1,42 +1,49 @@
-From: Pavel Machek <pavel@denx.de>
-Subject: Re: [PATCHv4 6/6] mmc: dw_mmc: Add support DW SD/MMC driver on
- SOCFPGA
-Date: Sun, 26 May 2013 20:11:16 +0200
-Message-ID: <20130526181116.GA16409@amd.pavel.ucw.cz>
-References: <1369410080-436-1-git-send-email-dinguyen@altera.com>
- <201305241912.53751.arnd@arndb.de>
- <1369418588.9717.0.camel@linux-builds1>
- <201305242058.34332.arnd@arndb.de>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 0/3] mmc: sdhci: support runtime PM for BYT SD cards
+Date: Sun, 26 May 2013 14:21:49 -0400
+Message-ID: <87r4gtk3eq.fsf@octavius.laptop.org>
+References: <1367831854-31952-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:44744 "EHLO
-	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754737Ab3EZSLS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 May 2013 14:11:18 -0400
-Content-Disposition: inline
-In-Reply-To: <201305242058.34332.arnd@arndb.de>
+Received: from void.printf.net ([89.145.121.20]:55967 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754621Ab3EZSVz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 26 May 2013 14:21:55 -0400
+In-Reply-To: <1367831854-31952-1-git-send-email-adrian.hunter@intel.com>
+	(Adrian Hunter's message of "Mon, 6 May 2013 12:17:31 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Dinh Nguyen <dinguyen@altera.com>, linux-arm-kernel@lists.infradead.org, dinh.linux@gmail.com, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Olof Johansson <olof@lixom.net>, linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 
-On Fri 2013-05-24 20:58:34, Arnd Bergmann wrote:
-> On Friday 24 May 2013, Dinh Nguyen wrote:
-> > I apologize for that. Will make sure to include a [PATCH 0/6] message in
-> > the future.
-> 
-> No worries, I actually saw now that my only other comment was also
-> wrong, as you have the binding I was looking for in patch 5/6.
+Hi Adrian,
 
-Could you take the series through your tree?
 
-Patches 1,2,4,5/6 are mostly local to arch/arm, 3/6 is stuff Dinh is
-listed as a maintainer for, and 6/6 is fairly socfpga-specific,
-too. (I guess Dinh could add MAINTAINERs entry for that...).
+On Mon, May 06 2013, Adrian Hunter wrote:
+> Hi
+>
+> Here are 3 patches to support runtime PM for BYT SD cards
+>
+> Please note that these patches are dependent upon 2 gpio patches
+> that are in linux-next and linux-gpio but not the mmc tree.
+> Those patches are:
+>
+> 	author	Mika Westerberg <mika.westerberg@linux.intel.com>	2013-04-03 10:56:54 (GMT)
+> 	committer	Linus Walleij <linus.walleij@linaro.org>	2013-04-11 22:31:18 (GMT)
+> 	commit	12028d2d216220618f76284af5f8ed510b11da55 (patch)
+> 	gpiolib-acpi: introduce acpi_get_gpio_by_index() helper
+>
+> 	author	Rafael J. Wysocki <rafael.j.wysocki@intel.com>	2013-04-09 13:57:25 (GMT)
+> 	committer	Linus Walleij <linus.walleij@linaro.org>	2013-04-10 21:41:17 (GMT)
+> 	commit	7fc7acb9a0b0ff3ffdf21818fe0735ebaf4fecb8 (patch)
+> 	gpio / ACPI: Handle ACPI events in accordance with the spec
+>
+> I think those patches are queued for 3.10.
 
-Thanks,
-									Pavel
+Thanks, I'll pushed these to mmc-next for 3.11 now.
+
+- Chris.
 -- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
