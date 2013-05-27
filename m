@@ -1,71 +1,43 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: dw_mmc: change the macro name from DTO to DRTO
-Date: Mon, 27 May 2013 13:47:57 +0900
-Message-ID: <51A2E57D.1000902@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V4 1/4] mmc: core: Stop bkops for eMMC only from mmc suspend
+Date: Mon, 27 May 2013 09:26:34 +0200
+Message-ID: <CAPDyKFrzF8nGO7Ow+GK-W8W4CYZDBpaEw5mNZWFC01vTEZc83Q@mail.gmail.com>
+References: <1367496159-7090-1-git-send-email-ulf.hansson@stericsson.com>
+	<1367496159-7090-2-git-send-email-ulf.hansson@stericsson.com>
+	<CAMj5BkiFcH2s42kB7DZ=tk36A6fzr8EwbxRNLMDhUdfKEPRFPw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:48371 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750772Ab3E0Err (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 May 2013 00:47:47 -0400
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MNF00MT4XBM07M0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 27 May 2013 13:47:46 +0900 (KST)
+Received: from mail-vb0-f54.google.com ([209.85.212.54]:42029 "EHLO
+	mail-vb0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756651Ab3E0H0f (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 May 2013 03:26:35 -0400
+Received: by mail-vb0-f54.google.com with SMTP id f13so4450629vbg.41
+        for <linux-mmc@vger.kernel.org>; Mon, 27 May 2013 00:26:34 -0700 (PDT)
+In-Reply-To: <CAMj5BkiFcH2s42kB7DZ=tk36A6fzr8EwbxRNLMDhUdfKEPRFPw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: 'Chris Ball' <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Will Newton <will.newton@gmail.com>, James Hogan <james.hogan@imgtec.com>
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Maya Erez <merez@codeaurora.org>, Subhash Jadavani <subhashj@codeaurora.org>, Arnd Bergmann <arnd@arndb.de>, Kevin Liu <kliu5@marvell.com>, Adrian Hunter <adrian.hunter@intel.com>, Daniel Drake <dsd@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>
 
-At Interrupt status register, Bit9 is Data Read Timeout.
-But we used macro name as the DTO. It could be confused with the Data
-Transfer Over(DTO)-Bit[3].
-it's clearly that is changed the DRTO instead of DTO.
+On 26 May 2013 04:22, zhangfei gao <zhangfei.gao@gmail.com> wrote:
+> On Thu, May 2, 2013 at 8:02 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
+>>
+>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>
+>> Move mmc suspend specific operations to be executed from the .suspend
+>> callback in the mmc bus_ops. This simplifies the mmc_suspend_host
+>> function which is supposed to handle nothing but common suspend tasks.
+>>
+>> Since eMMC can be considered non-removable there are no need to check
+>> for ongoing bkops at PM_SUSPEND_PREPARE notification so remove it.
+>
+>
+> Sorry, a bit confused about this desc.
+> How about mmc card, which can be removable.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |    4 ++--
- drivers/mmc/host/dw_mmc.h |    2 +-
- 2 files changed, 3 insertions(+), 3 deletions(-)
+It is only eMMC that supports BKOPS, thus no need to check for it at
+PM_SUSPEND_PREPARE notification.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index b10e5e1..7dca5e9 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -39,7 +39,7 @@
- #include "dw_mmc.h"
- 
- /* Common flag combinations */
--#define DW_MCI_DATA_ERROR_FLAGS	(SDMMC_INT_DTO | SDMMC_INT_DCRC | \
-+#define DW_MCI_DATA_ERROR_FLAGS	(SDMMC_INT_DRTO | SDMMC_INT_DCRC | \
- 				 SDMMC_INT_HTO | SDMMC_INT_SBE  | \
- 				 SDMMC_INT_EBE)
- #define DW_MCI_CMD_ERROR_FLAGS	(SDMMC_INT_RTO | SDMMC_INT_RCRC | \
-@@ -1093,7 +1093,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 			status = host->data_status;
- 
- 			if (status & DW_MCI_DATA_ERROR_FLAGS) {
--				if (status & SDMMC_INT_DTO) {
-+				if (status & SDMMC_INT_DRTO) {
- 					data->error = -ETIMEDOUT;
- 				} else if (status & SDMMC_INT_DCRC) {
- 					data->error = -EILSEQ;
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 0b74189..2f52c87 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -98,7 +98,7 @@
- #define SDMMC_INT_HLE			BIT(12)
- #define SDMMC_INT_FRUN			BIT(11)
- #define SDMMC_INT_HTO			BIT(10)
--#define SDMMC_INT_DTO			BIT(9)
-+#define SDMMC_INT_DRTO			BIT(9)
- #define SDMMC_INT_RTO			BIT(8)
- #define SDMMC_INT_DCRC			BIT(7)
- #define SDMMC_INT_RCRC			BIT(6)
--- 
-1.7.9.5
+Kind regards
+Ulf Hansson
