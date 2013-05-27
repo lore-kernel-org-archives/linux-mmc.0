@@ -1,55 +1,58 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [RFC/PATCH]: mmc: card/core: support password locked cards
-Date: Mon, 27 May 2013 17:28:37 +0200
-Message-ID: <201305271728.37770.arnd@arndb.de>
-References: <3B0B2667-A242-4337-96EC-3925AB4EC18F@turczak.de>
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Subject: Re: [PATCH 1/1] mmc: of_mmc_spi: fix card detect irq
+Date: Mon, 27 May 2013 22:02:00 +0400
+Message-ID: <51A39F98.4010904@cogentembedded.com>
+References: <1369571337-9300-1-git-send-email-plagnioj@jcrosoft.com> <51A25ECA.2060001@cogentembedded.com> <20130527141306.GS24476@game.jcrosoft.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:58185 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752929Ab3E0P2u (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 May 2013 11:28:50 -0400
-In-Reply-To: <3B0B2667-A242-4337-96EC-3925AB4EC18F@turczak.de>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:54808 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756075Ab3E0SCE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 May 2013 14:02:04 -0400
+Received: by mail-lb0-f174.google.com with SMTP id u10so6977428lbi.19
+        for <linux-mmc@vger.kernel.org>; Mon, 27 May 2013 11:02:03 -0700 (PDT)
+In-Reply-To: <20130527141306.GS24476@game.jcrosoft.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Turczak <peter@turczak.de>
-Cc: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org
+To: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-On Monday 27 May 2013, Peter Turczak wrote:
-> 
-> Therefore I propose to add a basic support for locked cards in the 
-> kernel. The user space applications might take care of unlocking the
-> card afterwards. When a card has been unlocked it stays unlocked
-> until cycling it, reset commands won't lock it again.
+Hello.
 
-Seems reasonable to me.
- 
-> My questions are:
-> 1. Should a card that is locked be visible via /dev/mmcblkX? 
->  I think it should be, in order to be able to issue an unlock command
+On 27-05-2013 18:13, Jean-Christophe PLAGNIOL-VILLARD wrote:
 
-Agreed
+>>> set missing irq type the IRQF_ONESHOT
 
-> 2. What should read/write operations return on a locked card EPERM, EACCESS
-> or something else?
+>>> Signed-off-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+>>> Cc: stable <stable@vger.kernel.org> # 3.4+
+>>> Cc: linux-mmc@vger.kernel.org
+>>> ---
+>>>   drivers/mmc/host/of_mmc_spi.c |    4 ++--
+>>>   1 file changed, 2 insertions(+), 2 deletions(-)
 
-I would have said EIO, but I don't have a strong opinion.
+>>> diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
+>>> index d720b5e..cfb2e61 100644
+>>> --- a/drivers/mmc/host/of_mmc_spi.c
+>>> +++ b/drivers/mmc/host/of_mmc_spi.c
+>>> @@ -74,8 +74,8 @@ static int of_mmc_spi_init(struct device *dev,
+>>>   {
+>>>   	struct of_mmc_spi *oms = to_of_mmc_spi(dev);
+>>> -	return request_threaded_irq(oms->detect_irq, NULL, irqhandler, 0,
+>>> -				    dev_name(dev), mmc);
+>>> +	return request_threaded_irq(oms->detect_irq, NULL, irqhandler,
+>>> +		IRQF_ONESHOT, dev_name(dev), mmc);
 
-> 3. Should locking/unlocking be done via a special ioctl command, as the
-> card needs to be rescanned anyways? 
+>>      Please don't change the indentation.
 
-I'd say we should use the generic ioctl unless it doesn't work. I would
-not object an unlock ioctl either if other people think that's a good
-idea.
+> too long > 80
 
-> 4. How to cleanly initiate a rescan from userspace if answer to 3 is no? 
-> Currently I issue a reset command to the card which forces to kernel to 
-> fail issuing CMD13 and therefore reinitialize it, not too nice honestly.
+     Reflow it then into several lines.
 
-Adding a rescan ioctl would have other possible applications, so that
-seems better than a special unlock ioctl.
+> Best Regards,
+> J.
 
-	Arnd
+WBR, Sergei
+
+
