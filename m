@@ -1,56 +1,55 @@
-From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
-Subject: Re: [PATCH 1/1] mmc: of_mmc_spi: fix card detect irq
-Date: Mon, 27 May 2013 16:13:06 +0200
-Message-ID: <20130527141306.GS24476@game.jcrosoft.org>
-References: <1369571337-9300-1-git-send-email-plagnioj@jcrosoft.com>
- <51A25ECA.2060001@cogentembedded.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [RFC/PATCH]: mmc: card/core: support password locked cards
+Date: Mon, 27 May 2013 17:28:37 +0200
+Message-ID: <201305271728.37770.arnd@arndb.de>
+References: <3B0B2667-A242-4337-96EC-3925AB4EC18F@turczak.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <51A25ECA.2060001@cogentembedded.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.8]:58185 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752929Ab3E0P2u (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 May 2013 11:28:50 -0400
+In-Reply-To: <3B0B2667-A242-4337-96EC-3925AB4EC18F@turczak.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Peter Turczak <peter@turczak.de>
+Cc: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org
 
-On 23:13 Sun 26 May     , Sergei Shtylyov wrote:
-> Hello.
+On Monday 27 May 2013, Peter Turczak wrote:
 > 
-> On 05/26/2013 04:28 PM, Jean-Christophe PLAGNIOL-VILLARD wrote:
-> 
-> >set missing irq type the IRQF_ONESHOT
-> >
-> >Signed-off-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
-> >Cc: stable <stable@vger.kernel.org> # 3.4+
-> >Cc: linux-mmc@vger.kernel.org
-> >---
-> >  drivers/mmc/host/of_mmc_spi.c |    4 ++--
-> >  1 file changed, 2 insertions(+), 2 deletions(-)
-> >
-> >diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-> >index d720b5e..cfb2e61 100644
-> >--- a/drivers/mmc/host/of_mmc_spi.c
-> >+++ b/drivers/mmc/host/of_mmc_spi.c
-> >@@ -74,8 +74,8 @@ static int of_mmc_spi_init(struct device *dev,
-> >  {
-> >  	struct of_mmc_spi *oms = to_of_mmc_spi(dev);
-> >-	return request_threaded_irq(oms->detect_irq, NULL, irqhandler, 0,
-> >-				    dev_name(dev), mmc);
-> >+	return request_threaded_irq(oms->detect_irq, NULL, irqhandler,
-> >+		IRQF_ONESHOT, dev_name(dev), mmc);
-> 
->     Please don't change the indentation.
-too long > 80
+> Therefore I propose to add a basic support for locked cards in the 
+> kernel. The user space applications might take care of unlocking the
+> card afterwards. When a card has been unlocked it stays unlocked
+> until cycling it, reset commands won't lock it again.
 
-Best Regards,
-J.
+Seems reasonable to me.
+ 
+> My questions are:
+> 1. Should a card that is locked be visible via /dev/mmcblkX? 
+>  I think it should be, in order to be able to issue an unlock command
+
+Agreed
+
+> 2. What should read/write operations return on a locked card EPERM, EACCESS
+> or something else?
+
+I would have said EIO, but I don't have a strong opinion.
+
+> 3. Should locking/unlocking be done via a special ioctl command, as the
+> card needs to be rescanned anyways? 
+
+I'd say we should use the generic ioctl unless it doesn't work. I would
+not object an unlock ioctl either if other people think that's a good
+idea.
+
+> 4. How to cleanly initiate a rescan from userspace if answer to 3 is no? 
+> Currently I issue a reset command to the card which forces to kernel to 
+> fail issuing CMD13 and therefore reinitialize it, not too nice honestly.
+
+Adding a rescan ioctl would have other possible applications, so that
+seems better than a special unlock ioctl.
+
+	Arnd
