@@ -1,14 +1,14 @@
 From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH V3 2/3] ARM: mmc: bcm281xx SDHCI driver
-Date: Wed, 29 May 2013 16:25:36 +0200
-Message-ID: <201305291625.37068.arnd@arndb.de>
+Subject: Re: [PATCH V3 3/3] ARM: mmc: bcm281xx SDHCI driver (dt mods)
+Date: Wed, 29 May 2013 16:27:20 +0200
+Message-ID: <201305291627.20984.arnd@arndb.de>
 References: <1369790016-13270-1-git-send-email-csd@broadcom.com>
- <1369790016-13270-2-git-send-email-csd@broadcom.com>
+ <1369790016-13270-3-git-send-email-csd@broadcom.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <1369790016-13270-2-git-send-email-csd-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+In-Reply-To: <1369790016-13270-3-git-send-email-csd-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
 List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
  <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
@@ -24,46 +24,21 @@ Cc: linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jerry Huang <Chang-Ming.H
 List-Id: linux-mmc@vger.kernel.org
 
 On Wednesday 29 May 2013, Christian Daudt wrote:
-> +static int sdhci_bcm_kona_sd_reset(struct sdhci_host *host)
-> +{
-
-> +	/*
-> +	 * Back-to-Back register write needs a delay of 1ms at bootup (min 10uS)
-> +	 * Back-to-Back writes to same register needs delay when SD bus clock
-> +	 * is very low w.r.t AHB clock, mainly during boot-time and during card
-> +	 * insert-removal.
-> +	 */
-> +	mdelay(1);
-> +	sdhci_writel(host, val, KONA_SDHOST_CORECTRL);
-
-This is now called always without spinlocks held and interrupts enabled,
-so it should really be msleep() not mdelay().
-
-> +static void sdhci_bcm_kona_sd_init(struct sdhci_host *host)
-> +{
-> +	unsigned int val;
+> +       sdio0: sdio@0x3f180000 {
+> +               max-frequency = <48000000>;
+> +               status = "okay";
+> +       };
 > +
-> +	/* enable the interrupt from the IP core */
-> +	val = sdhci_readl(host, KONA_SDHOST_COREIMR);
-> +	val |= KONA_SDHOST_IP;
-> +	sdhci_writel(host, val, KONA_SDHOST_COREIMR);
-> +
-> +	/* Enable the AHB clock gating module to the host */
-> +	val = sdhci_readl(host, KONA_SDHOST_CORECTRL);
-> +	val |= KONA_SDHOST_EN;
-> +
-> +	/*
-> +	 * Back-to-Back register write needs a delay of 1ms at bootup (min 10uS)
-> +	 * Back-to-Back writes to same register needs delay when SD bus clock
-> +	 * is very low w.r.t AHB clock, mainly during boot-time and during card
-> +	 * insert-removal.
-> +	 */
-> +	mdelay(1);
-> +	sdhci_writel(host, val, KONA_SDHOST_CORECTRL);
-> +}
 
-Same here.
+On a general note, there is no need to duplicate both the label and the
+name here, one of the two is enough. The easiest way to write this
+in a board file is
 
-Looks good aside from that.
+&sdio {
+	max-frequency = <48000000>;
+	status = "okay";
+};
 
-	Arnd
+Your version is not wrong though, so
+
+Acked-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
