@@ -1,39 +1,94 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: change the macro name from DTO to DRTO
-Date: Tue, 28 May 2013 21:04:07 +0900
-Message-ID: <000d01ce5b9b$74bd13d0$5e373b70$%jun@samsung.com>
-References: <51A2E57D.1000902@samsung.com> <51A47582.3010101@imgtec.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH] mmc: sh_mobile_sdhi: fix error return code in
+ sh_mobile_sdhi_probe()
+Date: Wed, 29 May 2013 08:58:03 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1305290841080.14157@axis700.grange>
+References: <CAPgLHd_dwxRp8Ug7=05=3gTTa9bPME5tb-Mq1aqRFXZSrgqFGg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:30940 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933338Ab3E1MEJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 May 2013 08:04:09 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MNI00AF4C6RT150@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 28 May 2013 21:04:07 +0900 (KST)
-In-reply-to: <51A47582.3010101@imgtec.com>
-Content-language: ko
+Received: from moutng.kundenserver.de ([212.227.126.171]:51584 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933908Ab3E2G6T (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 May 2013 02:58:19 -0400
+In-Reply-To: <CAPgLHd_dwxRp8Ug7=05=3gTTa9bPME5tb-Mq1aqRFXZSrgqFGg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'James Hogan' <james.hogan@imgtec.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@gmail.com>
+To: Wei Yongjun <weiyj.lk@gmail.com>
+Cc: ian@mnementh.co.uk, cjb@laptop.org, grant.likely@linaro.org, rob.herring@calxeda.com, yongjun_wei@trendmicro.com.cn, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
 
-On 05/28/13 6:15 PM, James Hogan wrote:
-> On 27/05/13 05:47, Jaehoon Chung wrote:
-> > At Interrupt status register, Bit9 is Data Read Timeout.
-> > But we used macro name as the DTO. It could be confused with the Data
-> > Transfer Over(DTO)-Bit[3].
-> > it's clearly that is changed the DRTO instead of DTO.
-> >
-> > Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Hi
+
+On Tue, 28 May 2013, Wei Yongjun wrote:
+
+> From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
 > 
-> Reviewed-by: James Hogan <james.hogan@imgtec.com>
+> Fix to return a negative error code instead of 0 when we cannot get
+> IRQ source by platform_get_irq(), as done elsewhere in this function.
+> 
+> Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
 
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+Thanks for the patch. Do you think the following version would be even a 
+bit simpler?
 
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index fe90853..76661b6 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -255,18 +255,17 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	if (multiplexed_isr) {
+ 		while (1) {
+ 			irq = platform_get_irq(pdev, i);
+-			if (irq < 0)
+-				break;
++			/* There must be at least one IRQ source */
++			if (irq < 0) {
++				ret = irq;
++				goto eirq;
++			}
+ 			i++;
+ 			ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_irq, 0,
+ 					  dev_name(&pdev->dev), host);
+ 			if (ret)
+ 				goto eirq;
+ 		}
+-
+-		/* There must be at least one IRQ source */
+-		if (!i)
+-			goto eirq;
+ 	}
+ 
+ 	dev_info(&pdev->dev, "%s base at 0x%08lx clock rate %u MHz\n",
+
+If you agree, maybe you could send a v2 of your patch in this form, I'll 
+ack it then.
+
+Thanks
+Guennadi
+
+> ---
+>  drivers/mmc/host/sh_mobile_sdhi.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+> index cc4c872..a4316b3 100644
+> --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+> @@ -273,8 +273,10 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+>  		}
+>  
+>  		/* There must be at least one IRQ source */
+> -		if (!i)
+> +		if (!i) {
+> +			ret = irq;
+>  			goto eirq;
+> +		}
+>  	}
+>  
+>  	dev_info(&pdev->dev, "%s base at 0x%08lx clock rate %u MHz\n",
+> 
+
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
