@@ -1,59 +1,69 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V3 1/3] mmc: Add size for caller in init+register
-Date: Wed, 29 May 2013 16:25:29 +0200
-Message-ID: <CAPDyKFqQCWdtwOVS2qoD0_k6ZW9NU=30kjEd4mQUesecmutqpg@mail.gmail.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH V3 2/3] ARM: mmc: bcm281xx SDHCI driver
+Date: Wed, 29 May 2013 16:25:36 +0200
+Message-ID: <201305291625.37068.arnd@arndb.de>
 References: <1369790016-13270-1-git-send-email-csd@broadcom.com>
- <CAPDyKFoPO0KTfW_i1EP8urSUT+U8yEaafrE2HdN2mmEkYCZm-w@mail.gmail.com>
- <201305291619.28396.arnd@arndb.de>
+ <1369790016-13270-2-git-send-email-csd@broadcom.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <201305291619.28396.arnd@arndb.de>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-doc@vger.kernel.org, Christian Daudt <csd@broadcom.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Grant Likely <grant.likely@secretlab.ca>, Wei WANG <wei_wang@realsil.com.cn>, matt.porter@linaro.org, Kevin Liu <kliu5@marvell.com>, Lars-Peter Clausen <lars@metafoo.de>, Russell King <linux@arm.linux.org.uk>, csd_b@daudt.org, Viresh Kumar <viresh.kumar@linaro.org>, Chris Ball <cjb@laptop.org>, plagnioj@jcrosoft.com, Sascha Hauer <s.hauer@pengutronix.de>, devicetree-discuss@lists.ozlabs.org, Rob Herring <rob.herring@calxeda.com>, Bill Pemberton <wfp5p@virginia.edu>, Haojian Zhuang <haojian.zhuang@gmail.com>, Stephen Warren <swarren@nvidia.com>, Anton Vorontsov <avorontsov@ru.mvista.com>, linux-arm-kernel@lists.infradead.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ludovic Desroches <ludovic.desroche>
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <1369790016-13270-2-git-send-email-csd-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Christian Daudt <csd-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Cc: linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jerry Huang <Chang-Ming.Huang-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Wei WANG <wei_wang-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>, matt.porter-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Kevin Liu <kliu5-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Viresh Kumar <viresh.kumar-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Bill Pemberton <wfp5p-4Ng6DfrEGID2fBVCVOL8/A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Anton Vorontsov <avorontsov-hkdhdckH98+B+jHODAdFcQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 29 May 2013 16:19, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Wednesday 29 May 2013, Ulf Hansson wrote:
->> > diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
->> > index 1210ed1..ed4a85d 100644
->> > --- a/drivers/mmc/host/sdhci-pltfm.h
->> > +++ b/drivers/mmc/host/sdhci-pltfm.h
->> > @@ -27,6 +27,8 @@ struct sdhci_pltfm_host {
->> >         /* migrate from sdhci_of_host */
->> >         unsigned int clock;
->> >         u16 xfer_mode_shadow;
->> > +
->> > +       unsigned long private[0] ____cacheline_aligned;
->>
->> Why do you need this to be "____cacheline_aligned"?
->
-> This is common practice for additional members in data structures
-> like this. The reason is that we append a structure which
-> may have larger alignment requirements than 'unsigned long'.
->
-> The kmalloc function generally returns a cache line aligned
-> object, so this provides the same alignment that we get
-> with a separate allocation.
->
->         Arnd
->
+On Wednesday 29 May 2013, Christian Daudt wrote:
+> +static int sdhci_bcm_kona_sd_reset(struct sdhci_host *host)
+> +{
 
-Arnd, thanks for the explanation!
+> +	/*
+> +	 * Back-to-Back register write needs a delay of 1ms at bootup (min 10uS)
+> +	 * Back-to-Back writes to same register needs delay when SD bus clock
+> +	 * is very low w.r.t AHB clock, mainly during boot-time and during card
+> +	 * insert-removal.
+> +	 */
+> +	mdelay(1);
+> +	sdhci_writel(host, val, KONA_SDHOST_CORECTRL);
 
-Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+This is now called always without spinlocks held and interrupts enabled,
+so it should really be msleep() not mdelay().
 
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+> +static void sdhci_bcm_kona_sd_init(struct sdhci_host *host)
+> +{
+> +	unsigned int val;
+> +
+> +	/* enable the interrupt from the IP core */
+> +	val = sdhci_readl(host, KONA_SDHOST_COREIMR);
+> +	val |= KONA_SDHOST_IP;
+> +	sdhci_writel(host, val, KONA_SDHOST_COREIMR);
+> +
+> +	/* Enable the AHB clock gating module to the host */
+> +	val = sdhci_readl(host, KONA_SDHOST_CORECTRL);
+> +	val |= KONA_SDHOST_EN;
+> +
+> +	/*
+> +	 * Back-to-Back register write needs a delay of 1ms at bootup (min 10uS)
+> +	 * Back-to-Back writes to same register needs delay when SD bus clock
+> +	 * is very low w.r.t AHB clock, mainly during boot-time and during card
+> +	 * insert-removal.
+> +	 */
+> +	mdelay(1);
+> +	sdhci_writel(host, val, KONA_SDHOST_CORECTRL);
+> +}
+
+Same here.
+
+Looks good aside from that.
+
+	Arnd
