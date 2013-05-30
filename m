@@ -1,66 +1,48 @@
-From: Dan Murphy <dmurphy@ti.com>
-Subject: Re: [PATCH] dmaengine: shdma: fix a build failure on platforms with
- no DMA support
-Date: Thu, 30 May 2013 11:23:13 -0500
-Message-ID: <51A77CF1.7040105@ti.com>
-References: <Pine.LNX.4.64.1305301650290.29171@axis700.grange>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1305301650290.29171@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Simon Horman <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Kevin Hilman <khilman@linaro.org>
+From: Ben Gardiner <bengardiner@nanometrics.ca>
+Subject: [PATCH 0/8] cross-compiling, SEND_STATUS, pretty-printing and enhanced user area
+Date: Thu, 30 May 2013 17:12:43 -0400
+Message-ID: <cover.1369947867.git.bengardiner@nanometrics.ca>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ie0-f171.google.com ([209.85.223.171]:33908 "EHLO
+	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755821Ab3E3VNH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 May 2013 17:13:07 -0400
+Received: by mail-ie0-f171.google.com with SMTP id s9so1918179iec.30
+        for <linux-mmc@vger.kernel.org>; Thu, 30 May 2013 14:13:07 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org
 
-On 05/30/2013 11:02 AM, Guennadi Liakhovetski wrote:
-> On platforms with no support for the shdma dmaengine driver build is
-> currently failing with
->
-> drivers/built-in.o: In function `sh_mobile_sdhi_probe':
-> drivers/mmc/host/sh_mobile_sdhi.c:170: undefined reference to`shdma_chan_filter'
->
-> Fix the breakage by defining shdma_chan_filter to NULL in such
-> configurations.
->
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-> ---
->
-> This is for "next." Compile-tested only. I'll test it on hardware next 
-> week, but I don't think it shall break anything.
->
->  include/linux/sh_dma.h |    4 ++++
->  1 files changed, 4 insertions(+), 0 deletions(-)
->
-> diff --git a/include/linux/sh_dma.h b/include/linux/sh_dma.h
-> index b64d6be..1fd8a20 100644
-> --- a/include/linux/sh_dma.h
-> +++ b/include/linux/sh_dma.h
-> @@ -99,6 +99,10 @@ struct sh_dmae_pdata {
->  #define CHCR_TE	0x00000002
->  #define CHCR_IE	0x00000004
->  
-> +#if IS_ENABLED(CONFIG_SH_DMAE)
->  bool shdma_chan_filter(struct dma_chan *chan, void *arg);
-> +#else
-> +#define shdma_chan_filter NULL
-Would this not be better as a
-#else
-static inline bool shdma_chan_filter(struct dma_chan *chan, void *arg)
-{
-    return false;
-}
-#endif
+This series builds on top of f74dfe23cd00894aa9f235374468e05acb793e17.
 
-Otherwise runtime will call a NULL pointer
+It introduces:
+ * some Makefile changes to make cross-compiling easier
+ * SEND_STATUS
+ * 'pretty'-printing sizes of some fields in KiB
+ * setting the OTP enhanced user area parameters
 
-> +#endif
->  
->  #endif
+available also https://github.com/BenGardiner/mmc-utils/commits/features/enh-programming
+if it helps.
 
+Ben Gardiner (8):
+  allow environment and command-line supplied make vars
+  extract definitions for EXT_CSD register EXT_CSD_PARTITIONING_SUPPORT
+  extract definitions for EXT_CSD register PARTITION_SETTING_COMPLETED
+    and pretty-print
+  Support SEND_STATUS command
+  fix printing ENH_START_ADDR
+  report if card is block-addressed and effect on ENH_START_ADDR
+  print KiB sizes for some fields
+  support setting the OTP enhanced user area parameters
 
--- 
-------------------
-Dan Murphy
+ Makefile   |   10 +-
+ mmc.c      |   10 ++
+ mmc.h      |   20 ++++
+ mmc_cmds.c |  307 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++----
+ mmc_cmds.h |    2 +
+ 5 files changed, 328 insertions(+), 21 deletions(-)
+
+--
+1.7.3.5
 
