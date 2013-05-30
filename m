@@ -1,44 +1,47 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH V3 3/3] ARM: mmc: bcm281xx SDHCI driver (dt mods)
-Date: Wed, 29 May 2013 16:27:20 +0200
-Message-ID: <201305291627.20984.arnd@arndb.de>
-References: <1369790016-13270-1-git-send-email-csd@broadcom.com>
- <1369790016-13270-3-git-send-email-csd@broadcom.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH 0/4] mmc: core: Let the mmc_bus handle suspend|resume sequence
+Date: Thu, 30 May 2013 14:53:07 +0200
+Message-ID: <1369918391-15277-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <1369790016-13270-3-git-send-email-csd-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Christian Daudt <csd-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Cc: linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jerry Huang <Chang-Ming.Huang-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Wei WANG <wei_wang-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>, matt.porter-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Kevin Liu <kliu5-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Viresh Kumar <viresh.kumar-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Bill Pemberton <wfp5p-4Ng6DfrEGID2fBVCVOL8/A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Anton Vorontsov <avorontsov-hkdhdckH98+B+jHODAdFcQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog113.obsmtp.com ([207.126.144.135]:59745 "EHLO
+	eu1sys200aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754551Ab3E3Mxe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 May 2013 08:53:34 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-On Wednesday 29 May 2013, Christian Daudt wrote:
-> +       sdio0: sdio@0x3f180000 {
-> +               max-frequency = <48000000>;
-> +               status = "okay";
-> +       };
-> +
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-On a general note, there is no need to duplicate both the label and the
-name here, one of the two is enough. The easiest way to write this
-in a board file is
+The MMC/SD/SDIO cards are registered on the mmc_bus and should from a power
+management perspective be controlled from there. As of today each and every
+host driver needs to issue mmc_suspend|resume_host from their respective
+.suspend|resume methods, which seems like an unnecessary requirement to
+put on them.
 
-&sdio {
-	max-frequency = <48000000>;
-	status = "okay";
-};
+This patch set moves the responsiblity to suspend the cards into the mmc_bus.
+In this patch set, the mmc_suspend|resume_host functions are not removed, but
+will instead always return successful. As a separate patch build on top of
+this patch set, we shall remove the API:s together with updating each and
+every host driver.
 
-Your version is not wrong though, so
+Ulf Hansson (4):
+  mmc: core: Remove unnecessary check for the remove callback
+  mmc: core: Validate suspend prerequisites for SDIO at SUSPEND_PREPARE
+  mmc: core: Push common suspend|resume code into each bus_ops
+  mmc: core: Initiate suspend|resume from mmc bus instead of mmc host
 
-Acked-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+ drivers/mmc/core/bus.c  |   28 ++++++++++++++-
+ drivers/mmc/core/core.c |   87 ++++++++---------------------------------------
+ drivers/mmc/core/core.h |    1 +
+ drivers/mmc/core/mmc.c  |    4 +++
+ drivers/mmc/core/sd.c   |    4 +++
+ drivers/mmc/core/sdio.c |   48 +++++++++++++++++++++++---
+ 6 files changed, 94 insertions(+), 78 deletions(-)
+
+-- 
+1.7.10
+
