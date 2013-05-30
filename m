@@ -1,15 +1,15 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 2/4] mmc: core: Validate suspend prerequisites for SDIO at SUSPEND_PREPARE
-Date: Thu, 30 May 2013 14:53:09 +0200
-Message-ID: <1369918391-15277-3-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH 3/4] mmc: core: Push common suspend|resume code into each bus_ops
+Date: Thu, 30 May 2013 14:53:10 +0200
+Message-ID: <1369918391-15277-4-git-send-email-ulf.hansson@stericsson.com>
 References: <1369918391-15277-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog106.obsmtp.com ([207.126.144.121]:33429 "EHLO
-	eu1sys200aog106.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754347Ab3E3Mxf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 May 2013 08:53:35 -0400
+Received: from eu1sys200aog114.obsmtp.com ([207.126.144.137]:55831 "EHLO
+	eu1sys200aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754569Ab3E3Mxh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 May 2013 08:53:37 -0400
 In-Reply-To: <1369918391-15277-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -18,139 +18,178 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
 From: Ulf Hansson <ulf.hansson@linaro.org>
 
-This patch moves the validation for all the suspend prerequisites to be
-done at SUSPEND_PREPARE notification. Previously in the SDIO case parts
-of the validation was done from mmc_suspend_host.
+By moving code from the mmc_suspend|resume_host down into each
+.suspend|resume bus_ops callback, we get a more flexible solution.
 
-This patch invents a new pre_suspend bus_ops callback and implements it
-for SDIO. Returning an error code from it, will mean at SUSPEND_PREPARE
-notification, the card will be removed before proceeding with the
-suspend sequence.
+Some nice side effects are that we get a better understanding of each
+bus_ops suspend|resume sequence and the common code don't have to take
+care of specific corner cases, especially for the SDIO case.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/core.c |   25 ++++++++-----------------
- drivers/mmc/core/core.h |    1 +
- drivers/mmc/core/sdio.c |   27 +++++++++++++++++++++++----
- 3 files changed, 32 insertions(+), 21 deletions(-)
+ drivers/mmc/core/core.c |   31 +++----------------------------
+ drivers/mmc/core/mmc.c  |    4 ++++
+ drivers/mmc/core/sd.c   |    4 ++++
+ drivers/mmc/core/sdio.c |   21 +++++++++++++++++++++
+ 4 files changed, 32 insertions(+), 28 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index d2ee282..7a8a42d 100644
+index 7a8a42d..da3b907 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -2628,22 +2628,6 @@ int mmc_suspend_host(struct mmc_host *host)
+@@ -2621,9 +2621,6 @@ int mmc_suspend_host(struct mmc_host *host)
+ {
+ 	int err = 0;
+ 
+-	cancel_delayed_work(&host->detect);
+-	mmc_flush_scheduled_work();
+-
+ 	mmc_bus_get(host);
  	if (host->bus_ops && !host->bus_dead) {
  		if (host->bus_ops->suspend)
- 			err = host->bus_ops->suspend(host);
--
--		if (err == -ENOSYS || !host->bus_ops->resume) {
--			/*
--			 * We simply "remove" the card in this case.
--			 * It will be redetected on resume.  (Calling
--			 * bus_ops->remove() with a claimed host can
--			 * deadlock.)
--			 */
--			host->bus_ops->remove(host);
--			mmc_claim_host(host);
--			mmc_detach_bus(host);
--			mmc_power_off(host);
--			mmc_release_host(host);
--			host->pm_flags = 0;
--			err = 0;
--		}
+@@ -2631,9 +2628,6 @@ int mmc_suspend_host(struct mmc_host *host)
  	}
  	mmc_bus_put(host);
  
-@@ -2706,6 +2690,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
- 	struct mmc_host *host = container_of(
- 		notify_block, struct mmc_host, pm_notify);
- 	unsigned long flags;
-+	int err = 0;
+-	if (!err && !mmc_card_keep_power(host))
+-		mmc_power_off(host);
+-
+ 	return err;
+ }
+ EXPORT_SYMBOL(mmc_suspend_host);
+@@ -2644,39 +2638,20 @@ EXPORT_SYMBOL(mmc_suspend_host);
+  */
+ int mmc_resume_host(struct mmc_host *host)
+ {
+-	int err = 0;
++	int err;
  
- 	switch (mode) {
- 	case PM_HIBERNATION_PREPARE:
-@@ -2715,7 +2700,13 @@ int mmc_pm_notify(struct notifier_block *notify_block,
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		cancel_delayed_work_sync(&host->detect);
+ 	mmc_bus_get(host);
+ 	if (host->bus_ops && !host->bus_dead) {
+-		if (!mmc_card_keep_power(host)) {
+-			mmc_power_up(host);
+-			mmc_select_voltage(host, host->ocr);
+-			/*
+-			 * Tell runtime PM core we just powered up the card,
+-			 * since it still believes the card is powered off.
+-			 * Note that currently runtime PM is only enabled
+-			 * for SDIO cards that are MMC_CAP_POWER_OFF_CARD
+-			 */
+-			if (mmc_card_sdio(host->card) &&
+-			    (host->caps & MMC_CAP_POWER_OFF_CARD)) {
+-				pm_runtime_disable(&host->card->dev);
+-				pm_runtime_set_active(&host->card->dev);
+-				pm_runtime_enable(&host->card->dev);
+-			}
+-		}
+ 		BUG_ON(!host->bus_ops->resume);
+ 		err = host->bus_ops->resume(host);
+-		if (err) {
++		if (err)
+ 			pr_warning("%s: error %d during resume "
+ 					    "(card was removed?)\n",
+ 					    mmc_hostname(host), err);
+-			err = 0;
+-		}
+ 	}
+-	host->pm_flags &= ~MMC_PM_KEEP_POWER;
+ 	mmc_bus_put(host);
  
--		if (!host->bus_ops || host->bus_ops->suspend)
-+		if (!host->bus_ops)
-+			break;
-+
-+		/* Validate prerequisites for suspend */
-+		if (host->bus_ops->pre_suspend)
-+			err = host->bus_ops->pre_suspend(host);
-+		if (!err && host->bus_ops->suspend)
- 			break;
+-	return err;
++	return 0;
+ }
+ EXPORT_SYMBOL(mmc_resume_host);
  
- 		/* Calling bus_ops->remove() with a claimed host can deadlock */
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 52a3650..79f37cf 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -18,6 +18,7 @@
- struct mmc_bus_ops {
- 	void (*remove)(struct mmc_host *);
- 	void (*detect)(struct mmc_host *);
-+	int (*pre_suspend)(struct mmc_host *);
- 	int (*suspend)(struct mmc_host *);
- 	int (*resume)(struct mmc_host *);
- 	int (*runtime_suspend)(struct mmc_host *);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 3a69b94..86ca103 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1494,6 +1494,8 @@ static int mmc_suspend(struct mmc_host *host)
+ 		err = mmc_deselect_cards(host);
+ 	host->card->state &= ~(MMC_STATE_HIGHSPEED | MMC_STATE_HIGHSPEED_200);
+ 
++	if (!err)
++		mmc_power_off(host);
+ out:
+ 	mmc_release_host(host);
+ 	return err;
+@@ -1513,6 +1515,8 @@ static int mmc_resume(struct mmc_host *host)
+ 	BUG_ON(!host->card);
+ 
+ 	mmc_claim_host(host);
++	mmc_power_up(host);
++	mmc_select_voltage(host, host->ocr);
+ 	err = mmc_init_card(host, host->ocr, host->card);
+ 	mmc_release_host(host);
+ 
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index aeaae7c..cacef27 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -1075,6 +1075,8 @@ static int mmc_sd_suspend(struct mmc_host *host)
+ 	if (!mmc_host_is_spi(host))
+ 		err = mmc_deselect_cards(host);
+ 	host->card->state &= ~MMC_STATE_HIGHSPEED;
++	if (!err)
++		mmc_power_off(host);
+ 	mmc_release_host(host);
+ 
+ 	return err;
+@@ -1094,6 +1096,8 @@ static int mmc_sd_resume(struct mmc_host *host)
+ 	BUG_ON(!host->card);
+ 
+ 	mmc_claim_host(host);
++	mmc_power_up(host);
++	mmc_select_voltage(host, host->ocr);
+ 	err = mmc_sd_init_card(host, host->ocr, host->card);
+ 	mmc_release_host(host);
+ 
 diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 1fbbd1b..be8cca8 100644
+index be8cca8..80d89cff 100644
 --- a/drivers/mmc/core/sdio.c
 +++ b/drivers/mmc/core/sdio.c
-@@ -910,11 +910,11 @@ out:
+@@ -963,6 +963,9 @@ static int mmc_sdio_suspend(struct mmc_host *host)
+ 		mmc_release_host(host);
+ 	}
+ 
++	if (!err && !mmc_card_keep_power(host))
++		mmc_power_off(host);
++
+ 	return err;
  }
  
- /*
-- * SDIO suspend.  We need to suspend all functions separately.
-+ * SDIO pre_suspend.  We need to suspend all functions separately.
-  * Therefore all registered functions must have drivers with suspend
-  * and resume methods.  Failing that we simply remove the whole card.
-  */
--static int mmc_sdio_suspend(struct mmc_host *host)
-+static int mmc_sdio_pre_suspend(struct mmc_host *host)
- {
- 	int i, err = 0;
+@@ -976,6 +979,23 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 	/* Basic card reinitialization. */
+ 	mmc_claim_host(host);
  
-@@ -925,8 +925,26 @@ static int mmc_sdio_suspend(struct mmc_host *host)
- 			if (!pmops || !pmops->suspend || !pmops->resume) {
- 				/* force removal of entire card in that case */
- 				err = -ENOSYS;
--			} else
--				err = pmops->suspend(&func->dev);
-+				break;
-+			}
++	/* Restore power if needed */
++	if (!mmc_card_keep_power(host)) {
++		mmc_power_up(host);
++		mmc_select_voltage(host, host->ocr);
++		/*
++		 * Tell runtime PM core we just powered up the card,
++		 * since it still believes the card is powered off.
++		 * Note that currently runtime PM is only enabled
++		 * for SDIO cards that are MMC_CAP_POWER_OFF_CARD
++		 */
++		if (host->caps & MMC_CAP_POWER_OFF_CARD) {
++			pm_runtime_disable(&host->card->dev);
++			pm_runtime_set_active(&host->card->dev);
++			pm_runtime_enable(&host->card->dev);
 +		}
 +	}
 +
-+	return err;
-+}
-+
-+/*
-+ * SDIO suspend.  Suspend all functions separately.
-+ */
-+static int mmc_sdio_suspend(struct mmc_host *host)
-+{
-+	int i, err = 0;
-+
-+	for (i = 0; i < host->card->sdio_funcs; i++) {
-+		struct sdio_func *func = host->card->sdio_func[i];
-+		if (func && sdio_func_present(func) && func->dev.driver) {
-+			const struct dev_pm_ops *pmops = func->dev.driver->pm;
-+			err = pmops->suspend(&func->dev);
- 			if (err)
- 				break;
+ 	/* No need to reinitialize powered-resumed nonremovable cards */
+ 	if (mmc_card_is_removable(host) || !mmc_card_keep_power(host)) {
+ 		sdio_reset(host);
+@@ -1013,6 +1033,7 @@ static int mmc_sdio_resume(struct mmc_host *host)
  		}
-@@ -1076,6 +1094,7 @@ static int mmc_sdio_runtime_resume(struct mmc_host *host)
- static const struct mmc_bus_ops mmc_sdio_ops = {
- 	.remove = mmc_sdio_remove,
- 	.detect = mmc_sdio_detect,
-+	.pre_suspend = mmc_sdio_pre_suspend,
- 	.suspend = mmc_sdio_suspend,
- 	.resume = mmc_sdio_resume,
- 	.runtime_suspend = mmc_sdio_runtime_suspend,
+ 	}
+ 
++	host->pm_flags &= ~MMC_PM_KEEP_POWER;
+ 	return err;
+ }
+ 
 -- 
 1.7.10
 
