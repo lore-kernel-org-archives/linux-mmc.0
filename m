@@ -1,121 +1,57 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 4/4] mmc: core: Initiate suspend|resume from mmc bus instead of mmc host
-Date: Thu, 30 May 2013 14:53:11 +0200
-Message-ID: <1369918391-15277-5-git-send-email-ulf.hansson@stericsson.com>
-References: <1369918391-15277-1-git-send-email-ulf.hansson@stericsson.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH] dmaengine: shdma: fix a build failure on platforms with no
+ DMA support
+Date: Thu, 30 May 2013 18:02:12 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1305301650290.29171@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog114.obsmtp.com ([207.126.144.137]:52517 "EHLO
-	eu1sys200aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752238Ab3E3MyN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 May 2013 08:54:13 -0400
-In-Reply-To: <1369918391-15277-1-git-send-email-ulf.hansson@stericsson.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-mmc@vger.kernel.org
+Cc: Kevin Hilman <khilman@linaro.org>, Simon Horman <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+On platforms with no support for the shdma dmaengine driver build is
+currently failing with
 
-The host should be responsible to suspend|resume the host and not the
-card. This patch changes this behaviour, by moving the responsiblity
-to the mmc bus instead which already holds the card device.
+drivers/built-in.o: In function `sh_mobile_sdhi_probe':
+drivers/mmc/host/sh_mobile_sdhi.c:170: undefined reference to`shdma_chan_filter'
 
-The exported functions mmc_suspend|resume_host are now to be considered
-as depcrecated. Once all host drivers moves away from using them, we
-can remove them. As of now, a successful error code is always returned.
+Fix the breakage by defining shdma_chan_filter to NULL in such
+configurations.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
 ---
- drivers/mmc/core/bus.c  |   15 ++++++++++++++-
- drivers/mmc/core/core.c |   26 +++-----------------------
- 2 files changed, 17 insertions(+), 24 deletions(-)
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index d9e8c2b..2842684 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -127,10 +127,16 @@ static int mmc_bus_suspend(struct device *dev)
- {
- 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
- 	struct mmc_card *card = mmc_dev_to_card(dev);
-+	struct mmc_host *host = card->host;
- 	int ret = 0;
+This is for "next." Compile-tested only. I'll test it on hardware next 
+week, but I don't think it shall break anything.
+
+ include/linux/sh_dma.h |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+diff --git a/include/linux/sh_dma.h b/include/linux/sh_dma.h
+index b64d6be..1fd8a20 100644
+--- a/include/linux/sh_dma.h
++++ b/include/linux/sh_dma.h
+@@ -99,6 +99,10 @@ struct sh_dmae_pdata {
+ #define CHCR_TE	0x00000002
+ #define CHCR_IE	0x00000004
  
--	if (dev->driver && drv->suspend)
-+	if (dev->driver && drv->suspend) {
- 		ret = drv->suspend(card);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	ret = host->bus_ops->suspend(host);
- 	return ret;
- }
++#if IS_ENABLED(CONFIG_SH_DMAE)
+ bool shdma_chan_filter(struct dma_chan *chan, void *arg);
++#else
++#define shdma_chan_filter NULL
++#endif
  
-@@ -138,10 +144,17 @@ static int mmc_bus_resume(struct device *dev)
- {
- 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
- 	struct mmc_card *card = mmc_dev_to_card(dev);
-+	struct mmc_host *host = card->host;
- 	int ret = 0;
- 
-+	ret = host->bus_ops->resume(host);
-+	if (ret)
-+		pr_warn("%s: error %d during resume (card was removed?)\n",
-+			mmc_hostname(host), ret);
-+
- 	if (dev->driver && drv->resume)
- 		ret = drv->resume(card);
-+
- 	return ret;
- }
  #endif
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index da3b907..49a5bca 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2619,16 +2619,8 @@ EXPORT_SYMBOL(mmc_cache_ctrl);
-  */
- int mmc_suspend_host(struct mmc_host *host)
- {
--	int err = 0;
--
--	mmc_bus_get(host);
--	if (host->bus_ops && !host->bus_dead) {
--		if (host->bus_ops->suspend)
--			err = host->bus_ops->suspend(host);
--	}
--	mmc_bus_put(host);
--
--	return err;
-+	/* This function is deprecated */
-+	return 0;
- }
- EXPORT_SYMBOL(mmc_suspend_host);
- 
-@@ -2638,19 +2630,7 @@ EXPORT_SYMBOL(mmc_suspend_host);
-  */
- int mmc_resume_host(struct mmc_host *host)
- {
--	int err;
--
--	mmc_bus_get(host);
--	if (host->bus_ops && !host->bus_dead) {
--		BUG_ON(!host->bus_ops->resume);
--		err = host->bus_ops->resume(host);
--		if (err)
--			pr_warning("%s: error %d during resume "
--					    "(card was removed?)\n",
--					    mmc_hostname(host), err);
--	}
--	mmc_bus_put(host);
--
-+	/* This function is deprecated */
- 	return 0;
- }
- EXPORT_SYMBOL(mmc_resume_host);
 -- 
-1.7.10
-
+1.7.2.5
