@@ -1,188 +1,130 @@
-From: Hebbar Gururaja <gururaja.hebbar-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH 09/11] mmc: omap_hsmmc: enhance pinctrl support
-Date: Fri, 31 May 2013 15:43:09 +0530
-Message-ID: <1369995191-20855-10-git-send-email-gururaja.hebbar@ti.com>
-References: <1369995191-20855-1-git-send-email-gururaja.hebbar@ti.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 1/4] mmc: core: Remove unnecessary check for the remove
+ callback
+Date: Fri, 31 May 2013 19:50:28 +0900
+Message-ID: <51A88074.6090006@samsung.com>
+References: <1369918391-15277-1-git-send-email-ulf.hansson@stericsson.com>
+ <1369918391-15277-2-git-send-email-ulf.hansson@stericsson.com>
+ <51A854B8.3020605@samsung.com>
+ <CAPDyKFrgytOSuhTCUxC+aS0YV+6CvC0bpXofc4qHWFohK-jxnw@mail.gmail.com>
+ <51A85DCA.8040701@samsung.com>
+ <CAPDyKFqYrLWYJ31WE69n9w4gX6Qu79+FiFrh5pZ0BfkgchFg1Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <1369995191-20855-1-git-send-email-gururaja.hebbar-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: khilman-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org
-Cc: davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org, sudhakar.raj-l0cyMroinI0@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, vaibhav.bedia-l0cyMroinI0@public.gmane.org, gururaja.hebbar-l0cyMroinI0@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:42456 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751814Ab3EaKuQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 31 May 2013 06:50:16 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MNN0021ISRQB9H0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 31 May 2013 19:50:14 +0900 (KST)
+In-reply-to: <CAPDyKFqYrLWYJ31WE69n9w4gX6Qu79+FiFrh5pZ0BfkgchFg1Q@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-Amend the hsmmc controller to optionally take a pin control handle and
-set the state of the pins to:
+Hi Ulf,
 
-- "default" on boot, resume and before performing a mmc transfer
-- "idle" after initial default, after resume default, and after each
-mmc/sd card access
-- "sleep" on suspend()
+Sorry..:-) I understood clear. it's my mis-understanding.
 
-By optionally putting the pins into sleep state in the suspend callback
-we can accomplish two things.
-- One is to minimize current leakage from pins and thus save power,
-- second, we can prevent the IP from driving pins output in an
-uncontrolled manner, which may happen if the power domain drops the
-domain regulator.
+Best Regards,
+Jaehoon Chung
 
-If any of the above pin states are missing in dt, a warning message
-about the missing state is displayed.
-If certain pin-states are not available, to remove this warning message
-pass respective state name with null phandler.
+On 05/31/2013 06:33 PM, Ulf Hansson wrote:
+> On 31 May 2013 10:22, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> On 05/31/2013 05:11 PM, Ulf Hansson wrote:
+>>> On 31 May 2013 09:43, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>>>> Hi Ulf,
+>>>>
+>>>> According to your commit message, host->bus_ops is also always existed, isn't?
+>>>
+>>> I am saying that the .remove callback always exist. Maybe I should
+>>> clarify it further somehow?
+>> Sorry if you are confused. My meaning is that according to your commit message,
+>> it didn't need also to check whether host->bus_ops is existed or not.
+>> For example,
+>> if (host->bus_ops && !host->bus_dead) {
+> 
+> I really can't see this information in the commit msg, I guess we are
+> reading it differently :-)
+> 
+> Anyway, I will rephrase it so it gets clear.
+> 
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>>
+>>> Kind regards
+>>> Ulf Hansson
+>>>
+>>>>
+>>>> Best Regards,
+>>>> Jaehoon Chung
+>>>>
+>>>> On 05/30/2013 09:53 PM, Ulf Hansson wrote:
+>>>>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>>>>
+>>>>> For every bus_ops type the .remove callback always exist, thus there
+>>>>> are no need to check the existence of it, before we decide to call it.
+>>>>>
+>>>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>>>> ---
+>>>>>  drivers/mmc/core/core.c |   11 +++--------
+>>>>>  1 file changed, 3 insertions(+), 8 deletions(-)
+>>>>>
+>>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>>>> index e9a104b..d2ee282 100644
+>>>>> --- a/drivers/mmc/core/core.c
+>>>>> +++ b/drivers/mmc/core/core.c
+>>>>> @@ -2483,9 +2483,7 @@ void mmc_stop_host(struct mmc_host *host)
+>>>>>       mmc_bus_get(host);
+>>>>>       if (host->bus_ops && !host->bus_dead) {
+>>>>>               /* Calling bus_ops->remove() with a claimed host can deadlock */
+>>>>> -             if (host->bus_ops->remove)
+>>>>> -                     host->bus_ops->remove(host);
+>>>>> -
+>>>>> +             host->bus_ops->remove(host);
+>>>>>               mmc_claim_host(host);
+>>>>>               mmc_detach_bus(host);
+>>>>>               mmc_power_off(host);
+>>>>> @@ -2638,8 +2636,7 @@ int mmc_suspend_host(struct mmc_host *host)
+>>>>>                        * bus_ops->remove() with a claimed host can
+>>>>>                        * deadlock.)
+>>>>>                        */
+>>>>> -                     if (host->bus_ops->remove)
+>>>>> -                             host->bus_ops->remove(host);
+>>>>> +                     host->bus_ops->remove(host);
+>>>>>                       mmc_claim_host(host);
+>>>>>                       mmc_detach_bus(host);
+>>>>>                       mmc_power_off(host);
+>>>>> @@ -2722,9 +2719,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
+>>>>>                       break;
+>>>>>
+>>>>>               /* Calling bus_ops->remove() with a claimed host can deadlock */
+>>>>> -             if (host->bus_ops->remove)
+>>>>> -                     host->bus_ops->remove(host);
+>>>>> -
+>>>>> +             host->bus_ops->remove(host);
+>>>>>               mmc_claim_host(host);
+>>>>>               mmc_detach_bus(host);
+>>>>>               mmc_power_off(host);
+>>>>>
+>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-Signed-off-by: Hebbar Gururaja <gururaja.hebbar-l0cyMroinI0@public.gmane.org>
-Cc: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
-Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
----
-:100644 100644 6e44025... a2d69aa... M	drivers/mmc/host/omap_hsmmc.c
- drivers/mmc/host/omap_hsmmc.c |   79 ++++++++++++++++++++++++++++++++++++++---
- 1 file changed, 74 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 6e44025..a2d69aa 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -183,6 +183,12 @@ struct omap_hsmmc_host {
- 	struct omap_hsmmc_next	next_data;
- 
- 	struct	omap_mmc_platform_data	*pdata;
-+
-+	/* Three pin states - default, idle & sleep */
-+	struct pinctrl			*pinctrl;
-+	struct pinctrl_state		*pins_default;
-+	struct pinctrl_state		*pins_idle;
-+	struct pinctrl_state		*pins_sleep;
- };
- 
- static int omap_hsmmc_card_detect(struct device *dev, int slot)
-@@ -1775,7 +1781,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	const struct of_device_id *match;
- 	dma_cap_mask_t mask;
- 	unsigned tx_req, rx_req;
--	struct pinctrl *pinctrl;
- 
- 	match = of_match_device(of_match_ptr(omap_mmc_of_match), &pdev->dev);
- 	if (match) {
-@@ -1982,10 +1987,46 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 
- 	omap_hsmmc_disable_irq(host);
- 
--	pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
--	if (IS_ERR(pinctrl))
--		dev_warn(&pdev->dev,
--			"pins are not configured from the driver\n");
-+	host->pinctrl = devm_pinctrl_get(&pdev->dev);
-+	if (!IS_ERR(host->pinctrl)) {
-+		host->pins_default = pinctrl_lookup_state(host->pinctrl,
-+							PINCTRL_STATE_DEFAULT);
-+		if (IS_ERR(host->pins_default))
-+			dev_dbg(&pdev->dev, "could not get default pinstate\n");
-+		else
-+			if (pinctrl_select_state(host->pinctrl,
-+						 host->pins_default))
-+				dev_err(&pdev->dev,
-+					"could not set default pinstate\n");
-+
-+		host->pins_idle = pinctrl_lookup_state(host->pinctrl,
-+							PINCTRL_STATE_IDLE);
-+		if (IS_ERR(host->pins_idle))
-+			dev_dbg(&pdev->dev, "could not get idle pinstate\n");
-+		else
-+			/* If possible, let's idle until the first transfer */
-+			if (pinctrl_select_state(host->pinctrl,
-+						 host->pins_idle))
-+				dev_err(&pdev->dev,
-+					"could not set idle pinstate\n");
-+
-+		host->pins_sleep = pinctrl_lookup_state(host->pinctrl,
-+							PINCTRL_STATE_SLEEP);
-+		if (IS_ERR(host->pins_sleep))
-+			dev_dbg(&pdev->dev, "could not get sleep pinstate\n");
-+	} else {
-+		/*
-+		* Since we continue even when pinctrl node is not found,
-+		* Invalidate pins as not available. This is to make sure that
-+		* IS_ERR(pins_xxx) results in failure when used.
-+		*/
-+		host->pins_default = ERR_PTR(-ENODATA);
-+		host->pins_idle = ERR_PTR(-ENODATA);
-+		host->pins_sleep = ERR_PTR(-ENODATA);
-+
-+		dev_dbg(&pdev->dev, "did not get pins for mmc error: %li\n",
-+			PTR_ERR(host->pinctrl));
-+	}
- 
- 	omap_hsmmc_protect_card(host);
- 
-@@ -2135,6 +2176,12 @@ static int omap_hsmmc_suspend(struct device *dev)
- 		clk_disable_unprepare(host->dbclk);
- err:
- 	pm_runtime_put_sync(host->dev);
-+
-+	/* Optionally let pins go into sleep states */
-+	if (!IS_ERR(host->pins_sleep))
-+		if (pinctrl_select_state(host->pinctrl, host->pins_sleep))
-+			dev_err(dev, "could not set pins to sleep state\n");
-+
- 	return ret;
- }
- 
-@@ -2152,6 +2199,16 @@ static int omap_hsmmc_resume(struct device *dev)
- 
- 	pm_runtime_get_sync(host->dev);
- 
-+	/* First go to the default state */
-+	if (!IS_ERR(host->pins_default))
-+		if (pinctrl_select_state(host->pinctrl, host->pins_default))
-+			dev_err(host->dev, "could not set pins to default state\n");
-+
-+	/* Then let's idle the pins until the next transfer happens */
-+	if (!IS_ERR(host->pins_idle))
-+		if (pinctrl_select_state(host->pinctrl, host->pins_idle))
-+			dev_err(host->dev, "couldn't set pins to idle state\n");
-+
- 	if (host->dbclk)
- 		clk_prepare_enable(host->dbclk);
- 
-@@ -2185,6 +2242,12 @@ static int omap_hsmmc_runtime_suspend(struct device *dev)
- 
- 	host = platform_get_drvdata(to_platform_device(dev));
- 	omap_hsmmc_context_save(host);
-+
-+	/* Optionally let pins go into sleep states */
-+	if (!IS_ERR(host->pins_idle))
-+		if (pinctrl_select_state(host->pinctrl, host->pins_idle))
-+			dev_err(dev, "could not set pins to idle state\n");
-+
- 	dev_dbg(dev, "disabled\n");
- 
- 	return 0;
-@@ -2195,6 +2258,12 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
- 	struct omap_hsmmc_host *host;
- 
- 	host = platform_get_drvdata(to_platform_device(dev));
-+
-+	/* Optionaly enable pins to be muxed in and configured */
-+	if (!IS_ERR(host->pins_default))
-+		if (pinctrl_select_state(host->pinctrl, host->pins_default))
-+			dev_err(host->dev, "could not set default pins\n");
-+
- 	omap_hsmmc_context_restore(host);
- 	dev_dbg(dev, "enabled\n");
- 
--- 
-1.7.9.5
