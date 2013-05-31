@@ -1,131 +1,86 @@
-From: Andreas Fenkart <andreas.fenkart@streamunlimited.com>
-Subject: Re: [RESEND PATCH v2 1/3] mmc: omap_hsmmc: Enable SDIO IRQ using a
- GPIO in idle mode.
-Date: Fri, 31 May 2013 09:59:28 +0200
-Message-ID: <20130531075858.GA16701@kuttelsuppe>
-References: <1368607516-2789-1-git-send-email-andreas.fenkart@streamunlimited.com>
- <1368607516-2789-2-git-send-email-andreas.fenkart@streamunlimited.com>
- <20130520205815.GJ10378@atomide.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/4] mmc: core: Remove unnecessary check for the remove callback
+Date: Fri, 31 May 2013 10:11:52 +0200
+Message-ID: <CAPDyKFrgytOSuhTCUxC+aS0YV+6CvC0bpXofc4qHWFohK-jxnw@mail.gmail.com>
+References: <1369918391-15277-1-git-send-email-ulf.hansson@stericsson.com>
+	<1369918391-15277-2-git-send-email-ulf.hansson@stericsson.com>
+	<51A854B8.3020605@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.gmx.net ([212.227.17.20]:57693 "EHLO mout.gmx.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753860Ab3EaH7w (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 31 May 2013 03:59:52 -0400
-Received: from mailout-de.gmx.net ([10.1.76.29]) by mrigmx.server.lan
- (mrigmx002) with ESMTP (Nemesis) id 0LzVZk-1UMxts3EJu-014hHL for
- <linux-mmc@vger.kernel.org>; Fri, 31 May 2013 09:59:50 +0200
-Content-Disposition: inline
-In-Reply-To: <20130520205815.GJ10378@atomide.com>
+Received: from mail-vb0-f52.google.com ([209.85.212.52]:36031 "EHLO
+	mail-vb0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753432Ab3EaILx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 31 May 2013 04:11:53 -0400
+Received: by mail-vb0-f52.google.com with SMTP id p12so829566vbe.39
+        for <linux-mmc@vger.kernel.org>; Fri, 31 May 2013 01:11:52 -0700 (PDT)
+In-Reply-To: <51A854B8.3020605@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Andreas Fenkart <andreas.fenkart@streamunlimited.com>, cjb@laptop.org, arnd@arndb.de, svenkatr@ti.com, balajitk@ti.com, grant.likely@secretlab.ca, linux-mmc@vger.kernel.org, rob@landley.net, linux-omap@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, zonque@gmail.com
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-Hi,
+On 31 May 2013 09:43, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi Ulf,
+>
+> According to your commit message, host->bus_ops is also always existed, isn't?
 
-this email adress will soon expire,
-my alternate email adress is
+I am saying that the .remove callback always exist. Maybe I should
+clarify it further somehow?
 
-afenkart at gmail.com
+Kind regards
+Ulf Hansson
 
-On Mon, May 20, 2013 at 01:58:16PM -0700, Tony Lindgren wrote:
-> * Andreas Fenkart <andreas.fenkart@streamunlimited.com> [130515 01:51]:
-> > Without functional clock the omap_hsmmc module can't forward SDIO IRQs to
-> > the system. This patch reconfigures dat1 line as a gpio while the fclk is
-> > off. When the fclk is present it uses the standard SDIO IRQ detection of
-> > the module.
-> > 
-> > The gpio irq is managed via the 'disable_depth' ref counter of the irq
-> > subsystem, this driver simply calls enable_irq/disable_irq when needed.
-> > 
-> >                       sdio irq    sdio irq
-> >                       unmasked     masked
-> >    -----------------------------------------
-> >     runtime default  |    1     |   2
-> >     runtime suspend  |    0     |   1
-> > 
-> >                   irq disable depth
-> > 
-> > 
-> > only when sdio irq is enabled AND the module is idle, the reference
-> > count drops to zero and the gpio irq is effectively armed.
-> > 
-> > Patch was tested on AM335x/Stream800. Test setup was two modules
-> > with sdio wifi cards. Modules where connected to a dual-band AP, each
-> > module using a different band. One of module was running iperf as server
-> > the other as client connecting to the server in a while true loop. Test
-> > was running for 4+ weeks. There were about 60 Mio. suspend/resume
-> > transitions. Test was shut down regularly.
-> 
-> Looks like this somehow breaks detecting of eMMC on mmc2 for me at least
-> with the non-dt legacyboot. For a removable mmc1 still keeps working.
-> 
-> For mmc2 I have .nonremovable = true and no gpio_cd or gpio_wp.
-> 
-> Also few comments below.
->  
-> > --- a/drivers/mmc/host/omap_hsmmc.c
-> > +++ b/drivers/mmc/host/omap_hsmmc.c
-> > +	host->pinctrl = devm_pinctrl_get(&pdev->dev);
-> > +	if (IS_ERR(host->pinctrl)) {
-> > +		ret = PTR_ERR(host->pinctrl);
-> > +		goto err_pinctrl;
-> > +	}
-> > +
-> > +	host->active = pinctrl_lookup_state(host->pinctrl,
-> > +					    PINCTRL_STATE_DEFAULT);
-> > +	if (IS_ERR(host->active)) {
-> > +		dev_warn(mmc_dev(host->mmc), "Unable to lookup active pinmux\n");
-> > +		ret = PTR_ERR(host->active);
-> > +		goto err_pinctrl_state;
-> > +	}
-> 
-> This should be checked, we have systems with all muxing done statically
-> in the bootloader. And we also have systems that provide the default
-> pinctrl state only as they don't need remuxing. So at most a warning should
-> be printed.
-> 
-> >  static int omap_hsmmc_runtime_resume(struct device *dev)
-> >  {
-> >  	struct omap_hsmmc_host *host;
-> > +	unsigned long flags;
-> > +	int ret = 0;
-> >  
-> >  	host = platform_get_drvdata(to_platform_device(dev));
-> >  	omap_hsmmc_context_restore(host);
-> >  	dev_dbg(dev, "enabled\n");
-> >  
-> > -	return 0;
-> > +	if (mmc_slot(host).sdio_irq && host->pinctrl) {
-> > +		disable_irq(mmc_slot(host).sdio_irq);
-> > +
-> > +		ret = pinctrl_select_state(host->pinctrl, host->active);
-> > +		if (ret < 0) {
-> > +			dev_warn(mmc_dev(host->mmc), "Unable to select active pinmux\n");
-> > +			return ret;
-> > +		}
-> > +
-> > +		spin_lock_irqsave(&host->irq_lock, flags);
-> > +		host->active_pinmux = true;
-> > +
-> > +		if (host->sdio_irq_en) {
-> > +			OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
-> > +			OMAP_HSMMC_WRITE(host->base, ISE, CIRQ_EN);
-> > +			OMAP_HSMMC_WRITE(host->base, IE, CIRQ_EN);
-> > +		}
-> > +		spin_unlock_irqrestore(&host->irq_lock, flags);
-> > +	}
-> > +	return ret;
-> >  }
-> 
-> The check for sdio_irq && host->pinctrl looks broken too as we may
-> have not dynamic muxing via pinctrl needed for let's say omap3 based
-> systems.
-> 
-> Other than that, looks good to me.
-> 
-> Regards,
-> 
-> Tony
+>
+> Best Regards,
+> Jaehoon Chung
+>
+> On 05/30/2013 09:53 PM, Ulf Hansson wrote:
+>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>
+>> For every bus_ops type the .remove callback always exist, thus there
+>> are no need to check the existence of it, before we decide to call it.
+>>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> ---
+>>  drivers/mmc/core/core.c |   11 +++--------
+>>  1 file changed, 3 insertions(+), 8 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index e9a104b..d2ee282 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -2483,9 +2483,7 @@ void mmc_stop_host(struct mmc_host *host)
+>>       mmc_bus_get(host);
+>>       if (host->bus_ops && !host->bus_dead) {
+>>               /* Calling bus_ops->remove() with a claimed host can deadlock */
+>> -             if (host->bus_ops->remove)
+>> -                     host->bus_ops->remove(host);
+>> -
+>> +             host->bus_ops->remove(host);
+>>               mmc_claim_host(host);
+>>               mmc_detach_bus(host);
+>>               mmc_power_off(host);
+>> @@ -2638,8 +2636,7 @@ int mmc_suspend_host(struct mmc_host *host)
+>>                        * bus_ops->remove() with a claimed host can
+>>                        * deadlock.)
+>>                        */
+>> -                     if (host->bus_ops->remove)
+>> -                             host->bus_ops->remove(host);
+>> +                     host->bus_ops->remove(host);
+>>                       mmc_claim_host(host);
+>>                       mmc_detach_bus(host);
+>>                       mmc_power_off(host);
+>> @@ -2722,9 +2719,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
+>>                       break;
+>>
+>>               /* Calling bus_ops->remove() with a claimed host can deadlock */
+>> -             if (host->bus_ops->remove)
+>> -                     host->bus_ops->remove(host);
+>> -
+>> +             host->bus_ops->remove(host);
+>>               mmc_claim_host(host);
+>>               mmc_detach_bus(host);
+>>               mmc_power_off(host);
+>>
+>
