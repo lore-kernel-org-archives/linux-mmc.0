@@ -1,130 +1,71 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/4] mmc: core: Remove unnecessary check for the remove
- callback
-Date: Fri, 31 May 2013 19:50:28 +0900
-Message-ID: <51A88074.6090006@samsung.com>
-References: <1369918391-15277-1-git-send-email-ulf.hansson@stericsson.com>
- <1369918391-15277-2-git-send-email-ulf.hansson@stericsson.com>
- <51A854B8.3020605@samsung.com>
- <CAPDyKFrgytOSuhTCUxC+aS0YV+6CvC0bpXofc4qHWFohK-jxnw@mail.gmail.com>
- <51A85DCA.8040701@samsung.com>
- <CAPDyKFqYrLWYJ31WE69n9w4gX6Qu79+FiFrh5pZ0BfkgchFg1Q@mail.gmail.com>
+From: Dan Murphy <dmurphy@ti.com>
+Subject: Re: [PATCH v2] dmaengine: shdma: fix a build failure on platforms
+ with no DMA support
+Date: Fri, 31 May 2013 06:18:31 -0500
+Message-ID: <51A88707.4040601@ti.com>
+References: <Pine.LNX.4.64.1305310423360.1470@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:42456 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751814Ab3EaKuQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 31 May 2013 06:50:16 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MNN0021ISRQB9H0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 31 May 2013 19:50:14 +0900 (KST)
-In-reply-to: <CAPDyKFqYrLWYJ31WE69n9w4gX6Qu79+FiFrh5pZ0BfkgchFg1Q@mail.gmail.com>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:55330 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753928Ab3EaLTD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 31 May 2013 07:19:03 -0400
+In-Reply-To: <Pine.LNX.4.64.1305310423360.1470@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Simon Horman <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Kevin Hilman <khilman@linaro.org>
 
-Hi Ulf,
+On 05/30/2013 10:01 PM, Guennadi Liakhovetski wrote:
+> On platforms with no support for the shdma dmaengine driver build is
+> currently failing with
+>
+> drivers/built-in.o: In function `sh_mobile_sdhi_probe':
+> drivers/mmc/host/sh_mobile_sdhi.c:170: undefined reference to`shdma_chan_filter'
+>
+> Fix the breakage by defining shdma_chan_filter to NULL in such
+> configurations.
+>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+> ---
+>
+> v2: in "next" shdma_chan_filter() is defined in shdma-base.c, which is 
+> built if CONFIG_SH_DMAE_BASE is defined. This version uses the correct 
+> symbol.
+>
+> This is for "next." Compile-tested only. I'll test it on hardware next 
+> week, but I don't think it shall break anything.
+>
+>  include/linux/sh_dma.h |    4 ++++
+>  1 files changed, 4 insertions(+), 0 deletions(-)
+>
+> diff --git a/include/linux/sh_dma.h b/include/linux/sh_dma.h
+> index b64d6be..1fd8a20 100644
+> --- a/include/linux/sh_dma.h
+> +++ b/include/linux/sh_dma.h
+> @@ -99,6 +99,10 @@ struct sh_dmae_pdata {
+>  #define CHCR_TE	0x00000002
+>  #define CHCR_IE	0x00000004
+>  
+> +#if IS_ENABLED(CONFIG_SH_DMAE_BASE)
+>  bool shdma_chan_filter(struct dma_chan *chan, void *arg);
+> +#else
+> +#define shdma_chan_filter NULL
+OK I did not see a reply to my previous comment
+Would this not be better as a
+#else
+static inline bool shdma_chan_filter(struct dma_chan *chan, void *arg) { return false; }
+#endif
 
-Sorry..:-) I understood clear. it's my mis-understanding.
+Otherwise runtime will call a NULL pointer
+> +#endif
+>  
+>  #endif
 
-Best Regards,
-Jaehoon Chung
 
-On 05/31/2013 06:33 PM, Ulf Hansson wrote:
-> On 31 May 2013 10:22, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> On 05/31/2013 05:11 PM, Ulf Hansson wrote:
->>> On 31 May 2013 09:43, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>>> Hi Ulf,
->>>>
->>>> According to your commit message, host->bus_ops is also always existed, isn't?
->>>
->>> I am saying that the .remove callback always exist. Maybe I should
->>> clarify it further somehow?
->> Sorry if you are confused. My meaning is that according to your commit message,
->> it didn't need also to check whether host->bus_ops is existed or not.
->> For example,
->> if (host->bus_ops && !host->bus_dead) {
-> 
-> I really can't see this information in the commit msg, I guess we are
-> reading it differently :-)
-> 
-> Anyway, I will rephrase it so it gets clear.
-> 
->>
->> Best Regards,
->> Jaehoon Chung
->>>
->>> Kind regards
->>> Ulf Hansson
->>>
->>>>
->>>> Best Regards,
->>>> Jaehoon Chung
->>>>
->>>> On 05/30/2013 09:53 PM, Ulf Hansson wrote:
->>>>> From: Ulf Hansson <ulf.hansson@linaro.org>
->>>>>
->>>>> For every bus_ops type the .remove callback always exist, thus there
->>>>> are no need to check the existence of it, before we decide to call it.
->>>>>
->>>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->>>>> ---
->>>>>  drivers/mmc/core/core.c |   11 +++--------
->>>>>  1 file changed, 3 insertions(+), 8 deletions(-)
->>>>>
->>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>>>> index e9a104b..d2ee282 100644
->>>>> --- a/drivers/mmc/core/core.c
->>>>> +++ b/drivers/mmc/core/core.c
->>>>> @@ -2483,9 +2483,7 @@ void mmc_stop_host(struct mmc_host *host)
->>>>>       mmc_bus_get(host);
->>>>>       if (host->bus_ops && !host->bus_dead) {
->>>>>               /* Calling bus_ops->remove() with a claimed host can deadlock */
->>>>> -             if (host->bus_ops->remove)
->>>>> -                     host->bus_ops->remove(host);
->>>>> -
->>>>> +             host->bus_ops->remove(host);
->>>>>               mmc_claim_host(host);
->>>>>               mmc_detach_bus(host);
->>>>>               mmc_power_off(host);
->>>>> @@ -2638,8 +2636,7 @@ int mmc_suspend_host(struct mmc_host *host)
->>>>>                        * bus_ops->remove() with a claimed host can
->>>>>                        * deadlock.)
->>>>>                        */
->>>>> -                     if (host->bus_ops->remove)
->>>>> -                             host->bus_ops->remove(host);
->>>>> +                     host->bus_ops->remove(host);
->>>>>                       mmc_claim_host(host);
->>>>>                       mmc_detach_bus(host);
->>>>>                       mmc_power_off(host);
->>>>> @@ -2722,9 +2719,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
->>>>>                       break;
->>>>>
->>>>>               /* Calling bus_ops->remove() with a claimed host can deadlock */
->>>>> -             if (host->bus_ops->remove)
->>>>> -                     host->bus_ops->remove(host);
->>>>> -
->>>>> +             host->bus_ops->remove(host);
->>>>>               mmc_claim_host(host);
->>>>>               mmc_detach_bus(host);
->>>>>               mmc_power_off(host);
->>>>>
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+-- 
+------------------
+Dan Murphy
 
