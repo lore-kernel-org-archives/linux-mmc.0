@@ -1,37 +1,39 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [RESEND PATCH v2 1/3] mmc: omap_hsmmc: Enable SDIO IRQ using a
- GPIO in idle mode.
-Date: Sat, 1 Jun 2013 07:44:02 -0700
-Message-ID: <20130601144402.GA3331@atomide.com>
-References: <1368607516-2789-1-git-send-email-andreas.fenkart@streamunlimited.com>
- <1368607516-2789-2-git-send-email-andreas.fenkart@streamunlimited.com>
- <20130520205815.GJ10378@atomide.com>
- <20130531075858.GA16701@kuttelsuppe>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH V4 2/3] ARM: mmc: bcm281xx SDHCI driver
+Date: Sat, 1 Jun 2013 22:13:47 +0200
+Message-ID: <201306012213.47386.arnd@arndb.de>
+References: <1369860607-25572-1-git-send-email-csd@broadcom.com>
+ <87d2s7ceh0.fsf@octavius.laptop.org> <51A93DA0.3070909@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:24587 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754506Ab3FAOoK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Jun 2013 10:44:10 -0400
-Content-Disposition: inline
-In-Reply-To: <20130531075858.GA16701@kuttelsuppe>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <51A93DA0.3070909-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Christian Daudt <csd-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Cc: linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jerry Huang <Chang-Ming.Huang-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Wei WANG <wei_wang-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>, matt.porter-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Kevin Liu <kliu5-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Viresh Kumar <viresh.kumar-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Bill Pemberton <wfp5p-4Ng6DfrEGID2fBVCVOL8/A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Anton Vorontsov <avorontsov-hkdhdckH98+B+jHODAdFcQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Andreas Fenkart <andreas.fenkart@streamunlimited.com>, afenkart@gmail.com
-Cc: cjb@laptop.org, arnd@arndb.de, svenkatr@ti.com, balajitk@ti.com, grant.likely@secretlab.ca, linux-mmc@vger.kernel.org, rob@landley.net, linux-omap@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, zonque@gmail.com
 
-* Andreas Fenkart <andreas.fenkart@streamunlimited.com> [130531 01:05]:
-> Hi,
-> 
-> this email adress will soon expire,
-> my alternate email adress is
+On Saturday 01 June 2013, Christian Daudt wrote:
+> I looked into it and it can replace just about everything that our own 
+> dt parsing code is doing. The only problem is with cd_gpio. If I call 
+> mmc_of_parse, then it will install its own irq handler for cd gpio, and 
+> our driver needs a different handler. the mmc irq handler can call a 
+> card_event callback, but that is already pointing to sdhci_card_event. 
+> So the only way I can use mmc_of_parse that I can see is by adding a 
+> flag to it to skip cd_gpio parsing which only this driver will then set 
+> to true. Any other ideas ?
 
-OK, noticed that the SDIO wake behaves in a different way between
-wl12xx and mwifiex, and there's an issue with the muxing still for
-legacy non-SDIO booting. So at least one more update coming from me
-for this patch.
+Can't you add a callback handler into sdhci_card_event that can call
+a platform specific function?
 
-Regards,
-
-Tony
+	Arnd
