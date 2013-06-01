@@ -1,48 +1,82 @@
-From: "Christian Daudt" <csd@broadcom.com>
-Subject: Re: [PATCH V4 2/3] ARM: mmc: bcm281xx SDHCI driver
-Date: Fri, 31 May 2013 17:17:36 -0700
-Message-ID: <51A93DA0.3070909@broadcom.com>
-References: <1369860607-25572-1-git-send-email-csd@broadcom.com>
- <1369860607-25572-2-git-send-email-csd@broadcom.com>
- <87d2s7ceh0.fsf@octavius.laptop.org>
+From: Jingoo Han <jg1.han@samsung.com>
+Subject: [PATCH] mmc: host: use platform_{get,set}_drvdata()
+Date: Sat, 01 Jun 2013 14:16:22 +0900
+Message-ID: <000001ce5e87$284f88e0$78ee9aa0$@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=iso-8859-2
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <87d2s7ceh0.fsf@octavius.laptop.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-doc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Grant Likely <grant.likely@secretlab.ca>, Wei WANG <wei_wang@realsil.com.cn>, matt.porter@linaro.org, Kevin Liu <kliu5@marvell.com>, Lars-Peter Clausen <lars@metafoo.de>, Stephen Warren <swarren@nvidia.com>, csd_b@daudt.org, Viresh Kumar <viresh.kumar@linaro.org>, plagnioj@jcrosoft.com, devicetree-discuss@lists.ozlabs.org, Arnd Bergmann <arnd@arndb.de>, Sascha Hauer <s.hauer@pengutronix.de>, Rob Herring <rob.herring@calxeda.com>, Bill Pemberton <wfp5p@virginia.edu>, Haojian Zhuang <haojian.zhuang@gmail.com>, Russell King <linux@arm.linux.org.uk>, Anton Vorontsov <avorontsov@ru.mvista.com>, linux-arm-kernel@lists.infradead.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ludovic Desroches <ludovic.desroches@atmel.com>, Rob Landley <rob@lan>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:35309 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750839Ab3FAFQZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Jun 2013 01:16:25 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MNP001KT7ZB5FC0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Sat, 01 Jun 2013 14:16:23 +0900 (KST)
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Chris Ball' <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, 'Jingoo Han' <jg1.han@samsung.com>, =?iso-8859-2?Q?'_Micha=B3_Miros=B3aw_'?= <mirq-linux@rere.qmqm.pl>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>
 
-Hi Chris,
-On 13-05-31 09:15 AM, Chris Ball wrote:
->
-> Could you investigate replacing this section of code with a call to
-> mmc_of_parse(), please?  It should be able to replace your parsing
-> and handling of bus-width, cd-gpios, wp-gpios, and non-removable
-> (other than the initialization quirks specific to your hardware).
->
-> I'd like to avoid every driver having its own DT parsing.
-> Thanks,
->
-> - Chris.
-I looked into it and it can replace just about everything that our own 
-dt parsing code is doing. The only problem is with cd_gpio. If I call 
-mmc_of_parse, then it will install its own irq handler for cd gpio, and 
-our driver needs a different handler. the mmc irq handler can call a 
-card_event callback, but that is already pointing to sdhci_card_event. 
-So the only way I can use mmc_of_parse that I can see is by adding a 
-flag to it to skip cd_gpio parsing which only this driver will then set 
-to true. Any other ideas ?
+Use the wrapper functions for getting and setting the driver data using
+platform_device instead of using dev_{get,set}_drvdata() with &pdev->dev,
+so we can directly pass a struct platform_device.
 
-  Thanks,
-    csd
+Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+---
+ drivers/mmc/host/cb710-mmc.c      |    2 +-
+ drivers/mmc/host/sh_mobile_sdhi.c |    6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mmc.c
+index 777ca20..9d6e2b8 100644
+--- a/drivers/mmc/host/cb710-mmc.c
++++ b/drivers/mmc/host/cb710-mmc.c
+@@ -703,7 +703,7 @@ static int cb710_mmc_init(struct platform_device *pdev)
+ 	if (!mmc)
+ 		return -ENOMEM;
+ 
+-	dev_set_drvdata(&pdev->dev, mmc);
++	platform_set_drvdata(pdev, mmc);
+ 
+ 	/* harmless (maybe) magic */
+ 	pci_read_config_dword(chip->pdev, 0x48, &val);
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index cc4c872..6a5d90e 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -51,7 +51,7 @@ struct sh_mobile_sdhi {
+ 
+ static int sh_mobile_sdhi_clk_enable(struct platform_device *pdev, unsigned int *f)
+ {
+-	struct mmc_host *mmc = dev_get_drvdata(&pdev->dev);
++	struct mmc_host *mmc = platform_get_drvdata(pdev);
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
+ 	struct sh_mobile_sdhi *priv = container_of(host->pdata, struct sh_mobile_sdhi, mmc_data);
+ 	int ret = clk_enable(priv->clk);
+@@ -64,7 +64,7 @@ static int sh_mobile_sdhi_clk_enable(struct platform_device *pdev, unsigned int
+ 
+ static void sh_mobile_sdhi_clk_disable(struct platform_device *pdev)
+ {
+-	struct mmc_host *mmc = dev_get_drvdata(&pdev->dev);
++	struct mmc_host *mmc = platform_get_drvdata(pdev);
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
+ 	struct sh_mobile_sdhi *priv = container_of(host->pdata, struct sh_mobile_sdhi, mmc_data);
+ 	clk_disable(priv->clk);
+@@ -119,7 +119,7 @@ static int sh_mobile_sdhi_write16_hook(struct tmio_mmc_host *host, int addr)
+ 
+ static void sh_mobile_sdhi_cd_wakeup(const struct platform_device *pdev)
+ {
+-	mmc_detect_change(dev_get_drvdata(&pdev->dev), msecs_to_jiffies(100));
++	mmc_detect_change(platform_get_drvdata(pdev), msecs_to_jiffies(100));
+ }
+ 
+ static const struct sh_mobile_sdhi_ops sdhi_ops = {
+-- 
+1.7.10.4
+
+
