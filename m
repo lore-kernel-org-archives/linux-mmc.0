@@ -1,125 +1,78 @@
-From: Oded Gabbay <ogabbay@advaoptical.com>
-Subject: [PATCH 1/3] MMC: P2020 SDHC: Add support for 8-bit bus width connection. Kernel version 3.4.47
-Date: Sun, 2 Jun 2013 09:32:12 +0300
-Message-ID: <1370154732-32582-1-git-send-email-ogabbay@advaoptical.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: [GIT PULL] MMC fixes for 3.10-rc5
+Date: Sun, 02 Jun 2013 14:28:14 -0400
+Message-ID: <878v2sbc5d.fsf@octavius.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: gregkh@linuxfoundation.org, cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:37635 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754895Ab3FBS2V (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 2 Jun 2013 14:28:21 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-This patch adds support of connecting an MMC media using an 8-bit 
-bus width connection to Freescale's P2020 H/W SDHC controller. During 
-the probe function, it detects if the processor is P2020 (by looking 
-at device tree) and if so, it adds the MMC_CAP_8_BIT_DATA to the MMC 
-caps 
+Hi Linus,
 
-Signed-off-by: Oded Gabbay <ogabbay@advaoptical.com>
----
- drivers/mmc/host/sdhci-esdhc.h    |  7 ++++++
- drivers/mmc/host/sdhci-of-esdhc.c | 49 ++++++++++++++++++++++++++++++++++++++-
- 2 files changed, 55 insertions(+), 1 deletion(-)
+Please pull from:
 
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index d25f9ab..6f9a018 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -36,6 +36,13 @@
- /* pltfm-specific */
- #define ESDHC_HOST_CONTROL_LE	0x20
- 
-+/*
-+ * P2020 interpretation of the SDHCI_HOST_CONTROL register
-+ */
-+#define ESDHC_CTRL_4BITBUS          (0x1 << 1)
-+#define ESDHC_CTRL_8BITBUS          (0x2 << 1)
-+#define ESDHC_CTRL_BUSWIDTH_MASK    (0x3 << 1)
-+
- /* OF-specific */
- #define ESDHC_DMA_SYSCTL	0x40c
- #define ESDHC_DMA_SNOOP		0x00000040
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index f8eb1fb..6f433b8 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -13,6 +13,7 @@
-  * your option) any later version.
-  */
- 
-+#include <linux/err.h>
- #include <linux/io.h>
- #include <linux/of.h>
- #include <linux/delay.h>
-@@ -143,6 +144,31 @@ static void esdhc_of_resume(struct sdhci_host *host)
- }
- #endif
- 
-+static int esdhc_pltfm_bus_width(struct sdhci_host *host, int width)
-+{
-+	u32 ctrl;
-+
-+	switch (width) {
-+	case MMC_BUS_WIDTH_8:
-+		ctrl = ESDHC_CTRL_8BITBUS;
-+		break;
-+
-+	case MMC_BUS_WIDTH_4:
-+		ctrl = ESDHC_CTRL_4BITBUS;
-+		break;
-+
-+	default:
-+		ctrl = 0;
-+		break;
-+	}
-+
-+	clrsetbits_be32(host->ioaddr + SDHCI_HOST_CONTROL,
-+			ESDHC_CTRL_BUSWIDTH_MASK, ctrl);
-+
-+	return 0;
-+}
-+
-+
- static struct sdhci_ops sdhci_esdhc_ops = {
- 	.read_l = sdhci_be32bs_readl,
- 	.read_w = esdhc_readw,
-@@ -158,6 +184,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
- 	.platform_suspend = esdhc_of_suspend,
- 	.platform_resume = esdhc_of_resume,
- #endif
-+	.platform_8bit_width = esdhc_pltfm_bus_width
- };
- 
- static struct sdhci_pltfm_data sdhci_esdhc_pdata = {
-@@ -169,7 +196,27 @@ static struct sdhci_pltfm_data sdhci_esdhc_pdata = {
- 
- static int __devinit sdhci_esdhc_probe(struct platform_device *pdev)
- {
--	return sdhci_pltfm_register(pdev, &sdhci_esdhc_pdata);
-+	struct sdhci_host *host;
-+	struct device_node *np;
-+	int ret = 0;
-+
-+	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_pdata);
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
-+
-+	sdhci_get_of_property(pdev);
-+
-+	np = pdev->dev.of_node;
-+	if (of_device_is_compatible(np, "fsl,p2020-esdhc")) {
-+		/* P2020 has capability of 8 bit bus width */
-+		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-+	}
-+
-+	ret = sdhci_add_host(host);
-+	if (ret)
-+		sdhci_pltfm_free(pdev);
-+
-+	return ret;
- }
- 
- static int __devexit sdhci_esdhc_remove(struct platform_device *pdev)
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-fixes-for-3.10-rc5
+
+to receive MMC fixes for 3.10-rc5.  There are no merge conflicts, and
+the patches have been tested in linux-next.  Thanks.
+
+
+The following changes since commit c7788792a5e7b0d5d7f96d0766b4cb6112d47d75:
+
+  Linux 3.10-rc2 (2013-05-20 14:37:38 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-fixes-for-3.10-rc5
+
+for you to fetch changes up to 4a29b5591faf25555fdf2b717594d50f70c15066:
+
+  mmc: omap_hsmmc: Skip platform_get_resource_byname() for dt case (2013-05-26 14:23:11 -0400)
+
+----------------------------------------------------------------
+MMC fixes for 3.10-rc5:
+ - sdhci-acpi: Fix initial runtime PM status, add more ACPI IDs
+ - atmel-mci, omap_hsmmc: DT handling fixes
+ - esdhc-imx: Fix SDIO IRQs, fix multiblock reads (both h/w errata)
+
+----------------------------------------------------------------
+Adrian Hunter (3):
+      mmc: sdhci-acpi: fix initial runtime pm status
+      mmc: sdhci-acpi: add more device ids
+      mmc: sdhci-pci: add more device ids
+
+Lucas Stach (1):
+      mmc: sdhci-esdhc-imx: fix multiblock reads on i.MX53
+
+Ludovic Desroches (1):
+      mmc: atmel-mci: convert to dma_request_slave_channel_compat()
+
+Martin Fuzzey (1):
+      mmc: sdhci-esdhc-imx: Fix SDIO interrupts
+
+Matt Porter (1):
+      mmc: omap_hsmmc: convert to dma_request_slave_channel_compat
+
+Santosh Shilimkar (1):
+      mmc: omap_hsmmc: Skip platform_get_resource_byname() for dt case
+
+Tony Lindgren (1):
+      mmc: omap_hsmmc: Fix the DT pbias workaround for MMC controllers 2 to 5
+
+ drivers/mmc/host/atmel-mci.c       | 25 +++++++-------
+ drivers/mmc/host/omap_hsmmc.c      | 51 +++++++++++++++++-----------
+ drivers/mmc/host/sdhci-acpi.c      | 69 +++++++++++++++++++++++++++++++++-----
+ drivers/mmc/host/sdhci-esdhc-imx.c | 41 +++++++++++++++++++---
+ drivers/mmc/host/sdhci-pci.c       | 54 +++++++++++++++++++++++++++++
+ 5 files changed, 195 insertions(+), 45 deletions(-)
+
 -- 
-1.7.11.7
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
