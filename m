@@ -1,78 +1,106 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [GIT PULL] MMC fixes for 3.10-rc5
-Date: Sun, 02 Jun 2013 14:28:14 -0400
-Message-ID: <878v2sbc5d.fsf@octavius.laptop.org>
+From: Heiko =?utf-8?q?St=C3=BCbner?= <heiko@sntech.de>
+Subject: arm: add basic support for Rockchip Cortex-A9 SoCs
+Date: Mon, 3 Jun 2013 00:55:15 +0200
+Message-ID: <201306030055.15413.heiko@sntech.de>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:37635 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754895Ab3FBS2V (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 2 Jun 2013 14:28:21 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: Mike Turquette <mturquette@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Seungwon Jeon <tgih.jun@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Jaehoon Chung <jh80.chung@samsung.com>, Olof Johansson <olof@lixom.net>, John Stultz <john.stultz@linaro.org>, Grant Likely <grant.likely@linaro.org>, Russell King <linux@arm.linux.org.uk>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, devicetree-discuss@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi Linus,
+Prepare your eggs and tomatoes please, I got myself a second playground ;-) .
 
-Please pull from:
+As the title implies this series adds basic support for Rockchip's Cortex-A9
+SoCs, like the RK3066 used in many cheaper tablets.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-fixes-for-3.10-rc5
+On the periphal side it's very lightweight, as it seems someone from Rockchip
+was shopping in the DesignWare store.
 
-to receive MMC fixes for 3.10-rc5.  There are no merge conflicts, and
-the patches have been tested in linux-next.  Thanks.
+This makes the pinctrl driver the biggest hunk in the series, but to get some
+bonus points I used the generic_irq implementation for the interrupt handling,
+based on Thomas' irqdomain support series.
+
+Supported periphals are, the timers, uarts and mmc controllers, so interested
+parties will need a serial console for now.
+
+Hopefully I didn't mess up to much :-)
 
 
-The following changes since commit c7788792a5e7b0d5d7f96d0766b4cb6112d47d75:
+Dependencies:
+ - the irqdomain support for the generic_irq from Thomas Gleixner is required
+   by the pinctrl driver
+ - "mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA" moves the
+   SDMMC_CMD_USE_HOLD_REG constant into the common header, which is required
+   on these Rockchip SoCs 
 
-  Linux 3.10-rc2 (2013-05-20 14:37:38 -0700)
+Heiko Stuebner (10):
+  clocksource: dw_apb_timer_of: use the clocksource as sched clock if
+    necessary
+  clocksource: dw_apb_timer_of: add clock-handling
+  clk: flag to use upper half of the register as change indicator
+  clk: divider: add flag to limit possible dividers to even numbers
+  mmc: dw_mmc-pltfm: remove static from dw_mci_pltfm_remove
+  mmc: dw_mmc-pltfm: add Rockchip variant
+  pinctrl: add pinctrl driver for Rockchip SoCs
+  clk: add basic Rockchip rk3066a clock support
+  arm: add debug uarts for rockchip rk29xx and rk3xxx series
+  arm: add basic support for Rockchip RK3066a boards
 
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git tags/mmc-fixes-for-3.10-rc5
-
-for you to fetch changes up to 4a29b5591faf25555fdf2b717594d50f70c15066:
-
-  mmc: omap_hsmmc: Skip platform_get_resource_byname() for dt case (2013-05-26 14:23:11 -0400)
-
-----------------------------------------------------------------
-MMC fixes for 3.10-rc5:
- - sdhci-acpi: Fix initial runtime PM status, add more ACPI IDs
- - atmel-mci, omap_hsmmc: DT handling fixes
- - esdhc-imx: Fix SDIO IRQs, fix multiblock reads (both h/w errata)
-
-----------------------------------------------------------------
-Adrian Hunter (3):
-      mmc: sdhci-acpi: fix initial runtime pm status
-      mmc: sdhci-acpi: add more device ids
-      mmc: sdhci-pci: add more device ids
-
-Lucas Stach (1):
-      mmc: sdhci-esdhc-imx: fix multiblock reads on i.MX53
-
-Ludovic Desroches (1):
-      mmc: atmel-mci: convert to dma_request_slave_channel_compat()
-
-Martin Fuzzey (1):
-      mmc: sdhci-esdhc-imx: Fix SDIO interrupts
-
-Matt Porter (1):
-      mmc: omap_hsmmc: convert to dma_request_slave_channel_compat
-
-Santosh Shilimkar (1):
-      mmc: omap_hsmmc: Skip platform_get_resource_byname() for dt case
-
-Tony Lindgren (1):
-      mmc: omap_hsmmc: Fix the DT pbias workaround for MMC controllers 2 to 5
-
- drivers/mmc/host/atmel-mci.c       | 25 +++++++-------
- drivers/mmc/host/omap_hsmmc.c      | 51 +++++++++++++++++-----------
- drivers/mmc/host/sdhci-acpi.c      | 69 +++++++++++++++++++++++++++++++++-----
- drivers/mmc/host/sdhci-esdhc-imx.c | 41 +++++++++++++++++++---
- drivers/mmc/host/sdhci-pci.c       | 54 +++++++++++++++++++++++++++++
- 5 files changed, 195 insertions(+), 45 deletions(-)
+ .../bindings/pinctrl/rockchip-pinctrl.txt          |  100 ++
+ Documentation/devicetree/bindings/rtc/dw-apb.txt   |   19 +
+ arch/arm/Kconfig                                   |    2 +
+ arch/arm/Kconfig.debug                             |   34 +
+ arch/arm/Makefile                                  |    1 +
+ arch/arm/boot/dts/rk3066a-clocks.dtsi              |  459 +++++++
+ arch/arm/boot/dts/rk3066a.dtsi                     |  359 ++++++
+ arch/arm/include/debug/rockchip.S                  |   42 +
+ arch/arm/mach-rockchip/Kconfig                     |   17 +
+ arch/arm/mach-rockchip/Makefile                    |    1 +
+ arch/arm/mach-rockchip/Makefile.boot               |    3 +
+ arch/arm/mach-rockchip/rockchip.c                  |   54 +
+ drivers/clk/Makefile                               |    1 +
+ drivers/clk/clk-divider.c                          |   29 +-
+ drivers/clk/clk-gate.c                             |   24 +-
+ drivers/clk/clk-mux.c                              |   15 +-
+ drivers/clk/rockchip/Makefile                      |    6 +
+ drivers/clk/rockchip/clk-rockchip-pll.c            |  131 ++
+ drivers/clk/rockchip/clk-rockchip-pll.h            |   19 +
+ drivers/clk/rockchip/clk-rockchip.c                |  315 +++++
+ drivers/clocksource/dw_apb_timer_of.c              |   52 +-
+ drivers/mmc/host/dw_mmc-pltfm.c                    |   48 +-
+ drivers/pinctrl/Kconfig                            |    6 +
+ drivers/pinctrl/Makefile                           |    1 +
+ drivers/pinctrl/pinctrl-rockchip.c                 | 1319 ++++++++++++++++++++
+ include/dt-bindings/pinctrl/rockchip.h             |   37 +
+ include/linux/clk-provider.h                       |   18 +
+ include/linux/clk/rockchip.h                       |   21 +
+ 28 files changed, 3097 insertions(+), 36 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/pinctrl/rockchip-pinctrl.txt
+ create mode 100644 arch/arm/boot/dts/rk3066a-clocks.dtsi
+ create mode 100644 arch/arm/boot/dts/rk3066a.dtsi
+ create mode 100644 arch/arm/include/debug/rockchip.S
+ create mode 100644 arch/arm/mach-rockchip/Kconfig
+ create mode 100644 arch/arm/mach-rockchip/Makefile
+ create mode 100644 arch/arm/mach-rockchip/Makefile.boot
+ create mode 100644 arch/arm/mach-rockchip/rockchip.c
+ create mode 100644 drivers/clk/rockchip/Makefile
+ create mode 100644 drivers/clk/rockchip/clk-rockchip-pll.c
+ create mode 100644 drivers/clk/rockchip/clk-rockchip-pll.h
+ create mode 100644 drivers/clk/rockchip/clk-rockchip.c
+ create mode 100644 drivers/pinctrl/pinctrl-rockchip.c
+ create mode 100644 include/dt-bindings/pinctrl/rockchip.h
+ create mode 100644 include/linux/clk/rockchip.h
 
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.2.3
