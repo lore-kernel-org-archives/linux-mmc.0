@@ -1,7 +1,8 @@
 From: Heiko =?utf-8?q?St=C3=BCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH 02/10] clocksource: dw_apb_timer_of: add clock-handling
-Date: Mon, 3 Jun 2013 00:56:37 +0200
-Message-ID: <201306030056.37724.heiko@sntech.de>
+Subject: [PATCH 03/10] clk: flag to use upper half of the register as change
+ indicator
+Date: Mon, 3 Jun 2013 00:57:15 +0200
+Message-ID: <201306030057.15989.heiko@sntech.de>
 References: <201306030055.15413.heiko@sntech.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,106 +23,195 @@ To: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-
 Cc: Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add the possibility to get the clock-frequency from a timer clock instead
-of specifying it as dt property. Additionally also add the possibility
-to also define a controlling periphal clock for the timer block.
+There exist platforms, namely at least all Rockchip Cortex-A9 based ones,
+that don't use the paradigm of reading-changing-writing the register contents,
+but instead only write the changes to the register with a mask that indicates
+the changed bits.
 
-The clock-frequency property is kept to act as fallback if no clocks
-are specified.
+This patch adds flags and code to support the case where the lower 16 bit of
+hold the information and the upper 16 bit are used as mask to indicate the
+written changes.
+
+As hardware-specific flags should not be added to the common clk flags, the
+flags are added to gate, mux and divider clocks individually.
 
 Signed-off-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
 ---
- Documentation/devicetree/bindings/rtc/dw-apb.txt |   19 ++++++++++++++++
- drivers/clocksource/dw_apb_timer_of.c            |   26 +++++++++++++++++++++-
- 2 files changed, 44 insertions(+), 1 deletions(-)
+ drivers/clk/clk-divider.c    |   15 +++++++++++++--
+ drivers/clk/clk-gate.c       |   24 ++++++++++++++++++------
+ drivers/clk/clk-mux.c        |   15 +++++++++++++--
+ include/linux/clk-provider.h |   16 ++++++++++++++++
+ 4 files changed, 60 insertions(+), 10 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/rtc/dw-apb.txt b/Documentation/devicetree/bindings/rtc/dw-apb.txt
-index 93e2b0f..80ab1c1 100644
---- a/Documentation/devicetree/bindings/rtc/dw-apb.txt
-+++ b/Documentation/devicetree/bindings/rtc/dw-apb.txt
-@@ -5,9 +5,20 @@ Required properties:
- - reg: physical base address of the controller and length of memory mapped
-   region.
- - interrupts: IRQ line for the timer.
-+- either clocks+clock-names or clock-frequency properties
-+
-+Optional properties:
-+- clocks	: list of clock specifiers, corresponding to entries in
-+		  the clock-names property;
-+- clock-names	: should contain "timer and "pclk" entries, matching entries
-+		  in the clocks property.
- - clock-frequency: The frequency in HZ of the timer.
- - clock-freq: For backwards compatibility with picoxcell
+diff --git a/drivers/clk/clk-divider.c b/drivers/clk/clk-divider.c
+index 6d96741..e37c48a 100644
+--- a/drivers/clk/clk-divider.c
++++ b/drivers/clk/clk-divider.c
+@@ -217,8 +217,12 @@ static int clk_divider_set_rate(struct clk_hw *hw, unsigned long rate,
+ 	if (divider->lock)
+ 		spin_lock_irqsave(divider->lock, flags);
  
-+If using the clock specifiers, the pclk clock is optional, as not all
-+systems may use one.
-+
-+
- Example:
+-	val = readl(divider->reg);
+-	val &= ~(div_mask(divider) << divider->shift);
++	if (divider->flags & CLK_DIVIDER_MASK_UPPER_HALF) {
++		val = div_mask(divider) << (divider->shift + 16);
++	} else {
++		val = readl(divider->reg);
++		val &= ~(div_mask(divider) << divider->shift);
++	}
+ 	val |= value << divider->shift;
+ 	writel(val, divider->reg);
  
- 		timer1: timer@ffc09000 {
-@@ -23,3 +34,11 @@ Example:
- 				clock-frequency = <200000000>;
- 				reg = <0xffd00000 0x1000>;
- 			};
-+
-+		timer3: timer@ffe00000 {
-+				compatible = "snps,dw-apb-timer-osc";
-+				interrupts = <0 170 4>;
-+				reg = <0xffe00000 0x1000>;
-+				clocks = <&timer_clk>, <&timer_pclk>;
-+				clock-names = "timer", "pclk";
-+			};
-diff --git a/drivers/clocksource/dw_apb_timer_of.c b/drivers/clocksource/dw_apb_timer_of.c
-index d6c0fda..1964f87 100644
---- a/drivers/clocksource/dw_apb_timer_of.c
-+++ b/drivers/clocksource/dw_apb_timer_of.c
-@@ -20,6 +20,7 @@
- #include <linux/of.h>
- #include <linux/of_address.h>
- #include <linux/of_irq.h>
-+#include <linux/clk.h>
+@@ -245,6 +249,13 @@ static struct clk *_register_divider(struct device *dev, const char *name,
+ 	struct clk *clk;
+ 	struct clk_init_data init;
  
- #include <asm/mach/time.h>
- #include <asm/sched_clock.h>
-@@ -27,14 +28,37 @@
- static void timer_get_base_and_rate(struct device_node *np,
- 				    void __iomem **base, u32 *rate)
- {
-+	struct clk *timer_clk;
-+	struct clk *pclk;
-+
- 	*base = of_iomap(np, 0);
- 
- 	if (!*base)
- 		panic("Unable to map regs for %s", np->name);
- 
-+	/*
-+	 * Not all implementations use a periphal clock, so don't panic
-+	 * if it's not present
-+	 */
-+	pclk = of_clk_get_by_name(np, "pclk");
-+	if (!IS_ERR(pclk))
-+		if (clk_prepare_enable(pclk))
-+			pr_warn("pclk for %s is present, but could not be activated\n",
-+				np->name);
-+
-+	timer_clk = of_clk_get_by_name(np, "timer");
-+	if (IS_ERR(timer_clk))
-+		goto try_clock_freq;
-+
-+	if (!clk_prepare_enable(timer_clk)) {
-+		*rate = clk_get_rate(timer_clk);
-+		return;
++	if ((clk_divider_flags & CLK_DIVIDER_MASK_UPPER_HALF) &&
++	    (shift + width > 15)) {
++		pr_err("%s: shift %d + width %d invalid\n", __func__,
++		       shift, width);
++		return ERR_PTR(-EINVAL);
 +	}
 +
-+try_clock_freq:
- 	if (of_property_read_u32(np, "clock-freq", rate) &&
- 		of_property_read_u32(np, "clock-frequency", rate))
--		panic("No clock-frequency property for %s", np->name);
-+		panic("No clock nor clock-frequency property for %s", np->name);
- }
+ 	/* allocate the divider */
+ 	div = kzalloc(sizeof(struct clk_divider), GFP_KERNEL);
+ 	if (!div) {
+diff --git a/drivers/clk/clk-gate.c b/drivers/clk/clk-gate.c
+index 15114fe..e553fa7 100644
+--- a/drivers/clk/clk-gate.c
++++ b/drivers/clk/clk-gate.c
+@@ -53,12 +53,19 @@ static void clk_gate_endisable(struct clk_hw *hw, int enable)
+ 	if (gate->lock)
+ 		spin_lock_irqsave(gate->lock, flags);
  
- static void add_clockevent(struct device_node *event_timer)
+-	reg = readl(gate->reg);
+-
+-	if (set)
+-		reg |= BIT(gate->bit_idx);
+-	else
+-		reg &= ~BIT(gate->bit_idx);
++	if (gate->flags & CLK_GATE_MASK_UPPER_HALF) {
++		reg = BIT(gate->bit_idx + 16);
++
++		if (set)
++			reg |= BIT(gate->bit_idx);
++	} else {
++		reg = readl(gate->reg);
++
++		if (set)
++			reg |= BIT(gate->bit_idx);
++		else
++			reg &= ~BIT(gate->bit_idx);
++	}
+ 
+ 	writel(reg, gate->reg);
+ 
+@@ -121,6 +128,11 @@ struct clk *clk_register_gate(struct device *dev, const char *name,
+ 	struct clk *clk;
+ 	struct clk_init_data init;
+ 
++	if ((clk_gate_flags & CLK_GATE_MASK_UPPER_HALF) && bit_idx > 15) {
++		pr_err("%s: bit_idx %d invalid\n", __func__, bit_idx);
++		return ERR_PTR(-EINVAL);
++	}
++
+ 	/* allocate the gate */
+ 	gate = kzalloc(sizeof(struct clk_gate), GFP_KERNEL);
+ 	if (!gate) {
+diff --git a/drivers/clk/clk-mux.c b/drivers/clk/clk-mux.c
+index 25b1734..fce26f5 100644
+--- a/drivers/clk/clk-mux.c
++++ b/drivers/clk/clk-mux.c
+@@ -86,8 +86,12 @@ static int clk_mux_set_parent(struct clk_hw *hw, u8 index)
+ 	if (mux->lock)
+ 		spin_lock_irqsave(mux->lock, flags);
+ 
+-	val = readl(mux->reg);
+-	val &= ~(mux->mask << mux->shift);
++	if (mux->flags & CLK_MUX_MASK_UPPER_HALF) {
++		val = mux->mask << (mux->shift + 16);
++	} else {
++		val = readl(mux->reg);
++		val &= ~(mux->mask << mux->shift);
++	}
+ 	val |= index << mux->shift;
+ 	writel(val, mux->reg);
+ 
+@@ -112,6 +116,13 @@ struct clk *clk_register_mux_table(struct device *dev, const char *name,
+ 	struct clk *clk;
+ 	struct clk_init_data init;
+ 
++	if (!mask || ((clk_mux_flags & CLK_MUX_MASK_UPPER_HALF) &&
++		      (__fls(mask << shift) > 15))) {
++		pr_err("%s: shift %d + mask %d invalid\n", __func__,
++		       shift, mask);
++		return ERR_PTR(-EINVAL);
++	}
++
+ 	/* allocate the mux */
+ 	mux = kzalloc(sizeof(struct clk_mux), GFP_KERNEL);
+ 	if (!mux) {
+diff --git a/include/linux/clk-provider.h b/include/linux/clk-provider.h
+index 265f384..420a187 100644
+--- a/include/linux/clk-provider.h
++++ b/include/linux/clk-provider.h
+@@ -210,6 +210,11 @@ void of_fixed_clk_setup(struct device_node *np);
+  * CLK_GATE_SET_TO_DISABLE - by default this clock sets the bit at bit_idx to
+  * 	enable the clock.  Setting this flag does the opposite: setting the bit
+  * 	disable the clock and clearing it enables the clock
++ * CLK_GATE_MASK_UPPER_HALF - this clock only uses the lower 16 bit of the
++ *	register to hold the gate bits, while using the upper 16 bit to
++ *	indicate the bits that get changed during a write. So gating the
++ *	clock in bit 2 would write BIT(18) | BIT(2) to the register, while
++ *	ungating this clock would write only BIT(18) to the register.
+  */
+ struct clk_gate {
+ 	struct clk_hw hw;
+@@ -220,6 +225,7 @@ struct clk_gate {
+ };
+ 
+ #define CLK_GATE_SET_TO_DISABLE		BIT(0)
++#define CLK_GATE_MASK_UPPER_HALF	BIT(1)
+ 
+ extern const struct clk_ops clk_gate_ops;
+ struct clk *clk_register_gate(struct device *dev, const char *name,
+@@ -257,6 +263,11 @@ struct clk_div_table {
+  *	Some hardware implementations gracefully handle this case and allow a
+  *	zero divisor by not modifying their input clock
+  *	(divide by one / bypass).
++ * CLK_DIVIDER_MASK_UPPER_HALF - this clock only uses the lower 16 bit of the
++ *	register to hold the divider bits, while using the upper 16 bit to
++ *	indicate the bits that get changed during a write. So for a clock with
++ *	shift 0 and width 2, setting the divider to 2 would result in a write
++ *	of (3 << 16) | (2 << 0).
+  */
+ struct clk_divider {
+ 	struct clk_hw	hw;
+@@ -271,6 +282,7 @@ struct clk_divider {
+ #define CLK_DIVIDER_ONE_BASED		BIT(0)
+ #define CLK_DIVIDER_POWER_OF_TWO	BIT(1)
+ #define CLK_DIVIDER_ALLOW_ZERO		BIT(2)
++#define CLK_DIVIDER_MASK_UPPER_HALF	BIT(3)
+ 
+ extern const struct clk_ops clk_divider_ops;
+ struct clk *clk_register_divider(struct device *dev, const char *name,
+@@ -299,6 +311,9 @@ struct clk *clk_register_divider_table(struct device *dev, const char *name,
+  * Flags:
+  * CLK_MUX_INDEX_ONE - register index starts at 1, not 0
+  * CLK_MUX_INDEX_BIT - register index is a single bit (power of two)
++ * CLK_MUX_MASK_UPPER_HALF - this clock only uses the lower 16 bit of the
++ *	register to hold the mux bits, while using the upper 16 bit to
++ *	indicate the bits that get changed during a write.
+  */
+ struct clk_mux {
+ 	struct clk_hw	hw;
+@@ -312,6 +327,7 @@ struct clk_mux {
+ 
+ #define CLK_MUX_INDEX_ONE		BIT(0)
+ #define CLK_MUX_INDEX_BIT		BIT(1)
++#define CLK_MUX_MASK_UPPER_HALF		BIT(3)
+ 
+ extern const struct clk_ops clk_mux_ops;
+ 
 -- 
 1.7.2.3
