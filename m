@@ -1,8 +1,7 @@
 From: Heiko =?utf-8?q?St=C3=BCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH 01/10] clocksource: dw_apb_timer_of: use the clocksource as
- sched clock if necessary
-Date: Mon, 3 Jun 2013 00:56:02 +0200
-Message-ID: <201306030056.03522.heiko@sntech.de>
+Subject: [PATCH 02/10] clocksource: dw_apb_timer_of: add clock-handling
+Date: Mon, 3 Jun 2013 00:56:37 +0200
+Message-ID: <201306030056.37724.heiko@sntech.de>
 References: <201306030055.15413.heiko@sntech.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,71 +22,106 @@ To: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-
 Cc: Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Currently the dw_apb_timer always expects a separate special timer to be
-availbable for the sched_clock. Some devices using dw_apb_timers do not
-have the sptimer but can use the clocksource as sched_clock.
-Therefore this patch adds using the clocksource timer as
-a fallback if no usable sched timer is found.
+Add the possibility to get the clock-frequency from a timer clock instead
+of specifying it as dt property. Additionally also add the possibility
+to also define a controlling periphal clock for the timer block.
+
+The clock-frequency property is kept to act as fallback if no clocks
+are specified.
 
 Signed-off-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
 ---
- drivers/clocksource/dw_apb_timer_of.c |   26 +++++++++++++++++---------
- 1 files changed, 17 insertions(+), 9 deletions(-)
+ Documentation/devicetree/bindings/rtc/dw-apb.txt |   19 ++++++++++++++++
+ drivers/clocksource/dw_apb_timer_of.c            |   26 +++++++++++++++++++++-
+ 2 files changed, 44 insertions(+), 1 deletions(-)
 
+diff --git a/Documentation/devicetree/bindings/rtc/dw-apb.txt b/Documentation/devicetree/bindings/rtc/dw-apb.txt
+index 93e2b0f..80ab1c1 100644
+--- a/Documentation/devicetree/bindings/rtc/dw-apb.txt
++++ b/Documentation/devicetree/bindings/rtc/dw-apb.txt
+@@ -5,9 +5,20 @@ Required properties:
+ - reg: physical base address of the controller and length of memory mapped
+   region.
+ - interrupts: IRQ line for the timer.
++- either clocks+clock-names or clock-frequency properties
++
++Optional properties:
++- clocks	: list of clock specifiers, corresponding to entries in
++		  the clock-names property;
++- clock-names	: should contain "timer and "pclk" entries, matching entries
++		  in the clocks property.
+ - clock-frequency: The frequency in HZ of the timer.
+ - clock-freq: For backwards compatibility with picoxcell
+ 
++If using the clock specifiers, the pclk clock is optional, as not all
++systems may use one.
++
++
+ Example:
+ 
+ 		timer1: timer@ffc09000 {
+@@ -23,3 +34,11 @@ Example:
+ 				clock-frequency = <200000000>;
+ 				reg = <0xffd00000 0x1000>;
+ 			};
++
++		timer3: timer@ffe00000 {
++				compatible = "snps,dw-apb-timer-osc";
++				interrupts = <0 170 4>;
++				reg = <0xffe00000 0x1000>;
++				clocks = <&timer_clk>, <&timer_pclk>;
++				clock-names = "timer", "pclk";
++			};
 diff --git a/drivers/clocksource/dw_apb_timer_of.c b/drivers/clocksource/dw_apb_timer_of.c
-index ab09ed3..d6c0fda 100644
+index d6c0fda..1964f87 100644
 --- a/drivers/clocksource/dw_apb_timer_of.c
 +++ b/drivers/clocksource/dw_apb_timer_of.c
-@@ -57,6 +57,9 @@ static void add_clockevent(struct device_node *event_timer)
- 	dw_apb_clockevent_register(ced);
- }
+@@ -20,6 +20,7 @@
+ #include <linux/of.h>
+ #include <linux/of_address.h>
+ #include <linux/of_irq.h>
++#include <linux/clk.h>
  
-+static void __iomem *sched_io_base;
-+static u32 sched_rate;
+ #include <asm/mach/time.h>
+ #include <asm/sched_clock.h>
+@@ -27,14 +28,37 @@
+ static void timer_get_base_and_rate(struct device_node *np,
+ 				    void __iomem **base, u32 *rate)
+ {
++	struct clk *timer_clk;
++	struct clk *pclk;
 +
- static void add_clocksource(struct device_node *source_timer)
- {
- 	void __iomem *iobase;
-@@ -71,9 +74,15 @@ static void add_clocksource(struct device_node *source_timer)
+ 	*base = of_iomap(np, 0);
  
- 	dw_apb_clocksource_start(cs);
- 	dw_apb_clocksource_register(cs);
--}
+ 	if (!*base)
+ 		panic("Unable to map regs for %s", np->name);
  
--static void __iomem *sched_io_base;
 +	/*
-+	 * Fallback to use the clocksource as sched_clock if no separate
-+	 * timer is found. sched_io_base then points to the current_value
-+	 * register of the clocksource timer.
++	 * Not all implementations use a periphal clock, so don't panic
++	 * if it's not present
 +	 */
-+	sched_io_base = iobase + 0x04;
-+	sched_rate = rate;
-+}
- 
- static u32 read_sched_clock(void)
- {
-@@ -89,16 +98,15 @@ static const struct of_device_id sptimer_ids[] __initconst = {
- static void init_sched_clock(void)
- {
- 	struct device_node *sched_timer;
--	u32 rate;
- 
- 	sched_timer = of_find_matching_node(NULL, sptimer_ids);
--	if (!sched_timer)
--		panic("No RTC for sched clock to use");
--
--	timer_get_base_and_rate(sched_timer, &sched_io_base, &rate);
--	of_node_put(sched_timer);
-+	if (sched_timer) {
-+		timer_get_base_and_rate(sched_timer, &sched_io_base,
-+					&sched_rate);
-+		of_node_put(sched_timer);
++	pclk = of_clk_get_by_name(np, "pclk");
++	if (!IS_ERR(pclk))
++		if (clk_prepare_enable(pclk))
++			pr_warn("pclk for %s is present, but could not be activated\n",
++				np->name);
++
++	timer_clk = of_clk_get_by_name(np, "timer");
++	if (IS_ERR(timer_clk))
++		goto try_clock_freq;
++
++	if (!clk_prepare_enable(timer_clk)) {
++		*rate = clk_get_rate(timer_clk);
++		return;
 +	}
- 
--	setup_sched_clock(read_sched_clock, 32, rate);
-+	setup_sched_clock(read_sched_clock, 32, sched_rate);
++
++try_clock_freq:
+ 	if (of_property_read_u32(np, "clock-freq", rate) &&
+ 		of_property_read_u32(np, "clock-frequency", rate))
+-		panic("No clock-frequency property for %s", np->name);
++		panic("No clock nor clock-frequency property for %s", np->name);
  }
  
- static const struct of_device_id osctimer_ids[] __initconst = {
+ static void add_clockevent(struct device_node *event_timer)
 -- 
 1.7.2.3
