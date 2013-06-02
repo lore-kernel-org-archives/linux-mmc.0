@@ -1,106 +1,93 @@
-From: Heiko =?utf-8?q?St=C3=BCbner?= <heiko@sntech.de>
-Subject: arm: add basic support for Rockchip Cortex-A9 SoCs
-Date: Mon, 3 Jun 2013 00:55:15 +0200
-Message-ID: <201306030055.15413.heiko@sntech.de>
+From: Heiko =?utf-8?q?St=C3=BCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Subject: [PATCH 01/10] clocksource: dw_apb_timer_of: use the clocksource as
+ sched clock if necessary
+Date: Mon, 3 Jun 2013 00:56:02 +0200
+Message-ID: <201306030056.03522.heiko@sntech.de>
+References: <201306030055.15413.heiko@sntech.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
-Cc: Mike Turquette <mturquette@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Seungwon Jeon <tgih.jun@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Jaehoon Chung <jh80.chung@samsung.com>, Olof Johansson <olof@lixom.net>, John Stultz <john.stultz@linaro.org>, Grant Likely <grant.likely@linaro.org>, Russell King <linux@arm.linux.org.uk>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, devicetree-discuss@lists.ozlabs.org
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <201306030055.15413.heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Cc: Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Prepare your eggs and tomatoes please, I got myself a second playground ;-) .
+Currently the dw_apb_timer always expects a separate special timer to be
+availbable for the sched_clock. Some devices using dw_apb_timers do not
+have the sptimer but can use the clocksource as sched_clock.
+Therefore this patch adds using the clocksource timer as
+a fallback if no usable sched timer is found.
 
-As the title implies this series adds basic support for Rockchip's Cortex-A9
-SoCs, like the RK3066 used in many cheaper tablets.
+Signed-off-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+---
+ drivers/clocksource/dw_apb_timer_of.c |   26 +++++++++++++++++---------
+ 1 files changed, 17 insertions(+), 9 deletions(-)
 
-On the periphal side it's very lightweight, as it seems someone from Rockchip
-was shopping in the DesignWare store.
-
-This makes the pinctrl driver the biggest hunk in the series, but to get some
-bonus points I used the generic_irq implementation for the interrupt handling,
-based on Thomas' irqdomain support series.
-
-Supported periphals are, the timers, uarts and mmc controllers, so interested
-parties will need a serial console for now.
-
-Hopefully I didn't mess up to much :-)
-
-
-Dependencies:
- - the irqdomain support for the generic_irq from Thomas Gleixner is required
-   by the pinctrl driver
- - "mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA" moves the
-   SDMMC_CMD_USE_HOLD_REG constant into the common header, which is required
-   on these Rockchip SoCs 
-
-Heiko Stuebner (10):
-  clocksource: dw_apb_timer_of: use the clocksource as sched clock if
-    necessary
-  clocksource: dw_apb_timer_of: add clock-handling
-  clk: flag to use upper half of the register as change indicator
-  clk: divider: add flag to limit possible dividers to even numbers
-  mmc: dw_mmc-pltfm: remove static from dw_mci_pltfm_remove
-  mmc: dw_mmc-pltfm: add Rockchip variant
-  pinctrl: add pinctrl driver for Rockchip SoCs
-  clk: add basic Rockchip rk3066a clock support
-  arm: add debug uarts for rockchip rk29xx and rk3xxx series
-  arm: add basic support for Rockchip RK3066a boards
-
- .../bindings/pinctrl/rockchip-pinctrl.txt          |  100 ++
- Documentation/devicetree/bindings/rtc/dw-apb.txt   |   19 +
- arch/arm/Kconfig                                   |    2 +
- arch/arm/Kconfig.debug                             |   34 +
- arch/arm/Makefile                                  |    1 +
- arch/arm/boot/dts/rk3066a-clocks.dtsi              |  459 +++++++
- arch/arm/boot/dts/rk3066a.dtsi                     |  359 ++++++
- arch/arm/include/debug/rockchip.S                  |   42 +
- arch/arm/mach-rockchip/Kconfig                     |   17 +
- arch/arm/mach-rockchip/Makefile                    |    1 +
- arch/arm/mach-rockchip/Makefile.boot               |    3 +
- arch/arm/mach-rockchip/rockchip.c                  |   54 +
- drivers/clk/Makefile                               |    1 +
- drivers/clk/clk-divider.c                          |   29 +-
- drivers/clk/clk-gate.c                             |   24 +-
- drivers/clk/clk-mux.c                              |   15 +-
- drivers/clk/rockchip/Makefile                      |    6 +
- drivers/clk/rockchip/clk-rockchip-pll.c            |  131 ++
- drivers/clk/rockchip/clk-rockchip-pll.h            |   19 +
- drivers/clk/rockchip/clk-rockchip.c                |  315 +++++
- drivers/clocksource/dw_apb_timer_of.c              |   52 +-
- drivers/mmc/host/dw_mmc-pltfm.c                    |   48 +-
- drivers/pinctrl/Kconfig                            |    6 +
- drivers/pinctrl/Makefile                           |    1 +
- drivers/pinctrl/pinctrl-rockchip.c                 | 1319 ++++++++++++++++++++
- include/dt-bindings/pinctrl/rockchip.h             |   37 +
- include/linux/clk-provider.h                       |   18 +
- include/linux/clk/rockchip.h                       |   21 +
- 28 files changed, 3097 insertions(+), 36 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/pinctrl/rockchip-pinctrl.txt
- create mode 100644 arch/arm/boot/dts/rk3066a-clocks.dtsi
- create mode 100644 arch/arm/boot/dts/rk3066a.dtsi
- create mode 100644 arch/arm/include/debug/rockchip.S
- create mode 100644 arch/arm/mach-rockchip/Kconfig
- create mode 100644 arch/arm/mach-rockchip/Makefile
- create mode 100644 arch/arm/mach-rockchip/Makefile.boot
- create mode 100644 arch/arm/mach-rockchip/rockchip.c
- create mode 100644 drivers/clk/rockchip/Makefile
- create mode 100644 drivers/clk/rockchip/clk-rockchip-pll.c
- create mode 100644 drivers/clk/rockchip/clk-rockchip-pll.h
- create mode 100644 drivers/clk/rockchip/clk-rockchip.c
- create mode 100644 drivers/pinctrl/pinctrl-rockchip.c
- create mode 100644 include/dt-bindings/pinctrl/rockchip.h
- create mode 100644 include/linux/clk/rockchip.h
-
+diff --git a/drivers/clocksource/dw_apb_timer_of.c b/drivers/clocksource/dw_apb_timer_of.c
+index ab09ed3..d6c0fda 100644
+--- a/drivers/clocksource/dw_apb_timer_of.c
++++ b/drivers/clocksource/dw_apb_timer_of.c
+@@ -57,6 +57,9 @@ static void add_clockevent(struct device_node *event_timer)
+ 	dw_apb_clockevent_register(ced);
+ }
+ 
++static void __iomem *sched_io_base;
++static u32 sched_rate;
++
+ static void add_clocksource(struct device_node *source_timer)
+ {
+ 	void __iomem *iobase;
+@@ -71,9 +74,15 @@ static void add_clocksource(struct device_node *source_timer)
+ 
+ 	dw_apb_clocksource_start(cs);
+ 	dw_apb_clocksource_register(cs);
+-}
+ 
+-static void __iomem *sched_io_base;
++	/*
++	 * Fallback to use the clocksource as sched_clock if no separate
++	 * timer is found. sched_io_base then points to the current_value
++	 * register of the clocksource timer.
++	 */
++	sched_io_base = iobase + 0x04;
++	sched_rate = rate;
++}
+ 
+ static u32 read_sched_clock(void)
+ {
+@@ -89,16 +98,15 @@ static const struct of_device_id sptimer_ids[] __initconst = {
+ static void init_sched_clock(void)
+ {
+ 	struct device_node *sched_timer;
+-	u32 rate;
+ 
+ 	sched_timer = of_find_matching_node(NULL, sptimer_ids);
+-	if (!sched_timer)
+-		panic("No RTC for sched clock to use");
+-
+-	timer_get_base_and_rate(sched_timer, &sched_io_base, &rate);
+-	of_node_put(sched_timer);
++	if (sched_timer) {
++		timer_get_base_and_rate(sched_timer, &sched_io_base,
++					&sched_rate);
++		of_node_put(sched_timer);
++	}
+ 
+-	setup_sched_clock(read_sched_clock, 32, rate);
++	setup_sched_clock(read_sched_clock, 32, sched_rate);
+ }
+ 
+ static const struct of_device_id osctimer_ids[] __initconst = {
 -- 
 1.7.2.3
