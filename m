@@ -1,60 +1,76 @@
 From: Oded Gabbay <ogabbay@advaoptical.com>
-Subject: [PATCH 3/3] MMC: FSL SDHC: Add support for hard-wired (permanent) card. Kernel version 3.4.47
-Date: Sun, 2 Jun 2013 09:38:48 +0300
-Message-ID: <1370155128-680-1-git-send-email-ogabbay@advaoptical.com>
+Subject: [PATCH 2/3] MMC: P2020 SDHC: Fix bug when writing to SDHCI_HOST_CONTROL register. Kernel version 3.4.47
+Date: Sun, 2 Jun 2013 09:35:26 +0300
+Message-ID: <1370154926-361-1-git-send-email-ogabbay@advaoptical.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.advaoptical.com ([91.217.199.15]:43167 "EHLO
+Received: from mail.advaoptical.com ([91.217.199.15]:43867 "EHLO
 	mail.advaoptical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751300Ab3FBGjG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 2 Jun 2013 02:39:06 -0400
+	with ESMTP id S1751333Ab3FBGxC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 2 Jun 2013 02:53:02 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: gregkh@linuxfoundation.org, cjb@laptop.org, grant.likely@secretlab.ca, rob@landley.net
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, ogabbay@advaoptical.com
+To: gregkh@linuxfoundation.org, cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ogabbay@advaoptical.com
 
-This patch adds support of recognizing hard-wired (permanent) cards
-to Freescale's SDHC host driver. This is done by adding the option
-"fsl,card-wired" to the SDHC device-tree entry. Detection of this
-option is done in the probe function. Update documentation in file
-fsl-esdhc.txt
+The P2020 has a non-standard implementation of the SDHCI_HOST_CONTROL
+register. This patch adds a QUIRK in the SDHCI header to signal that
+a host controller has a non-standard SDHCI_HOST_CONTROL register. The
+patch adds a check to the function esdhc_writeb in file
+sdhci-of-esdhc.c, where it checks if the write is done to the
+SDHCI_HOST_CONTROL register and th host has the above mentioned QUIRK,
+then the function simply returns instead of writing to the register.
+The patch also detects if the processor is P2020 (by looking in dev
+tree) and if so, adds the QUIRK to the host->quirk2
 
 Signed-off-by: Oded Gabbay <ogabbay@advaoptical.com>
 ---
- Documentation/devicetree/bindings/mmc/fsl-esdhc.txt | 3 +++
- drivers/mmc/host/sdhci-of-esdhc.c                   | 4 ++++
- 2 files changed, 7 insertions(+)
+ drivers/mmc/host/sdhci-of-esdhc.c | 10 ++++++++++
+ include/linux/mmc/sdhci.h         |  2 ++
+ 2 files changed, 12 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-index 64bcb8b..6f0eefa 100644
---- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-+++ b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-@@ -16,6 +16,9 @@ Required properties:
-     only handle 1-bit data transfers.
-   - sdhci,auto-cmd12: (optional) specifies that a controller can
-     only handle auto CMD12.
-+  - fsl,card-wired : (optional) specifies that the card is
-+    a permanent card and should not be detected for insertion or
-+    removal
- 
- Example:
- 
 diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index e70f22f..2f79ec2 100644
+index 6f433b8..e70f22f 100644
 --- a/drivers/mmc/host/sdhci-of-esdhc.c
 +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -222,6 +222,10 @@ static int __devinit sdhci_esdhc_probe(struct platform_device *pdev)
- 		host->quirks2 |= SDHCI_QUIRK2_BROKEN_HOST_CONTROL;
+@@ -82,6 +82,11 @@ static void esdhc_writeb(struct sdhci_host *host, u8 val, int reg)
+ 	if (reg == SDHCI_HOST_CONTROL) {
+ 		u32 dma_bits;
+ 
++		/* If host control register is not standard, exit
++		 * this function */
++		if (host->quirks2 & SDHCI_QUIRK2_BROKEN_HOST_CONTROL)
++			return;
++
+ 		/* DMA select is 22,23 bits in Protocol Control Register */
+ 		dma_bits = (val & SDHCI_CTRL_DMA_MASK) << 5;
+ 		clrsetbits_be32(host->ioaddr + reg , SDHCI_CTRL_DMA_MASK << 5,
+@@ -210,6 +215,11 @@ static int __devinit sdhci_esdhc_probe(struct platform_device *pdev)
+ 	if (of_device_is_compatible(np, "fsl,p2020-esdhc")) {
+ 		/* P2020 has capability of 8 bit bus width */
+ 		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
++
++		/* Freescale messed up with P2020 as it has a non-standard
++		* host control register
++		*/
++		host->quirks2 |= SDHCI_QUIRK2_BROKEN_HOST_CONTROL;
  	}
  
-+	/* If card is permanent, add capability of non-removable */
-+	if (of_get_property(np, "fsl,card-wired", NULL))
-+		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
-+
  	ret = sdhci_add_host(host);
- 	if (ret)
- 		sdhci_pltfm_free(pdev);
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index e9051e1..2742134 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -91,6 +91,8 @@ struct sdhci_host {
+ 	unsigned int quirks2;	/* More deviations from spec. */
+ 
+ #define SDHCI_QUIRK2_HOST_OFF_CARD_ON			(1<<0)
++/* Controller has a non-standard host control register */
++#define SDHCI_QUIRK2_BROKEN_HOST_CONTROL        (1<<1)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
 -- 
 1.7.11.7
 
