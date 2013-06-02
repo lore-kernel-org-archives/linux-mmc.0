@@ -1,39 +1,60 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH V4 2/3] ARM: mmc: bcm281xx SDHCI driver
-Date: Sat, 1 Jun 2013 22:13:47 +0200
-Message-ID: <201306012213.47386.arnd@arndb.de>
-References: <1369860607-25572-1-git-send-email-csd@broadcom.com>
- <87d2s7ceh0.fsf@octavius.laptop.org> <51A93DA0.3070909@broadcom.com>
+From: Oded Gabbay <ogabbay@advaoptical.com>
+Subject: [PATCH 3/3] MMC: FSL SDHC: Add support for hard-wired (permanent) card. Kernel version 3.4.47
+Date: Sun, 2 Jun 2013 09:38:48 +0300
+Message-ID: <1370155128-680-1-git-send-email-ogabbay@advaoptical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <51A93DA0.3070909-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Christian Daudt <csd-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Cc: linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jerry Huang <Chang-Ming.Huang-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Wei WANG <wei_wang-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>, matt.porter-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Kevin Liu <kliu5-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Viresh Kumar <viresh.kumar-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Bill Pemberton <wfp5p-4Ng6DfrEGID2fBVCVOL8/A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Anton Vorontsov <avorontsov-hkdhdckH98+B+jHODAdFcQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.advaoptical.com ([91.217.199.15]:43167 "EHLO
+	mail.advaoptical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751300Ab3FBGjG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 2 Jun 2013 02:39:06 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: gregkh@linuxfoundation.org, cjb@laptop.org, grant.likely@secretlab.ca, rob@landley.net
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, ogabbay@advaoptical.com
 
-On Saturday 01 June 2013, Christian Daudt wrote:
-> I looked into it and it can replace just about everything that our own 
-> dt parsing code is doing. The only problem is with cd_gpio. If I call 
-> mmc_of_parse, then it will install its own irq handler for cd gpio, and 
-> our driver needs a different handler. the mmc irq handler can call a 
-> card_event callback, but that is already pointing to sdhci_card_event. 
-> So the only way I can use mmc_of_parse that I can see is by adding a 
-> flag to it to skip cd_gpio parsing which only this driver will then set 
-> to true. Any other ideas ?
+This patch adds support of recognizing hard-wired (permanent) cards
+to Freescale's SDHC host driver. This is done by adding the option
+"fsl,card-wired" to the SDHC device-tree entry. Detection of this
+option is done in the probe function. Update documentation in file
+fsl-esdhc.txt
 
-Can't you add a callback handler into sdhci_card_event that can call
-a platform specific function?
+Signed-off-by: Oded Gabbay <ogabbay@advaoptical.com>
+---
+ Documentation/devicetree/bindings/mmc/fsl-esdhc.txt | 3 +++
+ drivers/mmc/host/sdhci-of-esdhc.c                   | 4 ++++
+ 2 files changed, 7 insertions(+)
 
-	Arnd
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+index 64bcb8b..6f0eefa 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
++++ b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+@@ -16,6 +16,9 @@ Required properties:
+     only handle 1-bit data transfers.
+   - sdhci,auto-cmd12: (optional) specifies that a controller can
+     only handle auto CMD12.
++  - fsl,card-wired : (optional) specifies that the card is
++    a permanent card and should not be detected for insertion or
++    removal
+ 
+ Example:
+ 
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index e70f22f..2f79ec2 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -222,6 +222,10 @@ static int __devinit sdhci_esdhc_probe(struct platform_device *pdev)
+ 		host->quirks2 |= SDHCI_QUIRK2_BROKEN_HOST_CONTROL;
+ 	}
+ 
++	/* If card is permanent, add capability of non-removable */
++	if (of_get_property(np, "fsl,card-wired", NULL))
++		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
+ 		sdhci_pltfm_free(pdev);
+-- 
+1.7.11.7
+
