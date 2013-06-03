@@ -1,129 +1,102 @@
-From: Heiko =?iso-8859-1?q?St=FCbner?= <heiko@sntech.de>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
 Subject: Re: [PATCH 10/10] arm: add basic support for Rockchip RK3066a boards
-Date: Mon, 3 Jun 2013 10:23:49 +0200
-Message-ID: <201306031023.49364.heiko@sntech.de>
-References: <201306030055.15413.heiko@sntech.de> <201306030102.20890.heiko@sntech.de> <5760087.7O4UgypAot@wuerfel>
+Date: Mon, 03 Jun 2013 11:22:35 +0200
+Message-ID: <9452845.qTGjLPCfXq@wuerfel>
+References: <201306030055.15413.heiko@sntech.de> <5760087.7O4UgypAot@wuerfel>
+ <201306031023.49364.heiko@sntech.de>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:43544 "EHLO gloria.sntech.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751179Ab3FCIYA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 3 Jun 2013 04:24:00 -0400
-In-Reply-To: <5760087.7O4UgypAot@wuerfel>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <201306031023.49364.heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Cc: Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, John Stultz <john.stultz@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Mike Turquette <mturquette@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Linus Walleij <linus.walleij@linaro.org>, devicetree-discuss@lists.ozlabs.org, Russell King <linux@arm.linux.org.uk>, Olof Johansson <olof@lixom.net>
 
-Am Montag, 3. Juni 2013, 04:15:46 schrieb Arnd Bergmann:
-> On Monday 03 June 2013 01:02:20 Heiko St=FCbner wrote:
-> > index 0000000..094b37d
-> > --- /dev/null
-> > +++ b/arch/arm/mach-rockchip/rockchip.c
->=20
-> If all goes well, this file can be removed again in 3.11 since it's
-> all generic, but let's add it for now.
->=20
-> > +
-> > +static void __init rockchip_timer_init(void)
-> > +{
-> > +       rockchip_init_clocks();
-> > +       dw_apb_timer_init();
-> > +}
->=20
-> Can't you use
->=20
-> 	of_clk_init(NULL);
-> 	clocksource_of_init();
->=20
-> here and change the two drivers to provide the respective macros?
+On Monday 03 June 2013 10:23:49 Heiko St=FCbner wrote:
+> Am Montag, 3. Juni 2013, 04:15:46 schrieb Arnd Bergmann:
+> > =
 
-hmm, while this would make a lot of things easier I don't see right now=
- how=20
-this would work.
+> > Can't you use
+> > =
 
-The dw_apb_timer clocksource does not have its own device node, but ins=
-tead=20
-uses two timer devices as clocksource and clockevent.
+> > 	of_clk_init(NULL);
+> > 	clocksource_of_init();
+> > =
 
-Hmm ... one idea would be to wrap them in the dt, like
+> > here and change the two drivers to provide the respective macros?
+> =
 
-	clocksource {
-		compatible =3D "snps,dw-apb-clocksource"
+> hmm, while this would make a lot of things easier I don't see right now h=
+ow =
 
-		timer@2003a000 {
-			compatible =3D "snps,dw-apb-timer-osc";
-			reg =3D <0x2003a000 0x100>;
-			interrupts =3D <GIC_SPI 45 IRQ_TYPE_LEVEL_HIGH>;
-			clocks =3D <&clk_gates1 1>, <&clk_gates7 8>;
-			clock-names =3D "timer", "pclk";
-		};
+> this would work.
+> =
 
-		timer@2000e000 {
-			compatible =3D "snps,dw-apb-timer-osc";
-			reg =3D <0x2000e000 0x100>;
-			interrupts =3D <GIC_SPI 46 IRQ_TYPE_LEVEL_HIGH>;
-			clocks =3D <&clk_gates1 2>, <&clk_gates7 9>;
-			clock-names =3D "timer", "pclk";
-		};
-	};
+> The dw_apb_timer clocksource does not have its own device node, but inste=
+ad =
 
-> > +
-> > +static void __init rockchip_dt_init(void)
-> > +{
-> > +#ifdef CONFIG_CACHE_L2X0
-> > +       l2x0_of_init(0, ~0UL);
-> > +#endif
-> > +       of_platform_populate(NULL, of_default_bus_match_table, NULL=
-,
-> > NULL); +}
->=20
-> We still need to find a common location to call l2x0_of_init.
->=20
-> > +
-> > +static const char * const rockchip_board_dt_compat[] =3D {
-> > +       "rockchip,rk2928", /* single core */
-> > +       "rockchip,rk30xx", /* dual cores */
-> > +       "rockchip,rk31xx", /* dual and quad cores */
-> > +       NULL,
-> > +};
->=20
-> Please use real numbers instead of wildcards: rockchip,rk3066
-> not rockchip,rk30xx.
+> uses two timer devices as clocksource and clockevent.
+> =
 
-ok
+> Hmm ... one idea would be to wrap them in the dt, like
+> =
 
-> > +DT_MACHINE_START(ROCKCHIP_DT, "Rockchip Cortex-A9 (Device Tree)")
-> > +       .map_io         =3D debug_ll_io_init,
-> > +       .init_machine   =3D rockchip_dt_init,
-> > +       .init_time      =3D rockchip_timer_init,
-> > +       .dt_compat      =3D rockchip_board_dt_compat,
-> > +MACHINE_END
->=20
-> The map_io line can already get removed.
+> 	clocksource {
+> 		compatible =3D "snps,dw-apb-clocksource"
+> =
 
-Yesterday I did grep thru the linux-next I was using as base looking fo=
-r the=20
-debug_ll_io_init default I read about but was not able to find it ... m=
-ost=20
-likely my linux-next is a tad to old.
+> 		timer@2003a000 {
+> 			compatible =3D "snps,dw-apb-timer-osc";
+> 			reg =3D <0x2003a000 0x100>;
+> 			interrupts =3D <GIC_SPI 45 IRQ_TYPE_LEVEL_HIGH>;
+> 			clocks =3D <&clk_gates1 1>, <&clk_gates7 8>;
+> 			clock-names =3D "timer", "pclk";
+> 		};
+> =
 
+> 		timer@2000e000 {
+> 			compatible =3D "snps,dw-apb-timer-osc";
+> 			reg =3D <0x2000e000 0x100>;
+> 			interrupts =3D <GIC_SPI 46 IRQ_TYPE_LEVEL_HIGH>;
+> 			clocks =3D <&clk_gates1 2>, <&clk_gates7 9>;
+> 			clock-names =3D "timer", "pclk";
+> 		};
+> 	};
 
-> What about SMP support? Still working on it?
+Can't you just have multiple CLOCKSOURCE_OF_DECLARE() lines, one
+for each of the nodes?
+ =
 
-I haven't even looked into it yet ;-) . But this is one of the next ite=
-ms on=20
-my wishlist ... which also contains making the SoC run at more than 600=
-MHz=20
-(due to the currently read-only pll which starts at this value and need=
-s to be=20
-set)
+> > > +DT_MACHINE_START(ROCKCHIP_DT, "Rockchip Cortex-A9 (Device Tree)")
+> > > +       .map_io         =3D debug_ll_io_init,
+> > > +       .init_machine   =3D rockchip_dt_init,
+> > > +       .init_time      =3D rockchip_timer_init,
+> > > +       .dt_compat      =3D rockchip_board_dt_compat,
+> > > +MACHINE_END
+> > =
 
-Reading the "upstream" kernel code to get the necessary informations do=
-es not=20
-make this easier ;-)
+> > The map_io line can already get removed.
+> =
 
+> Yesterday I did grep thru the linux-next I was using as base looking for =
+the =
 
-Heiko
+> debug_ll_io_init default I read about but was not able to find it ... mos=
+t =
+
+> likely my linux-next is a tad to old.
+
+Yes, it only showed up in today's linux-next. I thought it was older.
+
+	Arnd
