@@ -1,76 +1,65 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 10/10] arm: add basic support for Rockchip RK3066a boards
-Date: Mon, 03 Jun 2013 04:15:46 +0200
-Message-ID: <5760087.7O4UgypAot@wuerfel>
-References: <201306030055.15413.heiko@sntech.de> <201306030102.20890.heiko@sntech.de>
+From: Baruch Siach <baruch@tkos.co.il>
+Subject: Re: [PATCH 02/10] clocksource: dw_apb_timer_of: add clock-handling
+Date: Mon, 3 Jun 2013 06:22:19 +0300
+Message-ID: <20130603032219.GM11798@tarshish>
+References: <201306030055.15413.heiko@sntech.de>
+ <201306030056.37724.heiko@sntech.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:54198 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753050Ab3FCCPp convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 2 Jun 2013 22:15:45 -0400
-In-Reply-To: <201306030102.20890.heiko@sntech.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <201306030056.37724.heiko@sntech.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Heiko =?iso-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mike Turquette <mturquette@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Seungwon Jeon <tgih.jun@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Jaehoon Chung <jh80.chung@samsung.com>, Olof Johansson <olof@lixom.net>, John Stultz <john.stultz@linaro.org>, Grant Likely <grant.likely@linaro.org>, Russell King <linux@arm.linux.org.uk>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, devicetree-discuss@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, John Stultz <john.stultz@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Mike Turquette <mturquette@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Linus Walleij <linus.walleij@linaro.org>, devicetree-discuss@lists.ozlabs.org, Russell King <linux@arm.linux.org.uk>, Olof Johansson <olof@lixom.net>
 
-On Monday 03 June 2013 01:02:20 Heiko St=FCbner wrote:
-> index 0000000..094b37d
-> --- /dev/null
-> +++ b/arch/arm/mach-rockchip/rockchip.c
+Hi Heiko,
 
-If all goes well, this file can be removed again in 3.11 since it's
-all generic, but let's add it for now.
-
+On Mon, Jun 03, 2013 at 12:56:37AM +0200, Heiko St=FCbner wrote:
+> Add the possibility to get the clock-frequency from a timer clock ins=
+tead
+> of specifying it as dt property. Additionally also add the possibilit=
+y
+> to also define a controlling periphal clock for the timer block.
+>=20
+> The clock-frequency property is kept to act as fallback if no clocks
+> are specified.
+>=20
+> Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+> ---
+>  Documentation/devicetree/bindings/rtc/dw-apb.txt |   19 ++++++++++++=
+++++
+>  drivers/clocksource/dw_apb_timer_of.c            |   26 ++++++++++++=
++++++++++-
+>  2 files changed, 44 insertions(+), 1 deletions(-)
+>=20
+> diff --git a/Documentation/devicetree/bindings/rtc/dw-apb.txt b/Docum=
+entation/devicetree/bindings/rtc/dw-apb.txt
+> index 93e2b0f..80ab1c1 100644
+> --- a/Documentation/devicetree/bindings/rtc/dw-apb.txt
+> +++ b/Documentation/devicetree/bindings/rtc/dw-apb.txt
+> @@ -5,9 +5,20 @@ Required properties:
+>  - reg: physical base address of the controller and length of memory =
+mapped
+>    region.
+>  - interrupts: IRQ line for the timer.
+> +- either clocks+clock-names or clock-frequency properties
 > +
-> +static void __init rockchip_timer_init(void)
-> +{
-> +       rockchip_init_clocks();
-> +       dw_apb_timer_init();
-> +}
+> +Optional properties:
+> +- clocks	: list of clock specifiers, corresponding to entries in
+> +		  the clock-names property;
+> +- clock-names	: should contain "timer and "pclk" entries, matching e=
+ntries
 
-Can't you use=20
+Missing closing quotes around "timer".
 
-	of_clk_init(NULL);
-	clocksource_of_init();
+baruch
 
-here and change the two drivers to provide the respective macros?
-
-> +
-> +static void __init rockchip_dt_init(void)
-> +{
-> +#ifdef CONFIG_CACHE_L2X0
-> +       l2x0_of_init(0, ~0UL);
-> +#endif
-> +       of_platform_populate(NULL, of_default_bus_match_table, NULL, =
-NULL);
-> +}
-
-We still need to find a common location to call l2x0_of_init.
-
-> +
-> +static const char * const rockchip_board_dt_compat[] =3D {
-> +       "rockchip,rk2928", /* single core */
-> +       "rockchip,rk30xx", /* dual cores */
-> +       "rockchip,rk31xx", /* dual and quad cores */
-> +       NULL,
-> +};
-
-Please use real numbers instead of wildcards: rockchip,rk3066
-not rockchip,rk30xx.
-
-> +DT_MACHINE_START(ROCKCHIP_DT, "Rockchip Cortex-A9 (Device Tree)")
-> +       .map_io         =3D debug_ll_io_init,
-> +       .init_machine   =3D rockchip_dt_init,
-> +       .init_time      =3D rockchip_timer_init,
-> +       .dt_compat      =3D rockchip_board_dt_compat,
-> +MACHINE_END
-
-The map_io line can already get removed.
-
-What about SMP support? Still working on it?
-
-	Arnd
+--=20
+     http://baruch.siach.name/blog/                  ~. .~   Tk Open Sy=
+stems
+=3D}------------------------------------------------ooO--U--Ooo--------=
+----{=3D
+   - baruch@tkos.co.il - tel: +972.2.679.5364, http://www.tkos.co.il -
