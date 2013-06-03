@@ -1,57 +1,58 @@
-From: =?iso-8859-2?Q?'Micha=B3_Miros=B3aw'?= <mirq-linux@rere.qmqm.pl>
-Subject: Re: [PATCH] mmc: host: use platform_{get,set}_drvdata()
-Date: Mon, 3 Jun 2013 03:38:30 +0200
-Message-ID: <20130603013830.GA14722@rere.qmqm.pl>
-References: <000001ce5e87$284f88e0$78ee9aa0$@samsung.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: arm: add basic support for Rockchip Cortex-A9 SoCs
+Date: Mon, 03 Jun 2013 04:07:37 +0200
+Message-ID: <2754292.oXzDNzH2Zs@wuerfel>
+References: <201306030055.15413.heiko@sntech.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rere.qmqm.pl ([89.167.52.164]:57003 "EHLO rere.qmqm.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755276Ab3FCBrn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 2 Jun 2013 21:47:43 -0400
-Content-Disposition: inline
-In-Reply-To: <000001ce5e87$284f88e0$78ee9aa0$@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <201306030055.15413.heiko@sntech.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Mike Turquette <mturquette@linaro.org>, Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Jaehoon Chung <jh80.chung@samsung.com>, Grant Likely <grant.likely@linaro.org>, John Stultz <john.stultz@linaro.org>, Olof Johansson <olof@lixom.net>, Russell King <linux@arm.linux.org.uk>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, devicetree-discuss@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jingoo Han <jg1.han@samsung.com>
-Cc: 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>
 
-On Sat, Jun 01, 2013 at 02:16:22PM +0900, Jingoo Han wrote:
-> Use the wrapper functions for getting and setting the driver data usi=
-ng
-> platform_device instead of using dev_{get,set}_drvdata() with &pdev->=
-dev,
-> so we can directly pass a struct platform_device.
->=20
-> Signed-off-by: Jingoo Han <jg1.han@samsung.com>
-> ---
->  drivers/mmc/host/cb710-mmc.c      |    2 +-
->  drivers/mmc/host/sh_mobile_sdhi.c |    6 +++---
->  2 files changed, 4 insertions(+), 4 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mm=
-c.c
-> index 777ca20..9d6e2b8 100644
-> --- a/drivers/mmc/host/cb710-mmc.c
-> +++ b/drivers/mmc/host/cb710-mmc.c
-> @@ -703,7 +703,7 @@ static int cb710_mmc_init(struct platform_device =
-*pdev)
->  	if (!mmc)
->  		return -ENOMEM;
-> =20
-> -	dev_set_drvdata(&pdev->dev, mmc);
-> +	platform_set_drvdata(pdev, mmc);
-> =20
->  	/* harmless (maybe) magic */
->  	pci_read_config_dword(chip->pdev, 0x48, &val);
+On Monday 03 June 2013 00:55:15 Heiko St=FCbner wrote:
+> Prepare your eggs and tomatoes please, I got myself a second playground  .
+> =
 
-You missed the counterpart - cb710_slot_to_mmc() in cb710-mmc.h.
-After the fix:
+> As the title implies this series adds basic support for Rockchip's Cortex=
+-A9
+> SoCs, like the RK3066 used in many cheaper tablets.
+> =
 
-Acked-by: Micha=B3 Miros=B3aw <mirq-linux@rere.qmqm.pl>
-[for cb710]
+> On the periphal side it's very lightweight, as it seems someone from Rock=
+chip
+> was shopping in the DesignWare store.
+> =
 
-Best Regards,
-Micha=B3 Miros=B3aw
+> This makes the pinctrl driver the biggest hunk in the series, but to get =
+some
+> bonus points I used the generic_irq implementation for the interrupt hand=
+ling,
+> based on Thomas' irqdomain support series.
+> =
+
+> Supported periphals are, the timers, uarts and mmc controllers, so intere=
+sted
+> parties will need a serial console for now.
+> =
+
+> Hopefully I didn't mess up to much =
+
+
+Great stuff! I have a few small comments for later, but I'm basically fine
+with it going in as-is.
+
+Needs review from the clk and pinctrl maintainers of course.
+
+	Arnd
