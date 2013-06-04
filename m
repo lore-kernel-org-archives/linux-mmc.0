@@ -1,149 +1,71 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 4/4] mmc: core: Initiate suspend|resume from mmc bus
- instead of mmc host
-Date: Tue, 4 Jun 2013 10:34:44 +0200
-Message-ID: <CAPDyKFr_my24oKJGRnQSrub6Nr-vUVu_u+35jrh1csksB7pPag@mail.gmail.com>
-References: <1369918391-15277-1-git-send-email-ulf.hansson@stericsson.com>
-	<1369918391-15277-5-git-send-email-ulf.hansson@stericsson.com>
-	<51AD7B07.6050505@samsung.com>
+From: Heiko =?iso-8859-1?q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: [PATCH 06/10] mmc: dw_mmc-pltfm: add Rockchip variant
+Date: Tue, 4 Jun 2013 10:43:59 +0200
+Message-ID: <201306041044.00128.heiko@sntech.de>
+References: <201306030055.15413.heiko@sntech.de> <201306030059.03783.heiko@sntech.de> <51AD67CF.60300@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f44.google.com ([209.85.212.44]:62559 "EHLO
-	mail-vb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751210Ab3FDIep (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jun 2013 04:34:45 -0400
-Received: by mail-vb0-f44.google.com with SMTP id 11so133887vbf.31
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Jun 2013 01:34:45 -0700 (PDT)
-In-Reply-To: <51AD7B07.6050505@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: Text/Plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <51AD67CF.60300@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mike Turquette <mturquette@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Seungwon Jeon <tgih.jun@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Olof Johansson <olof@lixom.net>, John Stultz <john.stultz@linaro.org>, Grant Likely <grant.likely@linaro.org>, Russell King <linux@arm.linux.org.uk>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, devicetree-discuss@lists.ozlabs.org
+List-Id: linux-mmc@vger.kernel.org
 
-On 4 June 2013 07:28, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Hi Ulf,
->
-> On 05/30/2013 09:53 PM, Ulf Hansson wrote:
->> From: Ulf Hansson <ulf.hansson@linaro.org>
->>
->> The host should be responsible to suspend|resume the host and not the
->> card. This patch changes this behaviour, by moving the responsiblity
->> to the mmc bus instead which already holds the card device.
->>
->> The exported functions mmc_suspend|resume_host are now to be considered
->> as depcrecated. Once all host drivers moves away from using them, we
->> can remove them. As of now, a successful error code is always returned.
->>
->> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->> ---
->>  drivers/mmc/core/bus.c  |   15 ++++++++++++++-
->>  drivers/mmc/core/core.c |   26 +++-----------------------
->>  2 files changed, 17 insertions(+), 24 deletions(-)
->>
->> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
->> index d9e8c2b..2842684 100644
->> --- a/drivers/mmc/core/bus.c
->> +++ b/drivers/mmc/core/bus.c
->> @@ -127,10 +127,16 @@ static int mmc_bus_suspend(struct device *dev)
->>  {
->>       struct mmc_driver *drv = to_mmc_driver(dev->driver);
->>       struct mmc_card *card = mmc_dev_to_card(dev);
->> +     struct mmc_host *host = card->host;
->>       int ret = 0;
->>
->> -     if (dev->driver && drv->suspend)
->> +     if (dev->driver && drv->suspend) {
->>               ret = drv->suspend(card);
->> +             if (ret)
->> +                     return ret;
->> +     }
->> +
->> +     ret = host->bus_ops->suspend(host);
-> Need not to check whether host->bus_ops->suspend is existed or not?
+Am Dienstag, 4. Juni 2013, 06:06:39 schrieb Jaehoon Chung:
+> On 06/03/2013 07:59 AM, Heiko St=FCbner wrote:
+> > Cortex-A9 SoCs from Rockchip use a slightly modified variant of dw_=
+mmc
+> > controllers that seems to require the SDMMC_CMD_USE_HOLD_REG bit to
+> > always be set.
+> >=20
+> > There also seem to be no other modifications (additional register e=
+tc)
+> > present, so to keep the footprint low, add this small variant to th=
+e
+> > pltfm driver.
+> >=20
+> > Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+> > ---
+> >=20
+> >  drivers/mmc/host/dw_mmc-pltfm.c |   48
+> >  +++++++++++++++++++++++++++----------- 1 files changed, 34
+> >  insertions(+), 14 deletions(-)
+> >=20
+> > diff --git a/drivers/mmc/host/dw_mmc-pltfm.c
+> > b/drivers/mmc/host/dw_mmc-pltfm.c index 0048da8..7d041b5 100644
+> > --- a/drivers/mmc/host/dw_mmc-pltfm.c
+> > +++ b/drivers/mmc/host/dw_mmc-pltfm.c
+> > @@ -24,6 +24,16 @@
+> >=20
+> >  #include "dw_mmc.h"
+> >=20
+> > +
+> > +static void dw_mci_rockchip_prepare_command(struct dw_mci *host, u=
+32
+> > *cmdr)
+>=20
+> How about using "dw_mci_pltfm_prepare_command()"?
+> Maybe HOLD_REG could be used at other SoC.
 
-We don't need to check it here.
+The problem I had when thinking about it is that every implementation u=
+sing=20
+the HOLD_REG stuff does it differently ... on the Exynos variant it dep=
+ends on=20
+the CLKSEL register value and on the SOCFPGA variant on other clock val=
+ues.
 
-It is only for those cards that were not removed from the
-mmc_pm_notify function (PM_SUSPEND_PREPARE) that get suspended here.
-And the validation of the bus_ops has then already been done.
+It's only on the Rockchip variant that it seems to needed all the time.
 
->>       return ret;
->>  }
->>
->> @@ -138,10 +144,17 @@ static int mmc_bus_resume(struct device *dev)
->>  {
->>       struct mmc_driver *drv = to_mmc_driver(dev->driver);
->>       struct mmc_card *card = mmc_dev_to_card(dev);
->> +     struct mmc_host *host = card->host;
->>       int ret = 0;
->>
->> +     ret = host->bus_ops->resume(host);
-> Ditto
+So, doing it with a "dw_mci_pltfm_prepare_command()" would need a flag =
+to=20
+signal that the implementation needs the HOLD_REG all the time, but we =
+won't=20
+know yet if other implementations will have other constraints on its us=
+e -=20
+like only i special cases or such.
 
-See comment above. Moreover, in the case were a bus_ops>suspend
-function exist, there also exist an bus_ops->resume function.
-
-
-Kind regards
-Ulf Hansson
-
->
-> Best Regards,
-> Jaehoon Chung
->> +     if (ret)
->> +             pr_warn("%s: error %d during resume (card was removed?)\n",
->> +                     mmc_hostname(host), ret);
->> +
->>       if (dev->driver && drv->resume)
->>               ret = drv->resume(card);
->> +
->>       return ret;
->>  }
->>  #endif
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index da3b907..49a5bca 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -2619,16 +2619,8 @@ EXPORT_SYMBOL(mmc_cache_ctrl);
->>   */
->>  int mmc_suspend_host(struct mmc_host *host)
->>  {
->> -     int err = 0;
->> -
->> -     mmc_bus_get(host);
->> -     if (host->bus_ops && !host->bus_dead) {
->> -             if (host->bus_ops->suspend)
->> -                     err = host->bus_ops->suspend(host);
->> -     }
->> -     mmc_bus_put(host);
->> -
->> -     return err;
->> +     /* This function is deprecated */
->> +     return 0;
->>  }
->>  EXPORT_SYMBOL(mmc_suspend_host);
->>
->> @@ -2638,19 +2630,7 @@ EXPORT_SYMBOL(mmc_suspend_host);
->>   */
->>  int mmc_resume_host(struct mmc_host *host)
->>  {
->> -     int err;
->> -
->> -     mmc_bus_get(host);
->> -     if (host->bus_ops && !host->bus_dead) {
->> -             BUG_ON(!host->bus_ops->resume);
->> -             err = host->bus_ops->resume(host);
->> -             if (err)
->> -                     pr_warning("%s: error %d during resume "
->> -                                         "(card was removed?)\n",
->> -                                         mmc_hostname(host), err);
->> -     }
->> -     mmc_bus_put(host);
->> -
->> +     /* This function is deprecated */
->>       return 0;
->>  }
->>  EXPORT_SYMBOL(mmc_resume_host);
->>
->
+So personally I would keep it as it is for now, until more platforms us=
+ing the=20
+HOLD_REG come along to see some sort of pattern of its use?
