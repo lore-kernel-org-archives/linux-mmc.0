@@ -1,137 +1,38 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 4/4] mmc: core: Initiate suspend|resume from mmc bus
- instead of mmc host
-Date: Tue, 04 Jun 2013 14:28:39 +0900
-Message-ID: <51AD7B07.6050505@samsung.com>
-References: <1369918391-15277-1-git-send-email-ulf.hansson@stericsson.com>
- <1369918391-15277-5-git-send-email-ulf.hansson@stericsson.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 01/10] clocksource: dw_apb_timer_of: use the clocksource
+ as sched clock if necessary
+Date: Tue, 4 Jun 2013 08:34:44 +0200
+Message-ID: <CACRpkdYAvUQ+aymJm1Fw1bE1aGdO7RUqLR9byvoT7ECTk4tkpw@mail.gmail.com>
+References: <201306030055.15413.heiko@sntech.de>
+	<201306030056.03522.heiko@sntech.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:44329 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751803Ab3FDF2Y (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jun 2013 01:28:24 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MNU0057ASJ27Z90@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 04 Jun 2013 14:28:22 +0900 (KST)
-In-reply-to: <1369918391-15277-5-git-send-email-ulf.hansson@stericsson.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <201306030056.03522.heiko@sntech.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, John Stultz <john.stultz@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Mike Turquette <mturquette@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, Russell King <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Hi Ulf,
+On Mon, Jun 3, 2013 at 12:56 AM, Heiko St=FCbner <heiko@sntech.de> wrot=
+e:
 
-On 05/30/2013 09:53 PM, Ulf Hansson wrote:
-> From: Ulf Hansson <ulf.hansson@linaro.org>
-> 
-> The host should be responsible to suspend|resume the host and not the
-> card. This patch changes this behaviour, by moving the responsiblity
-> to the mmc bus instead which already holds the card device.
-> 
-> The exported functions mmc_suspend|resume_host are now to be considered
-> as depcrecated. Once all host drivers moves away from using them, we
-> can remove them. As of now, a successful error code is always returned.
-> 
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/core/bus.c  |   15 ++++++++++++++-
->  drivers/mmc/core/core.c |   26 +++-----------------------
->  2 files changed, 17 insertions(+), 24 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> index d9e8c2b..2842684 100644
-> --- a/drivers/mmc/core/bus.c
-> +++ b/drivers/mmc/core/bus.c
-> @@ -127,10 +127,16 @@ static int mmc_bus_suspend(struct device *dev)
->  {
->  	struct mmc_driver *drv = to_mmc_driver(dev->driver);
->  	struct mmc_card *card = mmc_dev_to_card(dev);
-> +	struct mmc_host *host = card->host;
->  	int ret = 0;
->  
-> -	if (dev->driver && drv->suspend)
-> +	if (dev->driver && drv->suspend) {
->  		ret = drv->suspend(card);
-> +		if (ret)
-> +			return ret;
-> +	}
-> +
-> +	ret = host->bus_ops->suspend(host);
-Need not to check whether host->bus_ops->suspend is existed or not?
->  	return ret;
->  }
->  
-> @@ -138,10 +144,17 @@ static int mmc_bus_resume(struct device *dev)
->  {
->  	struct mmc_driver *drv = to_mmc_driver(dev->driver);
->  	struct mmc_card *card = mmc_dev_to_card(dev);
-> +	struct mmc_host *host = card->host;
->  	int ret = 0;
->  
-> +	ret = host->bus_ops->resume(host);
-Ditto
+> Currently the dw_apb_timer always expects a separate special timer to=
+ be
+> availbable for the sched_clock. Some devices using dw_apb_timers do n=
+ot
+> have the sptimer but can use the clocksource as sched_clock.
+> Therefore this patch adds using the clocksource timer as
+> a fallback if no usable sched timer is found.
+>
+> Signed-off-by: Heiko Stuebner <heiko@sntech.de>
 
-Best Regards,
-Jaehoon Chung
-> +	if (ret)
-> +		pr_warn("%s: error %d during resume (card was removed?)\n",
-> +			mmc_hostname(host), ret);
-> +
->  	if (dev->driver && drv->resume)
->  		ret = drv->resume(card);
-> +
->  	return ret;
->  }
->  #endif
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index da3b907..49a5bca 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2619,16 +2619,8 @@ EXPORT_SYMBOL(mmc_cache_ctrl);
->   */
->  int mmc_suspend_host(struct mmc_host *host)
->  {
-> -	int err = 0;
-> -
-> -	mmc_bus_get(host);
-> -	if (host->bus_ops && !host->bus_dead) {
-> -		if (host->bus_ops->suspend)
-> -			err = host->bus_ops->suspend(host);
-> -	}
-> -	mmc_bus_put(host);
-> -
-> -	return err;
-> +	/* This function is deprecated */
-> +	return 0;
->  }
->  EXPORT_SYMBOL(mmc_suspend_host);
->  
-> @@ -2638,19 +2630,7 @@ EXPORT_SYMBOL(mmc_suspend_host);
->   */
->  int mmc_resume_host(struct mmc_host *host)
->  {
-> -	int err;
-> -
-> -	mmc_bus_get(host);
-> -	if (host->bus_ops && !host->bus_dead) {
-> -		BUG_ON(!host->bus_ops->resume);
-> -		err = host->bus_ops->resume(host);
-> -		if (err)
-> -			pr_warning("%s: error %d during resume "
-> -					    "(card was removed?)\n",
-> -					    mmc_hostname(host), err);
-> -	}
-> -	mmc_bus_put(host);
-> -
-> +	/* This function is deprecated */
->  	return 0;
->  }
->  EXPORT_SYMBOL(mmc_resume_host);
-> 
+Is this really what the patch does? I mean "ass the clocksourse as
+fallback", it seems more like that is controlled from the device tree,
+this looks more like some more careful handling of the device tree
+input making the sched_timer optional, it doesn't really "add"
+anything, does it?
 
+Yours,
+Linus Walleij
