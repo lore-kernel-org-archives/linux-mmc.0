@@ -1,59 +1,59 @@
 From: Linus Walleij <linus.walleij@linaro.org>
 Subject: Re: [PATCH 09/11] mmc: omap_hsmmc: enhance pinctrl support
-Date: Tue, 4 Jun 2013 09:11:00 +0200
-Message-ID: <CACRpkdbiYX5q8rvtV3Xcv7VdiJo2-6rGHNtvB1V=8C_qCpc=JA@mail.gmail.com>
+Date: Tue, 4 Jun 2013 09:19:57 +0200
+Message-ID: <CACRpkdYeh6UXnbUXiiZLPP+FUz11HKaD-FrHHaqUGX8AmA_p6g@mail.gmail.com>
 References: <1369995191-20855-1-git-send-email-gururaja.hebbar@ti.com>
 	<1369995191-20855-10-git-send-email-gururaja.hebbar@ti.com>
+	<CACRpkdbiYX5q8rvtV3Xcv7VdiJo2-6rGHNtvB1V=8C_qCpc=JA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f173.google.com ([209.85.214.173]:64470 "EHLO
-	mail-ob0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759290Ab3FDHLA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jun 2013 03:11:00 -0400
-Received: by mail-ob0-f173.google.com with SMTP id wc20so8869829obb.18
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Jun 2013 00:11:00 -0700 (PDT)
-In-Reply-To: <1369995191-20855-10-git-send-email-gururaja.hebbar@ti.com>
+Received: from mail-ob0-f172.google.com ([209.85.214.172]:38321 "EHLO
+	mail-ob0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759402Ab3FDHT5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jun 2013 03:19:57 -0400
+Received: by mail-ob0-f172.google.com with SMTP id wo10so8894143obc.3
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Jun 2013 00:19:57 -0700 (PDT)
+In-Reply-To: <CACRpkdbiYX5q8rvtV3Xcv7VdiJo2-6rGHNtvB1V=8C_qCpc=JA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Hebbar Gururaja <gururaja.hebbar@ti.com>
 Cc: Kevin Hilman <khilman@linaro.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Vaibhav Bedia <vaibhav.bedia@ti.com>, sudhakar.raj@ti.com, Balaji T K <balajitk@ti.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-OMAP <linux-omap@vger.kernel.org>
 
-On Fri, May 31, 2013 at 12:13 PM, Hebbar Gururaja
-<gururaja.hebbar@ti.com> wrote:
+On Tue, Jun 4, 2013 at 9:11 AM, Linus Walleij <linus.walleij@linaro.org> wrote:
+> On Fri, May 31, 2013 at 12:13 PM, Hebbar Gururaja
+> <gururaja.hebbar@ti.com> wrote:
+>
+>> Amend the hsmmc controller to optionally take a pin control handle and
+>> set the state of the pins to:
+>>
+>> - "default" on boot, resume and before performing a mmc transfer
+>> - "idle" after initial default, after resume default, and after each
+>> mmc/sd card access
+>> - "sleep" on suspend()
+>>
+>> By optionally putting the pins into sleep state in the suspend callback
+>> we can accomplish two things.
+>> - One is to minimize current leakage from pins and thus save power,
+>> - second, we can prevent the IP from driving pins output in an
+>> uncontrolled manner, which may happen if the power domain drops the
+>> domain regulator.
+>>
+>> If any of the above pin states are missing in dt, a warning message
+>> about the missing state is displayed.
+>> If certain pin-states are not available, to remove this warning message
+>> pass respective state name with null phandler.
+>>
+>> Signed-off-by: Hebbar Gururaja <gururaja.hebbar@ti.com>
+>> Cc: Balaji T K <balajitk@ti.com>
+>> Cc: Chris Ball <cjb@laptop.org>
+>> Cc: linux-mmc@vger.kernel.org
+>> Cc: linux-omap@vger.kernel.org
+>
+> This is perfectly correct.
+> Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
-> Amend the hsmmc controller to optionally take a pin control handle and
-> set the state of the pins to:
->
-> - "default" on boot, resume and before performing a mmc transfer
-> - "idle" after initial default, after resume default, and after each
-> mmc/sd card access
-> - "sleep" on suspend()
->
-> By optionally putting the pins into sleep state in the suspend callback
-> we can accomplish two things.
-> - One is to minimize current leakage from pins and thus save power,
-> - second, we can prevent the IP from driving pins output in an
-> uncontrolled manner, which may happen if the power domain drops the
-> domain regulator.
->
-> If any of the above pin states are missing in dt, a warning message
-> about the missing state is displayed.
-> If certain pin-states are not available, to remove this warning message
-> pass respective state name with null phandler.
->
-> Signed-off-by: Hebbar Gururaja <gururaja.hebbar@ti.com>
-> Cc: Balaji T K <balajitk@ti.com>
-> Cc: Chris Ball <cjb@laptop.org>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linux-omap@vger.kernel.org
-
-This is perfectly correct.
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
-
-As the PM code seems to be similar across platforms I have had
-loose plans to move this to the device core as well, but right now
-I'm too busy with other things, and it can surely be refactored later.
+So please consider my other option given in patch 2 instead.
 
 Yours,
 Linus Walleij
