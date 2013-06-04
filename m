@@ -1,117 +1,137 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 06/10] mmc: dw_mmc-pltfm: add Rockchip variant
-Date: Tue, 04 Jun 2013 13:06:39 +0900
-Message-ID: <51AD67CF.60300@samsung.com>
-References: <201306030055.15413.heiko@sntech.de>
- <201306030059.03783.heiko@sntech.de>
+Subject: Re: [PATCH 4/4] mmc: core: Initiate suspend|resume from mmc bus
+ instead of mmc host
+Date: Tue, 04 Jun 2013 14:28:39 +0900
+Message-ID: <51AD7B07.6050505@samsung.com>
+References: <1369918391-15277-1-git-send-email-ulf.hansson@stericsson.com>
+ <1369918391-15277-5-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <201306030059.03783.heiko@sntech.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mike Turquette <mturquette@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Seungwon Jeon <tgih.jun@samsung.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Jaehoon Chung <jh80.chung@samsung.com>, Olof Johansson <olof@lixom.net>, John Stultz <john.stultz@linaro.org>, Grant Likely <grant.likely@linaro.org>, Russell King <linux@arm.linux.org.uk>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, devicetree-discuss@lists.ozlabs.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:44329 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751803Ab3FDF2Y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jun 2013 01:28:24 -0400
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MNU0057ASJ27Z90@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 04 Jun 2013 14:28:22 +0900 (KST)
+In-reply-to: <1369918391-15277-5-git-send-email-ulf.hansson@stericsson.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On 06/03/2013 07:59 AM, Heiko St=FCbner wrote:
-> Cortex-A9 SoCs from Rockchip use a slightly modified variant of dw_mm=
-c
-> controllers that seems to require the SDMMC_CMD_USE_HOLD_REG bit to
-> always be set.
->=20
-> There also seem to be no other modifications (additional register etc=
-)
-> present, so to keep the footprint low, add this small variant to the
-> pltfm driver.
->=20
-> Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+Hi Ulf,
+
+On 05/30/2013 09:53 PM, Ulf Hansson wrote:
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+> 
+> The host should be responsible to suspend|resume the host and not the
+> card. This patch changes this behaviour, by moving the responsiblity
+> to the mmc bus instead which already holds the card device.
+> 
+> The exported functions mmc_suspend|resume_host are now to be considered
+> as depcrecated. Once all host drivers moves away from using them, we
+> can remove them. As of now, a successful error code is always returned.
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 > ---
->  drivers/mmc/host/dw_mmc-pltfm.c |   48 +++++++++++++++++++++++++++--=
----------
->  1 files changed, 34 insertions(+), 14 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mm=
-c-pltfm.c
-> index 0048da8..7d041b5 100644
-> --- a/drivers/mmc/host/dw_mmc-pltfm.c
-> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
-> @@ -24,6 +24,16 @@
-> =20
->  #include "dw_mmc.h"
-> =20
-> +
-> +static void dw_mci_rockchip_prepare_command(struct dw_mci *host, u32=
- *cmdr)
-How about using "dw_mci_pltfm_prepare_command()"?
-Maybe HOLD_REG could be used at other SoC.
-> +{
-> +	*cmdr |=3D SDMMC_CMD_USE_HOLD_REG;
-> +}
-> +
-> +static const struct dw_mci_drv_data rockchip_drv_data =3D {
-> +	.prepare_command	=3D dw_mci_rockchip_prepare_command,
-> +};
-> +
->  int dw_mci_pltfm_register(struct platform_device *pdev,
->  				const struct dw_mci_drv_data *drv_data)
+>  drivers/mmc/core/bus.c  |   15 ++++++++++++++-
+>  drivers/mmc/core/core.c |   26 +++-----------------------
+>  2 files changed, 17 insertions(+), 24 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> index d9e8c2b..2842684 100644
+> --- a/drivers/mmc/core/bus.c
+> +++ b/drivers/mmc/core/bus.c
+> @@ -127,10 +127,16 @@ static int mmc_bus_suspend(struct device *dev)
 >  {
-> @@ -63,20 +73,6 @@ int dw_mci_pltfm_register(struct platform_device *=
-pdev,
->  }
->  EXPORT_SYMBOL_GPL(dw_mci_pltfm_register);
-> =20
-> -static int dw_mci_pltfm_probe(struct platform_device *pdev)
-> -{
-> -	return dw_mci_pltfm_register(pdev, NULL);
-> -}
-> -
-> -int dw_mci_pltfm_remove(struct platform_device *pdev)
-> -{
-> -	struct dw_mci *host =3D platform_get_drvdata(pdev);
-> -
-> -	dw_mci_remove(host);
-> -	return 0;
-> -}
-> -EXPORT_SYMBOL_GPL(dw_mci_pltfm_remove);
-> -
->  #ifdef CONFIG_PM_SLEEP
->  /*
->   * TODO: we should probably disable the clock to the card in the sus=
-pend path.
-> @@ -114,10 +110,34 @@ EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
-> =20
->  static const struct of_device_id dw_mci_pltfm_match[] =3D {
->  	{ .compatible =3D "snps,dw-mshc", },
-> +	{ .compatible =3D "rockchip,cortex-a9-dw-mshc",
-> +		.data =3D &rockchip_drv_data },
->  	{},
->  };
->  MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
-> =20
-> +static int dw_mci_pltfm_probe(struct platform_device *pdev)
-> +{
-> +	const struct dw_mci_drv_data *drv_data =3D NULL;
-> +	const struct of_device_id *match;
-> +
-> +	if (pdev->dev.of_node) {
-> +		match =3D of_match_node(dw_mci_pltfm_match, pdev->dev.of_node);
-> +		drv_data =3D match->data;
+>  	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+>  	struct mmc_card *card = mmc_dev_to_card(dev);
+> +	struct mmc_host *host = card->host;
+>  	int ret = 0;
+>  
+> -	if (dev->driver && drv->suspend)
+> +	if (dev->driver && drv->suspend) {
+>  		ret = drv->suspend(card);
+> +		if (ret)
+> +			return ret;
 > +	}
 > +
-> +	return dw_mci_pltfm_register(pdev, drv_data);
-> +}
+> +	ret = host->bus_ops->suspend(host);
+Need not to check whether host->bus_ops->suspend is existed or not?
+>  	return ret;
+>  }
+>  
+> @@ -138,10 +144,17 @@ static int mmc_bus_resume(struct device *dev)
+>  {
+>  	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+>  	struct mmc_card *card = mmc_dev_to_card(dev);
+> +	struct mmc_host *host = card->host;
+>  	int ret = 0;
+>  
+> +	ret = host->bus_ops->resume(host);
+Ditto
+
+Best Regards,
+Jaehoon Chung
+> +	if (ret)
+> +		pr_warn("%s: error %d during resume (card was removed?)\n",
+> +			mmc_hostname(host), ret);
 > +
-> +int dw_mci_pltfm_remove(struct platform_device *pdev)
-> +{
-> +	struct dw_mci *host =3D platform_get_drvdata(pdev);
+>  	if (dev->driver && drv->resume)
+>  		ret = drv->resume(card);
 > +
-> +	dw_mci_remove(host);
+>  	return ret;
+>  }
+>  #endif
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index da3b907..49a5bca 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2619,16 +2619,8 @@ EXPORT_SYMBOL(mmc_cache_ctrl);
+>   */
+>  int mmc_suspend_host(struct mmc_host *host)
+>  {
+> -	int err = 0;
+> -
+> -	mmc_bus_get(host);
+> -	if (host->bus_ops && !host->bus_dead) {
+> -		if (host->bus_ops->suspend)
+> -			err = host->bus_ops->suspend(host);
+> -	}
+> -	mmc_bus_put(host);
+> -
+> -	return err;
+> +	/* This function is deprecated */
 > +	return 0;
-> +}
-> +EXPORT_SYMBOL_GPL(dw_mci_pltfm_remove);
-> +
->  static struct platform_driver dw_mci_pltfm_driver =3D {
->  	.probe		=3D dw_mci_pltfm_probe,
->  	.remove		=3D dw_mci_pltfm_remove,
->=20
+>  }
+>  EXPORT_SYMBOL(mmc_suspend_host);
+>  
+> @@ -2638,19 +2630,7 @@ EXPORT_SYMBOL(mmc_suspend_host);
+>   */
+>  int mmc_resume_host(struct mmc_host *host)
+>  {
+> -	int err;
+> -
+> -	mmc_bus_get(host);
+> -	if (host->bus_ops && !host->bus_dead) {
+> -		BUG_ON(!host->bus_ops->resume);
+> -		err = host->bus_ops->resume(host);
+> -		if (err)
+> -			pr_warning("%s: error %d during resume "
+> -					    "(card was removed?)\n",
+> -					    mmc_hostname(host), err);
+> -	}
+> -	mmc_bus_put(host);
+> -
+> +	/* This function is deprecated */
+>  	return 0;
+>  }
+>  EXPORT_SYMBOL(mmc_resume_host);
+> 
+
