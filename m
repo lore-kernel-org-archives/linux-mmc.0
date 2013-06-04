@@ -1,59 +1,55 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 09/11] mmc: omap_hsmmc: enhance pinctrl support
-Date: Tue, 4 Jun 2013 09:19:57 +0200
-Message-ID: <CACRpkdYeh6UXnbUXiiZLPP+FUz11HKaD-FrHHaqUGX8AmA_p6g@mail.gmail.com>
-References: <1369995191-20855-1-git-send-email-gururaja.hebbar@ti.com>
-	<1369995191-20855-10-git-send-email-gururaja.hebbar@ti.com>
-	<CACRpkdbiYX5q8rvtV3Xcv7VdiJo2-6rGHNtvB1V=8C_qCpc=JA@mail.gmail.com>
+From: Heiko =?iso-8859-1?q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: [PATCH 01/10] clocksource: dw_apb_timer_of: use the clocksource as sched clock if necessary
+Date: Tue, 4 Jun 2013 10:29:38 +0200
+Message-ID: <201306041029.39053.heiko@sntech.de>
+References: <201306030055.15413.heiko@sntech.de> <201306030056.03522.heiko@sntech.de> <CACRpkdYAvUQ+aymJm1Fw1bE1aGdO7RUqLR9byvoT7ECTk4tkpw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: Text/Plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f172.google.com ([209.85.214.172]:38321 "EHLO
-	mail-ob0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759402Ab3FDHT5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jun 2013 03:19:57 -0400
-Received: by mail-ob0-f172.google.com with SMTP id wo10so8894143obc.3
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Jun 2013 00:19:57 -0700 (PDT)
-In-Reply-To: <CACRpkdbiYX5q8rvtV3Xcv7VdiJo2-6rGHNtvB1V=8C_qCpc=JA@mail.gmail.com>
+Received: from gloria.sntech.de ([95.129.55.99]:56805 "EHLO gloria.sntech.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750982Ab3FDI3u (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 4 Jun 2013 04:29:50 -0400
+In-Reply-To: <CACRpkdYAvUQ+aymJm1Fw1bE1aGdO7RUqLR9byvoT7ECTk4tkpw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hebbar Gururaja <gururaja.hebbar@ti.com>
-Cc: Kevin Hilman <khilman@linaro.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Vaibhav Bedia <vaibhav.bedia@ti.com>, sudhakar.raj@ti.com, Balaji T K <balajitk@ti.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-OMAP <linux-omap@vger.kernel.org>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, John Stultz <john.stultz@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Mike Turquette <mturquette@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, Russell King <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>
 
-On Tue, Jun 4, 2013 at 9:11 AM, Linus Walleij <linus.walleij@linaro.org> wrote:
-> On Fri, May 31, 2013 at 12:13 PM, Hebbar Gururaja
-> <gururaja.hebbar@ti.com> wrote:
->
->> Amend the hsmmc controller to optionally take a pin control handle and
->> set the state of the pins to:
->>
->> - "default" on boot, resume and before performing a mmc transfer
->> - "idle" after initial default, after resume default, and after each
->> mmc/sd card access
->> - "sleep" on suspend()
->>
->> By optionally putting the pins into sleep state in the suspend callback
->> we can accomplish two things.
->> - One is to minimize current leakage from pins and thus save power,
->> - second, we can prevent the IP from driving pins output in an
->> uncontrolled manner, which may happen if the power domain drops the
->> domain regulator.
->>
->> If any of the above pin states are missing in dt, a warning message
->> about the missing state is displayed.
->> If certain pin-states are not available, to remove this warning message
->> pass respective state name with null phandler.
->>
->> Signed-off-by: Hebbar Gururaja <gururaja.hebbar@ti.com>
->> Cc: Balaji T K <balajitk@ti.com>
->> Cc: Chris Ball <cjb@laptop.org>
->> Cc: linux-mmc@vger.kernel.org
->> Cc: linux-omap@vger.kernel.org
->
-> This is perfectly correct.
-> Acked-by: Linus Walleij <linus.walleij@linaro.org>
+Am Dienstag, 4. Juni 2013, 08:34:44 schrieb Linus Walleij:
+> On Mon, Jun 3, 2013 at 12:56 AM, Heiko St=FCbner <heiko@sntech.de> wr=
+ote:
+> > Currently the dw_apb_timer always expects a separate special timer =
+to be
+> > availbable for the sched_clock. Some devices using dw_apb_timers do=
+ not
+> > have the sptimer but can use the clocksource as sched_clock.
+> > Therefore this patch adds using the clocksource timer as
+> > a fallback if no usable sched timer is found.
+> >=20
+> > Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+>=20
+> Is this really what the patch does? I mean "ass the clocksourse as
+> fallback", it seems more like that is controlled from the device tree=
+,
+> this looks more like some more careful handling of the device tree
+> input making the sched_timer optional, it doesn't really "add"
+> anything, does it?
 
-So please consider my other option given in patch 2 instead.
+Right, the commit message is probably based a bit to much on the before=
+-state=20
+of the driver, always expecting the "sptimer" and panicing if not found=
+=2E
 
-Yours,
-Linus Walleij
+How about:
+
+Currently the dw_apb_timer always expects a separate special timer to b=
+e
+availbable for the sched_clock. Some devices using dw_apb_timers do not
+have this sptimer but can use the clocksource as sched_clock instead.
+
+Therefore enable the driver to distiguish between devices with and with=
+out
+sptimer based on the devicetree data and select the correct timer as
+sched_clock.
