@@ -1,59 +1,38 @@
-From: Heiko =?iso-8859-1?q?St=FCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 07/10] pinctrl: add pinctrl driver for Rockchip SoCs
-Date: Wed, 5 Jun 2013 20:50:00 +0200
-Message-ID: <201306052050.00410.heiko@sntech.de>
-References: <201306030055.15413.heiko@sntech.de>
- <CACRpkdZty-TszfBTOab4_PUi8dy5DYim=wNERv=pyqC3HNuT4w@mail.gmail.com>
- <51AF72F9.3060307@wwwdotorg.org>
+From: Pavel Machek <pavel@denx.de>
+Subject: Re: [PATCHv6 6/6] mmc: dw_mmc: Add support DW SD/MMC driver on
+ SOCFPGA
+Date: Wed, 5 Jun 2013 22:31:25 +0200
+Message-ID: <20130605203125.GB19905@amd.pavel.ucw.cz>
+References: <1370444578-25721-1-git-send-email-dinguyen@altera.com>
+ <1370444578-25721-7-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <51AF72F9.3060307-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Cc: Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:49481 "EHLO
+	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932065Ab3FEUb2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jun 2013 16:31:28 -0400
+Content-Disposition: inline
+In-Reply-To: <1370444578-25721-7-git-send-email-dinguyen@altera.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: dinguyen@altera.com
+Cc: linux-arm-kernel@lists.infradead.org, dinh.linux@gmail.com, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, linux-mmc@vger.kernel.org
 
-Am Mittwoch, 5. Juni 2013, 19:18:49 schrieb Stephen Warren:
-> On 06/05/2013 01:01 AM, Linus Walleij wrote:
-> > On Tue, Jun 4, 2013 at 2:05 PM, Heiko St=FCbner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org> wrote:
-> ...
-> =
+Hi!
 
-> >> The only problem is the pull stuff mentioned above that is either pull
-> >> up or down without the driver having knowledge about it. And
-> >> generic_pinconf only knows about them separately right now.
-> > =
+> From: Dinh Nguyen <dinguyen@altera.com>
+> 
+> Add platform specific functionality for the DW SD/MMC driver for
+> SoCFPGA. Move SDMMC_CMD_USE_HOLD_REG to dw_mmc.h so other platforms
+> can use this define.
+> 
+> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
 
-> > Create a separate patch adding PIN_CONFIG_BIAS_PULL_AUTO
-> > to include/linux/pinctrl/pinconf-generic.h, don't forget the
-> > kerneldoc, and patching drivers/pinctrl/pinconf-generic.c.
-> =
+Reviewed-by: Pavel Machek <pavel@denx.de>
 
-> "AUTO" sounds really rather generic. Based on just the word "AUTO", I
-> have no idea if it's a HW- or SW-supplied default, or what the algorithm
-> is for determining the automatically selected value. Perhaps
-> s/AUTO/PIN_DEFAULT/ or something like that?
-
-I would also go with PIN_DEFAULT, which somehow captures what the function =
-
-does better than "AUTO". So, if no-one objects I'll go with Stephen's =
-
-suggestion.
-
-
-> While the concept is simple enough, it's unusual enough that such a
-> patch would hopefully have a comment containing a full explanation of
-> exactly what this option means.
-
-of course :-)
+Thanks!
+									Pavel
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
