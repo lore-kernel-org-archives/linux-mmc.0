@@ -1,38 +1,45 @@
-From: Pavel Machek <pavel@denx.de>
-Subject: Re: [PATCHv6 6/6] mmc: dw_mmc: Add support DW SD/MMC driver on
- SOCFPGA
-Date: Wed, 5 Jun 2013 22:31:25 +0200
-Message-ID: <20130605203125.GB19905@amd.pavel.ucw.cz>
-References: <1370444578-25721-1-git-send-email-dinguyen@altera.com>
- <1370444578-25721-7-git-send-email-dinguyen@altera.com>
+From: Maxime Ripard <maxime.ripard@free-electrons.com>
+Subject: Re: [PATCH 10/10] arm: add basic support for Rockchip RK3066a boards
+Date: Wed, 5 Jun 2013 23:45:06 +0200
+Message-ID: <20130605214506.GC14209@lukather>
+References: <201306030055.15413.heiko@sntech.de>
+ <201306030102.20890.heiko@sntech.de>
+ <20130605091119.18432af4@skate>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:49481 "EHLO
-	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932065Ab3FEUb2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jun 2013 16:31:28 -0400
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1370444578-25721-7-git-send-email-dinguyen@altera.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <20130605091119.18432af4@skate>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Cc: Heiko =?iso-8859-1?Q?St=FCbner?= <heiko@sntech.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mike Turquette <mturquette@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Jaehoon Chung <jh80.chung@samsung.com>, John Stultz <john.stultz@linaro.org>, Grant Likely <grant.likely@linaro.org>, Russell King <linux@arm.linux.org.uk>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, devicetree-discuss@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com
-Cc: linux-arm-kernel@lists.infradead.org, dinh.linux@gmail.com, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, linux-mmc@vger.kernel.org
 
-Hi!
+Hi Thomas,
 
-> From: Dinh Nguyen <dinguyen@altera.com>
-> 
-> Add platform specific functionality for the DW SD/MMC driver for
-> SoCFPGA. Move SDMMC_CMD_USE_HOLD_REG to dw_mmc.h so other platforms
-> can use this define.
-> 
-> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+On Wed, Jun 05, 2013 at 09:11:19AM +0200, Thomas Petazzoni wrote:
+> Dear Heiko St=FCbner,
+>=20
+> On Mon, 3 Jun 2013 01:02:20 +0200, Heiko St=FCbner wrote:
+> > index 0000000..a2d8c70
+> > --- /dev/null
+> > +++ b/arch/arm/mach-rockchip/Makefile.boot
+> > @@ -0,0 +1,3 @@
+> > +zreladdr-$(CONFIG_ARCH_ROCKCHIP)	:=3D 0x60408000
+> > +params_phys-$(CONFIG_ARCH_ROCKCHIP)	:=3D 0x60088000
+> > +initrd_phys-$(CONFIG_ARCH_ROCKCHIP)	:=3D 0x60800000
+>=20
+> Thanks to the AUTO_ZRELADDR thing that you're using as part of the
+> MULTIPLATFORM support, this Makefile.boot file is no longer useful. S=
+ee
+> mach-socfpga, mach-mvebu, mach-bcm2835, mach-bcm, mach-highbank, etc.
+>=20
+> Cc'ing Maxime Ripard, since I see that mach-sunxi does have a
+> Makefile.boot, even though I believe it is not needed.
 
-Reviewed-by: Pavel Machek <pavel@denx.de>
+Yes, it is a left-over and should be removed obviously.
 
-Thanks!
-									Pavel
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+Thanks for reminding it to me :)
+
+Maxime
