@@ -1,54 +1,42 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH] mmc: atmel-mci: remove include <mach/cpu.h>
-Date: Wed, 5 Jun 2013 11:42:25 +0200
-Message-ID: <33387.3594565832$1370425373@news.gmane.org>
-References: <1365511500-13778-1-git-send-email-nicolas.ferre@atmel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1365511500-13778-1-git-send-email-nicolas.ferre@atmel.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ludovic.desroches@atmel.com, cjb@laptop.org, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, linux-arm-kernel@lists.infradead.org
+From: Yaniv Gardi <ygardi@codeaurora.org>
+Subject: [PATCH v1] mmc: card: fixing an false identification of SANITIZE command
+Date: Wed,  5 Jun 2013 14:13:08 +0300
+Message-ID: <1370430804-5663-1-git-send-email-ygardi@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, ygardi@codeaurora.org, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Apr 09, 2013 at 02:45:00PM +0200, Nicolas Ferre wrote:
-> Header file not needed anymore as we have removed
-> the calls to cpu_is_xxx() macro.
-> 
-> Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+Inside the routine mmc_blk_ioctl_cmd() the sanitize command is
+identified according to the value of bits 16-23 of the argument.
 
-Late but of course:
+but what happens if a different command is sent, and only by chance,
+bits 16-23 contain the value of SANITIZE command ?
+In that case a SANITIZE command will be falsely identified.
+In order to prevent such a case, the condition is expanded and
+now it also checks the opcode itself, and verifies that it is an
+MMC_SWITCH opcode.
 
-Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
+---
+ drivers/mmc/card/block.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
 
-> ---
->  drivers/mmc/host/atmel-mci.c | 2 --
->  1 file changed, 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index e75774f..08e2b92 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -40,8 +40,6 @@
->  #include <asm/io.h>
->  #include <asm/unaligned.h>
->  
-> -#include <mach/cpu.h>
-> -
->  #include "atmel-mci-regs.h"
->  
->  #define ATMCI_DATA_ERROR_FLAGS	(ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
-> -- 
-> 1.8.0
-> 
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index c900d28..9775ae7 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -542,7 +542,9 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 			goto cmd_rel_host;
+ 	}
+ 
+-	if (MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_SANITIZE_START) {
++	if ((MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_SANITIZE_START) &&
++	     (cmd.opcode == MMC_SWITCH)) {
++
+ 		err = ioctl_do_sanitize(card);
+ 
+ 		if (err)
+-- 
+1.7.6
