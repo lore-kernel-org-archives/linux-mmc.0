@@ -1,68 +1,58 @@
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v9 1/9] ARM: davinci: move private EDMA API to arm/common
-Date: Wed, 5 Jun 2013 14:24:38 +0530
-Message-ID: <51AEFCCE.4040608@ti.com>
-References: <1362586540-10393-1-git-send-email-mporter@ti.com>
-	<1362586540-10393-2-git-send-email-mporter@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <1362586540-10393-2-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm->
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Subject: [PATCH 1/3] mmc: dw: don't check resource with devm_ioremap_resource
+Date: Wed,  5 Jun 2013 12:24:10 +0300
+Message-ID: <1370424252-31562-1-git-send-email-andriy.shevchenko@linux.intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([143.182.124.37]:15377 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753552Ab3FEJYT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 5 Jun 2013 05:24:19 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-Hi Russell,
+devm_ioremap_resource does sanity checks on the given resource. No need to
+duplicate this in the driver.
 
-On 3/6/2013 9:45 PM, Matt Porter wrote:
-> Move mach-davinci/dma.c to common/edma.c so it can be used
-> by OMAP (specifically AM33xx) as well.
-> 
-> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-> Acked-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+---
+ drivers/mmc/host/dw_mmc-pltfm.c | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
 
-Can you please ack this movement of davinci private EDMA implementation
-to arch/arm/common? I would like to take this patch through davinci tree
-for v3.11.
+diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+index 37873f1..526abae 100644
+--- a/drivers/mmc/host/dw_mmc-pltfm.c
++++ b/drivers/mmc/host/dw_mmc-pltfm.c
+@@ -25,7 +25,7 @@
+ #include "dw_mmc.h"
+ 
+ int dw_mci_pltfm_register(struct platform_device *pdev,
+-				const struct dw_mci_drv_data *drv_data)
++			  const struct dw_mci_drv_data *drv_data)
+ {
+ 	struct dw_mci *host;
+ 	struct resource	*regs;
+@@ -35,10 +35,6 @@ int dw_mci_pltfm_register(struct platform_device *pdev,
+ 	if (!host)
+ 		return -ENOMEM;
+ 
+-	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	if (!regs)
+-		return -ENXIO;
+-
+ 	host->irq = platform_get_irq(pdev, 0);
+ 	if (host->irq < 0)
+ 		return host->irq;
+@@ -47,6 +43,8 @@ int dw_mci_pltfm_register(struct platform_device *pdev,
+ 	host->dev = &pdev->dev;
+ 	host->irq_flags = 0;
+ 	host->pdata = pdev->dev.platform_data;
++
++	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	host->regs = devm_ioremap_resource(&pdev->dev, regs);
+ 	if (IS_ERR(host->regs))
+ 		return PTR_ERR(host->regs);
+-- 
+1.8.2.rc0.22.gb3600c3
 
-Thanks,
-Sekhar
-
-> ---
->  arch/arm/Kconfig                                   |    1 +
->  arch/arm/common/Kconfig                            |    3 +
->  arch/arm/common/Makefile                           |    1 +
->  arch/arm/{mach-davinci/dma.c => common/edma.c}     |    2 +-
->  arch/arm/mach-davinci/Makefile                     |    2 +-
->  arch/arm/mach-davinci/board-tnetv107x-evm.c        |    2 +-
->  arch/arm/mach-davinci/davinci.h                    |    2 +-
->  arch/arm/mach-davinci/devices-tnetv107x.c          |    2 +-
->  arch/arm/mach-davinci/devices.c                    |    6 +-
->  arch/arm/mach-davinci/dm355.c                      |    2 +-
->  arch/arm/mach-davinci/dm365.c                      |    2 +-
->  arch/arm/mach-davinci/dm644x.c                     |    2 +-
->  arch/arm/mach-davinci/dm646x.c                     |    2 +-
->  arch/arm/mach-davinci/include/mach/da8xx.h         |    2 +-
->  drivers/dma/edma.c                                 |    2 +-
->  drivers/mmc/host/davinci_mmc.c                     |    1 +
->  include/linux/mfd/davinci_voicecodec.h             |    3 +-
->  .../mach => include/linux/platform_data}/edma.h    |   89 +-------------------
->  include/linux/platform_data/spi-davinci.h          |    2 +-
->  sound/soc/davinci/davinci-evm.c                    |    1 +
->  sound/soc/davinci/davinci-pcm.c                    |    1 +
->  sound/soc/davinci/davinci-pcm.h                    |    2 +-
->  sound/soc/davinci/davinci-sffsdr.c                 |    5 +-
->  23 files changed, 33 insertions(+), 104 deletions(-)
->  rename arch/arm/{mach-davinci/dma.c => common/edma.c} (99%)
->  rename {arch/arm/mach-davinci/include/mach => include/linux/platform_data}/edma.h (59%)
-> 
