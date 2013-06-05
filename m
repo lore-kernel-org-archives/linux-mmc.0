@@ -1,44 +1,79 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: Re: [PATCH 1/3] mmc: dw: don't check resource with
- devm_ioremap_resource
-Date: Wed, 05 Jun 2013 17:14:19 +0300
-Message-ID: <1370441659.29283.295.camel@smile>
-References: <1370424252-31562-1-git-send-email-andriy.shevchenko@linux.intel.com>
-	 <001701ce61f5$220667d0$66133770$%jun@samsung.com>
+From: Lucas Stach <l.stach@pengutronix.de>
+Subject: Re: [PATCH 1/3] mmc: sdhci-esdhc-imx: Fix version register read
+Date: Wed, 05 Jun 2013 16:12:42 +0200
+Message-ID: <1370441562.4279.9.camel@weser.hi.pengutronix.de>
+References: <1370438006-13093-1-git-send-email-l.stach@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:36641 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754007Ab3FEOOY convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jun 2013 10:14:24 -0400
-In-Reply-To: <001701ce61f5$220667d0$66133770$%jun@samsung.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:38922 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752441Ab3FEOOq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jun 2013 10:14:46 -0400
+In-Reply-To: <1370438006-13093-1-git-send-email-l.stach@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, kernel@pengutronix.de
 
-On Wed, 2013-06-05 at 23:01 +0900, Seungwon Jeon wrote: 
-> On 06/05/13 6:24 PM, Andy Shevchenko wrote:
-> > devm_ioremap_resource does sanity checks on the given resource. No need to
-> > duplicate this in the driver.
-> > 
-> > Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Please disregard this patch. I just realized that this was already sent
+out and the current upstream behavior is the result of discussion
+regarding this patch.
+
+Am Mittwoch, den 05.06.2013, 15:13 +0200 schrieb Lucas Stach:
+> From: Sascha Hauer <s.hauer@pengutronix.de>
 > 
-> Looks good to me.
-> 'dw_mmc'(instead of 'dw') as a prefix of subject is expected with other patches, though.
-> Specially, dw_mmc-pci is for PATCH 3/3.
-
-Shall I resubmit patches?
-I think no-one can mess up with this, because we fortunately have only
-one mmc designware driver there.
-
-
-> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
-
-Thanks for review.
+> The i.MX ESDHC controller version register is a mess:
+> 
+> - i.MX25 has a v1 controller which identifies itself as v2
+> - i.MX6Q has a v3 controller which identifies itself as v4
+> - i.MX35,51,53 have v2 controllers which identify themselves correctly
+> 
+> Additionally on i.MX the register is located at offset 0xfc instead of
+> 0xfe. The i.MX6 had a quirk around it which converted v4 into v3. Instead
+> of reading the real version register, all other SoCs used to return
+> the value from 0xfe which contains 0x0 for all SoCs, so all controllers
+> except i.MX6q were identified as version v1.
+> 
+> This patch fixes this by returning the version based on the devtype
+> data leaving the useless version register untouched.
+> 
+> Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+> Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 14 ++++++++------
+>  1 file changed, 8 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index c9317ed..8f0d8c7 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -258,12 +258,14 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+>  	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+>  
+>  	if (unlikely(reg == SDHCI_HOST_VERSION)) {
+> -		reg ^= 2;
+> -		if (is_imx6q_usdhc(imx_data)) {
+> -			/*
+> -			 * The usdhc register returns a wrong host version.
+> -			 * Correct it here.
+> -			 */
+> +		switch (imx_data->devtype) {
+> +		case IMX25_ESDHC:
+> +			return SDHCI_SPEC_100;
+> +		case IMX35_ESDHC:
+> +		case IMX51_ESDHC:
+> +		case IMX53_ESDHC:
+> +			return SDHCI_SPEC_200;
+> +		case IMX6Q_USDHC:
+>  			return SDHCI_SPEC_300;
+>  		}
+>  	}
 
 -- 
-Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Intel Finland Oy
+Pengutronix e.K.                           | Lucas Stach                 |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-5076 |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+
