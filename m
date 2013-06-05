@@ -1,84 +1,39 @@
-From: Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: RE: [PATCH 06/10] mmc: dw_mmc-pltfm: add Rockchip variant
-Date: Wed, 05 Jun 2013 23:00:43 +0900
-Message-ID: <001601ce61f5$11b37b20$351a7160$%jun@samsung.com>
-References: <201306030055.15413.heiko@sntech.de>
- <201306030059.03783.heiko@sntech.de>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH 1/3] mmc: dw: don't check resource with
+ devm_ioremap_resource
+Date: Wed, 05 Jun 2013 23:01:10 +0900
+Message-ID: <001701ce61f5$220667d0$66133770$%jun@samsung.com>
+References: <1370424252-31562-1-git-send-email-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-reply-to: <201306030059.03783.heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:61672 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751803Ab3FEOBM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jun 2013 10:01:12 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MNX00H8DAXZSSW0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 05 Jun 2013 23:01:11 +0900 (KST)
+In-reply-to: <1370424252-31562-1-git-send-email-andriy.shevchenko@linux.intel.com>
 Content-language: ko
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: =?utf-8?Q?'Heiko_St=C3=BCbner'?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: 'Mike Turquette' <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, 'Rob Herring' <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, 'Jaehoon Chung' <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, 'John Stultz' <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, 'Grant Likely' <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, 'Russell King' <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, 'Thomas Gleixner' <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, 'Chris Ball' <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Andy Shevchenko' <andriy.shevchenko@linux.intel.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-T24gMDYvMDMvMTMgNzo1OSBBTSwgSGVpa28gU3TDvGJuZXIgd3JvdGU6Cj4gQ29ydGV4LUE5IFNv
-Q3MgZnJvbSBSb2NrY2hpcCB1c2UgYSBzbGlnaHRseSBtb2RpZmllZCB2YXJpYW50IG9mIGR3X21t
-Ywo+IGNvbnRyb2xsZXJzIHRoYXQgc2VlbXMgdG8gcmVxdWlyZSB0aGUgU0RNTUNfQ01EX1VTRV9I
-T0xEX1JFRyBiaXQgdG8KPiBhbHdheXMgYmUgc2V0Lgo+IAo+IFRoZXJlIGFsc28gc2VlbSB0byBi
-ZSBubyBvdGhlciBtb2RpZmljYXRpb25zIChhZGRpdGlvbmFsIHJlZ2lzdGVyIGV0YykKPiBwcmVz
-ZW50LCBzbyB0byBrZWVwIHRoZSBmb290cHJpbnQgbG93LCBhZGQgdGhpcyBzbWFsbCB2YXJpYW50
-IHRvIHRoZQo+IHBsdGZtIGRyaXZlci4KPiAKPiBTaWduZWQtb2ZmLWJ5OiBIZWlrbyBTdHVlYm5l
-ciA8aGVpa29Ac250ZWNoLmRlPgo+IC0tLQo+ICBkcml2ZXJzL21tYy9ob3N0L2R3X21tYy1wbHRm
-bS5jIHwgICA0OCArKysrKysrKysrKysrKysrKysrKysrKysrKystLS0tLS0tLS0tLQo+ICAxIGZp
-bGVzIGNoYW5nZWQsIDM0IGluc2VydGlvbnMoKyksIDE0IGRlbGV0aW9ucygtKQo+IAo+IGRpZmYg
-LS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy1wbHRmbS5jIGIvZHJpdmVycy9tbWMvaG9z
-dC9kd19tbWMtcGx0Zm0uYwo+IGluZGV4IDAwNDhkYTguLjdkMDQxYjUgMTAwNjQ0Cj4gLS0tIGEv
-ZHJpdmVycy9tbWMvaG9zdC9kd19tbWMtcGx0Zm0uYwo+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qv
-ZHdfbW1jLXBsdGZtLmMKPiBAQCAtMjQsNiArMjQsMTYgQEAKPiAKPiAgI2luY2x1ZGUgImR3X21t
-Yy5oIgo+IAo+ICsKPiArc3RhdGljIHZvaWQgZHdfbWNpX3JvY2tjaGlwX3ByZXBhcmVfY29tbWFu
-ZChzdHJ1Y3QgZHdfbWNpICpob3N0LCB1MzIgKmNtZHIpCj4gK3sKPiArCSpjbWRyIHw9IFNETU1D
-X0NNRF9VU0VfSE9MRF9SRUc7CkN1cnJlbnRseSwgU0RNTUNfQ01EX1VTRV9IT0xEX1JFRyBpcyBk
-ZWZpbmVkIGluIGR3X21tYy1leHlub3MuYwpJdCBzaG91bGQgYmUgbW92ZWQgdG8gZHdfbW1jLmgK
-ClRoYW5rcywKU2V1bmd3b24gSmVvbgo+ICt9Cj4gKwo+ICtzdGF0aWMgY29uc3Qgc3RydWN0IGR3
-X21jaV9kcnZfZGF0YSByb2NrY2hpcF9kcnZfZGF0YSA9IHsKPiArCS5wcmVwYXJlX2NvbW1hbmQJ
-PSBkd19tY2lfcm9ja2NoaXBfcHJlcGFyZV9jb21tYW5kLAo+ICt9Owo+ICsKPiAgaW50IGR3X21j
-aV9wbHRmbV9yZWdpc3RlcihzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2LAo+ICAJCQkJY29u
-c3Qgc3RydWN0IGR3X21jaV9kcnZfZGF0YSAqZHJ2X2RhdGEpCj4gIHsKPiBAQCAtNjMsMjAgKzcz
-LDYgQEAgaW50IGR3X21jaV9wbHRmbV9yZWdpc3RlcihzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpw
-ZGV2LAo+ICB9Cj4gIEVYUE9SVF9TWU1CT0xfR1BMKGR3X21jaV9wbHRmbV9yZWdpc3Rlcik7Cj4g
-Cj4gLXN0YXRpYyBpbnQgZHdfbWNpX3BsdGZtX3Byb2JlKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2Ug
-KnBkZXYpCj4gLXsKPiAtCXJldHVybiBkd19tY2lfcGx0Zm1fcmVnaXN0ZXIocGRldiwgTlVMTCk7
-Cj4gLX0KPiAtCj4gLWludCBkd19tY2lfcGx0Zm1fcmVtb3ZlKHN0cnVjdCBwbGF0Zm9ybV9kZXZp
-Y2UgKnBkZXYpCj4gLXsKPiAtCXN0cnVjdCBkd19tY2kgKmhvc3QgPSBwbGF0Zm9ybV9nZXRfZHJ2
-ZGF0YShwZGV2KTsKPiAtCj4gLQlkd19tY2lfcmVtb3ZlKGhvc3QpOwo+IC0JcmV0dXJuIDA7Cj4g
-LX0KPiAtRVhQT1JUX1NZTUJPTF9HUEwoZHdfbWNpX3BsdGZtX3JlbW92ZSk7Cj4gLQo+ICAjaWZk
-ZWYgQ09ORklHX1BNX1NMRUVQCj4gIC8qCj4gICAqIFRPRE86IHdlIHNob3VsZCBwcm9iYWJseSBk
-aXNhYmxlIHRoZSBjbG9jayB0byB0aGUgY2FyZCBpbiB0aGUgc3VzcGVuZCBwYXRoLgo+IEBAIC0x
-MTQsMTAgKzExMCwzNCBAQCBFWFBPUlRfU1lNQk9MX0dQTChkd19tY2lfcGx0Zm1fcG1vcHMpOwo+
-IAo+ICBzdGF0aWMgY29uc3Qgc3RydWN0IG9mX2RldmljZV9pZCBkd19tY2lfcGx0Zm1fbWF0Y2hb
-XSA9IHsKPiAgCXsgLmNvbXBhdGlibGUgPSAic25wcyxkdy1tc2hjIiwgfSwKPiArCXsgLmNvbXBh
-dGlibGUgPSAicm9ja2NoaXAsY29ydGV4LWE5LWR3LW1zaGMiLAo+ICsJCS5kYXRhID0gJnJvY2tj
-aGlwX2Rydl9kYXRhIH0sCj4gIAl7fSwKPiAgfTsKPiAgTU9EVUxFX0RFVklDRV9UQUJMRShvZiwg
-ZHdfbWNpX3BsdGZtX21hdGNoKTsKPiAKPiArc3RhdGljIGludCBkd19tY2lfcGx0Zm1fcHJvYmUo
-c3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikKPiArewo+ICsJY29uc3Qgc3RydWN0IGR3X21j
-aV9kcnZfZGF0YSAqZHJ2X2RhdGEgPSBOVUxMOwo+ICsJY29uc3Qgc3RydWN0IG9mX2RldmljZV9p
-ZCAqbWF0Y2g7Cj4gKwo+ICsJaWYgKHBkZXYtPmRldi5vZl9ub2RlKSB7Cj4gKwkJbWF0Y2ggPSBv
-Zl9tYXRjaF9ub2RlKGR3X21jaV9wbHRmbV9tYXRjaCwgcGRldi0+ZGV2Lm9mX25vZGUpOwo+ICsJ
-CWRydl9kYXRhID0gbWF0Y2gtPmRhdGE7Cj4gKwl9Cj4gKwo+ICsJcmV0dXJuIGR3X21jaV9wbHRm
-bV9yZWdpc3RlcihwZGV2LCBkcnZfZGF0YSk7Cj4gK30KPiArCj4gK2ludCBkd19tY2lfcGx0Zm1f
-cmVtb3ZlKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYpCj4gK3sKPiArCXN0cnVjdCBkd19t
-Y2kgKmhvc3QgPSBwbGF0Zm9ybV9nZXRfZHJ2ZGF0YShwZGV2KTsKPiArCj4gKwlkd19tY2lfcmVt
-b3ZlKGhvc3QpOwo+ICsJcmV0dXJuIDA7Cj4gK30KPiArRVhQT1JUX1NZTUJPTF9HUEwoZHdfbWNp
-X3BsdGZtX3JlbW92ZSk7Cj4gKwo+ICBzdGF0aWMgc3RydWN0IHBsYXRmb3JtX2RyaXZlciBkd19t
-Y2lfcGx0Zm1fZHJpdmVyID0gewo+ICAJLnByb2JlCQk9IGR3X21jaV9wbHRmbV9wcm9iZSwKPiAg
-CS5yZW1vdmUJCT0gZHdfbWNpX3BsdGZtX3JlbW92ZSwKPiAtLQo+IDEuNy4yLjMKPiAKPiAtLQo+
-IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmli
-ZSBsaW51eC1tbWMiIGluCj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2Vy
-Lmtlcm5lbC5vcmcKPiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwu
-b3JnL21ham9yZG9tby1pbmZvLmh0bWwKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fCmRldmljZXRyZWUtZGlzY3VzcyBtYWlsaW5nIGxpc3QKZGV2aWNldHJl
-ZS1kaXNjdXNzQGxpc3RzLm96bGFicy5vcmcKaHR0cHM6Ly9saXN0cy5vemxhYnMub3JnL2xpc3Rp
-bmZvL2RldmljZXRyZWUtZGlzY3Vzcwo=
+On 06/05/13 6:24 PM, Andy Shevchenko wrote:
+> devm_ioremap_resource does sanity checks on the given resource. No need to
+> duplicate this in the driver.
+> 
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+
+Looks good to me.
+'dw_mmc'(instead of 'dw') as a prefix of subject is expected with other patches, though.
+Specially, dw_mmc-pci is for PATCH 3/3.
+
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+
+
