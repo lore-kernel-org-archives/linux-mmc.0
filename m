@@ -1,118 +1,54 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH 3/3] mmc: dw: convert to use pcim_* and devm_*
-Date: Wed,  5 Jun 2013 12:24:12 +0300
-Message-ID: <1370424252-31562-3-git-send-email-andriy.shevchenko@linux.intel.com>
-References: <1370424252-31562-1-git-send-email-andriy.shevchenko@linux.intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:21663 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753549Ab3FEJYS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 5 Jun 2013 05:24:18 -0400
-In-Reply-To: <1370424252-31562-1-git-send-email-andriy.shevchenko@linux.intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH] mmc: atmel-mci: remove include <mach/cpu.h>
+Date: Wed, 5 Jun 2013 11:42:25 +0200
+Message-ID: <33387.3594565832$1370425373@news.gmane.org>
+References: <1365511500-13778-1-git-send-email-nicolas.ferre@atmel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <1365511500-13778-1-git-send-email-nicolas.ferre@atmel.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ludovic.desroches@atmel.com, cjb@laptop.org, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-The PCI driver is getting simplier and tidier with pcim_* and devm_* functions
-in use.
+On Tue, Apr 09, 2013 at 02:45:00PM +0200, Nicolas Ferre wrote:
+> Header file not needed anymore as we have removed
+> the calls to cpu_is_xxx() macro.
+> 
+> Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
 
-Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
----
- drivers/mmc/host/dw_mmc-pci.c | 50 +++++++++++++------------------------------
- 1 file changed, 15 insertions(+), 35 deletions(-)
+Late but of course:
 
-diff --git a/drivers/mmc/host/dw_mmc-pci.c b/drivers/mmc/host/dw_mmc-pci.c
-index c469ce6..b456b0c 100644
---- a/drivers/mmc/host/dw_mmc-pci.c
-+++ b/drivers/mmc/host/dw_mmc-pci.c
-@@ -21,7 +21,6 @@
- #include "dw_mmc.h"
- 
- #define PCI_BAR_NO 2
--#define COMPLETE_BAR 0
- #define SYNOPSYS_DW_MCI_VENDOR_ID 0x700
- #define SYNOPSYS_DW_MCI_DEVICE_ID 0x1107
- /* Defining the Capabilities */
-@@ -38,51 +37,37 @@ static struct dw_mci_board pci_board_data = {
- };
- 
- static int dw_mci_pci_probe(struct pci_dev *pdev,
--				  const struct pci_device_id *entries)
-+			    const struct pci_device_id *entries)
- {
- 	struct dw_mci *host;
- 	int ret;
- 
--	ret = pci_enable_device(pdev);
-+	ret = pcim_enable_device(pdev);
- 	if (ret)
- 		return ret;
--	if (pci_request_regions(pdev, "dw_mmc_pci")) {
--		ret = -ENODEV;
--		goto err_disable_dev;
--	}
- 
--	host = kzalloc(sizeof(struct dw_mci), GFP_KERNEL);
--	if (!host) {
--		ret = -ENOMEM;
--		goto err_release;
--	}
-+	host = devm_kzalloc(&pdev->dev, sizeof(struct dw_mci), GFP_KERNEL);
-+	if (!host)
-+		return -ENOMEM;
- 
- 	host->irq = pdev->irq;
- 	host->irq_flags = IRQF_SHARED;
- 	host->dev = &pdev->dev;
- 	host->pdata = &pci_board_data;
- 
--	host->regs = pci_iomap(pdev, PCI_BAR_NO, COMPLETE_BAR);
--	if (!host->regs) {
--		ret = -EIO;
--		goto err_unmap;
--	}
-+	ret = pcim_iomap_regions(pdev, 1 << PCI_BAR_NO, pci_name(pdev));
-+	if (ret)
-+		return ret;
-+
-+	host->regs = pcim_iomap_table(pdev)[0];
- 
--	pci_set_drvdata(pdev, host);
- 	ret = dw_mci_probe(host);
- 	if (ret)
--		goto err_probe_failed;
--	return ret;
--
--err_probe_failed:
--	pci_iounmap(pdev, host->regs);
--err_unmap:
--	kfree(host);
--err_release:
--	pci_release_regions(pdev);
--err_disable_dev:
--	pci_disable_device(pdev);
--	return ret;
-+		return ret;
-+
-+	pci_set_drvdata(pdev, host);
-+
-+	return 0;
- }
- 
- static void dw_mci_pci_remove(struct pci_dev *pdev)
-@@ -90,11 +75,6 @@ static void dw_mci_pci_remove(struct pci_dev *pdev)
- 	struct dw_mci *host = pci_get_drvdata(pdev);
- 
- 	dw_mci_remove(host);
--	pci_set_drvdata(pdev, NULL);
--	pci_release_regions(pdev);
--	pci_iounmap(pdev, host->regs);
--	kfree(host);
--	pci_disable_device(pdev);
- }
- 
- #ifdef CONFIG_PM_SLEEP
--- 
-1.8.2.rc0.22.gb3600c3
+Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 
+> ---
+>  drivers/mmc/host/atmel-mci.c | 2 --
+>  1 file changed, 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index e75774f..08e2b92 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -40,8 +40,6 @@
+>  #include <asm/io.h>
+>  #include <asm/unaligned.h>
+>  
+> -#include <mach/cpu.h>
+> -
+>  #include "atmel-mci-regs.h"
+>  
+>  #define ATMCI_DATA_ERROR_FLAGS	(ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
+> -- 
+> 1.8.0
+> 
