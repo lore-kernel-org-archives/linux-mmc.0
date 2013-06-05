@@ -1,16 +1,16 @@
 From: <dinguyen@altera.com>
-Subject: [PATCHv5 6/6] mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA
-Date: Wed, 5 Jun 2013 09:56:57 -0500
-Message-ID: <1370444217-25498-7-git-send-email-dinguyen@altera.com>
-References: <1370444217-25498-1-git-send-email-dinguyen@altera.com>
+Subject: [PATCHv6 6/6] mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA
+Date: Wed, 5 Jun 2013 10:02:58 -0500
+Message-ID: <1370444578-25721-7-git-send-email-dinguyen@altera.com>
+References: <1370444578-25721-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:47405
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753743Ab3FEOyz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jun 2013 10:54:55 -0400
-In-Reply-To: <1370444217-25498-1-git-send-email-dinguyen@altera.com>
+Received: from mail-db8lp0184.outbound.messaging.microsoft.com ([213.199.154.184]:2816
+	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753916Ab3FEPA5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jun 2013 11:00:57 -0400
+In-Reply-To: <1370444578-25721-1-git-send-email-dinguyen@altera.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org
