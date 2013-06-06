@@ -1,66 +1,72 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v2 02/10] mmc: omap_hsmmc: make vcc and vcc_aux independent
-Date: Fri, 7 Jun 2013 00:44:11 +0530
-Message-ID: <1370546059-24181-3-git-send-email-balajitk@ti.com>
+Subject: [PATCH v2 00/10] mmc: omap_hsmmc: dt pbias and regulator voltage switch
+Date: Fri, 7 Jun 2013 00:44:09 +0530
+Message-ID: <1370546059-24181-1-git-send-email-balajitk@ti.com>
 References: <20130523184045.GD13507@atomide.com>
- <1370546059-24181-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:41237 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751412Ab3FFTOt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jun 2013 15:14:49 -0400
-In-Reply-To: <1370546059-24181-1-git-send-email-balajitk@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20130523184045.GD13507@atomide.com>
+Sender: linux-omap-owner@vger.kernel.org
 To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, b-cousson@ti.com, devicetree-discuss@lists.ozlabs.org
 Cc: Balaji T K <balajitk@ti.com>
+List-Id: linux-mmc@vger.kernel.org
 
-handle vcc and vcc_aux independently
+This patch series adds support for configuring pbias register needed for
+switching (ON/OFF, voltage scaling 3V, 1.8V) vmmc regulator suppling
+OMAP mmc/sd1 i/o pads for device tree boot.
+The control module registers are needed for mmc pbias i/o, speed mode
+configuration of mmc1 and loopback clock configuration of mmc2.
 
-Signed-off-by: Balaji T K <balajitk@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c |    9 +++++----
- 1 files changed, 5 insertions(+), 4 deletions(-)
+With voltage switch support (pbias i/o) added for dt, enhance regulator
+deferred probe handling by adding needs_vmmc and needs_vmmc_aux to indicate
+whether regulator is applicable so that omap_hsmmc can handle regulator
+deferred probe error properly.
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 1865321..bda1a42 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -253,7 +253,7 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 	 * If we don't see a Vcc regulator, assume it's a fixed
- 	 * voltage always-on regulator.
- 	 */
--	if (!host->vcc)
-+	if (!host->vcc && !host->vcc_aux)
- 		return 0;
- 	/*
- 	 * With DT, never turn OFF the regulator for MMC1. This is because
-@@ -280,11 +280,12 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 	 * chips/cards need an interface voltage rail too.
- 	 */
- 	if (power_on) {
--		ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
-+		if (host->vcc)
-+			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
- 		/* Enable interface voltage rail, if needed */
- 		if (ret == 0 && host->vcc_aux) {
- 			ret = regulator_enable(host->vcc_aux);
--			if (ret < 0)
-+			if (ret < 0 && host->vcc)
- 				ret = mmc_regulator_set_ocr(host->mmc,
- 							host->vcc, 0);
- 		}
-@@ -292,7 +293,7 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 		/* Shut down the rail */
- 		if (host->vcc_aux)
- 			ret = regulator_disable(host->vcc_aux);
--		if (!ret) {
-+		if (host->vcc) {
- 			/* Then proceed to shut down the local regulator */
- 			ret = mmc_regulator_set_ocr(host->mmc,
- 						host->vcc, 0);
+Remove the assumption that vmmc_aux regulator to be present only if vmmc is
+available. Platforms can have fixed-always-ON regulator for vmmc and/or vmmc_aux
+in such cases vmmc regulator needed not be specified in board file.
+
+Balaji T K (10):
+  ARM: OMAP2+: add needs_vmmc to hsmmc_info
+  mmc: omap_hsmmc: make vcc and vcc_aux independent
+  mmc: omap_hsmmc: use needs_vmmc
+  mmc: omap_hsmmc: update needs_vmmc for dt
+  mmc: omap_hsmmc: remove use_reg
+  mmc: omap_hsmmc: add support for pbias configuration in dt
+  mmc: omap_hsmmc: remove dt pbias workaround
+  ARM: dts: omap3: split omap3_pmx_core
+  ARM: dts: omap3: add pbias and mmc_init pinctrl states
+  ARM: dts: omap4: add pbias and mmc_init pinctrl states
+
+ arch/arm/boot/dts/omap3-beagle-xm.dts        |   42 ++++++
+ arch/arm/boot/dts/omap3-beagle.dts           |   70 +++++++++-
+ arch/arm/boot/dts/omap3.dtsi                 |   21 +++-
+ arch/arm/boot/dts/omap4-panda-common.dtsi    |   34 +++++
+ arch/arm/boot/dts/omap4-sdp.dts              |   34 +++++
+ arch/arm/boot/dts/omap4.dtsi                 |   11 ++
+ arch/arm/mach-omap2/board-2430sdp.c          |    1 +
+ arch/arm/mach-omap2/board-3430sdp.c          |    3 +
+ arch/arm/mach-omap2/board-cm-t35.c           |    2 +
+ arch/arm/mach-omap2/board-devkit8000.c       |    1 +
+ arch/arm/mach-omap2/board-igep0020.c         |    3 +
+ arch/arm/mach-omap2/board-ldp.c              |    1 +
+ arch/arm/mach-omap2/board-omap3beagle.c      |    2 +
+ arch/arm/mach-omap2/board-omap3evm.c         |    3 +
+ arch/arm/mach-omap2/board-omap3logic.c       |    1 +
+ arch/arm/mach-omap2/board-omap3pandora.c     |    3 +
+ arch/arm/mach-omap2/board-omap3stalker.c     |    2 +
+ arch/arm/mach-omap2/board-omap3touchbook.c   |    2 +
+ arch/arm/mach-omap2/board-overo.c            |    1 +
+ arch/arm/mach-omap2/board-rm680.c            |    1 +
+ arch/arm/mach-omap2/board-rx51-peripherals.c |    3 +
+ arch/arm/mach-omap2/board-zoom-peripherals.c |    4 +
+ arch/arm/mach-omap2/hsmmc.c                  |    2 +
+ arch/arm/mach-omap2/hsmmc.h                  |    2 +
+ drivers/mmc/host/omap_hsmmc.c                |  188 +++++++++++++++++---------
+ include/linux/platform_data/mmc-omap.h       |    2 +
+ 26 files changed, 367 insertions(+), 72 deletions(-)
+
 -- 
 1.7.5.4
 
