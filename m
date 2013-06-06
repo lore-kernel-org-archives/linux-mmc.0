@@ -1,128 +1,39 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 4/4] mmc: sdhi/tmio: add DT DMA support
-Date: Thu,  6 Jun 2013 17:46:28 +0200
-Message-ID: <1370533588-23642-5-git-send-email-g.liakhovetski@gmx.de>
-References: <1370533588-23642-1-git-send-email-g.liakhovetski@gmx.de>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v3 1/2] mmc: tmio: fix unbalanced power-on calls with clock-gating enabled
+Date: Thu, 06 Jun 2013 11:48:38 -0400
+Message-ID: <8761xr6y09.fsf@octavius.laptop.org>
+References: <Pine.LNX.4.64.1304230916270.1422@axis700.grange>
+	<871u8f8nxb.fsf@octavius.laptop.org>
+	<Pine.LNX.4.64.1306061625290.32566@axis700.grange>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1370533588-23642-1-git-send-email-g.liakhovetski@gmx.de>
+In-Reply-To: <Pine.LNX.4.64.1306061625290.32566@axis700.grange> (Guennadi
+	Liakhovetski's message of "Thu, 6 Jun 2013 16:35:44 +0200 (CEST)")
 Sender: linux-sh-owner@vger.kernel.org
-To: linux-sh@vger.kernel.org
-Cc: Vinod Koul <vinod.koul@intel.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add support for initialising DMA from the Device Tree.
+Hi,
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
----
- drivers/mmc/host/sh_mobile_sdhi.c |   14 +++++++-------
- drivers/mmc/host/tmio_mmc_dma.c   |   19 ++++++++++++-------
- 2 files changed, 19 insertions(+), 14 deletions(-)
+On Thu, Jun 06 2013, Guennadi Liakhovetski wrote:
+> With MMC clock gating enabled the MMC core currently calls MMC host driver's
+> .set_ios() method with .power_mode == MMC_POWER_ON and the clock value set
+> either to 0 or to the target rate. The tmio MMC driver then wrongly
+> translates the latter calls to card slot power-on requests, even when the
+> slot already was on. This patch fixes the driver to avoid needlessly
+> incrementing power-supplying regulator's use count.
+>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+> Tested-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+> ---
+>
+> v3: rebased on top of current mmc-next / 3.10-rc
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 7f45f62..cc4c872 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -144,6 +144,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	struct tmio_mmc_host *host;
- 	int irq, ret, i = 0;
- 	bool multiplexed_isr = true;
-+	struct tmio_mmc_dma *dma_priv;
- 
- 	priv = devm_kzalloc(&pdev->dev, sizeof(struct sh_mobile_sdhi), GFP_KERNEL);
- 	if (priv == NULL) {
-@@ -152,6 +153,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	}
- 
- 	mmc_data = &priv->mmc_data;
-+	dma_priv = &priv->dma_priv;
- 
- 	if (p) {
- 		if (p->init) {
-@@ -184,8 +186,6 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 			mmc_data->get_cd = sh_mobile_sdhi_get_cd;
- 
- 		if (p->dma_slave_tx > 0 && p->dma_slave_rx > 0) {
--			struct tmio_mmc_dma *dma_priv = &priv->dma_priv;
--
- 			/*
- 			 * Yes, we have to provide slave IDs twice to TMIO:
- 			 * once as a filter parameter and once for channel
-@@ -195,14 +195,14 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 			dma_priv->chan_priv_rx = (void *)p->dma_slave_rx;
- 			dma_priv->slave_id_tx = p->dma_slave_tx;
- 			dma_priv->slave_id_rx = p->dma_slave_rx;
--
--			dma_priv->alignment_shift = 1; /* 2-byte alignment */
--			dma_priv->filter = shdma_chan_filter;
--
--			mmc_data->dma = dma_priv;
- 		}
- 	}
- 
-+	dma_priv->alignment_shift = 1; /* 2-byte alignment */
-+	dma_priv->filter = shdma_chan_filter;
-+
-+	mmc_data->dma = dma_priv;
-+
- 	/*
- 	 * All SDHI blocks support 2-byte and larger block sizes in 4-bit
- 	 * bus width mode.
-diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
-index 5fcf14f..47bdb8f 100644
---- a/drivers/mmc/host/tmio_mmc_dma.c
-+++ b/drivers/mmc/host/tmio_mmc_dma.c
-@@ -264,7 +264,8 @@ out:
- void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdata)
- {
- 	/* We can only either use DMA for both Tx and Rx or not use it at all */
--	if (!pdata->dma)
-+	if (!pdata->dma || (!host->pdev->dev.of_node &&
-+		(!pdata->dma->chan_priv_tx || !pdata->dma->chan_priv_rx)))
- 		return;
- 
- 	if (!host->chan_tx && !host->chan_rx) {
-@@ -280,15 +281,17 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
- 		dma_cap_zero(mask);
- 		dma_cap_set(DMA_SLAVE, mask);
- 
--		host->chan_tx = dma_request_channel(mask, pdata->dma->filter,
--						    pdata->dma->chan_priv_tx);
-+		host->chan_tx = dma_request_slave_channel_compat(mask,
-+					pdata->dma->filter, pdata->dma->chan_priv_tx,
-+					&host->pdev->dev, "tx");
- 		dev_dbg(&host->pdev->dev, "%s: TX: got channel %p\n", __func__,
- 			host->chan_tx);
- 
- 		if (!host->chan_tx)
- 			return;
- 
--		cfg.slave_id = pdata->dma->slave_id_tx;
-+		if (pdata->dma->chan_priv_tx)
-+			cfg.slave_id = pdata->dma->slave_id_tx;
- 		cfg.direction = DMA_MEM_TO_DEV;
- 		cfg.dst_addr = res->start + (CTL_SD_DATA_PORT << host->bus_shift);
- 		cfg.src_addr = 0;
-@@ -296,15 +299,17 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
- 		if (ret < 0)
- 			goto ecfgtx;
- 
--		host->chan_rx = dma_request_channel(mask, pdata->dma->filter,
--						    pdata->dma->chan_priv_rx);
-+		host->chan_rx = dma_request_slave_channel_compat(mask,
-+					pdata->dma->filter, pdata->dma->chan_priv_rx,
-+					&host->pdev->dev, "rx");
- 		dev_dbg(&host->pdev->dev, "%s: RX: got channel %p\n", __func__,
- 			host->chan_rx);
- 
- 		if (!host->chan_rx)
- 			goto ereqrx;
- 
--		cfg.slave_id = pdata->dma->slave_id_rx;
-+		if (pdata->dma->chan_priv_rx)
-+			cfg.slave_id = pdata->dma->slave_id_rx;
- 		cfg.direction = DMA_DEV_TO_MEM;
- 		cfg.src_addr = cfg.dst_addr;
- 		cfg.dst_addr = 0;
+Thanks, pushed to mmc-next for 3.10.
+
+- Chris.
 -- 
-1.7.2.5
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
