@@ -1,59 +1,101 @@
-From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
-Subject: Re: [PATCH] mmc: atmel-mci: remove include <mach/cpu.h>
-Date: Thu, 6 Jun 2013 10:33:00 +0200
-Message-ID: <20130606083300.GJ23653@game.jcrosoft.org>
-References: <1365511500-13778-1-git-send-email-nicolas.ferre@atmel.com>
- <20130605094225.GC2805@ludovic.desroches@atmel.com>
+From: Tanya Brokhman <tlinder@codeaurora.org>
+Subject: =?UTF-8?q?=5BPATCH=20v7=200/4=5D=20block=3A=20Adding=20ROW=20scheduling=20algorithm?=
+Date: Thu,  6 Jun 2013 14:20:28 +0300
+Message-ID: <1370517628-5620-1-git-send-email-tlinder@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <20130605094225.GC2805@ludovic.desroches@atmel.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Nicolas Ferre <nicolas.ferre@atmel.com>, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.codeaurora.org ([198.145.11.231]:34251 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932269Ab3FFLUg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jun 2013 07:20:36 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: axboe@kernel.dk
+Cc: linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, Tanya Brokhman <tlinder@codeaurora.org>
 
-On 11:42 Wed 05 Jun     , Ludovic Desroches wrote:
-> On Tue, Apr 09, 2013 at 02:45:00PM +0200, Nicolas Ferre wrote:
-> > Header file not needed anymore as we have removed
-> > the calls to cpu_is_xxx() macro.
-> > 
-> > Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-> 
-> Late but of course:
-> 
-> Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-Acked-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+In order to decrease the latency of a prioritized request (such as READ
+requests) the device driver might decide to stop the transmission of a
+current "low priority" request in order to handle the "high priority" o=
+ne.
+The urgency of the request is decided by the block layer I/O scheduler.
+When the block layer notifies the underlying device driver (eMMC for
+example) of an urgent request, the device driver might decide to stop
+the current request transmission. The remainder of the stopped request
+will be re-inserted back to the scheduler, to be re-scheduled after
+handling the urgent request.
 
-Best Regards,
-J.
-> 
-> > ---
-> >  drivers/mmc/host/atmel-mci.c | 2 --
-> >  1 file changed, 2 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> > index e75774f..08e2b92 100644
-> > --- a/drivers/mmc/host/atmel-mci.c
-> > +++ b/drivers/mmc/host/atmel-mci.c
-> > @@ -40,8 +40,6 @@
-> >  #include <asm/io.h>
-> >  #include <asm/unaligned.h>
-> >  
-> > -#include <mach/cpu.h>
-> > -
-> >  #include "atmel-mci-regs.h"
-> >  
-> >  #define ATMCI_DATA_ERROR_FLAGS	(ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
-> > -- 
-> > 1.8.0
-> > 
+The above is implemented in the block layer by 2 callbacks of the queue=
+:
+- urgent_request_fn() - This callback is registered by the underlying
+  device driver and is called instead of the existing requst_fn() callb=
+acks
+  to handle urgent requests.
+- elevator_is_urgent_fn() - This callback is registered by the current
+  I/O scheduler. If present it's used by the block layer to ping the
+  scheduler of an urgent request presence.          =20
+NOTE: If one of the above callbacks is not registered, these code pass
+will never be activated.
+
+The ROW I/O scheduler implements an urgent request notification mechani=
+sm.
+
+The policy of ROW I/O scheduler is to prioritize READ requests over WRI=
+TE
+as much as possible without starving the WRITE requests.
+
+The ROW I/O scheduler implements I/O priorities (CLASS_RT, CLASS_BE,
+CLASS_IDLE). Dissimilar to CFQ, CLASS_BE requests won=E2=80=99t be star=
+ved by
+CLASS_RT, and CLASS_IDLE requests won=E2=80=99t be starved by CLASS_RT/=
+CLASS_BE
+requests. A tolerance limit is managed to prevent starvation.
+
+The ROW I/O scheduler with the URGENT request support by the device dri=
+ver
+improves the READ throughput by ~25% and the READ worst case latency is
+decreased by ~85%. All measured for READ/WRITE coalition scenarios.
+
+=46or example, the bellow numbers were collected for  parallel lmdd rea=
+d and
+write. The tests were performed on:
+kernel version: 3.4
+Underline device driver: mmc
+Host controller: msm-sdcc
+Card: standard emmc NAND flash
+
+-------------------------------------------------------------------
+   Algorithm   |   Throughput [mb/sec]   |   Worst case Latency   |
+               |     READ    |   WRITE   |   READ Latency [msec]  |
+-------------------------------------------------------------------
+CFQ	       |    122.3    |   40.22   |         422            |
+ROW	       |    151.4    |   41.07   |         51.5           |
+
+Tanya Brokhman (4):
+  block: Add support for reinsert a dispatched req
+  block: Extend cmd_flags in struct request
+  block: Add API for urgent request handling
+  block: Adding ROW scheduling algorithm
+
+ Documentation/block/row-iosched.txt |  134 +++++
+ block/Kconfig.iosched               |   21 +
+ block/Makefile                      |    1 +
+ block/blk-core.c                    |   89 +++-
+ block/elevator.c                    |   40 ++
+ block/row-iosched.c                 | 1090 +++++++++++++++++++++++++++=
+++++++++
+ include/linux/blk_types.h           |    7 +
+ include/linux/blkdev.h              |    7 +
+ include/linux/elevator.h            |    7 +
+ 9 files changed, 1387 insertions(+), 9 deletions(-)
+ create mode 100644 Documentation/block/row-iosched.txt
+ create mode 100644 block/row-iosched.c
+
+--=20
+1.7.6
+
+--=20
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a mem=
+ber
+of Code Aurora Forum, hosted by The Linux Foundatio
