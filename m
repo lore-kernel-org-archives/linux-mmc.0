@@ -1,32 +1,38 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 2/3] mmc: sdhci-esdhc: calculate sdclk divider from
- controller clock
-Date: Thu, 6 Jun 2013 22:51:01 +0800
-Message-ID: <20130606145059.GA28270@S2101-09.ap.freescale.net>
-References: <1370438006-13093-1-git-send-email-l.stach@pengutronix.de>
- <1370438006-13093-2-git-send-email-l.stach@pengutronix.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db8lp0187.outbound.messaging.microsoft.com ([213.199.154.187]:56892
-	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750899Ab3FFOvJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jun 2013 10:51:09 -0400
-Content-Disposition: inline
-In-Reply-To: <1370438006-13093-2-git-send-email-l.stach@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 0/4] mmc: MMCIF & SDHI: DT DMA support
+Date: Thu,  6 Jun 2013 17:46:24 +0200
+Message-ID: <1370533588-23642-1-git-send-email-g.liakhovetski@gmx.de>
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-sh@vger.kernel.org
+Cc: Vinod Koul <vinod.koul@intel.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Lucas Stach <l.stach@pengutronix.de>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, kernel@pengutronix.de
 
-On Wed, Jun 05, 2013 at 03:13:25PM +0200, Lucas Stach wrote:
-> The SDCLK is divided down from the host controller clock. Host controller clock
-> may be different from the maximum SDCLK, so get it from the platform, instead
-> of just using the max SDCLK.
-> 
-> Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+Also a re-send of four earlier submitted patches. This patch-series alone 
+is not enough to support DMA in DT on these MMC host controllers, support 
+in appropriate DMAC driver is added in a separate series. This, however, 
+doesn't introduce a dependency, series can be applied in arbitrary order.
 
-Patch #2 and #3,
+Cc: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
 
-Acked-by: Shawn Guo <shawn.guo@linaro.org>
+Guennadi Liakhovetski (4):
+  mmc: sh_mmcif: add support for Device Tree DMA bindings
+  mmc: sdhi/tmio: make DMA filter implementation specific
+  mmc: sdhi/tmio: switch to using dmaengine_slave_config()
+  mmc: sdhi/tmio: add DT DMA support
 
+ drivers/mmc/host/sh_mmcif.c       |   29 ++++++++++++++--------
+ drivers/mmc/host/sh_mobile_sdhi.c |   24 ++++++++++++------
+ drivers/mmc/host/tmio_mmc_dma.c   |   48 +++++++++++++++++++++++++++----------
+ include/linux/mfd/tmio.h          |    5 ++++
+ 4 files changed, 74 insertions(+), 32 deletions(-)
+
+-- 
+1.7.2.5
+
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
