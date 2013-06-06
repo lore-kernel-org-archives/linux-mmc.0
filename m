@@ -1,81 +1,183 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v2 07/10] mmc: omap_hsmmc: remove dt pbias workaround
-Date: Fri, 7 Jun 2013 00:44:16 +0530
-Message-ID: <1370546059-24181-8-git-send-email-balajitk@ti.com>
+Subject: [PATCH v2 09/10] ARM: dts: omap3: add pbias and mmc_init pinctrl states
+Date: Fri, 7 Jun 2013 00:44:18 +0530
+Message-ID: <1370546059-24181-10-git-send-email-balajitk@ti.com>
 References: <20130523184045.GD13507@atomide.com>
  <1370546059-24181-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:43632 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752756Ab3FFTOx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 6 Jun 2013 15:14:53 -0400
+Return-path: <linux-omap-owner@vger.kernel.org>
 In-Reply-To: <1370546059-24181-1-git-send-email-balajitk@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-omap-owner@vger.kernel.org
 To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, b-cousson@ti.com, devicetree-discuss@lists.ozlabs.org
 Cc: Balaji T K <balajitk@ti.com>
+List-Id: linux-mmc@vger.kernel.org
 
-With pbias support in place remove dt workaround for pbias
+add pbias states for pbias 0, 1.8V, 3V
+add omap3 sd/mmc2 loop back clock config for devconf1 in mmc2_init pinctrl state
+add OMAP3430 sd/mmc1 loop back clock config for devconf0 in mmc1_init pinctrl state
+add OMAP3630 sd/mmc1 speed mode config for prog_io1 in mmc1_init pinctrl state
 
 Signed-off-by: Balaji T K <balajitk@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   20 +-------------------
- 1 files changed, 1 insertions(+), 19 deletions(-)
+ arch/arm/boot/dts/omap3-beagle-xm.dts |   42 +++++++++++++++++++++++++++++++++
+ arch/arm/boot/dts/omap3-beagle.dts    |   42 +++++++++++++++++++++++++++++++++
+ arch/arm/boot/dts/omap3.dtsi          |   10 ++++++++
+ 3 files changed, 94 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 8dd1cd3..f2e3d1a 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -161,7 +161,6 @@ struct omap_hsmmc_host {
- 	 */
- 	struct	regulator	*vcc;
- 	struct	regulator	*vcc_aux;
--	int			pbias_disable;
- 	void	__iomem		*base;
- 	resource_size_t		mapbase;
- 	spinlock_t		irq_lock; /* Prevent races with irq handler */
-@@ -259,13 +258,6 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 	 */
- 	if (!host->vcc && !host->vcc_aux)
- 		return 0;
--	/*
--	 * With DT, never turn OFF the regulator for MMC1. This is because
--	 * the pbias cell programming support is still missing when
--	 * booting with Device tree
--	 */
--	if (host->pbias_disable && !vdd)
--		return 0;
+diff --git a/arch/arm/boot/dts/omap3-beagle-xm.dts b/arch/arm/boot/dts/omap3-beagle-xm.dts
+index 3046d1f..45d1642 100644
+--- a/arch/arm/boot/dts/omap3-beagle-xm.dts
++++ b/arch/arm/boot/dts/omap3-beagle-xm.dts
+@@ -59,6 +59,40 @@
+ 	};
+ };
  
- 	if (mmc_slot(host).before_set_reg)
- 		mmc_slot(host).before_set_reg(dev, slot, power_on, vdd);
-@@ -1552,13 +1544,7 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		 * of external transceiver; but they all handle 1.8V.
- 		 */
- 		if ((OMAP_HSMMC_READ(host->base, HCTL) & SDVSDET) &&
--			(ios->vdd == DUAL_VOLT_OCR_BIT) &&
--			/*
--			 * With pbias cell programming missing, this
--			 * can't be allowed on MMC1 when booting with device
--			 * tree.
--			 */
--			!host->pbias_disable) {
-+			(ios->vdd == DUAL_VOLT_OCR_BIT)) {
- 				/*
- 				 * The mmc_select_voltage fn of the core does
- 				 * not seem to set the power_mode to
-@@ -1956,10 +1942,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
++&omap3_pmx_general {
++	pinctrl-names = "default";
++	pinctrl-0 = <>;
++	pbias_off: pinmux_pbias_off {
++		pinctrl-single,bits = <
++			0x2b0 0x1 0x3	/* pbias */
++		>;
++	};
++
++	pbias_1v8: pinmux_pbias_1v8 {
++		pinctrl-single,bits = <
++			0x2b0 0x2 0x3	/* pbias */
++		>;
++	};
++
++	pbias_3v: pinmux_pbias_3v {
++		pinctrl-single,bits = <
++			0x2b0 0x3 0x3	/* pbias */
++		>;
++	};
++
++	mmc1_init: pinmux_mmc1_init {
++		pinctrl-single,bits = <
++			0x1d8 0x100000 0x100000	/* prog_io1 */
++		>;
++	};
++
++	mmc2_init: pinmux_mmc2_init {
++		pinctrl-single,bits = <
++			0x68 0x40 0x40	/* devconf1 */
++		>;
++	};
++};
++
+ &i2c1 {
+ 	clock-frequency = <2600000>;
  
- 	omap_hsmmc_context_save(host);
+@@ -95,12 +129,20 @@
+ };
  
--	/* This can be removed once we support PBIAS with DT */
--	if (host->dev->of_node && host->mapbase == 0x4809c000)
--		host->pbias_disable = 1;
--
- 	host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
- 	/*
- 	 * MMC can still work without debounce clock.
+ &mmc1 {
++	pinctrl-names = "default", "mmc_init", "pbias_off", "pbias_1v8", "pbias_3v";
++	pinctrl-0 = <>;
++	pinctrl-1 = <&mmc1_init>;
++	pinctrl-2 = <&pbias_off>;
++	pinctrl-3 = <&pbias_1v8>;
++	pinctrl-4 = <&pbias_3v>;
+ 	vmmc-supply = <&vmmc1>;
+ 	vmmc_aux-supply = <&vsim>;
+ 	bus-width = <8>;
+ };
+ 
+ &mmc2 {
++	pinctrl-names = "mmc_init";
++	pinctrl-1 = <&mmc2_init>;
+ 	status = "disabled";
+ };
+ 
+diff --git a/arch/arm/boot/dts/omap3-beagle.dts b/arch/arm/boot/dts/omap3-beagle.dts
+index 7da9979..14e251f 100644
+--- a/arch/arm/boot/dts/omap3-beagle.dts
++++ b/arch/arm/boot/dts/omap3-beagle.dts
+@@ -109,6 +109,40 @@
+ 	};
+ };
+ 
++&omap3_pmx_general {
++	pinctrl-names = "default";
++	pinctrl-0 = <>;
++	pbias_off: pinmux_pbias_off {
++		pinctrl-single,bits = <
++			0x2b0 0x5 0x7	/* pbias */
++		>;
++	};
++
++	pbias_1v8: pinmux_pbias_1v8 {
++		pinctrl-single,bits = <
++			0x2b0 0x6 0x7	/* pbias */
++		>;
++	};
++
++	pbias_3v: pinmux_pbias_3v {
++		pinctrl-single,bits = <
++			0x2b0 0x7 0x7	/* pbias */
++		>;
++	};
++
++	mmc1_init: pinmux_mmc1_init {
++		pinctrl-single,bits = <
++			0x4 0x01000000 0x01000000	/* devconf0 */
++		>;
++	};
++
++	mmc2_init: pinmux_mmc2_init {
++		pinctrl-single,bits = <
++			0x68 0x40 0x40	/* devconf1 */
++		>;
++	};
++};
++
+ &i2c1 {
+ 	clock-frequency = <2600000>;
+ 
+@@ -122,12 +156,20 @@
+ /include/ "twl4030.dtsi"
+ 
+ &mmc1 {
++	pinctrl-names = "default", "mmc_init", "pbias_off", "pbias_1v8", "pbias_3v";
++	pinctrl-0 = <>;
++	pinctrl-1 = <&mmc1_init>;
++	pinctrl-2 = <&pbias_off>;
++	pinctrl-3 = <&pbias_1v8>;
++	pinctrl-4 = <&pbias_3v>;
+ 	vmmc-supply = <&vmmc1>;
+ 	vmmc_aux-supply = <&vsim>;
+ 	bus-width = <8>;
+ };
+ 
+ &mmc2 {
++	pinctrl-names = "mmc_init";
++	pinctrl-1 = <&mmc2_init>;
+ 	status = "disabled";
+ };
+ 
+diff --git a/arch/arm/boot/dts/omap3.dtsi b/arch/arm/boot/dts/omap3.dtsi
+index caaa708..de2940d 100644
+--- a/arch/arm/boot/dts/omap3.dtsi
++++ b/arch/arm/boot/dts/omap3.dtsi
+@@ -111,6 +111,16 @@
+ 			pinctrl-single,function-mask = <0x7f1f>;
+ 		};
+ 
++		omap3_pmx_general: pinmux@48002270 {
++			compatible = "ti,omap3-padconf", "pinctrl-single";
++			reg = <0x48002270 0x2f4>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++			pinctrl-single,bit-per-mux;
++			pinctrl-single,register-width = <32>;
++			pinctrl-single,function-mask = <0xffffffff>;
++		};
++
+ 		omap3_pmx_wkup: pinmux@0x48002a00 {
+ 			compatible = "ti,omap3-padconf", "pinctrl-single";
+ 			reg = <0x48002a00 0x5c>;
 -- 
 1.7.5.4
 
