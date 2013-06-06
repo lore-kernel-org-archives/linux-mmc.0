@@ -1,123 +1,128 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 2/4] mmc: sdhi/tmio: make DMA filter implementation specific
-Date: Thu,  6 Jun 2013 17:46:26 +0200
-Message-ID: <1370533588-23642-3-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 4/4] mmc: sdhi/tmio: add DT DMA support
+Date: Thu,  6 Jun 2013 17:46:28 +0200
+Message-ID: <1370533588-23642-5-git-send-email-g.liakhovetski@gmx.de>
 References: <1370533588-23642-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:61057 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752652Ab3FFPqi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jun 2013 11:46:38 -0400
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1370533588-23642-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-sh@vger.kernel.org
-Cc: Vinod Koul <vinod.koul@intel.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Samuel Ortiz <sameo@linux.intel.com>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+Cc: Vinod Koul <vinod.koul@intel.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
 
-So far only the SDHI implementation uses TMIO MMC with DMA. That way a DMA
-channel filter function, defined in the TMIO driver wasn't a problem.
-However, such a filter function is DMA controller specific. Since the SDHI
-glue is only running on systems with the SHDMA DMA controller, the filter
-function can safely be provided by it. Move it into SDHI.
+Add support for initialising DMA from the Device Tree.
 
-Cc: Samuel Ortiz <sameo@linux.intel.com>
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-Acked-by: Samuel Ortiz <sameo@linux.intel.com>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c |    9 +++++++++
- drivers/mmc/host/tmio_mmc_dma.c   |   12 ++----------
- include/linux/mfd/tmio.h          |    3 +++
- 3 files changed, 14 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c |   14 +++++++-------
+ drivers/mmc/host/tmio_mmc_dma.c   |   19 ++++++++++++-------
+ 2 files changed, 19 insertions(+), 14 deletions(-)
 
 diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index fe90853..e0088d7 100644
+index 7f45f62..cc4c872 100644
 --- a/drivers/mmc/host/sh_mobile_sdhi.c
 +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -20,6 +20,7 @@
+@@ -144,6 +144,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	struct tmio_mmc_host *host;
+ 	int irq, ret, i = 0;
+ 	bool multiplexed_isr = true;
++	struct tmio_mmc_dma *dma_priv;
  
- #include <linux/kernel.h>
- #include <linux/clk.h>
-+#include <linux/dmaengine.h>
- #include <linux/slab.h>
- #include <linux/mod_devicetable.h>
- #include <linux/module.h>
-@@ -124,6 +125,13 @@ static void sh_mobile_sdhi_cd_wakeup(const struct platform_device *pdev)
- 	mmc_detect_change(dev_get_drvdata(&pdev->dev), msecs_to_jiffies(100));
- }
+ 	priv = devm_kzalloc(&pdev->dev, sizeof(struct sh_mobile_sdhi), GFP_KERNEL);
+ 	if (priv == NULL) {
+@@ -152,6 +153,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	}
  
-+static bool sh_mobile_sdhi_filter(struct dma_chan *chan, void *arg)
-+{
-+	dev_dbg(chan->device->dev, "%s: slave data %p\n", __func__, arg);
-+	chan->private = arg;
-+	return true;
-+}
-+
- static const struct sh_mobile_sdhi_ops sdhi_ops = {
- 	.cd_wakeup = sh_mobile_sdhi_cd_wakeup,
- };
-@@ -191,6 +199,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 			priv->dma_priv.chan_priv_tx = &priv->param_tx.shdma_slave;
- 			priv->dma_priv.chan_priv_rx = &priv->param_rx.shdma_slave;
- 			priv->dma_priv.alignment_shift = 1; /* 2-byte alignment */
-+			priv->dma_priv.filter = sh_mobile_sdhi_filter;
- 			mmc_data->dma = &priv->dma_priv;
+ 	mmc_data = &priv->mmc_data;
++	dma_priv = &priv->dma_priv;
+ 
+ 	if (p) {
+ 		if (p->init) {
+@@ -184,8 +186,6 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 			mmc_data->get_cd = sh_mobile_sdhi_get_cd;
+ 
+ 		if (p->dma_slave_tx > 0 && p->dma_slave_rx > 0) {
+-			struct tmio_mmc_dma *dma_priv = &priv->dma_priv;
+-
+ 			/*
+ 			 * Yes, we have to provide slave IDs twice to TMIO:
+ 			 * once as a filter parameter and once for channel
+@@ -195,14 +195,14 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 			dma_priv->chan_priv_rx = (void *)p->dma_slave_rx;
+ 			dma_priv->slave_id_tx = p->dma_slave_tx;
+ 			dma_priv->slave_id_rx = p->dma_slave_rx;
+-
+-			dma_priv->alignment_shift = 1; /* 2-byte alignment */
+-			dma_priv->filter = shdma_chan_filter;
+-
+-			mmc_data->dma = dma_priv;
  		}
  	}
+ 
++	dma_priv->alignment_shift = 1; /* 2-byte alignment */
++	dma_priv->filter = shdma_chan_filter;
++
++	mmc_data->dma = dma_priv;
++
+ 	/*
+ 	 * All SDHI blocks support 2-byte and larger block sizes in 4-bit
+ 	 * bus width mode.
 diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
-index fff9286..dc4b10b 100644
+index 5fcf14f..47bdb8f 100644
 --- a/drivers/mmc/host/tmio_mmc_dma.c
 +++ b/drivers/mmc/host/tmio_mmc_dma.c
-@@ -261,14 +261,6 @@ out:
- 	spin_unlock_irq(&host->lock);
- }
- 
--/* It might be necessary to make filter MFD specific */
--static bool tmio_mmc_filter(struct dma_chan *chan, void *arg)
--{
--	dev_dbg(chan->device->dev, "%s: slave data %p\n", __func__, arg);
--	chan->private = arg;
--	return true;
--}
--
+@@ -264,7 +264,8 @@ out:
  void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdata)
  {
  	/* We can only either use DMA for both Tx and Rx or not use it at all */
-@@ -281,7 +273,7 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
+-	if (!pdata->dma)
++	if (!pdata->dma || (!host->pdev->dev.of_node &&
++		(!pdata->dma->chan_priv_tx || !pdata->dma->chan_priv_rx)))
+ 		return;
+ 
+ 	if (!host->chan_tx && !host->chan_rx) {
+@@ -280,15 +281,17 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
  		dma_cap_zero(mask);
  		dma_cap_set(DMA_SLAVE, mask);
  
--		host->chan_tx = dma_request_channel(mask, tmio_mmc_filter,
-+		host->chan_tx = dma_request_channel(mask, pdata->dma->filter,
- 						    pdata->dma->chan_priv_tx);
+-		host->chan_tx = dma_request_channel(mask, pdata->dma->filter,
+-						    pdata->dma->chan_priv_tx);
++		host->chan_tx = dma_request_slave_channel_compat(mask,
++					pdata->dma->filter, pdata->dma->chan_priv_tx,
++					&host->pdev->dev, "tx");
  		dev_dbg(&host->pdev->dev, "%s: TX: got channel %p\n", __func__,
  			host->chan_tx);
-@@ -289,7 +281,7 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
+ 
  		if (!host->chan_tx)
  			return;
  
--		host->chan_rx = dma_request_channel(mask, tmio_mmc_filter,
-+		host->chan_rx = dma_request_channel(mask, pdata->dma->filter,
- 						    pdata->dma->chan_priv_rx);
+-		cfg.slave_id = pdata->dma->slave_id_tx;
++		if (pdata->dma->chan_priv_tx)
++			cfg.slave_id = pdata->dma->slave_id_tx;
+ 		cfg.direction = DMA_MEM_TO_DEV;
+ 		cfg.dst_addr = res->start + (CTL_SD_DATA_PORT << host->bus_shift);
+ 		cfg.src_addr = 0;
+@@ -296,15 +299,17 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
+ 		if (ret < 0)
+ 			goto ecfgtx;
+ 
+-		host->chan_rx = dma_request_channel(mask, pdata->dma->filter,
+-						    pdata->dma->chan_priv_rx);
++		host->chan_rx = dma_request_slave_channel_compat(mask,
++					pdata->dma->filter, pdata->dma->chan_priv_rx,
++					&host->pdev->dev, "rx");
  		dev_dbg(&host->pdev->dev, "%s: RX: got channel %p\n", __func__,
  			host->chan_rx);
-diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-index 99bf3e66..0990d8a 100644
---- a/include/linux/mfd/tmio.h
-+++ b/include/linux/mfd/tmio.h
-@@ -81,10 +81,13 @@ int tmio_core_mmc_resume(void __iomem *cnf, int shift, unsigned long base);
- void tmio_core_mmc_pwr(void __iomem *cnf, int shift, int state);
- void tmio_core_mmc_clk_div(void __iomem *cnf, int shift, int state);
  
-+struct dma_chan;
-+
- struct tmio_mmc_dma {
- 	void *chan_priv_tx;
- 	void *chan_priv_rx;
- 	int alignment_shift;
-+	bool (*filter)(struct dma_chan *chan, void *arg);
- };
+ 		if (!host->chan_rx)
+ 			goto ereqrx;
  
- struct tmio_mmc_host;
+-		cfg.slave_id = pdata->dma->slave_id_rx;
++		if (pdata->dma->chan_priv_rx)
++			cfg.slave_id = pdata->dma->slave_id_rx;
+ 		cfg.direction = DMA_DEV_TO_MEM;
+ 		cfg.src_addr = cfg.dst_addr;
+ 		cfg.dst_addr = 0;
 -- 
 1.7.2.5
 
