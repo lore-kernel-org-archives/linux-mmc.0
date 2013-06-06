@@ -1,93 +1,53 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH v2] mmc: tmio: reset the controller after power-up
-Date: Thu, 6 Jun 2013 09:36:50 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1306060936280.32566@axis700.grange>
-References: <Pine.LNX.4.64.1304241143460.11670@axis700.grange>
- <Pine.LNX.4.64.1304251240360.21045@axis700.grange>
+Subject: Re: [PATCH] mmc: mmcif: don't clear masked interrupts
+Date: Thu, 6 Jun 2013 09:39:07 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1306060938310.32566@axis700.grange>
+References: <Pine.LNX.4.64.1305150746480.10596@axis700.grange>
+ <519349BB.6080200@jinso.co.jp> <87mwrvwhsn.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1304251240360.21045@axis700.grange>
+In-Reply-To: <87mwrvwhsn.wl%kuninori.morimoto.gx@renesas.com>
 Sender: linux-sh-owner@vger.kernel.org
-To: linux-sh@vger.kernel.org
-Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Nguyen Viet Dung <nv-dung@jinso.co.jp>, hechtb@gmail.com, Horman Simon <simon@horms.net>, Damm Magnus <magnus.damm@gmail.com>, "^[$B0p5H$5$s^[(B" <jinso.inayoshi@gmail.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Nguyen Hong Ky <nh-ky@jinso.co.jp>
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: Nguyen Viet Dung <nv-dung@jinso.co.jp>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
 
 Hi Chris
 
-On Thu, 25 Apr 2013, Guennadi Liakhovetski wrote:
+On Wed, 15 May 2013, Kuninori Morimoto wrote:
 
-> Hi Chris
-> 
-> On Wed, 24 Apr 2013, Guennadi Liakhovetski wrote:
-> 
-> > This fixes two reported problems:
-> > 1. after a system resume the controller isn't functioning until a command
-> >    runs on a timeout and a controller reset is performed.
-> > 2. if a card is ejected during a running write operation, its re-insertion
-> >    isn't detected.
+> Hi
+> At Wed, 15 May 2013 17:39:23 +0900,
+> Nguyen Viet Dung wrote:
 > > 
-> > Reported-by: Nguyen Viet Dung <nv-dung@jinso.co.jp>
-> > Reported-by: Nguyen Hong Ky <nh-ky@jinso.co.jp>
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+> > On 05/15/2013 02:50 PM, Guennadi Liakhovetski wrote:
+> > > Masking events on MMCIF means, an occurrence of the masked event won't raise
+> > > an interrupt, but the event bit will still be set in the interrupt status
+> > > register. If simultaneously a different event occurs, that was enabled, both
+> > > flags will be set. However, only the unmasked event bit should be cleared in
+> > > the status register in such a case. Clearing also the masked bit can lead to
+> > > lost interrupts, which indeed can be observed on the armadillo800eva r8a7740
+> > > board with an eMMC chip. The problem has been introduced by the recent "mmc:
+> > > sh_mmcif: simplify IRQ processing" patch. Fix the problem by only clearing
+> > > enabled interrupts.
+> > >
+> > > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+> > 
+> > tested-by: Nguyen Viet Dung<nv-dung@jinso.co.jp>
 > 
-> Please, add the following tags, when applying:
+> on Bock-W board
 > 
-> Tested-by: Nguyen Viet Dung <nv-dung@jinso.co.jp>
-> Tested-by: Nguyen Hong Ky <nh-ky@jinso.co.jp>
+> Tested-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 
-This one too, please :)
+Here's one more for you.
 
 Thanks
 Guennadi
 
-> > ---
-> > 
-> > v2: this patch supersedes the earlier "mmc: tmio: postpone controller 
-> > reset during resume" in that it extends the number of cases, in which the 
-> > reset is applied. It turned out, it is needed not only after a resume, but 
-> > also for recovery after an interrupted write. It also now applies on top 
-> > of "[PATCH v2] MMC: tmio: fix unbalanced power-on calls with clock-gating 
-> > enabled" http://article.gmane.org/gmane.linux.kernel.mmc/20233. Reporters 
-> > are cordially invited to add their "Tested-by" tags ;-)
-> > 
-> > Chris, both these patches are fixes. Not sure whether it's still a good 
-> > idea to push them for 3.9, maybe better get them into 3.10 and then to 
-> > stable?
-> > 
-> >  drivers/mmc/host/tmio_mmc_pio.c |    3 ++-
-> >  1 files changed, 2 insertions(+), 1 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> > index 1d5ef64..fcb9503 100644
-> > --- a/drivers/mmc/host/tmio_mmc_pio.c
-> > +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> > @@ -863,6 +863,8 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >  			tmio_mmc_clk_update(mmc);
-> >  			pm_runtime_get_sync(dev);
-> >  		}
-> > +		if (host->power == TMIO_MMC_OFF_STOP)
-> > +			tmio_mmc_reset(host);
-> >  		tmio_mmc_set_clock(host, ios->clock);
-> >  		if (host->power == TMIO_MMC_OFF_STOP)
-> >  			/* power up SD card and the bus */
-> > @@ -1161,7 +1163,6 @@ int tmio_mmc_host_resume(struct device *dev)
-> >  	struct mmc_host *mmc = dev_get_drvdata(dev);
-> >  	struct tmio_mmc_host *host = mmc_priv(mmc);
-> >  
-> > -	tmio_mmc_reset(host);
-> >  	tmio_mmc_enable_dma(host, true);
-> >  
-> >  	/* The MMC core will perform the complete set up */
-> > -- 
-> > 1.7.2.5
-> > 
-> > 
-> 
+> Best regards
 > ---
-> Guennadi Liakhovetski, Ph.D.
-> Freelance Open-Source Software Developer
-> http://www.open-technology.de/
+> Kuninori Morimoto
 > 
 
 ---
