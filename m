@@ -1,56 +1,59 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] mmc: mmcif: don't clear masked interrupts
-Date: Thu, 6 Jun 2013 09:39:07 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1306060938310.32566@axis700.grange>
-References: <Pine.LNX.4.64.1305150746480.10596@axis700.grange>
- <519349BB.6080200@jinso.co.jp> <87mwrvwhsn.wl%kuninori.morimoto.gx@renesas.com>
+From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Subject: Re: [PATCH] mmc: atmel-mci: remove include <mach/cpu.h>
+Date: Thu, 6 Jun 2013 10:33:00 +0200
+Message-ID: <20130606083300.GJ23653@game.jcrosoft.org>
+References: <1365511500-13778-1-git-send-email-nicolas.ferre@atmel.com>
+ <20130605094225.GC2805@ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <87mwrvwhsn.wl%kuninori.morimoto.gx@renesas.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Cc: Nguyen Viet Dung <nv-dung@jinso.co.jp>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <20130605094225.GC2805@ludovic.desroches@atmel.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Nicolas Ferre <nicolas.ferre@atmel.com>, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Chris
-
-On Wed, 15 May 2013, Kuninori Morimoto wrote:
-
-> Hi
-> At Wed, 15 May 2013 17:39:23 +0900,
-> Nguyen Viet Dung wrote:
+On 11:42 Wed 05 Jun     , Ludovic Desroches wrote:
+> On Tue, Apr 09, 2013 at 02:45:00PM +0200, Nicolas Ferre wrote:
+> > Header file not needed anymore as we have removed
+> > the calls to cpu_is_xxx() macro.
 > > 
-> > On 05/15/2013 02:50 PM, Guennadi Liakhovetski wrote:
-> > > Masking events on MMCIF means, an occurrence of the masked event won't raise
-> > > an interrupt, but the event bit will still be set in the interrupt status
-> > > register. If simultaneously a different event occurs, that was enabled, both
-> > > flags will be set. However, only the unmasked event bit should be cleared in
-> > > the status register in such a case. Clearing also the masked bit can lead to
-> > > lost interrupts, which indeed can be observed on the armadillo800eva r8a7740
-> > > board with an eMMC chip. The problem has been introduced by the recent "mmc:
-> > > sh_mmcif: simplify IRQ processing" patch. Fix the problem by only clearing
-> > > enabled interrupts.
-> > >
-> > > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+> > Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+> 
+> Late but of course:
+> 
+> Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+Acked-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+
+Best Regards,
+J.
+> 
+> > ---
+> >  drivers/mmc/host/atmel-mci.c | 2 --
+> >  1 file changed, 2 deletions(-)
 > > 
-> > tested-by: Nguyen Viet Dung<nv-dung@jinso.co.jp>
-> 
-> on Bock-W board
-> 
-> Tested-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-
-Here's one more for you.
-
-Thanks
-Guennadi
-
-> Best regards
-> ---
-> Kuninori Morimoto
-> 
-
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+> > diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> > index e75774f..08e2b92 100644
+> > --- a/drivers/mmc/host/atmel-mci.c
+> > +++ b/drivers/mmc/host/atmel-mci.c
+> > @@ -40,8 +40,6 @@
+> >  #include <asm/io.h>
+> >  #include <asm/unaligned.h>
+> >  
+> > -#include <mach/cpu.h>
+> > -
+> >  #include "atmel-mci-regs.h"
+> >  
+> >  #define ATMCI_DATA_ERROR_FLAGS	(ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
+> > -- 
+> > 1.8.0
+> > 
