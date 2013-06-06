@@ -1,67 +1,95 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: Re: [PATCH v4 12/13] mmc: add DT bindings for more MMC capability flags
-Date: Wed, 5 Jun 2013 18:55:01 -0700
-Message-ID: <CAOesGMh6VZHDrt6FvAXij-6Nz4m0C40hRPbzJbNK6Y4O7GxFBg@mail.gmail.com>
-References: <1360941242-18153-1-git-send-email-g.liakhovetski@gmx.de>
-	<1360941242-18153-13-git-send-email-g.liakhovetski@gmx.de>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH] mmc: tmio: postpone controller reset during resume
+Date: Thu, 6 Jun 2013 09:30:21 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1306060928050.32566@axis700.grange>
+References: <Pine.LNX.4.64.1304221025300.23906@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f173.google.com ([209.85.216.173]:59749 "EHLO
-	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756103Ab3FFBzD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jun 2013 21:55:03 -0400
-Received: by mail-qc0-f173.google.com with SMTP id c11so1354307qcv.18
-        for <linux-mmc@vger.kernel.org>; Wed, 05 Jun 2013 18:55:01 -0700 (PDT)
-In-Reply-To: <1360941242-18153-13-git-send-email-g.liakhovetski@gmx.de>
+Received: from moutng.kundenserver.de ([212.227.126.187]:51660 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754539Ab3FFHaq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jun 2013 03:30:46 -0400
+In-Reply-To: <Pine.LNX.4.64.1304221025300.23906@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, Linux-sh list <linux-sh@vger.kernel.org>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Arnd Bergmann <arnd@arndb.de>
+To: linux-sh@vger.kernel.org
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Nguyen Viet Dung <nv-dung@jinso.co.jp>, hechtb@gmail.com, Horman Simon <simon@horms.net>, Damm Magnus <magnus.damm@gmail.com>, "^[$B0p5H$5$s^[(B" <jinso.inayoshi@gmail.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-Hi,
+Hi Chris
 
+On Mon, 22 Apr 2013, Guennadi Liakhovetski wrote:
 
-On Fri, Feb 15, 2013 at 7:14 AM, Guennadi Liakhovetski
-<g.liakhovetski@gmx.de> wrote:
-> Many MMC capability flags are platform-dependent and are traditionally set
-> in platform data. With DT often each such capability requires a special
-> binding. Add bindings for MMC_CAP_SD_HIGHSPEED, MMC_CAP_MMC_HIGHSPEED,
-> MMC_CAP_POWER_OFF_CARD and MMC_CAP_SDIO_IRQ capabilities. Also add code to
-> DT parser to look up "keep-power-in-suspend" and "enable-sdio-wakeup"
-> bindings and set MMC_PM_KEEP_POWER and MMC_PM_WAKE_SDIO_IRQ respectively,
-> if found.
->
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> When resuming, the tmio_mmc_host_resume() function is run when the
+> controller might still be powered down. Issuing a reset command to it at
+> that time has no effect. This patch postpones resetting the controller
+> until the first powering-up .set_ios() call.
+> 
+> Reported-by: Nguyen Viet Dung <nv-dung@jinso.co.jp>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
 
-I just came across this patch after it was merged (with no review from
-any device tree maintainer :()
+Any reason why this hasn't been applied yet? Please, push for 3.10.
+
+Thanks
+Guennadi
 
 > ---
->  Documentation/devicetree/bindings/mmc/mmc.txt |    4 ++++
->  drivers/mmc/core/host.c                       |   13 +++++++++++++
->  2 files changed, 17 insertions(+), 0 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-> index 24c8552..d9ab51f 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-> @@ -25,6 +25,10 @@ Optional properties:
->  - max-frequency: maximum operating clock frequency
->  - no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
->    this system, even if the controller claims it is.
-> +- cap-sd-highspeed: SD high-speed timing is supported
-> +- cap-mmc-highspeed: MMC high-speed timing is supported
-> +- cap-power-off-card: powering off the card is safe
-> +- cap-sdio-irq: enable SDIO IRQ signalling on this interface
+> 
+> There is some risk associated with this patch: it removes unconditional 
+> (attempt of) controller reset from the tmio_mmc_host_resume() function. 
+> AFAICS, this shouldn't have any negative effects. There _should_ always be 
+> a powering-up .set_ios() call after a resume. However, if anyone sees any 
+> (potential) problems with it, please, let me know.
+> 
+>  drivers/mmc/host/tmio_mmc.h     |    1 +
+>  drivers/mmc/host/tmio_mmc_pio.c |    6 +++++-
+>  2 files changed, 6 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> index d857f5c..759d8f4 100644
+> --- a/drivers/mmc/host/tmio_mmc.h
+> +++ b/drivers/mmc/host/tmio_mmc.h
+> @@ -85,6 +85,7 @@ struct tmio_mmc_host {
+>  	unsigned long		last_req_ts;
+>  	struct mutex		ios_lock;	/* protect set_ios() context */
+>  	bool			native_hotplug;
+> +	bool			resuming;
+>  };
+>  
+>  int tmio_mmc_host_probe(struct tmio_mmc_host **host,
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index f508ecb..435cc4d 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -862,6 +862,10 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  		if (!host->power) {
+>  			tmio_mmc_clk_update(mmc);
+>  			pm_runtime_get_sync(dev);
+> +			if (host->resuming) {
+> +				tmio_mmc_reset(host);
+> +				host->resuming = false;
+> +			}
+>  		}
+>  		tmio_mmc_set_clock(host, ios->clock);
+>  		if (!host->power) {
+> @@ -1154,10 +1158,10 @@ int tmio_mmc_host_resume(struct device *dev)
+>  	struct mmc_host *mmc = dev_get_drvdata(dev);
+>  	struct tmio_mmc_host *host = mmc_priv(mmc);
+>  
+> -	tmio_mmc_reset(host);
+>  	tmio_mmc_enable_dma(host, true);
+>  
+>  	/* The MMC core will perform the complete set up */
+> +	host->resuming = true;
+>  	return mmc_resume_host(mmc);
+>  }
+>  EXPORT_SYMBOL(tmio_mmc_host_resume);
+> -- 
+> 1.7.2.5
+> 
+> 
 
-These are bad names for describing hardware properties. There is no
-reason to carry over the "cap" prefix from the internal usage of the
-hardware characteristics in the kernel.
-
-Other drivers use, for example "supports-highspeed", which this
-duplicates to some extent. More work should have been done to
-commonalize them. Etc.
-
-
--Olof
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
