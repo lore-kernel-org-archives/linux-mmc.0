@@ -1,83 +1,94 @@
-From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Subject: Re: [PATCH 1/4] mmc: sh_mmcif: add support for Device Tree DMA bindings
-Date: Thu, 06 Jun 2013 20:38:46 +0400
-Message-ID: <51B0BB16.6060401@cogentembedded.com>
-References: <1370533588-23642-1-git-send-email-g.liakhovetski@gmx.de> <1370533588-23642-2-git-send-email-g.liakhovetski@gmx.de>
+From: Heiko =?utf-8?q?St=C3=BCbner?= <heiko@sntech.de>
+Subject: [PATCH v2 0/8] arm: add basic support for Rockchip Cortex-A9 SoCs
+Date: Thu, 6 Jun 2013 21:07:58 +0200
+Message-ID: <201306062107.58875.heiko@sntech.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: Text/Plain;
+  charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f51.google.com ([209.85.215.51]:55455 "EHLO
-	mail-la0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752197Ab3FFQil (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jun 2013 12:38:41 -0400
-Received: by mail-la0-f51.google.com with SMTP id fq12so2584621lab.38
-        for <linux-mmc@vger.kernel.org>; Thu, 06 Jun 2013 09:38:39 -0700 (PDT)
-In-Reply-To: <1370533588-23642-2-git-send-email-g.liakhovetski@gmx.de>
+Received: from gloria.sntech.de ([95.129.55.99]:39365 "EHLO gloria.sntech.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751990Ab3FFTIK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 6 Jun 2013 15:08:10 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-sh@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+To: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Mike Turquette <mturquette@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Linus Walleij <linus.walleij@linaro.org>, devicetree-discuss@lists.ozlabs.org, Russell King <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-Hello.
+Second version of basic Rockchip A9 support.
 
-On 06/06/2013 07:46 PM, Guennadi Liakhovetski wrote:
 
-> To use DMA in the Device Tree case the driver has to be modified
-> to use suitable API to obtain DMA channels.
->
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-> ---
->   drivers/mmc/host/sh_mmcif.c |   29 ++++++++++++++++++-----------
->   1 files changed, 18 insertions(+), 11 deletions(-)
->
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 06caaae..a0937ae 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -386,25 +386,30 @@ static void sh_mmcif_request_dma(struct sh_mmcif_host *host,
->   
->   	host->dma_active = false;
->   
-> -	if (!pdata)
-> -		return;
-> -
-> -	if (pdata->slave_id_tx <= 0 || pdata->slave_id_rx <= 0)
-> -		return;
-> +	if (pdata) {
-> +		if (pdata->slave_id_tx <= 0 || pdata->slave_id_rx <= 0)
-> +			return;
-> +	} else {
-> +		if (!host->pd->dev.of_node)
+Changes since v1:
+- addressed Linus Walleij's comments to the pinctrl driver, including the
+  move to generic pinconfig (hopefully I did catch all)
+- renamed the clocks to use the SoC name of the initial user
+  as suggested by Olof Johansson
+- fixed the uart address, found by Arnd Bergmann
+- address Arnd's comments on the board file (use of_clk_init and friends,
+  remove map_io, use real soc names)
+- removed Makefile.boot as suggested by Thomas Petazzoni
 
-   Why not *else if*?
 
-> +			return;
-> +	}
->   
->   	/* We can only either use DMA for both Tx and Rx or not use it at all */
->   	dma_cap_zero(mask);
->   	dma_cap_set(DMA_SLAVE, mask);
->   
-> -	host->chan_tx = dma_request_channel(mask, shdma_chan_filter,
-> -					    (void *)pdata->slave_id_tx);
-> +	host->chan_tx = dma_request_slave_channel_compat(mask, shdma_chan_filter,
-> +				pdata ? (void *)pdata->slave_id_tx : NULL,
-> +				&host->pd->dev, "tx");
+Dependencies:
+- the irqdomain support for the generic_irq from Thomas Gleixner is required
+  by the pinctrl driver, which is strangely not in linux-next, only in tip.git
+- "mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA" moves the
+  SDMMC_CMD_USE_HOLD_REG constant into the common header, which is required
+  on these Rockchip SoCs 
+- the db_apb_timer enhancements sent separately
+- the pinctrl-generic option for pin-default pulls, sent today
 
-    Could you leave the indentation unchanged here?
 
-> @@ -412,15 +417,17 @@ static void sh_mmcif_request_dma(struct sh_mmcif_host *host,
->   	if (ret < 0)
->   		goto ecfgtx;
->   
-> -	host->chan_rx = dma_request_channel(mask, shdma_chan_filter,
-> -					    (void *)pdata->slave_id_rx);
-> +	host->chan_rx = dma_request_slave_channel_compat(mask, shdma_chan_filter,
-> +				pdata ? (void *)pdata->slave_id_rx : NULL,
-> +				&host->pd->dev, "rx");
+Heiko Stuebner (8):
+  clk: flag to use upper half of the register as change indicator
+  clk: divider: add flag to limit possible dividers to even numbers
+  mmc: dw_mmc-pltfm: remove static from dw_mci_pltfm_remove
+  mmc: dw_mmc-pltfm: add Rockchip variant
+  pinctrl: add pinctrl driver for Rockchip SoCs
+  clk: add basic Rockchip rk3066a clock support
+  arm: add debug uarts for rockchip rk29xx and rk3xxx series
+  arm: add basic support for Rockchip RK3066a boards
 
-    ... and here?
+ .../bindings/pinctrl/rockchip,pinctrl.txt          |   97 ++
+ arch/arm/Kconfig                                   |    2 +
+ arch/arm/Kconfig.debug                             |   34 +
+ arch/arm/Makefile                                  |    1 +
+ arch/arm/boot/dts/rk3066a-clocks.dtsi              |  460 +++++++
+ arch/arm/boot/dts/rk3066a.dtsi                     |  359 +++++
+ arch/arm/include/debug/rockchip.S                  |   42 +
+ arch/arm/mach-rockchip/Kconfig                     |   17 +
+ arch/arm/mach-rockchip/Makefile                    |    1 +
+ arch/arm/mach-rockchip/rockchip.c                  |   54 +
+ drivers/clk/Makefile                               |    1 +
+ drivers/clk/clk-divider.c                          |   29 +-
+ drivers/clk/clk-gate.c                             |   24 +-
+ drivers/clk/clk-mux.c                              |   15 +-
+ drivers/clk/rockchip/Makefile                      |    6 +
+ drivers/clk/rockchip/clk-rockchip-pll.c            |  131 ++
+ drivers/clk/rockchip/clk-rockchip-pll.h            |   19 +
+ drivers/clk/rockchip/clk-rockchip.c                |  313 +++++
+ drivers/mmc/host/dw_mmc-pltfm.c                    |   48 +-
+ drivers/pinctrl/Kconfig                            |    6 +
+ drivers/pinctrl/Makefile                           |    1 +
+ drivers/pinctrl/pinctrl-rockchip.c                 | 1364 ++++++++++++++++++++
+ include/dt-bindings/pinctrl/rockchip.h             |   37 +
+ include/linux/clk-provider.h                       |   18 +
+ 24 files changed, 3053 insertions(+), 26 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.txt
+ create mode 100644 arch/arm/boot/dts/rk3066a-clocks.dtsi
+ create mode 100644 arch/arm/boot/dts/rk3066a.dtsi
+ create mode 100644 arch/arm/include/debug/rockchip.S
+ create mode 100644 arch/arm/mach-rockchip/Kconfig
+ create mode 100644 arch/arm/mach-rockchip/Makefile
+ create mode 100644 arch/arm/mach-rockchip/rockchip.c
+ create mode 100644 drivers/clk/rockchip/Makefile
+ create mode 100644 drivers/clk/rockchip/clk-rockchip-pll.c
+ create mode 100644 drivers/clk/rockchip/clk-rockchip-pll.h
+ create mode 100644 drivers/clk/rockchip/clk-rockchip.c
+ create mode 100644 drivers/pinctrl/pinctrl-rockchip.c
+ create mode 100644 include/dt-bindings/pinctrl/rockchip.h
 
-WBR, Sergei
+-- 
+1.7.2.3
 
