@@ -1,154 +1,72 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v2 10/10] ARM: dts: omap4: add pbias and mmc_init pinctrl states
-Date: Fri, 7 Jun 2013 00:44:19 +0530
-Message-ID: <1370546059-24181-11-git-send-email-balajitk@ti.com>
-References: <20130523184045.GD13507@atomide.com>
- <1370546059-24181-1-git-send-email-balajitk@ti.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: [PATCH 06/10] mmc: dw_mmc-pltfm: add Rockchip variant
+Date: Thu, 6 Jun 2013 23:01:21 +0300
+Message-ID: <CAHp75VdpdP6Xtrv3o0EAKMPBvsMDROTVRQqbb54jpAH=LjFx1A@mail.gmail.com>
+References: <201306030055.15413.heiko@sntech.de>
+	<201306030059.03783.heiko@sntech.de>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1370546059-24181-1-git-send-email-balajitk@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, b-cousson@ti.com, devicetree-discuss@lists.ozlabs.org
-Cc: Balaji T K <balajitk@ti.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oa0-f48.google.com ([209.85.219.48]:38367 "EHLO
+	mail-oa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754277Ab3FFUBW convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jun 2013 16:01:22 -0400
+In-Reply-To: <201306030059.03783.heiko@sntech.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, John Stultz <john.stultz@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Mike Turquette <mturquette@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Linus Walleij <linus.walleij@linaro.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Russell King <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>
 
-add pbias states for pbias 0, 1.8V, 3V
-add sd/mmc1 pull strength values for control_mmc1 in mmc_init pinctrl state
+On Mon, Jun 3, 2013 at 1:59 AM, Heiko St=C3=BCbner <heiko@sntech.de> wr=
+ote:
+> Cortex-A9 SoCs from Rockchip use a slightly modified variant of dw_mm=
+c
+> controllers that seems to require the SDMMC_CMD_USE_HOLD_REG bit to
+> always be set.
+>
+> There also seem to be no other modifications (additional register etc=
+)
+> present, so to keep the footprint low, add this small variant to the
+> pltfm driver.
 
-Signed-off-by: Balaji T K <balajitk@ti.com>
----
- arch/arm/boot/dts/omap4-panda-common.dtsi |   34 +++++++++++++++++++++++++++++
- arch/arm/boot/dts/omap4-sdp.dts           |   34 +++++++++++++++++++++++++++++
- arch/arm/boot/dts/omap4.dtsi              |   11 +++++++++
- 3 files changed, 79 insertions(+), 0 deletions(-)
+=46ew comments below.
 
-diff --git a/arch/arm/boot/dts/omap4-panda-common.dtsi b/arch/arm/boot/dts/omap4-panda-common.dtsi
-index 03bd60d..d6ffbb1 100644
---- a/arch/arm/boot/dts/omap4-panda-common.dtsi
-+++ b/arch/arm/boot/dts/omap4-panda-common.dtsi
-@@ -137,6 +137,34 @@
- 	};
- };
- 
-+&omap4_padconf_global {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <>;
-+	pbias_off: pinmux_pbias_off {
-+		pinctrl-single,bits = <
-+			0x60 0x00000000 0x07e00000	/* pbias */
-+		>;
-+	};
-+
-+	pbias_1v8: pinmux_pbias_1v8 {
-+		pinctrl-single,bits = <
-+			0x60 0x04400000 0x07e00000	/* pbias */
-+		>;
-+	};
-+
-+	pbias_3v: pinmux_pbias_3v {
-+		pinctrl-single,bits = <
-+			0x60 0x04600000 0x07e00000	/* pbias */
-+		>;
-+	};
-+
-+	mmc1_init: pinmux_mmc1_init {
-+		pinctrl-single,bits = <
-+			0x88 0xce000000 0xfe000000	/* control_mmc1 */
-+		>;
-+	};
-+};
-+
- &i2c1 {
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&i2c1_pins>;
-@@ -197,6 +225,12 @@
- };
- 
- &mmc1 {
-+	pinctrl-names = "default", "mmc_init", "pbias_off", "pbias_1v8", "pbias_3v";
-+	pinctrl-0 = <>;
-+	pinctrl-1 = <&mmc1_init>;
-+	pinctrl-2 = <&pbias_off>;
-+	pinctrl-3 = <&pbias_1v8>;
-+	pinctrl-4 = <&pbias_3v>;
- 	vmmc-supply = <&vmmc>;
- 	bus-width = <8>;
- };
-diff --git a/arch/arm/boot/dts/omap4-sdp.dts b/arch/arm/boot/dts/omap4-sdp.dts
-index a35d9cd..b1c0e86 100644
---- a/arch/arm/boot/dts/omap4-sdp.dts
-+++ b/arch/arm/boot/dts/omap4-sdp.dts
-@@ -142,6 +142,34 @@
- 	};
- };
- 
-+&omap4_padconf_global {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <>;
-+	pbias_off: pinmux_pbias_off {
-+		pinctrl-single,bits = <
-+			0x60 0x00000000 0x07e00000	/* pbias */
-+		>;
-+	};
-+
-+	pbias_1v8: pinmux_pbias_1v8 {
-+		pinctrl-single,bits = <
-+			0x60 0x04400000 0x07e00000	/* pbias */
-+		>;
-+	};
-+
-+	pbias_3v: pinmux_pbias_3v {
-+		pinctrl-single,bits = <
-+			0x60 0x04600000 0x07e00000	/* pbias */
-+		>;
-+	};
-+
-+	mmc1_init: pinmux_mmc1_init {
-+		pinctrl-single,bits = <
-+			0x88 0xce000000 0xfe000000	/* control_mmc1 */
-+		>;
-+	};
-+};
-+
- &omap4_pmx_core {
- 	pinctrl-names = "default";
- 	pinctrl-0 = <
-@@ -381,6 +409,12 @@
- };
- 
- &mmc1 {
-+	pinctrl-names = "default", "mmc_init", "pbias_off", "pbias_1v8", "pbias_3v";
-+	pinctrl-0 = <>;
-+	pinctrl-1 = <&mmc1_init>;
-+	pinctrl-2 = <&pbias_off>;
-+	pinctrl-3 = <&pbias_1v8>;
-+	pinctrl-4 = <&pbias_3v>;
- 	vmmc-supply = <&vmmc>;
- 	bus-width = <8>;
- };
-diff --git a/arch/arm/boot/dts/omap4.dtsi b/arch/arm/boot/dts/omap4.dtsi
-index 2a56428..41f575d 100644
---- a/arch/arm/boot/dts/omap4.dtsi
-+++ b/arch/arm/boot/dts/omap4.dtsi
-@@ -114,6 +114,17 @@
- 			pinctrl-single,register-width = <16>;
- 			pinctrl-single,function-mask = <0x7fff>;
- 		};
-+
-+		omap4_padconf_global: pinmux@4a100600 {
-+			compatible = "ti,omap4-padconf", "pinctrl-single";
-+			reg = <0x4a1005a0 0x170>;
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			pinctrl-single,bit-per-mux;
-+			pinctrl-single,register-width = <32>;
-+			pinctrl-single,function-mask = <0xffffffff>;
-+		};
-+
- 		omap4_pmx_wkup: pinmux@4a31e040 {
- 			compatible = "ti,omap4-padconf", "pinctrl-single";
- 			reg = <0x4a31e040 0x0038>;
--- 
-1.7.5.4
+> --- a/drivers/mmc/host/dw_mmc-pltfm.c
+> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
+> @@ -24,6 +24,16 @@
+>
+>  #include "dw_mmc.h"
+>
+> +
 
+No need to add extra empty line here.
+
+> +static void dw_mci_rockchip_prepare_command(struct dw_mci *host, u32=
+ *cmdr)
+
+> @@ -63,20 +73,6 @@ int dw_mci_pltfm_register(struct platform_device *=
+pdev,
+>  }
+>  EXPORT_SYMBOL_GPL(dw_mci_pltfm_register);
+>
+> -static int dw_mci_pltfm_probe(struct platform_device *pdev)
+> -{
+> -       return dw_mci_pltfm_register(pdev, NULL);
+> -}
+> -
+> -int dw_mci_pltfm_remove(struct platform_device *pdev)
+> -{
+> -       struct dw_mci *host =3D platform_get_drvdata(pdev);
+> -
+> -       dw_mci_remove(host);
+> -       return 0;
+> -}
+> -EXPORT_SYMBOL_GPL(dw_mci_pltfm_remove);
+> -
+
+If you want to move those through code, please do separate patch.
+
+--
+With Best Regards,
+Andy Shevchenko
