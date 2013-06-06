@@ -1,178 +1,91 @@
-From: Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>
-Subject: [PATCH 3/4] mmc: sdhi/tmio: switch to using dmaengine_slave_config()
-Date: Thu,  6 Jun 2013 17:46:27 +0200
-Message-ID: <1370533588-23642-4-git-send-email-g.liakhovetski@gmx.de>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 1/4] mmc: sh_mmcif: add support for Device Tree DMA bindings
+Date: Thu,  6 Jun 2013 17:46:25 +0200
+Message-ID: <1370533588-23642-2-git-send-email-g.liakhovetski@gmx.de>
 References: <1370533588-23642-1-git-send-email-g.liakhovetski@gmx.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <1370533588-23642-1-git-send-email-g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Samuel Ortiz <sameo-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski+renesas-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.9]:57716 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752757Ab3FFPqk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jun 2013 11:46:40 -0400
+In-Reply-To: <1370533588-23642-1-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-sh@vger.kernel.org
+Cc: Vinod Koul <vinod.koul@intel.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
 
-This removes the deprecated use of the .private member of struct dma_chan
-and switches the sdhi / tmio mmc driver to using the
-dmaengine_slave_config() channel configuration method.
+To use DMA in the Device Tree case the driver has to be modified
+to use suitable API to obtain DMA channels.
 
-Cc: Samuel Ortiz <sameo-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Acked-by: Samuel Ortiz <sameo-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c |   33 ++++++++++++++++-----------------
- drivers/mmc/host/tmio_mmc_dma.c   |   25 +++++++++++++++++++++++++
- include/linux/mfd/tmio.h          |    2 ++
- 3 files changed, 43 insertions(+), 17 deletions(-)
+ drivers/mmc/host/sh_mmcif.c |   29 ++++++++++++++++++-----------
+ 1 files changed, 18 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index e0088d7..7f45f62 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -20,7 +20,6 @@
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 06caaae..a0937ae 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -386,25 +386,30 @@ static void sh_mmcif_request_dma(struct sh_mmcif_host *host,
  
- #include <linux/kernel.h>
- #include <linux/clk.h>
--#include <linux/dmaengine.h>
- #include <linux/slab.h>
- #include <linux/mod_devicetable.h>
- #include <linux/module.h>
-@@ -47,8 +46,6 @@ static const struct sh_mobile_sdhi_of_data sh_mobile_sdhi_of_cfg[] = {
- struct sh_mobile_sdhi {
- 	struct clk *clk;
- 	struct tmio_mmc_data mmc_data;
--	struct sh_dmae_slave param_tx;
--	struct sh_dmae_slave param_rx;
- 	struct tmio_mmc_dma dma_priv;
- };
+ 	host->dma_active = false;
  
-@@ -125,13 +122,6 @@ static void sh_mobile_sdhi_cd_wakeup(const struct platform_device *pdev)
- 	mmc_detect_change(dev_get_drvdata(&pdev->dev), msecs_to_jiffies(100));
- }
- 
--static bool sh_mobile_sdhi_filter(struct dma_chan *chan, void *arg)
--{
--	dev_dbg(chan->device->dev, "%s: slave data %p\n", __func__, arg);
--	chan->private = arg;
--	return true;
--}
+-	if (!pdata)
+-		return;
 -
- static const struct sh_mobile_sdhi_ops sdhi_ops = {
- 	.cd_wakeup = sh_mobile_sdhi_cd_wakeup,
- };
-@@ -194,13 +184,22 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 			mmc_data->get_cd = sh_mobile_sdhi_get_cd;
+-	if (pdata->slave_id_tx <= 0 || pdata->slave_id_rx <= 0)
+-		return;
++	if (pdata) {
++		if (pdata->slave_id_tx <= 0 || pdata->slave_id_rx <= 0)
++			return;
++	} else {
++		if (!host->pd->dev.of_node)
++			return;
++	}
  
- 		if (p->dma_slave_tx > 0 && p->dma_slave_rx > 0) {
--			priv->param_tx.shdma_slave.slave_id = p->dma_slave_tx;
--			priv->param_rx.shdma_slave.slave_id = p->dma_slave_rx;
--			priv->dma_priv.chan_priv_tx = &priv->param_tx.shdma_slave;
--			priv->dma_priv.chan_priv_rx = &priv->param_rx.shdma_slave;
--			priv->dma_priv.alignment_shift = 1; /* 2-byte alignment */
--			priv->dma_priv.filter = sh_mobile_sdhi_filter;
--			mmc_data->dma = &priv->dma_priv;
-+			struct tmio_mmc_dma *dma_priv = &priv->dma_priv;
-+
-+			/*
-+			 * Yes, we have to provide slave IDs twice to TMIO:
-+			 * once as a filter parameter and once for channel
-+			 * configuration as an explicit slave ID
-+			 */
-+			dma_priv->chan_priv_tx = (void *)p->dma_slave_tx;
-+			dma_priv->chan_priv_rx = (void *)p->dma_slave_rx;
-+			dma_priv->slave_id_tx = p->dma_slave_tx;
-+			dma_priv->slave_id_rx = p->dma_slave_rx;
-+
-+			dma_priv->alignment_shift = 1; /* 2-byte alignment */
-+			dma_priv->filter = shdma_chan_filter;
-+
-+			mmc_data->dma = dma_priv;
- 		}
- 	}
+ 	/* We can only either use DMA for both Tx and Rx or not use it at all */
+ 	dma_cap_zero(mask);
+ 	dma_cap_set(DMA_SLAVE, mask);
  
-diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
-index dc4b10b..5fcf14f 100644
---- a/drivers/mmc/host/tmio_mmc_dma.c
-+++ b/drivers/mmc/host/tmio_mmc_dma.c
-@@ -268,7 +268,14 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
+-	host->chan_tx = dma_request_channel(mask, shdma_chan_filter,
+-					    (void *)pdata->slave_id_tx);
++	host->chan_tx = dma_request_slave_channel_compat(mask, shdma_chan_filter,
++				pdata ? (void *)pdata->slave_id_tx : NULL,
++				&host->pd->dev, "tx");
+ 	dev_dbg(&host->pd->dev, "%s: TX: got channel %p\n", __func__,
+ 		host->chan_tx);
+ 
+ 	if (!host->chan_tx)
  		return;
  
- 	if (!host->chan_tx && !host->chan_rx) {
-+		struct resource *res = platform_get_resource(host->pdev,
-+							     IORESOURCE_MEM, 0);
-+		struct dma_slave_config cfg = {};
- 		dma_cap_mask_t mask;
-+		int ret;
-+
-+		if (!res)
-+			return;
+-	cfg.slave_id = pdata->slave_id_tx;
++	/* In the OF case the driver will get the slave ID from the DT */
++	if (pdata)
++		cfg.slave_id = pdata->slave_id_tx;
+ 	cfg.direction = DMA_MEM_TO_DEV;
+ 	cfg.dst_addr = res->start + MMCIF_CE_DATA;
+ 	cfg.src_addr = 0;
+@@ -412,15 +417,17 @@ static void sh_mmcif_request_dma(struct sh_mmcif_host *host,
+ 	if (ret < 0)
+ 		goto ecfgtx;
  
- 		dma_cap_zero(mask);
- 		dma_cap_set(DMA_SLAVE, mask);
-@@ -281,6 +288,14 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
- 		if (!host->chan_tx)
- 			return;
+-	host->chan_rx = dma_request_channel(mask, shdma_chan_filter,
+-					    (void *)pdata->slave_id_rx);
++	host->chan_rx = dma_request_slave_channel_compat(mask, shdma_chan_filter,
++				pdata ? (void *)pdata->slave_id_rx : NULL,
++				&host->pd->dev, "rx");
+ 	dev_dbg(&host->pd->dev, "%s: RX: got channel %p\n", __func__,
+ 		host->chan_rx);
  
-+		cfg.slave_id = pdata->dma->slave_id_tx;
-+		cfg.direction = DMA_MEM_TO_DEV;
-+		cfg.dst_addr = res->start + (CTL_SD_DATA_PORT << host->bus_shift);
-+		cfg.src_addr = 0;
-+		ret = dmaengine_slave_config(host->chan_tx, &cfg);
-+		if (ret < 0)
-+			goto ecfgtx;
-+
- 		host->chan_rx = dma_request_channel(mask, pdata->dma->filter,
- 						    pdata->dma->chan_priv_rx);
- 		dev_dbg(&host->pdev->dev, "%s: RX: got channel %p\n", __func__,
-@@ -289,6 +304,14 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
- 		if (!host->chan_rx)
- 			goto ereqrx;
+ 	if (!host->chan_rx)
+ 		goto erqrx;
  
-+		cfg.slave_id = pdata->dma->slave_id_rx;
-+		cfg.direction = DMA_DEV_TO_MEM;
-+		cfg.src_addr = cfg.dst_addr;
-+		cfg.dst_addr = 0;
-+		ret = dmaengine_slave_config(host->chan_rx, &cfg);
-+		if (ret < 0)
-+			goto ecfgrx;
-+
- 		host->bounce_buf = (u8 *)__get_free_page(GFP_KERNEL | GFP_DMA);
- 		if (!host->bounce_buf)
- 			goto ebouncebuf;
-@@ -302,9 +325,11 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
- 	return;
- 
- ebouncebuf:
-+ecfgrx:
- 	dma_release_channel(host->chan_rx);
- 	host->chan_rx = NULL;
- ereqrx:
-+ecfgtx:
- 	dma_release_channel(host->chan_tx);
- 	host->chan_tx = NULL;
- }
-diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-index 0990d8a..ce35113 100644
---- a/include/linux/mfd/tmio.h
-+++ b/include/linux/mfd/tmio.h
-@@ -86,6 +86,8 @@ struct dma_chan;
- struct tmio_mmc_dma {
- 	void *chan_priv_tx;
- 	void *chan_priv_rx;
-+	int slave_id_tx;
-+	int slave_id_rx;
- 	int alignment_shift;
- 	bool (*filter)(struct dma_chan *chan, void *arg);
- };
+-	cfg.slave_id = pdata->slave_id_rx;
++	if (pdata)
++		cfg.slave_id = pdata->slave_id_rx;
+ 	cfg.direction = DMA_DEV_TO_MEM;
+ 	cfg.dst_addr = 0;
+ 	cfg.src_addr = res->start + MMCIF_CE_DATA;
 -- 
 1.7.2.5
+
