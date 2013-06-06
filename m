@@ -1,15 +1,15 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v2 06/10] mmc: omap_hsmmc: add support for pbias configuration in dt
-Date: Fri, 7 Jun 2013 00:44:15 +0530
-Message-ID: <1370546059-24181-7-git-send-email-balajitk@ti.com>
+Subject: [PATCH v2 05/10] mmc: omap_hsmmc: remove use_reg
+Date: Fri, 7 Jun 2013 00:44:14 +0530
+Message-ID: <1370546059-24181-6-git-send-email-balajitk@ti.com>
 References: <20130523184045.GD13507@atomide.com>
  <1370546059-24181-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:41245 "EHLO
+Received: from devils.ext.ti.com ([198.47.26.153]:41248 "EHLO
 	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752482Ab3FFTOw (ORCPT
+	with ESMTP id S1752510Ab3FFTOw (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jun 2013 15:14:52 -0400
 In-Reply-To: <1370546059-24181-1-git-send-email-balajitk@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -17,158 +17,55 @@ List-Id: linux-mmc@vger.kernel.org
 To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, b-cousson@ti.com, devicetree-discuss@lists.ozlabs.org
 Cc: Balaji T K <balajitk@ti.com>
 
-PBIAS register configuration is based on the regulator voltage
-which supplies these pbias cells, sd i/o pads.
-With PBIAS register address and bit definitions different across
-omap[3,4,5], Simplify PBIAS configuration under three different
-regulator voltage levels - O V, 1.8 V, 3 V. Corresponding pinctrl states
-are defined as pbias_off, pbias_1v8, pbias_3v.
-
-pinctrl state mmc_init is used for configuring speed mode, loopback clock
-(in devconf0/devconf1/prog_io1 register for omap3) and pull strength
-configuration (in control_mmc1 for omap4)
+Since regulator_put can handle NULL / IS_ERR(regulator)
+use_reg can be removed, so that regulator_put in omap_hsmmc_reg_put
+can be reused for vmmc_aux regulator error scenario.
 
 Signed-off-by: Balaji T K <balajitk@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   83 ++++++++++++++++++++++++++++++++++++++--
- 1 files changed, 78 insertions(+), 5 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |    8 ++------
+ 1 files changed, 2 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 533ced2..8dd1cd3 100644
+index 08f4ca7..533ced2 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -182,6 +182,9 @@ struct omap_hsmmc_host {
+@@ -179,7 +179,6 @@ struct omap_hsmmc_host {
+ 	int			context_loss;
+ 	int			protect_card;
+ 	int			reqs_blocked;
+-	int			use_reg;
  	int			req_in_progress;
  	struct omap_hsmmc_next	next_data;
  
-+	struct pinctrl		*pinctrl;
-+	struct pinctrl_state	*pbias_off, *pbias_1v8, *pbias_3v, *mmc_init;
-+
- 	struct	omap_mmc_platform_data	*pdata;
- 	int needs_vmmc:1;
- 	int needs_vmmc_aux:1;
-@@ -267,6 +270,12 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 	if (mmc_slot(host).before_set_reg)
- 		mmc_slot(host).before_set_reg(dev, slot, power_on, vdd);
+@@ -1984,7 +1983,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 		ret = omap_hsmmc_reg_get(host);
+ 		if (ret)
+ 			goto err_irq_cd;
+-		host->use_reg = 1;
+ 	}
  
-+	if (host->pinctrl && host->pbias_off) {
-+		ret = pinctrl_select_state(host->pinctrl, host->pbias_off);
-+		if (ret < 0)
-+			dev_err(host->dev, "pinctrl pbias_off select error\n");
-+	}
-+
- 	/*
- 	 * Assume Vcc regulator is used only to power the card ... OMAP
- 	 * VDDS is used to power the pins, optionally with a transceiver to
-@@ -304,6 +313,25 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 	if (mmc_slot(host).after_set_reg)
- 		mmc_slot(host).after_set_reg(dev, slot, power_on, vdd);
- 
-+	/* 100ms delay required for PBIAS configuration */
-+	msleep(100);
-+	if (!vdd && host->pinctrl && host->pbias_off) {
-+		ret = pinctrl_select_state(host->pinctrl, host->pbias_off);
-+		if (ret < 0)
-+			dev_err(host->dev, "pinctrl pbias_off select error\n");
-+	} else if (((1 << vdd) <= MMC_VDD_165_195) && host->pinctrl &&
-+			host->pbias_1v8) {
-+		ret = pinctrl_select_state(host->pinctrl, host->pbias_1v8);
-+		if (ret < 0)
-+			dev_err(host->dev, "pinctrl pbias_1v8 select error\n");
-+	} else if (((1 << vdd) > MMC_VDD_165_195) && host->pinctrl &&
-+			host->pbias_3v) {
-+		ret = pinctrl_select_state(host->pinctrl, host->pbias_3v);
-+		if (ret < 0)
-+			dev_err(host->dev, "pinctrl pbias_3v select error\n");
-+	}
-+	usleep_range(350, 400);
-+
- 	return ret;
- }
- 
-@@ -1775,6 +1803,52 @@ static inline struct omap_mmc_platform_data
- }
- #endif
- 
-+static int omap_hsmmc_pinctrl_init(struct omap_hsmmc_host *host)
-+{
-+	int ret = 0;
-+
-+	host->pinctrl = devm_pinctrl_get(host->dev);
-+	if (IS_ERR(host->pinctrl)) {
-+		host->pinctrl = NULL;
-+		dev_warn(host->dev,
-+			 "pins are not configured from the driver\n");
-+		return 0;
-+	}
-+
-+	host->mmc_init = pinctrl_lookup_state(host->pinctrl, "mmc_init");
-+	if (IS_ERR(host->mmc_init)) {
-+		dev_vdbg(host->dev, "optional: mmc_init lookup error");
-+		host->mmc_init = NULL;
-+	} else {
-+		ret = pinctrl_select_state(host->pinctrl, host->mmc_init);
-+		if (ret < 0) {
-+			dev_err(host->dev, "pinctrl mmc_init select error\n");
-+			goto err_pinctrl;
-+		}
-+	}
-+
-+	host->pbias_off = pinctrl_lookup_state(host->pinctrl, "pbias_off");
-+	if (IS_ERR(host->pbias_off)) {
-+		dev_vdbg(host->dev, "optional: pbias_off lookup error");
-+		host->pbias_off = NULL;
-+	}
-+
-+	host->pbias_1v8 = pinctrl_lookup_state(host->pinctrl, "pbias_1v8");
-+	if (IS_ERR(host->pbias_1v8)) {
-+		dev_vdbg(host->dev, "optional: pbias_1v8 lookup error");
-+		host->pbias_1v8 = NULL;
-+	}
-+
-+	host->pbias_3v = pinctrl_lookup_state(host->pinctrl, "pbias_3v");
-+	if (IS_ERR(host->pbias_3v)) {
-+		dev_vdbg(host->dev, "optional: pbias_3v lookup error");
-+		host->pbias_3v = NULL;
-+	}
-+
-+err_pinctrl:
-+	return ret;
-+}
-+
- static int omap_hsmmc_probe(struct platform_device *pdev)
- {
- 	struct omap_mmc_platform_data *pdata = pdev->dev.platform_data;
-@@ -1785,7 +1859,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	const struct of_device_id *match;
- 	dma_cap_mask_t mask;
- 	unsigned tx_req, rx_req;
--	struct pinctrl *pinctrl;
- 
- 	match = of_match_device(of_match_ptr(omap_mmc_of_match), &pdev->dev);
- 	if (match) {
-@@ -2005,10 +2078,9 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 
- 	omap_hsmmc_disable_irq(host);
- 
--	pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
--	if (IS_ERR(pinctrl))
--		dev_warn(&pdev->dev,
--			"pins are not configured from the driver\n");
-+	ret = omap_hsmmc_pinctrl_init(host);
-+	if (ret)
-+		goto err_pinctrl_state;
- 
- 	omap_hsmmc_protect_card(host);
- 
-@@ -2034,6 +2106,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 
- err_slot_name:
+ 	mmc->ocr_avail = mmc_slot(host).ocr_mask;
+@@ -2038,8 +2036,7 @@ err_slot_name:
  	mmc_remove_host(mmc);
-+err_pinctrl_state:
  	free_irq(mmc_slot(host).card_detect_irq, host);
  err_irq_cd:
- 	omap_hsmmc_reg_put(host);
+-	if (host->use_reg)
+-		omap_hsmmc_reg_put(host);
++	omap_hsmmc_reg_put(host);
+ 	if (host->pdata->cleanup)
+ 		host->pdata->cleanup(&pdev->dev);
+ err_irq_cd_init:
+@@ -2075,8 +2072,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
+ 
+ 	pm_runtime_get_sync(host->dev);
+ 	mmc_remove_host(host->mmc);
+-	if (host->use_reg)
+-		omap_hsmmc_reg_put(host);
++	omap_hsmmc_reg_put(host);
+ 	if (host->pdata->cleanup)
+ 		host->pdata->cleanup(&pdev->dev);
+ 	free_irq(host->irq, host);
 -- 
 1.7.5.4
 
