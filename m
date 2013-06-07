@@ -1,61 +1,49 @@
 From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 09/11] mmc: omap_hsmmc: enhance pinctrl support
-Date: Fri, 7 Jun 2013 14:01:30 -0700
-Message-ID: <20130607210129.GH3331@atomide.com>
-References: <1369995191-20855-1-git-send-email-gururaja.hebbar@ti.com>
- <1369995191-20855-10-git-send-email-gururaja.hebbar@ti.com>
- <20130604144632.GI3331@atomide.com>
- <51B1E1C7.7050407@ti.com>
+Subject: [PATCH 0/4] Updated omap_hsmmc SDIO and remuxing patches
+Date: Fri, 07 Jun 2013 14:49:44 -0700
+Message-ID: <20130607214557.18581.75288.stgit@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:42128 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752900Ab3FGVBe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jun 2013 17:01:34 -0400
-Content-Disposition: inline
-In-Reply-To: <51B1E1C7.7050407@ti.com>
+Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:50891 "EHLO
+	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753181Ab3FGVtt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jun 2013 17:49:49 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: Hebbar Gururaja <gururaja.hebbar@ti.com>, khilman@linaro.org, linus.walleij@linaro.org, sudhakar.raj@ti.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, vaibhav.bedia@ti.com, linux-omap@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+To: cjb@laptop.org
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-* Balaji T K <balajitk@ti.com> [130607 06:42]:
-> On Tuesday 04 June 2013 08:16 PM, Tony Lindgren wrote:
-> >* Hebbar Gururaja <gururaja.hebbar@ti.com> [130531 03:19]:
-> >>Amend the hsmmc controller to optionally take a pin control handle and
-> >>set the state of the pins to:
-> >>
-> >>- "default" on boot, resume and before performing a mmc transfer
-> >>- "idle" after initial default, after resume default, and after each
-> >>mmc/sd card access
-> >>- "sleep" on suspend()
-> >>
-> >>By optionally putting the pins into sleep state in the suspend callback
-> >>we can accomplish two things.
-> >>- One is to minimize current leakage from pins and thus save power,
-> >>- second, we can prevent the IP from driving pins output in an
-> >>uncontrolled manner, which may happen if the power domain drops the
-> >>domain regulator.
-> >>
-> >>If any of the above pin states are missing in dt, a warning message
-> >>about the missing state is displayed.
-> >>If certain pin-states are not available, to remove this warning message
-> >>pass respective state name with null phandler.
-> >
-> >There's a similar patch in the "[RESEND PATCH v2 1/3] mmc: omap_hsmmc:
-> >Enable SDIO IRQ using a GPIO in idle mode" thread. It also makes the
-> >SDIO interrupts to work, so we need to consider that too.
-> >
-> 
-> Hi Tony,
-> 
-> I will try to combine both of these and make use of
-> pinctrl_pm_select_[*]_state helper functions.
+Hi all,
 
-OK thanks, I'll separate out the pinctrl parts from Andreas' patch
-and repost.
+Here are the update SDIO remuxing patches that are based on Andreas'
+earlier patches. The remuxing part is still in discussion, but that
+can be merged later in case there's some way to do it automatically
+at the drivers/base/pinctrl.c level.
+
+I've used these patches successfully with wl12xx and mwifiex_sdio
+on at least omap3 zoom, omap3 evm, omap4 sdp, and panda es.
 
 Regards,
 
 Tony
+
+---
+
+Andreas Fenkart (2):
+      mmc: omap_hsmmc: Enable SDIO IRQ using a GPIO in idle mode
+      mmc: omap_hsmmc: debugfs entries for GPIO and SDIO mode
+
+Tony Lindgren (2):
+      mmc: omap_hsmmc: Fix context save and restore for DT
+      mmc: omap_hsmmc: Remux pins to support SDIO interrupt and PM runtime
+
+
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   42 ++
+ drivers/mmc/host/omap_hsmmc.c                      |  356 +++++++++++++++++---
+ include/linux/platform_data/mmc-omap.h             |    4 
+ 3 files changed, 351 insertions(+), 51 deletions(-)
+
+-- 
+Signature
