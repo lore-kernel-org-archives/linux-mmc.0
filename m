@@ -1,107 +1,277 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: [PATCH 4/4] mmc: omap_hsmmc: debugfs entries for GPIO and SDIO mode
-Date: Fri, 07 Jun 2013 14:50:00 -0700
-Message-ID: <20130607215000.18581.97811.stgit@localhost>
-References: <20130607214557.18581.75288.stgit@localhost>
+From: Heiko =?iso-8859-1?q?St=FCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH v2 5/8] pinctrl: add pinctrl driver for Rockchip SoCs
+Date: Sat, 8 Jun 2013 01:13:48 +0200
+Message-ID: <201306080113.49186.heiko@sntech.de>
+References: <201306062107.58875.heiko@sntech.de>
+ <201306062111.40983.heiko@sntech.de>
+ <CACRpkdZ97poa5HOP4baDnsdq5OjwO5S2=+pPH9ey84r=ZW43nA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:51274 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1757093Ab3FGVuD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jun 2013 17:50:03 -0400
-In-Reply-To: <20130607214557.18581.75288.stgit@localhost>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <CACRpkdZ97poa5HOP4baDnsdq5OjwO5S2=+pPH9ey84r=ZW43nA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: Balaji T K <balajitk@ti.com>, Andreas Fenkart <andreas.fenkart@streamunlimited.com>, Andreas Fenkart <afenkart@gmail.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-From: Andreas Fenkart <andreas.fenkart@streamunlimited.com>
+Am Freitag, 7. Juni 2013, 14:53:51 schrieb Linus Walleij:
+> On Thu, Jun 6, 2013 at 9:11 PM, Heiko St=FCbner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org> wrote:
+> > +       for (i =3D 0, j =3D 0; i < size; i +=3D 4, j++) {
+> > +               unsigned long pinconf;
+> > +
+> > +               num =3D be32_to_cpu(*list++);
+> > +               bank =3D bank_num_to_bank(info, num);
+> > +               if (IS_ERR(bank))
+> > +                       return PTR_ERR(bank);
+> > +
+> > +               pin =3D be32_to_cpu(*list++);
+> > +               grp->pins[j] =3D bank->pin_base + pin;
+> > +               grp->func[j] =3D be32_to_cpu(*list++);
+> > +
+> > +               pinconf =3D be32_to_cpu(*list++);
+> > +               switch(pinconf) {
+> > +               case RK_PINCTRL_NONE:
+> > +                       bias =3D PIN_CONFIG_BIAS_DISABLE;
+> > +                       break;
+> > +               case RK_PINCTRL_PULL_PIN_DEFAULT:
+> > +                       bias =3D PIN_CONFIG_BIAS_PULL_PIN_DEFAULT;
+> > +                       break;
+> > +               case RK_PINCTRL_PULL_UP:
+> > +                       bias =3D PIN_CONFIG_BIAS_PULL_UP;
+> > +                       break;
+> > +               case RK_PINCTRL_PULL_DOWN:
+> > +                       bias =3D PIN_CONFIG_BIAS_PULL_DOWN;
+> > +                       break;
+> > +               }
+> > +
+> > +               grp->configs[j] =3D pinconf_to_config_packed(bias, 0);
+> > +       }
+> =
 
-Update the debugfs related code for the SDIO support.
-Note that PSTATE shows current state of data lines.
+> I would like this to be added to
+> drivers/pinctrl/pinconf-generic.c
+> as a utility function, with the header in
+> drivers/pinctrl/pinconf.h
+> =
 
-Cc: Andreas Fenkart <afenkart@gmail.com>
-Cc: Balaji T K <balajitk@ti.com>
-Signed-off-by: Andreas Fenkart <andreas.fenkart@streamunlimited.com>
-[tony@atomide.com: combined both sysfs patches into one]
----
- drivers/mmc/host/omap_hsmmc.c |   26 +++++++++++++++++++++++++-
- 1 file changed, 25 insertions(+), 1 deletion(-)
+> Also in a separate patch.
+> =
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 8ca08fb..d0d3df0 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -53,6 +53,7 @@
- #define OMAP_HSMMC_RSP54	0x0118
- #define OMAP_HSMMC_RSP76	0x011C
- #define OMAP_HSMMC_DATA		0x0120
-+#define OMAP_HSMMC_PSTATE	0x0124
- #define OMAP_HSMMC_HCTL		0x0128
- #define OMAP_HSMMC_SYSCTL	0x012C
- #define OMAP_HSMMC_STAT		0x0130
-@@ -188,6 +189,7 @@ struct omap_hsmmc_host {
- 	struct pinctrl		*pinctrl;
- 	struct pinctrl_state	*fixed, *active, *idle;
- 	bool			active_pinmux;
-+	int			pm_suspend_ct;
- 	struct	omap_mmc_platform_data	*pdata;
- };
- 
-@@ -1781,6 +1783,23 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
- {
- 	struct mmc_host *mmc = s->private;
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
-+	unsigned long flags;
+> > +++ b/include/dt-bindings/pinctrl/rockchip.h
+> =
+
+> (...)
+> =
+
+> > +#define RK_PINCTRL_NONE                        0
+> > +#define RK_PINCTRL_PULL_PIN_DEFAULT    (1 << 0)
+> > +#define RK_PINCTRL_PULL_UP             (1 << 1)
+> > +#define RK_PINCTRL_PULL_DOWN           (1 << 2)
+> =
+
+> So I'd like these moved to /include/dt-bindings/pinctrl/pinconfig.h
+> and used as a separete include. Drop the RK_* prefix as it
+> will be universal and use a PINCONFIG_* prefix instead
+> of PINCTRL_*.
+> =
+
+> I think that is the route we need to take.
+> =
+
+> Bonus if you implement more config options from
+> pinconf-generic.h but otherwise me and others will have
+> to do it.
+
+Gah, damn me for always wanting to get bonus points ;-),
+
+I did play around a bit with the idea you described above and came up
+with the stuff a bit below. This is in no way meant to be finished, I
+also only was able to compile test it yet, but it looks like it might
+work when I test it tomorrow.
+
+So if possible I would just like to get a "looks halfway sane, continue"
+or "completely wrong track" please :-) :
+
+
+constants in dt-bindings/pinctrl/pinconfig.h:
+-----------------------------
+#define PINCONFIG_NONE			0
+#define PINCONFIG_BIAS_DISABLE		(1 << 0)
+#define PINCONFIG_BIAS_HIGH_IMPEDANCE	(1 << 1)
+#define PINCONFIG_BIAS_BUS_HOLD		(1 << 2)
+#define PINCONFIG_BIAS_PULL_PIN_DEFAULT	(1 << 3)
+#define PINCONFIG_BIAS_PULL_UP		(1 << 4)
+#define PINCONFIG_BIAS_PULL_DOWN	(1 << 5)
+#define PINCONFIG_DRIVE_PUSH_PULL	(1 << 6)
+#define PINCONFIG_DRIVE_OPEN_DRAIN	(1 << 7)
+#define PINCONFIG_DRIVE_OPEN_SOURCE	(1 << 8)
+#define PINCONFIG_INPUT_SCHMITT_ENABLE	(1 << 9)
+#define PINCONFIG_INPUT_SCHMITT_DISABLE	(1 << 10)
+#define PINCONFIG_LOW_POWER_MODE	(1 << 11)
+#define PINCONFIG_OUTPUT_LOW		(1 << 12)
+#define PINCONFIG_OUTPUT_HIGH		(1 << 13)
+
+
+and code including how the rockchip driver could look like:
+---------
+diff --git a/drivers/pinctrl/pinconf-generic.c b/drivers/pinctrl/pinconf-ge=
+neric.c
+index 9a6812b..35c40be 100644
+--- a/drivers/pinctrl/pinconf-generic.c
++++ b/drivers/pinctrl/pinconf-generic.c
+@@ -139,3 +139,61 @@ void pinconf_generic_dump_config(struct pinctrl_dev *p=
+ctldev,
+ }
+ EXPORT_SYMBOL_GPL(pinconf_generic_dump_config);
+ #endif
 +
-+	if (mmc_slot(host).sdio_irq) {
-+		spin_lock_irqsave(&host->irq_lock, flags);
-+		seq_printf(s, "\n");
-+		seq_printf(s, "pinmux config\t%s\n", host->active_pinmux ?
-+			   "sdio" : "gpio");
-+		seq_printf(s, "sdio irq\t%s\n", host->sdio_irq_en ? "enabled" :
-+			   "disabled");
-+		if (!host->active_pinmux) {
-+			seq_printf(s, "sdio irq pin\t%s\n",
-+				   gpio_get_value(mmc_slot(host).gpio_cirq) ?
-+				   "high" : "low");
++/*
++ * Maps the devicetree config bits to actual pinconf values.
++ * The array indizes match the bits set in dt-bindings/pinctrl/pinconf.h
++ * and the array should contain an entry for each bit defined there
++ */
++static unsigned long conf_map[] =3D {
++	PIN_CONF_PACKED(PIN_CONFIG_BIAS_DISABLE, 0),
++	PIN_CONF_PACKED(PIN_CONFIG_BIAS_HIGH_IMPEDANCE, 0),
++	PIN_CONF_PACKED(PIN_CONFIG_BIAS_BUS_HOLD, 0),
++	PIN_CONF_PACKED(PIN_CONFIG_BIAS_PULL_PIN_DEFAULT, 0),
++	PIN_CONF_PACKED(PIN_CONFIG_BIAS_PULL_UP, 0),
++	PIN_CONF_PACKED(PIN_CONFIG_BIAS_PULL_DOWN, 0),
++	PIN_CONF_PACKED(PIN_CONFIG_DRIVE_PUSH_PULL, 0),
++	PIN_CONF_PACKED(PIN_CONFIG_DRIVE_OPEN_DRAIN, 0),
++	PIN_CONF_PACKED(PIN_CONFIG_DRIVE_OPEN_SOURCE, 0),
++	PIN_CONF_PACKED(PIN_CONFIG_INPUT_SCHMITT_ENABLE, 1),
++	PIN_CONF_PACKED(PIN_CONFIG_INPUT_SCHMITT_ENABLE, 0),
++	PIN_CONF_PACKED(PIN_CONFIG_LOW_POWER_MODE, 0),
++	PIN_CONF_PACKED(PIN_CONFIG_OUTPUT, 0),
++	PIN_CONF_PACKED(PIN_CONFIG_OUTPUT, 1),
++};
++
++/*
++ * Parse a pinconf bitmap from a devicetree entry into individual pin conf=
+igs.
++ * @pinconf: the bitmap containing config bits
++ * @configs: after the function returns contains a pointer to an array of
++ *	     pin configs
++ * @nconfigs: number of entries of configs
++ */
++int pinconf_generic_parse_dt_bitmap(unsigned long pinconf, =
+
++				    unsigned long *configs,
++				    unsigned int *nconfigs)
++{
++	int bit;
++	int i;
++
++	*nconfigs =3D hweight_long(pinconf);
++	configs =3D kzalloc(*nconfigs * sizeof(unsigned long), GFP_KERNEL);
++
++	i =3D 0;
++	while (pinconf && i < *nconfigs) {
++		bit =3D __ffs(pinconf);
++		pinconf &=3D ~BIT(i);
++
++		if (bit > ARRAY_SIZE(conf_map)) {
++			pr_err("%s: unknown bit %d\n", __func__, bit);
++			kfree(configs);
++			return -EINVAL;
 +		}
-+		seq_printf(s, "pm suspends\t%d\n", host->pm_suspend_ct);
-+		spin_unlock_irqrestore(&host->irq_lock, flags);
-+	}
- 
- 	if (host->suspended) {
- 		seq_printf(s, "host suspended, can't read registers\n");
-@@ -1788,9 +1807,11 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
- 	}
- 
- 	pm_runtime_get_sync(host->dev);
--
-+	seq_printf(s, "\nregs:\n");
- 	seq_printf(s, "CON:\t\t0x%08x\n",
- 			OMAP_HSMMC_READ(host->base, CON));
-+	seq_printf(s, "PSTATE:\t\t0x%08x\n",
-+		   OMAP_HSMMC_READ(host->base, PSTATE));
- 	seq_printf(s, "HCTL:\t\t0x%08x\n",
- 			OMAP_HSMMC_READ(host->base, HCTL));
- 	seq_printf(s, "SYSCTL:\t\t0x%08x\n",
-@@ -1970,6 +1991,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	host->slot_id	= 0;
- 	host->sdio_irq_en = false;
- 	host->active_pinmux = true;
-+	host->pm_suspend_ct = 0;
- 	host->mapbase	= res->start + pdata->reg_offset;
- 	host->base	= ioremap(host->mapbase, SZ_4K);
- 	host->power_mode = MMC_POWER_OFF;
-@@ -2378,6 +2400,8 @@ static int omap_hsmmc_runtime_suspend(struct device *dev)
- 	if (mmc->caps & MMC_CAP_SDIO_IRQ) {
- 		spin_lock_irqsave(&host->irq_lock, flags);
- 		host->active_pinmux = false;
-+		host->pm_suspend_ct++;
 +
- 		OMAP_HSMMC_WRITE(host->base, ISE, 0);
- 		OMAP_HSMMC_WRITE(host->base, IE, 0);
- 		OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
++		configs[i] =3D conf_map[bit];
++
++		i++;
++	}
++
++	return 0;
++}
+diff --git a/drivers/pinctrl/pinconf.h b/drivers/pinctrl/pinconf.h
+index 92c7267..0fab53a 100644
+--- a/drivers/pinctrl/pinconf.h
++++ b/drivers/pinctrl/pinconf.h
+@@ -123,3 +123,9 @@ static inline void pinconf_generic_dump_config(struct p=
+inctrl_dev *pctldev,
+ 	return;
+ }
+ #endif
++
++#ifdef CONFIG_GENERIC_PINCONF
++int pinconf_generic_parse_dt_bitmap(unsigned long pinconf, =
 
++				    unsigned long *configs,
++				    unsigned int *nconfigs);
++#endif
+diff --git a/drivers/pinctrl/pinctrl-rockchip.c b/drivers/pinctrl/pinctrl-r=
+ockchip.c
+index b77e241..88398df 100644
+--- a/drivers/pinctrl/pinctrl-rockchip.c
++++ b/drivers/pinctrl/pinctrl-rockchip.c
+@@ -40,6 +40,7 @@
+ #include <dt-bindings/pinctrl/rockchip.h>
+ =
+
+ #include "core.h"
++#include "pinconf.h"
+ =
+
+ /* GPIO control registers */
+ #define GPIO_SWPORT_DR		0x00
+@@ -639,7 +640,8 @@ static int rockchip_pinctrl_parse_groups(struct device_=
+node *np,
+ 	int num;
+ 	int i, j;
+ 	int pin;
+-	int bias;
++	int ret;
++	int nconfigs;
+ =
+
+ 	dev_dbg(info->dev, "group(%d): %s\n", index, np->name);
+ =
+
+@@ -683,22 +685,16 @@ static int rockchip_pinctrl_parse_groups(struct devic=
+e_node *np,
+ 		grp->func[j] =3D be32_to_cpu(*list++);
+ =
+
+ 		pinconf =3D be32_to_cpu(*list++);
+-		switch(pinconf) {
+-		case RK_PINCTRL_NONE:
+-			bias =3D PIN_CONFIG_BIAS_DISABLE;
+-			break;
+-		case RK_PINCTRL_PULL_PIN_DEFAULT:
+-			bias =3D PIN_CONFIG_BIAS_PULL_PIN_DEFAULT;
+-			break;
+-		case RK_PINCTRL_PULL_UP:
+-			bias =3D PIN_CONFIG_BIAS_PULL_UP;
+-			break;
+-		case RK_PINCTRL_PULL_DOWN:
+-			bias =3D PIN_CONFIG_BIAS_PULL_DOWN;
+-			break;
+-		}
+ =
+
+-		grp->configs[j] =3D pinconf_to_config_packed(bias, 0);
++		ret =3D pinconf_generic_parse_dt_bitmap(pinconf, =
+
++				    &grp->configs[j], &nconfigs);
++		if (ret)
++			return ret;
++
++		if (nconfigs !=3D 1) {
++			pr_err("unexpected number of config entries\n");
++			return -EINVAL;
++		}
+ 	}
+ =
+
+ 	return 0;
