@@ -1,129 +1,59 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v2 5/8] pinctrl: add pinctrl driver for Rockchip SoCs
-Date: Fri, 7 Jun 2013 14:53:51 +0200
-Message-ID: <CACRpkdZ97poa5HOP4baDnsdq5OjwO5S2=+pPH9ey84r=ZW43nA@mail.gmail.com>
-References: <201306062107.58875.heiko@sntech.de>
-	<201306062111.40983.heiko@sntech.de>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH 09/11] mmc: omap_hsmmc: enhance pinctrl support
+Date: Fri, 7 Jun 2013 19:06:07 +0530
+Message-ID: <51B1E1C7.7050407@ti.com>
+References: <1369995191-20855-1-git-send-email-gururaja.hebbar@ti.com> <1369995191-20855-10-git-send-email-gururaja.hebbar@ti.com> <20130604144632.GI3331@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f171.google.com ([209.85.214.171]:63333 "EHLO
-	mail-ob0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752995Ab3FGMxw convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jun 2013 08:53:52 -0400
-Received: by mail-ob0-f171.google.com with SMTP id dn14so6487956obc.2
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Jun 2013 05:53:51 -0700 (PDT)
-In-Reply-To: <201306062111.40983.heiko@sntech.de>
+Received: from comal.ext.ti.com ([198.47.26.152]:50661 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753082Ab3FGNgl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 7 Jun 2013 09:36:41 -0400
+In-Reply-To: <20130604144632.GI3331@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Mike Turquette <mturquette@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, Russell King <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+To: Tony Lindgren <tony@atomide.com>
+Cc: Hebbar Gururaja <gururaja.hebbar@ti.com>, khilman@linaro.org, linus.walleij@linaro.org, sudhakar.raj@ti.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, vaibhav.bedia@ti.com, linux-omap@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 
-On Thu, Jun 6, 2013 at 9:11 PM, Heiko St=FCbner <heiko@sntech.de> wrote=
-:
-
-> This driver adds support the Cortex-A9 based SoCs from Rockchip,
-> so at least the RK2928, RK3066 (a and b) and RK3188.
-> Earlier Rockchip SoCs seem to use similar mechanics for gpio
-> handling so should be supportable with relative small changes.
-> Pull handling on the rk3188 is currently a stub, due to it being
-> a bit different to the earlier SoCs.
+On Tuesday 04 June 2013 08:16 PM, Tony Lindgren wrote:
+> * Hebbar Gururaja <gururaja.hebbar@ti.com> [130531 03:19]:
+>> Amend the hsmmc controller to optionally take a pin control handle and
+>> set the state of the pins to:
+>>
+>> - "default" on boot, resume and before performing a mmc transfer
+>> - "idle" after initial default, after resume default, and after each
+>> mmc/sd card access
+>> - "sleep" on suspend()
+>>
+>> By optionally putting the pins into sleep state in the suspend callback
+>> we can accomplish two things.
+>> - One is to minimize current leakage from pins and thus save power,
+>> - second, we can prevent the IP from driving pins output in an
+>> uncontrolled manner, which may happen if the power domain drops the
+>> domain regulator.
+>>
+>> If any of the above pin states are missing in dt, a warning message
+>> about the missing state is displayed.
+>> If certain pin-states are not available, to remove this warning message
+>> pass respective state name with null phandler.
 >
-> Pinmuxing as well as gpio (and interrupt-) handling tested on
-> a rk3066a based machine.
+> There's a similar patch in the "[RESEND PATCH v2 1/3] mmc: omap_hsmmc:
+> Enable SDIO IRQ using a GPIO in idle mode" thread. It also makes the
+> SDIO interrupts to work, so we need to consider that too.
 >
-> Signed-off-by: Heiko Stuebner <heiko@sntech.de>
 
-This basically looks fine.
+Hi Tony,
 
-(...)
-> +Required properties for pin configuration node:
-> +  - rockchip,pins: 4 integers array, represents a group of pins mux =
-and config
-> +    setting. The format is rockchip,pins =3D <PIN_BANK PIN_BANK_NUM =
-MUX CONFIG>.
-> +    The MUX 0 means gpio and MUX 1 to 3 mean the specific device fun=
-ction
-> +
-> +Bits used for CONFIG:
-> +PULL_AUTO      (1 << 0): indicate this pin needs a pull setting for =
-SoCs
-> +                         that determine the pull up or down themself=
-s
-> +PULL_UP                (1 << 1): indicate this pin needs a pull up
-> +PULL_DOWN      (1 << 2): indicate this pin needs a pull down
+I will try to combine both of these and make use of
+pinctrl_pm_select_[*]_state helper functions.
 
 
-So I would rather have these (as a separate patch) in
-<dt-bindings/pinctrl/pinconfig.h>
-The documentation in
-Documentation/devicetree/bindings/pinctrl/pinctrl-bindings.txt
-and the same bindings to be used for as many systems as
-possible utilizing generic pin config.
-
-I will be liberal in accepting patches creating this
-infrastructure.
-
-We need to realize that we will be setting example for everyone
-else, and everyone else will be following that example.
-
-> +       for (i =3D 0, j =3D 0; i < size; i +=3D 4, j++) {
-> +               unsigned long pinconf;
-> +
-> +               num =3D be32_to_cpu(*list++);
-> +               bank =3D bank_num_to_bank(info, num);
-> +               if (IS_ERR(bank))
-> +                       return PTR_ERR(bank);
-> +
-> +               pin =3D be32_to_cpu(*list++);
-> +               grp->pins[j] =3D bank->pin_base + pin;
-> +               grp->func[j] =3D be32_to_cpu(*list++);
-> +
-> +               pinconf =3D be32_to_cpu(*list++);
-> +               switch(pinconf) {
-> +               case RK_PINCTRL_NONE:
-> +                       bias =3D PIN_CONFIG_BIAS_DISABLE;
-> +                       break;
-> +               case RK_PINCTRL_PULL_PIN_DEFAULT:
-> +                       bias =3D PIN_CONFIG_BIAS_PULL_PIN_DEFAULT;
-> +                       break;
-> +               case RK_PINCTRL_PULL_UP:
-> +                       bias =3D PIN_CONFIG_BIAS_PULL_UP;
-> +                       break;
-> +               case RK_PINCTRL_PULL_DOWN:
-> +                       bias =3D PIN_CONFIG_BIAS_PULL_DOWN;
-> +                       break;
-> +               }
-> +
-> +               grp->configs[j] =3D pinconf_to_config_packed(bias, 0)=
-;
-> +       }
-
-I would like this to be added to
-drivers/pinctrl/pinconf-generic.c
-as a utility function, with the header in
-drivers/pinctrl/pinconf.h
-
-Also in a separate patch.
-
-> +++ b/include/dt-bindings/pinctrl/rockchip.h
-(...)
-> +#define RK_PINCTRL_NONE                        0
-> +#define RK_PINCTRL_PULL_PIN_DEFAULT    (1 << 0)
-> +#define RK_PINCTRL_PULL_UP             (1 << 1)
-> +#define RK_PINCTRL_PULL_DOWN           (1 << 2)
-
-So I'd like these moved to /include/dt-bindings/pinctrl/pinconfig.h
-and used as a separete include. Drop the RK_* prefix as it
-will be universal and use a PINCONFIG_* prefix instead
-of PINCTRL_*.
-
-I think that is the route we need to take.
-
-Bonus if you implement more config options from
-pinconf-generic.h but otherwise me and others will have
-to do it.
-
-Yours,
-Linus Walleij
+> We can merge the dynamic pinmuxing parts separately, but they should
+> be in a separate function like I posted later on in the thread above.
+>
+> Regards,
+>
+> Tony
+>
