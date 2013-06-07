@@ -1,107 +1,529 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: Add the ability to set the ciu clock
- frequency
-Date: Fri, 07 Jun 2013 14:35:40 +0900
-Message-ID: <51B1712C.5030705@samsung.com>
-References: <1370580406-10254-1-git-send-email-dianders@chromium.org>
- <1370580406-10254-2-git-send-email-dianders@chromium.org>
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v9 1/9] ARM: davinci: move private EDMA API to arm/common
+Date: Fri, 7 Jun 2013 11:47:11 +0530
+Message-ID: <51B17AE7.4070403@ti.com>
+References: <1362586540-10393-1-git-send-email-mporter@ti.com>
+	<1362586540-10393-2-git-send-email-mporter@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <1370580406-10254-2-git-send-email-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, Andrew Bresticker <abrestic@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Rob Landley <rob@landley.net>, Will Newton <will.newton@imgtec.com>, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <1362586540-10393-2-git-send-email-mporter-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel@list>
 List-Id: linux-mmc@vger.kernel.org
 
-Looks good to me. If you can add the usage example, it will be more helpful to me.
++ Chris since the patch has some davinci_mmc.c changes.
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Chris, Mark,
 
-On 06/07/2013 01:46 PM, Doug Anderson wrote:
-> As of now we rely on code outside of the driver to set the ciu clock
-> frequency.  There's no reason to do that.  Add support for setting up
-> the clock in the driver during probe.
+On 3/6/2013 9:45 PM, Matt Porter wrote:
+> Move mach-davinci/dma.c to common/edma.c so it can be used
+> by OMAP (specifically AM33xx) as well.
 > 
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+> Acked-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+
+Can you please ack changes in mmc and sound respectively? I would like
+to take the patch for v3.11.
+
+Thanks,
+Sekhar
+
 > ---
->  .../devicetree/bindings/mmc/synopsis-dw-mshc.txt        | 13 +++++++++++++
->  drivers/mmc/host/dw_mmc.c                               | 17 +++++++++++++----
->  2 files changed, 26 insertions(+), 4 deletions(-)
+>  arch/arm/Kconfig                                   |    1 +
+>  arch/arm/common/Kconfig                            |    3 +
+>  arch/arm/common/Makefile                           |    1 +
+>  arch/arm/{mach-davinci/dma.c => common/edma.c}     |    2 +-
+>  arch/arm/mach-davinci/Makefile                     |    2 +-
+>  arch/arm/mach-davinci/board-tnetv107x-evm.c        |    2 +-
+>  arch/arm/mach-davinci/davinci.h                    |    2 +-
+>  arch/arm/mach-davinci/devices-tnetv107x.c          |    2 +-
+>  arch/arm/mach-davinci/devices.c                    |    6 +-
+>  arch/arm/mach-davinci/dm355.c                      |    2 +-
+>  arch/arm/mach-davinci/dm365.c                      |    2 +-
+>  arch/arm/mach-davinci/dm644x.c                     |    2 +-
+>  arch/arm/mach-davinci/dm646x.c                     |    2 +-
+>  arch/arm/mach-davinci/include/mach/da8xx.h         |    2 +-
+>  drivers/dma/edma.c                                 |    2 +-
+>  drivers/mmc/host/davinci_mmc.c                     |    1 +
+>  include/linux/mfd/davinci_voicecodec.h             |    3 +-
+>  .../mach => include/linux/platform_data}/edma.h    |   89 +-------------------
+>  include/linux/platform_data/spi-davinci.h          |    2 +-
+>  sound/soc/davinci/davinci-evm.c                    |    1 +
+>  sound/soc/davinci/davinci-pcm.c                    |    1 +
+>  sound/soc/davinci/davinci-pcm.h                    |    2 +-
+>  sound/soc/davinci/davinci-sffsdr.c                 |    5 +-
+>  23 files changed, 33 insertions(+), 104 deletions(-)
+>  rename arch/arm/{mach-davinci/dma.c => common/edma.c} (99%)
+>  rename {arch/arm/mach-davinci/include/mach => include/linux/platform_data}/edma.h (59%)
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
-> index b09d2d0..edb7659 100644
-> --- a/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
-> @@ -39,6 +39,19 @@ Required Properties:
+> diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+> index 5b71469..cb80a4d 100644
+> --- a/arch/arm/Kconfig
+> +++ b/arch/arm/Kconfig
+> @@ -956,6 +956,7 @@ config ARCH_DAVINCI
+>  	select GENERIC_IRQ_CHIP
+>  	select HAVE_IDE
+>  	select NEED_MACH_GPIO_H
+> +	select TI_PRIV_EDMA
+>  	select USE_OF
+>  	select ZONE_DMA
+>  	help
+> diff --git a/arch/arm/common/Kconfig b/arch/arm/common/Kconfig
+> index 9353184..c3a4e9c 100644
+> --- a/arch/arm/common/Kconfig
+> +++ b/arch/arm/common/Kconfig
+> @@ -17,3 +17,6 @@ config SHARP_PARAM
 >  
->  Optional properties:
->  
-> +* clocks: from common clock binding: handle to biu and ciu clocks for the
-> +  bus interface unit clock and the card interface unit clock.
+>  config SHARP_SCOOP
+>  	bool
 > +
-> +* clock-names: from common clock binding: Shall be "biu" and "ciu".
-> +  If the biu clock is missing we'll simply skip enabling it.  If the
-> +  ciu clock is missing we'll just assume that the clock is running at
-> +  clock-frequency.  It is an error to omit both the ciu clock and the
-> +  clock-frequency.
+> +config TI_PRIV_EDMA
+> +	bool
+> diff --git a/arch/arm/common/Makefile b/arch/arm/common/Makefile
+> index dc8dd0d..9643c50 100644
+> --- a/arch/arm/common/Makefile
+> +++ b/arch/arm/common/Makefile
+> @@ -11,3 +11,4 @@ obj-$(CONFIG_SHARP_PARAM)	+= sharpsl_param.o
+>  obj-$(CONFIG_SHARP_SCOOP)	+= scoop.o
+>  obj-$(CONFIG_PCI_HOST_ITE8152)  += it8152.o
+>  obj-$(CONFIG_ARM_TIMER_SP804)	+= timer-sp.o
+> +obj-$(CONFIG_TI_PRIV_EDMA)	+= edma.o
+> diff --git a/arch/arm/mach-davinci/dma.c b/arch/arm/common/edma.c
+> similarity index 99%
+> rename from arch/arm/mach-davinci/dma.c
+> rename to arch/arm/common/edma.c
+> index 45b7c71..dcaeb8e 100644
+> --- a/arch/arm/mach-davinci/dma.c
+> +++ b/arch/arm/common/edma.c
+> @@ -25,7 +25,7 @@
+>  #include <linux/io.h>
+>  #include <linux/slab.h>
+>  
+> -#include <mach/edma.h>
+> +#include <linux/platform_data/edma.h>
+>  
+>  /* Offsets matching "struct edmacc_param" */
+>  #define PARM_OPT		0x00
+> diff --git a/arch/arm/mach-davinci/Makefile b/arch/arm/mach-davinci/Makefile
+> index fb5c1aa..493a36b 100644
+> --- a/arch/arm/mach-davinci/Makefile
+> +++ b/arch/arm/mach-davinci/Makefile
+> @@ -5,7 +5,7 @@
+>  
+>  # Common objects
+>  obj-y 			:= time.o clock.o serial.o psc.o \
+> -			   dma.o usb.o common.o sram.o aemif.o
+> +			   usb.o common.o sram.o aemif.o
+>  
+>  obj-$(CONFIG_DAVINCI_MUX)		+= mux.o
+>  
+> diff --git a/arch/arm/mach-davinci/board-tnetv107x-evm.c b/arch/arm/mach-davinci/board-tnetv107x-evm.c
+> index 4f41602..10c9efd 100644
+> --- a/arch/arm/mach-davinci/board-tnetv107x-evm.c
+> +++ b/arch/arm/mach-davinci/board-tnetv107x-evm.c
+> @@ -26,12 +26,12 @@
+>  #include <linux/input.h>
+>  #include <linux/input/matrix_keypad.h>
+>  #include <linux/spi/spi.h>
+> +#include <linux/platform_data/edma.h>
+>  
+>  #include <asm/mach/arch.h>
+>  #include <asm/mach-types.h>
+>  
+>  #include <mach/irqs.h>
+> -#include <mach/edma.h>
+>  #include <mach/mux.h>
+>  #include <mach/cp_intc.h>
+>  #include <mach/tnetv107x.h>
+> diff --git a/arch/arm/mach-davinci/davinci.h b/arch/arm/mach-davinci/davinci.h
+> index 12d544b..d26a6bc 100644
+> --- a/arch/arm/mach-davinci/davinci.h
+> +++ b/arch/arm/mach-davinci/davinci.h
+> @@ -23,9 +23,9 @@
+>  #include <linux/platform_device.h>
+>  #include <linux/spi/spi.h>
+>  #include <linux/platform_data/davinci_asp.h>
+> +#include <linux/platform_data/edma.h>
+>  #include <linux/platform_data/keyscan-davinci.h>
+>  #include <mach/hardware.h>
+> -#include <mach/edma.h>
+>  
+>  #include <media/davinci/vpfe_capture.h>
+>  #include <media/davinci/vpif_types.h>
+> diff --git a/arch/arm/mach-davinci/devices-tnetv107x.c b/arch/arm/mach-davinci/devices-tnetv107x.c
+> index 773ab07..ba37760 100644
+> --- a/arch/arm/mach-davinci/devices-tnetv107x.c
+> +++ b/arch/arm/mach-davinci/devices-tnetv107x.c
+> @@ -18,10 +18,10 @@
+>  #include <linux/dma-mapping.h>
+>  #include <linux/clk.h>
+>  #include <linux/slab.h>
+> +#include <linux/platform_data/edma.h>
+>  
+>  #include <mach/common.h>
+>  #include <mach/irqs.h>
+> -#include <mach/edma.h>
+>  #include <mach/tnetv107x.h>
+>  
+>  #include "clock.h"
+> diff --git a/arch/arm/mach-davinci/devices.c b/arch/arm/mach-davinci/devices.c
+> index 4c48a36..ca0c7b3 100644
+> --- a/arch/arm/mach-davinci/devices.c
+> +++ b/arch/arm/mach-davinci/devices.c
+> @@ -19,9 +19,10 @@
+>  #include <mach/irqs.h>
+>  #include <mach/cputype.h>
+>  #include <mach/mux.h>
+> -#include <mach/edma.h>
+>  #include <linux/platform_data/mmc-davinci.h>
+>  #include <mach/time.h>
+> +#include <linux/platform_data/edma.h>
 > +
-> +* clock-frequency: should be the frequency (in Hz) of the ciu clock.  If this
-> +  is specified and the ciu clock is specified then we'll try to set the ciu
-> +  clock to this at probe time.
+>  
+>  #include "davinci.h"
+>  #include "clock.h"
+> @@ -34,6 +35,9 @@
+>  #define DM365_MMCSD0_BASE	     0x01D11000
+>  #define DM365_MMCSD1_BASE	     0x01D00000
+>  
+> +#define DAVINCI_DMA_MMCRXEVT	26
+> +#define DAVINCI_DMA_MMCTXEVT	27
 > +
->  * num-slots: specifies the number of slots supported by the controller.
->    The number of physical slots actually used could be equal or less than the
->    value specified by num-slots. If this property is not specified, the value
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index d3a0f8a..7ffb502 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2133,6 +2133,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->  	struct device_node *np = dev->of_node;
->  	const struct dw_mci_drv_data *drv_data = host->drv_data;
->  	int idx, ret;
-> +	u32 clock_frequency;
+>  void __iomem  *davinci_sysmod_base;
 >  
->  	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
->  	if (!pdata) {
-> @@ -2159,6 +2160,9 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  void davinci_map_sysmod(void)
+> diff --git a/arch/arm/mach-davinci/dm355.c b/arch/arm/mach-davinci/dm355.c
+> index b49c3b7..53998d8 100644
+> --- a/arch/arm/mach-davinci/dm355.c
+> +++ b/arch/arm/mach-davinci/dm355.c
+> @@ -19,7 +19,6 @@
+>  #include <asm/mach/map.h>
 >  
->  	of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
+>  #include <mach/cputype.h>
+> -#include <mach/edma.h>
+>  #include <mach/psc.h>
+>  #include <mach/mux.h>
+>  #include <mach/irqs.h>
+> @@ -28,6 +27,7 @@
+>  #include <mach/common.h>
+>  #include <linux/platform_data/spi-davinci.h>
+>  #include <mach/gpio-davinci.h>
+> +#include <linux/platform_data/edma.h>
 >  
-> +	if (!of_property_read_u32(np, "clock-frequency", &clock_frequency))
-> +		pdata->bus_hz = clock_frequency;
+>  #include "davinci.h"
+>  #include "clock.h"
+> diff --git a/arch/arm/mach-davinci/dm365.c b/arch/arm/mach-davinci/dm365.c
+> index 6c39805..9b41d33 100644
+> --- a/arch/arm/mach-davinci/dm365.c
+> +++ b/arch/arm/mach-davinci/dm365.c
+> @@ -18,11 +18,11 @@
+>  #include <linux/platform_device.h>
+>  #include <linux/dma-mapping.h>
+>  #include <linux/spi/spi.h>
+> +#include <linux/platform_data/edma.h>
+>  
+>  #include <asm/mach/map.h>
+>  
+>  #include <mach/cputype.h>
+> -#include <mach/edma.h>
+>  #include <mach/psc.h>
+>  #include <mach/mux.h>
+>  #include <mach/irqs.h>
+> diff --git a/arch/arm/mach-davinci/dm644x.c b/arch/arm/mach-davinci/dm644x.c
+> index db1dd92..e8bf21f 100644
+> --- a/arch/arm/mach-davinci/dm644x.c
+> +++ b/arch/arm/mach-davinci/dm644x.c
+> @@ -12,11 +12,11 @@
+>  #include <linux/clk.h>
+>  #include <linux/serial_8250.h>
+>  #include <linux/platform_device.h>
+> +#include <linux/platform_data/edma.h>
+>  
+>  #include <asm/mach/map.h>
+>  
+>  #include <mach/cputype.h>
+> -#include <mach/edma.h>
+>  #include <mach/irqs.h>
+>  #include <mach/psc.h>
+>  #include <mach/mux.h>
+> diff --git a/arch/arm/mach-davinci/dm646x.c b/arch/arm/mach-davinci/dm646x.c
+> index ac7b431..6d52a32 100644
+> --- a/arch/arm/mach-davinci/dm646x.c
+> +++ b/arch/arm/mach-davinci/dm646x.c
+> @@ -13,11 +13,11 @@
+>  #include <linux/clk.h>
+>  #include <linux/serial_8250.h>
+>  #include <linux/platform_device.h>
+> +#include <linux/platform_data/edma.h>
+>  
+>  #include <asm/mach/map.h>
+>  
+>  #include <mach/cputype.h>
+> -#include <mach/edma.h>
+>  #include <mach/irqs.h>
+>  #include <mach/psc.h>
+>  #include <mach/mux.h>
+> diff --git a/arch/arm/mach-davinci/include/mach/da8xx.h b/arch/arm/mach-davinci/include/mach/da8xx.h
+> index de439b7..311daec 100644
+> --- a/arch/arm/mach-davinci/include/mach/da8xx.h
+> +++ b/arch/arm/mach-davinci/include/mach/da8xx.h
+> @@ -20,8 +20,8 @@
+>  #include <linux/videodev2.h>
+>  
+>  #include <mach/serial.h>
+> -#include <mach/edma.h>
+>  #include <mach/pm.h>
+> +#include <linux/platform_data/edma.h>
+>  #include <linux/platform_data/i2c-davinci.h>
+>  #include <linux/platform_data/mmc-davinci.h>
+>  #include <linux/platform_data/usb-davinci.h>
+> diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
+> index cd7e328..5f3e532 100644
+> --- a/drivers/dma/edma.c
+> +++ b/drivers/dma/edma.c
+> @@ -24,7 +24,7 @@
+>  #include <linux/slab.h>
+>  #include <linux/spinlock.h>
+>  
+> -#include <mach/edma.h>
+> +#include <linux/platform_data/edma.h>
+>  
+>  #include "dmaengine.h"
+>  #include "virt-dma.h"
+> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+> index 2063677..f5d46ea 100644
+> --- a/drivers/mmc/host/davinci_mmc.c
+> +++ b/drivers/mmc/host/davinci_mmc.c
+> @@ -35,6 +35,7 @@
+>  #include <linux/edma.h>
+>  #include <linux/mmc/mmc.h>
+>  
+> +#include <linux/platform_data/edma.h>
+>  #include <linux/platform_data/mmc-davinci.h>
+>  
+>  /*
+> diff --git a/include/linux/mfd/davinci_voicecodec.h b/include/linux/mfd/davinci_voicecodec.h
+> index 0ab6132..7dd6524 100644
+> --- a/include/linux/mfd/davinci_voicecodec.h
+> +++ b/include/linux/mfd/davinci_voicecodec.h
+> @@ -26,8 +26,7 @@
+>  #include <linux/kernel.h>
+>  #include <linux/platform_device.h>
+>  #include <linux/mfd/core.h>
+> -
+> -#include <mach/edma.h>
+> +#include <linux/platform_data/edma.h>
+>  
+>  /*
+>   * Register values.
+> diff --git a/arch/arm/mach-davinci/include/mach/edma.h b/include/linux/platform_data/edma.h
+> similarity index 59%
+> rename from arch/arm/mach-davinci/include/mach/edma.h
+> rename to include/linux/platform_data/edma.h
+> index 7e84c90..2344ea2 100644
+> --- a/arch/arm/mach-davinci/include/mach/edma.h
+> +++ b/include/linux/platform_data/edma.h
+> @@ -1,28 +1,12 @@
+>  /*
+> - *  TI DAVINCI dma definitions
+> + *  TI EDMA definitions
+>   *
+> - *  Copyright (C) 2006-2009 Texas Instruments.
+> + *  Copyright (C) 2006-2013 Texas Instruments.
+>   *
+>   *  This program is free software; you can redistribute  it and/or modify it
+>   *  under  the terms of  the GNU General  Public License as published by the
+>   *  Free Software Foundation;  either version 2 of the  License, or (at your
+>   *  option) any later version.
+> - *
+> - *  THIS  SOFTWARE  IS PROVIDED   ``AS  IS'' AND   ANY  EXPRESS OR IMPLIED
+> - *  WARRANTIES,   INCLUDING, BUT NOT  LIMITED  TO, THE IMPLIED WARRANTIES OF
+> - *  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN
+> - *  NO  EVENT  SHALL   THE AUTHOR  BE    LIABLE FOR ANY   DIRECT, INDIRECT,
+> - *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+> - *  NOT LIMITED   TO, PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS OF
+> - *  USE, DATA,  OR PROFITS; OR  BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+> - *  ANY THEORY OF LIABILITY, WHETHER IN  CONTRACT, STRICT LIABILITY, OR TORT
+> - *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+> - *  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+> - *
+> - *  You should have received a copy of the  GNU General Public License along
+> - *  with this program; if not, write  to the Free Software Foundation, Inc.,
+> - *  675 Mass Ave, Cambridge, MA 02139, USA.
+> - *
+>   */
+>  
+>  /*
+> @@ -69,11 +53,6 @@ struct edmacc_param {
+>  	unsigned int ccnt;
+>  };
+>  
+> -#define CCINT0_INTERRUPT     16
+> -#define CCERRINT_INTERRUPT   17
+> -#define TCERRINT0_INTERRUPT   18
+> -#define TCERRINT1_INTERRUPT   19
+> -
+>  /* fields in edmacc_param.opt */
+>  #define SAM		BIT(0)
+>  #define DAM		BIT(1)
+> @@ -87,70 +66,6 @@ struct edmacc_param {
+>  #define TCCHEN		BIT(22)
+>  #define ITCCHEN		BIT(23)
+>  
+> -#define TRWORD (0x7<<2)
+> -#define PAENTRY (0x1ff<<5)
+> -
+> -/* Drivers should avoid using these symbolic names for dm644x
+> - * channels, and use platform_device IORESOURCE_DMA resources
+> - * instead.  (Other DaVinci chips have different peripherals
+> - * and thus have different DMA channel mappings.)
+> - */
+> -#define DAVINCI_DMA_MCBSP_TX              2
+> -#define DAVINCI_DMA_MCBSP_RX              3
+> -#define DAVINCI_DMA_VPSS_HIST             4
+> -#define DAVINCI_DMA_VPSS_H3A              5
+> -#define DAVINCI_DMA_VPSS_PRVU             6
+> -#define DAVINCI_DMA_VPSS_RSZ              7
+> -#define DAVINCI_DMA_IMCOP_IMXINT          8
+> -#define DAVINCI_DMA_IMCOP_VLCDINT         9
+> -#define DAVINCI_DMA_IMCO_PASQINT         10
+> -#define DAVINCI_DMA_IMCOP_DSQINT         11
+> -#define DAVINCI_DMA_SPI_SPIX             16
+> -#define DAVINCI_DMA_SPI_SPIR             17
+> -#define DAVINCI_DMA_UART0_URXEVT0        18
+> -#define DAVINCI_DMA_UART0_UTXEVT0        19
+> -#define DAVINCI_DMA_UART1_URXEVT1        20
+> -#define DAVINCI_DMA_UART1_UTXEVT1        21
+> -#define DAVINCI_DMA_UART2_URXEVT2        22
+> -#define DAVINCI_DMA_UART2_UTXEVT2        23
+> -#define DAVINCI_DMA_MEMSTK_MSEVT         24
+> -#define DAVINCI_DMA_MMCRXEVT             26
+> -#define DAVINCI_DMA_MMCTXEVT             27
+> -#define DAVINCI_DMA_I2C_ICREVT           28
+> -#define DAVINCI_DMA_I2C_ICXEVT           29
+> -#define DAVINCI_DMA_GPIO_GPINT0          32
+> -#define DAVINCI_DMA_GPIO_GPINT1          33
+> -#define DAVINCI_DMA_GPIO_GPINT2          34
+> -#define DAVINCI_DMA_GPIO_GPINT3          35
+> -#define DAVINCI_DMA_GPIO_GPINT4          36
+> -#define DAVINCI_DMA_GPIO_GPINT5          37
+> -#define DAVINCI_DMA_GPIO_GPINT6          38
+> -#define DAVINCI_DMA_GPIO_GPINT7          39
+> -#define DAVINCI_DMA_GPIO_GPBNKINT0       40
+> -#define DAVINCI_DMA_GPIO_GPBNKINT1       41
+> -#define DAVINCI_DMA_GPIO_GPBNKINT2       42
+> -#define DAVINCI_DMA_GPIO_GPBNKINT3       43
+> -#define DAVINCI_DMA_GPIO_GPBNKINT4       44
+> -#define DAVINCI_DMA_TIMER0_TINT0         48
+> -#define DAVINCI_DMA_TIMER1_TINT1         49
+> -#define DAVINCI_DMA_TIMER2_TINT2         50
+> -#define DAVINCI_DMA_TIMER3_TINT3         51
+> -#define DAVINCI_DMA_PWM0                 52
+> -#define DAVINCI_DMA_PWM1                 53
+> -#define DAVINCI_DMA_PWM2                 54
+> -
+> -/* DA830 specific EDMA3 information */
+> -#define EDMA_DA830_NUM_DMACH		32
+> -#define EDMA_DA830_NUM_TCC		32
+> -#define EDMA_DA830_NUM_PARAMENTRY	128
+> -#define EDMA_DA830_NUM_EVQUE		2
+> -#define EDMA_DA830_NUM_TC		2
+> -#define EDMA_DA830_CHMAP_EXIST		0
+> -#define EDMA_DA830_NUM_REGIONS		4
+> -#define DA830_DMACH2EVENT_MAP0		0x000FC03Fu
+> -#define DA830_DMACH2EVENT_MAP1		0x00000000u
+> -#define DA830_EDMA_ARM_OWN		0x30FFCCFFu
+> -
+>  /*ch_status paramater of callback function possible values*/
+>  #define DMA_COMPLETE 1
+>  #define DMA_CC_ERROR 2
+> diff --git a/include/linux/platform_data/spi-davinci.h b/include/linux/platform_data/spi-davinci.h
+> index 7af305b..8dc2fa47 100644
+> --- a/include/linux/platform_data/spi-davinci.h
+> +++ b/include/linux/platform_data/spi-davinci.h
+> @@ -19,7 +19,7 @@
+>  #ifndef __ARCH_ARM_DAVINCI_SPI_H
+>  #define __ARCH_ARM_DAVINCI_SPI_H
+>  
+> -#include <mach/edma.h>
+> +#include <linux/platform_data/edma.h>
+>  
+>  #define SPI_INTERN_CS	0xFF
+>  
+> diff --git a/sound/soc/davinci/davinci-evm.c b/sound/soc/davinci/davinci-evm.c
+> index 484b22c..fd7c45b 100644
+> --- a/sound/soc/davinci/davinci-evm.c
+> +++ b/sound/soc/davinci/davinci-evm.c
+> @@ -14,6 +14,7 @@
+>  #include <linux/timer.h>
+>  #include <linux/interrupt.h>
+>  #include <linux/platform_device.h>
+> +#include <linux/platform_data/edma.h>
+>  #include <linux/i2c.h>
+>  #include <sound/core.h>
+>  #include <sound/pcm.h>
+> diff --git a/sound/soc/davinci/davinci-pcm.c b/sound/soc/davinci/davinci-pcm.c
+> index afab81f..9bdd71b 100644
+> --- a/sound/soc/davinci/davinci-pcm.c
+> +++ b/sound/soc/davinci/davinci-pcm.c
+> @@ -17,6 +17,7 @@
+>  #include <linux/dma-mapping.h>
+>  #include <linux/kernel.h>
+>  #include <linux/genalloc.h>
+> +#include <linux/platform_data/edma.h>
+>  
+>  #include <sound/core.h>
+>  #include <sound/pcm.h>
+> diff --git a/sound/soc/davinci/davinci-pcm.h b/sound/soc/davinci/davinci-pcm.h
+> index b6ef703..fbb710c 100644
+> --- a/sound/soc/davinci/davinci-pcm.h
+> +++ b/sound/soc/davinci/davinci-pcm.h
+> @@ -14,7 +14,7 @@
+>  
+>  #include <linux/genalloc.h>
+>  #include <linux/platform_data/davinci_asp.h>
+> -#include <mach/edma.h>
+> +#include <linux/platform_data/edma.h>
+>  
+>  struct davinci_pcm_dma_params {
+>  	int channel;			/* sync dma channel ID */
+> diff --git a/sound/soc/davinci/davinci-sffsdr.c b/sound/soc/davinci/davinci-sffsdr.c
+> index 5be65aa..76ea586 100644
+> --- a/sound/soc/davinci/davinci-sffsdr.c
+> +++ b/sound/soc/davinci/davinci-sffsdr.c
+> @@ -17,6 +17,7 @@
+>  #include <linux/timer.h>
+>  #include <linux/interrupt.h>
+>  #include <linux/platform_device.h>
+> +#include <linux/platform_data/edma.h>
+>  #include <linux/gpio.h>
+>  #include <sound/core.h>
+>  #include <sound/pcm.h>
+> @@ -28,12 +29,14 @@
+>  #include <asm/plat-sffsdr/sffsdr-fpga.h>
+>  #endif
+>  
+> -#include <mach/edma.h>
+>  
+>  #include "../codecs/pcm3008.h"
+>  #include "davinci-pcm.h"
+>  #include "davinci-i2s.h"
+>  
+> +#define DAVINCI_DMA_MCBSP_TX	2
+> +#define DAVINCI_DMA_MCBSP_RX	3
 > +
->  	if (drv_data && drv_data->parse_dt) {
->  		ret = drv_data->parse_dt(host);
->  		if (ret)
-> @@ -2223,18 +2227,23 @@ int dw_mci_probe(struct dw_mci *host)
->  	host->ciu_clk = devm_clk_get(host->dev, "ciu");
->  	if (IS_ERR(host->ciu_clk)) {
->  		dev_dbg(host->dev, "ciu clock not available\n");
-> +		host->bus_hz = host->pdata->bus_hz;
->  	} else {
->  		ret = clk_prepare_enable(host->ciu_clk);
->  		if (ret) {
->  			dev_err(host->dev, "failed to enable ciu clock\n");
->  			goto err_clk_biu;
->  		}
-> -	}
->  
-> -	if (IS_ERR(host->ciu_clk))
-> -		host->bus_hz = host->pdata->bus_hz;
-> -	else
-> +		if (host->pdata->bus_hz) {
-> +			ret = clk_set_rate(host->ciu_clk, host->pdata->bus_hz);
-> +			if (ret)
-> +				dev_warn(host->dev,
-> +					 "Unable to set bus rate to %ul\n",
-> +					 host->pdata->bus_hz);
-> +		}
->  		host->bus_hz = clk_get_rate(host->ciu_clk);
-> +	}
->  
->  	if (drv_data && drv_data->setup_clock) {
->  		ret = drv_data->setup_clock(host);
+>  /*
+>   * CLKX and CLKR are the inputs for the Sample Rate Generator.
+>   * FSX and FSR are outputs, driven by the sample Rate Generator.
 > 
