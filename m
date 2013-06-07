@@ -1,74 +1,129 @@
-From: Heiko =?iso-8859-1?q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH v2 1/8] clk: flag to use upper half of the register as change indicator
-Date: Fri, 7 Jun 2013 14:27:20 +0200
-Message-ID: <201306071427.20512.heiko@sntech.de>
-References: <201306062107.58875.heiko@sntech.de> <201306062108.38587.heiko@sntech.de> <CACRpkda+QwnhCHBhQ3d-zUE9dD75Rv0_qt02h6prrzCBzNm5zw@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v2 5/8] pinctrl: add pinctrl driver for Rockchip SoCs
+Date: Fri, 7 Jun 2013 14:53:51 +0200
+Message-ID: <CACRpkdZ97poa5HOP4baDnsdq5OjwO5S2=+pPH9ey84r=ZW43nA@mail.gmail.com>
+References: <201306062107.58875.heiko@sntech.de>
+	<201306062111.40983.heiko@sntech.de>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=iso-8859-1
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:48387 "EHLO gloria.sntech.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752047Ab3FGM1c (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 7 Jun 2013 08:27:32 -0400
-In-Reply-To: <CACRpkda+QwnhCHBhQ3d-zUE9dD75Rv0_qt02h6prrzCBzNm5zw@mail.gmail.com>
+Received: from mail-ob0-f171.google.com ([209.85.214.171]:63333 "EHLO
+	mail-ob0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752995Ab3FGMxw convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jun 2013 08:53:52 -0400
+Received: by mail-ob0-f171.google.com with SMTP id dn14so6487956obc.2
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Jun 2013 05:53:51 -0700 (PDT)
+In-Reply-To: <201306062111.40983.heiko@sntech.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>, Haojian Zhuang <haojian.zhuang@linaro.org>
+To: =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>
 Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Mike Turquette <mturquette@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, Russell King <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-Am Freitag, 7. Juni 2013, 13:46:32 schrieb Linus Walleij:
-> On Thu, Jun 6, 2013 at 9:08 PM, Heiko St=FCbner <heiko@sntech.de> wro=
-te:
-> > There exist platforms, namely at least all Rockchip Cortex-A9 based=
- ones,
-> > that don't use the paradigm of reading-changing-writing the registe=
-r
-> > contents, but instead only write the changes to the register with a=
- mask
-> > that indicates the changed bits.
-> >=20
-> > This patch adds flags and code to support the case where the lower =
-16 bit
-> > of hold the information and the upper 16 bit are used as mask to
-> > indicate the written changes.
-> >=20
-> > As hardware-specific flags should not be added to the common clk fl=
-ags,
-> > the flags are added to gate, mux and divider clocks individually.
-> >=20
-> > Signed-off-by: Heiko Stuebner <heiko@sntech.de>
->=20
-> (...)
->=20
-> > +       if ((clk_gate_flags & CLK_GATE_MASK_UPPER_HALF) && bit_idx =
-> 15)
-> > { +               pr_err("%s: bit_idx %d invalid\n", __func__, bit_=
-idx);
-> > +               return ERR_PTR(-EINVAL);
-> > +       }
->=20
-> Now this looks *EXTREMELY* familiar to a patch just sent by Haojian
-> for HiSilicon.
->=20
-> "[PATCH v2 3/6] clk: divider: add CLK_DIVIDER_HIWORD_MASK flag"
-> http://marc.info/?l=3Dlinux-arm-kernel&m=3D137035873916777&w=3D2
->=20
-> What kind of coincidence is this? Are Rockchip and HiSilicon using
-> the same silicon IP or are they of a common origin? (It is a small
-> world after all.)
+On Thu, Jun 6, 2013 at 9:11 PM, Heiko St=FCbner <heiko@sntech.de> wrote=
+:
 
-Now this is really interesting :-) and the handling really seems to fol=
-low the=20
-same pattern.
+> This driver adds support the Cortex-A9 based SoCs from Rockchip,
+> so at least the RK2928, RK3066 (a and b) and RK3188.
+> Earlier Rockchip SoCs seem to use similar mechanics for gpio
+> handling so should be supportable with relative small changes.
+> Pull handling on the rk3188 is currently a stub, due to it being
+> a bit different to the earlier SoCs.
+>
+> Pinmuxing as well as gpio (and interrupt-) handling tested on
+> a rk3066a based machine.
+>
+> Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+
+This basically looks fine.
+
+(...)
+> +Required properties for pin configuration node:
+> +  - rockchip,pins: 4 integers array, represents a group of pins mux =
+and config
+> +    setting. The format is rockchip,pins =3D <PIN_BANK PIN_BANK_NUM =
+MUX CONFIG>.
+> +    The MUX 0 means gpio and MUX 1 to 3 mean the specific device fun=
+ction
+> +
+> +Bits used for CONFIG:
+> +PULL_AUTO      (1 << 0): indicate this pin needs a pull setting for =
+SoCs
+> +                         that determine the pull up or down themself=
+s
+> +PULL_UP                (1 << 1): indicate this pin needs a pull up
+> +PULL_DOWN      (1 << 2): indicate this pin needs a pull down
 
 
-> I think you two guys need to read each others patch sets closely
-> here. I'd like Haojian to look at Heiko's patches and Heiko to look
-> at Haojian's patches, just to make sure you're not actually writing
-> two drivers for the same hardware in the end.
+So I would rather have these (as a separate patch) in
+<dt-bindings/pinctrl/pinconfig.h>
+The documentation in
+Documentation/devicetree/bindings/pinctrl/pinctrl-bindings.txt
+and the same bindings to be used for as many systems as
+possible utilizing generic pin config.
 
-I'll take a look
+I will be liberal in accepting patches creating this
+infrastructure.
 
+We need to realize that we will be setting example for everyone
+else, and everyone else will be following that example.
 
-Heiko
+> +       for (i =3D 0, j =3D 0; i < size; i +=3D 4, j++) {
+> +               unsigned long pinconf;
+> +
+> +               num =3D be32_to_cpu(*list++);
+> +               bank =3D bank_num_to_bank(info, num);
+> +               if (IS_ERR(bank))
+> +                       return PTR_ERR(bank);
+> +
+> +               pin =3D be32_to_cpu(*list++);
+> +               grp->pins[j] =3D bank->pin_base + pin;
+> +               grp->func[j] =3D be32_to_cpu(*list++);
+> +
+> +               pinconf =3D be32_to_cpu(*list++);
+> +               switch(pinconf) {
+> +               case RK_PINCTRL_NONE:
+> +                       bias =3D PIN_CONFIG_BIAS_DISABLE;
+> +                       break;
+> +               case RK_PINCTRL_PULL_PIN_DEFAULT:
+> +                       bias =3D PIN_CONFIG_BIAS_PULL_PIN_DEFAULT;
+> +                       break;
+> +               case RK_PINCTRL_PULL_UP:
+> +                       bias =3D PIN_CONFIG_BIAS_PULL_UP;
+> +                       break;
+> +               case RK_PINCTRL_PULL_DOWN:
+> +                       bias =3D PIN_CONFIG_BIAS_PULL_DOWN;
+> +                       break;
+> +               }
+> +
+> +               grp->configs[j] =3D pinconf_to_config_packed(bias, 0)=
+;
+> +       }
+
+I would like this to be added to
+drivers/pinctrl/pinconf-generic.c
+as a utility function, with the header in
+drivers/pinctrl/pinconf.h
+
+Also in a separate patch.
+
+> +++ b/include/dt-bindings/pinctrl/rockchip.h
+(...)
+> +#define RK_PINCTRL_NONE                        0
+> +#define RK_PINCTRL_PULL_PIN_DEFAULT    (1 << 0)
+> +#define RK_PINCTRL_PULL_UP             (1 << 1)
+> +#define RK_PINCTRL_PULL_DOWN           (1 << 2)
+
+So I'd like these moved to /include/dt-bindings/pinctrl/pinconfig.h
+and used as a separete include. Drop the RK_* prefix as it
+will be universal and use a PINCONFIG_* prefix instead
+of PINCTRL_*.
+
+I think that is the route we need to take.
+
+Bonus if you implement more config options from
+pinconf-generic.h but otherwise me and others will have
+to do it.
+
+Yours,
+Linus Walleij
