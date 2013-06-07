@@ -1,65 +1,70 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCHv2] mmc: sdhci-s3c: fix the wrong register value when,
- clock is disabled
-Date: Fri, 07 Jun 2013 20:39:14 +0900
-Message-ID: <51B1C662.3060405@samsung.com>
-References: <51A2DCC4.2020307@samsung.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v2 1/8] clk: flag to use upper half of the register as
+ change indicator
+Date: Fri, 7 Jun 2013 13:46:32 +0200
+Message-ID: <CACRpkda+QwnhCHBhQ3d-zUE9dD75Rv0_qt02h6prrzCBzNm5zw@mail.gmail.com>
+References: <201306062107.58875.heiko@sntech.de>
+	<201306062108.38587.heiko@sntech.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:15022 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751424Ab3FGLjQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jun 2013 07:39:16 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MO000EHCTPC1T20@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 07 Jun 2013 20:39:15 +0900 (KST)
-In-reply-to: <51A2DCC4.2020307@samsung.com>
+Received: from mail-ob0-f173.google.com ([209.85.214.173]:38803 "EHLO
+	mail-ob0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751424Ab3FGLqd convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jun 2013 07:46:33 -0400
+Received: by mail-ob0-f173.google.com with SMTP id wc20so6301283obb.4
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Jun 2013 04:46:33 -0700 (PDT)
+In-Reply-To: <201306062108.38587.heiko@sntech.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>, Haojian Zhuang <haojian.zhuang@linaro.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Mike Turquette <mturquette@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, Russell King <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-Dear Chris,
+On Thu, Jun 6, 2013 at 9:08 PM, Heiko St=FCbner <heiko@sntech.de> wrote=
+:
 
-If you didn't have any comment, Could you merge this patch, plz?
+> There exist platforms, namely at least all Rockchip Cortex-A9 based o=
+nes,
+> that don't use the paradigm of reading-changing-writing the register =
+contents,
+> but instead only write the changes to the register with a mask that i=
+ndicates
+> the changed bits.
+>
+> This patch adds flags and code to support the case where the lower 16=
+ bit of
+> hold the information and the upper 16 bit are used as mask to indicat=
+e the
+> written changes.
+>
+> As hardware-specific flags should not be added to the common clk flag=
+s, the
+> flags are added to gate, mux and divider clocks individually.
+>
+> Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+(...)
+> +       if ((clk_gate_flags & CLK_GATE_MASK_UPPER_HALF) && bit_idx > =
+15) {
+> +               pr_err("%s: bit_idx %d invalid\n", __func__, bit_idx)=
+;
+> +               return ERR_PTR(-EINVAL);
+> +       }
 
-Best Regards,
-Jaehoon Chung
+Now this looks *EXTREMELY* familiar to a patch just sent by Haojian
+for HiSilicon.
 
-On 05/27/2013 01:10 PM, Jaehoon Chung wrote:
-> When use the QUIRK_NONSTANDARD_CLOCK, then never set to 0 at clock control register.
-> This patch is fixed this problem.
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.co
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
-> Changelog v2:
-> - Rebased at the latest mmc tree
-> 
->  drivers/mmc/host/sdhci-s3c.c |    5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 926aaf6..ce71f32 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -297,8 +297,11 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
->  	u16 clk = 0;
->  
->  	/* don't bother if the clock is going off */
-> -	if (clock == 0)
-> +	if (clock == 0) {
-> +		sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-> +		host->clock = clock;
->  		return;
-> +	}
->  
->  	sdhci_s3c_set_clock(host, clock);
->  
-> 
+"[PATCH v2 3/6] clk: divider: add CLK_DIVIDER_HIWORD_MASK flag"
+http://marc.info/?l=3Dlinux-arm-kernel&m=3D137035873916777&w=3D2
 
+What kind of coincidence is this? Are Rockchip and HiSilicon using
+the same silicon IP or are they of a common origin? (It is a small
+world after all.)
+
+I think you two guys need to read each others patch sets closely
+here. I'd like Haojian to look at Heiko's patches and Heiko to look
+at Haojian's patches, just to make sure you're not actually writing
+two drivers for the same hardware in the end.
+
+Yours,
+Linus Walleij
