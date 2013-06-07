@@ -1,77 +1,140 @@
-From: Boris BREZILLON <b.brezillon@overkiz.com>
-Subject: [RFC PATCH 29/50] mmc: atmel-mci: prepare clk before calling enable
-Date: Fri,  7 Jun 2013 18:26:31 +0200
-Message-ID: <1370622391-19654-1-git-send-email-b.brezillon@overkiz.com>
-References: <1370615115-16979-1-git-send-email-b.brezillon@overkiz.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1370615115-16979-1-git-send-email-b.brezillon@overkiz.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mike Turquette <mturquette@linaro.org>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Nicolas Ferre <nicolas.ferre@atmel.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Ludovic Desroches <ludovic.desroches@atmel.com>
-Cc: Boris BREZILLON <b.brezillon@overkiz.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+From: Doug Anderson <dianders@chromium.org>
+Subject: [PATCH v2 1/2] mmc: dw_mmc: Handle late vmmc regulators with EPROBE_DEFER
+Date: Fri,  7 Jun 2013 10:28:29 -0700
+Message-ID: <1370626110-1731-1-git-send-email-dianders@chromium.org>
+References: <1370580406-10254-1-git-send-email-dianders@chromium.org>
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1370580406-10254-1-git-send-email-dianders@chromium.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Olof Johansson <olof@lixom.net>, Andrew Bresticker <abrestic@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Doug Anderson <dianders@chromium.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Rob Landley <rob@landley.net>, Will Newton <will.newton@gmail.com>, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Replace clk_enable/disable with clk_prepare_enable/disable_unprepare to
-avoid common clk framework warnings.
+It is possible to specify a regulator that should be turned on when
+dw_mmc is probed.  At the moment dw_mmc will fail to use the regulator
+properly if the regulator probes after dw_mmc.  Fix this problem by
+honoring EPROBE_DEFER.
 
-Signed-off-by: Boris BREZILLON <b.brezillon@overkiz.com>
+At the same time move the regulator code out of the slot init code.
+We only specify one regulator for the whole device and other parts of
+the code (like suspend/resume) assume that the regulator has only been
+enabled once.
+
+Signed-off-by: Doug Anderson <dianders@chromium.org>
 ---
- drivers/mmc/host/atmel-mci.c |   16 +++++++++++++---
- 1 file changed, 13 insertions(+), 3 deletions(-)
+Changes in v2:
+- Avoid hackery to detect regulators that will never show up.
+- Move regulator out of slot init--it doesn't belong there.
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index e75774f..99c2fcc 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -380,6 +380,8 @@ static int atmci_regs_show(struct seq_file *s, void *v)
- {
- 	struct atmel_mci	*host = s->private;
- 	u32			*buf;
-+	int			ret;
+ .../devicetree/bindings/mmc/synopsis-dw-mshc.txt   |  4 +++
+ drivers/mmc/host/dw_mmc.c                          | 40 ++++++++++++----------
+ 2 files changed, 25 insertions(+), 19 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
+index 726fd21..d5cc94e 100644
+--- a/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
+@@ -55,6 +55,9 @@ Optional properties:
+ 
+ * broken-cd: as documented in mmc core bindings.
+ 
++* vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
++  specified we'll defer probe until we can find this regulator.
 +
+ Aliases:
  
- 	buf = kmalloc(ATMCI_REGS_SIZE, GFP_KERNEL);
- 	if (!buf)
-@@ -391,7 +393,11 @@ static int atmci_regs_show(struct seq_file *s, void *v)
- 	 * consistent.
- 	 */
- 	spin_lock_bh(&host->lock);
--	clk_enable(host->mck);
-+	ret = clk_enable(host->mck);
-+	if (ret) {
-+		kfree(buf);
-+		return ret;
+ - All the MSHC controller nodes should be represented in the aliases node using
+@@ -79,6 +82,7 @@ board specific portions as listed below.
+ 		broken-cd;
+ 		fifo-depth = <0x80>;
+ 		card-detect-delay = <200>;
++		vmmc-supply = <&buck8>;
+ 
+ 		slot@0 {
+ 			reg = <0>;
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index bc3a1bc..ab5642d 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1895,7 +1895,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	struct mmc_host *mmc;
+ 	struct dw_mci_slot *slot;
+ 	const struct dw_mci_drv_data *drv_data = host->drv_data;
+-	int ctrl_id, ret;
++	int ctrl_id;
+ 	u8 bus_width;
+ 
+ 	mmc = mmc_alloc_host(sizeof(struct dw_mci_slot), host->dev);
+@@ -1985,19 +1985,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ #endif /* CONFIG_MMC_DW_IDMAC */
+ 	}
+ 
+-	host->vmmc = devm_regulator_get(mmc_dev(mmc), "vmmc");
+-	if (IS_ERR(host->vmmc)) {
+-		pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
+-		host->vmmc = NULL;
+-	} else {
+-		ret = regulator_enable(host->vmmc);
+-		if (ret) {
+-			dev_err(host->dev,
+-				"failed to enable regulator: %d\n", ret);
+-			goto err_setup_bus;
+-		}
+-	}
+-
+ 	if (dw_mci_get_cd(mmc))
+ 		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+ 	else
+@@ -2023,10 +2010,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	queue_work(host->card_workqueue, &host->card_work);
+ 
+ 	return 0;
+-
+-err_setup_bus:
+-	mmc_free_host(mmc);
+-	return -EINVAL;
+ }
+ 
+ static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
+@@ -2229,11 +2212,29 @@ int dw_mci_probe(struct dw_mci *host)
+ 		}
+ 	}
+ 
++	host->vmmc = devm_regulator_get(host->dev, "vmmc");
++	if (IS_ERR(host->vmmc)) {
++		ret = PTR_ERR(host->vmmc);
++		if (ret == -EPROBE_DEFER)
++			goto err_clk_ciu;
++
++		dev_info(host->dev, "no vmmc regulator found: %d\n", ret);
++		host->vmmc = NULL;
++	} else {
++		ret = regulator_enable(host->vmmc);
++		if (ret) {
++			if (ret != -EPROBE_DEFER)
++				dev_err(host->dev,
++					"regulator_enable fail: %d\n", ret);
++			goto err_clk_ciu;
++		}
 +	}
- 	memcpy_fromio(buf, host->regs, ATMCI_REGS_SIZE);
- 	clk_disable(host->mck);
- 	spin_unlock_bh(&host->lock);
-@@ -2379,7 +2385,9 @@ static int __init atmci_probe(struct platform_device *pdev)
- 	if (!host->regs)
- 		goto err_ioremap;
++
+ 	if (!host->bus_hz) {
+ 		dev_err(host->dev,
+ 			"Platform data must supply bus speed\n");
+ 		ret = -ENODEV;
+-		goto err_clk_ciu;
++		goto err_regulator;
+ 	}
  
--	clk_enable(host->mck);
-+	ret = clk_prepare_enable(host->mck);
-+	if (ret)
-+		goto err_clk_prepare_enable;
- 	atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
- 	host->bus_hz = clk_get_rate(host->mck);
- 	clk_disable(host->mck);
-@@ -2463,6 +2471,8 @@ err_init_slot:
- 		dma_release_channel(host->dma.chan);
- 	free_irq(irq, host);
- err_request_irq:
-+	clk_unprepare(host->mck);
-+err_clk_prepare_enable:
- 	iounmap(host->regs);
- err_ioremap:
- 	clk_put(host->mck);
-@@ -2491,7 +2501,7 @@ static int __exit atmci_remove(struct platform_device *pdev)
- 	atmci_writel(host, ATMCI_IDR, ~0UL);
- 	atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
- 	atmci_readl(host, ATMCI_SR);
--	clk_disable(host->mck);
-+	clk_disable_unprepare(host->mck);
+ 	host->quirks = host->pdata->quirks;
+@@ -2378,6 +2379,7 @@ err_dmaunmap:
+ 	if (host->use_dma && host->dma_ops->exit)
+ 		host->dma_ops->exit(host);
  
- 	if (host->dma.chan)
- 		dma_release_channel(host->dma.chan);
++err_regulator:
+ 	if (host->vmmc)
+ 		regulator_disable(host->vmmc);
+ 
 -- 
-1.7.9.5
+1.8.3
+
