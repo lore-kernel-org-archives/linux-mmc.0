@@ -1,165 +1,157 @@
 From: Simon Baatz <gmbnomis@gmail.com>
-Subject: [RESEND PATCH V3 7/8] ARM: mvebu: Use standard MMC binding for all users of mvsdio
-Date: Sun,  9 Jun 2013 22:14:17 +0200
-Message-ID: <1370808858-32241-8-git-send-email-gmbnomis@gmail.com>
+Subject: [RESEND PATCH V3 8/8] mmc: mvsdio: use standard MMC device-tree binding parser mmc_of_parse()
+Date: Sun,  9 Jun 2013 22:14:18 +0200
+Message-ID: <1370808858-32241-9-git-send-email-gmbnomis@gmail.com>
 References: <1370808858-32241-1-git-send-email-gmbnomis@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mo-p00-ob.rzone.de ([81.169.146.160]:24489 "EHLO
+Received: from mo-p00-ob.rzone.de ([81.169.146.162]:43924 "EHLO
 	mo-p00-ob.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751116Ab3FIUPT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Jun 2013 16:15:19 -0400
+	with ESMTP id S1751116Ab3FIUPX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Jun 2013 16:15:23 -0400
 In-Reply-To: <1370808858-32241-1-git-send-email-gmbnomis@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
 Cc: Chris Ball <cjb@laptop.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-In order to prepare the switch to the standard MMC device tree parser
-for mvsdio, adapt all current uses of mvsdio in the dts files to the
-standard format.
+Instead of parsing the DT binding on our own, use the standard parser
+mmc_of_parse(), introduced by commit 6c56e7a.
 
 Signed-off-by: Simon Baatz <gmbnomis@gmail.com>
 ---
- arch/arm/boot/dts/armada-370-db.dts                |    1 +
- arch/arm/boot/dts/armada-370-mirabox.dts           |    1 +
- arch/arm/boot/dts/armada-370-rd.dts                |    1 +
- arch/arm/boot/dts/armada-370-xp.dtsi               |    4 ++++
- arch/arm/boot/dts/armada-xp-db.dts                 |    1 +
- arch/arm/boot/dts/kirkwood-dreamplug.dts           |    1 +
- .../arm/boot/dts/kirkwood-guruplug-server-plus.dts |    2 ++
- arch/arm/boot/dts/kirkwood-mplcec4.dts             |    2 +-
- arch/arm/boot/dts/kirkwood-topkick.dts             |    1 +
- arch/arm/boot/dts/kirkwood.dtsi                    |    4 ++++
- 10 files changed, 17 insertions(+), 1 deletion(-)
+ drivers/mmc/host/mvsdio.c |   73 +++++++++++++++++++++++++--------------------
+ 1 file changed, 40 insertions(+), 33 deletions(-)
 
-diff --git a/arch/arm/boot/dts/armada-370-db.dts b/arch/arm/boot/dts/armada-370-db.dts
-index 2353b1f..beee169 100644
---- a/arch/arm/boot/dts/armada-370-db.dts
-+++ b/arch/arm/boot/dts/armada-370-db.dts
-@@ -74,6 +74,7 @@
- 				 */
- 				status = "disabled";
- 				/* No CD or WP GPIOs */
-+				broken-cd;
- 			};
+diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+index 8960fc8..edfc481 100644
+--- a/drivers/mmc/host/mvsdio.c
++++ b/drivers/mmc/host/mvsdio.c
+@@ -35,7 +35,7 @@
  
- 			usb@50000 {
-diff --git a/arch/arm/boot/dts/armada-370-mirabox.dts b/arch/arm/boot/dts/armada-370-mirabox.dts
-index 14e36e1..45b1077 100644
---- a/arch/arm/boot/dts/armada-370-mirabox.dts
-+++ b/arch/arm/boot/dts/armada-370-mirabox.dts
-@@ -99,6 +99,7 @@
- 				 * No CD or WP GPIOs: SDIO interface used for
- 				 * Wifi/Bluetooth chip
- 				 */
-+				 broken-cd;
- 			};
+ #define DRIVER_NAME	"mvsdio"
  
- 			usb@50000 {
-diff --git a/arch/arm/boot/dts/armada-370-rd.dts b/arch/arm/boot/dts/armada-370-rd.dts
-index 130f839..89c2110 100644
---- a/arch/arm/boot/dts/armada-370-rd.dts
-+++ b/arch/arm/boot/dts/armada-370-rd.dts
-@@ -64,6 +64,7 @@
- 				pinctrl-names = "default";
- 				status = "okay";
- 				/* No CD or WP GPIOs */
-+				broken-cd;
- 			};
+-static int maxfreq = MVSD_CLOCKRATE_MAX;
++static int maxfreq;
+ static int nodma;
  
- 			usb@50000 {
-diff --git a/arch/arm/boot/dts/armada-370-xp.dtsi b/arch/arm/boot/dts/armada-370-xp.dtsi
-index 550eb77..0d73570 100644
---- a/arch/arm/boot/dts/armada-370-xp.dtsi
-+++ b/arch/arm/boot/dts/armada-370-xp.dtsi
-@@ -143,6 +143,10 @@
- 				reg = <0xd4000 0x200>;
- 				interrupts = <54>;
- 				clocks = <&gateclk 17>;
-+				bus-width = <4>;
-+				cap-sdio-irq;
-+				cap-sd-highspeed;
-+				cap-mmc-highspeed;
- 				status = "disabled";
- 			};
+ struct mvsd_host {
+@@ -685,7 +685,6 @@ static int __init mvsd_probe(struct platform_device *pdev)
+ 	const struct mbus_dram_target_info *dram;
+ 	struct resource *r;
+ 	int ret, irq;
+-	int gpio_card_detect, gpio_write_protect;
+ 	struct pinctrl *pinctrl;
  
-diff --git a/arch/arm/boot/dts/armada-xp-db.dts b/arch/arm/boot/dts/armada-xp-db.dts
-index d6cc8bf..7c22a20 100644
---- a/arch/arm/boot/dts/armada-xp-db.dts
-+++ b/arch/arm/boot/dts/armada-xp-db.dts
-@@ -97,6 +97,7 @@
- 				pinctrl-names = "default";
- 				status = "okay";
- 				/* No CD or WP GPIOs */
-+				broken-cd;
- 			};
+ 	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+@@ -718,6 +717,20 @@ static int __init mvsd_probe(struct platform_device *pdev)
+ 	if (!IS_ERR(host->clk))
+ 		clk_prepare_enable(host->clk);
  
- 			usb@50000 {
-diff --git a/arch/arm/boot/dts/kirkwood-dreamplug.dts b/arch/arm/boot/dts/kirkwood-dreamplug.dts
-index 289e51d..be16a84 100644
---- a/arch/arm/boot/dts/kirkwood-dreamplug.dts
-+++ b/arch/arm/boot/dts/kirkwood-dreamplug.dts
-@@ -79,6 +79,7 @@
- 			pinctrl-names = "default";
- 			status = "okay";
- 			/* No CD or WP GPIOs */
-+			broken-cd;
- 		};
- 	};
++	mmc->ops = &mvsd_ops;
++
++	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
++
++	mmc->f_min = DIV_ROUND_UP(host->base_clock, MVSD_BASE_DIV_MAX);
++	mmc->f_max = MVSD_CLOCKRATE_MAX;
++
++	mmc->max_blk_size = 2048;
++	mmc->max_blk_count = 65535;
++
++	mmc->max_segs = 1;
++	mmc->max_seg_size = mmc->max_blk_size * mmc->max_blk_count;
++	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
++
+ 	if (np) {
+ 		if (IS_ERR(host->clk)) {
+ 			dev_err(&pdev->dev, "DT platforms must have a clock associated\n");
+@@ -726,35 +739,38 @@ static int __init mvsd_probe(struct platform_device *pdev)
+ 		}
  
-diff --git a/arch/arm/boot/dts/kirkwood-guruplug-server-plus.dts b/arch/arm/boot/dts/kirkwood-guruplug-server-plus.dts
-index 44fd97d..484a2a6 100644
---- a/arch/arm/boot/dts/kirkwood-guruplug-server-plus.dts
-+++ b/arch/arm/boot/dts/kirkwood-guruplug-server-plus.dts
-@@ -72,6 +72,8 @@
+ 		host->base_clock = clk_get_rate(host->clk) / 2;
+-		gpio_card_detect = of_get_named_gpio(np, "cd-gpios", 0);
+-		gpio_write_protect = of_get_named_gpio(np, "wp-gpios", 0);
++		ret = mmc_of_parse(mmc);
++		if (ret < 0)
++			goto out;
+ 	} else {
+ 		const struct mvsdio_platform_data *mvsd_data;
++
+ 		mvsd_data = pdev->dev.platform_data;
+ 		if (!mvsd_data) {
+ 			ret = -ENXIO;
+ 			goto out;
+ 		}
++		mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ |
++			    MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+ 		host->base_clock = mvsd_data->clock / 2;
+-		gpio_card_detect = mvsd_data->gpio_card_detect ? : -EINVAL;
+-		gpio_write_protect = mvsd_data->gpio_write_protect ? : -EINVAL;
+-	}
+-
+-	mmc->ops = &mvsd_ops;
+-
+-	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+-	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ |
+-		    MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+-
+-	mmc->f_min = DIV_ROUND_UP(host->base_clock, MVSD_BASE_DIV_MAX);
+-	mmc->f_max = maxfreq;
++		/* GPIO 0 regarded as invalid for backward compatibility */
++		if (mvsd_data->gpio_card_detect &&
++		    gpio_is_valid(mvsd_data->gpio_card_detect)) {
++			ret = mmc_gpio_request_cd(mmc,
++						  mvsd_data->gpio_card_detect);
++			if (ret)
++				goto out;
++		} else {
++			mmc->caps |= MMC_CAP_NEEDS_POLL;
++		}
  
- 		mvsdio@90000 {
- 			status = "okay";
-+			/* No CD or WP GPIOs */
-+			broken-cd;
- 		};
- 	};
+-	mmc->max_blk_size = 2048;
+-	mmc->max_blk_count = 65535;
++		if (mvsd_data->gpio_write_protect &&
++		    gpio_is_valid(mvsd_data->gpio_write_protect))
++			mmc_gpio_request_ro(mmc, mvsd_data->gpio_write_protect);
++	}
  
-diff --git a/arch/arm/boot/dts/kirkwood-mplcec4.dts b/arch/arm/boot/dts/kirkwood-mplcec4.dts
-index 7588241..bf3a58c 100644
---- a/arch/arm/boot/dts/kirkwood-mplcec4.dts
-+++ b/arch/arm/boot/dts/kirkwood-mplcec4.dts
-@@ -136,7 +136,7 @@
- 			pinctrl-0 = <&pmx_sdio &pmx_sdio_cd>;
- 			pinctrl-names = "default";
- 			status = "okay";
--			cd-gpios = <&gpio1 15 0>;
-+			cd-gpios = <&gpio1 15 1>;
- 			/* No WP GPIO */
- 		};
- 	};
-diff --git a/arch/arm/boot/dts/kirkwood-topkick.dts b/arch/arm/boot/dts/kirkwood-topkick.dts
-index 66eb45b..7dc14f4 100644
---- a/arch/arm/boot/dts/kirkwood-topkick.dts
-+++ b/arch/arm/boot/dts/kirkwood-topkick.dts
-@@ -154,6 +154,7 @@
- 			pinctrl-names = "default";
- 			status = "okay";
- 			/* No CD or WP GPIOs */
-+			broken-cd;
- 		};
- 	};
+-	mmc->max_segs = 1;
+-	mmc->max_seg_size = mmc->max_blk_size * mmc->max_blk_count;
+-	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
++	if (maxfreq)
++		mmc->f_max = maxfreq;
  
-diff --git a/arch/arm/boot/dts/kirkwood.dtsi b/arch/arm/boot/dts/kirkwood.dtsi
-index fada7e6..e2a28db 100644
---- a/arch/arm/boot/dts/kirkwood.dtsi
-+++ b/arch/arm/boot/dts/kirkwood.dtsi
-@@ -200,6 +200,10 @@
- 			reg = <0x90000 0x200>;
- 			interrupts = <28>;
- 			clocks = <&gate_clk 4>;
-+			bus-width = <4>;
-+			cap-sdio-irq;
-+			cap-sd-highspeed;
-+			cap-mmc-highspeed;
- 			status = "disabled";
- 		};
- 	};
+ 	spin_lock_init(&host->lock);
+ 
+@@ -777,15 +793,6 @@ static int __init mvsd_probe(struct platform_device *pdev)
+ 		goto out;
+ 	}
+ 
+-	if (gpio_is_valid(gpio_card_detect)) {
+-		ret = mmc_gpio_request_cd(mmc, gpio_card_detect);
+-		if (ret)
+-			goto out;
+-	} else
+-		mmc->caps |= MMC_CAP_NEEDS_POLL;
+-
+-	mmc_gpio_request_ro(mmc, gpio_write_protect);
+-
+ 	setup_timer(&host->timer, mvsd_timeout_timer, (unsigned long)host);
+ 	platform_set_drvdata(pdev, mmc);
+ 	ret = mmc_add_host(mmc);
+@@ -793,10 +800,10 @@ static int __init mvsd_probe(struct platform_device *pdev)
+ 		goto out;
+ 
+ 	if (!(mmc->caps & MMC_CAP_NEEDS_POLL))
+-		dev_notice(&pdev->dev, "using GPIO %d for card detection\n",
+-			   gpio_card_detect);
++		dev_notice(&pdev->dev, "using GPIO for card detection\n");
+ 	else
+-		dev_notice(&pdev->dev, "lacking card detect (fall back to polling)\n");
++		dev_notice(&pdev->dev,
++			   "lacking card detect (fall back to polling)\n");
+ 	return 0;
+ 
+ out:
 -- 
 1.7.9.5
 
