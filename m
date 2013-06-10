@@ -1,36 +1,126 @@
-From: Dirk Behme <dirk.behme@de.bosch.com>
-Subject: Re: [PATCH 3/3] MMC: FSL SDHC: Add support for hard-wired (permanent)
- card. Kernel version 3.4.47
-Date: Mon, 10 Jun 2013 08:29:58 +0200
-Message-ID: <51B57266.9050107@de.bosch.com>
-References: <1370155128-680-1-git-send-email-ogabbay@advaoptical.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] drivers: mmc: reordered shutdown sequence in mmc_bld_remove_req
+Date: Mon, 10 Jun 2013 11:44:29 +0200
+Message-ID: <CAPDyKFq-h_FDNMc-3rvcknBkGhWd13KDLnHhwBrcX4Rfc0qWGQ@mail.gmail.com>
+References: <1370382160-7576-1-git-send-email-taysom@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1370155128-680-1-git-send-email-ogabbay@advaoptical.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Oded Gabbay <ogabbay@advaoptical.com>
-Cc: "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "cjb@laptop.org" <cjb@laptop.org>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "rob@landley.net" <rob@landley.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ve0-f180.google.com ([209.85.128.180]:53934 "EHLO
+	mail-ve0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752038Ab3FJJob (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jun 2013 05:44:31 -0400
+Received: by mail-ve0-f180.google.com with SMTP id pa12so4512776veb.25
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Jun 2013 02:44:30 -0700 (PDT)
+In-Reply-To: <1370382160-7576-1-git-send-email-taysom@chromium.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Paul Taysom <taysom@chromium.org>
+Cc: Chris Ball <cjb@laptop.org>, Namjae Jeon <linkinjeon@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, sonny@chromium.org, olofj@chromium.org
 
-On 02.06.2013 08:38, Oded Gabbay wrote:
-> This patch adds support of recognizing hard-wired (permanent) cards
-> to Freescale's SDHC host driver. This is done by adding the option
-> "fsl,card-wired" to the SDHC device-tree entry. Detection of this
-> option is done in the probe function. Update documentation in file
-> fsl-esdhc.txt
+On 4 June 2013 23:42, Paul Taysom <taysom@chromium.org> wrote:
+> We had a multi-partition SD-Card with two ext2 file systems. The partition
+> table was getting overwritten by a race between the card removal and
+> the unmount of the 2nd ext2 partition.
+>
+> What was observed:
+> 1. Suspend/resume would call to remove the device. The clearing
+>    of the device information is done asynchronously.
+> 2. A request is made to unmount the file system (this is called
+>    after the removal has started).
+> 3. The remapping table was cleared by the asynchronous part of
+>    the device removal.
+> 4. A write request to the super block (block 0 of the partition)
+>    was sent down and instead of being remapped to the partition
+>    offset, it was remapped to block 0 of the device which is where
+>    the partition table is located.
+> 5. Write was queued and written resulting in the overwriting
+>    of the partition table with the ext2 super block.
+> 6. The mmc_queue is cleaned up.
 
-Why don't you want to introduce "fsl,card-wired"? Why don't you use 
-"non-removable"?
+Hi Paul,
 
-To my understanding the patch
+An interesting bug you found here. My impression is that this is
+something that should be addressed through the blk layer, somehow.
 
-https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=7f217794ffa72f208a250b79ab0b7ea3de19677f
+Have you considered that this is not only a problem for SD cards, but
+for other block device drivers as well. I believe it is common to call
+del_gendisk before blk_cleanup_queue, which in principle is what you
+want to change.
 
-explicitly removed "fsl,card-wired". So I don't think re-introducing it 
-is a good idea?
+>
+> The mmc card device driver used to access SD cards, was calling del_gendisk
+> before calling mmc_cleanup-queue. The comment in the mmc_blk_remove_req
+> code indicated that it expected del_gendisk to block all further requests
+> from being queued but it doesn't. The mmc driver uses the presences of the
+> mmc_queue to determine if the request should be queued.
+>
+> The fix was to clean up the mmc_queue before the rest of the
+> the delete partition code is called.
+>
+> This prevents the overwriting of the partition table.
+>
+> However, the umount gets an error trying to write the super block.
+> The umount should be issued before the device is removed but that
+> is not always possible. The umount is still needed to cleanup other
+> data structures.
 
-Best regards
+So this clearly indicates to me that this is not the complete
+solution, even if it solves the most serious problem for this bug.
 
-Dirk
+I think it would be good to get a blk device maintainer's input to
+this discussion.
+
+Kind regards
+Ulf Hansson
+
+>
+> Addresses the problem described in http://crbug.com/240815
+>
+> Signed-off-by: Paul Taysom <taysom@chromium.org>
+> ---
+>  drivers/mmc/card/block.c | 14 ++++++++------
+>  1 file changed, 8 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index dd27b07..a79f113 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2158,6 +2158,14 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+>         struct mmc_card *card;
+>
+>         if (md) {
+> +               /*
+> +                * Flush remaining requests and free queues. It
+> +                * is freeing the queue that stops new requests
+> +                * from being accepted.
+> +                */
+> +               mmc_cleanup_queue(&md->queue);
+> +               if (md->flags & MMC_BLK_PACKED_CMD)
+> +                       mmc_packed_clean(&md->queue);
+>                 card = md->queue.card;
+>                 if (md->disk->flags & GENHD_FL_UP) {
+>                         device_remove_file(disk_to_dev(md->disk), &md->force_ro);
+> @@ -2166,14 +2174,8 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+>                                 device_remove_file(disk_to_dev(md->disk),
+>                                         &md->power_ro_lock);
+>
+> -                       /* Stop new requests from getting into the queue */
+>                         del_gendisk(md->disk);
+>                 }
+> -
+> -               /* Then flush out any already in there */
+> -               mmc_cleanup_queue(&md->queue);
+> -               if (md->flags & MMC_BLK_PACKED_CMD)
+> -                       mmc_packed_clean(&md->queue);
+>                 mmc_blk_put(md);
+>         }
+>  }
+> --
+> 1.8.3
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
