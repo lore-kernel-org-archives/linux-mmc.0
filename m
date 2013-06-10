@@ -1,15 +1,15 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 09/12] mmc: core: Add shutdown callback for (e)MMC bus_ops
-Date: Mon, 10 Jun 2013 17:03:44 +0200
-Message-ID: <1370876627-13439-10-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH 11/12] mmc: core: Invent MMC_CAP2_FULL_PWR_CYCLE
+Date: Mon, 10 Jun 2013 17:03:46 +0200
+Message-ID: <1370876627-13439-12-git-send-email-ulf.hansson@stericsson.com>
 References: <1370876627-13439-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog121.obsmtp.com ([207.126.144.151]:57703 "EHLO
-	eu1sys200aog121.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753743Ab3FJPEW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jun 2013 11:04:22 -0400
+Received: from eu1sys200aog102.obsmtp.com ([207.126.144.113]:37196 "EHLO
+	eu1sys200aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753767Ab3FJPE2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jun 2013 11:04:28 -0400
 In-Reply-To: <1370876627-13439-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -18,49 +18,49 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
 From: Ulf Hansson <ulf.hansson@linaro.org>
 
-The shutdown sequence of an (e)MMC is very similar to a suspend. We
-re-use the suspend function and tell it we are not in suspend context.
+MMC_CAP2_FULL_PWR_CYCLE shall be set by host drivers which are able to
+do a complete power cycle of the card. In the eMMC case that includes
+both vcc and vccq.
+
+This CAP is providing the protocol layer with important information,
+needed to take optimized decisions during card initialization and in
+the suspend/resume sequence.
+
+MMC_CAP2_POWEROFF_NOTIFY is replaced by MMC_CAP2_FULL_PWR_CYCLE, since
+it makes sense to use a wider scope for it.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/mmc.c |   10 ++++++++++
- 1 file changed, 10 insertions(+)
+ drivers/mmc/core/mmc.c   |    2 +-
+ include/linux/mmc/host.h |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index dcf0169..3aafb2e 100644
+index a96dcaa..38315f8 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -1509,6 +1509,14 @@ static int mmc_suspend(struct mmc_host *host)
- }
+@@ -1484,7 +1484,7 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+ 		goto out;
  
- /*
-+ * Shutdown callback
-+ */
-+static int mmc_shutdown(struct mmc_host *host)
-+{
-+	return _mmc_suspend(host, false);
-+}
-+
-+/*
-  * Resume callback from host.
-  *
-  * This function tries to determine if the same card is still present
-@@ -1597,6 +1605,7 @@ static const struct mmc_bus_ops mmc_ops = {
- 	.resume = NULL,
- 	.power_restore = mmc_power_restore,
- 	.alive = mmc_alive,
-+	.shutdown = mmc_shutdown,
- };
+ 	if (mmc_can_poweroff_notify(host->card) &&
+-		((host->caps2 & MMC_CAP2_POWEROFF_NOTIFY) || !is_suspend))
++		((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
+ 		err = mmc_poweroff_notify(host->card, notify_type);
+ 	else if (mmc_can_sleep(host->card))
+ 		err = mmc_sleep(host);
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 2e34ee5..c6dedc7 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -264,7 +264,7 @@ struct mmc_host {
  
- static const struct mmc_bus_ops mmc_ops_unsafe = {
-@@ -1608,6 +1617,7 @@ static const struct mmc_bus_ops mmc_ops_unsafe = {
- 	.runtime_resume = mmc_runtime_resume,
- 	.power_restore = mmc_power_restore,
- 	.alive = mmc_alive,
-+	.shutdown = mmc_shutdown,
- };
- 
- static void mmc_attach_bus_ops(struct mmc_host *host)
+ #define MMC_CAP2_BOOTPART_NOACC	(1 << 0)	/* Boot partition no access */
+ #define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
+-#define MMC_CAP2_POWEROFF_NOTIFY (1 << 2)	/* Notify poweroff supported */
++#define MMC_CAP2_FULL_PWR_CYCLE	(1 << 2)	/* Can do full power cycle */
+ #define MMC_CAP2_NO_MULTI_READ	(1 << 3)	/* Multiblock reads don't work */
+ #define MMC_CAP2_NO_SLEEP_CMD	(1 << 4)	/* Don't allow sleep command */
+ #define MMC_CAP2_HS200_1_8V_SDR	(1 << 5)        /* can support */
 -- 
 1.7.10
 
