@@ -1,15 +1,15 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 02/12] mmc: core: Validate suspend prerequisites for SDIO at SUSPEND_PREPARE
-Date: Mon, 10 Jun 2013 17:03:37 +0200
-Message-ID: <1370876627-13439-3-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH 04/12] mmc: core: Initiate suspend|resume from mmc bus instead of mmc host
+Date: Mon, 10 Jun 2013 17:03:39 +0200
+Message-ID: <1370876627-13439-5-git-send-email-ulf.hansson@stericsson.com>
 References: <1370876627-13439-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog117.obsmtp.com ([207.126.144.143]:33990 "EHLO
-	eu1sys200aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753604Ab3FJPEN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jun 2013 11:04:13 -0400
+Received: from eu1sys200aog122.obsmtp.com ([207.126.144.153]:45931 "EHLO
+	eu1sys200aog122.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753604Ab3FJPER (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jun 2013 11:04:17 -0400
 In-Reply-To: <1370876627-13439-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -18,140 +18,107 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
 From: Ulf Hansson <ulf.hansson@linaro.org>
 
-This patch moves the validation for all the suspend prerequisites to be
-done at SUSPEND_PREPARE notification. Previously in the SDIO case parts
-of the validation was done from mmc_suspend_host.
+The host should be responsible to suspend|resume the host and not the
+card. This patch changes this behaviour, by moving the responsiblity
+to the mmc bus instead which already holds the card device.
 
-This patch invents a new pre_suspend bus_ops callback and implements it
-for SDIO. Returning an error code from it, will mean at SUSPEND_PREPARE
-notification, the card will be removed before proceeding with the
-suspend sequence.
+The exported functions mmc_suspend|resume_host are now to be considered
+as depcrecated. Once all host drivers moves away from using them, we
+can remove them. As of now, a successful error code is always returned.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/core/core.c |   25 ++++++++-----------------
- drivers/mmc/core/core.h |    1 +
- drivers/mmc/core/sdio.c |   27 +++++++++++++++++++++++----
- 3 files changed, 32 insertions(+), 21 deletions(-)
+ drivers/mmc/core/bus.c  |   19 ++++++++++++++++---
+ drivers/mmc/core/core.c |   26 +++-----------------------
+ 2 files changed, 19 insertions(+), 26 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index d2ee282..7a8a42d 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2628,22 +2628,6 @@ int mmc_suspend_host(struct mmc_host *host)
- 	if (host->bus_ops && !host->bus_dead) {
- 		if (host->bus_ops->suspend)
- 			err = host->bus_ops->suspend(host);
--
--		if (err == -ENOSYS || !host->bus_ops->resume) {
--			/*
--			 * We simply "remove" the card in this case.
--			 * It will be redetected on resume.  (Calling
--			 * bus_ops->remove() with a claimed host can
--			 * deadlock.)
--			 */
--			host->bus_ops->remove(host);
--			mmc_claim_host(host);
--			mmc_detach_bus(host);
--			mmc_power_off(host);
--			mmc_release_host(host);
--			host->pm_flags = 0;
--			err = 0;
--		}
- 	}
- 	mmc_bus_put(host);
- 
-@@ -2706,6 +2690,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
- 	struct mmc_host *host = container_of(
- 		notify_block, struct mmc_host, pm_notify);
- 	unsigned long flags;
-+	int err = 0;
- 
- 	switch (mode) {
- 	case PM_HIBERNATION_PREPARE:
-@@ -2715,7 +2700,13 @@ int mmc_pm_notify(struct notifier_block *notify_block,
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		cancel_delayed_work_sync(&host->detect);
- 
--		if (!host->bus_ops || host->bus_ops->suspend)
-+		if (!host->bus_ops)
-+			break;
-+
-+		/* Validate prerequisites for suspend */
-+		if (host->bus_ops->pre_suspend)
-+			err = host->bus_ops->pre_suspend(host);
-+		if (!err && host->bus_ops->suspend)
- 			break;
- 
- 		/* Calling bus_ops->remove() with a claimed host can deadlock */
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 52a3650..79f37cf 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -18,6 +18,7 @@
- struct mmc_bus_ops {
- 	void (*remove)(struct mmc_host *);
- 	void (*detect)(struct mmc_host *);
-+	int (*pre_suspend)(struct mmc_host *);
- 	int (*suspend)(struct mmc_host *);
- 	int (*resume)(struct mmc_host *);
- 	int (*runtime_suspend)(struct mmc_host *);
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 1fbbd1b..be8cca8 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -910,11 +910,11 @@ out:
- }
- 
- /*
-- * SDIO suspend.  We need to suspend all functions separately.
-+ * SDIO pre_suspend.  We need to suspend all functions separately.
-  * Therefore all registered functions must have drivers with suspend
-  * and resume methods.  Failing that we simply remove the whole card.
-  */
--static int mmc_sdio_suspend(struct mmc_host *host)
-+static int mmc_sdio_pre_suspend(struct mmc_host *host)
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index d9e8c2b..3b7ca8a 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -127,10 +127,16 @@ static int mmc_bus_suspend(struct device *dev)
  {
- 	int i, err = 0;
+ 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+ 	struct mmc_card *card = mmc_dev_to_card(dev);
+-	int ret = 0;
++	struct mmc_host *host = card->host;
++	int ret;
  
-@@ -925,8 +925,26 @@ static int mmc_sdio_suspend(struct mmc_host *host)
- 			if (!pmops || !pmops->suspend || !pmops->resume) {
- 				/* force removal of entire card in that case */
- 				err = -ENOSYS;
--			} else
--				err = pmops->suspend(&func->dev);
-+				break;
-+			}
-+		}
+-	if (dev->driver && drv->suspend)
++	if (dev->driver && drv->suspend) {
+ 		ret = drv->suspend(card);
++		if (ret)
++			return ret;
 +	}
 +
-+	return err;
-+}
++	ret = host->bus_ops->suspend(host);
+ 	return ret;
+ }
+ 
+@@ -138,10 +144,17 @@ static int mmc_bus_resume(struct device *dev)
+ {
+ 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+ 	struct mmc_card *card = mmc_dev_to_card(dev);
+-	int ret = 0;
++	struct mmc_host *host = card->host;
++	int ret;
 +
-+/*
-+ * SDIO suspend.  Suspend all functions separately.
-+ */
-+static int mmc_sdio_suspend(struct mmc_host *host)
-+{
-+	int i, err = 0;
++	ret = host->bus_ops->resume(host);
++	if (ret)
++		pr_warn("%s: error %d during resume (card was removed?)\n",
++			mmc_hostname(host), ret);
+ 
+ 	if (dev->driver && drv->resume)
+ 		ret = drv->resume(card);
 +
-+	for (i = 0; i < host->card->sdio_funcs; i++) {
-+		struct sdio_func *func = host->card->sdio_func[i];
-+		if (func && sdio_func_present(func) && func->dev.driver) {
-+			const struct dev_pm_ops *pmops = func->dev.driver->pm;
-+			err = pmops->suspend(&func->dev);
- 			if (err)
- 				break;
- 		}
-@@ -1076,6 +1094,7 @@ static int mmc_sdio_runtime_resume(struct mmc_host *host)
- static const struct mmc_bus_ops mmc_sdio_ops = {
- 	.remove = mmc_sdio_remove,
- 	.detect = mmc_sdio_detect,
-+	.pre_suspend = mmc_sdio_pre_suspend,
- 	.suspend = mmc_sdio_suspend,
- 	.resume = mmc_sdio_resume,
- 	.runtime_suspend = mmc_sdio_runtime_suspend,
+ 	return ret;
+ }
+ #endif
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index da3b907..49a5bca 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2619,16 +2619,8 @@ EXPORT_SYMBOL(mmc_cache_ctrl);
+  */
+ int mmc_suspend_host(struct mmc_host *host)
+ {
+-	int err = 0;
+-
+-	mmc_bus_get(host);
+-	if (host->bus_ops && !host->bus_dead) {
+-		if (host->bus_ops->suspend)
+-			err = host->bus_ops->suspend(host);
+-	}
+-	mmc_bus_put(host);
+-
+-	return err;
++	/* This function is deprecated */
++	return 0;
+ }
+ EXPORT_SYMBOL(mmc_suspend_host);
+ 
+@@ -2638,19 +2630,7 @@ EXPORT_SYMBOL(mmc_suspend_host);
+  */
+ int mmc_resume_host(struct mmc_host *host)
+ {
+-	int err;
+-
+-	mmc_bus_get(host);
+-	if (host->bus_ops && !host->bus_dead) {
+-		BUG_ON(!host->bus_ops->resume);
+-		err = host->bus_ops->resume(host);
+-		if (err)
+-			pr_warning("%s: error %d during resume "
+-					    "(card was removed?)\n",
+-					    mmc_hostname(host), err);
+-	}
+-	mmc_bus_put(host);
+-
++	/* This function is deprecated */
+ 	return 0;
+ }
+ EXPORT_SYMBOL(mmc_resume_host);
 -- 
 1.7.10
 
