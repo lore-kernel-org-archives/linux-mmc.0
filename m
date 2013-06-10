@@ -1,63 +1,71 @@
 From: Daniel Drake <dsd@laptop.org>
-Subject: "exclude asynchronous transfer" patch causes boot fail
-Date: Mon, 10 Jun 2013 13:53:55 -0600
-Message-ID: <CAMLZHHRt=ajakDx6ZFRVx8CUKNojury5fX8R+gBhhJTOstQ6Xg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Subject: [PATCH] sdhci-pxav3: Fix runtime PM initialization
+Date: Mon, 10 Jun 2013 16:16:18 -0400 (EDT)
+Message-ID: <20130610201618.C08C3FAACC@dev.laptop.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f49.google.com ([209.85.216.49]:40872 "EHLO
-	mail-qa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751903Ab3FJTx4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jun 2013 15:53:56 -0400
-Received: by mail-qa0-f49.google.com with SMTP id hu16so2500046qab.8
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Jun 2013 12:53:55 -0700 (PDT)
+Received: from lists.laptop.org ([18.85.2.166]:49535 "EHLO swan.laptop.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751638Ab3FJUYJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 10 Jun 2013 16:24:09 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: tgih.jun@samsung.com
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, kliu5@marvell.com, jlfu@marvell.com
 
-Hi,
+Commit bb691ae464b77d30e74c66480e98d74e88d6b194 breaks boot on OLPC XO-4,
+it hangs somewhere inside sdhci_add_host.
 
-Testing the latest linus kernel on OLPC XO-4 (sdhci-pxav3), boot
-fails. Userspace does start, and I see that systemd is starting a few
-services (feels a bit slower than usual), then it hangs still while
-loading initial services - I don't even get to a shell prompt.
+When pm_runtime_set_autosuspend_delay() was being called, the device's usage
+counter was 0, causing the PM layer to runtime-suspend the device. We then
+went on to call sdhci_add_host() on a suspended device, which hung.
 
-git-bisect shows the following commit introduces the problem:
+Fix this by making the driver consistent with the omap_hsmmc driver, both
+in terms of runtime PM initialization and error handling. Now the device
+is not runtime-suspended until we exit the probe routine.
 
-commit 369d321ed1baa7748e770aaaae4d8effad699633
-Author: Seungwon Jeon <tgih.jun@samsung.com>
-Date:   Wed Dec 26 10:40:17 2012 +0900
+Signed-off-by: Daniel Drake <dsd@laptop.org>
+---
+ drivers/mmc/host/sdhci-pxav3.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-    mmc: queue: exclude asynchronous transfer for special request
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index a0cdbc5..86d8ac8 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -300,18 +300,15 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 
+ 	sdhci_get_of_property(pdev);
+ 
+-	pm_runtime_set_active(&pdev->dev);
+ 	pm_runtime_enable(&pdev->dev);
++	pm_runtime_get_sync(&pdev->dev);
+ 	pm_runtime_set_autosuspend_delay(&pdev->dev, PXAV3_RPM_DELAY_MS);
+ 	pm_runtime_use_autosuspend(&pdev->dev);
+ 	pm_suspend_ignore_children(&pdev->dev, 1);
+-	pm_runtime_get_noresume(&pdev->dev);
+ 
+ 	ret = sdhci_add_host(host);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "failed to add host\n");
+-		pm_runtime_forbid(&pdev->dev);
+-		pm_runtime_disable(&pdev->dev);
+ 		goto err_add_host;
+ 	}
+ 
+@@ -324,11 +321,14 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 		device_init_wakeup(&pdev->dev, 0);
+ 	}
+ 
++	pm_runtime_mark_last_busy(&pdev->dev);
+ 	pm_runtime_put_autosuspend(&pdev->dev);
+ 
+ 	return 0;
+ 
+ err_add_host:
++	pm_runtime_put_sync(&pdev->dev);
++	pm_runtime_disable(&pdev->dev);
+ 	clk_disable_unprepare(clk);
+ 	clk_put(clk);
+ err_cd_req:
+-- 
+1.8.1.4
 
-mmc debug messages from the point of hang:
-
-sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00000001
-sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00000002
-mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-mmc1:     4096 bytes transferred: 0
-mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
-<mmc1: starting CMD23 arg 00000008 flags 00000015>
-mmc1: starting CMD18 arg 00023000 flags 000000b5
-mmc1:     blksz 512 blocks 8 flags 00000200 tsac 10 ms nsac 0
-mmc1:     CMD12 arg 00000000 flags 0000049d
-sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00000001
-sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00000002
-mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-mmc1:     4096 bytes transferred: 0
-mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
-
-
-If I modify the patch as follows, things seem to be back to normal:
-#define MMC_REQ_SPECIAL_MASK (REQ_DISCARD)
-
-Whereas setting it as follows causes the boot failure:
-#define MMC_REQ_SPECIAL_MASK (REQ_FLUSH)
-
-So I would suspect that there is some incompatibility between
-REQ_FLUSH handling and the optimization that this patch introduces.
-
-Any ideas?
-
-Daniel
