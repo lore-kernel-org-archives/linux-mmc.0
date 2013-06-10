@@ -1,74 +1,66 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 3/4] mmc: omap_hsmmc: Remux pins to support SDIO
- interrupt and PM runtime
-Date: Mon, 10 Jun 2013 09:23:56 -0700
-Message-ID: <20130610162356.GL8164@atomide.com>
-References: <20130607214557.18581.75288.stgit@localhost>
- <20130607214957.18581.90624.stgit@localhost>
- <CACRpkdZ5CUvULBFpdHZ_AMotqfUdBcAQ63+8cT+r6TZ77bUWOA@mail.gmail.com>
+From: Oded Gabbay <ogabbay@advaoptical.com>
+Subject: Re: [PATCH 3/3] MMC: FSL SDHC: Add support for hard-wired (permanent)
+ card. Kernel version 3.4.47
+Date: Mon, 10 Jun 2013 19:44:38 +0300
+Message-ID: <51B60276.5040002@advaoptical.com>
+References: <1370155128-680-1-git-send-email-ogabbay@advaoptical.com> <51B57266.9050107@de.bosch.com> <51B5D7F0.4050708@advaoptical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CACRpkdZ5CUvULBFpdHZ_AMotqfUdBcAQ63+8cT+r6TZ77bUWOA@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, Balaji T K <balajitk@ti.com>, Andreas Fenkart <afenkart@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-OMAP <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.advaoptical.com ([91.217.199.15]:51552 "EHLO
+	mail.advaoptical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751999Ab3FJQpD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jun 2013 12:45:03 -0400
+In-Reply-To: <51B5D7F0.4050708@advaoptical.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dirk Behme <dirk.behme@de.bosch.com>
+Cc: "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "cjb@laptop.org" <cjb@laptop.org>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "rob@landley.net" <rob@landley.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>
 
-* Linus Walleij <linus.walleij@linaro.org> [130610 09:09]:
-> 
-> You can use the new infrastructure to make the core select:
-> 
-> pinctrl_pm_select_default_state(host->dev);
-> pinctrl_pm_select_idle_state(host->dev);
+Hi All,
 
-OK great.
- 
-> What is the semantic difference between "default" and "active"?
+Just noticed that 3.4.47/8 doesn't have the mmc_of_parse (compared to 
+3.9.4).
+Therefore, I will not use it and just fix the code to recognize the 
+property "non-removable"
 
-We only should remux the pins that need remuxing as that's done
-every time hitting idle. So I think we should have the following
-default groups:
+Best regards,
+Oded
 
-default		Static pins that don't change, no need to remux
-		configured in consumer driver probe like we already
-		do
+On 06/10/2013 04:43 PM, Oded Gabbay wrote:
+> Hi Dirk,
+>
+> You are absolutely right.
+> I will revise my patch series to reflect the change.
+> Basically, I will call the generic mmc_of_parse from the probe 
+> function of Freescale's driver.
+> That will handle all the additional capabilities.
+>
+> Thanks
+> Oded
+>
+> On 06/10/2013 09:29 AM, Dirk Behme wrote:
+>> On 02.06.2013 08:38, Oded Gabbay wrote:
+>>> This patch adds support of recognizing hard-wired (permanent) cards
+>>> to Freescale's SDHC host driver. This is done by adding the option
+>>> "fsl,card-wired" to the SDHC device-tree entry. Detection of this
+>>> option is done in the probe function. Update documentation in file
+>>> fsl-esdhc.txt
+>>
+>> Why don't you want to introduce "fsl,card-wired"? Why don't you use 
+>> "non-removable"?
+>>
+>> To my understanding the patch
+>>
+>> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=7f217794ffa72f208a250b79ab0b7ea3de19677f 
+>>
+>>
+>> explicitly removed "fsl,card-wired". So I don't think re-introducing 
+>> it is a good idea?
+>>
+>> Best regards
+>>
+>> Dirk
+>
 
-active		Optional dynamic pins remuxed for runtime, can be
-		configured and selected in consumer driver probe.
-		The consumer driver may also want to select this
-		state in PM runtime resume.
-
-idle		Optional dynamic pins remuxed for idle. The consumer
-		driver may also want to select this state in PM
-		runtime suspend depending on device_can_wakeup()
-		and driver specific needs.
- 
-> If this is something very generic that a lot of platforms will want
-> to have, why not add it to include/linux/pinctrl/pinctrl-state.h
-> and augment the core to cache and handle this too?
-
-Yes we should do that assuming the above grouping makes sense
-to you.
- 
-> However in this case I *suspect* that what you really want
-> to do it to rename the state called "default" to "sleep"
-> (it appears the default state is sleepy) and then rename
-> the "active" state to "default" (as this is the defined semantic
-> meaning of "default" from <linux/pinctrl/pinctrl-state.h>.
-
-The idle state above could also be called sleep instead of idle
-if you prefer that.
-
-> But maybe I'm not quite getting the subtle difference between
-> "default" and "active" here so enlighten me.
-
-I think the confusion is caused by the fact that we need three
-mux groups, not just two :) The toggling between active and idle
-is the hotpath as that can potentially happen for multiple drivers
-every time we enter and exit idle.
-
-Regards,
-
-Tony
