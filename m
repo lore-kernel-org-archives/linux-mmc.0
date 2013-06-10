@@ -1,71 +1,56 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: [PATCH] sdhci-pxav3: Fix runtime PM initialization
-Date: Mon, 10 Jun 2013 16:16:18 -0400 (EDT)
-Message-ID: <20130610201618.C08C3FAACC@dev.laptop.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V2 0/3] mmc: mmci: Support ap_sleep in cpuidle for ux500
+Date: Mon, 10 Jun 2013 22:43:15 +0200
+Message-ID: <CAPDyKFrtwGgnKi_E9Bu4W836KabjfE-rB1JPKg+CNcgRtqRXwQ@mail.gmail.com>
+References: <1369302307-28540-1-git-send-email-ulf.hansson@stericsson.com>
+	<C832F8F5D375BD43BFA11E82E0FE9FE0115A936A54@EXDCVYMBSTM005.EQ1STM.local>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lists.laptop.org ([18.85.2.166]:49535 "EHLO swan.laptop.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751638Ab3FJUYJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 10 Jun 2013 16:24:09 -0400
+Received: from mail-vb0-f41.google.com ([209.85.212.41]:60927 "EHLO
+	mail-vb0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750812Ab3FJUnQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jun 2013 16:43:16 -0400
+Received: by mail-vb0-f41.google.com with SMTP id p13so3368367vbe.14
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Jun 2013 13:43:15 -0700 (PDT)
+In-Reply-To: <C832F8F5D375BD43BFA11E82E0FE9FE0115A936A54@EXDCVYMBSTM005.EQ1STM.local>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org, kliu5@marvell.com, jlfu@marvell.com
+To: Russell King <linux@arm.linux.org.uk>
+Cc: Ulf HANSSON <ulf.hansson@stericsson.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Daniel Lezcano <daniel.lezcano@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Rickard ANDERSSON <rickard.andersson@stericsson.com>
 
-Commit bb691ae464b77d30e74c66480e98d74e88d6b194 breaks boot on OLPC XO-4,
-it hangs somewhere inside sdhci_add_host.
+On 27 May 2013 13:40, Rickard ANDERSSON
+<rickard.andersson@stericsson.com> wrote:
+> Acked-by: Rickard Andersson <rickard.andersson@stericsson.com>
+>
+> -----Original Message-----
+> From: Ulf HANSSON
+> Sent: den 23 maj 2013 11:45
+> To: linux-arm-kernel@lists.infradead.org; Russell King
+> Cc: linux-mmc@vger.kernel.org; Chris Ball; Daniel Lezcano; Linus Walleij; Rickard ANDERSSON; Ulf Hansson
+> Subject: [PATCH V2 0/3] mmc: mmci: Support ap_sleep in cpuidle for ux500
+>
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+>
+> To be able to enter ap_sleep state in cpuidle were the APE power domain regulator will be cut, a register save and restore mechanism needs to be implemented. This patchset adapts to these restrictions.
+>
+> Ulf Hansson (3):
+>   mmc: mmci: Use optional sleep pinctrl state
+>   mmc: mmci: Adapt to register write restrictions
+>   mmc: mmci: Save and restore register context
+>
+>  drivers/mmc/host/mmci.c |   75 +++++++++++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/mmci.h |    1 +
+>  2 files changed, 76 insertions(+)
+>
+> --
+> 1.7.10
+>
 
-When pm_runtime_set_autosuspend_delay() was being called, the device's usage
-counter was 0, causing the PM layer to runtime-suspend the device. We then
-went on to call sdhci_add_host() on a suspended device, which hung.
+Hi Russell,
 
-Fix this by making the driver consistent with the omap_hsmmc driver, both
-in terms of runtime PM initialization and error handling. Now the device
-is not runtime-suspended until we exit the probe routine.
+Just wanted to send a ping on this patch set. As you likely are aware
+of, I have uploaded the patches in your patch tracker a while ago.
 
-Signed-off-by: Daniel Drake <dsd@laptop.org>
----
- drivers/mmc/host/sdhci-pxav3.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index a0cdbc5..86d8ac8 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -300,18 +300,15 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 
- 	sdhci_get_of_property(pdev);
- 
--	pm_runtime_set_active(&pdev->dev);
- 	pm_runtime_enable(&pdev->dev);
-+	pm_runtime_get_sync(&pdev->dev);
- 	pm_runtime_set_autosuspend_delay(&pdev->dev, PXAV3_RPM_DELAY_MS);
- 	pm_runtime_use_autosuspend(&pdev->dev);
- 	pm_suspend_ignore_children(&pdev->dev, 1);
--	pm_runtime_get_noresume(&pdev->dev);
- 
- 	ret = sdhci_add_host(host);
- 	if (ret) {
- 		dev_err(&pdev->dev, "failed to add host\n");
--		pm_runtime_forbid(&pdev->dev);
--		pm_runtime_disable(&pdev->dev);
- 		goto err_add_host;
- 	}
- 
-@@ -324,11 +321,14 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 		device_init_wakeup(&pdev->dev, 0);
- 	}
- 
-+	pm_runtime_mark_last_busy(&pdev->dev);
- 	pm_runtime_put_autosuspend(&pdev->dev);
- 
- 	return 0;
- 
- err_add_host:
-+	pm_runtime_put_sync(&pdev->dev);
-+	pm_runtime_disable(&pdev->dev);
- 	clk_disable_unprepare(clk);
- 	clk_put(clk);
- err_cd_req:
--- 
-1.8.1.4
-
+Kind regards
+Ulf Hansson
