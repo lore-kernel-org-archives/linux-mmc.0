@@ -1,126 +1,82 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] drivers: mmc: reordered shutdown sequence in mmc_bld_remove_req
-Date: Mon, 10 Jun 2013 11:44:29 +0200
-Message-ID: <CAPDyKFq-h_FDNMc-3rvcknBkGhWd13KDLnHhwBrcX4Rfc0qWGQ@mail.gmail.com>
-References: <1370382160-7576-1-git-send-email-taysom@chromium.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f180.google.com ([209.85.128.180]:53934 "EHLO
-	mail-ve0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752038Ab3FJJob (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jun 2013 05:44:31 -0400
-Received: by mail-ve0-f180.google.com with SMTP id pa12so4512776veb.25
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Jun 2013 02:44:30 -0700 (PDT)
-In-Reply-To: <1370382160-7576-1-git-send-email-taysom@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Tushar Behera <tushar.behera@linaro.org>
+Subject: [PATCH 00/15] Convert to use devm_ioremap_resource
+Date: Mon, 10 Jun 2013 17:04:58 +0530
+Message-ID: <1370864113-17895-1-git-send-email-tushar.behera@linaro.org>
+Return-path: <linux-can-owner@vger.kernel.org>
+Sender: linux-can-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: thierry.reding@gmail.com, patches@linaro.org, alsa-devel@alsa-project.org, devel@driverdev.osuosl.org, linux-can@vger.kernel.org, linux-doc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org, linux-usb@vger.kernel.org, netdev@vger.kernel.org, sparclinux@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>, Chris Ball <cjb@laptop.org>, Dan Williams <djbw@fb.com>, "David S. Miller" <davem@davemloft.net>, Felipe Balbi <balbi@ti.com>, Grant Likely <grant.likely@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Liam Girdwood <lgirdwood@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Marc Kleine-Budde <mkl@pengutronix.de>, Mark Brown <broonie@kernel.org>, Michal Simek <michal.simek@xilinx.com>, Rob Landley <rob@landley.net>, Vinod Koul <vinod.koul@intel.com>, Wolfgang Grandegger <wg@grandegger.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Paul Taysom <taysom@chromium.org>
-Cc: Chris Ball <cjb@laptop.org>, Namjae Jeon <linkinjeon@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, sonny@chromium.org, olofj@chromium.org
 
-On 4 June 2013 23:42, Paul Taysom <taysom@chromium.org> wrote:
-> We had a multi-partition SD-Card with two ext2 file systems. The partition
-> table was getting overwritten by a race between the card removal and
-> the unmount of the 2nd ext2 partition.
->
-> What was observed:
-> 1. Suspend/resume would call to remove the device. The clearing
->    of the device information is done asynchronously.
-> 2. A request is made to unmount the file system (this is called
->    after the removal has started).
-> 3. The remapping table was cleared by the asynchronous part of
->    the device removal.
-> 4. A write request to the super block (block 0 of the partition)
->    was sent down and instead of being remapped to the partition
->    offset, it was remapped to block 0 of the device which is where
->    the partition table is located.
-> 5. Write was queued and written resulting in the overwriting
->    of the partition table with the ext2 super block.
-> 6. The mmc_queue is cleaned up.
+These are the remaining instances of devm_request_and_ioremap. Convert
+them to use devm_ioremap_resource as introduced by commit
+75096579c3ac ("lib: devres: Introduce devm_ioremap_resource()).
+Patches 1 to 13 remove occurrences of devm_request_and_ioremap.
+Patch 14 modifies one comment that speaks about devm_request_and_ioremap.
+Patch 15 removes the definition of devm_request_and_ioremap which
+should only be applied if all other pathces are merged.
 
-Hi Paul,
+Tushar Behera (15):
+  sparc,leon: Convert to use devm_ioremap_resource
+  sudmac: Convert to use devm_ioremap_resource
+  mmc: mvsdio: Convert to use devm_ioremap_resource
+  gpio_msm: Convert to use devm_ioremap_resource
+  gpio-sta2x11: Convert to use devm_ioremap_resource
+  net: bcm63xx_enet: Convert to use devm_ioremap_resource
+  net: fec: Convert to use devm_ioremap_resource
+  net: emaclite: Convert to use devm_ioremap_resource
+  net: can: Convert to use devm_ioremap_resource
+  Staging: netlogic: Convert to use devm_ioremap_resource
+  regulator: ti-abb: Convert to use devm_ioremap_resource
+  ASoC: spear: Convert to use devm_ioremap_resource
+  pci: mvebu: Convert to use devm_ioremap_resource
+  usb: phy: rcar-usb: Fix comment w.r.t. devm_ioremap_resource
+  lib: devres: Remove deprecated devm_request_and_ioremap
 
-An interesting bug you found here. My impression is that this is
-something that should be addressed through the blk layer, somehow.
+ Documentation/driver-model/devres.txt         |    1 -
+ arch/sparc/kernel/leon_pci_grpci1.c           |    6 +++---
+ drivers/dma/sh/sudmac.c                       |    6 +++---
+ drivers/gpio/gpio-msm-v1.c                    |   12 +++++------
+ drivers/gpio/gpio-sta2x11.c                   |    4 +++-
+ drivers/mmc/host/mvsdio.c                     |    6 +++---
+ drivers/net/can/c_can/c_can_platform.c        |    4 ++--
+ drivers/net/ethernet/broadcom/bcm63xx_enet.c  |   12 +++++------
+ drivers/net/ethernet/freescale/fec_main.c     |   12 +++++------
+ drivers/net/ethernet/xilinx/xilinx_emaclite.c |    6 ++++--
+ drivers/pci/host/pci-mvebu.c                  |    5 +++--
+ drivers/regulator/ti-abb-regulator.c          |   12 +++++------
+ drivers/staging/netlogic/xlr_net.c            |    8 +++----
+ drivers/usb/phy/phy-rcar-usb.c                |    2 +-
+ include/linux/device.h                        |    2 --
+ lib/devres.c                                  |   28 -------------------------
+ sound/soc/spear/spdif_out.c                   |   20 +++++-------------
+ 17 files changed, 55 insertions(+), 91 deletions(-)
 
-Have you considered that this is not only a problem for SD cards, but
-for other block device drivers as well. I believe it is common to call
-del_gendisk before blk_cleanup_queue, which in principle is what you
-want to change.
+CC: alsa-devel@alsa-project.org
+CC: devel@driverdev.osuosl.org
+CC: linux-can@vger.kernel.org
+CC: linux-doc@vger.kernel.org
+CC: linux-gpio@vger.kernel.org
+CC: linux-mmc@vger.kernel.org
+CC: linux-pci@vger.kernel.org
+CC: linux-usb@vger.kernel.org
+CC: netdev@vger.kernel.org
+CC: sparclinux@vger.kernel.org
+CC: Bjorn Helgaas <bhelgaas@google.com>
+CC: Chris Ball <cjb@laptop.org>
+CC: Dan Williams <djbw@fb.com>
+CC: "David S. Miller" <davem@davemloft.net>
+CC: Felipe Balbi <balbi@ti.com>
+CC: Grant Likely <grant.likely@linaro.org>
+CC: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+CC: Liam Girdwood <lgirdwood@gmail.com>
+CC: Linus Walleij <linus.walleij@linaro.org>
+CC: Marc Kleine-Budde <mkl@pengutronix.de>
+CC: Mark Brown <broonie@kernel.org>
+CC: Michal Simek <michal.simek@xilinx.com>
+CC: Rob Landley <rob@landley.net>
+CC: Vinod Koul <vinod.koul@intel.com>
+CC: Wolfgang Grandegger <wg@grandegger.com>
+-- 
+1.7.9.5
 
->
-> The mmc card device driver used to access SD cards, was calling del_gendisk
-> before calling mmc_cleanup-queue. The comment in the mmc_blk_remove_req
-> code indicated that it expected del_gendisk to block all further requests
-> from being queued but it doesn't. The mmc driver uses the presences of the
-> mmc_queue to determine if the request should be queued.
->
-> The fix was to clean up the mmc_queue before the rest of the
-> the delete partition code is called.
->
-> This prevents the overwriting of the partition table.
->
-> However, the umount gets an error trying to write the super block.
-> The umount should be issued before the device is removed but that
-> is not always possible. The umount is still needed to cleanup other
-> data structures.
-
-So this clearly indicates to me that this is not the complete
-solution, even if it solves the most serious problem for this bug.
-
-I think it would be good to get a blk device maintainer's input to
-this discussion.
-
-Kind regards
-Ulf Hansson
-
->
-> Addresses the problem described in http://crbug.com/240815
->
-> Signed-off-by: Paul Taysom <taysom@chromium.org>
-> ---
->  drivers/mmc/card/block.c | 14 ++++++++------
->  1 file changed, 8 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index dd27b07..a79f113 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -2158,6 +2158,14 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
->         struct mmc_card *card;
->
->         if (md) {
-> +               /*
-> +                * Flush remaining requests and free queues. It
-> +                * is freeing the queue that stops new requests
-> +                * from being accepted.
-> +                */
-> +               mmc_cleanup_queue(&md->queue);
-> +               if (md->flags & MMC_BLK_PACKED_CMD)
-> +                       mmc_packed_clean(&md->queue);
->                 card = md->queue.card;
->                 if (md->disk->flags & GENHD_FL_UP) {
->                         device_remove_file(disk_to_dev(md->disk), &md->force_ro);
-> @@ -2166,14 +2174,8 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
->                                 device_remove_file(disk_to_dev(md->disk),
->                                         &md->power_ro_lock);
->
-> -                       /* Stop new requests from getting into the queue */
->                         del_gendisk(md->disk);
->                 }
-> -
-> -               /* Then flush out any already in there */
-> -               mmc_cleanup_queue(&md->queue);
-> -               if (md->flags & MMC_BLK_PACKED_CMD)
-> -                       mmc_packed_clean(&md->queue);
->                 mmc_blk_put(md);
->         }
->  }
-> --
-> 1.8.3
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
