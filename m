@@ -1,63 +1,63 @@
-From: Andrew Lunn <andrew@lunn.ch>
-Subject: Re: [RESEND PATCH V3 0/8] mmc_of_parse() adaptations, switch mvsdio
- to mmc_of_parse()
-Date: Mon, 10 Jun 2013 21:05:23 +0200
-Message-ID: <20130610190523.GT2824@lunn.ch>
-References: <1370808858-32241-1-git-send-email-gmbnomis@gmail.com>
+From: Daniel Drake <dsd@laptop.org>
+Subject: "exclude asynchronous transfer" patch causes boot fail
+Date: Mon, 10 Jun 2013 13:53:55 -0600
+Message-ID: <CAMLZHHRt=ajakDx6ZFRVx8CUKNojury5fX8R+gBhhJTOstQ6Xg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from londo.lunn.ch ([80.238.139.98]:39026 "EHLO londo.lunn.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752557Ab3FJTF4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 10 Jun 2013 15:05:56 -0400
-Content-Disposition: inline
-In-Reply-To: <1370808858-32241-1-git-send-email-gmbnomis@gmail.com>
+Received: from mail-qa0-f49.google.com ([209.85.216.49]:40872 "EHLO
+	mail-qa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751903Ab3FJTx4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jun 2013 15:53:56 -0400
+Received: by mail-qa0-f49.google.com with SMTP id hu16so2500046qab.8
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Jun 2013 12:53:55 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Simon Baatz <gmbnomis@gmail.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Chris Ball <cjb@laptop.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: tgih.jun@samsung.com
 
-On Sun, Jun 09, 2013 at 10:14:10PM +0200, Simon Baatz wrote:
-> Hi,
-> 
-> 	RESEND V3:
-> 	- Dropped patches 9 and 10, they are part of linux-next already
-> 	NB: patch 7 as well, but I did not want to change the numbering
-> 
-> 	V3 changes:
-> 	- Patch 01/10: Added EPROBE_DEFER case to mmc_of_parse()
-> 	- Added Acked-By to (unmodified) patches 02 and 03.
-> 
-> 	V2 changes:
-> 	- Converted mvsdio to use mmc_of_parse()
-> 	- Adapted DTS files using mvsdio accordingly
-> 	- Changed mmc_of_parse() to return errors to the caller
-> 
-> While adding DT support for the Sheevaplugs by Globalscale Technologies
-> (Kirkwood), it turned out that the DT binding of mvsdio lacked features to
-> properly support the hardware (active high/low of CD and WP pins could not
-> be described in DT).
-> 
-> This is standard functionality provided by the mmc_of_parse() helper
-> function.  However, mmc_of_parse() may allocate GPIO lines.  If the
-> allocation fails, it outputs an error, but does not return an error to its
-> caller.  Therefore, a proposal to handle errors in mmc_of_parse() is made.
-> This also allows to handle the EPROBE_DEFER case when GPIO is not loaded
-> yet.
-> 
-> The patch set is structured as follows:
-> 
-> 1   Adapt mmc_of_parse() to return errors
-> 2-6 Handle errors in current drivers using mmc_of_parse() (compile tested
->     only)
-> 7-8 Convert mvsdio and respective dts files to mmc_of_parse() (tested on
->     kirkwood)
+Hi,
 
-Hi Simon
+Testing the latest linus kernel on OLPC XO-4 (sdhci-pxav3), boot
+fails. Userspace does start, and I see that systemd is starting a few
+services (feels a bit slower than usual), then it hangs still while
+loading initial services - I don't even get to a shell prompt.
 
-Tested-by: Andrew Lunn <andrew@lunn.ch>
+git-bisect shows the following commit introduces the problem:
 
-I tested on kirkwood topkick with DT. SDIO wifi device is found.
+commit 369d321ed1baa7748e770aaaae4d8effad699633
+Author: Seungwon Jeon <tgih.jun@samsung.com>
+Date:   Wed Dec 26 10:40:17 2012 +0900
 
-  Andrew
+    mmc: queue: exclude asynchronous transfer for special request
+
+mmc debug messages from the point of hang:
+
+sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00000001
+sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00000002
+mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
+mmc1:     4096 bytes transferred: 0
+mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
+<mmc1: starting CMD23 arg 00000008 flags 00000015>
+mmc1: starting CMD18 arg 00023000 flags 000000b5
+mmc1:     blksz 512 blocks 8 flags 00000200 tsac 10 ms nsac 0
+mmc1:     CMD12 arg 00000000 flags 0000049d
+sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00000001
+sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00000002
+mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
+mmc1:     4096 bytes transferred: 0
+mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
+
+
+If I modify the patch as follows, things seem to be back to normal:
+#define MMC_REQ_SPECIAL_MASK (REQ_DISCARD)
+
+Whereas setting it as follows causes the boot failure:
+#define MMC_REQ_SPECIAL_MASK (REQ_FLUSH)
+
+So I would suspect that there is some incompatibility between
+REQ_FLUSH handling and the optimization that this patch introduces.
+
+Any ideas?
+
+Daniel
