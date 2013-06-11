@@ -1,157 +1,48 @@
-From: "Christian Daudt" <csd@broadcom.com>
-Subject: Re: [PATCH] mmc: sirf: fix sdhci_pltfm_init sequence
-Date: Tue, 11 Jun 2013 15:39:16 -0700
-Message-ID: <51B7A714.7040804@broadcom.com>
-References: <24753444.e6CjWoyOih@wuerfel>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [PATCHv6 6/6] mmc: dw_mmc: Add support DW SD/MMC driver on
+ SOCFPGA
+Date: Tue, 11 Jun 2013 16:27:56 -0700
+Message-ID: <20130611232756.GD23774@quad.lixom.net>
+References: <1370444578-25721-1-git-send-email-dinguyen@altera.com>
+ <1370444578-25721-7-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=iso-8859-1;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mms1.broadcom.com ([216.31.210.17]:3326 "EHLO mms1.broadcom.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754672Ab3FKWjZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 11 Jun 2013 18:39:25 -0400
-In-Reply-To: <24753444.e6CjWoyOih@wuerfel>
+Received: from mail-pb0-f44.google.com ([209.85.160.44]:35120 "EHLO
+	mail-pb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752439Ab3FKX1w (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jun 2013 19:27:52 -0400
+Received: by mail-pb0-f44.google.com with SMTP id uo1so4310178pbc.3
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Jun 2013 16:27:51 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1370444578-25721-7-git-send-email-dinguyen@altera.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Barry Song <Baohua.Song@csr.com>, Chris Ball <cjb@laptop.org>
+To: dinguyen@altera.com
+Cc: linux-arm-kernel@lists.infradead.org, dinh.linux@gmail.com, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Pavel Machek <pavel@denx.de>, linux-mmc@vger.kernel.org
 
-On 13-06-03 03:02 PM, Arnd Bergmann wrote:
-> Patch "mmc: sdhci: Add size for caller in init+register" changed the
-> interface for sdhci_pltfm_init, while patch "mmc: sdhci-sirf: add mmc
-> host sdhci-pltfm based driver for SiRF SoCs" added a new driver
-> with the old interface.
->
-> This changes the sirf driver to use the new interface, avoiding
-> one warning, and simplifying the init sequence. Since we're here
-> already, this also adds an error path for failed clk_prepare_enable.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> Cc: Christian Daudt <csd@broadcom.com>
-> Cc: Barry Song <Baohua.Song@csr.com>
-> Cc: Chris Ball <cjb@laptop.org>
-> ----
-> This needs an Ack from Barry before it can get applied.
->
-> diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
-> index 09805af..cc80f26 100644
-> --- a/drivers/mmc/host/sdhci-sirf.c
-> +++ b/drivers/mmc/host/sdhci-sirf.c
-> @@ -24,7 +24,7 @@ struct sdhci_sirf_priv {
->   static unsigned int sdhci_sirf_get_max_clk(struct sdhci_host *host)
->   {
->   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -	struct sdhci_sirf_priv *priv = pltfm_host->priv;
-> +	struct sdhci_sirf_priv *priv = sdhci_pltfm_priv(pltfm_host);
->   	return clk_get_rate(priv->clk);
->   }
->   
-> @@ -47,6 +47,8 @@ static int sdhci_sirf_probe(struct platform_device *pdev)
->   	struct sdhci_pltfm_host *pltfm_host;
->   	struct sdhci_sirf_priv *priv;
->   	struct pinctrl *pinctrl;
-> +	struct clk *clk;
-> +	int gpio_cd;
->   	int ret;
->   
->   	pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
-> @@ -55,38 +57,31 @@ static int sdhci_sirf_probe(struct platform_device *pdev)
->   		return PTR_ERR(pinctrl);
->   	}
->   
-> -	priv = devm_kzalloc(&pdev->dev, sizeof(struct sdhci_sirf_priv),
-> -		GFP_KERNEL);
-> -	if (!priv) {
-> -		dev_err(&pdev->dev, "unable to allocate private data");
-> -		return -ENOMEM;
-> -	}
-> -
-> -	priv->clk = devm_clk_get(&pdev->dev, NULL);
-> -	if (IS_ERR(priv->clk)) {
-> +	clk = devm_clk_get(&pdev->dev, NULL);
-> +	if (IS_ERR(clk)) {
->   		dev_err(&pdev->dev, "unable to get clock");
-> -		return PTR_ERR(priv->clk);
-> +		return PTR_ERR(clk);
->   	}
->   
-> -	if (pdev->dev.of_node) {
-> -		priv->gpio_cd = of_get_named_gpio(pdev->dev.of_node,
-> -			"cd-gpios", 0);
-> -	} else {
-> -		priv->gpio_cd = -EINVAL;
-> -	}
-> +	if (pdev->dev.of_node)
-> +		gpio_cd = of_get_named_gpio(pdev->dev.of_node, "cd-gpios", 0);
-> +	else
-> +		gpio_cd = -EINVAL;
->   
-> -	host = sdhci_pltfm_init(pdev, &sdhci_sirf_pdata);
-> -	if (IS_ERR(host)) {
-> -		ret = PTR_ERR(host);
-> -		goto err_sdhci_pltfm_init;
-> -	}
-> +	host = sdhci_pltfm_init(pdev, &sdhci_sirf_pdata, sizeof(struct sdhci_sirf_priv));
-> +	if (IS_ERR(host))
-> +		return PTR_ERR(host);
->   
->   	pltfm_host = sdhci_priv(host);
-> -	pltfm_host->priv = priv;
-> +	priv = sdhci_pltfm_priv(pltfm_host);
-> +	priv->clk = clk;
-> +	priv->gpio_cd = gpio_cd;
->   
->   	sdhci_get_of_property(pdev);
->   
-> -	clk_prepare_enable(priv->clk);
-> +	ret = clk_prepare_enable(priv->clk);
-> +	if (ret)
-> +		goto err_clk_prepare;
->   
->   	ret = sdhci_add_host(host);
->   	if (ret)
-> @@ -111,8 +106,8 @@ err_request_cd:
->   	sdhci_remove_host(host, 0);
->   err_sdhci_add:
->   	clk_disable_unprepare(priv->clk);
-> +err_clk_prepare:
->   	sdhci_pltfm_free(pdev);
-> -err_sdhci_pltfm_init:
->   	return ret;
->   }
->   
-> @@ -120,7 +115,7 @@ static int sdhci_sirf_remove(struct platform_device *pdev)
->   {
->   	struct sdhci_host *host = platform_get_drvdata(pdev);
->   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -	struct sdhci_sirf_priv *priv = pltfm_host->priv;
-> +	struct sdhci_sirf_priv *priv = sdhci_pltfm_priv(pltfm_host);
->   
->   	sdhci_pltfm_unregister(pdev);
->   
-> @@ -136,7 +131,7 @@ static int sdhci_sirf_suspend(struct device *dev)
->   {
->   	struct sdhci_host *host = dev_get_drvdata(dev);
->   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -	struct sdhci_sirf_priv *priv = pltfm_host->priv;
-> +	struct sdhci_sirf_priv *priv = sdhci_pltfm_priv(pltfm_host);
->   	int ret;
->   
->   	ret = sdhci_suspend_host(host);
-> @@ -152,7 +147,7 @@ static int sdhci_sirf_resume(struct device *dev)
->   {
->   	struct sdhci_host *host = dev_get_drvdata(dev);
->   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -	struct sdhci_sirf_priv *priv = pltfm_host->priv;
-> +	struct sdhci_sirf_priv *priv = sdhci_pltfm_priv(pltfm_host);
->   	int ret;
->   
->   	ret = clk_enable(priv->clk);
->
->
-Acked-by: Christian Daudt <csd@broadcom.com>
+Hi,
+
+On Wed, Jun 05, 2013 at 10:02:58AM -0500, dinguyen@altera.com wrote:
+> From: Dinh Nguyen <dinguyen@altera.com>
+> 
+> Add platform specific functionality for the DW SD/MMC driver for
+> SoCFPGA. Move SDMMC_CMD_USE_HOLD_REG to dw_mmc.h so other platforms
+> can use this define.
+> 
+> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+> CC: Seungwon Jeon <tgih.jun@samsung.com>
+> CC: Jaehoon Chung <jh80.chung@samsung.com>
+> CC: Arnd Bergmann <arnd@arndb.de>
+> CC: Olof Johansson <olof@lixom.net>
+> CC: Pavel Machek <pavel@denx.de>
+> CC: linux-mmc@vger.kernel.org
+
+Acked-by: Olof Johansson <olof@lixom.net>
+
+This one should be sent to (and applied by) Chris Ball, the MMC maintainer. The
+driver is standalone and can go in independently on the platform code that will
+configure it, so he can merge it without dependencies.
 
 
+-Olof
