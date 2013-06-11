@@ -1,84 +1,114 @@
-From: Philip Rakity <prakity@nvidia.com>
-Subject: Re: [PATCH] mmc: sdhci: fix caps2 for HS200
-Date: Tue, 11 Jun 2013 17:09:17 +0200
-Message-ID: <DC90B37F-FB8C-4A1E-AACF-82CE5D53B95C@nvidia.com>
-References: <1370959760-27215-1-git-send-email-peppe.cavallaro@st.com>
+From: Mike Turquette <mturquette@linaro.org>
+Subject: Re: [PATCH v3 1/7] clk: divider: add flag to limit possible dividers to even
+ numbers
+Date: Tue, 11 Jun 2013 11:57:50 -0700
+Message-ID: <20130611185750.8816.82691@quantum>
+References: <201306111328.52679.heiko@sntech.de> <201306111329.32749.heiko@sntech.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate04.nvidia.com ([216.228.121.35]:6839 "EHLO
-	hqemgate04.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751464Ab3FKPJY convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jun 2013 11:09:24 -0400
-In-Reply-To: <1370959760-27215-1-git-send-email-peppe.cavallaro@st.com>
-Content-Language: en-US
+Received: from mail-pa0-f54.google.com ([209.85.220.54]:60143 "EHLO
+	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752855Ab3FKS54 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jun 2013 14:57:56 -0400
+Received: by mail-pa0-f54.google.com with SMTP id kx10so3500131pab.27
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Jun 2013 11:57:55 -0700 (PDT)
+In-Reply-To: <201306111329.32749.heiko@sntech.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>
+To: =?utf-8?q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Linus Walleij <linus.walleij@linaro.org>, devicetree-discuss@lists.ozlabs.org, Russell King <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Andy Shevchenko <andy.shevchenko@gmail.com>
 
-
-On Jun 11, 2013, at 3:09 PM, Giuseppe CAVALLARO <peppe.cavallaro@st.com> wrote:
-
-> Although the HC supports HS200 (eMMC) the caps2 are always zero; this means that
-> no way to use the super speed mode (when init the card).
-> 
-> If the HC support SDR104, for SD3.0, so it also supports HS200 for eMMC and
-> this patch just sets the MMC_CAP2_HS200 in the host caps2 field.
-> 
-> Reported-by: Youssef Triki <youssef.triki@st.com>
-> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+Quoting Heiko St=C3=BCbner (2013-06-11 04:29:32)
+> SoCs like the Rockchip Cortex-A9 ones contain divider some clocks
+> that use the regular mechanisms for storage but allow only even
+> dividers and 1 to be used.
+>=20
+> Therefore add a flag that lets _is_valid_div limit the valid dividers
+> to these values. _get_maxdiv is also adapted to return even values
+> for the CLK_DIVIDER_ONE_BASED case.
+>=20
+> Signed-off-by: Heiko Stuebner <heiko@sntech.de>
 > ---
-> drivers/mmc/host/sdhci.c |    8 ++++++--
-> 1 files changed, 6 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 2ea429c..5626f5f 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2962,9 +2962,13 @@ int sdhci_add_host(struct sdhci_host *host)
-> 		mmc->caps |= MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
-> 
-> 	/* SDR104 supports also implies SDR50 support */
-> -	if (caps[1] & SDHCI_SUPPORT_SDR104)
-> +	if (caps[1] & SDHCI_SUPPORT_SDR104) {
-> 		mmc->caps |= MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_SDR50;
-> -	else if (caps[1] & SDHCI_SUPPORT_SDR50)
-> +		/* SD3.0: SDR104 is supported so from eMMC caps2
-> +		 * can be promoted to support HS200.
-> +		 */
-> +		mmc->caps2 |= MMC_CAP2_HS200;
-> +	} else if (caps[1] & SDHCI_SUPPORT_SDR50)
-> 		mmc->caps |= MMC_CAP_UHS_SDR50;
-> 
-> 	if (caps[1] & SDHCI_SUPPORT_DDR50)
-> -- 
-> 1.7.4.4
+>  drivers/clk/clk-divider.c    |   14 ++++++++++++--
+>  include/linux/clk-provider.h |    2 ++
+>  2 files changed, 14 insertions(+), 2 deletions(-)
+>=20
+> diff --git a/drivers/clk/clk-divider.c b/drivers/clk/clk-divider.c
+> index ce5cfe9..bdee7cf 100644
+> --- a/drivers/clk/clk-divider.c
+> +++ b/drivers/clk/clk-divider.c
+> @@ -45,8 +45,16 @@ static unsigned int _get_table_maxdiv(const struct=
+ clk_div_table *table)
+> =20
+>  static unsigned int _get_maxdiv(struct clk_divider *divider)
+>  {
+> -       if (divider->flags & CLK_DIVIDER_ONE_BASED)
+> -               return div_mask(divider);
+> +       if (divider->flags & CLK_DIVIDER_ONE_BASED) {
+> +               unsigned int div =3D div_mask(divider);
+> +
+> +               /* decrease to even number */
+> +               if (divider->flags & CLK_DIVIDER_EVEN)
+> +                       div--;
+> +
+> +               return div;
+> +       }
+> +
+>         if (divider->flags & CLK_DIVIDER_POWER_OF_TWO)
+>                 return 1 << div_mask(divider);
+>         if (divider->table)
+> @@ -141,6 +149,8 @@ static bool _is_valid_div(struct clk_divider *div=
+ider, unsigned int div)
+>                 return is_power_of_2(div);
+>         if (divider->table)
+>                 return _is_valid_table_div(divider->table, div);
+> +       if (divider->flags & CLK_DIVIDER_EVEN && div !=3D 1 && (div %=
+ 2) !=3D 0)
 
+Is it correct to check for 'div !=3D 1' here?  Wouldn't that check only=
+ be
+valid in the presence of CLK_DIVIDER_ONE_BASED?
 
-further down in the code could you  change the  comment from
-        /* Does the host need tuning for HS200? */
-        if (mmc->caps2 & MMC_CAP2_HS200)
-                host->flags |= SDHCI_HS200_NEEDS_TUNING;
+Maybe something like this would be more correct:
 
+	if (divider->flags & CLK_DIVIDER_EVEN && (div % 2) !=3D 0) {
+		if (divider->flags & CLK_DIVIDER_ONE_BASED && div =3D=3D 1)
+			return true;
+		return false;
+	}
 
-to
+Regards,
+Mike
 
-        /* Does the host need tuning for SDR104/HS200? */
-        if (mmc->caps2 & MMC_CAP2_HS200)
-                host->flags |= SDHCI_HS200_NEEDS_TUNING;
-
-Since SDR104 and HS200 are effectively the same thing should we delete the defines for HS200 and use SDR104 ?
-or
-if we want SDR104 to be separate from HS200 create defines for that.  Like SDHCI_SDR104_NEEDS_TUNING 
-
-
-
-
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+> +               return false;
+>         return true;
+>  }
+> =20
+> diff --git a/include/linux/clk-provider.h b/include/linux/clk-provide=
+r.h
+> index 1ec14a7..bd52e52 100644
+> --- a/include/linux/clk-provider.h
+> +++ b/include/linux/clk-provider.h
+> @@ -266,6 +266,7 @@ struct clk_div_table {
+>   *   of this register, and mask of divider bits are in higher 16-bit=
+ of this
+>   *   register.  While setting the divider bits, higher 16-bit should=
+ also be
+>   *   updated to indicate changing divider bits.
+> + * CLK_DIVIDER_EVEN - only allow even divider values
+>   */
+>  struct clk_divider {
+>         struct clk_hw   hw;
+> @@ -281,6 +282,7 @@ struct clk_divider {
+>  #define CLK_DIVIDER_POWER_OF_TWO       BIT(1)
+>  #define CLK_DIVIDER_ALLOW_ZERO         BIT(2)
+>  #define CLK_DIVIDER_HIWORD_MASK                BIT(3)
+> +#define CLK_DIVIDER_EVEN               BIT(4)
+> =20
+>  extern const struct clk_ops clk_divider_ops;
+>  struct clk *clk_register_divider(struct device *dev, const char *nam=
+e,
+> --=20
+> 1.7.2.3
