@@ -1,269 +1,193 @@
 From: <dinguyen@altera.com>
-Subject: [PATCH 2/2] mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA
-Date: Tue, 11 Jun 2013 19:28:44 -0500
-Message-ID: <1370996924-23048-3-git-send-email-dinguyen@altera.com>
+Subject: [PATCH 1/2] ARM: socfpga: dts: Add support for SD/MMC
+Date: Tue, 11 Jun 2013 19:28:43 -0500
+Message-ID: <1370996924-23048-2-git-send-email-dinguyen@altera.com>
 References: <1370996924-23048-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:38768
+Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:27675
 	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755316Ab3FLA2u (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jun 2013 20:28:50 -0400
+	by vger.kernel.org with ESMTP id S1756853Ab3FLA2t (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jun 2013 20:28:49 -0400
 In-Reply-To: <1370996924-23048-1-git-send-email-dinguyen@altera.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, Dinh Nguyen <dinguyen@altera.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Pavel Machek <pavel@denx.de>
+Cc: cjb@laptop.org, Dinh Nguyen <dinguyen@altera.com>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Pavel Machek <pavel@denx.de>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, devicetree-discuss@lists.ozlabs.org, linux@arm.linux.org.uk
 
 From: Dinh Nguyen <dinguyen@altera.com>
 
-Add platform specific functionality for the DW SD/MMC driver for
-SoCFPGA. Move SDMMC_CMD_USE_HOLD_REG to dw_mmc.h so other platforms
-can use this define.
+Add bindings for SD/MMC for SOCFPGA.
+Add "syscon" to the "altr,sys-mgr" binding.
 
 Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
 Reviewed-by: Pavel Machek <pavel@denx.de>
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-Acked-by: Olof Johansson <olof@lixom.net>
-CC: Seungwon Jeon <tgih.jun@samsung.com>
-CC: Jaehoon Chung <jh80.chung@samsung.com>
 CC: Arnd Bergmann <arnd@arndb.de>
-CC: Pavel Machek <pavel@denx.de>
+CC: Olof Johansson <olof@lixom.net>
+Cc: Pavel Machek <pavel@denx.de>
+Cc: Grant Likely <grant.likely@linaro.org>
+Cc: Rob Herring <rob.herring@calxeda.com>
 Cc: Chris Ball <cjb@laptop.org>
-CC: linux-mmc@vger.kernel.org
-
-v7:
-- Add Acked-by: Olof Johansson <olof@lixom.net>
-
-v6:
-- Add Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-v5:
-- Add Reviewed-by: Pavel Machek <pavel@denx.de>
-
-v4:
-- Fix up SYSMGR_SDMMC_CTRL_SET macro
-
-v3:
-- Addressed comments from Seugwon, Jaehoon, and Pavel
-- Use clk_disable_unprepare/clk_prepare_enable
+Cc: devicetree-discuss@lists.ozlabs.org
+Cc: linux-mmc@vger.kernel.org
+CC: <linux@arm.linux.org.uk>
 
 v2:
-- Use syscon and regmap
-- Avoid divide by zero
-- Remove the need to set PWR_EN
+- Add "syscon" to "altr,sys-mgr"
+- Remove pwr-en field
 ---
- drivers/mmc/host/Kconfig          |    8 +++
- drivers/mmc/host/Makefile         |    1 +
- drivers/mmc/host/dw_mmc-exynos.c  |    2 -
- drivers/mmc/host/dw_mmc-socfpga.c |  140 +++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/dw_mmc.h         |    1 +
- 5 files changed, 150 insertions(+), 2 deletions(-)
- create mode 100644 drivers/mmc/host/dw_mmc-socfpga.c
+ .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   60 ++++++++++++++++++++
+ arch/arm/boot/dts/socfpga.dtsi                     |   13 ++++-
+ arch/arm/boot/dts/socfpga_cyclone5.dts             |   13 +++++
+ arch/arm/boot/dts/socfpga_vt.dts                   |   12 ++++
+ 4 files changed, 97 insertions(+), 1 deletion(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 9ab8f8d..1be2289 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -556,6 +556,14 @@ config MMC_DW_EXYNOS
- 	  Synopsys DesignWare Memory Card Interface driver. Select this option
- 	  for platforms based on Exynos4 and Exynos5 SoC's.
- 
-+config MMC_DW_SOCFPGA
-+	tristate "SOCFPGA specific extensions for Synopsys DW Memory Card Interface"
-+	depends on MMC_DW
-+	select MMC_DW_PLTFM
-+	help
-+	  This selects support for Altera SoCFPGA specific extensions to the
-+	  Synopsys DesignWare Memory Card Interface driver.
-+
- config MMC_DW_PCI
- 	tristate "Synopsys Designware MCI support on PCI bus"
- 	depends on MMC_DW && PCI
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index cd32280..67718c1 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -42,6 +42,7 @@ obj-$(CONFIG_SDH_BFIN)		+= bfin_sdh.o
- obj-$(CONFIG_MMC_DW)		+= dw_mmc.o
- obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
- obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
-+obj-$(CONFIG_MMC_DW_SOCFPGA)	+= dw_mmc-socfpga.o
- obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
- obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
- obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index f013e7e..866edef 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -31,8 +31,6 @@
- 					SDMMC_CLKSEL_CCLK_DRIVE(y) |	\
- 					SDMMC_CLKSEL_CCLK_DIVIDER(z))
- 
--#define SDMMC_CMD_USE_HOLD_REG		BIT(29)
--
- #define EXYNOS4210_FIXED_CIU_CLK_DIV	2
- #define EXYNOS4412_FIXED_CIU_CLK_DIV	4
- 
-diff --git a/drivers/mmc/host/dw_mmc-socfpga.c b/drivers/mmc/host/dw_mmc-socfpga.c
+diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
 new file mode 100644
-index 0000000..14b5961
+index 0000000..9d7062c
 --- /dev/null
-+++ b/drivers/mmc/host/dw_mmc-socfpga.c
-@@ -0,0 +1,140 @@
-+/*
-+ * Altera SoCFPGA Specific Extensions for Synopsys DW Multimedia Card Interface
-+ * driver
-+ *
-+ *  Copyright (C) 2012, Samsung Electronics Co., Ltd.
-+ *  Copyright (C) 2013 Altera Corporation
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or
-+ * (at your option) any later version.
-+ *
-+ * Taken from dw_mmc-exynos.c
-+ */
-+#include <linux/clk.h>
-+#include <linux/mfd/syscon.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/dw_mmc.h>
-+#include <linux/module.h>
-+#include <linux/of.h>
-+#include <linux/platform_device.h>
-+#include <linux/regmap.h>
++++ b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+@@ -0,0 +1,60 @@
++* Altera SOCFPGA specific extensions to the Synopsis Designware Mobile
++  Storage Host Controller
 +
-+#include "dw_mmc.h"
-+#include "dw_mmc-pltfm.h"
++Required Properties:
 +
-+#define SYSMGR_SDMMCGRP_CTRL_OFFSET		0x108
-+#define DRV_CLK_PHASE_SHIFT_SEL_MASK	0x7
-+#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel)          \
-+	((((smplsel) & 0x7) << 3) | (((drvsel) & 0x7) << 0))
++* compatible: should be
++	- "altr,socfpga-dw-mshc": for controllers with Altera SOCFPGA
++	  specific extentions.
 +
-+/* SOCFPGA implementation specific driver private data */
-+struct dw_mci_socfpga_priv_data {
-+	u8	ciu_div; /* card interface unit divisor */
-+	u32	hs_timing; /* bitmask for CIU clock phase shift */
-+	struct regmap   *sysreg; /* regmap for system manager register */
-+};
++* altr,dw-mshc-ciu-div: Specifies the divider value for the card interface
++  unit (ciu) clock. The value should be (n-1). For Altera's SOCFPGA, the divider
++  value is fixed at 3, which mean parent_clock/4.
 +
-+static int dw_mci_socfpga_priv_init(struct dw_mci *host)
-+{
-+	struct dw_mci_socfpga_priv_data *priv;
++* altr,dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
++  in transmit mode and CIU clock phase shift value in receive mode for single
++  data rate mode operation. Refer notes below for the order of the cells and the
++  valid values.
 +
-+	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
-+	if (!priv) {
-+		dev_err(host->dev, "mem alloc failed for private data\n");
-+		return -ENOMEM;
-+	}
++  Notes for the sdr-timing values:
 +
-+	priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
-+	if (IS_ERR(priv->sysreg)) {
-+		dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
-+		return PTR_ERR(priv->sysreg);
-+	}
-+	host->priv = priv;
++    The order of the cells should be
++      - First Cell: CIU clock phase shift value for RX mode, smplsel bits in
++	the system manager SDMMC control group.
++      - Second Cell: CIU clock phase shift value for TX mode, drvsel bits in
++	the system manager SDMMC control group.
 +
-+	return 0;
-+}
++    Valid values for SDR CIU clock timing for SOCFPGA:
++      - valid value for tx phase shift and rx phase shift is 0 to 7.
 +
-+static int dw_mci_socfpga_setup_clock(struct dw_mci *host)
-+{
-+	struct dw_mci_socfpga_priv_data *priv = host->priv;
++Required properties for a slot:
 +
-+	clk_disable_unprepare(host->ciu_clk);
-+	regmap_write(priv->sysreg, SYSMGR_SDMMCGRP_CTRL_OFFSET,
-+		priv->hs_timing);
-+	clk_prepare_enable(host->ciu_clk);
++* bus-width: Data width for card slot. 4-bit or 8-bit data.
 +
-+	host->bus_hz /= (priv->ciu_div + 1);
-+	return 0;
-+}
++Example:
 +
-+static void dw_mci_socfpga_prepare_command(struct dw_mci *host, u32 *cmdr)
-+{
-+	struct dw_mci_socfpga_priv_data *priv = host->priv;
++  The MSHC controller node can be split into two portions, SoC specific and
++  board specific portions as listed below.
 +
-+	if (priv->hs_timing & DRV_CLK_PHASE_SHIFT_SEL_MASK)
-+		*cmdr |= SDMMC_CMD_USE_HOLD_REG;
-+}
++	dwmmc0@ff704000 {
++		compatible = "altr,socfpga-dw-mshc";
++		reg = <0xff704000 0x1000>;
++		interrupts = <0 139 4>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++	};
 +
-+static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
-+{
-+	struct dw_mci_socfpga_priv_data *priv = host->priv;
-+	struct device_node *np = host->dev->of_node;
-+	u32 timing[2];
-+	u32 div = 0;
-+	int ret;
++	dwmmc0@ff704000 {
++		num-slots = <1>;
++		supports-highspeed;
++		broken-cd;
++		fifo-depth = <0x400>;
++		altr,dw-mshc-ciu-div = <3>;
++      		altr,dw-mshc-sdr-timing = <0 3>;
 +
-+	ret = of_property_read_u32(np, "altr,dw-mshc-ciu-div", &div);
-+	if (ret)
-+		dev_info(host->dev, "No dw-mshc-ciu-div specified, assuming 1");
-+	priv->ciu_div = div;
++		slot@0 {
++			reg = <0>;
++			bus-width = <4>;
++		};
++	};
 +
-+	ret = of_property_read_u32_array(np,
-+			"altr,dw-mshc-sdr-timing", timing, 2);
-+	if (ret)
-+		return ret;
+diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
+index bee62a2..dbf7f22 100644
+--- a/arch/arm/boot/dts/socfpga.dtsi
++++ b/arch/arm/boot/dts/socfpga.dtsi
+@@ -468,6 +468,17 @@
+ 			cache-level = <2>;
+ 		};
+ 
++		mmc: dwmmc0@ff704000 {
++			compatible = "altr,socfpga-dw-mshc";
++			reg = <0xff704000 0x1000>;
++			interrupts = <0 139 4>;
++			fifo-depth = <0x400>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++			clocks = <&l4_mp_clk>, <&sdmmc_clk>;
++			clock-names = "biu", "ciu";
++		};
 +
-+	priv->hs_timing = SYSMGR_SDMMC_CTRL_SET(timing[0], timing[1]);
-+	return 0;
-+}
+ 		/* Local timer */
+ 		timer@fffec600 {
+ 			compatible = "arm,cortex-a9-twd-timer";
+@@ -521,7 +532,7 @@
+ 			};
+ 
+ 		sysmgr@ffd08000 {
+-				compatible = "altr,sys-mgr";
++				compatible = "altr,sys-mgr", "syscon";
+ 				reg = <0xffd08000 0x4000>;
+ 			};
+ 	};
+diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dts b/arch/arm/boot/dts/socfpga_cyclone5.dts
+index 973999d..1853cb1 100644
+--- a/arch/arm/boot/dts/socfpga_cyclone5.dts
++++ b/arch/arm/boot/dts/socfpga_cyclone5.dts
+@@ -54,6 +54,19 @@
+ 			status = "okay";
+ 		};
+ 
++		dwmmc0@ff704000 {
++			num-slots = <1>;
++			supports-highspeed;
++			broken-cd;
++			altr,dw-mshc-ciu-div = <3>;
++			altr,dw-mshc-sdr-timing = <0 3>;
 +
-+static const struct dw_mci_drv_data socfpga_drv_data = {
-+	.init			= dw_mci_socfpga_priv_init,
-+	.setup_clock		= dw_mci_socfpga_setup_clock,
-+	.prepare_command	= dw_mci_socfpga_prepare_command,
-+	.parse_dt		= dw_mci_socfpga_parse_dt,
-+};
++			slot@0 {
++				reg = <0>;
++				bus-width = <4>;
++			};
++		};
 +
-+static const struct of_device_id dw_mci_socfpga_match[] = {
-+	{ .compatible = "altr,socfpga-dw-mshc",
-+			.data = &socfpga_drv_data, },
-+	{},
-+};
-+MODULE_DEVICE_TABLE(of, dw_mci_socfpga_match);
+ 		timer0@ffc08000 {
+ 			clock-frequency = <100000000>;
+ 		};
+diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
+index d1ec0ca..d93deb0 100644
+--- a/arch/arm/boot/dts/socfpga_vt.dts
++++ b/arch/arm/boot/dts/socfpga_vt.dts
+@@ -46,6 +46,18 @@
+ 			status = "okay";
+ 		};
+ 
++		dwmmc0@ff704000 {
++			num-slots = <1>;
++			supports-highspeed;
++			broken-cd;
++			altr,dw-mshc-ciu-div = <3>;
 +
-+int dw_mci_socfpga_probe(struct platform_device *pdev)
-+{
-+	const struct dw_mci_drv_data *drv_data;
-+	const struct of_device_id *match;
++			slot@0 {
++				reg = <0>;
++				bus-width = <4>;
++			};
++		};
 +
-+	match = of_match_node(dw_mci_socfpga_match, pdev->dev.of_node);
-+	drv_data = match->data;
-+	return dw_mci_pltfm_register(pdev, drv_data);
-+}
-+
-+static struct platform_driver dw_mci_socfpga_pltfm_driver = {
-+	.probe		= dw_mci_socfpga_probe,
-+	.remove		= __exit_p(dw_mci_pltfm_remove),
-+	.driver		= {
-+		.name		= "dwmmc_socfpga",
-+		.of_match_table	= of_match_ptr(dw_mci_socfpga_match),
-+		.pm		= &dw_mci_pltfm_pmops,
-+	},
-+};
-+
-+module_platform_driver(dw_mci_socfpga_pltfm_driver);
-+
-+MODULE_DESCRIPTION("Altera SOCFPGA Specific DW-MSHC Driver Extension");
-+MODULE_LICENSE("GPL v2");
-+MODULE_ALIAS("platform:dwmmc-socfpga");
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 0b74189..3700cb2 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -111,6 +111,7 @@
- #define SDMMC_INT_ERROR			0xbfc2
- /* Command register defines */
- #define SDMMC_CMD_START			BIT(31)
-+#define SDMMC_CMD_USE_HOLD_REG	BIT(29)
- #define SDMMC_CMD_CCS_EXP		BIT(23)
- #define SDMMC_CMD_CEATA_RD		BIT(22)
- #define SDMMC_CMD_UPD_CLK		BIT(21)
+ 		timer0@ffc08000 {
+ 			clock-frequency = <7000000>;
+ 		};
 -- 
 1.7.9.5
 
