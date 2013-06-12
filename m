@@ -1,46 +1,68 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] RFC: mmc: dw_mmc: Always go to STATE_DATA_BUSY from STATE_DATA_ERROR
-Date: Wed, 12 Jun 2013 12:06:45 -0700
-Message-ID: <CAD=FV=XKeRjpH1+ytjMfLuGGqQ5VVub22n=V+UpV=jBCD4LLHw@mail.gmail.com>
-References: <1363382956-14557-1-git-send-email-dianders@chromium.org>
-	<5146EAB0.1030705@samsung.com>
-	<CAD=FV=Ww-iK=-vg4jnJe6w4836-yQUoUyxNvCYsDQ5w0q-OMMQ@mail.gmail.com>
-	<515E88E3.5070507@samsung.com>
-	<003401ce3453$19d1e8c0$4d75ba40$%jun@samsung.com>
-	<CAD=FV=V+ZZ0MUtuWKUOgR9NPyAquUjFC6KtHvAP-4iHXAYpjqA@mail.gmail.com>
-	<001601ce35b9$652c5870$2f850950$%jun@samsung.com>
+From: Dinh Nguyen <dinguyen@altera.com>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA
+Date: Wed, 12 Jun 2013 14:39:22 -0500
+Message-ID: <1371065962.14236.21.camel@linux-builds1>
+References: <1370996924-23048-1-git-send-email-dinguyen@altera.com>
+	 <201306121731.53120.arnd@arndb.de> <1371052413.32077.2.camel@linux-builds1>
+	 <3040528.yQVRPuV2pW@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <001601ce35b9$652c5870$2f850950$%jun@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@gmail.com>, Bing Zhao <bzhao@marvell.com>, Ashok Nagarajan <asnagarajan@chromium.org>, Paul Stewart <pstew@chromium.org>, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-db8lp0184.outbound.messaging.microsoft.com ([213.199.154.184]:6013
+	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753747Ab3FLTjW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jun 2013 15:39:22 -0400
+In-Reply-To: <3040528.yQVRPuV2pW@wuerfel>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Pavel Machek <pavel@denx.de>
 
-Seungwon,
+On Wed, 2013-06-12 at 19:46 +0200, Arnd Bergmann wrote:
+> On Wednesday 12 June 2013 10:53:33 Dinh Nguyen wrote:
+> > On Wed, 2013-06-12 at 17:31 +0200, Arnd Bergmann wrote:
+> > > On Wednesday 12 June 2013, dinguyen@altera.com wrote:
+> > > > +static int dw_mci_socfpga_setup_clock(struct dw_mci *host)
+> > > > +{
+> > > > +       struct dw_mci_socfpga_priv_data *priv = host->priv;
+> > > > +
+> > > > +       clk_disable_unprepare(host->ciu_clk);
+> > > > +       regmap_write(priv->sysreg, SYSMGR_SDMMCGRP_CTRL_OFFSET,
+> > > > +               priv->hs_timing);
+> > > > +       clk_prepare_enable(host->ciu_clk);
+> > > > +
+> > > > +       host->bus_hz /= (priv->ciu_div + 1);
+> > > > +       return 0;
+> > > > +}
+> > > 
+> > > 
+> > > Sorry for being so late in the game here, but why do you need a
+> > > regmap_write() call in the driver here? Shouldn't you just be able
+> > > to use the clk_set_rate() interface from the generic dw_mmc-pltfm
+> > > code?
+> > 
+> > This write is necessary for setting phase_shift(s) for the clocks that
+> > are feeding the CIU clock. 
+> 
+> I don't understand. Shouldn't that be an implementation detail
+> of the clock controller rather than the mmc controller?
 
-On Wed, Apr 10, 2013 at 12:02 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> > There are two solutions we have applied.
->>
->> I'm a little confused.  Have you already applied one or both of the
->> solutions you list below, or are you proposing them as alternates to
->> the patch I submitted?
-> Yes, first one already has been applied.
-> I wanted to introduce our fix. Did you try to test with these fixes?
+The clock controller provides 2 clock to the mmc controller. 1 clock is
+for the IP and another is for clocking the Card Interface Unit(CIU). The
+CIU does exactly like the name states, it interfaces with the physical
+SD card. The IP allows for adjusting the phase_shift of this CIU clock
+to support different data rates on SD cards. 
 
-I'm coming back to this after being quite distracted for a while.
+So this "clocking" register is very specific to the SD block. Socfpga
+has them in the system manager, while the exynos platform has them in
+the SD block itself.
 
-I'm a little confused in that you said that your first fix was already
-applied.  I don't see it anywhere.  Did you mean that you've already
-applied it locally, or that it's applied in some git tree somewhere?
-If so, can you point me to it?
+Hope that was clear...
+Dinh
+> 
+> 	Arnd
+> 
 
-If this hasn't been sent out anywhere, perhaps you could send out
-official patches?
 
-I don't have the failing unit myself, so we'll have to get Bing to try
-the patches.  You are suggesting that we try applying both of your
-patches, right?
 
--Doug
