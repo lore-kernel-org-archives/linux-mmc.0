@@ -1,47 +1,46 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v2 08/10] ARM: dts: omap3: split omap3_pmx_core
-Date: Wed, 12 Jun 2013 10:54:44 -0700
-Message-ID: <20130612175444.GS8164@atomide.com>
-References: <20130523184045.GD13507@atomide.com>
- <1370546059-24181-1-git-send-email-balajitk@ti.com>
- <1370546059-24181-9-git-send-email-balajitk@ti.com>
- <20130612143459.GY8164@atomide.com>
- <51B8AB0F.9060701@ti.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] RFC: mmc: dw_mmc: Always go to STATE_DATA_BUSY from STATE_DATA_ERROR
+Date: Wed, 12 Jun 2013 12:06:45 -0700
+Message-ID: <CAD=FV=XKeRjpH1+ytjMfLuGGqQ5VVub22n=V+UpV=jBCD4LLHw@mail.gmail.com>
+References: <1363382956-14557-1-git-send-email-dianders@chromium.org>
+	<5146EAB0.1030705@samsung.com>
+	<CAD=FV=Ww-iK=-vg4jnJe6w4836-yQUoUyxNvCYsDQ5w0q-OMMQ@mail.gmail.com>
+	<515E88E3.5070507@samsung.com>
+	<003401ce3453$19d1e8c0$4d75ba40$%jun@samsung.com>
+	<CAD=FV=V+ZZ0MUtuWKUOgR9NPyAquUjFC6KtHvAP-4iHXAYpjqA@mail.gmail.com>
+	<001601ce35b9$652c5870$2f850950$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <51B8AB0F.9060701@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, b-cousson@ti.com, devicetree-discuss@lists.ozlabs.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <001601ce35b9$652c5870$2f850950$%jun@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@gmail.com>, Bing Zhao <bzhao@marvell.com>, Ashok Nagarajan <asnagarajan@chromium.org>, Paul Stewart <pstew@chromium.org>, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-* Balaji T K <balajitk@ti.com> [130612 10:14]:
-> On Wednesday 12 June 2013 08:05 PM, Tony Lindgren wrote:
-> >* Balaji T K <balajitk@ti.com> [130606 12:20]:
-> >>omap3_pmx_core: padconf register are in two banks 0x48003000 to 0x48002268
-> >>and 0x480025c0 to 0x480025f8.
-> >>
-> >>split omap3_pmx_core into 2 banks as register between 0x48002270 and 0x48002564
-> >>belongs to type pinctrl-single,bit-per-mux with access to certain bit
-> >>fields with bit field mask.
-> >
-> >Is this the right patch for the description? THe patch seems to deal with
-> >USB pins.
-> >
-> >Also, let's not hog any pins under the pinmux controllers, those make
-> >unloading pinctrl-single impossible which is not nice for distros and
-> >development.
-> 
-> omap3_pmx_core is not continuous, so had to split into two and
-> updated the only user in second bank (omap3_pmx_core2) which happened to be usb,
-> CC Roger for USB dynamic pin mux selection.
+Seungwon,
 
-I see. OK yes we can split it as that saves memory too for the unused
-registers. While at it, please move remove the hogs from the pmx
-entries and move the pins to the drivers claiming them.
+On Wed, Apr 10, 2013 at 12:02 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> > There are two solutions we have applied.
+>>
+>> I'm a little confused.  Have you already applied one or both of the
+>> solutions you list below, or are you proposing them as alternates to
+>> the patch I submitted?
+> Yes, first one already has been applied.
+> I wanted to introduce our fix. Did you try to test with these fixes?
 
-Regards,
+I'm coming back to this after being quite distracted for a while.
 
-TOny
+I'm a little confused in that you said that your first fix was already
+applied.  I don't see it anywhere.  Did you mean that you've already
+applied it locally, or that it's applied in some git tree somewhere?
+If so, can you point me to it?
+
+If this hasn't been sent out anywhere, perhaps you could send out
+official patches?
+
+I don't have the failing unit myself, so we'll have to get Bing to try
+the patches.  You are suggesting that we try applying both of your
+patches, right?
+
+-Doug
