@@ -1,52 +1,53 @@
-From: Dinh Nguyen <dinguyen@altera.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA
-Date: Wed, 12 Jun 2013 10:53:33 -0500
-Message-ID: <1371052413.32077.2.camel@linux-builds1>
-References: <1370996924-23048-1-git-send-email-dinguyen@altera.com>
-	 <1370996924-23048-3-git-send-email-dinguyen@altera.com>
-	 <201306121731.53120.arnd@arndb.de>
+From: Scott Wood <scottwood@freescale.com>
+Subject: Re: lockdep dump on devtree_lock (involving esdhc)
+Date: Wed, 12 Jun 2013 11:56:34 -0500
+Message-ID: <1371056194.18413.34@snotra>
+References: <20130611233330.GA15342@home.buserror.net>
+	<51B89723.7090808@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"; delsp=Yes; format=Flowed
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:25753
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751462Ab3FLPxb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jun 2013 11:53:31 -0400
-In-Reply-To: <201306121731.53120.arnd@arndb.de>
+Received: from co1ehsobe005.messaging.microsoft.com ([216.32.180.188]:25655
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754494Ab3FLQ4p convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 12 Jun 2013 12:56:45 -0400
+In-Reply-To: <51B89723.7090808@wwwdotorg.org> (from swarren@wwwdotorg.org on
+	Wed Jun 12 10:43:31 2013)
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Pavel Machek <pavel@denx.de>
+To: Stephen Warren <swarren@wwwdotorg.org>
+Cc: devicetree-discuss@lists.ozlabs.org, Thomas Gleixner <tglx@linutronix.de>, Jerry Huang <Chang-Ming.Huang@freescale.com>, linux-mmc@vger.kernel.org
 
-On Wed, 2013-06-12 at 17:31 +0200, Arnd Bergmann wrote:
-> On Wednesday 12 June 2013, dinguyen@altera.com wrote:
-> > +static int dw_mci_socfpga_setup_clock(struct dw_mci *host)
-> > +{
-> > +       struct dw_mci_socfpga_priv_data *priv = host->priv;
-> > +
-> > +       clk_disable_unprepare(host->ciu_clk);
-> > +       regmap_write(priv->sysreg, SYSMGR_SDMMCGRP_CTRL_OFFSET,
-> > +               priv->hs_timing);
-> > +       clk_prepare_enable(host->ciu_clk);
-> > +
-> > +       host->bus_hz /= (priv->ciu_div + 1);
-> > +       return 0;
-> > +}
+On 06/12/2013 10:43:31 AM, Stephen Warren wrote:
+> On 06/11/2013 05:33 PM, Scott Wood wrote:
+> > I get the following lockdump output on p2020rdb using
+> > v3.10-rc5-43-g34376a5.  While it's not particularly polite for the
+> > esdhc driver to be calling OF functions while holding another lock  
+> which
+> > can be acquired from interrupt context, why is devtree_lock usually
+> > acquired in an irqsafe manner but sometimes not?
+> >
+> > Both types of usage were added by the same commit:
+> >
+> > commit d6d3c4e656513dcea61ce900f0ecb9ca820ee7cd
+> > Author: Thomas Gleixner <tglx@linutronix.de>
+> > Date:   Wed Feb 6 15:30:56 2013 -0500
+> >
+> >     OF: convert devtree lock from rw_lock to raw spinlock
+> >
+> > Stephen, you asked about this here:
+> > http://lkml.indiana.edu/hypermail/linux/kernel/1302.1/01383.html
+> >
+> > Did you ever get an answer?
 > 
-> 
-> Sorry for being so late in the game here, but why do you need a
-> regmap_write() call in the driver here? Shouldn't you just be able
-> to use the clk_set_rate() interface from the generic dw_mmc-pltfm
-> code?
+> I believe that was fixed by c31a0c0 "of: fix recursive locking in
+> of_get_next_available_child()".
 
-This write is necessary for setting phase_shift(s) for the clocks that
-are feeding the CIU clock. 
+That may have fixed the hang that prompted that thread, but it didn't  
+answer the question you raised about mixing irqsafe and non-irqsafe  
+devtree_lock uses.
 
-Dinh
-> 
-> 	Arnd
-> 
-
-
-
+-Scott
