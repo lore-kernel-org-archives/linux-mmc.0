@@ -1,91 +1,48 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH v2 09/10] ARM: dts: omap3: add pbias and mmc_init pinctrl
- states
-Date: Wed, 12 Jun 2013 23:13:58 +0530
-Message-ID: <51B8B35E.20307@ti.com>
-References: <20130523184045.GD13507@atomide.com> <1370546059-24181-1-git-send-email-balajitk@ti.com> <1370546059-24181-10-git-send-email-balajitk@ti.com> <20130612143548.GZ8164@atomide.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA
+Date: Wed, 12 Jun 2013 19:46:29 +0200
+Message-ID: <3040528.yQVRPuV2pW@wuerfel>
+References: <1370996924-23048-1-git-send-email-dinguyen@altera.com> <201306121731.53120.arnd@arndb.de> <1371052413.32077.2.camel@linux-builds1>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:58274 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754290Ab3FLRoP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 12 Jun 2013 13:44:15 -0400
-In-Reply-To: <20130612143548.GZ8164@atomide.com>
+Received: from moutng.kundenserver.de ([212.227.17.10]:61155 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754290Ab3FLRqR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jun 2013 13:46:17 -0400
+In-Reply-To: <1371052413.32077.2.camel@linux-builds1>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, b-cousson@ti.com, devicetree-discuss@lists.ozlabs.org
+To: Dinh Nguyen <dinguyen@altera.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Pavel Machek <pavel@denx.de>
 
-On Wednesday 12 June 2013 08:05 PM, Tony Lindgren wrote:
-> * Balaji T K <balajitk@ti.com> [130606 12:20]:
->> add pbias states for pbias 0, 1.8V, 3V
->> add omap3 sd/mmc2 loop back clock config for devconf1 in mmc2_init pinctrl state
->> add OMAP3430 sd/mmc1 loop back clock config for devconf0 in mmc1_init pinctrl state
->> add OMAP3630 sd/mmc1 speed mode config for prog_io1 in mmc1_init pinctrl state
->
-> Looks OK to me, except these should be under mmc1 for omap[345].dtsi files.
->
+On Wednesday 12 June 2013 10:53:33 Dinh Nguyen wrote:
+> On Wed, 2013-06-12 at 17:31 +0200, Arnd Bergmann wrote:
+> > On Wednesday 12 June 2013, dinguyen@altera.com wrote:
+> > > +static int dw_mci_socfpga_setup_clock(struct dw_mci *host)
+> > > +{
+> > > +       struct dw_mci_socfpga_priv_data *priv = host->priv;
+> > > +
+> > > +       clk_disable_unprepare(host->ciu_clk);
+> > > +       regmap_write(priv->sysreg, SYSMGR_SDMMCGRP_CTRL_OFFSET,
+> > > +               priv->hs_timing);
+> > > +       clk_prepare_enable(host->ciu_clk);
+> > > +
+> > > +       host->bus_hz /= (priv->ciu_div + 1);
+> > > +       return 0;
+> > > +}
+> > 
+> > 
+> > Sorry for being so late in the game here, but why do you need a
+> > regmap_write() call in the driver here? Shouldn't you just be able
+> > to use the clk_set_rate() interface from the generic dw_mmc-pltfm
+> > code?
+> 
+> This write is necessary for setting phase_shift(s) for the clocks that
+> are feeding the CIU clock. 
 
-I think I can move &omap3_pmx_general to omap3.dtsi and override
-&pbias_1v8, &pbias_3v in omap36xx.dtsi, but I doubt pinctrl-[0,1,2,3,4]
-since pull up setting can vary between boards.
+I don't understand. Shouldn't that be an implementation detail
+of the clock controller rather than the mmc controller?
 
-> Regards,
->
-> Tony
->
->> Signed-off-by: Balaji T K <balajitk@ti.com>
->> ---
->>   arch/arm/boot/dts/omap3-beagle-xm.dts |   42 +++++++++++++++++++++++++++++++++
->>   arch/arm/boot/dts/omap3-beagle.dts    |   42 +++++++++++++++++++++++++++++++++
->>   arch/arm/boot/dts/omap3.dtsi          |   10 ++++++++
->>   3 files changed, 94 insertions(+), 0 deletions(-)
->>
->> diff --git a/arch/arm/boot/dts/omap3-beagle-xm.dts b/arch/arm/boot/dts/omap3-beagle-xm.dts
->> index 3046d1f..45d1642 100644
->> --- a/arch/arm/boot/dts/omap3-beagle-xm.dts
->> +++ b/arch/arm/boot/dts/omap3-beagle-xm.dts
->> @@ -59,6 +59,40 @@
->>   	};
->>   };
->>
->> +&omap3_pmx_general {
->> +	pinctrl-names = "default";
->> +	pinctrl-0 = <>;
->> +	pbias_off: pinmux_pbias_off {
->> +		pinctrl-single,bits = <
->> +			0x2b0 0x1 0x3	/* pbias */
->> +		>;
->> +	};
->> +
->> +	pbias_1v8: pinmux_pbias_1v8 {
->> +		pinctrl-single,bits = <
->> +			0x2b0 0x2 0x3	/* pbias */
->> +		>;
->> +	};
->> +
->> +	pbias_3v: pinmux_pbias_3v {
->> +		pinctrl-single,bits = <
->> +			0x2b0 0x3 0x3	/* pbias */
->> +		>;
->> +	};
->> +
->> +	mmc1_init: pinmux_mmc1_init {
->> +		pinctrl-single,bits = <
->> +			0x1d8 0x100000 0x100000	/* prog_io1 */
->> +		>;
->> +	};
->> +
->> +	mmc2_init: pinmux_mmc2_init {
->> +		pinctrl-single,bits = <
->> +			0x68 0x40 0x40	/* devconf1 */
->> +		>;
->> +	};
->> +};
->> +
->>   &i2c1 {
->>   	clock-frequency = <2600000>;
->>
-
+	Arnd
