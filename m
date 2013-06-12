@@ -1,46 +1,32 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 2/2] mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA
-Date: Wed, 12 Jun 2013 10:04:11 +0900
-Message-ID: <000801ce6708$c0262e10$40728a30$%jun@samsung.com>
-References: <1370996924-23048-1-git-send-email-dinguyen@altera.com>
- <1370996924-23048-3-git-send-email-dinguyen@altera.com>
+Subject: RE: [PATCH v3 3/7] mmc: dw_mmc-pltfm: move probe and remove below dt
+ match table
+Date: Wed, 12 Jun 2013 10:16:15 +0900
+Message-ID: <000901ce670a$6f96a2c0$4ec3e840$%jun@samsung.com>
+References: <201306111328.52679.heiko@sntech.de>
+ <201306111330.28759.heiko@sntech.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:50609 "EHLO
+Received: from mailout1.samsung.com ([203.254.224.24]:52815 "EHLO
 	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753649Ab3FLBEN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jun 2013 21:04:13 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MO900JQY9N0HC60@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 12 Jun 2013 10:04:12 +0900 (KST)
-In-reply-to: <1370996924-23048-3-git-send-email-dinguyen@altera.com>
+	with ESMTP id S1754235Ab3FLBQS convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jun 2013 21:16:18 -0400
+In-reply-to: <201306111330.28759.heiko@sntech.de>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com, linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Arnd Bergmann' <arnd@arndb.de>, 'Pavel Machek' <pavel@denx.de>
+To: =?UTF-8?Q?'Heiko_St=C3=BCbner'?= <heiko@sntech.de>, linux-arm-kernel@lists.infradead.org
+Cc: linux-kernel@vger.kernel.org, 'Mike Turquette' <mturquette@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org, 'Grant Likely' <grant.likely@linaro.org>, 'Rob Herring' <rob.herring@calxeda.com>, 'Linus Walleij' <linus.walleij@linaro.org>, devicetree-discuss@lists.ozlabs.org, 'Russell King' <linux@arm.linux.org.uk>, 'Arnd Bergmann' <arnd@arndb.de>, 'Olof Johansson' <olof@lixom.net>, 'Thomas Petazzoni' <thomas.petazzoni@free-electrons.com>, 'Andy Shevchenko' <andy.shevchenko@gmail.com>
 
-On 06/12/13 9:29 AM Dinh Nguyen wrote:
-> From: Dinh Nguyen <dinguyen@altera.com>
-> 
-> Add platform specific functionality for the DW SD/MMC driver for
-> SoCFPGA. Move SDMMC_CMD_USE_HOLD_REG to dw_mmc.h so other platforms
-> can use this define.
-> 
-> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-> Reviewed-by: Pavel Machek <pavel@denx.de>
-> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Acked-by: Olof Johansson <olof@lixom.net>
-> CC: Seungwon Jeon <tgih.jun@samsung.com>
+On 06/11/13 2013 8:30 PM Heiko St=C3=BCbner wrote:
+> In a subsquent patch probe will need to do some handling of data from
+> the dt match table. So to prevent the need for forward declarations,
+> move probe and remove below the match table.
+>=20
+> Signed-off-by: Heiko Stuebner <heiko@sntech.de>
 
 Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
-
-Thanks,
-Seungwon Jeon
 
 
