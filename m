@@ -1,41 +1,52 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: lockdep dump on devtree_lock (involving esdhc)
-Date: Wed, 12 Jun 2013 09:43:31 -0600
-Message-ID: <51B89723.7090808@wwwdotorg.org>
-References: <20130611233330.GA15342@home.buserror.net>
+From: Dinh Nguyen <dinguyen@altera.com>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA
+Date: Wed, 12 Jun 2013 10:53:33 -0500
+Message-ID: <1371052413.32077.2.camel@linux-builds1>
+References: <1370996924-23048-1-git-send-email-dinguyen@altera.com>
+	 <1370996924-23048-3-git-send-email-dinguyen@altera.com>
+	 <201306121731.53120.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:43584 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752688Ab3FLPne (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jun 2013 11:43:34 -0400
-In-Reply-To: <20130611233330.GA15342@home.buserror.net>
+Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:25753
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751462Ab3FLPxb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jun 2013 11:53:31 -0400
+In-Reply-To: <201306121731.53120.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Scott Wood <scottwood@freescale.com>
-Cc: devicetree-discuss@lists.ozlabs.org, Thomas Gleixner <tglx@linutronix.de>, Jerry Huang <Chang-Ming.Huang@freescale.com>, linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Pavel Machek <pavel@denx.de>
 
-On 06/11/2013 05:33 PM, Scott Wood wrote:
-> I get the following lockdump output on p2020rdb using
-> v3.10-rc5-43-g34376a5.  While it's not particularly polite for the
-> esdhc driver to be calling OF functions while holding another lock which
-> can be acquired from interrupt context, why is devtree_lock usually
-> acquired in an irqsafe manner but sometimes not?
+On Wed, 2013-06-12 at 17:31 +0200, Arnd Bergmann wrote:
+> On Wednesday 12 June 2013, dinguyen@altera.com wrote:
+> > +static int dw_mci_socfpga_setup_clock(struct dw_mci *host)
+> > +{
+> > +       struct dw_mci_socfpga_priv_data *priv = host->priv;
+> > +
+> > +       clk_disable_unprepare(host->ciu_clk);
+> > +       regmap_write(priv->sysreg, SYSMGR_SDMMCGRP_CTRL_OFFSET,
+> > +               priv->hs_timing);
+> > +       clk_prepare_enable(host->ciu_clk);
+> > +
+> > +       host->bus_hz /= (priv->ciu_div + 1);
+> > +       return 0;
+> > +}
 > 
-> Both types of usage were added by the same commit:
 > 
-> commit d6d3c4e656513dcea61ce900f0ecb9ca820ee7cd
-> Author: Thomas Gleixner <tglx@linutronix.de>
-> Date:   Wed Feb 6 15:30:56 2013 -0500
-> 
->     OF: convert devtree lock from rw_lock to raw spinlock
-> 
-> Stephen, you asked about this here:
-> http://lkml.indiana.edu/hypermail/linux/kernel/1302.1/01383.html
-> 
-> Did you ever get an answer?
+> Sorry for being so late in the game here, but why do you need a
+> regmap_write() call in the driver here? Shouldn't you just be able
+> to use the clk_set_rate() interface from the generic dw_mmc-pltfm
+> code?
 
-I believe that was fixed by c31a0c0 "of: fix recursive locking in
-of_get_next_available_child()".
+This write is necessary for setting phase_shift(s) for the clocks that
+are feeding the CIU clock. 
+
+Dinh
+> 
+> 	Arnd
+> 
+
+
+
