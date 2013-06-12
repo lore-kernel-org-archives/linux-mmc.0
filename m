@@ -1,86 +1,80 @@
 From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v2 09/10] ARM: dts: omap3: add pbias and mmc_init
+Subject: Re: [PATCH v2 10/10] ARM: dts: omap4: add pbias and mmc_init
  pinctrl states
-Date: Wed, 12 Jun 2013 07:35:49 -0700
-Message-ID: <20130612143548.GZ8164@atomide.com>
+Date: Wed, 12 Jun 2013 07:36:17 -0700
+Message-ID: <20130612143616.GA8164@atomide.com>
 References: <20130523184045.GD13507@atomide.com>
  <1370546059-24181-1-git-send-email-balajitk@ti.com>
- <1370546059-24181-10-git-send-email-balajitk@ti.com>
+ <1370546059-24181-11-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:59897 "EHLO
+	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750862Ab3FLOgT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jun 2013 10:36:19 -0400
 Content-Disposition: inline
-In-Reply-To: <1370546059-24181-10-git-send-email-balajitk@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
+In-Reply-To: <1370546059-24181-11-git-send-email-balajitk@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Balaji T K <balajitk@ti.com>
 Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, b-cousson@ti.com, devicetree-discuss@lists.ozlabs.org
-List-Id: linux-mmc@vger.kernel.org
 
 * Balaji T K <balajitk@ti.com> [130606 12:20]:
 > add pbias states for pbias 0, 1.8V, 3V
-> add omap3 sd/mmc2 loop back clock config for devconf1 in mmc2_init pinctrl state
-> add OMAP3430 sd/mmc1 loop back clock config for devconf0 in mmc1_init pinctrl state
-> add OMAP3630 sd/mmc1 speed mode config for prog_io1 in mmc1_init pinctrl state
+> add sd/mmc1 pull strength values for control_mmc1 in mmc_init pinctrl state
 
-Looks OK to me, except these should be under mmc1 for omap[345].dtsi files.
-
-Regards,
+This too should be under mmc1 in the omap4.dtsi file.
 
 Tony
  
 > Signed-off-by: Balaji T K <balajitk@ti.com>
 > ---
->  arch/arm/boot/dts/omap3-beagle-xm.dts |   42 +++++++++++++++++++++++++++++++++
->  arch/arm/boot/dts/omap3-beagle.dts    |   42 +++++++++++++++++++++++++++++++++
->  arch/arm/boot/dts/omap3.dtsi          |   10 ++++++++
->  3 files changed, 94 insertions(+), 0 deletions(-)
+>  arch/arm/boot/dts/omap4-panda-common.dtsi |   34 +++++++++++++++++++++++++++++
+>  arch/arm/boot/dts/omap4-sdp.dts           |   34 +++++++++++++++++++++++++++++
+>  arch/arm/boot/dts/omap4.dtsi              |   11 +++++++++
+>  3 files changed, 79 insertions(+), 0 deletions(-)
 > 
-> diff --git a/arch/arm/boot/dts/omap3-beagle-xm.dts b/arch/arm/boot/dts/omap3-beagle-xm.dts
-> index 3046d1f..45d1642 100644
-> --- a/arch/arm/boot/dts/omap3-beagle-xm.dts
-> +++ b/arch/arm/boot/dts/omap3-beagle-xm.dts
-> @@ -59,6 +59,40 @@
+> diff --git a/arch/arm/boot/dts/omap4-panda-common.dtsi b/arch/arm/boot/dts/omap4-panda-common.dtsi
+> index 03bd60d..d6ffbb1 100644
+> --- a/arch/arm/boot/dts/omap4-panda-common.dtsi
+> +++ b/arch/arm/boot/dts/omap4-panda-common.dtsi
+> @@ -137,6 +137,34 @@
 >  	};
 >  };
 >  
-> +&omap3_pmx_general {
+> +&omap4_padconf_global {
 > +	pinctrl-names = "default";
 > +	pinctrl-0 = <>;
 > +	pbias_off: pinmux_pbias_off {
 > +		pinctrl-single,bits = <
-> +			0x2b0 0x1 0x3	/* pbias */
+> +			0x60 0x00000000 0x07e00000	/* pbias */
 > +		>;
 > +	};
 > +
 > +	pbias_1v8: pinmux_pbias_1v8 {
 > +		pinctrl-single,bits = <
-> +			0x2b0 0x2 0x3	/* pbias */
+> +			0x60 0x04400000 0x07e00000	/* pbias */
 > +		>;
 > +	};
 > +
 > +	pbias_3v: pinmux_pbias_3v {
 > +		pinctrl-single,bits = <
-> +			0x2b0 0x3 0x3	/* pbias */
+> +			0x60 0x04600000 0x07e00000	/* pbias */
 > +		>;
 > +	};
 > +
 > +	mmc1_init: pinmux_mmc1_init {
 > +		pinctrl-single,bits = <
-> +			0x1d8 0x100000 0x100000	/* prog_io1 */
-> +		>;
-> +	};
-> +
-> +	mmc2_init: pinmux_mmc2_init {
-> +		pinctrl-single,bits = <
-> +			0x68 0x40 0x40	/* devconf1 */
+> +			0x88 0xce000000 0xfe000000	/* control_mmc1 */
 > +		>;
 > +	};
 > +};
 > +
 >  &i2c1 {
->  	clock-frequency = <2600000>;
->  
-> @@ -95,12 +129,20 @@
+>  	pinctrl-names = "default";
+>  	pinctrl-0 = <&i2c1_pins>;
+> @@ -197,6 +225,12 @@
 >  };
 >  
 >  &mmc1 {
@@ -90,64 +84,50 @@ Tony
 > +	pinctrl-2 = <&pbias_off>;
 > +	pinctrl-3 = <&pbias_1v8>;
 > +	pinctrl-4 = <&pbias_3v>;
->  	vmmc-supply = <&vmmc1>;
->  	vmmc_aux-supply = <&vsim>;
+>  	vmmc-supply = <&vmmc>;
 >  	bus-width = <8>;
 >  };
->  
->  &mmc2 {
-> +	pinctrl-names = "mmc_init";
-> +	pinctrl-1 = <&mmc2_init>;
->  	status = "disabled";
->  };
->  
-> diff --git a/arch/arm/boot/dts/omap3-beagle.dts b/arch/arm/boot/dts/omap3-beagle.dts
-> index 7da9979..14e251f 100644
-> --- a/arch/arm/boot/dts/omap3-beagle.dts
-> +++ b/arch/arm/boot/dts/omap3-beagle.dts
-> @@ -109,6 +109,40 @@
+> diff --git a/arch/arm/boot/dts/omap4-sdp.dts b/arch/arm/boot/dts/omap4-sdp.dts
+> index a35d9cd..b1c0e86 100644
+> --- a/arch/arm/boot/dts/omap4-sdp.dts
+> +++ b/arch/arm/boot/dts/omap4-sdp.dts
+> @@ -142,6 +142,34 @@
 >  	};
 >  };
 >  
-> +&omap3_pmx_general {
+> +&omap4_padconf_global {
 > +	pinctrl-names = "default";
 > +	pinctrl-0 = <>;
 > +	pbias_off: pinmux_pbias_off {
 > +		pinctrl-single,bits = <
-> +			0x2b0 0x5 0x7	/* pbias */
+> +			0x60 0x00000000 0x07e00000	/* pbias */
 > +		>;
 > +	};
 > +
 > +	pbias_1v8: pinmux_pbias_1v8 {
 > +		pinctrl-single,bits = <
-> +			0x2b0 0x6 0x7	/* pbias */
+> +			0x60 0x04400000 0x07e00000	/* pbias */
 > +		>;
 > +	};
 > +
 > +	pbias_3v: pinmux_pbias_3v {
 > +		pinctrl-single,bits = <
-> +			0x2b0 0x7 0x7	/* pbias */
+> +			0x60 0x04600000 0x07e00000	/* pbias */
 > +		>;
 > +	};
 > +
 > +	mmc1_init: pinmux_mmc1_init {
 > +		pinctrl-single,bits = <
-> +			0x4 0x01000000 0x01000000	/* devconf0 */
-> +		>;
-> +	};
-> +
-> +	mmc2_init: pinmux_mmc2_init {
-> +		pinctrl-single,bits = <
-> +			0x68 0x40 0x40	/* devconf1 */
+> +			0x88 0xce000000 0xfe000000	/* control_mmc1 */
 > +		>;
 > +	};
 > +};
 > +
->  &i2c1 {
->  	clock-frequency = <2600000>;
->  
-> @@ -122,12 +156,20 @@
->  /include/ "twl4030.dtsi"
+>  &omap4_pmx_core {
+>  	pinctrl-names = "default";
+>  	pinctrl-0 = <
+> @@ -381,6 +409,12 @@
+>  };
 >  
 >  &mmc1 {
 > +	pinctrl-names = "default", "mmc_init", "pbias_off", "pbias_1v8", "pbias_3v";
@@ -156,28 +136,21 @@ Tony
 > +	pinctrl-2 = <&pbias_off>;
 > +	pinctrl-3 = <&pbias_1v8>;
 > +	pinctrl-4 = <&pbias_3v>;
->  	vmmc-supply = <&vmmc1>;
->  	vmmc_aux-supply = <&vsim>;
+>  	vmmc-supply = <&vmmc>;
 >  	bus-width = <8>;
 >  };
->  
->  &mmc2 {
-> +	pinctrl-names = "mmc_init";
-> +	pinctrl-1 = <&mmc2_init>;
->  	status = "disabled";
->  };
->  
-> diff --git a/arch/arm/boot/dts/omap3.dtsi b/arch/arm/boot/dts/omap3.dtsi
-> index caaa708..de2940d 100644
-> --- a/arch/arm/boot/dts/omap3.dtsi
-> +++ b/arch/arm/boot/dts/omap3.dtsi
-> @@ -111,6 +111,16 @@
->  			pinctrl-single,function-mask = <0x7f1f>;
+> diff --git a/arch/arm/boot/dts/omap4.dtsi b/arch/arm/boot/dts/omap4.dtsi
+> index 2a56428..41f575d 100644
+> --- a/arch/arm/boot/dts/omap4.dtsi
+> +++ b/arch/arm/boot/dts/omap4.dtsi
+> @@ -114,6 +114,17 @@
+>  			pinctrl-single,register-width = <16>;
+>  			pinctrl-single,function-mask = <0x7fff>;
 >  		};
->  
-> +		omap3_pmx_general: pinmux@48002270 {
-> +			compatible = "ti,omap3-padconf", "pinctrl-single";
-> +			reg = <0x48002270 0x2f4>;
+> +
+> +		omap4_padconf_global: pinmux@4a100600 {
+> +			compatible = "ti,omap4-padconf", "pinctrl-single";
+> +			reg = <0x4a1005a0 0x170>;
 > +			#address-cells = <1>;
 > +			#size-cells = <0>;
 > +			pinctrl-single,bit-per-mux;
@@ -185,9 +158,9 @@ Tony
 > +			pinctrl-single,function-mask = <0xffffffff>;
 > +		};
 > +
->  		omap3_pmx_wkup: pinmux@0x48002a00 {
->  			compatible = "ti,omap3-padconf", "pinctrl-single";
->  			reg = <0x48002a00 0x5c>;
+>  		omap4_pmx_wkup: pinmux@4a31e040 {
+>  			compatible = "ti,omap4-padconf", "pinctrl-single";
+>  			reg = <0x4a31e040 0x0038>;
 > -- 
 > 1.7.5.4
 > 
