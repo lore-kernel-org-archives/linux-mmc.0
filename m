@@ -1,50 +1,46 @@
-From: <dinguyen@altera.com>
-Subject: [PATCH 0/2] mmc: dw_mmc: Add support and bindings for SOCFPGA dw_mmc driver
-Date: Tue, 11 Jun 2013 19:28:42 -0500
-Message-ID: <1370996924-23048-1-git-send-email-dinguyen@altera.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH 2/2] mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA
+Date: Wed, 12 Jun 2013 10:04:11 +0900
+Message-ID: <000801ce6708$c0262e10$40728a30$%jun@samsung.com>
+References: <1370996924-23048-1-git-send-email-dinguyen@altera.com>
+ <1370996924-23048-3-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:49461
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755316Ab3FLA2s (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jun 2013 20:28:48 -0400
+Received: from mailout1.samsung.com ([203.254.224.24]:50609 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753649Ab3FLBEN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jun 2013 21:04:13 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MO900JQY9N0HC60@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 12 Jun 2013 10:04:12 +0900 (KST)
+In-reply-to: <1370996924-23048-3-git-send-email-dinguyen@altera.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, Dinh Nguyen <dinguyen@altera.com>
+To: dinguyen@altera.com, linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Arnd Bergmann' <arnd@arndb.de>, 'Pavel Machek' <pavel@denx.de>
 
-From: Dinh Nguyen <dinguyen@altera.com>
+On 06/12/13 9:29 AM Dinh Nguyen wrote:
+> From: Dinh Nguyen <dinguyen@altera.com>
+> 
+> Add platform specific functionality for the DW SD/MMC driver for
+> SoCFPGA. Move SDMMC_CMD_USE_HOLD_REG to dw_mmc.h so other platforms
+> can use this define.
+> 
+> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+> Reviewed-by: Pavel Machek <pavel@denx.de>
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Acked-by: Olof Johansson <olof@lixom.net>
+> CC: Seungwon Jeon <tgih.jun@samsung.com>
 
-Hi Chris,
-
-I apologize for not including you in the original patch series. Can you can review
-and apply to your tree if there are not comments?
-
-PATCH[1/2] - Bindings and documentation for dw_mmc-socfpga
-PATCH[2/2] - SOCFPGA platform specific implementation for dw_mmc driver.
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
 Thanks,
-Dinh
-
-Dinh Nguyen (2):
-  ARM: socfpga: dts: Add support for SD/MMC
-  mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA
-
- .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   60 +++++++++
- arch/arm/boot/dts/socfpga.dtsi                     |   13 +-
- arch/arm/boot/dts/socfpga_cyclone5.dts             |   13 ++
- arch/arm/boot/dts/socfpga_vt.dts                   |   12 ++
- drivers/mmc/host/Kconfig                           |    8 ++
- drivers/mmc/host/Makefile                          |    1 +
- drivers/mmc/host/dw_mmc-exynos.c                   |    2 -
- drivers/mmc/host/dw_mmc-socfpga.c                  |  140 ++++++++++++++++++++
- drivers/mmc/host/dw_mmc.h                          |    1 +
- 9 files changed, 247 insertions(+), 3 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
- create mode 100644 drivers/mmc/host/dw_mmc-socfpga.c
-
--- 
-1.7.9.5
+Seungwon Jeon
 
 
