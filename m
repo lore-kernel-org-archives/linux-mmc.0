@@ -1,53 +1,70 @@
-From: Scott Wood <scottwood@freescale.com>
-Subject: Re: lockdep dump on devtree_lock (involving esdhc)
-Date: Wed, 12 Jun 2013 11:56:34 -0500
-Message-ID: <1371056194.18413.34@snotra>
-References: <20130611233330.GA15342@home.buserror.net>
-	<51B89723.7090808@wwwdotorg.org>
+From: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v2 01/10] ARM: OMAP2+: add needs_vmmc to hsmmc_info
+Date: Wed, 12 Jun 2013 22:30:08 +0530
+Message-ID: <51B8A918.5030605@ti.com>
+References: <20130523184045.GD13507@atomide.com>
+ <1370546059-24181-1-git-send-email-balajitk@ti.com>
+ <1370546059-24181-2-git-send-email-balajitk@ti.com>
+ <20130612142409.GW8164@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; delsp=Yes; format=Flowed
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe005.messaging.microsoft.com ([216.32.180.188]:25655
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754494Ab3FLQ4p convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 12 Jun 2013 12:56:45 -0400
-In-Reply-To: <51B89723.7090808@wwwdotorg.org> (from swarren@wwwdotorg.org on
-	Wed Jun 12 10:43:31 2013)
-Content-Disposition: inline
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <20130612142409.GW8164-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Cc: devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: devicetree-discuss@lists.ozlabs.org, Thomas Gleixner <tglx@linutronix.de>, Jerry Huang <Chang-Ming.Huang@freescale.com>, linux-mmc@vger.kernel.org
 
-On 06/12/2013 10:43:31 AM, Stephen Warren wrote:
-> On 06/11/2013 05:33 PM, Scott Wood wrote:
-> > I get the following lockdump output on p2020rdb using
-> > v3.10-rc5-43-g34376a5.  While it's not particularly polite for the
-> > esdhc driver to be calling OF functions while holding another lock  
-> which
-> > can be acquired from interrupt context, why is devtree_lock usually
-> > acquired in an irqsafe manner but sometimes not?
-> >
-> > Both types of usage were added by the same commit:
-> >
-> > commit d6d3c4e656513dcea61ce900f0ecb9ca820ee7cd
-> > Author: Thomas Gleixner <tglx@linutronix.de>
-> > Date:   Wed Feb 6 15:30:56 2013 -0500
-> >
-> >     OF: convert devtree lock from rw_lock to raw spinlock
-> >
-> > Stephen, you asked about this here:
-> > http://lkml.indiana.edu/hypermail/linux/kernel/1302.1/01383.html
-> >
-> > Did you ever get an answer?
-> 
-> I believe that was fixed by c31a0c0 "of: fix recursive locking in
-> of_get_next_available_child()".
+On Wednesday 12 June 2013 07:54 PM, Tony Lindgren wrote:
+> * Balaji T K <balajitk-l0cyMroinI0@public.gmane.org> [130606 12:20]:
+>> Add needs_vmmc and needs_vmmc_aux to indicate whether regulator is
+>> applicable so that omap_hsmmc can handle deferred probe error
+>> properly for regulators.
+>> Remove the assumption that vmmc_aux regulator to be available only if vmmc is
+>> present. Platforms can have fixed-always-ON regulator for vmmc and/or vmmc_aux
+>> in such cases regulator needed not be specified in board file.
+>
+> Looks good to me, I suggest you resend this again a bit later once the
+> other changes are merged so we can avoid a dependency between arch/arm/mach-omap2
+> and MMC changes.
+>
 
-That may have fixed the hang that prompted that thread, but it didn't  
-answer the question you raised about mixing irqsafe and non-irqsafe  
-devtree_lock uses.
+Ok, will separate the board changes and send the rest via mmc tree
 
--Scott
+> Regards,
+>
+> Tony
+>
+>> Signed-off-by: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
+>> ---
+>>   arch/arm/mach-omap2/board-2430sdp.c          |    1 +
+>>   arch/arm/mach-omap2/board-3430sdp.c          |    3 +++
+>>   arch/arm/mach-omap2/board-cm-t35.c           |    2 ++
+>>   arch/arm/mach-omap2/board-devkit8000.c       |    1 +
+>>   arch/arm/mach-omap2/board-igep0020.c         |    3 +++
+>>   arch/arm/mach-omap2/board-ldp.c              |    1 +
+>>   arch/arm/mach-omap2/board-omap3beagle.c      |    2 ++
+>>   arch/arm/mach-omap2/board-omap3evm.c         |    3 +++
+>>   arch/arm/mach-omap2/board-omap3logic.c       |    1 +
+>>   arch/arm/mach-omap2/board-omap3pandora.c     |    3 +++
+>>   arch/arm/mach-omap2/board-omap3stalker.c     |    2 ++
+>>   arch/arm/mach-omap2/board-omap3touchbook.c   |    2 ++
+>>   arch/arm/mach-omap2/board-overo.c            |    1 +
+>>   arch/arm/mach-omap2/board-rm680.c            |    1 +
+>>   arch/arm/mach-omap2/board-rx51-peripherals.c |    3 +++
+>>   arch/arm/mach-omap2/board-zoom-peripherals.c |    4 ++++
+>>   arch/arm/mach-omap2/hsmmc.c                  |    2 ++
+>>   arch/arm/mach-omap2/hsmmc.h                  |    2 ++
+>>   include/linux/platform_data/mmc-omap.h       |    2 ++
+>>   19 files changed, 39 insertions(+), 0 deletions(-)
+>>
