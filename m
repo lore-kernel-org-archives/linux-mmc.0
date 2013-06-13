@@ -1,104 +1,66 @@
-From: Lee Jones <lee.jones@linaro.org>
+From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
 Subject: Re: [PATCH v2 06/10] mmc: omap_hsmmc: add support for pbias
  configuration in dt
-Date: Thu, 13 Jun 2013 17:17:31 +0100
-Message-ID: <20130613161731.GA28134@laptop>
+Date: Thu, 13 Jun 2013 09:29:38 -0700
+Message-ID: <20130613162937.GK8164@atomide.com>
 References: <20130523184045.GD13507@atomide.com>
  <1370546059-24181-1-git-send-email-balajitk@ti.com>
  <1370546059-24181-7-git-send-email-balajitk@ti.com>
  <CACRpkdZAzAJW0UxGCSj-PWXTSi2Q6T8fqL9SQ+Y-91sELQ3SRQ@mail.gmail.com>
- <20130613104715.GC16677@laptop>
- <51B9DEE0.1060305@ti.com>
+ <20130613095353.GX8164@atomide.com> <51B9DA30.1090308@ti.com>
+ <CACRpkdY6cZ+bT-C9Go3sZVw6ErQqTm0m9__uKQrkg4eUU1thHA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f51.google.com ([74.125.83.51]:62073 "EHLO
-	mail-ee0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754538Ab3FMQRi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jun 2013 12:17:38 -0400
-Received: by mail-ee0-f51.google.com with SMTP id e52so5284206eek.10
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Jun 2013 09:17:37 -0700 (PDT)
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <51B9DEE0.1060305@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <CACRpkdY6cZ+bT-C9Go3sZVw6ErQqTm0m9__uKQrkg4eUU1thHA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Linux-OMAP <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, Linux-OMAP <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, ext Tony Lindgren <tony@atomide.com>, "Cousson, Benoit" <b-cousson@ti.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On Thu, 13 Jun 2013, Balaji T K wrote:
+* Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> [130613 08:35]:
+> On Thu, Jun 13, 2013 at 4:41 PM, Balaji T K <balajitk-l0cyMroinI0@public.gmane.org> wrote:
+> 
+> > You mean regulator via pinctrl APIs, I think It will just move the code
+> > from omap_hsmmc to a new regulator file with it own init data for pinctrl.
+> 
+> No I'm not saying you should use pinctrl as a "back-end" for this.
+> I mean you shall instantiate a regulator and let the callback ops
+> vtable for that regulator poke these bits.
 
-> On Thursday 13 June 2013 04:17 PM, Lee Jones wrote:
-> >On Thu, 13 Jun 2013, Linus Walleij wrote:
-> >
-> >>On Thu, Jun 6, 2013 at 9:14 PM, Balaji T K <balajitk@ti.com> wrote:
-> >>
-> >>>PBIAS register configuration is based on the regulator voltage
-> >>>which supplies these pbias cells, sd i/o pads.
-> >>>With PBIAS register address and bit definitions different across
-> >>>omap[3,4,5], Simplify PBIAS configuration under three different
-> >>>regulator voltage levels - O V, 1.8 V, 3 V. Corresponding pinctrl =
-states
-> >>>are defined as pbias_off, pbias_1v8, pbias_3v.
-> >>>
-> >>>pinctrl state mmc_init is used for configuring speed mode, loopbac=
-k clock
-> >>>(in devconf0/devconf1/prog_io1 register for omap3) and pull streng=
-th
-> >>>configuration (in control_mmc1 for omap4)
-> >>>
-> >>>Signed-off-by: Balaji T K <balajitk@ti.com>
-> >>
-> >>You *need* Lee Jones and Mark Brown to review this.
-> >>Maybe Laurent has something to add too.
-> >>
-> >>Ux500 had the very same thing, and there this was solved using
-> >>a GPIO regulator for "vqmmc" a level-shifter. I vaguely remember
-> >>Laurent doing something similar with the SH stuff.
-> >
-> >I haven't seem much of this patch-set, but this certainly looks like
-> >it should be handled by a GPIO regulator instead of pinctrl. States
-> >are easily declared in a 'struct gpio_regulator_state', which the
-> >framework then uses to set the correct pins for the required voltage=
-=2E
-> >
->=20
-> Thanks for the pointer, but wondering why is it named as gpio-regulat=
-or
-> and how it is different from fixed-regulator.
-> After going through git log description, I understand that voltage/cu=
-rrent level
-> for a particular regulator is controlled by a set of pad/pin on the P=
-OWER IC
-> and pad/pin may be usually connected to gpio pins if it is needs to b=
-e
-> configurable and ground/pulled for constant voltage.
->=20
-> Collection of gpios logic level are modeled as state for particular v=
-oltage.
-> But gpio is not used in my case.
->=20
-> >And yes, 'vqmmc' is a good place to store the this regulator.
+The interface to omap_hsmmc.c should be the regulator framework. This
+is because it allows us to clean up all the messed up before and after
+functions that really implement various GPIO regulators etc.
 
-As I say, I didn't see much of the code, only parts which looked
-similar a voltage level-shifter.
+> > It thought pinctrl-single,bits in pinctrl-single.c is introduced
+> > precisely for such misc control register which has bit configuration
+> > affecting different module i/o pads.
+> 
+> No. If we go down that road *anything* that is connected to a
+> pad becomes part of the pinctrl subsystem, then pinctrl-single
+> becomes some kind of hardware abstraction or BIOS, and that
+> is *not* the intent. It is only supposed to deal with the bits
+> there that are 100% related to what pinctrl does, nothing else.
 
-The difference between fixed and gpio regulators, is that the former
-is exactly that, 'fixed'. You can turn voltage on and off using a gpio
-pin, but you can't shift the voltage. Something which is required of
-your use-case. The latter switches between voltgages via a set of gpio
-pins, for instance, your use-case could look somelike like:
+Sounds like the way to go is to do a standalone regulator driver that
+optionally uses pinctrl-single,bits. But only for the bits in the PBIAS
+register that are 100% related to pinctrl.
 
-static struct gpio_regulator_state sdi0_reg_states[] =3D {
-        { .value =3D 3300000, .gpios =3D (1 << 0) },
-        { .value =3D 1800000, .gpios =3D (0 << 0) },
-};
+In any case the PBIAS regulator driver should be a separate driver
+as it may need to be a child of the SCM driver for PM needs in the
+future.
 
-But if there aren't any gpio pins involved, then this isn't what you
-want either.
+Regards,
 
---=20
-Lee Jones
-Linaro ST-Ericsson Landing Team Lead
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
+Tony
