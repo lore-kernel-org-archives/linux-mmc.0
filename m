@@ -1,30 +1,100 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 0/2] mmc: add support for eMMC hardware reset for BYT eMMC
-Date: Thu, 13 Jun 2013 11:50:25 +0300
-Message-ID: <1371113427-8257-1-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 1/2] mmc: sdhci-pci: add support for eMMC hardware reset for BYT eMMC.
+Date: Thu, 13 Jun 2013 11:50:26 +0300
+Message-ID: <1371113427-8257-2-git-send-email-adrian.hunter@intel.com>
+References: <1371113427-8257-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:46664 "EHLO mga11.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:1030 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756822Ab3FMIpH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 13 Jun 2013 04:45:07 -0400
+	id S1758455Ab3FMIpd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 13 Jun 2013 04:45:33 -0400
+In-Reply-To: <1371113427-8257-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
 Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>
 
-Hi
+Add support for eMMC hardware reset for BYT eMMC.
 
-Here are 2 patches to add support for eMMC hardware reset for BYT eMMC.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-pci.c | 32 ++++++++++++++++++++++++++++++--
+ 1 file changed, 30 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 611331a..e082fac 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -77,6 +77,8 @@ struct sdhci_pci_slot {
+ 	int			rst_n_gpio;
+ 	int			cd_gpio;
+ 	int			cd_irq;
++
++	void (*hw_reset)(struct sdhci_host *host);
+ };
+ 
+ struct sdhci_pci_chip {
+@@ -307,10 +309,27 @@ static const struct sdhci_pci_fixes sdhci_intel_pch_sdio = {
+ 	.probe_slot	= pch_hc_probe_slot,
+ };
+ 
++static void sdhci_pci_int_hw_reset(struct sdhci_host *host)
++{
++	u8 reg;
++
++	reg = sdhci_readb(host, SDHCI_POWER_CONTROL);
++	reg |= 0x10;
++	sdhci_writeb(host, reg, SDHCI_POWER_CONTROL);
++	/* For eMMC, minimum is 1us but give it 9us for good measure */
++	udelay(9);
++	reg &= ~0x10;
++	sdhci_writeb(host, reg, SDHCI_POWER_CONTROL);
++	/* For eMMC, minimum is 200us but give it 300us for good measure */
++	usleep_range(300, 1000);
++}
++
+ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
+ {
+-	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE;
++	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
++				 MMC_CAP_HW_RESET;
+ 	slot->host->mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ;
++	slot->hw_reset = sdhci_pci_int_hw_reset;
+ 	return 0;
+ }
+ 
+@@ -1016,7 +1035,7 @@ static int sdhci_pci_bus_width(struct sdhci_host *host, int width)
+ 	return 0;
+ }
+ 
+-static void sdhci_pci_hw_reset(struct sdhci_host *host)
++static void sdhci_pci_gpio_hw_reset(struct sdhci_host *host)
+ {
+ 	struct sdhci_pci_slot *slot = sdhci_priv(host);
+ 	int rst_n_gpio = slot->rst_n_gpio;
+@@ -1031,6 +1050,14 @@ static void sdhci_pci_hw_reset(struct sdhci_host *host)
+ 	usleep_range(300, 1000);
+ }
+ 
++static void sdhci_pci_hw_reset(struct sdhci_host *host)
++{
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++
++	if (slot->hw_reset)
++		slot->hw_reset(host);
++}
++
+ static const struct sdhci_ops sdhci_pci_ops = {
+ 	.enable_dma	= sdhci_pci_enable_dma,
+ 	.platform_bus_width	= sdhci_pci_bus_width,
+@@ -1328,6 +1355,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+ 		if (!gpio_request(slot->rst_n_gpio, "eMMC_reset")) {
+ 			gpio_direction_output(slot->rst_n_gpio, 1);
+ 			slot->host->mmc->caps |= MMC_CAP_HW_RESET;
++			slot->hw_reset = sdhci_pci_gpio_hw_reset;
+ 		} else {
+ 			dev_warn(&pdev->dev, "failed to request rst_n_gpio\n");
+ 			slot->rst_n_gpio = -EINVAL;
+-- 
+1.7.11.7
 
-Adrian Hunter (2):
-      mmc: sdhci-pci: add support for eMMC hardware reset for BYT eMMC.
-      mmc: sdhci-acpi: add support for eMMC hardware reset for HID 80860F14
-
- drivers/mmc/host/sdhci-acpi.c | 28 +++++++++++++++++++++++++++-
- drivers/mmc/host/sdhci-pci.c  | 32 ++++++++++++++++++++++++++++++--
- 2 files changed, 57 insertions(+), 3 deletions(-)
-
-
-Regards
-Adrian
