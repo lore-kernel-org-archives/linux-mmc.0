@@ -1,60 +1,66 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH v2 06/10] mmc: omap_hsmmc: add support for pbias configuration
- in dt
-Date: Thu, 13 Jun 2013 20:31:52 +0530
-Message-ID: <51B9DEE0.1060305@ti.com>
-References: <20130523184045.GD13507@atomide.com> <1370546059-24181-1-git-send-email-balajitk@ti.com> <1370546059-24181-7-git-send-email-balajitk@ti.com> <CACRpkdZAzAJW0UxGCSj-PWXTSi2Q6T8fqL9SQ+Y-91sELQ3SRQ@mail.gmail.com> <20130613104715.GC16677@laptop>
+From: Luciano Coelho <coelho@ti.com>
+Subject: [PATCH] mmc: omap: remove unnecessary #if 0's
+Date: Thu, 13 Jun 2013 18:25:55 +0300
+Message-ID: <1371137155-15318-1-git-send-email-coelho@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20130613104715.GC16677@laptop>
-Sender: linux-omap-owner@vger.kernel.org
-To: Lee Jones <lee.jones@linaro.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, Linux-OMAP <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, ext Tony Lindgren <tony@atomide.com>, "Cousson, Benoit" <b-cousson@ti.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from comal.ext.ti.com ([198.47.26.152]:46956 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751454Ab3FMP0A (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 13 Jun 2013 11:26:00 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com
 
-On Thursday 13 June 2013 04:17 PM, Lee Jones wrote:
-> On Thu, 13 Jun 2013, Linus Walleij wrote:
->
->> On Thu, Jun 6, 2013 at 9:14 PM, Balaji T K <balajitk@ti.com> wrote:
->>
->>> PBIAS register configuration is based on the regulator voltage
->>> which supplies these pbias cells, sd i/o pads.
->>> With PBIAS register address and bit definitions different across
->>> omap[3,4,5], Simplify PBIAS configuration under three different
->>> regulator voltage levels - O V, 1.8 V, 3 V. Corresponding pinctrl states
->>> are defined as pbias_off, pbias_1v8, pbias_3v.
->>>
->>> pinctrl state mmc_init is used for configuring speed mode, loopback clock
->>> (in devconf0/devconf1/prog_io1 register for omap3) and pull strength
->>> configuration (in control_mmc1 for omap4)
->>>
->>> Signed-off-by: Balaji T K <balajitk@ti.com>
->>
->> You *need* Lee Jones and Mark Brown to review this.
->> Maybe Laurent has something to add too.
->>
->> Ux500 had the very same thing, and there this was solved using
->> a GPIO regulator for "vqmmc" a level-shifter. I vaguely remember
->> Laurent doing something similar with the SH stuff.
->
-> I haven't seem much of this patch-set, but this certainly looks like
-> it should be handled by a GPIO regulator instead of pinctrl. States
-> are easily declared in a 'struct gpio_regulator_state', which the
-> framework then uses to set the correct pins for the required voltage.
->
+In commit 3451c067 (mmc: omap: add DMA engine support), some #if 0's
+were used to comment out parts of the code.  This has been in the code
+for over a year and are not needed anymore (and the commented-out code
+doesn't even compile).  Remove them.
 
-Thanks for the pointer, but wondering why is it named as gpio-regulator
-and how it is different from fixed-regulator.
-After going through git log description, I understand that voltage/current level
-for a particular regulator is controlled by a set of pad/pin on the POWER IC
-and pad/pin may be usually connected to gpio pins if it is needs to be
-configurable and ground/pulled for constant voltage.
+Signed-off-by: Luciano Coelho <coelho@ti.com>
+---
+ drivers/mmc/host/omap.c |   16 ----------------
+ 1 file changed, 16 deletions(-)
 
-Collection of gpios logic level are modeled as state for particular voltage.
-But gpio is not used in my case.
-
-> And yes, 'vqmmc' is a good place to store the this regulator.
->
+diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+index 4b3e0eb..b94f38e 100644
+--- a/drivers/mmc/host/omap.c
++++ b/drivers/mmc/host/omap.c
+@@ -1413,33 +1413,17 @@ static int mmc_omap_probe(struct platform_device *pdev)
+ 	else
+ 		sig = host->id == 0 ? OMAP_DMA_MMC_TX : OMAP_DMA_MMC2_TX;
+ 	host->dma_tx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
+-#if 0
+-	if (!host->dma_tx) {
+-		dev_err(host->dev, "unable to obtain TX DMA engine channel %u\n",
+-			sig);
+-		goto err_dma;
+-	}
+-#else
+ 	if (!host->dma_tx)
+ 		dev_warn(host->dev, "unable to obtain TX DMA engine channel %u\n",
+ 			sig);
+-#endif
+ 	if (mmc_omap2())
+ 		sig = host->id == 0 ? OMAP24XX_DMA_MMC1_RX : OMAP24XX_DMA_MMC2_RX;
+ 	else
+ 		sig = host->id == 0 ? OMAP_DMA_MMC_RX : OMAP_DMA_MMC2_RX;
+ 	host->dma_rx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
+-#if 0
+-	if (!host->dma_rx) {
+-		dev_err(host->dev, "unable to obtain RX DMA engine channel %u\n",
+-			sig);
+-		goto err_dma;
+-	}
+-#else
+ 	if (!host->dma_rx)
+ 		dev_warn(host->dev, "unable to obtain RX DMA engine channel %u\n",
+ 			sig);
+-#endif
+ 
+ 	ret = request_irq(host->irq, mmc_omap_irq, 0, DRIVER_NAME, host);
+ 	if (ret)
+-- 
+1.7.10.4
 
