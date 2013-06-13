@@ -1,116 +1,103 @@
-From: Heiko =?utf-8?q?St=C3=BCbner?= <heiko@sntech.de>
-Subject: [PATCH v4 3/3] mmc: dw_mmc-pltfm: add Rockchip variant
-Date: Thu, 13 Jun 2013 10:58:22 +0200
-Message-ID: <201306131058.23150.heiko@sntech.de>
-References: <201306131055.49595.heiko@sntech.de>
+From: Philip Rakity <prakity@nvidia.com>
+Subject: Re: [PATCH (v2)] mmc: sdhci: fix caps2 for HS200
+Date: Thu, 13 Jun 2013 10:59:42 +0200
+Message-ID: <3FCC5537-AABE-4E12-89D7-70D3B9E8F482@nvidia.com>
+References: <DC90B37F-FB8C-4A1E-AACF-82CE5D53B95C@nvidia.com>
+ <1371017798-4144-1-git-send-email-peppe.cavallaro@st.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:43292 "EHLO gloria.sntech.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756298Ab3FMI6Z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 13 Jun 2013 04:58:25 -0400
-In-Reply-To: <201306131055.49595.heiko@sntech.de>
+Received: from hqemgate04.nvidia.com ([216.228.121.35]:6582 "EHLO
+	hqemgate04.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756168Ab3FMI7q convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jun 2013 04:59:46 -0400
+In-Reply-To: <1371017798-4144-1-git-send-email-peppe.cavallaro@st.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Andy Shevchenko <andy.shevchenko@gmail.com>
+To: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>
 
-Cortex-A9 SoCs from Rockchip use a slightly modified variant of dw_mmc
-controllers that seems to require the SDMMC_CMD_USE_HOLD_REG bit to
-always be set.
 
-There also seem to be no other modifications (additional register etc)
-present, so to keep the footprint low, add this small variant to the
-pltfm driver.
+On Jun 12, 2013, at 7:16 AM, Giuseppe CAVALLARO <peppe.cavallaro@st.com> wrote:
 
-Signed-off-by: Heiko Stuebner <heiko@sntech.de>
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
----
-depends on "mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA"
- from Dinh Nguyen
+> Although the HC supports HS200 (eMMC) the caps2 are always zero; this means that
+> no way to use the super speed mode (when init the card).
+> 
+> If the HC support SDR104, for SD3.0, so it also supports HS200 for eMMC and
+> this patch just sets the MMC_CAP2_HS200 in the host caps2 field.
+> 
+> v2: Since SDR104 and HS200 are effectively the same thing the patch deletes
+> the defines for HS200 and use SDR104.
+> 
+> Reported-by: Youssef Triki <youssef.triki@st.com>
+> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+> Cc: Philip Rakity <prakity@nvidia.com>
+> ---
+> drivers/mmc/host/sdhci.c  |   14 +++++++++-----
+> include/linux/mmc/sdhci.h |    2 +-
+> 2 files changed, 10 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 2ea429c..b8bb3b3 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1846,7 +1846,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> 	 */
+> 	if (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR50) &&
+> 	    (host->flags & SDHCI_SDR50_NEEDS_TUNING ||
+> -	     host->flags & SDHCI_HS200_NEEDS_TUNING))
+> +	     host->flags & SDHCI_SDR104_NEEDS_TUNING))
+> 		requires_tuning_nonuhs = true;
+> 
+> 	if (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR104) ||
+> @@ -2962,9 +2962,13 @@ int sdhci_add_host(struct sdhci_host *host)
+> 		mmc->caps |= MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
+> 
+> 	/* SDR104 supports also implies SDR50 support */
+> -	if (caps[1] & SDHCI_SUPPORT_SDR104)
+> +	if (caps[1] & SDHCI_SUPPORT_SDR104) {
+> 		mmc->caps |= MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_SDR50;
+> -	else if (caps[1] & SDHCI_SUPPORT_SDR50)
+> +		/* SD3.0: SDR104 is supported so (for eMMC) the caps2
+> +		 * field can be promoted to support HS200.
+> +		 */
+> +		mmc->caps2 |= MMC_CAP2_HS200;
+> +	} else if (caps[1] & SDHCI_SUPPORT_SDR50)
+> 		mmc->caps |= MMC_CAP_UHS_SDR50;
+> 
+> 	if (caps[1] & SDHCI_SUPPORT_DDR50)
+> @@ -2974,9 +2978,9 @@ int sdhci_add_host(struct sdhci_host *host)
+> 	if (caps[1] & SDHCI_USE_SDR50_TUNING)
+> 		host->flags |= SDHCI_SDR50_NEEDS_TUNING;
+> 
+> -	/* Does the host need tuning for HS200? */
+> +	/* Does the host need tuning for SDR104 / HS200? */
+> 	if (mmc->caps2 & MMC_CAP2_HS200)
+> -		host->flags |= SDHCI_HS200_NEEDS_TUNING;
+> +		host->flags |= SDHCI_SDR104_NEEDS_TUNING;
+> 
+> 	/* Driver Type(s) (A, C, D) supported by the host */
+> 	if (caps[1] & SDHCI_DRIVER_TYPE_A)
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index b838ffc..0b1d7f4 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -126,7 +126,7 @@ struct sdhci_host {
+> #define SDHCI_AUTO_CMD23	(1<<7)	/* Auto CMD23 support */
+> #define SDHCI_PV_ENABLED	(1<<8)	/* Preset value enabled */
+> #define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	/* SDIO irq enabled */
+> -#define SDHCI_HS200_NEEDS_TUNING (1<<10)	/* HS200 needs tuning */
+> +#define SDHCI_SDR104_NEEDS_TUNING (1<<10)	/* SDR104/HS200 needs tuning */
+> #define SDHCI_USING_RETUNING_TIMER (1<<11)	/* Host is using a retuning timer for the card */
+> 
+> 	unsigned int version;	/* SDHCI spec. version */
+> -- 
+> 1.7.4.4
+> 
 
- .../devicetree/bindings/mmc/rockchip-dw-mshc.txt   |   23 ++++++++++++++++++++
- drivers/mmc/host/dw_mmc-pltfm.c                    |   21 +++++++++++++++++-
- 2 files changed, 43 insertions(+), 1 deletion(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+Reviewed-by: Philip Rakity <prakity@nvidia.com>
 
-diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-new file mode 100644
-index 0000000..8a3d91d
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-@@ -0,0 +1,23 @@
-+* Rockchip specific extensions to the Synopsis Designware Mobile
-+  Storage Host Controller
-+
-+The Synopsis designware mobile storage host controller is used to interface
-+a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-+differences between the core Synopsis dw mshc controller properties described
-+by synopsis-dw-mshc.txt and the properties used by the Rockchip specific
-+extensions to the Synopsis Designware Mobile Storage Host Controller.
-+
-+Required Properties:
-+
-+* compatible: should be
-+	- "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following
-+
-+Example:
-+
-+	rkdwmmc0@12200000 {
-+		compatible = "rockchip,rk2928-dw-mshc";
-+		reg = <0x12200000 0x1000>;
-+		interrupts = <0 75 0>;
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+	};
-diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-index 9b05381..3923ffd 100644
---- a/drivers/mmc/host/dw_mmc-pltfm.c
-+++ b/drivers/mmc/host/dw_mmc-pltfm.c
-@@ -24,6 +24,15 @@
- 
- #include "dw_mmc.h"
- 
-+static void dw_mci_rockchip_prepare_command(struct dw_mci *host, u32 *cmdr)
-+{
-+	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
-+}
-+
-+static const struct dw_mci_drv_data rockchip_drv_data = {
-+	.prepare_command	= dw_mci_rockchip_prepare_command,
-+};
-+
- int dw_mci_pltfm_register(struct platform_device *pdev,
- 				const struct dw_mci_drv_data *drv_data)
- {
-@@ -100,13 +109,23 @@ EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
- 
- static const struct of_device_id dw_mci_pltfm_match[] = {
- 	{ .compatible = "snps,dw-mshc", },
-+	{ .compatible = "rockchip,rk2928-dw-mshc",
-+		.data = &rockchip_drv_data },
- 	{},
- };
- MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
- 
- static int dw_mci_pltfm_probe(struct platform_device *pdev)
- {
--	return dw_mci_pltfm_register(pdev, NULL);
-+	const struct dw_mci_drv_data *drv_data = NULL;
-+	const struct of_device_id *match;
-+
-+	if (pdev->dev.of_node) {
-+		match = of_match_node(dw_mci_pltfm_match, pdev->dev.of_node);
-+		drv_data = match->data;
-+	}
-+
-+	return dw_mci_pltfm_register(pdev, drv_data);
- }
- 
- int dw_mci_pltfm_remove(struct platform_device *pdev)
--- 
-1.7.10.4
+note:  cannot test code at this time.
 
