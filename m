@@ -1,47 +1,49 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci: improve card removal check in
- sdhci_card_event()
-Date: Fri, 14 Jun 2013 20:43:39 +0800
-Message-ID: <20130614124338.GC4489@S2101-09.ap.freescale.net>
-References: <1370778564-32695-1-git-send-email-shawn.guo@linaro.org>
+From: Joel A Fernandes <agnel.joel@gmail.com>
+Subject: Re: [PATCH v2 0/3] omap_hsmmc DT DMA Client support
+Date: Fri, 14 Jun 2013 13:10:11 -0500
+Message-ID: <CAD=GYpbmFyZxwpRwSVjasehhmR5UzMQaGCZf_5Gfo9biQyb0Ww@mail.gmail.com>
+References: <1362518004-7083-1-git-send-email-mporter@ti.com>
+	<201303052126.01572.arnd@arndb.de>
+	<20130306133717.GJ6209@beef>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:36103
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752579Ab3FNMm7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jun 2013 08:42:59 -0400
-Content-Disposition: inline
-In-Reply-To: <1370778564-32695-1-git-send-email-shawn.guo@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20130306133717.GJ6209@beef>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Porter <mporter@ti.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Linux OMAP List <linux-omap@vger.kernel.org>, Balaji T K <balajitk@ti.com>, Vinod Koul <vinod.koul@intel.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>, Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, kernel@pengutronix.de
 
-On Sun, Jun 09, 2013 at 07:49:24PM +0800, Shawn Guo wrote:
-> The following error randomly appears on an imx6q board where gpio is
-> used to implement card-detection when mounting EXT4 rootfs during boot.
-> 
-> mmc1: Card removed during transfer!
-> mmc1: Resetting controller.
-> mmcblk0: unknown error -123 sending read/write command, card status 0x900
-> end_request: I/O error, dev mmcblk0, sector 106744
-> EXT4-fs error (device mmcblk0p2): ext4_find_entry:1312: inode #5011: comm swapper/0: reading directory lblock 0
-> 
-> It turns out that the error message comes from the card removal check
-> in function sdhci_card_event().  While we have a well implemented
-> function sdhci_do_get_cd() handling all the possible cases of
-> CD, the current code only checks controller internal CD case.  That
-> causes problem for other CD cases like gpio on above imx6q board.
-> 
-> Improve the check by using sdhci_do_get_cd() to cover all possible CD
-> cases, so that above error on the imx6q board gets fixed.
-> 
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+Hi,
 
-Chris,
+On Wed, Mar 6, 2013 at 7:37 AM, Matt Porter <mporter@ti.com> wrote:
+> On Tue, Mar 05, 2013 at 09:26:01PM +0000, Arnd Bergmann wrote:
+>> On Tuesday 05 March 2013, Matt Porter wrote:
+>> > Changes since v1:
+>> >         - rebase to 3.9-rc1, previous dependencies upstream
+>> >
+>> > This series adds DT DMA Engine Client support to the omap_hsmmc.
+>> > It leverages the generic DMA OF helpers in -next and the
+>> > dma_request_slave_channel_compat() wrapper introduced in the
+>> > AM33XX DMA Engine series to support DMA in omap_hsmmc on platforms
+>> > booting via DT. These platforms include omap2/3/4/5 and am33xx.
+>> >
+>> > These patches were split out from the v5 version of the AM33XX DMA
+>> > series and split from the EDMA-specific omap_hsmmc changes.
+>> >
+>>
+>> The description seems stale, but the patches all look good to me.
+>>
+>> I guess they can now get merged in any order.
+>>
+>> Acked-by: Arnd Bergmann <arnd@arndb.de>
+>
+> Yes, missed updating that to indicating that those are now in
+> 3.9-rc1.
 
-Are you fine with the patch?
+If there are no more changes, could this patch please be merged in for
+3.10 or if not, could Matt please update the description as requested
+and repost?
 
-Shawn
-
+Thanks,
+Joel
