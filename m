@@ -1,53 +1,48 @@
-From: Joel A Fernandes <agnel.joel@gmail.com>
-Subject: Re: [PATCH v2 0/3] omap_hsmmc DT DMA Client support
-Date: Fri, 14 Jun 2013 13:10:58 -0500
-Message-ID: <CAD=GYpaSMkTCWgetPxvchuZMWzzB09_F3nqazKFRJob1imoXUw@mail.gmail.com>
-References: <1362518004-7083-1-git-send-email-mporter@ti.com>
-	<201303052126.01572.arnd@arndb.de>
-	<20130306133717.GJ6209@beef>
-	<CAD=GYpbmFyZxwpRwSVjasehhmR5UzMQaGCZf_5Gfo9biQyb0Ww@mail.gmail.com>
+From: Zoran Markovic <zoran.markovic@linaro.org>
+Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
+Date: Fri, 14 Jun 2013 11:42:33 -0700
+Message-ID: <CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
+References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
+	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAD=GYpbmFyZxwpRwSVjasehhmR5UzMQaGCZf_5Gfo9biQyb0Ww@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: matt@ohporter.com
-Cc: Arnd Bergmann <arnd@arndb.de>, Linux OMAP List <linux-omap@vger.kernel.org>, Balaji T K <balajitk@ti.com>, Vinod Koul <vinod.koul@intel.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Herring <rob.herring@calxeda.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>, Dan Williams <djbw@fb.com>, Chris Ball <cjb@laptop.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oa0-f44.google.com ([209.85.219.44]:62720 "EHLO
+	mail-oa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752035Ab3FNSme (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jun 2013 14:42:34 -0400
+Received: by mail-oa0-f44.google.com with SMTP id l10so1118971oag.31
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Jun 2013 11:42:33 -0700 (PDT)
+In-Reply-To: <CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, Colin Cross <ccross@android.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-Resending on Matt's new email, thanks.
+> I am not sure I understand why this patch is needed. When a new card
+> is inserted/removed and the upper levels gets notification about the
+> new card, triggering the mounting/un-mounting of the file system, why
+> should it be the lowest layer (mmc) that prevents the platform from
+> enter suspend/sleep? Why do we need to prevent it at all?
+>
+> Note that notifier handling in mmc_pm_notify, was if I remember
+> correctly, not completely developed when the original version of this
+> patch was being discussed. mmc_pm_notify prevents cards from being
+> inserted/removed in the middle of suspend->resume sequence, is that
+> not enough?
 
-On Fri, Jun 14, 2013 at 1:10 PM, Joel A Fernandes <agnel.joel@gmail.com> wrote:
-> Hi,
->
-> On Wed, Mar 6, 2013 at 7:37 AM, Matt Porter <mporter@ti.com> wrote:
->> On Tue, Mar 05, 2013 at 09:26:01PM +0000, Arnd Bergmann wrote:
->>> On Tuesday 05 March 2013, Matt Porter wrote:
->>> > Changes since v1:
->>> >         - rebase to 3.9-rc1, previous dependencies upstream
->>> >
->>> > This series adds DT DMA Engine Client support to the omap_hsmmc.
->>> > It leverages the generic DMA OF helpers in -next and the
->>> > dma_request_slave_channel_compat() wrapper introduced in the
->>> > AM33XX DMA Engine series to support DMA in omap_hsmmc on platforms
->>> > booting via DT. These platforms include omap2/3/4/5 and am33xx.
->>> >
->>> > These patches were split out from the v5 version of the AM33XX DMA
->>> > series and split from the EDMA-specific omap_hsmmc changes.
->>> >
->>>
->>> The description seems stale, but the patches all look good to me.
->>>
->>> I guess they can now get merged in any order.
->>>
->>> Acked-by: Arnd Bergmann <arnd@arndb.de>
->>
->> Yes, missed updating that to indicating that those are now in
->> 3.9-rc1.
->
-> If there are no more changes, could this patch please be merged in for
-> 3.10 or if not, could Matt please update the description as requested
-> and repost?
->
-> Thanks,
-> Joel
+I will try to speak on behalf of the original implementers in a hope
+they would provide the original motivation for the patch.
+
+My understanding is that any preemption in the procedure could be an
+opportunity to suspend, as there may be a suspend request racing with
+this code. This is why the calls to __pm_stay_awake() and
+queue_delayed_work() are so tightly coupled. It would be up to the
+delayed work procedure (mmc_rescan()) to decide whether or not it is
+safe to suspend. If there are no changes in the MMC state or all
+changes can be handled by mmc_rescan(), it is safe to call
+__pm_relax(). Otherwise, userland may take over processing of this
+event, and this is why the awake state needs to be extended by 1/2
+second.
+
+Regards, Zoran
