@@ -1,7 +1,8 @@
 From: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v10 4/8] dmaengine: edma: enable build for AM33XX
-Date: Fri, 14 Jun 2013 21:32:46 -0500
-Message-ID: <1371263570-9323-4-git-send-email-joelagnel@ti.com>
+Subject: [PATCH v10 6/8] spi: omap2-mcspi: add generic DMA request support to
+	the DT binding
+Date: Fri, 14 Jun 2013 21:32:48 -0500
+Message-ID: <1371263570-9323-6-git-send-email-joelagnel@ti.com>
 References: <1371263570-9323-1-git-send-email-joelagnel@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,27 +23,56 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 
-Enable TI EDMA option on OMAP.
+The binding definition is based on the generic DMA request binding
 
 Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 Signed-off-by: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
 ---
- drivers/dma/Kconfig |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ Documentation/devicetree/bindings/spi/omap-spi.txt |   27 +++++++++++++++++++-
+ 1 file changed, 26 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/dma/Kconfig b/drivers/dma/Kconfig
-index e992489..3215a3c 100644
---- a/drivers/dma/Kconfig
-+++ b/drivers/dma/Kconfig
-@@ -213,7 +213,7 @@ config SIRF_DMA
+diff --git a/Documentation/devicetree/bindings/spi/omap-spi.txt b/Documentation/devicetree/bindings/spi/omap-spi.txt
+index 938809c..4c85c4c 100644
+--- a/Documentation/devicetree/bindings/spi/omap-spi.txt
++++ b/Documentation/devicetree/bindings/spi/omap-spi.txt
+@@ -10,7 +10,18 @@ Required properties:
+ 			  input. The default is D0 as input and
+ 			  D1 as output.
  
- config TI_EDMA
- 	tristate "TI EDMA support"
--	depends on ARCH_DAVINCI
-+	depends on ARCH_DAVINCI || ARCH_OMAP
- 	select DMA_ENGINE
- 	select DMA_VIRTUAL_CHANNELS
- 	default n
+-Example:
++Optional properties:
++- dmas: List of DMA specifiers with the controller specific format
++	as described in the generic DMA client binding. A tx and rx
++	specifier is required for each chip select.
++- dma-names: List of DMA request names. These strings correspond
++	1:1 with the DMA specifiers listed in dmas. The string naming
++	is to be "rxN" and "txN" for RX and TX requests,
++	respectively, where N equals the chip select number.
++
++Examples:
++
++[hwmod populated DMA resources]
+ 
+ mcspi1: mcspi@1 {
+     #address-cells = <1>;
+@@ -20,3 +31,17 @@ mcspi1: mcspi@1 {
+     ti,spi-num-cs = <4>;
+ };
+ 
++[generic DMA request binding]
++
++mcspi1: mcspi@1 {
++    #address-cells = <1>;
++    #size-cells = <0>;
++    compatible = "ti,omap4-mcspi";
++    ti,hwmods = "mcspi1";
++    ti,spi-num-cs = <2>;
++    dmas = <&edma 42
++	    &edma 43
++	    &edma 44
++	    &edma 45>;
++    dma-names = "tx0", "rx0", "tx1", "rx1";
++};
 -- 
 1.7.9.5
 
