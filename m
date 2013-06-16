@@ -1,131 +1,128 @@
-From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH 2/2] ARM: dts: add AM33XX MMC support
-Date: Sat, 15 Jun 2013 18:05:01 +0300
-Message-ID: <20130615150500.GA27629@arwen.pp.htv.fi>
-References: <79CD15C6BA57404B839C016229A409A83EC20C57@DBDE01.ent.ti.com>
- <20130307144656.GR6209@beef>
- <79CD15C6BA57404B839C016229A409A83EC20CCA@DBDE01.ent.ti.com>
- <20130307150408.GU6209@beef>
- <79CD15C6BA57404B839C016229A409A83EC20D27@DBDE01.ent.ti.com>
- <20130307160236.GV6209@beef>
- <79CD15C6BA57404B839C016229A409A83EC213C8@DBDE01.ent.ti.com>
- <CAD=GYpb3+nvoz863+VKO7iJijRHnM5RzsVj-5VJfQ-OHoUy19Q@mail.gmail.com>
- <20130614222537.GA25428@arwen.pp.htv.fi>
- <CAD=GYpYfMAZeV1RUC=DqhYGZaKiiukpTZg7bhO582eKwimS9aA@mail.gmail.com>
-Reply-To: balbi@ti.com
+From: Oded Gabbay <ogabbay@advaoptical.com>
+Subject: [PATCH v2 1/2] MMC: P2020 SDHC: Add support for 8-bit bus width and non-removable card
+Date: Sun, 16 Jun 2013 10:07:20 +0300
+Message-ID: <1371366440-9926-1-git-send-email-ogabbay@advaoptical.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============8441631458804934514=="
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAD=GYpYfMAZeV1RUC=DqhYGZaKiiukpTZg7bhO582eKwimS9aA@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Joel A Fernandes <agnel.joel@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>, "Krishnamoorthy, Balaji T" <balajitk@ti.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "Hiremath,
- Vaibhav" <hvaibhav@ti.com>, "balbi@ti.com" <balbi@ti.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.advaoptical.com ([91.217.199.15]:36769 "EHLO
+	mail.advaoptical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754974Ab3FPHHy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 16 Jun 2013 03:07:54 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org, ogabbay@advaoptical.com, shawn.guo@linaro.org, Chang-Ming.Huang@freescale.com, wfp5p@virginia.edu, gregkh@linuxfoundation.org, cbouatmailru@gmail.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
---===============8441631458804934514==
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="5mCyUwZo2JvN/JJP"
-Content-Disposition: inline
+This patch adds support of connecting an MMC media using an 8-bit
+bus width connection to Freescale's P2020 H/W SDHC controller. During
+the probe function, the generic function mmc_of_parse is called to detect
+whether the controller is configured with 8-bit bus width. Also, the generic
+function detecs if the non-removable property is set in the device tree.
+The function esdhc_pltfm_bus_width was added because the bus width configuration
+is platform specific.
 
---5mCyUwZo2JvN/JJP
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Oded Gabbay <ogabbay@advaoptical.com>
+Reviewed-by: Anton Vorontsov <anton@enomsg.org>
+---
+ drivers/mmc/host/sdhci-esdhc.h    |  7 +++++++
+ drivers/mmc/host/sdhci-of-esdhc.c | 44 ++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 50 insertions(+), 1 deletion(-)
 
-Hi,
+diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
+index d25f9ab..6f9a018 100644
+--- a/drivers/mmc/host/sdhci-esdhc.h
++++ b/drivers/mmc/host/sdhci-esdhc.h
+@@ -36,6 +36,13 @@
+ /* pltfm-specific */
+ #define ESDHC_HOST_CONTROL_LE	0x20
+ 
++/*
++ * P2020 interpretation of the SDHCI_HOST_CONTROL register
++ */
++#define ESDHC_CTRL_4BITBUS          (0x1 << 1)
++#define ESDHC_CTRL_8BITBUS          (0x2 << 1)
++#define ESDHC_CTRL_BUSWIDTH_MASK    (0x3 << 1)
++
+ /* OF-specific */
+ #define ESDHC_DMA_SYSCTL	0x40c
+ #define ESDHC_DMA_SNOOP		0x00000040
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 5e68adc..fd149a0 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -13,6 +13,7 @@
+  * your option) any later version.
+  */
+ 
++#include <linux/err.h>
+ #include <linux/io.h>
+ #include <linux/of.h>
+ #include <linux/delay.h>
+@@ -230,6 +231,30 @@ static void esdhc_of_platform_init(struct sdhci_host *host)
+ 		host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
+ }
+ 
++static int esdhc_pltfm_bus_width(struct sdhci_host *host, int width)
++{
++	u32 ctrl;
++
++	switch (width) {
++	case MMC_BUS_WIDTH_8:
++		ctrl = ESDHC_CTRL_8BITBUS;
++		break;
++
++	case MMC_BUS_WIDTH_4:
++		ctrl = ESDHC_CTRL_4BITBUS;
++		break;
++
++	default:
++		ctrl = 0;
++		break;
++	}
++
++	clrsetbits_be32(host->ioaddr + SDHCI_HOST_CONTROL,
++			ESDHC_CTRL_BUSWIDTH_MASK, ctrl);
++
++	return 0;
++}
++
+ static const struct sdhci_ops sdhci_esdhc_ops = {
+ 	.read_l = esdhc_readl,
+ 	.read_w = esdhc_readw,
+@@ -247,6 +272,7 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
+ 	.platform_resume = esdhc_of_resume,
+ #endif
+ 	.adma_workaround = esdhci_of_adma_workaround,
++	.platform_bus_width = esdhc_pltfm_bus_width,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_esdhc_pdata = {
+@@ -262,7 +288,23 @@ static const struct sdhci_pltfm_data sdhci_esdhc_pdata = {
+ 
+ static int sdhci_esdhc_probe(struct platform_device *pdev)
+ {
+-	return sdhci_pltfm_register(pdev, &sdhci_esdhc_pdata);
++	struct sdhci_host *host;
++	int ret;
++
++	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_pdata);
++	if (IS_ERR(host))
++		return PTR_ERR(host);
++
++	sdhci_get_of_property(pdev);
++
++	/* call to generic mmc_of_parse to support additional capabilities */
++	mmc_of_parse(host->mmc);
++
++	ret = sdhci_add_host(host);
++	if (ret)
++		sdhci_pltfm_free(pdev);
++
++	return ret;
+ }
+ 
+ static int sdhci_esdhc_remove(struct platform_device *pdev)
+-- 
+1.8.3.1
 
-On Fri, Jun 14, 2013 at 06:43:51PM -0500, Joel A Fernandes wrote:
-> > > >> I just doublechecked MMC rootfs on bone and evmsk as it's the stan=
-dard
-> > > >> smoke test. My EVM is intermittent now so trying to coax it to pow=
-er
-> > up
-> > > >> to reverify.
-> > > >>
-> > > >
-> > > > Matt,
-> > > >
-> > > > Your branch is working for me, I tested it on EVM. Not sure what is
-> > wrong with manual rebasing
-> > > > I did yesterday. I will try to nail-down root-cause here.
-> > > >
-> > > > And you can submit the next version fixing the comments I have give=
-n.
-> > >
-> > > The only comment I could find in the whole discussion was adding of
-> > > the interrupts property. I tested I don't have any problem booting
-> > > with Matt's patch, without having the interrupts property.
-> >
-> > might very well be, but we want to figure out why adding "intrrupts"
-> > causes issues. Why does it have to come through hwmod ? You might have
-> > uncovered a real problem which needs fixing. Besides, at the end of the
->=20
->=20
-> No actually I think I wasn't very descriptive in my post. There is no
-> problem here. Whether it comes from DT or not, it works in both cases . (I
-> haven't tried adding interrupt node to dts but what I gathered from
-> Vaibhav's post is that it works also when added to dts)
->=20
-> But I can revisit Vaibhav's suggestion of adding it to dts for completene=
-ss
-> sake. My tree currently works and picks up the interrupt info from hwmod.=
- I
-> just didn't see any activity on this thread for a while so I thought of
-> enquiring it was ok to pull it in for the 3.11 merge window or if the
-> consensus was that interrupt node be added to dts even though it works
-> without it.
-
-fair enough, then let's just add those interrupts to hwmod which will,
-eventually, let us drop all of that data from hwmod.
-
-cheers
-
---=20
-balbi
-
---5mCyUwZo2JvN/JJP
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJRvIKcAAoJEIaOsuA1yqREoT4P/33N3NwRRLlQBRTySoCkdXQ1
-iGeud8gRTCDOaiRmJ6lLKjObERpLKh29cnzs4hcPOLavXeBfORRj9VMWyK0o2D0o
-XQaDCbk1n2S2kZ79+bkLrCnvd2FhHJWpLlaTTpWz+WFgU0lQ+zS2lIK5iNHEPQGX
-a+zsZ3DlCeL7Qjc5eR/9gjsBdLPGaCMb0PMjCsIUpNg1dZ3Iuq8WnHO5gs0Kf4hf
-MVcIQNcLM77GRKpkgwAX5FiCTfH08aIqnkwGhixp/GkKM9Qq2VnxSzLWc6GivW7i
-GZYCVXLII8i5IIcAbIaDScNdd8JzDfWP/AYc9MjothySomoR9Z05uJb18vTRbtPf
-70TtJpeztXQflUdN8GFUkcoHnpysyHIbkGGFuSy+9fgnoq9kIoPF53JC544qQn3Y
-KFAExhd9IDvTO/nzp28HSwOZUgYDCoLd1KedXMasAwRUa5a/s6RsxocvFDu0XiIw
-dClRT1sizLd39E8ELdgj1Arzs7doCZ1/g2NTJeW4xHgs8YDr6iIhZZxKMbFXl1vh
-I6PVLuQEkwO7268jY02qEyvVDFM+AIXrJqbL/O3Dn0w2VgycrDj0k9xvbshKBpYo
-jisgYm5osz2NpAHztdH1tHPku1los4lixEFTVyfccCHqS3e2NbFy/2T09TEweyCs
-bB2ZkwTWWyQfqBUOvquc
-=qdGk
------END PGP SIGNATURE-----
-
---5mCyUwZo2JvN/JJP--
-
-
---===============8441631458804934514==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============8441631458804934514==--
