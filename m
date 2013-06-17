@@ -1,55 +1,94 @@
-From: "Fernandes, Joel A" <joelagnel@ti.com>
+From: "Fernandes, Joel A" <joelagnel-l0cyMroinI0@public.gmane.org>
 Subject: RE: [PATCH v10 5/8] dmaengine: edma: Add TI EDMA device tree binding
-Date: Mon, 17 Jun 2013 15:05:55 +0000
-Message-ID: <083BC63EECB6FD41B8E81CF7FD87CC0F2E4E92DA@DLEE08.ent.ti.com>
+Date: Mon, 17 Jun 2013 15:40:29 +0000
+Message-ID: <083BC63EECB6FD41B8E81CF7FD87CC0F2E4E9395@DLEE08.ent.ti.com>
 References: <1371263570-9323-1-git-send-email-joelagnel@ti.com>
- <1371263570-9323-5-git-send-email-joelagnel@ti.com> <51BEEC84.1080102@ti.com>
+	<1371263570-9323-5-git-send-email-joelagnel@ti.com>
+	<3940138.jZFEtfGGLz@wuerfel>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <51BEEC84.1080102@ti.com>
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <3940138.jZFEtfGGLz@wuerfel>
 Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: "Nori, Sekhar" <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Russell King <linux@arm.linux.org.uk>, "Cousson, Benoit" <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Koen Kooi <koen@beagleboard.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Vinod Koul <vinod.koul@intel.com>, Jason Kridner <jkridner@beagleboard.org>, Rob Landley <rob@landley.net>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Andrew Morton <akpm@linux-foundation.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Matt Porter <matt@ohporter.com>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "Cousson,  Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Andrew Morton <akpm>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Sekhar,
+Hi Arnd,
 
 > -----Original Message-----
-> From: Nori, Sekhar
-> Sent: Monday, June 17, 2013 6:01 AM
-> To: Fernandes, Joel A; Grant Likely; Rob Herring
-> Cc: Tony Lindgren; Matt Porter; Vinod Koul; Mark Brown; Cousson, Benoit;
-> Russell King; Rob Landley; Andrew Morton; Jason Kridner; Koen Kooi;
-> Devicetree Discuss; Linux OMAP List; Linux ARM Kernel List; Linux DaVinci
-> Kernel List; Linux Kernel Mailing List; Linux Documentation List; Linux MMC
-> List; Linux SPI Devel List; Arnd Bergmann
+> From: Arnd Bergmann [mailto:arnd-r2nGTMty4D4@public.gmane.org]
+> Sent: Monday, June 17, 2013 6:13 AM
+> To: Fernandes, Joel A
+> Cc: Tony Lindgren; Nori, Sekhar; Matt Porter; Grant Likely; Rob Herring; Vinod
+> Koul; Mark Brown; Cousson, Benoit; Russell King; Rob Landley; Andrew
+> Morton; Jason Kridner; Koen Kooi; Devicetree Discuss; Linux OMAP List; Linux
+> ARM Kernel List; Linux DaVinci Kernel List; Linux Kernel Mailing List; Linux
+> Documentation List; Linux MMC List; Linux SPI Devel List
 > Subject: Re: [PATCH v10 5/8] dmaengine: edma: Add TI EDMA device tree
 > binding
 > 
-> Grant, Rob,
+> On Friday 14 June 2013 21:32:47 Joel A Fernandes wrote:
+> >
+> > diff --git a/Documentation/devicetree/bindings/dma/ti-edma.txt
+> > b/Documentation/devicetree/bindings/dma/ti-edma.txt
+> > new file mode 100644
+> > index 0000000..ada0018
+> > --- /dev/null
+> > +++ b/Documentation/devicetree/bindings/dma/ti-edma.txt
+> > @@ -0,0 +1,26 @@
+> > +TI EDMA
+> > +
+> > +Required properties:
+> > +- compatible : "ti,edma3"
+> > +- ti,hwmods: Name of the hwmods associated to the EDMA
+> > +- ti,edma-regions: Number of regions
+> > +- ti,edma-slots: Number of slots
+> > +
+> > +Optional properties:
+> > +- ti,edma-xbar-event-map: Crossbar event to channel map
 > 
-> Can one of you please take a look at this patch and see if you have any
-> comments on the binding definition?
+> You need to list #dma-cells as required here, and which values are accepted
+> by the driver (I suppose only <1>). You should also explain the format of the
+> dma-specifier for a slave here for each possible value of #dma-cells.
 > 
-> Joel,
-> 
-> Ideally the bindings are described before they are used or along with its
-> usage. In that aspect, this patch is present too far back in the series. Can you
-> please fix this if you get to posting another version. I think I gave the same
-> comment on v9 as well.
+> For each of the standard properties (reg, interrupts, dma-channels), list
+> whether they are optional or required. Since the example has three
+> interrupts, you should probably list how many interrupts need to be specified
+> (minimum and maximum if the number is variable) and in what order to
+> expect them.
  
-[Joel] Yes, sure, I will make a note to push this up the series during the next posting.
+[Joel] Thanks for the suggestion, I updated it and it looks like this now:
+                                                                                                             
+Required properties:                                                                                                                   
+- compatible : "ti,edma3"                                                                                                              
+- ti,hwmods: Name of the hwmods associated to the EDMA                                                                                 
+- ti,edma-regions: Number of regions                                                                                                   
+- ti,edma-slots: Number of slots
+- #dma-cells: Should be set to <1> 
+              Clients should use a single number per DMA channel request.
+- dma-channels: Specify total DMA channels per CC                                                                                      
+- reg: Memory map for accessing module                                                                                                 
+- interrupt-parent: Interrupt controller the interrupt is routed through                                                               
+- interrupts: Exactly 3 interrupts need to be specified in the order:                                                                  
+              1. Transfer completion interrupt.                                                                                        
+              2. Memory protection interrupt.                                                                                          
+              3. Error interrupt.                                                                                                      
+Optional properties: 
+- ti,edma-xbar-event-map: Crossbar event to channel map
+
+
+Hope this looks ok. I will respin this patch and repost it in the next series spin.
 
 Thanks,
 Joel
