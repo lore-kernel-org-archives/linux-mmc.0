@@ -1,54 +1,76 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH v10 5/8] dmaengine: edma: Add TI EDMA device tree binding
-Date: Mon, 17 Jun 2013 13:12:32 +0200
-Message-ID: <3940138.jZFEtfGGLz@wuerfel>
-References: <1371263570-9323-1-git-send-email-joelagnel@ti.com>
- <1371263570-9323-5-git-send-email-joelagnel@ti.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
+Date: Mon, 17 Jun 2013 16:22:28 +0200
+Message-ID: <CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
+References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
+	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
+	<CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
+	<CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <1371263570-9323-5-git-send-email-joelagnel-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ve0-f176.google.com ([209.85.128.176]:52598 "EHLO
+	mail-ve0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752483Ab3FQOW3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jun 2013 10:22:29 -0400
+Received: by mail-ve0-f176.google.com with SMTP id c13so2116060vea.21
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Jun 2013 07:22:28 -0700 (PDT)
+In-Reply-To: <CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Colin Cross <ccross@android.com>
+Cc: Zoran Markovic <zoran.markovic@linaro.org>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-On Friday 14 June 2013 21:32:47 Joel A Fernandes wrote:
-> 
-> diff --git a/Documentation/devicetree/bindings/dma/ti-edma.txt b/Documentation/devicetree/bindings/dma/ti-edma.txt
-> new file mode 100644
-> index 0000000..ada0018
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/dma/ti-edma.txt
-> @@ -0,0 +1,26 @@
-> +TI EDMA
-> +
-> +Required properties:
-> +- compatible : "ti,edma3"
-> +- ti,hwmods: Name of the hwmods associated to the EDMA
-> +- ti,edma-regions: Number of regions
-> +- ti,edma-slots: Number of slots
-> +
-> +Optional properties:
-> +- ti,edma-xbar-event-map: Crossbar event to channel map
+On 14 June 2013 22:52, Colin Cross <ccross@android.com> wrote:
+> On Fri, Jun 14, 2013 at 11:42 AM, Zoran Markovic
+> <zoran.markovic@linaro.org> wrote:
+>>> I am not sure I understand why this patch is needed. When a new card
+>>> is inserted/removed and the upper levels gets notification about the
+>>> new card, triggering the mounting/un-mounting of the file system, why
+>>> should it be the lowest layer (mmc) that prevents the platform from
+>>> enter suspend/sleep? Why do we need to prevent it at all?
+>>>
+>>> Note that notifier handling in mmc_pm_notify, was if I remember
+>>> correctly, not completely developed when the original version of this
+>>> patch was being discussed. mmc_pm_notify prevents cards from being
+>>> inserted/removed in the middle of suspend->resume sequence, is that
+>>> not enough?
+>>
+>> I will try to speak on behalf of the original implementers in a hope
+>> they would provide the original motivation for the patch.
+>>
+>> My understanding is that any preemption in the procedure could be an
+>> opportunity to suspend, as there may be a suspend request racing with
+>> this code. This is why the calls to __pm_stay_awake() and
+>> queue_delayed_work() are so tightly coupled. It would be up to the
+>> delayed work procedure (mmc_rescan()) to decide whether or not it is
+>> safe to suspend. If there are no changes in the MMC state or all
+>> changes can be handled by mmc_rescan(), it is safe to call
+>> __pm_relax(). Otherwise, userland may take over processing of this
+>> event, and this is why the awake state needs to be extended by 1/2
+>> second.
+>
+> The __pm_stay_awake() is required to prevent autosleep during the time
+> between the card detect interrupt and when the userspace process that
+> gets the notification runs.  The 1/2 second delay is used because it
+> is easier than trying to detect when the userspace process has
+> received the notification, at which time it should hold its own
+> wakelock and the mmc subsystem can call __pm_relax().
 
-You need to list #dma-cells as required here, and which values are accepted by
-the driver (I suppose only <1>). You should also explain the format of the
-dma-specifier for a slave here for each possible value of #dma-cells.
+Hi Colin,
 
-For each of the standard properties (reg, interrupts, dma-channels), list
-whether they are optional or required. Since the example has three interrupts,
-you should probably list how many interrupts need to be specified (minimum
-and maximum if the number is variable) and in what order to expect them.
+I don't have the in-depth knowledge about how the userspace deamons
+handles the event notifications, so please bare with me while I am
+trying to understand more here.
 
-	Arnd
+First of all, are we trying to solve an  issue here or just improving
+some specific situation, that is not clear to me.
+
+I might have misunderstood this patch, but it seems like your concern
+is that you believe the event notification can get lost - if userspace
+are about to trigger a suspend while a card is being inserted/removed.
+If that is the case, could you elaborate on what level the
+notification can get lost?
+
+Kind regards
+Ulf Hansson
