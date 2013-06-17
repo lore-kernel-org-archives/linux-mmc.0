@@ -1,105 +1,97 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: Re: [PATCH v10 1/2] ARM: davinci: move private EDMA API to arm/common
-Date: Mon, 17 Jun 2013 10:57:03 -0700
-Message-ID: <CAOesGMgX=7mOtY9UN5iJNiCDTieXZpkLB-ceL1m_r0UZ_OSr0g@mail.gmail.com>
-References: <1371463571-2578-1-git-send-email-nsekhar@ti.com>
-	<1371463571-2578-2-git-send-email-nsekhar@ti.com>
-	<20130617170326.GA28497@quad.lixom.net>
-	<083BC63EECB6FD41B8E81CF7FD87CC0F2E4E95C2@DLEE08.ent.ti.com>
+From: Colin Cross <ccross@android.com>
+Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
+Date: Mon, 17 Jun 2013 11:33:45 -0700
+Message-ID: <CAMbhsRSC5XhhSK-DAoS7_JAj7XUfaM_Topp4UcBaVwRCYXSscQ@mail.gmail.com>
+References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
+	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
+	<CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
+	<CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
+	<CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f49.google.com ([209.85.216.49]:34475 "EHLO
-	mail-qa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754375Ab3FQR5E (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jun 2013 13:57:04 -0400
-Received: by mail-qa0-f49.google.com with SMTP id hu16so1592582qab.15
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Jun 2013 10:57:03 -0700 (PDT)
-In-Reply-To: <083BC63EECB6FD41B8E81CF7FD87CC0F2E4E95C2@DLEE08.ent.ti.com>
+Received: from mail-ve0-f173.google.com ([209.85.128.173]:40683 "EHLO
+	mail-ve0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751723Ab3FQSdq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jun 2013 14:33:46 -0400
+Received: by mail-ve0-f173.google.com with SMTP id jw11so2408240veb.18
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Jun 2013 11:33:45 -0700 (PDT)
+In-Reply-To: <CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Fernandes, Joel A" <joelagnel@ti.com>
-Cc: "Nori, Sekhar" <nsekhar@ti.com>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Chris Ball <cjb@laptop.org>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Kevin Hilman <khilman@deeprootsystems.com>, Matt Porter <matt@ohporter.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, Arnd Bergmann <arnd@arndb.de>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Zoran Markovic <zoran.markovic@linaro.org>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-On Mon, Jun 17, 2013 at 10:55 AM, Fernandes, Joel A <joelagnel@ti.com> wrote:
-> Hi Olof,
+On Mon, Jun 17, 2013 at 7:22 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 14 June 2013 22:52, Colin Cross <ccross@android.com> wrote:
+>> On Fri, Jun 14, 2013 at 11:42 AM, Zoran Markovic
+>> <zoran.markovic@linaro.org> wrote:
+>>>> I am not sure I understand why this patch is needed. When a new card
+>>>> is inserted/removed and the upper levels gets notification about the
+>>>> new card, triggering the mounting/un-mounting of the file system, why
+>>>> should it be the lowest layer (mmc) that prevents the platform from
+>>>> enter suspend/sleep? Why do we need to prevent it at all?
+>>>>
+>>>> Note that notifier handling in mmc_pm_notify, was if I remember
+>>>> correctly, not completely developed when the original version of this
+>>>> patch was being discussed. mmc_pm_notify prevents cards from being
+>>>> inserted/removed in the middle of suspend->resume sequence, is that
+>>>> not enough?
+>>>
+>>> I will try to speak on behalf of the original implementers in a hope
+>>> they would provide the original motivation for the patch.
+>>>
+>>> My understanding is that any preemption in the procedure could be an
+>>> opportunity to suspend, as there may be a suspend request racing with
+>>> this code. This is why the calls to __pm_stay_awake() and
+>>> queue_delayed_work() are so tightly coupled. It would be up to the
+>>> delayed work procedure (mmc_rescan()) to decide whether or not it is
+>>> safe to suspend. If there are no changes in the MMC state or all
+>>> changes can be handled by mmc_rescan(), it is safe to call
+>>> __pm_relax(). Otherwise, userland may take over processing of this
+>>> event, and this is why the awake state needs to be extended by 1/2
+>>> second.
+>>
+>> The __pm_stay_awake() is required to prevent autosleep during the time
+>> between the card detect interrupt and when the userspace process that
+>> gets the notification runs.  The 1/2 second delay is used because it
+>> is easier than trying to detect when the userspace process has
+>> received the notification, at which time it should hold its own
+>> wakelock and the mmc subsystem can call __pm_relax().
 >
->> -----Original Message-----
->> From: Olof Johansson [mailto:olof@lixom.net]
->> Sent: Monday, June 17, 2013 12:03 PM
->> To: Nori, Sekhar
->> Cc: Russell King; Vinod Koul; Chris Ball; Liam Girdwood; Mark Brown; Kevin
->> Hilman; Matt Porter; Fernandes, Joel A; linux-arm-kernel@lists.infradead.org;
->> davinci-linux-open-source@linux.davincidsp.com; linux-mmc@vger.kernel.org;
->> alsa-devel@alsa-project.org; Arnd Bergmann
->> Subject: Re: [PATCH v10 1/2] ARM: davinci: move private EDMA API to
->> arm/common
->>
->> On Mon, Jun 17, 2013 at 03:36:10PM +0530, Sekhar Nori wrote:
->> > From: Matt Porter <mporter@ti.com>
->> >
->> > Move mach-davinci/dma.c to common/edma.c so it can be used by OMAP
->> > (specifically AM33xx) as well.
->> >
->> > Signed-off-by: Matt Porter <mporter@ti.com>
->> > Acked-by: Chris Ball <cjb@laptop.org> # davinci_mmc.c
->> > [nsekhar@ti.com: dropped davinci sffsdr changes]
->> > Signed-off-by: Sekhar Nori <nsekhar@ti.com>
->>
->> Acked-by: Olof Johansson <olof@lixom.net>
->>
->> Tiny nit below, no need to respin just for that.
->>
->> I suppose we should take this through arm-soc.
->>
->> > ---
->> >  arch/arm/Kconfig                                   |    1 +
->> >  arch/arm/common/Kconfig                            |    3 +
->> >  arch/arm/common/Makefile                           |    1 +
->> >  arch/arm/{mach-davinci/dma.c => common/edma.c}     |    2 +-
->> >  arch/arm/mach-davinci/Makefile                     |    2 +-
->> >  arch/arm/mach-davinci/board-tnetv107x-evm.c        |    2 +-
->> >  arch/arm/mach-davinci/davinci.h                    |    2 +-
->> >  arch/arm/mach-davinci/devices-tnetv107x.c          |    2 +-
->> >  arch/arm/mach-davinci/devices.c                    |    6 +-
->> >  arch/arm/mach-davinci/dm355.c                      |    2 +-
->> >  arch/arm/mach-davinci/dm365.c                      |    2 +-
->> >  arch/arm/mach-davinci/dm644x.c                     |    2 +-
->> >  arch/arm/mach-davinci/dm646x.c                     |    2 +-
->> >  arch/arm/mach-davinci/include/mach/da8xx.h         |    2 +-
->> >  drivers/dma/edma.c                                 |    2 +-
->> >  drivers/mmc/host/davinci_mmc.c                     |    1 +
->> >  include/linux/mfd/davinci_voicecodec.h             |    3 +-
->> >  .../mach => include/linux/platform_data}/edma.h    |   89 +-------------------
->> >  include/linux/platform_data/spi-davinci.h          |    2 +-
->> >  sound/soc/davinci/davinci-evm.c                    |    1 +
->> >  sound/soc/davinci/davinci-pcm.c                    |    1 +
->> >  sound/soc/davinci/davinci-pcm.h                    |    2 +-
->> >  22 files changed, 29 insertions(+), 103 deletions(-)  rename
->> > arch/arm/{mach-davinci/dma.c => common/edma.c} (99%)  rename
->> > {arch/arm/mach-davinci/include/mach =>
->> > include/linux/platform_data}/edma.h (59%)
->> >
->> > diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig index
->> > 49d993c..b1c66a4 100644
->> > --- a/arch/arm/Kconfig
->> > +++ b/arch/arm/Kconfig
->> > @@ -840,6 +840,7 @@ config ARCH_DAVINCI
->> >     select GENERIC_IRQ_CHIP
->> >     select HAVE_IDE
->> >     select NEED_MACH_GPIO_H
->> > +   select TI_PRIV_EDMA
->>
->> What does PRIV here mean? Privileged? Private? I think it can be shortened to
->> TI_EDMA.
->>
->  [Joel] TI_EDMA already exists. It is used to build drivers/dma/edma.
-> I have a patch that reuses the TI_EDMA option instead of the PRIV one . I will
-> include that In my v11 series for EDMA (v10 was just posted) . If its ok, let us
-> merge Sekhar's patch as-is, and then mine will get rid of the PRIV option
-> (among other things).
+> Hi Colin,
+>
+> I don't have the in-depth knowledge about how the userspace deamons
+> handles the event notifications, so please bare with me while I am
+> trying to understand more here.
+>
+> First of all, are we trying to solve an  issue here or just improving
+> some specific situation, that is not clear to me.
+>
+> I might have misunderstood this patch, but it seems like your concern
+> is that you believe the event notification can get lost - if userspace
+> are about to trigger a suspend while a card is being inserted/removed.
+> If that is the case, could you elaborate on what level the
+> notification can get lost?
+>
+> Kind regards
+> Ulf Hansson
 
-Ok, fair enough. As I said, small nit.
+This is a generic requirement for using a kernel with autosleep
+enabled.  Autosleep will enter suspend whenever there is no wakeup
+source/wakelock held.  Consider the following sequence:
 
+Kernel is suspended
+Card is inserted, triggering a wakeup interrupt, which is an implicit
+wakeup source until it is handled
+Kernel starts resuming, resumes the mmc driver
+The mmc driver enables its interrupt, which is immediately handled and
+queues an event to be handled by userspace
+At this point the wakeup interrupt is handled and gone, and no wakeup
+sources are being held, so the kernel can choose to go back to
+suspend, so userspace can't handle the insertion event until the
+kernel wakes up for another reason.
 
--Olof
+In general, an event that is triggered by a wakeup interrupt that is
+being passed from the kernel to userspace needs to have a wakeup
+source held while the event is queued.
