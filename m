@@ -1,88 +1,56 @@
-From: Oded Gabbay <ogabbay@advaoptical.com>
-Subject: [PATCH v2 2/2] MMC: P2020 SDHC: Fix bug when writing to SDHCI_HOST_CONTROL register
-Date: Sun, 16 Jun 2013 10:07:47 +0300
-Message-ID: <1371366467-9997-1-git-send-email-ogabbay@advaoptical.com>
+From: Tushar Behera <tushar.behera@linaro.org>
+Subject: Re: [PATCH 03/15] mmc: mvsdio: Convert to use devm_ioremap_resource
+Date: Mon, 17 Jun 2013 11:42:23 +0530
+Message-ID: <51BEA8C7.3090501@linaro.org>
+References: <1370864113-17895-1-git-send-email-tushar.behera@linaro.org> <1370864113-17895-4-git-send-email-tushar.behera@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: cjb@laptop.org, ogabbay@advaoptical.com, Chang-Ming.Huang@freescale.com, gregkh@linuxfoundation.org, cbouatmailru@gmail.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f49.google.com ([209.85.220.49]:46653 "EHLO
+	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750937Ab3FQGM3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jun 2013 02:12:29 -0400
+Received: by mail-pa0-f49.google.com with SMTP id ld11so2492407pab.22
+        for <linux-mmc@vger.kernel.org>; Sun, 16 Jun 2013 23:12:28 -0700 (PDT)
+In-Reply-To: <1370864113-17895-4-git-send-email-tushar.behera@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: thierry.reding@gmail.com, patches@linaro.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-The P2020 has a non-standard implementation of the SDHCI_HOST_CONTROL
-register. This patch adds a QUIRK in the SDHCI header to signal that
-a host controller has a non-standard SDHCI_HOST_CONTROL register. The
-patch adds a check to the function esdhc_writeb in file
-sdhci-of-esdhc.c, where it checks if the write is done to the
-SDHCI_HOST_CONTROL register and th host has the above mentioned QUIRK,
-then the function simply returns instead of writing to the register.
-The patch also detects if the processor is P2020 (by looking in dev
-tree) and if so, adds the QUIRK to the host->quirk2
+On 06/10/2013 05:05 PM, Tushar Behera wrote:
+> Commit 75096579c3ac ("lib: devres: Introduce devm_ioremap_resource()")
+> introduced devm_ioremap_resource() and deprecated the use of
+> devm_request_and_ioremap().
+> 
+> Signed-off-by: Tushar Behera <tushar.behera@linaro.org>
+> CC: linux-mmc@vger.kernel.org
+> CC: Chris Ball <cjb@laptop.org>
+> ---
+>  drivers/mmc/host/mvsdio.c |    6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+> index d08fe6a..656f1f5 100644
+> --- a/drivers/mmc/host/mvsdio.c
+> +++ b/drivers/mmc/host/mvsdio.c
+> @@ -758,9 +758,9 @@ static int __init mvsd_probe(struct platform_device *pdev)
+>  
+>  	spin_lock_init(&host->lock);
+>  
+> -	host->base = devm_request_and_ioremap(&pdev->dev, r);
+> -	if (!host->base) {
+> -		ret = -ENOMEM;
+> +	host->base = devm_ioremap_resource(&pdev->dev, r);
+> +	if (IS_ERR(host->base)) {
+> +		ret = PTR_ERR(host->base);
+>  		goto out;
+>  	}
+>  
+> 
 
-This patch depends on the first patch of this set (total of 2 patches)
+Ping.
 
-Signed-off-by: Oded Gabbay <ogabbay@advaoptical.com>
-Reviewed-by: Anton Vorontsov <anton@enomsg.org>
----
- drivers/mmc/host/sdhci-of-esdhc.c | 14 ++++++++++++++
- include/linux/mmc/sdhci.h         |  2 ++
- 2 files changed, 16 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index fd149a0..ca88529 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -121,6 +121,13 @@ static void esdhc_writeb(struct sdhci_host *host, u8 val, int reg)
- 	if (reg == SDHCI_HOST_CONTROL) {
- 		u32 dma_bits;
- 
-+		/*
-+		 * If host control register is not standard, exit
-+		 * this function
-+		 */
-+		if (host->quirks2 & SDHCI_QUIRK2_BROKEN_HOST_CONTROL)
-+			return;
-+
- 		/* DMA select is 22,23 bits in Protocol Control Register */
- 		dma_bits = (val & SDHCI_CTRL_DMA_MASK) << 5;
- 		clrsetbits_be32(host->ioaddr + reg , SDHCI_CTRL_DMA_MASK << 5,
-@@ -289,6 +296,7 @@ static const struct sdhci_pltfm_data sdhci_esdhc_pdata = {
- static int sdhci_esdhc_probe(struct platform_device *pdev)
- {
- 	struct sdhci_host *host;
-+	struct device_node *np;
- 	int ret;
- 
- 	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_pdata);
-@@ -297,6 +304,15 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
- 
- 	sdhci_get_of_property(pdev);
- 
-+	np = pdev->dev.of_node;
-+	if (of_device_is_compatible(np, "fsl,p2020-esdhc")) {
-+		/*
-+		 * Freescale messed up with P2020 as it has a non-standard
-+		 * host control register
-+		 */
-+		host->quirks2 |= SDHCI_QUIRK2_BROKEN_HOST_CONTROL;
-+	}
-+
- 	/* call to generic mmc_of_parse to support additional capabilities */
- 	mmc_of_parse(host->mmc);
- 
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index b838ffc..b73dbdd 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -95,6 +95,8 @@ struct sdhci_host {
- /* The system physically doesn't support 1.8v, even if the host does */
- #define SDHCI_QUIRK2_NO_1_8_V				(1<<2)
- #define SDHCI_QUIRK2_PRESET_VALUE_BROKEN		(1<<3)
-+/* Controller has a non-standard host control register */
-+#define SDHCI_QUIRK2_BROKEN_HOST_CONTROL		(1<<4)
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
 -- 
-1.8.3.1
+Tushar Behera
