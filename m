@@ -1,46 +1,110 @@
-From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH 2/2] ARM: dts: add AM33XX MMC support
-Date: Sun, 16 Jun 2013 23:20:53 -0700
-Message-ID: <20130617062052.GG20992@atomide.com>
-References: <20130307144656.GR6209@beef>
- <79CD15C6BA57404B839C016229A409A83EC20CCA@DBDE01.ent.ti.com>
- <20130307150408.GU6209@beef>
- <79CD15C6BA57404B839C016229A409A83EC20D27@DBDE01.ent.ti.com>
- <20130307160236.GV6209@beef>
- <79CD15C6BA57404B839C016229A409A83EC213C8@DBDE01.ent.ti.com>
- <CAD=GYpb3+nvoz863+VKO7iJijRHnM5RzsVj-5VJfQ-OHoUy19Q@mail.gmail.com>
- <20130614222537.GA25428@arwen.pp.htv.fi>
- <CAD=GYpYfMAZeV1RUC=DqhYGZaKiiukpTZg7bhO582eKwimS9aA@mail.gmail.com>
- <20130615150500.GA27629@arwen.pp.htv.fi>
+From: Tanya Brokhman <tlinder@codeaurora.org>
+Subject: =?UTF-8?q?=5BPATCH=20v9=200/4=5D=20block=3A=20Adding=20ROW=20scheduling=20algorithm?=
+Date: Mon, 17 Jun 2013 09:39:13 +0300
+Message-ID: <1371451153-2055-1-git-send-email-tlinder@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20130615150500.GA27629-S8G//mZuvNWo5Im9Ml3/Zg@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org>
-Cc: Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "Krishnamoorthy,
- Balaji T" <balajitk-l0cyMroinI0@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.codeaurora.org ([198.145.11.231]:56326 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932068Ab3FQGjZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jun 2013 02:39:25 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: axboe@kernel.dk
+Cc: linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, Tanya Brokhman <tlinder@codeaurora.org>
 
-* Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org> [130615 08:12]:
-> 
-> fair enough, then let's just add those interrupts to hwmod which will,
-> eventually, let us drop all of that data from hwmod.
+In order to decrease the latency of a prioritized request (such as READ
+requests) the device driver might decide to stop the transmission of a
+current "low priority" request in order to handle the "high priority" o=
+ne.
+The urgency of the request is decided by the block layer I/O scheduler.
+When the block layer notifies the underlying device driver (eMMC for
+example) of an urgent request, the device driver might decide to stop
+the current request transmission. The remainder of the stopped request
+will be re-inserted back to the scheduler, to be re-scheduled after
+handling the urgent request.
 
-Nope, we're already dropping the duplicate data from hwmod for
-am33xx and omap4. See omap-for-v3.11/cleanup branch.
+The above is implemented in the block layer by 2 callbacks of the queue=
+:
+- urgent_request_fn() - This callback is registered by the underlying
+  device driver and is called instead of the existing requst_fn() callb=
+acks
+  to handle urgent requests.
+- elevator_is_urgent_fn() - This callback is registered by the current
+  I/O scheduler. If present it's used by the block layer to ping the
+  scheduler of an urgent request presence.          =20
+NOTE: If one of the above callbacks is not registered, these code pass
+will never be activated.
 
-Regards,
+The ROW I/O scheduler implements an urgent request notification mechani=
+sm.
 
-Tony
+The policy of ROW I/O scheduler is to prioritize READ requests over WRI=
+TE
+as much as possible without starving the WRITE requests.
+
+The ROW I/O scheduler implements I/O priorities (CLASS_RT, CLASS_BE,
+CLASS_IDLE). Dissimilar to CFQ, CLASS_BE requests won=E2=80=99t be star=
+ved by
+CLASS_RT, and CLASS_IDLE requests won=E2=80=99t be starved by CLASS_RT/=
+CLASS_BE
+requests. A tolerance limit is managed to prevent starvation.
+
+The ROW I/O scheduler with the URGENT request support by the device dri=
+ver
+improves the READ throughput by ~25% and the READ worst case latency is
+decreased by ~85%. All measured for READ/WRITE coalition scenarios.
+
+=46or example, the bellow numbers were collected for  parallel lmdd rea=
+d and
+write. The tests were performed on:
+kernel version: 3.4
+Underline device driver: mmc
+Host controller: msm-sdcc
+Card: standard emmc NAND flash
+
+-------------------------------------------------------------------
+   Algorithm   |   Throughput [mb/sec]   |   Worst case Latency   |
+               |     READ    |   WRITE   |   READ Latency [msec]  |
+-------------------------------------------------------------------
+CFQ	       |    122.3    |   40.22   |         422            |
+ROW	       |    151.4    |   41.07   |         51.5           |
+
+This development depends on a patch introduced by Jens Axboe in
+linux-block git tree which extends the req->cmd_flags field.
+It's attached to this patch set for convenience.
+
+Jens Axboe (1):
+  block: make rq->cmd_flags be 64-bit
+
+Tanya Brokhman (3):
+  block: Add support for reinsert a dispatched req
+  block: Add API for urgent request handling
+  block: Adding ROW scheduling algorithm
+
+ Documentation/block/row-iosched.txt |  134 +++++
+ block/Kconfig.iosched               |   21 +
+ block/Makefile                      |    1 +
+ block/blk-core.c                    |   91 +++-
+ block/blk-settings.c                |   12 +
+ block/elevator.c                    |   40 ++
+ block/row-iosched.c                 | 1090 +++++++++++++++++++++++++++=
+++++++++
+ drivers/block/floppy.c              |    4 +-
+ drivers/scsi/sd.c                   |    2 +-
+ include/linux/blk_types.h           |   68 ++-
+ include/linux/blkdev.h              |   10 +-
+ include/linux/elevator.h            |    7 +
+ 12 files changed, 1431 insertions(+), 49 deletions(-)
+ create mode 100644 Documentation/block/row-iosched.txt
+ create mode 100644 block/row-iosched.c
+
+--=20
+1.7.6
+
+--=20
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a mem=
+ber
+of Code Aurora Forum, hosted by The Linux Foundatio
