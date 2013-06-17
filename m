@@ -1,63 +1,70 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH v10 1/2] ARM: davinci: move private EDMA API to arm/common
-Date: Mon, 17 Jun 2013 11:43:27 +0100
-Message-ID: <20130617104327.GD1403@sirena.org.uk>
-References: <1371463571-2578-1-git-send-email-nsekhar@ti.com>
- <1371463571-2578-2-git-send-email-nsekhar@ti.com>
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v10 5/8] dmaengine: edma: Add TI EDMA device tree binding
+Date: Mon, 17 Jun 2013 16:31:24 +0530
+Message-ID: <51BEEC84.1080102@ti.com>
+References: <1371263570-9323-1-git-send-email-joelagnel@ti.com>
+	<1371263570-9323-5-git-send-email-joelagnel@ti.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="moC1XDyencuJ/zDM"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cassiel.sirena.org.uk ([80.68.93.111]:60393 "EHLO
-	cassiel.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756007Ab3FQKnl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jun 2013 06:43:41 -0400
-Content-Disposition: inline
-In-Reply-To: <1371463571-2578-2-git-send-email-nsekhar@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <1371263570-9323-5-git-send-email-joelagnel-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Sekhar Nori <nsekhar@ti.com>
-Cc: Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Chris Ball <cjb@laptop.org>, Liam Girdwood <lgirdwood@gmail.com>, Kevin Hilman <khilman@deeprootsystems.com>, Matt Porter <matt@ohporter.com>, Joel Fernandes A <joelagnel@ti.com>, linux-arm-kernel@lists.infradead.org, davinci-linux-open-source@linux.davincidsp.com, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>
 
+Grant, Rob,
 
---moC1XDyencuJ/zDM
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Can one of you please take a look at this patch and see if you have any
+comments on the binding definition?
 
-On Mon, Jun 17, 2013 at 03:36:10PM +0530, Sekhar Nori wrote:
-> From: Matt Porter <mporter@ti.com>
->=20
-> Move mach-davinci/dma.c to common/edma.c so it can be used
-> by OMAP (specifically AM33xx) as well.
->=20
-> Signed-off-by: Matt Porter <mporter@ti.com>
-> Acked-by: Chris Ball <cjb@laptop.org> # davinci_mmc.c
-> [nsekhar@ti.com: dropped davinci sffsdr changes]
-> Signed-off-by: Sekhar Nori <nsekhar@ti.com>
+Joel,
 
-Acked-by: Mark Brown <broonie@linaro.org>
+Ideally the bindings are described before they are used or along with
+its usage. In that aspect, this patch is present too far back in the
+series. Can you please fix this if you get to posting another version. I
+think I gave the same comment on v9 as well.
 
---moC1XDyencuJ/zDM
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+On 6/15/2013 8:02 AM, Joel A Fernandes wrote:
+> From: Matt Porter <mdp-l0cyMroinI0@public.gmane.org>
+> 
+> The binding definition is based on the generic DMA controller
+> binding.
+> 
+> Joel: Droped reserved and queue DT entries from Documentation
+> for now from the original patch series.
+> 
+> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+> Signed-off-by: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
+> ---
+>  Documentation/devicetree/bindings/dma/ti-edma.txt |   26 +++++++++++++++++++++
+>  1 file changed, 26 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/dma/ti-edma.txt
+> 
+> diff --git a/Documentation/devicetree/bindings/dma/ti-edma.txt b/Documentation/devicetree/bindings/dma/ti-edma.txt
+> new file mode 100644
+> index 0000000..ada0018
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/dma/ti-edma.txt
+> @@ -0,0 +1,26 @@
+> +TI EDMA
+> +
+> +Required properties:
+> +- compatible : "ti,edma3"
+> +- ti,hwmods: Name of the hwmods associated to the EDMA
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
+ti,hwmods should be optional, no? hwmod is not present on DaVinci where
+EDMA is also used. If it is not optional then these bindings wont work
+there.
 
-iQIcBAEBAgAGBQJRvuhMAAoJELSic+t+oim9bHEP+QHtO0gbJlbZAkS1lO+p3cch
-FBRsvIy8D8xAJHuw5uDcZkWWYQMwc9bSBSEbjctzbEPKJW6vEMUpribbyOVQ07T0
-ncJvBTI1q8RtNv1A3rLSlAfioLyw8hc17E0MZuluQBJ56NBG6TKhoQp71FKKbQZx
-BODJ8SvcPtUfOJgmtbIPl8uEfK0W/FaT0qFB42UI0ScF8lilPOXtTUC6aBiO3/Ch
-CunWpVOl/64zV7iyTPapVSvKms3lyHhDOSwyDHaLtcJdquhITkxMT+C0a05d8FJX
-31WB2RYIrOqzOyADsHEi3faFunkFezOs7lyVBbEuuFhtct84EcNIsv0+Go3zsbgj
-2EECKyQ4Lg/2sF9C6XOp+stRukNl+q5ttxXAZjLfAR0WikIK0tuJkrcL3I8IOjEW
-xQ81wd0QzMarFfKuZrBhsvV5urz8sSdMBqk8ufl7sIhNPJEio29Q8IQJZQZZ+WP6
-9Er7d35yGPW034ZOGe0KsqNpjsQiAI5k4XJRnvt/Y6mz965HxgjfeKWWZ6mvic9d
-sf3H2XDr83qWufdzs0OE+yTxzsSlTijbJclj++u4yFSnxT8DuV0rcrwI3q+YHo+y
-8jwCDypIqvEABtzcoYwlzpNHTqumtiRqlmVNnwBgB1765bIfZOihvqRjjFMjZv0V
-XkW1zTFBl8LhPjR3MbFt
-=Hbb/
------END PGP SIGNATURE-----
-
---moC1XDyencuJ/zDM--
+Thanks,
+Sekhar
