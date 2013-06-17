@@ -1,76 +1,55 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
-Date: Mon, 17 Jun 2013 16:22:28 +0200
-Message-ID: <CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
-References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
-	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
-	<CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
-	<CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
+From: "Fernandes, Joel A" <joelagnel@ti.com>
+Subject: RE: [PATCH v10 5/8] dmaengine: edma: Add TI EDMA device tree binding
+Date: Mon, 17 Jun 2013 15:05:55 +0000
+Message-ID: <083BC63EECB6FD41B8E81CF7FD87CC0F2E4E92DA@DLEE08.ent.ti.com>
+References: <1371263570-9323-1-git-send-email-joelagnel@ti.com>
+ <1371263570-9323-5-git-send-email-joelagnel@ti.com> <51BEEC84.1080102@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f176.google.com ([209.85.128.176]:52598 "EHLO
-	mail-ve0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752483Ab3FQOW3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jun 2013 10:22:29 -0400
-Received: by mail-ve0-f176.google.com with SMTP id c13so2116060vea.21
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Jun 2013 07:22:28 -0700 (PDT)
-In-Reply-To: <CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <51BEEC84.1080102@ti.com>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: "Nori, Sekhar" <nsekhar@ti.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Russell King <linux@arm.linux.org.uk>, "Cousson, Benoit" <b-cousson@ti.com>, Arnd Bergmann <arnd@arndb.de>, Linux Documentation List <linux-doc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Koen Kooi <koen@beagleboard.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Vinod Koul <vinod.koul@intel.com>, Jason Kridner <jkridner@beagleboard.org>, Rob Landley <rob@landley.net>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Andrew Morton <akpm@linux-foundation.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Matt Porter <matt@ohporter.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Colin Cross <ccross@android.com>
-Cc: Zoran Markovic <zoran.markovic@linaro.org>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-On 14 June 2013 22:52, Colin Cross <ccross@android.com> wrote:
-> On Fri, Jun 14, 2013 at 11:42 AM, Zoran Markovic
-> <zoran.markovic@linaro.org> wrote:
->>> I am not sure I understand why this patch is needed. When a new card
->>> is inserted/removed and the upper levels gets notification about the
->>> new card, triggering the mounting/un-mounting of the file system, why
->>> should it be the lowest layer (mmc) that prevents the platform from
->>> enter suspend/sleep? Why do we need to prevent it at all?
->>>
->>> Note that notifier handling in mmc_pm_notify, was if I remember
->>> correctly, not completely developed when the original version of this
->>> patch was being discussed. mmc_pm_notify prevents cards from being
->>> inserted/removed in the middle of suspend->resume sequence, is that
->>> not enough?
->>
->> I will try to speak on behalf of the original implementers in a hope
->> they would provide the original motivation for the patch.
->>
->> My understanding is that any preemption in the procedure could be an
->> opportunity to suspend, as there may be a suspend request racing with
->> this code. This is why the calls to __pm_stay_awake() and
->> queue_delayed_work() are so tightly coupled. It would be up to the
->> delayed work procedure (mmc_rescan()) to decide whether or not it is
->> safe to suspend. If there are no changes in the MMC state or all
->> changes can be handled by mmc_rescan(), it is safe to call
->> __pm_relax(). Otherwise, userland may take over processing of this
->> event, and this is why the awake state needs to be extended by 1/2
->> second.
->
-> The __pm_stay_awake() is required to prevent autosleep during the time
-> between the card detect interrupt and when the userspace process that
-> gets the notification runs.  The 1/2 second delay is used because it
-> is easier than trying to detect when the userspace process has
-> received the notification, at which time it should hold its own
-> wakelock and the mmc subsystem can call __pm_relax().
+Hi Sekhar,
 
-Hi Colin,
+> -----Original Message-----
+> From: Nori, Sekhar
+> Sent: Monday, June 17, 2013 6:01 AM
+> To: Fernandes, Joel A; Grant Likely; Rob Herring
+> Cc: Tony Lindgren; Matt Porter; Vinod Koul; Mark Brown; Cousson, Benoit;
+> Russell King; Rob Landley; Andrew Morton; Jason Kridner; Koen Kooi;
+> Devicetree Discuss; Linux OMAP List; Linux ARM Kernel List; Linux DaVinci
+> Kernel List; Linux Kernel Mailing List; Linux Documentation List; Linux MMC
+> List; Linux SPI Devel List; Arnd Bergmann
+> Subject: Re: [PATCH v10 5/8] dmaengine: edma: Add TI EDMA device tree
+> binding
+> 
+> Grant, Rob,
+> 
+> Can one of you please take a look at this patch and see if you have any
+> comments on the binding definition?
+> 
+> Joel,
+> 
+> Ideally the bindings are described before they are used or along with its
+> usage. In that aspect, this patch is present too far back in the series. Can you
+> please fix this if you get to posting another version. I think I gave the same
+> comment on v9 as well.
+ 
+[Joel] Yes, sure, I will make a note to push this up the series during the next posting.
 
-I don't have the in-depth knowledge about how the userspace deamons
-handles the event notifications, so please bare with me while I am
-trying to understand more here.
-
-First of all, are we trying to solve an  issue here or just improving
-some specific situation, that is not clear to me.
-
-I might have misunderstood this patch, but it seems like your concern
-is that you believe the event notification can get lost - if userspace
-are about to trigger a suspend while a card is being inserted/removed.
-If that is the case, could you elaborate on what level the
-notification can get lost?
-
-Kind regards
-Ulf Hansson
+Thanks,
+Joel
