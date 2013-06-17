@@ -1,110 +1,169 @@
 From: Tanya Brokhman <tlinder@codeaurora.org>
-Subject: =?UTF-8?q?=5BPATCH=20v9=200/4=5D=20block=3A=20Adding=20ROW=20scheduling=20algorithm?=
-Date: Mon, 17 Jun 2013 09:39:13 +0300
-Message-ID: <1371451153-2055-1-git-send-email-tlinder@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.11.231]:56326 "EHLO
-	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932068Ab3FQGjZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jun 2013 02:39:25 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH v9 1/4] block: make rq->cmd_flags be 64-bit
+Date: Mon, 17 Jun 2013 09:39:32 +0300
+Message-ID: <1371451184-2172-1-git-send-email-tlinder@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: axboe@kernel.dk
-Cc: linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, Tanya Brokhman <tlinder@codeaurora.org>
+Cc: linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, "open list:SCSI SUBSYSTEM" <linux-scsi@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
-In order to decrease the latency of a prioritized request (such as READ
-requests) the device driver might decide to stop the transmission of a
-current "low priority" request in order to handle the "high priority" o=
-ne.
-The urgency of the request is decided by the block layer I/O scheduler.
-When the block layer notifies the underlying device driver (eMMC for
-example) of an urgent request, the device driver might decide to stop
-the current request transmission. The remainder of the stopped request
-will be re-inserted back to the scheduler, to be re-scheduled after
-handling the urgent request.
+From: Jens Axboe <axboe@kernel.dk>
 
-The above is implemented in the block layer by 2 callbacks of the queue=
-:
-- urgent_request_fn() - This callback is registered by the underlying
-  device driver and is called instead of the existing requst_fn() callb=
-acks
-  to handle urgent requests.
-- elevator_is_urgent_fn() - This callback is registered by the current
-  I/O scheduler. If present it's used by the block layer to ping the
-  scheduler of an urgent request presence.          =20
-NOTE: If one of the above callbacks is not registered, these code pass
-will never be activated.
+We have officially run out of flags in a 32-bit space. Extend it
+to 64-bit even on 32-bit archs.
 
-The ROW I/O scheduler implements an urgent request notification mechani=
-sm.
+Signed-off-by: Jens Axboe <axboe@kernel.dk>
 
-The policy of ROW I/O scheduler is to prioritize READ requests over WRI=
-TE
-as much as possible without starving the WRITE requests.
-
-The ROW I/O scheduler implements I/O priorities (CLASS_RT, CLASS_BE,
-CLASS_IDLE). Dissimilar to CFQ, CLASS_BE requests won=E2=80=99t be star=
-ved by
-CLASS_RT, and CLASS_IDLE requests won=E2=80=99t be starved by CLASS_RT/=
-CLASS_BE
-requests. A tolerance limit is managed to prevent starvation.
-
-The ROW I/O scheduler with the URGENT request support by the device dri=
-ver
-improves the READ throughput by ~25% and the READ worst case latency is
-decreased by ~85%. All measured for READ/WRITE coalition scenarios.
-
-=46or example, the bellow numbers were collected for  parallel lmdd rea=
-d and
-write. The tests were performed on:
-kernel version: 3.4
-Underline device driver: mmc
-Host controller: msm-sdcc
-Card: standard emmc NAND flash
-
--------------------------------------------------------------------
-   Algorithm   |   Throughput [mb/sec]   |   Worst case Latency   |
-               |     READ    |   WRITE   |   READ Latency [msec]  |
--------------------------------------------------------------------
-CFQ	       |    122.3    |   40.22   |         422            |
-ROW	       |    151.4    |   41.07   |         51.5           |
-
-This development depends on a patch introduced by Jens Axboe in
-linux-block git tree which extends the req->cmd_flags field.
-It's attached to this patch set for convenience.
-
-Jens Axboe (1):
-  block: make rq->cmd_flags be 64-bit
-
-Tanya Brokhman (3):
-  block: Add support for reinsert a dispatched req
-  block: Add API for urgent request handling
-  block: Adding ROW scheduling algorithm
-
- Documentation/block/row-iosched.txt |  134 +++++
- block/Kconfig.iosched               |   21 +
- block/Makefile                      |    1 +
- block/blk-core.c                    |   91 +++-
- block/blk-settings.c                |   12 +
- block/elevator.c                    |   40 ++
- block/row-iosched.c                 | 1090 +++++++++++++++++++++++++++=
-++++++++
- drivers/block/floppy.c              |    4 +-
- drivers/scsi/sd.c                   |    2 +-
- include/linux/blk_types.h           |   68 ++-
- include/linux/blkdev.h              |   10 +-
- include/linux/elevator.h            |    7 +
- 12 files changed, 1431 insertions(+), 49 deletions(-)
- create mode 100644 Documentation/block/row-iosched.txt
- create mode 100644 block/row-iosched.c
-
---=20
+diff --git a/block/blk-core.c b/block/blk-core.c
+index 0852e5d..0256a5b 100644
+--- a/block/blk-core.c
++++ b/block/blk-core.c
+@@ -174,9 +174,9 @@ void blk_dump_rq_flags(struct request *rq, char *msg)
+ {
+ 	int bit;
+ 
+-	printk(KERN_INFO "%s: dev %s: type=%x, flags=%x\n", msg,
++	printk(KERN_INFO "%s: dev %s: type=%x, flags=%llx\n", msg,
+ 		rq->rq_disk ? rq->rq_disk->disk_name : "?", rq->cmd_type,
+-		rq->cmd_flags);
++		(unsigned long long) rq->cmd_flags);
+ 
+ 	printk(KERN_INFO "  sector %llu, nr/cnr %u/%u\n",
+ 	       (unsigned long long)blk_rq_pos(rq),
+diff --git a/drivers/block/floppy.c b/drivers/block/floppy.c
+index 04ceb7e..000abe2 100644
+--- a/drivers/block/floppy.c
++++ b/drivers/block/floppy.c
+@@ -2886,9 +2886,9 @@ static void do_fd_request(struct request_queue *q)
+ 		return;
+ 
+ 	if (WARN(atomic_read(&usage_count) == 0,
+-		 "warning: usage count=0, current_req=%p sect=%ld type=%x flags=%x\n",
++		 "warning: usage count=0, current_req=%p sect=%ld type=%x flags=%llx\n",
+ 		 current_req, (long)blk_rq_pos(current_req), current_req->cmd_type,
+-		 current_req->cmd_flags))
++		 (unsigned long long) current_req->cmd_flags))
+ 		return;
+ 
+ 	if (test_and_set_bit(0, &fdc_busy)) {
+diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
+index c1c5552..e61ed30 100644
+--- a/drivers/scsi/sd.c
++++ b/drivers/scsi/sd.c
+@@ -981,7 +981,7 @@ static int sd_prep_fn(struct request_queue *q, struct request *rq)
+ 		SCpnt->cmnd[0] = READ_6;
+ 		SCpnt->sc_data_direction = DMA_FROM_DEVICE;
+ 	} else {
+-		scmd_printk(KERN_ERR, SCpnt, "Unknown command %x\n", rq->cmd_flags);
++		scmd_printk(KERN_ERR, SCpnt, "Unknown command %llx\n", (unsigned long long) rq->cmd_flags);
+ 		goto out;
+ 	}
+ 
+diff --git a/include/linux/blk_types.h b/include/linux/blk_types.h
+index fa1abeb..c26801e 100644
+--- a/include/linux/blk_types.h
++++ b/include/linux/blk_types.h
+@@ -181,16 +181,16 @@ enum rq_flag_bits {
+ 	__REQ_NR_BITS,		/* stops here */
+ };
+ 
+-#define REQ_WRITE		(1 << __REQ_WRITE)
+-#define REQ_FAILFAST_DEV	(1 << __REQ_FAILFAST_DEV)
+-#define REQ_FAILFAST_TRANSPORT	(1 << __REQ_FAILFAST_TRANSPORT)
+-#define REQ_FAILFAST_DRIVER	(1 << __REQ_FAILFAST_DRIVER)
+-#define REQ_SYNC		(1 << __REQ_SYNC)
+-#define REQ_META		(1 << __REQ_META)
+-#define REQ_PRIO		(1 << __REQ_PRIO)
+-#define REQ_DISCARD		(1 << __REQ_DISCARD)
+-#define REQ_WRITE_SAME		(1 << __REQ_WRITE_SAME)
+-#define REQ_NOIDLE		(1 << __REQ_NOIDLE)
++#define REQ_WRITE		(1ULL << __REQ_WRITE)
++#define REQ_FAILFAST_DEV	(1ULL << __REQ_FAILFAST_DEV)
++#define REQ_FAILFAST_TRANSPORT	(1ULL << __REQ_FAILFAST_TRANSPORT)
++#define REQ_FAILFAST_DRIVER	(1ULL << __REQ_FAILFAST_DRIVER)
++#define REQ_SYNC		(1ULL << __REQ_SYNC)
++#define REQ_META		(1ULL << __REQ_META)
++#define REQ_PRIO		(1ULL << __REQ_PRIO)
++#define REQ_DISCARD		(1ULL << __REQ_DISCARD)
++#define REQ_WRITE_SAME		(1ULL << __REQ_WRITE_SAME)
++#define REQ_NOIDLE		(1ULL << __REQ_NOIDLE)
+ 
+ #define REQ_FAILFAST_MASK \
+ 	(REQ_FAILFAST_DEV | REQ_FAILFAST_TRANSPORT | REQ_FAILFAST_DRIVER)
+@@ -206,28 +206,28 @@ enum rq_flag_bits {
+ #define REQ_NOMERGE_FLAGS \
+ 	(REQ_NOMERGE | REQ_STARTED | REQ_SOFTBARRIER | REQ_FLUSH | REQ_FUA)
+ 
+-#define REQ_RAHEAD		(1 << __REQ_RAHEAD)
+-#define REQ_THROTTLED		(1 << __REQ_THROTTLED)
+-
+-#define REQ_SORTED		(1 << __REQ_SORTED)
+-#define REQ_SOFTBARRIER		(1 << __REQ_SOFTBARRIER)
+-#define REQ_FUA			(1 << __REQ_FUA)
+-#define REQ_NOMERGE		(1 << __REQ_NOMERGE)
+-#define REQ_STARTED		(1 << __REQ_STARTED)
+-#define REQ_DONTPREP		(1 << __REQ_DONTPREP)
+-#define REQ_QUEUED		(1 << __REQ_QUEUED)
+-#define REQ_ELVPRIV		(1 << __REQ_ELVPRIV)
+-#define REQ_FAILED		(1 << __REQ_FAILED)
+-#define REQ_QUIET		(1 << __REQ_QUIET)
+-#define REQ_PREEMPT		(1 << __REQ_PREEMPT)
+-#define REQ_ALLOCED		(1 << __REQ_ALLOCED)
+-#define REQ_COPY_USER		(1 << __REQ_COPY_USER)
+-#define REQ_FLUSH		(1 << __REQ_FLUSH)
+-#define REQ_FLUSH_SEQ		(1 << __REQ_FLUSH_SEQ)
+-#define REQ_IO_STAT		(1 << __REQ_IO_STAT)
+-#define REQ_MIXED_MERGE		(1 << __REQ_MIXED_MERGE)
+-#define REQ_SECURE		(1 << __REQ_SECURE)
+-#define REQ_KERNEL		(1 << __REQ_KERNEL)
+-#define REQ_PM			(1 << __REQ_PM)
++#define REQ_RAHEAD		(1ULL << __REQ_RAHEAD)
++#define REQ_THROTTLED		(1ULL << __REQ_THROTTLED)
++
++#define REQ_SORTED		(1ULL << __REQ_SORTED)
++#define REQ_SOFTBARRIER		(1ULL << __REQ_SOFTBARRIER)
++#define REQ_FUA			(1ULL << __REQ_FUA)
++#define REQ_NOMERGE		(1ULL << __REQ_NOMERGE)
++#define REQ_STARTED		(1ULL << __REQ_STARTED)
++#define REQ_DONTPREP		(1ULL << __REQ_DONTPREP)
++#define REQ_QUEUED		(1ULL << __REQ_QUEUED)
++#define REQ_ELVPRIV		(1ULL << __REQ_ELVPRIV)
++#define REQ_FAILED		(1ULL << __REQ_FAILED)
++#define REQ_QUIET		(1ULL << __REQ_QUIET)
++#define REQ_PREEMPT		(1ULL << __REQ_PREEMPT)
++#define REQ_ALLOCED		(1ULL << __REQ_ALLOCED)
++#define REQ_COPY_USER		(1ULL << __REQ_COPY_USER)
++#define REQ_FLUSH		(1ULL << __REQ_FLUSH)
++#define REQ_FLUSH_SEQ		(1ULL << __REQ_FLUSH_SEQ)
++#define REQ_IO_STAT		(1ULL << __REQ_IO_STAT)
++#define REQ_MIXED_MERGE		(1ULL << __REQ_MIXED_MERGE)
++#define REQ_SECURE		(1ULL << __REQ_SECURE)
++#define REQ_KERNEL		(1ULL << __REQ_KERNEL)
++#define REQ_PM			(1ULL << __REQ_PM)
+ 
+ #endif /* __LINUX_BLK_TYPES_H */
+diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+index 2fdb4a4..40e3cea 100644
+--- a/include/linux/blkdev.h
++++ b/include/linux/blkdev.h
+@@ -99,7 +99,7 @@ struct request {
+ 
+ 	struct request_queue *q;
+ 
+-	unsigned int cmd_flags;
++	u64 cmd_flags;
+ 	enum rq_cmd_type_bits cmd_type;
+ 	unsigned long atomic_flags;
+ 
+@@ -570,7 +570,7 @@ static inline void queue_flag_clear(unsigned int flag, struct request_queue *q)
+ 
+ #define list_entry_rq(ptr)	list_entry((ptr), struct request, queuelist)
+ 
+-#define rq_data_dir(rq)		((rq)->cmd_flags & 1)
++#define rq_data_dir(rq)		(((rq)->cmd_flags & 1) != 0)
+ 
+ static inline unsigned int blk_queue_cluster(struct request_queue *q)
+ {
+-- 
 1.7.6
-
---=20
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a mem=
-ber
-of Code Aurora Forum, hosted by The Linux Foundatio
