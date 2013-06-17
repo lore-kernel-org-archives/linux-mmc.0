@@ -1,56 +1,46 @@
-From: Tushar Behera <tushar.behera@linaro.org>
-Subject: Re: [PATCH 03/15] mmc: mvsdio: Convert to use devm_ioremap_resource
-Date: Mon, 17 Jun 2013 11:42:23 +0530
-Message-ID: <51BEA8C7.3090501@linaro.org>
-References: <1370864113-17895-1-git-send-email-tushar.behera@linaro.org> <1370864113-17895-4-git-send-email-tushar.behera@linaro.org>
+From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH 2/2] ARM: dts: add AM33XX MMC support
+Date: Sun, 16 Jun 2013 23:20:53 -0700
+Message-ID: <20130617062052.GG20992@atomide.com>
+References: <20130307144656.GR6209@beef>
+ <79CD15C6BA57404B839C016229A409A83EC20CCA@DBDE01.ent.ti.com>
+ <20130307150408.GU6209@beef>
+ <79CD15C6BA57404B839C016229A409A83EC20D27@DBDE01.ent.ti.com>
+ <20130307160236.GV6209@beef>
+ <79CD15C6BA57404B839C016229A409A83EC213C8@DBDE01.ent.ti.com>
+ <CAD=GYpb3+nvoz863+VKO7iJijRHnM5RzsVj-5VJfQ-OHoUy19Q@mail.gmail.com>
+ <20130614222537.GA25428@arwen.pp.htv.fi>
+ <CAD=GYpYfMAZeV1RUC=DqhYGZaKiiukpTZg7bhO582eKwimS9aA@mail.gmail.com>
+ <20130615150500.GA27629@arwen.pp.htv.fi>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f49.google.com ([209.85.220.49]:46653 "EHLO
-	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750937Ab3FQGM3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jun 2013 02:12:29 -0400
-Received: by mail-pa0-f49.google.com with SMTP id ld11so2492407pab.22
-        for <linux-mmc@vger.kernel.org>; Sun, 16 Jun 2013 23:12:28 -0700 (PDT)
-In-Reply-To: <1370864113-17895-4-git-send-email-tushar.behera@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20130615150500.GA27629-S8G//mZuvNWo5Im9Ml3/Zg@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org>
+Cc: Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "Krishnamoorthy,
+ Balaji T" <balajitk-l0cyMroinI0@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: thierry.reding@gmail.com, patches@linaro.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-On 06/10/2013 05:05 PM, Tushar Behera wrote:
-> Commit 75096579c3ac ("lib: devres: Introduce devm_ioremap_resource()")
-> introduced devm_ioremap_resource() and deprecated the use of
-> devm_request_and_ioremap().
+* Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org> [130615 08:12]:
 > 
-> Signed-off-by: Tushar Behera <tushar.behera@linaro.org>
-> CC: linux-mmc@vger.kernel.org
-> CC: Chris Ball <cjb@laptop.org>
-> ---
->  drivers/mmc/host/mvsdio.c |    6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-> index d08fe6a..656f1f5 100644
-> --- a/drivers/mmc/host/mvsdio.c
-> +++ b/drivers/mmc/host/mvsdio.c
-> @@ -758,9 +758,9 @@ static int __init mvsd_probe(struct platform_device *pdev)
->  
->  	spin_lock_init(&host->lock);
->  
-> -	host->base = devm_request_and_ioremap(&pdev->dev, r);
-> -	if (!host->base) {
-> -		ret = -ENOMEM;
-> +	host->base = devm_ioremap_resource(&pdev->dev, r);
-> +	if (IS_ERR(host->base)) {
-> +		ret = PTR_ERR(host->base);
->  		goto out;
->  	}
->  
-> 
+> fair enough, then let's just add those interrupts to hwmod which will,
+> eventually, let us drop all of that data from hwmod.
 
-Ping.
+Nope, we're already dropping the duplicate data from hwmod for
+am33xx and omap4. See omap-for-v3.11/cleanup branch.
 
--- 
-Tushar Behera
+Regards,
+
+Tony
