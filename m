@@ -1,47 +1,92 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: dw_mmc: remove the MMC_CAP_8_BIT_DATA in dw_mmc_caps[]
-Date: Mon, 17 Jun 2013 17:18:01 +0900
-Message-ID: <51BEC639.3070105@samsung.com>
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: [PATCH v10 2/2] ARM: edma: remove unused transfer controller handlers
+Date: Mon, 17 Jun 2013 15:36:11 +0530
+Message-ID: <1371463571-2578-3-git-send-email-nsekhar@ti.com>
+References: <1371463571-2578-1-git-send-email-nsekhar@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:13374 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756076Ab3FQIRy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jun 2013 04:17:54 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MOJ00LPP31SHM40@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 17 Jun 2013 17:17:52 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <1371463571-2578-1-git-send-email-nsekhar-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Liam Girdwood <lgirdwood-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Joel Fernandes A <joelagnel-l0cyMroinI0@public.gmane.org>, davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Kevin Hilman <khilman-1D3HCaltpLuhEniVeURVKkEOCMrvLtNR@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: 'Chris Ball' <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Thomas Abraham <thomas.abraham@linaro.org>
 
-This capability didn't need to set in dw_mmc_caps[].
-In dw-mmc.c, this capability could be set with bus_width value.
+From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Fix build on OMAP, the irqs are undefined on AM33xx.
+These error interrupt handlers were hardcoded as disabled
+so since they are unused code, simply remove them.
+
+Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+Signed-off-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
 ---
- drivers/mmc/host/dw_mmc-exynos.c |    3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ arch/arm/common/edma.c |   37 -------------------------------------
+ 1 file changed, 37 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index f013e7e..31d518b 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -154,8 +154,7 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+index dcaeb8e..a1db6cd 100644
+--- a/arch/arm/common/edma.c
++++ b/arch/arm/common/edma.c
+@@ -494,26 +494,6 @@ static irqreturn_t dma_ccerr_handler(int irq, void *data)
+ 	return IRQ_HANDLED;
+ }
  
- /* Common capabilities of Exynos4/Exynos5 SoC */
- static unsigned long exynos_dwmmc_caps[4] = {
--	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
--		MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
-+	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR | MMC_CAP_CMD23,
- 	MMC_CAP_CMD23,
- 	MMC_CAP_CMD23,
- 	MMC_CAP_CMD23,
+-/******************************************************************************
+- *
+- * Transfer controller error interrupt handlers
+- *
+- *****************************************************************************/
+-
+-#define tc_errs_handled	false	/* disabled as long as they're NOPs */
+-
+-static irqreturn_t dma_tc0err_handler(int irq, void *data)
+-{
+-	dev_dbg(data, "dma_tc0err_handler\n");
+-	return IRQ_HANDLED;
+-}
+-
+-static irqreturn_t dma_tc1err_handler(int irq, void *data)
+-{
+-	dev_dbg(data, "dma_tc1err_handler\n");
+-	return IRQ_HANDLED;
+-}
+-
+ static int reserve_contiguous_slots(int ctlr, unsigned int id,
+ 				     unsigned int num_slots,
+ 				     unsigned int start_slot)
+@@ -1541,23 +1521,6 @@ static int __init edma_probe(struct platform_device *pdev)
+ 		arch_num_cc++;
+ 	}
+ 
+-	if (tc_errs_handled) {
+-		status = request_irq(IRQ_TCERRINT0, dma_tc0err_handler, 0,
+-					"edma_tc0", &pdev->dev);
+-		if (status < 0) {
+-			dev_dbg(&pdev->dev, "request_irq %d failed --> %d\n",
+-				IRQ_TCERRINT0, status);
+-			return status;
+-		}
+-		status = request_irq(IRQ_TCERRINT, dma_tc1err_handler, 0,
+-					"edma_tc1", &pdev->dev);
+-		if (status < 0) {
+-			dev_dbg(&pdev->dev, "request_irq %d --> %d\n",
+-				IRQ_TCERRINT, status);
+-			return status;
+-		}
+-	}
+-
+ 	return 0;
+ 
+ fail:
 -- 
-1.7.9.5
+1.7.10.1
