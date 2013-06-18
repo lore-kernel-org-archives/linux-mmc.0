@@ -1,83 +1,138 @@
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v10 5/8] dmaengine: edma: Add TI EDMA device tree binding
-Date: Tue, 18 Jun 2013 10:10:51 +0530
-Message-ID: <51BFE4D3.50509@ti.com>
-References: <1371263570-9323-1-git-send-email-joelagnel@ti.com>
-	<1371263570-9323-5-git-send-email-joelagnel@ti.com>
-	<3940138.jZFEtfGGLz@wuerfel>
-	<083BC63EECB6FD41B8E81CF7FD87CC0F2E4E9395@DLEE08.ent.ti.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2 2/2] mmc: dw_mmc: Add the ability to set the ciu clock
+ frequency
+Date: Tue, 18 Jun 2013 13:51:32 +0900
+Message-ID: <51BFE754.6000909@samsung.com>
+References: <1370580406-10254-1-git-send-email-dianders@chromium.org>
+ <1370626110-1731-1-git-send-email-dianders@chromium.org>
+ <1370626110-1731-2-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <083BC63EECB6FD41B8E81CF7FD87CC0F2E4E9395-YmePFLaaepqIQmiDNMet8wC/G2K4zDHf@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: "Fernandes, Joel A" <joelagnel-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "Cousson,  Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uv+2+P5yyue3@public.gmane.org>
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-reply-to: <1370626110-1731-2-git-send-email-dianders@chromium.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, Andrew Bresticker <abrestic@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Rob Landley <rob@landley.net>, Will Newton <will.newton@gmail.com>, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+Hi Doug,
 
-On 6/17/2013 9:10 PM, Fernandes, Joel A wrote:
-> Hi Arnd,
+I have one question for using <clock-frequency>.
+I found the fixed-rate-clocks feature.
+If we want to set <clock-frequency>, then can we use the fixed-rate-clocks?
+i'm not sure how use the fixed-rate-clocks. but it seems to set fixed-rate value for clock frequency.
+
+clk_set_rate() didn't ensure to set the <clock-frequency> value.
+
+Best Regards,
+Jaehoon Chung
+
+On 06/08/2013 02:28 AM, Doug Anderson wrote:
+> As of now we rely on code outside of the driver to set the ciu clock
+> frequency.  There's no reason to do that.  Add support for setting up
+> the clock in the driver during probe.
 > 
->> -----Original Message-----
->> From: Arnd Bergmann [mailto:arnd-r2nGTMty4D4@public.gmane.org]
->> Sent: Monday, June 17, 2013 6:13 AM
->> To: Fernandes, Joel A
->> Cc: Tony Lindgren; Nori, Sekhar; Matt Porter; Grant Likely; Rob Herring; Vinod
->> Koul; Mark Brown; Cousson, Benoit; Russell King; Rob Landley; Andrew
->> Morton; Jason Kridner; Koen Kooi; Devicetree Discuss; Linux OMAP List; Linux
->> ARM Kernel List; Linux DaVinci Kernel List; Linux Kernel Mailing List; Linux
->> Documentation List; Linux MMC List; Linux SPI Devel List
->> Subject: Re: [PATCH v10 5/8] dmaengine: edma: Add TI EDMA device tree
->> binding
->>
->> On Friday 14 June 2013 21:32:47 Joel A Fernandes wrote:
->>>
->>> diff --git a/Documentation/devicetree/bindings/dma/ti-edma.txt
->>> b/Documentation/devicetree/bindings/dma/ti-edma.txt
->>> new file mode 100644
->>> index 0000000..ada0018
->>> --- /dev/null
->>> +++ b/Documentation/devicetree/bindings/dma/ti-edma.txt
->>> @@ -0,0 +1,26 @@
->>> +TI EDMA
->>> +
->>> +Required properties:
->>> +- compatible : "ti,edma3"
->>> +- ti,hwmods: Name of the hwmods associated to the EDMA
->>> +- ti,edma-regions: Number of regions
->>> +- ti,edma-slots: Number of slots
->>> +
->>> +Optional properties:
->>> +- ti,edma-xbar-event-map: Crossbar event to channel map
->>
->> You need to list #dma-cells as required here, and which values are accepted
->> by the driver (I suppose only <1>). You should also explain the format of the
->> dma-specifier for a slave here for each possible value of #dma-cells.
->>
->> For each of the standard properties (reg, interrupts, dma-channels), list
->> whether they are optional or required. Since the example has three
->> interrupts, you should probably list how many interrupts need to be specified
->> (minimum and maximum if the number is variable) and in what order to
->> expect them.
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+> Changes in v2:
+> - Added example as per Jaehoon.
+> 
+>  .../devicetree/bindings/mmc/synopsis-dw-mshc.txt        | 16 ++++++++++++++++
+>  drivers/mmc/host/dw_mmc.c                               | 17 +++++++++++++----
+>  2 files changed, 29 insertions(+), 4 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
+> index d5cc94e..dd31b00 100644
+> --- a/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
+> @@ -39,6 +39,19 @@ Required Properties:
 >  
-> [Joel] Thanks for the suggestion, I updated it and it looks like this now:
->                                                                                                              
-> Required properties:                                                                                                                   
-> - compatible : "ti,edma3"                                                                                                              
-> - ti,hwmods: Name of the hwmods associated to the EDMA  
+>  Optional properties:
+>  
+> +* clocks: from common clock binding: handle to biu and ciu clocks for the
+> +  bus interface unit clock and the card interface unit clock.
+> +
+> +* clock-names: from common clock binding: Shall be "biu" and "ciu".
+> +  If the biu clock is missing we'll simply skip enabling it.  If the
+> +  ciu clock is missing we'll just assume that the clock is running at
+> +  clock-frequency.  It is an error to omit both the ciu clock and the
+> +  clock-frequency.
+> +
+> +* clock-frequency: should be the frequency (in Hz) of the ciu clock.  If this
+> +  is specified and the ciu clock is specified then we'll try to set the ciu
+> +  clock to this at probe time.
+> +
+>  * num-slots: specifies the number of slots supported by the controller.
+>    The number of physical slots actually used could be equal or less than the
+>    value specified by num-slots. If this property is not specified, the value
+> @@ -70,6 +83,8 @@ board specific portions as listed below.
+>  
+>  	dwmmc0@12200000 {
+>  		compatible = "snps,dw-mshc";
+> +		clocks = <&clock 351>, <&clock 132>;
+> +		clock-names = "biu", "ciu";
+>  		reg = <0x12200000 0x1000>;
+>  		interrupts = <0 75 0>;
+>  		#address-cells = <1>;
+> @@ -77,6 +92,7 @@ board specific portions as listed below.
+>  	};
+>  
+>  	dwmmc0@12200000 {
+> +		clock-frequency = <400000000>;
+>  		num-slots = <1>;
+>  		supports-highspeed;
+>  		broken-cd;
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index ab5642d..b8a2f16 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2107,6 +2107,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  	struct device_node *np = dev->of_node;
+>  	const struct dw_mci_drv_data *drv_data = host->drv_data;
+>  	int idx, ret;
+> +	u32 clock_frequency;
+>  
+>  	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+>  	if (!pdata) {
+> @@ -2133,6 +2134,9 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  
+>  	of_property_read_u32(np, "card-detect-delay", &pdata->detect_delay_ms);
+>  
+> +	if (!of_property_read_u32(np, "clock-frequency", &clock_frequency))
+> +		pdata->bus_hz = clock_frequency;
+> +
+>  	if (drv_data && drv_data->parse_dt) {
+>  		ret = drv_data->parse_dt(host);
+>  		if (ret)
+> @@ -2190,18 +2194,23 @@ int dw_mci_probe(struct dw_mci *host)
+>  	host->ciu_clk = devm_clk_get(host->dev, "ciu");
+>  	if (IS_ERR(host->ciu_clk)) {
+>  		dev_dbg(host->dev, "ciu clock not available\n");
+> +		host->bus_hz = host->pdata->bus_hz;
+>  	} else {
+>  		ret = clk_prepare_enable(host->ciu_clk);
+>  		if (ret) {
+>  			dev_err(host->dev, "failed to enable ciu clock\n");
+>  			goto err_clk_biu;
+>  		}
+> -	}
+>  
+> -	if (IS_ERR(host->ciu_clk))
+> -		host->bus_hz = host->pdata->bus_hz;
+> -	else
+> +		if (host->pdata->bus_hz) {
+> +			ret = clk_set_rate(host->ciu_clk, host->pdata->bus_hz);
+> +			if (ret)
+> +				dev_warn(host->dev,
+> +					 "Unable to set bus rate to %ul\n",
+> +					 host->pdata->bus_hz);
+> +		}
+>  		host->bus_hz = clk_get_rate(host->ciu_clk);
+> +	}
+>  
+>  	if (drv_data && drv_data->setup_clock) {
+>  		ret = drv_data->setup_clock(host);
+> 
 
-I have already asked for ti,hwmods to be made optional. Please see my
-comment from yesterday.
-
-Thanks,
-Sekhar
