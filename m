@@ -1,135 +1,58 @@
-From: Joel A Fernandes <joelagnel@ti.com>
-Subject: [PATCH v11 8/8] spi: omap2-mcspi: convert to dma_request_slave_channel_compat()
-Date: Tue, 18 Jun 2013 01:38:19 -0500
-Message-ID: <1371537499-12970-9-git-send-email-joelagnel@ti.com>
-References: <1371537499-12970-1-git-send-email-joelagnel@ti.com>
+From: Sachin Kamat <sachin.kamat@linaro.org>
+Subject: [PATCH 1/1] mmc: sdhci-sirf: Fix build breakage
+Date: Tue, 18 Jun 2013 14:24:54 +0530
+Message-ID: <1371545694-31877-1-git-send-email-sachin.kamat@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:46561 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752201Ab3FRGj0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 18 Jun 2013 02:39:26 -0400
-In-Reply-To: <1371537499-12970-1-git-send-email-joelagnel@ti.com>
+Received: from mail-pb0-f49.google.com ([209.85.160.49]:49763 "EHLO
+	mail-pb0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755495Ab3FRJJm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jun 2013 05:09:42 -0400
+Received: by mail-pb0-f49.google.com with SMTP id jt11so3714163pbb.36
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Jun 2013 02:09:42 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Matt Porter <matt@ohporter.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Rob Landley <rob@landley.net>, Andrew Morton <akpm@linux-foundation.org>, Jason Kridner <jkridner@beagleboard.org>, Koen Kooi <koen@beagleboard.org>
-Cc: Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Arnd Bergmann <arnd@arndb.de>, Joel A Fernandes <joelagnel@ti.com>
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, sachin.kamat@linaro.org, Christian Daudt <csd@broadcom.com>, Barry Song <Baohua.Song@csr.com>
 
-From: Matt Porter <mporter@ti.com>
+Commit 0e74823429 ("mmc: sdhci: Add size for caller in init+register")
+introduced size parameter to sdhci_pltfm_init(). This driver probably
+got left out during the conversion. Passing in zero as done for other
+drivers to avoid the following build error:
 
-Convert dmaengine channel requests to use
-dma_request_slave_channel_compat(). This supports the DT case of
-platforms requiring channel selection from either the OMAP DMA or
-the EDMA engine. AM33xx only boots from DT and is the only user
-implementing EDMA so in the !DT case we can default to the OMAP DMA
-filter.
+drivers/mmc/host/sdhci-sirf.c: In function =E2=80=98sdhci_sirf_probe=E2=
+=80=99:
+drivers/mmc/host/sdhci-sirf.c:78:2: error: too few arguments to functio=
+n
+=E2=80=98sdhci_pltfm_init=E2=80=99
+  host =3D sdhci_pltfm_init(pdev, &sdhci_sirf_pdata);
 
-Signed-off-by: Matt Porter <mporter@ti.com>
-Acked-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Signed-off-by: Joel A Fernandes <joelagnel@ti.com>
+Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+Cc: Christian Daudt <csd@broadcom.com>
+Cc: Barry Song <Baohua.Song@csr.com>
 ---
- drivers/spi/spi-omap2-mcspi.c |   64 ++++++++++++++++++++++++++++-------------
- 1 file changed, 44 insertions(+), 20 deletions(-)
+Compile tested on linux-next (20130618)
+---
+ drivers/mmc/host/sdhci-sirf.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/spi/spi-omap2-mcspi.c b/drivers/spi/spi-omap2-mcspi.c
-index 86d2158..ca4ab78 100644
---- a/drivers/spi/spi-omap2-mcspi.c
-+++ b/drivers/spi/spi-omap2-mcspi.c
-@@ -102,6 +102,9 @@ struct omap2_mcspi_dma {
- 
- 	struct completion dma_tx_completion;
- 	struct completion dma_rx_completion;
-+
-+	char dma_rx_ch_name[14];
-+	char dma_tx_ch_name[14];
- };
- 
- /* use PIO for small transfers, avoiding DMA setup/teardown overhead and
-@@ -830,12 +833,20 @@ static int omap2_mcspi_request_dma(struct spi_device *spi)
- 	dma_cap_zero(mask);
- 	dma_cap_set(DMA_SLAVE, mask);
- 	sig = mcspi_dma->dma_rx_sync_dev;
--	mcspi_dma->dma_rx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
-+
-+	mcspi_dma->dma_rx =
-+		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
-+						 &sig, &master->dev,
-+						 mcspi_dma->dma_rx_ch_name);
- 	if (!mcspi_dma->dma_rx)
- 		goto no_dma;
- 
- 	sig = mcspi_dma->dma_tx_sync_dev;
--	mcspi_dma->dma_tx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
-+	mcspi_dma->dma_tx =
-+		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
-+						 &sig, &master->dev,
-+						 mcspi_dma->dma_tx_ch_name);
-+
- 	if (!mcspi_dma->dma_tx) {
- 		dma_release_channel(mcspi_dma->dma_rx);
- 		mcspi_dma->dma_rx = NULL;
-@@ -1256,29 +1267,42 @@ static int omap2_mcspi_probe(struct platform_device *pdev)
- 		goto free_master;
- 
- 	for (i = 0; i < master->num_chipselect; i++) {
--		char dma_ch_name[14];
-+		char *dma_rx_ch_name = mcspi->dma_channels[i].dma_rx_ch_name;
-+		char *dma_tx_ch_name = mcspi->dma_channels[i].dma_tx_ch_name;
- 		struct resource *dma_res;
- 
--		sprintf(dma_ch_name, "rx%d", i);
--		dma_res = platform_get_resource_byname(pdev, IORESOURCE_DMA,
--				dma_ch_name);
--		if (!dma_res) {
--			dev_dbg(&pdev->dev, "cannot get DMA RX channel\n");
--			status = -ENODEV;
--			break;
--		}
-+		sprintf(dma_rx_ch_name, "rx%d", i);
-+		if (!pdev->dev.of_node) {
-+			dma_res =
-+				platform_get_resource_byname(pdev,
-+							     IORESOURCE_DMA,
-+							     dma_rx_ch_name);
-+			if (!dma_res) {
-+				dev_dbg(&pdev->dev,
-+					"cannot get DMA RX channel\n");
-+				status = -ENODEV;
-+				break;
-+			}
- 
--		mcspi->dma_channels[i].dma_rx_sync_dev = dma_res->start;
--		sprintf(dma_ch_name, "tx%d", i);
--		dma_res = platform_get_resource_byname(pdev, IORESOURCE_DMA,
--				dma_ch_name);
--		if (!dma_res) {
--			dev_dbg(&pdev->dev, "cannot get DMA TX channel\n");
--			status = -ENODEV;
--			break;
-+			mcspi->dma_channels[i].dma_rx_sync_dev =
-+				dma_res->start;
- 		}
-+		sprintf(dma_tx_ch_name, "tx%d", i);
-+		if (!pdev->dev.of_node) {
-+			dma_res =
-+				platform_get_resource_byname(pdev,
-+							     IORESOURCE_DMA,
-+							     dma_tx_ch_name);
-+			if (!dma_res) {
-+				dev_dbg(&pdev->dev,
-+					"cannot get DMA TX channel\n");
-+				status = -ENODEV;
-+				break;
-+			}
- 
--		mcspi->dma_channels[i].dma_tx_sync_dev = dma_res->start;
-+			mcspi->dma_channels[i].dma_tx_sync_dev =
-+				dma_res->start;
-+		}
+diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sir=
+f.c
+index 09805af..1a149eb 100644
+--- a/drivers/mmc/host/sdhci-sirf.c
++++ b/drivers/mmc/host/sdhci-sirf.c
+@@ -75,7 +75,7 @@ static int sdhci_sirf_probe(struct platform_device *p=
+dev)
+ 		priv->gpio_cd =3D -EINVAL;
  	}
- 
- 	if (status < 0)
--- 
+=20
+-	host =3D sdhci_pltfm_init(pdev, &sdhci_sirf_pdata);
++	host =3D sdhci_pltfm_init(pdev, &sdhci_sirf_pdata, 0);
+ 	if (IS_ERR(host)) {
+ 		ret =3D PTR_ERR(host);
+ 		goto err_sdhci_pltfm_init;
+--=20
 1.7.9.5
 
