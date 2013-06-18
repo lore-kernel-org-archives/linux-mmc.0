@@ -1,16 +1,16 @@
 From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v10 1/2] ARM: davinci: move private EDMA API to arm/common
-Date: Tue, 18 Jun 2013 10:04:28 +0530
-Message-ID: <51BFE354.6070207@ti.com>
-References: <1371463571-2578-1-git-send-email-nsekhar@ti.com>
-	<1371463571-2578-2-git-send-email-nsekhar@ti.com>
-	<20130617170326.GA28497@quad.lixom.net>
-	<083BC63EECB6FD41B8E81CF7FD87CC0F2E4E95C2@DLEE08.ent.ti.com>
+Subject: Re: [PATCH v10 5/8] dmaengine: edma: Add TI EDMA device tree binding
+Date: Tue, 18 Jun 2013 10:10:51 +0530
+Message-ID: <51BFE4D3.50509@ti.com>
+References: <1371263570-9323-1-git-send-email-joelagnel@ti.com>
+	<1371263570-9323-5-git-send-email-joelagnel@ti.com>
+	<3940138.jZFEtfGGLz@wuerfel>
+	<083BC63EECB6FD41B8E81CF7FD87CC0F2E4E9395@DLEE08.ent.ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <083BC63EECB6FD41B8E81CF7FD87CC0F2E4E95C2-YmePFLaaepqIQmiDNMet8wC/G2K4zDHf@public.gmane.org>
+In-Reply-To: <083BC63EECB6FD41B8E81CF7FD87CC0F2E4E9395-YmePFLaaepqIQmiDNMet8wC/G2K4zDHf@public.gmane.org>
 List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
 	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
@@ -21,90 +21,63 @@ List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open
 Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
 Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
 To: "Fernandes, Joel A" <joelagnel-l0cyMroinI0@public.gmane.org>
-Cc: "davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org" <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, "alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org" <alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Liam Girdwood <lgirdwood-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Kevin Hilman <khilman-1D3HCaltpLuhEniVeURVKkEOCMrvLtNR@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "Cousson,  Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uv+2+P5yyue3@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 6/17/2013 11:25 PM, Fernandes, Joel A wrote:
-> Hi Olof,
+
+On 6/17/2013 9:10 PM, Fernandes, Joel A wrote:
+> Hi Arnd,
 > 
 >> -----Original Message-----
->> From: Olof Johansson [mailto:olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org]
->> Sent: Monday, June 17, 2013 12:03 PM
->> To: Nori, Sekhar
->> Cc: Russell King; Vinod Koul; Chris Ball; Liam Girdwood; Mark Brown; Kevin
->> Hilman; Matt Porter; Fernandes, Joel A; linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org;
->> davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
->> alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org; Arnd Bergmann
->> Subject: Re: [PATCH v10 1/2] ARM: davinci: move private EDMA API to
->> arm/common
+>> From: Arnd Bergmann [mailto:arnd-r2nGTMty4D4@public.gmane.org]
+>> Sent: Monday, June 17, 2013 6:13 AM
+>> To: Fernandes, Joel A
+>> Cc: Tony Lindgren; Nori, Sekhar; Matt Porter; Grant Likely; Rob Herring; Vinod
+>> Koul; Mark Brown; Cousson, Benoit; Russell King; Rob Landley; Andrew
+>> Morton; Jason Kridner; Koen Kooi; Devicetree Discuss; Linux OMAP List; Linux
+>> ARM Kernel List; Linux DaVinci Kernel List; Linux Kernel Mailing List; Linux
+>> Documentation List; Linux MMC List; Linux SPI Devel List
+>> Subject: Re: [PATCH v10 5/8] dmaengine: edma: Add TI EDMA device tree
+>> binding
 >>
->> On Mon, Jun 17, 2013 at 03:36:10PM +0530, Sekhar Nori wrote:
->>> From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+>> On Friday 14 June 2013 21:32:47 Joel A Fernandes wrote:
 >>>
->>> Move mach-davinci/dma.c to common/edma.c so it can be used by OMAP
->>> (specifically AM33xx) as well.
->>>
->>> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
->>> Acked-by: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org> # davinci_mmc.c
->>> [nsekhar-l0cyMroinI0@public.gmane.org: dropped davinci sffsdr changes]
->>> Signed-off-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+>>> diff --git a/Documentation/devicetree/bindings/dma/ti-edma.txt
+>>> b/Documentation/devicetree/bindings/dma/ti-edma.txt
+>>> new file mode 100644
+>>> index 0000000..ada0018
+>>> --- /dev/null
+>>> +++ b/Documentation/devicetree/bindings/dma/ti-edma.txt
+>>> @@ -0,0 +1,26 @@
+>>> +TI EDMA
+>>> +
+>>> +Required properties:
+>>> +- compatible : "ti,edma3"
+>>> +- ti,hwmods: Name of the hwmods associated to the EDMA
+>>> +- ti,edma-regions: Number of regions
+>>> +- ti,edma-slots: Number of slots
+>>> +
+>>> +Optional properties:
+>>> +- ti,edma-xbar-event-map: Crossbar event to channel map
 >>
->> Acked-by: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
+>> You need to list #dma-cells as required here, and which values are accepted
+>> by the driver (I suppose only <1>). You should also explain the format of the
+>> dma-specifier for a slave here for each possible value of #dma-cells.
 >>
->> Tiny nit below, no need to respin just for that.
->>
->> I suppose we should take this through arm-soc.
->>
->>> ---
->>>  arch/arm/Kconfig                                   |    1 +
->>>  arch/arm/common/Kconfig                            |    3 +
->>>  arch/arm/common/Makefile                           |    1 +
->>>  arch/arm/{mach-davinci/dma.c => common/edma.c}     |    2 +-
->>>  arch/arm/mach-davinci/Makefile                     |    2 +-
->>>  arch/arm/mach-davinci/board-tnetv107x-evm.c        |    2 +-
->>>  arch/arm/mach-davinci/davinci.h                    |    2 +-
->>>  arch/arm/mach-davinci/devices-tnetv107x.c          |    2 +-
->>>  arch/arm/mach-davinci/devices.c                    |    6 +-
->>>  arch/arm/mach-davinci/dm355.c                      |    2 +-
->>>  arch/arm/mach-davinci/dm365.c                      |    2 +-
->>>  arch/arm/mach-davinci/dm644x.c                     |    2 +-
->>>  arch/arm/mach-davinci/dm646x.c                     |    2 +-
->>>  arch/arm/mach-davinci/include/mach/da8xx.h         |    2 +-
->>>  drivers/dma/edma.c                                 |    2 +-
->>>  drivers/mmc/host/davinci_mmc.c                     |    1 +
->>>  include/linux/mfd/davinci_voicecodec.h             |    3 +-
->>>  .../mach => include/linux/platform_data}/edma.h    |   89 +-------------------
->>>  include/linux/platform_data/spi-davinci.h          |    2 +-
->>>  sound/soc/davinci/davinci-evm.c                    |    1 +
->>>  sound/soc/davinci/davinci-pcm.c                    |    1 +
->>>  sound/soc/davinci/davinci-pcm.h                    |    2 +-
->>>  22 files changed, 29 insertions(+), 103 deletions(-)  rename
->>> arch/arm/{mach-davinci/dma.c => common/edma.c} (99%)  rename
->>> {arch/arm/mach-davinci/include/mach =>
->>> include/linux/platform_data}/edma.h (59%)
->>>
->>> diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig index
->>> 49d993c..b1c66a4 100644
->>> --- a/arch/arm/Kconfig
->>> +++ b/arch/arm/Kconfig
->>> @@ -840,6 +840,7 @@ config ARCH_DAVINCI
->>>  	select GENERIC_IRQ_CHIP
->>>  	select HAVE_IDE
->>>  	select NEED_MACH_GPIO_H
->>> +	select TI_PRIV_EDMA
->>
->> What does PRIV here mean? Privileged? Private? I think it can be shortened to
->> TI_EDMA.
->>
->  [Joel] TI_EDMA already exists. It is used to build drivers/dma/edma.
-> I have a patch that reuses the TI_EDMA option instead of the PRIV one . I will
-> include that In my v11 series for EDMA (v10 was just posted) . If its ok, let us
-> merge Sekhar's patch as-is, and then mine will get rid of the PRIV option
-> (among other things).
+>> For each of the standard properties (reg, interrupts, dma-channels), list
+>> whether they are optional or required. Since the example has three
+>> interrupts, you should probably list how many interrupts need to be specified
+>> (minimum and maximum if the number is variable) and in what order to
+>> expect them.
+>  
+> [Joel] Thanks for the suggestion, I updated it and it looks like this now:
+>                                                                                                              
+> Required properties:                                                                                                                   
+> - compatible : "ti,edma3"                                                                                                              
+> - ti,hwmods: Name of the hwmods associated to the EDMA  
 
-PRIV is short for "private". We will get rid of TI_PRIV_EDMA along with
-all users of private DMA API (including audio). TI_EDMA and TI_PRIV_EDMA
-denote different things and we cannot reuse one for the other.
+I have already asked for ti,hwmods to be made optional. Please see my
+comment from yesterday.
 
 Thanks,
 Sekhar
