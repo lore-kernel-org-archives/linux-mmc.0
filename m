@@ -1,113 +1,149 @@
-From: "Shen, Jackey" <Jackey.Shen@amd.com>
-Subject: RE: [PATCH (v2)] mmc: sdhci: fix caps2 for HS200
-Date: Tue, 18 Jun 2013 02:32:50 +0000
-Message-ID: <0C8FBB70FF40A94D98BE847F9C171A9803A6FE72@SCYBEXDAG04.amd.com>
-References: <DC90B37F-FB8C-4A1E-AACF-82CE5D53B95C@nvidia.com>
- <1371017798-4144-1-git-send-email-peppe.cavallaro@st.com>
+From: "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>
+Subject: [PATCH v2] mmc: sh_mmcif: add SET_BLOCK_COUNT support
+Date: Tue, 18 Jun 2013 12:15:12 +0900
+Message-ID: <51BFD0C0.4080908@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:47134
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751453Ab3FRCdF convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 17 Jun 2013 22:33:05 -0400
-In-Reply-To: <1371017798-4144-1-git-send-email-peppe.cavallaro@st.com>
-Content-Language: en-US
+Received: from relmlor3.renesas.com ([210.160.252.173]:41954 "EHLO
+	relmlor3.renesas.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752247Ab3FRDPP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jun 2013 23:15:15 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Giuseppe CAVALLARO <peppe.cavallaro@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, Philip Rakity <prakity@nvidia.com>
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, SH-Linux <linux-sh@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-On Wed, Jun 12, 2013 at 2:16 PM, Giuseppe CAVALLARO <peppe.cavallaro@st.com> wrote:
+This patch adds SET_BLOCK_COUNT(CMD23) support to sh_mmcif driver.
+If we add MMC_CAP_CMD23 to ".caps" of sh_mmcif_plat_data, the mmc
+core driver will use CMD23. Then, the sh_mmcif driver can use
+Reliable Write feature.
 
-> Although the HC supports HS200 (eMMC) the caps2 are always zero; this means that
-> no way to use the super speed mode (when init the card).
-> 
-> If the HC support SDR104, for SD3.0, so it also supports HS200 for eMMC and
-> this patch just sets the MMC_CAP2_HS200 in the host caps2 field.
+Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+---
+ about v2:
+  - remove the wait_for_completion() to process the .request() asynchronously.
 
-Capabilities register defined in "SD Host Controller Standard Specification Version 3.00"
-doesn't indicate it support HS200(eMMC). Which specification do you refer to?
+ drivers/mmc/host/sh_mmcif.c |   64 +++++++++++++++++++++++++++++++++++++++---
+ 1 files changed, 59 insertions(+), 5 deletions(-)
 
-> 
-> v2: Since SDR104 and HS200 are effectively the same thing the patch deletes
-> the defines for HS200 and use SDR104.
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 8ef5efa..8f66532 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -223,7 +223,8 @@ enum mmcif_wait_for {
 
-Why do you think they are the same thing?
-SDR104: 1.8V signaling, Frequency up to 208 MHz, up to 104MB/sec 
-HS200: 1.8/1.2V IO voltage, Frequency 0-200MHz, up to 200MB/sec, bus width 4-bit/8-bit
+ struct sh_mmcif_host {
+ 	struct mmc_host *mmc;
+-	struct mmc_request *mrq;
++	struct mmc_request *mrq;	/* current mmc_request pointer */
++	struct mmc_request *mrq_orig;	/* original .request()'s pointer */
+ 	struct platform_device *pd;
+ 	struct clk *hclk;
+ 	unsigned int clk;
+@@ -244,6 +245,7 @@ struct sh_mmcif_host {
+ 	bool power;
+ 	bool card_present;
+ 	struct mutex thread_lock;
++	struct mmc_request mrq_sbc;	/* mmc_request for SBC */
 
-> 
-> Reported-by: Youssef Triki <youssef.triki@st.com>
-> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-> Cc: Philip Rakity <prakity@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci.c  |   14 +++++++++-----
->  include/linux/mmc/sdhci.h |    2 +-
->  2 files changed, 10 insertions(+), 6 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 2ea429c..b8bb3b3 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1846,7 +1846,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  	 */
->  	if (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR50) &&
->  	    (host->flags & SDHCI_SDR50_NEEDS_TUNING ||
-> -	     host->flags & SDHCI_HS200_NEEDS_TUNING))
-> +	     host->flags & SDHCI_SDR104_NEEDS_TUNING))
->  		requires_tuning_nonuhs = true;
-> 
->  	if (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR104) ||
-> @@ -2962,9 +2962,13 @@ int sdhci_add_host(struct sdhci_host *host)
->  		mmc->caps |= MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
-> 
->  	/* SDR104 supports also implies SDR50 support */
-> -	if (caps[1] & SDHCI_SUPPORT_SDR104)
-> +	if (caps[1] & SDHCI_SUPPORT_SDR104) {
->  		mmc->caps |= MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_SDR50;
-> -	else if (caps[1] & SDHCI_SUPPORT_SDR50)
-> +		/* SD3.0: SDR104 is supported so (for eMMC) the caps2
-> +		 * field can be promoted to support HS200.
-> +		 */
-> +		mmc->caps2 |= MMC_CAP2_HS200;
-> +	} else if (caps[1] & SDHCI_SUPPORT_SDR50)
->  		mmc->caps |= MMC_CAP_UHS_SDR50;
-> 
->  	if (caps[1] & SDHCI_SUPPORT_DDR50)
-> @@ -2974,9 +2978,9 @@ int sdhci_add_host(struct sdhci_host *host)
->  	if (caps[1] & SDHCI_USE_SDR50_TUNING)
->  		host->flags |= SDHCI_SDR50_NEEDS_TUNING;
-> 
-> -	/* Does the host need tuning for HS200? */
-> +	/* Does the host need tuning for SDR104 / HS200? */
->  	if (mmc->caps2 & MMC_CAP2_HS200)
-> -		host->flags |= SDHCI_HS200_NEEDS_TUNING;
-> +		host->flags |= SDHCI_SDR104_NEEDS_TUNING;
-> 
->  	/* Driver Type(s) (A, C, D) supported by the host */
->  	if (caps[1] & SDHCI_DRIVER_TYPE_A)
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index b838ffc..0b1d7f4 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -126,7 +126,7 @@ struct sdhci_host {
->  #define SDHCI_AUTO_CMD23	(1<<7)	/* Auto CMD23 support */
->  #define SDHCI_PV_ENABLED	(1<<8)	/* Preset value enabled */
->  #define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	/* SDIO irq enabled */
-> -#define SDHCI_HS200_NEEDS_TUNING (1<<10)	/* HS200 needs tuning */
-> +#define SDHCI_SDR104_NEEDS_TUNING (1<<10)	/* SDR104/HS200 needs tuning */
->  #define SDHCI_USING_RETUNING_TIMER (1<<11)	/* Host is using a retuning timer for the card */
-> 
->  	unsigned int version;	/* SDHCI spec. version */
-> --
-> 1.7.4.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ 	/* DMA support */
+ 	struct dma_chan		*chan_rx;
+@@ -802,7 +804,11 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
+ 		tmp |= CMD_SET_DWEN;
+ 	/* CMLTE/CMD12EN */
+ 	if (opc == MMC_READ_MULTIPLE_BLOCK || opc == MMC_WRITE_MULTIPLE_BLOCK) {
+-		tmp |= CMD_SET_CMLTE | CMD_SET_CMD12EN;
++		/* If SBC, we don't use CMD12(STOP) */
++		if (mrq->sbc)
++			tmp |= CMD_SET_CMLTE;
++		else
++			tmp |= CMD_SET_CMLTE | CMD_SET_CMD12EN;
+ 		sh_mmcif_bitset(host, MMCIF_CE_BLOCK_SET,
+ 				data->blocks << 16);
+ 	}
+@@ -936,9 +942,27 @@ static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		break;
+ 	}
 
+-	host->mrq = mrq;
++	if (mrq->sbc) {
++		/* Store original mrq to mrq_orig */
++		host->mrq_orig = mrq;
++
++		/* Copy original mrq data to mrq_sbc */
++		host->mrq_sbc = *mrq;
 
+-	sh_mmcif_start_cmd(host, mrq);
++		/* Switch the mrq_sbc.cmd for SBC */
++		host->mrq_sbc.cmd = mrq->sbc;
++		host->mrq_sbc.sbc = NULL;
++		host->mrq_sbc.data = NULL;
++		host->mrq_sbc.stop = NULL;
++
++		/* Set current mrq pointer to mrq_sbc */
++		host->mrq = &host->mrq_sbc;
++	} else {
++		/* Set current mrq pointer to original mrq */
++		host->mrq = mrq;
++	}
++
++	sh_mmcif_start_cmd(host, host->mrq);
+ }
+
+ static int sh_mmcif_clk_update(struct sh_mmcif_host *host)
+@@ -1212,13 +1236,35 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+ 		return IRQ_HANDLED;
+ 	}
+
++	if (mrq->sbc && (mrq->cmd->opcode == MMC_WRITE_MULTIPLE_BLOCK) &&
++			(host->wait_for != MMCIF_WAIT_FOR_WRITE_END)) {
++		/* Wait for end of data phase */
++		host->wait_for = MMCIF_WAIT_FOR_WRITE_END;
++		sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MDTRANE);
++		schedule_delayed_work(&host->timeout_work, host->timeout);
++		mutex_unlock(&host->thread_lock);
++		return IRQ_HANDLED;
++	}
++
++	if (mrq->sbc && (mrq->cmd->opcode == MMC_READ_MULTIPLE_BLOCK) &&
++			(host->wait_for != MMCIF_WAIT_FOR_READ_END)) {
++		/* Wait for end of data phase */
++		host->wait_for = MMCIF_WAIT_FOR_READ_END;
++		sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFRE);
++		schedule_delayed_work(&host->timeout_work, host->timeout);
++		mutex_unlock(&host->thread_lock);
++		return IRQ_HANDLED;
++	}
++
+ 	if (host->wait_for != MMCIF_WAIT_FOR_STOP) {
+ 		struct mmc_data *data = mrq->data;
+ 		if (!mrq->cmd->error && data && !data->error)
+ 			data->bytes_xfered =
+ 				data->blocks * data->blksz;
+
+-		if (mrq->stop && !mrq->cmd->error && (!data || !data->error)) {
++		/* If SBC, we don't use CMD12(STOP) */
++		if (mrq->stop && !mrq->cmd->error && (!data || !data->error) &&
++		    !mrq->sbc) {
+ 			sh_mmcif_stop_cmd(host, mrq);
+ 			if (!mrq->stop->error) {
+ 				schedule_delayed_work(&host->timeout_work, host->timeout);
+@@ -1228,6 +1274,14 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+ 		}
+ 	}
+
++	if ((mrq->cmd->opcode == MMC_SET_BLOCK_COUNT) && !mrq->cmd->error) {
++		/* Send the original .request() command */
++		host->mrq = host->mrq_orig;
++		sh_mmcif_start_cmd(host, host->mrq);
++		mutex_unlock(&host->thread_lock);
++		return IRQ_HANDLED;
++	}
++
+ 	host->wait_for = MMCIF_WAIT_FOR_REQUEST;
+ 	host->state = STATE_IDLE;
+ 	host->mrq = NULL;
+-- 
+1.7.1
