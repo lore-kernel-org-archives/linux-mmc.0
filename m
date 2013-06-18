@@ -1,149 +1,110 @@
-From: "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>
-Subject: [PATCH v2] mmc: sh_mmcif: add SET_BLOCK_COUNT support
-Date: Tue, 18 Jun 2013 12:15:12 +0900
-Message-ID: <51BFD0C0.4080908@renesas.com>
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v10 1/2] ARM: davinci: move private EDMA API to arm/common
+Date: Tue, 18 Jun 2013 10:04:28 +0530
+Message-ID: <51BFE354.6070207@ti.com>
+References: <1371463571-2578-1-git-send-email-nsekhar@ti.com>
+	<1371463571-2578-2-git-send-email-nsekhar@ti.com>
+	<20130617170326.GA28497@quad.lixom.net>
+	<083BC63EECB6FD41B8E81CF7FD87CC0F2E4E95C2@DLEE08.ent.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relmlor3.renesas.com ([210.160.252.173]:41954 "EHLO
-	relmlor3.renesas.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752247Ab3FRDPP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jun 2013 23:15:15 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <083BC63EECB6FD41B8E81CF7FD87CC0F2E4E95C2-YmePFLaaepqIQmiDNMet8wC/G2K4zDHf@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: "Fernandes, Joel A" <joelagnel-l0cyMroinI0@public.gmane.org>
+Cc: "davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org" <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, "alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org" <alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Liam Girdwood <lgirdwood-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Kevin Hilman <khilman-1D3HCaltpLuhEniVeURVKkEOCMrvLtNR@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, SH-Linux <linux-sh@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-This patch adds SET_BLOCK_COUNT(CMD23) support to sh_mmcif driver.
-If we add MMC_CAP_CMD23 to ".caps" of sh_mmcif_plat_data, the mmc
-core driver will use CMD23. Then, the sh_mmcif driver can use
-Reliable Write feature.
+On 6/17/2013 11:25 PM, Fernandes, Joel A wrote:
+> Hi Olof,
+> 
+>> -----Original Message-----
+>> From: Olof Johansson [mailto:olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org]
+>> Sent: Monday, June 17, 2013 12:03 PM
+>> To: Nori, Sekhar
+>> Cc: Russell King; Vinod Koul; Chris Ball; Liam Girdwood; Mark Brown; Kevin
+>> Hilman; Matt Porter; Fernandes, Joel A; linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org;
+>> davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
+>> alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org; Arnd Bergmann
+>> Subject: Re: [PATCH v10 1/2] ARM: davinci: move private EDMA API to
+>> arm/common
+>>
+>> On Mon, Jun 17, 2013 at 03:36:10PM +0530, Sekhar Nori wrote:
+>>> From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+>>>
+>>> Move mach-davinci/dma.c to common/edma.c so it can be used by OMAP
+>>> (specifically AM33xx) as well.
+>>>
+>>> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+>>> Acked-by: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org> # davinci_mmc.c
+>>> [nsekhar-l0cyMroinI0@public.gmane.org: dropped davinci sffsdr changes]
+>>> Signed-off-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+>>
+>> Acked-by: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
+>>
+>> Tiny nit below, no need to respin just for that.
+>>
+>> I suppose we should take this through arm-soc.
+>>
+>>> ---
+>>>  arch/arm/Kconfig                                   |    1 +
+>>>  arch/arm/common/Kconfig                            |    3 +
+>>>  arch/arm/common/Makefile                           |    1 +
+>>>  arch/arm/{mach-davinci/dma.c => common/edma.c}     |    2 +-
+>>>  arch/arm/mach-davinci/Makefile                     |    2 +-
+>>>  arch/arm/mach-davinci/board-tnetv107x-evm.c        |    2 +-
+>>>  arch/arm/mach-davinci/davinci.h                    |    2 +-
+>>>  arch/arm/mach-davinci/devices-tnetv107x.c          |    2 +-
+>>>  arch/arm/mach-davinci/devices.c                    |    6 +-
+>>>  arch/arm/mach-davinci/dm355.c                      |    2 +-
+>>>  arch/arm/mach-davinci/dm365.c                      |    2 +-
+>>>  arch/arm/mach-davinci/dm644x.c                     |    2 +-
+>>>  arch/arm/mach-davinci/dm646x.c                     |    2 +-
+>>>  arch/arm/mach-davinci/include/mach/da8xx.h         |    2 +-
+>>>  drivers/dma/edma.c                                 |    2 +-
+>>>  drivers/mmc/host/davinci_mmc.c                     |    1 +
+>>>  include/linux/mfd/davinci_voicecodec.h             |    3 +-
+>>>  .../mach => include/linux/platform_data}/edma.h    |   89 +-------------------
+>>>  include/linux/platform_data/spi-davinci.h          |    2 +-
+>>>  sound/soc/davinci/davinci-evm.c                    |    1 +
+>>>  sound/soc/davinci/davinci-pcm.c                    |    1 +
+>>>  sound/soc/davinci/davinci-pcm.h                    |    2 +-
+>>>  22 files changed, 29 insertions(+), 103 deletions(-)  rename
+>>> arch/arm/{mach-davinci/dma.c => common/edma.c} (99%)  rename
+>>> {arch/arm/mach-davinci/include/mach =>
+>>> include/linux/platform_data}/edma.h (59%)
+>>>
+>>> diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig index
+>>> 49d993c..b1c66a4 100644
+>>> --- a/arch/arm/Kconfig
+>>> +++ b/arch/arm/Kconfig
+>>> @@ -840,6 +840,7 @@ config ARCH_DAVINCI
+>>>  	select GENERIC_IRQ_CHIP
+>>>  	select HAVE_IDE
+>>>  	select NEED_MACH_GPIO_H
+>>> +	select TI_PRIV_EDMA
+>>
+>> What does PRIV here mean? Privileged? Private? I think it can be shortened to
+>> TI_EDMA.
+>>
+>  [Joel] TI_EDMA already exists. It is used to build drivers/dma/edma.
+> I have a patch that reuses the TI_EDMA option instead of the PRIV one . I will
+> include that In my v11 series for EDMA (v10 was just posted) . If its ok, let us
+> merge Sekhar's patch as-is, and then mine will get rid of the PRIV option
+> (among other things).
 
-Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
----
- about v2:
-  - remove the wait_for_completion() to process the .request() asynchronously.
+PRIV is short for "private". We will get rid of TI_PRIV_EDMA along with
+all users of private DMA API (including audio). TI_EDMA and TI_PRIV_EDMA
+denote different things and we cannot reuse one for the other.
 
- drivers/mmc/host/sh_mmcif.c |   64 +++++++++++++++++++++++++++++++++++++++---
- 1 files changed, 59 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 8ef5efa..8f66532 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -223,7 +223,8 @@ enum mmcif_wait_for {
-
- struct sh_mmcif_host {
- 	struct mmc_host *mmc;
--	struct mmc_request *mrq;
-+	struct mmc_request *mrq;	/* current mmc_request pointer */
-+	struct mmc_request *mrq_orig;	/* original .request()'s pointer */
- 	struct platform_device *pd;
- 	struct clk *hclk;
- 	unsigned int clk;
-@@ -244,6 +245,7 @@ struct sh_mmcif_host {
- 	bool power;
- 	bool card_present;
- 	struct mutex thread_lock;
-+	struct mmc_request mrq_sbc;	/* mmc_request for SBC */
-
- 	/* DMA support */
- 	struct dma_chan		*chan_rx;
-@@ -802,7 +804,11 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
- 		tmp |= CMD_SET_DWEN;
- 	/* CMLTE/CMD12EN */
- 	if (opc == MMC_READ_MULTIPLE_BLOCK || opc == MMC_WRITE_MULTIPLE_BLOCK) {
--		tmp |= CMD_SET_CMLTE | CMD_SET_CMD12EN;
-+		/* If SBC, we don't use CMD12(STOP) */
-+		if (mrq->sbc)
-+			tmp |= CMD_SET_CMLTE;
-+		else
-+			tmp |= CMD_SET_CMLTE | CMD_SET_CMD12EN;
- 		sh_mmcif_bitset(host, MMCIF_CE_BLOCK_SET,
- 				data->blocks << 16);
- 	}
-@@ -936,9 +942,27 @@ static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		break;
- 	}
-
--	host->mrq = mrq;
-+	if (mrq->sbc) {
-+		/* Store original mrq to mrq_orig */
-+		host->mrq_orig = mrq;
-+
-+		/* Copy original mrq data to mrq_sbc */
-+		host->mrq_sbc = *mrq;
-
--	sh_mmcif_start_cmd(host, mrq);
-+		/* Switch the mrq_sbc.cmd for SBC */
-+		host->mrq_sbc.cmd = mrq->sbc;
-+		host->mrq_sbc.sbc = NULL;
-+		host->mrq_sbc.data = NULL;
-+		host->mrq_sbc.stop = NULL;
-+
-+		/* Set current mrq pointer to mrq_sbc */
-+		host->mrq = &host->mrq_sbc;
-+	} else {
-+		/* Set current mrq pointer to original mrq */
-+		host->mrq = mrq;
-+	}
-+
-+	sh_mmcif_start_cmd(host, host->mrq);
- }
-
- static int sh_mmcif_clk_update(struct sh_mmcif_host *host)
-@@ -1212,13 +1236,35 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
- 		return IRQ_HANDLED;
- 	}
-
-+	if (mrq->sbc && (mrq->cmd->opcode == MMC_WRITE_MULTIPLE_BLOCK) &&
-+			(host->wait_for != MMCIF_WAIT_FOR_WRITE_END)) {
-+		/* Wait for end of data phase */
-+		host->wait_for = MMCIF_WAIT_FOR_WRITE_END;
-+		sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MDTRANE);
-+		schedule_delayed_work(&host->timeout_work, host->timeout);
-+		mutex_unlock(&host->thread_lock);
-+		return IRQ_HANDLED;
-+	}
-+
-+	if (mrq->sbc && (mrq->cmd->opcode == MMC_READ_MULTIPLE_BLOCK) &&
-+			(host->wait_for != MMCIF_WAIT_FOR_READ_END)) {
-+		/* Wait for end of data phase */
-+		host->wait_for = MMCIF_WAIT_FOR_READ_END;
-+		sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFRE);
-+		schedule_delayed_work(&host->timeout_work, host->timeout);
-+		mutex_unlock(&host->thread_lock);
-+		return IRQ_HANDLED;
-+	}
-+
- 	if (host->wait_for != MMCIF_WAIT_FOR_STOP) {
- 		struct mmc_data *data = mrq->data;
- 		if (!mrq->cmd->error && data && !data->error)
- 			data->bytes_xfered =
- 				data->blocks * data->blksz;
-
--		if (mrq->stop && !mrq->cmd->error && (!data || !data->error)) {
-+		/* If SBC, we don't use CMD12(STOP) */
-+		if (mrq->stop && !mrq->cmd->error && (!data || !data->error) &&
-+		    !mrq->sbc) {
- 			sh_mmcif_stop_cmd(host, mrq);
- 			if (!mrq->stop->error) {
- 				schedule_delayed_work(&host->timeout_work, host->timeout);
-@@ -1228,6 +1274,14 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
- 		}
- 	}
-
-+	if ((mrq->cmd->opcode == MMC_SET_BLOCK_COUNT) && !mrq->cmd->error) {
-+		/* Send the original .request() command */
-+		host->mrq = host->mrq_orig;
-+		sh_mmcif_start_cmd(host, host->mrq);
-+		mutex_unlock(&host->thread_lock);
-+		return IRQ_HANDLED;
-+	}
-+
- 	host->wait_for = MMCIF_WAIT_FOR_REQUEST;
- 	host->state = STATE_IDLE;
- 	host->mrq = NULL;
--- 
-1.7.1
+Thanks,
+Sekhar
