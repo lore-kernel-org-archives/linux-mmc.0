@@ -1,67 +1,73 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v2 2/2] mmc: dw_mmc: Add the ability to set the ciu clock frequency
-Date: Tue, 18 Jun 2013 08:15:37 -0700
-Message-ID: <CAD=FV=Wy5X9C=NOUVyAzZK5+BKD1w4FTmoTHzKipq2j_Y9rdtg@mail.gmail.com>
-References: <1370580406-10254-1-git-send-email-dianders@chromium.org>
-	<1370626110-1731-1-git-send-email-dianders@chromium.org>
-	<1370626110-1731-2-git-send-email-dianders@chromium.org>
-	<51BFE754.6000909@samsung.com>
+From: Colin Cross <ccross@android.com>
+Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
+Date: Tue, 18 Jun 2013 10:15:30 -0700
+Message-ID: <CAMbhsRQwGbpa4a1RziV92qnw4VFh6+=oQiadfqa17FANEiK8_Q@mail.gmail.com>
+References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
+	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
+	<CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
+	<CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
+	<CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
+	<CAMbhsRSC5XhhSK-DAoS7_JAj7XUfaM_Topp4UcBaVwRCYXSscQ@mail.gmail.com>
+	<CAPDyKFpMGS-JA47pY_n7xvqdtbPumGpc2fdnYZnSVQ_Rybre3g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f52.google.com ([209.85.215.52]:40718 "EHLO
-	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932293Ab3FRPUn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jun 2013 11:20:43 -0400
-Received: by mail-la0-f52.google.com with SMTP id fo12so3659089lab.11
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Jun 2013 08:20:40 -0700 (PDT)
-In-Reply-To: <51BFE754.6000909@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFpMGS-JA47pY_n7xvqdtbPumGpc2fdnYZnSVQ_Rybre3g@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Zoran Markovic <zoran.markovic@linaro.org>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, Andrew Bresticker <abrestic@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Rob Landley <rob@landley.net>, Will Newton <will.newton@gmail.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, linux-doc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Turquette <mturquette@linaro.org>
 
-Jaehoon,
-
-On Mon, Jun 17, 2013 at 9:51 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Hi Doug,
+On Tue, Jun 18, 2013 at 6:17 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 17 June 2013 20:33, Colin Cross <ccross@android.com> wrote:
+>> This is a generic requirement for using a kernel with autosleep
+>> enabled.  Autosleep will enter suspend whenever there is no wakeup
+>> source/wakelock held.  Consider the following sequence:
+>>
+>> Kernel is suspended
+>> Card is inserted, triggering a wakeup interrupt, which is an implicit
+>> wakeup source until it is handled
 >
-> I have one question for using <clock-frequency>.
-> I found the fixed-rate-clocks feature.
-> If we want to set <clock-frequency>, then can we use the fixed-rate-clocks?
-> i'm not sure how use the fixed-rate-clocks. but it seems to set fixed-rate value for clock frequency.
+> I don't think a card insert/remove irq need to be configured as a
+> wakeup interrupt. As you say, it will force a resume to detect the
+> card, but for what reason?
+> Instead, I think it it better to leave the card detection to be
+> handled at the next resume, thus not resuming the system when not
+> needed.
+
+That decision is going to be different on each device.  On Android
+devices it has been configured as a wakeup interrupt.  This patch is
+necessary on devices that want to handle the event as a wakeup event,
+and has negligible impact on those that do not.
+
+>> Kernel starts resuming, resumes the mmc driver
+>> The mmc driver enables its interrupt, which is immediately handled and
+>> queues an event to be handled by userspace
+>> At this point the wakeup interrupt is handled and gone, and no wakeup
+>> sources are being held, so the kernel can choose to go back to
+>> suspend, so userspace can't handle the insertion event until the
+>> kernel wakes up for another reason.
 >
-> clk_set_rate() didn't ensure to set the <clock-frequency> value.
+> Is this a problem? From my point of view it should be perfectly
+> acceptable to let userspace handle the event at the next resume/wakeup
+> instead. Don't you think so?
 
-I'm not sure I understand the question.  I don't think that the
-fixed-rate-clocks have a close relation to the clock-frequency or the
-ciu clock.  The fixed-rate-clock entries for a board usually specify
-the root clock source for a board.  For instance in exynos5250-snow
-you can see:
+Depends what userspace is doing.  If userspace would like to provide
+the user some feedback on the event, then it has to be a wakeup
+interrupt, and it has to hold a wakelock until it has passed the event
+to userspace.
 
-fixed-rate-clocks {
-  xxti {
-    compatible = "samsung,clock-xxti";
-    clock-frequency = <24000000>;
-  };
-};
+>>
+>> In general, an event that is triggered by a wakeup interrupt that is
+>> being passed from the kernel to userspace needs to have a wakeup
+>> source held while the event is queued.
+>
+> That's sounds reasonable. Would it then make sense to hold a generic
+> wakeup source in the "suspend/resume core", once a wakeup interrupt is
+> fetched?
 
-Other clocks in the board are derived from this clock through PLLs,
-muxes, dividers, gates, etc.  On 5250 we have:
-
- fin_pll (xxti) -> fout_mpll -> fout_mplldiv2 -> mout_mpll_fout ->
- sclk_mpll -> sclk_mpll_user -> mout_mmc1 -> div_mmc1
- div_mmc_pre1 -> sclk_mmc1
-
-In 5250 the ciu clock for mmc1 is sclk_mmc1, which is a simple gate.
-When you "enable" this clock it, ungates it.  The sclk_mmc1 has the
-flag CLK_SET_RATE_PARENT on it.  That means when you try to set the
-rate it will involve the parent clock (div_mmc_pre1).  The parent
-clock also has CLK_SET_RATE_PARENT, so it can also involve div_mmc1.
-I haven't dug through to see how the clock framework splits up divides
-between div_mmc1 and div_mmc_pre1, but it's supposed to handle that.
-
-We don't allow clk_set_rate to percolate any higher (no
-CLK_SET_RATE_PARENT at mout_mmc1).
-
--Doug
+No, the suspend/resume core can only hold a wakeup source until it has
+handed the event off to the driver, at which point it is the driver's
+responsibility to hold a wakeup source.  The suspend/resume core
+cannot tell if the event was handled by the driver or will be passed
+to userspace.
