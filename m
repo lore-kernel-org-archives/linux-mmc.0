@@ -1,97 +1,113 @@
-From: Colin Cross <ccross@android.com>
-Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
-Date: Mon, 17 Jun 2013 11:33:45 -0700
-Message-ID: <CAMbhsRSC5XhhSK-DAoS7_JAj7XUfaM_Topp4UcBaVwRCYXSscQ@mail.gmail.com>
-References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
-	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
-	<CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
-	<CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
-	<CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
+From: "Shen, Jackey" <Jackey.Shen@amd.com>
+Subject: RE: [PATCH (v2)] mmc: sdhci: fix caps2 for HS200
+Date: Tue, 18 Jun 2013 02:32:50 +0000
+Message-ID: <0C8FBB70FF40A94D98BE847F9C171A9803A6FE72@SCYBEXDAG04.amd.com>
+References: <DC90B37F-FB8C-4A1E-AACF-82CE5D53B95C@nvidia.com>
+ <1371017798-4144-1-git-send-email-peppe.cavallaro@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f173.google.com ([209.85.128.173]:40683 "EHLO
-	mail-ve0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751723Ab3FQSdq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jun 2013 14:33:46 -0400
-Received: by mail-ve0-f173.google.com with SMTP id jw11so2408240veb.18
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Jun 2013 11:33:45 -0700 (PDT)
-In-Reply-To: <CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
+Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:47134
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751453Ab3FRCdF convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 17 Jun 2013 22:33:05 -0400
+In-Reply-To: <1371017798-4144-1-git-send-email-peppe.cavallaro@st.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Zoran Markovic <zoran.markovic@linaro.org>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
+To: Giuseppe CAVALLARO <peppe.cavallaro@st.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "cjb@laptop.org" <cjb@laptop.org>, Philip Rakity <prakity@nvidia.com>
 
-On Mon, Jun 17, 2013 at 7:22 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 14 June 2013 22:52, Colin Cross <ccross@android.com> wrote:
->> On Fri, Jun 14, 2013 at 11:42 AM, Zoran Markovic
->> <zoran.markovic@linaro.org> wrote:
->>>> I am not sure I understand why this patch is needed. When a new card
->>>> is inserted/removed and the upper levels gets notification about the
->>>> new card, triggering the mounting/un-mounting of the file system, why
->>>> should it be the lowest layer (mmc) that prevents the platform from
->>>> enter suspend/sleep? Why do we need to prevent it at all?
->>>>
->>>> Note that notifier handling in mmc_pm_notify, was if I remember
->>>> correctly, not completely developed when the original version of this
->>>> patch was being discussed. mmc_pm_notify prevents cards from being
->>>> inserted/removed in the middle of suspend->resume sequence, is that
->>>> not enough?
->>>
->>> I will try to speak on behalf of the original implementers in a hope
->>> they would provide the original motivation for the patch.
->>>
->>> My understanding is that any preemption in the procedure could be an
->>> opportunity to suspend, as there may be a suspend request racing with
->>> this code. This is why the calls to __pm_stay_awake() and
->>> queue_delayed_work() are so tightly coupled. It would be up to the
->>> delayed work procedure (mmc_rescan()) to decide whether or not it is
->>> safe to suspend. If there are no changes in the MMC state or all
->>> changes can be handled by mmc_rescan(), it is safe to call
->>> __pm_relax(). Otherwise, userland may take over processing of this
->>> event, and this is why the awake state needs to be extended by 1/2
->>> second.
->>
->> The __pm_stay_awake() is required to prevent autosleep during the time
->> between the card detect interrupt and when the userspace process that
->> gets the notification runs.  The 1/2 second delay is used because it
->> is easier than trying to detect when the userspace process has
->> received the notification, at which time it should hold its own
->> wakelock and the mmc subsystem can call __pm_relax().
->
-> Hi Colin,
->
-> I don't have the in-depth knowledge about how the userspace deamons
-> handles the event notifications, so please bare with me while I am
-> trying to understand more here.
->
-> First of all, are we trying to solve an  issue here or just improving
-> some specific situation, that is not clear to me.
->
-> I might have misunderstood this patch, but it seems like your concern
-> is that you believe the event notification can get lost - if userspace
-> are about to trigger a suspend while a card is being inserted/removed.
-> If that is the case, could you elaborate on what level the
-> notification can get lost?
->
-> Kind regards
-> Ulf Hansson
+On Wed, Jun 12, 2013 at 2:16 PM, Giuseppe CAVALLARO <peppe.cavallaro@st.com> wrote:
 
-This is a generic requirement for using a kernel with autosleep
-enabled.  Autosleep will enter suspend whenever there is no wakeup
-source/wakelock held.  Consider the following sequence:
+> Although the HC supports HS200 (eMMC) the caps2 are always zero; this means that
+> no way to use the super speed mode (when init the card).
+> 
+> If the HC support SDR104, for SD3.0, so it also supports HS200 for eMMC and
+> this patch just sets the MMC_CAP2_HS200 in the host caps2 field.
 
-Kernel is suspended
-Card is inserted, triggering a wakeup interrupt, which is an implicit
-wakeup source until it is handled
-Kernel starts resuming, resumes the mmc driver
-The mmc driver enables its interrupt, which is immediately handled and
-queues an event to be handled by userspace
-At this point the wakeup interrupt is handled and gone, and no wakeup
-sources are being held, so the kernel can choose to go back to
-suspend, so userspace can't handle the insertion event until the
-kernel wakes up for another reason.
+Capabilities register defined in "SD Host Controller Standard Specification Version 3.00"
+doesn't indicate it support HS200(eMMC). Which specification do you refer to?
 
-In general, an event that is triggered by a wakeup interrupt that is
-being passed from the kernel to userspace needs to have a wakeup
-source held while the event is queued.
+> 
+> v2: Since SDR104 and HS200 are effectively the same thing the patch deletes
+> the defines for HS200 and use SDR104.
+
+Why do you think they are the same thing?
+SDR104: 1.8V signaling, Frequency up to 208 MHz, up to 104MB/sec 
+HS200: 1.8/1.2V IO voltage, Frequency 0-200MHz, up to 200MB/sec, bus width 4-bit/8-bit
+
+> 
+> Reported-by: Youssef Triki <youssef.triki@st.com>
+> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+> Cc: Philip Rakity <prakity@nvidia.com>
+> ---
+>  drivers/mmc/host/sdhci.c  |   14 +++++++++-----
+>  include/linux/mmc/sdhci.h |    2 +-
+>  2 files changed, 10 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 2ea429c..b8bb3b3 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1846,7 +1846,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	 */
+>  	if (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR50) &&
+>  	    (host->flags & SDHCI_SDR50_NEEDS_TUNING ||
+> -	     host->flags & SDHCI_HS200_NEEDS_TUNING))
+> +	     host->flags & SDHCI_SDR104_NEEDS_TUNING))
+>  		requires_tuning_nonuhs = true;
+> 
+>  	if (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR104) ||
+> @@ -2962,9 +2962,13 @@ int sdhci_add_host(struct sdhci_host *host)
+>  		mmc->caps |= MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
+> 
+>  	/* SDR104 supports also implies SDR50 support */
+> -	if (caps[1] & SDHCI_SUPPORT_SDR104)
+> +	if (caps[1] & SDHCI_SUPPORT_SDR104) {
+>  		mmc->caps |= MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_SDR50;
+> -	else if (caps[1] & SDHCI_SUPPORT_SDR50)
+> +		/* SD3.0: SDR104 is supported so (for eMMC) the caps2
+> +		 * field can be promoted to support HS200.
+> +		 */
+> +		mmc->caps2 |= MMC_CAP2_HS200;
+> +	} else if (caps[1] & SDHCI_SUPPORT_SDR50)
+>  		mmc->caps |= MMC_CAP_UHS_SDR50;
+> 
+>  	if (caps[1] & SDHCI_SUPPORT_DDR50)
+> @@ -2974,9 +2978,9 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	if (caps[1] & SDHCI_USE_SDR50_TUNING)
+>  		host->flags |= SDHCI_SDR50_NEEDS_TUNING;
+> 
+> -	/* Does the host need tuning for HS200? */
+> +	/* Does the host need tuning for SDR104 / HS200? */
+>  	if (mmc->caps2 & MMC_CAP2_HS200)
+> -		host->flags |= SDHCI_HS200_NEEDS_TUNING;
+> +		host->flags |= SDHCI_SDR104_NEEDS_TUNING;
+> 
+>  	/* Driver Type(s) (A, C, D) supported by the host */
+>  	if (caps[1] & SDHCI_DRIVER_TYPE_A)
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index b838ffc..0b1d7f4 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -126,7 +126,7 @@ struct sdhci_host {
+>  #define SDHCI_AUTO_CMD23	(1<<7)	/* Auto CMD23 support */
+>  #define SDHCI_PV_ENABLED	(1<<8)	/* Preset value enabled */
+>  #define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	/* SDIO irq enabled */
+> -#define SDHCI_HS200_NEEDS_TUNING (1<<10)	/* HS200 needs tuning */
+> +#define SDHCI_SDR104_NEEDS_TUNING (1<<10)	/* SDR104/HS200 needs tuning */
+>  #define SDHCI_USING_RETUNING_TIMER (1<<11)	/* Host is using a retuning timer for the card */
+> 
+>  	unsigned int version;	/* SDHCI spec. version */
+> --
+> 1.7.4.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
