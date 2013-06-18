@@ -1,73 +1,50 @@
-From: Colin Cross <ccross@android.com>
-Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
-Date: Tue, 18 Jun 2013 10:15:30 -0700
-Message-ID: <CAMbhsRQwGbpa4a1RziV92qnw4VFh6+=oQiadfqa17FANEiK8_Q@mail.gmail.com>
-References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
-	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
-	<CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
-	<CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
-	<CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
-	<CAMbhsRSC5XhhSK-DAoS7_JAj7XUfaM_Topp4UcBaVwRCYXSscQ@mail.gmail.com>
-	<CAPDyKFpMGS-JA47pY_n7xvqdtbPumGpc2fdnYZnSVQ_Rybre3g@mail.gmail.com>
+From: Bing Zhao <bzhao@marvell.com>
+Subject: RE: [PATCH] RFC: mmc: dw_mmc: Always go to STATE_DATA_BUSY from
+ STATE_DATA_ERROR
+Date: Tue, 18 Jun 2013 12:46:47 -0700
+Message-ID: <477F20668A386D41ADCC57781B1F70430EA2AA2513@SC-VEXCH1.marvell.com>
+References: <1363382956-14557-1-git-send-email-dianders@chromium.org>
+ <5146EAB0.1030705@samsung.com>
+ <CAD=FV=Ww-iK=-vg4jnJe6w4836-yQUoUyxNvCYsDQ5w0q-OMMQ@mail.gmail.com>
+ <515E88E3.5070507@samsung.com>
+ <003401ce3453$19d1e8c0$4d75ba40$%jun@samsung.com>
+ <CAD=FV=V+ZZ0MUtuWKUOgR9NPyAquUjFC6KtHvAP-4iHXAYpjqA@mail.gmail.com>
+ <001601ce35b9$652c5870$2f850950$%jun@samsung.com>
+ <CAD=FV=XKeRjpH1+ytjMfLuGGqQ5VVub22n=V+UpV=jBCD4LLHw@mail.gmail.com>
+ <001801ce6c20$6ba39900$42eacb00$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpMGS-JA47pY_n7xvqdtbPumGpc2fdnYZnSVQ_Rybre3g@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Zoran Markovic <zoran.markovic@linaro.org>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:36432 "EHLO
+	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932391Ab3FRTuv convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 18 Jun 2013 15:50:51 -0400
+In-Reply-To: <001801ce6c20$6ba39900$42eacb00$%jun@samsung.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>, 'Doug Anderson' <dianders@chromium.org>
+Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@gmail.com>, 'Ashok Nagarajan' <asnagarajan@chromium.org>, 'Paul Stewart' <pstew@chromium.org>, 'Olof Johansson' <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Tue, Jun 18, 2013 at 6:17 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 17 June 2013 20:33, Colin Cross <ccross@android.com> wrote:
->> This is a generic requirement for using a kernel with autosleep
->> enabled.  Autosleep will enter suspend whenever there is no wakeup
->> source/wakelock held.  Consider the following sequence:
->>
->> Kernel is suspended
->> Card is inserted, triggering a wakeup interrupt, which is an implicit
->> wakeup source until it is handled
->
-> I don't think a card insert/remove irq need to be configured as a
-> wakeup interrupt. As you say, it will force a resume to detect the
-> card, but for what reason?
-> Instead, I think it it better to leave the card detection to be
-> handled at the next resume, thus not resuming the system when not
-> needed.
+Hi Seungwon,
 
-That decision is going to be different on each device.  On Android
-devices it has been configured as a wakeup interrupt.  This patch is
-necessary on devices that want to handle the event as a wakeup event,
-and has negligible impact on those that do not.
+> > I don't have the failing unit myself, so we'll have to get Bing to try
+> > the patches.  You are suggesting that we try applying both of your
+> > patches, right?
+> Did you test the patch?
+> I wonder that both are good for your side.
 
->> Kernel starts resuming, resumes the mmc driver
->> The mmc driver enables its interrupt, which is immediately handled and
->> queues an event to be handled by userspace
->> At this point the wakeup interrupt is handled and gone, and no wakeup
->> sources are being held, so the kernel can choose to go back to
->> suspend, so userspace can't handle the insertion event until the
->> kernel wakes up for another reason.
->
-> Is this a problem? From my point of view it should be perfectly
-> acceptable to let userspace handle the event at the next resume/wakeup
-> instead. Don't you think so?
+I tested Doug's patch on my failing unit.
 
-Depends what userspace is doing.  If userspace would like to provide
-the user some feedback on the event, then it has to be a wakeup
-interrupt, and it has to hold a wakelock until it has passed the event
-to userspace.
+Without this patch, mmc got hung_task and rebooted eventually.
+With this patch applied, mmc returns CRC error instead of hung_task, and the error is handled gracefully.
 
->>
->> In general, an event that is triggered by a wakeup interrupt that is
->> being passed from the kernel to userspace needs to have a wakeup
->> source held while the event is queued.
->
-> That's sounds reasonable. Would it then make sense to hold a generic
-> wakeup source in the "suspend/resume core", once a wakeup interrupt is
-> fetched?
+Thanks,
+Bing
 
-No, the suspend/resume core can only hold a wakeup source until it has
-handed the event off to the driver, at which point it is the driver's
-responsibility to hold a wakeup source.  The suspend/resume core
-cannot tell if the event was handled by the driver or will be passed
-to userspace.
+> 
+> Thanks,
+> Seungwon Jeon
+
