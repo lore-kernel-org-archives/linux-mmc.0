@@ -1,145 +1,54 @@
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v11 3/8] ARM: edma: Add EDMA crossbar event mux support
-Date: Tue, 18 Jun 2013 15:49:59 +0530
-Message-ID: <51C0344F.6010709@ti.com>
-References: <1371537499-12970-1-git-send-email-joelagnel@ti.com>
-	<1371537499-12970-4-git-send-email-joelagnel@ti.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: "exclude asynchronous transfer" patch causes boot fail
+Date: Tue, 18 Jun 2013 21:33:45 +0900
+Message-ID: <001701ce6c20$134cda00$39e68e00$%jun@samsung.com>
+References: <CAMLZHHRt=ajakDx6ZFRVx8CUKNojury5fX8R+gBhhJTOstQ6Xg@mail.gmail.com>
+ <CAMLZHHRzvXucfoUn9ZqVv7Z9Q8oDbZu5-O9t8dJ=YpSjbbzXHg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <1371537499-12970-4-git-send-email-joelagnel-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:43410 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932160Ab3FRMdr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jun 2013 08:33:47 -0400
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MOL00GWY9KAIED0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 18 Jun 2013 21:33:46 +0900 (KST)
+In-reply-to: <CAMLZHHRzvXucfoUn9ZqVv7Z9Q8oDbZu5-O9t8dJ=YpSjbbzXHg@mail.gmail.com>
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Daniel Drake' <dsd@laptop.org>, linux-mmc@vger.kernel.org
 
-On 6/18/2013 12:08 PM, Joel A Fernandes wrote:
-> From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+On Saturday, June 15, 2013, Daniel Drake wrote:
+> On Mon, Jun 10, 2013 at 1:53 PM, Daniel Drake <dsd@laptop.org> wrote:
+> > Testing the latest linus kernel on OLPC XO-4 (sdhci-pxav3), boot
+> > fails. Userspace does start, and I see that systemd is starting a few
+> > services (feels a bit slower than usual), then it hangs still while
+> > loading initial services - I don't even get to a shell prompt.
+> >
+> > git-bisect shows the following commit introduces the problem:
+> >
+> > commit 369d321ed1baa7748e770aaaae4d8effad699633
+> > Author: Seungwon Jeon <tgih.jun@samsung.com>
+> > Date:   Wed Dec 26 10:40:17 2012 +0900
+> >
+> >     mmc: queue: exclude asynchronous transfer for special request
 > 
-> Changes by Joel:
-> * Split EDMA xbar support out of original EDMA DT parsing patch
-> to keep it easier for review.
-> * Rewrite shift and offset calculation.
-> 
-> Suggested-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-> Suggested by: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> Signed-off-by: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
-> 
-> Reference:
-> [1] https://patchwork.kernel.org/patch/2226991/
-> ---
->  arch/arm/common/edma.c             |   59 ++++++++++++++++++++++++++++++++++++
->  include/linux/platform_data/edma.h |    1 +
->  2 files changed, 60 insertions(+)
-> 
-> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
-> index 9823b79..1c2fb15 100644
-> --- a/arch/arm/common/edma.c
-> +++ b/arch/arm/common/edma.c
-> @@ -1410,6 +1410,52 @@ static int edma_of_read_u32_to_s16_array(const struct device_node *np,
->  	return 0;
->  }
->  
-> +static int edma_xbar_event_map(struct device *dev,
-> +			       struct device_node *node,
-> +			       struct edma_soc_info *pdata, int len)
-> +{
-> +	int ret = 0;
-> +	int i;
-> +	struct resource res;
-> +	void *xbar;
-
-void __iomem *xbar;
-
-> +	const s16 (*xbar_chans)[2];
-> +	u32 shift, offset, mux;
-> +
-> +	xbar_chans = devm_kzalloc(dev,
-> +				  len/sizeof(s16) + 2*sizeof(s16),
-> +				  GFP_KERNEL);
-> +	if (!xbar_chans)
-> +		return -ENOMEM;
-> +
-> +	ret = of_address_to_resource(node, 1, &res);
-> +	if (ret)
-> +		return -EIO;
-> +
-> +	xbar = devm_ioremap(dev, res.start, resource_size(&res));
-> +	if (!xbar)
-> +		return -ENOMEM;
-> +
-> +	ret = edma_of_read_u32_to_s16_array(node,
-> +					    "ti,edma-xbar-event-map",
-> +					    (s16 *)xbar_chans,
-> +					    len/sizeof(u32));
-> +	if (ret)
-> +		return -EIO;
-> +
-> +	for (i = 0; xbar_chans[i][0] != -1; i++) {
-> +		shift = (xbar_chans[i][1] & 0x03) << 3;
-> +		offset = xbar_chans[i][1] & 0xfffffffc;
-> +		mux = readl((void *)((u32)xbar + offset));
-
-Please drop unnecessary casting. Simply:
-
-	mux = readl(xbar + offset);
-
-> +		mux &= ~(0xff << shift);
-> +		mux |= xbar_chans[i][0] << shift;
-> +		writel(mux, (void *)((u32)xbar + offset));
-
-Fix the writel likewise.
-
-> +	}
-> +
-> +	pdata->xbar_chans = xbar_chans;
-> +
-> +	return 0;
-> +}
-> +
->  static int edma_of_parse_dt(struct device *dev,
->  			    struct device_node *node,
->  			    struct edma_soc_info *pdata)
-> @@ -1470,6 +1516,9 @@ static int edma_of_parse_dt(struct device *dev,
->  
->  	pdata->default_queue = 0;
->  
-> +	prop = of_find_property(node, "ti,edma-xbar-event-map", &sz);
-> +	if (prop)
-> +		ret = edma_xbar_event_map(dev, node, pdata, sz);
->  
->  	return ret;
->  }
-> @@ -1489,6 +1538,7 @@ static int edma_probe(struct platform_device *pdev)
->  	int			status = -1;
->  	const s16		(*rsv_chans)[2];
->  	const s16		(*rsv_slots)[2];
-> +	const s16		(*xbar_chans)[2];
->  	int			irq[EDMA_MAX_CC] = {0, 0};
->  	int			err_irq[EDMA_MAX_CC] = {0, 0};
->  	struct resource		*r[EDMA_MAX_CC] = {NULL, NULL};
-> @@ -1617,6 +1667,15 @@ static int edma_probe(struct platform_device *pdev)
->  			}
->  		}
->  
-> +		/* Clear the xbar mapped channels in unused list */
-> +		xbar_chans = info[j]->xbar_chans;
-> +		if (xbar_chans) {
-> +			for (i = 0; xbar_chans[i][1] != -1; i++) {
-> +				off = xbar_chans[i][1];
-> +				clear_bits(off, 1,
-> +					edma_cc[j]->edma_unused);
-
-Please fix the alignment here.
+> I realised that I wasn't testing linus master as I thought I was - I
+> was some way back in the history.
+> Updating to the latest makes the issue go away. I guess this was already fixed.
+Okay.
+For reference, there is no difference with between REQ_DISCARD and REG_FLUSH
+in mmc_blk_issue_rq()'s handling.
 
 Thanks,
-Sekhar
+Seungwon Jeon
+> 
+> Thanks
+> Daniel
+
