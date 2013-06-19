@@ -1,80 +1,94 @@
-From: Grant Grundler <grundler@chromium.org>
-Subject: mmc_rescan/sdio_reset timeout missing?
-Date: Wed, 19 Jun 2013 06:44:45 -0700
-Message-ID: <CANEJEGsPrkGwZVpK8bfYUyVYN2gfk2fbqs7D4DFaz5GhRaZRcw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
+Date: Wed, 19 Jun 2013 16:21:29 +0200
+Message-ID: <CAPDyKFroFY3-NJCFpkDYyBVx25CSfk492H_TnoS60jn2CdfWUQ@mail.gmail.com>
+References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
+	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
+	<CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
+	<CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
+	<CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
+	<CAMbhsRSC5XhhSK-DAoS7_JAj7XUfaM_Topp4UcBaVwRCYXSscQ@mail.gmail.com>
+	<CAPDyKFpMGS-JA47pY_n7xvqdtbPumGpc2fdnYZnSVQ_Rybre3g@mail.gmail.com>
+	<CAMbhsRQwGbpa4a1RziV92qnw4VFh6+=oQiadfqa17FANEiK8_Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:61052 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756623Ab3FSNor (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jun 2013 09:44:47 -0400
-Received: by mail-wi0-f182.google.com with SMTP id m6so661797wiv.15
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Jun 2013 06:44:45 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAMbhsRQwGbpa4a1RziV92qnw4VFh6+=oQiadfqa17FANEiK8_Q@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Colin Cross <ccross@android.com>
+Cc: Zoran Markovic <zoran.markovic@linaro.org>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
 
-I've looking through the code to understand this bug that caused this
-stack trace (and ended up panicing below):
+On 18 June 2013 19:15, Colin Cross <ccross@android.com> wrote:
+> On Tue, Jun 18, 2013 at 6:17 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 17 June 2013 20:33, Colin Cross <ccross@android.com> wrote:
+>>> This is a generic requirement for using a kernel with autosleep
+>>> enabled.  Autosleep will enter suspend whenever there is no wakeup
+>>> source/wakelock held.  Consider the following sequence:
+>>>
+>>> Kernel is suspended
+>>> Card is inserted, triggering a wakeup interrupt, which is an implicit
+>>> wakeup source until it is handled
+>>
+>> I don't think a card insert/remove irq need to be configured as a
+>> wakeup interrupt. As you say, it will force a resume to detect the
+>> card, but for what reason?
+>> Instead, I think it it better to leave the card detection to be
+>> handled at the next resume, thus not resuming the system when not
+>> needed.
+>
+> That decision is going to be different on each device.  On Android
+> devices it has been configured as a wakeup interrupt.  This patch is
+> necessary on devices that want to handle the event as a wakeup event,
+> and has negligible impact on those that do not.
+>
+>>> Kernel starts resuming, resumes the mmc driver
+>>> The mmc driver enables its interrupt, which is immediately handled and
+>>> queues an event to be handled by userspace
+>>> At this point the wakeup interrupt is handled and gone, and no wakeup
+>>> sources are being held, so the kernel can choose to go back to
+>>> suspend, so userspace can't handle the insertion event until the
+>>> kernel wakes up for another reason.
+>>
+>> Is this a problem? From my point of view it should be perfectly
+>> acceptable to let userspace handle the event at the next resume/wakeup
+>> instead. Don't you think so?
+>
+> Depends what userspace is doing.  If userspace would like to provide
+> the user some feedback on the event, then it has to be a wakeup
+> interrupt, and it has to hold a wakelock until it has passed the event
+> to userspace.
 
-<3>[ 1680.501338] INFO: task kworker/u:22:9101 blocked for more than
-120 seconds.
-<3>[ 1680.501348] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
-disables this message.
-<6>[ 1680.501357] kworker/u:22    D 8050644c     0  9101      2 0x00000000
-<5>[ 1680.501385] [<8050644c>] (__schedule+0x608/0x758) from
-[<80506938>] (schedule+0x94/0x98)
-<5>[ 1680.501399] [<80506938>] (schedule+0x94/0x98) from [<80504830>]
-(schedule_timeout+0x38/0x2d0)
-<5>[ 1680.501413] [<80504830>] (schedule_timeout+0x38/0x2d0) from
-[<80506788>] (wait_for_common+0x138/0x178)
-<5>[ 1680.501427] [<80506788>] (wait_for_common+0x138/0x178) from
-[<805068a0>] (wait_for_completion+0x20/0x24)
-<5>[ 1680.501442] [<805068a0>] (wait_for_completion+0x20/0x24) from
-[<803bc424>] (mmc_wait_for_req_done+0x2c/0x84)
-<5>[ 1680.501455] [<803bc424>] (mmc_wait_for_req_done+0x2c/0x84) from
-[<803bc8e8>] (mmc_wait_for_req+0x2c/0x30)
-<5>[ 1680.501468] [<803bc8e8>] (mmc_wait_for_req+0x2c/0x30) from
-[<803bc968>] (mmc_wait_for_cmd+0x7c/0x8c)
-<5>[ 1680.501481] [<803bc968>] (mmc_wait_for_cmd+0x7c/0x8c) from
-[<803c4fe4>] (mmc_io_rw_direct_host+0xc8/0x138)
-<5>[ 1680.501496] [<803c4fe4>] (mmc_io_rw_direct_host+0xc8/0x138) from
-[<803c5440>] (sdio_reset+0x38/0x74)
-<5>[ 1680.501508] [<803c5440>] (sdio_reset+0x38/0x74) from
-[<803be330>] (mmc_rescan+0x214/0x2c0)
-<5>[ 1680.501523] [<803be330>] (mmc_rescan+0x214/0x2c0) from
-[<80045b04>] (process_one_work+0x210/0x424)
-<5>[ 1680.501536] [<80045b04>] (process_one_work+0x210/0x424) from
-[<80046128>] (worker_thread+0x1f0/0x39c)
-<5>[ 1680.501549] [<80046128>] (worker_thread+0x1f0/0x39c) from
-[<8004acc0>] (kthread+0x9c/0xac)
-<5>[ 1680.501563] [<8004acc0>] (kthread+0x9c/0xac) from [<8000ee48>]
-(kernel_thread_exit+0x0/0x8)
-<0>[ 1680.501573] Kernel panic - not syncing: hung_task: blocked tasks
-<5>[ 1680.501586] [<80014890>] (unwind_backtrace+0x0/0xec) from
-[<80500018>] (dump_stack+0x20/0x24)
-<5>[ 1680.501597] [<80500018>] (dump_stack+0x20/0x24) from
-[<80500178>] (panic+0x98/0x1e0)
-<5>[ 1680.501610] [<80500178>] (panic+0x98/0x1e0) from [<80082658>]
-(watchdog+0x1e8/0x24c)
-<5>[ 1680.501621] [<80082658>] (watchdog+0x1e8/0x24c) from
-[<8004acc0>] (kthread+0x9c/0xac)
-<5>[ 1680.501633] [<8004acc0>] (kthread+0x9c/0xac) from [<8000ee48>]
-(kernel_thread_exit+0x0/0x8)
+It seems like a bad idea that an insertion of an SD card should
+trigger the display to be light up. That is indirectly in principle
+what you suggest should happen from user space once a new SD card is
+found. Right?
 
-I don't see any timers being set in any code path for the calls to
-mmc_io_rw_direct_host(host,... SDIO_CCCR_ABORT...) in sdio_reset()
-doesn't complete. I was thinking cmd_timeout_ms could be used but eMMC
-(dw_mmc driver) only appears to support data_timeout and
-response_timeout, not a cmd timeout. And even if dw_mmc did support
-that timeout in HW, cmd_timeout_ms isn't getting set in this code
-path.
+I have been working with Android for several years, we never used this
+kind of setup. Instead we wait for the user to press the "display on"
+button. At that time the confirmation will be received. Not saying
+that this is the only way of doing it, but it seems to be an accepted
+solution for all our customers.
 
-Any advice on how that should be fixed?
+I agree to that this patch should have negligible impact though - if
+we get things right. I will try to review the code in more detail
+soon.
 
-I'm assuming the eMMC device (Sandisk SEM16G - eMMC 4.41) has buggy FW
-and just wedges after a suspend/resume.
+Kind regards
+Ulf Hansson
 
-cheers,
-grant
+>
+>>>
+>>> In general, an event that is triggered by a wakeup interrupt that is
+>>> being passed from the kernel to userspace needs to have a wakeup
+>>> source held while the event is queued.
+>>
+>> That's sounds reasonable. Would it then make sense to hold a generic
+>> wakeup source in the "suspend/resume core", once a wakeup interrupt is
+>> fetched?
+>
+> No, the suspend/resume core can only hold a wakeup source until it has
+> handed the event off to the driver, at which point it is the driver's
+> responsibility to hold a wakeup source.  The suspend/resume core
+> cannot tell if the event was handled by the driver or will be passed
+> to userspace.
