@@ -1,147 +1,80 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH 3/8] mmc: atmel-mci: prepare clk before calling enable
-Date: Wed, 19 Jun 2013 14:50:46 +0200
-Message-ID: <38160.5570939884$1371646292@news.gmane.org>
-References: <1371640263-9268-1-git-send-email-b.brezillon@overkiz.com>
- <1371640590-9585-1-git-send-email-b.brezillon@overkiz.com>
+From: Grant Grundler <grundler@chromium.org>
+Subject: mmc_rescan/sdio_reset timeout missing?
+Date: Wed, 19 Jun 2013 06:44:45 -0700
+Message-ID: <CANEJEGsPrkGwZVpK8bfYUyVYN2gfk2fbqs7D4DFaz5GhRaZRcw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1371640590-9585-1-git-send-email-b.brezillon@overkiz.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Boris BREZILLON <b.brezillon@overkiz.com>
-Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <cjb@laptop.org>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f182.google.com ([209.85.212.182]:61052 "EHLO
+	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756623Ab3FSNor (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jun 2013 09:44:47 -0400
+Received: by mail-wi0-f182.google.com with SMTP id m6so661797wiv.15
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Jun 2013 06:44:45 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Boris,
+I've looking through the code to understand this bug that caused this
+stack trace (and ended up panicing below):
 
-Thanks for your patch.
+<3>[ 1680.501338] INFO: task kworker/u:22:9101 blocked for more than
+120 seconds.
+<3>[ 1680.501348] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
+disables this message.
+<6>[ 1680.501357] kworker/u:22    D 8050644c     0  9101      2 0x00000000
+<5>[ 1680.501385] [<8050644c>] (__schedule+0x608/0x758) from
+[<80506938>] (schedule+0x94/0x98)
+<5>[ 1680.501399] [<80506938>] (schedule+0x94/0x98) from [<80504830>]
+(schedule_timeout+0x38/0x2d0)
+<5>[ 1680.501413] [<80504830>] (schedule_timeout+0x38/0x2d0) from
+[<80506788>] (wait_for_common+0x138/0x178)
+<5>[ 1680.501427] [<80506788>] (wait_for_common+0x138/0x178) from
+[<805068a0>] (wait_for_completion+0x20/0x24)
+<5>[ 1680.501442] [<805068a0>] (wait_for_completion+0x20/0x24) from
+[<803bc424>] (mmc_wait_for_req_done+0x2c/0x84)
+<5>[ 1680.501455] [<803bc424>] (mmc_wait_for_req_done+0x2c/0x84) from
+[<803bc8e8>] (mmc_wait_for_req+0x2c/0x30)
+<5>[ 1680.501468] [<803bc8e8>] (mmc_wait_for_req+0x2c/0x30) from
+[<803bc968>] (mmc_wait_for_cmd+0x7c/0x8c)
+<5>[ 1680.501481] [<803bc968>] (mmc_wait_for_cmd+0x7c/0x8c) from
+[<803c4fe4>] (mmc_io_rw_direct_host+0xc8/0x138)
+<5>[ 1680.501496] [<803c4fe4>] (mmc_io_rw_direct_host+0xc8/0x138) from
+[<803c5440>] (sdio_reset+0x38/0x74)
+<5>[ 1680.501508] [<803c5440>] (sdio_reset+0x38/0x74) from
+[<803be330>] (mmc_rescan+0x214/0x2c0)
+<5>[ 1680.501523] [<803be330>] (mmc_rescan+0x214/0x2c0) from
+[<80045b04>] (process_one_work+0x210/0x424)
+<5>[ 1680.501536] [<80045b04>] (process_one_work+0x210/0x424) from
+[<80046128>] (worker_thread+0x1f0/0x39c)
+<5>[ 1680.501549] [<80046128>] (worker_thread+0x1f0/0x39c) from
+[<8004acc0>] (kthread+0x9c/0xac)
+<5>[ 1680.501563] [<8004acc0>] (kthread+0x9c/0xac) from [<8000ee48>]
+(kernel_thread_exit+0x0/0x8)
+<0>[ 1680.501573] Kernel panic - not syncing: hung_task: blocked tasks
+<5>[ 1680.501586] [<80014890>] (unwind_backtrace+0x0/0xec) from
+[<80500018>] (dump_stack+0x20/0x24)
+<5>[ 1680.501597] [<80500018>] (dump_stack+0x20/0x24) from
+[<80500178>] (panic+0x98/0x1e0)
+<5>[ 1680.501610] [<80500178>] (panic+0x98/0x1e0) from [<80082658>]
+(watchdog+0x1e8/0x24c)
+<5>[ 1680.501621] [<80082658>] (watchdog+0x1e8/0x24c) from
+[<8004acc0>] (kthread+0x9c/0xac)
+<5>[ 1680.501633] [<8004acc0>] (kthread+0x9c/0xac) from [<8000ee48>]
+(kernel_thread_exit+0x0/0x8)
 
-On Wed, Jun 19, 2013 at 01:16:30PM +0200, Boris BREZILLON wrote:
-> Replace clk_enable/disable with clk_prepare_enable/disable_unprepare to
-> avoid common clk framework warnings.
-> 
-> Signed-off-by: Boris BREZILLON <b.brezillon@overkiz.com>
+I don't see any timers being set in any code path for the calls to
+mmc_io_rw_direct_host(host,... SDIO_CCCR_ABORT...) in sdio_reset()
+doesn't complete. I was thinking cmd_timeout_ms could be used but eMMC
+(dw_mmc driver) only appears to support data_timeout and
+response_timeout, not a cmd timeout. And even if dw_mmc did support
+that timeout in HW, cmd_timeout_ms isn't getting set in this code
+path.
 
-Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+Any advice on how that should be fixed?
 
-One comment below
+I'm assuming the eMMC device (Sandisk SEM16G - eMMC 4.41) has buggy FW
+and just wedges after a suspend/resume.
 
-> ---
->  drivers/mmc/host/atmel-mci.c |   29 ++++++++++++++++++++---------
->  1 file changed, 20 insertions(+), 9 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index e75774f..e3058a5 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -380,6 +380,8 @@ static int atmci_regs_show(struct seq_file *s, void *v)
->  {
->  	struct atmel_mci	*host = s->private;
->  	u32			*buf;
-> +	int			ret = 0;
-> +
->  
->  	buf = kmalloc(ATMCI_REGS_SIZE, GFP_KERNEL);
->  	if (!buf)
-> @@ -391,9 +393,13 @@ static int atmci_regs_show(struct seq_file *s, void *v)
->  	 * consistent.
->  	 */
->  	spin_lock_bh(&host->lock);
-> -	clk_enable(host->mck);
-> +	ret = clk_prepare_enable(host->mck);
-> +	if (ret) {
-> +		spin_unlock_bh(&host->lock);
-> +		goto out;
-> +	}
->  	memcpy_fromio(buf, host->regs, ATMCI_REGS_SIZE);
-> -	clk_disable(host->mck);
-> +	clk_disable_unprepare(host->mck);
->  	spin_unlock_bh(&host->lock);
->  
->  	seq_printf(s, "MR:\t0x%08x%s%s ",
-> @@ -444,9 +450,10 @@ static int atmci_regs_show(struct seq_file *s, void *v)
->  				val & ATMCI_CFG_LSYNC ? " LSYNC" : "");
->  	}
->  
-> +out:
->  	kfree(buf);
->  
-> -	return 0;
-> +	return ret;
->  }
->  
->  static int atmci_regs_open(struct inode *inode, struct file *file)
-> @@ -1281,7 +1288,7 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  
->  		spin_lock_bh(&host->lock);
->  		if (!host->mode_reg) {
-> -			clk_enable(host->mck);
-> +			clk_prepare_enable(host->mck);
->  			atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
->  			atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIEN);
->  			if (host->caps.has_cfg_reg)
-> @@ -1361,7 +1368,7 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  			atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
->  			if (host->mode_reg) {
->  				atmci_readl(host, ATMCI_MR);
-> -				clk_disable(host->mck);
-> +				clk_disable_unprepare(host->mck);
->  			}
->  			host->mode_reg = 0;
->  		}
-> @@ -2379,10 +2386,12 @@ static int __init atmci_probe(struct platform_device *pdev)
->  	if (!host->regs)
->  		goto err_ioremap;
->  
-> -	clk_enable(host->mck);
-> +	ret = clk_prepare_enable(host->mck);
-> +	if (ret)
-> +		goto err_clk_prepare_enable;
->  	atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
->  	host->bus_hz = clk_get_rate(host->mck);
-> -	clk_disable(host->mck);
-> +	clk_disable_unprepare(host->mck);
->  
->  	host->mapbase = regs->start;
->  
-> @@ -2463,6 +2472,8 @@ err_init_slot:
->  		dma_release_channel(host->dma.chan);
->  	free_irq(irq, host);
->  err_request_irq:
-> +	clk_unprepare(host->mck);
-
-As discussed with you this part can be removed since a clk_disable_unprepare
-is done earlier.
-
-> +err_clk_prepare_enable:
->  	iounmap(host->regs);
->  err_ioremap:
->  	clk_put(host->mck);
-> @@ -2487,11 +2498,11 @@ static int __exit atmci_remove(struct platform_device *pdev)
->  			atmci_cleanup_slot(host->slot[i], i);
->  	}
->  
-> -	clk_enable(host->mck);
-> +	clk_prepare_enable(host->mck);
->  	atmci_writel(host, ATMCI_IDR, ~0UL);
->  	atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
->  	atmci_readl(host, ATMCI_SR);
-> -	clk_disable(host->mck);
-> +	clk_disable_unprepare(host->mck);
->  
->  	if (host->dma.chan)
->  		dma_release_channel(host->dma.chan);
-> -- 
-> 1.7.9.5
-> 
+cheers,
+grant
