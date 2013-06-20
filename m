@@ -1,8 +1,7 @@
 From: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v12 08/11] spi: omap2-mcspi: add generic DMA request support
-	to the DT binding
-Date: Thu, 20 Jun 2013 16:06:44 -0500
-Message-ID: <1371762407-24544-9-git-send-email-joelagnel@ti.com>
+Subject: [PATCH v12 05/11] edma: config: Enable config options for EDMA
+Date: Thu, 20 Jun 2013 16:06:41 -0500
+Message-ID: <1371762407-24544-6-git-send-email-joelagnel@ti.com>
 References: <1371762407-24544-1-git-send-email-joelagnel@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,58 +20,54 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+From: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 
-The binding definition is based on the generic DMA request binding
+Build TI_EDMA by default for ARCH_DAVINCI and ARCH_OMAP2PLUS
 
-Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 Signed-off-by: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
 ---
- Documentation/devicetree/bindings/spi/omap-spi.txt |   27 +++++++++++++++++++-
- 1 file changed, 26 insertions(+), 1 deletion(-)
+ arch/arm/Kconfig            |    1 +
+ arch/arm/mach-omap2/Kconfig |    1 +
+ drivers/dma/Kconfig         |    2 +-
+ 3 files changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/spi/omap-spi.txt b/Documentation/devicetree/bindings/spi/omap-spi.txt
-index 938809c..4c85c4c 100644
---- a/Documentation/devicetree/bindings/spi/omap-spi.txt
-+++ b/Documentation/devicetree/bindings/spi/omap-spi.txt
-@@ -10,7 +10,18 @@ Required properties:
- 			  input. The default is D0 as input and
- 			  D1 as output.
- 
--Example:
-+Optional properties:
-+- dmas: List of DMA specifiers with the controller specific format
-+	as described in the generic DMA client binding. A tx and rx
-+	specifier is required for each chip select.
-+- dma-names: List of DMA request names. These strings correspond
-+	1:1 with the DMA specifiers listed in dmas. The string naming
-+	is to be "rxN" and "txN" for RX and TX requests,
-+	respectively, where N equals the chip select number.
-+
-+Examples:
-+
-+[hwmod populated DMA resources]
- 
- mcspi1: mcspi@1 {
-     #address-cells = <1>;
-@@ -20,3 +31,17 @@ mcspi1: mcspi@1 {
-     ti,spi-num-cs = <4>;
- };
- 
-+[generic DMA request binding]
-+
-+mcspi1: mcspi@1 {
-+    #address-cells = <1>;
-+    #size-cells = <0>;
-+    compatible = "ti,omap4-mcspi";
-+    ti,hwmods = "mcspi1";
-+    ti,spi-num-cs = <2>;
-+    dmas = <&edma 42
-+	    &edma 43
-+	    &edma 44
-+	    &edma 45>;
-+    dma-names = "tx0", "rx0", "tx1", "rx1";
-+};
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index b1c66a4..7d58cd9 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -841,6 +841,7 @@ config ARCH_DAVINCI
+ 	select HAVE_IDE
+ 	select NEED_MACH_GPIO_H
+ 	select TI_PRIV_EDMA
++	select DMADEVICES
+ 	select USE_OF
+ 	select ZONE_DMA
+ 	help
+diff --git a/arch/arm/mach-omap2/Kconfig b/arch/arm/mach-omap2/Kconfig
+index f91b07f..c02f083 100644
+--- a/arch/arm/mach-omap2/Kconfig
++++ b/arch/arm/mach-omap2/Kconfig
+@@ -17,6 +17,7 @@ config ARCH_OMAP2PLUS
+ 	select PROC_DEVICETREE if PROC_FS
+ 	select SOC_BUS
+ 	select SPARSE_IRQ
++	select DMADEVICES
+ 	select TI_PRIV_EDMA
+ 	select USE_OF
+ 	help
+diff --git a/drivers/dma/Kconfig b/drivers/dma/Kconfig
+index 3215a3c..b2d6f15 100644
+--- a/drivers/dma/Kconfig
++++ b/drivers/dma/Kconfig
+@@ -216,7 +216,7 @@ config TI_EDMA
+ 	depends on ARCH_DAVINCI || ARCH_OMAP
+ 	select DMA_ENGINE
+ 	select DMA_VIRTUAL_CHANNELS
+-	default n
++	default y
+ 	help
+ 	  Enable support for the TI EDMA controller. This DMA
+ 	  engine is found on TI DaVinci and AM33xx parts.
 -- 
 1.7.9.5
 
