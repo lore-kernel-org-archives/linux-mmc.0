@@ -1,47 +1,58 @@
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v11 3/8] ARM: edma: Add EDMA crossbar event mux support
-Date: Thu, 20 Jun 2013 10:19:32 +0530
-Message-ID: <51C289DC.1080604@ti.com>
-References: <1371537499-12970-1-git-send-email-joelagnel@ti.com>
-	<1371537499-12970-4-git-send-email-joelagnel@ti.com>
-	<51C0344F.6010709@ti.com>
-	<CAD=GYpbVUu4H8vkLHYAGPUMqdzmbJncX4yOR+5k+5B8NJhfgAQ@mail.gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 2/4] mmc: omap_hsmmc: Enable SDIO IRQ using a GPIO in
+ idle mode
+Date: Thu, 20 Jun 2013 00:24:23 -0700
+Message-ID: <20130620072422.GG5523@atomide.com>
+References: <20130607214557.18581.75288.stgit@localhost>
+ <20130607214952.18581.90049.stgit@localhost>
+ <CAPDyKFq+==Bca+AaZwD=A5v6HzL8ShKatq+8U-S=atZUFh8=rQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <CAD=GYpbVUu4H8vkLHYAGPUMqdzmbJncX4yOR+5k+5B8NJhfgAQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>Linux
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:61361 "EHLO
+	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754518Ab3FTHY3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jun 2013 03:24:29 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFq+==Bca+AaZwD=A5v6HzL8ShKatq+8U-S=atZUFh8=rQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Andreas Fenkart <afenkart@gmail.com>, cjb@laptop.org, Balaji T K <balajitk@ti.com>, Andreas Fenkart <andreas.fenkart@streamunlimited.com>, linux-mmc@vger.kernel.org, Grant Likely <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-
-
-On 6/20/2013 6:06 AM, Joel A Fernandes wrote:
-
->>> +             /* Clear the xbar mapped channels in unused list */
->>> +             xbar_chans = info[j]->xbar_chans;
->>> +             if (xbar_chans) {
->>> +                     for (i = 0; xbar_chans[i][1] != -1; i++) {
->>> +                             off = xbar_chans[i][1];
->>> +                             clear_bits(off, 1,
->>> +                                     edma_cc[j]->edma_unused);
->>
->> Please fix the alignment here.
+* Ulf Hansson <ulf.hansson@linaro.org> [130614 04:55]:
+> On 7 June 2013 23:49, Tony Lindgren <tony@atomide.com> wrote:
+> > From: Andreas Fenkart <andreas.fenkart@streamunlimited.com>
+> > --- a/drivers/mmc/host/omap_hsmmc.c
+> > +++ b/drivers/mmc/host/omap_hsmmc.c
+> > +static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
+> > +{
+> > +       struct omap_hsmmc_host *host = mmc_priv(mmc);
+> > +       u32 irq_mask;
+> > +       unsigned long flags;
+> > +
+> > +       spin_lock_irqsave(&host->irq_lock, flags);
+> > +
+> > +       if (host->sdio_irq_en == enable) {
+> > +               dev_dbg(host->dev, "en/disable:%d already set", enable);
+> > +               spin_unlock_irqrestore(&host->irq_lock, flags);
+> > +               return;
+> > +       }
+> > +
 > 
-> I noticed the alignment was off in a few other places in that driver.
-> Fixed those up too.
+> Hi Tony/Andreas,
+> 
+> I belive a "pm_runtime_get_sync" would be needed here, outside the
+> spinlock ofcourse. Before returning from this function, obviusly
+> return the references by a pm_runtime_put* in some form.
+> 
+> Then you will be able to remove the "active_pinmux" variable entirely,
+> since you know the runtime callbacks is the only place were you need
+> to handle the gpio irq enable|disable.
 
-If you do, please make it a separate (pre)patch.
+Thanks for the review, that's a good point. I'll check this as
+soon as I have a chance.
 
-Thanks,
-Sekhar
+Regards,
+
+Tony
