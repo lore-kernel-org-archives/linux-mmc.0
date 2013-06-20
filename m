@@ -1,61 +1,122 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] dmaengine: shdma: fix a build failure on platforms with
- no DMA support
-Date: Wed, 19 Jun 2013 21:32:18 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1306192125480.12502@axis700.grange>
-References: <Pine.LNX.4.64.1305301650290.29171@axis700.grange>
- <51A77CF1.7040105@ti.com> <20130531024438.GB32564@verge.net.au>
- <CAGa+x8413povhYWx+BSj=TdzQDAuYFXmjF4A2kXvQt+=n+380w@mail.gmail.com>
+From: Joel A Fernandes <agnel.joel@gmail.com>
+Subject: Re: [PATCH v11 3/8] ARM: edma: Add EDMA crossbar event mux support
+Date: Wed, 19 Jun 2013 19:36:48 -0500
+Message-ID: <CAD=GYpbVUu4H8vkLHYAGPUMqdzmbJncX4yOR+5k+5B8NJhfgAQ@mail.gmail.com>
+References: <1371537499-12970-1-git-send-email-joelagnel@ti.com>
+	<1371537499-12970-4-git-send-email-joelagnel@ti.com>
+	<51C0344F.6010709@ti.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:59661 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S935087Ab3FSTca (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jun 2013 15:32:30 -0400
-In-Reply-To: <CAGa+x8413povhYWx+BSj=TdzQDAuYFXmjF4A2kXvQt+=n+380w@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <51C0344F.6010709@ti.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Sekhar Nori <nsekhar@ti.com>
+Cc: Joel A Fernandes <joelagnel@ti.com>, Tony Lindgren <tony@atomide.com>, Matt Porter <matt@ohporter.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Rob Landley <rob@landley.net>, Andrew Morton <akpm@linux-foundation.org>, Jason Kridner <jkridner@beagleboard.org>, Koen Kooi <koen@beagleboard.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@v>
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Hilman <khilman@linaro.org>
-Cc: Simon Horman <horms@verge.net.au>, Dan Murphy <dmurphy@ti.com>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, "Koul, Vinod" <vinod.koul@intel.com>
 
-Hi Vinod
+Hi Sekhar,
+Thanks for the feedback.
 
-On Wed, 19 Jun 2013, Kevin Hilman wrote:
+On Tue, Jun 18, 2013 at 5:19 AM, Sekhar Nori <nsekhar@ti.com> wrote:
+> On 6/18/2013 12:08 PM, Joel A Fernandes wrote:
+>> From: Matt Porter <mporter@ti.com>
+>>
+>> Changes by Joel:
+>> * Split EDMA xbar support out of original EDMA DT parsing patch
+>> to keep it easier for review.
+>> * Rewrite shift and offset calculation.
+>>
+>> Suggested-by: Sekhar Nori <nsekhar@ti.com>
+>> Suggested by: Andy Shevchenko <andy.shevchenko@gmail.com>
+>> Signed-off-by: Joel A Fernandes <joelagnel@ti.com>
+>>
+>> Reference:
+>> [1] https://patchwork.kernel.org/patch/2226991/
+>> ---
+>>  arch/arm/common/edma.c             |   59 ++++++++++++++++++++++++++++++++++++
+>>  include/linux/platform_data/edma.h |    1 +
+>>  2 files changed, 60 insertions(+)
+>>
+>> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+>> index 9823b79..1c2fb15 100644
+>> --- a/arch/arm/common/edma.c
+>> +++ b/arch/arm/common/edma.c
+>> @@ -1410,6 +1410,52 @@ static int edma_of_read_u32_to_s16_array(const struct device_node *np,
+>>       return 0;
+>>  }
+>>
+>> +static int edma_xbar_event_map(struct device *dev,
+>> +                            struct device_node *node,
+>> +                            struct edma_soc_info *pdata, int len)
+>> +{
+>> +     int ret = 0;
+>> +     int i;
+>> +     struct resource res;
+>> +     void *xbar;
+>
+> void __iomem *xbar;
 
-> On Thu, May 30, 2013 at 7:44 PM, Simon Horman <horms@verge.net.au> wrote:
-> 
-> [...]
-> 
-> > thanks for this. I will wait for a refresh (as we discussed earlier today).
-> > Can I confirm that this is a fix for v3.10? If so, could ou note
-> > that when you post your revised patch?
-> 
-> Any progress on this patch?
-> 
-> The SH-mobile defconfigs are still all failing in linux-next.
+OK.
 
-In
+>> +     const s16 (*xbar_chans)[2];
+>> +     u32 shift, offset, mux;
+>> +
+>> +     xbar_chans = devm_kzalloc(dev,
+>> +                               len/sizeof(s16) + 2*sizeof(s16),
+>> +                               GFP_KERNEL);
+>> +     if (!xbar_chans)
+>> +             return -ENOMEM;
+>> +
+>> +     ret = of_address_to_resource(node, 1, &res);
+>> +     if (ret)
+>> +             return -EIO;
+>> +
+>> +     xbar = devm_ioremap(dev, res.start, resource_size(&res));
+>> +     if (!xbar)
+>> +             return -ENOMEM;
+>> +
+>> +     ret = edma_of_read_u32_to_s16_array(node,
+>> +                                         "ti,edma-xbar-event-map",
+>> +                                         (s16 *)xbar_chans,
+>> +                                         len/sizeof(u32));
+>> +     if (ret)
+>> +             return -EIO;
+>> +
+>> +     for (i = 0; xbar_chans[i][0] != -1; i++) {
+>> +             shift = (xbar_chans[i][1] & 0x03) << 3;
+>> +             offset = xbar_chans[i][1] & 0xfffffffc;
+>> +             mux = readl((void *)((u32)xbar + offset));
+>
+> Please drop unnecessary casting. Simply:
 
-https://patchwork.kernel.org/patch/2640061/
+Done.
 
-I proposed a simple immediate fix for this problem. Arnd at the same time 
-developed an alternative solution:
+>
+>         mux = readl(xbar + offset);
+>
+>> +             mux &= ~(0xff << shift);
+>> +             mux |= xbar_chans[i][0] << shift;
+>> +             writel(mux, (void *)((u32)xbar + offset));
+>
+> Fix the writel likewise.
 
-https://patchwork.kernel.org/patch/2644121/
-https://patchwork.kernel.org/patch/2644111/
+Done.
 
-Which, I think, is a much larger change and isn't suitable as a bug-fix 
-this late in the release cycle. Instead those patches address other issues 
-with the shdma drivers, which might need to be carefully studied and 
-solutions have to be found, which, however, would require more work and 
-need a longer time. What is your opinion on this? Would you agree to apply 
-v2 of this patch, as referenced above or would you prefer a different 
-solution?
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+>>               }
+>>
+>> +             /* Clear the xbar mapped channels in unused list */
+>> +             xbar_chans = info[j]->xbar_chans;
+>> +             if (xbar_chans) {
+>> +                     for (i = 0; xbar_chans[i][1] != -1; i++) {
+>> +                             off = xbar_chans[i][1];
+>> +                             clear_bits(off, 1,
+>> +                                     edma_cc[j]->edma_unused);
+>
+> Please fix the alignment here.
+
+I noticed the alignment was off in a few other places in that driver.
+Fixed those up too.
+
+Thanks,
+Joel
