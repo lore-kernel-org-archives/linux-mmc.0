@@ -1,122 +1,77 @@
-From: Joel A Fernandes <agnel.joel@gmail.com>
-Subject: Re: [PATCH v11 3/8] ARM: edma: Add EDMA crossbar event mux support
-Date: Wed, 19 Jun 2013 19:36:48 -0500
-Message-ID: <CAD=GYpbVUu4H8vkLHYAGPUMqdzmbJncX4yOR+5k+5B8NJhfgAQ@mail.gmail.com>
-References: <1371537499-12970-1-git-send-email-joelagnel@ti.com>
-	<1371537499-12970-4-git-send-email-joelagnel@ti.com>
-	<51C0344F.6010709@ti.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] RFC: mmc: dw_mmc: Always go to STATE_DATA_BUSY from
+ STATE_DATA_ERROR
+Date: Thu, 20 Jun 2013 10:49:07 +0900
+Message-ID: <51C25F93.9050004@samsung.com>
+References: <1363382956-14557-1-git-send-email-dianders@chromium.org>
+ <5146EAB0.1030705@samsung.com>
+ <CAD=FV=Ww-iK=-vg4jnJe6w4836-yQUoUyxNvCYsDQ5w0q-OMMQ@mail.gmail.com>
+ <515E88E3.5070507@samsung.com>
+ <003401ce3453$19d1e8c0$4d75ba40$%jun@samsung.com>
+ <CAD=FV=V+ZZ0MUtuWKUOgR9NPyAquUjFC6KtHvAP-4iHXAYpjqA@mail.gmail.com>
+ <001601ce35b9$652c5870$2f850950$%jun@samsung.com>
+ <CAD=FV=XKeRjpH1+ytjMfLuGGqQ5VVub22n=V+UpV=jBCD4LLHw@mail.gmail.com>
+ <001801ce6c20$6ba39900$42eacb00$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <51C0344F.6010709@ti.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Sekhar Nori <nsekhar@ti.com>
-Cc: Joel A Fernandes <joelagnel@ti.com>, Tony Lindgren <tony@atomide.com>, Matt Porter <matt@ohporter.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Rob Landley <rob@landley.net>, Andrew Morton <akpm@linux-foundation.org>, Jason Kridner <jkridner@beagleboard.org>, Koen Kooi <koen@beagleboard.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@v>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:56335 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S935237Ab3FTBs5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jun 2013 21:48:57 -0400
+In-reply-to: <001801ce6c20$6ba39900$42eacb00$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Doug Anderson' <dianders@chromium.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@gmail.com>, 'Bing Zhao' <bzhao@marvell.com>, 'Ashok Nagarajan' <asnagarajan@chromium.org>, 'Paul Stewart' <pstew@chromium.org>, 'Olof Johansson' <olof@lixom.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Sekhar,
-Thanks for the feedback.
+Hi All,
 
-On Tue, Jun 18, 2013 at 5:19 AM, Sekhar Nori <nsekhar@ti.com> wrote:
-> On 6/18/2013 12:08 PM, Joel A Fernandes wrote:
->> From: Matt Porter <mporter@ti.com>
+I tested with Seungwon's patch and this patch.
+I'm agreed with Seungwon's opinion.
+
+Best Regards,
+Jaehoon Chung
+
+On 06/18/2013 09:36 PM, Seungwon Jeon wrote:
+> On Thursday, June 13, 2013, Doug Anderson wrote:
+>> Seungwon,
 >>
->> Changes by Joel:
->> * Split EDMA xbar support out of original EDMA DT parsing patch
->> to keep it easier for review.
->> * Rewrite shift and offset calculation.
+>> On Wed, Apr 10, 2013 at 12:02 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>>>>> There are two solutions we have applied.
+>>>>
+>>>> I'm a little confused.  Have you already applied one or both of the
+>>>> solutions you list below, or are you proposing them as alternates to
+>>>> the patch I submitted?
+>>> Yes, first one already has been applied.
+>>> I wanted to introduce our fix. Did you try to test with these fixes?
 >>
->> Suggested-by: Sekhar Nori <nsekhar@ti.com>
->> Suggested by: Andy Shevchenko <andy.shevchenko@gmail.com>
->> Signed-off-by: Joel A Fernandes <joelagnel@ti.com>
+>> I'm coming back to this after being quite distracted for a while.
 >>
->> Reference:
->> [1] https://patchwork.kernel.org/patch/2226991/
->> ---
->>  arch/arm/common/edma.c             |   59 ++++++++++++++++++++++++++++++++++++
->>  include/linux/platform_data/edma.h |    1 +
->>  2 files changed, 60 insertions(+)
+>> I'm a little confused in that you said that your first fix was already
+>> applied.  I don't see it anywhere.  Did you mean that you've already
+>> applied it locally, or that it's applied in some git tree somewhere?
+>> If so, can you point me to it?
 >>
->> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
->> index 9823b79..1c2fb15 100644
->> --- a/arch/arm/common/edma.c
->> +++ b/arch/arm/common/edma.c
->> @@ -1410,6 +1410,52 @@ static int edma_of_read_u32_to_s16_array(const struct device_node *np,
->>       return 0;
->>  }
+>> If this hasn't been sent out anywhere, perhaps you could send out
+>> official patches?
+> Currently, it has just applied for some projects, not official patch.
 >>
->> +static int edma_xbar_event_map(struct device *dev,
->> +                            struct device_node *node,
->> +                            struct edma_soc_info *pdata, int len)
->> +{
->> +     int ret = 0;
->> +     int i;
->> +     struct resource res;
->> +     void *xbar;
->
-> void __iomem *xbar;
-
-OK.
-
->> +     const s16 (*xbar_chans)[2];
->> +     u32 shift, offset, mux;
->> +
->> +     xbar_chans = devm_kzalloc(dev,
->> +                               len/sizeof(s16) + 2*sizeof(s16),
->> +                               GFP_KERNEL);
->> +     if (!xbar_chans)
->> +             return -ENOMEM;
->> +
->> +     ret = of_address_to_resource(node, 1, &res);
->> +     if (ret)
->> +             return -EIO;
->> +
->> +     xbar = devm_ioremap(dev, res.start, resource_size(&res));
->> +     if (!xbar)
->> +             return -ENOMEM;
->> +
->> +     ret = edma_of_read_u32_to_s16_array(node,
->> +                                         "ti,edma-xbar-event-map",
->> +                                         (s16 *)xbar_chans,
->> +                                         len/sizeof(u32));
->> +     if (ret)
->> +             return -EIO;
->> +
->> +     for (i = 0; xbar_chans[i][0] != -1; i++) {
->> +             shift = (xbar_chans[i][1] & 0x03) << 3;
->> +             offset = xbar_chans[i][1] & 0xfffffffc;
->> +             mux = readl((void *)((u32)xbar + offset));
->
-> Please drop unnecessary casting. Simply:
-
-Done.
-
->
->         mux = readl(xbar + offset);
->
->> +             mux &= ~(0xff << shift);
->> +             mux |= xbar_chans[i][0] << shift;
->> +             writel(mux, (void *)((u32)xbar + offset));
->
-> Fix the writel likewise.
-
-Done.
-
-
->>               }
+>> I don't have the failing unit myself, so we'll have to get Bing to try
+>> the patches.  You are suggesting that we try applying both of your
+>> patches, right?
+> Did you test the patch?
+> I wonder that both are good for your side.
+> 
+> Thanks,
+> Seungwon Jeon
 >>
->> +             /* Clear the xbar mapped channels in unused list */
->> +             xbar_chans = info[j]->xbar_chans;
->> +             if (xbar_chans) {
->> +                     for (i = 0; xbar_chans[i][1] != -1; i++) {
->> +                             off = xbar_chans[i][1];
->> +                             clear_bits(off, 1,
->> +                                     edma_cc[j]->edma_unused);
->
-> Please fix the alignment here.
+>> -Doug
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-I noticed the alignment was off in a few other places in that driver.
-Fixed those up too.
-
-Thanks,
-Joel
