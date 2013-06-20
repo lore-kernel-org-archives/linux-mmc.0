@@ -1,7 +1,8 @@
 From: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v12 10/11] ARM: dts: add AM33XX EDMA support
-Date: Thu, 20 Jun 2013 16:06:46 -0500
-Message-ID: <1371762407-24544-11-git-send-email-joelagnel@ti.com>
+Subject: [PATCH v12 08/11] spi: omap2-mcspi: add generic DMA request support
+	to the DT binding
+Date: Thu, 20 Jun 2013 16:06:44 -0500
+Message-ID: <1371762407-24544-9-git-send-email-joelagnel@ti.com>
 References: <1371762407-24544-1-git-send-email-joelagnel@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -20,44 +21,58 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Matt Porter <mdp-l0cyMroinI0@public.gmane.org>
+From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 
-Adds AM33XX EDMA support to the am33xx.dtsi as documented in
-Documentation/devicetree/bindings/dma/ti-edma.txt
-
-Joel: Drop DT entries that are non-hardware-description for now as discussed in [1]
-
-[1] https://patchwork.kernel.org/patch/2226761/
+The binding definition is based on the generic DMA request binding
 
 Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 Signed-off-by: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
 ---
- arch/arm/boot/dts/am33xx.dtsi |   12 ++++++++++++
- 1 file changed, 12 insertions(+)
+ Documentation/devicetree/bindings/spi/omap-spi.txt |   27 +++++++++++++++++++-
+ 1 file changed, 26 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
-index d9cad72..3d59bb3 100644
---- a/arch/arm/boot/dts/am33xx.dtsi
-+++ b/arch/arm/boot/dts/am33xx.dtsi
-@@ -89,6 +89,18 @@
- 			reg = <0x48200000 0x1000>;
- 		};
+diff --git a/Documentation/devicetree/bindings/spi/omap-spi.txt b/Documentation/devicetree/bindings/spi/omap-spi.txt
+index 938809c..4c85c4c 100644
+--- a/Documentation/devicetree/bindings/spi/omap-spi.txt
++++ b/Documentation/devicetree/bindings/spi/omap-spi.txt
+@@ -10,7 +10,18 @@ Required properties:
+ 			  input. The default is D0 as input and
+ 			  D1 as output.
  
-+		edma: edma@49000000 {
-+			compatible = "ti,edma3";
-+			ti,hwmods = "tpcc", "tptc0", "tptc1", "tptc2";
-+			reg =	<0x49000000 0x10000>,
-+				<0x44e10f90 0x10>;
-+			interrupts = <12 13 14>;
-+			#dma-cells = <1>;
-+			dma-channels = <64>;
-+			ti,edma-regions = <4>;
-+			ti,edma-slots = <256>;
-+		};
+-Example:
++Optional properties:
++- dmas: List of DMA specifiers with the controller specific format
++	as described in the generic DMA client binding. A tx and rx
++	specifier is required for each chip select.
++- dma-names: List of DMA request names. These strings correspond
++	1:1 with the DMA specifiers listed in dmas. The string naming
++	is to be "rxN" and "txN" for RX and TX requests,
++	respectively, where N equals the chip select number.
 +
- 		gpio0: gpio@44e07000 {
- 			compatible = "ti,omap4-gpio";
- 			ti,hwmods = "gpio1";
++Examples:
++
++[hwmod populated DMA resources]
+ 
+ mcspi1: mcspi@1 {
+     #address-cells = <1>;
+@@ -20,3 +31,17 @@ mcspi1: mcspi@1 {
+     ti,spi-num-cs = <4>;
+ };
+ 
++[generic DMA request binding]
++
++mcspi1: mcspi@1 {
++    #address-cells = <1>;
++    #size-cells = <0>;
++    compatible = "ti,omap4-mcspi";
++    ti,hwmods = "mcspi1";
++    ti,spi-num-cs = <2>;
++    dmas = <&edma 42
++	    &edma 43
++	    &edma 44
++	    &edma 45>;
++    dma-names = "tx0", "rx0", "tx1", "rx1";
++};
 -- 
 1.7.9.5
 
