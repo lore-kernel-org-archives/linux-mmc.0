@@ -1,83 +1,207 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 2/2] mmc: dw_mmc: Add the ability to set the ciu clock
- frequency
-Date: Thu, 20 Jun 2013 10:52:09 +0900
-Message-ID: <51C26049.10703@samsung.com>
-References: <1370580406-10254-1-git-send-email-dianders@chromium.org>
- <1370626110-1731-1-git-send-email-dianders@chromium.org>
- <1370626110-1731-2-git-send-email-dianders@chromium.org>
- <51BFE754.6000909@samsung.com>
- <CAD=FV=Wy5X9C=NOUVyAzZK5+BKD1w4FTmoTHzKipq2j_Y9rdtg@mail.gmail.com>
+Subject: Re: [PATCHv2 1/2] ARM: socfpga: dts: Add support for SD/MMC
+Date: Thu, 20 Jun 2013 10:54:27 +0900
+Message-ID: <51C260D3.4070003@samsung.com>
+References: <1371588170-17149-1-git-send-email-dinguyen@altera.com>
+ <1371588170-17149-2-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:16183 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S935237Ab3FTBwF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jun 2013 21:52:05 -0400
-In-reply-to: <CAD=FV=Wy5X9C=NOUVyAzZK5+BKD1w4FTmoTHzKipq2j_Y9rdtg@mail.gmail.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:57562 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S935237Ab3FTByR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jun 2013 21:54:17 -0400
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MOO002ZW5AF1MI0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 20 Jun 2013 10:54:16 +0900 (KST)
+In-reply-to: <1371588170-17149-2-git-send-email-dinguyen@altera.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, Andrew Bresticker <abrestic@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Rob Landley <rob@landley.net>, Will Newton <will.newton@gmail.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, linux-doc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Turquette <mturquette@linaro.org>
+To: dinguyen@altera.com
+Cc: dinh.linux@gmail.com, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Pavel Machek <pavel@denx.de>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Chris Ball <cjb@laptop.org>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux@arm.linux.org.uk
 
-Hi Doug,
+I didn't have the socfpga board. But it's looks good.
 
-I'm researching for fixed-rate-clocks.
-Maybe i misunderstood for using <fixed-rate-clocks>. :)
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
 Best Regards,
 Jaehoon Chung
 
-On 06/19/2013 12:15 AM, Doug Anderson wrote:
-> Jaehoon,
+On 06/19/2013 05:42 AM, dinguyen@altera.com wrote:
+> From: Dinh Nguyen <dinguyen@altera.com>
 > 
-> On Mon, Jun 17, 2013 at 9:51 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Hi Doug,
->>
->> I have one question for using <clock-frequency>.
->> I found the fixed-rate-clocks feature.
->> If we want to set <clock-frequency>, then can we use the fixed-rate-clocks?
->> i'm not sure how use the fixed-rate-clocks. but it seems to set fixed-rate value for clock frequency.
->>
->> clk_set_rate() didn't ensure to set the <clock-frequency> value.
+> Add bindings for SD/MMC for SOCFPGA.
+> Add "syscon" to the "altr,sys-mgr" binding.
 > 
-> I'm not sure I understand the question.  I don't think that the
-> fixed-rate-clocks have a close relation to the clock-frequency or the
-> ciu clock.  The fixed-rate-clock entries for a board usually specify
-> the root clock source for a board.  For instance in exynos5250-snow
-> you can see:
+> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+> Reviewed-by: Pavel Machek <pavel@denx.de>
+> CC: Arnd Bergmann <arnd@arndb.de>
+> CC: Olof Johansson <olof@lixom.net>
+> Cc: Pavel Machek <pavel@denx.de>
+> Cc: Grant Likely <grant.likely@linaro.org>
+> Cc: Rob Herring <rob.herring@calxeda.com>
+> Cc: Chris Ball <cjb@laptop.org>
+> Cc: devicetree-discuss@lists.ozlabs.org
+> Cc: linux-mmc@vger.kernel.org
+> CC: <linux@arm.linux.org.uk>
 > 
-> fixed-rate-clocks {
->   xxti {
->     compatible = "samsung,clock-xxti";
->     clock-frequency = <24000000>;
->   };
-> };
+> v2:
+> - Fixed misspellings extentions->extensions
+> ---
+>  .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   60 ++++++++++++++++++++
+>  arch/arm/boot/dts/socfpga.dtsi                     |   13 ++++-
+>  arch/arm/boot/dts/socfpga_cyclone5.dts             |   13 +++++
+>  arch/arm/boot/dts/socfpga_vt.dts                   |   12 ++++
+>  4 files changed, 97 insertions(+), 1 deletion(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
 > 
-> Other clocks in the board are derived from this clock through PLLs,
-> muxes, dividers, gates, etc.  On 5250 we have:
-> 
->  fin_pll (xxti) -> fout_mpll -> fout_mplldiv2 -> mout_mpll_fout ->
->  sclk_mpll -> sclk_mpll_user -> mout_mmc1 -> div_mmc1
->  div_mmc_pre1 -> sclk_mmc1
-> 
-> In 5250 the ciu clock for mmc1 is sclk_mmc1, which is a simple gate.
-> When you "enable" this clock it, ungates it.  The sclk_mmc1 has the
-> flag CLK_SET_RATE_PARENT on it.  That means when you try to set the
-> rate it will involve the parent clock (div_mmc_pre1).  The parent
-> clock also has CLK_SET_RATE_PARENT, so it can also involve div_mmc1.
-> I haven't dug through to see how the clock framework splits up divides
-> between div_mmc1 and div_mmc_pre1, but it's supposed to handle that.
-> 
-> We don't allow clk_set_rate to percolate any higher (no
-> CLK_SET_RATE_PARENT at mout_mmc1).
-> 
-> -Doug
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+> new file mode 100644
+> index 0000000..f218bb8
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+> @@ -0,0 +1,60 @@
+> +* Altera SOCFPGA specific extensions to the Synopsis Designware Mobile
+> +  Storage Host Controller
+> +
+> +Required Properties:
+> +
+> +* compatible: should be
+> +	- "altr,socfpga-dw-mshc": for controllers with Altera SOCFPGA
+> +	  specific extensions.
+> +
+> +* altr,dw-mshc-ciu-div: Specifies the divider value for the card interface
+> +  unit (ciu) clock. The value should be (n-1). For Altera's SOCFPGA, the divider
+> +  value is fixed at 3, which mean parent_clock/4.
+> +
+> +* altr,dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
+> +  in transmit mode and CIU clock phase shift value in receive mode for single
+> +  data rate mode operation. Refer notes below for the order of the cells and the
+> +  valid values.
+> +
+> +  Notes for the sdr-timing values:
+> +
+> +    The order of the cells should be
+> +      - First Cell: CIU clock phase shift value for RX mode, smplsel bits in
+> +	the system manager SDMMC control group.
+> +      - Second Cell: CIU clock phase shift value for TX mode, drvsel bits in
+> +	the system manager SDMMC control group.
+> +
+> +    Valid values for SDR CIU clock timing for SOCFPGA:
+> +      - valid value for tx phase shift and rx phase shift is 0 to 7.
+> +
+> +Required properties for a slot:
+> +
+> +* bus-width: Data width for card slot. 4-bit or 8-bit data.
+> +
+> +Example:
+> +
+> +  The MSHC controller node can be split into two portions, SoC specific and
+> +  board specific portions as listed below.
+> +
+> +	dwmmc0@ff704000 {
+> +		compatible = "altr,socfpga-dw-mshc";
+> +		reg = <0xff704000 0x1000>;
+> +		interrupts = <0 139 4>;
+> +		#address-cells = <1>;
+> +		#size-cells = <0>;
+> +	};
+> +
+> +	dwmmc0@ff704000 {
+> +		num-slots = <1>;
+> +		supports-highspeed;
+> +		broken-cd;
+> +		fifo-depth = <0x400>;
+> +		altr,dw-mshc-ciu-div = <3>;
+> +      		altr,dw-mshc-sdr-timing = <0 3>;
+> +
+> +		slot@0 {
+> +			reg = <0>;
+> +			bus-width = <4>;
+> +		};
+> +	};
+> +
+> diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
+> index bee62a2..dbf7f22 100644
+> --- a/arch/arm/boot/dts/socfpga.dtsi
+> +++ b/arch/arm/boot/dts/socfpga.dtsi
+> @@ -468,6 +468,17 @@
+>  			cache-level = <2>;
+>  		};
+>  
+> +		mmc: dwmmc0@ff704000 {
+> +			compatible = "altr,socfpga-dw-mshc";
+> +			reg = <0xff704000 0x1000>;
+> +			interrupts = <0 139 4>;
+> +			fifo-depth = <0x400>;
+> +			#address-cells = <1>;
+> +			#size-cells = <0>;
+> +			clocks = <&l4_mp_clk>, <&sdmmc_clk>;
+> +			clock-names = "biu", "ciu";
+> +		};
+> +
+>  		/* Local timer */
+>  		timer@fffec600 {
+>  			compatible = "arm,cortex-a9-twd-timer";
+> @@ -521,7 +532,7 @@
+>  			};
+>  
+>  		sysmgr@ffd08000 {
+> -				compatible = "altr,sys-mgr";
+> +				compatible = "altr,sys-mgr", "syscon";
+>  				reg = <0xffd08000 0x4000>;
+>  			};
+>  	};
+> diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dts b/arch/arm/boot/dts/socfpga_cyclone5.dts
+> index 973999d..1853cb1 100644
+> --- a/arch/arm/boot/dts/socfpga_cyclone5.dts
+> +++ b/arch/arm/boot/dts/socfpga_cyclone5.dts
+> @@ -54,6 +54,19 @@
+>  			status = "okay";
+>  		};
+>  
+> +		dwmmc0@ff704000 {
+> +			num-slots = <1>;
+> +			supports-highspeed;
+> +			broken-cd;
+> +			altr,dw-mshc-ciu-div = <3>;
+> +			altr,dw-mshc-sdr-timing = <0 3>;
+> +
+> +			slot@0 {
+> +				reg = <0>;
+> +				bus-width = <4>;
+> +			};
+> +		};
+> +
+>  		timer0@ffc08000 {
+>  			clock-frequency = <100000000>;
+>  		};
+> diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
+> index d1ec0ca..d93deb0 100644
+> --- a/arch/arm/boot/dts/socfpga_vt.dts
+> +++ b/arch/arm/boot/dts/socfpga_vt.dts
+> @@ -46,6 +46,18 @@
+>  			status = "okay";
+>  		};
+>  
+> +		dwmmc0@ff704000 {
+> +			num-slots = <1>;
+> +			supports-highspeed;
+> +			broken-cd;
+> +			altr,dw-mshc-ciu-div = <3>;
+> +
+> +			slot@0 {
+> +				reg = <0>;
+> +				bus-width = <4>;
+> +			};
+> +		};
+> +
+>  		timer0@ffc08000 {
+>  			clock-frequency = <7000000>;
+>  		};
 > 
 
