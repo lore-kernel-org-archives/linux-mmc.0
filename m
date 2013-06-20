@@ -1,207 +1,105 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCHv2 1/2] ARM: socfpga: dts: Add support for SD/MMC
-Date: Thu, 20 Jun 2013 10:54:27 +0900
-Message-ID: <51C260D3.4070003@samsung.com>
-References: <1371588170-17149-1-git-send-email-dinguyen@altera.com>
- <1371588170-17149-2-git-send-email-dinguyen@altera.com>
+Subject: Re: mmc_rescan/sdio_reset timeout missing?
+Date: Thu, 20 Jun 2013 10:58:06 +0900
+Message-ID: <51C261AE.5020507@samsung.com>
+References: <CANEJEGsPrkGwZVpK8bfYUyVYN2gfk2fbqs7D4DFaz5GhRaZRcw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:57562 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S935237Ab3FTByR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jun 2013 21:54:17 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout2.samsung.com ([203.254.224.25]:18734 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S935237Ab3FTB6C (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jun 2013 21:58:02 -0400
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MOO002ZW5AF1MI0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 20 Jun 2013 10:54:16 +0900 (KST)
-In-reply-to: <1371588170-17149-2-git-send-email-dinguyen@altera.com>
+ with ESMTP id <0MOO0046M5GIU160@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 20 Jun 2013 10:57:54 +0900 (KST)
+In-reply-to: <CANEJEGsPrkGwZVpK8bfYUyVYN2gfk2fbqs7D4DFaz5GhRaZRcw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com
-Cc: dinh.linux@gmail.com, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Pavel Machek <pavel@denx.de>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Chris Ball <cjb@laptop.org>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux@arm.linux.org.uk
+To: Grant Grundler <grundler@chromium.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>
 
-I didn't have the socfpga board. But it's looks good.
+Hi Grant,
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Which kernel-version do you use?
+And i want to know the controller IP version.
+
+CC'd to Seungwon.
 
 Best Regards,
 Jaehoon Chung
 
-On 06/19/2013 05:42 AM, dinguyen@altera.com wrote:
-> From: Dinh Nguyen <dinguyen@altera.com>
+On 06/19/2013 10:44 PM, Grant Grundler wrote:
+> I've looking through the code to understand this bug that caused this
+> stack trace (and ended up panicing below):
 > 
-> Add bindings for SD/MMC for SOCFPGA.
-> Add "syscon" to the "altr,sys-mgr" binding.
+> <3>[ 1680.501338] INFO: task kworker/u:22:9101 blocked for more than
+> 120 seconds.
+> <3>[ 1680.501348] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
+> disables this message.
+> <6>[ 1680.501357] kworker/u:22    D 8050644c     0  9101      2 0x00000000
+> <5>[ 1680.501385] [<8050644c>] (__schedule+0x608/0x758) from
+> [<80506938>] (schedule+0x94/0x98)
+> <5>[ 1680.501399] [<80506938>] (schedule+0x94/0x98) from [<80504830>]
+> (schedule_timeout+0x38/0x2d0)
+> <5>[ 1680.501413] [<80504830>] (schedule_timeout+0x38/0x2d0) from
+> [<80506788>] (wait_for_common+0x138/0x178)
+> <5>[ 1680.501427] [<80506788>] (wait_for_common+0x138/0x178) from
+> [<805068a0>] (wait_for_completion+0x20/0x24)
+> <5>[ 1680.501442] [<805068a0>] (wait_for_completion+0x20/0x24) from
+> [<803bc424>] (mmc_wait_for_req_done+0x2c/0x84)
+> <5>[ 1680.501455] [<803bc424>] (mmc_wait_for_req_done+0x2c/0x84) from
+> [<803bc8e8>] (mmc_wait_for_req+0x2c/0x30)
+> <5>[ 1680.501468] [<803bc8e8>] (mmc_wait_for_req+0x2c/0x30) from
+> [<803bc968>] (mmc_wait_for_cmd+0x7c/0x8c)
+> <5>[ 1680.501481] [<803bc968>] (mmc_wait_for_cmd+0x7c/0x8c) from
+> [<803c4fe4>] (mmc_io_rw_direct_host+0xc8/0x138)
+> <5>[ 1680.501496] [<803c4fe4>] (mmc_io_rw_direct_host+0xc8/0x138) from
+> [<803c5440>] (sdio_reset+0x38/0x74)
+> <5>[ 1680.501508] [<803c5440>] (sdio_reset+0x38/0x74) from
+> [<803be330>] (mmc_rescan+0x214/0x2c0)
+> <5>[ 1680.501523] [<803be330>] (mmc_rescan+0x214/0x2c0) from
+> [<80045b04>] (process_one_work+0x210/0x424)
+> <5>[ 1680.501536] [<80045b04>] (process_one_work+0x210/0x424) from
+> [<80046128>] (worker_thread+0x1f0/0x39c)
+> <5>[ 1680.501549] [<80046128>] (worker_thread+0x1f0/0x39c) from
+> [<8004acc0>] (kthread+0x9c/0xac)
+> <5>[ 1680.501563] [<8004acc0>] (kthread+0x9c/0xac) from [<8000ee48>]
+> (kernel_thread_exit+0x0/0x8)
+> <0>[ 1680.501573] Kernel panic - not syncing: hung_task: blocked tasks
+> <5>[ 1680.501586] [<80014890>] (unwind_backtrace+0x0/0xec) from
+> [<80500018>] (dump_stack+0x20/0x24)
+> <5>[ 1680.501597] [<80500018>] (dump_stack+0x20/0x24) from
+> [<80500178>] (panic+0x98/0x1e0)
+> <5>[ 1680.501610] [<80500178>] (panic+0x98/0x1e0) from [<80082658>]
+> (watchdog+0x1e8/0x24c)
+> <5>[ 1680.501621] [<80082658>] (watchdog+0x1e8/0x24c) from
+> [<8004acc0>] (kthread+0x9c/0xac)
+> <5>[ 1680.501633] [<8004acc0>] (kthread+0x9c/0xac) from [<8000ee48>]
+> (kernel_thread_exit+0x0/0x8)
 > 
-> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-> Reviewed-by: Pavel Machek <pavel@denx.de>
-> CC: Arnd Bergmann <arnd@arndb.de>
-> CC: Olof Johansson <olof@lixom.net>
-> Cc: Pavel Machek <pavel@denx.de>
-> Cc: Grant Likely <grant.likely@linaro.org>
-> Cc: Rob Herring <rob.herring@calxeda.com>
-> Cc: Chris Ball <cjb@laptop.org>
-> Cc: devicetree-discuss@lists.ozlabs.org
-> Cc: linux-mmc@vger.kernel.org
-> CC: <linux@arm.linux.org.uk>
+> I don't see any timers being set in any code path for the calls to
+> mmc_io_rw_direct_host(host,... SDIO_CCCR_ABORT...) in sdio_reset()
+> doesn't complete. I was thinking cmd_timeout_ms could be used but eMMC
+> (dw_mmc driver) only appears to support data_timeout and
+> response_timeout, not a cmd timeout. And even if dw_mmc did support
+> that timeout in HW, cmd_timeout_ms isn't getting set in this code
+> path.
 > 
-> v2:
-> - Fixed misspellings extentions->extensions
-> ---
->  .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   60 ++++++++++++++++++++
->  arch/arm/boot/dts/socfpga.dtsi                     |   13 ++++-
->  arch/arm/boot/dts/socfpga_cyclone5.dts             |   13 +++++
->  arch/arm/boot/dts/socfpga_vt.dts                   |   12 ++++
->  4 files changed, 97 insertions(+), 1 deletion(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+> Any advice on how that should be fixed?
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-> new file mode 100644
-> index 0000000..f218bb8
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-> @@ -0,0 +1,60 @@
-> +* Altera SOCFPGA specific extensions to the Synopsis Designware Mobile
-> +  Storage Host Controller
-> +
-> +Required Properties:
-> +
-> +* compatible: should be
-> +	- "altr,socfpga-dw-mshc": for controllers with Altera SOCFPGA
-> +	  specific extensions.
-> +
-> +* altr,dw-mshc-ciu-div: Specifies the divider value for the card interface
-> +  unit (ciu) clock. The value should be (n-1). For Altera's SOCFPGA, the divider
-> +  value is fixed at 3, which mean parent_clock/4.
-> +
-> +* altr,dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
-> +  in transmit mode and CIU clock phase shift value in receive mode for single
-> +  data rate mode operation. Refer notes below for the order of the cells and the
-> +  valid values.
-> +
-> +  Notes for the sdr-timing values:
-> +
-> +    The order of the cells should be
-> +      - First Cell: CIU clock phase shift value for RX mode, smplsel bits in
-> +	the system manager SDMMC control group.
-> +      - Second Cell: CIU clock phase shift value for TX mode, drvsel bits in
-> +	the system manager SDMMC control group.
-> +
-> +    Valid values for SDR CIU clock timing for SOCFPGA:
-> +      - valid value for tx phase shift and rx phase shift is 0 to 7.
-> +
-> +Required properties for a slot:
-> +
-> +* bus-width: Data width for card slot. 4-bit or 8-bit data.
-> +
-> +Example:
-> +
-> +  The MSHC controller node can be split into two portions, SoC specific and
-> +  board specific portions as listed below.
-> +
-> +	dwmmc0@ff704000 {
-> +		compatible = "altr,socfpga-dw-mshc";
-> +		reg = <0xff704000 0x1000>;
-> +		interrupts = <0 139 4>;
-> +		#address-cells = <1>;
-> +		#size-cells = <0>;
-> +	};
-> +
-> +	dwmmc0@ff704000 {
-> +		num-slots = <1>;
-> +		supports-highspeed;
-> +		broken-cd;
-> +		fifo-depth = <0x400>;
-> +		altr,dw-mshc-ciu-div = <3>;
-> +      		altr,dw-mshc-sdr-timing = <0 3>;
-> +
-> +		slot@0 {
-> +			reg = <0>;
-> +			bus-width = <4>;
-> +		};
-> +	};
-> +
-> diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
-> index bee62a2..dbf7f22 100644
-> --- a/arch/arm/boot/dts/socfpga.dtsi
-> +++ b/arch/arm/boot/dts/socfpga.dtsi
-> @@ -468,6 +468,17 @@
->  			cache-level = <2>;
->  		};
->  
-> +		mmc: dwmmc0@ff704000 {
-> +			compatible = "altr,socfpga-dw-mshc";
-> +			reg = <0xff704000 0x1000>;
-> +			interrupts = <0 139 4>;
-> +			fifo-depth = <0x400>;
-> +			#address-cells = <1>;
-> +			#size-cells = <0>;
-> +			clocks = <&l4_mp_clk>, <&sdmmc_clk>;
-> +			clock-names = "biu", "ciu";
-> +		};
-> +
->  		/* Local timer */
->  		timer@fffec600 {
->  			compatible = "arm,cortex-a9-twd-timer";
-> @@ -521,7 +532,7 @@
->  			};
->  
->  		sysmgr@ffd08000 {
-> -				compatible = "altr,sys-mgr";
-> +				compatible = "altr,sys-mgr", "syscon";
->  				reg = <0xffd08000 0x4000>;
->  			};
->  	};
-> diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dts b/arch/arm/boot/dts/socfpga_cyclone5.dts
-> index 973999d..1853cb1 100644
-> --- a/arch/arm/boot/dts/socfpga_cyclone5.dts
-> +++ b/arch/arm/boot/dts/socfpga_cyclone5.dts
-> @@ -54,6 +54,19 @@
->  			status = "okay";
->  		};
->  
-> +		dwmmc0@ff704000 {
-> +			num-slots = <1>;
-> +			supports-highspeed;
-> +			broken-cd;
-> +			altr,dw-mshc-ciu-div = <3>;
-> +			altr,dw-mshc-sdr-timing = <0 3>;
-> +
-> +			slot@0 {
-> +				reg = <0>;
-> +				bus-width = <4>;
-> +			};
-> +		};
-> +
->  		timer0@ffc08000 {
->  			clock-frequency = <100000000>;
->  		};
-> diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
-> index d1ec0ca..d93deb0 100644
-> --- a/arch/arm/boot/dts/socfpga_vt.dts
-> +++ b/arch/arm/boot/dts/socfpga_vt.dts
-> @@ -46,6 +46,18 @@
->  			status = "okay";
->  		};
->  
-> +		dwmmc0@ff704000 {
-> +			num-slots = <1>;
-> +			supports-highspeed;
-> +			broken-cd;
-> +			altr,dw-mshc-ciu-div = <3>;
-> +
-> +			slot@0 {
-> +				reg = <0>;
-> +				bus-width = <4>;
-> +			};
-> +		};
-> +
->  		timer0@ffc08000 {
->  			clock-frequency = <7000000>;
->  		};
+> I'm assuming the eMMC device (Sandisk SEM16G - eMMC 4.41) has buggy FW
+> and just wedges after a suspend/resume.
+> 
+> cheers,
+> grant
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 
