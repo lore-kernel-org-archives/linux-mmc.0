@@ -1,7 +1,7 @@
 From: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v12 06/11] da8xx: config: Enable MMC and FS options
-Date: Thu, 20 Jun 2013 16:06:42 -0500
-Message-ID: <1371762407-24544-7-git-send-email-joelagnel@ti.com>
+Subject: [PATCH v12 07/11] ARM: davinci: Fix compiler warnings in devices-da8xx
+Date: Thu, 20 Jun 2013 16:06:43 -0500
+Message-ID: <1371762407-24544-8-git-send-email-joelagnel@ti.com>
 References: <1371762407-24544-1-git-send-email-joelagnel@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,31 +22,51 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 
-Required to get OMAP-L1 EVM access MMC and mount rootfs
+queue_priority_mapping and queue_tc_mapping are no longer
+const anymore generating a bunch of warnings in devices-da8xx.
+Fix them by not doing constant assignments.
 
 Signed-off-by: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
 ---
- arch/arm/configs/da8xx_omapl_defconfig |    3 +++
- 1 file changed, 3 insertions(+)
+ arch/arm/mach-davinci/devices-da8xx.c |    8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm/configs/da8xx_omapl_defconfig b/arch/arm/configs/da8xx_omapl_defconfig
-index 7c86813..35919ca 100644
---- a/arch/arm/configs/da8xx_omapl_defconfig
-+++ b/arch/arm/configs/da8xx_omapl_defconfig
-@@ -104,6 +104,7 @@ CONFIG_SND_DAVINCI_SOC=m
- # CONFIG_USB_SUPPORT is not set
- CONFIG_EXT2_FS=y
- CONFIG_EXT3_FS=y
-+CONFIG_EXT4_FS=y
- CONFIG_XFS_FS=m
- CONFIG_INOTIFY=y
- CONFIG_AUTOFS4_FS=m
-@@ -135,3 +136,5 @@ CONFIG_DEBUG_ERRORS=y
- # CONFIG_CRYPTO_HW is not set
- CONFIG_CRC_CCITT=m
- CONFIG_CRC_T10DIF=m
-+CONFIG_MMC=y
-+CONFIG_MMC_DAVINCI=y
+diff --git a/arch/arm/mach-davinci/devices-da8xx.c b/arch/arm/mach-davinci/devices-da8xx.c
+index bf57252..eb254fe 100644
+--- a/arch/arm/mach-davinci/devices-da8xx.c
++++ b/arch/arm/mach-davinci/devices-da8xx.c
+@@ -105,27 +105,27 @@ struct platform_device da8xx_serial_device = {
+ 	},
+ };
+ 
+-static const s8 da8xx_queue_tc_mapping[][2] = {
++static s8 da8xx_queue_tc_mapping[][2] = {
+ 	/* {event queue no, TC no} */
+ 	{0, 0},
+ 	{1, 1},
+ 	{-1, -1}
+ };
+ 
+-static const s8 da8xx_queue_priority_mapping[][2] = {
++static s8 da8xx_queue_priority_mapping[][2] = {
+ 	/* {event queue no, Priority} */
+ 	{0, 3},
+ 	{1, 7},
+ 	{-1, -1}
+ };
+ 
+-static const s8 da850_queue_tc_mapping[][2] = {
++static s8 da850_queue_tc_mapping[][2] = {
+ 	/* {event queue no, TC no} */
+ 	{0, 0},
+ 	{-1, -1}
+ };
+ 
+-static const s8 da850_queue_priority_mapping[][2] = {
++static s8 da850_queue_priority_mapping[][2] = {
+ 	/* {event queue no, Priority} */
+ 	{0, 3},
+ 	{-1, -1}
 -- 
 1.7.9.5
 
