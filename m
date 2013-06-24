@@ -1,72 +1,67 @@
-From: Joel A Fernandes <agnel.joel@gmail.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
 Subject: Re: [PATCH v12 05/11] edma: config: Enable config options for EDMA
-Date: Mon, 24 Jun 2013 15:10:15 -0500
-Message-ID: <CAD=GYparFQPMH801j9N2tRA6VnMidn23qUS9=yW8amOLSDLOzA@mail.gmail.com>
+Date: Mon, 24 Jun 2013 22:28:23 +0200
+Message-ID: <201306242228.23297.arnd@arndb.de>
 References: <1371762407-24544-1-git-send-email-joelagnel@ti.com>
-	<201306211632.12577.arnd@arndb.de>
-	<CAD=GYpbhBAaSkMtcJaPtVpWar7AcW37QpAk3A0qgwX6G5PDoZg@mail.gmail.com>
-	<201306212044.26677.arnd@arndb.de>
-	<CAD=GYpY4koXd9f6_ijQfDHsiULD4d53cdu=9X421WXSAit_YQg@mail.gmail.com>
-	<51C82C3C.8040506@ti.com>
+	<201306220014.16427.arnd@arndb.de>
+	<CAD=GYpabakChmN-TEJbLn6p=BwX2wsK5KWsc5gH9-cAA+yWcEA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <51C82C3C.8040506@ti.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Sekhar Nori <nsekhar@ti.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, Joel A Fernandes <joelagnel@ti.com>, Tony Lindgren <tony@atomide.com>, Matt Porter <matt@ohporter.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Rob Landley <rob@landley.net>, Andrew Morton <akpm@linux-foundation.org>, Jason Kridner <jkridner@beagleboard.org>, Koen Kooi <koen@beagleboard.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <CAD=GYpabakChmN-TEJbLn6p=BwX2wsK5KWsc5gH9-cAA+yWcEA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel@>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jun 24, 2013 at 6:23 AM, Sekhar Nori <nsekhar@ti.com> wrote:
-> On 6/22/2013 3:23 AM, Joel A Fernandes wrote:
->> Hi Arnd,
->>
->> On Fri, Jun 21, 2013 at 1:44 PM, Arnd Bergmann <arnd@arndb.de> wrote:
->>> On Friday 21 June 2013, Joel A Fernandes wrote:
->>>> I think we are talking about different things, I agree the 'select
->>>> DMADEVICES' can be dropped but lets please keep the default y option
->>>> (not adding new select statements, just saying that if someone select
->>>> DMADEVICES in menuconfig and if they're ARCH_OMAP=1 , then default to
->>>> EDMA). This will simply allow people to have a default. Thanks.
->>>
->>> Yes, that's ok.
->>
->> Ok, thanks. I will follow up with a patch in my next submissions that builds it.
->>
->> Perhaps a:
->> default y if 'ARCH_OMAP2PLUS'
->>
->> and leave the existing as it is...
->> default n if  'ARCH_DAVINCI || ARCH_OMAP1 || ARCH_OMAP2'
->>
->> would make most sense to me. Basically EDMA is seen on current and all
->> new OMAP2PLUS.
->
-> OMAP2PLUS devices like OMAP3/4 do not have EDMA so this is not really true.
+On Saturday 22 June 2013, Joel A Fernandes wrote:
+> 
+> >> > config TI_EDMA
+> >> >         tristate "TI EDMA support"
+> >> >         default m if 'ARCH_DAVINCI || ARCH_OMAP1 || ARCH_OMAP2
+> >> >         select DMA_ENGINE
+> >> >         select DMA_VIRTUAL_CHANNELS
+> >>
+> >>
+> >> MMC depends on EDMA specially on AM33xx there's no PIO mode AFAIK. The
+> >> 'm' option will require some initramfs to load the module when needing
+> >> to MMC boot, I suggest lets leave it as y.
+> >>
+> >
+> > Ah, right: you still export a filter function from the edma driver
+> > and use it in slave drivers:
+> >
+> > drivers/mmc/host/davinci_mmc.c:         dma_request_slave_channel_compat(mask, edma_filter_fn,
+> > drivers/mmc/host/davinci_mmc.c:         dma_request_slave_channel_compat(mask, edma_filter_fn,
+> > drivers/spi/spi-davinci.c:      dspi->dma_rx = dma_request_channel(mask, edma_filter_fn,
+> > drivers/spi/spi-davinci.c:      dspi->dma_tx = dma_request_channel(mask, edma_filter_fn,
+> >
+> > As long as this is the case, you have to be careful with the dependencies
+> > to make sure that davinci_mmc and spi-davinci either depend on TI_EDMA, or
+> > edma_filter_fn gets defined to NULL when you are building for a DT-only platform.
+> 
+> Yes sure, right now they are defined  as follows in include/linux/edma.h:
+> 
+> #if defined(CONFIG_TI_EDMA) || defined(CONFIG_TI_EDMA_MODULE)
+> bool edma_filter_fn(struct dma_chan *, void *);
+> #else
+> static inline bool edma_filter_fn(struct dma_chan *chan, void *param)
+> {
+> return false;
+> }
+> #endif
 
-Sure. Right now though, and from what I've seen, all future SoCs are
-supporting EDMA.
+It's best to just define the filter function in the platform
+code and pass a pointer to it through platform data. The way you do
+it above makes the slave drivers inherently nonportable.
 
->>
->>>
->>> config TI_EDMA
->>>         tristate "TI EDMA support"
->>>         default m if 'ARCH_DAVINCI || ARCH_OMAP1 || ARCH_OMAP2
->>>         select DMA_ENGINE
->>>         select DMA_VIRTUAL_CHANNELS
->>
->>
->>
->> MMC depends on EDMA specially on AM33xx there's no PIO mode AFAIK. The
->> 'm' option will require some initramfs to load the module when needing
->> to MMC boot, I suggest lets leave it as y.
->
-> But there is no reason why it cannot work with PIO, right? Sounds like
-> the right fix is in driver.
-
-I am not sure about this. I agree no reason it cannot do PIO. I will check.
-But even if it did, loading EDMA as a module will require omap_hsmmc to switch
-to DMA mode which I am sure the driver doesn't support today.
-
-Thanks,
-Joel
+	Arnd
