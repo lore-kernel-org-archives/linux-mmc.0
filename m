@@ -1,53 +1,72 @@
-From: Zoran Markovic <zoran.markovic@linaro.org>
-Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
-Date: Mon, 24 Jun 2013 12:58:39 -0700
-Message-ID: <CAME+o4=WrfpvJo=jN1KZ_JHnYq9Frfk3EPcwtG10=aCwrbY+Rw@mail.gmail.com>
-References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
-	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
-	<CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
-	<CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
-	<CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
-	<CAMbhsRSC5XhhSK-DAoS7_JAj7XUfaM_Topp4UcBaVwRCYXSscQ@mail.gmail.com>
-	<CAPDyKFpMGS-JA47pY_n7xvqdtbPumGpc2fdnYZnSVQ_Rybre3g@mail.gmail.com>
-	<CAMbhsRQwGbpa4a1RziV92qnw4VFh6+=oQiadfqa17FANEiK8_Q@mail.gmail.com>
-	<CAPDyKFroFY3-NJCFpkDYyBVx25CSfk492H_TnoS60jn2CdfWUQ@mail.gmail.com>
-	<CAMbhsRTR9im-BsJ-1m+DD-67LM=s0=KOoy-o+2PmnkDyLOP0Gg@mail.gmail.com>
-	<CAPDyKFoX-ioDVVkfQ21epJyTqQD98xvsqBR1FXzgP9bN6_Zxjg@mail.gmail.com>
+From: Joel A Fernandes <agnel.joel@gmail.com>
+Subject: Re: [PATCH v12 05/11] edma: config: Enable config options for EDMA
+Date: Mon, 24 Jun 2013 15:10:15 -0500
+Message-ID: <CAD=GYparFQPMH801j9N2tRA6VnMidn23qUS9=yW8amOLSDLOzA@mail.gmail.com>
+References: <1371762407-24544-1-git-send-email-joelagnel@ti.com>
+	<201306211632.12577.arnd@arndb.de>
+	<CAD=GYpbhBAaSkMtcJaPtVpWar7AcW37QpAk3A0qgwX6G5PDoZg@mail.gmail.com>
+	<201306212044.26677.arnd@arndb.de>
+	<CAD=GYpY4koXd9f6_ijQfDHsiULD4d53cdu=9X421WXSAit_YQg@mail.gmail.com>
+	<51C82C3C.8040506@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f50.google.com ([209.85.219.50]:34147 "EHLO
-	mail-oa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750958Ab3FXT6k (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Jun 2013 15:58:40 -0400
-Received: by mail-oa0-f50.google.com with SMTP id k7so12572724oag.9
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Jun 2013 12:58:40 -0700 (PDT)
-In-Reply-To: <CAPDyKFoX-ioDVVkfQ21epJyTqQD98xvsqBR1FXzgP9bN6_Zxjg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <51C82C3C.8040506@ti.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Sekhar Nori <nsekhar@ti.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Joel A Fernandes <joelagnel@ti.com>, Tony Lindgren <tony@atomide.com>, Matt Porter <matt@ohporter.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Rob Landley <rob@landley.net>, Andrew Morton <akpm@linux-foundation.org>, Jason Kridner <jkridner@beagleboard.org>, Koen Kooi <koen@beagleboard.org>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Colin Cross <ccross@android.com>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
->> This patch is ported from the Android common tree, so you've probably
->> been using it.
+On Mon, Jun 24, 2013 at 6:23 AM, Sekhar Nori <nsekhar@ti.com> wrote:
+> On 6/22/2013 3:23 AM, Joel A Fernandes wrote:
+>> Hi Arnd,
+>>
+>> On Fri, Jun 21, 2013 at 1:44 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+>>> On Friday 21 June 2013, Joel A Fernandes wrote:
+>>>> I think we are talking about different things, I agree the 'select
+>>>> DMADEVICES' can be dropped but lets please keep the default y option
+>>>> (not adding new select statements, just saying that if someone select
+>>>> DMADEVICES in menuconfig and if they're ARCH_OMAP=1 , then default to
+>>>> EDMA). This will simply allow people to have a default. Thanks.
+>>>
+>>> Yes, that's ok.
+>>
+>> Ok, thanks. I will follow up with a patch in my next submissions that builds it.
+>>
+>> Perhaps a:
+>> default y if 'ARCH_OMAP2PLUS'
+>>
+>> and leave the existing as it is...
+>> default n if  'ARCH_DAVINCI || ARCH_OMAP1 || ARCH_OMAP2'
+>>
+>> would make most sense to me. Basically EDMA is seen on current and all
+>> new OMAP2PLUS.
 >
-> We removed more or less all Android code in the mmc subsystem, since
-> it just didn't work. :-)
+> OMAP2PLUS devices like OMAP3/4 do not have EDMA so this is not really true.
+
+Sure. Right now though, and from what I've seen, all future SoCs are
+supporting EDMA.
+
+>>
+>>>
+>>> config TI_EDMA
+>>>         tristate "TI EDMA support"
+>>>         default m if 'ARCH_DAVINCI || ARCH_OMAP1 || ARCH_OMAP2
+>>>         select DMA_ENGINE
+>>>         select DMA_VIRTUAL_CHANNELS
+>>
+>>
+>>
+>> MMC depends on EDMA specially on AM33xx there's no PIO mode AFAIK. The
+>> 'm' option will require some initramfs to load the module when needing
+>> to MMC boot, I suggest lets leave it as y.
 >
-> The "deferred resume" was very useful though, so after some rework we
-> kept it and could then improve the system resume time significantly.
+> But there is no reason why it cannot work with PIO, right? Sounds like
+> the right fix is in driver.
 
-For what it's worth, I fixed one bug I noticed in the Android kernel:
-if a system has a non-removable MMC device, a suspend/resume cycle on
-this device would hold a wake lock forever. This was a visible issue
-on the panda board I am using.
+I am not sure about this. I agree no reason it cannot do PIO. I will check.
+But even if it did, loading EDMA as a module will require omap_hsmmc to switch
+to DMA mode which I am sure the driver doesn't support today.
 
-If there are doubts on whether or not the system should stay awake
-during a MMC mount, we have the option to make the calls to
-wakeup_source_register/unregister configurable. Skipping these calls
-would leave the .ws field NULL, in which case
-__pm_stay_awake/__pm_relax/__pm_wakeup_event would do nothing.
-
-Thoughts?
-
-- Zoran
+Thanks,
+Joel
