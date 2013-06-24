@@ -1,76 +1,88 @@
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v12 05/11] edma: config: Enable config options for EDMA
-Date: Mon, 24 Jun 2013 17:23:44 +0530
-Message-ID: <51C83348.6040905@ti.com>
-References: <1371762407-24544-1-git-send-email-joelagnel@ti.com>
-	<201306212044.26677.arnd@arndb.de>
-	<CAD=GYpY4koXd9f6_ijQfDHsiULD4d53cdu=9X421WXSAit_YQg@mail.gmail.com>
-	<201306220014.16427.arnd@arndb.de>
-	<CAD=GYpabakChmN-TEJbLn6p=BwX2wsK5KWsc5gH9-cAA+yWcEA@mail.gmail.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH v2] mmc: sh_mmcif: add support for Device Tree DMA bindings
+Date: Mon, 24 Jun 2013 14:36:34 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1306241434200.19735@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <CAD=GYpabakChmN-TEJbLn6p=BwX2wsK5KWsc5gH9-cAA+yWcEA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>Linux
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 6/22/2013 8:23 AM, Joel A Fernandes wrote:
->>>> config TI_EDMA
->>>>         tristate "TI EDMA support"
->>>>         default m if 'ARCH_DAVINCI || ARCH_OMAP1 || ARCH_OMAP2
->>>>         select DMA_ENGINE
->>>>         select DMA_VIRTUAL_CHANNELS
->>>
->>>
->>> MMC depends on EDMA specially on AM33xx there's no PIO mode AFAIK. The
->>> 'm' option will require some initramfs to load the module when needing
->>> to MMC boot, I suggest lets leave it as y.
->>>
->>
->> Ah, right: you still export a filter function from the edma driver
->> and use it in slave drivers:
->>
->> drivers/mmc/host/davinci_mmc.c:         dma_request_slave_channel_compat(mask, edma_filter_fn,
->> drivers/mmc/host/davinci_mmc.c:         dma_request_slave_channel_compat(mask, edma_filter_fn,
->> drivers/spi/spi-davinci.c:      dspi->dma_rx = dma_request_channel(mask, edma_filter_fn,
->> drivers/spi/spi-davinci.c:      dspi->dma_tx = dma_request_channel(mask, edma_filter_fn,
->>
->> As long as this is the case, you have to be careful with the dependencies
->> to make sure that davinci_mmc and spi-davinci either depend on TI_EDMA, or
->> edma_filter_fn gets defined to NULL when you are building for a DT-only platform.
-> 
-> Yes sure, right now they are defined  as follows in include/linux/edma.h:
-> 
-> #if defined(CONFIG_TI_EDMA) || defined(CONFIG_TI_EDMA_MODULE)
-> bool edma_filter_fn(struct dma_chan *, void *);
-> #else
-> static inline bool edma_filter_fn(struct dma_chan *chan, void *param)
-> {
-> return false;
-> }
-> #endif
-> 
-> This also has the side effect of causing DMA requests to fail if
-> TI_EDMA is not built, causing frustration for a lot of people some of
-> whom don't want to deal with DMA so I think it is OK to build the
-> driver in by default as it is (and will be) used by a lot of
-> OMAP2PLUS.
+To use DMA in the Device Tree case the driver has to be modified
+to use suitable API to obtain DMA channels.
 
-Solution for this is to enable TI_EDMA in relevant defconfigs. Most
-folks who would get frustrated by such issues would be using defconfigs
-and for those who are building their configuration from scratch this
-will be pretty low in their list of worries.
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+---
 
-Thanks,
-Sekhar
+v2: use an "else if"
+
+ drivers/mmc/host/sh_mmcif.c |   26 ++++++++++++++++----------
+ 1 files changed, 16 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index ba76a53..4fff404 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -386,25 +386,29 @@ static void sh_mmcif_request_dma(struct sh_mmcif_host *host,
+ 
+ 	host->dma_active = false;
+ 
+-	if (!pdata)
+-		return;
+-
+-	if (pdata->slave_id_tx <= 0 || pdata->slave_id_rx <= 0)
++	if (pdata) {
++		if (pdata->slave_id_tx <= 0 || pdata->slave_id_rx <= 0)
++			return;
++	} else if (!host->pd->dev.of_node) {
+ 		return;
++	}
+ 
+ 	/* We can only either use DMA for both Tx and Rx or not use it at all */
+ 	dma_cap_zero(mask);
+ 	dma_cap_set(DMA_SLAVE, mask);
+ 
+-	host->chan_tx = dma_request_channel(mask, shdma_chan_filter,
+-					    (void *)pdata->slave_id_tx);
++	host->chan_tx = dma_request_slave_channel_compat(mask, shdma_chan_filter,
++				pdata ? (void *)pdata->slave_id_tx : NULL,
++				&host->pd->dev, "tx");
+ 	dev_dbg(&host->pd->dev, "%s: TX: got channel %p\n", __func__,
+ 		host->chan_tx);
+ 
+ 	if (!host->chan_tx)
+ 		return;
+ 
+-	cfg.slave_id = pdata->slave_id_tx;
++	/* In the OF case the driver will get the slave ID from the DT */
++	if (pdata)
++		cfg.slave_id = pdata->slave_id_tx;
+ 	cfg.direction = DMA_MEM_TO_DEV;
+ 	cfg.dst_addr = res->start + MMCIF_CE_DATA;
+ 	cfg.src_addr = 0;
+@@ -412,15 +416,17 @@ static void sh_mmcif_request_dma(struct sh_mmcif_host *host,
+ 	if (ret < 0)
+ 		goto ecfgtx;
+ 
+-	host->chan_rx = dma_request_channel(mask, shdma_chan_filter,
+-					    (void *)pdata->slave_id_rx);
++	host->chan_rx = dma_request_slave_channel_compat(mask, shdma_chan_filter,
++				pdata ? (void *)pdata->slave_id_rx : NULL,
++				&host->pd->dev, "rx");
+ 	dev_dbg(&host->pd->dev, "%s: RX: got channel %p\n", __func__,
+ 		host->chan_rx);
+ 
+ 	if (!host->chan_rx)
+ 		goto erqrx;
+ 
+-	cfg.slave_id = pdata->slave_id_rx;
++	if (pdata)
++		cfg.slave_id = pdata->slave_id_rx;
+ 	cfg.direction = DMA_DEV_TO_MEM;
+ 	cfg.dst_addr = 0;
+ 	cfg.src_addr = res->start + MMCIF_CE_DATA;
+-- 
+1.7.2.5
+
