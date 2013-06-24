@@ -1,88 +1,53 @@
-From: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v12 05/11] edma: config: Enable config options for EDMA
-Date: Mon, 24 Jun 2013 09:48:37 -0500
-Message-ID: <CAD=GYpYrkE--Snc-MoEdJRkUy5TfMY992kd0L--E6yPpMoRaxQ@mail.gmail.com>
-References: <1371762407-24544-1-git-send-email-joelagnel@ti.com>
-	<201306212044.26677.arnd@arndb.de>
-	<CAD=GYpY4koXd9f6_ijQfDHsiULD4d53cdu=9X421WXSAit_YQg@mail.gmail.com>
-	<201306220014.16427.arnd@arndb.de>
-	<CAD=GYpabakChmN-TEJbLn6p=BwX2wsK5KWsc5gH9-cAA+yWcEA@mail.gmail.com>
-	<51C83348.6040905@ti.com>
+From: Zoran Markovic <zoran.markovic@linaro.org>
+Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
+Date: Mon, 24 Jun 2013 12:58:39 -0700
+Message-ID: <CAME+o4=WrfpvJo=jN1KZ_JHnYq9Frfk3EPcwtG10=aCwrbY+Rw@mail.gmail.com>
+References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
+	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
+	<CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
+	<CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
+	<CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
+	<CAMbhsRSC5XhhSK-DAoS7_JAj7XUfaM_Topp4UcBaVwRCYXSscQ@mail.gmail.com>
+	<CAPDyKFpMGS-JA47pY_n7xvqdtbPumGpc2fdnYZnSVQ_Rybre3g@mail.gmail.com>
+	<CAMbhsRQwGbpa4a1RziV92qnw4VFh6+=oQiadfqa17FANEiK8_Q@mail.gmail.com>
+	<CAPDyKFroFY3-NJCFpkDYyBVx25CSfk492H_TnoS60jn2CdfWUQ@mail.gmail.com>
+	<CAMbhsRTR9im-BsJ-1m+DD-67LM=s0=KOoy-o+2PmnkDyLOP0Gg@mail.gmail.com>
+	<CAPDyKFoX-ioDVVkfQ21epJyTqQD98xvsqBR1FXzgP9bN6_Zxjg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-In-Reply-To: <51C83348.6040905-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Cc: Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Andrew
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oa0-f50.google.com ([209.85.219.50]:34147 "EHLO
+	mail-oa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750958Ab3FXT6k (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Jun 2013 15:58:40 -0400
+Received: by mail-oa0-f50.google.com with SMTP id k7so12572724oag.9
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Jun 2013 12:58:40 -0700 (PDT)
+In-Reply-To: <CAPDyKFoX-ioDVVkfQ21epJyTqQD98xvsqBR1FXzgP9bN6_Zxjg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Colin Cross <ccross@android.com>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-On Mon, Jun 24, 2013 at 6:53 AM, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org> wrote:
-> On 6/22/2013 8:23 AM, Joel A Fernandes wrote:
->>>>> config TI_EDMA
->>>>>         tristate "TI EDMA support"
->>>>>         default m if 'ARCH_DAVINCI || ARCH_OMAP1 || ARCH_OMAP2
->>>>>         select DMA_ENGINE
->>>>>         select DMA_VIRTUAL_CHANNELS
->>>>
->>>>
->>>> MMC depends on EDMA specially on AM33xx there's no PIO mode AFAIK. The
->>>> 'm' option will require some initramfs to load the module when needing
->>>> to MMC boot, I suggest lets leave it as y.
->>>>
->>>
->>> Ah, right: you still export a filter function from the edma driver
->>> and use it in slave drivers:
->>>
->>> drivers/mmc/host/davinci_mmc.c:         dma_request_slave_channel_compat(mask, edma_filter_fn,
->>> drivers/mmc/host/davinci_mmc.c:         dma_request_slave_channel_compat(mask, edma_filter_fn,
->>> drivers/spi/spi-davinci.c:      dspi->dma_rx = dma_request_channel(mask, edma_filter_fn,
->>> drivers/spi/spi-davinci.c:      dspi->dma_tx = dma_request_channel(mask, edma_filter_fn,
->>>
->>> As long as this is the case, you have to be careful with the dependencies
->>> to make sure that davinci_mmc and spi-davinci either depend on TI_EDMA, or
->>> edma_filter_fn gets defined to NULL when you are building for a DT-only platform.
->>
->> Yes sure, right now they are defined  as follows in include/linux/edma.h:
->>
->> #if defined(CONFIG_TI_EDMA) || defined(CONFIG_TI_EDMA_MODULE)
->> bool edma_filter_fn(struct dma_chan *, void *);
->> #else
->> static inline bool edma_filter_fn(struct dma_chan *chan, void *param)
->> {
->> return false;
->> }
->> #endif
->>
->> This also has the side effect of causing DMA requests to fail if
->> TI_EDMA is not built, causing frustration for a lot of people some of
->> whom don't want to deal with DMA so I think it is OK to build the
->> driver in by default as it is (and will be) used by a lot of
->> OMAP2PLUS.
+>> This patch is ported from the Android common tree, so you've probably
+>> been using it.
 >
-> Solution for this is to enable TI_EDMA in relevant defconfigs. Most
-> folks who would get frustrated by such issues would be using defconfigs
-> and for those who are building their configuration from scratch this
-> will be pretty low in their list of worries.
+> We removed more or less all Android code in the mmc subsystem, since
+> it just didn't work. :-)
+>
+> The "deferred resume" was very useful though, so after some rework we
+> kept it and could then improve the system resume time significantly.
 
-Yes, it is not in omap2plus_defconfig either. I will post a patch to
-add it to the same, and we can ignore the Kconfig defaults and select
-patches.
+For what it's worth, I fixed one bug I noticed in the Android kernel:
+if a system has a non-removable MMC device, a suspend/resume cycle on
+this device would hold a wake lock forever. This was a visible issue
+on the panda board I am using.
 
-Thanks,
-Joel
+If there are doubts on whether or not the system should stay awake
+during a MMC mount, we have the option to make the calls to
+wakeup_source_register/unregister configurable. Skipping these calls
+would leave the .ws field NULL, in which case
+__pm_stay_awake/__pm_relax/__pm_wakeup_event would do nothing.
 
-------------------------------------------------------------------------------
-This SF.net email is sponsored by Windows:
+Thoughts?
 
-Build for Windows Store.
-
-http://p.sf.net/sfu/windows-dev2dev
+- Zoran
