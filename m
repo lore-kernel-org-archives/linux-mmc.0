@@ -1,54 +1,73 @@
-From: Bing Zhao <bzhao@marvell.com>
-Subject: RE: [PATCH] RFC: mmc: dw_mmc: Always go to STATE_DATA_BUSY from
- STATE_DATA_ERROR
-Date: Mon, 24 Jun 2013 20:54:15 -0700
-Message-ID: <477F20668A386D41ADCC57781B1F70430EA2BD5ECB@SC-VEXCH1.marvell.com>
-References: <1363382956-14557-1-git-send-email-dianders@chromium.org>
-	<5146EAB0.1030705@samsung.com>
-	<CAD=FV=Ww-iK=-vg4jnJe6w4836-yQUoUyxNvCYsDQ5w0q-OMMQ@mail.gmail.com>
-	<515E88E3.5070507@samsung.com>
-	<003401ce3453$19d1e8c0$4d75ba40$%jun@samsung.com>
-	<CAD=FV=V+ZZ0MUtuWKUOgR9NPyAquUjFC6KtHvAP-4iHXAYpjqA@mail.gmail.com>
-	<001601ce35b9$652c5870$2f850950$%jun@samsung.com>
-	<CAD=FV=XKeRjpH1+ytjMfLuGGqQ5VVub22n=V+UpV=jBCD4LLHw@mail.gmail.com>
-	<001801ce6c20$6ba39900$42eacb00$%jun@samsung.com>
-	<477F20668A386D41ADCC57781B1F70430EA2AA2513@SC-VEXCH1.marvell.com>
-	<CAD=FV=Xz-Cp86u=w8m91AEMJgH-o6cLkz6_udVw_3bm7Tm0OiA@mail.gmail.com>
-	<477F20668A386D41ADCC57781B1F70430EA2AA251A@SC-VEXCH1.marvell.com>
- <CAD=FV=V6S7FsK+=+7EHDV74=Mw_iWecO2ZxVpVcd=p7ugW-sHA@mail.gmail.com>
+From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH v12 00/11] DMA Engine support for AM33XX
+Date: Mon, 24 Jun 2013 23:54:50 -0700
+Message-ID: <20130625065450.GY5523@atomide.com>
+References: <1371762407-24544-1-git-send-email-joelagnel@ti.com>
+	<20130624101903.GV5523@atomide.com> <51C85958.9030502@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog130.obsmtp.com ([74.125.149.143]:45686 "EHLO
-	na3sys009aog130.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751528Ab3FYD4d convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 24 Jun 2013 23:56:33 -0400
-In-Reply-To: <CAD=FV=V6S7FsK+=+7EHDV74=Mw_iWecO2ZxVpVcd=p7ugW-sHA@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <51C85958.9030502-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>
+Cc: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Andrew Morton <akpm@linux-foundat>
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@gmail.com>, Ashok Nagarajan <asnagarajan@chromium.org>, Paul Stewart <pstew@chromium.org>, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
+* Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org> [130624 07:42]:
+> Hi Tony,
+> 
+> On 06/24/2013 12:19 PM, Tony Lindgren wrote:
+> > Hi,
+> > 
+> > For merging this series, I suggest the following sets:
+> > 
+> > * Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org> [130620 14:13]:
+> >>
+> >> Joel A Fernandes (3):
+> >>   edma: config: Enable config options for EDMA
+> >>   da8xx: config: Enable MMC and FS options
+> >>   ARM: davinci: Fix compiler warnings in devices-da8xx
+> >>
+> >> Matt Porter (8):
+> >>   dmaengine: edma: Add TI EDMA device tree binding
+> >>   ARM: edma: Add DT and runtime PM support to the private EDMA API
+> >>   ARM: edma: Add EDMA crossbar event mux support
+> >>   dmaengine: edma: enable build for AM33XX
+> > 
+> > Sekhar should queue the above patches, I've acked the
+> > mach-omap2/Kconfig change.
+> > 
+> >>   spi: omap2-mcspi: add generic DMA request support to the DT binding
+> >>   spi: omap2-mcspi: convert to dma_request_slave_channel_compat()
+> > 
+> > 
+> > The spi changes should get merged via the driver list.
+> > 
+> >>   ARM: dts: add AM33XX EDMA support
+> >>   ARM: dts: add AM33XX SPI DMA support
+> > 
+> > Benoit should queue the .dts changes.
+> 
+> I'll do that, but do you consider them for 3.11?
 
-> I think the proposal on the table is to take Seungwon's patches
-> instead of mine.  Assuming they solve your problems, I'm OK with that.
->  I think he was requesting testing the first of his two patches alone
-> and then both of his two patches together.
+Yes right after -rc1 if it makes the DMA work. We almost
+certainly need to send few branches of fixes after -rc1 once
+we find out what might have broken by the removal of the
+hwmod data..
 
-Test #1: Swungwon's patch #1 alone [1]
-Test #2: Swungwon's patch #2 alone [1]
-Test #3: Swungwon's patch #1 and #2 [1]
-Test #4: Doug's original patch [2]
+But let's stick to minimal changes for the -rc series
+naturally.
 
-Test #1 and #3: it doesn't work; system reboots due to kernel hung_task
-Test #2 and #4: it works; instead of hung_task driver gets CRC error (which is expected)
+Regards,
 
-Thanks,
-Bing
-
-[1] https://lkml.org/lkml/2013/4/8/316
-[2] https://lkml.org/lkml/2013/3/15/583
-
+Tony
