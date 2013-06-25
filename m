@@ -1,118 +1,76 @@
-From: Boris BREZILLON <b.brezillon@overkiz.com>
-Subject: [PATCH v2 2/4] mmc: atmel-mci: prepare clk before calling enable
-Date: Tue, 25 Jun 2013 10:11:31 +0200
-Message-ID: <1372147891-4296-1-git-send-email-b.brezillon@overkiz.com>
-References: <1372147702-4074-1-git-send-email-b.brezillon@overkiz.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 4.mo1.mail-out.ovh.net ([46.105.76.26]:48238 "EHLO
-	mo1.mail-out.ovh.net" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751766Ab3FYILn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jun 2013 04:11:43 -0400
-Received: from mail435.ha.ovh.net (b6.ovh.net [213.186.33.56])
-	by mo1.mail-out.ovh.net (Postfix) with SMTP id 3E471FF8E0C
-	for <linux-mmc@vger.kernel.org>; Tue, 25 Jun 2013 10:11:42 +0200 (CEST)
-In-Reply-To: <1372147702-4074-1-git-send-email-b.brezillon@overkiz.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v12 00/11] DMA Engine support for AM33XX
+Date: Tue, 25 Jun 2013 19:46:20 +0530
+Message-ID: <51C9A634.6030605@ti.com>
+References: <1371762407-24544-1-git-send-email-joelagnel@ti.com>
+ <20130624101903.GV5523@atomide.com> <51C85958.9030502@ti.com>
+ <20130625065450.GY5523@atomide.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <20130625065450.GY5523-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Cc: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Ferre <nicolas.ferre@atmel.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Chris Ball <cjb@laptop.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Boris BREZILLON <b.brezillon@overkiz.com>
 
-Replace clk_enable/disable with clk_prepare_enable/disable_unprepare to
-avoid common clk framework warnings.
+On 6/25/2013 12:24 PM, Tony Lindgren wrote:
+> * Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org> [130624 07:42]:
+>> Hi Tony,
+>>
+>> On 06/24/2013 12:19 PM, Tony Lindgren wrote:
+>>> Hi,
+>>>
+>>> For merging this series, I suggest the following sets:
+>>>
+>>> * Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org> [130620 14:13]:
+>>>>
+>>>> Joel A Fernandes (3):
+>>>>   edma: config: Enable config options for EDMA
+>>>>   da8xx: config: Enable MMC and FS options
+>>>>   ARM: davinci: Fix compiler warnings in devices-da8xx
+>>>>
+>>>> Matt Porter (8):
+>>>>   dmaengine: edma: Add TI EDMA device tree binding
+>>>>   ARM: edma: Add DT and runtime PM support to the private EDMA API
+>>>>   ARM: edma: Add EDMA crossbar event mux support
+>>>>   dmaengine: edma: enable build for AM33XX
+>>>
+>>> Sekhar should queue the above patches, I've acked the
+>>> mach-omap2/Kconfig change.
+>>>
+>>>>   spi: omap2-mcspi: add generic DMA request support to the DT binding
+>>>>   spi: omap2-mcspi: convert to dma_request_slave_channel_compat()
+>>>
+>>>
+>>> The spi changes should get merged via the driver list.
+>>>
+>>>>   ARM: dts: add AM33XX EDMA support
+>>>>   ARM: dts: add AM33XX SPI DMA support
+>>>
+>>> Benoit should queue the .dts changes.
+>>
+>> I'll do that, but do you consider them for 3.11?
+> 
+> Yes right after -rc1 if it makes the DMA work. We almost
+> certainly need to send few branches of fixes after -rc1 once
+> we find out what might have broken by the removal of the
+> hwmod data..
 
-Signed-off-by: Boris BREZILLON <b.brezillon@overkiz.com>
----
- drivers/mmc/host/atmel-mci.c |   27 ++++++++++++++++++---------
- 1 file changed, 18 insertions(+), 9 deletions(-)
+The DMA related changes went into arm-soc yesterday. So it should be
+safe to send the DT patches in before the merge window opens. If Tony is
+done with sending his pull requests may be Benoit can send to arm-soc
+directly?
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index e75774f..631c4cf 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -380,6 +380,8 @@ static int atmci_regs_show(struct seq_file *s, void *v)
- {
- 	struct atmel_mci	*host = s->private;
- 	u32			*buf;
-+	int			ret = 0;
-+
- 
- 	buf = kmalloc(ATMCI_REGS_SIZE, GFP_KERNEL);
- 	if (!buf)
-@@ -391,9 +393,13 @@ static int atmci_regs_show(struct seq_file *s, void *v)
- 	 * consistent.
- 	 */
- 	spin_lock_bh(&host->lock);
--	clk_enable(host->mck);
-+	ret = clk_prepare_enable(host->mck);
-+	if (ret) {
-+		spin_unlock_bh(&host->lock);
-+		goto out;
-+	}
- 	memcpy_fromio(buf, host->regs, ATMCI_REGS_SIZE);
--	clk_disable(host->mck);
-+	clk_disable_unprepare(host->mck);
- 	spin_unlock_bh(&host->lock);
- 
- 	seq_printf(s, "MR:\t0x%08x%s%s ",
-@@ -444,9 +450,10 @@ static int atmci_regs_show(struct seq_file *s, void *v)
- 				val & ATMCI_CFG_LSYNC ? " LSYNC" : "");
- 	}
- 
-+out:
- 	kfree(buf);
- 
--	return 0;
-+	return ret;
- }
- 
- static int atmci_regs_open(struct inode *inode, struct file *file)
-@@ -1281,7 +1288,7 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 		spin_lock_bh(&host->lock);
- 		if (!host->mode_reg) {
--			clk_enable(host->mck);
-+			clk_prepare_enable(host->mck);
- 			atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
- 			atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIEN);
- 			if (host->caps.has_cfg_reg)
-@@ -1361,7 +1368,7 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
- 			if (host->mode_reg) {
- 				atmci_readl(host, ATMCI_MR);
--				clk_disable(host->mck);
-+				clk_disable_unprepare(host->mck);
- 			}
- 			host->mode_reg = 0;
- 		}
-@@ -2379,10 +2386,12 @@ static int __init atmci_probe(struct platform_device *pdev)
- 	if (!host->regs)
- 		goto err_ioremap;
- 
--	clk_enable(host->mck);
-+	ret = clk_prepare_enable(host->mck);
-+	if (ret)
-+		goto err_request_irq;
- 	atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
- 	host->bus_hz = clk_get_rate(host->mck);
--	clk_disable(host->mck);
-+	clk_disable_unprepare(host->mck);
- 
- 	host->mapbase = regs->start;
- 
-@@ -2487,11 +2496,11 @@ static int __exit atmci_remove(struct platform_device *pdev)
- 			atmci_cleanup_slot(host->slot[i], i);
- 	}
- 
--	clk_enable(host->mck);
-+	clk_prepare_enable(host->mck);
- 	atmci_writel(host, ATMCI_IDR, ~0UL);
- 	atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
- 	atmci_readl(host, ATMCI_SR);
--	clk_disable(host->mck);
-+	clk_disable_unprepare(host->mck);
- 
- 	if (host->dma.chan)
- 		dma_release_channel(host->dma.chan);
--- 
-1.7.9.5
-
+Thanks,
+Sekhar
