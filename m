@@ -1,63 +1,53 @@
-From: "Fernandes, Joel A" <joelagnel-l0cyMroinI0@public.gmane.org>
-Subject: RE: [PATCH v12 05/11] edma: config: Enable config options for EDMA
-Date: Mon, 24 Jun 2013 21:09:58 +0000
-Message-ID: <083BC63EECB6FD41B8E81CF7FD87CC0F2E4EE5A1@DLEE08.ent.ti.com>
-References: <1371762407-24544-1-git-send-email-joelagnel@ti.com>
-	<201306242228.23297.arnd@arndb.de>
-	<CAD=GYpYwswOYGHRzZ6SeKD+sEfi-7s3HuqKr7G0OXQWFCA_EtQ@mail.gmail.com>
-	<201306242307.35840.arnd@arndb.de>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH 1/4] mmc: sdhci-s3c: fix the wrong register value,
+ when clock is disabled
+Date: Tue, 25 Jun 2013 10:20:57 +0900
+Message-ID: <51C8F079.8090009@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <201306242307.35840.arnd-r2nGTMty4D4@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "Cousson,  Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Andrew Morton <akpm>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:12306 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750745Ab3FYBUy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Jun 2013 21:20:54 -0400
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MOX00KHID295570@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 25 Jun 2013 10:20:53 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: 'Chris Ball' <cjb@laptop.org>, =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>, Kyungmin Park <kyungmin.park@samsung.com>
 
-> -----Original Message-----
-> From: Arnd Bergmann [mailto:arnd-r2nGTMty4D4@public.gmane.org]
-> Sent: Monday, June 24, 2013 4:08 PM
-> To: Joel A Fernandes
-> Cc: Nori, Sekhar; Fernandes, Joel A; Tony Lindgren; Matt Porter; Grant Likely;
-> Rob Herring; Vinod Koul; Mark Brown; Cousson, Benoit; Russell King; Rob
-> Landley; Andrew Morton; Jason Kridner; Koen Kooi; Devicetree Discuss; Linux
-> OMAP List; Linux ARM Kernel List; Linux DaVinci Kernel List; Linux Kernel
-> Mailing List; Linux Documentation List; Linux MMC List; Linux SPI Devel List
-> Subject: Re: [PATCH v12 05/11] edma: config: Enable config options for EDMA
-> 
-> On Monday 24 June 2013, Joel A Fernandes wrote:
-> > >> Yes sure, right now they are defined  as follows in include/linux/edma.h:
-> > >>
-> > >> #if defined(CONFIG_TI_EDMA) || defined(CONFIG_TI_EDMA_MODULE)
-> bool
-> > >> edma_filter_fn(struct dma_chan *, void *); #else static inline bool
-> > >> edma_filter_fn(struct dma_chan *chan, void *param) { return false;
-> > >> } #endif
-> > >
-> > > It's best to just define the filter function in the platform code
-> > > and pass a pointer to it through platform data. The way you do it
-> > > above makes the slave drivers inherently nonportable.
-> >
-> > But with DT-only platforms, can you really do that?
-> 
-> The nice thing about this is that with a DT-only platform, the filter function will
-> automatically go away: you have no platform_data, which means that if you
-> are using dma_request_slave_channel_compat, you just pass NULL as the filter
-> and the filter-data, same as just calling dma_request_slave_channel.
-> 
+When use the QUIRK_NONSTANDARD_CLOCK, then never set to 0 at clock control register.
+This patch is fixed this problem.
+([PATCHv2] mmc: sdhci-s3c: fix teh wrong register value, when clock is disabled)
+
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |    5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 926aaf6..ce71f32 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -297,8 +297,11 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	u16 clk = 0;
  
-[Joel] Ah yes! Thanks for that. Right, edma_filter_fn is not passed explicitly for DT case.
-
-Thanks,
-Joel
+ 	/* don't bother if the clock is going off */
+-	if (clock == 0)
++	if (clock == 0) {
++		sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
++		host->clock = clock;
+ 		return;
++	}
+ 
+ 	sdhci_s3c_set_clock(host, clock);
+ 
+-- 
+1.7.9.5
