@@ -1,7 +1,7 @@
 From: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH 0/2] EDMA config and comments
-Date: Tue, 25 Jun 2013 20:31:54 -0500
-Message-ID: <1372210314-7115-1-git-send-email-joelagnel@ti.com>
+Subject: [PATCH 2/2] DMA: EDMA: Add comments for A-sync case calculations
+Date: Tue, 25 Jun 2013 20:32:04 -0500
+Message-ID: <1372210324-7181-1-git-send-email-joelagnel@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -21,25 +21,56 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 
-Minor patches remaining after EDMA series has been merged:
+A-sync case in EDMA driver is tricky and not so obvious.
+Document the reasons for the calculations and the scenarious
+they are used.
 
-First patch adds the TI_EDMA option which people can forget to add and
-can result in failure without any informative errors of why DMA is not
-working.
+Signed-off-by: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+---
+ drivers/dma/edma.c |   22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
 
-Second patch adds comments to the EDMA code for the calculations in the
-A-sync case. From my experience, this code is not-so-obvious. Hopefully
-this makes the life of readers of the code a little better.
-
-Joel A Fernandes (2):
-  ARM: configs: Enable TI_EDMA in omap2plus_defconfig
-  DMA: EDMA: Add comments for A-sync case calculations
-
- arch/arm/configs/omap2plus_defconfig |    1 +
- drivers/dma/edma.c                   |   22 ++++++++++++++++++++++
- 2 files changed, 23 insertions(+)
-
+diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
+index e008ed2..a1d9f3785 100644
+--- a/drivers/dma/edma.c
++++ b/drivers/dma/edma.c
+@@ -284,8 +284,24 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+ 		 */
+ 		if (burst == 1) {
+ 			edesc->absync = false;
++			/*
++			 * For the A-sync case, bcnt and ccnt are the remainder
++			 * and quotient respectively of the division of:
++			 * (sg_dma_len(sg) / acnt) by (SZ_64K -1). This is so
++			 * that in case bcnt over flows, we have ccnt to use.
++			 * Note: In A-sync tranfer only, bcntrld is used, but it
++			 * only applies for sg_dma_len(sg) >= SZ_64K.
++			 * In this case, the best way adopted is- bccnt for the
++			 * first frame will be the remainder below. Then for
++			 * every successive frame, bcnt will be SZ_64K-1. This
++			 * is assured as bcntrld = 0xffff in end of function.
++			 */
+ 			ccnt = sg_dma_len(sg) / acnt / (SZ_64K - 1);
+ 			bcnt = sg_dma_len(sg) / acnt - ccnt * (SZ_64K - 1);
++			/*
++			 * If bcnt is non-zero, we have a remainder and hence an
++			 * extra frame to transfer, so increment ccnt.
++			 */
+ 			if (bcnt)
+ 				ccnt++;
+ 			else
+@@ -343,6 +359,12 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+ 
+ 		edesc->pset[i].a_b_cnt = bcnt << 16 | acnt;
+ 		edesc->pset[i].ccnt = ccnt;
++		/*
++		 * Only time when (bcntrld) auto reload is required is for
++		 * A-sync case, and in this case, a requirement of reload value
++		 * of SZ_64K-1 only is assured. 'link' is initially set to NULL
++		 * and then later will be populated by edma_execute.
++		 */
+ 		edesc->pset[i].link_bcntrld = 0xffffffff;
+ 
+ 	}
 -- 
-Resending as first attempt didn't work.
-
 1.7.9.5
