@@ -1,40 +1,89 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: [PATCH 1/1] mmc: vub300: Staticize vub300_init_card
-Date: Wed, 26 Jun 2013 12:02:30 +0530
-Message-ID: <1372228350-6375-1-git-send-email-sachin.kamat@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f43.google.com ([209.85.220.43]:48742 "EHLO
-	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750729Ab3FZGrg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Jun 2013 02:47:36 -0400
-Received: by mail-pa0-f43.google.com with SMTP id hz11so13839805pad.30
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Jun 2013 23:47:35 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH 3/5] ARM: dts: am33xx: Add interrupts and memory resources
+ for MMC
+Date: Wed, 26 Jun 2013 22:03:54 +0530
+Message-ID: <51CB17F2.5060504@ti.com>
+References: <1372209888-6649-1-git-send-email-joelagnel@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1372209888-6649-1-git-send-email-joelagnel@ti.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Joel A Fernandes <agnel.joel@gmail.com>
+Cc: Mark Brown <broonie@linaro.org>, Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Koen Kooi <koen@beagleboard.org>, Grant Likely <grant.likely@secretlab.ca>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Linux Documentation List <linux-doc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Rob Herring <rob.herring@calxeda.com>, Jason Kridner <jkridner@beagleboard.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Benoit Cousson <b-cousson@ti.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Landley <rob@landley.net>, Linux SPI Devel List <spi-dev>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, tony.olech@elandigitalsystems.com, sachin.kamat@linaro.org
 
-'vub300_init_card' is used only in this file. Make it
-static.
+Hi Joel,
 
-Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
----
- drivers/mmc/host/vub300.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+On Wednesday 26 June 2013 06:54 AM, Joel A Fernandes wrote:
+> From: Joel A Fernandes <agnel.joel@gmail.com>
+>
+> HWMOD irq entries for MMC were removed. We provide the same from DT for MMC.
+>
+> This fixes issue where memory resource could not be found during probe.
+> Also, added the reg-offset property to account for the offset from start.
+>
+> Signed-off-by: Joel A Fernandes <agnel.joel@gmail.com>
+> ---
+>   arch/arm/boot/dts/am33xx.dtsi |   12 ++++++++++++
+>   1 file changed, 12 insertions(+)
+>
+> diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+> index 119f8a9..e0a5741 100644
+> --- a/arch/arm/boot/dts/am33xx.dtsi
+> +++ b/arch/arm/boot/dts/am33xx.dtsi
+> @@ -237,6 +237,10 @@
+>   			dmas = <&edma 24
+>   				&edma 25>;
+>   			dma-names = "tx", "rx";
+> +			interrupts = <64>;
+> +			interrupt-parent = <&intc>;
+> +			reg = <0x48060000 0x1000>;
+> +			reg-offset = <0x100>;
+>   			status = "disabled";
+>   		};
+>
+> @@ -247,6 +251,10 @@
+>   			dmas = <&edma 2
+>   				&edma 3>;
+>   			dma-names = "tx", "rx";
+> +			interrupts = <24>;
 
-diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-index cb9f361..e9028ad 100644
---- a/drivers/mmc/host/vub300.c
-+++ b/drivers/mmc/host/vub300.c
-@@ -2079,7 +2079,7 @@ static void vub300_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	kref_put(&vub300->kref, vub300_delete);
- }
- 
--void vub300_init_card(struct mmc_host *mmc, struct mmc_card *card)
-+static void vub300_init_card(struct mmc_host *mmc, struct mmc_card *card)
- {				/* NOT irq */
- 	struct vub300_mmc_host *vub300 = mmc_priv(mmc);
- 	dev_info(&vub300->udev->dev, "NO host QUIRKS for this card\n");
--- 
-1.7.9.5
+s/24/28
 
+> +			interrupt-parent = <&intc>;
+> +			reg = <0x481d8000 0x1000>;
+> +			reg-offset = <0x100>;
+>   			status = "disabled";
+>   		};
+>
+> @@ -254,6 +262,10 @@
+>   			compatible = "ti,omap3-hsmmc";
+
+compatible should be ti,omap4-hsmmc since omap4 hsmmc IP is re-used in am33xx
+and reg-offset property is not needed.
+combine this patch with 2/5 ARM: dts: add AM33XX MMC support and please add
+your signed-off to that patch.
+
+>   			ti,hwmods = "mmc3";
+>   			ti,needs-special-reset;
+> +			interrupts = <25>;
+
+s/25/29
+
+> +			interrupt-parent = <&intc>;
+> +			reg = <0x47810000 0x1000>;
+> +			reg-offset = <0x100>;
+>   			status = "disabled";
+>   		};
+>
+>
