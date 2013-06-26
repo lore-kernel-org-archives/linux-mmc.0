@@ -1,7 +1,8 @@
 From: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH 2/5] ARM: dts: add AM33XX MMC support
-Date: Tue, 25 Jun 2013 20:24:41 -0500
-Message-ID: <1372209881-6616-1-git-send-email-joelagnel@ti.com>
+Subject: [PATCH 3/5] ARM: dts: am33xx: Add interrupts and memory resources for
+	MMC
+Date: Tue, 25 Jun 2013 20:24:48 -0500
+Message-ID: <1372209888-6649-1-git-send-email-joelagnel@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -19,121 +20,54 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+From: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 
-Adds AM33XX MMC support for am335x-bone, am335x-evm, and
-am335x-evmsk.
+HWMOD irq entries for MMC were removed. We provide the same from DT for MMC.
 
-Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
-Acked-by: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+This fixes issue where memory resource could not be found during probe.
+Also, added the reg-offset property to account for the offset from start.
+
+Signed-off-by: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 ---
- arch/arm/boot/dts/am335x-bone.dts  |    7 +++++++
- arch/arm/boot/dts/am335x-evm.dts   |    7 +++++++
- arch/arm/boot/dts/am335x-evmsk.dts |    7 +++++++
- arch/arm/boot/dts/am33xx.dtsi      |   28 ++++++++++++++++++++++++++++
- 4 files changed, 49 insertions(+)
+ arch/arm/boot/dts/am33xx.dtsi |   12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
-diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
-index 5302f79..80bff9c 100644
---- a/arch/arm/boot/dts/am335x-bone.dts
-+++ b/arch/arm/boot/dts/am335x-bone.dts
-@@ -120,6 +120,8 @@
- 		};
- 
- 		ldo3_reg: regulator@5 {
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <3300000>;
- 			regulator-always-on;
- 		};
- 
-@@ -136,3 +138,8 @@
- &cpsw_emac1 {
- 	phy_id = <&davinci_mdio>, <1>;
- };
-+
-+&mmc1 {
-+	status = "okay";
-+	vmmc-supply = <&ldo3_reg>;
-+};
-diff --git a/arch/arm/boot/dts/am335x-evm.dts b/arch/arm/boot/dts/am335x-evm.dts
-index 0423298..62af561 100644
---- a/arch/arm/boot/dts/am335x-evm.dts
-+++ b/arch/arm/boot/dts/am335x-evm.dts
-@@ -232,6 +232,8 @@
- 		};
- 
- 		vmmc_reg: regulator@12 {
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <3300000>;
- 			regulator-always-on;
- 		};
- 	};
-@@ -244,3 +246,8 @@
- &cpsw_emac1 {
- 	phy_id = <&davinci_mdio>, <1>;
- };
-+
-+&mmc1 {
-+	status = "okay";
-+	vmmc-supply = <&vmmc_reg>;
-+};
-diff --git a/arch/arm/boot/dts/am335x-evmsk.dts b/arch/arm/boot/dts/am335x-evmsk.dts
-index f67c360..8904b88 100644
---- a/arch/arm/boot/dts/am335x-evmsk.dts
-+++ b/arch/arm/boot/dts/am335x-evmsk.dts
-@@ -244,7 +244,14 @@
- 		};
- 
- 		vmmc_reg: regulator@12 {
-+			regulator-min-microvolt = <1800000>;
-+			regulator-max-microvolt = <3300000>;
- 			regulator-always-on;
- 		};
- 	};
- };
-+
-+&mmc1 {
-+	status = "okay";
-+	vmmc-supply = <&vmmc_reg>;
-+};
 diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
-index b4fda12..119f8a9 100644
+index 119f8a9..e0a5741 100644
 --- a/arch/arm/boot/dts/am33xx.dtsi
 +++ b/arch/arm/boot/dts/am33xx.dtsi
-@@ -229,6 +229,34 @@
+@@ -237,6 +237,10 @@
+ 			dmas = <&edma 24
+ 				&edma 25>;
+ 			dma-names = "tx", "rx";
++			interrupts = <64>;
++			interrupt-parent = <&intc>;
++			reg = <0x48060000 0x1000>;
++			reg-offset = <0x100>;
  			status = "disabled";
  		};
  
-+		mmc1: mmc@48060000 {
-+			compatible = "ti,omap3-hsmmc";
-+			ti,hwmods = "mmc1";
-+			ti,dual-volt;
-+			ti,needs-special-reset;
-+			dmas = <&edma 24
-+				&edma 25>;
-+			dma-names = "tx", "rx";
-+			status = "disabled";
-+		};
-+
-+		mmc2: mmc@481d8000 {
-+			compatible = "ti,omap3-hsmmc";
-+			ti,hwmods = "mmc2";
-+			ti,needs-special-reset;
-+			dmas = <&edma 2
-+				&edma 3>;
-+			dma-names = "tx", "rx";
-+			status = "disabled";
-+		};
-+
-+		mmc3: mmc@47810000 {
-+			compatible = "ti,omap3-hsmmc";
-+			ti,hwmods = "mmc3";
-+			ti,needs-special-reset;
-+			status = "disabled";
-+		};
-+
- 		wdt2: wdt@44e35000 {
- 			compatible = "ti,omap3-wdt";
- 			ti,hwmods = "wd_timer2";
+@@ -247,6 +251,10 @@
+ 			dmas = <&edma 2
+ 				&edma 3>;
+ 			dma-names = "tx", "rx";
++			interrupts = <24>;
++			interrupt-parent = <&intc>;
++			reg = <0x481d8000 0x1000>;
++			reg-offset = <0x100>;
+ 			status = "disabled";
+ 		};
+ 
+@@ -254,6 +262,10 @@
+ 			compatible = "ti,omap3-hsmmc";
+ 			ti,hwmods = "mmc3";
+ 			ti,needs-special-reset;
++			interrupts = <25>;
++			interrupt-parent = <&intc>;
++			reg = <0x47810000 0x1000>;
++			reg-offset = <0x100>;
+ 			status = "disabled";
+ 		};
+ 
 -- 
 1.7.9.5
