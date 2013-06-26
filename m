@@ -1,68 +1,69 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: remove the MMC_CAP_8_BIT_DATA in dw_mmc_caps[]
-Date: Wed, 26 Jun 2013 10:56:29 +0900
-Message-ID: <001101ce7210$5fd99020$1f8cb060$%jun@samsung.com>
-References: <51BEC639.3070105@samsung.com>
+From: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 0/2] EDMA config and comments
+Date: Tue, 25 Jun 2013 22:25:19 -0500
+Message-ID: <CAD=GYpa_-x3g_UV6A4y=tcAL-UODAqCAG0FNe_OVvVJQvHVgCQ@mail.gmail.com>
+References: <1372210314-7115-1-git-send-email-joelagnel@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:14441 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751326Ab3FZB4b (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jun 2013 21:56:31 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MOZ00DUZ9D1TX50@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 26 Jun 2013 10:56:30 +0900 (KST)
-In-reply-to: <51BEC639.3070105@samsung.com>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+In-Reply-To: <1372210314-7115-1-git-send-email-joelagnel-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Porter <matt-agtwNxEcTQJWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <cjb@laptop.org>, 'James Hogan' <james.hogan@imgtec.com>, 'Thomas Abraham' <thomas.abraham@linaro.org>
 
-On Monday, June 17, 2013, Jaehoon Chung wrote:
-> This capability didn't need to set in dw_mmc_caps[].
-> In dw-mmc.c, this capability could be set with bus_width value.
-You're right. It can be set from dw_mci_of_get_bus_wd.
-But I have another idea. exynos_dwmmc_caps is host own capability.
-As we know, host#0 support 8-bit widths.
-This capability is meaningful by default at this view.
-On the other hand, we don't need to refer to bus_width value.
+On Tuesday, June 25, 2013, Joel A Fernandes wrote:
 
-If we exclude bus-width capability from exynos_dwmmc_caps,
-it should assume that bus-width is decided from outside.
-Then, I think the related comment should be included.
+> From: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org <javascript:;>>
 
-Thanks,
-Seungwon Jeon
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc-exynos.c |    3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index f013e7e..31d518b 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -154,8 +154,7 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
-> 
->  /* Common capabilities of Exynos4/Exynos5 SoC */
->  static unsigned long exynos_dwmmc_caps[4] = {
-> -	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
-> -		MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
-> +	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR | MMC_CAP_CMD23,
->  	MMC_CAP_CMD23,
->  	MMC_CAP_CMD23,
->  	MMC_CAP_CMD23,
+
+Please donot pull these patches. I have posted them with my wrong email
+address by mistake. I will correct my email during the next repost,
+after a round
+of review.
+
+-Joel
+
+
+> Minor patches remaining after EDMA series has been merged:
+>
+> First patch adds the TI_EDMA option which people can forget to add and
+> can result in failure without any informative errors of why DMA is not
+> working.
+>
+> Second patch adds comments to the EDMA code for the calculations in the
+> A-sync case. From my experience, this code is not-so-obvious. Hopefully
+> this makes the life of readers of the code a little better.
+>
+> Joel A Fernandes (2):
+>   ARM: configs: Enable TI_EDMA in omap2plus_defconfig
+>   DMA: EDMA: Add comments for A-sync case calculations
+>
+>  arch/arm/configs/omap2plus_defconfig |    1 +
+>  drivers/dma/edma.c                   |   22 ++++++++++++++++++++++
+>  2 files changed, 23 insertions(+)
+>
 > --
+> Resending as first attempt didn't work.
+>
 > 1.7.9.5
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
+> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org <javascript:;>
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+------------------------------------------------------------------------------
+This SF.net email is sponsored by Windows:
 
+Build for Windows Store.
+
+http://p.sf.net/sfu/windows-dev2dev
