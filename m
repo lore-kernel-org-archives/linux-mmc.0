@@ -1,82 +1,51 @@
-From: Heiko =?iso-8859-1?q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH 4/4] mmc: sdhci-s3c: remove the duplicated calling sequence
-Date: Tue, 25 Jun 2013 21:55:57 +0200
-Message-ID: <201306252155.58225.heiko@sntech.de>
-References: <51C8F07B.5080205@samsung.com>
+From: Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
+Subject: [PATCH 0/5] AM33xx: MMC resources from DT without HWMOD data
+Date: Tue, 25 Jun 2013 20:23:28 -0500
+Message-ID: <1372209808-6532-1-git-send-email-joelagnel@ti.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:36299 "EHLO gloria.sntech.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751314Ab3FYT4B (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 25 Jun 2013 15:56:01 -0400
-In-Reply-To: <51C8F07B.5080205@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Matt Porter <matt-agtwNxEcTQJWk0Htik3J/w@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Am Dienstag, 25. Juni 2013, 03:20:59 schrieb Jaehoon Chung:
-> Didn't need to call the sdhci_s3c_notify_change in
-> setup_card_detect_gpio().
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <Kyungmin.park@samsung.com>
+From: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 
+This series is fixes to get MMC working on AM33XX without HWMOD data.
+On removal of HWMOD data, interrupt and register properties need to be provided
+for the driver to function correctly.
 
-with the issue below addressed:
+Also instead of specifying offset in match->data, I've added bindings for the
+same and specify it directly from DT as this is a hardware description.
 
-Acked-by: Heiko Stuebner <heiko@sntech.de>
+Reposting Matt's remaining 2 patches on the bindings and dts.
 
-and on a s3c2416
-Tested-by: Heiko Stuebner <heiko@sntech.de>
+Joel A Fernandes (3):
+  MMC: omap_hsmmc: Add reg_offset to DT bindings
+  ARM: dts: am33xx: Add interrupts and memory resources for MMC
+  mmc: omap_hsmmc: Add reg-offset to bindings documentation
 
+Matt Porter (2):
+  ARM: dts: add AM33XX MMC support
+  mmc: omap_hsmmc: add generic DMA request support to the DT binding
 
-> ---
->  drivers/mmc/host/sdhci-s3c.c |   26 ++++++++++++--------------
->  1 file changed, 12 insertions(+), 14 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index f1d5965..64defad 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -409,20 +409,18 @@ static void sdhci_s3c_setup_card_detect_gpio(struct
-> sdhci_s3c *sc) if (devm_gpio_request(dev, pdata->ext_cd_gpio, "SDHCI EXT
-> CD") == 0) { sc->ext_cd_gpio = pdata->ext_cd_gpio;
->  		sc->ext_cd_irq = gpio_to_irq(pdata->ext_cd_gpio);
-> -		if (sc->ext_cd_irq &&
-> -		    request_threaded_irq(sc->ext_cd_irq, NULL,
-> -					 sdhci_s3c_gpio_card_detect_thread,
-> -					 IRQF_TRIGGER_RISING |
-> -					 IRQF_TRIGGER_FALLING |
-> -					 IRQF_ONESHOT,
-> -					 dev_name(dev), sc) == 0) {
-> -			int status = gpio_get_value(sc->ext_cd_gpio);
-> -			if (pdata->ext_cd_gpio_invert)
-> -				status = !status;
-> -			sdhci_s3c_notify_change(sc->pdev, status);
-> -		} else {
-> -			dev_warn(dev, "cannot request irq for card detect\n");
-> -			sc->ext_cd_irq = 0;
-> +		if (sc->ext_cd_irq) {
-> +			ret = request_threaded_irq(sc->ext_cd_irq, NULL,
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   29 +++++++++++++-
+ arch/arm/boot/dts/am335x-bone.dts                  |    7 ++++
+ arch/arm/boot/dts/am335x-evm.dts                   |    7 ++++
+ arch/arm/boot/dts/am335x-evmsk.dts                 |    7 ++++
+ arch/arm/boot/dts/am33xx.dtsi                      |   40 ++++++++++++++++++++
+ drivers/mmc/host/omap_hsmmc.c                      |    7 +++-
+ 6 files changed, 95 insertions(+), 2 deletions(-)
 
-when testing on linux-next from 20130624 I get a
-ret undeclared here.
-
-> +					sdhci_s3c_gpio_card_detect_thread,
-> +					IRQF_TRIGGER_RISING |
-> +					IRQF_TRIGGER_FALLING |
-> +					IRQF_ONESHOT,
-> +					dev_name(dev), sc);
-> +			if (ret) {
-> +				dev_warn(dev,
-> +					"cannot request irq for card detect\n");
-> +				sc->ext_cd_irq = 0;
-> +			}
->  		}
->  	} else {
->  		dev_err(dev, "cannot request gpio for card detect\n");
-
+-- 
+1.7.9.5
