@@ -1,89 +1,68 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH 3/5] ARM: dts: am33xx: Add interrupts and memory resources
- for MMC
-Date: Wed, 26 Jun 2013 22:03:54 +0530
-Message-ID: <51CB17F2.5060504@ti.com>
-References: <1372209888-6649-1-git-send-email-joelagnel@ti.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
+Date: Wed, 26 Jun 2013 22:57:13 +0200
+Message-ID: <CAPDyKFpKYeqoFn=S6P2tu1s2C28daCh4vcHTUCCRUOx2_MHShg@mail.gmail.com>
+References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
+	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
+	<CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
+	<CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
+	<CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
+	<CAMbhsRSC5XhhSK-DAoS7_JAj7XUfaM_Topp4UcBaVwRCYXSscQ@mail.gmail.com>
+	<CAPDyKFpMGS-JA47pY_n7xvqdtbPumGpc2fdnYZnSVQ_Rybre3g@mail.gmail.com>
+	<CAMbhsRQwGbpa4a1RziV92qnw4VFh6+=oQiadfqa17FANEiK8_Q@mail.gmail.com>
+	<CAPDyKFroFY3-NJCFpkDYyBVx25CSfk492H_TnoS60jn2CdfWUQ@mail.gmail.com>
+	<CAMbhsRTR9im-BsJ-1m+DD-67LM=s0=KOoy-o+2PmnkDyLOP0Gg@mail.gmail.com>
+	<CAPDyKFoX-ioDVVkfQ21epJyTqQD98xvsqBR1FXzgP9bN6_Zxjg@mail.gmail.com>
+	<CAME+o4=WrfpvJo=jN1KZ_JHnYq9Frfk3EPcwtG10=aCwrbY+Rw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1372209888-6649-1-git-send-email-joelagnel@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Joel A Fernandes <agnel.joel@gmail.com>
-Cc: Mark Brown <broonie@linaro.org>, Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Koen Kooi <koen@beagleboard.org>, Grant Likely <grant.likely@secretlab.ca>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Linux Documentation List <linux-doc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Rob Herring <rob.herring@calxeda.com>, Jason Kridner <jkridner@beagleboard.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Benoit Cousson <b-cousson@ti.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rob Landley <rob@landley.net>, Linux SPI Devel List <spi-dev>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ve0-f178.google.com ([209.85.128.178]:50514 "EHLO
+	mail-ve0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751663Ab3FZU5O (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Jun 2013 16:57:14 -0400
+Received: by mail-ve0-f178.google.com with SMTP id pb11so12120601veb.9
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Jun 2013 13:57:13 -0700 (PDT)
+In-Reply-To: <CAME+o4=WrfpvJo=jN1KZ_JHnYq9Frfk3EPcwtG10=aCwrbY+Rw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Zoran Markovic <zoran.markovic@linaro.org>
+Cc: Colin Cross <ccross@android.com>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-Hi Joel,
+On 24 June 2013 21:58, Zoran Markovic <zoran.markovic@linaro.org> wrote:
+>>> This patch is ported from the Android common tree, so you've probably
+>>> been using it.
+>>
+>> We removed more or less all Android code in the mmc subsystem, since
+>> it just didn't work. :-)
+>>
+>> The "deferred resume" was very useful though, so after some rework we
+>> kept it and could then improve the system resume time significantly.
+>
+> For what it's worth, I fixed one bug I noticed in the Android kernel:
+> if a system has a non-removable MMC device, a suspend/resume cycle on
+> this device would hold a wake lock forever. This was a visible issue
+> on the panda board I am using.
+>
+> If there are doubts on whether or not the system should stay awake
+> during a MMC mount, we have the option to make the calls to
+> wakeup_source_register/unregister configurable. Skipping these calls
+> would leave the .ws field NULL, in which case
+> __pm_stay_awake/__pm_relax/__pm_wakeup_event would do nothing.
 
-On Wednesday 26 June 2013 06:54 AM, Joel A Fernandes wrote:
-> From: Joel A Fernandes <agnel.joel@gmail.com>
->
-> HWMOD irq entries for MMC were removed. We provide the same from DT for MMC.
->
-> This fixes issue where memory resource could not be found during probe.
-> Also, added the reg-offset property to account for the offset from start.
->
-> Signed-off-by: Joel A Fernandes <agnel.joel@gmail.com>
-> ---
->   arch/arm/boot/dts/am33xx.dtsi |   12 ++++++++++++
->   1 file changed, 12 insertions(+)
->
-> diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
-> index 119f8a9..e0a5741 100644
-> --- a/arch/arm/boot/dts/am33xx.dtsi
-> +++ b/arch/arm/boot/dts/am33xx.dtsi
-> @@ -237,6 +237,10 @@
->   			dmas = <&edma 24
->   				&edma 25>;
->   			dma-names = "tx", "rx";
-> +			interrupts = <64>;
-> +			interrupt-parent = <&intc>;
-> +			reg = <0x48060000 0x1000>;
-> +			reg-offset = <0x100>;
->   			status = "disabled";
->   		};
->
-> @@ -247,6 +251,10 @@
->   			dmas = <&edma 2
->   				&edma 3>;
->   			dma-names = "tx", "rx";
-> +			interrupts = <24>;
+Even if we make this feature configurable, I can't see any host driver
+that would benefit from it as of today. The reason is simply that host
+drivers do not configure it's card detect irq as a wakeup irq. Myself
+is also having quite hard to see the benefit of doing that, but I
+don't know all the use cases.
 
-s/24/28
+Let's see if we can get someone else to provide input...
 
-> +			interrupt-parent = <&intc>;
-> +			reg = <0x481d8000 0x1000>;
-> +			reg-offset = <0x100>;
->   			status = "disabled";
->   		};
 >
-> @@ -254,6 +262,10 @@
->   			compatible = "ti,omap3-hsmmc";
-
-compatible should be ti,omap4-hsmmc since omap4 hsmmc IP is re-used in am33xx
-and reg-offset property is not needed.
-combine this patch with 2/5 ARM: dts: add AM33XX MMC support and please add
-your signed-off to that patch.
-
->   			ti,hwmods = "mmc3";
->   			ti,needs-special-reset;
-> +			interrupts = <25>;
-
-s/25/29
-
-> +			interrupt-parent = <&intc>;
-> +			reg = <0x47810000 0x1000>;
-> +			reg-offset = <0x100>;
->   			status = "disabled";
->   		};
+> Thoughts?
 >
->
+> - Zoran
+
+
+Kind regards
+Ulf Hansson
