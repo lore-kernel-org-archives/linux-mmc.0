@@ -1,57 +1,40 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCHv2] mmc: sdhci-s3c: fix the wrong register value when, clock is disabled
-Date: Thu, 27 Jun 2013 10:53:10 -0400
-Message-ID: <87ip0zr4fd.fsf@octavius.laptop.org>
-References: <51A2DCC4.2020307@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: change the macro name from DTO to DRTO
+Date: Thu, 27 Jun 2013 10:54:28 -0400
+Message-ID: <87bo6rr4d7.fsf@octavius.laptop.org>
+References: <51A2E57D.1000902@samsung.com> <51A47582.3010101@imgtec.com>
+	<000d01ce5b9b$74bd13d0$5e373b70$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:37378 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:37404 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751408Ab3F0OxP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 27 Jun 2013 10:53:15 -0400
-In-Reply-To: <51A2DCC4.2020307@samsung.com> (Jaehoon Chung's message of "Mon,
-	27 May 2013 13:10:44 +0900")
+	id S1752866Ab3F0Oyb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Jun 2013 10:54:31 -0400
+In-Reply-To: <000d01ce5b9b$74bd13d0$5e373b70$%jun@samsung.com> (Seungwon
+	Jeon's message of "Tue, 28 May 2013 21:04:07 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'James Hogan' <james.hogan@imgtec.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, 'Will Newton' <will.newton@gmail.com>
 
-Hi Jaehoon,
+Hi,
 
-On Mon, May 27 2013, Jaehoon Chung wrote:
-> When use the QUIRK_NONSTANDARD_CLOCK, then never set to 0 at clock control register.
-> This patch is fixed this problem.
+On Tue, May 28 2013, Seungwon Jeon wrote:
+> On 05/28/13 6:15 PM, James Hogan wrote:
+>> On 27/05/13 05:47, Jaehoon Chung wrote:
+>> > At Interrupt status register, Bit9 is Data Read Timeout.
+>> > But we used macro name as the DTO. It could be confused with the Data
+>> > Transfer Over(DTO)-Bit[3].
+>> > it's clearly that is changed the DRTO instead of DTO.
+>> >
+>> > Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> 
+>> Reviewed-by: James Hogan <james.hogan@imgtec.com>
 >
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.co
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
-> Changelog v2:
-> - Rebased at the latest mmc tree
->
->  drivers/mmc/host/sdhci-s3c.c |    5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 926aaf6..ce71f32 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -297,8 +297,11 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
->  	u16 clk = 0;
->  
->  	/* don't bother if the clock is going off */
-> -	if (clock == 0)
-> +	if (clock == 0) {
-> +		sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-> +		host->clock = clock;
->  		return;
-> +	}
->  
->  	sdhci_s3c_set_clock(host, clock);
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
-You should change the comment too, since your patch invalidates it.
-
-Thanks,
+Thanks, pushed to mmc-next for 3.11.
 
 - Chris.
 -- 
