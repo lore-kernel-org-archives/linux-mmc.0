@@ -1,47 +1,95 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v2 1/2] mmc: dw_mmc: Handle late vmmc regulators with EPROBE_DEFER
-Date: Thu, 27 Jun 2013 10:10:26 -0700
-Message-ID: <CAD=FV=X8qVAeD_F-kQLHcgusY65pw4WCs5mMsO0wTapqBUAiQw@mail.gmail.com>
-References: <1370580406-10254-1-git-send-email-dianders@chromium.org>
-	<1370626110-1731-1-git-send-email-dianders@chromium.org>
-	<87vc4zlczt.fsf@octavius.laptop.org>
+From: "Fernandes, Joel" <joelf-l0cyMroinI0@public.gmane.org>
+Subject: RE: [PATCH 0/5] AM33xx: MMC resources from DT without HWMOD data
+Date: Thu, 27 Jun 2013 18:08:55 +0000
+Message-ID: <083BC63EECB6FD41B8E81CF7FD87CC0F2E4F0F95@DLEE08.ent.ti.com>
+References: <1372209808-6532-1-git-send-email-joelagnel@ti.com>
+	<CAD=GYpbdVVrh-tiqOcbHi3mkWRJUBdx0EsEZEFVVbgFgcCWgsw@mail.gmail.com>
+	<51CC2A1E.2040003@ti.com>
+	<CAD=GYpa9LQ1fV6=O9B65sJURVAigsgXCPLWav8cHXTuGQXPc9A@mail.gmail.com>
+	<51CC67CA.2070805@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:39361 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751685Ab3F0RK1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Jun 2013 13:10:27 -0400
-Received: by mail-lb0-f174.google.com with SMTP id x10so546847lbi.19
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Jun 2013 10:10:26 -0700 (PDT)
-In-Reply-To: <87vc4zlczt.fsf@octavius.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <51CC67CA.2070805-l0cyMroinI0@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: "Krishnamoorthy, Balaji T" <balajitk-l0cyMroinI0@public.gmane.org>, "Cousson, Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, "lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org" <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>Linux
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Olof Johansson <olof@lixom.net>, Andrew Bresticker <abrestic@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Rob Landley <rob@landley.net>, Will Newton <will.newton@gmail.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, linux-doc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Chris,
+Hi Balaji,
 
-On Thu, Jun 27, 2013 at 9:44 AM, Chris Ball <cjb@laptop.org> wrote:
-> This hunk breaks the build for me, because err_setup_bus and ret are
-> used in the error path of the call to mmc_add_host() in this function.
->
-> I'll push a version that leaves those in.  Let me know if you think
-> something strange is happening that made this work okay for you, like
-> a mismerge.
+> -----Original Message-----
+> From: Krishnamoorthy, Balaji T
+> Sent: Thursday, June 27, 2013 11:27 AM
+> To: Cousson, Benoit; Fernandes, Joel
+> Cc: lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org; Tony Lindgren; Nori, Sekhar; Matt Porter; Grant Likely;
+> Rob Herring; Vinod Koul; Mark Brown; Russell King; Rob Landley; Andrew
+> Morton; Jason Kridner; Koen Kooi; Chris Ball; Devicetree Discuss; Linux OMAP
+> List; Linux ARM Kernel List; Linux DaVinci Kernel List; Linux Kernel Mailing List;
+> Linux MMC List; Arnd Bergmann
+> Subject: Re: [PATCH 0/5] AM33xx: MMC resources from DT without HWMOD
+> data
+> 
+> On Thursday 27 June 2013 07:56 PM, Joel A Fernandes wrote:
+> > Hi Benoit,
+> >
+> > On Thu, Jun 27, 2013 at 7:03 AM, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org> wrote:
+> >> Hi Joel,
+> >>
+> >> On 06/26/2013 05:28 AM, Joel A Fernandes wrote:
+> >>> On Tue, Jun 25, 2013 at 8:23 PM, Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org>
+> wrote:
+> >>>> From: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> >>>>
+> >>>> This series is fixes to get MMC working on AM33XX without HWMOD
+> data.
+> >>>> On removal of HWMOD data, interrupt and register properties need to
+> >>>> be provided for the driver to function correctly.
+> >>>
+> >>> Please don't pull patches authored by me in this series. I have
+> >>> posted them with my wrong email address by mistake. I will correct
+> >>> my email during the next repost, after a round of review. Matt's
+> >>> patches in the series are still good though.
+> >>
+> >> In that case, please repost these in two series to avoid pulling the
+> >> DTS files in the MMC tree.
+> >
+> > The series has been replaced with the single patch:
+> > "[PATCH v2] ARM: dts: add AM33XX MMC support"
+> > http://marc.info/?l=linux-omap&m=137230403815943&w=2
+> >
+> > Some patches were squashed and others dropped in the series resulting
+> > in the single patch above. This patch should be good to apply
+> Hi Joel,
+> 
+> Before pushing mmc dts support for am335x, Can you please let me
+> know if below 2 patches [1] are merged/accepted,
+> IIRC these patches are needed for MMC to work properly.
+> 
+> I suggest to hold the dts patch until slave_sg_limit gets merged
+> otherwise it will cause regression in am335x mmc.
+> 
+> [PATCH v4 1/3] dmaengine: add dma_get_slave_sg_limits()
+> [PATCH v4 2/3] dma: edma: add device_slave_sg_limits() support
 
-WTF.  OK, this is clearly my fault.  I went back to the exact patch
-and it didn't compile for me, either.  :(  My typical workflow is to
-develop something in our local tree and then cherry-pick (and test!)
-on ToT linux.  Probably what happened in this case was that there was
-a compile error and I didn't notice and somehow ended up testing my
-local tree (which doesn't error-check mmc_add_host).
+Actually this is an independent regression and is currently worked on by Lars-Peter Clausen [1].
 
-Sorry for the hassle.  Leaving the err_setup_bus in is correct (and
-leaving the "ret" variable declared).
+Currently not having the MMC DTS merged is also a regression, so I suggest lets take it one
+step at a time and get the DTS merged in first. Also there will be overhead of reposting this
+DTS patch later again which will not change. What do you say?
 
-I did those fixups and it now compiles and things boot.  I haven't
-tested the deferral case in ToT yet, though.  I'll try that now and
-post if something weird comes up.
+Thanks,
 
--Doug
+-Joel
+
+[1] https://patchwork.kernel.org/patch/2228041/
