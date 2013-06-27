@@ -1,47 +1,37 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCHv2 2/2] mmc: dw_mmc: Add support DW SD/MMC driver on SOCFPGA
-Date: Thu, 27 Jun 2013 11:53:17 -0400
-Message-ID: <87y59vmtxu.fsf@octavius.laptop.org>
-References: <1371050331-31331-1-git-send-email-dinguyen@altera.com>
-	<1371050331-31331-2-git-send-email-dinguyen@altera.com>
+Subject: Re: [PATCH 0/2] mmc: add support for eMMC hardware reset for BYT eMMC
+Date: Thu, 27 Jun 2013 11:54:29 -0400
+Message-ID: <87txkjmtvu.fsf@octavius.laptop.org>
+References: <1371113427-8257-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35086 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:35108 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753837Ab3F0Pxb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 27 Jun 2013 11:53:31 -0400
-In-Reply-To: <1371050331-31331-2-git-send-email-dinguyen@altera.com>
-	(dinguyen@altera.com's message of "Wed, 12 Jun 2013 10:18:51 -0500")
+	id S1752648Ab3F0Pyd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Jun 2013 11:54:33 -0400
+In-Reply-To: <1371113427-8257-1-git-send-email-adrian.hunter@intel.com>
+	(Adrian Hunter's message of "Thu, 13 Jun 2013 11:50:25 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com
-Cc: linux-mmc@vger.kernel.org, dinh.linux@gmail.com, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Pavel Machek <pavel@denx.de>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org
 
-Hi Dinh,
+Hi Adrian,
 
-On Wed, Jun 12 2013, dinguyen@altera.com wrote:
-> From: Dinh Nguyen <dinguyen@altera.com>
+On Thu, Jun 13 2013, Adrian Hunter wrote:
+> Here are 2 patches to add support for eMMC hardware reset for BYT eMMC.
 >
-> Add platform specific functionality for the DW SD/MMC driver for
-> SoCFPGA. Move SDMMC_CMD_USE_HOLD_REG to dw_mmc.h so other platforms
-> can use this define.
 >
-> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-> Reviewed-by: Pavel Machek <pavel@denx.de>
-> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Acked-by: Olof Johansson <olof@lixom.net>
-> Acked-by: Seungwon Jeon <tgih.jun@samsung.com
-> CC: Seungwon Jeon <tgih.jun@samsung.com>
-> CC: Jaehoon Chung <jh80.chung@samsung.com>
-> CC: Arnd Bergmann <arnd@arndb.de>
-> Cc: Olof Johansson <olof@lixom.net>
-> CC: Pavel Machek <pavel@denx.de>
-> Cc: Chris Ball <cjb@laptop.org>
-> CC: linux-mmc@vger.kernel.org
+> Adrian Hunter (2):
+>       mmc: sdhci-pci: add support for eMMC hardware reset for BYT eMMC.
+>       mmc: sdhci-acpi: add support for eMMC hardware reset for HID 80860F14
+>
+>  drivers/mmc/host/sdhci-acpi.c | 28 +++++++++++++++++++++++++++-
+>  drivers/mmc/host/sdhci-pci.c  | 32 ++++++++++++++++++++++++++++++--
+>  2 files changed, 57 insertions(+), 3 deletions(-)
 
-Thanks, I've taken patch 2 into mmc-next for 3.11.  Since there are no
-arch ACKs on patch 1 yet, please submit that one through arm-soc.
+Thanks, both pushed to mmc-next for 3.11.
 
 - Chris.
 -- 
