@@ -1,31 +1,39 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/3] mmc: sdhci-esdhc-imx: Fix version register read
-Date: Thu, 27 Jun 2013 11:30:16 -0400
-Message-ID: <87zjubo9kn.fsf@octavius.laptop.org>
-References: <1370438006-13093-1-git-send-email-l.stach@pengutronix.de>
-	<1370441562.4279.9.camel@weser.hi.pengutronix.de>
+Subject: Re: [PATCH v2 1/2] mmc: dw_mmc: Handle late vmmc regulators with EPROBE_DEFER
+Date: Thu, 27 Jun 2013 11:34:39 -0400
+Message-ID: <87vc4zo9dc.fsf@octavius.laptop.org>
+References: <1370580406-10254-1-git-send-email-dianders@chromium.org>
+	<1370626110-1731-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54559 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751273Ab3F0PaU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 27 Jun 2013 11:30:20 -0400
-In-Reply-To: <1370441562.4279.9.camel@weser.hi.pengutronix.de> (Lucas Stach's
-	message of "Wed, 05 Jun 2013 16:12:42 +0200")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1370626110-1731-1-git-send-email-dianders@chromium.org> (Doug
+	Anderson's message of "Fri, 7 Jun 2013 10:28:29 -0700")
+Sender: linux-doc-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Olof Johansson <olof@lixom.net>, Andrew Bresticker <abrestic@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Rob Landley <rob@landley.net>, Will Newton <will.newton@gmail.com>, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lucas Stach <l.stach@pengutronix.de>
-Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, kernel@pengutronix.de
 
-Hi Lucas,
+Hi Doug,
 
-On Wed, Jun 05 2013, Lucas Stach wrote:
-> Please disregard this patch. I just realized that this was already sent
-> out and the current upstream behavior is the result of discussion
-> regarding this patch.
+On Fri, Jun 07 2013, Doug Anderson wrote:
+> It is possible to specify a regulator that should be turned on when
+> dw_mmc is probed.  At the moment dw_mmc will fail to use the regulator
+> properly if the regulator probes after dw_mmc.  Fix this problem by
+> honoring EPROBE_DEFER.
+>
+> At the same time move the regulator code out of the slot init code.
+> We only specify one regulator for the whole device and other parts of
+> the code (like suspend/resume) assume that the regulator has only been
+> enabled once.
+>
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> ---
+> Changes in v2:
+> - Avoid hackery to detect regulators that will never show up.
+> - Move regulator out of slot init--it doesn't belong there.
 
-Thanks, I pushed patches 2 and 3 only to mmc-next for 3.11.
+Thanks, pushed to mmc-next for 3.11.
 
 - Chris.
 -- 
