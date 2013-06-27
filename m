@@ -1,64 +1,58 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH v2] dmaengine: shdma: fix a build failure on platforms
- with no DMA support
-Date: Thu, 27 Jun 2013 22:49:20 +0900
-Message-ID: <20130627134920.GD28902@verge.net.au>
-References: <Pine.LNX.4.64.1305310423360.1470@axis700.grange>
- <3410825.gK3KBC8v80@wuerfel>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: jz4740: Use clk_prepare_enable/clk_disable_unprepare
+Date: Thu, 27 Jun 2013 10:19:56 -0400
+Message-ID: <87wqpfskj7.fsf@octavius.laptop.org>
+References: <1368382358-4433-1-git-send-email-lars@metafoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <3410825.gK3KBC8v80@wuerfel>
-Sender: linux-sh-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-arm-kernel@lists.infradead.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, Kevin Hilman <khilman@linaro.org>, Chris Ball <cjb@laptop.org>, linux-sh@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:35898 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751569Ab3F0OUB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Jun 2013 10:20:01 -0400
+In-Reply-To: <1368382358-4433-1-git-send-email-lars@metafoo.de> (Lars-Peter
+	Clausen's message of "Sun, 12 May 2013 20:12:38 +0200")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Lars-Peter Clausen <lars@metafoo.de>
+Cc: linux-mmc@vger.kernel.org
 
-On Fri, May 31, 2013 at 04:51:52PM +0200, Arnd Bergmann wrote:
-> On Friday 31 May 2013 05:01:31 Guennadi Liakhovetski wrote:
-> > On platforms with no support for the shdma dmaengine driver build is
-> > currently failing with
-> > 
-> > drivers/built-in.o: In function `sh_mobile_sdhi_probe':
-> > drivers/mmc/host/sh_mobile_sdhi.c:170: undefined reference to`shdma_chan_filter'
-> > 
-> > Fix the breakage by defining shdma_chan_filter to NULL in such
-> > configurations.
-> > 
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-> 
-> Sorry, I saw your patch too late and already spent some time doing a different one.
-> 
-> > diff --git a/include/linux/sh_dma.h b/include/linux/sh_dma.h
-> > index b64d6be..1fd8a20 100644
-> > --- a/include/linux/sh_dma.h
-> > +++ b/include/linux/sh_dma.h
-> > @@ -99,6 +99,10 @@ struct sh_dmae_pdata {
-> >  #define CHCR_TE        0x00000002
-> >  #define CHCR_IE        0x00000004
-> >  
-> > +#if IS_ENABLED(CONFIG_SH_DMAE_BASE)
-> >  bool shdma_chan_filter(struct dma_chan *chan, void *arg);
-> > +#else
-> > +#define shdma_chan_filter NULL
-> > +#endif
-> 
-> I still think that this is not the right solution, or at least not
-> complete: No slave driver should care about which dma-engine it is
-> connected to. You have already done most of the necessary conversion,
-> so it would be straightforward to also pass the filter function
-> pointer to the sdhi driver along with the data that gets passed into
-> it.
+Hi,
 
-Hi Arnd, Hi Guennadi,
+Lars-Peter Clausen <lars@metafoo.de> writes:
+> In preparation to switching the jz4740 clk driver to the common clk framework
+> update the clk enable/disable calls to clk_prepare_enable/clk_disable_unprepare.
+>
+> Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+> ---
+>  drivers/mmc/host/jz4740_mmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+> index 2391c6b..2bc147f 100644
+> --- a/drivers/mmc/host/jz4740_mmc.c
+> +++ b/drivers/mmc/host/jz4740_mmc.c
+> @@ -626,7 +626,7 @@ static void jz4740_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  			gpio_set_value(host->pdata->gpio_power,
+>  					!host->pdata->power_active_low);
+>  		host->cmdat |= JZ_MMC_CMDAT_INIT;
+> -		clk_enable(host->clk);
+> +		clk_prepare_enable(host->clk);
+>  		break;
+>  	case MMC_POWER_ON:
+>  		break;
+> @@ -634,7 +634,7 @@ static void jz4740_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  		if (gpio_is_valid(host->pdata->gpio_power))
+>  			gpio_set_value(host->pdata->gpio_power,
+>  					host->pdata->power_active_low);
+> -		clk_disable(host->clk);
+> +		clk_disable_unprepare(host->clk);
+>  		break;
+>  	}
 
-It seems to me that the solution above, though not particularly generic,
-is sufficient as according to Guennadi SHDMA users cannot use other DMA
-drivers[1]. The change above also has the merit of being rather small.
+Thanks, pushed to mmc-next for 3.11.
 
-[1] https://patchwork.kernel.org/patch/2644101/
-
-With that reasoning I would like to provide:
-
-Acked-by: Simon Horman <horms+renesas@verge.net.au>
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
