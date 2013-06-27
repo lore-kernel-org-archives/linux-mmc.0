@@ -1,31 +1,33 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [RESEND PATCH V3 0/8] mmc_of_parse() adaptations, switch mvsdio to mmc_of_parse()
-Date: Thu, 27 Jun 2013 10:26:17 -0400
-Message-ID: <87sj03sk8m.fsf@octavius.laptop.org>
-References: <1370808858-32241-1-git-send-email-gmbnomis@gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhci-sirf: let device core setup the default pin configuration
+Date: Thu, 27 Jun 2013 10:32:08 -0400
+Message-ID: <87obarsjyv.fsf@octavius.laptop.org>
+References: <1368522511-26491-1-git-send-email-Baohua.Song@csr.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:47027 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:41966 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753694Ab3F0O02 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 27 Jun 2013 10:26:28 -0400
-In-Reply-To: <1370808858-32241-1-git-send-email-gmbnomis@gmail.com> (Simon
-	Baatz's message of "Sun, 9 Jun 2013 22:14:10 +0200")
+	id S1753647Ab3F0OcN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Jun 2013 10:32:13 -0400
+In-Reply-To: <1368522511-26491-1-git-send-email-Baohua.Song@csr.com> (Barry
+	Song's message of "Tue, 14 May 2013 17:08:31 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Simon Baatz <gmbnomis@gmail.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Barry Song <Baohua.Song@csr.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, workgroup.linux@csr.com
 
-Hi Simon,
+Hi,
 
-Simon Baatz <gmbnomis@gmail.com> writes:
-> 	RESEND V3:
-> 	- Dropped patches 9 and 10, they are part of linux-next already
-> 	NB: patch 7 as well, but I did not want to change the numbering
+On Tue, May 14 2013, Barry Song wrote:
+> With device core now able to setup the default pin configuration, the call
+> to devm_pinctrl_get_select_default can be removed. And the pin configuration
+> code based on the deprecated Samsung specific gpio bindings is also removed.
+>
+> Acked-by: Linus Walleij <linus.walleij@linaro.org>
+> Signed-off-by: Barry Song <Baohua.Song@csr.com>
 
-I've pushed all patches except 7 to mmc-next for 3.11 now, and I made
-Stephen Warren's nit change to patch 6.  Thanks!
+Thanks, pushed to mmc-next for 3.11.
 
 - Chris.
 -- 
