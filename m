@@ -1,68 +1,195 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
-Date: Wed, 26 Jun 2013 22:57:13 +0200
-Message-ID: <CAPDyKFpKYeqoFn=S6P2tu1s2C28daCh4vcHTUCCRUOx2_MHShg@mail.gmail.com>
-References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
-	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
-	<CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
-	<CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
-	<CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
-	<CAMbhsRSC5XhhSK-DAoS7_JAj7XUfaM_Topp4UcBaVwRCYXSscQ@mail.gmail.com>
-	<CAPDyKFpMGS-JA47pY_n7xvqdtbPumGpc2fdnYZnSVQ_Rybre3g@mail.gmail.com>
-	<CAMbhsRQwGbpa4a1RziV92qnw4VFh6+=oQiadfqa17FANEiK8_Q@mail.gmail.com>
-	<CAPDyKFroFY3-NJCFpkDYyBVx25CSfk492H_TnoS60jn2CdfWUQ@mail.gmail.com>
-	<CAMbhsRTR9im-BsJ-1m+DD-67LM=s0=KOoy-o+2PmnkDyLOP0Gg@mail.gmail.com>
-	<CAPDyKFoX-ioDVVkfQ21epJyTqQD98xvsqBR1FXzgP9bN6_Zxjg@mail.gmail.com>
-	<CAME+o4=WrfpvJo=jN1KZ_JHnYq9Frfk3EPcwtG10=aCwrbY+Rw@mail.gmail.com>
+From: Joel Fernandes <joelf@ti.com>
+Subject: [PATCH v2] ARM: dts: add AM33XX MMC support
+Date: Wed, 26 Jun 2013 22:32:36 -0500
+Message-ID: <1372303956-30208-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f178.google.com ([209.85.128.178]:50514 "EHLO
-	mail-ve0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751663Ab3FZU5O (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Jun 2013 16:57:14 -0400
-Received: by mail-ve0-f178.google.com with SMTP id pb11so12120601veb.9
-        for <linux-mmc@vger.kernel.org>; Wed, 26 Jun 2013 13:57:13 -0700 (PDT)
-In-Reply-To: <CAME+o4=WrfpvJo=jN1KZ_JHnYq9Frfk3EPcwtG10=aCwrbY+Rw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Matt Porter <matt@ohporter.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Mark Brown <broonie@linaro.org>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Balaji TK <balajitk@ti.com>, Gururaja Hebbar <gururaja.hebbar@ti.com>, Chris Ball <cjb@laptop.org>
+Cc: Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>, Arnd Bergmann <arnd@arndb.de>, Joel Fernandes <joelf@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Zoran Markovic <zoran.markovic@linaro.org>
-Cc: Colin Cross <ccross@android.com>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-On 24 June 2013 21:58, Zoran Markovic <zoran.markovic@linaro.org> wrote:
->>> This patch is ported from the Android common tree, so you've probably
->>> been using it.
->>
->> We removed more or less all Android code in the mmc subsystem, since
->> it just didn't work. :-)
->>
->> The "deferred resume" was very useful though, so after some rework we
->> kept it and could then improve the system resume time significantly.
->
-> For what it's worth, I fixed one bug I noticed in the Android kernel:
-> if a system has a non-removable MMC device, a suspend/resume cycle on
-> this device would hold a wake lock forever. This was a visible issue
-> on the panda board I am using.
->
-> If there are doubts on whether or not the system should stay awake
-> during a MMC mount, we have the option to make the calls to
-> wakeup_source_register/unregister configurable. Skipping these calls
-> would leave the .ws field NULL, in which case
-> __pm_stay_awake/__pm_relax/__pm_wakeup_event would do nothing.
+From: Matt Porter <mporter@ti.com>
 
-Even if we make this feature configurable, I can't see any host driver
-that would benefit from it as of today. The reason is simply that host
-drivers do not configure it's card detect irq as a wakeup irq. Myself
-is also having quite hard to see the benefit of doing that, but I
-don't know all the use cases.
+Adds AM33XX MMC support for am335x-bone, am335x-evm, and am335x-evmsk.
+Also added is the DMA binding definitions based on the generic DMA
+request binding.
 
-Let's see if we can get someone else to provide input...
+The HWMOD data removal was breaking MMC so some new properties like reg,
+interrupt etc were added.
 
->
-> Thoughts?
->
-> - Zoran
+Changes to DTS:
+Interrupt and reg added by: Joel Fernandes <joelf@ti.com>
+Compatible added by Balaji TK <balajitk@ti.com>
+ti,needs-special-hs-handling added by Gururaja Hebbar <gururaja.hebbar@ti.com>
 
+Signed-off-by: Matt Porter <mporter@ti.com>
+Acked-by: Tony Lindgren <tony@atomide.com>
+Signed-off-by: Joel Fernandes <joelf@ti.com>
+---
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   26 +++++++++++++-
+ arch/arm/boot/dts/am335x-bone.dts                  |    7 ++++
+ arch/arm/boot/dts/am335x-evm.dts                   |    7 ++++
+ arch/arm/boot/dts/am335x-evmsk.dts                 |    7 ++++
+ arch/arm/boot/dts/am33xx.dtsi                      |   38 ++++++++++++++++++++
+ 5 files changed, 84 insertions(+), 1 deletion(-)
 
-Kind regards
-Ulf Hansson
+diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+index ed271fc..8c8908a 100644
+--- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
++++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+@@ -20,8 +20,29 @@ ti,dual-volt: boolean, supports dual voltage cards
+ ti,non-removable: non-removable slot (like eMMC)
+ ti,needs-special-reset: Requires a special softreset sequence
+ ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
++dmas: List of DMA specifiers with the controller specific format
++as described in the generic DMA client binding. A tx and rx
++specifier is required.
++dma-names: List of DMA request names. These strings correspond
++1:1 with the DMA specifiers listed in dmas. The string naming is
++to be "rx" and "tx" for RX and TX DMA requests, respectively.
++
++Examples:
++
++[hwmod populated DMA resources]
++
++	mmc1: mmc@0x4809c000 {
++		compatible = "ti,omap4-hsmmc";
++		reg = <0x4809c000 0x400>;
++		ti,hwmods = "mmc1";
++		ti,dual-volt;
++		bus-width = <4>;
++		vmmc-supply = <&vmmc>; /* phandle to regulator node */
++		ti,non-removable;
++	};
++
++[generic DMA request binding]
+ 
+-Example:
+ 	mmc1: mmc@0x4809c000 {
+ 		compatible = "ti,omap4-hsmmc";
+ 		reg = <0x4809c000 0x400>;
+@@ -30,4 +51,7 @@ Example:
+ 		bus-width = <4>;
+ 		vmmc-supply = <&vmmc>; /* phandle to regulator node */
+ 		ti,non-removable;
++		dmas = <&edma 24
++			&edma 25>;
++		dma-names = "tx", "rx";
+ 	};
+diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
+index 5302f79..80bff9c 100644
+--- a/arch/arm/boot/dts/am335x-bone.dts
++++ b/arch/arm/boot/dts/am335x-bone.dts
+@@ -120,6 +120,8 @@
+ 		};
+ 
+ 		ldo3_reg: regulator@5 {
++			regulator-min-microvolt = <1800000>;
++			regulator-max-microvolt = <3300000>;
+ 			regulator-always-on;
+ 		};
+ 
+@@ -136,3 +138,8 @@
+ &cpsw_emac1 {
+ 	phy_id = <&davinci_mdio>, <1>;
+ };
++
++&mmc1 {
++	status = "okay";
++	vmmc-supply = <&ldo3_reg>;
++};
+diff --git a/arch/arm/boot/dts/am335x-evm.dts b/arch/arm/boot/dts/am335x-evm.dts
+index 0423298..62af561 100644
+--- a/arch/arm/boot/dts/am335x-evm.dts
++++ b/arch/arm/boot/dts/am335x-evm.dts
+@@ -232,6 +232,8 @@
+ 		};
+ 
+ 		vmmc_reg: regulator@12 {
++			regulator-min-microvolt = <1800000>;
++			regulator-max-microvolt = <3300000>;
+ 			regulator-always-on;
+ 		};
+ 	};
+@@ -244,3 +246,8 @@
+ &cpsw_emac1 {
+ 	phy_id = <&davinci_mdio>, <1>;
+ };
++
++&mmc1 {
++	status = "okay";
++	vmmc-supply = <&vmmc_reg>;
++};
+diff --git a/arch/arm/boot/dts/am335x-evmsk.dts b/arch/arm/boot/dts/am335x-evmsk.dts
+index f67c360..8904b88 100644
+--- a/arch/arm/boot/dts/am335x-evmsk.dts
++++ b/arch/arm/boot/dts/am335x-evmsk.dts
+@@ -244,7 +244,14 @@
+ 		};
+ 
+ 		vmmc_reg: regulator@12 {
++			regulator-min-microvolt = <1800000>;
++			regulator-max-microvolt = <3300000>;
+ 			regulator-always-on;
+ 		};
+ 	};
+ };
++
++&mmc1 {
++	status = "okay";
++	vmmc-supply = <&vmmc_reg>;
++};
+diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+index b4fda12..8ab566f 100644
+--- a/arch/arm/boot/dts/am33xx.dtsi
++++ b/arch/arm/boot/dts/am33xx.dtsi
+@@ -229,6 +229,44 @@
+ 			status = "disabled";
+ 		};
+ 
++		mmc1: mmc@48060000 {
++			compatible = "ti,omap4-hsmmc";
++			ti,hwmods = "mmc1";
++			ti,dual-volt;
++			ti,needs-special-reset;
++			ti,needs-special-hs-handling;
++			dmas = <&edma 24
++				&edma 25>;
++			dma-names = "tx", "rx";
++			interrupts = <64>;
++			interrupt-parent = <&intc>;
++			reg = <0x48060000 0x1000>;
++			status = "disabled";
++		};
++
++		mmc2: mmc@481d8000 {
++			compatible = "ti,omap4-hsmmc";
++			ti,hwmods = "mmc2";
++			ti,needs-special-reset;
++			dmas = <&edma 2
++				&edma 3>;
++			dma-names = "tx", "rx";
++			interrupts = <28>;
++			interrupt-parent = <&intc>;
++			reg = <0x481d8000 0x1000>;
++			status = "disabled";
++		};
++
++		mmc3: mmc@47810000 {
++			compatible = "ti,omap4-hsmmc";
++			ti,hwmods = "mmc3";
++			ti,needs-special-reset;
++			interrupts = <29>;
++			interrupt-parent = <&intc>;
++			reg = <0x47810000 0x1000>;
++			status = "disabled";
++		};
++
+ 		wdt2: wdt@44e35000 {
+ 			compatible = "ti,omap3-wdt";
+ 			ti,hwmods = "wd_timer2";
+-- 
+1.7.9.5
+
