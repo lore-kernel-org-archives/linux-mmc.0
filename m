@@ -1,37 +1,55 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: eMMC bus test command failure
-Date: Thu, 27 Jun 2013 10:51:51 -0400
-Message-ID: <87ppv7r4hk.fsf@octavius.laptop.org>
-References: <59606D77376AA44BB2E289FE5BA55046751CFA84@NTXXIAMBX01.xacn.micron.com>
+Subject: Re: [PATCHv2] mmc: sdhci-s3c: fix the wrong register value when, clock is disabled
+Date: Thu, 27 Jun 2013 10:53:10 -0400
+Message-ID: <87ip0zr4fd.fsf@octavius.laptop.org>
+References: <51A2DCC4.2020307@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:37347 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:37378 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751869Ab3F0Ov5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 27 Jun 2013 10:51:57 -0400
-In-Reply-To: <59606D77376AA44BB2E289FE5BA55046751CFA84@NTXXIAMBX01.xacn.micron.com>
-	(Minjian Wu's message of "Mon, 27 May 2013 01:12:49 +0000")
+	id S1751408Ab3F0OxP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Jun 2013 10:53:15 -0400
+In-Reply-To: <51A2DCC4.2020307@samsung.com> (Jaehoon Chung's message of "Mon,
+	27 May 2013 13:10:44 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Minjian Wu (minjianwu)" <minjianwu@micron.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Minjian,
+Hi Jaehoon,
 
-On Sun, May 26 2013, Minjian Wu (minjianwu) wrote:
-> Hi,
+On Mon, May 27 2013, Jaehoon Chung wrote:
+> When use the QUIRK_NONSTANDARD_CLOCK, then never set to 0 at clock control register.
+> This patch is fixed this problem.
 >
-> 	I got one issue on Linux V3.7 as following.
->          > mmc0: switch to bus width 1 ddr 0 failed 
->          > mmc0: error -110 whilst initialising MMC card
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.co
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+> Changelog v2:
+> - Rebased at the latest mmc tree
 >
->          After debugging and checking the source codes, we find that
-> in mmc_send_bus_test function, there is no data timeout
-> setting(mmc_set_data_timeout). After we add the timeout setting
-> function, this issue is fixed, could you help confirm it? Thank you!
+>  drivers/mmc/host/sdhci-s3c.c |    5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 926aaf6..ce71f32 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -297,8 +297,11 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	u16 clk = 0;
+>  
+>  	/* don't bother if the clock is going off */
+> -	if (clock == 0)
+> +	if (clock == 0) {
+> +		sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+> +		host->clock = clock;
+>  		return;
+> +	}
+>  
+>  	sdhci_s3c_set_clock(host, clock);
 
-Please could you submit the patch you used?
+You should change the comment too, since your patch invalidates it.
 
 Thanks,
 
