@@ -1,45 +1,53 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci-acpi: fix error return code in sdhci_acpi_add_own_cd()
-Date: Thu, 27 Jun 2013 10:56:36 -0400
-Message-ID: <877ghfr49n.fsf@octavius.laptop.org>
-References: <CAPgLHd_FWg3egTZxBena+BTgWdZCzqr9AjV1_NpWBGYD3aPz0w@mail.gmail.com>
-	<000801ce5b65$28d9f400$7a8ddc00$@samsung.com> <51A44E6C.9070708@intel.com>
+Subject: Re: [PATCH] mmc: sh_mobile_sdhi: fix error return code in sh_mobile_sdhi_probe()
+Date: Thu, 27 Jun 2013 10:57:52 -0400
+Message-ID: <8738s3r47j.fsf@octavius.laptop.org>
+References: <CAPgLHd_dwxRp8Ug7=05=3gTTa9bPME5tb-Mq1aqRFXZSrgqFGg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56469 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:56506 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751663Ab3F0O4q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 27 Jun 2013 10:56:46 -0400
-In-Reply-To: <51A44E6C.9070708@intel.com> (Adrian Hunter's message of "Tue, 28
-	May 2013 09:27:56 +0300")
+	id S1752024Ab3F0O6D (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Jun 2013 10:58:03 -0400
+In-Reply-To: <CAPgLHd_dwxRp8Ug7=05=3gTTa9bPME5tb-Mq1aqRFXZSrgqFGg@mail.gmail.com> (Wei
+	Yongjun's message of "Tue, 28 May 2013 13:26:50 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Jingoo Han <jg1.han@samsung.com>, 'Wei Yongjun' <weiyj.lk@gmail.com>, rafael.j.wysocki@intel.com, sonic.zhang@analog.com, yongjun_wei@trendmicro.com.cn, linux-mmc@vger.kernel.org
+To: Wei Yongjun <weiyj.lk@gmail.com>
+Cc: g.liakhovetski@gmx.de, ian@mnementh.co.uk, grant.likely@linaro.org, rob.herring@calxeda.com, yongjun_wei@trendmicro.com.cn, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
 
-Hi,
+Hi Wei,
 
-On Tue, May 28 2013, Adrian Hunter wrote:
-> On 28/05/13 08:35, Jingoo Han wrote:
->> On Tuesday, May 28, 2013 2:26 PM, Wei Yongjun wrote:
->>>
->>> From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
->>>
->>> Fix to return a negative error code in the gpio_to_irq() error
->>> handling case instead of 0, as done elsewhere in this function.
->>>
->>> Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
->> 
->> It looks good.
->> 
->> Reviewed-by: Jingoo Han <jg1.han@samsung.com>
+On Tue, May 28 2013, Wei Yongjun wrote:
+> From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
 >
-> Yes, thank you!
+> Fix to return a negative error code instead of 0 when we cannot get
+> IRQ source by platform_get_irq(), as done elsewhere in this function.
 >
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+> ---
+>  drivers/mmc/host/sh_mobile_sdhi.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+> index cc4c872..a4316b3 100644
+> --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+> @@ -273,8 +273,10 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+>  		}
+>  
+>  		/* There must be at least one IRQ source */
+> -		if (!i)
+> +		if (!i) {
+> +			ret = irq;
+>  			goto eirq;
+> +		}
+>  	}
+>  
+>  	dev_info(&pdev->dev, "%s base at 0x%08lx clock rate %u MHz\n",
 
-Pushed to mmc-next for 3.11, sorry for the delay.
+Thanks, pushed to mmc-next for 3.11.
 
 - Chris.
 -- 
