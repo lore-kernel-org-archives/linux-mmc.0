@@ -1,156 +1,64 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2] mmc: sh_mmcif: add SET_BLOCK_COUNT support
-Date: Thu, 27 Jun 2013 12:04:56 -0400
-Message-ID: <878v1vmtef.fsf@octavius.laptop.org>
-References: <51BFD0C0.4080908@renesas.com>
+Subject: Re: [PATCH 1/1] mmc: sdhci-pci: add another device id
+Date: Thu, 27 Jun 2013 12:06:20 -0400
+Message-ID: <874ncjmtc3.fsf@octavius.laptop.org>
+References: <1371722279-16975-1-git-send-email-adrian.hunter@intel.com>
+	<1371722279-16975-2-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56854 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:37978 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752018Ab3F0QFB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 27 Jun 2013 12:05:01 -0400
-In-Reply-To: <51BFD0C0.4080908@renesas.com> (Yoshihiro Shimoda's message of
-	"Tue, 18 Jun 2013 12:15:12 +0900")
+	id S1752030Ab3F0QGX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Jun 2013 12:06:23 -0400
+In-Reply-To: <1371722279-16975-2-git-send-email-adrian.hunter@intel.com>
+	(Adrian Hunter's message of "Thu, 20 Jun 2013 12:57:59 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>
-Cc: linux-mmc@vger.kernel.org, SH-Linux <linux-sh@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org
 
-Hi Guennadi, please could you review this one?
+Hi Adrian,
 
-On Mon, Jun 17 2013, Shimoda, Yoshihiro wrote:
-> This patch adds SET_BLOCK_COUNT(CMD23) support to sh_mmcif driver.
-> If we add MMC_CAP_CMD23 to ".caps" of sh_mmcif_plat_data, the mmc
-> core driver will use CMD23. Then, the sh_mmcif driver can use
-> Reliable Write feature.
+On Thu, Jun 20 2013, Adrian Hunter wrote:
+> Add another PCI device id for an eMMC host controller.
 >
-> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 > ---
->  about v2:
->   - remove the wait_for_completion() to process the .request() asynchronously.
+>  drivers/mmc/host/sdhci-pci.c | 9 +++++++++
+>  1 file changed, 9 insertions(+)
 >
->  drivers/mmc/host/sh_mmcif.c |   64 +++++++++++++++++++++++++++++++++++++++---
->  1 files changed, 59 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 8ef5efa..8f66532 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -223,7 +223,8 @@ enum mmcif_wait_for {
->
->  struct sh_mmcif_host {
->  	struct mmc_host *mmc;
-> -	struct mmc_request *mrq;
-> +	struct mmc_request *mrq;	/* current mmc_request pointer */
-> +	struct mmc_request *mrq_orig;	/* original .request()'s pointer */
->  	struct platform_device *pd;
->  	struct clk *hclk;
->  	unsigned int clk;
-> @@ -244,6 +245,7 @@ struct sh_mmcif_host {
->  	bool power;
->  	bool card_present;
->  	struct mutex thread_lock;
-> +	struct mmc_request mrq_sbc;	/* mmc_request for SBC */
->
->  	/* DMA support */
->  	struct dma_chan		*chan_rx;
-> @@ -802,7 +804,11 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
->  		tmp |= CMD_SET_DWEN;
->  	/* CMLTE/CMD12EN */
->  	if (opc == MMC_READ_MULTIPLE_BLOCK || opc == MMC_WRITE_MULTIPLE_BLOCK) {
-> -		tmp |= CMD_SET_CMLTE | CMD_SET_CMD12EN;
-> +		/* If SBC, we don't use CMD12(STOP) */
-> +		if (mrq->sbc)
-> +			tmp |= CMD_SET_CMLTE;
-> +		else
-> +			tmp |= CMD_SET_CMLTE | CMD_SET_CMD12EN;
->  		sh_mmcif_bitset(host, MMCIF_CE_BLOCK_SET,
->  				data->blocks << 16);
->  	}
-> @@ -936,9 +942,27 @@ static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  		break;
->  	}
->
-> -	host->mrq = mrq;
-> +	if (mrq->sbc) {
-> +		/* Store original mrq to mrq_orig */
-> +		host->mrq_orig = mrq;
+> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+> index e082fac..d7d6bc8 100644
+> --- a/drivers/mmc/host/sdhci-pci.c
+> +++ b/drivers/mmc/host/sdhci-pci.c
+> @@ -36,6 +36,7 @@
+>  #define PCI_DEVICE_ID_INTEL_BYT_EMMC	0x0f14
+>  #define PCI_DEVICE_ID_INTEL_BYT_SDIO	0x0f15
+>  #define PCI_DEVICE_ID_INTEL_BYT_SD	0x0f16
+> +#define PCI_DEVICE_ID_INTEL_BYT_EMMC2	0x0f50
+>  
+>  /*
+>   * PCI registers
+> @@ -931,6 +932,14 @@ static const struct pci_device_id pci_ids[] = {
+>  	},
+>  
+>  	{
+> +		.vendor		= PCI_VENDOR_ID_INTEL,
+> +		.device		= PCI_DEVICE_ID_INTEL_BYT_EMMC2,
+> +		.subvendor	= PCI_ANY_ID,
+> +		.subdevice	= PCI_ANY_ID,
+> +		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
+> +	},
 > +
-> +		/* Copy original mrq data to mrq_sbc */
-> +		host->mrq_sbc = *mrq;
->
-> -	sh_mmcif_start_cmd(host, mrq);
-> +		/* Switch the mrq_sbc.cmd for SBC */
-> +		host->mrq_sbc.cmd = mrq->sbc;
-> +		host->mrq_sbc.sbc = NULL;
-> +		host->mrq_sbc.data = NULL;
-> +		host->mrq_sbc.stop = NULL;
-> +
-> +		/* Set current mrq pointer to mrq_sbc */
-> +		host->mrq = &host->mrq_sbc;
-> +	} else {
-> +		/* Set current mrq pointer to original mrq */
-> +		host->mrq = mrq;
-> +	}
-> +
-> +	sh_mmcif_start_cmd(host, host->mrq);
->  }
->
->  static int sh_mmcif_clk_update(struct sh_mmcif_host *host)
-> @@ -1212,13 +1236,35 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
->  		return IRQ_HANDLED;
->  	}
->
-> +	if (mrq->sbc && (mrq->cmd->opcode == MMC_WRITE_MULTIPLE_BLOCK) &&
-> +			(host->wait_for != MMCIF_WAIT_FOR_WRITE_END)) {
-> +		/* Wait for end of data phase */
-> +		host->wait_for = MMCIF_WAIT_FOR_WRITE_END;
-> +		sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MDTRANE);
-> +		schedule_delayed_work(&host->timeout_work, host->timeout);
-> +		mutex_unlock(&host->thread_lock);
-> +		return IRQ_HANDLED;
-> +	}
-> +
-> +	if (mrq->sbc && (mrq->cmd->opcode == MMC_READ_MULTIPLE_BLOCK) &&
-> +			(host->wait_for != MMCIF_WAIT_FOR_READ_END)) {
-> +		/* Wait for end of data phase */
-> +		host->wait_for = MMCIF_WAIT_FOR_READ_END;
-> +		sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFRE);
-> +		schedule_delayed_work(&host->timeout_work, host->timeout);
-> +		mutex_unlock(&host->thread_lock);
-> +		return IRQ_HANDLED;
-> +	}
-> +
->  	if (host->wait_for != MMCIF_WAIT_FOR_STOP) {
->  		struct mmc_data *data = mrq->data;
->  		if (!mrq->cmd->error && data && !data->error)
->  			data->bytes_xfered =
->  				data->blocks * data->blksz;
->
-> -		if (mrq->stop && !mrq->cmd->error && (!data || !data->error)) {
-> +		/* If SBC, we don't use CMD12(STOP) */
-> +		if (mrq->stop && !mrq->cmd->error && (!data || !data->error) &&
-> +		    !mrq->sbc) {
->  			sh_mmcif_stop_cmd(host, mrq);
->  			if (!mrq->stop->error) {
->  				schedule_delayed_work(&host->timeout_work, host->timeout);
-> @@ -1228,6 +1274,14 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
->  		}
->  	}
->
-> +	if ((mrq->cmd->opcode == MMC_SET_BLOCK_COUNT) && !mrq->cmd->error) {
-> +		/* Send the original .request() command */
-> +		host->mrq = host->mrq_orig;
-> +		sh_mmcif_start_cmd(host, host->mrq);
-> +		mutex_unlock(&host->thread_lock);
-> +		return IRQ_HANDLED;
-> +	}
-> +
->  	host->wait_for = MMCIF_WAIT_FOR_REQUEST;
->  	host->state = STATE_IDLE;
->  	host->mrq = NULL;
+> +	{
+>  		.vendor		= PCI_VENDOR_ID_O2,
+>  		.device		= PCI_DEVICE_ID_O2_8120,
+>  		.subvendor	= PCI_ANY_ID,
 
+Thanks, pushed to mmc-next for 3.11.
+
+- Chris.
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
