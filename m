@@ -1,38 +1,55 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: atmel-mci: remove include <mach/cpu.h>
-Date: Thu, 27 Jun 2013 11:27:06 -0400
-Message-ID: <878v1vpoad.fsf@octavius.laptop.org>
-References: <1365511500-13778-1-git-send-email-nicolas.ferre@atmel.com>
-	<20130605094225.GC2805@ludovic.desroches@atmel.com>
-	<20130606083300.GJ23653@game.jcrosoft.org>
+Subject: Re: [PATCH v1] mmc: card: fixing an false identification of SANITIZE command
+Date: Thu, 27 Jun 2013 11:28:32 -0400
+Message-ID: <874ncjpo7z.fsf@octavius.laptop.org>
+References: <1370430804-5663-1-git-send-email-ygardi@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54463 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:54500 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751273Ab3F0P1L (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 27 Jun 2013 11:27:11 -0400
-In-Reply-To: <20130606083300.GJ23653@game.jcrosoft.org> (Jean-Christophe
-	PLAGNIOL-VILLARD's message of "Thu, 6 Jun 2013 10:33:00 +0200")
+	id S1752302Ab3F0P2f (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Jun 2013 11:28:35 -0400
+In-Reply-To: <1370430804-5663-1-git-send-email-ygardi@codeaurora.org> (Yaniv
+	Gardi's message of "Wed, 5 Jun 2013 14:13:08 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
-Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Yaniv Gardi <ygardi@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
 
-Hi,
+Hi Yaniv,
 
-On Thu, Jun 06 2013, Jean-Christophe PLAGNIOL-VILLARD wrote:
-> On 11:42 Wed 05 Jun     , Ludovic Desroches wrote:
->> On Tue, Apr 09, 2013 at 02:45:00PM +0200, Nicolas Ferre wrote:
->> > Header file not needed anymore as we have removed
->> > the calls to cpu_is_xxx() macro.
->> > 
->> > Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
->> 
->> Late but of course:
->> 
->> Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> Acked-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+On Wed, Jun 05 2013, Yaniv Gardi wrote:
+> Inside the routine mmc_blk_ioctl_cmd() the sanitize command is
+> identified according to the value of bits 16-23 of the argument.
+>
+> but what happens if a different command is sent, and only by chance,
+> bits 16-23 contain the value of SANITIZE command ?
+> In that case a SANITIZE command will be falsely identified.
+> In order to prevent such a case, the condition is expanded and
+> now it also checks the opcode itself, and verifies that it is an
+> MMC_SWITCH opcode.
+>
+> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
+> ---
+>  drivers/mmc/card/block.c |    4 +++-
+>  1 files changed, 3 insertions(+), 1 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index c900d28..9775ae7 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -542,7 +542,9 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+>  			goto cmd_rel_host;
+>  	}
+>  
+> -	if (MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_SANITIZE_START) {
+> +	if ((MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_SANITIZE_START) &&
+> +	     (cmd.opcode == MMC_SWITCH)) {
+> +
+>  		err = ioctl_do_sanitize(card);
+>  
+>  		if (err)
 
 Thanks, pushed to mmc-next for 3.11.
 
