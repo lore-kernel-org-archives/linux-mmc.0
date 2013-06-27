@@ -1,75 +1,75 @@
-From: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH 0/5] AM33xx: MMC resources from DT without HWMOD data
-Date: Thu, 27 Jun 2013 21:56:50 +0530
-Message-ID: <51CC67CA.2070805@ti.com>
-References: <1372209808-6532-1-git-send-email-joelagnel@ti.com>
-	<CAD=GYpbdVVrh-tiqOcbHi3mkWRJUBdx0EsEZEFVVbgFgcCWgsw@mail.gmail.com>
-	<51CC2A1E.2040003@ti.com>
-	<CAD=GYpa9LQ1fV6=O9B65sJURVAigsgXCPLWav8cHXTuGQXPc9A@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v2 1/2] mmc: dw_mmc: Handle late vmmc regulators with EPROBE_DEFER
+Date: Thu, 27 Jun 2013 12:44:38 -0400
+Message-ID: <87vc4zlczt.fsf@octavius.laptop.org>
+References: <1370580406-10254-1-git-send-email-dianders@chromium.org>
+	<1370626110-1731-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <CAD=GYpa9LQ1fV6=O9B65sJURVAigsgXCPLWav8cHXTuGQXPc9A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, joelf-l0cyMroinI0@public.gmane.org
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>Linux ARM Kernel List <l>
+Content-Type: text/plain
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1370626110-1731-1-git-send-email-dianders@chromium.org> (Doug
+	Anderson's message of "Fri, 7 Jun 2013 10:28:29 -0700")
+Sender: linux-doc-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Olof Johansson <olof@lixom.net>, Andrew Bresticker <abrestic@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Rob Landley <rob@landley.net>, Will Newton <will.newton@gmail.com>, devicetree-discuss@lists.ozlabs.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thursday 27 June 2013 07:56 PM, Joel A Fernandes wrote:
-> Hi Benoit,
->
-> On Thu, Jun 27, 2013 at 7:03 AM, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org> wrote:
->> Hi Joel,
->>
->> On 06/26/2013 05:28 AM, Joel A Fernandes wrote:
->>> On Tue, Jun 25, 2013 at 8:23 PM, Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org> wrote:
->>>> From: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
->>>>
->>>> This series is fixes to get MMC working on AM33XX without HWMOD data.
->>>> On removal of HWMOD data, interrupt and register properties need to be provided
->>>> for the driver to function correctly.
->>>
->>> Please don't pull patches authored by me in this series. I have posted
->>> them with my wrong email address by mistake. I will correct my email
->>> during the next repost, after a round of review. Matt's patches in the
->>> series are still good though.
->>
->> In that case, please repost these in two series to avoid pulling the DTS
->> files in the MMC tree.
->
-> The series has been replaced with the single patch:
-> "[PATCH v2] ARM: dts: add AM33XX MMC support"
-> http://marc.info/?l=linux-omap&m=137230403815943&w=2
->
-> Some patches were squashed and others dropped in the series resulting
-> in the single
-> patch above. This patch should be good to apply
-Hi Joel,
+Hi Doug,
 
-Before pushing mmc dts support for am335x, Can you please let me
-know if below 2 patches [1] are merged/accepted,
-IIRC these patches are needed for MMC to work properly.
+On Fri, Jun 07 2013, Doug Anderson wrote:
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index bc3a1bc..ab5642d 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1895,7 +1895,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  	struct mmc_host *mmc;
+>  	struct dw_mci_slot *slot;
+>  	const struct dw_mci_drv_data *drv_data = host->drv_data;
+> -	int ctrl_id, ret;
+> +	int ctrl_id;
+>  	u8 bus_width;
+>  
+>  	mmc = mmc_alloc_host(sizeof(struct dw_mci_slot), host->dev);
+> @@ -1985,19 +1985,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  #endif /* CONFIG_MMC_DW_IDMAC */
+>  	}
+>  
+> -	host->vmmc = devm_regulator_get(mmc_dev(mmc), "vmmc");
+> -	if (IS_ERR(host->vmmc)) {
+> -		pr_info("%s: no vmmc regulator found\n", mmc_hostname(mmc));
+> -		host->vmmc = NULL;
+> -	} else {
+> -		ret = regulator_enable(host->vmmc);
+> -		if (ret) {
+> -			dev_err(host->dev,
+> -				"failed to enable regulator: %d\n", ret);
+> -			goto err_setup_bus;
+> -		}
+> -	}
+> -
+>  	if (dw_mci_get_cd(mmc))
+>  		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+>  	else
+> @@ -2023,10 +2010,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  	queue_work(host->card_workqueue, &host->card_work);
+>  
+>  	return 0;
+> -
+> -err_setup_bus:
+> -	mmc_free_host(mmc);
+> -	return -EINVAL;
+>  }
+>  
+>  static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
 
-I suggest to hold the dts patch until slave_sg_limit gets merged
-otherwise it will cause regression in am335x mmc.
+This hunk breaks the build for me, because err_setup_bus and ret are
+used in the error path of the call to mmc_add_host() in this function.
 
-[PATCH v4 1/3] dmaengine: add dma_get_slave_sg_limits()
-[PATCH v4 2/3] dma: edma: add device_slave_sg_limits() support
+I'll push a version that leaves those in.  Let me know if you think
+something strange is happening that made this work okay for you, like
+a mismerge.
 
-[1]
-https://groups.google.com/forum/#!topic/linux.kernel/khTTcPtQpag
-
->
-> Thanks,
->
-> -Joel
->
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
