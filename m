@@ -1,44 +1,40 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/3] mmc: dw: don't check resource with devm_ioremap_resource
-Date: Thu, 27 Jun 2013 11:25:49 -0400
-Message-ID: <87fvw3poci.fsf@octavius.laptop.org>
-References: <1370424252-31562-1-git-send-email-andriy.shevchenko@linux.intel.com>
-	<001701ce61f5$220667d0$66133770$%jun@samsung.com>
-	<1370441659.29283.295.camel@smile>
+Subject: Re: [PATCH] mmc: atmel-mci: remove include <mach/cpu.h>
+Date: Thu, 27 Jun 2013 11:27:06 -0400
+Message-ID: <878v1vpoad.fsf@octavius.laptop.org>
+References: <1365511500-13778-1-git-send-email-nicolas.ferre@atmel.com>
+	<20130605094225.GC2805@ludovic.desroches@atmel.com>
+	<20130606083300.GJ23653@game.jcrosoft.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:52447 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:54463 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751796Ab3F0PZx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 27 Jun 2013 11:25:53 -0400
-In-Reply-To: <1370441659.29283.295.camel@smile> (Andy Shevchenko's message of
-	"Wed, 05 Jun 2013 17:14:19 +0300")
+	id S1751273Ab3F0P1L (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Jun 2013 11:27:11 -0400
+In-Reply-To: <20130606083300.GJ23653@game.jcrosoft.org> (Jean-Christophe
+	PLAGNIOL-VILLARD's message of "Thu, 6 Jun 2013 10:33:00 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
+To: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi Andy,
+Hi,
 
-On Wed, Jun 05 2013, Andy Shevchenko wrote:
-> On Wed, 2013-06-05 at 23:01 +0900, Seungwon Jeon wrote: 
->> On 06/05/13 6:24 PM, Andy Shevchenko wrote:
->> > devm_ioremap_resource does sanity checks on the given resource. No need to
->> > duplicate this in the driver.
+On Thu, Jun 06 2013, Jean-Christophe PLAGNIOL-VILLARD wrote:
+> On 11:42 Wed 05 Jun     , Ludovic Desroches wrote:
+>> On Tue, Apr 09, 2013 at 02:45:00PM +0200, Nicolas Ferre wrote:
+>> > Header file not needed anymore as we have removed
+>> > the calls to cpu_is_xxx() macro.
 >> > 
->> > Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+>> > Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
 >> 
->> Looks good to me.
->> 'dw_mmc'(instead of 'dw') as a prefix of subject is expected with other patches, though.
->> Specially, dw_mmc-pci is for PATCH 3/3.
->
-> Shall I resubmit patches?
-> I think no-one can mess up with this, because we fortunately have only
-> one mmc designware driver there.
+>> Late but of course:
+>> 
+>> Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> Acked-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
 
-Thanks, I pushed all three patches to mmc-next for 3.11 and corrected
-the titles.
+Thanks, pushed to mmc-next for 3.11.
 
 - Chris.
 -- 
