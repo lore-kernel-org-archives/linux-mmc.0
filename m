@@ -1,41 +1,43 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sirf: fix sdhci_pltfm_init sequence
-Date: Thu, 27 Jun 2013 11:18:56 -0400
-Message-ID: <87ppv7ponz.fsf@octavius.laptop.org>
-References: <24753444.e6CjWoyOih@wuerfel>
+Subject: Re: [PATCH 04/13] mmc: mxs-mmc: Let device core handle pinctrl
+Date: Thu, 27 Jun 2013 11:20:34 -0400
+Message-ID: <87obarpol9.fsf@octavius.laptop.org>
+References: <1367863561-11534-1-git-send-email-fabio.estevam@freescale.com>
+	<1367863561-11534-4-git-send-email-fabio.estevam@freescale.com>
+	<CAOMZO5BmvsnNPCxv6shNQsVg3cJcdPxQrMJzZz3fyBGKPOYF_A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:52621 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:52660 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751408Ab3F0PTF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 27 Jun 2013 11:19:05 -0400
-In-Reply-To: <24753444.e6CjWoyOih@wuerfel> (Arnd Bergmann's message of "Tue,
-	04 Jun 2013 00:02:13 +0200")
+	id S1751893Ab3F0PUk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Jun 2013 11:20:40 -0400
+In-Reply-To: <CAOMZO5BmvsnNPCxv6shNQsVg3cJcdPxQrMJzZz3fyBGKPOYF_A@mail.gmail.com> (Fabio
+	Estevam's message of "Sun, 26 May 2013 18:01:17 -0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Christian Daudt <csd@broadcom.com>, Barry Song <Baohua.Song@csr.com>
+To: Fabio Estevam <festevam@gmail.com>
+Cc: Fabio Estevam <fabio.estevam@freescale.com>, shawn.guo@linaro.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org
 
-Hi Arnd,
+Hi Fabio,
 
-On Mon, Jun 03 2013, Arnd Bergmann wrote:
-> Patch "mmc: sdhci: Add size for caller in init+register" changed the
-> interface for sdhci_pltfm_init, while patch "mmc: sdhci-sirf: add mmc
-> host sdhci-pltfm based driver for SiRF SoCs" added a new driver
-> with the old interface.
+On Sun, May 26 2013, Fabio Estevam wrote:
+> Hi Chris,
 >
-> This changes the sirf driver to use the new interface, avoiding
-> one warning, and simplifying the init sequence. Since we're here
-> already, this also adds an error path for failed clk_prepare_enable.
+> On Mon, May 6, 2013 at 3:05 PM, Fabio Estevam
+> <fabio.estevam@freescale.com> wrote:
+>> Since commit ab78029 (drivers/pinctrl: grab default handles from device core),
+>> we can rely on device core for handling pinctrl.
+>>
+>> So remove devm_pinctrl_get_select_default() from the driver.
+>>
+>> Cc: Chris Ball <cjb@laptop.org>
+>> Cc: <linux-mmc@vger.kernel.org>
+>> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
 >
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> Cc: Christian Daudt <csd@broadcom.com>
-> Cc: Barry Song <Baohua.Song@csr.com>
-> Cc: Chris Ball <cjb@laptop.org>
+> Any comments on this one?
 
-Thanks, fixed the conflict and pushed to mmc-next for 3.11; sorry for
-the delay.
+Thanks, pushed to mmc-next for 3.11.
 
 - Chris.
 -- 
