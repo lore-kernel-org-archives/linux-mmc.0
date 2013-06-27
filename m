@@ -1,44 +1,64 @@
-From: Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH 0/5] AM33xx: MMC resources from DT without HWMOD data
-Date: Thu, 27 Jun 2013 14:03:42 +0200
-Message-ID: <51CC2A1E.2040003@ti.com>
-References: <1372209808-6532-1-git-send-email-joelagnel@ti.com>
-	<CAD=GYpbdVVrh-tiqOcbHi3mkWRJUBdx0EsEZEFVVbgFgcCWgsw@mail.gmail.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v2] dmaengine: shdma: fix a build failure on platforms
+ with no DMA support
+Date: Thu, 27 Jun 2013 22:49:20 +0900
+Message-ID: <20130627134920.GD28902@verge.net.au>
+References: <Pine.LNX.4.64.1305310423360.1470@axis700.grange>
+ <3410825.gK3KBC8v80@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <CAD=GYpbdVVrh-tiqOcbHi3mkWRJUBdx0EsEZEFVVbgFgcCWgsw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel@v>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <3410825.gK3KBC8v80@wuerfel>
+Sender: linux-sh-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-arm-kernel@lists.infradead.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, Kevin Hilman <khilman@linaro.org>, Chris Ball <cjb@laptop.org>, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Joel,
-
-On 06/26/2013 05:28 AM, Joel A Fernandes wrote:
-> On Tue, Jun 25, 2013 at 8:23 PM, Joel A Fernandes <joelagnel-l0cyMroinI0@public.gmane.org> wrote:
->> From: Joel A Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
->>
->> This series is fixes to get MMC working on AM33XX without HWMOD data.
->> On removal of HWMOD data, interrupt and register properties need to be provided
->> for the driver to function correctly.
+On Fri, May 31, 2013 at 04:51:52PM +0200, Arnd Bergmann wrote:
+> On Friday 31 May 2013 05:01:31 Guennadi Liakhovetski wrote:
+> > On platforms with no support for the shdma dmaengine driver build is
+> > currently failing with
+> > 
+> > drivers/built-in.o: In function `sh_mobile_sdhi_probe':
+> > drivers/mmc/host/sh_mobile_sdhi.c:170: undefined reference to`shdma_chan_filter'
+> > 
+> > Fix the breakage by defining shdma_chan_filter to NULL in such
+> > configurations.
+> > 
+> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
 > 
-> Please don't pull patches authored by me in this series. I have posted
-> them with my wrong email address by mistake. I will correct my email
-> during the next repost, after a round of review. Matt's patches in the
-> series are still good though.
+> Sorry, I saw your patch too late and already spent some time doing a different one.
+> 
+> > diff --git a/include/linux/sh_dma.h b/include/linux/sh_dma.h
+> > index b64d6be..1fd8a20 100644
+> > --- a/include/linux/sh_dma.h
+> > +++ b/include/linux/sh_dma.h
+> > @@ -99,6 +99,10 @@ struct sh_dmae_pdata {
+> >  #define CHCR_TE        0x00000002
+> >  #define CHCR_IE        0x00000004
+> >  
+> > +#if IS_ENABLED(CONFIG_SH_DMAE_BASE)
+> >  bool shdma_chan_filter(struct dma_chan *chan, void *arg);
+> > +#else
+> > +#define shdma_chan_filter NULL
+> > +#endif
+> 
+> I still think that this is not the right solution, or at least not
+> complete: No slave driver should care about which dma-engine it is
+> connected to. You have already done most of the necessary conversion,
+> so it would be straightforward to also pass the filter function
+> pointer to the sdhi driver along with the data that gets passed into
+> it.
 
-In that case, please repost these in two series to avoid pulling the DTS
-files in the MMC tree.
+Hi Arnd, Hi Guennadi,
 
-Thanks,
-Benoit
+It seems to me that the solution above, though not particularly generic,
+is sufficient as according to Guennadi SHDMA users cannot use other DMA
+drivers[1]. The change above also has the merit of being rather small.
+
+[1] https://patchwork.kernel.org/patch/2644101/
+
+With that reasoning I would like to provide:
+
+Acked-by: Simon Horman <horms+renesas@verge.net.au>
