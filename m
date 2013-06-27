@@ -1,83 +1,39 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 00/12] mmc: core: mmc_bus to handle suspend|resume|shutdown
-Date: Thu, 27 Jun 2013 11:43:37 -0400
-Message-ID: <87bo6ro8ye.fsf@octavius.laptop.org>
-References: <1370876627-13439-1-git-send-email-ulf.hansson@stericsson.com>
+Subject: Re: [PATCH] sdhci-pxav3: Fix runtime PM initialization
+Date: Thu, 27 Jun 2013 11:47:34 -0400
+Message-ID: <877ghfo8rt.fsf@octavius.laptop.org>
+References: <20130610201618.C08C3FAACC@dev.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54093 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:44735 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751796Ab3F0Pnl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 27 Jun 2013 11:43:41 -0400
-In-Reply-To: <1370876627-13439-1-git-send-email-ulf.hansson@stericsson.com>
-	(Ulf Hansson's message of "Mon, 10 Jun 2013 17:03:35 +0200")
+	id S1752654Ab3F0Pri (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Jun 2013 11:47:38 -0400
+In-Reply-To: <20130610201618.C08C3FAACC@dev.laptop.org> (Daniel Drake's
+	message of "Mon, 10 Jun 2013 16:16:18 -0400 (EDT)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: Daniel Drake <dsd@laptop.org>
+Cc: linux-mmc@vger.kernel.org, kliu5@marvell.com, jlfu@marvell.com
 
-Hi Ulf,
+Hi Daniel,
 
-On Mon, Jun 10 2013, Ulf Hansson wrote:
-> From: Ulf Hansson <ulf.hansson@linaro.org>
+On Mon, Jun 10 2013, Daniel Drake wrote:
+> Commit bb691ae464b77d30e74c66480e98d74e88d6b194 breaks boot on OLPC XO-4,
+> it hangs somewhere inside sdhci_add_host.
 >
-> The MMC/SD/SDIO cards are registered on the mmc_bus and should from a power
-> management perspective be controlled from there. As of today each and every
-> host driver needs to issue mmc_suspend|resume_host from their respective
-> .suspend|resume methods, which seems like an unnecessary requirement to
-> put on them. Additionally, a shutdown sequence shall be initiated from the
-> mmc_bus.
+> When pm_runtime_set_autosuspend_delay() was being called, the device's usage
+> counter was 0, causing the PM layer to runtime-suspend the device. We then
+> went on to call sdhci_add_host() on a suspended device, which hung.
 >
-> This patch set moves the responsiblity to suspend the cards into the mmc_bus.
-> It also invents the shutdown sequence, also to be handled from the mmc_bus.
-> In the SDIO case, the shutdown sequence will not involve any SDIO specific
-> operations. If this would be desired, I suggest to handle that as and separate
-> step, since it would involve the sdio bus and potentially the sdio drivers.
+> Fix this by making the driver consistent with the omap_hsmmc driver, both
+> in terms of runtime PM initialization and error handling. Now the device
+> is not runtime-suspended until we exit the probe routine.
 >
-> As a part of the patches releated to adding the shutdown sequence, specific
-> issues to handle eMMC power off notification properly are included in this
-> patch set as well.
->
-> The mmc_suspend|resume_host functions are not removed, but will instead always
-> return successful. A separate patch(es) build on top of this patch set, shall
-> remove the API:s together with updating each and every host driver.
->
-> Do note, that patch 1 to 4 has been sent earlier in the set "mmc: core: Let the
-> mmc_bus handle suspend|resume sequence". Since the functionallity are very close
-> releated I decided to fold them in into this patch set.
->
-> A big thank you to Jaehoon Chung who has tested the patches 1 to 4.
->
-> Ulf Hansson (12):
->   mmc: core: Remove unnecessary check for the remove callback
->   mmc: core: Validate suspend prerequisites for SDIO at SUSPEND_PREPARE
->   mmc: core: Push common suspend|resume code into each bus_ops
->   mmc: core: Initiate suspend|resume from mmc bus instead of mmc host
->   mmc: core: Handle card shutdown from mmc_bus
->   mmc: core: Extend shutdown sequence to handle bus operations
->   mmc: core: Add shutdown callback for SD bus_ops
->   mmc: core: Handle both poweroff notification types for eMMC
->   mmc: core: Add shutdown callback for (e)MMC bus_ops
->   mmc: core: Enable power_off_notify for eMMC shutdown sequence
->   mmc: core: Invent MMC_CAP2_FULL_PWR_CYCLE
->   mmc: core: Add DT-bindings for MMC_CAP2_FULL_PWR_CYCLE
->
->  Documentation/devicetree/bindings/mmc/mmc.txt |    1 +
->  drivers/mmc/card/block.c                      |   15 ++++-
->  drivers/mmc/card/mmc_test.c                   |    5 ++
->  drivers/mmc/core/bus.c                        |   37 ++++++++++-
->  drivers/mmc/core/core.c                       |   87 ++++---------------------
->  drivers/mmc/core/core.h                       |    2 +
->  drivers/mmc/core/host.c                       |    2 +
->  drivers/mmc/core/mmc.c                        |   40 +++++++++---
->  drivers/mmc/core/sd.c                         |    6 ++
->  drivers/mmc/core/sdio.c                       |   48 ++++++++++++--
->  include/linux/mmc/card.h                      |    1 +
->  include/linux/mmc/host.h                      |    2 +-
->  12 files changed, 153 insertions(+), 93 deletions(-)
+> Signed-off-by: Daniel Drake <dsd@laptop.org>
 
-Thanks, all pushed to mmc-next, hopefully for 3.11 depending on testing.
+Thanks for the fix, pushed to mmc-next for 3.11.
 
 - Chris.
 -- 
