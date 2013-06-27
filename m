@@ -1,32 +1,32 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/2] mmc-utils: Correctly handle CARD_TYPE.
-Date: Thu, 27 Jun 2013 10:42:21 -0400
-Message-ID: <877ghfsjhu.fsf@octavius.laptop.org>
-References: <1369354267-18632-1-git-send-email-olegm@lab126.com>
-	<1369354267-18632-2-git-send-email-olegm@lab126.com>
+Subject: Re: [PATCH 0/8] sdhci: Move real work out of an atomic context
+Date: Thu, 27 Jun 2013 10:46:54 -0400
+Message-ID: <87wqpfr4pt.fsf@octavius.laptop.org>
+References: <1369411242-20515-1-git-send-email-jeremie.samuel.ext@parrot.com>
+	<51B9D5D4.9040907@parrot.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56304 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:44214 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751663Ab3F0Om0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 27 Jun 2013 10:42:26 -0400
-In-Reply-To: <1369354267-18632-2-git-send-email-olegm@lab126.com> (Oleg
-	Matcovschi's message of "Thu, 23 May 2013 17:11:07 -0700")
+	id S1751408Ab3F0Oq7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Jun 2013 10:46:59 -0400
+In-Reply-To: <51B9D5D4.9040907@parrot.com> (Jeremie Samuel's message of "Thu,
+	13 Jun 2013 16:23:16 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Oleg Matcovschi <olegm@lab126.com>
-Cc: linux-mmc@vger.kernel.org
+To: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Matthieu Castet <matthieu.castet@parrot.com>, =?utf-8?Q?Gr=C3=A9gor?= BOIRIE <gregor.boirie@parrot.com>
 
-Hi,
+Hi Jeremie,
 
-On Thu, May 23 2013, Oleg Matcovschi wrote:
-> Analysis was based on value of EXT_CSD_BOOT_INFO, not CARD_TYPE.
-> CARD_TYPE should be handled using bitmask, not values.
->
-> Signed-off-by: Oleg Matcovschi <olegm@lab126.com>
+On Thu, Jun 13 2013, Jeremie Samuel wrote:
+> I posted these patches a few weeks ago. Is it possible to get a
+> feedback for this submission?
 
-Thanks, pushed to mmc-utils.
+Please could you resubmit in two weeks or so, so that we can spend a
+full cycle with these in linux-next before including them in Linux
+3.12 if there are no problems?  Thanks!
 
 - Chris.
 -- 
