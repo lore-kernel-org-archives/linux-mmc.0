@@ -1,59 +1,31 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci: fix ctrl_2 on super-speed selection
-Date: Thu, 27 Jun 2013 11:56:42 -0400
-Message-ID: <87li5vmts5.fsf@octavius.laptop.org>
-References: <1371134488-20219-1-git-send-email-peppe.cavallaro@st.com>
+Subject: Re: [PATCH] mmc: omap: remove unnecessary #if 0's
+Date: Thu, 27 Jun 2013 11:57:17 -0400
+Message-ID: <87hagjmtr6.fsf@octavius.laptop.org>
+References: <1371137155-15318-1-git-send-email-coelho@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:52955 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:52973 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753258Ab3F0P4p (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 27 Jun 2013 11:56:45 -0400
-In-Reply-To: <1371134488-20219-1-git-send-email-peppe.cavallaro@st.com>
-	(Giuseppe CAVALLARO's message of "Thu, 13 Jun 2013 16:41:28 +0200")
+	id S1753258Ab3F0P5U (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Jun 2013 11:57:20 -0400
+In-Reply-To: <1371137155-15318-1-git-send-email-coelho@ti.com> (Luciano
+	Coelho's message of "Thu, 13 Jun 2013 18:25:55 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
-Cc: linux-mmc@vger.kernel.org
+To: Luciano Coelho <coelho@ti.com>
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, tony@atomide.com
 
-Hi Giuseppe,
+Hi Luciano,
 
-On Thu, Jun 13 2013, Giuseppe CAVALLARO wrote:
-> This patch fixes the HC ctrl_2 programming where, in case of
-> SDR104 and HS200, we have to write 100b in the the UHS Mode
-> bits. We wrote 101b that is reserved from Arasan Specs.
+On Thu, Jun 13 2013, Luciano Coelho wrote:
+> In commit 3451c067 (mmc: omap: add DMA engine support), some #if 0's
+> were used to comment out parts of the code.  This has been in the code
+> for over a year and are not needed anymore (and the commented-out code
+> doesn't even compile).  Remove them.
 >
-> Reported-by: Youssef Triki <youssef.triki@st.com>
-> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-> ---
->  drivers/mmc/host/sdhci.c |    7 +++----
->  1 files changed, 3 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index b8bb3b3..ae745ab 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1526,16 +1526,15 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
->  			ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->  			/* Select Bus Speed Mode for host */
->  			ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
-> -			if (ios->timing == MMC_TIMING_MMC_HS200)
-> -				ctrl_2 |= SDHCI_CTRL_HS_SDR200;
-> +			if ((ios->timing == MMC_TIMING_MMC_HS200) ||
-> +			    (ios->timing == MMC_TIMING_UHS_SDR104))
-> +				ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
->  			else if (ios->timing == MMC_TIMING_UHS_SDR12)
->  				ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
->  			else if (ios->timing == MMC_TIMING_UHS_SDR25)
->  				ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
->  			else if (ios->timing == MMC_TIMING_UHS_SDR50)
->  				ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
-> -			else if (ios->timing == MMC_TIMING_UHS_SDR104)
-> -				ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
->  			else if (ios->timing == MMC_TIMING_UHS_DDR50)
->  				ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
->  			sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+> Signed-off-by: Luciano Coelho <coelho@ti.com>
 
 Thanks, pushed to mmc-next for 3.11.
 
