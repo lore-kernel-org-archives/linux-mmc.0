@@ -1,53 +1,31 @@
-From: <a-bindra@ti.com>
-Subject: [PATCH] mmc: omap_hsmmc: use for OMAP5 as well
-Date: Fri, 28 Jun 2013 18:04:54 +0530
-Message-ID: <1372422894-23729-1-git-send-email-a-bindra@ti.com>
+From: Chris Ball <chris@printf.net>
+Subject: Re: [PATCH 0/2] mmc: add support for eMMC hardware reset for BYT eMMC
+Date: Fri, 28 Jun 2013 14:59:04 +0100
+Message-ID: <86fvw25obb.fsf@void.printf.net>
+References: <1371113427-8257-1-git-send-email-adrian.hunter@intel.com>
+	<87txkjmtvu.fsf@octavius.laptop.org> <51CD3AAB.2090508@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:40438 "EHLO comal.ext.ti.com"
+Received: from void.printf.net ([89.145.121.20]:36179 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750822Ab3F1MfV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 28 Jun 2013 08:35:21 -0400
+	id S1752819Ab3F1N7L (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 28 Jun 2013 09:59:11 -0400
+In-Reply-To: <51CD3AAB.2090508@intel.com> (Adrian Hunter's message of "Fri, 28
+	Jun 2013 10:26:35 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>, balbi@ti.com, nm@ti.com, Amarinder Bindra <a-bindra@ti.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-From: Amarinder Bindra <a-bindra@ti.com>
+Hi Adrian,
 
-OMAP's hs_mmc driver is also used for OMAP5 MMC controller operation.
-Considering that the device tree entries are already there for this,
-allow the driver to be built when only OMAP5 is enabled.
-This allows MMC root filesystems to be available in "OMAP5 only"
-configurations.
+On Fri, Jun 28 2013, Adrian Hunter wrote:
+> Thanks, but "mmc: sdhci-pci: add support for eMMC hardware reset for BYT
+> eMMC." has been mixed with someone else's patch. i.e. it now looks like this:
 
-Signed-off-by: Amarinder Bindra <a-bindra@ti.com>
-Acked-by: Felipe Balbi <balbi@ti.com>
-Acked-by: Nishanth Menon <nm@ti.com>
----
- drivers/mmc/host/Kconfig |    6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+Ouch, that's terrible, thank you for catching it.  Will fix. 
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 009dabd..6722e21 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -254,11 +254,11 @@ config MMC_OMAP
- 
- config MMC_OMAP_HS
- 	tristate "TI OMAP High Speed Multimedia Card Interface support"
--	depends on SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4
-+	depends on SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4 || SOC_OMAP5
- 	help
- 	  This selects the TI OMAP High Speed Multimedia card Interface.
--	  If you have an OMAP2430 or OMAP3 board or OMAP4 board with a
--	  Multimedia Card slot, say Y or M here.
-+	  If you have an OMAP2430 or OMAP3 board or OMAP4 board or OMAP5
-+	  board with a Multimedia Card slot, say Y or M here.
- 
- 	  If unsure, say N.
- 
+- Chris.
 -- 
-1.7.9.5
-
+Chris Ball   <chris@printf.net>   <http://printf.net/>
