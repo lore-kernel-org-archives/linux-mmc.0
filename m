@@ -1,67 +1,53 @@
-From: Pavel Machek <pavel@denx.de>
-Subject: Re: [PATCHv3] ARM: socfpga: dts: Add support for SD/MMC
-Date: Fri, 28 Jun 2013 13:28:33 +0200
-Message-ID: <20130628112833.GC22234@amd.pavel.ucw.cz>
-References: <1372397738-8093-1-git-send-email-dinguyen@altera.com>
- <1372397738-8093-2-git-send-email-dinguyen@altera.com>
+From: <a-bindra@ti.com>
+Subject: [PATCH] mmc: omap_hsmmc: use for OMAP5 as well
+Date: Fri, 28 Jun 2013 18:04:54 +0530
+Message-ID: <1372422894-23729-1-git-send-email-a-bindra@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:46622 "EHLO
-	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755716Ab3F1L2f (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Jun 2013 07:28:35 -0400
-Content-Disposition: inline
-In-Reply-To: <1372397738-8093-2-git-send-email-dinguyen@altera.com>
+Received: from comal.ext.ti.com ([198.47.26.152]:40438 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750822Ab3F1MfV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 28 Jun 2013 08:35:21 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinh.linux@gmail.com
-Cc: Dinh Nguyen <dinguyen@altera.com>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Chris Ball <cjb@laptop.org>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux@arm.linux.org.uk, wd@denx.de
+To: linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>, balbi@ti.com, nm@ti.com, Amarinder Bindra <a-bindra@ti.com>
 
-Hi!
+From: Amarinder Bindra <a-bindra@ti.com>
 
-Just some nit-picking... (not worth blocking apply for this, can
-easily go through trivial tree later.)
+OMAP's hs_mmc driver is also used for OMAP5 MMC controller operation.
+Considering that the device tree entries are already there for this,
+allow the driver to be built when only OMAP5 is enabled.
+This allows MMC root filesystems to be available in "OMAP5 only"
+configurations.
 
->  create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-> new file mode 100644
-> index 0000000..f36b7ee
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-> @@ -0,0 +1,60 @@
-> +* Altera SOCFPGA specific extensions to the Synopsis Designware Mobile
-> +  Storage Host Controller
-> +
-> +Required Properties:
-> +
-> +* compatible: should be
-> +	- "altr,socfpga-dw-mshc": for controllers with Altera SOCFPGA
-> +	  specific extensions.
-> +
-> +* altr,dw-mshc-ciu-div: Specifies the divider value for the card interface
-> +  unit (ciu) clock. The value should be (n+1). For Altera's SOCFPGA, the divider
-> +  value is fixed at 3, which mean parent_clock/4.
+Signed-off-by: Amarinder Bindra <a-bindra@ti.com>
+Acked-by: Felipe Balbi <balbi@ti.com>
+Acked-by: Nishanth Menon <nm@ti.com>
+---
+ drivers/mmc/host/Kconfig |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-"which means".
-
-> +* altr,dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
-> +  in transmit mode and CIU clock phase shift value in receive mode for single
-> +  data rate mode operation. Refer notes below for the order of the cells and the
-
-"refer to".
-
-> +Example:
-> +
-> +  The MSHC controller node can be split into two portions, SoC specific and
-> +  board specific portions as listed below.
-
-", as listed".
-
-Thanks,
-									Pavel
-
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 009dabd..6722e21 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -254,11 +254,11 @@ config MMC_OMAP
+ 
+ config MMC_OMAP_HS
+ 	tristate "TI OMAP High Speed Multimedia Card Interface support"
+-	depends on SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4
++	depends on SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4 || SOC_OMAP5
+ 	help
+ 	  This selects the TI OMAP High Speed Multimedia card Interface.
+-	  If you have an OMAP2430 or OMAP3 board or OMAP4 board with a
+-	  Multimedia Card slot, say Y or M here.
++	  If you have an OMAP2430 or OMAP3 board or OMAP4 board or OMAP5
++	  board with a Multimedia Card slot, say Y or M here.
+ 
+ 	  If unsure, say N.
+ 
 -- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+1.7.9.5
+
