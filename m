@@ -1,86 +1,80 @@
-From: "Fernandes, Joel" <joelf-l0cyMroinI0@public.gmane.org>
-Subject: RE: [PATCH 0/5] AM33xx: MMC resources from DT without HWMOD data
-Date: Fri, 28 Jun 2013 16:56:04 +0000
-Message-ID: <083BC63EECB6FD41B8E81CF7FD87CC0F2E4F186C@DLEE08.ent.ti.com>
-References: <1372209808-6532-1-git-send-email-joelagnel@ti.com>
-	<CAD=GYpbdVVrh-tiqOcbHi3mkWRJUBdx0EsEZEFVVbgFgcCWgsw@mail.gmail.com>
-	<51CC2A1E.2040003@ti.com>
-	<CAD=GYpa9LQ1fV6=O9B65sJURVAigsgXCPLWav8cHXTuGQXPc9A@mail.gmail.com>
-	<51CC67CA.2070805@ti.com>
-	<083BC63EECB6FD41B8E81CF7FD87CC0F2E4F0F95@DLEE08.ent.ti.com>
-	<51CDB06B.9010604@ti.com>
+From: H Hartley Sweeten <hartleys@visionengravers.com>
+Subject: Q: mmc au size
+Date: Fri, 28 Jun 2013 16:46:21 -0700
+Message-ID: <201306281646.21319.hartleys@visionengravers.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <51CDB06B.9010604-l0cyMroinI0@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: "Krishnamoorthy, Balaji T" <balajitk-l0cyMroinI0@public.gmane.org>
-Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, "benoit.cousson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" <benoit.cousson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, "lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org" <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-k>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Linux Kernel <linux-kernel@vger.kernel.org>, cjb@laptop.org, hsweeten@visionengravers.com
 List-Id: linux-mmc@vger.kernel.org
 
-> -----Original Message-----
-> From: Krishnamoorthy, Balaji T
-> Sent: Friday, June 28, 2013 10:49 AM
-> To: Fernandes, Joel
-> Cc: benoit.cousson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org; lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org; Tony Lindgren; Nori, Sekhar;
-> Matt Porter; Grant Likely; Rob Herring; Vinod Koul; Mark Brown; Russell King;
-> Rob Landley; Andrew Morton; Jason Kridner; Koen Kooi; Chris Ball; Devicetree
-> Discuss; Linux OMAP List; Linux ARM Kernel List; Linux DaVinci Kernel List;
-> Linux Kernel Mailing List; Linux MMC List; Arnd Bergmann
-> Subject: Re: [PATCH 0/5] AM33xx: MMC resources from DT without HWMOD
-> data
-> 
-> On Thursday 27 June 2013 11:38 PM, Fernandes, Joel wrote:
-> > Hi Balaji,
-> >
-> 
-> <snip>
-> 
-> >>> Some patches were squashed and others dropped in the series
-> >>> resulting in the single patch above. This patch should be good to
-> >>> apply
-> >> Hi Joel,
-> >>
-> >> Before pushing mmc dts support for am335x, Can you please let me know
-> >> if below 2 patches [1] are merged/accepted, IIRC these patches are
-> >> needed for MMC to work properly.
-> >>
-> >> I suggest to hold the dts patch until slave_sg_limit gets merged
-> >> otherwise it will cause regression in am335x mmc.
-> >>
-> >> [PATCH v4 1/3] dmaengine: add dma_get_slave_sg_limits() [PATCH v4
-> >> 2/3] dma: edma: add device_slave_sg_limits() support
-> >
-> > Actually this is an independent regression and is currently worked on by Lars-
-> Peter Clausen [1].
-> >
-> > Currently not having the MMC DTS merged is also a regression,
-> 
-> No, Right now mmc support is not added to am335x, so it is not really a
-> regression.
-> 
->  > so I suggest lets take it one
-> > step at a time and get the DTS merged in first. Also there will be
-> > overhead of reposting this DTS patch later again which will not change. What
-> do you say?
-> >
-> 
-> If it gets enabled via dts, without slave sg limit support, file read/write will fail,
-> possibly corrupting file system.
+Hello all,
 
-I agree with this. Thank you.
+I have a question concerning the "au" size of a SD Card.
 
-Tony, Benoit, I guess let's just not apply the DTS yet till the slave-sg limits support
-is merged as well. Sorry for the noise. Thanks.
+I have an old Kingston 64MB SD-Card and lately I have noticed this
+kernel message when I use the card:
 
--Joel
+mmc0: SD Status: Invalid Allocation Unit size.
+
+This is due to the following commit:
+
+commit b63b5e819d5b21ae493c17c356018ffa98d3ee1c
+Author: Alan Cox <alan@linux.intel.com>
+Date: =C2=A0 Mon Jul 2 18:55:13 2012 +0100
+
+=C2=A0 =C2=A0 mmc: core: correct invalid error checking
+
+
+=46rom the "SD Specifications, Part 1, Physical Layer Specification",
+
+* AU_SIZE
+This 4-bit field indicates AU Size and the value can be selected from
+16 KB.
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0
+=C2=A0 AU_SIZE =C2=A0Value Definition
+=C2=A0 ------- =C2=A0----------------
+=C2=A0 =C2=A0 0h =C2=A0 =C2=A0 Not Defined
+=C2=A0 =C2=A0 1h =C2=A0 =C2=A0 16 KB
+=C2=A0 =C2=A0 2h =C2=A0 =C2=A0 32 KB
+=C2=A0 =C2=A0 3h =C2=A0 =C2=A0 64 KB
+=C2=A0 =C2=A0 4h =C2=A0 =C2=A0 128 KB
+=C2=A0 =C2=A0 5h =C2=A0 =C2=A0 256 KB
+=C2=A0 =C2=A0 6h =C2=A0 =C2=A0 512 KB
+=C2=A0 =C2=A0 7h =C2=A0 =C2=A0 1 MB
+=C2=A0 =C2=A0 8h =C2=A0 =C2=A0 2 MB
+=C2=A0 =C2=A0 9h =C2=A0 =C2=A0 4 MB
+=C2=A0 =C2=A0 Ah =C2=A0 =C2=A0 8 MB
+=C2=A0 =C2=A0 Bh =C2=A0 =C2=A0 12 MB
+=C2=A0 =C2=A0 Ch =C2=A0 =C2=A0 16 MB
+=C2=A0 =C2=A0 Dh =C2=A0 =C2=A0 24 MB
+=C2=A0 =C2=A0 Eh =C2=A0 =C2=A0 32 MB
+=C2=A0 =C2=A0 Fh =C2=A0 =C2=A0 64 MB
+
+Also in the specification is this note:
+
+Sector: is the unit that is related to the erase commands. Its size
+is the number of blocks that will be erased in one portion. The size
+of a sector is fixed for each device. The information about the sector
+size (in blocks) is stored in the CSD. Note that if the card specifies
+AU size, sector size should be ignored.
+
+And this:
+
+* SECTOR_SIZE
+This field is fixed to 7Fh, which indicates 64 KBytes. This value does
+not relate to erase operations. High Capacity and Extended Capacity
+cards indicate memory boundary by AU size and this field should not
+be used.
+
+
+So, if an au size of 0 is reported wouldn't the erase size be the
+sector size? If nothing else I think the test needs to be adjusted to
+not report the error for an au size of 0.
+
+Regards,
+Hartley
