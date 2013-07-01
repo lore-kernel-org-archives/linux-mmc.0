@@ -1,72 +1,133 @@
-From: Jackey Shen <jackey.shen@amd.com>
-Subject: [PATCH] mmc: sdhci-pci: identify correct base addresses for slots
-Date: Mon, 1 Jul 2013 17:22:15 +0800
-Message-ID: <1372670535-2778-1-git-send-email-jackey.shen@amd.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH] mmc: dw_mmc: don't queue up a card detect at slot startup
+Date: Mon, 01 Jul 2013 19:37:58 +0900
+Message-ID: <002201ce7647$0de17cc0$29a47640$%jun@samsung.com>
+References: <1371772064-7505-1-git-send-email-dianders@chromium.org>
+ <001401ce70b1$71c325e0$554971a0$%jun@samsung.com>
+ <CAD=FV=XNuphYrPSJqhuQrLvBJ7_EGvTSsCrVaOQLZGozDDDTBA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co9ehsobe005.messaging.microsoft.com ([207.46.163.28]:42592
-	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752974Ab3GAJZD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Jul 2013 05:25:03 -0400
-Received: from mail134-co9 (localhost [127.0.0.1])	by
- mail134-co9-R.bigfish.com (Postfix) with ESMTP id 57372480745	for
- <linux-mmc@vger.kernel.org>; Mon,  1 Jul 2013 09:25:02 +0000 (UTC)
-Received: from CO9EHSMHS007.bigfish.com (unknown [10.236.132.236])	by
- mail134-co9.bigfish.com (Postfix) with ESMTP id 977CF3C0294	for
- <linux-mmc@vger.kernel.org>; Mon,  1 Jul 2013 09:25:00 +0000 (UTC)
-Received: from sausexedgep01.amd.com (sausexedgep01-ext.amd.com
- [163.181.249.72])	(using TLSv1 with cipher AES128-SHA (128/128 bits))	(No
- client certificate requested)	by ausb3twp01.amd.com (Axway MailGate 3.8.1)
- with ESMTP id 2E66210280BA	for <linux-mmc@vger.kernel.org>; Mon,  1 Jul 2013
- 04:24:58 -0500 (CDT)
+Received: from mailout1.samsung.com ([203.254.224.24]:19302 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751751Ab3GAKiB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Jul 2013 06:38:01 -0400
+In-reply-to: <CAD=FV=XNuphYrPSJqhuQrLvBJ7_EGvTSsCrVaOQLZGozDDDTBA@mail.gmail.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Jackey Shen <jackey.shen@amd.com>
+To: 'Doug Anderson' <dianders@chromium.org>
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Olof Johansson' <olof@lixom.net>, 'Andrew Bresticker' <abrestic@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Tomasz Figa' <tomasz.figa@gmail.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-A PCI Based SD Host Controller can support up to a total of six SD Slots, and
-the base addresses are specified by Slot Information Register of its PCI header.
-Please refer to C.3.3 of SD Host Controller Standard Specification Version 3.0.
+On Sat, June 29, 2013, Doug Anderson wrote:
+> Seungwon,
+> 
+> On Mon, Jun 24, 2013 at 1:04 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> > This patch looks good to me. I agree above.
+> > Card detection procedure of mmc subsystem will be started by mmc_start_host during probe time.
+> > There is no need to do same in host driver.
+> > Could you describe the race point of this problem and why the duplication makes the problem?
+> > What is described below is not clear.
+> > If a actual detection of card is triggered during probe, similar problem may be occurred in spite of
+> this patch.
+> 
+> OK, so I think the race is between the "mmc_rescan" thread and the
+> "dw_mci_work_routine_card" thread:
+> 
+> The "mmc_rescan" thread sets "host->state = STATE_SENDING_CMD" in
+> dw_mci_queue_request() with a stack crawl that looks like this (from
+> dump_stack):
+> 
+> [<803c5d10>] (dw_mci_request+0xb0/0x100) from [<803b1864>]
+> (__mmc_start_req+0x14c/0x164)
+> [<803b1864>] (__mmc_start_req+0x14c/0x164) from [<803b189c>]
+> (mmc_wait_for_req+0x20/0x30)
+> [<803b189c>] (mmc_wait_for_req+0x20/0x30) from [<803b1934>]
+> (mmc_wait_for_cmd+0x88/0xb4)
+> [<803b1934>] (mmc_wait_for_cmd+0x88/0xb4) from [<803bae34>]
+> (mmc_io_rw_direct_host+0xd0/0x160)
+> [<803bae34>] (mmc_io_rw_direct_host+0xd0/0x160) from [<803bb324>]
+> (sdio_reset+0x44/0x9c)
+> [<803bb324>] (sdio_reset+0x44/0x9c) from [<803b35d8>] (mmc_rescan+0x230/0x2c8)
+> [<803b35d8>] (mmc_rescan+0x230/0x2c8) from [<8004619c>]
+> (process_one_work+0x25c/0x418)
+> [<8004619c>] (process_one_work+0x25c/0x418) from [<8004680c>]
+> (worker_thread+0x280/0x3c4)
+> [<8004680c>] (worker_thread+0x280/0x3c4) from [<8004b4c0>] (kthread+0xc8/0xdc)
+> [<8004b4c0>] (kthread+0xc8/0xdc) from [<8000e758>] (ret_from_fork+0x14/0x20)
+> 
+> 
+> It's got the host->lock when it does that.  ...but then it releases
+> the lock at the end of dw_mci_request().  That allows
+> dw_mci_work_routine_card() to jump in.  You can see its stack crawl
+> (from kgdb):
+> 
+> #1  0x803c8008 in dw_mci_work_routine_card (work=0xee6f8ba0) at
+> /.../drivers/mmc/host/dw_mmc.c:1720
+> #2  0x8004619c in process_one_work (worker=worker@entry=0xeea74d00,
+> work=0xee6f8ba0) at /.../kernel/workqueue.c:2263
+> #3  0x8004680c in worker_thread (__worker=__worker@entry=0xeea74d00)
+> at /.../kernel/workqueue.c:2383
+> #4  0x8004b4c0 in kthread (_create=0xef209e38) at /.../kernel/kthread.c:168
+> 
+> 
+> I can reproduce the problem reliably by adding an "mdelay(100);" in
+> dw_mci_queue_request() right after "host->state = STATE_SENDING_CMD;".
+> 
+> When I do that and add a kgdb_breakpoint() in
+> dw_mci_work_routine_card() for the -ENOMEDIUM case, I can even see the
+> state of the "mmc_rescan" thread with kgdb:
+> 
+> #0  mmc_wait_for_req (host=host@entry=0xee702140,
+> mrq=mrq@entry=0xef1efdbc) at /.../drivers/mmc/core/core.c:474
+> #1  0x803b1934 in mmc_wait_for_cmd (host=host@entry=0xee702140,
+> cmd=cmd@entry=0xef1efe14, retries=0) at
+> /.../drivers/mmc/core/core.c:567
+> #2  0x803bae34 in mmc_io_rw_direct_host (host=host@entry=0xee702140,
+> write=write@entry=0, fn=fn@entry=0, addr=addr@entry=6, in=0 '\000',
+> out=out@entry=0xef1efe83 "\356\027\345\032'")
+>     at /.../drivers/mmc/core/sdio_ops.c:89
+> #3  0x803bb324 in sdio_reset (host=host@entry=0xee702140) at
+> /.../drivers/mmc/core/sdio_ops.c:214
+> #4  0x803b35d8 in mmc_rescan_try_freq (freq=<optimized out>,
+> host=0xee702140) at /.../drivers/mmc/core/core.c:2084
+> #5  mmc_rescan (work=0xee7023ac) at /.../drivers/mmc/core/core.c:2210
+> #6  0x8004619c in process_one_work (worker=worker@entry=0xef0af900,
+> work=0xee7023ac) at /.../kernel/workqueue.c:2263
+> #7  0x8004680c in worker_thread (__worker=__worker@entry=0xef0af900)
+> at /.../kernel/workqueue.c:2383
+> #8  0x8004b4c0 in kthread (_create=0xef18de40) at /.../kernel/kthread.c:168
+> #9  0x8000e758 in ret_from_fork () at /.../arch/arm/kernel/entry-common.S:92
+> #10 0x8000e758 in ret_from_fork () at /.../arch/arm/kernel/entry-common.S:92
+> Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+> 
+> 
+> I'm not sure I have time to track down the whole race at the moment,
+> though I may be able to come back to it later.  However, we now have a
+> set of steps to reproduce (I think) and a full description of the
+> race.  Perhaps someone else who knows the code better would be able to
+> have a whack at it?
+> 
+> In any case, it seems reasonable to still merge my CL, since it makes
+> the race much less likely (and impossible in the case of non-removable
+> cards) removes some pointless code.  Would you be interested in acking
+> it?
 
-Signed-off-by: Jackey Shen <jackey.shen@amd.com>
----
- drivers/mmc/host/sdhci-pci.c |    7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+Thanks you for detail.
+Certainly, host own triggering for 'dw_mci_work_routine_card' makes problem during probing.
+While progressing the request from 'mmc_rescan', if 'dw_mci_work_routine_card' routine is activated,
+it will cancel the current request.
+The problem case is that 'mmc_rescan' is prior to 'dw_mci_work_routine_card' from host own.
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index d7d6bc8..3a84e95 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -50,7 +50,8 @@
- #define  PCI_SLOT_INFO_SLOTS(x)		((x >> 4) & 7)
- #define  PCI_SLOT_INFO_FIRST_BAR_MASK	0x07
- 
--#define MAX_SLOTS			8
-+#define MAX_SLOTS			6
-+#define MAX_BARS			6
- 
- struct sdhci_pci_chip;
- struct sdhci_pci_slot;
-@@ -1282,7 +1283,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
- {
- 	struct sdhci_pci_slot *slot;
- 	struct sdhci_host *host;
--	int ret, bar = first_bar + slotno;
-+	int ret, bar = (first_bar + slotno) % MAX_BARS;
- 
- 	if (!(pci_resource_flags(pdev, bar) & IORESOURCE_MEM)) {
- 		dev_err(&pdev->dev, "BAR %d is not iomem. Aborting.\n", bar);
-@@ -1481,7 +1482,7 @@ static int sdhci_pci_probe(struct pci_dev *pdev,
- 
- 	first_bar &= PCI_SLOT_INFO_FIRST_BAR_MASK;
- 
--	if (first_bar > 5) {
-+	if (first_bar > MAX_BARS - 1) {
- 		dev_err(&pdev->dev, "Invalid first BAR. Aborting.\n");
- 		return -ENODEV;
- 	}
--- 
-1.7.10.4
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
+Thanks,
+Seungwon Jeon
+> 
+> -Doug
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
