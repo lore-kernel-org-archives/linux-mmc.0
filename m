@@ -1,729 +1,152 @@
-From: Konstantin Dorfman <kdorfman@codeaurora.org>
-Subject: [RFC/PATCH v1] mmc: Add support to handle Urgent data transfer request
-Date: Sun, 30 Jun 2013 15:19:49 +0300
-Message-ID: <1372594789-24558-2-git-send-email-kdorfman@codeaurora.org>
-References: <n>
- <1372594789-24558-1-git-send-email-kdorfman@codeaurora.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1372594789-24558-1-git-send-email-kdorfman@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: cjb@laptop.org
-Cc: tlinder@codeaurora.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, merez@codeaurora.org, kdorfman@codeaurora.org
+From: KOBAYASHI Yoshitake <yoshitake.kobayashi@toshiba.co.jp>
+Subject: [PATCH 3.4-stable] mmc: block: fix a bug of error handling in MMC driver
+Date: Mon,  1 Jul 2013 16:56:25 +0900
+Message-ID: <1372665385-8993-1-git-send-email-yoshitake.kobayashi@toshiba.co.jp>
+References: <1368165727-32125-1-git-send-email-yoshitake.kobayashi@toshiba.co.jp>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from imx9.toshiba.co.jp ([202.33.96.51]:39059 "EHLO
+	imx9.toshiba.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752798Ab3GAI0E (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Jul 2013 04:26:04 -0400
+In-Reply-To: <1368165727-32125-1-git-send-email-yoshitake.kobayashi@toshiba.co.jp>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, stable@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, KOBAYASHI Yoshitake <yoshitake.kobayashi@toshiba.co.jp>
 
-Urgent request notification stops currently running transaction
-on bus.
-In order to decrease a latency of a prioritized requests (aka Urgent
-request), we might want to stop the transmission of a running "low
-priority" request in order to handle the Urgent request. The urgency of
-the request is decided by the block layer I/O scheduler. When the block
-layer notifies the MMC layer of an urgent request and if the MMC layer is
-blocked on current request to complete, it will be woken up.
+Backport for 3.4-stable for the following patch:
+     https://lkml.org/lkml/2013/5/10/20
 
-The decision on whether to stop an ongoing transfer is taken according to
-several parameters, one of them being the number of bytes already
-transferred for ongoing transfer by host controller so far.
+This patch fixes a bug of error handling in Linux MMC driver.
 
-To calculate how many bytes were successfully programmed before stop,
-CORRECTLY_PRG_SECTORS_NUM[245:242] parsed from EXT_CSD register. The
-remainder of stopped request (and next prepared request in case it
-exists) re-inserted back to the I/O scheduler to be handled after the
-completion of the urgent request.
+Current MMC driver doesn't handle generic error (bit19 of device
+status) in write sequence. As a result, write data gets lost when
+generic error occurs. For example, a generic error when updating a
+filesystem management information causes a loss of write data and
+corrupts the filesystem. In the worst case, the system will never
+boot.
 
-In case it is decided not to stop the ongoing transfer, MMC context will
-wait for normal completion of the ongoing transfer, then already prepared
-next request (if it exists) will be re-inserted back into block layer and
-the urgent request fetched.
+This patch includes the following functionality:
+  1. To enable error checking for the response of CMD12 and CMD13
+     in write command sequence
+  2. To retry write sequence when a generic error occures
 
-URGENT_REQUEST handling has following dependencies:
-1. Host controller driver should support mmc_host op named "stop_request"
-2. Block I/O scheduler should support re-insert API
-3. eMMC card should support HPI (High Priority Interrupt) command
+This patch was also posted to 3.4.46-LTSI.
+  https://patchwork.kernel.org/patch/2726801/
 
-If any of the above dependencies are not met then urgent request mechanism
-will not become operational.
-
-Change-Id: Ic3fa1ca9463cc8991aefee940d8bfddf76c111d3
-Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
+Signed-off-by: KOBAYASHI Yoshitake <yoshitake.kobayashi@toshiba.co.jp>
+---
+ drivers/mmc/card/block.c |   46 +++++++++++++++++++++++++++++++++++++++++++---
+ 1 files changed, 43 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index cd0b7f4..da45dc5 100644
+index 833ff16..e77053f 100644
 --- a/drivers/mmc/card/block.c
 +++ b/drivers/mmc/card/block.c
-@@ -1203,6 +1203,122 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 	return MMC_BLK_SUCCESS;
- }
- 
-+/*
-+ * mmc_blk_reinsert_req() - re-insert request back to the scheduler
-+ * @areq:	request to re-insert.
-+ *
-+ * Request may be packed or single. When fails to reinsert request, it will be
-+ * requeued to the the dispatch queue.
-+ */
-+static void mmc_blk_reinsert_req(struct mmc_async_req *areq)
-+{
-+	struct request *prq;
-+	int ret = 0;
-+	struct mmc_queue_req *mq_rq;
-+	struct request_queue *q;
-+
-+	mq_rq = container_of(areq, struct mmc_queue_req, mmc_active);
-+	q = mq_rq->req->q;
-+	if (mq_rq->cmd_type != MMC_PACKED_NONE) {
-+		while (!list_empty(&mq_rq->packed->list)) {
-+			/* return requests in reverse order */
-+			prq = list_entry_rq(mq_rq->packed->list.prev);
-+			list_del_init(&prq->queuelist);
-+			spin_lock_irq(q->queue_lock);
-+			ret = blk_reinsert_request(q, prq);
-+			if (ret) {
-+				blk_requeue_request(q, prq);
-+				spin_unlock_irq(q->queue_lock);
-+				goto reinsert_error;
-+			}
-+			spin_unlock_irq(q->queue_lock);
-+		}
-+	} else {
-+		spin_lock_irq(q->queue_lock);
-+		ret = blk_reinsert_request(q, mq_rq->req);
-+		if (ret)
-+			blk_requeue_request(q, mq_rq->req);
-+		spin_unlock_irq(q->queue_lock);
-+	}
-+	return;
-+
-+reinsert_error:
-+	pr_err("%s: blk_reinsert_request() failed (%d)",
-+			mq_rq->req->rq_disk->disk_name, ret);
-+	/*
-+	 * -EIO will be reported for this request and rest of packed->list.
-+	 *  Urgent request will be proceeded anyway, while upper layer
-+	 *  responsibility to re-send failed requests
-+	 */
-+	while (!list_empty(&mq_rq->packed->list)) {
-+		prq = list_entry_rq(mq_rq->packed->list.next);
-+		list_del_init(&prq->queuelist);
-+		spin_lock_irq(q->queue_lock);
-+		blk_requeue_request(q, prq);
-+		spin_unlock_irq(q->queue_lock);
-+	}
-+}
-+
-+/*
-+ * mmc_blk_update_interrupted_req() - update of the stopped request
-+ * @card:	the MMC card associated with the request.
-+ * @areq:	interrupted async request.
-+ *
-+ * Get stopped request state from card and update successfully done part of
-+ * the request by setting packed_fail_idx.  The packed_fail_idx is index of
-+ * first uncompleted request in packed request list, for non-packed request
-+ * packed_fail_idx remains unchanged.
-+ *
-+ * Returns: MMC_BLK_SUCCESS for success, MMC_BLK_ABORT otherwise
-+ */
-+static int mmc_blk_update_interrupted_req(struct mmc_card *card,
-+					struct mmc_async_req *areq)
-+{
-+	int ret = MMC_BLK_SUCCESS;
-+	u8 *ext_csd;
-+	int correctly_done;
-+	struct mmc_queue_req *mq_rq = container_of(areq, struct mmc_queue_req,
-+				      mmc_active);
-+	struct request *prq;
-+	u8 req_index = 0;
-+	struct mmc_packed *packed;
-+
-+	if (mq_rq->cmd_type == MMC_PACKED_NONE)
-+		return MMC_BLK_SUCCESS;
-+
-+	ext_csd = kmalloc(512, GFP_KERNEL);
-+	if (!ext_csd)
-+		return MMC_BLK_ABORT;
-+
-+	/* get correctly programmed sectors number from card */
-+	ret = mmc_send_ext_csd(card, ext_csd);
-+	if (ret) {
-+		pr_err("%s: error %d reading ext_csd\n",
-+				mmc_hostname(card->host), ret);
-+		ret = MMC_BLK_ABORT;
-+		goto exit;
-+	}
-+	correctly_done = card->ext_csd.data_sector_size *
-+		(ext_csd[EXT_CSD_CORRECTLY_PRG_SECTORS_NUM + 0] << 0 |
-+		 ext_csd[EXT_CSD_CORRECTLY_PRG_SECTORS_NUM + 1] << 8 |
-+		 ext_csd[EXT_CSD_CORRECTLY_PRG_SECTORS_NUM + 2] << 16 |
-+		 ext_csd[EXT_CSD_CORRECTLY_PRG_SECTORS_NUM + 3] << 24);
-+
-+	packed = mq_rq->packed;
-+	list_for_each_entry(prq, &packed->list, queuelist) {
-+		if ((correctly_done - (int)blk_rq_bytes(prq)) < 0) {
-+			/* prq is not successfull */
-+			packed->idx_failure = req_index;
-+			break;
-+		}
-+		correctly_done -= blk_rq_bytes(prq);
-+		req_index++;
-+	}
-+exit:
-+	kfree(ext_csd);
-+	return ret;
-+}
-+
- static int mmc_blk_packed_err_check(struct mmc_card *card,
- 				    struct mmc_async_req *areq)
+@@ -701,7 +701,7 @@ static int mmc_blk_cmd_error(struct request *req, const char *name, int error,
+  * Otherwise we don't understand what happened, so abort.
+  */
+ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
+-	struct mmc_blk_request *brq, int *ecc_err)
++	struct mmc_blk_request *brq, int *ecc_err, int *gen_err)
  {
-@@ -1411,7 +1527,11 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 	}
+ 	bool prev_cmd_status_valid = true;
+ 	u32 status, stop_status = 0;
+@@ -739,6 +739,16 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
+ 	    (brq->cmd.resp[0] & R1_CARD_ECC_FAILED))
+ 		*ecc_err = 1;
  
- 	mqrq->mmc_active.mrq = &brq->mrq;
-+	mqrq->mmc_active.cmd_flags = req->cmd_flags;
- 	mqrq->mmc_active.err_check = mmc_blk_err_check;
-+	mqrq->mmc_active.reinsert_req = mmc_blk_reinsert_req;
-+	mqrq->mmc_active.update_interrupted_req =
-+		mmc_blk_update_interrupted_req;
- 
- 	mmc_queue_bounce_pre(mqrq);
- }
-@@ -1620,6 +1740,11 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
- 
- 	mqrq->mmc_active.mrq = &brq->mrq;
- 	mqrq->mmc_active.err_check = mmc_blk_packed_err_check;
-+	mqrq->mmc_active.cmd_flags = req->cmd_flags;
-+
-+	mqrq->mmc_active.reinsert_req = mmc_blk_reinsert_req;
-+	mqrq->mmc_active.update_interrupted_req =
-+		mmc_blk_update_interrupted_req;
- 
- 	mmc_queue_bounce_pre(mqrq);
- }
-@@ -1780,6 +1905,20 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 		mmc_queue_bounce_post(mq_rq);
- 
- 		switch (status) {
-+		case MMC_BLK_URGENT:
-+			if (mq_rq->cmd_type != MMC_PACKED_NONE) {
-+				/* complete successfully transmitted part */
-+				if (mmc_blk_end_packed_req(mq_rq))
-+					/* process for not transmitted part */
-+					mmc_blk_reinsert_req(areq);
-+			} else {
-+				mmc_blk_reinsert_req(areq);
-+			}
-+
-+			mq->flags |= MMC_QUEUE_URGENT_REQUEST;
-+			ret = 0;
-+			break;
-+		case MMC_BLK_URGENT_DONE:
- 		case MMC_BLK_SUCCESS:
- 		case MMC_BLK_PARTIAL:
- 			/*
-@@ -1959,13 +2098,23 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	}
- 
- out:
-+	/*
-+	 * packet burst is over, when one of the following occurs:
-+	 * - no more requests and new request notification is not in progress
-+	 * - urgent notification in progress and current request is not urgent
-+	 *   (all existing requests completed or reinserted to the block layer)
-+	 */
- 	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
--	     (req && (req->cmd_flags & MMC_REQ_SPECIAL_MASK)))
-+	     (req && (req->cmd_flags & MMC_REQ_SPECIAL_MASK)) ||
-+			((mq->flags & MMC_QUEUE_URGENT_REQUEST) &&
-+				!(mq->mqrq_cur->req->cmd_flags & REQ_URGENT)))
-+
- 		/*
- 		 * Release host when there are no more requests
- 		 * and after special request(discard, flush) is done.
- 		 * In case sepecial request, there is no reentry to
- 		 * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
-+		 * In case urgent request is pending, no release host
- 		 */
- 		mmc_put_card(card);
- 	return ret;
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index fa9632e..c549b10 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -69,8 +69,18 @@ static int mmc_queue_thread(void *d)
- 			cmd_flags = req ? req->cmd_flags : 0;
- 			mq->issue_fn(mq, req);
- 			if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
--				mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
- 				continue; /* fetch again */
-+			} else if ((mq->flags & MMC_QUEUE_URGENT_REQUEST) &&
-+				   (mq->mqrq_cur->req &&
-+				!(mq->mqrq_cur->req->cmd_flags & REQ_URGENT))) {
-+				/*
-+				 * clean current request when urgent request
-+				 * processing in progress and current request is
-+				 * not urgent (all existing requests completed
-+				 * or reinserted to the block layer
-+				 */
-+				mq->mqrq_cur->brq.mrq.data = NULL;
-+				mq->mqrq_cur->req = NULL;
- 			}
- 
- 			/*
-@@ -93,6 +103,7 @@ static int mmc_queue_thread(void *d)
- 				set_current_state(TASK_RUNNING);
- 				break;
- 			}
-+			mq->card->host->context_info.is_urgent = false;
- 			up(&mq->thread_sem);
- 			schedule();
- 			down(&mq->thread_sem);
-@@ -141,6 +152,42 @@ static void mmc_request_fn(struct request_queue *q)
- 		wake_up_process(mq->thread);
- }
- 
-+/*
-+ * mmc_urgent_request() - Urgent MMC request handler.
-+ * @q: request queue.
-+ *
-+ * This is called when block layer has urgent request for delivery.  When mmc
-+ * context is waiting for the current request to complete, it will be awaken,
-+ * current request may be interrupted and re-inserted back to block device
-+ * request queue.  The next fetched request should be urgent request, this
-+ * will be ensured by block i/o scheduler.
-+ */
-+static void mmc_urgent_request(struct request_queue *q)
-+{
-+	unsigned long flags;
-+	struct mmc_queue *mq = q->queuedata;
-+	struct mmc_context_info *cntx;
-+
-+	if (!mq) {
-+		mmc_request_fn(q);
-+		return;
-+	}
-+	cntx = &mq->card->host->context_info;
-+
-+	/* critical section with mmc_wait_data_done() */
-+	spin_lock_irqsave(&cntx->lock, flags);
-+
-+	/* do stop flow only when mmc thread is waiting for done */
-+	if (mq->mqrq_cur->req || mq->mqrq_prev->req) {
-+		cntx->is_urgent = true;
-+		spin_unlock_irqrestore(&cntx->lock, flags);
-+		wake_up_interruptible(&cntx->wait);
-+	} else {
-+		spin_unlock_irqrestore(&cntx->lock, flags);
-+		mmc_request_fn(q);
-+	}
-+}
-+
- static struct scatterlist *mmc_alloc_sg(int sg_len, int *err)
- {
- 	struct scatterlist *sg;
-@@ -203,6 +250,11 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	if (!mq->queue)
- 		return -ENOMEM;
- 
-+	if ((host->caps2 & MMC_CAP2_STOP_REQUEST) &&
-+			host->ops->stop_request &&
-+			mq->card->ext_csd.hpi)
-+		blk_urgent_request(mq->queue, mmc_urgent_request);
-+
- 	mq->mqrq_cur = mqrq_cur;
- 	mq->mqrq_prev = mqrq_prev;
- 	mq->queue->queuedata = mq;
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index 5752d50..e8bb320 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -48,8 +48,9 @@ struct mmc_queue {
- 	struct task_struct	*thread;
- 	struct semaphore	thread_sem;
- 	unsigned int		flags;
--#define MMC_QUEUE_SUSPENDED	(1 << 0)
--#define MMC_QUEUE_NEW_REQUEST	(1 << 1)
-+#define MMC_QUEUE_SUSPENDED		(1 << 0)
-+#define MMC_QUEUE_NEW_REQUEST		(1 << 1)
-+#define MMC_QUEUE_URGENT_REQUEST	(1 << 2)
- 
- 	int			(*issue_fn)(struct mmc_queue *, struct request *);
- 	void			*data;
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 49a5bca..91e5b3e 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -372,6 +372,86 @@ static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
- }
- 
- /*
-+ * mmc_should_stop_curr_req() - check for stop flow rationality
-+ * @host: MMC host running request.
-+ *
-+ * Check possibility to interrupt current running request
-+ * Returns true in case it is worth to stop transfer,
-+ *          false otherwise
-+ */
-+static bool mmc_should_stop_curr_req(struct mmc_host *host)
-+{
-+	int remainder;
-+
-+	if (host->areq->cmd_flags & REQ_URGENT ||
-+	    !(host->areq->cmd_flags & REQ_WRITE) ||
-+	    (host->areq->cmd_flags & REQ_FUA))
-+		return false;
-+
-+	remainder = (host->ops->get_xfer_remain) ?
-+		host->ops->get_xfer_remain(host) : -1;
-+	return (remainder > 0);
-+}
-+
-+/*
-+ * mmc_stop_request() - Stops current running request
-+ * @host: MMC host to prepare the command.
-+ *
-+ * Triggers stop flow in the host driver and sends CMD12 (stop command) to the
-+ * card. Sends HPI to get the card out of R1_STATE_PRG immediately
-+ *
-+ * Returns 0 when success, error propagated otherwise
-+ */
-+static int mmc_stop_request(struct mmc_host *host)
-+{
-+	struct mmc_command cmd = {0};
-+	struct mmc_card *card = host->card;
-+	int err = 0;
-+	u32 status;
-+
-+	if (!host->ops->stop_request || !card->ext_csd.hpi) {
-+		pr_warn("%s: host ops stop_request() or HPI not supported\n",
-+				mmc_hostname(host));
-+		return -ENOTSUPP;
-+	}
-+	err = host->ops->stop_request(host);
-+	if (err) {
-+		pr_err("%s: Call to host->ops->stop_request() failed (%d)\n",
-+				mmc_hostname(host), err);
-+		goto out;
-+	}
-+
-+	cmd.opcode = MMC_STOP_TRANSMISSION;
-+	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
-+	err = mmc_wait_for_cmd(host, &cmd, 0);
-+	if (err) {
-+		err = mmc_send_status(card, &status);
-+		if (err) {
-+			pr_err("%s: Get card status fail\n",
-+					mmc_hostname(card->host));
-+			goto out;
++	/* Flag General errors */
++	if (!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ)
++		if ((status & R1_ERROR) ||
++			(brq->stop.resp[0] & R1_ERROR)) {
++			pr_err("%s: %s: general error sending stop or status command, stop cmd response %#x, card status %#x\n",
++			       req->rq_disk->disk_name, __func__,
++			       brq->stop.resp[0], status);
++			*gen_err = 1;
 +		}
-+		switch (R1_CURRENT_STATE(status)) {
-+		case R1_STATE_DATA:
-+		case R1_STATE_RCV:
-+			pr_err("%s: CMD12 fails with error (%d)\n",
-+					mmc_hostname(host), err);
-+			goto out;
-+		default:
-+			break;
-+		}
-+	}
-+	err = mmc_interrupt_hpi(card);
-+	if (err) {
-+		pr_err("%s: mmc_interrupt_hpi() failed (%d)\n",
-+				mmc_hostname(host), err);
-+		goto out;
-+	}
-+out:
-+	return err;
-+}
-+
-+/*
-  * mmc_wait_for_data_req_done() - wait for request completed
-  * @host: MMC host to prepare the command.
-  * @mrq: MMC request to wait for
-@@ -388,14 +468,18 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
- {
- 	struct mmc_command *cmd;
- 	struct mmc_context_info *context_info = &host->context_info;
-+	bool pending_is_urgent = false;
-+	bool is_urgent = false;
- 	int err;
- 	unsigned long flags;
- 
- 	while (1) {
- 		wait_event_interruptible(context_info->wait,
- 				(context_info->is_done_rcv ||
--				 context_info->is_new_req));
-+				 context_info->is_new_req  ||
-+				 context_info->is_urgent));
- 		spin_lock_irqsave(&context_info->lock, flags);
-+		is_urgent = context_info->is_urgent;
- 		context_info->is_waiting_last_req = false;
- 		spin_unlock_irqrestore(&context_info->lock, flags);
- 		if (context_info->is_done_rcv) {
-@@ -407,6 +491,21 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
- 			    mmc_card_removed(host->card)) {
- 				err = host->areq->err_check(host->card,
- 							    host->areq);
-+				if (pending_is_urgent || is_urgent) {
-+					/*
-+					 * all the success/partial operations
-+					 * are done in an addition to handling
-+					 * the urgent request
-+					 */
-+					if ((err == MMC_BLK_PARTIAL) ||
-+						(err == MMC_BLK_SUCCESS))
-+						err = pending_is_urgent ?
-+						       MMC_BLK_URGENT_DONE
-+						       : MMC_BLK_URGENT;
-+
-+					/* reset is_urgent for next request */
-+					context_info->is_urgent = false;
-+				}
- 				break; /* return err */
- 			} else {
- 				pr_info("%s: req failed (CMD%u): %d, retrying...\n",
-@@ -415,14 +514,60 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
- 				cmd->retries--;
- 				cmd->error = 0;
- 				host->ops->request(host, mrq);
--				continue; /* wait for done/new event again */
-+				/*
-+				 * ignore urgent flow, request retry has greater
-+				 * priority than urgent flow
-+				 */
-+				context_info->is_urgent = false;
-+				/* wait for done/new/urgent event again */
-+				continue;
- 			}
--		} else if (context_info->is_new_req) {
-+		} else if (context_info->is_new_req && !is_urgent) {
- 			context_info->is_new_req = false;
- 			if (!next_req) {
- 				err = MMC_BLK_NEW_REQUEST;
- 				break; /* return err */
- 			}
-+		} else {
-+			/*
-+			 * The case when block layer sent next urgent
-+			 * notification before it receives end_io on
-+			 * the current
-+			 */
-+			BUG_ON(pending_is_urgent == true);
-+
-+			context_info->is_urgent = false;
-+			context_info->is_new_req = false;
-+			if (mmc_should_stop_curr_req(host)) {
-+				err = mmc_stop_request(host);
-+				if (err && !context_info->is_done_rcv) {
-+					err = MMC_BLK_ABORT;
-+					break;
-+				}
-+				/* running request has finished at this point */
-+				if (context_info->is_done_rcv) {
-+					err = host->areq->err_check(host->card,
-+							host->areq);
-+					context_info->is_done_rcv = false;
-+					break; /* return err */
-+				}
-+
-+				err = host->areq->update_interrupted_req(
-+						host->card, host->areq);
-+				if (!err)
-+					err = MMC_BLK_URGENT;
-+				break; /* return err */
-+			} else {
-+				/*
-+				 *  The flow will back to wait for is_done_rcv,
-+				 *  but in this case original is_urgent cleared.
-+				 *  Mark pending_is_urgent to differentiate the
-+				 *  case, when is_done_rcv and is_urgent really
-+				 *  concurrent.
-+				 */
-+				pending_is_urgent = true;
-+				continue; /* wait for done/new/urgent event */
-+			}
- 		}
- 	}
- 	return err;
-@@ -529,14 +674,40 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
- 	int err = 0;
- 	int start_err = 0;
- 	struct mmc_async_req *data = host->areq;
-+	unsigned long flags;
-+	bool is_urgent;
- 
- 	/* Prepare a new request */
--	if (areq)
-+	if (areq) {
-+		/*
-+		 * start waiting here for possible interrupt
-+		 * because mmc_pre_req() taking long time
-+		 */
- 		mmc_pre_req(host, areq->mrq, !host->areq);
-+	}
- 
- 	if (host->areq) {
--		err = mmc_wait_for_data_req_done(host, host->areq->mrq,	areq);
--		if (err == MMC_BLK_NEW_REQUEST) {
-+		err = mmc_wait_for_data_req_done(host, host->areq->mrq,
-+				areq);
-+		if (err == MMC_BLK_URGENT || err == MMC_BLK_URGENT_DONE) {
-+			mmc_post_req(host, host->areq->mrq, 0);
-+			host->areq = NULL;
-+			if (areq) {
-+				if (!(areq->cmd_flags & REQ_URGENT)) {
-+					areq->reinsert_req(areq);
-+					mmc_post_req(host, areq->mrq, 0);
-+				} else {
-+					start_err = __mmc_start_data_req(host,
-+							areq->mrq);
-+					if (start_err)
-+						mmc_post_req(host, areq->mrq,
-+								-EINVAL);
-+					else
-+						host->areq = areq;
-+				}
-+			}
-+			goto exit;
-+		} else if (err == MMC_BLK_NEW_REQUEST) {
- 			if (error)
- 				*error = err;
- 			/*
-@@ -554,9 +725,27 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
- 		    (host->areq->mrq->cmd->resp[0] & R1_EXCEPTION_EVENT))
- 			mmc_start_bkops(host->card, true);
- 	}
--
--	if (!err && areq)
--		start_err = __mmc_start_data_req(host, areq->mrq);
-+	if (!err && areq) {
-+		/* urgent notification may come again */
-+		spin_lock_irqsave(&host->context_info.lock, flags);
-+		is_urgent = host->context_info.is_urgent;
-+		host->context_info.is_urgent = false;
-+		spin_unlock_irqrestore(&host->context_info.lock, flags);
-+
-+		if (!is_urgent || (areq->cmd_flags & REQ_URGENT)) {
-+			start_err = __mmc_start_data_req(host, areq->mrq);
-+		} else {
-+			/* previous request was done */
-+			err = MMC_BLK_URGENT_DONE;
-+			if (host->areq) {
-+				mmc_post_req(host, host->areq->mrq, 0);
-+				host->areq = NULL;
-+			}
-+			areq->reinsert_req(areq);
-+			mmc_post_req(host, areq->mrq, 0);
-+			goto exit;
-+		}
-+	}
- 
- 	if (host->areq)
- 		mmc_post_req(host, host->areq->mrq, 0);
-@@ -570,6 +759,7 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
- 	else
- 		host->areq = areq;
- 
-+exit:
- 	if (error)
- 		*error = err;
- 	return data;
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 842de3e..bbd4ede 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -196,6 +196,7 @@ struct sdio_cis {
- struct mmc_host;
- struct sdio_func;
- struct sdio_func_tuple;
-+struct mmc_queue;
- 
- #define SDIO_MAX_FUNCS		7
- 
-@@ -209,6 +210,8 @@ enum mmc_blk_status {
- 	MMC_BLK_ECC_ERR,
- 	MMC_BLK_NOMEDIUM,
- 	MMC_BLK_NEW_REQUEST,
-+	MMC_BLK_URGENT,
-+	MMC_BLK_URGENT_DONE,
- };
- 
- /* The number of MMC physical partitions.  These consist of:
-@@ -528,5 +531,5 @@ extern void mmc_unregister_driver(struct mmc_driver *);
- 
- extern void mmc_fixup_device(struct mmc_card *card,
- 			     const struct mmc_fixup *table);
--
-+extern void mmc_blk_disable_wr_packing(struct mmc_queue *mq);
- #endif /* LINUX_MMC_CARD_H */
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 3b0c33a..4617036 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -139,6 +139,8 @@ struct mmc_host_ops {
- 	int	(*select_drive_strength)(unsigned int max_dtr, int host_drv, int card_drv);
- 	void	(*hw_reset)(struct mmc_host *host);
- 	void	(*card_event)(struct mmc_host *host);
-+	int	(*stop_request)(struct mmc_host *host);
-+	unsigned int	(*get_xfer_remain)(struct mmc_host *host);
- };
- 
- struct mmc_card;
-@@ -147,11 +149,18 @@ struct device;
- struct mmc_async_req {
- 	/* active mmc request */
- 	struct mmc_request	*mrq;
-+	unsigned int cmd_flags; /* copied from struct request */
 +
  	/*
- 	 * Check error status of completed mmc request.
- 	 * Returns 0 if success otherwise non zero.
+ 	 * Check the current card state.  If it is in some data transfer
+ 	 * mode, tell it to stop (and hopefully transition back to TRAN.)
+@@ -758,6 +768,13 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
+ 			return ERR_ABORT;
+ 		if (stop_status & R1_CARD_ECC_FAILED)
+ 			*ecc_err = 1;
++		if (!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ)
++			if (stop_status & R1_ERROR) {
++				pr_err("%s: %s: general error sending stop command, stop cmd response %#x\n",
++				       req->rq_disk->disk_name, __func__,
++				       stop_status);
++				*gen_err = 1;
++			}
+ 	}
+ 
+ 	/* Check for set block count errors */
+@@ -1007,7 +1024,7 @@ static int mmc_blk_err_check(struct mmc_card *card,
+ 						    mmc_active);
+ 	struct mmc_blk_request *brq = &mq_mrq->brq;
+ 	struct request *req = mq_mrq->req;
+-	int ecc_err = 0;
++	int ecc_err = 0, gen_err = 0;
+ 
+ 	/*
+ 	 * sbc.error indicates a problem with the set block count
+@@ -1021,7 +1038,7 @@ static int mmc_blk_err_check(struct mmc_card *card,
  	 */
- 	int (*err_check) (struct mmc_card *, struct mmc_async_req *);
-+	/* Reinserts request back to the block layer */
-+	void (*reinsert_req) (struct mmc_async_req *);
-+	/* update what part of request is not done (packed_fail_idx) */
-+	int (*update_interrupted_req) (struct mmc_card *,
-+			struct mmc_async_req *);
- };
+ 	if (brq->sbc.error || brq->cmd.error || brq->stop.error ||
+ 	    brq->data.error) {
+-		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err)) {
++		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
+ 		case ERR_RETRY:
+ 			return MMC_BLK_RETRY;
+ 		case ERR_ABORT:
+@@ -1051,6 +1068,15 @@ static int mmc_blk_err_check(struct mmc_card *card,
+ 	 */
+ 	if (!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ) {
+ 		u32 status;
++
++		/* Check stop command response */
++		if (brq->stop.resp[0] & R1_ERROR) {
++			pr_err("%s: %s: general error sending stop command, stop cmd response %#x\n",
++			       req->rq_disk->disk_name, __func__,
++			       brq->stop.resp[0]);
++			gen_err = 1;
++		}
++
+ 		do {
+ 			int err = get_card_status(card, &status, 5);
+ 			if (err) {
+@@ -1058,6 +1084,13 @@ static int mmc_blk_err_check(struct mmc_card *card,
+ 				       req->rq_disk->disk_name, err);
+ 				return MMC_BLK_CMD_ERR;
+ 			}
++
++			if (status & R1_ERROR) {
++				pr_err("%s: %s: general error sending status command, card status %#x\n",
++				       req->rq_disk->disk_name, __func__,
++				       status);
++				gen_err = 1;
++			}
+ 			/*
+ 			 * Some cards mishandle the status bits,
+ 			 * so make sure to check both the busy
+@@ -1067,6 +1100,13 @@ static int mmc_blk_err_check(struct mmc_card *card,
+ 			 (R1_CURRENT_STATE(status) == R1_STATE_PRG));
+ 	}
  
- /**
-@@ -176,7 +185,10 @@ struct mmc_slot {
-  * mmc_context_info - synchronization details for mmc context
-  * @is_done_rcv		wake up reason was done request
-  * @is_new_req		wake up reason was new request
-- * @is_waiting_last_req	mmc context waiting for single running request
-+ * @is_waiting_last_req	is true, when 1 request running on the bus and
-+ *			NULL fetched as second request. MMC_BLK_NEW_REQUEST
-+ *			notification will wake up mmc thread from waiting.
-+ * @is_urgent		wake up reason was urgent request
-  * @wait		wait queue
-  * @lock		lock to protect data fields
-  */
-@@ -184,6 +196,7 @@ struct mmc_context_info {
- 	bool			is_done_rcv;
- 	bool			is_new_req;
- 	bool			is_waiting_last_req;
-+	bool			is_urgent;
- 	wait_queue_head_t	wait;
- 	spinlock_t		lock;
- };
-@@ -282,6 +295,7 @@ struct mmc_host {
- #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before scan */
- #define MMC_CAP2_SANITIZE	(1 << 15)		/* Support Sanitize */
- 
-+#define MMC_CAP2_STOP_REQUEST	(1 << 14)	/* Allow stop ongoing request */
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 
- #ifdef CONFIG_MMC_CLKGATE
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 50bcde3..38014cf 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -321,6 +321,7 @@ struct _mmc_csd {
- #define EXT_CSD_PWR_CL_200_360		237	/* RO */
- #define EXT_CSD_PWR_CL_DDR_52_195	238	/* RO */
- #define EXT_CSD_PWR_CL_DDR_52_360	239	/* RO */
-+#define EXT_CSD_CORRECTLY_PRG_SECTORS_NUM 242	/* RO, 4 bytes */
- #define EXT_CSD_BKOPS_STATUS		246	/* RO */
- #define EXT_CSD_POWER_OFF_LONG_TIME	247	/* RO */
- #define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
++	/* if general error occurs, retry the write operation. */
++	if (gen_err) {
++		pr_warning("%s: retrying write for general error\n",
++				req->rq_disk->disk_name);
++		return MMC_BLK_RETRY;
++	}
++
+ 	if (brq->data.error) {
+ 		pr_err("%s: error %d transferring data, sector %u, nr %u, cmd response %#x, card status %#x\n",
+ 		       req->rq_disk->disk_name, brq->data.error,
 -- 
-1.7.6
+1.7.0.4
+
+
