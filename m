@@ -1,152 +1,72 @@
-From: KOBAYASHI Yoshitake <yoshitake.kobayashi@toshiba.co.jp>
-Subject: [PATCH 3.4-stable] mmc: block: fix a bug of error handling in MMC driver
-Date: Mon,  1 Jul 2013 16:56:25 +0900
-Message-ID: <1372665385-8993-1-git-send-email-yoshitake.kobayashi@toshiba.co.jp>
-References: <1368165727-32125-1-git-send-email-yoshitake.kobayashi@toshiba.co.jp>
-Content-Transfer-Encoding: 7bit
+From: Jackey Shen <jackey.shen@amd.com>
+Subject: [PATCH] mmc: sdhci-pci: identify correct base addresses for slots
+Date: Mon, 1 Jul 2013 17:22:15 +0800
+Message-ID: <1372670535-2778-1-git-send-email-jackey.shen@amd.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from imx9.toshiba.co.jp ([202.33.96.51]:39059 "EHLO
-	imx9.toshiba.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752798Ab3GAI0E (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Jul 2013 04:26:04 -0400
-In-Reply-To: <1368165727-32125-1-git-send-email-yoshitake.kobayashi@toshiba.co.jp>
+Received: from co9ehsobe005.messaging.microsoft.com ([207.46.163.28]:42592
+	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752974Ab3GAJZD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Jul 2013 05:25:03 -0400
+Received: from mail134-co9 (localhost [127.0.0.1])	by
+ mail134-co9-R.bigfish.com (Postfix) with ESMTP id 57372480745	for
+ <linux-mmc@vger.kernel.org>; Mon,  1 Jul 2013 09:25:02 +0000 (UTC)
+Received: from CO9EHSMHS007.bigfish.com (unknown [10.236.132.236])	by
+ mail134-co9.bigfish.com (Postfix) with ESMTP id 977CF3C0294	for
+ <linux-mmc@vger.kernel.org>; Mon,  1 Jul 2013 09:25:00 +0000 (UTC)
+Received: from sausexedgep01.amd.com (sausexedgep01-ext.amd.com
+ [163.181.249.72])	(using TLSv1 with cipher AES128-SHA (128/128 bits))	(No
+ client certificate requested)	by ausb3twp01.amd.com (Axway MailGate 3.8.1)
+ with ESMTP id 2E66210280BA	for <linux-mmc@vger.kernel.org>; Mon,  1 Jul 2013
+ 04:24:58 -0500 (CDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, stable@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, KOBAYASHI Yoshitake <yoshitake.kobayashi@toshiba.co.jp>
+To: linux-mmc@vger.kernel.org
+Cc: Jackey Shen <jackey.shen@amd.com>
 
-Backport for 3.4-stable for the following patch:
-     https://lkml.org/lkml/2013/5/10/20
+A PCI Based SD Host Controller can support up to a total of six SD Slots, and
+the base addresses are specified by Slot Information Register of its PCI header.
+Please refer to C.3.3 of SD Host Controller Standard Specification Version 3.0.
 
-This patch fixes a bug of error handling in Linux MMC driver.
-
-Current MMC driver doesn't handle generic error (bit19 of device
-status) in write sequence. As a result, write data gets lost when
-generic error occurs. For example, a generic error when updating a
-filesystem management information causes a loss of write data and
-corrupts the filesystem. In the worst case, the system will never
-boot.
-
-This patch includes the following functionality:
-  1. To enable error checking for the response of CMD12 and CMD13
-     in write command sequence
-  2. To retry write sequence when a generic error occures
-
-This patch was also posted to 3.4.46-LTSI.
-  https://patchwork.kernel.org/patch/2726801/
-
-Signed-off-by: KOBAYASHI Yoshitake <yoshitake.kobayashi@toshiba.co.jp>
+Signed-off-by: Jackey Shen <jackey.shen@amd.com>
 ---
- drivers/mmc/card/block.c |   46 +++++++++++++++++++++++++++++++++++++++++++---
- 1 files changed, 43 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci-pci.c |    7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 833ff16..e77053f 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -701,7 +701,7 @@ static int mmc_blk_cmd_error(struct request *req, const char *name, int error,
-  * Otherwise we don't understand what happened, so abort.
-  */
- static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
--	struct mmc_blk_request *brq, int *ecc_err)
-+	struct mmc_blk_request *brq, int *ecc_err, int *gen_err)
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index d7d6bc8..3a84e95 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -50,7 +50,8 @@
+ #define  PCI_SLOT_INFO_SLOTS(x)		((x >> 4) & 7)
+ #define  PCI_SLOT_INFO_FIRST_BAR_MASK	0x07
+ 
+-#define MAX_SLOTS			8
++#define MAX_SLOTS			6
++#define MAX_BARS			6
+ 
+ struct sdhci_pci_chip;
+ struct sdhci_pci_slot;
+@@ -1282,7 +1283,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
  {
- 	bool prev_cmd_status_valid = true;
- 	u32 status, stop_status = 0;
-@@ -739,6 +739,16 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
- 	    (brq->cmd.resp[0] & R1_CARD_ECC_FAILED))
- 		*ecc_err = 1;
+ 	struct sdhci_pci_slot *slot;
+ 	struct sdhci_host *host;
+-	int ret, bar = first_bar + slotno;
++	int ret, bar = (first_bar + slotno) % MAX_BARS;
  
-+	/* Flag General errors */
-+	if (!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ)
-+		if ((status & R1_ERROR) ||
-+			(brq->stop.resp[0] & R1_ERROR)) {
-+			pr_err("%s: %s: general error sending stop or status command, stop cmd response %#x, card status %#x\n",
-+			       req->rq_disk->disk_name, __func__,
-+			       brq->stop.resp[0], status);
-+			*gen_err = 1;
-+		}
-+
- 	/*
- 	 * Check the current card state.  If it is in some data transfer
- 	 * mode, tell it to stop (and hopefully transition back to TRAN.)
-@@ -758,6 +768,13 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
- 			return ERR_ABORT;
- 		if (stop_status & R1_CARD_ECC_FAILED)
- 			*ecc_err = 1;
-+		if (!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ)
-+			if (stop_status & R1_ERROR) {
-+				pr_err("%s: %s: general error sending stop command, stop cmd response %#x\n",
-+				       req->rq_disk->disk_name, __func__,
-+				       stop_status);
-+				*gen_err = 1;
-+			}
+ 	if (!(pci_resource_flags(pdev, bar) & IORESOURCE_MEM)) {
+ 		dev_err(&pdev->dev, "BAR %d is not iomem. Aborting.\n", bar);
+@@ -1481,7 +1482,7 @@ static int sdhci_pci_probe(struct pci_dev *pdev,
+ 
+ 	first_bar &= PCI_SLOT_INFO_FIRST_BAR_MASK;
+ 
+-	if (first_bar > 5) {
++	if (first_bar > MAX_BARS - 1) {
+ 		dev_err(&pdev->dev, "Invalid first BAR. Aborting.\n");
+ 		return -ENODEV;
  	}
- 
- 	/* Check for set block count errors */
-@@ -1007,7 +1024,7 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 						    mmc_active);
- 	struct mmc_blk_request *brq = &mq_mrq->brq;
- 	struct request *req = mq_mrq->req;
--	int ecc_err = 0;
-+	int ecc_err = 0, gen_err = 0;
- 
- 	/*
- 	 * sbc.error indicates a problem with the set block count
-@@ -1021,7 +1038,7 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 	 */
- 	if (brq->sbc.error || brq->cmd.error || brq->stop.error ||
- 	    brq->data.error) {
--		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err)) {
-+		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
- 		case ERR_RETRY:
- 			return MMC_BLK_RETRY;
- 		case ERR_ABORT:
-@@ -1051,6 +1068,15 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 	 */
- 	if (!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ) {
- 		u32 status;
-+
-+		/* Check stop command response */
-+		if (brq->stop.resp[0] & R1_ERROR) {
-+			pr_err("%s: %s: general error sending stop command, stop cmd response %#x\n",
-+			       req->rq_disk->disk_name, __func__,
-+			       brq->stop.resp[0]);
-+			gen_err = 1;
-+		}
-+
- 		do {
- 			int err = get_card_status(card, &status, 5);
- 			if (err) {
-@@ -1058,6 +1084,13 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 				       req->rq_disk->disk_name, err);
- 				return MMC_BLK_CMD_ERR;
- 			}
-+
-+			if (status & R1_ERROR) {
-+				pr_err("%s: %s: general error sending status command, card status %#x\n",
-+				       req->rq_disk->disk_name, __func__,
-+				       status);
-+				gen_err = 1;
-+			}
- 			/*
- 			 * Some cards mishandle the status bits,
- 			 * so make sure to check both the busy
-@@ -1067,6 +1100,13 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 			 (R1_CURRENT_STATE(status) == R1_STATE_PRG));
- 	}
- 
-+	/* if general error occurs, retry the write operation. */
-+	if (gen_err) {
-+		pr_warning("%s: retrying write for general error\n",
-+				req->rq_disk->disk_name);
-+		return MMC_BLK_RETRY;
-+	}
-+
- 	if (brq->data.error) {
- 		pr_err("%s: error %d transferring data, sector %u, nr %u, cmd response %#x, card status %#x\n",
- 		       req->rq_disk->disk_name, brq->data.error,
 -- 
-1.7.0.4
+1.7.10.4
 
 
