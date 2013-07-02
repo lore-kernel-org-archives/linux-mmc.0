@@ -1,49 +1,50 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: Crash during reboot due to 7628774 "mmc: core: Handle card
- shutdown from mmc_bus"
-Date: Tue, 2 Jul 2013 12:40:10 +0200
-Message-ID: <CAPDyKFrd7L0XvFCkRQku_nc8U5jSuRaqks-aOxTOMfj7fr_L=g@mail.gmail.com>
-References: <51D1E77A.3010601@wwwdotorg.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Subject: [PATCH] mmc: core: Fixup Oops for SDIO shutdown
+Date: Tue,  2 Jul 2013 12:53:01 +0200
+Message-ID: <1372762381-18832-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f181.google.com ([209.85.128.181]:57728 "EHLO
-	mail-ve0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752782Ab3GBKkN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jul 2013 06:40:13 -0400
-Received: by mail-ve0-f181.google.com with SMTP id db10so4585940veb.26
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Jul 2013 03:40:11 -0700 (PDT)
-In-Reply-To: <51D1E77A.3010601@wwwdotorg.org>
+Received: from mail-lb0-f182.google.com ([209.85.217.182]:56476 "EHLO
+	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751537Ab3GBKxJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jul 2013 06:53:09 -0400
+Received: by mail-lb0-f182.google.com with SMTP id r11so3227365lbv.13
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Jul 2013 03:53:08 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-next@vger.kernel.org" <linux-next@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Stephen Warren <swarren@wwwdotorg.org>, Tuomas Tynkkynen <ttynkkynen@nvidia.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On 1 July 2013 22:32, Stephen Warren <swarren@wwwdotorg.org> wrote:
-> It looks like commit 7628774 "mmc: core: Handle card shutdown from
-> mmc_bus" causes a crash during "reboot" at least on Tegra platforms. The
-> issue appears to be in:
->
->> static void mmc_bus_shutdown(struct device *dev)
->> {
->>       struct mmc_driver *drv = to_mmc_driver(dev->driver);
->>       struct mmc_card *card = mmc_dev_to_card(dev);
->>       struct mmc_host *host = card->host;
->>       int ret;
->>
->>       drv->shutdown(card);
->
-> Since drv == NULL.
->
-> Is this expected (and hence there's a missing guard on that function
-> call), or is the root-cause some other issue?
+Commit "mmc: core: Handle card shutdown from mmc_bus" introduced an
+Oops in the shutdown sequence for SDIO.
 
-Hi Stephen,
+The drv pointer, does not exist for SDIO since the probing of the SDIO
+card from the mmc_bus perspective is expected to fail by returning
+-ENODEV.
 
-It is expected that drv is NULL, and obviously needs to be a check for
-it before calling it, my bad!
+This patch adds the proper check for the pointer before calling it.
 
-A fixup patch is on it's way asap.
+Reported-by: Stephen Warren <swarren@wwwdotorg.org>
+Reported-by: Tuomas Tynkkynen <ttynkkynen@nvidia.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/bus.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Kind regards
-Ulf Hansson
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 4c0decf..d4b99bb 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -129,7 +129,8 @@ static void mmc_bus_shutdown(struct device *dev)
+ 	struct mmc_host *host = card->host;
+ 	int ret;
+ 
+-	drv->shutdown(card);
++	if (dev->driver && drv->shutdown)
++		drv->shutdown(card);
+ 
+ 	if (host->bus_ops->shutdown) {
+ 		ret = host->bus_ops->shutdown(host);
+-- 
+1.7.10
+
