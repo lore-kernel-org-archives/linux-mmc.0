@@ -1,40 +1,211 @@
-From: Tuomas Tynkkynen <ttynkkynen@nvidia.com>
-Subject: Re: [PATCH] mmc: core: Fixup Oops for SDIO shutdown
-Date: Tue, 2 Jul 2013 13:58:56 +0300
-Message-ID: <51D2B270.8000603@nvidia.com>
-References: <1372762381-18832-1-git-send-email-ulf.hansson@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+From: Peter Turczak <peter@turczak.de>
+Subject: Re: [PATCH v2] Add basic support for password protected (locked) SD cards.
+Date: Tue, 2 Jul 2013 14:15:32 +0200
+Message-ID: <CBAC2FC9-96A2-4C2C-BD1C-94338EC7A49E@turczak.de>
+References: <04F10DA1-D19F-4AD1-904E-6FD628602F7A@netconsequence.de> <CAELcNGQkwZmnR0aN6DEDiPdJR8e5VNqJGfDyV0w1oYPyp=4bzw@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 6.3 \(1503\))
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate03.nvidia.com ([216.228.121.140]:18875 "EHLO
-	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751665Ab3GBK7A (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jul 2013 06:59:00 -0400
-In-Reply-To: <1372762381-18832-1-git-send-email-ulf.hansson@linaro.org>
+Received: from netconsequence.de ([85.214.40.104]:38770 "EHLO
+	mx.netconsequence.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751780Ab3GBMPg convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jul 2013 08:15:36 -0400
+In-Reply-To: <CAELcNGQkwZmnR0aN6DEDiPdJR8e5VNqJGfDyV0w1oYPyp=4bzw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Stephen Warren <swarren@wwwdotorg.org>, Jaehoon Chung <jh80.chung@samsung.com>
+To: Jae hoon Chung <jh80.chung@gmail.com>, Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-On 07/02/2013 01:53 PM, Ulf Hansson wrote:
-> Commit "mmc: core: Handle card shutdown from mmc_bus" introduced an
-> Oops in the shutdown sequence for SDIO.
-> 
-> The drv pointer, does not exist for SDIO since the probing of the SDIO
-> card from the mmc_bus perspective is expected to fail by returning
-> -ENODEV.
-> 
-> This patch adds the proper check for the pointer before calling it.
-> 
-> Reported-by: Stephen Warren <swarren@wwwdotorg.org>
-> Reported-by: Tuomas Tynkkynen <ttynkkynen@nvidia.com>
-> Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
+Thank you, Jae hoon, for the heads up! You are right, I missed a few spots 
+in the first run. This version fixes the mistakes from last time.
 
-Hi,
+Adds support for sd cards that are locked by a password and rereading an
+already enumerated card.
+This fixes compatibility issues with password locked cards as they would
+not enumerate correctly when detecting them. The card side locking
+functionality is specified as mandatory in the Physical Layer Specifications,
+Version 3.01.
 
-That fixes it, thanks.
 
-Tested-by: Tuomas Tynkkynen <ttynkkynen@nvidia.com>
+Signed-off-by: Peter Turczak <pt@turczak.de>
+---
+drivers/mmc/card/block.c |   61 +++++++++++++++++++++++++++++++++++++++++++---
+drivers/mmc/core/sd.c    |   24 +++++++++++++++++-
+include/linux/mmc/card.h |    4 +++
+3 files changed, 84 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index dd27b07..972e4c4 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -568,12 +568,57 @@ cmd_err:
+	return err;
+}
+
++static int mmc_blk_ioctl_rescan(struct block_device *bdev)
++{
++	struct mmc_blk_data *md;
++	struct mmc_card *card;
++	int err = 0;
++
++	/*
++	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
++	 * whole block device, not on a partition.  This prevents overspray
++	 * between sibling partitions.
++	 */
++	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
++		return -EPERM;
++
++	md = mmc_blk_get(bdev->bd_disk);
++	if (!md) {
++		err = -EINVAL;
++		goto cmd_err;
++	}
++
++	card = md->queue.card;
++	if (IS_ERR(card)) {
++		err = PTR_ERR(card);
++		goto cmd_done;
++	}
++
++	mmc_power_restore_host(card->host);
++
++	/* Enable scanning of partition tables after unlocking */
++	if (!mmc_card_locked(card))
++		md->disk->flags &= ~GENHD_FL_NO_PART_SCAN;
++	else
++		md->disk->flags |= GENHD_FL_NO_PART_SCAN;
++
++	ioctl_by_bdev(bdev, BLKRRPART, 0);
++cmd_done:
++	mmc_blk_put(md);
++cmd_err:
++	kfree(idata->buf);
++	kfree(idata);
++	return err;
++}
++
+static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
+	unsigned int cmd, unsigned long arg)
+{
+	int ret = -EINVAL;
+	if (cmd == MMC_IOC_CMD)
+		ret = mmc_blk_ioctl_cmd(bdev, (struct mmc_ioc_cmd __user *)arg);
++	else if (cmd == MMC_IOC_RESCAN)
++		ret = mmc_blk_ioctl_rescan(bdev);
+	return ret;
+}
+
+@@ -775,7 +820,7 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
+	u32 status, stop_status = 0;
+	int err, retry;
+
+-	if (mmc_card_removed(card))
++	if (mmc_card_removed(card) || mmc_card_locked(card))
+		return ERR_NOMEDIUM;
+
+	/*
+@@ -1857,7 +1902,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+	if (mmc_packed_cmd(mq_rq->cmd_type)) {
+		mmc_blk_abort_packed_req(mq_rq);
+	} else {
+-		if (mmc_card_removed(card))
++		if (mmc_card_removed(card) || mmc_card_locked(card))
+			req->cmd_flags |= REQ_QUIET;
+		while (ret)
+			ret = blk_end_request(req, -EIO,
+@@ -2018,6 +2063,13 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+	if (area_type & MMC_BLK_DATA_AREA_RPMB)
+		md->disk->flags |= GENHD_FL_NO_PART_SCAN;
+
++	/* If SD/MMC is locked, any read operation will fail
++	 * so there is no point in doing a partition scan
++	 * until the device is unlocked.
++	 */
++	if (mmc_card_locked(card))
++		md->disk->flags |= GENHD_FL_NO_PART_SCAN;
++
+	/*
+	 * As discussed on lkml, GENHD_FL_REMOVABLE should:
+	 *
+@@ -2319,9 +2371,10 @@ static int mmc_blk_probe(struct mmc_card *card)
+
+	string_get_size((u64)get_capacity(md->disk) << 9, STRING_UNITS_2,
+			cap_str, sizeof(cap_str));
+-	pr_info("%s: %s %s %s %s\n",
++	pr_info("%s: %s %s %s %s %s\n",
+		md->disk->disk_name, mmc_card_id(card), mmc_card_name(card),
+-		cap_str, md->read_only ? "(ro)" : "");
++		cap_str, md->read_only ? "(ro)" : "",
++		mmc_card_locked(card) ? "(locked)" : "");
+
+	if (mmc_blk_alloc_parts(card, md))
+		goto out;
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 9e645e1..f774e9c 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -805,8 +805,30 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
+	bool reinit)
+{
+	int err;
++	int status;
+
+-	if (!reinit) {
++	/*
++	 * Test if card is locked
++	 */
++	err = mmc_send_status(card, &status);
++	if (err)
++		return err;
++
++	if (status & R1_CARD_IS_LOCKED)
++		mmc_card_set_locked(card);
++	else {
++		/* If card used to be locked, this is _not_ an reinit! */
++		if (mmc_card_locked(card))
++			reinit = false;
++
++		mmc_card_clr_locked(card);
++	}
++
++	/*
++	 * If card is locked or already initialized, do not try to
++	 * set it up further.
++	 */
++	if (!reinit && !mmc_card_locked(card)) {
+		/*
+		 * Fetch SCR from card.
+		 */
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index f31725b..08f325d 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -249,6 +249,7 @@ struct mmc_card {
+#define MMC_CARD_REMOVED	(1<<7)		/* card has been removed */
+#define MMC_STATE_HIGHSPEED_200	(1<<8)		/* card is in HS200 mode */
+#define MMC_STATE_DOING_BKOPS	(1<<10)		/* card is doing BKOPS */
++#define MMC_STATE_LOCKED	(1<<11)		/* card is password protected */
+	unsigned int		quirks; 	/* card quirks */
+#define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
+#define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
+@@ -416,6 +417,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+#define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
+#define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
+#define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
++#define mmc_card_locked(c)	((c)->state & MMC_STATE_LOCKED)
+
+#define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
+#define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
+@@ -429,6 +431,8 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+#define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
+#define mmc_card_set_doing_bkops(c)	((c)->state |= MMC_STATE_DOING_BKOPS)
+#define mmc_card_clr_doing_bkops(c)	((c)->state &= ~MMC_STATE_DOING_BKOPS)
++#define mmc_card_set_locked(c)	((c)->state |= MMC_STATE_LOCKED)
++#define mmc_card_clr_locked(c)	((c)->state &= ~MMC_STATE_LOCKED)
+
+/*
+ * Quirk add/remove for MMC products.
+-- 
+1.7.0.4
