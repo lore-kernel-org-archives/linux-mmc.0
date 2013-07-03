@@ -1,70 +1,75 @@
 From: Fabio Estevam <festevam@gmail.com>
-Subject: [PATCH 1/2] mmc: mxs-mmc: Use devm_clk_get()
-Date: Wed,  3 Jul 2013 17:02:37 -0300
-Message-ID: <1372881758-23502-1-git-send-email-festevam@gmail.com>
+Subject: [PATCH 2/2] mmc: mxs-mmc: Check the return value from stmp_reset_block()
+Date: Wed,  3 Jul 2013 17:02:38 -0300
+Message-ID: <1372881758-23502-2-git-send-email-festevam@gmail.com>
+References: <1372881758-23502-1-git-send-email-festevam@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yh0-f42.google.com ([209.85.213.42]:35815 "EHLO
-	mail-yh0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932690Ab3GCUCy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Jul 2013 16:02:54 -0400
-Received: by mail-yh0-f42.google.com with SMTP id c41so194973yho.15
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Jul 2013 13:02:54 -0700 (PDT)
+Received: from mail-gg0-f169.google.com ([209.85.161.169]:57812 "EHLO
+	mail-gg0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932690Ab3GCUJb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Jul 2013 16:09:31 -0400
+Received: by mail-gg0-f169.google.com with SMTP id b1so160244ggn.0
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Jul 2013 13:09:31 -0700 (PDT)
+In-Reply-To: <1372881758-23502-1-git-send-email-festevam@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org
-Cc: shawn.guo@linaro.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org, Fabio Estevam <festevam@gmail.com>
+Cc: shawn.guo@linaro.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
 
-Using devm_clk_get() allows us to remove the clk_put() calls, so let's use it
-to simplify the code.
+From: Fabio Estevam <fabio.estevam@freescale.com>
 
-Rename the 'out_clk_put' label to 'out_clk_disable' now that clk_put is removed.
+stmp_reset_block() may fail, so let's check its return value and propagate it in
+the case of error.
 
-Signed-off-by: Fabio Estevam <festevam@gmail.com>
+Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
 ---
- drivers/mmc/host/mxs-mmc.c | 8 +++-----
- 1 file changed, 3 insertions(+), 5 deletions(-)
+ drivers/mmc/host/mxs-mmc.c | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index f38d75f..b76778f 100644
+index b76778f..383830d 100644
 --- a/drivers/mmc/host/mxs-mmc.c
 +++ b/drivers/mmc/host/mxs-mmc.c
-@@ -618,7 +618,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 		}
- 	}
+@@ -102,12 +102,15 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+ 		  BM_SSP_STATUS_CARD_DETECT) ^ host->cd_inverted;
+ }
  
--	ssp->clk = clk_get(&pdev->dev, NULL);
-+	ssp->clk = devm_clk_get(&pdev->dev, NULL);
- 	if (IS_ERR(ssp->clk)) {
- 		ret = PTR_ERR(ssp->clk);
- 		goto out_mmc_free;
-@@ -632,7 +632,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 		dev_err(mmc_dev(host->mmc),
- 			"%s: failed to request dma\n", __func__);
- 		ret = -ENODEV;
--		goto out_clk_put;
+-static void mxs_mmc_reset(struct mxs_mmc_host *host)
++static int mxs_mmc_reset(struct mxs_mmc_host *host)
+ {
+ 	struct mxs_ssp *ssp = &host->ssp;
+ 	u32 ctrl0, ctrl1;
+-
+-	stmp_reset_block(ssp->base);
++	int ret;
++
++	ret = stmp_reset_block(ssp->base);
++	if (ret)
++		return ret;
+ 
+ 	ctrl0 = BM_SSP_CTRL0_IGNORE_CRC;
+ 	ctrl1 = BF_SSP(0x3, CTRL1_SSP_MODE) |
+@@ -132,6 +135,7 @@ static void mxs_mmc_reset(struct mxs_mmc_host *host)
+ 
+ 	writel(ctrl0, ssp->base + HW_SSP_CTRL0);
+ 	writel(ctrl1, ssp->base + HW_SSP_CTRL1(ssp));
++	return 0;
+ }
+ 
+ static void mxs_mmc_start_cmd(struct mxs_mmc_host *host,
+@@ -625,7 +629,11 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+ 	}
+ 	clk_prepare_enable(ssp->clk);
+ 
+-	mxs_mmc_reset(host);
++	ret = mxs_mmc_reset(host);
++	if (ret) {
++		dev_err(&pdev->dev, "Failed to reset mmc: %d\n", ret);
 +		goto out_clk_disable;
- 	}
++	}
  
- 	/* set mmc core parameters */
-@@ -685,9 +685,8 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- out_free_dma:
- 	if (ssp->dmach)
- 		dma_release_channel(ssp->dmach);
--out_clk_put:
-+out_clk_disable:
- 	clk_disable_unprepare(ssp->clk);
--	clk_put(ssp->clk);
- out_mmc_free:
- 	mmc_free_host(mmc);
- 	return ret;
-@@ -705,7 +704,6 @@ static int mxs_mmc_remove(struct platform_device *pdev)
- 		dma_release_channel(ssp->dmach);
- 
- 	clk_disable_unprepare(ssp->clk);
--	clk_put(ssp->clk);
- 
- 	mmc_free_host(mmc);
- 
+ 	ssp->dmach = dma_request_slave_channel(&pdev->dev, "rx-tx");
+ 	if (!ssp->dmach) {
 -- 
 1.8.1.2
 
