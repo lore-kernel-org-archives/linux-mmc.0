@@ -1,52 +1,71 @@
-From: Peter Turczak <peter@turczak.de>
-Subject: Re: [PATCH v2] Add basic support for password protected (locked) SD cards.
-Date: Thu, 4 Jul 2013 14:16:00 +0200
-Message-ID: <E5D649A7-5C32-4F45-AAAA-9922D897F93A@turczak.de>
-References: <04F10DA1-D19F-4AD1-904E-6FD628602F7A@netconsequence.de> <CAELcNGQkwZmnR0aN6DEDiPdJR8e5VNqJGfDyV0w1oYPyp=4bzw@mail.gmail.com> <CBAC2FC9-96A2-4C2C-BD1C-94338EC7A49E@turczak.de> <CAPDyKFqD-qejfY8gkja_ofjOqjnwbjg3C1RhqvfBZo-Y8zhFwA@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 6.3 \(1503\))
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Ezequiel Garcia <ezequiel.garcia@free-electrons.com>
+Subject: [PATCH] mmc: core: Add sanity NULL pointer check
+Date: Thu,  4 Jul 2013 11:40:01 -0300
+Message-ID: <1372948801-20230-1-git-send-email-ezequiel.garcia@free-electrons.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from netconsequence.de ([85.214.40.104]:46963 "EHLO
-	mx.netconsequence.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755312Ab3GDMQD convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Jul 2013 08:16:03 -0400
-In-Reply-To: <CAPDyKFqD-qejfY8gkja_ofjOqjnwbjg3C1RhqvfBZo-Y8zhFwA@mail.gmail.com>
+Received: from mail.free-electrons.com ([94.23.35.102]:55744 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755247Ab3GDOkL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Jul 2013 10:40:11 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: khilman@linaro.org, tgih.jun@samsung.com, kdorfman@codeaurora.org, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>
 
-Hi Ulf,
+Commit 762877485 "mmc: core: Handle card shutdown from mmc_bus"
+added shutdown support. However, there are some situations where the
+'owner' struct pointer can be NULL.
 
-On 04.07.2013, at 09:21, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> Hi Peter,
-> 
-> You need a mmc_get|put_card surrounding the call for re-intitalize the card.
-Sorry, but I can not find no mmc_get_card function in the current kernel mmc git repository.
-These could be found in mmc/card/block.c:
-static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk);
-static struct mmc_blk_data *mmc_blk_put(struct gendisk *disk);
-I used the above, like e.g. the mmc_blk_ioctl_cmd() function which my routine is based upon, like so:
->> +       if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
->> +               return -EPERM;
->> +
->> +       md = mmc_blk_get(bdev->bd_disk);
->> +       if (!md) {
->> +               err = -EINVAL;
->> +               goto cmd_err;
->> +       }
+Solve this by adding a check, just as it's done in the other busses.
 
+This commit solves a panic upon a reboot request, found in today's linux-next,
+on a Armada 370 Mirabox board.
 
-Furthermore there are the following get|put functions defined:
-drivers/mmc/core/core.c:
-static inline void mmc_bus_get(struct mmc_host *host);
-static inline void mmc_bus_put(struct mmc_host *host);
+[snip]
+[  225.592003] Unable to handle kernel NULL pointer dereference at virtual address 0000004c
+[  225.600114] pgd = eea2c000
+[  225.602897] [0000004c] *pgd=2ea38831, *pte=00000000, *ppte=00000000
+[  225.609216] Internal error: Oops: 17 [#1] PREEMPT SMP ARM
+[  225.614628] CPU: 0 PID: 1100 Comm: init Not tainted 3.10.0-next-20130704 #19
+[  225.621690] task: ef1adb00 ti: ef3ce000 task.ti: ef3ce000
+[  225.627111] PC is at mmc_bus_shutdown+0x14/0x5c
+[  225.631657] LR is at device_shutdown+0x34/0x184
+[  225.636196] pc : [<c0267548>]    lr : [<c01b487c>]    psr: 600f0013
+[  225.636196] sp : ef3cfe68  ip : 00000002  fp : 00000000
+[  225.647693] r10: 00000000  r9 : ef3ce000  r8 : c049229c
+[  225.652927] r7 : ef304c3c  r6 : c04b4f30  r5 : ef304c08  r4 : ef304000
+[  225.659466] r3 : ef304c08  r2 : 00000000  r1 : 00000000  r0 : ef304c00
+[  225.666005] Flags: nZCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment user
+[  225.673153] Control: 10c5387d  Table: 2ea2c019  DAC: 00000015
+[  225.678909] Process init (pid: 1100, stack limit = 0xef3ce238)
 
-Or maybe I did not see it. Which ones did you mean and should I use?
-> 
-> Kind regards
-> Ulf Hansson
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>
+Signed-off-by: Ezequiel Garcia <ezequiel.garcia@free-electrons.com>
+---
+This patch applies cleanly on today's linux-next.
 
-Best regards,
-  Peter
+Honestly, I can't see how the owner pointer can be NULL,
+but every other bus driver is checking, so I guess it can
+be NULL under some circumstance.
+
+ drivers/mmc/core/bus.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index b9e5bea..8fcf0b9 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -129,7 +129,8 @@ static void mmc_bus_shutdown(struct device *dev)
+ 	struct mmc_host *host = card->host;
+ 	int ret;
+ 
+-	drv->shutdown(card);
++	if (drv)
++		drv->shutdown(card);
+ 
+ 	if (host->bus_ops->shutdown) {
+ 		ret = host->bus_ops->shutdown(host);
+-- 
+1.8.1.5
+
