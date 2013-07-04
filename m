@@ -1,27 +1,52 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v2 1/2] ARM: configs: Enable TI_EDMA in
- omap2plus_defconfig
-Date: Thu, 4 Jul 2013 05:05:23 -0700
-Message-ID: <20130704120523.GM5523@atomide.com>
-References: <1372304523-30742-1-git-send-email-joelf@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Peter Turczak <peter@turczak.de>
+Subject: Re: [PATCH v2] Add basic support for password protected (locked) SD cards.
+Date: Thu, 4 Jul 2013 14:16:00 +0200
+Message-ID: <E5D649A7-5C32-4F45-AAAA-9922D897F93A@turczak.de>
+References: <04F10DA1-D19F-4AD1-904E-6FD628602F7A@netconsequence.de> <CAELcNGQkwZmnR0aN6DEDiPdJR8e5VNqJGfDyV0w1oYPyp=4bzw@mail.gmail.com> <CBAC2FC9-96A2-4C2C-BD1C-94338EC7A49E@turczak.de> <CAPDyKFqD-qejfY8gkja_ofjOqjnwbjg3C1RhqvfBZo-Y8zhFwA@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 6.3 \(1503\))
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:53286 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1756172Ab3GDMFh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Jul 2013 08:05:37 -0400
-Content-Disposition: inline
-In-Reply-To: <1372304523-30742-1-git-send-email-joelf@ti.com>
+Received: from netconsequence.de ([85.214.40.104]:46963 "EHLO
+	mx.netconsequence.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755312Ab3GDMQD convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Jul 2013 08:16:03 -0400
+In-Reply-To: <CAPDyKFqD-qejfY8gkja_ofjOqjnwbjg3C1RhqvfBZo-Y8zhFwA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Joel Fernandes <joelf@ti.com>
-Cc: Sekhar Nori <nsekhar@ti.com>, Matt Porter <matt@ohporter.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Mark Brown <broonie@linaro.org>, Benoit Cousson <b-cousson@ti.com>, Russell King <linux@arm.linux.org.uk>, Rob Landley <rob@landley.net>, Andrew Morton <akpm@linux-foundation.org>, Arnd Bergmann <arnd@arndb.de>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-* Joel Fernandes <joelf@ti.com> [130626 20:48]:
-> Build EDMA in by default to avoid fewer people stepping on their toes
-> with broken DMA on drivers needing EDMA.
+Hi Ulf,
 
-Thanks applying this one into omap-for-v3.11/fixes.
+On 04.07.2013, at 09:21, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> Hi Peter,
+> 
+> You need a mmc_get|put_card surrounding the call for re-intitalize the card.
+Sorry, but I can not find no mmc_get_card function in the current kernel mmc git repository.
+These could be found in mmc/card/block.c:
+static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk);
+static struct mmc_blk_data *mmc_blk_put(struct gendisk *disk);
+I used the above, like e.g. the mmc_blk_ioctl_cmd() function which my routine is based upon, like so:
+>> +       if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
+>> +               return -EPERM;
+>> +
+>> +       md = mmc_blk_get(bdev->bd_disk);
+>> +       if (!md) {
+>> +               err = -EINVAL;
+>> +               goto cmd_err;
+>> +       }
 
-Tony
+
+Furthermore there are the following get|put functions defined:
+drivers/mmc/core/core.c:
+static inline void mmc_bus_get(struct mmc_host *host);
+static inline void mmc_bus_put(struct mmc_host *host);
+
+Or maybe I did not see it. Which ones did you mean and should I use?
+> 
+> Kind regards
+> Ulf Hansson
+
+Best regards,
+  Peter
