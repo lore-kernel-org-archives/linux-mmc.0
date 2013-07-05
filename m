@@ -1,92 +1,71 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: core: Add sanity NULL pointer check
-Date: Fri, 05 Jul 2013 11:25:29 +0900
-Message-ID: <51D62E99.9010506@samsung.com>
-References: <1372948801-20230-1-git-send-email-ezequiel.garcia@free-electrons.com>
+From: Vinod Koul <vinod.koul@intel.com>
+Subject: Re: [PATCH] dmaengine: shdma: fix a build failure on platforms
+ with no DMA support
+Date: Fri, 5 Jul 2013 10:23:50 +0530
+Message-ID: <20130705045350.GA10947@intel.com>
+References: <Pine.LNX.4.64.1305301650290.29171@axis700.grange>
+ <51A77CF1.7040105@ti.com>
+ <20130531024438.GB32564@verge.net.au>
+ <CAGa+x8413povhYWx+BSj=TdzQDAuYFXmjF4A2kXvQt+=n+380w@mail.gmail.com>
+ <Pine.LNX.4.64.1306192125480.12502@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:56238 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755500Ab3GECZ2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Jul 2013 22:25:28 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MPF0042PYQCXIL0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 05 Jul 2013 11:25:24 +0900 (KST)
-In-reply-to: <1372948801-20230-1-git-send-email-ezequiel.garcia@free-electrons.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1306192125480.12502@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Kevin Hilman <khilman@linaro.org>, Simon Horman <horms@verge.net.au>, Dan Murphy <dmurphy@ti.com>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ezequiel Garcia <ezequiel.garcia@free-electrons.com>
-Cc: linux-mmc@vger.kernel.org, khilman@linaro.org, tgih.jun@samsung.com, kdorfman@codeaurora.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>
 
-Hi Ezequiel,
-
-Already posted the patch for this issue.
-
-https://patchwork.kernel.org/patch/2811611/
-
-Best Regards,
-Jaehoon Chung
-
-
-On 07/04/2013 11:40 PM, Ezequiel Garcia wrote:
-> Commit 762877485 "mmc: core: Handle card shutdown from mmc_bus"
-> added shutdown support. However, there are some situations where the
-> 'owner' struct pointer can be NULL.
+On Wed, Jun 19, 2013 at 09:32:18PM +0200, Guennadi Liakhovetski wrote:
+> Hi Vinod
 > 
-> Solve this by adding a check, just as it's done in the other busses.
+> On Wed, 19 Jun 2013, Kevin Hilman wrote:
 > 
-> This commit solves a panic upon a reboot request, found in today's linux-next,
-> on a Armada 370 Mirabox board.
+> > On Thu, May 30, 2013 at 7:44 PM, Simon Horman <horms@verge.net.au> wrote:
+> > 
+> > [...]
+> > 
+> > > thanks for this. I will wait for a refresh (as we discussed earlier today).
+> > > Can I confirm that this is a fix for v3.10? If so, could ou note
+> > > that when you post your revised patch?
+> > 
+> > Any progress on this patch?
+> > 
+> > The SH-mobile defconfigs are still all failing in linux-next.
 > 
-> [snip]
-> [  225.592003] Unable to handle kernel NULL pointer dereference at virtual address 0000004c
-> [  225.600114] pgd = eea2c000
-> [  225.602897] [0000004c] *pgd=2ea38831, *pte=00000000, *ppte=00000000
-> [  225.609216] Internal error: Oops: 17 [#1] PREEMPT SMP ARM
-> [  225.614628] CPU: 0 PID: 1100 Comm: init Not tainted 3.10.0-next-20130704 #19
-> [  225.621690] task: ef1adb00 ti: ef3ce000 task.ti: ef3ce000
-> [  225.627111] PC is at mmc_bus_shutdown+0x14/0x5c
-> [  225.631657] LR is at device_shutdown+0x34/0x184
-> [  225.636196] pc : [<c0267548>]    lr : [<c01b487c>]    psr: 600f0013
-> [  225.636196] sp : ef3cfe68  ip : 00000002  fp : 00000000
-> [  225.647693] r10: 00000000  r9 : ef3ce000  r8 : c049229c
-> [  225.652927] r7 : ef304c3c  r6 : c04b4f30  r5 : ef304c08  r4 : ef304000
-> [  225.659466] r3 : ef304c08  r2 : 00000000  r1 : 00000000  r0 : ef304c00
-> [  225.666005] Flags: nZCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment user
-> [  225.673153] Control: 10c5387d  Table: 2ea2c019  DAC: 00000015
-> [  225.678909] Process init (pid: 1100, stack limit = 0xef3ce238)
+> In
 > 
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Chris Ball <cjb@laptop.org>
-> Signed-off-by: Ezequiel Garcia <ezequiel.garcia@free-electrons.com>
+> https://patchwork.kernel.org/patch/2640061/
+And you havent CC maintainers on this patch, so I dont have it!
+> 
+> I proposed a simple immediate fix for this problem. Arnd at the same time 
+> developed an alternative solution:
+> 
+> https://patchwork.kernel.org/patch/2644121/
+> https://patchwork.kernel.org/patch/2644111/
+Reading these patches I agree with Arnd that client drivers should not depend on
+dma slave drivers. Existing issue need to be fixed
+
+Arnd, Have you merged these changes?
+
+--
+~Vinod
+> 
+> Which, I think, is a much larger change and isn't suitable as a bug-fix 
+> this late in the release cycle. Instead those patches address other issues 
+> with the shdma drivers, which might need to be carefully studied and 
+> solutions have to be found, which, however, would require more work and 
+> need a longer time. What is your opinion on this? Would you agree to apply 
+> v2 of this patch, as referenced above or would you prefer a different 
+> solution?
+> 
+> Thanks
+> Guennadi
 > ---
-> This patch applies cleanly on today's linux-next.
-> 
-> Honestly, I can't see how the owner pointer can be NULL,
-> but every other bus driver is checking, so I guess it can
-> be NULL under some circumstance.
-> 
->  drivers/mmc/core/bus.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> index b9e5bea..8fcf0b9 100644
-> --- a/drivers/mmc/core/bus.c
-> +++ b/drivers/mmc/core/bus.c
-> @@ -129,7 +129,8 @@ static void mmc_bus_shutdown(struct device *dev)
->  	struct mmc_host *host = card->host;
->  	int ret;
->  
-> -	drv->shutdown(card);
-> +	if (drv)
-> +		drv->shutdown(card);
->  
->  	if (host->bus_ops->shutdown) {
->  		ret = host->bus_ops->shutdown(host);
-> 
+> Guennadi Liakhovetski, Ph.D.
+> Freelance Open-Source Software Developer
+> http://www.open-technology.de/
 
+-- 
