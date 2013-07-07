@@ -1,52 +1,72 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: Re: [PATCH] mmc: core: Fixup Oops for SDIO shutdown
-Date: Sun, 7 Jul 2013 10:55:12 -0700
-Message-ID: <CAOesGMiFmzumD5rMx8k4Tf9R=vhJqmGopABYUO79-At9yftqRg@mail.gmail.com>
-References: <1372762381-18832-1-git-send-email-ulf.hansson@linaro.org>
-	<51D2EEA0.1050804@wwwdotorg.org>
-	<CAOesGMiL-vY2O-WdiqcYOyNDvXz83PeDij+sijxrGTx-GLV+_w@mail.gmail.com>
-	<868v1i1dvz.fsf@void.printf.net>
+From: Ezequiel Garcia <ezequiel.garcia@free-electrons.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: use for OMAP5 as well
+Date: Sun, 7 Jul 2013 17:13:10 -0300
+Message-ID: <20130707201309.GA5429@localhost>
+References: <1372422894-23729-1-git-send-email-a-bindra@ti.com>
+ <51CDB260.8080108@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f178.google.com ([209.85.216.178]:59112 "EHLO
-	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752358Ab3GGRzN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Jul 2013 13:55:13 -0400
-Received: by mail-qc0-f178.google.com with SMTP id c11so1906574qcv.37
-        for <linux-mmc@vger.kernel.org>; Sun, 07 Jul 2013 10:55:12 -0700 (PDT)
-In-Reply-To: <868v1i1dvz.fsf@void.printf.net>
+Received: from mail.free-electrons.com ([94.23.35.102]:56534 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753096Ab3GGUNH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Jul 2013 16:13:07 -0400
+Content-Disposition: inline
+In-Reply-To: <51CDB260.8080108@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Stephen Warren <swarren@wwwdotorg.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tuomas Tynkkynen <ttynkkynen@nvidia.com>, Jaehoon Chung <jh80.chung@samsung.com>
+To: Balaji T K <balajitk@ti.com>
+Cc: a-bindra@ti.com, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-omap@vger.kernel.org, balbi@ti.com, nm@ti.com
 
-On Sun, Jul 7, 2013 at 10:25 AM, Chris Ball <cjb@laptop.org> wrote:
-> Hi,
->
-> On Sun, Jul 07 2013, Olof Johansson wrote:
->> On Tue, Jul 2, 2013 at 8:15 AM, Stephen Warren <swarren@wwwdotorg.org> wrote:
->>> On 07/02/2013 04:53 AM, Ulf Hansson wrote:
->>>> Commit "mmc: core: Handle card shutdown from mmc_bus" introduced an
->>>> Oops in the shutdown sequence for SDIO.
->>>>
->>>> The drv pointer, does not exist for SDIO since the probing of the SDIO
->>>> card from the mmc_bus perspective is expected to fail by returning
->>>> -ENODEV.
->>>>
->>>> This patch adds the proper check for the pointer before calling it.
->>>
->>> Tested-by: Stephen Warren <swarren@nvidia.com>
->>
->> Acked-by: Olof Johansson <olof@lixom.net>
->>
->> Chris, I hit this on the 0705 linux-next. Can you pick up this patch
->> soonish please? Thanks!
->
-> Sorry for the delay -- I merged this on Friday, so it'll be in
-> tonight's -next.
+Hi guys,
 
-Great, thanks!
+On Fri, Jun 28, 2013 at 09:27:20PM +0530, Balaji T K wrote:
+> On Friday 28 June 2013 06:04 PM, a-bindra@ti.com wrote:
+> > From: Amarinder Bindra <a-bindra@ti.com>
+> >
+> > OMAP's hs_mmc driver is also used for OMAP5 MMC controller operatio=
+n.
+> > Considering that the device tree entries are already there for this=
+,
+> > allow the driver to be built when only OMAP5 is enabled.
+> > This allows MMC root filesystems to be available in "OMAP5 only"
+> > configurations.
+> >
+> > Signed-off-by: Amarinder Bindra <a-bindra@ti.com>
+> > Acked-by: Felipe Balbi <balbi@ti.com>
+> > Acked-by: Nishanth Menon <nm@ti.com>
+>=20
+> Looks good to me,
+> Acked-by: Balaji T K <balajitk@ti.com>
+>=20
 
+I came across this same issue while trying MMC patches on AM3xx,
+which is nor OMAP3 neither OMAP4.
 
--Olof
+Now, looking at the driver I don't see any OMAP-specific bits
+(welcome to the multiplatform world ;-) so I think we can just
+remove the 'depends' line. Something like this:
+
+---
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 9ab8f8d..bade7f2 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -273,10 +273,9 @@ config MMC_OMAP
+=20
+ config MMC_OMAP_HS
+ 	tristate "TI OMAP High Speed Multimedia Card Interface support"
+-	depends on SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4
+ 	help
+ 	  This selects the TI OMAP High Speed Multimedia card Interface.
+-	  If you have an OMAP2430 or OMAP3 board or OMAP4 board with a
++	  If you have an OMAP2430, OMAP3, OMAP4 or AM3xx board with a
+ 	  Multimedia Card slot, say Y or M here.
+=20
+ 	  If unsure, say N.
+
+--=20
+Ezequiel Garc=C3=ADa, Free Electrons
+Embedded Linux, Kernel and Android Engineering
+http://free-electrons.com
