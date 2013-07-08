@@ -1,42 +1,73 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: [PATCH 3/3] mmc: sdhci-bcm-kona: Staticize sdhci_bcm_kona_card_event
-Date: Mon,  8 Jul 2013 11:41:53 +0530
-Message-ID: <1373263914-18050-3-git-send-email-sachin.kamat@linaro.org>
-References: <1373263914-18050-1-git-send-email-sachin.kamat@linaro.org>
+From: "Minjian Wu (minjianwu)" <minjianwu@micron.com>
+Subject: RE: eMMC bus test command failure
+Date: Mon, 8 Jul 2013 07:28:24 +0000
+Message-ID: <59606D77376AA44BB2E289FE5BA55046751E243B@NTXXIAMBX01.xacn.micron.com>
+References: <59606D77376AA44BB2E289FE5BA55046751CFA84@NTXXIAMBX01.xacn.micron.com>
+ <87ppv7r4hk.fsf@octavius.laptop.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f171.google.com ([209.85.192.171]:39543 "EHLO
-	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753381Ab3GHG1f (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jul 2013 02:27:35 -0400
-Received: by mail-pd0-f171.google.com with SMTP id y14so3718248pdi.30
-        for <linux-mmc@vger.kernel.org>; Sun, 07 Jul 2013 23:27:34 -0700 (PDT)
-In-Reply-To: <1373263914-18050-1-git-send-email-sachin.kamat@linaro.org>
+Received: from mailout.micron.com ([137.201.242.129]:59026 "EHLO
+	mailout.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751962Ab3GHH2c convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jul 2013 03:28:32 -0400
+In-Reply-To: <87ppv7r4hk.fsf@octavius.laptop.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: csd@broadcom.com, cjb@laptop.org, sachin.kamat@linaro.org, patches@linaro.org
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-sdhci_bcm_kona_card_event is referenced only in this file.
-Make it static.
+Hi Chris,
+	Sorry for the late response. Below is the patch based on Linux 3.8.4. Please help to check it. Thanks!
 
-Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
----
- drivers/mmc/host/sdhci-bcm-kona.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+diff --git a/linux-3.8.4/drivers/mmc/core/mmc_ops.c b/linux-3.8_new/drivers/mmc/
+index 6d8f701..a3ca845 100644
+--- a/linux-3.8.4/drivers/mmc/core/mmc_ops.c
++++ b/linux-3.8_new/drivers/mmc/core/mmc_ops.c
+@@ -560,6 +560,7 @@ mmc_send_bus_test(struct mmc_card *card, struct mmc_host *ho
+        else
+                data.flags = MMC_DATA_WRITE;
+ 
++       mmc_set_data_timeout(&data,card);
+        data.sg = &sg;
+        data.sg_len = 1;
+        sg_init_one(&sg, data_buf, len);
 
-diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-index d7a44ae..f59f332 100644
---- a/drivers/mmc/host/sdhci-bcm-kona.c
-+++ b/drivers/mmc/host/sdhci-bcm-kona.c
-@@ -161,7 +161,7 @@ static int sdhci_bcm_kona_sd_card_emulate(struct sdhci_host *host, int insert)
- /*
-  * SD card interrupt event callback
-  */
--void sdhci_bcm_kona_card_event(struct sdhci_host *host)
-+static void sdhci_bcm_kona_card_event(struct sdhci_host *host)
- {
- 	if (mmc_gpio_get_cd(host->mmc) > 0) {
- 		dev_dbg(mmc_dev(host->mmc),
+
+
+
+-----Original Message-----
+From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chris Ball
+Sent: Thursday, June 27, 2013 10:52 PM
+To: Minjian Wu (minjianwu)
+Cc: linux-mmc@vger.kernel.org
+Subject: Re: eMMC bus test command failure
+
+Hi Minjian,
+
+On Sun, May 26 2013, Minjian Wu (minjianwu) wrote:
+> Hi,
+>
+> 	I got one issue on Linux V3.7 as following.
+>          > mmc0: switch to bus width 1 ddr 0 failed 
+>          > mmc0: error -110 whilst initialising MMC card
+>
+>          After debugging and checking the source codes, we find that
+> in mmc_send_bus_test function, there is no data timeout
+> setting(mmc_set_data_timeout). After we add the timeout setting
+> function, this issue is fixed, could you help confirm it? Thank you!
+
+Please could you submit the patch you used?
+
+Thanks,
+
+- Chris.
 -- 
-1.7.9.5
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
+--
+To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
