@@ -1,86 +1,97 @@
-From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: use for OMAP5 as well
-Date: Mon, 8 Jul 2013 10:46:06 +0300
-Message-ID: <20130708074606.GD16635@arwen.pp.htv.fi>
-References: <1372422894-23729-1-git-send-email-a-bindra@ti.com>
- <51CDB260.8080108@ti.com>
- <20130707201309.GA5429@localhost>
-Reply-To: <balbi@ti.com>
+From: Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v2 1/3] mmc: omap_hsmmc: Enable SDIO IRQ using a GPIO in
+ idle mode.
+Date: Mon, 8 Jul 2013 10:50:27 +0300
+Message-ID: <20130708075006.GE16635@arwen.pp.htv.fi>
+References: <1365770307-19859-1-git-send-email-andreas.fenkart@streamunlimited.com>
+ <1365770307-19859-2-git-send-email-andreas.fenkart@streamunlimited.com>
+Reply-To: balbi-l0cyMroinI0@public.gmane.org
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="MAH+hnPXVZWQ5cD/"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:41701 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751000Ab3GHHqW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 8 Jul 2013 03:46:22 -0400
-Content-Disposition: inline
-In-Reply-To: <20130707201309.GA5429@localhost>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============6403174971933409514=="
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <1365770307-19859-2-git-send-email-andreas.fenkart-6oiIBCxl0MMjD8S081q9vkEOCMrvLtNR@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: Andreas Fenkart <andreas.fenkart-6oiIBCxl0MMjD8S081q9vkEOCMrvLtNR@public.gmane.org>
+Cc: linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, balajitk-l0cyMroinI0@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ezequiel Garcia <ezequiel.garcia@free-electrons.com>
-Cc: Balaji T K <balajitk@ti.com>, a-bindra@ti.com, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-omap@vger.kernel.org, balbi@ti.com, nm@ti.com
 
---MAH+hnPXVZWQ5cD/
+--===============6403174971933409514==
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="+jhVVhN62yS6hEJ8"
+Content-Disposition: inline
+
+--+jhVVhN62yS6hEJ8
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Sun, Jul 07, 2013 at 05:13:10PM -0300, Ezequiel Garcia wrote:
-> Hi guys,
->=20
-> On Fri, Jun 28, 2013 at 09:27:20PM +0530, Balaji T K wrote:
-> > On Friday 28 June 2013 06:04 PM, a-bindra@ti.com wrote:
-> > > From: Amarinder Bindra <a-bindra@ti.com>
-> > >
-> > > OMAP's hs_mmc driver is also used for OMAP5 MMC controller operation.
-> > > Considering that the device tree entries are already there for this,
-> > > allow the driver to be built when only OMAP5 is enabled.
-> > > This allows MMC root filesystems to be available in "OMAP5 only"
-> > > configurations.
-> > >
-> > > Signed-off-by: Amarinder Bindra <a-bindra@ti.com>
-> > > Acked-by: Felipe Balbi <balbi@ti.com>
-> > > Acked-by: Nishanth Menon <nm@ti.com>
-> >=20
-> > Looks good to me,
-> > Acked-by: Balaji T K <balajitk@ti.com>
-> >=20
->=20
-> I came across this same issue while trying MMC patches on AM3xx,
-> which is nor OMAP3 neither OMAP4.
->=20
-> Now, looking at the driver I don't see any OMAP-specific bits
-> (welcome to the multiplatform world ;-) so I think we can just
-> remove the 'depends' line. Something like this:
+Hi,
 
-frankly speaking, this driver should be deleted and all users should be
-moved to sdhci. OMAP's HSMMC controller is compatible with SDHCI except
-for a couple quirks which can be easily worked around.
+On Fri, Apr 12, 2013 at 02:38:25PM +0200, Andreas Fenkart wrote:
+> Without functional clock the omap_hsmmc module can't forward
+> SDIO IRQs to the system. This patch reconfigures dat1 line as a
+> gpio while the fclk is off. It uses regulare SDIO IRQ detection of
+> the module, while fclk is present.
+>=20
+> Reviewed-by: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
+> Signed-off-by: Andreas Fenkart <andreas.fenkart-6oiIBCxl0MMjD8S081q9vkEOCMrvLtNR@public.gmane.org>
+
+looks like this patch needs to be split. In part one you add the normal
+CIRQ handling and enable_sdio_irq() callback while in part two you add
+the workaround handling for the missing swakeup line.
+
+Another thing, just to make things clearer, I would require a quirk flag
+(not only passing the gpio number) to enable the remuxing of the DAT1
+line. And yet another thing, it should be clear in the commit log that
+for devices which actually provide the swakeup line, setting the wakeup
+bit for the DAT lines should be sufficient. That would mean OMAP devices
+need to provide the 'idle' pinctrl state.
 
 --=20
 balbi
 
---MAH+hnPXVZWQ5cD/
+--+jhVVhN62yS6hEJ8
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.12 (GNU/Linux)
 
-iQIcBAEBAgAGBQJR2m4+AAoJEIaOsuA1yqREloAP/jgQSPMd/lrZ6mSJhzUVn57X
-kW2xmC4u33ZmB3NN7dNGO4THgPQPUl1QriNB2dFknsJZgPCdfip6ZCLSxdt7dDQJ
-ImZipI7zzoKzaIhYcUA1jH621KRICRBwaig41HuN8Xl3K6+hBUql1PS4Z7oSVl44
-qD3fhZ9J/kCwz9cWs0M0gahDZFSv09PW8IRmWo62IOf89Ci63zbVyDSfjvvnJhYr
-LOMOYfHKdJnELrwrwEpiu3Rm8hCr7da+xcbQF8oIruuMBjg6OGEGih2pKJBB6FRm
-oHwTONvfh4vq2jJXKymukRqFRNHtfST83MWiNqoxH/xA7EfHlg1SogowjzgYrJi4
-WK8ZHTWRb7yX76KBdM9lqkjEfwtHVZz9anlkClgWTsyh/p0yD+MyDhfcbZbv5vRw
-itLW9FmoMd3xzELOOgAME32qga3eBjbxBcXl1gxGWQ6rvAKEnBKUpSNivikz1/Fh
-jF+iABryuut7ot0L7KU0M1F9reAVke0pByEI4ZKLWNRlHCdEJibnzM86zC0vzvBG
-+VikLNW7NqyZobviq7UfoF+HUroA3VcAqnVeMpdD27tgVApQXT7Ot0McMaerzKxd
-ktN7/Od+4NEo6BegOyb48BwHrNU7uof1INrWwP54UsGgEY2xYBANrJp+26UuBu2m
-LqFFodyoRqnBPX24cEr6
-=aoIV
+iQIcBAEBAgAGBQJR2m9DAAoJEIaOsuA1yqRE6GgP/j2i5mLXmEBqvSAPo9gOosNj
+xDlP/zokcNJknGdNSYGVsTZW6GizRXFyujfvOUxcTTLsyo/ghfZoJ1p6yWLKiV3b
+Utxf1QLZEupGWz5tR3E0urMRbdpGRMPxUD/ixy7qYSG7KJu90keAsMyGXr52QK3j
+JWEsdFVjDYb/nFhX/gGMneN/KSXyQotGuDU3me6rClH8d1ELle8s+2F19X+tLKbS
+ViRGN1bXHPzpgWvHitXQYsJTnh64Gh2ELqK1DgRiUam6PLtHmFAlp4Pc3PFRCtjs
+VyM70HdyXVHUtcVV7AZU5Ye0B2XzVJaFkuzb5Ad+sHT8D0BFQ+2hbwL3EWuAzSJ7
+xy/+J1S/JCwlyaGg9G2w1SFfPuJdd4IkrQGYON9TOgxQw5/r/x20QXgiuWS0QHCT
+0PfpfCKx1RWROHb3pMs7cT1/E3bP5cBTa8nyQauI9E0G4LZTBefTMF4aXuaSaXdS
+yj76/+C39CwUzDZs6G3HLB56zJTe94yMrI+XEH7p9d/Zn7UCagWZh7vrL5ZeRWhv
+61KYMzqUdIj8gfnDw18KLsObaWmDkm8KG/1GG46TYByIClNFvBbwaPgBXgVoEMsI
+axq08dsLzuGpBwU1xNxOPWvOYKgW1LyrBIVsKlB8MSGHPp01QrRQrdLw4ZfIOneC
+MgDoBg4m+zdSpSu+jOID
+=RpSF
 -----END PGP SIGNATURE-----
 
---MAH+hnPXVZWQ5cD/--
+--+jhVVhN62yS6hEJ8--
+
+--===============6403174971933409514==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+devicetree-discuss mailing list
+devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+https://lists.ozlabs.org/listinfo/devicetree-discuss
+
+--===============6403174971933409514==--
