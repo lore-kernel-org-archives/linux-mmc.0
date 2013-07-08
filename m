@@ -1,97 +1,62 @@
-From: Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v2 1/3] mmc: omap_hsmmc: Enable SDIO IRQ using a GPIO in
- idle mode.
-Date: Mon, 8 Jul 2013 10:50:27 +0300
-Message-ID: <20130708075006.GE16635@arwen.pp.htv.fi>
-References: <1365770307-19859-1-git-send-email-andreas.fenkart@streamunlimited.com>
- <1365770307-19859-2-git-send-email-andreas.fenkart@streamunlimited.com>
-Reply-To: balbi-l0cyMroinI0@public.gmane.org
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [PATCH] dmaengine: shdma: fix a build failure on platforms with
+ no DMA support
+Date: Mon, 8 Jul 2013 00:52:16 -0700
+Message-ID: <CAOesGMjp4Ort89z8ZhQT9xAPNyG-0uU-kz9G2f_GzRFF-Y2MxA@mail.gmail.com>
+References: <Pine.LNX.4.64.1305301650290.29171@axis700.grange>
+	<51A77CF1.7040105@ti.com>
+	<20130531024438.GB32564@verge.net.au>
+	<CAGa+x8413povhYWx+BSj=TdzQDAuYFXmjF4A2kXvQt+=n+380w@mail.gmail.com>
+	<Pine.LNX.4.64.1306192125480.12502@axis700.grange>
+	<20130705045350.GA10947@intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============6403174971933409514=="
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <1365770307-19859-2-git-send-email-andreas.fenkart-6oiIBCxl0MMjD8S081q9vkEOCMrvLtNR@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: Andreas Fenkart <andreas.fenkart-6oiIBCxl0MMjD8S081q9vkEOCMrvLtNR@public.gmane.org>
-Cc: linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, balajitk-l0cyMroinI0@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <20130705045350.GA10947@intel.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Vinod Koul <vinod.koul@intel.com>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Kevin Hilman <khilman@linaro.org>, Simon Horman <horms@verge.net.au>, Dan Murphy <dmurphy@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
---===============6403174971933409514==
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="+jhVVhN62yS6hEJ8"
-Content-Disposition: inline
+On Thu, Jul 4, 2013 at 9:53 PM, Vinod Koul <vinod.koul@intel.com> wrote:
+> On Wed, Jun 19, 2013 at 09:32:18PM +0200, Guennadi Liakhovetski wrote:
+>> Hi Vinod
+>>
+>> On Wed, 19 Jun 2013, Kevin Hilman wrote:
+>>
+>> > On Thu, May 30, 2013 at 7:44 PM, Simon Horman <horms@verge.net.au> wrote:
+>> >
+>> > [...]
+>> >
+>> > > thanks for this. I will wait for a refresh (as we discussed earlier today).
+>> > > Can I confirm that this is a fix for v3.10? If so, could ou note
+>> > > that when you post your revised patch?
+>> >
+>> > Any progress on this patch?
+>> >
+>> > The SH-mobile defconfigs are still all failing in linux-next.
+>>
+>> In
+>>
+>> https://patchwork.kernel.org/patch/2640061/
+> And you havent CC maintainers on this patch, so I dont have it!
+>>
+>> I proposed a simple immediate fix for this problem. Arnd at the same time
+>> developed an alternative solution:
+>>
+>> https://patchwork.kernel.org/patch/2644121/
+>> https://patchwork.kernel.org/patch/2644111/
+> Reading these patches I agree with Arnd that client drivers should not depend on
+> dma slave drivers. Existing issue need to be fixed
+>
+> Arnd, Have you merged these changes?
 
---+jhVVhN62yS6hEJ8
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Looks like we now have breakage in linux-next for this again (new
+breakage due to the header file move being applied by you on Friday,
+Vinod? Are you planning on sending the code in for 3.11? If not, you
+shouldn't apply patches right now).
 
-Hi,
+bockw_defconfig, kota2_defconfig, marzen_defconfig and others are
+currently broken.
 
-On Fri, Apr 12, 2013 at 02:38:25PM +0200, Andreas Fenkart wrote:
-> Without functional clock the omap_hsmmc module can't forward
-> SDIO IRQs to the system. This patch reconfigures dat1 line as a
-> gpio while the fclk is off. It uses regulare SDIO IRQ detection of
-> the module, while fclk is present.
->=20
-> Reviewed-by: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
-> Signed-off-by: Andreas Fenkart <andreas.fenkart-6oiIBCxl0MMjD8S081q9vkEOCMrvLtNR@public.gmane.org>
-
-looks like this patch needs to be split. In part one you add the normal
-CIRQ handling and enable_sdio_irq() callback while in part two you add
-the workaround handling for the missing swakeup line.
-
-Another thing, just to make things clearer, I would require a quirk flag
-(not only passing the gpio number) to enable the remuxing of the DAT1
-line. And yet another thing, it should be clear in the commit log that
-for devices which actually provide the swakeup line, setting the wakeup
-bit for the DAT lines should be sufficient. That would mean OMAP devices
-need to provide the 'idle' pinctrl state.
-
---=20
-balbi
-
---+jhVVhN62yS6hEJ8
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJR2m9DAAoJEIaOsuA1yqRE6GgP/j2i5mLXmEBqvSAPo9gOosNj
-xDlP/zokcNJknGdNSYGVsTZW6GizRXFyujfvOUxcTTLsyo/ghfZoJ1p6yWLKiV3b
-Utxf1QLZEupGWz5tR3E0urMRbdpGRMPxUD/ixy7qYSG7KJu90keAsMyGXr52QK3j
-JWEsdFVjDYb/nFhX/gGMneN/KSXyQotGuDU3me6rClH8d1ELle8s+2F19X+tLKbS
-ViRGN1bXHPzpgWvHitXQYsJTnh64Gh2ELqK1DgRiUam6PLtHmFAlp4Pc3PFRCtjs
-VyM70HdyXVHUtcVV7AZU5Ye0B2XzVJaFkuzb5Ad+sHT8D0BFQ+2hbwL3EWuAzSJ7
-xy/+J1S/JCwlyaGg9G2w1SFfPuJdd4IkrQGYON9TOgxQw5/r/x20QXgiuWS0QHCT
-0PfpfCKx1RWROHb3pMs7cT1/E3bP5cBTa8nyQauI9E0G4LZTBefTMF4aXuaSaXdS
-yj76/+C39CwUzDZs6G3HLB56zJTe94yMrI+XEH7p9d/Zn7UCagWZh7vrL5ZeRWhv
-61KYMzqUdIj8gfnDw18KLsObaWmDkm8KG/1GG46TYByIClNFvBbwaPgBXgVoEMsI
-axq08dsLzuGpBwU1xNxOPWvOYKgW1LyrBIVsKlB8MSGHPp01QrRQrdLw4ZfIOneC
-MgDoBg4m+zdSpSu+jOID
-=RpSF
------END PGP SIGNATURE-----
-
---+jhVVhN62yS6hEJ8--
-
---===============6403174971933409514==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-devicetree-discuss mailing list
-devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-https://lists.ozlabs.org/listinfo/devicetree-discuss
-
---===============6403174971933409514==--
+-Olof
