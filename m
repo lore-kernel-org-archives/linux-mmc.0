@@ -1,76 +1,78 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH 3/4] mmc: esdhc: Add quirks to support T4240 board
-Date: Mon, 8 Jul 2013 10:12:24 +0800
-Message-ID: <1373249545-23928-3-git-send-email-Haijun.Zhang@freescale.com>
-References: <1373249545-23928-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Sachin Kamat <sachin.kamat@linaro.org>
+Subject: Re: [PATCH] ARM: pxa: propagate errors from regulator_enable() to pxamci
+Date: Mon, 8 Jul 2013 10:05:48 +0530
+Message-ID: <CAK9yfHzVtQR1=cCiE3Se0FUUF68GEK5UeYE2gtOLZpaXaODVvQ@mail.gmail.com>
+References: <201307051751.20729.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db9lp0253.outbound.messaging.microsoft.com ([213.199.154.253]:47682
-	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753357Ab3GHDCL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Jul 2013 23:02:11 -0400
-In-Reply-To: <1373249545-23928-1-git-send-email-Haijun.Zhang@freescale.com>
+Received: from mail-ob0-f181.google.com ([209.85.214.181]:49463 "EHLO
+	mail-ob0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750793Ab3GHEft (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jul 2013 00:35:49 -0400
+Received: by mail-ob0-f181.google.com with SMTP id 16so4943130obc.26
+        for <linux-mmc@vger.kernel.org>; Sun, 07 Jul 2013 21:35:48 -0700 (PDT)
+In-Reply-To: <201307051751.20729.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
-Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, AFLEMING@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Mike Rapoport <mike@compulab.co.il>, Paul Gortmaker <paul.gortmaker@windriver.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
-On T4240 board controllers has an unusable ADMA engine, so use SDMA instead.
-Also 3.0v is support on T4240 board even if the capacity detailed only 1.8v
-support. Without this quirk SD card will declare voltage not support and
+On 5 July 2013 21:21, Arnd Bergmann <arnd@arndb.de> wrote:
+> The em_x270_mci_setpower() and em_x270_usb_hub_init() functions
+> call regulator_enable(), which may return an error that must
+> be checked.
+>
+> This changes the em_x270_usb_hub_init() function to bail out
+> if it fails, and changes the pxamci_platform_data->setpower
+> callback so that the a failed em_x270_mci_setpower call
+> can be propagated by the pxamci driver into the mmc core.
+>
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> Cc: Mike Rapoport <mike@compulab.co.il>
+> Cc: Paul Gortmaker <paul.gortmaker@windriver.com>
+> Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>
+> Cc: Haojian Zhuang <haojian.zhuang@gmail.com>
+> Cc: Chris Ball <cjb@laptop.org>
+>
+> diff --git a/arch/arm/mach-pxa/em-x270.c b/arch/arm/mach-pxa/em-x270.c
+> index f6726bb..f8062e4 100644
+> --- a/arch/arm/mach-pxa/em-x270.c
+> +++ b/arch/arm/mach-pxa/em-x270.c
+> @@ -477,16 +477,24 @@ static int em_x270_usb_hub_init(void)
+>         /* USB Hub power-on and reset */
+>         gpio_direction_output(usb_hub_reset, 1);
+>         gpio_direction_output(GPIO9_USB_VBUS_EN, 0);
+> -       regulator_enable(em_x270_usb_ldo);
+> +       err = regulator_enable(em_x270_usb_ldo);
+> +       if (err)
+> +               goto err_free_rst_gpio;
+> +
+>         gpio_set_value(usb_hub_reset, 0);
+>         gpio_set_value(usb_hub_reset, 1);
+>         regulator_disable(em_x270_usb_ldo);
+> -       regulator_enable(em_x270_usb_ldo);
+> +       if (err)
+> +               goto err_free_rst_gpio;
 
-Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
----
- drivers/mmc/host/sdhci-pltfm.c | 5 +++++
- drivers/mmc/host/sdhci.c       | 3 +++
- include/linux/mmc/sdhci.h      | 2 ++
- 3 files changed, 10 insertions(+)
+Shouldn't this check be after the below (regulator_enable) statement?
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index e2065a4..02edb3d 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -92,6 +92,11 @@ void sdhci_get_of_property(struct platform_device *pdev)
- 		if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
- 			host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
- 
-+		if (of_device_is_compatible(np, "fsl,t4240-esdhc")) {
-+			host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
-+			host->quirks2 |= SDHCI_QUIRK2_CIRCUIT_SUPPORT_VS30;
-+		}
-+
- 		if (of_device_is_compatible(np, "fsl,p2020-esdhc") ||
- 		    of_device_is_compatible(np, "fsl,p1010-esdhc") ||
- 		    of_device_is_compatible(np, "fsl,t4240-esdhc") ||
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a78bd4f..de7fa81 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2797,6 +2797,9 @@ int sdhci_add_host(struct sdhci_host *host)
- 			host->caps1 :
- 			sdhci_readl(host, SDHCI_CAPABILITIES_1);
- 
-+	if (host->quirks2 & SDHCI_QUIRK2_CIRCUIT_SUPPORT_VS30)
-+		caps[0] = caps[0] | SDHCI_CAN_VDD_300;
-+
- 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
- 		host->flags |= SDHCI_USE_SDMA;
- 	else if (!(caps[0] & SDHCI_CAN_DO_SDMA))
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index e3c6a74..dc608d7 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -98,6 +98,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON		(1<<4)
- /* Controller has a non-standard host control register */
- #define SDHCI_QUIRK2_BROKEN_HOST_CONTROL		(1<<5)
-+/* The host support VS300 even if the capacity detailed not */
-+#define SDHCI_QUIRK2_CIRCUIT_SUPPORT_VS30		(1<<6)
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
+> +
+> +       err = regulator_enable(em_x270_usb_ldo);
+>         gpio_set_value(usb_hub_reset, 0);
+>         gpio_set_value(GPIO9_USB_VBUS_EN, 1);
+>
+>         return 0;
+>
+> +err_free_rst_gpio:
+> +       gpio_free(usb_hub_reset);
+>  err_free_vbus_gpio:
+>         gpio_free(GPIO9_USB_VBUS_EN);
+>  err_free_usb_ldo:
+> @@ -592,7 +600,7 @@ err_irq:
+>         return err;
+>  }
+
 -- 
-1.8.0
-
-
+With warm regards,
+Sachin
