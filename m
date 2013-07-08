@@ -1,53 +1,65 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH] mmc: tmio: fix compiler warning
-Date: Mon, 8 Jul 2013 11:38:09 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1307081135170.19819@axis700.grange>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:65468 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751067Ab3GHJiS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jul 2013 05:38:18 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: [PATCH v3 0/7] ARM: shmobile: DMAC, MMCIF and SDHI for H2 and APE6
+Date: Mon,  8 Jul 2013 17:54:39 +0200
+Message-ID: <1373298887-9877-1-git-send-email-g.liakhovetski@gmx.de>
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-sh@vger.kernel.org
+Cc: Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+
+These patches add support for DMA, MMCIF and SDHI controllers to non-DT 
+APE6EVM and Lager board implementations, and MMCIF and SDHI DT templates 
+for APE6 and H2 SoCs.
+
+A note concerning SDHI OF compatibility strings. Patch 5 of this series 
+adds OF compatibility strings for sh73a0, r8a73a4, r8a7790 to make it 
+possible to use correct SoC names instead of a supposedly compatible one. 
+Patches 6 and 7 then use those names in SDHI DT templates on r8a73a4 and 
+r8a7790. This doesn't directly impose a commit order dependency, since 
+those templates are added in a disabled state. Therefore these patches 
+can be pushed upstream via different git-trees. Only when specific boards 
+enable SDHI interfaces in their .dts files, only then will it be 
+important to have both respective patches in the kernel: the drivers/mmc 
+patch and the respective SoC .dtsi patch. It is therefore proposed to 
+push these patches to 3.12 and to begin enabling SDHI interfaces in 
+respective board .dtsi files from 3.13. Also note, that sh73a0 is already 
+using "renesas,r8a7740-sdhi" compatibility in its .dtsi. After patch 5 
+this still will work, but it also will become possible to use a more 
+obvious "renesas,sh73a0-sdhi" OF compatibility string.
+
+Developed and tested on top of Simon's renesas.git next snapshot of
+08.07.2013.
+
+Cc: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+Cc: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>
 
-This patch fixes a compiler warning:
+Guennadi Liakhovetski (7):
+  ARM: shmobile: r8a73a4: add a DMAC platform device and clock for it
+  ARM: shmobile: ape6evm: add MMCIF support
+  ARM: shmobile: ape6evm: add SDHI interfaces
+  ARM: shmobile: lager: add MMCIF support
+  mmc: SDHI: add DT compatibility strings for further SoCs
+  ARM: shmobile: r8a73a4: add MMCIF and SDHI DT templates
+  ARM: shmobile: r8a7790: add MMCIF and SDHI DT templates
 
-drivers/mmc/host/tmio_mmc_pio.c: In function 'tmio_mmc_power_on':
-drivers/mmc/host/tmio_mmc_pio.c:798:19: warning: ignoring return value of 
-'regulator_enable', declared with attribute warn_unused_result [-Wunused-result]
+ arch/arm/boot/dts/r8a73a4.dtsi                |   45 ++++++++++++
+ arch/arm/boot/dts/r8a7790.dtsi                |   54 +++++++++++++++
+ arch/arm/mach-shmobile/board-ape6evm.c        |   81 ++++++++++++++++++++++
+ arch/arm/mach-shmobile/board-lager.c          |   31 +++++++++
+ arch/arm/mach-shmobile/clock-r8a73a4.c        |    4 +-
+ arch/arm/mach-shmobile/include/mach/r8a73a4.h |    9 +++
+ arch/arm/mach-shmobile/setup-r8a73a4.c        |   90 +++++++++++++++++++++++++
+ drivers/mmc/host/sh_mobile_sdhi.c             |    3 +
+ 8 files changed, 316 insertions(+), 1 deletions(-)
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
----
-
-This warning is present in "next" and in 3.10, but since it doesn't affect 
-functionality, I don't think it's needed for stable.
-
- drivers/mmc/host/tmio_mmc_pio.c |    6 +++++-
- 1 files changed, 5 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index f294708..84e1888 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -795,9 +795,13 @@ static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned short vdd)
- 	 * omap_hsmmc.c driver does.
- 	 */
- 	if (!IS_ERR(mmc->supply.vqmmc) && !ret) {
--		regulator_enable(mmc->supply.vqmmc);
-+		ret = regulator_enable(mmc->supply.vqmmc);
- 		udelay(200);
- 	}
-+
-+	if (ret < 0)
-+		dev_dbg(&host->pdev->dev, "Regulators failed to power up: %d\n",
-+			ret);
- }
- 
- static void tmio_mmc_power_off(struct tmio_mmc_host *host)
 -- 
 1.7.2.5
 
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
