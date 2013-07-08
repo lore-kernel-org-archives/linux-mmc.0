@@ -1,73 +1,86 @@
-From: "Minjian Wu (minjianwu)" <minjianwu@micron.com>
-Subject: RE: eMMC bus test command failure
-Date: Mon, 8 Jul 2013 07:28:24 +0000
-Message-ID: <59606D77376AA44BB2E289FE5BA55046751E243B@NTXXIAMBX01.xacn.micron.com>
-References: <59606D77376AA44BB2E289FE5BA55046751CFA84@NTXXIAMBX01.xacn.micron.com>
- <87ppv7r4hk.fsf@octavius.laptop.org>
+From: Felipe Balbi <balbi@ti.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: use for OMAP5 as well
+Date: Mon, 8 Jul 2013 10:46:06 +0300
+Message-ID: <20130708074606.GD16635@arwen.pp.htv.fi>
+References: <1372422894-23729-1-git-send-email-a-bindra@ti.com>
+ <51CDB260.8080108@ti.com>
+ <20130707201309.GA5429@localhost>
+Reply-To: <balbi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="MAH+hnPXVZWQ5cD/"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout.micron.com ([137.201.242.129]:59026 "EHLO
-	mailout.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751962Ab3GHH2c convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jul 2013 03:28:32 -0400
-In-Reply-To: <87ppv7r4hk.fsf@octavius.laptop.org>
-Content-Language: en-US
+Received: from comal.ext.ti.com ([198.47.26.152]:41701 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751000Ab3GHHqW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 8 Jul 2013 03:46:22 -0400
+Content-Disposition: inline
+In-Reply-To: <20130707201309.GA5429@localhost>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ezequiel Garcia <ezequiel.garcia@free-electrons.com>
+Cc: Balaji T K <balajitk@ti.com>, a-bindra@ti.com, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-omap@vger.kernel.org, balbi@ti.com, nm@ti.com
 
-Hi Chris,
-	Sorry for the late response. Below is the patch based on Linux 3.8.4. Please help to check it. Thanks!
+--MAH+hnPXVZWQ5cD/
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/linux-3.8.4/drivers/mmc/core/mmc_ops.c b/linux-3.8_new/drivers/mmc/
-index 6d8f701..a3ca845 100644
---- a/linux-3.8.4/drivers/mmc/core/mmc_ops.c
-+++ b/linux-3.8_new/drivers/mmc/core/mmc_ops.c
-@@ -560,6 +560,7 @@ mmc_send_bus_test(struct mmc_card *card, struct mmc_host *ho
-        else
-                data.flags = MMC_DATA_WRITE;
- 
-+       mmc_set_data_timeout(&data,card);
-        data.sg = &sg;
-        data.sg_len = 1;
-        sg_init_one(&sg, data_buf, len);
+On Sun, Jul 07, 2013 at 05:13:10PM -0300, Ezequiel Garcia wrote:
+> Hi guys,
+>=20
+> On Fri, Jun 28, 2013 at 09:27:20PM +0530, Balaji T K wrote:
+> > On Friday 28 June 2013 06:04 PM, a-bindra@ti.com wrote:
+> > > From: Amarinder Bindra <a-bindra@ti.com>
+> > >
+> > > OMAP's hs_mmc driver is also used for OMAP5 MMC controller operation.
+> > > Considering that the device tree entries are already there for this,
+> > > allow the driver to be built when only OMAP5 is enabled.
+> > > This allows MMC root filesystems to be available in "OMAP5 only"
+> > > configurations.
+> > >
+> > > Signed-off-by: Amarinder Bindra <a-bindra@ti.com>
+> > > Acked-by: Felipe Balbi <balbi@ti.com>
+> > > Acked-by: Nishanth Menon <nm@ti.com>
+> >=20
+> > Looks good to me,
+> > Acked-by: Balaji T K <balajitk@ti.com>
+> >=20
+>=20
+> I came across this same issue while trying MMC patches on AM3xx,
+> which is nor OMAP3 neither OMAP4.
+>=20
+> Now, looking at the driver I don't see any OMAP-specific bits
+> (welcome to the multiplatform world ;-) so I think we can just
+> remove the 'depends' line. Something like this:
 
+frankly speaking, this driver should be deleted and all users should be
+moved to sdhci. OMAP's HSMMC controller is compatible with SDHCI except
+for a couple quirks which can be easily worked around.
 
+--=20
+balbi
 
+--MAH+hnPXVZWQ5cD/
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
------Original Message-----
-From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chris Ball
-Sent: Thursday, June 27, 2013 10:52 PM
-To: Minjian Wu (minjianwu)
-Cc: linux-mmc@vger.kernel.org
-Subject: Re: eMMC bus test command failure
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
 
-Hi Minjian,
+iQIcBAEBAgAGBQJR2m4+AAoJEIaOsuA1yqREloAP/jgQSPMd/lrZ6mSJhzUVn57X
+kW2xmC4u33ZmB3NN7dNGO4THgPQPUl1QriNB2dFknsJZgPCdfip6ZCLSxdt7dDQJ
+ImZipI7zzoKzaIhYcUA1jH621KRICRBwaig41HuN8Xl3K6+hBUql1PS4Z7oSVl44
+qD3fhZ9J/kCwz9cWs0M0gahDZFSv09PW8IRmWo62IOf89Ci63zbVyDSfjvvnJhYr
+LOMOYfHKdJnELrwrwEpiu3Rm8hCr7da+xcbQF8oIruuMBjg6OGEGih2pKJBB6FRm
+oHwTONvfh4vq2jJXKymukRqFRNHtfST83MWiNqoxH/xA7EfHlg1SogowjzgYrJi4
+WK8ZHTWRb7yX76KBdM9lqkjEfwtHVZz9anlkClgWTsyh/p0yD+MyDhfcbZbv5vRw
+itLW9FmoMd3xzELOOgAME32qga3eBjbxBcXl1gxGWQ6rvAKEnBKUpSNivikz1/Fh
+jF+iABryuut7ot0L7KU0M1F9reAVke0pByEI4ZKLWNRlHCdEJibnzM86zC0vzvBG
++VikLNW7NqyZobviq7UfoF+HUroA3VcAqnVeMpdD27tgVApQXT7Ot0McMaerzKxd
+ktN7/Od+4NEo6BegOyb48BwHrNU7uof1INrWwP54UsGgEY2xYBANrJp+26UuBu2m
+LqFFodyoRqnBPX24cEr6
+=aoIV
+-----END PGP SIGNATURE-----
 
-On Sun, May 26 2013, Minjian Wu (minjianwu) wrote:
-> Hi,
->
-> 	I got one issue on Linux V3.7 as following.
->          > mmc0: switch to bus width 1 ddr 0 failed 
->          > mmc0: error -110 whilst initialising MMC card
->
->          After debugging and checking the source codes, we find that
-> in mmc_send_bus_test function, there is no data timeout
-> setting(mmc_set_data_timeout). After we add the timeout setting
-> function, this issue is fixed, could you help confirm it? Thank you!
-
-Please could you submit the patch you used?
-
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
---
-To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--MAH+hnPXVZWQ5cD/--
