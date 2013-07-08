@@ -1,62 +1,58 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: Re: [PATCH] dmaengine: shdma: fix a build failure on platforms with
- no DMA support
-Date: Mon, 8 Jul 2013 00:52:16 -0700
-Message-ID: <CAOesGMjp4Ort89z8ZhQT9xAPNyG-0uU-kz9G2f_GzRFF-Y2MxA@mail.gmail.com>
-References: <Pine.LNX.4.64.1305301650290.29171@axis700.grange>
-	<51A77CF1.7040105@ti.com>
-	<20130531024438.GB32564@verge.net.au>
-	<CAGa+x8413povhYWx+BSj=TdzQDAuYFXmjF4A2kXvQt+=n+380w@mail.gmail.com>
-	<Pine.LNX.4.64.1306192125480.12502@axis700.grange>
-	<20130705045350.GA10947@intel.com>
+From: Felipe Balbi <balbi@ti.com>
+Subject: Re: [PATCH v2 2/3] mmc: omap_hsmmc: debugfs entries for GPIO mode.
+Date: Mon, 8 Jul 2013 10:51:47 +0300
+Message-ID: <20130708075139.GF16635@arwen.pp.htv.fi>
+References: <1365770307-19859-1-git-send-email-andreas.fenkart@streamunlimited.com>
+ <1365770307-19859-3-git-send-email-andreas.fenkart@streamunlimited.com>
+Reply-To: <balbi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20130705045350.GA10947@intel.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Vinod Koul <vinod.koul@intel.com>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Kevin Hilman <khilman@linaro.org>, Simon Horman <horms@verge.net.au>, Dan Murphy <dmurphy@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="AqCDj3hiknadvR6t"
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1365770307-19859-3-git-send-email-andreas.fenkart@streamunlimited.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Andreas Fenkart <andreas.fenkart@streamunlimited.com>
+Cc: tony@atomide.com, cjb@laptop.org, arnd@arndb.de, balajitk@ti.com, grant.likely@secretlab.ca, linux-mmc@vger.kernel.org, rob@landley.net, linux-omap@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, zonque@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jul 4, 2013 at 9:53 PM, Vinod Koul <vinod.koul@intel.com> wrote:
-> On Wed, Jun 19, 2013 at 09:32:18PM +0200, Guennadi Liakhovetski wrote:
->> Hi Vinod
->>
->> On Wed, 19 Jun 2013, Kevin Hilman wrote:
->>
->> > On Thu, May 30, 2013 at 7:44 PM, Simon Horman <horms@verge.net.au> wrote:
->> >
->> > [...]
->> >
->> > > thanks for this. I will wait for a refresh (as we discussed earlier today).
->> > > Can I confirm that this is a fix for v3.10? If so, could ou note
->> > > that when you post your revised patch?
->> >
->> > Any progress on this patch?
->> >
->> > The SH-mobile defconfigs are still all failing in linux-next.
->>
->> In
->>
->> https://patchwork.kernel.org/patch/2640061/
-> And you havent CC maintainers on this patch, so I dont have it!
->>
->> I proposed a simple immediate fix for this problem. Arnd at the same time
->> developed an alternative solution:
->>
->> https://patchwork.kernel.org/patch/2644121/
->> https://patchwork.kernel.org/patch/2644111/
-> Reading these patches I agree with Arnd that client drivers should not depend on
-> dma slave drivers. Existing issue need to be fixed
->
-> Arnd, Have you merged these changes?
+--AqCDj3hiknadvR6t
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Looks like we now have breakage in linux-next for this again (new
-breakage due to the header file move being applied by you on Friday,
-Vinod? Are you planning on sending the code in for 3.11? If not, you
-shouldn't apply patches right now).
+On Fri, Apr 12, 2013 at 02:38:26PM +0200, Andreas Fenkart wrote:
+> Signed-off-by: Andreas Fenkart <andreas.fenkart@streamunlimited.com>
 
-bockw_defconfig, kota2_defconfig, marzen_defconfig and others are
-currently broken.
+-ENODESCRIPTION ??
 
--Olof
+Also, looking at the patch, I wonder if it really needs to be applied in
+mainline. Seems like you only needed it to count how many times it went
+into suspend and we already have generic pm_runtime counters for that.
+
+--=20
+balbi
+
+--AqCDj3hiknadvR6t
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIcBAEBAgAGBQJR2m+TAAoJEIaOsuA1yqREUUcP/150X+RggbXWTC7OGwzkriYq
+xz0lNpe0iXlqtRem/R4PFjhC+1BgZic31Gn9rI8dIFbY9jkqBouPwCc53aI6Qk0a
+pCVyp0/YCGfCGmSkkw8gpZNLWj7mHkQzzkBVzxD5axR1wUkRiPtzV+KE1Q3B1JcD
+/wpbwMNfSB+xc2Ppv687T/VJkwPuH+iIfYtufC+tuDBSwFy1g8D5HwLy8cKG5MjC
+rstwXSb7Uc22ZwAq2iUIblv8OqmhEBLnkSg+YSbsrueLoOY0fFe33/GVs8jzK+Au
+GKi4hPiEzwkcSFJX1MeGNCnjmnKx4em1xeeJ2NwunWBBDmrFWl8uWiFc52hqxHM0
+f4+0p3hJps2i/vXckXpLZSwwtiKFmtJEQemb1I3l9gfoYhC9Yv07qRNzK8a3WRwo
+DQJIyAKvH19p2A8qITY1p9pgmnBx44a76ATxorPhf4iiBxkiPPIfSf1cdCW2LHJo
+iPCyzOCMRh8CJm0tcJr1rE+R7aRPWJcE9SvDtNLZJV2dsX0fkUf5ncD37Mi9/RZs
+iy6XZdSr9WZwEADzm+/F24p9hL5FgP9+2qVO9xKbCjjx4UqwyP2J6ChwhOfLGtTi
+VOL28NrvPn7Ky8oeIwgjH4y+gglmQiayReYTAqj+EGiRjet5N3LewJI20/HN1hHH
+UNSczbkNGnFCXdMqdxTL
+=gZjX
+-----END PGP SIGNATURE-----
+
+--AqCDj3hiknadvR6t--
