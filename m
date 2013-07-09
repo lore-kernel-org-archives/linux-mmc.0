@@ -1,188 +1,68 @@
-From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Subject: [PATCH 2/8] sdhci: Turn tuning timeout timer into delayed work
-Date: Tue, 9 Jul 2013 17:44:06 +0200
-Message-ID: <1373384652-21958-3-git-send-email-jeremie.samuel.ext@parrot.com>
+From: Philip Rakity <prakity@nvidia.com>
+Subject: Re: [PATCH 0/8] sdhci: Move real work out of an atomic context
+Date: Tue, 9 Jul 2013 17:52:55 +0200
+Message-ID: <D49C0E13-CD9B-451A-8CFB-B28404AA6A8E@nvidia.com>
 References: <1373384652-21958-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co202.xi-lite.net ([149.6.83.202]:45915 "EHLO co202.xi-lite.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751939Ab3GIPop (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 9 Jul 2013 11:44:45 -0400
+Received: from hqemgate03.nvidia.com ([216.228.121.140]:16018 "EHLO
+	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751026Ab3GIPxB convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jul 2013 11:53:01 -0400
 In-Reply-To: <1373384652-21958-1-git-send-email-jeremie.samuel.ext@parrot.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, matthieu.castet@parrot.com, gregor.boirie@parrot.com, Jeremie Samuel <jeremie.samuel.ext@parrot.com>
+To: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "matthieu.castet@parrot.com" <matthieu.castet@parrot.com>, "gregor.boirie@parrot.com" <gregor.boirie@parrot.com>
 
-Same as previous patch
 
-Signed-off-by: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
----
- drivers/mmc/host/sdhci.c  |   46 ++++++++++++++++++++++-----------------------
- include/linux/mmc/sdhci.h |    2 +-
- 2 files changed, 24 insertions(+), 24 deletions(-)
+On Jul 9, 2013, at 4:44 PM, Jeremie Samuel <jeremie.samuel.ext@parrot.com> wrote:
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 3fede60..06ad0bb 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -53,7 +53,7 @@ static void sdhci_finish_data(struct sdhci_host *);
- static void sdhci_send_command(struct sdhci_host *, struct mmc_command *);
- static void sdhci_finish_command(struct sdhci_host *);
- static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
--static void sdhci_tuning_timer(unsigned long data);
-+static void sdhci_tuning_timeout_work(struct work_struct *wk);
- static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
- 
- #ifdef CONFIG_PM_RUNTIME
-@@ -268,7 +268,7 @@ static void sdhci_reinit(struct sdhci_host *host)
- 	if (host->flags & SDHCI_USING_RETUNING_TIMER) {
- 		host->flags &= ~SDHCI_USING_RETUNING_TIMER;
- 
--		del_timer_sync(&host->tuning_timer);
-+		flush_delayed_work(&host->tuning_timeout_work);
- 		host->flags &= ~SDHCI_NEEDS_RETUNING;
- 		host->mmc->max_blk_count =
- 			(host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
-@@ -1380,7 +1380,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 		present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
- 		/*
--		 * Check if the re-tuning timer has already expired and there
-+		 * Check if the re-tuning timeout has already expired and there
- 		 * is no on-going data transfer. If so, we need to execute
- 		 * tuning procedure before sending command.
- 		 */
-@@ -1994,32 +1994,33 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- out:
- 	/*
- 	 * If this is the very first time we are here, we start the retuning
--	 * timer. Since only during the first time, SDHCI_NEEDS_RETUNING
--	 * flag won't be set, we check this condition before actually starting
--	 * the timer.
-+	 * timeout workqueue. Since only during the first time,
-+	 * SDHCI_NEEDS_RETUNING flag won't be set, we check this condition
-+	 * before actually starting the timeout worqueue.
- 	 */
- 	if (!(host->flags & SDHCI_NEEDS_RETUNING) && host->tuning_count &&
- 	    (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
- 		host->flags |= SDHCI_USING_RETUNING_TIMER;
--		mod_timer(&host->tuning_timer, jiffies +
-+		schedule_delayed_work(&host->tuning_timeout_work,
- 			host->tuning_count * HZ);
- 		/* Tuning mode 1 limits the maximum data length to 4MB */
- 		mmc->max_blk_count = (4 * 1024 * 1024) / mmc->max_blk_size;
- 	} else {
- 		host->flags &= ~SDHCI_NEEDS_RETUNING;
--		/* Reload the new initial value for timer */
-+		/* Reload the new initial value for timeout workqueue */
- 		if (host->tuning_mode == SDHCI_TUNING_MODE_1)
--			mod_timer(&host->tuning_timer, jiffies +
-+			schedule_delayed_work(&host->tuning_timeout_work,
- 				host->tuning_count * HZ);
- 	}
- 
- 	/*
- 	 * In case tuning fails, host controllers which support re-tuning can
--	 * try tuning again at a later time, when the re-tuning timer expires.
-+	 * try tuning again at a later time, when the re-tuning timeout
-+	 * workqueue expires.
- 	 * So for these controllers, we return 0. Since there might be other
- 	 * controllers who do not have this capability, we return error for
- 	 * them. SDHCI_USING_RETUNING_TIMER means the host is currently using
--	 * a retuning timer to do the retuning for the card.
-+	 * a retuning timeout workqueue to do the retuning for the card.
- 	 */
- 	if (err && (host->flags & SDHCI_USING_RETUNING_TIMER))
- 		err = 0;
-@@ -2204,12 +2205,12 @@ static void sdhci_timeout_work(struct work_struct *wk)
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
--static void sdhci_tuning_timer(unsigned long data)
-+static void sdhci_tuning_timeout_work(struct work_struct *wk)
- {
- 	struct sdhci_host *host;
- 	unsigned long flags;
- 
--	host = (struct sdhci_host *)data;
-+	host = container_of(wk, struct sdhci_host, tuning_timeout_work.work);
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -2556,7 +2557,7 @@ int sdhci_suspend_host(struct sdhci_host *host)
- 
- 	/* Disable tuning since we are suspending */
- 	if (host->flags & SDHCI_USING_RETUNING_TIMER) {
--		del_timer_sync(&host->tuning_timer);
-+		flush_delayed_work(&host->tuning_timeout_work);
- 		host->flags &= ~SDHCI_NEEDS_RETUNING;
- 	}
- 
-@@ -2564,7 +2565,7 @@ int sdhci_suspend_host(struct sdhci_host *host)
- 	if (ret) {
- 		if (host->flags & SDHCI_USING_RETUNING_TIMER) {
- 			host->flags |= SDHCI_NEEDS_RETUNING;
--			mod_timer(&host->tuning_timer, jiffies +
-+			schedule_delayed_work(&host->tuning_timeout_work,
- 					host->tuning_count * HZ);
- 		}
- 
-@@ -2668,7 +2669,7 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
- 
- 	/* Disable tuning since we are suspending */
- 	if (host->flags & SDHCI_USING_RETUNING_TIMER) {
--		del_timer_sync(&host->tuning_timer);
-+		flush_delayed_work(&host->tuning_timeout_work);
- 		host->flags &= ~SDHCI_NEEDS_RETUNING;
- 	}
- 
-@@ -3026,13 +3027,13 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (caps[1] & SDHCI_DRIVER_TYPE_D)
- 		mmc->caps |= MMC_CAP_DRIVER_TYPE_D;
- 
--	/* Initial value for re-tuning timer count */
-+	/* Initial value for re-tuning timeout count */
- 	host->tuning_count = (caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
- 			      SDHCI_RETUNING_TIMER_COUNT_SHIFT;
- 
- 	/*
--	 * In case Re-tuning Timer is not disabled, the actual value of
--	 * re-tuning timer will be 2 ^ (n - 1).
-+	 * In case Re-tuning Timeout is not disabled, the actual value of
-+	 * re-tuning timeout will be 2 ^ (n - 1).
- 	 */
- 	if (host->tuning_count)
- 		host->tuning_count = 1 << (host->tuning_count - 1);
-@@ -3208,10 +3209,9 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (host->version >= SDHCI_SPEC_300) {
- 		init_waitqueue_head(&host->buf_ready_int);
- 
--		/* Initialize re-tuning timer */
--		init_timer(&host->tuning_timer);
--		host->tuning_timer.data = (unsigned long)host;
--		host->tuning_timer.function = sdhci_tuning_timer;
-+		/* Initialize re-tuning timeout work */
-+		INIT_DELAYED_WORK(&host->tuning_timeout_work,
-+					sdhci_tuning_timeout_work);
- 	}
- 
- 	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 30ed613..33efb73 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -179,7 +179,7 @@ struct sdhci_host {
- 	unsigned int		tuning_count;	/* Timer count for re-tuning */
- 	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
- #define SDHCI_TUNING_MODE_1	0
--	struct timer_list	tuning_timer;	/* Timer for tuning */
-+	struct delayed_work	tuning_timeout_work;	/* Work for tuning timeouts */
- 
- 	unsigned long private[0] ____cacheline_aligned;
- };
--- 
-1.7.10.4
+> Hi all,
+> 
+> Currently the sdhci driver does everything in the atomic context.
+> And what is worse, PIO transfers are made from the IRQ handler.
+> 
+> Some patches were already submitted to solve this issue. But there were
+> rejected because they involved new issues.
+> 
+> This set of patches is an evolution of an old patch from Anton Vorontsov.
+> I tried to fix all the problems involved by the patches. I tested it for
+> several time now with SD cards and SDIO.
+> 
+> So, this patch set reworks sdhci code to avoid atomic context,
+> almost completely.
+> 
+> Thanks,
+> 
+
+Running DDR50, SDR104 or HS200 what is the performance impact ?
+
+
+> Jeremie Samuel
+> 
+> Jeremie Samuel (8):
+>  sdhci: Turn timeout timer into delayed work
+>  sdhci: Turn tuning timeout timer into delayed work
+>  sdhci: Use work structs instead of tasklets
+>  sdhci: Use threaded IRQ handler
+>  sdhci: Delay led blinking
+>  sdhci: Turn host->lock into a mutex
+>  sdhci: Get rid of mdelay()s where it is safe and makes sense
+>  sdhci: Use jiffies instead of a timeout counter
+> 
+> drivers/mmc/host/sdhci.c  |  327 ++++++++++++++++++++++-----------------------
+> include/linux/mmc/sdhci.h |   13 +-
+> 2 files changed, 168 insertions(+), 172 deletions(-)
+> 
+> -- 
+> 1.7.10.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
