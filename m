@@ -1,132 +1,231 @@
 From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Subject: [PATCH 8/8] sdhci: Use jiffies instead of a timeout counter
-Date: Tue, 9 Jul 2013 17:44:12 +0200
-Message-ID: <1373384652-21958-9-git-send-email-jeremie.samuel.ext@parrot.com>
+Subject: [PATCH 3/8] sdhci: Use work structs instead of tasklets
+Date: Tue, 9 Jul 2013 17:44:07 +0200
+Message-ID: <1373384652-21958-4-git-send-email-jeremie.samuel.ext@parrot.com>
 References: <1373384652-21958-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co202.xi-lite.net ([149.6.83.202]:45932 "EHLO co202.xi-lite.net"
+Received: from co202.xi-lite.net ([149.6.83.202]:45918 "EHLO co202.xi-lite.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752030Ab3GIPor (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 9 Jul 2013 11:44:47 -0400
+	id S1751722Ab3GIPop (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 9 Jul 2013 11:44:45 -0400
 In-Reply-To: <1373384652-21958-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
 Cc: linux-mmc@vger.kernel.org, matthieu.castet@parrot.com, gregor.boirie@parrot.com, Jeremie Samuel <jeremie.samuel.ext@parrot.com>, Anton Vorontsov <avorontsov@mvista.com>
 
-Just a cosmetic change, should not affect functionality.
+The driver can happily live without an atomic context and tasklets,
+so turn the tasklets into the work structs.
+
+Tasklets handlers still grab irqsave spinlocks, but we'll deal
+with it in a separate patch.
 
 Patch based on: http://thread.gmane.org/gmane.linux.kernel.mmc/2579.
 
 Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
 Signed-off-by: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
 ---
- drivers/mmc/host/sdhci.c |   22 +++++++++-------------
- 1 file changed, 9 insertions(+), 13 deletions(-)
+ drivers/mmc/host/sdhci.c  |   55 +++++++++++++++++++++------------------------
+ include/linux/mmc/sdhci.h |    4 ++--
+ 2 files changed, 27 insertions(+), 32 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index cabbe29..b261555 100644
+index 06ad0bb..ab635d5 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -210,17 +210,16 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
- 	}
+@@ -979,7 +979,7 @@ static void sdhci_finish_data(struct sdhci_host *host)
  
- 	/* Wait max 100 ms */
--	timeout = 100;
-+	timeout = jiffies + msecs_to_jiffies(100);
+ 		sdhci_send_command(host, data->stop);
+ 	} else
+-		tasklet_schedule(&host->finish_tasklet);
++		schedule_work(&host->finish_work);
+ }
  
- 	/* hw clears the bit when it's done */
- 	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
--		if (timeout == 0) {
-+		if (time_after(jiffies, timeout)) {
- 			pr_err("%s: Reset 0x%x never completed.\n",
- 				mmc_hostname(host->mmc), (int)mask);
- 			sdhci_dumpregs(host);
- 			return;
- 		}
--		timeout--;
- 		msleep(1);
- 	}
- 
-@@ -996,7 +995,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 	WARN_ON(host->cmd);
- 
- 	/* Wait max 10 ms */
--	timeout = 10;
-+	timeout = jiffies + msecs_to_jiffies(10);
- 
- 	mask = SDHCI_CMD_INHIBIT;
- 	if ((cmd->data != NULL) || (cmd->flags & MMC_RSP_BUSY))
-@@ -1008,7 +1007,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 		mask &= ~SDHCI_DATA_INHIBIT;
- 
- 	while (sdhci_readl(host, SDHCI_PRESENT_STATE) & mask) {
--		if (timeout == 0) {
-+		if (time_after(jiffies, timeout)) {
- 			pr_err("%s: Controller never released "
+ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+@@ -1008,7 +1008,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
  				"inhibit bit(s).\n", mmc_hostname(host->mmc));
  			sdhci_dumpregs(host);
-@@ -1016,7 +1015,6 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 			schedule_work(&host->finish_work);
+ 			cmd->error = -EIO;
+-			tasklet_schedule(&host->finish_tasklet);
++			schedule_work(&host->finish_work);
  			return;
  		}
--		timeout--;
- 		mdelay(1);
+ 		timeout--;
+@@ -1029,7 +1029,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 		pr_err("%s: Unsupported response type!\n",
+ 			mmc_hostname(host->mmc));
+ 		cmd->error = -EINVAL;
+-		tasklet_schedule(&host->finish_tasklet);
++		schedule_work(&host->finish_work);
+ 		return;
  	}
  
-@@ -1228,16 +1226,15 @@ clock_set:
- 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+@@ -1090,7 +1090,7 @@ static void sdhci_finish_command(struct sdhci_host *host)
+ 			sdhci_finish_data(host);
  
- 	/* Wait max 20 ms */
--	timeout = 20;
-+	timeout = jiffies + msecs_to_jiffies(20);
- 	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
- 		& SDHCI_CLOCK_INT_STABLE)) {
--		if (timeout == 0) {
-+		if (time_after(jiffies, timeout)) {
- 			pr_err("%s: Internal clock never "
- 				"stabilised.\n", mmc_hostname(host->mmc));
- 			sdhci_dumpregs(host);
- 			return;
- 		}
--		timeout--;
- 		msleep(1);
+ 		if (!host->cmd->data)
+-			tasklet_schedule(&host->finish_tasklet);
++			schedule_work(&host->finish_work);
+ 
+ 		host->cmd = NULL;
  	}
+@@ -1374,7 +1374,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
  
-@@ -1894,12 +1891,12 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	 * Issue CMD19 repeatedly till Execute Tuning is set to 0 or the number
- 	 * of loops reaches 40 times or a timeout of 150ms occurs.
- 	 */
--	timeout = 150;
-+	timeout = jiffies + msecs_to_jiffies(150);
- 	do {
- 		struct mmc_command cmd = {0};
- 		struct mmc_request mrq = {NULL};
- 
--		if (!tuning_loop_counter && !timeout)
-+		if (!tuning_loop_counter && time_after(jiffies, timeout))
- 			break;
- 
- 		cmd.opcode = opcode;
-@@ -1970,7 +1967,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 
- 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 		tuning_loop_counter--;
--		timeout--;
- 		msleep(1);
- 	} while (ctrl & SDHCI_CTRL_EXEC_TUNING);
- 
-@@ -1978,7 +1974,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	 * The Host Driver has exhausted the maximum number of loops allowed,
- 	 * so use fixed sampling frequency.
- 	 */
--	if (!tuning_loop_counter || !timeout) {
-+	if (!tuning_loop_counter || time_after(jiffies, timeout)) {
- 		ctrl &= ~SDHCI_CTRL_TUNED_CLK;
- 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
+ 		host->mrq->cmd->error = -ENOMEDIUM;
+-		tasklet_schedule(&host->finish_tasklet);
++		schedule_work(&host->finish_work);
  	} else {
+ 		u32 present_state;
+ 
+@@ -2081,7 +2081,7 @@ static void sdhci_card_event(struct mmc_host *mmc)
+ 		sdhci_reset(host, SDHCI_RESET_DATA);
+ 
+ 		host->mrq->cmd->error = -ENOMEDIUM;
+-		tasklet_schedule(&host->finish_tasklet);
++		schedule_work(&host->finish_work);
+ 	}
+ 
+ 	spin_unlock_irqrestore(&host->lock, flags);
+@@ -2106,29 +2106,30 @@ static const struct mmc_host_ops sdhci_ops = {
+  *                                                                           *
+ \*****************************************************************************/
+ 
+-static void sdhci_tasklet_card(unsigned long param)
++static void sdhci_card_detect_work(struct work_struct *wk)
+ {
+-	struct sdhci_host *host = (struct sdhci_host*)param;
++	struct sdhci_host *host = container_of(wk, struct sdhci_host,
++						   card_detect_work);
+ 
+ 	sdhci_card_event(host->mmc);
+ 
+ 	mmc_detect_change(host->mmc, msecs_to_jiffies(200));
+ }
+ 
+-static void sdhci_tasklet_finish(unsigned long param)
++static void sdhci_finish_work(struct work_struct *wk)
+ {
+ 	struct sdhci_host *host;
+ 	unsigned long flags;
+ 	struct mmc_request *mrq;
+ 
+-	host = (struct sdhci_host*)param;
++	host = container_of(wk, struct sdhci_host, finish_work);
+ 
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+-        /*
+-         * If this tasklet gets rescheduled while running, it will
+-         * be run again afterwards but without any active request.
+-         */
++	/*
++	 * If this work gets rescheduled while running, it will
++	 * be run again afterwards but without any active request.
++	 */
+ 	if (!host->mrq) {
+ 		spin_unlock_irqrestore(&host->lock, flags);
+ 		return;
+@@ -2197,7 +2198,7 @@ static void sdhci_timeout_work(struct work_struct *wk)
+ 			else
+ 				host->mrq->cmd->error = -ETIMEDOUT;
+ 
+-			tasklet_schedule(&host->finish_tasklet);
++			schedule_work(&host->finish_work);
+ 		}
+ 	}
+ 
+@@ -2244,7 +2245,7 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
+ 		host->cmd->error = -EILSEQ;
+ 
+ 	if (host->cmd->error) {
+-		tasklet_schedule(&host->finish_tasklet);
++		schedule_work(&host->finish_work);
+ 		return;
+ 	}
+ 
+@@ -2453,7 +2454,7 @@ again:
+ 		sdhci_writel(host, intmask & (SDHCI_INT_CARD_INSERT |
+ 			     SDHCI_INT_CARD_REMOVE), SDHCI_INT_STATUS);
+ 		intmask &= ~(SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE);
+-		tasklet_schedule(&host->card_tasklet);
++		schedule_work(&host->card_detect_work);
+ 	}
+ 
+ 	if (intmask & SDHCI_INT_CMD_MASK) {
+@@ -3197,12 +3198,10 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	mmc->max_blk_count = (host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
+ 
+ 	/*
+-	 * Init tasklets.
++	 * Init work structs.
+ 	 */
+-	tasklet_init(&host->card_tasklet,
+-		sdhci_tasklet_card, (unsigned long)host);
+-	tasklet_init(&host->finish_tasklet,
+-		sdhci_tasklet_finish, (unsigned long)host);
++	INIT_WORK(&host->card_detect_work, sdhci_card_detect_work);
++	INIT_WORK(&host->finish_work, sdhci_finish_work);
+ 
+ 	INIT_DELAYED_WORK(&host->timeout_work, sdhci_timeout_work);
+ 
+@@ -3219,7 +3218,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (ret) {
+ 		pr_err("%s: Failed to request IRQ %d: %d\n",
+ 		       mmc_hostname(mmc), host->irq, ret);
+-		goto untasklet;
++		return ret;
+ 	}
+ 
+ 	sdhci_init(host, 0);
+@@ -3263,10 +3262,6 @@ reset:
+ 	sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
+ 	free_irq(host->irq, host);
+ #endif
+-untasklet:
+-	tasklet_kill(&host->card_tasklet);
+-	tasklet_kill(&host->finish_tasklet);
+-
+ 	return ret;
+ }
+ 
+@@ -3286,7 +3281,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 				" transfer!\n", mmc_hostname(host->mmc));
+ 
+ 			host->mrq->cmd->error = -ENOMEDIUM;
+-			tasklet_schedule(&host->finish_tasklet);
++			schedule_work(&host->finish_work);
+ 		}
+ 
+ 		spin_unlock_irqrestore(&host->lock, flags);
+@@ -3308,8 +3303,8 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 
+ 	flush_delayed_work(&host->timeout_work);
+ 
+-	tasklet_kill(&host->card_tasklet);
+-	tasklet_kill(&host->finish_tasklet);
++	flush_work(&host->card_detect_work);
++	flush_work(&host->finish_work);
+ 
+ 	if (host->vmmc) {
+ 		regulator_disable(host->vmmc);
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 33efb73..0cc97ce 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -161,8 +161,8 @@ struct sdhci_host {
+ 	dma_addr_t adma_addr;	/* Mapped ADMA descr. table */
+ 	dma_addr_t align_addr;	/* Mapped bounce buffer */
+ 
+-	struct tasklet_struct card_tasklet;	/* Tasklet structures */
+-	struct tasklet_struct finish_tasklet;
++	struct work_struct	card_detect_work;
++	struct work_struct	finish_work;
+ 
+ 	struct delayed_work	timeout_work;	/* Work for timeouts */
+ 
 -- 
 1.7.10.4
 
