@@ -1,40 +1,37 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH 5/5] mmc: dw_mmc: Set timeout to max upon resume
-Date: Tue,  9 Jul 2013 10:31:11 -0700
-Message-ID: <1373391071-6312-6-git-send-email-dianders@chromium.org>
+Subject: Re: [PATCH 3/5] mmc: dw_mmc: Add exynos resume callback to clear WAKEUP_INT
+Date: Tue, 9 Jul 2013 12:09:42 -0700
+Message-ID: <CAD=FV=XLp_2t83JfUBryaSvqLZr5OHEZeFZDRmQ1T=XA1MRkHg@mail.gmail.com>
 References: <1373391071-6312-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1373391071-6312-1-git-send-email-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
+	<1373391071-6312-4-git-send-email-dianders@chromium.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1373391071-6312-4-git-send-email-dianders@chromium.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Doug Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Doug Anderson <dianders@chromium.org>, Kukjin Kim <kgene.kim@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The TMOUT register is initted to 0xffffffff at probe time but isn't
-initted after suspend/resume.  Add an init of this value.
+Hi,
 
-No problems were observed without this (it will also get initted in
-__dw_mci_start_request if there is data to send), but it makes the
-register dump before and after suspend clean.
+On Tue, Jul 9, 2013 at 10:31 AM, Doug Anderson <dianders@chromium.org> wrote:
+> If the WAKEUP_INT is asserted at wakeup and not cleared, we'll end up
+> looping around forever.
+>
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> ---
+>  drivers/mmc/host/dw_mmc-exynos.c | 23 +++++++++++++++++++++++
+>  1 file changed, 23 insertions(+)
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
- drivers/mmc/host/dw_mmc.c | 3 +++
- 1 file changed, 3 insertions(+)
+Grant just pointed out that the WAKEUP_INT is supposed to only be
+enabled if bits 8, 9, or 10 are 1.  Our driver never sets those so we
+_should_ never get a WAKEUP_INT.  Bits 8-10 are marked as RESERVED on
+the exynos5420 manual, so the current guess is that they're broken on
+that silicon but that sometimes the interrupt fires anyway.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index a0a07df..eedb517 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2494,6 +2494,9 @@ int dw_mci_resume(struct dw_mci *host)
- 	/* Restore the old value at FIFOTH register */
- 	mci_writel(host, FIFOTH, host->fifoth_val);
- 
-+	/* Put in max timeout */
-+	mci_writel(host, TMOUT, 0xFFFFFFFF);
-+
- 	mci_writel(host, RINTSTS, 0xFFFFFFFF);
- 	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
- 		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
--- 
-1.8.3
+In any case, it is still a reasonable thing to clear this interrupt at
+wakeup if it has fired, even if we're on an exynos device without any
+problems.
+
+-Doug
