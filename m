@@ -1,68 +1,70 @@
-From: Philip Rakity <prakity@nvidia.com>
-Subject: Re: [PATCH 0/8] sdhci: Move real work out of an atomic context
-Date: Tue, 9 Jul 2013 17:52:55 +0200
-Message-ID: <D49C0E13-CD9B-451A-8CFB-B28404AA6A8E@nvidia.com>
-References: <1373384652-21958-1-git-send-email-jeremie.samuel.ext@parrot.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Doug Anderson <dianders@chromium.org>
+Subject: [PATCH 1/5] mmc: dw_mmc: Invalidate cache of current_speed after suspend/resume
+Date: Tue,  9 Jul 2013 10:31:07 -0700
+Message-ID: <1373391071-6312-2-git-send-email-dianders@chromium.org>
+References: <1373391071-6312-1-git-send-email-dianders@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate03.nvidia.com ([216.228.121.140]:16018 "EHLO
-	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751026Ab3GIPxB convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jul 2013 11:53:01 -0400
-In-Reply-To: <1373384652-21958-1-git-send-email-jeremie.samuel.ext@parrot.com>
-Content-Language: en-US
+Received: from mail-ve0-f202.google.com ([209.85.128.202]:33907 "EHLO
+	mail-ve0-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751957Ab3GIRbo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jul 2013 13:31:44 -0400
+Received: by mail-ve0-f202.google.com with SMTP id m1so517440ves.3
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Jul 2013 10:31:44 -0700 (PDT)
+In-Reply-To: <1373391071-6312-1-git-send-email-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "matthieu.castet@parrot.com" <matthieu.castet@parrot.com>, "gregor.boirie@parrot.com" <gregor.boirie@parrot.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Doug Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
+The dw_mmc driver keeps a cache of the current slot->clock in order to
+avoid doing a whole lot of work every time set_ios() is called.
+However, after suspend/resume the register values are bogus so we need
+to ensure that the cached value is invalidated.
 
-On Jul 9, 2013, at 4:44 PM, Jeremie Samuel <jeremie.samuel.ext@parrot.com> wrote:
+In many cases we got by without this since the core mmc code fiddles
+with the clock a lot.  If we've got a card present we're probably
+running it at something like 50MHz and the core will temporarily
+switch us to 400kHz after resume.  One case that didn't work (for me)
+is the case of having no card in the slot.  The slot is initted to
+400kHz at boot time.  After suspend/resume the slot thinks it's still
+at 400kHz (due to the cache) so doesn't adjust timing.  When it tries
+to send the command at probe time it just times out and gets left in a
+bad state.
 
-> Hi all,
-> 
-> Currently the sdhci driver does everything in the atomic context.
-> And what is worse, PIO transfers are made from the IRQ handler.
-> 
-> Some patches were already submitted to solve this issue. But there were
-> rejected because they involved new issues.
-> 
-> This set of patches is an evolution of an old patch from Anton Vorontsov.
-> I tried to fix all the problems involved by the patches. I tested it for
-> several time now with SD cards and SDIO.
-> 
-> So, this patch set reworks sdhci code to avoid atomic context,
-> almost completely.
-> 
-> Thanks,
-> 
+Invalidating the current_speed also means that we don't need to call:
+  dw_mci_setup_bus(slot, true);
+...to force an update of the clock in the case when the slot was left
+powered.
 
-Running DDR50, SDR104 or HS200 what is the performance impact ?
+Signed-off-by: Doug Anderson <dianders@chromium.org>
+---
+ drivers/mmc/host/dw_mmc.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
-
-> Jeremie Samuel
-> 
-> Jeremie Samuel (8):
->  sdhci: Turn timeout timer into delayed work
->  sdhci: Turn tuning timeout timer into delayed work
->  sdhci: Use work structs instead of tasklets
->  sdhci: Use threaded IRQ handler
->  sdhci: Delay led blinking
->  sdhci: Turn host->lock into a mutex
->  sdhci: Get rid of mdelay()s where it is safe and makes sense
->  sdhci: Use jiffies instead of a timeout counter
-> 
-> drivers/mmc/host/sdhci.c  |  327 ++++++++++++++++++++++-----------------------
-> include/linux/mmc/sdhci.h |   13 +-
-> 2 files changed, 168 insertions(+), 172 deletions(-)
-> 
-> -- 
-> 1.7.10.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index bc3a1bc..f20273e 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2488,13 +2488,18 @@ int dw_mci_resume(struct dw_mci *host)
+ 		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
+ 	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
+ 
++	/*
++	 * Invalidate the 'current_speed' value since CLKDIV has some up in
++	 * default state and our cache is incorrect.
++	 */
++	host->current_speed = 0xFFFFFFFF;
++
+ 	for (i = 0; i < host->num_slots; i++) {
+ 		struct dw_mci_slot *slot = host->slot[i];
+ 		if (!slot)
+ 			continue;
+ 		if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
+ 			dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
+-			dw_mci_setup_bus(slot, true);
+ 		}
+ 
+ 		ret = mmc_resume_host(host->slot[i]->mmc);
+-- 
+1.8.3
 
