@@ -1,30 +1,50 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH v4 5/7] mmc: SDHI: add DT compatibility strings for
- further SoCs
-Date: Tue, 9 Jul 2013 18:06:00 +0900
-Message-ID: <CANqRtoQY7hwEhN5XMXG5V234aXDFZ_kfei8ZQL+VMKaaxW=0DQ@mail.gmail.com>
-References: <Pine.LNX.4.64.1307090940310.28812@axis700.grange>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH] mmc: TMIO: update Device Tree binding documentation
+Date: Tue, 9 Jul 2013 11:13:22 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1307091110540.28812@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1307090940310.28812@axis700.grange>
 Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: SH-Linux <linux-sh@vger.kernel.org>, Simon Horman <horms@verge.net.au>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+To: linux-sh@vger.kernel.org
+Cc: Simon Horman <horms@verge.net.au>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jul 9, 2013 at 4:43 PM, Guennadi Liakhovetski
-<g.liakhovetski@gmx.de> wrote:
-> Add further OF compatibility strings to the SDHI driver to be able to
-> precisely control driver's behaviour on each of them.
->
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-> ---
->
-> v4:
-> 1. added r8a7778 and r8a7779 per Morimoto-san's request
-> 2. sh* and r8a* entries now sorted alphabetically
+The SDHI mmc-tmio implementation has been updated to cover additional SoC
+types. This patch documents the changes.
 
-This looks good to me, thanks.
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+---
 
-Acked-by: Magnus Damm <damm@opensource.se>
+Now, that the patch "mmc: SDHI: add DT compatibility strings for further 
+SoCs" has been approved, it shall be accompanied by this documentation 
+update.
+
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt |   13 +++++++++----
+ 1 files changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+index df204e1..ec6f5bd 100644
+--- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+@@ -13,8 +13,13 @@ Optional properties:
+ - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
+ 
+ When used with Renesas SDHI hardware, the following compatibility strings
+-configure various model-specific properties:
++configure properties, specific to the respective SoC model:
+ 
+-"renesas,sh7372-sdhi":	(default) compatible with SH7372
+-"renesas,r8a7740-sdhi":	compatible with R8A7740: certain MMC/SD commands have to
+-			wait for the interface to become idle.
++"renesas,shmobile-sdhi":	generic SDHI block
++"renesas,sh7372-sdhi":		SDHI block, used on SH7372 (SH-Mobile AP4)
++"renesas,sh73a0-sdhi":		SDHI block, used on SH73A0 (SH-Mobile AG5)
++"renesas,r8a73a4-sdhi":		SDHI block, used on R8A73A4 (R-Mobile APE6)
++"renesas,r8a7740-sdhi":		SDHI block, used on R8A7740 (R-Mobile A1)
++"renesas,r8a7778-sdhi":		SDHI block, used on R8A7778 (R-Car M1A)
++"renesas,r8a7779-sdhi":		SDHI block, used on R8A7779 (R-Car H1)
++"renesas,r8a7790-sdhi":		SDHI block, used on R8A7790 (R-Car H2)
+-- 
+1.7.2.5
+
