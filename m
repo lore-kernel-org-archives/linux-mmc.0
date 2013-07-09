@@ -1,14 +1,14 @@
 From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Subject: [PATCH 3/8] sdhci: Use work structs instead of tasklets
-Date: Tue, 9 Jul 2013 17:44:07 +0200
-Message-ID: <1373384652-21958-4-git-send-email-jeremie.samuel.ext@parrot.com>
+Subject: [PATCH 1/8] sdhci: Turn timeout timer into delayed work
+Date: Tue, 9 Jul 2013 17:44:05 +0200
+Message-ID: <1373384652-21958-2-git-send-email-jeremie.samuel.ext@parrot.com>
 References: <1373384652-21958-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co202.xi-lite.net ([149.6.83.202]:45918 "EHLO co202.xi-lite.net"
+Received: from co202.xi-lite.net ([149.6.83.202]:45913 "EHLO co202.xi-lite.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751722Ab3GIPop (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	id S1751843Ab3GIPop (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
 	Tue, 9 Jul 2013 11:44:45 -0400
 In-Reply-To: <1373384652-21958-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -16,216 +16,106 @@ List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
 Cc: linux-mmc@vger.kernel.org, matthieu.castet@parrot.com, gregor.boirie@parrot.com, Jeremie Samuel <jeremie.samuel.ext@parrot.com>, Anton Vorontsov <avorontsov@mvista.com>
 
-The driver can happily live without an atomic context and tasklets,
-so turn the tasklets into the work structs.
+There is no need for the timeout handler to run in the atomic
+context, so this patch turns timeout timeout into the delayed
+work.
 
-Tasklets handlers still grab irqsave spinlocks, but we'll deal
-with it in a separate patch.
+Note that the timeout handler still grabs an irqsave spinlock,
+we'll deal with it in a separate patch.
 
-Patch based on: http://thread.gmane.org/gmane.linux.kernel.mmc/2579.
+Patch based on http://thread.gmane.org/gmane.linux.kernel.mmc/2579.
 
 Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
 Signed-off-by: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
 ---
- drivers/mmc/host/sdhci.c  |   55 +++++++++++++++++++++------------------------
- include/linux/mmc/sdhci.h |    4 ++--
- 2 files changed, 27 insertions(+), 32 deletions(-)
+ drivers/mmc/host/sdhci.c  |   13 +++++++------
+ include/linux/mmc/sdhci.h |    3 ++-
+ 2 files changed, 9 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 06ad0bb..ab635d5 100644
+index a78bd4f..3fede60 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -979,7 +979,7 @@ static void sdhci_finish_data(struct sdhci_host *host)
+@@ -13,6 +13,7 @@
+  *     - JMicron (hardware and technical support)
+  */
  
- 		sdhci_send_command(host, data->stop);
- 	} else
--		tasklet_schedule(&host->finish_tasklet);
-+		schedule_work(&host->finish_work);
- }
++#include <linux/workqueue.h>
+ #include <linux/delay.h>
+ #include <linux/highmem.h>
+ #include <linux/io.h>
+@@ -1014,7 +1015,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 		mdelay(1);
+ 	}
  
- static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
-@@ -1008,7 +1008,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 				"inhibit bit(s).\n", mmc_hostname(host->mmc));
- 			sdhci_dumpregs(host);
- 			cmd->error = -EIO;
--			tasklet_schedule(&host->finish_tasklet);
-+			schedule_work(&host->finish_work);
- 			return;
- 		}
- 		timeout--;
-@@ -1029,7 +1029,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 		pr_err("%s: Unsupported response type!\n",
- 			mmc_hostname(host->mmc));
- 		cmd->error = -EINVAL;
--		tasklet_schedule(&host->finish_tasklet);
-+		schedule_work(&host->finish_work);
+-	mod_timer(&host->timer, jiffies + 10 * HZ);
++	schedule_delayed_work(&host->timeout_work, 10 * HZ);
+ 
+ 	host->cmd = cmd;
+ 
+@@ -2132,7 +2133,7 @@ static void sdhci_tasklet_finish(unsigned long param)
  		return;
  	}
  
-@@ -1090,7 +1090,7 @@ static void sdhci_finish_command(struct sdhci_host *host)
- 			sdhci_finish_data(host);
+-	del_timer(&host->timer);
++	cancel_delayed_work(&host->timeout_work);
  
- 		if (!host->cmd->data)
--			tasklet_schedule(&host->finish_tasklet);
-+			schedule_work(&host->finish_work);
+ 	mrq = host->mrq;
  
- 		host->cmd = NULL;
- 	}
-@@ -1374,7 +1374,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
- 		host->mrq->cmd->error = -ENOMEDIUM;
--		tasklet_schedule(&host->finish_tasklet);
-+		schedule_work(&host->finish_work);
- 	} else {
- 		u32 present_state;
- 
-@@ -2081,7 +2081,7 @@ static void sdhci_card_event(struct mmc_host *mmc)
- 		sdhci_reset(host, SDHCI_RESET_DATA);
- 
- 		host->mrq->cmd->error = -ENOMEDIUM;
--		tasklet_schedule(&host->finish_tasklet);
-+		schedule_work(&host->finish_work);
- 	}
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
-@@ -2106,29 +2106,30 @@ static const struct mmc_host_ops sdhci_ops = {
-  *                                                                           *
- \*****************************************************************************/
- 
--static void sdhci_tasklet_card(unsigned long param)
-+static void sdhci_card_detect_work(struct work_struct *wk)
- {
--	struct sdhci_host *host = (struct sdhci_host*)param;
-+	struct sdhci_host *host = container_of(wk, struct sdhci_host,
-+						   card_detect_work);
- 
- 	sdhci_card_event(host->mmc);
- 
- 	mmc_detect_change(host->mmc, msecs_to_jiffies(200));
+@@ -2172,12 +2173,12 @@ static void sdhci_tasklet_finish(unsigned long param)
+ 	sdhci_runtime_pm_put(host);
  }
  
--static void sdhci_tasklet_finish(unsigned long param)
-+static void sdhci_finish_work(struct work_struct *wk)
+-static void sdhci_timeout_timer(unsigned long data)
++static void sdhci_timeout_work(struct work_struct *wk)
  {
  	struct sdhci_host *host;
  	unsigned long flags;
- 	struct mmc_request *mrq;
  
--	host = (struct sdhci_host*)param;
-+	host = container_of(wk, struct sdhci_host, finish_work);
+-	host = (struct sdhci_host*)data;
++	host = container_of(wk, struct sdhci_host, timeout_work.work);
  
  	spin_lock_irqsave(&host->lock, flags);
  
--        /*
--         * If this tasklet gets rescheduled while running, it will
--         * be run again afterwards but without any active request.
--         */
-+	/*
-+	 * If this work gets rescheduled while running, it will
-+	 * be run again afterwards but without any active request.
-+	 */
- 	if (!host->mrq) {
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		return;
-@@ -2197,7 +2198,7 @@ static void sdhci_timeout_work(struct work_struct *wk)
- 			else
- 				host->mrq->cmd->error = -ETIMEDOUT;
+@@ -3202,7 +3203,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	tasklet_init(&host->finish_tasklet,
+ 		sdhci_tasklet_finish, (unsigned long)host);
  
--			tasklet_schedule(&host->finish_tasklet);
-+			schedule_work(&host->finish_work);
- 		}
- 	}
+-	setup_timer(&host->timer, sdhci_timeout_timer, (unsigned long)host);
++	INIT_DELAYED_WORK(&host->timeout_work, sdhci_timeout_work);
  
-@@ -2244,7 +2245,7 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
- 		host->cmd->error = -EILSEQ;
- 
- 	if (host->cmd->error) {
--		tasklet_schedule(&host->finish_tasklet);
-+		schedule_work(&host->finish_work);
- 		return;
- 	}
- 
-@@ -2453,7 +2454,7 @@ again:
- 		sdhci_writel(host, intmask & (SDHCI_INT_CARD_INSERT |
- 			     SDHCI_INT_CARD_REMOVE), SDHCI_INT_STATUS);
- 		intmask &= ~(SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE);
--		tasklet_schedule(&host->card_tasklet);
-+		schedule_work(&host->card_detect_work);
- 	}
- 
- 	if (intmask & SDHCI_INT_CMD_MASK) {
-@@ -3197,12 +3198,10 @@ int sdhci_add_host(struct sdhci_host *host)
- 	mmc->max_blk_count = (host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
- 
- 	/*
--	 * Init tasklets.
-+	 * Init work structs.
- 	 */
--	tasklet_init(&host->card_tasklet,
--		sdhci_tasklet_card, (unsigned long)host);
--	tasklet_init(&host->finish_tasklet,
--		sdhci_tasklet_finish, (unsigned long)host);
-+	INIT_WORK(&host->card_detect_work, sdhci_card_detect_work);
-+	INIT_WORK(&host->finish_work, sdhci_finish_work);
- 
- 	INIT_DELAYED_WORK(&host->timeout_work, sdhci_timeout_work);
- 
-@@ -3219,7 +3218,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (ret) {
- 		pr_err("%s: Failed to request IRQ %d: %d\n",
- 		       mmc_hostname(mmc), host->irq, ret);
--		goto untasklet;
-+		return ret;
- 	}
- 
- 	sdhci_init(host, 0);
-@@ -3263,10 +3262,6 @@ reset:
+ 	if (host->version >= SDHCI_SPEC_300) {
+ 		init_waitqueue_head(&host->buf_ready_int);
+@@ -3305,7 +3306,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
  	sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
  	free_irq(host->irq, host);
- #endif
--untasklet:
--	tasklet_kill(&host->card_tasklet);
--	tasklet_kill(&host->finish_tasklet);
--
- 	return ret;
- }
  
-@@ -3286,7 +3281,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 				" transfer!\n", mmc_hostname(host->mmc));
+-	del_timer_sync(&host->timer);
++	flush_delayed_work(&host->timeout_work);
  
- 			host->mrq->cmd->error = -ENOMEDIUM;
--			tasklet_schedule(&host->finish_tasklet);
-+			schedule_work(&host->finish_work);
- 		}
- 
- 		spin_unlock_irqrestore(&host->lock, flags);
-@@ -3308,8 +3303,8 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 
- 	flush_delayed_work(&host->timeout_work);
- 
--	tasklet_kill(&host->card_tasklet);
--	tasklet_kill(&host->finish_tasklet);
-+	flush_work(&host->card_detect_work);
-+	flush_work(&host->finish_work);
- 
- 	if (host->vmmc) {
- 		regulator_disable(host->vmmc);
+ 	tasklet_kill(&host->card_tasklet);
+ 	tasklet_kill(&host->finish_tasklet);
 diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 33efb73..0cc97ce 100644
+index e3c6a74..30ed613 100644
 --- a/include/linux/mmc/sdhci.h
 +++ b/include/linux/mmc/sdhci.h
-@@ -161,8 +161,8 @@ struct sdhci_host {
- 	dma_addr_t adma_addr;	/* Mapped ADMA descr. table */
- 	dma_addr_t align_addr;	/* Mapped bounce buffer */
+@@ -12,6 +12,7 @@
+ #define LINUX_MMC_SDHCI_H
  
--	struct tasklet_struct card_tasklet;	/* Tasklet structures */
--	struct tasklet_struct finish_tasklet;
-+	struct work_struct	card_detect_work;
-+	struct work_struct	finish_work;
+ #include <linux/scatterlist.h>
++#include <linux/workqueue.h>
+ #include <linux/compiler.h>
+ #include <linux/types.h>
+ #include <linux/io.h>
+@@ -163,7 +164,7 @@ struct sdhci_host {
+ 	struct tasklet_struct card_tasklet;	/* Tasklet structures */
+ 	struct tasklet_struct finish_tasklet;
  
- 	struct delayed_work	timeout_work;	/* Work for timeouts */
+-	struct timer_list timer;	/* Timer for timeouts */
++	struct delayed_work	timeout_work;	/* Work for timeouts */
  
+ 	u32 caps;		/* Alternative CAPABILITY_0 */
+ 	u32 caps1;		/* Alternative CAPABILITY_1 */
 -- 
 1.7.10.4
 
