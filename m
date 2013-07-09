@@ -1,41 +1,67 @@
-From: Scott Wood <scottwood@freescale.com>
-Subject: Re: [PATCH 1/4] powerpc/85xx: Add support for 85xx cpu type
- detection
-Date: Mon, 8 Jul 2013 18:43:06 -0500
-Message-ID: <1373326986.8183.185@snotra>
-References: <1373249545-23928-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Zhang Haijun-B42677 <B42677@freescale.com>
+Subject: =?gb2312?B?tPC4tDogW1BBVENIXSBQb3dlcnBjL3Q0MjQwOiBjaGFuZ2UgdGhlIGNvbXBh?=
+ =?gb2312?Q?tible_flags_for_t4240qds_board?=
+Date: Tue, 9 Jul 2013 06:04:01 +0000
+Message-ID: <99E897753B6F7048BD8CCDB4661D02E1396F57@039-SN2MPN1-021.039d.mgd.msft.net>
+References: <1373267764-6364-1-git-send-email-Haijun.Zhang@freescale.com>,
+ <1373303645.8183.163@snotra>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; delsp=Yes; format=Flowed
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:49630
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753400Ab3GHXnf convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 8 Jul 2013 19:43:35 -0400
-In-Reply-To: <1373249545-23928-1-git-send-email-Haijun.Zhang@freescale.com>
-	(from Haijun.Zhang@freescale.com on Sun Jul  7 21:12:22 2013)
-Content-Disposition: inline
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <1373303645.8183.163@snotra>
+Content-Language: zh-CN
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Wood Scott-B07421 <B07421@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wrobel Heinz-R39252 <r39252@freescale.com>, Fleming Andy-AFLEMING <afleming@freescale.com>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 List-Id: linux-mmc@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, cbouatmailru@gmail.com, cjb@laptop.org, AFLEMING@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhao Chenhui <chenhui.zhao@freescale.com>
 
-On 07/07/2013 09:12:22 PM, Haijun Zhang wrote:
-> Add this file to help detect cpu type in runtime.
-> These macros and inline routines will be more favorable for driver
-> to apply errata and workaround to specified cpu type.
-> 
-> Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
-> Signed-off-by: Zhao Chenhui <chenhui.zhao@freescale.com>
-> ---
->  arch/powerpc/include/asm/mpc85xx.h | 96  
-> ++++++++++++++++++++++++++++++++++++++
->  1 file changed, 96 insertions(+)
->  create mode 100644 arch/powerpc/include/asm/mpc85xx.h
-
-What changed since the last time this was posted?  I don't see any of  
-the feedback addressed that I gave here:
-
-http://patchwork.ozlabs.org/patch/144880/
-
--Scott
+CgpSZWdhcmRzICYgVGhhbmtzCgpIYWlqdW4uCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fCreivP7IyzogV29vZCBTY290dC1CMDc0MjEKt6LLzcqxvOQ6IDIwMTPE6jfU
+wjjI1SAxNzoxNArK1bz+yMs6IFpoYW5nIEhhaWp1bi1CNDI2NzcKs63LzTogbGludXgtbW1jQHZn
+ZXIua2VybmVsLm9yZzsgbGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmc7IGNib3VhdG1haWxy
+dUBnbWFpbC5jb207IGNqYkBsYXB0b3Aub3JnOyBGbGVtaW5nIEFuZHktQUZMRU1JTkc7IFdyb2Jl
+bCBIZWluei1SMzkyNTI7IFpoYW5nIEhhaWp1bi1CNDI2NzcK1vfM4jogUmU6IFtQQVRDSF0gUG93
+ZXJwYy90NDI0MDogY2hhbmdlIHRoZSBjb21wYXRpYmxlIGZsYWdzIGZvciB0NDI0MHFkcyBib2Fy
+ZAoKT24gMDcvMDgvMjAxMyAwMjoxNjowMyBBTSwgSGFpanVuIFpoYW5nIHdyb3RlOgo+IEluIG9y
+ZGVyIHRvIG1ha2UgYSBkaWZmZXJlbmNlIGJldHdlZW4gZGlmZmVyZW50IFQ0MjQwIGJvYXJkLgo+
+IFNwZWNpZnkgVDQyNDBRRFMgYm9hcmQgdGhlIHVuaXF1ZSBjb21wYXRpYmxlIGZsYWdzIGZvciB0
+NDI0MHFkcwo+IGVTREhDIGhvc3QuCj4KPiBTaWduZWQtb2ZmLWJ5OiBIYWlqdW4gWmhhbmcgPEhh
+aWp1bi5aaGFuZ0BmcmVlc2NhbGUuY29tPgo+IC0tLQo+ICBhcmNoL3Bvd2VycGMvYm9vdC9kdHMv
+ZnNsL3Q0MjQwc2ktcG9zdC5kdHNpIHwgMiArLQo+ICAxIGZpbGUgY2hhbmdlZCwgMSBpbnNlcnRp
+b24oKyksIDEgZGVsZXRpb24oLSkKPgo+IGRpZmYgLS1naXQgYS9hcmNoL3Bvd2VycGMvYm9vdC9k
+dHMvZnNsL3Q0MjQwc2ktcG9zdC5kdHNpCj4gYi9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3Q0
+MjQwc2ktcG9zdC5kdHNpCj4gaW5kZXggYmQ2MTFhOS4uMDhiNDdkMCAxMDA2NDQKPiAtLS0gYS9h
+cmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3Q0MjQwc2ktcG9zdC5kdHNpCj4gKysrIGIvYXJjaC9w
+b3dlcnBjL2Jvb3QvZHRzL2ZzbC90NDI0MHNpLXBvc3QuZHRzaQo+IEBAIC0zOTcsNyArMzk3LDcg
+QEAKPgo+ICAvaW5jbHVkZS8gInFvcmlxLWVzZGhjLTAuZHRzaSIKPiAgICAgICBzZGhjQDExNDAw
+MCB7Cj4gLSAgICAgICAgICAgICBjb21wYXRpYmxlID0gImZzbCx0NDI0MC1lc2RoYyIsICJmc2ws
+ZXNkaGMiOwo+ICsgICAgICAgICAgICAgY29tcGF0aWJsZSA9ICJmc2wsdDQyNDBxZHMtZXNkaGMi
+LCAiZnNsLGVzZGhjIjsKPiAgICAgICAgICAgICAgIHNkaGNpLGF1dG8tY21kMTI7Cj4gICAgICAg
+fTsKCk5BQ0suICBUaGlzIG5vZGUgaXMgZGVzY3JpYmluZyB0aGUgc2RoYyBibG9jayBvZiB0aGUg
+dDQyNDAgU29DLiAgV2hhdApib2FyZCB5b3Ugc3RpY2sgaXQgaW4gZG9lc24ndCBjaGFuZ2Ugd2hh
+dCBpdCBpcy4KClBsdXMsIHdoYXQgYWJvdXQgdXNlcnMgd2l0aCBvbGQgZGV2aWNlIHRyZWVzPwoK
+Q3VycmVudGx5IG5vIHVzZXJzIHVzZSB0aGlzIGlwIGJsb2NrIGV4Y2VwdCBlc2RoYyBkcml2ZXIu
+CgpIb3cgYWJvdXQgY2hhbmdlIHRoaXMgaW4gYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL3Q0MjQwcWRz
+LmR0cwoKKysrIGIvYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL3Q0MjQwcWRzLmR0cwpAQCAtMTE3LDYg
+KzExNywxMCBAQAogICAgICAgICAgICAgICAgICAgICAgICB9OwogICAgICAgICAgICAgICAgfTsK
+IAogICAgICAgICAgICAgICBzZGhjQDExNDAwMCB7CiAgICAgICAgICAgICAgICAgICAgICBjb21w
+YXRpYmxlID0gImZzbCx0NDI0MC1lc2RoYyIsICJmc2wsZXNkaGMiOwogICAgICAgICAgICAgICB9
+OwoKICAgICAgICAgICAgICAgaTJjQDExODAwMCB7CiAgICAgICAgICAgIAoKKysrIGIvYXJjaC9w
+b3dlcnBjL2Jvb3QvZHRzL3Q0MjQwcWRzLmR0cwpAQCAtMTE3LDYgKzExNywxMCBAQAogICAgICAg
+ICAgICAgICAgICAgICAgICB9OwogICAgICAgICAgICAgICAgfTsKIAorICAgICAgICAgICAgICAg
+c2RoY0AxMTQwMDAgeworICAgICAgICAgICAgICAgICAgICAgICBjb21wYXRpYmxlID0gImZzbCx0
+NDI0MHFkcy1lc2RoYyIsICJmc2wsZXNkaGMiOworICAgICAgICAgICAgICAgfTsKKwogICAgICAg
+ICAgICAgICAgaTJjQDExODAwMCB7CiAgICAgICAgICAgIAoKLVNjb3R0Cl9fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCkxpbnV4cHBjLWRldiBtYWlsaW5nIGxp
+c3QKTGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmcKaHR0cHM6Ly9saXN0cy5vemxhYnMub3Jn
+L2xpc3RpbmZvL2xpbnV4cHBjLWRldg==
