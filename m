@@ -1,87 +1,38 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH 2/5] mmc: dw_mmc: Add suspend/resume callbacks; disable irq during suspend
-Date: Tue,  9 Jul 2013 10:31:08 -0700
-Message-ID: <1373391071-6312-3-git-send-email-dianders@chromium.org>
-References: <1373391071-6312-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1373391071-6312-1-git-send-email-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Doug Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH 0/5] mmc: dw_mmc: fixes for suspend/resume on exynos
+Date: Tue,  9 Jul 2013 10:31:06 -0700
+Message-ID: <1373391071-6312-1-git-send-email-dianders@chromium.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f202.google.com ([209.85.216.202]:47448 "EHLO
+	mail-qc0-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751998Ab3GIRbo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jul 2013 13:31:44 -0400
+Received: by mail-qc0-f202.google.com with SMTP id z1so520896qcx.1
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Jul 2013 10:31:44 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Doug Anderson <dianders@chromium.org>, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On some platforms (like exynos5420) the dw_mmc controller may be in a
-strange state after we wake up from sleep.  Add callbacks to allow for
-dealing with these quirks.  Prevent interrupts from firing when we're
-suspended since this strange state may cause interrupts to fire.
+This series of patches addresses some suspend/resume problems with
+dw_mmc on exynos platforms.  Since suspend/resume is not fully working
+on ToT Linux (3.10) on exynos5250-snow, this series was tested against
+the current ToT ChromeOS 3.8 tree.  I have confirmed basic booting
+and eMMC / SD card usage (and compiling, honest!) against ToT Linux.
 
-In my case I saw the WAKEUP_INT interrupt firing upon resume and
-needed to add some code to handle this.
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
- drivers/mmc/host/dw_mmc.c | 12 ++++++++++++
- drivers/mmc/host/dw_mmc.h |  4 ++++
- 2 files changed, 16 insertions(+)
+Doug Anderson (5):
+  mmc: dw_mmc: Invalidate cache of current_speed after suspend/resume
+  mmc: dw_mmc: Add suspend/resume callbacks; disable irq during suspend
+  mmc: dw_mmc: Add exynos resume callback to clear WAKEUP_INT
+  mmc: dw_mmc: Always setup the bus after suspend/resume
+  mmc: dw_mmc: Set timeout to max upon resume
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index f20273e..2aaa93f 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2434,6 +2434,7 @@ EXPORT_SYMBOL(dw_mci_remove);
-  */
- int dw_mci_suspend(struct dw_mci *host)
- {
-+	const struct dw_mci_drv_data *drv_data = host->drv_data;
- 	int i, ret = 0;
- 
- 	for (i = 0; i < host->num_slots; i++) {
-@@ -2454,14 +2455,25 @@ int dw_mci_suspend(struct dw_mci *host)
- 	if (host->vmmc)
- 		regulator_disable(host->vmmc);
- 
-+	disable_irq(host->irq);
-+
-+	if (drv_data && drv_data->suspend)
-+		drv_data->suspend(host);
-+
- 	return 0;
- }
- EXPORT_SYMBOL(dw_mci_suspend);
- 
- int dw_mci_resume(struct dw_mci *host)
- {
-+	const struct dw_mci_drv_data *drv_data = host->drv_data;
- 	int i, ret;
- 
-+	if (drv_data && drv_data->resume)
-+		drv_data->resume(host);
-+
-+	enable_irq(host->irq);
-+
- 	if (host->vmmc) {
- 		ret = regulator_enable(host->vmmc);
- 		if (ret) {
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 0b74189..52a3266 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -190,6 +190,8 @@ extern int dw_mci_resume(struct dw_mci *host);
-  * @prepare_command: handle CMD register extensions.
-  * @set_ios: handle bus specific extensions.
-  * @parse_dt: parse implementation specific device tree properties.
-+ * @suspend: called late in the suspend process
-+ * @resume: called early in the resume process
-  *
-  * Provide controller implementation specific extensions. The usage of this
-  * data structure is fully optional and usage of each member in this structure
-@@ -202,5 +204,7 @@ struct dw_mci_drv_data {
- 	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
- 	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
- 	int		(*parse_dt)(struct dw_mci *host);
-+	void		(*suspend)(struct dw_mci *host);
-+	void		(*resume)(struct dw_mci *host);
- };
- #endif /* _DW_MMC_H_ */
+ drivers/mmc/host/dw_mmc-exynos.c | 23 +++++++++++++++++++++++
+ drivers/mmc/host/dw_mmc.c        | 26 ++++++++++++++++++++++----
+ drivers/mmc/host/dw_mmc.h        |  4 ++++
+ 3 files changed, 49 insertions(+), 4 deletions(-)
+
 -- 
 1.8.3
+
