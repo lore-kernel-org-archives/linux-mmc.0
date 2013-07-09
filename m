@@ -1,38 +1,66 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH 0/5] mmc: dw_mmc: fixes for suspend/resume on exynos
-Date: Tue,  9 Jul 2013 10:31:06 -0700
-Message-ID: <1373391071-6312-1-git-send-email-dianders@chromium.org>
+Subject: [PATCH 4/5] mmc: dw_mmc: Always setup the bus after suspend/resume
+Date: Tue,  9 Jul 2013 10:31:10 -0700
+Message-ID: <1373391071-6312-5-git-send-email-dianders@chromium.org>
+References: <1373391071-6312-1-git-send-email-dianders@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f202.google.com ([209.85.216.202]:47448 "EHLO
-	mail-qc0-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751998Ab3GIRbo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jul 2013 13:31:44 -0400
-Received: by mail-qc0-f202.google.com with SMTP id z1so520896qcx.1
+Received: from mail-qe0-f74.google.com ([209.85.128.74]:43116 "EHLO
+	mail-qe0-f74.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752609Ab3GIRbp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jul 2013 13:31:45 -0400
+Received: by mail-qe0-f74.google.com with SMTP id a11so510446qen.5
         for <linux-mmc@vger.kernel.org>; Tue, 09 Jul 2013 10:31:44 -0700 (PDT)
+In-Reply-To: <1373391071-6312-1-git-send-email-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Doug Anderson <dianders@chromium.org>, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Doug Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-This series of patches addresses some suspend/resume problems with
-dw_mmc on exynos platforms.  Since suspend/resume is not fully working
-on ToT Linux (3.10) on exynos5250-snow, this series was tested against
-the current ToT ChromeOS 3.8 tree.  I have confirmed basic booting
-and eMMC / SD card usage (and compiling, honest!) against ToT Linux.
+After suspend/resume all of the dw_mmc registers are reset to
+defaults.  We restore most of them, but specifically don't setup the
+clock registers after resume unless we've got a powered card.  Things
+still work because the core will eventually call set_ios() and we'll
+set things up.
 
+There doesn't seem to be any reason that I can see _not_ to set things
+up after resume.  Restoring this state makes the code easier to reason
+about and should help prevent bugs.  It also allows us to do a
+register dump before and after suspend/resume to confirm that we've
+set things up OK.
 
-Doug Anderson (5):
-  mmc: dw_mmc: Invalidate cache of current_speed after suspend/resume
-  mmc: dw_mmc: Add suspend/resume callbacks; disable irq during suspend
-  mmc: dw_mmc: Add exynos resume callback to clear WAKEUP_INT
-  mmc: dw_mmc: Always setup the bus after suspend/resume
-  mmc: dw_mmc: Set timeout to max upon resume
+I examined the state of the dw_mmc instance before and after suspend
+after this patch.  I had no card inserted in an SD card slot.
 
- drivers/mmc/host/dw_mmc-exynos.c | 23 +++++++++++++++++++++++
- drivers/mmc/host/dw_mmc.c        | 26 ++++++++++++++++++++++----
- drivers/mmc/host/dw_mmc.h        |  4 ++++
- 3 files changed, 49 insertions(+), 4 deletions(-)
+Before this patch, differences were:
+* CLKDIV (0x08)
+* CLKENA (0x10)
+* TMOUT (0x14)
+* CMD (0x2C) - difference is not important
+* CLKSEL (0x9C - exynos specific)
 
+After this patch, only TMOUT was different.  I have a separate patch
+for that.
+
+Signed-off-by: Doug Anderson <dianders@chromium.org>
+---
+ drivers/mmc/host/dw_mmc.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 2aaa93f..a0a07df 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2510,9 +2510,7 @@ int dw_mci_resume(struct dw_mci *host)
+ 		struct dw_mci_slot *slot = host->slot[i];
+ 		if (!slot)
+ 			continue;
+-		if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
+-			dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
+-		}
++		dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
+ 
+ 		ret = mmc_resume_host(host->slot[i]->mmc);
+ 		if (ret < 0)
 -- 
 1.8.3
 
