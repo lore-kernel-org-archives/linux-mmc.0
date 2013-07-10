@@ -1,67 +1,41 @@
-From: <a-bindra@ti.com>
-Subject: [PATCH v2] mmc: omap_hsmmc: use the generic config for omap2plus devices
-Date: Wed, 10 Jul 2013 21:36:24 +0530
-Message-ID: <1373472384-13067-1-git-send-email-a-bindra@ti.com>
-References: <1372422894-23729-1-git-send-email-a-bindra@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 6/6] ARM: shmobile: lager: disable MMCIF Command Completion Signal, add CLK_CTRL2
+Date: Wed, 10 Jul 2013 21:21:17 +0200
+Message-ID: <1373484077-10460-7-git-send-email-g.liakhovetski@gmx.de>
+References: <1373484077-10460-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:60761 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753735Ab3GJQGx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 10 Jul 2013 12:06:53 -0400
-In-Reply-To: <1372422894-23729-1-git-send-email-a-bindra@ti.com>
+Received: from moutng.kundenserver.de ([212.227.126.187]:64561 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754976Ab3GJTVW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Jul 2013 15:21:22 -0400
+In-Reply-To: <1373484077-10460-1-git-send-email-g.liakhovetski@gmx.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>, Amarinder Bindra <a-bindra@ti.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Felipe Balbi <balbi@ti.com>, Nishanth Menon <nm@ti.com>
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, Nobuyuki HIRAI <nobuyuki.hirai.xe@renesas.com>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
 
-From: Amarinder Bindra <a-bindra@ti.com>
+MMCIF on r8a7790 doesn't support Command Completion Signal, but it does
+implement a CE_CLK_CTRL2 register. Platform parameters have to be added to
+account for these features on lager.
 
-OMAP's hs_mmc driver is used for MMC controller operation on many
-omap2plus SoCs (OMAP2430, OMAP3, 4, 5 and AM335x).
-
-Considering that the device tree entries are already present for these,
-allow the driver to be built using the config ARCH_OMAP2PLUS rather
-than individually adding a config for each SoC to enable the
-support.
-
-Use COMPILE_TEST to enable the build for other platforms.
-
-Signed-off-by: Amarinder Bindra <a-bindra@ti.com>
-Cc: Ezequiel Garcia <ezequiel.garcia@free-electrons.com>
-Cc: Felipe Balbi <balbi@ti.com>
-Cc: Nishanth Menon <nm@ti.com>
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
 ---
-Changes in v2:
-- Use the config ARCH_OMAP2PLUS to enable the driver
-- Use COMPILE_TEST
-- Update the commit message
+ arch/arm/mach-shmobile/board-lager.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
 
-v1: https://patchwork.kernel.org/patch/2824632/ 
-
- drivers/mmc/host/Kconfig |    6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 009dabd..48f6fe7 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -254,11 +254,11 @@ config MMC_OMAP
+diff --git a/arch/arm/mach-shmobile/board-lager.c b/arch/arm/mach-shmobile/board-lager.c
+index 3c67b2a..9b3085f 100644
+--- a/arch/arm/mach-shmobile/board-lager.c
++++ b/arch/arm/mach-shmobile/board-lager.c
+@@ -84,6 +84,8 @@ static struct regulator_consumer_supply fixed3v3_power_consumers[] =
+ /* MMCIF */
+ static struct sh_mmcif_plat_data mmcif1_pdata = {
+ 	.caps		= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE,
++	.clk_ctrl2_present = true,
++	.ccs_unsupported = true,
+ };
  
- config MMC_OMAP_HS
- 	tristate "TI OMAP High Speed Multimedia Card Interface support"
--	depends on SOC_OMAP2430 || ARCH_OMAP3 || ARCH_OMAP4
-+	depends on ARCH_OMAP2PLUS || COMPILE_TEST
- 	help
- 	  This selects the TI OMAP High Speed Multimedia card Interface.
--	  If you have an OMAP2430 or OMAP3 board or OMAP4 board with a
--	  Multimedia Card slot, say Y or M here.
-+	  If you have an omap2plus board with a Multimedia Card slot,
-+	  say Y or M here.
- 
- 	  If unsure, say N.
- 
+ static struct resource mmcif1_resources[] = {
 -- 
-1.7.9.5
+1.7.2.5
 
