@@ -1,41 +1,75 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 6/6] ARM: shmobile: lager: disable MMCIF Command Completion Signal, add CLK_CTRL2
-Date: Wed, 10 Jul 2013 21:21:17 +0200
-Message-ID: <1373484077-10460-7-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 2/6] mmc: sh_mmcif: revision-specific CLK_CTRL2 handling
+Date: Wed, 10 Jul 2013 21:21:13 +0200
+Message-ID: <1373484077-10460-3-git-send-email-g.liakhovetski@gmx.de>
 References: <1373484077-10460-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:64561 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754976Ab3GJTVW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Jul 2013 15:21:22 -0400
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1373484077-10460-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, Nobuyuki HIRAI <nobuyuki.hirai.xe@renesas.com>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
 
-MMCIF on r8a7790 doesn't support Command Completion Signal, but it does
-implement a CE_CLK_CTRL2 register. Platform parameters have to be added to
-account for these features on lager.
+Some newer MMCIF IP revisions contain a CE_CLK_CTRL2 register, that has to
+be set for proper operation. Support for this feature is added in a way to
+preserve the current behaviour by default, i.e. when it is not enabled
+in platform data. Patch is based on work by Nobuyuki HIRAI.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
 ---
- arch/arm/mach-shmobile/board-lager.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sh_mmcif.c  |    4 ++++
+ include/linux/mmc/sh_mmcif.h |    2 ++
+ 2 files changed, 6 insertions(+), 0 deletions(-)
 
-diff --git a/arch/arm/mach-shmobile/board-lager.c b/arch/arm/mach-shmobile/board-lager.c
-index 3c67b2a..9b3085f 100644
---- a/arch/arm/mach-shmobile/board-lager.c
-+++ b/arch/arm/mach-shmobile/board-lager.c
-@@ -84,6 +84,8 @@ static struct regulator_consumer_supply fixed3v3_power_consumers[] =
- /* MMCIF */
- static struct sh_mmcif_plat_data mmcif1_pdata = {
- 	.caps		= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE,
-+	.clk_ctrl2_present = true,
-+	.ccs_unsupported = true,
- };
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 7be20c9..dc3ce52 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -246,6 +246,7 @@ struct sh_mmcif_host {
+ 	bool power;
+ 	bool card_present;
+ 	bool ccs_enable;		/* Command Completion Signal support */
++	bool clk_ctrl2_enable;
+ 	struct mutex thread_lock;
  
- static struct resource mmcif1_resources[] = {
+ 	/* DMA support */
+@@ -490,6 +491,8 @@ static void sh_mmcif_sync_reset(struct sh_mmcif_host *host)
+ 	sh_mmcif_writel(host->addr, MMCIF_CE_VERSION, SOFT_RST_OFF);
+ 	if (host->ccs_enable)
+ 		tmp |= SCCSTO_29;
++	if (host->clk_ctrl2_enable)
++		sh_mmcif_writel(host->addr, MMCIF_CE_CLK_CTRL2, 0x0F0F0000);
+ 	sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, tmp |
+ 		SRSPTO_256 | SRBSYTO_29 | SRWDTO_29);
+ 	/* byte swap on */
+@@ -1390,6 +1393,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 	host->addr	= reg;
+ 	host->timeout	= msecs_to_jiffies(1000);
+ 	host->ccs_enable = !pd || !pd->ccs_unsupported;
++	host->clk_ctrl2_enable = pd && pd->clk_ctrl2_present;
+ 
+ 	host->pd = pdev;
+ 
+diff --git a/include/linux/mmc/sh_mmcif.h b/include/linux/mmc/sh_mmcif.h
+index b2a22b6..d4277d9 100644
+--- a/include/linux/mmc/sh_mmcif.h
++++ b/include/linux/mmc/sh_mmcif.h
+@@ -40,6 +40,7 @@ struct sh_mmcif_plat_data {
+ 	unsigned int		slave_id_rx;
+ 	bool			use_cd_gpio : 1;
+ 	bool			ccs_unsupported : 1;
++	bool			clk_ctrl2_present : 1;
+ 	unsigned int		cd_gpio;
+ 	u8			sup_pclk;	/* 1 :SH7757, 0: SH7724/SH7372 */
+ 	unsigned long		caps;
+@@ -63,6 +64,7 @@ struct sh_mmcif_plat_data {
+ #define MMCIF_CE_INT_MASK	0x00000044
+ #define MMCIF_CE_HOST_STS1	0x00000048
+ #define MMCIF_CE_HOST_STS2	0x0000004C
++#define MMCIF_CE_CLK_CTRL2	0x00000070
+ #define MMCIF_CE_VERSION	0x0000007C
+ 
+ /* CE_BUF_ACC */
 -- 
 1.7.2.5
 
