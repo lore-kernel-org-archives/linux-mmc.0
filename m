@@ -1,85 +1,99 @@
-From: Zhang Haijun-B42677 <B42677@freescale.com>
-Subject: =?utf-8?B?UkU6IOetlOWkjTogW1BBVENIXSBQb3dlcnBjL3Q0MjQwOiBjaGFuZ2UgdGhl?=
- =?utf-8?Q?_compatible_flags_for_t4240qds_board?=
-Date: Wed, 10 Jul 2013 03:41:22 +0000
-Message-ID: <99E897753B6F7048BD8CCDB4661D02E139CE27@039-SN2MPN1-021.039d.mgd.msft.net>
-References: <99E897753B6F7048BD8CCDB4661D02E1396F57@039-SN2MPN1-021.039d.mgd.msft.net>
-	(from B42677@freescale.com on Tue Jul  9 01:04:01 2013)
- <1373400262.8183.201@snotra>
+From: Haijun Zhang <Haijun.Zhang@freescale.com>
+Subject: [PATCH 1/4 V2] powerpc/85xx: Add support for 85xx cpu type detection
+Date: Wed, 10 Jul 2013 15:39:01 +0800
+Message-ID: <1373441941-32650-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe005.messaging.microsoft.com ([216.32.180.188]:5386
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754224Ab3GJDjU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jul 2013 23:39:20 -0400
-In-Reply-To: <1373400262.8183.201@snotra>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
+Cc: Zhao Chenhui <chenhui.zhao@freescale.com>, r39252@freescale.com, AFLEMING@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, cbouatmailru@gmail.com, scottwood@freescale.com, cjb@laptop.org, X.Xie@freescale.com
 List-Id: linux-mmc@vger.kernel.org
-To: Wood Scott-B07421 <B07421@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, Fleming Andy-AFLEMING <afleming@freescale.com>, Wrobel Heinz-R39252 <r39252@freescale.com>
 
-DQoNClRoYW5rcy4NCg0KUmVnYXJkcw0KSGFpanVuLg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2Fn
-ZS0tLS0tDQo+IEZyb206IFdvb2QgU2NvdHQtQjA3NDIxDQo+IFNlbnQ6IFdlZG5lc2RheSwgSnVs
-eSAxMCwgMjAxMyA0OjA0IEFNDQo+IFRvOiBaaGFuZyBIYWlqdW4tQjQyNjc3DQo+IENjOiBXb29k
-IFNjb3R0LUIwNzQyMTsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgbGludXhwcGMtDQo+IGRl
-dkBsaXN0cy5vemxhYnMub3JnOyBjYm91YXRtYWlscnVAZ21haWwuY29tOyBjamJAbGFwdG9wLm9y
-ZzsgRmxlbWluZw0KPiBBbmR5LUFGTEVNSU5HOyBXcm9iZWwgSGVpbnotUjM5MjUyDQo+IFN1Ympl
-Y3Q6IFJlOiDnrZTlpI06IFtQQVRDSF0gUG93ZXJwYy90NDI0MDogY2hhbmdlIHRoZSBjb21wYXRp
-YmxlIGZsYWdzIGZvcg0KPiB0NDI0MHFkcyBib2FyZA0KPiANCj4gT24gMDcvMDkvMjAxMyAwMTow
-NDowMSBBTSwgWmhhbmcgSGFpanVuLUI0MjY3NyB3cm90ZToNCj4gPg0KPiA+DQo+ID4gUmVnYXJk
-cyAmIFRoYW5rcw0KPiA+DQo+ID4gSGFpanVuLg0KPiA+DQo+ID4gX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fXw0KPiA+IOWPkeS7tuS6ujogV29vZCBTY290dC1CMDc0MjEN
-Cj4gPiDlj5HpgIHml7bpl7Q6IDIwMTPlubQ35pyIOOaXpSAxNzoxNA0KPiA+IOaUtuS7tuS6ujog
-WmhhbmcgSGFpanVuLUI0MjY3Nw0KPiA+IOaKhOmAgTogbGludXgtbW1jQHZnZXIua2VybmVsLm9y
-ZzsgbGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmc7DQo+ID4gY2JvdWF0bWFpbHJ1QGdtYWls
-LmNvbTsgY2piQGxhcHRvcC5vcmc7IEZsZW1pbmcgQW5keS1BRkxFTUlORzsgV3JvYmVsDQo+ID4g
-SGVpbnotUjM5MjUyOyBaaGFuZyBIYWlqdW4tQjQyNjc3DQo+ID4g5Li76aKYOiBSZTogW1BBVENI
-XSBQb3dlcnBjL3Q0MjQwOiBjaGFuZ2UgdGhlIGNvbXBhdGlibGUgZmxhZ3MgZm9yDQo+ID4gdDQy
-NDBxZHMgYm9hcmQNCj4gPg0KPiA+IE9uIDA3LzA4LzIwMTMgMDI6MTY6MDMgQU0sIEhhaWp1biBa
-aGFuZyB3cm90ZToNCj4gPiA+IEluIG9yZGVyIHRvIG1ha2UgYSBkaWZmZXJlbmNlIGJldHdlZW4g
-ZGlmZmVyZW50IFQ0MjQwIGJvYXJkLg0KPiA+ID4gU3BlY2lmeSBUNDI0MFFEUyBib2FyZCB0aGUg
-dW5pcXVlIGNvbXBhdGlibGUgZmxhZ3MgZm9yIHQ0MjQwcWRzDQo+ID4gPiBlU0RIQyBob3N0Lg0K
-PiA+ID4NCj4gPiA+IFNpZ25lZC1vZmYtYnk6IEhhaWp1biBaaGFuZyA8SGFpanVuLlpoYW5nQGZy
-ZWVzY2FsZS5jb20+DQo+ID4gPiAtLS0NCj4gPiA+ICBhcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNs
-L3Q0MjQwc2ktcG9zdC5kdHNpIHwgMiArLQ0KPiA+ID4gIDEgZmlsZSBjaGFuZ2VkLCAxIGluc2Vy
-dGlvbigrKSwgMSBkZWxldGlvbigtKQ0KPiA+ID4NCj4gPiA+IGRpZmYgLS1naXQgYS9hcmNoL3Bv
-d2VycGMvYm9vdC9kdHMvZnNsL3Q0MjQwc2ktcG9zdC5kdHNpDQo+ID4gPiBiL2FyY2gvcG93ZXJw
-Yy9ib290L2R0cy9mc2wvdDQyNDBzaS1wb3N0LmR0c2kNCj4gPiA+IGluZGV4IGJkNjExYTkuLjA4
-YjQ3ZDAgMTAwNjQ0DQo+ID4gPiAtLS0gYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3Q0MjQw
-c2ktcG9zdC5kdHNpDQo+ID4gPiArKysgYi9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3Q0MjQw
-c2ktcG9zdC5kdHNpDQo+ID4gPiBAQCAtMzk3LDcgKzM5Nyw3IEBADQo+ID4gPg0KPiA+ID4gIC9p
-bmNsdWRlLyAicW9yaXEtZXNkaGMtMC5kdHNpIg0KPiA+ID4gICAgICAgc2RoY0AxMTQwMDAgew0K
-PiA+ID4gLSAgICAgICAgICAgICBjb21wYXRpYmxlID0gImZzbCx0NDI0MC1lc2RoYyIsICJmc2ws
-ZXNkaGMiOw0KPiA+ID4gKyAgICAgICAgICAgICBjb21wYXRpYmxlID0gImZzbCx0NDI0MHFkcy1l
-c2RoYyIsICJmc2wsZXNkaGMiOw0KPiA+ID4gICAgICAgICAgICAgICBzZGhjaSxhdXRvLWNtZDEy
-Ow0KPiA+ID4gICAgICAgfTsNCj4gPg0KPiA+IE5BQ0suICBUaGlzIG5vZGUgaXMgZGVzY3JpYmlu
-ZyB0aGUgc2RoYyBibG9jayBvZiB0aGUgdDQyNDAgU29DLiAgV2hhdA0KPiA+IGJvYXJkIHlvdSBz
-dGljayBpdCBpbiBkb2Vzbid0IGNoYW5nZSB3aGF0IGl0IGlzLg0KPiA+DQo+ID4gUGx1cywgd2hh
-dCBhYm91dCB1c2VycyB3aXRoIG9sZCBkZXZpY2UgdHJlZXM/DQo+ID4NCj4gPiBDdXJyZW50bHkg
-bm8gdXNlcnMgdXNlIHRoaXMgaXAgYmxvY2sgZXhjZXB0IGVzZGhjIGRyaXZlci4NCj4gDQo+IEkn
-bSBub3QgdGFsa2luZyBhYm91dCBjb2RlIHVzZXJzLiAgSSdtIHRhbGtpbmcgYWJvdXQgcGVvcGxl
-IHVzZXJzLg0KPiANCj4gPiBIb3cgYWJvdXQgY2hhbmdlIHRoaXMgaW4gYXJjaC9wb3dlcnBjL2Jv
-b3QvZHRzL3Q0MjQwcWRzLmR0cw0KPiA+DQo+ID4gKysrIGIvYXJjaC9wb3dlcnBjL2Jvb3QvZHRz
-L3Q0MjQwcWRzLmR0cw0KPiA+IEBAIC0xMTcsNiArMTE3LDEwIEBADQo+ID4gICAgICAgICAgICAg
-ICAgICAgICAgICAgfTsNCj4gPiAgICAgICAgICAgICAgICAgfTsNCj4gPg0KPiA+ICAgICAgICAg
-ICAgICAgIHNkaGNAMTE0MDAwIHsNCj4gPiAgICAgICAgICAgICAgICAgICAgICAgY29tcGF0aWJs
-ZSA9ICJmc2wsdDQyNDAtZXNkaGMiLCAiZnNsLGVzZGhjIjsNCj4gPiAgICAgICAgICAgICAgICB9
-Ow0KPiA+DQo+ID4gICAgICAgICAgICAgICAgaTJjQDExODAwMCB7DQo+ID4NCj4gPg0KPiA+ICsr
-KyBiL2FyY2gvcG93ZXJwYy9ib290L2R0cy90NDI0MHFkcy5kdHMNCj4gPiBAQCAtMTE3LDYgKzEx
-NywxMCBAQA0KPiA+ICAgICAgICAgICAgICAgICAgICAgICAgIH07DQo+ID4gICAgICAgICAgICAg
-ICAgIH07DQo+ID4NCj4gPiArICAgICAgICAgICAgICAgc2RoY0AxMTQwMDAgew0KPiA+ICsgICAg
-ICAgICAgICAgICAgICAgICAgIGNvbXBhdGlibGUgPSAiZnNsLHQ0MjQwcWRzLWVzZGhjIiwNCj4g
-PiAiZnNsLGVzZGhjIjsNCj4gPiArICAgICAgICAgICAgICAgfTsNCj4gPiArDQo+ID4gICAgICAg
-ICAgICAgICAgIGkyY0AxMTgwMDAgew0KPiANCj4gTm8uICBJdCdzIHN0aWxsIHN1cHBvc2VkIHRv
-IGJlIGRlc2NyaWJpbmcgdGhlIHNkaGMgYmxvY2sgaXRzZWxmLCBub3QgdGhlDQo+IGJvYXJkIC0t
-IGFuZCBhbnkgd29ya2Fyb3VuZHMgdGhhdCBrZXkgb2ZmIG9mIHRoaXMgd2lsbCBzdGlsbCBmYWls
-IHRvIHdvcmsNCj4gd2l0aCBleGlzdGluZyBkZXZpY2UgdHJlZXMuDQpbSGFpanVuIFdyb3RlOl0g
-U28sIGxlYXZlIGR0cyB1bmNoYW5nZWQgYW5kIHRvIGNoZWNrIGNvbXBpdGFibGUgZm9yIGJvYXJk
-IGluIHNkaGNpLXBsdGZtLmMNCmUuZy46DQoJdW5zaWduZWQgbG9uZyByb290ID0gb2ZfZ2V0X2Zs
-YXRfZHRfcm9vdCgpOw0KDQoJaWYgKG9mX2ZsYXRfZHRfaXNfY29tcGF0aWJsZShyb290LCAiZnNs
-LFQ0MjQwUURTIikpDQoJCWhvc3QtPnF1aXJrcyB8PSBYWFg7DQoNCklzIHRoaXMgb2s/DQoJDQo+
-IA0KPiAtU2NvdHQNCg==
+Add this file to help detect cpu type in runtime.
+These macros will be more favorable for driver
+to apply errata and workaround to specified cpu type.
 
+Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
+Signed-off-by: Zhao Chenhui <chenhui.zhao@freescale.com>
+---
+changes v2:
+	- Remove inline function
+	- Ignore E bit of SOC
+	- Add Macro to get current soc version
+
+ arch/powerpc/include/asm/mpc85xx.h | 53 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 53 insertions(+)
+ create mode 100644 arch/powerpc/include/asm/mpc85xx.h
+
+diff --git a/arch/powerpc/include/asm/mpc85xx.h b/arch/powerpc/include/asm/mpc85xx.h
+new file mode 100644
+index 0000000..20af5e8
+--- /dev/null
++++ b/arch/powerpc/include/asm/mpc85xx.h
+@@ -0,0 +1,53 @@
++/*
++ * MPC85xx cpu type detection
++ *
++ * Copyright 2011-2012 Freescale Semiconductor, Inc.
++ *
++ * This is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++
++#ifndef __ASM_PPC_MPC85XX_H
++#define __ASM_PPC_MPC85XX_H
++
++#define SVR_REV(svr)	((svr) & 0xFF)		/* SOC design resision */
++#define SVR_MAJ(svr)	(((svr) >>  4) & 0xF)	/* Major revision field*/
++#define SVR_MIN(svr)	(((svr) >>  0) & 0xF)	/* Minor revision field*/
++
++/* Some parts define SVR[0:23] as the SOC version */
++#define SVR_SOC_VER(svr) (((svr) >> 8) & 0xFFF7FF)	/* SOC Version fields */
++
++/* Get current SOC Version */
++#define GET_SVR()	(mfspr(SPRN_SVR))
++
++#define IS_SVR_REV(svr, maj, min) \
++	((SVR_MAJ(svr) == (maj)) && (SVR_MIN(svr) == (min)))
++
++#define SVR_8533	0x803400
++#define SVR_8535	0x803701
++#define SVR_8536	0x803700
++#define SVR_8540	0x803000
++#define SVR_8541	0x807200
++#define SVR_8543	0x803200
++#define SVR_8544	0x803401
++#define SVR_8545	0x803102
++#define SVR_8547	0x803101
++#define SVR_8548	0x803100
++#define SVR_8555	0x807100
++#define SVR_8560	0x807000
++#define SVR_8567	0x807501
++#define SVR_8568	0x807500
++#define SVR_8569	0x808000
++#define SVR_8572	0x80E000
++#define SVR_P1010	0x80f900
++#define SVR_P2041	0x821001
++#define SVR_P3041	0x821103
++#define SVR_P5010	0x822100
++#define SVR_P5020	0x822000
++#define SVR_P5040	0x820400
++#define SVR_T4240	0x824800
++#define SVR_B4860	0x868800
++
++#endif
+-- 
+1.8.0
